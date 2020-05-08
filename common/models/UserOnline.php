@@ -2,9 +2,11 @@
 
 namespace common\models;
 
+use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "user_online".
@@ -71,5 +73,20 @@ class UserOnline extends ActiveRecord
     public function getUoUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'uo_user_id']);
+    }
+
+    /**
+     * @param bool $insert
+     * @param array $changedAttributes
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        if ($insert) {
+            Yii::info(VarDumper::dumpAsString($insert), 'info\UserOnline:afterSave:insert');
+        } else {
+            Yii::info(VarDumper::dumpAsString($insert), 'info\UserOnline:afterSave:update');
+        }
     }
 }

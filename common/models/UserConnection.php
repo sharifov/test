@@ -10,6 +10,7 @@ use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "user_connection".
@@ -146,8 +147,21 @@ class UserConnection extends \yii\db\ActiveRecord
         parent::afterSave($insert, $changedAttributes);
 
         if ($insert) {
-            NativeEventDispatcher::recordEvent(UserConnectionEvents::class, UserConnectionEvents::INSERT, [UserConnectionEvents::class, 'insertUserOnline'], $this);
-            NativeEventDispatcher::trigger(UserConnectionEvents::class, UserConnectionEvents::INSERT);
+            //NativeEventDispatcher::recordEvent(UserConnectionEvents::class, UserConnectionEvents::INSERT, [UserConnectionEvents::class, 'insertUserOnline'], $this);
+            //NativeEventDispatcher::trigger(UserConnectionEvents::class, UserConnectionEvents::INSERT);
+
+            if ($this->uc_user_id) {
+                $exist = UserOnline::find()->where(['uo_user_id' => $this->uc_user_id])->exists();
+
+                if (!$exist) {
+                    $uo = new UserOnline();
+                    $uo->uo_user_id = $this->uc_user_id;
+                    if (!$uo->save()) {
+                        \Yii::error(VarDumper::dumpAsString($uo->errors), 'UserConnectionEvents:insertUserOnline:UserOnline:save');
+                    }
+                }
+            }
+
         }
     }
 
