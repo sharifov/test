@@ -75,18 +75,18 @@ class UserOnline extends ActiveRecord
         return $this->hasOne(Employee::class, ['id' => 'uo_user_id']);
     }
 
-    /**
-     * @param bool $insert
-     * @param array $changedAttributes
-     */
-    public function afterSave($insert, $changedAttributes)
-    {
-        parent::afterSave($insert, $changedAttributes);
-
-        if ($insert) {
-            Yii::warning(VarDumper::dumpAsString($insert), 'info\UserOnline:afterSave:insert');
-        } else {
-            Yii::warning(VarDumper::dumpAsString($insert), 'info\UserOnline:afterSave:update');
-        }
-    }
+//    /**
+//     * @param bool $insert
+//     * @param array $changedAttributes
+//     */
+//    public function afterSave($insert, $changedAttributes)
+//    {
+//        parent::afterSave($insert, $changedAttributes);
+//
+//        if ($insert) {
+//            Yii::warning(VarDumper::dumpAsString($insert), 'info\UserOnline:afterSave:insert');
+//        } else {
+//            Yii::warning(VarDumper::dumpAsString($insert), 'info\UserOnline:afterSave:update');
+//        }
+//    }
 }
