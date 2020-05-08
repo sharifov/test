@@ -53,6 +53,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => static function (\common\models\UserOnline $model) {
                     return $model->uo_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->uo_updated_dt), 'php: Y-m-d [H:i:s]')  : '-';
                 },
+                'format' => 'raw'
             ],
 
 
