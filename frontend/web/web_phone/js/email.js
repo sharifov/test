@@ -109,10 +109,15 @@ let PhoneWidgetEmail = function () {
                 }
                 form.find(".email-modal__contact-input").val("");
                 form.find(".email-modal__msg-input").val("");
+                let message = 'Success';
+                if (data.message) {
+                    message = data.message;
+                }
+                new PNotify({title: "Send email", type: "success", text: message, hide: true});
             })
             .fail(function () {
                 hidePreloader();
-                new PNotify({title: "Send sms", type: "error", text: 'Server Error. Try again later', hide: true});
+                new PNotify({title: "Send email", type: "error", text: 'Server Error. Try again later', hide: true});
             });
     }
 
