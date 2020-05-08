@@ -2,9 +2,11 @@
 
 namespace sales\parcingDump\Gds;
 
+use common\components\SearchService;
 use common\models\Airline;
 use common\models\Airport;
 use common\models\local\FlightSegment;
+use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
 use yii\base\ErrorException;
 
 /**
@@ -67,7 +69,7 @@ class Reservation implements ParseDump
                     }
                 }
 
-                if (!is_numeric(intval($rowArr[0]))) continue;
+                if (!is_numeric((int)$rowArr[0])) continue;
 
                 $segmentCount++;
                 $carrier = substr($rowArr[1], 0, 2);
@@ -165,7 +167,7 @@ class Reservation implements ParseDump
                 $cabin = trim(str_replace($flightNumber, '', trim($rowExpl[0])));
                 if ($depCity !== null && $arrCity !== null && $depCity->dst != $arrCity->dst) {
                     $flightDuration = ($arrDateTime->getTimestamp() - $depDateTime->getTimestamp()) / 60;
-                    $flightDuration = intval($flightDuration) + (intval($depCity->dst) * 60) - (intval($arrCity->dst) * 60);
+                    $flightDuration = (int)$flightDuration + ((int)$depCity->dst * 60) - ((int)$arrCity->dst * 60);
                 } else {
                     $flightDuration = ($arrDateTime->getTimestamp() - $depDateTime->getTimestamp()) / 60;
                 }
@@ -192,9 +194,10 @@ class Reservation implements ParseDump
                     'layoverDuration' => 0,
                     'arrivalOffset' => $this->getArrivalOffset($row),
                 ];
-                if(!empty($airline)){
+                if($airline !== null){
                     $segment['cabin'] = $airline->getCabinByClass($cabin);
                 }
+                $segment['cabin'] = SearchService::getCabinRealCode($segment['cabin']);
                 if (!empty($operationAirlineCode)) {
                     $segment['operatingAirline'] = $operationAirlineCode;
                 }
@@ -203,21 +206,7 @@ class Reservation implements ParseDump
                     $segment['layoverDuration'] = ($segment['departureDateTime']->getTimestamp() - $previewSegment['arrivalDateTime']->getTimestamp()) / 60;
                 }
                 $data[] = $segment;
-                $fSegment = new FlightSegment();
-                $fSegment->airlineCode = $segment['carrier'];
-                $fSegment->bookingClass = $segment['bookingClass'];
-                if(isset($segment['cabin']) && !empty($segment['cabin'])){
-                    $fSegment->cabin = $segment['cabin'];
-                }
-                $fSegment->flightNumber = $segment['flightNumber'];
-                $fSegment->departureAirportCode = $segment['departureAirport'];
-                $fSegment->destinationAirportCode = $segment['arrivalAirport'];
-                $fSegment->departureTime = $segment['departureDateTime']->format('Y-m-d H:i:s');
-                $fSegment->arrivalTime = $segment['arrivalDateTime']->format('Y-m-d H:i:s');
-                if (!empty($operationAirlineCode)) {
-                    $fSegment->operationAirlineCode = $operationAirlineCode;
-                }
-                $itinerary[] = $fSegment;
+                $itinerary[] = (new ItineraryDumpDTO([]))->feelByParsedReservationDump($segment);
             }
             if ($validation) {
                 if ($segmentCount !== count($data) + $operatedCnt) {

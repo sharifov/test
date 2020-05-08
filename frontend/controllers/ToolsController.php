@@ -98,7 +98,7 @@ class ToolsController extends FController
     /**
      * @return string
      */
-    public function actionCheckFlightDump()
+    public function actionCheckFlightDump(): string
     {
         $data = [];
         $dump = Yii::$app->request->post('dump');
@@ -115,6 +115,7 @@ class ToolsController extends FController
             'dump' => $dump,
             'data' => $data,
             'type' => $type,
+            'typeDump' => $typeDump ?? null,
         ]);
     }
 }

@@ -7,6 +7,7 @@ use yii\helpers\Html;
 /* @var $data array */
 /* @var $dump string */
 /* @var string $type */
+/* @var string|null $typeDump */
 
 $this->title = 'Check Flight dump ';
 $this->params['breadcrumbs'][] = $this->title;
@@ -33,7 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
     <div class="col-md-8">
-        <h2>Parse dump:</h2>
+        <h2>Parse dump: <?php echo $typeDump ?></h2>
         <?php if ($data): ?>
             <pre>
             <?php \yii\helpers\VarDumper::dump($data, 10, true) ?>

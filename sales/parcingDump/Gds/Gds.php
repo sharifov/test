@@ -32,8 +32,10 @@ class Gds
                 $typeDump = self::TYPE_BAGGAGE;
             } elseif (self::getTypeReservationByFirstString($row)) {
                 $typeDump = self::TYPE_RESERVATION;
-            } else {
+            } elseif (self::getTypePricingByFirstString($row)) {
                 $typeDump = self::TYPE_PRICING;
+            } else {
+                $typeDump = self::DEFAULT_TYPE;
             }
         } catch (\Throwable $throwable) {
             $typeDump = self::DEFAULT_TYPE;
@@ -48,6 +50,12 @@ class Gds
     private static function getTypeReservationByFirstString(string $row): bool
     {
         preg_match("/^(\d{1})\s/s", $row, $matches);
+        return (!empty($matches));
+    }
+
+    private static function getTypePricingByFirstString(string $row): bool
+    {
+        preg_match("/^(\d{1}[A-Z])/s", $row, $matches);
         return (!empty($matches));
     }
 
