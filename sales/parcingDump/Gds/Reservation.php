@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\parcingDump\worldspanGds;
+namespace sales\parcingDump\Gds;
 
 use common\models\Airline;
 use common\models\Airport;

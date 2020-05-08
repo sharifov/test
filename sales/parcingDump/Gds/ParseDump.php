@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\parcingDump\worldspanGds;
+namespace sales\parcingDump\Gds;
 
 /**
  * Interface ParseDump

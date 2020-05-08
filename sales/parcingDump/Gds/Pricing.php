@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\parcingDump\worldspanGds;
+namespace sales\parcingDump\Gds;
 
 use common\models\Airline;
 
@@ -21,7 +21,7 @@ class Pricing implements ParseDump
         $baggage = new Baggage();
 
         $result['iata'] = $this->parseIata($string);
-        //$result['airline'] = $this->getAirline($result['iata']);
+        $result['airline'] = $this->getAirline($result['iata']);
         $result['price'] = $this->parsePrice($string);
         $result['baggage'] = $baggage->parseBaggageAllowance($string);
         $result['carry_on_allowance'] = $baggage->parseCarryOnAllowance($string);
