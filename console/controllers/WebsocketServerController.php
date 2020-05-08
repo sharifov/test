@@ -372,9 +372,11 @@ class WebsocketServerController extends Controller
                     $uc->delete();
                     unset($uc);
                 }
+                \Yii::$app->db->createCommand('DELETE FROM user_online WHERE uo_user_id NOT IN (SELECT DISTINCT(uc_user_id) FROM user_connection)')->execute();
             }
 
-            UserOnline::deleteAll('uo_user_id NOT IN (SELECT DISTINCT(uc_user_id) FROM user_connection)');
+
+            //UserOnline::deleteAll('uo_user_id NOT IN (SELECT DISTINCT(uc_user_id) FROM user_connection)');
 
             //VarDumper::dump($server->channelList);
 
@@ -398,7 +400,6 @@ class WebsocketServerController extends Controller
         $server->on('workerError', static function(Server $server, int $workerId, $workerPid, $exitCode, $signal) {
             $message = "Error Worker (Id: {$workerId}): pid={$workerPid} code={$exitCode} signal={$signal}";
             echo '> ' . $message . PHP_EOL;
-            UserOnline::deleteAll('uo_user_id NOT IN (SELECT DISTINCT(uc_user_id) FROM user_connection)');
         });
 
         $server->start();
