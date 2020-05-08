@@ -3,6 +3,8 @@
 namespace frontend\controllers;
 
 use common\models\Quote;
+
+use sales\parcingDump\Gds\Gds;
 use Yii;
 use common\models\ApiLog;
 use common\models\search\ApiLogSearch;
@@ -93,17 +95,27 @@ class ToolsController extends FController
         return $this->render('supervisor');
     }
 
-    public function actionCheckFlightDump()
+    /**
+     * @return string
+     */
+    public function actionCheckFlightDump(): string
     {
         $data = [];
         $dump = Yii::$app->request->post('dump');
+        $type = Yii::$app->request->post('type');
+
         if ($dump) {
+            $typeDump = $type !== '' ? $type : Gds::getParserType($dump);
 
-            $data = Quote::parseDump($dump, true);
-
-
+            $obj = Gds::initClass($typeDump);
+            $data = $obj->parseDump($dump, true);
         }
 
-        return $this->render('check-flight-dump', ['dump' => $dump, 'data' => $data]);
+        return $this->render('check-flight-dump', [
+            'dump' => $dump,
+            'data' => $data,
+            'type' => $type,
+            'typeDump' => $typeDump ?? null,
+        ]);
     }
 }
