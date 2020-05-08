@@ -686,7 +686,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 40px; }
+        margin-bottom: 8px; }
       .phone-widget .messages-modal .pw-msg-item__name {
         font-weight: 600;
         font-size: 14px;
