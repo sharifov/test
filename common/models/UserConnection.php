@@ -146,9 +146,6 @@ class UserConnection extends \yii\db\ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
 
-        //Yii::info(VarDumper::dumpAsString($changedAttributes), 'info\UserConnection:afterSave:UserOnline');
-        \Yii::error(VarDumper::dumpAsString($changedAttributes), 'UserConnectionEvents:afterSave');
-
         if ($insert) {
             //NativeEventDispatcher::recordEvent(UserConnectionEvents::class, UserConnectionEvents::INSERT, [UserConnectionEvents::class, 'insertUserOnline'], $this);
             //NativeEventDispatcher::trigger(UserConnectionEvents::class, UserConnectionEvents::INSERT);
@@ -157,7 +154,6 @@ class UserConnection extends \yii\db\ActiveRecord
                 $exist = UserOnline::find()->where(['uo_user_id' => $this->uc_user_id])->exists();
 
                 if (!$exist) {
-                    //Yii::info(VarDumper::dumpAsString($changedAttributes), 'info\UserConnection:UserOnline:afterSave:UserOnline');
                     $uo = new UserOnline();
                     $uo->uo_user_id = $this->uc_user_id;
                     if (!$uo->save()) {
