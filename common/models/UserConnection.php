@@ -138,35 +138,36 @@ class UserConnection extends \yii\db\ActiveRecord
         return new UserConnectionQuery(static::class);
     }
 
-//    /**
-//     * @param bool $insert
-//     * @param array $changedAttributes
-//     */
-//    public function afterSave($insert, $changedAttributes)
-//    {
-//        parent::afterSave($insert, $changedAttributes);
-//
-//        Yii::info(VarDumper::dumpAsString($changedAttributes), 'info\UserConnection:afterSave:UserOnline');
-//
-//        if ($insert) {
-//            //NativeEventDispatcher::recordEvent(UserConnectionEvents::class, UserConnectionEvents::INSERT, [UserConnectionEvents::class, 'insertUserOnline'], $this);
-//            //NativeEventDispatcher::trigger(UserConnectionEvents::class, UserConnectionEvents::INSERT);
-//
-//            if ($this->uc_user_id) {
-//                $exist = UserOnline::find()->where(['uo_user_id' => $this->uc_user_id])->exists();
-//
-//                if (!$exist) {
-//                    Yii::info(VarDumper::dumpAsString($changedAttributes), 'info\UserConnection:UserOnline:afterSave:UserOnline');
-//                    $uo = new UserOnline();
-//                    $uo->uo_user_id = $this->uc_user_id;
-//                    if (!$uo->save()) {
-//                        \Yii::error(VarDumper::dumpAsString($uo->errors), 'UserConnectionEvents:insertUserOnline:UserOnline:save');
-//                    }
-//                }
-//            }
-//
-//        }
-//    }
+    /**
+     * @param bool $insert
+     * @param array $changedAttributes
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        //Yii::info(VarDumper::dumpAsString($changedAttributes), 'info\UserConnection:afterSave:UserOnline');
+        \Yii::error(VarDumper::dumpAsString($changedAttributes), 'UserConnectionEvents:afterSave');
+
+        if ($insert) {
+            //NativeEventDispatcher::recordEvent(UserConnectionEvents::class, UserConnectionEvents::INSERT, [UserConnectionEvents::class, 'insertUserOnline'], $this);
+            //NativeEventDispatcher::trigger(UserConnectionEvents::class, UserConnectionEvents::INSERT);
+
+            if ($this->uc_user_id) {
+                $exist = UserOnline::find()->where(['uo_user_id' => $this->uc_user_id])->exists();
+
+                if (!$exist) {
+                    //Yii::info(VarDumper::dumpAsString($changedAttributes), 'info\UserConnection:UserOnline:afterSave:UserOnline');
+                    $uo = new UserOnline();
+                    $uo->uo_user_id = $this->uc_user_id;
+                    if (!$uo->save()) {
+                        \Yii::error(VarDumper::dumpAsString($uo->errors), 'UserConnectionEvents:insertUserOnline:UserOnline:save');
+                    }
+                }
+            }
+
+        }
+    }
 
 
     /**
