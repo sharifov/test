@@ -56,7 +56,7 @@
     .phone-widget .current-number__phone {
       font-size: 14px;
       line-height: 18px;
-      width: calc(100% - 72px); }
+      width: calc(100% - $sp9); }
     .phone-widget .current-number__identifier {
       font-weight: 500;
       font-size: 10px;
@@ -519,7 +519,7 @@
     font-weight: normal;
     font-size: 14px;
     line-height: 18px;
-    color: #ffffff;
+    color: #fff;
     margin-bottom: 4px; }
   .phone-widget .modal-messaging__contact-name {
     font-weight: 600; }
@@ -551,7 +551,7 @@
       padding: 18px 16px; }
     .phone-widget .email-modal input,
     .phone-widget .email-modal textarea {
-      background: #ffffff;
+      background: #fff;
       border: 1px solid #dddddd;
       box-sizing: border-box;
       border-radius: 4px;
@@ -686,7 +686,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 4px; }
+        margin-bottom: 40px; }
       .phone-widget .messages-modal .pw-msg-item__name {
         font-weight: 600;
         font-size: 14px;
@@ -704,9 +704,9 @@
         color: #9badbe;
         transform: translateY(-1px); }
         .phone-widget .messages-modal .pw-msg-item__status--delivered {
-          color: #33a549; }
+          color: #399e65; }
         .phone-widget .messages-modal .pw-msg-item__status--error {
-          color: #eb4545; }
+          color: #e15258; }
       .phone-widget .messages-modal .pw-msg-item__msg-main {
         flex-basis: calc(100% - 32px);
         padding-left: 12px; }
