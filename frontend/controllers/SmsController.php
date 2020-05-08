@@ -449,8 +449,8 @@ class SmsController extends FController
                     //->andWhere(['s_client_id' => $form->getContactId()])
                     ->andWhere([
                         'OR',
-                        ['s_phone_from' => $form->userPhone, 's_phone_to' => $form->getContactPhone()],
-                        ['s_phone_from' => $form->getContactPhone(), 's_phone_to' => $form->userPhone],
+                        ['s_phone_from' => $form->userPhone, 's_phone_to' => $form->getContactPhone(), 's_type_id' => Sms::TYPE_OUTBOX],
+                        ['s_phone_from' => $form->getContactPhone(), 's_phone_to' => $form->userPhone, 's_type_id' => Sms::TYPE_INBOX],
                     ])
                     ->orderBy(['s_created_dt' => SORT_ASC])->asArray()->all();
 
