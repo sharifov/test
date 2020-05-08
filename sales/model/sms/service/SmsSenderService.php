@@ -42,7 +42,13 @@ class SmsSenderService
             if ($in->save()) {
                 $transaction->commit();
                 $result['success'] = true;
-                if ($ntf = Notifications::create($form->contactEntity->id, 'New message from ' . $form->user->full_name, $in->s_sms_text, Notifications::TYPE_INFO, true)) {
+                if ($ntf = Notifications::create(
+                    $form->contactEntity->id,
+                    'New SMS ' . $form->userPhone,
+                    'Message from ' . trim($form->user->full_name) . '. Text: '. $in->s_sms_text,
+                    Notifications::TYPE_INFO,
+                    true
+                )) {
                     $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
                     Notifications::publish('getNewNotification', ['user_id' => $form->contactEntity->id], $dataNotification);
                 } else {
