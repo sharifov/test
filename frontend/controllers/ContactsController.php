@@ -6,6 +6,7 @@ use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\UserContactList;
 use frontend\models\form\ContactForm;
+use frontend\widgets\newWebPhone\contacts\helper\ContactsHelper;
 use sales\access\ContactUpdateAccess;
 use sales\auth\Auth;
 use sales\forms\CompositeFormHelper;
@@ -19,6 +20,7 @@ use yii\db\StaleObjectException;
 use yii\helpers\ArrayHelper;
 use yii\helpers\StringHelper;
 use yii\helpers\VarDumper;
+use yii\web\BadRequestHttpException;
 use yii\web\HttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -351,9 +353,48 @@ class ContactsController extends FController
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
-
-    public function actionListAjax(?string $q = null): Response
+    /**
+     * From Contacts section full list on Phone Widget
+     *
+     * @return Response
+     * @throws BadRequestHttpException
+     */
+    public function actionFullListAjax(): Response
     {
+        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
+            throw new BadRequestHttpException();
+        }
+
+        $page = (int)Yii::$app->request->post('page', 0);
+
+        $provider = (new ContactsSearch(Auth::id()))->searchByWidgetContactsSection();
+        $provider->getPagination()->setPage($page);
+        $rows = $provider->getModels();
+
+        $out = [
+            'results' => ContactsHelper::processContactsList($rows),
+            'page' => $page + 1,
+            'rows' => empty($rows)
+        ];
+
+//        VarDumper::dump($out);die;
+
+        return $this->asJson($out);
+    }
+
+    /**
+     * From Contacts section with search on Phone Widget
+     *
+     * @param string|null $q
+     * @return Response
+     * @throws BadRequestHttpException
+     */
+    public function actionSearchListAjax(?string $q = null): Response
+    {
+        if (!Yii::$app->request->isAjax) {
+            throw new BadRequestHttpException();
+        }
+
         $out = ['results' => []];
 
         if ($q !== null) {
@@ -361,47 +402,36 @@ class ContactsController extends FController
             if (strlen($q) < 2) {
                 return $this->asJson($out);
             }
-            
-            $contacts = (new ContactsSearch(Auth::id()))->searchByWidget($q)->getModels();
 
-            $data = [];
-            if ($contacts) {
-                foreach ($contacts as $n => $contact) {
-                    $contactData = [];
-                    if ($contact->is_company) {
-                        $name = $contact->company_name ?: $contact->first_name . ' ' . $contact->last_name;
-                    } else {
-                        $name = $contact->first_name . ' ' . $contact->last_name;
-                    }
-                    $group = strtoupper($name[0] ?? 'A');
-                    $contactData['id'] = $contact->id;
-                    $contactData['name'] = $name;
-                    $contactData['description'] = $contact->description ?: '';
-                    $contactData['avatar'] = $group;
-                    $contactData['is_company'] = $contact->is_company;
-                    if ($contact->clientPhones) {
-                        foreach ($contact->clientPhones as $phone) {
-                            $contactData['phones'][] = $phone->phone;
-                        }
-                    }
-                    if ($contact->clientEmails) {
-                        foreach ($contact->clientEmails as $email) {
-                            $contactData['emails'][] = $email->email;
-                        }
-                    }
-                    //$data[$n]['selection'] = $item['text'];
-                    $data[$group][$n] = $contactData;
-                }
-            }
+            $provider = (new ContactsSearch(Auth::id()))->searchByWidgetContactsSection($q);
+            ($provider->getPagination())->setPageSize(null);
 
-            $out['results'] = $data;
+            $rows = $provider->getModels();
+
+            $out = [
+                'results' => ContactsHelper::processContactsList($rows),
+                'rows' => empty($rows)
+            ];
         }
+
+//        VarDumper::dump($out);die;
 
         return $this->asJson($out);
     }
 
+    /**
+     * From Call section on Phone Widget
+     *
+     * @param string|null $q
+     * @return Response
+     * @throws BadRequestHttpException
+     */
     public function actionListCallsAjax(?string $q = null): Response
     {
+//        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
+//            throw new BadRequestHttpException();
+//        }
+
         $out = ['results' => []];
 
         if ($q !== null) {
@@ -409,7 +439,6 @@ class ContactsController extends FController
             if (strlen($q) < 3) {
                 return $this->asJson($out);
             }
-
 
             $contacts = (new ContactsSearch(Auth::id()))->searchByWidgetCallSection($q, $limit = 3);
 
@@ -430,11 +459,12 @@ class ContactsController extends FController
                     $contactData['type'] = (int)$contact['type'];
 
                     if ($contactData['type'] === Client::TYPE_INTERNAL) {
+                        $isOnline = (int)$contact['user_is_online'] ? true : false;
                         $isCallFree = (int)$contact['user_is_on_call'] ? false : true;
                         $isCallStatusReady = (int)$contact['user_call_phone_status'] ? true : false;
-                        if ($isCallFree && $isCallStatusReady) {
+                        if ($isOnline && $isCallFree && $isCallStatusReady) {
                             $class = 'text-success';
-                        } elseif ($isCallStatusReady) {
+                        } elseif ($isOnline && $isCallStatusReady) {
                             $class = 'text-warning';
                         } else {
                             $class = 'text-danger';

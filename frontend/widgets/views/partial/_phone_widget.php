@@ -5,6 +5,7 @@ use yii\web\View;
 /** @var $phoneFrom string */
 /** @var View $this */
 /** @var array $userPhones */
+/** @var array $userEmails */
 
 ?>
 
@@ -44,10 +45,11 @@ use yii\web\View;
     </div>
     <div class="phone-widget__body">
         <?= $this->render('tab/call'); ?>
-        <?= $this->render('tab/contacts', ['userPhones' => $userPhones]); ?>
+        <?= $this->render('tab/contacts', ['userPhones' => $userPhones, 'userEmails' => $userEmails]); ?>
         <?= $this->render('tab/history'); ?>
         <div class="widget-phone__contact-info-modal widget-modal contact-modal-info"></div>
         <div class="widget-phone__messages-modal widget-modal messages-modal"></div>
+        <div class="widget-phone__email-modal widget-modal email-modal"></div>
 
         <?php /*
         <div class="widget-phone__contact-info-modal widget-modal contact-modal-info">

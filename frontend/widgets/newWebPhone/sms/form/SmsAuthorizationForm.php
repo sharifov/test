@@ -5,6 +5,7 @@ namespace frontend\widgets\newWebPhone\sms\form;
 use common\models\Client;
 use common\models\Employee;
 use common\models\UserProjectParams;
+use sales\model\sms\useCase\send\Contact;
 use yii\base\Model;
 
 /**
@@ -13,18 +14,27 @@ use yii\base\Model;
  * @property string $userPhone
  * @property int $contactId
  * @property string $contactPhone
- * @property Client $contact
+ * @property int $contactType
+ * @property Client|Employee $contactEntity
  * @property Employee $user
  * @property int|null $projectId
+ * @property Contact $contact
  */
 class SmsAuthorizationForm extends Model
 {
+    public const CLIENT_TYPES = [
+        Client::TYPE_CONTACT,
+        Client::TYPE_INTERNAL
+    ];
+
     public $userPhone;
     public $contactId;
     public $contactPhone;
-    public $contact;
+    public $contactType;
+    public $contactEntity;
+    public $user;
 
-    private $user;
+    private $contact;
     private $projectId;
 
     public function __construct(Employee $user, $config = [])
@@ -39,6 +49,11 @@ class SmsAuthorizationForm extends Model
             ['userPhone', 'required'],
             ['userPhone', 'string'],
             ['userPhone', 'validateUserPhone', 'skipOnError' => true, 'skipOnEmpty' => true],
+
+            ['contactType', 'required'],
+            ['contactType', 'integer'],
+            ['contactType', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['contactType', 'in', 'range' => self::CLIENT_TYPES],
 
             ['contactId', 'required'],
             ['contactId', 'integer'],
@@ -69,8 +84,24 @@ class SmsAuthorizationForm extends Model
 
     public function validateContact(): void
     {
-        if (!$this->contact = Client::findOne($this->contactId)) {
-            $this->addError('contactId', 'Contact not found.');
+        if ($this->hasErrors()) {
+            return;
+        }
+
+        if ($this->contactType === Client::TYPE_CONTACT) {
+            if (!$this->contactEntity = Client::find()->byId($this->contactId)->byContact()->limit(1)->one()) {
+                $this->addError('contactId', 'Contact not found.');
+            }
+            $this->contact = new Contact($this->contactEntity);
+            return;
+        }
+
+        if ($this->contactType === Client::TYPE_INTERNAL) {
+            if (!$this->contactEntity = Employee::findOne($this->contactId)) {
+                $this->addError('contactId', 'Contact not found.');
+            }
+            $this->contact = new Contact($this->contactEntity);
+            return;
         }
     }
 
@@ -80,13 +111,30 @@ class SmsAuthorizationForm extends Model
             return;
         }
 
-        foreach ($this->contact->clientPhones as $phone) {
-            if ($phone->phone === $this->contactPhone) {
-                return;
+        if ($this->contactType === Client::TYPE_CONTACT) {
+            foreach ($this->contactEntity->clientPhones as $phone) {
+                if ($phone->phone === $this->contactPhone) {
+                    return;
+                }
             }
+            $this->addError('contactPhone', 'Contact phone not found.');
+            return;
         }
 
-        $this->addError('contactPhone', 'Contact phone not found.');
+        if ($this->contactType === Client::TYPE_INTERNAL) {
+            foreach (Employee::getPhoneList($this->contactId) as $phone) {
+                if ($phone === $this->contactPhone) {
+                    return;
+                }
+            }
+            $this->addError('contactPhone', 'Contact phone not found.');
+            return;
+        }
+    }
+
+    public function getContactType(): int
+    {
+        return $this->contactType;
     }
 
     public function getContactPhone(): string
@@ -94,13 +142,38 @@ class SmsAuthorizationForm extends Model
         return $this->contactPhone;
     }
 
-    public function formName(): string
+    public function getContactId(): int
     {
-        return '';
+        return $this->contact->getId();
+    }
+
+    public function getContactName(): ?string
+    {
+        return $this->contact->getName();
+    }
+
+    public function getContact(): Contact
+    {
+        return $this->contact;
+    }
+
+    public function contactIsContact(): bool
+    {
+        return $this->contactType === Client::TYPE_CONTACT;
+    }
+
+    public function contactIsInternal(): bool
+    {
+        return $this->contactType === Client::TYPE_INTERNAL;
     }
 
     public function getProjectId(): ?int
     {
         return $this->projectId;
+    }
+
+    public function formName(): string
+    {
+        return '';
     }
 }

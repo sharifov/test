@@ -31,21 +31,26 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php Pjax::begin(); ?>
 
     <p>
-        <?= Html::a('Create Contact', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('<i class="fa fa-plus"></i> Add Contact', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'rowOptions' => static function (Client $model, $index, $widget, $grid) {
+            if ($model->disabled) {
+                return ['class' => 'danger'];
+            }
+        },
         'columns' => [
             ['class' => SerialColumn::class],
             [
                 'class' => 'yii\grid\ActionColumn',
                 'header' => 'Actions',
-                'template' => '{view} {update} {delete}',
+                'template' => '{view} &nbsp;&nbsp; {update} &nbsp;&nbsp;&nbsp; {delete}',
                 'buttons' => [
                     'delete' => static function($url, Client $model){
-                        return Html::a('<span class="glyphicon glyphicon-trash"></span>', ['delete', 'id' => $model->id], [
+                        return Html::a('<span class="glyphicon glyphicon-trash text-danger"></span>', ['delete', 'id' => $model->id], [
                             'class' => '',
                             'data' => [
                                 'confirm' => 'Are you sure you want to delete this item?',
@@ -65,23 +70,21 @@ $this->params['breadcrumbs'][] = $this->title;
                     'view' => true,
                 ],
                 'options' => [
-                    'style' => 'width:70px'
+                    'style' => 'width:100px'
                 ],
             ],
             [
                 'attribute' => 'is_company',
+                'label' => 'Type',
                 'value' => static function(Client $model) {
-                    $out = '<span class="not-set">(not set)</span>';
-                    if (isset($model->is_company)) {
-                        $out = $model->is_company ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
-                    }
-                    return $out;
+                    return $model->is_company ? '<i class="fa fa-building-o" title="Company"></i>' : '<i class="fa fa-user" title="Personal"></i>';
                 },
                 'format' => 'raw',
-                'filter' => [1 => 'Yes', 0 => 'No'],
+                'filter' => [1 => 'Company', 0 => 'Personal'],
                 'options' => [
-                    'style' => 'width:100px'
+                    'style' => 'width:80px',
                 ],
+                'contentOptions' => ['class' => 'text-center'],
             ],
             [
                 'attribute' => 'ucl_favorite',
@@ -100,22 +103,35 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $out;
                 },
                 'format' => 'raw',
-                'filter' => [1 => 'Yes', 0 => 'No']
+                'filter' => [1 => 'Yes', 0 => 'No'],
+                'options' => [
+                    'style' => 'width:80px',
+                ],
+                'contentOptions' => ['class' => 'text-center'],
             ],
             [
                 'header' => 'Name',
                 'attribute' => 'by_name',
                 'value' => static function(Client $model) {
-                    $out = '';
-                    $out .= $model->first_name ? '<em>First name:</em> ' . Html::encode($model->first_name) . '<br />' : '';
-                    $out .= $model->middle_name ? '<em>Middle name:</em> ' . Html::encode($model->middle_name) . '<br />' : '';
-                    $out .= $model->last_name ? '<em>Last name:</em> ' . Html::encode($model->last_name) . '<br />' : '';
+//                    $out = '';
+//                    $out .= $model->first_name ? '<em>First name:</em> ' . Html::encode($model->first_name) . '<br />' : '';
+//                    $out .= $model->middle_name ? '<em>Middle name:</em> ' . Html::encode($model->middle_name) . '<br />' : '';
+//                    $out .= $model->last_name ? '<em>Last name:</em> ' . Html::encode($model->last_name) . '<br />' : '';
 
-                    return $out;
+                    return  $model->is_company ? '-' : '<i class="fa fa-user"></i> ' . '<b>' . Html::encode($model->full_name) .'</b>';
                 },
                 'format' => 'raw',
             ],
-            'company_name',
+
+            [
+                'attribute' => 'company_name',
+                'value' => static function(Client $model) {
+
+                    return $model->is_company ? '<i class="fa fa-building-o" title="Company"></i> ' . '<b>' . Html::encode($model->company_name) .'</b>' : '-';
+                },
+                'format' => 'raw',
+            ],
+
             [
                 'header' => 'Phones',
                 'attribute' => 'client_phone',
@@ -124,11 +140,14 @@ $this->params['breadcrumbs'][] = $this->title;
                     $data = [];
                     if($phones) {
                         foreach ($phones as $k => $phone) {
+
+                            $access = CallAccess::isUserCanDial(Auth::id(),UserProfile::CALL_TYPE_WEB);
+
                             $out = '<span data-toggle="tooltip" 
                                             title="'. Html::encode($phone->cp_title) . '"
                                             data-original-title="' . Html::encode($phone->cp_title) . '">';
-                            $out .= CallHelper::callNumber($phone->phone, CallAccess::isUserCanDial(Auth::id(),
-                                UserProfile::CALL_TYPE_WEB), '', ['disable-icon' => true], 'code');
+
+                            $out .= CallHelper::callNumber($phone->phone, $access, '', ['disable-icon' => $access ? false : true], 'span');
                             $out .= '</span>';
 
                             $data[] = $out;
@@ -159,35 +178,33 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => ['class' => 'text-left'],
             ],
             [
+                'label' => 'Public',
                 'attribute' => 'is_public',
                 'value' => static function(Client $model) {
-                    $out = '<span class="not-set">(not set)</span>';
-                    if (isset($model->is_public)) {
-                        $out = $model->is_public ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
-                    }
-                    return $out;
+                    return $model->is_public ? '<i class="fa fa-globe" title="public"></i>' : '<i class="fa fa-book" title="private"></i>';
                 },
                 'format' => 'raw',
                 'filter' => [1 => 'Yes', 0 => 'No'],
                 'options' => [
-                    'style' => 'width:100px'
+                    'style' => 'width:80px',
                 ],
+                'contentOptions' => ['class' => 'text-center'],
             ],
             [
                 'attribute' => 'disabled',
                 'value' => static function(Client $model) {
-                    $out = '<span class="not-set">(not set)</span>';
-                    if (isset($model->disabled)) {
-                        $innerBtn = $model->disabled ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
-                        $out = Html::a($innerBtn, null, [
-                            'class' => 'btn-disabled',
-                            'data' => [
-                                'client-id' => $model->id,
-                                'is-disabled' => $model->disabled,
-                            ],
-                        ]);
-                    }
-                    return $out;
+
+
+//                    $innerBtn = $model->disabled ? '<span class="label label-success">Disabled</span>' : '-';
+//                    $out = Html::a($innerBtn, null, [
+//                        'class' => 'btn-disabled',
+//                        'data' => [
+//                            'client-id' => $model->id,
+//                            'is-disabled' => $model->disabled,
+//                        ],
+//                    ]);
+
+                    return $model->disabled ? '<span class="label label-danger">Disabled</span>' : '-';
                 },
                 'format' => 'raw',
                 'filter' => [1 => 'Yes', 0 => 'No']

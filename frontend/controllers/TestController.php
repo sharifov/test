@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\components\Purifier;
 use common\components\jobs\TelegramSendMessageJob;
+use common\components\SearchService;
 use common\models\Call;
 use common\models\Client;
 use common\models\ClientEmail;
@@ -95,6 +96,7 @@ use sales\helpers\payment\CreditCardHelper;
 use sales\helpers\query\QueryHelper;
 use sales\helpers\user\UserFinder;
 use sales\model\callLog\entity\callLog\CallLog;
+use sales\model\coupon\useCase\request\CouponForm;
 use sales\model\emailList\entity\EmailList;
 use sales\model\lead\useCase\lead\api\create\Handler;
 use sales\model\lead\useCase\lead\api\create\LeadForm;
@@ -145,9 +147,11 @@ use yii\filters\AccessControl;
 use yii\helpers\Html;
 use yii\helpers\Inflector;
 use yii\helpers\Json;
+use yii\helpers\StringHelper;
 use yii\helpers\VarDumper;
 use common\components\ReceiveEmailsJob;
 use yii\queue\Queue;
+use common\components\CentrifugoService;
 
 
 /**
@@ -211,7 +215,8 @@ class TestController extends FController
 
 
         $search = new ContactsSearch(295);
-        $search->searchByWidgetCallSection('373');
+        $search->searchContactsByWidget('373');
+        die;
 
 
 //        return $this->render('blank');
@@ -1150,6 +1155,39 @@ class TestController extends FController
 		var_dump($expMonth);
 	}
 
+    public function actionCentSend()
+    {
+        CentrifugoService::sendMsg('Message from channel "ownUserChannel"', 'ownUserChannel#' . Auth::id());
+    }
+
+    public function actionCentSend1(){
+        CentrifugoService::sendMsg('Message from channel "multipleUsersChannel"', 'multipleUsersChannel#658,659');
+    }
+
+    public function actionCentrifugoNotifications()
+    {
+        $clientMsgCount = Yii::$app->request->post('msgCount');
+
+        $count = Notifications::findNewCount(Auth::id());
+        if ($clientMsgCount != $count){
+            CentrifugoService::sendMsg(json_encode(['count' => $count]), 'ownUserChannel#' . Auth::id());
+
+            $notifications = Notifications::findNew(Auth::id());
+            $msg = [];
+            foreach ($notifications as $notification){
+                $item = [
+                    'n_id' => $notification['n_id'],
+                    'n_title' => $notification['n_title'],
+                    'n_msg' => StringHelper::truncate(Email::strip_html_tags($notification['n_message']), 80, '...'),
+                    'n_created_dt' => strtotime($notification['n_created_dt']),
+                    'relative_created_dt' => Yii::$app->formatter->asRelativeTime($notification['n_created_dt'])
+                ];
+                array_push($msg, $item);
+            }
+
+            CentrifugoService::sendMsg(json_encode(['newMessages' =>$msg]), 'ownUserChannel#' . Auth::id());
+        }
+    }
 
     public function actionWebSocket()
     {

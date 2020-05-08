@@ -147,7 +147,7 @@ class Sms extends \yii\db\ActiveRecord
 
     public static function createByIncomingDefault(
         SmsIncomingForm $form,
-        int $clientId,
+        ?int $clientId,
         ?int $ownerId,
         ?int $leadId,
         ?int $caseId
@@ -169,7 +169,7 @@ class Sms extends \yii\db\ActiveRecord
      */
     public static function createByIncomingExchange(
         SmsIncomingForm $form,
-        int $clientId,
+        ?int $clientId,
         ?int $ownerId,
         ?int $caseId
     ): self
@@ -190,7 +190,7 @@ class Sms extends \yii\db\ActiveRecord
      */
     public static function createByIncomingSupport(
         SmsIncomingForm $form,
-        int $clientId,
+        ?int $clientId,
         ?int $ownerId,
         ?int $caseId
     ): self
@@ -211,7 +211,7 @@ class Sms extends \yii\db\ActiveRecord
      */
     public static function createByIncomingSales(
         SmsIncomingForm $form,
-        int $clientId,
+        ?int $clientId,
         ?int $ownerId,
         ?int $leadId
     ): self
@@ -228,7 +228,7 @@ class Sms extends \yii\db\ActiveRecord
      * @param int $clientId
      * @param int|null $ownerId
      */
-    private function loadByIncoming(SmsIncomingForm $form, int $clientId, ?int $ownerId): void
+    private function loadByIncoming(SmsIncomingForm $form, ?int $clientId, ?int $ownerId): void
     {
 //        $this->s_communication_id = $form->si_id;
         $this->s_type_id = self::TYPE_INBOX;

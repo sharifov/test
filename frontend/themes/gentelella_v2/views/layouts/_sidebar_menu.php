@@ -178,6 +178,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Conference Room', 'url' => ['/conference-room/index'], 'icon' => 'comment'],
                 ['label' => 'Conferences', 'url' => ['/conference/index'], 'icon' => 'comment'],
                 ['label' => 'Conference Participant', 'url' => ['/conference-participant/index'], 'icon' => 'phone'],
+                ['label' => 'User Voice Mail', 'url' => ['/user-voice-mail/index'], 'icon' => 'microphone'],
             ]
         ];
 
@@ -334,6 +335,8 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Check List Types', 'url' => ['/lead-checklist-type/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('manageLeadChecklistType')],
                 ['label' => 'Case status history', 'url' => ['/case-status-log/index'], 'icon' => 'bars'],
                 ['label' => 'Case categories', 'url' => ['/case-category/index'], 'icon' => 'list'],
+                ['label' => 'Coupons', 'url' => ['/coupon/index'], 'icon' => 'list'],
+                ['label' => 'Coupon Cases', 'url' => ['/coupon-case/index'], 'icon' => 'list'],
             ]
         ];
 
@@ -405,6 +408,7 @@ $isSuperAdmin = $user->isSuperAdmin();
 
                 ['label' => 'User Stats', 'url' => ['/user-connection/stats'], 'icon' => 'area-chart'],
                 ['label' => 'Call User Map', 'url' => ['/call/user-map'], 'icon' => 'map'],
+                ['label' => 'Real-time User Map', 'url' => ['/call/realtime-user-map'], 'icon' => 'map'],
                 ['label' => 'Agents Ratings', 'url' => ['/stats/agent-ratings'], 'icon' => 'star-half-empty'],
             ]
         ];

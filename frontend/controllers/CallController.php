@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\components\CentrifugoService;
 use common\models\Conference;
 use common\models\Department;
 use common\models\DepartmentPhoneProject;
@@ -16,6 +17,7 @@ use frontend\widgets\CallBox;
 use frontend\widgets\IncomingCallWidget;
 use http\Exception\InvalidArgumentException;
 use sales\auth\Auth;
+
 use sales\helpers\call\CallHelper;
 use sales\services\call\CallService;
 use Yii;
@@ -332,6 +334,7 @@ class CallController extends FController
 
         //$searchModel->date_range = $searchModel->datetime_start.' - '. $searchModel->datetime_end;
 
+        //var_dump($dataProvider3->getModels()); die();
 
         return $this->render('user-map/user-map', [
             'dataProviderOnlineDep1' => $dataProviderOnlineDep1,
@@ -345,6 +348,90 @@ class CallController extends FController
             //'searchModel' => $searchModel,
         ]);
 
+    }
+
+    public function actionRealtimeUserMap()
+    {
+        $this->layout = '@frontend/themes/gentelella_v2/views/layouts/main_tv';
+
+        if (Yii::$app->request->isPost){
+            $user = Auth::user();
+            $searchUserConnectionModel = new UserConnectionSearch();
+            $searchUserCallModel = new CallSearch();
+            //$params = Yii::$app->request->queryParams;
+
+            $accessDepartmentModels = $user->udDeps;
+            if($accessDepartmentModels) {
+                $accessDepartments = ArrayHelper::map($accessDepartmentModels, 'dep_id', 'dep_id');
+            } else {
+                $accessDepartments = [];
+            }
+
+            $isSuper = ($user->isSupervision() || $user->isExSuper() || $user->isSupSuper());
+            if ($isSuper && !in_array(Department::DEPARTMENT_SUPPORT, $accessDepartments, true)) {
+                $userGroupsModel = $user->ugsGroups;
+
+                if ($userGroupsModel) {
+                    $userGroups = ArrayHelper::map($userGroupsModel, 'ug_id', 'ug_id');
+                } else {
+                    $userGroups = [];
+                }
+
+                $params['UserConnectionSearch']['ug_ids'] = $userGroups;
+                $params['CallSearch']['ug_ids'] = $userGroups;
+            }
+
+            if (!$accessDepartments || in_array(Department::DEPARTMENT_SALES, $accessDepartments, true)) {
+                $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_SALES;
+                $usersOnlineDepSales = $searchUserConnectionModel->searchRealtimeUserCallMap($params);
+            } else {
+                $usersOnlineDepSales = [];
+            }
+
+            if (!$accessDepartments || in_array(Department::DEPARTMENT_EXCHANGE, $accessDepartments, true)) {
+                $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_EXCHANGE;
+                $usersOnlineDepExchange = $searchUserConnectionModel->searchRealtimeUserCallMap($params);
+            } else {
+                $usersOnlineDepExchange = [];
+            }
+
+            if (!$accessDepartments || in_array(Department::DEPARTMENT_SUPPORT, $accessDepartments, true)) {
+                $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_SUPPORT;
+                $usersOnlineDepSupport = $searchUserConnectionModel->searchRealtimeUserCallMap($params);
+            } else {
+                $usersOnlineDepSupport = [];
+            }
+
+            if (!$accessDepartments) {
+                $params['UserConnectionSearch']['dep_id'] = 0;
+                $usersOnline = $searchUserConnectionModel->searchRealtimeUserCallMap($params);
+            } else {
+                $usersOnline = [];
+            }
+
+            $params['CallSearch']['dep_ids'] = $accessDepartments;
+            $params['CallSearch']['status_ids'] = [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING, Call::STATUS_QUEUE, Call::STATUS_IVR, Call::STATUS_DELAY];
+            $realtimeCalls = $searchUserCallModel->searchRealtimeUserCallMap($params);
+
+            $params['CallSearch']['status_ids'] = [Call::STATUS_COMPLETED, Call::STATUS_BUSY, Call::STATUS_FAILED, Call::STATUS_NO_ANSWER, Call::STATUS_CANCELED];
+
+            $callsHistory = $searchUserCallModel->searchRealtimeUserCallMapHistory($params);
+
+            CentrifugoService::sendMsg(json_encode([
+                'onlineDepSales' => $usersOnlineDepSales,
+                'onlineDepExchange' => $usersOnlineDepExchange,
+                'onlineDepSupport' => $usersOnlineDepSupport,
+                'usersOnline' => $usersOnline,
+                'realtimeCalls' => $realtimeCalls,
+                'callsHistory' => $callsHistory
+            ]), 'realtimeUserMapChannel#' . Auth::id());
+
+            return $this->asJson(['updatedTime' => Yii::$app->formatter->asTime(time(), 'php:H:i:s')]);
+        } else {
+            $this->layout = '@frontend/themes/gentelella_v2/views/layouts/main_tv';
+
+            return $this->render('realtime-user-map/index');
+        }
     }
 
     public function actionUserMap2()

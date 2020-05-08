@@ -61,6 +61,13 @@ return [
             'recording_url' => 'https://api.twilio.com/2010-04-01/Accounts/AC10f3c74efba7b492cbd7dca86077736c/Recordings/'
         ],
 
+        'airsearch' => [
+            'class' => \common\components\AirSearchService::class,
+            'url' => 'https://airsearch.api.travelinsides.com/',
+            'username' => 'SAL101',
+            'password' => 'c940e3484fe9fcc73ed12a7fcec469b4',
+        ],
+
         'currency' => [
             'class' => \common\components\CurrencyService::class,
             'url' => 'https://airsearch.api.travelinsides.com/v1/',

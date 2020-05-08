@@ -51,6 +51,13 @@ $(document).ready(function() {
                 });
             }
         }
+
+        if ($current === '#tab-contacts') {
+            if (PhoneWidgetContacts.fullListIsEmpty()) {
+                PhoneWidgetContacts.requestFullList();
+            }
+        }
+
     });
 
     function initLazyLoadHistory(simpleBar) {
@@ -87,8 +94,6 @@ $(document).ready(function() {
         });
     }
 
-
-
     $('.phone-widget__tab').each(function(i, el) {
         var simpleBar = new SimpleBar(el);
         simpleBar.getContentElement();
@@ -97,7 +102,11 @@ $(document).ready(function() {
             initLazyLoadHistory(simpleBar);
             historySimpleBar = simpleBar;
         }
-    })
+
+        if ($(el).attr('id') === 'tab-contacts') {
+           PhoneWidgetContacts.initLazyLoadFullList(simpleBar);
+        }
+    });
 
     $(document).on("click", ".widget-modal__close", function () {
         $(".widget-modal").hide();
@@ -109,11 +118,6 @@ $(document).ready(function() {
     $('.js-toggle-contact-info').on('click', function() {
         $('.contact-modal-info').show()
     })
-
-    $(".js-trigger-email-modal").on("click", function () {
-        $(".email-modal").show();
-        $(".phone-widget__tab").addClass('ovf-hidden');
-    });
 
     function addCC() {
         return '<input type="text" class="email-modal__contact-input additional-subj" placeholder="CC">'

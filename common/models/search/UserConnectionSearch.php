@@ -10,6 +10,7 @@ use yii\data\ActiveDataProvider;
 use common\models\UserConnection;
 use common\models\UserGroupAssign;
 use Yii;
+use yii\db\Query;
 
 /**
  * UserConnectionSearch represents the model behind the search form of `common\models\UserConnection`.
@@ -154,6 +155,39 @@ class UserConnectionSearch extends UserConnection
         //$query->with(['ucUser']);
 
         return $dataProvider;
+    }
+
+    public function searchRealtimeUserCallMap($params)
+    {
+        $this->load($params);
+
+        $query = UserConnection::find()->joinWith(['ucUser', 'ucUser.userStatus']);
+        $query->select(['uc_user_id', 'username', 'us_call_phone_status', 'us_is_on_call']);
+        $query->addSelect([
+            'user_roles' => (new Query())
+                ->select(['group_concat(auth_assignment.item_name SEPARATOR "-")'])
+                ->from('auth_assignment')
+                ->where('auth_assignment.user_id = uc_user_id')
+        ]);
+        $query->groupBy(['uc_user_id']);
+
+        if ($this->dep_id > 0) {
+            $subQuery = UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['ud_dep_id' => $this->dep_id]);
+            $query->andWhere(['IN', 'uc_user_id', $subQuery]);
+        } elseif ($this->dep_id === 0) {
+            $subQuery = UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['ud_dep_id' => [Department::DEPARTMENT_SALES, Department::DEPARTMENT_EXCHANGE, Department::DEPARTMENT_SUPPORT]]);
+            $query->andWhere(['NOT IN', 'uc_user_id', $subQuery]);
+        }
+
+        if ($this->ug_ids) {
+            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['ugs_group_id' => $this->ug_ids]);
+            $query->andWhere(['IN', 'uc_user_id', $subQuery]);
+        }
+
+        $query->cache(5);
+        $command = $query->createCommand();
+
+        return $command->queryAll();
     }
 
 
