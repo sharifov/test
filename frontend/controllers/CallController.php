@@ -352,8 +352,6 @@ class CallController extends FController
 
     public function actionRealtimeUserMap()
     {
-        $this->layout = '@frontend/themes/gentelella_v2/views/layouts/main_tv';
-
         if (Yii::$app->request->isPost){
             $user = Auth::user();
             $searchUserConnectionModel = new UserConnectionSearch();
