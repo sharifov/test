@@ -233,7 +233,7 @@ class WebsocketServerController extends Controller
                 $json = json_encode(['cmd' => 'initConnection', 'fd' => $userConnection->uc_connection_id, 'uc_id' => $userConnection->uc_id]);
                 $server->push($request->fd, $json); //WEBSOCKET_OPCODE_PING
 
-                unset($userConnection);
+
 
                 if ($subList) {
                     foreach ($subList as $k => $value) {
@@ -251,6 +251,8 @@ class WebsocketServerController extends Controller
                     $server->channelList[$value][$request->fd] = $request->fd;
                     $server->redis->subscribe($value);
                 }
+
+                unset($userConnection);
 
                 //VarDumper::dump($server->channelList);
 
