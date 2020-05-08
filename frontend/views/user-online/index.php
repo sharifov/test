@@ -48,9 +48,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'relation' => 'uoUser',
             ],*/
             [
-                'class' => \common\components\grid\DateTimeColumn::class,
+                //'class' => \common\components\grid\DateTimeColumn::class,
                 'attribute' => 'uo_updated_dt',
+                'value' => static function (\common\models\UserOnline $model) {
+                    return $model->uo_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->uo_updated_dt), 'php: Y-m-d [H:i:s]')  : '-';
+                },
             ],
+
+
 
             ['class' => 'yii\grid\ActionColumn'],
         ],
