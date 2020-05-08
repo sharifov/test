@@ -12,7 +12,7 @@ class EmailSenderService
     public function send(EmailSendForm $form): array
     {
         $mail = new Email();
-        $mail->e_project_id = $form->projectId;
+        $mail->e_project_id = $form->getProjectId();
         $mail->e_type_id = Email::TYPE_OUTBOX;
         $mail->e_status_id = Email::STATUS_PENDING;
         $mail->e_email_subject = $form->subject;

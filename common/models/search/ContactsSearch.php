@@ -289,6 +289,7 @@ class ContactsSearch extends Client
             'description' => new Expression('null'),
         ]);
 
+        $queryUser->andWhere(['status' => Employee::STATUS_ACTIVE]);
         $queryUser->innerJoin(UserProfile::tableName(), 'up_user_id = u.id and up_show_in_contact_list = 1');
 
         $queryUser->andWhere(['<>', 'u.id', $this->userId]);
@@ -366,6 +367,7 @@ class ContactsSearch extends Client
             'uo_user_id as user_is_online'
         ]);
 
+        $queryUser->andWhere(['status' => Employee::STATUS_ACTIVE]);
         $queryUser->innerJoin(UserProjectParams::tableName(), 'upp_user_id = u.id');
         $queryUser->innerJoin(UserProfile::tableName(), 'up_user_id = u.id and up_show_in_contact_list = 1');
         $queryUser->innerJoin(PhoneList::tableName(), 'pl_id = upp_phone_list_id');

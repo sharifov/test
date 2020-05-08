@@ -24,6 +24,11 @@ use yii\base\Model;
  */
 class EmailSendForm extends Model
 {
+    public const CONTACT_TYPES = [
+        Client::TYPE_CONTACT,
+        Client::TYPE_INTERNAL
+    ];
+
     public $userEmail;
     public $contactId;
     public $contactEmail;
@@ -52,7 +57,7 @@ class EmailSendForm extends Model
             ['contactType', 'required'],
             ['contactType', 'integer'],
             ['contactType', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            //['contactType', 'in', 'range' => [Client::TYPE_CLIENT, Client::TYPE_INTERNAL]],
+            ['contactType', 'in', 'range' => self::CONTACT_TYPES],
 
             ['contactId', 'required'],
             ['contactId', 'integer'],
@@ -93,8 +98,8 @@ class EmailSendForm extends Model
             return;
         }
 
-        if ($this->contactType === Client::TYPE_CLIENT) {
-            if (!$this->contactEntity = Client::findOne($this->contactId)) {
+        if ($this->contactType === Client::TYPE_CONTACT) {
+            if (!$this->contactEntity = Client::find()->byId($this->contactId)->byContact()->limit(1)->one()) {
                 $this->addError('contactId', 'Contact not found.');
             }
             $this->contact = new Contact($this->contactEntity);
@@ -108,6 +113,8 @@ class EmailSendForm extends Model
             $this->contact = new Contact($this->contactEntity);
             return;
         }
+
+        $this->addError('contactId', 'Contact type undefined.');
     }
 
     public function validateContactEmail(): void
@@ -116,7 +123,7 @@ class EmailSendForm extends Model
             return;
         }
 
-        if ($this->contactType === Client::TYPE_CLIENT) {
+        if ($this->contactType === Client::TYPE_CONTACT) {
             foreach ($this->contactEntity->clientEmails as $email) {
                 if ($email->email === $this->contactEmail) {
                     return;
@@ -137,39 +144,14 @@ class EmailSendForm extends Model
         }
     }
 
-    public function getContactType(): int
-    {
-        return $this->contactType;
-    }
-
     public function getContactEmail(): string
     {
         return $this->contactEmail;
     }
 
-    public function getContactId(): int
-    {
-        return $this->contact->getId();
-    }
-
     public function getContactName(): ?string
     {
         return $this->contact->getName();
-    }
-
-    public function getContact(): Contact
-    {
-        return $this->contact;
-    }
-
-    public function contactIsClient(): bool
-    {
-        return $this->contactType === Client::TYPE_CLIENT;
-    }
-
-    public function contactIsInternal(): bool
-    {
-        return $this->contactType === Client::TYPE_INTERNAL;
     }
 
     public function getProjectId(): ?int
