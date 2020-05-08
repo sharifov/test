@@ -119,11 +119,6 @@ $(document).ready(function() {
         $('.contact-modal-info').show()
     })
 
-    $(".js-trigger-email-modal").on("click", function () {
-        $(".email-modal").show();
-        $(".phone-widget__tab").addClass('ovf-hidden');
-    });
-
     function addCC() {
         return '<input type="text" class="email-modal__contact-input additional-subj" placeholder="CC">'
     }

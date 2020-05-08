@@ -9,8 +9,10 @@ use yii\widgets\ActiveForm;
 
 /** @var View $this */
 /** @var array $userPhones */
+/** @var array $userEmails */
 
 echo $this->render('@frontend/widgets/newWebPhone/view/sms', ['userPhones' => $userPhones]);
+echo $this->render('@frontend/widgets/newWebPhone/view/email', ['userEmails' => $userEmails]);
 
 ?>
 
