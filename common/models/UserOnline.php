@@ -84,9 +84,9 @@ class UserOnline extends ActiveRecord
         parent::afterSave($insert, $changedAttributes);
 
         if ($insert) {
-            Yii::info(VarDumper::dumpAsString($insert), 'info\UserOnline:afterSave:insert');
+            Yii::warning(VarDumper::dumpAsString($insert), 'info\UserOnline:afterSave:insert');
         } else {
-            Yii::info(VarDumper::dumpAsString($insert), 'info\UserOnline:afterSave:update');
+            Yii::warning(VarDumper::dumpAsString($insert), 'info\UserOnline:afterSave:update');
         }
     }
 }
