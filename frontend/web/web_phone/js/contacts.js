@@ -144,15 +144,25 @@ let PhoneWidgetContacts = function () {
             '<ul class="contact-modal-info__contacts contact-full-info">' +
             '<li>' +
             '<div class="form-group">' +
-            '<label for="">Type</label>' +
-            '<div class="form-control-wrap" data-type="company">' +
-            '<i class="fa fa-building contact-type-company"></i>' +
-            '<i class="fa fa-user contact-type-person"></i>' +
-            '<select readonly type="text" class="form-control select-contact-type" value="Company" autocomplete="off" readonly disabled>';
+            '<label for="">Type</label>';
+
+            let type = 'person';
+            if (contact['is_company']) {
+                type = 'company';
+            }
+
+            content += '<div class="form-control-wrap" data-type="' + type + '">';
+            if (type === 'person') {
+                content += '<i class="fa fa-user contact-type-person"></i>';
+            } else {
+                content += '<i class="fa fa-building contact-type-company"></i>';
+            }
+
+            content += '<select readonly type="text" class="form-control select-contact-type" autocomplete="off" readonly disabled>';
         if (contact['is_company']) {
             content += '<option value="company" selected="selected">Company</option> <option value="person">Person</option>';
         } else {
-            content += '<option value="company">Company</option> <option value="person"  selected="selected">Person</option>';
+            content += '<option value="company">Company</option> <option value="person" selected="selected">Person</option>';
         }
         content += '</select>' +
             '</div>' +
