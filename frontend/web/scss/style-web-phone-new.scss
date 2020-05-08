@@ -339,6 +339,14 @@ $red: #e15258;
 		display: flex;
 		padding: 14px 0 0;
 
+		&__label {
+			display: block;
+			font-size: 12px;
+			line-height: 18px;
+			text-align: center;
+			color: #fff;
+		}
+
 		&.is-collapsible {
 			flex-direction: column;
 			position: relative;
@@ -1003,7 +1011,7 @@ $red: #e15258;
 				}
 
 				#{$this}__name {
-					color: #668BAF;
+					color: #668baf;
 				}
 
 				// #{$this}__data {
@@ -1048,15 +1056,15 @@ $red: #e15258;
 
 			&__status {
 				padding-left: 6px;
-				color: #9BADBE;
+				color: #9badbe;
 				transform: translateY(-1px);
 
 				&--delivered {
-					color: #33A549;
+					color: #33a549;
 				}
 
 				&--error {
-					color: #EB4545;
+					color: #eb4545;
 				}
 			}
 
@@ -1538,7 +1546,7 @@ $red: #e15258;
 	.call-pane-calling {
 		background: linear-gradient(180deg, #446586 0%, #364b61 100%);
 
-		padding: 34px 32px 29px;
+		padding: 34px 24px 29px;
 
 		height: 100%;
 		width: 100%;
@@ -1560,12 +1568,15 @@ $red: #e15258;
 		}
 
 		.contact-info-card {
+			padding-top: 32px;
 			&__details {
 				border: 0 none;
 				padding-bottom: 38px;
 			}
 			&__line {
 				justify-content: center;
+				flex-direction: column;
+				align-items: center;
 			}
 
 			&__name {
@@ -1582,6 +1593,14 @@ $red: #e15258;
 				line-height: 18px;
 				color: rgba(#fff, 0.6);
 			}
+		}
+
+		.call-pane__call-btns {
+			margin-bottom: 42px;
+		}
+
+		.sound-indication {
+			margin-bottom: 38px;
 		}
 
 		.sound-controls {
@@ -1667,6 +1686,56 @@ $red: #e15258;
 		}
 	}
 
+	.in-call-controls {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+
+		padding: 0;
+		margin: -12px 0 28px;
+
+		list-style-type: none;
+
+		&__item {
+			width: calc(50% - 8px);
+			margin: 6px 0;
+		}
+
+		&__action {
+			border: 1px solid rgba(#fff, .3);
+			position: relative;
+			display: inline-block;
+			width: 100%;
+			
+			padding: 8px 12px 8px 30px;
+			border-radius: 4px;
+
+			color: #fff;
+
+			&:focus,
+			&:active,
+			&:hover,
+			&:visited,
+			&:active:hover,
+			&:focus:active {
+				color: #fff;
+				text-decoration: none;
+			}
+
+			span {
+				font-weight: 500;
+				font-size: 12px;
+				line-height: 18px;
+				white-space: nowrap;
+			}
+
+			.fa {
+				position: absolute;
+				left: 12px;
+			}
+		}
+	}
+
 	.contacts {
 		&__search-wrap {
 			padding: 0;
@@ -1708,6 +1777,48 @@ $red: #e15258;
 
 	.simplebar-track {
 		right: 2px;
+	}
+
+	.calling-from-info {
+		position: absolute;
+		width: 100%;
+		left: 0;
+		top: 0;
+		background-color: rgba(#fff, 0.1);
+		display: flex;
+		align-items: center;
+		padding: 8px 16px;
+
+		&__label {
+			color: rgba(#fff, 0.6);
+			font-weight: 600;
+			font-size: 12px;
+			line-height: 18px;
+			flex-grow: 1;
+		}
+
+		&__number {
+			font-size: 14px;
+			line-height: 18px;
+			color: #fff;
+		}
+
+		&__identifier {
+			font-weight: 500;
+			font-size: 10px;
+			line-height: 11px;
+			color: #2a3f54;
+			background-color: #d6e3f0;
+			text-transform: uppercase;
+			border-radius: 2px;
+			margin-right: 8px;
+			padding: 3px 4px 2px 4px;
+			display: inline-block;
+			max-width: 72px;
+			text-overflow: ellipsis;
+			overflow: hidden;
+			white-space: nowrap;
+		}
 	}
 }
 

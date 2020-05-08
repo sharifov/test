@@ -51,7 +51,8 @@
       right: 10px;
       top: 50%;
       transform: translateY(-50%);
-      color: #fff; }
+      color: #fff;
+      pointer-events: none; }
     .phone-widget .current-number__phone {
       font-size: 14px;
       line-height: 18px;
@@ -231,6 +232,12 @@
   .phone-widget .contact-info-card {
     display: flex;
     padding: 14px 0 0; }
+    .phone-widget .contact-info-card__label {
+      display: block;
+      font-size: 12px;
+      line-height: 18px;
+      text-align: center;
+      color: #fff; }
     .phone-widget .contact-info-card.is-collapsible {
       flex-direction: column;
       position: relative; }
@@ -666,7 +673,7 @@
         .phone-widget .messages-modal .pw-msg-item--user .pw-msg-item__avatar {
           display: none; }
         .phone-widget .messages-modal .pw-msg-item--user .pw-msg-item__name {
-          color: #668BAF; }
+          color: #668baf; }
         .phone-widget .messages-modal .pw-msg-item--user .pw-msg-item__msg-main {
           padding-left: 0;
           padding-right: 12px;
@@ -694,12 +701,12 @@
         padding-left: 6px; }
       .phone-widget .messages-modal .pw-msg-item__status {
         padding-left: 6px;
-        color: #9BADBE;
+        color: #9badbe;
         transform: translateY(-1px); }
         .phone-widget .messages-modal .pw-msg-item__status--delivered {
-          color: #33A549; }
+          color: #33a549; }
         .phone-widget .messages-modal .pw-msg-item__status--error {
-          color: #EB4545; }
+          color: #eb4545; }
       .phone-widget .messages-modal .pw-msg-item__msg-main {
         flex-basis: calc(100% - 32px);
         padding-left: 12px; }
@@ -1007,7 +1014,7 @@
         font-weight: normal; }
   .phone-widget .call-pane-calling {
     background: linear-gradient(180deg, #446586 0%, #364b61 100%);
-    padding: 34px 32px 29px;
+    padding: 34px 24px 29px;
     height: 100%;
     width: 100%;
     visibility: hidden;
@@ -1021,22 +1028,30 @@
       visibility: visible;
       opacity: 1;
       z-index: 3; }
-    .phone-widget .call-pane-calling .contact-info-card__details {
-      border: 0 none;
-      padding-bottom: 38px; }
-    .phone-widget .call-pane-calling .contact-info-card__line {
-      justify-content: center; }
-    .phone-widget .call-pane-calling .contact-info-card__name {
-      font-weight: normal;
-      font-size: 22px;
-      line-height: 26px;
-      color: #fff;
-      margin-bottom: 4px; }
-    .phone-widget .call-pane-calling .contact-info-card__call-type {
-      font-weight: normal;
-      font-size: 16px;
-      line-height: 18px;
-      color: rgba(255, 255, 255, 0.6); }
+    .phone-widget .call-pane-calling .contact-info-card {
+      padding-top: 32px; }
+      .phone-widget .call-pane-calling .contact-info-card__details {
+        border: 0 none;
+        padding-bottom: 38px; }
+      .phone-widget .call-pane-calling .contact-info-card__line {
+        justify-content: center;
+        flex-direction: column;
+        align-items: center; }
+      .phone-widget .call-pane-calling .contact-info-card__name {
+        font-weight: normal;
+        font-size: 22px;
+        line-height: 26px;
+        color: #fff;
+        margin-bottom: 4px; }
+      .phone-widget .call-pane-calling .contact-info-card__call-type {
+        font-weight: normal;
+        font-size: 16px;
+        line-height: 18px;
+        color: rgba(255, 255, 255, 0.6); }
+    .phone-widget .call-pane-calling .call-pane__call-btns {
+      margin-bottom: 42px; }
+    .phone-widget .call-pane-calling .sound-indication {
+      margin-bottom: 38px; }
     .phone-widget .call-pane-calling .sound-controls {
       position: relative;
       height: 4px;
@@ -1092,6 +1107,35 @@
       background: #3c5773;
       z-index: 33;
       transition: all ease-in-out 0.1s; }
+  .phone-widget .in-call-controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 0;
+    margin: -12px 0 28px;
+    list-style-type: none; }
+    .phone-widget .in-call-controls__item {
+      width: calc(50% - 8px);
+      margin: 6px 0; }
+    .phone-widget .in-call-controls__action {
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      position: relative;
+      display: inline-block;
+      width: 100%;
+      padding: 8px 12px 8px 30px;
+      border-radius: 4px;
+      color: #fff; }
+      .phone-widget .in-call-controls__action:focus, .phone-widget .in-call-controls__action:active, .phone-widget .in-call-controls__action:hover, .phone-widget .in-call-controls__action:visited, .phone-widget .in-call-controls__action:active:hover, .phone-widget .in-call-controls__action:focus:active {
+        color: #fff;
+        text-decoration: none; }
+      .phone-widget .in-call-controls__action span {
+        font-weight: 500;
+        font-size: 12px;
+        line-height: 18px;
+        white-space: nowrap; }
+      .phone-widget .in-call-controls__action .fa {
+        position: absolute;
+        left: 12px; }
   .phone-widget .contacts__search-wrap {
     padding: 0;
     position: relative; }
@@ -1118,6 +1162,40 @@
     width: 6px; }
   .phone-widget .simplebar-track {
     right: 2px; }
+  .phone-widget .calling-from-info {
+    position: absolute;
+    width: 100%;
+    left: 0;
+    top: 0;
+    background-color: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    padding: 8px 16px; }
+    .phone-widget .calling-from-info__label {
+      color: rgba(255, 255, 255, 0.6);
+      font-weight: 600;
+      font-size: 12px;
+      line-height: 18px;
+      flex-grow: 1; }
+    .phone-widget .calling-from-info__number {
+      font-size: 14px;
+      line-height: 18px;
+      color: #fff; }
+    .phone-widget .calling-from-info__identifier {
+      font-weight: 500;
+      font-size: 10px;
+      line-height: 11px;
+      color: #2a3f54;
+      background-color: #d6e3f0;
+      text-transform: uppercase;
+      border-radius: 2px;
+      margin-right: 8px;
+      padding: 3px 4px 2px 4px;
+      display: inline-block;
+      max-width: 72px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap; }
 
 .phone-widget-icon {
   cursor: pointer;

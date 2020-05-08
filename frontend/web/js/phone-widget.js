@@ -358,8 +358,7 @@ $(document).ready(function() {
                 '<div class="dropdown">'+
                     selected +
                     '<div class="dropdown-menu" >' +
-                        arr
-                    +
+                        arr +
                     '</div>'+
                     '<i class="fa fa-chevron-down"></i>'+
                 '</div>'
@@ -403,11 +402,13 @@ $(document).ready(function() {
             setValue($(this))
         });
 
-        return {
+        return {    
             getData: this.getData(),
         }
 
     }
+
+
     var data = {
         'selected': {
             'value': '+1-222-555-2222',
@@ -433,6 +434,7 @@ $(document).ready(function() {
             }
         ]
     }
+    
     var currentNumber = toSelect($('.custom-phone-select'), data, function() {
         console.log('here goes a callback')
         console.log(currentNumber.getData);
