@@ -64,8 +64,17 @@ $this->params['breadcrumbs'][] = $this->title;
                 [
                     //'label' => 'Type/...',
                     'value' => static function ($model) {
+                        $onlineClass = '';
+                        if ($model['type'] === Client::TYPE_INTERNAL) {
+                            /** @var Employee $user */
+                            $user = $model['model'];
+                            if($user && $user->isOnline()) {
+                                $onlineClass = 'text-success';
+                            }
+                        }
+
                         $labels = [];
-                        $labels[] = $model['is_company'] ? '<i class="fa fa-building-o" title="Company"></i>' : '<i class="fa fa-user" title="Personal"></i>';
+                        $labels[] = $model['is_company'] ? '<i class="fa fa-building-o" title="Company"></i>' : '<i class="fa fa-user ' . $onlineClass . '" title="Personal"></i>';
                         $labels[] = $model['is_public'] ? '<i class="fa fa-globe" title="public"></i>' : '<i class="fa fa-book" title="private"></i>';
                         $labels[] = $model['disabled'] ? '<i class="fa fa-ban text-danger" title="Disabled"></i>' : '';
                         return implode('&nbsp;&nbsp;&nbsp;', $labels);
@@ -120,7 +129,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 ]) . '&nbsp;&nbsp;&nbsp;';
                             }
                         }
-                        $out .= ($model['type'] === Client::TYPE_INTERNAL ? '<i class="fa fa-user"></i> ' : '') . '<b>' . Html::encode($model['full_name']) . '</b>';
+                        $out .= ($model['type'] === Client::TYPE_INTERNAL ? '<i class="fa fa-user"></i>&nbsp;&nbsp; ' : '') . '<b>' . Html::encode($model['full_name']) . '</b>';
                         return $out;
 
                     },
