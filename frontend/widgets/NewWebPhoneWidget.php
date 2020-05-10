@@ -26,18 +26,15 @@ class NewWebPhoneWidget extends Widget
 
 		$useNewWebPhoneWidget = Yii::$app->params['settings']['use_new_web_phone_widget'] ?? false;
 
-		$phoneUserProject = UserProjectParams::find()->select(['upp_project_id', 'pl_phone_number'])->byUserId($this->userId)->withExistingPhoneInPhoneList()->asArray()->one();
+		$userPhoneProject = $this->getUserProjectParams($this->userId);
 
-		$phoneFrom = $phoneUserProject['pl_phone_number'] ?? null;
-		$userProjectId = $phoneUserProject['upp_project_id'] ?? null;
-
-		if (!$useNewWebPhoneWidget || !$phoneFrom) {
+		if (!$useNewWebPhoneWidget || empty($userPhoneProject)) {
 			return '';
 		}
 
 		return $this->render('web_phone_new', [
-			'phoneFrom' => $phoneFrom,
-			'projectId' => $userProjectId,
+			'userPhoneProject' => $userPhoneProject,
+            'formattedPhoneProject' => json_encode($this->formatDataForSelectList($userPhoneProject)),
             'userPhones' => array_keys($this->getUserPhones()),
             'userEmails' => array_keys($this->getUserEmails()),
 		]);
@@ -52,4 +49,34 @@ class NewWebPhoneWidget extends Widget
     {
         return Employee::getEmailList($this->userId);
     }
+
+    private function getUserProjectParams(int $userId)
+	{
+		return UserProjectParams::find()
+			->select(['upp_project_id', 'pl_phone_number', 'p.name as project_name'])
+			->byUserId($userId)
+			->withExistingPhoneInPhoneList()
+			->withProject()
+			->asArray()->all();
+	}
+
+	private function formatDataForSelectList(array $userProjectPhones): array
+	{
+		$result = [
+			'selected' => [],
+			'options' => []
+		];
+		foreach ($userProjectPhones as $phone) {
+			$result['options'][] = [
+				'value' => $phone['pl_phone_number'],
+				'project' => $phone['project_name'],
+				'projectId' => $phone['upp_project_id']
+			];
+		}
+		$result['selected']['value'] = $userProjectPhones[0]['pl_phone_number'] ?? 'undefined';
+		$result['selected']['project'] = $userProjectPhones[0]['project_name'] ?? 'undefined';
+		$result['selected']['projectId'] = $userProjectPhones[0]['upp_project_id'] ?? 'undefined';
+
+		return $result;
+	}
 }
