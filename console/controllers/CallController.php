@@ -135,8 +135,8 @@ class CallController extends Controller
         $resultInfo = 'Processed: '. count($out) .' Total execution time: ' .
             number_format(round(microtime(true) - $timeStart, 2), 2);
         $this->outputHelper->printInfo($resultInfo, $point);
-        $resultInfo = count($out) ? VarDumper::dumpAsString(['calls' => $out, 'errors' => $errors]) . $resultInfo : $resultInfo;
-        Yii::info(VarDumper::dumpAsString(['calls' => $out, 'errors' => $errors]) . $resultInfo,'info\Console:CallController::end');
+        //$resultInfo = count($out) ? VarDumper::dumpAsString(['calls' => $out, 'errors' => $errors]) . $resultInfo : $resultInfo;
+        //Yii::info(VarDumper::dumpAsString(['calls' => $out, 'errors' => $errors]) . $resultInfo,'info\Console:CallController::end');
     }
 
     public function actionUsers()
