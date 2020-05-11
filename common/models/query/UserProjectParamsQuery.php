@@ -81,6 +81,11 @@ class UserProjectParamsQuery extends ActiveQuery
 		return $this->innerJoin( 'phone_list', 'upp_phone_list_id = pl_id and pl_enabled = 1 and pl_phone_number is not null');
 	}
 
+	public function withProject(): UserProjectParamsQuery
+	{
+		return $this->innerJoin('projects as p', 'upp_project_id = p.id and p.closed <> 1');
+	}
+
 	public function withCallTypeParams(int $callType): UserProjectParamsQuery
 	{
 		return $this->innerJoin('user_profile', 'up_user_id = upp_user_id and up_call_type_id and up_call_type_id = ' . $callType);

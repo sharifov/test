@@ -268,7 +268,16 @@ class PhoneController extends FController
         if (PhoneBlacklist::find()->isExists($phone)) {
             return $this->asJson(['success' => false, 'message' => 'Declined Call. Reason: Blacklisted']);
         }
-        return $this->asJson(['success' => true]);
+        $callTo = ClientPhone::findOne(['phone' => $phone]);
+		$response = [
+			'callToName' => '',
+			'phone' => $phone,
+			'success' => true
+		];
+        if ($callTo) {
+			$response['callToName'] = $callTo->client->first_name . ' ' . $callTo->client->last_name;
+		}
+        return $this->asJson($response);
     }
 
     /**

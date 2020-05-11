@@ -1,4 +1,5 @@
 $(document).ready(function() {
+
     $phoneTabAnchor = $('[data-toggle-tab]');
     var historySimpleBar;
 
@@ -270,7 +271,7 @@ $(document).ready(function() {
             updateAgentStatus(connection, false, 1);
             device.disconnectAll();
 
-            newWidgetCancelCall();
+            PhoneWidgetCall.cancelCall();
 
             clearTimeout(timeout)
         }
@@ -308,10 +309,132 @@ $(document).ready(function() {
     //     return node;
     // }
 
-    window.newWidgetCancelCall = function () {
-        $('.phone-widget-icon').removeClass('is-on-call');
-        $('.phone-widget-icon').removeClass('is-pending');
-        $('.call-pane__call-btns').removeClass('is-on-call');
-        $('.call-pane__call-btns').removeClass('is-pending')
-    }
+    // var data = {
+    //     'selected': {
+    //         'value': '+1-222-555-2222',
+    //         'project': 'gtt',
+    //         'id': 'dd-select'
+    //     },
+    //     'options': [
+    //         {
+    //             'value': '+1-222-555-4444',
+    //             'project': 'flygtravel'
+    //         },
+    //         {
+    //             'value': '+1-222-555-3333',
+    //             'project': 'wowgateway'
+    //         },
+    //         {
+    //             'value': '+1-222-555-2222',
+    //             'project': 'gtt'
+    //         },
+    //         {
+    //             'value': '+1-222-555-1111',
+    //             'project': 'gtt2'
+    //         }
+    //     ]
+    // }
+    
+    // var currentNumber = toSelect($('.custom-phone-select'), data, function() {
+    //     console.log('here goes a callback')
+    //     console.log(currentNumber.getData);
+    // });
+    
+    
 });
+
+function toSelect(elem, obj, cb) {
+    var $element = $(elem),
+        $toggle = '.dropdown-toggle',
+        $option = '.dropdown-item',
+        selectedNumber = '.current-number__selected-nr',
+        selectedText = '.current-number__selected-project';
+    optionClass = 'dropdown-item';
+
+    var selected = 'optionselected';
+
+    this.data = {
+        value: obj.selected.value,
+        project: obj.selected.project,
+        projectId: obj.selected.projectId
+    }
+
+    // nodes
+    function selectedNode(value, project, id, projectId) {
+        return (
+            '<button value="' + value + '" data-info-project="' + project + '" data-info-project-id="'+ projectId +'" class="btn btn-secondary dropdown-toggle" type="button" id="' +id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+
+            '<small class="current-number__phone current-number__selected-nr">' + value + '</small>'+
+            '<span class="current-number__identifier current-number__selected-project">' + project + '</span>'+
+            '</button>'
+        );
+    }
+
+    function optionNode(optionList) {
+        arr = []
+        optionList.forEach(function(el) {
+            arr.push('<button class="dropdown-item" type="button" value="' + el.value + '" data-info-project="' + el.project + '" data-info-project-id="' + el.projectId + '">'+
+                '<small class="current-number__phone">' + el.value + '</small>'+
+                '<span class="current-number__identifier">' + el.project + '</span>'+
+                '</button>')
+        })
+
+        return arr;
+    }
+
+    function containerNode(selected, optionList) {
+        var arr = optionNode(optionList).join('');
+
+        return (
+            '<div class="dropdown">'+
+            selected +
+            '<div class="dropdown-menu" >' +
+            arr +
+            '</div>'+
+            '<i class="fa fa-chevron-down"></i>'+
+            '</div>'
+        )
+    }
+
+    function generateSelect(obj) {
+        $element.append(
+            containerNode(selectedNode(obj.selected.value, obj.selected.project, obj.selected.id, obj.selected.projectId), obj.options)
+        )
+    }
+
+    function setValue(option) {
+        this.data.value = option.val();
+        this.data.project = option.attr('data-info-project');
+        this.data.projectId = option.attr('data-info-project-id');
+        $($element).trigger(selected);
+    }
+
+    this.getData = function() {
+        return this.data;
+    }
+
+    generateSelect(obj)
+
+    $($element).on(selected, $($toggle), function(e) {
+        var elem = e.target,
+            $selectedNumber = $element.find(selectedNumber),
+            $selectedText = $element.find(selectedText);
+
+        $(elem).find($toggle).val(this.data.value);
+        $selectedNumber.text(this.data.value);
+        $selectedText.text(this.data.project);
+
+        if (typeof cb === 'function') {
+            cb.call(this);
+        }
+
+    }.bind(this));
+
+    $($element).on('click', $option, function() {
+        setValue($(this))
+    });
+
+    return {
+        getData: this.getData(),
+    }
+
+}

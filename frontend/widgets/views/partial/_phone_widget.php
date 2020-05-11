@@ -2,7 +2,7 @@
 
 use yii\web\View;
 
-/** @var $phoneFrom string */
+/** @var $showWidgetContent bool */
 /** @var View $this */
 /** @var array $userPhones */
 /** @var array $userEmails */
@@ -10,7 +10,7 @@ use yii\web\View;
 ?>
 
 <div class="phone-widget" style="margin-bottom: 30px">
-	<?php if($phoneFrom): ?>
+	<?php if($showWidgetContent): ?>
     <div class="phone-widget__header">
         <div class="phone-widget__heading">
             <span class="phone-widget__title">Calls</span>

@@ -4,8 +4,8 @@ use frontend\widgets\newWebPhone\NewWebPhoneAsset;
 use yii\helpers\Url;
 use yii\web\View;
 
-/* @var $phoneFrom string */
-/* @var $projectId int */
+/* @var $userPhoneProject string */
+/* @var $formattedPhoneProject string */
 /* @var $this View */
 /** @var array $userPhones */
 /** @var array $userEmails */
@@ -14,7 +14,7 @@ NewWebPhoneAsset::register($this);
 ?>
 
 <?= $this->render('partial/_phone_widget', [
-	'phoneFrom' => $phoneFrom,
+	'showWidgetContent' => !empty($userPhoneProject),
 	'userPhones' => $userPhones,
 	'userEmails' => $userEmails,
 ]) ?>
@@ -28,6 +28,9 @@ $ajaxBlackList = Url::to(['/phone/check-black-phone']);
 <?php
 
 $js = <<<JS
+	var data = JSON.parse('{$formattedPhoneProject}');
+	var phoneNumbers = toSelect($('.custom-phone-select'), data);
+
     $(document).on('click', '#btn-new-make-call', function(e) {
         e.preventDefault();
         
@@ -44,24 +47,18 @@ $js = <<<JS
 			return false;	
 		}
 		
-        
         $.post('{$ajaxCheckUserForCallUrl}', {user_id: userId}, function(data) {
             
             if(data && data.is_ready) {
-                let phone_from = '{$phoneFrom}';
-                
-                let project_id = '{$projectId}';
-                
+               let phone_from = phoneNumbers.getData.value;
+               let project_id = phoneNumbers.getData.projectId;
+
                 $.post('{$ajaxBlackList}', {phone: phone_to}, function(data) {
                     if (data.success) {
 						if (device) {
 							let params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': null, 'case_id': null, 'c_type': 'call-web', 'c_user_id': userId};
 							webPhoneParams = params;
-							console.log(params);
-							$('.phone-widget-icon').addClass('is-pending');
-							$('.call-pane__call-btns').addClass('is-pending');
-							$('.suggested-contacts').removeClass('is_active');
-							$('.call-in-action__time').hide();
+							PhoneWidgetCall.initCall({from: phoneNumbers.getData, to: data});
 							createNotify('Calling', 'Calling ' + params.To + '...', 'success');
 							updateAgentStatus(connection, false, 0);
 							connection = device.connect(params);
@@ -76,7 +73,12 @@ $js = <<<JS
                 }, 'json');
                 
             } else {
-                alert('You have active call');
+
+								alert('You have active call');
+								$('.call-pane').removeClass('is_active');
+								$('.call-pane-calling').addClass('is_active');
+								$(".call-pane__call-btns").addClass("is-on-call");
+
                 return false;
             }
         }, 'json');

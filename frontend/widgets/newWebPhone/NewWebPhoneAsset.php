@@ -19,6 +19,7 @@ class NewWebPhoneAsset extends AssetBundle
 	public $js = [
 		'https://cdn.jsdelivr.net/npm/simplebar@latest/dist/simplebar.min.js',
 		'/js/phone-widget.js',
+		'/web_phone/js/call.js',
 		'/web_phone/js/sms.js',
 		'/web_phone/js/contacts.js',
 		'/web_phone/js/email.js',

@@ -24,9 +24,22 @@ let PhoneWidgetSms = function () {
         return userPhones;
     }
 
+    function setSmsIconStatus(smsStatus) {
+        console.log(smsStatus)
+        switch (getStatusClass(smsStatus).trim()) {
+            case statuses[5]:
+                return '<span class="pw-msg-item__status pw-msg-item__status--delivered"> <i class="fa fa-check-double"></i> </span>';
+            case statuses[6]:
+                return '<span class="pw-msg-item__status pw-msg-item__status--error"> <i class="fa fa-exclamation-circle"></i> </span>'
+            default:
+                return '<span class="pw-msg-item__status"> <i class="fa fa-check"></i> </span>';
+        }
+    }
+
     function updateStatus(sms) {
         let container = $(document).find('.web-phone-widget-sms-' + sms.id + '-status');
         clearStatusClass(container);
+        setSmsIconStatus(sms.status);
         let statusClass = getStatusClass(sms.status);
         if (statusClass) {
             container.addClass(statusClass);
@@ -157,6 +170,9 @@ let PhoneWidgetSms = function () {
         if (sms.type === 1) {
             typeClass = ' pw-msg-item--user';
         }
+
+
+
         return '<li class="messages-modal__msg-item pw-msg-item' + typeClass + '">' +
                     '<div class="pw-msg-item__avatar">' +
                         '<div class="agent-text-avatar">' +
@@ -167,6 +183,7 @@ let PhoneWidgetSms = function () {
                         '<div class="pw-msg-item__data">' +
                             '<span class="pw-msg-item__name">' + sms.name + '</span>' +
                             '<span class="pw-msg-item__timestamp">' + sms.time + '</span>' +
+                            setSmsIconStatus(sms.status) +
                         '</div>' +
                         '<div class="pw-msg-item__msg-wrap' + getStatusClass(sms.status) + ' web-phone-widget-sms-' + sms.id + '-status">' +
                             '<p class="pw-msg-item__msg">' + sms.text + '</p>' +

@@ -369,6 +369,7 @@ use yii\helpers\Html;
     function bindVolumeIndicators(connection) {
         connection.on('volume', function (inputVolume, outputVolume) {
             volumeIndicatorsChange(inputVolume, outputVolume);
+            PhoneWidgetCall.volumeIndicatorsChange(inputVolume, outputVolume)
         });
     }
 
@@ -575,6 +576,7 @@ use yii\helpers\Html;
 
                     volumeIndicators.style.display = 'block';
                     bindVolumeIndicators(conn);
+                    PhoneWidgetCall.updateConnection(conn);
                 });
 
                 device.on('disconnect', function (conn) {
@@ -592,8 +594,8 @@ use yii\helpers\Html;
                     volumeIndicators.style.display = 'none';
                     cleanPhones();
 
-                    if (typeof window.newWidgetCancelCall === "function") {
-                        window.newWidgetCancelCall();
+                    if (typeof PhoneWidgetCall !== "function") {
+                        PhoneWidgetCall.cancelCall();
                     }
                 });
 

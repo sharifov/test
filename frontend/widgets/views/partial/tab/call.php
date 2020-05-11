@@ -4,9 +4,15 @@
 
 ?>
 <div class="phone-widget__tab is_active" id="tab-phone">
-    <div class="call-pane">
+    <div class="call-pane is_active">
+        
+        <div class="current-number">
+            <label class="call-pane-label" for="">Calling from</label>
+            <div class="custom-phone-select"></div>
+            <!-- Custom select is appended to this block. Please, search search JS function initialized with 'current-number' selector. -->
+        </div>
         <div class="call-pane__number">
-            <div class="suggestion-placeholder">
+            <!-- <div class="suggestion-placeholder">
                 <svg width="75" height="75" viewBox="0 0 75 75" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M1.97374 43.421C0.888156 43.421 0 44.3092 0 45.3946C0 46.4802 0.888156 47.3683 1.97374 47.3683C3.05933 47.3683 3.94749 46.4802 3.94749 45.3946C3.9473 44.3092 3.05914 43.421 1.97374 43.421Z" fill="white" fill-opacity="0.1"/>
                     <path d="M1.97374 27.6315C0.888156 27.6315 0 28.5196 0 29.6052C0 30.6908 0.888156 31.579 1.97374 31.579C3.05933 31.579 3.94749 30.6908 3.94749 29.6052C3.9473 28.5196 3.05914 27.6315 1.97374 27.6315Z" fill="white" fill-opacity="0.1"/>
@@ -38,31 +44,36 @@
                     <i class="far fa-user"></i>
 
                 </div>
-            </div>
+            </div> -->
             <ul class="phone-widget__list-item calls-history suggested-contacts"></ul>
 
-            <?php
+            
+            <div class="phone-input-wrap">
+                <label class="call-pane-label" for="">Calling to</label>
+                <?php
 
-            use yii\bootstrap4\Html;
-            use yii\web\View;
-            use yii\widgets\ActiveForm;
+                use yii\bootstrap4\Html;
+				use yii\helpers\Url;
+				use yii\web\View;
+                use yii\widgets\ActiveForm;
 
-            $form = ActiveForm::begin([
-                'id' => 'contact-list-calls-ajax',
-                'action' => ['/contacts/list-calls-ajax'],
-                'method' => 'get',
-            ]);
+                $form = ActiveForm::begin([
+                    'id' => 'contact-list-calls-ajax',
+                    'action' => ['/contacts/list-calls-ajax'],
+                    'method' => 'get',
+                ]);
 
-            echo Html::input('text', 'q', null, [
-                'id' => 'call-pane__dial-number',
-                'class' => 'call-pane__dial-number',
-                'placeholder' => 'Name, company, phone...',
-                'autocomplete' => 'off',
-            ]);
+                echo Html::input('text', 'q', null, [
+                    'id' => 'call-pane__dial-number',
+                    'class' => 'call-pane__dial-number',
+                    'placeholder' => 'Name, company, phone...',
+                    'autocomplete' => 'off',
+                ]);
 
-            ActiveForm::end()
+                ActiveForm::end()
 
-            ?>
+                ?>
+            </div>
 
             <a href="#" class="call-pane__dial-clear-all is-shown">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -87,6 +98,7 @@
                 <li class="dial__item"><button class="dial__btn" value="✱">✱</button></li>
                 <li class="dial__item"><button class="dial__btn" value="0">0</button></li>
                 <li class="dial__item"><button class="dial__btn" value="#">#</button></li>
+                <li class="dial__item"><button class="dial__btn" value="+">+</button></li>
             </ul>
             <div class="call-pane__call-btns">
                 <button class="call-pane__start-call calling-state-block" id="btn-new-make-call">
@@ -127,122 +139,128 @@
 <!--            </button>-->
 <!--        </div>-->
     </div>
+    <div class="call-pane-calling">
+        <div class="calling-from-info">
+            <span class="calling-from-info__label">From</span>
+            <span class="calling-from-info__identifier">WOWFARE</span>
+            <span class="calling-from-info__number">+1-222-555-8888</span>
+        </div>
+        <div class="contact-info-card">
+            <div class="contact-info-card__details">
+                
+                <div class="contact-info-card__line history-details">
+                    <span class="contact-info-card__label">To</span>
+                    <strong class="contact-info-card__name">Geordan Reyney</strong>
+                </div>
+
+                <div class="contact-info-card__line history-details">
+                    <span class="contact-info-card__call-type">+1-222-555-8888</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="call-pane__call-btns">
+            <button class="call-pane__mute" id="call-pane__mute" data-is-muted="false">
+                <i class="fa fa-volume-mute"></i>
+            </button>
+            <button class="call-pane__start-call calling-state-block">
+                <div class="call-in-action">
+                    <span class="call-in-action__text">on call</span>
+                    <span class="call-in-action__time">01:54</span>
+                </div>
+                <!-- <i class="fas fa-phone"></i> -->
+            </button>
+            <button class="call-pane__end-call">
+                <i class="fa fa-phone-slash"></i>
+            </button>
+            <!-- <button class="call-pane__correction">
+            <i class="fa fa-backspace"></i>
+            </button> -->
+
+        </div>
+
+        <div class="sound-indication">
+            <div class="sound-control-wrap" id="wg-call-volume">
+                <i class="fa fa-volume-down"></i>
+                <div class="sound-controls">
+                    <div class="progres-wrap">
+                        <div class="sound-progress" ></div>
+                        <div class="sound-ovf" style="right: -100%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sound-control-wrap" id="wg-call-microphone">
+                <i class="fa fa-microphone"></i>
+                <div class="sound-controls">
+                    
+                <div class="progres-wrap">
+                    <div class="sound-progress" ></div>
+                    <div class="sound-ovf" style="right: -30%;"></div>
+                </div>
+            </div>
+        </div>
+
+        
+    </div>
+    <ul class="in-call-controls">
+      <li class="in-call-controls__item">
+        <a href="#" class="in-call-controls__action">
+          <i class="fa fa-pause"></i>
+          <span>On Hold</span> 
+        </a>
+      </li>
+      <li class="in-call-controls__item" id="wg-transfer-call">
+        <a href="#" class="in-call-controls__action">
+        <i class="fa fa-random"></i>
+          <span>Transfer Call</span>
+        </a>
+      </li>
+      <li class="in-call-controls__item">
+        <a href="#" class="in-call-controls__action">
+          <i class="fa fa-plus"></i>
+          <span>Add Person</span>
+        </a>
+      </li>
+      <li class="in-call-controls__item">
+        <a href="#" class="in-call-controls__action">
+        <i class="fa fa-th"></i>
+          <span>Dialpad</span>
+        </a>
+      </li>
+    </ul>
+
+    <div class="call-pane__note-block">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd"
+              d="M4.5778 11.0407C4.5778 11.2514 4.74859 11.4222 4.95928 11.4222H7.49903C7.70138 11.4222 7.89544 11.3418 8.03853 11.1987L15.7766 3.46065C15.9196 3.31757 16 3.12355 16 2.92123C16 2.71892 15.9196 2.52489 15.7766 2.38182L13.6182 0.223386C13.4751 0.0803521 13.2811 0 13.0788 0C12.8765 0 12.6824 0.0803521 12.5393 0.223386L4.80126 7.96147C4.65818 8.10455 4.5778 8.29862 4.5778 8.50097V11.0407ZM14.1576 2.92123L7.18256 9.89627H6.10373V8.81744L13.0788 1.8424L14.1576 2.92123Z"
+              fill="#446D97"></path>
+              <path
+              d="M1.52593 14.474V2.26655H5.34076V0.740614H1.52593C0.683183 0.740614 0 1.4238 0 2.26655V14.474C0 15.3168 0.683184 15.9999 1.52593 15.9999H13.7334C14.5761 15.9999 15.2593 15.3168 15.2593 14.474V10.6592H13.7334V14.474H1.52593Z"
+              fill="#446D97"></path>
+      </svg>
+
+      <div class="form-group">
+          <input type="text" class="call-pane__note-msg form-control" placeholder="Add Note">
+          <div class="error-message"></div>
+      </div>
+      <button class="call-pane__add-note">
+        <svg width="17" height="12" viewBox="0 0 17 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd"
+            d="M16.7072 1.70718L6.50008 11.9143L0.292969 5.70718L1.70718 4.29297L6.50008 9.08586L15.293 0.292969L16.7072 1.70718Z"
+            fill="white" />
+        </svg>
+      </button>
+    </div>
+  </div>
 </div>
 
 <?php
+$ajaxCallRedirectGetAgents = Url::to(['phone/ajax-call-get-agents']);
 $js = <<<JS
-
-(function() {
-    
-    function delay(callback, ms) {
-        var timer = 0;
-        return function() {
-            var context = this, args = arguments;
-            clearTimeout(timer);
-            timer = setTimeout(function () {
-                callback.apply(context, args);
-            }, ms || 0);
-        };
-    }
-    
-    $("#call-pane__dial-number").on('keyup', delay(function() {
-        $('.suggested-contacts').removeClass('is_active');
-        let contactList = $("#contact-list-calls-ajax"); 
-        let q = contactList.find("input[name=q]").val();
-        if (q.length < 3) {
-            return false;
-        }
-        contactList.submit();
-    }, 300));
-     
-    $('#contact-list-calls-ajax').on('beforeSubmit', function (e) {
-        e.preventDefault();
-        let yiiform = $(this);
-        let q = yiiform.find("input[name=q]").val();
-        if (q.length < 3) {
-            //  new PNotify({
-            //     title: "Search contacts",
-            //     type: "warning",
-            //     text: 'Minimum 2 symbols',
-            //     hide: true
-            // });
-            return false;
-        }
-        $.ajax({
-                type: yiiform.attr('method'),
-                url: yiiform.attr('action'),
-                data: yiiform.serializeArray(),
-                dataType: 'json',
-            }
-        )
-        .done(function(data) {
-            let content = '';
-             if (data.results.length < 1) {
-                 content += loadNotFound();
-            } else {
-                $.each(data.results, function(i, item) {
-                    content += loadContact(item);     
-                });
-                $('.suggested-contacts').html(content);
-                $('.suggested-contacts').addClass('is_active');
-                $('.call-pane__dial-clear-all').addClass('is-shown')
-            }
-            $('.suggested-contacts').html(content);
-            $('.suggested-contacts').addClass('is_active');
-            $('.call-pane__dial-clear-all').addClass('is-shown')
-        })
-        .fail(function () {
-            new PNotify({
-                title: "Search contacts",
-                type: "error",
-                text: 'Server Error. Try again later',
-                hide: true
-            });
-        });
-        return false;
-    });
-    
-    function loadContact(contact) {
-        //  type = 3 = Internal contact
-        let contactIcon = '';
-        if (contact['type'] === 3) {
-            contactIcon = '<div class="contact-info-card__status">' +
-                            '<i class="far fa-user ' + contact['user_status_class'] + ' "></i>' +
-                        '</div>'; 
-        }
-        let content = '<li class="calls-history__item contact-info-card call-contact-card" data-phone="' + contact['phone'] + '">' +
-                    '<div class="collapsible-toggler">' +
-                        contactIcon
-                        + '<div class="contact-info-card__details">' +
-                            '<div class="contact-info-card__line history-details">' +
-                                '<strong class="contact-info-card__name">' + contact['name'] + '</strong>' +
-                            '</div>' +
-                        '</div>' +
-                    '</div>' +
-                '</li>';
-        return content;
-    }
-    
-    function loadNotFound() {
-        let content = '<li class="calls-history__item contact-info-card">' +
-                    '<div class="collapsible-toggler">' +
-                        '<div class="contact-info-card__details">' +
-                            '<div class="contact-info-card__line history-details">' +
-                                '<strong class="contact-info-card__name">No results found</strong>' +
-                            '</div>' +
-                        '</div>' +
-                    '</div>' +
-                '</li>';
-        return content;
-    }
-    
-      $(document).on('click', "li.call-contact-card", function () {
-         let phone = $(this).data('phone');
-         $("#call-pane__dial-number").val(phone);
-         $('.suggested-contacts').removeClass('is_active');
-     });
-    
-})();
+PhoneWidgetCall.init({
+    'ajaxCallRedirectGetAgents': '{$ajaxCallRedirectGetAgents}'
+});
 
 JS;
 $this->registerJs($js);
