@@ -114,7 +114,12 @@ var PhoneWidgetCall = function () {
 
     function refreshCallStatus(obj)
     {
-        console.log('Refresh Call Status');
+        if (obj.status === 'In progress') {
+            obj.status = 'On Call';
+            $('.call-pane__call-btns').removeClass('is-pending').addClass('is-on-call');
+        }else {
+            $('.call-pane__call-btns').removeClass('is-on-call').addClass('is-pending');
+        }
         $('.call-in-action__text').html(obj.status);
         $('.call-in-action__time').html('').show().timer('remove').timer({format: '%M:%S', seconds: status.duration | 0}).timer('start');
     }
