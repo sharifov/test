@@ -53,7 +53,8 @@
                 <?php
 
                 use yii\bootstrap4\Html;
-                use yii\web\View;
+				use yii\helpers\Url;
+				use yii\web\View;
                 use yii\widgets\ActiveForm;
 
                 $form = ActiveForm::begin([
@@ -159,7 +160,7 @@
         </div>
 
         <div class="call-pane__call-btns">
-            <button class="call-pane__mute">
+            <button class="call-pane__mute" id="call-pane__mute" data-is-muted="false">
                 <i class="fa fa-volume-mute"></i>
             </button>
             <button class="call-pane__start-call calling-state-block">
@@ -179,7 +180,7 @@
         </div>
 
         <div class="sound-indication">
-            <div class="sound-control-wrap">
+            <div class="sound-control-wrap" id="wg-call-volume">
                 <i class="fa fa-volume-down"></i>
                 <div class="sound-controls">
                     <div class="progres-wrap">
@@ -189,7 +190,7 @@
                 </div>
             </div>
 
-            <div class="sound-control-wrap">
+            <div class="sound-control-wrap" id="wg-call-microphone">
                 <i class="fa fa-microphone"></i>
                 <div class="sound-controls">
                     
@@ -209,7 +210,7 @@
           <span>On Hold</span> 
         </a>
       </li>
-      <li class="in-call-controls__item">
+      <li class="in-call-controls__item" id="wg-transfer-call">
         <a href="#" class="in-call-controls__action">
         <i class="fa fa-random"></i>
           <span>Transfer Call</span>
@@ -255,119 +256,11 @@
 </div>
 
 <?php
+$ajaxCallRedirectGetAgents = Url::to(['phone/ajax-call-get-agents']);
 $js = <<<JS
-
-(function() {
-    
-    function delay(callback, ms) {
-        var timer = 0;
-        return function() {
-            var context = this, args = arguments;
-            clearTimeout(timer);
-            timer = setTimeout(function () {
-                callback.apply(context, args);
-            }, ms || 0);
-        };
-    }
-    
-    $("#call-pane__dial-number").on('keyup', delay(function() {
-        $('.suggested-contacts').removeClass('is_active');
-        let contactList = $("#contact-list-calls-ajax"); 
-        let q = contactList.find("input[name=q]").val();
-        if (q.length < 3) {
-            return false;
-        }
-        contactList.submit();
-    }, 300));
-     
-    $('#contact-list-calls-ajax').on('beforeSubmit', function (e) {
-        e.preventDefault();
-        let yiiform = $(this);
-        let q = yiiform.find("input[name=q]").val();
-        if (q.length < 3) {
-            //  new PNotify({
-            //     title: "Search contacts",
-            //     type: "warning",
-            //     text: 'Minimum 2 symbols',
-            //     hide: true
-            // });
-            return false;
-        }
-        $.ajax({
-                type: yiiform.attr('method'),
-                url: yiiform.attr('action'),
-                data: yiiform.serializeArray(),
-                dataType: 'json',
-            }
-        )
-        .done(function(data) {
-            let content = '';
-             if (data.results.length < 1) {
-                 content += loadNotFound();
-            } else {
-                $.each(data.results, function(i, item) {
-                    content += loadContact(item);     
-                });
-                $('.suggested-contacts').html(content);
-                $('.suggested-contacts').addClass('is_active');
-                $('.call-pane__dial-clear-all').addClass('is-shown')
-            }
-            $('.suggested-contacts').html(content);
-            $('.suggested-contacts').addClass('is_active');
-            $('.call-pane__dial-clear-all').addClass('is-shown')
-        })
-        .fail(function () {
-            new PNotify({
-                title: "Search contacts",
-                type: "error",
-                text: 'Server Error. Try again later',
-                hide: true
-            });
-        });
-        return false;
-    });
-    
-    function loadContact(contact) {
-        //  type = 3 = Internal contact
-        let contactIcon = '';
-        if (contact['type'] === 3) {
-            contactIcon = '<div class="contact-info-card__status">' +
-                            '<i class="far fa-user ' + contact['user_status_class'] + ' "></i>' +
-                        '</div>'; 
-        }
-        let content = '<li class="calls-history__item contact-info-card call-contact-card" data-phone="' + contact['phone'] + '">' +
-                    '<div class="collapsible-toggler">' +
-                        contactIcon
-                        + '<div class="contact-info-card__details">' +
-                            '<div class="contact-info-card__line history-details">' +
-                                '<strong class="contact-info-card__name">' + contact['name'] + '</strong>' +
-                            '</div>' +
-                        '</div>' +
-                    '</div>' +
-                '</li>';
-        return content;
-    }
-    
-    function loadNotFound() {
-        let content = '<li class="calls-history__item contact-info-card">' +
-                    '<div class="collapsible-toggler">' +
-                        '<div class="contact-info-card__details">' +
-                            '<div class="contact-info-card__line history-details">' +
-                                '<strong class="contact-info-card__name">No results found</strong>' +
-                            '</div>' +
-                        '</div>' +
-                    '</div>' +
-                '</li>';
-        return content;
-    }
-    
-      $(document).on('click', "li.call-contact-card", function () {
-         let phone = $(this).data('phone');
-         $("#call-pane__dial-number").val(phone);
-         $('.suggested-contacts').removeClass('is_active');
-     });
-    
-})();
+PhoneWidgetCall.init({
+    'ajaxCallRedirectGetAgents': '{$ajaxCallRedirectGetAgents}'
+});
 
 JS;
 $this->registerJs($js);

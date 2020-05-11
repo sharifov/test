@@ -58,11 +58,7 @@ $js = <<<JS
 						if (device) {
 							let params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': null, 'case_id': null, 'c_type': 'call-web', 'c_user_id': userId};
 							webPhoneParams = params;
-							console.log(params);
-							$('.phone-widget-icon').addClass('is-pending');
-							$('.call-pane__call-btns').addClass('is-pending');
-							$('.suggested-contacts').removeClass('is_active');
-							$('.call-in-action__time').hide();
+							PhoneWidgetCall.initCall({from: phoneNumbers.getData, to: data});
 							createNotify('Calling', 'Calling ' + params.To + '...', 'success');
 							updateAgentStatus(connection, false, 0);
 							connection = device.connect(params);

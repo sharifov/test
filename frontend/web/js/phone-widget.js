@@ -271,7 +271,7 @@ $(document).ready(function() {
             updateAgentStatus(connection, false, 1);
             device.disconnectAll();
 
-            newWidgetCancelCall();
+            PhoneWidgetCall.cancelCall();
 
             clearTimeout(timeout)
         }
@@ -308,15 +308,6 @@ $(document).ready(function() {
     //         '</li>';
     //     return node;
     // }
-
-    window.newWidgetCancelCall = function () {
-        $('.phone-widget-icon').removeClass('is-on-call');
-        $('.phone-widget-icon').removeClass('is-pending');
-        $('.call-pane__call-btns').removeClass('is-on-call');
-        $('.call-pane__call-btns').removeClass('is-pending');
-        $('.call-pane-calling').removeClass('is_active');
-        $('.call-pane').addClass('is_active');
-    }
 
     // var data = {
     //     'selected': {
