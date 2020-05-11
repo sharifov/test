@@ -56,15 +56,18 @@ class UserConnectionEvents extends Component
          */
         $userConnection = $params->data;
 
-        if ($userConnection->uc_user_id) {
-            $exist = UserConnection::find()->where(['uc_user_id' => $userConnection->uc_user_id])->exists();
-            if (!$exist) {
-                $uo = UserOnline::find()->where(['uo_user_id' => $userConnection->uc_user_id])->limit(1)->one();
-                if ($uo) {
-                    $uo->delete();
-                }
-            }
-        }
+        UserOnline::deleteAll('uo_user_id NOT IN (SELECT DISTINCT(uc_user_id) FROM user_connection)');
+
+
+//        if ($userConnection->uc_user_id) {
+//            $exist = UserConnection::find()->where(['uc_user_id' => $userConnection->uc_user_id])->exists();
+//            if (!$exist) {
+//                $uo = UserOnline::find()->where(['uo_user_id' => $userConnection->uc_user_id])->limit(1)->one();
+//                if ($uo) {
+//                    $uo->delete();
+//                }
+//            }
+//        }
     }
 
 }

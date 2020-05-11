@@ -335,6 +335,8 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Check List Types', 'url' => ['/lead-checklist-type/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('manageLeadChecklistType')],
                 ['label' => 'Case status history', 'url' => ['/case-status-log/index'], 'icon' => 'bars'],
                 ['label' => 'Case categories', 'url' => ['/case-category/index'], 'icon' => 'list'],
+                ['label' => 'Coupons', 'url' => ['/coupon/index'], 'icon' => 'list'],
+                ['label' => 'Coupon Cases', 'url' => ['/coupon-case/index'], 'icon' => 'list'],
             ]
         ];
 

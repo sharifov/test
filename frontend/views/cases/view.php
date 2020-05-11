@@ -29,6 +29,9 @@ use yii\bootstrap4\Modal;
  * @var $modelNote common\models\CaseNote
  * @var $dataProviderNotes yii\data\ArrayDataProvider
  *
+ * @var $coupons \sales\model\coupon\entity\couponCase\CouponCase[]
+ * @var $sendCouponsForm \sales\model\coupon\useCase\send\SendCouponsForm
+ *
  *
  */
 
@@ -106,14 +109,7 @@ $user = Yii::$app->user->identity;
 
     <div class="row">
         <div class="col-md-6">
-
-            <?= $this->render('notes/agent_notes', [
-                'caseModel' => $model,
-                'dataProviderNotes'  => $dataProviderNotes,
-                'modelNote'  => $modelNote,
-            ]); ?>
-
-
+            <?= $this->render('coupons/view', ['model' => $model, 'coupons' => $coupons, 'sendCouponsForm' => $sendCouponsForm]) ?>
         </div>
 
         <div class="col-md-6">
@@ -149,6 +145,19 @@ $user = Yii::$app->user->identity;
 			<?php else: ?>
                 <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
 			<?php endif;?>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+
+			<?= $this->render('notes/agent_notes', [
+				'caseModel' => $model,
+				'dataProviderNotes'  => $dataProviderNotes,
+				'modelNote'  => $modelNote,
+			]); ?>
+
+
         </div>
     </div>
 

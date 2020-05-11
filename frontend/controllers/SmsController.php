@@ -8,10 +8,8 @@ use frontend\models\SmsInboxForm;
 use frontend\widgets\newWebPhone\sms\dto\SmsDto;
 use frontend\widgets\newWebPhone\sms\form\SmsListForm;
 use frontend\widgets\newWebPhone\sms\form\SmsSendForm;
-use frontend\widgets\newWebPhone\sms\job\SmsSendJob;
 use sales\auth\Auth;
-use sales\model\sms\service\SmsSenderService;
-use sales\model\sms\useCase\send\Contact;
+use sales\model\sms\useCase\send\SmsSenderService;
 use sales\services\TransactionManager;
 use Yii;
 use common\models\Sms;
@@ -449,8 +447,8 @@ class SmsController extends FController
                     //->andWhere(['s_client_id' => $form->getContactId()])
                     ->andWhere([
                         'OR',
-                        ['s_phone_from' => $form->userPhone, 's_phone_to' => $form->getContactPhone()],
-                        ['s_phone_from' => $form->getContactPhone(), 's_phone_to' => $form->userPhone],
+                        ['s_phone_from' => $form->userPhone, 's_phone_to' => $form->getContactPhone(), 's_type_id' => Sms::TYPE_OUTBOX],
+                        ['s_phone_from' => $form->getContactPhone(), 's_phone_to' => $form->userPhone, 's_type_id' => Sms::TYPE_INBOX],
                     ])
                     ->orderBy(['s_created_dt' => SORT_ASC])->asArray()->all();
 

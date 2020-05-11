@@ -95,7 +95,7 @@ let PhoneWidgetContacts = function () {
         }
         if (contact['emails']) {
             contact['emails'].forEach(function(email, index) {
-                content += getEmailItem(email, index)
+                content += getEmailItem(email, index, contact);
             })
         }
         content += '</ul>' +
@@ -144,15 +144,25 @@ let PhoneWidgetContacts = function () {
             '<ul class="contact-modal-info__contacts contact-full-info">' +
             '<li>' +
             '<div class="form-group">' +
-            '<label for="">Type</label>' +
-            '<div class="form-control-wrap" data-type="company">' +
-            '<i class="fa fa-building contact-type-company"></i>' +
-            '<i class="fa fa-user contact-type-person"></i>' +
-            '<select readonly type="text" class="form-control select-contact-type" value="Company" autocomplete="off" readonly disabled>';
+            '<label for="">Type</label>';
+
+            let type = 'person';
+            if (contact['is_company']) {
+                type = 'company';
+            }
+
+            content += '<div class="form-control-wrap" data-type="' + type + '">';
+            if (type === 'person') {
+                content += '<i class="fa fa-user contact-type-person"></i>';
+            } else {
+                content += '<i class="fa fa-building contact-type-company"></i>';
+            }
+
+            content += '<select readonly type="text" class="form-control select-contact-type" autocomplete="off" readonly disabled>';
         if (contact['is_company']) {
             content += '<option value="company" selected="selected">Company</option> <option value="person">Person</option>';
         } else {
-            content += '<option value="company">Company</option> <option value="person"  selected="selected">Person</option>';
+            content += '<option value="company">Company</option> <option value="person" selected="selected">Person</option>';
         }
         content += '</select>' +
             '</div>' +
@@ -165,7 +175,7 @@ let PhoneWidgetContacts = function () {
         }
         if (contact['emails']) {
             contact['emails'].forEach(function(email, index) {
-                content += getEmailItem(email, index)
+                content += getEmailItem(email, index, contact)
             })
         }
 
@@ -176,17 +186,17 @@ let PhoneWidgetContacts = function () {
         return content;
     }
 
-    function getEmailItem(email, index) {
+    function getEmailItem(email, index, contact) {
         return '<li>' +
             '<div class="form-group">' +
             '<label for="">Email ' + (index + 1) + '</label>' +
             '<input readonly type="email" class="form-control" value="' + email + '" autocomplete="off">' +
             '</div>' +
-            // '<ul class="actions-list">' +
-            //     '<li class="actions-list__option js-trigger-email-modal">' +
-            //         '<i class="fa fa-envelope"></i>' +
-            //     '</li>' +
-            // '</ul>' +
+                '<ul class="actions-list">' +
+                    '<li class="actions-list__option js-trigger-email-modal" data-contact="' + encode(contact) + '" data-contact-email="' + email + '">' +
+                        '<i class="fa fa-envelope"></i>' +
+                    '</li>' +
+                '</ul>' +
             '</li>';
     }
 
