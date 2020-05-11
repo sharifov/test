@@ -112,12 +112,20 @@ var PhoneWidgetCall = function () {
         return false;
     }
 
+    function refreshCallStatus(obj)
+    {
+        console.log('Refresh Call Status');
+        $('.call-in-action__text').html(obj.status);
+        $('.call-in-action__time').html('').show().timer('remove').timer({format: '%M:%S', seconds: status.duration | 0}).timer('start');
+    }
+
     return {
         init: init,
         initCall: initCall,
         cancelCall: cancelCall,
         volumeIndicatorsChange: volumeIndicatorsChange,
-        updateConnection: updateConnection
+        updateConnection: updateConnection,
+        refreshCallStatus: refreshCallStatus
     };
 }();
 
