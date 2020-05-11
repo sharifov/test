@@ -312,6 +312,16 @@ return [
     'as beforeRequest' => [
         'class' => \frontend\components\UserSiteActivityLog::class,
     ],
+    'as access' => [
+        'class' => 'yii\filters\AccessControl',
+        'except' => ['site/login'],
+        'rules' => [
+            [
+                'allow' => true,
+                'roles' => ['@'],
+            ],
+        ],
+    ],
     'container' => [
         'definitions' => [
             yii\grid\GridView::class => [

@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\models\ClientEmail;
 use common\models\ClientPhone;
+use common\models\Employee;
 use common\models\UserContactList;
 use frontend\models\form\ContactForm;
 use frontend\widgets\newWebPhone\contacts\helper\ContactsHelper;
@@ -70,6 +71,22 @@ class ContactsController extends FController
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
+//    /**
+//     * Lists all Client models.
+//     * @return mixed
+//     */
+//    public function actionIndex()
+//    {
+//        $searchModel = new ContactsSearch(Auth::id());
+//
+//        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+//
+//        return $this->render('index', [
+//            'searchModel' => $searchModel,
+//            'dataProvider' => $dataProvider,
+//        ]);
+//    }
+
     /**
      * Lists all Client models.
      * @return mixed
@@ -78,9 +95,25 @@ class ContactsController extends FController
     {
         $searchModel = new ContactsSearch(Auth::id());
 
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider = $searchModel->searchUnion(Yii::$app->request->queryParams);
 
-        return $this->render('index', [
+//        $models = $dataProvider->getModels();
+//        VarDumper::dump($models);die;
+
+        $contacts = [];
+        foreach ($dataProvider->getModels() as $item) {
+            $item['type'] = (int)$item['type'];
+            $item['disabled'] = (int)$item['disabled'];
+            if ($item['type'] === Client::TYPE_INTERNAL) {
+                $item['model'] = Employee::find()->andWhere(['id' => $item['id']])->with(['userProjectParams.phoneList', 'userProjectParams.emailList'])->one();
+            } else {
+                $item['model'] = Client::find()->andWhere(['id' => $item['id']])->with(['clientPhones', 'clientEmails'])->one();
+            }
+            $contacts[] = $item;
+        }
+        $dataProvider->setModels($contacts);
+
+        return $this->render('index_union', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);

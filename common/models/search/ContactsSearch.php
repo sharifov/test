@@ -32,6 +32,7 @@ use yii\helpers\VarDumper;
  * @property string $by_name
  * @property Employee $user
  * @property int $contact_project_id
+ * @property string $search_text
  */
 class ContactsSearch extends Client
 {
@@ -44,6 +45,8 @@ class ContactsSearch extends Client
     public $userId;
     public $isPublic = true;
     public $isDisabled = false;
+    public $search_text = '';
+    public $favorite;
 
     private $user;
 
@@ -73,7 +76,9 @@ class ContactsSearch extends Client
             [['first_name', 'middle_name', 'last_name', 'created', 'updated'], 'safe'],
             ['uuid', 'string', 'max' => 36],
             [['company_name', 'by_name'], 'string', 'max' => 150],
-            [['is_company', 'is_public', 'disabled', 'ucl_favorite'], 'boolean'],
+            [['is_company', 'is_public', 'disabled', 'ucl_favorite', 'favorite'], 'boolean'],
+            ['search_text', 'string'],
+            ['full_name', 'string']
         ];
     }
 
@@ -94,15 +99,15 @@ class ContactsSearch extends Client
         if (!$this->isRoleAdmin()) {
             $query->andWhere(['user_contact_list.ucl_user_id' => $this->userId]);
             $query->orWhere(['AND',
-               ['!=', 'user_contact_list.ucl_user_id', $this->userId],
-               ['disabled' => $this->isDisabled],
-               ['is_public' => $this->isPublic],
+                ['!=', 'user_contact_list.ucl_user_id', $this->userId],
+                ['disabled' => $this->isDisabled],
+                ['is_public' => $this->isPublic],
             ]);
         }
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -115,13 +120,13 @@ class ContactsSearch extends Client
             return $dataProvider;
         }
 
-        if ($this->created){
+        if ($this->created) {
             $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
-                ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 *24)]);
+                ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
         }
-        if ($this->updated){
+        if ($this->updated) {
             $query->andFilterWhere(['>=', 'updated', Employee::convertTimeFromUserDtToUTC(strtotime($this->updated))])
-                ->andFilterWhere(['<=', 'updated', Employee::convertTimeFromUserDtToUTC(strtotime($this->updated) + 3600 *24)]);
+                ->andFilterWhere(['<=', 'updated', Employee::convertTimeFromUserDtToUTC(strtotime($this->updated) + 3600 * 24)]);
         }
         $query->andFilterWhere([
             'id' => $this->id,
@@ -151,7 +156,7 @@ class ContactsSearch extends Client
             'ucl_favorite' => $this->ucl_favorite,
         ]);
 
-        if ($this->by_name)  {
+        if ($this->by_name) {
             $query->andWhere(
                 ['OR',
                     ['like', 'first_name', $this->by_name],
@@ -284,6 +289,7 @@ class ContactsSearch extends Client
             'description' => new Expression('null'),
         ]);
 
+        $queryUser->andWhere(['status' => Employee::STATUS_ACTIVE]);
         $queryUser->innerJoin(UserProfile::tableName(), 'up_user_id = u.id and up_show_in_contact_list = 1');
 
         $queryUser->andWhere(['<>', 'u.id', $this->userId]);
@@ -361,6 +367,7 @@ class ContactsSearch extends Client
             'uo_user_id as user_is_online'
         ]);
 
+        $queryUser->andWhere(['status' => Employee::STATUS_ACTIVE]);
         $queryUser->innerJoin(UserProjectParams::tableName(), 'upp_user_id = u.id');
         $queryUser->innerJoin(UserProfile::tableName(), 'up_user_id = u.id and up_show_in_contact_list = 1');
         $queryUser->innerJoin(PhoneList::tableName(), 'pl_id = upp_phone_list_id');
@@ -392,6 +399,140 @@ class ContactsSearch extends Client
 //        VarDumper::dump($query->createCommand()->getRawSql());die;
 
         return $query->all();
+    }
+
+    public function searchUnion($params): ActiveDataProvider
+    {
+        $queryClient = Client::find()->alias('c')->select([
+            'c.id as id',
+            'full_name' => new Expression('if (c.is_company, c.company_name, (concat(IFNULL(c.first_name, \'\'), \' \', IFNULL(c.middle_name, \'\'), \' \', IFNULL(c.last_name, \'\'))))'),
+            'c.cl_type_id as type',
+            'c.is_company as is_company',
+            'c.is_public as is_public',
+            'c.disabled as disabled',
+            'ucl_favorite as favorite'
+        ]);
+
+        $queryClient->andWhere(['c.cl_type_id' => Client::TYPE_CONTACT]);
+        $queryClient->innerJoin(UserContactList::tableName(), 'ucl_client_id = c.id');
+
+        if (!$this->isRoleAdmin()) {
+            $queryClient->andWhere(['ucl_user_id' => $this->userId]);
+            $queryClient->orWhere(['AND',
+                ['!=', 'ucl_user_id', $this->userId],
+                ['c.disabled' => $this->isDisabled],
+                ['c.is_public' => $this->isPublic],
+            ]);
+        }
+
+//        VarDumper::dump($queryClient->createCommand()->getRawSql());die;
+
+        $queryUser = Employee::find()->alias('u')->select([
+            'u.id as id',
+            'u.full_name as full_name',
+            'type' => new Expression(Client::TYPE_INTERNAL),
+            'is_company' => new Expression('0'),
+            'is_public' => new Expression('1'),
+            'disabled' => new Expression('0'),
+            'favorite' => new Expression('0'),
+        ]);
+
+        $queryUser->andWhere(['status' => Employee::STATUS_ACTIVE]);
+        $queryUser->innerJoin(UserProfile::tableName(), 'up_user_id = u.id and up_show_in_contact_list = 1');
+        $queryUser->andWhere(['<>', 'u.id', $this->userId]);
+
+//        VarDumper::dump($queryUser->createCommand()->getRawSql());die;
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            $union = $queryClient->union($queryUser);
+            $query = (new Query())->select(['id', 'full_name', 'type', 'is_company', 'is_public', 'disabled', 'favorite'])->from($union)->orderBy(['full_name' => SORT_ASC]);
+            $dataProvider = new ActiveDataProvider([
+                'query' => $query,
+                'pagination' => [
+                    'pageSize' => 20,
+                ]
+            ]);
+            return $dataProvider;
+        }
+
+        if ($this->search_text) {
+
+            $queryClient->andWhere([
+                'OR',
+                ['IN', 'c.id', ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['like', 'phone', $this->search_text])],
+                ['IN', 'c.id', ClientEmail::find()->select(['DISTINCT(client_id)'])->where(['like', 'email', $this->search_text])],
+                ['like', 'c.first_name', $this->search_text],
+                ['like', 'c.middle_name', $this->search_text],
+                ['like', 'c.last_name', $this->search_text],
+                ['like', 'c.company_name', $this->search_text],
+            ]);
+
+            $queryUser->andWhere([
+                'OR',
+                ['IN', 'u.id', UserProjectParams::find()->select(['DISTINCT(upp_user_id)'])->andWhere('upp_user_id = u.id')->andWhere([
+                    'upp_phone_list_id' => PhoneList::find()->select('pl_id')->andWhere(['like', 'pl_phone_number', $this->search_text])
+                ])],
+                ['IN', 'u.id', UserProjectParams::find()->select(['DISTINCT(upp_user_id)'])->andWhere('upp_user_id = u.id')->andWhere([
+                    'upp_email_list_id' => EmailList::find()->select('el_id')->andWhere(['like', 'el_email', $this->search_text])
+                ])],
+                ['like', 'u.full_name', $this->search_text],
+            ]);
+
+        }
+
+        $union = $queryClient->union($queryUser);
+
+        $query = (new Query())->select(['id', 'full_name', 'type', 'is_company', 'is_public', 'disabled', 'favorite'])->from($union);
+
+        $query->andFilterHaving([
+            'is_id' => $this->id,
+            'is_company' => $this->is_company,
+            'is_public' => $this->is_public,
+            'disabled' => $this->disabled,
+            'favorite' => $this->favorite,
+        ]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+            'sort' => ['defaultOrder' => ['full_name' => SORT_ASC]]
+        ]);
+
+        $dataProvider->sort->attributes['id'] = [
+            'desc' => ['id' => SORT_DESC],
+            'asc' => ['id' => SORT_ASC],
+        ];
+
+        $dataProvider->sort->attributes['is_company'] = [
+            'desc' => ['is_company' => SORT_DESC],
+            'asc' => ['is_company' => SORT_ASC],
+        ];
+
+        $dataProvider->sort->attributes['is_public'] = [
+            'desc' => ['is_public' => SORT_DESC],
+            'asc' => ['is_public' => SORT_ASC],
+        ];
+
+        $dataProvider->sort->attributes['disabled'] = [
+            'desc' => ['disabled' => SORT_DESC],
+            'asc' => ['disabled' => SORT_ASC],
+        ];
+
+        $dataProvider->sort->attributes['full_name'] = [
+            'desc' => ['full_name' => SORT_DESC],
+            'asc' => ['full_name' => SORT_ASC],
+        ];
+
+        $dataProvider->sort->attributes['favorite'] = [
+            'desc' => ['favorite' => SORT_DESC],
+            'asc' => ['favorite' => SORT_ASC],
+        ];
+
+        return $dataProvider;
     }
 
     private function isRoleAdmin()

@@ -32,11 +32,11 @@ let PhoneWidgetEmail = function () {
     }
 
     function showPreloader() {
-        $($current).append('<div class="wg-history-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
+        $(document).find(".email-modal").append('<div class="wg-history-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
     }
 
     function hidePreloader() {
-        $($current).find('.wg-history-load').remove();
+        $(document).find(".email-modal").find('.wg-history-load').remove();
     }
 
     function parseErrors(errors) {

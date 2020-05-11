@@ -2,6 +2,7 @@
 namespace console\controllers;
 
 use common\models\UserConnection;
+use common\models\UserOnline;
 use Swoole\Redis;
 use Swoole\Table;
 use Swoole\WebSocket\Server;
@@ -181,8 +182,24 @@ class WebsocketServerController extends Controller
                 $userConnection->uc_app_instance = \Yii::$app->params['appInstance'] ?? null;
                 $userConnection->uc_sub_list = $subList ? @json_encode($subList) : null;
 
-                if (!$userConnection->save()) {
-                    \Yii::error(VarDumper::dumpAsString($userConnection->errors), 'WS:UserConnection:save');
+                if ($userConnection->save()) {
+
+                    $exist = UserOnline::find()->where(['uo_user_id' => $userConnection->uc_user_id])->exists();
+
+                    if (!$exist) {
+                        $uo = new UserOnline();
+                        $uo->uo_user_id = $userConnection->uc_user_id;
+                        if (!$uo->save()) {
+                            echo 'UserOnline:save' . PHP_EOL;
+                            VarDumper::dump($uo->errors);
+                        }
+                        unset($uo);
+                    }
+                    unset($exist);
+
+                } else {
+                    echo 'UserConnection:save' . PHP_EOL;
+                    VarDumper::dump($userConnection->errors);
                 }
 
                 $server->tblConnections->set($request->fd,[
@@ -212,8 +229,10 @@ class WebsocketServerController extends Controller
 
 
 
+
                 $json = json_encode(['cmd' => 'initConnection', 'fd' => $userConnection->uc_connection_id, 'uc_id' => $userConnection->uc_id]);
                 $server->push($request->fd, $json); //WEBSOCKET_OPCODE_PING
+
 
 
                 if ($subList) {
@@ -232,6 +251,8 @@ class WebsocketServerController extends Controller
                     $server->channelList[$value][$request->fd] = $request->fd;
                     $server->redis->subscribe($value);
                 }
+
+                unset($userConnection);
 
                 //VarDumper::dump($server->channelList);
 
@@ -353,7 +374,11 @@ class WebsocketServerController extends Controller
                     $uc->delete();
                     unset($uc);
                 }
+                \Yii::$app->db->createCommand('DELETE FROM user_online WHERE uo_user_id NOT IN (SELECT DISTINCT(uc_user_id) FROM user_connection)')->execute();
             }
+
+
+            //UserOnline::deleteAll('uo_user_id NOT IN (SELECT DISTINCT(uc_user_id) FROM user_connection)');
 
             //VarDumper::dump($server->channelList);
 
@@ -377,7 +402,6 @@ class WebsocketServerController extends Controller
         $server->on('workerError', static function(Server $server, int $workerId, $workerPid, $exitCode, $signal) {
             $message = "Error Worker (Id: {$workerId}): pid={$workerPid} code={$exitCode} signal={$signal}";
             echo '> ' . $message . PHP_EOL;
-            \Yii::error($message, 'WS:'. __METHOD__);
         });
 
         $server->start();

@@ -22,7 +22,7 @@ use yii\base\Model;
  */
 class SmsAuthorizationForm extends Model
 {
-    public const CLIENT_TYPES = [
+    public const CONTACT_TYPES = [
         Client::TYPE_CONTACT,
         Client::TYPE_INTERNAL
     ];
@@ -53,7 +53,7 @@ class SmsAuthorizationForm extends Model
             ['contactType', 'required'],
             ['contactType', 'integer'],
             ['contactType', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['contactType', 'in', 'range' => self::CLIENT_TYPES],
+            ['contactType', 'in', 'range' => self::CONTACT_TYPES],
 
             ['contactId', 'required'],
             ['contactId', 'integer'],
