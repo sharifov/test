@@ -615,9 +615,9 @@ $('#btn-user-call-map-refresh').on('click', function () {
 });
 
 JS;
-
-$this->registerJs($js);
+$this->registerJs($js, \yii\web\View::POS_LOAD);
 ?>
+
 <style>
     #call-map-page table {margin-bottom: 5px}
 </style>
