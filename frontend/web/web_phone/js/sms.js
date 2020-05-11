@@ -26,16 +26,13 @@ let PhoneWidgetSms = function () {
 
     function setSmsIconStatus(smsStatus) {
         console.log(smsStatus)
-        switch (getStatusClass(smsStatus)) {
+        switch (getStatusClass(smsStatus).trim()) {
             case statuses[5]:
-                '<span class="pw-msg-item__status pw-msg-item__status--delivered"> <i class="fa fa-check-double"></i> </span>';
-                break;
+                return '<span class="pw-msg-item__status pw-msg-item__status--delivered"> <i class="fa fa-check-double"></i> </span>';
             case statuses[6]:
-                '<span class="pw-msg-item__status pw-msg-item__status--error"> <i class="fa fa-exclamation-circle"></i> </span>'
-                break;
+                return '<span class="pw-msg-item__status pw-msg-item__status--error"> <i class="fa fa-exclamation-circle"></i> </span>'
             default:
-                '<span class="pw-msg-item__status"> <i class="fa fa-check"></i> </span>';
-                break;
+                return '<span class="pw-msg-item__status"> <i class="fa fa-check"></i> </span>';
         }
     }
 
