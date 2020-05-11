@@ -26,7 +26,7 @@ $dataProviderQuotes = $searchModel->searchProduct($params);*/
 $pjaxId = 'pjax-product-' . $product->pr_id;
 $pjaxRequest = $pjaxRequest ?? false;
 
-$chevronClass = $pjaxRequest ? 'fa fa-chevron-down' : 'fa fa-chevron-up'
+$chevronClass = $pjaxRequest ? 'fa fa-chevron-up' : 'fa fa-chevron-down'
 ?>
 <?php \yii\widgets\Pjax::begin(['id' => $pjaxId,  'enablePushState' => false, 'enableReplaceState' => false, 'timeout' => 2000])?>
     <div class="x_panel">

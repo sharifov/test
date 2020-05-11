@@ -63,7 +63,7 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
 
                 <?php endif; ?>
                 <li>
-                    <a class="collapse-link"><i class="fa fa-chevron-down"></i></a>
+                    <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                 </li>
             </ul>
             <div class="clearfix"></div>
