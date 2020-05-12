@@ -57,7 +57,7 @@ var PhoneWidgetCall = function () {
                 if (connection) {
                     connection.mute(true);
                     if (connection.isMuted()) {
-                        mute.html('<i class="fas fa-microphone"></i>').attr('data-is-muted', true);
+                        mute.html('<i class="fas fa-microphone-alt-slash"></i>').attr('data-is-muted', true);
                     } else {
                         new PNotify({title: "Mute", type: "error", text: "Error", hide: true});
                     }
@@ -66,7 +66,7 @@ var PhoneWidgetCall = function () {
                 if (connection) {
                     connection.mute(false);
                     if (!connection.isMuted()) {
-                        $(this).html('<i class="fas fa-microphone-alt-slash"></i>').attr('data-is-muted', false);
+                        $(this).html('<i class="fas fa-microphone"></i>').attr('data-is-muted', false);
                     } else {
                         new PNotify({title: "Unmute", type: "error", text: "Error", hide: true});
                     }
