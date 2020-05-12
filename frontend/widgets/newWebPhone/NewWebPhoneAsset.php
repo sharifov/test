@@ -13,7 +13,6 @@ class NewWebPhoneAsset extends AssetBundle
 	public $css = [
 		'https://cdn.jsdelivr.net/npm/simplebar@latest/dist/simplebar.css',
 		'css/style-web-phone-new.css',
-        '/web_phone/css/sms.css',
 	];
 
 	public $js = [
