@@ -161,7 +161,8 @@
 
         <div class="call-pane__call-btns">
             <button class="call-pane__mute" id="call-pane__mute" data-is-muted="false">
-                <i class="fa fa-volume-mute"></i>
+<!--                <i class="fas fa-microphone"></i>-->
+                <i class="fas fa-microphone-alt-slash"></i>
             </button>
             <button class="call-pane__start-call calling-state-block">
                 <div class="call-in-action">
