@@ -5,6 +5,7 @@ namespace sales\services\parsingDump;
 use common\components\SearchService;
 use common\models\Airline;
 use common\models\Airport;
+use DateTime;
 use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
 use sales\services\parsingDump\worldSpan\Reservation;
 use yii\base\ErrorException;
@@ -12,16 +13,8 @@ use yii\base\ErrorException;
 /**
  * Class ReservationService
  */
-class ReservationService extends Reservation
+class WorldSpanReservationService
 {
-    private CONST ARRIVAL_OFFSET_MAP = [
-        '' => 'arrival on the same day',
-        '-1' => 'arrival a day earlier',
-        '#1' => 'arrival the next day',
-        '#2' => 'arrival in a day',
-        '#3' => 'arrival in two days',
-    ]; /* TODO::  */
-
     /**
      * @param $string
      * @param bool $validation
@@ -32,15 +25,16 @@ class ReservationService extends Reservation
     public function parseReservation($string, $validation = true, &$itinerary = [], $onView = false): array
     {
         $result = [];
+        $parserReservation = new Reservation();
 
         $rows = explode("\n", $string);
         foreach ($rows as $key => $row) {
 
-            if (empty($rawData = $this->parseRow($row))) {
+            if (empty($rawData = $parserReservation->parseRow($row))) {
                 $result['failed'][] = $row;
                 continue;
             }
-            $parseData = $this->dataMapping($rawData);
+            $parseData = $parserReservation->dataMapping($rawData);
 
             $result['todo'] = $parseData;
 
@@ -54,11 +48,11 @@ class ReservationService extends Reservation
                 $parseData['departure_time_hh'],
                 $parseData['departure_time_mm']
             );
-            $result['arrivalDateTime'] = $this->createDateTime(
-                $parseData['departure_date_day'],
-                $parseData['departure_date_month'],
-                $parseData['departure_time_hh'],
-                $parseData['departure_time_mm']
+            $result['arrivalDateTime'] = $this->getArrivalDateTime(
+                $result['departureDateTime'],
+                $parseData['arrival_time_hh'],
+                $parseData['arrival_time_mm'],
+                $parseData['arrival_offset']
             );
 
         }
@@ -69,12 +63,50 @@ class ReservationService extends Reservation
         return $result;
     }
 
+    /**
+     * @param DateTime $departureDateTime
+     * @param string $arrivalHour
+     * @param string $arrivalMinute
+     * @param string $arrivalOffset
+     * @throws \Exception
+     */
+    private function getArrivalDateTime(?DateTime $departureDateTime,  string $arrivalHour, string $arrivalMinute, string $arrivalOffset)
+    {
+        if (!$departureDateTime) {
+            return null;
+        }
+        $sourceDate = clone $departureDateTime;
+        $arrivalOffset = $this->prepareArrivalOffset($arrivalOffset);
+        if ($arrivalOffset === 0) {
+            $result = $sourceDate->setTime($arrivalHour, $arrivalMinute);
+        } else {
+            $result = $sourceDate->modify($arrivalOffset . ' day')->setTime($arrivalHour, $arrivalMinute);
+        }
+		return $result;
+    }
+
+    /**
+     * @param string $arrivalOffset
+     * @return string
+     */
+    private function prepareArrivalOffset(string $arrivalOffset): string
+    {
+		$arrivalOffset = ($arrivalOffset === '') ? '0' : $arrivalOffset;
+		return str_replace('#', '+', $arrivalOffset);
+    }
+
+    /**
+     * @param string $day
+     * @param string $month
+     * @param string $hour
+     * @param string $minute
+     * @return DateTime|false
+     */
     private function createDateTime(string $day, string $month, string $hour, string $minute)
     {
         $dateFormat = 'dM H:i';
         $dateString = $day . strtolower($month) . ' ' . $hour . ':' . $minute;
-
-		return \DateTime::createFromFormat($dateFormat, $dateString);
+        return \DateTime::createFromFormat($dateFormat, $dateString);
     }
 
     /**
@@ -257,7 +289,7 @@ class ReservationService extends Reservation
                     'arrivalCity' => $arrCity,
                     'flightDuration' => $flightDuration,
                     'layoverDuration' => 0,
-                    'arrivalOffset' => $this->getArrivalOffset($row),
+                    /*'arrivalOffset' => $this->getArrivalOffset($row),*/
                 ];
                 if($airline !== null){
                     $segment['cabin'] = $airline->getCabinByClass($cabin);
@@ -283,24 +315,6 @@ class ReservationService extends Reservation
         }
 
         return $data;
-    }
-
-    /**
-     * @param string $row
-     * @return string
-     */
-    private function getArrivalOffset(string $row): string
-    {
-        $explodeRaw = explode('$', $row);
-        $explodeRaw = explode(' ', trim($explodeRaw[0]));
-        $offsetRaw = end($explodeRaw);
-        $offsetRaw = explode('/', $offsetRaw);
-        $offset = $offsetRaw[0];
-
-        if (array_key_exists($offset, self::ARRIVAL_OFFSET_MAP)) {
-            return self::ARRIVAL_OFFSET_MAP[$offset];
-        }
-        return '';
     }
 
 }
