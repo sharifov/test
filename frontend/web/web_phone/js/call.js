@@ -11,8 +11,8 @@ var PhoneWidgetCall = function () {
     {
         $('.calling-from-info__identifier').html(selectedNumber.from.project);
         $('.calling-from-info__number').html(selectedNumber.from.value);
-        $('.contact-info-card__name').html(selectedNumber.to.callToName);
-        $('.contact-info-card__call-type').html(selectedNumber.to.phone);
+        $('.call-pane-calling').find('.contact-info-card__name').html(selectedNumber.to.callToName);
+        $('.call-pane-calling').find('.contact-info-card__call-type').html(selectedNumber.to.phone);
         $('.phone-widget-icon').addClass('is-pending');
         $('.call-pane__call-btns').addClass('is-pending');
         $('.suggested-contacts').removeClass('is_active');
@@ -57,7 +57,7 @@ var PhoneWidgetCall = function () {
                 if (connection) {
                     connection.mute(true);
                     if (connection.isMuted()) {
-                        mute.html('<i class="fa fa-volume-up"></i>').attr('data-is-muted', true);
+                        mute.html('<i class="fas fa-microphone-alt-slash"></i>').attr('data-is-muted', true);
                     } else {
                         new PNotify({title: "Mute", type: "error", text: "Error", hide: true});
                     }
@@ -66,7 +66,7 @@ var PhoneWidgetCall = function () {
                 if (connection) {
                     connection.mute(false);
                     if (!connection.isMuted()) {
-                        $(this).html('<i class="fa fa-volume-mute"></i>').attr('data-is-muted', false);
+                        $(this).html('<i class="fas fa-microphone"></i>').attr('data-is-muted', false);
                     } else {
                         new PNotify({title: "Unmute", type: "error", text: "Error", hide: true});
                     }
