@@ -109,12 +109,8 @@ $(document).ready(function() {
         }
     });
 
-    $(document).on("click", ".widget-modal__close", function () {
-        $(".widget-modal").hide();
-        $(".phone-widget__tab").removeClass('ovf-hidden');
-        $('.collapsible-container').collapse('hide');
-        clearEmailTab()
-    });
+
+
 
     $('.js-toggle-contact-info').on('click', function() {
         $('.contact-modal-info').show()
@@ -229,6 +225,7 @@ $(document).ready(function() {
 
         $(".phone-widget").toggleClass("is_active");
         $(this).toggleClass("is-mirror");
+
     });
 
     $(".phone-widget__close").on("click", function (e) {
@@ -340,7 +337,65 @@ $(document).ready(function() {
     //     console.log(currentNumber.getData);
     // });
     
-    
+    $(document).on("click", ".widget-modal__close", function () {
+        $(".widget-modal").hide();
+        $(".phone-widget__tab").removeClass('ovf-hidden');
+        $('.collapsible-container').collapse('hide');
+        clearEmailTab()
+    });
+
+
+
+
+
+    // function phoneWidgetBehavior(elem) {
+    //     var $main = $(elem),
+    //         backElement = '.widget-modal__close',
+    //         widgetModal = '.widget-modal',
+    //         widgetTab = '.phone-widget__tab',
+    //         collapsibleContainer = '.collapsible-container';
+
+    //         var events = {
+    //             pwBackAction: 'pw-back-action'
+    //         }
+
+    //         this.actionMapping = function(object) {
+    //             return {
+    //                 back: object.back
+    //             }
+    //         };
+
+    //         function getElement(selector) {
+    //             return $($main).find(selector)
+    //         }
+
+    //         function backAction() {
+    //             getElement(widgetModal).hide();
+    //             getElement(widgetTab).removeClass('ovf-hidden');
+    //             getElement(collapsibleContainer).collapse('hide');
+    //         }
+
+    //         $($main).on('click', backElement, function() {
+    //             backAction();
+    //             $(backElement).trigger(events.pwBackAction);
+                
+    //         });
+
+    //     return {
+    //         control: $main
+    //     };
+
+    // }
+
+    // var widget = phoneWidgetBehavior('.phone-widget');
+
+
+    // $(widget.control).on('pw-back-action', function () {
+    //     console.log('here is a event for back button');
+    // })
+
+
+
 });
 
 function toSelect(elem, obj, cb) {
