@@ -166,7 +166,7 @@
             <button class="call-pane__start-call calling-state-block">
                 <div class="call-in-action">
                     <span class="call-in-action__text">on call</span>
-                    <span class="call-in-action__time">01:54</span>
+                    <span class="call-in-action__time"></span>
                 </div>
                 <!-- <i class="fas fa-phone"></i> -->
             </button>
