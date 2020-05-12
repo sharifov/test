@@ -1,11 +1,11 @@
 <?php
 
-namespace sales\services\parsingDump\gds;
+namespace sales\services\parsingDump\worldSpan;
 
 /**
  * Class Gds
  */
-class Gds
+class WorldSpan
 {
     public CONST TYPE_RESERVATION = 'Reservation';
     public CONST TYPE_PRICING = 'Pricing';

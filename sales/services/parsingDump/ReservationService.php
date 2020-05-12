@@ -6,13 +6,13 @@ use common\components\SearchService;
 use common\models\Airline;
 use common\models\Airport;
 use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
-use sales\services\parsingDump\gds\Reservation;
+use sales\services\parsingDump\worldSpan\Reservation;
 use yii\base\ErrorException;
 
 /**
- * Class gdsReservationService
+ * Class ReservationService
  */
-class gdsReservationService extends Reservation
+class ReservationService extends Reservation
 {
     private CONST ARRIVAL_OFFSET_MAP = [
         '' => 'arrival on the same day',
@@ -42,21 +42,39 @@ class gdsReservationService extends Reservation
             }
             $parseData = $this->dataMapping($rawData);
 
+            $result['todo'] = $parseData;
+
             $result['carrier'] = $parseData['airline'];
             $result['airlineName'] = $this->getAirlineName($parseData['airline']);
-            $result['airlineName'] = $this->getAirlineName($parseData['airline']);
+            $result['departureAirport'] = $parseData['airport_code_from'];
+            $result['arrivalAirport'] = $parseData['airport_code_to'];
+            $result['departureDateTime'] = $this->createDateTime(
+                $parseData['departure_date_day'],
+                $parseData['departure_date_month'],
+                $parseData['departure_time_hh'],
+                $parseData['departure_time_mm']
+            );
+            $result['arrivalDateTime'] = $this->createDateTime(
+                $parseData['departure_date_day'],
+                $parseData['departure_date_month'],
+                $parseData['departure_time_hh'],
+                $parseData['departure_time_mm']
+            );
 
-            /*
-            'departureAirport' => 'SLC'
-            'arrivalAirport' => 'DFW'
-            'departureDateTime'
-            */
         }
 
         \yii\helpers\VarDumper::dump($result, 10, true); exit();
         /* FOR DEBUG:: must by remove */
 
         return $result;
+    }
+
+    private function createDateTime(string $day, string $month, string $hour, string $minute)
+    {
+        $dateFormat = 'dM H:i';
+        $dateString = $day . strtolower($month) . ' ' . $hour . ':' . $minute;
+
+		return \DateTime::createFromFormat($dateFormat, $dateString);
     }
 
     /**

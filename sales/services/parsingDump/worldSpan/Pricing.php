@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\services\parsingDump\gds;
+namespace sales\services\parsingDump\worldSpan;
 
 /**
  * Class Pricing

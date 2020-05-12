@@ -1,6 +1,6 @@
 <?php
 
-use sales\services\parsingDump\gds\Gds;
+use sales\services\parsingDump\worldSpan\WorldSpan;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -20,7 +20,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="col-md-4">
         <?= Html::beginForm() ?>
         <?= Html::dropDownList('type', $type,
-            Gds::TYPE_MAP,
+            WorldSpan::TYPE_MAP,
             [
                 'class' => 'form-control',
                 'style' => 'margin-bottom: 12px; display:none;',

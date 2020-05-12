@@ -4,7 +4,7 @@ namespace frontend\controllers;
 
 use common\models\Quote;
 
-use sales\services\parsingDump\gds\Gds;
+use sales\services\parsingDump\worldSpan\WorldSpan;
 use Yii;
 use common\models\ApiLog;
 use common\models\search\ApiLogSearch;
@@ -105,9 +105,9 @@ class ToolsController extends FController
         $type = Yii::$app->request->post('type');
 
         if ($dump) {
-            $typeDump = $type !== '' ? $type : Gds::getParserType($dump);
+            $typeDump = $type !== '' ? $type : WorldSpan::getParserType($dump);
 
-            $obj = Gds::initClass($typeDump);
+            $obj = WorldSpan::initClass($typeDump);
             $data = $obj->parseDump($dump);
         }
 
