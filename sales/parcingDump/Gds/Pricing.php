@@ -11,17 +11,14 @@ class Pricing implements ParseDump
 {
     /**
      * @param string $string
-     * @param bool $validation
-     * @param array $itinerary
-     * @param bool $onView
      * @return array
      */
-    public function parseDump(string $string, $validation = true, &$itinerary = [], $onView = false): array
+    public function parseDump(string $string): array
     {
         $baggage = new Baggage();
 
         $result['iata'] = $this->parseIata($string);
-        $result['airline'] = $this->getAirline($result['iata']);
+        //$result['airline'] = $this->getAirline($result['iata']); /* TODO::  */
         $result['price'] = $this->parsePrice($string);
         $result['baggage'] = $baggage->parseBaggageAllowance($string);
         $result['carry_on_allowance'] = $baggage->parseCarryOnAllowance($string);
