@@ -6,6 +6,10 @@ use common\models\Call;
 use common\models\Employee;
 use common\models\query\CallQuery;
 use common\models\search\CallSearch;
+use sales\model\callLog\entity\callLog\CallLog;
+use sales\model\callLog\entity\callLog\search\CallLogSearch;
+use sales\model\callLog\entity\callLog\CallLogType;
+use sales\model\callLog\entity\callLog\CallLogStatus;
 use common\models\UserGroupAssign;
 use kartik\daterange\DateRangeBehavior;
 use Yii;
@@ -34,7 +38,7 @@ use DateTime;
  * @property array $userGroupIds
  * @property string $timeZone
  */
-class CallGraphsSearch extends CallSearch
+class CallGraphsSearch extends CallLogSearch
 {
 	public $createTimeRange;
 	public $createTimeStart;
@@ -163,12 +167,10 @@ class CallGraphsSearch extends CallSearch
 	public function rules(): array
 	{
 		return [
-			[['c_id', 'c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_is_new', 'supervision_id', 'limit', 'c_recording_duration',
-				'c_source_type_id', 'call_duration_from', 'call_duration_to', 'c_case_id', 'c_client_id', 'c_status_id', 'callDepId', 'userGroupId', 'recordingDurationFrom', 'recordingDurationTo', 'betweenHoursFrom', 'betweenHoursTo', 'callGraphGroupBy', 'chartTotalCallsVaxis'], 'integer'],
-			[['c_call_sid', 'c_account_sid', 'c_from', 'c_to', 'c_sip', 'c_call_status', 'c_api_version', 'c_direction', 'c_forwarded_from', 'c_caller_name', 'c_parent_call_sid', 'c_call_duration', 'c_sip_response_code', 'c_recording_url', 'c_recording_sid',
-				'c_timestamp', 'c_uri', 'c_sequence_number', 'c_created_dt', 'c_updated_dt', 'c_error_message', 'c_price', 'statuses', 'limit', 'projectId', 'statusId', 'callTypeId'], 'safe'],
+			[['cl_id', 'cl_type_id', 'cl_user_id', 'cl_project_id', 'cl_duration', 'cl_client_id', 'cl_status_id', 'recordingDurationFrom', 'recordingDurationTo', 'betweenHoursFrom', 'betweenHoursTo', 'callGraphGroupBy', 'chartTotalCallsVaxis'], 'integer'],
+			[['cl_call_created_dt', 'statuses', 'limit', 'projectId', 'statusId', 'callTypeId'], 'safe'],
 			[['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
-			[['ug_ids', 'status_ids', 'dep_ids', 'totalChartColumns', 'projectIds', 'userGroupIds'], 'each', 'rule' => ['integer']],
+			[['dep_ids', 'totalChartColumns', 'projectIds', 'userGroupIds'], 'each', 'rule' => ['integer']],
 			['recordingDurationTo', 'compare', 'compareAttribute' => 'recordingDurationFrom', 'operator' => '>='],
 			['betweenHoursTo', 'compare', 'compareAttribute' => 'betweenHoursFrom', 'operator' => '>='],
 			[['betweenHoursFrom', 'betweenHoursTo'], 'number', 'min' => 0, 'max' => 24],
@@ -252,7 +254,6 @@ class CallGraphsSearch extends CallSearch
 	{
 		$dateFormat = $this->getDateFormat($this->callGraphGroupBy) ?? $this->getDefaultDateFormat();
 
-
 		$query = self::find()->select([
 			'sum(incoming) as incoming',
 			'sum(outgoing) as outgoing',
@@ -269,16 +270,9 @@ class CallGraphsSearch extends CallSearch
 
 		if ((int)$this->callGraphGroupBy === self::DATE_FORMAT_WEEKS) {
 			$query->addSelect(["concat(str_to_date(date_format(created, '%Y %v Monday'), '%x %v %W'), ' - ', str_to_date(date_format(created, '%Y %v Sunday'), '%x %v %W')) as created_formatted"]);
-//			$query->addSelect(["sum(incoming) / count(distinct str_to_date(date_format(created, '%Y %v Monday'), '%x %v %W'), ' - ', str_to_date(date_format(created, '%Y %v Sunday'), '%x %v %W')) as 'incoming_avg'"]);
-//			$query->addSelect(["sum(outgoing) / count(distinct str_to_date(date_format(created, '%Y %v Monday'), '%x %v %W'), ' - ', str_to_date(date_format(created, '%Y %v Sunday'), '%x %v %W')) as 'outgoing_avg'"]);
-//			$query->addSelect(["sum(incoming + outgoing) / count(distinct date_format(created, '%Y-%m-%d')) as total_calls_avg"]);
 		} else {
 			$query->addSelect(["date_format(`created`, '$dateFormat') as created_formatted"]);
-//			$query->addSelect(['sum(incoming) / count(distinct date_format(created, \''.self::DATE_FORMAT_LIST_COUNT[$this->callGraphGroupBy].'\')) as incoming_avg']);
-//			$query->addSelect(['sum(outgoing) / count(distinct date_format(created, \''.self::DATE_FORMAT_LIST_COUNT[$this->callGraphGroupBy].'\')) as outgoing_avg']);
-//			$query->addSelect(['sum(incoming + outgoing) / count(distinct date_format(created, \''.self::DATE_FORMAT_LIST_COUNT[$this->callGraphGroupBy].'\')) as total_calls_avg']);
 		}
-
 
 		if ($this->createTimeRange) {
 			$this->createTimeStart = date('Y-m-d H:i:00', $this->createTimeStart);
@@ -289,8 +283,8 @@ class CallGraphsSearch extends CallSearch
 			$this->createTimeRange = $this->createTimeStart . ' - ' . $this->createTimeEnd;
 		}
 
-		if (!$this->c_recording_duration) {
-			$this->c_recording_duration = 2;
+		if (!$this->cl_duration) {
+			$this->cl_duration = 2;
 		}
 
 		$incomingComplete = $this->getCompleteIncomingCallsQuery();
@@ -312,87 +306,75 @@ class CallGraphsSearch extends CallSearch
 				'created' => SORT_ASC,
 			];
 		}
-		$query->orderBy($order);
+		$query->orderBy('created_formatted');
 
 		return new SqlDataProvider(['sql' => $query->createCommand()->rawSql, 'pagination' => false]);
 	}
 
-	/**
-	 * @return CallQuery
-	 */
-	private function getCompleteIncomingCallsQuery(): CallQuery
+	private function getCompleteIncomingCallsQuery()
 	{
-		$query = Call::find()
+		$query = CallLog::find()
 			->select([
-				'count(c_id) as incoming',
+				'count(cl_id) as incoming',
 				'coalesce(0) as outgoing',
-				'coalesce(sum(c_recording_duration), 0) as incoming_duration_sum',
+				'coalesce(sum(cl_duration), 0) as incoming_duration_sum',
 				'coalesce(0) as outgoing_duration_sum'
 			])
-			->andWhere(['c_call_type_id' => self::CALL_TYPE_IN])
-			->andWhere(['c_status_id' => self::STATUS_COMPLETED])
-			->andWhere(['not', ['c_parent_id' => null]]);
+			->andWhere(['cl_type_id' => CallLogType::IN])
+			->andWhere(['cl_status_id' => CallLogStatus::COMPLETE]);
 
 		if ($this->recordingDurationFrom) {
-			$query->andWhere(['>=', 'c_recording_duration', $this->recordingDurationFrom]);
+			$query->andWhere(['>=', 'cl_duration', $this->recordingDurationFrom]);
 		}
 
 		if ($this->recordingDurationTo) {
-			$query->andWhere(['<=', 'c_recording_duration', $this->recordingDurationTo]);
+			$query->andWhere(['<=', 'cl_duration', $this->recordingDurationTo]);
 		}
 
 		return $this->applySearchQuery($query);
 	}
 
-	/**
-	 * @return CallQuery
-	 */
-	private function getNotAnsweredIncomingCallsQuery(): CallQuery
+	private function getNotAnsweredIncomingCallsQuery()
 	{
-		$query = Call::find()
+		$query = CallLog::find()
 			->select([
-				'count(c_id) as incoming',
+				'count(cl_id) as incoming',
 				'coalesce(0) as outgoing',
-				'coalesce(sum(c_recording_duration), 0) as incoming_duration_sum',
+				'coalesce(sum(cl_duration), 0) as incoming_duration_sum',
 				'coalesce(0) as outgoing_duration_sum'
 			])
-			->andWhere(['c_call_type_id' => self::CALL_TYPE_IN])
-			->andWhere(['c_status_id' => [self::STATUS_BUSY, self::STATUS_NO_ANSWER]])
-			->andWhere(['c_parent_id' => null]);
+			->andWhere(['cl_type_id' => CallLogType::IN])
+			->andWhere(['cl_status_id' => [CallLogStatus::BUSY, CallLogStatus::NOT_ANSWERED]]);
 
 		if ($this->recordingDurationFrom) {
-			$query->andWhere(['>=', 'c_recording_duration', $this->recordingDurationFrom]);
+			$query->andWhere(['>=', 'cl_duration', $this->recordingDurationFrom]);
 		}
 
 		if ($this->recordingDurationTo) {
-			$query->andWhere(['<=', 'c_recording_duration', $this->recordingDurationTo]);
+			$query->andWhere(['<=', 'cl_duration', $this->recordingDurationTo]);
 		}
 
 		return $this->applySearchQuery($query);
 	}
 
-	/**
-	 * @return CallQuery
-	 */
-	private function getCompleteOutgoingCallsQuery(): CallQuery
+	private function getCompleteOutgoingCallsQuery()
 	{
-		$query = Call::find()
+		$query = CallLog::find()
 			->select([
 				'coalesce(0) as incoming',
-				'count(c_id) as outgoing',
+				'count(cl_id) as outgoing',
 				'coalesce(0) as incoming_duration_sum',
-				'coalesce(sum(c_recording_duration), 0) as outgoing_duration_sum'
+				'coalesce(sum(cl_duration), 0) as outgoing_duration_sum'
 			])
-			->andWhere(['c_call_type_id' => self::CALL_TYPE_OUT])
-			->andWhere(['c_status_id' => self::STATUS_COMPLETED])
-			->andWhere(['not', ['c_parent_id' => null]]);
+			->andWhere(['cl_type_id' => CallLogType::OUT])
+			->andWhere(['cl_status_id' => CallLogStatus::COMPLETE]);
 
 		if ($this->recordingDurationFrom) {
-			$query->andWhere(['>=', 'c_recording_duration', $this->recordingDurationFrom]);
+			$query->andWhere(['>=', 'cl_duration', $this->recordingDurationFrom]);
 		}
 
 		if ($this->recordingDurationTo) {
-			$query->andWhere(['<=', 'c_recording_duration', $this->recordingDurationTo]);
+			$query->andWhere(['<=', 'cl_duration', $this->recordingDurationTo]);
 		}
 
 		return $this->applySearchQuery($query);
@@ -401,57 +383,53 @@ class CallGraphsSearch extends CallSearch
 	/**
 	 * @return CallQuery
 	 */
-	private function getNotAnsweredOutgoingCallsQuery(): CallQuery
+	private function getNotAnsweredOutgoingCallsQuery()
 	{
-		$query = Call::find()
+		$query = CallLog::find()
 			->select([
 				'coalesce(0) as incoming',
-				'count(c_id) as outgoing',
+				'count(cl_id) as outgoing',
 				'coalesce(0) as incoming_duration_sum',
-				'coalesce(sum(c_recording_duration), 0) as outgoing_duration_sum'
+				'coalesce(sum(cl_duration), 0) as outgoing_duration_sum'
 			])
-			->andWhere(['c_call_type_id' => self::CALL_TYPE_OUT])
-			->andWhere(['c_status_id' => [self::STATUS_BUSY, self::STATUS_NO_ANSWER]])
-			->andWhere(['not', ['c_parent_id' => null]]);
+			->andWhere(['cl_type_id' => CallLogType::OUT])
+			->andWhere(['cl_status_id' => [CallLogStatus::BUSY, CallLogStatus::NOT_ANSWERED]]);
+			//->andWhere(['not', ['c_parent_id' => null]]);
 
 		return $this->applySearchQuery($query);
 	}
 
-	/**
-	 * @param CallQuery $query
-	 * @return CallQuery
-	 */
-	private function applySearchQuery(CallQuery $query): CallQuery
+	private function applySearchQuery($query)
 	{
 		$timeZone = Employee::getUtcOffsetDst($this->timeZone, date('Y-m-d'));
 
-		$query->addSelect(["date_format(convert_tz(c_created_dt, '+00:00', '$timeZone'), '%Y-%m-%d %H:00:00') as created"]);
+		$query->addSelect(["date_format(convert_tz(cl_call_created_dt, '+00:00', '$timeZone'), '%Y-%m-%d %H:00:00') as created"]);
 
-		$query->andWhere(['between', "convert_tz(c_created_dt, '+00:00', '".$timeZone."')", $this->createTimeStart, $this->createTimeEnd]);
+		$query->andWhere(['between', "convert_tz(cl_call_created_dt, '+00:00', '".$timeZone."')", $this->createTimeStart, $this->createTimeEnd]);
 
 		if ($this->projectIds) {
-			$query->andWhere(['c_project_id' => $this->projectIds]);
+			$query->andWhere(['cl_project_id' => $this->projectIds]);
 		}
 
 		if ($this->dep_ids) {
-			$query->andWhere(['c_dep_id' => $this->dep_ids]);
+			$query->andWhere(['cl_department_id' => $this->dep_ids]);
 		}
 
-		if ($this->c_created_user_id) {
-			$query->andWhere(['c_created_user_id' => $this->c_created_user_id]);
+		if ($this->cl_user_id) {
+			$query->andWhere(['cl_user_id' => $this->cl_user_id]);
 		} else if ($this->userGroupIds) {
-			$userIdsByGroup = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id) as c_created_user_id'])->where(['ugs_group_id' => $this->userGroupIds])->asArray()->all();
+			$userIdsByGroup = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id) as cl_user_id'])->where(['ugs_group_id' => $this->userGroupIds])->asArray()->all();
 			if ($userIdsByGroup) {
-				$query->andWhere(['in', ['c_created_user_id'], $userIdsByGroup]);
+				$query->andWhere(['in', ['cl_user_id'], $userIdsByGroup]);
 			}
 		}
 
 		if ($this->betweenHoursFrom) {
-			$query->andWhere(['>=', 'hour(convert_tz(c_created_dt, \'+00:00\', \''.$timeZone.'\'))', $this->betweenHoursFrom]);
+			$query->andWhere(['>=', 'hour(convert_tz(cl_call_created_dt, \'+00:00\', \''.$timeZone.'\'))', $this->betweenHoursFrom]);
 		}
 
 		if ($this->betweenHoursTo) {
-			$query->andWhere(['<=', 'hour(convert_tz(c_created_dt, \'+00:00\', \''.$timeZone.'\'))', $this->betweenHoursTo]);
+			$query->andWhere(['<=', 'hour(convert_tz(cl_call_created_dt, \'+00:00\', \''.$timeZone.'\'))', $this->betweenHoursTo]);
 		}
 
 		$query->groupBy('created')->orderBy('created');
