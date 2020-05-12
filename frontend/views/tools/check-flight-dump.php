@@ -1,6 +1,6 @@
 <?php
 
-use sales\parcingDump\Gds\Gds;
+use sales\services\parsingDump\gds\Gds;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */

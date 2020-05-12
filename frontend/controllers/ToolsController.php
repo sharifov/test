@@ -4,7 +4,7 @@ namespace frontend\controllers;
 
 use common\models\Quote;
 
-use sales\parcingDump\Gds\Gds;
+use sales\services\parsingDump\gds\Gds;
 use Yii;
 use common\models\ApiLog;
 use common\models\search\ApiLogSearch;
@@ -108,7 +108,7 @@ class ToolsController extends FController
             $typeDump = $type !== '' ? $type : Gds::getParserType($dump);
 
             $obj = Gds::initClass($typeDump);
-            $data = $obj->parseDump($dump, true);
+            $data = $obj->parseDump($dump);
         }
 
         return $this->render('check-flight-dump', [

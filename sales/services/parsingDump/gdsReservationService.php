@@ -1,18 +1,18 @@
 <?php
 
-namespace sales\parcingDump\Gds;
+namespace sales\services\parsingDump;
 
 use common\components\SearchService;
 use common\models\Airline;
 use common\models\Airport;
-use common\models\local\FlightSegment;
 use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
+use sales\services\parsingDump\gds\Reservation;
 use yii\base\ErrorException;
 
 /**
- * Class Reservation
+ * Class gdsReservationService
  */
-class Reservation implements ParseDump
+class gdsReservationService extends Reservation
 {
     private CONST ARRIVAL_OFFSET_MAP = [
         '' => 'arrival on the same day',
@@ -20,7 +20,7 @@ class Reservation implements ParseDump
         '#1' => 'arrival the next day',
         '#2' => 'arrival in a day',
         '#3' => 'arrival in two days',
-    ];
+    ]; /* TODO::  */
 
     /**
      * @param $string
@@ -44,77 +44,18 @@ class Reservation implements ParseDump
 
             $result['carrier'] = $parseData['airline'];
             $result['airlineName'] = $this->getAirlineName($parseData['airline']);
-            /* TODO::  */
+            $result['airlineName'] = $this->getAirlineName($parseData['airline']);
+
             /*
             'departureAirport' => 'SLC'
             'arrivalAirport' => 'DFW'
+            'departureDateTime'
             */
         }
 
         \yii\helpers\VarDumper::dump($result, 10, true); exit();
         /* FOR DEBUG:: must by remove */
 
-        return $result;
-    }
-
-    public function parseDump(string $string): array
-    {
-        $result = [];
-        $rows = explode("\n", $string);
-        foreach ($rows as $key => $row) {
-
-            if (empty($rawData = $this->parseRow($row))) {
-                $result['failed'][] = $row;
-                continue;
-            }
-            $parseData = $this->dataMapping($rawData);
-            $result['parseData'][$parseData['index']] = $parseData;
-        }
-        return $result;
-    }
-
-    /**
-     * @param string $row
-     * @return array
-     */
-    private function parseRow(string $row): array
-    {
-        $row = trim($row);
-        $pattern = '/^
-            (\d) # key
-            \s([A-Z]{2}) # Airline
-            \s*(\d{2,4})([A-Z]{1}) # Flight number + Booking Class
-            \s{1}(\d{2})([A-Z]{3}) # Departure Date
-            \s{1}([A-Z]{2}) # Departure Day of the week
-            \s{1}([A-Z]{3})([A-Z]{3}) # Airport codes from+to
-            \s{1}.{3}\s{2}(\d{2})(\d{2}) # Departure Time HHMM 
-            \s{2}(\d{2})(\d{2}) # Arrival Time HHMM  
-            (.*?)\/\X|\/\O # Arrival offset                            
-            /x';
-        preg_match($pattern, $row, $matches);
-        return $matches;
-    }
-
-    /**
-     * @param array $data
-     * @return array
-     */
-    private function dataMapping(array $data): array
-    {
-        $result['index'] = $data[1];
-        $result['airline'] = $data[2];
-        $result['flight_number'] = $data[3];
-        $result['booking_class'] = $data[4];
-        $result['departure_date_day'] = $data[5];
-        $result['departure_date_month'] = $data[6];
-        $result['departure_day_of_week'] = $data[7];
-        $result['airport_code_from'] = $data[8];
-        $result['airport_code_to'] = $data[9];
-        $result['departure_time_hh'] = $data[10];
-        $result['departure_time_mm'] = $data[11];
-        $result['arrival_time_hh'] = $data[12];
-        $result['arrival_time_mm'] = $data[13];
-        $result['arrival_offset'] = trim($data[14]);
         return $result;
     }
 
@@ -343,6 +284,5 @@ class Reservation implements ParseDump
         }
         return '';
     }
-
 
 }

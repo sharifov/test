@@ -1,8 +1,6 @@
 <?php
 
-namespace sales\parcingDump\Gds;
-
-use common\models\Airline;
+namespace sales\services\parsingDump\gds;
 
 /**
  * Class Pricing
@@ -18,7 +16,6 @@ class Pricing implements ParseDump
         $baggage = new Baggage();
 
         $result['iata'] = $this->parseIata($string);
-        //$result['airline'] = $this->getAirline($result['iata']); /* TODO::  */
         $result['price'] = $this->parsePrice($string);
         $result['baggage'] = $baggage->parseBaggageAllowance($string);
         $result['carry_on_allowance'] = $baggage->parseCarryOnAllowance($string);
@@ -67,21 +64,6 @@ class Pricing implements ParseDump
         $airlinePattern = '/CARRIER DEFAULT\s(.*?)\n\*/';
         preg_match($airlinePattern, $string, $airlineMatches);
         return isset($airlineMatches[1]) ? trim($airlineMatches[1]) : null;
-    }
-
-    /**
-     * @param string|null $iata
-     * @param bool $asArray
-     * @return array|Airline|null
-     */
-    private function getAirline(?string $iata, bool $asArray = true)
-    {
-        if ($iata) {
-            if ($airline = Airline::findIdentity($iata)) {
-                return $asArray ? $airline->toArray() : $airline;
-            }
-        }
-        return null;
     }
 
     /**

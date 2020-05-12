@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\parcingDump\Gds;
+namespace sales\services\parsingDump\gds;
 
 /**
  * Class Baggage
