@@ -8,7 +8,7 @@ use common\models\local\FlightSegment;
 use common\models\local\LeadLogMessage;
 use common\models\query\QuoteQuery;
 use sales\entities\EventTrait;
-use sales\parcingDump\Gds\Reservation;
+use sales\services\parsingDump\WorldSpanReservationService;
 use Yii;
 use yii\base\ErrorException;
 use yii\base\InvalidArgumentException;
@@ -541,7 +541,7 @@ class Quote extends \yii\db\ActiveRecord
 
     public function checkReservationDump()
     {
-        $dumpParser = (new Reservation())->parseDump($this->reservation_dump, true, $this->itinerary);
+        $dumpParser = (new WorldSpanReservationService())->parseReservation($this->reservation_dump, true, $this->itinerary);
         if (empty($dumpParser)) {
             $this->addError('reservation_dump', 'Incorrect reservation dump!');
         }
@@ -1517,7 +1517,7 @@ class Quote extends \yii\db\ActiveRecord
     {
         $trips = [];
         $tripIndex = 0;
-        $segments = (new Reservation())->parseDump($this->reservation_dump, false);
+        $segments = (new WorldSpanReservationService())->parseReservation($this->reservation_dump, false);
         foreach ($segments as $key => $segment) {
             if(!isset($segment['cabin']) || empty($segment['cabin'])){
                 $segment['cabin'] = $this->cabin;
@@ -1572,7 +1572,7 @@ class Quote extends \yii\db\ActiveRecord
     {
         $trips = [];
         $tripIndex = 0;
-        $segments = (new Reservation())->parseDump($this->reservation_dump, false);
+        $segments = (new WorldSpanReservationService())->parseReservation($this->reservation_dump, false);
         foreach ($segments as $key => $segment) {
             if(!isset($segment['cabin']) || empty($segment['cabin'])){
                 $segment['cabin'] = $this->cabin;

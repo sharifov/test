@@ -98,6 +98,7 @@ class ToolsController extends FController
 
     /**
      * @return string
+     * @throws \Exception
      */
     public function actionCheckFlightDump(): string
     {
