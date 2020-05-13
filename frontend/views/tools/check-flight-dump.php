@@ -39,8 +39,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
     <div class="col-md-8">
-        <h2>Parse dump: <?php echo $typeDump ?></h2>
         <?php if ($data): ?>
+        <h2>Parse dump: <?php echo $typeDump ?></h2>
             <pre>
             <?php \yii\helpers\VarDumper::dump($data, 10, true) ?>
             </pre>
