@@ -4,7 +4,7 @@
 
 ?>
 <div class="phone-widget__tab is_active" id="tab-phone">
-  <div class="call-pane call-pane-initial ">
+  <div class="call-pane call-pane-initial is_active">
 
     <div class="calling-from-info">
       <div class="current-number">
@@ -51,7 +51,7 @@
             </div> -->
             <ul class="phone-widget__list-item calls-history suggested-contacts"></ul>
 
-            
+
             <div class="phone-input-wrap">
                 <label class="call-pane-label" for="">Calling to</label>
                 <?php
@@ -201,7 +201,7 @@
             <div class="sound-control-wrap" id="wg-call-microphone">
                 <i class="fa fa-microphone"></i>
                 <div class="sound-controls">
-                    
+
                 <div class="progres-wrap">
                     <div class="sound-progress" ></div>
                     <div class="sound-ovf" style="right: -30%;"></div>
@@ -209,13 +209,13 @@
             </div>
         </div>
 
-        
+
     </div>
     <ul class="in-call-controls">
       <li class="in-call-controls__item">
         <a href="#" class="in-call-controls__action">
           <i class="fa fa-pause"></i>
-          <span>On Hold</span> 
+          <span>On Hold</span>
         </a>
       </li>
       <li class="in-call-controls__item" id="wg-transfer-call">
@@ -263,15 +263,15 @@
   </div>
 
   <div class="call-pane-incoming call-pane-initial">
-    <div class="calling-from-info">
-      <div class="current-number">
-        <div class="custom-phone-select"></div>
-      </div>
-      <div class="number-toggle">
-        <input type="checkbox" id="number-status">
-        <label for="number-status"></label>
-      </div>
-    </div>
+<!--    <div class="calling-from-info">-->
+<!--      <div class="current-number">-->
+<!--        <div class="custom-phone-select"></div>-->
+<!--      </div>-->
+<!--      <div class="number-toggle">-->
+<!--        <input type="checkbox" id="number-status">-->
+<!--        <label for="number-status"></label>-->
+<!--      </div>-->
+<!--    </div>-->
     <div class="contact-info-card">
       <div class="contact-info-card__details">
 
@@ -286,7 +286,7 @@
       </div>
     </div>
     <div class="call-pane__call-btns ">
-      <button class="call-pane__start-call calling-state-block" id="btn-new-make-call">
+      <button class="call-pane__start-call calling-state-block" id="btn-accept-call">
         <div class="call-in-action">
           <span class="call-in-action__text">Calling</span>
           <span class="call-in-action__time">01:54</span>
@@ -303,9 +303,11 @@
 
 <?php
 $ajaxCallRedirectGetAgents = Url::to(['phone/ajax-call-get-agents']);
+$ajaxAcceptIncomingCall = Url::to(['call/ajax-accept-incoming-call']);
 $js = <<<JS
 PhoneWidgetCall.init({
-    'ajaxCallRedirectGetAgents': '{$ajaxCallRedirectGetAgents}'
+    'ajaxCallRedirectGetAgents': '{$ajaxCallRedirectGetAgents}',
+    'acceptCallUrl': '{$ajaxAcceptIncomingCall}',
 });
 
 JS;

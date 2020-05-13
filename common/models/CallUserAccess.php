@@ -158,6 +158,11 @@ class CallUserAccess extends \yii\db\ActiveRecord
         $this->cua_status_id = self::STATUS_TYPE_NO_ANSWERED;
     }
 
+    public function isPending(): bool
+	{
+		return $this->cua_status_id === self::STATUS_TYPE_PENDING;
+	}
+
     /**
      * @param bool $insert
      * @param array $changedAttributes
@@ -186,7 +191,14 @@ class CallUserAccess extends \yii\db\ActiveRecord
 
         if($insert || isset($changedAttributes['cua_status_id'])) {
             //Notifications::socket($this->cua_user_id, null, 'updateIncomingCall', $this->attributes);
-            Notifications::publish('updateIncomingCall', ['user_id' => $this->cua_user_id], $this->attributes);
+			if ($this->isPending()) {
+				$client = $this->cuaCall->cClient;
+				$callFromInfo = [
+					'phoneFrom' => $this->cuaCall->c_from,
+					'name' => $client->first_name . ' ' . $client->last_name
+				];
+			}
+            Notifications::publish('updateIncomingCall', ['user_id' => $this->cua_user_id], array_merge($this->attributes, $callFromInfo ?? []));
         }
 
         if (!$insert && isset($changedAttributes['cua_status_id'])) {

@@ -179,7 +179,7 @@ $js = <<<JS
                                 refreshInboxCallWidget(obj);
                             }
                             if (typeof PhoneWidgetCall === 'object') {
-                                PhoneWidgetCall.initIncomingCall();
+                                PhoneWidgetCall.initIncomingCall(obj);
                             }
                         }
                         

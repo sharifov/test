@@ -5,6 +5,7 @@ var PhoneWidgetCall = function () {
     {
         muteBtnEvent();
         transferCallBtnEvent(options);
+        acceptCallBtnEvent(options);
     }
 
     function initCall(selectedNumber)
@@ -124,13 +125,77 @@ var PhoneWidgetCall = function () {
         $('.call-in-action__time').html('').show().timer('remove').timer({format: '%M:%S', seconds: status.duration | 0}).timer('start');
     }
 
+    function initIncomingCall(obj)
+    {
+        openWidget();
+        openCallTab();
+        if (typeof obj === 'object' && 'phoneFrom' in obj) {
+            $('#btn-accept-call').attr('data-call-id', obj.cua_call_id);
+            showIncomingCallPanel(obj.phoneFrom, obj.name || '');
+        }
+    }
+
+    function openWidget()
+    {
+        $('.phone-widget').addClass('is_active');
+        $('.js-toggle-phone-widget').removeClass('is-mirror');
+    }
+
+    function openCallTab()
+    {
+        $('.phone-widget__tab').removeClass('is_active');
+        $('#tab-phone').addClass('is_active');
+    }
+
+    function showIncomingCallPanel(phone, name)
+    {
+        $('#tab-phone .call-panel').removeClass('is_active');
+        $('#tab-phone .call-pane-initial').addClass('is_active');
+        $('#btn-accept-call').find('i').removeClass('fa fa-spinner fa-spin').addClass('fas fa-check');
+        $('.call-pane-incoming .contact-info-card__name').html(name);
+        $('.call-pane-incoming .contact-info-card__call-type').html(phone);
+    }
+
+    function acceptCallBtnEvent(options)
+    {
+        $(document).on('click', '#btn-accept-call', function () {
+            var btn = $(this);
+            $.ajax({
+                type: 'post',
+                url: options.acceptCallUrl,
+                dataType: 'json',
+                data: {act: 'accept', call_id: btn.attr('data-call-id')},
+                beforeSend: function () {
+                    btn.addClass('disabled');
+                    btn.find('i').removeClass('fas fa-check').addClass('fa fa-spinner fa-spin');
+                },
+                success: function (data) {
+                    console.log(data);
+                    if (data.error) {
+                         new PNotify({
+                            title: "Error",
+                            type: "error",
+                            text: data.message,
+                            hide: true
+                        });
+                    }
+                },
+                complete: function () {
+                    btn.removeClass('disabled');
+                    btn.find('i').addClass('fas fa-check').removeClass('fa fa-spinner fa-spin');
+                }
+            })
+        });
+    }
+
     return {
         init: init,
         initCall: initCall,
         cancelCall: cancelCall,
         volumeIndicatorsChange: volumeIndicatorsChange,
         updateConnection: updateConnection,
-        refreshCallStatus: refreshCallStatus
+        refreshCallStatus: refreshCallStatus,
+        initIncomingCall: initIncomingCall
     };
 }();
 

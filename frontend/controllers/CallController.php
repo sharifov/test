@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\components\CentrifugoService;
+use common\models\CallUserAccess;
 use common\models\Conference;
 use common\models\Department;
 use common\models\DepartmentPhoneProject;
@@ -19,6 +20,9 @@ use http\Exception\InvalidArgumentException;
 use sales\auth\Auth;
 
 use sales\helpers\call\CallHelper;
+use sales\repositories\call\CallRepository;
+use sales\repositories\call\CallUserAccessRepository;
+use sales\repositories\NotFoundException;
 use sales\services\call\CallService;
 use Yii;
 use common\models\Call;
@@ -35,15 +39,27 @@ use yii\web\Response;
  * CallController implements the CRUD actions for Call model.
  *
  * @property CallService $callService
+ * @property CallRepository $callRepository
+ * @property CallUserAccessRepository $callUserAccessRepository
  */
 class CallController extends FController
 {
     private $callService;
+    private $callRepository;
+    private $callUserAccessRepository;
 
-    public function __construct($id, $module, CallService $callService, $config = [])
-    {
+    public function __construct(
+    	$id,
+		$module,
+		CallService $callService,
+		CallRepository $callRepository,
+		CallUserAccessRepository $callUserAccessRepository,
+		$config = []
+	) {
         parent::__construct($id, $module, $config);
         $this->callService = $callService;
+        $this->callRepository = $callRepository;
+        $this->callUserAccessRepository = $callUserAccessRepository;
     }
 
     public function behaviors()
@@ -943,6 +959,39 @@ class CallController extends FController
 
         return $this->redirect(['index']);
     }
+
+    public function actionAjaxAcceptIncomingCall(): Response
+	{
+		$action = \Yii::$app->request->get('act');
+		$call_id = \Yii::$app->request->get('call_id');
+
+		$response = [
+			'error' => true,
+			'message' => 'Internal Server Error'
+		];
+		if ($action && $call_id) {
+			try {
+				$call = $this->callRepository->find($call_id);
+				$callUserAccess = $this->callUserAccessRepository->getByUserAndCallId(Auth::id(), $call->c_id);
+				switch ($action) {
+					case 'accept':
+						$this->callService->acceptCall($callUserAccess, Auth::user());
+						$response['error'] = false;
+						$response['message'] = 'success';
+						break;
+					case 'busy':
+						$this->callService->busyCall($callUserAccess, Auth::user());
+						$response['error'] = false;
+						$response['message'] = 'success';
+						break;
+				}
+			} catch (\RuntimeException | NotFoundException $e) {
+				$response['message'] = $e->getMessage();
+			}
+		}
+
+		return $this->asJson($response);
+	}
 
     /**
      * @param string $sid
