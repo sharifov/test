@@ -32,7 +32,7 @@ class Pricing implements ParseDump
     public function parsePrice(string $string): ?array
     {
         $result = null;
-        $ticketPricePattern = '/LAST DATE TO TICKET(.*?)\*TTL/s';
+        $ticketPricePattern = '/TICKET (.*?)\*TTL/s';
         preg_match($ticketPricePattern, $string, $ticketPriceMatches);
 
         if (isset($ticketPriceMatches[1]) && $ticketPrice = trim($ticketPriceMatches[1])) {

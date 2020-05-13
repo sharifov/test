@@ -80,11 +80,20 @@ class Baggage implements ParseDump
         preg_match($baggagePattern, $string, $baggageMatches);
 
         if (isset($baggageMatches[1])) {
-            $rowDelimPatten = '[A-Z]{2}\s[A-Z]{6}\s{2}\d{1}PC';
+            // AA SLCCDG  0PC
+            $rowDelimPatten = '[A-Z]{2}\s[A-Z]{6}\s{1,2}\d{1}PC';
             preg_match_all('(' . $rowDelimPatten . ')', $baggageMatches[1], $codeMatches);
 
             $items = preg_split('/' . $rowDelimPatten . '/', $baggageMatches[1]);
             array_shift($items);
+
+/*
+            \yii\helpers\VarDumper::dump([
+                     $items,
+                    $string,
+                ], 10, true); exit();
+             */
+                /* FOR DEBUG:: must by remove */
 
             if ($codeMatches[0]) {
                 foreach ($codeMatches[0] as $key => $value) {
@@ -101,8 +110,10 @@ class Baggage implements ParseDump
                         if (strlen($valueBag) < 10) {
                             continue;
                         }
-                        // example: BAG 1 -  75.00 USD    UPTO50LB/23KG AND UPTO62LI/158LCM
-                        preg_match("/BAG\s(\d{1})\s-\s{2}([0-9]*\.[0-9]*)\s([A-Z]{2,3})\s{4}(.*?)\sAND\s(.*?)$/s", $valueBag, $bagMatches);
+                        // BAG 1 -  75.00 USD    UPTO50LB/23KG AND UPTO62LI/158LCM
+                        // BAG 1 - NO FEE UPTO50LB/23KG AND UPTO81LI/208LCM
+
+                        preg_match("/BAG\s(\d{1})\s-\s{1,2}([0-9]*\.[0-9]*)\s([A-Z]{2,3})\s{4}(.*?)\sAND\s(.*?)$/s", $valueBag, $bagMatches);
 
                         if (!empty($bagMatches)) {
                             $result[$key]['bag'][$keyBag]['price'] = isset($bagMatches[2]) ? trim($bagMatches[2]) : null;
@@ -123,7 +134,7 @@ class Baggage implements ParseDump
      */
     private function getBagInfo(string $text): array
     {
-        preg_match("/([A-Z]{2})\s([A-Z]{6})\s{2}(\d{1})PC/", $text, $rowInfoMatches);
+        preg_match("/([A-Z]{2})\s([A-Z]{6})\s{1,2}(\d{1})PC/", $text, $rowInfoMatches);
 
         $result['iata'] = $rowInfoMatches[1] ?? null;
         $result['code'] = $rowInfoMatches[2] ?? null;

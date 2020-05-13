@@ -21,7 +21,6 @@ class Reservation implements ParseDump
         foreach ($rows as $key => $row) {
             try {
                 if (empty($rawData = $this->parseRow($row))) {
-                    $result['failed'][] = $row;
                     continue;
                 }
                 $parseData = $this->dataMapping($rawData);
@@ -42,7 +41,7 @@ class Reservation implements ParseDump
         $row = trim($row);
         $pattern = '/^
             (\d{1,2}) # index
-            \s([A-Z]{2}) # Airline
+            (\s{1}|\*)([A-Z]{2}) # Airline
             \s*(\d{2,4})([A-Z]{1}) # Flight number + Booking Class
             \s{1}(\d{1,2})([A-Z]{3}) # Departure Date
             \s{1}([A-Z]{2}) # Departure Day of the week
@@ -70,20 +69,20 @@ class Reservation implements ParseDump
     public function dataMapping(array $data): array
     {
         $result['index'] = $data[1];
-        $result['airline'] = $data[2];
-        $result['flight_number'] = $data[3];
-        $result['booking_class'] = $data[4];
-        $result['departure_date_day'] = $data[5];
-        $result['departure_date_month'] = $data[6];
-        $result['departure_day_of_week'] = $data[7];
-        $result['departure_airport_iata'] = $data[8];
-        $result['arrival_airport_iata'] = $data[9];
-        $result['departure_time_hh'] = $data[10];
-        $result['departure_time_mm'] = $data[11];
-        $result['arrival_time_hh'] = $data[12];
-        $result['arrival_time_mm'] = $data[13];
-        $result['arrival_offset'] = trim($data[14]);
-        $result['cabin'] = $data[15];
+        $result['airline'] = $data[3];
+        $result['flight_number'] = $data[4];
+        $result['booking_class'] = $data[5];
+        $result['departure_date_day'] = $data[6];
+        $result['departure_date_month'] = $data[7];
+        $result['departure_day_of_week'] = $data[8];
+        $result['departure_airport_iata'] = $data[9];
+        $result['arrival_airport_iata'] = $data[10];
+        $result['departure_time_hh'] = $data[11];
+        $result['departure_time_mm'] = $data[12];
+        $result['arrival_time_hh'] = $data[13];
+        $result['arrival_time_mm'] = $data[14];
+        $result['arrival_offset'] = trim($data[15]);
+        $result['cabin'] = trim($data[16]);
         return $result;
     }
 }

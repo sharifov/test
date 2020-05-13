@@ -26,37 +26,17 @@ class WorldSpan
     public static function getParserType(string $dump): string
     {
         try {
-            $row = explode("\n", $dump)[0];
-
-            if (stripos($row, 'BAGGAGE ALLOWANCE') !== false) {
-                $typeDump = self::TYPE_BAGGAGE;
-            } elseif (self::getTypeReservationByFirstString($row)) {
-                $typeDump = self::TYPE_RESERVATION;
-            } elseif (self::getTypePricingByFirstString($row)) {
+            if (stripos($dump, 'TICKET') !== false) {
                 $typeDump = self::TYPE_PRICING;
+            } elseif (stripos($dump, 'BAGGAGE ALLOWANCE') !== false) {
+                $typeDump = self::TYPE_BAGGAGE;
             } else {
-                $typeDump = self::DEFAULT_TYPE;
+                 $typeDump = self::TYPE_RESERVATION;
             }
         } catch (\Throwable $throwable) {
             $typeDump = self::DEFAULT_TYPE;
         }
         return $typeDump;
-    }
-
-    /**
-     * @param string $row
-     * @return bool
-     */
-    private static function getTypeReservationByFirstString(string $row): bool
-    {
-        preg_match("/^(\d{1})\s/s", $row, $matches);
-        return (!empty($matches));
-    }
-
-    private static function getTypePricingByFirstString(string $row): bool
-    {
-        preg_match("/^(\d{1}[A-Z])/s", $row, $matches);
-        return (!empty($matches));
     }
 
     /**
