@@ -578,7 +578,9 @@ use yii\helpers\Html;
 
                     volumeIndicators.style.display = 'block';
                     bindVolumeIndicators(conn);
-                    PhoneWidgetCall.updateConnection(conn);
+                    if (typeof PhoneWidgetCall === 'object') {
+                        PhoneWidgetCall.updateConnection(conn);
+                    }
                 });
 
                 device.on('disconnect', function (conn) {
