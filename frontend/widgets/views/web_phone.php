@@ -596,7 +596,7 @@ use yii\helpers\Html;
                     volumeIndicators.style.display = 'none';
                     cleanPhones();
 
-                    if (typeof PhoneWidgetCall !== "function") {
+                    if (typeof PhoneWidgetCall === "object") {
                         PhoneWidgetCall.cancelCall();
                     }
                 });
