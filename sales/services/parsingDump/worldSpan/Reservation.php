@@ -14,6 +14,7 @@ class Reservation implements ParseDump
     public function parseDump(string $string): array
     {
         $result = [];
+        $string = trim($string);
         $rows = explode("\n", $string);
         foreach ($rows as $key => $row) {
 

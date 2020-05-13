@@ -27,6 +27,7 @@ class WorldSpanReservationService
     {
         $result = [];
         $parserReservation = new Reservation();
+        $string = trim($string);
         $rows = explode("\n", $string);
         if (!empty($itinerary) && $validation) {
             $itinerary = [];
