@@ -135,7 +135,7 @@ class FlightQuoteCreateForm extends CompositeForm
 
 	public function checkReservationDump(): void
 	{
-		$dumpParser = (new WorldSpanReservationService())->parseReservation($this->reservationDump, true, $this->itinerary);
+		$dumpParser = FlightQuoteHelper::parseDump($this->reservationDump, true, $this->itinerary);
 		if (empty($dumpParser)) {
 			$this->addError('reservationDump', 'Incorrect reservation dump!');
 		}
