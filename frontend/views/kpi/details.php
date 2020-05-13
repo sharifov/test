@@ -1,6 +1,6 @@
 <?php
 
-use sales\parcingDump\Gds\Reservation;
+use sales\services\parsingDump\WorldSpanReservationService;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -188,7 +188,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 $quote = $model->getBookedQuote();
                 if (!empty($quote) && isset($quote['reservation_dump']) && !empty($quote['reservation_dump'])) {
                     $data = [];
-                    $segments = (new Reservation())->parseDump($quote['reservation_dump'], false, $data, true);
+                    $segments = Quote::parseDump($quote['reservation_dump'], false, $data, true);
                     return $segments[0]['departureDateTime']->format('Y-m-d H:i');
                 }
                 $firstSegment = $model->getFirstFlightSegment();

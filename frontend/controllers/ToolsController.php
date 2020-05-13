@@ -4,7 +4,8 @@ namespace frontend\controllers;
 
 use common\models\Quote;
 
-use sales\parcingDump\Gds\Gds;
+use sales\services\parsingDump\worldSpan\WorldSpan;
+use sales\services\parsingDump\WorldSpanReservationService;
 use Yii;
 use common\models\ApiLog;
 use common\models\search\ApiLogSearch;
@@ -97,18 +98,25 @@ class ToolsController extends FController
 
     /**
      * @return string
+     * @throws \Exception
      */
     public function actionCheckFlightDump(): string
     {
         $data = [];
         $dump = Yii::$app->request->post('dump');
         $type = Yii::$app->request->post('type');
+        $prepareSegment = (int) Yii::$app->request->post('prepare_segment', 0);
 
         if ($dump) {
-            $typeDump = $type !== '' ? $type : Gds::getParserType($dump);
+            $typeDump = $type !== '' ? $type : WorldSpan::getParserType($dump);
 
-            $obj = Gds::initClass($typeDump);
-            $data = $obj->parseDump($dump, true);
+            $obj = WorldSpan::initClass($typeDump);
+
+            if ($typeDump === WorldSpan::TYPE_RESERVATION && $prepareSegment === 1) {
+                $data = (new WorldSpanReservationService())->parseReservation($dump, false);
+            } else {
+                $data = $obj->parseDump($dump);
+            }
         }
 
         return $this->render('check-flight-dump', [
@@ -116,6 +124,7 @@ class ToolsController extends FController
             'data' => $data,
             'type' => $type,
             'typeDump' => $typeDump ?? null,
+            'prepareSegment' => $prepareSegment,
         ]);
     }
 }

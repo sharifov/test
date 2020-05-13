@@ -6,7 +6,7 @@
  * @var $div string
  */
 
-use sales\parcingDump\Gds\Reservation;
+use sales\services\parsingDump\WorldSpanReservationService;
 use yii\bootstrap\Html;
 use yii\data\ActiveDataProvider;
 use yii\grid\GridView;
@@ -270,7 +270,7 @@ if($user->isAdmin() || $user->isSupervision()) {
             'value' => static function ($model) {
                 if (isset($model['reservation_dump']) && !empty($model['reservation_dump'])) {
                     $data = [];
-                    $segments = (new Reservation())->parseDump($model['reservation_dump'], false, $data, true);
+                    $segments = Quote::parseDump($model['reservation_dump'], false, $data, true);
                     return $segments[0]['departureDateTime']->format('Y-m-d H:i');
                 }
                 return $model['departure'];
