@@ -2,6 +2,8 @@
 
 namespace sales\services\parsingDump\worldSpan;
 
+use sales\helpers\app\AppHelper;
+
 /**
  * Class Baggage
  */
@@ -13,9 +15,13 @@ class Baggage implements ParseDump
      */
     public function parseDump(string $string): array
     {
-        $result['baggage'] = $this->parseBaggageAllowance($string);
-        $result['carry_on_allowance'] = $this->parseCarryOnAllowance($string);
-
+        $result = [];
+        try {
+            $result['baggage'] = $this->parseBaggageAllowance($string);
+            $result['carry_on_allowance'] = $this->parseCarryOnAllowance($string);
+        } catch (\Throwable $throwable) {
+            \Yii::error(AppHelper::throwableFormatter($throwable), 'WorldSpan:Baggage:parseDump:Throwable');
+        }
         return $result;
     }
 

@@ -2,6 +2,8 @@
 
 namespace sales\services\parsingDump\worldSpan;
 
+use sales\helpers\app\AppHelper;
+
 /**
  * Class Pricing
  */
@@ -13,8 +15,13 @@ class Pricing implements ParseDump
      */
     public function parseDump(string $string): array
     {
-        $result['iata'] = $this->parseIata($string);
-        $result['price'] = $this->parsePrice($string);
+        $result = [];
+        try {
+            $result['iata'] = $this->parseIata($string);
+            $result['price'] = $this->parsePrice($string);
+        } catch (\Throwable $throwable) {
+            \Yii::error(AppHelper::throwableFormatter($throwable), 'WorldSpan:Pricing:parseDump:Throwable');
+        }
         return $result;
     }
 

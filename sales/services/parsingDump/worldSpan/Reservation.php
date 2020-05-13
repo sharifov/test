@@ -2,6 +2,8 @@
 
 namespace sales\services\parsingDump\worldSpan;
 
+use sales\helpers\app\AppHelper;
+
 /**
  * Class Reservation
  */
@@ -17,14 +19,16 @@ class Reservation implements ParseDump
         $string = trim($string);
         $rows = explode("\n", $string);
         foreach ($rows as $key => $row) {
-
-            if (empty($rawData = $this->parseRow($row))) {
-                $result['failed'][] = $row;
-                continue;
+            try {
+                if (empty($rawData = $this->parseRow($row))) {
+                    $result['failed'][] = $row;
+                    continue;
+                }
+                $parseData = $this->dataMapping($rawData);
+                $result['parseData'][$parseData['index']] = $parseData;
+            } catch (\Throwable $throwable) {
+                \Yii::error(AppHelper::throwableFormatter($throwable), 'WorldSpan:Reservation:parseDump:Throwable');
             }
-
-            $parseData = $this->dataMapping($rawData);
-            $result['parseData'][$parseData['index']] = $parseData;
         }
         return $result;
     }
@@ -56,7 +60,6 @@ class Reservation implements ParseDump
         } else {
             $matches = [];
         }
-
         return $matches;
     }
 
