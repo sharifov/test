@@ -72,8 +72,8 @@ class Reservation implements ParseDump
         $result['departure_date_day'] = $data[5];
         $result['departure_date_month'] = $data[6];
         $result['departure_day_of_week'] = $data[7];
-        $result['airport_code_from'] = $data[8];
-        $result['airport_code_to'] = $data[9];
+        $result['departure_airport_iata'] = $data[8];
+        $result['arrival_airport_iata'] = $data[9];
         $result['departure_time_hh'] = $data[10];
         $result['departure_time_mm'] = $data[11];
         $result['arrival_time_hh'] = $data[12];
