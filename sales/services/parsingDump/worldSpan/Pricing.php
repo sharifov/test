@@ -13,12 +13,8 @@ class Pricing implements ParseDump
      */
     public function parseDump(string $string): array
     {
-        $baggage = new Baggage();
-
         $result['iata'] = $this->parseIata($string);
         $result['price'] = $this->parsePrice($string);
-        $result['baggage'] = $baggage->parseBaggageAllowance($string);
-        $result['carry_on_allowance'] = $baggage->parseCarryOnAllowance($string);
         return $result;
     }
 
@@ -29,27 +25,20 @@ class Pricing implements ParseDump
     public function parsePrice(string $string): ?array
     {
         $result = null;
-        $ticketPricePattern = '/LAST DATE TO TICKET(.*?)\*LOWEST FARE/s';
+        $ticketPricePattern = '/LAST DATE TO TICKET(.*?)\*TTL/s';
         preg_match($ticketPricePattern, $string, $ticketPriceMatches);
 
         if (isset($ticketPriceMatches[1]) && $ticketPrice = trim($ticketPriceMatches[1])) {
             $ticketPrices = explode("\n", $ticketPrice);
-            $totalRaw = end($ticketPrices);
             array_shift($ticketPrices);
-            array_pop($ticketPrices);
 
             foreach ($ticketPrices as $key => $value) {
                 if ($values = $this->prepareRow($value)) {
                     $result['tickets'][$key]['name'] = $values[0] ?? null;
-                    $result['tickets'][$key]['base'] = $values[1] ?? null;
-                    $result['tickets'][$key]['fee'] = $values[2] ?? null;
+                    $result['tickets'][$key]['fare'] = $values[1] ?? null;
+                    $result['tickets'][$key]['taxes'] = $values[2] ?? null;
                     $result['tickets'][$key]['amount'] = $values[3] ?? null;
                 }
-            }
-            if ($total = $this->prepareRow($totalRaw)) {
-                $result['priceTotal']['base'] = $total[1] ?? null;
-                $result['priceTotal']['fee'] = $total[2] ?? null;
-                $result['priceTotal']['amount'] = $total[3] ?? null;
             }
         }
         return $result;

@@ -28,7 +28,6 @@ class WorldSpanReservationService
         $result = [];
         $parserReservation = new Reservation();
         $rows = explode("\n", $string);
-        $failed = 0;
         if (!empty($itinerary) && $validation) {
             $itinerary = [];
         }
@@ -36,7 +35,7 @@ class WorldSpanReservationService
         foreach ($rows as $key => $row) {
             try {
                 if (empty($rawData = $parserReservation->parseRow($row))) {
-                    $result['failed'][] = $row;
+                    $result['failed']['parsed'][] = $row;
                     continue;
                 }
                 $parseData = $parserReservation->dataMapping($rawData);
@@ -80,11 +79,11 @@ class WorldSpanReservationService
                      'throwable' => $throwable,
                 ], 10),
                 'WorldSpanReservationService:parseReservation:Throwable');
-                $failed++;
+                $result['failed']['segment'][] = $row;
             }
         }
 
-        if ($validation && $failed > 0) {
+        if ($validation && isset($result['failed'])) {
             $result = [];
         }
 

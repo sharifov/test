@@ -8,13 +8,14 @@ use yii\helpers\Html;
 /* @var $dump string */
 /* @var string $type */
 /* @var string|null $typeDump */
+/* @var bool|null $prepareSegment */
 
-$this->title = 'Check Flight dump ';
+$this->title = 'Check Flight dump - GDS WorldSpan';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="check-flight-dump">
 
-    <h1><?= Html::encode($this->title) ?></h1>
+    <h3><?= Html::encode($this->title) ?></h3>
 
 
     <div class="col-md-4">
@@ -28,6 +29,10 @@ $this->params['breadcrumbs'][] = $this->title;
             ])
         ?>
         <?= Html::textarea('dump', $dump, ['rows' => 10, 'style' => 'width: 100%']) ?><br><br>
+
+        <?php echo Html::checkbox('prepare_segment', $prepareSegment,
+                    ['id' => 'prepare_segment', ]) ?> Reservation prepare segment<br><br>
+
         <?= Html::submitButton('Check Flight', ['class' => 'btn btn-primary']) ?>
         <?= Html::endForm() ?>
     </div>
