@@ -4,14 +4,14 @@ let PhoneWidgetSms = function () {
     let sendUrl = '';
     let userPhones = {};
     let statuses = {
-        1: "status-new",
-        2: "status-pending",
-        3: "status-process",
-        4: "status-cancel",
-        5: "status-done",
-        6: "status-error",
-        7: "status-sent",
-        8: "status-queued",
+        1: '<span class="pw-msg-item__status"> <i class="fa fa-check"></i> </span>', //new
+        2: '<span class="pw-msg-item__status"> <i class="fa fa-check"></i> </span>', //pending
+        3: '<span class="pw-msg-item__status"> <i class="fa fa-check"></i> </span>', //process
+        4: '<span class="pw-msg-item__status"> <i class="fa fa-check"></i> </span>', //cancel
+        5: '<span class="pw-msg-item__status pw-msg-item__status--delivered"> <i class="fa fa-check-double"></i> </span>', //done
+        6: '<span class="pw-msg-item__status pw-msg-item__status--error"> <i class="fa fa-exclamation-circle"></i> </span>', //error
+        7: '<span class="pw-msg-item__status"> <i class="fa fa-check"></i> </span>', //sent
+        8: '<span class="pw-msg-item__status"> <i class="fa fa-check"></i> </span>', //queued
     };
 
     function init(listUrlInit, sendUrlInit, userPhonesInit) {
@@ -24,37 +24,23 @@ let PhoneWidgetSms = function () {
         return userPhones;
     }
 
-    function setSmsIconStatus(smsStatus) {
-        console.log(smsStatus)
-        switch (getStatusClass(smsStatus).trim()) {
-            case statuses[5]:
-                return '<span class="pw-msg-item__status pw-msg-item__status--delivered"> <i class="fa fa-check-double"></i> </span>';
-            case statuses[6]:
-                return '<span class="pw-msg-item__status pw-msg-item__status--error"> <i class="fa fa-exclamation-circle"></i> </span>'
-            default:
-                return '<span class="pw-msg-item__status"> <i class="fa fa-check"></i> </span>';
+    function getSmsIconStatus(sms) {
+        //console.log(sms.status);
+        if (typeof statuses[sms.status] === 'undefined') {
+            return '';
         }
+        return statuses[sms.status];
+    }
+
+    function getSmsStatusId(sms) {
+        return 'web-phone-widget-sms-' + sms.id;
     }
 
     function updateStatus(sms) {
-        let container = $(document).find('.web-phone-widget-sms-' + sms.id + '-status');
-        clearStatusClass(container);
-        setSmsIconStatus(sms.status);
-        let statusClass = getStatusClass(sms.status);
-        if (statusClass) {
-            container.addClass(statusClass);
+        let container = $(document).find('.' + getSmsStatusId(sms));
+        if (container) {
+            container.html(getSmsIconStatus(sms));
         }
-    }
-
-    function getStatusClass(statusId) {
-        if (typeof statuses[statusId] === 'undefined') {
-            return '';
-        }
-        return ' ' + statuses[statusId];
-    }
-
-    function clearStatusClass(container) {
-        Object.values(statuses).forEach((status) => container.removeClass(status));
     }
 
     function encode(str) {
@@ -171,8 +157,6 @@ let PhoneWidgetSms = function () {
             typeClass = ' pw-msg-item--user';
         }
 
-
-
         return '<li class="messages-modal__msg-item pw-msg-item' + typeClass + '">' +
                     '<div class="pw-msg-item__avatar">' +
                         '<div class="agent-text-avatar">' +
@@ -183,9 +167,9 @@ let PhoneWidgetSms = function () {
                         '<div class="pw-msg-item__data">' +
                             '<span class="pw-msg-item__name">' + sms.name + '</span>' +
                             '<span class="pw-msg-item__timestamp">' + sms.time + '</span>' +
-                            setSmsIconStatus(sms.status) +
+                            '<span class="' + getSmsStatusId(sms) + '">' + getSmsIconStatus(sms) + '</span>' +
                         '</div>' +
-                        '<div class="pw-msg-item__msg-wrap' + getStatusClass(sms.status) + ' web-phone-widget-sms-' + sms.id + '-status">' +
+                        '<div class="pw-msg-item__msg-wrap">' +
                             '<p class="pw-msg-item__msg">' + sms.text + '</p>' +
                         '</div>' +
                     '</div>' +
