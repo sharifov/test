@@ -962,8 +962,8 @@ class CallController extends FController
 
     public function actionAjaxAcceptIncomingCall(): Response
 	{
-		$action = \Yii::$app->request->get('act');
-		$call_id = \Yii::$app->request->get('call_id');
+		$action = \Yii::$app->request->post('act');
+		$call_id = \Yii::$app->request->post('call_id');
 
 		$response = [
 			'error' => true,
