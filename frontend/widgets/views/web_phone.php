@@ -369,7 +369,9 @@ use yii\helpers\Html;
     function bindVolumeIndicators(connection) {
         connection.on('volume', function (inputVolume, outputVolume) {
             volumeIndicatorsChange(inputVolume, outputVolume);
-            PhoneWidgetCall.volumeIndicatorsChange(inputVolume, outputVolume)
+            if (typeof  PhoneWidgetCall === 'object') {
+                PhoneWidgetCall.volumeIndicatorsChange(inputVolume, outputVolume)
+            }
         });
     }
 
