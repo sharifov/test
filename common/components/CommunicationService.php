@@ -587,7 +587,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
             $data['recording_sid'] = $recordingSid;
         }
 
-        $response = $this->sendRequest('voice/update-recording-status', $data);
+        /*$response = $this->sendRequest('voice/update-recording-status', $data);
 
         if ($response->isOk) {
             if(isset($response->data['data']['response'])) {
@@ -607,7 +607,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
             $out['error'] = $response->content;
             \Yii::error(VarDumper::dumpAsString($out['error']),
             'CommunicationService::updateRecordingStatus:failRequest');
-        }
+        }*/
 
         return $out;
     }
