@@ -1232,8 +1232,18 @@ class Call extends \yii\db\ActiveRecord
                 $call->update();
 
 
-                $agent = 'seller' . $user_id;
-                $res = \Yii::$app->communication->callRedirect($call->c_call_sid, 'client', $call->c_from, $agent);
+//                $agent = 'seller' . $user_id;
+//                $res = \Yii::$app->communication->callRedirect($call->c_call_sid, 'client', $call->c_from, $agent);
+
+                $to = 'client:seller' . $user_id;
+                $res = \Yii::$app->communication->acceptConferenceCall(
+                    $call->c_call_sid,
+                    $to,
+                    $call->c_from,
+                    $call->c_to
+//                    $call->c_project_id,
+//                    $call->c_id
+                );
 
                 if ($res && isset($res['error']) && $res['error'] === false) {
                     if (isset($res['data']['is_error']) && $res['data']['is_error'] === true) {

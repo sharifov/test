@@ -19,6 +19,7 @@ class ConferenceSearch extends Conference
         return [
             [['cf_id', 'cf_cr_id', 'cf_status_id'], 'integer'],
             [['cf_sid', 'cf_options', 'cf_created_dt', 'cf_updated_dt'], 'safe'],
+            ['cf_friendly_name', 'string'],
         ];
     }
 
@@ -67,6 +68,7 @@ class ConferenceSearch extends Conference
             'cf_status_id' => $this->cf_status_id,
             'cf_created_dt' => $this->cf_created_dt,
             'cf_updated_dt' => $this->cf_updated_dt,
+            'cf_friendly_name' => $this->cf_friendly_name,
         ]);
 
         $query->andFilterWhere(['like', 'cf_sid', $this->cf_sid])

@@ -54,7 +54,7 @@ class Conference extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['cf_cr_id'], 'required'],
+//            [['cf_cr_id'], 'required'],
             [['cf_cr_id', 'cf_status_id', 'cf_recording_duration'], 'integer'],
             [['cf_options'], 'string'],
             [['cf_created_dt', 'cf_updated_dt'], 'safe'],
@@ -78,6 +78,7 @@ class Conference extends \yii\db\ActiveRecord
             'cf_options' => 'Options',
             'cf_created_dt' => 'Created Dt',
             'cf_updated_dt' => 'Updated Dt',
+            'cf_friendly_name' => 'Friendly name',
         ];
     }
 

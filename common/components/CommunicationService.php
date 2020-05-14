@@ -8,8 +8,13 @@
 
 namespace common\components;
 
+use common\models\CallQueue;
+use common\models\Conference;
+use common\models\ConferenceRoom;
+use sales\model\call\entity\conferenceCall\ConferenceCall;
 use Yii;
 use yii\base\Component;
+use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\httpclient\Client;
 use yii\httpclient\CurlTransport;
@@ -710,6 +715,33 @@ class CommunicationService extends Component implements CommunicationServiceInte
         } else {
             $out['error'] = $response->content;
             \Yii::error(VarDumper::dumpAsString($out['error']), 'Component:CommunicationService::callRedirect');
+        }
+
+        return $out;
+    }
+
+    public function acceptConferenceCall($sid, $to, $from, $to_parent_call)
+    {
+        $out = ['error' => false, 'data' => []];
+
+        $data = [
+            'call_sid' => $sid,
+            'to' => $to,
+            'from' => $from,
+            'to_parent_call' => $to_parent_call,
+        ];
+
+        $response = $this->sendRequest('twilio-jwt/accept-conference-call', $data);
+
+        if ($response->isOk) {
+            if(isset($response->data['data'])) {
+                $out['data'] = $response->data['data'];
+            } else {
+                $out['error'] = 'Not found in response array data key [data]';
+            }
+        } else {
+            $out['error'] = $response->content;
+            \Yii::error(VarDumper::dumpAsString($out['error']), 'Component:CommunicationService::acceptConference');
         }
 
         return $out;

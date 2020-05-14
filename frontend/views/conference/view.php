@@ -32,6 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'cf_id',
             'cf_cr_id',
             'cf_sid',
+            'cf_friendly_name',
             'cf_status_id',
             'cf_options:ntext',
             'cf_created_dt',
