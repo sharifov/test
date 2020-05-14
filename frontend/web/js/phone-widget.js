@@ -261,7 +261,7 @@ $(document).ready(function() {
     //
     // });
 
-    $('.call-pane__end-call').on('click', function(e) {
+    $(document).on('click', '.call-pane__end-call', function(e) {
         e.preventDefault();
 
         if (device) {

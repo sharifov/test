@@ -149,11 +149,17 @@ var PhoneWidgetCall = function () {
 
     function showIncomingCallPanel(phone, name)
     {
-        $('#tab-phone .call-panel').removeClass('is_active');
-        $('#tab-phone .call-pane-initial').addClass('is_active');
+        $('#tab-phone .call-pane-initial').removeClass('is_active');
+        $('#tab-phone .call-pane-incoming').addClass('is_active');
         $('#btn-accept-call').find('i').removeClass('fa fa-spinner fa-spin').addClass('fas fa-check');
         $('.call-pane-incoming .contact-info-card__name').html(name);
         $('.call-pane-incoming .contact-info-card__call-type').html(phone);
+    }
+
+    function showCallingPanel()
+    {
+        $('#tab-phone .call-pane-initial').removeClass('is_active');
+        $('#tab-phone .call-pane-calling').addClass('is_active');
     }
 
     function acceptCallBtnEvent(options)
@@ -170,7 +176,6 @@ var PhoneWidgetCall = function () {
                     btn.find('i').removeClass('fas fa-check').addClass('fa fa-spinner fa-spin');
                 },
                 success: function (data) {
-                    console.log(data);
                     if (data.error) {
                          new PNotify({
                             title: "Error",
@@ -178,6 +183,8 @@ var PhoneWidgetCall = function () {
                             text: data.message,
                             hide: true
                         });
+                    } else {
+                        showCallingPanel();
                     }
                 },
                 complete: function () {
