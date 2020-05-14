@@ -6,6 +6,7 @@ var PhoneWidgetCall = function () {
         muteBtnEvent();
         transferCallBtnEvent(options);
         acceptCallBtnEvent(options);
+        changeUserCallStatusEvent(options);
     }
 
     function initCall(selectedNumber)
@@ -33,6 +34,22 @@ var PhoneWidgetCall = function () {
         $('.call-pane-calling').removeClass('is_active');
         $('.call-pane').addClass('is_active');
         $('.call-in-action__time').hide();
+    }
+
+    function changeUserCallStatusEvent(options)
+    {
+        $(document).on('change', '#number-status3', function () {
+            var type_id = $(this).prop('checked') ? 1 : 2;
+            $.ajax({
+                type: 'post',
+                data: {'type_id': type_id},
+                url: options.callStatusUrl,
+                success: function (data) {},
+                error: function (error) {
+                    console.error('Error: ' + error);
+                }
+            });
+        });
     }
 
     // function bindVolumeIndicators(connection)

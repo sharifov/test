@@ -1,6 +1,7 @@
 <?php
 
 /** @var View $this */
+/** @var \common\models\UserCallStatus $userCallStatus */
 
 ?>
 <div class="phone-widget__tab is_active" id="tab-phone">
@@ -11,7 +12,7 @@
         <div class="custom-phone-select"></div>
       </div>
       <div class="number-toggle">
-        <input type="checkbox" id="number-status3">
+        <input type="checkbox" id="number-status3" <?= ($userCallStatus->isReady() ? 'checked' : '') ?>>
         <label for="number-status3"></label>
       </div>
     </div>
@@ -304,10 +305,12 @@
 <?php
 $ajaxCallRedirectGetAgents = Url::to(['phone/ajax-call-get-agents']);
 $ajaxAcceptIncomingCall = Url::to(['call/ajax-accept-incoming-call']);
+$callStatusUrl = \yii\helpers\Url::to(['/user-call-status/update-status']);
 $js = <<<JS
 PhoneWidgetCall.init({
     'ajaxCallRedirectGetAgents': '{$ajaxCallRedirectGetAgents}',
     'acceptCallUrl': '{$ajaxAcceptIncomingCall}',
+    'callStatusUrl': '{$callStatusUrl}'
 });
 
 JS;

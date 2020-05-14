@@ -6,6 +6,7 @@ use yii\web\View;
 
 /* @var $userPhoneProject string */
 /* @var $formattedPhoneProject string */
+/* @var $userCallStatus \common\models\UserCallStatus */
 /* @var $this View */
 /** @var array $userPhones */
 /** @var array $userEmails */
@@ -17,6 +18,7 @@ NewWebPhoneAsset::register($this);
 	'showWidgetContent' => !empty($userPhoneProject),
 	'userPhones' => $userPhones,
 	'userEmails' => $userEmails,
+	'userCallStatus' => $userCallStatus
 ]) ?>
 <?= $this->render('partial/_phone_widget_icon') ?>
 
