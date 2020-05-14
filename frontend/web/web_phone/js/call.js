@@ -115,14 +115,14 @@ var PhoneWidgetCall = function () {
 
     function refreshCallStatus(obj)
     {
-        if ('isIn' in obj && obj.isIn) {
-            initIncomingCall(obj);
-        }
-
         if (obj.status === 'In progress') {
             obj.status = 'On Call';
             $('.call-pane__call-btns').removeClass('is-pending').addClass('is-on-call');
-        }else {
+        }else if(obj.status === 'Ringing') {
+            if ('isIn' in obj && obj.isIn) {
+                initIncomingCall(obj);
+            }
+        } else {
             $('.call-pane__call-btns').removeClass('is-on-call');
         }
         $('.call-in-action__text').html(obj.status);
