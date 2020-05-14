@@ -305,14 +305,14 @@
 <?php
 $ajaxCallRedirectGetAgents = Url::to(['phone/ajax-call-get-agents']);
 $ajaxAcceptIncomingCall = Url::to(['call/ajax-accept-incoming-call']);
-$callStatusUrl = \yii\helpers\Url::to(['/user-call-status/update-status']);
+$callStatusUrl = Url::to(['/user-call-status/update-status']);
 $ajaxSaveCallUrl = Url::to(['phone/ajax-save-call']);
 $js = <<<JS
 PhoneWidgetCall.init({
     'ajaxCallRedirectGetAgents': '{$ajaxCallRedirectGetAgents}',
     'acceptCallUrl': '{$ajaxAcceptIncomingCall}',
     'callStatusUrl': '{$callStatusUrl}',
-    'ajaxSaveCallUrl': {$ajaxSaveCallUrl}
+    'ajaxSaveCallUrl': '{$ajaxSaveCallUrl}'
 });
 
 JS;
