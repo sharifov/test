@@ -290,7 +290,7 @@ use yii\helpers\Html;
    // "use strict";
 
     var device;
-    var connection;
+    var window.connection;
 
     const speakerDevices = document.getElementById('speaker-devices');
     const ringtoneDevices = document.getElementById('ringtone-devices');
