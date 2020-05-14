@@ -1,9 +1,8 @@
 <?php
 
-namespace sales\services\parsingDump\worldSpan;
+namespace sales\services\parsingDump\Sabre;
 
 use sales\helpers\app\AppHelper;
-use sales\services\parsingDump\ParseDump;
 
 /**
  * Class Pricing
@@ -23,7 +22,7 @@ class Pricing implements ParseDump
                 $result['price'] = $prices;
             }
         } catch (\Throwable $throwable) {
-            \Yii::error(AppHelper::throwableFormatter($throwable), 'WorldSpan:Pricing:parseDump:Throwable');
+            \Yii::error(AppHelper::throwableFormatter($throwable), 'Sabre:Pricing:parseDump:Throwable');
         }
         return $result;
     }

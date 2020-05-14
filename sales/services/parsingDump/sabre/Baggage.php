@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\services\parsingDump\worldSpan;
+namespace sales\services\parsingDump\Sabre;
 
 use sales\helpers\app\AppHelper;
 use sales\services\parsingDump\ParseDump;
@@ -25,7 +25,7 @@ class Baggage implements ParseDump
                 $result['carry_on_allowance'] = $carryOnAllowance;
             }
         } catch (\Throwable $throwable) {
-            \Yii::error(AppHelper::throwableFormatter($throwable), 'WorldSpan:Baggage:parseDump:Throwable');
+            \Yii::error(AppHelper::throwableFormatter($throwable), 'Sabre:Baggage:parseDump:Throwable');
         }
         return $result;
     }

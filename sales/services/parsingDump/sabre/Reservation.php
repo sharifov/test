@@ -1,9 +1,8 @@
 <?php
 
-namespace sales\services\parsingDump\worldSpan;
+namespace sales\services\parsingDump\Sabre;
 
 use sales\helpers\app\AppHelper;
-use sales\services\parsingDump\ParseDump;
 
 /**
  * Class Reservation
@@ -27,7 +26,7 @@ class Reservation implements ParseDump
                 $parseData = $this->dataMapping($rawData);
                 $result['reservation'][$parseData['index']] = $parseData;
             } catch (\Throwable $throwable) {
-                \Yii::error(AppHelper::throwableFormatter($throwable), 'WorldSpan:Reservation:parseDump:Throwable');
+                \Yii::error(AppHelper::throwableFormatter($throwable), 'Sabre:Reservation:parseDump:Throwable');
             }
         }
         return $result;

@@ -1,6 +1,6 @@
 <?php
 
-use sales\services\parsingDump\worldSpan\WorldSpan;
+use sales\services\parsingDump\worldSpan\Sabre;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -21,8 +21,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="col-md-4">
         <?= Html::beginForm() ?>
         <?= Html::dropDownList('type', $type,
-            WorldSpan::TYPE_MAP,
-            [
+                               Sabre::TYPE_MAP,
+                               [
                 'class' => 'form-control',
                 'style' => 'margin-bottom: 12px;',
             ])

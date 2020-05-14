@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\services\parsingDump\worldSpan;
+namespace sales\services\parsingDump;
 
 /**
  * Interface ParseDump
