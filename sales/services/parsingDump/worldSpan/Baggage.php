@@ -36,7 +36,7 @@ class Baggage implements ParseDump
         preg_match($carryPattern, $string, $carryMatches);
 
         if (isset($carryMatches[1])) {
-            $rowDelimPatten = '[A-Z]{2}\s[A-Z]{6}\s{2}\d{1}PC';
+            $rowDelimPatten = '[A-Z]{2}\s[A-Z]{6}\s{1,2}\d{1}PC';
             $itemPattern = '/' . $rowDelimPatten . '(.*?)' . $rowDelimPatten . '/s';
             preg_match_all($itemPattern, $carryMatches[1], $itemMatches);
 
@@ -56,7 +56,10 @@ class Baggage implements ParseDump
                     $itemRows = explode("\n", $itemRow);
 
                     foreach ($itemRows as $keyBag => $valueBag) {
-                        preg_match("/BAG\s(\d{1})\s-\s{2}(.*?)\s{7}(.*?)\s{3}/s", $valueBag, $bagMatches);
+                        preg_match("/BAG\s(\d{1})
+                            \s-\s+(NO\sFEE)
+                            \s+(.*?)$
+                            /xs", $valueBag, $bagMatches);
 
                         if (isset($bagMatches[3])) {
                             $result[$key]['bag'][$keyBag]['price'] = isset($bagMatches[2]) ? trim($bagMatches[2]) : null;
@@ -87,14 +90,6 @@ class Baggage implements ParseDump
             $items = preg_split('/' . $rowDelimPatten . '/', $baggageMatches[1]);
             array_shift($items);
 
-/*
-            \yii\helpers\VarDumper::dump([
-                     $items,
-                    $string,
-                ], 10, true); exit();
-             */
-                /* FOR DEBUG:: must by remove */
-
             if ($codeMatches[0]) {
                 foreach ($codeMatches[0] as $key => $value) {
 
@@ -111,15 +106,20 @@ class Baggage implements ParseDump
                             continue;
                         }
                         // BAG 1 -  75.00 USD    UPTO50LB/23KG AND UPTO62LI/158LCM
-                        // BAG 1 - NO FEE UPTO50LB/23KG AND UPTO81LI/208LCM
-
-                        preg_match("/BAG\s(\d{1})\s-\s{1,2}([0-9]*\.[0-9]*)\s([A-Z]{2,3})\s{4}(.*?)\sAND\s(.*?)$/s", $valueBag, $bagMatches);
+                        // BAG 2 - NO FEE UPTO50LB/23KG AND UPTO81LI/208LCM
+                        preg_match("/BAG\s(\d{1})
+                                \s-\s+
+                                ((NO\sFEE)|(\d*\.\d*)\s*([A-Z]{2,3}))                                
+                                \s+(.*?)
+                                \sAND\s(.*?)$
+                                /xs", $valueBag, $bagMatches);
 
                         if (!empty($bagMatches)) {
-                            $result[$key]['bag'][$keyBag]['price'] = isset($bagMatches[2]) ? trim($bagMatches[2]) : null;
-                            $result[$key]['bag'][$keyBag]['currency'] = isset($bagMatches[3]) ? trim($bagMatches[3]) : null;
-                            $result[$key]['bag'][$keyBag]['allow_max_weight'] = isset($bagMatches[4]) ? trim($bagMatches[4]) : null;
-                            $result[$key]['bag'][$keyBag]['allow_max_size'] = isset($bagMatches[5]) ? trim($bagMatches[5]) : null;
+                            $price = !empty($bagMatches[4]) ? $bagMatches[4] : $bagMatches[3];
+                            $result[$key]['bag'][$keyBag]['price'] = trim($price);
+                            $result[$key]['bag'][$keyBag]['currency'] = isset($bagMatches[5]) ? trim($bagMatches[5]) : null;
+                            $result[$key]['bag'][$keyBag]['allow_max_weight'] = isset($bagMatches[6]) ? trim($bagMatches[6]) : null;
+                            $result[$key]['bag'][$keyBag]['allow_max_size'] = isset($bagMatches[7]) ? trim($bagMatches[7]) : null;
                         }
                     }
                 }
