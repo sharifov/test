@@ -288,7 +288,7 @@ class CouponController extends FController
 							}
 						}
 
-						Yii::error(VarDumper::dumpAsString($mailResponse), 'CouponController::actionSend::Debug');
+						// Yii::error(VarDumper::dumpAsString($mailResponse), 'CouponController::actionSend::Debug');
 
 						if (isset($mailResponse['error']) && $mailResponse['error']) {
 							$previewEmailForm->addError('error', 'Error: Email Message has not been sent to ' .  $mail->e_email_to);
