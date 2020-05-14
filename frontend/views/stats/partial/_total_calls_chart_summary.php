@@ -10,20 +10,20 @@ $totalRows = count($totalCallsDbData) ?: 1;
 $inRecDuration = array_sum(ArrayHelper::getColumn($totalCallsDbData, 'inc_dur_count'));
 $outRecDuration = array_sum(ArrayHelper::getColumn($totalCallsDbData, 'out_dur_count'));
 
-$totalCalls = array_sum(ArrayHelper::getColumn($totalCallsDbData, 'total_calls'));
-$totalCallsAvg = $totalCalls / $totalRows;
-$totalRecDuration = array_sum(ArrayHelper::getColumn($totalCallsDbData, 'total_rec_duration'));
-$totalRecDurationAvg = $totalRecDuration / (($inRecDuration + $outRecDuration) ?: 1);
-
 $totalIncomingCalls = array_sum(ArrayHelper::getColumn($totalCallsDbData, 'incoming'));
 $totalIncomingCallsAvg = $totalIncomingCalls / $totalRows;
 $totalIncomingRecDuration = array_sum(ArrayHelper::getColumn($totalCallsDbData, 'in_rec_duration'));
-$totalIncomingRecDurationAvg = $totalIncomingRecDuration / ($inRecDuration ?: 1);
+$totalIncomingRecDurationAvg = $totalIncomingRecDuration / ($totalIncomingCalls ?: 1);
 
 $totalOutgoingCalls = array_sum(ArrayHelper::getColumn($totalCallsDbData, 'outgoing'));
 $totalOutgoingCallsAvg = $totalOutgoingCalls / $totalRows;
 $totalOutgoingRecDuration = array_sum(ArrayHelper::getColumn($totalCallsDbData, 'out_rec_duration'));
-$totalOutgoingRecDurationAvg = $totalOutgoingRecDuration / ($outRecDuration ?: 1);
+$totalOutgoingRecDurationAvg = $totalOutgoingRecDuration / ($totalOutgoingCalls ?: 1);
+
+$totalCalls = array_sum(ArrayHelper::getColumn($totalCallsDbData, 'total_calls'));
+$totalCallsAvg = $totalCalls / $totalRows;
+$totalRecDuration = array_sum(ArrayHelper::getColumn($totalCallsDbData, 'total_rec_duration'));
+$totalRecDurationAvg = $totalRecDuration / (($totalIncomingCalls + $totalOutgoingCalls) ?: 1);
 
 ?>
 <div class="row" style="margin-top: 40px;">
