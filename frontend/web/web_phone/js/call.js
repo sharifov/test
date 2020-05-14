@@ -32,7 +32,7 @@ var PhoneWidgetCall = function () {
         $('.phone-widget-icon').removeClass('is-pending');
         $('.call-pane__call-btns').removeClass('is-on-call');
         $('.call-pane__call-btns').removeClass('is-pending');
-        $('.call-pane-calling').removeClass('is_active');
+        $('.call-pane-initial').removeClass('is_active');
         $('.call-pane').addClass('is_active');
         $('.call-in-action__time').hide();
     }
