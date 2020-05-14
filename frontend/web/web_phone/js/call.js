@@ -135,6 +135,7 @@ var PhoneWidgetCall = function () {
         openCallTab();
         if (typeof obj === 'object' && 'phoneFrom' in obj) {
             $('#btn-accept-call').attr('data-call-id', obj.cua_call_id);
+            $('#btn-accept-call').attr('data-from-internal', obj.fromInternal | false);
             showIncomingCallPanel(obj.phoneFrom, obj.name || '');
         }
     }
@@ -171,11 +172,9 @@ var PhoneWidgetCall = function () {
     {
         $(document).on('click', '#btn-accept-call', function () {
             var btn = $(this);
+            var fromInternal = btn.attr('data-from-internal');
 
-            console.log('fromInternal' in options);
-            console.log(options.fromInternal);
-            console.log(window.connection);
-            if ('fromInternal' in options && options.fromInternal && window.connection) {
+            if (fromInternal && window.connection) {
                 window.connection.accept();
             } else {
                 $.ajax({
