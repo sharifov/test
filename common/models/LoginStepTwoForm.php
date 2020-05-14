@@ -67,9 +67,12 @@ class LoginStepTwoForm extends Model
     public function login(): bool
     {
         if($this->validate() && $user = Employee::findOne(['email' => $this->userEmail])) {
-            $this->saveDataAfterLogin($user);
-
-            return Yii::$app->user->login($user, $this->rememberMe ? 3600 * 24 * 30 : 0);
+            $isLogin = Yii::$app->user->login($user, $this->rememberMe ? 3600 * 24 * 30 : 0);
+            if ($isLogin) {
+                LoginForm::sendWsIdentityCookie(Yii::$app->user->identity, $this->rememberMe ? 3600 * 24 * 30 : 0);
+                $this->saveDataAfterLogin($user);
+            }
+            return $isLogin;
         }
         return false;
     }
