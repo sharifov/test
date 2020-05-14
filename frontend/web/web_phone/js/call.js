@@ -172,6 +172,9 @@ var PhoneWidgetCall = function () {
         $(document).on('click', '#btn-accept-call', function () {
             var btn = $(this);
 
+            console.log('fromInternal' in options);
+            console.log(options.fromInternal);
+            console.log(window.connection);
             if ('fromInternal' in options && options.fromInternal && window.connection) {
                 window.connection.accept();
             } else {
