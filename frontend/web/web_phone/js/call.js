@@ -54,7 +54,7 @@ var PhoneWidgetCall = function () {
 
     function changeUserCallStatusEvent(options)
     {
-        $(document).on('change', '#number-status3', function () {
+        $(document).on('change', '.call-status-switcher', function () {
             var type_id = $(this).prop('checked') ? 1 : 2;
             $.ajax({
                 type: 'post',

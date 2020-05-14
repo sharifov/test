@@ -12,7 +12,7 @@
         <div class="custom-phone-select"></div>
       </div>
       <div class="number-toggle">
-        <input type="checkbox" id="number-status3" <?= ($userCallStatus->isReady() ? 'checked' : '') ?>>
+        <input type="checkbox" id="number-status3" class="call-status-switcher" <?= ($userCallStatus->isReady() ? 'checked' : '') ?>>
         <label for="number-status3"></label>
       </div>
     </div>
@@ -150,7 +150,7 @@
         <div class="custom-phone-select"></div>
       </div>
       <div class="number-toggle">
-        <input type="checkbox" id="number-status2">
+        <input type="checkbox" id="number-status2" class="call-status-switcher" <?= ($userCallStatus->isReady() ? 'checked' : '') ?>>
         <label for="number-status2"></label>
       </div>
     </div>
