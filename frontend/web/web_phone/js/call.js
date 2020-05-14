@@ -176,6 +176,8 @@ var PhoneWidgetCall = function () {
 
             if (fromInternal && window.connection) {
                 window.connection.accept();
+                showCallingPanel();
+                $('#call-controls2').hide();
             } else {
                 $.ajax({
                     type: 'post',
