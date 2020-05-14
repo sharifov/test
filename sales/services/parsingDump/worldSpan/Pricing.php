@@ -17,8 +17,10 @@ class Pricing implements ParseDump
     {
         $result = [];
         try {
-            $result['iata'] = $this->parseIata($string);
-            $result['price'] = $this->parsePrice($string);
+            if ($prices = $this->parsePrice($string)) {
+                $result['iata'] = $this->parseIata($string);
+                $result['price'] = $prices;
+            }
         } catch (\Throwable $throwable) {
             \Yii::error(AppHelper::throwableFormatter($throwable), 'WorldSpan:Pricing:parseDump:Throwable');
         }

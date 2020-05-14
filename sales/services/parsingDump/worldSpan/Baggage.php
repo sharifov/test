@@ -17,8 +17,12 @@ class Baggage implements ParseDump
     {
         $result = [];
         try {
-            $result['baggage'] = $this->parseBaggageAllowance($string);
-            $result['carry_on_allowance'] = $this->parseCarryOnAllowance($string);
+            if ($baggage = $this->parseBaggageAllowance($string)) {
+                $result['baggage'] = $baggage;
+            }
+            if ($carryOnAllowance = $this->parseCarryOnAllowance($string)) {
+                $result['carry_on_allowance'] = $carryOnAllowance;
+            }
         } catch (\Throwable $throwable) {
             \Yii::error(AppHelper::throwableFormatter($throwable), 'WorldSpan:Baggage:parseDump:Throwable');
         }

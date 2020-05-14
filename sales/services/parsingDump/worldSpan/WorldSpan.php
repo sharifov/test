@@ -10,14 +10,16 @@ class WorldSpan
     public CONST TYPE_RESERVATION = 'Reservation';
     public CONST TYPE_PRICING = 'Pricing';
     public CONST TYPE_BAGGAGE = 'Baggage';
+    public CONST TYPE_ALL = 'All';
 
     public CONST TYPE_MAP = [
+        self::TYPE_ALL => 'All',
         self::TYPE_RESERVATION => 'Reservation',
         self::TYPE_PRICING => 'Pricing',
         self::TYPE_BAGGAGE => 'Baggage',
     ];
 
-    public CONST DEFAULT_TYPE = self::TYPE_RESERVATION;
+    public CONST DEFAULT_TYPE = self::TYPE_ALL;
 
     /**
      * @param string $dump
@@ -30,13 +32,21 @@ class WorldSpan
                 $typeDump = self::TYPE_PRICING;
             } elseif (stripos($dump, 'BAGGAGE ALLOWANCE') !== false) {
                 $typeDump = self::TYPE_BAGGAGE;
+            } elseif (self::findTypeReservation($dump)) {
+                $typeDump = self::TYPE_RESERVATION;
             } else {
-                 $typeDump = self::TYPE_RESERVATION;
+                $typeDump = self::DEFAULT_TYPE;
             }
         } catch (\Throwable $throwable) {
             $typeDump = self::DEFAULT_TYPE;
         }
         return $typeDump;
+    }
+
+    private static function findTypeReservation(string $dump): bool
+    {
+        preg_match(Reservation::getPatternRow(), $dump, $matches);
+        return (!empty($matches));
     }
 
     /**
@@ -52,6 +62,4 @@ class WorldSpan
         }
         return new Reservation();
     }
-
-
 }

@@ -24,7 +24,7 @@ $this->params['breadcrumbs'][] = $this->title;
             WorldSpan::TYPE_MAP,
             [
                 'class' => 'form-control',
-                'style' => 'margin-bottom: 12px; display:none;',
+                'style' => 'margin-bottom: 12px;',
                 'prompt' => '---',
             ])
         ?>

@@ -4,6 +4,9 @@ namespace frontend\controllers;
 
 use common\models\Quote;
 
+use sales\services\parsingDump\worldSpan\Baggage;
+use sales\services\parsingDump\worldSpan\Pricing;
+use sales\services\parsingDump\worldSpan\Reservation;
 use sales\services\parsingDump\worldSpan\WorldSpan;
 use sales\services\parsingDump\WorldSpanReservationService;
 use Yii;
@@ -110,11 +113,14 @@ class ToolsController extends FController
         if ($dump) {
             $typeDump = $type !== '' ? $type : WorldSpan::getParserType($dump);
 
-            $obj = WorldSpan::initClass($typeDump);
-
             if ($typeDump === WorldSpan::TYPE_RESERVATION && $prepareSegment === 1) {
                 $data = (new WorldSpanReservationService())->parseReservation($dump, false);
+            } elseif ($typeDump === WorldSpan::TYPE_ALL) {
+                $data[] = (new Reservation())->parseDump($dump);
+                $data[] = (new Pricing())->parseDump($dump);
+                $data[] = (new Baggage())->parseDump($dump);
             } else {
+                $obj = WorldSpan::initClass($typeDump);
                 $data = $obj->parseDump($dump);
             }
         }

@@ -24,7 +24,7 @@ class Reservation implements ParseDump
                     continue;
                 }
                 $parseData = $this->dataMapping($rawData);
-                $result['parseData'][$parseData['index']] = $parseData;
+                $result['reservation'][$parseData['index']] = $parseData;
             } catch (\Throwable $throwable) {
                 \Yii::error(AppHelper::throwableFormatter($throwable), 'WorldSpan:Reservation:parseDump:Throwable');
             }
@@ -39,17 +39,7 @@ class Reservation implements ParseDump
     public function parseRow(string $row): array
     {
         $row = trim($row);
-        $pattern = '/^
-            (\d{1,2}) # index
-            (\s{1}|\*)([A-Z]{2}) # Airline
-            \s*(\d{2,4})([A-Z]{1}) # Flight number + Booking Class
-            \s{1}(\d{1,2})([A-Z]{3}) # Departure Date
-            \s{1}([A-Z]{2}) # Departure Day of the week
-            \s{1}([A-Z]{3})([A-Z]{3}) # Airport codes from+to
-            \s{1}.{3}\s{1,2}(\d{2})(\d{2}) # Departure Time HHMM 
-            \s{1,2}(\d{2})(\d{2}) # Arrival Time HHMM  
-            (.*?)\/\X|\/\O\ # Arrival offset           
-            /x';
+        $pattern = self::getPatternRow();
 
         preg_match($pattern, $row, $matches);
         preg_match('/([A-Z]{1,2})\z/', $row, $matchesCabin);
@@ -84,5 +74,23 @@ class Reservation implements ParseDump
         $result['arrival_offset'] = trim($data[15]);
         $result['cabin'] = trim($data[16]);
         return $result;
+    }
+
+    /**
+     * @return string
+     */
+    public static function getPatternRow(): string
+    {
+        return '/^
+            (\d{1,2}) # index
+            (\s{1}|\*)([A-Z]{2}) # Airline
+            \s*(\d{2,4})([A-Z]{1}) # Flight number + Booking Class
+            \s{1}(\d{1,2})([A-Z]{3}) # Departure Date
+            \s{1}([A-Z]{2}) # Departure Day of the week
+            \s{1}([A-Z]{3})([A-Z]{3}) # Airport codes from+to
+            \s{1}.{3}\s{1,2}(\d{2})(\d{2}) # Departure Time HHMM 
+            \s{1,2}(\d{2})(\d{2}) # Arrival Time HHMM  
+            (.*?)\/\X|\/\O\ # Arrival offset           
+            /x';
     }
 }
