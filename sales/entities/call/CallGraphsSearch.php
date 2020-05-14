@@ -311,7 +311,7 @@ class CallGraphsSearch extends CallLogSearch
 				'created' => SORT_ASC,
 			];
 		}
-		$query->orderBy('created_formatted');
+		$query->orderBy($order);
 
 		return new SqlDataProvider(['sql' => $query->createCommand()->rawSql, 'pagination' => false]);
 	}
