@@ -17,8 +17,10 @@ class Pricing implements ParseDump
     {
         $result = [];
         try {
-            $result['iata'] = $this->parseIata($string);
-            $result['price'] = $this->parsePrice($string);
+            if ($prices = $this->parsePrice($string)) {
+                $result['iata'] = $this->parseIata($string);
+                $result['price'] = $prices;
+            }
         } catch (\Throwable $throwable) {
             \Yii::error(AppHelper::throwableFormatter($throwable), 'WorldSpan:Pricing:parseDump:Throwable');
         }
@@ -32,7 +34,7 @@ class Pricing implements ParseDump
     public function parsePrice(string $string): ?array
     {
         $result = null;
-        $ticketPricePattern = '/LAST DATE TO TICKET(.*?)\*TTL/s';
+        $ticketPricePattern = '/TICKET (.*?)\*TTL/s';
         preg_match($ticketPricePattern, $string, $ticketPriceMatches);
 
         if (isset($ticketPriceMatches[1]) && $ticketPrice = trim($ticketPriceMatches[1])) {

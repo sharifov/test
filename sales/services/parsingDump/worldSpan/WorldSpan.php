@@ -10,14 +10,16 @@ class WorldSpan
     public CONST TYPE_RESERVATION = 'Reservation';
     public CONST TYPE_PRICING = 'Pricing';
     public CONST TYPE_BAGGAGE = 'Baggage';
+    public CONST TYPE_ALL = 'All';
 
     public CONST TYPE_MAP = [
+        self::TYPE_ALL => 'All',
         self::TYPE_RESERVATION => 'Reservation',
         self::TYPE_PRICING => 'Pricing',
         self::TYPE_BAGGAGE => 'Baggage',
     ];
 
-    public CONST DEFAULT_TYPE = self::TYPE_RESERVATION;
+    public CONST DEFAULT_TYPE = self::TYPE_ALL;
 
     /**
      * @param string $dump
@@ -26,14 +28,12 @@ class WorldSpan
     public static function getParserType(string $dump): string
     {
         try {
-            $row = explode("\n", $dump)[0];
-
-            if (stripos($row, 'BAGGAGE ALLOWANCE') !== false) {
-                $typeDump = self::TYPE_BAGGAGE;
-            } elseif (self::getTypeReservationByFirstString($row)) {
-                $typeDump = self::TYPE_RESERVATION;
-            } elseif (self::getTypePricingByFirstString($row)) {
+            if (stripos($dump, 'TICKET') !== false) {
                 $typeDump = self::TYPE_PRICING;
+            } elseif (stripos($dump, 'BAGGAGE ALLOWANCE') !== false) {
+                $typeDump = self::TYPE_BAGGAGE;
+            } elseif (self::findTypeReservation($dump)) {
+                $typeDump = self::TYPE_RESERVATION;
             } else {
                 $typeDump = self::DEFAULT_TYPE;
             }
@@ -43,19 +43,9 @@ class WorldSpan
         return $typeDump;
     }
 
-    /**
-     * @param string $row
-     * @return bool
-     */
-    private static function getTypeReservationByFirstString(string $row): bool
+    private static function findTypeReservation(string $dump): bool
     {
-        preg_match("/^(\d{1})\s/s", $row, $matches);
-        return (!empty($matches));
-    }
-
-    private static function getTypePricingByFirstString(string $row): bool
-    {
-        preg_match("/^(\d{1}[A-Z])/s", $row, $matches);
+        preg_match(Reservation::getPatternRow(), $dump, $matches);
         return (!empty($matches));
     }
 
@@ -72,6 +62,4 @@ class WorldSpan
         }
         return new Reservation();
     }
-
-
 }
