@@ -2,14 +2,12 @@
 
 namespace sales\entities\call;
 
-use common\models\Call;
 use common\models\Employee;
-use common\models\query\CallQuery;
-use common\models\search\CallSearch;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\callLog\entity\callLog\search\CallLogSearch;
 use sales\model\callLog\entity\callLog\CallLogType;
 use sales\model\callLog\entity\callLog\CallLogStatus;
+use sales\model\callLog\entity\callLog\CallLogCategory;
 use common\models\UserGroupAssign;
 use kartik\daterange\DateRangeBehavior;
 use Yii;
@@ -36,6 +34,13 @@ use DateTime;
  * @property array $projectIds
  * @property array $dep_ids
  * @property array $userGroupIds
+ * @property mixed $notAnsweredOutgoingCallsQuery
+ * @property mixed $completeOutgoingCallsQuery
+ * @property mixed $notAnsweredIncomingCallsQuery
+ * @property string|mixed $defaultDateFormat
+ * @property mixed $completeIncomingCallsQuery
+ * @property string $partitionsByYears
+ * @property \yii\data\SqlDataProvider $totalCalls
  * @property string $timeZone
  */
 class CallGraphsSearch extends CallLogSearch
@@ -321,7 +326,8 @@ class CallGraphsSearch extends CallLogSearch
 				'coalesce(0) as outgoing_duration_sum'
 			])
 			->andWhere(['cl_type_id' => CallLogType::IN])
-			->andWhere(['cl_status_id' => CallLogStatus::COMPLETE]);
+			->andWhere(['cl_status_id' => CallLogStatus::COMPLETE])
+            ->andWhere(['<>','cl_category_id', CallLogCategory::TRANSFER_CALL]);
 
 		if ($this->recordingDurationFrom) {
 			$query->andWhere(['>=', 'cl_duration', $this->recordingDurationFrom]);
@@ -344,7 +350,8 @@ class CallGraphsSearch extends CallLogSearch
 				'coalesce(0) as outgoing_duration_sum'
 			])
 			->andWhere(['cl_type_id' => CallLogType::IN])
-			->andWhere(['cl_status_id' => [CallLogStatus::BUSY, CallLogStatus::NOT_ANSWERED]]);
+			->andWhere(['cl_status_id' => [CallLogStatus::BUSY, CallLogStatus::NOT_ANSWERED]])
+            ->andWhere(['<>','cl_category_id', CallLogCategory::TRANSFER_CALL]);
 
 		if ($this->recordingDurationFrom) {
 			$query->andWhere(['>=', 'cl_duration', $this->recordingDurationFrom]);
@@ -367,7 +374,8 @@ class CallGraphsSearch extends CallLogSearch
 				'coalesce(sum(cl_duration), 0) as outgoing_duration_sum'
 			])
 			->andWhere(['cl_type_id' => CallLogType::OUT])
-			->andWhere(['cl_status_id' => CallLogStatus::COMPLETE]);
+			->andWhere(['cl_status_id' => CallLogStatus::COMPLETE])
+            ->andWhere(['<>','cl_category_id', CallLogCategory::TRANSFER_CALL]);
 
 		if ($this->recordingDurationFrom) {
 			$query->andWhere(['>=', 'cl_duration', $this->recordingDurationFrom]);
@@ -380,9 +388,6 @@ class CallGraphsSearch extends CallLogSearch
 		return $this->applySearchQuery($query);
 	}
 
-	/**
-	 * @return CallQuery
-	 */
 	private function getNotAnsweredOutgoingCallsQuery()
 	{
 		$query = CallLog::find()
@@ -393,8 +398,8 @@ class CallGraphsSearch extends CallLogSearch
 				'coalesce(sum(cl_duration), 0) as outgoing_duration_sum'
 			])
 			->andWhere(['cl_type_id' => CallLogType::OUT])
-			->andWhere(['cl_status_id' => [CallLogStatus::BUSY, CallLogStatus::NOT_ANSWERED]]);
-			//->andWhere(['not', ['c_parent_id' => null]]);
+			->andWhere(['cl_status_id' => [CallLogStatus::BUSY, CallLogStatus::NOT_ANSWERED]])
+            ->andWhere(['<>','cl_category_id', CallLogCategory::TRANSFER_CALL]);
 
 		return $this->applySearchQuery($query);
 	}
@@ -402,6 +407,8 @@ class CallGraphsSearch extends CallLogSearch
 	private function applySearchQuery($query)
 	{
 		$timeZone = Employee::getUtcOffsetDst($this->timeZone, date('Y-m-d'));
+
+		$query->from([new \yii\db\Expression(CallLog::tableName(). ' PARTITION('. $this->getPartitionsByYears() .') ')]);
 
 		$query->addSelect(["date_format(convert_tz(cl_call_created_dt, '+00:00', '$timeZone'), '%Y-%m-%d %H:00:00') as created"]);
 
@@ -436,6 +443,23 @@ class CallGraphsSearch extends CallLogSearch
 
 		return $query;
 	}
+
+	private function getPartitionsByYears()
+    {
+        $yFrom = date('y', strtotime($this->createTimeStart));
+        $yTo = date('y', strtotime($this->createTimeEnd));
+        $partitions = 'y';
+        if ($yFrom == $yTo){
+            $nextYear = (int)$yFrom + 1 ;
+            $partitions = 'y' . $nextYear ;
+        } else {
+            $nextYearFrom = (int)$yFrom + 1 ;
+            $nextYearTo = (int)$yTo + 1 ;
+            $partitions = 'y'. $nextYearFrom . ',' . 'y' . $nextYearTo ;
+        }
+
+        return $partitions;
+    }
 
 	/**
 	 * @return array
