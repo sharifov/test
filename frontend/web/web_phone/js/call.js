@@ -7,6 +7,7 @@ var PhoneWidgetCall = function () {
         transferCallBtnEvent(options);
         acceptCallBtnEvent(options);
         changeUserCallStatusEvent(options);
+        rejectIncomingCallEvent(options);
     }
 
     function initCall(selectedNumber)
@@ -34,6 +35,21 @@ var PhoneWidgetCall = function () {
         $('.call-pane-calling').removeClass('is_active');
         $('.call-pane').addClass('is_active');
         $('.call-in-action__time').hide();
+    }
+
+    function rejectIncomingCallEvent(options)
+    {
+        $(document).on('click', '#reject-incoming-call', function(e) {
+            e.preventDefault();
+            var btn = $(this);
+
+            if (window.connection) {
+                window.connection.reject();
+                $.get(options.ajaxSaveCallUrl + '?sid=' + window.connection.parameters.CallSid + '&user_id=' + btn.attr('data-user-id'));
+                $('#call-controls2').hide();
+                cancelCall();
+            }
+        })
     }
 
     function changeUserCallStatusEvent(options)

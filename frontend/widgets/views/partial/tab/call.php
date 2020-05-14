@@ -179,7 +179,7 @@
                 </div>
                 <!-- <i class="fas fa-phone"></i> -->
             </button>
-            <button class="call-pane__end-call">
+            <button class="call-pane__end-call" id="cancel-active-call">
                 <i class="fa fa-phone-slash"></i>
             </button>
             <!-- <button class="call-pane__correction">
@@ -294,7 +294,7 @@
         </div>
         <i class="fas fa-phone"></i>
       </button>
-      <button class="call-pane__end-call">
+      <button class="call-pane__end-call" id="reject-incoming-call" data-user-id="<?= \sales\auth\Auth::id() ?>">
         <i class="fa fa-phone-slash"></i>
       </button>
     </div>
@@ -306,11 +306,13 @@
 $ajaxCallRedirectGetAgents = Url::to(['phone/ajax-call-get-agents']);
 $ajaxAcceptIncomingCall = Url::to(['call/ajax-accept-incoming-call']);
 $callStatusUrl = \yii\helpers\Url::to(['/user-call-status/update-status']);
+$ajaxSaveCallUrl = Url::to(['phone/ajax-save-call']);
 $js = <<<JS
 PhoneWidgetCall.init({
     'ajaxCallRedirectGetAgents': '{$ajaxCallRedirectGetAgents}',
     'acceptCallUrl': '{$ajaxAcceptIncomingCall}',
-    'callStatusUrl': '{$callStatusUrl}'
+    'callStatusUrl': '{$callStatusUrl}',
+    'ajaxSaveCallUrl': {$ajaxSaveCallUrl}
 });
 
 JS;
