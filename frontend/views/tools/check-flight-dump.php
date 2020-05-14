@@ -25,7 +25,6 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'class' => 'form-control',
                 'style' => 'margin-bottom: 12px;',
-                'prompt' => '---',
             ])
         ?>
         <?= Html::textarea('dump', $dump, ['rows' => 10, 'style' => 'width: 100%']) ?><br><br>

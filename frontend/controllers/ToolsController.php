@@ -111,7 +111,7 @@ class ToolsController extends FController
         $prepareSegment = (int) Yii::$app->request->post('prepare_segment', 0);
 
         if ($dump) {
-            $typeDump = $type !== '' ? $type : WorldSpan::getParserType($dump);
+            $typeDump = $type !== '' ? $type : WorldSpan::TYPE_ALL;
 
             if ($typeDump === WorldSpan::TYPE_RESERVATION && $prepareSegment === 1) {
                 $data = (new WorldSpanReservationService())->parseReservation($dump, false);
