@@ -171,32 +171,37 @@ var PhoneWidgetCall = function () {
     {
         $(document).on('click', '#btn-accept-call', function () {
             var btn = $(this);
-            $.ajax({
-                type: 'post',
-                url: options.acceptCallUrl,
-                dataType: 'json',
-                data: {act: 'accept', call_id: btn.attr('data-call-id')},
-                beforeSend: function () {
-                    btn.addClass('disabled');
-                    btn.find('i').removeClass('fas fa-check').addClass('fa fa-spinner fa-spin');
-                },
-                success: function (data) {
-                    if (data.error) {
-                         new PNotify({
-                            title: "Error",
-                            type: "error",
-                            text: data.message,
-                            hide: true
-                        });
-                    } else {
-                        showCallingPanel();
+
+            if ('fromInternal' in options && options.fromInternal && connection) {
+                connection.accept();
+            } else {
+                $.ajax({
+                    type: 'post',
+                    url: options.acceptCallUrl,
+                    dataType: 'json',
+                    data: {act: 'accept', call_id: btn.attr('data-call-id')},
+                    beforeSend: function () {
+                        btn.addClass('disabled');
+                        btn.find('i').removeClass('fas fa-check').addClass('fa fa-spinner fa-spin');
+                    },
+                    success: function (data) {
+                        if (data.error) {
+                             new PNotify({
+                                title: "Error",
+                                type: "error",
+                                text: data.message,
+                                hide: true
+                            });
+                        } else {
+                            showCallingPanel();
+                        }
+                    },
+                    complete: function () {
+                        btn.removeClass('disabled');
+                        btn.find('i').addClass('fas fa-check').removeClass('fa fa-spinner fa-spin');
                     }
-                },
-                complete: function () {
-                    btn.removeClass('disabled');
-                    btn.find('i').addClass('fas fa-check').removeClass('fa fa-spinner fa-spin');
-                }
-            })
+                })
+            };
         });
     }
 

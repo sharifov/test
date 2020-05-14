@@ -8,6 +8,7 @@ use common\models\query\CallUserAccessQuery;
 use frontend\widgets\notification\NotificationMessage;
 use sales\dispatchers\NativeEventDispatcher;
 use sales\model\call\entity\callUserAccess\events\CallUserAccessEvents;
+use sales\model\phoneList\entity\PhoneList;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -195,7 +196,8 @@ class CallUserAccess extends \yii\db\ActiveRecord
 				$client = $this->cuaCall->cClient;
 				$callFromInfo = [
 					'phoneFrom' => $this->cuaCall->c_from,
-					'name' => $client ? $client->getFullName() : ''
+					'name' => $client ? $client->getFullName() : '',
+					'fromInternal' => PhoneList::find()->byPhone($this->cuaCall->c_from)->enabled()->exists()
 				];
 			}
             Notifications::publish('updateIncomingCall', ['user_id' => $this->cua_user_id], array_merge($this->attributes, $callFromInfo ?? []));

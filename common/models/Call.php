@@ -1104,7 +1104,8 @@ class Call extends \yii\db\ActiveRecord
 					'leadId' => $this->c_lead_id,
 					'isIn' => $this->isIn(),
 					'phoneFrom' => $this->c_from,
-					'name' => $this->cClient ? $this->cClient->getFullName() : ''
+					'name' => $this->cClient ? $this->cClient->getFullName() : '',
+					'fromInternal' => PhoneList::find()->byPhone($this->c_from)->enabled()->exists()
 				]
 			);
         }
