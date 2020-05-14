@@ -115,6 +115,10 @@ var PhoneWidgetCall = function () {
 
     function refreshCallStatus(obj)
     {
+        if ('isIn' in obj && obj.isIn) {
+            initIncomingCall(obj);
+        }
+
         if (obj.status === 'In progress') {
             obj.status = 'On Call';
             $('.call-pane__call-btns').removeClass('is-pending').addClass('is-on-call');
@@ -144,6 +148,7 @@ var PhoneWidgetCall = function () {
     function openCallTab()
     {
         $('.phone-widget__tab').removeClass('is_active');
+        $('[data-toggle-tab]').removeClass('is_active');
         $('#tab-phone').addClass('is_active');
     }
 

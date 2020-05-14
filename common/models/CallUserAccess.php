@@ -195,7 +195,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
 				$client = $this->cuaCall->cClient;
 				$callFromInfo = [
 					'phoneFrom' => $this->cuaCall->c_from,
-					'name' => $client->first_name . ' ' . $client->last_name
+					'name' => $client ? $client->getFullName() : ''
 				];
 			}
             Notifications::publish('updateIncomingCall', ['user_id' => $this->cua_user_id], array_merge($this->attributes, $callFromInfo ?? []));
