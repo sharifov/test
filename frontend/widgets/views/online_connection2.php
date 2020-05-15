@@ -178,7 +178,7 @@ $js = <<<JS
                             if (typeof refreshInboxCallWidget === "function") {
                                 refreshInboxCallWidget(obj);
                             }
-                            if (typeof PhoneWidgetCall === 'object' && typeof PhoneWidgetCall.initIncomingCall === 'function') {
+                            if (typeof PhoneWidgetCall === 'object') {
                                 PhoneWidgetCall.initIncomingCall();
                             }
                         }
