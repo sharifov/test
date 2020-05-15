@@ -4,10 +4,10 @@ namespace frontend\controllers;
 
 use common\models\Quote;
 
-use sales\services\parsingDump\worldSpan\Baggage;
-use sales\services\parsingDump\worldSpan\Pricing;
-use sales\services\parsingDump\worldSpan\Reservation;
-use sales\services\parsingDump\worldSpan\WorldSpan;
+use sales\services\parsingDump\lib\worldSpan\Baggage;
+use sales\services\parsingDump\lib\worldSpan\Pricing;
+use sales\services\parsingDump\lib\worldSpan\Reservation;
+use sales\services\parsingDump\lib\worldSpan\WorldSpan;
 use sales\services\parsingDump\WorldSpanReservationService;
 use Yii;
 use common\models\ApiLog;

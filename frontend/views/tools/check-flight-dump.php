@@ -1,6 +1,7 @@
 <?php
 
-use sales\services\parsingDump\worldSpan\Sabre;
+
+use sales\services\parsingDump\lib\ParsingDump;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -21,8 +22,15 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="col-md-4">
         <?= Html::beginForm() ?>
         <?= Html::dropDownList('type', $type,
-                               Sabre::TYPE_MAP,
-                               [
+            ParsingDump::GDS_TYPE_MAP,
+            [
+                'class' => 'form-control',
+                'style' => 'margin-bottom: 12px;',
+            ])
+        ?>
+        <?= Html::dropDownList('type', $type,
+            ParsingDump::PARSING_TYPE_MAP,
+            [
                 'class' => 'form-control',
                 'style' => 'margin-bottom: 12px;',
             ])

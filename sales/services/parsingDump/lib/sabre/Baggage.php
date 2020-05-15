@@ -1,14 +1,14 @@
 <?php
 
-namespace sales\services\parsingDump\Sabre;
+namespace sales\services\parsingDump\lib\Sabre;
 
 use sales\helpers\app\AppHelper;
-use sales\services\parsingDump\ParseDump;
+use sales\services\parsingDump\lib\ParseDumpInterface;
 
 /**
  * Class Baggage
  */
-class Baggage implements ParseDump
+class Baggage implements ParseDumpInterface
 {
     /**
      * @param string $string

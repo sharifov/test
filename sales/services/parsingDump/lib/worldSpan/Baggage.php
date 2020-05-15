@@ -1,14 +1,14 @@
 <?php
 
-namespace sales\services\parsingDump\worldSpan;
+namespace sales\services\parsingDump\lib\worldSpan;
 
 use sales\helpers\app\AppHelper;
-use sales\services\parsingDump\ParseDump;
+use sales\services\parsingDump\lib\ParseDumpInterface;
 
 /**
  * Class Baggage
  */
-class Baggage implements ParseDump
+class Baggage implements ParseDumpInterface
 {
     /**
      * @param string $string

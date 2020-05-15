@@ -1,13 +1,14 @@
 <?php
 
-namespace sales\services\parsingDump\Sabre;
+namespace sales\services\parsingDump\lib\Sabre;
 
 use sales\helpers\app\AppHelper;
+use sales\services\parsingDump\lib\ParseDumpInterface;
 
 /**
  * Class Reservation
  */
-class Reservation implements ParseDump
+class Reservation implements ParseDumpInterface
 {
     /**
      * @param string $string

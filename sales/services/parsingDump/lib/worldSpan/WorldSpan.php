@@ -1,11 +1,13 @@
 <?php
 
-namespace sales\services\parsingDump\Sabre;
+namespace sales\services\parsingDump\lib\worldSpan;
+
+use sales\services\parsingDump\lib\worldSpan\Reservation;
 
 /**
  * Class Gds
  */
-class Sabre
+class WorldSpan
 {
     public CONST TYPE_RESERVATION = 'Reservation';
     public CONST TYPE_PRICING = 'Pricing';
