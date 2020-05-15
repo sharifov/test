@@ -8,7 +8,7 @@ use yii\helpers\Html;
 /* @var $data array */
 /* @var $dump string */
 /* @var string $type */
-/* @var string|null $typeDump */
+/* @var string $gds */
 /* @var bool|null $prepareSegment */
 
 $this->title = 'Check Flight dump - GDS WorldSpan';
@@ -21,7 +21,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <div class="col-md-4">
         <?= Html::beginForm() ?>
-        <?= Html::dropDownList('type', $type,
+        <?= Html::dropDownList('gds', $gds,
             ParsingDump::GDS_TYPE_MAP,
             [
                 'class' => 'form-control',
@@ -47,7 +47,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <div class="col-md-8">
         <?php if ($data): ?>
-        <h2>Parse dump: <?php echo $typeDump ?></h2>
+        <h2>Parse dump: <?php echo $type ?></h2>
             <pre>
             <?php \yii\helpers\VarDumper::dump($data, 10, true) ?>
             </pre>

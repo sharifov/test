@@ -10,8 +10,8 @@ class ParsingDump
     public CONST PARSING_TYPE_RESERVATION = 'Reservation';
     public CONST PARSING_TYPE_PRICING = 'Pricing';
     public CONST PARSING_TYPE_BAGGAGE = 'Baggage';
-    public CONST PARSING_TYPE_ALL = 'All';
-    public CONST DEFAULT_TYPE = self::PARSING_TYPE_ALL;
+    public CONST PARSING_TYPE_ALL = 'ParseAll';
+    public CONST PARSING_DEFAULT_TYPE = self::PARSING_TYPE_ALL;
 
     public CONST PARSING_TYPE_MAP = [
         self::PARSING_TYPE_ALL => 'All',
@@ -28,13 +28,18 @@ class ParsingDump
         self::GDS_TYPE_SABRE => 'Sabre',
     ];
 
-    public static function initClass(string $class)
+    /**
+     * @param string $gds
+     * @param string $class
+     * @return mixed|null
+     */
+    public static function initClass(string $gds, string $class)
     {
-        $nameClass = __NAMESPACE__ . '\\' . $class;
+        $nameClass = __NAMESPACE__ . '\\' . $gds . '\\' . $class;
 
-        if (array_key_exists($class, self::TYPE_MAP) && class_exists($nameClass)) {
+        if (class_exists($nameClass)) {
             return new $nameClass();
         }
-        return new Reservation();
+        return null;
     }
 }
