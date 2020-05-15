@@ -166,7 +166,8 @@ $(document).ready(function() {
     })
 
     $('.toggle-bar-settings').on('click', function() {
-        $('#bar-settings').slideDown(150)
+        $('#bar-settings').slideToggle(150)
+        $('#bar-logs').slideUp(150)
     })
     
     $('.additional-bar__close').on('click', function() {
@@ -175,7 +176,8 @@ $(document).ready(function() {
     })
 
     $('.toggle-bar-logs').on('click', function() {
-        $('#bar-logs').slideDown(150)
+        $('#bar-logs').slideToggle(150)
+        $('#bar-settings').slideUp(150)
     })
     
     $('.additional-bar__close').on('click', function() {
