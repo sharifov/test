@@ -53,6 +53,24 @@ class Reservation implements ParseDumpInterface
         return $matches;
     }
 
+     /**
+     * @return string
+     */
+    public static function getPatternRow(): string
+    {
+        return '/^
+            (\d{1,2}) # index
+            (\s{1}|\*)([A-Z]{2}) # Airline
+            \s*(\d{2,4})([A-Z]{1}) # Flight number + Booking Class
+            \s{1}(\d{1,2})([A-Z]{3}) # Departure Date
+            \s{1}([A-Z]{2}) # Departure Day of the week
+            \s{1}([A-Z]{3})([A-Z]{3}) # Airport codes from+to
+            \s{1}.{3}\s{1,2}(\d{2})(\d{2}) # Departure Time HHMM 
+            \s{1,2}(\d{2})(\d{2}) # Arrival Time HHMM  
+            (.*?)\/\X|\/\O\ # Arrival offset           
+            /x';
+    }
+
     /**
      * @param array $data
      * @return array
@@ -75,23 +93,5 @@ class Reservation implements ParseDumpInterface
         $result['arrival_offset'] = trim($data[15]);
         $result['cabin'] = trim($data[16]);
         return $result;
-    }
-
-    /**
-     * @return string
-     */
-    public static function getPatternRow(): string
-    {
-        return '/^
-            (\d{1,2}) # index
-            (\s{1}|\*)([A-Z]{2}) # Airline
-            \s*(\d{2,4})([A-Z]{1}) # Flight number + Booking Class
-            \s{1}(\d{1,2})([A-Z]{3}) # Departure Date
-            \s{1}([A-Z]{2}) # Departure Day of the week
-            \s{1}([A-Z]{3})([A-Z]{3}) # Airport codes from+to
-            \s{1}.{3}\s{1,2}(\d{2})(\d{2}) # Departure Time HHMM 
-            \s{1,2}(\d{2})(\d{2}) # Arrival Time HHMM  
-            (.*?)\/\X|\/\O\ # Arrival offset           
-            /x';
     }
 }
