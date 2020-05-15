@@ -151,7 +151,7 @@ var PhoneWidgetCall = function () {
         if (obj.status === 'In progress') {
             obj.status = 'On Call';
             $('.call-pane__call-btns').removeClass('is-pending').addClass('is-on-call');
-        }else if(obj.status === 'Ringing') {
+        }else if(['Ringing', 'Queued'].includes(obj.status)) {
             if ('isIn' in obj && obj.isIn) {
                 initIncomingCall(obj);
             }
