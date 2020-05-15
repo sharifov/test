@@ -35,6 +35,7 @@ var PhoneWidgetCall = function () {
         $('.call-pane-initial').removeClass('is_active');
         $('.call-pane').addClass('is_active');
         $('.call-in-action__time').hide();
+        window.connection = '';
     }
 
     function rejectIncomingCallEvent(options)
@@ -157,7 +158,9 @@ var PhoneWidgetCall = function () {
             if ('isIn' in obj && obj.isIn) {
                 initIncomingCall(obj);
             }
-        } else {
+        }else if (obj.status === 'Completed') {
+            cancelCall();
+        }else {
             $('.call-pane__call-btns').removeClass('is-on-call');
         }
         $('.call-in-action__text').html(obj.status);
@@ -207,13 +210,11 @@ var PhoneWidgetCall = function () {
         $(document).on('click', '#btn-accept-call', function () {
             var btn = $(this);
             var fromInternal = btn.attr('data-from-internal');
-
             if (fromInternal && window.connection) {
                 window.connection.accept();
                 showCallingPanel();
                 $('#call-controls2').hide();
             } else {
-                console.log('options.acceptCallUrl: ' + options.acceptCallUrl);
                 $.ajax({
                     type: 'post',
                     url: options.acceptCallUrl,
