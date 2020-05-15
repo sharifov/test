@@ -12,7 +12,7 @@ var PhoneWidgetCall = function () {
         if ('isCallInProgress' in options && options.isCallInProgress) {
             showCallingPanel();
         } else if ('isCallRinging' in options && options.isCallRinging) {
-            showIncomingCallPanel(options.phoneFrom, options.name || '');
+            initIncomingCall(options);
         }
     }
 
