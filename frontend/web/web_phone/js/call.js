@@ -167,8 +167,8 @@ var PhoneWidgetCall = function () {
         openWidget();
         openCallTab();
         if (typeof obj === 'object' && 'phoneFrom' in obj) {
-            $('#btn-accept-call').attr('data-call-id', obj.cua_call_id);
-            $('#btn-accept-call').attr('data-from-internal', obj.fromInternal | false);
+            console.log('initIncomingCall: ' + obj.cua_call_id);
+            $('#btn-accept-call').attr('data-from-internal', obj.fromInternal | false).attr('data-call-id', obj.cua_call_id);
             showIncomingCallPanel(obj.phoneFrom, obj.name || '');
         }
     }
