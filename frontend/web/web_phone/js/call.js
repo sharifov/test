@@ -9,6 +9,8 @@ var PhoneWidgetCall = function () {
         changeUserCallStatusEvent(options);
         rejectIncomingCallEvent(options);
 
+        console.log(options);
+
         if ('isCallInProgress' in options && options.isCallInProgress) {
             showCallingPanel();
         } else if ('isCallRinging' in options && options.isCallRinging) {
