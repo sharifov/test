@@ -87,7 +87,6 @@ var PhoneWidgetCall = function () {
         $(document).on('click', '#call-pane__mute', function(e) {
             let connection = _self.connection;
             let mute = $(this);
-            console.log(mute.attr('data-is-muted') === 'false');
             if (mute.attr('data-is-muted') === 'false') {
                 if (connection) {
                     connection.mute(true);
@@ -149,7 +148,6 @@ var PhoneWidgetCall = function () {
 
     function refreshCallStatus(obj)
     {
-        console.log('refreshCallStatus - updateCall: ' + obj.status);
         if (obj.status === 'In progress') {
             obj.status = 'On Call';
             $('.call-pane__call-btns').removeClass('is-pending').addClass('is-on-call');
