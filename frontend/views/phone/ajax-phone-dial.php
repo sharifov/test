@@ -197,7 +197,8 @@ $user = Yii::$app->user->identity;
                         <?=Html::hiddenInput('call-project-id', $project ? $project->id : '', ['id' => 'call-project-id'])?>
                     </td>
                     <td>
-                        <?=\yii\helpers\Html::button('<i class="fa fa-phone-square"></i> Make Call', ['class' => 'btn btn-sm btn-success', 'id' => 'btn-make-call'])?>
+                        <?=\yii\helpers\Html::button('<i class="fa fa-phone-square"></i> Make Call', ['class' => 'btn btn-sm btn-success btn-make-call', 'data-is_conference' => 0])?>
+                        <?=\yii\helpers\Html::button('<i class="fa fa-phone-square"></i> Make Call as Conference', ['class' => 'btn btn-sm btn-success btn-make-call', 'data-is_conference' => 1])?>
                     </td>
                 </tr>
             </table>

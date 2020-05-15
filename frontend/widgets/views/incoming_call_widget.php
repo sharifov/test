@@ -109,6 +109,7 @@ use yii\widgets\Pjax;
                     <div class="col-md-3 text-right">
 
                         <?=\yii\helpers\Html::a('<i class="fa fa-check"></i> Accept', ['call/incoming-call-widget', 'act' => 'accept', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-success btn-incoming-call-accept'])?>
+                        <?=\yii\helpers\Html::a('<i class="fa fa-check"></i> Accept as Conference', ['call/incoming-call-widget', 'act' => 'accept-conference', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-success btn-incoming-call-accept'])?>
                         <?php //=\yii\helpers\Html::a('<i class="fa fa-angle-double-right"></i> Skip', ['call/incoming-call-widget', 'act' => 'skip', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-info', 'id' => 'btn-incoming-call-skip'])?>
                         <?php //=\yii\helpers\Html::a('<i class="fa fa-close"></i> Busy', ['call/incoming-call-widget', 'act' => 'busy', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-danger', 'id' => 'btn-incoming-call-busy'])?>
                     </div>
@@ -185,6 +186,7 @@ use yii\widgets\Pjax;
 
                         <?php //=\yii\helpers\Html::a('<i class="fa fa-ban"></i> Busy', ['call/incoming-call-widget', 'act' => 'busy', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-danger btn-incoming-call-busy'])?>
                         <?=\yii\helpers\Html::a('<i class="fa fa-check"></i> Accept', ['call/incoming-call-widget', 'act' => 'accept', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-success btn-incoming-call-accept'])?>
+                        <?=\yii\helpers\Html::a('<i class="fa fa-check"></i> Accept as Conference', ['call/incoming-call-widget', 'act' => 'accept-conference', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-success btn-incoming-call-accept'])?>
                         <?php //=\yii\helpers\Html::a('<i class="fa fa-angle-double-right"></i> Skip', ['call/incoming-call-widget', 'act' => 'skip', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-info', 'id' => 'btn-incoming-call-skip'])?>
 
                     </div>

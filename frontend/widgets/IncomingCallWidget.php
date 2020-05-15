@@ -75,7 +75,10 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
 
                         switch ($action) {
                             case 'accept':
-                                $this->acceptCall($callUserAccess, $userModel);
+                                $this->acceptCall($callUserAccess, $userModel, $isConference = false);
+                                break;
+                            case 'accept-conference':
+                                $this->acceptCall($callUserAccess, $userModel, $isConference = true);
                                 break;
 //                            case 'skip':
 //                                $this->skipCall($callUserAccess);
@@ -133,11 +136,12 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
     /**
      * @param CallUserAccess $callUserAccess
      * @param Employee $user
+     * @param bool $isConference
      * @return bool
      * @throws \Throwable
      * @throws \yii\db\StaleObjectException
      */
-    private function acceptCall(CallUserAccess $callUserAccess, Employee $user): bool
+    private function acceptCall(CallUserAccess $callUserAccess, Employee $user, bool $isConference): bool
     {
         $callUserAccess->acceptCall();
         if($callUserAccess->update()) {
@@ -150,7 +154,7 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
                     Yii::error(VarDumper::dumpAsString($call->errors), 'IncomingCallWidget:acceptCall:Call:update');
                 }*/
 
-                if (Call::applyCallToAgent($call, $user->id)) {
+                if (Call::applyCallToAgent($call, $user->id, $isConference)) {
                     Notifications::pingUserMap();
                     return true;
                 }

@@ -697,7 +697,7 @@ use yii\helpers\Html;
     //});
 
 
-    function webCall(phone_from, phone_to, project_id, lead_id, case_id, type) {
+    function webCall(phone_from, phone_to, project_id, lead_id, case_id, type, is_conference_call) {
 
         /*var access =  updateAgentStatus(connection);
         if(!access) {
@@ -705,7 +705,7 @@ use yii\helpers\Html;
             return false;
         }*/
 
-        let params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': lead_id, 'case_id': case_id, 'c_type': type, 'c_user_id': userId};
+        let params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': lead_id, 'case_id': case_id, 'c_type': type, 'c_user_id': userId, 'is_conference_call': is_conference_call};
         console.log(params);
         webPhoneParams = params;
 
@@ -927,7 +927,8 @@ $js = <<<JS
         );
     });
     
-    $(document).on('click', '#btn-make-call', function(e) {
+    $(document).on('click', '.btn-make-call', function(e) {
+        let is_conference = $(this).data('is_conference');
         e.preventDefault();
         
         $.post(ajaxCheckUserForCallUrl, {user_id: userId}, function(data) {
@@ -947,7 +948,7 @@ $js = <<<JS
                 
                 $.post(ajaxBlackList, {phone: phone_to}, function(data) {
                     if (data.success) {
-                        webCall(phone_from, phone_to, project_id, lead_id, case_id, 'web-call');        
+                        webCall(phone_from, phone_to, project_id, lead_id, case_id, 'web-call', is_conference);        
                     } else {
                         var text = 'Error. Try again later';
                         if (data.message) {
