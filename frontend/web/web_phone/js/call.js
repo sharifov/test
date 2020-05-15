@@ -172,6 +172,8 @@ var PhoneWidgetCall = function () {
         if (typeof obj === 'object' && 'phoneFrom' in obj) {
             $('#btn-accept-call').attr('data-from-internal', obj.fromInternal | false).attr('data-call-id', obj.cua_call_id);
             showIncomingCallPanel(obj.phoneFrom, obj.name || '');
+        } else if (obj.cua_status_id === 5) {
+            cancelCall();
         }
     }
 
