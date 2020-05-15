@@ -213,6 +213,7 @@ var PhoneWidgetCall = function () {
                 showCallingPanel();
                 $('#call-controls2').hide();
             } else {
+                console.log('options.acceptCallUrl: ' + options.acceptCallUrl);
                 $.ajax({
                     type: 'post',
                     url: options.acceptCallUrl,
