@@ -148,6 +148,7 @@ $(document).ready(function() {
     // var messagesModal = $(".messages-modal__messages-scroll");
     // var emailModal = $(".email-modal__messages-scroll");
 
+    var additionalBar = $('.additional-bar__body');
     var contactModal = $(".contact-modal-info");
     var blockSuggestion = $(".suggested-contacts");
     // var msgModalScroll = new SimpleBar(messagesModal[0]);
@@ -159,6 +160,29 @@ $(document).ready(function() {
     // msgModalScroll.getContentElement();
     // emailModalScroll.getContentElement();
     // msgModalScroll.recalculate();
+    $(additionalBar).each(function(i, el) {
+        var elem = new SimpleBar(el);
+        elem.getContentElement();
+    })
+
+    $('.toggle-bar-settings').on('click', function() {
+        $('#bar-settings').slideDown(150)
+    })
+    
+    $('.additional-bar__close').on('click', function() {
+        console.log($(this).parents('.additional-bar'))
+        $(this).parents('.additional-bar').slideUp(150);
+    })
+
+    $('.toggle-bar-logs').on('click', function() {
+        $('#bar-logs').slideDown(150)
+    })
+    
+    $('.additional-bar__close').on('click', function() {
+        console.log($(this).parents('.additional-bar'))
+        $(this).parents('.additional-bar').slideUp(150);
+    })
+
 
     $('.dial__btn').on('click', function(e) {
         e.preventDefault();

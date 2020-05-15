@@ -11,48 +11,51 @@ use yii\web\View;
 ?>
 
 <div class="phone-widget" style="margin-bottom: 30px">
-	<?php if($showWidgetContent): ?>
-    <div class="phone-widget__header">
-        <div class="phone-widget__heading">
-            <span class="phone-widget__title">Calls</span>
-            <a href="#" class="phone-widget__close">
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                            d="M7 8.20625L12.7937 14L13.9999 12.7938L8.2062 7.00004L14 1.20621L12.7938 0L7 5.79383L1.2062 0L0 1.20621L5.7938 7.00004L7.97135e-05 12.7938L1.20628 14L7 8.20625Z"
-                            fill="white" />
-                </svg>
-            </a>
-        </div>
-        <ul class="phone-widget__header-actions">
-            <li>
-                <a href="#" data-toggle-tab="tab-phone" class="is_active">
-                    <i class="fas fa-phone"></i>
-                    <span>Call</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" data-toggle-tab="tab-contacts" >
-                    <i class="far fa-address-book"></i>
-                    <span>Contacts</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" data-toggle-tab="tab-history">
-                    <i class="fas fa-file-invoice"></i>
-                    <span>history</span>
-                </a>
-            </li>
-        </ul>
-    </div>
-    <div class="phone-widget__body">
-        <?= $this->render('tab/call', ['userCallStatus' => $userCallStatus]); ?>
-        <?= $this->render('tab/contacts', ['userPhones' => $userPhones, 'userEmails' => $userEmails]); ?>
-        <?= $this->render('tab/history'); ?>
-        <div class="widget-phone__contact-info-modal widget-modal contact-modal-info"></div>
-        <div class="widget-phone__messages-modal widget-modal messages-modal"></div>
-        <div class="widget-phone__email-modal widget-modal email-modal"></div>
+  <?php if($showWidgetContent): ?>
+  <div class="phone-widget__header">
+    <div class="phone-widget__heading">
 
-        <?php /*
+      <a href="#" class="phone-widget__dev header-action-small toggle-bar-logs"><i class="fas fa-tools"></i></a>
+      <span class="phone-widget__title">Calls</span>
+      <a href="#" class="phone-widget__settings header-action-small toggle-bar-settings"><i class="fa fa-cog"></i></a>
+      <a href="#" class="phone-widget__close header-action-small">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M7 8.20625L12.7937 14L13.9999 12.7938L8.2062 7.00004L14 1.20621L12.7938 0L7 5.79383L1.2062 0L0 1.20621L5.7938 7.00004L7.97135e-05 12.7938L1.20628 14L7 8.20625Z"
+            fill="white" />
+        </svg>
+      </a>
+    </div>
+    <ul class="phone-widget__header-actions">
+      <li>
+        <a href="#" data-toggle-tab="tab-phone" class="is_active">
+          <i class="fas fa-phone"></i>
+          <span>Call</span>
+        </a>
+      </li>
+      <li>
+        <a href="#" data-toggle-tab="tab-contacts">
+          <i class="far fa-address-book"></i>
+          <span>Contacts</span>
+        </a>
+      </li>
+      <li>
+        <a href="#" data-toggle-tab="tab-history">
+          <i class="fas fa-file-invoice"></i>
+          <span>history</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+  <div class="phone-widget__body">
+    <?= $this->render('tab/call', ['userCallStatus' => $userCallStatus]); ?>
+    <?= $this->render('tab/contacts', ['userPhones' => $userPhones, 'userEmails' => $userEmails]); ?>
+    <?= $this->render('tab/history'); ?>
+    <div class="widget-phone__contact-info-modal widget-modal contact-modal-info"></div>
+    <div class="widget-phone__messages-modal widget-modal messages-modal"></div>
+    <div class="widget-phone__email-modal widget-modal email-modal"></div>
+
+    <?php /*
         <div class="widget-phone__contact-info-modal widget-modal contact-modal-info">
             <a href="#" class="widget-modal__close">
                 <i class="fa fa-arrow-left"></i>
@@ -348,11 +351,54 @@ use yii\web\View;
         </div>
         */ ?>
 
+  </div>
+
+  
+  <div class="phone-widget__additional-bar additional-bar" id="bar-logs">
+    <div class="additional-bar__header">
+      <span class="additional-bar__header-title">
+        Logs
+      </span>
+      <a href="#" class="additional-bar__close">
+        <i class="fas fa-times"></i>
+      </a>
     </div>
-	<?php else: ?>
-        <div class="alert alert-danger alert-dismissible" role="alert">
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <strong>Warning!</strong> WebCall token is empty.
+    <div class="additional-bar__body">
+      <pre class="logs-block">
+        <p>&gt;&nbsp;Requesting Capability Token...</p>
+        <p>&gt;&nbsp;Got a token</p>
+        <p>&gt;&nbsp;Twilio.Device Ready!</p>
+      </pre>
+    </div>
+  </div>
+
+  <div class="phone-widget__additional-bar additional-bar" id="bar-settings">
+    <div class="additional-bar__header">
+      <span class="additional-bar__header-title">
+        Settings
+      </span>
+      <a href="#" class="additional-bar__close">
+        <i class="fas fa-times"></i>
+      </a>
+    </div>
+    <div class="additional-bar__body">
+        <div id="output-selection">
+            <label>Ringtone Devices</label>
+            <select id="ringtone-devices" multiple></select>
+            <label>Speaker Devices</label>
+            <select id="speaker-devices" multiple></select><br/>
+            
         </div>
-	<?php endif; ?>
+
+    </div>
+   
+  </div>
+
+  <?php else: ?>
+  <div class="alert alert-danger alert-dismissible" role="alert">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+        aria-hidden="true">&times;</span></button>
+    <strong>Warning!</strong> WebCall token is empty.
+  </div>
+  <?php endif; ?>
 </div>
