@@ -1232,7 +1232,6 @@ class Call extends \yii\db\ActiveRecord
 
                 $call->update();
 
-
                 if ($isConference) {
                     $to = 'client:seller' . $user_id;
                     $res = \Yii::$app->communication->acceptConferenceCall(

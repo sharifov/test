@@ -734,14 +734,17 @@ class CommunicationService extends Component implements CommunicationServiceInte
         $response = $this->sendRequest('twilio-jwt/accept-conference-call', $data);
 
         if ($response->isOk) {
-            if(isset($response->data['data'])) {
+            if (isset($response->data['data'])) {
                 $out['data'] = $response->data['data'];
+                if (isset($out['data']['is_error']) &&  $out['data']['is_error'] === true) {
+                    \Yii::error(VarDumper::dumpAsString($response->data), 'Component:CommunicationService::acceptConferenceCall:response');
+                }
             } else {
                 $out['error'] = 'Not found in response array data key [data]';
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error']), 'Component:CommunicationService::acceptConference');
+            \Yii::error(VarDumper::dumpAsString($out['error']), 'Component:CommunicationService::acceptConferenceCall');
         }
 
         return $out;

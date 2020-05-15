@@ -2337,8 +2337,19 @@ class CommunicationController extends ApiBaseController
                                 'API:Communication:voiceConferenceCallback:ConferenceParticipant:save-leave');
                         }
                     } else {
-                        Yii::warning('Not found ConferenceParticipant by callSid: conferenceData - ' . VarDumper::dumpAsString($conferenceData),
-                            'API:CommunicationController:voiceConferenceCallback:conferenceData:notfound');
+                        $call = Call::find()->where(['c_call_sid' => $conferenceData['CallSid']])->one();
+
+                        $cPart = new ConferenceParticipant();
+                        $cPart->cp_cf_id = $conference->cf_id;
+                        $cPart->cp_call_sid = $conferenceData['CallSid'];
+                        $cPart->cp_status_id = ConferenceParticipant::STATUS_LEAVE;
+                        $cPart->cp_leave_dt = date('Y-m-d H:i:s');
+                        if ($call) {
+                            $cPart->cp_call_id = $call->c_id;
+                        }
+                        if(!$cPart->save()) {
+                            Yii::error(VarDumper::dumpAsString($cPart->errors), 'API:Communication:voiceConferenceCallback:ConferenceParticipant:save-leave');
+                        }
                     }
                 }
 
