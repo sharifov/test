@@ -167,6 +167,8 @@ var PhoneWidgetCall = function () {
         openWidget();
         openCallTab();
         console.log('initIncomingCall before if else statement: ' + (typeof obj === 'object' && 'phoneFrom' in obj));
+        console.log(typeof obj === 'object');
+        console.log('phoneFrom' in obj);
         if (typeof obj === 'object' && 'phoneFrom' in obj) {
             console.log('initIncomingCall: ' + obj.cua_call_id);
             $('#btn-accept-call').attr('data-from-internal', obj.fromInternal | false).attr('data-call-id', obj.cua_call_id);
