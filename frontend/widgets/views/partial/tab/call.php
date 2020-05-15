@@ -2,6 +2,9 @@
 
 /** @var View $this */
 /** @var \common\models\UserCallStatus $userCallStatus */
+/** @var bool $isCallRinging */
+/** @var bool $isCallInProgress */
+/** @var \common\models\Call|null $lastCall */
 
 ?>
 <div class="phone-widget__tab is_active" id="tab-phone">
@@ -307,12 +310,18 @@ $ajaxCallRedirectGetAgents = Url::to(['phone/ajax-call-get-agents']);
 $ajaxAcceptIncomingCall = Url::to(['call/ajax-accept-incoming-call']);
 $callStatusUrl = Url::to(['/user-call-status/update-status']);
 $ajaxSaveCallUrl = Url::to(['phone/ajax-save-call']);
+$name = $lastCall->cClient ? $lastCall->cClient->getFullName() : 'ClientName';
 $js = <<<JS
 PhoneWidgetCall.init({
     'ajaxCallRedirectGetAgents': '{$ajaxCallRedirectGetAgents}',
     'acceptCallUrl': '{$ajaxAcceptIncomingCall}',
     'callStatusUrl': '{$callStatusUrl}',
-    'ajaxSaveCallUrl': '{$ajaxSaveCallUrl}'
+    'ajaxSaveCallUrl': '{$ajaxSaveCallUrl}',
+    'isCallRinging': '{$isCallRinging}',
+    'isCallInProgress': '{$isCallInProgress}',
+    'isIn': '{$lastCall->isIn()}',
+    'phoneFrom': '{$lastCall->c_from}',
+    'name': '{$name}' 
 });
 
 JS;

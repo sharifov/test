@@ -1,6 +1,7 @@
 <?php
 namespace frontend\widgets;
 
+use common\models\Call;
 use common\models\Employee;
 use common\models\UserCallStatus;
 use common\models\UserProfile;
@@ -34,13 +35,17 @@ class NewWebPhoneWidget extends Widget
 		}
 
 		$userCallStatus = UserCallStatus::find()->where(['us_user_id' => $this->userId])->orderBy(['us_id' => SORT_DESC])->limit(1)->one();
+		$lastCall = Call::find()->where(['c_created_user_id' => $this->userId])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
 
 		return $this->render('web_phone_new', [
 			'userPhoneProject' => $userPhoneProject,
             'formattedPhoneProject' => json_encode($this->formatDataForSelectList($userPhoneProject)),
             'userPhones' => array_keys($this->getUserPhones()),
             'userEmails' => array_keys($this->getUserEmails()),
-			'userCallStatus' => $userCallStatus
+			'userCallStatus' => $userCallStatus,
+			'isCallRinging' => ($lastCall && $lastCall->isStatusRinging()),
+			'isCallInProgress' => ($lastCall && $lastCall->isStatusInProgress()),
+			'lastCall' => $lastCall
 		]);
 	}
 

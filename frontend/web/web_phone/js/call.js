@@ -8,6 +8,12 @@ var PhoneWidgetCall = function () {
         acceptCallBtnEvent(options);
         changeUserCallStatusEvent(options);
         rejectIncomingCallEvent(options);
+
+        if ('isCallInProgress' in options && options.isCallInProgress) {
+            showCallingPanel();
+        } else if ('isCallRinging' in options && options.isCallRinging) {
+            showIncomingCallPanel(options.phoneFrom, options.name || '');
+        }
     }
 
     function initCall(selectedNumber)
@@ -48,8 +54,8 @@ var PhoneWidgetCall = function () {
                 window.connection.reject();
                 $.get(options.ajaxSaveCallUrl + '?sid=' + window.connection.parameters.CallSid + '&user_id=' + btn.attr('data-user-id'));
                 $('#call-controls2').hide();
-                cancelCall();
             }
+            cancelCall();
         })
     }
 
