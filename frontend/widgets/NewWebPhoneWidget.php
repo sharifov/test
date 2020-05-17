@@ -9,6 +9,7 @@ use common\models\UserProjectParams;
 use sales\auth\Auth;
 use Yii;
 use yii\bootstrap\Widget;
+use yii\helpers\VarDumper;
 
 /**
  * Class NewWebPhoneWidget
@@ -36,6 +37,8 @@ class NewWebPhoneWidget extends Widget
 
 		$userCallStatus = UserCallStatus::find()->where(['us_user_id' => $this->userId])->orderBy(['us_id' => SORT_DESC])->limit(1)->one();
 		$lastCall = Call::find()->where(['c_created_user_id' => $this->userId])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+
+		Yii::info(VarDumper::dumpAsString($lastCall), 'info\NewWebPhoneWidget::execute');
 
 		return $this->render('web_phone_new', [
 			'userPhoneProject' => $userPhoneProject,
