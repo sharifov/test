@@ -13,7 +13,7 @@ var PhoneWidgetCall = function () {
 
         if ('isCallInProgress' in options && options.isCallInProgress) {
             refreshCallStatus({
-                'status': "In Progress",
+                'status': "In progress",
                 'duration': options.duration | 0
             })
         } else if ('isCallRinging' in options && options.isCallRinging) {
