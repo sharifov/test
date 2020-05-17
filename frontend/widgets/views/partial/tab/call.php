@@ -4,8 +4,11 @@
 /** @var \common\models\UserCallStatus $userCallStatus */
 /** @var bool $isCallRinging */
 /** @var bool $isCallInProgress */
-/** @var \common\models\Call|null $lastCall */
+/** @var \common\models\Call|null $call */
 
+$name = $call && $call->cClient ? $call->cClient->getFullName() : 'ClientName';
+$isIn = $call ? $call->isIn() : false;
+$phoneFrom = $call ? $call->c_from : '';
 ?>
 <div class="phone-widget__tab is_active" id="tab-phone">
   <div class="call-pane call-pane-initial is_active">
@@ -161,12 +164,12 @@
       <div class="contact-info-card__details">
 
         <div class="contact-info-card__line history-details">
-          <span class="contact-info-card__label">To</span>
-          <strong class="contact-info-card__name">Geordan Reyney</strong>
+          <span class="contact-info-card__label"><?= $call && $call->isIn() ? 'From' : 'To' ?></span>
+          <strong class="contact-info-card__name"><?= $call && $call->cClient ? $call->cClient->getFullName() : 'ClientName' ?></strong>
         </div>
 
         <div class="contact-info-card__line history-details">
-          <span class="contact-info-card__call-type">+1-222-555-8888</span>
+          <span class="contact-info-card__call-type"><?= ($call ? ($call->isIn() ? $call->c_from : $call->c_to) : '') ?></span>
         </div>
       </div>
     </div>
@@ -281,11 +284,11 @@
 
         <div class="contact-info-card__line history-details">
           <span class="contact-info-card__label">Incomming Call</span>
-          <strong class="contact-info-card__name">Geordan Reyney</strong>
+          <strong class="contact-info-card__name"><?= $call && $call->cClient ? $call->cClient->getFullName() : 'ClientName' ?></strong>
         </div>
 
         <div class="contact-info-card__line history-details">
-          <span class="contact-info-card__call-type">+1-222-555-8888</span>
+          <span class="contact-info-card__call-type"><?= $call ? $call->c_from : '' ?></span>
         </div>
       </div>
     </div>
@@ -310,9 +313,7 @@ $ajaxCallRedirectGetAgents = Url::to(['phone/ajax-call-get-agents']);
 $ajaxAcceptIncomingCall = Url::to(['call/ajax-accept-incoming-call']);
 $callStatusUrl = Url::to(['/user-call-status/update-status']);
 $ajaxSaveCallUrl = Url::to(['phone/ajax-save-call']);
-$name = $lastCall && $lastCall->cClient ? $lastCall->cClient->getFullName() : 'ClientName';
-$isIn = $lastCall ? $lastCall->isIn() : false;
-$phoneFrom = $lastCall ? $lastCall->c_from : '';
+$callDuration = $call ? $call->c_call_duration : 0;
 $js = <<<JS
 PhoneWidgetCall.init({
     'ajaxCallRedirectGetAgents': '{$ajaxCallRedirectGetAgents}',
@@ -323,7 +324,8 @@ PhoneWidgetCall.init({
     'isCallInProgress': '{$isCallInProgress}',
     'isIn': '{$isIn}',
     'phoneFrom': '{$phoneFrom}',
-    'name': '{$name}' 
+    'name': '{$name}',
+    'duration': '{$callDuration}'
 });
 
 JS;

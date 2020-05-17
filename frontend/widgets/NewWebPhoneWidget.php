@@ -42,13 +42,20 @@ class NewWebPhoneWidget extends Widget
 			->innerJoin('call', 'call.c_id = call_user_access.cua_call_id')
 			->where(['cua_user_id' => $this->userId, 'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING])
 			->andWhere(['OR', ['c_created_user_id' => null], ['<>', 'c_created_user_id', $this->userId]])
-			->orderBy(['cua_created_dt' => SORT_ASC])->exists();
+			->orderBy(['cua_created_dt' => SORT_DESC])->limit(1)->one();
 
 		$directCallUserAccessList = CallUserAccess::find()
 			->innerJoin('call', 'call.c_id = call_user_access.cua_call_id')
 			->where(['cua_user_id' => $this->userId, 'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING])
 			->andWhere(['c_created_user_id' => $this->userId])
-			->orderBy(['cua_created_dt' => SORT_ASC])->exists();
+			->orderBy(['cua_created_dt' => SORT_DESC])->limit(1)->one();
+
+		$call = null;
+		if ($generalCallUserAccessList && $generalCallUserAccessList->cuaCall) {
+			$call = $generalCallUserAccessList->cuaCall;
+		} else if ($directCallUserAccessList && $directCallUserAccessList->cuaCall) {
+			$call = $directCallUserAccessList->cuaCall;
+		}
 
 		return $this->render('web_phone_new', [
 			'userPhoneProject' => $userPhoneProject,
@@ -56,9 +63,10 @@ class NewWebPhoneWidget extends Widget
             'userPhones' => array_keys($this->getUserPhones()),
             'userEmails' => array_keys($this->getUserEmails()),
 			'userCallStatus' => $userCallStatus,
-			'isCallRinging' => $generalCallUserAccessList || $directCallUserAccessList,
-			'isCallInProgress' => $lastCall && $lastCall->isStatusInProgress(),
-			'lastCall' => $lastCall
+			'isCallRinging' => $call && ($call->isStatusRinging() || $call->isStatusQueue()),
+			'isCallInProgress' => $call && $call->isStatusInProgress(),
+			'lastCall' => $lastCall,
+			'call' => $call
 		]);
 	}
 

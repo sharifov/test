@@ -9,7 +9,7 @@ use yii\web\View;
 /** @var array $userEmails */
 /** @var bool $isCallRinging */
 /** @var bool $isCallInProgress */
-/** @var \common\models\Call|null $lastCall */
+/** @var \common\models\Call|null $call */
 ?>
 
 <div class="phone-widget" style="margin-bottom: 30px">
@@ -51,7 +51,7 @@ use yii\web\View;
             'userCallStatus' => $userCallStatus,
             'isCallRinging' => $isCallRinging,
             'isCallInProgress' => $isCallInProgress,
-			'lastCall' => $lastCall
+			'call' => $call
 		]); ?>
         <?= $this->render('tab/contacts', ['userPhones' => $userPhones, 'userEmails' => $userEmails]); ?>
         <?= $this->render('tab/history'); ?>

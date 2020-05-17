@@ -12,7 +12,10 @@ var PhoneWidgetCall = function () {
         console.log(options);
 
         if ('isCallInProgress' in options && options.isCallInProgress) {
-            showCallingPanel();
+            refreshCallStatus({
+                'status': "In Progress",
+                'duration': options.duration | 0
+            })
         } else if ('isCallRinging' in options && options.isCallRinging) {
             initIncomingCall(options);
         }
@@ -28,7 +31,7 @@ var PhoneWidgetCall = function () {
         $('.call-pane__call-btns').addClass('is-pending');
         $('.suggested-contacts').removeClass('is_active');
         // $('.call-in-action__time').hide();
-        $('.call-pane').removeClass('is_active');
+        $('.call-pane-initial').removeClass('is_active');
         $('.call-pane-calling').addClass('is_active');
         $('.call-in-action__text').html('Dialing');
         $('.call-in-action__time').html('').show().timer('remove').timer({format: '%M:%S', seconds: 0}).timer('start');
