@@ -17,7 +17,12 @@ var PhoneWidgetCall = function () {
                 'duration': options.duration | 0
             })
         } else if ('isCallRinging' in options && options.isCallRinging) {
-            initIncomingCall(options);
+            initIncomingCall({
+                'fromInternal': options.fromInternal,
+                'cua_call_id': options.call_id,
+                'phoneFrom': options.phoneFrom,
+                'name': options.name || ''
+            });
         }
     }
 
