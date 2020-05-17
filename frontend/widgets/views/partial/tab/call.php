@@ -314,6 +314,7 @@ $ajaxAcceptIncomingCall = Url::to(['call/ajax-accept-incoming-call']);
 $callStatusUrl = Url::to(['/user-call-status/update-status']);
 $ajaxSaveCallUrl = Url::to(['phone/ajax-save-call']);
 $callDuration = $call ? $call->c_call_duration : 0;
+$callId = $call ? $call->c_id : null;
 $js = <<<JS
 PhoneWidgetCall.init({
     'ajaxCallRedirectGetAgents': '{$ajaxCallRedirectGetAgents}',
@@ -325,7 +326,8 @@ PhoneWidgetCall.init({
     'isIn': '{$isIn}',
     'phoneFrom': '{$phoneFrom}',
     'name': '{$name}',
-    'duration': '{$callDuration}'
+    'duration': '{$callDuration}',
+    'call_id': '{$callId}'
 });
 
 JS;
