@@ -64,7 +64,7 @@ class NewWebPhoneWidget extends Widget
             'userEmails' => array_keys($this->getUserEmails()),
 			'userCallStatus' => $userCallStatus,
 			'isCallRinging' => $call && ($call->isStatusRinging() || $call->isStatusQueue()),
-			'isCallInProgress' => $call && $call->isStatusInProgress(),
+			'isCallInProgress' => ($call && $call->isStatusInProgress()) || ($lastCall && $lastCall->isStatusInProgress()),
 			'lastCall' => $lastCall,
 			'call' => $call ?? $lastCall
 		]);
