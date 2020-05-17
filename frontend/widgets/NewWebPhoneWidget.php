@@ -66,7 +66,7 @@ class NewWebPhoneWidget extends Widget
 			'isCallRinging' => $call && ($call->isStatusRinging() || $call->isStatusQueue()),
 			'isCallInProgress' => $call && $call->isStatusInProgress(),
 			'lastCall' => $lastCall,
-			'call' => $call
+			'call' => $call ?? $lastCall
 		]);
 	}
 
