@@ -121,7 +121,8 @@ $user = Yii::$app->user->identity;
                         'previewSmsForm' => $previewSmsForm,
                         'comForm'       => $comForm,
                         'dataProvider'  => $dataProviderCommunication,
-                        'isAdmin'       => $isAdmin
+                        'isAdmin'       => $isAdmin,
+                        'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_case']
                     ]);
                     ?>
 				<?php endif;?>
@@ -137,8 +138,9 @@ $user = Yii::$app->user->identity;
                         'previewSmsForm' => $previewSmsForm,
                         'comForm'       => $comForm,
                         'dataProvider'  => $dataProviderCommunicationLog,
-                        'isAdmin'       => $isAdmin
-                    ]);
+                        'isAdmin'       => $isAdmin,
+						'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_case']
+					]);
                     ?>
 				<?php endif;?>
 			<?php else: ?>
