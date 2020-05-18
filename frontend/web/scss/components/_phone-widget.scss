@@ -20,7 +20,16 @@
 	z-index: -2;
 
 	transition: 0.2s;
+	@media (min-width: 768px) {
+		max-width: 300px;
+		bottom: calc(180px + #{$icon-size + 4px});
+		right: 20px;
+		left: auto;
+		top: auto;
+		border-radius: 6px;
 
+		height: 628px;
+	}
 	button {
 		cursor: pointer;
 		outline: none;
@@ -50,15 +59,74 @@
 		font-weight: 900;
 	}
 
-	@media (min-width: 768px) {
-		max-width: 300px;
-		bottom: calc(180px + #{$icon-size + 4px});
-		right: 20px;
-		left: auto;
-		top: auto;
-		border-radius: 6px;
+	.logs-block {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		height: 300px;
+		overflow: hidden auto;
+		margin: 0;
+		p {
+			color: #686865;
+			font-family: 'Share Tech Mono', 'Courier New', Courier, fixed-width;
+			font-size: 10px;
+			line-height: 1.2em;
+			
+			text-indent: -1.25em;
+			width: 98%;
+			margin-left: $sp;
+			margin-bottom: $sp;
+		}
+	}
 
-		height: 628px;
+	&__additional-bar {
+		position: absolute;
+		left: 0;
+		bottom: 0;
+		width: 100%;
+		background-color: $white;
+		z-index: 4;
+		border-radius: $sp2 $sp2 0 0;
+	}
+
+	.additional-bar {
+		display: none;
+		&__close {
+			position: absolute;
+			padding: 4px;
+			width: $sp3;
+			height: $sp3;
+			right: 10px;
+			line-height: 18px;
+			font-size: 18px;
+			top: 50%;
+			transform: translateY(-50%);
+			color: $color-theme-text-dark
+		}
+
+		&__header {
+			padding: $sp2;
+			border-bottom: 1px solid $project-pill-bg;
+			position: relative;
+
+		}
+
+		&__header-title {
+			font-style: normal;
+			font-weight: 500;
+			font-size: 16px;
+			line-height: 18px;
+			color: $color-theme-text-dark;
+		}
+
+		&__body {
+			max-height: 360px;
+			overflow-y: auto;
+			overflow-x: hidden;
+
+			padding: $sp2;
+		}
 	}
 
 	.current-number {
@@ -271,11 +339,35 @@
 		color: $white;
 	}
 
-	&__close {
+	.header-action-small {
 		position: absolute;
 		top: -4px;
-		right: -10px;
 		padding: 4px;
+		color: $white;
+
+		.fa {
+			font-size: 16px;
+		}
+
+		&:hover,
+		&:active,
+		&:focus,
+		&:active:focus,
+		&:focus:active {
+			color: $white;
+		}
+	}
+
+	&__dev {
+		left: -6px;
+	}
+
+	&__settings {
+		right: 20px;
+	}
+
+	&__close {
+		right: -10px;
 	}
 
 	&__body {

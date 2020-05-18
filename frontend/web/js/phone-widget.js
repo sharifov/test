@@ -150,6 +150,7 @@ $(document).ready(function() {
 
     var elemScrollable = $('.scrollable-block');
 
+    var additionalBar = $('.additional-bar__body');
     var contactModal = $(".contact-modal-info");
     var blockSuggestion = $(".suggested-contacts");
     // var msgModalScroll = new SimpleBar(messagesModal[0]);
@@ -161,6 +162,31 @@ $(document).ready(function() {
     // msgModalScroll.getContentElement();
     // emailModalScroll.getContentElement();
     // msgModalScroll.recalculate();
+    $(additionalBar).each(function(i, el) {
+        var elem = new SimpleBar(el);
+        elem.getContentElement();
+    })
+
+    $('.toggle-bar-settings').on('click', function() {
+        $('#bar-settings').slideToggle(150)
+        $('#bar-logs').slideUp(150)
+    })
+
+    $('.additional-bar__close').on('click', function() {
+        console.log($(this).parents('.additional-bar'))
+        $(this).parents('.additional-bar').slideUp(150);
+    })
+
+    $('.toggle-bar-logs').on('click', function() {
+        $('#bar-logs').slideToggle(150)
+        $('#bar-settings').slideUp(150)
+    })
+
+    $('.additional-bar__close').on('click', function() {
+        console.log($(this).parents('.additional-bar'))
+        $(this).parents('.additional-bar').slideUp(150);
+    })
+
 
     $(elemScrollable).each(function(i, elem) {
         var el = new SimpleBar(elem);
