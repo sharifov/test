@@ -18,7 +18,7 @@ class WorldSpanReservationService
     /**
      * @param $string
      * @param bool $validation
-     * @param array $itinerary
+     * @param array $itinerary`
      * @param bool $onView
      * @return array
      * @throws \Exception
@@ -36,28 +36,16 @@ class WorldSpanReservationService
         foreach ($rows as $key => $row) {
             try {
                 if (empty($rawData = $parserReservation->parseRow($row))) {
-                    $result['failed']['parsed'][] = $row;
                     continue;
                 }
-                $parseData = $parserReservation->dataMapping($rawData);
+                $parseData = $parserReservation->processingRow($rawData);
 
                 $result[$key]['carrier'] = $parseData['airline'];
                 $result[$key]['airlineName'] = $this->getAirlineName($parseData['airline'], $onView);
                 $result[$key]['departureAirport'] = $parseData['departure_airport_iata'];
                 $result[$key]['arrivalAirport'] = $parseData['arrival_airport_iata'];
-                $result[$key]['departureDateTime'] = $parserReservation->createDateTime(
-                    $parseData['departure_date_day'],
-                    $parseData['departure_date_month'],
-                    $parseData['departure_time_hh'],
-                    $parseData['departure_time_mm']
-                );
-
-                $result[$key]['arrivalDateTime'] = $parserReservation->getArrivalDateTime(
-                    $result[$key]['departureDateTime'],
-                    $parseData['arrival_time_hh'],
-                    $parseData['arrival_time_mm'],
-                    $parseData['arrival_offset']
-                );
+                $result[$key]['departureDateTime'] = $parseData['departure_date_time'];
+                $result[$key]['arrivalDateTime'] = $parseData['arrival_date_time'];
                 $result[$key]['flightNumber'] = $parseData['flight_number'];
                 $result[$key]['bookingClass'] = $parseData['booking_class'];
                 $result[$key]['departureCity'] = Airport::findIdentity($parseData['departure_airport_iata']);
@@ -69,8 +57,10 @@ class WorldSpanReservationService
                     $result[$key]['arrivalCity']
                 );
                 $result[$key]['layoverDuration'] = $this->getLayoverDuration($result, $key);
-                $result[$key]['arrivalDayOffset'] = $parserReservation->prepareArrivalOffset($parseData['arrival_offset']);
-                $result[$key]['cabin'] = SearchService::getCabinRealCode($parseData['cabin']);
+
+                if ($airline = Airline::findIdentity($parseData['airline'])) {
+                    $result[$key]['cabin'] = $airline->getCabinByClass($parseData['booking_class']);
+                }
 
                 $itinerary[] = (new ItineraryDumpDTO([]))->feelByParsedReservationDump($result[$key]);
 

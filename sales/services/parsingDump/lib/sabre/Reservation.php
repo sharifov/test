@@ -25,9 +25,7 @@ class Reservation implements ParseDumpInterface
                 if (empty($rawData = $this->parseRow($row))) {
                     continue;
                 }
-                $parseData = $this->dataMapping($rawData);
-                $parseData = $this->postProcessing($parseData);
-                $parseData = $this->removeTrash($parseData, self::getTemporaryKeys());
+                $parseData = $this->processingRow($rawData);
 
                 $result['reservation'][$parseData['index']] = $parseData;
             } catch (\Throwable $throwable) {
@@ -35,6 +33,18 @@ class Reservation implements ParseDumpInterface
             }
         }
         return $result;
+    }
+
+    /**
+     * @param array $rawData
+     * @return array
+     */
+    public function processingRow(array $rawData): array
+    {
+        $parseData = $this->dataMapping($rawData);
+        $parseData = $this->postProcessing($parseData);
+        $parseData = $this->removeTrash($parseData, self::getTemporaryKeys());
+        return $parseData;
     }
 
     /**

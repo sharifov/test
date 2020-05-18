@@ -84,11 +84,29 @@ class Baggage implements ParseDumpInterface
     public function parseBaggageAllowance(string $string): ?array
     {
         $result = null;
-        $baggagePattern = '/BAGGAGE ALLOWANCE(.*?)CARRY ON ALLOWANCE/s';
+        $baggagePattern = '/BAG ALLOWANCE(.*?)CARRY ON ALLOWANCE/s';
         preg_match($baggagePattern, $string, $baggageMatches);
 
         if (isset($baggageMatches[1])) {
             // AA SLCCDG  0PC
+
+            /* TODO::
+            1STCHECKED BAG FEE-MIACUU-USD30.00/AA/UP TO 50 POUNDS/23 KILOGR
+AMS AND UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS**
+2NDCHECKED BAG FEE-MIACUU-USD40.00/AA/UP TO 50 POUNDS/23 KILOGR
+AMS AND UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS**
+-----------------------------------
+            BAG ALLOWANCE -MIACUU-NIL/AA
+1STCHECKED BAG FEE-MIACUU-USD30.00/AA/UP TO 50 POUNDS/23 KILOGR
+AMS AND UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS**
+2NDCHECKED BAG FEE-MIACUU-USD40.00/AA/UP TO 50 POUNDS/23 KILOGR
+AMS AND UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS**
+             */
+
+            \yii\helpers\VarDumper::dump($baggageMatches, 10, true); exit();
+            /* FOR DEBUG:: must by remove */
+
+
             $rowDelimPatten = '[A-Z]{2}\s[A-Z]{6}\s{1,2}\d{1}PC';
             preg_match_all('(' . $rowDelimPatten . ')', $baggageMatches[1], $codeMatches);
 
