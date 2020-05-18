@@ -64,7 +64,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
         $cicleCount = 1;
         $countTotal = 0;
 
-        //Yii::info(VarDumper::dumpAsString(['last_email_id' => $this->last_email_id, 'request_data' => $this->request_data]), 'info\JOB:ReceiveEmailsJob');
+//        Yii::info(VarDumper::dumpAsString(['last_email_id' => $this->last_email_id, 'request_data' => $this->request_data]), 'info\JOB:ReceiveEmailsJob');
 
         try {
         	$this->emailService = Yii::createObject(EmailService::class);
@@ -121,8 +121,12 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                     && isset($res['data']['emails'][0])
                     && $res['data']['emails'][0]
                 ) {
-
+                    
                     foreach ($res['data']['emails'] as $mail) {
+
+                        if ($debug) {
+                            echo '.';
+                        }
 
                         $filter['last_id'] = $mail['ei_id'] + 1;
 
@@ -144,8 +148,12 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                         $email->e_email_to = $mail['ei_email_to'];
                         $email->e_email_to_name = $mail['ei_email_to_name'] ?? null;
                         $email->e_email_from = $mail['ei_email_from'];
-                        $email->e_email_from_name = $mail['ei_email_from_name'] ?? null;
-                        $email->e_email_subject = $mail['ei_email_subject'];
+                        if (isset($mail['ei_email_from_name'])) {
+                            $email->e_email_from_name = $this->filter($mail['ei_email_from_name']);
+                        }
+                        if (isset($mail['ei_email_subject'])) {
+                            $email->e_email_subject = $this->filter($mail['ei_email_subject']);
+                        }
                         if ($mail['ei_project_id'] > 0) {
                             $project = Project::findOne($mail['ei_project_id']);
                             if ($project) {
@@ -156,7 +164,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                         $email->e_created_dt = $mail['ei_created_dt'];
 
                         $email->e_inbox_email_id = $mail['ei_id'];
-                        $email->e_inbox_created_dt = $mail['ei_created_dt'];
+                        $email->e_inbox_created_dt = $mail['ei_received_dt'] ?: $mail['ei_created_dt'];
                         $email->e_ref_message_id = $mail['ei_ref_mess_ids'];
                         $email->e_message_id = $mail['ei_message_id'];
 
@@ -186,7 +194,10 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 						}
 
                         if (!$email->save()) {
-                            \Yii::error(VarDumper::dumpAsString($email->errors), 'ReceiveEmailsJob:execute');
+                            \Yii::error(VarDumper::dumpAsString([
+                                'communicationId' => $mail['ei_id'],
+                                'error' => $email->errors,
+                            ]), 'ReceiveEmailsJob:execute');
                         } else {
                             if ($lead_id === null && $case_id === null && $this->emailService->isNotInternalEmail($email->e_email_from)) {
                                 try {
@@ -246,7 +257,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                     if ($ntf = Notifications::create($user_id, 'New Emails received', 'New Emails received. Check your inbox.', Notifications::TYPE_INFO, true)) {
                         // Notifications::socket($user_id, null, 'getNewNotification', [], true);
                         $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                        Notifications::sendSocket('getNewNotification', ['user_id' => $user_id], $dataNotification);
+                        Notifications::publish('getNewNotification', ['user_id' => $user_id], $dataNotification);
                     }
                 }
             }
@@ -265,11 +276,22 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 //                }
 //            }
         } catch (\Throwable $e) {
-            \Yii::error($e->getTraceAsString(), 'ReceiveEmailsJob:execute');
+            if ($debug) {
+                echo "error: " . VarDumper::dumpAsString($e);
+            }
+            \Yii::error($e, 'ReceiveEmailsJob:execute');
         }
         if ($debug) {
             echo "cicleCount:" . $cicleCount . " countTotal:" . $countTotal . PHP_EOL;
         }
         return true;
+    }
+
+    private function filter($str)
+    {
+        if (!$str) {
+            return $str;
+        }
+        return filter_var($str, FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW|FILTER_FLAG_STRIP_HIGH);
     }
 }

@@ -120,7 +120,7 @@ $pjaxId = 'pjax-product-' . $product->pr_id;
                     </div>
                 </li>
                 <li>
-                    <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                    <a class="collapse-link"><i class="fa fa-chevron-down"></i></a>
                 </li>
                 <?php //php endif; ?>
 

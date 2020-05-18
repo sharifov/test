@@ -3,6 +3,7 @@ namespace common\models;
 
 use Yii;
 use yii\base\Model;
+use yii\web\IdentityInterface;
 
 /**
  * Login form
@@ -62,11 +63,18 @@ class LoginForm extends Model
                 if (!$this->checkByIp($user)) {
                     return false;
                 }
-                return Yii::$app->user->login($user, $this->rememberMe ? 3600 * 24 * 30 : 0);
+
+                $isLogin = Yii::$app->user->login($user, $this->rememberMe ? 3600 * 24 * 30 : 0);
+                if ($isLogin) {
+                    self::sendWsIdentityCookie(Yii::$app->user->identity, $this->rememberMe ? 3600 * 24 * 30 : 0);
+                }
+                return $isLogin;
             }
         }
         return false;
     }
+
+
 
     /**
      * @return Employee|null
@@ -138,5 +146,37 @@ class LoginForm extends Model
         }
 
         return $this->_user;
+    }
+
+    /**
+     * @param IdentityInterface $identity
+     * @param int $duration
+     * @throws \yii\base\InvalidConfigException
+     */
+    public static function sendWsIdentityCookie(IdentityInterface $identity, int $duration = 0): void
+    {
+        $identityCookie = Yii::$app->params['wsIdentityCookie'] ?? [];
+
+        $cookie = Yii::createObject(array_merge($identityCookie, [
+            'class' => 'yii\web\Cookie',
+            'value' => json_encode([
+                $identity->getId(),
+                $identity->getAuthKey(),
+                $duration,
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+            'expire' => $duration ? time() + $duration : 0,
+        ]));
+        Yii::$app->getResponse()->getCookies()->add($cookie);
+    }
+
+    /**
+     * @throws \yii\base\InvalidConfigException
+     */
+    public static function removeWsIdentityCookie(): void
+    {
+        $identityCookie = Yii::$app->params['wsIdentityCookie'] ?? [];
+        Yii::$app->getResponse()->getCookies()->remove(Yii::createObject(array_merge($identityCookie, [
+            'class' => 'yii\web\Cookie',
+        ])));
     }
 }

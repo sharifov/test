@@ -3,12 +3,14 @@
 namespace frontend\controllers;
 
 use common\models\Employee;
+use common\models\Lead;
 use common\models\search\LeadQcallSearch;
 use sales\repositories\lead\LeadBadgesRepository;
 use yii\filters\ContentNegotiator;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\ForbiddenHttpException;
+use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use Yii;
 
@@ -128,6 +130,11 @@ class BadgesController extends FController
                         $result['bonus'] = $count;
                     }
                     break;
+                case 'failed-bookings':
+                    if ($count = $this->getFailedBookings()) {
+                        $result['failed-bookings'] = $count;
+                    }
+                    break;
             }
         }
         return $result;
@@ -156,7 +163,23 @@ class BadgesController extends FController
         }
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
-        return $this->leadBadgesRepository->getInboxCount($user);
+
+        $limit = 0;
+        if ($user->isAgent()) {
+            $userParams = $user->userParams;
+            if ($userParams) {
+                if ($userParams->up_inbox_show_limit_leads > 0) {
+                    $limit = $userParams->up_inbox_show_limit_leads;
+                }
+            } else {
+                return null;
+            }
+        }
+        $count = $this->leadBadgesRepository->getInboxCount($user);
+        if ($limit > 0 && $count > 0 && $count > $limit) {
+            return $limit;
+        }
+        return $count;
     }
 
     /**
@@ -263,4 +286,32 @@ class BadgesController extends FController
         return (new LeadQcallSearch())->searchByRedial([], $user)->query->count();
     }
 
+    /**
+     * @return int|null
+     */
+    private function getFailedBookings(): ?int
+    {
+        if (!Yii::$app->user->can('/lead/failed-bookings')) {
+            return null;
+        }
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
+        $limit = 0;
+        if ($user->isAgent()) {
+            $userParams = $user->userParams;
+            if ($userParams) {
+                if ($userParams->up_inbox_show_limit_leads > 0) {
+                    $limit = $userParams->up_inbox_show_limit_leads;
+                }
+            } else {
+                return null;
+            }
+        }
+        $count = $this->leadBadgesRepository->getFailedBookingsCount($user);
+        if ($limit > 0 && $count > 0 && $count > $limit) {
+            return $limit;
+        }
+        return $count;
+    }
 }

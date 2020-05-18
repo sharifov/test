@@ -747,9 +747,16 @@ $this->registerJs($js);
 
     <?php Pjax::end(); ?>
 
-    <?php
+<?php
 
 $js = <<<JS
+
+    $(document).on('beforeSubmit', '#lead_form', function(event) {
+        let btn = $(this).find('.search_leads_btn');
+        
+        btn.html('<span class="spinner-border spinner-border-sm"></span> Loading');        
+        btn.prop("disabled", true)
+    });
 
     $(document).on('pjax:end', function() {
          $('[data-toggle="tooltip"]').tooltip();
@@ -759,6 +766,5 @@ $js = <<<JS
 
 JS;
     $this->registerJs($js, View::POS_READY);
-    ?>
+?>
 
-</div>

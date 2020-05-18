@@ -36,6 +36,7 @@ use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
 use frontend\models\SendEmailForm;
 use modules\order\src\entities\order\search\OrderSearch;
+use modules\twilio\components\TwilioCommunicationService;
 use PHPUnit\Framework\Warning;
 use sales\auth\Auth;
 use sales\entities\cases\Cases;
@@ -1790,6 +1791,48 @@ class LeadController extends FController
             'user' => $user,
             'newLeadsCount' => $user->getCountNewLeadCurrentShift(),
             'taskSummary' => $taskSummary
+        ]);
+    }
+
+    /**
+     * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionFailedBookings(): string
+    {
+        $user = Auth::user();
+
+        $checkShiftTime = true;
+        $isAccessNewLead = true;
+        $accessLeadByFrequency = [];
+        $limit = null;
+
+        if ($user->isAgent()) {
+            $checkShiftTime = $user->checkShiftTime();
+            $userParams = $user->userParams;
+            if ($userParams) {
+                if ($userParams->up_inbox_show_limit_leads > 0) {
+                    $limit = $userParams->up_inbox_show_limit_leads;
+                }
+            } else {
+                throw new NotFoundHttpException('Not set user params for agent! Please ask supervisor to set shift time and other.');
+            }
+            $accessLeadByFrequency = $user->accessTakeLeadByFrequencyMinutes([], [Lead::STATUS_BOOK_FAILED]);
+            if (!$accessLeadByFrequency['access']) {
+                $isAccessNewLead = $accessLeadByFrequency['access'];
+            }
+        }
+
+        $searchModel = new LeadSearch();
+        $dataProvider = $searchModel->searchFailedBookings(Yii::$app->request->queryParams, $user, $limit);
+
+        return $this->render('failed-bookings', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'checkShiftTime' => $checkShiftTime,
+            'isAccessNewLead' => $isAccessNewLead,
+            'accessLeadByFrequency' => $accessLeadByFrequency,
+            'user' => $user,
         ]);
     }
 

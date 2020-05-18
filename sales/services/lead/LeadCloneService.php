@@ -55,12 +55,14 @@ class LeadCloneService
 
         $clone = $this->transactionManager->wrap(function () use ($lead, $ownerId, $creatorId, $reason) {
 
+            $ownerOfOriginalLead = $lead->employee_id;
+
             $clone = $lead->createClone($reason);
             $clone->processing($ownerId, $creatorId, $reason);
 
             $this->leadRepository->save($clone);
 
-            $this->eventDispatcher->dispatchAll([new LeadCreatedCloneByUserEvent($clone, $ownerId)]);
+            $this->eventDispatcher->dispatchAll([new LeadCreatedCloneByUserEvent($clone, $ownerId, $ownerOfOriginalLead)]);
 
             foreach ($lead->leadFlightSegments as $segment) {
                 $cloneSegment = $segment->createClone($clone->id);

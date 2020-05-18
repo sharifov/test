@@ -3,6 +3,7 @@
 use kivork\rbacExportImport\src\rbac\DbManager;
 use kivork\rbacExportImport\RbacImportExportModule;
 use common\models\Employee;
+use modules\email\EmailModule;
 use modules\flight\FlightModule;
 use modules\hotel\HotelModule;
 use modules\invoice\InvoiceModule;
@@ -304,9 +305,22 @@ return [
 				]
 			]
 		],
+        'mail' => [
+            'class' => EmailModule::class,
+        ],
     ],
     'as beforeRequest' => [
         'class' => \frontend\components\UserSiteActivityLog::class,
+    ],
+    'as access' => [
+        'class' => 'yii\filters\AccessControl',
+        'except' => ['site/login', 'site/step-two'],
+        'rules' => [
+            [
+                'allow' => true,
+                'roles' => ['@'],
+            ],
+        ],
     ],
     'container' => [
         'definitions' => [

@@ -19,20 +19,11 @@ class WebSocketAsset extends AssetBundle
     public $baseUrl = '@web';
 
     public $css = [
-        /*'https://cdnjs.cloudflare.com/ajax/libs/pnotify/3.2.1/pnotify.css',
-        'https://cdnjs.cloudflare.com/ajax/libs/pnotify/3.2.1/pnotify.mobile.css',
-        'https://cdnjs.cloudflare.com/ajax/libs/pnotify/3.2.1/pnotify.nonblock.css',*/
-        'js/pnotify/pnotify.custom.min.css'
     ];
 
     public $js = [
-        'js/pnotify/pnotify.custom.min.js',
-        //'https://cdnjs.cloudflare.com/ajax/libs/ion-sound/3.0.7/js/ion.sound.min.js'
-        /*'https://cdnjs.cloudflare.com/ajax/libs/pnotify/3.2.1/pnotify.js',
-        'https://cdnjs.cloudflare.com/ajax/libs/pnotify/3.2.1/pnotify.desktop.js',
-        'https://cdnjs.cloudflare.com/ajax/libs/pnotify/3.2.1/pnotify.animate.js',
-        'https://cdnjs.cloudflare.com/ajax/libs/pnotify/3.2.1/pnotify.nonblock.js',
-        'https://cdnjs.cloudflare.com/ajax/libs/pnotify/3.2.1/pnotify.mobile.js'*/
+        //'js/pnotify/pnotify.custom.min.js',
+        '/js/reconnecting-websocket.min.js'
     ];
 
     public $depends = [

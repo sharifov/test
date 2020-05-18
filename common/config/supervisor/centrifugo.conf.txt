@@ -1,0 +1,7 @@
+[program:RunCentrifugoServer]
+directory = /etc/centrifugo
+command=centrifugo
+autostart=true
+autorestart=true
+user=root
+stopsignal=KILL

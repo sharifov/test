@@ -4,6 +4,7 @@ namespace console\migrations;
 
 use Yii;
 use yii\helpers\VarDumper;
+use yii\rbac\Permission;
 use yii\rbac\Role;
 use yii2mod\rbac\models\RouteModel;
 
@@ -230,5 +231,70 @@ class RbacMigrationService
         }
         $this->auth = Yii::$app->authManager;
         return $this->auth;
+    }
+
+    /**
+     * @param Permission|string $searchPermission
+     * @return Role[]
+     */
+    public function getAllRolesCanPermission($searchPermission): array
+    {
+        if (is_string($searchPermission)) {
+            if (!$permission = $this->getAuth()->getPermission($searchPermission)) {
+                throw new \RuntimeException('Not found old permission: ' . $searchPermission);
+            }
+        } elseif (!$searchPermission instanceof Permission) {
+            throw new \InvalidArgumentException('Permission must be string or Permission type');
+        } else {
+            $permission = $searchPermission;
+        }
+
+        $roles = [];
+        foreach ($this->getAuth()->getRoles() as $role) {
+            foreach ($this->getAuth()->getPermissionsByRole($role->name) as $authPermission) {
+                if ($permission->name === $authPermission->name) {
+                    $roles[] = $role;
+                    break;
+                }
+            }
+        }
+        return $roles;
+    }
+
+    public function addNewPermissionToRolesWhoCanOldPermission(string $newPermission, string $oldPermission): void
+    {
+        $auth = $this->getAuth();
+
+        if (!$oldAuthPermission = $auth->getPermission($oldPermission)) {
+            throw new \RuntimeException('Not found old permission: ' . $oldPermission);
+        }
+
+        if (!$newAuthPermission = $auth->getPermission($newPermission)) {
+            $newAuthPermission = $auth->createPermission($newPermission);
+            $auth->add($newAuthPermission);
+        }
+
+        foreach ($this->getAllRolesCanPermission($oldAuthPermission) as $role) {
+            if (!$auth->hasChild($role, $newAuthPermission) && $auth->canAddChild($role, $newAuthPermission)) {
+                $auth->addChild($role, $newAuthPermission);
+            }
+        }
+    }
+
+    public function removePermissionFromRolesWhoCanOtherPermission(string $permission, string $otherPermission): void
+    {
+        $auth = $this->getAuth();
+
+        if (!$authPermission = $auth->getPermission($permission)) {
+            throw new \RuntimeException('Not found permission: ' . $permission);
+        }
+
+        if (!$authOtherPermission = $auth->getPermission($otherPermission)) {
+            throw new \RuntimeException('Not found other permission: ' . $otherPermission);
+        }
+
+        foreach ($this->getAllRolesCanPermission($authOtherPermission) as $role) {
+            $auth->removeChild($role, $authPermission);
+        }
     }
 }

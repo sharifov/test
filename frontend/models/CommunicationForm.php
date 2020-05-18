@@ -178,7 +178,7 @@ class CommunicationForm extends Model
             [['c_email_subject', 'c_email_message', 'c_sms_message'], 'trim'],
 
             [['c_phone_number'], 'string', 'max' => 30],
-            [['c_phone_number'], PhoneInputValidator::class],
+            [['c_phone_number'], PhoneInputValidator::class, 'enableClientValidation' => false],
 
             [['c_voice_sid'], 'string', 'max' => 40],
 

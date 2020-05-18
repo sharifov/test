@@ -7,14 +7,6 @@ return [
     'vendorPath' => dirname(dirname(__DIR__)) . '/vendor',
     'timeZone' => 'UTC',
     'components' => [
-        /*'log' => [
-            'targets' => [
-                [
-                    'class' => 'yii\log\DbTarget',
-                    'levels' => ['error', 'warning'],
-                ]
-            ],
-        ],*/
         'formatter' => [
             'class' => 'yii\i18n\Formatter',
             'timeZone' => 'Europe/Chisinau',
@@ -34,6 +26,13 @@ return [
 
             'thousandSeparator' => ',',
             'decimalSeparator' => '.',
+        ],
+        'redis' => [
+            'class' => \yii\redis\Connection::class,
+            'hostname' => 'localhost',
+            'unixSocket' => null,
+            'port' => 6379,
+            'database' => 0,
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
@@ -76,6 +75,12 @@ return [
             'password' => '',
         ],
 
+        'queue_sms_job' => [
+            'class' => \yii\queue\beanstalk\Queue::class,
+            'host' => 'localhost',
+            'port' => 11300,
+            'tube' => 'queue_sms_job',
+        ],
         'queue_email_job' => [
             'class' => \yii\queue\beanstalk\Queue::class,
             'host' => 'localhost',
@@ -94,14 +99,15 @@ return [
             'port' => 11300,
             'tube' => 'queue_job',
         ],
-
         'telegram' => [
             'class' => \aki\telegram\Telegram::class,
+            'botUsername' => 'CrmKivorkBot',
             'botToken' => '817992632:AAE6UXJRqDscAZc9gUBScEpaT_T4zGukdos',
         ]
 
     ],
     'bootstrap' => [
+        'queue_sms_job',
         'queue_email_job',
         'queue_phone_check',
         'queue_job',

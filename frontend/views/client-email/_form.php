@@ -16,6 +16,8 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'email')->textInput(['maxlength' => true]) ?>
 
+    <?= $form->field($model, 'ce_title')->textInput(['maxlength' => true]) ?>
+
     <?= $form->field($model, 'comments')->textarea(['rows' => 6]) ?>
 
     <?= $form->field($model, 'type')->dropDownList($model::getEmailTypeList()) ?>

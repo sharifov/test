@@ -70,7 +70,7 @@ class LoggerController extends Controller
 					\Yii::error('Error: ' . VarDumper::dumpAsString($log->errors), 'Console:LoggerController:actionFormatLogManagedAttr:GlobalLog:save');
 				}
 			} else if (!$log->delete()) {
-				\Yii::error('Error while deleting log: ' . $this->getParsedErrors($log->getErrors()), 'Console:LoggerController:actionFormatLogManagedAttr:GlobalLog:save');
+				\Yii::error('Error while deleting log: ' . VarDumper::dumpAsString($log->getErrors()), 'Console:LoggerController:actionFormatLogManagedAttr:GlobalLog:save');
 			}
 		}
 		$time_end = microtime(true);

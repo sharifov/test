@@ -21,7 +21,7 @@ class KpiService
         $end = clone $date;
         $end->modify('last day of this month');
 
-        $agents = Employee::getAllEmployeesByRole('agent');
+        $agents = Employee::getAllEmployeesByRole(Employee::ROLE_AGENT);
 
         foreach ($agents as $agent){
             $kpiHistory = KpiHistory::recalculateSalary($agent, $start, $end);

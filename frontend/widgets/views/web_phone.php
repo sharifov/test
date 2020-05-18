@@ -82,6 +82,10 @@ use yii\helpers\Html;
                                 <?=Html::button('<i class="fa fa-forward"></i> Reject', ['class' => 'btn btn-xs btn-danger','id' => 'button-reject'])?>
                             </div>
                         </div>
+
+                        <div class="btn-group" id="btn-group-id-mute" style="display: none;">
+                            <?=Html::button('<i class="fa fa-microphone"></i> Mute', ['id' => 'btn-mute-microphone', 'class' => 'btn btn-sm btn-success'])?>
+                        </div>
                     </td>
                 </tr>
             </table>
@@ -365,6 +369,9 @@ use yii\helpers\Html;
     function bindVolumeIndicators(connection) {
         connection.on('volume', function (inputVolume, outputVolume) {
             volumeIndicatorsChange(inputVolume, outputVolume);
+            if (typeof  PhoneWidgetCall === 'object') {
+                PhoneWidgetCall.volumeIndicatorsChange(inputVolume, outputVolume)
+            }
         });
     }
 
@@ -560,6 +567,8 @@ use yii\helpers\Html;
                     //console.info(conn.parameters);
                     //alert(clientId + ' - ' + conn.parameters.From);
                     $('#btn-group-id-hangup').show();
+                    $('#btn-mute-microphone').html('<i class="fa fa-microphone"></i> Mute').removeClass('btn-warning').addClass('btn-success');
+                    $('#btn-group-id-mute').show();
 
                     if (conn.parameters.From === undefined) {
                         $('#btn-group-id-redirect').show();
@@ -569,6 +578,9 @@ use yii\helpers\Html;
 
                     volumeIndicators.style.display = 'block';
                     bindVolumeIndicators(conn);
+                    if (typeof PhoneWidgetCall === 'object') {
+                        PhoneWidgetCall.updateConnection(conn);
+                    }
                 });
 
                 device.on('disconnect', function (conn) {
@@ -582,8 +594,13 @@ use yii\helpers\Html;
 
                     $('#btn-group-id-hangup').hide();
                     $('#btn-group-id-redirect').hide();
+                    $('#btn-group-id-mute').hide();
                     volumeIndicators.style.display = 'none';
                     cleanPhones();
+
+                    if (typeof PhoneWidgetCall === "object") {
+                        PhoneWidgetCall.cancelCall();
+                    }
                 });
 
                 // device.on('ringing', function (conn) {
@@ -594,10 +611,14 @@ use yii\helpers\Html;
                 device.on('incoming', function (conn) {
                     connection = conn;
                     $('#call-controls2').hide();
-                    if (document.visibilityState === 'visible') {
-                        conn.accept();
-                    } else {
+                    if ("autoAccept" in connection.message && connection.message.autoAccept === 'false') {
                         $('#call-controls2').show();
+                    } else {
+                        if (document.visibilityState === 'visible') {
+                            conn.accept();
+                        } else {
+                            $('#call-controls2').show();
+                        }
                     }
 
                     /*var access =  updateAgentStatus(connection, true, 0);
@@ -689,6 +710,7 @@ use yii\helpers\Html;
         }*/
 
         let params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': lead_id, 'case_id': case_id, 'c_type': type, 'c_user_id': userId};
+        console.log(params);
         webPhoneParams = params;
 
         if (device) {
@@ -765,27 +787,31 @@ $js = <<<JS
             if(connection.status() !== 'open') {
                 connection.accept();
             }
-                           
-            $.ajax({
-                type: 'post',
-                data: {
-                    'sid': connection.parameters.CallSid,
-                    'id': objValue,
-                    'type': objType
-                },
-                url: ajaxCallTransferUrl,
-                success: function (data) {
-                    if (data.error) {
-                        alert(data.message);
+                        
+            if (objValue && objType) {
+                $.ajax({
+                    type: 'post',
+                    data: {
+                        'sid': connection.parameters.CallSid,
+                        'id': objValue,
+                        'type': objType
+                    },
+                    url: ajaxCallTransferUrl,
+                    success: function (data) {
+                        if (data.error) {
+                            alert(data.message);
+                        }
+                        modal.modal('hide').find('.modal-body').html('');
+                    },
+                    error: function (error) {
+                        console.error(error);
+                        modal.modal('hide').find('.modal-body').html('');
                     }
-                    modal.modal('hide').find('.modal-body').html('');
-                },
-                error: function (error) {
-                    console.error(error);
-                    modal.modal('hide').find('.modal-body').html('');
-                }
-            });
-
+                });
+            } else {
+                new PNotify({title: "Transfer call", type: "error", text: "Please try again after some seconds", hide: true});
+            }
+                    
         } else {
             alert('Error: Not found active connection or CallSid');
         }
@@ -941,6 +967,29 @@ $js = <<<JS
             }
         }, 'json');
         
+    });
+    
+    $(document).on('click', '#btn-mute-microphone', function(e) {
+        let mute = $(this).html();
+        if (mute === '<i class="fa fa-microphone"></i> Mute') {
+            if (connection) {
+                connection.mute(true);
+                if (connection.isMuted()) {
+                    $(this).html('<i class="fa fa-microphone"></i> Unmute').removeClass('btn-success').addClass('btn-warning');
+                } else {
+                    new PNotify({title: "Mute", type: "error", text: "Error", hide: true});
+                }
+            }
+        } else {
+            if (connection) {
+                connection.mute(false);
+                if (!connection.isMuted()) {
+                    $(this).html('<i class="fa fa-microphone"></i> Mute').removeClass('btn-warning').addClass('btn-success');
+                } else {
+                    new PNotify({title: "Unmute", type: "error", text: "Error", hide: true});
+                }
+            }
+        }
     });
     
     webPhoneWidget.css({left:'50%', 'margin-left':'-' + (webPhoneWidget.width() / 2) + 'px'}); //.slideDown();

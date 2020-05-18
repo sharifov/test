@@ -2,8 +2,11 @@
 
 namespace common\models;
 
+use Yii;
+use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "user_online".
@@ -31,6 +34,23 @@ class UserOnline extends ActiveRecord
         return [
             [['uo_updated_dt'], 'safe'],
             [['uo_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['uo_user_id' => 'id']],
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['uo_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['uo_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s')
+            ],
         ];
     }
 

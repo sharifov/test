@@ -2,6 +2,7 @@
 
 namespace modules\qaTask\src\listeners;
 
+use common\components\purifier\Purifier;
 use frontend\widgets\notification\NotificationMessage;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\qaTask\src\useCases\qaTask\returnTask\QaTaskReturnEvent;
@@ -10,7 +11,6 @@ use common\models\Notifications;
 use modules\qaTask\src\entities\qaTaskActionReason\QaTaskActionReason;
 use sales\repositories\NotFoundException;
 use sales\repositories\user\UserRepository;
-use yii\helpers\Url;
 
 /**
  * Class QaTaskReturnNotifierListener
@@ -51,7 +51,7 @@ class QaTaskReturnNotifierListener
 
         $task = $event->task;
 
-        $subject = Yii::t('email', 'You task #{id} has been returned to {status} by {username}', [
+        $subject = Yii::t('email', 'You task (Id: {id}) has been returned to {status} by {username}', [
             'id' => $task->t_id,
             'status' => QaTaskStatus::getName($event->getChangeStateLog()->endStatusId),
             'username' => $creator->username,
@@ -62,20 +62,19 @@ class QaTaskReturnNotifierListener
             $reason = $reasonModel->tar_name;
         }
 
-        $body = Yii::t('email', "You task #{id} has been returned to {status} by {username} ({role}). Reason: {reason}. {url}",
+        $body = Yii::t('email', "You task (Id: {id}) has been returned to {status} by {username} ({role}). Reason: {reason}.",
             [
-                'id' => $task->t_id,
+                'id' => Purifier::createQaTaskShortLink($task),
                 'status' => QaTaskStatus::getName($event->getChangeStateLog()->endStatusId),
                 'username' => $creator->username,
                 'role' => implode(',', $creator->getRoles(true)),
                 'reason' => $reason,
-                'url' => Url::toRoute( ['/qa-task/qa-task/view', 'gid' => $task->t_gid], true),
             ]);
 
         if ($ntf = Notifications::create($oldAssigned->id, $subject, $body, Notifications::TYPE_INFO, true)) {
             //Notifications::socket($oldAssigned->id, null, 'getNewNotification', [], true);
             $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-            Notifications::sendSocket('getNewNotification', ['user_id' => $oldAssigned->id], $dataNotification);
+            Notifications::publish('getNewNotification', ['user_id' => $oldAssigned->id], $dataNotification);
         } else {
             Yii::error(
                 'Not created Email notification to employee_id: ' . $oldAssigned->id . ', task: ' . $task->t_id,

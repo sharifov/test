@@ -2,12 +2,12 @@
 
 namespace sales\listeners\sms;
 
+use common\components\purifier\Purifier;
 use common\models\ClientPhone;
 use common\models\Notifications;
 use frontend\widgets\notification\NotificationMessage;
 use sales\events\sms\SmsCreatedByIncomingSalesEvent;
 use sales\repositories\user\UserProjectParamsRepository;
-use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 
 /**
@@ -40,13 +40,13 @@ class SmsCreatedByIncomingSalesNotificationListener
                     $userId,
                     'New SMS ' . $event->clientPhone,
                     'SMS from ' . $event->clientPhone . ' (' . $clientName . ') to ' . $event->userPhone . ' <br> ' . nl2br(Html::encode($event->text))
-                    . ($event->leadId ? '<br>Lead ID: ' . $event->leadId : ''),
+                    . ($event->sms->sLead ? '<br>Lead (Id: ' . Purifier::createLeadShortLink($event->sms->sLead) . ')' : ''),
                     Notifications::TYPE_INFO,
                     true)
                 ) {
 //                    Notifications::socket($userId, null, 'getNewNotification', ['sms_id' => $event->sms->s_id], true);
                     $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                    Notifications::sendSocket('getNewNotification', ['user_id' => $userId], $dataNotification);
+                    Notifications::publish('getNewNotification', ['user_id' => $userId], $dataNotification);
                 }
             }
         }
