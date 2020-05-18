@@ -114,38 +114,19 @@ $user = Yii::$app->user->identity;
 
         <div class="col-md-6">
             <?php if ($enableCommunication) : ?>
-	            <?php if(!Yii::$app->params['settings']['new_communication_block_case']): ?>
                     <?= $this->render('communication/case_communication', [
                         'model'      => $model,
                         'previewEmailForm' => $previewEmailForm,
                         'previewSmsForm' => $previewSmsForm,
                         'comForm'       => $comForm,
-                        'dataProvider'  => $dataProviderCommunication,
+                        'dataProvider'  => (bool)Yii::$app->params['settings']['new_communication_block_case'] ? $dataProviderCommunicationLog : $dataProviderCommunication,
                         'isAdmin'       => $isAdmin,
                         'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_case']
                     ]);
                     ?>
-				<?php endif;?>
             <?php else: ?>
                 <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
             <?php endif;?>
-
-			<?php if ($enableCommunication) : ?>
-                <?php if(Yii::$app->params['settings']['new_communication_block_case']): ?>
-                    <?= $this->render('communication/case_communication', [
-                        'model'      => $model,
-                        'previewEmailForm' => $previewEmailForm,
-                        'previewSmsForm' => $previewSmsForm,
-                        'comForm'       => $comForm,
-                        'dataProvider'  => $dataProviderCommunicationLog,
-                        'isAdmin'       => $isAdmin,
-						'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_case']
-					]);
-                    ?>
-				<?php endif;?>
-			<?php else: ?>
-                <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
-			<?php endif;?>
         </div>
     </div>
 

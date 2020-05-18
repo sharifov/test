@@ -161,40 +161,19 @@ $lead = $leadForm->getLead();
             <?php endif; ?>
 
             <?php if (Yii::$app->user->can('lead/view_CommunicationBlock', ['lead' => $lead])) : ?>
-            	<?php if (!Yii::$app->params['settings']['new_communication_block_lead']): ?>
-                    <?= $this->render('communication/lead_communication', [
-                        'leadForm'      => $leadForm,
-                        'previewEmailForm' => $previewEmailForm,
-                        'previewSmsForm' => $previewSmsForm,
-                        'comForm'       => $comForm,
-                        'leadId'        => $lead->id,
-                        'dataProvider'  => $dataProviderCommunication,
-                        'isAdmin'       => $is_admin,
-                        'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_lead']
-                    ]); ?>
-				<?php endif; ?>
+                <?= $this->render('communication/lead_communication', [
+                    'leadForm'      => $leadForm,
+                    'previewEmailForm' => $previewEmailForm,
+                    'previewSmsForm' => $previewSmsForm,
+                    'comForm'       => $comForm,
+                    'leadId'        => $lead->id,
+                    'dataProvider'  => (bool)Yii::$app->params['settings']['new_communication_block_lead'] ? $dataProviderCommunicationLog : $dataProviderCommunication,
+                    'isAdmin'       => $is_admin,
+                    'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_lead']
+                ]); ?>
             <?php else: ?>
                 <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
             <?php endif;?>
-
-			<?php if (Yii::$app->user->can('lead/view_CommunicationBlock', ['lead' => $lead])): ?>
-                <?php if (Yii::$app->params['settings']['new_communication_block_lead']): ?>
-				<?= $this->render('communication/lead_communication', [
-					'leadForm'      => $leadForm,
-					'previewEmailForm' => $previewEmailForm,
-					'previewSmsForm' => $previewSmsForm,
-					'comForm'       => $comForm,
-					'leadId'        => $lead->id,
-					'dataProvider'  => $dataProviderCommunicationLog,
-					'isAdmin'       => $is_admin,
-                    'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_lead']
-                ]);
-				?>
-                <?php endif; ?>
-			<?php else: ?>
-                <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
-			<?php endif;?>
-
 
             <?php //php \yii\helpers\VarDumper::dump(Yii::$app->user->identity->callExpertCountByShiftTime) ?>
 
