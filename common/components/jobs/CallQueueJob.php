@@ -196,7 +196,7 @@ class CallQueueJob extends BaseObject implements JobInterface
                 }
 
 
-                if (!$call->update()) {
+                if ($call->update() === false) {
                     Yii::error(VarDumper::dumpAsString($call->errors), 'CallQueueJob:execute:Call:update');
                 }
 

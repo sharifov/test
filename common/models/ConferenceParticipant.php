@@ -48,7 +48,7 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
             [['cp_cf_id', 'cp_call_id', 'cp_status_id'], 'integer'],
             [['cp_join_dt', 'cp_leave_dt'], 'safe'],
             [['cp_call_sid'], 'string', 'max' => 34],
-            [['cp_call_sid'], 'unique'],
+//            [['cp_call_sid'], 'unique'],
             [['cp_call_id'], 'exist', 'skipOnError' => true, 'targetClass' => Call::class, 'targetAttribute' => ['cp_call_id' => 'c_id']],
             [['cp_cf_id'], 'exist', 'skipOnError' => true, 'targetClass' => Conference::class, 'targetAttribute' => ['cp_cf_id' => 'cf_id']],
         ];

@@ -495,8 +495,7 @@ class CommunicationController extends ApiBaseController
                 $call = Call::find()->where(['c_call_sid' => $callData['CallSid']])->orderBy(['c_id' => SORT_ASC])->limit(1)->one();
             }
 
-            $is_conference_call = (bool)($callData['is_conference_call'] ?? false);
-            if (!$is_conference_call) {
+            if (!$call->isConference()) {
                 if ($call->isGeneralParent()) {
                     if ($child = Call::find()->firstChild($call->c_id)->one()) {
                         $call = $child;
@@ -704,6 +703,10 @@ class CommunicationController extends ApiBaseController
                 Yii::warning('Not found status Call: ' . $callSid . ', ' . VarDumper::dumpAsString($callOriginalData), 'API:Communication:voiceClient:Call::status');
             }
 
+            if (!empty($callOriginalData['is_conference_call']) && !$call->isConference()) {
+                $call->conference();
+            }
+
 
 //            if ($call->c_parent_call_sid) {
 //
@@ -899,16 +902,16 @@ class CommunicationController extends ApiBaseController
                 $call->c_group_id = $parentCall->c_group_id;
                 $call->c_queue_start_dt = $parentCall->c_queue_start_dt;
 
-                if ($parentCall->callUserGroups && !$call->callUserGroups) {
-                    foreach ($parentCall->callUserGroups as $cugItem) {
-                        $cug = new CallUserGroup();
-                        $cug->cug_ug_id = $cugItem->cug_ug_id;
-                        $cug->cug_c_id = $call->c_id;
-                        if (!$cug->save()) {
-                            \Yii::error(VarDumper::dumpAsString($cug->errors), 'API:CommunicationController:findOrCreateCall:CallUserGroup:save');
-                        }
-                    }
-                }
+//                if ($parentCall->callUserGroups && !$call->callUserGroups) {
+//                    foreach ($parentCall->callUserGroups as $cugItem) {
+//                        $cug = new CallUserGroup();
+//                        $cug->cug_ug_id = $cugItem->cug_ug_id;
+//                        $cug->cug_c_id = $call->c_id;
+//                        if (!$cug->save()) {
+//                            \Yii::error(VarDumper::dumpAsString($cug->errors), 'API:CommunicationController:findOrCreateCall:CallUserGroup:save');
+//                        }
+//                    }
+//                }
                     //$call->c_u_id = $parentCall->c_dep_id;
             }
 
@@ -941,6 +944,17 @@ class CommunicationController extends ApiBaseController
             if (!$call->save()) {
                 \Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:findOrCreateCall:Call:save');
                 throw new \Exception('findOrCreateCall: Can not save call in db', 1);
+            } else {
+                if ($parentCall && $parentCall->callUserGroups && !$call->callUserGroups) {
+                    foreach ($parentCall->callUserGroups as $cugItem) {
+                        $cug = new CallUserGroup();
+                        $cug->cug_ug_id = $cugItem->cug_ug_id;
+                        $cug->cug_c_id = $call->c_id;
+                        if (!$cug->save()) {
+                            \Yii::error(VarDumper::dumpAsString($cug->errors), 'API:CommunicationController:findOrCreateCall:CallUserGroup:save');
+                        }
+                    }
+                }
             }
         }
 
@@ -1015,16 +1029,16 @@ class CommunicationController extends ApiBaseController
 
                 }*/
 
-                if ($parentCall->callUserGroups && !$call->callUserGroups) {
-                    foreach ($parentCall->callUserGroups as $cugItem) {
-                        $cug = new CallUserGroup();
-                        $cug->cug_ug_id = $cugItem->cug_ug_id;
-                        $cug->cug_c_id = $call->c_id;
-                        if (!$cug->save()) {
-                            \Yii::error(VarDumper::dumpAsString($cug->errors), 'API:CommunicationController:findOrCreateCall:CallUserGroup:save');
-                        }
-                    }
-                }
+//                if ($parentCall->callUserGroups && !$call->callUserGroups) {
+//                    foreach ($parentCall->callUserGroups as $cugItem) {
+//                        $cug = new CallUserGroup();
+//                        $cug->cug_ug_id = $cugItem->cug_ug_id;
+//                        $cug->cug_c_id = $call->c_id;
+//                        if (!$cug->save()) {
+//                            \Yii::error(VarDumper::dumpAsString($cug->errors), 'API:CommunicationController:findOrCreateCall:CallUserGroup:save');
+//                        }
+//                    }
+//                }
                 //$call->c_u_id = $parentCall->c_dep_id;
             }
 
@@ -1058,6 +1072,21 @@ class CommunicationController extends ApiBaseController
                 \Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:findOrCreateCallByData:Call:save');
                 throw new \Exception('findOrCreateCallByData: Can not save call in db', 1);
             }*/
+
+            if (!$call->save()) {
+                \Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:findOrCreateCallByData:Call:save');
+            } else {
+                if ($parentCall && $parentCall->callUserGroups && !$call->callUserGroups) {
+                    foreach ($parentCall->callUserGroups as $cugItem) {
+                        $cug = new CallUserGroup();
+                        $cug->cug_ug_id = $cugItem->cug_ug_id;
+                        $cug->cug_c_id = $call->c_id;
+                        if (!$cug->save()) {
+                            \Yii::error(VarDumper::dumpAsString($cug->errors), 'API:CommunicationController:findOrCreateCallByData:CallUserGroup:save');
+                        }
+                    }
+                }
+            }
         }
 
 
@@ -1111,6 +1140,10 @@ class CommunicationController extends ApiBaseController
 
         if (!$call->c_recording_sid && isset($callData['RecordingSid']) && $callData['RecordingSid']) {
             $call->c_recording_sid = $callData['RecordingSid'];
+        }
+
+        if (!empty($callData['is_conference_call']) && !$call->isConference()) {
+            $call->conference();
         }
 
         return $call;

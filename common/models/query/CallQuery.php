@@ -28,4 +28,19 @@ class CallQuery extends \yii\db\ActiveQuery
     {
         return $this->andWhere(['c_parent_id' => $parentId])->orderBy(['c_id' => SORT_DESC])->limit(1);
     }
+
+    public function bySid(string $sid): self
+    {
+        return $this->andWhere(['c_call_sid' => $sid]);
+    }
+
+    public function byCreatedUser(int $userId): self
+    {
+        return $this->andWhere(['c_created_user_id' => $userId]);
+    }
+
+    public function inProgress(): self
+    {
+        return $this->andWhere(['c_status_id' => Call::STATUS_IN_PROGRESS]);
+    }
 }

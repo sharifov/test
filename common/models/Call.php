@@ -75,6 +75,7 @@ use Locale;
  * @property bool $c_is_transfer
  * @property string $c_queue_start_dt
  * @property int|null $c_group_id
+ * @property bool $c_is_conference
  *
  * @property string $c_recording_url
  * @property bool $c_is_new
@@ -252,6 +253,8 @@ class Call extends \yii\db\ActiveRecord
             ['c_queue_start_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
 
             ['c_group_id', 'integer'],
+
+            ['c_is_conference', 'boolean'],
         ];
     }
 
@@ -294,6 +297,7 @@ class Call extends \yii\db\ActiveRecord
             'c_is_transfer' => 'Transfer',
             'c_queue_start_dt' => 'Queue start dt',
             'c_group_id' => 'Group ID',
+            'c_is_conference' => 'Is conference',
         ];
     }
 
@@ -1233,6 +1237,10 @@ class Call extends \yii\db\ActiveRecord
                 $call->update();
 
                 if ($isConference) {
+                    if (!$call->isConference()) {
+                        $call->conference();
+                        $call->update();
+                    }
                     $to = 'client:seller' . $user_id;
                     $res = \Yii::$app->communication->acceptConferenceCall(
                         $call->c_call_sid,
@@ -1892,5 +1900,15 @@ class Call extends \yii\db\ActiveRecord
     public function getRecordingUrl(): string
     {
         return $this->c_recording_sid ? Yii::$app->communication->recording_url . $this->c_recording_sid : '';
+    }
+
+    public function isConference(): bool
+    {
+        return $this->c_is_conference ? true : false;
+    }
+
+    public function conference(): void
+    {
+        $this->c_is_conference = true;
     }
 }

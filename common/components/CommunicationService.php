@@ -731,7 +731,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'to_parent_call' => $to_parent_call,
         ];
 
-        $response = $this->sendRequest('twilio-jwt/accept-conference-call', $data);
+        $response = $this->sendRequest('twilio-conference-call/accept-conference-call', $data);
 
         if ($response->isOk) {
             if (isset($response->data['data'])) {
