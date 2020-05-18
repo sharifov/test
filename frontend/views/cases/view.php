@@ -114,23 +114,24 @@ $user = Yii::$app->user->identity;
 
         <div class="col-md-6">
             <?php if ($enableCommunication) : ?>
-                <?= $this->render('communication/case_communication', [
-                    'model'      => $model,
-                    'previewEmailForm' => $previewEmailForm,
-                    'previewSmsForm' => $previewSmsForm,
-                    'comForm'       => $comForm,
-                    'dataProvider'  => $dataProviderCommunication,
-                    'isAdmin'       => $isAdmin
-                ]);
-                ?>
+	            <?php if(!Yii::$app->params['settings']['new_communication_block_case']): ?>
+                    <?= $this->render('communication/case_communication', [
+                        'model'      => $model,
+                        'previewEmailForm' => $previewEmailForm,
+                        'previewSmsForm' => $previewSmsForm,
+                        'comForm'       => $comForm,
+                        'dataProvider'  => $dataProviderCommunication,
+                        'isAdmin'       => $isAdmin
+                    ]);
+                    ?>
+				<?php endif;?>
             <?php else: ?>
                 <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
             <?php endif;?>
 
 			<?php if ($enableCommunication) : ?>
-
                 <?php if(Yii::$app->params['settings']['new_communication_block_case']): ?>
-                    <?= $this->render('communication/case_communication_log', [
+                    <?= $this->render('communication/case_communication', [
                         'model'      => $model,
                         'previewEmailForm' => $previewEmailForm,
                         'previewSmsForm' => $previewSmsForm,
@@ -139,8 +140,6 @@ $user = Yii::$app->user->identity;
                         'isAdmin'       => $isAdmin
                     ]);
                     ?>
-                <?php else: ?>
-                    <div class="alert alert-info" role="alert">Communication Log block is turned off.</div>
 				<?php endif;?>
 			<?php else: ?>
                 <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
