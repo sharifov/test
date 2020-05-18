@@ -7,7 +7,7 @@ use common\models\Airline;
 use common\models\Airport;
 use DateTime;
 use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
-use sales\services\parsingDump\worldSpan\Reservation;
+use sales\services\parsingDump\lib\worldSpan\Reservation;
 use yii\helpers\VarDumper;
 
 /**
@@ -45,14 +45,14 @@ class WorldSpanReservationService
                 $result[$key]['airlineName'] = $this->getAirlineName($parseData['airline'], $onView);
                 $result[$key]['departureAirport'] = $parseData['departure_airport_iata'];
                 $result[$key]['arrivalAirport'] = $parseData['arrival_airport_iata'];
-                $result[$key]['departureDateTime'] = $this->createDateTime(
+                $result[$key]['departureDateTime'] = $parserReservation->createDateTime(
                     $parseData['departure_date_day'],
                     $parseData['departure_date_month'],
                     $parseData['departure_time_hh'],
                     $parseData['departure_time_mm']
                 );
 
-                $result[$key]['arrivalDateTime'] = $this->getArrivalDateTime(
+                $result[$key]['arrivalDateTime'] = $parserReservation->getArrivalDateTime(
                     $result[$key]['departureDateTime'],
                     $parseData['arrival_time_hh'],
                     $parseData['arrival_time_mm'],
@@ -69,7 +69,7 @@ class WorldSpanReservationService
                     $result[$key]['arrivalCity']
                 );
                 $result[$key]['layoverDuration'] = $this->getLayoverDuration($result, $key);
-                $result[$key]['arrivalDayOffset'] = $this->prepareArrivalOffset($parseData['arrival_offset']);
+                $result[$key]['arrivalDayOffset'] = $parserReservation->prepareArrivalOffset($parseData['arrival_offset']);
                 $result[$key]['cabin'] = SearchService::getCabinRealCode($parseData['cabin']);
 
                 $itinerary[] = (new ItineraryDumpDTO([]))->feelByParsedReservationDump($result[$key]);
@@ -91,14 +91,14 @@ class WorldSpanReservationService
         return $result;
     }
 
-    /**
+    /** TODO:: to helper
      * @param DateTime $departureDateTime
      * @param DateTime $arrivalDateTime
      * @param Airport|null $departureCity
      * @param Airport|null $arrivalCity
      * @return float|int
      */
-    private function getFlightDuration(DateTime $departureDateTime, DateTime $arrivalDateTime, ?Airport $departureCity, ?Airport $arrivalCity)
+    public function getFlightDuration(DateTime $departureDateTime, DateTime $arrivalDateTime, ?Airport $departureCity, ?Airport $arrivalCity)
     {
         if (isset($departureCity, $arrivalCity) && $departureCity->dst !== $arrivalCity->dst) {
             $flightDuration = ($arrivalDateTime->getTimestamp() - $departureDateTime->getTimestamp()) / 60;
@@ -121,52 +121,6 @@ class WorldSpanReservationService
             $result = ($data[$index]['departureDateTime']->getTimestamp() - $data[$index - 1]['arrivalDateTime']->getTimestamp()) / 60;
         }
         return $result;
-    }
-
-    /**
-     * @param DateTime $departureDateTime
-     * @param string $arrivalHour
-     * @param string $arrivalMinute
-     * @param string $arrivalOffset
-     * @throws \Exception
-     */
-    private function getArrivalDateTime(?DateTime $departureDateTime,  string $arrivalHour, string $arrivalMinute, string $arrivalOffset)
-    {
-        if (!$departureDateTime) {
-            return null;
-        }
-        $sourceDate = clone $departureDateTime;
-        $arrivalOffset = $this->prepareArrivalOffset($arrivalOffset);
-        if ($arrivalOffset === 0) {
-            $result = $sourceDate->setTime($arrivalHour, $arrivalMinute);
-        } else {
-            $result = $sourceDate->modify($arrivalOffset . ' day')->setTime($arrivalHour, $arrivalMinute);
-        }
-		return $result;
-    }
-
-    /**
-     * @param string $arrivalOffset
-     * @return string
-     */
-    private function prepareArrivalOffset(string $arrivalOffset): string
-    {
-		$arrivalOffset = ($arrivalOffset === '') ? '0' : $arrivalOffset;
-		return str_replace('#', '+', $arrivalOffset);
-    }
-
-    /**
-     * @param string $day
-     * @param string $month
-     * @param string $hour
-     * @param string $minute
-     * @return DateTime|false
-     */
-    private function createDateTime(string $day, string $month, string $hour, string $minute)
-    {
-        $dateFormat = 'dM H:i';
-        $dateString = $day . strtolower($month) . ' ' . $hour . ':' . $minute;
-        return \DateTime::createFromFormat($dateFormat, $dateString);
     }
 
     /**

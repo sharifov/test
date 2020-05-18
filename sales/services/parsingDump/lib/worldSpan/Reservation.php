@@ -2,6 +2,7 @@
 
 namespace sales\services\parsingDump\lib\worldSpan;
 
+use DateTime;
 use sales\helpers\app\AppHelper;
 use sales\services\parsingDump\lib\ParseDumpInterface;
 
@@ -25,6 +26,9 @@ class Reservation implements ParseDumpInterface
                     continue;
                 }
                 $parseData = $this->dataMapping($rawData);
+                $parseData = $this->postProcessing($parseData);
+                $parseData = $this->removeTrash($parseData, self::getTemporaryKeys());
+
                 $result['reservation'][$parseData['index']] = $parseData;
             } catch (\Throwable $throwable) {
                 \Yii::error(AppHelper::throwableFormatter($throwable), 'WorldSpan:Reservation:parseDump:Throwable');
@@ -41,24 +45,18 @@ class Reservation implements ParseDumpInterface
     {
         $row = trim($row);
         $pattern = self::getPatternRow();
-
         preg_match($pattern, $row, $matches);
-        preg_match('/([A-Z]{1,2})\z/', $row, $matchesCabin);
-
-        if (count($matches) >= 14) {
-            $matches[] = $matchesCabin[1] ?? '';
-        } else {
-            $matches = [];
-        }
-        return $matches;
+        return count($matches) >= 14 ? $matches : [];
     }
 
-     /**
+
+    /**
+     * @param string|null $pattern
      * @return string
      */
-    public static function getPatternRow(): string
+    public static function getPatternRow(?string $pattern = null): string
     {
-        return '/^
+        return $pattern ?? '/^
             (\d{1,2}) # index
             (\s{1}|\*)([A-Z]{2}) # Airline
             \s*(\d{2,4})([A-Z]{1}) # Flight number + Booking Class
@@ -91,7 +89,95 @@ class Reservation implements ParseDumpInterface
         $result['arrival_time_hh'] = $data[13];
         $result['arrival_time_mm'] = $data[14];
         $result['arrival_offset'] = trim($data[15]);
-        $result['cabin'] = trim($data[16]);
         return $result;
+    }
+
+    /**
+     * @param string $day
+     * @param string $month
+     * @param string $hour
+     * @param string $minute
+     * @return DateTime|false
+     */
+    public function createDateTime(string $day, string $month, string $hour, string $minute)
+    {
+        $dateFormat = 'dM H:i';
+        $dateString = $day . strtolower($month) . ' ' . $hour . ':' . $minute;
+        return DateTime::createFromFormat($dateFormat, $dateString);
+    }
+
+    private function postProcessing(array $data): array
+    {
+        $data['departure_date_time'] = $this->createDateTime(
+            $data['departure_date_day'],
+            $data['departure_date_month'],
+            $data['departure_time_hh'],
+            $data['departure_time_mm']
+        );
+        $data['arrival_date_time'] = $this->getArrivalDateTime(
+            $data['departure_date_time'],
+            $data['arrival_time_hh'],
+            $data['arrival_time_mm'],
+            $data['arrival_offset']
+        );
+        return $data;
+    }
+
+    /**
+     * @param DateTime $departureDateTime
+     * @param string $arrivalHour
+     * @param string $arrivalMinute
+     * @param string $arrivalOffset
+     * @throws \Exception
+     */
+    public function getArrivalDateTime(?DateTime $departureDateTime,  string $arrivalHour, string $arrivalMinute, string $arrivalOffset)
+    {
+        if (!$departureDateTime) {
+            return null;
+        }
+        $sourceDate = clone $departureDateTime;
+        $arrivalOffset = $this->prepareArrivalOffset($arrivalOffset);
+        if ($arrivalOffset === 0) {
+            $result = $sourceDate->setTime($arrivalHour, $arrivalMinute);
+        } else {
+            $result = $sourceDate->modify($arrivalOffset . ' day')->setTime($arrivalHour, $arrivalMinute);
+        }
+		return $result;
+    }
+
+    /**
+     * @param string $arrivalOffset
+     * @return string
+     */
+    public function prepareArrivalOffset(string $arrivalOffset): string
+    {
+		$arrivalOffset = ($arrivalOffset === '') ? '0' : $arrivalOffset;
+		return str_replace('#', '+', $arrivalOffset);
+    }
+
+    /**
+     * @param array|null $temporaryKeys
+     * @return array
+     */
+    private static function getTemporaryKeys(?array $temporaryKeys = null): array
+    {
+        return $temporaryKeys ?? [
+            'departure_date_day', 'departure_date_month', 'departure_time_hh', 'departure_time_mm',
+            'arrival_date_day', 'arrival_date_month', 'arrival_time_hh', 'arrival_time_mm',
+            'arrival_offset',
+        ];
+    }
+
+    /**
+     * @param array $data
+     * @param array $temporaryKeys
+     * @return array
+     */
+    private function removeTrash(array $data, array $temporaryKeys): array
+    {
+        foreach ($temporaryKeys as $value) {
+            unset($data[$value]);
+        }
+        return $data;
     }
 }
