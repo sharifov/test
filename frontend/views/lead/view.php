@@ -169,10 +169,9 @@ $lead = $leadForm->getLead();
                         'comForm'       => $comForm,
                         'leadId'        => $lead->id,
                         'dataProvider'  => $dataProviderCommunication,
-                        'isAdmin'       => $is_admin
+                        'isAdmin'       => $is_admin,
+                        'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_lead']
                     ]); ?>
-				<?php else: ?>
-                    <div class="alert alert-info" role="alert">Communication Log block is turned off.</div>
 				<?php endif; ?>
             <?php else: ?>
                 <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
@@ -187,11 +186,10 @@ $lead = $leadForm->getLead();
 					'comForm'       => $comForm,
 					'leadId'        => $lead->id,
 					'dataProvider'  => $dataProviderCommunicationLog,
-					'isAdmin'       => $is_admin
-				]);
+					'isAdmin'       => $is_admin,
+                    'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_lead']
+                ]);
 				?>
-                <?php else: ?>
-                    <div class="alert alert-info" role="alert">Communication Log block is turned off.</div>
                 <?php endif; ?>
 			<?php else: ?>
                 <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
