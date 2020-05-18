@@ -19,7 +19,6 @@ class Pricing implements ParseDumpInterface
         $result = [];
         try {
             if ($prices = $this->parsePrice($string)) {
-                $result['iata'] = $this->parseIata($string);
                 $result['price'] = $prices;
             }
         } catch (\Throwable $throwable) {
@@ -39,30 +38,29 @@ class Pricing implements ParseDumpInterface
         preg_match($ticketPricePattern, $string, $ticketPriceMatches);
 
         if (isset($ticketPriceMatches[1]) && $ticketPrice = trim($ticketPriceMatches[1])) {
+            $j = 0;
             $ticketPrices = explode("\n", $ticketPrice);
             array_shift($ticketPrices);
 
             foreach ($ticketPrices as $key => $value) {
                 if ($values = $this->prepareRow($value)) {
-                    $result['tickets'][$key]['name'] = $values[0] ?? null;
-                    $result['tickets'][$key]['fare'] = $values[1] ?? null;
-                    $result['tickets'][$key]['taxes'] = $values[2] ?? null;
-                    $result['tickets'][$key]['amount'] = $values[3] ?? null;
+
+                    preg_match('/([A-Z]+)(\d+)/', $values[0], $typeMatches);
+                    if (empty($typeMatches)) {
+                        continue;
+                    }
+
+                    for ($i = 0; $i < (int) $typeMatches[2]; $i++) {
+                        $result[$j]['type'] = $this->typeMapping($typeMatches[1]);
+                        $result[$j]['fare'] = $values[1] ?? null;
+                        $result[$j]['taxes'] = $values[2] ?? null;
+                        $result[$j]['amount'] = $values[3] ?? null;
+                        $j ++;
+                    }
                 }
             }
         }
         return $result;
-    }
-
-    /**
-     * @param string $string
-     * @return string|null
-     */
-    public function parseIata(string $string): ?string
-    {
-        $airlinePattern = '/CARRIER DEFAULT\s(.*?)\n\*/';
-        preg_match($airlinePattern, $string, $airlineMatches);
-        return isset($airlineMatches[1]) ? trim($airlineMatches[1]) : null;
     }
 
     /**
@@ -74,5 +72,30 @@ class Pricing implements ParseDumpInterface
         $value = trim($row);
         $value = preg_replace('|[\s]+|s', ' ', $value);
         return explode(' ', $value);
+    }
+
+    /** TODO:: Alexei get info
+     * @param string|null $source
+     * @return string
+     */
+    private function typeMapping(?string $source): string
+    {
+        switch ($source) {
+            case 'ADT':
+            case 'JCB':
+                $result = 'ADT';
+                break;
+            case 'CNN':
+            case 'JNN':
+                $result = 'CHD';
+                break;
+            case 'INF':
+            case 'JNF':
+                $result = 'INF';
+                break;
+            default:
+                $result = 'ADT';
+        }
+        return $result;
     }
 }

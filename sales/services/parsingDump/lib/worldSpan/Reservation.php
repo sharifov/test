@@ -164,7 +164,7 @@ class Reservation implements ParseDumpInterface
         return $temporaryKeys ?? [
             'departure_date_day', 'departure_date_month', 'departure_time_hh', 'departure_time_mm',
             'arrival_date_day', 'arrival_date_month', 'arrival_time_hh', 'arrival_time_mm',
-            'arrival_offset',
+            'departure_day_of_week', 'arrival_offset',
         ];
     }
 

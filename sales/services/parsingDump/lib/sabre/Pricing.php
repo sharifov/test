@@ -19,7 +19,7 @@ class Pricing implements ParseDumpInterface
         $result = [];
         try {
             if ($prices = $this->parsePrice($string)) {
-                $result['iata'] = $this->parseIata($string);
+
                 $result['price'] = $prices;
             }
         } catch (\Throwable $throwable) {
@@ -35,44 +35,57 @@ class Pricing implements ParseDumpInterface
     public function parsePrice(string $string): ?array
     {
         $result = null;
-        $ticketPricePattern = '/TICKET (.*?)\*TTL/s';
+        $ticketPricePattern = "/BASE FARE TAXES\/FEES\/CHARGES TOTAL\s(.*?)TTL/s";
         preg_match($ticketPricePattern, $string, $ticketPriceMatches);
 
-        if (isset($ticketPriceMatches[1]) && $ticketPrice = trim($ticketPriceMatches[1])) {
-            $ticketPrices = explode("\n", $ticketPrice);
-            array_shift($ticketPrices);
+        if (isset($ticketPriceMatches[1]) && $ticketPriceText = trim($ticketPriceMatches[1])) {
+            $i = 0;
+            $ticketPrices = explode("\n", $ticketPriceText);
+            $pricePattern = '/
+                (\d{1,2})-
+                \s+USD(\d+.\d+) # fare
+                \s+(\d+.\d+)[A-Z]{1,3} # taxes
+                \s+USD(\d+.\d+)([A-Z]{3}) # amount + type                         
+                /x';
 
-            foreach ($ticketPrices as $key => $value) {
-                if ($values = $this->prepareRow($value)) {
-                    $result['tickets'][$key]['name'] = $values[0] ?? null;
-                    $result['tickets'][$key]['fare'] = $values[1] ?? null;
-                    $result['tickets'][$key]['taxes'] = $values[2] ?? null;
-                    $result['tickets'][$key]['amount'] = $values[3] ?? null;
+            foreach ($ticketPrices as $row) {
+                preg_match($pricePattern, $row, $matches);
+                if (isset($matches[1])) {
+                    $type = $matches[5] ?? null;
+                    $result[$i]['type'] = $this->typeMapping($type);
+                    $result[$i]['fare'] = $matches[2] ?? null;
+                    $result[$i]['taxes'] = $matches[3] ?? null;
+                    $result[$i]['amount'] = $matches[4] ?? null;
+                    $i ++;
                 }
+
             }
         }
         return $result;
     }
 
     /**
-     * @param string $string
-     * @return string|null
+     * @param string|null $source
+     * @return string
      */
-    public function parseIata(string $string): ?string
+    private function typeMapping(?string $source): string
     {
-        $airlinePattern = '/CARRIER DEFAULT\s(.*?)\n\*/';
-        preg_match($airlinePattern, $string, $airlineMatches);
-        return isset($airlineMatches[1]) ? trim($airlineMatches[1]) : null;
-    }
-
-    /**
-     * @param string $row
-     * @return false|string[]
-     */
-    private function prepareRow(string $row)
-    {
-        $value = trim($row);
-        $value = preg_replace('|[\s]+|s', ' ', $value);
-        return explode(' ', $value);
+        switch ($source) {
+            case 'ADT':
+            case 'JCB':
+                $result = 'ADT';
+                break;
+            case 'CNN':
+            case 'JNN':
+                $result = 'CHD';
+                break;
+            case 'INF':
+            case 'JNF':
+                $result = 'INF';
+                break;
+            default:
+                $result = 'ADT';
+        }
+        return $result;
     }
 }
