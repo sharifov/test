@@ -264,7 +264,7 @@ $(document).ready(function() {
     $(document).on('click', '#cancel-active-call', function(e) {
         e.preventDefault();
 
-        let twilioDevice = window.localStorage.getItem('twilioDevice');
+        let twilioDevice = JSON.parse(window.localStorage.getItem('twilioDevice'));
 
         if (device || (device = twilioDevice)) {
             updateAgentStatus(connection, false, 1);

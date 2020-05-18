@@ -686,7 +686,13 @@ use yii\helpers\Html;
                     $('#output-selection').show();
                 }
 
-                window.localStorage.setItem('twilioDevice', device);
+                window.localStorage.setItem('twilioDevice', JSON.stringify(device, function (key, value) {
+                    if (typeof value === 'function') {
+                        return value.toString();
+                    } else {
+                        return value;
+                    }
+                }));
             })
             .catch(function (err) {
                 updateAgentStatus(connection, false, 1);
