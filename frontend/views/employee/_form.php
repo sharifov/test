@@ -15,6 +15,7 @@ use yii\grid\ActionColumn;
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $dataUserProductType yii\data\ActiveDataProvider */
 /* @var $model common\models\Employee */
+/* @var $userVoiceMailProvider \yii\data\ActiveDataProvider */
 
 use sales\access\EmployeeProjectAccess;
 use yii\bootstrap\Html;
@@ -381,6 +382,7 @@ JS;
                     <?= $form->field($modelProfile, 'up_skill')->dropDownList(\common\models\UserProfile::SKILL_TYPE_LIST, ['prompt' => '---']) ?>
                     <?= $form->field($modelProfile, 'up_auto_redial')->checkbox() ?>
                     <?= $form->field($modelProfile, 'up_kpi_enable')->checkbox() ?>
+                    <?= $form->field($modelProfile, 'up_show_in_contact_list')->checkbox() ?>
                 </div>
                 <div class="col-md-3">
                     <?= $form->field($modelProfile, 'up_2fa_enable')->checkbox() ?>
@@ -529,6 +531,60 @@ JS;
             <?php \yii\widgets\Pjax::end(); ?>
         </div>
 
+        <div class="user-voice-mail">
+            <h4>User Voice Mail</h4>
+			<?php \yii\widgets\Pjax::begin(['id' => 'pjax-grid-voice-mail']); ?>
+
+            <p>
+				<?php echo Html::a('<i class="glyphicon glyphicon-plus"></i> Add Voice Mail',null,
+					[
+						'class' => 'btn btn-success btn-xs add-voice-mail',
+						'title' => 'Add Voice Mail',
+						'data-user_id' => $model->id,
+						'data-pjax' => '0',
+					]
+				)?>
+            </p>
+
+			<?= \yii\grid\GridView::widget([
+				'dataProvider' => $userVoiceMailProvider,
+				'columns' => [
+					'uvm_name',
+					'uvm_say_language',
+					'uvm_record_enable:booleanByLabel',
+					'uvm_max_recording_time',
+					'uvm_transcribe_enable:booleanByLabel',
+					'uvm_enabled:booleanByLabel',
+					'uvm_created_dt:byUserDateTime',
+					'uvm_updated_dt:byUserDateTime',
+					[
+						'class' => ActionColumn::class,
+						'template' => '{view} {update} {delete}',
+						'controller' => 'user-voice-mail',
+						'buttons' => [
+							'update' => static function ($key) {
+								return Html::a('<span class="glyphicon glyphicon-edit"></span>','#', [
+                                    'class' => 'update-user-voice-mail',
+                                    'title' => 'Update Voice Mail',
+                                    'data-id' => $key,
+                                    'data-pjax' => '0',
+                                ]);
+							},
+							'delete' => static function ($url) {
+                                return Html::a('<span class="glyphicon glyphicon-trash"></span>', '#', [
+                                    'class' => 'delete-user-voice-mail',
+                                    'title' => 'Delete Voice Mail',
+                                    'data-pjax' => '0'
+                                ]);
+							},
+						],
+					],
+				],
+			]); ?>
+
+			<?php \yii\widgets\Pjax::end(); ?>
+        </div>
+
         <?php if (Auth::can('user-product-type/list')) :?>
             <div class="user-product-type">
                 <h4>Product Type</h4>
@@ -637,6 +693,7 @@ $js = <<<JS
 
     $('#modal-df').on('hidden.bs.modal', function () {
         $.pjax.reload({container:'#pjax-grid-upp', 'async': false});
+        $.pjax.reload({container:'#pjax-grid-voice-mail', 'async': false});
         $.pjax.reload({container: "#pjax-grid-product-type", 'async': false});
         
         /*new PNotify({
@@ -715,6 +772,48 @@ $js = <<<JS
         $.get('/user-product-type/update-ajax', {data : $(this).closest('tr').data('key')},
             function (data) {
                 modal.find('.modal-title').html('Update Product Type');
+                modal.find('.modal-body').html(data);
+                modal.modal();
+            }
+        );
+    });
+    
+    $(document).on('click', '.update-user-voice-mail', function(e) {
+        e.preventDefault();
+        let modal = $('#modal-df');
+        
+        $.get('/user-voice-mail/ajax-update', {id: $(this).closest('tr').data('key')},
+            function (data) {
+                modal.find('.modal-title').html('Update Voice Mail');
+                modal.find('.modal-body').html(data);
+                modal.modal();
+            }
+        );
+    });
+    
+    $(document).on('click', '.delete-user-voice-mail', function(e) {
+        e.preventDefault();
+        let modal = $('#modal-df');
+        
+        if (confirm('Confirm deletion...'))
+        $.get('/user-voice-mail/ajax-delete', {id: $(this).closest('tr').data('key')},
+            function (data) {
+                if (!data.error) {
+                    $.pjax.reload({container:'#pjax-grid-voice-mail', 'async': false});
+                } else {
+                    createNotify('Error', data.message, 'error');
+                }
+            }
+        );
+    });
+    
+    $(document).on('click', '.add-voice-mail', function (e) { 
+        e.preventDefault();
+        let modal = $('#modal-df');
+        
+        $.get('/user-voice-mail/ajax-create', {uid: $(this).data('user_id')},
+            function (data) {
+                modal.find('.modal-title').html('Add Voice Mail');
                 modal.find('.modal-body').html(data);
                 modal.modal();
             }

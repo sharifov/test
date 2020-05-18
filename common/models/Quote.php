@@ -8,6 +8,7 @@ use common\models\local\FlightSegment;
 use common\models\local\LeadLogMessage;
 use common\models\query\QuoteQuery;
 use sales\entities\EventTrait;
+use sales\services\parsingDump\WorldSpanReservationService;
 use Yii;
 use yii\base\ErrorException;
 use yii\base\InvalidArgumentException;

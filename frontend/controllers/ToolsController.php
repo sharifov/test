@@ -3,6 +3,12 @@
 namespace frontend\controllers;
 
 use common\models\Quote;
+
+use sales\services\parsingDump\worldSpan\Baggage;
+use sales\services\parsingDump\worldSpan\Pricing;
+use sales\services\parsingDump\worldSpan\Reservation;
+use sales\services\parsingDump\worldSpan\WorldSpan;
+use sales\services\parsingDump\WorldSpanReservationService;
 use Yii;
 use common\models\ApiLog;
 use common\models\search\ApiLogSearch;
@@ -93,17 +99,38 @@ class ToolsController extends FController
         return $this->render('supervisor');
     }
 
-    public function actionCheckFlightDump()
+    /**
+     * @return string
+     * @throws \Exception
+     */
+    public function actionCheckFlightDump(): string
     {
         $data = [];
         $dump = Yii::$app->request->post('dump');
+        $type = Yii::$app->request->post('type');
+        $prepareSegment = (int) Yii::$app->request->post('prepare_segment', 0);
+
         if ($dump) {
+            $typeDump = $type !== '' ? $type : WorldSpan::TYPE_ALL;
 
-            $data = Quote::parseDump($dump, true);
-
-
+            if ($typeDump === WorldSpan::TYPE_RESERVATION && $prepareSegment === 1) {
+                $data = (new WorldSpanReservationService())->parseReservation($dump, false);
+            } elseif ($typeDump === WorldSpan::TYPE_ALL) {
+                $data[] = (new Reservation())->parseDump($dump);
+                $data[] = (new Pricing())->parseDump($dump);
+                $data[] = (new Baggage())->parseDump($dump);
+            } else {
+                $obj = WorldSpan::initClass($typeDump);
+                $data = $obj->parseDump($dump);
+            }
         }
 
-        return $this->render('check-flight-dump', ['dump' => $dump, 'data' => $data]);
+        return $this->render('check-flight-dump', [
+            'dump' => $dump,
+            'data' => $data,
+            'type' => $type,
+            'typeDump' => $typeDump ?? null,
+            'prepareSegment' => $prepareSegment,
+        ]);
     }
 }

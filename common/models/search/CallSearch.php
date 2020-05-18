@@ -60,6 +60,7 @@ class CallSearch extends Call
     public $timeTo;
 
     public $dep_ids = [];
+    public $phoneList = [];
 
     private $callSearchRepository;
 
@@ -99,6 +100,8 @@ class CallSearch extends Call
             ['c_is_transfer', 'boolean'],
             ['c_queue_start_dt', 'date', 'format' => 'php:Y-m-d'],
             ['c_group_id', 'integer'],
+
+			['phoneList', 'safe']
         ];
     }
 
@@ -374,6 +377,57 @@ class CallSearch extends Call
         $query->with(['cProject', 'cLead', /*'cLead.leadFlightSegments',*/ 'cCreatedUser', 'cDep', 'callUserAccesses', 'cuaUsers', 'cugUgs', 'calls']);
 
         return $dataProvider;
+    }
+
+    public function searchRealtimeUserCallMap($params)
+    {
+        $this->load($params);
+
+        $query = Call::find()->alias('c');
+        $query->select(['c.c_id', 'c.c_call_type_id', 'c.c_source_type_id', 'c.c_from', 'c.c_to', 'c.c_status_id', 'c.c_parent_id', 'c.c_call_duration',
+            'c.c_lead_id', 'c.c_case_id', 'c.c_created_dt', 'c.c_updated_dt', 'c.c_created_user_id', 'c.c_call_duration',
+            'name as project_name', 'ce.username', 'dep_name', 'c.c_recording_sid',
+            'group_concat(cau.username SEPARATOR "-") as cua_user_names', 'concat(cls.first_name, " ", cls.last_name) as full_name', 'l.gid', 'cs_gid',
+            'group_concat(cua_user_id SEPARATOR "-") as cua_user_ids', 'group_concat(cua_status_id SEPARATOR "-") as cua_status_ids'
+        ]);
+        $query->groupBy(['c.c_id']);
+        $query->orderBy(['c.c_id' => SORT_DESC]);
+
+
+        $query->andWhere(['or',
+            ['c.c_parent_id' => null],
+            ['c.c_status_id' => [Call::STATUS_DELAY, Call::STATUS_QUEUE, Call::STATUS_IN_PROGRESS]]
+        ]);
+
+        if ($this->status_ids) {
+            $query->andWhere(['c.c_status_id' => $this->status_ids]);
+        }
+
+        if ($this->dep_ids) {
+            $query->andWhere(['c_dep_id' => $this->dep_ids]);
+        }
+
+        if ($this->ug_ids) {
+            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])
+                ->where(['ugs_group_id' => $this->ug_ids]);
+            $query->andWhere(['IN', 'c_created_user_id', $subQuery]);
+        }
+
+        $query->joinWith(['cProject', 'cLead as l', 'cCase', 'cCreatedUser as ce', 'cDep', 'cClient as cls', 'callUserAccesses.cuaUser as cau', 'cugUgs']);
+
+        $command = $query->createCommand();
+        $data = $command->queryAll();
+
+        foreach ($data as $key => $row) {
+            if ($row['c_created_dt']) {
+                $data[$key]['c_created_dt'] = Yii::$app->formatter->asDatetime(strtotime($row['c_created_dt']), 'php: Y-m-d H:i:s');
+            }
+            if ($row['c_updated_dt']) {
+                $data[$key]['c_updated_dt'] = Yii::$app->formatter->asDatetime(strtotime($row['c_updated_dt']), 'php: Y-m-d H:i:s');
+            }
+        }
+
+        return $data;
     }
 
     /**
@@ -754,4 +808,107 @@ class CallSearch extends Call
 
         return $dataProvider;
     }
+
+    public function searchRealtimeUserCallMapHistory($params)
+    {
+        $this->load($params);
+        $query = Call::find()->alias('c')->limit(10);
+        $query->select(['c.c_id', 'c.c_source_type_id', 'c.c_status_id', 'c.c_parent_id', 'c.c_call_type_id', 'c.c_created_user_id', 'c.c_lead_id', 'c.c_case_id',
+            'c.c_created_dt', 'c.c_updated_dt', 'c.c_to', 'c.c_from', 'c.c_call_duration', 'c.c_recording_sid',
+            'ce.username', 'name as project_name', 'concat(cls.first_name, " ", cls.last_name) as full_name', 'dep_name', 'l.gid', 'cs_gid',
+            'group_concat(cau.username SEPARATOR "-") as cua_user_names', 'group_concat(cua_user_id SEPARATOR "-") as cua_user_ids', 'group_concat(cua_status_id SEPARATOR "-") as cua_status_ids'
+        ]);
+        $query->groupBy(['c.c_id']);
+        $query->orderBy(['c.c_id' => SORT_DESC]);
+
+
+        /*$query->andWhere(['c_call_status' => [Call::CALL_STATUS_RINGING]]);
+        $query->orWhere(['c_call_status' => [Call::CALL_STATUS_IN_PROGRESS]]);
+        $query->orWhere(['c_call_status' => [Call::CALL_STATUS_QUEUE]]);*/
+
+        $query->andWhere(['c.c_parent_id' => null]);
+
+        if ($this->status_ids) {
+            $query->andWhere(['c_status_id' => $this->status_ids]);
+        }
+
+        if ($this->dep_ids) {
+            $query->andWhere(['c_dep_id' => $this->dep_ids]);
+        }
+
+        if ($this->ug_ids) {
+            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])
+                ->where(['ugs_group_id' => $this->ug_ids]);
+            $query->andWhere(['IN', 'c_created_user_id', $subQuery]);
+        }
+
+        $query->joinWith(['cProject', 'cLead as l', 'cCase', 'cClient as cls', 'cCreatedUser as ce', 'cDep', 'callUserAccesses.cuaUser as cau', 'cugUgs']);
+
+        $command = $query->createCommand();
+        $data = $command->queryAll();
+
+        foreach ($data as $row){
+            $queryChild = Call::find()->alias('ch');
+            $queryChild->select(['ch.c_id', 'ch.c_parent_id', 'ch.c_call_type_id', 'ch.c_created_dt', 'ch.c_updated_dt', 'ch.c_source_type_id', 'ch.c_status_id', 'ch.c_to',
+                'ch.c_created_user_id', 'ch.c_call_duration', 'ch.c_recording_sid', 'ce.username', 'dep_name', 'group_concat(cau.username SEPARATOR "-") as cua_user_names',
+                'group_concat(cua_user_id SEPARATOR "-") as cua_user_ids', 'group_concat(cua_status_id SEPARATOR "-") as cua_status_ids'
+            ]);
+            $queryChild->andWhere(['ch.c_parent_id' => $row['c_id']]);
+            $queryChild->groupBy(['ch.c_id']);
+
+            $queryChild->joinWith(['cCreatedUser as ce', 'cDep', 'callUserAccesses.cuaUser as cau']);
+
+            $command = $queryChild->createCommand();
+            $childData = $command->queryAll();
+            foreach ($childData as $row){
+                array_push($data, $row);
+            }
+        }
+
+        foreach ($data as $key => $row) {
+            if ($row['c_created_dt']) {
+                $data[$key]['c_created_dt'] = Yii::$app->formatter->asDatetime(strtotime($row['c_created_dt']), 'php: Y-m-d H:i:s');
+            }
+
+            if ($row['c_updated_dt']) {
+                $data[$key]['c_updated_dt'] = Yii::$app->formatter->asDatetime(strtotime($row['c_updated_dt']), 'php: Y-m-d H:i:s');
+            }
+        }
+
+        return $data;
+    }
+
+    public function getCallHistory($params): ActiveDataProvider
+	{
+		$this->load($params);
+
+		$query = new Query();
+
+		if($this->limit > 0) {
+			$query->limit($this->limit);
+		}
+
+		$dataProvider = new ActiveDataProvider([
+			'query' => $query,
+			'pagination' => $this->limit > 0 ? false : [
+				'pageSize' => 10,
+			]
+		]);
+
+		if (!$this->validate()) {
+			// uncomment the following line if you do not want to return any records when validation fails
+			$query->where('0=1');
+			return $dataProvider;
+		}
+
+		$query->select(['c_call_type_id', 'c_from', 'c_to', 'c_caller_name', 'c_created_dt', 'c_status_id', 'c_call_duration']);
+		$query->from('call');
+		$query->where(['IN', 'c_from', $this->phoneList]);
+		$query->orWhere(['IN', 'c_to', $this->phoneList]);
+		$query->orderBy(['c_created_dt' => SORT_DESC]);
+
+//		print_r($query->createCommand()->rawSql);die;
+
+		return $dataProvider;
+	}
 }

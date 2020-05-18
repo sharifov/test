@@ -3,6 +3,7 @@
 use common\models\Department;
 use common\models\Lead;
 use frontend\widgets\lead\editTool\ButtonWidget;
+use sales\auth\Auth;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\DetailView;
@@ -21,7 +22,7 @@ $this->title = 'Lead ID: ' . $model->id . ', UID: '.$model->uid;
 $this->params['breadcrumbs'][] = ['label' => 'Leads', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 
-$isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
+$isAgent = Auth::user()->isAgent();
 
 ?>
 <div class="lead-view">

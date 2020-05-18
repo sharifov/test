@@ -6,6 +6,7 @@ use common\components\ChartTools;
 use common\components\CommunicationService;
 use common\models\query\SmsQuery;
 use DateTime;
+use modules\twilio\components\TwilioCommunicationService;
 use sales\entities\cases\Cases;
 use sales\entities\EventTrait;
 use sales\events\sms\SmsCreatedByIncomingSalesEvent;
@@ -14,6 +15,7 @@ use sales\events\sms\SmsCreatedEvent;
 use sales\services\sms\incoming\SmsIncomingForm;
 use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\VarDumper;
 
@@ -67,6 +69,7 @@ use yii\helpers\VarDumper;
  * @property Project $sProject
  * @property SmsTemplateType $sTemplateType
  * @property Employee $sUpdatedUser
+ * @property Client $client
  */
 class Sms extends \yii\db\ActiveRecord
 {
@@ -144,7 +147,7 @@ class Sms extends \yii\db\ActiveRecord
 
     public static function createByIncomingDefault(
         SmsIncomingForm $form,
-        int $clientId,
+        ?int $clientId,
         ?int $ownerId,
         ?int $leadId,
         ?int $caseId
@@ -166,7 +169,7 @@ class Sms extends \yii\db\ActiveRecord
      */
     public static function createByIncomingExchange(
         SmsIncomingForm $form,
-        int $clientId,
+        ?int $clientId,
         ?int $ownerId,
         ?int $caseId
     ): self
@@ -187,7 +190,7 @@ class Sms extends \yii\db\ActiveRecord
      */
     public static function createByIncomingSupport(
         SmsIncomingForm $form,
-        int $clientId,
+        ?int $clientId,
         ?int $ownerId,
         ?int $caseId
     ): self
@@ -208,7 +211,7 @@ class Sms extends \yii\db\ActiveRecord
      */
     public static function createByIncomingSales(
         SmsIncomingForm $form,
-        int $clientId,
+        ?int $clientId,
         ?int $ownerId,
         ?int $leadId
     ): self
@@ -225,7 +228,7 @@ class Sms extends \yii\db\ActiveRecord
      * @param int $clientId
      * @param int|null $ownerId
      */
-    private function loadByIncoming(SmsIncomingForm $form, int $clientId, ?int $ownerId): void
+    private function loadByIncoming(SmsIncomingForm $form, ?int $clientId, ?int $ownerId): void
     {
 //        $this->s_communication_id = $form->si_id;
         $this->s_type_id = self::TYPE_INBOX;
@@ -384,6 +387,14 @@ class Sms extends \yii\db\ActiveRecord
         return self::TYPE_LIST[$this->s_type_id] ?? '-';
     }
 
+	/**
+	 * @return array|string[]
+	 */
+    public static function getSmsTypeList(): array
+	{
+		return self::TYPE_LIST;
+	}
+
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -432,6 +443,11 @@ class Sms extends \yii\db\ActiveRecord
         return $this->hasOne(SmsTemplateType::class, ['stp_id' => 's_template_type_id']);
     }
 
+    public function getClient(): ActiveQuery
+    {
+        return $this->hasOne(Client::class, ['id' => 's_client_id']);
+    }
+
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -458,6 +474,7 @@ class Sms extends \yii\db\ActiveRecord
         $communication = Yii::$app->communication;
         $data = [];
         $data['project_id'] = $this->s_project_id;
+        $data['s_id'] = $this->s_id;
 
         $content_data['sms_text'] = $this->s_sms_text;
 
@@ -729,5 +746,20 @@ class Sms extends \yii\db\ActiveRecord
         if ($this->s_case_id && $this->sCase) {
             $this->sCase->updateLastAction();
         }
+    }
+
+    public function isOut(): bool
+    {
+        return $this->s_type_id === self::TYPE_OUTBOX;
+    }
+
+    public function isIn(): bool
+    {
+        return $this->s_type_id === self::TYPE_INBOX;
+    }
+
+    public function isDraft(): bool
+    {
+        return $this->s_type_id === self::TYPE_DRAFT;
     }
 }

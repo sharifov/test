@@ -336,6 +336,9 @@ use yii\widgets\Pjax; ?>
     function refreshCallBox(obj) {
         // console.log(obj);
         $.pjax.reload({url: callBoxUrl, container: '#call-box-pjax', push: false, replace: false, 'scrollTo': false, timeout: 7000, async: false, data: {id: obj.id, status: obj.status}});
+        if (typeof PhoneWidgetCall === 'object') {
+            PhoneWidgetCall.refreshCallStatus(obj);
+        }
     }
 
 </script>

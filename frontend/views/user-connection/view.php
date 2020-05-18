@@ -31,6 +31,18 @@ $this->params['breadcrumbs'][] = $this->title;
         'attributes' => [
             'uc_id',
             'uc_connection_id',
+            'uc_connection_uid',
+            'uc_app_instance',
+            [
+                'attribute' => 'uc_sub_list',
+                'value' => static function (\common\models\UserConnection $model) {
+                    if ($model->uc_sub_list && $subList = @json_decode($model->uc_sub_list, true)) {
+                        return Html::encode(implode(', ', $subList));
+                    }
+                    return  '-';
+                },
+                'format' => 'raw',
+            ],
             'uc_user_id',
             'uc_lead_id',
             'uc_case_id',

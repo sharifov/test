@@ -1,5 +1,6 @@
 <?php
 
+use frontend\helpers\EmailHelper;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use \common\models\Email;
@@ -106,7 +107,7 @@ use \common\models\Call;
                     <?php echo \yii\helpers\StringHelper::truncate(Email::strip_html_tags($mail->getEmailBodyHtml()), 300, '...', null, true)?>
                 </div>
                 <div class="chat__message-footer">
-                    <?=Html::a('<i class="fa fa-search-plus"></i> Details', '#', ['class' => 'chat__details', 'data-id' => $mail->e_id])?>
+                    <?= EmailHelper::renderDetailButton($mail) ?>
                 </div>
             </div>
         </div>

@@ -8,9 +8,6 @@ use yii\widgets\ActiveForm;
 /* @var $form yii\widgets\ActiveForm */
 /* @var $caseModel \sales\entities\cases\Cases*/
 
-
-//$isAgent = Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id);
-
 ?>
 
 <div class="sale-search">

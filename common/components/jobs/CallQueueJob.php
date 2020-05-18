@@ -34,6 +34,7 @@ use yii\queue\Queue;
  * @property int $call_id
  * @property int $delay
  * @property int $source_id
+ * @property bool $callFromInternalPhone
  *
  * @property CasesCreateService $casesCreateService
  * @property ClientManageService $clientManageService
@@ -47,6 +48,7 @@ class CallQueueJob extends BaseObject implements JobInterface
     public $call_id;
     public $source_id = 0;
     public $delay;
+    public $callFromInternalPhone = false;
 
     private $casesCreateService;
     private $casesRepository;
@@ -75,7 +77,10 @@ class CallQueueJob extends BaseObject implements JobInterface
             $this->casesRepository = Yii::createObject(CasesRepository::class);
             $this->casesSaleService = Yii::createObject(CasesSaleService::class);
 
-            // Yii::info('CallQueueJob - CallId: ' . $this->call_id ,'info\CallQueueJob');
+            $createLeadOnIncoming = $this->callFromInternalPhone ? false : (bool)(Yii::$app->params['settings']['create_lead_on_incoming_call'] ?? true);
+            $createCaseOnIncoming = $this->callFromInternalPhone ? false : (bool)(Yii::$app->params['settings']['create_case_on_incoming_call'] ?? true);
+
+			// Yii::info('CallQueueJob - CallId: ' . $this->call_id ,'info\CallQueueJob');
 
             if ($this->delay) {
                 sleep($this->delay);
@@ -98,7 +103,6 @@ class CallQueueJob extends BaseObject implements JobInterface
                     // $call->c_call_status = Call::TW_STATUS_QUEUE;
                     $call->setStatusQueue();
                 }
-
 
                 if ((int) $call->c_dep_id === Department::DEPARTMENT_SALES) {
                     if ($call->c_from) {
@@ -127,14 +131,19 @@ class CallQueueJob extends BaseObject implements JobInterface
 
                         try {
                             $lead = Lead::findLastLeadByClientPhone($call->c_from, $call->c_project_id);
-                            if (!$lead) {
+                            if (!$lead && $createLeadOnIncoming) {
                                 $lead = (Yii::createObject(LeadManageService::class))->createByIncomingCall($call->c_from, $call->c_project_id, $this->source_id, $call->c_offset_gmt);
                             }
-                            $call->c_lead_id = $lead->id;
+
+//                            if (!$lead) {
+//                            	return true;
+//							}
+
+                            $call->c_lead_id = $lead->id ?? null;
                             if (!$call->c_client_id) {
-                                $call->c_client_id = $lead->client_id;
+                                $call->c_client_id = $lead->client_id ?? null;
                             }
-                            if (!$lead->isCallReady() && $call->isEnded()) {
+                            if (($lead && !$lead->isCallReady()) && $call->isEnded()) {
                                 $leadRepository = Yii::createObject(LeadRepository::class);
                                 $lead->callReady();
                                 $leadRepository->save($lead);
@@ -148,18 +157,19 @@ class CallQueueJob extends BaseObject implements JobInterface
 
                     }
 
-                } elseif((int) $call->c_dep_id === Department::DEPARTMENT_EXCHANGE || (int) $call->c_dep_id === Department::DEPARTMENT_SUPPORT) {
+                } elseif(((int) $call->c_dep_id === Department::DEPARTMENT_EXCHANGE || (int) $call->c_dep_id === Department::DEPARTMENT_SUPPORT)) {
 
                     try {
                         $case = $this->casesCreateService->getOrCreateByCall(
                             [new PhoneCreateForm(['phone' => $call->c_from])],
                             $call->c_id,
                             $call->c_project_id,
-                            (int)$call->c_dep_id
+                            (int)$call->c_dep_id,
+							$createCaseOnIncoming
                         );
-                        $call->c_case_id = $case->cs_id;
+                        $call->c_case_id = $case->cs_id ?? null;
                         if (!$call->c_client_id) {
-                            $call->c_client_id = $case->cs_client_id;
+                            $call->c_client_id = $case->cs_client_id ?? null;
                         }
 //                        if (!$call->update()) {
 //                            Yii::error(VarDumper::dumpAsString($call->errors), 'CallQueueJob:execute:Call:update3');

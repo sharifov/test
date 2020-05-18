@@ -23,21 +23,42 @@ use yii\db\ActiveQuery;
  * @property string $created
  * @property string $updated
  * @property string $uuid
- *
  * @property string $full_name
+ * @property int $parent_id
+ * @property bool $is_company
+ * @property bool $is_public
+ * @property string $company_name
+ * @property string $description
+ * @property bool $disabled
+ * @property int $rating
+ * @property int $cl_type_id // 1 - Client, 2 - Contact
  *
  * @property ClientEmail[] $clientEmails
  * @property ClientPhone[] $clientPhones
  * @property ClientPhone[] $clientPhonesByType
  * @property Lead[] $leads
+ * @property string $nameByType
+ * @property array $phoneNumbersSms
+ * @property array $emailList
+ * @property Project[] $projects
+ * @property UserContactList $contact
  * @method clientPhonesByType(array $array)
  */
 class Client extends ActiveRecord
 {
-
     use EventTrait;
 
     public $full_name;
+
+    public const TYPE_CLIENT  = 1;
+    public const TYPE_CONTACT = 2;
+    public const TYPE_INTERNAL = 3;
+
+    public const TYPE_LIST = [
+        self::TYPE_CLIENT  => 'Client',
+        self::TYPE_CONTACT => 'Contact',
+        self::TYPE_INTERNAL => 'Internal',
+    ];
 
     /**
      * @return string
@@ -81,10 +102,12 @@ class Client extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['first_name'], 'required'],
-            [['created', 'updated'], 'safe'],
+            [['created', 'updated', 'ucl_favorite',], 'safe'],
             [['first_name', 'middle_name', 'last_name'], 'string', 'max' => 100],
-
+            [['company_name'], 'string', 'max' => 150],
+            [['description'], 'string'],
+            [['is_company', 'is_public', 'disabled'], 'boolean'],
+            [['parent_id', 'rating', 'cl_type_id'], 'integer'],
             ['uuid', 'unique'],
             ['uuid', UuidValidator::class],
         ];
@@ -103,9 +126,17 @@ class Client extends ActiveRecord
             'created' => 'Created',
             'updated' => 'Updated',
             'full_name' => 'Full Name',
+            'parent_id' => 'Parent id',
+            'is_company' => 'Is company',
+            'is_public' => 'Is public',
+            'company_name' => 'Company name',
+            'description' => 'Description',
+            'disabled' => 'Disabled',
+            'rating' => 'Rating',
+            'cl_type_id' => 'Type',
+            'ucl_favorite' => 'Favorite'
         ];
     }
-
 
     public function afterFind(): void
     {
@@ -153,6 +184,22 @@ class Client extends ActiveRecord
     public function getLeads(): ActiveQuery
     {
         return $this->hasMany(Lead::class, ['client_id' => 'id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getProjects(): ActiveQuery
+    {
+         return $this->hasMany(Project::class, ['id' => 'cp_project_id'])->viaTable('client_project', ['cp_client_id' => 'id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getContact(): ActiveQuery
+    {
+         return $this->hasOne(UserContactList::class, ['ucl_client_id' => 'id']);
     }
 
     public function beforeSave($insert): bool
@@ -246,6 +293,15 @@ class Client extends ActiveRecord
     /**
      * @return array
      */
+    public static function getParentList(): array
+    {
+        $data = self::find()->where(['IS', 'parent_id', null])->orderBy(['id' => SORT_ASC])->asArray()->all();
+        return ArrayHelper::map($data, 'id', 'first_name');
+    }
+
+    /**
+     * @return array
+     */
     public function getPhoneNumbersSms(): array
     {
         $phoneList = [];
@@ -272,5 +328,20 @@ class Client extends ActiveRecord
     public static function find(): ClientQuery
     {
         return new ClientQuery(static::class);
+    }
+
+    /**
+     * @return string
+     */
+    public function getNameByType(): string
+    {
+        return $this->is_company ?
+            $this->company_name :
+            trim($this->first_name . ' ' . $this->middle_name . ' ' . $this->last_name);
+    }
+
+    public function getAvatar(): string
+    {
+        return strtoupper($this->getNameByType()[0] ?? '');
     }
 }

@@ -28,6 +28,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'validate_dt')->textInput() ?>
 
+        <?= $form->field($model, 'cp_title')->textInput() ?>
+
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
         </div>

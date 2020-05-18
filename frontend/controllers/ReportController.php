@@ -9,6 +9,7 @@ use common\models\search\LeadSearch;
 use frontend\models\SoldReportForm;
 use common\models\Employee;
 use common\models\Lead;
+use sales\auth\Auth;
 use Yii;
 use yii\data\ArrayDataProvider;
 use yii\filters\AccessControl;
@@ -43,7 +44,7 @@ class ReportController extends FController
         $employees = Employee::getAllEmployees();
 
         $isSupervision = true;
-        if (Yii::$app->user->identity->canRole('agent')) {
+        if (Auth::user()->isAgent()) {
             $model->employee = Yii::$app->user->identity->getId();
             $isSupervision = false;
         }

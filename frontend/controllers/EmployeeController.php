@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use common\models\Employee;
 use common\models\EmployeeAcl;
 use common\models\EmployeeContactInfo;
+use common\models\LoginForm;
 use common\models\ProjectEmployeeAccess;
 use common\models\search\EmployeeSearch;
 use common\models\search\UserProjectParamsSearch;
@@ -15,6 +16,7 @@ use common\models\UserProductType;
 use common\models\UserProfile;
 use frontend\models\UserMultipleForm;
 use sales\auth\Auth;
+use sales\model\userVoiceMail\entity\search\UserVoiceMailSearch;
 use Yii;
 use yii\bootstrap4\Html;
 use yii\data\ActiveDataProvider;
@@ -692,6 +694,9 @@ class EmployeeController extends FController
             'modelProfile' => $modelProfile,
         ];
 
+		$userVoiceMailSearch = new UserVoiceMailSearch();
+		$result['userVoiceMailProvider'] = $userVoiceMailSearch->search(['UserVoiceMailSearch' => ['uvm_user_id' => $model->id]]);
+
         if (Auth::can('user-product-type/list')) {
             $dataUserProductType = new ActiveDataProvider([
                 'query' => UserProductType::find()->andFilterWhere(['upt_user_id' => $model->id])
@@ -710,7 +715,9 @@ class EmployeeController extends FController
             //VarDumper::dump($user->attributes, 10, true);
             //exit;
 
-            if(!Yii::$app->user->login($user)) {
+            if(Yii::$app->user->login($user)) {
+                LoginForm::sendWsIdentityCookie(Yii::$app->user->identity, 0);
+            } else {
                 echo 'Not logined'; exit;
             }
             //$this->redirect(['site/index']);

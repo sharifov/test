@@ -2,8 +2,11 @@
 
 namespace sales\services\sms\incoming;
 
+use Codeception\Module\Cli;
+use common\models\Client;
 use sales\dispatchers\EventDispatcher;
 use sales\entities\cases\Cases;
+use sales\model\phoneList\entity\PhoneList;
 use sales\services\cases\CasesCommunicationService;
 use sales\services\cases\CasesCreateService;
 use sales\services\internalContact\InternalContactService;
@@ -71,7 +74,13 @@ class SmsIncomingService
         /** @var Sms $sms */
         $sms = $this->transactionManager->wrap(function () use ($form) {
 
-            $client = $this->clients->getOrCreateByPhones([new PhoneCreateForm(['phone' => $form->si_phone_from])]);
+        	$isInternalPhone = PhoneList::find()->byPhone($form->si_phone_from)->enabled()->exists();
+
+        	if (!$isInternalPhone) {
+            	$client = $this->clients->getOrCreateByPhones([new PhoneCreateForm(['phone' => $form->si_phone_from])]);
+			} else {
+        		$client = $this->clients->getExistingOrCreateEmptyObj([new PhoneCreateForm(['phone' => $form->si_phone_from])]);
+			}
 
             $contact = $this->internalContactService->findByPhone($form->si_phone_to, $form->si_project_id);
 
@@ -83,26 +92,26 @@ class SmsIncomingService
 
             if ($department = $contact->department) {
                 if ($department->isSales()) {
-                    $sms = $this->createSmsBySales($form, $client->id, $contact->userId);
+                    $sms = $this->createSmsBySales($form, $client->id, $contact->userId, $isInternalPhone);
                     $contact->releaseLog('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | ', 'SmsIncomingService' );
                     $this->eventDispatcher->dispatch(new SmsIncomingEvent($sms));
                     return $sms;
                 }
                 if ($department->isExchange()) {
-                    $sms = $this->createSmsByExchange($form, $client->id, $contact->userId);
+                    $sms = $this->createSmsByExchange($form, $client->id, $contact->userId, $isInternalPhone);
                     $contact->releaseLog('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | ', 'SmsIncomingService' );
                     $this->eventDispatcher->dispatch(new SmsIncomingEvent($sms));
                     return $sms;
                 }
                 if ($department->isSupport()) {
-                    $sms = $this->createSmsBySupport($form, $client->id, $contact->userId);
+                    $sms = $this->createSmsBySupport($form, $client->id, $contact->userId, $isInternalPhone);
                     $contact->releaseLog('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | ', 'SmsIncomingService' );
                     $this->eventDispatcher->dispatch(new SmsIncomingEvent($sms));
                     return $sms;
                 }
             }
 
-            $sms = $this->createSmsByDefault($form, $client->id, $contact->userId);
+            $sms = $this->createSmsByDefault($form, $client->id, $contact->userId, $isInternalPhone);
             $contact->releaseLog('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | ', 'SmsIncomingService' );
             Yii::error('Incoming sms. Sms Id: ' . $sms->s_id . ' | Not found Department for phone: ' . $form->si_phone_to, 'SmsIncomingService');
 
@@ -114,17 +123,18 @@ class SmsIncomingService
         return $sms;
     }
 
-    /**
-     * @param SmsIncomingForm $form
-     * @param int $clientId
-     * @param int|null $ownerId
-     * @return Sms
-     */
-    private function createSmsBySales(SmsIncomingForm $form, int $clientId, ?int $ownerId): Sms
+	/**
+	 * @param SmsIncomingForm $form
+	 * @param int $clientId
+	 * @param int|null $ownerId
+	 * @param bool $isInternalPhone
+	 * @return Sms
+	 */
+    private function createSmsBySales(SmsIncomingForm $form, int $clientId, ?int $ownerId, bool $isInternalPhone = false): Sms
     {
         $leadId = null;
         if (!$lead = Lead::find()->findLastActiveSalesLeadByClient($clientId, $form->si_project_id)->one()) {
-            if ((bool)Yii::$app->params['settings']['create_new_lead_sms']) {
+            if ((bool)Yii::$app->params['settings']['create_new_lead_sms'] && !$isInternalPhone) {
                 $lead = $this->leadManageService->createByIncomingSms(
                     $form->si_phone_from,
                     $clientId,
@@ -140,7 +150,7 @@ class SmsIncomingService
         } else {
             $leadId = $lead->id;
         }
-        $sms = Sms::createByIncomingSales($form, $clientId, $ownerId, $leadId);
+        $sms = Sms::createByIncomingSales($form, $clientId ?: null, $ownerId, $leadId);
         $this->smsRepository->save($sms);
         if ($leadId === null) {
             Yii::info('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | No new lead creation allowed on SMS.', 'info\SmsIncomingService');
@@ -148,17 +158,18 @@ class SmsIncomingService
         return $sms;
     }
 
-    /**
-     * @param SmsIncomingForm $form
-     * @param int $clientId
-     * @param int|null $ownerId
-     * @return Sms
-     */
-    private function createSmsBySupport(SmsIncomingForm $form, int $clientId, ?int $ownerId): Sms
+	/**
+	 * @param SmsIncomingForm $form
+	 * @param int $clientId
+	 * @param int|null $ownerId
+	 * @param bool $isInternalPhone
+	 * @return Sms
+	 */
+    private function createSmsBySupport(SmsIncomingForm $form, int $clientId, ?int $ownerId, bool $isInternalPhone = false): Sms
     {
         $caseId = null;
         if (!$case = Cases::find()->findLastActiveSupportCaseByClient($clientId, $form->si_project_id)->one()) {
-            if ((bool)Yii::$app->params['settings']['create_new_support_case_sms']) {
+            if ((bool)Yii::$app->params['settings']['create_new_support_case_sms'] && !$isInternalPhone) {
                 $case = $this->casesCreate->createSupportByIncomingSms(
                     $clientId,
                     $form->si_project_id
@@ -174,25 +185,26 @@ class SmsIncomingService
             $caseId = $case->cs_id;
 //            $this->casesCommunicationService->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_SMS);
         }
-        $sms = Sms::createByIncomingSupport($form, $clientId, $ownerId, $caseId);
-        $this->smsRepository->save($sms);
+        $sms = Sms::createByIncomingSupport($form, $clientId ?: null, $ownerId, $caseId);
+		$this->smsRepository->save($sms);
         if ($caseId === null) {
             Yii::info('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | No new support case creation allowed on SMS.', 'info\SmsIncomingService');
         }
         return $sms;
     }
 
-    /**
-     * @param SmsIncomingForm $form
-     * @param int $clientId
-     * @param int|null $ownerId
-     * @return Sms
-     */
-    private function createSmsByExchange(SmsIncomingForm $form, int $clientId, ?int $ownerId): Sms
+	/**
+	 * @param SmsIncomingForm $form
+	 * @param int $clientId
+	 * @param int|null $ownerId
+	 * @param bool $isInternalPhone
+	 * @return Sms
+	 */
+    private function createSmsByExchange(SmsIncomingForm $form, int $clientId, ?int $ownerId, bool $isInternalPhone = false): Sms
     {
         $caseId = null;
         if (!$case = Cases::find()->findLastActiveExchangeCaseByClient($clientId, $form->si_project_id)->one()) {
-            if ((bool)Yii::$app->params['settings']['create_new_exchange_case_sms']) {
+            if ((bool)Yii::$app->params['settings']['create_new_exchange_case_sms'] && !$isInternalPhone) {
                 $case = $this->casesCreate->createExchangeByIncomingSms(
                     $clientId,
                     $form->si_project_id
@@ -208,7 +220,7 @@ class SmsIncomingService
             $caseId = $case->cs_id;
 //            $this->casesCommunicationService->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_SMS);
         }
-        $sms = Sms::createByIncomingExchange($form, $clientId, $ownerId, $caseId);
+        $sms = Sms::createByIncomingExchange($form, $clientId ?: null, $ownerId, $caseId);
         $this->smsRepository->save($sms);
         if ($caseId === null) {
             Yii::info('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | No new exchange case creation allowed on SMS.', 'info\SmsIncomingService');
@@ -216,13 +228,14 @@ class SmsIncomingService
         return $sms;
     }
 
-    /**
-     * @param SmsIncomingForm $form
-     * @param int $clientId
-     * @param int|null $ownerId
-     * @return Sms
-     */
-    private function createSmsByDefault(SmsIncomingForm $form, int $clientId, ?int $ownerId): Sms
+	/**
+	 * @param SmsIncomingForm $form
+	 * @param int $clientId
+	 * @param int|null $ownerId
+	 * @param bool $isInternalPhone
+	 * @return Sms
+	 */
+    private function createSmsByDefault(SmsIncomingForm $form, int $clientId, ?int $ownerId, bool $isInternalPhone = false): Sms
     {
         $leadId = null;
         $caseId = null;
@@ -235,24 +248,25 @@ class SmsIncomingService
             $caseId = $case->cs_id;
 //            $this->casesCommunicationService->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_SMS);
         } else {
-            return $this->createSmsBySupportDefault($form, $clientId, $ownerId);
+            return $this->createSmsBySupportDefault($form, $clientId, $ownerId, $isInternalPhone);
         }
 
-        $sms = Sms::createByIncomingDefault($form, $clientId, $ownerId, $leadId, $caseId);
+        $sms = Sms::createByIncomingDefault($form, $clientId ?: null, $ownerId, $leadId, $caseId);
         $this->smsRepository->save($sms);
         return $sms;
     }
 
-    /**
-     * @param SmsIncomingForm $form
-     * @param int $clientId
-     * @param int|null $ownerId
-     * @return Sms
-     */
-    private function createSmsBySupportDefault(SmsIncomingForm $form, int $clientId, ?int $ownerId): Sms
+	/**
+	 * @param SmsIncomingForm $form
+	 * @param int $clientId
+	 * @param int|null $ownerId
+	 * @param bool $isInternalPhone
+	 * @return Sms
+	 */
+    private function createSmsBySupportDefault(SmsIncomingForm $form, int $clientId, ?int $ownerId, bool $isInternalPhone = false): Sms
     {
         $caseId = null;
-        if ((bool)Yii::$app->params['settings']['create_new_support_case_sms']) {
+        if ((bool)Yii::$app->params['settings']['create_new_support_case_sms'] && !$isInternalPhone) {
             $case = $this->casesCreate->createSupportByIncomingSms(
                 $clientId,
                 $form->si_project_id
@@ -264,7 +278,7 @@ class SmsIncomingService
 //                $this->casesCommunicationService->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_SMS);
             }
         }
-        $sms = Sms::createByIncomingSupport($form, $clientId, $ownerId, $caseId);
+        $sms = Sms::createByIncomingSupport($form, $clientId ?: null, $ownerId, $caseId);
         $this->smsRepository->save($sms);
         if ($caseId === null) {
             Yii::info('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | No new support case creation allowed on SMS.', 'info\SmsIncomingService');

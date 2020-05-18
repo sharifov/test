@@ -3,6 +3,10 @@
 /yii_test
 /yii_test.bat
 
+#node modules
+
+/node_modules
+
 # phpstorm project files
 .idea
 

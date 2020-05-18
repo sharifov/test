@@ -23,6 +23,7 @@ use frontend\extensions\DatePicker;
         'options' => [
             'data-pjax' => 1
         ],
+        'id' => 'lead_form',
     ]); ?>
 
     <div class="row">
@@ -301,8 +302,8 @@ use frontend\extensions\DatePicker;
         <div class="col-md-12">
             <br>
             <div class="form-group text-center">
-                <?= Html::submitButton('<i class="fa fa-search"></i> Search leads', ['name' => 'search', 'class' => 'btn btn-primary']) ?>
-                <?= Html::submitButton('<i class="fa fa-close"></i> Reset form', ['name' => 'reset', 'class' => 'btn btn-warning']) ?>
+                <?= Html::submitButton('<i class="fa fa-search"></i> Search leads', ['name' => 'search', 'class' => 'btn btn-primary search_leads_btn']) ?>
+                <?= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset data', ['leads/index'], ['class' => 'btn btn-warning']) ?>
             </div>
         </div>
     </div>

@@ -70,6 +70,10 @@ return [
         'route' => 'lead/inbox',
     ],
     [
+        'pattern' => 'queue/failed-bookings',
+        'route' => 'lead/failed-bookings',
+    ],
+    [
         'pattern' => 'queue/trash',
         'route' => 'lead/trash',
     ],
