@@ -188,7 +188,9 @@ class StatsController extends FController
                 $date[0] = $date[1] = date('Y-m-d', strtotime('-0 day'));
             }
             $smsGraphData = Sms::getSmsStats($date[0], $date[1], $rangeBy, (int)$chartOptions['smsType']);
-
+            if ($chartOptions['dateRange'] == ''){
+                $date[0] = $date[1] = date('Y-m-d', strtotime('-0 day'));
+            }
             return $this->renderAjax('sms-report', [
                 'smsGraphData' => $smsGraphData
             ]);
