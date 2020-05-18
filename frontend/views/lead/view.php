@@ -161,23 +161,26 @@ $lead = $leadForm->getLead();
             <?php endif; ?>
 
             <?php if (Yii::$app->user->can('lead/view_CommunicationBlock', ['lead' => $lead])) : ?>
-                <?= $this->render('communication/lead_communication', [
-                    'leadForm'      => $leadForm,
-                    'previewEmailForm' => $previewEmailForm,
-                    'previewSmsForm' => $previewSmsForm,
-                    'comForm'       => $comForm,
-                    'leadId'        => $lead->id,
-                    'dataProvider'  => $dataProviderCommunication,
-                    'isAdmin'       => $is_admin
-                ]);
-                ?>
+            	<?php if (!Yii::$app->params['settings']['new_communication_block_lead']): ?>
+                    <?= $this->render('communication/lead_communication', [
+                        'leadForm'      => $leadForm,
+                        'previewEmailForm' => $previewEmailForm,
+                        'previewSmsForm' => $previewSmsForm,
+                        'comForm'       => $comForm,
+                        'leadId'        => $lead->id,
+                        'dataProvider'  => $dataProviderCommunication,
+                        'isAdmin'       => $is_admin
+                    ]); ?>
+				<?php else: ?>
+                    <div class="alert alert-info" role="alert">Communication Log block is turned off.</div>
+				<?php endif; ?>
             <?php else: ?>
                 <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
             <?php endif;?>
 
 			<?php if (Yii::$app->user->can('lead/view_CommunicationBlock', ['lead' => $lead])): ?>
                 <?php if (Yii::$app->params['settings']['new_communication_block_lead']): ?>
-				<?= $this->render('communication/lead_communication_log', [
+				<?= $this->render('communication/lead_communication', [
 					'leadForm'      => $leadForm,
 					'previewEmailForm' => $previewEmailForm,
 					'previewSmsForm' => $previewSmsForm,
