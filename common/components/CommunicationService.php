@@ -720,6 +720,32 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $out;
     }
 
+    public function callForward($sid, $from, $to): array
+    {
+        $out = ['error' => false, 'data' => []];
+
+        $data = [
+            'sid' => $sid,
+            'redirect_from' => $from,
+            'redirect_to' => $to,
+        ];
+
+        $response = $this->sendRequest('twilio-conference-call/forward', $data);
+
+        if ($response->isOk) {
+            if(isset($response->data['data'])) {
+                $out['data'] = $response->data['data'];
+            } else {
+                $out['error'] = 'Not found in response array data key [data]';
+            }
+        } else {
+            $out['error'] = $response->content;
+            \Yii::error(VarDumper::dumpAsString($out['error']), 'Component:CommunicationService::callRedirect');
+        }
+
+        return $out;
+    }
+
     public function acceptConferenceCall($sid, $to, $from, $to_parent_call)
     {
         $out = ['error' => false, 'data' => []];
@@ -731,7 +757,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'to_parent_call' => $to_parent_call,
         ];
 
-        $response = $this->sendRequest('twilio-conference-call/accept-conference-call', $data);
+        $response = $this->sendRequest('twilio-conference-call/accept-call', $data);
 
         if ($response->isOk) {
             if (isset($response->data['data'])) {

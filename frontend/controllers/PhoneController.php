@@ -421,7 +421,18 @@ class PhoneController extends FController
             }
 
             $communication = \Yii::$app->communication;
-            $resultApi = $communication->callRedirect($sid, $type, $from, $to, $firstTransferToNumber);
+
+//            Yii::error(VarDumper::dumpAsString([$sid, $type, $from, $to, $firstTransferToNumber]));
+
+            if ($originalCall->isConference() && $originalCall->cParent) {
+                $sid = $originalCall->cParent->c_call_sid;
+                $resultApi = $communication->callForward($sid, $from, $to);
+//            } elseif ($originalCall->isConference() && $originalCall->isOut()) {
+//                $sid = $originalCall->c_call_sid;
+//                $resultApi = $communication->callForward($sid, $from, $to);
+            } else {
+                $resultApi = $communication->callRedirect($sid, $type, $from, $to, $firstTransferToNumber);
+            }
 
             if ($resultApi && isset($resultApi['data']['result']['sid'])) {
 

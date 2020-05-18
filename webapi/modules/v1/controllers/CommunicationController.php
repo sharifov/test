@@ -2360,7 +2360,11 @@ class CommunicationController extends ApiBaseController
                 } elseif ($conferenceData['StatusCallbackEvent'] === 'participant-leave') {
                     //$conference->cf_status_id = Conference::STATUS_START;
 
-                    $cPart = ConferenceParticipant::find()->where(['cp_call_sid' => $conferenceData['CallSid']])->one();
+                    $cPart = ConferenceParticipant::find()->where([
+                        'cp_cf_id' => $conference->cf_id,
+                        'cp_call_sid' => $conferenceData['CallSid'],
+
+                    ])->one();
 
                     if ($cPart) {
                         $cPart->cp_status_id = ConferenceParticipant::STATUS_LEAVE;
