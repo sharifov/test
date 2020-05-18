@@ -269,7 +269,7 @@ $phoneFrom = $call ? $call->c_from : '';
     </div>
   </div>
 
-  <div class="call-pane-incoming call-pane-initial is_active">
+  <div class="call-pane-incoming call-pane-initial">
 <!--    <div class="calling-from-info">-->
 <!--      <div class="current-number">-->
 <!--        <div class="current-number-indicator">-->
@@ -285,7 +285,7 @@ $phoneFrom = $call ? $call->c_from : '';
     <div class="incall-group">
       <div class="contact-info-card">
         <div class="contact-info-card__status">
-          <div class="agent-text-avatar"><span>T</span></div>
+<!--          <div class="agent-text-avatar"><span>T</span></div>-->
         </div>
         <div class="contact-info-card__details">
 
@@ -300,9 +300,9 @@ $phoneFrom = $call ? $call->c_from : '';
         </div>
       </div>
       <div class="call-pane__call-btns ">
-        <button class="call-pane__info">
-          <i class="fa fa-info"></i>
-        </button>
+<!--        <button class="call-pane__info">-->
+<!--          <i class="fa fa-info"></i>-->
+<!--        </button>-->
         <button class="call-pane__start-call calling-state-block" id="btn-accept-call">
           <div class="call-in-action">
             <span class="call-in-action__text">Calling</span>
@@ -315,35 +315,35 @@ $phoneFrom = $call ? $call->c_from : '';
         </button>
       </div>
     </div>
-    <div class="additional-info">
-      <div class="additional-info__header">
-        <div class="agent-text-avatar"><span>T</span></div>
-        <span class="additional-info__header-title">Contact Info</span>
-        <a href="#" class="additional-info__close">
-        <i class="fas fa-times"></i>
-        </a>
-      </div>
-      <div class="additional-info__body scrollable-block">
-        <ul class="info-listing incoming-info">
-          <li>
-             <small class="incoming-info__label">Role</small>
-             <span class="incoming-info__value">Supervisor</span>
-          </li>
-          <li>
-             <small class="incoming-info__label">Last Call</small>
-             <span class="incoming-info__value">12.05.2012 13:03 - 15m 20s</span>
-          </li>
-          <li>
-             <small class="incoming-info__label">Project</small>
-             <span class="incoming-info__value">Wowfare</span>
-          </li>
-          <li>
-             <small class="incoming-info__label">Random data</small>
-             <span class="incoming-info__value">Random data value</span>
-          </li>
-        </ul>
-      </div>
-    </div>
+<!--    <div class="additional-info">-->
+<!--      <div class="additional-info__header">-->
+<!--        <div class="agent-text-avatar"><span>T</span></div>-->
+<!--        <span class="additional-info__header-title">Contact Info</span>-->
+<!--        <a href="#" class="additional-info__close">-->
+<!--        <i class="fas fa-times"></i>-->
+<!--        </a>-->
+<!--      </div>-->
+<!--      <div class="additional-info__body scrollable-block">-->
+<!--        <ul class="info-listing incoming-info">-->
+<!--          <li>-->
+<!--             <small class="incoming-info__label">Role</small>-->
+<!--             <span class="incoming-info__value">Supervisor</span>-->
+<!--          </li>-->
+<!--          <li>-->
+<!--             <small class="incoming-info__label">Last Call</small>-->
+<!--             <span class="incoming-info__value">12.05.2012 13:03 - 15m 20s</span>-->
+<!--          </li>-->
+<!--          <li>-->
+<!--             <small class="incoming-info__label">Project</small>-->
+<!--             <span class="incoming-info__value">Wowfare</span>-->
+<!--          </li>-->
+<!--          <li>-->
+<!--             <small class="incoming-info__label">Random data</small>-->
+<!--             <span class="incoming-info__value">Random data value</span>-->
+<!--          </li>-->
+<!--        </ul>-->
+<!--      </div>-->
+<!--    </div>-->
   </div>
 
 
