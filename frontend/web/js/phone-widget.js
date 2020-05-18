@@ -148,6 +148,8 @@ $(document).ready(function() {
     // var messagesModal = $(".messages-modal__messages-scroll");
     // var emailModal = $(".email-modal__messages-scroll");
 
+    var elemScrollable = $('.scrollable-block');
+
     var contactModal = $(".contact-modal-info");
     var blockSuggestion = $(".suggested-contacts");
     // var msgModalScroll = new SimpleBar(messagesModal[0]);
@@ -159,6 +161,11 @@ $(document).ready(function() {
     // msgModalScroll.getContentElement();
     // emailModalScroll.getContentElement();
     // msgModalScroll.recalculate();
+
+    $(elemScrollable).each(function(i, elem) {
+        var el = new SimpleBar(elem);
+        el.getContentElement();
+    })
 
     $('.dial__btn').on('click', function(e) {
         e.preventDefault();
@@ -396,7 +403,13 @@ $(document).ready(function() {
     //     console.log('here is a event for back button');
     // })
 
+    $('.additional-info__close').on('click', function() {
+        $('.additional-info').slideUp(150);
+    });
 
+    $('.call-pane__info').on('click', function() {
+        $('.additional-info').slideDown(150);
+    })
 
 });
 
