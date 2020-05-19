@@ -685,6 +685,14 @@ use yii\helpers\Html;
                 if (device.audio.isOutputSelectionSupported) {
                     $('#output-selection').show();
                 }
+
+                window.localStorage.setItem('twilioDevice', JSON.stringify(device, function (key, value) {
+                    if (typeof value === 'function') {
+                        return value.toString();
+                    } else {
+                        return value;
+                    }
+                }));
             })
             .catch(function (err) {
                 updateAgentStatus(connection, false, 1);

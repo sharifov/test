@@ -586,7 +586,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
         if ($recordingSid) {
             $data['recording_sid'] = $recordingSid;
         }
-        /* TODO::  */
+
         /*$response = $this->sendRequest('voice/update-recording-status', $data);
 
         if ($response->isOk) {

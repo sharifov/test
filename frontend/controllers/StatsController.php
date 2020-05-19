@@ -184,8 +184,13 @@ class StatsController extends FController
             $chartOptions = Yii::$app->request->post();
             $rangeBy = Yii::$app->request->post('groupBy');
             $date = explode("/", $chartOptions['dateRange']);
+            if ($chartOptions['dateRange'] == ''){
+                $date[0] = $date[1] = date('Y-m-d', strtotime('-0 day'));
+            }
             $smsGraphData = Sms::getSmsStats($date[0], $date[1], $rangeBy, (int)$chartOptions['smsType']);
-
+            if ($chartOptions['dateRange'] == ''){
+                $date[0] = $date[1] = date('Y-m-d', strtotime('-0 day'));
+            }
             return $this->renderAjax('sms-report', [
                 'smsGraphData' => $smsGraphData
             ]);
@@ -205,6 +210,9 @@ class StatsController extends FController
             $chartOptions = Yii::$app->request->post();
             $rangeBy = Yii::$app->request->post('groupBy');
             $date = explode("/", $chartOptions['dateRange']);
+            if ($chartOptions['dateRange'] == ''){
+                $date[0] = $date[1] = date('Y-m-d', strtotime('-0 day'));
+            }
             $emailsGraphData = Email::getEmailsStats($date[0], $date[1], $rangeBy, (int)$chartOptions['emailsType']);
 
             return $this->renderAjax('emails-report', [

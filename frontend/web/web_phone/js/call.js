@@ -8,6 +8,22 @@ var PhoneWidgetCall = function () {
         acceptCallBtnEvent(options);
         changeUserCallStatusEvent(options);
         rejectIncomingCallEvent(options);
+
+        console.log(options);
+
+        if ('isCallInProgress' in options && options.isCallInProgress) {
+            refreshCallStatus({
+                'status': "In progress",
+                'duration': options.duration | 0
+            })
+        } else if ('isCallRinging' in options && options.isCallRinging) {
+            initIncomingCall({
+                'fromInternal': options.fromInternal,
+                'cua_call_id': options.call_id,
+                'phoneFrom': options.phoneFrom,
+                'name': options.name || ''
+            });
+        }
     }
 
     function initCall(selectedNumber)
@@ -20,7 +36,7 @@ var PhoneWidgetCall = function () {
         $('.call-pane__call-btns').addClass('is-pending');
         $('.suggested-contacts').removeClass('is_active');
         // $('.call-in-action__time').hide();
-        $('.call-pane').removeClass('is_active');
+        $('.call-pane-initial').removeClass('is_active');
         $('.call-pane-calling').addClass('is_active');
         $('.call-in-action__text').html('Dialing');
         $('.call-in-action__time').html('').show().timer('remove').timer({format: '%M:%S', seconds: 0}).timer('start');
@@ -35,6 +51,7 @@ var PhoneWidgetCall = function () {
         $('.call-pane-initial').removeClass('is_active');
         $('.call-pane').addClass('is_active');
         $('.call-in-action__time').hide();
+        window.connection = '';
     }
 
     function rejectIncomingCallEvent(options)
@@ -47,8 +64,8 @@ var PhoneWidgetCall = function () {
                 window.connection.reject();
                 $.get(options.ajaxSaveCallUrl + '?sid=' + window.connection.parameters.CallSid + '&user_id=' + btn.attr('data-user-id'));
                 $('#call-controls2').hide();
-                cancelCall();
             }
+            cancelCall();
         })
     }
 
@@ -86,7 +103,6 @@ var PhoneWidgetCall = function () {
         $(document).on('click', '#call-pane__mute', function(e) {
             let connection = _self.connection;
             let mute = $(this);
-            console.log(mute.attr('data-is-muted') === 'false');
             if (mute.attr('data-is-muted') === 'false') {
                 if (connection) {
                     connection.mute(true);
@@ -151,11 +167,14 @@ var PhoneWidgetCall = function () {
         if (obj.status === 'In progress') {
             obj.status = 'On Call';
             $('.call-pane__call-btns').removeClass('is-pending').addClass('is-on-call');
-        }else if(obj.status === 'Ringing') {
+            showCallingPanel();
+        }else if(['Ringing', 'Queued'].includes(obj.status)) {
             if ('isIn' in obj && obj.isIn) {
                 initIncomingCall(obj);
             }
-        } else {
+        }else if (obj.status === 'Completed') {
+            cancelCall();
+        }else {
             $('.call-pane__call-btns').removeClass('is-on-call');
         }
         $('.call-in-action__text').html(obj.status);
@@ -167,9 +186,10 @@ var PhoneWidgetCall = function () {
         openWidget();
         openCallTab();
         if (typeof obj === 'object' && 'phoneFrom' in obj) {
-            $('#btn-accept-call').attr('data-call-id', obj.cua_call_id);
-            $('#btn-accept-call').attr('data-from-internal', obj.fromInternal | false);
+            $('#btn-accept-call').attr('data-from-internal', obj.fromInternal | false).attr('data-call-id', obj.cua_call_id);
             showIncomingCallPanel(obj.phoneFrom, obj.name || '');
+        } else if (obj.cua_status_id === 5) {
+            cancelCall();
         }
     }
 
@@ -206,7 +226,6 @@ var PhoneWidgetCall = function () {
         $(document).on('click', '#btn-accept-call', function () {
             var btn = $(this);
             var fromInternal = btn.attr('data-from-internal');
-
             if (fromInternal && window.connection) {
                 window.connection.accept();
                 showCallingPanel();
