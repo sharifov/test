@@ -55,8 +55,19 @@ $(document).ready(function() {
 
         if ($current === '#tab-contacts') {
             if (PhoneWidgetContacts.fullListIsEmpty()) {
-                PhoneWidgetContacts.requestFullList();
             }
+
+            if ($(this).hasClass('js-add-to-conference')) {
+                window.localStorage.setItem('contactSelectableState', 1);
+                $('.contacts-list').addClass('contacts-list--selection');
+
+            } else {
+                window.localStorage.setItem('contactSelectableState', 0);
+                $('.contacts-list').removeClass('contacts-list--selection');
+            }
+
+            PhoneWidgetContacts.requestFullList();
+
         }
 
     });
@@ -108,6 +119,8 @@ $(document).ready(function() {
            PhoneWidgetContacts.initLazyLoadFullList(simpleBar);
         }
     });
+
+    
 
 
 
@@ -436,6 +449,8 @@ $(document).ready(function() {
     $('.call-pane__info').on('click', function() {
         $('.additional-info').slideDown(150);
     })
+
+    
 
 });
 

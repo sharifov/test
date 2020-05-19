@@ -60,6 +60,6 @@ JS;
     $this->registerJs($js);
     ?>
 
-    <div class="contacts-list" id="list-of-contacts"></div>
+    <div class="contacts-list contacts-list--selection" id="list-of-contacts"></div>
 
 </div>

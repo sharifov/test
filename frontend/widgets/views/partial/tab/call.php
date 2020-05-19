@@ -232,7 +232,7 @@ $phoneFrom = $call ? $call->c_from : '';
         </a>
       </li>
       <li class="in-call-controls__item">
-        <a href="#" class="in-call-controls__action">
+        <a href="#" class="in-call-controls__action js-add-to-conference" data-toggle-tab="tab-contacts">
           <i class="fa fa-plus"></i>
           <span>Add Person</span>
         </a>
