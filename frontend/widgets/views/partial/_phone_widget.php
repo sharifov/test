@@ -390,9 +390,9 @@ use yii\web\View;
     <div class="additional-bar__body">
         <div id="output-selection">
             <label>Ringtone Devices</label>
-            <select id="ringtone-devices" multiple></select>
+            <select id="ringtone-devices" class="ringtone-devices" multiple></select>
             <label>Speaker Devices</label>
-            <select id="speaker-devices" multiple></select><br/>
+            <select id="speaker-devices" class="speaker-devices" multiple></select><br/>
 
         </div>
 
