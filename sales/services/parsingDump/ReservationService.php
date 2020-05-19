@@ -2,19 +2,29 @@
 
 namespace sales\services\parsingDump;
 
-use common\components\SearchService;
 use common\models\Airline;
 use common\models\Airport;
 use DateTime;
 use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
-use sales\services\parsingDump\lib\worldSpan\Reservation;
+use sales\services\parsingDump\lib\ParsingDump;
 use yii\helpers\VarDumper;
 
 /**
  * Class ReservationService
  */
-class WorldSpanReservationService
+class ReservationService
 {
+    public string $gds;
+
+    /**
+     * ReservationService constructor.
+     * @param string $gds
+     */
+    public function __construct(string $gds)
+	{
+		$this->gds = $gds;
+	}
+
     /**
      * @param $string
      * @param bool $validation
@@ -25,8 +35,9 @@ class WorldSpanReservationService
      */
     public function parseReservation($string, $validation = true, &$itinerary = [], $onView = false): array
     {
+        $i = 0;
         $result = [];
-        $parserReservation = new Reservation();
+        $parserReservation = ParsingDump::initClass($this->gds, ParsingDump::PARSING_TYPE_RESERVATION);
         $string = trim($string);
         $rows = explode("\n", $string);
         if (!empty($itinerary) && $validation) {
@@ -40,29 +51,30 @@ class WorldSpanReservationService
                 }
                 $parseData = $parserReservation->processingRow($rawData);
 
-                $result[$key]['carrier'] = $parseData['airline'];
-                $result[$key]['airlineName'] = $this->getAirlineName($parseData['airline'], $onView);
-                $result[$key]['departureAirport'] = $parseData['departure_airport_iata'];
-                $result[$key]['arrivalAirport'] = $parseData['arrival_airport_iata'];
-                $result[$key]['departureDateTime'] = $parseData['departure_date_time'];
-                $result[$key]['arrivalDateTime'] = $parseData['arrival_date_time'];
-                $result[$key]['flightNumber'] = $parseData['flight_number'];
-                $result[$key]['bookingClass'] = $parseData['booking_class'];
-                $result[$key]['departureCity'] = Airport::findIdentity($parseData['departure_airport_iata']);
-                $result[$key]['arrivalCity'] = Airport::findIdentity($parseData['arrival_airport_iata']);
-                $result[$key]['flightDuration'] = $this->getFlightDuration(
-                    $result[$key]['departureDateTime'],
-                    $result[$key]['arrivalDateTime'],
-                    $result[$key]['departureCity'],
-                    $result[$key]['arrivalCity']
+                $result[$i]['carrier'] = $parseData['airline'];
+                $result[$i]['airlineName'] = $this->getAirlineName($parseData['airline'], $onView);
+                $result[$i]['departureAirport'] = $parseData['departure_airport_iata'];
+                $result[$i]['arrivalAirport'] = $parseData['arrival_airport_iata'];
+                $result[$i]['departureDateTime'] = $parseData['departure_date_time'];
+                $result[$i]['arrivalDateTime'] = $parseData['arrival_date_time'];
+                $result[$i]['flightNumber'] = $parseData['flight_number'];
+                $result[$i]['bookingClass'] = $parseData['booking_class'];
+                $result[$i]['departureCity'] = Airport::findIdentity($parseData['departure_airport_iata']);
+                $result[$i]['arrivalCity'] = Airport::findIdentity($parseData['arrival_airport_iata']);
+                $result[$i]['flightDuration'] = $this->getFlightDuration(
+                    $result[$i]['departureDateTime'],
+                    $result[$i]['arrivalDateTime'],
+                    $result[$i]['departureCity'],
+                    $result[$i]['arrivalCity']
                 );
-                $result[$key]['layoverDuration'] = $this->getLayoverDuration($result, $key);
+                $result[$i]['layoverDuration'] = $this->getLayoverDuration($result, $i);
 
                 if ($airline = Airline::findIdentity($parseData['airline'])) {
-                    $result[$key]['cabin'] = $airline->getCabinByClass($parseData['booking_class']);
+                    $result[$i]['cabin'] = $airline->getCabinByClass($parseData['booking_class']);
                 }
 
-                $itinerary[] = (new ItineraryDumpDTO([]))->feelByParsedReservationDump($result[$key]);
+                $itinerary[] = (new ItineraryDumpDTO([]))->feelByParsedReservationDump($result[$i]);
+                $i ++;
 
             } catch (\Throwable $throwable) {
                 \Yii::error(VarDumper::dumpAsString([

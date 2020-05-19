@@ -12,7 +12,7 @@ use modules\product\src\entities\productTypePaymentMethod\ProductTypePaymentMeth
 use sales\auth\Auth;
 use sales\forms\CompositeForm;
 use sales\helpers\product\ProductQuoteHelper;
-use sales\services\parsingDump\WorldSpanReservationService;
+use sales\services\parsingDump\ReservationService;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;

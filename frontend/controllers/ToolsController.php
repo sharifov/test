@@ -9,7 +9,7 @@ use sales\services\parsingDump\lib\worldSpan\Baggage;
 use sales\services\parsingDump\lib\worldSpan\Pricing;
 use sales\services\parsingDump\lib\worldSpan\Reservation;
 use sales\services\parsingDump\lib\worldSpan\WorldSpan;
-use sales\services\parsingDump\WorldSpanReservationService;
+use sales\services\parsingDump\ReservationService;
 use Yii;
 use common\models\ApiLog;
 use common\models\search\ApiLogSearch;
@@ -114,9 +114,9 @@ class ToolsController extends FController
 
         if ($dump) {
             if ($prepareSegment === 1 && $type === ParsingDump::PARSING_TYPE_RESERVATION) {
-                if ($gds === ParsingDump::GDS_TYPE_WORLDSPAN) {
-                    $data = (new WorldSpanReservationService())->parseReservation($dump, false);
-                }
+
+                $data = (new ReservationService($gds))->parseReservation($dump, false);
+
             } elseif ($obj = ParsingDump::initClass($gds, $type)) {
                 $data = $obj->parseDump($dump);
             } else {
