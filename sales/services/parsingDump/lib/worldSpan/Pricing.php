@@ -19,12 +19,25 @@ class Pricing implements ParseDumpInterface
         $result = [];
         try {
             if ($prices = $this->parsePrice($string)) {
-                $result['price'] = $prices;
+                $result['validating_carrier'] = $this->parseValidatingCarrier($string);
+                $result['prices'] = $prices;
             }
         } catch (\Throwable $throwable) {
             \Yii::error(AppHelper::throwableFormatter($throwable), 'WorldSpan:Pricing:parseDump:Throwable');
         }
         return $result;
+    }
+
+    /**
+     * @param string $string
+     * @return string|null
+     */
+    private function parseValidatingCarrier(string $string): ?string
+    {
+        $carrierPattern = "/VALIDATING\s+CARRIER\s+DEFAULT\s+([A-Z]+)/";
+        preg_match($carrierPattern, $string, $carrierMatches);
+
+        return $carrierMatches[1] ?? null;
     }
 
     /**
@@ -54,7 +67,6 @@ class Pricing implements ParseDumpInterface
                         $result[$j]['type'] = $this->typeMapping($typeMatches[1]);
                         $result[$j]['fare'] = $values[1] ?? null;
                         $result[$j]['taxes'] = $values[2] ?? null;
-                        $result[$j]['amount'] = $values[3] ?? null;
                         $j ++;
                     }
                 }
@@ -98,4 +110,6 @@ class Pricing implements ParseDumpInterface
         }
         return $result;
     }
+
+
 }

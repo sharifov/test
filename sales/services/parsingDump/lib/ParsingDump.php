@@ -2,6 +2,8 @@
 
 namespace sales\services\parsingDump\lib;
 
+use common\models\Quote;
+
 /**
  * Class parsingDump
  */
@@ -28,6 +30,11 @@ class ParsingDump
         self::GDS_TYPE_SABRE => 'Sabre',
     ];
 
+    public CONST QUOTE_GDS_TYPE_MAP = [
+        Quote::GDS_WORLDSPAN => self::GDS_TYPE_WORLDSPAN,
+        Quote::GDS_SABRE => self::GDS_TYPE_SABRE,
+    ];
+
     /**
      * @param string $gds
      * @param string $class
@@ -39,6 +46,18 @@ class ParsingDump
 
         if (class_exists($nameClass)) {
             return new $nameClass();
+        }
+        return null;
+    }
+
+    /**
+     * @param string $gdsQuote
+     * @return null|string
+     */
+    public static function getGdsByQuote(string $gdsQuote): ?string
+    {
+        if (array_key_exists($gdsQuote, self::QUOTE_GDS_TYPE_MAP)) {
+            return self::QUOTE_GDS_TYPE_MAP[$gdsQuote];
         }
         return null;
     }

@@ -94,8 +94,7 @@ $js = <<<JS
         }
         
         $('#preloader').removeClass('hidden');
-        
-        
+                
         $.ajax({
             url: url,
             type: form.attr("method"),
@@ -103,7 +102,7 @@ $js = <<<JS
             success: function (data) {
                 var itineraryErr = false;
                 $('#preloader').addClass('hidden');
-
+                
                 $.each(data, function( index, value ) {
                     $('#'+index).val(value);
                     if(index == 'quote-main_airline_code'){
@@ -167,6 +166,12 @@ $js = <<<JS
         $('#alternativequote-status').val(1);
         var form = $('#$formID');
         addEditAltQuote(form, form.attr("action") + '?save=true');
+    });
+    $('#prepare_dump_btn').click(function (e) {
+        e.preventDefault();
+        $('#alternativequote-status').val(1);
+        var form = $('#$formID');
+        addEditAltQuote(form, '/quote/prepare-dump');
     });
 
     $('.clone-alt-price-by-type').click(function(e) {
@@ -482,6 +487,9 @@ $this->registerJs($js);
                 <li>
                 	<?= Html::a('Pricing', sprintf('#r-dump-pane-%d', $quote->id), ['data-toggle' => 'tab']) ?>
                 </li>
+                <li>
+                	<?= Html::a('GDS Dump', sprintf('#r-prepare_dump-%d', $quote->id), ['data-toggle' => 'tab']) ?>
+                </li>
             </ul>
             <div class="tab-content">
                 <div id="<?= sprintf('r-dump-%d', $quote->id) ?>" class="tab-pane fade in active">
@@ -504,6 +512,11 @@ $this->registerJs($js);
                         'rows' => 5
                     ]) ?>
                 </div>
+                <div id="<?= sprintf('r-prepare_dump-%d', $quote->id) ?>" class="tab-pane fade in">
+                    <?php echo Html::textarea('prepare_dump', null,
+                        ['id' => 'prepare_dump', 'rows' => 13, 'class' => 'form-control'])
+                    ?>
+                </div>
             </div>
         </div>
     </div>
@@ -521,6 +534,12 @@ $this->registerJs($js);
             <?= Html::button('<i class="fa fa-save"></i> Save', [
                 'id' => 'save-alt-quote',
                 'class' => 'btn btn-primary'
+            ]) ?>
+        <?php endif; ?>
+        <?php if ($quote->isNewRecord) :?>
+            <?= Html::button('<i class="fa fa-recycle"></i> Prepare Dump', [
+                'id' => 'prepare_dump_btn',
+                'class' => 'btn btn-warning'
             ]) ?>
         <?php endif; ?>
     </div>

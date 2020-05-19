@@ -19,13 +19,25 @@ class Pricing implements ParseDumpInterface
         $result = [];
         try {
             if ($prices = $this->parsePrice($string)) {
-
-                $result['price'] = $prices;
+                $result['validating_carrier'] = $this->parseValidatingCarrier($string);
+                $result['prices'] = $prices;
             }
         } catch (\Throwable $throwable) {
             \Yii::error(AppHelper::throwableFormatter($throwable), 'Sabre:Pricing:parseDump:Throwable');
         }
         return $result;
+    }
+
+    /**
+     * @param string $string
+     * @return string|null
+     */
+    private function parseValidatingCarrier(string $string): ?string
+    {
+        $carrierPattern = "/VALIDATING\s+CARRIER\s+\W\s+([A-Z]+)/";
+        preg_match($carrierPattern, $string, $carrierMatches);
+
+        return $carrierMatches[1] ?? null;
     }
 
     /**
@@ -55,7 +67,6 @@ class Pricing implements ParseDumpInterface
                     $result[$i]['type'] = $this->typeMapping($type);
                     $result[$i]['fare'] = $matches[2] ?? null;
                     $result[$i]['taxes'] = $matches[3] ?? null;
-                    $result[$i]['amount'] = $matches[4] ?? null;
                     $i ++;
                 }
 
