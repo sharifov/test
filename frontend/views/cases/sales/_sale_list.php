@@ -125,7 +125,7 @@ $user = Yii::$app->user->identity;
                     if(is_array($dataSale)) {
 
                         $dataProviderCc = new ActiveDataProvider([
-                            'query' => CreditCard::find()//->innerJoin('sale_credit_card', 'scc_cc_id=cc_id')->where(['scc_sale_id' => $item->css_sale_id]),
+                            'query' => CreditCard::find()->innerJoin('sale_credit_card', 'scc_cc_id=cc_id')->where(['scc_sale_id' => $item->css_sale_id]),
                         ]);
 
                         $content = $this->render('/sale/view', [

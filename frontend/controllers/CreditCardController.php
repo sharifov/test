@@ -2,12 +2,14 @@
 
 namespace frontend\controllers;
 
+use common\models\SaleCreditCard;
 use frontend\models\form\CreditCardForm;
 use Yii;
 use common\models\CreditCard;
 use common\models\search\CreditCardSearch;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
+use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -129,6 +131,50 @@ class CreditCardController extends FController
             'model' => $model,
         ]);
     }
+
+    public function actionAjaxAddCreditCard()
+	{
+		$caseId = Yii::$app->request->get('caseId');
+		$saleId = Yii::$app->request->get('saleId');
+
+		if (!$caseId || !$saleId) {
+			throw new BadRequestHttpException();
+		}
+
+		try {
+			$form = new CreditCardForm();
+
+			if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+				$model = new CreditCard();
+				$model->attributes = $form->attributes;
+				$model->cc_status_id = CreditCard::STATUS_VALID;
+				$model->updateSecureCardNumber();
+				$model->updateSecureCvv();
+
+				if ($model->save()) {
+
+					$saleCreditCard = new SaleCreditCard();
+					$saleCreditCard->scc_sale_id = $saleId;
+					$saleCreditCard->scc_cc_id = $model->primaryKey;
+
+					if (!$saleCreditCard->save()) {
+						throw new \RuntimeException($saleCreditCard->getErrorSummary(false)[0]);
+					} else {
+						return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#pjax-credit-card-table"}); createNotify("Success", "Credit Card Successfully created", "success")</script>';
+					}
+				}
+			}
+		} catch (\Throwable $e) {
+			$form->addError('general', $e->getMessage());
+		}
+
+		return $this->renderAjax('_form', [
+			'caseId' => $caseId,
+			'saleId' => $saleId,
+			'model' => $form,
+			'isAjax' => true
+		]);
+	}
 
     /**
      * Deletes an existing CreditCard model.
