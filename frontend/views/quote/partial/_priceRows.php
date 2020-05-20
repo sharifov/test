@@ -3,12 +3,20 @@
 /**
  * @var $prices []
  * @var QuotePrice $price
+ * @var Lead $lead
  */
 
+use common\models\Lead;
 use common\models\QuotePrice;
 use yii\bootstrap\Html;
 
+$paxCntTypes = [
+    QuotePrice::PASSENGER_ADULT => $lead->adults,
+    QuotePrice::PASSENGER_CHILD => $lead->children,
+    QuotePrice::PASSENGER_INFANT => $lead->infants
+];
 $applyBtn = [];
+
 foreach ($prices as $index => $price) : ?>
     <tr class="pax-type-<?= $price->passenger_type ?> zzz" id="price-index-<?= $index ?>">
         <td class="td-input">

@@ -14,6 +14,7 @@ use common\models\QuotePrice;
 use common\models\search\QuotePriceSearch;
 use common\models\search\QuoteSearch;
 use sales\auth\Auth;
+use sales\helpers\app\AppHelper;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use sales\services\parsingDump\lib\ParsingDump;
@@ -512,53 +513,68 @@ class QuoteController extends FController
 
     public function actionPrepareDump(): array
     {
+        Yii::$app->response->format = Response::FORMAT_JSON;
         $response = [
-            'status' => 1, /* TODO::  */
-            'errors' => [],
-            'itinerary' => [],
+            'status' => 1,
+            'error' => '',
+            'reservation_dump' => [],
             'validating_carrier' => '',
             'prices' => '',
         ];
 
-        Yii::$app->response->format = Response::FORMAT_JSON;
+        /* TODO:: add tc and throws */
 
-        if (Yii::$app->request->isPost) {
-            $post = Yii::$app->request->post();
+        try {
+            if (Yii::$app->request->isPost) {
 
-            if (isset($post['Quote'], $post['prepare_dump'])) {
-                $postQuote = $post['Quote'];
-
-                if (!$gds = ParsingDump::getGdsByQuote($postQuote['gds'])) {
-                    $response['errors'][] = 'This gds cannot be processed';
-                    return $response;
+                $leadId = (int) Yii::$app->request->get('lead_id');
+                if (!$lead = Lead::findOne(['id' => $leadId])) {
+                    throw new \DomainException( 'Lead id(' . $leadId . ') not found');
                 }
 
-                /* TODO::
-                    3) segments
-                 */
+                $post = Yii::$app->request->post();
 
-                if($pricing = (new PricingService($gds))->formattingForQuote($post['prepare_dump'])) {
-                    $response['validating_carrier'] = $pricing['validating_carrier'];
-                    $prices = [];
-                    foreach ($pricing['prices'] as $type => $value) {
-                        $price = new QuotePrice();
-                        $price->passenger_type = $type;
-                        $price->fare = $value['fare'];
-                        $price->taxes = $value['taxes'];
-                        $price->net = $price->fare + $price->taxes;
-                        $price->selling = $price->net + $price->mark_up;
-                        $price->toFloat();
+                if (isset($post['Quote'], $post['prepare_dump'])) {
+                    $postQuote = $post['Quote'];
 
-                        $prices[] = $price;
+                    if (!$gds = ParsingDump::getGdsByQuote($postQuote['gds'])) {
+                        throw new \DomainException(  'This gds(' . $postQuote['gds'] . ') cannot be processed');
                     }
-                    $response['prices'] = $this->renderAjax('partial/_priceRows', [
-                        'prices' => $prices,
-                    ]);
+
+                    $prices = [];
+                    if($pricing = (new PricingService($gds))->formattingForQuote($post['prepare_dump'])) {
+                        $response['validating_carrier'] = $pricing['validating_carrier'];
+
+                        foreach ($pricing['prices'] as $type => $value) {
+                            $price = new QuotePrice();
+                            $price->passenger_type = $type;
+                            $price->fare = $value['fare'];
+                            $price->taxes = $value['taxes'];
+                            $price->net = $price->fare + $price->taxes;
+                            $price->selling = $price->net + $price->mark_up;
+                            $price->toFloat();
+
+                            $prices[] = $price;
+                        }
+                        $response['prices'] = $this->renderAjax('partial/_priceRows', [
+                            'prices' => $prices,
+                            'lead' => $lead,
+                        ]);
+                    } else {
+                        throw new \DomainException(  'Parse "prices dump" failed');
+                    }
+
+                    $itinerary = [];
+                    if ((new ReservationService($gds))->parseReservation($post['prepare_dump'], true, $itinerary)) {
+                        $response['reservation_dump'] = Quote::createDump($itinerary);
+                    } else {
+                        throw new \DomainException(  'Parse "reservation dump" failed');
+                    }
                 }
-
-                // (new ReservationService($gds))->parseReservation($post['prepare_dump'], true, $quote->itinerary);
-
             }
+        } catch (\Throwable $throwable) {
+            $response['status'] = 0;
+            $response['error'] = $throwable->getMessage();
         }
         return $response;
     }

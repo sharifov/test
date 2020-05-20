@@ -26,6 +26,9 @@ $paxCntTypes = [
 ];
 
 $js = <<<JS
+
+    var leadId = '$lead->id';
+
     $('[data-toggle="tooltip"]').tooltip();
 
     $('.alt-quote-price').keyup(function (event) {
@@ -206,35 +209,27 @@ $js = <<<JS
             $('#dumpTab #box-gds-tab a').tab('show');       
         } else {
             $('#prepare_dump_btn').hide(1000);
-            $('#box-gds-tab').hide();             
+            $('#save_dump_btn').hide(1000);  
+            $('#box-gds-tab').hide();
             $('#dumpTab #reservation-dump-tab a').tab('show');       
         }
     });
     
     $('#prepare_dump_btn').click(function (e) {
-        e.preventDefault();
+        e.preventDefault();        
         $('#alternativequote-status').val(1);
-        var form = $('#$formID');        
-        if($('#prepare_dump').val() == '') {
-            alert('Insert Reservation dump please');
-            $('#quote-reservation_dump').focus();
-            return false;
-        }        
-        prepareDumpQuote(form, '/quote/prepare-dump');
-    }); 
+        $('#save_dump_btn').hide();
+        PNotify.removeAll();                    
+        var form = $('#$formID');
+        
+        prepareDumpQuote(form, '/quote/prepare-dump?lead_id=' + leadId);
+    });
     
     function prepareDumpQuote(form, url)
     {
-        $('.field-error').each(function() {
-            $(this).removeClass('field-error');
-        });
-        $('.parent-error').removeClass('has-error');
-        
-        if($('#quote-gds').val() == '') {
-            alert('Select GDS please');
-            $('#quote-gds').focus();
+        if (!checkPrepareDumpQuote()) {
             return false;
-        }        
+        }
                         
         $.ajax({
             url: url,
@@ -242,44 +237,75 @@ $js = <<<JS
             data: form.serialize(),
             dataType: 'json',
             beforeSend: function () {                    
-                $('#preloader').removeClass('hidden');
+                $('#preloader').removeClass('hidden'); 
+                              
             },
             success: function (dataResponse) {               
                 $('#preloader').addClass('hidden');
-                
-                console.log(dataResponse); // TODO:: for debug
+                $('#prepare_dump_btn').prop("disabled", false);
                 
                 if (dataResponse.status === 1) {
-                
-                   /* $.each(dataResponse., function( index, value ) {
-                        $('#'+index).val(value);
-                        if(index == 'quote-main_airline_code'){
-                            $('#'+index).trigger('change');
-                        }
-                    });*/
-                    
-                   //
+                   
                     if (dataResponse.validating_carrier.length) {
                        $('#quote-main_airline_code').val(dataResponse.validating_carrier).trigger('change');
                     }
                     if (dataResponse.prices.length) {
                        $('#price-table tbody').html(dataResponse.prices); 
                     }
-                                                            
+                    if (dataResponse.reservation_dump.length) {
+                        var reservationDump = dataResponse.reservation_dump.join('<br />');
+                        new PNotify({
+                            title: "Please check reservation dump",
+                            type: "info",
+                            text: reservationDump,
+                            hide: true,
+                            width:'480px',
+                            delay: 15000
+                        }); 
+                    }                    
+                    $('#save_dump_btn').show(1000);                                                            
 	            } else {
-                    if (dataResponse.errors.length) {
-                        let errorList = dataResponse.errors.join('.');
-                        alert(errorList);
+                    if (dataResponse.error.length) {                        
+                        new PNotify({
+                            title: "Error",
+                            type: "error",
+                            text: dataResponse.error,
+                            hide: true
+                        }); 
                     }    
 	            }
             },
             error: function (error) {
                 $('#preloader').addClass('hidden');
+                $('#prepare_dump_btn').prop("disabled", false);
                 console.log('Error: ' + error);
             }
-        });
-                
+        });                
     }
+    
+    function checkPrepareDumpQuote() 
+    {    
+        let status = 1;
+        let message = '';
+        
+        if($('#prepare_dump').val() === '') {
+            message = 'Insert Reservation dump please';
+        } 
+        if($('#quote-gds').val() === '') {
+            message = 'Select GDS please';
+        } 
+        
+        if (status !== 1) {
+            new PNotify({
+                title: "Error",
+                type: "error",
+                text: message,
+                hide: true
+            });
+            return false;
+        } 
+        return true;   
+    } 
 JS;
 $this->registerJs($js);
 
@@ -630,6 +656,11 @@ $this->registerCss('
                 'class' => 'btn btn-warning',
                 'style' => 'display: none',
             ]) ?>
+            <?= Html::button('<i class="fa fa-check-circle"></i> Save from GDS dump', [
+                'id' => 'save_dump_btn',
+                'class' => 'btn btn-success',
+                'style' => 'display: none',
+            ]) ?>
         <?php endif; ?>
     </div>
 </div>
@@ -657,3 +688,4 @@ $this->registerCss('
         </div>
     </div>
 </div>
+
