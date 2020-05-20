@@ -603,7 +603,8 @@
     .phone-widget .contacts-list--selection .contact-info-card .contact-full-info__email {
       display: none; }
     .phone-widget .contacts-list--selection .contact-info-card .contact-full-info .actions-list__option {
-      display: none; }
+      display: none;
+      cursor: auto; }
       .phone-widget .contacts-list--selection .contact-info-card .contact-full-info .actions-list__option--if-selectable {
         display: flex;
         justify-content: center;
@@ -1480,17 +1481,24 @@
           background: #a6eb71;
           transform: translateX(calc(100% - 2px)); }
   .phone-widget .checkbox {
-    height: 18px;
-    width: 18px;
-    position: relative; }
+    height: 32px;
+    width: 32px;
+    position: relative;
+    transform: translateX(25%); }
     .phone-widget .checkbox label {
-      display: block;
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      border-radius: 3px;
-      background-color: #FBFBFB;
-      border: 1px solid #CECECE; }
+      margin: 0;
+      cursor: pointer; }
+      .phone-widget .checkbox label:not([data-area-label]) {
+        display: block;
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        border-radius: 3px;
+        background-color: #FBFBFB;
+        border: 1px solid #CECECE;
+        right: 50%;
+        top: 50%;
+        transform: translate(50%, -50%); }
       .phone-widget .checkbox label:after {
         content: '';
         width: 6px;
@@ -1504,6 +1512,11 @@
         transform: translate(-50%, -50%) rotate(45deg);
         opacity: 0;
         transition: opacity, .1s; }
+      .phone-widget .checkbox label[data-area-label] {
+        display: block;
+        position: absolute;
+        width: 100%;
+        height: 100%; }
     .phone-widget .checkbox input {
       position: absolute;
       width: 100%;

@@ -75,6 +75,7 @@ let PhoneWidgetContacts = function () {
             '<div class="checkbox">'+
             '<input type="checkbox" name="checkedContact'+ contact.id +'" id="checkedContact'+ contact.id +'" value="'+ contact.phones[0] +'" data-selected-contact="'+ contact.id +'">'+
             '<label for="checkedContact'+ contact.id +'"></label>'+
+            '<label for="checkedContact'+ contact.id +'" data-area-label></label>'+
             '</div>' +
             '</div>'
         }
@@ -90,6 +91,8 @@ let PhoneWidgetContacts = function () {
             '<div class="checkbox">'+
             '<input type="checkbox" name="checkedContact'+ index + 2 +'" id="checkedContact'+ index + 2 +'" value="'+ contact.phones[index] +'" data-selected-contact="'+ contact.id +'">'+
             '<label for="checkedContact'+ index + 2 +'"></label>'+
+            '<label for="checkedContact'+ index + 2 +'" data-area-label></label>'+
+
             '</div>' +
             '</li>'
         } 
