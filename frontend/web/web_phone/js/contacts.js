@@ -427,29 +427,14 @@ let PhoneWidgetContacts = function () {
             if (!i || !item) {
                 return;
             }
+
             let content = '<span class="section-separator">' + i + '</span>';
             content += '<ul class="phone-widget__list-item calls-history" id="contacts-tab">';
-            // TEST
-            let testContent = {
-                avatar: "T",
-                description: "Andrew test",
-                emails: ["tandroid@gmail.com", "tandroid@gmail.com"],
-                group: "T",
-                id: 34,
-                is_company: false,
-                name: "Test 3",
-                phones: ["+37369271517", "+37369271518"],
-                type: 2
-            };
-            // END TEST
+         
             $.each(list[i], function (j, contact) {
                 content += getContactItem(contact);
             });
-            // TEST
-            // content += getContactItem(testContent);
-            content += getContactItem(testContent);
-           
-            // END TEST
+       
             content += '</ul>';
             data += content;
         });

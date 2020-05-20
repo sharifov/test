@@ -60,11 +60,13 @@ $(document).ready(function() {
             if ($(this).hasClass('js-add-to-conference')) {
                 window.localStorage.setItem('contactSelectableState', 1);
                 $('.contacts-list').addClass('contacts-list--selection');
+                $('.selection-amount').show();
 
             } else {
                 window.localStorage.setItem('contactSelectableState', 0);
                 $('.contacts-list').removeClass('contacts-list--selection');
                 $('.submit-selected-contacts').slideUp(10);
+                $('.selection-amount').hide();
             }
 
             PhoneWidgetContacts.requestFullList();
