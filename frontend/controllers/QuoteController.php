@@ -18,6 +18,7 @@ use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use sales\services\parsingDump\lib\ParsingDump;
 use sales\services\parsingDump\PricingService;
+use sales\services\parsingDump\ReservationService;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\filters\AccessControl;
@@ -509,13 +510,66 @@ class QuoteController extends FController
         return $result;
     }
 
+    public function actionPrepareDump(): array
+    {
+        $response = [
+            'status' => 1, /* TODO::  */
+            'errors' => [],
+            'itinerary' => [],
+            'validating_carrier' => '',
+            'prices' => '',
+        ];
+
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        if (Yii::$app->request->isPost) {
+            $post = Yii::$app->request->post();
+
+            if (isset($post['Quote'], $post['prepare_dump'])) {
+                $postQuote = $post['Quote'];
+
+                if (!$gds = ParsingDump::getGdsByQuote($postQuote['gds'])) {
+                    $response['errors'][] = 'This gds cannot be processed';
+                    return $response;
+                }
+
+                /* TODO::
+                    3) segments
+                 */
+
+                if($pricing = (new PricingService($gds))->formattingForQuote($post['prepare_dump'])) {
+                    $response['validating_carrier'] = $pricing['validating_carrier'];
+                    $prices = [];
+                    foreach ($pricing['prices'] as $type => $value) {
+                        $price = new QuotePrice();
+                        $price->passenger_type = $type;
+                        $price->fare = $value['fare'];
+                        $price->taxes = $value['taxes'];
+                        $price->net = $price->fare + $price->taxes;
+                        $price->selling = $price->net + $price->mark_up;
+                        $price->toFloat();
+
+                        $prices[] = $price;
+                    }
+                    $response['prices'] = $this->renderAjax('partial/_priceRows', [
+                        'prices' => $prices,
+                    ]);
+                }
+
+                // (new ReservationService($gds))->parseReservation($post['prepare_dump'], true, $quote->itinerary);
+
+            }
+        }
+        return $response;
+    }
+
     /**
      * @return array
      * @throws \Throwable
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\db\StaleObjectException
      */
-    public function actionPrepareDump(): array
+    public function actionPrepareDumpV1(): array /* TODO::  */
     {
         $response = [
             'success' => false,
@@ -535,16 +589,15 @@ class QuoteController extends FController
 
                 if ($quote) {
                     $quote->uid = uniqid('', false);
-                    $changedAttributes = $quote->attributes;
                     $quote->attributes = $postQuote;
+                    $quote->employee_id = Yii::$app->user->id;
+                    $quote->employee_name = Yii::$app->user->identity->username;
 
                     if (!$gds = ParsingDump::getGdsByQuote($postQuote['gds'])) {
-                        $response['errors'][] = 'This gds (' . $postQuote['gds'] . ') cannot be processed';
+                        $response['errors'][] = 'This gds cannot be processed';
                     }
 
-                    $pricingService = new PricingService($gds);
-
-                    if(!$response['errors'] && $pricing = $pricingService->formattingForQuote($post['prepare_dump'])) {
+                    if(!$response['errors'] && $pricing = (new PricingService($gds))->formattingForQuote($post['prepare_dump'])) {
 
                         if (!empty($pricing['validating_carrier'])) {
                             $quote->main_airline_code = $pricing['validating_carrier'];
@@ -553,42 +606,41 @@ class QuoteController extends FController
                         $response['pricing'] = $pricing;
                         $response[Html::getInputId($quote, 'gds')] = $postQuote['gds'];
 
-                        if (isset($post['QuotePrice'])) {
-                            foreach ($post['QuotePrice'] as $key => $quotePrice) {
-                                $price = empty($quotePrice['id'])
-                                    ? new QuotePrice()
-                                    : QuotePrice::findOne(['id' => $quotePrice['id']]);
-                                if ($price !== null) {
-                                    $price->attributes = $quotePrice;
-                                    $price->quote_id = $quote->id;
+                        foreach ($post['QuotePrice'] as $key => $quotePrice) {
+                            $price = empty($quotePrice['id'])
+                                ? new QuotePrice()
+                                : QuotePrice::findOne(['id' => $quotePrice['id']]);
+                            if ($price !== null) {
+                                $price->attributes = $quotePrice;
+                                $price->quote_id = $quote->id;
 
-                                    if (isset($pricing['prices'][$price->passenger_type])) {
-                                        $price->fare = $pricing['prices'][$price->passenger_type]['fare'];
-                                        $price->taxes = $pricing['prices'][$price->passenger_type]['taxes'];
-                                        $price->net = $price->fare + $price->taxes;
-                                        $price->selling = $price->net + $price->mark_up;
-                                    }
-
-                                    $price->oldParams = serialize($price->attributes);
-
-                                    $price->toFloat();
-                                    $response[Html::getInputId($price, '[' . $key . ']fare')] = $price->fare;
-                                    $response[Html::getInputId($price, '[' . $key . ']taxes')] = $price->taxes;
-                                    $response[Html::getInputId($price, '[' . $key . ']net')] = $price->net;
-                                    $response[Html::getInputId($price, '[' . $key . ']selling')] = $price->selling;
+                                if (isset($pricing['prices'][$price->passenger_type])) {
+                                    $price->fare = $pricing['prices'][$price->passenger_type]['fare'];
+                                    $price->taxes = $pricing['prices'][$price->passenger_type]['taxes'];
+                                    $price->net = $price->fare + $price->taxes;
+                                    $price->selling = $price->net + $price->mark_up;
                                 }
+
+                                $price->oldParams = serialize($price->attributes);
+
+                                $price->toFloat();
+                                $response[Html::getInputId($price, '[' . $key . ']fare')] = $price->fare;
+                                $response[Html::getInputId($price, '[' . $key . ']taxes')] = $price->taxes;
+                                $response[Html::getInputId($price, '[' . $key . ']net')] = $price->net;
+                                $response[Html::getInputId($price, '[' . $key . ']selling')] = $price->selling;
                             }
                         }
-                    }
 
-                    $quote->employee_id = Yii::$app->user->id;
-                    $quote->employee_name = Yii::$app->user->identity->username;
+                        (new ReservationService($gds))->parseReservation($post['prepare_dump'], true, $quote->itinerary);
 
-                    $lead = Lead::findOne(['id' => $quote->lead_id]);
-                    if (isset($post['QuotePrice']) && $lead !== null) {
-                        $response['success'] = $quote->validate();
-                        $response['itinerary'] = $quote::createDump($quote->itinerary);
-                        $response['errors'] = $quote->getErrors();
+                        $reservationDump = $quote::createDump($quote->itinerary);
+                        $quote->reservation_dump = $response['itinerary'] = $reservationDump;
+
+                        if ($quote->getErrors()) {
+                            $response['errors'] = $quote->getErrors();
+                        } else {
+                            $response['success'] = true;
+                        }
                     }
                 }
             }

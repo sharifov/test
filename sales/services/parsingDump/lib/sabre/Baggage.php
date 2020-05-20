@@ -103,10 +103,6 @@ AMS AND UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS**
 AMS AND UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS**
              */
 
-            \yii\helpers\VarDumper::dump($baggageMatches, 10, true); exit();
-            /* FOR DEBUG:: must by remove */
-
-
             $rowDelimPatten = '[A-Z]{2}\s[A-Z]{6}\s{1,2}\d{1}PC';
             preg_match_all('(' . $rowDelimPatten . ')', $baggageMatches[1], $codeMatches);
 

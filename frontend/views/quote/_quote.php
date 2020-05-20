@@ -51,7 +51,7 @@ $js = <<<JS
             }
         });
     });
-
+    
     /***  Cancel card  ***/
     $('#cancel-alt-quote').click(function (e) {
         e.preventDefault();
@@ -79,20 +79,13 @@ $js = <<<JS
             alert('Select GDS please');
             $('#quote-gds').focus();
             return false;
-        }
-        
+        }        
         if($('#quote-main_airline_code').val() == '') {
             alert('Select Validating Carrier please');
             $('#quote-main_airline_code').focus();
             return false;
-        }
-        
-        if($('#quote-reservation_dump').val() == '') {
-            alert('Insert Reservation dump please');
-            $('#quote-reservation_dump').focus();
-            return false;
-        }
-        
+        } 
+                        
         $('#preloader').removeClass('hidden');
                 
         $.ajax({
@@ -154,10 +147,17 @@ $js = <<<JS
             }
         });
     }
+    
     $('#save-alt-quote').click(function (e) {
         e.preventDefault();
         $('#alternativequote-status').val(1);
         var form = $('#$formID');
+               
+        if($('#quote-reservation_dump').val() == '') {
+            alert('Insert Reservation dump please');
+            $('#quote-reservation_dump').focus();
+            return false;
+        }        
         addEditAltQuote(form, form.attr("action"));
     });
     $('#confirm-alt-quote').click(function (e) {
@@ -167,13 +167,7 @@ $js = <<<JS
         var form = $('#$formID');
         addEditAltQuote(form, form.attr("action") + '?save=true');
     });
-    $('#prepare_dump_btn').click(function (e) {
-        e.preventDefault();
-        $('#alternativequote-status').val(1);
-        var form = $('#$formID');
-        addEditAltQuote(form, '/quote/prepare-dump');
-    });
-
+    
     $('.clone-alt-price-by-type').click(function(e) {
         e.preventDefault();
         $(this).blur();
@@ -200,9 +194,103 @@ $js = <<<JS
             }
         });
     });
+    
+    $('#quote-gds').change(function (e) {
+        e.preventDefault();
+        
+        let gds = $(this).val();
+        
+        if (gds === 'S' || gds === 'W') {
+            $('#prepare_dump_btn').show(1000);
+            $('#box-gds-tab').show();             
+            $('#dumpTab #box-gds-tab a').tab('show');       
+        } else {
+            $('#prepare_dump_btn').hide(1000);
+            $('#box-gds-tab').hide();             
+            $('#dumpTab #reservation-dump-tab a').tab('show');       
+        }
+    });
+    
+    $('#prepare_dump_btn').click(function (e) {
+        e.preventDefault();
+        $('#alternativequote-status').val(1);
+        var form = $('#$formID');        
+        if($('#prepare_dump').val() == '') {
+            alert('Insert Reservation dump please');
+            $('#quote-reservation_dump').focus();
+            return false;
+        }        
+        prepareDumpQuote(form, '/quote/prepare-dump');
+    }); 
+    
+    function prepareDumpQuote(form, url)
+    {
+        $('.field-error').each(function() {
+            $(this).removeClass('field-error');
+        });
+        $('.parent-error').removeClass('has-error');
+        
+        if($('#quote-gds').val() == '') {
+            alert('Select GDS please');
+            $('#quote-gds').focus();
+            return false;
+        }        
+                        
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: form.serialize(),
+            dataType: 'json',
+            beforeSend: function () {                    
+                $('#preloader').removeClass('hidden');
+            },
+            success: function (dataResponse) {               
+                $('#preloader').addClass('hidden');
+                
+                console.log(dataResponse); // TODO:: for debug
+                
+                if (dataResponse.status === 1) {
+                
+                   /* $.each(dataResponse., function( index, value ) {
+                        $('#'+index).val(value);
+                        if(index == 'quote-main_airline_code'){
+                            $('#'+index).trigger('change');
+                        }
+                    });*/
+                    
+                   //
+                    if (dataResponse.validating_carrier.length) {
+                       $('#quote-main_airline_code').val(dataResponse.validating_carrier).trigger('change');
+                    }
+                    if (dataResponse.prices.length) {
+                       $('#price-table tbody').html(dataResponse.prices); 
+                    }
+                                                            
+	            } else {
+                    if (dataResponse.errors.length) {
+                        let errorList = dataResponse.errors.join('.');
+                        alert(errorList);
+                    }    
+	            }
+            },
+            error: function (error) {
+                $('#preloader').addClass('hidden');
+                console.log('Error: ' + error);
+            }
+        });
+                
+    }
 JS;
 $this->registerJs($js);
 
+?>
+
+<?php
+$this->registerCss('
+    .nav-tabs li a.active {
+        font-weight: 900;
+    } 
+');
 ?>
 
 <?php $form = ActiveForm::begin([
@@ -233,7 +321,7 @@ $this->registerJs($js);
             ],
             'template' => '{input}'
         ])->hiddenInput() ?>
-        <table class="table table-striped table-neutral">
+        <table class="table table-striped table-neutral" id="price-table">
             <thead>
             <tr>
                 <th style="min-width: 100px;">Name</th>
@@ -480,19 +568,19 @@ $this->registerJs($js);
             </table>
         </div>
         <div class="col-sm-6">
-            <ul class="nav nav-tabs">
-                <li class="active">
-                    <?= Html::a('Reservation Dump', sprintf('#r-dump-%d', $quote->id), ['data-toggle' => 'tab']) ?>
+            <ul class="nav nav-tabs" id="dumpTab">
+                <li id="reservation-dump-tab">
+                    <?= Html::a('Reservation Dump', sprintf('#r-dump-%d', $quote->id), ['data-toggle' => 'tab', 'class' => 'active']) ?>
                 </li>
                 <li>
                 	<?= Html::a('Pricing', sprintf('#r-dump-pane-%d', $quote->id), ['data-toggle' => 'tab']) ?>
                 </li>
-                <li>
+                <li id="box-gds-tab" style="display: none;">
                 	<?= Html::a('GDS Dump', sprintf('#r-prepare_dump-%d', $quote->id), ['data-toggle' => 'tab']) ?>
                 </li>
             </ul>
             <div class="tab-content">
-                <div id="<?= sprintf('r-dump-%d', $quote->id) ?>" class="tab-pane fade in active">
+                <div id="<?= sprintf('r-dump-%d', $quote->id) ?>" class="tab-pane fade in active show">
                     <?= $form->field($quote, 'reservation_dump', [
                         'options' => [
                             'tag' => false,
@@ -512,7 +600,7 @@ $this->registerJs($js);
                         'rows' => 5
                     ]) ?>
                 </div>
-                <div id="<?= sprintf('r-prepare_dump-%d', $quote->id) ?>" class="tab-pane fade in">
+                <div id="<?= sprintf('r-prepare_dump-%d', $quote->id) ?>" class="prepare_dump_box tab-pane fade in">
                     <?php echo Html::textarea('prepare_dump', null,
                         ['id' => 'prepare_dump', 'rows' => 13, 'class' => 'form-control'])
                     ?>
@@ -537,9 +625,10 @@ $this->registerJs($js);
             ]) ?>
         <?php endif; ?>
         <?php if ($quote->isNewRecord) :?>
-            <?= Html::button('<i class="fa fa-recycle"></i> Prepare Dump', [
+            <?= Html::button('<i class="fa fa-recycle"></i> Import from GDS dump', [
                 'id' => 'prepare_dump_btn',
-                'class' => 'btn btn-warning'
+                'class' => 'btn btn-warning',
+                'style' => 'display: none',
             ]) ?>
         <?php endif; ?>
     </div>
