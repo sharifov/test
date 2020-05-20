@@ -4,12 +4,13 @@ namespace common\models;
 
 use common\models\query\CreditCardQuery;
 use sales\helpers\payment\CreditCardHelper;
+use yii\base\Exception;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\Html;
-use yii\helpers\VarDumper;
+use yii\helpers\StringHelper;
 
 /**
  * This is the model class for table "credit_card".
@@ -18,6 +19,7 @@ use yii\helpers\VarDumper;
  * @property string $cc_number
  * @property string|null $cc_display_number
  * @property string|null $cc_holder_name
+ * @property string|null $cc_security_hash
  * @property int $cc_expiration_month
  * @property int $cc_expiration_year
  * @property string|null $cc_cvv
@@ -28,6 +30,7 @@ use yii\helpers\VarDumper;
  * @property int|null $cc_updated_user_id
  * @property string|null $cc_created_dt
  * @property string|null $cc_updated_dt
+ * @property string|null $cc_bo_link
  *
  * @property BillingInfo[] $billingInfos
  * @property Employee $ccCreatedUser
@@ -93,7 +96,8 @@ class CreditCard extends ActiveRecord
             [['cc_number'], 'string', 'max' => 50],
             [['cc_display_number'], 'string', 'max' => 18],
             [['cc_holder_name'], 'string', 'max' => 50],
-            [['cc_cvv'], 'string', 'max' => 32],
+            [['cc_bo_link'], 'string', 'max' => 255],
+            [['cc_cvv', 'cc_security_hash'], 'string', 'max' => 32],
             [['cc_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['cc_created_user_id' => 'id']],
             [['cc_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['cc_updated_user_id' => 'id']],
         ];
@@ -115,10 +119,12 @@ class CreditCard extends ActiveRecord
             'cc_type_id' => 'Type ID',
             'cc_status_id' => 'Status ID',
             'cc_is_expired' => 'Is Expired',
+            'cc_security_hash' => 'Security Hash',
             'cc_created_user_id' => 'Created User ID',
             'cc_updated_user_id' => 'Updated User ID',
             'cc_created_dt' => 'Created Dt',
             'cc_updated_dt' => 'Updated Dt',
+            'cc_bo_link' => 'BO link',
         ];
     }
 
@@ -230,24 +236,40 @@ class CreditCard extends ActiveRecord
      */
     public function getSecurityKey(): string
     {
-        return $this->cc_expiration_month . '|' . $this->cc_expiration_year;
+        return md5($this->cc_expiration_month . '|' . $this->cc_security_hash . '|' . $this->cc_expiration_year);
     }
 
     /**
      * @return string
+     * @throws Exception
      */
     public function updateSecureCardNumber(): string
     {
+        $this->updateSecureHash();
         $this->cc_display_number = CreditCardHelper::maskCreditCard($this->cc_number);
         return $this->cc_number = self::encrypt($this->cc_number, $this->securityKey);
     }
 
     /**
      * @return string
+     * @throws Exception
      */
     public function updateSecureCvv(): string
     {
+        $this->updateSecureHash();
         return $this->cc_cvv = self::encrypt($this->cc_cvv, $this->securityKey);
+    }
+
+    /**
+     * @return string
+     * @throws Exception
+     */
+    public function updateSecureHash(): string
+    {
+        if (!$this->cc_security_hash) {
+            $this->cc_security_hash = md5(\Yii::$app->security->generateRandomString(32));
+        }
+        return $this->cc_security_hash;
     }
 
     /**
@@ -309,4 +331,5 @@ class CreditCard extends ActiveRecord
         $str = openssl_decrypt($data, $cryptMethod, $cryptPassword, 0, $cryptIv);
         return $str ?: '';
     }
+
 }
