@@ -5,15 +5,19 @@ use common\models\CaseSale;
 use kartik\editable\Editable;
 use kartik\popover\PopoverX;
 use sales\guards\cases\CaseManageSaleInfoGuard;
+use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $data array */
 /* @var $csId int */
 /* @var $itemKey int */
 /* @var $caseSaleModel common\models\CaseSale */
-/* @var array $additionalData */
+/* @var $caseModel sales\entities\cases\Cases */
+/* @var $additionalData array */
+/* @var $dataProviderCc yii\data\ActiveDataProvider */
 
 if(Yii::$app->request->isPjax) {
 
@@ -37,7 +41,7 @@ if (!empty($caseSaleModel)) {
             <div class="error-dump"></div>
         </div>
 
-        <?php if (isset($additionalData) && $additionalData['withFareRules'] === 0) :?>
+        <?php if (!empty($additionalData) && $additionalData['withFareRules'] === 0) :?>
             <div class="col-md-12">
                 <?php echo Html::a(
                     'Check Fare rules',
@@ -240,6 +244,9 @@ if (!empty($caseSaleModel)) {
                     <?php endforeach;?>
                 </table>
             <?php endif;?>
+
+            <?php echo $this->render('partial/_sale_credit_card', ['csId' => $csId, 'saleId' => $data['saleId'], 'dataProvider' => $dataProviderCc, 'caseSaleModel' => $caseSaleModel, 'caseModel' => $caseModel]); ?>
+
         </div>
 
     </div>

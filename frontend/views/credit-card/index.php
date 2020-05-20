@@ -48,6 +48,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'cc_holder_name',
             'cc_expiration_month',
             'cc_expiration_year',
+            'cc_security_hash',
             //'cc_cvv',
             //'cc_type_id',
             [
@@ -66,6 +67,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             //'cc_status_id',
             'cc_is_expired:boolean',
+            'cc_bo_link',
 
             [
                 'class' => UserSelect2Column::class,
@@ -74,15 +76,15 @@ $this->params['breadcrumbs'][] = $this->title;
                 'placeholder' => 'Select User',
             ],
 
-            [
-                'class' => UserSelect2Column::class,
-                'attribute' => 'cc_updated_user_id',
-                'relation' => 'ccCreatedUser',
-                'placeholder' => 'Select User',
-            ],
+//            [
+//                'class' => UserSelect2Column::class,
+//                'attribute' => 'cc_updated_user_id',
+//                'relation' => 'ccCreatedUser',
+//                'placeholder' => 'Select User',
+//            ],
 
             'cc_created_dt:ByUserDateTime',
-            'cc_updated_dt:ByUserDateTime',
+//            'cc_updated_dt:ByUserDateTime',
 
             ['class' => 'yii\grid\ActionColumn'],
         ],
