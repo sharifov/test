@@ -64,6 +64,7 @@ $(document).ready(function() {
             } else {
                 window.localStorage.setItem('contactSelectableState', 0);
                 $('.contacts-list').removeClass('contacts-list--selection');
+                $('.submit-selected-contacts').slideUp(10);
             }
 
             PhoneWidgetContacts.requestFullList();
@@ -393,7 +394,7 @@ $(document).ready(function() {
     });
 
 
-
+    
 
 
     // function phoneWidgetBehavior(elem) {
@@ -450,7 +451,7 @@ $(document).ready(function() {
         $('.additional-info').slideDown(150);
     })
 
-    
+ 
 
 });
 

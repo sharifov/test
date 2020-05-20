@@ -7,6 +7,7 @@ let PhoneWidgetContacts = function () {
     let simpleBar = null;
     let currentFullListContainer = true;
 
+    let selectedContacts = [];
    
 
     function init(titleAccessGetMessagesInit, disabledClassInit, urlFullListInit) {
@@ -66,17 +67,71 @@ let PhoneWidgetContacts = function () {
         $($current).find('.wg-history-load').remove();
     }
 
-    function showCheckbox(contact) {
+    function showCheckbox(contact, index) {
+        // handleContactSelection($('[data-selected-contact]'),contact);
+
         if (window.localStorage.getItem('contactSelectableState') == '1' && contact.phones.length <= 1) {
             return '<div class="select-contact">' +
             '<div class="checkbox">'+
-            '<input type="checkbox" name="contact1" id="contact1">'+
-            '<label for="contact1"></label>'+
+            '<input type="checkbox" name="checkedContact'+ contact.id +'" id="checkedContact'+ contact.id +'" value="'+ contact.phones[0] +'" data-selected-contact="'+ contact.id +'">'+
+            '<label for="checkedContact'+ contact.id +'"></label>'+
             '</div>' +
             '</div>'
         }
 
         return '<a href="#" class="collapsible-arrow"><i class="fas fa-chevron-right"></i></a>'
+    }
+
+
+    function showCheckboxMultiple(contact, index) {
+        handleContactSelection('[data-selected-contact]',contact);
+        if (window.localStorage.getItem('contactSelectableState') == '1' && contact.phones.length >= 2) {
+            return '<li class="actions-list__option actions-list__option--if-selectable">'+
+            '<div class="checkbox">'+
+            '<input type="checkbox" name="checkedContact'+ index + 2 +'" id="checkedContact'+ index + 2 +'" value="'+ contact.phones[index] +'" data-selected-contact="'+ contact.id +'">'+
+            '<label for="checkedContact'+ index + 2 +'"></label>'+
+            '</div>' +
+            '</li>'
+        } 
+        
+        return ''
+    }
+
+    function cleanSelectedContacts(elem, elemData) {
+        for (var i = 0; i < selectedContacts.length; i++) {
+            if (selectedContacts[i].id === parseInt($(elem).attr(elemData))) {
+                selectedContacts.splice(selectedContacts.indexOf(selectedContacts[i]), 1);
+            }
+        }
+    }
+
+    function handleContactSelection(current, contact) {
+        var elemData = 'data-selected-contact';
+
+        $(document).on('change', current, function() {
+           
+            
+            if ($(this).is(':checked')) {
+                $('.submit-selected-contacts').slideDown(250);
+                var selected = $('['+ elemData +'="'+ $(this).attr(elemData) +'"]');
+                $(selected).prop('checked', false);
+               
+                $(this).prop('checked', true);
+
+                if (contact.hasOwnProperty('id')  && contact['id'] === parseInt($(this).attr(elemData))) {
+                    
+                    cleanSelectedContacts($(this), elemData)
+                    selectedContacts.push(contact);
+                }
+            }
+            else {
+                cleanSelectedContacts($(this), elemData)
+            }
+            if (selectedContacts.length === 0) {
+                $('.submit-selected-contacts').slideUp(150);
+            }
+            console.log(selectedContacts)
+        })
     }
 
     function getSelectableState(contact) {
@@ -282,6 +337,7 @@ let PhoneWidgetContacts = function () {
             '</li>';
     }
 
+
     function getPhoneItem(phone, index, contact) {
         let content = '<li class="contact-full-info__phone">' +
             '<div class="form-group">' +
@@ -296,12 +352,7 @@ let PhoneWidgetContacts = function () {
                     'data-contact-id="' + contact['id'] + '" data-contact-phone="' + phone + '" data-contact-type="' + contact['type'] + '">' +
             '<i class="fa fa-comment-alt"></i>' +
             '</li>' +
-            '<li class="actions-list__option actions-list__option--if-selectable">'+
-            '<div class="checkbox">'+
-            '<input type="checkbox" name="contact1" id="contact1">'+
-            '<label for="contact1"></label>'+
-            '</div>' +
-            '</li>' +
+            showCheckboxMultiple(contact, index) +
             '</ul>' +
             '</li>';
         return content;
@@ -314,6 +365,7 @@ let PhoneWidgetContacts = function () {
     function noResultsTemplate() {
         return '<div style="width:100%;text-align:center;margin-top:20px">No results found</div>';
     }
+
 
     function requestFullList() {
         showPreloader();
@@ -386,7 +438,7 @@ let PhoneWidgetContacts = function () {
                 id: 34,
                 is_company: false,
                 name: "Test 3",
-                phones: ["+37369271516", "+37369271516"],
+                phones: ["+37369271517", "+37369271518"],
                 type: 2
             };
             // END TEST

@@ -62,4 +62,10 @@ JS;
 
     <div class="contacts-list contacts-list--selection" id="list-of-contacts"></div>
 
+    <div class="submit-selected-contacts">
+        <button type="submit" class="js-add-contacts">
+            <i class="fa fa-check"></i>
+            <span>Confirm</span>
+        </button>
+    </div>
 </div>
