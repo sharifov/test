@@ -332,6 +332,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'SMS template types', 'url' => ['/sms-template-type/index'], 'icon' => 'comments-o'],
                 ['label' => 'Case Sales', 'url' => ['/case-sale/index'], 'icon' => 'list'],
                 ['label' => 'Case Notes', 'url' => ['/case-note/index'], 'icon' => 'list'],
+                ['label' => 'Sale Ticket', 'url' => ['/sale-ticket/index'], 'icon' => 'list'],
                 ['label' => 'Project Settings', 'url' => ['/settings/projects'], 'icon' => 'product-hunt'],
                 ['label' => 'Check List Types', 'url' => ['/lead-checklist-type/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('manageLeadChecklistType')],
                 ['label' => 'Case status history', 'url' => ['/case-status-log/index'], 'icon' => 'bars'],
