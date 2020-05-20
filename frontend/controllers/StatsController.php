@@ -139,44 +139,44 @@ class StatsController extends FController
 
     public function actionCallsGraph()
     {
-		$params = Yii::$app->request->queryParams;
-		$model = new CallGraphsSearch();
-		$model->load($params);
+        $params = Yii::$app->request->queryParams;
+        $model = new CallGraphsSearch();
+        $model->load($params);
 
-		if (Yii::$app->request->post('export_type') && $model->validate()) {
-			return $this->render('partial/_call_graph_export', [
-				'viewModel' => new ViewModelTotalCallGraph($model->getTotalCalls(), $model),
-			]);
-		} else {
-			return $this->render('calls-stats', [
-				'model' => $model
-			]);
-		}
+        if (Yii::$app->request->post('export_type') && $model->validate()) {
+            return $this->render('partial/_call_graph_export', [
+                'viewModel' => new ViewModelTotalCallGraph($model->getTotalCalls(), $model),
+            ]);
+        } else {
+            return $this->render('calls-stats', [
+                'model' => $model
+            ]);
+        }
 
-	}
+    }
 
-	/**
-	 * @throws \yii\base\InvalidConfigException
-	 */
-	public function actionAjaxGetTotalChart(): \yii\web\Response
-	{
-		$callSearch = new CallGraphsSearch();
-		$callSearch->load(Yii::$app->request->post());
-		if ($callSearch->validate()) {
+    /**
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function actionAjaxGetTotalChart(): \yii\web\Response
+    {
+        $callSearch = new CallGraphsSearch();
+        $callSearch->load(Yii::$app->request->post());
+        if ($callSearch->validate()) {
 
-			$html = $this->renderAjax('partial/_total_calls_chart', [
-				'viewModel' => new ViewModelTotalCallGraph($callSearch->getTotalCalls(), $callSearch),
-			]);
-		}
+            $html = $this->renderAjax('partial/_total_calls_chart', [
+                'viewModel' => new ViewModelTotalCallGraph($callSearch->getCallLogStats(), $callSearch),
+            ]);
+        }
 
-		$response = [
-			'html' => $html ?? '',
-			'error' => $callSearch->hasErrors(),
-			'message' => $callSearch->getErrorSummary(true)
-		];
+        $response = [
+            'html' => $html ?? '',
+            'error' => $callSearch->hasErrors(),
+            'message' => $callSearch->getErrorSummary(true)
+        ];
 
-		return $this->asJson($response);
-	}
+        return $this->asJson($response);
+    }
 
     public function actionSmsGraph()
     {
@@ -302,9 +302,9 @@ class StatsController extends FController
         $teamsSkill = json_decode($teamsSettingsSkill['s_value'], true);
 
         if(Yii::$app->request->isPost){
-           $period = Yii::$app->request->post('period');
+            $period = Yii::$app->request->post('period');
         } else {
-           $period = 'currentWeek';
+            $period = 'currentWeek';
         }
 
         $profitDataProvider = $searchLeader->searchTopAgents('finalProfit', $period);
