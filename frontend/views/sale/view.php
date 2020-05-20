@@ -5,6 +5,7 @@ use common\models\CaseSale;
 use kartik\editable\Editable;
 use kartik\popover\PopoverX;
 use sales\guards\cases\CaseManageSaleInfoGuard;
+use sales\model\saleTicket\entity\SaleTicket;
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
@@ -112,7 +113,52 @@ if (!empty($caseSaleModel)) {
 
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-9">
+            <?php if ($saleTicket = $caseSaleModel->cssSaleTicket): ?>
+                <div class="row">
+                    <div class="col-md-12">
+                        <h2>Sale Tickets</h2>
+                        <table class="table table-bordered table-hover">
+                            <tr>
+                                <th>Last/First Name</th>
+                                <th>Ticket Number</th>
+                                <th>Record Locator</th>
+                                <th>Original FOP</th>
+                                <th>Charge System</th>
+                                <th>Airline Penalty</th>
+                                <th>Penalty Amount</th>
+                                <th>Selling</th>
+                                <th>Service Fee</th>
+                                <th>Real Commission</th>
+                                <th>Markup</th>
+                                <th>Upfront Charge</th>
+                                <th>Refundable Amount</th>
+                            </tr>
+							<?php
+                            /** @var $saleTicket SaleTicket[] */
+                            foreach($saleTicket as $ticket): ?>
+                                <tr>
+                                    <td><?=Html::encode($ticket->st_client_name)?></td>
+                                    <td><?=Html::encode($ticket->st_ticket_number)?></td>
+                                    <td><?=Html::encode($ticket->st_record_locator)?></td>
+                                    <td><?=Html::encode($ticket->st_original_fop)?></td>
+                                    <td><?=Html::encode(SaleTicket::getChargeTypeName($ticket->st_charge_system))?></td>
+                                    <td><?=Html::encode($ticket->st_penalty_type)?></td>
+                                    <td><?=Html::encode($ticket->st_penalty_amount)?></td>
+                                    <td><?=Html::encode($ticket->st_selling)?></td>
+                                    <td><?=Html::encode($ticket->st_service_fee)?></td>
+                                    <td><?=Html::encode($ticket->st_recall_commission)?></td>
+                                    <td><?=Html::encode($ticket->st_markup)?></td>
+                                    <td><?=Html::encode($ticket->st_upfront_charge)?></td>
+                                    <td><?=Html::encode($ticket->st_refundable_amount)?></td>
+                                </tr>
+							<?php endforeach;?>
+                        </table>
+                    </div>
+                </div>
+            <?php endif; ?>
+            <div class="row">
+                <div class="col-md-5">
 
             <h2>Processing Teams Status</h2>
             <?php if(isset($data['processingTeamsStatus']) && $data['processingTeamsStatus']): ?>
