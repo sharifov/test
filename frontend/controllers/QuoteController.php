@@ -580,6 +580,9 @@ class QuoteController extends FController
         return $response;
     }
 
+    /**
+     * @return array
+     */
     public function actionSaveFromDump(): array
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
@@ -590,10 +593,9 @@ class QuoteController extends FController
             'errors' => [],
         ];
 
+        $transaction = Quote::getDb()->beginTransaction();
         try {
-            //$transaction = Quote::getDb()->beginTransaction();
             if (Yii::$app->request->isPost) {
-
 
                 $leadId = (int) Yii::$app->request->get('lead_id');
                 if (!$lead = Lead::findOne(['id' => $leadId])) {
@@ -624,7 +626,7 @@ class QuoteController extends FController
 
                     if (!$quote->save(false)) {
                         $response['errors'] = $quote->getErrors();
-                        return $response;
+                        throw new \DomainException(  'Quote not saved. Error: ' . $quote->getErrorSummary(false)[0]);
                     }
 
                     foreach ($post['QuotePrice'] as $key => $quotePrice) {
@@ -639,20 +641,77 @@ class QuoteController extends FController
                     }
 
                     if (count($response['errorsPrices'])) {
-                       // $transaction->rollBack();
-                        $quote->delete();
-                        return $response;
+                        throw new \DomainException(  'QuotePrice not saved.');
+                    }
+
+                    $this->logQuote($quote);
+                    $quote->createQuoteTrips();
+
+                    if($objParser = ParsingDump::initClass($gds, ParsingDump::PARSING_TYPE_BAGGAGE)) {
+
+                        $quoteAttributes = $objParser->parseDump($post['prepare_dump']);
+
+                        foreach ($quoteAttributes['baggage'] as $baggageAttr){
+                            $segmentKey = $baggageAttr['segment'];
+                            $origin = substr($segmentKey, 0, 3);
+                            $destination = substr($segmentKey, 2, 3);
+                            $segment = QuoteSegment::find()->innerJoin(QuoteTrip::tableName(),'qs_trip_id = qt_id')
+                            ->andWhere(['qt_quote_id' =>  $quote->id])
+                            ->andWhere(['or',
+                                ['qs_departure_airport_code'=>$origin],
+                                ['qs_arrival_airport_code'=>$destination]
+                            ])
+                            ->one();
+                            $segments = [];
+                            if(!empty($segment)){
+                                $segments = QuoteSegment::find()
+                                ->andWhere(['qs_trip_id' =>  $segment->qs_trip_id])
+                                ->all();
+                            }
+                            if(!empty($segments)){
+                                if(isset($baggageAttr['free_baggage']) && isset($baggageAttr['free_baggage']['piece'])){
+                                    foreach ($segments as $segment){
+                                        $baggage = new QuoteSegmentBaggage();
+                                        $baggage->qsb_allow_pieces = $baggageAttr['free_baggage']['piece'];
+                                        $baggage->qsb_segment_id = $segment->qs_id;
+                                        if(isset($baggageAttr['free_baggage']['weight'])){
+                                            $baggage->qsb_allow_max_weight = substr($baggageAttr['free_baggage']['weight'], 0, 100);
+                                        }
+                                        if(isset($baggageAttr['free_baggage']['height'])){
+                                            $baggage->qsb_allow_max_size = substr($baggageAttr['free_baggage']['height'], 0, 100);
+                                        }
+                                        $baggage->save(false);
+                                    }
+                                }
+                                if(isset($baggageAttr['paid_baggage']) && !empty($baggageAttr['paid_baggage'])){
+                                    foreach ($segments as $segment){
+                                        foreach ($baggageAttr['paid_baggage'] as $paidBaggageAttr){
+                                            $baggage = new QuoteSegmentBaggageCharge();
+                                            $baggage->qsbc_segment_id = $segment->qs_id;
+                                            $baggage->qsbc_price = str_replace('USD', '', $paidBaggageAttr['price']);
+                                            if(isset($paidBaggageAttr['piece'])){
+                                                $baggage->qsbc_first_piece = $paidBaggageAttr['piece'];
+                                                $baggage->qsbc_last_piece = $paidBaggageAttr['piece'];
+                                            }
+                                            if(isset($paidBaggageAttr['weight'])){
+                                                $baggage->qsbc_max_weight = substr($paidBaggageAttr['weight'], 0 , 100);
+                                            }
+                                            if(isset($paidBaggageAttr['height'])){
+                                                $baggage->qsbc_max_size = substr($paidBaggageAttr['height'],0, 100);
+                                            }
+                                            $baggage->save(false);
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
 
                     if($lead->called_expert) {
                        $quote->sendUpdateBO();
                     }
 
-                    $this->logQuote($quote);
-                    $quote->createQuoteTrips();
-
-
-                    /* TODO:: baggage */
+                    $transaction->commit();
                     $response['status'] = 1;
 
                 } else {
@@ -662,7 +721,7 @@ class QuoteController extends FController
                 throw new \DomainException(  'POST data required');
             }
         } catch (\Throwable $throwable) {
-            //$transaction->rollBack();
+            $transaction->rollBack();
             $response['errorMessage'] = $throwable->getMessage();
         }
         return $response;

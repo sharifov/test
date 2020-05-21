@@ -113,6 +113,7 @@ class ToolsController extends FController
         $prepareSegment = (int) Yii::$app->request->post('prepare_segment', 0);
 
         if ($dump) {
+
             if ($prepareSegment === 1 && $type === ParsingDump::PARSING_TYPE_RESERVATION) {
 
                 $data = (new ReservationService($gds))->parseReservation($dump, false);

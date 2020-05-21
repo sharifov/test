@@ -47,7 +47,7 @@ class Pricing implements ParseDumpInterface
     public function parsePrice(string $string): ?array
     {
         $result = null;
-        $ticketPricePattern = "/BASE FARE TAXES\/FEES\/CHARGES TOTAL\s(.*?)TTL/s";
+        $ticketPricePattern = "/BASE FARE TAXES\/FEES\/CHARGES TOTAL\s(.*?)TTL/s"; /* TODO:: remove */
         preg_match($ticketPricePattern, $string, $ticketPriceMatches);
 
         if (isset($ticketPriceMatches[1]) && $ticketPriceText = trim($ticketPriceMatches[1])) {
