@@ -6,18 +6,25 @@ use yii\widgets\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $model common\models\CreditCard */
 /* @var $form yii\widgets\ActiveForm */
+/* @var $isAjax bool */
 
 \frontend\assets\CreditCardAsset::register($this);
 
+$isAjax = isset($isAjax);
+$colMd = $isAjax ? 'col-md-12' : 'col-md-4';
+$pjaxId = 'pjax-create-credit-card'
 ?>
 
+<script>pjaxOffFormSubmit('#<?= $pjaxId ?>');</script>
 <div class="credit-card-form">
 
-    <?php $form = ActiveForm::begin(); ?>
+    <?php \yii\widgets\Pjax::begin(['id' => $pjaxId, 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false]) ?>
+
+    <?php $form = ActiveForm::begin(['options' => ['data-pjax' => 1]]); ?>
 
     <?php echo $form->errorSummary($model); ?>
 
-    <div class="col-md-4">
+    <div class="<?= $colMd ?>">
 
         <div class="row">
             <div class="col-md-12">
@@ -61,14 +68,17 @@ use yii\widgets\ActiveForm;
             <div class="col-md-6">
                 <?= $form->field($model, 'cc_type_id')->dropDownList(\common\models\CreditCard::getTypeList(), ['prompt' => '---']) ?>
             </div>
+            <?php if(!$isAjax): ?>
             <div class="col-md-6">
                 <?= $form->field($model, 'cc_status_id')->dropDownList(\common\models\CreditCard::getStatusList(), ['prompt' => '---']) ?>
             </div>
+            <?php endif; ?>
         </div>
-
+		<?php if(!$isAjax): ?>
         <?= $form->field($model, 'cc_is_expired')->checkbox() ?>
+		<?php endif; ?>
 
-    <!--    --><?php //= $form->field($model, 'cc_created_user_id')->textInput() ?>
+        <!--    --><?php //= $form->field($model, 'cc_created_user_id')->textInput() ?>
     <!---->
     <!--    --><?php //= $form->field($model, 'cc_updated_user_id')->textInput() ?>
     <!---->
@@ -83,6 +93,7 @@ use yii\widgets\ActiveForm;
 
     <?php ActiveForm::end(); ?>
 
+    <?php \yii\widgets\Pjax::end(); ?>
 </div>
 
 <?php

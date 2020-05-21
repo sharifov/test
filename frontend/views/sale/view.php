@@ -245,7 +245,17 @@ if (!empty($caseSaleModel)) {
                 </table>
             <?php endif;?>
 
-            <?php echo $this->render('partial/_sale_credit_card', ['csId' => $csId, 'saleId' => $data['saleId'], 'dataProvider' => $dataProviderCc, 'caseSaleModel' => $caseSaleModel, 'caseModel' => $caseModel]); ?>
+            <?php
+                if (!empty($csId)) {
+                    echo $this->render('partial/_sale_credit_card', [
+                        'csId' => $csId,
+                        'saleId' => $data['saleId'],
+                        'dataProvider' => $dataProviderCc,
+                        'caseSaleModel' => $caseSaleModel,
+                        'caseModel' => $caseModel
+                    ]);
+                }
+            ?>
 
         </div>
 
