@@ -215,34 +215,44 @@ $js = <<<JS
         }
     });
     
+    function loadingBtn(btnObj, loading)
+    {
+        if (loading === true) {
+            btnObj.removeClass()
+                .addClass('btn btn-default')
+                .html('<span class="spinner-border spinner-border-sm"></span> Loading')
+                .prop("disabled", true);
+        } else {
+            let origClass = btnObj.data('class');
+            let origInner = btnObj.data('inner');
+            btnObj.removeClass()
+                .addClass(origClass)
+                .html(origInner)
+                .prop("disabled", false);
+        }  
+    }
+    
     $('#prepare_dump_btn').click(function (e) {
         e.preventDefault();        
         $('#alternativequote-status').val(1);
         $('#save_dump_btn').hide();
         PNotify.removeAll();                    
-        var form = $('#$formID');
+        let form = $('#$formID');
         
-        prepareDumpQuote(form, '/quote/prepare-dump?lead_id=' + leadId);
-    });
-    
-    function prepareDumpQuote(form, url)
-    {
+        loadingBtn($(this), true);        
         if (!checkPrepareDumpQuote()) {
             return false;
         }
                         
         $.ajax({
-            url: url,
+            url: '/quote/prepare-dump?lead_id=' + leadId,
             type: 'POST',
             data: form.serialize(),
             dataType: 'json',
-            beforeSend: function () {                    
-                $('#preloader').removeClass('hidden'); 
-                              
+            beforeSend: function () {                              
             },
-            success: function (dataResponse) {               
-                $('#preloader').addClass('hidden');
-                $('#prepare_dump_btn').prop("disabled", false);
+            success: function (dataResponse) {
+                loadingBtn($('#prepare_dump_btn'), false);
                 
                 if (dataResponse.status === 1) {
                    
@@ -263,7 +273,7 @@ $js = <<<JS
                             delay: 15000
                         }); 
                     }                    
-                    $('#save_dump_btn').show(1000);                                                            
+                    $('#save_dump_btn').show(500);                                                            
 	            } else {
                     if (dataResponse.error.length) {                        
                         new PNotify({
@@ -275,13 +285,81 @@ $js = <<<JS
                     }    
 	            }
             },
-            error: function (error) {
-                $('#preloader').addClass('hidden');
-                $('#prepare_dump_btn').prop("disabled", false);
+            error: function (error) {               
+                loadingBtn($('#prepare_dump_btn'), false);
                 console.log('Error: ' + error);
             }
-        });                
-    }
+        });
+    });
+    
+    $('#save_dump_btn').click(function (e) {
+        e.preventDefault();        
+        $('#alternativequote-status').val(1);
+        
+        $('.field-error').each(function() {
+            $(this).removeClass('field-error');
+        });
+        $('.parent-error').removeClass('has-error');
+        
+        PNotify.removeAll(); 
+        loadingBtn($(this), true);
+        if (!checkPrepareDumpQuote()) {
+            return false;
+        }
+                        
+        $.ajax({
+            url: '/quote/save-from-dump?lead_id=' + leadId,
+            type: 'POST',
+            data: $('#$formID').serialize(),
+            dataType: 'json',
+            beforeSend: function () {                              
+            },
+            success: function (dataResponse) {
+                loadingBtn($('#save_dump_btn'), false);
+                
+                if (dataResponse.status === 1) {                   
+                    new PNotify({
+                        title: "Success",
+                        type: "success",
+                        text: 'Quote created',
+                        hide: true
+                    });
+                    window.location.reload();                                        
+	            } else {
+	            
+	                if (dataResponse.errorsPrices.length) {
+	                    $.each(dataResponse.errorsPrices, function( index, value ) {
+                            $.each(value, function (idx, val){
+                                $('#quoteprice-'+index+'-'+idx).addClass('field-error');
+                                $('#quoteprice-'+index+'-'+idx).parent().addClass('has-error parent-error');
+                            });
+                        });
+	                }
+                    if (dataResponse.errors.length) {
+	                    $.each(dataResponse.errors, function( index, value ) {
+                            $('#quote-'+index).addClass('field-error');
+                            $('#quote-'+index).parent().addClass('has-error parent-error');
+                            if (index == 'reservation_dump') {
+                                itineraryErr = true;
+                            }
+                        });
+	                }                   
+                    if (dataResponse.error.length) {                        
+                        new PNotify({
+                            title: "Error",
+                            type: "error",
+                            text: dataResponse.error,
+                            hide: true
+                        }); 
+                    }    
+	            }
+            },
+            error: function (error) {                
+                loadingBtn($('#save_dump_btn'), false);
+                console.log('Error: ' + error);
+            }
+        });
+    });
     
     function checkPrepareDumpQuote() 
     {    
@@ -655,11 +733,17 @@ $this->registerCss('
                 'id' => 'prepare_dump_btn',
                 'class' => 'btn btn-warning',
                 'style' => 'display: none',
+                'data-inner' => '<i class="fa fa-recycle"></i> Import from GDS dump',
+                'data-class' => 'btn btn-warning',
+                'width' => '172px',
             ]) ?>
             <?= Html::button('<i class="fa fa-check-circle"></i> Save from GDS dump', [
                 'id' => 'save_dump_btn',
                 'class' => 'btn btn-success',
                 'style' => 'display: none',
+                'data-inner' => '<i class="fa fa-check-circle"></i> Save from GDS dump',
+                'data-class' => 'btn btn-success',
+                'width' => '168px',
             ]) ?>
         <?php endif; ?>
     </div>

@@ -61,4 +61,19 @@ class ParsingDump
         }
         return null;
     }
+
+    /**
+     * @param string $gds
+     * @return string
+     */
+    public static function setGdsForParsing(string $gds): string
+    {
+        if (array_key_exists($gds, self::GDS_TYPE_MAP)) {
+            return $gds;
+        }
+        if ($dumpGds = self::getGdsByQuote($gds)) {
+            return $dumpGds;
+        }
+        throw new \DomainException('This GDS (' . $gds . ') cannot be processed');
+    }
 }

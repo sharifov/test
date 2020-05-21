@@ -17,7 +17,7 @@ class PricingService
      */
     public function __construct(string $gds)
 	{
-		$this->gds = $gds;
+		$this->gds = ParsingDump::setGdsForParsing($gds);
 	}
 
     /**

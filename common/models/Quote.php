@@ -8,6 +8,7 @@ use common\models\local\FlightSegment;
 use common\models\local\LeadLogMessage;
 use common\models\query\QuoteQuery;
 use sales\entities\EventTrait;
+use sales\services\parsingDump\lib\ParsingDump;
 use sales\services\parsingDump\ReservationService;
 use Yii;
 use yii\base\ErrorException;
@@ -267,6 +268,27 @@ class Quote extends \yii\db\ActiveRecord
         }
         $quote->lead_id = $leadId;
         $quote->uid = uniqid();
+        $quote->status = self::STATUS_CREATED;
+        return $quote;
+    }
+
+    /**
+     * @param array $attributes
+     * @param int $leadId
+     * @param bool $isAlternative
+     * @return static
+     */
+    public static function createQuote(array $attributes, int $leadId, bool $isAlternative): self
+    {
+        $quote = new self();
+        $quote->attributes = $attributes;
+        if ($isAlternative) {
+            $quote->alternative();
+        } else {
+            $quote->base();
+        }
+        $quote->lead_id = $leadId;
+        $quote->uid = uniqid('', false);
         $quote->status = self::STATUS_CREATED;
         return $quote;
     }
@@ -536,12 +558,13 @@ class Quote extends \yii\db\ActiveRecord
         return $elapsedTime;
     }
 
-
-
-
     public function checkReservationDump()
     {
-        $dumpParser = self::parseDump($this->reservation_dump, true, $this->itinerary);
+        if ($gds = ParsingDump::getGdsByQuote($this->gds)) {
+            $dumpParser = (new ReservationService($gds))->parseReservation($this->reservation_dump, true, $itinerary);
+        } else {
+            $dumpParser = self::parseDump($this->reservation_dump, true, $this->itinerary);
+        }
         if (empty($dumpParser)) {
             $this->addError('reservation_dump', 'Incorrect reservation dump!');
         }
