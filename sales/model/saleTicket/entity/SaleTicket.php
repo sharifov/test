@@ -99,7 +99,7 @@ class SaleTicket extends \yii\db\ActiveRecord
             ['st_created_user_id', 'integer'],
             ['st_created_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['st_created_user_id' => 'id']],
 
-            ['st_markup', 'number'],
+            ['st_markup', 'number', 'max' => 999719.99],
 
             ['st_client_name', 'string', 'max' => 50],
 

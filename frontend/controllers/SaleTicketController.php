@@ -7,6 +7,7 @@ use sales\model\saleTicket\entity\SaleTicket;
 use sales\model\saleTicket\entity\search\SaleTicketSearch;
 use frontend\controllers\FController;
 use yii\helpers\ArrayHelper;
+use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -103,6 +104,31 @@ class SaleTicketController extends FController
 
         return $this->redirect(['index']);
     }
+
+    public function actionAjaxSaleTicketEditInfo()
+	{
+		$id = Yii::$app->request->get('st_id');
+		$out = [
+			'output' => '',
+			'message' => '',
+		];
+		try {
+			if (!$id) {
+				throw new BadRequestHttpException('Sale Ticket Id is not provided');
+			}
+
+			$saleTicket = $this->findModel($id);
+
+			if (!$saleTicket->load(Yii::$app->request->post())
+				|| !$saleTicket->validate() || !$saleTicket->save()) {
+				throw new \RuntimeException($saleTicket->getErrorSummary(false)[0]);
+			}
+
+		} catch (\Throwable $e) {
+			$out['message'] = $e->getMessage();
+		}
+		return $this->asJson($out);
+	}
 
     /**
      * @param integer $id
