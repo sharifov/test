@@ -5,6 +5,7 @@ namespace sales\model\saleTicket\entity;
 use common\models\CaseSale;
 use common\models\Employee;
 use sales\entities\cases\Cases;
+use sales\model\saleTicket\useCase\create\SaleTicketCreateDTO;
 use Yii;
 use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -20,7 +21,7 @@ use yii\db\ActiveRecord;
  * @property string|null $st_record_locator
  * @property string|null $st_client_name
  * @property string|null $st_original_fop
- * @property int|null $st_charge_system
+ * @property string|null $st_charge_system
  * @property string|null $st_penalty_type
  * @property float|null $st_penalty_amount
  * @property float|null $st_selling
@@ -41,14 +42,8 @@ use yii\db\ActiveRecord;
  */
 class SaleTicket extends \yii\db\ActiveRecord
 {
-	private const CHARGE_SYSTEM_STRIPE = 1;
-	private const CHARGE_SYSTEM_AIRLINE = 2;
-	private const CHARGE_SYSTEM_CONNEXPAY = 3;
 
 	private const CHARGE_SYSTEM_LIST = [
-		self::CHARGE_SYSTEM_STRIPE => 'Stripe',
-		self::CHARGE_SYSTEM_AIRLINE => 'Airline',
-		self::CHARGE_SYSTEM_CONNEXPAY => 'Connexpay'
 	];
 
 	public function beforeSave($insert)
@@ -92,7 +87,7 @@ class SaleTicket extends \yii\db\ActiveRecord
             ['st_case_sale_id', 'required'],
             ['st_case_sale_id', 'integer'],
 
-            ['st_charge_system', 'integer'],
+            ['st_charge_system', 'string'],
 
             ['st_created_dt', 'safe'],
 
@@ -186,16 +181,6 @@ class SaleTicket extends \yii\db\ActiveRecord
         return 'sale_ticket';
     }
 
-    public static function getChargeTypeList(): array
-	{
-		return self::CHARGE_SYSTEM_LIST;
-	}
-
-	public static function getChargeTypeName(int $chargeType): string
-	{
-		return self::getChargeTypeList()[$chargeType] ?? '';
-	}
-
 	private function calculateUpfrontCharge()
 	{
 		if ($this->st_original_fop === 'CC') {
@@ -209,6 +194,27 @@ class SaleTicket extends \yii\db\ActiveRecord
 		if (in_array($this->st_original_fop, ['CK', 'VCC'])) {
 			return $this->st_selling - $this->st_recall_commission - $this->st_markup - $this->st_penalty_amount;
 		}
-		return 0;
+		return $this->st_selling;
+	}
+
+	public static function createBySaleData(SaleTicketCreateDTO $dto): SaleTicket
+	{
+		$ticket = new self();
+
+		$ticket->st_case_id = $dto->caseId;
+		$ticket->st_case_sale_id = $dto->caseSaleId;
+		$ticket->st_ticket_number = $dto->ticketNumber;
+		$ticket->st_client_name = $dto->clientName;
+		$ticket->st_record_locator = $dto->recordLocator;
+		$ticket->st_original_fop = $dto->originalFop;
+		$ticket->st_charge_system = $dto->chargeSystem;
+		$ticket->st_penalty_type = $dto->penaltyType;
+		$ticket->st_penalty_amount = $dto->penaltyAmount;
+		$ticket->st_selling = $dto->selling;
+		$ticket->st_service_fee = $dto->serviceFee;
+		$ticket->st_recall_commission = $dto->recallCommission;
+		$ticket->st_markup = $dto->markup;
+
+		return $ticket;
 	}
 }

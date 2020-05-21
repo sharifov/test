@@ -115,7 +115,7 @@ if (!empty($caseSaleModel)) {
         </div>
 
         <div class="col-md-9">
-            <?php if ($saleTicket = $caseSaleModel->cssSaleTicket): ?>
+            <?php if (!empty($caseSaleModel) && $saleTicket = $caseSaleModel->cssSaleTicket): ?>
                 <div class="row">
                     <div class="col-md-12">
                         <h2>Sale Tickets</h2>
@@ -144,7 +144,7 @@ if (!empty($caseSaleModel)) {
                                     <td><?=Html::encode($ticket->st_ticket_number)?></td>
                                     <td><?=Html::encode($ticket->st_record_locator)?></td>
                                     <td><?=Html::encode($ticket->st_original_fop)?></td>
-                                    <td><?=Html::encode(SaleTicket::getChargeTypeName($ticket->st_charge_system))?></td>
+                                    <td><?=Html::encode($ticket->st_charge_system)?></td>
                                     <td><?=Html::encode($ticket->st_penalty_type)?></td>
                                     <td><?=Html::encode($ticket->st_penalty_amount)?></td>
                                     <td><?=Html::encode($ticket->st_selling)?></td>

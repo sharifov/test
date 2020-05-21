@@ -38,12 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'st_ticket_number',
                 'st_record_locator',
                 'st_original_fop',
-                [
-                    'attribute' => 'st_charge_system',
-                    'value' => static function (SaleTicket $model) {
-                        return SaleTicket::getChargeTypeName($model->st_charge_system);
-                    }
-                ],
+                'st_charge_system',
                 'st_penalty_type',
                 'st_penalty_amount',
                 'st_selling',

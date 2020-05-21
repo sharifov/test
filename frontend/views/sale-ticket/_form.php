@@ -32,7 +32,7 @@ use yii\widgets\Pjax;
 
         <?= $form->field($model, 'st_original_fop')->textInput(['maxlength' => true]) ?>
 
-        <?= $form->field($model, 'st_charge_system')->dropDownList(SaleTicket::getChargeTypeList(), ['prompt' => '---']) ?>
+        <?= $form->field($model, 'st_charge_system')->textInput(['maxlength' => true]) ?>
 
     </div>
     <div class="col-md-2">
