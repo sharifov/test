@@ -110,6 +110,7 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
                         titleColor: '#596b7d',
                     },
                     theme: 'material',
+                    isStacked: true
                 };
 
                 // let newGraphData = [];

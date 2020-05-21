@@ -251,61 +251,147 @@ class CallGraphsSearch extends CallLogSearch
         ];
     }
 
-    public function getCallLogStats()
+    /**
+     * @return SqlDataProvider
+     */
+    public function getCallLogStats():SqlDataProvider
     {
+        $timeZone = Employee::getUtcOffsetDst($this->timeZone, date('Y-m-d'));
+
+        if ($this->createTimeRange) {
+            $this->createTimeStart = date('Y-m-d H:i:00', $this->createTimeStart);
+            $this->createTimeEnd = date('Y-m-d H:i:59', $this->createTimeEnd);
+        } else {
+            $this->createTimeStart = date('Y-m-d 00:00:00', strtotime(self::CREATE_TIME_START_DEFAULT));
+            $this->createTimeEnd = date('Y-m-d H:i:s');
+            $this->createTimeRange = $this->createTimeStart . ' - ' . $this->createTimeEnd;
+        }
+
         $parentQuery = self::find()->select([
-            //'hour(cl_call_created_dt) as `group`',
-            'TIME_FORMAT(cl_call_created_dt, \'%H:%00\') as `group`',
+            ''. $this->setGroupingParam() .' AS `group`',
             'CASE cl_type_id WHEN 1 THEN \'out\' WHEN 2 THEN \'in\' END `callType`',
             'COUNT(*) as `totalCalls`',
             'count(*)/count(distinct(DATE_FORMAT(cl_call_created_dt, \'%Y-%m-%d\'))) `avgCallsPerGroup`',
             'sum(cl_duration)as `totalCallsDuration`',
             'avg(cl_duration) as `avgCallDuration`'
         ]);
-        $parentQuery->where(['between', 'cl_call_created_dt', '2020-03-01 00:00:00', '2020-03-01 00:59:59']);
-        $parentQuery->andWhere(['>', 'cl_duration', '30']);
+        $parentQuery->from([new \yii\db\Expression(CallLog::tableName(). ' PARTITION('. $this->getPartitionsByYears() .') ')]);
+
+
+        $parentQuery->andWhere(['between', "convert_tz(cl_call_created_dt, '+00:00', '".$timeZone."')", $this->createTimeStart, $this->createTimeEnd]);
         $parentQuery->andWhere(['cl_status_id' => [CallLogStatus::COMPLETE, CallLogStatus::BUSY, CallLogStatus::NOT_ANSWERED]]);
         $parentQuery->andWhere(['OR',
             ['cl_category_id' => null],
             ['<>', 'cl_category_id', CallLogCategory::TRANSFER_CALL]
         ]);
 
+        if ($this->projectIds) {
+            $parentQuery->andWhere(['cl_project_id' => $this->projectIds]);
+        }
+
+        if ($this->dep_ids) {
+            $parentQuery->andWhere(['cl_department_id' => $this->dep_ids]);
+        }
+
+        if ($this->cl_user_id) {
+            $parentQuery->andWhere(['cl_user_id' => $this->cl_user_id]);
+        } else if ($this->userGroupIds) {
+            $userIdsByGroup = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id) as cl_user_id'])->where(['ugs_group_id' => $this->userGroupIds])->asArray()->all();
+            if ($userIdsByGroup) {
+                $parentQuery->andWhere(['in', ['cl_user_id'], $userIdsByGroup]);
+            }
+        }
+
+        if ($this->recordingDurationFrom) {
+            $parentQuery->andWhere(['>=', 'cl_duration', $this->recordingDurationFrom]);
+        }
+
+        if ($this->recordingDurationTo) {
+            $parentQuery->andWhere(['<=', 'cl_duration', $this->recordingDurationTo]);
+        }
+
+        if ($this->betweenHoursFrom) {
+            $parentQuery->andWhere(['>=', 'hour(convert_tz(cl_call_created_dt, \'+00:00\', \''.$timeZone.'\'))', $this->betweenHoursFrom]);
+        }
+
+        if ($this->betweenHoursTo) {
+            $parentQuery->andWhere(['<=', 'hour(convert_tz(cl_call_created_dt, \'+00:00\', \''.$timeZone.'\'))', $this->betweenHoursTo]);
+        }
+
         $parentQuery->groupBy([new \yii\db\Expression('1,2')]);
 
         $childQuery = self::find()->select([
-            //'hour(cl_call_created_dt) as `group`',
-            'TIME_FORMAT(cl_call_created_dt, \'%H:%00\') AS group',
+            ''. $this->setGroupingParam() .' AS group',
             '"total" AS `callType`',
             'count(*) as `totalCalls`',
             'count(*)/count(distinct(DATE_FORMAT(cl_call_created_dt, \'%Y-%m-%d\'))) `avgCallsPerGroup`',
             'sum(cl_duration)as `totalCallsDuration`',
             'avg(cl_duration) as `avgCallDuration`'
         ]);
-        $childQuery->where(['between', 'cl_call_created_dt', '2020-03-01 00:00:00', '2020-03-01 00:59:59']);
-        $childQuery->andWhere(['>', 'cl_duration', '30']);
+
+        $childQuery->from([new \yii\db\Expression(CallLog::tableName(). ' PARTITION('. $this->getPartitionsByYears() .') ')]);
+
+        $childQuery->andWhere(['between', "convert_tz(cl_call_created_dt, '+00:00', '".$timeZone."')", $this->createTimeStart, $this->createTimeEnd]);
         $childQuery->andWhere(['cl_status_id' => [CallLogStatus::COMPLETE, CallLogStatus::BUSY, CallLogStatus::NOT_ANSWERED]]);
         $childQuery->andWhere(['OR',
             ['cl_category_id' => null],
             ['<>', 'cl_category_id', CallLogCategory::TRANSFER_CALL]
         ]);
 
+        if ($this->projectIds) {
+            $childQuery->andWhere(['cl_project_id' => $this->projectIds]);
+        }
+
+        if ($this->dep_ids) {
+            $childQuery->andWhere(['cl_department_id' => $this->dep_ids]);
+        }
+
+        if ($this->cl_user_id) {
+            $childQuery->andWhere(['cl_user_id' => $this->cl_user_id]);
+        } else if ($this->userGroupIds) {
+            $userIdsByGroup = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id) as cl_user_id'])->where(['ugs_group_id' => $this->userGroupIds])->asArray()->all();
+            if ($userIdsByGroup) {
+                $childQuery->andWhere(['in', ['cl_user_id'], $userIdsByGroup]);
+            }
+        }
+
+        if ($this->recordingDurationFrom) {
+            $childQuery->andWhere(['>=', 'cl_duration', $this->recordingDurationFrom]);
+        }
+
+        if ($this->recordingDurationTo) {
+            $childQuery->andWhere(['<=', 'cl_duration', $this->recordingDurationTo]);
+        }
+
+        if ($this->betweenHoursFrom) {
+            $childQuery->andWhere(['>=', 'hour(convert_tz(cl_call_created_dt, \'+00:00\', \''.$timeZone.'\'))', $this->betweenHoursFrom]);
+        }
+
+        if ($this->betweenHoursTo) {
+            $childQuery->andWhere(['<=', 'hour(convert_tz(cl_call_created_dt, \'+00:00\', \''.$timeZone.'\'))', $this->betweenHoursTo]);
+        }
+
         $childQuery->groupBy([new \yii\db\Expression('1')]);
 
         $parentQuery->union($childQuery);
 
-
-        /*$cmdP = $parentQuery->createCommand();
-        $cmdC = $childQuery->createCommand();
-        //var_dump($cmdP->createCommand()->rawSql); die();
-        var_dump($cmdP->queryAll()); die();*/
-
         return new SqlDataProvider(['sql' => $parentQuery->createCommand()->rawSql, 'pagination' => false]);
+    }
+
+    private function setGroupingParam()
+    {
+        $dateFormat = $this->getDateFormat($this->callGraphGroupBy) ?? $this->getDefaultDateFormat();
+        if ((int)$this->callGraphGroupBy === self::DATE_FORMAT_WEEKS) {
+            return "concat(str_to_date(date_format(cl_call_created_dt, '%Y %v Monday'), '%x %v %W'), ' - ', str_to_date(date_format(cl_call_created_dt, '%Y %v Sunday'), '%x %v %W'))";
+        } else {
+            return "date_format(`cl_call_created_dt`, '$dateFormat')";
+        }
     }
 
     /**
      * @return SqlDataProvider
      */
-    public function getTotalCalls(): SqlDataProvider
+    /*public function getTotalCalls(): SqlDataProvider
     {
         $dateFormat = $this->getDateFormat($this->callGraphGroupBy) ?? $this->getDefaultDateFormat();
 
@@ -492,7 +578,7 @@ class CallGraphsSearch extends CallLogSearch
         $query->groupBy('created')->orderBy('created');
 
         return $query;
-    }
+    }*/
 
     private function getPartitionsByYears()
     {

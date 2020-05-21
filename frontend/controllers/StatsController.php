@@ -137,6 +137,9 @@ class StatsController extends FController
         ]);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function actionCallsGraph()
     {
         $params = Yii::$app->request->queryParams;
@@ -145,7 +148,7 @@ class StatsController extends FController
 
         if (Yii::$app->request->post('export_type') && $model->validate()) {
             return $this->render('partial/_call_graph_export', [
-                'viewModel' => new ViewModelTotalCallGraph($model->getTotalCalls(), $model),
+                'viewModel' => new ViewModelTotalCallGraph($model->getCallLogStats(), $model),
             ]);
         } else {
             return $this->render('calls-stats', [

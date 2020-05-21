@@ -23,6 +23,7 @@ use yii\helpers\ArrayHelper;
  * @property CallGraphsSearch $callGraphsSearch
  * @property SqlDataProvider $dataProvider
  * @property array $gridColumns
+ * @property array $exportData
  */
 class ViewModelTotalCallGraph
 {
@@ -41,6 +42,8 @@ class ViewModelTotalCallGraph
     public $dataProvider;
 
     public $gridColumns;
+
+    public $exportData;
 
     /**
      * ViewModelTotalCallGraph constructor.
@@ -61,8 +64,64 @@ class ViewModelTotalCallGraph
         $this->totalCallsRecDurationData();
         $this->totalCallsRecDurationDataAVG();
 
-        $this->dataProvider = (new ArrayDataProvider(['allModels' => $this->callData]));
+        $this->prepareStatsExport();
+
+        $this->dataProvider = (new ArrayDataProvider(['allModels' => $this->exportData]));
         $this->gridColumns = $this->fetchGridColumns();
+    }
+
+    private function prepareStatsExport():void
+    {
+        $data = [];
+        $finalData = [];
+        $mappedData = [];
+
+        foreach ($this->callData as $rowIndex){
+            foreach ($this->callData as $row){
+                if ($rowIndex['group'] == $row['group']) {
+                    $data['date'] = $row['group'];
+                    if ($row['callType'] === 'in'){
+                        $data['incoming'] = $row['totalCalls'];
+                        $data['incomingAvg'] = $row['avgCallsPerGroup'];
+                        $data['incomingTotal'] = $row['totalCallsDuration'];
+                        $data['incomingAvgDuration'] = $row['avgCallDuration'];
+                    }
+
+                    if ($row['callType'] === 'out'){
+                        $data['outgoing'] = $row['totalCalls'];
+                        $data['outgoingAvg'] = $row['avgCallsPerGroup'];
+                        $data['outgoingTotal'] = $row['totalCallsDuration'];
+                        $data['outgoingAvgDuration'] = $row['avgCallDuration'];
+                    }
+
+                    if ($row['callType'] === 'total'){
+                        $data['total'] = $row['totalCalls'];
+                        $data['totalCallsDuration'] = $row['totalCallsDuration'];
+                        $data['totalAvgDuration'] = $row['avgCallDuration'];
+                    }
+                    $finalData[$row['group']] = $data;
+                }
+            }
+        }
+
+        foreach ($finalData as $arr){
+            array_push($mappedData, [
+                'date' => $arr['date'],
+                'incoming' => isset($arr['incoming']) ? (int)$arr['incoming'] : 0,
+                'outgoing' => isset($arr['outgoing']) ? (int)$arr['outgoing'] : 0,
+                'total' => (int)$arr['total'],
+                'incomingAvg' => isset($arr['incomingAvg']) ? (int)$arr['incomingAvg'] : 0,
+                'outgoingAvg' => isset($arr['outgoingAvg']) ? (int)$arr['outgoingAvg'] : 0,
+                'incomingTotal' => isset($arr['incomingTotal']) ? (int)$arr['incomingTotal'] : 0,
+                'outgoingTotal' => isset($arr['outgoingTotal']) ? (int)$arr['outgoingTotal'] : 0,
+                'totalCallsDuration' => (int)$arr['totalCallsDuration'],
+                'incomingAvgDuration' => isset($arr['incomingAvgDuration']) ? (int)$arr['incomingAvgDuration'] : 0,
+                'outgoingAvgDuration' => isset($arr['outgoingAvgDuration']) ? (int)$arr['outgoingAvgDuration'] : 0,
+                'totalAvgDuration' => (int)$arr['totalAvgDuration'],
+            ]);
+        }
+
+        $this->exportData = $mappedData;
     }
 
     /**
@@ -70,9 +129,6 @@ class ViewModelTotalCallGraph
      */
     private function formatTotalCallsGraphData(): void
     {
-        /*$data = array_map( static function ($arr) {
-            return [$arr['created_formatted'],(int)$arr['incoming'], (int)$arr['outgoing'], (int)$arr['total_calls']];
-        }, $this->callData);*/
         $data = [];
         $finalData = [];
         $mappedData = [];
@@ -98,18 +154,13 @@ class ViewModelTotalCallGraph
         }
 
         foreach ($finalData as $arr){
-            array_push($mappedData, [$arr['date'],(int)$arr['incoming'], (int)$arr['outgoing'], (int)$arr['total']]);
+            array_push($mappedData, [
+                $arr['date'],
+                isset($arr['incoming']) ? (int)$arr['incoming'] : 0,
+                isset($arr['outgoing']) ? (int)$arr['outgoing'] : 0,
+                (int)$arr['total']]);
         }
 
-        /*$mappedData = array_map( static function ($arr) {
-            return [$arr['date'],(int)$arr['incoming'], (int)$arr['outgoing'], (int)$arr['total']];
-        }, $finalData);*/
-        /*var_dump(json_encode(ArrayHelper::merge([[
-            'Date',
-            'Incoming',
-            'Outgoing',
-            'Total',
-        ]], $mappedData))); die();*/
         $this->totalCallsGraphData = json_encode(ArrayHelper::merge([[
             'Date',
             'Incoming',
@@ -148,7 +199,12 @@ class ViewModelTotalCallGraph
         }
 
         foreach ($finalData as $arr){
-            array_push($mappedData, [$arr['date'],(int)$arr['incoming'], (int)$arr['outgoing'], (int)$arr['total']]);
+            array_push($mappedData, [
+                $arr['date'],
+                isset($arr['incoming']) ? (int)$arr['incoming'] : 0,
+                isset($arr['outgoing']) ? (int)$arr['outgoing'] : 0,
+                (int)$arr['total']
+            ]);
         }
 
         $this->totalCallsGraphDataAvg = json_encode(ArrayHelper::merge([[
@@ -157,21 +213,6 @@ class ViewModelTotalCallGraph
             'Outgoing',
             'Total',
         ]], $mappedData));
-
-        /*$data = array_map( static function ($arr) {
-            return [
-                $arr['created_formatted'],
-                $arr['incoming_avg'],
-                $arr['outgoing_avg'],
-                $arr['total_calls_avg'],
-            ];
-        }, $this->callData);
-        $this->totalCallsGraphDataAvg = json_encode(ArrayHelper::merge([[
-            'Date',
-            'Incoming Avg',
-            'Outgoing Avg',
-            'Total Avg',
-        ]], $data));*/
     }
 
     /**
@@ -206,10 +247,10 @@ class ViewModelTotalCallGraph
         foreach ($finalData as $arr){
             array_push($mappedData, [
                 $arr['date'],
-                (int)$arr['incoming'],
-                'Incoming Call Duration: ' . Yii::$app->formatter->asDuration((int)$arr['incoming']),
-                (int)$arr['outgoing'],
-                'Outgoing Call Duration: ' . Yii::$app->formatter->asDuration((int)$arr['outgoing']),
+                isset($arr['incoming']) ? (int)$arr['incoming'] : 0,
+                'Incoming Call Duration: ' . Yii::$app->formatter->asDuration(isset($arr['incoming']) ? (int)$arr['incoming'] : 0),
+                isset($arr['outgoing']) ? (int)$arr['outgoing'] : 0,
+                'Outgoing Call Duration: ' . Yii::$app->formatter->asDuration(isset($arr['outgoing']) ? (int)$arr['outgoing'] : 0),
                 (int)$arr['total'],
                 'Total Call Duration: ' . Yii::$app->formatter->asDuration((int)$arr['total']),
             ]);
@@ -233,36 +274,6 @@ class ViewModelTotalCallGraph
                 'role' => 'tooltip'
             ],
         ]], $mappedData));
-
-        /*$data = array_map( static function ($arr) {
-            return [
-                $arr['created_formatted'],
-                (int)$arr['in_rec_duration'],
-                'Incoming Call Duration: ' . Yii::$app->formatter->asDuration((int)$arr['in_rec_duration']),
-                (int)$arr['out_rec_duration'],
-                'Outgoing Call Duration: ' . Yii::$app->formatter->asDuration((int)$arr['out_rec_duration']),
-                (int)$arr['total_rec_duration'],
-                'Total Call Duration: ' . Yii::$app->formatter->asDuration((int)$arr['total_rec_duration']),
-            ];
-        }, $this->callData);
-        $this->totalCallsRecDurationData = json_encode(ArrayHelper::merge([[
-            'Date',
-            'Incoming Call Duration',
-            [
-                'type' => 'string',
-                'role' => 'tooltip'
-            ],
-            'Outgoing Call Duration',
-            [
-                'type' => 'string',
-                'role' => 'tooltip'
-            ],
-            'Total Call Duration',
-            [
-                'type' => 'string',
-                'role' => 'tooltip'
-            ],
-        ]], $data));*/
     }
 
     /**
@@ -297,10 +308,10 @@ class ViewModelTotalCallGraph
         foreach ($finalData as $arr){
             array_push($mappedData, [
                 $arr['date'],
-                (int)$arr['incoming'],
-                'Incoming Call Duration AVG: ' . Yii::$app->formatter->asDuration((int)$arr['incoming']),
-                (int)$arr['outgoing'],
-                'Outgoing Call Duration AVG: ' . Yii::$app->formatter->asDuration((int)$arr['outgoing']),
+                isset($arr['incoming']) ? (int)$arr['incoming'] : 0,
+                'Incoming Call Duration AVG: ' . Yii::$app->formatter->asDuration(isset($arr['incoming']) ? (int)$arr['incoming'] : 0),
+                isset($arr['outgoing']) ? (int)$arr['outgoing'] : 0,
+                'Outgoing Call Duration AVG: ' . Yii::$app->formatter->asDuration(isset($arr['outgoing']) ? (int)$arr['outgoing'] : 0),
                 (int)$arr['total'],
                 'Total Call Duration AVG: ' . Yii::$app->formatter->asDuration((int)$arr['total']),
             ]);
@@ -324,36 +335,6 @@ class ViewModelTotalCallGraph
                 'role' => 'tooltip'
             ],
         ]], $mappedData));
-
-        /*$data = array_map( static function ($arr) {
-            return [
-                $arr['created_formatted'],
-                (int)$arr['incoming_duration_avg'],
-                'Incoming Call Duration AVG: ' . Yii::$app->formatter->asDuration((int)$arr['incoming_duration_avg']),
-                (int)$arr['outgoing_duration_avg'],
-                'Outgoing Call Duration AVG: ' . Yii::$app->formatter->asDuration((int)$arr['outgoing_duration_avg']),
-                (int)$arr['total_rec_duration_avg'],
-                'Total Call Duration AVG: ' . Yii::$app->formatter->asDuration((int)$arr['total_rec_duration_avg']),
-            ];
-        }, $this->callData);
-        $this->totalCallsRecDurationDataAVG = json_encode(ArrayHelper::merge([[
-            'Date',
-            'Incoming Call Duration AVG',
-            [
-                'type' => 'string',
-                'role' => 'tooltip'
-            ],
-            'Outgoing Call Duration AVG',
-            [
-                'type' => 'string',
-                'role' => 'tooltip'
-            ],
-            'Total Call Duration AVG',
-            [
-                'type' => 'string',
-                'role' => 'tooltip'
-            ],
-        ]], $data));*/
     }
 
     /**
@@ -361,7 +342,7 @@ class ViewModelTotalCallGraph
      * @return $this
      * @throws \Exception
      */
-    private function calcTotalCallsAverage(array &$callData): void
+    /*private function calcTotalCallsAverage(array &$callData): void
     {
         foreach ($callData as $key => $item) {
             $delimiter = 1;
@@ -375,7 +356,7 @@ class ViewModelTotalCallGraph
             $callData[$key]['outgoing_avg'] = $item['outgoing'] / $delimiter;
             $callData[$key]['total_calls_avg'] = ($item['incoming'] + $item['outgoing']) / $delimiter;
         }
-    }
+    }*/
 
     /**
      * How many times the hour of the day repeat in the datetime range
@@ -386,7 +367,7 @@ class ViewModelTotalCallGraph
      * @return int
      * @throws \Exception
      */
-    private function countHourDayInDateRange(string $hour, string $dateStart, string $dateEnd): int
+    /*private function countHourDayInDateRange(string $hour, string $dateStart, string $dateEnd): int
     {
         $dateStart = new DateTime($dateStart);
         $dateEnd = new DateTime($dateEnd);
@@ -401,7 +382,7 @@ class ViewModelTotalCallGraph
         }
 
         return $hourCount;
-    }
+    }*/
 
     /**
      * @param string $dayName
@@ -410,7 +391,7 @@ class ViewModelTotalCallGraph
      * @return int
      * @throws \Exception
      */
-    private function countWeekDayInDateRange(string $dayName, string $dateStart, string $dateEnd): int
+    /*private function countWeekDayInDateRange(string $dayName, string $dateStart, string $dateEnd): int
     {
         $week = ['Monday' => 0, 'Tuesday' => 0, 'Wednesday' => 0, 'Thursday' => 0, 'Friday' => 0, 'Saturday' => 0, 'Sunday' => 0];
 
@@ -425,14 +406,14 @@ class ViewModelTotalCallGraph
         }
 
         return $week[$dayName];
-    }
+    }*/
 
     private function fetchGridColumns()
     {
         return [
             [
                 'label' => 'Group By',
-                'attribute' => 'created_formatted'
+                'attribute' => 'date'
             ],
             [
                 'label' => 'Incoming',
@@ -444,60 +425,60 @@ class ViewModelTotalCallGraph
             ],
             [
                 'label' => 'Total Calls',
-                'attribute' => 'total_calls'
+                'attribute' => 'total'
             ],
             [
                 'label' => 'Incoming Average',
-                'attribute' => 'incoming_avg'
+                'attribute' => 'incomingAvg'
             ],
             [
                 'label' => 'Outgoing Average',
-                'attribute' => 'outgoing_avg'
+                'attribute' => 'outgoingAvg'
             ],
-            [
+            /*[
                 'label' => 'Total Average',
                 'attribute' => 'total_calls_avg'
-            ],
+            ],*/
             [
                 'label' => 'Incoming Call Duration',
-                'attribute' => 'in_rec_duration',
+                'attribute' => 'incomingTotal',
                 'value' => static function ($val) {
-                    return Yii::$app->formatter->asDuration((int)$val['in_rec_duration']);
+                    return Yii::$app->formatter->asDuration((int)$val['incomingTotal']);
                 }
             ],
             [
                 'label' => 'Outgoing Call Duration',
-                'attribute' => 'out_rec_duration',
+                'attribute' => 'outgoingTotal',
                 'value' => static function ($val) {
-                    return Yii::$app->formatter->asDuration((int)$val['out_rec_duration']);
+                    return Yii::$app->formatter->asDuration((int)$val['outgoingTotal']);
                 }
             ],
             [
                 'label' => 'Total Call Duration',
-                'attribute' => 'total_rec_duration',
+                'attribute' => 'totalCallsDuration',
                 'value' => static function ($val) {
-                    return Yii::$app->formatter->asDuration((int)$val['total_rec_duration']);
+                    return Yii::$app->formatter->asDuration((int)$val['totalCallsDuration']);
                 }
             ],
             [
                 'label' => 'Incoming Call Duration Average',
-                'attribute' => 'incoming_duration_avg',
+                'attribute' => 'incomingAvgDuration',
                 'value' => static function ($val) {
-                    return Yii::$app->formatter->asDuration((int)$val['incoming_duration_avg']);
+                    return Yii::$app->formatter->asDuration((int)$val['incomingAvgDuration']);
                 }
             ],
             [
                 'label' => 'Outgoing Call Duration Average',
-                'attribute' => 'outgoing_duration_avg',
+                'attribute' => 'outgoingAvgDuration',
                 'value' => static function ($val) {
-                    return Yii::$app->formatter->asDuration((int)$val['outgoing_duration_avg']);
+                    return Yii::$app->formatter->asDuration((int)$val['outgoingAvgDuration']);
                 }
             ],
             [
                 'label' => 'Total Call Duration Average',
-                'attribute' => 'total_rec_duration_avg',
+                'attribute' => 'totalAvgDuration',
                 'value' => static function ($val) {
-                    return Yii::$app->formatter->asDuration((int)$val['total_rec_duration_avg']);
+                    return Yii::$app->formatter->asDuration((int)$val['totalAvgDuration']);
                 }
             ]
         ];
