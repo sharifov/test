@@ -2292,10 +2292,16 @@ class CommunicationController extends ApiBaseController
                     $conference->cf_sid = $conferenceSid;
                     $conference->cf_friendly_name = $conferenceData['friendly_name'] ?? null;
                     $conference->cf_call_sid = $conferenceData['friendly_name'] ?? null;
-                    if (!$conference->save()) {
-                        Yii::error(VarDumper::dumpAsString($conference->errors),
-                            'API:CommunicationController:startConference:Conference:without_room_id:save');
+
+                    try {
+                        if (!$conference->save()) {
+                            Yii::error(VarDumper::dumpAsString($conference->errors),
+                                'API:CommunicationController:startConference:Conference:without_room_id:save');
+                        }
+                    } catch (\Throwable $e) {
+                        Yii::error($e->getMessage(), 'API:CommunicationController:startConference:Conference:without_room_id:throwable:save');
                     }
+
                 } else {
                     $conferenceRoom = ConferenceRoom::find()->where(['cr_key' => $conferenceData['FriendlyName'], 'cr_enabled' => true])->limit(1)->one();
 
@@ -2305,9 +2311,13 @@ class CommunicationController extends ApiBaseController
                         $conference->cf_options = @json_encode($conferenceRoom->attributes);
                         $conference->cf_status_id = Conference::STATUS_START;
                         $conference->cf_sid = $conferenceSid;
-                        if (!$conference->save()) {
-                            Yii::error(VarDumper::dumpAsString($conference->errors),
-                                'API:CommunicationController:startConference:Conference:save');
+                        try {
+                            if (!$conference->save()) {
+                                Yii::error(VarDumper::dumpAsString($conference->errors),
+                                    'API:CommunicationController:startConference:Conference:save');
+                            }
+                        } catch (\Throwable $e) {
+                            Yii::error($e->getMessage(), 'API:CommunicationController:startConference:Conference:with_room_id:throwable:save');
                         }
                     } else {
                         Yii::warning('Not found ConferenceRoom by key: conferenceData - ' . VarDumper::dumpAsString($conferenceData),
