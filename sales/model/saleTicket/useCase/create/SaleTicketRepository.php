@@ -26,12 +26,25 @@ class SaleTicketRepository extends Repository
 	 * @param int $saleId
 	 * @return array|ActiveRecord[]
 	 */
-	public function findByPrimaryKeys(int $caseId, int $saleId)
+	public function findByCaseAndSale(int $caseId, int $saleId): array
 	{
 		$tickets = SaleTicket::find()->where(['st_case_id' => $caseId, 'st_case_sale_id' => $saleId])->all();
 		if (!$tickets) {
 			throw new NotFoundException('Sale Tickets are not found');
 		}
 		return $tickets;
+	}
+
+	/**
+	 * @param int $caseId
+	 * @param int $saleId
+	 * @return int
+	 * @throws \yii\db\Exception
+	 */
+	public function deleteByCaseAndSale(int $caseId, int $saleId): int
+	{
+		return \Yii::$app->db->createCommand()
+			->delete(SaleTicket::tableName(), ['st_case_id' => $caseId, 'st_case_sale_id' => $saleId])
+			->execute();
 	}
 }

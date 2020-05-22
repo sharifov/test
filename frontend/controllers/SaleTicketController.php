@@ -168,7 +168,7 @@ class SaleTicketController extends FController
 
 		try {
 			$response = ['error' => false, 'message' => 'Email was sent successfully'];
-			$saleTickets = $this->saleTicketRepository->findByPrimaryKeys((int)$caseId, (int)$saleId);
+			$saleTickets = $this->saleTicketRepository->findByCaseAndSale((int)$caseId, (int)$saleId);
 			$emailSettings = Yii::$app->params['settings']['case_sale_ticket_email_data'];
 
 			$html = $this->renderPartial('partial/_email_body', ['saleTickets' => $saleTickets]);
