@@ -2,10 +2,12 @@
 
 namespace frontend\controllers;
 
+use sales\auth\Auth;
+use sales\model\saleTicket\useCase\create\SaleTicketRepository;
+use sales\model\saleTicket\useCase\sendEmail\SaleTicketEmailService;
 use Yii;
 use sales\model\saleTicket\entity\SaleTicket;
 use sales\model\saleTicket\entity\search\SaleTicketSearch;
-use frontend\controllers\FController;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
@@ -13,9 +15,33 @@ use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\db\StaleObjectException;
 
+/**
+ * Class SaleTicketController
+ * @package frontend\controllers
+ *
+ * @property SaleTicketRepository $saleTicketRepository
+ * @property SaleTicketEmailService $saleTicketEmailService
+ */
 class SaleTicketController extends FController
 {
-    /**
+
+	/**
+	 * @var SaleTicketRepository
+	 */
+	private $saleTicketRepository;
+	/**
+	 * @var SaleTicketEmailService
+	 */
+	private $saleTicketEmailService;
+
+	public function __construct($id, $module, SaleTicketRepository $saleTicketRepository, SaleTicketEmailService $saleTicketEmailService, $config = [])
+	{
+		parent::__construct($id, $module, $config);
+		$this->saleTicketRepository = $saleTicketRepository;
+		$this->saleTicketEmailService = $saleTicketEmailService;
+	}
+
+	/**
     * @return array
     */
 	public function behaviors()
@@ -128,6 +154,32 @@ class SaleTicketController extends FController
 			$out['message'] = $e->getMessage();
 		}
 		return $this->asJson($out);
+	}
+
+	public function actionAjaxSendEmail()
+	{
+		$caseId = Yii::$app->request->get('case_id');
+		$saleId = Yii::$app->request->get('sale_id');
+		$bookingId = Yii::$app->request->get('booking_id');
+
+		if (!$caseId || !$saleId) {
+			throw new BadRequestHttpException('Case Id or Sale Id is not provided');
+		}
+
+		try {
+			$response = ['error' => false, 'message' => 'Email was sent successfully'];
+			$saleTickets = $this->saleTicketRepository->findByPrimaryKeys((int)$caseId, (int)$saleId);
+			$emailSettings = Yii::$app->params['settings']['case_sale_ticket_email_data'];
+
+			$html = $this->renderPartial('partial/_email_body', ['saleTickets' => $saleTickets]);
+
+			$this->saleTicketEmailService->generateAndSendEmail($saleTickets, $emailSettings, $html, $caseId, $bookingId, Auth::user());
+		} catch (\Throwable $e) {
+			$response['error'] = true;
+			$response['message'] = $e->getMessage();
+			Yii::error($e->getMessage() . '; File: ' . $e->getFile() . '; On Line: ' . $e->getLine(), 'SaleTicketController::actionAjaxSendEmail::Throwable');
+		}
+		$this->asJson($response);
 	}
 
     /**
