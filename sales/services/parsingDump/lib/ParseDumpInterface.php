@@ -1,11 +1,11 @@
 <?php
 
-namespace sales\services\parsingDump\worldSpan;
+namespace sales\services\parsingDump\lib;
 
 /**
  * Interface ParseDump
  */
-interface ParseDump
+interface ParseDumpInterface
 {
     /**
      * @param string $string
