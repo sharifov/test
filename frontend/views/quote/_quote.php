@@ -198,23 +198,6 @@ $js = <<<JS
         });
     });
     
-    $('#quote-gds').change(function (e) {
-        e.preventDefault();
-        
-        let gds = $(this).val();
-        
-        if (gds === 'S' || gds === 'W') {
-            $('#prepare_dump_btn').show(1000);
-            $('#box-gds-tab').show();             
-            $('#dumpTab #box-gds-tab a').tab('show');       
-        } else {
-            $('#prepare_dump_btn').hide(1000);
-            $('#save_dump_btn').hide(1000);  
-            $('#box-gds-tab').hide();
-            $('#dumpTab #reservation-dump-tab a').tab('show');       
-        }
-    });
-    
     function loadingBtn(btnObj, loading)
     {
         if (loading === true) {
@@ -386,7 +369,31 @@ $js = <<<JS
     } 
 JS;
 $this->registerJs($js);
-
+?>
+<?php
+$jsGdsParsing = <<<JS
+    $('#quote-gds').change(function (e) {
+        e.preventDefault();
+        
+        let gds = $(this).val();
+        
+        if (gds === 'S' || gds === 'W') {
+            $('#prepare_dump_btn').show(1000);
+            $('#box-gds-tab').show();             
+            $('#dumpTab #box-gds-tab a').tab('show');       
+        } else {
+            $('#prepare_dump_btn').hide(1000);
+            $('#save_dump_btn').hide(1000);  
+            $('#box-gds-tab').hide();
+            $('#dumpTab #reservation-dump-tab a').tab('show');       
+        }
+    });
+JS;
+?>
+<?php
+    if (\Yii::$app->params['settings']['enable_gds_parsers_for_create_quote']) {
+        $this->registerJs($jsGdsParsing);
+    }
 ?>
 
 <?php
