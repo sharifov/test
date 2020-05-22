@@ -24,7 +24,9 @@ class Baggage implements ParseDumpInterface
         try {
             $this->setSegments($string);
 
-            $result['baggage'] = $this->processingResult($string);
+            if ($baggage = $this->processingResult($string)) {
+                $result['baggage'] = $baggage;
+            }
         } catch (\Throwable $throwable) {
             \Yii::error(AppHelper::throwableFormatter($throwable), 'WorldSpan:Baggage:parseDump:Throwable');
         }

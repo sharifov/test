@@ -18,7 +18,9 @@ class Baggage implements ParseDumpInterface
     {
         $result = [];
         try {
-            $result['baggage'] = $this->getParseDump($string);
+            if ($baggage = $this->getParseDump($string)) {
+                $result['baggage'] = $baggage;
+            }
         } catch (\Throwable $throwable) {
             \Yii::error(AppHelper::throwableFormatter($throwable), 'Sabre:Baggage:parseDump:Throwable');
         }

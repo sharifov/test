@@ -46,10 +46,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
     <div class="col-md-8">
+        <?php echo (empty($data) && !empty($dump)) ? 'Parsing failed' : '' ?>
+
         <?php if ($data): ?>
-        <h2>Parse dump: <?php echo $type ?></h2>
+            <h2>Parse dump: <?php echo $type ?>.</h2>
             <pre>
-            <?php \yii\helpers\VarDumper::dump($data, 10, true) ?>
+                <?php \yii\helpers\VarDumper::dump($data, 10, true) ?>
             </pre>
         <?php endif; ?>
     </div>

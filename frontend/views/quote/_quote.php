@@ -380,12 +380,14 @@ $jsGdsParsing = <<<JS
         if (gds === 'S' || gds === 'W') {
             $('#prepare_dump_btn').show(1000);
             $('#box-gds-tab').show();             
-            $('#dumpTab #box-gds-tab a').tab('show');       
+            $('#dumpTab #box-gds-tab a').tab('show'); 
+            $('.base-btn, .base-tab').hide();                  
         } else {
             $('#prepare_dump_btn').hide(1000);
             $('#save_dump_btn').hide(1000);  
             $('#box-gds-tab').hide();
-            $('#dumpTab #reservation-dump-tab a').tab('show');       
+            $('#dumpTab #reservation-dump-tab a').tab('show'); 
+            $('.base-btn, .base-tab').show();     
         }
     });
 JS;
@@ -680,10 +682,10 @@ $this->registerCss('
         </div>
         <div class="col-sm-6">
             <ul class="nav nav-tabs" id="dumpTab">
-                <li id="reservation-dump-tab">
+                <li class="base-tab" id="reservation-dump-tab">
                     <?= Html::a('Reservation Dump', sprintf('#r-dump-%d', $quote->id), ['data-toggle' => 'tab', 'class' => 'active']) ?>
                 </li>
-                <li>
+                <li class="base-tab">
                 	<?= Html::a('Pricing', sprintf('#r-dump-pane-%d', $quote->id), ['data-toggle' => 'tab']) ?>
                 </li>
                 <li id="box-gds-tab" style="display: none;">
@@ -722,7 +724,7 @@ $this->registerCss('
     <div class="btn-wrapper">
         <?= Html::button('<i class="glyphicon glyphicon-remove-circle"></i> Cancel', [
             'id' => 'cancel-alt-quote',
-            'class' => 'btn btn-danger'
+            'class' => 'btn btn-danger base-btn'
         ]) ?>
         <?php
         $applied = Quote::findOne([
@@ -732,7 +734,7 @@ $this->registerCss('
         if (($quote->isNewRecord || $quote->status == $quote::STATUS_CREATED) && $applied === null) : ?>
             <?= Html::button('<i class="fa fa-save"></i> Save', [
                 'id' => 'save-alt-quote',
-                'class' => 'btn btn-primary'
+                'class' => 'btn btn-primary base-btn'
             ]) ?>
         <?php endif; ?>
         <?php if ($quote->isNewRecord) :?>
