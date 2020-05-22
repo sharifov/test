@@ -35,6 +35,8 @@ if (!empty($caseSaleModel)) {
 } else {
     $canManageSaleInfo = true;
 }
+
+$saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_id' => $caseModel->cs_id, 'sale_id' => $data['saleId'], 'booking_id' => $data['bookingId']]);
 ?>
 <div class="sale-view">
     <h3><?= Html::encode($title) ?></h3>
@@ -118,7 +120,10 @@ if (!empty($caseSaleModel)) {
             <?php if (!empty($caseSaleModel) && $saleTicket = $caseSaleModel->cssSaleTicket): ?>
                 <div class="row">
                     <div class="col-md-12">
-                        <h2>Sale Tickets</h2>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h2>Sale Tickets</h2>
+                            <?= Html::a('<i class="fa fa-envelope"></i> Generate Email', $saleTicketGenerateEmail, ['id' => 'sale-ticket-generate-email-btn', 'class' => 'btn btn-success', 'title' => 'Send Email']) ?>
+                        </div>
                         <?php Pjax::begin(['id' => 'pjax-case-sale-tickets', 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false]) ?>
                         <table class="table table-bordered table-hover">
                             <tr>
@@ -186,151 +191,152 @@ if (!empty($caseSaleModel)) {
             <div class="row">
                 <div class="col-md-5">
 
-            <h2>Processing Teams Status</h2>
-            <?php if(isset($data['processingTeamsStatus']) && $data['processingTeamsStatus']): ?>
-                <table class="table table-bordered table-hover">
-                    <tr>
-                        <th>Type</th>
-                        <th>Value</th>
-                    </tr>
-                    <?php foreach($data['processingTeamsStatus'] as $pStatusKey => $pStatusValue): ?>
-                        <tr>
-                            <td><?=Html::encode($pStatusKey)?></td>
-                            <td><?=Html::encode($pStatusValue)?></td>
-                        </tr>
-                    <?php endforeach;?>
-                </table>
-            <?php endif;?>
-
-            <h2>Notes</h2>
-            <div style="width: 100%;overflow-x: auto;">
-                <?php if(isset($data['notes']) && $data['notes']): ?>
-                    <table class="table table-bordered table-hover">
-                        <tr>
-                            <th>Created</th>
-                            <th>Message</th>
-                            <th>Agent</th>
-                            <th>Team</th>
-                        </tr>
-                        <?php foreach($data['notes'] as $note): ?>
+                    <h2>Processing Teams Status</h2>
+                    <?php if(isset($data['processingTeamsStatus']) && $data['processingTeamsStatus']): ?>
+                        <table class="table table-bordered table-hover">
                             <tr>
-                                <td><?=Yii::$app->formatter->asDatetime(strtotime($note['created']))?></td>
-                                <td><?=Html::encode($note['message'])?></td>
-                                <td><?=Html::encode($note['agent'])?></td>
-                                <td><?=Html::encode($note['team'])?></td>
+                                <th>Type</th>
+                                <th>Value</th>
                             </tr>
-                        <?php endforeach;?>
-                    </table>
-                <?php endif;?>
+                            <?php foreach($data['processingTeamsStatus'] as $pStatusKey => $pStatusValue): ?>
+                                <tr>
+                                    <td><?=Html::encode($pStatusKey)?></td>
+                                    <td><?=Html::encode($pStatusValue)?></td>
+                                </tr>
+                            <?php endforeach;?>
+                        </table>
+                    <?php endif;?>
+
+                    <h2>Notes</h2>
+                    <div style="width: 100%;overflow-x: auto;">
+                        <?php if(isset($data['notes']) && $data['notes']): ?>
+                            <table class="table table-bordered table-hover">
+                                <tr>
+                                    <th>Created</th>
+                                    <th>Message</th>
+                                    <th>Agent</th>
+                                    <th>Team</th>
+                                </tr>
+                                <?php foreach($data['notes'] as $note): ?>
+                                    <tr>
+                                        <td><?=Yii::$app->formatter->asDatetime(strtotime($note['created']))?></td>
+                                        <td><?=Html::encode($note['message'])?></td>
+                                        <td><?=Html::encode($note['agent'])?></td>
+                                        <td><?=Html::encode($note['team'])?></td>
+                                    </tr>
+                                <?php endforeach;?>
+                            </table>
+                        <?php endif;?>
+                    </div>
+
+                    <h2>Customer Information</h2>
+                    <div style="width: 100%; overflow-x: auto;">
+                        <?php if(!empty($data['customerInfo'])): ?>
+                            <table class="table table-bordered table-hover">
+                                <tr>
+                                    <th>First Name</th>
+                                    <th>Last Name</th>
+                                    <th>Phone number</th>
+                                    <th>Email</th>
+                                </tr>
+                                <tr>
+                                    <td><?=Html::encode($data['customerInfo']['firstName'] ?? '')?></td>
+                                    <td><?=Html::encode($data['customerInfo']['lastName'] ?? '')?></td>
+                                    <td><?=Html::encode($data['customerInfo']['phoneNumber'] ?? '')?></td>
+                                    <td><?=Html::encode($data['email'] ?? '')?></td>
+                                </tr>
+                            </table>
+                        <?php endif;?>
+                    </div>
+
+                </div>
+
+                <div class="col-md-7">
+                    <h2>Price</h2>
+                    <?php if(isset($data['price']) && $data['price']): ?>
+
+                        <?php if(isset($data['price']['priceQuotes']) && $data['price']['priceQuotes']): ?>
+                        <table class="table table-bordered table-hover">
+                            <tr>
+                                <th>Pax Type</th>
+                                <th>Selling</th>
+                                <th>Net</th>
+                                <th>Fare</th>
+                                <th>Taxes</th>
+                                <th>Mark Up</th>
+                                <th>Over Cap</th>
+                                <th>Source Fee</th>
+                            </tr>
+                            <?php foreach($data['price']['priceQuotes'] as $paxType => $price): ?>
+                                <tr>
+                                    <td><?=Html::encode($paxType)?></td>
+                                    <td><?=Html::encode($price['selling'])?></td>
+                                    <td><?=Html::encode($price['net'])?></td>
+                                    <td><?=Html::encode($price['fare'])?></td>
+                                    <td><?=Html::encode($price['taxes'])?></td>
+                                    <td><?=Html::encode($price['mark_up'])?></td>
+                                    <td><?=Html::encode($price['over_cap'])?></td>
+                                    <td><?=Html::encode($price['source_fee'])?></td>
+                                </tr>
+                            <?php endforeach;?>
+                        </table>
+
+
+                            <table class="table table-bordered table-hover">
+                                <tr>
+                                    <th>Amount Charged</th>
+                                    <td><?=($data['price']['amountCharged'])?></td>
+                                </tr>
+                                <tr>
+                                    <th>Profit</th>
+                                    <td><?=number_format($data['price']['profit'], 2)?> <?=Html::encode($data['price']['currency'])?></td>
+                                </tr>
+                            </table>
+
+                        <?php endif;?>
+                    <?php endif;?>
+
+                    <h2>Auth List</h2>
+                    <?php if(isset($data['authList']) && $data['authList']): ?>
+                        <table class="table table-bordered table-hover table-striped">
+                            <tr>
+                                <th>Created</th>
+                                <th>Auth system</th>
+                                <th>For what</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Message</th>
+                                <th>CC Number</th>
+                            </tr>
+                            <?php foreach($data['authList'] as $list): ?>
+                                <tr>
+                                    <td><?=Yii::$app->formatter->asDatetime(strtotime($list['created']))?></td>
+                                    <td><?=Html::encode($list['auth_system'])?></td>
+                                    <td><?=Html::encode($list['for_what'])?></td>
+                                    <td><?=number_format($list['amount'], 2)?></td>
+                                    <td><?=Html::encode($list['status'])?></td>
+                                    <td><?=Html::encode($list['message'])?></td>
+                                    <td><?=Html::encode($list['ccNumber'])?></td>
+                                </tr>
+                            <?php endforeach;?>
+                        </table>
+                    <?php endif;?>
+
+                    <?php
+                        if (!empty($csId)) {
+                            echo $this->render('partial/_sale_credit_card', [
+                                'csId' => $csId,
+                                'saleId' => $data['saleId'],
+                                'dataProvider' => $dataProviderCc,
+                                'caseSaleModel' => $caseSaleModel,
+                                'caseModel' => $caseModel
+                            ]);
+                        }
+                    ?>
+
+                </div>
             </div>
-
-            <h2>Customer Information</h2>
-            <div style="width: 100%; overflow-x: auto;">
-				<?php if(!empty($data['customerInfo'])): ?>
-                    <table class="table table-bordered table-hover">
-                        <tr>
-                            <th>First Name</th>
-                            <th>Last Name</th>
-                            <th>Phone number</th>
-                            <th>Email</th>
-                        </tr>
-                        <tr>
-                            <td><?=Html::encode($data['customerInfo']['firstName'] ?? '')?></td>
-                            <td><?=Html::encode($data['customerInfo']['lastName'] ?? '')?></td>
-                            <td><?=Html::encode($data['customerInfo']['phoneNumber'] ?? '')?></td>
-                            <td><?=Html::encode($data['email'] ?? '')?></td>
-                        </tr>
-                    </table>
-				<?php endif;?>
-            </div>
-
         </div>
-
-        <div class="col-md-5">
-            <h2>Price</h2>
-            <?php if(isset($data['price']) && $data['price']): ?>
-
-                <?php if(isset($data['price']['priceQuotes']) && $data['price']['priceQuotes']): ?>
-                <table class="table table-bordered table-hover">
-                    <tr>
-                        <th>Pax Type</th>
-                        <th>Selling</th>
-                        <th>Net</th>
-                        <th>Fare</th>
-                        <th>Taxes</th>
-                        <th>Mark Up</th>
-                        <th>Over Cap</th>
-                        <th>Source Fee</th>
-                    </tr>
-                    <?php foreach($data['price']['priceQuotes'] as $paxType => $price): ?>
-                        <tr>
-                            <td><?=Html::encode($paxType)?></td>
-                            <td><?=Html::encode($price['selling'])?></td>
-                            <td><?=Html::encode($price['net'])?></td>
-                            <td><?=Html::encode($price['fare'])?></td>
-                            <td><?=Html::encode($price['taxes'])?></td>
-                            <td><?=Html::encode($price['mark_up'])?></td>
-                            <td><?=Html::encode($price['over_cap'])?></td>
-                            <td><?=Html::encode($price['source_fee'])?></td>
-                        </tr>
-                    <?php endforeach;?>
-                </table>
-
-
-                    <table class="table table-bordered table-hover">
-                        <tr>
-                            <th>Amount Charged</th>
-                            <td><?=($data['price']['amountCharged'])?></td>
-                        </tr>
-                        <tr>
-                            <th>Profit</th>
-                            <td><?=number_format($data['price']['profit'], 2)?> <?=Html::encode($data['price']['currency'])?></td>
-                        </tr>
-                    </table>
-
-                <?php endif;?>
-            <?php endif;?>
-
-            <h2>Auth List</h2>
-            <?php if(isset($data['authList']) && $data['authList']): ?>
-                <table class="table table-bordered table-hover table-striped">
-                    <tr>
-                        <th>Created</th>
-                        <th>Auth system</th>
-                        <th>For what</th>
-                        <th>Amount</th>
-                        <th>Status</th>
-                        <th>Message</th>
-                        <th>CC Number</th>
-                    </tr>
-                    <?php foreach($data['authList'] as $list): ?>
-                        <tr>
-                            <td><?=Yii::$app->formatter->asDatetime(strtotime($list['created']))?></td>
-                            <td><?=Html::encode($list['auth_system'])?></td>
-                            <td><?=Html::encode($list['for_what'])?></td>
-                            <td><?=number_format($list['amount'], 2)?></td>
-                            <td><?=Html::encode($list['status'])?></td>
-                            <td><?=Html::encode($list['message'])?></td>
-                            <td><?=Html::encode($list['ccNumber'])?></td>
-                        </tr>
-                    <?php endforeach;?>
-                </table>
-            <?php endif;?>
-
-            <?php
-                if (!empty($csId)) {
-                    echo $this->render('partial/_sale_credit_card', [
-                        'csId' => $csId,
-                        'saleId' => $data['saleId'],
-                        'dataProvider' => $dataProviderCc,
-                        'caseSaleModel' => $caseSaleModel,
-                        'caseModel' => $caseModel
-                    ]);
-                }
-            ?>
-
-        </div>
-
     </div>
     <div class="row">
         <div class="col-md-12">
@@ -946,6 +952,21 @@ $('.refresh-from-bo').on('click', function (e) {
     });
                     
     $('#passengers span[data-toggle="tooltip"]').tooltip();
+    
+    $(document).on('click', '#sale-ticket-generate-email-btn', function (e) {
+        e.preventDefault();
+        var btn = $(this);
+        
+        btn.attr('disabled', true).find('i').toggleClass('fa-spin').removeClass('fa-envelope').addClass('fa-refresh');
+        $.get('$saleTicketGenerateEmail', function(data) {
+            if (data.error) {
+                createNotify('Error', data.message, 'error');
+            } else {
+                createNotify('Success', data.message, 'success');
+            }
+            btn.find('i').toggleClass('fa-spin').removeClass('fa-refresh').addClass('fa-envelope');
+        });
+    })
 JS;
 $this->registerJs($js);
     ?>
