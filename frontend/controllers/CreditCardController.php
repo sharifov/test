@@ -4,6 +4,8 @@ namespace frontend\controllers;
 
 use common\models\SaleCreditCard;
 use frontend\models\form\CreditCardForm;
+use http\Exception\RuntimeException;
+use sales\repositories\NotFoundException;
 use Yii;
 use common\models\CreditCard;
 use common\models\search\CreditCardSearch;
@@ -132,6 +134,46 @@ class CreditCardController extends FController
         ]);
     }
 
+    public function actionAjaxUpdate()
+	{
+		$id = Yii::$app->request->get('id');
+
+		try {
+			$modelCc = $this->findModel($id);
+
+			if (!$modelCc) {
+				throw new NotFoundException('Credit Card data is not found');
+			}
+
+			$form = new CreditCardForm();
+
+			if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+				$modelCc->attributes = $form->attributes;
+				$modelCc->cc_expiration_month = $form->cc_expiration_month;
+				$modelCc->cc_expiration_year = $form->cc_expiration_year;
+				$modelCc->updateSecureCardNumber();
+				$modelCc->updateSecureCvv();
+				if ($modelCc->save()) {
+					return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#pjax-credit-card-table"}); createNotify("Success Updated", "Credit Card Successfully updated", "success")</script>';
+				}
+				Yii::error(VarDumper::dumpAsString($modelCc->errors), 'CreditCard:actionAjaxUpdate:save');
+			} else {
+				$form->attributes = $modelCc->attributes;
+				$form->cc_number = $modelCc->initNumber;
+				$form->cc_cvv = $modelCc->initCvv;
+				$form->cc_expiration = date('m / y', strtotime($modelCc->cc_expiration_year.'-'.$modelCc->cc_expiration_month.'-01'));
+
+			}
+		} catch (\Throwable $e) {
+			$form->addError('general', $e->getMessage());
+		}
+
+		return $this->renderAjax('_form', [
+			'model' => $form,
+			'isAjax' => true
+		]);
+	}
+
     public function actionAjaxAddCreditCard()
 	{
 		$caseId = Yii::$app->request->get('caseId');
@@ -174,6 +216,29 @@ class CreditCardController extends FController
 			'model' => $form,
 			'isAjax' => true
 		]);
+	}
+
+	public function actionAjaxDelete()
+	{
+		$id = Yii::$app->request->get('id');
+		$saleId = Yii::$app->request->get('saleId');
+
+		try {
+			$model = SaleCreditCard::findOne(['scc_cc_id' => $id, 'scc_sale_id' => $saleId]);
+
+			if (!$model) {
+				throw new NotFoundException('Credit Card data is not found');
+			}
+
+			if (!$model->delete()) {
+				throw new \RuntimeException($model->getErrorSummary(false)[0]);
+			}
+
+			return $this->asJson(['error' => false, 'message' => 'Credit Card Successfully deleted']);
+		} catch (\Throwable $e) {
+			$message = $e->getMessage();
+		}
+		return $this->asJson(['error' => true, 'message' => $message]);
 	}
 
     /**

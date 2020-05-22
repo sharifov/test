@@ -18,19 +18,22 @@ $pjaxId = 'pjax-create-credit-card'
 <script>pjaxOffFormSubmit('#<?= $pjaxId ?>');</script>
 <div class="credit-card-form">
 
-    <?php \yii\widgets\Pjax::begin(['id' => $pjaxId, 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false]) ?>
-
-    <?php $form = ActiveForm::begin(['options' => ['data-pjax' => 1]]); ?>
-
-    <?php echo $form->errorSummary($model); ?>
 
     <div class="<?= $colMd ?>">
 
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card-wrapper"></div>
-            </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card-wrapper"></div>
         </div>
+    </div>
+
+    <?php \yii\widgets\Pjax::begin(['id' => $pjaxId, 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false]) ?>
+
+
+    <?php $form = ActiveForm::begin(['options' => ['data-pjax' => 1], 'id' => 'credit-card-create-form']); ?>
+
+    <?php echo $form->errorSummary($model); ?>
+
 
         <div class="clearfix"></div>
 
@@ -89,11 +92,11 @@ $pjaxId = 'pjax-create-credit-card'
         <div class="form-group">
             <?= Html::submitButton('<i class="fa fa-save"></i> Save', ['class' => 'btn btn-success']) ?>
         </div>
-    </div>
 
     <?php ActiveForm::end(); ?>
 
     <?php \yii\widgets\Pjax::end(); ?>
+    </div>
 </div>
 
 <?php
@@ -103,7 +106,7 @@ $js = <<<JS
         let card = new Card({
             // a selector or DOM element for the form where users will
             // be entering their information
-            form: 'form', // *required*
+            form: '#credit-card-create-form', // *required*
             // a selector or DOM element for the container
             // where you want the card to appear
             container: '.card-wrapper', // *required*
