@@ -351,6 +351,9 @@ class PhoneController extends FController
                 throw new Exception('Error: Not found Call To (actionAjaxCallRedirect)', 5);
             }
 
+            if (!$originalCall = Call::find()->andWhere(['c_call_sid' => $sid])->one()) {
+                throw new Exception('Error: Not found Call ' . $sid . '(actionAjaxCallRedirect)', 6);
+            }
 
 //            $to_id = (int)Yii::$app->request->post('to_id');
 //            $projectId = (int)Yii::$app->request->post('project_id');
@@ -360,7 +363,6 @@ class PhoneController extends FController
 
             $firstTransferToNumber = false;
 
-            $originalCall = Call::find()->andWhere(['c_call_sid' => $sid])->one();
             $originalCall->c_is_transfer = true;
 
             $lastChild = null;
@@ -646,7 +648,9 @@ class PhoneController extends FController
 
             $communication = \Yii::$app->communication;
 
-            $communication->updateRecordingStatus($sid, Call::TW_RECORDING_STATUS_PAUSED);
+            if (!$originCall->isConference()) {
+                $communication->updateRecordingStatus($sid, Call::TW_RECORDING_STATUS_PAUSED);
+            }
 
             //$updateData = ['status' => 'completed'];
             /*$updateData = [
