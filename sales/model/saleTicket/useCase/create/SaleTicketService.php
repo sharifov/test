@@ -49,6 +49,13 @@ class SaleTicketService
 		return true;
 	}
 
+	/**
+	 * @param int $caseId
+	 * @param int $saleId
+	 * @param array $saleData
+	 * @return mixed
+	 * @throws \Throwable
+	 */
 	public function refreshSaleTicketBySaleData(int $caseId, int $saleId, array $saleData)
 	{
 		$ci = $this;
