@@ -24,6 +24,8 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Create Call Log', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
+    <?php echo $this->render('partial/_index_search', ['model' => $searchModel]); ?>
+
     <?php Pjax::begin(); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
