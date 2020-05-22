@@ -93,7 +93,7 @@ class ReservationService
         return $result;
     }
 
-    /** TODO:: to helper
+    /**
      * @param DateTime $departureDateTime
      * @param DateTime $arrivalDateTime
      * @param Airport|null $departureCity

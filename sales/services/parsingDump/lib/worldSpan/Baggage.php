@@ -22,6 +22,8 @@ class Baggage implements ParseDumpInterface
     {
         $result = [];
         try {
+            $this->setSegments($string);
+
             $result['baggage'] = $this->processingResult($string);
         } catch (\Throwable $throwable) {
             \Yii::error(AppHelper::throwableFormatter($throwable), 'WorldSpan:Baggage:parseDump:Throwable');
@@ -36,14 +38,23 @@ class Baggage implements ParseDumpInterface
     private function processingResult(string $dump): array
     {
         $result = [];
-        $baggage = $this->prepareBaggageAllowance($dump);
+        $paidBaggage = $this->prepareBaggageAllowance($dump);
+        $freeBaggage = $this->prepareCarryOnAllowance($dump);
 
         $i = 0;
-        foreach ($baggage as $segment => $value) {
+        foreach ($this->segments as $segment) {
             $result[$i]['segment'] = $segment;
-            $result[$i]['free_baggage'] = [];
-            unset($value['segment']);
-            $result[$i]['paid_baggage'] = $value;
+
+            if (array_key_exists($segment, $paidBaggage)) {
+                $result[$i]['paid_baggage'] = $paidBaggage[$segment];
+            } else {
+                $result[$i]['paid_baggage'] = [];
+            }
+            if (array_key_exists($segment, $freeBaggage)) {
+                $result[$i]['free_baggage'] = $freeBaggage[$segment][0];
+            } else {
+                $result[$i]['free_baggage'] = [];
+            }
             $i ++;
         }
         return $result;
@@ -72,8 +83,6 @@ class Baggage implements ParseDumpInterface
                 foreach ($codeMatches[0] as $key => $value) {
                     $info = $this->getBagInfo($value);
                     $segment = $info['code'];
-                    $result[$segment]['segment'] = $segment;
-
                     $itemRow = trim($items[$key]);
                     $itemRows = explode("\n", $itemRow);
 
@@ -94,7 +103,7 @@ class Baggage implements ParseDumpInterface
                             $weightAlt = $bagMatches[6] ?? '';
                             $heightAlt = $bagMatches[7] ?? '';
 
-                            $result[$segment][$keyBag]['piece'] = $info['allow_pieces'];
+                            $result[$segment][$keyBag]['piece'] = (int) $info['allow_pieces'];
                             $result[$segment][$keyBag]['price'] = 'USD0';
                             $result[$segment][$keyBag]['weight'] = $bagMatches[4] . $weightAlt;
                             $result[$segment][$keyBag]['height'] = $bagMatches[5] . $heightAlt;
@@ -120,7 +129,6 @@ class Baggage implements ParseDumpInterface
         preg_match($baggagePattern, $string, $baggageMatches);
 
         if (isset($baggageMatches[1])) {
-            // AA SLCCDG  0PC
             preg_match_all('(' . $this->rowDelimPatten . ')', $baggageMatches[1], $codeMatches);
 
             $items = preg_split('/' . $this->rowDelimPatten . '/', $baggageMatches[1]);
@@ -130,8 +138,6 @@ class Baggage implements ParseDumpInterface
                 foreach ($codeMatches[0] as $key => $value) {
                     $info = $this->getBagInfo($value);
                     $segment = $info['code'];
-                    $result[$segment]['segment'] = $segment;
-
                     $itemRow = trim($items[$key]);
                     $itemRows = explode("\n", $itemRow);
 

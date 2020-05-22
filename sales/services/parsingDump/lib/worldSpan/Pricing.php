@@ -86,23 +86,20 @@ class Pricing implements ParseDumpInterface
         return explode(' ', $value);
     }
 
-    /** TODO:: Alexei get info
+    /**
      * @param string|null $source
      * @return string
      */
     private function typeMapping(?string $source): string
     {
         switch ($source) {
-            case 'ADT':
-            case 'JCB':
+            case 'ADT': case 'JCB': case 'PFA': case 'ITX': case 'WEB':
                 $result = 'ADT';
                 break;
-            case 'CNN':
-            case 'JNN':
+            case 'CNN': case 'JNN': case 'PNN': case 'INN':
                 $result = 'CHD';
                 break;
-            case 'INF':
-            case 'JNF':
+            case 'INF': case 'JNF': case 'PNF': case 'ITF':
                 $result = 'INF';
                 break;
             default:
@@ -110,6 +107,4 @@ class Pricing implements ParseDumpInterface
         }
         return $result;
     }
-
-
 }

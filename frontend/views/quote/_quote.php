@@ -269,7 +269,7 @@ $js = <<<JS
                             type: "info",
                             text: reservationDump,
                             hide: true,
-                            width:'480px',
+                            width:'520px',
                             delay: 15000
                         }); 
                     }                    

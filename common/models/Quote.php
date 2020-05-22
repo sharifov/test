@@ -561,7 +561,7 @@ class Quote extends \yii\db\ActiveRecord
     public function checkReservationDump()
     {
         if ($gds = ParsingDump::getGdsByQuote($this->gds)) {
-            $dumpParser = (new ReservationService($gds))->parseReservation($this->reservation_dump, true, $itinerary);
+            $dumpParser = (new ReservationService($gds))->parseReservation($this->reservation_dump, true, $this->itinerary);
         } else {
             $dumpParser = self::parseDump($this->reservation_dump, true, $this->itinerary);
         }
