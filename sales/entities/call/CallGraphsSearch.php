@@ -98,7 +98,7 @@ class CallGraphsSearch extends CallLogSearch
         self::DATE_FORMAT_HOURS => '%Y-%m-%d %H:00',
         self::DATE_FORMAT_DAYS => '%Y-%m-%d',
         self::DATE_FORMAT_WEEKS => '%v',
-        self::DATE_FORMAT_MONTH => '%Y-%M',
+        self::DATE_FORMAT_MONTH => '%Y-%m',
         self::DATE_FORMAT_WEEKDAYS => '%W',
     ];
 
@@ -117,7 +117,7 @@ class CallGraphsSearch extends CallLogSearch
     private const CHART_TOTAL_CALLS_TEXT = [
         self::CHART_TOTAL_CALLS_INCOMING => 'Incoming',
         self::CHART_TOTAL_CALLS_OUTGOING => 'Outgoing',
-        self::CHART_TOTAL_CALLS_TOTAL => 'Total'
+        /*self::CHART_TOTAL_CALLS_TOTAL => 'Total'*/
     ];
 
     private const CHART_TOTAL_CALLS_LIST = [
@@ -383,6 +383,8 @@ class CallGraphsSearch extends CallLogSearch
         $dateFormat = $this->getDateFormat($this->callGraphGroupBy) ?? $this->getDefaultDateFormat();
         if ((int)$this->callGraphGroupBy === self::DATE_FORMAT_WEEKS) {
             return "concat(str_to_date(date_format(cl_call_created_dt, '%Y %v Monday'), '%x %v %W'), ' - ', str_to_date(date_format(cl_call_created_dt, '%Y %v Sunday'), '%x %v %W'))";
+        } if ((int)$this->callGraphGroupBy === self::DATE_FORMAT_WEEKDAYS){
+            return "WEEKDAY(cl_call_created_dt)";
         } else {
             return "date_format(`cl_call_created_dt`, '$dateFormat')";
         }
