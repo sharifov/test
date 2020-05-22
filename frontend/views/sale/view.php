@@ -5,15 +5,21 @@ use common\models\CaseSale;
 use kartik\editable\Editable;
 use kartik\popover\PopoverX;
 use sales\guards\cases\CaseManageSaleInfoGuard;
+use sales\model\saleTicket\entity\SaleTicket;
+use yii\grid\GridView;
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\helpers\VarDumper;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $data array */
 /* @var $csId int */
 /* @var $itemKey int */
 /* @var $caseSaleModel common\models\CaseSale */
-/* @var array $additionalData */
+/* @var $caseModel sales\entities\cases\Cases */
+/* @var $additionalData array */
+/* @var $dataProviderCc yii\data\ActiveDataProvider */
 
 if(Yii::$app->request->isPjax) {
 
@@ -37,7 +43,7 @@ if (!empty($caseSaleModel)) {
             <div class="error-dump"></div>
         </div>
 
-        <?php if (isset($additionalData) && $additionalData['withFareRules'] === 0) :?>
+        <?php if (!empty($additionalData) && $additionalData['withFareRules'] === 0) :?>
             <div class="col-md-12">
                 <?php echo Html::a(
                     'Check Fare rules',
@@ -108,7 +114,77 @@ if (!empty($caseSaleModel)) {
 
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-9">
+            <?php if (!empty($caseSaleModel) && $saleTicket = $caseSaleModel->cssSaleTicket): ?>
+                <div class="row">
+                    <div class="col-md-12">
+                        <h2>Sale Tickets</h2>
+                        <?php Pjax::begin(['id' => 'pjax-case-sale-tickets', 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false]) ?>
+                        <table class="table table-bordered table-hover">
+                            <tr>
+                                <th>Last/First Name</th>
+                                <th>Ticket Number</th>
+                                <th>Record Locator</th>
+                                <th>Original FOP</th>
+                                <th>Charge System</th>
+                                <th>Airline Penalty</th>
+                                <th>Penalty Amount</th>
+                                <th>Selling</th>
+                                <th>Service Fee</th>
+                                <th>Real Commission</th>
+                                <th>Markup</th>
+                                <th>Upfront Charge</th>
+                                <th>Refundable Amount</th>
+                            </tr>
+							<?php
+                            /** @var $saleTicket SaleTicket[] */
+                            foreach($saleTicket as $key => $ticket): ?>
+                                <tr>
+                                    <td><?=Html::encode($ticket->st_client_name)?></td>
+                                    <td><?=Html::encode($ticket->st_ticket_number)?></td>
+                                    <td><?=Html::encode($ticket->st_record_locator)?></td>
+                                    <td><?=Html::encode($ticket->st_original_fop)?></td>
+                                    <td><?=Html::encode($ticket->st_charge_system)?></td>
+                                    <td><?=Html::encode($ticket->st_penalty_type)?></td>
+                                    <td><?=Html::encode($ticket->st_penalty_amount)?></td>
+                                    <td><?=Html::encode($ticket->st_selling)?></td>
+                                    <td><?=Html::encode($ticket->st_service_fee)?></td>
+                                    <td><?=Html::encode($ticket->st_recall_commission)?></td>
+                                    <td>
+										<?php if (!$canManageSaleInfo):
+											echo Editable::widget([
+												'model' => $ticket,
+												'attribute' => 'st_markup',
+												'header' => 'Markup',
+												'asPopover' => false,
+												'inputType' => Editable::INPUT_HTML5,
+												'formOptions' => [ 'action' => [Url::to(['/sale-ticket/ajax-sale-ticket-edit-info/', 'st_id' => $ticket->st_id])] ],
+                                                'options' => [
+                                                    'id' => 'sale-ticket-markup-'.$key
+                                                ],
+												'pluginEvents' => [
+                                                    'editableSuccess' => 'function (event, val, form, data) {
+                                                        pjaxReload({container: "#pjax-case-sale-tickets"});
+                                                    }',
+												],
+											]);
+										else:
+											echo Html::encode($ticket->st_markup);
+										endif;
+										?>
+                                    </td>
+
+                                    <td><?=Html::encode($ticket->st_upfront_charge)?></td>
+                                    <td><?=Html::encode($ticket->st_refundable_amount)?></td>
+                                </tr>
+							<?php endforeach;?>
+                        </table>
+                        <?php Pjax::end(); ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+            <div class="row">
+                <div class="col-md-5">
 
             <h2>Processing Teams Status</h2>
             <?php if(isset($data['processingTeamsStatus']) && $data['processingTeamsStatus']): ?>
@@ -240,6 +316,19 @@ if (!empty($caseSaleModel)) {
                     <?php endforeach;?>
                 </table>
             <?php endif;?>
+
+            <?php
+                if (!empty($csId)) {
+                    echo $this->render('partial/_sale_credit_card', [
+                        'csId' => $csId,
+                        'saleId' => $data['saleId'],
+                        'dataProvider' => $dataProviderCc,
+                        'caseSaleModel' => $caseSaleModel,
+                        'caseModel' => $caseModel
+                    ]);
+                }
+            ?>
+
         </div>
 
     </div>
@@ -304,7 +393,7 @@ if (!empty($caseSaleModel)) {
                                         'inputType' => Editable::INPUT_DATE,
                                         'displayValue' => date('d M Y', strtotime($passenger['birth_date'])),
                                         'value' => date('d M Y', strtotime($passenger['birth_date'])),
-                                        'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
+                                        'formOptions' => [ 'action' => [Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
                                         'options' => [
                                             'convertFormat'=>true,
                                             'pluginOptions'=>[
@@ -336,7 +425,7 @@ if (!empty($caseSaleModel)) {
                                             'inputType' => Editable::INPUT_DROPDOWN_LIST,
                                             'data' => ['F' => 'Female', 'M' => 'Male'],
                                             'value' => Html::encode($passenger['gender']),
-                                            'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
+                                            'formOptions' => [ 'action' => [Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
                                             'pluginEvents' => [
                                                 'editableSuccess' => 'function (event, val, form, data) {
                                                     document.activateButtonSync(data);
@@ -359,7 +448,7 @@ if (!empty($caseSaleModel)) {
                                         'data' => CaseSale::PASSENGER_MEAL,
                                         'options' => ['prompt'=>'Select meal...'],
                                         'value' => Html::encode(!empty($passenger['meal']) && is_array($passenger['meal']) ? reset($passenger['meal']) : null),
-                                        'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
+                                        'formOptions' => [ 'action' => [Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
                                         'pluginEvents' => [
                                             'editableSuccess' => 'function (event, val, form, data) {
                                                 document.activateButtonSync(data);
@@ -386,7 +475,7 @@ if (!empty($caseSaleModel)) {
 										'inputType' => Editable::INPUT_DROPDOWN_LIST,
 										'data' => CaseSale::PASSENGER_WHEELCHAIR,
 										'value' => Html::encode(!empty($passenger['wheelchair']) && is_array($passenger['wheelchair']) ? reset($passenger['wheelchair']) : null),
-										'formOptions' => ['action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])]],
+										'formOptions' => ['action' => [Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])]],
 										'options' => ['prompt' => 'Select wheelchair...'],
 										'pluginEvents' => [
 											'editableSuccess' => 'function (event, val, form, data) {
@@ -414,7 +503,7 @@ if (!empty($caseSaleModel)) {
 										'inputType' => Editable::INPUT_DROPDOWN_LIST,
 										'data' => Airline::getAirlinesMapping(true),
 										'value' => Html::encode(!empty($passenger['ff_airline']) ? $passenger['ff_airline'] : $data['validatingCarrier']),
-										'formOptions' => ['action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])]],
+										'formOptions' => ['action' => [Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])]],
 										'options' => [],
 										'pluginEvents' => [
 											'editableSuccess' => 'function (event, val, form, data) {
@@ -441,7 +530,7 @@ if (!empty($caseSaleModel)) {
 										'asPopover' => false,
 										'inputType' => Editable::INPUT_TEXT,
 										'value' => Html::encode(!empty($passenger['ff_numbers']) && is_array($passenger['ff_numbers']) ? reset($passenger['ff_numbers']) : null),
-										'formOptions' => ['action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])]],
+										'formOptions' => ['action' => [Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])]],
 										'pluginEvents' => [
 											'editableSuccess' => 'function (event, val, form, data) {
 										    document.activateButtonSync(data);
@@ -467,7 +556,7 @@ if (!empty($caseSaleModel)) {
                                         'asPopover' => false,
                                         'inputType' => Editable::INPUT_TEXT,
                                         'value' => Html::encode(!empty($passenger['kt_numbers']) && is_array($passenger['kt_numbers']) ? reset($passenger['kt_numbers']) : null),
-                                        'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
+                                        'formOptions' => [ 'action' => [Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
                                         'pluginEvents' => [
                                             'editableSuccess' => 'function (event, val, form, data) {
                                                 document.activateButtonSync(data);
@@ -687,8 +776,8 @@ if (!empty($caseSaleModel)) {
     <?php endif; ?>
 
     <?php
-	$url = \yii\helpers\Url::to(['/cases/ajax-sync-with-back-office/']);
-	$urlRefresh = \yii\helpers\Url::to(['/cases/ajax-refresh-sale-info']);
+	$url = Url::to(['/cases/ajax-sync-with-back-office/']);
+	$urlRefresh = Url::to(['/cases/ajax-refresh-sale-info']);
 
 	$js = <<<JS
                     $(".update-to-bo").on('click', function (e) {

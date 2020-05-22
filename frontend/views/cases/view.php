@@ -39,6 +39,7 @@ $this->title = 'Case ' . $model->cs_id;
 $this->params['breadcrumbs'][] = ['label' => 'Cases', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
+\frontend\assets\CreditCardAsset::register($this);
 
 $bundle = \frontend\themes\gentelella\assets\AssetLeadCommunication::register($this);
 
