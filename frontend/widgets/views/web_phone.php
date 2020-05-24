@@ -185,6 +185,9 @@ use yii\helpers\Html;
     $ajaxConferenceCompleteUrl = Url::to(['/phone/ajax-conference-complete']);
     $conferenceBase = (bool)(Yii::$app->params['settings']['voip_conference_base'] ?? false);
 
+    $csrf_param = Yii::$app->request->csrfParam;
+    $csrf_token = Yii::$app->request->csrfToken;
+
 ?>
 <script type="text/javascript">
 
@@ -545,6 +548,7 @@ use yii\helpers\Html;
             $.ajax({
                 type: 'post',
                 data: {
+                    '<?= $csrf_param ?>' : '<?= $csrf_token ?>',
                     'call_acc_sid': call_acc_sid,
                     'call_sid': call_sid,
                     'call_from': call_from,
