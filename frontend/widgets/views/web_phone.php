@@ -10,6 +10,7 @@ use yii\bootstrap4\Modal;
 use yii\helpers\Html;
 
 \frontend\assets\WebPhoneAsset::register($this);
+
 ?>
 
 <div class="fabs2" style="<?=((isset($_COOKIE['web-phone-widget-close']) && $_COOKIE['web-phone-widget-close']) ? '' : 'display: none')?>">
@@ -181,6 +182,8 @@ use yii\helpers\Html;
     $ajaxCheckUserForCallUrl = Url::to(['phone/ajax-check-user-for-call']);
     $ajaxPhoneDialUrl = Url::to(['phone/ajax-phone-dial']);
     $ajaxBlackList = Url::to(['phone/check-black-phone']);
+    $ajaxConferenceCompleteUrl = Url::to(['/phone/ajax-conference-complete']);
+    $conferenceBase = (bool)(Yii::$app->params['settings']['voip_conference_base'] ?? false);
 
 ?>
 <script type="text/javascript">
@@ -192,6 +195,8 @@ use yii\helpers\Html;
     const ajaxCallRedirectGetAgents = '<?=$ajaxCallRedirectGetAgents?>';
     const ajaxPhoneDialUrl = '<?=$ajaxPhoneDialUrl?>';
     const ajaxBlackList = '<?=$ajaxBlackList?>';
+    const ajaxConferenceCompleteUrl = '<?= $ajaxConferenceCompleteUrl ?>';
+    const conferenceBase = '<?= $conferenceBase ?>';
 
     const clientId = '<?=$clientId?>';
 
@@ -308,10 +313,48 @@ use yii\helpers\Html;
     document.getElementById('button-hangup').onclick = function () {
         log('Hanging up...');
         if (device) {
-            updateAgentStatus(connection, false, 1);
-            device.disconnectAll();
+            if (conferenceBase) {
+                conferenceComplete(this);
+            } else {
+                updateAgentStatus(connection, false, 1);
+                device.disconnectAll();
+            }
+        } else {
+            log('Device is null');
         }
     };
+
+    function conferenceComplete() {
+        $('#button-hangup').prop('disabled', true);
+        if (connection && connection.parameters.CallSid) {
+
+            if (connection.status() !== 'open') {
+                connection.accept();
+            }
+
+            $.ajax({
+                type: 'post',
+                data: {
+                    'sid': connection.parameters.CallSid,
+                },
+                url: ajaxConferenceCompleteUrl
+            })
+            .done(function(data) {
+                if (data.error) {
+                    new PNotify({title: "Hangup", type: "error", text: data.message, hide: true});
+                }
+            })
+            .fail(function(error) {
+                console.error(error);
+            })
+            .always(function () {
+                $('#button-hangup').prop('disabled', false);
+            });
+
+        } else {
+            new PNotify({title: "Hangup", type: "error", text: 'Not found active connection or CallSid', hide: true});
+        }
+    }
 
     /*document.getElementById('get-devices').onclick = function () {
         navigator.mediaDevices.getUserMedia({audio: true})
@@ -547,6 +590,7 @@ use yii\helpers\Html;
                 //console.log([data, device]);
                 device.on('ready', function (device) {
                     log('Twilio.Device Ready!');
+                    console.log('Twilio.Device Ready!');
                 });
 
                 device.on('error', function (error) {

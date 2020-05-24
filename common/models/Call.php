@@ -75,7 +75,8 @@ use Locale;
  * @property bool $c_is_transfer
  * @property string $c_queue_start_dt
  * @property int|null $c_group_id
- * @property bool $c_is_conference
+ * @property string $c_conference_sid
+ * @property string $c_is_conference
  *
  * @property string $c_recording_url
  * @property bool $c_is_new
@@ -254,6 +255,9 @@ class Call extends \yii\db\ActiveRecord
 
             ['c_group_id', 'integer'],
 
+            ['c_conference_sid', 'string', 'max' => 34],
+
+            ['c_is_conference', 'default', 'value' => false],
             ['c_is_conference', 'boolean'],
         ];
     }
@@ -298,6 +302,7 @@ class Call extends \yii\db\ActiveRecord
             'c_queue_start_dt' => 'Queue start dt',
             'c_group_id' => 'Group ID',
             'c_is_conference' => 'Is conference',
+            'c_conference_sid' => 'Conference SID',
         ];
     }
 
@@ -1234,11 +1239,13 @@ class Call extends \yii\db\ActiveRecord
                     }
                 }
 
-                $call->update();
+                if ($call->update() === false) {
+                    Yii::error(VarDumper::dumpAsString(['call' => $call->getAttributes(), 'error' => $call->getErrors()]), 'Call:applyCallToAgent:call:update');
+                }
 
                 if ($isConference) {
                     if (!$call->isConference()) {
-                        $call->conference();
+                        $call->setConferenceType();
                         $call->update();
                     }
                     $to = 'client:seller' . $user_id;
@@ -1907,7 +1914,7 @@ class Call extends \yii\db\ActiveRecord
         return $this->c_is_conference ? true : false;
     }
 
-    public function conference(): void
+    public function setConferenceType(): void
     {
         $this->c_is_conference = true;
     }

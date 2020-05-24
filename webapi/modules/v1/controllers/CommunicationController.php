@@ -704,7 +704,7 @@ class CommunicationController extends ApiBaseController
             }
 
             if (!empty($callOriginalData['is_conference_call']) && !$call->isConference()) {
-                $call->conference();
+                $call->setConferenceType();
             }
 
 
@@ -1143,7 +1143,7 @@ class CommunicationController extends ApiBaseController
         }
 
         if (!empty($callData['is_conference_call']) && !$call->isConference()) {
-            $call->conference();
+            $call->setConferenceType();
         }
 
         return $call;
@@ -2353,6 +2353,13 @@ class CommunicationController extends ApiBaseController
                 } elseif ($conferenceData['StatusCallbackEvent'] === 'participant-join') {
 
                     $call = Call::find()->where(['c_call_sid' => $conferenceData['CallSid']])->one();
+                    if ($call->c_conference_sid !== $conference->cf_sid) {
+                        $call->c_conference_sid = $conference->cf_sid;
+                        if (!$call->save()) {
+                            Yii::error(VarDumper::dumpAsString($conference->errors),
+                                'API:CommunicationController:voiceConferenceCallback:participant-join:call:save');
+                        }
+                    }
 
                     $cPart = new ConferenceParticipant();
                     $cPart->cp_cf_id = $conference->cf_id;
@@ -2385,6 +2392,13 @@ class CommunicationController extends ApiBaseController
                         }
                     } else {
                         $call = Call::find()->where(['c_call_sid' => $conferenceData['CallSid']])->one();
+                        if ($call->c_conference_sid !== $conference->cf_sid) {
+                            $call->c_conference_sid = $conference->cf_sid;
+                            if (!$call->save()) {
+                                Yii::error(VarDumper::dumpAsString($conference->errors),
+                                    'API:CommunicationController:voiceConferenceCallback:participant-leave:call:save');
+                            }
+                        }
 
                         $cPart = new ConferenceParticipant();
                         $cPart->cp_cf_id = $conference->cf_id;

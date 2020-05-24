@@ -746,7 +746,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $out;
     }
 
-    public function acceptConferenceCall($sid, $to, $from, $to_parent_call)
+    public function acceptConferenceCall($sid, $to, $from, $to_parent_call): array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -771,6 +771,33 @@ class CommunicationService extends Component implements CommunicationServiceInte
         } else {
             $out['error'] = $response->content;
             \Yii::error(VarDumper::dumpAsString($out['error']), 'Component:CommunicationService::acceptConferenceCall');
+        }
+
+        return $out;
+    }
+
+    public function completeConference(string $sid): array
+    {
+        $out = ['error' => false, 'data' => []];
+
+        $data = [
+            'sid' => $sid,
+        ];
+
+        $response = $this->sendRequest('twilio-conference-call/complete-conference', $data);
+
+        if ($response->isOk) {
+            if (isset($response->data['data'])) {
+                $out['data'] = $response->data['data'];
+                if (isset($out['data']['is_error']) &&  $out['data']['is_error'] === true) {
+                    \Yii::error(VarDumper::dumpAsString($response->data), 'Component:CommunicationService::completeConference:response');
+                }
+            } else {
+                $out['error'] = 'Not found in response array data key [data]';
+            }
+        } else {
+            $out['error'] = $response->content;
+            \Yii::error(VarDumper::dumpAsString($out['error']), 'Component:CommunicationService::completeConference');
         }
 
         return $out;

@@ -181,9 +181,11 @@ class ApiBaseController extends Controller
      */
     public function startApiLog(string $action = ''): ApiLog
     {
+        $data = Yii::$app->request->post();
+        $data['received_microtime'] = microtime(true);
 
         $apiLog = new ApiLog();
-        $apiLog->al_request_data = @json_encode(Yii::$app->request->post());
+        $apiLog->al_request_data = @json_encode($data);
         $apiLog->al_request_dt = date('Y-m-d H:i:s');
         $apiLog->al_ip_address = Yii::$app->request->getRemoteIP();
         $apiLog->al_action = $action;
