@@ -2299,6 +2299,7 @@ class CommunicationController extends ApiBaseController
                                 'API:CommunicationController:startConference:Conference:without_room_id:save');
                         }
                     } catch (\Throwable $e) {
+                        $conference = Conference::findOne(['cf_sid' => $conferenceSid]);
                         Yii::error($e->getMessage(), 'API:CommunicationController:startConference:Conference:without_room_id:throwable:save');
                     }
 
@@ -2317,6 +2318,7 @@ class CommunicationController extends ApiBaseController
                                     'API:CommunicationController:startConference:Conference:save');
                             }
                         } catch (\Throwable $e) {
+                            $conference = Conference::findOne(['cf_sid' => $conferenceSid]);
                             Yii::error($e->getMessage(), 'API:CommunicationController:startConference:Conference:with_room_id:throwable:save');
                         }
                     } else {
