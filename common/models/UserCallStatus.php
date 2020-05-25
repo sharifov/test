@@ -131,6 +131,11 @@ class UserCallStatus extends \yii\db\ActiveRecord
         return true;
     }
 
+    public function isReady(): bool
+	{
+		return $this->us_type_id === self::STATUS_TYPE_READY;
+	}
+
 
     /**
      *

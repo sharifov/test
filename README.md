@@ -139,10 +139,15 @@ sudo service mysql restart
 
 
 
-Prod Host:
+Prod Kiv Host:
 -------------------
  - [sales.travelinsides.com](https://sales.travelinsides.com) - Frontend
  - [sales.api.travelinsides.com](https://sales.api.travelinsides.com) - API
+ 
+Prod GTT Host:
+-------------------
+- [crm.gttglobal.com](https://crm.gttglobal.com) - Frontend
+- [crm-api.gttglobal.com](https://crm-api.gttglobal.com) - API
  
 Stage Host:
 -------------------

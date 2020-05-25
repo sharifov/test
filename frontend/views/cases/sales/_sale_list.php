@@ -1,5 +1,8 @@
 <?php
 
+use common\models\CreditCard;
+use common\models\search\CreditCardSearch;
+use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -77,14 +80,18 @@ $user = Yii::$app->user->identity;
                         <td>'.Yii::$app->formatter->asDatetime($item->css_created_dt).'</td>';
 
                     if ($caseModel->isProcessing()) {
-                        $label .= '<td>' . Html::button('<i class="fa fa-upload"></i> Update', [
+                        $label .= '<td>';
+
+                        $label .= Html::button('<i class="fa fa-upload"></i> Update', [
 							'class' => 'update-to-bo btn ' . ($item->css_need_sync_bo ? 'btn-success' : 'btn-default'),
 							'disabled' => !$item->css_need_sync_bo ? true : false,
 							'id' => 'update-to-bo-' . $item->css_sale_id,
                             'data-case-id' => $item->css_cs_id,
                             'data-case-sale-id' => $item->css_sale_id,
                             'title' => 'Update data to B/O'
-                            ]) . '</td>';
+                            ]);
+
+                        $label .= '</td>';
                     }
                     if ($user->isAdmin() || $user->isSuperAdmin()) {
                         $label .= '<td>' . Html::button('<i class="fa fa-refresh"></i> Refresh', [
@@ -116,7 +123,20 @@ $user = Yii::$app->user->identity;
 //                    echo '<pre>';
 //                    print_r($dataSale);die;
                     if(is_array($dataSale)) {
-                        $content = $this->render('/sale/view', ['data' => $dataSale, 'csId' => $caseModel->cs_id, 'caseSaleModel' => $item, 'itemKey' => $itemKey]);
+
+                        $dataProviderCc = new ActiveDataProvider([
+                            'query' => CreditCard::find()->innerJoin('sale_credit_card', 'scc_cc_id=cc_id')->where(['scc_sale_id' => $item->css_sale_id]),
+                        ]);
+
+                        $content = $this->render('/sale/view', [
+                                'data' => $dataSale,
+                                'csId' => $caseModel->cs_id,
+                                'caseSaleModel' => $item,
+                                'itemKey' => $itemKey,
+                                'dataProviderCc' => $dataProviderCc,
+                                'caseModel' => $caseModel,
+                                'additionalData' => [],
+                        ]);
                         //echo '******';
                         //\yii\helpers\VarDumper::dump($content); exit;
                     }

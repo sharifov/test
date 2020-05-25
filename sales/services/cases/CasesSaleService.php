@@ -408,14 +408,16 @@ class CasesSaleService
      * @param int $sale_id
      * @param int $withFareRules
      * @param int $requestTime
+     * @param int $withRefundRules
      * @return array
      * @throws BadRequestHttpException
      */
-    public function detailRequestToBackOffice(int $sale_id, int $withFareRules = 0, int $requestTime = 120): ?array
+    public function detailRequestToBackOffice(int $sale_id, int $withFareRules = 0, int $requestTime = 120, int $withRefundRules = 0): ?array
     {
         try {
             $data['sale_id'] = $sale_id;
             $data['withFareRules'] = $withFareRules;
+            $data['withRefundRules'] = $withRefundRules;
             $response = BackOffice::sendRequest2('cs/detail', $data, 'POST', $requestTime);
 
             if ($response->isOk) {

@@ -1864,7 +1864,6 @@ class CommunicationController extends ApiBaseController
                 }
 
 
-                Yii::error($smsData);
                 $smsStatusChanged = false;
                 if(isset($smsData['status'])) {
 

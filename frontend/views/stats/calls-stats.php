@@ -94,7 +94,7 @@ $this->title = 'Calls Stats';
                             </div>
 
                             <div class="col-md-2">
-                                <?= $form->field($model, 'c_created_user_id', [
+                                <?= $form->field($model, 'cl_user_id', [
                                         'options' => ['class' => 'form-group']
                                 ])->dropDownList(\common\models\Employee::getList(), [
                                         'prompt' => 'All'
