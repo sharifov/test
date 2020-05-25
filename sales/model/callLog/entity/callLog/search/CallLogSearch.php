@@ -76,7 +76,7 @@ class CallLogSearch extends CallLog
     public function __construct($config = [])
     {
         parent::__construct($config);
-        $this->createTimeRange = date('Y-m-d 00:00:00', strtotime(self::CREATE_TIME_START_DEFAULT_RANGE)) . ' - ' . date('Y-m-d H:i:s');
+        $this->createTimeRange = date('Y-m-d 00:00:00', strtotime(self::CREATE_TIME_START_DEFAULT_RANGE)) . ' - ' . date('Y-m-d 23:59:59');
     }
 
     public function behaviors()
