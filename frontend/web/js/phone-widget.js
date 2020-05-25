@@ -109,12 +109,8 @@ $(document).ready(function() {
         }
     });
 
-    $(document).on("click", ".widget-modal__close", function () {
-        $(".widget-modal").hide();
-        $(".phone-widget__tab").removeClass('ovf-hidden');
-        $('.collapsible-container').collapse('hide');
-        clearEmailTab()
-    });
+
+
 
     $('.js-toggle-contact-info').on('click', function() {
         $('.contact-modal-info').show()
@@ -152,6 +148,9 @@ $(document).ready(function() {
     // var messagesModal = $(".messages-modal__messages-scroll");
     // var emailModal = $(".email-modal__messages-scroll");
 
+    var elemScrollable = $('.scrollable-block');
+
+    var additionalBar = $('.additional-bar__body');
     var contactModal = $(".contact-modal-info");
     var blockSuggestion = $(".suggested-contacts");
     // var msgModalScroll = new SimpleBar(messagesModal[0]);
@@ -163,16 +162,140 @@ $(document).ready(function() {
     // msgModalScroll.getContentElement();
     // emailModalScroll.getContentElement();
     // msgModalScroll.recalculate();
+    $(additionalBar).each(function(i, el) {
+        var elem = new SimpleBar(el);
+        elem.getContentElement();
+    })
 
-    $('.dial__btn').on('click', function(e) {
-        e.preventDefault();
-        var currentVal = $('.call-pane__dial-number').val();
-        $('.call-pane__dial-number').val(currentVal + $(this).val());
+    $('.toggle-bar-settings').on('click', function() {
+        $('#bar-settings').slideToggle(150)
+        $('#bar-logs').slideUp(150)
+    })
+
+    $('.additional-bar__close').on('click', function() {
+        console.log($(this).parents('.additional-bar'))
+        $(this).parents('.additional-bar').slideUp(150);
+    })
+
+    $('.toggle-bar-logs').on('click', function() {
+        $('#bar-logs').slideToggle(150)
+        $('#bar-settings').slideUp(150)
+    })
+
+    $('.additional-bar__close').on('click', function() {
+        console.log($(this).parents('.additional-bar'))
+        $(this).parents('.additional-bar').slideUp(150);
+    })
+
+
+    $(elemScrollable).each(function(i, elem) {
+        var el = new SimpleBar(elem);
+        el.getContentElement();
+    })
+
+
+    let context = null;
+
+    context = new AudioContext();
+    const beep = (freq = 520, duration = 200, vol = 100) => {
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
+        oscillator.connect(gain);
+        oscillator.frequency.value = freq;
+        oscillator.type = "sine";
+        gain.connect(context.destination);
+        gain.gain.value = vol * 0.01;
+        oscillator.start(context.currentTime);
+        oscillator.stop(context.currentTime + duration * 0.001);
+    }
+
+    // document.querySelector('button').addEventListener('click', function () {
+    //     context = new AudioContext();
+    //     beep();
+    // });
+
+    var btnPlus = false;
+
+
+    $('.dial__btn').on('mouseup', function(){
+        clearTimeout(pressTimer);
+
+        let btnVal = $(this).val();
+        let currentVal = $('.call-pane__dial-number').val();
+        if (btnVal == "0") {
+            if (btnPlus) {
+                btnPlus = false;
+            } else {
+                $('.call-pane__dial-number').val(currentVal + "0");
+                beep(500, 100, 5);
+            }
+        }
+        return false;
+    }).on('mousedown', function(){
+
+
+
+
+        let btnVal = $(this).val();
+        let currentVal = $('.call-pane__dial-number').val();
+
+        if (btnVal == "0") {
+            pressTimer = window.setTimeout(function () {
+                btnPlus = true;
+                $('.call-pane__dial-number').val(currentVal + "+");
+                beep(450, 100, 5);
+            }, 500);
+        } else {
+            $('.call-pane__dial-number').val(currentVal + btnVal);
+
+            let freq = 450;
+            if (btnVal > 0 && btnVal < 10) {
+                freq = 500 + (btnVal * 10);
+            }
+
+            beep(freq, 100, 5);
+        }
+
         $('.call-pane__dial-clear-all').addClass('is-shown');
-        $('.suggested-contacts').addClass('is_active');
-        $('.call-pane__dial-number').focus()
+        //$('.suggested-contacts').addClass('is_active');
+        $('.call-pane__dial-number').focus();
 
+        return false;
     });
+
+
+    // var longpress = false;
+    //
+    // $('.dial__btn').on('click', function (e) {
+    //     e.preventDefault();
+    //     let btnVal = $(this).val();
+    //     let currentVal = $('.call-pane__dial-number').val();
+    //
+    //     if(longpress && btnVal == "0") { // if detect hold, stop onclick function
+    //         $('.call-pane__dial-number').val(currentVal + "+");
+    //     } else {
+    //         $('.call-pane__dial-number').val(currentVal + btnVal);
+    //     }
+    //     $('.call-pane__dial-clear-all').addClass('is-shown');
+    //     //$('.suggested-contacts').addClass('is_active');
+    //     $('.call-pane__dial-number').focus();
+    //     return false;
+    // });
+    //
+    // $('.dial__btn').on('mousedown', function () {
+    //     longpress = false; //longpress is false initially
+    //     pressTimer = window.setTimeout(function(){
+    //         // your code here
+    //
+    //         longpress = true; //if run hold function, longpress is true
+    //     },500)
+    // });
+    //
+    // $('.dial__btn').on('mouseup', function () {
+    //     clearTimeout(pressTimer); //clear time on mouseup
+    // });
+
+
 
     $('.call-pane__dial-clear-all').on('click', function(e) {
         e.preventDefault();
@@ -229,6 +352,7 @@ $(document).ready(function() {
 
         $(".phone-widget").toggleClass("is_active");
         $(this).toggleClass("is-mirror");
+
     });
 
     $(".phone-widget__close").on("click", function (e) {
@@ -264,10 +388,12 @@ $(document).ready(function() {
     //
     // });
 
-    $('.call-pane__end-call').on('click', function(e) {
+    $(document).on('click', '#cancel-active-call', function(e) {
         e.preventDefault();
 
-        if (device) {
+        let twilioDevice = JSON.parse(window.localStorage.getItem('twilioDevice'));
+
+        if (device || (device = twilioDevice)) {
             updateAgentStatus(connection, false, 1);
             device.disconnectAll();
 
@@ -340,7 +466,71 @@ $(document).ready(function() {
     //     console.log(currentNumber.getData);
     // });
     
-    
+    $(document).on("click", ".widget-modal__close", function () {
+        $(".widget-modal").hide();
+        $(".phone-widget__tab").removeClass('ovf-hidden');
+        $('.collapsible-container').collapse('hide');
+        clearEmailTab()
+    });
+
+
+
+
+
+    // function phoneWidgetBehavior(elem) {
+    //     var $main = $(elem),
+    //         backElement = '.widget-modal__close',
+    //         widgetModal = '.widget-modal',
+    //         widgetTab = '.phone-widget__tab',
+    //         collapsibleContainer = '.collapsible-container';
+
+    //         var events = {
+    //             pwBackAction: 'pw-back-action'
+    //         }
+
+    //         this.actionMapping = function(object) {
+    //             return {
+    //                 back: object.back
+    //             }
+    //         };
+
+    //         function getElement(selector) {
+    //             return $($main).find(selector)
+    //         }
+
+    //         function backAction() {
+    //             getElement(widgetModal).hide();
+    //             getElement(widgetTab).removeClass('ovf-hidden');
+    //             getElement(collapsibleContainer).collapse('hide');
+    //         }
+
+    //         $($main).on('click', backElement, function() {
+    //             backAction();
+    //             $(backElement).trigger(events.pwBackAction);
+                
+    //         });
+
+    //     return {
+    //         control: $main
+    //     };
+
+    // }
+
+    // var widget = phoneWidgetBehavior('.phone-widget');
+
+
+    // $(widget.control).on('pw-back-action', function () {
+    //     console.log('here is a event for back button');
+    // })
+
+    $('.additional-info__close').on('click', function() {
+        $('.additional-info').slideUp(150);
+    });
+
+    $('.call-pane__info').on('click', function() {
+        $('.additional-info').slideDown(150);
+    })
+
 });
 
 function toSelect(elem, obj, cb) {

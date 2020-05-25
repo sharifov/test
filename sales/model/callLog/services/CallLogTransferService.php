@@ -70,7 +70,10 @@ class CallLogTransferService
     {
         $this->call = $call->getAttributes();
 
-        Yii::info($this->call, 'info\DebugCallLog');
+        $debugEnable = Yii::$app->params['settings']['call_log_debug_enable'] ?? false;
+        if ($debugEnable) {
+            Yii::info($this->call, 'info\DebugCallLog');
+        }
 
         if ($call->isOut() && $call->isGeneralParent() && !$call->isTransfer()) {
             $this->outParentCall();

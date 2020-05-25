@@ -40,6 +40,7 @@ use sales\guards\cases\CaseTakeGuard;
 use sales\model\cases\useCases\cases\updateInfo\Handler;
 use sales\model\coupon\entity\couponCase\CouponCase;
 use sales\model\coupon\useCase\send\SendCouponsForm;
+use sales\model\saleTicket\useCase\create\SaleTicketService;
 use sales\repositories\cases\CaseCategoryRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\cases\CasesSaleRepository;
@@ -82,6 +83,7 @@ use yii\widgets\ActiveForm;
  * @property ClientUpdateFromEntityService $clientUpdateFromEntityService
  * @property CaseTakeGuard $caseTakeGuard
  * @property Handler $updateHandler
+ * @property SaleTicketService $saleTicketService
  */
 class CasesController extends FController
 {
@@ -97,6 +99,7 @@ class CasesController extends FController
     private $clientUpdateFromEntityService;
     private $caseTakeGuard;
     private $updateHandler;
+    private $saleTicketService;
 
     public function __construct(
         $id,
@@ -112,6 +115,7 @@ class CasesController extends FController
         ClientUpdateFromEntityService $clientUpdateFromEntityService,
         CaseTakeGuard $caseTakeGuard,
         Handler $updateHandler,
+        SaleTicketService $saleTicketService,
         $config = []
     )
     {
@@ -126,6 +130,7 @@ class CasesController extends FController
         $this->casesSaleService = $casesSaleService;
         $this->clientUpdateFromEntityService = $clientUpdateFromEntityService;
         $this->caseTakeGuard = $caseTakeGuard;
+        $this->saleTicketService = $saleTicketService;
         $this->updateHandler = $updateHandler;
     }
 
@@ -727,7 +732,7 @@ class CasesController extends FController
 			->where(['s_case_id' => $model->cs_id]);
 
 		$query3 = (new \yii\db\Query())
-			->select(['id' => new Expression('if (cl_group_id is null, cl_id, cl_group_id)')])
+			->select(['id' => new Expression('cl_group_id')])
 			->addSelect(['type' => new Expression('"voice"')])
 			->addSelect(['case_id' => 'call_log_case.clc_case_id', 'created_dt' => 'MIN(call_log.cl_call_created_dt)'])
 			->from('call_log_case')
@@ -761,11 +766,12 @@ class CasesController extends FController
         $hash = Yii::$app->request->post('h');
 
         try {
+			$transaction = Yii::$app->db->beginTransaction();
             $model = $this->findModelByGid($gid);
 
             $arr = explode('|', base64_decode($hash));
             $id = (int)($arr[1] ?? 0);
-            $saleData = $this->casesSaleService->detailRequestToBackOffice($id);
+            $saleData = $this->casesSaleService->detailRequestToBackOffice($id, 0, 120, 1);
 
             $cs = CaseSale::find()->where(['css_cs_id' => $model->cs_id, 'css_sale_id' => $saleData['saleId']])->limit(1)->one();
             if($cs) {
@@ -787,13 +793,17 @@ class CasesController extends FController
                     Yii::error(VarDumper::dumpAsString($cs->errors). ' Data: ' . VarDumper::dumpAsString($saleData), 'CasesController:actionAddSale:CaseSale:save');
                 } else {
                     $model->updateLastAction();
+					$this->saleTicketService->createSaleTicketBySaleData($cs->css_cs_id, $cs->css_sale_id, $saleData);
                 }
             }
 
             $out['data'] = ['sale_id' => $saleData['saleId'], 'gid' => $gid, 'h' => $hash];
 
+            $transaction->commit();
+
         } catch (\Throwable $exception) {
             $out['error'] = $exception->getMessage();
+            $transaction->rollBack();
         }
 
         return $out;
@@ -1489,8 +1499,10 @@ class CasesController extends FController
 			$caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$caseSaleId);
 			$this->checkAccessToManageCaseSaleInfo($caseSale, true);
 
-			$saleData = $this->casesSaleService->detailRequestToBackOffice((int)$caseSale->css_sale_id, $withFareRules);
+			$saleData = $this->casesSaleService->detailRequestToBackOffice((int)$caseSale->css_sale_id, $withFareRules, 120, 1);
 			$caseSale = $this->casesSaleService->refreshOriginalSaleData($caseSale, $case, $saleData);
+
+			$this->saleTicketService->refreshSaleTicketBySaleData((int)$caseId, $caseSale->css_sale_id, $saleData);
 
 			$out['message'] = 'Sale info: ' . $caseSale->css_sale_id . ' successfully refreshed';
 

@@ -12,7 +12,7 @@ use modules\product\src\entities\productTypePaymentMethod\ProductTypePaymentMeth
 use sales\auth\Auth;
 use sales\forms\CompositeForm;
 use sales\helpers\product\ProductQuoteHelper;
-use sales\parcingDump\Gds\Reservation;
+use sales\services\parsingDump\ReservationService;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
@@ -135,7 +135,7 @@ class FlightQuoteCreateForm extends CompositeForm
 
 	public function checkReservationDump(): void
 	{
-		$dumpParser = (new Reservation())->parseDump($this->reservationDump, true, $this->itinerary);
+		$dumpParser = FlightQuoteHelper::parseDump($this->reservationDump, true, $this->itinerary);
 		if (empty($dumpParser)) {
 			$this->addError('reservationDump', 'Incorrect reservation dump!');
 		}

@@ -14,8 +14,12 @@ use common\models\QuotePrice;
 use common\models\search\QuotePriceSearch;
 use common\models\search\QuoteSearch;
 use sales\auth\Auth;
+use sales\helpers\app\AppHelper;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
+use sales\services\parsingDump\lib\ParsingDump;
+use sales\services\parsingDump\PricingService;
+use sales\services\parsingDump\ReservationService;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\filters\AccessControl;
@@ -44,7 +48,6 @@ use common\models\EmailTemplateType;
  */
 class QuoteController extends FController
 {
-
     /**
      * @param $leadId
      * @return string
@@ -490,6 +493,214 @@ class QuoteController extends FController
         return $result;
     }
 
+    /**
+     * @return array
+     */
+    public function actionPrepareDump(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $response = [
+            'status' => 1,
+            'error' => '',
+            'reservation_dump' => [],
+            'validating_carrier' => '',
+            'prices' => '',
+        ];
+
+        try {
+            if (Yii::$app->request->isPost) {
+
+                $leadId = (int) Yii::$app->request->get('lead_id');
+                if (!$lead = Lead::findOne(['id' => $leadId])) {
+                    throw new \DomainException( 'Lead id(' . $leadId . ') not found');
+                }
+
+                $post = Yii::$app->request->post();
+
+                if (isset($post['Quote'], $post['prepare_dump'])) {
+                    $postQuote = $post['Quote'];
+
+                    if (!$gds = ParsingDump::getGdsByQuote($postQuote['gds'])) {
+                        throw new \DomainException(  'This gds(' . $postQuote['gds'] . ') cannot be processed');
+                    }
+
+                    $prices = [];
+                    if($pricing = (new PricingService($gds))->formattingForQuote($post['prepare_dump'])) {
+                        $response['validating_carrier'] = $pricing['validating_carrier'];
+
+                        foreach ($pricing['prices'] as $type => $value) {
+                            $price = new QuotePrice();
+                            $price->passenger_type = $type;
+                            $price->fare = $value['fare'];
+                            $price->taxes = $value['taxes'];
+                            $price->net = $price->fare + $price->taxes;
+                            $price->selling = $price->net + $price->mark_up;
+                            $price->toFloat();
+
+                            $prices[] = $price;
+                        }
+                        $response['prices'] = $this->renderAjax('partial/_priceRows', [
+                            'prices' => $prices,
+                            'lead' => $lead,
+                        ]);
+                    } else {
+                        throw new \DomainException(  'Parse dump failed. Step "prices"');
+                    }
+
+                    $itinerary = [];
+                    if ((new ReservationService($gds))->parseReservation($post['prepare_dump'], true, $itinerary)) {
+                        $response['reservation_dump'] = Quote::createDump($itinerary);
+                    } else {
+                        throw new \DomainException(  'Parse dump failed. Step "reservation"');
+                    }
+                }
+            }
+        } catch (\Throwable $throwable) {
+            $response['status'] = 0;
+            $response['error'] = $throwable->getMessage();
+        }
+        return $response;
+    }
+
+    /**
+     * @return array
+     */
+    public function actionSaveFromDump(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $response = [
+            'status' => 0,
+            'errorMessage' => '',
+            'errorsPrices' => [],
+            'errors' => [],
+        ];
+
+        $transaction = Quote::getDb()->beginTransaction();
+        try {
+            if (Yii::$app->request->isPost) {
+
+                $leadId = (int) Yii::$app->request->get('lead_id');
+                if (!$lead = Lead::findOne(['id' => $leadId])) {
+                    throw new \DomainException( 'Lead id(' . $leadId . ') not found');
+                }
+
+                $post = Yii::$app->request->post();
+
+                if (isset($post['Quote'])) {
+                    $postQuote = $post['Quote'];
+                    $postQuote['employee_id'] = Yii::$app->user->id;
+                    $postQuote['employee_name'] = Yii::$app->user->identity->username;
+
+                    if (!$gds = ParsingDump::getGdsByQuote($postQuote['gds'])) {
+                        throw new \DomainException(  'This gds(' . $postQuote['gds'] . ') cannot be processed');
+                    }
+
+                    $quote = Quote::createQuote($postQuote, $lead->id, $lead->originalQuoteExist());
+
+                    $itinerary = [];
+                    if ((new ReservationService($gds))->parseReservation($post['prepare_dump'], true, $quote->itinerary)) {
+                        $response['reservation_dump'] = Quote::createDump($itinerary);
+                    } else {
+                        throw new \DomainException(  'Parse "reservation dump" failed');
+                    }
+                    $itinerary = $quote::createDump($quote->itinerary);
+                    $quote->reservation_dump = str_replace('&nbsp;', ' ', implode("\n", $itinerary));
+
+                    if (!$quote->save(false)) {
+                        $response['errors'] = $quote->getErrors();
+                        throw new \DomainException(  'Quote not saved. Error: ' . $quote->getErrorSummary(false)[0]);
+                    }
+
+                    foreach ($post['QuotePrice'] as $key => $quotePrice) {
+                        if ($price = new QuotePrice()) {
+                            $price->attributes = $quotePrice;
+                            $price->quote_id = $quote->id;
+                            $price->toFloat();
+                            if (!$price->save()) {
+                                $response['errorsPrices'][$key] = $price->getErrors();
+                            }
+                        }
+                    }
+
+                    if (count($response['errorsPrices'])) {
+                        throw new \DomainException(  'QuotePrice not saved.');
+                    }
+
+                    $this->logQuote($quote);
+                    $quote->createQuoteTrips();
+
+                    if($objParser = ParsingDump::initClass($gds, ParsingDump::PARSING_TYPE_BAGGAGE)) {
+                        $parsedBaggage = $objParser->parseDump($post['prepare_dump']);
+
+                        foreach ($parsedBaggage['baggage'] as $baggageAttr) {
+                            $segmentKey = $baggageAttr['segment'];
+                            $origin = substr($segmentKey, 0, 3);
+                            $destination = substr($segmentKey, 2, 3);
+                            $segment = QuoteSegment::find()->innerJoin(QuoteTrip::tableName(), 'qs_trip_id = qt_id')
+                                ->andWhere(['qt_quote_id' => $quote->id])
+                                ->andWhere(
+                                    [
+                                        'OR',
+                                        ['qs_departure_airport_code' => $origin],
+                                        ['qs_arrival_airport_code' => $destination]
+                                    ]
+                                )
+                                ->one();
+                            if ($segment) {
+                                if (isset($baggageAttr['paid_baggage'])) {
+                                    foreach ($baggageAttr['paid_baggage'] as $paidBaggageAttr){
+                                        $baggage = new QuoteSegmentBaggageCharge();
+                                        $baggage->qsbc_segment_id = $segment->qs_id;
+                                        $baggage->qsbc_price = str_replace('USD', '', $paidBaggageAttr['price']);
+                                        if(isset($paidBaggageAttr['piece'])){
+                                            $baggage->qsbc_first_piece = $paidBaggageAttr['piece'];
+                                            $baggage->qsbc_last_piece = $paidBaggageAttr['piece'];
+                                        }
+                                        if(isset($paidBaggageAttr['weight'])){
+                                            $baggage->qsbc_max_weight = substr($paidBaggageAttr['weight'], 0 , 100);
+                                        }
+                                        if(isset($paidBaggageAttr['height'])){
+                                            $baggage->qsbc_max_size = substr($paidBaggageAttr['height'],0, 100);
+                                        }
+                                        $baggage->save(false);
+                                    }
+                                }
+                                if(isset($baggageAttr['free_baggage']) && isset($baggageAttr['free_baggage']['piece'])) {
+                                    $baggage = new QuoteSegmentBaggage();
+                                    $baggage->qsb_allow_pieces = $baggageAttr['free_baggage']['piece'];
+                                    $baggage->qsb_segment_id = $segment->qs_id;
+                                    if(isset($baggageAttr['free_baggage']['weight'])){
+                                        $baggage->qsb_allow_max_weight = substr($baggageAttr['free_baggage']['weight'], 0, 100);
+                                    }
+                                    if(isset($baggageAttr['free_baggage']['height'])){
+                                        $baggage->qsb_allow_max_size = substr($baggageAttr['free_baggage']['height'], 0, 100);
+                                    }
+                                    $baggage->save(false);
+                                }
+                            }
+                        }
+                    }
+
+                    if($lead->called_expert) {
+                       $quote->sendUpdateBO();
+                    }
+
+                    $transaction->commit();
+                    $response['status'] = 1;
+
+                } else {
+                    $response['errorMessage'] = 'POST data Quote required';
+                }
+            } else {
+                throw new \DomainException(  'POST data required');
+            }
+        } catch (\Throwable $throwable) {
+            $transaction->rollBack();
+            $response['errorMessage'] = $throwable->getMessage();
+        }
+        return $response;
+    }
+
     public function actionSave($save = false)
     {
         $save = (bool)$save;
@@ -913,5 +1124,22 @@ class QuoteController extends FController
             ]);
         }
         return null;
+    }
+
+    private function logQuote(Quote $quote):void
+    {
+        $data = (new Quote())->getDataForProfit($quote->id);
+        (\Yii::createObject(GlobalLogInterface::class))->log(
+            new LogDTO(
+                get_class($quote),
+                $quote->id,
+                \Yii::$app->id,
+                Auth::id(),
+                Json::encode(['selling' => 0]),
+                Json::encode(['selling' => round($data['selling'], 2)]),
+                null,
+                GlobalLog::ACTION_TYPE_CREATE
+            )
+        );
     }
 }

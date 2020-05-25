@@ -6,24 +6,34 @@ use yii\widgets\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $model common\models\CreditCard */
 /* @var $form yii\widgets\ActiveForm */
+/* @var $isAjax bool */
 
 \frontend\assets\CreditCardAsset::register($this);
 
+$isAjax = isset($isAjax);
+$colMd = $isAjax ? 'col-md-12' : 'col-md-4';
+$pjaxId = 'pjax-create-credit-card'
 ?>
 
+<script>pjaxOffFormSubmit('#<?= $pjaxId ?>');</script>
 <div class="credit-card-form">
 
-    <?php $form = ActiveForm::begin(); ?>
+
+    <div class="<?= $colMd ?>">
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card-wrapper"></div>
+        </div>
+    </div>
+
+    <?php \yii\widgets\Pjax::begin(['id' => $pjaxId, 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false]) ?>
+
+
+    <?php $form = ActiveForm::begin(['options' => ['data-pjax' => 1], 'id' => 'credit-card-create-form']); ?>
 
     <?php echo $form->errorSummary($model); ?>
 
-    <div class="col-md-4">
-
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card-wrapper"></div>
-            </div>
-        </div>
 
         <div class="clearfix"></div>
 
@@ -61,14 +71,17 @@ use yii\widgets\ActiveForm;
             <div class="col-md-6">
                 <?= $form->field($model, 'cc_type_id')->dropDownList(\common\models\CreditCard::getTypeList(), ['prompt' => '---']) ?>
             </div>
+            <?php if(!$isAjax): ?>
             <div class="col-md-6">
                 <?= $form->field($model, 'cc_status_id')->dropDownList(\common\models\CreditCard::getStatusList(), ['prompt' => '---']) ?>
             </div>
+            <?php endif; ?>
         </div>
-
+		<?php if(!$isAjax): ?>
         <?= $form->field($model, 'cc_is_expired')->checkbox() ?>
+		<?php endif; ?>
 
-    <!--    --><?php //= $form->field($model, 'cc_created_user_id')->textInput() ?>
+        <!--    --><?php //= $form->field($model, 'cc_created_user_id')->textInput() ?>
     <!---->
     <!--    --><?php //= $form->field($model, 'cc_updated_user_id')->textInput() ?>
     <!---->
@@ -79,10 +92,11 @@ use yii\widgets\ActiveForm;
         <div class="form-group">
             <?= Html::submitButton('<i class="fa fa-save"></i> Save', ['class' => 'btn btn-success']) ?>
         </div>
-    </div>
 
     <?php ActiveForm::end(); ?>
 
+    <?php \yii\widgets\Pjax::end(); ?>
+    </div>
 </div>
 
 <?php
@@ -92,7 +106,7 @@ $js = <<<JS
         let card = new Card({
             // a selector or DOM element for the form where users will
             // be entering their information
-            form: 'form', // *required*
+            form: '#credit-card-create-form', // *required*
             // a selector or DOM element for the container
             // where you want the card to appear
             container: '.card-wrapper', // *required*

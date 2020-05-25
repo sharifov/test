@@ -9,8 +9,8 @@
  */
 
 $root = str_replace('\\', '/', __DIR__);
-$tplEnvFile = 'env.conf.tpl';
-$env['skipFiles'] = ['index.php', 'env.conf', $tplEnvFile, 'env_scan'];
+$tplEnvFile = '.env.example';
+$env['skipFiles'] = ['index.php', '.env', $tplEnvFile, 'env_scan'];
 
 echo "Environment Scan Tool v1.0\n\n";
 echo '... Start scan keys: ' . date('H:i:s'). " ...\n";
