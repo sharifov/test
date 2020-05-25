@@ -36,6 +36,7 @@ if (!empty($caseSaleModel)) {
     $canManageSaleInfo = true;
 }
 
+$sendEmailBtnClass = 'sale-ticket-generate-email-btn-'.$data['saleId'];
 $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_id' => !empty($caseModel) ? $caseModel->cs_id : 0, 'sale_id' => $data['saleId'], 'booking_id' => $data['bookingId']]);
 ?>
 <div class="sale-view">
@@ -122,7 +123,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                     <div class="col-md-12">
                         <div class="d-flex justify-content-between align-items-center">
                             <h2>Sale Tickets</h2>
-                            <?= Html::a('<i class="fa fa-envelope"></i> Generate Email', $saleTicketGenerateEmail, ['class' => 'btn btn-success sale-ticket-generate-email-btn', 'title' => 'Send Email']) ?>
+                            <?= Html::a('<i class="fa fa-envelope"></i> Generate Email', $saleTicketGenerateEmail, ['class' => 'btn btn-success '.$sendEmailBtnClass, 'title' => 'Send Email']) ?>
                         </div>
                         <?php Pjax::begin(['id' => 'pjax-case-sale-tickets', 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false]) ?>
                         <table class="table table-bordered table-hover">
@@ -953,20 +954,21 @@ $('.refresh-from-bo').on('click', function (e) {
                     
     $('#passengers span[data-toggle="tooltip"]').tooltip();
     
-    $(document).on('click', '.sale-ticket-generate-email-btn', function (e) {
+    $(document).on('click', '.{$sendEmailBtnClass}', function (e) {
         e.preventDefault();
         var btn = $(this);
+        var url = btn.attr('href');
         
-        btn.attr('disabled', true).find('i').toggleClass('fa-spin').removeClass('fa-envelope').addClass('fa-refresh');
-        $.get('$saleTicketGenerateEmail', function(data) {
+        btn.attr('disabled', true).find('i').addClass('fa-spin').removeClass('fa-envelope').addClass('fa-refresh');
+        $.get(url, function(data) {
             if (data.error) {
                 createNotify('Error', data.message, 'error');
             } else {
                 createNotify('Success', data.message, 'success');
             }
-            btn.find('i').toggleClass('fa-spin').removeClass('fa-refresh').addClass('fa-envelope');
+            btn.find('i').removeClass('fa-spin').removeClass('fa-refresh').addClass('fa-envelope');
         });
-    })
+    });
 JS;
 $this->registerJs($js);
     ?>

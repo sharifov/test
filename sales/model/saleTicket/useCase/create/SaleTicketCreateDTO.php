@@ -29,7 +29,7 @@ class SaleTicketCreateDTO
 		$dto->clientName = ($customerInfo['firstName'] ?? null) . '/' . ($customerInfo['lastName'] ?? null);
 		$dto->recordLocator = $pnr;
 		$dto->originalFop = $refundRules['original_FOP'] ?? null;
-		$dto->chargeSystem = $refundRules['charge_system'] ?? null;
+		$dto->chargeSystem = (string)($refundRules['charge_system'] ?? null);
 		$dto->penaltyType = !preg_match('/^\d+$/', $refundRules['airline_penalty']) ? $refundRules['airline_penalty'] : null;
 		$dto->penaltyAmount = preg_match('/^\d+$/', $refundRules['airline_penalty']) ? $refundRules['airline_penalty'] : 0;
 		$dto->selling = $rule['selling_price'] ?? null;
