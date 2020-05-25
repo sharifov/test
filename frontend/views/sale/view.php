@@ -953,7 +953,7 @@ $('.refresh-from-bo').on('click', function (e) {
                     
     $('#passengers span[data-toggle="tooltip"]').tooltip();
     
-    $('#sale-ticket-generate-email-btn').off().on('click', function (e) {
+    $(document).on('click', '#sale-ticket-generate-email-btn', function (e) {
         e.preventDefault();
         var btn = $(this);
         
