@@ -122,7 +122,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                     <div class="col-md-12">
                         <div class="d-flex justify-content-between align-items-center">
                             <h2>Sale Tickets</h2>
-                            <?= Html::a('<i class="fa fa-envelope"></i> Generate Email', $saleTicketGenerateEmail, ['id' => 'sale-ticket-generate-email-btn', 'class' => 'btn btn-success', 'title' => 'Send Email']) ?>
+                            <?= Html::a('<i class="fa fa-envelope"></i> Generate Email', $saleTicketGenerateEmail, ['class' => 'btn btn-success sale-ticket-generate-email-btn', 'title' => 'Send Email']) ?>
                         </div>
                         <?php Pjax::begin(['id' => 'pjax-case-sale-tickets', 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false]) ?>
                         <table class="table table-bordered table-hover">
@@ -953,7 +953,7 @@ $('.refresh-from-bo').on('click', function (e) {
                     
     $('#passengers span[data-toggle="tooltip"]').tooltip();
     
-    $(document).on('click', '#sale-ticket-generate-email-btn', function (e) {
+    $(document).on('click', '.sale-ticket-generate-email-btn', function (e) {
         e.preventDefault();
         var btn = $(this);
         
