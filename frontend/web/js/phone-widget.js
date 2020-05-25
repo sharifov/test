@@ -193,72 +193,85 @@ $(document).ready(function() {
         el.getContentElement();
     })
 
-    // var btnPlus = false;
-    //
-    // $('.dial__btn2').on('mouseup', function(){
-    //     clearTimeout(pressTimer);
-    //
-    //     let btnVal = $(this).val();
-    //     let currentVal = $('.call-pane__dial-number').val();
-    //     if (btnVal == "0") {
-    //         if (btnPlus) {
-    //             btnPlus = false;
-    //         } else {
-    //             $('.call-pane__dial-number').val(currentVal + "0");
-    //         }
-    //     }
-    //     return false;
-    // }).on('mousedown', function(){
-    //
-    //     let btnVal = $(this).val();
-    //     let currentVal = $('.call-pane__dial-number').val();
-    //
-    //     if (btnVal == "0") {
-    //         pressTimer = window.setTimeout(function () {
-    //             btnPlus = true;
-    //             $('.call-pane__dial-number').val(currentVal + "+");
-    //         }, 500);
-    //     } else {
-    //         $('.call-pane__dial-number').val(currentVal + btnVal);
-    //     }
-    //
-    //     $('.call-pane__dial-clear-all').addClass('is-shown');
-    //     //$('.suggested-contacts').addClass('is_active');
-    //     $('.call-pane__dial-number').focus();
-    //
-    //     return false;
-    // });
+    var btnPlus = false;
 
-    var longpress = false;
+    $('.dial__btn').on('mouseup', function(){
+        clearTimeout(pressTimer);
 
-    $('.dial__btn').on('click', function (e) {
-        e.preventDefault();
+        let btnVal = $(this).val();
+        let currentVal = $('.call-pane__dial-number').val();
+        if (btnVal == "0") {
+            if (btnPlus) {
+                btnPlus = false;
+            } else {
+                $('.call-pane__dial-number').val(currentVal + "0");
+            }
+        }
+        return false;
+    }).on('mousedown', function(){
+
         let btnVal = $(this).val();
         let currentVal = $('.call-pane__dial-number').val();
 
-        if(longpress && btnVal == "0") { // if detect hold, stop onclick function
-            $('.call-pane__dial-number').val(currentVal + "+");
+        if (btnVal == "0") {
+            pressTimer = window.setTimeout(function () {
+                btnPlus = true;
+                $('.call-pane__dial-number').val(currentVal + "+");
+            }, 500);
         } else {
             $('.call-pane__dial-number').val(currentVal + btnVal);
         }
+
         $('.call-pane__dial-clear-all').addClass('is-shown');
         //$('.suggested-contacts').addClass('is_active');
         $('.call-pane__dial-number').focus();
+
         return false;
     });
 
-    $('.dial__btn').on('mousedown', function () {
-        longpress = false; //longpress is false initially
-        pressTimer = window.setTimeout(function(){
-            // your code here
+    $('.dial__btn2').on('contextmenu', function(){
+        alert(123);
+        let btnVal = $(this).val();
+        let currentVal = $('.call-pane__dial-number').val();
 
-            longpress = true; //if run hold function, longpress is true
-        },500)
+        $('.call-pane__dial-number').val(currentVal + "+");
+        $('.call-pane__dial-clear-all').addClass('is-shown');
+        //$('.suggested-contacts').addClass('is_active');
+        $('.call-pane__dial-number').focus();
+
+        return false;
     });
 
-    $('.dial__btn').on('mouseup', function () {
-        clearTimeout(pressTimer); //clear time on mouseup
-    });
+    // var longpress = false;
+    //
+    // $('.dial__btn').on('click', function (e) {
+    //     e.preventDefault();
+    //     let btnVal = $(this).val();
+    //     let currentVal = $('.call-pane__dial-number').val();
+    //
+    //     if(longpress && btnVal == "0") { // if detect hold, stop onclick function
+    //         $('.call-pane__dial-number').val(currentVal + "+");
+    //     } else {
+    //         $('.call-pane__dial-number').val(currentVal + btnVal);
+    //     }
+    //     $('.call-pane__dial-clear-all').addClass('is-shown');
+    //     //$('.suggested-contacts').addClass('is_active');
+    //     $('.call-pane__dial-number').focus();
+    //     return false;
+    // });
+    //
+    // $('.dial__btn').on('mousedown', function () {
+    //     longpress = false; //longpress is false initially
+    //     pressTimer = window.setTimeout(function(){
+    //         // your code here
+    //
+    //         longpress = true; //if run hold function, longpress is true
+    //     },500)
+    // });
+    //
+    // $('.dial__btn').on('mouseup', function () {
+    //     clearTimeout(pressTimer); //clear time on mouseup
+    // });
 
 
 
