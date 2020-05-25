@@ -47,12 +47,12 @@ class Baggage implements ParseDumpInterface
         foreach ($this->segments as $segment) {
             $result[$i]['segment'] = $segment;
 
-            if (array_key_exists($segment, $paidBaggage)) {
+            if (!empty($paidBaggage) && array_key_exists($segment, $paidBaggage)) {
                 $result[$i]['paid_baggage'] = $paidBaggage[$segment];
             } else {
                 $result[$i]['paid_baggage'] = [];
             }
-            if (array_key_exists($segment, $freeBaggage)) {
+            if (!empty($freeBaggage) && array_key_exists($segment, $freeBaggage)) {
                 $result[$i]['free_baggage'] = $freeBaggage[$segment][0];
             } else {
                 $result[$i]['free_baggage'] = [];
