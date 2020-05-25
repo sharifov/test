@@ -109,7 +109,7 @@ $phoneFrom = $call ? $call->c_from : '';
         <li class="dial__item"><button class="dial__btn" value="✱">✱</button></li>
           <li class="dial__item"><button class="dial__btn" value="0">0 <small>+</small></li>
         <li class="dial__item"><button class="dial__btn" value="#">#</button></li>
-<!--        <li class="dial__item"><button class="dial__btn" value="+">+</button></li>-->
+        <li class="dial__item"><button class="dial__btn" value="+">+</button></li>
       </ul>
       <div class="call-pane__call-btns">
         <button class="call-pane__start-call calling-state-block" id="btn-new-make-call">
