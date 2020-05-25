@@ -2354,7 +2354,7 @@ class CommunicationController extends ApiBaseController
                 } elseif ($conferenceData['StatusCallbackEvent'] === 'participant-join') {
 
                     $call = Call::find()->where(['c_call_sid' => $conferenceData['CallSid']])->one();
-                    if ($call->c_conference_sid !== $conference->cf_sid) {
+                    if ($call && $call->c_conference_sid !== $conference->cf_sid) {
                         $call->c_conference_sid = $conference->cf_sid;
                         if (!$call->save()) {
                             Yii::error(VarDumper::dumpAsString($conference->errors),
@@ -2393,7 +2393,7 @@ class CommunicationController extends ApiBaseController
                         }
                     } else {
                         $call = Call::find()->where(['c_call_sid' => $conferenceData['CallSid']])->one();
-                        if ($call->c_conference_sid !== $conference->cf_sid) {
+                        if ($call && $call->c_conference_sid !== $conference->cf_sid) {
                             $call->c_conference_sid = $conference->cf_sid;
                             if (!$call->save()) {
                                 Yii::error(VarDumper::dumpAsString($conference->errors),
