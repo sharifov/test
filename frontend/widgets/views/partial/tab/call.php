@@ -115,7 +115,7 @@ $phoneFrom = $call ? $call->c_from : '';
         <button class="call-pane__start-call calling-state-block" id="btn-new-make-call">
           <div class="call-in-action">
             <span class="call-in-action__text">Calling</span>
-            <span class="call-in-action__time">01:54</span>
+            <span class="call-in-action__time">00:00</span>
           </div>
           <i class="fas fa-phone"></i>
         </button>

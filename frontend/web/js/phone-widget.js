@@ -193,7 +193,29 @@ $(document).ready(function() {
         el.getContentElement();
     })
 
+
+    let context = null;
+
+    context = new AudioContext();
+    const beep = (freq = 520, duration = 200, vol = 100) => {
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
+        oscillator.connect(gain);
+        oscillator.frequency.value = freq;
+        oscillator.type = "sine";
+        gain.connect(context.destination);
+        gain.gain.value = vol * 0.01;
+        oscillator.start(context.currentTime);
+        oscillator.stop(context.currentTime + duration * 0.001);
+    }
+
+    // document.querySelector('button').addEventListener('click', function () {
+    //     context = new AudioContext();
+    //     beep();
+    // });
+
     var btnPlus = false;
+
 
     $('.dial__btn').on('mouseup', function(){
         clearTimeout(pressTimer);
@@ -205,10 +227,14 @@ $(document).ready(function() {
                 btnPlus = false;
             } else {
                 $('.call-pane__dial-number').val(currentVal + "0");
+                beep(500, 100, 5);
             }
         }
         return false;
     }).on('mousedown', function(){
+
+
+
 
         let btnVal = $(this).val();
         let currentVal = $('.call-pane__dial-number').val();
@@ -217,9 +243,17 @@ $(document).ready(function() {
             pressTimer = window.setTimeout(function () {
                 btnPlus = true;
                 $('.call-pane__dial-number').val(currentVal + "+");
+                beep(450, 100, 5);
             }, 500);
         } else {
             $('.call-pane__dial-number').val(currentVal + btnVal);
+
+            let freq = 450;
+            if (btnVal > 0 && btnVal < 10) {
+                freq = 500 + (btnVal * 10);
+            }
+
+            beep(freq, 100, 5);
         }
 
         $('.call-pane__dial-clear-all').addClass('is-shown');
@@ -229,18 +263,6 @@ $(document).ready(function() {
         return false;
     });
 
-    $('.dial__btn2').on('contextmenu', function(){
-        alert(123);
-        let btnVal = $(this).val();
-        let currentVal = $('.call-pane__dial-number').val();
-
-        $('.call-pane__dial-number').val(currentVal + "+");
-        $('.call-pane__dial-clear-all').addClass('is-shown');
-        //$('.suggested-contacts').addClass('is_active');
-        $('.call-pane__dial-number').focus();
-
-        return false;
-    });
 
     // var longpress = false;
     //
