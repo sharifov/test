@@ -34,6 +34,7 @@ use yii\db\ActiveRecord;
  * @property string|null $st_updated_dt
  * @property int|null $st_created_user_id
  * @property int|null $st_updated_user_id
+ * @property string $st_transaction_ids
  *
  * @property CaseSale $stCaseSale
  * @property Cases $stCase
@@ -121,7 +122,9 @@ class SaleTicket extends \yii\db\ActiveRecord
             ['st_updated_user_id', 'integer'],
             ['st_updated_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['st_updated_user_id' => 'id']],
 
-            ['st_upfront_charge', 'number']
+            ['st_upfront_charge', 'number'],
+
+            ['st_transaction_ids', 'string']
         ];
     }
 
@@ -168,6 +171,7 @@ class SaleTicket extends \yii\db\ActiveRecord
             'st_updated_dt' => 'Updated Dt',
             'st_created_user_id' => 'Created User ID',
             'st_updated_user_id' => 'Updated User ID',
+            'st_transaction_ids' => 'Transaction IDs',
         ];
     }
 
@@ -214,7 +218,13 @@ class SaleTicket extends \yii\db\ActiveRecord
 		$ticket->st_service_fee = $dto->serviceFee;
 		$ticket->st_recall_commission = $dto->recallCommission;
 		$ticket->st_markup = $dto->markup;
+		$ticket->st_transaction_ids = $dto->transactionIds;
 
 		return $ticket;
+	}
+
+	public function isNeedAdditionalInfoForEmail(): bool
+	{
+		return ((($this->st_original_fop === 'CK' && in_array($this->st_charge_system, ['Stripe', 'Auth.net Capital', 'Auth.net'])) || $this->st_original_fop === 'VCC'));
 	}
 }

@@ -17,6 +17,7 @@ class SaleTicketCreateDTO
 	public $serviceFee;
 	public $recallCommission;
 	public $markup;
+	public $transactionIds;
 
 	public function feelBySaleData(int $caseId, int $caseSaleId, string $pnr, array $rule, array $refundRules, array $customerInfo): self
 	{
@@ -35,6 +36,7 @@ class SaleTicketCreateDTO
 		$dto->serviceFee = $rule['original_service_fee'] ?? null;
 		$dto->recallCommission = $refundRules['recall_commission'] ?? null;
 		$dto->markup = $rule['service_fee_amount'] ?? 0;
+		$dto->transactionIds = implode(',', $refundRules['transaction_IDs']);
 
 		return $dto;
 	}

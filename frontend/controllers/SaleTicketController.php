@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use sales\auth\Auth;
 use sales\model\saleTicket\useCase\create\SaleTicketRepository;
 use sales\model\saleTicket\useCase\sendEmail\SaleTicketEmailService;
+use sales\repositories\cases\CasesSaleRepository;
 use Yii;
 use sales\model\saleTicket\entity\SaleTicket;
 use sales\model\saleTicket\entity\search\SaleTicketSearch;
@@ -21,6 +22,7 @@ use yii\db\StaleObjectException;
  *
  * @property SaleTicketRepository $saleTicketRepository
  * @property SaleTicketEmailService $saleTicketEmailService
+ * @property CasesSaleRepository $casesSaleRepository
  */
 class SaleTicketController extends FController
 {
@@ -33,12 +35,17 @@ class SaleTicketController extends FController
 	 * @var SaleTicketEmailService
 	 */
 	private $saleTicketEmailService;
+	/**
+	 * @var CasesSaleRepository
+	 */
+	private $casesSaleRepository;
 
-	public function __construct($id, $module, SaleTicketRepository $saleTicketRepository, SaleTicketEmailService $saleTicketEmailService, $config = [])
+	public function __construct($id, $module, SaleTicketRepository $saleTicketRepository, SaleTicketEmailService $saleTicketEmailService, CasesSaleRepository $casesSaleRepository, $config = [])
 	{
 		parent::__construct($id, $module, $config);
 		$this->saleTicketRepository = $saleTicketRepository;
 		$this->saleTicketEmailService = $saleTicketEmailService;
+		$this->casesSaleRepository = $casesSaleRepository;
 	}
 
 	/**
@@ -168,10 +175,11 @@ class SaleTicketController extends FController
 
 		try {
 			$response = ['error' => false, 'message' => 'Email was sent successfully'];
-			$saleTickets = $this->saleTicketRepository->findByPrimaryKeys((int)$caseId, (int)$saleId);
+			$saleTickets = $this->saleTicketRepository->findByCaseAndSale((int)$caseId, (int)$saleId);
 			$emailSettings = Yii::$app->params['settings']['case_sale_ticket_email_data'];
 
-			$html = $this->renderPartial('partial/_email_body', ['saleTickets' => $saleTickets]);
+			$caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$saleId);
+			$html = $this->renderPartial('partial/_email_body', ['saleTickets' => $saleTickets, 'caseSale' => $caseSale]);
 
 			$this->saleTicketEmailService->generateAndSendEmail($saleTickets, $emailSettings, $html, $caseId, $bookingId, Auth::user());
 		} catch (\Throwable $e) {

@@ -9,7 +9,7 @@ use sales\model\saleTicket\entity\SaleTicket;
 class SaleTicketEmailService
 {
 	/**
-	 * @param array $saleTickets
+	 * @param SaleTicket[] $saleTickets
 	 * @param array $emailSettings
 	 * @param string $emailBody
 	 * @param int $caseId
@@ -29,8 +29,9 @@ class SaleTicketEmailService
 		$mail->body_html = $emailBody;
 		$mail->e_email_from = $this->getEmailFrom($mail->e_project_id, $user);
 
+
 		$mail->e_email_to = $emailSettings['sendTo'][0];
-		$mail->e_email_cc = $this->getEmailCC($emailSettings['sendTo']);
+		$mail->e_email_cc = $this->getEmailCC($emailSettings, $saleTickets[0]);
 		$mail->e_created_dt = date('Y-m-d H:i:s');
 		$mail->e_created_user_id = $user->id;
 
@@ -58,11 +59,17 @@ class SaleTicketEmailService
 	}
 
 	/**
-	 * @param array $emails
-	 * @return string|null
+	 * @param array $emailSettings
+	 * @param SaleTicket $saleTicket
+	 * @return string
 	 */
-	private function getEmailCC(array $emails): string
+	private function getEmailCC(array $emailSettings, SaleTicket $saleTicket): string
 	{
+		$emails = $emailSettings['sendTo'] ?? [];
+		$bookeepingEmails = $emailSettings['bookeepingEmails'] ?? [];
+
+		$emails = $saleTicket->isNeedAdditionalInfoForEmail() ? array_merge($emails, $bookeepingEmails) : $emails;
+
 		if (!empty($emails)) {
 			unset($emails[0]);
 			return implode(',', $emails);

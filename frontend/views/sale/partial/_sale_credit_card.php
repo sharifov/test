@@ -74,7 +74,34 @@ use common\components\grid\UserSelect2Column;
             ],
             'cc_created_dt:ByUserDateTime',
 
-            //['class' => 'yii\grid\ActionColumn'],
+            [
+                'class' => 'yii\grid\ActionColumn',
+				'template' => '{edit} {delete} {sync}',
+
+                'buttons' => [
+                    'edit' => static function ($url, $model) {
+                        /** @var $model \common\models\CreditCard*/
+						$editCreditCardUrl = \yii\helpers\Url::toRoute(['/credit-card/ajax-update', 'id' => $model->cc_id]);
+						return Html::a('<i class="fa fa-pencil"></i>', $editCreditCardUrl, [
+							'title' => 'Edit Credit Card', 'data-pjax' => 0, 'class' => 'btn-edit-credit-card'
+						]);
+                    },
+                    'delete' => static function ($url, $model) use ($saleId) {
+						/** @var $model \common\models\CreditCard*/
+						$deleteCreditCardUrl = \yii\helpers\Url::toRoute(['/credit-card/ajax-delete', 'id' => $model->cc_id, 'saleId' => $saleId]);
+						return Html::a('<i class="fa fa-trash"></i>', $deleteCreditCardUrl, [
+							'title' => 'Delete Credit Card', 'data-pjax' => 0, 'class' => 'btn-delete-credit-card'
+						]);
+                    },
+                    'sync' => static function ($url, $model) {
+						/** @var $model \common\models\CreditCard*/
+						$deleteCreditCardUrl = \yii\helpers\Url::toRoute(['/credit-card/ajax-sync', 'id' => $model->cc_id]);
+						return Html::a('<i class="fa fa-trash"></i>', $deleteCreditCardUrl, [
+							'title' => 'Delete Credit Card', 'data-pjax' => 0, 'class' => 'btn-delete-credit-card'
+						]);
+                    }
+                ]
+            ],
         ],
     ]); ?>
 
@@ -97,7 +124,41 @@ $js = <<<JS
         });
             
        return false;
-    })
+    });
+    
+    $(document).on('click', '.btn-edit-credit-card', function (e) {
+        e.preventDefault();
+        var modal = $('#modal-df');
+        var url = $(this).attr('href');
+            //$('#search-sale-panel').toggle();
+        modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> </div>');
+        modal.modal('show').find('.modal-header').html('<h3>' + $(this).attr('title') + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
+        
+        $.get(url, function(data) {
+            modal.find('.modal-body').html(data);
+        });
+            
+       return false;
+    });
+    
+    $(document).on('click', '.btn-delete-credit-card', function (e) {
+        e.preventDefault();
+        if (confirm('Are you sure you want to delete this item?')) {
+            var modal = $('#modal-df');
+            var url = $(this).attr('href');
+            
+            $.get(url, function(data) {
+                if (data.error) {
+                    createNotify("Deletion Failed", data.message, "error")
+                } else {
+                    pjaxReload({container: "#pjax-credit-card-table"}); 
+                    createNotify("Success Deleted", "Credit Card Successfully deleted", "success")
+                }
+            });
+        }
+            
+       return false;
+    });
 JS;
 $this->registerJs($js);
 

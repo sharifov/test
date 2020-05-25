@@ -121,6 +121,14 @@ class ViewModelTotalCallGraph
             ]);
         }
 
+        if ($this->callGraphsSearch->callGraphGroupBy === CallGraphsSearch::DATE_FORMAT_WEEKDAYS) {
+            $mappedData = $this->setWeekDayName($mappedData);
+        }
+
+        if ($this->callGraphsSearch->callGraphGroupBy === CallGraphsSearch::DATE_FORMAT_MONTH) {
+            $mappedData = $this->setMonthName($mappedData);
+        }
+
         $this->exportData = $mappedData;
     }
 
@@ -145,9 +153,9 @@ class ViewModelTotalCallGraph
                         $data['outgoing'] = $row['totalCalls'];
                     }
 
-                    if ($row['callType'] === 'total'){
+                    /*if ($row['callType'] === 'total'){
                         $data['total'] = $row['totalCalls'];
-                    }
+                    }*/
                     $finalData[$row['group']] = $data;
                 }
             }
@@ -158,14 +166,23 @@ class ViewModelTotalCallGraph
                 $arr['date'],
                 isset($arr['incoming']) ? (int)$arr['incoming'] : 0,
                 isset($arr['outgoing']) ? (int)$arr['outgoing'] : 0,
-                (int)$arr['total']]);
+                /*(int)$arr['total']*/
+                ]);
+        }
+
+        if ($this->callGraphsSearch->callGraphGroupBy === CallGraphsSearch::DATE_FORMAT_WEEKDAYS) {
+            $mappedData = $this->setWeekDayName($mappedData);
+        }
+
+        if ($this->callGraphsSearch->callGraphGroupBy === CallGraphsSearch::DATE_FORMAT_MONTH) {
+            $mappedData = $this->setMonthName($mappedData);
         }
 
         $this->totalCallsGraphData = json_encode(ArrayHelper::merge([[
             'Date',
             'Incoming',
             'Outgoing',
-            'Total',
+            /*'Total',*/
         ]], $mappedData));
     }
 
@@ -190,9 +207,9 @@ class ViewModelTotalCallGraph
                         $data['outgoing'] = $row['avgCallsPerGroup'];
                     }
 
-                    if ($row['callType'] === 'total'){
+                    /*if ($row['callType'] === 'total'){
                         $data['total'] = $row['avgCallsPerGroup'];
-                    }
+                    }*/
                     $finalData[$row['group']] = $data;
                 }
             }
@@ -203,15 +220,23 @@ class ViewModelTotalCallGraph
                 $arr['date'],
                 isset($arr['incoming']) ? (int)$arr['incoming'] : 0,
                 isset($arr['outgoing']) ? (int)$arr['outgoing'] : 0,
-                (int)$arr['total']
+                /*(int)$arr['total']*/
             ]);
+        }
+
+        if ($this->callGraphsSearch->callGraphGroupBy === CallGraphsSearch::DATE_FORMAT_WEEKDAYS) {
+            $mappedData = $this->setWeekDayName($mappedData);
+        }
+
+        if ($this->callGraphsSearch->callGraphGroupBy === CallGraphsSearch::DATE_FORMAT_MONTH) {
+            $mappedData = $this->setMonthName($mappedData);
         }
 
         $this->totalCallsGraphDataAvg = json_encode(ArrayHelper::merge([[
             'Date',
             'Incoming',
             'Outgoing',
-            'Total',
+            /*'Total',*/
         ]], $mappedData));
     }
 
@@ -236,9 +261,9 @@ class ViewModelTotalCallGraph
                         $data['outgoing'] = $row['totalCallsDuration'];
                     }
 
-                    if ($row['callType'] === 'total'){
+                    /*if ($row['callType'] === 'total'){
                         $data['total'] = $row['totalCallsDuration'];
-                    }
+                    }*/
                     $finalData[$row['group']] = $data;
                 }
             }
@@ -251,9 +276,17 @@ class ViewModelTotalCallGraph
                 'Incoming Call Duration: ' . Yii::$app->formatter->asDuration(isset($arr['incoming']) ? (int)$arr['incoming'] : 0),
                 isset($arr['outgoing']) ? (int)$arr['outgoing'] : 0,
                 'Outgoing Call Duration: ' . Yii::$app->formatter->asDuration(isset($arr['outgoing']) ? (int)$arr['outgoing'] : 0),
-                (int)$arr['total'],
-                'Total Call Duration: ' . Yii::$app->formatter->asDuration((int)$arr['total']),
+                /*(int)$arr['total'],
+                'Total Call Duration: ' . Yii::$app->formatter->asDuration((int)$arr['total']),*/
             ]);
+        }
+
+        if ($this->callGraphsSearch->callGraphGroupBy === CallGraphsSearch::DATE_FORMAT_WEEKDAYS) {
+            $mappedData = $this->setWeekDayName($mappedData);
+        }
+
+        if ($this->callGraphsSearch->callGraphGroupBy === CallGraphsSearch::DATE_FORMAT_MONTH) {
+            $mappedData = $this->setMonthName($mappedData);
         }
 
         $this->totalCallsRecDurationData = json_encode(ArrayHelper::merge([[
@@ -268,11 +301,11 @@ class ViewModelTotalCallGraph
                 'type' => 'string',
                 'role' => 'tooltip'
             ],
-            'Total Call Duration',
+            /*'Total Call Duration',
             [
                 'type' => 'string',
                 'role' => 'tooltip'
-            ],
+            ],*/
         ]], $mappedData));
     }
 
@@ -297,9 +330,9 @@ class ViewModelTotalCallGraph
                         $data['outgoing'] = $row['avgCallDuration'];
                     }
 
-                    if ($row['callType'] === 'total'){
+                    /*if ($row['callType'] === 'total'){
                         $data['total'] = $row['avgCallDuration'];
-                    }
+                    }*/
                     $finalData[$row['group']] = $data;
                 }
             }
@@ -312,9 +345,17 @@ class ViewModelTotalCallGraph
                 'Incoming Call Duration AVG: ' . Yii::$app->formatter->asDuration(isset($arr['incoming']) ? (int)$arr['incoming'] : 0),
                 isset($arr['outgoing']) ? (int)$arr['outgoing'] : 0,
                 'Outgoing Call Duration AVG: ' . Yii::$app->formatter->asDuration(isset($arr['outgoing']) ? (int)$arr['outgoing'] : 0),
-                (int)$arr['total'],
-                'Total Call Duration AVG: ' . Yii::$app->formatter->asDuration((int)$arr['total']),
+                /*(int)$arr['total'],
+                'Total Call Duration AVG: ' . Yii::$app->formatter->asDuration((int)$arr['total']),*/
             ]);
+        }
+
+        if ($this->callGraphsSearch->callGraphGroupBy === CallGraphsSearch::DATE_FORMAT_WEEKDAYS) {
+            $mappedData = $this->setWeekDayName($mappedData);
+        }
+
+        if ($this->callGraphsSearch->callGraphGroupBy === CallGraphsSearch::DATE_FORMAT_MONTH) {
+            $mappedData = $this->setMonthName($mappedData);
         }
 
         $this->totalCallsRecDurationDataAVG = json_encode(ArrayHelper::merge([[
@@ -329,12 +370,43 @@ class ViewModelTotalCallGraph
                 'type' => 'string',
                 'role' => 'tooltip'
             ],
-            'Total Call Duration AVG',
+            /*'Total Call Duration AVG',
             [
                 'type' => 'string',
                 'role' => 'tooltip'
-            ],
+            ],*/
         ]], $mappedData));
+    }
+
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    private function setWeekDayName(array $data):array
+    {
+        $week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+        foreach ($data as $key => $arr){
+            $firstKey = array_key_first($arr);
+            $data[$key][$firstKey] = $week[$arr[$firstKey]];
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    private function setMonthName(array $data):array
+    {
+        foreach ($data as $key => $arr){
+            $firstKey = array_key_first($arr);
+            $data[$key][$firstKey] = date('Y-F', strtotime($data[$key][$firstKey]));
+        }
+
+        return $data;
     }
 
     /**

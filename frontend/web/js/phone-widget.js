@@ -193,15 +193,42 @@ $(document).ready(function() {
         el.getContentElement();
     })
 
-    $('.dial__btn').on('click', function(e) {
-        e.preventDefault();
-        var currentVal = $('.call-pane__dial-number').val();
-        $('.call-pane__dial-number').val(currentVal + $(this).val());
-        $('.call-pane__dial-clear-all').addClass('is-shown');
-        $('.suggested-contacts').addClass('is_active');
-        $('.call-pane__dial-number').focus()
+    var btnPlus = false;
 
+    $('.dial__btn').on('mouseup', function(){
+        clearTimeout(pressTimer);
+
+        let btnVal = $(this).val();
+        let currentVal = $('.call-pane__dial-number').val();
+        if (btnVal == "0") {
+            if (btnPlus) {
+                btnPlus = false;
+            } else {
+                $('.call-pane__dial-number').val(currentVal + "0");
+            }
+        }
+        return false;
+    }).on('mousedown', function(){
+
+        let btnVal = $(this).val();
+        let currentVal = $('.call-pane__dial-number').val();
+
+        if (btnVal == "0") {
+            pressTimer = window.setTimeout(function () {
+                btnPlus = true;
+                $('.call-pane__dial-number').val(currentVal + "+");
+            }, 500);
+        } else {
+            $('.call-pane__dial-number').val(currentVal + btnVal);
+        }
+
+        $('.call-pane__dial-clear-all').addClass('is-shown');
+        //$('.suggested-contacts').addClass('is_active');
+        $('.call-pane__dial-number').focus();
+
+        return false;
     });
+
 
     $('.call-pane__dial-clear-all').on('click', function(e) {
         e.preventDefault();

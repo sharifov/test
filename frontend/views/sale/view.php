@@ -36,7 +36,7 @@ if (!empty($caseSaleModel)) {
     $canManageSaleInfo = true;
 }
 
-$saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_id' => $caseModel->cs_id, 'sale_id' => $data['saleId'], 'booking_id' => $data['bookingId']]);
+$saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_id' => $caseModel ? $caseModel->cs_id : 0, 'sale_id' => $data['saleId'], 'booking_id' => $data['bookingId']]);
 ?>
 <div class="sale-view">
     <h3><?= Html::encode($title) ?></h3>
@@ -953,7 +953,7 @@ $('.refresh-from-bo').on('click', function (e) {
                     
     $('#passengers span[data-toggle="tooltip"]').tooltip();
     
-    $(document).on('click', '#sale-ticket-generate-email-btn', function (e) {
+    $('#sale-ticket-generate-email-btn').off().on('click', function (e) {
         e.preventDefault();
         var btn = $(this);
         
