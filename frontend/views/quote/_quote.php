@@ -241,7 +241,7 @@ $js = <<<JS
                    
                     if (dataResponse.validating_carrier.length) {
                        $('#quote-main_airline_code').val(dataResponse.validating_carrier).trigger('change');
-                    }
+                    } 
                     if (dataResponse.prices.length) {
                        $('#price-table tbody').html(dataResponse.prices); 
                     }

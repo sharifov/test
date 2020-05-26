@@ -543,15 +543,16 @@ class QuoteController extends FController
                             'prices' => $prices,
                             'lead' => $lead,
                         ]);
-                    } else {
-                        throw new \DomainException(  'Parse dump failed. Step "prices"');
                     }
 
                     $itinerary = [];
                     if ((new ReservationService($gds))->parseReservation($post['prepare_dump'], true, $itinerary)) {
                         $response['reservation_dump'] = Quote::createDump($itinerary);
-                    } else {
-                        throw new \DomainException(  'Parse dump failed. Step "reservation"');
+                    }
+
+                    if (empty($response['reservation_dump']) && empty($response['validating_carrier']) && empty($response['prices'])) {
+                        $response['status'] = 0;
+                        $response['error'] = 'Parse GDS Dump failed';
                     }
                 }
             }
