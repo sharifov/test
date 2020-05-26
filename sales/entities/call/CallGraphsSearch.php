@@ -72,11 +72,11 @@ class CallGraphsSearch extends CallLogSearch
     public const DATE_FORMAT_HOURS_DAYS = 1;
     public const DATE_FORMAT_WEEKDAYS = 5;
 
-    public const CREATE_TIME_START_DEFAULT = '-6 days';
+    public const CREATE_TIME_START_DEFAULT = '0 days';
 
     public const DATE_FORMAT_TEXT = [
-        self::DATE_FORMAT_DAYS => 'Day',
         self::DATE_FORMAT_HOURS => 'Hour',
+        self::DATE_FORMAT_DAYS => 'Day',
         self::DATE_FORMAT_WEEKS => 'Week',
         self::DATE_FORMAT_MONTH => 'Month',
         self::DATE_FORMAT_HOURS_DAYS => 'Hour of the Day',
@@ -159,7 +159,7 @@ class CallGraphsSearch extends CallLogSearch
     public function __construct($config = [])
     {
         parent::__construct($config);
-        $this->createTimeRange = date('Y-m-d 00:00:00', strtotime(self::CREATE_TIME_START_DEFAULT)) . ' - ' . date('Y-m-d H:i:s');
+        $this->createTimeRange = date('Y-m-d 00:00:00', strtotime(self::CREATE_TIME_START_DEFAULT)) . ' - ' . date('Y-m-d 23:59:59');
         $this->betweenHoursFrom = 0;
         $this->betweenHoursTo = 24;
         $this->recordingDurationFrom = 30;
