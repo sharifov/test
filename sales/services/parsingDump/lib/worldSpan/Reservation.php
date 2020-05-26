@@ -68,7 +68,7 @@ class Reservation implements ParseDumpInterface
     {
         return $pattern ?? '/^
             (\d{1,2}) # index
-            (\s{1}|\*)([A-Z]{2}) # Airline
+            (\s{1}|\*)([A-Z]{2}|[A-Z]{1}\d{1}) # Airline
             \s*(\d{2,4})([A-Z]{1}) # Flight number + Booking Class
             \s{1}(\d{1,2})([A-Z]{3}) # Departure Date
             \s{1}([A-Z]{2}) # Departure Day of the week

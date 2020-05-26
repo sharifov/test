@@ -247,17 +247,8 @@ $js = <<<JS
                     }
                     if (dataResponse.reservation_dump.length) {
                         var reservationDump = dataResponse.reservation_dump.join('<br />');
-                        
+                        reservationDump = '<h6>Imported reservation info</h6>' + reservationDump; 
                         $('#box_reservation_result').html(reservationDump);
-                        
-                        /* new PNotify({
-                            title: "Please check reservation dump",
-                            type: "info",
-                            text: reservationDump,
-                            hide: true,
-                            width:'520px',
-                            delay: 15000
-                        }); */
                     }                    
                     $('#save_dump_btn').show(500);                                                            
 	            } else {
@@ -417,7 +408,7 @@ $this->registerCss('
 ]) ?>
 <!------------- Add/Edit Alternative Quote Form ------------->
 <div class="alternatives__item">
-    <div id="box_reservation_result"></div>
+    <div id="box_reservation_result" style="margin-bottom: 8px;"></div>
     <div class="table-wrapper table-responsive ticket-details-block__table mb-20"
          id="alt-quote-fares-info-<?= $quote->id ?>">
         <?= $form->field($quote, 'id', [
