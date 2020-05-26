@@ -196,7 +196,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
 				$client = $this->cuaCall->cClient;
 				$callFromInfo = [
 					'phoneFrom' => $this->cuaCall->c_from,
-					'name' => $client ? $client->getFullName() : '',
+					'name' => $this->cuaCall ? $this->cuaCall->getCallerName($this->cuaCall->c_from) : 'ClientName',
 					'fromInternal' => PhoneList::find()->byPhone($this->cuaCall->c_from)->enabled()->exists()
 				];
 			}
