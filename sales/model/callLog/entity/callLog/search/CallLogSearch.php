@@ -213,4 +213,17 @@ class CallLogSearch extends CallLog
 
 		return $dataProvider;
 	}
+
+    public function searchMyCalls($params, Employee $user): ActiveDataProvider
+    {
+        $query = static::find();
+        $query->where(['cl_user_id' => $user->id]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort'=> ['defaultOrder' => ['cl_id' => SORT_DESC]],
+        ]);
+
+        return $dataProvider;
+    }
 }

@@ -136,6 +136,17 @@ class CallLogController extends FController
         return $this->redirect(['index']);
     }
 
+    public function actionList()
+    {
+        $searchModel = new CallLogSearch();
+        $dataProvider = $searchModel->searchMyCalls(Yii::$app->request->queryParams, Auth::user());
+
+        return $this->render('list', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
     /**
      * @param $id
      * @return CallLog
