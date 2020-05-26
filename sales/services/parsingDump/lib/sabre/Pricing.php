@@ -47,7 +47,7 @@ class Pricing implements ParseDumpInterface
     public function parsePrice(string $string): ?array
     {
         $result = null;
-        $ticketPricePattern = "/BASE\s+FARE\s+TAXES\/FEES\/CHARGES\s+TOTAL\s(.*?)TTL/s";
+        $ticketPricePattern = "/CHARGES\s+TOTAL\s(.*?)TTL/s";
         preg_match($ticketPricePattern, $string, $ticketPriceMatches);
 
         if (isset($ticketPriceMatches[1]) && $ticketPriceText = trim($ticketPriceMatches[1])) {
@@ -55,13 +55,14 @@ class Pricing implements ParseDumpInterface
             $ticketPrices = explode("\n", $ticketPriceText);
             $pricePattern = '/
                 (\d{1,2})-
-                \s+USD(\d+.\d+) # fare
+                \w|\s+USD(\d+.\d+) # fare
                 \s+(\d+.\d+)[A-Z]{1,3} # taxes
                 \s+USD(\d+.\d+)([A-Z]{3}) # amount + type                         
                 /x';
 
             foreach ($ticketPrices as $row) {
                 preg_match($pricePattern, $row, $matches);
+
                 if (isset($matches[1])) {
                     $type = $matches[5] ?? null;
                     $result[$i]['type'] = $this->typeMapping($type);
