@@ -137,6 +137,7 @@ class CreditCardController extends FController
     public function actionAjaxUpdate()
 	{
 		$id = Yii::$app->request->get('id');
+		$pjaxId = Yii::$app->request->get('pjaxId');
 
 		try {
 			$modelCc = $this->findModel($id);
@@ -154,7 +155,7 @@ class CreditCardController extends FController
 				$modelCc->updateSecureCardNumber();
 				$modelCc->updateSecureCvv();
 				if ($modelCc->save()) {
-					return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#pjax-credit-card-table"}); createNotify("Success Updated", "Credit Card Successfully updated", "success")</script>';
+					return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#'.$pjaxId.'"}); createNotify("Success Updated", "Credit Card Successfully updated", "success")</script>';
 				}
 				Yii::error(VarDumper::dumpAsString($modelCc->errors), 'CreditCard:actionAjaxUpdate:save');
 			} else {
@@ -178,6 +179,7 @@ class CreditCardController extends FController
 	{
 		$caseId = Yii::$app->request->get('caseId');
 		$saleId = Yii::$app->request->get('saleId');
+		$pjaxId = Yii::$app->request->get('pjaxId');
 
 		if (!$caseId || !$saleId) {
 			throw new BadRequestHttpException();
@@ -202,7 +204,7 @@ class CreditCardController extends FController
 					if (!$saleCreditCard->save()) {
 						throw new \RuntimeException($saleCreditCard->getErrorSummary(false)[0]);
 					} else {
-						return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#pjax-credit-card-table"}); createNotify("Success", "Credit Card Successfully created", "success")</script>';
+						return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#'.$pjaxId.'"}); createNotify("Success", "Credit Card Successfully created", "success")</script>';
 					}
 				}
 			}
