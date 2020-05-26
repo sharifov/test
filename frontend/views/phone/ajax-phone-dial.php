@@ -16,8 +16,6 @@ use yii\helpers\Html;
 /** @var Employee $user */
 $user = Yii::$app->user->identity;
 
-$conferenceBase = (bool)(Yii::$app->params['settings']['voip_conference_base'] ?? false);
-
 ?>
 <div class="phone-update">
 
@@ -199,13 +197,7 @@ $conferenceBase = (bool)(Yii::$app->params['settings']['voip_conference_base'] ?
                         <?=Html::hiddenInput('call-project-id', $project ? $project->id : '', ['id' => 'call-project-id'])?>
                     </td>
                     <td>
-                        <?php
-                            if ($conferenceBase) {
-                                echo Html::button('<i class="fa fa-phone-square"></i> Make Call', ['class' => 'btn btn-sm btn-success btn-make-call', 'data-is_conference' => 1]);
-                            } else {
-                                echo Html::button('<i class="fa fa-phone-square"></i> Make Call', ['class' => 'btn btn-sm btn-success btn-make-call', 'data-is_conference' => 0]);
-                            }
-                        ?>
+                        <?= Html::button('<i class="fa fa-phone-square"></i> Make Call', ['class' => 'btn btn-sm btn-success btn-make-call']) ?>
                     </td>
                 </tr>
             </table>

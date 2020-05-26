@@ -2375,6 +2375,72 @@ class CommunicationController extends ApiBaseController
                     }
 
                     // $conference->cf_status_id = Conference::STATUS_START;
+                } elseif ($conferenceData['StatusCallbackEvent'] === 'participant-hold') {
+                    $cPart = ConferenceParticipant::find()->where([
+                        'cp_cf_id' => $conference->cf_id,
+                        'cp_call_sid' => $conferenceData['CallSid'],
+
+                    ])->one();
+
+                    if ($cPart) {
+                        $cPart->cp_status_id = ConferenceParticipant::STATUS_HOLD;
+                        if (!$cPart->save()) {
+                            Yii::error(VarDumper::dumpAsString($cPart->errors),'API:Communication:voiceConferenceCallback:ConferenceParticipant:save-hold');
+                        }
+                    } else {
+                        $call = Call::find()->where(['c_call_sid' => $conferenceData['CallSid']])->one();
+                        if ($call && $call->c_conference_sid !== $conference->cf_sid) {
+                            $call->c_conference_sid = $conference->cf_sid;
+                            if (!$call->save()) {
+                                Yii::error(VarDumper::dumpAsString($conference->errors),
+                                    'API:CommunicationController:voiceConferenceCallback:participant-hold:call:save');
+                            }
+                        }
+
+                        $cPart = new ConferenceParticipant();
+                        $cPart->cp_cf_id = $conference->cf_id;
+                        $cPart->cp_call_sid = $conferenceData['CallSid'];
+                        $cPart->cp_status_id = ConferenceParticipant::STATUS_HOLD;
+                        if ($call) {
+                            $cPart->cp_call_id = $call->c_id;
+                        }
+                        if(!$cPart->save()) {
+                            Yii::error(VarDumper::dumpAsString($cPart->errors), 'API:Communication:voiceConferenceCallback:ConferenceParticipant:save-hold');
+                        }
+                    }
+                } elseif ($conferenceData['StatusCallbackEvent'] === 'participant-unhold') {
+                    $cPart = ConferenceParticipant::find()->where([
+                        'cp_cf_id' => $conference->cf_id,
+                        'cp_call_sid' => $conferenceData['CallSid'],
+
+                    ])->one();
+
+                    if ($cPart) {
+                        $cPart->cp_status_id = ConferenceParticipant::STATUS_UNHOLD;
+                        if (!$cPart->save()) {
+                            Yii::error(VarDumper::dumpAsString($cPart->errors),'API:Communication:voiceConferenceCallback:ConferenceParticipant:save-hold');
+                        }
+                    } else {
+                        $call = Call::find()->where(['c_call_sid' => $conferenceData['CallSid']])->one();
+                        if ($call && $call->c_conference_sid !== $conference->cf_sid) {
+                            $call->c_conference_sid = $conference->cf_sid;
+                            if (!$call->save()) {
+                                Yii::error(VarDumper::dumpAsString($conference->errors),
+                                    'API:CommunicationController:voiceConferenceCallback:participant-hold:call:save');
+                            }
+                        }
+
+                        $cPart = new ConferenceParticipant();
+                        $cPart->cp_cf_id = $conference->cf_id;
+                        $cPart->cp_call_sid = $conferenceData['CallSid'];
+                        $cPart->cp_status_id = ConferenceParticipant::STATUS_UNHOLD;
+                        if ($call) {
+                            $cPart->cp_call_id = $call->c_id;
+                        }
+                        if(!$cPart->save()) {
+                            Yii::error(VarDumper::dumpAsString($cPart->errors), 'API:Communication:voiceConferenceCallback:ConferenceParticipant:save-hold');
+                        }
+                    }
                 } elseif ($conferenceData['StatusCallbackEvent'] === 'participant-leave') {
                     //$conference->cf_status_id = Conference::STATUS_START;
 

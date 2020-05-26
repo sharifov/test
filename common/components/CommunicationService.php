@@ -722,34 +722,19 @@ class CommunicationService extends Component implements CommunicationServiceInte
 
     public function callForward($sid, $from, $to): array
     {
-        $out = ['error' => false, 'data' => []];
-
         $data = [
             'sid' => $sid,
             'redirect_from' => $from,
             'redirect_to' => $to,
         ];
 
-        $response = $this->sendRequest('twilio-conference-call/forward', $data);
+        $response = $this->sendRequest('twilio-conference/forward', $data);
 
-        if ($response->isOk) {
-            if(isset($response->data['data'])) {
-                $out['data'] = $response->data['data'];
-            } else {
-                $out['error'] = 'Not found in response array data key [data]';
-            }
-        } else {
-            $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error']), 'Component:CommunicationService::callRedirect');
-        }
-
-        return $out;
+        return $this->processConferenceResponse($response);
     }
 
     public function acceptConferenceCall($sid, $to, $from, $to_parent_call): array
     {
-        $out = ['error' => false, 'data' => []];
-
         $data = [
             'call_sid' => $sid,
             'to' => $to,
@@ -757,47 +742,70 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'to_parent_call' => $to_parent_call,
         ];
 
-        $response = $this->sendRequest('twilio-conference-call/accept-call', $data);
+        $response = $this->sendRequest('twilio-conference/accept-call', $data);
 
-        if ($response->isOk) {
-            if (isset($response->data['data'])) {
-                $out['data'] = $response->data['data'];
-                if (isset($out['data']['is_error']) &&  $out['data']['is_error'] === true) {
-                    \Yii::error(VarDumper::dumpAsString($response->data), 'Component:CommunicationService::acceptConferenceCall:response');
-                }
-            } else {
-                $out['error'] = 'Not found in response array data key [data]';
-            }
-        } else {
-            $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error']), 'Component:CommunicationService::acceptConferenceCall');
-        }
-
-        return $out;
+        return $this->processConferenceResponse($response);
     }
 
     public function completeConference(string $sid): array
     {
-        $out = ['error' => false, 'data' => []];
-
         $data = [
             'sid' => $sid,
         ];
 
-        $response = $this->sendRequest('twilio-conference-call/complete-conference', $data);
+        $response = $this->sendRequest('twilio-conference/complete-conference', $data);
+
+        return $this->processConferenceResponse($response);
+    }
+
+    public function holdConferenceDoubleCall(string $conferenceSid, string $holderSid, string $keeperSid): array
+    {
+        $data = [
+            'conferenceSid' => $conferenceSid,
+            'holderSid' => $holderSid,
+            'keeperSid' => $keeperSid,
+        ];
+
+        $response = $this->sendRequest('twilio-conference/hold-double-call', $data);
+
+        return $this->processConferenceResponse($response);
+    }
+
+    public function unholdConferenceDoubleCall(string $conferenceSid, string $holderSid, string $keeperSid): array
+    {
+        $data = [
+            'conferenceSid' => $conferenceSid,
+            'holderSid' => $holderSid,
+            'keeperSid' => $keeperSid,
+        ];
+
+        $response = $this->sendRequest('twilio-conference/unhold-double-call', $data);
+
+        return $this->processConferenceResponse($response);
+    }
+
+    private function processConferenceResponse(\yii\httpclient\Response $response): array
+    {
+        $out = ['error' => false, 'message' => '', 'result' => []];
 
         if ($response->isOk) {
             if (isset($response->data['data'])) {
-                $out['data'] = $response->data['data'];
-                if (isset($out['data']['is_error']) &&  $out['data']['is_error'] === true) {
-                    \Yii::error(VarDumper::dumpAsString($response->data), 'Component:CommunicationService::completeConference:response');
+                $data = $response->data['data'];
+                $isError = (bool)($data['is_error'] ?? false);
+                if ($isError) {
+                    $out['error'] = true;
+                    $out['message'] = $data['message'] ?? 'Undefined error message';
+                    \Yii::error(VarDumper::dumpAsString($response->data), 'Component:CommunicationService::processConferenceResponse:response');
                 }
+                $out['result'] = $data['result'] ?? [];
             } else {
-                $out['error'] = 'Not found in response array data key [data]';
+                $out['error'] = true;
+                $out['message'] = 'Not found in response array data';
             }
         } else {
-            $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error']), 'Component:CommunicationService::completeConference');
+            $out['error'] = true;
+            $out['message'] = 'Server error. Try again later.';
+            \Yii::error(VarDumper::dumpAsString($response->content), 'Component:CommunicationService::processConferenceResponse');
         }
 
         return $out;

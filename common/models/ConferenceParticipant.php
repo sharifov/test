@@ -24,10 +24,14 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
 
     public const STATUS_JOIN    = 1;
     public const STATUS_LEAVE   = 2;
+    public const STATUS_HOLD   = 3;
+    public const STATUS_UNHOLD   = 4;
 
     public const STATUS_LIST = [
         self::STATUS_JOIN   => 'Join',
         self::STATUS_LEAVE   => 'Leave',
+        self::STATUS_HOLD   => 'Hold',
+        self::STATUS_UNHOLD   => 'UnHold',
     ];
 
     /**
@@ -44,8 +48,11 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
+            ['cp_status_id', 'integer'],
+            ['cp_status_id', 'in', 'range' => array_keys(self::STATUS_LIST)],
+
             [['cp_cf_id'], 'required'],
-            [['cp_cf_id', 'cp_call_id', 'cp_status_id'], 'integer'],
+            [['cp_cf_id', 'cp_call_id'], 'integer'],
             [['cp_join_dt', 'cp_leave_dt'], 'safe'],
             [['cp_call_sid'], 'string', 'max' => 34],
 //            [['cp_call_sid'], 'unique'],
@@ -64,7 +71,7 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
             'cp_cf_id' => 'Conference ID',
             'cp_call_sid' => 'Call Sid',
             'cp_call_id' => 'Call ID',
-            'cp_status_id' => 'Status ID',
+            'cp_status_id' => 'Status',
             'cp_join_dt' => 'Join Dt',
             'cp_leave_dt' => 'Leave Dt',
         ];

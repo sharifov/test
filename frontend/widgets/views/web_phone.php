@@ -85,8 +85,12 @@ use yii\helpers\Html;
                         </div>
 
                         <div class="btn-group" id="btn-group-id-mute" style="display: none;">
-                            <?=Html::button('<i class="fa fa-microphone"></i> Mute', ['id' => 'btn-mute-microphone', 'class' => 'btn btn-sm btn-success'])?>
+                            <?= Html::button('<i class="fa fa-microphone"></i> Mute', ['id' => 'btn-mute-microphone', 'class' => 'btn btn-sm btn-success']) ?>
                         </div>
+                      <?php /*  <div class="btn-group" id="btn-group-id-hold-double-call" style="display: none;">
+                            <?= Html::button('<i class="fa fa-pause"></i> Hold', ['id' => 'btn-hold-double-call', 'class' => 'btn btn-sm btn-success', 'data-call-sid' => '', 'data-is-hold' => false]) ?>
+                        </div>
+                        */ ?>
                     </td>
                 </tr>
             </table>
@@ -183,6 +187,8 @@ use yii\helpers\Html;
     $ajaxPhoneDialUrl = Url::to(['phone/ajax-phone-dial']);
     $ajaxBlackList = Url::to(['phone/check-black-phone']);
     $ajaxConferenceCompleteUrl = Url::to(['/phone/ajax-conference-complete']);
+    $ajaxHoldConferenceDoubleCall = Url::to(['/phone/ajax-hold-conference-double-call']);
+    $ajaxUnholdConferenceDoubleCall = Url::to(['/phone/ajax-unhold-conference-double-call']);
     $conferenceBase = (bool)(Yii::$app->params['settings']['voip_conference_base'] ?? false);
 
     $csrf_param = Yii::$app->request->csrfParam;
@@ -199,6 +205,8 @@ use yii\helpers\Html;
     const ajaxPhoneDialUrl = '<?=$ajaxPhoneDialUrl?>';
     const ajaxBlackList = '<?=$ajaxBlackList?>';
     const ajaxConferenceCompleteUrl = '<?= $ajaxConferenceCompleteUrl ?>';
+    const ajaxHoldConferenceDoubleCall = '<?= $ajaxHoldConferenceDoubleCall ?>';
+    const ajaxUnholdConferenceDoubleCall = '<?= $ajaxUnholdConferenceDoubleCall ?>';
     const conferenceBase = '<?= $conferenceBase ?>';
 
     const clientId = '<?=$clientId?>';
@@ -317,7 +325,7 @@ use yii\helpers\Html;
         log('Hanging up...');
         if (device) {
             if (conferenceBase) {
-                conferenceComplete(this);
+                conferenceComplete();
             } else {
                 updateAgentStatus(connection, false, 1);
                 device.disconnectAll();
@@ -587,6 +595,8 @@ use yii\helpers\Html;
         }
     }
 
+    // let currentConnection;
+
 
     function initDevice() {
         clearLog();
@@ -612,6 +622,7 @@ use yii\helpers\Html;
                 });
 
                 device.on('connect', function (conn) {
+                    // currentConnection = conn;
                     //console.log("connect call: status: " + connection.status() + "\n" + 'connection: ' + JSON.stringify(connection) + "\n conn:" + JSON.stringify(conn));
                     //updateAgentStatus(connection, true);
                     let access = updateAgentStatus(connection, true, 0);
@@ -624,6 +635,8 @@ use yii\helpers\Html;
                     $('#btn-group-id-hangup').show();
                     $('#btn-mute-microphone').html('<i class="fa fa-microphone"></i> Mute').removeClass('btn-warning').addClass('btn-success');
                     $('#btn-group-id-mute').show();
+                    // $('#btn-hold-double-call').attr('data-call-sid', connection.parameters.CallSid).attr('data-is-hold', false).html('<i class="fa fa-pause"></i> Hold');
+                    // $('#btn-group-id-hold-double-call').show();
 
                     if (conn.parameters.From === undefined) {
                         $('#btn-group-id-redirect').show();
@@ -650,6 +663,9 @@ use yii\helpers\Html;
                     $('#btn-group-id-hangup').hide();
                     $('#btn-group-id-redirect').hide();
                     $('#btn-group-id-mute').hide();
+                    // $('#btn-group-id-hold-double-call').hide();
+                    // $('#btn-hold-double-call').attr('data-call-sid', '').attr('data-is-hold', false);
+
                     volumeIndicators.style.display = 'none';
                     cleanPhones();
 
@@ -764,7 +780,7 @@ use yii\helpers\Html;
     //});
 
 
-    function webCall(phone_from, phone_to, project_id, lead_id, case_id, type, is_conference_call) {
+    function webCall(phone_from, phone_to, project_id, lead_id, case_id, type) {
 
         /*var access =  updateAgentStatus(connection);
         if(!access) {
@@ -772,8 +788,19 @@ use yii\helpers\Html;
             return false;
         }*/
 
-        let params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': lead_id, 'case_id': case_id, 'c_type': type, 'c_user_id': userId, 'is_conference_call': is_conference_call};
-        console.log(params);
+        let params = {
+            'To': phone_to,
+            'FromAgentPhone': phone_from,
+            'project_id': project_id,
+            'lead_id': lead_id,
+            'case_id': case_id,
+            'c_type': type,
+            'c_user_id': userId,
+            'is_conference_call': <?= $conferenceBase ?>
+
+        };
+
+        // console.log(params);
         webPhoneParams = params;
 
         if (device) {
@@ -797,7 +824,9 @@ use yii\helpers\Html;
             'lead_id': lead_id,
             'c_type': type,
             'c_user_id': userId,
-            'c_source_type_id': c_source_type_id
+            'c_source_type_id': c_source_type_id,
+            'is_conference_call': <?= $conferenceBase ?>
+
         };
         webPhoneParams = params;
 
@@ -995,7 +1024,6 @@ $js = <<<JS
     });
     
     $(document).on('click', '.btn-make-call', function(e) {
-        let is_conference = $(this).data('is_conference');
         e.preventDefault();
         
         $.post(ajaxCheckUserForCallUrl, {user_id: userId}, function(data) {
@@ -1015,7 +1043,7 @@ $js = <<<JS
                 
                 $.post(ajaxBlackList, {phone: phone_to}, function(data) {
                     if (data.success) {
-                        webCall(phone_from, phone_to, project_id, lead_id, case_id, 'web-call', is_conference);        
+                        webCall(phone_from, phone_to, project_id, lead_id, case_id, 'web-call');        
                     } else {
                         var text = 'Error. Try again later';
                         if (data.message) {
@@ -1058,6 +1086,104 @@ $js = <<<JS
     
     webPhoneWidget.css({left:'50%', 'margin-left':'-' + (webPhoneWidget.width() / 2) + 'px'}); //.slideDown();
     initDevice();
+    
+     $(document).on('click', '#btn-hold-double-call', function(e) {
+        let btn = $(this);
+        let isHold = btn.attr('data-is-hold');
+        let callSid = btn.attr('data-call-sid');
+        
+        e.preventDefault();
+        
+        if ((currentConnection && currentConnection.parameters.CallSid)) {
+            updateAgentStatus(currentConnection, false, 1);
+            
+            if(currentConnection.status() !== 'open') {
+                currentConnection.accept();
+            }
+            
+            if (!callSid) {
+                callSid = currentConnection.parameters.CallSid;
+                btn.attr('data-call-sid', callSid);
+            }
+                         
+            if (isHold === 'false') {
+                holdDoubleCall(callSid, btn);
+            } else {
+                unHoldDoubleCall(callSid, btn);
+            }
+                     
+        } else {
+            alert('Error: Not found active connection or CallSid');
+        }
+    });
+     
+     function holdDoubleCall(callSid, btn) {
+          let spinner = '<i class="fa fa-spinner fa-spin"></i> Hold'; 
+          let oldValue = btn.html();
+          
+          btn.html(spinner);
+          btn.prop('disabled', true);
+          
+          $.ajax({
+                type: 'post',
+                data: {
+                    'sid': callSid,
+                },
+                url: ajaxHoldConferenceDoubleCall
+            })
+            .done(function (data) {
+                if (data.error) {
+                    new PNotify({title: "Hold", type: "error", text: data.message, hide: true});
+                    btn.html(oldValue);
+                } else {
+                    btn.html('<i class="fa fa-angle-double-right"></i> UnHold');
+                    btn.attr('data-is-hold', true);
+                    new PNotify({title: "Hold", type: "success", text: 'Success', hide: true});
+                }                
+             })
+             .fail(function (error) {
+                console.error(error);
+                btn.html(oldValue);
+             })
+             .always(function() {
+                btn.prop('disabled', false);
+             });
+     }
+     
+     function unHoldDoubleCall(callSid, btn) {
+          let spinner = '<i class="fa fa-spinner fa-spin"></i> UnHold'; 
+          let oldValue = btn.html();
+          
+          btn.html(spinner);
+          btn.prop('disabled', true);
+          
+          $.ajax({
+                type: 'post',
+                data: {
+                    'sid': callSid,
+                },
+                url: ajaxUnholdConferenceDoubleCall
+            })
+            .done(function (data) {
+                if (data.error) {
+                    new PNotify({title: "Unhold", type: "error", text: data.message, hide: true});
+                     btn.html(oldValue);
+                } else {
+                    btn.html('<i class="fa fa-pause"></i> Hold');
+                    btn.attr('data-is-hold', false);
+                    new PNotify({title: "UnHold", type: "success", text: 'Success', hide: true});
+                }                
+             })
+             .fail(function (error) {
+                console.error(error);
+                 btn.html(oldValue);
+             })
+             .always(function() {
+                btn.prop('disabled', false);
+             });
+     }
+     
+     
     //setInterval('renewTwDevice();', 50000);
 
 JS;

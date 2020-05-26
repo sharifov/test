@@ -31,6 +31,9 @@ NewWebPhoneAsset::register($this);
 <?php
 $ajaxCheckUserForCallUrl = Url::to(['/phone/ajax-check-user-for-call']);
 $ajaxBlackList = Url::to(['/phone/check-black-phone']);
+
+$conferenceBase = (bool)(Yii::$app->params['settings']['voip_conference_base'] ?? false);
+
 ?>
 
 <?php
@@ -64,7 +67,7 @@ $js = <<<JS
                 $.post('{$ajaxBlackList}', {phone: phone_to}, function(data) {
                     if (data.success) {
 						if (device) {
-							let params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': null, 'case_id': null, 'c_type': 'call-web', 'c_user_id': userId};
+							let params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': null, 'case_id': null, 'c_type': 'call-web', 'c_user_id': userId, 'is_conference_call': {$conferenceBase}};
 							webPhoneParams = params;
 							PhoneWidgetCall.initCall({from: phoneNumbers.getData, to: data});
 							createNotify('Calling', 'Calling ' + params.To + '...', 'success');

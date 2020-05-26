@@ -12,8 +12,6 @@
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 
-$conferenceBase = (bool)(Yii::$app->params['settings']['voip_conference_base'] ?? false);
-
 ?>
 
 <style>
@@ -110,14 +108,7 @@ $conferenceBase = (bool)(Yii::$app->params['settings']['voip_conference_base'] ?
 
                     </div>
                     <div class="col-md-3 text-right">
-
-                        <?php
-                            if ($conferenceBase) {
-                                echo Html::a('<i class="fa fa-check"></i> Accept', ['call/incoming-call-widget', 'act' => 'accept-conference', 'call_id' => $call->c_id], ['onClick' => 'return incomingCallWidgetAccept($(this));', 'class' => 'btn btn-sm btn-success']);
-                            } else {
-                                echo Html::a('<i class="fa fa-check"></i> Accept', ['call/incoming-call-widget', 'act' => 'accept', 'call_id' => $call->c_id], ['onClick' => 'return incomingCallWidgetAccept($(this));', 'class' => 'btn btn-sm btn-success']);
-                            }
-                        ?>
+                        <?= Html::a('<i class="fa fa-check"></i> Accept', ['/call/incoming-call-widget', 'act' => 'accept', 'call_id' => $call->c_id], ['onClick' => 'return incomingCallWidgetAccept($(this));', 'class' => 'btn btn-sm btn-success']) ?>
                         <?php //=\yii\helpers\Html::a('<i class="fa fa-angle-double-right"></i> Skip', ['call/incoming-call-widget', 'act' => 'skip', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-info', 'id' => 'btn-incoming-call-skip'])?>
                         <?php //=\yii\helpers\Html::a('<i class="fa fa-close"></i> Busy', ['call/incoming-call-widget', 'act' => 'busy', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-danger', 'id' => 'btn-incoming-call-busy'])?>
                     </div>
@@ -191,15 +182,8 @@ $conferenceBase = (bool)(Yii::$app->params['settings']['voip_conference_base'] ?
 
                     </div>
                     <div class="col-md-4 text-right">
-
                         <?php //=\yii\helpers\Html::a('<i class="fa fa-ban"></i> Busy', ['call/incoming-call-widget', 'act' => 'busy', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-danger btn-incoming-call-busy'])?>
-                        <?php
-                            if ($conferenceBase) {
-                                echo Html::a('<i class="fa fa-check"></i> Accept', ['call/incoming-call-widget', 'act' => 'accept-conference', 'call_id' => $call->c_id], ['onClick' => 'return incomingCallWidgetAccept($(this));', 'class' => 'btn btn-sm btn-success']);
-                            } else {
-                                echo Html::a('<i class="fa fa-check"></i> Accept', ['call/incoming-call-widget', 'act' => 'accept', 'call_id' => $call->c_id], ['onClick' => 'return incomingCallWidgetAccept($(this));', 'class' => 'btn btn-sm btn-success']);
-                            }
-                        ?>
+                        <?= Html::a('<i class="fa fa-check"></i> Accept', ['/call/incoming-call-widget', 'act' => 'accept', 'call_id' => $call->c_id], ['onClick' => 'return incomingCallWidgetAccept($(this));', 'class' => 'btn btn-sm btn-success']) ?>
                         <?php //=\yii\helpers\Html::a('<i class="fa fa-angle-double-right"></i> Skip', ['call/incoming-call-widget', 'act' => 'skip', 'call_id' => $call->c_id], ['class' => 'btn btn-sm btn-info', 'id' => 'btn-incoming-call-skip'])?>
 
                     </div>

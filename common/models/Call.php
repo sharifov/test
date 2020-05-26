@@ -1174,12 +1174,14 @@ class Call extends \yii\db\ActiveRecord
     /**
      * @param Call $call
      * @param int $user_id
-     * @param bool $isConference
      * @return bool
      */
-    public static function applyCallToAgent(Call $call, int $user_id, bool $isConference): bool
+    public static function applyCallToAgent(Call $call, int $user_id): bool
     {
         try {
+
+            $conferenceBase = (bool)(Yii::$app->params['settings']['voip_conference_base'] ?? false);
+
             if ($call) {
 
                 // \Yii::info('INFO: Call ('.$call->getStatusName().', '.$call->c_call_status.') CallId: ' . $call->c_id. ',  User: ' . $user_id, 'info\Call:applyCallToAgent:callRedirect');
@@ -1254,7 +1256,7 @@ class Call extends \yii\db\ActiveRecord
                     Yii::error(VarDumper::dumpAsString(['call' => $call->getAttributes(), 'error' => $call->getErrors()]), 'Call:applyCallToAgent:call:update');
                 }
 
-                if ($isConference) {
+                if ($conferenceBase) {
                     if (!$call->isConference()) {
                         $call->setConferenceType();
                         $call->update();
@@ -1266,28 +1268,41 @@ class Call extends \yii\db\ActiveRecord
                         $call->c_from,
                         $call->c_to
                     );
+
+                    if ($res) {
+                        $isError = (bool)($res['error'] ?? true);
+                        if ($isError) {
+                            $call->c_call_status = self::TW_STATUS_CANCELED;
+                            $call->setStatusByTwilioStatus($call->c_call_status);
+                            $call->c_created_user_id = null;
+                            $call->update();
+                            return false;
+                        }
+                        return true;
+                    }
+
                 } else {
                     $agent = 'seller' . $user_id;
                     $res = \Yii::$app->communication->callRedirect($call->c_call_sid, 'client', $call->c_from, $agent);
-                }
 
+                    if ($res && isset($res['error']) && $res['error'] === false) {
+                        if (isset($res['data']['is_error']) && $res['data']['is_error'] === true) {
+                            $call->c_call_status = self::TW_STATUS_CANCELED;
+                            $call->setStatusByTwilioStatus($call->c_call_status);
+                            $call->c_created_user_id = null;
+                            $call->update();
+                            return false;
+                        }
 
-                if ($res && isset($res['error']) && $res['error'] === false) {
-                    if (isset($res['data']['is_error']) && $res['data']['is_error'] === true) {
-                        $call->c_call_status = self::TW_STATUS_CANCELED;
-                        $call->setStatusByTwilioStatus($call->c_call_status);
-                        $call->c_created_user_id = null;
-                        $call->update();
-                        return false;
+                        /*$call->c_call_status = self::CALL_STATUS_RINGING;
+                        $call->c_created_user_id = $user_id;
+                        $call->update();*/
+
+                        // \Yii::info(VarDumper::dumpAsString($res), 'info\Call:applyCallToAgent:callRedirect');
+                        return true;
                     }
-
-                    /*$call->c_call_status = self::CALL_STATUS_RINGING;
-                    $call->c_created_user_id = $user_id;
-                    $call->update();*/
-
-                    // \Yii::info(VarDumper::dumpAsString($res), 'info\Call:applyCallToAgent:callRedirect');
-                    return true;
                 }
+
                 \Yii::warning('Error: ' . VarDumper::dumpAsString($res), 'Call:applyCallToAgent:callRedirect');
             } else {
                 \Yii::warning('Error: Not found Call' . VarDumper::dumpAsString($call), 'Call:applyCallToAgent:callRedirect');
