@@ -304,28 +304,25 @@ $js = <<<JS
                     window.location.reload();                                        
 	            } else {
 	            
-	                if (dataResponse.errorsPrices.length) {
-	                    $.each(dataResponse.errorsPrices, function( index, value ) {
-                            $.each(value, function (idx, val){
-                                $('#quoteprice-'+index+'-'+idx).addClass('field-error');
-                                $('#quoteprice-'+index+'-'+idx).parent().addClass('has-error parent-error');
-                            });
+                    $.each(dataResponse.errorsPrices, function( index, value ) {
+                        $.each(value, function (idx, val){                            
+                            $('#quoteprice-'+index+'-'+idx).addClass('field-error');
+                            $('#quoteprice-'+index+'-'+idx).parent().addClass('has-error parent-error');
                         });
-	                }
-                    if (dataResponse.errors.length) {
-	                    $.each(dataResponse.errors, function( index, value ) {
-                            $('#quote-'+index).addClass('field-error');
-                            $('#quote-'+index).parent().addClass('has-error parent-error');
-                            if (index == 'reservation_dump') {
-                                itineraryErr = true;
-                            }
-                        });
-	                }                   
-                    if (dataResponse.error.length) {                        
+                    });
+                    $.each(dataResponse.errors, function( index, value ) {
+                        $('#quote-'+index).addClass('field-error');
+                        $('#quote-'+index).parent().addClass('has-error parent-error');
+                        if (index == 'reservation_dump') {
+                            itineraryErr = true;
+                        }
+                    });
+	                                  
+                    if (dataResponse.errorMessage.length) {                        
                         new PNotify({
                             title: "Error",
                             type: "error",
-                            text: dataResponse.error,
+                            text: dataResponse.errorMessage,
                             hide: true
                         }); 
                     }    

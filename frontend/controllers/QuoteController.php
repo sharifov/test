@@ -567,6 +567,8 @@ class QuoteController extends FController
                     $itinerary = [];
                     if ((new ReservationService($gds))->parseReservation($post['prepare_dump'], true, $itinerary)) {
                         $response['reservation_dump'] = Quote::createDump($itinerary);
+                    } else {
+                        throw new \DomainException(  'Parse dump failed. Step "reservation"');
                     }
 
                     if (empty($response['reservation_dump']) && empty($response['validating_carrier']) && empty($response['prices'])) {
