@@ -164,7 +164,7 @@ $phoneFrom = $call ? $call->c_from : '';
       <div class="contact-info-card__details">
 
         <div class="contact-info-card__line history-details">
-          <span class="contact-info-card__label"><?= $call && $call->isIn() ? 'From' : 'To' ?></span>
+          <span class="contact-info-card__label"><?= $call && $call->isIn() ? 'Incoming' : 'Outgoing' ?></span>
           <strong class="contact-info-card__name"><?= $call && $call->cClient ? $call->cClient->getFullName() : 'ClientName' ?></strong>
         </div>
 

@@ -184,9 +184,9 @@ var PhoneWidgetCall = function () {
         $('.call-in-action__time').html('').show().timer('remove').timer({format: '%M:%S', seconds: status.duration | 0}).timer('start');
 
         if ('isIn' in obj && obj.isIn) {
-            $('.call-pane-initial .contact-info-card__label').html('From');
+            $('.call-pane-initial .contact-info-card__label').html('Incoming');
         } else {
-            $('.call-pane-initial .contact-info-card__label').html('To');
+            $('.call-pane-initial .contact-info-card__label').html('Outgoing');
         }
 
     }
