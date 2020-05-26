@@ -75,6 +75,12 @@ $pjaxCreditCardTable = 'pjax-credit-card-table' . $saleId;
                     return $model->cc_bo_link ? 'Yes' :  '-';
                 },
             ],
+			[
+				'attribute' => 'cc_is_sync_bo',
+				'value' => static function(\common\models\CreditCard $model) {
+					return $model->cc_is_sync_bo ? 'Yes' :  '-';
+				},
+			],
             'cc_created_dt:ByUserDateTime',
 
             [
@@ -132,7 +138,7 @@ $js = <<<JS
     
     $(document).on('click', '.{$editCreditCardBtnClass}', function (e) {
         e.preventDefault();
-        var modal = $('#modal-df');
+        var modal = $('#modal-sm');
         var url = $(this).attr('href');
             //$('#search-sale-panel').toggle();
         modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> </div>');
