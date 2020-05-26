@@ -66,15 +66,15 @@ class Reservation implements ParseDumpInterface
     {
         return $pattern ?? '/^
             (\d{1,2}) # index
-            \s{1}([A-Z]{2}) # Airline
+            \s+([A-Z]{2}) # Airline
             \s*(\d{1,4})([A-Z]{1}) # Flight number + Booking Class 
             \s+(\d{2})(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) # Departure day + month
-            \s+([A-Z]{1}) # ?
-            \s+([A-Z]{3})([A-Z]{3}) # iata airport departure + arrival    
-            \W([A-Z]{2}\d{1}) # ?   
+            (\s{1}[A-Z]{1}\s{1}|\s{1}) # ignore
+            \s*([A-Z]{3})([A-Z]{3}) # iata airport departure + arrival
+            (\W[A-Z]{2}\d{1}|\s{1})* # ignore
             (\s+\d{1}|\s+\d{2})(\d{2})(N|A|P) # Departure time hours + min + (AM|PM)
-            (\s+\d{1}|\s+\d{2})(\d{2})(N|A|P) # Arrival time hours + min + (AM|PM) 
-            \s+((\d{2})(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC))* # Arrival day + month             
+            (\s+\d{1}|\s+\d{2})(\d{2})(N|A|P) # Arrival time hours + min + (AM|PM)
+            \s+((\d{2})(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC))* # Arrival day + month
             /x';
     }
 
