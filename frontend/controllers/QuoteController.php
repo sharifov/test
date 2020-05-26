@@ -524,26 +524,45 @@ class QuoteController extends FController
                         throw new \DomainException(  'This gds(' . $postQuote['gds'] . ') cannot be processed');
                     }
 
+                    $pricesFromDump = [];
+                    if ($obj = ParsingDump::initClass($gds, 'Pricing')) {
+                        if ($pricingData = $obj->parseDump($post['prepare_dump'])) {
+                            $response['validating_carrier'] = $pricingData['validating_carrier'];
+                            $pricesFromDump = $pricingData['prices'];
+                        }
+                    }
+
                     $prices = [];
-                    if($pricing = (new PricingService($gds))->formattingForQuote($post['prepare_dump'])) {
-                        $response['validating_carrier'] = $pricing['validating_carrier'];
+                    foreach ($lead->getPaxTypes() as $type) {
+                        $price = null;
 
-                        foreach ($pricing['prices'] as $type => $value) {
+                        foreach ($pricesFromDump as $key => $value) {
+                            if ($type === $value['type']) {
+                                $price = new QuotePrice();
+                                $price->passenger_type = $type;
+                                $price->fare = $value['fare'];
+                                $price->taxes = $value['taxes'];
+                                $price->net = $price->fare + $price->taxes;
+                                $price->selling = $price->net + $price->mark_up;
+                                $price->toFloat();
+
+                                $prices[] = $price;
+                                unset($pricesFromDump[$key]);
+                                break;
+                            }
+                        }
+
+                        if ($price === null) {
                             $price = new QuotePrice();
-                            $price->passenger_type = $type;
-                            $price->fare = $value['fare'];
-                            $price->taxes = $value['taxes'];
-                            $price->net = $price->fare + $price->taxes;
-                            $price->selling = $price->net + $price->mark_up;
-                            $price->toFloat();
-
+                            $price->createQPrice($type);
                             $prices[] = $price;
                         }
-                        $response['prices'] = $this->renderAjax('partial/_priceRows', [
-                            'prices' => $prices,
-                            'lead' => $lead,
-                        ]);
                     }
+
+                    $response['prices'] = $this->renderAjax('partial/_priceRows', [
+                        'prices' => $prices,
+                        'lead' => $lead,
+                    ]);
 
                     $itinerary = [];
                     if ((new ReservationService($gds))->parseReservation($post['prepare_dump'], true, $itinerary)) {
