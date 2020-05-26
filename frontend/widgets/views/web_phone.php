@@ -189,7 +189,11 @@ use yii\helpers\Html;
     $ajaxConferenceCompleteUrl = Url::to(['/phone/ajax-conference-complete']);
     $ajaxHoldConferenceDoubleCall = Url::to(['/phone/ajax-hold-conference-double-call']);
     $ajaxUnholdConferenceDoubleCall = Url::to(['/phone/ajax-unhold-conference-double-call']);
-    $conferenceBase = (bool)(Yii::$app->params['settings']['voip_conference_base'] ?? false);
+
+    $conferenceBase = 0;
+    if (isset(Yii::$app->params['settings']['voip_conference_base'])) {
+        $conferenceBase = Yii::$app->params['settings']['voip_conference_base'] ? 1 : 0;
+    }
 
     $csrf_param = Yii::$app->request->csrfParam;
     $csrf_token = Yii::$app->request->csrfToken;
@@ -796,8 +800,7 @@ use yii\helpers\Html;
             'case_id': case_id,
             'c_type': type,
             'c_user_id': userId,
-            'is_conference_call': <?= $conferenceBase ?>
-
+            'is_conference_call': conferenceBase
         };
 
         // console.log(params);
@@ -825,8 +828,7 @@ use yii\helpers\Html;
             'c_type': type,
             'c_user_id': userId,
             'c_source_type_id': c_source_type_id,
-            'is_conference_call': <?= $conferenceBase ?>
-
+            'is_conference_call': conferenceBase
         };
         webPhoneParams = params;
 
