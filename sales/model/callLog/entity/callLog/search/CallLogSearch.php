@@ -216,13 +216,42 @@ class CallLogSearch extends CallLog
 
     public function searchMyCalls($params, Employee $user): ActiveDataProvider
     {
-        $query = static::find();
+        $this->load($params);
+
+        $query = static::find()/*->with(['record', 'callLogLead', 'callLogCase'])*/;
         $query->where(['cl_user_id' => $user->id]);
+
+        /*->with(['project', 'department', 'phoneList', 'user', 'record'])
+        ->joinWith(['callLogLead.lead', 'callLogCase.case', 'queue']);*/
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort'=> ['defaultOrder' => ['cl_id' => SORT_DESC]],
         ]);
+
+        if (!$this->validate()) {
+            return $dataProvider;
+        }
+
+        if ($this->cl_call_created_dt) {
+            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cl_call_created_dt', $this->cl_call_created_dt, $user->timezone);
+        }
+
+        $query->andFilterWhere([
+            'cl_id' => $this->cl_id,
+            'cl_project_id' => $this->cl_project_id,
+            'cl_department_id' => $this->cl_department_id,
+            'cl_type_id' => $this->cl_type_id,
+            'cl_category_id' => $this->cl_category_id,
+            'cl_status_id' => $this->cl_status_id,
+            'cl_client_id' => $this->cl_client_id,
+
+            /*'cll_lead_id' => $this->lead_id,
+            'clc_case_id' => $this->case_id,*/
+        ]);
+
+        $query->andFilterWhere(['like', 'cl_phone_from', $this->cl_phone_from])
+            ->andFilterWhere(['like', 'cl_phone_to', $this->cl_phone_to]);
 
         return $dataProvider;
     }
