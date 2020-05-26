@@ -32,7 +32,10 @@ NewWebPhoneAsset::register($this);
 $ajaxCheckUserForCallUrl = Url::to(['/phone/ajax-check-user-for-call']);
 $ajaxBlackList = Url::to(['/phone/check-black-phone']);
 
-$conferenceBase = (bool)(Yii::$app->params['settings']['voip_conference_base'] ?? false);
+$conferenceBase = 0;
+if (isset(Yii::$app->params['settings']['voip_conference_base'])) {
+	$conferenceBase = Yii::$app->params['settings']['voip_conference_base'] ? 1 : 0;
+}
 
 ?>
 
