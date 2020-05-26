@@ -68,7 +68,7 @@ foreach ($prices as $index => $price) : ?>
             </div>
         </td>
         <td class="td-input text-right">
-            <?php  if (!in_array($price->passenger_type, $applyBtn) && $paxCntTypes[$price->passenger_type] > 1) {
+            <?php /*  if (!in_array($price->passenger_type, $applyBtn) && $paxCntTypes[$price->passenger_type] > 1) {
                 $applyBtn[] = $price->passenger_type;
                 echo Html::button('<i class="fa fa-copy"></i>', [
                     'title' => '',
@@ -79,7 +79,7 @@ foreach ($prices as $index => $price) : ?>
                     'data-price-index' => $index,
                     'data-type' => $price->passenger_type
                 ]);
-            }  ?>
+            } */ ?>
         </td>
     </tr>
 <?php endforeach; ?>

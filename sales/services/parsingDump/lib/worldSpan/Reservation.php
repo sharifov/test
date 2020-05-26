@@ -59,7 +59,6 @@ class Reservation implements ParseDumpInterface
         return count($matches) >= 14 ? $matches : [];
     }
 
-
     /**
      * @param string|null $pattern
      * @return string
@@ -69,7 +68,7 @@ class Reservation implements ParseDumpInterface
         return $pattern ?? '/^
             (\d{1,2}) # index
             (\s{1}|\*)([A-Z]{2}|[A-Z]{1}\d{1}) # Airline
-            \s*(\d{2,4})([A-Z]{1}) # Flight number + Booking Class
+            \s*(\d{1,4})([A-Z]{1}) # Flight number + Booking Class
             \s{1}(\d{1,2})([A-Z]{3}) # Departure Date
             \s{1}([A-Z]{2}) # Departure Day of the week
             \s{1}([A-Z]{3})([A-Z]{3}) # Airport codes from+to

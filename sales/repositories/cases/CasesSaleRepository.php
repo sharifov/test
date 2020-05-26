@@ -88,4 +88,9 @@ class CasesSaleRepository
 		}
 		return $caseSale;
 	}
+
+	public function getProjectApiKey(CaseSale $caseSale)
+	{
+		return @json_decode((string)$caseSale->css_sale_data, true)['projectApiKey'] ?? '';
+	}
 }

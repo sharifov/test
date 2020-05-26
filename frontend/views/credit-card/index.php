@@ -68,6 +68,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'cc_status_id',
             'cc_is_expired:boolean',
             'cc_bo_link',
+            'cc_is_sync_bo:boolean',
 
             [
                 'class' => UserSelect2Column::class,

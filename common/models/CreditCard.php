@@ -31,6 +31,7 @@ use yii\helpers\StringHelper;
  * @property string|null $cc_created_dt
  * @property string|null $cc_updated_dt
  * @property string|null $cc_bo_link
+ * @property int|null $cc_is_sync_bo
  *
  * @property BillingInfo[] $billingInfos
  * @property Employee $ccCreatedUser
@@ -76,13 +77,22 @@ class CreditCard extends ActiveRecord
         self::STATUS_INVALID         =>   'danger',
     ];
 
-    /**
+	public const SCENARIO_CASE_AJAX_UPDATE = 'case_ajax_update';
+
+	/**
      * @return string
      */
     public static function tableName(): string
     {
         return 'credit_card';
     }
+
+	public function scenarios()
+	{
+		$scenarios = parent::scenarios();
+		$scenarios[self::SCENARIO_CASE_AJAX_UPDATE] = ['cc_holder_name', 'cc_type_id'];
+		return $scenarios;
+	}
 
     /**
      * @return array
@@ -94,6 +104,7 @@ class CreditCard extends ActiveRecord
             [['cc_expiration_month', 'cc_expiration_year', 'cc_type_id', 'cc_status_id', 'cc_is_expired', 'cc_created_user_id', 'cc_updated_user_id'], 'integer'],
             [['cc_created_dt', 'cc_updated_dt'], 'safe'],
             [['cc_number'], 'string', 'max' => 50],
+            [['cc_is_sync_bo'], 'integer'],
             [['cc_display_number'], 'string', 'max' => 18],
             [['cc_holder_name'], 'string', 'max' => 50],
             [['cc_bo_link'], 'string', 'max' => 255],
@@ -125,6 +136,7 @@ class CreditCard extends ActiveRecord
             'cc_created_dt' => 'Created Dt',
             'cc_updated_dt' => 'Updated Dt',
             'cc_bo_link' => 'BO link',
+            'cc_is_sync_bo' => 'Sync With B/O',
         ];
     }
 

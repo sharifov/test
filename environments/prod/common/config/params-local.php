@@ -25,6 +25,7 @@ return [
         'ver' => '{{ common.config.params.backOffice.ver:str }}',
         'apiKey' => '{{ common.config.params.backOffice.apiKey:str }}',
         'serverUrl' => '{{ common.config.params.backOffice.serverUrl:str }}',
+        'serverUrlV3' => '{{ common.config.params.backOffice.serverUrlV3:str }}',
         'webHookEndpoint' => 'webhook/ping',
     ],
 

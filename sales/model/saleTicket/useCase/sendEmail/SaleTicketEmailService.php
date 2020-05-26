@@ -63,7 +63,7 @@ class SaleTicketEmailService
 	 * @param SaleTicket $saleTicket
 	 * @return string
 	 */
-	private function getEmailCC(array $emailSettings, SaleTicket $saleTicket): string
+	public function getEmailCC(array $emailSettings, SaleTicket $saleTicket): string
 	{
 		$emails = $emailSettings['sendTo'] ?? [];
 		$bookeepingEmails = $emailSettings['bookeepingEmails'] ?? [];
