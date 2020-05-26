@@ -107,7 +107,7 @@ $phoneFrom = $call ? $call->c_from : '';
         <li class="dial__item"><button class="dial__btn" value="8">8</button></li>
         <li class="dial__item"><button class="dial__btn" value="9">9</button></li>
         <li class="dial__item"><button class="dial__btn" value="✱">✱</button></li>
-          <li class="dial__item"><button class="dial__btn dial__btn2" value="0">0 <small>+</small></li>
+        <li class="dial__item"><button class="dial__btn" value="0">0</button></li>
         <li class="dial__item"><button class="dial__btn" value="#">#</button></li>
         <li class="dial__item"><button class="dial__btn" value="+">+</button></li>
       </ul>

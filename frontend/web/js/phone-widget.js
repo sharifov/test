@@ -194,106 +194,103 @@ $(document).ready(function() {
     })
 
 
-    let context = null;
+    //--------------------------------------------------------------------------
 
-    context = new AudioContext();
-    const beep = (freq = 520, duration = 200, vol = 100) => {
-        const oscillator = context.createOscillator();
-        const gain = context.createGain();
-        oscillator.connect(gain);
-        oscillator.frequency.value = freq;
-        oscillator.type = "sine";
-        gain.connect(context.destination);
-        gain.gain.value = vol * 0.01;
-        oscillator.start(context.currentTime);
-        oscillator.stop(context.currentTime + duration * 0.001);
+    // polyfill
+    var AudioContext = window.AudioContext || window.webkitAudioContext || window.mozAudioContext;
+
+    function Tone(context, freq1, freq2) {
+        this.context = context;
+        this.status = 0;
+        this.freq1 = freq1;
+        this.freq2 = freq2;
     }
 
-    // document.querySelector('button').addEventListener('click', function () {
-    //     context = new AudioContext();
-    //     beep();
-    // });
+    Tone.prototype.setup = function(){
+        this.osc1 = context.createOscillator();
+        this.osc2 = context.createOscillator();
+        this.osc1.frequency.value = this.freq1;
+        this.osc2.frequency.value = this.freq2;
 
-    var btnPlus = false;
+        this.gainNode = this.context.createGain();
+        this.gainNode.gain.value = 0.25;
 
+        this.filter = this.context.createBiquadFilter();
+        this.filter.type = "lowpass";
+        this.filter.frequency = 8000;
 
-    $('.dial__btn').on('mouseup', function(){
-        clearTimeout(pressTimer);
+        this.osc1.connect(this.gainNode);
+        this.osc2.connect(this.gainNode);
 
-        let btnVal = $(this).val();
-        let currentVal = $('.call-pane__dial-number').val();
-        if (btnVal == "0") {
-            if (btnPlus) {
-                btnPlus = false;
-            } else {
-                $('.call-pane__dial-number').val(currentVal + "0");
-                beep(500, 100, 5);
-            }
+        this.gainNode.connect(this.filter);
+        this.filter.connect(context.destination);
+    }
+
+    Tone.prototype.start = function(){
+        this.setup();
+        this.osc1.start(0);
+        this.osc2.start(0);
+        this.status = 1;
+    }
+
+    Tone.prototype.stop = function(){
+        this.osc1.stop(0);
+        this.osc2.stop(0);
+        this.status = 0;
+    }
+
+    var dtmfFrequencies = {
+        "1": {f1: 697, f2: 1209},
+        "2": {f1: 697, f2: 1336},
+        "3": {f1: 697, f2: 1477},
+        "4": {f1: 770, f2: 1209},
+        "5": {f1: 770, f2: 1336},
+        "6": {f1: 770, f2: 1477},
+        "7": {f1: 852, f2: 1209},
+        "8": {f1: 852, f2: 1336},
+        "9": {f1: 852, f2: 1477},
+        "✱": {f1: 941, f2: 1209},
+        "0": {f1: 941, f2: 1336},
+        "#": {f1: 941, f2: 1477},
+        "+": {f1: 941, f2: 1497}
+    }
+
+    var context = new AudioContext();
+
+    var dtmf = new Tone(context, 350, 440);
+
+    $('.dial__btn').on("mousedown touchstart", function(e){
+        e.preventDefault();
+
+        var keyPressed = $(this).val();
+        var frequencyPair = dtmfFrequencies[keyPressed];
+
+        // this sets the freq1 and freq2 properties
+        dtmf.freq1 = frequencyPair.f1;
+        dtmf.freq2 = frequencyPair.f2;
+
+        if (dtmf.status == 0){
+            dtmf.start();
         }
-        return false;
-    }).on('mousedown', function(){
 
-
-
-
-        let btnVal = $(this).val();
+        //let btnVal = $(this).val();
         let currentVal = $('.call-pane__dial-number').val();
 
-        if (btnVal == "0") {
-            pressTimer = window.setTimeout(function () {
-                btnPlus = true;
-                $('.call-pane__dial-number').val(currentVal + "+");
-                beep(450, 100, 5);
-            }, 500);
-        } else {
-            $('.call-pane__dial-number').val(currentVal + btnVal);
-
-            let freq = 450;
-            if (btnVal > 0 && btnVal < 10) {
-                freq = 500 + (btnVal * 10);
-            }
-
-            beep(freq, 100, 5);
-        }
-
+        $('.call-pane__dial-number').val(currentVal + keyPressed);
         $('.call-pane__dial-clear-all').addClass('is-shown');
         //$('.suggested-contacts').addClass('is_active');
         $('.call-pane__dial-number').focus();
-
-        return false;
     });
 
+    $(window).on("mouseup touchend", function(){
+        if (typeof dtmf !== "undefined" && dtmf.status){
+            dtmf.stop();
+        }
+    });
 
-    // var longpress = false;
-    //
-    // $('.dial__btn').on('click', function (e) {
-    //     e.preventDefault();
-    //     let btnVal = $(this).val();
-    //     let currentVal = $('.call-pane__dial-number').val();
-    //
-    //     if(longpress && btnVal == "0") { // if detect hold, stop onclick function
-    //         $('.call-pane__dial-number').val(currentVal + "+");
-    //     } else {
-    //         $('.call-pane__dial-number').val(currentVal + btnVal);
-    //     }
-    //     $('.call-pane__dial-clear-all').addClass('is-shown');
-    //     //$('.suggested-contacts').addClass('is_active');
-    //     $('.call-pane__dial-number').focus();
-    //     return false;
-    // });
-    //
-    // $('.dial__btn').on('mousedown', function () {
-    //     longpress = false; //longpress is false initially
-    //     pressTimer = window.setTimeout(function(){
-    //         // your code here
-    //
-    //         longpress = true; //if run hold function, longpress is true
-    //     },500)
-    // });
-    //
-    // $('.dial__btn').on('mouseup', function () {
-    //     clearTimeout(pressTimer); //clear time on mouseup
-    // });
+    //---------------------------------------------------
+
+
 
 
 
