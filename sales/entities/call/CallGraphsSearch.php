@@ -204,7 +204,7 @@ class CallGraphsSearch extends CallLogSearch
     {
         parent::afterValidate();
 
-        $dateStart = new DateTime(date('Y-m-d H:i:s', $this->createTimeStart));
+        /*$dateStart = new DateTime(date('Y-m-d H:i:s', $this->createTimeStart));
         $dateEnd = new DateTime(date('Y-m-d H:i:s', $this->createTimeEnd));
 
         if (((int)$this->callGraphGroupBy === self::DATE_FORMAT_HOURS || (int)$this->callGraphGroupBy === self::DATE_FORMAT_HOURS_DAYS) && $this->createTimeStart && $this->createTimeEnd) {
@@ -229,7 +229,7 @@ class CallGraphsSearch extends CallLogSearch
                 $this->addError('callGraphGroupBy', 'The difference between two dates cannot be more than ' . self::Year_DIFF_MAX_RANGE . ' year when grouped by Weeks');
                 return false;
             }
-        }
+        }*/
 
         if (empty($this->totalChartColumns)) {
             $this->totalChartColumns = self::getChartTotalCallList();
@@ -277,8 +277,13 @@ class CallGraphsSearch extends CallLogSearch
         ]);
         $parentQuery->from([new \yii\db\Expression(CallLog::tableName(). ' PARTITION('. $this->getPartitionsByYears() .') ')]);
 
+        $parentQuery->andWhere([
+            'between',
+            'cl_call_created_dt',
+            Employee::convertTimeFromUserDtToUTC(strtotime($this->createTimeStart)),
+            Employee::convertTimeFromUserDtToUTC(strtotime($this->createTimeEnd))
+        ]);
 
-        $parentQuery->andWhere(['between', "convert_tz(cl_call_created_dt, '+00:00', '".$timeZone."')", $this->createTimeStart, $this->createTimeEnd]);
         $parentQuery->andWhere(['cl_status_id' => [CallLogStatus::COMPLETE, CallLogStatus::BUSY, CallLogStatus::NOT_ANSWERED]]);
         $parentQuery->andWhere(['OR',
             ['cl_category_id' => null],
@@ -331,7 +336,13 @@ class CallGraphsSearch extends CallLogSearch
 
         $childQuery->from([new \yii\db\Expression(CallLog::tableName(). ' PARTITION('. $this->getPartitionsByYears() .') ')]);
 
-        $childQuery->andWhere(['between', "convert_tz(cl_call_created_dt, '+00:00', '".$timeZone."')", $this->createTimeStart, $this->createTimeEnd]);
+        $childQuery->andWhere([
+            'between',
+            'cl_call_created_dt',
+            Employee::convertTimeFromUserDtToUTC(strtotime($this->createTimeStart)),
+            Employee::convertTimeFromUserDtToUTC(strtotime($this->createTimeEnd))
+            ]);
+
         $childQuery->andWhere(['cl_status_id' => [CallLogStatus::COMPLETE, CallLogStatus::BUSY, CallLogStatus::NOT_ANSWERED]]);
         $childQuery->andWhere(['OR',
             ['cl_category_id' => null],
@@ -380,13 +391,15 @@ class CallGraphsSearch extends CallLogSearch
 
     private function setGroupingParam()
     {
+        $timeZone = Employee::getUtcOffsetDst($this->timeZone, $this->createTimeStart);
+
         $dateFormat = $this->getDateFormat($this->callGraphGroupBy) ?? $this->getDefaultDateFormat();
         if ((int)$this->callGraphGroupBy === self::DATE_FORMAT_WEEKS) {
-            return "concat(str_to_date(date_format(cl_call_created_dt, '%Y %v Monday'), '%x %v %W'), ' - ', str_to_date(date_format(cl_call_created_dt, '%Y %v Sunday'), '%x %v %W'))";
+            return "concat(str_to_date(date_format(convert_tz(cl_call_created_dt, '+00:00', '".$timeZone."'), '%Y %v Monday'), '%x %v %W'), ' - ', str_to_date(date_format(convert_tz(cl_call_created_dt, '+00:00', '".$timeZone."'), '%Y %v Sunday'), '%x %v %W'))";
         } if ((int)$this->callGraphGroupBy === self::DATE_FORMAT_WEEKDAYS){
-            return "WEEKDAY(cl_call_created_dt)";
+            return "WEEKDAY(convert_tz(cl_call_created_dt, '+00:00', '".$timeZone."'))";
         } else {
-            return "date_format(`cl_call_created_dt`, '$dateFormat')";
+            return "date_format(convert_tz(cl_call_created_dt, '+00:00', '".$timeZone."'), '$dateFormat')";
         }
     }
 

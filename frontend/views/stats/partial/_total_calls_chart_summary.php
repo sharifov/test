@@ -54,21 +54,21 @@ foreach ($totalCallsDbData as $results){
                 <td><?= $totalIncomingCalls ?></td>
                 <td><?= number_format($totalIncomingCallsAvg / ($countIn ?: 1)) ?></td>
                 <td><?= Yii::$app->formatter->asDuration($totalIncomingDuration) ?></td>
-                <td><?= Yii::$app->formatter->asDuration((int)$totalIncomingDuration / $totalIncomingCalls) ?></td>
+                <td><?= Yii::$app->formatter->asDuration((int)$totalIncomingDuration / ($totalIncomingCalls ?: 1)) ?></td>
             </tr>
             <tr>
                 <td>Outgoing</td>
                 <td><?= $totalOutgoingCalls ?></td>
                 <td><?= number_format($totalOutgoingCallsAvg / ($countOut ?: 1)) ?></td>
                 <td><?= Yii::$app->formatter->asDuration((int)$totalOutgoingDuration) ?></td>
-                <td><?= Yii::$app->formatter->asDuration((int)$totalOutgoingDuration / $totalOutgoingCalls) ?></td>
+                <td><?= Yii::$app->formatter->asDuration((int)$totalOutgoingDuration / ($totalOutgoingCalls ?: 1)) ?></td>
             </tr>
             <tr>
                 <td>Total</td>
                 <td><?= $totalInOutCalls ?></td>
                 <td><?= number_format($totalInOutCallsAvg / ($countInOut ?: 1)) ?></td>
                 <td><?= Yii::$app->formatter->asDuration((int)$totalInOutCallsDuration) ?></td>
-                <td><?= Yii::$app->formatter->asDuration((int)$totalInOutCallsDuration / $totalInOutCalls) ?></td>
+                <td><?= Yii::$app->formatter->asDuration((int)$totalInOutCallsDuration / ($totalInOutCalls ?: 1)) ?></td>
             </tr>
             </tbody>
         </table>
