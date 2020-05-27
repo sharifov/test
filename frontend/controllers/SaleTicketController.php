@@ -6,6 +6,7 @@ use sales\auth\Auth;
 use sales\model\saleTicket\useCase\create\SaleTicketRepository;
 use sales\model\saleTicket\useCase\sendEmail\SaleTicketEmailService;
 use sales\repositories\cases\CasesSaleRepository;
+use sales\repositories\creditCard\CreditCardRepository;
 use Yii;
 use sales\model\saleTicket\entity\SaleTicket;
 use sales\model\saleTicket\entity\search\SaleTicketSearch;
@@ -23,6 +24,7 @@ use yii\db\StaleObjectException;
  * @property SaleTicketRepository $saleTicketRepository
  * @property SaleTicketEmailService $saleTicketEmailService
  * @property CasesSaleRepository $casesSaleRepository
+ * @property CreditCardRepository $creditCardRepository
  */
 class SaleTicketController extends FController
 {
@@ -39,13 +41,18 @@ class SaleTicketController extends FController
 	 * @var CasesSaleRepository
 	 */
 	private $casesSaleRepository;
+	/**
+	 * @var CreditCardRepository
+	 */
+	private $creditCardRepository;
 
-	public function __construct($id, $module, SaleTicketRepository $saleTicketRepository, SaleTicketEmailService $saleTicketEmailService, CasesSaleRepository $casesSaleRepository, $config = [])
+	public function __construct($id, $module, SaleTicketRepository $saleTicketRepository, SaleTicketEmailService $saleTicketEmailService, CasesSaleRepository $casesSaleRepository, CreditCardRepository $creditCardRepository, $config = [])
 	{
 		parent::__construct($id, $module, $config);
 		$this->saleTicketRepository = $saleTicketRepository;
 		$this->saleTicketEmailService = $saleTicketEmailService;
 		$this->casesSaleRepository = $casesSaleRepository;
+		$this->creditCardRepository = $creditCardRepository;
 	}
 
 	/**
@@ -179,7 +186,8 @@ class SaleTicketController extends FController
 			$emailSettings = Yii::$app->params['settings']['case_sale_ticket_email_data'];
 
 			$caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$saleId);
-			$html = $this->renderPartial('partial/_email_body', ['saleTickets' => $saleTickets, 'caseSale' => $caseSale]);
+			$creditCards = $this->creditCardRepository->findBySaleId((int)$saleId);
+			$html = $this->renderPartial('partial/_email_body', ['saleTickets' => $saleTickets, 'caseSale' => $caseSale, 'creditCards' => $creditCards]);
 
 			$this->saleTicketEmailService->generateAndSendEmail($saleTickets, $emailSettings, $html, $caseId, $bookingId, Auth::user());
 		} catch (\Throwable $e) {

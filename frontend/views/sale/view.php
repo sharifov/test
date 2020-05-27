@@ -6,6 +6,7 @@ use kartik\editable\Editable;
 use kartik\popover\PopoverX;
 use sales\guards\cases\CaseManageSaleInfoGuard;
 use sales\model\saleTicket\entity\SaleTicket;
+use sales\model\saleTicket\useCase\sendEmail\SaleTicketHelper;
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -123,7 +124,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                     <div class="col-md-12">
                         <div class="d-flex justify-content-between align-items-center">
                             <h2>Sale Tickets</h2>
-                            <?= Html::a('<i class="fa fa-envelope"></i> Send Email', $saleTicketGenerateEmail, ['class' => 'btn btn-success '.$sendEmailBtnClass, 'title' => 'Send Email']) ?>
+                            <?= Html::a('<i class="fa fa-envelope"></i> Send Email', $saleTicketGenerateEmail, ['class' => 'btn btn-success '.$sendEmailBtnClass, 'title' => SaleTicketHelper::getTitleForSendEmailBtn($saleTicket)]) ?>
                         </div>
                         <?php Pjax::begin(['id' => 'pjax-case-sale-tickets', 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false]) ?>
                         <table class="table table-bordered table-hover">
