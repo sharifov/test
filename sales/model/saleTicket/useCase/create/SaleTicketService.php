@@ -44,7 +44,7 @@ class SaleTicketService
 		foreach ($refundRules['rules'] as $rule) {
 			$firstLastName = $this->getPassengerName($rule , $saleData['passengers']);
 			$cntPassengers = $this->getPassengersCountExceptInf($saleData['passengers']);
-			$dto = (new SaleTicketCreateDTO())->feelBySaleData($caseId, $saleId, $saleData['pnr'] ?? '', $firstLastName, $cntPassengers, $rule, $refundRules, $saleData['customerInfo']);
+			$dto = (new SaleTicketCreateDTO())->feelBySaleData($caseId, $saleId, $saleData['pnr'] ?? '', $firstLastName, $cntPassengers, $rule, $refundRules);
 			$saleTicket = SaleTicket::createBySaleData($dto);
 			$this->saleTicketRepository->save($saleTicket);
 		}
