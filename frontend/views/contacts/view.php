@@ -79,7 +79,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     $title = $phone->cp_title ? ' <em>(' . $phone->cp_title . ')</em>' : '' ;
                                     $data[] =
                                         CallHelper::callNumber($phone->phone, CallAccess::isUserCanDial(Auth::id(),
-                                        UserProfile::CALL_TYPE_WEB), '',  ['disable-icon' => true], 'code') .
+                                        UserProfile::CALL_TYPE_WEB), '',  ['data-title' => $model->full_name, 'disable-icon' => true], 'code') .
                                         $title;
                                 }
                             }

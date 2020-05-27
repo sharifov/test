@@ -332,21 +332,19 @@ var PhoneWidgetCall = function () {
                     clearTimeout(timeout);
                 }
                 if (data.results.length < 1) {
-                    content += loadNotFound();
-                    timeout = setTimeout(function () {
-                        $('.suggested-contacts').removeClass('is_active');
-                    }, 2000);
+                    // content += loadNotFound();
+                    // timeout = setTimeout(function () {
+                    //     $('.suggested-contacts').removeClass('is_active');
+                    // }, 2000);
                 } else {
                     $.each(data.results, function(i, item) {
                         content += loadContact(item);
                     });
-                    $('.suggested-contacts').html(content);
-                    $('.suggested-contacts').addClass('is_active');
+                    $('.suggested-contacts').html(content).addClass('is_active');
                     $('.call-pane__dial-clear-all').addClass('is-shown')
                 }
-                $('.suggested-contacts').html(content);
-                $('.suggested-contacts').addClass('is_active');
-                $('.call-pane__dial-clear-all').addClass('is-shown')
+                //$('.suggested-contacts').html(content).addClass('is_active');
+                //$('.call-pane__dial-clear-all').addClass('is-shown')
             })
             .fail(function () {
                 new PNotify({
@@ -395,8 +393,9 @@ var PhoneWidgetCall = function () {
 
     $(document).on('click', "li.call-contact-card", function () {
         let phone = $(this).data('phone');
-        $("#call-pane__dial-number").val(phone);
+        $("#call-pane__dial-number").val(phone).attr('readonly', 'readonly');
         $('.suggested-contacts').removeClass('is_active');
+        soundNotification("button_tiny");
     });
 
 })();

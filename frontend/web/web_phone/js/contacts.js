@@ -208,7 +208,7 @@ let PhoneWidgetContacts = function () {
             '</div>' +
             '<ul class="actions-list">' +
             '<li class="actions-list__option actions-list__option--phone js-call-tab-trigger">' +
-            '<i class="fa fa-phone phone-dial" data-phone="' + phone + '"></i>' +
+            '<i class="fa fa-phone phone-dial" data-phone="' + phone + '" data-title="' + contact['name'] + '"></i>' +
             '</li>' +
             '<li title="' + titleAccessGetMessages + '" class="actions-list__option js-trigger-messages-modal' + disabledClass + '" ' +
                     'data-contact-id="' + contact['id'] + '" data-contact-phone="' + phone + '" data-contact-type="' + contact['type'] + '">' +
@@ -421,11 +421,17 @@ $(document).on('click', ".js-toggle-contact-info", function () {
 $(document).on('click', '.phone-dial', function(e) {
     e.preventDefault();
     let phone = $(this).data('phone');
+    let title = $(this).data('title');
     $(".widget-phone__contact-info-modal").hide();
     $('.phone-widget__header-actions a[data-toggle-tab]').removeClass('is_active');
     $('.phone-widget__tab').removeClass('is_active');
     $('.phone-widget__header-actions a[data-toggle-tab="tab-phone"]').addClass('is_active');
     $('#tab-phone').addClass('is_active');
-    $("#call-pane__dial-number").val(phone);
+    $("#call-pane__dial-number").val(phone).attr('readonly', 'readonly');
+    if (title.length > 0) {
+        $("#call-to-label").text(title);
+    }
     $('.suggested-contacts').removeClass('is_active');
+    soundNotification("button_tiny");
+    $('.dial__btn').attr('disabled', 'disabled').addClass('disabled');
 });
