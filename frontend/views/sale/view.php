@@ -138,7 +138,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                 <th>Penalty Amount</th>
                                 <th>Selling</th>
                                 <th>Service Fee</th>
-                                <th>Real Commission</th>
+                                <th>Recal Commission</th>
                                 <th>Markup</th>
                                 <th>Upfront Charge</th>
                                 <th>Refundable Amount</th>

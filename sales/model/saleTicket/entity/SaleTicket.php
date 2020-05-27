@@ -101,7 +101,7 @@ class SaleTicket extends \yii\db\ActiveRecord
 
             ['st_original_fop', 'string', 'max' => 5],
 
-            ['st_penalty_amount', 'number'],
+            ['st_penalty_amount', 'string'],
 
             ['st_penalty_type', 'string', 'max' => 30],
 
@@ -187,18 +187,26 @@ class SaleTicket extends \yii\db\ActiveRecord
 
 	private function calculateUpfrontCharge()
 	{
-		if ($this->st_original_fop === 'CC') {
-			return $this->st_recall_commission + $this->st_markup + $this->st_penalty_amount - $this->st_service_fee;
+		if (in_array($this->st_original_fop, ['CC', 'SPLIT', 'SPLT'])) {
+			return $this->st_recall_commission + $this->st_markup + $this->getPenaltyAmountIntValue() - $this->st_service_fee;
 		}
 		return 0;
 	}
 
 	private function calculateRefundableAmount()
 	{
-		if (in_array($this->st_original_fop, ['CK', 'VCC'])) {
-			return $this->st_selling - $this->st_recall_commission - $this->st_markup - $this->st_penalty_amount;
+		if (in_array($this->st_original_fop, ['CP', 'CK', 'VCC'])) {
+			return $this->st_selling - $this->st_recall_commission - $this->st_markup - $this->getPenaltyAmountIntValue();
 		}
 		return $this->st_selling;
+	}
+
+	private function getPenaltyAmountIntValue(): float
+	{
+		if (preg_match('/^\d+$/', $this->st_penalty_amount)) {
+			return (float)$this->st_penalty_amount;
+		}
+		return 0.00;
 	}
 
 	public static function createBySaleData(SaleTicketCreateDTO $dto): SaleTicket
@@ -225,6 +233,6 @@ class SaleTicket extends \yii\db\ActiveRecord
 
 	public function isNeedAdditionalInfoForEmail(): bool
 	{
-		return ((($this->st_original_fop === 'CK' && in_array($this->st_charge_system, ['Stripe', 'Auth.net Capital', 'Auth.net'])) || $this->st_original_fop === 'VCC'));
+		return (((in_array($this->st_original_fop, ['CK', 'CP']) && in_array($this->st_charge_system, ['Stripe', 'Auth.net Capital', 'Auth.net'])) || $this->st_original_fop === 'VCC'));
 	}
 }
