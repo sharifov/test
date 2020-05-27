@@ -26,6 +26,11 @@ return [
         'pattern' => 'cases/take/<gid>',
         'route' => 'cases/take',
     ],
+
+    [
+        'pattern' => 'cases/take-over/<gid>',
+        'route' => 'cases/take-over',
+    ],
 	[
         'pattern' => 'cases/ajax-sale-list-edit-info/<caseId>/<caseSaleId>',
         'route' => 'cases/ajax-sale-list-edit-info',

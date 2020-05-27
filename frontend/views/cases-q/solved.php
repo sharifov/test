@@ -5,6 +5,7 @@ use common\models\Employee;
 use common\models\Project;
 use sales\access\ListsAccess;
 use dosamigos\datepicker\DatePicker;
+use sales\auth\Auth;
 use sales\entities\cases\CaseCategory;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -147,6 +148,11 @@ $lists = new ListsAccess($user->id);
             [
                 'class' => 'yii\grid\ActionColumn',
                 'template' => '{view}',
+                'visibleButtons' => [
+                    'view' => static function (CasesQSearch $model, $key, $index) {
+                        return Auth::can('cases/view', ['case' => $model]);
+                    },
+                ],
                 'buttons' => [
                     'view' => static function ($url, CasesQSearch $model) {
                         return Html::a('<i class="glyphicon glyphicon-search"></i> View Case', [
