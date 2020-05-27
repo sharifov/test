@@ -111,7 +111,7 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
                     },
                     theme: 'material',
                     isStacked: true,
-                    bar: {groupWidth: "10%"}
+                    bar: {groupWidth: "50%"}
                 };
 
                 // let newGraphData = [];
@@ -197,6 +197,46 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
                 });
 
                 $('.totalChartColumns').on('change', function () {
+                    var data = google.visualization.arrayToDataTable(graphData);
+                    var view = new google.visualization.DataView(data);
+                    var arr = [0];
+                    let c = [];
+                    var selectedMeasure = +$('.chartTotalCallsVaxis').val();
+                    $('.totalChartColumns').each( function(i, elem) {
+                        if ($(elem).prop('checked')) {
+                            if (
+                                selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION ?>
+                                || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION_AVG ?>
+                            ) {
+                                indexes[+$(elem).val()].forEach( function (e) {
+                                    arr.push(e);
+                                });
+                                c.push(colors[+$(elem).val()-1]);
+                            } else {
+                                arr.push((+$(elem).val()));
+                                c.push(colors[+$(elem).val()-1]);
+                            }
+                        }
+
+                        $('input[name="'+$(elem).attr('data-name')+'"][value="'+$(elem).val()+'"]').prop('checked', $(elem).prop('checked'));
+                    });
+
+                    if (arr.length < 2) {
+                        $(this).prop('checked', !$(this).prop('checked'));
+                        new PNotify({
+                            title: 'Warning',
+                            text: 'Graph must contain min 1 column',
+                            type: 'warning'
+                        });
+                        return false;
+                    }
+
+                    view.setColumns(arr);
+                    options.colors = c;
+                    totalCallsChart.draw(view, options);
+                });
+
+                $(window).on('resize', function () {
                     var data = google.visualization.arrayToDataTable(graphData);
                     var view = new google.visualization.DataView(data);
                     var arr = [0];
