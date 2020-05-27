@@ -139,6 +139,8 @@ class CallLogController extends FController
     public function actionList()
     {
         $searchModel = new CallLogSearch();
+        $searchModel->createTimeRange = null;
+
         $dataProvider = $searchModel->searchMyCalls(Yii::$app->request->queryParams, Auth::user());
 
         return $this->render('list', [

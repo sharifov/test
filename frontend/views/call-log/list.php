@@ -19,6 +19,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><i class="fa fa-phone"></i> <?= Html::encode($this->title) ?></h1>
 </div>
 
+<?= $this->render('partial/_list_search', ['model' => $searchModel]); ?>
+
 <?= GridView::widget([
     'dataProvider' => $dataProvider,
     'filterModel' => $searchModel,
