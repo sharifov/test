@@ -568,8 +568,9 @@ class QuoteController extends FController
                     $itinerary = [];
                     if ((new ReservationService($gds))->parseReservation($post['prepare_dump'], true, $itinerary)) {
                         $response['reservation_dump'] = Quote::createDump($itinerary);
-                    } else {
-                        throw new \DomainException(  'Parse dump failed. Step "reservation"');
+                    } elseif (!empty($post['reservation_result']) &&
+                        (new ReservationService('sabre'))->parseReservation($post['reservation_result'], true, $itinerary)) {
+                        $response['reservation_dump'] = Quote::createDump($itinerary);
                     }
 
                     if (empty($response['reservation_dump']) && empty($response['validating_carrier']) && empty($response['prices'])) {
@@ -622,7 +623,10 @@ class QuoteController extends FController
 
                     $itinerary = [];
                     if ((new ReservationService($gds))->parseReservation($post['prepare_dump'], true, $quote->itinerary)) {
-                        $response['reservation_dump'] = Quote::createDump($itinerary);
+                        $response['reservation_dump'] = Quote::createDump($quote->itinerary);
+                    } elseif (!empty($post['reservation_result']) &&
+                        (new ReservationService('sabre'))->parseReservation($post['reservation_result'], true, $quote->itinerary)) {
+                            $response['reservation_dump'] = Quote::createDump($quote->itinerary);
                     } else {
                         throw new \DomainException(  'Parse "reservation dump" failed');
                     }

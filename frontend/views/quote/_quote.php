@@ -248,10 +248,12 @@ $js = <<<JS
                     if (dataResponse.prices.length) {
                        $('#price-table tbody').html(dataResponse.prices); 
                     }
-                    if (dataResponse.reservation_dump.length) {
-                        var reservationDump = dataResponse.reservation_dump.join('<br />');
-                        reservationDump = '<h6>Imported reservation info</h6>' + reservationDump; 
-                        $('#box_reservation_result').html(reservationDump);
+                    if (dataResponse.reservation_dump.length) {                        
+                        $('#reservation_result').val(dataResponse.reservation_dump.join("\\n"));
+                        
+                        var reservationDumpOut = dataResponse.reservation_dump.join("<br />");
+                        reservationDumpOut = '<h6>Imported reservation info</h6>' + reservationDumpOut; 
+                        $('#box_reservation_result').html(reservationDumpOut);
                     }                    
                     $('#save_dump_btn').show(500);                                                            
 	            } else {
@@ -409,6 +411,9 @@ $this->registerCss('
 <!------------- Add/Edit Alternative Quote Form ------------->
 <div class="alternatives__item">
     <div id="box_reservation_result" style="margin-bottom: 8px;"></div>
+    <?php echo Html::textarea('reservation_result', null,
+        ['id' => 'reservation_result', 'style' => 'display:none;'])
+    ?>
     <div class="table-wrapper table-responsive ticket-details-block__table mb-20"
          id="alt-quote-fares-info-<?= $quote->id ?>">
         <?= $form->field($quote, 'id', [

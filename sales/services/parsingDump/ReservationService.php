@@ -135,4 +135,20 @@ class ReservationService
         $airline = (!$onView) ? Airline::findIdentity($code) : null;
         return $airline ? $airline->name : $code;
     }
+
+
+
+    public static function getPatternRow(?string $pattern = null): string
+    {
+        return $pattern ?? '/^
+            (\d{1,2}) # index
+            \s+([A-Z]{2}|[A-Z]{1}\d{1}) # Airline
+            \s*(\d{1,4})([A-Z]{1}) # Flight number + Booking Class 
+            \s+(\d{2})(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) # Departure day + month            
+            \s*([A-Z]{3})([A-Z]{3}) # iata airport departure + arrival 
+            (\s+\d{1}|\s+\d{2})(\d{2})(N|A|A\+|P) # Departure time hours + min + (AM|PM)
+            (\s+\d{1}|\s+\d{2})(\d{2})(N|A|A\+|P) # Arrival time hours + min + (AM|PM) 
+            \s+((\d{2})(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC))* # Arrival day + month          
+            /x';
+    }
 }
