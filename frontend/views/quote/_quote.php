@@ -30,13 +30,15 @@ $js = <<<JS
     var leadId = '$lead->id';
 
     $('[data-toggle="tooltip"]').tooltip();
-
-    $('.alt-quote-price').keyup(function (event) {
+    
+    $(document).on('keyup', '.alt-quote-price', function(event){
         var key = event.keyCode ? event.keyCode : event.which;
         validatePriceField($(this), key);
     });
-    $('.alt-quote-price').change(function (event) {
-        if ($(this).val().length == 0) {
+    
+    $(document).on('change', '.alt-quote-price', function(event){
+    
+        if ($(this).val().length === 0) {
             $(this).val(0);
         }
         var form = $('#$formID');
@@ -45,6 +47,7 @@ $js = <<<JS
             url: '$quotePriceUrl',
             data: form.serialize(),
             success: function (data) {
+            
                 $.each(data, function( index, value ) {
                     $('#'+index).val(value);
                 });
@@ -54,7 +57,7 @@ $js = <<<JS
             }
         });
     });
-    
+
     /***  Cancel card  ***/
     $('#cancel-alt-quote').click(function (e) {
         e.preventDefault();
