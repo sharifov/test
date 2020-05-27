@@ -545,6 +545,7 @@ class QuoteController extends FController
                                 $price->net = $price->fare + $price->taxes;
                                 $price->selling = $price->net + $price->mark_up;
                                 $price->toFloat();
+                                $price->oldParams = serialize($price->attributes);
 
                                 $prices[] = $price;
                                 unset($pricesFromDump[$key]);
