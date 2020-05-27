@@ -1,6 +1,8 @@
 <?php
 use yii\helpers\Html;
 use \kartik\form\ActiveForm;
+use kartik\select2\Select2;
+use common\models\Department;
 
 
 /* @var $this yii\web\View */
@@ -32,7 +34,7 @@ use \kartik\form\ActiveForm;
             </ul>
             <div class="clearfix"></div>
         </div>
-        <div class="x_content" style="display: <?=(Yii::$app->request->isPjax || Yii::$app->request->get('CallSearch') || Yii::$app->request->get('createTimeRange')) ? 'block' : 'none'?>">
+        <div class="x_content" style="display: <?=(Yii::$app->request->isPjax || Yii::$app->request->get('CallLogSearch') || Yii::$app->request->get('createTimeRange')) ? 'block' : 'none'?>">
             <?php $form = ActiveForm::begin([
                 'action' => ['list'],
                 'method' => 'get',
@@ -41,56 +43,10 @@ use \kartik\form\ActiveForm;
                 ],
             ]); ?>
 
-            <?php /*= $form->field($model, 'c_id') ?>
-
-    <?= $form->field($model, 'c_call_sid') ?>
-
-    <?= $form->field($model, 'c_call_type_id') ?>
-
-    <?= $form->field($model, 'c_from')*/ ?>
-
-            <?php // echo $form->field($model, 'c_to') ?>
-
-            <?php // echo $form->field($model, 'c_call_status') ?>
-
-            <?php // echo $form->field($model, 'c_forwarded_from') ?>
-
-            <?php // echo $form->field($model, 'c_caller_name') ?>
-
-            <?php // echo $form->field($model, 'c_parent_call_sid') ?>
-
-            <?php // echo $form->field($model, 'c_call_duration') ?>
-
-            <?php // echo $form->field($model, 'c_recording_url') ?>
-
-            <?php // echo $form->field($model, 'c_recording_duration') ?>
-
-            <?php // echo $form->field($model, 'c_sequence_number') ?>
-
-            <?php // echo $form->field($model, 'c_lead_id') ?>
-
-            <?php // echo $form->field($model, 'c_created_user_id') ?>
-
-            <?php // echo $form->field($model, 'c_created_dt') ?>
-
-            <?php // echo $form->field($model, 'c_com_call_id') ?>
-
-            <?php // echo $form->field($model, 'c_updated_dt') ?>
-
-            <?php // echo $form->field($model, 'c_project_id') ?>
-
-            <?php // echo $form->field($model, 'c_error_message') ?>
-
-            <?php // echo $form->field($model, 'c_is_new') ?>
-
-
 
             <div class="row">
                 <div class="col-md-3">
-
-                    <?php
-
-                    echo $form->field($model, 'createTimeRange', [
+                    <?php echo $form->field($model, 'createTimeRange', [
                         //'addon'=>['prepend'=>['content'=>'<i class="fa fa-calendar"></i>']],
                         'options' => ['class' => 'form-group']
                     ])->widget(\kartik\daterange\DateRangePicker::class, [
@@ -112,24 +68,70 @@ use \kartik\form\ActiveForm;
                     ])->label('Created DateTime Range');
                     ?>
                 </div>
-                <!--<div class="col-md-3">
+
+                <div class="col-md-3">
                     <div class="col-md-6">
-                        <?php /*echo $form->field($model, 'call_duration_from')->input('number', ['min' => 0]) */?>
+                        <?php echo $form->field($model, 'callDurationFrom')->input('number', ['min' => 0]) ?>
                     </div>
                     <div class="col-md-6">
-                        <?php /*echo $form->field($model, 'call_duration_to')->input('number', ['min' => 0]) */?>
+                        <?php echo $form->field($model, 'callDurationTo')->input('number', ['min' => 0]) ?>
                     </div>
                 </div>
 
                 <div class="col-md-2">
-                    <?php /*echo $form->field($model, 'c_project_id')->dropDownList(\common\models\Project::getListByUser(Yii::$app->user->id), ['prompt' => '-']) */?>
+                    <?= $form->field($model, 'projectIds', [
+                        'options' => ['class' => 'form-group']
+                    ])->widget(Select2::class, [
+                        'data' => \common\models\Project::getListByUser(Yii::$app->user->id),
+                        'size' => Select2::SMALL,
+                        'options' => ['placeholder' => 'Select Project', 'multiple' => true],
+                        'pluginOptions' => ['allowClear' => true],
+                    ])->label('Project') ?>
                 </div>
+
                 <div class="col-md-2">
-                    <?php /*echo $form->field($model, 'c_status_id')->dropDownList(\common\models\Call::STATUS_LIST, ['prompt' => '-']) */?>
+                    <?= $form->field($model, 'statusIds', [
+                        'options' => ['class' => 'form-group']
+                    ])->widget(Select2::class, [
+                        'data' => sales\model\callLog\entity\callLog\CallLogStatus::getList(),
+                        'size' => Select2::SMALL,
+                        'options' => ['placeholder' => 'Select Status', 'multiple' => true],
+                        'pluginOptions' => ['allowClear' => true],
+                    ])->label('Status') ?>
                 </div>
+
                 <div class="col-md-2">
-                    <?php /*echo $form->field($model, 'c_call_type_id')->dropDownList(\common\models\Call::CALL_TYPE_LIST, ['prompt' => '-']) */?>
-                </div>-->
+                    <?= $form->field($model, 'typesIds', [
+                        'options' => ['class' => 'form-group']
+                    ])->widget(Select2::class, [
+                        'data' => sales\model\callLog\entity\callLog\CallLogType::getList(),
+                        'size' => Select2::SMALL,
+                        'options' => ['placeholder' => 'Select Type', 'multiple' => true],
+                        'pluginOptions' => ['allowClear' => true],
+                    ])->label('Type') ?>
+                </div>
+
+                <div class="col-md-2">
+                    <?= $form->field($model, 'categoryIds', [
+                        'options' => ['class' => 'form-group']
+                    ])->widget(Select2::class, [
+                        'data' => sales\model\callLog\entity\callLog\CallLogCategory::getList(),
+                        'size' => Select2::SMALL,
+                        'options' => ['placeholder' => 'Select Category', 'multiple' => true],
+                        'pluginOptions' => ['allowClear' => true],
+                    ])->label('Category') ?>
+                </div>
+
+                <div class="col-md-2">
+                    <?= $form->field($model, 'departmentIds', [
+                        'options' => ['class' => 'form-group']
+                    ])->widget(Select2::class, [
+                        'data' => Department::getList(),
+                        'size' => Select2::SMALL,
+                        'options' => ['placeholder' => 'Select Department', 'multiple' => true],
+                        'pluginOptions' => ['allowClear' => true],
+                    ])->label('Department') ?>
+                </div>
             </div>
 
             <div class="row">

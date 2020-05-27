@@ -34,6 +34,14 @@ class CallLogSearch extends CallLog
     public $createTimeStart;
     public $createTimeEnd;
 
+    public $projectIds = [];
+    public $statusIds = [];
+    public $typesIds = [];
+    public $categoryIds = [];
+    public $departmentIds = [];
+    public $callDurationFrom;
+    public $callDurationTo;
+
     public const CREATE_TIME_START_DEFAULT_RANGE = '-6 days';
 
     public function rules(): array
@@ -70,6 +78,8 @@ class CallLogSearch extends CallLog
             [['clq_access_count', 'clq_queue_time'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
             [['clq_access_count', 'clq_queue_time'], 'integer'],
             [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+            [['callDurationFrom', 'callDurationTo'], 'integer'],
+            [['projectIds', 'statusIds', 'typesIds', 'categoryIds', 'departmentIds'], 'each', 'rule' => ['integer']],
         ];
     }
 
@@ -218,11 +228,8 @@ class CallLogSearch extends CallLog
     {
         $this->load($params);
 
-        $query = static::find()/*->with(['record', 'callLogLead', 'callLogCase'])*/;
+        $query = static::find();
         $query->where(['cl_user_id' => $user->id]);
-
-        /*->with(['project', 'department', 'phoneList', 'user', 'record'])
-        ->joinWith(['callLogLead.lead', 'callLogCase.case', 'queue']);*/
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -237,6 +244,39 @@ class CallLogSearch extends CallLog
             \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cl_call_created_dt', $this->cl_call_created_dt, $user->timezone);
         }
 
+        if ($this->createTimeRange){
+            $dateTimeStart = Employee::convertTimeFromUserDtToUTC($this->createTimeStart);
+            $dateTimeEnd = Employee::convertTimeFromUserDtToUTC($this->createTimeEnd);
+            $query->andWhere(['between', 'cl_call_created_dt', $dateTimeStart, $dateTimeEnd]);
+        }
+
+        if ($this->projectIds){
+            $query->andWhere(['cl_project_id' => $this->projectIds]);
+        }
+
+        if ($this->statusIds){
+            $query->andWhere(['cl_status_id' => $this->statusIds]);
+        }
+
+        if ($this->typesIds){
+            $query->andWhere(['cl_type_id' => $this->typesIds]);
+        }
+        if ($this->categoryIds){
+            $query->andWhere(['cl_category_id' => $this->categoryIds]);
+        }
+
+        if ($this->departmentIds){
+            $query->andWhere(['cl_department_id' => $this->departmentIds]);
+        }
+
+        if($this->callDurationFrom){
+            $query->andWhere(['>=', 'cl_duration', $this->callDurationFrom]);
+        }
+
+        if ($this->callDurationTo){
+            $query->andWhere(['<=', 'cl_duration', $this->callDurationTo]);
+        }
+
         $query->andFilterWhere([
             'cl_id' => $this->cl_id,
             'cl_project_id' => $this->cl_project_id,
@@ -245,9 +285,6 @@ class CallLogSearch extends CallLog
             'cl_category_id' => $this->cl_category_id,
             'cl_status_id' => $this->cl_status_id,
             'cl_client_id' => $this->cl_client_id,
-
-            /*'cll_lead_id' => $this->lead_id,
-            'clc_case_id' => $this->case_id,*/
         ]);
 
         $query->andFilterWhere(['like', 'cl_phone_from', $this->cl_phone_from])
