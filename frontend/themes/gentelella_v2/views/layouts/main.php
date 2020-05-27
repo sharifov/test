@@ -8,6 +8,7 @@ use frontend\widgets\notification\NotificationSocketWidget;
 use frontend\widgets\notification\NotificationWidget;
 use sales\auth\Auth;
 use yii\helpers\Html;
+use frontend\widgets\centrifugo\CentrifugoNotificationWidget;
 
 $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
 \frontend\assets\PageLoaderAsset::register($this);
@@ -65,7 +66,6 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
 <div class="container body">
     <div class="main_container">
         <?php if(!Yii::$app->user->isGuest):?>
-
         <div class="col-md-3 left_col">
             <div class="left_col scroll-view">
 
@@ -126,6 +126,7 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
                         </li>
 
                         <?php /*php if($isAdmin):*/ ?>
+
                             <?= frontend\widgets\OnlineConnection::widget() ?>
                             <?php //= frontend\widgets\Notifications::widget() ?>
                             <?php
@@ -135,6 +136,13 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
                                     echo NotificationWidget::widget(['userId' => Auth::id()]);
                                 }
                             ?>
+                        <?php /*= CentrifugoNotificationWidget::widget([
+                            'userId' => Auth::id(),
+                            'userAllowedChannels' => [
+                                'ownUserChannel#' . Auth::id(),
+                                'multipleUsersChannel#658,659'
+                            ]
+                        ]) */ ?>
 
                         <li class="nav-item">
                             <a href="javascript:;" class="info-number" title="Incoming Call - Volume ON" id="incoming-sound-indicator"></a>
@@ -226,6 +234,7 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
 
 <?= frontend\widgets\CallBox::widget() ?>
 <?= frontend\widgets\WebPhone::widget() ?>
+<?= frontend\widgets\NewWebPhoneWidget::widget(['userId' => Auth::id()]) ?>
 
 <?php $this->endBody(); ?>
 </body>

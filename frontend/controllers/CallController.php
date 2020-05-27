@@ -2,6 +2,8 @@
 
 namespace frontend\controllers;
 
+use common\components\CentrifugoService;
+use common\models\CallUserAccess;
 use common\models\Conference;
 use common\models\Department;
 use common\models\DepartmentPhoneProject;
@@ -15,6 +17,12 @@ use common\models\UserProjectParams;
 use frontend\widgets\CallBox;
 use frontend\widgets\IncomingCallWidget;
 use http\Exception\InvalidArgumentException;
+use sales\auth\Auth;
+
+use sales\helpers\call\CallHelper;
+use sales\repositories\call\CallRepository;
+use sales\repositories\call\CallUserAccessRepository;
+use sales\repositories\NotFoundException;
 use sales\services\call\CallService;
 use Yii;
 use common\models\Call;
@@ -31,15 +39,27 @@ use yii\web\Response;
  * CallController implements the CRUD actions for Call model.
  *
  * @property CallService $callService
+ * @property CallRepository $callRepository
+ * @property CallUserAccessRepository $callUserAccessRepository
  */
 class CallController extends FController
 {
     private $callService;
+    private $callRepository;
+    private $callUserAccessRepository;
 
-    public function __construct($id, $module, CallService $callService, $config = [])
-    {
+    public function __construct(
+    	$id,
+		$module,
+		CallService $callService,
+		CallRepository $callRepository,
+		CallUserAccessRepository $callUserAccessRepository,
+		$config = []
+	) {
         parent::__construct($id, $module, $config);
         $this->callService = $callService;
+        $this->callRepository = $callRepository;
+        $this->callUserAccessRepository = $callUserAccessRepository;
     }
 
     public function behaviors()
@@ -330,6 +350,7 @@ class CallController extends FController
 
         //$searchModel->date_range = $searchModel->datetime_start.' - '. $searchModel->datetime_end;
 
+        //var_dump($dataProvider3->getModels()); die();
 
         return $this->render('user-map/user-map', [
             'dataProviderOnlineDep1' => $dataProviderOnlineDep1,
@@ -343,6 +364,88 @@ class CallController extends FController
             //'searchModel' => $searchModel,
         ]);
 
+    }
+
+    public function actionRealtimeUserMap()
+    {
+        if (Yii::$app->request->isPost){
+            $user = Auth::user();
+            $searchUserConnectionModel = new UserConnectionSearch();
+            $searchUserCallModel = new CallSearch();
+            //$params = Yii::$app->request->queryParams;
+
+            $accessDepartmentModels = $user->udDeps;
+            if($accessDepartmentModels) {
+                $accessDepartments = ArrayHelper::map($accessDepartmentModels, 'dep_id', 'dep_id');
+            } else {
+                $accessDepartments = [];
+            }
+
+            $isSuper = ($user->isSupervision() || $user->isExSuper() || $user->isSupSuper());
+            if ($isSuper && !in_array(Department::DEPARTMENT_SUPPORT, $accessDepartments, true)) {
+                $userGroupsModel = $user->ugsGroups;
+
+                if ($userGroupsModel) {
+                    $userGroups = ArrayHelper::map($userGroupsModel, 'ug_id', 'ug_id');
+                } else {
+                    $userGroups = [];
+                }
+
+                $params['UserConnectionSearch']['ug_ids'] = $userGroups;
+                $params['CallSearch']['ug_ids'] = $userGroups;
+            }
+
+            if (!$accessDepartments || in_array(Department::DEPARTMENT_SALES, $accessDepartments, true)) {
+                $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_SALES;
+                $usersOnlineDepSales = $searchUserConnectionModel->searchRealtimeUserCallMap($params);
+            } else {
+                $usersOnlineDepSales = [];
+            }
+
+            if (!$accessDepartments || in_array(Department::DEPARTMENT_EXCHANGE, $accessDepartments, true)) {
+                $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_EXCHANGE;
+                $usersOnlineDepExchange = $searchUserConnectionModel->searchRealtimeUserCallMap($params);
+            } else {
+                $usersOnlineDepExchange = [];
+            }
+
+            if (!$accessDepartments || in_array(Department::DEPARTMENT_SUPPORT, $accessDepartments, true)) {
+                $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_SUPPORT;
+                $usersOnlineDepSupport = $searchUserConnectionModel->searchRealtimeUserCallMap($params);
+            } else {
+                $usersOnlineDepSupport = [];
+            }
+
+            if (!$accessDepartments) {
+                $params['UserConnectionSearch']['dep_id'] = 0;
+                $usersOnline = $searchUserConnectionModel->searchRealtimeUserCallMap($params);
+            } else {
+                $usersOnline = [];
+            }
+
+            $params['CallSearch']['dep_ids'] = $accessDepartments;
+            $params['CallSearch']['status_ids'] = [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING, Call::STATUS_QUEUE, Call::STATUS_IVR, Call::STATUS_DELAY];
+            $realtimeCalls = $searchUserCallModel->searchRealtimeUserCallMap($params);
+
+            $params['CallSearch']['status_ids'] = [Call::STATUS_COMPLETED, Call::STATUS_BUSY, Call::STATUS_FAILED, Call::STATUS_NO_ANSWER, Call::STATUS_CANCELED];
+
+            $callsHistory = $searchUserCallModel->searchRealtimeUserCallMapHistory($params);
+
+            CentrifugoService::sendMsg(json_encode([
+                'onlineDepSales' => $usersOnlineDepSales,
+                'onlineDepExchange' => $usersOnlineDepExchange,
+                'onlineDepSupport' => $usersOnlineDepSupport,
+                'usersOnline' => $usersOnline,
+                'realtimeCalls' => $realtimeCalls,
+                'callsHistory' => $callsHistory
+            ]), 'realtimeUserMapChannel#' . Auth::id());
+
+            return $this->asJson(['updatedTime' => Yii::$app->formatter->asTime(time(), 'php:H:i:s')]);
+        } else {
+            $this->layout = '@frontend/themes/gentelella_v2/views/layouts/main_tv';
+
+            return $this->render('realtime-user-map/index');
+        }
     }
 
     public function actionUserMap2()
@@ -856,6 +959,39 @@ class CallController extends FController
 
         return $this->redirect(['index']);
     }
+
+    public function actionAjaxAcceptIncomingCall(): Response
+	{
+		$action = \Yii::$app->request->post('act');
+		$call_id = \Yii::$app->request->post('call_id');
+
+		$response = [
+			'error' => true,
+			'message' => 'Internal Server Error'
+		];
+		if ($action && $call_id) {
+			try {
+				$call = $this->callRepository->find($call_id);
+				$callUserAccess = $this->callUserAccessRepository->getByUserAndCallId(Auth::id(), $call->c_id);
+				switch ($action) {
+					case 'accept':
+						$this->callService->acceptCall($callUserAccess, Auth::user());
+						$response['error'] = false;
+						$response['message'] = 'success';
+						break;
+					case 'busy':
+						$this->callService->busyCall($callUserAccess, Auth::user());
+						$response['error'] = false;
+						$response['message'] = 'success';
+						break;
+				}
+			} catch (\RuntimeException | NotFoundException $e) {
+				$response['message'] = $e->getMessage();
+			}
+		}
+
+		return $this->asJson($response);
+	}
 
     /**
      * @param string $sid

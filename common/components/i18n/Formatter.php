@@ -2,6 +2,8 @@
 
 namespace common\components\i18n;
 
+use common\components\purifier\Purifier;
+use common\models\CaseSale;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Lead;
@@ -42,6 +44,8 @@ use sales\entities\cases\CasesSourceType;
 use sales\model\callLog\entity\callLog\CallLogCategory;
 use sales\model\callLog\entity\callLog\CallLogStatus;
 use sales\model\callLog\entity\callLog\CallLogType;
+use sales\model\coupon\entity\coupon\CouponStatus;
+use sales\model\coupon\entity\coupon\CouponType;
 use sales\model\emailList\entity\EmailList;
 use sales\model\emailList\helpers\formatters\EmailListFormatter;
 use sales\model\phoneList\entity\PhoneList;
@@ -52,6 +56,23 @@ use yii\bootstrap4\Html;
 
 class Formatter extends \yii\i18n\Formatter
 {
+    public function asPurify($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+        return Purifier::purify($value);
+    }
+
+    public function asNtextWithPurify($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+        $value = $this->asNtext($value);
+        return Purifier::purify($value);
+    }
+
     public function asPhoneList($value): string
     {
         if ($value === null) {
@@ -351,6 +372,21 @@ class Formatter extends \yii\i18n\Formatter
         return \sales\model\cases\helpers\formatters\cases\Formatter::asCase($case);
     }
 
+    public function asCaseSale(?CaseSale $caseSale): string
+	{
+		if ($caseSale === null) {
+			return $this->nullDisplay;
+		}
+
+		return Html::tag('i', '', ['class' => 'fa fa-arrow-right'])
+			. ' '
+			. Html::a(
+				'Case Sale',
+				['/case-sale/view', 'css_cs_id' => $caseSale->css_cs_id, 'css_sale_id' => $caseSale->css_sale_id],
+				['target' => '_blank', 'data-pjax' => 0]
+			);
+	}
+
     public function asProductType($value): string
     {
         if ($value === null) {
@@ -592,5 +628,23 @@ class Formatter extends \yii\i18n\Formatter
             return $this->nullDisplay;
         }
         return Html::tag('i', '', ['class' => 'fa fa-user']) . ' ' . Html::a($value, ['/client/view', 'id' => $value], ['data-pjax' => 0, 'target' => '_blank']);
+    }
+
+    public function asCouponStatus($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return CouponStatus::asFormat($value);
+    }
+
+    public function asCouponType($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return CouponType::asFormat($value);
     }
 }

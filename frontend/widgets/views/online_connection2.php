@@ -178,6 +178,9 @@ $js = <<<JS
                             if (typeof refreshInboxCallWidget === "function") {
                                 refreshInboxCallWidget(obj);
                             }
+                            if (typeof PhoneWidgetCall === 'object') {
+                                PhoneWidgetCall.initIncomingCall(obj);
+                            }
                         }
                         
                         
@@ -192,6 +195,12 @@ $js = <<<JS
                             hiddenLink.attr("target", "_blank");
                             hiddenLink.attr("data-pjax", "0");
                             hiddenLink[0].click();*/
+                        }
+                        
+                        if(obj.cmd === 'phoneWidgetSmsSocketMessage') {
+                            if (typeof obj.data !== 'undefined') {
+                                PhoneWidgetSms.socket(obj.data);
+                             }
                         }
                     }
                     // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');

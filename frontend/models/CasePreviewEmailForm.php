@@ -24,6 +24,7 @@ use yii\base\Model;
  * @property array $e_content_data
  *
  * @property string $e_quote_list
+ * @property string $coupon_list
  * @property boolean $is_send
  *
  */
@@ -46,6 +47,24 @@ class CasePreviewEmailForm extends Model
 
     public $is_send;
 
+    public $coupon_list;
+
+
+    public function __construct(array $data = [], $config = [])
+	{
+		parent::__construct($config);
+
+		if ($data) {
+			$this->e_case_id = $data['email_data']['case']['id'] ?? null;
+			$this->e_email_from = $data['email_from'] ?? null;
+			$this->e_email_to = $data['email_to'] ?? null;
+			$this->e_email_from_name = $data['email_from_name'] ?? null;
+			$this->e_email_to_name = $data['email_to_name'] ?? null;
+			$this->e_email_subject = $data['email_subject'] ?? null;
+			$this->e_email_message = $data['email_body_html'] ?? null;
+		}
+
+	}
 
     /**
      * @return array
@@ -58,7 +77,7 @@ class CasePreviewEmailForm extends Model
             //[['e_type_id'], 'validateType'],
             [['e_email_to', 'e_email_from'], 'email'],
             [['e_email_tpl_id', 'e_case_id'], 'integer'],
-            [['e_email_message', 'e_quote_list'], 'string'],
+            [['e_email_message', 'e_quote_list', 'coupon_list'], 'string'],
             [['e_email_subject'], 'string', 'max' => 80, 'min' => 5],
             [['e_email_from_name', 'e_email_to_name'], 'string', 'max' => 50],
             [['e_language_id'], 'string', 'max' => 5],

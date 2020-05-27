@@ -20,8 +20,13 @@ return [
     ]
     ,
     'syncAirlineClasses' => 'https://airsearch.api.travelinsides.com/airline/get-cabin-classes',
-    'searchApiUrl' => 'https://airsearch.api.travelinsides.com/v1/search',
+    'search' => [
+        'host' => 'https://airsearch.api.travelinsides.com',
+        'api_cid' => 'SAL101',
+        'api_key' => 'c940e3484fe9fcc73ed12a7fcec469b4'
+    ],
 
+    'searchApiUrl' => 'https://airsearch.api.travelinsides.com/v1/search',
     'lead' => [
         'call2DelayTime' => 2 * 60 * 60,     // 2 hours
     ],
@@ -34,6 +39,7 @@ return [
         'apiKey' => '5394bbedf41dd2c0403897ca621f188b',
         'serverUrl' => 'https://backoffice.travelinsides.com/api/sync',
         'webHookEndpoint' => 'webhook/ping',
+		'serverUrlV3' => 'https://backoffice.travelinsides.com/api/v3'
     ],
     'global_phone' => '+16692011799',
 
@@ -53,5 +59,5 @@ return [
         'method'    => 'aes-256-cbc',
         'password'  => '',
         'iv'        => '',
-    ]
+    ],
 ];

@@ -3,6 +3,13 @@
 namespace frontend\controllers;
 
 use common\models\Quote;
+
+use sales\services\parsingDump\lib\ParsingDump;
+use sales\services\parsingDump\lib\worldSpan\Baggage;
+use sales\services\parsingDump\lib\worldSpan\Pricing;
+use sales\services\parsingDump\lib\worldSpan\Reservation;
+use sales\services\parsingDump\lib\worldSpan\WorldSpan;
+use sales\services\parsingDump\ReservationService;
 use Yii;
 use common\models\ApiLog;
 use common\models\search\ApiLogSearch;
@@ -93,17 +100,37 @@ class ToolsController extends FController
         return $this->render('supervisor');
     }
 
-    public function actionCheckFlightDump()
+    /**
+     * @return string
+     * @throws \Exception
+     */
+    public function actionCheckFlightDump(): string
     {
         $data = [];
         $dump = Yii::$app->request->post('dump');
+        $type = Yii::$app->request->post('type', ParsingDump::PARSING_DEFAULT_TYPE);
+        $gds = Yii::$app->request->post('gds');
+        $prepareSegment = (int) Yii::$app->request->post('prepare_segment', 0);
+
         if ($dump) {
 
-            $data = Quote::parseDump($dump, true);
+            if ($prepareSegment === 1 && $type === ParsingDump::PARSING_TYPE_RESERVATION) {
 
+                $data = (new ReservationService($gds))->parseReservation($dump, false);
 
+            } elseif ($obj = ParsingDump::initClass($gds, $type)) {
+                $data = $obj->parseDump($dump);
+            } else {
+                throw new \DomainException('Class (' . $gds . '\\' . $type . ') not found');
+            }
         }
 
-        return $this->render('check-flight-dump', ['dump' => $dump, 'data' => $data]);
+        return $this->render('check-flight-dump', [
+            'dump' => $dump,
+            'data' => $data,
+            'type' => $type,
+            'gds' => $gds,
+            'prepareSegment' => $prepareSegment,
+        ]);
     }
 }

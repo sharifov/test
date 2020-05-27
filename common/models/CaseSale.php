@@ -4,9 +4,11 @@ namespace common\models;
 
 use common\models\query\CaseSaleQuery;
 use sales\entities\cases\Cases;
+use sales\model\saleTicket\entity\SaleTicket;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
 /**
@@ -39,6 +41,7 @@ use yii\db\ActiveRecord;
  * @property Employee $cssCreatedUser
  * @property Cases $cssCs
  * @property Employee $cssUpdatedUser
+ * @property SaleTicket $cssSaleTicket
  */
 class CaseSale extends \yii\db\ActiveRecord
 {
@@ -201,6 +204,11 @@ class CaseSale extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Employee::class, ['id' => 'css_updated_user_id']);
     }
+
+    public function getCssSaleTicket(): ActiveQuery
+	{
+		return $this->hasMany(SaleTicket::class, ['st_case_id' => 'css_cs_id', 'st_case_sale_id' => 'css_sale_id']);
+	}
 
     /**
      * {@inheritdoc}

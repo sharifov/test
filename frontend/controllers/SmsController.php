@@ -5,24 +5,40 @@ namespace frontend\controllers;
 use common\models\Employee;
 use common\models\UserProjectParams;
 use frontend\models\SmsInboxForm;
-use phpDocumentor\Reflection\Types\This;
+use frontend\widgets\newWebPhone\sms\dto\SmsDto;
+use frontend\widgets\newWebPhone\sms\form\SmsListForm;
+use frontend\widgets\newWebPhone\sms\form\SmsSendForm;
+use sales\auth\Auth;
+use sales\model\sms\useCase\send\SmsSenderService;
+use sales\services\TransactionManager;
 use Yii;
 use common\models\Sms;
 use common\models\search\SmsSearch;
-use frontend\controllers\FController;
-use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use common\components\CommunicationService;
+use yii\web\Response;
 
 /**
  * SmsController implements the CRUD actions for Sms model.
+ *
+ * @property TransactionManager $transactionManager
+ * @property SmsSenderService $smsSender
  */
 class SmsController extends FController
 {
+    private $transactionManager;
+    private $smsSender;
+
+    public function __construct($id, $module, TransactionManager $transactionManager, SmsSenderService $smsSender, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->transactionManager = $transactionManager;
+        $this->smsSender = $smsSender;
+    }
 
     public function behaviors()
     {
@@ -396,5 +412,103 @@ class SmsController extends FController
         }
 
         return $this->redirect(['index']);
+    }
+
+    public function actionListAjax(): Response
+    {
+        $user = Auth::user();
+
+        $form = new SmsListForm($user);
+
+        $result = [
+            'success' => false,
+            'errors' => [],
+            'contact' => [],
+            'user' => [],
+            'smses' => [],
+        ];
+
+        if ($form->load(Yii::$app->request->post())) {
+
+            if ($form->validate()) {
+
+                $result['success'] = true;
+                $result['contact'] = [
+                    'id' => $form->getContactId(),
+                    'name' => $form->getContactName(),
+                    'phone' => $form->getContactPhone(),
+                    'type' => $form->getContactType(),
+                ];
+                $result['user'] = [
+                    'phone' => $form->userPhone,
+                ];
+
+                $smsList = Sms::find()
+                    //->andWhere(['s_client_id' => $form->getContactId()])
+                    ->andWhere([
+                        'OR',
+                        ['s_phone_from' => $form->userPhone, 's_phone_to' => $form->getContactPhone(), 's_type_id' => Sms::TYPE_OUTBOX],
+                        ['s_phone_from' => $form->getContactPhone(), 's_phone_to' => $form->userPhone, 's_type_id' => Sms::TYPE_INBOX],
+                    ])
+                    ->orderBy(['s_created_dt' => SORT_ASC])->asArray()->all();
+
+                foreach ($smsList as $sms) {
+                    $result['smses'][] = (new SmsDto($sms, $form->user, $form->getContact()))->toArray();
+                }
+
+            } else {
+                $result['errors'] = $form->getErrors();
+            }
+
+        } else {
+            $result['errors'] = ['data' => ['Not found post data']];
+        }
+
+        return $this->asJson($result);
+    }
+
+    public function actionSend(): Response
+    {
+        $user = Auth::user();
+
+        $form = new SmsSendForm($user);
+
+        $result = [
+            'success' => false,
+            'errors' => [],
+            'contact' => [],
+            'user' => [],
+            'sms' => [],
+        ];
+
+        if ($form->load(Yii::$app->request->post())) {
+
+            if ($form->validate()) {
+
+                $result['contact'] = [
+                    'id' => $form->getContactId(),
+                    'name' => $form->getContactName(),
+                    'phone' => $form->getContactPhone(),
+                    'type' => $form->getContactType(),
+                ];
+                $result['user'] = [
+                    'phone' => $form->userPhone,
+                ];
+
+                if ($form->contactIsContact()) {
+                    $result = array_merge($result, $this->smsSender->sendToExternalNumber($form));
+                } elseif ($form->contactIsInternal()) {
+                    $result = array_merge($result, $this->smsSender->sendToInternalNumber($form));
+                }
+
+            } else {
+                $result['errors'] = $form->getErrors();
+            }
+
+        } else {
+            $result['errors'] = ['data' => ['Not found post data']];
+        }
+
+        return $this->asJson($result);
     }
 }

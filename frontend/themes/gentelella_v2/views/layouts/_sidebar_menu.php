@@ -148,6 +148,12 @@ $isSuperAdmin = $user->isSuperAdmin();
         }
 
         $menuItems[] = [
+            'label' => 'My Contacts <span id="call-inbox-queue" class="label-info label pull-right"></span>',
+            'url' => ['/contacts/index'],
+            'icon' => 'user'
+        ];
+
+        $menuItems[] = [
             'label' => 'Data Lists',
             'url' => 'javascript:',
             'icon' => 'th-list',
@@ -172,6 +178,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Conference Room', 'url' => ['/conference-room/index'], 'icon' => 'comment'],
                 ['label' => 'Conferences', 'url' => ['/conference/index'], 'icon' => 'comment'],
                 ['label' => 'Conference Participant', 'url' => ['/conference-participant/index'], 'icon' => 'phone'],
+                ['label' => 'User Voice Mail', 'url' => ['/user-voice-mail/index'], 'icon' => 'microphone'],
             ]
         ];
 
@@ -233,7 +240,6 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'User Status', 'url' => ['/user-status/index'], 'icon' => 'sliders'],
                 ['label' => 'User Online', 'url' => ['/user-online/index'], 'icon' => 'plug'],
                 ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
-                ['label' => 'Visitor Log', 'url' => ['/visitor-log/index'], 'icon' => 'list'],
                 ['label' => 'User Commission Rules', 'url' => ['/user-commission-rules-crud/index'], 'icon' => 'list'],
                 ['label' => 'User Bonus Rules', 'url' => ['/user-bonus-rules-crud/index'], 'icon' => 'list'],
             ]
@@ -247,6 +253,9 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Clients', 'url' => ['/client/index'], 'icon' => 'users'],
                 ['label' => 'Clients phones', 'url' => ['/client-phone/index'], 'icon' => 'phone'],
                 ['label' => 'Clients emails', 'url' => ['/client-email/index'], 'icon' => 'envelope '],
+                ['label' => 'Visitor Log', 'url' => ['/visitor-log/index'], 'icon' => 'list'],
+                ['label' => 'User Contact Lists', 'url' => ['/user-contact-list/index'], 'icon' => 'list'],
+                ['label' => 'Client Project', 'url' => ['/client-project/index'], 'icon' => 'list'],
             ]
         ];
 
@@ -280,6 +289,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Invoices Status Log', 'url' => ['/invoice/invoice-status-log-crud/index']],
                 ['label' => 'Billing Info', 'url' => ['/billing-info/index']],
                 ['label' => 'Credit Cards', 'url' => ['/credit-card/index']],
+                ['label' => 'Sale Credit Cards', 'url' => ['/sale-credit-card/index']],
                 ['label' => 'Payments', 'url' => ['/payment/index']],
                 ['label' => 'Payment Methods', 'url' => ['/payment-method/index']],
                 ['label' => 'Transactions', 'url' => ['/transaction/index']],
@@ -322,10 +332,13 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'SMS template types', 'url' => ['/sms-template-type/index'], 'icon' => 'comments-o'],
                 ['label' => 'Case Sales', 'url' => ['/case-sale/index'], 'icon' => 'list'],
                 ['label' => 'Case Notes', 'url' => ['/case-note/index'], 'icon' => 'list'],
+                ['label' => 'Sale Ticket', 'url' => ['/sale-ticket/index'], 'icon' => 'list'],
                 ['label' => 'Project Settings', 'url' => ['/settings/projects'], 'icon' => 'product-hunt'],
                 ['label' => 'Check List Types', 'url' => ['/lead-checklist-type/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('manageLeadChecklistType')],
                 ['label' => 'Case status history', 'url' => ['/case-status-log/index'], 'icon' => 'bars'],
                 ['label' => 'Case categories', 'url' => ['/case-category/index'], 'icon' => 'list'],
+                ['label' => 'Coupons', 'url' => ['/coupon/index'], 'icon' => 'list'],
+                ['label' => 'Coupon Cases', 'url' => ['/coupon-case/index'], 'icon' => 'list'],
             ]
         ];
 
@@ -397,6 +410,7 @@ $isSuperAdmin = $user->isSuperAdmin();
 
                 ['label' => 'User Stats', 'url' => ['/user-connection/stats'], 'icon' => 'area-chart'],
                 ['label' => 'Call User Map', 'url' => ['/call/user-map'], 'icon' => 'map'],
+                ['label' => 'Real-time User Map', 'url' => ['/call/realtime-user-map'], 'icon' => 'map'],
                 ['label' => 'Agents Ratings', 'url' => ['/stats/agent-ratings'], 'icon' => 'star-half-empty'],
             ]
         ];

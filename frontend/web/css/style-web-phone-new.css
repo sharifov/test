@@ -1,0 +1,1533 @@
+@charset "UTF-8";
+.wg-history-load {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    height: 100%;
+    width: 100%;
+    background-color: rgba(255,255,255,0.5);
+    z-index: 10;
+    font-size: 4rem;
+}
+.phone-widget {
+  max-width: 100%;
+  height: 100vh;
+  left: 0;
+  right: auto;
+  top: 0;
+  bottom: auto;
+  width: 100%;
+  overflow: hidden;
+  position: fixed;
+  box-shadow: 1px 2px 8px rgba(0, 0, 0, 0.3);
+  visibility: hidden;
+  opacity: 0;
+  z-index: -2;
+  transition: 0.2s; }
+  @media (min-width: 768px) {
+    .phone-widget {
+      max-width: 300px;
+      bottom: calc(180px + 68px);
+      right: 20px;
+      left: auto;
+      top: auto;
+      border-radius: 6px;
+      height: 628px; } }
+  .phone-widget button {
+    cursor: pointer;
+    outline: none; }
+    .phone-widget button:hover, .phone-widget button:focus, .phone-widget button:active {
+      outline: none;
+      box-shadow: none; }
+  .phone-widget .call-pane-label {
+    font-style: normal;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 18px;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0; }
+  .phone-widget .fa,
+  .phone-widget .far,
+  .phone-widget .fas {
+    font: unset;
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900; }
+  .phone-widget .logs-block {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    height: 300px;
+    overflow: hidden auto;
+    margin: 0; }
+    .phone-widget .logs-block p {
+      color: #686865;
+      font-family: 'Share Tech Mono', 'Courier New', Courier, fixed-width;
+      font-size: 10px;
+      line-height: 1.2em;
+      text-indent: -1.25em;
+      width: 98%;
+      margin-left: 8px;
+      margin-bottom: 8px; }
+  .phone-widget__additional-bar {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: #fff;
+    z-index: 4;
+    border-radius: 16px 16px 0 0; }
+  .phone-widget .additional-bar {
+    display: none; }
+    .phone-widget .additional-bar__close {
+      position: absolute;
+      padding: 4px;
+      width: 24px;
+      height: 24px;
+      right: 10px;
+      line-height: 18px;
+      font-size: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #363c45; }
+    .phone-widget .additional-bar__header {
+      padding: 16px;
+      border-bottom: 1px solid #d6e3f0;
+      position: relative; }
+    .phone-widget .additional-bar__header-title {
+      font-style: normal;
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 18px;
+      color: #363c45; }
+    .phone-widget .additional-bar__body {
+      max-height: 360px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 16px; }
+  .phone-widget .current-number {
+    margin: 0;
+    width: auto;
+    top: 14px; }
+    .phone-widget .current-number .fa {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #fff;
+      pointer-events: none; }
+    .phone-widget .current-number__phone {
+      font-size: 14px;
+      line-height: 18px;
+      width: calc(100% - 72px); }
+    .phone-widget .current-number__identifier {
+      font-weight: 500;
+      font-size: 10px;
+      line-height: 11px;
+      color: #2a3f54;
+      background-color: #d6e3f0;
+      text-transform: uppercase;
+      border-radius: 2px;
+      margin-left: 8px;
+      padding: 3px 4px 2px 4px;
+      display: inline-block;
+      max-width: 72px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap; }
+    .phone-widget .current-number__selected-project {
+      margin: 0;
+      top: -16px;
+      position: absolute; }
+    .phone-widget .current-number .dropdown {
+      width: 100%;
+      appearance: none;
+      -webkit-appearance: none;
+      border-radius: 4px;
+      border: 0 none;
+      color: #fff;
+      font-size: 14px;
+      line-height: 18px;
+      background: transparent;
+      height: 22px; }
+      .phone-widget .current-number .dropdown .dropdown-menu {
+        background-color: #6986a6;
+        border: 0 none;
+        /*width: 100%;*/
+        margin: 0;
+        top: -2px; }
+      .phone-widget .current-number .dropdown .dropdown-toggle {
+        background-color: transparent;
+        width: 100%;
+        border: 0 none;
+        padding: 0 30px 0 0;
+        height: 100%;
+        text-align: left;
+        margin: 0;
+        outline: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between; }
+        .phone-widget .current-number .dropdown .dropdown-toggle:focus, .phone-widget .current-number .dropdown .dropdown-toggle:active {
+          outline: none;
+          box-shadow: none; }
+        .phone-widget .current-number .dropdown .dropdown-toggle:after {
+          display: none; }
+      .phone-widget .current-number .dropdown .dropdown-item {
+        background-color: transparent;
+        color: #fff;
+        padding: 10px;
+        margin: 0;
+        position: relative;
+        display: flex;
+        align-items: center; }
+        .phone-widget .current-number .dropdown .dropdown-item:after {
+          content: "";
+          position: absolute;
+          width: 100%;
+          height: 1px;
+          background-color: rgba(255, 255, 255, 0.15);
+          top: 0;
+          left: 50%;
+          transform: translateX(-50%); }
+        .phone-widget .current-number .dropdown .dropdown-item:first-child:after {
+          display: none; }
+  .phone-widget .agent-text-avatar {
+    height: 30px;
+    width: 30px;
+    font-size: 18px;
+    line-height: 30px;
+    text-align: center;
+    background-color: #4494e3;
+    color: #fff;
+    border-radius: 50%;
+    text-align: center;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.4); }
+    .phone-widget .agent-text-avatar span {
+      display: inherit; }
+  .phone-widget.is_active {
+    visibility: visible;
+    opacity: 1;
+    z-index: 1050; }
+  .phone-widget .fa-phone {
+    transform: rotate3d(1, 1, 5, 90deg); }
+  .phone-widget .collapsible-toggler {
+    display: flex;
+    width: 100%;
+    position: relative; }
+  .phone-widget .simplebar-content-wrapper {
+    overflow-y: scroll !important; }
+  .phone-widget__header {
+    background-color: #2a3f54;
+    padding: 12px 16px; }
+  .phone-widget__heading {
+    text-align: center;
+    position: relative;
+    margin-bottom: 16px; }
+  .phone-widget__header-actions {
+    padding: 0;
+    margin: 0;
+    list-style-type: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #fff; }
+    .phone-widget__header-actions i {
+      color: #fff;
+      margin-right: 6px; }
+    .phone-widget__header-actions a {
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 18px;
+      opacity: 0.3;
+      text-transform: capitalize;
+      color: #fff; }
+      .phone-widget__header-actions a:hover, .phone-widget__header-actions a:focus, .phone-widget__header-actions a:active {
+        color: #fff; }
+      .phone-widget__header-actions a.is_active {
+        opacity: 1; }
+  .phone-widget__title {
+    font-size: 18px;
+    line-height: 18px;
+    color: #fff; }
+  .phone-widget .header-action-small {
+    position: absolute;
+    top: -4px;
+    padding: 4px;
+    color: #fff; }
+    .phone-widget .header-action-small .fa {
+      font-size: 16px; }
+    .phone-widget .header-action-small:hover, .phone-widget .header-action-small:active, .phone-widget .header-action-small:focus, .phone-widget .header-action-small:active:focus, .phone-widget .header-action-small:focus:active {
+      color: #fff; }
+  .phone-widget__dev {
+    left: -6px; }
+  .phone-widget__settings {
+    right: 20px; }
+  .phone-widget__close {
+    right: -10px; }
+  .phone-widget__body {
+    min-height: calc(100vh - 80px);
+    background-color: #f3f3f3;
+    position: relative; }
+    @media (min-width: 768px) {
+      .phone-widget__body {
+        min-height: 552px; } }
+  .phone-widget__tab {
+    position: absolute;
+    opacity: 0;
+    z-index: -1;
+    transition: opacity 0.2s;
+    width: 100%;
+    height: calc(100vh - 80px);
+    display: flex; }
+    .phone-widget__tab.ovf-hidden {
+      overflow: hidden !important;
+      padding: 0; }
+    @media (min-width: 768px) {
+      .phone-widget__tab {
+        height: 552px; } }
+    .phone-widget__tab.is_active {
+      opacity: 1;
+      z-index: 4;
+      transition: opacity 0.1s; }
+  .phone-widget__list-item {
+    list-style-type: none;
+    margin: 0;
+    padding: 0 10px 34px 10px;
+    background-color: #fff; }
+  .phone-widget .contacts-list .phone-widget__list-item {
+    padding-bottom: 0; }
+  .phone-widget .section-separator {
+    font-weight: 600;
+    font-size: 11px;
+    line-height: 18px;
+    color: #668baf;
+    padding: 4px 10px;
+    display: inline-block;
+    width: 100%;
+    background-color: #f3f3f3; }
+  .phone-widget .contact-info-card {
+    display: flex;
+    padding: 14px 0 0; }
+    .phone-widget .contact-info-card__label {
+      display: block;
+      font-size: 12px;
+      line-height: 18px;
+      text-align: center;
+      color: #fff; }
+    .phone-widget .contact-info-card.is-collapsible {
+      flex-direction: column;
+      position: relative; }
+      .phone-widget .contact-info-card.is-collapsible::before {
+        content: "";
+        height: 1px;
+        width: calc(100% - 44px);
+        right: 0;
+        bottom: 0;
+        position: absolute;
+        background-color: #dedede; }
+      .phone-widget .contact-info-card.is-collapsible:last-child:before {
+        display: none; }
+    .phone-widget .contact-info-card .contact-options-list {
+      margin-left: 50px;
+      padding-top: 0; }
+    .phone-widget .contact-info-card .collapsible-container {
+      margin: 0 -10px; }
+    .phone-widget .contact-info-card .contact-full-info {
+      margin: 4px -0px 0;
+      background-color: #f8f8fb; }
+      .phone-widget .contact-info-card .contact-full-info > li {
+        border-bottom: 1px solid #dedede;
+        margin-bottom: 0;
+        padding: 10px 10px;
+        align-items: center; }
+        .phone-widget .contact-info-card .contact-full-info > li:last-child {
+          border-bottom: 0 none; }
+      .phone-widget .contact-info-card .contact-full-info .form-control {
+        line-height: 15px;
+        height: 15px; }
+      .phone-widget .contact-info-card .contact-full-info label {
+        line-height: 15px;
+        text-transform: capitalize; }
+      .phone-widget .contact-info-card .contact-full-info .actions-list li {
+        background-color: transparent;
+        transition: 0.15s; }
+        .phone-widget .contact-info-card .contact-full-info .actions-list li:hover {
+          background-color: #e9e9e9; }
+    .phone-widget .contact-info-card .collapsible-arrow {
+      position: absolute;
+      right: 0;
+      top: 2px;
+      padding: 4px;
+      transition: 0.1s;
+      transform: rotate(90deg);
+      height: 32px;
+      width: 32px;
+      text-align: center; }
+      .phone-widget .contact-info-card .collapsible-arrow i {
+        color: #9b9da8;
+        line-height: 28px; }
+    .phone-widget .contact-info-card__line {
+      display: flex;
+      justify-content: space-between; }
+    .phone-widget .contact-info-card__name {
+      font-weight: 600;
+      font-size: 14px;
+      line-height: 18px;
+      color: #363c45; }
+    .phone-widget .contact-info-card__timestamp {
+      color: #363c45;
+      font-weight: 500;
+      font-size: 12px;
+      line-height: 18px; }
+    .phone-widget .contact-info-card__call-type {
+      font-size: 12px;
+      line-height: 18px;
+      color: #9b9da8; }
+    .phone-widget .contact-info-card__call-length {
+      font-size: 12px;
+      line-height: 18px;
+      color: #9b9da8; }
+    .phone-widget .contact-info-card__note {
+      padding-top: 4px;
+      display: flex;
+      margin-bottom: -10px; }
+      .phone-widget .contact-info-card__note svg {
+        display: block; }
+    .phone-widget .contact-info-card__note-message {
+      font-size: 13px;
+      line-height: 18px;
+      font-style: italic;
+      color: #446d97; }
+    .phone-widget .contact-info-card__details {
+      width: 100%;
+      border-bottom: 1px solid #dedede;
+      padding-bottom: 14px;
+      margin-left: 14px; }
+    .phone-widget .contact-info-card.is-collapsible .contact-info-card__details {
+      border: 0 none;
+      min-height: 50px;
+      display: flex;
+      align-items: flex-start;
+      flex-direction: column;
+      justify-content: center; }
+    .phone-widget .contact-info-card__status {
+      position: relative;
+      width: 32px; }
+    .phone-widget .contact-info-card__call-icon {
+      height: 32px;
+      width: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      overflow: hidden;
+      background-color: #f3f3f3; }
+    .phone-widget .contact-info-card .agent-text-avatar, .phone-widget .contact-info-card__call-icon {
+      position: absolute;
+      top: 2px;
+      left: 0; }
+  .phone-widget .collapsible-toggler {
+    cursor: pointer; }
+    .phone-widget .collapsible-toggler.collapsed .collapsible-arrow {
+      transform: rotate(0); }
+  .phone-widget .contact-options-list {
+    display: flex;
+    justify-content: space-between;
+    list-style-type: none;
+    padding: 2px 0 8px 0;
+    margin: 0 0 0 44px; }
+    .phone-widget .contact-options-list__option {
+      width: calc(100% / 3 - 3px);
+      text-align: center;
+      background-color: #f3f3f3;
+      border-radius: 4px;
+      padding: 4px;
+      cursor: pointer; }
+      .phone-widget .contact-options-list__option span {
+        text-transform: uppercase;
+        display: inline-block;
+        margin-left: 4px;
+        font-weight: 500;
+        font-size: 12px;
+        line-height: 18px;
+        color: #33404f; }
+      .phone-widget .contact-options-list__option--call i,
+      .phone-widget .contact-options-list__option--call span {
+        color: #399e65; }
+  .phone-widget .widget-modal {
+    background-color: #fff;
+    padding: 34px 0 26px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    overflow-y: auto;
+    height: calc(100vh - 80px);
+    display: none;
+    z-index: 15; }
+    .phone-widget .widget-modal__close {
+      color: #363c45;
+      text-transform: capitalize;
+      position: absolute;
+      padding: 8px 16px;
+      left: 0;
+      width: 100%;
+      top: 0;
+      font-weight: normal;
+      font-size: 14px;
+      line-height: 18px;
+      background-color: #f3f3f3; }
+      .phone-widget .widget-modal__close i {
+        margin-right: 6px;
+        font-size: 14px; }
+  .phone-widget .contact-full-info {
+    list-style-type: none;
+    margin: 0;
+    padding: 0; }
+    .phone-widget .contact-full-info select {
+      appearance: initial; }
+    .phone-widget .contact-full-info > li {
+      margin-bottom: 16px;
+      display: flex;
+      align-items: flex-end; }
+    .phone-widget .contact-full-info .actions-list {
+      display: flex;
+      list-style-type: none;
+      margin: 0 0 -3px;
+      padding: 0;
+      width: 25%;
+      justify-content: flex-end; }
+      .phone-widget .contact-full-info .actions-list__option {
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f3f3f3;
+        border-radius: 50%;
+        margin-left: 10px;
+        cursor: pointer; }
+        .phone-widget .contact-full-info .actions-list__option i {
+          font-size: 14px; }
+        .phone-widget .contact-full-info .actions-list__option:first-child {
+          margin: 0; }
+        .phone-widget .contact-full-info .actions-list__option--phone i {
+          color: #399e65; }
+    .phone-widget .contact-full-info .form-control:disabled {
+      cursor: unset;
+      background-color: #fff; }
+    .phone-widget .contact-full-info .form-control-wrap {
+      display: flex;
+      align-items: center; }
+      .phone-widget .contact-full-info .form-control-wrap i {
+        margin-right: 6px; }
+      .phone-widget .contact-full-info .form-control-wrap[data-type="person"] .contact-type-company {
+        display: none; }
+      .phone-widget .contact-full-info .form-control-wrap[data-type="person"] .contact-type-person {
+        display: block; }
+      .phone-widget .contact-full-info .form-control-wrap[data-type="company"] .contact-type-company {
+        display: block; }
+      .phone-widget .contact-full-info .form-control-wrap[data-type="company"] .contact-type-person {
+        display: none; }
+    .phone-widget .contact-full-info.edit-mode .actions-list {
+      display: none; }
+    .phone-widget .contact-full-info.edit-mode > li {
+      border-bottom: 1px solid rgba(56, 119, 181, 0.5); }
+    .phone-widget .contact-full-info.edit-mode select {
+      appearance: button; }
+    .phone-widget .contact-full-info label {
+      font-weight: 600;
+      font-size: 11px;
+      line-height: 18px;
+      color: #668baf;
+      text-transform: uppercase;
+      margin: 0; }
+    .phone-widget .contact-full-info .form-group {
+      margin-bottom: 0px;
+      max-width: 75%;
+      width: 100%; }
+    .phone-widget .contact-full-info .form-control {
+      border: 0 none;
+      background: transparent;
+      padding: 0;
+      font-size: 14px;
+      line-height: 18px;
+      color: #363c45;
+      height: 20px;
+      border-bottom: 1px solid transparent; }
+  @media (min-width: 768px) {
+    .phone-widget .contact-modal-info {
+      height: 552px; } }
+  .phone-widget .contact-modal-info .agent-text-avatar {
+    width: 50px;
+    height: 50px;
+    line-height: 50px;
+    font-size: 26px;
+    margin-bottom: 8px; }
+  .phone-widget .contact-modal-info__remove-contact {
+    color: #e15258;
+    font-size: 11px;
+    line-height: 18px; }
+  .phone-widget .contact-modal-info__body {
+    padding: 0 16px; }
+  .phone-widget .contact-modal-info__actions {
+    width: 100%; }
+    .phone-widget .contact-modal-info__actions .contact-options-list {
+      margin: 0 0 28px;
+      padding: 0; }
+  .phone-widget .contact-modal-info__name {
+    margin: 0 0 20px;
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 24px;
+    color: #363c45; }
+  .phone-widget .contact-modal-info__user {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    padding: 26px 32px 0;
+    margin-bottom: 20px; }
+  .phone-widget .modal-messaging__contact-info {
+    background: #66798b;
+    text-align: center;
+    padding: 8px; }
+  .phone-widget .modal-messaging__info-item {
+    font-weight: normal;
+    font-size: 14px;
+    line-height: 18px;
+    color: #fff;
+    margin-bottom: 4px; }
+  .phone-widget .modal-messaging__contact-name {
+    font-weight: 600; }
+  .phone-widget .modal-messaging__info-number {
+    font-weight: normal;
+    font-size: 14px;
+    line-height: 18px;
+    color: rgba(255, 255, 255, 0.7); }
+  .phone-widget .email-modal {
+    background-color: #f5f5f5;
+    height: calc(100vh - 80px); }
+    @media (min-width: 768px) {
+      .phone-widget .email-modal {
+        height: 552px;
+        overflow: hidden !important; } }
+    .phone-widget .email-modal .simplebar-content-wrapper {
+      overflow-y: scroll !important; }
+    .phone-widget .email-modal__messages-scroll {
+      overflow-y: auto;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 172px); }
+      @media (min-width: 768px) {
+        .phone-widget .email-modal__messages-scroll {
+          height: 387px; } }
+    .phone-widget .email-modal__body {
+      height: 100%;
+      padding: 18px 16px; }
+    .phone-widget .email-modal input,
+    .phone-widget .email-modal textarea {
+      background: #fff;
+      border: 1px solid #dddddd;
+      box-sizing: border-box;
+      border-radius: 4px;
+      padding: 10px 12px;
+      width: 100%;
+      resize: none; }
+      .phone-widget .email-modal input:focus, .phone-widget .email-modal input:active,
+      .phone-widget .email-modal textarea:focus,
+      .phone-widget .email-modal textarea:active {
+        box-shadow: none;
+        outline: none; }
+    .phone-widget .email-modal__contact-input {
+      margin-bottom: 12px;
+      height: 40px; }
+    .phone-widget .email-modal__msg-input {
+      height: 192px;
+      margin-bottom: 12px; }
+    .phone-widget .email-modal__send-btn {
+      display: flex;
+      align-items: center;
+      padding: 8px 16px;
+      background: #4494e3;
+      border-radius: 4px;
+      border: 0 none;
+      margin-bottom: 8px; }
+      .phone-widget .email-modal__send-btn span {
+        text-transform: uppercase;
+        font-weight: 600;
+        font-size: 14px;
+        line-height: 18px;
+        color: #fff;
+        margin-right: 8px;
+        display: inline-block; }
+      .phone-widget .email-modal__send-btn i {
+        color: #fff; }
+    .phone-widget .email-modal .subject-option {
+      list-style-type: none;
+      margin: 0 0 12px;
+      padding: 0;
+      display: flex; }
+      .phone-widget .email-modal .subject-option__add {
+        margin-right: 8px;
+        padding: 4px 8px;
+        background: rgba(102, 121, 139, 0.5);
+        color: #fff;
+        font-size: 10px;
+        text-transform: uppercase;
+        border-radius: 3px;
+        cursor: pointer; }
+        .phone-widget .email-modal .subject-option__add.added {
+          color: #b6b6b6;
+          background-color: rgba(102, 121, 139, 0.13); }
+    .phone-widget .email-modal .email-history {
+      font-weight: 600;
+      font-size: 12px;
+      line-height: 18px;
+      color: #4494e3;
+      text-decoration: underline; }
+  .phone-widget .messages-modal {
+    overflow: hidden;
+    height: calc(100vh - 80px); }
+    @media (min-width: 768px) {
+      .phone-widget .messages-modal {
+        height: 552px;
+        overflow: hidden !important; } }
+    .phone-widget .messages-modal__msg-list {
+      list-style-type: none;
+      margin: 0;
+      padding: 20px 0; }
+    .phone-widget .messages-modal .simplebar-content-wrapper {
+      overflow-y: scroll !important; }
+    .phone-widget .messages-modal__body {
+      display: flex;
+      flex-direction: column;
+      height: 100%; }
+    .phone-widget .messages-modal__footer {
+      background-color: #f5f5f5;
+      box-shadow: 0px -2px 4px rgba(0, 0, 0, 0.1);
+      padding: 20px 12px; }
+    .phone-widget .messages-modal__messages-scroll {
+      overflow-y: auto;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 247px); }
+      @media (min-width: 768px) {
+        .phone-widget .messages-modal__messages-scroll {
+          height: 364px; } }
+    .phone-widget .messages-modal__input-group {
+      display: flex;
+      border-radius: 4px;
+      overflow: hidden; }
+    .phone-widget .messages-modal__msg-input {
+      width: calc(100% - 40px);
+      height: 40px;
+      border: 1px solid #dddddd;
+      border-radius: 4px 0 0 4px;
+      padding: 0 8px; }
+    .phone-widget .messages-modal__send-btn {
+      margin: 0;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #4494e3;
+      color: #fff;
+      font-size: 16px;
+      border: 0 none; }
+    .phone-widget .messages-modal .pw-msg-item {
+      display: flex;
+      padding: 0 12px;
+      margin-bottom: 24px;
+      width: 100%; }
+      .phone-widget .messages-modal .pw-msg-item:last-child {
+        margin-bottom: 0; }
+      .phone-widget .messages-modal .pw-msg-item--user {
+        justify-content: flex-end; }
+        .phone-widget .messages-modal .pw-msg-item--user .pw-msg-item__avatar {
+          display: none; }
+        .phone-widget .messages-modal .pw-msg-item--user .pw-msg-item__name {
+          color: #668baf; }
+        .phone-widget .messages-modal .pw-msg-item--user .pw-msg-item__msg-main {
+          padding-left: 0;
+          padding-right: 12px;
+          transform: translateX(12px); }
+        .phone-widget .messages-modal .pw-msg-item--user .pw-msg-item__msg-wrap {
+          background-color: #cae2ff;
+          width: calc(100% + 12px);
+          border-radius: 4px 0 0 4px; }
+      .phone-widget .messages-modal .pw-msg-item__data {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px; }
+      .phone-widget .messages-modal .pw-msg-item__name {
+        font-weight: 600;
+        font-size: 14px;
+        line-height: 18px;
+        color: #363c45;
+        flex-grow: 1; }
+      .phone-widget .messages-modal .pw-msg-item__timestamp {
+        font-weight: 500;
+        font-size: 10px;
+        line-height: 18px;
+        color: #66798b;
+        padding-left: 6px; }
+      .phone-widget .messages-modal .pw-msg-item__status {
+        padding-left: 6px;
+        color: #9badbe;
+        transform: translateY(-1px); }
+        .phone-widget .messages-modal .pw-msg-item__status--delivered {
+          color: #399e65; }
+        .phone-widget .messages-modal .pw-msg-item__status--error {
+          color: #e15258; }
+      .phone-widget .messages-modal .pw-msg-item__msg-main {
+        flex-basis: calc(100% - 32px);
+        padding-left: 12px; }
+      .phone-widget .messages-modal .pw-msg-item__msg-wrap {
+        background-color: #f3f3f3;
+        border-radius: 4px;
+        padding: 8px 12px; }
+      .phone-widget .messages-modal .pw-msg-item__msg {
+        font-size: 14px;
+        line-height: 18px;
+        color: #363c45;
+        margin: 0;
+        word-wrap: wrap;
+        word-break: break-all; }
+  .phone-widget .call-pane-initial {
+    visibility: hidden;
+    opacity: 0.7;
+    z-index: -1;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    padding: 82px 24px 29px;
+    transition: opacity ease-in-out 0.2s;
+    overflow: hidden; }
+    .phone-widget .call-pane-initial.is_active {
+      visibility: visible;
+      opacity: 1;
+      z-index: 3; }
+  .phone-widget .call-pane {
+    background: linear-gradient(180deg, #385778 0%, #273a4e 100%);
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 30px); }
+    @media (min-width: 768px) {
+      .phone-widget .call-pane {
+        height: 100%; } }
+    .phone-widget .call-pane__note-block {
+      display: flex;
+      align-items: center; }
+      .phone-widget .call-pane__note-block svg {
+        display: block;
+        width: 20px;
+        height: 20px; }
+        .phone-widget .call-pane__note-block svg path {
+          fill: #fff; }
+      .phone-widget .call-pane__note-block .form-group {
+        flex-grow: 1;
+        margin: 0;
+        padding: 0 12px; }
+    .phone-widget .call-pane__note-msg {
+      background-color: transparent;
+      border-width: 0 0 1px 0;
+      border-style: solid;
+      border-color: #fff;
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 18px;
+      padding: 0; }
+      .phone-widget .call-pane__note-msg::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+        font-weight: 500;
+        font-size: 14px;
+        line-height: 18px; }
+    .phone-widget .call-pane__add-note {
+      background-color: rgba(255, 255, 255, 0.2);
+      border: 0 none;
+      border-radius: 4px;
+      width: 30px;
+      height: 30px;
+      margin: 0; }
+      .phone-widget .call-pane__add-note svg {
+        fill: #fff;
+        width: 16px;
+        height: auto; }
+    .phone-widget .call-pane__number {
+      margin-bottom: 28px;
+      position: relative;
+      padding-top: 0; }
+      .phone-widget .call-pane__number .suggestion-placeholder {
+        position: absolute;
+        top: -18px;
+        left: 50%;
+        transform: translateX(-50%); }
+        .phone-widget .call-pane__number .suggestion-placeholder .suggestion-icon-wrap {
+          position: absolute;
+          height: 50px;
+          width: 50px;
+          border-radius: 50%;
+          background-color: #65798c;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          top: 12px;
+          left: 50%;
+          transform: translateX(-50%); }
+        .phone-widget .call-pane__number .suggestion-placeholder i {
+          color: #fff;
+          font-size: 20px; }
+      .phone-widget .call-pane__number .calls-history {
+        width: 100%;
+        border-radius: 0 0 4px 4px;
+        padding-bottom: 0;
+        background-color: #65798c;
+        overflow-y: auto;
+        overflow-x: hidden;
+        position: absolute;
+        z-index: 33;
+        top: -82px;
+        width: calc(100% + 68px);
+        left: -34px;
+        height: 92px;
+        transform: translateY(-100%);
+        opacity: 0;
+        z-index: -2;
+        transition: 0.1s; }
+        .phone-widget .call-pane__number .calls-history.is_active {
+          opacity: 1;
+          transform: translateY(0);
+          z-index: 3; }
+      .phone-widget .call-pane__number .contact-info-card {
+        padding: 6px 0;
+        border-bottom: 1px solid rgba(222, 222, 222, 0.2);
+        cursor: pointer; }
+        .phone-widget .call-pane__number .contact-info-card__name {
+          color: #fff;
+          font-weight: normal; }
+        .phone-widget .call-pane__number .contact-info-card__details {
+          padding-bottom: 0;
+          border: 0 none;
+          margin-left: 4px; }
+        .phone-widget .call-pane__number .contact-info-card__call-type {
+          color: #d7d9e3; }
+        .phone-widget .call-pane__number .contact-info-card__status {
+          display: flex;
+          justify-content: center;
+          align-items: center; }
+          .phone-widget .call-pane__number .contact-info-card__status i {
+            color: #fff; }
+        .phone-widget .call-pane__number .contact-info-card:last-child {
+          border-bottom: 0 none; }
+    .phone-widget .call-pane__dial-number {
+      font-weight: normal;
+      font-size: 24px;
+      line-height: 24px;
+      color: #fff;
+      padding-bottom: 4px;
+      padding-right: 28px;
+      border-width: 0 0 1px 0;
+      border-style: solid;
+      border-color: rgba(255, 255, 255, 0.5);
+      background-color: transparent;
+      width: 100%; }
+      .phone-widget .call-pane__dial-number::placeholder {
+        font-size: 16px;
+        color: rgba(255, 255, 255, 0.5); }
+    .phone-widget .call-pane__dial-clear-all {
+      display: none;
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background-color: #66798b;
+      padding: 5px;
+      border-radius: 50%;
+      right: 0;
+      bottom: 8px; }
+      .phone-widget .call-pane__dial-clear-all svg {
+        width: 8px;
+        height: 8px; }
+      .phone-widget .call-pane__dial-clear-all.is-shown {
+        display: flex;
+        align-items: center;
+        justify-content: center; }
+    .phone-widget .call-pane__call-btns {
+      display: flex;
+      align-items: center;
+      position: relative;
+      justify-content: center;
+      margin-bottom: 16px; }
+      .phone-widget .call-pane__call-btns.is-pending .calling-state-block {
+        animation: callAnimation 2s infinite linear; }
+        .phone-widget .call-pane__call-btns.is-pending .calling-state-block i {
+          display: none; }
+        .phone-widget .call-pane__call-btns.is-pending .calling-state-block .call-in-action {
+          transition: 0.15s;
+          opacity: 1; }
+          .phone-widget .call-pane__call-btns.is-pending .calling-state-block .call-in-action__text {
+            color: #e2a300; }
+      .phone-widget .call-pane__call-btns.is-pending .call-pane__end-call,
+      .phone-widget .call-pane__call-btns.is-pending .call-pane__mute {
+        display: flex; }
+      .phone-widget .call-pane__call-btns.is-pending .call-pane__correction {
+        display: none; }
+      .phone-widget .call-pane__call-btns.is-on-call .calling-state-block {
+        box-shadow: 0px 0px 0px 9px rgba(255, 255, 255, 0.2); }
+        .phone-widget .call-pane__call-btns.is-on-call .calling-state-block i {
+          display: none; }
+        .phone-widget .call-pane__call-btns.is-on-call .calling-state-block .call-in-action {
+          transition: 0.15s;
+          opacity: 1; }
+          .phone-widget .call-pane__call-btns.is-on-call .calling-state-block .call-in-action__text {
+            color: #008344; }
+      .phone-widget .call-pane__call-btns.is-on-call .call-pane__mute,
+      .phone-widget .call-pane__call-btns.is-on-call .call-pane__end-call {
+        display: flex; }
+      .phone-widget .call-pane__call-btns.is-on-call .call-pane__correction {
+        display: none; }
+    .phone-widget .call-pane .calling-state-block, .phone-widget .call-pane__start-call {
+      width: 70px;
+      height: 70px;
+      background-color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      border: 0 none;
+      margin: 0;
+      transition: box-shadow 0.15s; }
+      .phone-widget .call-pane .calling-state-block i, .phone-widget .call-pane__start-call i {
+        color: #399e65;
+        font-size: 18px; }
+      .phone-widget .call-pane .calling-state-block .call-in-action, .phone-widget .call-pane__start-call .call-in-action {
+        position: absolute;
+        opacity: 0; }
+        .phone-widget .call-pane .calling-state-block .call-in-action span, .phone-widget .call-pane__start-call .call-in-action span {
+          display: block;
+          width: 100%;
+          text-align: center; }
+        .phone-widget .call-pane .calling-state-block .call-in-action__text, .phone-widget .call-pane__start-call .call-in-action__text {
+          font-weight: 500;
+          font-size: 11px;
+          line-height: 18px;
+          text-transform: uppercase; }
+        .phone-widget .call-pane .calling-state-block .call-in-action__time, .phone-widget .call-pane__start-call .call-in-action__time {
+          font-weight: 500;
+          font-size: 16px;
+          line-height: 18px;
+          color: #2a3f54; }
+    .phone-widget .call-pane__mute {
+      position: absolute;
+      left: 20px;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      justify-content: center;
+      align-items: center;
+      border: 0 none;
+      background-color: rgba(255, 255, 255, 0.8);
+      display: none; }
+      .phone-widget .call-pane__mute i {
+        font-size: 18px;
+        color: #2a3f54; }
+    .phone-widget .call-pane__correction, .phone-widget .call-pane__end-call, .phone-widget .call-pane__info {
+      position: absolute;
+      right: 20px;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      justify-content: center;
+      align-items: center;
+      border: 0 none;
+      background-color: rgba(255, 255, 255, 0.8);
+      display: none; }
+      .phone-widget .call-pane__correction i, .phone-widget .call-pane__end-call i, .phone-widget .call-pane__info i {
+        color: #e15258; }
+    .phone-widget .call-pane__info {
+      right: auto;
+      left: 20px;
+      display: block; }
+      .phone-widget .call-pane__info i {
+        color: #2a3f54; }
+    .phone-widget .call-pane__correction {
+      display: flex;
+      border: 0 none;
+      background-color: rgba(255, 255, 255, 0.4); }
+      .phone-widget .call-pane__correction i {
+        color: #fff; }
+  .phone-widget .dial {
+    list-style-type: none;
+    margin: 0 -5px 18px;
+    padding: 0;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center; }
+    .phone-widget .dial__item {
+      width: calc(100% / 3);
+      padding: 5px; }
+    .phone-widget .dial__btn {
+      font-weight: 600;
+      font-size: 22px;
+      line-height: 18px;
+      color: #fff;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 0 none;
+      width: 100%;
+      padding: 12px;
+      margin: 0;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      transition: background 0.1s; }
+      .phone-widget .dial__btn:hover {
+        background: rgba(255, 255, 255, 0.35); }
+      .phone-widget .dial__btn:active {
+        background: rgba(255, 255, 255, 0.1); }
+      .phone-widget .dial__btn[value="✱"] {
+        font-size: 18px;
+        font-weight: normal; }
+  .phone-widget .additional-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #fff;
+    z-index: 3;
+    border-radius: 16px 16px 0 0; }
+  .phone-widget .call-pane-incoming {
+    background: linear-gradient(180deg, #6caa62 0%, #227758 73.23%, #374d63 100%);
+    border-radius: 0px 0px 6px 6px;
+    flex-direction: column;
+    display: flex; }
+    .phone-widget .call-pane-incoming .incall-group {
+      transform: translateY(calc(50% - 24px)); }
+    .phone-widget .call-pane-incoming .additional-info {
+      height: 204px; }
+      .phone-widget .call-pane-incoming .additional-info__body {
+        overflow-y: auto;
+        height: 148px; }
+      .phone-widget .call-pane-incoming .additional-info__close {
+        font-size: 16px;
+        padding: 4px;
+        width: 26px;
+        height: 26px;
+        line-height: 18px;
+        text-align: center;
+        position: absolute;
+        right: 10px;
+        color: #66798b; }
+      .phone-widget .call-pane-incoming .additional-info__header {
+        display: flex;
+        align-items: center;
+        padding: 10px 16px;
+        border-bottom: 1px solid #efefef; }
+      .phone-widget .call-pane-incoming .additional-info .agent-text-avatar {
+        margin-right: 10px; }
+      .phone-widget .call-pane-incoming .additional-info__header-title {
+        font-weight: 500;
+        font-size: 16px;
+        line-height: 18px;
+        color: #363c45; }
+      .phone-widget .call-pane-incoming .additional-info .info-listing {
+        list-style-type: none;
+        margin: 0;
+        padding: 0; }
+        .phone-widget .call-pane-incoming .additional-info .info-listing li {
+          padding: 10px 16px; }
+      .phone-widget .call-pane-incoming .additional-info .incoming-info li {
+        display: flex;
+        flex-direction: column;
+        border-bottom: 1px solid #efefef; }
+        .phone-widget .call-pane-incoming .additional-info .incoming-info li:last-child {
+          border-bottom: 0; }
+      .phone-widget .call-pane-incoming .additional-info .incoming-info__label {
+        color: #668baf;
+        font-weight: 600;
+        font-size: 12px;
+        line-height: 14px; }
+      .phone-widget .call-pane-incoming .additional-info .incoming-info__value {
+        font-weight: normal;
+        font-size: 13px;
+        line-height: 18px;
+        color: #363c45; }
+    .phone-widget .call-pane-incoming .calling-from-info {
+      background-color: rgba(51, 77, 102, 0.2); }
+    .phone-widget .call-pane-incoming .contact-info-card {
+      padding-top: 0;
+      padding-bottom: 48px; }
+      .phone-widget .call-pane-incoming .contact-info-card .agent-text-avatar {
+        transform: none;
+        top: 15px; }
+      .phone-widget .call-pane-incoming .contact-info-card__details {
+        border: 0 none;
+        padding-bottom: 0;
+        margin: 0;
+        width: calc(100% - 60px); }
+      .phone-widget .call-pane-incoming .contact-info-card__line {
+        justify-content: center;
+        flex-direction: column;
+        align-items: center; }
+      .phone-widget .call-pane-incoming .contact-info-card__name {
+        font-weight: normal;
+        font-size: 22px;
+        line-height: 26px;
+        color: #fff;
+        margin-bottom: 4px; }
+      .phone-widget .call-pane-incoming .contact-info-card__call-type {
+        font-weight: normal;
+        font-size: 16px;
+        line-height: 18px;
+        color: rgba(255, 255, 255, 0.6); }
+    .phone-widget .call-pane-incoming .call-pane__call-btns {
+      margin: 0; }
+    .phone-widget .call-pane-incoming .call-pane__end-call {
+      display: flex; }
+  .phone-widget .call-pane-calling {
+    background: linear-gradient(180deg, #446586 0%, #364b61 100%); }
+    .phone-widget .call-pane-calling .contact-info-card {
+      padding-top: 0; }
+      .phone-widget .call-pane-calling .contact-info-card__details {
+        border: 0 none;
+        padding-bottom: 38px;
+        margin: 0; }
+      .phone-widget .call-pane-calling .contact-info-card__line {
+        justify-content: center;
+        flex-direction: column;
+        align-items: center; }
+      .phone-widget .call-pane-calling .contact-info-card__name {
+        font-weight: normal;
+        font-size: 22px;
+        line-height: 26px;
+        color: #fff;
+        margin-bottom: 4px; }
+      .phone-widget .call-pane-calling .contact-info-card__call-type {
+        font-weight: normal;
+        font-size: 16px;
+        line-height: 18px;
+        color: rgba(255, 255, 255, 0.6); }
+    .phone-widget .call-pane-calling .call-pane__call-btns {
+      margin-bottom: 42px; }
+    .phone-widget .call-pane-calling .sound-indication {
+      margin-bottom: 38px; }
+    .phone-widget .call-pane-calling .sound-controls {
+      position: relative;
+      height: 4px;
+      width: 100%;
+      margin-left: 8px; }
+    .phone-widget .call-pane-calling .sound-range {
+      -webkit-appearance: none;
+      appearance: none;
+      background-color: transparent;
+      height: 4px;
+      position: absolute;
+      bottom: 0;
+      z-index: 3;
+      width: 100%; }
+      .phone-widget .call-pane-calling .sound-range::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        height: 4px;
+        width: 4px;
+        background-color: #77b984;
+        transition: 0.1s;
+        border-radius: 50%; }
+      .phone-widget .call-pane-calling .sound-range:hover::-webkit-slider-thumb {
+        width: 14px;
+        height: 14px; }
+    .phone-widget .call-pane-calling .sound-control-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start; }
+      .phone-widget .call-pane-calling .sound-control-wrap i {
+        font-size: 18px;
+        color: rgba(255, 255, 255, 0.8); }
+    .phone-widget .call-pane-calling .progres-wrap {
+      overflow-x: hidden;
+      position: relative;
+      width: 100%;
+      height: 4px;
+      background: inherit; }
+    .phone-widget .call-pane-calling .sound-progress {
+      height: 4px;
+      position: absolute;
+      background: linear-gradient(0.25turn, #fff8b6, #77b984);
+      background-position: 0%;
+      background-size: 100%;
+      width: 100%;
+      border-radius: 2px;
+      width: 100%;
+      left: 0%; }
+    .phone-widget .call-pane-calling .sound-ovf {
+      height: 4px;
+      position: absolute;
+      width: 100%;
+      background: #3c5773;
+      z-index: 33;
+      transition: all ease-in-out 0.1s; }
+  .phone-widget .in-call-controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 0;
+    margin: -12px 0 28px;
+    list-style-type: none; }
+    .phone-widget .in-call-controls__item {
+      width: calc(50% - 8px);
+      margin: 6px 0; }
+    .phone-widget .in-call-controls__action {
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      position: relative;
+      display: inline-block;
+      width: 100%;
+      padding: 8px 12px 8px 30px;
+      border-radius: 4px;
+      color: #fff; }
+      .phone-widget .in-call-controls__action:focus, .phone-widget .in-call-controls__action:active, .phone-widget .in-call-controls__action:hover, .phone-widget .in-call-controls__action:visited, .phone-widget .in-call-controls__action:active:hover, .phone-widget .in-call-controls__action:focus:active {
+        color: #fff;
+        text-decoration: none; }
+      .phone-widget .in-call-controls__action span {
+        font-weight: 500;
+        font-size: 12px;
+        line-height: 18px;
+        white-space: nowrap; }
+      .phone-widget .in-call-controls__action .fa {
+        position: absolute;
+        left: 12px; }
+  .phone-widget .contacts__search-wrap {
+    padding: 0;
+    position: relative; }
+  .phone-widget .contacts__icon {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 8px; }
+    .phone-widget .contacts__icon i {
+      color: #9b9da8;
+      font-size: 16px; }
+  .phone-widget .contacts__search-input {
+    border: 0 none;
+    width: 100%;
+    height: 46px;
+    padding: 0 10px 0 36px;
+    font-size: 14px; }
+    .phone-widget .contacts__search-input::placeholder {
+      color: #9b9da8; }
+  .phone-widget .simplebar-scrollbar::before {
+    background-color: #2a3f54;
+    width: 4px; }
+  .phone-widget .simplebar-track.simplebar-vertical {
+    width: 6px; }
+  .phone-widget .simplebar-track {
+    right: 2px; }
+  .phone-widget .calling-from-info {
+    position: absolute;
+    width: 100%;
+    left: 0;
+    top: 0;
+    background-color: #334D66;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 16px 8px; }
+    .phone-widget .calling-from-info .current-number-indicator {
+      color: #fff;
+      width: 100%;
+      appearance: none;
+      -webkit-appearance: none;
+      border-radius: 4px;
+      border: 0 none;
+      color: #fff;
+      font-size: 14px;
+      line-height: 22px;
+      background: transparent;
+      height: 22px; }
+      .phone-widget .calling-from-info .current-number-indicator span {
+        font-weight: 500;
+        font-size: 10px;
+        line-height: 11px;
+        color: #2a3f54;
+        background-color: #d6e3f0;
+        text-transform: uppercase;
+        border-radius: 2px;
+        margin-left: 8px;
+        padding: 3px 4px 2px 4px;
+        display: inline-block;
+        max-width: 72px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        left: 16px;
+        margin: 0;
+        bottom: auto;
+        top: 10px; }
+    .phone-widget .calling-from-info .number-toggle {
+      width: 50px;
+      height: 28px;
+      transform: translateY(-8px);
+      position: relative; }
+      .phone-widget .calling-from-info .number-toggle label {
+        background: #526A83;
+        border-radius: 50px;
+        width: 100%;
+        height: 28px;
+        margin: 0;
+        transition: all 0.15s;
+        cursor: pointer; }
+        .phone-widget .calling-from-info .number-toggle label:after {
+          content: "";
+          width: 22px;
+          height: 22px;
+          background: #ff7e7e;
+          border-radius: 50%;
+          position: absolute;
+          left: 4px;
+          top: 3px;
+          transition: all 0.15s; }
+      .phone-widget .calling-from-info .number-toggle input {
+        visibility: hidden;
+        position: absolute; }
+        .phone-widget .calling-from-info .number-toggle input:checked + label:after {
+          background: #a6eb71;
+          transform: translateX(calc(100% - 2px)); }
+
+.phone-widget-icon {
+  cursor: pointer;
+  position: fixed;
+  bottom: 180px;
+  right: 0px;
+ margin: 1rem;
+}
+  .phone-widget-icon .standby-phone {
+    height: 56px;
+    width: 56px;
+    color: #fff;
+    background-color: #2a3f54;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%; }
+    .phone-widget-icon .standby-phone i {
+      font-size: 32px;
+      transform: rotate3d(1, 1, 5, -100deg); }
+  .phone-widget-icon .calling-state-block {
+    display: none; }
+    .phone-widget-icon .calling-state-block .call-in-action__time {
+      color: #fff; }
+    .phone-widget-icon .calling-state-block .call-in-action__text {
+      font-weight: 600; }
+  .phone-widget-icon.is-mirror.is-on-call .standby-phone {
+    display: none; }
+  .phone-widget-icon.is-mirror.is-on-call .calling-state-block {
+    display: flex;
+    box-shadow: 0px 0px 0px 9px rgba(57, 158, 101, 0.4);
+    background-color: #399e65; }
+    .phone-widget-icon.is-mirror.is-on-call .calling-state-block i {
+      display: none; }
+    .phone-widget-icon.is-mirror.is-on-call .calling-state-block .call-in-action {
+      transition: 0.15s;
+      opacity: 1; }
+      .phone-widget-icon.is-mirror.is-on-call .calling-state-block .call-in-action__text {
+        color: #fff; }
+  .phone-widget-icon.is-mirror.is-pending .standby-phone {
+    display: none; }
+  .phone-widget-icon.is-mirror.is-pending .calling-state-block {
+    display: flex;
+    animation: callAnimationv2 2s infinite linear;
+    background-color: #e2a300; }
+    .phone-widget-icon.is-mirror.is-pending .calling-state-block i {
+      display: none; }
+    .phone-widget-icon.is-mirror.is-pending .calling-state-block .call-in-action {
+      transition: 0.15s;
+      opacity: 1; }
+      .phone-widget-icon.is-mirror.is-pending .calling-state-block .call-in-action__text {
+        color: #fff; }
+  .phone-widget-icon .calling-state-block {
+    height: 64px;
+    width: 64px; }
+
+.calling-state-block {
+  width: 70px;
+  height: 70px;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 0 none;
+  margin: 0;
+  transition: box-shadow 0.15s; }
+  .calling-state-block i {
+    color: #399e65;
+    font-size: 18px;
+    transform: rotate3d(1, 1, 5, 90deg); }
+  .calling-state-block .call-in-action {
+    position: absolute;
+    opacity: 0; }
+    .calling-state-block .call-in-action span {
+      display: block;
+      width: 100%;
+      text-align: center; }
+    .calling-state-block .call-in-action__text {
+      font-weight: 500;
+      font-size: 11px;
+      line-height: 18px;
+      text-transform: uppercase; }
+    .calling-state-block .call-in-action__time {
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 18px;
+      color: #2a3f54; }
+
+@keyframes callAnimation {
+  0% {
+    box-shadow: 0px 0px 0px 3px rgba(255, 255, 255, 0.2); }
+  25% {
+    box-shadow: 0px 0px 0px 6px rgba(255, 255, 255, 0.2); }
+  50% {
+    box-shadow: 0px 0px 0px 9px rgba(255, 255, 255, 0.2); }
+  75% {
+    box-shadow: 0px 0px 0px 6px rgba(255, 255, 255, 0.2); }
+  100% {
+    box-shadow: 0px 0px 0px 3px rgba(255, 255, 255, 0.2); } }
+
+@keyframes callAnimationv2 {
+  0% {
+    box-shadow: 0px 0px 0px 3px rgba(226, 163, 0, 0.4); }
+  25% {
+    box-shadow: 0px 0px 0px 6px rgba(226, 163, 0, 0.4); }
+  50% {
+    box-shadow: 0px 0px 0px 9px rgba(226, 163, 0, 0.4); }
+  75% {
+    box-shadow: 0px 0px 0px 6px rgba(226, 163, 0, 0.4); }
+  100% {
+    box-shadow: 0px 0px 0px 3px rgba(226, 163, 0, 0.4); } }
+
+.main-content {
+  min-height: calc(100vh - 67px); }
+
+@keyframes speakerAnimation {
+  0% {
+    transform: scale(1); }
+  50% {
+    transform: scale(1.05, 1); }
+  100% {
+    transform: scale(1); } }

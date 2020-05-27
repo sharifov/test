@@ -7,7 +7,7 @@
  * @var $previewEmailForm CasePreviewEmailForm
  * @var $previewSmsForm CasePreviewSmsForm
  * @var $isAdmin bool
- *
+ * @var $isCommunicationLogEnabled bool
  */
 
 use common\models\DepartmentEmailProject;
@@ -24,6 +24,8 @@ $c_type_id = $comForm->c_type_id;
 
 // <script src="https://cdnjs.cloudflare.com/ajax/libs/timer.jquery/0.9.0/timer.jquery.min.js"></script>
 
+$pjaxContainerId = $isCommunicationLogEnabled ? 'pjax-case-communication-log' : 'pjax-case-communication';
+$listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communication/_list_item';
 ?>
 
 <div class="x_panel">
@@ -47,7 +49,7 @@ $c_type_id = $comForm->c_type_id;
         <div class="clearfix"></div>
     </div>
     <div class="x_content" style="display: block;">
-    <?php yii\widgets\Pjax::begin(['id' => 'pjax-case-communication' ,'enablePushState' => false]) ?>
+    <?php yii\widgets\Pjax::begin(['id' => $pjaxContainerId ,'enablePushState' => false]) ?>
         <?php /*<h1><?=random_int(1, 100)?></h1>*/ ?>
         <div class="panel">
             <div class="chat__list">
@@ -62,8 +64,8 @@ $c_type_id = $comForm->c_type_id;
                     ],
                     'emptyText' => '<div class="text-center">Not found communication messages</div><br>',
                     'layout' => "{summary}\n<div class=\"text-center\">{pager}</div>\n{items}<div class=\"text-center\">{pager}</div>\n",
-                    'itemView' => function ($model, $key, $index, $widget) use ($dataProvider) {
-                        return $this->render('/lead/communication/_list_item',['model' => $model, 'dataProvider' => $dataProvider]);
+                    'itemView' => function ($model, $key, $index, $widget) use ($dataProvider, $listItemView) {
+                        return $this->render($listItemView, ['model' => $model, 'dataProvider' => $dataProvider]);
                     },
 
                     'itemOptions' => [
@@ -621,7 +623,7 @@ JS;
     const currentUrl = '<?=$currentUrl?>';
 
     function updateCommunication() {
-        $.pjax.reload({url: currentUrl, container: '#pjax-case-communication', push: false, replace: false, timeout: 6000});
+        $.pjax.reload({url: currentUrl, container: '#<?= $pjaxContainerId ?>', push: false, replace: false, timeout: 6000});
     }
 
     function stopCall(duration) {

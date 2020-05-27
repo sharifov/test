@@ -7,6 +7,7 @@
  * @var $previewEmailForm LeadPreviewEmailForm
  * @var $previewSmsForm LeadPreviewSmsForm
  * @var $isAdmin bool
+ * @var $isCommunicationLogEnabled bool
  *
  */
 
@@ -19,6 +20,9 @@ use yii\bootstrap4\Modal;
 use vova07\imperavi\Widget;
 
 $c_type_id = $comForm->c_type_id;
+
+$pjaxContainerId = $isCommunicationLogEnabled ? 'pjax-lead-communication-log' : 'pjax-lead-communication';
+$listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '_list_item';
 ?>
 
 <div class="x_panel">
@@ -42,7 +46,7 @@ $c_type_id = $comForm->c_type_id;
         <div class="clearfix"></div>
     </div>
     <div class="x_content" style="display: block;">
-    <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-communication' , 'timeout' => 5000]) ?>
+    <?php yii\widgets\Pjax::begin(['id' => $pjaxContainerId , 'timeout' => 5000]) ?>
         <?php /*<h1><?=random_int(1, 100)?></h1>*/ ?>
         <div class="panel">
             <div class="chat__list">
@@ -57,8 +61,8 @@ $c_type_id = $comForm->c_type_id;
                     ],
                     'emptyText' => '<div class="text-center">Not found communication messages</div><br>',
                     'layout' => "{summary}\n<div class=\"text-center\">{pager}</div>\n{items}<div class=\"text-center\">{pager}</div>\n",
-                    'itemView' => function ($model, $key, $index, $widget) use ($dataProvider) {
-                        return $this->render('_list_item',['model' => $model, 'dataProvider' => $dataProvider]);
+                    'itemView' => function ($model, $key, $index, $widget) use ($dataProvider, $listItemView) {
+                        return $this->render($listItemView, ['model' => $model, 'dataProvider' => $dataProvider]);
                     },
 
                     'itemOptions' => [
@@ -594,7 +598,7 @@ JS;
     const currentUrl = '<?=$currentUrl?>';
 
     function updateCommunication() {
-        $.pjax.reload({url: currentUrl, container: '#pjax-lead-communication', push: false, replace: false, timeout: 6000, async: false});
+        $.pjax.reload({url: currentUrl, container: '#<?= $pjaxContainerId ?>', push: false, replace: false, timeout: 6000, async: false});
     }
 
     function stopCall(duration) {

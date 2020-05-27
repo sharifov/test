@@ -3,10 +3,12 @@
 namespace common\models;
 
 use common\components\jobs\AgentCallQueueJob;
+use common\components\purifier\Purifier;
 use common\models\query\CallUserAccessQuery;
 use frontend\widgets\notification\NotificationMessage;
 use sales\dispatchers\NativeEventDispatcher;
 use sales\model\call\entity\callUserAccess\events\CallUserAccessEvents;
+use sales\model\phoneList\entity\PhoneList;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -157,6 +159,11 @@ class CallUserAccess extends \yii\db\ActiveRecord
         $this->cua_status_id = self::STATUS_TYPE_NO_ANSWERED;
     }
 
+    public function isPending(): bool
+	{
+		return $this->cua_status_id === self::STATUS_TYPE_PENDING;
+	}
+
     /**
      * @param bool $insert
      * @param array $changedAttributes
@@ -166,7 +173,14 @@ class CallUserAccess extends \yii\db\ActiveRecord
         parent::afterSave($insert, $changedAttributes);
 
         if ($insert) {
-            if ($ntf = Notifications::create($this->cua_user_id, 'New incoming Call (' . $this->cua_call_id . ')', 'New incoming Call (' . $this->cua_call_id . ')', Notifications::TYPE_SUCCESS, true)) {
+            $message = 'New incoming Call (' . $this->cua_call_id . ')';
+            if (isset($this->cuaCall->cLead)) {
+                $message .= ', Lead (Id: ' . Purifier::createLeadShortLink($this->cuaCall->cLead) . ')';
+            }
+            if (isset($this->cuaCall->cCase)) {
+                $message .= ', Case (Id: ' . Purifier::createCaseShortLink($this->cuaCall->cCase) . ')';
+            }
+            if ($ntf = Notifications::create($this->cua_user_id, 'New incoming Call (' . $this->cua_call_id . ')', $message, Notifications::TYPE_SUCCESS, true)) {
                 //Notifications::socket($this->cua_user_id, null, 'getNewNotification', [], true);
                 $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
                 Notifications::publish('getNewNotification', ['user_id' => $this->cua_user_id], $dataNotification);
@@ -178,7 +192,15 @@ class CallUserAccess extends \yii\db\ActiveRecord
 
         if($insert || isset($changedAttributes['cua_status_id'])) {
             //Notifications::socket($this->cua_user_id, null, 'updateIncomingCall', $this->attributes);
-            Notifications::publish('updateIncomingCall', ['user_id' => $this->cua_user_id], $this->attributes);
+			if ($this->isPending()) {
+				$client = $this->cuaCall->cClient;
+				$callFromInfo = [
+					'phoneFrom' => $this->cuaCall->c_from,
+					'name' => $this->cuaCall ? $this->cuaCall->getCallerName($this->cuaCall->c_from) : 'ClientName',
+					'fromInternal' => PhoneList::find()->byPhone($this->cuaCall->c_from)->enabled()->exists()
+				];
+			}
+            Notifications::publish('updateIncomingCall', ['user_id' => $this->cua_user_id], array_merge($this->attributes, $callFromInfo ?? []));
         }
 
         if (!$insert && isset($changedAttributes['cua_status_id'])) {

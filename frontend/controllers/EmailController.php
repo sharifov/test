@@ -5,9 +5,12 @@ namespace frontend\controllers;
 use common\components\CommunicationService;
 use common\models\Employee;
 use common\models\UserProjectParams;
+use frontend\widgets\newWebPhone\email\form\EmailSendForm;
 use http\Url;
+use sales\auth\Auth;
 use sales\entities\cases\Cases;
 use sales\helpers\email\TextConvertingHelper;
+use sales\model\email\useCase\send\EmailSenderService;
 use sales\model\emailList\entity\EmailList;
 use Yii;
 use common\models\Email;
@@ -18,12 +21,22 @@ use yii\helpers\Html;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * EmailController implements the CRUD actions for Email model.
+ *
+ * @property EmailSenderService $emailSender
  */
 class EmailController extends FController
 {
+    private $emailSender;
+
+    public function __construct($id, $module, EmailSenderService $emailSender, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->emailSender = $emailSender;
+    }
 
     public function behaviors()
     {
@@ -438,5 +451,31 @@ class EmailController extends FController
         $model->e_is_deleted = (int) ! $model->e_is_deleted;
         $model->save();
         return $this->redirect(Yii::$app->request->referrer);
+    }
+
+    public function actionSend(): Response
+    {
+        $user = Auth::user();
+
+        $form = new EmailSendForm($user);
+
+        $result = [
+            'success' => false,
+            'errors' => [],
+        ];
+
+        if ($form->load(Yii::$app->request->post())) {
+
+            if ($form->validate()) {
+                $result = array_merge($result, $this->emailSender->send($form));
+            } else {
+                $result['errors'] = $form->getErrors();
+            }
+
+        } else {
+            $result['errors'] = ['data' => ['Not found post data']];
+        }
+
+        return $this->asJson($result);
     }
 }

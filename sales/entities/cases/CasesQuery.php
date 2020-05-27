@@ -69,4 +69,9 @@ class CasesQuery extends ActiveQuery
     {
         return $this->andWhere(['cs_dep_id' => $departmentId]);
     }
+
+    public function withNotFinishStatus(): self
+    {
+        return $this->andWhere(['NOT IN', 'cs_status', [CasesStatus::STATUS_SOLVED, CasesStatus::STATUS_TRASH]]);
+    }
 }

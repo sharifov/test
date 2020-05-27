@@ -70,7 +70,10 @@ class CallLogTransferService
     {
         $this->call = $call->getAttributes();
 
-        Yii::info($this->call, 'info\DebugCallLog');
+        $debugEnable = Yii::$app->params['settings']['call_log_debug_enable'] ?? false;
+        if ($debugEnable) {
+            Yii::info($this->call, 'info\DebugCallLog');
+        }
 
         if ($call->isOut() && $call->isGeneralParent() && !$call->isTransfer()) {
             $this->outParentCall();
@@ -83,7 +86,7 @@ class CallLogTransferService
         }
 
         if ($call->isOut() && !$call->isGeneralParent() && ($call->c_group_id == null || $call->isTransfer())) {
-//           $this->outChildCall();
+            $this->outChildCall();
             return;
         }
 
@@ -163,6 +166,13 @@ class CallLogTransferService
     {
         $this->callLog['cl_group_id'] = $this->call['c_id'];
 
+        $firstChild = Call::find()->select(['c_status_id'])->andWhere(['c_parent_id' => $this->call['c_id']])->orderBy(['c_id' => SORT_ASC])->asArray()->limit(1)->one();
+        if ($this->call['c_status_id'] == Call::STATUS_COMPLETED && $firstChild && array_key_exists((int)$firstChild['c_status_id'], CallLogStatus::getList())) {
+            $this->callLog['cl_status_id'] = $firstChild['c_status_id'];
+        } else {
+            $this->callLog['cl_status_id'] = $this->call['c_status_id'];
+        }
+
         $this->createCallLogs();
     }
 
@@ -178,13 +188,23 @@ class CallLogTransferService
         } else {
             $this->callLog['cl_status_id'] = $this->call['c_status_id'];
         }
-        $this->callLog['cl_duration'] = $this->call['c_call_duration'] + (strtotime($this->call['c_created_dt']) - strtotime($this->call['c_queue_start_dt']));
 
-        $this->queue['clq_queue_time'] = strtotime($this->call['c_created_dt']) - strtotime($this->call['c_queue_start_dt']);
+        if ($this->call['c_queue_start_dt'] !== null) {
+            $this->callLog['cl_duration'] = $this->call['c_call_duration'] + (strtotime($this->call['c_created_dt']) - strtotime($this->call['c_queue_start_dt']));
+        } else {
+            $this->callLog['cl_duration'] = $this->call['c_call_duration'];
+        }
+
+        if ($this->call['c_queue_start_dt'] !== null) {
+            $this->queue['clq_queue_time'] = strtotime($this->call['c_created_dt']) - strtotime($this->call['c_queue_start_dt']);
+        } else {
+            $this->queue['clq_queue_time'] = null;
+        }
+
         $this->queue['clq_access_count'] =
             (int)CallUserAccess::find()
                 ->andWhere(['cua_call_id' => $this->call['c_parent_id']])
-                ->andWhere(['>=', 'cua_created_dt', $this->call['c_queue_start_dt']])
+                ->andWhere(['>=', 'cua_updated_dt', $this->call['c_queue_start_dt']])
                 ->andWhere(['<=', 'cua_created_dt', $this->call['c_created_dt']])
                 ->count();
 
@@ -200,10 +220,21 @@ class CallLogTransferService
         } else {
             $this->callLog['cl_status_id'] = $this->call['c_status_id'];
         }
-        $this->callLog['cl_duration'] = $this->call['c_call_duration'] + (strtotime($this->call['c_created_dt']) - strtotime($this->call['c_queue_start_dt']));
+
+        if ($this->call['c_queue_start_dt'] !== null) {
+            $this->callLog['cl_duration'] = $this->call['c_call_duration'] + (strtotime($this->call['c_created_dt']) - strtotime($this->call['c_queue_start_dt']));
+        } else {
+            $this->callLog['cl_duration'] = $this->call['c_call_duration'];
+        }
+
         $this->callLog['cl_group_id'] = $this->call['c_id'];
 
-        $this->queue['clq_queue_time'] = strtotime($this->call['c_created_dt']) - strtotime($this->call['c_queue_start_dt']);
+        if ($this->call['c_queue_start_dt'] !== null) {
+            $this->queue['clq_queue_time'] = strtotime($this->call['c_created_dt']) - strtotime($this->call['c_queue_start_dt']);
+        } else {
+            $this->queue['clq_queue_time'] = null;
+        }
+
         $this->queue['clq_access_count'] =
             (int)CallUserAccess::find()
                 ->andWhere(['cua_call_id' => $this->call['c_parent_id']])
@@ -243,13 +274,13 @@ class CallLogTransferService
 
     private function outChildCall(): void
     {
-        if ($this->call['c_group_id'] == null) {
-            $this->callLog['cl_group_id'] = $this->call['c_id'];
-        } else {
-            $this->callLog['cl_group_id'] = $this->call['c_group_id'];
+        if (!$this->call['c_is_transfer'] && $this->call['c_status_id'] != Call::STATUS_COMPLETED) {
+            try {
+                CallLog::updateAll(['cl_status_id' => $this->call['c_status_id']], 'cl_id = ' . (int)$this->call['c_parent_id']);
+            } catch (\Throwable $e) {
+                Yii::error(VarDumper::dumpAsString(['category' => 'outChildCall', 'error' => $e->getMessage()]), 'CallLogTransferService');
+            }
         }
-
-        $this->createCallLogs();
     }
 
     private function outTransferParentCall(): void

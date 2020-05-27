@@ -987,6 +987,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $this->auth_key = Yii::$app->security->generateRandomString();
     }
 
+    public function getFirstUserProjectParam(): ActiveQuery
+	{
+		return $this->hasOne(UserProjectParams::class, ['upp_user_id' => 'id']);
+	}
+
     /**
      * @param bool $onlyNames
      * @return array
@@ -2033,6 +2038,27 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
+     * @param int $user_id
+     * @param bool $onyEnabled
+     * @return array
+     */
+    public static function getEmailList(int $user_id, $onyEnabled = false) : array
+    {
+        $emailList = UserProjectParams::find()
+            ->select(['el_email', 'upp_email_list_id'])
+            ->byUserId($user_id)
+            ->innerJoinWith(['emailList' => static function(\sales\model\emailList\entity\Scopes $query) use ($onyEnabled) {
+                if ($onyEnabled) {
+                    $query->andOnCondition(['el_enabled' => true]);
+                }
+            }], false)
+            ->indexBy('el_email')
+            ->column();
+
+        return $emailList;
+    }
+
+    /**
      * @return bool
      */
     public function isOnline() : bool
@@ -2284,6 +2310,19 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $users;
     }
 
+    public static function convertTimeFromUtcToUserTime(Employee $user, int $time): string
+    {
+        $timezone = $user->timezone;
+        $format = 'Y-m-d H:i:s';
+        try {
+            return (new \DateTimeImmutable(date($format, $time), new \DateTimeZone('UTC')))
+                ->setTimezone(new \DateTimeZone($timezone))
+                ->format($format);
+        } catch (\Throwable $e) {
+            return '';
+        }
+    }
+
     /**
      * @param int $time
      * @return string
@@ -2385,6 +2424,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $url = '//www.gravatar.com/avatar/?d=' . $default . '&s=60';
         }
         return $url;
+    }
+
+    public function getAvatar(): string
+    {
+        return strtoupper($this->full_name[0] ?? '');
     }
 
     public function getProjectsToArray(): array

@@ -8,6 +8,8 @@ use common\models\local\FlightSegment;
 use common\models\local\LeadLogMessage;
 use common\models\query\QuoteQuery;
 use sales\entities\EventTrait;
+use sales\services\parsingDump\lib\ParsingDump;
+use sales\services\parsingDump\ReservationService;
 use Yii;
 use yii\base\ErrorException;
 use yii\base\InvalidArgumentException;
@@ -266,6 +268,27 @@ class Quote extends \yii\db\ActiveRecord
         }
         $quote->lead_id = $leadId;
         $quote->uid = uniqid();
+        $quote->status = self::STATUS_CREATED;
+        return $quote;
+    }
+
+    /**
+     * @param array $attributes
+     * @param int $leadId
+     * @param bool $isAlternative
+     * @return static
+     */
+    public static function createQuote(array $attributes, int $leadId, bool $isAlternative): self
+    {
+        $quote = new self();
+        $quote->attributes = $attributes;
+        if ($isAlternative) {
+            $quote->alternative();
+        } else {
+            $quote->base();
+        }
+        $quote->lead_id = $leadId;
+        $quote->uid = uniqid('', false);
         $quote->status = self::STATUS_CREATED;
         return $quote;
     }
@@ -535,14 +558,32 @@ class Quote extends \yii\db\ActiveRecord
         return $elapsedTime;
     }
 
-
-
-
-    public function checkReservationDump()
+    /**
+     * @param bool|null $enableGdsParsers
+     * @throws \Exception
+     */
+    public function checkReservationDump(?bool $enableGdsParsers = null): void
     {
-        $dumpParser = self::parseDump($this->reservation_dump, true, $this->itinerary);
+        $enableGdsParsers = $enableGdsParsers !== null ?
+            $enableGdsParsers :
+            \Yii::$app->params['settings']['enable_gds_parsers_for_create_quote'];
+
+        if ($enableGdsParsers && $gds = ParsingDump::getGdsByQuote($this->gds)) {
+            $dumpParser = (new ReservationService($gds))->parseReservation($this->reservation_dump, true, $this->itinerary);
+        } else {
+            $dumpParser = self::parseDump($this->reservation_dump, true, $this->itinerary);
+        }
         if (empty($dumpParser)) {
             $this->addError('reservation_dump', 'Incorrect reservation dump!');
+
+            \Yii::info(
+                \yii\helpers\VarDumper::dumpAsString([
+                    $this->gds,
+                    $this->reservation_dump,
+                ], 20, true),
+                'info\Debug:' . self::class . ':' . __FUNCTION__
+            );
+            /* TODO: FOR DEBUG:: must by remove */
         }
     }
 

@@ -1,5 +1,6 @@
 <?php
 
+use sales\auth\Auth;
 use yii\bootstrap4\Modal;
 
 /* @var $model \common\models\Notifications[] */
@@ -125,8 +126,12 @@ use yii\widgets\Pjax; ?>
                     </div>
                     <div class="col-md-6">
                         <?php
+                        $disabled = [];
+                        if (!Auth::can('/user-call-status/update-status')) {
+                            $disabled = ['disabled' => 'disabled'];
+                        }
                         echo \yii\helpers\Html::dropDownList('user-call-status', $userCallStatus ? $userCallStatus->us_type_id : \common\models\UserCallStatus::STATUS_TYPE_READY, \common\models\UserCallStatus::STATUS_TYPE_LIST,
-                            ['class' => 'form-control', 'id' => 'user-call-status-select']);
+                            array_merge(['class' => 'form-control', 'id' => 'user-call-status-select'], $disabled));
                         ?>
 
                         <?php /*=\yii\helpers\Html::button('<i class="fa fa-search"></i> Show Details', ['class' => 'btn btn-sm btn-info', 'id' => 'call_box_first_screen'])*/?>
@@ -336,6 +341,9 @@ use yii\widgets\Pjax; ?>
     function refreshCallBox(obj) {
         // console.log(obj);
         $.pjax.reload({url: callBoxUrl, container: '#call-box-pjax', push: false, replace: false, 'scrollTo': false, timeout: 7000, async: false, data: {id: obj.id, status: obj.status}});
+        if (typeof PhoneWidgetCall === 'object') {
+            PhoneWidgetCall.refreshCallStatus(obj);
+        }
     }
 
 </script>

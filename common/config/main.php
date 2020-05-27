@@ -61,6 +61,13 @@ return [
             'recording_url' => 'https://api.twilio.com/2010-04-01/Accounts/AC10f3c74efba7b492cbd7dca86077736c/Recordings/'
         ],
 
+        'airsearch' => [
+            'class' => \common\components\AirSearchService::class,
+            'url' => 'https://airsearch.api.travelinsides.com/',
+            'username' => 'SAL101',
+            'password' => 'c940e3484fe9fcc73ed12a7fcec469b4',
+        ],
+
         'currency' => [
             'class' => \common\components\CurrencyService::class,
             'url' => 'https://airsearch.api.travelinsides.com/v1/',
@@ -68,6 +75,12 @@ return [
             'password' => '',
         ],
 
+        'queue_sms_job' => [
+            'class' => \yii\queue\beanstalk\Queue::class,
+            'host' => 'localhost',
+            'port' => 11300,
+            'tube' => 'queue_sms_job',
+        ],
         'queue_email_job' => [
             'class' => \yii\queue\beanstalk\Queue::class,
             'host' => 'localhost',
@@ -88,11 +101,13 @@ return [
         ],
         'telegram' => [
             'class' => \aki\telegram\Telegram::class,
+            'botUsername' => 'CrmKivorkBot',
             'botToken' => '817992632:AAE6UXJRqDscAZc9gUBScEpaT_T4zGukdos',
         ]
 
     ],
     'bootstrap' => [
+        'queue_sms_job',
         'queue_email_job',
         'queue_phone_check',
         'queue_job',

@@ -3,12 +3,14 @@
 namespace sales\model\callLog\entity\callLog\search;
 
 use common\models\Employee;
+use kartik\daterange\DateRangeBehavior;
 use sales\model\callLog\entity\callLog\CallLogCategory;
 use sales\model\callLog\entity\callLog\CallLogStatus;
 use sales\model\callLog\entity\callLog\CallLogType;
 use sales\model\callLog\entity\callLogQueue\CallLogQueue;
 use yii\data\ActiveDataProvider;
 use sales\model\callLog\entity\callLog\CallLog;
+use yii\db\Query;
 
 /**
  * Class CallLogSearch
@@ -17,6 +19,9 @@ use sales\model\callLog\entity\callLog\CallLog;
  * @property int|null $case_id
  * @property int $clq_queue_time
  * @property int $clq_access_count
+ * @property string $createTimeRange
+ * @property string $createTimeStart
+ * @property string $createTimeEnd
  */
 class CallLogSearch extends CallLog
 {
@@ -24,6 +29,12 @@ class CallLogSearch extends CallLog
     public $case_id;
     public $clq_queue_time;
     public $clq_access_count;
+
+    public $createTimeRange;
+    public $createTimeStart;
+    public $createTimeEnd;
+
+    public const CREATE_TIME_START_DEFAULT_RANGE = '-6 days';
 
     public function rules(): array
     {
@@ -58,6 +69,25 @@ class CallLogSearch extends CallLog
 
             [['clq_access_count', 'clq_queue_time'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
             [['clq_access_count', 'clq_queue_time'], 'integer'],
+            [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+        ];
+    }
+
+    public function __construct($config = [])
+    {
+        parent::__construct($config);
+        $this->createTimeRange = date('Y-m-d 00:00:00', strtotime(self::CREATE_TIME_START_DEFAULT_RANGE)) . ' - ' . date('Y-m-d 23:59:59');
+    }
+
+    public function behaviors()
+    {
+        return [
+            [
+                'class' => DateRangeBehavior::class,
+                'attribute' => 'createTimeRange',
+                'dateStartAttribute' => 'createTimeStart',
+                'dateEndAttribute' => 'createTimeEnd',
+            ]
         ];
     }
 
@@ -71,6 +101,10 @@ class CallLogSearch extends CallLog
             'query' => $query,
             'sort'=> ['defaultOrder' => ['cl_call_created_dt' => SORT_DESC]],
         ]);
+
+        /*if(!array_filter(isset($params['CallLogSearch']) ? $params['CallLogSearch'] : [])) {
+            $dataProvider->totalCount = static::find()->count();
+        }*/
 
         $dataProvider->sort->attributes['lead_id'] = [
             'asc' => ['cll_lead_id' => SORT_ASC],
@@ -122,6 +156,12 @@ class CallLogSearch extends CallLog
             ]);
         }
 
+        if ($this->createTimeRange){
+            $dateTimeStart = Employee::convertTimeFromUserDtToUTC($this->createTimeStart);
+            $dateTimeEnd = Employee::convertTimeFromUserDtToUTC($this->createTimeEnd);
+            $query->andWhere(['between', 'cl_call_created_dt', $dateTimeStart, $dateTimeEnd]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'cl_id' => $this->cl_id,
@@ -146,4 +186,31 @@ class CallLogSearch extends CallLog
 
         return $dataProvider;
     }
+
+	public function getCallHistory($params): ActiveDataProvider
+	{
+		$this->load($params);
+
+		$query = static::find();
+
+		$dataProvider = new ActiveDataProvider([
+			'query' => $query,
+			'pagination' => [
+				'pageSize' => 10,
+			]
+		]);
+
+		if (!$this->validate()) {
+			$query->where('0=1');
+			return $dataProvider;
+		}
+
+		$query->select(['call_log.cl_type_id', 'cl_phone_from', 'cl_phone_to', 'cl_client_id', 'cl_call_created_dt', 'cl_status_id', 'cl_duration']);
+		$query->addSelect(['if (clients.first_name is not null, concat(clients.first_name, \' \', clients.last_name), null) as client_name']);
+		$query->leftJoin('clients', 'clients.id = cl_client_id');
+		$query->where(['cl_user_id' => $this->cl_user_id]);
+		$query->orderBy(['cl_call_created_dt' => SORT_DESC]);
+
+		return $dataProvider;
+	}
 }

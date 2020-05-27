@@ -112,6 +112,7 @@ class SaleController extends FController
         }
 
         $result = [
+            'csId' => 0,
             'data' => $saleData,
             'additionalData' => [
                 'hash' => $hash,

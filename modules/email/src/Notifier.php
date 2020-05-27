@@ -29,7 +29,7 @@ class Notifier
             if ($ntf = Notifications::create($userId, 'New Emails received', 'New Emails received. Check your inbox.', Notifications::TYPE_INFO, true)) {
                 // Notifications::socket($user_id, null, 'getNewNotification', [], true);
                 $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                Notifications::sendSocket('getNewNotification', ['user_id' => $userId], $dataNotification);
+                Notifications::publish('getNewNotification', ['user_id' => $userId], $dataNotification);
             }
         }
     }

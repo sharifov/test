@@ -194,7 +194,10 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 						}
 
                         if (!$email->save()) {
-                            \Yii::error(VarDumper::dumpAsString($email->errors), 'ReceiveEmailsJob:execute');
+                            \Yii::error(VarDumper::dumpAsString([
+                                'communicationId' => $mail['ei_id'],
+                                'error' => $email->errors,
+                            ]), 'ReceiveEmailsJob:execute');
                         } else {
                             if ($lead_id === null && $case_id === null && $this->emailService->isNotInternalEmail($email->e_email_from)) {
                                 try {

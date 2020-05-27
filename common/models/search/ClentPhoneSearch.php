@@ -21,6 +21,7 @@ class ClentPhoneSearch extends ClientPhone
         return [
             [['id', 'client_id', 'is_sms', 'type'], 'integer'],
             [['phone', 'created', 'updated', 'comments', 'validate_dt'], 'safe'],
+            [['cp_title'], 'string', 'max' => 150],
         ];
     }
 
@@ -88,8 +89,9 @@ class ClentPhoneSearch extends ClientPhone
         ]);
 
         $query->andFilterWhere(['like', 'phone', $this->phone])
-            ->andFilterWhere(['like', 'comments', $this->comments]);
-        //VarDumper::dump($query, 10, true); exit;
+            ->andFilterWhere(['like', 'comments', $this->comments])
+            ->andFilterWhere(['like', 'cp_title', $this->cp_title]);
+
         return $dataProvider;
     }
 }
