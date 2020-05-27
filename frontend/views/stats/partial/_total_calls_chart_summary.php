@@ -4,9 +4,9 @@
  * @var $totalCallsDbData array
  */
 
-$totalIncomingCalls = $totalIncomingCallsAvg = $totalIncomingDuration = $totalIncomingDurationAvg = 0;
-$totalOutgoingCalls = $totalOutgoingCallsAvg = $totalOutgoingDuration = $totalOutgoingDurationAvg = 0;
-$totalInOutCalls = $totalInOutCallsAvg = $totalInOutCallsDuration = $totalInOutCallsDurationAvg = 0;
+$totalIncomingCalls = $totalIncomingCallsAvg = $totalIncomingDuration = 0;
+$totalOutgoingCalls = $totalOutgoingCallsAvg = $totalOutgoingDuration = 0;
+$totalInOutCalls = $totalInOutCallsAvg = $totalInOutCallsDuration = 0;
 
 $countIn = $countOut = $countInOut = 0;
 
@@ -16,21 +16,18 @@ foreach ($totalCallsDbData as $results){
         $totalIncomingCalls = $totalIncomingCalls + $results['totalCalls'];
         $totalIncomingCallsAvg = $totalIncomingCallsAvg + $results['avgCallsPerGroup'];
         $totalIncomingDuration = $totalIncomingDuration + $results['totalCallsDuration'];
-        $totalIncomingDurationAvg = $totalIncomingDurationAvg + $results['avgCallDuration'];
     }
     if ($results['callType'] === 'out'){
         $countOut++;
         $totalOutgoingCalls = $totalOutgoingCalls + $results['totalCalls'];
         $totalOutgoingCallsAvg = $totalOutgoingCallsAvg + $results['avgCallsPerGroup'];
         $totalOutgoingDuration = $totalOutgoingDuration + $results['totalCallsDuration'];
-        $totalOutgoingDurationAvg = $totalOutgoingDurationAvg + $results['avgCallDuration'];
     }
     if ($results['callType'] === 'total'){
         $countInOut++;
         $totalInOutCalls = $totalInOutCalls + $results['totalCalls'];
         $totalInOutCallsAvg = $totalInOutCallsAvg + $results['avgCallsPerGroup'];
         $totalInOutCallsDuration = $totalInOutCallsDuration + $results['totalCallsDuration'];
-        $totalInOutCallsDurationAvg = $totalInOutCallsDurationAvg + $results['avgCallDuration'];
     }
 }
 
@@ -57,21 +54,21 @@ foreach ($totalCallsDbData as $results){
                 <td><?= $totalIncomingCalls ?></td>
                 <td><?= number_format($totalIncomingCallsAvg / ($countIn ?: 1)) ?></td>
                 <td><?= Yii::$app->formatter->asDuration($totalIncomingDuration) ?></td>
-                <td><?= Yii::$app->formatter->asDuration((int)$totalIncomingDurationAvg) ?></td>
+                <td><?= Yii::$app->formatter->asDuration((int)$totalIncomingDuration / ($totalIncomingCalls ?: 1)) ?></td>
             </tr>
             <tr>
                 <td>Outgoing</td>
                 <td><?= $totalOutgoingCalls ?></td>
                 <td><?= number_format($totalOutgoingCallsAvg / ($countOut ?: 1)) ?></td>
                 <td><?= Yii::$app->formatter->asDuration((int)$totalOutgoingDuration) ?></td>
-                <td><?= Yii::$app->formatter->asDuration((int)$totalOutgoingDurationAvg) ?></td>
+                <td><?= Yii::$app->formatter->asDuration((int)$totalOutgoingDuration / ($totalOutgoingCalls ?: 1)) ?></td>
             </tr>
             <tr>
                 <td>Total</td>
                 <td><?= $totalInOutCalls ?></td>
                 <td><?= number_format($totalInOutCallsAvg / ($countInOut ?: 1)) ?></td>
                 <td><?= Yii::$app->formatter->asDuration((int)$totalInOutCallsDuration) ?></td>
-                <td><?= Yii::$app->formatter->asDuration((int)$totalInOutCallsDurationAvg) ?></td>
+                <td><?= Yii::$app->formatter->asDuration((int)$totalInOutCallsDuration / ($totalInOutCalls ?: 1)) ?></td>
             </tr>
             </tbody>
         </table>

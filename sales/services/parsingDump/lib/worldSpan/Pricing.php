@@ -30,14 +30,14 @@ class Pricing implements ParseDumpInterface
 
     /**
      * @param string $string
-     * @return string|null
+     * @return string
      */
     private function parseValidatingCarrier(string $string): ?string
     {
         $carrierPattern = "/VALIDATING\s+CARRIER\s+DEFAULT\s+([A-Z]+)/";
         preg_match($carrierPattern, $string, $carrierMatches);
 
-        return $carrierMatches[1] ?? null;
+        return $carrierMatches[1] ?? '';
     }
 
     /**

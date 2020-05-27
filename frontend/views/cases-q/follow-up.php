@@ -4,6 +4,7 @@ use common\models\Department;
 use common\models\Employee;
 use common\models\Project;
 use sales\access\ListsAccess;
+use sales\auth\Auth;
 use sales\entities\cases\CaseCategory;
 use sales\entities\cases\CasesQSearch;
 use common\components\grid\cases\NeedActionColumn;
@@ -165,6 +166,14 @@ $lists = new ListsAccess($user->id);
             [
                 'class' => 'yii\grid\ActionColumn',
                 'template' => '{view} {take}',
+                'visibleButtons' => [
+                    'view' => static function (CasesQSearch $model, $key, $index) {
+                        return Auth::can('cases/view', ['case' => $model]);
+                    },
+                    'take' => static function (CasesQSearch $model, $key, $index) {
+                        return Auth::can('cases/take', ['case' => $model]);
+                    },
+                ],
                 'buttons' => [
                     'view' => function ($url, Cases $model) {
                         return Html::a('<i class="glyphicon glyphicon-search"></i> View Case', [
@@ -178,7 +187,7 @@ $lists = new ListsAccess($user->id);
                         ]);
                     },
                     'take' => function ($url, Cases $model) {
-                        return Html::a('<i class="fa fa-download"></i> Take', ['cases/take', 'gid' => $model->cs_gid, 'is_over' => false], [
+                        return Html::a('<i class="fa fa-download"></i> Take', ['cases/take', 'gid' => $model->cs_gid], [
                             'class' => 'btn btn-primary btn-xs take-processing-btn',
                             'data-pjax' => 0,
                             /*'data' => [

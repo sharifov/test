@@ -158,7 +158,7 @@
       .phone-widget .current-number .dropdown .dropdown-menu {
         background-color: #6986a6;
         border: 0 none;
-        width: 100%;
+        /*width: 100%;*/
         margin: 0;
         top: -2px; }
       .phone-widget .current-number .dropdown .dropdown-toggle {

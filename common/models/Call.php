@@ -1106,6 +1106,8 @@ class Call extends \yii\db\ActiveRecord
         if ($this->c_created_user_id && ($insert || $isChangedStatus))  {
             //Notifications::socket($this->c_created_user_id, $this->c_lead_id, 'callUpdate', ['id' => $this->c_id, 'status' => $this->getStatusName(), 'duration' => $this->c_call_duration, 'snr' => $this->c_sequence_number], true);
 
+			$isInternal = PhoneList::find()->byPhone($this->c_from)->enabled()->exists();
+			$fromName = $isInternal ? $this->getCallerName($this->isIn() ? $this->c_from : $this->c_to)  : 'ClientName';
             Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id, 'lead_id' => $this->c_lead_id, 'case_id' => $this->c_case_id],
                 [
                 	'id' => $this->c_id,
@@ -1115,8 +1117,8 @@ class Call extends \yii\db\ActiveRecord
 					'leadId' => $this->c_lead_id,
 					'isIn' => $this->isIn(),
 					'phoneFrom' => $this->c_from,
-					'name' => $this->cClient ? $this->cClient->getFullName() : '',
-					'fromInternal' => PhoneList::find()->byPhone($this->c_from)->enabled()->exists()
+					'name' => $fromName,
+					'fromInternal' => $isInternal
 				]
 			);
         }
@@ -1956,4 +1958,27 @@ class Call extends \yii\db\ActiveRecord
     {
         return $this->c_source_type_id === self::SOURCE_COACH_CALL;
     }
+
+    public function getCallerName(string $fromNumber)
+	{
+		if ($this->cClient) {
+			return $this->cClient->getFullName();
+		}
+
+		$phone = PhoneList::find()->byPhone($fromNumber)->enabled()->one();
+
+		if ($phone->departmentPhoneProject && $phone->departmentPhoneProject->dppDep && $phone->departmentPhoneProject->isEnabled()) {
+			/** @var $department Department */
+			$department = $phone->departmentPhoneProject->dppDep;
+			return $department->dep_name;
+		}
+
+		$userProjectParams = UserProjectParams::find()->byPhone($fromNumber)->one();
+		if ($userProjectParams && $userProjectParams->uppUser) {
+			return $userProjectParams->uppUser->username;
+		}
+
+		return 'ClientName';
+	}
+
 }

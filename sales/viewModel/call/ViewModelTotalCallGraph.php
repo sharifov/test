@@ -77,6 +77,20 @@ class ViewModelTotalCallGraph
         $mappedData = [];
 
         foreach ($this->callData as $rowIndex){
+            $data['incoming'] = 0;
+            $data['incomingAvg'] = 0;
+            $data['incomingTotal'] = 0;
+            $data['incomingAvgDuration'] = 0;
+
+            $data['outgoing'] = 0;
+            $data['outgoingAvg'] = 0;
+            $data['outgoingTotal'] = 0;
+            $data['outgoingAvgDuration'] = 0;
+
+            $data['total'] = 0;
+            $data['totalCallsDuration'] = 0;
+            $data['totalAvgDuration'] = 0;
+
             foreach ($this->callData as $row){
                 if ($rowIndex['group'] == $row['group']) {
                     $data['date'] = $row['group'];
@@ -107,16 +121,16 @@ class ViewModelTotalCallGraph
         foreach ($finalData as $arr){
             array_push($mappedData, [
                 'date' => $arr['date'],
-                'incoming' => isset($arr['incoming']) ? (int)$arr['incoming'] : 0,
-                'outgoing' => isset($arr['outgoing']) ? (int)$arr['outgoing'] : 0,
+                'incoming' => (int)$arr['incoming'],
+                'outgoing' => (int)$arr['outgoing'],
                 'total' => (int)$arr['total'],
-                'incomingAvg' => isset($arr['incomingAvg']) ? (int)$arr['incomingAvg'] : 0,
-                'outgoingAvg' => isset($arr['outgoingAvg']) ? (int)$arr['outgoingAvg'] : 0,
-                'incomingTotal' => isset($arr['incomingTotal']) ? (int)$arr['incomingTotal'] : 0,
-                'outgoingTotal' => isset($arr['outgoingTotal']) ? (int)$arr['outgoingTotal'] : 0,
+                'incomingAvg' => (int)$arr['incomingAvg'],
+                'outgoingAvg' => (int)$arr['outgoingAvg'],
+                'incomingTotal' => (int)$arr['incomingTotal'],
+                'outgoingTotal' => (int)$arr['outgoingTotal'],
                 'totalCallsDuration' => (int)$arr['totalCallsDuration'],
-                'incomingAvgDuration' => isset($arr['incomingAvgDuration']) ? (int)$arr['incomingAvgDuration'] : 0,
-                'outgoingAvgDuration' => isset($arr['outgoingAvgDuration']) ? (int)$arr['outgoingAvgDuration'] : 0,
+                'incomingAvgDuration' => (int)$arr['incomingAvgDuration'],
+                'outgoingAvgDuration' =>  (int)$arr['outgoingAvgDuration'],
                 'totalAvgDuration' => (int)$arr['totalAvgDuration'],
             ]);
         }
@@ -142,9 +156,12 @@ class ViewModelTotalCallGraph
         $mappedData = [];
 
         foreach ($this->callData as $rowIndex){
+            $data['incoming'] = 0;
+            $data['outgoing'] = 0;
             foreach ($this->callData as $row){
                 if ($rowIndex['group'] == $row['group']) {
                     $data['date'] = $row['group'];
+
                     if ($row['callType'] === 'in'){
                         $data['incoming'] = $row['totalCalls'];
                     }
@@ -164,8 +181,8 @@ class ViewModelTotalCallGraph
         foreach ($finalData as $arr){
             array_push($mappedData, [
                 $arr['date'],
-                isset($arr['incoming']) ? (int)$arr['incoming'] : 0,
-                isset($arr['outgoing']) ? (int)$arr['outgoing'] : 0,
+                (int)$arr['incoming'],
+                (int)$arr['outgoing'],
                 /*(int)$arr['total']*/
                 ]);
         }
@@ -196,6 +213,8 @@ class ViewModelTotalCallGraph
         $mappedData = [];
 
         foreach ($this->callData as $rowIndex){
+            $data['incoming'] = 0;
+            $data['outgoing'] = 0;
             foreach ($this->callData as $row){
                 if ($rowIndex['group'] == $row['group']) {
                     $data['date'] = $row['group'];
@@ -218,8 +237,8 @@ class ViewModelTotalCallGraph
         foreach ($finalData as $arr){
             array_push($mappedData, [
                 $arr['date'],
-                isset($arr['incoming']) ? (int)$arr['incoming'] : 0,
-                isset($arr['outgoing']) ? (int)$arr['outgoing'] : 0,
+                (int)$arr['incoming'],
+                (int)$arr['outgoing'],
                 /*(int)$arr['total']*/
             ]);
         }
@@ -250,6 +269,8 @@ class ViewModelTotalCallGraph
         $mappedData = [];
 
         foreach ($this->callData as $rowIndex){
+            $data['incoming'] = 0;
+            $data['outgoing'] = 0;
             foreach ($this->callData as $row){
                 if ($rowIndex['group'] == $row['group']) {
                     $data['date'] = $row['group'];
@@ -272,10 +293,10 @@ class ViewModelTotalCallGraph
         foreach ($finalData as $arr){
             array_push($mappedData, [
                 $arr['date'],
-                isset($arr['incoming']) ? (int)$arr['incoming'] : 0,
-                'Incoming Call Duration: ' . Yii::$app->formatter->asDuration(isset($arr['incoming']) ? (int)$arr['incoming'] : 0),
-                isset($arr['outgoing']) ? (int)$arr['outgoing'] : 0,
-                'Outgoing Call Duration: ' . Yii::$app->formatter->asDuration(isset($arr['outgoing']) ? (int)$arr['outgoing'] : 0),
+                (int)$arr['incoming'],
+                'Incoming Call Duration: ' . Yii::$app->formatter->asDuration((int)$arr['incoming']),
+                (int)$arr['outgoing'],
+                'Outgoing Call Duration: ' . Yii::$app->formatter->asDuration((int)$arr['outgoing']),
                 /*(int)$arr['total'],
                 'Total Call Duration: ' . Yii::$app->formatter->asDuration((int)$arr['total']),*/
             ]);
@@ -319,6 +340,8 @@ class ViewModelTotalCallGraph
         $mappedData = [];
 
         foreach ($this->callData as $rowIndex){
+            $data['incoming'] = 0;
+            $data['outgoing'] = 0;
             foreach ($this->callData as $row){
                 if ($rowIndex['group'] == $row['group']) {
                     $data['date'] = $row['group'];
@@ -341,10 +364,10 @@ class ViewModelTotalCallGraph
         foreach ($finalData as $arr){
             array_push($mappedData, [
                 $arr['date'],
-                isset($arr['incoming']) ? (int)$arr['incoming'] : 0,
-                'Incoming Call Duration AVG: ' . Yii::$app->formatter->asDuration(isset($arr['incoming']) ? (int)$arr['incoming'] : 0),
-                isset($arr['outgoing']) ? (int)$arr['outgoing'] : 0,
-                'Outgoing Call Duration AVG: ' . Yii::$app->formatter->asDuration(isset($arr['outgoing']) ? (int)$arr['outgoing'] : 0),
+                (int)$arr['incoming'],
+                'Incoming Call Duration AVG: ' . Yii::$app->formatter->asDuration((int)$arr['incoming']),
+                (int)$arr['outgoing'],
+                'Outgoing Call Duration AVG: ' . Yii::$app->formatter->asDuration((int)$arr['outgoing']),
                 /*(int)$arr['total'],
                 'Total Call Duration AVG: ' . Yii::$app->formatter->asDuration((int)$arr['total']),*/
             ]);
@@ -507,10 +530,6 @@ class ViewModelTotalCallGraph
                 'label' => 'Outgoing Average',
                 'attribute' => 'outgoingAvg'
             ],
-            /*[
-                'label' => 'Total Average',
-                'attribute' => 'total_calls_avg'
-            ],*/
             [
                 'label' => 'Incoming Call Duration',
                 'attribute' => 'incomingTotal',

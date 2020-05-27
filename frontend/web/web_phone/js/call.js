@@ -39,6 +39,7 @@ var PhoneWidgetCall = function () {
         $('.call-pane-initial').removeClass('is_active');
         $('.call-pane-calling').addClass('is_active');
         $('.call-in-action__text').html('Dialing');
+        $('.call-pane-initial .contact-info-card__label').html('To');
         $('.call-in-action__time').html('').show().timer('remove').timer({format: '%M:%S', seconds: 0}).timer('start');
     }
 
@@ -168,10 +169,12 @@ var PhoneWidgetCall = function () {
             obj.status = 'On Call';
             $('.call-pane__call-btns').removeClass('is-pending').addClass('is-on-call');
             showCallingPanel();
+            $('.call-pane-calling .contact-info-card__name').html(obj.name);
         }else if(['Ringing', 'Queued'].includes(obj.status)) {
             if ('isIn' in obj && obj.isIn) {
                 initIncomingCall(obj);
             }
+            $('.call-pane-calling .contact-info-card__name').html(obj.name);
         }else if (obj.status === 'Completed') {
             cancelCall();
         }else {
@@ -179,6 +182,13 @@ var PhoneWidgetCall = function () {
         }
         $('.call-in-action__text').html(obj.status);
         $('.call-in-action__time').html('').show().timer('remove').timer({format: '%M:%S', seconds: status.duration | 0}).timer('start');
+
+        if ('isIn' in obj && obj.isIn) {
+            $('.call-pane-initial .contact-info-card__label').html('Incoming');
+        } else {
+            $('.call-pane-initial .contact-info-card__label').html('Outgoing');
+        }
+
     }
 
     function initIncomingCall(obj)

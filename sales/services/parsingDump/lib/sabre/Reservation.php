@@ -5,6 +5,7 @@ namespace sales\services\parsingDump\lib\Sabre;
 use DateTime;
 use sales\helpers\app\AppHelper;
 use sales\services\parsingDump\lib\ParseDumpInterface;
+use sales\services\parsingDump\ReservationService;
 
 /**
  * Class Reservation
@@ -66,15 +67,15 @@ class Reservation implements ParseDumpInterface
     {
         return $pattern ?? '/^
             (\d{1,2}) # index
-            \s{1}([A-Z]{2}) # Airline
+            \s+([A-Z]{2}|[A-Z]{1}\d{1}) # Airline
             \s*(\d{1,4})([A-Z]{1}) # Flight number + Booking Class 
             \s+(\d{2})(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) # Departure day + month
-            \s+([A-Z]{1}) # ?
-            \s+([A-Z]{3})([A-Z]{3}) # iata airport departure + arrival    
-            \W([A-Z]{2}\d{1}) # ?   
-            (\s+\d{1}|\s+\d{2})(\d{2})(N|A|P) # Departure time hours + min + (AM|PM)
-            (\s+\d{1}|\s+\d{2})(\d{2})(N|A|P) # Arrival time hours + min + (AM|PM) 
-            \s+((\d{2})(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC))* # Arrival day + month             
+            (\s{1}[A-Z]{1}\s{1}|\s{1}) # ignore
+            \s*([A-Z]{3})([A-Z]{3}) # iata airport departure + arrival
+            (\W[A-Z]{2}\d{1}|\s{1})* # ignore
+            (\s+\d{1}|\s+\d{2})(\d{2})(N|A|A\+|P) # Departure time hours + min + (AM|PM)
+            (\s+\d{1}|\s+\d{2})(\d{2})(N|A|A\+|P) # Arrival time hours + min + (AM|PM)
+            \s+((\d{2})(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC))* # Arrival day + month
             /x';
     }
 
@@ -175,7 +176,7 @@ class Reservation implements ParseDumpInterface
     private function createDateTime(string $day, string $month, string $hour, string $minute, string $ampm)
     {
         $dateFormat = 'dM g:i A';
-        $ampm = $ampm === 'A' ? 'AM' : 'PM';
+        $ampm = ($ampm === 'A' || $ampm === 'A+') ? 'AM' : 'PM';
         $dateString = $day . strtolower($month) . ' ' . $hour . ':' . $minute . ' ' . $ampm;
         return DateTime::createFromFormat($dateFormat, $dateString);
     }

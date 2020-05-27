@@ -42,7 +42,9 @@ class SaleTicketService
 		}
 		$refundRules = $saleData['refundRules'];
 		foreach ($refundRules['rules'] as $rule) {
-			$dto = (new SaleTicketCreateDTO())->feelBySaleData($caseId, $saleId, $saleData['pnr'] ?? '', $rule, $refundRules, $saleData['customerInfo']);
+			$firstLastName = $this->getPassengerName($rule , $saleData['passengers']);
+			$cntPassengers = $this->getPassengersCountExceptInf($saleData['passengers']);
+			$dto = (new SaleTicketCreateDTO())->feelBySaleData($caseId, $saleId, $saleData['pnr'] ?? '', $firstLastName, $cntPassengers, $rule, $refundRules);
 			$saleTicket = SaleTicket::createBySaleData($dto);
 			$this->saleTicketRepository->save($saleTicket);
 		}
@@ -63,5 +65,48 @@ class SaleTicketService
 			$ci->saleTicketRepository->deleteByCaseAndSale($caseId, $saleId);
 			$ci->createSaleTicketBySaleData($caseId, $saleId, $saleData);
 		});
+	}
+
+	private function getPassengerName(array $rule, array $passengers): string
+	{
+		if (!empty($rule['nameref'])) {
+			return $this->getPassengerNameByNameref($rule['nameref'], $passengers);
+		}
+
+		if (!empty($rule['ticket_number'])) {
+			return $this->getPassengerNameByTicketNumber($rule['ticket_number'], $passengers);
+		}
+		return '';
+	}
+
+	private function getPassengerNameByNameref(string $nameref, array $passengers): string
+	{
+		foreach ($passengers as $passenger) {
+			if ($passenger['nameref'] === $nameref) {
+				return trim($passenger['first_name'] . ' / ' . $passenger['last_name']);
+			}
+		}
+		return '';
+	}
+
+	private function getPassengerNameByTicketNumber(string $ticketNumber, array $passengers): string
+	{
+		foreach ($passengers as $passenger) {
+			if ($passenger['ticket_number'] === $ticketNumber) {
+				return trim($passenger['first_name'] . ' / ' . $passenger['last_name']);
+			}
+		}
+		return '';
+	}
+
+	private function getPassengersCountExceptInf(array $passengers): int
+	{
+		$cnt = 0;
+		foreach ($passengers as $passenger) {
+			if ($passenger['type'] !== 'INF') {
+				$cnt++;
+			}
+		}
+		return $cnt;
 	}
 }

@@ -39,6 +39,7 @@ use console\migrations\RbacMigrationService;
 use DateInterval;
 use DatePeriod;
 use DateTime;
+use frontend\models\form\CreditCardForm;
 use frontend\widgets\lead\editTool\Form;
 use frontend\widgets\newWebPhone\sms\socket\Message;
 use frontend\widgets\notification\NotificationMessage;
@@ -111,11 +112,13 @@ use sales\model\user\entity\ShiftTime;
 use sales\model\user\entity\StartTime;
 use sales\repositories\airport\AirportRepository;
 use sales\repositories\cases\CasesRepository;
+use sales\repositories\cases\CasesSaleRepository;
 use sales\repositories\cases\CaseStatusLogRepository;
 use sales\repositories\lead\LeadBadgesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\Repository;
 use sales\services\cases\CasesManageService;
+use sales\services\cases\CasesSaleService;
 use sales\services\client\ClientManageService;
 use sales\services\email\incoming\EmailIncomingService;
 use sales\services\lead\LeadCreateApiService;
@@ -1226,5 +1229,27 @@ class TestController extends FController
 		echo Html::encode($test3);
 		echo '<br>';
 		echo Html::encode($test4);
+	}
+
+	public function actionTestAddCreditCardBo()
+	{
+		$bookId = 'B2917FB';
+		$saleId = 136503;
+
+		$card = new CreditCardForm();
+		$card->cc_holder_name = 'Alex Grub Test';
+		$card->cc_number = '5555555555555555';
+		$card->cc_expiration = '10 / 21';
+		$card->cc_cvv = 111;
+
+		$repository = Yii::createObject(CasesSaleRepository::class);
+
+		$caseSale = $repository->getSaleByPrimaryKeys(135814, $saleId);
+
+		$saleOriginalData = json_decode((string)$caseSale->css_sale_data, true);
+
+		$service = Yii::createObject(CasesSaleService::class);
+		echo '<pre>';
+		print_r($service->sendAddedCreditCardToBO($saleOriginalData['projectApiKey'], $bookId, $saleId, $card));
 	}
 }

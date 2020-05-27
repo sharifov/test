@@ -2,10 +2,13 @@
 
 namespace frontend\controllers;
 
+use common\models\CaseSale;
 use common\models\SaleCreditCard;
 use frontend\models\form\CreditCardForm;
 use http\Exception\RuntimeException;
+use sales\repositories\cases\CasesSaleRepository;
 use sales\repositories\NotFoundException;
+use sales\services\cases\CasesSaleService;
 use Yii;
 use common\models\CreditCard;
 use common\models\search\CreditCardSearch;
@@ -18,10 +21,30 @@ use yii\filters\VerbFilter;
 
 /**
  * CreditCardController implements the CRUD actions for CreditCard model.
+ *
+ * @property CasesSaleService $casesSaleService
+ * @property CasesSaleRepository $casesSaleRepository
  */
 class CreditCardController extends FController
 {
-    /**
+	/**
+	 * @var CasesSaleService
+	 */
+	private $casesSaleService;
+
+	/**
+	 * @var CasesSaleRepository
+	 */
+	private $casesSaleRepository;
+
+	public function __construct($id, $module, CasesSaleService $casesSaleService, CasesSaleRepository $casesSaleRepository, $config = [])
+	{
+		parent::__construct($id, $module, $config);
+		$this->casesSaleService = $casesSaleService;
+		$this->casesSaleRepository = $casesSaleRepository;
+	}
+
+	/**
      * @return array
      */
     public function behaviors(): array
@@ -137,6 +160,7 @@ class CreditCardController extends FController
     public function actionAjaxUpdate()
 	{
 		$id = Yii::$app->request->get('id');
+		$pjaxId = Yii::$app->request->get('pjaxId');
 
 		try {
 			$modelCc = $this->findModel($id);
@@ -145,31 +169,23 @@ class CreditCardController extends FController
 				throw new NotFoundException('Credit Card data is not found');
 			}
 
-			$form = new CreditCardForm();
+			$modelCc->scenario = CreditCard::SCENARIO_CASE_AJAX_UPDATE;
 
-			if ($form->load(Yii::$app->request->post()) && $form->validate()) {
-				$modelCc->attributes = $form->attributes;
-				$modelCc->cc_expiration_month = $form->cc_expiration_month;
-				$modelCc->cc_expiration_year = $form->cc_expiration_year;
-				$modelCc->updateSecureCardNumber();
-				$modelCc->updateSecureCvv();
+			if ($modelCc->load(Yii::$app->request->post()) && $modelCc->validate()) {
 				if ($modelCc->save()) {
-					return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#pjax-credit-card-table"}); createNotify("Success Updated", "Credit Card Successfully updated", "success")</script>';
+					return '<script>$("#modal-sm").modal("hide"); pjaxReload({container: "#'.$pjaxId.'"}); createNotify("Success Updated", "Credit Card Successfully updated", "success")</script>';
 				}
-				Yii::error(VarDumper::dumpAsString($modelCc->errors), 'CreditCard:actionAjaxUpdate:save');
-			} else {
-				$form->attributes = $modelCc->attributes;
-				$form->cc_number = $modelCc->initNumber;
-				$form->cc_cvv = $modelCc->initCvv;
-				$form->cc_expiration = date('m / y', strtotime($modelCc->cc_expiration_year.'-'.$modelCc->cc_expiration_month.'-01'));
-
+				throw new \RuntimeException($modelCc->getErrorSummary(false)[0]);
 			}
 		} catch (\Throwable $e) {
-			$form->addError('general', $e->getMessage());
+			if (!$modelCc) {
+				$modelCc = new CreditCard();
+			}
+			$modelCc->addError('general', $e->getMessage());
 		}
 
-		return $this->renderAjax('_form', [
-			'model' => $form,
+		return $this->renderAjax('_form_ajax_update', [
+			'model' => $modelCc,
 			'isAjax' => true
 		]);
 	}
@@ -178,6 +194,7 @@ class CreditCardController extends FController
 	{
 		$caseId = Yii::$app->request->get('caseId');
 		$saleId = Yii::$app->request->get('saleId');
+		$pjaxId = Yii::$app->request->get('pjaxId');
 
 		if (!$caseId || !$saleId) {
 			throw new BadRequestHttpException();
@@ -187,6 +204,8 @@ class CreditCardController extends FController
 			$form = new CreditCardForm();
 
 			if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+				$caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$saleId);
+
 				$model = new CreditCard();
 				$model->attributes = $form->attributes;
 				$model->cc_status_id = CreditCard::STATUS_VALID;
@@ -202,7 +221,18 @@ class CreditCardController extends FController
 					if (!$saleCreditCard->save()) {
 						throw new \RuntimeException($saleCreditCard->getErrorSummary(false)[0]);
 					} else {
-						return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#pjax-credit-card-table"}); createNotify("Success", "Credit Card Successfully created", "success")</script>';
+						$apiKey = $this->casesSaleRepository->getProjectApiKey($caseSale);
+						$result = $this->casesSaleService->sendAddedCreditCardToBO($apiKey, $caseSale->css_sale_book_id, $caseSale->css_sale_id, $form);
+
+						$notify = '';
+						if ($result['error']) {
+							$notify = 'createNotify("B/O add card notice", "'.$result['message'].'", "warning")';
+						} else {
+							$model->cc_is_sync_bo = 1;
+							$model->save();
+						}
+
+						return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#'.$pjaxId.'"}); createNotify("Success", "Credit Card Successfully created", "success"); '.$notify.'</script>';
 					}
 				}
 			}

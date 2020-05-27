@@ -14,7 +14,7 @@ use \kartik\form\ActiveForm;
             <h2><i class="fa fa-search"></i> Search</h2>
             <ul class="nav navbar-right panel_toolbox">
                 <li>
-                    <a class="collapse-link"><i class="fa fa-chevron-down"></i></a>
+                    <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                 </li>
 
                 <?php /*<li class="dropdown">
@@ -31,7 +31,7 @@ use \kartik\form\ActiveForm;
             </ul>
             <div class="clearfix"></div>
         </div>
-        <div class="x_content" style="display: <?=(Yii::$app->request->isPjax || Yii::$app->request->get('CallSearch') || Yii::$app->request->get('createTimeRange')) ? 'block' : 'none'?>">
+        <div class="x_content" style="display: ">
             <?php $form = ActiveForm::begin([
                 'action' => ['index'],
                 'method' => 'get',

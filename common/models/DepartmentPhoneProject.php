@@ -216,4 +216,9 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
     {
         return new DepartmentPhoneProjectQuery(static::class);
     }
+
+    public function isEnabled(): bool
+	{
+		return (bool)$this->dpp_enable;
+	}
 }

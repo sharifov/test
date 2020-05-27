@@ -107,7 +107,7 @@ $phoneFrom = $call ? $call->c_from : '';
         <li class="dial__item"><button class="dial__btn" value="8">8</button></li>
         <li class="dial__item"><button class="dial__btn" value="9">9</button></li>
         <li class="dial__item"><button class="dial__btn" value="✱">✱</button></li>
-          <li class="dial__item"><button class="dial__btn" value="0">0 <small>+</small></li>
+        <li class="dial__item"><button class="dial__btn" value="0">0</button></li>
         <li class="dial__item"><button class="dial__btn" value="#">#</button></li>
         <li class="dial__item"><button class="dial__btn" value="+">+</button></li>
       </ul>
@@ -115,7 +115,7 @@ $phoneFrom = $call ? $call->c_from : '';
         <button class="call-pane__start-call calling-state-block" id="btn-new-make-call">
           <div class="call-in-action">
             <span class="call-in-action__text">Calling</span>
-            <span class="call-in-action__time">01:54</span>
+            <span class="call-in-action__time">00:00</span>
           </div>
           <i class="fas fa-phone"></i>
         </button>
@@ -164,7 +164,7 @@ $phoneFrom = $call ? $call->c_from : '';
       <div class="contact-info-card__details">
 
         <div class="contact-info-card__line history-details">
-          <span class="contact-info-card__label"><?= $call && $call->isIn() ? 'From' : 'To' ?></span>
+          <span class="contact-info-card__label"><?= $call && $call->isIn() ? 'Incoming' : 'Outgoing' ?></span>
           <strong class="contact-info-card__name"><?= $call && $call->cClient ? $call->cClient->getFullName() : 'ClientName' ?></strong>
         </div>
 

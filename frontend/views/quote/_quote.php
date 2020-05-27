@@ -30,13 +30,15 @@ $js = <<<JS
     var leadId = '$lead->id';
 
     $('[data-toggle="tooltip"]').tooltip();
-
-    $('.alt-quote-price').keyup(function (event) {
+    
+    $(document).on('keyup', '.alt-quote-price', function(event){
         var key = event.keyCode ? event.keyCode : event.which;
         validatePriceField($(this), key);
     });
-    $('.alt-quote-price').change(function (event) {
-        if ($(this).val().length == 0) {
+    
+    $(document).on('change', '.alt-quote-price', function(event){
+    
+        if ($(this).val().length === 0) {
             $(this).val(0);
         }
         var form = $('#$formID');
@@ -45,6 +47,7 @@ $js = <<<JS
             url: '$quotePriceUrl',
             data: form.serialize(),
             success: function (data) {
+            
                 $.each(data, function( index, value ) {
                     $('#'+index).val(value);
                 });
@@ -54,7 +57,7 @@ $js = <<<JS
             }
         });
     });
-    
+
     /***  Cancel card  ***/
     $('#cancel-alt-quote').click(function (e) {
         e.preventDefault();
@@ -241,20 +244,16 @@ $js = <<<JS
                    
                     if (dataResponse.validating_carrier.length) {
                        $('#quote-main_airline_code').val(dataResponse.validating_carrier).trigger('change');
-                    }
+                    } 
                     if (dataResponse.prices.length) {
                        $('#price-table tbody').html(dataResponse.prices); 
                     }
-                    if (dataResponse.reservation_dump.length) {
-                        var reservationDump = dataResponse.reservation_dump.join('<br />');
-                        new PNotify({
-                            title: "Please check reservation dump",
-                            type: "info",
-                            text: reservationDump,
-                            hide: true,
-                            width:'520px',
-                            delay: 15000
-                        }); 
+                    if (dataResponse.reservation_dump.length) {                        
+                        $('#reservation_result').val(dataResponse.reservation_dump.join("\\n"));
+                        
+                        var reservationDumpOut = dataResponse.reservation_dump.join("<br />");
+                        reservationDumpOut = '<h6>Imported reservation info</h6>' + reservationDumpOut; 
+                        $('#box_reservation_result').html(reservationDumpOut);
                     }                    
                     $('#save_dump_btn').show(500);                                                            
 	            } else {
@@ -310,28 +309,25 @@ $js = <<<JS
                     window.location.reload();                                        
 	            } else {
 	            
-	                if (dataResponse.errorsPrices.length) {
-	                    $.each(dataResponse.errorsPrices, function( index, value ) {
-                            $.each(value, function (idx, val){
-                                $('#quoteprice-'+index+'-'+idx).addClass('field-error');
-                                $('#quoteprice-'+index+'-'+idx).parent().addClass('has-error parent-error');
-                            });
+                    $.each(dataResponse.errorsPrices, function( index, value ) {
+                        $.each(value, function (idx, val){                            
+                            $('#quoteprice-'+index+'-'+idx).addClass('field-error');
+                            $('#quoteprice-'+index+'-'+idx).parent().addClass('has-error parent-error');
                         });
-	                }
-                    if (dataResponse.errors.length) {
-	                    $.each(dataResponse.errors, function( index, value ) {
-                            $('#quote-'+index).addClass('field-error');
-                            $('#quote-'+index).parent().addClass('has-error parent-error');
-                            if (index == 'reservation_dump') {
-                                itineraryErr = true;
-                            }
-                        });
-	                }                   
-                    if (dataResponse.error.length) {                        
+                    });
+                    $.each(dataResponse.errors, function( index, value ) {
+                        $('#quote-'+index).addClass('field-error');
+                        $('#quote-'+index).parent().addClass('has-error parent-error');
+                        if (index == 'reservation_dump') {
+                            itineraryErr = true;
+                        }
+                    });
+	                                  
+                    if (dataResponse.errorMessage.length) {                        
                         new PNotify({
                             title: "Error",
                             type: "error",
-                            text: dataResponse.error,
+                            text: dataResponse.errorMessage,
                             hide: true
                         }); 
                     }    
@@ -414,6 +410,10 @@ $this->registerCss('
 ]) ?>
 <!------------- Add/Edit Alternative Quote Form ------------->
 <div class="alternatives__item">
+    <div id="box_reservation_result" style="margin-bottom: 8px;"></div>
+    <?php echo Html::textarea('reservation_result', null,
+        ['id' => 'reservation_result', 'style' => 'display:none;'])
+    ?>
     <div class="table-wrapper table-responsive ticket-details-block__table mb-20"
          id="alt-quote-fares-info-<?= $quote->id ?>">
         <?= $form->field($quote, 'id', [
@@ -536,7 +536,7 @@ $this->registerCss('
                         ]) ?>
                     </td>
                     <td class="td-input text-right">
-                        <?php if (!in_array($price->passenger_type, $applyBtn) && $paxCntTypes[$price->passenger_type] > 1) {
+                        <?php /* if (!in_array($price->passenger_type, $applyBtn) && $paxCntTypes[$price->passenger_type] > 1) {
                             $applyBtn[] = $price->passenger_type;
                             echo Html::button('<i class="fa fa-copy"></i>', [
                                 'title' => '',
@@ -547,7 +547,7 @@ $this->registerCss('
                                 'data-price-index' => $index,
                                 'data-type' => $price->passenger_type
                             ]);
-                        } ?>
+                        } */ ?>
                     </td>
                 </tr>
             <?php endforeach; ?>

@@ -1,6 +1,7 @@
 <?php
 
 use common\models\CaseSale;
+use common\models\CreditCard;
 use sales\helpers\cases\CaseSaleHelper;
 use sales\model\saleTicket\entity\SaleTicket;
 use yii\helpers\Html;
@@ -8,6 +9,7 @@ use yii\helpers\Html;
 
 /** @var $saleTickets SaleTicket[] */
 /** @var $caseSale CaseSale */
+/** @var $creditCards CreditCard[] */
 
 $chargeSystem = null;
 $transactionIds = null;
@@ -89,32 +91,59 @@ $isNeedAdditionalInfoForEmail = false;
 <br>
 <br>
 
-
-<?php if($isNeedAdditionalInfoForEmail): ?>
-<table width="25%" cellpadding="0" cellspacing="0" style="width:25%;">
+<table>
     <tr>
-        <th style="border: 1px solid; padding: 10px;">Sale Id</th>
-        <td style="border: 1px solid; padding: 10px;"><?= $caseSale->css_sale_id ?></td>
-    </tr>
-    <tr>
-        <th style="border: 1px solid; padding: 10px;">PNR</th>
-        <td style="border: 1px solid; padding: 10px;"><?= $caseSale->css_sale_pnr ?></td>
-    </tr>
-    <tr>
-        <th style="border: 1px solid; padding: 10px;">Charge System</th>
-        <td style="border: 1px solid; padding: 10px;"><?= $chargeSystem ?></td>
-    </tr>
-    <tr>
-        <th style="border: 1px solid; padding: 10px;">Trans. IDs</th>
-        <td style="border: 1px solid; padding: 10px;"><?= $transactionIds ?></td>
-    </tr>
-    <tr>
-        <th style="border: 1px solid; padding: 10px;">Card Number</th>
-        <td style="border: 1px solid; padding: 10px;"><?= CaseSaleHelper::getCardNumbers(json_decode((string)$caseSale->css_sale_data, true)) ?></td>
-    </tr>
-    <tr>
-        <th style="border: 1px solid; padding: 10px;">Refundable Amount</th>
-        <td style="border: 1px solid; padding: 10px;">$<?= $totalRefundableAmount ?></td>
+        <td>
+			<?php if($isNeedAdditionalInfoForEmail): ?>
+                <table width="25%" cellpadding="0" cellspacing="0" style="width:25%;">
+                    <tr>
+                        <th style="border: 1px solid; padding: 10px;">Sale Id</th>
+                        <td style="border: 1px solid; padding: 10px;"><?= $caseSale->css_sale_id ?></td>
+                    </tr>
+                    <tr>
+                        <th style="border: 1px solid; padding: 10px;">PNR</th>
+                        <td style="border: 1px solid; padding: 10px;"><?= $caseSale->css_sale_pnr ?></td>
+                    </tr>
+                    <tr>
+                        <th style="border: 1px solid; padding: 10px;">Charge System</th>
+                        <td style="border: 1px solid; padding: 10px;"><?= $chargeSystem ?></td>
+                    </tr>
+                    <tr>
+                        <th style="border: 1px solid; padding: 10px;">Trans. IDs</th>
+                        <td style="border: 1px solid; padding: 10px;"><?= $transactionIds ?></td>
+                    </tr>
+                    <tr>
+                        <th style="border: 1px solid; padding: 10px;">Card Number</th>
+                        <td style="border: 1px solid; padding: 10px;"><?= CaseSaleHelper::getCardNumbers(json_decode((string)$caseSale->css_sale_data, true)) ?></td>
+                    </tr>
+                    <tr>
+                        <th style="border: 1px solid; padding: 10px;">Refundable Amount</th>
+                        <td style="border: 1px solid; padding: 10px;">$<?= $totalRefundableAmount ?></td>
+                    </tr>
+                </table>
+			<?php endif; ?>
+        </td>
+        <td style="vertical-align: top;">
+			<?php if($creditCards): ?>
+                <table width="40%" cellpadding="0" cellspacing="0" style="width:40%;">
+                    <thead>
+                    <tr>
+                        <th style="border: 1px solid; padding: 10px;">Display Number</th>
+                        <th style="border: 1px solid; padding: 10px;">Holder Name</th>
+                        <th style="border: 1px solid; padding: 10px;">B/O Synchronised</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+					<?php foreach($creditCards as $card): ?>
+                        <tr>
+                            <td style="border: 1px solid; padding: 10px;"><?= $card->cc_display_number ?></td>
+                            <td style="border: 1px solid; padding: 10px;"><?= $card->cc_holder_name ?></td>
+                            <td style="border: 1px solid; padding: 10px;"><?= $card->cc_is_sync_bo ? 'Yes' : '--' ?></td>
+                        </tr>
+					<?php endforeach; ?>
+                    </tbody>
+                </table>
+			<?php endif; ?>
+        </td>
     </tr>
 </table>
-<?php endif; ?>

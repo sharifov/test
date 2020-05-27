@@ -34,6 +34,8 @@ class CallLogSearch extends CallLog
     public $createTimeStart;
     public $createTimeEnd;
 
+    public const CREATE_TIME_START_DEFAULT_RANGE = '-6 days';
+
     public function rules(): array
     {
         return [
@@ -71,6 +73,12 @@ class CallLogSearch extends CallLog
         ];
     }
 
+    public function __construct($config = [])
+    {
+        parent::__construct($config);
+        $this->createTimeRange = date('Y-m-d 00:00:00', strtotime(self::CREATE_TIME_START_DEFAULT_RANGE)) . ' - ' . date('Y-m-d 23:59:59');
+    }
+
     public function behaviors()
     {
         return [
@@ -89,14 +97,14 @@ class CallLogSearch extends CallLog
             ->with(['project', 'department', 'phoneList', 'user', 'record'])
             ->joinWith(['callLogLead.lead', 'callLogCase.case', 'queue']);
 
-        $dataProvider = new ActiveDataProvider([            'query' => $query,
-
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
             'sort'=> ['defaultOrder' => ['cl_call_created_dt' => SORT_DESC]],
         ]);
 
-        if(!array_filter(isset($params['CallLogSearch']) ? $params['CallLogSearch'] : [])) {
+        /*if(!array_filter(isset($params['CallLogSearch']) ? $params['CallLogSearch'] : [])) {
             $dataProvider->totalCount = static::find()->count();
-        }
+        }*/
 
         $dataProvider->sort->attributes['lead_id'] = [
             'asc' => ['cll_lead_id' => SORT_ASC],
