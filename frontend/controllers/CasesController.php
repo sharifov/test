@@ -36,7 +36,6 @@ use sales\forms\cases\CasesCreateByWebForm;
 use sales\forms\cases\CasesSaleForm;
 use sales\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
 use sales\guards\cases\CaseManageSaleInfoGuard;
-use sales\guards\cases\CaseTakeGuard;
 use sales\model\cases\useCases\cases\updateInfo\Handler;
 use sales\model\coupon\entity\couponCase\CouponCase;
 use sales\model\coupon\useCase\send\SendCouponsForm;
@@ -81,7 +80,6 @@ use yii\widgets\ActiveForm;
  * @property CasesSaleRepository $casesSaleRepository
  * @property CasesSaleService $casesSaleService
  * @property ClientUpdateFromEntityService $clientUpdateFromEntityService
- * @property CaseTakeGuard $caseTakeGuard
  * @property Handler $updateHandler
  * @property SaleTicketService $saleTicketService
  */
@@ -97,7 +95,6 @@ class CasesController extends FController
     private $casesSaleRepository;
     private $casesSaleService;
     private $clientUpdateFromEntityService;
-    private $caseTakeGuard;
     private $updateHandler;
     private $saleTicketService;
 
@@ -113,7 +110,6 @@ class CasesController extends FController
         CasesSaleRepository $casesSaleRepository,
         CasesSaleService $casesSaleService,
         ClientUpdateFromEntityService $clientUpdateFromEntityService,
-        CaseTakeGuard $caseTakeGuard,
         Handler $updateHandler,
         SaleTicketService $saleTicketService,
         $config = []
@@ -129,7 +125,6 @@ class CasesController extends FController
         $this->casesSaleRepository = $casesSaleRepository;
         $this->casesSaleService = $casesSaleService;
         $this->clientUpdateFromEntityService = $clientUpdateFromEntityService;
-        $this->caseTakeGuard = $caseTakeGuard;
         $this->saleTicketService = $saleTicketService;
         $this->updateHandler = $updateHandler;
     }
