@@ -256,8 +256,6 @@ class CallGraphsSearch extends CallLogSearch
      */
     public function getCallLogStats():SqlDataProvider
     {
-        $timeZone = Employee::getUtcOffsetDst($this->timeZone, date('Y-m-d'));
-
         if ($this->createTimeRange) {
             $this->createTimeStart = date('Y-m-d H:i:00', $this->createTimeStart);
             $this->createTimeEnd = date('Y-m-d H:i:59', $this->createTimeEnd);
@@ -266,6 +264,8 @@ class CallGraphsSearch extends CallLogSearch
             $this->createTimeEnd = date('Y-m-d H:i:s');
             $this->createTimeRange = $this->createTimeStart . ' - ' . $this->createTimeEnd;
         }
+
+        $timeZone = Employee::getUtcOffsetDst($this->timeZone, $this->createTimeStart);
 
         $parentQuery = self::find()->select([
             ''. $this->setGroupingParam() .' AS `group`',
