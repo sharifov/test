@@ -784,6 +784,22 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $this->processConferenceResponse($response);
     }
 
+    public function addCoach(string $callSid, string $conferenceSid, int $projectId, string $from, string $to, string $mode): array
+    {
+        $data = [
+            'callSid' => $callSid,
+            'conferenceSid' => $conferenceSid,
+            'projectId' => $projectId,
+            'from' => $from,
+            'to' => $to,
+            'mode' => $mode,
+        ];
+
+        $response = $this->sendRequest('twilio-conference/add-coach', $data);
+
+        return $this->processConferenceResponse($response);
+    }
+
     private function processConferenceResponse(\yii\httpclient\Response $response): array
     {
         $out = ['error' => false, 'message' => '', 'result' => []];

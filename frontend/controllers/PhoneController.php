@@ -875,6 +875,80 @@ class PhoneController extends FController
         return $this->asJson($result);
     }
 
+    public function actionAjaxAddCoach(): Response
+    {
+        try {
+            $call_sid = (string)Yii::$app->request->post('call_sid');
+            $mode = (string)Yii::$app->request->post('mode');
+
+            $call = $this->getCoachCall($call_sid);
+
+            $diff = time() - (int)(Yii::$app->session->get('add-coach', 0));
+            /** 15 sec diff between requests */
+            if ($diff < 15) {
+                throw new \Exception('Please wait ' . (15 - $diff) . ' seconds.');
+            }
+
+            $parentCallTo = $call->cParent->c_to ?? $call->c_from;
+
+            $result = Yii::$app->communication->addCoach(
+                $call->c_call_sid,
+                $call->c_conference_sid,
+                $call->c_project_id,
+                $parentCallTo,
+                'client:seller' . Auth::id(),
+                $mode
+            );
+            Yii::$app->session->set('add-coach', time());
+        } catch (\Throwable $e) {
+            $result = [
+                'error' => true,
+                'message' => $e->getMessage(),
+            ];
+        }
+        return $this->asJson($result);
+    }
+
+    private function getCoachCall(string $sid): Call
+    {
+        if (!$sid) {
+            throw new BadRequestHttpException('Not found Call SID in request', 1);
+        }
+
+        if (!$call = Call::findOne(['c_call_sid' => $sid])) {
+            throw new BadRequestHttpException('Not found Call. Sid: ' . $sid, 2);
+        }
+
+        if ($call->isIn()) {
+            if (!$call->isStatusInProgress()) {
+                throw new BadRequestHttpException('Call is not InProgress', 4);
+            }
+        } elseif ($call->isOut()) {
+            if (!($call->isStatusRinging() && $call->isGeneralParent())) {
+                throw new BadRequestHttpException('Selected is not correct Call', 4);
+            }
+        }
+
+        if (!$call->isConference()) {
+            throw new BadRequestHttpException('Call is not conference Call. Sid: ' . $sid, 5);
+        }
+
+        if (!$call->c_conference_sid) {
+            throw new BadRequestHttpException('Call not updated. Please wait some seconds.', 6);
+        }
+
+        if (Call::find()->andWhere([
+            'c_created_user_id' => Auth::id(),
+            'c_parent_call_sid' => $call->c_call_sid,
+            'c_source_type_id' => Call::SOURCE_COACH_CALL,
+            'c_status_id' => Call::STATUS_IN_PROGRESS,
+        ])->limit(1)->one()) {
+            throw new BadRequestHttpException('Already exist active one of coach call', 7);
+        }
+
+        return $call;
+    }
+
     private function getDataForHoldUnholdConferenceDoubleCall(string $sid): array
     {
         if (!$sid) {

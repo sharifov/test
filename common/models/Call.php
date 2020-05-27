@@ -181,6 +181,7 @@ class Call extends \yii\db\ActiveRecord
     public const SOURCE_TRANSFER_CALL   = 4;
     public const SOURCE_CONFERENCE_CALL = 5;
     public const SOURCE_REDIAL_CALL     = 6;
+    public const SOURCE_COACH_CALL     = 7;
 
     public const SOURCE_LIST = [
         self::SOURCE_GENERAL_LINE => 'General Line',
@@ -189,6 +190,7 @@ class Call extends \yii\db\ActiveRecord
         self::SOURCE_TRANSFER_CALL  => 'Transfer Call',
         self::SOURCE_CONFERENCE_CALL  => 'Conference Call',
         self::SOURCE_REDIAL_CALL  => 'Redial Call',
+        self::SOURCE_COACH_CALL  => 'Coach Call',
     ];
 
     public const SHORT_SOURCE_LIST = [
@@ -1943,5 +1945,15 @@ class Call extends \yii\db\ActiveRecord
     public function setConferenceType(): void
     {
         $this->c_is_conference = true;
+    }
+
+    public function setCoachType(): void
+    {
+        $this->c_source_type_id = self::SOURCE_COACH_CALL;
+    }
+
+    public function isCoachType(): bool
+    {
+        return $this->c_source_type_id === self::SOURCE_COACH_CALL;
     }
 }

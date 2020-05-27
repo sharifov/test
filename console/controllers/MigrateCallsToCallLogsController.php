@@ -739,7 +739,7 @@ class MigrateCallsToCallLogsController extends Controller
             $callLog->cl_project_id = $callData['cl_project_id'] ?? $call['c_project_id'];
             $callLog->cl_price = $callData['cl_price'] ?? $call['c_price'];
             $callLog->cl_category_id = $callData['cl_category_id'] ?? (in_array($call['c_source_type_id'], [
-                Call::SOURCE_GENERAL_LINE, Call::SOURCE_DIRECT_CALL, Call::SOURCE_REDIRECT_CALL, Call::SOURCE_TRANSFER_CALL, Call::SOURCE_CONFERENCE_CALL, Call::SOURCE_REDIAL_CALL
+                Call::SOURCE_GENERAL_LINE, Call::SOURCE_DIRECT_CALL, Call::SOURCE_REDIRECT_CALL, Call::SOURCE_TRANSFER_CALL, Call::SOURCE_CONFERENCE_CALL, Call::SOURCE_REDIAL_CALL, Call::SOURCE_COACH_CALL
             ], false) ? $call['c_source_type_id'] : null);
             $callLog->cl_is_transfer = $callData['cl_is_transfer'] ?? false;
             $callLog->cl_department_id = $callData['cl_department_id'] ?? $call['c_dep_id'];

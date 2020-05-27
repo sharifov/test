@@ -214,8 +214,10 @@ class TestController extends FController
     {
 
 
-        $search = new ContactsSearch(295);
-        $search->searchContactsByWidget('373');
+
+
+//        $search = new ContactsSearch(295);
+//        $search->searchContactsByWidget('373');
         die;
 
 

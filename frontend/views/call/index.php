@@ -7,6 +7,7 @@ use common\models\Call;
 use common\models\Employee;
 use dosamigos\datepicker\DatePicker;
 use common\components\grid\call\CallDurationColumn;
+use sales\auth\Auth;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -56,7 +57,7 @@ $user = Yii::$app->user->identity;
                 'options' => ['style' => 'width: 80px']
             ],
             ['class' => 'yii\grid\ActionColumn',
-                'template' => '{view} {update} {delete} {cancel}',
+                'template' => '{view} {update} {delete} {cancel} {join}',
                 'visibleButtons' => [
                     /*'view' => function ($model, $key, $index) {
                         return User::hasPermission('viewOrder');
@@ -72,6 +73,10 @@ $user = Yii::$app->user->identity;
                     'cancel' => static function (Call $model, $key, $index) use ($user) {
                         return $user->isAdmin() && $model->isIn() && ($model->isStatusIvr() || $model->isStatusQueue() || $model->isStatusRinging() || $model->isStatusInProgress());
                     },
+
+                    'join' => static function (Call $model, $key, $index) use ($user) {
+                        return ((bool)(Yii::$app->params['settings']['voip_conference_base'] ?? false) && Auth::can('/phone/ajax-add-coach'));
+                    },
                 ],
                 'buttons' => [
                     'cancel' => static function ($url, Call $model) {
@@ -85,6 +90,18 @@ $user = Yii::$app->user->identity;
                                 //'method' => 'post',
                             ],
                         ]);
+                    },
+                    'join' => static function ($url, Call $model) {
+                        return'<div class="dropdown">
+                              <button class="btn btn-success dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fa fa-rss"></i>
+                              </button>
+                              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <a class="dropdown-item conference-coach" href="#" onclick="coachListen(\'' . $model->c_call_sid . '\');">Listen</a>
+                                <a class="dropdown-item conference-coach" href="#" onclick="coachCoach(\'' . $model->c_call_sid . '\');">Coach</a>
+                                <a class="dropdown-item conference-coach" href="#" onclick="coachBarge(\'' . $model->c_call_sid . '\');">Barge</a>
+                              </div>
+                            </div>';
                     }
                 ],
             ],

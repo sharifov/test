@@ -1073,6 +1073,14 @@ class CommunicationController extends ApiBaseController
                 throw new \Exception('findOrCreateCallByData: Can not save call in db', 1);
             }*/
 
+            if (!empty($callData['is_conference_call'])) {
+                $call->setConferenceType();
+            }
+
+            if (!empty($callData['is_coach'])) {
+                $call->setCoachType();
+            }
+
             if (!$call->save()) {
                 \Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:findOrCreateCallByData:Call:save');
             } else {
@@ -1144,6 +1152,10 @@ class CommunicationController extends ApiBaseController
 
         if (!empty($callData['is_conference_call']) && !$call->isConference()) {
             $call->setConferenceType();
+        }
+
+        if (!empty($callData['is_coach']) && !$call->isCoachType()) {
+            $call->setCoachType();
         }
 
         return $call;

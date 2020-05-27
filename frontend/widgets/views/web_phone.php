@@ -189,6 +189,7 @@ use yii\helpers\Html;
     $ajaxConferenceCompleteUrl = Url::to(['/phone/ajax-conference-complete']);
     $ajaxHoldConferenceDoubleCall = Url::to(['/phone/ajax-hold-conference-double-call']);
     $ajaxUnholdConferenceDoubleCall = Url::to(['/phone/ajax-unhold-conference-double-call']);
+    $ajaxAddCoachUrl = Url::to(['/phone/ajax-add-coach']);
 
     $conferenceBase = 0;
     if (isset(Yii::$app->params['settings']['voip_conference_base'])) {
@@ -211,7 +212,8 @@ use yii\helpers\Html;
     const ajaxConferenceCompleteUrl = '<?= $ajaxConferenceCompleteUrl ?>';
     const ajaxHoldConferenceDoubleCall = '<?= $ajaxHoldConferenceDoubleCall ?>';
     const ajaxUnholdConferenceDoubleCall = '<?= $ajaxUnholdConferenceDoubleCall ?>';
-    const conferenceBase = '<?= $conferenceBase ?>';
+    const conferenceBase = parseInt('<?= $conferenceBase ?>');
+    const ajaxAddCoachUrl = '<?= $ajaxAddCoachUrl ?>';
 
     const clientId = '<?=$clientId?>';
 
@@ -306,6 +308,7 @@ use yii\helpers\Html;
 
     var webPhoneParams = {};
     var call_acc_sid = '';
+    var isCoachCall = false;
 
    // "use strict";
 
@@ -328,11 +331,13 @@ use yii\helpers\Html;
     document.getElementById('button-hangup').onclick = function () {
         log('Hanging up...');
         if (device) {
-            if (conferenceBase) {
+            if (conferenceBase && !isCoachCall) {
+                updateAgentStatus(connection, false, 1);
                 conferenceComplete();
             } else {
                 updateAgentStatus(connection, false, 1);
-                device.disconnectAll();
+                // device.disconnectAll();
+                connection.disconnect();
             }
         } else {
             log('Device is null');
@@ -631,6 +636,7 @@ use yii\helpers\Html;
                     //updateAgentStatus(connection, true);
                     let access = updateAgentStatus(connection, true, 0);
                     connection = conn;
+
                     console.log({"action":"connect", "cid":connection.parameters.CallSid, "access": access});
                     //log('Successfully established call!');
                     // console.warn(conn);
@@ -642,10 +648,24 @@ use yii\helpers\Html;
                     // $('#btn-hold-double-call').attr('data-call-sid', connection.parameters.CallSid).attr('data-is-hold', false).html('<i class="fa fa-pause"></i> Hold');
                     // $('#btn-group-id-hold-double-call').show();
 
-                    if (conn.parameters.From === undefined) {
-                        $('#btn-group-id-redirect').show();
+                    let isCoach = false;
+                    conn.customParameters.forEach(function(value, key) {
+                        if (key === 'is_coach' && value == 1) {
+                            isCoach = true;
+                            $('#web-call-from-number').text(conn.parameters.From);
+                            $('#web-call-to-number').text(conn.parameters.To);
+                        }
+                    });
+
+                    if (isCoach) {
+                        isCoachCall = true;
                     } else {
-                        $('#btn-group-id-redirect').show();
+                        isCoachCall = false;
+                        if (conn.parameters.From === undefined) {
+                            $('#btn-group-id-redirect').show();
+                        } else {
+                            $('#btn-group-id-redirect').show();
+                        }
                     }
 
                     volumeIndicators.style.display = 'block';
@@ -816,6 +836,47 @@ use yii\helpers\Html;
             connection = device.connect(params);
             $('#btn-group-id-redirect').hide();
         }
+    }
+
+    function coachListen(call_sid) {
+        coachConference('listen', call_sid);
+    }
+
+    function coachCoach(call_sid) {
+        coachConference('coach', call_sid);
+    }
+
+    function coachBarge(call_sid) {
+        coachConference('barge', call_sid);
+    }
+
+    function coachConference(mode, call_sid) {
+        let title = mode.charAt(0).toUpperCase() + mode.slice(1);
+        $.ajax({
+            type: 'post',
+            data: {
+                '<?= $csrf_param ?>' : '<?= $csrf_token ?>',
+                'call_sid': call_sid,
+                'mode': mode
+            },
+            url: ajaxAddCoachUrl
+        })
+        .done(function (data) {
+            if (data.error) {
+                new PNotify({title: title, type: "error", text: data.message, hide: true});
+            } else {
+                new PNotify({title: title, type: "success", text: 'Success', hide: true});
+            }
+        })
+        .fail(function (error) {
+            if (error) {
+                new PNotify({title: title, type: "error", text: error, hide: true});
+                console.error(error);
+            }
+        })
+        .always(function () {
+
+        });
     }
 
     function webCallLeadRedial(phone_from, phone_to, project_id, lead_id, type, c_source_type_id) {
