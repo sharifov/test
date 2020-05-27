@@ -359,13 +359,14 @@ var PhoneWidgetCall = function () {
 
     function loadContact(contact) {
         //  type = 3 = Internal contact
+        console.log(contact);
         let contactIcon = '';
         if (contact['type'] === 3) {
             contactIcon = '<div class="contact-info-card__status">' +
                 '<i class="far fa-user ' + contact['user_status_class'] + ' "></i>' +
                 '</div>';
         }
-        let content = '<li class="calls-history__item contact-info-card call-contact-card" data-phone="' + contact['phone'] + '">' +
+        let content = '<li class="calls-history__item contact-info-card call-contact-card" data-phone="' + contact['phone'] + '" data-title="' + contact['title'] + '">' +
             '<div class="collapsible-toggler">' +
             contactIcon
             + '<div class="contact-info-card__details">' +
@@ -393,9 +394,9 @@ var PhoneWidgetCall = function () {
 
     $(document).on('click', "li.call-contact-card", function () {
         let phone = $(this).data('phone');
-        $("#call-pane__dial-number").val(phone).attr('readonly', 'readonly');
+        let title = $(this).data('title');
+        insertPhoneNumber(phone, title);
         $('.suggested-contacts').removeClass('is_active');
-        soundNotification("button_tiny");
     });
 
 })();

@@ -427,11 +427,6 @@ $(document).on('click', '.phone-dial', function(e) {
     $('.phone-widget__tab').removeClass('is_active');
     $('.phone-widget__header-actions a[data-toggle-tab="tab-phone"]').addClass('is_active');
     $('#tab-phone').addClass('is_active');
-    $("#call-pane__dial-number").val(phone).attr('readonly', 'readonly');
-    if (title.length > 0) {
-        $("#call-to-label").text(title);
-    }
-    $('.suggested-contacts').removeClass('is_active');
-    soundNotification("button_tiny");
-    $('.dial__btn').attr('disabled', 'disabled').addClass('disabled');
+    insertPhoneNumber(phone, title);
+
 });
