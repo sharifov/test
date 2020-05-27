@@ -530,6 +530,16 @@ $(document).ready(function() {
 
 });
 
+function formatPhoneNumber(phoneNumberString) {
+    let cleaned = ('' + phoneNumberString).replace(/\D/g, '')
+    let match = cleaned.match(/^(1|)?(\d{3})(\d{3})(\d{4})$/)
+    if (match) {
+        var intlCode = (match[1] ? '+1 ' : '')
+        return [intlCode, '(', match[2], ') ', match[3], '-', match[4]].join('')
+    }
+    return null
+}
+
 function toSelect(elem, obj, cb) {
     var $element = $(elem),
         $toggle = '.dropdown-toggle',
@@ -549,18 +559,18 @@ function toSelect(elem, obj, cb) {
     // nodes
     function selectedNode(value, project, id, projectId) {
         return (
-            '<button value="' + value + '" data-info-project="' + project + '" data-info-project-id="'+ projectId +'" class="btn btn-secondary dropdown-toggle" type="button" id="' +id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+
-            '<small class="current-number__phone current-number__selected-nr">' + value + '</small>'+
+            '<button value="' + value + '" data-info-project="' + project + '" data-info-project-id="'+ projectId +'" class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+
+            '<small class="current-number__phone current-number__selected-nr">' + formatPhoneNumber(value) + '</small>'+
             '<span class="current-number__identifier current-number__selected-project">' + project + '</span>'+
             '</button>'
         );
     }
 
     function optionNode(optionList) {
-        arr = []
+        let arr = []
         optionList.forEach(function(el) {
             arr.push('<button class="dropdown-item" type="button" value="' + el.value + '" data-info-project="' + el.project + '" data-info-project-id="' + el.projectId + '">'+
-                '<small class="current-number__phone">' + el.value + '</small>'+
+                '<small class="current-number__phone">' + formatPhoneNumber(el.value) + '</small>'+
                 '<span class="current-number__identifier">' + el.project + '</span>'+
                 '</button>')
         })
@@ -569,17 +579,18 @@ function toSelect(elem, obj, cb) {
     }
 
     function containerNode(selected, optionList) {
-        var arr = optionNode(optionList).join('');
-
-        return (
-            '<div class="dropdown">'+
+        let arr = optionNode(optionList).join('');
+        let str = '<div class="dropdown">'+
             selected +
             '<div class="dropdown-menu" >' +
             arr +
-            '</div>'+
-            '<i class="fa fa-chevron-down"></i>'+
-            '</div>'
-        )
+            '</div>';
+        if (optionList.length > 1) {
+            str = str + '<i class="fa fa-chevron-down"></i>';
+        }
+        str = str + '</div>';
+
+        return str;
     }
 
     function generateSelect(obj) {
