@@ -501,7 +501,8 @@ $this->registerCss('
                             ],
                             'template' => '<span class="input-group-addon">$</span>{input}'
                         ])->textInput([
-                            'class' => 'form-control alt-quote-price'
+                            'class' => 'form-control alt-quote-price',
+                            'readonly' => true
                         ]) ?>
                     </td>
                     <td class="td-input">
@@ -522,7 +523,6 @@ $this->registerCss('
                             'template' => '<span class="input-group-addon">$</span>{input}'
                         ])->textInput([
                             'class' => 'form-control alt-quote-price',
-                            'readonly' => true
                         ]) ?>
                     </td>
                     <td class="td-input">
