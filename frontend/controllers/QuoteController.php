@@ -623,14 +623,14 @@ class QuoteController extends FController
 
                     $itinerary = [];
                     if ((new ReservationService($gds))->parseReservation($post['prepare_dump'], true, $quote->itinerary)) {
-                        $response['reservation_dump'] = Quote::createDump($quote->itinerary);
+                        $itinerary = Quote::createDump($quote->itinerary);
                     } elseif (!empty($post['reservation_result']) &&
-                        (new ReservationService('sabre'))->parseReservation($post['reservation_result'], true, $quote->itinerary)) {
-                            $response['reservation_dump'] = Quote::createDump($quote->itinerary);
+                        (new ReservationService('sabre'))->parseReservation(str_replace('&nbsp;', ' ', $post['reservation_result']), true, $quote->itinerary)) {
+                            $itinerary = Quote::createDump($quote->itinerary);
                     } else {
                         throw new \DomainException(  'Parse "reservation dump" failed');
                     }
-                    $itinerary = $quote::createDump($quote->itinerary);
+
                     $quote->reservation_dump = str_replace('&nbsp;', ' ', implode("\n", $itinerary));
 
                     if (!$quote->save(false)) {
@@ -658,51 +658,52 @@ class QuoteController extends FController
 
                     if($objParser = ParsingDump::initClass($gds, ParsingDump::PARSING_TYPE_BAGGAGE)) {
                         $parsedBaggage = $objParser->parseDump($post['prepare_dump']);
-
-                        foreach ($parsedBaggage['baggage'] as $baggageAttr) {
-                            $segmentKey = $baggageAttr['segment'];
-                            $origin = substr($segmentKey, 0, 3);
-                            $destination = substr($segmentKey, 2, 3);
-                            $segment = QuoteSegment::find()->innerJoin(QuoteTrip::tableName(), 'qs_trip_id = qt_id')
-                                ->andWhere(['qt_quote_id' => $quote->id])
-                                ->andWhere(
-                                    [
-                                        'OR',
-                                        ['qs_departure_airport_code' => $origin],
-                                        ['qs_arrival_airport_code' => $destination]
-                                    ]
-                                )
-                                ->one();
-                            if ($segment) {
-                                if (isset($baggageAttr['paid_baggage'])) {
-                                    foreach ($baggageAttr['paid_baggage'] as $paidBaggageAttr){
-                                        $baggage = new QuoteSegmentBaggageCharge();
-                                        $baggage->qsbc_segment_id = $segment->qs_id;
-                                        $baggage->qsbc_price = str_replace('USD', '', $paidBaggageAttr['price']);
-                                        if(isset($paidBaggageAttr['piece'])){
-                                            $baggage->qsbc_first_piece = $paidBaggageAttr['piece'];
-                                            $baggage->qsbc_last_piece = $paidBaggageAttr['piece'];
+                        if (isset($parsedBaggage['baggage'])) {
+                            foreach ($parsedBaggage['baggage'] as $baggageAttr) {
+                                $segmentKey = $baggageAttr['segment'];
+                                $origin = substr($segmentKey, 0, 3);
+                                $destination = substr($segmentKey, 2, 3);
+                                $segment = QuoteSegment::find()->innerJoin(QuoteTrip::tableName(), 'qs_trip_id = qt_id')
+                                    ->andWhere(['qt_quote_id' => $quote->id])
+                                    ->andWhere(
+                                        [
+                                            'OR',
+                                            ['qs_departure_airport_code' => $origin],
+                                            ['qs_arrival_airport_code' => $destination]
+                                        ]
+                                    )
+                                    ->one();
+                                if ($segment) {
+                                    if (isset($baggageAttr['paid_baggage'])) {
+                                        foreach ($baggageAttr['paid_baggage'] as $paidBaggageAttr){
+                                            $baggage = new QuoteSegmentBaggageCharge();
+                                            $baggage->qsbc_segment_id = $segment->qs_id;
+                                            $baggage->qsbc_price = str_replace('USD', '', $paidBaggageAttr['price']);
+                                            if(isset($paidBaggageAttr['piece'])){
+                                                $baggage->qsbc_first_piece = $paidBaggageAttr['piece'];
+                                                $baggage->qsbc_last_piece = $paidBaggageAttr['piece'];
+                                            }
+                                            if(isset($paidBaggageAttr['weight'])){
+                                                $baggage->qsbc_max_weight = substr($paidBaggageAttr['weight'], 0 , 100);
+                                            }
+                                            if(isset($paidBaggageAttr['height'])){
+                                                $baggage->qsbc_max_size = substr($paidBaggageAttr['height'],0, 100);
+                                            }
+                                            $baggage->save(false);
                                         }
-                                        if(isset($paidBaggageAttr['weight'])){
-                                            $baggage->qsbc_max_weight = substr($paidBaggageAttr['weight'], 0 , 100);
+                                    }
+                                    if(isset($baggageAttr['free_baggage']) && isset($baggageAttr['free_baggage']['piece'])) {
+                                        $baggage = new QuoteSegmentBaggage();
+                                        $baggage->qsb_allow_pieces = $baggageAttr['free_baggage']['piece'];
+                                        $baggage->qsb_segment_id = $segment->qs_id;
+                                        if(isset($baggageAttr['free_baggage']['weight'])){
+                                            $baggage->qsb_allow_max_weight = substr($baggageAttr['free_baggage']['weight'], 0, 100);
                                         }
-                                        if(isset($paidBaggageAttr['height'])){
-                                            $baggage->qsbc_max_size = substr($paidBaggageAttr['height'],0, 100);
+                                        if(isset($baggageAttr['free_baggage']['height'])){
+                                            $baggage->qsb_allow_max_size = substr($baggageAttr['free_baggage']['height'], 0, 100);
                                         }
                                         $baggage->save(false);
                                     }
-                                }
-                                if(isset($baggageAttr['free_baggage']) && isset($baggageAttr['free_baggage']['piece'])) {
-                                    $baggage = new QuoteSegmentBaggage();
-                                    $baggage->qsb_allow_pieces = $baggageAttr['free_baggage']['piece'];
-                                    $baggage->qsb_segment_id = $segment->qs_id;
-                                    if(isset($baggageAttr['free_baggage']['weight'])){
-                                        $baggage->qsb_allow_max_weight = substr($baggageAttr['free_baggage']['weight'], 0, 100);
-                                    }
-                                    if(isset($baggageAttr['free_baggage']['height'])){
-                                        $baggage->qsb_allow_max_size = substr($baggageAttr['free_baggage']['height'], 0, 100);
-                                    }
-                                    $baggage->save(false);
                                 }
                             }
                         }

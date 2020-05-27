@@ -57,8 +57,9 @@ class Baggage implements ParseDumpInterface
             } else {
                 $result[$i]['free_baggage'] = [];
             }
-            $i ++;
+            $i++;
         }
+
         return $result;
     }
 
@@ -202,6 +203,8 @@ class Baggage implements ParseDumpInterface
                 $info = $this->getBagInfo($value);
                 $this->segments[$info['code']] = $info['code'];
             }
+        } else {
+            $this->segments = [];
         }
         return $this;
     }
