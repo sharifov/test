@@ -39,6 +39,10 @@ $js = <<<JS
     $(document).on('change', '.alt-quote-price', function(event){
         
         $('.alt-quote-price').prop('readonly', true);
+        $('.field-error').each(function() {
+            $(this).removeClass('field-error');
+        });
+        $('.parent-error').removeClass('has-error');
         
         if ($(this).val().length === 0) {
             $(this).val(0);
