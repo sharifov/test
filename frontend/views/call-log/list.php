@@ -29,6 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             'cl_id',
             [
+                'label' => 'Date/Time',
                 'class' => DateTimeColumn::class,
                 'attribute' => 'cl_call_created_dt',
                 'format' => 'byUserDateTimeWithSeconds'],
