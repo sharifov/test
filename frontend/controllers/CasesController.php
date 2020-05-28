@@ -803,11 +803,12 @@ class CasesController extends FController
 
                 if(!$cs->save()) {
                     Yii::error(VarDumper::dumpAsString($cs->errors). ' Data: ' . VarDumper::dumpAsString($saleData), 'CasesController:actionAddSale:CaseSale:save');
-                } else {
-                    $model->updateLastAction();
-					$this->saleTicketService->createSaleTicketBySaleData($cs->css_cs_id, $cs->css_sale_id, $saleData);
-                }
-            }
+					throw new \RuntimeException($cs->getErrorSummary(false)[0]);
+				}
+
+				$model->updateLastAction();
+				$this->saleTicketService->createSaleTicketBySaleData($cs, $saleData);
+			}
 
             $out['data'] = ['sale_id' => $saleData['saleId'], 'gid' => $gid, 'h' => $hash];
 
@@ -1537,7 +1538,7 @@ class CasesController extends FController
 			$saleData = $this->casesSaleService->detailRequestToBackOffice((int)$caseSale->css_sale_id, $withFareRules, 120, 1);
 			$caseSale = $this->casesSaleService->refreshOriginalSaleData($caseSale, $case, $saleData);
 
-			$this->saleTicketService->refreshSaleTicketBySaleData((int)$caseId, $caseSale->css_sale_id, $saleData);
+			$this->saleTicketService->refreshSaleTicketBySaleData((int)$caseId, $caseSale, $saleData);
 
 			$out['message'] = 'Sale info: ' . $caseSale->css_sale_id . ' successfully refreshed';
 

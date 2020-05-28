@@ -1,7 +1,9 @@
 <?php
 namespace sales\model\saleTicket\useCase\create;
 
+use common\models\CaseSale;
 use sales\model\saleTicket\entity\SaleTicket;
+use sales\repositories\cases\CasesSaleRepository;
 use sales\services\TransactionManager;
 
 /**
@@ -10,6 +12,7 @@ use sales\services\TransactionManager;
  *
  * @property SaleTicketRepository $saleTicketRepository
  * @property TransactionManager $transactionManager
+ * @property CasesSaleRepository $casesSaleRepository
  */
 class SaleTicketService
 {
@@ -22,48 +25,57 @@ class SaleTicketService
 	 * @var TransactionManager
 	 */
 	private $transactionManager;
+	/**
+	 * @var CasesSaleRepository
+	 */
+	private $casesSaleRepository;
 
-	public function __construct(SaleTicketRepository $saleTicketRepository, TransactionManager $transactionManager)
+	public function __construct(SaleTicketRepository $saleTicketRepository, CasesSaleRepository $casesSaleRepository, TransactionManager $transactionManager)
 	{
 		$this->saleTicketRepository = $saleTicketRepository;
 		$this->transactionManager = $transactionManager;
+		$this->casesSaleRepository = $casesSaleRepository;
 	}
 
 	/**
 	 * @param int $caseId
-	 * @param int $saleId
+	 * @param CaseSale $caseSale
 	 * @param array $saleData
 	 * @return bool
 	 */
-	public function createSaleTicketBySaleData(int $caseId, int $saleId, array $saleData): bool
+	public function createSaleTicketBySaleData(CaseSale $caseSale, array $saleData): bool
 	{
 		if (empty($saleData['refundRules'])) {
 			return false;
 		}
 		$refundRules = $saleData['refundRules'];
+		$penaltyTypeId = SaleTicket::getPenaltyTypeId(trim($refundRules['airline_penalty'] ?? ''));
 		foreach ($refundRules['rules'] as $rule) {
 			$firstLastName = $this->getPassengerName($rule , $saleData['passengers']);
 			$cntPassengers = $this->getPassengersCountExceptInf($saleData['passengers']);
-			$dto = (new SaleTicketCreateDTO())->feelBySaleData($caseId, $saleId, $saleData['pnr'] ?? '', $firstLastName, $cntPassengers, $rule, $refundRules);
+			$dto = (new SaleTicketCreateDTO())->feelBySaleData($caseSale->css_cs_id, $caseSale->css_sale_id, $saleData['pnr'] ?? '', $firstLastName, $cntPassengers, $penaltyTypeId, $rule, $refundRules);
 			$saleTicket = SaleTicket::createBySaleData($dto);
 			$this->saleTicketRepository->save($saleTicket);
 		}
+
+		$departureDt = $this->casesSaleRepository->getFirstDepartureDtFromItinerary($saleData);
+		$this->casesSaleRepository->setPenaltyTypeAndDepartureDt($penaltyTypeId, $departureDt, $caseSale);
 		return true;
 	}
 
 	/**
 	 * @param int $caseId
-	 * @param int $saleId
+	 * @param CaseSale $caseSale
 	 * @param array $saleData
 	 * @return mixed
 	 * @throws \Throwable
 	 */
-	public function refreshSaleTicketBySaleData(int $caseId, int $saleId, array $saleData)
+	public function refreshSaleTicketBySaleData(int $caseId, CaseSale $caseSale, array $saleData)
 	{
 		$ci = $this;
-		return $this->transactionManager->wrap(static function () use ($caseId, $saleId, $saleData, &$ci) {
-			$ci->saleTicketRepository->deleteByCaseAndSale($caseId, $saleId);
-			$ci->createSaleTicketBySaleData($caseId, $saleId, $saleData);
+		return $this->transactionManager->wrap(static function () use ($caseId, $caseSale, $saleData, &$ci) {
+			$ci->saleTicketRepository->deleteByCaseAndSale($caseId, $caseSale->css_sale_id);
+			$ci->createSaleTicketBySaleData($caseSale, $saleData);
 		});
 	}
 

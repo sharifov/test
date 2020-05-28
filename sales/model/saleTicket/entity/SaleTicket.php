@@ -22,7 +22,7 @@ use yii\db\ActiveRecord;
  * @property string|null $st_client_name
  * @property string|null $st_original_fop
  * @property string|null $st_charge_system
- * @property string|null $st_penalty_type
+ * @property int|null $st_penalty_type
  * @property float|null $st_penalty_amount
  * @property float|null $st_selling
  * @property float|null $st_service_fee
@@ -43,8 +43,18 @@ use yii\db\ActiveRecord;
  */
 class SaleTicket extends \yii\db\ActiveRecord
 {
+	private const AIRLINE_PENALTY_W 	= 1;
+	private const AIRLINE_PENALTY_WIC 	= 2;
+	private const AIRLINE_PENALTY_APFR 	= 3;
+	private const AIRLINE_PENALTY_CA 	= 4;
+	private const AIRLINE_PENALTY_NP 	= 5;
 
-	private const CHARGE_SYSTEM_LIST = [
+	private const AIRLINE_PENALTY_LIST = [
+		self::AIRLINE_PENALTY_W 	=> 'Waived',
+		self::AIRLINE_PENALTY_WIC 	=> 'Waived, if cancelled',
+		self::AIRLINE_PENALTY_APFR 	=> 'As per fare rules',
+		self::AIRLINE_PENALTY_CA 	=> 'Contact Airline',
+		self::AIRLINE_PENALTY_NP 	=> 'Not permitted'
 	];
 
 	public function beforeSave($insert)
@@ -103,7 +113,7 @@ class SaleTicket extends \yii\db\ActiveRecord
 
             ['st_penalty_amount', 'string'],
 
-            ['st_penalty_type', 'string', 'max' => 30],
+            ['st_penalty_type', 'integer'],
 
             ['st_recall_commission', 'number'],
 
@@ -234,5 +244,20 @@ class SaleTicket extends \yii\db\ActiveRecord
 	public function isNeedAdditionalInfoForEmail(): bool
 	{
 		return (((in_array($this->st_original_fop, ['CK', 'CP']) && in_array($this->st_charge_system, ['Stripe', 'Auth.net Capital', 'Auth.net'])) || $this->st_original_fop === 'VCC'));
+	}
+
+	public static function getAirlinePenaltyList(): array
+	{
+		return self::AIRLINE_PENALTY_LIST;
+	}
+
+	public static function getPenaltyTypeId(string $penaltyType): ?int
+	{
+		return array_search($penaltyType, self::getAirlinePenaltyList(), false) ?: null;
+	}
+
+	public static function getPenaltyTypeName(int $id): ?string
+	{
+		return self::getAirlinePenaltyList()[$id] ?? '';
 	}
 }

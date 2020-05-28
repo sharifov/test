@@ -137,6 +137,8 @@ class CaseController extends Controller
 
 			$boErrors = [];
 
+			$caseSaleRepository = Yii::createObject(CasesSaleRepository::class);
+
 			foreach ($result as $item) {
 				try {
 					$saleData = $caseSaleService->detailRequestToBackOffice((int)$item['css_sale_id'], 1, 120, 1);
@@ -146,8 +148,9 @@ class CaseController extends Controller
 					Console::updateProgress($n, $total);
 					continue;
 				}
+				$caseSale = $caseSaleRepository->getSaleByPrimaryKeys((int)$item['cs_id'], (int)$item['css_sale_id']);
 //				$caseSale = $caseSaleService->refreshOriginalSaleData($caseSale, $case, $saleData);
-				$saleTicketService->refreshSaleTicketBySaleData((int)$item['cs_id'], (int)$item['css_sale_id'], $saleData);
+				$saleTicketService->refreshSaleTicketBySaleData((int)$item['cs_id'], $caseSale, $saleData);
 
 				$n++;
 				Console::updateProgress($n, $total);
