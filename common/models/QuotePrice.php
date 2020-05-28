@@ -170,11 +170,13 @@ class QuotePrice extends \yii\db\ActiveRecord
 
         } elseif ($this->oldAttributes['mark_up'] !== $this->mark_up) {
             $this->selling = ($this->fare + $this->taxes + $this->mark_up);
+        } else {
+            $this->oldParams = serialize($this->attributes);
+            return $this;
         }
 
         $this->service_fee = $this->selling * (new Quote())->serviceFee;
         $this->selling += $this->service_fee;
-
         $this->roundValue(2, true);
         $this->oldParams = serialize($this->attributes);
 

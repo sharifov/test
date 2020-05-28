@@ -477,7 +477,7 @@ class QuoteController extends FController
                 $price = new QuotePrice();
             }
             $price->attributes = $item;
-            $price = $price->calculatePrice();
+            $price->calculatePrice();
 
             $result[Html::getInputId($price, '[' . $key . ']mark_up')] = $price->mark_up;
             $result[Html::getInputId($price, '[' . $key . ']selling')] = $price->selling;
