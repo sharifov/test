@@ -64,15 +64,15 @@ return [
         'airsearch' => [
             'class' => \common\components\AirSearchService::class,
             'url' => 'https://airsearch.api.travelinsides.com/',
-            'username' => 'SAL101',
-            'password' => 'c940e3484fe9fcc73ed12a7fcec469b4',
+            'api_cid' => 'SAL101',
+            'api_key' => 'c940e3484fe9fcc73ed12a7fcec469b4',
         ],
 
         'currency' => [
             'class' => \common\components\CurrencyService::class,
             'url' => 'https://airsearch.api.travelinsides.com/v1/',
-            'username' => 'crm',
-            'password' => '',
+            'api_cid' => 'SAL101',
+            'api_key' => 'c940e3484fe9fcc73ed12a7fcec469b4', /* TODO::  */
         ],
 
         'queue_sms_job' => [

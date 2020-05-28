@@ -13,14 +13,14 @@ use yii\httpclient\Response;
  * @package common\components
  *
  * @property string $url
- * @property string $username
- * @property string $password
+ * @property string $api_cid
+ * @property string $api_key
  * @property Request $request
  */
 class AirSearchService extends Component
 {
-    public string $username;
-    public string $password;
+    public string $api_cid;
+    public string $api_key;
     public string $url;
     public Request $request;
 
@@ -36,7 +36,7 @@ class AirSearchService extends Component
      */
     private function initRequest() : bool
     {
-        $authStr = base64_encode($this->username . ':' . $this->password);
+        $authStr = base64_encode($this->api_cid . ':' . $this->api_key);
 
         try {
             $client = new Client();

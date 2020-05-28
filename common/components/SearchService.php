@@ -167,7 +167,7 @@ class SearchService
         $params['fl'] = $fl;
 
         $fields = http_build_query($params);
-        $url = \Yii::$app->params['searchApiUrl'].'?' . $fields;
+        $url = \Yii::$app->params['searchApiUrl'].'?' . $fields; /* TODO::  */
 
 
         $client = new Client();
