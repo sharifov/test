@@ -39,7 +39,7 @@ foreach ($prices as $index => $price) : ?>
             <div class="input-group field-quoteprice-0-selling">
                 <span class="input-group-addon">$</span>
                 <?= Html::activeTextInput($price, '[' . $index . ']net', [
-                    'class' => 'input-group form-control alt-quote-price price_row',
+                    'class' => 'input-group form-control price_row',
                     'readonly' => true,
                 ]) ?>
             </div>

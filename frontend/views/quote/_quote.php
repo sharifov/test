@@ -37,10 +37,13 @@ $js = <<<JS
     });
     
     $(document).on('change', '.alt-quote-price', function(event){
-    
+        
+        $('.alt-quote-price').prop('readonly', true);
+        
         if ($(this).val().length === 0) {
             $(this).val(0);
         }
+        
         var form = $('#$formID');
         $.ajax({
             type: 'post',
@@ -51,9 +54,11 @@ $js = <<<JS
                 $.each(data, function( index, value ) {
                     $('#'+index).val(value);
                 });
+                $('.alt-quote-price').prop('readonly', false);
             },
             error: function (error) {
                 console.log('Error: ' + error);
+                $('.alt-quote-price').prop('readonly', false);
             }
         });
     });
@@ -501,7 +506,7 @@ $this->registerCss('
                             ],
                             'template' => '<span class="input-group-addon">$</span>{input}'
                         ])->textInput([
-                            'class' => 'form-control alt-quote-price',
+                            'class' => 'form-control ',
                             'readonly' => true
                         ]) ?>
                     </td>
