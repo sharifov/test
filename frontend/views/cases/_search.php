@@ -102,6 +102,9 @@ use yii\widgets\ActiveForm;
     </div>
     <div class="row">
         <div class="col-md-1">
+            <?= $form->field($model, 'clientId') ?>
+        </div>
+        <div class="col-md-1">
             <?= $form->field($model, 'cssChargedFrom') ?>
         </div>
         <div class="col-md-1">
