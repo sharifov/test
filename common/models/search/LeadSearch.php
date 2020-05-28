@@ -1025,7 +1025,7 @@ class LeadSearch extends Lead
         $query->addSelect([
             'profit' => (new Query())
                 ->select([
-                    (new Query())->select(['SUM('.QuotePrice::tableName(). '.selling' .'-'. QuotePrice::tableName(). '.net' .'+'.   'CASE WHEN '.Quote::tableName().'.check_payment'.' THEN CASE WHEN '.Quote::tableName().'.service_fee_percent'.'  THEN '.Quote::tableName().'.service_fee_percent'.' ELSE ('.QuotePrice::tableName(). '.selling' . '*' .Quote::SERVICE_FEE.' * 100) / 100 END ELSE 0 END'  . ')'])
+                    (new Query())->select(['SUM('.QuotePrice::tableName(). '.selling' .'-'. QuotePrice::tableName(). '.net' .'+'.   'CASE WHEN '.Quote::tableName().'.check_payment'.' THEN CASE WHEN '.Quote::tableName().'.service_fee_percent'.'  THEN '.Quote::tableName().'.service_fee_percent'.' ELSE ('.QuotePrice::tableName(). '.selling' . '*' .(new Quote())->serviceFee.' * 100) / 100 END ELSE 0 END'  . ')'])
                         ->from(QuotePrice::tableName())
                         ->where(QuotePrice::tableName() . '.quote_id = ' . Quote::tableName() . '.id') ])
                 ->from(Quote::tableName())
