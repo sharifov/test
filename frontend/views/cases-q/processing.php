@@ -8,6 +8,7 @@ use sales\auth\Auth;
 use sales\entities\cases\CaseCategory;
 use sales\entities\cases\CasesQSearch;
 use common\components\grid\cases\NeedActionColumn;
+use sales\model\saleTicket\entity\SaleTicket;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use dosamigos\datepicker\DatePicker;
@@ -153,6 +154,30 @@ $lists = new ListsAccess($user->id);
 
 					return ($diffHours > 3 && $diffHours < 73 ) ? $diffHours.' hours' : Yii::$app->formatter->asRelativeTime($createdTS);
 				},
+			],
+			[
+				'attribute' => 'css_penalty_type',
+				'value' => static function (CasesQSearch $model) {
+					return $model->css_penalty_type ? SaleTicket::getPenaltyTypeName($model->css_penalty_type) : '-';
+				},
+				'filter' => SaleTicket::getAirlinePenaltyList()
+			],
+			[
+				'attribute' => 'css_departure_dt',
+				'value' => static function (CasesQSearch $model) {
+					return $model->css_departure_dt ? Yii::$app->formatter->asDatetime(strtotime($model->css_departure_dt)) : '-';
+				},
+				'filter' => DatePicker::widget([
+					'model' => $searchModel,
+					'attribute' => 'css_departure_dt',
+					'clientOptions' => [
+						'autoclose' => true,
+						'format' => 'yyyy-mm-dd'
+					],
+					'options' => [
+						'autocomplete' => 'off'
+					]
+				]),
 			],
             [
                 'class' => 'yii\grid\ActionColumn',
