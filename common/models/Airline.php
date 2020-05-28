@@ -117,8 +117,8 @@ class Airline extends ActiveRecord
                     ->asArray()
                     ->all();
 
-                if(!empty($lastUpdated)){
-                    if(new \DateTime($lastUpdated[0]['updated_dt']) >= $lastModified){
+                if(!empty($lastUpdated) && $lastUpdatedDT = new \DateTime($lastUpdated[0]['updated_dt'])){
+                    if ($lastUpdatedDT >= $lastModified) {
                         $flgSync = false;
                     }
                 }
@@ -130,6 +130,7 @@ class Airline extends ActiveRecord
                     try {
                         $data = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
                         if(isset($data['results'])){
+
                             foreach ($data['results'] as $entry){
                                 $airline = Airline::findOne(['iata'=> $entry['airlineCode']]);
                                 if($airline === null){
@@ -144,18 +145,14 @@ class Airline extends ActiveRecord
                                 $airline->cl_premium_first = $entry['premium-first'];
                                 $airline->name = $entry['airlineName'];
                                 if (!$airline->save()) {
-                                    \Yii::error(
-                                        \yii\helpers\VarDumper::dumpAsString([$entry, $airline->getErrors()], 20),
-                                        'Airline:syncCabinClasses:notSaved'
-                                    );
+                                    \Yii::error(\yii\helpers\VarDumper::dumpAsString([$entry, $airline->getErrors()], 20),
+                                        'Airline:syncCabinClasses:notSaved');
                                 }
                             }
                         }
                     } catch (\JsonException $e) {
-                        \Yii::error(
-                            \yii\helpers\VarDumper::dumpAsString($e->getMessage(), 20),
-                            'Airline:syncCabinClasses:noJsonDecode'
-                        );
+                        \Yii::error(\yii\helpers\VarDumper::dumpAsString($e->getMessage(), 20),
+                            'Airline:syncCabinClasses:noJsonDecode');
                     }
                 }
             }
