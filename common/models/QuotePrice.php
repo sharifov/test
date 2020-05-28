@@ -148,46 +148,37 @@ class QuotePrice extends \yii\db\ActiveRecord
         $model->oldParams = serialize($model->attributes);
     }
 
-
-    public function calculation2($check_payment = true)
+    /**
+     * @return $this
+     */
+    public function calculatePrice(): QuotePrice
     {
-        $model = $this;
-        $model->oldAttributes = unserialize($model->oldParams);
-        $model->oldParams = '';
-        $model->toFloat();
+        $this->oldAttributes = unserialize($this->oldParams, ['allowed_classes' => false]);
+        $this->oldParams = '';
+        $this->toFloat();
 
-        if ($model->oldAttributes['selling'] != $model->selling) {
-            $model->mark_up = $model->mark_up + ($model->selling - $model->oldAttributes['selling']);
-        } elseif ($model->oldAttributes['net'] != $model->net) {
-            $model->fare = $model->fare + ($model->net - $model->oldAttributes['net']);
-            $model->mark_up = $model->selling - $model->net;
-            if ($model->fare < 0) {
-                $model->taxes = $model->taxes + $model->fare;
-                $model->fare = 0;
-            }
-            $model->selling = $model->net + $model->mark_up;
-        } else {
-            if ($model->fare >= $model->net) {
-                $model->net = $model->fare + $model->taxes;
-            } else {
-                $model->taxes = $model->net - $model->fare;
-            }
-            $model->selling = $model->net + $model->mark_up + $model->extra_mark_up;
-        }
-        $model->selling = ($model->selling < 0)
-        ? 0 : $model->selling;
+        if ($this->oldAttributes['selling'] !== $this->selling) {
+            $this->mark_up = $this->selling / Quote::SERVICE_FEE - $this->net;
 
-        if (!$check_payment) {
-            $model->service_fee = 0;
-        } else {
-            $model->service_fee = round($model->selling * Quote::SERVICE_FEE, 2);
+        } elseif ($this->oldAttributes['fare'] !== $this->fare) {
+            $this->net = $this->fare + $this->taxes;
+            $this->selling = ($this->fare + $this->taxes + $this->mark_up);
+
+        } elseif ($this->oldAttributes['taxes'] !== $this->taxes) {
+            $this->net = $this->fare + $this->taxes;
+            $this->selling = ($this->fare + $this->taxes + $this->mark_up);
+
+        } elseif ($this->oldAttributes['mark_up'] !== $this->mark_up) {
+            $this->selling = ($this->fare + $this->taxes + $this->mark_up);
         }
 
-        $model->selling += $model->service_fee;
+        $this->service_fee = $this->selling * Quote::SERVICE_FEE;
+        $this->selling += $this->service_fee;
 
-        $model->roundValue();
+        $this->roundValue(2, true);
+        $this->oldParams = serialize($this->attributes);
 
-        $model->oldParams = serialize($model->attributes);
+        return $this;
     }
 
     public function toFloat(&$attributes = null)
@@ -207,10 +198,15 @@ class QuotePrice extends \yii\db\ActiveRecord
         }
     }
 
-    public function roundValue($precision = 2)
+    /**
+     * @param int $precision
+     * @param bool $setZero
+     */
+    public function roundValue($precision = 2, $setZero = false): void
     {
         foreach ($this->attributes as $attr => $value) {
             if (in_array($attr, ['net', 'selling', 'extra_mark_up', 'mark_up', 'taxes', 'fare', 'service_fee'])) {
+                $value = $setZero && $value < 0 ? 0 : $value;
                 $this->$attr = round($value, $precision);
             }
         }

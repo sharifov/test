@@ -32,7 +32,6 @@ foreach ($prices as $index => $price) : ?>
                 <span class="input-group-addon">$</span>
                 <?= Html::activeTextInput($price, '[' . $index . ']selling', [
                     'class' => 'input-group form-control alt-quote-price price_row',
-                    'data-index' => $index,
                 ]) ?>
             </div>
         </td>
@@ -40,8 +39,8 @@ foreach ($prices as $index => $price) : ?>
             <div class="input-group field-quoteprice-0-selling">
                 <span class="input-group-addon">$</span>
                 <?= Html::activeTextInput($price, '[' . $index . ']net', [
-                    'class' => 'input-group form-control alt-quote-price price_row',
-                    'data-index' => $index,
+                    'class' => 'input-group form-control price_row',
+                    'readonly' => true,
                 ]) ?>
             </div>
         </td>
@@ -50,7 +49,6 @@ foreach ($prices as $index => $price) : ?>
                 <span class="input-group-addon">$</span>
                 <?= Html::activeTextInput($price, '[' . $index . ']fare', [
                     'class' => 'input-group form-control alt-quote-price price_row',
-                    'data-index' => $index,
                 ]) ?>
             </div>
         </td>
@@ -59,8 +57,6 @@ foreach ($prices as $index => $price) : ?>
                 <span class="input-group-addon">$</span>
                 <?= Html::activeTextInput($price, '[' . $index . ']taxes', [
                     'class' => 'input-group form-control alt-quote-price price_row',
-                    'readonly' => true,
-                    'data-index' => $index,
                 ]) ?>
             </div>
         </td>
@@ -69,8 +65,6 @@ foreach ($prices as $index => $price) : ?>
                 <span class="input-group-addon">$</span>
                 <?= Html::activeTextInput($price, '[' . $index . ']mark_up', [
                     'class' => 'input-group form-control alt-quote-price price_row',
-                    'id' => 'mark_up_' . $index,
-                    'data-index' => $index,
                 ]) ?>
             </div>
         </td>
