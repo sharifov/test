@@ -177,9 +177,13 @@ $gridId = 'cases-grid-id';
                 },
                 'format' => 'raw'
             ],
-            'cs_client_id:client',
             [
-                'header' => 'Client / Emails / Phones',
+                'label' => 'Client ID',
+                'attribute' => 'cs_client_id',
+                'format' => 'client'
+            ],
+            [
+                'header' => 'Client Info',
                 'format' => 'raw',
                 'value' => static function (Cases $case) use ($user) {
 
