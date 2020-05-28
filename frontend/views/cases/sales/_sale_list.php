@@ -226,6 +226,7 @@ $jsCode = <<<JS
 JS;
 
 $this->registerJs($jsCode, \yii\web\View::POS_READY);
+$urlRefresh = \yii\helpers\Url::to(['/cases/ajax-refresh-sale-info']);
 
 $js = <<<JS
 document.activateButtonSync = function(data) {
@@ -249,5 +250,78 @@ document.activateButtonSync = function(data) {
 ( function () {
     $('.cssSaleData_passengers_birth_date').off('editableSuccess');
 })();
+
+
+$(document).on('click', '.refresh-from-bo', function (e) {
+    e.preventDefault();
+    e.stopPropagation();  
+    
+    let obj = $(this),
+        caseId = obj.attr('data-case-id'),
+        caseSaleId = obj.attr('data-case-sale-id'),
+        checkFareRules = obj.attr('check-fare-rules');
+        
+    if (typeof checkFareRules === typeof undefined) {
+        checkFareRules = 0;    
+    }
+    
+    $.ajax({
+        url: "$urlRefresh/" + caseId + '/' + caseSaleId,
+        type: 'post',
+        data : {check_fare_rules: checkFareRules},
+        dataType: "json",    
+        beforeSend: function () {
+            obj.attr('disabled', true).find('i').toggleClass('fa-spin');
+            $(obj).closest('.panel').find('.error-dump').html();
+        },
+        success: function (data) {
+            if (data.error) {
+               new PNotify({
+                    title: "Error",
+                    type: "error",
+                    text: data.message,
+                    hide: true
+                }); 
+            } else {
+                new PNotify({
+                    title: "Success",
+                    type: "success",
+                    text: data.message,
+                    hide: true
+                }); 
+                $.pjax.reload({container: '#pjax-sale-list',push: false, replace: false, 'scrollTo': false, timeout: 1000, async: false,});
+            }
+        },
+        error: function (text) {
+            new PNotify({
+                title: "Error",
+                type: "error",
+                text: "Internal Server Error. Try again letter.",
+                hide: true
+            });
+        },
+        complete: function () {
+            obj.removeAttr('disabled').find('i').toggleClass('fa-spin');
+            $(obj).closest('.panel').find('.error-dump').html();
+        }
+    });
+});
+
+
+$(document).on('click', '.sale-ticket-generate-email-btn', function (e) {
+        e.preventDefault();
+        var btn = $(this);
+        var url = btn.attr('href');
+        
+        btn.attr('disabled', true).find('i').addClass('fa-spin').removeClass('fa-envelope').addClass('fa-refresh');
+        $.get(url, function(data) {
+            if (data.error) {
+                createNotify('Error', data.message, 'error');
+            } else {
+                createNotify('Success', data.message, 'success');
+            }
+            btn.find('i').removeClass('fa-spin').removeClass('fa-refresh').addClass('fa-envelope');
+        });
+    });
 JS;
 $this->registerJs($js);
