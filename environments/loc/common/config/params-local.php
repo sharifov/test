@@ -13,7 +13,6 @@ return [
         'username' => 'AKIAI5VDT2W5LGW7T3TQ',
         'password' => 'Avufe0iKvYJGNT+Dv8LyVBesiCbMX2ZaB5HC4kBc/2Zn'
     ],
-    'searchApiUrl' => 'http://airsearch.api.travelinsides.com/v1/search',
     'crypt' => [
         'method'    => 'aes-256-cbc',
         'password'  => '',

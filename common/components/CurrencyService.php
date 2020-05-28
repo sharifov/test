@@ -20,16 +20,16 @@ use yii\httpclient\Response;
  * @package common\components
  *
  * @property string $url
- * @property string $username
- * @property string $password
+ * @property string $api_cid
+ * @property string $api_key
  * @property Request $request
  */
 
 class CurrencyService extends Component
 {
     public $url;
-    public $username;
-    public $password;
+    public string $api_cid;
+    public string $api_key;
 
     private $request;
 
@@ -44,7 +44,7 @@ class CurrencyService extends Component
      */
     private function initRequest() : bool
     {
-        $authStr = base64_encode($this->username . ':' . $this->password);
+        $authStr = base64_encode($this->api_cid . ':' . $this->api_key);
 
         try {
             $client = new Client();
