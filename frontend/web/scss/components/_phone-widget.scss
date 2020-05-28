@@ -1651,6 +1651,12 @@
 				font-size: 18px;
 				font-weight: normal;
 			}
+
+			&[disabled],
+			&.disabled {
+				color: rgba($white, .3);
+				background-color: rgba($white, .08);
+			}
 		}
 	}
 
