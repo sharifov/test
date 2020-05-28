@@ -24,9 +24,16 @@ class CallHelper
 			'data-phone-number' => $phone,
 			'data-confirm' => isset($dataParams['confirm']) ? 1 : 0,
 			'data-call' => isset($dataParams['call']) ? 1 : 0,
-			'data-phone-from-id' => $dataParams['phone-from-id'] ?? '',
 			'class' => $access ? 'wg-call badge badge-pill badge-light' : ''
 		];
+
+		if (!empty($dataParams['data-title'])) {
+		    $options['data-title'] = $dataParams['data-title'];
+        }
+
+		if (!empty($dataParams['phone-from-id'])) {
+            $options['data-phone-from-id'] = $dataParams['phone-from-id'];
+        }
 
 
         $disableIcon = $dataParams['disable-icon'] ?? false;

@@ -332,21 +332,19 @@ var PhoneWidgetCall = function () {
                     clearTimeout(timeout);
                 }
                 if (data.results.length < 1) {
-                    content += loadNotFound();
-                    timeout = setTimeout(function () {
-                        $('.suggested-contacts').removeClass('is_active');
-                    }, 2000);
+                    // content += loadNotFound();
+                    // timeout = setTimeout(function () {
+                    //     $('.suggested-contacts').removeClass('is_active');
+                    // }, 2000);
                 } else {
                     $.each(data.results, function(i, item) {
                         content += loadContact(item);
                     });
-                    $('.suggested-contacts').html(content);
-                    $('.suggested-contacts').addClass('is_active');
+                    $('.suggested-contacts').html(content).addClass('is_active');
                     $('.call-pane__dial-clear-all').addClass('is-shown')
                 }
-                $('.suggested-contacts').html(content);
-                $('.suggested-contacts').addClass('is_active');
-                $('.call-pane__dial-clear-all').addClass('is-shown')
+                //$('.suggested-contacts').html(content).addClass('is_active');
+                //$('.call-pane__dial-clear-all').addClass('is-shown')
             })
             .fail(function () {
                 new PNotify({
@@ -361,13 +359,14 @@ var PhoneWidgetCall = function () {
 
     function loadContact(contact) {
         //  type = 3 = Internal contact
+        console.log(contact);
         let contactIcon = '';
         if (contact['type'] === 3) {
             contactIcon = '<div class="contact-info-card__status">' +
                 '<i class="far fa-user ' + contact['user_status_class'] + ' "></i>' +
                 '</div>';
         }
-        let content = '<li class="calls-history__item contact-info-card call-contact-card" data-phone="' + contact['phone'] + '">' +
+        let content = '<li class="calls-history__item contact-info-card call-contact-card" data-phone="' + contact['phone'] + '" data-title="' + contact['title'] + '">' +
             '<div class="collapsible-toggler">' +
             contactIcon
             + '<div class="contact-info-card__details">' +
@@ -395,7 +394,8 @@ var PhoneWidgetCall = function () {
 
     $(document).on('click', "li.call-contact-card", function () {
         let phone = $(this).data('phone');
-        $("#call-pane__dial-number").val(phone);
+        let title = $(this).data('title');
+        insertPhoneNumber(phone, title);
         $('.suggested-contacts').removeClass('is_active');
     });
 

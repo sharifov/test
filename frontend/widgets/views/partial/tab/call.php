@@ -60,7 +60,7 @@ $phoneFrom = $call ? $call->c_from : '';
 
 
             <div class="phone-input-wrap">
-                <label class="call-pane-label" for="">Calling to</label>
+                <label class="call-pane-label" for="">Calling to <sapn id="call-to-label" style="color: white"></sapn></label>
                 <?php
 
                 use yii\bootstrap4\Html;
@@ -74,11 +74,12 @@ $phoneFrom = $call ? $call->c_from : '';
                     'method' => 'get',
                 ]);
 
-                echo Html::input('text', 'q', null, [
+                echo Html::textInput('q', null, [
                     'id' => 'call-pane__dial-number',
                     'class' => 'call-pane__dial-number',
                     'placeholder' => 'Name, company, phone...',
                     'autocomplete' => 'off',
+                    'maxlength' => 16
                 ]);
 
                 ActiveForm::end()

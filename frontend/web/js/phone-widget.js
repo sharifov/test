@@ -296,8 +296,11 @@ $(document).ready(function() {
 
     $('.call-pane__dial-clear-all').on('click', function(e) {
         e.preventDefault();
-        $('.call-pane__dial-number').val('')
+        $('.call-pane__dial-number').val('').attr('readonly', false).prop('readonly', false);
+        $('#call-to-label').text('');
         $('.suggested-contacts').removeClass('is_active');
+
+        $('.dial__btn').attr('disabled', false).removeClass('disabled');
 
         // $(this).removeClass('is-shown')
     });
