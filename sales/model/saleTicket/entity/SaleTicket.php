@@ -115,7 +115,7 @@ class SaleTicket extends \yii\db\ActiveRecord
 
             ['st_service_fee', 'number'],
 
-            ['st_ticket_number', 'string', 'max' => 15],
+            ['st_ticket_number', 'string', 'max' => 30],
 
             ['st_updated_dt', 'safe'],
 
@@ -188,7 +188,7 @@ class SaleTicket extends \yii\db\ActiveRecord
 	private function calculateUpfrontCharge()
 	{
 		if (in_array($this->st_original_fop, ['CC', 'SPLIT', 'SPLT'])) {
-			return $this->st_recall_commission + $this->st_markup + $this->getPenaltyAmountIntValue() - $this->st_service_fee;
+			return $this->st_recall_commission + $this->st_markup - $this->st_service_fee;
 		}
 		return 0;
 	}
@@ -198,7 +198,7 @@ class SaleTicket extends \yii\db\ActiveRecord
 		if (in_array($this->st_original_fop, ['CP', 'CK', 'VCC'])) {
 			return $this->st_selling - $this->st_recall_commission - $this->st_markup - $this->getPenaltyAmountIntValue();
 		}
-		return $this->st_selling;
+		return $this->st_selling - $this->getPenaltyAmountIntValue();
 	}
 
 	private function getPenaltyAmountIntValue(): float
