@@ -3,6 +3,7 @@ use yii\helpers\Html;
 use \kartik\form\ActiveForm;
 use kartik\select2\Select2;
 use common\models\Department;
+use common\models\Project;
 
 
 /* @var $this yii\web\View */
@@ -78,16 +79,18 @@ use common\models\Department;
                     </div>
                 </div>
 
+                <?php if(count(Project::getList()) > 1) : ?>
                 <div class="col-md-2">
                     <?= $form->field($model, 'projectIds', [
                         'options' => ['class' => 'form-group']
                     ])->widget(Select2::class, [
-                        'data' => \common\models\Project::getListByUser(Yii::$app->user->id),
+                        'data' => Project::getListByUser(Yii::$app->user->id),
                         'size' => Select2::SMALL,
                         'options' => ['placeholder' => 'Select Project', 'multiple' => true],
                         'pluginOptions' => ['allowClear' => true],
                     ])->label('Project') ?>
                 </div>
+                <?php endif; ?>
 
                 <div class="col-md-2">
                     <?= $form->field($model, 'statusIds', [

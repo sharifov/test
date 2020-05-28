@@ -5,6 +5,7 @@ use yii\grid\GridView;
 use yii\widgets\Pjax;
 use common\components\grid\DateTimeColumn;
 use \sales\model\callLog\entity\callLog\search\CallLogSearch;
+use \common\models\Project;
 
 /**
  * @var $searchModel sales\model\callLog\entity\callLog\search\CallLogSearch
@@ -35,7 +36,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => \common\components\grid\project\ProjectColumn::class,
                 'attribute' => 'cl_project_id',
                 'relation' => 'project',
-                'filter' => \common\models\Project::getListByUser(Yii::$app->user->id),
+                'filter' => Project::getListByUser(Yii::$app->user->id),
+                'visible' => count(Project::getList()) > 1
             ],
             [
                 'class' => \common\components\grid\department\DepartmentColumn::class,
