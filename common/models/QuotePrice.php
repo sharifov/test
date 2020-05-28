@@ -138,7 +138,7 @@ class QuotePrice extends \yii\db\ActiveRecord
         if (!$check_payment) {
             $model->service_fee = 0;
         } else {
-            $model->service_fee = round($model->selling * Quote::SERVICE_FEE, 2);
+            $model->service_fee = round($model->selling * (new Quote())->serviceFee, 2);
         }
 
         $model->selling += $model->service_fee;
@@ -158,7 +158,7 @@ class QuotePrice extends \yii\db\ActiveRecord
         $this->toFloat();
 
         if ($this->oldAttributes['selling'] !== $this->selling) {
-            $this->mark_up = $this->selling / Quote::SERVICE_FEE - $this->net;
+            $this->mark_up = $this->selling / (new Quote())->serviceFee - $this->net;
 
         } elseif ($this->oldAttributes['fare'] !== $this->fare) {
             $this->net = $this->fare + $this->taxes;
@@ -172,7 +172,7 @@ class QuotePrice extends \yii\db\ActiveRecord
             $this->selling = ($this->fare + $this->taxes + $this->mark_up);
         }
 
-        $this->service_fee = $this->selling * Quote::SERVICE_FEE;
+        $this->service_fee = $this->selling * (new Quote())->serviceFee;
         $this->selling += $this->service_fee;
 
         $this->roundValue(2, true);
@@ -347,7 +347,7 @@ class QuotePrice extends \yii\db\ActiveRecord
         $this->passenger_type = $paxType;
         $this->selling = $this->net = $this->fare = $this->taxes = $this->mark_up = $this->extra_mark_up = 0;
 
-        $this->service_fee = round($this->selling * Quote::SERVICE_FEE, 2);
+        $this->service_fee = round($this->selling * (new Quote())->serviceFee, 2);
         $this->selling += $this->service_fee;
 
         $this->toFloat();

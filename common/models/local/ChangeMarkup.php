@@ -74,7 +74,7 @@ class ChangeMarkup extends Model
                     $quotePrice->extra_mark_up = $this->value;
                     $quotePrice->selling = $quotePrice->net + $quotePrice->mark_up + $quotePrice->extra_mark_up;
                     if ($this->quote->check_payment) {
-                        $quotePrice->service_fee = round($quotePrice->selling * Quote::SERVICE_FEE, 2);
+                        $quotePrice->service_fee = round($quotePrice->selling * (new Quote())->serviceFee, 2);
                         $quotePrice->selling += $quotePrice->service_fee;
                     }
                     $result['actual']['sellingPrice'] += $quotePrice->selling;
@@ -84,7 +84,7 @@ class ChangeMarkup extends Model
                     $quotePrice->extra_mark_up = $this->value;
                     $quotePrice->selling = $quotePrice->net + $quotePrice->mark_up + $quotePrice->extra_mark_up;
                     if ($this->quote->check_payment) {
-                        $quotePrice->service_fee = round($quotePrice->selling * Quote::SERVICE_FEE, 2);
+                        $quotePrice->service_fee = round($quotePrice->selling * (new Quote())->serviceFee, 2);
                         $quotePrice->selling += $quotePrice->service_fee;
                     }
                     $result['actual']['sellingPrice'] += $quotePrice->selling;
@@ -94,7 +94,7 @@ class ChangeMarkup extends Model
                     $quotePrice->extra_mark_up = $this->value;
                     $quotePrice->selling = $quotePrice->net + $quotePrice->mark_up + $quotePrice->extra_mark_up;
                     if ($this->quote->check_payment) {
-                        $quotePrice->service_fee = round($quotePrice->selling * Quote::SERVICE_FEE, 2);
+                        $quotePrice->service_fee = round($quotePrice->selling * (new Quote())->serviceFee, 2);
                         $quotePrice->selling += $quotePrice->service_fee;
                     }
                     $result['actual']['sellingPrice'] += $quotePrice->selling;
