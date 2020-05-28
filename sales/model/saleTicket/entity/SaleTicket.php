@@ -256,7 +256,7 @@ class SaleTicket extends \yii\db\ActiveRecord
 		return array_search($penaltyType, self::getAirlinePenaltyList(), false) ?: null;
 	}
 
-	public static function getPenaltyTypeName(int $id): ?string
+	public static function getPenaltyTypeName(?int $id): ?string
 	{
 		return self::getAirlinePenaltyList()[$id] ?? '';
 	}
