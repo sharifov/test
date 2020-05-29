@@ -24,6 +24,7 @@ use yii\db\ActiveRecord;
  * @property string|null $st_charge_system
  * @property int|null $st_penalty_type
  * @property float|null $st_penalty_amount
+ * @property string|null $st_refund_waiver
  * @property float|null $st_selling
  * @property float|null $st_service_fee
  * @property float|null $st_recall_commission
@@ -111,7 +112,9 @@ class SaleTicket extends \yii\db\ActiveRecord
 
             ['st_original_fop', 'string', 'max' => 5],
 
-            ['st_penalty_amount', 'string'],
+            ['st_penalty_amount', 'number'],
+
+			['st_refund_waiver', 'string', 'max' => 50],
 
             ['st_penalty_type', 'integer'],
 
@@ -171,6 +174,7 @@ class SaleTicket extends \yii\db\ActiveRecord
             'st_charge_system' => 'Charge System',
             'st_penalty_type' => 'Penalty Type',
             'st_penalty_amount' => 'Penalty Amount',
+            'st_refund_waiver' => 'Refund Waiver',
             'st_selling' => 'Selling',
             'st_service_fee' => 'Service Fee',
             'st_recall_commission' => 'Recall Commission',
@@ -206,9 +210,9 @@ class SaleTicket extends \yii\db\ActiveRecord
 	private function calculateRefundableAmount()
 	{
 		if (in_array($this->st_original_fop, ['CP', 'CK', 'VCC'])) {
-			return $this->st_selling - $this->st_recall_commission - $this->st_markup - $this->getPenaltyAmountIntValue();
+			return $this->st_selling - $this->st_recall_commission - $this->st_markup - $this->st_penalty_amount;
 		}
-		return $this->st_selling - $this->getPenaltyAmountIntValue();
+		return $this->st_selling - $this->st_penalty_amount;
 	}
 
 	private function getPenaltyAmountIntValue(): float
@@ -232,6 +236,7 @@ class SaleTicket extends \yii\db\ActiveRecord
 		$ticket->st_charge_system = $dto->chargeSystem;
 		$ticket->st_penalty_type = $dto->penaltyType;
 		$ticket->st_penalty_amount = $dto->penaltyAmount;
+		$ticket->st_refund_waiver = $dto->refundWaiver;
 		$ticket->st_selling = $dto->selling;
 		$ticket->st_service_fee = $dto->serviceFee;
 		$ticket->st_recall_commission = $dto->recallCommission;
