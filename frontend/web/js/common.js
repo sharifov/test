@@ -77,15 +77,25 @@
         e.preventDefault();
 
         let phone = $(this).data('phone-number');
+        let title = $(this).data('title');
         let widgetBtn = $('.js-toggle-phone-widget');
         if (widgetBtn.length) {
             $('.phone-widget').addClass('is_active')
             $('.js-toggle-phone-widget').addClass('is-mirror');
-            $('#call-pane__dial-number').val(phone);
+            insertPhoneNumber(phone, title);
         }
     });
 
 })(window, $);
+
+function insertPhoneNumber(phone, title) {
+    $('#call-pane__dial-number').val(phone).attr('readonly', 'readonly');
+    if (title.length > 0) {
+        $("#call-to-label").text(title);
+    }
+    soundNotification("button_tiny");
+    $('.dial__btn').attr('disabled', 'disabled').addClass('disabled');
+}
 
 function soundNotification(fileName = 'button_tiny', volume = 0.3) {
     let audio = new Audio('/js/sounds/' + fileName + '.mp3');

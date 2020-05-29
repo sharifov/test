@@ -147,6 +147,10 @@ $isSuperAdmin = $user->isSuperAdmin();
             $menuItems[] = ['label' => 'My Calls <span id="call-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/call/list'], 'icon' => 'phone'];
         }
 
+        if ($user->canCall()) {
+            $menuItems[] = ['label' => 'My Calls Log <span id="call-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/call-log/list'], 'icon' => 'phone'];
+        }
+
         $menuItems[] = [
             'label' => 'My Contacts <span id="call-inbox-queue" class="label-info label pull-right"></span>',
             'url' => ['/contacts/index'],

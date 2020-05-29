@@ -2,6 +2,8 @@
 namespace sales\model\saleTicket\useCase\create;
 
 
+use sales\model\saleTicket\entity\SaleTicket;
+
 class SaleTicketCreateDTO
 {
 	public $caseId;
@@ -19,7 +21,16 @@ class SaleTicketCreateDTO
 	public $markup;
 	public $transactionIds;
 
-	public function feelBySaleData(int $caseId, int $caseSaleId, string $pnr, string $clientName, int $cntPassengers, array $rule, array $refundRules): self
+	public function feelBySaleData(
+		int $caseId,
+		int $caseSaleId,
+		string $pnr,
+		string $clientName,
+		int $cntPassengers,
+		?int $penaltyTypeId,
+		array $rule,
+		array $refundRules
+	): self
 	{
 		$dto = new self();
 
@@ -30,7 +41,7 @@ class SaleTicketCreateDTO
 		$dto->recordLocator = $pnr;
 		$dto->originalFop = $refundRules['original_FOP'] ?? null;
 		$dto->chargeSystem = (string)($refundRules['charge_system'] ?? null);
-		$dto->penaltyType = $refundRules['airline_penalty'] ?? null;
+		$dto->penaltyType = $penaltyTypeId;
 		$dto->penaltyAmount = (string)($refundRules['refund_waiver'] ?? 0);
 		$dto->selling = $rule['selling_price'] ?? null;
 		$dto->serviceFee = $rule['original_service_fee'] ?? null;

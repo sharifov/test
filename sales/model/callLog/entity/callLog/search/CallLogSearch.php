@@ -34,6 +34,14 @@ class CallLogSearch extends CallLog
     public $createTimeStart;
     public $createTimeEnd;
 
+    public $projectIds = [];
+    public $statusIds = [];
+    public $typesIds = [];
+    public $categoryIds = [];
+    public $departmentIds = [];
+    public $callDurationFrom;
+    public $callDurationTo;
+
     public const CREATE_TIME_START_DEFAULT_RANGE = '-6 days';
 
     public function rules(): array
@@ -70,6 +78,8 @@ class CallLogSearch extends CallLog
             [['clq_access_count', 'clq_queue_time'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
             [['clq_access_count', 'clq_queue_time'], 'integer'],
             [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+            [['callDurationFrom', 'callDurationTo'], 'integer'],
+            [['projectIds', 'statusIds', 'typesIds', 'categoryIds', 'departmentIds'], 'each', 'rule' => ['integer']],
         ];
     }
 
@@ -213,4 +223,73 @@ class CallLogSearch extends CallLog
 
 		return $dataProvider;
 	}
+
+    public function searchMyCalls($params, Employee $user): ActiveDataProvider
+    {
+        $this->load($params);
+
+        $query = static::find();
+        $query->where(['cl_user_id' => $user->id]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort'=> ['defaultOrder' => ['cl_id' => SORT_DESC]],
+        ]);
+
+        if (!$this->validate()) {
+            return $dataProvider;
+        }
+
+        if ($this->cl_call_created_dt) {
+            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cl_call_created_dt', $this->cl_call_created_dt, $user->timezone);
+        }
+
+        if ($this->createTimeRange){
+            $dateTimeStart = Employee::convertTimeFromUserDtToUTC($this->createTimeStart);
+            $dateTimeEnd = Employee::convertTimeFromUserDtToUTC($this->createTimeEnd);
+            $query->andWhere(['between', 'cl_call_created_dt', $dateTimeStart, $dateTimeEnd]);
+        }
+
+        if ($this->projectIds){
+            $query->andWhere(['cl_project_id' => $this->projectIds]);
+        }
+
+        if ($this->statusIds){
+            $query->andWhere(['cl_status_id' => $this->statusIds]);
+        }
+
+        if ($this->typesIds){
+            $query->andWhere(['cl_type_id' => $this->typesIds]);
+        }
+        if ($this->categoryIds){
+            $query->andWhere(['cl_category_id' => $this->categoryIds]);
+        }
+
+        if ($this->departmentIds){
+            $query->andWhere(['cl_department_id' => $this->departmentIds]);
+        }
+
+        if($this->callDurationFrom){
+            $query->andWhere(['>=', 'cl_duration', $this->callDurationFrom]);
+        }
+
+        if ($this->callDurationTo){
+            $query->andWhere(['<=', 'cl_duration', $this->callDurationTo]);
+        }
+
+        $query->andFilterWhere([
+            'cl_id' => $this->cl_id,
+            'cl_project_id' => $this->cl_project_id,
+            'cl_department_id' => $this->cl_department_id,
+            'cl_type_id' => $this->cl_type_id,
+            'cl_category_id' => $this->cl_category_id,
+            'cl_status_id' => $this->cl_status_id,
+            'cl_client_id' => $this->cl_client_id,
+        ]);
+
+        $query->andFilterWhere(['like', 'cl_phone_from', $this->cl_phone_from])
+            ->andFilterWhere(['like', 'cl_phone_to', $this->cl_phone_to]);
+
+        return $dataProvider;
+    }
 }

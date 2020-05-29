@@ -61,7 +61,6 @@ class Quote extends \yii\db\ActiveRecord
 
     use EventTrait;
 
-    public const SERVICE_FEE = 0.035;
     public const CHECKOUT_URL_PAGE = 'checkout/quote';
 
     public const
@@ -136,6 +135,21 @@ class Quote extends \yii\db\ActiveRecord
         self::TYPE_ORIGINAL => 'Original',
         self::TYPE_ALTERNATIVE => 'Alternative',
     ];
+
+    public float $serviceFee = 0.035;
+
+    /**
+     * Quote constructor.
+     * @param array $config
+     */
+    public function __construct(array $config = [])
+    {
+        if (isset(Yii::$app->params['settings']['quote_service_fee_percent'])) {
+            $this->serviceFee = Yii::$app->params['settings']['quote_service_fee_percent'] / 100;
+        }
+
+        parent::__construct($config);
+    }
 
     public static function getTypeName($type)
     {
@@ -2051,7 +2065,7 @@ class Quote extends \yii\db\ActiveRecord
 
     public function getServiceFeePercent()
     {
-        return ($this->check_payment)?($this->service_fee_percent?$this->service_fee_percent:self::SERVICE_FEE*100):0;
+        return ($this->check_payment)?($this->service_fee_percent?$this->service_fee_percent:$this->serviceFee*100):0;
     }
 
     public function getEstimationProfitText()

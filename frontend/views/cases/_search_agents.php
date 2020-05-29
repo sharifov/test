@@ -47,6 +47,9 @@ use yii\widgets\ActiveForm;
                     <?= $form->field($model, 'cs_status')->dropDownList(CasesStatus::STATUS_LIST, ['prompt' => '-']) ?>
                 </div>
                 <div class="col-md-1">
+                    <?= $form->field($model, 'clientId') ?>
+                </div>
+                <div class="col-md-1">
                     <?= $form->field($model, 'paxFirstName') ?>
                 </div>
                 <div class="col-md-1">

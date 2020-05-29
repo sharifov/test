@@ -23,6 +23,8 @@ use yii\db\Query;
  * @property string $last_out_date
  * @property string $saleExist
  * @property string|null $nextFlight
+ * @property int|null $css_penalty_type
+ * @property string|null $css_departure_dt
  *
  */
 class CasesQSearch extends Cases
@@ -38,6 +40,8 @@ class CasesQSearch extends Cases
 
     public $saleExist;
     public $nextFlight;
+    public $css_penalty_type;
+    public $css_departure_dt;
 
     /**
      * CasesSearch constructor.
@@ -70,7 +74,8 @@ class CasesQSearch extends Cases
             ['trash_date', 'string'],
             ['cs_need_action', 'boolean'],
             ['cs_order_uid', 'string'],
-            [['last_in_date', 'last_out_date'], 'string'],
+            ['css_penalty_type', 'integer'],
+            [['last_in_date', 'last_out_date', 'css_departure_dt'], 'string'],
             [['saleExist', 'nextFlight'], 'safe'],
         ];
     }
@@ -250,7 +255,24 @@ class CasesQSearch extends Cases
     {
         $query = $this->casesQRepository->getProcessingQuery($user);
 
-        // add conditions that should always apply here
+		$query->addSelect('css_penalty_type');
+		$query->addSelect('css_departure_dt');
+
+		// add conditions that should always apply here
+
+		$query->leftJoin([
+			'penalty_departure' => CaseSale::find()
+				->select([
+					'css_cs_id',
+					new Expression('
+                    MIN(css_penalty_type) AS css_penalty_type'),
+					new Expression('
+                    MIN(css_departure_dt) AS css_departure_dt'),
+				])
+				->innerJoin(Cases::tableName() . ' AS cases',
+					'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PROCESSING)
+				->groupBy('css_cs_id')
+		], 'cases.cs_id = penalty_departure.css_cs_id');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -259,6 +281,23 @@ class CasesQSearch extends Cases
                 'pageSize' => 20,
             ],
         ]);
+
+		$sorting = $dataProvider->getSort();
+		$sorting->attributes = array_merge($sorting->attributes, [
+			'css_penalty_type' => [
+				'asc' => ['css_penalty_type' => SORT_ASC],
+				'desc' => ['css_penalty_type' => SORT_DESC],
+				'default' => SORT_ASC,
+				'label' => 'Penalty Type',
+			],
+			'css_departure_dt' => [
+				'asc' => ['css_departure_dt' => SORT_ASC],
+				'desc' => ['css_departure_dt' => SORT_DESC],
+				'default' => SORT_ASC,
+				'label' => 'Departure Date Time',
+			],
+		]);
+		$dataProvider->setSort($sorting);
 
         $this->load($params);
 
@@ -277,6 +316,8 @@ class CasesQSearch extends Cases
             'cs_dep_id' => $this->cs_dep_id,
 			'cs_user_id' => $this->cs_user_id,
             'cs_need_action' => $this->cs_need_action,
+			'css_penalty_type' => $this->css_penalty_type,
+			'date_format(css_departure_dt, "%Y-%m-%d")' => $this->css_departure_dt,
 		]);
 
 //        if ($this->cs_user_id) {
@@ -620,6 +661,8 @@ class CasesQSearch extends Cases
             'cs_need_action' => 'Need Action',
             'cs_order_uid' => 'Booking ID',
             'nextFlight' => 'Next Flight Date',
+            'css_penalty_type' => 'Penalty Type',
+            'css_departure_dt' => 'Departure DT',
         ];
     }
 }

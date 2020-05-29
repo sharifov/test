@@ -8,11 +8,18 @@ use common\models\Client;
 use common\models\ClientEmail;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesSourceType;
+use sales\entities\cases\CasesStatus;
 use sales\helpers\app\AppHelper;
+use sales\model\saleTicket\useCase\create\SaleTicketService;
+use sales\repositories\cases\CasesRepository;
+use sales\repositories\cases\CasesSaleRepository;
+use sales\services\cases\CasesSaleService;
 use Yii;
 use yii\console\Controller;
 use yii\console\Exception;
+use yii\db\Query;
 use yii\helpers\Console;
+use yii\web\BadRequestHttpException;
 
 class CaseController extends Controller
 {
@@ -92,6 +99,79 @@ class CaseController extends Controller
 
 		$time_end = microtime(true);
 		$time = number_format(round($time_end - $time_start, 2), 2);
+		printf("\nExecute Time: %s ", $this->ansiFormat($time . ' s', Console::FG_RED));
+		printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+	}
+
+	public function actionRefreshCaseSales(int $caseId = null, int $saleId = null, int $limit = 1000, int $offset = 0)
+	{
+		printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+		$time_start = microtime(true);
+
+		try {
+
+			$transaction = Yii::$app->db->beginTransaction();
+
+			$query = new Query();
+			$query->addSelect(['cs_id', 'css_sale_id'])->from('cases')->where(['cs_status' => CasesStatus::STATUS_PROCESSING]);
+
+			if ($saleId) {
+				$query->innerJoin('case_sale', 'case_sale.css_cs_id = cases.cs_id and case_sale.css_sale_id = :saleId', ['saleId' => $saleId]);
+			} else {
+				$query->innerJoin('case_sale', 'case_sale.css_cs_id = cases.cs_id');
+			}
+
+			if ($caseId) {
+				$query->andWhere(['cs_id' => $caseId]);
+			}
+			$query->limit($limit)->offset($offset);
+
+			$result = $query->all();
+
+			$caseSaleService = Yii::createObject(CasesSaleService::class);
+			$saleTicketService = Yii::createObject(SaleTicketService::class);
+
+			$n=0;
+			$total = count($result);
+			Console::startProgress(0, $total, 'Counting objects: ', false);
+
+			$boErrors = [];
+
+			$caseSaleRepository = Yii::createObject(CasesSaleRepository::class);
+
+			foreach ($result as $item) {
+				try {
+					$saleData = $caseSaleService->detailRequestToBackOffice((int)$item['css_sale_id'], 1, 120, 1);
+				} catch (BadRequestHttpException $e) {
+					$n++;
+					$boErrors[] = "Loop: {$n}; BO error occurred: caseId: {$item['cs_id']}; saleId: {$item['css_sale_id']}";
+					Console::updateProgress($n, $total);
+					continue;
+				}
+				$caseSale = $caseSaleRepository->getSaleByPrimaryKeys((int)$item['cs_id'], (int)$item['css_sale_id']);
+//				$caseSale = $caseSaleService->refreshOriginalSaleData($caseSale, $case, $saleData);
+				$saleTicketService->refreshSaleTicketBySaleData((int)$item['cs_id'], $caseSale, $saleData);
+
+				$n++;
+				Console::updateProgress($n, $total);
+			}
+
+			Console::endProgress("done." . PHP_EOL);
+
+			if (!empty($boErrors)) {
+				printf("\nBo errors occurred: %s ", $this->ansiFormat(implode('; ' . PHP_EOL, $boErrors), Console::FG_RED));
+			}
+
+
+			$transaction->commit();
+		} catch (\Throwable $e) {
+			$transaction->rollBack();
+			printf("\nError occurred: %s ", $this->ansiFormat($e->getMessage() . '; File: ' . $e->getFile() . '; On Line: ' . $e->getLine(), Console::FG_RED));
+		}
+
+		$time_end = microtime(true);
+		$time = number_format(round($time_end - $time_start, 2), 2);
+		printf("\nExecute Time: %s ", $this->ansiFormat($time . ' s', Console::FG_RED));
 		printf("\nExecute Time: %s ", $this->ansiFormat($time . ' s', Console::FG_RED));
 		printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 	}

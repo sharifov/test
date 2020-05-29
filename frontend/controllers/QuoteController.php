@@ -361,7 +361,7 @@ class QuoteController extends FController
                                         $price->net = $price->fare + $price->taxes;
                                         $price->mark_up = $paxEntry['markup'];
                                         $price->selling = $price->net + $price->mark_up + $price->extra_mark_up;
-                                        $price->service_fee = ($quote->check_payment)?round($price->selling * Quote::SERVICE_FEE, 2):0;
+                                        $price->service_fee = ($quote->check_payment)?round($price->selling * (new Quote())->serviceFee, 2):0;
                                         $price->selling += $price->service_fee;
 
                                         if(!$price->validate()){
@@ -477,9 +477,8 @@ class QuoteController extends FController
                 $price = new QuotePrice();
             }
             $price->attributes = $item;
+            $price->calculatePrice();
 
-            $price::calculation($price, $quote->check_payment);
-            //$price->toMoney();
             $result[Html::getInputId($price, '[' . $key . ']mark_up')] = $price->mark_up;
             $result[Html::getInputId($price, '[' . $key . ']selling')] = $price->selling;
             $result[Html::getInputId($price, '[' . $key . ']net')] = $price->net;
