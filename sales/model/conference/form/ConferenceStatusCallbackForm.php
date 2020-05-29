@@ -1,0 +1,122 @@
+<?php
+
+namespace sales\model\conference\form;
+
+use yii\base\Model;
+
+/**
+ * Class ConferenceStatusCallbackForm
+ *
+ * @property  $ConferenceSid;
+ * @property  $CallSidToCoach;
+ * @property  $Coaching;
+ * @property  $FriendlyName;
+ * @property  $AccountSid;
+ * @property  $SequenceNumber;
+ * @property  $Timestamp;
+ * @property  $StatusCallbackEvent;
+ * @property  $CallSid;
+ * @property  $Muted;
+ * @property  $Hold;
+ * @property  $EndConferenceOnExit;
+ * @property  $StartConferenceOnEnter;
+ * @property  $CallSidEndingConference;
+ * @property  $ReasonConferenceEnded;
+ * @property  $Reason;
+ *
+ * @property $technical_number
+ * @property $friendly_name
+ */
+class ConferenceStatusCallbackForm extends Model
+{
+    /** Twilio parameters. Camel Case */
+
+    public $ConferenceSid;
+    public $CallSidToCoach;
+    public $Coaching;
+    public $FriendlyName;
+    public $AccountSid;
+    public $SequenceNumber;
+    public $Timestamp;
+    public $StatusCallbackEvent;
+    public $CallSid;
+    public $Muted;
+    public $Hold;
+    public $EndConferenceOnExit;
+    public $StartConferenceOnEnter;
+    public $CallSidEndingConference;
+    public $ReasonConferenceEnded;
+    public $Reason;
+
+    /** Custom parameters. Snake Case */
+
+    /** number for search Api user for send request */
+    public $technical_number;
+    public $friendly_name;
+
+    public function rules(): array
+    {
+        return [
+            ['ConferenceSid', 'required'],
+            ['ConferenceSid', 'string'],
+            ['ConferenceSid', 'filter', 'filter' => static function ($value) {
+                return mb_substr($value, 0, 34);
+            }, 'skipOnEmpty' => true, 'skipOnError' => true],
+
+            ['CallSidToCoach', 'string'],
+
+            ['Coaching', 'default', 'value' => null],
+            ['Coaching', 'filter', 'filter' => [$this, 'filterBool'], 'skipOnEmpty' => true],
+
+            ['FriendlyName', 'required'],
+            ['FriendlyName', 'string'],
+
+            ['AccountSid', 'required'],
+            ['AccountSid', 'string'],
+
+            ['SequenceNumber', 'integer'],
+            ['SequenceNumber', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+
+            ['Timestamp', 'string'],
+
+            ['StatusCallbackEvent', 'string'],
+
+            ['CallSid', 'string'],
+
+            ['Muted', 'default', 'value' => null],
+            ['Muted', 'filter', 'filter' => [$this, 'filterBool'], 'skipOnEmpty' => true],
+
+            ['Hold', 'default', 'value' => null],
+            ['Hold', 'filter', 'filter' => [$this, 'filterBool'], 'skipOnEmpty' => true],
+
+            ['EndConferenceOnExit', 'default', 'value' => null],
+            ['EndConferenceOnExit', 'filter', 'filter' => [$this, 'filterBool'], 'skipOnEmpty' => true],
+
+            ['StartConferenceOnEnter', 'default', 'value' => null],
+            ['StartConferenceOnEnter', 'filter', 'filter' => [$this, 'filterBool'], 'skipOnEmpty' => true],
+
+            ['CallSidEndingConference', 'string'],
+
+            ['ReasonConferenceEnded', 'string'],
+
+            ['Reason', 'string'],
+
+            ['technical_number', 'string'],
+
+            ['friendly_name', 'string'],
+        ];
+    }
+
+    public function filterBool($value): string
+    {
+        if (!$value || $value !== 'true') {
+            return 0;
+        }
+        return 1;
+    }
+
+    public function formName(): string
+    {
+        return '';
+    }
+}

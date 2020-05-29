@@ -29,6 +29,16 @@ use yii\db\ActiveRecord;
  */
 class Conference extends \yii\db\ActiveRecord
 {
+    public const EVENT_CONFERENCE_END = 'conference-end';
+    public const EVENT_CONFERENCE_START = 'conference-start';
+    public const EVENT_PARTICIPANT_LEAVE = 'participant-leave';
+    public const EVENT_PARTICIPANT_JOIN = 'participant-join';
+    public const EVENT_PARTICIPANT_MUTE = 'participant-mute';
+    public const EVENT_PARTICIPANT_UNMUTE = 'participant-unmute';
+    public const EVENT_PARTICIPANT_HOLD = 'participant-hold';
+    public const EVENT_PARTICIPANT_UNHOLD = 'participant-unhold';
+    public const EVENT_PARTICIPANT_SPEECH_START = 'participant-speech-start';
+    public const EVENT_PARTICIPANT_SPEECH_STOP = 'participant-speech-stop';
 
     public const STATUS_START   = 1;
     public const STATUS_DELAY   = 2;
@@ -138,5 +148,20 @@ class Conference extends \yii\db\ActiveRecord
     public static function getList(): array
     {
         return self::STATUS_LIST;
+    }
+
+    public function start(): void
+    {
+        $this->cf_status_id = self::STATUS_START;
+    }
+
+    public function delay(): void
+    {
+        $this->cf_status_id = self::STATUS_DELAY;
+    }
+
+    public function end(): void
+    {
+        $this->cf_status_id = self::STATUS_END;
     }
 }

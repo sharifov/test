@@ -117,4 +117,24 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
     {
         return self::STATUS_LIST;
     }
+
+    public function join(): void
+    {
+        $this->cp_status_id = self::STATUS_JOIN;
+    }
+
+    public function hold(): void
+    {
+        $this->cp_status_id = self::STATUS_HOLD;
+    }
+
+    public function unhold(): void
+    {
+        $this->cp_status_id = self::STATUS_UNHOLD;
+    }
+
+    public function leave(): void
+    {
+        $this->cp_status_id = self::STATUS_LEAVE;
+    }
 }
