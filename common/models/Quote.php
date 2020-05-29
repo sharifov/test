@@ -137,6 +137,7 @@ class Quote extends \yii\db\ActiveRecord
     ];
 
     public float $serviceFee = 0.035;
+    public float $serviceFeePercent = 3.5;
 
     /**
      * Quote constructor.
@@ -146,6 +147,7 @@ class Quote extends \yii\db\ActiveRecord
     {
         if (isset(Yii::$app->params['settings']['quote_service_fee_percent'])) {
             $this->serviceFee = Yii::$app->params['settings']['quote_service_fee_percent'] / 100;
+            $this->serviceFeePercent = Yii::$app->params['settings']['quote_service_fee_percent'];
         }
 
         parent::__construct($config);

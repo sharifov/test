@@ -157,26 +157,26 @@ class QuotePrice extends \yii\db\ActiveRecord
         $this->oldParams = '';
         $this->toFloat();
 
+        $serviceFee = (new Quote())->serviceFee;
+
         if ($this->oldAttributes['selling'] !== $this->selling) {
-            $this->mark_up = $this->selling / (new Quote())->serviceFee - $this->net;
+            $this->mark_up = $this->selling / (1 + $serviceFee) - $this->net; // Selling Price/(1+SERVICE_FEE) - Net Price
 
         } elseif ($this->oldAttributes['fare'] !== $this->fare) {
             $this->net = $this->fare + $this->taxes;
-            $this->selling = ($this->fare + $this->taxes + $this->mark_up);
+            $this->selling = ($this->fare + $this->taxes + $this->mark_up) * (1 + $serviceFee); // Selling Price = (Fare + Taxes + Mark-up)*(1+SERVICE_FEE)
 
         } elseif ($this->oldAttributes['taxes'] !== $this->taxes) {
             $this->net = $this->fare + $this->taxes;
-            $this->selling = ($this->fare + $this->taxes + $this->mark_up);
+            $this->selling = ($this->fare + $this->taxes + $this->mark_up) * (1 + $serviceFee);
 
         } elseif ($this->oldAttributes['mark_up'] !== $this->mark_up) {
-            $this->selling = ($this->fare + $this->taxes + $this->mark_up);
+            $this->selling = ($this->fare + $this->taxes + $this->mark_up) * (1 + $serviceFee);
         } else {
             $this->oldParams = serialize($this->attributes);
             return $this;
         }
 
-        $this->service_fee = $this->selling * (new Quote())->serviceFee;
-        $this->selling += $this->service_fee;
         $this->roundValue(2, true);
         $this->oldParams = serialize($this->attributes);
 
