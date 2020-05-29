@@ -44,7 +44,6 @@ class QuotePrice extends \yii\db\ActiveRecord
     ];
 
     public $oldParams;
-    public $selling, $net, $service_fee;
 
     /**
      * @param array $attributes
