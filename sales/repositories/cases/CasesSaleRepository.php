@@ -93,4 +93,25 @@ class CasesSaleRepository
 	{
 		return @json_decode((string)$caseSale->css_sale_data, true)['projectApiKey'] ?? '';
 	}
+
+	public function getFirstDepartureDtFromItinerary(array $saleData): string
+	{
+		if ($saleData['itinerary']) {
+			foreach ($saleData['itinerary'] as $itinerary) {
+				foreach ($itinerary['segments'] as $segment) {
+					if (!empty($segment['departureTime'])) {
+						return (string)$segment['departureTime'];
+					}
+				}
+			}
+		}
+		return '';
+	}
+
+	public function setPenaltyTypeAndDepartureDt(?int $penaltyTypeId, string $departureDt, CaseSale $caseSale): void
+	{
+		$caseSale->css_penalty_type = $penaltyTypeId;
+		$caseSale->css_departure_dt = $departureDt;
+		$this->save($caseSale);
+	}
 }
