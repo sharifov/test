@@ -3,6 +3,7 @@ namespace common\models;
 
 use Yii;
 use yii\base\Model;
+use yii\helpers\Url;
 use yii\web\IdentityInterface;
 
 /**
@@ -13,6 +14,8 @@ class LoginForm extends Model
     public $username;
     public $password;
     public $rememberMe = false;
+    public $verifyCode;
+    public $captcha;
 
     private $_user;
 
@@ -29,6 +32,8 @@ class LoginForm extends Model
             ['rememberMe', 'boolean'],
             // password is validated by validatePassword()
             ['password', 'validatePassword'],
+            ['verifyCode', 'captcha', 'captchaAction' => Url::to('/site/captcha')],
+            [['verifyCode'], 'safe'],
         ];
     }
 
@@ -56,21 +61,20 @@ class LoginForm extends Model
      */
     public function login()
     {
-        if ($this->validate()) {
-            $user = $this->getUser();
+        $user = $this->getUser();
 
-            if($user) {
-                if (!$this->checkByIp($user)) {
-                    return false;
-                }
-
-                $isLogin = Yii::$app->user->login($user, $this->rememberMe ? 3600 * 24 * 30 : 0);
-                if ($isLogin) {
-                    self::sendWsIdentityCookie(Yii::$app->user->identity, $this->rememberMe ? 3600 * 24 * 30 : 0);
-                }
-                return $isLogin;
+        if($user) {
+            if (!$this->checkByIp($user)) {
+                return false;
             }
+
+            $isLogin = Yii::$app->user->login($user, $this->rememberMe ? 3600 * 24 * 30 : 0);
+            if ($isLogin) {
+                self::sendWsIdentityCookie(Yii::$app->user->identity, $this->rememberMe ? 3600 * 24 * 30 : 0);
+            }
+            return $isLogin;
         }
+
         return false;
     }
 
