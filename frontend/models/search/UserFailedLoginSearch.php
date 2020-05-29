@@ -14,7 +14,7 @@ class UserFailedLoginSearch extends UserFailedLogin
     /**
      * {@inheritdoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['ufl_id', 'ufl_user_id'], 'integer'],

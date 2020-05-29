@@ -30,13 +30,15 @@ use yii\helpers\Url;
                     <?php /*<input type="password" class="form-control" placeholder="Password" required="" />*/ ?>
                 </div>
 
-                <div>
-                    <?= $form->field($model, 'verifyCode')->widget(Captcha::class, [
-                        'captchaAction' => Url::to('/site/captcha'),
-                        'options' => ['autocomplete' => 'off'],
-                        'template' => '<div class="row"><div class="col-lg-4">{image}</div><div class="col-lg-7">{input}</div></div>',
-                    ]) ?>
-                </div>
+                <?php if (Yii::$app->params['settings']['captcha_login_enable']): ?>
+                    <div>
+                        <?= $form->field($model, 'verifyCode')->widget(Captcha::class, [
+                            'captchaAction' => Url::to('/site/captcha'),
+                            'options' => ['autocomplete' => 'off'],
+                            'template' => '<div class="row"><div class="col-lg-4">{image}</div><div class="col-lg-7">{input}</div></div>',
+                        ]) ?>
+                    </div>
+                <?php endif ?>
 
                 <div class="form-group">
                     <div class="text-left"><?= $form->field($model, 'rememberMe')->checkbox() ?></div>

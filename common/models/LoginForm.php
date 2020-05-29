@@ -1,6 +1,7 @@
 <?php
 namespace common\models;
 
+use frontend\models\UserFailedLogin;
 use Yii;
 use yii\base\Model;
 use yii\helpers\Url;
@@ -32,8 +33,9 @@ class LoginForm extends Model
             ['rememberMe', 'boolean'],
             // password is validated by validatePassword()
             ['password', 'validatePassword'],
-            ['verifyCode', 'captcha', 'captchaAction' => Url::to('/site/captcha')],
-            [['verifyCode'], 'safe'],
+            ['verifyCode', 'captcha', 'captchaAction' => Url::to('/site/captcha'), 'when' => function () {
+                return Yii::$app->params['settings']['captcha_login_enable'];
+            }],
         ];
     }
 
@@ -77,8 +79,6 @@ class LoginForm extends Model
 
         return false;
     }
-
-
 
     /**
      * @return Employee|null
@@ -182,5 +182,18 @@ class LoginForm extends Model
         Yii::$app->getResponse()->getCookies()->remove(Yii::createObject(array_merge($identityCookie, [
             'class' => 'yii\web\Cookie',
         ])));
+    }
+
+
+    public function afterValidate()
+    {
+        parent::afterValidate();
+
+        if ($this->hasErrors()) {
+            $userFailedLogin = new UserFailedLogin();
+            //$userFailedLogin->create();
+
+
+        }
     }
 }
