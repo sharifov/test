@@ -854,7 +854,6 @@ class CallController extends FController
 
         $params = Yii::$app->request->queryParams;
         $params['CallSearch']['c_created_user_id'] = Yii::$app->user->id;
-        $params['CallSearch']['c_call_type_id'] = Call::CALL_TYPE_IN;
         // $params['CallSearch']['c_call_status'] = Call::TW_STATUS_NO_ANSWER;
         $params['CallSearch']['c_status_id'] = Call::STATUS_NO_ANSWER;
         $params['CallSearch']['c_call_type_id'] = Call::CALL_TYPE_IN;

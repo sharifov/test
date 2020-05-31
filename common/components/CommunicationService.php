@@ -724,8 +724,8 @@ class CommunicationService extends Component implements CommunicationServiceInte
     {
         $data = [
             'sid' => $sid,
-            'redirect_from' => $from,
-            'redirect_to' => $to,
+            'from' => $from,
+            'to' => $to,
         ];
 
         $response = $this->sendRequest('twilio-conference/forward', $data);
@@ -733,13 +733,12 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $this->processConferenceResponse($response);
     }
 
-    public function acceptConferenceCall($sid, $to, $from, $to_parent_call): array
+    public function acceptConferenceCall($sid, $to, $from): array
     {
         $data = [
             'call_sid' => $sid,
             'to' => $to,
             'from' => $from,
-            'to_parent_call' => $to_parent_call,
         ];
 
         $response = $this->sendRequest('twilio-conference/accept-call', $data);
@@ -784,7 +783,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $this->processConferenceResponse($response);
     }
 
-    public function addCoach(string $callSid, string $conferenceSid, int $projectId, string $from, string $to, string $mode): array
+    public function joinToConference(string $callSid, string $conferenceSid, int $projectId, string $from, string $to, string $source_type_id): array
     {
         $data = [
             'callSid' => $callSid,
@@ -792,10 +791,10 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'projectId' => $projectId,
             'from' => $from,
             'to' => $to,
-            'mode' => $mode,
+            'source_type_id' => $source_type_id,
         ];
 
-        $response = $this->sendRequest('twilio-conference/add-coach', $data);
+        $response = $this->sendRequest('twilio-conference/join-to-conference', $data);
 
         return $this->processConferenceResponse($response);
     }

@@ -68,7 +68,13 @@ class AgentReportController extends FController
         $params = $this->validateDateParams($params);
         $dataProvider = $searchModel->searchCalls($params);
 
-        $title = ($params['AgentActivitySearch']['c_call_type_id'] == Call::CALL_TYPE_OUT) ? 'Outbound calls' : 'Inbound calls';
+        if ($params['AgentActivitySearch']['c_call_type_id'] == Call::CALL_TYPE_OUT) {
+            $title = 'Outbound calls';
+        } elseif ($params['AgentActivitySearch']['c_call_type_id'] == Call::CALL_TYPE_IN) {
+            $title = 'Inbound calls';
+        } elseif ($params['AgentActivitySearch']['c_call_type_id'] == Call::CALL_TYPE_JOIN) {
+            $title = 'Join calls';
+        }
 
         return $this->render('_calls', [
             'title' => $title,

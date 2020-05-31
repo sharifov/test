@@ -96,10 +96,6 @@ class CallQueueJob extends BaseObject implements JobInterface
                     throw new Exception('CallQueueJob: Not found CallId: ' . $this->call_id, 5);
                 }
 
-                if ($call->isCoachType()) {
-                    throw new Exception('CallQueueJob: Call is Coach: ' . $this->call_id, 6);
-                }
-
                 $originalAgentId = $call->c_created_user_id;
 
                 if ($call->isStatusIvr()) {

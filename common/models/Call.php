@@ -168,10 +168,12 @@ class Call extends \yii\db\ActiveRecord
 
     public const CALL_TYPE_OUT  = 1;
     public const CALL_TYPE_IN   = 2;
+    public const CALL_TYPE_JOIN   = 3;
 
-    public const CALL_TYPE_LIST = [
+    public const TYPE_LIST = [
         self::CALL_TYPE_OUT => 'Outgoing',
         self::CALL_TYPE_IN  => 'Incoming',
+        self::CALL_TYPE_JOIN  => 'Join',
     ];
 
 
@@ -181,7 +183,9 @@ class Call extends \yii\db\ActiveRecord
     public const SOURCE_TRANSFER_CALL   = 4;
     public const SOURCE_CONFERENCE_CALL = 5;
     public const SOURCE_REDIAL_CALL     = 6;
-    public const SOURCE_COACH_CALL     = 7;
+    public const SOURCE_LISTEN          = 7;
+    public const SOURCE_COACH           = 8;
+    public const SOURCE_BARGE           = 9;
 
     public const SOURCE_LIST = [
         self::SOURCE_GENERAL_LINE => 'General Line',
@@ -190,7 +194,9 @@ class Call extends \yii\db\ActiveRecord
         self::SOURCE_TRANSFER_CALL  => 'Transfer Call',
         self::SOURCE_CONFERENCE_CALL  => 'Conference Call',
         self::SOURCE_REDIAL_CALL  => 'Redial Call',
-        self::SOURCE_COACH_CALL  => 'Coach Call',
+        self::SOURCE_LISTEN  => 'Listen',
+        self::SOURCE_COACH  => 'Coach',
+        self::SOURCE_BARGE  => 'Barge',
     ];
 
     public const SHORT_SOURCE_LIST = [
@@ -635,12 +641,12 @@ class Call extends \yii\db\ActiveRecord
      */
     public function getCallTypeName()
     {
-        return self::CALL_TYPE_LIST[$this->c_call_type_id] ?? '-';
+        return self::TYPE_LIST[$this->c_call_type_id] ?? '-';
     }
 
     public static function getCallTypeNameById(int $type)
 	{
-		return self::CALL_TYPE_LIST[$type] ?? '-';
+		return self::TYPE_LIST[$type] ?? '-';
 	}
 
     /**
@@ -1265,12 +1271,10 @@ class Call extends \yii\db\ActiveRecord
                         $call->setConferenceType();
                         $call->update();
                     }
-                    $to = 'client:seller' . $user_id;
                     $res = \Yii::$app->communication->acceptConferenceCall(
                         $call->c_call_sid,
-                        $to,
-                        $call->c_from,
-                        $call->c_to
+                        'client:seller' . $user_id,
+                        $call->c_from
                     );
 
                     if ($res) {
@@ -1637,20 +1641,34 @@ class Call extends \yii\db\ActiveRecord
         return $this->c_call_status === self::TW_STATUS_FAILED;
     }
 
-    /**
-     * @return bool
-     */
+    public function setTypeIn(): void
+    {
+        $this->c_call_type_id = self::CALL_TYPE_IN;
+    }
+
     public function isIn(): bool
     {
         return (int) $this->c_call_type_id === self::CALL_TYPE_IN;
     }
 
-    /**
-     * @return bool
-     */
+    public function setTypeOut(): void
+    {
+        $this->c_call_type_id = self::CALL_TYPE_OUT;
+    }
+
     public function isOut(): bool
     {
         return (int) $this->c_call_type_id === self::CALL_TYPE_OUT;
+    }
+
+    public function setTypeJoin(): void
+    {
+        $this->c_call_type_id = self::CALL_TYPE_JOIN;
+    }
+
+    public function isJoin(): bool
+    {
+        return (int) $this->c_call_type_id === self::CALL_TYPE_JOIN;
     }
 
 
@@ -1947,16 +1965,6 @@ class Call extends \yii\db\ActiveRecord
     public function setConferenceType(): void
     {
         $this->c_is_conference = true;
-    }
-
-    public function setCoachType(): void
-    {
-        $this->c_source_type_id = self::SOURCE_COACH_CALL;
-    }
-
-    public function isCoachType(): bool
-    {
-        return $this->c_source_type_id === self::SOURCE_COACH_CALL;
     }
 
     public function getCallerName(string $fromNumber)

@@ -16,7 +16,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'c_call_sid')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'c_call_type_id')->dropDownList(\common\models\Call::CALL_TYPE_LIST) ?>
+    <?= $form->field($model, 'c_call_type_id')->dropDownList(\common\models\Call::TYPE_LIST) ?>
 
     <?= $form->field($model, 'c_from')->textInput(['maxlength' => true]) ?>
 

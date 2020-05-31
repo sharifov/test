@@ -5,6 +5,7 @@
 /* @var $supportGeneralPhones array */
 /* @var $use_browser_call_access bool */
 
+use common\models\Call;
 use yii\helpers\Url;
 use yii\bootstrap4\Modal;
 use yii\helpers\Html;
@@ -23,7 +24,7 @@ use yii\helpers\Html;
             <table class="table" style="margin: 0; background-color: rgba(255,255,255,.3);">
                 <tr>
                     <?php /*<td style="display: none"><i title="<?=$token?>">Token</i></td>*/?>
-                    <td style="width: 100px"><i class="fa fa-user"></i> <span><?=$clientId?></span></td>
+                    <td style="width: 100px"><i class="fa fa-user"></i> <span><?=$clientId?></span> <span style="display:none;" id="join-source-type"></span></td>
                     <td>From: <i class="fa fa-phone"></i> <span id="web-call-from-number"></span></td>
                     <td>To: <i class="fa fa-phone"></i> <span id="web-call-to-number"></span></td>
                     <td style="width: 120px">
@@ -189,7 +190,7 @@ use yii\helpers\Html;
     $ajaxConferenceCompleteUrl = Url::to(['/phone/ajax-conference-complete']);
     $ajaxHoldConferenceDoubleCall = Url::to(['/phone/ajax-hold-conference-double-call']);
     $ajaxUnholdConferenceDoubleCall = Url::to(['/phone/ajax-unhold-conference-double-call']);
-    $ajaxAddCoachUrl = Url::to(['/phone/ajax-add-coach']);
+    $ajaxJoinToConferenceUrl = Url::to(['/phone/ajax-join-to-conference']);
 
     $conferenceBase = 0;
     if (isset(Yii::$app->params['settings']['voip_conference_base'])) {
@@ -213,7 +214,7 @@ use yii\helpers\Html;
     const ajaxHoldConferenceDoubleCall = '<?= $ajaxHoldConferenceDoubleCall ?>';
     const ajaxUnholdConferenceDoubleCall = '<?= $ajaxUnholdConferenceDoubleCall ?>';
     const conferenceBase = parseInt('<?= $conferenceBase ?>');
-    const ajaxAddCoachUrl = '<?= $ajaxAddCoachUrl ?>';
+    const ajaxJoinToConferenceUrl = '<?= $ajaxJoinToConferenceUrl ?>';
 
     const clientId = '<?=$clientId?>';
 
@@ -308,11 +309,12 @@ use yii\helpers\Html;
 
     var webPhoneParams = {};
     var call_acc_sid = '';
-    var isCoachCall = false;
+    var isJoinCall = false;
 
    // "use strict";
 
     var device;
+    var joinConnection = null;
     window.connection;
 
     const speakerDevices = document.getElementsByClassName('speaker-devices');
@@ -331,13 +333,19 @@ use yii\helpers\Html;
     document.getElementById('button-hangup').onclick = function () {
         log('Hanging up...');
         if (device) {
-            if (conferenceBase && !isCoachCall) {
-                updateAgentStatus(connection, false, 1);
-                conferenceComplete();
+            $('#join-source-type').html();
+            $('#join-source-type').hide();
+            if (conferenceBase) {
+                if (isJoinCall) {
+                    updateAgentStatus(joinConnection, false, 1);
+                    joinConnection.disconnect();
+                } else {
+                    updateAgentStatus(connection, false, 1);
+                    conferenceComplete();
+                }
             } else {
                 updateAgentStatus(connection, false, 1);
-                // device.disconnectAll();
-                connection.disconnect();
+                device.disconnectAll();
             }
         } else {
             log('Device is null');
@@ -345,9 +353,8 @@ use yii\helpers\Html;
     };
 
     function conferenceComplete() {
-        $('#button-hangup').prop('disabled', true);
         if (connection && connection.parameters.CallSid) {
-
+            $('#button-hangup').prop('disabled', true);
             if (connection.status() !== 'open') {
                 connection.accept();
             }
@@ -644,23 +651,38 @@ use yii\helpers\Html;
                     //alert(clientId + ' - ' + conn.parameters.From);
                     $('#btn-group-id-hangup').show();
                     $('#btn-mute-microphone').html('<i class="fa fa-microphone"></i> Mute').removeClass('btn-warning').addClass('btn-success');
-                    $('#btn-group-id-mute').show();
                     // $('#btn-hold-double-call').attr('data-call-sid', connection.parameters.CallSid).attr('data-is-hold', false).html('<i class="fa fa-pause"></i> Hold');
                     // $('#btn-group-id-hold-double-call').show();
 
-                    let isCoach = false;
+                    let isJoin = false;
+                    let sourceTypeId = null;
                     conn.customParameters.forEach(function(value, key) {
-                        if (key === 'is_coach' && value == 1) {
-                            isCoach = true;
-                            $('#web-call-from-number').text(conn.parameters.From);
-                            $('#web-call-to-number').text(conn.parameters.To);
+                        if (key === 'type_id' && value == '<?= Call::CALL_TYPE_JOIN ?>') {
+                            isJoin = true;
+                        }
+                        if (key === 'source_type_id') {
+                            sourceTypeId = value;
                         }
                     });
 
-                    if (isCoach) {
-                        isCoachCall = true;
+                    if (isJoin) {
+                        joinConnection = conn;
+                        isJoinCall = true;
+                        if (sourceTypeId == '<?= Call::SOURCE_LISTEN ?>') {
+                            $('#join-source-type').html('Join: ' + 'Listen').show();
+                        } else if (sourceTypeId == '<?= Call::SOURCE_COACH ?>') {
+                            $('#join-source-type').html('Join: ' + 'Coach').show();
+                            $('#btn-group-id-mute').show();
+                        } else if (sourceTypeId == '<?= Call::SOURCE_BARGE ?>') {
+                            $('#join-source-type').html('Join: ' + 'Barge').show();
+                            $('#btn-group-id-mute').show();
+                        }
                     } else {
-                        isCoachCall = false;
+                        joinConnection = null;
+                        $('#web-call-from-number').text(conn.parameters.From);
+                        $('#web-call-to-number').text(conn.parameters.To);
+                        $('#btn-group-id-mute').show();
+                        isJoinCall = false;
                         if (conn.parameters.From === undefined) {
                             $('#btn-group-id-redirect').show();
                         } else {
@@ -687,6 +709,9 @@ use yii\helpers\Html;
                     $('#btn-group-id-hangup').hide();
                     $('#btn-group-id-redirect').hide();
                     $('#btn-group-id-mute').hide();
+
+                    $('#join-source-type').html();
+                    $('#join-source-type').hide();
                     // $('#btn-group-id-hold-double-call').hide();
                     // $('#btn-hold-double-call').attr('data-call-sid', '').attr('data-is-hold', false);
 
@@ -838,39 +863,39 @@ use yii\helpers\Html;
         }
     }
 
-    function coachListen(call_sid) {
-        coachConference('listen', call_sid);
+    function joinListen(call_sid) {
+        joinConference('Listen', '<?= Call::SOURCE_LISTEN ?>', call_sid);
     }
 
-    function coachCoach(call_sid) {
-        coachConference('coach', call_sid);
+    function joinCoach(call_sid) {
+        joinConference('Coach', '<?= Call::SOURCE_COACH ?>', call_sid);
     }
 
-    function coachBarge(call_sid) {
-        coachConference('barge', call_sid);
+    function joinBarge(call_sid) {
+        joinConference('Barge', '<?= Call::SOURCE_BARGE ?>', call_sid);
     }
 
-    function coachConference(mode, call_sid) {
-        let title = mode.charAt(0).toUpperCase() + mode.slice(1);
+    function joinConference(source_type, source_type_id, call_sid) {
+        new PNotify({title: source_type, type: "success", text: 'Request', hide: true});
         $.ajax({
             type: 'post',
             data: {
                 '<?= $csrf_param ?>' : '<?= $csrf_token ?>',
                 'call_sid': call_sid,
-                'mode': mode
+                'source_type_id': source_type_id
             },
-            url: ajaxAddCoachUrl
+            url: ajaxJoinToConferenceUrl
         })
         .done(function (data) {
             if (data.error) {
-                new PNotify({title: title, type: "error", text: data.message, hide: true});
+                new PNotify({title: source_type, type: "error", text: data.message, hide: true});
             } else {
-                new PNotify({title: title, type: "success", text: 'Success', hide: true});
+                new PNotify({title: source_type, type: "success", text: 'Success', hide: true});
             }
         })
         .fail(function (error) {
             if (error) {
-                new PNotify({title: title, type: "error", text: error, hide: true});
+                new PNotify({title: source_type, type: "error", text: error, hide: true});
                 console.error(error);
             }
         })

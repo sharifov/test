@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\model\conference\form;
+namespace sales\model\conference\useCase\statusCallBackEvent;
 
 use yii\base\Model;
 
@@ -29,6 +29,19 @@ use yii\base\Model;
  */
 class ConferenceStatusCallbackForm extends Model
 {
+    public const STATUS_CALL_BACK_EVENTS = [
+        'conference-end',
+        'conference-start',
+        'participant-leave',
+        'participant-join',
+        'participant-mute',
+        'participant-unmute',
+        'participant-hold',
+        'participant-unhold',
+        'participant-speech-start',
+        'participant-speech-stop'
+    ];
+
     /** Twilio parameters. Camel Case */
 
     public $ConferenceSid;
@@ -80,6 +93,7 @@ class ConferenceStatusCallbackForm extends Model
             ['Timestamp', 'string'],
 
             ['StatusCallbackEvent', 'string'],
+            ['StatusCallbackEvent', 'in', 'range' => self::STATUS_CALL_BACK_EVENTS],
 
             ['CallSid', 'string'],
 

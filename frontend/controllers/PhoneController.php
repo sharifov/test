@@ -216,7 +216,7 @@ class PhoneController extends FController
                 $call->c_to = $call_to;
                 $call->c_created_dt = date('Y-m-d H:i:s');
                 $call->c_created_user_id = Yii::$app->user->id;
-                $call->c_call_type_id = Call::CALL_TYPE_OUT;
+                $call->setTypeOut();
 
                 // $call->c_call_status = Call::CALL_STATUS_RINGING;
 
@@ -427,8 +427,17 @@ class PhoneController extends FController
 
 //            Yii::error(VarDumper::dumpAsString([$sid, $type, $from, $to, $firstTransferToNumber]));
 
-            if ($originalCall->isConference() && $originalCall->cParent) {
-                $sid = $originalCall->cParent->c_call_sid;
+            if ($originalCall->isConference()) {
+
+                if ($originalCall->cParent) {
+                    $sid = $originalCall->cParent->c_call_sid;
+                } else {
+                    if (!$firstChild = Call::find()->firstChild($originalCall->c_id)->one()) {
+                        throw new Exception('API Error: PhoneController/actionAjaxCallRedirect: Not found first child conference call ', 10);
+                    }
+                    $sid = $firstChild->c_call_sid;
+                }
+
                 $resultApi = $communication->callForward($sid, $from, $to);
                 if ($resultApi && isset($resultApi['result']['sid'])) {
                     $result = [
@@ -439,6 +448,7 @@ class PhoneController extends FController
                 } else {
                     throw new Exception('API Error: PhoneController/actionAjaxCallRedirect: Not found resultApi[result][sid] - ' . VarDumper::dumpAsString($resultApi), 10);
                 }
+
             } else {
                 $resultApi = $communication->callRedirect($sid, $type, $from, $to, $firstTransferToNumber);
                 if ($resultApi && isset($resultApi['data']['result']['sid'])) {
@@ -875,31 +885,31 @@ class PhoneController extends FController
         return $this->asJson($result);
     }
 
-    public function actionAjaxAddCoach(): Response
+    public function actionAjaxJoinToConference(): Response
     {
         try {
             $call_sid = (string)Yii::$app->request->post('call_sid');
-            $mode = (string)Yii::$app->request->post('mode');
+            $source_type_id = (string)Yii::$app->request->post('source_type_id');
 
-            $call = $this->getCoachCall($call_sid);
+            $call = $this->getJoinCall($call_sid);
 
-            $diff = time() - (int)(Yii::$app->session->get('add-coach', 0));
+            $diff = time() - (int)(Yii::$app->session->get('conference-call-join', 0));
             /** 15 sec diff between requests */
             if ($diff < 15) {
                 throw new \Exception('Please wait ' . (15 - $diff) . ' seconds.');
             }
 
-            $parentCallTo = $call->cParent->c_to ?? $call->c_from;
+            $from = $call->cParent->c_to ?? $call->c_from;
 
-            $result = Yii::$app->communication->addCoach(
+            $result = Yii::$app->communication->joinToConference(
                 $call->c_call_sid,
                 $call->c_conference_sid,
                 $call->c_project_id,
-                $parentCallTo,
+                $from,
                 'client:seller' . Auth::id(),
-                $mode
+                $source_type_id
             );
-            Yii::$app->session->set('add-coach', time());
+            Yii::$app->session->set('conference-call-join', time());
         } catch (\Throwable $e) {
             $result = [
                 'error' => true,
@@ -909,7 +919,7 @@ class PhoneController extends FController
         return $this->asJson($result);
     }
 
-    private function getCoachCall(string $sid): Call
+    private function getJoinCall(string $sid): Call
     {
         if (!$sid) {
             throw new BadRequestHttpException('Not found Call SID in request', 1);
@@ -927,6 +937,8 @@ class PhoneController extends FController
             if (!($call->isStatusRinging() && $call->isGeneralParent())) {
                 throw new BadRequestHttpException('Selected is not correct Call', 4);
             }
+        } else {
+            throw new BadRequestHttpException('Selected is not correct Call', 4);
         }
 
         if (!$call->isConference()) {
@@ -938,12 +950,12 @@ class PhoneController extends FController
         }
 
         if (Call::find()->andWhere([
+//            'c_call_type_id' => Call::CALL_TYPE_JOIN,
             'c_created_user_id' => Auth::id(),
-            'c_parent_call_sid' => $call->c_call_sid,
-            'c_source_type_id' => Call::SOURCE_COACH_CALL,
             'c_status_id' => Call::STATUS_IN_PROGRESS,
+//            'c_source_type_id' => [Call::SOURCE_LISTEN, Call::SOURCE_COACH, Call::SOURCE_BARGE]
         ])->limit(1)->one()) {
-            throw new BadRequestHttpException('Already exist active one of coach call', 7);
+            throw new BadRequestHttpException('Already exist active call', 7);
         }
 
         return $call;

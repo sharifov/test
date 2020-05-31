@@ -4,7 +4,6 @@ namespace sales\model\conference\useCase\statusCallBackEvent;
 
 use common\models\Conference;
 use common\models\ConferenceParticipant;
-use sales\model\conference\form\ConferenceStatusCallbackForm;
 use Yii;
 use yii\helpers\VarDumper;
 

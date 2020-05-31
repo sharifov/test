@@ -361,7 +361,7 @@ class TwilioController extends ApiBaseNoAuthController
                 } else {
                     $call->c_source_type_id = Call::SOURCE_TRANSFER_CALL;
                 }
-                $call->c_call_type_id = Call::CALL_TYPE_IN;
+                $call->setTypeIn();
             }
 
             // Yii::info(VarDumper::dumpAsString($callData), 'info\API:Twilio:RedirectCall:callData');
@@ -1198,9 +1198,9 @@ class TwilioController extends ApiBaseNoAuthController
 			} else {
 
 				if (strpos($call->c_from, 'client:') !== false) {
-					$call->c_call_type_id = Call::CALL_TYPE_OUT;
+					$call->setTypeOut();
 				} else {
-					$call->c_call_type_id = Call::CALL_TYPE_IN;
+					$call->setTypeIn();
 				}
 			}
 

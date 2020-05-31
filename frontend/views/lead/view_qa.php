@@ -138,7 +138,8 @@ if($is_admin || $is_supervision) {
                         'comForm'       => $comForm,
                         'leadId'        => $lead->id,
                         'dataProvider'  => $dataProviderCommunication,
-                        'isAdmin'       => $is_admin
+                        'isAdmin'       => $is_admin,
+                        'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_lead'],
                     ]);
                     ?>
                 <?php else: ?>

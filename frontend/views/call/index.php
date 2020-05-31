@@ -37,7 +37,7 @@ $user = Yii::$app->user->identity;
         'filterModel' => $searchModel,
         //'tableOptions' => ['class' => 'table table-bordered table-condensed table-hover'],
         'rowOptions' => function (\common\models\Call $model, $index, $widget, $grid) {
-            if ((int) $model->c_call_type_id === \common\models\Call::CALL_TYPE_OUT) {
+            if ($model->isOut()) {
                 if ($model->isStatusBusy() || $model->isStatusNoAnswer()) {
                     return ['class' => 'danger'];
                 } elseif ($model->isStatusRinging() || $model->isStatusQueue()) {
@@ -75,7 +75,7 @@ $user = Yii::$app->user->identity;
                     },
 
                     'join' => static function (Call $model, $key, $index) use ($user) {
-                        return ((bool)(Yii::$app->params['settings']['voip_conference_base'] ?? false) && Auth::can('/phone/ajax-add-coach'));
+                        return ((bool)(Yii::$app->params['settings']['voip_conference_base'] ?? false) && Auth::can('/phone/ajax-join-to-conference'));
                     },
                 ],
                 'buttons' => [
@@ -97,9 +97,9 @@ $user = Yii::$app->user->identity;
                                 <i class="fa fa-rss"></i>
                               </button>
                               <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <a class="dropdown-item conference-coach" href="#" onclick="coachListen(\'' . $model->c_call_sid . '\');">Listen</a>
-                                <a class="dropdown-item conference-coach" href="#" onclick="coachCoach(\'' . $model->c_call_sid . '\');">Coach</a>
-                                <a class="dropdown-item conference-coach" href="#" onclick="coachBarge(\'' . $model->c_call_sid . '\');">Barge</a>
+                                <a class="dropdown-item conference-coach" href="#" onclick="joinListen(\'' . $model->c_call_sid . '\');">Listen</a>
+                                <a class="dropdown-item conference-coach" href="#" onclick="joinCoach(\'' . $model->c_call_sid . '\');">Coach</a>
+                                <a class="dropdown-item conference-coach" href="#" onclick="joinBarge(\'' . $model->c_call_sid . '\');">Barge</a>
                               </div>
                             </div>';
                     }
@@ -221,7 +221,7 @@ $user = Yii::$app->user->identity;
                 'value' => static function (\common\models\Call $model) {
                     return $model->getCallTypeName();
                 },
-                'filter' => \common\models\Call::CALL_TYPE_LIST
+                'filter' => \common\models\Call::TYPE_LIST
             ],
 
             [
