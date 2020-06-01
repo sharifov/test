@@ -88,13 +88,13 @@ class Pricing implements ParseDumpInterface
     private function typeMapping(?string $source): string
     {
         switch ($source) {
-            case 'ADT': case 'JCB': case 'PFA': case 'ITX': case 'WEB':
+            case 'ADT': case 'JCB': case 'PFA': case 'ITX': case 'JWZ': case 'WEB':
                 $result = 'ADT';
                 break;
-            case 'CNN': case 'JNN': case 'PNN': case 'INN':
+            case 'CNN': case 'JNN':case 'CBC': case 'INN': case 'PNN': case 'JWC':
                 $result = 'CHD';
                 break;
-            case 'INF': case 'JNF': case 'PNF': case 'ITF':
+            case 'INF': case 'INS': case 'JNS':case 'CBI': case 'JNF': case 'PNF': case 'ITF': case 'ITS':
                 $result = 'INF';
                 break;
             default:
