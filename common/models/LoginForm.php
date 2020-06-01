@@ -2,6 +2,7 @@
 namespace common\models;
 
 use frontend\models\UserFailedLogin;
+use sales\services\authentication\antiBruteForceService;
 use Yii;
 use yii\base\Model;
 use yii\helpers\Url;
@@ -112,37 +113,13 @@ class LoginForm extends Model
     private function checkByIp($user): bool
     {
         if($user->acl_rules_activated) {
-            $clientIP = $this->getClientIPAddress();
+            $clientIP = antiBruteForceService::getClientIPAddress();
             if ($clientIP === 'UNKNOWN' ||  (!GlobalAcl::isActiveIPRule($clientIP) && !EmployeeAcl::isActiveIPRule($clientIP, $user->id))) {
                 $this->addError('username', sprintf('Remote Address %s Denied! Please, contact your Supervision or Administrator.', $clientIP));
                 return false;
             }
         }
         return true;
-    }
-
-
-    /**
-     * @return string
-     */
-    private function getClientIPAddress()
-    {
-        if (isset($_SERVER['HTTP_CLIENT_IP']))
-            $ipAddress = $_SERVER['HTTP_CLIENT_IP'];
-        else if (isset($_SERVER['HTTP_X_FORWARDED_FOR']))
-            $ipAddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
-        else if (isset($_SERVER['HTTP_X_FORWARDED']))
-            $ipAddress = $_SERVER['HTTP_X_FORWARDED'];
-        else if (isset($_SERVER['HTTP_FORWARDED_FOR']))
-            $ipAddress = $_SERVER['HTTP_FORWARDED_FOR'];
-        else if (isset($_SERVER['HTTP_FORWARDED']))
-            $ipAddress = $_SERVER['HTTP_FORWARDED'];
-        else if (isset($_SERVER['REMOTE_ADDR']))
-            $ipAddress = $_SERVER['REMOTE_ADDR'];
-        else
-            $ipAddress = 'UNKNOWN';
-
-        return $ipAddress;
     }
 
     /**
@@ -198,7 +175,7 @@ class LoginForm extends Model
     {
         $settings = Yii::$app->params['settings'];
         if ($settings['captcha_login_enable']) {
-            $failedLoginCount = UserFailedLogin::getCountActiveByIp($this->getClientIPAddress());
+            $failedLoginCount = UserFailedLogin::getCountActiveByIp(antiBruteForceService::getClientIPAddress());
             if ($settings['captcha_login_attempts'] === 0 || $failedLoginCount >= $settings['captcha_login_attempts']) {
                 return true;
             }
@@ -213,7 +190,7 @@ class LoginForm extends Model
                 $this->username,
                $this->_user ? $this->_user->id : null,
                 Yii::$app->request->getUserAgent(),
-                $this->getClientIPAddress(),
+                antiBruteForceService::getClientIPAddress(),
                 Yii::$app->session->id
             );
             if (!$userFailedLogin->save()) {

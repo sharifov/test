@@ -11,11 +11,11 @@ use yii\helpers\Inflector;
  */
 class m200529_073740_add_captcha_setting extends Migration
 {
-    public $route = [
+    public array $route = [
         '/user-failed-login/*',
     ];
 
-    public $roles = [
+    public array $roles = [
         Employee::ROLE_SUPER_ADMIN,
         Employee::ROLE_ADMIN,
     ];
