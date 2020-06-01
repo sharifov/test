@@ -56,7 +56,7 @@ class Pricing implements ParseDumpInterface
             $pricePattern = '/
                 ^(\d{1,2})\- # count pas
                 \w|\s+USD(\d+.\d+) # fare
-                \s+(\d+.\d+)[A-Z]{1,3} # taxes
+                \s+((\d+.\d+)[A-Z]{1,3})? # taxes
                 \s+USD(\d+.\d+)([A-Z]{3}) # amount + type                         
                 /x';
 
@@ -69,10 +69,10 @@ class Pricing implements ParseDumpInterface
                 if (isset($matches[1], $matchesCount[1])) {
 
                     for ($i = 0; $i < (int) $matchesCount[1]; $i++) {
-                        $type = $matches[5] ?? null;
+                        $type = $matches[6] ?? null;
                         $result[$j]['type'] = $this->typeMapping($type);
                         $result[$j]['fare'] = $matches[2] ?? null;
-                        $result[$j]['taxes'] = $matches[3] ?? null;
+                        $result[$j]['taxes'] = !empty($matches[4]) ? $matches[4] : '0.00';
                         $j ++;
                     }
                 }
