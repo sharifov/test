@@ -91,7 +91,7 @@ class Pricing implements ParseDumpInterface
             case 'ADT': case 'JCB': case 'PFA': case 'ITX': case 'JWZ': case 'WEB':
                 $result = 'ADT';
                 break;
-            case 'CNN': case 'JNN':case 'CBC': case 'INN': case 'PNN': case 'JWC':
+            case 'CNN': case 'JNN':case 'CBC': case 'INN': case 'PNN': case 'JWC': case 'UNN':
                 $result = 'CHD';
                 break;
             case 'INF': case 'INS': case 'JNS':case 'CBI': case 'JNF': case 'PNF': case 'ITF': case 'ITS':
