@@ -40,6 +40,7 @@ use DateInterval;
 use DatePeriod;
 use DateTime;
 use frontend\models\form\CreditCardForm;
+use frontend\models\UserFailedLogin;
 use frontend\widgets\lead\editTool\Form;
 use frontend\widgets\newWebPhone\sms\socket\Message;
 use frontend\widgets\notification\NotificationMessage;
@@ -1249,5 +1250,12 @@ class TestController extends FController
 		$service = Yii::createObject(CasesSaleService::class);
 		echo '<pre>';
 		print_r($service->sendAddedCreditCardToBO($saleOriginalData['projectApiKey'], $bookId, $saleId, $card));
+	}
+
+	public function actionZ()
+	{
+        $xxx = UserFailedLogin::getLastAttempts(501);
+        \yii\helpers\VarDumper::dump($xxx, 10, true); exit();
+        /* FOR DEBUG:: must by remove */
 	}
 }

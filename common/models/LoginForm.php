@@ -33,12 +33,26 @@ class LoginForm extends Model
             [['username', 'password'], 'required'],
             // rememberMe must be a boolean value
             ['rememberMe', 'boolean'],
-            // password is validated by validatePassword()
+            ['username', 'checkIsBlocked'],
             ['password', 'validatePassword'],
             ['verifyCode', 'captcha', 'captchaAction' => Url::to('/site/captcha'), 'when' => static function () {
                 return (new antiBruteForceService())->checkCaptchaEnable();
             }],
         ];
+    }
+
+    /**
+     * @param $attribute
+     * @param $params
+     */
+    public function checkIsBlocked($attribute): void
+    {
+        if (!$this->hasErrors()) {
+            $userBlocked = Employee::findByUsername($this->username, Employee::STATUS_BLOCKED);
+            if ($userBlocked) {
+                $this->addError($attribute, 'The user is blocked.');
+            }
+        }
     }
 
     /**
@@ -179,11 +193,13 @@ class LoginForm extends Model
                 Yii::$app->session->id
             );
             if (!$userFailedLogin->save()) {
-                \Yii::error(VarDumper::dumpAsString($userFailedLogin->getErrors(), 10, true),
+                \Yii::error(VarDumper::dumpAsString($userFailedLogin->getErrors(), 10),
                 'LoginForm:afterValidate:saveFailed');
             }
 
-
+            if ($this->_user) {
+                (new antiBruteForceService())->checkAttempts($this->_user);
+            }
             
 
         }

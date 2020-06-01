@@ -770,11 +770,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * Finds user by username
      *
      * @param string $username
+     * @param int $status
      * @return static|null
      */
-    public static function findByUsername($username)
+    public static function findByUsername(string $username, int $status = self::STATUS_ACTIVE): ?Employee
     {
-        return static::findOne(['username' => $username, 'status' => self::STATUS_ACTIVE]);
+        return static::findOne(['username' => $username, 'status' => $status]);
     }
 
     /**

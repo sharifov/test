@@ -145,5 +145,26 @@ class UserFailedLogin extends ActiveRecord
         return self::find()->where(['ufl_ip' => $ip, 'ufl_active' => true])->count();
     }
 
+    /**
+     * @param int $userId
+     * @return int|null
+     */
+    public static function getCountActiveByUserId(int $userId): ?int
+    {
+        return self::find()->where(['ufl_user_id' => $userId, 'ufl_active' => true])->count();
+    }
 
+    /**
+     * @param int $userId
+     * @param int $limit
+     * @return array|UserFailedLogin[]
+     */
+    public static function getLastAttempts(int $userId, int $limit = 3): array
+    {
+        return self::find()
+            ->where(['ufl_user_id' => $userId, 'ufl_active' => true])
+            ->orderBy(['ufl_id' => SORT_DESC])
+            ->limit($limit)
+            ->all();
+    }
 }
