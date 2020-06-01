@@ -18,6 +18,7 @@ class UserFailedLoginSearch extends UserFailedLogin
     {
         return [
             [['ufl_id', 'ufl_user_id'], 'integer'],
+            [['ufl_active'], 'boolean'],
             [['ufl_username', 'ufl_ua', 'ufl_ip', 'ufl_session_id', 'ufl_created_dt'], 'safe'],
         ];
     }

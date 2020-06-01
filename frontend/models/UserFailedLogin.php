@@ -4,6 +4,8 @@ namespace frontend\models;
 
 use common\models\Employee;
 use common\models\query\EmployeeQuery;
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "user_failed_login".
@@ -15,12 +17,12 @@ use common\models\query\EmployeeQuery;
  * @property string|null $ufl_ip
  * @property string|null $ufl_session_id
  * @property string|null $ufl_created_dt
+ * @property bool $ufl_active
  *
  * @property Employee $user
  */
-class UserFailedLogin extends \yii\db\ActiveRecord
+class UserFailedLogin extends ActiveRecord
 {
-
     /**
      * @return string
      */
@@ -35,6 +37,7 @@ class UserFailedLogin extends \yii\db\ActiveRecord
     public function rules(): array
     {
         return [
+            [['ufl_ip', 'ufl_active'], 'required'],
             [['ufl_user_id'], 'integer'],
             [['ufl_created_dt'], 'safe'],
             [['ufl_username'], 'string', 'max' => 150],
@@ -42,6 +45,7 @@ class UserFailedLogin extends \yii\db\ActiveRecord
             [['ufl_ip'], 'string', 'max' => 40],
             [['ufl_session_id'], 'string', 'max' => 100],
             [['ufl_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ufl_user_id' => 'id']],
+            ['ufl_active', 'boolean'],
         ];
     }
 
@@ -59,31 +63,24 @@ class UserFailedLogin extends \yii\db\ActiveRecord
             'ufl_ip' => 'Ip',
             'ufl_session_id' => 'Session ID',
             'ufl_created_dt' => 'Created',
+            'ufl_active' => 'Active',
         ];
     }
 
-    /**
-     * @param string $username
-     * @param int|null $userId
-     * @param string|null $userAgent
-     * @param string $ip
-     * @param string|null $sessionId
-     * @return static
+     /**
+     * @return array
      */
-    public function create(
-        string $username,
-        ?int $userId,
-        ?string $userAgent,
-        string $ip,
-        ?string $sessionId
-    ): self {
-        $model = new static();
-        $model->ufl_username = $username;
-        $model->ufl_user_id = $userId;
-        $model->ufl_ua = $userAgent;
-        $model->ufl_ip = $ip;
-        $model->ufl_session_id = $sessionId;
-        return $model;
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['ufl_created_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s')
+            ],
+        ];
     }
 
     /**
@@ -102,4 +99,51 @@ class UserFailedLogin extends \yii\db\ActiveRecord
     {
         return new UserFailedLoginQuery(get_called_class());
     }
+
+    /**
+     * @param string $username
+     * @param int|null $userId
+     * @param string|null $userAgent
+     * @param string $ip
+     * @param string|null $sessionId
+     * @param bool $active
+     * @return static
+     */
+    public static function create(
+        string $username,
+        ?int $userId,
+        ?string $userAgent,
+        string $ip,
+        ?string $sessionId,
+        bool $active = true
+    ): self {
+        $model = new static();
+        $model->ufl_username = $username;
+        $model->ufl_user_id = $userId;
+        $model->ufl_ua = $userAgent;
+        $model->ufl_ip = $ip;
+        $model->ufl_session_id = $sessionId;
+        $model->ufl_active = $active;
+        return $model;
+    }
+
+    /**
+     * @param string $ip
+     * @return array|UserFailedLogin[]
+     */
+    public static function getActiveByIp(string $ip): array
+    {
+        return self::find()->where(['ufl_ip' => $ip, 'ufl_active' => true])->all();
+    }
+
+    /**
+     * @param string $ip
+     * @return int|null
+     */
+    public static function getCountActiveByIp(string $ip): ?int
+    {
+        return self::find()->where(['ufl_ip' => $ip, 'ufl_active' => true])->count();
+    }
+
+
 }

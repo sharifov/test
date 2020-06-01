@@ -34,6 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'ufl_user_id',
             'ufl_ua',
             'ufl_ip',
+            'ufl_active:booleanByLabel',
             'ufl_session_id',
             'ufl_created_dt',
         ],

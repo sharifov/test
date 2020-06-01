@@ -19,7 +19,7 @@ class LoginForm extends Model
     public $captcha;
 
     private $_user;
-
+    private bool $userChecked = false;
 
     /**
      * {@inheritdoc}
@@ -34,7 +34,7 @@ class LoginForm extends Model
             // password is validated by validatePassword()
             ['password', 'validatePassword'],
             ['verifyCode', 'captcha', 'captchaAction' => Url::to('/site/captcha'), 'when' => function () {
-                return Yii::$app->params['settings']['captcha_login_enable'];
+                return $this->checkCaptchaEnable();
             }],
         ];
     }
@@ -63,6 +63,12 @@ class LoginForm extends Model
      */
     public function login()
     {
+        if ($this->userChecked === false) {
+            if (!$this->validate()) {
+                return false;
+            }
+        }
+
         $user = $this->getUser();
 
         if($user) {
@@ -76,7 +82,6 @@ class LoginForm extends Model
             }
             return $isLogin;
         }
-
         return false;
     }
 
@@ -92,6 +97,7 @@ class LoginForm extends Model
                 if (!$this->checkByIp($user)) {
                     return null;
                 }
+                $this->userChecked = true;
                 return $user;
             }
         }
@@ -184,16 +190,37 @@ class LoginForm extends Model
         ])));
     }
 
-
-    public function afterValidate()
+    /**
+     * @return bool
+     */
+    public function checkCaptchaEnable(): bool
     {
-        parent::afterValidate();
+        $settings = Yii::$app->params['settings'];
+        if ($settings['captcha_login_enable']) {
+            $failedLoginCount = UserFailedLogin::getCountActiveByIp($this->getClientIPAddress());
+            if ($settings['captcha_login_attempts'] === 0 || $failedLoginCount >= $settings['captcha_login_attempts']) {
+                return true;
+            }
+        }
+        return false;
+    }
 
+    public function afterValidate(): void
+    {
         if ($this->hasErrors()) {
-            $userFailedLogin = new UserFailedLogin();
-            //$userFailedLogin->create();
-
+            $userFailedLogin = UserFailedLogin::create(
+                $this->username,
+               $this->_user ? $this->_user->id : null,
+                Yii::$app->request->getUserAgent(),
+                $this->getClientIPAddress(),
+                Yii::$app->session->id
+            );
+            if (!$userFailedLogin->save()) {
+                \Yii::error(\yii\helpers\VarDumper::dumpAsString($userFailedLogin->getErrors(), 10, true),
+                'LoginForm:afterValidate:saveFailed');
+            }
 
         }
+        parent::afterValidate();
     }
 }

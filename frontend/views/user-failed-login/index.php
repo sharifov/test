@@ -1,11 +1,12 @@
 <?php
 
+use yii\grid\ActionColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 
-/* @var $this yii\web\View */
-/* @var $searchModel frontend\models\search\UserFailedLoginSearch */
-/* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var yii\web\View $this */
+/* @var frontend\models\search\UserFailedLoginSearch $searchModel */
+/* @var yii\data\ActiveDataProvider $dataProvider */
 
 $this->title = 'User Failed Logins';
 $this->params['breadcrumbs'][] = $this->title;
@@ -28,13 +29,13 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'ufl_id',
             'ufl_username',
-            'ufl_user_id',
+            'ufl_user_id:userName',
             'ufl_ua',
             'ufl_ip',
-            //'ufl_session_id',
-            //'ufl_created_dt',
-
-            ['class' => 'yii\grid\ActionColumn'],
+            'ufl_active:booleanByLabel',
+            'ufl_session_id',
+            'ufl_created_dt:byUserDateTime',
+            ['class' => ActionColumn::class],
         ],
     ]); ?>
 

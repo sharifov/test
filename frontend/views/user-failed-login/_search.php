@@ -25,6 +25,8 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'ufl_ip') ?>
 
+    <?= $form->field($model, 'ufl_active')->dropDownList([1 => 'Yes', 0 => 'No'], ['prompt' => '-']) ?>
+
     <?php // echo $form->field($model, 'ufl_session_id') ?>
 
     <?php // echo $form->field($model, 'ufl_created_dt') ?>
