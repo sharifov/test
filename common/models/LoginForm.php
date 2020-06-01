@@ -35,8 +35,8 @@ class LoginForm extends Model
             ['rememberMe', 'boolean'],
             // password is validated by validatePassword()
             ['password', 'validatePassword'],
-            ['verifyCode', 'captcha', 'captchaAction' => Url::to('/site/captcha'), 'when' => function () {
-                return $this->checkCaptchaEnable();
+            ['verifyCode', 'captcha', 'captchaAction' => Url::to('/site/captcha'), 'when' => static function () {
+                return (new antiBruteForceService())->checkCaptchaEnable();
             }],
         ];
     }
@@ -166,21 +166,6 @@ class LoginForm extends Model
         Yii::$app->getResponse()->getCookies()->remove(Yii::createObject(array_merge($identityCookie, [
             'class' => 'yii\web\Cookie',
         ])));
-    }
-
-    /**
-     * @return bool
-     */
-    public function checkCaptchaEnable(): bool
-    {
-        $settings = Yii::$app->params['settings'];
-        if ($settings['captcha_login_enable']) {
-            $failedLoginCount = UserFailedLogin::getCountActiveByIp(antiBruteForceService::getClientIPAddress());
-            if ($settings['captcha_login_attempts'] === 0 || $failedLoginCount >= $settings['captcha_login_attempts']) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public function afterValidate(): void
