@@ -1068,6 +1068,8 @@
         align-items: center;
         justify-content: center;
         box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1); }
+      .phone-widget .call-pane__info:hover, .phone-widget .call-pane__info:active, .phone-widget .call-pane__info:focus, .phone-widget .call-pane__info:active:hover, .phone-widget .call-pane__info:hover:focus {
+        box-shadow: 0px 3px 3px rgba(0, 0, 0, 0.15); }
     .phone-widget .call-pane__correction {
       display: flex;
       border: 0 none;
