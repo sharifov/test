@@ -36,7 +36,7 @@ class EmailSearch extends Email
         return [
             [['datetime_start', 'datetime_end'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
-            [['e_id', 'e_reply_id', 'e_lead_id', 'e_project_id', 'e_type_id', 'e_template_type_id', 'e_communication_id', 'e_is_deleted', 'e_is_new', 'e_delay', 'e_priority', 'e_status_id', 'e_created_user_id', 'e_updated_user_id', 'e_inbox_email_id', 'email_type_id', 'supervision_id', 'e_case_id'], 'integer'],
+            [['e_id', 'e_reply_id', 'e_lead_id', 'e_project_id', 'e_type_id', 'e_template_type_id', 'e_communication_id', 'e_is_deleted', 'e_is_new', 'e_delay', 'e_priority', 'e_status_id', 'e_created_user_id', 'e_updated_user_id', 'e_inbox_email_id', 'email_type_id', 'supervision_id', 'e_case_id', 'e_client_id'], 'integer'],
 			[['e_template_type_name'], 'string'],
             [['e_email_from', 'e_email_to', 'e_email_cc', 'e_email_bc', 'e_email_subject', 'e_email_body_text', 'e_attach', 'e_email_data', 'e_language_id', 'e_status_done_dt', 'e_read_dt', 'e_error_message', 'e_created_dt', 'e_updated_dt', 'e_message_id', 'e_ref_message_id', 'e_inbox_created_dt'], 'safe'],
         ];
@@ -75,7 +75,8 @@ class EmailSearch extends Email
 			'e_communication_id',
 			'e_status_id',
 			'e_created_user_id',
-			'e_created_dt'
+			'e_created_dt',
+			'e_client_id'
 		]);
 
         // add conditions that should always apply here
@@ -136,6 +137,7 @@ class EmailSearch extends Email
             'e_email_from' => $this->e_email_from,
             'e_email_to' => $this->e_email_to,
             'e_language_id' => $this->e_language_id,
+			'e_client_id' => $this->e_client_id,
         ]);
 
         if ($this->e_template_type_name) {

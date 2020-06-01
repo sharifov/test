@@ -168,6 +168,8 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                         $email->e_ref_message_id = $mail['ei_ref_mess_ids'];
                         $email->e_message_id = $mail['ei_message_id'];
 
+                        $email->e_client_id = $this->emailService->detectClientId($email);
+
                         $lead_id = $this->emailService->detectLeadId($email);
                         $case_id = $this->emailService->detectCaseId($email);
 
