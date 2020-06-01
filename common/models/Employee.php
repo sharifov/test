@@ -100,6 +100,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
     public const STATUS_DELETED = 0;
     public const STATUS_ACTIVE = 10;
+    public const STATUS_BLOCKED = 20;
 
     public const PROFIT_BONUSES = [
         11000 => 500,
@@ -470,6 +471,23 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function isActive()
     {
         return $this->status === self::STATUS_ACTIVE;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isBlocked(): bool
+    {
+        return $this->status === self::STATUS_BLOCKED;
+    }
+
+    /**
+     * @return $this
+     */
+    public function setBlocked(): Employee
+    {
+        $this->status = self::STATUS_BLOCKED;
+        return $this;
     }
 
     /**

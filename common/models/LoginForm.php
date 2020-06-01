@@ -5,6 +5,7 @@ use frontend\models\UserFailedLogin;
 use Yii;
 use yii\base\Model;
 use yii\helpers\Url;
+use yii\helpers\VarDumper;
 use yii\web\IdentityInterface;
 
 /**
@@ -216,9 +217,10 @@ class LoginForm extends Model
                 Yii::$app->session->id
             );
             if (!$userFailedLogin->save()) {
-                \Yii::error(\yii\helpers\VarDumper::dumpAsString($userFailedLogin->getErrors(), 10, true),
+                \Yii::error(VarDumper::dumpAsString($userFailedLogin->getErrors(), 10, true),
                 'LoginForm:afterValidate:saveFailed');
             }
+
 
             
 
