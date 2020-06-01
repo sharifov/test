@@ -252,9 +252,9 @@ class EmailService
 		return $lead ?? null;
 	}
 
-	public function detectClientId(Email $email)
+	public function detectClientId(string $email)
 	{
-		$clientEmail = ClientEmail::find()->where(['email' => $email->e_email_from])->orWhere(['email' => $email->e_email_to])->one();
+		$clientEmail = ClientEmail::find()->where(['email' => $email])->one();
 
 		return $clientEmail->client_id ?? null;
 	}

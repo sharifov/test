@@ -805,7 +805,7 @@ class Email extends \yii\db\ActiveRecord
 
             if (!$this->e_client_id) {
 				$emailService = Yii::createObject(EmailService::class);
-				$this->e_client_id = $emailService->detectClientId($this);
+				$this->e_client_id = $emailService->detectClientId($this->e_email_to);
 			}
 
             return true;
