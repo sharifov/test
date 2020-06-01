@@ -1175,8 +1175,6 @@
     display: flex; }
     .phone-widget .call-pane-incoming .incall-group {
       transform: translateY(calc(50% - 24px)); }
-    .phone-widget .call-pane-incoming .calling-from-info {
-      background-color: rgba(51, 77, 102, 0.2); }
     .phone-widget .call-pane-incoming .contact-info-card .agent-text-avatar {
       transform: none;
       top: 15px; }
