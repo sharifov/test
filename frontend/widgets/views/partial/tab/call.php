@@ -191,7 +191,7 @@ $type = $call->c_call_type_id;
               <i class="user-icon fa fa-user"></i>
               <i class="info-icon fa fa-info"></i>
             </button>
-            <strong>
+              <strong class="contact-info-card__name_text">
               <?php
                 $name = '';
                 if ($call) {
@@ -358,7 +358,7 @@ $type = $call->c_call_type_id;
                 <i class="user-icon fa fa-user"></i>
                 <i class="info-icon fa fa-info"></i>
               </button>
-              <strong>
+              <strong class="contact-info-card__name_text">
                 <?= $name ?>
               </strong>
             </div>

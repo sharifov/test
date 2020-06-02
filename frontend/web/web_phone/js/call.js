@@ -36,7 +36,7 @@ var PhoneWidgetCall = function () {
     {
         $('.calling-from-info__identifier').html(selectedNumber.from.project);
         $('.calling-from-info__number').html(selectedNumber.from.value);
-        $('.call-pane-calling').find('.contact-info-card__name').html(selectedNumber.to.callToName);
+        $('.call-pane-calling').find('.contact-info-card__name_text').html(selectedNumber.to.callToName);
         $('.call-pane-calling').find('.contact-info-card__call-type').html(selectedNumber.to.phone);
         $('.phone-widget-icon').addClass('is-pending');
         $('.call-pane__call-btns').addClass('is-pending');
@@ -197,7 +197,7 @@ var PhoneWidgetCall = function () {
             obj.status = 'On Call';
             $('.call-pane__call-btns').removeClass('is-pending').addClass('is-on-call');
             $('.call-pane-initial .contact-info-card__call-type').html(obj.phoneFrom);
-            $('.call-pane-initial .contact-info-card__name').html(obj.name);
+            $('.call-pane-initial .contact-info-card__name_text').html(obj.name);
             if ('type' in obj && obj.type && obj.type === 3) {
                 $('#wg-transfer-call').hide();
                 $('#wg-add-person').hide();
@@ -215,9 +215,9 @@ var PhoneWidgetCall = function () {
         }else if(['Ringing', 'Queued'].includes(obj.status)) {
             openWidget();
             $('.call-pane-incoming.call-pane-initial .contact-info-card__label').html(obj.type_description);
-            $('.call-pane-incoming.call-pane-initial .contact-info-card__name').html(obj.name);
+            $('.call-pane-incoming.call-pane-initial .contact-info-card__name_text').html(obj.name);
             $('.call-pane-calling .contact-info-card__label').html(obj.type_description);
-            $('.call-pane-calling .contact-info-card__name').html(obj.name);
+            $('.call-pane-calling .contact-info-card__name_text').html(obj.name);
             if ('isIn' in obj && obj.isIn) {
                 initIncomingCall(obj);
             }
@@ -269,7 +269,7 @@ var PhoneWidgetCall = function () {
         $('#tab-phone .call-pane-incoming').addClass('is_active');
         $('#btn-accept-call').find('i').removeClass('fa fa-spinner fa-spin').addClass('fas fa-check');
         $('.call-pane-incoming .contact-info-card__label').html(type_description);
-        $('.call-pane-incoming .contact-info-card__name').html(name);
+        $('.call-pane-incoming .contact-info-card__name_text').html(name);
         $('.call-pane-incoming .contact-info-card__call-type').html(phone);
     }
 
@@ -321,7 +321,7 @@ var PhoneWidgetCall = function () {
 
     function clearCallLayersInfo() {
         $('.call-pane-initial .contact-info-card__label').html('');
-        $('.call-pane-initial .contact-info-card__name').html('');
+        $('.call-pane-initial .contact-info-card__name_text').html('');
         $('.call-pane-initial .contact-info-card__call-type').html('');
     }
 
