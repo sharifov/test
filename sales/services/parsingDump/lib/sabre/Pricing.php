@@ -56,7 +56,7 @@ class Pricing implements ParseDumpInterface
             $pricePattern = '/
                 ^(\d{1,2})\- # count pas
                 \w|\s+USD(\d+.\d+) # fare
-                \s+(\d+.\d+)[A-Z]{1,3} # taxes
+                \s+((\d+.\d+)[A-Z]{1,3})? # taxes
                 \s+USD(\d+.\d+)([A-Z]{3}) # amount + type                         
                 /x';
 
@@ -69,10 +69,10 @@ class Pricing implements ParseDumpInterface
                 if (isset($matches[1], $matchesCount[1])) {
 
                     for ($i = 0; $i < (int) $matchesCount[1]; $i++) {
-                        $type = $matches[5] ?? null;
+                        $type = $matches[6] ?? null;
                         $result[$j]['type'] = $this->typeMapping($type);
                         $result[$j]['fare'] = $matches[2] ?? null;
-                        $result[$j]['taxes'] = $matches[3] ?? null;
+                        $result[$j]['taxes'] = !empty($matches[4]) ? $matches[4] : '0.00';
                         $j ++;
                     }
                 }
@@ -88,13 +88,13 @@ class Pricing implements ParseDumpInterface
     private function typeMapping(?string $source): string
     {
         switch ($source) {
-            case 'ADT': case 'JCB': case 'PFA': case 'ITX': case 'WEB':
+            case 'ADT': case 'JCB': case 'PFA': case 'ITX': case 'JWZ': case 'WEB':
                 $result = 'ADT';
                 break;
-            case 'CNN': case 'JNN': case 'PNN': case 'INN':
+            case 'CNN': case 'JNN':case 'CBC': case 'INN': case 'PNN': case 'JWC': case 'UNN':
                 $result = 'CHD';
                 break;
-            case 'INF': case 'JNF': case 'PNF': case 'ITF':
+            case 'INF': case 'INS': case 'JNS':case 'CBI': case 'JNF': case 'PNF': case 'ITF': case 'ITS':
                 $result = 'INF';
                 break;
             default:

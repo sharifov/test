@@ -157,7 +157,8 @@ $user = Yii::$app->user->identity;
                 },
                 'filter' => \common\models\Email::STATUS_LIST
             ],
-            //'e_status_done_dt',
+			'attribute' => 'e_client_id:client',
+			//'e_status_done_dt',
             //'e_read_dt',
             //'e_error_message',
             /*[

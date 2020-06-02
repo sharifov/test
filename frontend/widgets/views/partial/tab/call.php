@@ -156,19 +156,28 @@ $type = $call->c_call_type_id;
   </div>
   <div class="call-pane-calling call-pane-initial">
     <div class="calling-from-info">
-      <div class="current-number">
+      <!-- <div class="current-number">
         <div class="custom-phone-select"></div>
+      </div> -->
+      
+      <div class="static-number-indicator">
+        <span class="static-number-indicator__label">wowfare</span>
+        <i class="static-number-indicator__separator"></i>
+        <span class="static-number-indicator__name">Sales General</span>
       </div>
-      <div class="number-toggle">
-        <input type="checkbox" id="number-status2" class="call-status-switcher" <?= ($userCallStatus && $userCallStatus->isReady() ? 'checked' : '') ?>>
-        <label for="number-status2"></label>
-      </div>
+
+      <!-- <div class="number-toggle"> -->
+        <!-- <input type="checkbox" id="number-status2" class="call-status-switcher"> -->
+        <!-- ($userCallStatus && $userCallStatus->isReady() ? 'checked' : '') -->
+        <!-- <label for="number-status2"></label> -->
+      <!-- </div> -->
     </div>
     <div class="contact-info-card">
       <div class="contact-info-card__details">
 
         <div class="contact-info-card__line history-details">
-            <span class="contact-info-card__label">
+
+           <span class="contact-info-card__label">
                 <?php
                 $type_description = '';
                 if ($call) {
@@ -176,8 +185,13 @@ $type = $call->c_call_type_id;
                 }
                 echo $type_description;
                 ?>
-            </span>
-          <strong class="contact-info-card__name">
+           </span>
+          <div class="contact-info-card__name">
+            <button class="call-pane__info">
+              <i class="user-icon fa fa-user"></i>
+              <i class="info-icon fa fa-info"></i>
+            </button>
+            <strong>
               <?php
                 $name = '';
                 if ($call) {
@@ -189,7 +203,9 @@ $type = $call->c_call_type_id;
                 }
                 echo $name;
               ?>
-          </strong>
+            </strong>
+          </div>
+
         </div>
 
         <div class="contact-info-card__line history-details">
@@ -312,28 +328,41 @@ $type = $call->c_call_type_id;
   </div>
 
   <div class="call-pane-incoming call-pane-initial">
-<!--    <div class="calling-from-info">-->
-<!--      <div class="current-number">-->
-<!--        <div class="current-number-indicator">-->
-<!--          <small class="current-number__phone current-number__selected-nr">+37378155478</small>-->
-<!--          <span class="current-number__identifier current-number__selected-project">OVAGO</span>-->
-<!--        </div>-->
-<!--      </div>-->
-<!--      <div class="number-toggle">-->
-<!--        <input type="checkbox" id="number-status">-->
-<!--        <label for="number-status"></label>-->
-<!--      </div>-->
-<!--    </div>-->
-    <div class="incall-group">
-      <div class="contact-info-card">
-        <div class="contact-info-card__status">
-<!--          <div class="agent-text-avatar"><span>T</span></div>-->
+    <div class="calling-from-info">
+      <div class="static-number-indicator">
+        <span class="static-number-indicator__label">wowfare</span>
+        <i class="static-number-indicator__separator"></i>
+        <span class="static-number-indicator__name">Sales General</span>
+      </div>
+        <!-- <div class="current-number">
+          <div class="current-number-indicator">
+            <small class="current-number__phone current-number__selected-nr">+37378155478</small>
+            <span class="current-number__identifier current-number__selected-project">OVAGO</span>
+          </div>
         </div>
-        <div class="contact-info-card__details">
+        <div class="number-toggle">
+          <input type="checkbox" id="number-status">
+          <label for="number-status"></label>
+        </div> -->
+    </div>
+    <div class="incall-group">
+  
 
+      <div class="contact-info-card">
+        <div class="contact-info-card__details">
+          
           <div class="contact-info-card__line history-details">
             <span class="contact-info-card__label"></span>
-            <strong class="contact-info-card__name"><?= $name ?></strong>
+            <div class="contact-info-card__name">
+              <button class="call-pane__info">
+                <i class="user-icon fa fa-user"></i>
+                <i class="info-icon fa fa-info"></i>
+              </button>
+              <strong>
+                <?= $name ?>
+              </strong>
+            </div>
+            
           </div>
 
           <div class="contact-info-card__line history-details">
@@ -343,9 +372,7 @@ $type = $call->c_call_type_id;
       </div>
 
       <div class="call-pane__call-btns ">
-<!--        <button class="call-pane__info">-->
-<!--          <i class="fa fa-info"></i>-->
-<!--        </button>-->
+      
         <button class="call-pane__start-call calling-state-block" id="btn-accept-call">
           <div class="call-in-action">
             <span class="call-in-action__text">Calling</span>
@@ -359,36 +386,37 @@ $type = $call->c_call_type_id;
       </div>
 
     </div>
-<!--    <div class="additional-info">-->
-<!--      <div class="additional-info__header">-->
-<!--        <div class="agent-text-avatar"><span>T</span></div>-->
-<!--        <span class="additional-info__header-title">Contact Info</span>-->
-<!--        <a href="#" class="additional-info__close">-->
-<!--        <i class="fas fa-times"></i>-->
-<!--        </a>-->
-<!--      </div>-->
-<!--      <div class="additional-info__body scrollable-block">-->
-<!--        <ul class="info-listing incoming-info">-->
-<!--          <li>-->
-<!--             <small class="incoming-info__label">Role</small>-->
-<!--             <span class="incoming-info__value">Supervisor</span>-->
-<!--          </li>-->
-<!--          <li>-->
-<!--             <small class="incoming-info__label">Last Call</small>-->
-<!--             <span class="incoming-info__value">12.05.2012 13:03 - 15m 20s</span>-->
-<!--          </li>-->
-<!--          <li>-->
-<!--             <small class="incoming-info__label">Project</small>-->
-<!--             <span class="incoming-info__value">Wowfare</span>-->
-<!--          </li>-->
-<!--          <li>-->
-<!--             <small class="incoming-info__label">Random data</small>-->
-<!--             <span class="incoming-info__value">Random data value</span>-->
-<!--          </li>-->
-<!--        </ul>-->
-<!--      </div>-->
-<!--    </div>-->
+    
   </div>
+  <div class="additional-info contact-info">
+      <div class="additional-info__header">
+        <div class="agent-text-avatar"><span>T</span></div>
+        <span class="additional-info__header-title">Contact Info</span>
+        <a href="#" class="additional-info__close">
+        <i class="fas fa-times"></i>
+        </a>
+      </div>
+      <div class="additional-info__body scrollable-block">
+        <ul class="info-listing incoming-info">
+          <li>
+             <small class="incoming-info__label">Role</small>
+             <span class="incoming-info__value">Supervisor</span>
+          </li>
+          <li>
+             <small class="incoming-info__label">Last Call</small>
+             <span class="incoming-info__value">12.05.2012 13:03 - 15m 20s</span>
+          </li>
+          <li>
+             <small class="incoming-info__label">Project</small>
+             <span class="incoming-info__value">Wowfare</span>
+          </li>
+          <li>
+             <small class="incoming-info__label">Random data</small>
+             <span class="incoming-info__value">Random data value</span>
+          </li>
+        </ul>
+      </div>
+    </div> 
 
 
 </div>
