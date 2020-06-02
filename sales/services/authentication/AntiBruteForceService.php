@@ -188,10 +188,10 @@ class AntiBruteForceService
             $email->e_message_id = $email->generateMessageId();
             $email->update();
 
-            $mailResponse = $email->sendMail();
-            if (isset($mailResponse['error']) && $mailResponse['error']) {
+            //$mailResponse = $email->sendMail(); /* TODO::  */
+            /*if (isset($mailResponse['error']) && $mailResponse['error']) {
                 throw new \RuntimeException(VarDumper::dumpAsString($mailResponse['error'], 10));
-            }
+            }*/
 		} catch (\Throwable $throwable) {
 		    Yii::error(AppHelper::throwableFormatter($throwable), 'antiBruteForceService:sendEmail:failed');
 		    return false;

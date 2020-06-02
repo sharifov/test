@@ -2,6 +2,7 @@
 
 namespace frontend\models\search;
 
+use common\models\Employee;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use frontend\models\UserFailedLogin;
@@ -43,10 +44,12 @@ class UserFailedLoginSearch extends UserFailedLogin
     {
         $query = UserFailedLogin::find();
 
-        // add conditions that should always apply here
-
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> ['defaultOrder' => ['ufl_id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 50,
+            ],
         ]);
 
         $this->load($params);
@@ -61,8 +64,12 @@ class UserFailedLoginSearch extends UserFailedLogin
         $query->andFilterWhere([
             'ufl_id' => $this->ufl_id,
             'ufl_user_id' => $this->ufl_user_id,
-            'ufl_created_dt' => $this->ufl_created_dt,
         ]);
+
+        if ($this->ufl_created_dt) {
+            $query->andFilterWhere(['>=', 'au_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ufl_created_dt))])
+                ->andFilterWhere(['<=', 'au_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ufl_created_dt) + 3600 * 24)]);
+        }
 
         $query->andFilterWhere(['like', 'ufl_username', $this->ufl_username])
             ->andFilterWhere(['like', 'ufl_ua', $this->ufl_ua])

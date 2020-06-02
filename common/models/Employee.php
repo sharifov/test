@@ -474,6 +474,15 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
+     * @return $this
+     */
+    public function setActive(): Employee
+    {
+        $this->status = self::STATUS_ACTIVE;
+        return $this;
+    }
+
+    /**
      * @return bool
      */
     public function isBlocked(): bool

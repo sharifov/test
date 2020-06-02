@@ -2,12 +2,16 @@
 
 namespace frontend\controllers;
 
+use common\models\Employee;
+use sales\helpers\app\AppHelper;
 use Yii;
 use frontend\models\UserFailedLogin;
 use frontend\models\search\UserFailedLoginSearch;
 use frontend\controllers\FController;
+use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * UserFailedLoginController implements the CRUD actions for UserFailedLogin model.
@@ -107,6 +111,37 @@ class UserFailedLoginController extends FController
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
+    }
+
+    /**
+     * @return array
+     */
+    public function actionSetActiveAjax(): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $result = ['message' => '', 'status' => 0];
+
+        if (Yii::$app->request->isAjax) {
+            try {
+                $userId = (int) Yii::$app->request->post('id');
+
+                if ($user = Employee::findOne(['id' => $userId, 'status' => Employee::STATUS_BLOCKED])) {
+                    $user->setActive();
+                    if ($user->save(false)) {
+                        $result['status'] = 1;
+                        $result['message'] = 'Status changed to active.';
+                    }  else {
+                        throw new \DomainException($user->getErrorSummary(false)[0]);
+                    }
+                } else {
+                    throw new \DomainException('Blocked user not found');
+                }
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableFormatter($throwable), 'UserFailedLoginController:actionSetActiveAjax:save');
+                $result['message'] = VarDumper::dumpAsString($throwable->getMessage());
+            }
+        }
+        return $result;
     }
 
     /**

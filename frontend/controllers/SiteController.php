@@ -76,10 +76,10 @@ class SiteController extends FController
             'captcha' => [
                 'class' => CaptchaAction::class,
                 'fixedVerifyCode' => null,
-                'maxLength' => 4,
-                'minLength' => 3,
+                'maxLength' => 6,
+                'minLength' => 5,
                 'transparent' => true,
-                'offset' => 8,
+                'offset' => 3,
                 'foreColor' => '596b7d',
             ],
         ];

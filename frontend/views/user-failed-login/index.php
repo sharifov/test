@@ -1,8 +1,12 @@
 <?php
 
+use common\components\grid\DateTimeColumn;
+use yii\grid\SerialColumn;
+use frontend\models\UserFailedLogin;
 use yii\grid\ActionColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
+use dosamigos\datepicker\DatePicker;
 
 /* @var yii\web\View $this */
 /* @var frontend\models\search\UserFailedLoginSearch $searchModel */
@@ -25,16 +29,16 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
-
+            ['class' => SerialColumn::class],
             'ufl_id',
             'ufl_username',
             'ufl_user_id:userName',
             'ufl_ua',
             'ufl_ip',
-            'ufl_active:booleanByLabel',
+            'ufl_active:boolean',
             'ufl_session_id',
-            'ufl_created_dt:byUserDateTime',
+            ['class' => DateTimeColumn::class, 'attribute' => 'ufl_created_dt'],
+
             ['class' => ActionColumn::class],
         ],
     ]); ?>
