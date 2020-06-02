@@ -389,18 +389,20 @@ $(document).ready(function() {
     // });
 
     $(document).on('click', '#cancel-active-call', function(e) {
-        e.preventDefault();
 
-        let twilioDevice = JSON.parse(window.localStorage.getItem('twilioDevice'));
-
-        if (device || (device = twilioDevice)) {
-            updateAgentStatus(connection, false, 1);
-            device.disconnectAll();
-
-            PhoneWidgetCall.cancelCall();
-
-            clearTimeout(timeout)
-        }
+        hangup($('#cancel-active-call'));
+        // e.preventDefault();
+        //
+        // let twilioDevice = JSON.parse(window.localStorage.getItem('twilioDevice'));
+        //
+        // if (device || (device = twilioDevice)) {
+        //     updateAgentStatus(connection, false, 1);
+        //     device.disconnectAll();
+        //
+        //     PhoneWidgetCall.cancelCall();
+        //
+        //     clearTimeout(timeout)
+        // }
     })
 
     // $('.messages-modal__send-btn').on('click', function() {

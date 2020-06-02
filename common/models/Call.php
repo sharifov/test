@@ -4,6 +4,7 @@ namespace common\models;
 
 use common\components\purifier\Purifier;
 use common\models\query\CallQuery;
+use frontend\widgets\newWebPhone\call\CallHelper;
 use frontend\widgets\notification\NotificationMessage;
 use sales\access\EmployeeDepartmentAccess;
 use sales\dispatchers\NativeEventDispatcher;
@@ -1113,8 +1114,27 @@ class Call extends \yii\db\ActiveRecord
             //Notifications::socket($this->c_created_user_id, $this->c_lead_id, 'callUpdate', ['id' => $this->c_id, 'status' => $this->getStatusName(), 'duration' => $this->c_call_duration, 'snr' => $this->c_sequence_number], true);
 
 			$isInternal = PhoneList::find()->byPhone($this->c_from)->enabled()->exists();
-			$fromName = $isInternal ? $this->getCallerName($this->isIn() ? $this->c_from : $this->c_to)  : 'ClientName';
-            Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id, 'lead_id' => $this->c_lead_id, 'case_id' => $this->c_case_id],
+            $fromName = '';
+            $phoneFrom = '';
+            if ($this->isIn()) {
+                $phoneFrom = $this->c_from;
+            } elseif ($this->isOut()) {
+                $phoneFrom = $this->c_to;
+            }
+
+			if ($this->isJoin()) {
+                if ($this->cParent && $this->cParent->cCreatedUser) {
+                    $fromName = $this->cParent->cCreatedUser->username;
+                    if ($this->cParent->isIn()) {
+                        $phoneFrom = $this->cParent->c_to;
+                    } elseif ($this->cParent->isOut()) {
+                        $phoneFrom = $this->cParent->c_from;
+                    }
+                }
+            } else {
+                $fromName = $isInternal ? $this->getCallerName($this->isIn() ? $this->c_from : $this->c_to)  : 'ClientName';
+            }
+            Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id],
                 [
                 	'id' => $this->c_id,
 					'status' => $this->getStatusName(),
@@ -1122,14 +1142,17 @@ class Call extends \yii\db\ActiveRecord
 					'snr' => $this->c_sequence_number,
 					'leadId' => $this->c_lead_id,
 					'isIn' => $this->isIn(),
-					'phoneFrom' => $this->c_from,
+					'type' => $this->c_call_type_id,
+					'type_description' => CallHelper::getTypeDescription($this),
+					'source_type_id' => $this->c_source_type_id,
+					'phoneFrom' => $phoneFrom,
 					'name' => $fromName,
 					'fromInternal' => $isInternal
 				]
 			);
         }
 
-        if ($this->c_lead_id || $this->c_case_id) {
+        if (($this->c_lead_id || $this->c_case_id) && !$this->isJoin()) {
             //Notifications::socket(null, $this->c_lead_id, 'updateCommunication', ['lead_id' => $this->c_lead_id, 'status_id' => $this->c_status_id, 'status' => $this->getStatusName()], true);
 
             $socketParams = [];
@@ -1975,7 +1998,7 @@ class Call extends \yii\db\ActiveRecord
 
 		$phone = PhoneList::find()->byPhone($fromNumber)->enabled()->one();
 
-		if ($phone->departmentPhoneProject && $phone->departmentPhoneProject->dppDep && $phone->departmentPhoneProject->isEnabled()) {
+		if ($phone && $phone->departmentPhoneProject && $phone->departmentPhoneProject->dppDep && $phone->departmentPhoneProject->isEnabled()) {
 			/** @var $department Department */
 			$department = $phone->departmentPhoneProject->dppDep;
 			return $department->dep_name;

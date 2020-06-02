@@ -191,6 +191,7 @@ use yii\helpers\Html;
     $ajaxHoldConferenceDoubleCall = Url::to(['/phone/ajax-hold-conference-double-call']);
     $ajaxUnholdConferenceDoubleCall = Url::to(['/phone/ajax-unhold-conference-double-call']);
     $ajaxJoinToConferenceUrl = Url::to(['/phone/ajax-join-to-conference']);
+    $ajaxHangupUrl = Url::to(['/phone/ajax-hangup']);
 
     $conferenceBase = 0;
     if (isset(Yii::$app->params['settings']['voip_conference_base'])) {
@@ -215,6 +216,7 @@ use yii\helpers\Html;
     const ajaxUnholdConferenceDoubleCall = '<?= $ajaxUnholdConferenceDoubleCall ?>';
     const conferenceBase = parseInt('<?= $conferenceBase ?>');
     const ajaxJoinToConferenceUrl = '<?= $ajaxJoinToConferenceUrl ?>';
+    const ajaxHangupUrl = '<?= $ajaxHangupUrl ?>';
 
     const clientId = '<?=$clientId?>';
 
@@ -333,24 +335,57 @@ use yii\helpers\Html;
     document.getElementById('button-hangup').onclick = function () {
         log('Hanging up...');
         if (device) {
-            $('#join-source-type').html();
-            $('#join-source-type').hide();
-            if (conferenceBase) {
-                if (isJoinCall) {
-                    updateAgentStatus(joinConnection, false, 1);
-                    joinConnection.disconnect();
-                } else {
-                    updateAgentStatus(connection, false, 1);
-                    conferenceComplete();
-                }
-            } else {
-                updateAgentStatus(connection, false, 1);
-                device.disconnectAll();
-            }
+            // $('#join-source-type').html();
+            // $('#join-source-type').hide();
+            // if (conferenceBase) {
+            //     if (isJoinCall) {
+            //         updateAgentStatus(joinConnection, false, 1);
+            //         joinConnection.disconnect();
+            //     } else {
+            //         updateAgentStatus(connection, false, 1);
+            //         conferenceComplete();
+            //     }
+            // } else {
+            //     updateAgentStatus(connection, false, 1);
+            //     device.disconnectAll();
+            // }
+            // updateAgentStatus(connection, false, 1);
+            hangup($('#button-hangup'));
         } else {
             log('Device is null');
         }
     };
+
+    function hangup(button) {
+        let callSid = null;
+        let activeConnection = getActiveConnection();
+        if (activeConnection) {
+            callSid = activeConnection.CallSid;
+        }
+        if (callSid) {
+            button.prop('disabled', true);
+            $.ajax({
+                type: 'post',
+                data: {
+                    'sid': callSid,
+                },
+                url: ajaxHangupUrl
+            })
+                .done(function(data) {
+                    if (data.error) {
+                        new PNotify({title: "Hangup", type: "error", text: data.message, hide: true});
+                    }
+                })
+                .fail(function(error) {
+                    console.error(error);
+                })
+                .always(function () {
+                    button.prop('disabled', false);
+                });
+        } else {
+            new PNotify({title: "Hangup", type: "error", text: 'Not found active connection Sid', hide: true});
+        }
+    }
 
     function conferenceComplete() {
         if (connection && connection.parameters.CallSid) {
@@ -666,6 +701,8 @@ use yii\helpers\Html;
                     });
 
                     if (isJoin) {
+                        $('#wg-transfer-call').hide();
+                        $('#wg-add-person').hide();
                         joinConnection = conn;
                         isJoinCall = true;
                         if (sourceTypeId == '<?= Call::SOURCE_LISTEN ?>') {
@@ -678,6 +715,8 @@ use yii\helpers\Html;
                             $('#btn-group-id-mute').show();
                         }
                     } else {
+                        $('#wg-transfer-call').show();
+                        $('#wg-add-person').show();
                         joinConnection = null;
                         $('#web-call-from-number').text(conn.parameters.From);
                         $('#web-call-to-number').text(conn.parameters.To);
@@ -695,6 +734,8 @@ use yii\helpers\Html;
                     if (typeof PhoneWidgetCall === 'object') {
                         PhoneWidgetCall.updateConnection(conn);
                     }
+
+                    setActiveConnection(conn);
                 });
 
                 device.on('disconnect', function (conn) {
@@ -720,6 +761,7 @@ use yii\helpers\Html;
 
                     if (typeof PhoneWidgetCall === "object") {
                         PhoneWidgetCall.cancelCall();
+                        PhoneWidgetCall.clearCallLayersInfo();
                     }
                 });
 
@@ -828,6 +870,20 @@ use yii\helpers\Html;
         setInterval('renewTwDevice();', 50000);*/
     //});
 
+    function getActiveConnection() {
+        let activeConnection = window.localStorage.getItem('activeConnection');
+        if (activeConnection) {
+            return JSON.parse(activeConnection);
+        }
+        return null;
+    }
+
+    function setActiveConnection(conn) {
+        window.localStorage.setItem('activeConnection', JSON.stringify({
+            'CallSid': conn.parameters.CallSid,
+            'To': connection.parameters.To
+        }));
+    }
 
     function webCall(phone_from, phone_to, project_id, lead_id, case_id, type) {
 
@@ -961,18 +1017,18 @@ $js = <<<JS
         let modal = $('#web-phone-redirect-agents-modal');
         modal.find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
         
-        if(connection && connection.parameters.CallSid) {
-            updateAgentStatus(connection, false, 1);
-            
-            if(connection.status() !== 'open') {
-                connection.accept();
-            }
-                        
+        let callSid = null;
+        let activeConnection = getActiveConnection();
+        if (activeConnection) {
+            callSid = activeConnection.CallSid;
+        }
+        
+        if (callSid) {                                    
             if (objValue && objType) {
                 $.ajax({
                     type: 'post',
                     data: {
-                        'sid': connection.parameters.CallSid,
+                        'sid': callSid,
                         'id': objValue,
                         'type': objType
                     },
@@ -993,8 +1049,42 @@ $js = <<<JS
             }
                     
         } else {
-            alert('Error: Not found active connection or CallSid');
+            alert('Error: Not found active connection Call SID!');
         }
+        // if(connection && connection.parameters.CallSid) {
+        //     updateAgentStatus(connection, false, 1);
+        //    
+        //     if(connection.status() !== 'open') {
+        //         connection.accept();
+        //     }
+        //                
+        //     if (objValue && objType) {
+        //         $.ajax({
+        //             type: 'post',
+        //             data: {
+        //                 'sid': connection.parameters.CallSid,
+        //                 'id': objValue,
+        //                 'type': objType
+        //             },
+        //             url: ajaxCallTransferUrl,
+        //             success: function (data) {
+        //                 if (data.error) {
+        //                     alert(data.message);
+        //                 }
+        //                 modal.modal('hide').find('.modal-body').html('');
+        //             },
+        //             error: function (error) {
+        //                 console.error(error);
+        //                 modal.modal('hide').find('.modal-body').html('');
+        //             }
+        //         });
+        //     } else {
+        //         new PNotify({title: "Transfer call", type: "error", text: "Please try again after some seconds", hide: true});
+        //     }
+        //            
+        // } else {
+        //     alert('Error: Not found active connection or CallSid');
+        // }
     });
         
         
@@ -1006,9 +1096,15 @@ $js = <<<JS
         
         obj.attr('disabled', true);
         
-        console.log(connection.parameters);
+        let callSid = null;
+        let to = null;
+        let activeConnection = getActiveConnection();
+        if (activeConnection) {
+            callSid = activeConnection.CallSid;
+            to = activeConnection.To;
+        }
         
-        if(connection && connection.parameters.CallSid) {
+        if (callSid) {
             if(objValue.length < 2) {
                 console.error('Error call forward param TO');
                 return false;
@@ -1021,9 +1117,9 @@ $js = <<<JS
             $.ajax({
                 type: 'post',
                 data: {
-                    'sid': connection.parameters.CallSid,
+                    'sid': callSid,
                     'type': objType,
-                    'from': connection.parameters.To,
+                    'from': to,
                     'to': objValue,
                 },
                 url: ajaxCallRedirectUrl,
@@ -1043,6 +1139,44 @@ $js = <<<JS
         } else {
             alert('Error: Not found active connection or CallSid');
         }
+        
+//        console.log(connection.parameters);
+//        
+//        if(connection && connection.parameters.CallSid) {
+//            if(objValue.length < 2) {
+//                console.error('Error call forward param TO');
+//                return false;
+//            }
+//            
+//            let modal = $('#web-phone-redirect-agents-modal');
+//            modal.find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+//            // connection.accept();
+//            
+//            $.ajax({
+//                type: 'post',
+//                data: {
+//                    'sid': connection.parameters.CallSid,
+//                    'type': objType,
+//                    'from': connection.parameters.To,
+//                    'to': objValue,
+//                },
+//                url: ajaxCallRedirectUrl,
+//                success: function (data) {
+//                    // updateAgentStatus(connection, false, 1);
+//                    //console.log(data);
+//                    if (data.error) {
+//                        alert(data.message);
+//                    }
+//                    modal.modal('hide').find('.modal-body').html('');
+//                },
+//                error: function (error) {
+//                    console.error(error);
+//                    modal.modal('hide').find('.modal-body').html('');
+//                }
+//            });
+//        } else {
+//            alert('Error: Not found active connection or CallSid');
+//        }
     });
 
 

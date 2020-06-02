@@ -5,6 +5,7 @@ namespace common\models;
 use common\components\jobs\AgentCallQueueJob;
 use common\components\purifier\Purifier;
 use common\models\query\CallUserAccessQuery;
+use frontend\widgets\newWebPhone\call\CallHelper;
 use frontend\widgets\notification\NotificationMessage;
 use sales\dispatchers\NativeEventDispatcher;
 use sales\model\call\entity\callUserAccess\events\CallUserAccessEvents;
@@ -194,13 +195,33 @@ class CallUserAccess extends \yii\db\ActiveRecord
             //Notifications::socket($this->cua_user_id, null, 'updateIncomingCall', $this->attributes);
 			if ($this->isPending()) {
 				$client = $this->cuaCall->cClient;
-				$callFromInfo = [
-					'phoneFrom' => $this->cuaCall->c_from,
-					'name' => $this->cuaCall ? $this->cuaCall->getCallerName($this->cuaCall->c_from) : 'ClientName',
+				$call = $this->cuaCall;
+
+				$name = '';
+				$phone = '';
+                if ($call->isJoin()) {
+                    if (($parent = $call->cParent) && $parent->cCreatedUser) {
+                        $name = $parent->cCreatedUser->username;
+                        $phone = $parent->c_to;
+                    }
+                } else {
+                    $name = $call ? $call->getCallerName($call->c_from) : 'ClientName';
+                    if ($call->isIn()) {
+                        $phone = $call->c_from;
+                    } elseif ($call->isOut()) {
+                        $phone = $call->c_to;
+                    }
+                }
+
+				$callInfo = [
+                    'type' => $call->c_call_type_id,
+                    'type_description' => CallHelper::getTypeDescription($this->cuaCall),
+                    'name' => $name,
+                    'phoneFrom' => $phone,
 					'fromInternal' => PhoneList::find()->byPhone($this->cuaCall->c_from)->enabled()->exists()
 				];
 			}
-            Notifications::publish('updateIncomingCall', ['user_id' => $this->cua_user_id], array_merge($this->attributes, $callFromInfo ?? []));
+            Notifications::publish('updateIncomingCall', ['user_id' => $this->cua_user_id], array_merge($this->attributes, $callInfo ?? []));
         }
 
         if (!$insert && isset($changedAttributes['cua_status_id'])) {

@@ -6,9 +6,10 @@
 /** @var bool $isCallInProgress */
 /** @var \common\models\Call|null $call */
 
-$name = $call && $call->cClient ? $call->cClient->getFullName() : 'ClientName';
+//$name = $call && $call->cClient ? $call->cClient->getFullName() : 'ClientName';
 $isIn = $call ? $call->isIn() : false;
-$phoneFrom = $call ? $call->c_from : '';
+$type = $call->c_call_type_id;
+//$phoneFrom = $call ? $call->c_from : '';
 ?>
 <div class="phone-widget__tab is_active" id="tab-phone">
   <div class="call-pane call-pane-initial is_active">
@@ -63,6 +64,8 @@ $phoneFrom = $call ? $call->c_from : '';
                 <label class="call-pane-label" for="">Calling to <sapn id="call-to-label" style="color: white"></sapn></label>
                 <?php
 
+                use common\models\Call;
+                use frontend\widgets\newWebPhone\call\CallHelper;
                 use yii\bootstrap4\Html;
 				use yii\helpers\Url;
 				use yii\web\View;
@@ -165,12 +168,50 @@ $phoneFrom = $call ? $call->c_from : '';
       <div class="contact-info-card__details">
 
         <div class="contact-info-card__line history-details">
-          <span class="contact-info-card__label"><?= $call && $call->isIn() ? 'Incoming' : 'Outgoing' ?></span>
-          <strong class="contact-info-card__name"><?= $call && $call->cClient ? $call->cClient->getFullName() : 'ClientName' ?></strong>
+            <span class="contact-info-card__label">
+                <?php
+                $type_description = '';
+                if ($call) {
+                    $type_description = CallHelper::getTypeDescription($call);
+                }
+                echo $type_description;
+                ?>
+            </span>
+          <strong class="contact-info-card__name">
+              <?php
+                $name = '';
+                if ($call) {
+                    if ($call->isIn() || $call->isOut()) {
+                        $name = $call->cClient ? $call->cClient->getFullName() : 'ClientName';
+                    } elseif ($call->isJoin() && ($parentJoin = $call->cParent) && $parentJoin->cCreatedUser) {
+                        $name = $parentJoin->cCreatedUser->username;
+                    }
+                }
+                echo $name;
+              ?>
+          </strong>
         </div>
 
         <div class="contact-info-card__line history-details">
-          <span class="contact-info-card__call-type"><?= ($call ? ($call->isIn() ? $call->c_from : $call->c_to) : '') ?></span>
+          <span class="contact-info-card__call-type">
+              <?php
+              $phoneFrom = '';
+                if ($call) {
+                    if ($call->isIn() ) {
+                        $phoneFrom = $call->c_from;
+                    } elseif ($call->isOut()) {
+                        $phoneFrom = $call->c_to;
+                    } elseif ($call->isJoin() && ($parentJoin = $call->cParent)) {
+                        if ($parentJoin->isIn()) {
+                            $phoneFrom = $parentJoin->c_to;
+                        } elseif ($parentJoin->isOut()) {
+                            $phoneFrom = $parentJoin->c_from;
+                        }
+                    }
+                }
+                echo $phoneFrom;
+              ?>
+          </span>
         </div>
       </div>
     </div>
@@ -232,7 +273,7 @@ $phoneFrom = $call ? $call->c_from : '';
           <span>Transfer Call</span>
         </a>
       </li>
-      <li class="in-call-controls__item">
+      <li class="in-call-controls__item" id="wg-add-person">
         <a href="#" class="in-call-controls__action">
           <i class="fa fa-plus"></i>
           <span>Add Person</span>
@@ -291,15 +332,16 @@ $phoneFrom = $call ? $call->c_from : '';
         <div class="contact-info-card__details">
 
           <div class="contact-info-card__line history-details">
-            <span class="contact-info-card__label">Incomming Call</span>
-            <strong class="contact-info-card__name"><?= $call && $call->cClient ? $call->cClient->getFullName() : 'ClientName' ?></strong>
+            <span class="contact-info-card__label"></span>
+            <strong class="contact-info-card__name"><?= $name ?></strong>
           </div>
 
           <div class="contact-info-card__line history-details">
-            <span class="contact-info-card__call-type"><?= $call ? $call->c_from : '' ?></span>
+            <span class="contact-info-card__call-type"><?= $phoneFrom ?></span>
           </div>
         </div>
       </div>
+
       <div class="call-pane__call-btns ">
 <!--        <button class="call-pane__info">-->
 <!--          <i class="fa fa-info"></i>-->
@@ -315,6 +357,7 @@ $phoneFrom = $call ? $call->c_from : '';
           <i class="fa fa-phone-slash"></i>
         </button>
       </div>
+
     </div>
 <!--    <div class="additional-info">-->
 <!--      <div class="additional-info__header">-->
@@ -369,7 +412,10 @@ PhoneWidgetCall.init({
     'phoneFrom': '{$phoneFrom}',
     'name': '{$name}',
     'duration': '{$callDuration}',
-    'call_id': '{$callId}'
+    'call_id': '{$callId}',
+    'type' : '{$type}',
+    'type_description' : '{$type_description}',
+    'source_type_id' : '{$call->c_source_type_id}'
 });
 
 JS;

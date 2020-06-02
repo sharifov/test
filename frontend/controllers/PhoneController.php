@@ -356,6 +356,14 @@ class PhoneController extends FController
                 throw new Exception('Error: Not found Call ' . $sid . '(actionAjaxCallRedirect)', 6);
             }
 
+            if ($originalCall->isJoin()) {
+                throw new Exception('Error: Cant redirect Join Call', 7);
+            }
+
+            if (!$originalCall->isOwner(Auth::id())) {
+                throw new BadRequestHttpException('Is not your Call', 8);
+            }
+
 //            $to_id = (int)Yii::$app->request->post('to_id');
 //            $projectId = (int)Yii::$app->request->post('project_id');
 //            $lead_id = (int)Yii::$app->request->post('lead_id');
@@ -371,7 +379,7 @@ class PhoneController extends FController
             $createdUserId = null;
 
             if ($originalCall->isGeneralParent()) {
-                if ($lastChild = Call::find()->lastChild($originalCall->c_id)->one()) {
+                if ($lastChild = Call::find()->lastChild($originalCall->c_id)->andWhere(['<>', 'c_call_type_id', Call::CALL_TYPE_JOIN])->one()) {
                     $createdUserId = $lastChild->c_created_user_id;
                     $lastChild->c_source_type_id = Call::SOURCE_TRANSFER_CALL;
                     $lastChild->c_created_user_id = null;
@@ -432,7 +440,7 @@ class PhoneController extends FController
                 if ($originalCall->cParent) {
                     $sid = $originalCall->cParent->c_call_sid;
                 } else {
-                    if (!$firstChild = Call::find()->firstChild($originalCall->c_id)->one()) {
+                    if (!$firstChild = Call::find()->firstChild($originalCall->c_id)->andWhere(['<>', 'c_call_type_id', Call::CALL_TYPE_JOIN])->one()) {
                         throw new Exception('API Error: PhoneController/actionAjaxCallRedirect: Not found first child conference call ', 10);
                     }
                     $sid = $firstChild->c_call_sid;
@@ -624,19 +632,21 @@ class PhoneController extends FController
                 throw new BadRequestHttpException('Not found Type in request', 4);
             }
 
-
             //$originCall = Call::find()->where(['c_created_user_id' => Yii::$app->user->id/*, 'c_call_status' => Call::CALL_STATUS_IN_PROGRESS*/])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
 
             $originCall = Call::find()->where(['c_call_sid' => $sid])->one();
 
             if (!$originCall) {
-                $originCall = Call::find()->where(['c_call_sid' => $sid])->one();
-            }
-
-            if (!$originCall) {
                 throw new BadRequestHttpException('Not found Call', 5);
             }
 
+            if ($originCall->isJoin()) {
+                throw new Exception('Error: Cant redirect Join Call', 7);
+            }
+
+            if (!$originCall->isOwner(Auth::id())) {
+                throw new BadRequestHttpException('Is not your Call', 8);
+            }
 
             $data = [];
 
@@ -710,7 +720,10 @@ class PhoneController extends FController
                 $callSid = $originCall->cParent->c_call_sid;
                 $result = $communication->redirectCall($callSid, $data, $callbackUrl);
             } else {
-                $childCall = Call::find()->where(['c_parent_id' => $originCall->c_id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+                $childCall = Call::find()
+                    ->andWhere(['c_parent_id' => $originCall->c_id])
+                    ->andWhere(['<>', 'c_call_type_id', Call::CALL_TYPE_JOIN])
+                    ->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
 
                 if ($childCall) {
 
@@ -845,6 +858,39 @@ class PhoneController extends FController
             }
 
             $result = Yii::$app->communication->completeConference($call->c_conference_sid);
+
+        } catch (\Throwable $e) {
+            $result = [
+                'error' => true,
+                'message' => $e->getMessage(),
+            ];
+        }
+        return $this->asJson($result);
+    }
+
+    public function actionAjaxHangup(): Response
+    {
+        try {
+
+            $sid = (string)Yii::$app->request->post('sid');
+
+            if (!$sid) {
+                throw new BadRequestHttpException('Not found Call SID in request', 1);
+            }
+
+            if (!$call = Call::findOne(['c_call_sid' => $sid])) {
+                throw new BadRequestHttpException('Not found Call. Sid: ' . $sid, 2);
+            }
+
+            if (!$call->isOwner(Auth::id())) {
+                throw new BadRequestHttpException('Is not your Call', 3);
+            }
+
+            if (!($call->isStatusInProgress() || $call->isStatusRinging())) {
+                throw new BadRequestHttpException('Call is not correct status', 4);
+            }
+
+            $result = Yii::$app->communication->hangUp($call->c_call_sid);
 
         } catch (\Throwable $e) {
             $result = [

@@ -14,14 +14,20 @@ var PhoneWidgetCall = function () {
         if ('isCallInProgress' in options && options.isCallInProgress) {
             refreshCallStatus({
                 'status': "In progress",
-                'duration': options.duration | 0
+                'duration': options.duration | 0,
+                'type': parseInt(options.type),
+                'source_type_id': parseInt(options.source_type_id),
+                'type_description': options.type_description
             })
         } else if ('isCallRinging' in options && options.isCallRinging) {
             initIncomingCall({
                 'fromInternal': options.fromInternal,
                 'cua_call_id': options.call_id,
                 'phoneFrom': options.phoneFrom,
-                'name': options.name || ''
+                'name': options.name || '',
+                'type': options.type,
+                'source_type_id': parseInt(options.source_type_id),
+                'type_description': options.type_description
             });
         }
     }
@@ -141,14 +147,18 @@ var PhoneWidgetCall = function () {
 
     function initRedirectToAgent(options)
     {
-        let connection = this.connection;
         if (options.ajaxCallRedirectGetAgents === undefined) {
             alert('Ajax call redirect url is not set');
             return false;
         }
 
-        if (connection && connection.parameters.CallSid) {
-            let callSid = connection.parameters.CallSid;
+        let callSid = null;
+        let activeConnection = getActiveConnection();
+        if (activeConnection) {
+            callSid = activeConnection.CallSid;
+        }
+
+        if (callSid) {
             let modal = $('#web-phone-redirect-agents-modal');
             modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
             $('#web-phone-redirect-agents-modal-label').html('Transfer Call');
@@ -158,23 +168,59 @@ var PhoneWidgetCall = function () {
                     modal.find('.modal-body').html(data);
                 });
         } else {
-            alert('Error: Not found Call connection or Call SID!');
+            alert('Error: Not found active connection Call SID!');
         }
+
+        // let connection = this.connection;
+        // if (connection && connection.parameters.CallSid) {
+        //     let callSid = connection.parameters.CallSid;
+        //     let modal = $('#web-phone-redirect-agents-modal');
+        //     modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+        //     $('#web-phone-redirect-agents-modal-label').html('Transfer Call');
+        //
+        //     $.post(options.ajaxCallRedirectGetAgents, { sid: callSid }) // , user_id: userId
+        //         .done(function(data) {
+        //             modal.find('.modal-body').html(data);
+        //         });
+        // } else {
+        //     alert('Error: Not found Call connection or Call SID!');
+        // }
         return false;
     }
 
-    function refreshCallStatus(obj)
-    {
+    function refreshCallStatus(obj) {
+
+        $('.call-pane-initial .contact-info-card__label').html(obj.type_description);
+
         if (obj.status === 'In progress') {
+            openWidget();
             obj.status = 'On Call';
             $('.call-pane__call-btns').removeClass('is-pending').addClass('is-on-call');
+            $('.call-pane-initial .contact-info-card__call-type').html(obj.phoneFrom);
+            $('.call-pane-initial .contact-info-card__name').html(obj.name);
+            if ('type' in obj && obj.type && obj.type === 3) {
+                $('#wg-transfer-call').hide();
+                $('#wg-add-person').hide();
+                if ('source_type_id' in obj && obj.source_type_id && obj.source_type_id === 7) {
+                    $('#call-pane__mute').hide();
+                } else {
+                    $('#call-pane__mute').show();
+                }
+            } else {
+                $('#call-pane__mute').show();
+                $('#wg-transfer-call').show();
+                $('#wg-add-person').show();
+            }
             showCallingPanel();
-            $('.call-pane-calling .contact-info-card__name').html(obj.name);
         }else if(['Ringing', 'Queued'].includes(obj.status)) {
+            openWidget();
+            $('.call-pane-incoming.call-pane-initial .contact-info-card__label').html(obj.type_description);
+            $('.call-pane-incoming.call-pane-initial .contact-info-card__name').html(obj.name);
+            $('.call-pane-calling .contact-info-card__label').html(obj.type_description);
+            $('.call-pane-calling .contact-info-card__name').html(obj.name);
             if ('isIn' in obj && obj.isIn) {
                 initIncomingCall(obj);
             }
-            $('.call-pane-calling .contact-info-card__name').html(obj.name);
         }else if (obj.status === 'Completed') {
             cancelCall();
         }else {
@@ -183,21 +229,22 @@ var PhoneWidgetCall = function () {
         $('.call-in-action__text').html(obj.status);
         $('.call-in-action__time').html('').show().timer('remove').timer({format: '%M:%S', seconds: status.duration | 0}).timer('start');
 
-        if ('isIn' in obj && obj.isIn) {
-            $('.call-pane-initial .contact-info-card__label').html('Incoming');
-        } else {
-            $('.call-pane-initial .contact-info-card__label').html('Outgoing');
-        }
+        // if ('isIn' in obj && obj.isIn) {
+        //     $('.call-pane-initial .contact-info-card__label').html('Incoming');
+        // } else {
+        //     $('.call-pane-initial .contact-info-card__label').html('Outgoing');
+        // }
 
     }
 
     function initIncomingCall(obj)
     {
+        // clearCallLayersInfo();
         openWidget();
         openCallTab();
         if (typeof obj === 'object' && 'phoneFrom' in obj) {
             $('#btn-accept-call').attr('data-from-internal', obj.fromInternal | false).attr('data-call-id', obj.cua_call_id);
-            showIncomingCallPanel(obj.phoneFrom, obj.name || '');
+            showIncomingCallPanel(obj.phoneFrom, obj.name || '', obj.type_description);
         } else if (obj.cua_status_id === 5) {
             cancelCall();
         }
@@ -216,11 +263,12 @@ var PhoneWidgetCall = function () {
         $('#tab-phone').addClass('is_active');
     }
 
-    function showIncomingCallPanel(phone, name)
+    function showIncomingCallPanel(phone, name, type_description)
     {
         $('#tab-phone .call-pane-initial').removeClass('is_active');
         $('#tab-phone .call-pane-incoming').addClass('is_active');
         $('#btn-accept-call').find('i').removeClass('fa fa-spinner fa-spin').addClass('fas fa-check');
+        $('.call-pane-incoming .contact-info-card__label').html(type_description);
         $('.call-pane-incoming .contact-info-card__name').html(name);
         $('.call-pane-incoming .contact-info-card__call-type').html(phone);
     }
@@ -271,6 +319,12 @@ var PhoneWidgetCall = function () {
         });
     }
 
+    function clearCallLayersInfo() {
+        $('.call-pane-initial .contact-info-card__label').html('');
+        $('.call-pane-initial .contact-info-card__name').html('');
+        $('.call-pane-initial .contact-info-card__call-type').html('');
+    }
+
     return {
         init: init,
         initCall: initCall,
@@ -278,7 +332,8 @@ var PhoneWidgetCall = function () {
         volumeIndicatorsChange: volumeIndicatorsChange,
         updateConnection: updateConnection,
         refreshCallStatus: refreshCallStatus,
-        initIncomingCall: initIncomingCall
+        initIncomingCall: initIncomingCall,
+        clearCallLayersInfo: clearCallLayersInfo
     };
 }();
 

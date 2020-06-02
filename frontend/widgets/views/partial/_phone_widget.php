@@ -10,9 +10,11 @@ use yii\web\View;
 /** @var bool $isCallRinging */
 /** @var bool $isCallInProgress */
 /** @var \common\models\Call|null $call */
+
+$isActiveWidget = $isCallInProgress ? ' is_active' : '';
 ?>
 
-<div class="phone-widget" style="margin-bottom: 30px">
+<div class="phone-widget<?= $isActiveWidget ?>" style="margin-bottom: 30px">
   <?php if($showWidgetContent): ?>
   <div class="phone-widget__header">
     <div class="phone-widget__heading">
