@@ -47,11 +47,9 @@ class LoginForm extends Model
      */
     public function checkIsBlocked($attribute): void
     {
-        if (!$this->hasErrors()) {
-            $userBlocked = Employee::findByUsername($this->username, Employee::STATUS_BLOCKED);
-            if ($userBlocked) {
-                $this->addError($attribute, 'The user is blocked.');
-            }
+        $userBlocked = Employee::findByUsername($this->username, Employee::STATUS_BLOCKED);
+        if ($userBlocked) {
+            $this->addError($attribute, 'The user is blocked.');
         }
     }
 
@@ -200,7 +198,6 @@ class LoginForm extends Model
             if ($this->_user) {
                 (new AntiBruteForceService())->checkAttempts($this->_user);
             }
-            
 
         }
         parent::afterValidate();

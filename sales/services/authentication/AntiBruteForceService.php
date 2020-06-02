@@ -91,7 +91,8 @@ class AntiBruteForceService
     public function checkAttempts(Employee $user): void
     {
         if (!$user->isBlocked() && $attempts = UserFailedLogin::getCountActiveByUserId($user->id)) {
-            if ($attempts >= $this->userNotifyFailedLoginAttempts &&
+            if ($this->userNotifyFailedLoginAttempts !== 0 &&
+                $attempts >= $this->userNotifyFailedLoginAttempts &&
                 $attempts < $this->userBlockAttempts
             ) {
                 $this->setNotificationTitle($user);
@@ -99,9 +100,9 @@ class AntiBruteForceService
                 $this->sendNotification($user);
                 $this->sendEmail($user);
 
-            } elseif ($attempts >= $this->userBlockAttempts) {
+            } elseif ($this->userBlockAttempts !== 0 && $attempts >= $this->userBlockAttempts) {
                 $user->setBlocked();
-                if (!$user->save()) {
+                if (!$user->save(false)) {
                     \Yii::error(VarDumper::dumpAsString($user->getErrors(), 10),
                     'antiBruteForceService:checkAttempts:saveFailed');
                 }
@@ -111,7 +112,7 @@ class AntiBruteForceService
                 $this->sendNotification($user);
                 $this->sendEmail($user);
 
-                $admins = Employee::getAllEmployeesByRole(Employee::ROLE_ADMIN);;
+                $admins = Employee::getAllEmployeesByRole(Employee::ROLE_ADMIN);
                 foreach ($admins as $admin) {
                     $this->sendNotification($admin);
                     $this->sendEmail($admin);
@@ -127,7 +128,7 @@ class AntiBruteForceService
      */
     private function setNotificationTitle(Employee $user, ?string $title = null): string
     {
-        $title = $title ?? 'Attention. Failed authentication attempt by user : %s, id : %d';
+        $title = $title ?? 'Attention. Failed authentication attempt by user : %s, id : %d ';
         $this->notificationTitle = sprintf($title, $user->username, $user->getId());
         return $this->notificationTitle;
     }
@@ -141,7 +142,7 @@ class AntiBruteForceService
     private function setNotificationMessage(Employee $user, ?int $limit = null, ?string $body = null): string
     {
         $limit = $limit ?? $this->userNotifyFailedLoginAttempts;
-        $body = $body ?? 'The limit: %d of failed authentication attempts has been reached by user: %s, id: %s';
+        $body = $body ?? 'The limit: %d of failed authentication attempts has been reached by user: %s, id: %s ';
         $this->notificationMessage = sprintf($body, $limit, $user->username, $user->getId());
         return $this->notificationMessage;
     }
@@ -174,24 +175,13 @@ class AntiBruteForceService
     private function sendEmail(Employee $user): bool
     {
 		try {
-		    $email = new Email();
-            $email->e_type_id = Email::TYPE_OUTBOX;
-            $email->e_status_id = Email::STATUS_PENDING;
-            $email->e_email_subject = $this->notificationTitle;
-            $email->body_html = $this->notificationMessage;
-            $email->e_email_from = $user->email;
-            $email->e_email_to = $user->email;
-
-            if (!$email->save()) {
-                throw new \RuntimeException($email->getErrorSummary(false)[0]);
-            }
-            $email->e_message_id = $email->generateMessageId();
-            $email->update();
-
-            //$mailResponse = $email->sendMail(); /* TODO::  */
-            /*if (isset($mailResponse['error']) && $mailResponse['error']) {
-                throw new \RuntimeException(VarDumper::dumpAsString($mailResponse['error'], 10));
-            }*/
+		    Yii::$app->mailer->compose()
+                ->setFrom($user->email)
+                ->setTo($user->email)
+                ->setSubject($this->notificationTitle)
+                ->setTextBody($this->notificationMessage)
+                ->setHtmlBody($this->notificationMessage)
+                ->send();
 		} catch (\Throwable $throwable) {
 		    Yii::error(AppHelper::throwableFormatter($throwable), 'antiBruteForceService:sendEmail:failed');
 		    return false;
@@ -205,7 +195,7 @@ class AntiBruteForceService
      */
     public function setTitleForBlocked(Employee $user): string
     {
-        $this->notificationTitle = sprintf('Account is blocked. User : %s, id : %d', $user->username, $user->getId());
+        $this->notificationTitle = sprintf('Account is blocked. User : %s, id : %d ', $user->username, $user->id);
         return $this->notificationTitle;
     }
 
@@ -214,17 +204,17 @@ class AntiBruteForceService
      * @param bool $info
      * @return string
      */
-    public function setMessageForBlocked(Employee $user, bool $info = false): string
+    public function setMessageForBlocked(Employee $user, bool $info = true): string
     {
-        $this->notificationMessage = "Account is blocked. \n";
-        $this->notificationMessage .= $this->setNotificationMessage($user) . "\n\n";
+        $this->notificationMessage = 'Account is blocked. User : ' . $user->username . ' id : ' . $user->id . " \n\n";
+        $this->notificationMessage .= "Last failed Attempts: \n\n";
 
         if ($info) {
             foreach (UserFailedLogin::getLastAttempts($user->id) as $value) {
                 /** @var UserFailedLogin $value */
-                $this->notificationMessage .= 'Date : ' . $value->ufl_created_dt .
-                ' IP : ' . $value->ufl_ip .
-                ' User Agent : ' . $value->ufl_ua . "\n";
+                $this->notificationMessage .= 'Date : (' . $value->ufl_created_dt .
+                ') IP : (' . $value->ufl_ip .
+                ') User Agent : (' . $value->ufl_ua . ")\n";
             }
         }
         return $this->notificationMessage;

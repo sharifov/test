@@ -75,7 +75,6 @@ class SiteController extends FController
             ],
             'captcha' => [
                 'class' => CaptchaAction::class,
-                'fixedVerifyCode' => null,
                 'maxLength' => 6,
                 'minLength' => 5,
                 'transparent' => true,
