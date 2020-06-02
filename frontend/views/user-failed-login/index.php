@@ -35,7 +35,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'ufl_user_id:userName',
             'ufl_ua',
             'ufl_ip',
-            'ufl_active:boolean',
             'ufl_session_id',
             ['class' => DateTimeColumn::class, 'attribute' => 'ufl_created_dt'],
 

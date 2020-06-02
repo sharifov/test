@@ -17,7 +17,6 @@ use yii\db\ActiveRecord;
  * @property string|null $ufl_ip
  * @property string|null $ufl_session_id
  * @property string|null $ufl_created_dt
- * @property bool $ufl_active
  *
  * @property Employee $user
  */
@@ -37,7 +36,7 @@ class UserFailedLogin extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['ufl_ip', 'ufl_active'], 'required'],
+            [['ufl_ip'], 'required'],
             [['ufl_user_id'], 'integer'],
             [['ufl_created_dt'], 'safe'],
             [['ufl_username'], 'string', 'max' => 150],
@@ -45,7 +44,6 @@ class UserFailedLogin extends ActiveRecord
             [['ufl_ip'], 'string', 'max' => 40],
             [['ufl_session_id'], 'string', 'max' => 100],
             [['ufl_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ufl_user_id' => 'id']],
-            ['ufl_active', 'boolean'],
         ];
     }
 
@@ -63,7 +61,6 @@ class UserFailedLogin extends ActiveRecord
             'ufl_ip' => 'Ip',
             'ufl_session_id' => 'Session ID',
             'ufl_created_dt' => 'Created',
-            'ufl_active' => 'Active',
         ];
     }
 
@@ -114,8 +111,7 @@ class UserFailedLogin extends ActiveRecord
         ?int $userId,
         ?string $userAgent,
         string $ip,
-        ?string $sessionId,
-        bool $active = true
+        ?string $sessionId
     ): self {
         $model = new static();
         $model->ufl_username = $username;
@@ -123,7 +119,6 @@ class UserFailedLogin extends ActiveRecord
         $model->ufl_ua = $userAgent;
         $model->ufl_ip = $ip;
         $model->ufl_session_id = $sessionId;
-        $model->ufl_active = $active;
         return $model;
     }
 
@@ -133,7 +128,7 @@ class UserFailedLogin extends ActiveRecord
      */
     public static function getActiveByIp(string $ip): array
     {
-        return self::find()->where(['ufl_ip' => $ip, 'ufl_active' => true])->all();
+        return self::find()->where(['ufl_ip' => $ip])->all(); /* TODO::  */
     }
 
     /**
@@ -142,7 +137,7 @@ class UserFailedLogin extends ActiveRecord
      */
     public static function getCountActiveByIp(string $ip): ?int
     {
-        return self::find()->where(['ufl_ip' => $ip, 'ufl_active' => true])->count();
+        return self::find()->where(['ufl_ip' => $ip])->count(); /* TODO::  */
     }
 
     /**
@@ -151,7 +146,7 @@ class UserFailedLogin extends ActiveRecord
      */
     public static function getCountActiveByUserId(int $userId): ?int
     {
-        return self::find()->where(['ufl_user_id' => $userId, 'ufl_active' => true])->count();
+        return self::find()->where(['ufl_user_id' => $userId])->count(); /* TODO::  */
     }
 
     /**
@@ -162,7 +157,7 @@ class UserFailedLogin extends ActiveRecord
     public static function getLastAttempts(int $userId, int $limit = 3): array
     {
         return self::find()
-            ->where(['ufl_user_id' => $userId, 'ufl_active' => true])
+            ->where(['ufl_user_id' => $userId]) /* TODO::  */
             ->orderBy(['ufl_id' => SORT_DESC])
             ->limit($limit)
             ->all();

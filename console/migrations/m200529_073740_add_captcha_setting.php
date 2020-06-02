@@ -76,7 +76,6 @@ class m200529_073740_add_captcha_setting extends Migration
             'ufl_ip' => $this->string(40)->notNull(),
             'ufl_session_id' => $this->string(100),
             'ufl_created_dt' => $this->dateTime(),
-            'ufl_active' => $this->boolean()->notNull()->defaultValue(true),
         ], $tableOptions);
 
         $this->createIndex('IND-user_failed_login-active', '{{%user_failed_login}}', 'ufl_active');

@@ -24,8 +24,6 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'ufl_created_dt')->textInput() ?>
 
-    <?= $form->field($model, 'ufl_active')->checkbox() ?>
-
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>

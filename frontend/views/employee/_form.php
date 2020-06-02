@@ -683,7 +683,6 @@ JS;
                     'dataProvider' => $lastFailedLoginAttempts,
                     'columns' => [
                         'ufl_ip',
-                        'ufl_active:boolean',
                         'ufl_ua',
                         'ufl_session_id',
                         'ufl_created_dt:byUserDateTime',
