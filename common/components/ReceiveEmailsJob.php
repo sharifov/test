@@ -168,6 +168,8 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                         $email->e_ref_message_id = $mail['ei_ref_mess_ids'];
                         $email->e_message_id = $mail['ei_message_id'];
 
+                        $email->e_client_id = $this->emailService->detectClientId($email->e_email_from);
+
                         $lead_id = $this->emailService->detectLeadId($email);
                         $case_id = $this->emailService->detectCaseId($email);
 
@@ -210,7 +212,8 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                                     );
                                     $email->e_lead_id = $process->leadId;
                                     $email->e_case_id = $process->caseId;
-                                    $email->save(false);
+									$email->e_client_id = $this->emailService->detectClientId($email->e_email_from);
+									$email->save(false);
                                 } catch (\Throwable $e) {
                                     Yii::error($e->getMessage(), 'ReceiveEmailsJob:EmailIncomingService:create');
                                 }

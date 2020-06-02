@@ -44,7 +44,6 @@ class QuotePrice extends \yii\db\ActiveRecord
     ];
 
     public $oldParams;
-    public $selling, $net, $service_fee;
 
     /**
      * @param array $attributes
@@ -204,11 +203,10 @@ class QuotePrice extends \yii\db\ActiveRecord
      * @param int $precision
      * @param bool $setZero
      */
-    public function roundValue($precision = 2, $setZero = false): void
+    public function roundValue($precision = 2): void
     {
         foreach ($this->attributes as $attr => $value) {
             if (in_array($attr, ['net', 'selling', 'extra_mark_up', 'mark_up', 'taxes', 'fare', 'service_fee'])) {
-                $value = $setZero && $value < 0 ? 0 : $value;
                 $this->$attr = round($value, $precision);
             }
         }
@@ -222,7 +220,7 @@ class QuotePrice extends \yii\db\ActiveRecord
         return [
             [['quote_id'], 'integer'],
             [['selling', 'net', 'fare', 'taxes', 'mark_up', 'service_fee'], 'number'],
-            [['extra_mark_up', 'mark_up'], 'number', 'min' => 0],
+            [['extra_mark_up', 'service_fee'], 'number', 'min' => 0],
 
             [['created', 'updated', 'oldParams', 'uid'], 'safe'],
             [['passenger_type'], 'string', 'max' => 255],
