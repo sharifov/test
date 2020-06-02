@@ -1111,6 +1111,10 @@
       .phone-widget .dial__btn[value="✱"] {
         font-size: 18px;
         font-weight: normal; }
+      .phone-widget .dial__btn[disabled], .phone-widget .dial__btn.disabled {
+        color: rgba(255, 255, 255, 0.3);
+        background-color: rgba(255, 255, 255, 0.08);
+        cursor: auto; }
   .phone-widget .additional-info {
     position: absolute;
     bottom: 0;
