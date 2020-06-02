@@ -51,26 +51,31 @@ class Pricing implements ParseDumpInterface
         preg_match($ticketPricePattern, $string, $ticketPriceMatches);
 
         if (isset($ticketPriceMatches[1]) && $ticketPriceText = trim($ticketPriceMatches[1])) {
-            $i = 0;
+            $j = 0;
             $ticketPrices = explode("\n", $ticketPriceText);
             $pricePattern = '/
-                (\d{1,2})-
+                ^(\d{1,2})\- # count pas
                 \w|\s+USD(\d+.\d+) # fare
-                \s+(\d+.\d+)[A-Z]{1,3} # taxes
+                \s+((\d+.\d+)[A-Z]{1,3})? # taxes
                 \s+USD(\d+.\d+)([A-Z]{3}) # amount + type                         
                 /x';
 
             foreach ($ticketPrices as $row) {
+                $row = trim($row);
+
+                preg_match('/^(\d{1,2})-/', $row, $matchesCount);
                 preg_match($pricePattern, $row, $matches);
 
-                if (isset($matches[1])) {
-                    $type = $matches[5] ?? null;
-                    $result[$i]['type'] = $this->typeMapping($type);
-                    $result[$i]['fare'] = $matches[2] ?? null;
-                    $result[$i]['taxes'] = $matches[3] ?? null;
-                    $i ++;
-                }
+                if (isset($matches[1], $matchesCount[1])) {
 
+                    for ($i = 0; $i < (int) $matchesCount[1]; $i++) {
+                        $type = $matches[6] ?? null;
+                        $result[$j]['type'] = $this->typeMapping($type);
+                        $result[$j]['fare'] = $matches[2] ?? null;
+                        $result[$j]['taxes'] = !empty($matches[4]) ? $matches[4] : '0.00';
+                        $j ++;
+                    }
+                }
             }
         }
         return $result;
@@ -83,13 +88,13 @@ class Pricing implements ParseDumpInterface
     private function typeMapping(?string $source): string
     {
         switch ($source) {
-            case 'ADT': case 'JCB': case 'PFA': case 'ITX': case 'WEB':
+            case 'ADT': case 'JCB': case 'PFA': case 'ITX': case 'JWZ': case 'WEB':
                 $result = 'ADT';
                 break;
-            case 'CNN': case 'JNN': case 'PNN': case 'INN':
+            case 'CNN': case 'JNN':case 'CBC': case 'INN': case 'PNN': case 'JWC': case 'UNN':
                 $result = 'CHD';
                 break;
-            case 'INF': case 'JNF': case 'PNF': case 'ITF':
+            case 'INF': case 'INS': case 'JNS':case 'CBI': case 'JNF': case 'PNF': case 'ITF': case 'ITS':
                 $result = 'INF';
                 break;
             default:

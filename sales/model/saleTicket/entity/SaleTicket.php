@@ -22,8 +22,9 @@ use yii\db\ActiveRecord;
  * @property string|null $st_client_name
  * @property string|null $st_original_fop
  * @property string|null $st_charge_system
- * @property string|null $st_penalty_type
+ * @property int|null $st_penalty_type
  * @property float|null $st_penalty_amount
+ * @property string|null $st_refund_waiver
  * @property float|null $st_selling
  * @property float|null $st_service_fee
  * @property float|null $st_recall_commission
@@ -43,8 +44,18 @@ use yii\db\ActiveRecord;
  */
 class SaleTicket extends \yii\db\ActiveRecord
 {
+	private const AIRLINE_PENALTY_W 	= 1;
+	private const AIRLINE_PENALTY_WIC 	= 2;
+	private const AIRLINE_PENALTY_APFR 	= 3;
+	private const AIRLINE_PENALTY_CA 	= 4;
+	private const AIRLINE_PENALTY_NP 	= 5;
 
-	private const CHARGE_SYSTEM_LIST = [
+	private const AIRLINE_PENALTY_LIST = [
+		self::AIRLINE_PENALTY_W 	=> 'Waived',
+		self::AIRLINE_PENALTY_WIC 	=> 'Waived, if cancelled',
+		self::AIRLINE_PENALTY_APFR 	=> 'As per fare rules',
+		self::AIRLINE_PENALTY_CA 	=> 'Contact Airline',
+		self::AIRLINE_PENALTY_NP 	=> 'Not permitted'
 	];
 
 	public function beforeSave($insert)
@@ -101,9 +112,11 @@ class SaleTicket extends \yii\db\ActiveRecord
 
             ['st_original_fop', 'string', 'max' => 5],
 
-            ['st_penalty_amount', 'string'],
+            ['st_penalty_amount', 'number'],
 
-            ['st_penalty_type', 'string', 'max' => 30],
+			['st_refund_waiver', 'string', 'max' => 50],
+
+            ['st_penalty_type', 'integer'],
 
             ['st_recall_commission', 'number'],
 
@@ -115,7 +128,7 @@ class SaleTicket extends \yii\db\ActiveRecord
 
             ['st_service_fee', 'number'],
 
-            ['st_ticket_number', 'string', 'max' => 15],
+            ['st_ticket_number', 'string', 'max' => 30],
 
             ['st_updated_dt', 'safe'],
 
@@ -161,6 +174,7 @@ class SaleTicket extends \yii\db\ActiveRecord
             'st_charge_system' => 'Charge System',
             'st_penalty_type' => 'Penalty Type',
             'st_penalty_amount' => 'Penalty Amount',
+            'st_refund_waiver' => 'Refund Waiver',
             'st_selling' => 'Selling',
             'st_service_fee' => 'Service Fee',
             'st_recall_commission' => 'Recall Commission',
@@ -188,7 +202,7 @@ class SaleTicket extends \yii\db\ActiveRecord
 	private function calculateUpfrontCharge()
 	{
 		if (in_array($this->st_original_fop, ['CC', 'SPLIT', 'SPLT'])) {
-			return $this->st_recall_commission + $this->st_markup + $this->getPenaltyAmountIntValue() - $this->st_service_fee;
+			return $this->st_recall_commission + $this->st_markup - $this->st_service_fee;
 		}
 		return 0;
 	}
@@ -196,9 +210,9 @@ class SaleTicket extends \yii\db\ActiveRecord
 	private function calculateRefundableAmount()
 	{
 		if (in_array($this->st_original_fop, ['CP', 'CK', 'VCC'])) {
-			return $this->st_selling - $this->st_recall_commission - $this->st_markup - $this->getPenaltyAmountIntValue();
+			return $this->st_selling - $this->st_recall_commission - $this->st_markup - $this->st_penalty_amount;
 		}
-		return $this->st_selling;
+		return $this->st_selling - $this->st_penalty_amount;
 	}
 
 	private function getPenaltyAmountIntValue(): float
@@ -222,6 +236,7 @@ class SaleTicket extends \yii\db\ActiveRecord
 		$ticket->st_charge_system = $dto->chargeSystem;
 		$ticket->st_penalty_type = $dto->penaltyType;
 		$ticket->st_penalty_amount = $dto->penaltyAmount;
+		$ticket->st_refund_waiver = $dto->refundWaiver;
 		$ticket->st_selling = $dto->selling;
 		$ticket->st_service_fee = $dto->serviceFee;
 		$ticket->st_recall_commission = $dto->recallCommission;
@@ -234,5 +249,20 @@ class SaleTicket extends \yii\db\ActiveRecord
 	public function isNeedAdditionalInfoForEmail(): bool
 	{
 		return (((in_array($this->st_original_fop, ['CK', 'CP']) && in_array($this->st_charge_system, ['Stripe', 'Auth.net Capital', 'Auth.net'])) || $this->st_original_fop === 'VCC'));
+	}
+
+	public static function getAirlinePenaltyList(): array
+	{
+		return self::AIRLINE_PENALTY_LIST;
+	}
+
+	public static function getPenaltyTypeId(string $penaltyType): ?int
+	{
+		return array_search($penaltyType, self::getAirlinePenaltyList(), false) ?: null;
+	}
+
+	public static function getPenaltyTypeName(?int $id): ?string
+	{
+		return self::getAirlinePenaltyList()[$id] ?? '';
 	}
 }

@@ -37,6 +37,8 @@ use yii\db\ActiveRecord;
  * @property string|null $css_out_date
  * @property string|null $css_in_date
  * @property string|null $css_fare_rules
+ * @property int|null $css_penalty_type
+ * @property string|null $css_departure_dt
  *
  * @property Employee $cssCreatedUser
  * @property Cases $cssCs
@@ -116,16 +118,17 @@ class CaseSale extends \yii\db\ActiveRecord
     {
         return [
             [['css_cs_id', 'css_sale_id', 'css_sale_data'], 'required'],
-            [['css_cs_id', 'css_sale_id', 'css_sale_pax'], 'integer'],
+            [['css_cs_id', 'css_sale_id', 'css_sale_pax', 'css_penalty_type'], 'integer'],
             [['css_sale_created_dt', 'css_sale_data', 'css_created_dt', 'css_updated_dt', 'css_created_user_id', 'css_updated_user_id', 'css_fare_rules'], 'safe'],
             [['css_sale_book_id', 'css_sale_pnr'], 'string', 'max' => 8],
             [['css_cs_id', 'css_sale_id'], 'unique', 'targetAttribute' => ['css_cs_id', 'css_sale_id']],
             [['css_cs_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['css_cs_id' => 'cs_id']],
             [['css_profit', 'css_charged'], 'number'],
             [['css_out_departure_airport', 'css_out_arrival_airport', 'css_in_departure_airport', 'css_in_arrival_airport'], 'string', 'max' => 3],
-            [['css_out_date', 'css_in_date', 'css_fare_rules'], 'string'],
-            [['css_out_date', 'css_in_date'],  'datetime', 'format' => 'php:Y-m-d H:i:s'],
+            [['css_out_date', 'css_in_date', 'css_fare_rules', 'css_departure_dt'], 'string'],
+            [['css_out_date', 'css_in_date', 'css_departure_dt'],  'datetime', 'format' => 'php:Y-m-d H:i:s'],
             [['css_charge_type'], 'string', 'max' => 100],
+			['css_penalty_type', 'in', 'range' => array_keys(SaleTicket::getAirlinePenaltyList()), 'skipOnEmpty' => true,]
         ];
     }
 
@@ -156,6 +159,8 @@ class CaseSale extends \yii\db\ActiveRecord
             'css_out_date' => 'Out date',
             'css_in_date' => 'In date',
             'css_fare_rules' => 'Fare rules',
+			'css_penalty_type' => 'Penalty Type',
+			'css_departure_dt' => 'Departure DT'
         ];
     }
 

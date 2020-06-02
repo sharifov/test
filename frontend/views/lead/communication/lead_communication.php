@@ -21,8 +21,8 @@ use vova07\imperavi\Widget;
 
 $c_type_id = $comForm->c_type_id;
 
-$pjaxContainerId = $isCommunicationLogEnabled ? 'pjax-lead-communication-log' : 'pjax-lead-communication';
-$listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '_list_item';
+$pjaxContainerId = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled ? 'pjax-lead-communication-log' : 'pjax-lead-communication';
+$listItemView = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled ? '_list_item_log' : '_list_item';
 ?>
 
 <div class="x_panel">
