@@ -4,6 +4,7 @@
 /* @var $form yii\bootstrap\ActiveForm */
 /* @var $model LoginForm */
 
+use sales\services\authentication\AntiBruteForceService;
 use yii\captcha\Captcha;
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
@@ -30,7 +31,7 @@ use yii\helpers\Url;
                     <?php /*<input type="password" class="form-control" placeholder="Password" required="" />*/ ?>
                 </div>
 
-                <?php if ($model->checkCaptchaEnable()): ?>
+                <?php if ((new AntiBruteForceService())->checkCaptchaEnable()): ?>
                     <div>
                         <?= $form->field($model, 'verifyCode')->widget(Captcha::class, [
                             'captchaAction' => Url::to('/site/captcha'),

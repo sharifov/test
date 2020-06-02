@@ -14,7 +14,7 @@ use yii\helpers\VarDumper;
 /**
  * Class antiBruteForceService
  */
-class antiBruteForceService
+class AntiBruteForceService
 {
     public string $notificationTitle;
     public string $notificationMessage;
@@ -24,6 +24,7 @@ class antiBruteForceService
     private int $userNotifyFailedLoginAttempts;
     private int $userBlockAttempts;
     private string $ip;
+    private Employee $user;
 
     /**
      * antiBruteForceService constructor.
@@ -93,6 +94,8 @@ class antiBruteForceService
             if ($attempts >= $this->userNotifyFailedLoginAttempts &&
                 $attempts < $this->userBlockAttempts
             ) {
+                $this->setNotificationTitle($user);
+                $this->setNotificationMessage($user);
                 $this->sendNotification($user);
                 $this->sendEmail($user);
 
@@ -103,16 +106,16 @@ class antiBruteForceService
                     'antiBruteForceService:checkAttempts:saveFailed');
                 }
 
-                $this->setNotificationTitle($user, 'Account is blocked. User : %s, id : %d');
-                // $this->setNotificationMessage($user, 'Account is blocked. User : %s, id : %d');
-                // getMessageForBlocked
-
+                $this->setTitleForBlocked($user);
+                $this->setMessageForBlocked($user);
                 $this->sendNotification($user);
                 $this->sendEmail($user);
 
-
-
-
+                $admins = Employee::getAllEmployeesByRole(Employee::ROLE_ADMIN);;
+                foreach ($admins as $admin) {
+                    $this->sendNotification($admin);
+                    $this->sendEmail($admin);
+                }
             }
         }
     }
@@ -125,7 +128,8 @@ class antiBruteForceService
     private function setNotificationTitle(Employee $user, ?string $title = null): string
     {
         $title = $title ?? 'Attention. Failed authentication attempt by user : %s, id : %d';
-        return $this->notificationTitle = sprintf($title, $user->username, $user->getId());
+        $this->notificationTitle = sprintf($title, $user->username, $user->getId());
+        return $this->notificationTitle;
     }
 
     /**
@@ -150,8 +154,8 @@ class antiBruteForceService
     {
         $notification = Notifications::create(
             $user->id,
-            $this->setNotificationTitle($user),
-            $this->setNotificationMessage($user),
+            $this->notificationTitle,
+            $this->notificationMessage,
             Notifications::TYPE_WARNING,
             true
         );
@@ -173,11 +177,10 @@ class antiBruteForceService
 		    $email = new Email();
             $email->e_type_id = Email::TYPE_OUTBOX;
             $email->e_status_id = Email::STATUS_PENDING;
-            $email->e_email_subject = $this->setNotificationTitle($user);
-            $email->body_html = $this->setNotificationMessage($user);
+            $email->e_email_subject = $this->notificationTitle;
+            $email->body_html = $this->notificationMessage;
             $email->e_email_from = $user->email;
             $email->e_email_to = $user->email;
-            $email->e_created_dt = date('Y-m-d H:i:s');
 
             if (!$email->save()) {
                 throw new \RuntimeException($email->getErrorSummary(false)[0]);
@@ -196,31 +199,34 @@ class antiBruteForceService
 		return true;
     }
 
+    /**
+     * @param Employee $user
+     * @return string
+     */
+    public function setTitleForBlocked(Employee $user): string
+    {
+        $this->notificationTitle = sprintf('Account is blocked. User : %s, id : %d', $user->username, $user->getId());
+        return $this->notificationTitle;
+    }
 
     /**
      * @param Employee $user
      * @param bool $info
      * @return string
      */
-    public function getMessageForBlocked(Employee $user, bool $info = false): string
+    public function setMessageForBlocked(Employee $user, bool $info = false): string
     {
-        $result = "Account is blocked. \n";
-        $result .= $this->setNotificationMessage($user) . "\n\n";
+        $this->notificationMessage = "Account is blocked. \n";
+        $this->notificationMessage .= $this->setNotificationMessage($user) . "\n\n";
 
         if ($info) {
             foreach (UserFailedLogin::getLastAttempts($user->id) as $value) {
                 /** @var UserFailedLogin $value */
-                $result .= 'Date : ' . $value->ufl_created_dt .
+                $this->notificationMessage .= 'Date : ' . $value->ufl_created_dt .
                 ' IP : ' . $value->ufl_ip .
                 ' User Agent : ' . $value->ufl_ua . "\n";
             }
         }
-        return $result;
+        return $this->notificationMessage;
     }
-
-    /* TODO::
-
-        add logic to profile
-     */
-
 }

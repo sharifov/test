@@ -1251,11 +1251,4 @@ class TestController extends FController
 		echo '<pre>';
 		print_r($service->sendAddedCreditCardToBO($saleOriginalData['projectApiKey'], $bookId, $saleId, $card));
 	}
-
-	public function actionZ()
-	{
-        $xxx = UserFailedLogin::getLastAttempts(501);
-        \yii\helpers\VarDumper::dump($xxx, 10, true); exit();
-        /* FOR DEBUG:: must by remove */
-	}
 }

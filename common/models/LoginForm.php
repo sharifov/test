@@ -2,7 +2,7 @@
 namespace common\models;
 
 use frontend\models\UserFailedLogin;
-use sales\services\authentication\antiBruteForceService;
+use sales\services\authentication\AntiBruteForceService;
 use Yii;
 use yii\base\Model;
 use yii\helpers\Url;
@@ -36,7 +36,7 @@ class LoginForm extends Model
             ['username', 'checkIsBlocked'],
             ['password', 'validatePassword'],
             ['verifyCode', 'captcha', 'captchaAction' => Url::to('/site/captcha'), 'when' => static function () {
-                return (new antiBruteForceService())->checkCaptchaEnable();
+                return (new AntiBruteForceService())->checkCaptchaEnable();
             }],
         ];
     }
@@ -127,7 +127,7 @@ class LoginForm extends Model
     private function checkByIp($user): bool
     {
         if($user->acl_rules_activated) {
-            $clientIP = antiBruteForceService::getClientIPAddress();
+            $clientIP = AntiBruteForceService::getClientIPAddress();
             if ($clientIP === 'UNKNOWN' ||  (!GlobalAcl::isActiveIPRule($clientIP) && !EmployeeAcl::isActiveIPRule($clientIP, $user->id))) {
                 $this->addError('username', sprintf('Remote Address %s Denied! Please, contact your Supervision or Administrator.', $clientIP));
                 return false;
@@ -187,9 +187,9 @@ class LoginForm extends Model
         if ($this->hasErrors()) {
             $userFailedLogin = UserFailedLogin::create(
                 $this->username,
-               $this->_user ? $this->_user->id : null,
+                $this->_user ? $this->_user->id : null,
                 Yii::$app->request->getUserAgent(),
-                antiBruteForceService::getClientIPAddress(),
+                AntiBruteForceService::getClientIPAddress(),
                 Yii::$app->session->id
             );
             if (!$userFailedLogin->save()) {
@@ -198,7 +198,7 @@ class LoginForm extends Model
             }
 
             if ($this->_user) {
-                (new antiBruteForceService())->checkAttempts($this->_user);
+                (new AntiBruteForceService())->checkAttempts($this->_user);
             }
             
 
