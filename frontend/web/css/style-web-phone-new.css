@@ -1172,6 +1172,33 @@
       font-size: 13px;
       line-height: 18px;
       color: #363c45; }
+  .phone-widget .additional-info.dial-popup {
+    background-color: #668BAF;
+    height: 335px; }
+    .phone-widget .additional-info.dial-popup .dial {
+      margin: 0; }
+    .phone-widget .additional-info.dial-popup form {
+      position: relative; }
+      .phone-widget .additional-info.dial-popup form .call-pane__dial-number {
+        padding-bottom: 20px;
+        border: 0 none; }
+      .phone-widget .additional-info.dial-popup form .call-pane__dial-clear-all {
+        bottom: auto;
+        top: 4px;
+        background-color: rgba(255, 255, 255, 0.2); }
+        .phone-widget .additional-info.dial-popup form .call-pane__dial-clear-all svg path {
+          fill: rgba(42, 63, 84, 0.2); }
+    .phone-widget .additional-info.dial-popup .additional-info__close,
+    .phone-widget .additional-info.dial-popup .additional-info__header-title {
+      color: #fff; }
+    .phone-widget .additional-info.dial-popup .additional-info__header {
+      border-bottom: none;
+      padding: 16px; }
+    .phone-widget .additional-info.dial-popup .additional-info__dial {
+      height: 202px; }
+    .phone-widget .additional-info.dial-popup .additional-info__body {
+      padding: 8px 16px;
+      height: 285px; }
   .phone-widget .call-pane-incoming {
     background: linear-gradient(180deg, #6caa62 0%, #227758 73.23%, #374d63 100%);
     border-radius: 0px 0px 6px 6px;

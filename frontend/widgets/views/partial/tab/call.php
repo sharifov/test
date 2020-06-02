@@ -256,7 +256,7 @@ $phoneFrom = $call ? $call->c_from : '';
         </a>
       </li>
       <li class="in-call-controls__item">
-        <a href="#" class="in-call-controls__action">
+        <a href="#" class="in-call-controls__action js-toggle-dial">
         <i class="fa fa-th"></i>
           <span>Dialpad</span>
         </a>
@@ -350,6 +350,42 @@ $phoneFrom = $call ? $call->c_from : '';
     </div>
     
   </div>
+
+  <!-- Dial popup -->
+  <div class="additional-info dial-popup">
+    <div class="additional-info__header">
+    <span class="additional-info__header-title">Dialpad</span>
+        <a href="#" class="additional-info__close">
+        <i class="fas fa-times"></i>
+        </a>
+    </div>
+    <div class="additional-info__body">
+
+      <form id="contact-list-calls-ajax" action="/contacts/list-calls-ajax" method="get">
+        <input type="text" id="call-pane__dial-number" class="call-pane__dial-number" name="q" maxlength="16" placeholder="Name, company, phone..." autocomplete="off" readonly="readonly">
+        <a href="#" class="call-pane__dial-clear-all is-shown">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 8.20625L12.7937 14L13.9999 12.7938L8.2062 7.00004L14 1.20621L12.7938 0L7 5.79383L1.2062 0L0 1.20621L5.7938 7.00004L7.97135e-05 12.7938L1.20628 14L7 8.20625Z" fill="white"></path>
+          </svg>
+        </a>
+      </form>
+      <ul class="call-pane__dial dial">
+        <li class="dial__item"><button class="dial__btn" value="1">1</button></li>
+        <li class="dial__item"><button class="dial__btn" value="2">2</button></li>
+        <li class="dial__item"><button class="dial__btn" value="3">3</button></li>
+        <li class="dial__item"><button class="dial__btn" value="4">4</button></li>
+        <li class="dial__item"><button class="dial__btn" value="5">5</button></li>
+        <li class="dial__item"><button class="dial__btn" value="6">6</button></li>
+        <li class="dial__item"><button class="dial__btn" value="7">7</button></li>
+        <li class="dial__item"><button class="dial__btn" value="8">8</button></li>
+        <li class="dial__item"><button class="dial__btn" value="9">9</button></li>
+        <li class="dial__item"><button class="dial__btn" value="✱">✱</button></li>
+        <li class="dial__item"><button class="dial__btn" value="0">0</button></li>
+        <li class="dial__item"><button class="dial__btn" value="#">#</button></li>
+      </ul>
+    </div>
+  </div>
+
   <div class="additional-info contact-info">
       <div class="additional-info__header">
         <div class="agent-text-avatar"><span>T</span></div>

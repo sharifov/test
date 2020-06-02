@@ -1774,6 +1774,59 @@
 		}
 	}
 
+	.additional-info {
+		$this: '.additional-info';
+		$callPane: '.call-pane';
+		&.dial-popup {
+			background-color: $color-steel;
+			height: 335px;
+
+			.dial {
+				margin: 0;
+			}
+
+			form {
+				position: relative;
+
+				#{$callPane}__dial-number {
+					padding-bottom: 20px;
+					border: 0 none;
+				}
+
+				#{$callPane}__dial-clear-all {
+					bottom: auto;
+					top: $sp05;
+					background-color: rgba($white, .2);
+					svg {
+						path {
+							fill: rgba($color-theme-dark, .2);
+						}
+					}
+				}
+			}
+
+			#{$this}__close,
+			#{$this}__header-title {
+				color: $white;
+			}
+
+			#{$this}__header {
+				border-bottom: none;
+				padding: $sp2;
+			}
+
+			#{$this}__dial {
+				height: 202px;
+			}
+
+			#{$this}__body {
+				padding: $sp $sp2;
+				height: 285px;
+			}
+		}
+	}
+
+
 	.call-pane-incoming {
 		background: linear-gradient(
 			180deg,

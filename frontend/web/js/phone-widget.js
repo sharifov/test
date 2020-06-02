@@ -531,6 +531,10 @@ $(document).ready(function() {
         $('.additional-info').slideDown(150);
     })
 
+    $('.js-toggle-dial').on('click', function() {
+        $('.dial-popup').show()
+    })
+
 });
 
 
