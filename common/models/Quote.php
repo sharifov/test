@@ -587,19 +587,12 @@ class Quote extends \yii\db\ActiveRecord
         if ($enableGdsParsers && $gds = ParsingDump::getGdsByQuote($this->gds)) {
             $dumpParser = (new ReservationService($gds))->parseReservation($this->reservation_dump, true, $this->itinerary);
         } else {
-            $dumpParser = self::parseDump($this->reservation_dump, true, $this->itinerary);
+            $validation = $this->gds === 'A' ? false : true ;
+            $dumpParser = self::parseDump($this->reservation_dump, $validation, $this->itinerary);
         }
         if (empty($dumpParser)) {
             $this->addError('reservation_dump', 'Incorrect reservation dump!');
 
-            \Yii::info(
-                \yii\helpers\VarDumper::dumpAsString([
-                    $this->gds,
-                    $this->reservation_dump,
-                ], 20, true),
-                'info\Debug:' . self::class . ':' . __FUNCTION__
-            );
-            /* TODO: FOR DEBUG:: must by remove */
         }
     }
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\services\parsingDump\lib\sabre;
+namespace sales\services\parsingDump\lib\amadeus;
 
 use sales\helpers\app\AppHelper;
 use sales\services\parsingDump\lib\ParseDumpInterface;
@@ -23,7 +23,7 @@ class Pricing implements ParseDumpInterface
                 $result['prices'] = $prices;
             }
         } catch (\Throwable $throwable) {
-            \Yii::error(AppHelper::throwableFormatter($throwable), 'Sabre:Pricing:parseDump:Throwable');
+            \Yii::error(AppHelper::throwableFormatter($throwable), 'amadeus:Pricing:parseDump:Throwable');
         }
         return $result;
     }
