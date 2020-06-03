@@ -19,32 +19,22 @@ class AntiBruteForceService
     public string $notificationTitle;
     public string $notificationMessage;
 
-    private bool $captchaLoginEnable;
-    private int $captchaLoginAttempts;
-    private int $userNotifyFailedLoginAttempts;
-    private int $userBlockAttempts;
-    private string $ip;
+    public bool $captchaLoginEnable;
+    public int $captchaLoginAttempts;
+    public int $userNotifyFailedLoginAttempts;
+    public int $userBlockAttempts;
+    public string $ip;
     private Employee $user;
 
     /**
-     * antiBruteForceService constructor.
-     * @param bool|null $captchaLoginEnable
-     * @param int|null $captchaLoginAttempts
-     * @param int|null $userNotifyFailedLoginAttempts
-     * @param int|null $userBlockAttempts
+     * AntiBruteForceService constructor.
      */
-    public function __construct(
-        ?bool $captchaLoginEnable = null,
-        ?int $captchaLoginAttempts = null,
-        ?int $userNotifyFailedLoginAttempts = null,
-        ?int $userBlockAttempts = null
-    ) {
+    public function __construct() {
         $settings = Yii::$app->params['settings'];
-        $this->captchaLoginEnable = ($captchaLoginEnable !== null) ? $captchaLoginEnable : $settings['captcha_login_enable'];
-        $this->captchaLoginAttempts = ($captchaLoginAttempts !== null) ? $captchaLoginAttempts : $settings['captcha_login_attempts'];
-        $this->userNotifyFailedLoginAttempts = ($userNotifyFailedLoginAttempts !== null) ?
-            $userNotifyFailedLoginAttempts : $settings['user_notify_failed_login_attempts'];
-        $this->userBlockAttempts = ($userBlockAttempts !== null) ? $userBlockAttempts : $settings['user_block_attempts'];
+        $this->captchaLoginEnable = $settings['captcha_login_enable'];
+        $this->captchaLoginAttempts = $settings['captcha_login_attempts'];
+        $this->userNotifyFailedLoginAttempts = $settings['user_notify_failed_login_attempts'];
+        $this->userBlockAttempts = $settings['user_block_attempts'];
         $this->ip = self::getClientIPAddress();
     }
 
@@ -214,8 +204,7 @@ class AntiBruteForceService
             foreach (UserFailedLogin::getLastAttempts($user->id) as $value) {
                 /** @var UserFailedLogin $value */
                 $this->notificationMessage .= 'Date : (' . $value->ufl_created_dt .
-                ') IP : (' . $value->ufl_ip .
-                ') User Agent : (' . $value->ufl_ua . ")\n";
+                ') IP : (' . $value->ufl_ip . ') User Agent : (' . $value->ufl_ua . ")\n";
             }
         }
         return $this->notificationMessage;
