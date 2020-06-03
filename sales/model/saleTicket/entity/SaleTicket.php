@@ -273,4 +273,9 @@ class SaleTicket extends \yii\db\ActiveRecord
 	{
 		return self::getAirlinePenaltyList()[$id] ?? '';
 	}
+
+	public function getFormattedOriginalFop(): string
+	{
+		return $this->st_original_fop === 'CP' ? 'CK' : $this->st_original_fop;
+	}
 }
