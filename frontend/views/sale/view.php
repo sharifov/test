@@ -149,7 +149,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                     <td><?=Html::encode($ticket->st_client_name)?></td>
                                     <td><?=Html::encode($ticket->st_ticket_number)?></td>
                                     <td><?=Html::encode($ticket->st_record_locator)?></td>
-                                    <td><?=Html::encode($ticket->st_original_fop)?></td>
+                                    <td><?=Html::encode($ticket->st_original_fop === 'CP' ? 'CK' : $ticket->st_original_fop)?></td>
                                     <td><?=Html::encode($ticket->st_charge_system)?></td>
                                     <td><?=Html::encode(SaleTicket::getPenaltyTypeName($ticket->st_penalty_type))?></td>
                                     <td><?=Html::encode(empty($ticket->st_refund_waiver) ? $ticket->st_penalty_amount : $ticket->st_refund_waiver)?></td>

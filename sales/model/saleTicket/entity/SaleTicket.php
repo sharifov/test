@@ -58,6 +58,14 @@ class SaleTicket extends \yii\db\ActiveRecord
 		self::AIRLINE_PENALTY_NP 	=> 'Not permitted'
 	];
 
+	private const CHARGE_SYSTEM_VALUE_LIST = [
+		'Stripe',
+		'Auth.net Capital',
+		'Auth.net',
+		'Authorize.net(CapitalOne)',
+		'Authorize.net'
+	];
+
 	public function beforeSave($insert)
 	{
 		$this->st_upfront_charge = $this->calculateUpfrontCharge();
@@ -248,7 +256,7 @@ class SaleTicket extends \yii\db\ActiveRecord
 
 	public function isNeedAdditionalInfoForEmail(): bool
 	{
-		return (((in_array($this->st_original_fop, ['CK', 'CP']) && in_array($this->st_charge_system, ['Stripe', 'Auth.net Capital', 'Auth.net'])) || $this->st_original_fop === 'VCC'));
+		return (((in_array($this->st_original_fop, ['CK', 'CP']) && in_array($this->st_charge_system, self::CHARGE_SYSTEM_VALUE_LIST, false)) || $this->st_original_fop === 'VCC'));
 	}
 
 	public static function getAirlinePenaltyList(): array

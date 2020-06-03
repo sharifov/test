@@ -53,12 +53,21 @@ class CreditCardForm extends Model
                 return str_replace(' ', '', $value);
             }],
             //[['cc_expiration'], 'string', 'max' => 18],
-            [['cc_expiration'], 'date', 'format' => 'MM / yyyy'],
+            [['cc_expiration'], 'validateDateFormat'],
             [['cc_expiration'], 'parseDate'],
             [['cc_holder_name'], 'string', 'max' => 50],
             [['cc_cvv'], 'string', 'max' => 4],
         ];
     }
+
+    public function validateDateFormat(): void
+	{
+		$fPattern = '/^\d{2}\/\d{2}$/';
+		$sPattern = '/^\d{2} \/ \d{2}$/';
+		if (!preg_match($fPattern, trim($this->cc_expiration)) && !preg_match($sPattern, trim($this->cc_expiration))) {
+			$this->addError('cc_expiration', 'The format of Expiration is invalid');
+		}
+	}
 
     public function parseDate()
     {
