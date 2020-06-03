@@ -71,6 +71,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
             ],
             [
+                'attribute' => 'dpp_language_id',
+                'value' => static function (\common\models\DepartmentPhoneProject $model) {
+                    return $model->dppLanguage ? $model->dppLanguage->language_id : '-';
+                },
+                'filter' => \common\models\Language::getLanguages(true,  'language')
+            ],
+            [
                 'attribute' => 'dpp_source_id',
                 'value' => static function (\common\models\DepartmentPhoneProject $model) {
                     return $model->dppSource ? $model->dppSource->name : '-';
