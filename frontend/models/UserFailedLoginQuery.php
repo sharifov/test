@@ -9,10 +9,14 @@ namespace frontend\models;
  */
 class UserFailedLoginQuery extends \yii\db\ActiveQuery
 {
-    /*public function active()
+    /**
+     * @param string $limitDateTime
+     * @return UserFailedLoginQuery
+     */
+    public function byLimitDateTime(string $limitDateTime): UserFailedLoginQuery
     {
-        return $this->andWhere('[[status]]=1');
-    }*/
+        return $this->andWhere(['>=', 'ufl_created_dt', $limitDateTime]);
+    }
 
     /**
      * {@inheritdoc}

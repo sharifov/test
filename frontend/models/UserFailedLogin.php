@@ -22,6 +22,17 @@ use yii\db\ActiveRecord;
  */
 class UserFailedLogin extends ActiveRecord
 {
+
+    public int $minutesInterval;
+    public $limitDateTime;
+
+    public function init()
+    {
+        parent::init();
+        $this->minutesInterval = \Yii::$app->params['settings']['user_attempts_minutes_interval'];
+        $this->limitDateTime = date('Y-m-d H:i:s', strtotime("-{$this->minutesInterval} minutes"));
+    }
+
     /**
      * @return string
      */
@@ -126,27 +137,36 @@ class UserFailedLogin extends ActiveRecord
      * @param string $ip
      * @return array|UserFailedLogin[]
      */
-    public static function getActiveByIp(string $ip): array
+    public function getActiveByIp(string $ip): array
     {
-        return self::find()->where(['ufl_ip' => $ip])->all(); /* TODO::  */
+        return self::find()
+            ->where(['ufl_ip' => $ip])
+            ->byLimitDateTime($this->limitDateTime)
+            ->all();
     }
 
     /**
      * @param string $ip
      * @return int|null
      */
-    public static function getCountActiveByIp(string $ip): ?int
+    public function getCountActiveByIp(string $ip): ?int
     {
-        return self::find()->where(['ufl_ip' => $ip])->count(); /* TODO::  */
+        return self::find()
+            ->where(['ufl_ip' => $ip])
+            ->byLimitDateTime($this->limitDateTime)
+            ->count();
     }
 
     /**
      * @param int $userId
      * @return int|null
      */
-    public static function getCountActiveByUserId(int $userId): ?int
+    public function getCountActiveByUserId(int $userId): ?int
     {
-        return self::find()->where(['ufl_user_id' => $userId])->count(); /* TODO::  */
+        return self::find()
+            ->where(['ufl_user_id' => $userId])
+            ->byLimitDateTime($this->limitDateTime)
+            ->count();
     }
 
     /**
@@ -157,7 +177,7 @@ class UserFailedLogin extends ActiveRecord
     public static function getLastAttempts(int $userId, int $limit = 3): array
     {
         return self::find()
-            ->where(['ufl_user_id' => $userId]) /* TODO::  */
+            ->where(['ufl_user_id' => $userId])
             ->orderBy(['ufl_id' => SORT_DESC])
             ->limit($limit)
             ->all();

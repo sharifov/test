@@ -77,7 +77,7 @@ class AntiBruteForceService
     public function checkCaptchaEnable(): bool
     {
         if ($this->captchaLoginEnable) {
-            $failedLoginCount = UserFailedLogin::getCountActiveByIp($this->ip);
+            $failedLoginCount = (new UserFailedLogin())->getCountActiveByIp($this->ip);
             if ($this->captchaLoginAttempts === 0 || $failedLoginCount >= $this->captchaLoginAttempts) {
                 return true;
             }
@@ -90,7 +90,7 @@ class AntiBruteForceService
      */
     public function checkAttempts(Employee $user): void
     {
-        if (!$user->isBlocked() && $attempts = UserFailedLogin::getCountActiveByUserId($user->id)) {
+        if (!$user->isBlocked() && $attempts = (new UserFailedLogin())->getCountActiveByUserId($user->id)) {
             if ($this->userNotifyFailedLoginAttempts !== 0 &&
                 $attempts >= $this->userNotifyFailedLoginAttempts &&
                 $attempts < $this->userBlockAttempts
@@ -113,6 +113,7 @@ class AntiBruteForceService
                 $this->sendEmail($user);
 
                 $admins = Employee::getAllEmployeesByRole(Employee::ROLE_ADMIN);
+                $this->setMessageForBlocked($user, false);
                 foreach ($admins as $admin) {
                     $this->sendNotification($admin);
                     $this->sendEmail($admin);
@@ -176,7 +177,7 @@ class AntiBruteForceService
     {
 		try {
 		    Yii::$app->mailer->compose()
-                ->setFrom($user->email)
+                ->setFrom(\Yii::$app->params['email_from']['no-reply'])
                 ->setTo($user->email)
                 ->setSubject($this->notificationTitle)
                 ->setTextBody($this->notificationMessage)

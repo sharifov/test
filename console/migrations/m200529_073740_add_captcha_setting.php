@@ -62,6 +62,14 @@ class m200529_073740_add_captcha_setting extends Migration
             's_updated_dt' => date('Y-m-d H:i:s'),
             's_category_id' => $category ? $category->sc_id : null,
         ]);
+        $this->insert('{{%setting}}', [
+            's_key' => 'user_attempts_minutes_interval',
+            's_name' => 'User attempts minutes interval',
+            's_type' => \common\models\Setting::TYPE_INT,
+            's_value' => 10,
+            's_updated_dt' => date('Y-m-d H:i:s'),
+            's_category_id' => $category ? $category->sc_id : null,
+        ]);
 
         $tableOptions = null;
         if ($this->db->driverName === 'mysql') {
@@ -78,7 +86,6 @@ class m200529_073740_add_captcha_setting extends Migration
             'ufl_created_dt' => $this->dateTime(),
         ], $tableOptions);
 
-        $this->createIndex('IND-user_failed_login-active', '{{%user_failed_login}}', 'ufl_active');
         $this->createIndex('IND-user_failed_login-ufl_ip', '{{%user_failed_login}}', 'ufl_ip');
         $this->addForeignKey('FK-user_failed_login-ufl_user_id',
             '{{%user_failed_login}}', ['ufl_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
@@ -101,10 +108,10 @@ class m200529_073740_add_captcha_setting extends Migration
         }
 
         $this->delete('{{%setting}}', ['IN', 's_key', [
-            'captcha_login_enable', 'captcha_login_attempts', 'user_notify_failed_login_attempts', 'user_block_attempts',
+            'captcha_login_enable', 'captcha_login_attempts', 'user_notify_failed_login_attempts',
+            'user_block_attempts', 'user_attempts_minutes_interval',
         ]]);
 
-        $this->dropIndex('IND-user_failed_login-active', '{{%user_failed_login}}');
         $this->dropIndex('IND-user_failed_login-ufl_ip', '{{%user_failed_login}}');
         $this->dropTable('{{%user_failed_login}}');
 
