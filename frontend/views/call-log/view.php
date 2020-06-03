@@ -7,7 +7,7 @@ use yii\widgets\DetailView;
 /* @var $model sales\model\callLog\entity\callLog\CallLog */
 
 $this->title = $model->cl_id;
-$this->params['breadcrumbs'][] = ['label' => 'Call Logs', 'url' => ['list']];
+$this->params['breadcrumbs'][] = ['label' => 'My Call Logs', 'url' => ['list']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>
