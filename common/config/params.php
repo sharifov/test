@@ -13,6 +13,7 @@ return [
 
     'email_from' => [
         'sales' => 'sales@travelinsides.com',
+        'no-reply' => 'no-reply@techork.com',
     ],
 
     'email_to' => [
@@ -60,4 +61,5 @@ return [
         'password'  => '',
         'iv'        => '',
     ],
+
 ];

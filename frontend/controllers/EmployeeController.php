@@ -14,8 +14,11 @@ use common\models\UserGroupAssign;
 use common\models\UserParams;
 use common\models\UserProductType;
 use common\models\UserProfile;
+use frontend\models\search\UserFailedLoginSearch;
+use frontend\models\UserFailedLogin;
 use frontend\models\UserMultipleForm;
 use sales\auth\Auth;
+use sales\helpers\app\AppHelper;
 use sales\model\userVoiceMail\entity\search\UserVoiceMailSearch;
 use Yii;
 use yii\bootstrap4\Html;
@@ -686,12 +689,20 @@ class EmployeeController extends FController
                 }
             }
 
+        $dataLastFailedLogin = new ActiveDataProvider([
+            'query' => UserFailedLogin::find()->andFilterWhere(['ufl_user_id' => $model->id]),
+            'sort'=> ['defaultOrder' => ['ufl_id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 10,
+            ],
+        ]);
 
         $result = [
             'model' => $model,
             'modelUserParams' => $modelUserParams,
             'dataProvider' => $dataProvider,
             'modelProfile' => $modelProfile,
+            'lastFailedLoginAttempts' => $dataLastFailedLogin,
         ];
 
 		$userVoiceMailSearch = new UserVoiceMailSearch();

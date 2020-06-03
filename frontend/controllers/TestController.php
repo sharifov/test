@@ -40,6 +40,7 @@ use DateInterval;
 use DatePeriod;
 use DateTime;
 use frontend\models\form\CreditCardForm;
+use frontend\models\UserFailedLogin;
 use frontend\widgets\lead\editTool\Form;
 use frontend\widgets\newWebPhone\sms\socket\Message;
 use frontend\widgets\notification\NotificationMessage;
