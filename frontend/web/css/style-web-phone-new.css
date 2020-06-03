@@ -1463,50 +1463,89 @@
   bottom: 180px;
   right: 0px;
   margin: 1rem; }
+  .phone-widget-icon__ongoing:empty, .phone-widget-icon__text:empty, .phone-widget-icon__time:empty {
+    display: none; }
+  .phone-widget-icon__state {
+    display: flex;
+    flex-direction: column;
+    align-items: center; }
+  .phone-widget-icon__text {
+    text-transform: uppercase;
+    font-size: 11px;
+    line-height: 16px; }
+  .phone-widget-icon__ongoing {
+    font-size: 14px;
+    line-height: 14px;
+    font-weight: bold;
+    color: #FFEEB1; }
+  .phone-widget-icon__time {
+    font-size: 16px;
+    line-height: 16px;
+    color: rgba(255, 255, 255, 0.75); }
   .phone-widget-icon .standby-phone {
-    height: 56px;
-    width: 56px;
+    height: 70px;
+    width: 70px;
     color: #fff;
-    background-color: #2a3f54;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%; }
+    flex-direction: column;
+    border-radius: 50%;
+    box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.6); }
     .phone-widget-icon .standby-phone i {
-      font-size: 32px;
-      transform: rotate3d(1, 1, 5, -100deg); }
+      font-size: 22px;
+      display: none; }
+  .phone-widget-icon .widget-icon-inner:before {
+    content: '';
+    width: 18px;
+    height: 18px;
+    border: 3px solid #fff;
+    background-color: #D15151;
+    position: absolute;
+    box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.6);
+    border-radius: 50%;
+    left: 0;
+    top: -2px; }
+  .phone-widget-icon .widget-icon-inner[data-wo-status="online"]:before {
+    background-color: #53E93A; }
+  .phone-widget-icon .widget-icon-inner[data-wi-type="default"] .standby-phone {
+    background-color: #2a3f54; }
+    .phone-widget-icon .widget-icon-inner[data-wi-type="default"] .standby-phone .icon-phone {
+      display: block; }
+  .phone-widget-icon .widget-icon-inner[data-wi-type="incoming"] .standby-phone {
+    background-color: #82BA3A;
+    align-items: flex-end;
+    padding-bottom: 26px;
+    flex-direction: row-reverse; }
+    .phone-widget-icon .widget-icon-inner[data-wi-type="incoming"] .standby-phone .icon-phone-answer {
+      display: block;
+      transform: rotate(-45deg); }
+  .phone-widget-icon .widget-icon-inner[data-wi-type="incoming"] .phone-widget-icon__ongoing {
+    margin-left: 2px; }
+  .phone-widget-icon .widget-icon-inner[data-wi-type="incoming"].animate .standby-phone {
+    animation: pulse-animation-grass 2s infinite linear; }
+  .phone-widget-icon .widget-icon-inner[data-wi-type="outgoing"] .standby-phone {
+    background-color: #0AA359; }
+  .phone-widget-icon .widget-icon-inner[data-wi-type="outgoing"].animate .standby-phone {
+    animation: radar-animation-green 2.5s infinite ease-out; }
+  .phone-widget-icon .widget-icon-inner[data-wi-type="ongoing"] .standby-phone {
+    background-color: #0AA359; }
+  .phone-widget-icon .widget-icon-inner[data-wi-type="ongoing"].animate .standby-phone {
+    animation: pulse-animation-green 3s infinite linear; }
+  .phone-widget-icon .widget-icon-inner[data-wi-type="hold"] .standby-phone {
+    background-color: #E2A300; }
+  .phone-widget-icon .widget-icon-inner[data-wi-type="hold"].animate .standby-phone {
+    animation: radar-animation-orange 2.5s infinite ease-out; }
+  .phone-widget-icon .widget-icon-inner[data-wi-type="missed"] .standby-phone {
+    background-color: #D15151; }
+  .phone-widget-icon .widget-icon-inner[data-wi-type="missed"].animate .standby-phone {
+    animation: radar-animation-red 2.5s infinite linear; }
   .phone-widget-icon .calling-state-block {
     display: none; }
     .phone-widget-icon .calling-state-block .call-in-action__time {
       color: #fff; }
     .phone-widget-icon .calling-state-block .call-in-action__text {
       font-weight: 600; }
-  .phone-widget-icon.is-mirror.is-on-call .standby-phone {
-    display: none; }
-  .phone-widget-icon.is-mirror.is-on-call .calling-state-block {
-    display: flex;
-    box-shadow: 0px 0px 0px 9px rgba(57, 158, 101, 0.4);
-    background-color: #399e65; }
-    .phone-widget-icon.is-mirror.is-on-call .calling-state-block i {
-      display: none; }
-    .phone-widget-icon.is-mirror.is-on-call .calling-state-block .call-in-action {
-      transition: 0.15s;
-      opacity: 1; }
-      .phone-widget-icon.is-mirror.is-on-call .calling-state-block .call-in-action__text {
-        color: #fff; }
-  .phone-widget-icon.is-mirror.is-pending .standby-phone {
-    display: none; }
-  .phone-widget-icon.is-mirror.is-pending .calling-state-block {
-    display: flex;
-    animation: callAnimationv2 2s infinite linear;
-    background-color: #e2a300; }
-    .phone-widget-icon.is-mirror.is-pending .calling-state-block i {
-      display: none; }
-    .phone-widget-icon.is-mirror.is-pending .calling-state-block .call-in-action {
-      transition: 0.15s;
-      opacity: 1; }
-      .phone-widget-icon.is-mirror.is-pending .calling-state-block .call-in-action__text {
-        color: #fff; }
   .phone-widget-icon .calling-state-block {
     height: 64px;
     width: 64px; }
@@ -1544,32 +1583,88 @@
       line-height: 18px;
       color: #2a3f54; }
 
-@keyframes callAnimation {
-  0% {
-    box-shadow: 0px 0px 0px 3px rgba(255, 255, 255, 0.2); }
-  25% {
-    box-shadow: 0px 0px 0px 6px rgba(255, 255, 255, 0.2); }
-  50% {
-    box-shadow: 0px 0px 0px 9px rgba(255, 255, 255, 0.2); }
-  75% {
-    box-shadow: 0px 0px 0px 6px rgba(255, 255, 255, 0.2); }
-  100% {
-    box-shadow: 0px 0px 0px 3px rgba(255, 255, 255, 0.2); } }
-
-@keyframes callAnimationv2 {
-  0% {
-    box-shadow: 0px 0px 0px 3px rgba(226, 163, 0, 0.4); }
-  25% {
-    box-shadow: 0px 0px 0px 6px rgba(226, 163, 0, 0.4); }
-  50% {
-    box-shadow: 0px 0px 0px 9px rgba(226, 163, 0, 0.4); }
-  75% {
-    box-shadow: 0px 0px 0px 6px rgba(226, 163, 0, 0.4); }
-  100% {
-    box-shadow: 0px 0px 0px 3px rgba(226, 163, 0, 0.4); } }
-
 .main-content {
   min-height: calc(100vh - 67px); }
+
+@keyframes pulse-animation-green {
+  0% {
+    box-shadow: 0px 0px 0px 2px rgba(10, 163, 89, 0.1); }
+  25% {
+    box-shadow: 0px 0px 0px 4px rgba(10, 163, 89, 0.3), 0px 0px 0px 0px rgba(10, 163, 89, 0.1); }
+  50% {
+    box-shadow: 0px 0px 0px 2px rgba(10, 163, 89, 0.1), 0px 0px 0px 12px rgba(10, 163, 89, 0.1); }
+  75% {
+    box-shadow: 0px 0px 0px 6px rgba(10, 163, 89, 0.3), 0px 0px 0px 6px rgba(10, 163, 89, 0.1); }
+  100% {
+    box-shadow: 0px 0px 0px 2px rgba(10, 163, 89, 0.1); } }
+
+@keyframes pulse-animation-grass {
+  0% {
+    box-shadow: 0px 0px 0px 2px rgba(130, 186, 58, 0.1); }
+  25% {
+    box-shadow: 0px 0px 0px 4px rgba(130, 186, 58, 0.3), 0px 0px 0px 0px rgba(130, 186, 58, 0.1); }
+  50% {
+    box-shadow: 0px 0px 0px 2px rgba(130, 186, 58, 0.1), 0px 0px 0px 12px rgba(130, 186, 58, 0.1); }
+  75% {
+    box-shadow: 0px 0px 0px 6px rgba(130, 186, 58, 0.3), 0px 0px 0px 6px rgba(130, 186, 58, 0.1); }
+  100% {
+    box-shadow: 0px 0px 0px 2px rgba(130, 186, 58, 0.1); } }
+
+@keyframes pulse-animation-red {
+  0% {
+    box-shadow: 0px 0px 0px 2px rgba(209, 81, 81, 0.1); }
+  25% {
+    box-shadow: 0px 0px 0px 4px rgba(209, 81, 81, 0.3), 0px 0px 0px 0px rgba(209, 81, 81, 0.1); }
+  50% {
+    box-shadow: 0px 0px 0px 2px rgba(209, 81, 81, 0.1), 0px 0px 0px 12px rgba(209, 81, 81, 0.1); }
+  75% {
+    box-shadow: 0px 0px 0px 6px rgba(209, 81, 81, 0.3), 0px 0px 0px 6px rgba(209, 81, 81, 0.1); }
+  100% {
+    box-shadow: 0px 0px 0px 2px rgba(209, 81, 81, 0.1); } }
+
+@keyframes pulse-animation-orange {
+  0% {
+    box-shadow: 0px 0px 0px 2px rgba(226, 163, 0, 0.1); }
+  25% {
+    box-shadow: 0px 0px 0px 4px rgba(226, 163, 0, 0.3), 0px 0px 0px 0px rgba(226, 163, 0, 0.1); }
+  50% {
+    box-shadow: 0px 0px 0px 2px rgba(226, 163, 0, 0.1), 0px 0px 0px 12px rgba(226, 163, 0, 0.1); }
+  75% {
+    box-shadow: 0px 0px 0px 6px rgba(226, 163, 0, 0.3), 0px 0px 0px 6px rgba(226, 163, 0, 0.1); }
+  100% {
+    box-shadow: 0px 0px 0px 2px rgba(226, 163, 0, 0.1); } }
+
+@keyframes radar-animation-green {
+  20% {
+    box-shadow: 0px 0px 0px 0px rgba(10, 163, 89, 0.6); }
+  100% {
+    box-shadow: 0px 0px 0px 12px rgba(10, 163, 89, 0); }
+  0% {
+    box-shadow: 0px 0px 0px 0px rgba(10, 163, 89, 0.6); } }
+
+@keyframes radar-animation-grass {
+  20% {
+    box-shadow: 0px 0px 0px 0px rgba(130, 186, 58, 0.6); }
+  100% {
+    box-shadow: 0px 0px 0px 12px rgba(130, 186, 58, 0); }
+  0% {
+    box-shadow: 0px 0px 0px 0px rgba(130, 186, 58, 0.6); } }
+
+@keyframes radar-animation-red {
+  20% {
+    box-shadow: 0px 0px 0px 0px rgba(209, 81, 81, 0.6); }
+  100% {
+    box-shadow: 0px 0px 0px 12px rgba(209, 81, 81, 0); }
+  0% {
+    box-shadow: 0px 0px 0px 0px rgba(209, 81, 81, 0.6); } }
+
+@keyframes radar-animation-orange {
+  20% {
+    box-shadow: 0px 0px 0px 0px rgba(226, 163, 0, 0.6); }
+  100% {
+    box-shadow: 0px 0px 0px 12px rgba(226, 163, 0, 0); }
+  0% {
+    box-shadow: 0px 0px 0px 0px rgba(226, 163, 0, 0.6); } }
 
 @keyframes speakerAnimation {
   0% {

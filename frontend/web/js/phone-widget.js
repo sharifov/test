@@ -1,4 +1,7 @@
 $(document).ready(function() {
+    window.widgetIcon = new handleWidgetIcon();
+    widgetIcon.init();
+
 
     $phoneTabAnchor = $('[data-toggle-tab]');
     var historySimpleBar;
@@ -290,10 +293,6 @@ $(document).ready(function() {
 
     //---------------------------------------------------
 
-
-
-
-
     $('.call-pane__dial-clear-all').on('click', function(e) {
         e.preventDefault();
         $('.call-pane__dial-number').val('').attr('readonly', false).prop('readonly', false);
@@ -400,6 +399,13 @@ $(document).ready(function() {
             PhoneWidgetCall.cancelCall();
 
             clearTimeout(timeout)
+
+            widgetIcon.update({
+                type: 'default', 
+                timer: false,
+                text: null,
+                currentCalls: null
+            })
         }
     })
 
@@ -531,6 +537,11 @@ $(document).ready(function() {
         $('.additional-info').slideDown(150);
     })
 
+
+
+    
+    
+    
 });
 
 
@@ -643,3 +654,87 @@ function toSelect(elem, obj, cb) {
     }
 
 }
+
+function handleWidgetIcon() {
+    var $parent = $('.phone-widget-icon'),
+        $inner = '.widget-icon-inner',
+        animationClass = 'animate',
+        initialNode;
+
+    var interval = null;
+    
+    function createInitialIcon(type) {
+        initialNode = '<div class="widget-icon-inner" data-wi-type="'+ type +'" data-wo-status="online">'+
+            '<div class="standby-phone">'+
+            '<div class="phone-widget-icon__state">'+
+            '<span class="phone-widget-icon__ongoing"></span>'+
+            '<span class="phone-widget-icon__text"></span>'+
+            '<span class="phone-widget-icon__time"></span>'+
+            '</div>'+
+            '<i class="fa fa-phone icon-phone"></i>'+
+            '<i class="fa fa-phone-volume icon-phone-answer"></i>' +
+            '</div>'+
+            '</div>';
+
+        $($parent).append(initialNode)
+    }
+
+    function stateTimer(el) {
+        var min = '00';
+        var sec = 0;
+        
+        interval = setInterval(function() {
+            if (sec > 58) {
+                min = '0' + (parseInt(min) + 1);
+                sec = -1;
+
+                if (parseInt(min) > 9) {
+                    min = parseInt(min);
+                }
+            }
+
+            sec++;
+
+            if (parseInt(sec) < 10) {
+                sec = '0' + sec;
+            }
+
+            $(el).html(min + ':' + sec)
+        },1000);
+    }
+
+    function updateIcon(props) {
+        $($inner).removeClass(animationClass);
+        var inner = '.widget-icon-inner',
+            ongoing = '.phone-widget-icon__ongoing',
+            text = '.phone-widget-icon__text',
+            time = '.phone-widget-icon__time';
+
+        console.log(props.text)
+
+        clearInterval(interval)
+
+        $(inner).attr('data-wi-type', props.type);
+        $(ongoing).html(props.currentCalls);
+        $(text).html(props.text);
+
+        if (props.timer) {
+            stateTimer(time)
+        } else {
+            $(time).html(null)
+        }
+
+        props = null;
+        $($inner).addClass(animationClass);
+    }
+
+    return {
+        init: function() {
+            createInitialIcon('default') 
+        },
+        update: function(props) {
+            updateIcon(props)
+        }
+    }
+}
+

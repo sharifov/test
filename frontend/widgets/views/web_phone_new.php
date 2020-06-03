@@ -39,6 +39,7 @@ $js = <<<JS
 	var data = JSON.parse('{$formattedPhoneProject}');
 	var phoneNumbers = toSelect($('.custom-phone-select'), data);
 
+
     $(document).on('click', '#btn-new-make-call', function(e) {
         e.preventDefault();
         
@@ -79,9 +80,14 @@ $js = <<<JS
                         new PNotify({title: "Make call", type: "error", text: text, hide: true});
                     }
                 }, 'json');
-                
+					
             } else {
-
+								widgetIcon.update({
+									type: 'incoming',
+									timer: false,
+									text: null,
+									currentCalls: null
+								})
 								alert('You have active call');
 								$('.call-pane').removeClass('is_active');
 								$('.call-pane-calling').addClass('is_active');
