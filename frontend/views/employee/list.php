@@ -103,7 +103,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
         'pjax' => false,
         //'layout' => $template,
         'rowOptions' => static function (\common\models\Employee $model, $index, $widget, $grid) {
-            if ($model->isDeleted()) {
+            if ($model->isDeleted() || $model->isBlocked()) {
                 return ['class' => 'danger'];
             }
         },
@@ -118,8 +118,6 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 'attribute' => 'id',
                 'contentOptions' => ['class' => 'text-left', 'style' => 'width: 60px'],
             ],
-
-
             [
                 'class' => ActionColumn::class,
                 'template' => '{update} {projects} {groups} {switch}',
@@ -188,9 +186,9 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             'email:email',
             [
                 'attribute' => 'status',
-                'filter' => [$searchModel::STATUS_ACTIVE => 'Active', $searchModel::STATUS_DELETED => 'Deleted'],
-                'value' => static function (\common\models\Employee $model) {
-                    return ($model->status === $model::STATUS_DELETED) ? '<span class="label label-danger">Deleted</span>' : '<span class="label label-success">Active</span>';
+                'filter' => $searchModel::STATUS_LIST,
+                'value' => function(\common\models\Employee $model) {
+                    return Yii::$app->formatter->asEmployeeStatusLabel($model->status);
                 },
                 'format' => 'raw'
             ],

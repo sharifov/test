@@ -102,6 +102,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public const STATUS_ACTIVE = 10;
     public const STATUS_BLOCKED = 20;
 
+    public const STATUS_LIST = [
+        self::STATUS_ACTIVE => 'Active',
+        self::STATUS_BLOCKED => 'Blocked',
+        self::STATUS_DELETED => 'Deleted',
+    ];
+
     public const PROFIT_BONUSES = [
         11000 => 500,
         8000 => 300,

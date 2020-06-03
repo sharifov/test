@@ -681,6 +681,11 @@ JS;
 
                 <?= \yii\grid\GridView::widget([
                     'dataProvider' => $lastFailedLoginAttempts,
+                    'rowOptions' => function (UserFailedLogin $UserFailedLogin, $index, $widget, $grid) {
+                        if ($UserFailedLogin->ufl_created_dt > $UserFailedLogin->limitDateTime) {
+                            return ['class' => 'danger'];
+                        }
+                    },
                     'columns' => [
                         'ufl_ip',
                         'ufl_ua',

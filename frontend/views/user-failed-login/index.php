@@ -28,11 +28,16 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'rowOptions' => function (UserFailedLogin $model, $index, $widget, $grid) {
+            if ($model->ufl_created_dt > $model->limitDateTime) {
+                return ['class' => 'danger'];
+            }
+        },
         'columns' => [
             ['class' => SerialColumn::class],
             'ufl_id',
             'ufl_username',
-            'ufl_user_id:userName',
+            'ufl_user_id:UserNameLinkToUpdate',
             'ufl_ua',
             'ufl_ip',
             'ufl_session_id',
