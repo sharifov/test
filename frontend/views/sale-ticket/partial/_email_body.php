@@ -15,6 +15,7 @@ $chargeSystem = null;
 $transactionIds = null;
 $fop = null;
 $isNeedAdditionalInfoForEmail = false;
+$saleData = $caseSale ? json_decode((string)$caseSale->css_sale_data, true) : [];
 ?>
 <table width="100%" cellpadding="0" cellspacing="0" style="min-width:100%;">
     <thead>
@@ -94,7 +95,7 @@ $isNeedAdditionalInfoForEmail = false;
 <table>
     <tr>
         <td>
-			<?php if($isNeedAdditionalInfoForEmail): ?>
+			<?php if($isNeedAdditionalInfoForEmail && $caseSale): ?>
                 <table width="25%" cellpadding="0" cellspacing="0" style="width:25%;">
                     <tr>
                         <th style="border: 1px solid; padding: 10px;">Sale Id</th>
@@ -113,8 +114,12 @@ $isNeedAdditionalInfoForEmail = false;
                         <td style="border: 1px solid; padding: 10px;"><?= $transactionIds ?></td>
                     </tr>
                     <tr>
+                        <th style="border: 1px solid; padding: 10px;">Trans. Date</th>
+                        <td style="border: 1px solid; padding: 10px;"><?= CaseSaleHelper::getTransactionDate($saleData) ?></td>
+                    </tr>
+                    <tr>
                         <th style="border: 1px solid; padding: 10px;">Card Number</th>
-                        <td style="border: 1px solid; padding: 10px;"><?= CaseSaleHelper::getCardNumbers(json_decode((string)$caseSale->css_sale_data, true)) ?></td>
+                        <td style="border: 1px solid; padding: 10px;"><?= CaseSaleHelper::getCardNumbers($saleData) ?></td>
                     </tr>
                     <tr>
                         <th style="border: 1px solid; padding: 10px;">Refundable Amount</th>

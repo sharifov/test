@@ -155,7 +155,29 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                     <td><?=Html::encode(empty($ticket->st_refund_waiver) ? $ticket->st_penalty_amount : $ticket->st_refund_waiver)?></td>
                                     <td><?=Html::encode($ticket->st_selling)?></td>
                                     <td><?=Html::encode($ticket->st_service_fee)?></td>
-                                    <td><?=Html::encode($ticket->st_recall_commission)?></td>
+                                    <td>
+										<?php if (!$canManageSaleInfo):
+											echo Editable::widget([
+												'model' => $ticket,
+												'attribute' => 'st_recall_commission',
+												'header' => 'Recall Commission',
+												'asPopover' => false,
+												'inputType' => Editable::INPUT_HTML5,
+												'formOptions' => [ 'action' => [Url::to(['/sale-ticket/ajax-sale-ticket-edit-info/', 'st_id' => $ticket->st_id])] ],
+												'options' => [
+													'id' => 'sale-ticket-markup-'.$key
+												],
+												'pluginEvents' => [
+													'editableSuccess' => 'function (event, val, form, data) {
+                                                        pjaxReload({container: "#pjax-case-sale-tickets"});
+                                                    }',
+												],
+											]);
+										else:
+											echo Html::encode($ticket->st_recall_commission);
+										endif;
+										?>
+                                    </td>
                                     <td>
 										<?php if (!$canManageSaleInfo):
 											echo Editable::widget([

@@ -1,9 +1,11 @@
 <?php
 namespace sales\model\saleTicket\useCase\sendEmail;
 
+use common\models\CaseSale;
 use common\models\Email;
 use common\models\Employee;
 use common\models\UserProjectParams;
+use sales\helpers\cases\CaseSaleHelper;
 use sales\model\saleTicket\entity\SaleTicket;
 
 class SaleTicketEmailService
@@ -15,10 +17,11 @@ class SaleTicketEmailService
 	 * @param int $caseId
 	 * @param string $bookingId
 	 * @param Employee $user
+	 * @param array $caseSaleData
 	 * @throws \Throwable
 	 * @throws \yii\db\StaleObjectException
 	 */
-	public function generateAndSendEmail(array $saleTickets, array $emailSettings, string $emailBody, int $caseId, string $bookingId, Employee $user): void
+	public function generateAndSendEmail(array $saleTickets, array $emailSettings, string $emailBody, int $caseId, string $bookingId, Employee $user, array $caseSaleData): void
 	{
 		$mail = new Email();
 		$mail->e_project_id = $this->getProjectIdFromST($saleTickets[0]);
@@ -31,7 +34,7 @@ class SaleTicketEmailService
 
 
 		$mail->e_email_to = $emailSettings['sendTo'][0];
-		$mail->e_email_cc = $this->getEmailCC($emailSettings, $saleTickets[0]);
+		$mail->e_email_cc = $this->getEmailCC($emailSettings, $saleTickets[0], SaleTicketHelper::isRecallCommissionChanged($saleTickets, $caseSaleData));
 		$mail->e_created_dt = date('Y-m-d H:i:s');
 		$mail->e_created_user_id = $user->id;
 
@@ -61,14 +64,20 @@ class SaleTicketEmailService
 	/**
 	 * @param array $emailSettings
 	 * @param SaleTicket $saleTicket
+	 * @param bool $isChangedRecallCommission
 	 * @return string
 	 */
-	public function getEmailCC(array $emailSettings, SaleTicket $saleTicket): string
+	public function getEmailCC(array $emailSettings, SaleTicket $saleTicket, bool $isChangedRecallCommission): string
 	{
 		$emails = $emailSettings['sendTo'] ?? [];
 		$bookeepingEmails = $emailSettings['bookeepingEmails'] ?? [];
+		$additionalEmail = $emailSettings['emailOnRecallCommChanged'] ?? [];
 
 		$emails = $saleTicket->isNeedAdditionalInfoForEmail() ? array_merge($emails, $bookeepingEmails) : $emails;
+
+		if ($isChangedRecallCommission) {
+			$emails = array_merge($emails, $additionalEmail);
+		}
 
 		if (!empty($emails)) {
 			unset($emails[0]);
