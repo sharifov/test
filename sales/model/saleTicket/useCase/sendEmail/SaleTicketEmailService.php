@@ -94,7 +94,7 @@ class SaleTicketEmailService
 	 */
 	private function generateEmailSubject(string $subject, SaleTicket $saleTicket, string $bookingId)
 	{
-		return preg_replace(['/\[bookingId\]/', '/\[originalFop\]/'], [$bookingId, $saleTicket->st_original_fop], $subject);
+		return preg_replace(['/\[bookingId\]/', '/\[originalFop\]/'], [$bookingId, $saleTicket->getFormattedOriginalFop()], $subject);
 	}
 
 	private function getEmailFrom(?int $projectId, Employee $user)
