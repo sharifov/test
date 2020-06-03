@@ -100,6 +100,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
     public const STATUS_DELETED = 0;
     public const STATUS_ACTIVE = 10;
+    public const STATUS_BLOCKED = 20;
+
+    public const STATUS_LIST = [
+        self::STATUS_ACTIVE => 'Active',
+        self::STATUS_BLOCKED => 'Blocked',
+        self::STATUS_DELETED => 'Deleted',
+    ];
 
     public const PROFIT_BONUSES = [
         11000 => 500,
@@ -473,6 +480,32 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
+     * @return $this
+     */
+    public function setActive(): Employee
+    {
+        $this->status = self::STATUS_ACTIVE;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isBlocked(): bool
+    {
+        return $this->status === self::STATUS_BLOCKED;
+    }
+
+    /**
+     * @return $this
+     */
+    public function setBlocked(): Employee
+    {
+        $this->status = self::STATUS_BLOCKED;
+        return $this;
+    }
+
+    /**
      * @return bool|string
      */
     public function getTimezone()
@@ -752,11 +785,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * Finds user by username
      *
      * @param string $username
+     * @param int $status
      * @return static|null
      */
-    public static function findByUsername($username)
+    public static function findByUsername(string $username, int $status = self::STATUS_ACTIVE): ?Employee
     {
-        return static::findOne(['username' => $username, 'status' => self::STATUS_ACTIVE]);
+        return static::findOne(['username' => $username, 'status' => $status]);
     }
 
     /**

@@ -8,9 +8,11 @@ use common\models\query\EmailQuery;
 use DateTime;
 use sales\entities\cases\Cases;
 use sales\helpers\email\TextConvertingHelper;
+use sales\services\email\EmailService;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\db\Expression;
 use yii\helpers\VarDumper;
 
 /**
@@ -53,6 +55,7 @@ use yii\helpers\VarDumper;
  * @property string $e_email_from_name
  * @property string $e_email_to_name
  * @property int|null $e_case_id
+ * @property int|null $e_client_id
  *
  * @property string $body_html
  *
@@ -158,6 +161,7 @@ class Email extends \yii\db\ActiveRecord
             [['e_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['e_project_id' => 'id']],
             [['e_template_type_id'], 'exist', 'skipOnError' => true, 'targetClass' => EmailTemplateType::class, 'targetAttribute' => ['e_template_type_id' => 'etp_id']],
             [['e_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['e_updated_user_id' => 'id']],
+            [['e_client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['e_client_id' => 'id']],
             [['quotes'], 'safe'],
         ];
     }
@@ -205,6 +209,7 @@ class Email extends \yii\db\ActiveRecord
             'e_inbox_created_dt' => 'Inbox Created Dt',
             'e_inbox_email_id' => 'Inbox Email ID',
             'e_case_id' => 'Case ID',
+            'e_client_id' => 'Client ID',
         ];
     }
 
@@ -320,6 +325,11 @@ class Email extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Employee::class, ['id' => 'e_updated_user_id']);
     }
+
+    public function getClient(): \yii\db\ActiveQuery
+	{
+		return $this->hasOne(Client::class, ['id' => 'e_client_id']);
+	}
 
     /**
      * {@inheritdoc}
@@ -444,6 +454,7 @@ class Email extends \yii\db\ActiveRecord
                 $this->save();
                 $out['error'] = $this->e_error_message;
             }
+
 
         } catch (\Throwable $exception) {
             $error = VarDumper::dumpAsString($exception->getMessage());
@@ -791,6 +802,12 @@ class Email extends \yii\db\ActiveRecord
                 $this->e_email_body_text = TextConvertingHelper::htmlToText($this->body_html);
                 $this->e_email_body_blob = TextConvertingHelper::compress($this->body_html);
             }
+
+            if (!$this->e_client_id) {
+				$emailService = Yii::createObject(EmailService::class);
+				$this->e_client_id = $emailService->detectClientId($this->e_email_to);
+			}
+
             return true;
         }
         return false;

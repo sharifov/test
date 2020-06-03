@@ -1,8 +1,12 @@
 <?php
 namespace common\models;
 
+use frontend\models\UserFailedLogin;
+use sales\services\authentication\AntiBruteForceService;
 use Yii;
 use yii\base\Model;
+use yii\helpers\Url;
+use yii\helpers\VarDumper;
 use yii\web\IdentityInterface;
 
 /**
@@ -13,9 +17,11 @@ class LoginForm extends Model
     public $username;
     public $password;
     public $rememberMe = false;
+    public $verifyCode;
+    public $captcha;
 
     private $_user;
-
+    private bool $userChecked = false;
 
     /**
      * {@inheritdoc}
@@ -27,9 +33,24 @@ class LoginForm extends Model
             [['username', 'password'], 'required'],
             // rememberMe must be a boolean value
             ['rememberMe', 'boolean'],
-            // password is validated by validatePassword()
+            ['username', 'checkIsBlocked'],
             ['password', 'validatePassword'],
+            ['verifyCode', 'captcha', 'captchaAction' => Url::to('/site/captcha'), 'when' => static function () {
+                return (new AntiBruteForceService())->checkCaptchaEnable();
+            }],
         ];
+    }
+
+    /**
+     * @param $attribute
+     * @param $params
+     */
+    public function checkIsBlocked($attribute): void
+    {
+        $userBlocked = Employee::findByUsername($this->username, Employee::STATUS_BLOCKED);
+        if ($userBlocked) {
+            $this->addError($attribute, 'The user is blocked.');
+        }
     }
 
     /**
@@ -56,25 +77,27 @@ class LoginForm extends Model
      */
     public function login()
     {
-        if ($this->validate()) {
-            $user = $this->getUser();
-
-            if($user) {
-                if (!$this->checkByIp($user)) {
-                    return false;
-                }
-
-                $isLogin = Yii::$app->user->login($user, $this->rememberMe ? 3600 * 24 * 30 : 0);
-                if ($isLogin) {
-                    self::sendWsIdentityCookie(Yii::$app->user->identity, $this->rememberMe ? 3600 * 24 * 30 : 0);
-                }
-                return $isLogin;
+        if ($this->userChecked === false) {
+            if (!$this->validate()) {
+                return false;
             }
+        }
+
+        $user = $this->getUser();
+
+        if($user) {
+            if (!$this->checkByIp($user)) {
+                return false;
+            }
+
+            $isLogin = Yii::$app->user->login($user, $this->rememberMe ? 3600 * 24 * 30 : 0);
+            if ($isLogin) {
+                self::sendWsIdentityCookie(Yii::$app->user->identity, $this->rememberMe ? 3600 * 24 * 30 : 0);
+            }
+            return $isLogin;
         }
         return false;
     }
-
-
 
     /**
      * @return Employee|null
@@ -88,6 +111,7 @@ class LoginForm extends Model
                 if (!$this->checkByIp($user)) {
                     return null;
                 }
+                $this->userChecked = true;
                 return $user;
             }
         }
@@ -101,37 +125,13 @@ class LoginForm extends Model
     private function checkByIp($user): bool
     {
         if($user->acl_rules_activated) {
-            $clientIP = $this->getClientIPAddress();
+            $clientIP = AntiBruteForceService::getClientIPAddress();
             if ($clientIP === 'UNKNOWN' ||  (!GlobalAcl::isActiveIPRule($clientIP) && !EmployeeAcl::isActiveIPRule($clientIP, $user->id))) {
                 $this->addError('username', sprintf('Remote Address %s Denied! Please, contact your Supervision or Administrator.', $clientIP));
                 return false;
             }
         }
         return true;
-    }
-
-
-    /**
-     * @return string
-     */
-    private function getClientIPAddress()
-    {
-        if (isset($_SERVER['HTTP_CLIENT_IP']))
-            $ipAddress = $_SERVER['HTTP_CLIENT_IP'];
-        else if (isset($_SERVER['HTTP_X_FORWARDED_FOR']))
-            $ipAddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
-        else if (isset($_SERVER['HTTP_X_FORWARDED']))
-            $ipAddress = $_SERVER['HTTP_X_FORWARDED'];
-        else if (isset($_SERVER['HTTP_FORWARDED_FOR']))
-            $ipAddress = $_SERVER['HTTP_FORWARDED_FOR'];
-        else if (isset($_SERVER['HTTP_FORWARDED']))
-            $ipAddress = $_SERVER['HTTP_FORWARDED'];
-        else if (isset($_SERVER['REMOTE_ADDR']))
-            $ipAddress = $_SERVER['REMOTE_ADDR'];
-        else
-            $ipAddress = 'UNKNOWN';
-
-        return $ipAddress;
     }
 
     /**
@@ -178,5 +178,28 @@ class LoginForm extends Model
         Yii::$app->getResponse()->getCookies()->remove(Yii::createObject(array_merge($identityCookie, [
             'class' => 'yii\web\Cookie',
         ])));
+    }
+
+    public function afterValidate(): void
+    {
+        if ($this->hasErrors()) {
+            $userFailedLogin = UserFailedLogin::create(
+                $this->username,
+                $this->_user ? $this->_user->id : null,
+                Yii::$app->request->getUserAgent(),
+                AntiBruteForceService::getClientIPAddress(),
+                Yii::$app->session->id
+            );
+            if (!$userFailedLogin->save()) {
+                \Yii::error(VarDumper::dumpAsString($userFailedLogin->getErrors(), 10),
+                'LoginForm:afterValidate:saveFailed');
+            }
+
+            if ($this->_user) {
+                (new AntiBruteForceService())->checkAttempts($this->_user);
+            }
+
+        }
+        parent::afterValidate();
     }
 }

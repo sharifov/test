@@ -2,6 +2,8 @@
 namespace sales\model\saleTicket\useCase\create;
 
 
+use sales\model\saleTicket\entity\SaleTicket;
+
 class SaleTicketCreateDTO
 {
 	public $caseId;
@@ -13,13 +15,23 @@ class SaleTicketCreateDTO
 	public $chargeSystem;
 	public $penaltyType;
 	public $penaltyAmount;
+	public $refundWaiver;
 	public $selling;
 	public $serviceFee;
 	public $recallCommission;
 	public $markup;
 	public $transactionIds;
 
-	public function feelBySaleData(int $caseId, int $caseSaleId, string $pnr, string $clientName, int $cntPassengers, array $rule, array $refundRules): self
+	public function feelBySaleData(
+		int $caseId,
+		int $caseSaleId,
+		string $pnr,
+		string $clientName,
+		int $cntPassengers,
+		?int $penaltyTypeId,
+		array $rule,
+		array $refundRules
+	): self
 	{
 		$dto = new self();
 
@@ -30,8 +42,9 @@ class SaleTicketCreateDTO
 		$dto->recordLocator = $pnr;
 		$dto->originalFop = $refundRules['original_FOP'] ?? null;
 		$dto->chargeSystem = (string)($refundRules['charge_system'] ?? null);
-		$dto->penaltyType = $refundRules['airline_penalty'] ?? null;
-		$dto->penaltyAmount = (string)($refundRules['refund_waiver'] ?? 0);
+		$dto->penaltyType = $penaltyTypeId;
+		$dto->penaltyAmount = preg_match('/^[+-]?\d+(?:\.\d+)?$/', $refundRules['refund_waiver']) ? (float)$refundRules['refund_waiver'] : null;
+		$dto->refundWaiver = !preg_match('/^[+-]?\d+(?:\.\d+)?$/', $refundRules['refund_waiver']) ? (string)$refundRules['refund_waiver'] : null;
 		$dto->selling = $rule['selling_price'] ?? null;
 		$dto->serviceFee = $rule['original_service_fee'] ?? null;
 		$dto->recallCommission = ($refundRules['recall_commission'] ?? 0) / ($cntPassengers ?: 1);

@@ -37,7 +37,6 @@ if (!empty($caseSaleModel)) {
     $canManageSaleInfo = true;
 }
 
-$sendEmailBtnClass = 'sale-ticket-generate-email-btn-'.$data['saleId'];
 $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_id' => !empty($caseModel) ? $caseModel->cs_id : 0, 'sale_id' => $data['saleId'], 'booking_id' => $data['bookingId']]);
 ?>
 <div class="sale-view">
@@ -124,7 +123,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                     <div class="col-md-12">
                         <div class="d-flex justify-content-between align-items-center">
                             <h2>Sale Tickets</h2>
-                            <?= Html::a('<i class="fa fa-envelope"></i> Send Email', $saleTicketGenerateEmail, ['class' => 'btn btn-success '.$sendEmailBtnClass, 'title' => SaleTicketHelper::getTitleForSendEmailBtn($saleTicket)]) ?>
+                            <?= Html::a('<i class="fa fa-envelope"></i> Send Email', $saleTicketGenerateEmail, ['class' => 'btn btn-success sale-ticket-generate-email-btn', 'title' => SaleTicketHelper::getTitleForSendEmailBtn($saleTicket), 'data-pjax' => 0]) ?>
                         </div>
                         <?php Pjax::begin(['id' => 'pjax-case-sale-tickets', 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false]) ?>
                         <table class="table table-bordered table-hover">
@@ -150,10 +149,10 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                     <td><?=Html::encode($ticket->st_client_name)?></td>
                                     <td><?=Html::encode($ticket->st_ticket_number)?></td>
                                     <td><?=Html::encode($ticket->st_record_locator)?></td>
-                                    <td><?=Html::encode($ticket->st_original_fop)?></td>
+                                    <td><?=Html::encode($ticket->getFormattedOriginalFop())?></td>
                                     <td><?=Html::encode($ticket->st_charge_system)?></td>
-                                    <td><?=Html::encode($ticket->st_penalty_type)?></td>
-                                    <td><?=Html::encode($ticket->st_penalty_amount)?></td>
+                                    <td><?=Html::encode(SaleTicket::getPenaltyTypeName($ticket->st_penalty_type))?></td>
+                                    <td><?=Html::encode(empty($ticket->st_refund_waiver) ? $ticket->st_penalty_amount : $ticket->st_refund_waiver)?></td>
                                     <td><?=Html::encode($ticket->st_selling)?></td>
                                     <td><?=Html::encode($ticket->st_service_fee)?></td>
                                     <td><?=Html::encode($ticket->st_recall_commission)?></td>
@@ -785,7 +784,6 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
 
     <?php
 	$url = Url::to(['/cases/ajax-sync-with-back-office/']);
-	$urlRefresh = Url::to(['/cases/ajax-refresh-sale-info']);
 
 	$js = <<<JS
                     $(".update-to-bo").on('click', function (e) {
@@ -843,62 +841,6 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                         });
                     });
 
-$('.refresh-from-bo').on('click', function (e) {
-    e.preventDefault();
-    e.stopPropagation();  
-    
-    let obj = $(this),
-        caseId = obj.attr('data-case-id'),
-        caseSaleId = obj.attr('data-case-sale-id'),
-        checkFareRules = obj.attr('check-fare-rules');
-        
-    if (typeof checkFareRules === typeof undefined) {
-        checkFareRules = 0;    
-    }
-    
-    $.ajax({
-        url: "$urlRefresh/" + caseId + '/' + caseSaleId,
-        type: 'post',
-        data : {check_fare_rules: checkFareRules},
-        dataType: "json",    
-        beforeSend: function () {
-            obj.attr('disabled', true).find('i').toggleClass('fa-spin');
-            $(obj).closest('.panel').find('.error-dump').html();
-        },
-        success: function (data) {
-            if (data.error) {
-               new PNotify({
-                    title: "Error",
-                    type: "error",
-                    text: data.message,
-                    hide: true
-                }); 
-            } else {
-                new PNotify({
-                    title: "Success",
-                    type: "success",
-                    text: data.message,
-                    hide: true
-                }); 
-                $.pjax.reload({container: '#pjax-sale-list',push: false, replace: false, 'scrollTo': false, timeout: 1000, async: false,});
-            }
-        },
-        error: function (text) {
-            new PNotify({
-                title: "Error",
-                type: "error",
-                text: "Internal Server Error. Try again letter.",
-                hide: true
-            });
-        },
-        complete: function () {
-            obj.removeAttr('disabled').find('i').toggleClass('fa-spin');
-            $(obj).closest('.panel').find('.error-dump').html();
-        }
-    });
-});
-
-    
     $('.remove-sale').on('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
@@ -955,21 +897,6 @@ $('.refresh-from-bo').on('click', function (e) {
                     
     $('#passengers span[data-toggle="tooltip"]').tooltip();
     
-    $(document).on('click', '.{$sendEmailBtnClass}', function (e) {
-        e.preventDefault();
-        var btn = $(this);
-        var url = btn.attr('href');
-        
-        btn.attr('disabled', true).find('i').addClass('fa-spin').removeClass('fa-envelope').addClass('fa-refresh');
-        $.get(url, function(data) {
-            if (data.error) {
-                createNotify('Error', data.message, 'error');
-            } else {
-                createNotify('Success', data.message, 'success');
-            }
-            btn.find('i').removeClass('fa-spin').removeClass('fa-refresh').addClass('fa-envelope');
-        });
-    });
 JS;
 $this->registerJs($js);
     ?>

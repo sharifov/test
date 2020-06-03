@@ -29,6 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             'cl_id',
             [
+                'label' => 'Date/Time',
                 'class' => DateTimeColumn::class,
                 'attribute' => 'cl_call_created_dt',
                 'format' => 'byUserDateTimeWithSeconds'],
@@ -47,8 +48,14 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => \sales\model\callLog\grid\columns\CallLogTypeColumn::class],
             ['class' => \sales\model\callLog\grid\columns\CallLogCategoryColumn::class],
             ['class' => \sales\model\callLog\grid\columns\CallLogStatusColumn::class],
-            'cl_phone_from',
-            'cl_phone_to',
+            [
+                'label' => 'From',
+                'attribute' => 'cl_phone_from',
+            ],
+            [
+                'label' => 'To',
+                'attribute' => 'cl_phone_to',
+            ],
             [
                 'attribute' => 'cl_duration',
                 'value' => static function(CallLogSearch $log){
@@ -66,7 +73,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => \sales\model\callLog\grid\columns\RecordingUrlColumn::class,
                 'filter' => false
             ],
-            'cl_client_id:client',
+            [
+                'label' => 'Contact',
+                'attribute' => 'cl_client_id',
+                'format' => 'client'
+            ],
             [
                 'class' => \common\components\grid\CombinedDataColumn::class,
                 'labelTemplate' => '{0}  /  {1}',

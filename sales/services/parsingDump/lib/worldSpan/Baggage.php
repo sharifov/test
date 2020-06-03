@@ -43,19 +43,33 @@ class Baggage implements ParseDumpInterface
         $paidBaggage = $this->prepareBaggageAllowance($dump);
         $freeBaggage = $this->prepareCarryOnAllowance($dump);
 
+        $uniq = [];
         $i = 0;
         foreach ($this->segments as $segment) {
+
             $result[$i]['segment'] = $segment;
+            $result[$i]['paid_baggage'] = [];
+            $result[$i]['free_baggage'] = [];
 
             if (!empty($paidBaggage) && array_key_exists($segment, $paidBaggage)) {
-                $result[$i]['paid_baggage'] = $paidBaggage[$segment];
-            } else {
-                $result[$i]['paid_baggage'] = [];
+
+                $hash = md5(serialize($paidBaggage[$segment]));
+                if (!array_key_exists($hash, $uniq)) {
+                    $result[$i]['paid_baggage'] = $paidBaggage[$segment];
+                    $uniq[$hash] = $paidBaggage[$segment];
+                }
             }
+
             if (!empty($freeBaggage) && array_key_exists($segment, $freeBaggage)) {
-                $result[$i]['free_baggage'] = $freeBaggage[$segment][0];
-            } else {
-                $result[$i]['free_baggage'] = [];
+                $hash = md5(serialize($freeBaggage[$segment]));
+                if (!array_key_exists($hash, $uniq)) {
+                    $result[$i]['free_baggage'] = $freeBaggage[$segment][0];
+                    $uniq[$hash] = $freeBaggage[$segment];
+                }
+            }
+
+            if (empty($result[$i]['paid_baggage']) && empty($result[$i]['free_baggage'])) {
+                unset($result[$i]);
             }
             $i++;
         }

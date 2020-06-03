@@ -4,9 +4,12 @@
 /* @var $form yii\bootstrap\ActiveForm */
 /* @var $model LoginForm */
 
+use sales\services\authentication\AntiBruteForceService;
+use yii\captcha\Captcha;
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
 use common\models\LoginForm;
+use yii\helpers\Url;
 
 ?>
 
@@ -27,6 +30,17 @@ use common\models\LoginForm;
                     <?= $form->field($model, 'password', ['template' => '{input}{error}'])->passwordInput(['maxlength' => true, 'placeholder' => 'Password']) ?>
                     <?php /*<input type="password" class="form-control" placeholder="Password" required="" />*/ ?>
                 </div>
+
+                <?php if ((new AntiBruteForceService())->checkCaptchaEnable()): ?>
+                    <div>
+                        <?= $form->field($model, 'verifyCode')->widget(Captcha::class, [
+                            'captchaAction' => Url::to('/site/captcha'),
+                            'options' => ['autocomplete' => 'off'],
+                            'template' => '<div class="row"><div class="col-lg-4">{image}</div><div class="col-lg-7">{input}</div></div>',
+                        ]) ?>
+                    </div>
+                <?php endif ?>
+
                 <div class="form-group">
                     <div class="text-left"><?= $form->field($model, 'rememberMe')->checkbox() ?></div>
                     <?= Html::submitButton('Login', ['class' => 'btn btn-default', 'name' => 'login-button']) ?>
@@ -50,7 +64,7 @@ use common\models\LoginForm;
                     <br />
 
                     <div>
-                        <h1><i class="fa fa-dollar"></i>ales</h1>
+                        <h1><i class="fa fa-dollar"></i>ales!</h1>
                         <p>©2017-<?=date('Y')?> All Rights Reserved.</p>
                     </div>
                 </div>

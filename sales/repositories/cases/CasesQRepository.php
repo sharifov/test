@@ -155,7 +155,7 @@ class CasesQRepository
      */
     public function getProcessingQuery(Employee $user): ActiveQuery
     {
-        $query = CasesQSearch::find()->andWhere(['cs_status' => CasesStatus::STATUS_PROCESSING]);
+        $query = CasesQSearch::find()->select('cases.*')->andWhere(['cs_status' => CasesStatus::STATUS_PROCESSING]);
 
         if ($user->isAdmin()) {
             return $query;

@@ -95,7 +95,7 @@ class SettingCategory extends ActiveRecord
      */
     public static function getList(): array
     {
-        $data = self::find()->active()->orderBy(['sc_id' => SORT_ASC])->asArray()->all();
+        $data = self::find()->active()->orderBy(['sc_name' => SORT_ASC])->asArray()->all();
         return ArrayHelper::map($data, 'sc_id', 'sc_name');
     }
 }

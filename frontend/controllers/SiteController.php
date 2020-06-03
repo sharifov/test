@@ -26,6 +26,7 @@ use Da\TwoFA\Manager;
 use Da\TwoFA\Service\TOTPSecretKeyUriGeneratorService;
 use Da\TwoFA\Service\QrCodeDataUriGeneratorService;
 use yii\web\Response;
+use yii\captcha\CaptchaAction;
 
 /**
  * Site controller
@@ -42,11 +43,11 @@ class SiteController extends FController
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['login', 'error', 'step-two'],
+                        'actions' => ['login', 'error', 'step-two', 'captcha'],
                         'allow' => true,
                     ],
                     [
-                        'actions' => ['index', 'logout', 'profile', 'get-airport', 'blank'],
+                        'actions' => ['index', 'logout', 'profile', 'get-airport', 'blank', ],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -71,6 +72,14 @@ class SiteController extends FController
                 'class' => 'yii\web\ErrorAction',
                 'view' => '@frontend/themes/gentelella_v2/views/site/error',
                 'layout' => '@frontend/themes/gentelella_v2/views/layouts/error'
+            ],
+            'captcha' => [
+                'class' => CaptchaAction::class,
+                'maxLength' => 6,
+                'minLength' => 5,
+                'transparent' => true,
+                'offset' => 3,
+                'foreColor' => '596b7d',
             ],
         ];
     }
