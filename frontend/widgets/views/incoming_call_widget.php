@@ -78,6 +78,7 @@ use yii\widgets\Pjax;
                         <?php if($call->cProject):?> <span class="badge badge-info"><?=\yii\helpers\Html::encode($call->cProject->name)?></span> <?php endif; ?>
                         <?php if($call->cDep):?> <span class="badge badge-info"><?=\yii\helpers\Html::encode($call->cDep->dep_name)?></span> <?php endif; ?>
                         <?php if($call->c_source_type_id):?> <span class="label label-warning"><?=\yii\helpers\Html::encode($call->getSourceName())?></span> <?php endif; ?>
+                        <?php if($call->c_language_id):?> <span class="label label-default"><?=\yii\helpers\Html::encode($call->c_language_id)?></span> <?php endif; ?>
                     </div>
                     <div class="col-md-5 text-right" style="padding-top: 3px; padding-bottom: 4px; ">
 
