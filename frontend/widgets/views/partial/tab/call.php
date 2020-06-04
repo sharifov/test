@@ -300,10 +300,10 @@ $sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
       <div class="static-number-indicator">
 
           <span class="static-number-indicator__label" id="cw-project_name"><?= Html::encode($projectName) ?></span>
-          <?php if($call && $call->c_source_type_id):?>
+          <?php /*if($call && $call->c_source_type_id):?>
               <i class="static-number-indicator__separator"></i>
               <span class="static-number-indicator__name" id="cw-source_name"><?= Html::encode($sourceName) ?> </span>
-          <?php endif; ?>
+          <?php endif;*/ ?>
       </div>
     </div>
     <div class="incall-group">
