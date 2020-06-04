@@ -6,7 +6,7 @@
 /** @var bool $isCallInProgress */
 /** @var \common\models\Call|null $call */
 
-$name = $call && $call->cClient ? $call->cClient->getFullName() : 'ClientName';
+$clientName = $call && $call->cClient ? $call->cClient->getFullName() : '------';
 $isIn = $call ? $call->isIn() : false;
 $phoneFrom = $call ? $call->c_from : '';
 ?>
@@ -185,7 +185,7 @@ $phoneFrom = $call ? $call->c_from : '';
               <i class="info-icon fa fa-info"></i>
             </button>
             <strong>
-              <?= $call && $call->cClient ? $call->cClient->getFullName() : 'ClientName' ?>
+              <?= Html::encode($clientName) ?>
             </strong>
           </div>
         </div>
@@ -302,20 +302,9 @@ $phoneFrom = $call ? $call->c_from : '';
               <span class="static-number-indicator__name"><?= Html::encode($call->getSourceName()) ?> </span>
           <?php endif; ?>
       </div>
-        <!-- <div class="current-number">
-          <div class="current-number-indicator">
-            <small class="current-number__phone current-number__selected-nr">+37378155478</small>
-            <span class="current-number__identifier current-number__selected-project">OVAGO</span>
-          </div>
-        </div>
-        <div class="number-toggle">
-          <input type="checkbox" id="number-status">
-          <label for="number-status"></label>
-        </div> -->
     </div>
     <div class="incall-group">
   
-
       <div class="contact-info-card">
         <div class="contact-info-card__details">
           
@@ -328,7 +317,7 @@ $phoneFrom = $call ? $call->c_from : '';
                 <i class="info-icon fa fa-info"></i>
               </button>
               <strong>
-                <?= $call && $call->cClient ? $call->cClient->getFullName() : 'ClientName' ?>
+                <?= Html::encode($clientName) ?>
               </strong>
             </div>
             
@@ -347,7 +336,7 @@ $phoneFrom = $call ? $call->c_from : '';
         <button class="call-pane__start-call calling-state-block" id="btn-accept-call">
           <div class="call-in-action">
             <span class="call-in-action__text">Calling</span>
-            <span class="call-in-action__time">01:54</span>
+            <span class="call-in-action__time">00:00</span>
           </div>
           <i class="fas fa-phone"></i>
         </button>
@@ -408,7 +397,7 @@ PhoneWidgetCall.init({
     'isCallInProgress': '{$isCallInProgress}',
     'isIn': '{$isIn}',
     'phoneFrom': '{$phoneFrom}',
-    'name': '{$name}',
+    'name': '{$clientName}',
     'duration': '{$callDuration}',
     'call_id': '{$callId}'
 });
