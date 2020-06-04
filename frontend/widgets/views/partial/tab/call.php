@@ -158,9 +158,13 @@ $phoneFrom = $call ? $call->c_from : '';
       </div> -->
       
       <div class="static-number-indicator">
-        <span class="static-number-indicator__label">wowfare</span>
-        <i class="static-number-indicator__separator"></i>
-        <span class="static-number-indicator__name">Sales General</span>
+        <?php if($call && $call->c_project_id):?>
+            <span class="static-number-indicator__label"><?= Html::encode($call->cProject->name) ?></span>
+        <?php endif; ?>
+        <?php if($call && $call->c_source_type_id):?>
+            <i class="static-number-indicator__separator"></i>
+            <span class="static-number-indicator__name"><?= Html::encode($call->getSourceName()) ?> </span>
+        <?php endif; ?>
       </div>
 
       <!-- <div class="number-toggle"> -->
@@ -290,9 +294,13 @@ $phoneFrom = $call ? $call->c_from : '';
   <div class="call-pane-incoming call-pane-initial">
     <div class="calling-from-info">
       <div class="static-number-indicator">
-        <span class="static-number-indicator__label">wowfare</span>
-        <i class="static-number-indicator__separator"></i>
-        <span class="static-number-indicator__name">Sales General</span>
+          <?php if($call && $call->c_project_id):?>
+              <span class="static-number-indicator__label"><?= Html::encode($call->cProject->name) ?></span>
+          <?php endif; ?>
+          <?php if($call && $call->c_source_type_id):?>
+              <i class="static-number-indicator__separator"></i>
+              <span class="static-number-indicator__name"><?= Html::encode($call->getSourceName()) ?> </span>
+          <?php endif; ?>
       </div>
         <!-- <div class="current-number">
           <div class="current-number-indicator">
