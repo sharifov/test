@@ -2299,9 +2299,7 @@
 		&[data-wi-type="incoming"] {
 			.standby-phone {
 				background-color: $theme-grass;
-				align-items: flex-end;
-				padding-bottom: 26px;
-				flex-direction: row-reverse;
+
 				.icon-phone-answer {
 					display: block;
 					transform: rotate(-45deg);
@@ -2310,6 +2308,9 @@
 
 			.phone-widget-icon__ongoing {
 				margin-left: 2px;
+				position: absolute;
+				left: 60%;
+				bottom: 50%;
 			}
 			&.animate {
 				.standby-phone {

@@ -667,13 +667,14 @@ function handleWidgetIcon() {
     function createInitialIcon(type,status) {
         initialNode = '<div class="widget-icon-inner" data-wi-type="'+ type +'" data-wi-status="'+ status +'">'+
             '<div class="standby-phone">'+
+            '<i class="fa fa-phone-volume icon-phone-answer"></i>' +
             '<div class="phone-widget-icon__state">'+
             '<span class="phone-widget-icon__ongoing"></span>'+
             '<span class="phone-widget-icon__text"></span>'+
             '<span class="phone-widget-icon__time"></span>'+
             '</div>'+
             '<i class="fa fa-phone icon-phone"></i>'+
-            '<i class="fa fa-phone-volume icon-phone-answer"></i>' +
+            
             '</div>'+
             '</div>';
 
@@ -681,45 +682,38 @@ function handleWidgetIcon() {
     }
 
     function stateTimer(el, timerStamp) {
-        var hr = '00';
-        var min = '00';
-        var sec = 0;
 
-        if (timerStamp) {
-            var stamp = timerStamp.split(':');
-            hr = stamp[0];
-            min = stamp[1];
-            sec = parseInt(stamp[2])
 
-        }
+        var sec = Math.floor(timerStamp % 60);
+        var min = Math.floor((timerStamp - sec) / 60);
+        var hr = Math.floor((timerStamp - min) / 60);
         
         interval = setInterval(function() {
-            if (sec > 58) {
-                min = '0' + (parseInt(min) + 1);
-                sec = -1;
-
-                if (parseInt(min) > 9) {
-                    min = parseInt(min);
-                }
+            sec = Math.floor(timerStamp % 60);
+            min = Math.floor(((timerStamp - sec) / 60) % 60);
+            hr = Math.floor(timerStamp / 3600);
+            
+            if (timerStamp === 86399) {
+                timerStamp = 0;
             }
-
-            if (min > 59) {
-                hr = '0' + (parseInt(hr) + 1);
-                min = '00';
-
-                if (parseInt(hr) > 9) {
-                    hr = parseInt(hr);
-                }
-            }
-
-            sec++;
-
+            
             if (parseInt(sec) < 10) {
                 sec = '0' + sec;
             }
 
+            if (parseInt(min) < 10) {
+                min = '0' + min;
+            }
+
+            if (parseInt(hr) < 10) {
+                hr = '0' + hr;
+            }
+
+            timerStamp++
             $(el).html(hr + ':' + min + ':' + sec)
-        },1000);
+
+        }, 1000)
+
     }
 
     function updateIcon(props) {

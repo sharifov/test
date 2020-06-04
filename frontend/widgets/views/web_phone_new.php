@@ -84,10 +84,11 @@ $js = <<<JS
             } else {
 								widgetIcon.update({
 									type: 'incoming',
-									timer: false,
+									timer: true,
 									text: null,
 									currentCalls: null,
-									status: 'online'
+									status: 'online',
+									timerStamp: 0
 								})
 								alert('You have active call');
 								$('.call-pane').removeClass('is_active');
