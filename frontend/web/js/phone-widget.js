@@ -681,14 +681,15 @@ function handleWidgetIcon() {
     }
 
     function stateTimer(el, timerStamp) {
+        var hr = '00';
         var min = '00';
         var sec = 0;
 
         if (timerStamp) {
             var stamp = timerStamp.split(':');
-            
-            min = stamp[0];
-            sec = parseInt(stamp[1])
+            hr = stamp[0];
+            min = stamp[1];
+            sec = parseInt(stamp[2])
 
         }
         
@@ -702,13 +703,22 @@ function handleWidgetIcon() {
                 }
             }
 
+            if (min > 59) {
+                hr = '0' + (parseInt(hr) + 1);
+                min = '00';
+
+                if (parseInt(hr) > 9) {
+                    hr = parseInt(hr);
+                }
+            }
+
             sec++;
 
             if (parseInt(sec) < 10) {
                 sec = '0' + sec;
             }
 
-            $(el).html(min + ':' + sec)
+            $(el).html(hr + ':' + min + ':' + sec)
         },1000);
     }
 
