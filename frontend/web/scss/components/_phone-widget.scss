@@ -1622,7 +1622,6 @@
 			&:active:hover,
 			&:hover:focus {
 				box-shadow: 0px 3px 3px rgba(0, 0, 0, 0.15);
-
 			}
 		}
 
@@ -1687,8 +1686,8 @@
 
 			&[disabled],
 			&.disabled {
-				color: rgba($white, .3);
-				background-color: rgba($white, .08);
+				color: rgba($white, 0.3);
+				background-color: rgba($white, 0.08);
 				cursor: auto;
 			}
 		}
@@ -2222,8 +2221,8 @@
 
 	&__state {
 		display: flex;
-    flex-direction: column;
-    align-items: center;
+		flex-direction: column;
+		align-items: center;
 	}
 
 	&__text {
@@ -2236,13 +2235,13 @@
 		font-size: 14px;
 		line-height: 14px;
 		font-weight: bold;
-		color: #FFEEB1;
+		color: #ffeeb1;
 	}
 
 	&__time {
 		font-size: 16px;
 		line-height: 16px;
-		color: rgba($white, .75);
+		color: rgba($white, 0.75);
 	}
 
 	.standby-phone {
@@ -2250,7 +2249,7 @@
 		height: $size;
 		width: $size;
 		color: $white;
-		
+
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -2267,25 +2266,24 @@
 	}
 
 	.widget-icon-inner {
-
 		&:before {
 			$size: 18px;
-			content: '';
+			content: "";
 			width: $size;
 			height: $size;
 			border: 3px solid $white;
 			background-color: $theme-red;
 			position: absolute;
-			box-shadow: 0px 1px 4px
-			rgba(0, 0, 0, 0.6);
+			box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.6);
 			border-radius: 50%;
 			left: 0;
 			top: -2px;
 		}
 
-		&[data-wo-status="online"] {
+		&[data-wi-status="online"],
+		&[data-wi-status="1"] {
 			&:before {
-				background-color: #53E93A;
+				background-color: #53e93a;
 			}
 		}
 
@@ -2353,6 +2351,7 @@
 				}
 			}
 		}
+		&[data-wi-type="error"],
 		&[data-wi-type="missed"] {
 			.standby-phone {
 				background-color: $theme-red;
@@ -2364,7 +2363,6 @@
 			}
 		}
 	}
-
 
 	.calling-state-block {
 		display: none;
@@ -2379,8 +2377,6 @@
 			}
 		}
 	}
-
-
 
 	.calling-state-block {
 		height: 64px;
@@ -2438,7 +2434,6 @@
 	}
 }
 
-
 .main-content {
 	min-height: calc(100vh - 67px);
 }
@@ -2446,50 +2441,45 @@
 @mixin icon-animation-pulse($name, $color) {
 	@keyframes #{$name} {
 		0% {
-			box-shadow: 0px 0px 0px 2px rgba($color, .1);
+			box-shadow: 0px 0px 0px 2px rgba($color, 0.1);
 		}
-	
+
 		25% {
-			box-shadow: 0px 0px 0px 4px rgba($color, .3), 0px 0px 0px 0px rgba($color, .1);
-			
+			box-shadow: 0px 0px 0px 4px rgba($color, 0.3),
+				0px 0px 0px 0px rgba($color, 0.1);
 		}
-	
+
 		50% {
-			
-			box-shadow: 0px 0px 0px 2px rgba($color, .1), 0px 0px 0px 12px rgba($color, .1);
-			
+			box-shadow: 0px 0px 0px 2px rgba($color, 0.1),
+				0px 0px 0px 12px rgba($color, 0.1);
 		}
 
 		75% {
-		
-			box-shadow: 0px 0px 0px 6px rgba($color, .3), 0px 0px 0px 6px rgba($color, .1);
-
+			box-shadow: 0px 0px 0px 6px rgba($color, 0.3),
+				0px 0px 0px 6px rgba($color, 0.1);
 		}
 
 		100% {
-			box-shadow: 0px 0px 0px 2px rgba($color, .1);
+			box-shadow: 0px 0px 0px 2px rgba($color, 0.1);
 		}
-	
-
 	}
 }
 
 @mixin icon-animation-radar($name, $color) {
 	@keyframes #{$name} {
 		20% {
-			box-shadow: 0px 0px 0px 0px rgba($color, .6);
+			box-shadow: 0px 0px 0px 0px rgba($color, 0.6);
 		}
-	
+
 		100% {
 			box-shadow: 0px 0px 0px 12px rgba($color, 0);
 		}
-	
+
 		0% {
-			box-shadow: 0px 0px 0px 0px rgba($color, .6);
+			box-shadow: 0px 0px 0px 0px rgba($color, 0.6);
 		}
 	}
 }
-
 
 @include icon-animation-pulse(pulse-animation-green, $theme-green-clean);
 @include icon-animation-pulse(pulse-animation-grass, $theme-grass);
@@ -2499,9 +2489,6 @@
 @include icon-animation-radar(radar-animation-grass, $theme-grass);
 @include icon-animation-radar(radar-animation-red, $theme-red);
 @include icon-animation-radar(radar-animation-orange, $theme-orange);
-
-
-
 
 @keyframes speakerAnimation {
 	0% {

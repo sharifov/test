@@ -404,7 +404,8 @@ $(document).ready(function() {
                 type: 'default', 
                 timer: false,
                 text: null,
-                currentCalls: null
+                currentCalls: null,
+                status: 'online'
             })
         }
     })
@@ -663,8 +664,8 @@ function handleWidgetIcon() {
 
     var interval = null;
     
-    function createInitialIcon(type) {
-        initialNode = '<div class="widget-icon-inner" data-wi-type="'+ type +'" data-wo-status="online">'+
+    function createInitialIcon(type,status) {
+        initialNode = '<div class="widget-icon-inner" data-wi-type="'+ type +'" data-wi-status="'+ status +'">'+
             '<div class="standby-phone">'+
             '<div class="phone-widget-icon__state">'+
             '<span class="phone-widget-icon__ongoing"></span>'+
@@ -714,6 +715,7 @@ function handleWidgetIcon() {
 
         clearInterval(interval)
 
+        $(inner).attr('data-wi-status', props.status)
         $(inner).attr('data-wi-type', props.type);
         $(ongoing).html(props.currentCalls);
         $(text).html(props.text);
@@ -730,7 +732,7 @@ function handleWidgetIcon() {
 
     return {
         init: function() {
-            createInitialIcon('default') 
+            createInitialIcon('default', 'offline') 
         },
         update: function(props) {
             updateIcon(props)

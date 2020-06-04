@@ -1477,7 +1477,7 @@
     font-size: 14px;
     line-height: 14px;
     font-weight: bold;
-    color: #FFEEB1; }
+    color: #ffeeb1; }
   .phone-widget-icon__time {
     font-size: 16px;
     line-height: 16px;
@@ -1496,7 +1496,7 @@
       font-size: 22px;
       display: none; }
   .phone-widget-icon .widget-icon-inner:before {
-    content: '';
+    content: "";
     width: 18px;
     height: 18px;
     border: 3px solid #fff;
@@ -1506,8 +1506,8 @@
     border-radius: 50%;
     left: 0;
     top: -2px; }
-  .phone-widget-icon .widget-icon-inner[data-wo-status="online"]:before {
-    background-color: #53E93A; }
+  .phone-widget-icon .widget-icon-inner[data-wi-status="online"]:before, .phone-widget-icon .widget-icon-inner[data-wi-status="1"]:before {
+    background-color: #53e93a; }
   .phone-widget-icon .widget-icon-inner[data-wi-type="default"] .standby-phone {
     background-color: #2a3f54; }
     .phone-widget-icon .widget-icon-inner[data-wi-type="default"] .standby-phone .icon-phone {
@@ -1536,9 +1536,9 @@
     background-color: #E2A300; }
   .phone-widget-icon .widget-icon-inner[data-wi-type="hold"].animate .standby-phone {
     animation: radar-animation-orange 2.5s infinite ease-out; }
-  .phone-widget-icon .widget-icon-inner[data-wi-type="missed"] .standby-phone {
+  .phone-widget-icon .widget-icon-inner[data-wi-type="error"] .standby-phone, .phone-widget-icon .widget-icon-inner[data-wi-type="missed"] .standby-phone {
     background-color: #D15151; }
-  .phone-widget-icon .widget-icon-inner[data-wi-type="missed"].animate .standby-phone {
+  .phone-widget-icon .widget-icon-inner[data-wi-type="error"].animate .standby-phone, .phone-widget-icon .widget-icon-inner[data-wi-type="missed"].animate .standby-phone {
     animation: radar-animation-red 2.5s infinite linear; }
   .phone-widget-icon .calling-state-block {
     display: none; }

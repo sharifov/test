@@ -86,7 +86,8 @@ $js = <<<JS
 									type: 'incoming',
 									timer: false,
 									text: null,
-									currentCalls: null
+									currentCalls: null,
+									status: 'online'
 								})
 								alert('You have active call');
 								$('.call-pane').removeClass('is_active');
