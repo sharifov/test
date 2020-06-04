@@ -312,10 +312,12 @@ $phoneFrom = $call ? $call->c_from : '';
           
             <span class="contact-info-card__label"><?= $call && $call->isIn() ? 'Incoming' : 'Outgoing' ?></span>
             <div class="contact-info-card__name">
-              <button class="call-pane__info">
-                <i class="user-icon fa fa-user"></i>
-                <i class="info-icon fa fa-info"></i>
-              </button>
+                <?php if($call && $call->cClient): ?>
+                  <button class="call-pane__info">
+                    <i class="user-icon fa fa-user"></i>
+                    <i class="info-icon fa fa-info"></i>
+                  </button>
+                <?php endif; ?>
               <strong id="cw-client-name">
                 <?= Html::encode($clientName) ?>
               </strong>
@@ -355,27 +357,17 @@ $phoneFrom = $call ? $call->c_from : '';
         <i class="fas fa-times"></i>
         </a>
       </div>
-      <div class="additional-info__body scrollable-block">
-        <ul class="info-listing incoming-info">
-          <li>
-             <small class="incoming-info__label">Role</small>
-             <span class="incoming-info__value">Supervisor</span>
-          </li>
-          <li>
-             <small class="incoming-info__label">Last Call</small>
-             <span class="incoming-info__value">12.05.2012 13:03 - 15m 20s</span>
-          </li>
-          <li>
-             <small class="incoming-info__label">Project</small>
-             <span class="incoming-info__value">Wowfare</span>
-          </li>
-          <li>
-             <small class="incoming-info__label">Random data</small>
-             <span class="incoming-info__value">Random data value</span>
-          </li>
-        </ul>
-      </div>
-    </div> 
+        <?php if($call && $call->cClient): ?>
+            <div class="additional-info__body scrollable-block">
+                <ul class="info-listing incoming-info">
+                  <li>
+                     <small class="incoming-info__label">Name</small>
+                     <span class="incoming-info__value"><?= Html::encode($clientName) ?></span>
+                  </li>
+                </ul>
+              </div>
+        <?php endif; ?>
+    </div>
 
 
 </div>
