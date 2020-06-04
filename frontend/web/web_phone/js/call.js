@@ -31,8 +31,8 @@ var PhoneWidgetCall = function () {
         $('.calling-from-info__identifier').html(selectedNumber.from.project);
         $('.calling-from-info__number').html(selectedNumber.from.value);
         $('#cw-client_name').html(selectedNumber.to.callToName);
-        $('#cw-project_name').html('');
-        $('#cw-source_name').html('');
+        //$('#cw-project_name').html('');
+        //$('#cw-source_name').html('');
         $('.call-pane-calling').find('.contact-info-card__call-type').html(selectedNumber.to.phone);
         $('.phone-widget-icon').addClass('is-pending');
         $('.call-pane__call-btns').addClass('is-pending');

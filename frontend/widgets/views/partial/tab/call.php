@@ -162,7 +162,7 @@ $sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
       </div> -->
       
       <div class="static-number-indicator">
-        <?php if($call && $call->c_project_id):?>
+        <?php /*if($call && $call->c_project_id):?>
             <span class="static-number-indicator__label" id="cw-project_name"><?= Html::encode($call->cProject->name) ?></span>
         <?php endif; ?>
         <?php /*if($call && $call->c_source_type_id):?>
