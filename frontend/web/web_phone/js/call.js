@@ -30,7 +30,7 @@ var PhoneWidgetCall = function () {
     {
         $('.calling-from-info__identifier').html(selectedNumber.from.project);
         $('.calling-from-info__number').html(selectedNumber.from.value);
-        $('.call-pane-calling').find('.contact-info-card__name').html(selectedNumber.to.callToName);
+        $('#cw-client-name').html(selectedNumber.to.callToName);
         $('.call-pane-calling').find('.contact-info-card__call-type').html(selectedNumber.to.phone);
         $('.phone-widget-icon').addClass('is-pending');
         $('.call-pane__call-btns').addClass('is-pending');
@@ -169,12 +169,12 @@ var PhoneWidgetCall = function () {
             obj.status = 'On Call';
             $('.call-pane__call-btns').removeClass('is-pending').addClass('is-on-call');
             showCallingPanel();
-            $('.call-pane-calling .contact-info-card__name').html(obj.name);
+            $('#cw-client-name').html(obj.name);
         }else if(['Ringing', 'Queued'].includes(obj.status)) {
             if ('isIn' in obj && obj.isIn) {
                 initIncomingCall(obj);
             }
-            $('.call-pane-calling .contact-info-card__name').html(obj.name);
+            $('#cw-client-name').html(obj.name);
         }else if (obj.status === 'Completed') {
             cancelCall();
         }else {
@@ -221,7 +221,7 @@ var PhoneWidgetCall = function () {
         $('#tab-phone .call-pane-initial').removeClass('is_active');
         $('#tab-phone .call-pane-incoming').addClass('is_active');
         $('#btn-accept-call').find('i').removeClass('fa fa-spinner fa-spin').addClass('fas fa-check');
-        $('.call-pane-incoming .contact-info-card__name').html(name);
+        $('#cw-client-name').html(name);
         $('.call-pane-incoming .contact-info-card__call-type').html(phone);
     }
 
@@ -371,7 +371,7 @@ var PhoneWidgetCall = function () {
             contactIcon
             + '<div class="contact-info-card__details">' +
             '<div class="contact-info-card__line history-details">' +
-            '<strong class="contact-info-card__name">' + contact['name'] + '</strong>' +
+            '<div class="contact-info-card__name"><button class="call-pane__info"><i class="user-icon fa fa-user"></i><i class="info-icon fa fa-info"></i></button><strong id="cw-client-name">' + contact['name'] + '</strong></div>' +
             '</div>' +
             '</div>' +
             '</div>' +
@@ -379,18 +379,18 @@ var PhoneWidgetCall = function () {
         return content;
     }
 
-    function loadNotFound() {
-        let content = '<li class="calls-history__item contact-info-card">' +
-            '<div class="collapsible-toggler">' +
-            '<div class="contact-info-card__details">' +
-            '<div class="contact-info-card__line history-details">' +
-            '<strong class="contact-info-card__name">No results found</strong>' +
-            '</div>' +
-            '</div>' +
-            '</div>' +
-            '</li>';
-        return content;
-    }
+    // function loadNotFound() {
+    //     let content = '<li class="calls-history__item contact-info-card">' +
+    //         '<div class="collapsible-toggler">' +
+    //         '<div class="contact-info-card__details">' +
+    //         '<div class="contact-info-card__line history-details">' +
+    //         '<strong class="contact-info-card__name">No results found</strong>' +
+    //         '</div>' +
+    //         '</div>' +
+    //         '</div>' +
+    //         '</li>';
+    //     return content;
+    // }
 
     $(document).on('click', "li.call-contact-card", function () {
         let phone = $(this).data('phone');

@@ -316,7 +316,7 @@ $phoneFrom = $call ? $call->c_from : '';
                 <i class="user-icon fa fa-user"></i>
                 <i class="info-icon fa fa-info"></i>
               </button>
-              <strong>
+              <strong id="cw-client-name">
                 <?= Html::encode($clientName) ?>
               </strong>
             </div>
