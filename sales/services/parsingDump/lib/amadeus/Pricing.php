@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\services\parsingDump\lib\worldSpan;
+namespace sales\services\parsingDump\lib\amadeus;
 
 use sales\helpers\app\AppHelper;
 use sales\services\parsingDump\lib\ParseDumpInterface;
@@ -23,7 +23,7 @@ class Pricing implements ParseDumpInterface
                 $result['prices'] = $prices;
             }
         } catch (\Throwable $throwable) {
-            \Yii::error(AppHelper::throwableFormatter($throwable), 'WorldSpan:Pricing:parseDump:Throwable');
+            \Yii::error(AppHelper::throwableFormatter($throwable), 'amadeus:Pricing:parseDump:Throwable');
         }
         return $result;
     }
@@ -34,7 +34,7 @@ class Pricing implements ParseDumpInterface
      */
     private function parseValidatingCarrier(string $string): ?string
     {
-        $carrierPattern = "/VALIDATING\s+CARRIER\s+DEFAULT\s+([A-Z]+)/";
+        $carrierPattern = "/VALIDATING\s+CARRIER\s+\W\s+([A-Z]+)/";
         preg_match($carrierPattern, $string, $carrierMatches);
 
         return $carrierMatches[1] ?? '';
@@ -47,43 +47,38 @@ class Pricing implements ParseDumpInterface
     public function parsePrice(string $string): ?array
     {
         $result = null;
-        $ticketPricePattern = '/TICKET (.*?)\*TTL/s';
+        $ticketPricePattern = "/CHARGES\s+TOTAL\s(.*?)TTL/s";
         preg_match($ticketPricePattern, $string, $ticketPriceMatches);
 
-        if (isset($ticketPriceMatches[1]) && $ticketPrice = trim($ticketPriceMatches[1])) {
+        if (isset($ticketPriceMatches[1]) && $ticketPriceText = trim($ticketPriceMatches[1])) {
             $j = 0;
-            $ticketPrices = explode("\n", $ticketPrice);
-            array_shift($ticketPrices);
+            $ticketPrices = explode("\n", $ticketPriceText);
+            $pricePattern = '/
+                ^(\d{1,2})\- # count pas
+                \w|\s+USD(\d+.\d+) # fare
+                \s+((\d+.\d+)[A-Z]{1,3})? # taxes
+                \s+USD(\d+.\d+)([A-Z]{3}) # amount + type                         
+                /x';
 
-            foreach ($ticketPrices as $key => $value) {
-                if ($values = $this->prepareRow($value)) {
+            foreach ($ticketPrices as $row) {
+                $row = trim($row);
 
-                    preg_match('/([A-Z]+)(\d+)/', $values[0], $typeMatches);
-                    if (empty($typeMatches)) {
-                        continue;
-                    }
+                preg_match('/^(\d{1,2})-/', $row, $matchesCount);
+                preg_match($pricePattern, $row, $matches);
 
-                    for ($i = 0; $i < (int) $typeMatches[2]; $i++) {
-                        $result[$j]['type'] = $this->typeMapping($typeMatches[1]);
-                        $result[$j]['fare'] = $values[1] ?? null;
-                        $result[$j]['taxes'] = $values[2] ?? null;
+                if (isset($matches[1], $matchesCount[1])) {
+
+                    for ($i = 0; $i < (int) $matchesCount[1]; $i++) {
+                        $type = $matches[6] ?? null;
+                        $result[$j]['type'] = $this->typeMapping($type);
+                        $result[$j]['fare'] = $matches[2] ?? null;
+                        $result[$j]['taxes'] = !empty($matches[4]) ? $matches[4] : '0.00';
                         $j ++;
                     }
                 }
             }
         }
         return $result;
-    }
-
-    /**
-     * @param string $row
-     * @return false|string[]
-     */
-    private function prepareRow(string $row)
-    {
-        $value = trim($row);
-        $value = preg_replace('|[\s]+|s', ' ', $value);
-        return explode(' ', $value);
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\services\parsingDump\lib\sabre;
+namespace sales\services\parsingDump\lib\amadeus;
 
 use DateTime;
 use sales\helpers\app\AppHelper;
@@ -30,7 +30,7 @@ class Reservation implements ParseDumpInterface
 
                 $result['reservation'][$parseData['index']] = $parseData;
             } catch (\Throwable $throwable) {
-                \Yii::error(AppHelper::throwableFormatter($throwable), 'Sabre:Reservation:parseDump:Throwable');
+                \Yii::error(AppHelper::throwableFormatter($throwable), 'amadeus:Reservation:parseDump:Throwable');
             }
         }
         return $result;

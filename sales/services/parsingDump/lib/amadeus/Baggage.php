@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\services\parsingDump\lib\sabre;
+namespace sales\services\parsingDump\lib\amadeus;
 
 use sales\helpers\app\AppHelper;
 use sales\services\parsingDump\lib\ParseDumpInterface;
@@ -22,7 +22,7 @@ class Baggage implements ParseDumpInterface
                 $result['baggage'] = $baggage;
             }
         } catch (\Throwable $throwable) {
-            \Yii::error(AppHelper::throwableFormatter($throwable), 'Sabre:Baggage:parseDump:Throwable');
+            \Yii::error(AppHelper::throwableFormatter($throwable), 'amadeus:Baggage:parseDump:Throwable');
         }
         return $result;
     }
