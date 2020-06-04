@@ -371,7 +371,7 @@ var PhoneWidgetCall = function () {
             contactIcon
             + '<div class="contact-info-card__details">' +
             '<div class="contact-info-card__line history-details">' +
-            '<div class="contact-info-card__name"><button class="call-pane__info"><i class="user-icon fa fa-user"></i><i class="info-icon fa fa-info"></i></button><strong id="cw-client-name">' + contact['name'] + '</strong></div>' +
+            '<strong class="contact-info-card__name">' + contact['name'] + '</strong>' +
             '</div>' +
             '</div>' +
             '</div>' +
