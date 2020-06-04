@@ -255,7 +255,10 @@
   .phone-widget__settings {
     right: 20px; }
   .phone-widget__close {
-    right: -10px; }
+    right: -10px;
+    top: -6px !important; }
+    .phone-widget__close .fa {
+      font-size: 18px !important; }
   .phone-widget__body {
     min-height: calc(100vh - 80px);
     background-color: #f3f3f3;
@@ -816,12 +819,12 @@
     .phone-widget .call-pane__note-block {
       display: flex;
       align-items: center; }
-      .phone-widget .call-pane__note-block svg {
-        display: block;
-        width: 20px;
-        height: 20px; }
-        .phone-widget .call-pane__note-block svg path {
-          fill: #fff; }
+      .phone-widget .call-pane__note-block .fa {
+        font-size: 20px;
+        line-height: 20px;
+        color: #fff; }
+      .phone-widget .call-pane__note-block .fa-check {
+        font-size: 16px; }
       .phone-widget .call-pane__note-block .form-group {
         flex-grow: 1;
         margin: 0;
@@ -941,6 +944,7 @@
       background-color: #66798b;
       padding: 5px;
       border-radius: 50%;
+      color: rgba(255, 255, 255, 0.6);
       right: 0;
       bottom: 8px; }
       .phone-widget .call-pane__dial-clear-all svg {
