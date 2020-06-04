@@ -2281,7 +2281,8 @@
 		}
 
 		&[data-wi-status="online"],
-		&[data-wi-status="1"] {
+		&[data-wi-status="1"],
+		&[data-wi-status="true"] {
 			&:before {
 				background-color: #53e93a;
 			}
@@ -2328,7 +2329,7 @@
 			}
 		}
 
-		&[data-wi-type="ongoing"] {
+		&[data-wi-type="inProgress"] {
 			.standby-phone {
 				background-color: $theme-green-clean;
 			}

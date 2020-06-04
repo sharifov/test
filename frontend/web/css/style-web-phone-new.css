@@ -1506,7 +1506,7 @@
     border-radius: 50%;
     left: 0;
     top: -2px; }
-  .phone-widget-icon .widget-icon-inner[data-wi-status="online"]:before, .phone-widget-icon .widget-icon-inner[data-wi-status="1"]:before {
+  .phone-widget-icon .widget-icon-inner[data-wi-status="online"]:before, .phone-widget-icon .widget-icon-inner[data-wi-status="1"]:before, .phone-widget-icon .widget-icon-inner[data-wi-status="true"]:before {
     background-color: #53e93a; }
   .phone-widget-icon .widget-icon-inner[data-wi-type="default"] .standby-phone {
     background-color: #2a3f54; }
@@ -1528,9 +1528,9 @@
     background-color: #0AA359; }
   .phone-widget-icon .widget-icon-inner[data-wi-type="outgoing"].animate .standby-phone {
     animation: radar-animation-green 2.5s infinite ease-out; }
-  .phone-widget-icon .widget-icon-inner[data-wi-type="ongoing"] .standby-phone {
+  .phone-widget-icon .widget-icon-inner[data-wi-type="inProgress"] .standby-phone {
     background-color: #0AA359; }
-  .phone-widget-icon .widget-icon-inner[data-wi-type="ongoing"].animate .standby-phone {
+  .phone-widget-icon .widget-icon-inner[data-wi-type="inProgress"].animate .standby-phone {
     animation: pulse-animation-green 3s infinite linear; }
   .phone-widget-icon .widget-icon-inner[data-wi-type="hold"] .standby-phone {
     background-color: #E2A300; }

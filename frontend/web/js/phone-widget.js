@@ -680,9 +680,17 @@ function handleWidgetIcon() {
         $($parent).append(initialNode)
     }
 
-    function stateTimer(el) {
+    function stateTimer(el, timerStamp) {
         var min = '00';
         var sec = 0;
+
+        if (timerStamp) {
+            var stamp = timerStamp.split(':');
+            
+            min = stamp[0];
+            sec = parseInt(stamp[1])
+
+        }
         
         interval = setInterval(function() {
             if (sec > 58) {
@@ -711,8 +719,6 @@ function handleWidgetIcon() {
             text = '.phone-widget-icon__text',
             time = '.phone-widget-icon__time';
 
-        console.log(props.text)
-
         clearInterval(interval)
 
         $(inner).attr('data-wi-status', props.status)
@@ -721,7 +727,7 @@ function handleWidgetIcon() {
         $(text).html(props.text);
 
         if (props.timer) {
-            stateTimer(time)
+            stateTimer(time, props.timerStamp)
         } else {
             $(time).html(null)
         }
