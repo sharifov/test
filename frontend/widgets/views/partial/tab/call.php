@@ -9,6 +9,10 @@
 $clientName = $call && $call->cClient ? $call->cClient->getFullName() : '------';
 $isIn = $call ? $call->isIn() : false;
 $phoneFrom = $call ? $call->c_from : '';
+
+$projectName = $call && $call->c_project_id? $call->cProject->name : '';
+$sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
+
 ?>
 <div class="phone-widget__tab is_active" id="tab-phone">
   <div class="call-pane call-pane-initial is_active">
@@ -294,12 +298,11 @@ $phoneFrom = $call ? $call->c_from : '';
   <div class="call-pane-incoming call-pane-initial">
     <div class="calling-from-info">
       <div class="static-number-indicator">
-          <?php if($call && $call->c_project_id):?>
-              <span class="static-number-indicator__label"><?= Html::encode($call->cProject->name) ?></span>
-          <?php endif; ?>
+
+          <span class="static-number-indicator__label" id="cw-project_name"><?= Html::encode($projectName) ?></span>
           <?php if($call && $call->c_source_type_id):?>
               <i class="static-number-indicator__separator"></i>
-              <span class="static-number-indicator__name"><?= Html::encode($call->getSourceName()) ?> </span>
+              <span class="static-number-indicator__name" id="cw-source_name"><?= Html::encode($sourceName) ?> </span>
           <?php endif; ?>
       </div>
     </div>
@@ -318,7 +321,7 @@ $phoneFrom = $call ? $call->c_from : '';
                     <i class="info-icon fa fa-info"></i>
                   </button>
                 <?php endif; ?>
-              <strong id="cw-client-name">
+              <strong id="cw-client_name">
                 <?= Html::encode($clientName) ?>
               </strong>
             </div>
@@ -389,6 +392,8 @@ PhoneWidgetCall.init({
     'isCallInProgress': '{$isCallInProgress}',
     'isIn': '{$isIn}',
     'phoneFrom': '{$phoneFrom}',
+    'projectName': '{$projectName}',
+    'sourceName': '{$sourceName}',
     'name': '{$clientName}',
     'duration': '{$callDuration}',
     'call_id': '{$callId}'
