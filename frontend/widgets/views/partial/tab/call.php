@@ -163,12 +163,12 @@ $sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
       
       <div class="static-number-indicator">
         <?php if($call && $call->c_project_id):?>
-            <span class="static-number-indicator__label"><?= Html::encode($call->cProject->name) ?></span>
+            <span class="static-number-indicator__label" id="cw-project_name"><?= Html::encode($call->cProject->name) ?></span>
         <?php endif; ?>
-        <?php if($call && $call->c_source_type_id):?>
+        <?php /*if($call && $call->c_source_type_id):?>
             <i class="static-number-indicator__separator"></i>
             <span class="static-number-indicator__name"><?= Html::encode($call->getSourceName()) ?> </span>
-        <?php endif; ?>
+        <?php endif;*/ ?>
       </div>
 
       <!-- <div class="number-toggle"> -->
