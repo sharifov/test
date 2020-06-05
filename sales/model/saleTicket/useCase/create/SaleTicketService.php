@@ -53,8 +53,9 @@ class SaleTicketService
 		$penaltyTypeId = SaleTicket::getPenaltyTypeId(trim($refundRules['airline_penalty'] ?? ''));
 		foreach ($refundRules['rules'] as $rule) {
 			$firstLastName = $this->getPassengerName($rule , $saleData['passengers']);
+			$isPassengerInfant = $this->isPassengerInfant($rule['ticket_number'], $saleData['passengers']);
 			$cntPassengers = CaseSaleHelper::getPassengersCountExceptInf($saleData['passengers']);
-			$dto = (new SaleTicketCreateDTO())->feelBySaleData($caseSale->css_cs_id, $caseSale->css_sale_id, $saleData['pnr'] ?? '', $firstLastName, $cntPassengers, $penaltyTypeId, $rule, $refundRules);
+			$dto = (new SaleTicketCreateDTO())->feelBySaleData($caseSale->css_cs_id, $caseSale->css_sale_id, $saleData['pnr'] ?? '', $firstLastName, $isPassengerInfant, $cntPassengers, $penaltyTypeId, $rule, $refundRules);
 			$saleTicket = SaleTicket::createBySaleData($dto);
 			$this->saleTicketRepository->save($saleTicket);
 		}
@@ -104,11 +105,40 @@ class SaleTicketService
 
 	private function getPassengerNameByTicketNumber(string $ticketNumber, array $passengers): string
 	{
-		foreach ($passengers as $passenger) {
-			if ($passenger['ticket_number'] === $ticketNumber) {
-				return trim($passenger['first_name'] . ' / ' . $passenger['last_name']);
-			}
+		$passenger = $this->getPassengerByTicketNumber($ticketNumber, $passengers);
+
+		if ($passenger && $passenger['ticket_number'] && $passenger['ticket_number'] === $ticketNumber) {
+			return trim($passenger['first_name'] . ' / ' . $passenger['last_name']);
 		}
 		return '';
+	}
+
+	/**
+	 * @param string $ticketNumber
+	 * @param array $passengers
+	 * @return bool
+	 */
+	private function isPassengerInfant(string $ticketNumber, array $passengers): bool
+	{
+		$passenger = $this->getPassengerByTicketNumber($ticketNumber, $passengers);
+		if ($passenger && $passenger['type'] === 'INF') {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * @param string $ticketNumber
+	 * @param array $passengers
+	 * @return array|null
+	 */
+	private function getPassengerByTicketNumber(string $ticketNumber, array $passengers): ?array
+	{
+		foreach ($passengers as $passenger) {
+			if ($passenger['ticket_number'] === $ticketNumber) {
+				return $passenger;
+			}
+		}
+		return null;
 	}
 }
