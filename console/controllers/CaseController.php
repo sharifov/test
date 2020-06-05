@@ -103,7 +103,7 @@ class CaseController extends Controller
 		printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 	}
 
-	public function actionRefreshCaseSales(int $caseId = null, int $saleId = null, int $limit = 1000, int $offset = 0)
+	public function actionRefreshCaseSales($caseId = null, $saleId = null, $limit = 1000, $offset = 0)
 	{
 		printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 		$time_start = microtime(true);
