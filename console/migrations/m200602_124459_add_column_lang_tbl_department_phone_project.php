@@ -13,7 +13,7 @@ class m200602_124459_add_column_lang_tbl_department_phone_project extends Migrat
     public function safeUp()
     {
 
-        $this->dropColumn('{{%department_phone_project}}', 'dpp_language_id');
+        //$this->dropColumn('{{%department_phone_project}}', 'dpp_language_id');
 
         $this->addColumn('{{%department_phone_project}}', 'dpp_language_id', $this->string(5)->append('CHARACTER SET utf8 COLLATE utf8_unicode_ci'));
         $this->addForeignKey('FK-department_phone_project-dpp_language_id',
