@@ -1254,6 +1254,14 @@ class TestController extends FController
 
 	public function actionZ()
 	{
+	     $emailPostfix = Project::getEmailPostfix(9);
+
+	     $data = EmailList::searchEmailList('an', $emailPostfix);
+
+	     \yii\helpers\VarDumper::dump($data, 10, true); exit();
+	     /* FOR DEBUG:: must by remove */
+
+
 	     $email_postfix = 'techork.com';
 	     $q = 'an';
 

@@ -277,4 +277,14 @@ class Project extends \yii\db\ActiveRecord
     {
         return new ProjectQuery(static::class);
     }
+
+    /**
+     * @param int $id
+     * @return string|null
+     */
+    public static function getEmailPostfix(int $id): ?string
+    {
+        $emailPostfix = self::find()->select('email_postfix')->where(['id' => $id])->asArray()->one();
+        return $emailPostfix['email_postfix'];
+    }
 }
