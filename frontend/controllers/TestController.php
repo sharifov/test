@@ -1251,4 +1251,23 @@ class TestController extends FController
 		echo '<pre>';
 		print_r($service->sendAddedCreditCardToBO($saleOriginalData['projectApiKey'], $bookId, $saleId, $card));
 	}
+
+	public function actionZ()
+	{
+	     $email_postfix = 'techork.com';
+	     $q = 'an';
+
+	     $data = EmailList::find()->select(['id' => 'el_id', 'text' => 'el_email', 'enabled' => 'el_enabled', 'title' => 'el_title'])
+                ->where(['like', 'el_email', $q])
+                ->orWhere(['el_id' => (int)$q])
+                ->orWhere(['like', 'el_title', $q])
+                ->andWhere(['like', 'el_email', $email_postfix])
+                ->limit(20)
+                //->indexBy('id')
+                ->asArray()
+                ->all();
+
+         \yii\helpers\VarDumper::dump($data, 10, true); exit();
+         /* FOR DEBUG:: must by remove */
+	}
 }

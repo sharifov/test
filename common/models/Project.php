@@ -21,6 +21,7 @@ use yii\httpclient\CurlTransport;
  * @property string $last_update
  * @property string $custom_data
  * @property int $sort_order
+ * @property string $email_postfix
  *
  * @property Sources[] $sources
  * @property ContactInfo $contactInfo
@@ -48,6 +49,7 @@ class Project extends \yii\db\ActiveRecord
             [['closed'], 'boolean'],
             [['last_update'], 'safe'],
             [['name', 'link', 'api_key'], 'string', 'max' => 255],
+            [['email_postfix'], 'string', 'max' => 100],
         ];
     }
 
@@ -66,6 +68,7 @@ class Project extends \yii\db\ActiveRecord
             'last_update' => 'Last Update',
             'custom_data' => 'Custom Data',
             'sort_order' => 'Sort',
+            'email_postfix' => 'Email postfix',
         ];
     }
 
