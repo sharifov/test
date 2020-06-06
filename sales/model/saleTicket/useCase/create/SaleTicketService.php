@@ -2,6 +2,7 @@
 namespace sales\model\saleTicket\useCase\create;
 
 use common\models\CaseSale;
+use sales\helpers\cases\CaseSaleHelper;
 use sales\model\saleTicket\entity\SaleTicket;
 use sales\repositories\cases\CasesSaleRepository;
 use sales\services\TransactionManager;
@@ -52,7 +53,7 @@ class SaleTicketService
 		$penaltyTypeId = SaleTicket::getPenaltyTypeId(trim($refundRules['airline_penalty'] ?? ''));
 		foreach ($refundRules['rules'] as $rule) {
 			$firstLastName = $this->getPassengerName($rule , $saleData['passengers']);
-			$cntPassengers = $this->getPassengersCountExceptInf($saleData['passengers']);
+			$cntPassengers = CaseSaleHelper::getPassengersCountExceptInf($saleData['passengers']);
 			$dto = (new SaleTicketCreateDTO())->feelBySaleData($caseSale->css_cs_id, $caseSale->css_sale_id, $saleData['pnr'] ?? '', $firstLastName, $cntPassengers, $penaltyTypeId, $rule, $refundRules);
 			$saleTicket = SaleTicket::createBySaleData($dto);
 			$this->saleTicketRepository->save($saleTicket);
@@ -109,16 +110,5 @@ class SaleTicketService
 			}
 		}
 		return '';
-	}
-
-	private function getPassengersCountExceptInf(array $passengers): int
-	{
-		$cnt = 0;
-		foreach ($passengers as $passenger) {
-			if ($passenger['type'] !== 'INF') {
-				$cnt++;
-			}
-		}
-		return $cnt;
 	}
 }

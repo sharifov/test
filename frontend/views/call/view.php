@@ -119,7 +119,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     },
                     'format' => 'raw'
                 ],
-
+                'c_language_id'
 
 
             ],

@@ -315,7 +315,7 @@ return [
     ],
     'as access' => [
         'class' => 'yii\filters\AccessControl',
-        'except' => ['site/login', 'site/step-two'],
+        'except' => ['site/login', 'site/step-two', 'site/captcha'],
         'rules' => [
             [
                 'allow' => true,

@@ -2,7 +2,12 @@
 
 namespace common\models;
 
+use lajax\translatemanager\models\LanguageSource;
+use lajax\translatemanager\models\LanguageTranslate;
 use Yii;
+use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "language".
@@ -18,8 +23,36 @@ use Yii;
  * @property LanguageTranslate[] $languageTranslates
  * @property LanguageSource[] $ids
  */
-class Language extends \yii\db\ActiveRecord
+class Language extends ActiveRecord
 {
+
+    /**
+     * Status of inactive language.
+     */
+    const STATUS_INACTIVE = 0;
+
+    /**
+     * Status of active language.
+     */
+    const STATUS_ACTIVE = 1;
+
+    /**
+     * Status of ‘beta’ language.
+     */
+    const STATUS_BETA = 2;
+
+    /**
+     * Array containing possible states.
+     *
+     * @var array
+     * @translate
+     */
+    private static $_CONDITIONS = [
+        self::STATUS_INACTIVE => 'Inactive',
+        self::STATUS_ACTIVE => 'Active',
+        self::STATUS_BETA => 'Beta',
+    ];
+
     /**
      * {@inheritdoc}
      */
@@ -59,7 +92,7 @@ class Language extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getEmails()
     {
@@ -67,7 +100,7 @@ class Language extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getLanguageTranslates()
     {
@@ -75,15 +108,50 @@ class Language extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getIds()
     {
         return $this->hasMany(LanguageSource::class, ['id' => 'id'])->viaTable('language_translate', ['language' => 'language_id']);
     }
 
+    /**
+     * @return array
+     */
     public static function getList(): array
 	{
 		return self::find()->select(['language_id'])->indexBy('language_id')->asArray()->column();
 	}
+
+    /**
+     * @param bool $active
+     * @param null $group
+     * @return array
+     */
+    public static function getLanguages($active = true, $group = null): array
+    {
+        if ($active) {
+            $query = self::find()->where(['status' => static::STATUS_ACTIVE]);
+        } else {
+            $query =  self::find();
+        }
+
+        $data = ArrayHelper::map($query->asArray(true)->all(), 'language_id', 'language_id', $group);
+
+        return $data;
+    }
+
+//    /**
+//     * @param bool $active
+//     * @return array
+//     */
+//    public static function getLanguageNames($active = false): array
+//    {
+//        $languageNames = [];
+//        foreach (self::getLanguages($active, true) as $language) {
+//            $languageNames[$language['language_id']] = $language['name'];
+//        }
+//
+//        return $languageNames;
+//    }
 }

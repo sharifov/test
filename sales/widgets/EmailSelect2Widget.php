@@ -29,10 +29,24 @@ class EmailSelect2Widget extends Select2
     public $delay = 300;
     public $placeholder = '';
     public $url;
+    public int $projectId = 0;
 
     public function init(): void
     {
         parent::init();
+
+        if ($this->projectId > 0) {
+            $js = 'function(params) { return {q:params.term, project:' . $this->projectId . '}; }';
+        } else {
+            $js = 'function(params) { 
+                let projectId = $("#project_id").val();                
+                if (projectId.length === 0) {
+                    alert("Please select a project first");
+                    return false;
+                }    
+                return {q:params.term, project:projectId}; 
+            }';
+        }
 
         $this->url = $this->url ?: Url::to(['/email-list/list-ajax']);
         $this->theme = $this->theme ?: self::THEME_KRAJEE;
@@ -42,7 +56,7 @@ class EmailSelect2Widget extends Select2
             'ajax' => [
                 'url' => $this->url,
                 'dataType' => 'json',
-                'data' => new JsExpression('function(params) { return {q:params.term}; }'),
+                'data' => new JsExpression($js),
                 'delay' => $this->delay
             ],
             'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),

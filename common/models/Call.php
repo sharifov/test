@@ -81,6 +81,7 @@ use Locale;
  * @property string|null $c_conference_sid
  * @property int|null $c_conference_id
  * @property string $c_is_conference
+ * @property string|null $c_language_id
  *
  * @property string $c_recording_url
  * @property bool $c_is_new
@@ -91,6 +92,7 @@ use Locale;
  * @property Client $cClient
  * @property Department $cDep
  * @property Lead $cLead
+ * @property Language $cLanguage
  * @property Call $cParent
  * @property Call[] $calls
  * @property Project $cProject
@@ -257,6 +259,8 @@ class Call extends \yii\db\ActiveRecord
             [['c_caller_name'], 'string', 'max' => 50],
             //[['c_recording_url'], 'string', 'max' => 200],
             [['c_error_message'], 'string', 'max' => 500],
+            [['c_language_id'], 'string', 'max' => 5],
+            [['c_language_id'], 'exist', 'skipOnError' => true, 'targetClass' => Language::class, 'targetAttribute' => ['c_language_id' => 'language_id']],
             [['c_case_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['c_case_id' => 'cs_id']],
             [['c_client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['c_client_id' => 'id']],
             [['c_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['c_created_user_id' => 'id']],
@@ -324,6 +328,7 @@ class Call extends \yii\db\ActiveRecord
             'c_is_conference' => 'Is conference',
             'c_conference_id' => 'Conference ID',
             'c_conference_sid' => 'Conference SID',
+            'c_language_id' => 'Language ID',
         ];
     }
 
@@ -516,9 +521,9 @@ class Call extends \yii\db\ActiveRecord
 
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getConferenceParticipants()
+    public function getConferenceParticipants(): ActiveQuery
     {
         return $this->hasMany(ConferenceParticipant::class, ['cp_call_id' => 'c_id']);
     }
@@ -535,95 +540,107 @@ class Call extends \yii\db\ActiveRecord
 
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getCallUserAccesses()
+    public function getCallUserAccesses(): ActiveQuery
     {
         return $this->hasMany(CallUserAccess::class, ['cua_call_id' => 'c_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getCuaUsers()
+    public function getCuaUsers(): ActiveQuery
     {
         return $this->hasMany(Employee::class, ['id' => 'cua_user_id'])->viaTable('call_user_access', ['cua_call_id' => 'c_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getCallUserGroups()
+    public function getCallUserGroups(): ActiveQuery
     {
         return $this->hasMany(CallUserGroup::class, ['cug_c_id' => 'c_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getCugUgs()
+    public function getCugUgs(): ActiveQuery
     {
         return $this->hasMany(UserGroup::class, ['ug_id' => 'cug_ug_id'])->viaTable('call_user_group', ['cug_c_id' => 'c_id']);
     }
 
-
-    public function getCases()
+    /**
+     * @return ActiveQuery
+     */
+    public function getCases(): ActiveQuery
     {
         return $this->hasMany(Cases::class, ['cs_call_id' => 'c_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery: ActiveQuery
      */
-    public function getCCase()
+    public function getCCase(): ActiveQuery
     {
         return $this->hasOne(Cases::class, ['cs_id' => 'c_case_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getCClient()
+    public function getCClient(): ActiveQuery
     {
         return $this->hasOne(Client::class, ['id' => 'c_client_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getCDep()
+    public function getCDep(): ActiveQuery
     {
         return $this->hasOne(Department::class, ['dep_id' => 'c_dep_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * Gets query for [[CLanguage]].
+     *
+     * @return ActiveQuery
      */
-    public function getCCreatedUser()
+    public function getCLanguage(): ActiveQuery
+    {
+        return $this->hasOne(Language::class, ['language_id' => 'c_language_id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getCCreatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'c_created_user_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getCProject()
+    public function getCProject(): ActiveQuery
     {
         return $this->hasOne(Project::class, ['id' => 'c_project_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getCLead()
+    public function getCLead(): ActiveQuery
     {
         return $this->hasOne(Lead::class, ['id' => 'c_lead_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getCParent()
+    public function getCParent(): ActiveQuery
     {
         return $this->hasOne(self::class, ['c_id' => 'c_parent_id']);
     }
@@ -643,7 +660,7 @@ class Call extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getCalls()
     {

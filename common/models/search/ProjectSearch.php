@@ -20,6 +20,7 @@ class ProjectSearch extends Project
         return [
             [['id', 'closed', 'sort_order'], 'integer'],
             [['name', 'link', 'api_key', 'contact_info', 'last_update', 'custom_data'], 'safe'],
+            [['email_postfix'], 'string', 'max' => 100],
         ];
     }
 
@@ -72,7 +73,8 @@ class ProjectSearch extends Project
             ->andFilterWhere(['like', 'link', $this->link])
             ->andFilterWhere(['like', 'api_key', $this->api_key])
             ->andFilterWhere(['like', 'contact_info', $this->contact_info])
-            ->andFilterWhere(['like', 'custom_data', $this->custom_data]);
+            ->andFilterWhere(['like', 'custom_data', $this->custom_data])
+            ->andFilterWhere(['like', 'email_postfix', $this->email_postfix]);
 
         return $dataProvider;
     }

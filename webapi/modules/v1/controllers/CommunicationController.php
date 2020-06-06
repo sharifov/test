@@ -359,11 +359,12 @@ class CommunicationController extends ApiBaseController
                 $call_project_id = $departmentPhone->dpp_project_id;
                 $call_dep_id = $departmentPhone->dpp_dep_id;
                 $call_source_id = $departmentPhone->dpp_source_id;
+                $call_language_id = $departmentPhone->dpp_language_id;
 
                 $ivrEnable = (bool)$departmentPhone->dpp_ivr_enable;
 
                 $callModel = $this->findOrCreateCall($callSid, $parentCallSid, $postCall, $call_project_id,
-                    $call_dep_id, $call_source_id);
+                    $call_dep_id, $call_source_id, $call_language_id);
 
                 if ($departmentPhone->dugUgs) {
                     foreach ($departmentPhone->dugUgs as $userGroup) {
@@ -865,17 +866,19 @@ class CommunicationController extends ApiBaseController
     }
 
 
-	/**
-	 * @param string $callSid
-	 * @param string|null $parentCallSid
-	 * @param array $calData
-	 * @param int $call_project_id
-	 * @param int|null $call_dep_id
-	 * @param int|null $call_source_id
-	 * @return Call
-	 * @throws \Exception
-	 */
-    protected function findOrCreateCall(string $callSid, ?string $parentCallSid, array $calData, int $call_project_id, ?int $call_dep_id, ?int $call_source_id = null, bool $callFromInternalPhone = false): Call
+    /**
+     * @param string $callSid
+     * @param string|null $parentCallSid
+     * @param array $calData
+     * @param int $call_project_id
+     * @param int|null $call_dep_id
+     * @param int|null $call_source_id
+     * @param bool $callFromInternalPhone
+     * @param string|null $call_language_id
+     * @return Call
+     * @throws \Exception
+     */
+    protected function findOrCreateCall(string $callSid, ?string $parentCallSid, array $calData, int $call_project_id, ?int $call_dep_id, ?int $call_source_id = null, bool $callFromInternalPhone = false, ?string $callLanguageId = null): Call
     {
         $call = null;
         $parentCall = null;
@@ -921,6 +924,7 @@ class CommunicationController extends ApiBaseController
                 $call->c_project_id = $parentCall->c_project_id;
                 $call->c_dep_id = $parentCall->c_dep_id;
                 $call->c_source_type_id = $parentCall->c_source_type_id;
+                $call->c_language_id = $parentCall->c_language_id;
                 $call->c_group_id = $parentCall->c_group_id;
                 $call->c_queue_start_dt = $parentCall->c_queue_start_dt;
 
@@ -942,6 +946,10 @@ class CommunicationController extends ApiBaseController
             }
             if ($call_dep_id) {
                 $call->c_dep_id = $call_dep_id;
+            }
+
+            if ($callLanguageId) {
+                $call->c_language_id = $callLanguageId;
             }
 
             $call->c_is_new = true;
