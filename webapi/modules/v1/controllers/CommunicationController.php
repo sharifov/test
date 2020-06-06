@@ -513,7 +513,7 @@ class CommunicationController extends ApiBaseController
                 $call = Call::find()->where(['c_call_sid' => $callData['CallSid']])->orderBy(['c_id' => SORT_ASC])->limit(1)->one();
             }
 
-            if (!$call->isConference()) {
+            if (!$call->isConferenceType()) {
                 if ($call->isGeneralParent()) {
                     if ($child = Call::find()->firstChild($call->c_id)->one()) {
                         $call = $child;
@@ -721,7 +721,7 @@ class CommunicationController extends ApiBaseController
                 Yii::warning('Not found status Call: ' . $callSid . ', ' . VarDumper::dumpAsString($callOriginalData), 'API:Communication:voiceClient:Call::status');
             }
 
-            if (!empty($callOriginalData['is_conference_call']) && !$call->isConference()) {
+            if (!empty($callOriginalData['is_conference_call']) && !$call->isConferenceType()) {
                 $call->setConferenceType();
             }
 
@@ -1196,7 +1196,7 @@ class CommunicationController extends ApiBaseController
             $call->c_recording_sid = $callData['RecordingSid'];
         }
 
-        if ($custom_parameters->is_conference_call && !$call->isConference()) {
+        if ($custom_parameters->is_conference_call && !$call->isConferenceType()) {
             $call->setConferenceType();
         }
 
@@ -2358,6 +2358,7 @@ class CommunicationController extends ApiBaseController
             $conference->cf_sid = $form->ConferenceSid;
             $conference->cf_friendly_name = $form->friendly_name;
             $conference->cf_call_sid = $form->friendly_name;
+            $conference->cf_created_user_id = $form->conference_created_user_id;
 
             try {
                 if (!$conference->save()) {

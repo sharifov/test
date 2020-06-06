@@ -3,6 +3,7 @@ namespace frontend\widgets;
 
 use common\models\Call;
 use common\models\CallUserAccess;
+use common\models\ConferenceParticipant;
 use common\models\Employee;
 use common\models\UserCallStatus;
 use common\models\UserProfile;
@@ -50,12 +51,20 @@ class NewWebPhoneWidget extends Widget
 			->andWhere(['c_created_user_id' => $this->userId])
 			->orderBy(['cua_created_dt' => SORT_DESC])->limit(1)->one();
 
-		$call = null;
-		if ($generalCallUserAccessList && $generalCallUserAccessList->cuaCall) {
-			$call = $generalCallUserAccessList->cuaCall;
-		} else if ($directCallUserAccessList && $directCallUserAccessList->cuaCall) {
-			$call = $directCallUserAccessList->cuaCall;
-		}
+        $call = Call::find()->andWhere(['c_created_user_id' => $this->userId, 'c_status_id' => [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING]])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+        if (!$call) {
+            if ($generalCallUserAccessList && $generalCallUserAccessList->cuaCall) {
+                $call = $generalCallUserAccessList->cuaCall;
+            } else if ($directCallUserAccessList && $directCallUserAccessList->cuaCall) {
+                $call = $directCallUserAccessList->cuaCall;
+            }
+        }
+
+		$participantCall = $call ?? $lastCall;
+		$isHold = false;
+		if ($participantCall && $participantCall->currentParticipant && $participantCall->currentParticipant->isHold()) {
+            $isHold = true;
+        }
 
 		return $this->render('web_phone_new', [
 			'userPhoneProject' => $userPhoneProject,
@@ -66,7 +75,8 @@ class NewWebPhoneWidget extends Widget
 			'isCallRinging' => $call && ($call->isStatusRinging() || $call->isStatusQueue()),
 			'isCallInProgress' => ($call && $call->isStatusInProgress()) || ($lastCall && $lastCall->isStatusInProgress()),
 			'lastCall' => $lastCall,
-			'call' => $call ?? $lastCall
+			'call' => $call ?? $lastCall,
+            'isHold' => $isHold
 		]);
 	}
 

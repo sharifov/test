@@ -5,6 +5,7 @@
 /** @var bool $isCallRinging */
 /** @var bool $isCallInProgress */
 /** @var \common\models\Call|null $call */
+/** @var bool $isHold */
 
 //$name = $call && $call->cClient ? $call->cClient->getFullName() : 'ClientName';
 $isIn = $call ? $call->isIn() : false;
@@ -216,7 +217,12 @@ $type = $call->c_call_type_id;
                     if ($call->isIn() ) {
                         $phoneFrom = $call->c_from;
                     } elseif ($call->isOut()) {
-                        $phoneFrom = $call->c_to;
+                        if ($call->cParent && $call->currentParticipant && $call->currentParticipant->isAgent()) {
+                            $phoneFrom = $call->c_from;
+                        } else {
+                            $phoneFrom = $call->c_to;
+                        }
+
                     } elseif ($call->isJoin() && ($parentJoin = $call->cParent)) {
                         if ($parentJoin->isIn()) {
                             $phoneFrom = $parentJoin->c_to;
@@ -278,9 +284,9 @@ $type = $call->c_call_type_id;
     </div>
     <ul class="in-call-controls">
       <li class="in-call-controls__item">
-        <a href="#" class="in-call-controls__action">
+        <a href="#" class="in-call-controls__action btn-hold-call" data-mode="unhold">
           <i class="fa fa-pause"></i>
-          <span>On Hold</span>
+          <span>Hold</span>
         </a>
       </li>
       <li class="in-call-controls__item" id="wg-transfer-call">
@@ -428,6 +434,7 @@ $callStatusUrl = Url::to(['/user-call-status/update-status']);
 $ajaxSaveCallUrl = Url::to(['phone/ajax-save-call']);
 $callDuration = $call ? $call->c_call_duration : 0;
 $callId = $call ? $call->c_id : null;
+$isHold = $isHold ? 1 : 0;
 $js = <<<JS
 PhoneWidgetCall.init({
     'ajaxCallRedirectGetAgents': '{$ajaxCallRedirectGetAgents}',
@@ -441,9 +448,10 @@ PhoneWidgetCall.init({
     'name': '{$name}',
     'duration': '{$callDuration}',
     'call_id': '{$callId}',
-    'type' : '{$type}',
+    'type' : parseInt('{$type}'),
     'type_description' : '{$type_description}',
-    'source_type_id' : '{$call->c_source_type_id}'
+    'source_type_id' : '{$call->c_source_type_id}',
+    'is_hold': parseInt('{$isHold}')
 });
 
 JS;

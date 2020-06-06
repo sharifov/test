@@ -202,6 +202,12 @@ $js = <<<JS
                                 PhoneWidgetSms.socket(obj.data);
                              }
                         }
+                        
+                        if(obj.cmd === 'holdCall') {
+                            if (typeof obj.data !== 'undefined') {
+                                holdEvent(obj.data);
+                             }
+                        }
                     }
                     // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
                 } catch (error) {

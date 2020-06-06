@@ -20,9 +20,10 @@ class ConferenceParticipantJoin
     {
         $conference = $this->conference;
 
-        $call = ConferenceParticipantCallFinder::find($form->CallSid, $conference->cf_sid);
+        $call = ConferenceParticipantCallFinder::findAndUpdateCall($form->CallSid, $conference);
 
         $participant = new ConferenceParticipant();
+        $participant->cp_type_id = $form->participant_type_id;
         $participant->cp_cf_id = $conference->cf_id;
         $participant->cp_call_sid = $form->CallSid;
         if ($call) {

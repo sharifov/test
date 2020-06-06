@@ -17,8 +17,9 @@ var PhoneWidgetCall = function () {
                 'duration': options.duration | 0,
                 'type': parseInt(options.type),
                 'source_type_id': parseInt(options.source_type_id),
-                'type_description': options.type_description
-            })
+                'type_description': options.type_description,
+                'is_hold': options.is_hold
+            });
         } else if ('isCallRinging' in options && options.isCallRinging) {
             initIncomingCall({
                 'fromInternal': options.fromInternal,
@@ -152,12 +153,7 @@ var PhoneWidgetCall = function () {
             return false;
         }
 
-        let callSid = null;
-        let activeConnection = getActiveConnection();
-        if (activeConnection) {
-            callSid = activeConnection.CallSid;
-        }
-
+        let callSid = getActiveConnectionCallSid();
         if (callSid) {
             let modal = $('#web-phone-redirect-agents-modal');
             modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
@@ -211,6 +207,26 @@ var PhoneWidgetCall = function () {
                 $('#wg-transfer-call').show();
                 $('#wg-add-person').show();
             }
+
+            let btnHold = $('.btn-hold-call');
+            if (obj.type === 3) {
+                btnHold.prop('disabled', true);
+                if (obj.is_hold) {
+                    btnHold.html('<i class="fa fa-close"></i> <span>Unhold</span>');
+                } else {
+                    btnHold.html('<i class="fa fa-close"></i> <span>Hold</span>');
+                }
+            } else {
+                btnHold.prop('disabled', false);
+                if (obj.is_hold) {
+                    btnHold.html('<i class="fa fa-play"></i> <span>Unhold</span>');
+                    btnHold.data('mode', 'hold');
+                } else {
+                    btnHold.html('<i class="fa fa-pause"></i> <span>Hold</span>');
+                    btnHold.data('mode', 'unhold');
+                }
+            }
+
             showCallingPanel();
         }else if(['Ringing', 'Queued'].includes(obj.status)) {
             openWidget();
@@ -234,7 +250,6 @@ var PhoneWidgetCall = function () {
         // } else {
         //     $('.call-pane-initial .contact-info-card__label').html('Outgoing');
         // }
-
     }
 
     function initIncomingCall(obj)
@@ -282,6 +297,11 @@ var PhoneWidgetCall = function () {
     function acceptCallBtnEvent(options)
     {
         $(document).on('click', '#btn-accept-call', function () {
+
+            if (typeof device == "undefined" || device == null || (device && device._status !== 'ready')) {
+                new PNotify({title: "Accept call", type: "warning", text: "Please try again after some seconds. Device is not ready.", hide: true});
+                return false;
+            }
             var btn = $(this);
             var fromInternal = btn.attr('data-from-internal');
             if (fromInternal && window.connection) {

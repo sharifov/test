@@ -6,6 +6,7 @@ use common\models\query\ConferenceQuery;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
 /**
@@ -23,6 +24,7 @@ use yii\db\ActiveRecord;
  * @property string $cf_updated_dt
  * @property string $cf_friendly_name
  * @property string $cf_call_sid
+ * @property int|null $cf_created_user_id
  *
  * @property ConferenceRoom $cfCr
  * @property ConferenceParticipant[] $conferenceParticipants
@@ -72,6 +74,8 @@ class Conference extends \yii\db\ActiveRecord
             [['cf_sid', 'cf_recording_sid'], 'unique'],
             [['cf_recording_url'], 'string', 'max' => 200],
             [['cf_cr_id'], 'exist', 'skipOnError' => true, 'targetClass' => ConferenceRoom::class, 'targetAttribute' => ['cf_cr_id' => 'cr_id']],
+
+            ['cf_created_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['cf_created_user_id' => 'id']],
         ];
     }
 
@@ -89,6 +93,7 @@ class Conference extends \yii\db\ActiveRecord
             'cf_created_dt' => 'Created Dt',
             'cf_updated_dt' => 'Updated Dt',
             'cf_friendly_name' => 'Friendly name',
+            'cf_created_user_id' => 'Created User',
         ];
     }
 
@@ -107,6 +112,11 @@ class Conference extends \yii\db\ActiveRecord
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
         ];
+    }
+
+    public function getCreatedUser(): ActiveQuery
+    {
+        return $this->hasOne(Employee::class, ['id' => 'cf_created_user_id']);
     }
 
     /**

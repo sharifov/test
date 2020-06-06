@@ -4,6 +4,7 @@ namespace common\models;
 
 use common\components\purifier\Purifier;
 use common\models\query\CallQuery;
+use frontend\controllers\ConferenceController;
 use frontend\widgets\newWebPhone\call\CallHelper;
 use frontend\widgets\notification\NotificationMessage;
 use sales\access\EmployeeDepartmentAccess;
@@ -29,6 +30,7 @@ use Yii;
 use DateTime;
 use common\components\ChartTools;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
@@ -76,7 +78,8 @@ use Locale;
  * @property bool $c_is_transfer
  * @property string $c_queue_start_dt
  * @property int|null $c_group_id
- * @property string $c_conference_sid
+ * @property string|null $c_conference_sid
+ * @property int|null $c_conference_id
  * @property string $c_is_conference
  *
  * @property string $c_recording_url
@@ -97,6 +100,8 @@ use Locale;
  * @property UserGroup[] $cugUgs
  * @property Cases[] $cases
  * @property ConferenceParticipant[] $conferenceParticipants
+ * @property ConferenceParticipant $currentParticipant
+ * @property Conference[] $conferences
  */
 class Call extends \yii\db\ActiveRecord
 {
@@ -136,6 +141,7 @@ class Call extends \yii\db\ActiveRecord
     public const STATUS_CANCELED       = 9;
     public const STATUS_DELAY          = 10;
     public const STATUS_DECLINED       = 11;
+    public const STATUS_HOLD           = 12;
 
     public const STATUS_LIST = [
         self::STATUS_IVR           => 'IVR',
@@ -149,6 +155,7 @@ class Call extends \yii\db\ActiveRecord
         self::STATUS_CANCELED      => 'Canceled',
         self::STATUS_DELAY         => 'Delay',
         self::STATUS_DECLINED      => 'Declined',
+        self::STATUS_HOLD          => 'Hold',
     ];
 
 
@@ -164,6 +171,7 @@ class Call extends \yii\db\ActiveRecord
         self::STATUS_CANCELED       => '<span class="label label-danger"><i class="fa fa-close"></i> ' . self::STATUS_LIST[self::STATUS_CANCELED] . '</span>',
         self::STATUS_DELAY          => '<span class="label label-danger"><i class="fa fa-pause"></i> ' . self::STATUS_LIST[self::STATUS_DELAY] . '</span>',
         self::STATUS_DECLINED       => '<span class="label label-danger"><i class="fa fa-pause"></i> ' . self::STATUS_LIST[self::STATUS_DECLINED] . '</span>',
+        self::STATUS_HOLD           => '<span class="label label-warning"><i class="fa fa-pause"></i> ' . self::STATUS_LIST[self::STATUS_HOLD] . '</span>',
     ];
 
 
@@ -264,6 +272,9 @@ class Call extends \yii\db\ActiveRecord
 
             ['c_group_id', 'integer'],
 
+            ['c_conference_id', 'integer'],
+            ['c_conference_id', 'exist', 'skipOnError' => true, 'targetClass' => Conference::class, 'targetAttribute' => ['c_conference_id' => 'cf_id']],
+
             ['c_conference_sid', 'string', 'max' => 34],
 
             ['c_is_conference', 'default', 'value' => false],
@@ -311,6 +322,7 @@ class Call extends \yii\db\ActiveRecord
             'c_queue_start_dt' => 'Queue start dt',
             'c_group_id' => 'Group ID',
             'c_is_conference' => 'Is conference',
+            'c_conference_id' => 'Conference ID',
             'c_conference_sid' => 'Conference SID',
         ];
     }
@@ -509,6 +521,16 @@ class Call extends \yii\db\ActiveRecord
     public function getConferenceParticipants()
     {
         return $this->hasMany(ConferenceParticipant::class, ['cp_call_id' => 'c_id']);
+    }
+
+    public function getCurrentParticipant(): ActiveQuery
+    {
+        return $this->hasOne(ConferenceParticipant::class, ['cp_call_id' => 'c_id'])->orderBy(['cp_id' => SORT_DESC])->limit(1);
+    }
+
+    public function getConferences(): ActiveQuery
+    {
+        return $this->hasMany(Conference::class, ['cf_created_user_id' => 'c_created_user_id']);
     }
 
 
@@ -830,7 +852,7 @@ class Call extends \yii\db\ActiveRecord
                 if ($callUserAccessAny) {
                     foreach ($callUserAccessAny as $callAccess) {
                         $callAccess->noAnsweredCall();
-                        if (!$callAccess->update()) {
+                        if ($callAccess->update() === false) {
                             Yii::error(VarDumper::dumpAsString($callAccess->errors),
                                 'Call:afterSave:CallUserAccess:update');
                         }
@@ -1003,17 +1025,20 @@ class Call extends \yii\db\ActiveRecord
                 $userListNotifications[$this->c_created_user_id] = $this->c_created_user_id;
             }
 
-            if ($this->c_lead_id && $this->cLead && $this->cLead->employee_id) {
-                $userListNotifications[$this->cLead->employee_id] = $this->cLead->employee_id;
-            }
+            if ($changedAttributes['c_status_id'] !== self::STATUS_HOLD) {
+                if ($this->c_lead_id && $this->cLead && $this->cLead->employee_id) {
+                    $userListNotifications[$this->cLead->employee_id] = $this->cLead->employee_id;
+                }
 
-            if ($this->c_case_id && $this->cCase && $this->cCase->cs_user_id) {
-                $userListNotifications[$this->cCase->cs_user_id] = $this->cCase->cs_user_id;
+                if ($this->c_case_id && $this->cCase && $this->cCase->cs_user_id) {
+                    $userListNotifications[$this->cCase->cs_user_id] = $this->cCase->cs_user_id;
+                }
             }
 
             if ($userListNotifications) {
-                $title = 'Missed Call (' . $this->getSourceName() . ')';
-                $message = 'Missed Call (' . $this->getSourceName() . ')  from ' . $this->c_from . ' to ' . $this->c_to;
+                $holdMessage = $changedAttributes['c_status_id'] === self::STATUS_HOLD ? ' Hold' : '';
+                $title = 'Missed' . $holdMessage . ' Call (' . $this->getSourceName() . ')';
+                $message = 'Missed' . $holdMessage . ' Call (' . $this->getSourceName() . ')  from ' . $this->c_from . ' to ' . $this->c_to;
                 if ($this->c_lead_id && $this->cLead) {
                     $message .= ', Lead (Id: ' . Purifier::createLeadShortLink($this->cLead) . ')';
                 }
@@ -1119,7 +1144,13 @@ class Call extends \yii\db\ActiveRecord
             if ($this->isIn()) {
                 $phoneFrom = $this->c_from;
             } elseif ($this->isOut()) {
-                $phoneFrom = $this->c_to;
+                if ($this->cParent) {
+                    $phoneFrom = $this->cParent->c_to;
+//                }elseif ($this->cParent && $this->currentParticipant && $this->currentParticipant->isClient()) {
+//                    $phoneFrom = $this->c_to;
+                } else {
+                    $phoneFrom = $this->c_to;
+                }
             }
 
 			if ($this->isJoin()) {
@@ -1134,6 +1165,10 @@ class Call extends \yii\db\ActiveRecord
             } else {
                 $fromName = $isInternal ? $this->getCallerName($this->isIn() ? $this->c_from : $this->c_to)  : 'ClientName';
             }
+			$isHold = false;
+			if ($this->currentParticipant && $this->currentParticipant->isHold()) {
+			    $isHold = true;
+            }
             Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id],
                 [
                 	'id' => $this->c_id,
@@ -1147,7 +1182,8 @@ class Call extends \yii\db\ActiveRecord
 					'source_type_id' => $this->c_source_type_id,
 					'phoneFrom' => $phoneFrom,
 					'name' => $fromName,
-					'fromInternal' => $isInternal
+					'fromInternal' => $isInternal,
+                    'is_hold' => $isHold,
 				]
 			);
         }
@@ -1290,14 +1326,15 @@ class Call extends \yii\db\ActiveRecord
                 }
 
                 if ($conferenceBase) {
-                    if (!$call->isConference()) {
+                    if (!$call->isConferenceType()) {
                         $call->setConferenceType();
                         $call->update();
                     }
                     $res = \Yii::$app->communication->acceptConferenceCall(
                         $call->c_call_sid,
                         'client:seller' . $user_id,
-                        $call->c_from
+                        $call->c_from,
+                        $user_id
                     );
 
                     if ($res) {
@@ -1891,6 +1928,16 @@ class Call extends \yii\db\ActiveRecord
         return $this->c_status_id === self::STATUS_DECLINED;
     }
 
+    public function hold(): void
+    {
+        $this->c_status_id = self::STATUS_HOLD;
+    }
+
+    public function isHold(): bool
+    {
+        return $this->c_status_id === self::STATUS_HOLD;
+    }
+
     /**
      * @return bool
      */
@@ -1980,7 +2027,7 @@ class Call extends \yii\db\ActiveRecord
         return $this->c_recording_sid ? Yii::$app->communication->recording_url . $this->c_recording_sid : '';
     }
 
-    public function isConference(): bool
+    public function isConferenceType(): bool
     {
         return $this->c_is_conference ? true : false;
     }

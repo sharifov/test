@@ -733,12 +733,13 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $this->processConferenceResponse($response);
     }
 
-    public function acceptConferenceCall($sid, $to, $from): array
+    public function acceptConferenceCall($sid, $to, $from, $userId): array
     {
         $data = [
             'call_sid' => $sid,
             'to' => $to,
             'from' => $from,
+            'user_id' => $userId
         ];
 
         $response = $this->sendRequest('twilio-conference/accept-call', $data);
@@ -777,6 +778,65 @@ class CommunicationService extends Component implements CommunicationServiceInte
         ];
 
         $response = $this->sendRequest('twilio-conference/hold-double-call', $data);
+
+        return $this->processConferenceResponse($response);
+    }
+
+    public function holdConferenceCall(string $conferenceSid, string $keeperSid): array
+    {
+        $data = [
+            'conferenceSid' => $conferenceSid,
+            'keeperSid' => $keeperSid,
+        ];
+
+        $response = $this->sendRequest('twilio-conference/hold-call', $data);
+
+        return $this->processConferenceResponse($response);
+    }
+
+    public function unholdConferenceCall(string $conferenceSid, string $keeperSid): array
+    {
+        $data = [
+            'conferenceSid' => $conferenceSid,
+            'keeperSid' => $keeperSid,
+        ];
+
+        $response = $this->sendRequest('twilio-conference/unhold-call', $data);
+
+        return $this->processConferenceResponse($response);
+    }
+
+    public function disconnectFromConferenceCall(string $conferenceSid, string $keeperSid): array
+    {
+        $data = [
+            'conferenceSid' => $conferenceSid,
+            'keeperSid' => $keeperSid,
+        ];
+
+        $response = $this->sendRequest('twilio-conference/disconnect-from-conference-call', $data);
+
+        return $this->processConferenceResponse($response);
+    }
+
+    public function returnToConferenceCall(
+        string $callSid,
+        string $parentCallSid,
+        string $friendlyName,
+        string $conferenceSid,
+        string $to,
+        int $userId
+    ): array
+    {
+        $data = [
+            'callSid' => $callSid,
+            'parentCallSid' => $parentCallSid,
+            'friendlyName' => $friendlyName,
+            'conferenceSid' => $conferenceSid,
+            'to' => $to,
+            'user_id' => $userId
+        ];
+
+        $response = $this->sendRequest('twilio-conference/return-to-conference-call', $data);
 
         return $this->processConferenceResponse($response);
     }

@@ -2,8 +2,11 @@
 
 namespace sales\model\conference\useCase\statusCallBackEvent;
 
+use common\models\Call;
 use common\models\Conference;
 use common\models\ConferenceParticipant;
+use common\models\Notifications;
+use frontend\widgets\newWebPhone\call\socket\HoldMessage;
 use Yii;
 use yii\helpers\VarDumper;
 
@@ -27,7 +30,11 @@ class ConferenceParticipantUnhold
 
         if ($participant) {
             $participant->unhold();
-            if (!$participant->save()) {
+            if ($participant->save()) {
+                if ($call = $participant->cpCall) {
+                    $this->sendMessageToSocket($call, $participant);
+                }
+            } else {
                 Yii::error(VarDumper::dumpAsString([
                     'errors' => $participant->getErrors(),
                     'model' => $participant->getAttributes(),
@@ -36,7 +43,7 @@ class ConferenceParticipantUnhold
             return;
         }
 
-        $call = ConferenceParticipantCallFinder::find($form->CallSid, $conference->cf_sid);
+        $call = ConferenceParticipantCallFinder::findAndUpdateCall($form->CallSid, $conference);
 
         $participant = new ConferenceParticipant();
         $participant->cp_cf_id = $conference->cf_id;
@@ -45,11 +52,22 @@ class ConferenceParticipantUnhold
         if ($call) {
             $participant->cp_call_id = $call->c_id;
         }
-        if (!$participant->save()) {
+        if ($participant->save()) {
+            if ($call) {
+                $this->sendMessageToSocket($call, $participant);
+            }
+        } else {
             Yii::error(VarDumper::dumpAsString([
                 'errors' => $participant->getErrors(),
                 'model' => $participant->getAttributes(),
             ]), static::class);
+        }
+    }
+
+    private function sendMessageToSocket(Call $call, ConferenceParticipant $participant): void
+    {
+        if ($call && $call->c_created_user_id && $participant->isAgent()) {
+            Notifications::publish(HoldMessage::COMMAND, ['user_id' => $call->c_created_user_id], HoldMessage::unhold($call));
         }
     }
 }

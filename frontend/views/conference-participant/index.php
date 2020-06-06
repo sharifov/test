@@ -1,5 +1,6 @@
 <?php
 
+use common\components\grid\conferenceParticipant\ConferenceParticipantTypeColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -28,6 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //['class' => 'yii\grid\SerialColumn'],
 
             'cp_id',
+            ['class' => ConferenceParticipantTypeColumn::class],
             //'cp_cf_id',
             [
                 'attribute' => 'cp_cf_id',
@@ -60,7 +62,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => static function(\common\models\ConferenceParticipant $model) {
                     return $model->getStatusName();
                 },
-                'filter' => \common\models\ConferenceParticipant::getList()
+                'filter' => \common\models\ConferenceParticipant::getStatusList()
             ],
             //'cp_status_id',
             //'cp_join_dt',

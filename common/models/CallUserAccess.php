@@ -173,29 +173,32 @@ class CallUserAccess extends \yii\db\ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
 
+        $call = $this->cuaCall;
+
         if ($insert) {
-            $message = 'New incoming Call (' . $this->cua_call_id . ')';
-            if (isset($this->cuaCall->cLead)) {
-                $message .= ', Lead (Id: ' . Purifier::createLeadShortLink($this->cuaCall->cLead) . ')';
-            }
-            if (isset($this->cuaCall->cCase)) {
-                $message .= ', Case (Id: ' . Purifier::createCaseShortLink($this->cuaCall->cCase) . ')';
-            }
-            if ($ntf = Notifications::create($this->cua_user_id, 'New incoming Call (' . $this->cua_call_id . ')', $message, Notifications::TYPE_SUCCESS, true)) {
-                //Notifications::socket($this->cua_user_id, null, 'getNewNotification', [], true);
-                $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                Notifications::publish('getNewNotification', ['user_id' => $this->cua_user_id], $dataNotification);
+            if ($call && !$call->isHold()) {
+                $message = 'New incoming Call' . ' (' . $this->cua_call_id . ')';
+                if (isset($call->cLead)) {
+                    $message .= ', Lead (Id: ' . Purifier::createLeadShortLink($call->cLead) . ')';
+                }
+                if (isset($call->cCase)) {
+                    $message .= ', Case (Id: ' . Purifier::createCaseShortLink($call->cCase) . ')';
+                }
+                if ($ntf = Notifications::create($this->cua_user_id, 'New incoming Call (' . $this->cua_call_id . ')', $message, Notifications::TYPE_SUCCESS, true)) {
+                    //Notifications::socket($this->cua_user_id, null, 'getNewNotification', [], true);
+                    $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                    Notifications::publish('getNewNotification', ['user_id' => $this->cua_user_id], $dataNotification);
+                }
             }
 
             NativeEventDispatcher::recordEvent(CallUserAccessEvents::class, CallUserAccessEvents::INSERT, [CallUserAccessEvents::class, 'updateUserStatus'], $this);
             NativeEventDispatcher::trigger(CallUserAccessEvents::class, CallUserAccessEvents::INSERT);
         }
 
-        if($insert || isset($changedAttributes['cua_status_id'])) {
+        if(($insert || isset($changedAttributes['cua_status_id'])) && $call && ($call->isIn() || $call->isHold())) {
             //Notifications::socket($this->cua_user_id, null, 'updateIncomingCall', $this->attributes);
 			if ($this->isPending()) {
 				$client = $this->cuaCall->cClient;
-				$call = $this->cuaCall;
 
 				$name = '';
 				$phone = '';

@@ -37,6 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'cf_options:ntext',
             'cf_created_dt',
             'cf_updated_dt',
+            'createdUser:userName'
         ],
     ]) ?>
 

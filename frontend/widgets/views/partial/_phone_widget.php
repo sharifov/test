@@ -10,6 +10,7 @@ use yii\web\View;
 /** @var bool $isCallRinging */
 /** @var bool $isCallInProgress */
 /** @var \common\models\Call|null $call */
+/** @var bool $isHold */
 
 $isActiveWidget = $isCallInProgress ? ' is_active' : '';
 ?>
@@ -56,7 +57,8 @@ $isActiveWidget = $isCallInProgress ? ' is_active' : '';
 		  'userCallStatus' => $userCallStatus,
 		  'isCallRinging' => $isCallRinging,
 		  'isCallInProgress' => $isCallInProgress,
-		  'call' => $call
+		  'call' => $call,
+          'isHold' => $isHold,
 	  ]); ?><?= $this->render('tab/contacts', ['userPhones' => $userPhones, 'userEmails' => $userEmails]); ?>
     <?= $this->render('tab/history'); ?>
     <div class="widget-phone__contact-info-modal widget-modal contact-modal-info"></div>

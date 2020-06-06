@@ -20,6 +20,7 @@ use http\Exception\InvalidArgumentException;
 use sales\auth\Auth;
 
 use sales\helpers\call\CallHelper;
+use sales\model\conference\useCase\DisconnectFromAllConferenceCalls;
 use sales\repositories\call\CallRepository;
 use sales\repositories\call\CallUserAccessRepository;
 use sales\repositories\NotFoundException;
@@ -974,7 +975,10 @@ class CallController extends FController
 				$callUserAccess = $this->callUserAccessRepository->getByUserAndCallId(Auth::id(), $call->c_id);
 				switch ($action) {
 					case 'accept':
-						$this->callService->acceptCall($callUserAccess, Auth::user());
+                        $disconnect = new DisconnectFromAllConferenceCalls();
+                        if ($disconnect->disconnect(Auth::id())) {
+                            $this->callService->acceptCall($callUserAccess, Auth::user());
+                        }
 						$response['error'] = false;
 						$response['message'] = 'success';
 						break;

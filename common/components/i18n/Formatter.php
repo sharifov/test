@@ -4,6 +4,7 @@ namespace common\components\i18n;
 
 use common\components\purifier\Purifier;
 use common\models\CaseSale;
+use common\models\ConferenceParticipant;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Lead;
@@ -646,5 +647,14 @@ class Formatter extends \yii\i18n\Formatter
         }
 
         return CouponType::asFormat($value);
+    }
+
+    public function asConferenceParticipantType($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return ConferenceParticipant::getTypeName($value);
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use common\components\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -111,6 +112,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'options' => ['style' => 'width: 100px']
             ],
+
+            ['class' => UserSelect2Column::class, 'attribute' => 'cf_created_user_id', 'relation' => 'createdUser'],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

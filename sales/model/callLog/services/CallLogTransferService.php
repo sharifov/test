@@ -58,7 +58,7 @@ class CallLogTransferService
                 Yii::error(VarDumper::dumpAsString([
                     'category' => 'saveRecord',
                     'model' => $callLogRecord->toArray(),
-                    'message' => $callLogRecord->getErrors()
+                    'errors' => $callLogRecord->getErrors()
                 ]), 'CallLogTransferService');
             }
         } catch (\Throwable $e) {

@@ -12,6 +12,8 @@ use common\models\CallUserAccess;
 use common\models\Employee;
 use common\models\Notifications;
 use common\models\UserCallStatus;
+use sales\model\conference\useCase\DisconnectFromAllConferenceCalls;
+use sales\model\conference\useCase\ReturnToHoldCall;
 use Yii;
 use yii\helpers\VarDumper;
 
@@ -74,8 +76,20 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
                         //VarDumper::dump($action); exit;
 
                         switch ($action) {
+                            case 'return':
+                                $disconnect = new DisconnectFromAllConferenceCalls();
+                                if ($disconnect->disconnect($userModel->id)) {
+                                    $return = new ReturnToHoldCall();
+                                    if ($return->return($call, $userModel->id)) {
+                                        $this->acceptHoldCall($callUserAccess, $userModel);
+                                    }
+                                }
+                                break;
                             case 'accept':
-                                $this->acceptCall($callUserAccess, $userModel);
+                                $disconnect = new DisconnectFromAllConferenceCalls();
+                                if ($disconnect->disconnect($userModel->id)) {
+                                    $this->acceptCall($callUserAccess, $userModel);
+                                }
                                 break;
 //                            case 'skip':
 //                                $this->skipCall($callUserAccess);
@@ -109,6 +123,21 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
             ->limit(10)
             ->all();
 
+        $onSound = false;
+        foreach ($generalCallUserAccessList as $callUserAccess) {
+            if ($callUserAccess->cuaCall && !$callUserAccess->cuaCall->isHold()) {
+                $onSound = true;
+                break;
+            }
+        }
+        if (!$onSound) {
+            foreach ($directCallUserAccessList as $callUserAccess) {
+                if ($callUserAccess->cuaCall && !$callUserAccess->cuaCall->isHold()) {
+                    $onSound = true;
+                    break;
+                }
+            }
+        }
 
         //VarDumper::dump($directCallUserAccessList, 10, true); exit;
 
@@ -125,8 +154,33 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
         return $this->render('incoming_call_widget', [
             'generalCallUserAccessList' => $generalCallUserAccessList,
             'directCallUserAccessList' => $directCallUserAccessList,
-            'userModel' => $userModel]
-        );
+            'userModel' => $userModel,
+            'onSound' => $onSound,
+        ]);
+    }
+
+    private function acceptHoldCall(CallUserAccess $callUserAccess, Employee $user): bool
+    {
+        $callUserAccess->acceptCall();
+
+        if ($callUserAccess->save()) {
+
+            if ($call = $callUserAccess->cuaCall) {
+
+                $call->setStatusDelay();
+
+                if ($call->save()) {
+                    Notifications::pingUserMap();
+                    return true;
+                } else  {
+                    Yii::error(VarDumper::dumpAsString($call->errors), 'IncomingCallWidget:acceptHoldCall:Call:save');
+                }
+
+            }
+
+        }
+
+        return false;
     }
 
 

@@ -1,5 +1,6 @@
 <?php
 
+use common\models\ConferenceParticipant;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -23,6 +24,8 @@ use yii\widgets\ActiveForm;
     <?= $form->field($model, 'cp_join_dt')->textInput() ?>
 
     <?= $form->field($model, 'cp_leave_dt')->textInput() ?>
+
+    <?= $form->field($model, 'cp_type_id')->dropDownList(ConferenceParticipant::TYPE_LIST, ['prompt' => 'Select type']) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

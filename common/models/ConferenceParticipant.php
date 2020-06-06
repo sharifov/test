@@ -15,6 +15,7 @@ use Yii;
  * @property int $cp_status_id
  * @property string $cp_join_dt
  * @property string $cp_leave_dt
+ * @property int|null $cp_type_id
  *
  * @property Call $cpCall
  * @property Conference $cpCf
@@ -32,6 +33,16 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
         self::STATUS_LEAVE   => 'Leave',
         self::STATUS_HOLD   => 'Hold',
         self::STATUS_UNHOLD   => 'UnHold',
+    ];
+
+    public const TYPE_AGENT = 1;
+    public const TYPE_CLIENT = 2;
+    public const TYPE_USER = 3;
+
+    public const TYPE_LIST = [
+        self::TYPE_AGENT => 'Agent',
+        self::TYPE_CLIENT => 'Client',
+        self::TYPE_USER => 'User',
     ];
 
     /**
@@ -58,6 +69,9 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
 //            [['cp_call_sid'], 'unique'],
             [['cp_call_id'], 'exist', 'skipOnError' => true, 'targetClass' => Call::class, 'targetAttribute' => ['cp_call_id' => 'c_id']],
             [['cp_cf_id'], 'exist', 'skipOnError' => true, 'targetClass' => Conference::class, 'targetAttribute' => ['cp_cf_id' => 'cf_id']],
+
+            ['cp_type_id', 'integer'],
+            ['cp_type_id', 'in', 'range' => array_keys(self::TYPE_LIST)],
         ];
     }
 
@@ -74,6 +88,7 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
             'cp_status_id' => 'Status',
             'cp_join_dt' => 'Join Dt',
             'cp_leave_dt' => 'Leave Dt',
+            'cp_type_id' => 'Type',
         ];
     }
 
@@ -113,9 +128,19 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
     /**
      * @return array
      */
-    public static function getList(): array
+    public static function getStatusList(): array
     {
         return self::STATUS_LIST;
+    }
+
+    public static function getTypeName(?int $value)
+    {
+        return self::TYPE_LIST[$value] ?? 'Undefined';
+    }
+
+    public static function getTypeList(): array
+    {
+        return self::TYPE_LIST;
     }
 
     public function join(): void
@@ -123,9 +148,19 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
         $this->cp_status_id = self::STATUS_JOIN;
     }
 
+    public function isJoin(): bool
+    {
+        return $this->cp_status_id === self::STATUS_JOIN;
+    }
+
     public function hold(): void
     {
         $this->cp_status_id = self::STATUS_HOLD;
+    }
+
+    public function isHold(): bool
+    {
+        return $this->cp_status_id === self::STATUS_HOLD;
     }
 
     public function unhold(): void
@@ -133,8 +168,33 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
         $this->cp_status_id = self::STATUS_UNHOLD;
     }
 
+    public function isUnhold(): bool
+    {
+        return $this->cp_status_id === self::STATUS_UNHOLD;
+    }
+
     public function leave(): void
     {
         $this->cp_status_id = self::STATUS_LEAVE;
+    }
+
+    public function isLeave(): bool
+    {
+        return $this->cp_status_id === self::STATUS_LEAVE;
+    }
+
+    public function isAgent(): bool
+    {
+        return $this->cp_type_id === self::TYPE_AGENT;
+    }
+
+    public function isClient(): bool
+    {
+        return $this->cp_type_id === self::TYPE_CLIENT;
+    }
+
+    public function isUser(): bool
+    {
+        return $this->cp_type_id === self::TYPE_USER;
     }
 }

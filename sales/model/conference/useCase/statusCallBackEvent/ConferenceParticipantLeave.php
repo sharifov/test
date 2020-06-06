@@ -37,7 +37,7 @@ class ConferenceParticipantLeave
             return;
         }
 
-        $call = ConferenceParticipantCallFinder::find($form->CallSid, $conference->cf_sid);
+        $call = ConferenceParticipantCallFinder::findAndUpdateCall($form->CallSid, $conference);
 
         $participant = new ConferenceParticipant();
         $participant->cp_cf_id = $conference->cf_id;

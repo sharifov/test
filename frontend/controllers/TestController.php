@@ -9,6 +9,8 @@ use common\models\Call;
 use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
+use common\models\Conference;
+use common\models\ConferenceParticipant;
 use common\models\CreditCard;
 use common\models\Currency;
 use common\models\CurrencyHistory;
@@ -24,6 +26,8 @@ use common\models\Notifications;
 use common\models\PhoneBlacklist;
 use common\models\Project;
 use common\models\ProjectEmployeeAccess;
+use common\models\query\ConferenceParticipantQuery;
+use common\models\query\ConferenceQuery;
 use common\models\Quote;
 use common\models\search\ContactsSearch;
 use common\models\Sms;
@@ -97,6 +101,8 @@ use sales\helpers\payment\CreditCardHelper;
 use sales\helpers\query\QueryHelper;
 use sales\helpers\user\UserFinder;
 use sales\model\callLog\entity\callLog\CallLog;
+use sales\model\conference\service\ManageCurrentCallsByUserService;
+use sales\model\conference\useCase\DisconnectFromAllConferenceCalls;
 use sales\model\coupon\useCase\request\CouponForm;
 use sales\model\emailList\entity\EmailList;
 use sales\model\lead\useCase\lead\api\create\Handler;
@@ -215,10 +221,55 @@ class TestController extends FController
 
     public function actionTest()
     {
+        $userId = 295;
 
+//         $q =  Call::find()->andWhere([
+//             'c_created_user_id' => $userId,
+//             'c_call_type_id' => [Call::CALL_TYPE_IN, Call::CALL_TYPE_OUT],
+//             'c_status_id' => [Call::STATUS_RINGING, Call::STATUS_IN_PROGRESS]
+//         ])
+//             ->innerJoinWith(['conferenceParticipants' => static function(ConferenceParticipantQuery $query) {
+//                 $query->andOnCondition([
+//                     'cp_type_id' => ConferenceParticipant::TYPE_AGENT,
+//                     'cp_status_id' => [
+//                         ConferenceParticipant::STATUS_JOIN,
+//                         ConferenceParticipant::STATUS_UNHOLD,
+//                         ConferenceParticipant::STATUS_HOLD,
+//                     ],
+//                 ]);
+//             }], false)
+//             ->innerJoinWith(['conferences' => static function(ConferenceQuery $query) {
+//                 $query->andOnCondition([
+//                     'cf_status_id' => [
+//                         Conference::STATUS_START,
+//                     ],
+//                 ]);
+//                 $query->andOnCondition('cf_id = c_conference_id');
+//             }], false)
+////             ->all();
+//         ->createCommand()->getRawSql();
+//
+//         VarDumper::dump($q);
+//         die;
 
+        $s = new DisconnectFromAllConferenceCalls();
+        $s->disconnect($userId);
+        die;
 
+        if ($call = Call::findOne(3371922)) {
+            VarDumper::dump($call->currentParticipant);
+        }
 
+        die;
+        $service = Yii::$app->communication;
+
+        $call = Call::findOne(['c_call_sid' => 'CA78c6d347bc1db1e33550997bb9b0b6c2']);
+//
+//        $service->disconnectFromConferenceCall($call->c_conference_sid, $call->c_call_sid);
+//
+        $conference = Conference::findOne(['cf_sid' => $call->c_conference_sid]);
+        $service->returnToConferenceCall($call->c_call_sid,$conference->cf_friendly_name,$conference->cf_sid,'client:seller295');
+//
 //        $search = new ContactsSearch(295);
 //        $search->searchContactsByWidget('373');
         die;

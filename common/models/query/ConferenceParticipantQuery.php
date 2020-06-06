@@ -4,33 +4,10 @@ namespace common\models\query;
 
 use common\models\ConferenceParticipant;
 
-/**
- * This is the ActiveQuery class for [[ConferenceParticipant]].
- *
- * @see ConferenceParticipant
- */
 class ConferenceParticipantQuery extends \yii\db\ActiveQuery
 {
-    /*public function active()
+    public function byAgent(): self
     {
-        return $this->andWhere('[[status]]=1');
-    }*/
-
-    /**
-     * {@inheritdoc}
-     * @return ConferenceParticipant[]|array
-     */
-    public function all($db = null)
-    {
-        return parent::all($db);
-    }
-
-    /**
-     * {@inheritdoc}
-     * @return ConferenceParticipant|array|null
-     */
-    public function one($db = null)
-    {
-        return parent::one($db);
+        return $this->andWhere(['cp_type_id' => ConferenceParticipant::TYPE_AGENT]);
     }
 }
