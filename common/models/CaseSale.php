@@ -223,4 +223,12 @@ class CaseSale extends \yii\db\ActiveRecord
     {
         return new CaseSaleQuery(static::class);
     }
+
+    public function getSaleDataDecoded(): array
+	{
+		if (is_string($this->css_sale_data)) {
+			return json_decode((string)$this->css_sale_data, true);
+		}
+		return $this->css_sale_data;
+	}
 }

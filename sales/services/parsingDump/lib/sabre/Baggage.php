@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\services\parsingDump\lib\Sabre;
+namespace sales\services\parsingDump\lib\sabre;
 
 use sales\helpers\app\AppHelper;
 use sales\services\parsingDump\lib\ParseDumpInterface;

@@ -189,7 +189,7 @@ class SaleTicketController extends FController
 			$creditCards = $this->creditCardRepository->findBySaleId((int)$saleId);
 			$html = $this->renderPartial('partial/_email_body', ['saleTickets' => $saleTickets, 'caseSale' => $caseSale, 'creditCards' => $creditCards]);
 
-			$this->saleTicketEmailService->generateAndSendEmail($saleTickets, $emailSettings, $html, $caseId, $bookingId, Auth::user());
+			$this->saleTicketEmailService->generateAndSendEmail($saleTickets, $emailSettings, $html, $caseId, $bookingId, Auth::user(), $caseSale->getSaleDataDecoded());
 		} catch (\Throwable $e) {
 			$response['error'] = true;
 			$response['message'] = $e->getMessage();

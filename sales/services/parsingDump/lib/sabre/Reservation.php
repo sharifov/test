@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\services\parsingDump\lib\Sabre;
+namespace sales\services\parsingDump\lib\sabre;
 
 use DateTime;
 use sales\helpers\app\AppHelper;

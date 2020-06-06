@@ -59,6 +59,7 @@ class DepartmentPhoneProjectController extends BaseController
       *                    "cid": "WOWMAC",
       *                    "department_id": 1,
       *                    "department": "Sales",
+      *                    "language_id": "en-US",
       *                    "updated_dt": "2019-01-08 11:44:57"
       *                },
       *                {
@@ -66,6 +67,7 @@ class DepartmentPhoneProjectController extends BaseController
       *                    "cid": "WSUDCV",
       *                    "department_id": 3,
       *                    "department": "Support",
+      *                    "language_id": "fr-FR",
       *                    "updated_dt": "2019-01-09 11:50:25"
 
       *               }
@@ -141,6 +143,8 @@ class DepartmentPhoneProjectController extends BaseController
             );
         }
 
+        /** @var DepartmentPhoneProject[] $phones */
+
         $phones = DepartmentPhoneProject::find()
             ->andWhere(['dpp_project_id' => $form->project_id])
             ->andWhere(['dpp_show_on_site' => true])
@@ -156,6 +160,7 @@ class DepartmentPhoneProjectController extends BaseController
                 'cid' => $phone->dppSource ? $phone->dppSource->cid : null,
                 'department_id' => $phone->dpp_dep_id,
                 'department' => $phone->dpp_dep_id ? Department::getName($phone->dpp_dep_id) : null,
+                'language_id' => $phone->dpp_language_id,
                 'updated_dt' => $phone->dpp_updated_dt,
             ];
         }

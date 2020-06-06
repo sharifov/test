@@ -76,9 +76,12 @@ use yii\widgets\Pjax;
                 <div class="row" style="margin-top: 4px;  margin-right: 0px; margin-left: 1px; /*background-color: rgba(58,199,200,0.26)*/">
                     <div class="col-md-4" style="padding-top: 5px;">
                         <?php //=$call->c_id?>
+
                         <?php if($call->cProject):?> <span class="badge badge-info"><?= Html::encode($call->cProject->name)?></span> <?php endif; ?>
                         <?php if($call->cDep):?> <span class="badge badge-info"><?= Html::encode($call->cDep->dep_name)?></span> <?php endif; ?>
                         <?php if($call->c_source_type_id):?> <span class="label label-warning"><?= Html::encode($call->getSourceName())?></span> <?php endif; ?>
+                        <?php if($call->c_language_id):?> <span class="label label-default"><?= Html::encode($call->c_language_id)?></span> <?php endif; ?>
+
                     </div>
                     <div class="col-md-5 text-right" style="padding-top: 3px; padding-bottom: 4px; ">
 

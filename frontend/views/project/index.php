@@ -65,6 +65,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ]),
             ],
             //'api_key',
+            'email_postfix',
             'closed:boolean',
             'sort_order',
             //'api_key',

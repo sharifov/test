@@ -43,6 +43,35 @@ class Baggage implements ParseDumpInterface
         $paidBaggage = $this->prepareBaggageAllowance($dump);
         $freeBaggage = $this->prepareCarryOnAllowance($dump);
 
+        $i = 0;
+        foreach ($this->segments as $segment) {
+            $result[$i]['segment'] = $segment;
+
+            if (!empty($paidBaggage) && array_key_exists($segment, $paidBaggage)) {
+                $result[$i]['paid_baggage'] = $paidBaggage[$segment];
+            } else {
+                $result[$i]['paid_baggage'] = [];
+            }
+            if (!empty($freeBaggage) && array_key_exists($segment, $freeBaggage)) {
+                $result[$i]['free_baggage'] = $freeBaggage[$segment][0];
+            } else {
+                $result[$i]['free_baggage'] = [];
+            }
+            $i++;
+        }
+        return $result;
+    }
+
+    /**
+     * @param string $dump
+     * @return array
+     */
+    private function processingResultAlt(string $dump): array
+    {
+        $result = [];
+        $paidBaggage = $this->prepareBaggageAllowance($dump);
+        $freeBaggage = $this->prepareCarryOnAllowance($dump);
+
         $uniq = [];
         $i = 0;
         foreach ($this->segments as $segment) {

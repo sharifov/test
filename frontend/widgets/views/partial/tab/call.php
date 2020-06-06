@@ -7,6 +7,7 @@
 /** @var \common\models\Call|null $call */
 
 //$name = $call && $call->cClient ? $call->cClient->getFullName() : 'ClientName';
+//$clientName = $call && $call->cClient ? $call->cClient->getFullName() : '------';
 $isIn = $call ? $call->isIn() : false;
 $type = $call->c_call_type_id;
 //$phoneFrom = $call ? $call->c_from : '';
@@ -161,9 +162,13 @@ $type = $call->c_call_type_id;
       </div> -->
       
       <div class="static-number-indicator">
-        <span class="static-number-indicator__label">wowfare</span>
-        <i class="static-number-indicator__separator"></i>
-        <span class="static-number-indicator__name">Sales General</span>
+        <?php if($call && $call->c_project_id):?>
+            <span class="static-number-indicator__label"><?= Html::encode($call->cProject->name) ?></span>
+        <?php endif; ?>
+        <?php if($call && $call->c_source_type_id):?>
+            <i class="static-number-indicator__separator"></i>
+            <span class="static-number-indicator__name"><?= Html::encode($call->getSourceName()) ?> </span>
+        <?php endif; ?>
       </div>
 
       <!-- <div class="number-toggle"> -->
@@ -191,17 +196,17 @@ $type = $call->c_call_type_id;
               <i class="user-icon fa fa-user"></i>
               <i class="info-icon fa fa-info"></i>
             </button>
-              <strong class="contact-info-card__name_text">
+              <strong>
               <?php
                 $name = '';
                 if ($call) {
                     if ($call->isIn() || $call->isOut()) {
-                        $name = $call->cClient ? $call->cClient->getFullName() : 'ClientName';
+                        $name = $call->cClient ? $call->cClient->getFullName() : '------';
                     } elseif ($call->isJoin() && ($parentJoin = $call->cParent) && $parentJoin->cCreatedUser) {
                         $name = $parentJoin->cCreatedUser->username;
                     }
                 }
-                echo $name;
+                echo Html::encode($name);
               ?>
             </strong>
           </div>
@@ -289,7 +294,7 @@ $type = $call->c_call_type_id;
           <span>Transfer Call</span>
         </a>
       </li>
-      <li class="in-call-controls__item" id="wg-add-person">
+      <li class="in-call-controls__item">
         <a href="#" class="in-call-controls__action">
           <i class="fa fa-plus"></i>
           <span>Add Person</span>
@@ -330,36 +335,29 @@ $type = $call->c_call_type_id;
   <div class="call-pane-incoming call-pane-initial">
     <div class="calling-from-info">
       <div class="static-number-indicator">
-        <span class="static-number-indicator__label">wowfare</span>
-        <i class="static-number-indicator__separator"></i>
-        <span class="static-number-indicator__name">Sales General</span>
+          <?php if($call && $call->c_project_id):?>
+              <span class="static-number-indicator__label"><?= Html::encode($call->cProject->name) ?></span>
+          <?php endif; ?>
+          <?php if($call && $call->c_source_type_id):?>
+              <i class="static-number-indicator__separator"></i>
+              <span class="static-number-indicator__name"><?= Html::encode($call->getSourceName()) ?> </span>
+          <?php endif; ?>
       </div>
-        <!-- <div class="current-number">
-          <div class="current-number-indicator">
-            <small class="current-number__phone current-number__selected-nr">+37378155478</small>
-            <span class="current-number__identifier current-number__selected-project">OVAGO</span>
-          </div>
-        </div>
-        <div class="number-toggle">
-          <input type="checkbox" id="number-status">
-          <label for="number-status"></label>
-        </div> -->
     </div>
     <div class="incall-group">
   
-
       <div class="contact-info-card">
         <div class="contact-info-card__details">
           
           <div class="contact-info-card__line history-details">
-            <span class="contact-info-card__label"></span>
+            <span class="contact-info-card__label"><?= $type_description ?></span>
             <div class="contact-info-card__name">
               <button class="call-pane__info">
                 <i class="user-icon fa fa-user"></i>
                 <i class="info-icon fa fa-info"></i>
               </button>
-              <strong class="contact-info-card__name_text">
-                <?= $name ?>
+              <strong id="cw-client-name">
+                <?= Html::encode($name) ?>
               </strong>
             </div>
             
@@ -376,7 +374,7 @@ $type = $call->c_call_type_id;
         <button class="call-pane__start-call calling-state-block" id="btn-accept-call">
           <div class="call-in-action">
             <span class="call-in-action__text">Calling</span>
-            <span class="call-in-action__time">01:54</span>
+            <span class="call-in-action__time">00:00</span>
           </div>
           <i class="fas fa-phone"></i>
         </button>

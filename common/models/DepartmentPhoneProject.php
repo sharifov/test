@@ -14,28 +14,30 @@ use yii\db\ActiveRecord;
  * This is the model class for table "department_phone_project".
  *
  * @property int $dpp_id
- * @property int $dpp_dep_id
+ * @property int|null $dpp_dep_id
  * @property int $dpp_project_id
- * @property string $dpp_phone_number
- * @property int $dpp_source_id
+ * @property string|null $dpp_phone_number
+ * @property int|null $dpp_source_id
  * @property array $dpp_params
  * @property bool $dpp_ivr_enable
  * @property bool $dpp_enable
- * @property int $dpp_updated_user_id
- * @property string $dpp_updated_dt
+ * @property int|null $dpp_updated_user_id
+ * @property string|null $dpp_updated_dt
  * @property bool $dpp_redial
- * @property string $dpp_description
- * @property int $dpp_default
+ * @property string|null $dpp_description
+ * @property int|null $dpp_default
  * @property bool $dpp_show_on_site
  * @property int|null $dpp_phone_list_id
+ * @property string|null $dpp_language_id
  *
  * @property array $user_group_list
  *
+ * @property DepartmentPhoneProjectUserGroup[] $departmentPhoneProjectUserGroups
  * @property Department $dppDep
+ * @property Language $dppLanguage
  * @property Project $dppProject
  * @property Sources $dppSource
  * @property Employee $dppUpdatedUser
- * @property DepartmentPhoneProjectUserGroup[] $departmentPhoneProjectUserGroups
  * @property UserGroup[] $dugUgs
  * @property PhoneList $phoneList
  */
@@ -43,9 +45,7 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
 {
 
     public $user_group_list = [];
-
     public const DPP_DEFAULT_TRUE = 1;
-
     public const DEP_DEFAULT_TRUE = 1;
 
     /**
@@ -81,14 +81,17 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
             [['dpp_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['dpp_updated_user_id' => 'id']],
 
             ['dpp_redial', 'boolean'],
+            [['dpp_phone_number'], 'string', 'max' => 18],
             ['dpp_description', 'string', 'max' => 255],
-
+            [['dpp_language_id'], 'default', 'value' => null],
+            [['dpp_language_id'], 'string', 'max' => 5],
             ['dpp_show_on_site', 'boolean'],
 
             ['dpp_phone_list_id', 'required'],
             ['dpp_phone_list_id', 'integer'],
             ['dpp_phone_list_id', 'unique'],
-            ['dpp_phone_list_id', 'exist', 'skipOnError' => true, 'targetClass' => PhoneList::class, 'targetAttribute' => ['dpp_phone_list_id' => 'pl_id']],
+            [['dpp_phone_list_id'], 'exist', 'skipOnError' => true, 'targetClass' => PhoneList::class, 'targetAttribute' => ['dpp_phone_list_id' => 'pl_id']],
+            [['dpp_language_id'], 'exist', 'skipOnError' => true, 'targetClass' => Language::class, 'targetAttribute' => ['dpp_language_id' => 'language_id']],
 
             [['dpp_dep_id', 'dpp_project_id', 'dpp_phone_list_id'], 'unique', 'targetAttribute' => ['dpp_dep_id', 'dpp_project_id', 'dpp_phone_list_id']],
         ];
@@ -116,6 +119,7 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
 			'dpp_show_on_site' => 'Show on site',
             'dpp_phone_list_id' => 'Phone List',
             'phoneList.pl_phone_number' => 'Phone List',
+            'dpp_language_id' => 'Language ID',
         ];
     }
 
@@ -142,53 +146,67 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getDppDep()
+    public function getDppDep(): ActiveQuery
     {
         return $this->hasOne(Department::class, ['dep_id' => 'dpp_dep_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * Gets query for [[DppLanguage]].
+     *
+     * @return ActiveQuery
      */
-    public function getDppProject()
+    public function getDppLanguage(): ActiveQuery
+    {
+        return $this->hasOne(Language::class, ['language_id' => 'dpp_language_id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getDppProject(): ActiveQuery
     {
         return $this->hasOne(Project::class, ['id' => 'dpp_project_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getDppSource()
+    public function getDppSource(): ActiveQuery
     {
         return $this->hasOne(Sources::class, ['id' => 'dpp_source_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getDppUpdatedUser()
+    public function getDppUpdatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'dpp_updated_user_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getDepartmentPhoneProjectUserGroups()
+    public function getDepartmentPhoneProjectUserGroups(): ActiveQuery
     {
         return $this->hasMany(DepartmentPhoneProjectUserGroup::class, ['dug_dpp_id' => 'dpp_id']);
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
-    public function getDugUgs()
+    public function getDugUgs(): ActiveQuery
     {
         return $this->hasMany(UserGroup::class, ['ug_id' => 'dug_ug_id'])->viaTable('department_phone_project_user_group', ['dug_dpp_id' => 'dpp_id']);
     }
 
+    /**
+     * @param bool $onlyEnabled
+     * @return string|null
+     */
     public function getPhone(bool $onlyEnabled = false): ?string
     {
         if (!$this->phoneList) {
@@ -203,20 +221,27 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
         return $this->phoneList->pl_phone_number;
     }
 
+    /**
+     * Gets query for [[PhoneList]].
+     *
+     * @return ActiveQuery
+     */
     public function getPhoneList(): ActiveQuery
     {
         return $this->hasOne(PhoneList::class, ['pl_id' => 'dpp_phone_list_id']);
     }
 
     /**
-     * {@inheritdoc}
-     * @return DepartmentPhoneProjectQuery the active query used by this AR class.
+     * @return DepartmentPhoneProjectQuery
      */
-    public static function find()
+    public static function find(): DepartmentPhoneProjectQuery
     {
         return new DepartmentPhoneProjectQuery(static::class);
     }
 
+    /**
+     * @return bool
+     */
     public function isEnabled(): bool
 	{
 		return (bool)$this->dpp_enable;

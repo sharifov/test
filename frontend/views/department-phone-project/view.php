@@ -26,7 +26,8 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ]) ?>
     </p>
-
+    <div class="row">
+    <div class="col-md-6">
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
@@ -58,6 +59,16 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
             ],
 
+
+        ],
+    ]) ?>
+    </div>
+    <div class="col-md-6">
+    <?= DetailView::widget([
+        'model' => $model,
+        'attributes' => [
+
+            'dpp_language_id',
             //'dpp_params',
             'dpp_ivr_enable:booleanByLabel',
             'dpp_enable:booleanByLabel',
@@ -68,6 +79,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'dpp_updated_dt:byUserDateTime',
         ],
     ]) ?>
+    </div>
+    </div>
 
     <div class="row">
         <div class="col-md-12">

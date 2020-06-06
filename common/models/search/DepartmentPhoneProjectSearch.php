@@ -20,7 +20,7 @@ class DepartmentPhoneProjectSearch extends DepartmentPhoneProject
         return [
             [['dpp_id', 'dpp_project_id', 'dpp_dep_id', 'dpp_source_id', 'dpp_ivr_enable', 'dpp_enable', 'dpp_updated_user_id'], 'integer'],
 //            ['dpp_phone_number', 'safe'],
-            [['dpp_params', 'dpp_updated_dt'], 'safe'],
+            [['dpp_params', 'dpp_updated_dt', 'dpp_language_id'], 'safe'],
             [['dpp_redial', 'dpp_default'], 'boolean'],
 
             ['dpp_show_on_site', 'boolean'],
@@ -79,6 +79,7 @@ class DepartmentPhoneProjectSearch extends DepartmentPhoneProject
             'dpp_default' => $this->dpp_default,
             'dpp_show_on_site' => $this->dpp_show_on_site,
             'dpp_phone_list_id' => $this->dpp_phone_list_id,
+            'dpp_language_id' => $this->dpp_language_id,
         ]);
 
         $query

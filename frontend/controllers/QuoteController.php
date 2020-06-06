@@ -532,6 +532,7 @@ class QuoteController extends FController
                     }
 
                     $prices = [];
+                    $serviceFee = (new Quote())->serviceFee;
                     foreach ($lead->getPaxTypes() as $type) {
                         $price = null;
 
@@ -542,8 +543,9 @@ class QuoteController extends FController
                                 $price->fare = $value['fare'];
                                 $price->taxes = $value['taxes'];
                                 $price->net = $price->fare + $price->taxes;
-                                $price->selling = $price->net + $price->mark_up;
+                                $price->selling = ($price->net + $price->mark_up)  * (1 + $serviceFee);
                                 $price->toFloat();
+                                $price->roundValue();
                                 $price->oldParams = serialize($price->attributes);
 
                                 $prices[] = $price;
