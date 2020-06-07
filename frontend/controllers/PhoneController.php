@@ -18,6 +18,7 @@ use common\models\UserProfile;
 use common\models\UserProjectParams;
 use sales\auth\Auth;
 use sales\entities\cases\Cases;
+use sales\model\call\useCase\conference\create\CreateCallForm;
 use sales\model\user\entity\userStatus\UserStatus;
 use yii\base\Exception;
 use yii\helpers\Html;
@@ -1042,6 +1043,38 @@ class PhoneController extends FController
         return $this->asJson($result);
     }
 
+    public function actionAjaxCreateCall()
+    {
+        try {
+            $isOnCall = UserStatus::findOne(['us_user_id' => Auth::id(), 'us_is_on_call' => true]);
+            if ($isOnCall) {
+                throw new BadRequestHttpException('Already exist active call');
+            }
+
+            $form = new CreateCallForm();
+
+            if (!$form->load(Yii::$app->request->post())) {
+                throw new BadRequestHttpException('Cant load data');
+            }
+
+            $form->user_id = Auth::id();
+            $form->caller = 'client:seller' . Auth::id();
+
+            if (!$form->validate()) {
+                throw new BadRequestHttpException('Request error: ' . VarDumper::dumpAsString($form->getErrors()));
+            }
+
+            $result = Yii::$app->communication->createCall($form);
+
+        } catch (\Throwable $e) {
+            $result = [
+                'error' => true,
+                'message' => $e->getMessage(),
+            ];
+        }
+        return $this->asJson($result);
+    }
+
     private function getJoinCall(string $sid): Call
     {
         if (!$sid) {
@@ -1106,7 +1139,7 @@ class PhoneController extends FController
         }
 
         if (
-            ($call->isOut() && $call->isGeneralParent() && $call->isStatusRinging())
+            ($call->isOut() && $call->isGeneralParent() && ($call->isStatusRinging()/* || $call->isStatusInProgress()*/))
             || ($call->isOut() && !$call->isGeneralParent() && $call->isStatusInProgress())
             || ($call->isIn() && $call->isStatusInProgress())
         ) {

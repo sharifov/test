@@ -8,10 +8,9 @@
 
 namespace common\components;
 
-use common\models\CallQueue;
 use common\models\Conference;
 use common\models\ConferenceRoom;
-use sales\model\call\entity\conferenceCall\ConferenceCall;
+use sales\model\call\useCase\conference\create\CreateCallForm;
 use Yii;
 use yii\base\Component;
 use yii\helpers\Json;
@@ -866,6 +865,13 @@ class CommunicationService extends Component implements CommunicationServiceInte
         ];
 
         $response = $this->sendRequest('twilio-conference/join-to-conference', $data);
+
+        return $this->processConferenceResponse($response);
+    }
+
+    public function createCall(CreateCallForm $form): array
+    {
+        $response = $this->sendRequest('twilio-conference/create-call', $form->getAttributes());
 
         return $this->processConferenceResponse($response);
     }

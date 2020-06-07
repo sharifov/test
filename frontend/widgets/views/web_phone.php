@@ -197,10 +197,16 @@ use yii\helpers\Html;
     $ajaxUnholdConferenceDoubleCall = Url::to(['/phone/ajax-unhold-conference-double-call']);
     $ajaxJoinToConferenceUrl = Url::to(['/phone/ajax-join-to-conference']);
     $ajaxHangupUrl = Url::to(['/phone/ajax-hangup']);
+    $ajaxCreateCallUrl = Url::to(['/phone/ajax-create-call']);
 
     $conferenceBase = 0;
     if (isset(Yii::$app->params['settings']['voip_conference_base'])) {
         $conferenceBase = Yii::$app->params['settings']['voip_conference_base'] ? 1 : 0;
+    }
+
+    $callOutBackendSide = 0;
+    if (isset(Yii::$app->params['settings']['call_out_backend_side'])) {
+        $callOutBackendSide = Yii::$app->params['settings']['call_out_backend_side'] ? 1 : 0;
     }
 
     $csrf_param = Yii::$app->request->csrfParam;
@@ -223,6 +229,8 @@ use yii\helpers\Html;
     const conferenceBase = parseInt('<?= $conferenceBase ?>');
     const ajaxJoinToConferenceUrl = '<?= $ajaxJoinToConferenceUrl ?>';
     const ajaxHangupUrl = '<?= $ajaxHangupUrl ?>';
+    const ajaxCreateCallUrl = '<?= $ajaxCreateCallUrl ?>';
+    const callOutBackendSide = parseInt('<?= $callOutBackendSide ?>');
 
     const clientId = '<?=$clientId?>';
 
@@ -919,6 +927,32 @@ use yii\helpers\Html;
             return false;
         }*/
 
+        if (conferenceBase && callOutBackendSide) {
+
+            let createCallParams = {
+                '<?= $csrf_param ?>' : '<?= $csrf_token ?>',
+                'called': phone_to,
+                'from': phone_from,
+                'project_id': project_id,
+                'lead_id': lead_id,
+                'case_id': case_id,
+            };
+
+            $.post(ajaxCreateCallUrl, createCallParams, function(data) {
+                if (data.error) {
+                    var text = 'Error. Try again later';
+                    if (data.message) {
+                        text = data.message;
+                    }
+                    new PNotify({title: "Make call", type: "error", text: text, hide: true});
+                } else {
+                    console.log('webCall success');
+                }
+            }, 'json');
+
+            return;
+        }
+
         let params = {
             'To': phone_to,
             'FromAgentPhone': phone_from,
@@ -929,6 +963,7 @@ use yii\helpers\Html;
             'c_user_id': userId,
             'is_conference_call': conferenceBase
         };
+
 
         // console.log(params);
         webPhoneParams = params;
@@ -987,6 +1022,32 @@ use yii\helpers\Html;
     }
 
     function webCallLeadRedial(phone_from, phone_to, project_id, lead_id, type, c_source_type_id) {
+
+        if (conferenceBase && callOutBackendSide) {
+
+            let createCallParams = {
+                '<?= $csrf_param ?>' : '<?= $csrf_token ?>',
+                'called': phone_to,
+                'from': phone_from,
+                'project_id': project_id,
+                'lead_id': lead_id,
+                'source_type_id': c_source_type_id,
+            };
+
+            $.post(ajaxCreateCallUrl, createCallParams, function(data) {
+                if (data.error) {
+                    var text = 'Error. Try again later';
+                    if (data.message) {
+                        text = data.message;
+                    }
+                    new PNotify({title: "Make call", type: "error", text: text, hide: true});
+                } else {
+                    console.log('webCall success');
+                }
+            }, 'json');
+
+            return;
+        }
 
         let params = {
             'To': phone_to,

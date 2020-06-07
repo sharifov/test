@@ -13,6 +13,9 @@ use yii\base\Model;
  * @property int $type_id
  * @property int $source_type_id
  * @property int $project_id
+ * @property int $lead_id
+ * @property int $case_id
+ * @property int $user_id
  */
 class CallCustomParameters extends Model
 {
@@ -21,6 +24,9 @@ class CallCustomParameters extends Model
     public $type_id;
     public $source_type_id;
     public $project_id;
+    public $lead_id;
+    public $case_id;
+    public $user_id;
 
     public function rules(): array
     {
@@ -39,6 +45,12 @@ class CallCustomParameters extends Model
 
             ['project_id', 'integer'],
             ['project_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+
+            ['lead_id', 'integer'],
+
+            ['case_id', 'integer'],
+
+            ['user_id', 'integer'],
         ];
     }
 

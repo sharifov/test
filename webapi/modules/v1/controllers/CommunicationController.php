@@ -1135,6 +1135,22 @@ class CommunicationController extends ApiBaseController
                 $call->c_project_id = $custom_parameters->project_id;
             }
 
+            if ($custom_parameters->project_id) {
+                $call->c_project_id = $custom_parameters->project_id;
+            }
+
+            if ($custom_parameters->lead_id) {
+                $call->c_lead_id = $custom_parameters->lead_id;
+            }
+
+            if ($custom_parameters->case_id) {
+                $call->c_case_id = $custom_parameters->case_id;
+            }
+
+            if ($custom_parameters->user_id) {
+                $call->c_created_user_id = $custom_parameters->user_id;
+            }
+
             if (!$call->save()) {
                 \Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:findOrCreateCallByData:Call:save');
             } else {
@@ -1179,8 +1195,12 @@ class CommunicationController extends ApiBaseController
             }
         }
 
-        if ($agentId) {
-            $call->c_created_user_id = $agentId;
+        if ($custom_parameters->user_id) {
+            $call->c_created_user_id = $custom_parameters->user_id;
+        } else {
+            if ($agentId) {
+                $call->c_created_user_id = $agentId;
+            }
         }
 
         if (!$call->c_created_user_id && $parentCall && $call->isOut()) {
