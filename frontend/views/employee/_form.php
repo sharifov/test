@@ -62,10 +62,10 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             <div class="well">
                 <div class="row">
                     <div class="col-sm-6">
-                        <?= $form->field($model, 'username')->textInput(['autocomplete' => "new-user"]) ?>
+                        <?= $form->field($model, 'username')->textInput(['autocomplete' => "off"]) ?>
                     </div>
                     <div class="col-sm-6">
-                        <?= $form->field($model, 'password')->passwordInput(['autocomplete' => "new-password"]) ?>
+                        <?= $form->field($model, 'email')->input('email') ?>
                     </div>
                 </div>
                 <div class="row">
@@ -73,7 +73,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                         <?= $form->field($model, 'full_name')->textInput() ?>
                     </div>
                     <div class="col-sm-6">
-                        <?= $form->field($model, 'email')->input('email') ?>
+                        <?= $form->field($model, 'password')->passwordInput(['autocomplete' => "off"]) ?>
                     </div>
                 </div>
 
@@ -100,7 +100,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     </div>
                     <?php if (!$model->isNewRecord) : ?>
                         <div class="col-sm-6">
-                            <?= $form->field($model, 'deleted', ['template' => '{label}{input}'])->checkbox() ?>
+                            <?= $form->field($model, 'status')->dropDownList($model::getStatusList()) ?>
                         </div>
                     <?php endif; ?>
                 </div>
