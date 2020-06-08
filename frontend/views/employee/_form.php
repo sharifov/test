@@ -60,12 +60,25 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
         'id' => sprintf('%s-ID', $model->formName())
     ]) ?>
             <div class="well">
+
+                <?php if ($model->isBlocked()) :?>
+                    <div class="alert alert-warning" role="alert">
+                        <i class="fa fa-warning"></i> This user is <strong>Blocked</strong>!
+                    </div>
+                <?php endif ?>
+
+                <?php if ($model->isDeleted()) :?>
+                    <div class="alert alert-danger" role="alert">
+                        <i class="fa fa-warning"></i> This user is <strong>Deleted</strong>!
+                    </div>
+                <?php endif ?>
+
                 <div class="row">
                     <div class="col-sm-6">
-                        <?= $form->field($model, 'username')->textInput(['autocomplete' => "new-user"]) ?>
+                        <?= $form->field($model, 'username')->textInput(['autocomplete' => "off"]) ?>
                     </div>
                     <div class="col-sm-6">
-                        <?= $form->field($model, 'password')->passwordInput(['autocomplete' => "new-password"]) ?>
+                        <?= $form->field($model, 'email')->input('email') ?>
                     </div>
                 </div>
                 <div class="row">
@@ -73,7 +86,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                         <?= $form->field($model, 'full_name')->textInput() ?>
                     </div>
                     <div class="col-sm-6">
-                        <?= $form->field($model, 'email')->input('email') ?>
+                        <?= $form->field($model, 'password')->passwordInput(['autocomplete' => "off"]) ?>
                     </div>
                 </div>
 
@@ -100,7 +113,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     </div>
                     <?php if (!$model->isNewRecord) : ?>
                         <div class="col-sm-6">
-                            <?= $form->field($model, 'deleted', ['template' => '{label}{input}'])->checkbox() ?>
+                            <?= $form->field($model, 'status')->dropDownList($model::getStatusList()) ?>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -665,16 +678,16 @@ JS;
                 <h4>User Failed Login</h4>
 
                 <?php if ($model->isBlocked()) :?>
-                    <p>
-                        <?php echo Html::a('<i class="glyphicon glyphicon-remove-circle"></i> User Blocked',null,
+
+                        <?php /*echo Html::a('<i class="glyphicon glyphicon-remove-circle"></i> User Blocked',null,
                             [
                                 'class' => 'btn btn-warning btn-xs unblock-user',
                                 'title' => 'Click to unblock user',
                                 'data-user_id' => $model->id,
                                 'data-pjax' => '0',
                             ]
-                        )?>
-                    </p>
+                        )*/?>
+
                 <?php endif ?>
 
                 <?php \yii\widgets\Pjax::begin(['id' => 'pjax-grid-user-failed']); ?>
@@ -736,52 +749,52 @@ JS;
 <?php
 $js = <<<JS
 
-     $(document).on('click', '.unblock-user', function(e) {
-         e.preventDefault();
-        
-         if(!confirm('Are you sure un-block this user?')) {
-            return true;
-         }
-         
-         let objBtn = $(this);
-         let htmlInner = objBtn.html();
-             
-         $.ajax({
-            type: 'post',
-            url: '/user-failed-login/set-active-ajax',
-            dataType: 'json',
-            data: {id:objBtn.data('user_id')},                
-            beforeSend: function () {                    
-                objBtn.html('<span class="spinner-border spinner-border-sm"></span>');
-                objBtn.prop('disabled', true);    
-            },
-            success: function (dataResponse) {            
-                objBtn.prop('disabled', false);
-                objBtn.html(htmlInner); 
-                  
-                if (dataResponse.status === 1) {                        
-                    objBtn.hide(); 
-                    new PNotify({
-                        title: "Success",
-                        type: "success",
-                        text: dataResponse.message,
-                        hide: true
-                    });                      
-                } else {                        
-                    new PNotify({
-                        title: "Error:",
-                        type: "error",
-                        text: dataResponse.message,
-                        hide: true
-                    });
-                }                       
-            },
-            error: function () {
-                objBtn.prop('disabled', false);
-                objBtn.html(htmlInner); 
-            }
-         });  
-    });
+    //  $(document).on('click', '.unblock-user', function(e) {
+    //      e.preventDefault();
+    //    
+    //      if(!confirm('Are you sure un-block this user?')) {
+    //         return true;
+    //      }
+    //     
+    //      let objBtn = $(this);
+    //      let htmlInner = objBtn.html();
+    //         
+    //      $.ajax({
+    //         type: 'post',
+    //         url: '/user-failed-login/set-active-ajax',
+    //         dataType: 'json',
+    //         data: {id:objBtn.data('user_id')},                
+    //         beforeSend: function () {                    
+    //             objBtn.html('<span class="spinner-border spinner-border-sm"></span>');
+    //             objBtn.prop('disabled', true);    
+    //         },
+    //         success: function (dataResponse) {            
+    //             objBtn.prop('disabled', false);
+    //             objBtn.html(htmlInner); 
+    //              
+    //             if (dataResponse.status === 1) {                        
+    //                 objBtn.hide(); 
+    //                 new PNotify({
+    //                     title: "Success",
+    //                     type: "success",
+    //                     text: dataResponse.message,
+    //                     hide: true
+    //                 });                      
+    //             } else {                        
+    //                 new PNotify({
+    //                     title: "Error:",
+    //                     type: "error",
+    //                     text: dataResponse.message,
+    //                     hide: true
+    //                 });
+    //             }                       
+    //         },
+    //         error: function () {
+    //             objBtn.prop('disabled', false);
+    //             objBtn.html(htmlInner); 
+    //         }
+    //      });  
+    // });
 
     $('#modal-df').on('hidden.bs.modal', function () {
         $.pjax.reload({container:'#pjax-grid-upp', 'async': false});
