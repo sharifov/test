@@ -837,9 +837,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $timestamp + $expire >= time();
     }
 
-    public static function getAllEmployees()
+    /**
+     * @return array
+     */
+    public static function getAllEmployees(): array
     {
-        return ArrayHelper::map(self::find()->where(['status' => self::STATUS_ACTIVE])->all(), 'id', 'username');
+        return ArrayHelper::map(self::find()->select(['id', 'username'])->where(['status' => [self::STATUS_ACTIVE, self::STATUS_BLOCKED]])->asArray()->all(), 'id', 'username');
     }
 
     /**
@@ -956,19 +959,30 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $this->password_reset_token = null;
     }
 
+    /**
+     * @param $attr
+     * @return bool
+     */
     public function prepareSave($attr)
     {
         $this->username = $attr['username'];
         $this->email = $attr['email'];
         $this->full_name = $attr['full_name'];
-        $this->password = $attr['password'];
-        if (!empty($this->password)) {
-            $this->setPassword($this->password);
+
+        //$this->password = $attr['password'];
+        if (!empty($attr['password'])) {
+            $this->setPassword($attr['password']);
         }
-        if (isset($attr['deleted'])) {
+
+        /*if (isset($attr['deleted'])) {
             $this->status = empty($attr['deleted'])
                 ? self::STATUS_ACTIVE : self::STATUS_DELETED;
+        }*/
+
+        if (isset($attr['status']) && is_numeric($attr['status'])) {
+            $this->status = (int) $attr['status'];
         }
+
         if (isset($attr['acl_rules_activated'])) {
             $this->acl_rules_activated = $attr['acl_rules_activated'];
         }
@@ -977,7 +991,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
                 $this->form_roles[] = $role;
             }
         }
-        $this->generateAuthKey();
+        
+        if (!$this->auth_key) {
+            $this->generateAuthKey();
+        }
 
         return $this->isNewRecord;
     }
@@ -2444,6 +2461,22 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public static function find(): EmployeeQuery
     {
         return new EmployeeQuery(static::class);
+    }
+
+    /**
+     * @return string[]
+     */
+    public static function getStatusList(): array
+    {
+        return self::STATUS_LIST;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatusName(): string
+    {
+        return self::STATUS_LIST[$this->status] ?? '-';
     }
 
     /**
