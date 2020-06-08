@@ -176,6 +176,9 @@ class CaseController extends Controller
 			if (!empty($boErrors)) {
 				printf("\nBo errors occurred: %s ", $this->ansiFormat(implode('; ' . PHP_EOL, $boErrors), Console::FG_RED));
 			}
+			if (!empty($refreshSaleTicketError)) {
+				printf("\nSaleTicketService error occurred: %s ", $this->ansiFormat(implode('; ' . PHP_EOL, $refreshSaleTicketError), Console::FG_RED));
+			}
 
 
 			$transaction->commit();
