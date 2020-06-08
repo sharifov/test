@@ -60,6 +60,19 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
         'id' => sprintf('%s-ID', $model->formName())
     ]) ?>
             <div class="well">
+
+                <?php if ($model->isBlocked()) :?>
+                    <div class="alert alert-warning" role="alert">
+                        <i class="fa fa-warning"></i> This user is <strong>Blocked</strong>!
+                    </div>
+                <?php endif ?>
+
+                <?php if ($model->isDeleted()) :?>
+                    <div class="alert alert-danger" role="alert">
+                        <i class="fa fa-warning"></i> This user is <strong>Deleted</strong>!
+                    </div>
+                <?php endif ?>
+
                 <div class="row">
                     <div class="col-sm-6">
                         <?= $form->field($model, 'username')->textInput(['autocomplete' => "off"]) ?>
@@ -666,9 +679,6 @@ JS;
 
                 <?php if ($model->isBlocked()) :?>
 
-                    <div class="alert alert-danger" role="alert">
-                        <i class="fa fa-warning"></i> This user is <strong>blocked</strong>!
-                    </div>
                         <?php /*echo Html::a('<i class="glyphicon glyphicon-remove-circle"></i> User Blocked',null,
                             [
                                 'class' => 'btn btn-warning btn-xs unblock-user',
