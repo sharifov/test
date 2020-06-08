@@ -69,15 +69,15 @@ class SaleTicketService
 	 * @param int $caseId
 	 * @param CaseSale $caseSale
 	 * @param array $saleData
-	 * @return mixed
+	 * @return bool
 	 * @throws \Throwable
 	 */
-	public function refreshSaleTicketBySaleData(int $caseId, CaseSale $caseSale, array $saleData)
+	public function refreshSaleTicketBySaleData(int $caseId, CaseSale $caseSale, array $saleData): bool
 	{
 		$ci = $this;
 		return $this->transactionManager->wrap(static function () use ($caseId, $caseSale, $saleData, &$ci) {
 			$ci->saleTicketRepository->deleteByCaseAndSale($caseId, $caseSale->css_sale_id);
-			$ci->createSaleTicketBySaleData($caseSale, $saleData);
+			return $ci->createSaleTicketBySaleData($caseSale, $saleData);
 		});
 	}
 
