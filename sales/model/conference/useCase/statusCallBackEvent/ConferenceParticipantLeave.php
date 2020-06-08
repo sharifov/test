@@ -40,6 +40,7 @@ class ConferenceParticipantLeave
         $call = ConferenceParticipantCallFinder::findAndUpdateCall($form->CallSid, $conference);
 
         $participant = new ConferenceParticipant();
+        $participant->cp_type_id = $form->participant_type_id;
         $participant->cp_cf_id = $conference->cf_id;
         $participant->cp_call_sid = $form->CallSid;
         $participant->leave();
