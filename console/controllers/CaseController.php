@@ -144,7 +144,7 @@ class CaseController extends Controller
 			foreach ($result as $item) {
 				try {
 					$bo_time_start = microtime(true);
-					$saleData = $caseSaleService->detailRequestToBackOffice((int)$item['css_sale_id'], 1, 120, 1);
+					$saleData = $caseSaleService->detailRequestToBackOffice((int)$item['css_sale_id'], 0, 120, 1);
 					$bo_time_end = microtime(true);
 					$boRequestTime += (float)number_format(round($bo_time_end - $bo_time_start, 2), 2);
 
