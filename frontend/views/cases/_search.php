@@ -15,6 +15,7 @@ use yii\widgets\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $model sales\entities\cases\CasesSearch */
 /* @var $form yii\widgets\ActiveForm */
+/* @var $dataProvider yii\data\ActiveDataProvider */
 ?>
 
 <div class="cases-search">
@@ -184,11 +185,56 @@ use yii\widgets\ActiveForm;
             ?>
             <?= $form->field($model, 'cssChargeType')->dropDownList($types, ['prompt' => '---']) ?>
         </div>
+        <div class="col-md-2">
+			<?= $form->field($model, 'saleTicketSendEmailDate', [
+				'options' => ['class' => 'form-group'],
+			])->widget(
+				\dosamigos\datepicker\DatePicker::class, [
+				'inline' => false,
+				'clientOptions' => [
+					'autoclose' => true,
+					'format' => 'dd-M-yyyy',
+				]
+			])->label('Send Email Date') ?>
+
+        </div>
     </div>
 
     <div class="form-group text-center">
         <?= Html::submitButton('<i class="fa fa-search"></i> Search cases', ['class' => 'btn btn-primary']) ?>
         <?= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset form', ['cases/index'], ['class' => 'btn btn-warning']) ?>
+        <?php if ($model->saleTicketSendEmailDate) : ?>
+			<?php echo \kartik\export\ExportMenu::widget([
+				'dataProvider' => $dataProvider,
+				'columns' => [
+                    ['attribute' => 'cs_id', 'label' => 'Case Id'],
+                    ['attribute' => 'cssSaleId', 'label' => 'Sale Id'],
+                    ['attribute' => 'cssBookId', 'label' => 'Booking Id'],
+                    ['attribute' => 'salePNR', 'label' => 'PNR'],
+                    ['attribute' => 'saleTicketSendEmailDate'],
+                ],
+				'exportConfig' => [
+					\kartik\export\ExportMenu::FORMAT_PDF => [
+						'pdfConfig' => [
+							'mode' => 'c',
+							'format' => 'A4-L',
+						]
+					]
+				],
+				'target' => \kartik\export\ExportMenu::TARGET_BLANK,
+				'fontAwesome' => true,
+				'dropdownOptions' => [
+					'label' => 'Full Export'
+				],
+				'columnSelectorOptions' => [
+					'label' => 'Export Fields'
+				],
+				'showConfirmAlert' => false,
+				'options' => [
+					'id' => 'export-links'
+				],
+			]); ?>
+        <?php endif; ?>
     </div>
 
     <?php ActiveForm::end(); ?>

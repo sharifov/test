@@ -7,9 +7,26 @@ use common\models\Employee;
 use common\models\UserProjectParams;
 use sales\helpers\cases\CaseSaleHelper;
 use sales\model\saleTicket\entity\SaleTicket;
+use sales\repositories\cases\CasesSaleRepository;
 
+/**
+ * Class SaleTicketEmailService
+ * @package sales\model\saleTicket\useCase\sendEmail
+ *
+ * @property CasesSaleRepository $casesSaleRepository
+ */
 class SaleTicketEmailService
 {
+	/**
+	 * @var CasesSaleRepository
+	 */
+	private $casesSaleRepository;
+
+	public function __construct(CasesSaleRepository $casesSaleRepository)
+	{
+		$this->casesSaleRepository = $casesSaleRepository;
+	}
+
 	/**
 	 * @param SaleTicket[] $saleTickets
 	 * @param array $emailSettings
@@ -21,7 +38,7 @@ class SaleTicketEmailService
 	 * @throws \Throwable
 	 * @throws \yii\db\StaleObjectException
 	 */
-	public function generateAndSendEmail(array $saleTickets, array $emailSettings, string $emailBody, int $caseId, string $bookingId, Employee $user, array $caseSaleData): void
+	public function generateAndSendEmail(array $saleTickets, array $emailSettings, string $emailBody, int $caseId, string $bookingId, Employee $user, CaseSale $caseSale): void
 	{
 		$mail = new Email();
 		$mail->e_project_id = $this->getProjectIdFromST($saleTickets[0]);
@@ -34,13 +51,15 @@ class SaleTicketEmailService
 
 
 		$mail->e_email_to = $emailSettings['sendTo'][0];
-		$mail->e_email_cc = $this->getEmailCC($emailSettings, $saleTickets[0], SaleTicketHelper::isRecallCommissionChanged($saleTickets, $caseSaleData));
+		$mail->e_email_cc = $this->getEmailCC($emailSettings, $saleTickets[0], SaleTicketHelper::isRecallCommissionChanged($saleTickets, $caseSale->getSaleDataDecoded()));
 		$mail->e_created_dt = date('Y-m-d H:i:s');
 		$mail->e_created_user_id = $user->id;
 
 		if (!$mail->save()) {
 			throw new \RuntimeException($mail->getErrorSummary(false)[0]);
 		}
+
+		$this->casesSaleRepository->setSendEmailDt(date('Y-m-d H:i:s'), $caseSale);
 
 		$this->sendEmail($mail);
 	}

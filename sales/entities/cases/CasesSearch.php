@@ -6,11 +6,14 @@ use common\models\Airport;
 use common\models\CaseSale;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
+use common\models\Email;
 use common\models\Employee;
 use common\models\Lead;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
+use sales\helpers\setting\SettingHelper;
 use yii\data\ActiveDataProvider;
+use yii\db\Expression;
 use yii\helpers\VarDumper;
 
 /**
@@ -38,6 +41,7 @@ use yii\helpers\VarDumper;
  * @property $departureCountries
  * @property $arrivalCountries
  * @property $css_profit
+ * @property $saleTicketSendEmailDate
  *
  * @property array $cacheSaleData
  */
@@ -66,6 +70,7 @@ class CasesSearch extends Cases
     public $departureCountries;
     public $arrivalCountries;
     public $clientId;
+    public $saleTicketSendEmailDate;
 
     private $cacheSaleData = [];
 
@@ -104,7 +109,7 @@ class CasesSearch extends Cases
             [['cssChargedFrom', 'cssChargedTo', 'cssProfitFrom', 'cssProfitTo'], 'number'],
             [['cssOutDate', 'cssInDate'], 'date'],
             [['cssChargeType'], 'string', 'max' => 100],
-            [['departureAirport', 'arrivalAirport', 'departureCountries', 'arrivalCountries', 'cssInOutDate'], 'safe'],
+            [['departureAirport', 'arrivalAirport', 'departureCountries', 'arrivalCountries', 'cssInOutDate', 'saleTicketSendEmailDate'], 'safe'],
         ];
     }
 
@@ -140,7 +145,8 @@ class CasesSearch extends Cases
             'arrivalAirport' => 'Arrival Airport',
             'departureCountries' => 'Depart. Countries',
             'arrivalCountries' => 'Arrival Countries',
-            'clientId' => 'Client ID'
+            'clientId' => 'Client ID',
+			'saleTicketSendEmailDate' => 'Send Email Date'
         ];
     }
 
@@ -331,7 +337,7 @@ class CasesSearch extends Cases
      */
     private function searchByAdmin($params): ActiveDataProvider
     {
-        $query = Cases::find()->with(['project', 'department', 'category']);
+        $query = self::find()->with(['project', 'department', 'category']);
 
         $query->andWhere(['cs_dep_id' => array_keys(EmployeeDepartmentAccess::getDepartments())]);
         $query->andWhere(['cs_project_id' => array_keys(EmployeeProjectAccess::getProjects())]);
@@ -463,6 +469,22 @@ class CasesSearch extends Cases
 				]);
 			}
 		}
+
+		if ($this->saleTicketSendEmailDate) {
+			$emails = SettingHelper::getCaseSaleTicketMainEmailList();
+			$this->saleTicketSendEmailDate = date('Y-m-d', strtotime($this->saleTicketSendEmailDate));
+			$query->andWhere(['cs_id' => Email::find()->select('e_case_id')
+				->byEmailToList($emails)
+				->byDateSend($this->saleTicketSendEmailDate)
+			]);
+
+			if ($params['export_type']) {
+				$query->addSelect(['cases.*', 'css_sale_id as cssSaleId', 'css_sale_book_id as cssBookId', 'css_sale_pnr as salePNR', 'css_send_email_dt as saleTicketSendEmailDate'])
+					->innerJoin(CaseSale::tableName(), new Expression('css_cs_id = cs_id and css_send_email_dt is not null'))
+					->andWhere(['date_format(css_send_email_dt, "%Y-%m-%d")' => $this->saleTicketSendEmailDate]);
+			}
+		}
+
         if ($this->cssChargeType) {
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_charge_type' => $this->cssChargeType])]);
         }
