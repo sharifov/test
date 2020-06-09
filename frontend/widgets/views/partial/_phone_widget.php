@@ -26,11 +26,12 @@ use yii\web\View;
       <!-- <span class="phone-widget__title">Calls</span> -->
       <a href="#" class="phone-widget__settings header-action-small toggle-bar-settings"><i class="fa fa-cog"></i></a>
       <a href="#" class="phone-widget__close header-action-small">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path
             d="M7 8.20625L12.7937 14L13.9999 12.7938L8.2062 7.00004L14 1.20621L12.7938 0L7 5.79383L1.2062 0L0 1.20621L5.7938 7.00004L7.97135e-05 12.7938L1.20628 14L7 8.20625Z"
             fill="white" />
-        </svg>
+        </svg> -->
+        <i class="fa fa-times"></i>
       </a>
     </div>
     <ul class="phone-widget__header-actions">

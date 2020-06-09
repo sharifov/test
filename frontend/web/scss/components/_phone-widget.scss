@@ -425,7 +425,11 @@
 	}
 
 	&__close {
-		right: $sp;
+		right: -10px;
+		top: -6px !important;
+		.fa {
+			font-size: 18px !important;
+		}
 	}
 
 	&__body {
@@ -1282,13 +1286,14 @@
 		&__note-block {
 			display: flex;
 			align-items: center;
-			svg {
-				display: block;
-				width: 20px;
-				height: 20px;
-				path {
-					fill: $white;
-				}
+			.fa {
+				font-size: 20px;
+				line-height: 20px;
+				color: $white;
+			}
+
+			.fa-check {
+				font-size: 16px;
 			}
 
 			.form-group {
@@ -1470,6 +1475,8 @@
 			background-color: #66798b;
 			padding: 5px;
 			border-radius: 50%;
+
+			color: rgba($white, .6);
 
 			right: 0;
 			bottom: $sp;
