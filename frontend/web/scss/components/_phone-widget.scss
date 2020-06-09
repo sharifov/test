@@ -1622,7 +1622,6 @@
 			&:active:hover,
 			&:hover:focus {
 				box-shadow: 0px 3px 3px rgba(0, 0, 0, 0.15);
-
 			}
 		}
 
@@ -1687,8 +1686,8 @@
 
 			&[disabled],
 			&.disabled {
-				color: rgba($white, .3);
-				background-color: rgba($white, .08);
+				color: rgba($white, 0.3);
+				background-color: rgba($white, 0.08);
 				cursor: auto;
 			}
 		}
@@ -2212,20 +2211,158 @@
 	right: 0px;
 	margin: 1rem;
 
+	&__ongoing,
+	&__text,
+	&__time {
+		&:empty {
+			display: none;
+		}
+	}
+
+	&__state {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+
+	&__text {
+		text-transform: uppercase;
+		font-size: 11px;
+		line-height: 16px;
+	}
+
+	&__ongoing {
+		font-size: 14px;
+		line-height: 14px;
+		font-weight: bold;
+		color: #ffeeb1;
+	}
+
+	&__time {
+		font-size: 14px;
+		line-height: 16px;
+		color: rgba($white, 0.75);
+	}
+
 	.standby-phone {
-		$size: 56px;
+		$size: 70px;
 		height: $size;
 		width: $size;
 		color: $white;
-		background-color: $color-theme-dark;
+
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		flex-direction: column;
 		border-radius: 50%;
 
+		box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.6);
+
 		i {
-			font-size: $sp4;
-			transform: rotate3d(1, 1, 5, -100deg);
+			font-size: 22px;
+			display: none;
+			// transform: rotate3d(1, 1, 5, -100deg);
+		}
+	}
+
+	.widget-icon-inner {
+		&:before {
+			$size: 18px;
+			content: "";
+			width: $size;
+			height: $size;
+			border: 3px solid $white;
+			background-color: $theme-red;
+			position: absolute;
+			box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.6);
+			border-radius: 50%;
+			left: 0;
+			top: -2px;
+		}
+
+		&[data-wi-status="online"],
+		&[data-wi-status="1"],
+		&[data-wi-status="true"] {
+			&:before {
+				background-color: #53e93a;
+			}
+		}
+
+		&[data-wi-type="default"] {
+			.standby-phone {
+				background-color: $color-theme-dark;
+				.icon-phone {
+					display: block;
+				}
+			}
+		}
+		&[data-wi-type="incoming"] {
+			.standby-phone {
+				background-color: $theme-grass;
+
+				.icon-phone-answer {
+					display: block;
+					transform: rotate(-45deg);
+				}
+			}
+
+			.phone-widget-icon__ongoing {
+				margin-left: 2px;
+				position: absolute;
+				left: 60%;
+				bottom: 50%;
+			}
+			&.animate {
+				.standby-phone {
+					animation: pulse-animation-grass 2s infinite linear;
+				}
+			}
+		}
+		&[data-wi-type="outgoing"] {
+			.standby-phone {
+				background-color: $theme-green-clean;
+			}
+
+			&.animate {
+				.standby-phone {
+					animation: radar-animation-green 2.5s infinite ease-out;
+				}
+			}
+		}
+
+		&[data-wi-type="inProgress"] {
+			.standby-phone {
+				background-color: $theme-green-clean;
+			}
+
+			&.animate {
+				.standby-phone {
+					animation: pulse-animation-green 3s infinite linear;
+				}
+			}
+		}
+
+		&[data-wi-type="hold"] {
+			.standby-phone {
+				background-color: $theme-orange;
+			}
+
+			&.animate {
+				.standby-phone {
+					animation: radar-animation-orange 2.5s infinite ease-out;
+				}
+			}
+		}
+		&[data-wi-type="error"],
+		&[data-wi-type="missed"] {
+			.standby-phone {
+				background-color: $theme-red;
+			}
+			&.animate {
+				.standby-phone {
+					animation: radar-animation-red 2.5s infinite linear;
+				}
+			}
 		}
 	}
 
@@ -2239,54 +2376,6 @@
 
 			&__text {
 				font-weight: 600;
-			}
-		}
-	}
-
-	&.is-mirror {
-		&.is-on-call {
-			.standby-phone {
-				display: none;
-			}
-
-			.calling-state-block {
-				display: flex;
-				box-shadow: 0px 0px 0px 9px rgba($green, 0.4);
-				background-color: $green;
-				i {
-					display: none;
-				}
-				.call-in-action {
-					transition: 0.15s;
-					opacity: 1;
-
-					&__text {
-						color: $white;
-					}
-				}
-			}
-		}
-
-		&.is-pending {
-			.standby-phone {
-				display: none;
-			}
-			.calling-state-block {
-				display: flex;
-				animation: callAnimationv2 2s infinite linear;
-				background-color: #e2a300;
-				i {
-					display: none;
-				}
-
-				.call-in-action {
-					transition: 0.15s;
-					opacity: 1;
-
-					&__text {
-						color: $white;
-					}
-				}
 			}
 		}
 	}
@@ -2347,53 +2436,61 @@
 	}
 }
 
-@keyframes callAnimation {
-	0% {
-		box-shadow: 0px 0px 0px 3px rgba(255, 255, 255, 0.2);
-	}
-
-	25% {
-		box-shadow: 0px 0px 0px 6px rgba(255, 255, 255, 0.2);
-	}
-
-	50% {
-		box-shadow: 0px 0px 0px 9px rgba(255, 255, 255, 0.2);
-	}
-
-	75% {
-		box-shadow: 0px 0px 0px 6px rgba(255, 255, 255, 0.2);
-	}
-
-	100% {
-		box-shadow: 0px 0px 0px 3px rgba(255, 255, 255, 0.2);
-	}
-}
-
-@keyframes callAnimationv2 {
-	0% {
-		box-shadow: 0px 0px 0px 3px rgba(#e2a300, 0.4);
-	}
-
-	25% {
-		box-shadow: 0px 0px 0px 6px rgba(#e2a300, 0.4);
-	}
-
-	50% {
-		box-shadow: 0px 0px 0px 9px rgba(#e2a300, 0.4);
-	}
-
-	75% {
-		box-shadow: 0px 0px 0px 6px rgba(#e2a300, 0.4);
-	}
-
-	100% {
-		box-shadow: 0px 0px 0px 3px rgba(#e2a300, 0.4);
-	}
-}
-
 .main-content {
 	min-height: calc(100vh - 67px);
 }
+
+@mixin icon-animation-pulse($name, $color) {
+	@keyframes #{$name} {
+		0% {
+			box-shadow: 0px 0px 0px 2px rgba($color, 0.1);
+		}
+
+		25% {
+			box-shadow: 0px 0px 0px 4px rgba($color, 0.3),
+				0px 0px 0px 0px rgba($color, 0.1);
+		}
+
+		50% {
+			box-shadow: 0px 0px 0px 2px rgba($color, 0.1),
+				0px 0px 0px 12px rgba($color, 0.1);
+		}
+
+		75% {
+			box-shadow: 0px 0px 0px 6px rgba($color, 0.3),
+				0px 0px 0px 6px rgba($color, 0.1);
+		}
+
+		100% {
+			box-shadow: 0px 0px 0px 2px rgba($color, 0.1);
+		}
+	}
+}
+
+@mixin icon-animation-radar($name, $color) {
+	@keyframes #{$name} {
+		20% {
+			box-shadow: 0px 0px 0px 0px rgba($color, 0.6);
+		}
+
+		100% {
+			box-shadow: 0px 0px 0px 12px rgba($color, 0);
+		}
+
+		0% {
+			box-shadow: 0px 0px 0px 0px rgba($color, 0.6);
+		}
+	}
+}
+
+@include icon-animation-pulse(pulse-animation-green, $theme-green-clean);
+@include icon-animation-pulse(pulse-animation-grass, $theme-grass);
+@include icon-animation-pulse(pulse-animation-red, $theme-red);
+@include icon-animation-pulse(pulse-animation-orange, $theme-orange);
+@include icon-animation-radar(radar-animation-green, $theme-green-clean);
+@include icon-animation-radar(radar-animation-grass, $theme-grass);
+@include icon-animation-radar(radar-animation-red, $theme-red);
+@include icon-animation-radar(radar-animation-orange, $theme-orange);
 
 @keyframes speakerAnimation {
 	0% {
