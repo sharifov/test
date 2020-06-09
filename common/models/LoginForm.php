@@ -183,10 +183,11 @@ class LoginForm extends Model
     public function afterValidate(): void
     {
         if ($this->hasErrors()) {
+            $user = $this->_user ?? Employee::findOne(['username' => $this->username]);
             $userFailedLogin = UserFailedLogin::create(
                 $this->username,
-                $this->_user ? $this->_user->id : null,
-                Yii::$app->request->getUserAgent(),
+                $user ? $user->id : null,
+                $this->getBrowserName() . ' UserAgent:' . Yii::$app->request->getUserAgent(),
                 AntiBruteForceService::getClientIPAddress(),
                 Yii::$app->session->id
             );
@@ -201,5 +202,29 @@ class LoginForm extends Model
 
         }
         parent::afterValidate();
+    }
+
+    /**
+     * @return string
+     */
+    private function getBrowserName(): string
+    {
+        $exactBrowserName = $_SERVER['HTTP_USER_AGENT'];
+
+        if (strpos(strtolower($exactBrowserName), 'safari/') && strpos(strtolower($exactBrowserName), 'opr/')) {
+            $browserName = 'Opera';
+        } elseif (strpos(strtolower($exactBrowserName), 'safari/') && strpos(strtolower($exactBrowserName), 'chrome/')) {
+            $browserName = 'Chrome';
+        } elseif (strpos(strtolower($exactBrowserName), 'msie')) {
+            $browserName = 'Internet Explorer';
+        } elseif (strpos(strtolower($exactBrowserName), 'firefox/')) {
+            $browserName = 'Firefox';
+        } elseif (strpos(strtolower($exactBrowserName), 'safari/') && strpos(strtolower($exactBrowserName), 'opr/') === false &&
+            strpos(strtolower($exactBrowserName), "chrome/") === false) {
+                $browserName = 'Safari';
+        } else {
+            $browserName = 'Browser not defined';
+        }
+        return $browserName;
     }
 }

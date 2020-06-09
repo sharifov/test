@@ -85,8 +85,8 @@ class AntiBruteForceService
                 $attempts >= $this->userNotifyFailedLoginAttempts &&
                 $attempts < $this->userBlockAttempts
             ) {
-                $this->setNotificationTitle($user);
-                $this->setNotificationMessage($user);
+                $this->notificationTitle = 'Review failed sign-in attempt';
+                $this->setUserNotificationMessage($user);
                 $this->sendNotification($user);
                 $this->sendEmail($user);
 
@@ -103,7 +103,7 @@ class AntiBruteForceService
                 $this->sendEmail($user);
 
                 $admins = Employee::getAllEmployeesByRole(Employee::ROLE_ADMIN);
-                $this->setMessageForBlocked($user, false);
+                $this->setMessageForBlocked($user);
                 foreach ($admins as $admin) {
                     $this->sendNotification($admin);
                     $this->sendEmail($admin);
@@ -126,15 +126,16 @@ class AntiBruteForceService
 
     /**
      * @param Employee $user
-     * @param int|null $limit
-     * @param string|null $body
      * @return string
      */
-    private function setNotificationMessage(Employee $user, ?int $limit = null, ?string $body = null): string
+    private function setUserNotificationMessage(Employee $user): string
     {
-        $limit = $limit ?: $this->userNotifyFailedLoginAttempts;
-        $body = $body ?: 'The limit: %d of failed authentication attempts has been reached by user: %s, id: %s ';
-        $this->notificationMessage = sprintf($body, $limit, $user->username, $user->getId());
+        $this->notificationMessage = "Sing-in attempts limit has been reached. If this wasn't you, please contact administrator. \n\n";
+        $this->notificationMessage .= "Last failed attempts: \n\n";
+        foreach (UserFailedLogin::getLastAttempts($user->id) as $value) {
+            $browser = explode('UserAgent', $value->ufl_ua);
+            $this->notificationMessage .= '[Failed] ' . $value->ufl_created_dt .' - IP: ' . $value->ufl_ip . ' / ' . $browser[0] . "\n";
+        }
         return $this->notificationMessage;
     }
 
@@ -186,24 +187,18 @@ class AntiBruteForceService
      */
     public function setTitleForBlocked(Employee $user): string
     {
-        $this->notificationTitle = sprintf('Account is blocked. Username: "%s" (%d)', $user->username, $user->id);
+        $this->notificationTitle = sprintf('Blocked account. User: "%s"', $user->username);
         return $this->notificationTitle;
     }
 
     /**
      * @param Employee $user
-     * @param bool $info
      * @return string
      */
-    public function setMessageForBlocked(Employee $user, bool $info = true): string
+    public function setMessageForBlocked(Employee $user): string
     {
-        $this->notificationMessage = 'Account is blocked. Username: "' . $user->username . '" (' . $user->id . ')';
-        if ($info) {
-            $this->notificationMessage .= "\n\nLast failed attempts: \n\n";
-            foreach (UserFailedLogin::getLastAttempts($user->id) as $value) {
-                $this->notificationMessage .= '- DateTime: ' . $value->ufl_created_dt .', IP: ' . $value->ufl_ip . ', UserAgent: ' . $value->ufl_ua . "\n";
-            }
-        }
+        $this->notificationMessage = "The system has blocked user account. Reason: login attempts limit reached.  \n\n";
+        $this->notificationMessage .= 'Username: "' . $user->username . '" (' . $user->id . ')';
         return $this->notificationMessage;
     }
 }
