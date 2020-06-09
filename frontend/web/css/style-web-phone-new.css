@@ -1,4 +1,19 @@
 @charset "UTF-8";
+.wg-history-load {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.5);
+  z-index: 10;
+  font-size: 4rem; }
+
 .phone-widget {
   max-width: 100%;
   height: 100vh;
@@ -29,6 +44,28 @@
     .phone-widget button:hover, .phone-widget button:focus, .phone-widget button:active {
       outline: none;
       box-shadow: none; }
+  .phone-widget .submit-selected-contacts {
+    display: none; }
+    .phone-widget .submit-selected-contacts button {
+      background-color: #4494E3;
+      color: #fff;
+      text-align: center;
+      padding: 16px 14px;
+      box-shadow: 0px -4px 4px rgba(0, 0, 0, 0.15);
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      margin: 0;
+      border: 0 none; }
+    .phone-widget .submit-selected-contacts span {
+      font-size: 16px;
+      display: inline-block;
+      line-height: 22px; }
+    .phone-widget .submit-selected-contacts .fa {
+      margin-right: 4px;
+      line-height: 22px;
+      display: inline-block; }
   .phone-widget .call-pane-label {
     font-style: normal;
     font-weight: 600;
@@ -334,7 +371,7 @@
     font-size: 11px;
     line-height: 18px;
     color: #668baf;
-    padding: 4px 10px;
+    padding: 4px 16px;
     display: inline-block;
     width: 100%;
     background-color: #f3f3f3; }
@@ -371,7 +408,7 @@
       .phone-widget .contact-info-card .contact-full-info > li {
         border-bottom: 1px solid #dedede;
         margin-bottom: 0;
-        padding: 10px 10px;
+        padding: 10px 10px 10px 50px;
         align-items: center; }
         .phone-widget .contact-info-card .contact-full-info > li:last-child {
           border-bottom: 0 none; }
@@ -386,6 +423,8 @@
         transition: 0.15s; }
         .phone-widget .contact-info-card .contact-full-info .actions-list li:hover {
           background-color: #e9e9e9; }
+    .phone-widget .contact-info-card .select-contact {
+      display: none; }
     .phone-widget .contact-info-card .collapsible-arrow {
       position: absolute;
       right: 0;
@@ -520,24 +559,27 @@
     .phone-widget .contact-full-info select {
       appearance: initial; }
     .phone-widget .contact-full-info > li {
-      margin-bottom: 16px;
+      margin-bottom: 0;
       display: flex;
-      align-items: flex-end; }
+      align-items: flex-end;
+      padding: 8px 16px;
+      border-bottom: 1px solid #F3F3F3; }
     .phone-widget .contact-full-info .actions-list {
       display: flex;
       list-style-type: none;
-      margin: 0 0 -3px;
+      margin: 0;
       padding: 0;
       width: 25%;
       justify-content: flex-end; }
       .phone-widget .contact-full-info .actions-list__option {
-        width: 28px;
-        height: 28px;
+        min-width: 36px;
+        width: 36px;
+        height: 36px;
         display: flex;
         align-items: center;
         justify-content: center;
         background-color: #f3f3f3;
-        border-radius: 50%;
+        border-radius: 4px;
         margin-left: 10px;
         cursor: pointer; }
         .phone-widget .contact-full-info .actions-list__option i {
@@ -546,6 +588,8 @@
           margin: 0; }
         .phone-widget .contact-full-info .actions-list__option--phone i {
           color: #399e65; }
+        .phone-widget .contact-full-info .actions-list__option--if-selectable {
+          display: none; }
     .phone-widget .contact-full-info .form-control:disabled {
       cursor: unset;
       background-color: #fff; }
@@ -570,10 +614,10 @@
       appearance: button; }
     .phone-widget .contact-full-info label {
       font-weight: 600;
-      font-size: 11px;
-      line-height: 18px;
-      color: #668baf;
-      text-transform: uppercase;
+      font-size: 12px;
+      line-height: 14px;
+      color: #668BAF;
+      text-transform: capitalize;
       margin: 0; }
     .phone-widget .contact-full-info .form-group {
       margin-bottom: 0px;
@@ -586,8 +630,31 @@
       font-size: 14px;
       line-height: 18px;
       color: #363c45;
-      height: 20px;
+      height: 18px;
       border-bottom: 1px solid transparent; }
+  .phone-widget .contacts-list--selection {
+    padding-bottom: 52px; }
+    .phone-widget .contacts-list--selection .select-contact {
+      display: block; }
+    .phone-widget .contacts-list--selection .contact-options-list {
+      display: none; }
+    .phone-widget .contacts-list--selection .select-contact {
+      position: absolute;
+      right: 8px; }
+    .phone-widget .contacts-list--selection .contact-info-card .contact-full-info__email {
+      display: none; }
+    .phone-widget .contacts-list--selection .contact-info-card .contact-full-info .actions-list__option {
+      display: none;
+      cursor: auto; }
+      .phone-widget .contacts-list--selection .contact-info-card .contact-full-info .actions-list__option--if-selectable {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        right: -1px;
+        cursor: auto; }
+        .phone-widget .contacts-list--selection .contact-info-card .contact-full-info .actions-list__option--if-selectable:hover {
+          background-color: transparent; }
   @media (min-width: 768px) {
     .phone-widget .contact-modal-info {
       height: 534px; } }
@@ -602,7 +669,7 @@
     font-size: 11px;
     line-height: 18px; }
   .phone-widget .contact-modal-info__body {
-    padding: 0 16px; }
+    padding: 0; }
   .phone-widget .contact-modal-info__actions {
     width: 100%; }
     .phone-widget .contact-modal-info__actions .contact-options-list {
@@ -613,13 +680,14 @@
     font-weight: 500;
     font-size: 20px;
     line-height: 24px;
-    color: #363c45; }
+    color: #fff; }
   .phone-widget .contact-modal-info__user {
     display: flex;
     align-items: center;
     flex-direction: column;
     padding: 26px 32px 0;
-    margin-bottom: 20px; }
+    margin-bottom: 0;
+    background: linear-gradient(180deg, #446586 0%, #364B61 100%); }
   .phone-widget .modal-messaging__contact-info {
     background: #66798b;
     text-align: center;
@@ -1279,7 +1347,9 @@
     .phone-widget .call-pane-calling .call-pane__call-btns {
       margin-bottom: 42px; }
     .phone-widget .call-pane-calling .sound-indication {
-      margin-bottom: 38px; }
+      margin-bottom: 38px;
+      display: flex;
+      justify-content: space-between; }
     .phone-widget .call-pane-calling .sound-controls {
       position: relative;
       height: 4px;
@@ -1308,7 +1378,8 @@
     .phone-widget .call-pane-calling .sound-control-wrap {
       display: flex;
       align-items: center;
-      justify-content: flex-start; }
+      justify-content: flex-start;
+      flex-basis: calc(50% - 8px); }
       .phone-widget .call-pane-calling .sound-control-wrap i {
         font-size: 18px;
         color: rgba(255, 255, 255, 0.8); }
@@ -1364,6 +1435,20 @@
       .phone-widget .in-call-controls__action .fa {
         position: absolute;
         left: 12px; }
+  .phone-widget .selection-amount {
+    display: none;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 16px;
+    color: #fff;
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%); }
+    .phone-widget .selection-amount.is-shown {
+      display: block; }
+    .phone-widget .selection-amount i {
+      font-style: normal; }
   .phone-widget .contacts__search-wrap {
     padding: 0;
     position: relative; }
@@ -1373,16 +1458,18 @@
     transform: translateY(-50%);
     left: 8px; }
     .phone-widget .contacts__icon i {
-      color: #9b9da8;
+      color: rgba(255, 255, 255, 0.8);
       font-size: 16px; }
   .phone-widget .contacts__search-input {
     border: 0 none;
     width: 100%;
-    height: 46px;
-    padding: 0 10px 0 36px;
-    font-size: 14px; }
+    height: 50px;
+    padding: 0 60px 0 36px;
+    font-size: 14px;
+    background-color: #66798B;
+    color: rgba(255, 255, 255, 0.8); }
     .phone-widget .contacts__search-input::placeholder {
-      color: #9b9da8; }
+      color: rgba(255, 255, 255, 0.8); }
   .phone-widget .simplebar-scrollbar::before {
     background-color: #2a3f54;
     width: 4px; }
@@ -1608,6 +1695,53 @@
       font-size: 16px;
       line-height: 18px;
       color: rgba(255, 255, 255, 0.6); }
+  .phone-widget .checkbox {
+    height: 32px;
+    width: 32px;
+    position: relative;
+    transform: translateX(25%); }
+    .phone-widget .checkbox label {
+      margin: 0;
+      cursor: pointer; }
+      .phone-widget .checkbox label:not([data-area-label]) {
+        display: block;
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        border-radius: 3px;
+        background-color: #FBFBFB;
+        border: 1px solid #CECECE;
+        right: 50%;
+        top: 50%;
+        transform: translate(50%, -50%); }
+      .phone-widget .checkbox label:after {
+        content: '';
+        width: 6px;
+        height: 10px;
+        border-width: 0 2px 2px 0;
+        border-style: solid;
+        border-color: #4494E3;
+        position: absolute;
+        left: 50%;
+        top: 7px;
+        transform: translate(-50%, -50%) rotate(45deg);
+        opacity: 0;
+        transition: opacity, .1s; }
+      .phone-widget .checkbox label[data-area-label] {
+        display: block;
+        position: absolute;
+        width: 100%;
+        height: 100%; }
+    .phone-widget .checkbox input {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      z-index: -1; }
+      .phone-widget .checkbox input:checked + label:after {
+        opacity: 1; }
 
 .phone-widget-icon {
   cursor: pointer;

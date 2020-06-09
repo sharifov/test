@@ -1,3 +1,21 @@
+@charset "UTF-8";
+
+.wg-history-load {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	position: absolute;
+	top: 0;
+	right: 0;
+	left: 0;
+	bottom: 0;
+	height: 100%;
+	width: 100%;
+	background-color: rgba(255, 255, 255, 0.5);
+	z-index: 10;
+	font-size: 4rem;
+}
+
 .phone-widget {
 	$root: &;
 	$icon-size: 64px;
@@ -39,6 +57,34 @@
 		&:active {
 			outline: none;
 			box-shadow: none;
+		}
+	}
+
+	.submit-selected-contacts {
+		display: none;
+		button {
+			background-color: $widget-accent;
+			color: $white;
+			text-align: center;
+			padding: $sp2 14px;
+			box-shadow: 0px -4px 4px rgba(0, 0, 0, 0.15);
+			position: absolute;
+			bottom: 0;
+			left: 0;
+			width: 100%;
+			margin: 0;
+			border: 0 none;
+		}
+		span {
+			font-size: $sp2;
+			display: inline-block;
+			line-height: 22px;
+		}
+
+		.fa {
+			margin-right: $sp05;
+			line-height: 22px;
+			display: inline-block;
 		}
 	}
 
@@ -465,6 +511,7 @@
 			z-index: 4;
 			transition: opacity 0.1s;
 		}
+
 	}
 
 	&__list-item {
@@ -485,7 +532,7 @@
 		font-size: 11px;
 		line-height: 18px;
 		color: #668baf;
-		padding: 4px 10px;
+		padding: $sp05 $sp2;
 		display: inline-block;
 		width: 100%;
 		background-color: $section-bg;
@@ -540,7 +587,7 @@
 				// background-color: ;
 				border-bottom: 1px solid #dedede;
 				margin-bottom: 0;
-				padding: 10px 10px;
+				padding: 10px 10px 10px 50px;
 				align-items: center;
 
 				&:last-child {
@@ -567,6 +614,9 @@
 					}
 				}
 			}
+		}
+		.select-contact {
+			display: none;
 		}
 
 		.collapsible-arrow {
@@ -765,22 +815,25 @@
 		}
 
 		> li {
-			margin-bottom: $sp2;
+			margin-bottom: 0;
 			display: flex;
 			align-items: flex-end;
+			padding: $sp $sp2;
+			border-bottom: 1px solid $widget-neutral-light;
 		}
 
 		.actions-list {
 			display: flex;
 			list-style-type: none;
-			margin: 0 0 -3px;
+			margin: 0;
 			padding: 0;
 
 			width: 25%;
 			justify-content: flex-end;
 
 			&__option {
-				$size: 28px;
+				$size: 36px;
+				min-width: $size;
 				width: $size;
 				height: $size;
 				display: flex;
@@ -788,7 +841,7 @@
 				justify-content: center;
 
 				background-color: $section-bg;
-				border-radius: 50%;
+				border-radius: $sp05;
 
 				margin-left: 10px;
 				cursor: pointer;
@@ -805,6 +858,10 @@
 					i {
 						color: $green;
 					}
+				}
+
+				&--if-selectable {
+					display: none;
 				}
 			}
 		}
@@ -858,10 +915,10 @@
 
 		label {
 			font-weight: 600;
-			font-size: 11px;
-			line-height: 18px;
-			color: #668baf;
-			text-transform: uppercase;
+			font-size: 12px;
+			line-height: 14px;
+			color: $widget-steel;
+			text-transform: capitalize;
 			margin: 0;
 		}
 
@@ -878,11 +935,64 @@
 			font-size: 14px;
 			line-height: 18px;
 			color: $color-theme-text-dark;
-			height: 20px;
+			height: 18px;
 
 			border-bottom: 1px solid transparent;
 		}
 	}
+
+	// .contacts-list--selection {
+
+	
+	// }
+.contacts-list--selection {
+	padding-bottom: 52px;
+	.select-contact {
+		display: block;
+	}
+
+	.contact-options-list {
+		display: none;
+	}
+
+	.select-contact {
+		position: absolute;
+		right: $sp;
+	}
+
+	.contact-info-card  {
+		.contact-full-info {
+
+			&__email {
+				display: none;
+			}
+			.actions-list {
+				&__option {
+					display: none;
+					cursor: auto;
+					// &:hover {
+					// 	background-color: transparent;
+					// }
+		
+					&--if-selectable {
+						display: flex;
+						justify-content: center;
+						align-items: center;
+						position: relative;
+						right: -1px;
+						cursor: auto;
+						&:hover {
+							background-color: transparent;
+						}
+					}
+				}
+			}
+		}
+	}
+
+
+}
+	
 
 	.contact-modal-info {
 		@media (min-width: 768px) {
@@ -904,7 +1014,7 @@
 		}
 
 		&__body {
-			padding: 0 $sp2;
+			padding: 0;
 		}
 
 		&__actions {
@@ -920,14 +1030,16 @@
 			font-weight: 500;
 			font-size: 20px;
 			line-height: $sp3;
-			color: $color-theme-text-dark;
+			color: $white;
 		}
 		&__user {
 			display: flex;
 			align-items: center;
 			flex-direction: column;
 			padding: 26px $sp4 0;
-			margin-bottom: 20px;
+			margin-bottom: 0;
+
+			background: $screen-gradient;
 		}
 	}
 
@@ -1971,6 +2083,8 @@
 
 		.sound-indication {
 			margin-bottom: 38px;
+			display: flex;
+			justify-content: space-between;
 		}
 
 		.sound-controls {
@@ -2013,7 +2127,7 @@
 			display: flex;
 			align-items: center;
 			justify-content: flex-start;
-
+			flex-basis: calc(50% - #{$sp});
 			i {
 				font-size: 18px;
 				color: rgba($white, 0.8);
@@ -2106,6 +2220,27 @@
 		}
 	}
 
+	.selection-amount {
+		display: none;
+		font-weight: 600;
+		font-size: 14px;
+		line-height: 16px;
+		color: $white;
+
+
+		position: absolute;
+		top: 50%;
+		right: 10px;
+		transform: translateY(-50%);
+
+		&.is-shown {
+			display: block;
+		}
+		i {
+			font-style: normal;
+		}
+	}
+
 	.contacts {
 		&__search-wrap {
 			padding: 0;
@@ -2118,7 +2253,7 @@
 			transform: translateY(-50%);
 			left: $sp;
 			i {
-				color: #9b9da8;
+				color: rgba($white, .8);
 				font-size: $sp2;
 			}
 		}
@@ -2126,12 +2261,15 @@
 		&__search-input {
 			border: 0 none;
 			width: 100%;
-			height: 46px;
-			padding: 0 10px 0 36px;
+			height: 50px;
+			padding: 0 60px 0 36px;
 			font-size: 14px;
 
+			background-color: $widget-secondary;
+			color: rgba($white, .8);
+
 			&::placeholder {
-				color: #9b9da8;
+				color: rgba($white, .8);
 			}
 		}
 	}
@@ -2442,6 +2580,75 @@
 				color: rgba($white, 0.6);
 			}
 		}
+	}
+
+	.checkbox {
+		$size: 32px;
+		height: $size;
+		width: $size;
+		position: relative;
+		transform: translateX(25%);
+		label {
+			margin: 0;
+			&:not([data-area-label]) {
+				$size: 18px;
+				display: block;
+				position: absolute;
+				width: $size;
+				height: $size;
+				border-radius: 3px;
+				background-color: #FBFBFB;
+				border: 1px solid #CECECE;
+				right: 50%;
+				top: 50%;
+				transform: translate(50%, -50%);
+			}
+
+
+			cursor: pointer;
+
+			&:after {
+				content: '';
+				width: 6px;
+				height: 10px;
+				border-width: 0 2px 2px 0;
+				border-style: solid;
+				border-color: $widget-accent;
+				position: absolute;
+				left: 50%;
+				top: 7px;
+				transform: translate(-50%, -50%) rotate(45deg);
+				opacity: 0;
+				transition: opacity, .1s;
+			}
+
+			&[data-area-label] {
+				display: block;
+				position: absolute;
+				width: 100%;
+				height: 100%;
+			
+			}
+		}
+		input {
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			left: 0;
+			top: 0;
+			opacity: 0;
+			z-index: -1;
+
+			&:checked {
+				+ label {
+					&:after {
+						opacity: 1;
+					}
+				}
+			}
+		}
+
+	
 	}
 }
 
