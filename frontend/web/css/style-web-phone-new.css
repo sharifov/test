@@ -275,7 +275,8 @@
         border-radius: 50%;
         position: absolute;
         color: #fff;
-        font-weight: 500; }
+        font-weight: 500;
+        text-align: center; }
   .phone-widget__title {
     font-size: 18px;
     line-height: 18px;
