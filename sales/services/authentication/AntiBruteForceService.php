@@ -119,7 +119,7 @@ class AntiBruteForceService
      */
     private function setNotificationTitle(Employee $user, ?string $title = null): string
     {
-        $title = $title ?? 'Attention. Failed authentication attempt by user : %s, id : %d ';
+        $title = $title ?: 'Attention. Failed authentication attempt by user : %s, id : %d ';
         $this->notificationTitle = sprintf($title, $user->username, $user->getId());
         return $this->notificationTitle;
     }
@@ -132,8 +132,8 @@ class AntiBruteForceService
      */
     private function setNotificationMessage(Employee $user, ?int $limit = null, ?string $body = null): string
     {
-        $limit = $limit ?? $this->userNotifyFailedLoginAttempts;
-        $body = $body ?? 'The limit: %d of failed authentication attempts has been reached by user: %s, id: %s ';
+        $limit = $limit ?: $this->userNotifyFailedLoginAttempts;
+        $body = $body ?: 'The limit: %d of failed authentication attempts has been reached by user: %s, id: %s ';
         $this->notificationMessage = sprintf($body, $limit, $user->username, $user->getId());
         return $this->notificationMessage;
     }
@@ -186,7 +186,7 @@ class AntiBruteForceService
      */
     public function setTitleForBlocked(Employee $user): string
     {
-        $this->notificationTitle = sprintf('Account is blocked. User : %s, id : %d ', $user->username, $user->id);
+        $this->notificationTitle = sprintf('Account is blocked. Username: "%s" (%d)', $user->username, $user->id);
         return $this->notificationTitle;
     }
 
@@ -197,14 +197,11 @@ class AntiBruteForceService
      */
     public function setMessageForBlocked(Employee $user, bool $info = true): string
     {
-        $this->notificationMessage = 'Account is blocked. User : ' . $user->username . ' id : ' . $user->id . " \n\n";
-        $this->notificationMessage .= "Last failed Attempts: \n\n";
-
+        $this->notificationMessage = 'Account is blocked. Username: "' . $user->username . '" (' . $user->id . ')';
         if ($info) {
+            $this->notificationMessage .= "\n\nLast failed attempts: \n\n";
             foreach (UserFailedLogin::getLastAttempts($user->id) as $value) {
-                /** @var UserFailedLogin $value */
-                $this->notificationMessage .= 'Date : (' . $value->ufl_created_dt .
-                ') IP : (' . $value->ufl_ip . ') User Agent : (' . $value->ufl_ua . ")\n";
+                $this->notificationMessage .= '- DateTime: ' . $value->ufl_created_dt .', IP: ' . $value->ufl_ip . ', UserAgent: ' . $value->ufl_ua . "\n";
             }
         }
         return $this->notificationMessage;
