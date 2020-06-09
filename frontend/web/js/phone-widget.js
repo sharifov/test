@@ -761,7 +761,7 @@ function handleWidgetIcon() {
 
     return {
         init: function() {
-            createInitialIcon('default', 'offline') 
+            createInitialIcon('default', false) 
         },
         update: function(props) {
             updateIcon(props)

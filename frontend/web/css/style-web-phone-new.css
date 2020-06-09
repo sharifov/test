@@ -303,7 +303,7 @@
     position: relative; }
     @media (min-width: 768px) {
       .phone-widget__body {
-        min-height: 552px; } }
+        min-height: 534px; } }
   .phone-widget__tab {
     position: absolute;
     opacity: 0;
@@ -317,7 +317,7 @@
       padding: 0; }
     @media (min-width: 768px) {
       .phone-widget__tab {
-        height: 552px; } }
+        height: 534px; } }
     .phone-widget__tab.is_active {
       opacity: 1;
       z-index: 4;
@@ -590,7 +590,7 @@
       border-bottom: 1px solid transparent; }
   @media (min-width: 768px) {
     .phone-widget .contact-modal-info {
-      height: 552px; } }
+      height: 534px; } }
   .phone-widget .contact-modal-info .agent-text-avatar {
     width: 50px;
     height: 50px;
@@ -642,7 +642,7 @@
     height: calc(100vh - 80px); }
     @media (min-width: 768px) {
       .phone-widget .email-modal {
-        height: 552px;
+        height: 534px;
         overflow: hidden !important; } }
     .phone-widget .email-modal .simplebar-content-wrapper {
       overflow-y: scroll !important; }
@@ -724,7 +724,7 @@
     height: calc(100vh - 80px); }
     @media (min-width: 768px) {
       .phone-widget .messages-modal {
-        height: 552px;
+        height: 534px;
         overflow: hidden !important; } }
     .phone-widget .messages-modal__msg-list {
       list-style-type: none;

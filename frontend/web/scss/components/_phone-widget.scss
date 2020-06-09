@@ -1,7 +1,7 @@
 .phone-widget {
 	$root: &;
 	$icon-size: 64px;
-	$body-height: 552px;
+	$body-height: 534px;
 	max-width: 100%;
 	height: 100vh;
 	left: 0;
@@ -849,9 +849,7 @@
 			> li {
 				border-bottom: 1px solid rgba(#3877b5, 0.5);
 			}
-			.form-control {
-				// border-bottom: 1px solid rgba(#3877b5, 0.5);
-			}
+		
 
 			select {
 				appearance: button;
