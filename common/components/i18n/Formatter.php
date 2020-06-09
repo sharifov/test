@@ -648,7 +648,6 @@ class Formatter extends \yii\i18n\Formatter
         return CouponType::asFormat($value);
     }
 
-
     public function asConferenceParticipantType($value): string
     {
         if ($value === null) {
@@ -659,10 +658,10 @@ class Formatter extends \yii\i18n\Formatter
     }
 
     /**
-     * @param int $userId
+     * @param int|null $userId
      * @return string
      */
-    public function asUserNameLinkToUpdate(int $userId): string
+    public function asUserNameLinkToUpdate(?int $userId): string
     {
         if ($user = Employee::find()->select(['username'])->where(['id' => $userId])->cache(3600)->one()) {
             $result = Html::a(Html::tag('i', '', ['class' => 'fa fa-user']) . ' ' .
@@ -670,7 +669,7 @@ class Formatter extends \yii\i18n\Formatter
                 ['employee/update', 'id' => $userId],
                 ['target' => '_blank']);
         } else {
-            $result = 'not found';
+            $result = $this->nullDisplay;
         }
         return $result;
     }
