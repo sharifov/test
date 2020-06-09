@@ -27,12 +27,16 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
     public const STATUS_LEAVE   = 2;
     public const STATUS_HOLD   = 3;
     public const STATUS_UNHOLD   = 4;
+    public const STATUS_MUTE   = 5;
+    public const STATUS_UNMUTE   = 6;
 
     public const STATUS_LIST = [
         self::STATUS_JOIN   => 'Join',
         self::STATUS_LEAVE   => 'Leave',
         self::STATUS_HOLD   => 'Hold',
         self::STATUS_UNHOLD   => 'UnHold',
+        self::STATUS_MUTE   => 'Mute',
+        self::STATUS_UNMUTE   => 'Unmute',
     ];
 
     public const TYPE_AGENT = 1;
@@ -181,6 +185,26 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
     public function isLeave(): bool
     {
         return $this->cp_status_id === self::STATUS_LEAVE;
+    }
+
+    public function mute(): void
+    {
+        $this->cp_status_id = self::STATUS_MUTE;
+    }
+
+    public function isMute(): bool
+    {
+        return $this->cp_status_id === self::STATUS_MUTE;
+    }
+
+    public function unmute(): void
+    {
+        $this->cp_status_id = self::STATUS_UNMUTE;
+    }
+
+    public function isUnmute(): bool
+    {
+        return $this->cp_status_id === self::STATUS_UNMUTE;
     }
 
     public function isAgent(): bool

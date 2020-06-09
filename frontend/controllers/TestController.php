@@ -254,9 +254,9 @@ class TestController extends FController
 
     public function actionTestNew()
     {
-//        $userId = 295;
-//        $s = new DisconnectFromAllConferenceCalls();
-//        $s->disconnect($userId);
+        $userId = 295;
+        $s = new DisconnectFromAllConferenceCalls();
+        $s->disconnect($userId);
          die;
     }
 

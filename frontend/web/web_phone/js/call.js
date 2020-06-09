@@ -242,7 +242,13 @@ var PhoneWidgetCall = function () {
             $('.call-pane-calling .contact-info-card__name_text').html(obj.name);
             if ('isIn' in obj && obj.isIn) {
                 initIncomingCall(obj);
+                showCallingPanel();
+            } else if ('isIn' in obj && !obj.isIn) {
+                initIncomingCall(obj);
+            } else {
+                showCallingPanel();
             }
+            $('#cw-client-name').html(obj.name);
             $('#cw-client_name').html(obj.name);
             $('#cw-project_name').html(obj.projectName);
             $('#cw-source_name').html(obj.sourceName);

@@ -27,6 +27,8 @@ use sales\helpers\app\AppHelper;
 use sales\model\call\form\CallCustomParameters;
 use sales\model\callLog\services\CallLogTransferService;
 use sales\model\conference\useCase\recordingStatusCallBackEvent\ConferenceRecordingStatusCallbackForm;
+use sales\model\conference\useCase\statusCallBackEvent\ConferenceParticipantMute;
+use sales\model\conference\useCase\statusCallBackEvent\ConferenceParticipantUnmute;
 use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackForm;
 use sales\model\conference\useCase\statusCallBackEvent\ConferenceEnd;
 use sales\model\conference\useCase\statusCallBackEvent\ConferenceParticipantHold;
@@ -1129,10 +1131,6 @@ class CommunicationController extends ApiBaseController
 
             if ($custom_parameters->source_type_id) {
                 $call->c_source_type_id = $custom_parameters->source_type_id;
-            }
-
-            if ($custom_parameters->project_id) {
-                $call->c_project_id = $custom_parameters->project_id;
             }
 
             if ($custom_parameters->project_id) {
@@ -2428,6 +2426,14 @@ class CommunicationController extends ApiBaseController
         } elseif ($form->StatusCallbackEvent === Conference::EVENT_PARTICIPANT_LEAVE) {
 
             (new ConferenceParticipantLeave($conference))($form);
+
+        } elseif ($form->StatusCallbackEvent === Conference::EVENT_PARTICIPANT_MUTE) {
+
+            (new ConferenceParticipantMute($conference))($form);
+
+        } elseif ($form->StatusCallbackEvent === Conference::EVENT_PARTICIPANT_UNMUTE) {
+
+            (new ConferenceParticipantUnmute($conference))($form);
 
         }
 

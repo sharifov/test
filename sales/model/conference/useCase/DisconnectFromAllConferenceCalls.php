@@ -114,12 +114,9 @@ class DisconnectFromAllConferenceCalls
             ->innerJoinWith(['conferenceParticipants' => static function(ConferenceParticipantQuery $query) {
                 $query->andOnCondition([
                     'cp_type_id' => ConferenceParticipant::TYPE_AGENT,
-                    'cp_status_id' => [
-                        ConferenceParticipant::STATUS_JOIN,
-                        ConferenceParticipant::STATUS_UNHOLD,
-                        ConferenceParticipant::STATUS_HOLD,
-                    ],
                 ]);
+                $query->andOnCondition(['IS NOT', 'cp_status_id', null]);
+                $query->andOnCondition(['<>', 'cp_status_id', ConferenceParticipant::STATUS_LEAVE]);
             }], false)
             ->innerJoinWith(['conferences' => static function(ConferenceQuery $query) {
                 $query->andOnCondition([
