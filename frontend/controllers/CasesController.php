@@ -158,13 +158,24 @@ class CasesController extends FController
         $user = Yii::$app->user->identity;
         $params = Yii::$app->request->queryParams;
 
+        $params['export_type'] = Yii::$app->request->post('export_type');
+
         $dataProvider = $searchModel->search($params, $user);
 
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-            'user' => $user
-        ]);
+		if ($params['export_type']) {
+
+			return $this->render('_search', [
+				'model' => $searchModel,
+				'dataProvider' => $dataProvider,
+			]);
+		} else {
+			return $this->render('index', [
+				'searchModel' => $searchModel,
+				'dataProvider' => $dataProvider,
+				'user' => $user,
+			]);
+		}
+
     }
 
     /**

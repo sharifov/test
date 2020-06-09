@@ -38,7 +38,9 @@ var PhoneWidgetCall = function () {
         $('.calling-from-info__identifier').html(selectedNumber.from.project);
         $('.calling-from-info__number').html(selectedNumber.from.value);
         //$('.call-pane-calling').find('.contact-info-card__name_text').html(selectedNumber.to.callToName);
-        $('#cw-client-name').html(selectedNumber.to.callToName);
+        $('#cw-client_name').html(selectedNumber.to.callToName);
+        //$('#cw-project_name').html('');
+        //$('#cw-source_name').html('');
         $('.call-pane-calling').find('.contact-info-card__call-type').html(selectedNumber.to.phone);
         $('.phone-widget-icon').addClass('is-pending');
         $('.call-pane__call-btns').addClass('is-pending');
@@ -229,7 +231,9 @@ var PhoneWidgetCall = function () {
             }
 
             showCallingPanel();
-            $('#cw-client-name').html(obj.name);
+            $('#cw-client_name').html(obj.name);
+            $('#cw-project_name').html(obj.projectName);
+            $('#cw-source_name').html(obj.sourceName);
         }else if(['Ringing', 'Queued'].includes(obj.status)) {
             openWidget();
             $('.call-pane-incoming.call-pane-initial .contact-info-card__label').html(obj.type_description);
@@ -239,7 +243,9 @@ var PhoneWidgetCall = function () {
             if ('isIn' in obj && obj.isIn) {
                 initIncomingCall(obj);
             }
-            $('#cw-client-name').html(obj.name);
+            $('#cw-client_name').html(obj.name);
+            $('#cw-project_name').html(obj.projectName);
+            $('#cw-source_name').html(obj.sourceName);
         }else if (obj.status === 'Completed') {
             cancelCall();
         }else {
@@ -262,7 +268,7 @@ var PhoneWidgetCall = function () {
         openCallTab();
         if (typeof obj === 'object' && 'phoneFrom' in obj) {
             $('#btn-accept-call').attr('data-from-internal', obj.fromInternal | false).attr('data-call-id', obj.cua_call_id);
-            showIncomingCallPanel(obj.phoneFrom, obj.name || '', obj.type_description);
+            showIncomingCallPanel(obj.phoneFrom, obj.name || '', obj.type_description, obj.projectName, obj.sourceName);
         } else if (obj.cua_status_id === 5) {
             cancelCall();
         }
@@ -281,14 +287,15 @@ var PhoneWidgetCall = function () {
         $('#tab-phone').addClass('is_active');
     }
 
-    function showIncomingCallPanel(phone, name, type_description)
+    function showIncomingCallPanel(phone, name, type_description, projectName, sourceName)
     {
         $('#tab-phone .call-pane-initial').removeClass('is_active');
         $('#tab-phone .call-pane-incoming').addClass('is_active');
         $('#btn-accept-call').find('i').removeClass('fa fa-spinner fa-spin').addClass('fas fa-check');
         //$('.call-pane-incoming .contact-info-card__label').html(type_description);
-        //$('.call-pane-incoming .contact-info-card__name_text').html(name);
-        $('#cw-client-name').html(name);
+        $('#cw-client_name').html(name);
+        $('#cw-project_name').html(projectName);
+        $('#cw-source_name').html(sourceName);
         $('.call-pane-incoming .contact-info-card__call-type').html(phone);
     }
 
