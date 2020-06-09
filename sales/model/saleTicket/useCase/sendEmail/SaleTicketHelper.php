@@ -38,8 +38,9 @@ class SaleTicketHelper
 	 */
 	public static function isRecallCommissionChanged(array $saleTickets, array $caseSaleData): bool
 	{
+		/** @var SaleTicket $saleTicket */
 		foreach ($saleTickets as $saleTicket) {
-			if ($saleTicket->st_recall_commission !== CaseSaleHelper::getRecallCommission($caseSaleData)) {
+			if ((float)$saleTicket->st_recall_commission !== CaseSaleHelper::getRecallCommission($caseSaleData)) {
 				return true;
 			}
 		}

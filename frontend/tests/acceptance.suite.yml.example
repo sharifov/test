@@ -3,7 +3,7 @@ actor: AcceptanceTester
 modules:
     enabled:
         - WebDriver:
-            url: http://localhost:8080
+            url: https://sales.zeit.test
             browser: firefox
         - Yii2:
             part: init
