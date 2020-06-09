@@ -675,26 +675,26 @@ JS;
         <?php if (Auth::user()->isAdmin() || Auth::user()->isSuperAdmin()) :?>
 
             <div class="user-failed-login">
-                <h4>User Failed Login</h4>
+                <h5>User Failed Login</h5>
 
-                <?php if ($model->isBlocked()) :?>
+                <?php /*if ($model->isBlocked()) :?>
 
-                        <?php /*echo Html::a('<i class="glyphicon glyphicon-remove-circle"></i> User Blocked',null,
+                        <?php echo Html::a('<i class="glyphicon glyphicon-remove-circle"></i> User Blocked',null,
                             [
                                 'class' => 'btn btn-warning btn-xs unblock-user',
                                 'title' => 'Click to unblock user',
                                 'data-user_id' => $model->id,
                                 'data-pjax' => '0',
                             ]
-                        )*/?>
+                        )?>
 
-                <?php endif ?>
+                <?php endif*/ ?>
 
                 <?php \yii\widgets\Pjax::begin(['id' => 'pjax-grid-user-failed']); ?>
 
                 <?= \yii\grid\GridView::widget([
                     'dataProvider' => $lastFailedLoginAttempts,
-                    'rowOptions' => function (UserFailedLogin $UserFailedLogin, $index, $widget, $grid) {
+                    'rowOptions' => static function (UserFailedLogin $UserFailedLogin, $index, $widget, $grid) {
                         if ($UserFailedLogin->ufl_created_dt > $UserFailedLogin->limitDateTime) {
                             return ['class' => 'danger'];
                         }

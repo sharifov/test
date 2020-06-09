@@ -35,7 +35,7 @@ use yii\helpers\Url;
                     <div>
                         <?= $form->field($model, 'verifyCode')->widget(Captcha::class, [
                             'captchaAction' => Url::to('/site/captcha'),
-                            'options' => ['autocomplete' => 'off'],
+                            'options' => ['autocomplete' => 'off', 'value' => ''],
                             'template' => '<div class="row"><div class="col-lg-4">{image}</div><div class="col-lg-7">{input}</div></div>',
                         ]) ?>
                     </div>
