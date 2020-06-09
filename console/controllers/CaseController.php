@@ -131,44 +131,68 @@ class CaseController extends Controller
 			$caseSaleService = Yii::createObject(CasesSaleService::class);
 			$saleTicketService = Yii::createObject(SaleTicketService::class);
 
-			$n=0;
+			$n=1;
 			$total = count($result);
 			Console::startProgress(0, $total, 'Counting objects: ', false);
 
 			$boErrors = [];
 			$refreshSaleTicketError = [];
 
+			$boRequestTime = 0;
+			$serviceTime = 0;
+
 			$caseSaleRepository = Yii::createObject(CasesSaleRepository::class);
 
 			foreach ($result as $item) {
 				try {
+					$bo_time_start = microtime(true);
 					$saleData = $caseSaleService->detailRequestToBackOffice((int)$item['css_sale_id'], 1, 120, 1);
+					$bo_time_end = microtime(true);
+					$boRequestTime += (float)number_format(round($bo_time_end - $bo_time_start, 2), 2);
 
+					$service_time_start = microtime(true);
 					$caseSale = $caseSaleRepository->getSaleByPrimaryKeys((int)$item['cs_id'], (int)$item['css_sale_id']);
 	//				$caseSale = $caseSaleService->refreshOriginalSaleData($caseSale, $case, $saleData);
 					if (!$saleTicketService->refreshSaleTicketBySaleData((int)$item['cs_id'], $caseSale, $saleData)) {
 						$refreshSaleTicketError[] = "Sale {$item['css_sale_id']} doesnt have refund rules;";
 					}
+					$service_time_end = microtime(true);
+					$serviceTime += (float)number_format(round($service_time_end - $service_time_start, 2), 2);
+
 				} catch (BadRequestHttpException $e) {
 					$boErrors[] = "Loop: {$n}; BO error occurred: {$e->getMessage()}; caseId: {$item['cs_id']}; saleId: {$item['css_sale_id']}";
+					$bo_time_end = microtime(true);
+					$boRequestTime += (float)number_format(round($bo_time_end - $bo_time_start, 2), 2);
 				} catch (\Throwable $e) {
 					$refreshSaleTicketError[] = "Sale {$item['css_sale_id']} doesnt have refund rules;";
+					$bo_time_end = microtime(true);
+					$boRequestTime += (float)number_format(round($bo_time_end - $bo_time_start, 2), 2);
 				}
 
-				$n++;
 
-				if (($n % $showErrorsOnLoop) == 0 && !empty($boErrors)) {
+				if (($n % $showErrorsOnLoop) === 0) {
+
+					if (!empty($boErrors)) {
+						Console::moveCursorNextLine(2);
+						Console::stdout('Bo errors occurred: ' . PHP_EOL . implode('; ' . PHP_EOL, $boErrors) . PHP_EOL);
+						$boErrors = [];
+					}
+
+					if (!empty($refreshSaleTicketError)) {
+						Console::moveCursorNextLine(2);
+						Console::stdout('SaleTicketService error occurred: ' . PHP_EOL . implode('; ' . PHP_EOL, $refreshSaleTicketError) . PHP_EOL);
+						$refreshSaleTicketError = [];
+					}
+
 					Console::moveCursorNextLine(2);
-					Console::stdout('Bo errors occurred: ' . PHP_EOL . implode('; ' . PHP_EOL, $boErrors) . PHP_EOL);
-					$boErrors = [];
+					print_r($this->ansiFormat('BO request time average: ' . ($boRequestTime/$n) . PHP_EOL, Console::FG_YELLOW));
+					print_r($this->ansiFormat('Service work time average: ' . ($serviceTime/$n) . PHP_EOL, Console::FG_YELLOW));
+					print_r($this->ansiFormat('-------------------------------------------' . PHP_EOL, Console::FG_YELLOW));
 				}
-				if (($n % $showErrorsOnLoop) == 0 && !empty($refreshSaleTicketError)) {
-					Console::moveCursorNextLine(2);
-					Console::stdout('SaleTicketService error occurred: ' . PHP_EOL . implode('; ' . PHP_EOL, $refreshSaleTicketError) . PHP_EOL);
-					$refreshSaleTicketError = [];
-				}
+
 				Console::clearLineBeforeCursor();
 				Console::updateProgress($n, $total);
+				$n++;
 			}
 
 			Console::endProgress("done." . PHP_EOL);
