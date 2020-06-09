@@ -110,8 +110,6 @@ class CaseController extends Controller
 
 		try {
 
-			$transaction = Yii::$app->db->beginTransaction();
-
 			$query = new Query();
 			$query->addSelect(['cs_id', 'css_sale_id'])->from('cases')->where(['cs_status' => CasesStatus::STATUS_PROCESSING]);
 
@@ -205,9 +203,7 @@ class CaseController extends Controller
 			}
 
 
-			$transaction->commit();
 		} catch (\Throwable $e) {
-			$transaction->rollBack();
 			printf("\nError occurred: %s ", $this->ansiFormat($e->getMessage() . '; File: ' . $e->getFile() . '; On Line: ' . $e->getLine(), Console::FG_RED));
 		}
 
