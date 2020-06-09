@@ -26,7 +26,7 @@ class GdsDumpParserTest extends \Codeception\Test\Unit
         expect('Need True', true)->true();
     }
 
-    public function testWorldspanParser()
+    public function testWorldspanParser(): void
     {
 
         //expect('error message should be set', $model->errors)->hasKey('password');
