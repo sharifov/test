@@ -535,7 +535,11 @@ $(document).ready(function() {
     });
 
     $('.call-pane__info').on('click', function() {
-        $('.additional-info').slideDown(150);
+        $('.contact-info').slideDown(150);
+    })
+
+    $('.js-toggle-dial').on('click', function() {
+        $('.dial-popup').slideDown(150)
     })
 
 
