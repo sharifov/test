@@ -6,6 +6,7 @@ use sales\auth\Auth;
 use sales\entities\cases\CaseCategory;
 use sales\entities\cases\CasesQSearch;
 use common\components\grid\cases\NeedActionColumn;
+use sales\model\saleTicket\entity\SaleTicket;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use dosamigos\datepicker\DatePicker;
@@ -85,6 +86,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'options' => ['style' => 'width: 180px']
             ],
+			[
+				'attribute' => 'css_penalty_type',
+				'value' => static function (CasesQSearch $model) {
+					return $model->css_penalty_type ? SaleTicket::getPenaltyTypeName($model->css_penalty_type) : '-';
+				},
+				'filter' => SaleTicket::getAirlinePenaltyList()
+			],
 			[
 				'attribute' => 'cs_dep_id',
 				'value' => static function (CasesQSearch $model) {
