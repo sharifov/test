@@ -154,7 +154,7 @@ use yii\widgets\ActiveForm;
 				'inline' => false,
 				'clientOptions' => [
 					'autoclose' => true,
-					'format' => 'dd-M-yyyy',
+					'format' => 'yyyy-mm-dd',
 				]
 			])->label('Send Email Date') ?>
 

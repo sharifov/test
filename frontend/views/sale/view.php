@@ -165,7 +165,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
 												'inputType' => Editable::INPUT_HTML5,
 												'formOptions' => [ 'action' => [Url::to(['/sale-ticket/ajax-sale-ticket-edit-info/', 'st_id' => $ticket->st_id])] ],
 												'options' => [
-													'id' => 'sale-ticket-markup-'.$key
+													'id' => 'sale-ticket-recall-commission-'.$key
 												],
 												'pluginEvents' => [
 													'editableSuccess' => 'function (event, val, form, data) {

@@ -592,7 +592,13 @@ class Quote extends \yii\db\ActiveRecord
         }
         if (empty($dumpParser)) {
             $this->addError('reservation_dump', 'Incorrect reservation dump!');
-
+            \Yii::info(
+                \yii\helpers\VarDumper::dumpAsString([
+                    'gds' => $this->gds,
+                    'dump' => $this->reservation_dump,
+                ], 20),
+                'Quote:checkReservationDump:IncorrectReservationDump'
+            );
         }
     }
 

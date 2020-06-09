@@ -103,14 +103,12 @@ class CaseController extends Controller
 		printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 	}
 
-	public function actionRefreshCaseSales(int $caseId = null, int $saleId = null, int $limit = 1000, int $offset = 0)
+	public function actionRefreshCaseSales($caseId = null, $saleId = null, $limit = 1000, $offset = 0, $showErrorsOnLoop = 1000)
 	{
 		printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 		$time_start = microtime(true);
 
 		try {
-
-			$transaction = Yii::$app->db->beginTransaction();
 
 			$query = new Query();
 			$query->addSelect(['cs_id', 'css_sale_id'])->from('cases')->where(['cs_status' => CasesStatus::STATUS_PROCESSING]);
@@ -131,29 +129,68 @@ class CaseController extends Controller
 			$caseSaleService = Yii::createObject(CasesSaleService::class);
 			$saleTicketService = Yii::createObject(SaleTicketService::class);
 
-			$n=0;
+			$n=1;
 			$total = count($result);
 			Console::startProgress(0, $total, 'Counting objects: ', false);
 
 			$boErrors = [];
+			$refreshSaleTicketError = [];
+
+			$boRequestTime = 0;
+			$serviceTime = 0;
 
 			$caseSaleRepository = Yii::createObject(CasesSaleRepository::class);
 
 			foreach ($result as $item) {
 				try {
-					$saleData = $caseSaleService->detailRequestToBackOffice((int)$item['css_sale_id'], 1, 120, 1);
-				} catch (BadRequestHttpException $e) {
-					$n++;
-					$boErrors[] = "Loop: {$n}; BO error occurred: caseId: {$item['cs_id']}; saleId: {$item['css_sale_id']}";
-					Console::updateProgress($n, $total);
-					continue;
-				}
-				$caseSale = $caseSaleRepository->getSaleByPrimaryKeys((int)$item['cs_id'], (int)$item['css_sale_id']);
-//				$caseSale = $caseSaleService->refreshOriginalSaleData($caseSale, $case, $saleData);
-				$saleTicketService->refreshSaleTicketBySaleData((int)$item['cs_id'], $caseSale, $saleData);
+					$bo_time_start = microtime(true);
+					$saleData = $caseSaleService->detailRequestToBackOffice((int)$item['css_sale_id'], 0, 120, 1);
+					$bo_time_end = microtime(true);
+					$boRequestTime += (float)number_format(round($bo_time_end - $bo_time_start, 2), 2);
 
-				$n++;
+					$service_time_start = microtime(true);
+					$caseSale = $caseSaleRepository->getSaleByPrimaryKeys((int)$item['cs_id'], (int)$item['css_sale_id']);
+	//				$caseSale = $caseSaleService->refreshOriginalSaleData($caseSale, $case, $saleData);
+					if (!$saleTicketService->refreshSaleTicketBySaleData((int)$item['cs_id'], $caseSale, $saleData)) {
+						$refreshSaleTicketError[] = "Sale {$item['css_sale_id']} doesnt have refund rules;";
+					}
+					$service_time_end = microtime(true);
+					$serviceTime += (float)number_format(round($service_time_end - $service_time_start, 2), 2);
+
+				} catch (BadRequestHttpException $e) {
+					$boErrors[] = "Loop: {$n}; BO error occurred: {$e->getMessage()}; caseId: {$item['cs_id']}; saleId: {$item['css_sale_id']}";
+					$bo_time_end = microtime(true);
+					$boRequestTime += (float)number_format(round($bo_time_end - $bo_time_start, 2), 2);
+				} catch (\Throwable $e) {
+					$refreshSaleTicketError[] = "Sale {$item['css_sale_id']} doesnt have refund rules;";
+					$bo_time_end = microtime(true);
+					$boRequestTime += (float)number_format(round($bo_time_end - $bo_time_start, 2), 2);
+				}
+
+
+				if (($n % $showErrorsOnLoop) === 0) {
+
+					if (!empty($boErrors)) {
+						Console::moveCursorNextLine(2);
+						Console::stdout('Bo errors occurred: ' . PHP_EOL . implode('; ' . PHP_EOL, $boErrors) . PHP_EOL);
+						$boErrors = [];
+					}
+
+					if (!empty($refreshSaleTicketError)) {
+						Console::moveCursorNextLine(2);
+						Console::stdout('SaleTicketService error occurred: ' . PHP_EOL . implode('; ' . PHP_EOL, $refreshSaleTicketError) . PHP_EOL);
+						$refreshSaleTicketError = [];
+					}
+
+					Console::moveCursorNextLine(2);
+					print_r($this->ansiFormat('BO request time average: ' . ($boRequestTime/$n) . PHP_EOL, Console::FG_YELLOW));
+					print_r($this->ansiFormat('Service work time average: ' . ($serviceTime/$n) . PHP_EOL, Console::FG_YELLOW));
+					print_r($this->ansiFormat('-------------------------------------------' . PHP_EOL, Console::FG_YELLOW));
+				}
+
+				Console::clearLineBeforeCursor();
 				Console::updateProgress($n, $total);
+				$n++;
 			}
 
 			Console::endProgress("done." . PHP_EOL);
@@ -161,11 +198,12 @@ class CaseController extends Controller
 			if (!empty($boErrors)) {
 				printf("\nBo errors occurred: %s ", $this->ansiFormat(implode('; ' . PHP_EOL, $boErrors), Console::FG_RED));
 			}
+			if (!empty($refreshSaleTicketError)) {
+				printf("\nSaleTicketService error occurred: %s ", $this->ansiFormat(implode('; ' . PHP_EOL, $refreshSaleTicketError), Console::FG_RED));
+			}
 
 
-			$transaction->commit();
 		} catch (\Throwable $e) {
-			$transaction->rollBack();
 			printf("\nError occurred: %s ", $this->ansiFormat($e->getMessage() . '; File: ' . $e->getFile() . '; On Line: ' . $e->getLine(), Console::FG_RED));
 		}
 

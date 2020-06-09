@@ -27,6 +27,7 @@ class SaleTicketCreateDTO
 		int $caseSaleId,
 		string $pnr,
 		string $clientName,
+		bool $isPassengerInfant,
 		int $cntPassengers,
 		?int $penaltyTypeId,
 		array $rule,
@@ -50,6 +51,10 @@ class SaleTicketCreateDTO
 		$dto->recallCommission = ($refundRules['recall_commission'] ?? 0) / ($cntPassengers ?: 1);
 		$dto->markup = $rule['service_fee_amount'] ?? 0;
 		$dto->transactionIds = implode(',', $refundRules['transaction_IDs']);
+
+		if ($isPassengerInfant) {
+			$dto->recallCommission = 0;
+		}
 
 		return $dto;
 	}
