@@ -16,9 +16,14 @@ use yii\web\View;
   <?php if($showWidgetContent): ?>
   <div class="phone-widget__header">
     <div class="phone-widget__heading">
+      <div class="number-toggle">
+        <input type="checkbox" id="number-status3" class="call-status-switcher" <?= ($userCallStatus && $userCallStatus->isReady() ? 'checked' : '') ?>>
+        <label for="number-status3">ready</label>
 
-      <a href="#" class="phone-widget__dev header-action-small toggle-bar-logs"><i class="fas fa-tools"></i></a>
-      <span class="phone-widget__title">Calls</span>
+        <div class="status-confirmation"></div>
+      </div>
+      <!-- <a href="#" class="phone-widget__dev header-action-small toggle-bar-logs"><i class="fas fa-tools"></i></a> -->
+      <!-- <span class="phone-widget__title">Calls</span> -->
       <a href="#" class="phone-widget__settings header-action-small toggle-bar-settings"><i class="fa fa-cog"></i></a>
       <a href="#" class="phone-widget__close header-action-small">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -30,23 +35,24 @@ use yii\web\View;
     </div>
     <ul class="phone-widget__header-actions">
       <li>
-        <a href="#" data-toggle-tab="tab-phone" class="is_active">
+        <a href="#" data-toggle-tab="tab-phone" class="is_active" data-call-in-progress="true">
           <i class="fas fa-phone"></i>
           <span>Call</span>
         </a>
       </li>
       <li>
-        <a href="#" data-toggle-tab="tab-contacts">
-          <i class="far fa-address-book"></i>
-          <span>Contacts</span>
-        </a>
-      </li>
-      <li>
-        <a href="#" data-toggle-tab="tab-history">
+        <a href="#" data-toggle-tab="tab-history" data-missed-calls="3">
           <i class="fas fa-file-invoice"></i>
           <span>history</span>
         </a>
       </li>
+      <li>
+        <a href="#" data-toggle-tab="tab-contacts" >
+          <i class="far fa-address-book"></i>
+          <span>Contacts</span>
+        </a>
+      </li>
+   
     </ul>
   </div>
   <div class="phone-widget__body">
@@ -360,7 +366,7 @@ use yii\web\View;
   </div>
 
 
-  <div class="phone-widget__additional-bar additional-bar" id="bar-logs">
+  <!-- <div class="phone-widget__additional-bar additional-bar" id="bar-logs">
     <div class="additional-bar__header">
       <span class="additional-bar__header-title">
         Logs
@@ -370,13 +376,9 @@ use yii\web\View;
       </a>
     </div>
     <div class="additional-bar__body">
-      <pre class="logs-block">
-        <p>&gt;&nbsp;Requesting Capability Token...</p>
-        <p>&gt;&nbsp;Got a token</p>
-        <p>&gt;&nbsp;Twilio.Device Ready!</p>
-      </pre>
+      
     </div>
-  </div>
+  </div> -->
 
   <div class="phone-widget__additional-bar additional-bar" id="bar-settings">
     <div class="additional-bar__header">
@@ -387,14 +389,31 @@ use yii\web\View;
         <i class="fas fa-times"></i>
       </a>
     </div>
-    <div class="additional-bar__body">
-        <div id="output-selection">
-            <label>Ringtone Devices</label>
-            <select id="ringtone-devices" class="ringtone-devices" multiple></select>
-            <label>Speaker Devices</label>
-            <select id="speaker-devices" class="speaker-devices" multiple></select><br/>
+    <div class="additional-bar__body tabs">
+        <ul class="tabs__nav tab-nav">
+            <li><a href="#tab-device" class="tab-trigger active-tab">Devices</a></li>
+            <li><a href="#tab-logs" class="tab-trigger">Logs</a></li>
+        </ul>
+        <ul class="tabs__container tab-container">
+            <li class="tabs__item" id="tab-device">
+                <div id="output-selection">
+                <label>Ringtone Devices</label>
+                <select id="ringtone-devices" class="ringtone-devices form-control" multiple></select>
+                <label>Speaker Devices</label>
+                <select id="speaker-devices" class="speaker-devices form-control" multiple></select><br/>
+                </div>
+            </li>
+            <li class="tabs__item" id="tab-logs">
+            <pre class="logs-block">
+                <p>&gt;&nbsp;Requesting Capability Token...</p>
+                <p>&gt;&nbsp;Got a token</p>
+                <p>&gt;&nbsp;Twilio.Device Ready!</p>
+            </pre>
+            </li>
+        </ul>
+       
 
-        </div>
+        
 
     </div>
 
