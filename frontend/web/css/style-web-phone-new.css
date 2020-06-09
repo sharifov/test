@@ -210,33 +210,73 @@
     overflow-y: scroll !important; }
   .phone-widget__header {
     background-color: #2a3f54;
-    padding: 12px 16px; }
+    padding: 12px 0 6px; }
   .phone-widget__heading {
     text-align: center;
     position: relative;
-    margin-bottom: 16px; }
+    margin-bottom: 12px;
+    padding: 0 16px; }
   .phone-widget__header-actions {
-    padding: 0;
+    padding: 6px 0 0;
     margin: 0;
     list-style-type: none;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    color: #fff; }
+    color: #fff;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 2.6%); }
+    .phone-widget__header-actions li {
+      flex-basis: 100%;
+      text-align: center; }
+      .phone-widget__header-actions li span {
+        display: block;
+        width: 100%;
+        text-align: center; }
     .phone-widget__header-actions i {
-      color: #fff;
-      margin-right: 6px; }
+      color: rgba(255, 255, 255, 0.3);
+      font-size: 12px !important; }
     .phone-widget__header-actions a {
       font-weight: 500;
       font-size: 14px;
       line-height: 18px;
-      opacity: 0.3;
       text-transform: capitalize;
-      color: #fff; }
+      color: rgba(255, 255, 255, 0.3);
+      position: relative; }
       .phone-widget__header-actions a:hover, .phone-widget__header-actions a:focus, .phone-widget__header-actions a:active {
         color: #fff; }
+        .phone-widget__header-actions a:hover i, .phone-widget__header-actions a:focus i, .phone-widget__header-actions a:active i {
+          color: #fff; }
       .phone-widget__header-actions a.is_active {
-        opacity: 1; }
+        color: #fff; }
+        .phone-widget__header-actions a.is_active i {
+          color: #fff; }
+      .phone-widget__header-actions a[data-call-in-progress="true"]:before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        background-color: #82BA3A;
+        top: 2px;
+        right: -6px;
+        border-radius: 50%;
+        position: absolute; }
+      .phone-widget__header-actions a[data-missed-calls="0"]:before, .phone-widget__header-actions a[data-missed-calls=""]:before {
+        display: none; }
+      .phone-widget__header-actions a[data-missed-calls]:before {
+        content: attr(data-missed-calls);
+        width: 14px;
+        height: 14px;
+        font-size: 9px;
+        line-height: 14px;
+        text-align: center;
+        background-color: #D15151;
+        top: 2px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 50%;
+        position: absolute;
+        color: #fff;
+        font-weight: 500;
+        text-align: center; }
   .phone-widget__title {
     font-size: 18px;
     line-height: 18px;
@@ -250,12 +290,10 @@
       font-size: 16px; }
     .phone-widget .header-action-small:hover, .phone-widget .header-action-small:active, .phone-widget .header-action-small:focus, .phone-widget .header-action-small:active:focus, .phone-widget .header-action-small:focus:active {
       color: #fff; }
-  .phone-widget__dev {
-    left: -6px; }
   .phone-widget__settings {
-    right: 20px; }
+    right: 32px; }
   .phone-widget__close {
-    right: -10px; }
+    right: 8px; }
   .phone-widget__body {
     min-height: calc(100vh - 80px);
     background-color: #f3f3f3;
@@ -1389,35 +1427,118 @@
         margin: 0;
         bottom: auto;
         top: 10px; }
-    .phone-widget .calling-from-info .number-toggle {
-      width: 50px;
-      height: 28px;
-      transform: translateY(-8px);
-      position: relative; }
-      .phone-widget .calling-from-info .number-toggle label {
-        background: #526A83;
-        border-radius: 50px;
-        width: 100%;
-        height: 28px;
-        margin: 0;
-        transition: all 0.15s;
-        cursor: pointer; }
-        .phone-widget .calling-from-info .number-toggle label:after {
-          content: "";
-          width: 22px;
-          height: 22px;
-          background: #ff7e7e;
-          border-radius: 50%;
+  .phone-widget .number-toggle {
+    width: 76px;
+    height: 21px;
+    margin-left: -16px;
+    position: relative; }
+    .phone-widget .number-toggle label {
+      background: #526A83;
+      border-radius: 0 50px 50px 0;
+      width: 100%;
+      height: 21px;
+      margin: 0;
+      transition: all 0.15s;
+      cursor: pointer;
+      color: #fff;
+      padding-left: 14px;
+      text-transform: uppercase;
+      font-size: 12px;
+      line-height: 22px;
+      font-weight: 500;
+      user-select: none; }
+      .phone-widget .number-toggle label:after {
+        content: "";
+        width: 10px;
+        height: 10px;
+        background: #ff7e7e;
+        border-radius: 50%;
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        transition: all 0.15s; }
+    .phone-widget .number-toggle input {
+      visibility: hidden;
+      position: absolute; }
+      .phone-widget .number-toggle input:checked + label:after {
+        background: #a6eb71; }
+    .phone-widget .number-toggle .status-confirmation {
+      opacity: 1;
+      z-index: 5;
+      position: absolute;
+      left: 10px;
+      top: calc(100% + 14px);
+      width: 100%; }
+      .phone-widget .number-toggle .status-confirmation a {
+        color: #fff; }
+      .phone-widget .number-toggle .status-confirmation .status-confirmation-tooltip {
+        background-color: #8F97A4;
+        border-radius: 3px;
+        color: #fff;
+        min-width: 280px;
+        padding: 12px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center; }
+        .phone-widget .number-toggle .status-confirmation .status-confirmation-tooltip:after, .phone-widget .number-toggle .status-confirmation .status-confirmation-tooltip:before {
+          bottom: 100%;
+          left: 50%;
+          border: solid transparent;
+          content: " ";
+          height: 0;
+          width: 0;
           position: absolute;
-          left: 4px;
-          top: 3px;
-          transition: all 0.15s; }
-      .phone-widget .calling-from-info .number-toggle input {
-        visibility: hidden;
-        position: absolute; }
-        .phone-widget .calling-from-info .number-toggle input:checked + label:after {
-          background: #a6eb71;
-          transform: translateX(calc(100% - 2px)); }
+          pointer-events: none; }
+        .phone-widget .number-toggle .status-confirmation .status-confirmation-tooltip:after {
+          border-color: rgba(143, 151, 164, 0);
+          border-bottom-color: #8F97A4;
+          border-width: 6px;
+          margin-left: -6px; }
+        .phone-widget .number-toggle .status-confirmation .status-confirmation-tooltip:before {
+          border-color: rgba(143, 151, 164, 0);
+          border-bottom-color: #8F97A4;
+          border-width: 8px;
+          margin-left: -8px; }
+        .phone-widget .number-toggle .status-confirmation .status-confirmation-tooltip span {
+          font-size: 12px;
+          line-height: 16px; }
+          .phone-widget .number-toggle .status-confirmation .status-confirmation-tooltip span i {
+            display: inline-block;
+            padding: 2px 6px 0;
+            border-radius: 50px;
+            font-style: normal;
+            font-size: 10px;
+            line-height: 16px;
+            font-weight: 600;
+            text-transform: uppercase; }
+            .phone-widget .number-toggle .status-confirmation .status-confirmation-tooltip span i.occupied {
+              background-color: #e15258; }
+            .phone-widget .number-toggle .status-confirmation .status-confirmation-tooltip span i.online {
+              background-color: #77B984; }
+        .phone-widget .number-toggle .status-confirmation .status-confirmation-tooltip .status-action-group {
+          margin: -8px -6px -8px 0; }
+        .phone-widget .number-toggle .status-confirmation .status-confirmation-tooltip a {
+          font-size: 12px;
+          line-height: 16px; }
+          .phone-widget .number-toggle .status-confirmation .status-confirmation-tooltip a:first-child {
+            margin-right: 6px; }
+          .phone-widget .number-toggle .status-confirmation .status-confirmation-tooltip a[data-status-action="false"] {
+            text-decoration: underline; }
+            .phone-widget .number-toggle .status-confirmation .status-confirmation-tooltip a[data-status-action="false"]:hover, .phone-widget .number-toggle .status-confirmation .status-confirmation-tooltip a[data-status-action="false"]:active, .phone-widget .number-toggle .status-confirmation .status-confirmation-tooltip a[data-status-action="false"]:focus, .phone-widget .number-toggle .status-confirmation .status-confirmation-tooltip a[data-status-action="false"]:active:hover, .phone-widget .number-toggle .status-confirmation .status-confirmation-tooltip a[data-status-action="false"]:focus:active {
+              text-decoration: underline; }
+          .phone-widget .number-toggle .status-confirmation .status-confirmation-tooltip a[data-status-action="true"] {
+            width: 30px;
+            height: 30px;
+            display: inline-block;
+            vertical-align: middle;
+            background-color: #77B984;
+            border-radius: 4px;
+            margin-right: -4px;
+            line-height: 30px; }
+          .phone-widget .number-toggle .status-confirmation .status-confirmation-tooltip a:hover, .phone-widget .number-toggle .status-confirmation .status-confirmation-tooltip a:active, .phone-widget .number-toggle .status-confirmation .status-confirmation-tooltip a:focus, .phone-widget .number-toggle .status-confirmation .status-confirmation-tooltip a:active:hover, .phone-widget .number-toggle .status-confirmation .status-confirmation-tooltip a:focus:active {
+            text-decoration: none;
+            color: #fff; }
   .phone-widget .call-pane .calling-from-info {
     background-color: #334D66;
     padding: 24px 16px 8px; }
@@ -1613,7 +1734,41 @@
 .main-content {
   min-height: calc(100vh - 67px); }
 
-@keyframes pulse-animation-green {
+
+.additional-bar .tabs__nav {
+  display: flex;
+  list-style-type: none;
+  margin: 0 -16px 16px;
+  padding: 0 12px;
+  border-bottom: 1px solid #d6e3f0; }
+  .additional-bar .tabs__nav li {
+    margin-bottom: -1px; }
+    .additional-bar .tabs__nav li:not(:first-child) {
+      margin-left: 8px; }
+
+.additional-bar .tabs .tab-trigger {
+  font-size: 14px;
+  line-height: 18px;
+  padding: 4px 6px;
+  color: #526A83;
+  border: 1px solid transparent;
+  display: inline-block;
+  border-radius: 4px 4px 0 0; }
+  .additional-bar .tabs .tab-trigger:hover, .additional-bar .tabs .tab-trigger:active, .additional-bar .tabs .tab-trigger:focus, .additional-bar .tabs .tab-trigger:active:hover, .additional-bar .tabs .tab-trigger:focus:active, .additional-bar .tabs .tab-trigger.active-tab {
+    color: #2a3f54; }
+  .additional-bar .tabs .tab-trigger.active-tab {
+    border: 1px solid #d6e3f0;
+    border-bottom: 1px solid #fff; }
+
+.additional-bar .tabs__container {
+  list-style-type: none;
+  margin: 0;
+  padding: 0; }
+
+.additional-bar .tabs__item {
+  display: none; }
+
+@keyframes callAnimation {
   0% {
     box-shadow: 0px 0px 0px 2px rgba(10, 163, 89, 0.1); }
   25% {

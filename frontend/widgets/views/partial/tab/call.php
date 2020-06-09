@@ -17,10 +17,7 @@ $phoneFrom = $call ? $call->c_from : '';
       <div class="current-number">
         <div class="custom-phone-select"></div>
       </div>
-      <div class="number-toggle">
-        <input type="checkbox" id="number-status3" class="call-status-switcher" <?= ($userCallStatus && $userCallStatus->isReady() ? 'checked' : '') ?>>
-        <label for="number-status3"></label>
-      </div>
+      
     </div>
     <div class="call-pane__number">
       <!-- <div class="suggestion-placeholder">

@@ -190,11 +190,26 @@ $(document).ready(function() {
         $(this).parents('.additional-bar').slideUp(150);
     })
 
+    var activeSettingTab = $('.tab-trigger.active-tab').attr('href');
+
+    $(activeSettingTab).show()
+
+    $('.tab-trigger').on('click', function(e) {
+        e.preventDefault()
+        $('.tab-trigger').removeClass('active-tab');
+        $(this).addClass('active-tab');
+
+        $('.tabs__item').hide()
+        $($(this).attr('href')).show()
+
+    })
+
 
     $(elemScrollable).each(function(i, elem) {
         var el = new SimpleBar(elem);
         el.getContentElement();
     })
+
 
 
     //--------------------------------------------------------------------------
@@ -542,11 +557,11 @@ $(document).ready(function() {
         $('.dial-popup').slideDown(150)
     })
 
+    window.statusCheckbox = new widgetStatus('.call-status-switcher');
+    statusCheckbox.getStatus();
 
 
-    
-    
-    
+
 });
 
 
@@ -754,3 +769,74 @@ function handleWidgetIcon() {
     }
 }
 
+function widgetStatus (selector) {
+    var parent = '.status-confirmation';
+    var state = {
+        status: $(selector).attr('checked') ? true : false,
+        shown: false
+    }
+
+    function node (status) {
+        return ('<div class="status-confirmation-tooltip">'+
+        '<span>Switch to <i class="' + (status ? 'occupied' : 'online') +'">' + (status ? 'occupied' : 'online') + '</i> ?</span>'+
+        '<div class="status-action-group">'+
+        '<a href="#" data-status-action="false">NO</a>'+
+        '<a href="#" data-status-action="true"><i class="fa fa-check"></i></a>'+
+        '</div>'+
+        '</div>');
+    }
+    
+    function handleChange(action) {
+        if (action === 'true') {
+            $(selector).prop('checked', !state.status)
+            state.status = !state.status;
+        }
+
+        if (state.shown) {
+            $('.status-confirmation-tooltip').detach()
+        }
+        state.shown = false;
+    }
+
+    $(document).on('click', '[data-status-action]', function(e) {
+        e.preventDefault();
+        handleChange($(this).attr('data-status-action'));
+    })
+
+    $(document).on('click', selector, function(e){
+        e.preventDefault();
+
+        if (!state.shown) {
+            state.shown = true;
+            $(parent).append(node(state.status));
+        }
+    });
+
+    $(document).on('click', '.phone-widget', function(e) {
+
+        if (state.shown && !$(e.target).closest('.number-toggle').length) {
+            $('.status-confirmation-tooltip').detach();
+            state.shown = false;
+        }
+    });
+
+    return {
+        getStatus: function() {
+            switch (state.status) {
+                case true:
+                    return 1
+            
+                case false:
+                    return 2
+            }
+        },
+        setStatus: function(status) {
+            if (typeof status === 'boolean') {
+                state.status = !status
+                handleChange('true')
+                return;
+            }
+        }
+    }
+
+}
