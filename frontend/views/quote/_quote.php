@@ -26,28 +26,43 @@ $paxCntTypes = [
 ];
 
 $js = <<<JS
-    $('[data-toggle="tooltip"]').tooltip();
 
-    $('.alt-quote-price').keyup(function (event) {
+    var leadId = '$lead->id';
+
+    $('[data-toggle="tooltip"]').tooltip();
+    
+    $(document).on('keyup', '.alt-quote-price', function(event){
         var key = event.keyCode ? event.keyCode : event.which;
         validatePriceField($(this), key);
     });
-    $('.alt-quote-price').change(function (event) {
-        if ($(this).val().length == 0) {
+    
+    $(document).on('change', '.alt-quote-price', function(event){
+        
+        $('.alt-quote-price').prop('readonly', true);
+        $('.field-error').each(function() {
+            $(this).removeClass('field-error');
+        });
+        $('.parent-error').removeClass('has-error');
+        
+        if ($(this).val().length === 0) {
             $(this).val(0);
         }
+        
         var form = $('#$formID');
         $.ajax({
             type: 'post',
             url: '$quotePriceUrl',
             data: form.serialize(),
             success: function (data) {
+            
                 $.each(data, function( index, value ) {
                     $('#'+index).val(value);
                 });
+                $('.alt-quote-price').prop('readonly', false);
             },
             error: function (error) {
                 console.log('Error: ' + error);
+                $('.alt-quote-price').prop('readonly', false);
             }
         });
     });
@@ -79,23 +94,15 @@ $js = <<<JS
             alert('Select GDS please');
             $('#quote-gds').focus();
             return false;
-        }
-        
+        }        
         if($('#quote-main_airline_code').val() == '') {
             alert('Select Validating Carrier please');
             $('#quote-main_airline_code').focus();
             return false;
-        }
-        
-        if($('#quote-reservation_dump').val() == '') {
-            alert('Insert Reservation dump please');
-            $('#quote-reservation_dump').focus();
-            return false;
-        }
-        
+        } 
+                        
         $('#preloader').removeClass('hidden');
-        
-        
+                
         $.ajax({
             url: url,
             type: form.attr("method"),
@@ -103,7 +110,7 @@ $js = <<<JS
             success: function (data) {
                 var itineraryErr = false;
                 $('#preloader').addClass('hidden');
-
+                
                 $.each(data, function( index, value ) {
                     $('#'+index).val(value);
                     if(index == 'quote-main_airline_code'){
@@ -155,10 +162,17 @@ $js = <<<JS
             }
         });
     }
+    
     $('#save-alt-quote').click(function (e) {
         e.preventDefault();
         $('#alternativequote-status').val(1);
         var form = $('#$formID');
+               
+        if($('#quote-reservation_dump').val() == '') {
+            alert('Insert Reservation dump please');
+            $('#quote-reservation_dump').focus();
+            return false;
+        }        
         addEditAltQuote(form, form.attr("action"));
     });
     $('#confirm-alt-quote').click(function (e) {
@@ -168,7 +182,7 @@ $js = <<<JS
         var form = $('#$formID');
         addEditAltQuote(form, form.attr("action") + '?save=true');
     });
-
+    
     $('.clone-alt-price-by-type').click(function(e) {
         e.preventDefault();
         $(this).blur();
@@ -195,9 +209,206 @@ $js = <<<JS
             }
         });
     });
+    
+    function loadingBtn(btnObj, loading)
+    {
+        if (loading === true) {
+            btnObj.removeClass()
+                .addClass('btn btn-default')
+                .html('<span class="spinner-border spinner-border-sm"></span> Loading')
+                .prop("disabled", true);
+        } else {
+            let origClass = btnObj.data('class');
+            let origInner = btnObj.data('inner');
+            btnObj.removeClass()
+                .addClass(origClass)
+                .html(origInner)
+                .prop("disabled", false);
+        }  
+    }
+    
+    $('#prepare_dump_btn').click(function (e) {
+        e.preventDefault();        
+        $('#alternativequote-status').val(1);
+        $('#save_dump_btn').hide();
+        PNotify.removeAll();                    
+        let form = $('#$formID');
+        
+        loadingBtn($(this), true);        
+        if (!checkPrepareDumpQuote()) {
+            return false;
+        }
+                        
+        $.ajax({
+            url: '/quote/prepare-dump?lead_id=' + leadId,
+            type: 'POST',
+            data: form.serialize(),
+            dataType: 'json',
+            beforeSend: function () {                              
+            },
+            success: function (dataResponse) {
+                loadingBtn($('#prepare_dump_btn'), false);
+                
+                if (dataResponse.status === 1) {
+                   
+                    if (dataResponse.validating_carrier.length) {
+                       $('#quote-main_airline_code').val(dataResponse.validating_carrier).trigger('change');
+                    } 
+                    if (dataResponse.prices.length) {
+                       $('#price-table tbody').html(dataResponse.prices); 
+                    }
+                    if (dataResponse.reservation_dump.length) {                        
+                        $('#reservation_result').val(dataResponse.reservation_dump.join("\\n"));
+                        
+                        var reservationDumpOut = dataResponse.reservation_dump.join("<br />");
+                        reservationDumpOut = '<h6>Imported reservation info</h6>' + reservationDumpOut; 
+                        $('#box_reservation_result').html(reservationDumpOut);
+                    }                    
+                    $('#save_dump_btn').show(500);                                                            
+	            } else {
+                    if (dataResponse.error.length) {                        
+                        new PNotify({
+                            title: "Error",
+                            type: "error",
+                            text: dataResponse.error,
+                            hide: true
+                        }); 
+                    }    
+	            }
+            },
+            error: function (error) {               
+                loadingBtn($('#prepare_dump_btn'), false);
+                console.log('Error: ' + error);
+            }
+        });
+    });
+    
+    $('#save_dump_btn').click(function (e) {
+        e.preventDefault();        
+        $('#alternativequote-status').val(1);
+        
+        $('.field-error').each(function() {
+            $(this).removeClass('field-error');
+        });
+        $('.parent-error').removeClass('has-error');
+        
+        PNotify.removeAll(); 
+        loadingBtn($(this), true);
+        if (!checkPrepareDumpQuote()) {
+            return false;
+        }
+                        
+        $.ajax({
+            url: '/quote/save-from-dump?lead_id=' + leadId,
+            type: 'POST',
+            data: $('#$formID').serialize(),
+            dataType: 'json',
+            beforeSend: function () {                              
+            },
+            success: function (dataResponse) {
+                loadingBtn($('#save_dump_btn'), false);
+                
+                if (dataResponse.status === 1) {                   
+                    new PNotify({
+                        title: "Success",
+                        type: "success",
+                        text: 'Quote created',
+                        hide: true
+                    });
+                    window.location.reload();                                        
+	            } else {
+	            
+                    $.each(dataResponse.errorsPrices, function( index, value ) {
+                        $.each(value, function (idx, val){                            
+                            $('#quoteprice-'+index+'-'+idx).addClass('field-error');
+                            $('#quoteprice-'+index+'-'+idx).parent().addClass('has-error parent-error');
+                        });
+                    });
+                    $.each(dataResponse.errors, function( index, value ) {
+                        $('#quote-'+index).addClass('field-error');
+                        $('#quote-'+index).parent().addClass('has-error parent-error');
+                        if (index == 'reservation_dump') {
+                            itineraryErr = true;
+                        }
+                    });
+	                                  
+                    if (dataResponse.errorMessage.length) {                        
+                        new PNotify({
+                            title: "Error",
+                            type: "error",
+                            text: dataResponse.errorMessage,
+                            hide: true
+                        }); 
+                    }    
+	            }
+            },
+            error: function (error) {                
+                loadingBtn($('#save_dump_btn'), false);
+                console.log('Error: ' + error);
+            }
+        });
+    });
+    
+    function checkPrepareDumpQuote() 
+    {    
+        let status = 1;
+        let message = '';
+        
+        if($('#prepare_dump').val() === '') {
+            message = 'Insert Reservation dump please';
+        } 
+        if($('#quote-gds').val() === '') {
+            message = 'Select GDS please';
+        } 
+        
+        if (status !== 1) {
+            new PNotify({
+                title: "Error",
+                type: "error",
+                text: message,
+                hide: true
+            });
+            return false;
+        } 
+        return true;   
+    } 
 JS;
 $this->registerJs($js);
+?>
+<?php
+$jsGdsParsing = <<<JS
+    $('#quote-gds').change(function (e) {
+        e.preventDefault();
+        
+        let gds = $(this).val();
+        
+        if (gds === 'S' || gds === 'W') {
+            $('#prepare_dump_btn').show(1000);
+            $('#box-gds-tab').show();             
+            $('#dumpTab #box-gds-tab a').tab('show'); 
+            $('.base-btn, .base-tab').hide();                  
+        } else {
+            $('#prepare_dump_btn').hide(1000);
+            $('#save_dump_btn').hide(1000);  
+            $('#box-gds-tab').hide();
+            $('#dumpTab #reservation-dump-tab a').tab('show'); 
+            $('.base-btn, .base-tab').show();     
+        }
+    });
+JS;
+?>
+<?php
+    if (\Yii::$app->params['settings']['enable_gds_parsers_for_create_quote']) {
+        $this->registerJs($jsGdsParsing);
+    }
+?>
 
+<?php
+$this->registerCss('
+    .nav-tabs li a.active {
+        font-weight: 900;
+    } 
+');
 ?>
 
 <?php $form = ActiveForm::begin([
@@ -208,6 +419,10 @@ $this->registerJs($js);
 ]) ?>
 <!------------- Add/Edit Alternative Quote Form ------------->
 <div class="alternatives__item">
+    <div id="box_reservation_result" style="margin-bottom: 8px;"></div>
+    <?php echo Html::textarea('reservation_result', null,
+        ['id' => 'reservation_result', 'style' => 'display:none;'])
+    ?>
     <div class="table-wrapper table-responsive ticket-details-block__table mb-20"
          id="alt-quote-fares-info-<?= $quote->id ?>">
         <?= $form->field($quote, 'id', [
@@ -228,7 +443,7 @@ $this->registerJs($js);
             ],
             'template' => '{input}'
         ])->hiddenInput() ?>
-        <table class="table table-striped table-neutral">
+        <table class="table table-striped table-neutral" id="price-table">
             <thead>
             <tr>
                 <th style="min-width: 100px;">Name</th>
@@ -295,7 +510,8 @@ $this->registerJs($js);
                             ],
                             'template' => '<span class="input-group-addon">$</span>{input}'
                         ])->textInput([
-                            'class' => 'form-control alt-quote-price'
+                            'class' => 'form-control ',
+                            'readonly' => true
                         ]) ?>
                     </td>
                     <td class="td-input">
@@ -316,7 +532,6 @@ $this->registerJs($js);
                             'template' => '<span class="input-group-addon">$</span>{input}'
                         ])->textInput([
                             'class' => 'form-control alt-quote-price',
-                            'readonly' => true
                         ]) ?>
                     </td>
                     <td class="td-input">
@@ -330,7 +545,7 @@ $this->registerJs($js);
                         ]) ?>
                     </td>
                     <td class="td-input text-right">
-                        <?php if (!in_array($price->passenger_type, $applyBtn) && $paxCntTypes[$price->passenger_type] > 1) {
+                        <?php /* if (!in_array($price->passenger_type, $applyBtn) && $paxCntTypes[$price->passenger_type] > 1) {
                             $applyBtn[] = $price->passenger_type;
                             echo Html::button('<i class="fa fa-copy"></i>', [
                                 'title' => '',
@@ -341,7 +556,7 @@ $this->registerJs($js);
                                 'data-price-index' => $index,
                                 'data-type' => $price->passenger_type
                             ]);
-                        } ?>
+                        } */ ?>
                     </td>
                 </tr>
             <?php endforeach; ?>
@@ -475,16 +690,19 @@ $this->registerJs($js);
             </table>
         </div>
         <div class="col-sm-6">
-            <ul class="nav nav-tabs">
-                <li class="active">
-                    <?= Html::a('Reservation Dump', sprintf('#r-dump-%d', $quote->id), ['data-toggle' => 'tab']) ?>
+            <ul class="nav nav-tabs" id="dumpTab">
+                <li class="base-tab" id="reservation-dump-tab">
+                    <?= Html::a('Reservation Dump', sprintf('#r-dump-%d', $quote->id), ['data-toggle' => 'tab', 'class' => 'active']) ?>
                 </li>
-                <li>
+                <li class="base-tab">
                 	<?= Html::a('Pricing', sprintf('#r-dump-pane-%d', $quote->id), ['data-toggle' => 'tab']) ?>
+                </li>
+                <li id="box-gds-tab" style="display: none;">
+                	<?= Html::a('GDS Dump', sprintf('#r-prepare_dump-%d', $quote->id), ['data-toggle' => 'tab']) ?>
                 </li>
             </ul>
             <div class="tab-content">
-                <div id="<?= sprintf('r-dump-%d', $quote->id) ?>" class="tab-pane fade in active">
+                <div id="<?= sprintf('r-dump-%d', $quote->id) ?>" class="tab-pane fade in active show">
                     <?= $form->field($quote, 'reservation_dump', [
                         'options' => [
                             'tag' => false,
@@ -504,13 +722,18 @@ $this->registerJs($js);
                         'rows' => 5
                     ]) ?>
                 </div>
+                <div id="<?= sprintf('r-prepare_dump-%d', $quote->id) ?>" class="prepare_dump_box tab-pane fade in">
+                    <?php echo Html::textarea('prepare_dump', null,
+                        ['id' => 'prepare_dump', 'rows' => 13, 'class' => 'form-control'])
+                    ?>
+                </div>
             </div>
         </div>
     </div>
     <div class="btn-wrapper">
         <?= Html::button('<i class="glyphicon glyphicon-remove-circle"></i> Cancel', [
             'id' => 'cancel-alt-quote',
-            'class' => 'btn btn-danger'
+            'class' => 'btn btn-danger base-btn'
         ]) ?>
         <?php
         $applied = Quote::findOne([
@@ -520,7 +743,25 @@ $this->registerJs($js);
         if (($quote->isNewRecord || $quote->status == $quote::STATUS_CREATED) && $applied === null) : ?>
             <?= Html::button('<i class="fa fa-save"></i> Save', [
                 'id' => 'save-alt-quote',
-                'class' => 'btn btn-primary'
+                'class' => 'btn btn-primary base-btn'
+            ]) ?>
+        <?php endif; ?>
+        <?php if ($quote->isNewRecord) :?>
+            <?= Html::button('<i class="fa fa-recycle"></i> Import from GDS dump', [
+                'id' => 'prepare_dump_btn',
+                'class' => 'btn btn-warning',
+                'style' => 'display: none',
+                'data-inner' => '<i class="fa fa-recycle"></i> Import from GDS dump',
+                'data-class' => 'btn btn-warning',
+                'width' => '172px',
+            ]) ?>
+            <?= Html::button('<i class="fa fa-check-circle"></i> Save from GDS dump', [
+                'id' => 'save_dump_btn',
+                'class' => 'btn btn-success',
+                'style' => 'display: none',
+                'data-inner' => '<i class="fa fa-check-circle"></i> Save from GDS dump',
+                'data-class' => 'btn btn-success',
+                'width' => '168px',
             ]) ?>
         <?php endif; ?>
     </div>
@@ -549,3 +790,4 @@ $this->registerJs($js);
         </div>
     </div>
 </div>
+

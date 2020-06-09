@@ -1032,7 +1032,7 @@ class LeadController extends FController
             ->addGroupBy(['id']);
 
         $queryCallLog = (new Query())
-			->select(['id' => new Expression('if (cl_group_id is null, cl_id, cl_group_id)')])
+			->select(['id' => new Expression('cl_group_id')])
 			->addSelect(['type' => new Expression('"voice"')])
 			->addSelect(['lead_id' => 'call_log_lead.cll_lead_id', 'created_dt' => 'MIN(call_log.cl_call_created_dt)'])
 			->from('call_log_lead')

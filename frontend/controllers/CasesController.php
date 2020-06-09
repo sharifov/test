@@ -36,10 +36,10 @@ use sales\forms\cases\CasesCreateByWebForm;
 use sales\forms\cases\CasesSaleForm;
 use sales\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
 use sales\guards\cases\CaseManageSaleInfoGuard;
-use sales\guards\cases\CaseTakeGuard;
 use sales\model\cases\useCases\cases\updateInfo\Handler;
 use sales\model\coupon\entity\couponCase\CouponCase;
 use sales\model\coupon\useCase\send\SendCouponsForm;
+use sales\model\saleTicket\useCase\create\SaleTicketService;
 use sales\repositories\cases\CaseCategoryRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\cases\CasesSaleRepository;
@@ -80,8 +80,8 @@ use yii\widgets\ActiveForm;
  * @property CasesSaleRepository $casesSaleRepository
  * @property CasesSaleService $casesSaleService
  * @property ClientUpdateFromEntityService $clientUpdateFromEntityService
- * @property CaseTakeGuard $caseTakeGuard
  * @property Handler $updateHandler
+ * @property SaleTicketService $saleTicketService
  */
 class CasesController extends FController
 {
@@ -95,8 +95,8 @@ class CasesController extends FController
     private $casesSaleRepository;
     private $casesSaleService;
     private $clientUpdateFromEntityService;
-    private $caseTakeGuard;
     private $updateHandler;
+    private $saleTicketService;
 
     public function __construct(
         $id,
@@ -110,8 +110,8 @@ class CasesController extends FController
         CasesSaleRepository $casesSaleRepository,
         CasesSaleService $casesSaleService,
         ClientUpdateFromEntityService $clientUpdateFromEntityService,
-        CaseTakeGuard $caseTakeGuard,
         Handler $updateHandler,
+        SaleTicketService $saleTicketService,
         $config = []
     )
     {
@@ -125,7 +125,7 @@ class CasesController extends FController
         $this->casesSaleRepository = $casesSaleRepository;
         $this->casesSaleService = $casesSaleService;
         $this->clientUpdateFromEntityService = $clientUpdateFromEntityService;
-        $this->caseTakeGuard = $caseTakeGuard;
+        $this->saleTicketService = $saleTicketService;
         $this->updateHandler = $updateHandler;
     }
 
@@ -135,6 +135,11 @@ class CasesController extends FController
             'access' => [
                 'allowActions' => [
                     'mark-checked',
+                    'view',
+                    'ajax-update',
+                    'add-sale',
+                    'take',
+                    'take-over',
                 ],
             ],
         ];
@@ -174,8 +179,12 @@ class CasesController extends FController
      */
     public function actionView($gid): string
     {
+        $model = $this->findModelByGid((string)$gid);
 
-        $model = $this->findModelByGid($gid);
+        if (!Auth::can('cases/view', ['case' => $model])) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
         /** @var Employee $userModel */
         $userModel = Yii::$app->user->identity;
 
@@ -593,7 +602,11 @@ class CasesController extends FController
         $params = Yii::$app->request->queryParams;
 
         try {
-            $saleDataProvider = $saleSearchModel->search($params);
+            if (Auth::can('cases/update', ['case' => $model])) {
+                $saleDataProvider = $saleSearchModel->search($params);
+            } else {
+                $saleDataProvider = new ArrayDataProvider();
+            }
         } catch (\Exception $exception) {
             $saleDataProvider = new ArrayDataProvider();
             Yii::error(VarDumper::dumpAsString([$exception->getFile(), $exception->getCode(), $exception->getMessage()]), 'SaleController:actionSearch');
@@ -761,11 +774,16 @@ class CasesController extends FController
         $hash = Yii::$app->request->post('h');
 
         try {
+			$transaction = Yii::$app->db->beginTransaction();
             $model = $this->findModelByGid($gid);
+
+            if (!Auth::can('cases/update', ['case' => $model])) {
+                throw new ForbiddenHttpException('Access denied.');
+            }
 
             $arr = explode('|', base64_decode($hash));
             $id = (int)($arr[1] ?? 0);
-            $saleData = $this->casesSaleService->detailRequestToBackOffice($id);
+            $saleData = $this->casesSaleService->detailRequestToBackOffice($id, 0, 120, 1);
 
             $cs = CaseSale::find()->where(['css_cs_id' => $model->cs_id, 'css_sale_id' => $saleData['saleId']])->limit(1)->one();
             if($cs) {
@@ -785,15 +803,20 @@ class CasesController extends FController
 
                 if(!$cs->save()) {
                     Yii::error(VarDumper::dumpAsString($cs->errors). ' Data: ' . VarDumper::dumpAsString($saleData), 'CasesController:actionAddSale:CaseSale:save');
-                } else {
-                    $model->updateLastAction();
-                }
-            }
+					throw new \RuntimeException($cs->getErrorSummary(false)[0]);
+				}
+
+				$model->updateLastAction();
+				$this->saleTicketService->createSaleTicketBySaleData($cs, $saleData);
+			}
 
             $out['data'] = ['sale_id' => $saleData['saleId'], 'gid' => $gid, 'h' => $hash];
 
+            $transaction->commit();
+
         } catch (\Throwable $exception) {
             $out['error'] = $exception->getMessage();
+            $transaction->rollBack();
         }
 
         return $out;
@@ -933,28 +956,48 @@ class CasesController extends FController
 
     /**
      * @param $gid
-     * @param $is_over
      * @return Response
+     * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
      */
-    public function actionTake($gid, $is_over = false): Response
+    public function actionTake($gid): Response
     {
-        $gId = (string) $gid;
-        $isOver = (bool)$is_over;
-        $userId = Yii::$app->user->id;
-        $case = $this->findModelByGid($gId);
+        $case = $this->findModelByGid((string)$gid);
+
+        if (!Auth::can('cases/take', ['case' => $case])) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
         try {
-            $this->caseTakeGuard->guard($case);
-            $user = $this->userRepository->find($userId);
-            if ($isOver) {
-                $this->casesManageService->takeOver($case->cs_id, $user->id, $user->id, 'Take over');
-            } else {
-                $this->casesManageService->take($case->cs_id, $user->id, $user->id, 'Take');
-            }
+            $user = $this->userRepository->find(Auth::id());
+            $this->casesManageService->take($case->cs_id, $user->id, $user->id);
             Yii::$app->session->setFlash('success', 'Success');
         } catch (\Throwable $e) {
             Yii::$app->session->setFlash('error', $e->getMessage());
-            //Yii::error($e, 'Cases:CasesController:Take');
+        }
+        return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
+    }
+
+    /**
+     * @param $gid
+     * @return Response
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
+     */
+    public function actionTakeOver($gid): Response
+    {
+        $case = $this->findModelByGid((string)$gid);
+
+        if (!Auth::can('cases/takeOver', ['case' => $case])) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
+        try {
+            $user = $this->userRepository->find(Auth::id());
+            $this->casesManageService->takeOver($case->cs_id, $user->id, $user->id);
+            Yii::$app->session->setFlash('success', 'Success');
+        } catch (\Throwable $e) {
+            Yii::$app->session->setFlash('error', $e->getMessage());
         }
         return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
     }
@@ -1271,15 +1314,18 @@ class CasesController extends FController
         ]);
     }
 
-
-
     /**
      * @return string|Response
+     * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
      */
     public function actionAjaxUpdate()
     {
         $case = $this->findModelByGid((string)Yii::$app->request->get('gid'));
+
+        if (!Auth::can('cases/update', ['case' => $case])) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
 
         $form = new UpdateInfoForm(
             $case,
@@ -1489,8 +1535,10 @@ class CasesController extends FController
 			$caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$caseSaleId);
 			$this->checkAccessToManageCaseSaleInfo($caseSale, true);
 
-			$saleData = $this->casesSaleService->detailRequestToBackOffice((int)$caseSale->css_sale_id, $withFareRules);
+			$saleData = $this->casesSaleService->detailRequestToBackOffice((int)$caseSale->css_sale_id, $withFareRules, 120, 1);
 			$caseSale = $this->casesSaleService->refreshOriginalSaleData($caseSale, $case, $saleData);
+
+			$this->saleTicketService->refreshSaleTicketBySaleData((int)$caseId, $caseSale, $saleData);
 
 			$out['message'] = 'Sale info: ' . $caseSale->css_sale_id . ' successfully refreshed';
 

@@ -1,5 +1,9 @@
 <?php
 
+use sales\auth\Auth;
+use common\models\CreditCard;
+use common\models\search\CreditCardSearch;
+use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -17,7 +21,7 @@ $user = Yii::$app->user->identity;
     <div class="x_title">
         <h2><i class="fa fa-list"></i> Sale List</h2>
         <ul class="nav navbar-right panel_toolbox">
-            <?php if($caseModel->isProcessing()):?>
+            <?php if (Auth::can('cases/update', ['case' => $caseModel])) : ?>
                 <li>
                     <?=Html::a('<i class="fa fa-search warning"></i> Search Sales', null, ['class' => 'modal', 'id' => 'search-sale-btn', 'title' => 'Search Sales for Case'])?>
                 </li>
@@ -77,14 +81,18 @@ $user = Yii::$app->user->identity;
                         <td>'.Yii::$app->formatter->asDatetime($item->css_created_dt).'</td>';
 
                     if ($caseModel->isProcessing()) {
-                        $label .= '<td>' . Html::button('<i class="fa fa-upload"></i> Update', [
+                        $label .= '<td>';
+
+                        $label .= Html::button('<i class="fa fa-upload"></i> Update', [
 							'class' => 'update-to-bo btn ' . ($item->css_need_sync_bo ? 'btn-success' : 'btn-default'),
 							'disabled' => !$item->css_need_sync_bo ? true : false,
 							'id' => 'update-to-bo-' . $item->css_sale_id,
                             'data-case-id' => $item->css_cs_id,
                             'data-case-sale-id' => $item->css_sale_id,
                             'title' => 'Update data to B/O'
-                            ]) . '</td>';
+                            ]);
+
+                        $label .= '</td>';
                     }
                     if ($user->isAdmin() || $user->isSuperAdmin()) {
                         $label .= '<td>' . Html::button('<i class="fa fa-refresh"></i> Refresh', [
@@ -101,12 +109,16 @@ $user = Yii::$app->user->identity;
 								'check-fare-rules' => 1,
                                 'title' => 'Check Fare rules',
                         ]) . '</td>';
-                        $label .= '<td>' . Html::button('<i class="fa fa-warning"></i> Remove', [
-					            'class' => 'remove-sale btn btn-warning',
-					            'data-case-id' => $item->css_cs_id,
-								'data-case-sale-id' => $item->css_sale_id,
+                        $label .= '<td>';
+                        if (Auth::can('cases/update', ['case' => $caseModel])) {
+                            $label .= Html::button('<i class="fa fa-warning"></i> Remove', [
+                                'class' => 'remove-sale btn btn-warning',
+                                'data-case-id' => $item->css_cs_id,
+                                'data-case-sale-id' => $item->css_sale_id,
                                 'title' => 'Remove Sale',
-                        ]) . '</td>';
+                            ]);
+                        }
+                        $label .= '</td>';
                     }
                     $label .= '</tr></table>';
 
@@ -116,7 +128,20 @@ $user = Yii::$app->user->identity;
 //                    echo '<pre>';
 //                    print_r($dataSale);die;
                     if(is_array($dataSale)) {
-                        $content = $this->render('/sale/view', ['data' => $dataSale, 'csId' => $caseModel->cs_id, 'caseSaleModel' => $item, 'itemKey' => $itemKey]);
+
+                        $dataProviderCc = new ActiveDataProvider([
+                            'query' => CreditCard::find()->innerJoin('sale_credit_card', 'scc_cc_id=cc_id')->where(['scc_sale_id' => $item->css_sale_id]),
+                        ]);
+
+                        $content = $this->render('/sale/view', [
+                                'data' => $dataSale,
+                                'csId' => $caseModel->cs_id,
+                                'caseSaleModel' => $item,
+                                'itemKey' => $itemKey,
+                                'dataProviderCc' => $dataProviderCc,
+                                'caseModel' => $caseModel,
+                                'additionalData' => [],
+                        ]);
                         //echo '******';
                         //\yii\helpers\VarDumper::dump($content); exit;
                     }
@@ -201,6 +226,7 @@ $jsCode = <<<JS
 JS;
 
 $this->registerJs($jsCode, \yii\web\View::POS_READY);
+$urlRefresh = \yii\helpers\Url::to(['/cases/ajax-refresh-sale-info']);
 
 $js = <<<JS
 document.activateButtonSync = function(data) {
@@ -224,5 +250,78 @@ document.activateButtonSync = function(data) {
 ( function () {
     $('.cssSaleData_passengers_birth_date').off('editableSuccess');
 })();
+
+
+$(document).on('click', '.refresh-from-bo', function (e) {
+    e.preventDefault();
+    e.stopPropagation();  
+    
+    let obj = $(this),
+        caseId = obj.attr('data-case-id'),
+        caseSaleId = obj.attr('data-case-sale-id'),
+        checkFareRules = obj.attr('check-fare-rules');
+        
+    if (typeof checkFareRules === typeof undefined) {
+        checkFareRules = 0;    
+    }
+    
+    $.ajax({
+        url: "$urlRefresh/" + caseId + '/' + caseSaleId,
+        type: 'post',
+        data : {check_fare_rules: checkFareRules},
+        dataType: "json",    
+        beforeSend: function () {
+            obj.attr('disabled', true).find('i').toggleClass('fa-spin');
+            $(obj).closest('.panel').find('.error-dump').html();
+        },
+        success: function (data) {
+            if (data.error) {
+               new PNotify({
+                    title: "Error",
+                    type: "error",
+                    text: data.message,
+                    hide: true
+                }); 
+            } else {
+                new PNotify({
+                    title: "Success",
+                    type: "success",
+                    text: data.message,
+                    hide: true
+                }); 
+                $.pjax.reload({container: '#pjax-sale-list',push: false, replace: false, 'scrollTo': false, timeout: 1000, async: false,});
+            }
+        },
+        error: function (text) {
+            new PNotify({
+                title: "Error",
+                type: "error",
+                text: "Internal Server Error. Try again letter.",
+                hide: true
+            });
+        },
+        complete: function () {
+            obj.removeAttr('disabled').find('i').toggleClass('fa-spin');
+            $(obj).closest('.panel').find('.error-dump').html();
+        }
+    });
+});
+
+
+$(document).on('click', '.sale-ticket-generate-email-btn', function (e) {
+        e.preventDefault();
+        var btn = $(this);
+        var url = btn.attr('href');
+        
+        btn.attr('disabled', true).find('i').addClass('fa-spin').removeClass('fa-envelope').addClass('fa-refresh');
+        $.get(url, function(data) {
+            if (data.error) {
+                createNotify('Error', data.message, 'error');
+            } else {
+                createNotify('Success', data.message, 'success');
+            }
+            btn.find('i').removeClass('fa-spin').removeClass('fa-refresh').addClass('fa-envelope');
+        });
+    });
 JS;
 $this->registerJs($js);

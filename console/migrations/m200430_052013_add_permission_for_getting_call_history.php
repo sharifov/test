@@ -43,7 +43,7 @@ class m200430_052013_add_permission_for_getting_call_history extends Migration
      */
     public function safeDown()
     {
-		(new RbacMigrationService())->up($this->routes, $this->roles);
+		(new RbacMigrationService())->down($this->routes, $this->roles);
 
 		if (\Yii::$app->cache) {
 			\Yii::$app->cache->flush();

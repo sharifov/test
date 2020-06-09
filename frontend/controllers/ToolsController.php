@@ -4,11 +4,12 @@ namespace frontend\controllers;
 
 use common\models\Quote;
 
-use sales\services\parsingDump\worldSpan\Baggage;
-use sales\services\parsingDump\worldSpan\Pricing;
-use sales\services\parsingDump\worldSpan\Reservation;
-use sales\services\parsingDump\worldSpan\WorldSpan;
-use sales\services\parsingDump\WorldSpanReservationService;
+use sales\services\parsingDump\lib\ParsingDump;
+use sales\services\parsingDump\lib\worldSpan\Baggage;
+use sales\services\parsingDump\lib\worldSpan\Pricing;
+use sales\services\parsingDump\lib\worldSpan\Reservation;
+use sales\services\parsingDump\lib\worldSpan\WorldSpan;
+use sales\services\parsingDump\ReservationService;
 use Yii;
 use common\models\ApiLog;
 use common\models\search\ApiLogSearch;
@@ -107,21 +108,20 @@ class ToolsController extends FController
     {
         $data = [];
         $dump = Yii::$app->request->post('dump');
-        $type = Yii::$app->request->post('type');
+        $type = Yii::$app->request->post('type', ParsingDump::PARSING_DEFAULT_TYPE);
+        $gds = Yii::$app->request->post('gds');
         $prepareSegment = (int) Yii::$app->request->post('prepare_segment', 0);
 
         if ($dump) {
-            $typeDump = $type !== '' ? $type : WorldSpan::TYPE_ALL;
 
-            if ($typeDump === WorldSpan::TYPE_RESERVATION && $prepareSegment === 1) {
-                $data = (new WorldSpanReservationService())->parseReservation($dump, false);
-            } elseif ($typeDump === WorldSpan::TYPE_ALL) {
-                $data[] = (new Reservation())->parseDump($dump);
-                $data[] = (new Pricing())->parseDump($dump);
-                $data[] = (new Baggage())->parseDump($dump);
-            } else {
-                $obj = WorldSpan::initClass($typeDump);
+            if ($prepareSegment === 1 && $type === ParsingDump::PARSING_TYPE_RESERVATION) {
+
+                $data = (new ReservationService($gds))->parseReservation($dump, false);
+
+            } elseif ($obj = ParsingDump::initClass($gds, $type)) {
                 $data = $obj->parseDump($dump);
+            } else {
+                throw new \DomainException('Class (' . $gds . '\\' . $type . ') not found');
             }
         }
 
@@ -129,7 +129,7 @@ class ToolsController extends FController
             'dump' => $dump,
             'data' => $data,
             'type' => $type,
-            'typeDump' => $typeDump ?? null,
+            'gds' => $gds,
             'prepareSegment' => $prepareSegment,
         ]);
     }

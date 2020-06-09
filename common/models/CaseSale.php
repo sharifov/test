@@ -4,9 +4,11 @@ namespace common\models;
 
 use common\models\query\CaseSaleQuery;
 use sales\entities\cases\Cases;
+use sales\model\saleTicket\entity\SaleTicket;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
 /**
@@ -35,10 +37,13 @@ use yii\db\ActiveRecord;
  * @property string|null $css_out_date
  * @property string|null $css_in_date
  * @property string|null $css_fare_rules
+ * @property int|null $css_penalty_type
+ * @property string|null $css_departure_dt
  *
  * @property Employee $cssCreatedUser
  * @property Cases $cssCs
  * @property Employee $cssUpdatedUser
+ * @property SaleTicket $cssSaleTicket
  */
 class CaseSale extends \yii\db\ActiveRecord
 {
@@ -113,16 +118,17 @@ class CaseSale extends \yii\db\ActiveRecord
     {
         return [
             [['css_cs_id', 'css_sale_id', 'css_sale_data'], 'required'],
-            [['css_cs_id', 'css_sale_id', 'css_sale_pax'], 'integer'],
+            [['css_cs_id', 'css_sale_id', 'css_sale_pax', 'css_penalty_type'], 'integer'],
             [['css_sale_created_dt', 'css_sale_data', 'css_created_dt', 'css_updated_dt', 'css_created_user_id', 'css_updated_user_id', 'css_fare_rules'], 'safe'],
             [['css_sale_book_id', 'css_sale_pnr'], 'string', 'max' => 8],
             [['css_cs_id', 'css_sale_id'], 'unique', 'targetAttribute' => ['css_cs_id', 'css_sale_id']],
             [['css_cs_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['css_cs_id' => 'cs_id']],
             [['css_profit', 'css_charged'], 'number'],
             [['css_out_departure_airport', 'css_out_arrival_airport', 'css_in_departure_airport', 'css_in_arrival_airport'], 'string', 'max' => 3],
-            [['css_out_date', 'css_in_date', 'css_fare_rules'], 'string'],
-            [['css_out_date', 'css_in_date'],  'datetime', 'format' => 'php:Y-m-d H:i:s'],
+            [['css_out_date', 'css_in_date', 'css_fare_rules', 'css_departure_dt'], 'string'],
+            [['css_out_date', 'css_in_date', 'css_departure_dt'],  'datetime', 'format' => 'php:Y-m-d H:i:s'],
             [['css_charge_type'], 'string', 'max' => 100],
+			['css_penalty_type', 'in', 'range' => array_keys(SaleTicket::getAirlinePenaltyList()), 'skipOnEmpty' => true,]
         ];
     }
 
@@ -153,6 +159,8 @@ class CaseSale extends \yii\db\ActiveRecord
             'css_out_date' => 'Out date',
             'css_in_date' => 'In date',
             'css_fare_rules' => 'Fare rules',
+			'css_penalty_type' => 'Penalty Type',
+			'css_departure_dt' => 'Departure DT'
         ];
     }
 
@@ -202,6 +210,11 @@ class CaseSale extends \yii\db\ActiveRecord
         return $this->hasOne(Employee::class, ['id' => 'css_updated_user_id']);
     }
 
+    public function getCssSaleTicket(): ActiveQuery
+	{
+		return $this->hasMany(SaleTicket::class, ['st_case_id' => 'css_cs_id', 'st_case_sale_id' => 'css_sale_id']);
+	}
+
     /**
      * {@inheritdoc}
      * @return CaseSaleQuery the active query used by this AR class.
@@ -210,4 +223,12 @@ class CaseSale extends \yii\db\ActiveRecord
     {
         return new CaseSaleQuery(static::class);
     }
+
+    public function getSaleDataDecoded(): array
+	{
+		if (is_string($this->css_sale_data)) {
+			return json_decode((string)$this->css_sale_data, true);
+		}
+		return $this->css_sale_data;
+	}
 }

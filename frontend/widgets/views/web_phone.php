@@ -99,9 +99,9 @@ use yii\helpers\Html;
                                 <?php /*<div id="client-name"></div>*/ ?>
                                 <div id="output-selection">
                                     <label>Ringtone Devices</label>
-                                    <select id="ringtone-devices" multiple></select>
+                                    <select id="ringtone-devices" class="ringtone-devices" multiple></select>
                                     <label>Speaker Devices</label>
-                                    <select id="speaker-devices" multiple></select><br/>
+                                    <select id="speaker-devices" class="speaker-devices" multiple></select><br/>
                                     <?php /*<a id="get-devices">Seeing unknown devices?</a>*/?>
                                 </div>
                             </div>
@@ -290,10 +290,10 @@ use yii\helpers\Html;
    // "use strict";
 
     var device;
-    var connection;
+    window.connection;
 
-    const speakerDevices = document.getElementById('speaker-devices');
-    const ringtoneDevices = document.getElementById('ringtone-devices');
+    const speakerDevices = document.getElementsByClassName('speaker-devices');
+    const ringtoneDevices = document.getElementsByClassName('ringtone-devices');
     const outputVolumeBar = document.getElementById('output-volume');
     const inputVolumeBar = document.getElementById('input-volume');
     const volumeIndicators = document.getElementById('volume-indicators');
@@ -318,30 +318,33 @@ use yii\helpers\Html;
             .then(updateAllDevices.bind(device));
     }*/
 
-    speakerDevices.addEventListener('change', function () {
-        let selectedDevices = [].slice.call(speakerDevices.children)
-            .filter(function (node) {
-                return node.selected;
-            })
-            .map(function (node) {
-                return node.getAttribute('data-id');
-            });
+    for (var i = 0; i < speakerDevices.length; i++) {
+        speakerDevices[i].addEventListener('change', function () {
+            let selectedDevices = [].slice.call(speakerDevices[i].children)
+                .filter(function (node) {
+                    return node.selected;
+                })
+                .map(function (node) {
+                    return node.getAttribute('data-id');
+                });
 
-        device.audio.speakerDevices.set(selectedDevices);
-    });
+            device.audio.speakerDevices.set(selectedDevices);
+        });
+    }
 
-    ringtoneDevices.addEventListener('change', function () {
-        let selectedDevices = [].slice.call(ringtoneDevices.children)
-            .filter(function (node) {
-                return node.selected;
-            })
-            .map(function (node) {
-                return node.getAttribute('data-id');
-            });
+    for (var i = 0; i < ringtoneDevices.length; i++) {
+        ringtoneDevices[i].addEventListener('change', function () {
+            let selectedDevices = [].slice.call(ringtoneDevices[i].children)
+                .filter(function (node) {
+                    return node.selected;
+                })
+                .map(function (node) {
+                    return node.getAttribute('data-id');
+                });
 
-        device.audio.ringtoneDevices.set(selectedDevices);
-    });
-
+            device.audio.ringtoneDevices.set(selectedDevices);
+        });
+    }
 
     function volumeIndicatorsChange(inputVolume, outputVolume) {
         let inputColor = 'red';
@@ -376,8 +379,12 @@ use yii\helpers\Html;
     }
 
     function updateAllDevices() {
-        updateDevices(speakerDevices, device.audio.speakerDevices.get());
-        updateDevices(ringtoneDevices, device.audio.ringtoneDevices.get());
+        for (var i = 0; i < speakerDevices.length; i++) {
+            updateDevices(speakerDevices[i], device.audio.speakerDevices.get());
+        }
+        for (var i = 0; i < speakerDevices.length; i++) {
+            updateDevices(ringtoneDevices[i], device.audio.ringtoneDevices.get());
+        }
 
         // updateDevices(speakerDevices, );
         // updateDevices(ringtoneDevices, device);
@@ -685,6 +692,14 @@ use yii\helpers\Html;
                 if (device.audio.isOutputSelectionSupported) {
                     $('#output-selection').show();
                 }
+
+                window.localStorage.setItem('twilioDevice', JSON.stringify(device, function (key, value) {
+                    if (typeof value === 'function') {
+                        return value.toString();
+                    } else {
+                        return value;
+                    }
+                }));
             })
             .catch(function (err) {
                 updateAgentStatus(connection, false, 1);
@@ -719,8 +734,8 @@ use yii\helpers\Html;
 
             console.log('Calling ' + params.To + '...');
             createNotify('Calling', 'Calling ' + params.To + '...', 'success');
-            updateAgentStatus(connection, false, 0);
             connection = device.connect(params);
+            updateAgentStatus(connection, false, 0);
             $('#btn-group-id-redirect').hide();
         }
     }

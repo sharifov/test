@@ -2,7 +2,7 @@
 return [
     'components' => [
         'request' => [
-            'cookieValidationKey' => 'YNQtkeRBtplq97uEj9ZrrqPDuHWMCe4n',
+            'cookieValidationKey' => '{{ frontend.config.main.components.request.cookieValidationKey:str }}',
         ],
     ],
 ];

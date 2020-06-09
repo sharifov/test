@@ -14,6 +14,7 @@ use sales\entities\cases\Cases;
 use \sales\entities\cases\CasesStatus;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
+use yii\helpers\ArrayHelper;
 
 /* @var $this yii\web\View */
 /* @var $searchModel sales\entities\cases\CasesSearch */
@@ -97,7 +98,43 @@ $gridId = 'cases-grid-id';
                     'class' => 'text-center'
                 ]
             ],
-            'cs_gid',
+            [
+                'label' => 'Client ID',
+                'attribute' => 'cs_client_id',
+                'format' => 'client'
+            ],
+            [
+                'header' => 'Client Info',
+                'format' => 'raw',
+                'value' => static function (Cases $case) use ($user) {
+
+                    if ($case->client) {
+                        $clientName = $case->client->first_name . ' ' . $case->client->last_name;
+                        if ($clientName === 'Client Name') {
+                            $clientName = '- - - ';
+                        } else {
+                            $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName);
+                        }
+                    } else {
+                        $clientName = '-';
+                    }
+
+                    $str = $clientName . '<br>';
+
+                    if ($user->isAgent() && $case->isOwner($user->id)) {
+                        $str .= '- // - // - // -';
+                    } elseif ($case->client) {
+                        $str .= $case->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', ArrayHelper::map($case->client->clientEmails, 'email', 'email')) . '' : '';
+                        $str .= $case->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', ArrayHelper::map($case->client->clientPhones, 'phone', 'phone')) . '' : '';
+                    }
+
+                    return $str ?? '-';
+                },
+                'options' => [
+                    'style' => 'width:180px'
+                ]
+            ],
+            //'cs_gid',
 
             [
                 'class' => \common\components\grid\project\ProjectColumn::class,

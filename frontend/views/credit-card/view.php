@@ -49,6 +49,9 @@ $this->params['breadcrumbs'][] = $this->title;
             'cc_holder_name',
             'cc_expiration_month',
             'cc_expiration_year',
+            'cc_security_hash',
+            'cc_bo_link',
+            'cc_is_sync_bo:boolean'
 
 
         ],

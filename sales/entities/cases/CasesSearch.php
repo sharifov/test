@@ -65,6 +65,7 @@ class CasesSearch extends Cases
     public $arrivalAirport;
     public $departureCountries;
     public $arrivalCountries;
+    public $clientId;
 
     private $cacheSaleData = [];
 
@@ -83,7 +84,7 @@ class CasesSearch extends Cases
             ['cs_lead_id', 'string'],
             ['cs_dep_id', 'integer'],
             ['cs_created_dt', 'string'],
-            ['cs_client_id', 'integer'],
+            [['cs_client_id', 'clientId'], 'integer'],
             ['cs_project_id', 'integer'],
             ['cs_source_type_id', 'integer'],
             ['cs_last_action_dt', 'safe'],
@@ -139,6 +140,7 @@ class CasesSearch extends Cases
             'arrivalAirport' => 'Arrival Airport',
             'departureCountries' => 'Depart. Countries',
             'arrivalCountries' => 'Arrival Countries',
+            'clientId' => 'Client ID'
         ];
     }
 
@@ -197,6 +199,7 @@ class CasesSearch extends Cases
             'cs_status' => $this->cs_status,
             'cs_source_type_id' => $this->cs_source_type_id,
             'cs_need_action' => $this->cs_need_action,
+            'cs_client_id' => $this->cs_client_id,
         ]);
 
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
@@ -217,6 +220,11 @@ class CasesSearch extends Cases
                 $query->where('0=1');
             }
         }
+
+        if ($this->clientId){
+            $query->andWhere(['cs_client_id' => $this->clientId]);
+        }
+
         if ($this->paxFirstName) {
             if ($saleId = $this->getSaleIdByPaxFirstName($this->paxFirstName)) {
                 $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
@@ -381,6 +389,10 @@ class CasesSearch extends Cases
             } else {
                 $query->where('0=1');
             }
+        }
+
+        if ($this->clientId){
+            $query->andWhere(['cs_client_id' => $this->clientId]);
         }
 
         if ($this->paxFirstName) {

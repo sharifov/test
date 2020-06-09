@@ -43,13 +43,17 @@ class BackOffice
 	 * @param array $fields
 	 * @param string $type
 	 * @param int $curlTimeOut
+	 * @param string $host
 	 * @return \yii\httpclient\Response
 	 * @throws \yii\base\InvalidConfigException
+	 * @throws \yii\httpclient\Exception
 	 */
-    public static function sendRequest2(string $endpoint = '', array $fields = [], string $type = 'POST', int $curlTimeOut = 30): \yii\httpclient\Response
+    public static function sendRequest2(string $endpoint = '', array $fields = [], string $type = 'POST', int $curlTimeOut = 30, string $host = ''): \yii\httpclient\Response
     {
 
-        $uri = Yii::$app->params['backOffice']['serverUrl'] . '/' . $endpoint;
+    	$host = $host ?: Yii::$app->params['backOffice']['serverUrl'];
+
+        $uri = $host . '/' . $endpoint;
         $signature = self::getSignatureBO(Yii::$app->params['backOffice']['apiKey'], Yii::$app->params['backOffice']['ver']);
 
         $client = new \yii\httpclient\Client([
