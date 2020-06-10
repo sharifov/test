@@ -208,6 +208,12 @@ $js = <<<JS
                                 holdEvent(obj.data);
                              }
                         }
+                        
+                        if(obj.cmd === 'muteCall') {
+                            if (typeof obj.data !== 'undefined') {
+                                muteEvent(obj.data);
+                             }
+                        }
                     }
                     // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
                 } catch (error) {

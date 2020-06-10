@@ -1,8 +1,12 @@
 var PhoneWidgetCall = function () {
     this.connection = '';
+    let muteUrl = '';
+    let unmuteUrl = '';
 
     function init (options)
     {
+        muteUrl = options.muteUrl;
+        unmuteUrl = options.unmuteUrl;
         muteBtnEvent();
         transferCallBtnEvent(options);
         acceptCallBtnEvent(options);
@@ -18,7 +22,9 @@ var PhoneWidgetCall = function () {
                 'type': parseInt(options.type),
                 'source_type_id': parseInt(options.source_type_id),
                 'type_description': options.type_description,
-                'is_hold': options.is_hold
+                'is_hold': options.is_hold,
+                'is_mute': options.is_mute,
+                'is_listen': options.is_listen
             });
         } else if ('isCallRinging' in options && options.isCallRinging) {
             initIncomingCall({
@@ -114,28 +120,114 @@ var PhoneWidgetCall = function () {
     {
         let _self = this;
         $(document).on('click', '#call-pane__mute', function(e) {
-            let connection = _self.connection;
-            let mute = $(this);
-            if (mute.attr('data-is-muted') === 'false') {
-                if (connection) {
-                    connection.mute(true);
-                    if (connection.isMuted()) {
-                        mute.html('<i class="fas fa-microphone-alt-slash"></i>').attr('data-is-muted', true);
-                    } else {
-                        new PNotify({title: "Mute", type: "error", text: "Error", hide: true});
+
+            let muteBtn = $(this);
+
+            if (conferenceBase) {
+
+                let callSid = getActiveConnectionCallSid();
+
+                if (callSid) {
+                    if (muteBtn.attr('data-is-muted') === 'false') {
+                       mute(callSid, muteBtn);
+                    } else if (muteBtn.attr('data-is-muted') === 'true') {
+                       unmute(callSid, muteBtn);
                     }
+                } else {
+                    alert('Error: Not found active Connection CallSid');
                 }
+
             } else {
-                if (connection) {
-                    connection.mute(false);
-                    if (!connection.isMuted()) {
-                        $(this).html('<i class="fas fa-microphone"></i>').attr('data-is-muted', false);
-                    } else {
-                        new PNotify({title: "Unmute", type: "error", text: "Error", hide: true});
+                let connection = _self.connection;
+                if (muteBtn.attr('data-is-muted') === 'false') {
+                    if (connection) {
+                        connection.mute(true);
+                        if (connection.isMuted()) {
+                            muteBtn.html('<i class="fas fa-microphone-alt-slash"></i>').attr('data-is-muted', true);
+                        } else {
+                            new PNotify({title: "Mute", type: "error", text: "Error", hide: true});
+                        }
+                    }
+                } else {
+                    if (connection) {
+                        connection.mute(false);
+                        if (!connection.isMuted()) {
+                            $(this).html('<i class="fas fa-microphone"></i>').attr('data-is-muted', false);
+                        } else {
+                            new PNotify({title: "Unmute", type: "error", text: "Error", hide: true});
+                        }
                     }
                 }
             }
         });
+    }
+
+    function mute(callSid, btn) {
+        btn.prop('disabled', true);
+        btn.attr('data-is-muted', null);
+        btn.html('<i class="fa fa-spinner fa-spin"></i>');
+
+        $.ajax({
+            type: 'post',
+            data: {
+                'sid': callSid,
+            },
+            url: muteUrl
+        })
+            .done(function (data) {
+                if (data.error) {
+                    new PNotify({title: "Mute", type: "error", text: data.message, hide: true});
+                    btn.prop('disabled', false);
+                    btn.attr('data-is-muted', 'false');
+                    btn.html('<i class="fas fa-microphone"></i>');
+                } else {
+                    // new PNotify({title: "Hold", type: "success", text: 'Wait', hide: true});
+                }
+            })
+            .fail(function (error) {
+                new PNotify({title: "Hold", type: "error", text: data.message, hide: true});
+                btn.prop('disabled', false);
+                btn.attr('data-is-muted', 'false');
+                btn.html('<i class="fas fa-microphone"></i>');
+                console.error(error);
+            })
+            .always(function () {
+
+            });
+    }
+
+    function unmute(callSid, btn) {
+        btn.prop('disabled', true);
+        btn.attr('data-is-muted', null);
+        btn.html('<i class="fa fa-spinner fa-spin"></i>');
+
+        $.ajax({
+            type: 'post',
+            data: {
+                'sid': callSid,
+            },
+            url: unmuteUrl
+        })
+            .done(function (data) {
+                if (data.error) {
+                    new PNotify({title: "Unmute", type: "error", text: data.message, hide: true});
+                    btn.prop('disabled', false);
+                    btn.attr('data-is-muted', 'true');
+                    btn.html('<i class="fas fa-microphone-alt-slash"></i>');
+                } else {
+                    // new PNotify({title: "Unmute", type: "success", text: 'Wait', hide: true});
+                }
+            })
+            .fail(function (error) {
+                new PNotify({title: "Unmute", type: "error", text: data.message, hide: true});
+                btn.prop('disabled', false);
+                btn.attr('data-is-muted', 'true');
+                btn.html('<i class="fas fa-microphone-alt-slash"></i>');
+                console.error(error);
+            })
+            .always(function () {
+
+            });
     }
 
     function updateConnection(conn)
@@ -192,7 +284,22 @@ var PhoneWidgetCall = function () {
     function refreshCallStatus(obj) {
 
         $('.call-pane-initial .contact-info-card__label').html(obj.type_description);
-
+        if (obj.is_mute) {
+            let btn = $('#call-pane__mute');
+            btn.attr('data-is-muted', 'true');
+            btn.html('<i class="fas fa-microphone-alt-slash"></i>');
+        } else {
+            let btn = $('#call-pane__mute');
+            btn.attr('data-is-muted', 'false');
+            btn.html('<i class="fas fa-microphone"></i>');
+        }
+        if (obj.is_listen) {
+            let btn = $('#call-pane__mute');
+            btn.prop('disabled', true);
+        } else {
+            let btn = $('#call-pane__mute');
+            btn.prop('disabled', false);
+        }
         if (obj.status === 'In progress') {
             openWidget();
             obj.status = 'On Call';
@@ -202,11 +309,11 @@ var PhoneWidgetCall = function () {
             if ('type' in obj && obj.type && obj.type === 3) {
                 $('#wg-transfer-call').hide();
                 $('#wg-add-person').hide();
-                if ('source_type_id' in obj && obj.source_type_id && obj.source_type_id === 7) {
-                    $('#call-pane__mute').hide();
-                } else {
+                // if ('source_type_id' in obj && obj.source_type_id && obj.source_type_id === 7) {
+                //     $('#call-pane__mute').hide();
+                // } else {
                     $('#call-pane__mute').show();
-                }
+                // }
             } else {
                 $('#call-pane__mute').show();
                 $('#wg-transfer-call').show();

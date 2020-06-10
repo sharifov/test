@@ -954,7 +954,7 @@ class PhoneController extends FController
             $data = $this->getDataForHoldConferenceCall($sid);
             /** @var Call $call */
             $call = $data['call'];
-            if (!($call->currentParticipant->isJoin() || $call->currentParticipant->isUnhold())) {
+            if (!($call->currentParticipant->isJoin() || $call->currentParticipant->isUnhold() || $call->currentParticipant->isMute() || $call->currentParticipant->isUnmute())) {
                 throw new \Exception('Invalid type of Participant');
             }
             $result = Yii::$app->communication->holdConferenceCall($data['conferenceSid'], $data['keeperSid']);
@@ -1075,6 +1075,42 @@ class PhoneController extends FController
         return $this->asJson($result);
     }
 
+    public function actionAjaxMuteParticipant(): Response
+    {
+        try {
+            $sid = (string)Yii::$app->request->post('sid');
+            $call = $this->getCallForMuteUnmuteParticipant($sid);
+            if (!($call->currentParticipant->isJoin() || $call->currentParticipant->isUnhold() || $call->currentParticipant->isUnmute())) {
+                throw new \Exception('Invalid type of Participant');
+            }
+            $result = Yii::$app->communication->muteParticipant($call->c_conference_sid, $call->c_call_sid);
+        } catch (\Throwable $e) {
+            $result = [
+                'error' => true,
+                'message' => $e->getMessage(),
+            ];
+        }
+        return $this->asJson($result);
+    }
+
+    public function actionAjaxUnmuteParticipant(): Response
+    {
+        try {
+            $sid = (string)Yii::$app->request->post('sid');
+            $call = $this->getCallForMuteUnmuteParticipant($sid);
+            if (!$call->currentParticipant->isMute()) {
+                throw new \Exception('Invalid type of Participant');
+            }
+            $result = Yii::$app->communication->unmuteParticipant($call->c_conference_sid, $call->c_call_sid);
+        } catch (\Throwable $e) {
+            $result = [
+                'error' => true,
+                'message' => $e->getMessage(),
+            ];
+        }
+        return $this->asJson($result);
+    }
+
     private function getJoinCall(string $sid): Call
     {
         if (!$sid) {
@@ -1105,7 +1141,7 @@ class PhoneController extends FController
             throw new BadRequestHttpException('Invalid Participant type. Sid: ' . $sid);
         }
 
-        if (!($participant->isUnhold() || $participant->isJoin())) {
+        if (!($participant->isUnhold() || $participant->isJoin() || $participant->isMute() || $participant->isUnmute())) {
             throw new BadRequestHttpException('Participant status is not valid');
         }
 
@@ -1258,5 +1294,77 @@ class PhoneController extends FController
             'holderSid' => $holderSid,
             'keeperSid' => $keeperSid,
         ];
+    }
+
+    private function getCallForMuteUnmuteParticipant(string $sid): Call
+    {
+        if (!$sid) {
+            throw new BadRequestHttpException('Not found Call SID in request');
+        }
+
+        if (!$call = Call::findOne(['c_call_sid' => $sid])) {
+            throw new BadRequestHttpException('Not found Call. Sid: ' . $sid);
+        }
+
+        if (!$call->isOwner(Auth::id())) {
+            throw new BadRequestHttpException('Is not your Call');
+        }
+
+        if ($call->isJoin() && $call->c_source_type_id === Call::SOURCE_LISTEN) {
+            throw new BadRequestHttpException('Invalid type of Call');
+        }
+
+        if (!$participant = $call->currentParticipant) {
+            throw new BadRequestHttpException('Not found Participant');
+        }
+
+        if (!$participant->isAgent()) {
+            throw new BadRequestHttpException('Invalid type of Participant');
+        }
+
+        if (
+            ($call->isOut() && $call->isGeneralParent() && ($call->isStatusRinging()/* || $call->isStatusInProgress()*/))
+            || ($call->isOut() && !$call->isGeneralParent() && $call->isStatusInProgress())
+            || ($call->isIn() && $call->isStatusInProgress())
+            || ($call->isJoin() && $call->isStatusInProgress())
+        ) {
+
+        } else {
+            throw new BadRequestHttpException('Invalid Call Status');
+        }
+
+        if (!$call->isConferenceType()) {
+            throw new BadRequestHttpException('Call is not conference Call. Sid: ' . $sid);
+        }
+
+        if (!$call->c_conference_id) {
+            throw new BadRequestHttpException('Call not updated. Please wait some seconds.');
+        }
+
+        if (!$conference = Conference::findOne(['cf_id' => $call->c_conference_id])) {
+            throw new BadRequestHttpException('Not found conference. SID: ' . $call->c_conference_sid);
+        }
+
+        if ($conference->isEnd()) {
+            throw new BadRequestHttpException('Invalid Conference status. SID: ' . $call->c_conference_sid);
+        }
+
+        if (!$participants = $conference->conferenceParticipants) {
+            throw new BadRequestHttpException('Not found participants on Conference Sid: ' . $call->c_conference_sid);
+        }
+
+        $callIsOneOfParticipants = false;
+        foreach ($participants as $participant) {
+            if ($participant->cp_call_id === $call->c_id) {
+                $callIsOneOfParticipants = true;
+                break;
+            }
+        }
+
+        if (!$callIsOneOfParticipants) {
+            throw new BadRequestHttpException('Call is not One of participants on Conference Sid: ' . $call->c_conference_sid);
+        }
+
+        return $call;
     }
 }

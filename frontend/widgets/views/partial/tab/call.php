@@ -425,6 +425,8 @@ $ajaxCallRedirectGetAgents = Url::to(['phone/ajax-call-get-agents']);
 $ajaxAcceptIncomingCall = Url::to(['call/ajax-accept-incoming-call']);
 $callStatusUrl = Url::to(['/user-call-status/update-status']);
 $ajaxSaveCallUrl = Url::to(['phone/ajax-save-call']);
+$ajaxMuteUrl = Url::to(['phone/ajax-mute-participant']);
+$ajaxUnmuteUrl = Url::to(['phone/ajax-unmute-participant']);
 
 if ($call->isStatusRinging() || $call->isStatusInProgress() || $call->isStatusQueue()) {
     $callDuration = 0;
@@ -436,6 +438,18 @@ if ($call->isStatusRinging() || $call->isStatusInProgress() || $call->isStatusQu
     }
 } else {
     $callDuration = $call ? $call->c_call_duration : 0;
+}
+
+$isMute = 0;
+$isListen = 0;
+if (
+        ($call->currentParticipant && $call->currentParticipant->isMute())
+        || ($call->isJoin() && $call->c_source_type_id === Call::SOURCE_LISTEN)
+) {
+    $isMute = 1;
+}
+if ($call->isJoin() && $call->c_source_type_id === Call::SOURCE_LISTEN) {
+    $isListen = 1;
 }
 
 $callId = $call ? $call->c_id : null;
@@ -459,7 +473,11 @@ PhoneWidgetCall.init({
     'type_description' : '{$type_description}',
     'source_type_id' : '{$call->c_source_type_id}',
     'is_hold': parseInt('{$isHold}'),
-    'status': '{$call->getStatusName()}'
+    'status': '{$call->getStatusName()}',
+    'muteUrl': '{$ajaxMuteUrl}',
+    'unmuteUrl': '{$ajaxUnmuteUrl}',
+    'is_mute': parseInt('{$isMute}'),
+    'is_listen': parseInt('{$isListen}')    
 });
 
 JS;

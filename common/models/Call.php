@@ -1183,8 +1183,17 @@ class Call extends \yii\db\ActiveRecord
                 $fromName = $isInternal ? $this->getCallerName($this->isIn() ? $this->c_from : $this->c_to)  : 'ClientName';
             }
 			$isHold = false;
+			$isListen = false;
+			$isMute = false;
 			if ($this->currentParticipant && $this->currentParticipant->isHold()) {
 			    $isHold = true;
+            }
+			if ($this->currentParticipant && $this->currentParticipant->isMute()) {
+			    $isMute = true;
+            }
+			if ($this->isJoin() && $this->c_source_type_id === self::SOURCE_LISTEN) {
+			    $isListen = true;
+                $isMute = true;
             }
             Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id],
                 [
@@ -1201,6 +1210,8 @@ class Call extends \yii\db\ActiveRecord
 					'name' => $fromName,
 					'fromInternal' => $isInternal,
                     'is_hold' => $isHold,
+                    'is_listen' => $isListen,
+                    'is_mute' => $isMute,
 				]
 			);
         }

@@ -165,13 +165,28 @@ class Conference extends \yii\db\ActiveRecord
         $this->cf_status_id = self::STATUS_START;
     }
 
+    public function isStart(): bool
+    {
+        return $this->cf_status_id === self::STATUS_START;
+    }
+
     public function delay(): void
     {
         $this->cf_status_id = self::STATUS_DELAY;
     }
 
+    public function isDelay(): bool
+    {
+        return $this->cf_status_id === self::STATUS_DELAY;
+    }
+
     public function end(): void
     {
         $this->cf_status_id = self::STATUS_END;
+    }
+
+    public function isEnd(): bool
+    {
+        return $this->cf_status_id === self::STATUS_END;
     }
 }

@@ -19,7 +19,6 @@ class MuteMessage
                     'id' => $call->c_id,
                     'sid' => $call->c_call_sid,
                     'user_id' => $call->c_created_user_id,
-                    'type_id' => $call->c_call_type_id,
                 ],
             ],
         ];
@@ -34,7 +33,6 @@ class MuteMessage
                     'id' => $call->c_id,
                     'sid' => $call->c_call_sid,
                     'user_id' => $call->c_created_user_id,
-                    'type_id' => $call->c_call_type_id,
                 ],
             ],
         ];

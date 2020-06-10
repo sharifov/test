@@ -374,6 +374,10 @@ use yii\helpers\Html;
         let callSid = getActiveConnectionCallSid();
 
         if (callSid) {
+            let btn = $('#cancel-active-call');
+            if (btn.length > 0) {
+                btn.html('<i class="fa fa-spinner fa-spin"></i>');
+            }
             button.prop('disabled', true);
             $.ajax({
                 type: 'post',
@@ -391,6 +395,9 @@ use yii\helpers\Html;
                     console.error(error);
                 })
                 .always(function () {
+                    if (btn.length > 0) {
+                        btn.html('<i class="fa fa-phone-slash"></i>');
+                    }
                     button.prop('disabled', false);
                 });
         } else {
@@ -1500,6 +1507,24 @@ $js = <<<JS
                  }
                  btn.data('mode', 'unhold');
                  // new PNotify({title: "Unhold", type: "success", text: 'Success', hide: true});    
+             }
+         }
+     }
+     
+     function muteEvent(data)
+     {
+         let callSid = getActiveConnectionCallSid();
+         
+         if (callSid && data.call.sid === callSid) {
+             let btn = $('#call-pane__mute');
+             if (data.command === 'mute') {
+                    btn.prop('disabled', false);
+                    btn.attr('data-is-muted', 'true');
+                    btn.html('<i class="fas fa-microphone-alt-slash"></i>');
+             } else if (data.command === 'unmute') {
+                    btn.prop('disabled', false);
+                    btn.attr('data-is-muted', 'false');
+                    btn.html('<i class="fas fa-microphone"></i>');
              }
          }
      }

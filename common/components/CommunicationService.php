@@ -853,11 +853,11 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $this->processConferenceResponse($response);
     }
 
-    public function muteParticipant(string $callSid, string $conferenceSid): array
+    public function muteParticipant(string $conferenceSid, string $callSid): array
     {
         $data = [
-            'callSid' => $callSid,
             'conferenceSid' => $conferenceSid,
+            'callSid' => $callSid,
         ];
 
         $response = $this->sendRequest('twilio-conference/mute-participant', $data);
@@ -865,11 +865,11 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $this->processConferenceResponse($response);
     }
 
-    public function unmuteParticipant(string $callSid, string $conferenceSid): array
+    public function unmuteParticipant(string $conferenceSid, string $callSid): array
     {
         $data = [
-            'callSid' => $callSid,
             'conferenceSid' => $conferenceSid,
+            'callSid' => $callSid,
         ];
 
         $response = $this->sendRequest('twilio-conference/unmute-participant', $data);
