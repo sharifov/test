@@ -19,17 +19,23 @@ class VueAsset extends AssetBundle
         'css/site.css',
     ];*/
 
-    public $js = [
+    /*public $js = [
         ['https://cdn.jsdelivr.net/npm/vue/dist/vue.js', 'position' => \yii\web\View::POS_HEAD],
-    ];
+    ];*/
 
-    /*public function init()
+    public function init()
     {
         parent::init();
 
-        $this->js[] = YII_ENV === 'dev' ? 'app.js' : 'app.min.js';
-    }*/
+        if (YII_ENV === 'prod' || YII_ENV === 'stage') {
+            $jsFile = 'https://cdn.jsdelivr.net/npm/vue';
+        } else {
+            $jsFile = 'https://cdn.jsdelivr.net/npm/vue/dist/vue.js';
+        }
 
-    public $depends = [
-    ];
+        $this->js[] = [$jsFile, 'position' => \yii\web\View::POS_HEAD];
+    }
+
+//    public $depends = [
+//    ];
 }
