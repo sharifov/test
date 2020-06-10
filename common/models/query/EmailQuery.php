@@ -33,4 +33,14 @@ class EmailQuery extends \yii\db\ActiveQuery
     {
         return parent::one($db);
     }
+
+    public function byEmailToList(array $emails): EmailQuery
+	{
+		return $this->andWhere(['IN', 'e_email_to', $emails]);
+	}
+
+	public function byDateSend(string $date): EmailQuery
+	{
+		return $this->andWhere(['date_format(e_created_dt, "%Y-%m-%d")' => $date]);
+	}
 }

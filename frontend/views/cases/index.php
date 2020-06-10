@@ -65,7 +65,7 @@ $gridId = 'cases-grid-id';
                 $searchTpl = '_search_agents';
             }
             ?>
-            <?= $this->render($searchTpl, ['model' => $searchModel]); ?>
+            <?= $this->render($searchTpl, ['model' => $searchModel, 'dataProvider' => $dataProvider]); ?>
         </div>
     </div>
 
