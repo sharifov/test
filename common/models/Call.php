@@ -1922,7 +1922,7 @@ class Call extends \yii\db\ActiveRecord
 
 		$phone = PhoneList::find()->byPhone($fromNumber)->enabled()->one();
 
-		if ($phone->departmentPhoneProject && $phone->departmentPhoneProject->dppDep && $phone->departmentPhoneProject->isEnabled()) {
+		if ($phone && $phone->departmentPhoneProject && $phone->departmentPhoneProject->dppDep && $phone->departmentPhoneProject->isEnabled()) {
 			/** @var $department Department */
 			$department = $phone->departmentPhoneProject->dppDep;
 			return $department->dep_name;
