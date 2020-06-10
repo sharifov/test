@@ -258,7 +258,7 @@ var PhoneWidgetCall = function () {
             $('.call-pane__call-btns').removeClass('is-on-call');
         }
         $('.call-in-action__text').html(obj.status);
-        $('.call-in-action__time').html('').show().timer('remove').timer({format: '%M:%S', seconds: status.duration | 0}).timer('start');
+        $('.call-in-action__time').html('').show().timer('remove').timer({format: '%M:%S', seconds: obj.duration | 0}).timer('start');
 
         // if ('isIn' in obj && obj.isIn) {
         //     $('.call-pane-initial .contact-info-card__label').html('Incoming');

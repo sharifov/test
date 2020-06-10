@@ -425,7 +425,19 @@ $ajaxCallRedirectGetAgents = Url::to(['phone/ajax-call-get-agents']);
 $ajaxAcceptIncomingCall = Url::to(['call/ajax-accept-incoming-call']);
 $callStatusUrl = Url::to(['/user-call-status/update-status']);
 $ajaxSaveCallUrl = Url::to(['phone/ajax-save-call']);
-$callDuration = $call ? $call->c_call_duration : 0;
+
+if ($call->isStatusRinging() || $call->isStatusInProgress()) {
+    $callDuration = 0;
+    if($call->c_updated_dt) {
+        $callDuration = time() - strtotime($call->c_updated_dt);
+        if (!$callDuration) {
+            $callDuration = 0;
+        }
+    }
+} else {
+    $callDuration = $call ? $call->c_call_duration : 0;
+}
+
 $callId = $call ? $call->c_id : null;
 $isHold = $isHold ? 1 : 0;
 $js = <<<JS
