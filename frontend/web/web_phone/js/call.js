@@ -278,7 +278,9 @@ var PhoneWidgetCall = function () {
         if (typeof obj === 'object' && 'phoneFrom' in obj) {
             $('#btn-accept-call').attr('data-from-internal', obj.fromInternal | false).attr('data-call-id', obj.cua_call_id);
             showIncomingCallPanel(obj.phoneFrom, obj.name || '', obj.type_description, obj.projectName, obj.sourceName);
-            $('.call-pane__call-btns').addClass('is-pending');
+            if (obj.type === 1) {
+                $('.call-pane__call-btns').addClass('is-pending');
+            }
             $('.call-in-action__time').html('').show().timer('remove').timer({format: '%M:%S', seconds: obj.duration | 0}).timer('start');
             if (obj.status) {
                 $('.call-in-action__text').html(obj.status);
