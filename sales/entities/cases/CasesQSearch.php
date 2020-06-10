@@ -140,7 +140,8 @@ class CasesQSearch extends Cases
     public function searchInbox($params, Employee $user): ActiveDataProvider
     {
         $query = $this->casesQRepository->getInboxQuery($user);
-        $query->joinWith('project', true, 'INNER JOIN');
+
+		$query->joinWith('project', true, 'INNER JOIN');
 
         $query->addSelect('*');
         $query->addSelect(new Expression('
@@ -151,6 +152,20 @@ class CasesQSearch extends Cases
             END AS saleExist'));
         $query->addSelect(new Expression('
             DATE(if(last_out_date IS NULL, last_in_date, LEAST(last_in_date, last_out_date))) AS nextFlight'));
+
+		$query->addSelect('css_penalty_type');
+
+		$query->leftJoin([
+			'penalty_departure' => CaseSale::find()
+				->select([
+					'css_cs_id',
+					new Expression('
+                    MIN(css_penalty_type) AS css_penalty_type'),
+				])
+				->innerJoin(Cases::tableName() . ' AS cases',
+					'case_sale.css_cs_id = cases.cs_id AND cases.cs_status = ' . CasesStatus::STATUS_PENDING)
+				->groupBy('css_cs_id')
+		], 'cases.cs_id = penalty_departure.css_cs_id');
 
         $query->leftJoin([
             'sale_out' => CaseSale::find()
@@ -210,6 +225,12 @@ class CasesQSearch extends Cases
                 'default' => SORT_ASC,
                 'label' => 'Next flight date',
             ],
+			'css_penalty_type' => [
+				'asc' => ['css_penalty_type' => SORT_ASC],
+				'desc' => ['css_penalty_type' => SORT_DESC],
+				'default' => SORT_ASC,
+				'label' => 'Penalty Type',
+			],
         ]);
         $dataProvider->setSort($sorting);
 
@@ -229,7 +250,8 @@ class CasesQSearch extends Cases
             'cs_category_id' => $this->cs_category_id,
             'cs_dep_id' => $this->cs_dep_id,
             'cs_need_action' => $this->cs_need_action,
-        ]);
+			'css_penalty_type' => $this->css_penalty_type,
+		]);
 
         if ($this->cs_lead_id) {
             $query->andWhere(['cs_lead_id' => Lead::find()->select('id')->andWhere(['uid' => $this->cs_lead_id])]);

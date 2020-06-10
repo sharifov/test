@@ -2,6 +2,7 @@
 namespace common\models;
 
 use frontend\models\UserFailedLogin;
+use sales\services\authentication\AntiBruteForceHelper;
 use sales\services\authentication\AntiBruteForceService;
 use Yii;
 use yii\base\Model;
@@ -125,7 +126,7 @@ class LoginForm extends Model
     private function checkByIp($user): bool
     {
         if($user->acl_rules_activated) {
-            $clientIP = AntiBruteForceService::getClientIPAddress();
+            $clientIP = AntiBruteForceHelper::getClientIPAddress();
             if ($clientIP === 'UNKNOWN' ||  (!GlobalAcl::isActiveIPRule($clientIP) && !EmployeeAcl::isActiveIPRule($clientIP, $user->id))) {
                 $this->addError('username', sprintf('Remote Address %s Denied! Please, contact your Supervision or Administrator.', $clientIP));
                 return false;
@@ -183,11 +184,12 @@ class LoginForm extends Model
     public function afterValidate(): void
     {
         if ($this->hasErrors()) {
+            $user = $this->_user ?? Employee::findOne(['username' => $this->username]);
             $userFailedLogin = UserFailedLogin::create(
                 $this->username,
-                $this->_user ? $this->_user->id : null,
-                Yii::$app->request->getUserAgent(),
-                AntiBruteForceService::getClientIPAddress(),
+                $user ? $user->id : null,
+                AntiBruteForceHelper::getBrowserName() . ' UserAgent:' . Yii::$app->request->getUserAgent(),
+                AntiBruteForceHelper::getClientIPAddress(),
                 Yii::$app->session->id
             );
             if (!$userFailedLogin->save()) {
