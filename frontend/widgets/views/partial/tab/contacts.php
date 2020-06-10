@@ -40,7 +40,7 @@ echo $this->render('@frontend/widgets/newWebPhone/view/email', ['userEmails' => 
 
         ?>
         <div class="selection-amount">
-            <i class="selection-amount__selected">2</i>/<i class="selection-amount__contact-amount">386</i>
+            <i class="selection-amount__selected">0</i>/<i class="selection-amount__contact-amount">386</i>
         </div>
     </div>
 

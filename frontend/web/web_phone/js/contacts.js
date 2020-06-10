@@ -133,6 +133,8 @@ let PhoneWidgetContacts = function () {
             if (selectedContacts.length === 0) {
                 $('.submit-selected-contacts').slideUp(150);
             }
+
+            $('.selection-amount__selected').html(selectedContacts.length);
             console.log(selectedContacts)
         })
     }
