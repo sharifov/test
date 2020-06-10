@@ -28,7 +28,9 @@ var PhoneWidgetCall = function () {
                 'name': options.name || '',
                 'type': options.type,
                 'source_type_id': parseInt(options.source_type_id),
-                'type_description': options.type_description
+                'type_description': options.type_description,
+                'duration': options.duration | 0,
+                'status': options.status
             });
         }
     }
@@ -252,6 +254,7 @@ var PhoneWidgetCall = function () {
             $('#cw-client_name').html(obj.name);
             $('#cw-project_name').html(obj.projectName);
             $('#cw-source_name').html(obj.sourceName);
+            // $('.call-pane__call-btns').addClass('is-pending');
         }else if (obj.status === 'Completed') {
             cancelCall();
         }else {
@@ -275,6 +278,11 @@ var PhoneWidgetCall = function () {
         if (typeof obj === 'object' && 'phoneFrom' in obj) {
             $('#btn-accept-call').attr('data-from-internal', obj.fromInternal | false).attr('data-call-id', obj.cua_call_id);
             showIncomingCallPanel(obj.phoneFrom, obj.name || '', obj.type_description, obj.projectName, obj.sourceName);
+            $('.call-pane__call-btns').addClass('is-pending');
+            $('.call-in-action__time').html('').show().timer('remove').timer({format: '%M:%S', seconds: obj.duration | 0}).timer('start');
+            if (obj.status) {
+                $('.call-in-action__text').html(obj.status);
+            }
         } else if (obj.cua_status_id === 5) {
             cancelCall();
         }
@@ -298,7 +306,7 @@ var PhoneWidgetCall = function () {
         $('#tab-phone .call-pane-initial').removeClass('is_active');
         $('#tab-phone .call-pane-incoming').addClass('is_active');
         $('#btn-accept-call').find('i').removeClass('fa fa-spinner fa-spin').addClass('fas fa-check');
-        //$('.call-pane-incoming .contact-info-card__label').html(type_description);
+        $('.call-pane-incoming .contact-info-card__label').html(type_description);
         $('#cw-client_name').html(name);
         $('#cw-project_name').html(projectName);
         $('#cw-source_name').html(sourceName);

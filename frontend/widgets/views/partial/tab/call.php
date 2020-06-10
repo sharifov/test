@@ -426,7 +426,7 @@ $ajaxAcceptIncomingCall = Url::to(['call/ajax-accept-incoming-call']);
 $callStatusUrl = Url::to(['/user-call-status/update-status']);
 $ajaxSaveCallUrl = Url::to(['phone/ajax-save-call']);
 
-if ($call->isStatusRinging() || $call->isStatusInProgress()) {
+if ($call->isStatusRinging() || $call->isStatusInProgress() || $call->isStatusQueue()) {
     $callDuration = 0;
     if($call->c_updated_dt) {
         $callDuration = time() - strtotime($call->c_updated_dt);
@@ -458,7 +458,8 @@ PhoneWidgetCall.init({
     'type' : parseInt('{$type}'),
     'type_description' : '{$type_description}',
     'source_type_id' : '{$call->c_source_type_id}',
-    'is_hold': parseInt('{$isHold}')
+    'is_hold': parseInt('{$isHold}'),
+    'status': '{$call->getStatusName()}'
 });
 
 JS;

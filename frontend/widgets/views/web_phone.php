@@ -784,10 +784,10 @@ use yii\helpers\Html;
                     volumeIndicators.style.display = 'none';
                     cleanPhones();
 
-                    if (typeof PhoneWidgetCall === "object") {
-                        PhoneWidgetCall.cancelCall();
-                        PhoneWidgetCall.clearCallLayersInfo();
-                    }
+                    // if (typeof PhoneWidgetCall === "object") {
+                    //     PhoneWidgetCall.cancelCall();
+                    //     PhoneWidgetCall.clearCallLayersInfo();
+                    // }
                 });
 
                 // device.on('ringing', function (conn) {
