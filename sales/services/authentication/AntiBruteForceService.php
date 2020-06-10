@@ -161,7 +161,7 @@ class AntiBruteForceService
      */
     public function setMessageForBlocked(Employee $user): string
     {
-        $this->notificationMessage = "The system has blocked user account. Reason: login attempts limit reached.  \n\n";
+        $this->notificationMessage = "The system has blocked user account. Reason: login attempts limit reached.\n";
         $this->notificationMessage .= 'Username: "' . $user->username . '" (' . $user->id . ')';
         return $this->notificationMessage;
     }
