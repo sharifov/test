@@ -1251,6 +1251,11 @@ class TestController extends FController
 		echo '<pre>';
 		print_r($service->sendAddedCreditCardToBO($saleOriginalData['projectApiKey'], $bookId, $saleId, $card));
 	}
+
+    public function actionVue()
+    {
+        return $this->render('vue');
+    }
 }
 
 

@@ -17,7 +17,9 @@ class AppAsset extends AssetBundle
         'css/site.css?v=1.3',
     ];
     public $js = [
-        '/js/util.js?v=1.6'
+        '/js/util.js?v=1.6',
+        // ['https://cdn.jsdelivr.net/npm/vue/dist/vue.js', 'position' => \yii\web\View::POS_HEAD],
+        //'https://ru.vuejs.org/js/vue.js',
     ];
     public $depends = [
         'yii\web\YiiAsset',
