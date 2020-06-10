@@ -110,13 +110,8 @@ $this->registerJs($js);
         ]) ?>
     <?php endif;?>
 
-    <?php $form = ActiveForm::begin(['options' => ['data-pjax' => true, 'class' => '', 'style' => 'overflow: hidden;']]); // ['action' => ['leads/update-multiple'] ?>
-
     <?php
-
     $gridColumns = [
-        // ['class' => 'yii\grid\SerialColumn'],
-
         [
             'class' => '\kartik\grid\CheckboxColumn',
             'name' => 'LeadMultipleForm[lead_list]',
@@ -128,41 +123,6 @@ $this->registerJs($js);
             },
             'visible' => Auth::can('leadSearchMultipleSelect')
         ],
-
-        /*[
-                'class' => 'yii\grid\CheckboxColumn',
-                'name' => 'LeadMultipleForm[lead_list]'
-                'checkboxOptions' => function(Lead $model) {
-                    return ['value' => $model->id];
-                },
-        ],*/
-
-        /*[
-
-            'header'=>Html::checkbox('selection_all', false, ['class'=>'select-on-check-all', 'value'=>1,
-                'onclick'=>'
-                    $(".kv-row-checkbox").prop("checked", $(this).is(":checked"));
-                    if($(".kv-row-checkbox").prop("checked") === true) $(".delete_ready").attr("class","delete_ready warning");
-                    if($(".kv-row-checkbox").prop("checked") === false) $(".delete_ready").attr("class","delete_ready");
-
-
-                    ']),
-            'contentOptions'=>['class'=>'kv-row-select'],
-            'content'=>function($model, $key){
-
-
-                    return Html::checkbox('id[]', false, ['class'=>'kv-row-checkbox ',
-                        'value'=>$key, 'onclick'=>'$(this).closest("tr").toggleClass("warning");']);
-
-                //return Html::checkbox('selection[]', false, ['class'=>'kv-row-checkbox', 'value'=>$key, 'onclick'=>'$(this).closest("tr").toggleClass("danger");', 'disabled'=> isset($model->stopDelete)&&!($model->stopDelete===1)]);
-            },
-            'hAlign'=>'center',
-            'vAlign'=>'middle',
-            'hiddenFromExport'=>true,
-            'mergeHeader'=>true,
-            'width'=>'50px'
-        ],*/
-
         [
             'attribute' => 'id',
             'value' => static function (Lead $model) {
@@ -181,7 +141,6 @@ $this->registerJs($js);
                 'class' => 'text-center'
             ]
         ],
-
         [
             'attribute' => 'uid',
             'options' => [
@@ -191,47 +150,7 @@ $this->registerJs($js);
                 'class' => 'text-center'
             ]
         ],
-
         'client_id:client',
-
-        /*[
-            'attribute' => 'client_id',
-            'value' => static function (Lead $model) {
-                return $model->client_id ? Html::a($model->client_id, ['client/index', 'ClientSearch[id]' => $model->client_id], ['data-pjax' => 0, 'target' => '_blank']) : '-';
-            },
-            'format' => 'raw',
-            'options' => [
-                'style' => 'width:80px'
-            ],
-            'contentOptions' => [
-                'class' => 'text-center'
-            ]
-        ],*/
-        /*[
-            // 'attribute' => 'client_id',
-            'header' => 'Client name',
-            'format' => 'raw',
-            'value' => static function (Lead $model) {
-
-                if ($model->client) {
-                    $clientName = $model->client->first_name . ' ' . $model->client->last_name;
-                    if ($clientName === 'Client Name') {
-                        $clientName = '- - - ';
-                    } else {
-                        $clientName = '<i class="fa fa-user"></i> ' . Html::encode($clientName);
-                    }
-                } else {
-                    $clientName = '-';
-                }
-
-                return $clientName;
-            },
-            'options' => [
-                'style' => 'width:160px'
-            ]
-            // 'filter' => \common\models\Employee::getList()
-        ],*/
-
         [
             'header' => 'Client / Emails / Phones',
             'format' => 'raw',
@@ -256,32 +175,12 @@ $this->registerJs($js);
                     $str .= $lead->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', ArrayHelper::map($lead->client->clientEmails, 'email', 'email')) . '' : '';
                     $str .= $lead->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', ArrayHelper::map($lead->client->clientPhones, 'phone', 'phone')) . '' : '';
                 }
-
-                /*$str .= '<br>';
-                $str .= '<span title="Calls Out / In"><i class="fa fa-phone"></i> '. $lead->getCountCalls(Call::CALL_TYPE_OUT) .'/'.  $lead->getCountCalls(Call::CALL_TYPE_IN) .'</span> | ';
-                $str .= '<span title="SMS Out / In"><i class="fa fa-comments"></i> '. $lead->getCountSms(Sms::TYPE_OUTBOX) .'/'.  $lead->getCountCalls(Sms::TYPE_INBOX) .'</span> | ';
-                $str .= '<span title="Email Out / In"><i class="fa fa-envelope"></i> '. $lead->getCountEmails(Email::TYPE_OUTBOX) .'/'.  $lead->getCountEmails(Email::TYPE_INBOX) .'</span>';*/
-
-                //$strArr[] = $str;
-
-                //$str = implode('<br>', $strArr);
-
                 return $str ?? '-';
             },
             'options' => [
                 'style' => 'width:180px'
             ]
         ],
-
-        /*[
-            'header' => 'Client Phones',
-            'value' => function(Lead $model) {
-                return $model->client && $model->client->clientPhones ? implode(', ', ArrayHelper::map($model->client->clientPhones, 'phone', 'phone')) : '-';
-            },
-        ],*/
-
-        //'employee_id',
-        //'status',
         [
             'attribute' => 'status',
             'value' => static function (Lead $lead) {
@@ -303,7 +202,6 @@ $this->registerJs($js);
                     ->one();
 
                 if ($statusLog) {
-                    // $statusValue .= '<br><span class="label label-default">'.Yii::$app->formatter->asDatetime(strtotime($statusLog->created)).'</span>';
                     $statusValue .= '<br><br><span class="label label-default">' . Yii::$app->formatter->asDatetime(strtotime($statusLog->created)) . '</span>';
                     $statusValue .= '<br>' . Yii::$app->formatter->asRelativeTime(strtotime($statusLog->created)) . '';
                 }
@@ -318,7 +216,6 @@ $this->registerJs($js);
             'contentOptions' => [
                 'class' => 'text-center'
             ]
-
         ],
         [
             'attribute' => 'created',
@@ -329,32 +226,12 @@ $this->registerJs($js);
             'visible' => !$isAgent,
             'format' => 'raw'
         ],
-
         [
             'class' => \common\components\grid\project\ProjectColumn::class,
             'attribute' => 'project_id',
             'relation' => 'project',
             'onlyUserProjects' => true
         ],
-
-        // 'source_id',
-        /*[
-            'attribute' => 'source_id',
-            'value' => static function (Lead $model) {
-                return $model->source ? $model->source->name : '-';
-            },
-            'filter' => \common\models\Source::getList(),
-            'visible' => ! $isAgent
-        ],
-
-        [
-            'attribute' => 'trip_type',
-            'value' => static function (Lead $model) {
-                return Lead::getFlightType($model->trip_type) ?? '-';
-            },
-            'filter' => Lead::TRIP_TYPE_LIST
-        ],*/
-
         [
             'attribute' => 'cabin',
             'value' => static function (Lead $model) {
@@ -362,26 +239,9 @@ $this->registerJs($js);
             },
             'filter' => Lead::CABIN_LIST
         ],
-
-        // 'trip_type',
-        // 'cabin',
-        // 'adults',
-
-        /*[
-            'label' => 'Pax',
-            'value' => static function (Lead $model) {
-                return '<i class="fa fa-male"></i> <span title="adult">'. $model->adults .'</span> / <span title="child">' . $model->children . '</span> / <span title="infant">' . $model->infants.'</span>';
-            },
-            'format' => 'raw',
-            'contentOptions' => [
-                'class' => 'text-center'
-            ]
-        ],*/
-
         [
             'label' => 'Pax / Communication',
             'value' => static function (Lead $model) {
-                //$str = '';
                 $str = '<i class="fa fa-male"></i> <span title="adult">' . $model->adults . '</span> / <span title="child">' . $model->children . '</span> / <span title="infant">' . $model->infants . '</span><br>';
                 $str .= $model->getCommunicationInfo();
                 return $str;
@@ -406,69 +266,6 @@ $this->registerJs($js);
                 'class' => 'text-center'
             ]
         ],
-
-        /*[
-            'attribute' => 'adults',
-            'value' => static function (Lead $model) {
-                return $model->adults ?: 0;
-            },
-            'filter' => array_combine(range(0, 9), range(0, 9)),
-            'contentOptions' => [
-                'class' => 'text-center'
-            ]
-        ],
-
-        [
-            'attribute' => 'children',
-            'value' => static function (Lead $model) {
-                return $model->children ?: '-';
-            },
-            'filter' => array_combine(range(0, 9), range(0, 9)),
-            'contentOptions' => [
-                'class' => 'text-center'
-            ]
-        ],*/
-
-        /*[
-            'attribute' => 'infants',
-            'value' => function(Lead $model) {
-                return $model->infants ?: '-';
-            },
-            'filter' => array_combine(range(0, 9), range(0, 9)),
-            'contentOptions' => ['class' => 'text-center'],
-        ],*/
-        /*[
-            // 'header' => 'Grade',
-            'attribute' => 'l_answered',
-            'value' => static function (Lead $model) {
-                return $model->l_answered ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
-            },
-            'filter' => [
-                1 => 'Yes',
-                0 => 'No'
-            ],
-            'contentOptions' => [
-                'class' => 'text-center'
-            ],
-            'format' => 'raw'
-
-            // 'visible' => !$isAgent
-        ], */
-
-        /*[
-            'header' => 'Task Info',
-            'value' => static function (Lead $model) use ($isAgent) {
-                return '<small style="font-size: 10px">' . $model->getTaskInfo() . '</small>';
-            },
-            'format' => 'raw',
-            'contentOptions' => [
-                'class' => 'text-left'
-            ],
-            'visible' => ! $isAgent,
-            'options' => [
-                'style' => 'width:200px'
-            ]
-        ],*/
         [
             'attribute' => 'hybrid_uid',
             'label' => '<span title="Hybrid UID">Booking ID</span>',
@@ -491,7 +288,6 @@ $this->registerJs($js);
                 'style' => 'width:200px'
             ]
         ],
-
         [
             'header' => 'Quotes',
             'value' => static function (Lead $model) use ($isAgent) {
@@ -546,7 +342,6 @@ $this->registerJs($js);
                 }
                 $segmentStr = implode('<br>', $segmentData);
                 return '' . $segmentStr . '';
-                // return $model->leadFlightSegmentsCount ? Html::a($model->leadFlightSegmentsCount, ['lead-flight-segment/index', "LeadFlightSegmentSearch[lead_id]" => $model->id], ['target' => '_blank', 'data-pjax' => 0]) : '-' ;
             },
             'format' => 'raw',
             'contentOptions' => [
@@ -556,7 +351,6 @@ $this->registerJs($js);
                 'style' => 'width:140px'
             ]
         ],
-
         [
             'header' => 'Depart',
             'value' => static function (Lead $model) {
@@ -573,14 +367,6 @@ $this->registerJs($js);
                 'style' => 'width:100px'
             ]
         ],
-        // 'children',
-        // 'infants',
-        // 'notes_for_experts:ntext',
-
-        // 'updated',
-        // 'request_ip',
-        // 'request_ip_detail:ntext',
-
         [
             'attribute' => 'employee_id',
             'format' => 'raw',
@@ -589,19 +375,6 @@ $this->registerJs($js);
             },
             'filter' => $lists->getEmployees(true) ?: false
         ],
-
-        // 'rating',
-        // 'called_expert',
-        /*
-         * [
-         * 'attribute' => 'discount_id',
-         * 'options' => ['style' => 'width:100px'],
-         * 'contentOptions' => ['class' => 'text-center'],
-         * ],
-         */
-        // 'offset_gmt',
-        // 'snooze_for',
-        // 'created',
         [
             'attribute' => 'created',
             'value' => static function (Lead $model) {
@@ -610,8 +383,6 @@ $this->registerJs($js);
             'format' => 'raw',
             'filter' => false
         ],
-        // 'created:date',
-
         [
             'attribute' => 'updated',
             'value' => static function (Lead $model) {
@@ -628,7 +399,6 @@ $this->registerJs($js);
                 'class' => 'text-center'
             ],
         ],
-
         [
             'attribute' => 'l_last_action_dt',
             'value' => static function (Lead $model) {
@@ -645,58 +415,21 @@ $this->registerJs($js);
                 'class' => 'text-center'
             ],
         ],
-
-        // 'bo_flight_id',
-
-        /*[
-            'class' => 'yii\grid\ActionColumn',
-            'template' => '{view}'
-        ]*/
     ];
 
     ?>
 
-
-
     <?php
-
-    /*
-     * if(Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id)) {
-     *
-     *
-     * echo \yii\grid\GridView::widget([
-     * 'dataProvider' => $dataProvider,
-     * //'filterModel' => Yii::$app->authManager->getAssignment('agent', Yii::$app->user->id) ? false : $searchModel,
-     * 'columns' => $gridColumns,
-     *
-     * ]);
-     * } else {
-     */
 
     echo GridView::widget([
         'id' => $gridId,
         'dataProvider' => $dataProvider,
         'filterModel' => $isAgent ? false : $searchModel,
-        // 'containerOptions' => ['style'=>'overflow: auto'], // only set when $responsive = false
-
-        /*
-         * 'export' => [
-         * 'label' => 'Page',
-         * 'fontAwesome' => true,
-         * 'itemsAfter'=> [
-         * '<li role="presentation" class="divider"></li>',
-         * '<li class="dropdown-header">Export All Data</li>',
-         * $fullExportMenu
-         * ]
-         * ],
-         */
 
         'columns' => $gridColumns,
-
         'toolbar' => [
             [
                 'content' =>
-                // Html::button('<i class="glyphicon glyphicon-plus"></i>', ['type'=>'button', 'title'=>'Add Lead', 'class'=>'btn btn-success', 'onclick'=>'alert("This will launch the book creation form.\n\nDisabled for this demo!");']) . ' '.
                     Html::a('<i class="glyphicon glyphicon-repeat"></i>', [
                         'leads/index'
                     ], [
@@ -706,9 +439,6 @@ $this->registerJs($js);
                     ])
 
             ]
-            // '{export}',
-            // $fullExportMenu,
-            // '{toggleData}'
         ],
         'pjax' => false,
         /*'pjaxSettings' => [
@@ -718,29 +448,23 @@ $this->registerJs($js);
                 'clientOptions' => ['method' => 'get']
             ],
         ],*/
-
-        //'bordered' => true,
         'striped' => true,
         'condensed' => true,
         'responsive' => false,
         'bsVersion' => '4.x',
         'hover' => true,
         'floatHeader' => false,
-//        'floatHeaderOptions' => [
-//            'scrollingTop' => 20
-//        ],
-        /*'showPageSummary' => true,*/
         'panel' => [
             'type' => GridView::TYPE_PRIMARY,
             'heading' => '<h3 class="panel-title"><i class="glyphicon glyphicon-list"></i> Leads</h3>'
         ]
 
     ]);
-    // }
-
     ?>
 
     <br>
+    <?php $form = ActiveForm::begin(['options' => ['data-pjax' => true, 'class' => '', 'style' => 'overflow: hidden;']]); // ['action' => ['leads/update-multiple'] ?>
+
     <?= Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-info multiple-update-btn']) ?>
 
     <?php ActiveForm::end(); ?>
