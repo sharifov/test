@@ -313,7 +313,7 @@ $(document).on('click', '.sale-ticket-generate-email-btn', function (e) {
         var url = btn.attr('href');
         var creditCardExist = btn.attr('data-credit-card-exist');
         
-        if (creditCardExist != 0 && !confirm('Use same CC?')) {
+        if (creditCardExist == 0 && !confirm('Use same CC?')) {
             return false;
         }
         
