@@ -173,6 +173,8 @@ use yii\widgets\ActiveForm;
 					['attribute' => 'cssBookId', 'label' => 'Booking Id'],
 					['attribute' => 'salePNR', 'label' => 'PNR'],
 					['attribute' => 'saleTicketSendEmailDate'],
+					['attribute' => 'sentEmailBy'],
+					['attribute' => 'userGroup'],
 				],
 				'exportConfig' => [
 					\kartik\export\ExportMenu::FORMAT_PDF => [
