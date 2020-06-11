@@ -428,7 +428,7 @@ $ajaxSaveCallUrl = Url::to(['phone/ajax-save-call']);
 $ajaxMuteUrl = Url::to(['phone/ajax-mute-participant']);
 $ajaxUnmuteUrl = Url::to(['phone/ajax-unmute-participant']);
 
-if ($call->isStatusRinging() || $call->isStatusInProgress() || $call->isStatusQueue()) {
+if ($call && ($call->isStatusRinging() || $call->isStatusInProgress() || $call->isStatusQueue())) {
     $callDuration = 0;
     if($call->c_updated_dt) {
         $callDuration = time() - strtotime($call->c_updated_dt);
@@ -442,13 +442,14 @@ if ($call->isStatusRinging() || $call->isStatusInProgress() || $call->isStatusQu
 
 $isMute = 0;
 $isListen = 0;
-if (
-        ($call->currentParticipant && $call->currentParticipant->isMute())
-        || ($call->isJoin() && $call->c_source_type_id === Call::SOURCE_LISTEN)
+if ( $call && (
+                ($call->currentParticipant && $call->currentParticipant->isMute())
+                || ($call->isJoin() && $call->c_source_type_id === Call::SOURCE_LISTEN)
+            )
 ) {
     $isMute = 1;
 }
-if ($call->isJoin() && $call->c_source_type_id === Call::SOURCE_LISTEN) {
+if ($call && ($call->isJoin() && $call->c_source_type_id === Call::SOURCE_LISTEN)) {
     $isListen = 1;
 }
 
