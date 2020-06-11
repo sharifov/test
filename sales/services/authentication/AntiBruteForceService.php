@@ -22,6 +22,8 @@ class AntiBruteForceService
     public int $captchaLoginAttempts;
     public int $userNotifyFailedLoginAttempts;
     public int $userBlockAttempts;
+    public bool $internalNotificationForUserEmail;
+
     public string $ip;
     private Employee $user;
 
@@ -34,6 +36,7 @@ class AntiBruteForceService
         $this->captchaLoginAttempts = $settings['captcha_login_attempts'];
         $this->userNotifyFailedLoginAttempts = $settings['user_notify_failed_login_attempts'];
         $this->userBlockAttempts = $settings['user_block_attempts'];
+        $this->internalNotificationForUserEmail = $settings['internal_notification_for_user_email'];
         $this->ip = AntiBruteForceHelper::getClientIPAddress();
     }
 
@@ -130,6 +133,10 @@ class AntiBruteForceService
      */
     private function sendEmail(Employee $user): bool
     {
+		if ($this->internalNotificationForUserEmail === false) {
+		    return false;
+		}
+
 		try {
 		    Yii::$app->mailer->compose()
                 ->setFrom(\Yii::$app->params['email_from']['no-reply'])
