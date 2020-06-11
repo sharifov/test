@@ -1,4 +1,7 @@
 $(document).ready(function() {
+    window.widgetIcon = new handleWidgetIcon();
+    widgetIcon.init();
+
 
     $phoneTabAnchor = $('[data-toggle-tab]');
     var historySimpleBar;
@@ -55,8 +58,22 @@ $(document).ready(function() {
 
         if ($current === '#tab-contacts') {
             if (PhoneWidgetContacts.fullListIsEmpty()) {
-                PhoneWidgetContacts.requestFullList();
             }
+
+            if ($(this).hasClass('js-add-to-conference')) {
+                window.localStorage.setItem('contactSelectableState', 1);
+                $('.contacts-list').addClass('contacts-list--selection');
+                $('.selection-amount').show();
+
+            } else {
+                window.localStorage.setItem('contactSelectableState', 0);
+                $('.contacts-list').removeClass('contacts-list--selection');
+                $('.submit-selected-contacts').slideUp(10);
+                $('.selection-amount').hide();
+            }
+
+            PhoneWidgetContacts.requestFullList();
+
         }
 
     });
@@ -108,6 +125,8 @@ $(document).ready(function() {
            PhoneWidgetContacts.initLazyLoadFullList(simpleBar);
         }
     });
+
+    
 
 
 
@@ -187,11 +206,26 @@ $(document).ready(function() {
         $(this).parents('.additional-bar').slideUp(150);
     })
 
+    var activeSettingTab = $('.tab-trigger.active-tab').attr('href');
+
+    $(activeSettingTab).show()
+
+    $('.tab-trigger').on('click', function(e) {
+        e.preventDefault()
+        $('.tab-trigger').removeClass('active-tab');
+        $(this).addClass('active-tab');
+
+        $('.tabs__item').hide()
+        $($(this).attr('href')).show()
+
+    })
+
 
     $(elemScrollable).each(function(i, elem) {
         var el = new SimpleBar(elem);
         el.getContentElement();
     })
+
 
 
     //--------------------------------------------------------------------------
@@ -289,10 +323,6 @@ $(document).ready(function() {
     });
 
     //---------------------------------------------------
-
-
-
-
 
     $('.call-pane__dial-clear-all').on('click', function(e) {
         e.preventDefault();
@@ -403,6 +433,19 @@ $(document).ready(function() {
         //
         //     clearTimeout(timeout)
         // }
+        widgetIcon.update({
+            type: 'default', 
+            timer: false,
+            text: null,
+            currentCalls: null,
+            status: 'online'
+        })
+    
+            // PhoneWidgetCall.cancelCall();
+
+            // clearTimeout(timeout)
+
+       
     })
 
     // $('.messages-modal__send-btn').on('click', function() {
@@ -476,7 +519,7 @@ $(document).ready(function() {
     });
 
 
-
+    
 
 
     // function phoneWidgetBehavior(elem) {
@@ -530,8 +573,17 @@ $(document).ready(function() {
     });
 
     $('.call-pane__info').on('click', function() {
-        $('.additional-info').slideDown(150);
+        $('.contact-info').slideDown(150);
     })
+
+    $('.js-toggle-dial').on('click', function() {
+        $('.dial-popup').slideDown(150)
+    })
+
+    window.statusCheckbox = new widgetStatus('.call-status-switcher');
+    statusCheckbox.getStatus();
+
+
 
 });
 
@@ -642,6 +694,172 @@ function toSelect(elem, obj, cb) {
 
     return {
         getData: this.getData(),
+    }
+
+}
+
+function handleWidgetIcon() {
+    var $parent = $('.phone-widget-icon'),
+        $inner = '.widget-icon-inner',
+        animationClass = 'animate',
+        initialNode;
+
+    var interval = null;
+    
+    function createInitialIcon(type,status) {
+        initialNode = '<div class="widget-icon-inner" data-wi-type="'+ type +'" data-wi-status="'+ status +'">'+
+            '<div class="standby-phone">'+
+            '<i class="fa fa-phone-volume icon-phone-answer"></i>' +
+            '<div class="phone-widget-icon__state">'+
+            '<span class="phone-widget-icon__ongoing"></span>'+
+            '<span class="phone-widget-icon__text"></span>'+
+            '<span class="phone-widget-icon__time"></span>'+
+            '</div>'+
+            '<i class="fa fa-phone icon-phone"></i>'+
+            
+            '</div>'+
+            '</div>';
+
+        $($parent).append(initialNode)
+    }
+
+    function stateTimer(el, timerStamp) {
+
+
+        var sec = Math.floor(timerStamp % 60);
+        var min = Math.floor((timerStamp - sec) / 60);
+        var hr = Math.floor((timerStamp - min) / 60);
+        
+        interval = setInterval(function() {
+            sec = Math.floor(timerStamp % 60);
+            min = Math.floor(((timerStamp - sec) / 60) % 60);
+            hr = Math.floor(timerStamp / 3600);
+            
+            if (timerStamp === 86399) {
+                timerStamp = 0;
+            }
+            
+            if (parseInt(sec) < 10) {
+                sec = '0' + sec;
+            }
+
+            if (parseInt(min) < 10) {
+                min = '0' + min;
+            }
+
+            if (parseInt(hr) < 10) {
+                hr = '0' + hr;
+            }
+
+            timerStamp++
+            $(el).html(hr + ':' + min + ':' + sec)
+
+        }, 1000)
+
+    }
+
+    function updateIcon(props) {
+        $($inner).removeClass(animationClass);
+        var inner = '.widget-icon-inner',
+            ongoing = '.phone-widget-icon__ongoing',
+            text = '.phone-widget-icon__text',
+            time = '.phone-widget-icon__time';
+
+        clearInterval(interval)
+
+        $(inner).attr('data-wi-status', props.status)
+        $(inner).attr('data-wi-type', props.type);
+        $(ongoing).html(props.currentCalls);
+        $(text).html(props.text);
+
+        if (props.timer) {
+            stateTimer(time, props.timerStamp)
+        } else {
+            $(time).html(null)
+        }
+
+        props = null;
+        $($inner).addClass(animationClass);
+    }
+
+    return {
+        init: function() {
+            createInitialIcon('default', false) 
+        },
+        update: function(props) {
+            updateIcon(props)
+        }
+    }
+}
+
+function widgetStatus (selector) {
+    var parent = '.status-confirmation';
+    var state = {
+        status: $(selector).attr('checked') ? true : false,
+        shown: false
+    }
+
+    function node (status) {
+        return ('<div class="status-confirmation-tooltip">'+
+        '<span>Switch to <i class="' + (status ? 'occupied' : 'online') +'">' + (status ? 'occupied' : 'online') + '</i> ?</span>'+
+        '<div class="status-action-group">'+
+        '<a href="#" data-status-action="false">NO</a>'+
+        '<a href="#" data-status-action="true"><i class="fa fa-check"></i></a>'+
+        '</div>'+
+        '</div>');
+    }
+    
+    function handleChange(action) {
+        if (action === 'true') {
+            $(selector).prop('checked', !state.status)
+            state.status = !state.status;
+        }
+
+        if (state.shown) {
+            $('.status-confirmation-tooltip').detach()
+        }
+        state.shown = false;
+    }
+
+    $(document).on('click', '[data-status-action]', function(e) {
+        e.preventDefault();
+        handleChange($(this).attr('data-status-action'));
+    })
+
+    $(document).on('click', selector, function(e){
+        e.preventDefault();
+
+        if (!state.shown) {
+            state.shown = true;
+            $(parent).append(node(state.status));
+        }
+    });
+
+    $(document).on('click', '.phone-widget', function(e) {
+
+        if (state.shown && !$(e.target).closest('.number-toggle').length) {
+            $('.status-confirmation-tooltip').detach();
+            state.shown = false;
+        }
+    });
+
+    return {
+        getStatus: function() {
+            switch (state.status) {
+                case true:
+                    return 1
+            
+                case false:
+                    return 2
+            }
+        },
+        setStatus: function(status) {
+            if (typeof status === 'boolean') {
+                state.status = !status
+                handleChange('true')
+                return;
+            }
+        }
     }
 
 }
