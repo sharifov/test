@@ -386,7 +386,6 @@ $sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
     </div>
 
 
-</div>
 
 <?php
 $ajaxCallRedirectGetAgents = Url::to(['phone/ajax-call-get-agents']);
