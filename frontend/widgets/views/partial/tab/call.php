@@ -455,6 +455,10 @@ if ($call && ($call->isJoin() && $call->c_source_type_id === Call::SOURCE_LISTEN
 
 $callId = $call ? $call->c_id : null;
 $isHold = $isHold ? 1 : 0;
+
+$sourceTypeId = $call->c_source_type_id ?? null;
+$status = isset($call) ? $call->getStatusName() : null;
+
 $js = <<<JS
 PhoneWidgetCall.init({
     'ajaxCallRedirectGetAgents': '{$ajaxCallRedirectGetAgents}',
@@ -472,9 +476,9 @@ PhoneWidgetCall.init({
     'call_id': '{$callId}',
     'type' : parseInt('{$type}'),
     'type_description' : '{$type_description}',
-    'source_type_id' : '{$call->c_source_type_id}',
+    'source_type_id' : '{$sourceTypeId}',
     'is_hold': parseInt('{$isHold}'),
-    'status': '{$call->getStatusName()}',
+    'status': '{$status}',
     'muteUrl': '{$ajaxMuteUrl}',
     'unmuteUrl': '{$ajaxUnmuteUrl}',
     'is_mute': parseInt('{$isMute}'),
