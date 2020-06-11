@@ -111,9 +111,8 @@ class EmailListController extends FController
     {
         $out = ['results' => ['id' => '', 'text' => '', 'selection' => '']];
         $projectId = (int) Yii::$app->request->get('project');
-        $emailPostfix = Project::getEmailPostfix($projectId);
-
-        if ($q !== null) {
+        
+        if ($q !== null && $emailPostfix = Project::getEmailPostfix($projectId)) {
             $data = EmailList::searchEmailList($q, $emailPostfix);
 
             if ($data) {
