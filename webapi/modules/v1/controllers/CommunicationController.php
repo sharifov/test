@@ -366,7 +366,7 @@ class CommunicationController extends ApiBaseController
                 $ivrEnable = (bool)$departmentPhone->dpp_ivr_enable;
 
                 $callModel = $this->findOrCreateCall($callSid, $parentCallSid, $postCall, $call_project_id,
-                    $call_dep_id, $call_source_id, $call_language_id);
+                    $call_dep_id, $call_source_id, false, $call_language_id);
 
                 if ($departmentPhone->dugUgs) {
                     foreach ($departmentPhone->dugUgs as $userGroup) {
