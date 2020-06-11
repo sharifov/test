@@ -15,6 +15,10 @@ use yii\widgets\Pjax;
 /* @var $saleDataProvider yii\data\ArrayDataProvider */
 
 $user = Yii::$app->user->identity;
+
+$userCanRefresh = Auth::can('/cases/ajax-refresh-sale-info');
+$userCanCheckFareRules = Auth::can('/cases/ajax-refresh-sale-info');
+$userCanDeleteSaleData = Auth::can('/sale/delete-ajax');
 ?>
 
 <div class="x_panel">
@@ -56,9 +60,13 @@ $user = Yii::$app->user->identity;
                         <td>Update to B/O</td>
                     <?php endif; ?>
 
-                    <?php if ($user->isAdmin() || $user->isSuperAdmin()): ?>
+                    <?php if ($userCanRefresh): ?>
                         <td>Refresh Data From B/O</td>
+                    <?php endif; ?>
+                    <?php if ($userCanCheckFareRules): ?>
                         <td>Check Fare rules</td>
+                    <?php endif; ?>
+                    <?php if ($userCanDeleteSaleData): ?>
                         <td>Remove Sale</td>
                     <?php endif; ?>
                 </tr>
@@ -94,7 +102,7 @@ $user = Yii::$app->user->identity;
 
                         $label .= '</td>';
                     }
-                    if ($user->isAdmin() || $user->isSuperAdmin()) {
+                    if ($userCanRefresh) {
                         $label .= '<td>' . Html::button('<i class="fa fa-refresh"></i> Refresh', [
 					            'class' => 'refresh-from-bo btn btn-info',
 								'data-case-id' => $item->css_cs_id,
@@ -102,6 +110,8 @@ $user = Yii::$app->user->identity;
 								'check-fare-rules' => 0,
                                 'title' => 'Refresh from B/O'
                         ]) . '</td>';
+                    }
+                    if ($userCanCheckFareRules) {
                         $label .= '<td>' . Html::button('<i class="fa fa-refresh"></i> Check Fare rules', [
 					            'class' => 'refresh-from-bo btn btn-info',
 								'data-case-id' => $item->css_cs_id,
@@ -109,17 +119,17 @@ $user = Yii::$app->user->identity;
 								'check-fare-rules' => 1,
                                 'title' => 'Check Fare rules',
                         ]) . '</td>';
-                        $label .= '<td>';
-                        if (Auth::can('cases/update', ['case' => $caseModel])) {
-                            $label .= Html::button('<i class="fa fa-warning"></i> Remove', [
-                                'class' => 'remove-sale btn btn-warning',
-                                'data-case-id' => $item->css_cs_id,
-                                'data-case-sale-id' => $item->css_sale_id,
-                                'title' => 'Remove Sale',
-                            ]);
-                        }
-                        $label .= '</td>';
                     }
+                    $label .= '<td>';
+                    if ($userCanDeleteSaleData && Auth::can('cases/update', ['case' => $caseModel])) {
+                        $label .= Html::button('<i class="fa fa-warning"></i> Remove', [
+                            'class' => 'remove-sale btn btn-warning',
+                            'data-case-id' => $item->css_cs_id,
+                            'data-case-sale-id' => $item->css_sale_id,
+                            'title' => 'Remove Sale',
+                        ]);
+                    }
+                    $label .= '</td>';
                     $label .= '</tr></table>';
 
                     $content = '';
