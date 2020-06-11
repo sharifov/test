@@ -294,6 +294,18 @@ $sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
 <!--      </button>-->
 <!--    </div>-->
 
+      <div class="form-group">
+          <input type="text" class="call-pane__note-msg form-control" id="active_call_add_note" placeholder="Add Note">
+          <div class="error-message"></div>
+      </div>
+      <button class="call-pane__add-note" id="active_call_add_note_submit">
+        <svg width="17" height="12" viewBox="0 0 17 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd"
+            d="M16.7072 1.70718L6.50008 11.9143L0.292969 5.70718L1.70718 4.29297L6.50008 9.08586L15.293 0.292969L16.7072 1.70718Z"
+            fill="white" />
+        </svg>
+      </button>
+    </div>
   </div>
 
   <div class="call-pane-incoming call-pane-initial">
@@ -381,6 +393,7 @@ $ajaxCallRedirectGetAgents = Url::to(['phone/ajax-call-get-agents']);
 $ajaxAcceptIncomingCall = Url::to(['call/ajax-accept-incoming-call']);
 $callStatusUrl = Url::to(['/user-call-status/update-status']);
 $ajaxSaveCallUrl = Url::to(['phone/ajax-save-call']);
+$ajaxCallAddNoteUrl = Url::to(['/call/ajax-add-note']);
 $callDuration = $call ? $call->c_call_duration : 0;
 $callId = $call ? $call->c_id : null;
 $js = <<<JS
@@ -397,7 +410,8 @@ PhoneWidgetCall.init({
     'sourceName': '{$sourceName}',
     'name': '{$clientName}',
     'duration': '{$callDuration}',
-    'call_id': '{$callId}'
+    'call_id': '{$callId}',
+    'callAddNoteUrl': '{$ajaxCallAddNoteUrl}'
 });
 
 JS;

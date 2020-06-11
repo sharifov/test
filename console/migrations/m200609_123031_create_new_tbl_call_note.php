@@ -1,5 +1,7 @@
 <?php
 
+use common\models\Employee;
+use console\migrations\RbacMigrationService;
 use yii\db\Migration;
 
 /**
@@ -7,6 +9,31 @@ use yii\db\Migration;
  */
 class m200609_123031_create_new_tbl_call_note extends Migration
 {
+	private $routes = [
+		'/call/ajax-add-note',
+		'/call-note-crud/index',
+		'/call-note-crud/update',
+		'/call-note-crud/create',
+		'/call-note-crud/delete',
+		'/call-note-crud/view',
+	];
+
+	private $roles = [
+		Employee::ROLE_ADMIN,
+		Employee::ROLE_SUPER_ADMIN,
+		Employee::ROLE_AGENT,
+		Employee::ROLE_SUPERVISION,
+		Employee::ROLE_QA,
+		Employee::ROLE_USER_MANAGER,
+		Employee::ROLE_SUP_AGENT,
+		Employee::ROLE_SUP_SUPER,
+		Employee::ROLE_EX_AGENT,
+		Employee::ROLE_EX_SUPER,
+		Employee::ROLE_SALES_SENIOR,
+		Employee::ROLE_EXCHANGE_SENIOR,
+		Employee::ROLE_SUPPORT_SENIOR,
+	];
+
     /**
      * {@inheritdoc}
      */
@@ -32,9 +59,7 @@ class m200609_123031_create_new_tbl_call_note extends Migration
 		$this->addForeignKey('FK-call_note-cn_created_user_id', '{{%call_note}}', ['cn_created_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
 		$this->addForeignKey('FK-call_note-cn_updated_user_id', '{{%call_note}}', ['cn_updated_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
 
-		if (Yii::$app->cache) {
-			Yii::$app->cache->flush();
-		}
+		(new RbacMigrationService())->up($this->routes, $this->roles);
     }
 
     /**
@@ -44,8 +69,6 @@ class m200609_123031_create_new_tbl_call_note extends Migration
     {
 		$this->dropTable('{{%call_note}}');
 
-		if (Yii::$app->cache) {
-			Yii::$app->cache->flush();
-		}
-    }
+		(new RbacMigrationService())->down($this->routes, $this->roles);
+	}
 }
