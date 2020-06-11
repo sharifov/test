@@ -63,15 +63,14 @@ return [
         'airsearch' => [
             'class' => \common\components\AirSearchService::class,
             'url' => 'https://airsearch.api.travelinsides.com/',
-            'api_cid' => 'SAL101',
-            'api_key' => 'c940e3484fe9fcc73ed12a7fcec469b4',
-            'options' => [CURLOPT_ENCODING => 'gzip'],
+            'username' => 'SAL101',
+            'password' => 'c940e3484fe9fcc73ed12a7fcec469b4',
         ],
         'currency' => [
             'class' => \common\components\CurrencyService::class,
             'url' => 'https://airsearch.api.travelinsides.com/v1/',
-            'api_cid' => 'SAL101',
-            'api_key' => 'c940e3484fe9fcc73ed12a7fcec469b4',
+            'username' => 'SAL101',
+            'password' => 'c940e3484fe9fcc73ed12a7fcec469b4',
         ],
         'queue_sms_job' => [
             'class' => \yii\queue\beanstalk\Queue::class,
