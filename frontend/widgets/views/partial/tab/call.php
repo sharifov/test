@@ -10,7 +10,7 @@
 //$name = $call && $call->cClient ? $call->cClient->getFullName() : 'ClientName';
 //$clientName = $call && $call->cClient ? $call->cClient->getFullName() : '------';
 $isIn = $call ? $call->isIn() : false;
-$type = $call->c_call_type_id;
+$type = $call ? $call->c_call_type_id : null;
 $projectName = $call && $call->c_project_id? $call->cProject->name : '';
 $sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
 
