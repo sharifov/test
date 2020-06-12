@@ -22,6 +22,7 @@ use common\models\Note;
 use common\models\ProjectEmailTemplate;
 use common\models\search\LeadCallExpertSearch;
 use common\models\search\LeadChecklistSearch;
+use kivork\rbacExportImport\src\formatters\FileSizeFormatter;
 use modules\offer\src\entities\offer\search\OfferSearch;
 use modules\offer\src\entities\offerSendLog\CreateDto;
 use modules\offer\src\entities\offerSendLog\OfferSendLogType;
@@ -55,6 +56,7 @@ use sales\model\lead\useCases\lead\import\LeadImportUploadForm;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\NotFoundException;
+use sales\services\email\EmailService;
 use sales\services\lead\LeadAssignService;
 use sales\services\lead\LeadCloneService;
 use sales\services\lead\LeadManageService;
@@ -660,7 +662,13 @@ class LeadController extends FController
                                     }
                                 }
 
-                                $previewEmailForm->e_email_message = $mailPreview['data']['email_body_html'];
+                                /* TODO::  */
+                                $emailBodyHtml = EmailService::prepareEmailBody($mailPreview['data']['email_body_html']);
+                                $keyCache = md5($emailBodyHtml);
+                                Yii::$app->cacheFile->set($keyCache, $emailBodyHtml, 120 * 60);
+                                $previewEmailForm->keyCache = $keyCache;
+
+                                $previewEmailForm->e_email_message = $emailBodyHtml;
                                 if (isset($mailPreview['data']['email_subject']) && $mailPreview['data']['email_subject']) {
                                     $previewEmailForm->e_email_subject = $mailPreview['data']['email_subject'];
                                 }
@@ -2443,6 +2451,15 @@ class LeadController extends FController
 
         return $this->render('import', ['model' => $form, 'log' => $logResult]);
     }
+
+    /**
+     * @return mixed|null
+     */
+    public function actionGetTemplate()
+	{
+	    $keyCache =Yii::$app->request->get('key_cache');
+	    return Yii::$app->cacheFile->get($keyCache);
+	}
 
     /**
      * @param $id

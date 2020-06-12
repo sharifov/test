@@ -25,6 +25,7 @@ use yii\base\Model;
  *
  * @property string $e_quote_list
  * @property boolean $is_send
+ * @property string $keyCache
  *
  */
 
@@ -45,6 +46,7 @@ class LeadPreviewEmailForm extends Model
     public $e_quote_list;
 
     public $is_send;
+    public $keyCache;
 
 
     /**
@@ -66,6 +68,7 @@ class LeadPreviewEmailForm extends Model
             [['e_language_id'], 'exist', 'skipOnError' => true, 'targetClass' => Language::class, 'targetAttribute' => ['e_language_id' => 'language_id']],
             [['e_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['e_lead_id' => 'id']],
             [['e_email_tpl_id'], 'exist', 'skipOnError' => true, 'targetClass' => EmailTemplateType::class, 'targetAttribute' => ['e_email_tpl_id' => 'etp_id']],
+            ['keyCache', 'safe'],
         ];
     }
 

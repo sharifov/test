@@ -92,7 +92,7 @@ $listItemView = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled 
 
                     <?php $form2 = \yii\bootstrap\ActiveForm::begin([
                         //'action' => ['index'],
-                        //'id' => 'email-preview-form',
+                        'id' => 'email-preview-form',
                         'method' => 'post',
                         'options' => [
                             'data-pjax' => 1,
@@ -128,6 +128,17 @@ $listItemView = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled 
                     </div>
                     <div class="form-group">
 
+                        <?php /* TODO::  */ ?>
+
+                            <?php echo $form2->field($previewEmailForm, 'e_email_message')->textarea(
+                                ['style' => 'display:none', 'id' => 'e_email_message']) ?>
+
+                            <?php $x = '<body>Hello</body>' ?>
+
+                            <div style="max-height: 800px; overflow-x: auto;">
+                                <iframe id="email_view" src="/lead/get-template?key_cache=<?php echo $previewEmailForm->keyCache?>"
+                                    style="width: 100%; height: 800px; border: 0;"></iframe>
+                            </div>
 
 <!--                        --><?php
 //                        echo $form2->field($previewEmailForm, 'e_email_message')->widget(Widget::class, [
@@ -143,8 +154,8 @@ $listItemView = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled 
 //                        ]);
 //                        ?>
 
-
-                        <?= $form2->field($previewEmailForm, 'e_email_message')->widget(\dosamigos\ckeditor\CKEditor::class, [
+                        <?php /*
+                            echo $form2->field($previewEmailForm, 'e_email_message')->widget(\dosamigos\ckeditor\CKEditor::class, [
                             'options' => [
                                 'rows' => 6,
                                 'readonly' => false
@@ -159,7 +170,9 @@ $listItemView = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled 
                                 'removeButtons' => 'Subscript,Superscript,Flash,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe',
                                 'removePlugins' => 'elementspath',
                             ]
-                        ]) ?>
+                        ])
+                        */ ?>
+
                     </div>
                     <?php if($isAdmin):?>
                     <div class="row" style="display: none" id="email-data-content-div">
@@ -184,7 +197,8 @@ $listItemView = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled 
                     </div>
 
                     <div class="btn-wrapper text-right">
-                        <?= Html::submitButton('<i class="fa fa-envelope-o"></i> Send Email', ['class' => 'btn btn-lg btn-primary']) ?>
+                        <?= Html::submitButton('<i class="fa fa-envelope-o"></i> Send Email',
+                            ['class' => 'btn btn-lg btn-primary', 'id' => 'send_email']) ?>
                         <?php if($isAdmin):?>
                             <?= Html::button('<i class="fa fa-list"></i> Show Email data (for Admins)', ['class' => 'btn btn-lg btn-warning', 'onclick' => '$("#email-data-content-div").toggle()']) ?>
                         <?php endif; ?>
@@ -201,7 +215,7 @@ $listItemView = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled 
 
                         <?php $form3 = \yii\bootstrap\ActiveForm::begin([
                                 //'action' => ['index'],
-                                //'id' => 'email-preview-form',
+                                //'id' => 'sms-preview-form',
                                 'method' => 'post',
                                 'options' => [
                                     'data-pjax' => 1,
@@ -511,15 +525,33 @@ $listItemView = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled 
                         <?= $form2->field($comForm, 'c_call_id')->hiddenInput(['id' => 'c_call_id'])->label(false); ?>
 
 
-                         <?php
-                             if ($comForm->c_preview_email) {
-                                 $this->registerJs("$('#modal-email-preview').modal('show');");
-                             }
+<?php /* TODO::  */
+if ($comForm->c_preview_email) {
+    $js = <<<JS
+ 
+    $('#modal-email-preview').modal('show');
+    
+    $(document).on('click', '#send_email', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        let iframeEmail = document.getElementById('email_view');
+        let contentEmail = iframeEmail.contentWindow.document.documentElement.outerHTML;
+             
+        $('#e_email_message').val(contentEmail);        
+        $('#email-preview-form').submit(); 
+        return true;       
+    });
+JS;
+    $this->registerJs($js);
+}
+?>
 
+                        <?php
                              if ($comForm->c_preview_sms) {
                                  $this->registerJs("$('#modal-sms-preview').modal('show');");
                              }
-                         ?>
+                        ?>
                          <?php
     $js = <<<JS
     
