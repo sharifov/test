@@ -533,7 +533,7 @@ class CasesSaleService
                     throw new \RuntimeException('Error. CaseSale not saved.');
                 }
 
-                if ($refreshSaleData = $this->detailRequestToBackOffice($saleId)) {
+                if ($refreshSaleData = $this->detailRequestToBackOffice($saleId, 0, 120, 1)) {
                     $caseSale->css_sale_pnr = $saleData['pnr'] ?? null;
                     $caseSale->css_sale_created_dt = $saleData['created'] ?? null;
                     $caseSale->css_sale_book_id = $saleData['confirmationNumber'] ?? null;
