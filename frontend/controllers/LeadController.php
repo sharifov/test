@@ -662,13 +662,13 @@ class LeadController extends FController
                                     }
                                 }
 
-                                /* TODO::  */
                                 $emailBodyHtml = EmailService::prepareEmailBody($mailPreview['data']['email_body_html']);
-                                $keyCache = md5($emailBodyHtml);
-                                Yii::$app->cacheFile->set($keyCache, $emailBodyHtml, 120 * 60);
-                                $previewEmailForm->keyCache = $keyCache;
 
+                                $keyCache = md5($emailBodyHtml);
+                                Yii::$app->cacheFile->set($keyCache, $emailBodyHtml, 60 * 60);
+                                $previewEmailForm->keyCache = $keyCache;
                                 $previewEmailForm->e_email_message = $emailBodyHtml;
+
                                 if (isset($mailPreview['data']['email_subject']) && $mailPreview['data']['email_subject']) {
                                     $previewEmailForm->e_email_subject = $mailPreview['data']['email_subject'];
                                 }

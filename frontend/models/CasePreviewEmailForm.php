@@ -26,6 +26,7 @@ use yii\base\Model;
  * @property string $e_quote_list
  * @property string $coupon_list
  * @property boolean $is_send
+ * @property string $keyCache
  *
  */
 
@@ -48,6 +49,7 @@ class CasePreviewEmailForm extends Model
     public $is_send;
 
     public $coupon_list;
+    public $keyCache;
 
 
     public function __construct(array $data = [], $config = [])
@@ -85,6 +87,7 @@ class CasePreviewEmailForm extends Model
             [['e_language_id'], 'exist', 'skipOnError' => true, 'targetClass' => Language::class, 'targetAttribute' => ['e_language_id' => 'language_id']],
             [['e_case_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['e_case_id' => 'cs_id']],
             [['e_email_tpl_id'], 'exist', 'skipOnError' => true, 'targetClass' => EmailTemplateType::class, 'targetAttribute' => ['e_email_tpl_id' => 'etp_id']],
+            ['keyCache', 'safe'],
         ];
     }
 

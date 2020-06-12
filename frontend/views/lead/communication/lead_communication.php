@@ -128,50 +128,13 @@ $listItemView = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled 
                     </div>
                     <div class="form-group">
 
-                        <?php /* TODO::  */ ?>
+                        <?php echo $form2->field($previewEmailForm, 'e_email_message')->textarea(
+                            ['style' => 'display:none', 'id' => 'e_email_message']) ?>
 
-                            <?php echo $form2->field($previewEmailForm, 'e_email_message')->textarea(
-                                ['style' => 'display:none', 'id' => 'e_email_message']) ?>
-
-                            <?php $x = '<body>Hello</body>' ?>
-
-                            <div style="max-height: 800px; overflow-x: auto;">
-                                <iframe id="email_view" src="/lead/get-template?key_cache=<?php echo $previewEmailForm->keyCache?>"
-                                    style="width: 100%; height: 800px; border: 0;"></iframe>
-                            </div>
-
-<!--                        --><?php
-//                        echo $form2->field($previewEmailForm, 'e_email_message')->widget(Widget::class, [
-//                            'settings' => [
-//                                'lang' => 'en',
-//                                'minHeight' => 300,
-//                                'plugins' => [
-//                                    'clips',
-//                                    'fullscreen',
-//                                    'advanced'
-//                                ]
-//                            ],
-//                        ]);
-//                        ?>
-
-                        <?php /*
-                            echo $form2->field($previewEmailForm, 'e_email_message')->widget(\dosamigos\ckeditor\CKEditor::class, [
-                            'options' => [
-                                'rows' => 6,
-                                'readonly' => false
-                            ],
-                            'preset' => 'custom',
-                            'clientOptions' => [
-                                'height' => 500,
-                                'fullPage' => true,
-
-                                'allowedContent' => true,
-                                'resize_enabled' => false,
-                                'removeButtons' => 'Subscript,Superscript,Flash,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe',
-                                'removePlugins' => 'elementspath',
-                            ]
-                        ])
-                        */ ?>
+                        <div style="max-height: 800px; overflow-x: auto;">
+                            <iframe id="email_view" src="/lead/get-template?key_cache=<?php echo $previewEmailForm->keyCache?>"
+                                style="width: 100%; height: 800px; border: 0;"></iframe>
+                        </div>
 
                     </div>
                     <?php if($isAdmin):?>
@@ -525,7 +488,7 @@ $listItemView = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled 
                         <?= $form2->field($comForm, 'c_call_id')->hiddenInput(['id' => 'c_call_id'])->label(false); ?>
 
 
-<?php /* TODO::  */
+<?php
 if ($comForm->c_preview_email) {
     $js = <<<JS
  
