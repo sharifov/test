@@ -2,6 +2,7 @@
 namespace common\models;
 
 use frontend\models\UserFailedLogin;
+use sales\services\authentication\AntiBruteForceHelper;
 use sales\services\authentication\AntiBruteForceService;
 use Yii;
 use yii\base\Model;
@@ -125,7 +126,7 @@ class LoginForm extends Model
     private function checkByIp($user): bool
     {
         if($user->acl_rules_activated) {
-            $clientIP = AntiBruteForceService::getClientIPAddress();
+            $clientIP = AntiBruteForceHelper::getClientIPAddress();
             if ($clientIP === 'UNKNOWN' ||  (!GlobalAcl::isActiveIPRule($clientIP) && !EmployeeAcl::isActiveIPRule($clientIP, $user->id))) {
                 $this->addError('username', sprintf('Remote Address %s Denied! Please, contact your Supervision or Administrator.', $clientIP));
                 return false;
@@ -187,8 +188,8 @@ class LoginForm extends Model
             $userFailedLogin = UserFailedLogin::create(
                 $this->username,
                 $user ? $user->id : null,
-                $this->getBrowserName() . ' UserAgent:' . Yii::$app->request->getUserAgent(),
-                AntiBruteForceService::getClientIPAddress(),
+                AntiBruteForceHelper::getBrowserName() . ' UserAgent:' . Yii::$app->request->getUserAgent(),
+                AntiBruteForceHelper::getClientIPAddress(),
                 Yii::$app->session->id
             );
             if (!$userFailedLogin->save()) {
@@ -202,29 +203,5 @@ class LoginForm extends Model
 
         }
         parent::afterValidate();
-    }
-
-    /**
-     * @return string
-     */
-    private function getBrowserName(): string
-    {
-        $exactBrowserName = $_SERVER['HTTP_USER_AGENT'];
-
-        if (strpos(strtolower($exactBrowserName), 'safari/') && strpos(strtolower($exactBrowserName), 'opr/')) {
-            $browserName = 'Opera';
-        } elseif (strpos(strtolower($exactBrowserName), 'safari/') && strpos(strtolower($exactBrowserName), 'chrome/')) {
-            $browserName = 'Chrome';
-        } elseif (strpos(strtolower($exactBrowserName), 'msie')) {
-            $browserName = 'Internet Explorer';
-        } elseif (strpos(strtolower($exactBrowserName), 'firefox/')) {
-            $browserName = 'Firefox';
-        } elseif (strpos(strtolower($exactBrowserName), 'safari/') && strpos(strtolower($exactBrowserName), 'opr/') === false &&
-            strpos(strtolower($exactBrowserName), "chrome/") === false) {
-                $browserName = 'Safari';
-        } else {
-            $browserName = 'Browser not defined';
-        }
-        return $browserName;
     }
 }

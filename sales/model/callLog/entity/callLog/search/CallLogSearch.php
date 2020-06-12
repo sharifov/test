@@ -2,12 +2,15 @@
 
 namespace sales\model\callLog\entity\callLog\search;
 
+use common\models\Call;
+use common\models\Client;
 use common\models\Employee;
 use kartik\daterange\DateRangeBehavior;
 use sales\model\callLog\entity\callLog\CallLogCategory;
 use sales\model\callLog\entity\callLog\CallLogStatus;
 use sales\model\callLog\entity\callLog\CallLogType;
 use sales\model\callLog\entity\callLogQueue\CallLogQueue;
+use sales\model\callNote\entity\CallNote;
 use yii\data\ActiveDataProvider;
 use sales\model\callLog\entity\callLog\CallLog;
 use yii\db\Query;
@@ -22,6 +25,7 @@ use yii\db\Query;
  * @property string $createTimeRange
  * @property string $createTimeStart
  * @property string $createTimeEnd
+ * @property string $callNote
  */
 class CallLogSearch extends CallLog
 {
@@ -41,6 +45,7 @@ class CallLogSearch extends CallLog
     public $departmentIds = [];
     public $callDurationFrom;
     public $callDurationTo;
+    public $callNote;
 
     public const CREATE_TIME_START_DEFAULT_RANGE = '-6 days';
 
@@ -58,7 +63,7 @@ class CallLogSearch extends CallLog
 
             ['cl_is_transfer', 'boolean'],
 
-            [['cl_phone_from', 'cl_phone_to'], 'string'],
+            [['cl_phone_from', 'cl_phone_to', 'callNote'], 'string'],
 
             ['cl_phone_list_id', 'integer'],
 
@@ -216,9 +221,11 @@ class CallLogSearch extends CallLog
 		}
 
 		$query->select(['call_log.cl_type_id', 'cl_phone_from', 'cl_phone_to', 'cl_client_id', 'cl_call_created_dt', 'cl_status_id', 'cl_duration']);
-		$query->addSelect(['if (clients.first_name is not null, concat(clients.first_name, \' \', clients.last_name), null) as client_name']);
-		$query->leftJoin('clients', 'clients.id = cl_client_id');
+		$query->addSelect(['if (clients.first_name is not null, concat(clients.first_name, \' \', clients.last_name), null) as client_name', 'cn_note as callNote']);
+		$query->leftJoin(Client::tableName(), 'clients.id = cl_client_id');
+		$query->leftJoin(CallNote::tableName(), 'cn_call_id = cl_id');
 		$query->where(['cl_user_id' => $this->cl_user_id]);
+		$query->groupBy(['cl_id']);
 		$query->orderBy(['cl_call_created_dt' => SORT_DESC]);
 
 		return $dataProvider;

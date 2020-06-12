@@ -1,5 +1,9 @@
 var PhoneWidgetCall = function () {
     this.connection = '';
+    this.obj;
+
+    const $addNoteInput = $('#active_call_add_note');
+    const $addNoteSubmit = $('#active_call_add_note_submit');
 
     function init (options)
     {
@@ -8,8 +12,7 @@ var PhoneWidgetCall = function () {
         acceptCallBtnEvent(options);
         changeUserCallStatusEvent(options);
         rejectIncomingCallEvent(options);
-
-        console.log(options);
+        callAddNoteEvent(options);
 
         if ('isCallInProgress' in options && options.isCallInProgress) {
             refreshCallStatus({
@@ -70,6 +73,50 @@ var PhoneWidgetCall = function () {
             }
             cancelCall();
         })
+    }
+
+    function callAddNoteEvent(options) {
+        var _self = this;
+        $addNoteSubmit.on('click', function (e) {
+            e.preventDefault();
+            let btnHtml = $(this).html();
+            let callSid = _self.connection.parameters.CallSid || null;
+            let callId = _self.obj ? _self.obj.id : null;
+            if (!callSid && !callId) {
+                createNotify('Warning', 'Call Sid & Call Id is undefined', 'warning');
+                return false;
+            }
+
+            let value = $addNoteInput.val().trim();
+            if (!value) {
+                createNotify('Warning', 'Note value is empty', 'warning');
+                return false;
+            }
+
+            $.ajax({
+                type: 'post',
+                data: {'callSid': callSid, note: value, callId: callId},
+                url: options.callAddNoteUrl,
+                dataType: 'json',
+                beforeSend: function () {
+                    $addNoteSubmit.html('<i class="fa fa-spinner fa-spin" style="color: #fff;"></i>').attr('disabled', 'disabled');
+                },
+                success: function (data) {
+                    if (data.error) {
+                        createNotify('Error', data.message, 'error');
+                    } else {
+                        createNotify('Success', data.message, 'success');
+                    }
+                },
+                error: function (error) {
+                    createNotify('Error', error.responseText, 'error');
+                },
+                complete: function () {
+                    $addNoteSubmit.html(btnHtml).removeAttr('disabled');
+                }
+            })
+
+        });
     }
 
     function changeUserCallStatusEvent(options)
@@ -195,6 +242,7 @@ var PhoneWidgetCall = function () {
             $('.call-pane-initial .contact-info-card__label').html('Outgoing');
         }
 
+        this.obj = obj;
     }
 
     function initIncomingCall(obj)
@@ -207,6 +255,8 @@ var PhoneWidgetCall = function () {
         } else if (obj.cua_status_id === 5) {
             cancelCall();
         }
+
+        this.obj;
     }
 
     function openWidget()

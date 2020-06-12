@@ -102,9 +102,10 @@ class CallHelper
 			$callDate = new DateTime($call['cl_call_created_dt']);
 			$dDiff = $currentDate->diff($callDate);
 
-			if ($dDiff->d === 0) {
+
+			if ($dDiff->d === 0 && $dDiff->m === 0) {
 				$result['Today'][] = $call;
-			} elseif ($dDiff->d === 1) {
+			} elseif ($dDiff->d === 1 && $dDiff->m === 0) {
 				$result['Yesterday'][] = $call;
 			} else {
 				$result[date('Y-m-d', strtotime($call['cl_call_created_dt']))][] = $call;

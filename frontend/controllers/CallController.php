@@ -20,6 +20,7 @@ use http\Exception\InvalidArgumentException;
 use sales\auth\Auth;
 
 use sales\helpers\call\CallHelper;
+use sales\model\callNote\useCase\addNote\CallNoteRepository;
 use sales\repositories\call\CallRepository;
 use sales\repositories\call\CallUserAccessRepository;
 use sales\repositories\NotFoundException;
@@ -41,26 +42,30 @@ use yii\web\Response;
  * @property CallService $callService
  * @property CallRepository $callRepository
  * @property CallUserAccessRepository $callUserAccessRepository
+ * @property CallNoteRepository $callNoteRepository
  */
 class CallController extends FController
 {
     private $callService;
     private $callRepository;
     private $callUserAccessRepository;
+	private $callNoteRepository;
 
-    public function __construct(
+	public function __construct(
     	$id,
 		$module,
 		CallService $callService,
 		CallRepository $callRepository,
 		CallUserAccessRepository $callUserAccessRepository,
+		CallNoteRepository $callNoteRepository,
 		$config = []
 	) {
         parent::__construct($id, $module, $config);
         $this->callService = $callService;
         $this->callRepository = $callRepository;
         $this->callUserAccessRepository = $callUserAccessRepository;
-    }
+		$this->callNoteRepository = $callNoteRepository;
+	}
 
     public function behaviors()
     {
@@ -1027,4 +1032,29 @@ class CallController extends FController
             echo $e->getMessage();
         }
     }*/
+
+	public function actionAjaxAddNote(): Response
+	{
+		$callSid = Yii::$app->request->post('callSid');
+		$note = Yii::$app->request->post('note');
+		$callId = Yii::$app->request->post('callId');
+
+		$result = [
+			'error' => false,
+			'message' => 'Note successfully added'
+		];
+
+		try {
+			$call = $this->callRepository->findByCallSidOrCallId((string)$callSid, (int)$callId);
+			$this->callNoteRepository->add($call->c_id, $note);
+		} catch (\RuntimeException $e) {
+			$result['error'] = true;
+			$result['message'] = $e->getMessage();
+		} catch (\Throwable $e) {
+			$result['error'] = true;
+			$result['message'] = 'Internal Server Error;';
+		}
+
+		return $this->asJson($result);
+	}
 }
