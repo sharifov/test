@@ -158,7 +158,7 @@ $pjaxCaseSaleTicketContainerId = 'pjax-case-sale-tickets-'.$caseSaleModel->css_c
 										<?php if (!$canManageSaleInfo):
 											echo Editable::widget([
 												'model' => $ticket,
-												'attribute' => empty($ticket->st_refund_waiver) ? 'st_penalty_amount' : 'st_refund_waiver',
+												'attribute' => 'st_penalty_amount',
 												'header' => 'Penalty Amount',
 												'asPopover' => false,
 												'inputType' => Editable::INPUT_HTML5,
