@@ -147,6 +147,10 @@ $isSuperAdmin = $user->isSuperAdmin();
             $menuItems[] = ['label' => 'My Calls <span id="call-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/call/list'], 'icon' => 'phone'];
         }
 
+        if ($user->canCall()) {
+            $menuItems[] = ['label' => 'My Calls Log <span id="call-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/call-log/list'], 'icon' => 'phone'];
+        }
+
         $menuItems[] = [
             'label' => 'My Contacts <span id="call-inbox-queue" class="label-info label pull-right"></span>',
             'url' => ['/contacts/index'],
@@ -289,6 +293,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Invoices Status Log', 'url' => ['/invoice/invoice-status-log-crud/index']],
                 ['label' => 'Billing Info', 'url' => ['/billing-info/index']],
                 ['label' => 'Credit Cards', 'url' => ['/credit-card/index']],
+                ['label' => 'Sale Credit Cards', 'url' => ['/sale-credit-card/index']],
                 ['label' => 'Payments', 'url' => ['/payment/index']],
                 ['label' => 'Payment Methods', 'url' => ['/payment-method/index']],
                 ['label' => 'Transactions', 'url' => ['/transaction/index']],
@@ -331,6 +336,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'SMS template types', 'url' => ['/sms-template-type/index'], 'icon' => 'comments-o'],
                 ['label' => 'Case Sales', 'url' => ['/case-sale/index'], 'icon' => 'list'],
                 ['label' => 'Case Notes', 'url' => ['/case-note/index'], 'icon' => 'list'],
+                ['label' => 'Sale Ticket', 'url' => ['/sale-ticket/index'], 'icon' => 'list'],
                 ['label' => 'Project Settings', 'url' => ['/settings/projects'], 'icon' => 'product-hunt'],
                 ['label' => 'Check List Types', 'url' => ['/lead-checklist-type/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('manageLeadChecklistType')],
                 ['label' => 'Case status history', 'url' => ['/case-status-log/index'], 'icon' => 'bars'],

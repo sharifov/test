@@ -3,11 +3,15 @@
 namespace sales\services\call;
 
 use common\models\Call;
+use common\models\CallUserAccess;
+use common\models\Employee;
 use common\models\Notifications;
 use common\models\PhoneBlacklist;
+use common\models\UserCallStatus;
 use common\models\UserProjectParams;
 use frontend\widgets\notification\NotificationMessage;
 use sales\repositories\call\CallRepository;
+use sales\repositories\call\CallUserAccessRepository;
 use sales\services\ServiceFinder;
 use yii\helpers\VarDumper;
 
@@ -15,16 +19,19 @@ use yii\helpers\VarDumper;
  * Class CallService
  *
  * @property  CallRepository $callRepository
+ * @property  CallUserAccessRepository $callUserAccessRepository
  * @property  ServiceFinder $finder
  */
 class CallService
 {
     private $callRepository;
+    private $callUserAccessRepository;
     private $finder;
 
-    public function __construct(CallRepository $callRepository, ServiceFinder $finder)
+    public function __construct(CallRepository $callRepository, CallUserAccessRepository $callUserAccessRepository, ServiceFinder $finder)
     {
         $this->callRepository = $callRepository;
+        $this->callUserAccessRepository = $callUserAccessRepository;
         $this->finder = $finder;
     }
 
@@ -97,4 +104,39 @@ class CallService
 
         throw new CallDeclinedException('Declined Call Id: ' . $call->c_id . '. Reason: Blacklisted');
     }
+
+	/**
+	 * @param CallUserAccess $callUserAccess
+	 * @param Employee $user
+	 * @return bool
+	 */
+    public function acceptCall(CallUserAccess $callUserAccess, Employee $user): bool
+	{
+		$callUserAccess->acceptCall();
+		$this->callUserAccessRepository->save($callUserAccess);
+		if (($call = $callUserAccess->cuaCall) && Call::applyCallToAgent($call, $user->id)) {
+			Notifications::pingUserMap();
+		}
+		return false;
+	}
+
+	/**
+	 * @param CallUserAccess $callUserAccess
+	 * @param Employee $user
+	 */
+	public function busyCall(CallUserAccess $callUserAccess, Employee $user): void
+	{
+		$callUserAccess->busyCall();
+		$ucs = new UserCallStatus();
+		$ucs->us_type_id = UserCallStatus::STATUS_TYPE_OCCUPIED;
+		$ucs->us_user_id = $user->id;
+		$ucs->us_created_dt = date('Y-m-d H:i:s');
+		if($ucs->save()) {
+			$callUserAccess->save();
+			Notifications::publish('updateUserCallStatus', ['user_id' =>$ucs->us_user_id], ['id' => 'ucs'.$ucs->us_id, 'type_id' => $ucs->us_type_id]);
+			Notifications::pingUserMap();
+		} else {
+			\Yii::error(VarDumper::dumpAsString($ucs->errors), 'CallService:busyCall:save');
+		}
+	}
 }

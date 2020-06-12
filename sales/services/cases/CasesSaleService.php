@@ -5,6 +5,7 @@ namespace sales\services\cases;
 use common\components\BackOffice;
 use common\models\CaseSale;
 use Exception;
+use frontend\models\form\CreditCardForm;
 use http\Exception\RuntimeException;
 use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
@@ -408,14 +409,16 @@ class CasesSaleService
      * @param int $sale_id
      * @param int $withFareRules
      * @param int $requestTime
+     * @param int $withRefundRules
      * @return array
      * @throws BadRequestHttpException
      */
-    public function detailRequestToBackOffice(int $sale_id, int $withFareRules = 0, int $requestTime = 120): ?array
+    public function detailRequestToBackOffice(int $sale_id, int $withFareRules = 0, int $requestTime = 120, int $withRefundRules = 0): ?array
     {
         try {
             $data['sale_id'] = $sale_id;
             $data['withFareRules'] = $withFareRules;
+            $data['withRefundRules'] = $withRefundRules;
             $response = BackOffice::sendRequest2('cs/detail', $data, 'POST', $requestTime);
 
             if ($response->isOk) {
@@ -431,6 +434,59 @@ class CasesSaleService
             throw new BadRequestHttpException($exception->getMessage());
         }
     }
+
+    public function sendAddedCreditCardToBO(string $projectApiKey, string $bookingId, int $saleId, CreditCardForm $form, int $requestTime = 120): array
+	{
+		$response = [
+			'error' => false,
+			'message' => ''
+		];
+
+		try {
+
+			$data = [
+				'apiKey' => $projectApiKey,
+				'flightRequest' => [
+					'uid' => $bookingId,
+					'saleId' => $saleId
+				],
+				'card' => [
+					'nickname' => $form->cc_holder_name,
+					'number' => (string)$form->cc_number,
+					'expiration_date' => $form->cc_expiration,
+					'cvv' => (string)$form->cc_cvv
+				]
+			];
+
+			$host = Yii::$app->params['backOffice']['serverUrlV3'];
+			$responseBO = BackOffice::sendRequest2('payment/add-credit-card', $data, 'POST', $requestTime, $host);
+
+			if ($responseBO->isOk) {
+				$result = $responseBO->data;
+
+				if (!(bool)$result['success']) {
+					$errors = '';
+					foreach ($result['errors'] as $error) {
+						if (is_array($error)) {
+							$errors .= implode('; ', $error);
+						} else {
+							$errors .= $error . '; ';
+						}
+					}
+					throw new \RuntimeException('BO add credit card request errors: ' . $errors);
+				}
+			} else {
+				throw new \RuntimeException('BO add credit card request error. ' . VarDumper::dumpAsString($responseBO->content));
+			}
+
+
+		} catch (\Throwable $e) {
+			$response['error'] = true;
+			$response['message'] = $e->getMessage();
+		}
+
+		return $response;
+	}
 
     /**
      * @param string|null $order_uid
@@ -477,7 +533,7 @@ class CasesSaleService
                     throw new \RuntimeException('Error. CaseSale not saved.');
                 }
 
-                if ($refreshSaleData = $this->detailRequestToBackOffice($saleId)) {
+                if ($refreshSaleData = $this->detailRequestToBackOffice($saleId, 0, 120, 1)) {
                     $caseSale->css_sale_pnr = $saleData['pnr'] ?? null;
                     $caseSale->css_sale_created_dt = $saleData['created'] ?? null;
                     $caseSale->css_sale_book_id = $saleData['confirmationNumber'] ?? null;

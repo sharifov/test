@@ -209,6 +209,15 @@ class CasesController extends BaseController
             );
         }
 
+        if ($case = Cases::find()->andWhere(['cs_category_id' => $form->category_id, 'cs_order_uid' => $form->order_uid])->withNotFinishStatus()->limit(1)->one()) {
+            return new SuccessResponse(
+                new DataMessage(
+                    new Message('case_gid', $case->cs_gid),
+                    new Message('client_uuid', $case->client->uuid),
+                )
+            );
+        }
+
         try {
             $result = $this->createHandler->handle($form->getDto());
         } catch (\Throwable $e) {

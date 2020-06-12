@@ -3,6 +3,7 @@
 namespace sales\model\callLog\entity\callLog\search;
 
 use common\models\Employee;
+use kartik\daterange\DateRangeBehavior;
 use sales\model\callLog\entity\callLog\CallLogCategory;
 use sales\model\callLog\entity\callLog\CallLogStatus;
 use sales\model\callLog\entity\callLog\CallLogType;
@@ -18,6 +19,9 @@ use yii\db\Query;
  * @property int|null $case_id
  * @property int $clq_queue_time
  * @property int $clq_access_count
+ * @property string $createTimeRange
+ * @property string $createTimeStart
+ * @property string $createTimeEnd
  */
 class CallLogSearch extends CallLog
 {
@@ -25,6 +29,20 @@ class CallLogSearch extends CallLog
     public $case_id;
     public $clq_queue_time;
     public $clq_access_count;
+
+    public $createTimeRange;
+    public $createTimeStart;
+    public $createTimeEnd;
+
+    public $projectIds = [];
+    public $statusIds = [];
+    public $typesIds = [];
+    public $categoryIds = [];
+    public $departmentIds = [];
+    public $callDurationFrom;
+    public $callDurationTo;
+
+    public const CREATE_TIME_START_DEFAULT_RANGE = '-6 days';
 
     public function rules(): array
     {
@@ -59,6 +77,27 @@ class CallLogSearch extends CallLog
 
             [['clq_access_count', 'clq_queue_time'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
             [['clq_access_count', 'clq_queue_time'], 'integer'],
+            [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+            [['callDurationFrom', 'callDurationTo'], 'integer'],
+            [['projectIds', 'statusIds', 'typesIds', 'categoryIds', 'departmentIds'], 'each', 'rule' => ['integer']],
+        ];
+    }
+
+    public function __construct($config = [])
+    {
+        parent::__construct($config);
+        $this->createTimeRange = date('Y-m-d 00:00:00', strtotime(self::CREATE_TIME_START_DEFAULT_RANGE)) . ' - ' . date('Y-m-d 23:59:59');
+    }
+
+    public function behaviors()
+    {
+        return [
+            [
+                'class' => DateRangeBehavior::class,
+                'attribute' => 'createTimeRange',
+                'dateStartAttribute' => 'createTimeStart',
+                'dateEndAttribute' => 'createTimeEnd',
+            ]
         ];
     }
 
@@ -72,6 +111,10 @@ class CallLogSearch extends CallLog
             'query' => $query,
             'sort'=> ['defaultOrder' => ['cl_call_created_dt' => SORT_DESC]],
         ]);
+
+        /*if(!array_filter(isset($params['CallLogSearch']) ? $params['CallLogSearch'] : [])) {
+            $dataProvider->totalCount = static::find()->count();
+        }*/
 
         $dataProvider->sort->attributes['lead_id'] = [
             'asc' => ['cll_lead_id' => SORT_ASC],
@@ -121,6 +164,12 @@ class CallLogSearch extends CallLog
                 ['cl_id' => $this->cl_group_id],
                 ['cl_group_id' => $this->cl_group_id],
             ]);
+        }
+
+        if ($this->createTimeRange){
+            $dateTimeStart = Employee::convertTimeFromUserDtToUTC($this->createTimeStart);
+            $dateTimeEnd = Employee::convertTimeFromUserDtToUTC($this->createTimeEnd);
+            $query->andWhere(['between', 'cl_call_created_dt', $dateTimeStart, $dateTimeEnd]);
         }
 
         // grid filtering conditions
@@ -174,4 +223,73 @@ class CallLogSearch extends CallLog
 
 		return $dataProvider;
 	}
+
+    public function searchMyCalls($params, Employee $user): ActiveDataProvider
+    {
+        $this->load($params);
+
+        $query = static::find();
+        $query->where(['cl_user_id' => $user->id]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort'=> ['defaultOrder' => ['cl_id' => SORT_DESC]],
+        ]);
+
+        if (!$this->validate()) {
+            return $dataProvider;
+        }
+
+        if ($this->cl_call_created_dt) {
+            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cl_call_created_dt', $this->cl_call_created_dt, $user->timezone);
+        }
+
+        if ($this->createTimeRange){
+            $dateTimeStart = Employee::convertTimeFromUserDtToUTC($this->createTimeStart);
+            $dateTimeEnd = Employee::convertTimeFromUserDtToUTC($this->createTimeEnd);
+            $query->andWhere(['between', 'cl_call_created_dt', $dateTimeStart, $dateTimeEnd]);
+        }
+
+        if ($this->projectIds){
+            $query->andWhere(['cl_project_id' => $this->projectIds]);
+        }
+
+        if ($this->statusIds){
+            $query->andWhere(['cl_status_id' => $this->statusIds]);
+        }
+
+        if ($this->typesIds){
+            $query->andWhere(['cl_type_id' => $this->typesIds]);
+        }
+        if ($this->categoryIds){
+            $query->andWhere(['cl_category_id' => $this->categoryIds]);
+        }
+
+        if ($this->departmentIds){
+            $query->andWhere(['cl_department_id' => $this->departmentIds]);
+        }
+
+        if($this->callDurationFrom){
+            $query->andWhere(['>=', 'cl_duration', $this->callDurationFrom]);
+        }
+
+        if ($this->callDurationTo){
+            $query->andWhere(['<=', 'cl_duration', $this->callDurationTo]);
+        }
+
+        $query->andFilterWhere([
+            'cl_id' => $this->cl_id,
+            'cl_project_id' => $this->cl_project_id,
+            'cl_department_id' => $this->cl_department_id,
+            'cl_type_id' => $this->cl_type_id,
+            'cl_category_id' => $this->cl_category_id,
+            'cl_status_id' => $this->cl_status_id,
+            'cl_client_id' => $this->cl_client_id,
+        ]);
+
+        $query->andFilterWhere(['like', 'cl_phone_from', $this->cl_phone_from])
+            ->andFilterWhere(['like', 'cl_phone_to', $this->cl_phone_to]);
+
+        return $dataProvider;
+    }
 }

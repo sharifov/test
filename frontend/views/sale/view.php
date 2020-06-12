@@ -5,15 +5,22 @@ use common\models\CaseSale;
 use kartik\editable\Editable;
 use kartik\popover\PopoverX;
 use sales\guards\cases\CaseManageSaleInfoGuard;
+use sales\model\saleTicket\entity\SaleTicket;
+use sales\model\saleTicket\useCase\sendEmail\SaleTicketHelper;
+use yii\grid\GridView;
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\helpers\VarDumper;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $data array */
 /* @var $csId int */
 /* @var $itemKey int */
 /* @var $caseSaleModel common\models\CaseSale */
-/* @var array $additionalData */
+/* @var $caseModel sales\entities\cases\Cases */
+/* @var $additionalData array */
+/* @var $dataProviderCc yii\data\ActiveDataProvider */
 
 if(Yii::$app->request->isPjax) {
 
@@ -29,6 +36,10 @@ if (!empty($caseSaleModel)) {
 } else {
     $canManageSaleInfo = true;
 }
+
+$saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_id' => !empty($caseModel) ? $caseModel->cs_id : 0, 'sale_id' => $data['saleId'], 'booking_id' => $data['bookingId']]);
+
+$pjaxCaseSaleTicketContainerId = 'pjax-case-sale-tickets-'.$caseSaleModel->css_cs_id.'-'.$caseSaleModel->css_sale_id;
 ?>
 <div class="sale-view">
     <h3><?= Html::encode($title) ?></h3>
@@ -37,7 +48,7 @@ if (!empty($caseSaleModel)) {
             <div class="error-dump"></div>
         </div>
 
-        <?php if (isset($additionalData) && $additionalData['withFareRules'] === 0) :?>
+        <?php if (!empty($additionalData) && $additionalData['withFareRules'] === 0) :?>
             <div class="col-md-12">
                 <?php echo Html::a(
                     'Check Fare rules',
@@ -108,140 +119,271 @@ if (!empty($caseSaleModel)) {
 
         </div>
 
-        <div class="col-md-4">
-
-            <h2>Processing Teams Status</h2>
-            <?php if(isset($data['processingTeamsStatus']) && $data['processingTeamsStatus']): ?>
-                <table class="table table-bordered table-hover">
-                    <tr>
-                        <th>Type</th>
-                        <th>Value</th>
-                    </tr>
-                    <?php foreach($data['processingTeamsStatus'] as $pStatusKey => $pStatusValue): ?>
-                        <tr>
-                            <td><?=Html::encode($pStatusKey)?></td>
-                            <td><?=Html::encode($pStatusValue)?></td>
-                        </tr>
-                    <?php endforeach;?>
-                </table>
-            <?php endif;?>
-
-            <h2>Notes</h2>
-            <div style="width: 100%;overflow-x: auto;">
-                <?php if(isset($data['notes']) && $data['notes']): ?>
-                    <table class="table table-bordered table-hover">
-                        <tr>
-                            <th>Created</th>
-                            <th>Message</th>
-                            <th>Agent</th>
-                            <th>Team</th>
-                        </tr>
-                        <?php foreach($data['notes'] as $note): ?>
+        <div class="col-md-9">
+            <?php if (!empty($caseSaleModel) && $saleTicket = $caseSaleModel->cssSaleTicket): ?>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h2>Sale Tickets</h2>
+                            <?= Html::a('<i class="fa fa-envelope"></i> Send Email', $saleTicketGenerateEmail, ['class' => 'btn btn-success sale-ticket-generate-email-btn report-send-email-'.$caseSaleModel->css_sale_id, 'title' => SaleTicketHelper::getTitleForSendEmailBtn($saleTicket), 'data-pjax' => 0, 'data-credit-card-exist' => $dataProviderCc->totalCount]) ?>
+                        </div>
+                        <?php Pjax::begin(['id' => $pjaxCaseSaleTicketContainerId, 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false]) ?>
+                        <table class="table table-bordered table-hover">
                             <tr>
-                                <td><?=Yii::$app->formatter->asDatetime(strtotime($note['created']))?></td>
-                                <td><?=Html::encode($note['message'])?></td>
-                                <td><?=Html::encode($note['agent'])?></td>
-                                <td><?=Html::encode($note['team'])?></td>
+                                <th>Last/First Name</th>
+                                <th>Ticket Number</th>
+                                <th>Record Locator</th>
+                                <th>Original FOP</th>
+                                <th>Charge System</th>
+                                <th>Airline Penalty</th>
+                                <th>Penalty Amount</th>
+                                <th>Selling</th>
+                                <th>Service Fee</th>
+                                <th>Recal Commission</th>
+                                <th>Markup</th>
+                                <th>Upfront Charge</th>
+                                <th>Refundable Amount</th>
                             </tr>
-                        <?php endforeach;?>
-                    </table>
-                <?php endif;?>
+							<?php
+                            /** @var $saleTicket SaleTicket[] */
+                            foreach($saleTicket as $key => $ticket): ?>
+                                <tr>
+                                    <td><?=Html::encode($ticket->st_client_name)?></td>
+                                    <td><?=Html::encode($ticket->st_ticket_number)?></td>
+                                    <td><?=Html::encode($ticket->st_record_locator)?></td>
+                                    <td><?=Html::encode($ticket->getFormattedOriginalFop())?></td>
+                                    <td><?=Html::encode($ticket->st_charge_system)?></td>
+                                    <td><?=Html::encode(SaleTicket::getPenaltyTypeName($ticket->st_penalty_type))?></td>
+                                    <td>
+										<?php if (!$canManageSaleInfo):
+											echo Editable::widget([
+												'model' => $ticket,
+												'attribute' => empty($ticket->st_refund_waiver) ? 'st_penalty_amount' : 'st_refund_waiver',
+												'header' => 'Penalty Amount',
+												'asPopover' => false,
+												'inputType' => Editable::INPUT_HTML5,
+												'formOptions' => [ 'action' => [Url::to(['/sale-ticket/ajax-sale-ticket-edit-info/', 'st_id' => $ticket->st_id])] ],
+												'options' => [
+													'id' => 'sale-ticket-penalty-amount-'.$key . '-' . $ticket->st_case_sale_id
+												],
+												'pluginEvents' => [
+													'editableSuccess' => 'function (event, val, form, data) {
+                                                        pjaxReload({container: "#'.$pjaxCaseSaleTicketContainerId.'"});
+                                                    }',
+												],
+											]);
+										else:
+											echo Html::encode(empty($ticket->st_refund_waiver) ? $ticket->st_penalty_amount : $ticket->st_refund_waiver);
+										endif;
+										?>
+                                    </td>
+                                    <td><?=Html::encode($ticket->st_selling)?></td>
+                                    <td><?=Html::encode($ticket->st_service_fee)?></td>
+                                    <td>
+										<?php if (!$canManageSaleInfo):
+											echo Editable::widget([
+												'model' => $ticket,
+												'attribute' => 'st_recall_commission',
+												'header' => 'Recall Commission',
+												'asPopover' => false,
+												'inputType' => Editable::INPUT_HTML5,
+												'formOptions' => [ 'action' => [Url::to(['/sale-ticket/ajax-sale-ticket-edit-info/', 'st_id' => $ticket->st_id])] ],
+												'options' => [
+													'id' => 'sale-ticket-recall-commission-'.$key . '-' . $ticket->st_case_sale_id
+												],
+												'pluginEvents' => [
+													'editableSuccess' => 'function (event, val, form, data) {
+                                                        pjaxReload({container: "#'.$pjaxCaseSaleTicketContainerId.'"});
+                                                    }',
+												],
+											]);
+										else:
+											echo Html::encode($ticket->st_recall_commission);
+										endif;
+										?>
+                                    </td>
+                                    <td>
+										<?php if (!$canManageSaleInfo):
+											echo Editable::widget([
+												'model' => $ticket,
+												'attribute' => 'st_markup',
+												'header' => 'Markup',
+												'asPopover' => false,
+												'inputType' => Editable::INPUT_HTML5,
+												'formOptions' => [ 'action' => [Url::to(['/sale-ticket/ajax-sale-ticket-edit-info/', 'st_id' => $ticket->st_id])] ],
+                                                'options' => [
+                                                    'id' => 'sale-ticket-markup-'.$key . '-' . $ticket->st_case_sale_id
+                                                ],
+												'pluginEvents' => [
+                                                    'editableSuccess' => 'function (event, val, form, data) {
+                                                        pjaxReload({container: "#'.$pjaxCaseSaleTicketContainerId.'"});
+                                                    }',
+												],
+											]);
+										else:
+											echo Html::encode($ticket->st_markup);
+										endif;
+										?>
+                                    </td>
+
+                                    <td><?=Html::encode($ticket->st_upfront_charge)?></td>
+                                    <td><?=Html::encode($ticket->st_refundable_amount)?></td>
+                                </tr>
+							<?php endforeach;?>
+                        </table>
+                        <?php Pjax::end(); ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+            <div class="row">
+                <div class="col-md-5">
+
+                    <h2>Processing Teams Status</h2>
+                    <?php if(isset($data['processingTeamsStatus']) && $data['processingTeamsStatus']): ?>
+                        <table class="table table-bordered table-hover">
+                            <tr>
+                                <th>Type</th>
+                                <th>Value</th>
+                            </tr>
+                            <?php foreach($data['processingTeamsStatus'] as $pStatusKey => $pStatusValue): ?>
+                                <tr>
+                                    <td><?=Html::encode($pStatusKey)?></td>
+                                    <td><?=Html::encode($pStatusValue)?></td>
+                                </tr>
+                            <?php endforeach;?>
+                        </table>
+                    <?php endif;?>
+
+                    <h2>Notes</h2>
+                    <div style="width: 100%;overflow-x: auto;">
+                        <?php if(isset($data['notes']) && $data['notes']): ?>
+                            <table class="table table-bordered table-hover">
+                                <tr>
+                                    <th>Created</th>
+                                    <th>Message</th>
+                                    <th>Agent</th>
+                                    <th>Team</th>
+                                </tr>
+                                <?php foreach($data['notes'] as $note): ?>
+                                    <tr>
+                                        <td><?=Yii::$app->formatter->asDatetime(strtotime($note['created']))?></td>
+                                        <td><?=Html::encode($note['message'])?></td>
+                                        <td><?=Html::encode($note['agent'])?></td>
+                                        <td><?=Html::encode($note['team'])?></td>
+                                    </tr>
+                                <?php endforeach;?>
+                            </table>
+                        <?php endif;?>
+                    </div>
+
+                    <h2>Customer Information</h2>
+                    <div style="width: 100%; overflow-x: auto;">
+                        <?php if(!empty($data['customerInfo'])): ?>
+                            <table class="table table-bordered table-hover">
+                                <tr>
+                                    <th>First Name</th>
+                                    <th>Last Name</th>
+                                    <th>Phone number</th>
+                                    <th>Email</th>
+                                </tr>
+                                <tr>
+                                    <td><?=Html::encode($data['customerInfo']['firstName'] ?? '')?></td>
+                                    <td><?=Html::encode($data['customerInfo']['lastName'] ?? '')?></td>
+                                    <td><?=Html::encode($data['customerInfo']['phoneNumber'] ?? '')?></td>
+                                    <td><?=Html::encode($data['email'] ?? '')?></td>
+                                </tr>
+                            </table>
+                        <?php endif;?>
+                    </div>
+
+                </div>
+
+                <div class="col-md-7">
+                    <h2>Price</h2>
+                    <?php if(isset($data['price']) && $data['price']): ?>
+
+                        <?php if(isset($data['price']['priceQuotes']) && $data['price']['priceQuotes']): ?>
+                        <table class="table table-bordered table-hover">
+                            <tr>
+                                <th>Pax Type</th>
+                                <th>Selling</th>
+                                <th>Net</th>
+                                <th>Fare</th>
+                                <th>Taxes</th>
+                                <th>Mark Up</th>
+                                <th>Over Cap</th>
+                                <th>Source Fee</th>
+                            </tr>
+                            <?php foreach($data['price']['priceQuotes'] as $paxType => $price): ?>
+                                <tr>
+                                    <td><?=Html::encode($paxType)?></td>
+                                    <td><?=Html::encode($price['selling'])?></td>
+                                    <td><?=Html::encode($price['net'])?></td>
+                                    <td><?=Html::encode($price['fare'])?></td>
+                                    <td><?=Html::encode($price['taxes'])?></td>
+                                    <td><?=Html::encode($price['mark_up'])?></td>
+                                    <td><?=Html::encode($price['over_cap'])?></td>
+                                    <td><?=Html::encode($price['source_fee'])?></td>
+                                </tr>
+                            <?php endforeach;?>
+                        </table>
+
+
+                            <table class="table table-bordered table-hover">
+                                <tr>
+                                    <th>Amount Charged</th>
+                                    <td><?=($data['price']['amountCharged'])?></td>
+                                </tr>
+                                <tr>
+                                    <th>Profit</th>
+                                    <td><?=number_format($data['price']['profit'], 2)?> <?=Html::encode($data['price']['currency'])?></td>
+                                </tr>
+                            </table>
+
+                        <?php endif;?>
+                    <?php endif;?>
+
+                    <h2>Auth List</h2>
+                    <?php if(isset($data['authList']) && $data['authList']): ?>
+                        <table class="table table-bordered table-hover table-striped">
+                            <tr>
+                                <th>Created</th>
+                                <th>Auth system</th>
+                                <th>For what</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Message</th>
+                                <th>CC Number</th>
+                            </tr>
+                            <?php foreach($data['authList'] as $list): ?>
+                                <tr>
+                                    <td><?=Yii::$app->formatter->asDatetime(strtotime($list['created']))?></td>
+                                    <td><?=Html::encode($list['auth_system'])?></td>
+                                    <td><?=Html::encode($list['for_what'])?></td>
+                                    <td><?=number_format($list['amount'], 2)?></td>
+                                    <td><?=Html::encode($list['status'])?></td>
+                                    <td><?=Html::encode($list['message'])?></td>
+                                    <td><?=Html::encode($list['ccNumber'])?></td>
+                                </tr>
+                            <?php endforeach;?>
+                        </table>
+                    <?php endif;?>
+
+                    <?php
+                        if (!empty($csId)) {
+                            echo $this->render('partial/_sale_credit_card', [
+                                'csId' => $csId,
+                                'saleId' => $data['saleId'],
+                                'dataProvider' => $dataProviderCc,
+                                'caseSaleModel' => $caseSaleModel,
+                                'caseModel' => $caseModel
+                            ]);
+                        }
+                    ?>
+
+                </div>
             </div>
-
-            <h2>Customer Information</h2>
-            <div style="width: 100%; overflow-x: auto;">
-				<?php if(!empty($data['customerInfo'])): ?>
-                    <table class="table table-bordered table-hover">
-                        <tr>
-                            <th>First Name</th>
-                            <th>Last Name</th>
-                            <th>Phone number</th>
-                            <th>Email</th>
-                        </tr>
-                        <tr>
-                            <td><?=Html::encode($data['customerInfo']['firstName'] ?? '')?></td>
-                            <td><?=Html::encode($data['customerInfo']['lastName'] ?? '')?></td>
-                            <td><?=Html::encode($data['customerInfo']['phoneNumber'] ?? '')?></td>
-                            <td><?=Html::encode($data['email'] ?? '')?></td>
-                        </tr>
-                    </table>
-				<?php endif;?>
-            </div>
-
         </div>
-
-        <div class="col-md-5">
-            <h2>Price</h2>
-            <?php if(isset($data['price']) && $data['price']): ?>
-
-                <?php if(isset($data['price']['priceQuotes']) && $data['price']['priceQuotes']): ?>
-                <table class="table table-bordered table-hover">
-                    <tr>
-                        <th>Pax Type</th>
-                        <th>Selling</th>
-                        <th>Net</th>
-                        <th>Fare</th>
-                        <th>Taxes</th>
-                        <th>Mark Up</th>
-                        <th>Over Cap</th>
-                        <th>Source Fee</th>
-                    </tr>
-                    <?php foreach($data['price']['priceQuotes'] as $paxType => $price): ?>
-                        <tr>
-                            <td><?=Html::encode($paxType)?></td>
-                            <td><?=Html::encode($price['selling'])?></td>
-                            <td><?=Html::encode($price['net'])?></td>
-                            <td><?=Html::encode($price['fare'])?></td>
-                            <td><?=Html::encode($price['taxes'])?></td>
-                            <td><?=Html::encode($price['mark_up'])?></td>
-                            <td><?=Html::encode($price['over_cap'])?></td>
-                            <td><?=Html::encode($price['source_fee'])?></td>
-                        </tr>
-                    <?php endforeach;?>
-                </table>
-
-
-                    <table class="table table-bordered table-hover">
-                        <tr>
-                            <th>Amount Charged</th>
-                            <td><?=($data['price']['amountCharged'])?></td>
-                        </tr>
-                        <tr>
-                            <th>Profit</th>
-                            <td><?=number_format($data['price']['profit'], 2)?> <?=Html::encode($data['price']['currency'])?></td>
-                        </tr>
-                    </table>
-
-                <?php endif;?>
-            <?php endif;?>
-
-            <h2>Auth List</h2>
-            <?php if(isset($data['authList']) && $data['authList']): ?>
-                <table class="table table-bordered table-hover table-striped">
-                    <tr>
-                        <th>Created</th>
-                        <th>Auth system</th>
-                        <th>For what</th>
-                        <th>Amount</th>
-                        <th>Status</th>
-                        <th>Message</th>
-                        <th>CC Number</th>
-                    </tr>
-                    <?php foreach($data['authList'] as $list): ?>
-                        <tr>
-                            <td><?=Yii::$app->formatter->asDatetime(strtotime($list['created']))?></td>
-                            <td><?=Html::encode($list['auth_system'])?></td>
-                            <td><?=Html::encode($list['for_what'])?></td>
-                            <td><?=number_format($list['amount'], 2)?></td>
-                            <td><?=Html::encode($list['status'])?></td>
-                            <td><?=Html::encode($list['message'])?></td>
-                            <td><?=Html::encode($list['ccNumber'])?></td>
-                        </tr>
-                    <?php endforeach;?>
-                </table>
-            <?php endif;?>
-        </div>
-
     </div>
     <div class="row">
         <div class="col-md-12">
@@ -304,7 +446,7 @@ if (!empty($caseSaleModel)) {
                                         'inputType' => Editable::INPUT_DATE,
                                         'displayValue' => date('d M Y', strtotime($passenger['birth_date'])),
                                         'value' => date('d M Y', strtotime($passenger['birth_date'])),
-                                        'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
+                                        'formOptions' => [ 'action' => [Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
                                         'options' => [
                                             'convertFormat'=>true,
                                             'pluginOptions'=>[
@@ -336,7 +478,7 @@ if (!empty($caseSaleModel)) {
                                             'inputType' => Editable::INPUT_DROPDOWN_LIST,
                                             'data' => ['F' => 'Female', 'M' => 'Male'],
                                             'value' => Html::encode($passenger['gender']),
-                                            'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
+                                            'formOptions' => [ 'action' => [Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
                                             'pluginEvents' => [
                                                 'editableSuccess' => 'function (event, val, form, data) {
                                                     document.activateButtonSync(data);
@@ -359,7 +501,7 @@ if (!empty($caseSaleModel)) {
                                         'data' => CaseSale::PASSENGER_MEAL,
                                         'options' => ['prompt'=>'Select meal...'],
                                         'value' => Html::encode(!empty($passenger['meal']) && is_array($passenger['meal']) ? reset($passenger['meal']) : null),
-                                        'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
+                                        'formOptions' => [ 'action' => [Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
                                         'pluginEvents' => [
                                             'editableSuccess' => 'function (event, val, form, data) {
                                                 document.activateButtonSync(data);
@@ -386,7 +528,7 @@ if (!empty($caseSaleModel)) {
 										'inputType' => Editable::INPUT_DROPDOWN_LIST,
 										'data' => CaseSale::PASSENGER_WHEELCHAIR,
 										'value' => Html::encode(!empty($passenger['wheelchair']) && is_array($passenger['wheelchair']) ? reset($passenger['wheelchair']) : null),
-										'formOptions' => ['action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])]],
+										'formOptions' => ['action' => [Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])]],
 										'options' => ['prompt' => 'Select wheelchair...'],
 										'pluginEvents' => [
 											'editableSuccess' => 'function (event, val, form, data) {
@@ -414,7 +556,7 @@ if (!empty($caseSaleModel)) {
 										'inputType' => Editable::INPUT_DROPDOWN_LIST,
 										'data' => Airline::getAirlinesMapping(true),
 										'value' => Html::encode(!empty($passenger['ff_airline']) ? $passenger['ff_airline'] : $data['validatingCarrier']),
-										'formOptions' => ['action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])]],
+										'formOptions' => ['action' => [Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])]],
 										'options' => [],
 										'pluginEvents' => [
 											'editableSuccess' => 'function (event, val, form, data) {
@@ -441,7 +583,7 @@ if (!empty($caseSaleModel)) {
 										'asPopover' => false,
 										'inputType' => Editable::INPUT_TEXT,
 										'value' => Html::encode(!empty($passenger['ff_numbers']) && is_array($passenger['ff_numbers']) ? reset($passenger['ff_numbers']) : null),
-										'formOptions' => ['action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])]],
+										'formOptions' => ['action' => [Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])]],
 										'pluginEvents' => [
 											'editableSuccess' => 'function (event, val, form, data) {
 										    document.activateButtonSync(data);
@@ -467,7 +609,7 @@ if (!empty($caseSaleModel)) {
                                         'asPopover' => false,
                                         'inputType' => Editable::INPUT_TEXT,
                                         'value' => Html::encode(!empty($passenger['kt_numbers']) && is_array($passenger['kt_numbers']) ? reset($passenger['kt_numbers']) : null),
-                                        'formOptions' => [ 'action' => [\yii\helpers\Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
+                                        'formOptions' => [ 'action' => [Url::to(['/cases/ajax-sale-list-edit-info/', 'caseId' => $csId, 'caseSaleId' => $data['saleId']])] ],
                                         'pluginEvents' => [
                                             'editableSuccess' => 'function (event, val, form, data) {
                                                 document.activateButtonSync(data);
@@ -687,8 +829,7 @@ if (!empty($caseSaleModel)) {
     <?php endif; ?>
 
     <?php
-	$url = \yii\helpers\Url::to(['/cases/ajax-sync-with-back-office/']);
-	$urlRefresh = \yii\helpers\Url::to(['/cases/ajax-refresh-sale-info']);
+	$url = Url::to(['/cases/ajax-sync-with-back-office/']);
 
 	$js = <<<JS
                     $(".update-to-bo").on('click', function (e) {
@@ -746,62 +887,6 @@ if (!empty($caseSaleModel)) {
                         });
                     });
 
-$('.refresh-from-bo').on('click', function (e) {
-    e.preventDefault();
-    e.stopPropagation();  
-    
-    let obj = $(this),
-        caseId = obj.attr('data-case-id'),
-        caseSaleId = obj.attr('data-case-sale-id'),
-        checkFareRules = obj.attr('check-fare-rules');
-        
-    if (typeof checkFareRules === typeof undefined) {
-        checkFareRules = 0;    
-    }
-    
-    $.ajax({
-        url: "$urlRefresh/" + caseId + '/' + caseSaleId,
-        type: 'post',
-        data : {check_fare_rules: checkFareRules},
-        dataType: "json",    
-        beforeSend: function () {
-            obj.attr('disabled', true).find('i').toggleClass('fa-spin');
-            $(obj).closest('.panel').find('.error-dump').html();
-        },
-        success: function (data) {
-            if (data.error) {
-               new PNotify({
-                    title: "Error",
-                    type: "error",
-                    text: data.message,
-                    hide: true
-                }); 
-            } else {
-                new PNotify({
-                    title: "Success",
-                    type: "success",
-                    text: data.message,
-                    hide: true
-                }); 
-                $.pjax.reload({container: '#pjax-sale-list',push: false, replace: false, 'scrollTo': false, timeout: 1000, async: false,});
-            }
-        },
-        error: function (text) {
-            new PNotify({
-                title: "Error",
-                type: "error",
-                text: "Internal Server Error. Try again letter.",
-                hide: true
-            });
-        },
-        complete: function () {
-            obj.removeAttr('disabled').find('i').toggleClass('fa-spin');
-            $(obj).closest('.panel').find('.error-dump').html();
-        }
-    });
-});
-
-    
     $('.remove-sale').on('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
@@ -857,6 +942,7 @@ $('.refresh-from-bo').on('click', function (e) {
     });
                     
     $('#passengers span[data-toggle="tooltip"]').tooltip();
+    
 JS;
 $this->registerJs($js);
     ?>

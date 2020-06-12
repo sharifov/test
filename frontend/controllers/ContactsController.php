@@ -490,6 +490,7 @@ class ContactsController extends FController
                     $contactData['name'] = StringHelper::truncate($name, 18, '...') . ' ' . $contact['phone'];
                     $contactData['phone'] = $contact['phone'];
                     $contactData['type'] = (int)$contact['type'];
+                    $contactData['title'] = StringHelper::truncate($name, 18, '...');
 
                     if ($contactData['type'] === Client::TYPE_INTERNAL) {
                         $isOnline = (int)$contact['user_is_online'] ? true : false;

@@ -6,9 +6,13 @@ use yii\web\View;
 
 /* @var $userPhoneProject string */
 /* @var $formattedPhoneProject string */
+/* @var $userCallStatus \common\models\UserCallStatus */
 /* @var $this View */
 /** @var array $userPhones */
 /** @var array $userEmails */
+/** @var bool $isCallRinging */
+/** @var bool $isCallInProgress */
+/** @var \common\models\Call|null $call */
 
 NewWebPhoneAsset::register($this);
 ?>
@@ -17,6 +21,10 @@ NewWebPhoneAsset::register($this);
 	'showWidgetContent' => !empty($userPhoneProject),
 	'userPhones' => $userPhones,
 	'userEmails' => $userEmails,
+	'userCallStatus' => $userCallStatus,
+	'isCallRinging' => $isCallRinging,
+	'isCallInProgress' => $isCallInProgress,
+	'call' => $call
 ]) ?>
 <?= $this->render('partial/_phone_widget_icon') ?>
 
@@ -41,7 +49,7 @@ $js = <<<JS
 			return false;
 		}
 		
-		var reg = new RegExp('^[+]?[0-9]+$');
+		var reg = new RegExp('^[+]?[0-9]{9,15}$');
 		if (!reg.test(phone_to)) {
 		    new PNotify({title: "Phone Widget", type: "error", text: 'Entered phone number is not correct. Phone number should contain only numbers and +', hide: true});
 			return false;	
@@ -60,8 +68,8 @@ $js = <<<JS
 							webPhoneParams = params;
 							PhoneWidgetCall.initCall({from: phoneNumbers.getData, to: data});
 							createNotify('Calling', 'Calling ' + params.To + '...', 'success');
-							updateAgentStatus(connection, false, 0);
 							connection = device.connect(params);
+							updateAgentStatus(connection, false, 0);
 						}      
                     } else {
                         var text = 'Error. Try again later';

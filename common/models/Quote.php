@@ -8,7 +8,8 @@ use common\models\local\FlightSegment;
 use common\models\local\LeadLogMessage;
 use common\models\query\QuoteQuery;
 use sales\entities\EventTrait;
-use sales\services\parsingDump\WorldSpanReservationService;
+use sales\services\parsingDump\lib\ParsingDump;
+use sales\services\parsingDump\ReservationService;
 use Yii;
 use yii\base\ErrorException;
 use yii\base\InvalidArgumentException;
@@ -60,7 +61,6 @@ class Quote extends \yii\db\ActiveRecord
 
     use EventTrait;
 
-    public const SERVICE_FEE = 0.035;
     public const CHECKOUT_URL_PAGE = 'checkout/quote';
 
     public const
@@ -135,6 +135,23 @@ class Quote extends \yii\db\ActiveRecord
         self::TYPE_ORIGINAL => 'Original',
         self::TYPE_ALTERNATIVE => 'Alternative',
     ];
+
+    public float $serviceFee = 0.035;
+    public float $serviceFeePercent = 3.5;
+
+    /**
+     * Quote constructor.
+     * @param array $config
+     */
+    public function __construct(array $config = [])
+    {
+        if (isset(Yii::$app->params['settings']['quote_service_fee_percent'])) {
+            $this->serviceFee = Yii::$app->params['settings']['quote_service_fee_percent'] / 100;
+            $this->serviceFeePercent = Yii::$app->params['settings']['quote_service_fee_percent'];
+        }
+
+        parent::__construct($config);
+    }
 
     public static function getTypeName($type)
     {
@@ -267,6 +284,27 @@ class Quote extends \yii\db\ActiveRecord
         }
         $quote->lead_id = $leadId;
         $quote->uid = uniqid();
+        $quote->status = self::STATUS_CREATED;
+        return $quote;
+    }
+
+    /**
+     * @param array $attributes
+     * @param int $leadId
+     * @param bool $isAlternative
+     * @return static
+     */
+    public static function createQuote(array $attributes, int $leadId, bool $isAlternative): self
+    {
+        $quote = new self();
+        $quote->attributes = $attributes;
+        if ($isAlternative) {
+            $quote->alternative();
+        } else {
+            $quote->base();
+        }
+        $quote->lead_id = $leadId;
+        $quote->uid = uniqid('', false);
         $quote->status = self::STATUS_CREATED;
         return $quote;
     }
@@ -536,14 +574,31 @@ class Quote extends \yii\db\ActiveRecord
         return $elapsedTime;
     }
 
-
-
-
-    public function checkReservationDump()
+    /**
+     * @param bool|null $enableGdsParsers
+     * @throws \Exception
+     */
+    public function checkReservationDump(?bool $enableGdsParsers = null): void
     {
-        $dumpParser = self::parseDump($this->reservation_dump, true, $this->itinerary);
+        $enableGdsParsers = $enableGdsParsers !== null ?
+            $enableGdsParsers :
+            \Yii::$app->params['settings']['enable_gds_parsers_for_create_quote'];
+
+        if ($enableGdsParsers && $gds = ParsingDump::getGdsByQuote($this->gds)) {
+            $dumpParser = (new ReservationService($gds))->parseReservation($this->reservation_dump, true, $this->itinerary);
+        } else {
+            $validation = $this->gds === 'A' ? false : true ;
+            $dumpParser = self::parseDump($this->reservation_dump, $validation, $this->itinerary);
+        }
         if (empty($dumpParser)) {
             $this->addError('reservation_dump', 'Incorrect reservation dump!');
+            \Yii::info(
+                \yii\helpers\VarDumper::dumpAsString([
+                    'gds' => $this->gds,
+                    'dump' => $this->reservation_dump,
+                ], 20),
+                'Quote:checkReservationDump:IncorrectReservationDump'
+            );
         }
     }
 
@@ -2011,7 +2066,7 @@ class Quote extends \yii\db\ActiveRecord
 
     public function getServiceFeePercent()
     {
-        return ($this->check_payment)?($this->service_fee_percent?$this->service_fee_percent:self::SERVICE_FEE*100):0;
+        return ($this->check_payment)?($this->service_fee_percent?$this->service_fee_percent:$this->serviceFee*100):0;
     }
 
     public function getEstimationProfitText()

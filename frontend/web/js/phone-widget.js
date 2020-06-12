@@ -109,12 +109,8 @@ $(document).ready(function() {
         }
     });
 
-    $(document).on("click", ".widget-modal__close", function () {
-        $(".widget-modal").hide();
-        $(".phone-widget__tab").removeClass('ovf-hidden');
-        $('.collapsible-container').collapse('hide');
-        clearEmailTab()
-    });
+
+
 
     $('.js-toggle-contact-info').on('click', function() {
         $('.contact-modal-info').show()
@@ -152,6 +148,9 @@ $(document).ready(function() {
     // var messagesModal = $(".messages-modal__messages-scroll");
     // var emailModal = $(".email-modal__messages-scroll");
 
+    var elemScrollable = $('.scrollable-block');
+
+    var additionalBar = $('.additional-bar__body');
     var contactModal = $(".contact-modal-info");
     var blockSuggestion = $(".suggested-contacts");
     // var msgModalScroll = new SimpleBar(messagesModal[0]);
@@ -163,21 +162,145 @@ $(document).ready(function() {
     // msgModalScroll.getContentElement();
     // emailModalScroll.getContentElement();
     // msgModalScroll.recalculate();
+    $(additionalBar).each(function(i, el) {
+        var elem = new SimpleBar(el);
+        elem.getContentElement();
+    })
 
-    $('.dial__btn').on('click', function(e) {
+    $('.toggle-bar-settings').on('click', function() {
+        $('#bar-settings').slideToggle(150)
+        $('#bar-logs').slideUp(150)
+    })
+
+    $('.additional-bar__close').on('click', function() {
+        console.log($(this).parents('.additional-bar'))
+        $(this).parents('.additional-bar').slideUp(150);
+    })
+
+    $('.toggle-bar-logs').on('click', function() {
+        $('#bar-logs').slideToggle(150)
+        $('#bar-settings').slideUp(150)
+    })
+
+    $('.additional-bar__close').on('click', function() {
+        console.log($(this).parents('.additional-bar'))
+        $(this).parents('.additional-bar').slideUp(150);
+    })
+
+
+    $(elemScrollable).each(function(i, elem) {
+        var el = new SimpleBar(elem);
+        el.getContentElement();
+    })
+
+
+    //--------------------------------------------------------------------------
+
+    // polyfill
+    var AudioContext = window.AudioContext || window.webkitAudioContext || window.mozAudioContext;
+
+    function Tone(context, freq1, freq2) {
+        this.context = context;
+        this.status = 0;
+        this.freq1 = freq1;
+        this.freq2 = freq2;
+    }
+
+    Tone.prototype.setup = function(){
+        this.osc1 = context.createOscillator();
+        this.osc2 = context.createOscillator();
+        this.osc1.frequency.value = this.freq1;
+        this.osc2.frequency.value = this.freq2;
+
+        this.gainNode = this.context.createGain();
+        this.gainNode.gain.value = 0.25;
+
+        this.filter = this.context.createBiquadFilter();
+        this.filter.type = "lowpass";
+        this.filter.frequency = 8000;
+
+        this.osc1.connect(this.gainNode);
+        this.osc2.connect(this.gainNode);
+
+        this.gainNode.connect(this.filter);
+        this.filter.connect(context.destination);
+    }
+
+    Tone.prototype.start = function(){
+        this.setup();
+        this.osc1.start(0);
+        this.osc2.start(0);
+        this.status = 1;
+    }
+
+    Tone.prototype.stop = function(){
+        this.osc1.stop(0);
+        this.osc2.stop(0);
+        this.status = 0;
+    }
+
+    var dtmfFrequencies = {
+        "1": {f1: 697, f2: 1209},
+        "2": {f1: 697, f2: 1336},
+        "3": {f1: 697, f2: 1477},
+        "4": {f1: 770, f2: 1209},
+        "5": {f1: 770, f2: 1336},
+        "6": {f1: 770, f2: 1477},
+        "7": {f1: 852, f2: 1209},
+        "8": {f1: 852, f2: 1336},
+        "9": {f1: 852, f2: 1477},
+        "✱": {f1: 941, f2: 1209},
+        "0": {f1: 941, f2: 1336},
+        "#": {f1: 941, f2: 1477},
+        "+": {f1: 941, f2: 1497}
+    }
+
+    var context = new AudioContext();
+
+    var dtmf = new Tone(context, 350, 440);
+
+    $('.dial__btn').on("mousedown touchstart", function(e){
         e.preventDefault();
-        var currentVal = $('.call-pane__dial-number').val();
-        $('.call-pane__dial-number').val(currentVal + $(this).val());
-        $('.call-pane__dial-clear-all').addClass('is-shown');
-        $('.suggested-contacts').addClass('is_active');
-        $('.call-pane__dial-number').focus()
 
+        var keyPressed = $(this).val();
+        var frequencyPair = dtmfFrequencies[keyPressed];
+
+        // this sets the freq1 and freq2 properties
+        dtmf.freq1 = frequencyPair.f1;
+        dtmf.freq2 = frequencyPair.f2;
+
+        if (dtmf.status == 0){
+            dtmf.start();
+        }
+
+        //let btnVal = $(this).val();
+        let currentVal = $('.call-pane__dial-number').val();
+
+        $('.call-pane__dial-number').val(currentVal + keyPressed);
+        $('.call-pane__dial-clear-all').addClass('is-shown');
+        //$('.suggested-contacts').addClass('is_active');
+        $('.call-pane__dial-number').focus();
     });
+
+    $(window).on("mouseup touchend", function(){
+        if (typeof dtmf !== "undefined" && dtmf.status){
+            dtmf.stop();
+        }
+    });
+
+    //---------------------------------------------------
+
+
+
+
 
     $('.call-pane__dial-clear-all').on('click', function(e) {
         e.preventDefault();
-        $('.call-pane__dial-number').val('')
+        $('.call-pane__dial-number').val('').attr('readonly', false).prop('readonly', false);
+        $('#call-to-label').text('');
         $('.suggested-contacts').removeClass('is_active');
+
+        $('.dial__btn').attr('disabled', false).removeClass('disabled');
 
         // $(this).removeClass('is-shown')
     });
@@ -229,6 +352,7 @@ $(document).ready(function() {
 
         $(".phone-widget").toggleClass("is_active");
         $(this).toggleClass("is-mirror");
+
     });
 
     $(".phone-widget__close").on("click", function (e) {
@@ -264,10 +388,12 @@ $(document).ready(function() {
     //
     // });
 
-    $('.call-pane__end-call').on('click', function(e) {
+    $(document).on('click', '#cancel-active-call', function(e) {
         e.preventDefault();
 
-        if (device) {
+        let twilioDevice = JSON.parse(window.localStorage.getItem('twilioDevice'));
+
+        if (device || (device = twilioDevice)) {
             updateAgentStatus(connection, false, 1);
             device.disconnectAll();
 
@@ -340,8 +466,84 @@ $(document).ready(function() {
     //     console.log(currentNumber.getData);
     // });
     
-    
+    $(document).on("click", ".widget-modal__close", function () {
+        $(".widget-modal").hide();
+        $(".phone-widget__tab").removeClass('ovf-hidden');
+        $('.collapsible-container').collapse('hide');
+        clearEmailTab()
+    });
+
+
+
+
+
+    // function phoneWidgetBehavior(elem) {
+    //     var $main = $(elem),
+    //         backElement = '.widget-modal__close',
+    //         widgetModal = '.widget-modal',
+    //         widgetTab = '.phone-widget__tab',
+    //         collapsibleContainer = '.collapsible-container';
+
+    //         var events = {
+    //             pwBackAction: 'pw-back-action'
+    //         }
+
+    //         this.actionMapping = function(object) {
+    //             return {
+    //                 back: object.back
+    //             }
+    //         };
+
+    //         function getElement(selector) {
+    //             return $($main).find(selector)
+    //         }
+
+    //         function backAction() {
+    //             getElement(widgetModal).hide();
+    //             getElement(widgetTab).removeClass('ovf-hidden');
+    //             getElement(collapsibleContainer).collapse('hide');
+    //         }
+
+    //         $($main).on('click', backElement, function() {
+    //             backAction();
+    //             $(backElement).trigger(events.pwBackAction);
+                
+    //         });
+
+    //     return {
+    //         control: $main
+    //     };
+
+    // }
+
+    // var widget = phoneWidgetBehavior('.phone-widget');
+
+
+    // $(widget.control).on('pw-back-action', function () {
+    //     console.log('here is a event for back button');
+    // })
+
+    $('.additional-info__close').on('click', function() {
+        $('.additional-info').slideUp(150);
+    });
+
+    $('.call-pane__info').on('click', function() {
+        $('.additional-info').slideDown(150);
+    })
+
 });
+
+
+
+function formatPhoneNumber(phoneNumberString) {
+    let cleaned = ('' + phoneNumberString).replace(/\D/g, '')
+    let match = cleaned.match(/^(1|)?(\d{3})(\d{3})(\d{4})$/)
+    if (match) {
+        var intlCode = (match[1] ? '+1 ' : '')
+        return [intlCode, '(', match[2], ') ', match[3], '-', match[4]].join('')
+    }
+    return null
+}
 
 function toSelect(elem, obj, cb) {
     var $element = $(elem),
@@ -362,37 +564,40 @@ function toSelect(elem, obj, cb) {
     // nodes
     function selectedNode(value, project, id, projectId) {
         return (
-            '<button value="' + value + '" data-info-project="' + project + '" data-info-project-id="'+ projectId +'" class="btn btn-secondary dropdown-toggle" type="button" id="' +id + '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+
-            '<small class="current-number__phone current-number__selected-nr">' + value + '</small>'+
+            '<button value="' + value + '" data-info-project="' + project + '" data-info-project-id="'+ projectId +'" class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+
+            '<small class="current-number__phone current-number__selected-nr">' + formatPhoneNumber(value) + '</small>'+
             '<span class="current-number__identifier current-number__selected-project">' + project + '</span>'+
             '</button>'
         );
     }
 
     function optionNode(optionList) {
-        arr = []
-        optionList.forEach(function(el) {
-            arr.push('<button class="dropdown-item" type="button" value="' + el.value + '" data-info-project="' + el.project + '" data-info-project-id="' + el.projectId + '">'+
-                '<small class="current-number__phone">' + el.value + '</small>'+
-                '<span class="current-number__identifier">' + el.project + '</span>'+
-                '</button>')
-        })
+        let arr = []
+        if (optionList.length > 1) {
+            optionList.forEach(function (el) {
+                arr.push('<button class="dropdown-item" type="button" value="' + el.value + '" data-info-project="' + el.project + '" data-info-project-id="' + el.projectId + '">' +
+                    '<small class="current-number__phone">' + formatPhoneNumber(el.value) + '</small>' +
+                    '<span class="current-number__identifier">' + el.project + '</span>' +
+                    '</button>')
+            })
+        }
 
         return arr;
     }
 
     function containerNode(selected, optionList) {
-        var arr = optionNode(optionList).join('');
-
-        return (
-            '<div class="dropdown">'+
+        let arr = optionNode(optionList).join('');
+        let str = '<div class="dropdown">'+
             selected +
             '<div class="dropdown-menu" >' +
             arr +
-            '</div>'+
-            '<i class="fa fa-chevron-down"></i>'+
-            '</div>'
-        )
+            '</div>';
+        if (optionList.length > 1) {
+            str = str + '<i class="fa fa-chevron-down"></i>';
+        }
+        str = str + '</div>';
+
+        return str;
     }
 
     function generateSelect(obj) {
