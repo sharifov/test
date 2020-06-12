@@ -2,6 +2,7 @@
 
 use common\models\CaseSale;
 use common\models\CreditCard;
+use common\models\Employee;
 use sales\helpers\cases\CaseSaleHelper;
 use sales\model\saleTicket\entity\SaleTicket;
 use yii\helpers\Html;

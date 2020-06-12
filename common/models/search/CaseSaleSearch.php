@@ -6,6 +6,7 @@ use common\models\Employee;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\CaseSale;
+use yii\db\Expression;
 use yii\helpers\VarDumper;
 
 /**
@@ -138,5 +139,27 @@ class CaseSaleSearch extends CaseSale
         return $dataProvider;
     }
 
+    public function searchForExport($params)
+	{
+		$query = CaseSale::find()->where(new Expression('css_send_email_dt is not null'));
+
+		$dataProvider = new ActiveDataProvider([
+			'query' => $query,
+			'sort'=> ['defaultOrder' => ['css_created_dt' => SORT_DESC]],
+			'pagination' => [
+				'pageSize' => 10,
+			],
+		]);
+
+		$this->load($params);
+
+		if (!$this->validate()) {
+			return $dataProvider;
+		}
+
+		$query->andWhere(['css_cs_id' => $this->css_cs_id]);
+
+		return $dataProvider;
+	}
 
 }
