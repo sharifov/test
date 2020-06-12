@@ -521,7 +521,9 @@ class CasesSaleService
 
         $transaction = Yii::$app->db->beginTransaction();
         try {
-            if (!empty($saleData['saleId']) && $case = Cases::findOne($csId)) {
+			Yii::info('SaleId: ' . $saleData['saleId'] ?? '--', 'info\CaseSaleService::createSale::afterBeginTransaction');
+			Yii::info('CaseId: ' . $csId, 'info\CaseSaleService::createSale::afterBeginTransaction');
+			if (!empty($saleData['saleId']) && $case = Cases::findOne($csId)) {
                 $saleId = (int)$saleData['saleId'];
 
                 $caseSale = new CaseSale();
