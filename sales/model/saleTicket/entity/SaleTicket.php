@@ -220,7 +220,7 @@ class SaleTicket extends \yii\db\ActiveRecord
 		if (in_array($this->st_original_fop, ['CP', 'CK', 'VCC'])) {
 			return $this->st_selling - $this->st_recall_commission - $this->st_markup - $this->st_penalty_amount;
 		}
-		return $this->st_selling - $this->st_penalty_amount;
+		return $this->st_selling - $this->st_penalty_amount - $this->st_service_fee;
 	}
 
 	private function getPenaltyAmountIntValue(): float

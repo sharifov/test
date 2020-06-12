@@ -68,8 +68,8 @@ $js = <<<JS
 							webPhoneParams = params;
 							PhoneWidgetCall.initCall({from: phoneNumbers.getData, to: data});
 							createNotify('Calling', 'Calling ' + params.To + '...', 'success');
-							updateAgentStatus(connection, false, 0);
 							connection = device.connect(params);
+							updateAgentStatus(connection, false, 0);
 						}      
                     } else {
                         var text = 'Error. Try again later';
