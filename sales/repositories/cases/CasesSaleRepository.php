@@ -114,4 +114,10 @@ class CasesSaleRepository
 		$caseSale->css_departure_dt = $departureDt;
 		$this->save($caseSale);
 	}
+
+	public function setSendEmailDt(string $dateTime, CaseSale $caseSale): void
+	{
+		$caseSale->css_send_email_dt = $dateTime;
+		$this->save($caseSale);
+	}
 }

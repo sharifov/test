@@ -39,6 +39,7 @@ use yii\db\ActiveRecord;
  * @property string|null $css_fare_rules
  * @property int|null $css_penalty_type
  * @property string|null $css_departure_dt
+ * @property string|null $css_send_email_dt
  *
  * @property Employee $cssCreatedUser
  * @property Cases $cssCs
@@ -125,7 +126,7 @@ class CaseSale extends \yii\db\ActiveRecord
             [['css_cs_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['css_cs_id' => 'cs_id']],
             [['css_profit', 'css_charged'], 'number'],
             [['css_out_departure_airport', 'css_out_arrival_airport', 'css_in_departure_airport', 'css_in_arrival_airport'], 'string', 'max' => 3],
-            [['css_out_date', 'css_in_date', 'css_fare_rules', 'css_departure_dt'], 'string'],
+            [['css_out_date', 'css_in_date', 'css_fare_rules', 'css_departure_dt', 'css_send_email_dt'], 'string'],
             [['css_out_date', 'css_in_date', 'css_departure_dt'],  'datetime', 'format' => 'php:Y-m-d H:i:s'],
             [['css_charge_type'], 'string', 'max' => 100],
 			['css_penalty_type', 'in', 'range' => array_keys(SaleTicket::getAirlinePenaltyList()), 'skipOnEmpty' => true,]
@@ -160,7 +161,8 @@ class CaseSale extends \yii\db\ActiveRecord
             'css_in_date' => 'In date',
             'css_fare_rules' => 'Fare rules',
 			'css_penalty_type' => 'Penalty Type',
-			'css_departure_dt' => 'Departure DT'
+			'css_departure_dt' => 'Departure DT',
+			'css_send_email_dt' => 'Send Email DT',
         ];
     }
 

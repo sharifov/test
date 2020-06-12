@@ -317,11 +317,15 @@ $(document).on('click', '.refresh-from-bo', function (e) {
     });
 });
 
-
 $(document).on('click', '.sale-ticket-generate-email-btn', function (e) {
         e.preventDefault();
         var btn = $(this);
         var url = btn.attr('href');
+        var creditCardExist = btn.attr('data-credit-card-exist');
+        
+        if (creditCardExist == 0 && !confirm('Use same CC?')) {
+            return false;
+        }
         
         btn.attr('disabled', true).find('i').addClass('fa-spin').removeClass('fa-envelope').addClass('fa-refresh');
         $.get(url, function(data) {
