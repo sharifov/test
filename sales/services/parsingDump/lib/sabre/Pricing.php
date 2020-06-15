@@ -55,7 +55,7 @@ class Pricing implements ParseDumpInterface
             $j = 0;
             $ticketPrices = explode("\n", $ticketPriceText);
             $pricePattern = '/
-                ^(\d{1,2})\- # count pas
+                ^(\d{1,2})\- # count passengers
                 \w|\s+USD(\d+.\d+) # fare
                 \s+((\d+.\d+)[A-Z]{1,3})? # taxes
                 \s+USD(\d+.\d+)([A-Z]{3}) # amount + type                         
