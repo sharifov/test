@@ -47,4 +47,26 @@ class PricingService
         }
         return $result;
     }
+
+    /**
+     * @param string|null $source
+     * @return string
+     */
+    public static function passengerTypeMapping(?string $source): string
+    {
+        switch ($source) {
+            case 'ADT': case 'JCB': case 'PFA': case 'ITX': case 'JWZ': case 'WEB':
+                $result = 'ADT';
+                break;
+            case 'CNN': case 'JNN':case 'CBC': case 'INN': case 'PNN': case 'JWC': case 'UNN':
+                $result = 'CHD';
+                break;
+            case 'INF': case 'INS': case 'JNS':case 'CBI': case 'JNF': case 'PNF': case 'ITF': case 'ITS':
+                $result = 'INF';
+                break;
+            default:
+                $result = 'ADT';
+        }
+        return $result;
+    }
 }
