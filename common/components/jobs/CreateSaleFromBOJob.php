@@ -38,14 +38,17 @@ class CreateSaleFromBOJob extends BaseObject implements JobInterface
                 $this->casesSaleService = Yii::createObject(CasesSaleService::class);
 
                 $saleData = $this->casesSaleService->getSaleFromBo($this->order_uid, $this->email, $this->phone);
+				Yii::info('CaseSale Job SaleId: ' . ($saleData['saleId'] ?? '--'), 'info\CreateSaleFromBOJob::execute');
                 if (count($saleData) && isset($saleData['saleId'])) {
 
                     $keyCasesSale = $this->case_id . '-' . $saleData['saleId'];
                     $existCasesSale = Yii::$app->cache->get($keyCasesSale);
 
+                    Yii::info('CaseSale exist: ' . $existCasesSale . '; type: ' . gettype($existCasesSale), 'info\CreateSaleFromBOJob::execute::caseSaleExist');
                     if ($existCasesSale === false) {
                         Yii::$app->cache->set($keyCasesSale, $keyCasesSale, 60);
                         $this->casesSaleService->createSale($this->case_id, $saleData);
+
                     }
                 }
             } else {
