@@ -33,8 +33,10 @@ $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
 $caseGuard = Yii::createObject(CaseManageSaleInfoGuard::class);
 if (!empty($caseSaleModel)) {
     $canManageSaleInfo =  $caseGuard->canManageSaleInfo($caseSaleModel, Yii::$app->user->identity, $data['passengers'] ?? []);
+    $pjaxCaseSaleTicketContainerId = 'pjax-case-sale-tickets-'.$caseSaleModel->css_cs_id.'-'.$caseSaleModel->css_sale_id;
 } else {
     $canManageSaleInfo = true;
+    $pjaxCaseSaleTicketContainerId = 'pjax-case-sale-tickets-'.$data['saleId'];
 }
 
 $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_id' => !empty($caseModel) ? $caseModel->cs_id : 0, 'sale_id' => $data['saleId'], 'booking_id' => $data['bookingId']]);
@@ -123,9 +125,9 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                     <div class="col-md-12">
                         <div class="d-flex justify-content-between align-items-center">
                             <h2>Sale Tickets</h2>
-                            <?= Html::a('<i class="fa fa-envelope"></i> Send Email', $saleTicketGenerateEmail, ['class' => 'btn btn-success sale-ticket-generate-email-btn', 'title' => SaleTicketHelper::getTitleForSendEmailBtn($saleTicket), 'data-pjax' => 0, 'data-credit-card-exist' => $dataProviderCc->totalCount]) ?>
+                            <?= Html::a('<i class="fa fa-envelope"></i> Send Email', $saleTicketGenerateEmail, ['class' => 'btn btn-success sale-ticket-generate-email-btn report-send-email-'.$caseSaleModel->css_sale_id, 'title' => SaleTicketHelper::getTitleForSendEmailBtn($saleTicket), 'data-pjax' => 0, 'data-credit-card-exist' => $dataProviderCc->totalCount]) ?>
                         </div>
-                        <?php Pjax::begin(['id' => 'pjax-case-sale-tickets', 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false]) ?>
+                        <?php Pjax::begin(['id' => $pjaxCaseSaleTicketContainerId, 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false]) ?>
                         <table class="table table-bordered table-hover">
                             <tr>
                                 <th>Last/First Name</th>
@@ -152,7 +154,29 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                     <td><?=Html::encode($ticket->getFormattedOriginalFop())?></td>
                                     <td><?=Html::encode($ticket->st_charge_system)?></td>
                                     <td><?=Html::encode(SaleTicket::getPenaltyTypeName($ticket->st_penalty_type))?></td>
-                                    <td><?=Html::encode(empty($ticket->st_refund_waiver) ? $ticket->st_penalty_amount : $ticket->st_refund_waiver)?></td>
+                                    <td>
+										<?php if (!$canManageSaleInfo):
+											echo Editable::widget([
+												'model' => $ticket,
+												'attribute' => 'st_penalty_amount',
+												'header' => 'Penalty Amount',
+												'asPopover' => false,
+												'inputType' => Editable::INPUT_HTML5,
+												'formOptions' => [ 'action' => [Url::to(['/sale-ticket/ajax-sale-ticket-edit-info/', 'st_id' => $ticket->st_id])] ],
+												'options' => [
+													'id' => 'sale-ticket-penalty-amount-'.$key . '-' . $ticket->st_case_sale_id
+												],
+												'pluginEvents' => [
+													'editableSuccess' => 'function (event, val, form, data) {
+                                                        pjaxReload({container: "#'.$pjaxCaseSaleTicketContainerId.'"});
+                                                    }',
+												],
+											]);
+										else:
+											echo Html::encode(empty($ticket->st_refund_waiver) ? $ticket->st_penalty_amount : $ticket->st_refund_waiver);
+										endif;
+										?>
+                                    </td>
                                     <td><?=Html::encode($ticket->st_selling)?></td>
                                     <td><?=Html::encode($ticket->st_service_fee)?></td>
                                     <td>
@@ -165,11 +189,11 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
 												'inputType' => Editable::INPUT_HTML5,
 												'formOptions' => [ 'action' => [Url::to(['/sale-ticket/ajax-sale-ticket-edit-info/', 'st_id' => $ticket->st_id])] ],
 												'options' => [
-													'id' => 'sale-ticket-recall-commission-'.$key
+													'id' => 'sale-ticket-recall-commission-'.$key . '-' . $ticket->st_case_sale_id
 												],
 												'pluginEvents' => [
 													'editableSuccess' => 'function (event, val, form, data) {
-                                                        pjaxReload({container: "#pjax-case-sale-tickets"});
+                                                        pjaxReload({container: "#'.$pjaxCaseSaleTicketContainerId.'"});
                                                     }',
 												],
 											]);
@@ -188,11 +212,11 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
 												'inputType' => Editable::INPUT_HTML5,
 												'formOptions' => [ 'action' => [Url::to(['/sale-ticket/ajax-sale-ticket-edit-info/', 'st_id' => $ticket->st_id])] ],
                                                 'options' => [
-                                                    'id' => 'sale-ticket-markup-'.$key
+                                                    'id' => 'sale-ticket-markup-'.$key . '-' . $ticket->st_case_sale_id
                                                 ],
 												'pluginEvents' => [
                                                     'editableSuccess' => 'function (event, val, form, data) {
-                                                        pjaxReload({container: "#pjax-case-sale-tickets"});
+                                                        pjaxReload({container: "#'.$pjaxCaseSaleTicketContainerId.'"});
                                                     }',
 												],
 											]);

@@ -117,7 +117,7 @@ $pjaxCreditCardTable = 'pjax-credit-card-table' . $saleId;
 
     <script>
         if (window.jQuery) {
-            $('.sale-ticket-generate-email-btn').attr('data-credit-card-exist', '<?= $dataProvider->totalCount ?>');
+            $('.report-send-email-<?= $saleId ?>').attr('data-credit-card-exist', '<?= $dataProvider->totalCount ?>');
         }
     </script>
 

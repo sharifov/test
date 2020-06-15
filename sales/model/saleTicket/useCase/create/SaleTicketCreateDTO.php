@@ -44,8 +44,7 @@ class SaleTicketCreateDTO
 		$dto->originalFop = $refundRules['original_FOP'] ?? null;
 		$dto->chargeSystem = (string)($refundRules['charge_system'] ?? null);
 		$dto->penaltyType = $penaltyTypeId;
-		$dto->penaltyAmount = preg_match('/^[+-]?\d+(?:\.\d+)?$/', $refundRules['refund_waiver']) ? (float)$refundRules['refund_waiver'] : null;
-		$dto->refundWaiver = !preg_match('/^[+-]?\d+(?:\.\d+)?$/', $refundRules['refund_waiver']) ? (string)$refundRules['refund_waiver'] : null;
+		$dto->penaltyAmount = trim($refundRules['refund_waiver'] ?? 0);
 		$dto->selling = $rule['selling_price'] ?? null;
 		$dto->serviceFee = $rule['original_service_fee'] ?? null;
 		$dto->recallCommission = ($refundRules['recall_commission'] ?? 0) / ($cntPassengers ?: 1);
