@@ -541,7 +541,14 @@ if ($comForm->c_preview_email) {
  
     $('#modal-email-preview').modal('show');
     
-    $(document).on('click', '#send_email_btn', function(e) {
+    var isProcessing = false;
+    
+    $(document).on('click', '#send_email_btn', function(e) {    
+        if (isProcessing) {
+            return;
+        } 
+        isProcessing = true; 
+    
         e.preventDefault();
         e.stopPropagation();
         
