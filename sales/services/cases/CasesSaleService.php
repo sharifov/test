@@ -529,8 +529,6 @@ class CasesSaleService
 
         $transaction = Yii::$app->db->beginTransaction();
         try {
-			Yii::info('SaleId: ' . $saleData['saleId'] ?? '--', 'info\CaseSaleService::createSale::afterBeginTransaction');
-			Yii::info('CaseId: ' . $csId, 'info\CaseSaleService::createSale::afterBeginTransaction');
 			if (!empty($saleData['saleId']) && $case = Cases::findOne($csId)) {
                 $saleId = (int)$saleData['saleId'];
 
@@ -543,7 +541,6 @@ class CasesSaleService
                     throw new \RuntimeException('Error. CaseSale not saved.');
                 }
 
-                Yii::info('SaleId: ' . $saleId, 'info\CaseSaleService::createSale');
                 if ($refreshSaleData = $this->detailRequestToBackOffice($saleId, 0, 120, 1)) {
                     $caseSale->css_sale_pnr = $saleData['pnr'] ?? null;
                     $caseSale->css_sale_created_dt = $saleData['created'] ?? null;
