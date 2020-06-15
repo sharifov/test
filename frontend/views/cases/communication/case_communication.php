@@ -170,7 +170,7 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
 
                     <div class="btn-wrapper text-right">
                         <?= Html::submitButton('<i class="fa fa-envelope-o"></i> Send Email',
-                            ['class' => 'btn btn-lg btn-primary', 'id' => 'send_email']) ?>
+                            ['class' => 'btn btn-lg btn-primary', 'id' => 'send_email_btn']) ?>
                         <?php if($isAdmin):?>
                             <?= Html::button('<i class="fa fa-list"></i> Show Email data (for Admins)', ['class' => 'btn btn-lg btn-warning', 'onclick' => '$("#email-data-content-div").toggle()']) ?>
                         <?php endif; ?>
@@ -475,7 +475,8 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
 
                             </div>
                             <div class="btn-wrapper">
-                                <?= Html::submitButton('<i class="fa fa-envelope-o"></i> Preview and Send Email', ['class' => 'btn btn-lg btn-primary']) ?>
+                                <?= Html::submitButton('<i class="fa fa-envelope-o"></i> Preview and Send Email',
+                                    ['class' => 'btn btn-lg btn-primary', 'id' => 'preview_email_btn']) ?>
                             </div>
                         </div>
                         <div class="chat__call call-box message-field-phone" id="call-box" style="display: none;">
@@ -540,9 +541,14 @@ if ($comForm->c_preview_email) {
  
     $('#modal-email-preview').modal('show');
     
-    $(document).on('click', '#send_email', function(e) {
+    $(document).on('click', '#send_email_btn', function(e) {
         e.preventDefault();
         e.stopPropagation();
+        
+        let btn = $(this);
+        btn.prop('disabled', true);                
+        let loaderInner = '<span class="spinner-border spinner-border-sm"></span> Loading';
+        btn.html(loaderInner);
         
         let iframeEmail = document.getElementById('email_view');
         let contentEmail = iframeEmail.contentWindow.document.documentElement.outerHTML;
@@ -803,7 +809,12 @@ $js = <<<JS
         $('#c_quotes').val(jsonQuotes);
     });
     
-       
+    $(document).on('beforeSubmit', '#communication-form', function(e) {
+        let btn = $('#preview_email_btn'),
+            loaderInner = '<span class="spinner-border spinner-border-sm"></span> Loading';
+        btn.html(loaderInner).prop('disabled', true);
+    });
+           
     //startCallTimer();
     
     /*$('body').on('click', '#btn-start-call', function() {
