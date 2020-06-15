@@ -9,6 +9,7 @@ use frontend\models\form\CreditCardForm;
 use http\Exception\RuntimeException;
 use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
+use sales\model\saleTicket\useCase\create\SaleTicketService;
 use sales\repositories\cases\CasesSaleRepository;
 use Yii;
 use yii\helpers\VarDumper;
@@ -43,14 +44,20 @@ class CasesSaleService
 	 * @var array
 	 */
 	private $namref = [];
+	/**
+	 * @var SaleTicketService
+	 */
+	private $saleTicketService;
 
 	/**
 	 * CasesSaleService constructor.
 	 * @param CasesSaleRepository $casesSaleRepository
+	 * @param SaleTicketService $saleTicketService
 	 */
-	public function __construct(CasesSaleRepository $casesSaleRepository)
+	public function __construct(CasesSaleRepository $casesSaleRepository, SaleTicketService $saleTicketService)
 	{
 		$this->casesSaleRepository = $casesSaleRepository;
+		$this->saleTicketService = $saleTicketService;
 	}
 
 	/**
@@ -317,6 +324,7 @@ class CasesSaleService
                 throw new \RuntimeException('Error. Additional data not saved');
             }
             $case->updateLastAction();
+			$this->saleTicketService->createSaleTicketBySaleData($caseSale, $saleData);
             return $caseSale;
         }
         throw new \RuntimeException('Error. Additional data not saved. Broken saleData params');
@@ -521,7 +529,9 @@ class CasesSaleService
 
         $transaction = Yii::$app->db->beginTransaction();
         try {
-            if (!empty($saleData['saleId']) && $case = Cases::findOne($csId)) {
+			Yii::info('SaleId: ' . $saleData['saleId'] ?? '--', 'info\CaseSaleService::createSale::afterBeginTransaction');
+			Yii::info('CaseId: ' . $csId, 'info\CaseSaleService::createSale::afterBeginTransaction');
+			if (!empty($saleData['saleId']) && $case = Cases::findOne($csId)) {
                 $saleId = (int)$saleData['saleId'];
 
                 $caseSale = new CaseSale();
@@ -533,6 +543,7 @@ class CasesSaleService
                     throw new \RuntimeException('Error. CaseSale not saved.');
                 }
 
+                Yii::info('SaleId: ' . $saleId, 'info\CaseSaleService::createSale');
                 if ($refreshSaleData = $this->detailRequestToBackOffice($saleId, 0, 120, 1)) {
                     $caseSale->css_sale_pnr = $saleData['pnr'] ?? null;
                     $caseSale->css_sale_created_dt = $saleData['created'] ?? null;

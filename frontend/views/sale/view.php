@@ -33,13 +33,13 @@ $title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
 $caseGuard = Yii::createObject(CaseManageSaleInfoGuard::class);
 if (!empty($caseSaleModel)) {
     $canManageSaleInfo =  $caseGuard->canManageSaleInfo($caseSaleModel, Yii::$app->user->identity, $data['passengers'] ?? []);
+    $pjaxCaseSaleTicketContainerId = 'pjax-case-sale-tickets-'.$caseSaleModel->css_cs_id.'-'.$caseSaleModel->css_sale_id;
 } else {
     $canManageSaleInfo = true;
+    $pjaxCaseSaleTicketContainerId = 'pjax-case-sale-tickets-'.$data['saleId'];
 }
 
 $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_id' => !empty($caseModel) ? $caseModel->cs_id : 0, 'sale_id' => $data['saleId'], 'booking_id' => $data['bookingId']]);
-
-$pjaxCaseSaleTicketContainerId = 'pjax-case-sale-tickets-'.$caseSaleModel->css_cs_id.'-'.$caseSaleModel->css_sale_id;
 ?>
 <div class="sale-view">
     <h3><?= Html::encode($title) ?></h3>
@@ -158,7 +158,7 @@ $pjaxCaseSaleTicketContainerId = 'pjax-case-sale-tickets-'.$caseSaleModel->css_c
 										<?php if (!$canManageSaleInfo):
 											echo Editable::widget([
 												'model' => $ticket,
-												'attribute' => empty($ticket->st_refund_waiver) ? 'st_penalty_amount' : 'st_refund_waiver',
+												'attribute' => 'st_penalty_amount',
 												'header' => 'Penalty Amount',
 												'asPopover' => false,
 												'inputType' => Editable::INPUT_HTML5,
