@@ -4,6 +4,7 @@ namespace sales\services\parsingDump\lib\sabre;
 
 use sales\helpers\app\AppHelper;
 use sales\services\parsingDump\lib\ParseDumpInterface;
+use sales\services\parsingDump\PricingService;
 
 /**
  * Class Pricing
@@ -70,7 +71,7 @@ class Pricing implements ParseDumpInterface
 
                     for ($i = 0; $i < (int) $matchesCount[1]; $i++) {
                         $type = $matches[6] ?? null;
-                        $result[$j]['type'] = $this->typeMapping($type);
+                        $result[$j]['type'] = PricingService::passengerTypeMapping($type);
                         $result[$j]['fare'] = $matches[2] ?? null;
                         $result[$j]['taxes'] = !empty($matches[4]) ? $matches[4] : '0.00';
                         $j ++;
