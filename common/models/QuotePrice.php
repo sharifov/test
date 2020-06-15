@@ -31,7 +31,7 @@ use yii\db\ActiveRecord;
  */
 class QuotePrice extends \yii\db\ActiveRecord
 {
-    const
+    public const
         PASSENGER_ADULT = 'ADT',
         PASSENGER_CHILD = 'CHD',
         PASSENGER_INFANT = 'INF';
