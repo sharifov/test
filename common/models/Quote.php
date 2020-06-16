@@ -597,7 +597,7 @@ class Quote extends \yii\db\ActiveRecord
                     'gds' => $this->gds,
                     'dump' => $this->reservation_dump,
                 ], 20),
-                'Quote:checkReservationDump:IncorrectReservationDump'
+                'info\Quote:checkReservationDump:IncorrectReservationDump'
             );
         }
     }
