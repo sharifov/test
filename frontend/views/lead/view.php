@@ -17,6 +17,7 @@
  * @var $itineraryForm \sales\forms\lead\ItineraryEditForm
  * @var $dataProviderOffers ActiveDataProvider
  * @var $dataProviderOrders ActiveDataProvider
+ * @var $fromPhoneNumbers array
  */
 
 use common\models\Employee;
@@ -169,7 +170,9 @@ $lead = $leadForm->getLead();
                     'leadId'        => $lead->id,
                     'dataProvider'  => (bool)Yii::$app->params['settings']['new_communication_block_lead'] ? $dataProviderCommunicationLog : $dataProviderCommunication,
                     'isAdmin'       => $is_admin,
-                    'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_lead']
+                    'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_lead'],
+                    'lead' => $lead,
+                    'fromPhoneNumbers' => $fromPhoneNumbers
                 ]); ?>
             <?php else: ?>
                 <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
