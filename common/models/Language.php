@@ -22,6 +22,7 @@ use yii\helpers\ArrayHelper;
  * @property Email[] $emails
  * @property LanguageTranslate[] $languageTranslates
  * @property LanguageSource[] $ids
+ * @property Lead[] $leads
  */
 class Language extends ActiveRecord
 {
@@ -113,6 +114,14 @@ class Language extends ActiveRecord
     public function getIds()
     {
         return $this->hasMany(LanguageSource::class, ['id' => 'id'])->viaTable('language_translate', ['language' => 'language_id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getLeads(): ActiveQuery
+    {
+        return $this->hasMany(Lead::class, ['l_client_lang' => 'language_id']);
     }
 
     /**

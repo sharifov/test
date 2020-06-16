@@ -74,6 +74,7 @@ class LeadController extends BaseController
      * @apiParam {int{2}=14-BOOK_FAILED, 15-ALTERNATIVE}   lead.status              Status
      * @apiParam {string{1}=E-ECONOMY, B-BUSINESS, F-FIRST, P-PREMIUM} lead.cabin   Cabin
      * @apiParam {int}                  lead.flight_id                              BO Flight ID
+     * @apiParam {string{5}}            lead.language                               Language
      *
      * @apiParamExample {json} Request-Example:
      *
