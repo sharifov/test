@@ -146,7 +146,7 @@ class Language extends ActiveRecord
             $query =  self::find();
         }
 
-        $data = ArrayHelper::map($query->asArray(true)->all(), 'language_id', 'language_id', $group);
+        $data = ArrayHelper::map($query->asArray(true)->all(), 'language_id', 'name', $group);
 
         return $data;
     }
