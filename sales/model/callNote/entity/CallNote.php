@@ -40,8 +40,10 @@ class CallNote extends \yii\db\ActiveRecord
 			],
 			'user' => [
 				'class' => BlameableBehavior::class,
-				'createdByAttribute' => 'cn_created_user_id',
-				'updatedByAttribute' => 'cn_updated_user_id',
+				'attributes' => [
+					ActiveRecord::EVENT_BEFORE_INSERT => ['cn_created_user_id'],
+					ActiveRecord::EVENT_BEFORE_UPDATE => ['cn_updated_user_id'],
+				]
 			],
 		];
 	}
