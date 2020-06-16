@@ -978,7 +978,7 @@ class CasesController extends FController
     {
         $id = (int)$id;
         $str = '';
-        if ($categories = $this->caseCategoryRepository->getAllByDep($id)) {
+        if ($categories = $this->caseCategoryRepository->getEnabledByDep($id)) {
             $str .= '<option>Choose a category</option>';
             foreach ($categories as $category) {
                 $str .= '<option value="' . Html::encode($category->cc_id) . '">' . Html::encode($category->cc_name) . '</option>';
@@ -1364,7 +1364,7 @@ class CasesController extends FController
 
         $form = new UpdateInfoForm(
             $case,
-            ArrayHelper::map($this->caseCategoryRepository->getAllByDep($case->cs_dep_id), 'cc_id', 'cc_name')
+            ArrayHelper::map($this->caseCategoryRepository->getEnabledByDep($case->cs_dep_id), 'cc_id', 'cc_name')
         );
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {

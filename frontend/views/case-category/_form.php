@@ -20,6 +20,7 @@ use common\models\Department;
     <?= $form->field($model, 'cc_dep_id')->dropDownList(Department::getList(), ['prompt' => 'Select department']) ?>
 
     <?= $form->field($model, 'cc_system')->checkbox() ?>
+    <?= $form->field($model, 'cc_enabled')->checkbox() ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

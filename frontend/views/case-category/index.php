@@ -1,5 +1,6 @@
 <?php
 
+use common\components\grid\BooleanColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use common\models\Department;
@@ -43,12 +44,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $model->dep ? $model->dep->dep_name : 'undefined';
                 }
             ],
-            [
-                'attribute' => 'cc_system',
-                'format' => 'boolean',
-                'filter' => [1 => 'Yes', 0 => 'No']
-            ],
-
+            ['class' => BooleanColumn::class, 'attribute' => 'cc_system'],
+            ['class' => BooleanColumn::class, 'attribute' => 'cc_enabled'],
             ['class' => yii\grid\ActionColumn::class],
         ],
     ]); ?>
