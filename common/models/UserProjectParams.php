@@ -87,6 +87,7 @@ class UserProjectParams extends \yii\db\ActiveRecord
             ['upp_phone_list_id', 'exist', 'skipOnError' => true, 'targetClass' => PhoneList::class, 'targetAttribute' => ['upp_phone_list_id' => 'pl_id']],
 
             ['upp_email_list_id', 'integer'],
+            ['upp_email_list_id', 'unique'],
             ['upp_email_list_id', 'exist', 'skipOnError' => true, 'targetClass' => EmailList::class, 'targetAttribute' => ['upp_email_list_id' => 'el_id']],
         ];
     }
