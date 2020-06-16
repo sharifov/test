@@ -69,13 +69,13 @@ class Reservation implements ParseDumpInterface
             (\d{1,2}) # index
             \s+([A-Z]{2}|[A-Z]{1}\d{1}) # Airline
             \s*(\d{1,4})\s+([A-Z]{1}) # Flight number + Booking Class 
-            \s+(\d{1,2})(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) # Departure day + month 
+            \s+(\d{1,2})(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) # Departure day + month
             \s+\w{1,2} # ignore
-            \W([A-Z]{3})([A-Z]{3}) # iata airport departure + arrival 
-            \s+\w{1,4} # ignore  
+            \W*([A-Z]{3})([A-Z]{3}) # iata airport departure + arrival 
+            \s+\w{1,4}\s+\w* # ignore  
             \s+(\d{1}|\d{2})(\d{2})(A|P) # Departure time hours + min + (AM|PM)
-            \s+(\d{1}|\d{2})(\d{2})(A|P) # Arrival time hours + min + (AM|PM)  
-            \s+(\d{1,2})(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) # Arrival day + month      
+            \s+(\d{1}|\d{2})(\d{2})(A|P) # Arrival time hours + min + (AM|PM) 
+            \s+((\d{2})(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC))* # Arrival day + month                          
             /x';
     }
 
@@ -100,9 +100,9 @@ class Reservation implements ParseDumpInterface
         $result['arrival_time_mm'] = $data[13];
         $result['arrival_am_pm'] = $data[14];
 
-        if (isset($data[15], $data[16])) {
-            $result['arrival_date_day'] = $data[15];
-            $result['arrival_date_month'] = $data[16];
+        if (isset($data[16], $data[17])) {
+            $result['arrival_date_day'] = $data[16];
+            $result['arrival_date_month'] = $data[17];
         }
         return $result;
     }
