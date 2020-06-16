@@ -44,6 +44,11 @@ use yii\web\View;
                 <?= $form->field($leadPreferencesForm, 'currency')->dropDownList(\common\models\Currency::getList(), ['prompt' => '-']) ?>
             </div>
         </div>
+        <div class="row">
+            <div class="col-md-12">
+                <?= $form->field($leadPreferencesForm, 'clientLang')->dropDownList(\common\models\Language::getList(), ['prompt' => '-']) ?>
+            </div>
+        </div>
 
         <div class="row">
             <div class="col-md-12">

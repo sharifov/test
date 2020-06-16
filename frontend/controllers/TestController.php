@@ -17,6 +17,7 @@ use common\models\DepartmentEmailProject;
 use common\models\DepartmentPhoneProject;
 use common\models\Email;
 use common\models\Employee;
+use common\models\Language;
 use common\models\Lead;
 use common\models\LeadFlow;
 use common\models\LeadQcall;

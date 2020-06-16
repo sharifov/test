@@ -550,12 +550,10 @@ class LeadController extends FController
             }
         }
 
-
-        $comForm = new CommunicationForm();
+        $comForm = new CommunicationForm($lead->l_client_lang);
         $comForm->c_preview_email = 0;
         $comForm->c_preview_sms = 0;
         $comForm->c_voice_status = 0;
-
 
         if ($comForm->load(Yii::$app->request->post())) {
 
