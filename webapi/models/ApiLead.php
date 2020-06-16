@@ -5,6 +5,7 @@ namespace webapi\models;
 use common\models\Client;
 use common\models\DepartmentPhoneProject;
 use common\models\Employee;
+use common\models\Language;
 use common\models\Lead;
 use common\models\Sources;
 use common\models\UserProjectParams;
@@ -138,7 +139,6 @@ class ApiLead extends Model
             [['trip_type'], 'string', 'max' => 2],
             [['cabin'], 'string', 'max' => 1],
 
-            [['user_language'], 'string', 'max' => 5],
             [['user_agent'], 'string'],
 
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['client_id' => 'id']],
@@ -146,6 +146,10 @@ class ApiLead extends Model
             [['flights'], 'checkIsFlights'],
 
             ['visitor_log', 'checkVisitorLog', 'skipOnEmpty' => false],
+
+            [['user_language'], 'string', 'max' => 5],
+            ['user_language', 'exist', 'skipOnError' => true, 'skipOnEmpty' => true,
+                'targetClass' => Language::class, 'targetAttribute' => ['user_language' => 'language_id']],
         ];
     }
 

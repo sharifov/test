@@ -28,7 +28,7 @@ use yii\base\Model;
  * @property array $segments
  * @property array $client
  * @property int $flight_id
- * @property string|null $language
+ * @property string|null $user_language
  *
  * @property SegmentForm[] $segmentsForm
  * @property ClientForm $clientForm
@@ -51,7 +51,7 @@ class LeadCreateForm extends Model
     public $segments;
     public $client;
     public $flight_id;
-    public $language;
+    public ?string $user_language;
 
     public $segmentsForm;
     public $clientForm;
@@ -115,9 +115,9 @@ class LeadCreateForm extends Model
             ['flight_id', 'integer'],
             ['flight_id', 'filter', 'filter' => 'intval'],
 
-            ['language', 'string', 'max' => 5],
-            ['language', 'exist', 'skipOnError' => true, 'skipOnEmpty' => true,
-                'targetClass' => Language::class, 'targetAttribute' => ['language' => 'language_id']],
+            ['user_language', 'string', 'max' => 5],
+            ['user_language', 'exist', 'skipOnError' => true, 'skipOnEmpty' => true,
+                'targetClass' => Language::class, 'targetAttribute' => ['user_language' => 'language_id']],
         ];
     }
 
