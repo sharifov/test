@@ -47,7 +47,6 @@ var PhoneWidgetCall = function () {
         // console.log(data);
 
         panes.incoming.load(data);
-        updateProjectAndSourceUI(data.projectName, data.sourceName)
         panes.incoming.show();
         openWidget();
         openCallTab();
@@ -58,7 +57,6 @@ var PhoneWidgetCall = function () {
         // console.log(data);
 
         panes.outgoing.load(data);
-        updateProjectAndSourceUI(data.projectName, data.sourceName)
         panes.outgoing.show();
         openWidget();
         openCallTab();
@@ -69,7 +67,6 @@ var PhoneWidgetCall = function () {
         // console.log(data);
 
         panes.active.load(data);
-        updateProjectAndSourceUI(data.projectName, data.sourceName)
         panes.active.show();
         openWidget();
         openCallTab();
@@ -122,7 +119,7 @@ var PhoneWidgetCall = function () {
         $addNoteSubmit.on('click', function (e) {
             e.preventDefault();
             let btnHtml = $(this).html();
-            let callSid = _self.connection.parameters.CallSid || null;
+            let callSid = getActiveConnectionCallSid();
             let callId = _self.obj ? _self.obj.id : null;
             if (!callSid && !callId) {
                 createNotify('Warning', 'Call Sid & Call Id is undefined', 'warning');
@@ -474,7 +471,7 @@ var PhoneWidgetCall = function () {
         $('.call-pane-incoming .contact-info-card__call-type').html(phone);
     }
 
-    function updateProjectAndSourceUI(projectName, sourceName)
+    function updateProjectAndSourceUI(pane, projectName, sourceName)
     {
         if (projectName) {
             $('.cw-project_name').html(projectName).show();

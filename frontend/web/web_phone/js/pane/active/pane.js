@@ -76,6 +76,19 @@ var PhoneWidgetPaneActive = function () {
             format: '%M:%S',
             seconds: data.duration
         }).timer('start');
+
+        let project = $('.call-pane-calling .cw-project_name');
+        if (data.projectName) {
+            project.html(data.projectName).show();
+        } else {
+            project.html('').hide();
+        }
+        let source = $('.call-pane-calling .cw-source_name');
+        if (data.sourceName) {
+            source.html(data.sourceName).show();
+        } else {
+            source.html('').show();
+        }
     }
 
     function setCallId(callId) {

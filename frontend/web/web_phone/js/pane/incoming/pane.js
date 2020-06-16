@@ -17,6 +17,18 @@ var PhoneWidgetPaneIncoming = function () {
         $('.call-pane-incoming .contact-info-card__label').html(data.type);
         $('#cw-client_name').html(data.name);
         $('.call-pane-incoming .contact-info-card__call-type').html(data.phone);
+        let project = $('.call-pane-incoming .cw-project_name');
+        if (data.projectName) {
+            project.html(data.projectName).show();
+        } else {
+            project.html('').hide();
+        }
+        let source = $('.call-pane-incoming .cw-source_name');
+        if (data.sourceName) {
+            source.html(data.sourceName).show();
+        } else {
+            source.html('').show();
+        }
     }
 
     function show() {

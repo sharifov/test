@@ -225,7 +225,7 @@ class CallLogSearch extends CallLog
 		$query->leftJoin(Client::tableName(), 'clients.id = cl_client_id');
 		$query->leftJoin(CallNote::tableName(), 'cn_call_id = cl_id');
 		$query->where(['cl_user_id' => $this->cl_user_id]);
-		$query->groupBy(['cl_id']);
+		//$query->groupBy(['cl_id']);
 		$query->orderBy(['cl_call_created_dt' => SORT_DESC]);
 
 		return $dataProvider;

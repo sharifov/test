@@ -24,6 +24,18 @@ var PhoneWidgetPaneOutgoing = function () {
             format: '%M:%S',
             seconds: data.duration
         }).timer('start');
+        let project = $('.call-pane-outgoing .cw-project_name');
+        if (data.projectName) {
+            project.html(data.projectName).show();
+        } else {
+            project.html('').hide();
+        }
+        let source = $('.call-pane-outgoing .cw-source_name');
+        if (data.sourceName) {
+            source.html(data.sourceName).show();
+        } else {
+            source.html('').show();
+        }
     }
 
     function show() {
