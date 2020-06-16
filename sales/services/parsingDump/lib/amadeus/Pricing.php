@@ -25,7 +25,8 @@ class Pricing implements ParseDumpInterface
                 $result['prices'] = $prices;
             }
         } catch (\Throwable $throwable) {
-            \Yii::error(AppHelper::throwableFormatter($throwable), 'amadeus:Pricing:parseDump:Throwable');
+            \Yii::error(AppHelper::throwableFormatter($throwable),
+                'Amadeus:Pricing:parseDump:Throwable');
         }
         return $result;
     }
@@ -63,14 +64,12 @@ class Pricing implements ParseDumpInterface
      */
     private function parsePriceSingleType(string $dump): ?array
     {
-        $j = 0;
-        $result = null;
-
         if ($countPassengers = self::getCountPassengers($dump)) {
             $ticketRows = explode("\n", $dump);
             $passengerType = self::getPassengerType($ticketRows);
 
             if (isset($countPassengers, $passengerType)) {
+                $j = 0;
                 $fare = self::getFare($dump);
                 $taxes = self::getTaxes($ticketRows);
 
@@ -82,7 +81,7 @@ class Pricing implements ParseDumpInterface
                 }
             }
         }
-        return $result;
+        return $result ?? null;
     }
 
     /**
@@ -92,7 +91,7 @@ class Pricing implements ParseDumpInterface
     private static function getCountPassengers(string $dump): ?int
     {
         $countPattern = '/
-            ^01\s{1}P1\W*(\d*) # count passengers                                
+            01\s{1}P1\W*(\d*) # count passengers                                
             /x';
         preg_match($countPattern, $dump, $countMatches);
         if (isset($countMatches[1])) {
@@ -122,7 +121,6 @@ class Pricing implements ParseDumpInterface
         return $result;
     }
 
-
     /**
      * @param string $string
      * @return string|null
@@ -142,7 +140,6 @@ class Pricing implements ParseDumpInterface
      */
     private static function getPassengerType(array $ticketRows): ?string
     {
-        $result = null;
         foreach ($ticketRows as $numRow => $row) {
             $row = trim($row);
             if ((strpos($row, 'FARE BASIS') !== false) && isset($ticketRows[$numRow + 2])) {
@@ -157,7 +154,7 @@ class Pricing implements ParseDumpInterface
                 break;
             }
         }
-        return $result;
+        return $result ?? null;
     }
 
     /**
@@ -166,7 +163,6 @@ class Pricing implements ParseDumpInterface
      */
     private function parsePriceMultipleType(string $string): ?array
     {
-        $result = null;
         $j = 0;
         $pricePattern = '/
             ^\d{2}
@@ -191,8 +187,6 @@ class Pricing implements ParseDumpInterface
                 }
             }
         }
-        return $result;
+        return $result ?? null;
     }
-
-
 }
