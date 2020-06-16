@@ -206,7 +206,7 @@ use yii\helpers\VarDumper;
  * @property mixed $sentCount
  * @property bool $calledExpert
  * @property $quoteType
- * @property Language $clientLanguage
+ * @property Language $language
  *
  */
 class Lead extends ActiveRecord implements Objectable
@@ -737,6 +737,7 @@ class Lead extends ActiveRecord implements Objectable
         $lead->bo_flight_id = $form->flight_id;
         $lead->l_dep_id = Department::DEPARTMENT_SALES;
         $lead->l_type_create = self::TYPE_CREATE_API;
+        $lead->l_client_lang = $form->language;
         return $lead;
     }
 
@@ -1980,7 +1981,7 @@ class Lead extends ActiveRecord implements Objectable
     /**
      * @return ActiveQuery
      */
-    public function getClientLanguage(): ActiveQuery
+    public function getLanguage(): ActiveQuery
     {
         return $this->hasOne(Language::class, ['language_id' => 'l_client_lang']);
     }
