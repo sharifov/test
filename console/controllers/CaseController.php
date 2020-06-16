@@ -13,12 +13,14 @@ use sales\helpers\app\AppHelper;
 use sales\model\saleTicket\useCase\create\SaleTicketService;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\cases\CasesSaleRepository;
+use sales\services\cases\CasesManageService;
 use sales\services\cases\CasesSaleService;
 use Yii;
 use yii\console\Controller;
 use yii\console\Exception;
 use yii\db\Query;
 use yii\helpers\Console;
+use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 
 class CaseController extends Controller
@@ -212,4 +214,45 @@ class CaseController extends Controller
 		printf("\nExecute Time: %s ", $this->ansiFormat($time . ' s', Console::FG_RED));
 		printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 	}
+
+    /**
+     * @throws \yii\db\Exception
+     */
+	public function actionRemoveDuplicate()
+    {
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+        $time_start = microtime(true);
+        $db = Yii::$app->getDb();
+
+
+        $duplicateCases = $db->createCommand('SELECT DISTINCT(c.cs_id) FROM case_sale as cs
+            INNER JOIN cases AS c ON (cs.css_cs_id = c.cs_id)
+            WHERE c.cs_status = 1 AND css_sale_id IN (
+                SELECT css_sale_id FROM case_sale as cs2
+                INNER JOIN cases AS c2 ON (cs2.css_cs_id = c2.cs_id)
+                WHERE c2.cs_status = 2
+            )')->queryAll();
+
+
+        if ($duplicateCases) {
+            foreach ($duplicateCases as $row) {
+                $caseId = (int) $row['cs_id'];
+                $case = Cases::findOne($caseId);
+
+                try {
+                    Yii::createObject(CasesManageService::class)->trash($case->cs_id, null, 'system:duplicate');
+                } catch (\Throwable $throwable) {
+                    VarDumper::dump($throwable);
+                }
+
+                echo $case->cs_id . "\r\n";
+            }
+        }
+
+        $time_end = microtime(true);
+		$time = number_format(round($time_end - $time_start, 2), 2);
+		printf("\nExecute Time: %s ", $this->ansiFormat($time . ' s', Console::FG_RED));
+		printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+    }
+
 }

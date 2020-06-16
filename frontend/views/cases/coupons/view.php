@@ -18,7 +18,9 @@ $clientEmails = $model->client ? $model->client->getEmailList() : [];
 ?>
 
 <script>
-    pjaxOffFormSubmit('#pjax-case-coupons-table');
+    if (typeof pjaxOffFormSubmit === 'function') {
+        pjaxOffFormSubmit('#pjax-case-coupons-table');
+    }
 </script>
 <div class="x_panel">
 	<div class="x_title" >
@@ -39,8 +41,8 @@ $clientEmails = $model->client ? $model->client->getEmailList() : [];
             </div>
         </div>
         <br>
-            <?php if ($coupons): ?>
             <?php \yii\widgets\Pjax::begin(['id' => 'pjax-case-coupons-table', 'enableReplaceState' => false, 'enablePushState' => false, 'timeout' => 10000]) ?>
+            <?php if ($coupons): ?>
 				<?php if(isset($previewEmailForm)): ?>
 					<?= $this->render('_email_preview', [
 						'previewEmailForm' => $previewEmailForm,
@@ -103,10 +105,10 @@ $clientEmails = $model->client ? $model->client->getEmailList() : [];
                 </div>
                 <?php \yii\widgets\ActiveForm::end() ?>
                 <?php endif; ?>
-            <?php \yii\widgets\Pjax::end()?>
             <?php else: ?>
                 <p>Not found coupons</p>
         <?php endif; ?>
+            <?php \yii\widgets\Pjax::end()?>
     </div>
 </div>
 

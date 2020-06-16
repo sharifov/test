@@ -1098,8 +1098,8 @@ use yii\helpers\Html;
 
             console.log('Calling ' + params.To + '...');
             createNotify('Calling', 'Calling ' + params.To + '...', 'success');
-            updateAgentStatus(connection, false, 0);
             connection = device.connect(params);
+            updateAgentStatus(connection, false, 0);
            // $('#btn-group-id-redirect').hide();
         }
 

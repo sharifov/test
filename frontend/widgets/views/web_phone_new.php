@@ -77,6 +77,7 @@ $js = <<<JS
                 $.post('{$ajaxBlackList}', {phone: phone_to}, function(data) {
                     if (data.success) {
 						if (device) {
+
 							if (conferenceBase && callOutBackendSide) {
 								let createCallParams = {
 									'<?= $csrf_param ?>' : '<?= $csrf_token ?>',

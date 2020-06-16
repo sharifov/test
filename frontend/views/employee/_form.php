@@ -5,6 +5,7 @@ use common\models\UserProductType;
 use frontend\models\UserFailedLogin;
 use modules\product\src\entities\productType\ProductType;
 use sales\auth\Auth;
+use yii\helpers\Url;
 use yii\web\View;
 use yii\grid\ActionColumn;
 
@@ -53,11 +54,15 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 
 ?>
 
-
 <div class="col-sm-5">
     <?php $form = ActiveForm::begin([
         'successCssClass' => '',
-        'id' => sprintf('%s-ID', $model->formName())
+        'id' => sprintf('%s-ID', $model->formName()),
+        'enableClientValidation' => false,
+        'enableAjaxValidation' => true,
+        'validateOnChange' => false,
+		'validateOnBlur' => false,
+        'validationUrl' => Url::to(['employee/employee-validation', 'id' => (int) $model->id]),
     ]) ?>
             <div class="well">
 
@@ -208,7 +213,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 
                     <div class="row">
                         <div class="col-md-12">
-                            <?php echo $form->errorSummary($modelUserParams) ?>
+                            <?php  echo Html::errorSummary($modelUserParams) ?>
                         </div>
                     </div>
 

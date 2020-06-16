@@ -68,14 +68,14 @@ class Reservation implements ParseDumpInterface
         return $pattern ?? '/^
             (\d{1,2}) # index
             \s+([A-Z]{2}|[A-Z]{1}\d{1}) # Airline
-            \s*(\d{1,4})([A-Z]{1}) # Flight number + Booking Class 
-            \s+(\d{2})(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) # Departure day + month
-            (\s{1}[A-Z]{1}\s{1}|\s{1}) # ignore
-            \s*([A-Z]{3})([A-Z]{3}) # iata airport departure + arrival
-            (\W[A-Z]{2}\d{1}|\s{1})* # ignore
-            (\s+\d{1}|\s+\d{2})(\d{2})(N|A|A\+|P) # Departure time hours + min + (AM|PM)
-            (\s+\d{1}|\s+\d{2})(\d{2})(N|A|A\+|P) # Arrival time hours + min + (AM|PM)
-            \s+((\d{2})(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC))* # Arrival day + month
+            \s*(\d{1,4})\s+([A-Z]{1}) # Flight number + Booking Class 
+            \s+(\d{1,2})(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) # Departure day + month
+            \s+\w{1,2} # ignore
+            \W*([A-Z]{3})([A-Z]{3}) # iata airport departure + arrival 
+            \s+\w{1,4}\s+\w* # ignore  
+            \s+(\d{1}|\d{2})(\d{2})(A|P) # Departure time hours + min + (AM|PM)
+            \s+(\d{1}|\d{2})(\d{2})(A|P) # Arrival time hours + min + (AM|PM) 
+            \s+((\d{2})(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC))* # Arrival day + month                          
             /x';
     }
 
@@ -91,18 +91,18 @@ class Reservation implements ParseDumpInterface
         $result['booking_class'] = $data[4];
         $result['departure_date_day'] = $data[5];
         $result['departure_date_month'] = $data[6];
-        $result['departure_airport_iata'] = $data[8];
-        $result['arrival_airport_iata'] = $data[9];
-        $result['departure_time_hh'] = trim($data[11]);
-        $result['departure_time_mm'] = $data[12];
-        $result['departure_am_pm'] = $data[13];
-        $result['arrival_time_hh'] = trim($data[14]);
-        $result['arrival_time_mm'] = $data[15];
-        $result['arrival_am_pm'] = $data[16];
+        $result['departure_airport_iata'] = $data[7];
+        $result['arrival_airport_iata'] = $data[8];
+        $result['departure_time_hh'] = trim($data[9]);
+        $result['departure_time_mm'] = $data[10];
+        $result['departure_am_pm'] = $data[11];
+        $result['arrival_time_hh'] = trim($data[12]);
+        $result['arrival_time_mm'] = $data[13];
+        $result['arrival_am_pm'] = $data[14];
 
-        if (isset($data[18], $data[19])) {
-            $result['arrival_date_day'] = $data[18];
-            $result['arrival_date_month'] = $data[19];
+        if (isset($data[16], $data[17])) {
+            $result['arrival_date_day'] = $data[16];
+            $result['arrival_date_month'] = $data[17];
         }
         return $result;
     }
@@ -176,25 +176,8 @@ class Reservation implements ParseDumpInterface
     private function createDateTime(string $day, string $month, string $hour, string $minute, string $ampm)
     {
         $dateFormat = 'dM g:i A';
-        $ampm = ($ampm === 'A' || $ampm === 'A+') ? 'AM' : 'PM';
+        $ampm = ($ampm === 'A') ? 'AM' : 'PM';
         $dateString = $day . strtolower($month) . ' ' . $hour . ':' . $minute . ' ' . $ampm;
         return DateTime::createFromFormat($dateFormat, $dateString);
     }
-
-    /* Example row data map
-     * 1 DL 967E 16MAY J PHXSLC*HK1 1106A 124P /DCDL*GGVSUD /E
-        1 - index
-        DL - Airline
-        967 - Flight number
-        E - Booking Class
-        16MAY - Departure day + month
-        J - ?
-        PHX - iata airport departure
-        SLC - iata airport arrival
-        *HK1 - HK это статус сегмента, обозначающий что он подтвержден (Confirmed), 1 это количество мест
-        1106A - Departure time hours + min + (AM|PM)
-        124P - Arrival time hours + min + (AM|PM)
-        /DCDL*GGVSUD - DL Это Airline а GGVSUD это Confirmation Number авиалинии.
-        /E - элетронный билет
-     */
 }

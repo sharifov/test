@@ -50,6 +50,7 @@ use sales\repositories\user\UserRepository;
 use sales\services\cases\CasesCreateService;
 use sales\services\cases\CasesManageService;
 use sales\services\client\ClientUpdateFromEntityService;
+use sales\services\email\EmailService;
 use Yii;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesSearch;
@@ -460,7 +461,12 @@ class CasesController extends FController
                                 $comForm->c_preview_email = 0;
                             } else {
 
-                                $previewEmailForm->e_email_message = $mailPreview['data']['email_body_html'];
+                                $emailBodyHtml = EmailService::prepareEmailBody($mailPreview['data']['email_body_html']);
+                                $keyCache = md5($emailBodyHtml);
+                                Yii::$app->cacheFile->set($keyCache, $emailBodyHtml, 60 * 60);
+                                $previewEmailForm->keyCache = $keyCache;
+                                $previewEmailForm->e_email_message = $emailBodyHtml;
+
                                 if (isset($mailPreview['data']['email_subject']) && $mailPreview['data']['email_subject']) {
                                     $previewEmailForm->e_email_subject = $mailPreview['data']['email_subject'];
                                 }

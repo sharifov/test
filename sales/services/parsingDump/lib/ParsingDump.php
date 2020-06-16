@@ -24,15 +24,18 @@ class ParsingDump
 
     public CONST GDS_TYPE_WORLDSPAN = 'worldSpan';
     public CONST GDS_TYPE_SABRE = 'sabre';
+    public CONST GDS_TYPE_AMADEUS = 'amadeus';
 
     public CONST GDS_TYPE_MAP = [
-        self::GDS_TYPE_WORLDSPAN => 'WorldSpan',
+        self::GDS_TYPE_AMADEUS => 'Amadeus',
         self::GDS_TYPE_SABRE => 'Sabre',
+        self::GDS_TYPE_WORLDSPAN => 'WorldSpan',
     ];
 
     public CONST QUOTE_GDS_TYPE_MAP = [
-        Quote::GDS_WORLDSPAN => self::GDS_TYPE_WORLDSPAN,
+        Quote::GDS_AMADEUS => self::GDS_TYPE_AMADEUS,
         Quote::GDS_SABRE => self::GDS_TYPE_SABRE,
+        Quote::GDS_WORLDSPAN => self::GDS_TYPE_WORLDSPAN,
     ];
 
     /**

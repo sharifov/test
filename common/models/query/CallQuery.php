@@ -43,4 +43,13 @@ class CallQuery extends \yii\db\ActiveQuery
     {
         return $this->andWhere(['c_status_id' => Call::STATUS_IN_PROGRESS]);
     }
+	/**
+	 * @param string $callSid
+	 * @param int $id
+	 * @return CallQuery
+	 */
+    public function byCallSidOrCallId(string $callSid, int $id): CallQuery
+	{
+		return $this->andWhere(['c_call_sid' => $callSid])->orWhere(['c_id' => $id]);
+	}
 }

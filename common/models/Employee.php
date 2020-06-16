@@ -624,7 +624,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function isDeleted() : bool
     {
-        return !(boolean)$this->status;
+        return $this->status === self::STATUS_DELETED;
     }
 
 
@@ -969,7 +969,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $this->email = $attr['email'];
         $this->full_name = $attr['full_name'];
 
-        //$this->password = $attr['password'];
+        $this->password = $attr['password'];
         if (!empty($attr['password'])) {
             $this->setPassword($attr['password']);
         }

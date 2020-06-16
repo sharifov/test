@@ -225,7 +225,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
 					'fromInternal' => PhoneList::find()->byPhone($this->cuaCall->c_from)->enabled()->exists(),
                     'projectName' => $call->c_project_id ? $call->cProject->name : '',
                     'sourceName' => $call->c_source_type_id ? $call->getSourceName() : '',
-                    'status' => $call->getStatusName()
+                    'status' => $call->getStatusName(),
 				];
 			}
             Notifications::publish('updateIncomingCall', ['user_id' => $this->cua_user_id], array_merge($this->attributes, $callInfo ?? []));

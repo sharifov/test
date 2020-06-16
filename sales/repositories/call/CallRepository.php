@@ -3,6 +3,7 @@
 namespace sales\repositories\call;
 
 use common\models\Call;
+use http\Exception\RuntimeException;
 use sales\dispatchers\EventDispatcher;
 use sales\repositories\NotFoundException;
 use sales\repositories\Repository;
@@ -93,5 +94,19 @@ class CallRepository extends Repository
         }
         $this->eventDispatcher->dispatchAll($call->releaseEvents());
     }
+
+	/**
+	 * @param string $callSid
+	 * @param int $callId
+	 * @return Call
+	 */
+    public function findByCallSidOrCallId(string $callSid, int $callId): Call
+	{
+		$call = Call::find()->byCallSidOrCallId($callSid, $callId)->one();
+		if (!$call) {
+			throw new \RuntimeException('Call is not found');
+		}
+		return $call;
+	}
 
 }

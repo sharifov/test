@@ -30,6 +30,7 @@ use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
+use yii\widgets\ActiveForm;
 
 /**
  * EmployeeController controller
@@ -716,6 +717,22 @@ class EmployeeController extends FController
         }
 
         return $this->render('_form', $result);
+    }
+
+    /**
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function actionEmployeeValidation(): array
+    {
+        $id = Yii::$app->request->get('id');
+        $model = ($id) ? Employee::findOne($id) : new Employee(['scenario' => Employee::SCENARIO_REGISTER]);
+
+        if (Yii::$app->request->isAjax && $model && $model->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
+        throw new BadRequestHttpException();
     }
 
     public function actionSwitch()

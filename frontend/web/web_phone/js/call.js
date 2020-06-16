@@ -1,6 +1,10 @@
 var PhoneWidgetCall = function () {
 
     this.connection = '';
+    this.obj;
+
+    const $addNoteInput = $('#active_call_add_note');
+    const $addNoteSubmit = $('#active_call_add_note_submit');
 
     let settings = {
         'ajaxCallRedirectGetAgents': '',
@@ -8,7 +12,8 @@ var PhoneWidgetCall = function () {
         'callStatusUrl': '',
         'ajaxSaveCallUrl': '',
         'muteUrl': '',
-        'unmuteUrl': ''
+        'unmuteUrl': '',
+        'callAddNoteUrl': ''
     };
 
     let panes = {
@@ -27,12 +32,14 @@ var PhoneWidgetCall = function () {
         settings.ajaxSaveCallUrl = options.ajaxSaveCallUrl;
         settings.muteUrl = options.muteUrl;
         settings.unmuteUrl = options.unmuteUrl;
+        settings.callAddNoteUrl = options.callAddNoteUrl;
 
         muteBtnEvent();
         transferCallBtnEvent();
         acceptCallBtnEvent();
         changeUserCallStatusEvent();
         rejectIncomingCallEvent();
+        callAddNoteEvent();
     }
 
     function incomingCall(data) {
@@ -108,6 +115,50 @@ var PhoneWidgetCall = function () {
             }
             cancelCall();
         })
+    }
+
+    function callAddNoteEvent() {
+        var _self = this;
+        $addNoteSubmit.on('click', function (e) {
+            e.preventDefault();
+            let btnHtml = $(this).html();
+            let callSid = _self.connection.parameters.CallSid || null;
+            let callId = _self.obj ? _self.obj.id : null;
+            if (!callSid && !callId) {
+                createNotify('Warning', 'Call Sid & Call Id is undefined', 'warning');
+                return false;
+            }
+
+            let value = $addNoteInput.val().trim();
+            if (!value) {
+                createNotify('Warning', 'Note value is empty', 'warning');
+                return false;
+            }
+
+            $.ajax({
+                type: 'post',
+                data: {'callSid': callSid, note: value, callId: callId},
+                url: settings.callAddNoteUrl,
+                dataType: 'json',
+                beforeSend: function () {
+                    $addNoteSubmit.html('<i class="fa fa-spinner fa-spin" style="color: #fff;"></i>').attr('disabled', 'disabled');
+                },
+                success: function (data) {
+                    if (data.error) {
+                        createNotify('Error', data.message, 'error');
+                    } else {
+                        createNotify('Success', data.message, 'success');
+                    }
+                },
+                error: function (error) {
+                    createNotify('Error', error.responseText, 'error');
+                },
+                complete: function () {
+                    $addNoteSubmit.html(btnHtml).removeAttr('disabled');
+                }
+            })
+
+        });
     }
 
     function changeUserCallStatusEvent()
@@ -284,19 +335,22 @@ var PhoneWidgetCall = function () {
         return false;
     }
 
-    function refreshCallStatus(obj) {
+    function refreshCallStatus(obj)
+    {
         if (obj.status === 'In progress') {
             activeCall(obj);
         } else if (obj.status === 'Ringing' || obj.status === 'Queued') {
             if (obj.typeId === 2) {
                 incomingCall(obj);
-
             } else if (obj.typeId === 1) {
                 outgoingCall(obj);
             }
         } else if (obj.status === 'Completed' || obj.isEnded) {
             cancelCall(obj.callId);
         }
+
+        this.obj = obj;
+
     }
 
     function updateProjectAndSourceUI(projectName, sourceName)
@@ -416,9 +470,24 @@ var PhoneWidgetCall = function () {
         $('#btn-accept-call').find('i').removeClass('fa fa-spinner fa-spin').addClass('fas fa-check');
         $('.call-pane-incoming .contact-info-card__label').html(type_description);
         $('#cw-client_name').html(name);
-        $('#cw-project_name').html(projectName);
-        $('#cw-source_name').html(sourceName);
+        updateProjectAndSourceUI(projectName, sourceName);
         $('.call-pane-incoming .contact-info-card__call-type').html(phone);
+    }
+
+    function updateProjectAndSourceUI(projectName, sourceName)
+    {
+        if (projectName) {
+            $('.cw-project_name').html(projectName).show();
+        } else {
+            $('.cw-project_name').html('').hide();
+        }
+        if (sourceName) {
+            $('.cw-source_name').html(sourceName);
+            $('.cw-source_name *').show();
+        } else {
+            $('.cw-source_name').html('');
+            $('.cw-source_name *').hide();
+        }
     }
 
     function showCallingPanel()

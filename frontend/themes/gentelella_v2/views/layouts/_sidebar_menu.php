@@ -163,6 +163,7 @@ $isSuperAdmin = $user->isSuperAdmin();
             'icon' => 'th-list',
             'items' => [
                 ['label' => 'Call List', 'url' => ['/call/index'], 'icon' => 'phone'],
+                ['label' => 'Call Note', 'url' => ['/call-note-crud/index'], 'icon' => 'list'],
                 [
                     'label' => 'Call logs',
                     'url' => 'javascript:',
