@@ -18,6 +18,7 @@ class CaseCategorySearch extends CaseCategory
         return [
             [['cc_id', 'cc_key', 'cc_name'], 'string'],
             [['cc_dep_id', 'cc_system'], 'integer'],
+            ['cc_enabled', 'boolean'],
         ];
     }
 
@@ -38,8 +39,7 @@ class CaseCategorySearch extends CaseCategory
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 
@@ -48,6 +48,7 @@ class CaseCategorySearch extends CaseCategory
             'cc_id' => $this->cc_id,
             'cc_dep_id' => $this->cc_dep_id,
             'cc_system' => $this->cc_system,
+            'cc_enabled' => $this->cc_enabled,
         ]);
 
         $query
