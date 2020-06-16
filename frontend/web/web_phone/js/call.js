@@ -3,6 +3,8 @@ var PhoneWidgetCall = function () {
     this.connection = '';
     this.obj;
 
+    let statusCheckbox = null;
+
     const $addNoteInput = $('#active_call_add_note');
     const $addNoteSubmit = $('#active_call_add_note_submit');
 
@@ -34,10 +36,11 @@ var PhoneWidgetCall = function () {
         settings.unmuteUrl = options.unmuteUrl;
         settings.callAddNoteUrl = options.callAddNoteUrl;
 
+        statusCheckbox = new widgetStatus('.call-status-switcher', options.updateStatusUrl);
+
         muteBtnEvent();
         transferCallBtnEvent();
         acceptCallBtnEvent();
-        changeUserCallStatusEvent();
         rejectIncomingCallEvent();
         callAddNoteEvent();
     }
@@ -157,23 +160,7 @@ var PhoneWidgetCall = function () {
 
         });
     }
-
-    function changeUserCallStatusEvent()
-    {
-        $(document).on('change', '.call-status-switcher', function () {
-            var type_id = $(this).prop('checked') ? 1 : 2;
-            $.ajax({
-                type: 'post',
-                data: {'type_id': type_id},
-                url: settings.callStatusUrl,
-                success: function (data) {},
-                error: function (error) {
-                    console.error('Error: ' + error);
-                }
-            });
-        });
-    }
-
+    
     // function bindVolumeIndicators(connection)
     // {
     //     connection.on('volume', function (inputVolume, outputVolume) {
@@ -539,6 +526,10 @@ var PhoneWidgetCall = function () {
         });
     }
 
+    function changeStatus(status) {
+        statusCheckbox.setStatus(status);
+    }
+
     return {
         init: init,
         cancelCall: cancelCall,
@@ -549,6 +540,7 @@ var PhoneWidgetCall = function () {
         incomingCall: incomingCall,
         activeCall: activeCall,
         outgoingCall: outgoingCall,
+        changeStatus: changeStatus
     };
 }();
 

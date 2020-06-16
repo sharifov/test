@@ -167,6 +167,10 @@ $js = <<<JS
                                 updateUserCallStatus(obj);
                             }*/
                             
+                             if (typeof PhoneWidgetCall === 'object') {
+                                 PhoneWidgetCall.changeStatus(obj.type_id);
+                            }
+                            
                             if (typeof refreshCallBox === "function") {
                                 refreshCallBox(obj);
                             }

@@ -22,10 +22,6 @@ $sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
       <div class="current-number">
         <div class="custom-phone-select"></div>
       </div>
-      <div class="number-toggle">
-        <input type="checkbox" id="number-status3" class="call-status-switcher" <?= ($userCallStatus && $userCallStatus->isReady() ? 'checked' : '') ?>>
-        <label for="number-status3"></label>
-      </div>
     </div>
     <div class="call-pane__number">
       <!-- <div class="suggestion-placeholder">
@@ -527,6 +523,7 @@ $ajaxSaveCallUrl = Url::to(['/phone/ajax-save-call']);
 $ajaxMuteUrl = Url::to(['/phone/ajax-mute-participant']);
 $ajaxUnmuteUrl = Url::to(['/phone/ajax-unmute-participant']);
 $ajaxCallAddNoteUrl = Url::to(['/call/ajax-add-note']);
+$updateStatusUrl = Url::to(['/user-call-status/update-status']);
 
 $js = <<<JS
 PhoneWidgetCall.init({
@@ -536,7 +533,8 @@ PhoneWidgetCall.init({
     'ajaxSaveCallUrl': '$ajaxSaveCallUrl',
     'muteUrl': '$ajaxMuteUrl',
     'unmuteUrl': '$ajaxUnmuteUrl',
-    'callAddNoteUrl': '$ajaxCallAddNoteUrl'
+    'callAddNoteUrl': '$ajaxCallAddNoteUrl',
+    'updateStatusUrl': '$updateStatusUrl'
 });
 JS;
 $this->registerJs($js);
