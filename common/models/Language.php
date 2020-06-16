@@ -129,7 +129,8 @@ class Language extends ActiveRecord
      */
     public static function getList(): array
 	{
-		return self::find()->select(['language_id'])->indexBy('language_id')->asArray()->column();
+        return ArrayHelper::map(
+            self::find()->orderBy(['name' => SORT_ASC])->asArray()->all(), 'language_id', 'name');
 	}
 
     /**

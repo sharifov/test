@@ -3,6 +3,7 @@
 namespace sales\forms\lead;
 
 use common\models\Currency;
+use common\models\Language;
 use sales\helpers\lead\LeadPreferencesHelper;
 use yii\base\Model;
 use common\models\Lead;
@@ -40,7 +41,9 @@ class LeadPreferencesForm extends Model
      */
 	public $currency;
 
-	/**
+    public ?string $clientLang;
+
+    /**
 	 * LeadPreferencesForm constructor.
 	 * @param Lead|null $lead
 	 * @param array $config
@@ -55,6 +58,7 @@ class LeadPreferencesForm extends Model
 
 			$this->notesForExperts = $lead->notes_for_experts;
 			$this->delayedCharge = $lead->l_delayed_charge;
+			$this->clientLang = $lead->l_client_lang;
 		}
 
 		parent::__construct($config);
@@ -78,6 +82,9 @@ class LeadPreferencesForm extends Model
             [['currency'], 'string', 'max' => 3],
             ['currency', 'default', 'value' => null],
             [['currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['currency' => 'cur_code']],
+            [['clientLang'], 'string', 'max' => 5],
+            ['clientLang', 'exist', 'skipOnError' => true, 'skipOnEmpty' => true,
+                'targetClass' => Language::class, 'targetAttribute' => ['clientLang' => 'language_id']],
 		];
 	}
 
@@ -94,7 +101,8 @@ class LeadPreferencesForm extends Model
 			'numberStops' => 'Number Stops',
 			'notesForExperts' => 'Notes for Expert',
 			'delayedCharge' => 'Delayed charge',
-            'currency'  => 'Currency'
+            'currency'  => 'Currency',
+            'l_client_lang' => 'Client Lang',
 		];
 	}
 }
