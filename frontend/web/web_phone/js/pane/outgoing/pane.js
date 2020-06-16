@@ -6,7 +6,8 @@ var PhoneWidgetPaneOutgoing = function () {
            type,
            status,
            duration,
-           project
+           projectName,
+           sourceName,
            to: {
                 phone,
                 name
@@ -17,7 +18,6 @@ var PhoneWidgetPaneOutgoing = function () {
         setCallId(data.callId);
         $('.contact-info-card__label').html(data.type);
         $('.call-in-action__text').html(data.status);
-        $('#cw-outgoing-project_name').html(data.project);
         $('#cw-outgoing-name').html(data.to.name);
         $('.contact-info-card__call-type').html(data.to.phone);
         $('.call-in-action__time').html('').show().timer('remove').timer({

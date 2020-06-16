@@ -163,16 +163,12 @@ $sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
       <!-- <div class="current-number">
         <div class="custom-phone-select"></div>
       </div> -->
-      
-      <div class="static-number-indicator">
-        <?php /*if($call && $call->c_project_id):?>
-            <span class="static-number-indicator__label" id="cw-project_name"><?= Html::encode($call->cProject->name) ?></span>
-        <?php endif; ?>
-        <?php /*if($call && $call->c_source_type_id):?>
+
+        <div class="static-number-indicator">
+            <span class="static-number-indicator__label cw-project_name"><?= Html::encode($projectName) ?></span>
             <i class="static-number-indicator__separator"></i>
-            <span class="static-number-indicator__name"><?= Html::encode($call->getSourceName()) ?> </span>
-        <?php endif;*/ ?>
-      </div>
+            <span class="static-number-indicator__name cw-source_name"><?= Html::encode($sourceName) ?></span>
+        </div>
 
       <!-- <div class="number-toggle"> -->
         <!-- <input type="checkbox" id="number-status2" class="call-status-switcher"> -->
@@ -343,12 +339,9 @@ $sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
   <div class="call-pane-incoming call-pane-initial">
     <div class="calling-from-info">
       <div class="static-number-indicator">
-
-          <span class="static-number-indicator__label" id="cw-project_name"><?= Html::encode($projectName) ?></span>
-          <?php /*if($call && $call->c_source_type_id):?>
-              <i class="static-number-indicator__separator"></i>
-              <span class="static-number-indicator__name" id="cw-source_name"><?= Html::encode($sourceName) ?> </span>
-          <?php endif;*/ ?>
+          <span class="static-number-indicator__label cw-project_name"><?= Html::encode($projectName) ?></span>
+          <i class="static-number-indicator__separator"></i>
+          <span class="static-number-indicator__name cw-source_name"><?= Html::encode($sourceName) ?> </span>
       </div>
     </div>
     <div class="incall-group">
@@ -401,11 +394,9 @@ $sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
         <div class="calling-from-info">
             <div class="static-number-indicator">
 
-                <span class="static-number-indicator__label" id="cw-outgoing-project_name"></span>
-                <?php /*if($call && $call->c_source_type_id):?>
-              <i class="static-number-indicator__separator"></i>
-              <span class="static-number-indicator__name" id="cw-source_name"><?= Html::encode($sourceName) ?> </span>
-          <?php endif;*/ ?>
+                <span class="static-number-indicator__label cw-project_name"><?= Html::encode($projectName) ?></span>
+                <i class="static-number-indicator__separator"></i>
+                <span class="static-number-indicator__name cw-source_name"><?= Html::encode($sourceName) ?> </span>
             </div>
         </div>
         <div class="incall-group">
@@ -573,7 +564,9 @@ PhoneWidgetCall.activeCall({
     'typeId': $type,
     'isHold': $isHold,
     'isListen': $isListen,
-    'isMute': $isMute
+    'isMute': $isMute,
+    'projectName': '{$projectName}',
+    'sourceName': '{$sourceName}'
 });
 JS;
         $this->registerJs($js);
@@ -598,7 +591,8 @@ PhoneWidgetCall.outgoingCall({
    'type': '{$type_description}',
    'status': '{$status}',
    'duration': '{$callDuration}',
-   'project': '{$projectName}',
+   'projectName': '{$projectName}',
+   'sourceName': '{$sourceName}',
    'to': {
        'phone': '{$phoneFrom}',
        'name': '{$name}'

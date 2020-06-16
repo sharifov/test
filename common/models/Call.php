@@ -1212,7 +1212,8 @@ class Call extends \yii\db\ActiveRecord
                         'isHold' => $isHold,
                         'isListen' => $isListen,
                         'isMute' => $isMute,
-                        'project' => $this->c_project_id ? $this->cProject->name : '',
+                        'projectName' => $this->c_project_id ? $this->cProject->name : '',
+                        'sourceName' => $this->c_source_type_id ? $this->getSourceName() : '',
                         'to' => [
                             'name' => $name,
                             'phone' => $phone

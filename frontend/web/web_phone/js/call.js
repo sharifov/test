@@ -40,6 +40,7 @@ var PhoneWidgetCall = function () {
         // console.log(data);
 
         panes.incoming.load(data);
+        updateProjectAndSourceUI(data.projectName, data.sourceName)
         panes.incoming.show();
         openWidget();
         openCallTab();
@@ -50,6 +51,7 @@ var PhoneWidgetCall = function () {
         // console.log(data);
 
         panes.outgoing.load(data);
+        updateProjectAndSourceUI(data.projectName, data.sourceName)
         panes.outgoing.show();
         openWidget();
         openCallTab();
@@ -60,6 +62,7 @@ var PhoneWidgetCall = function () {
         // console.log(data);
 
         panes.active.load(data);
+        updateProjectAndSourceUI(data.projectName, data.sourceName)
         panes.active.show();
         openWidget();
         openCallTab();
@@ -287,11 +290,28 @@ var PhoneWidgetCall = function () {
         } else if (obj.status === 'Ringing' || obj.status === 'Queued') {
             if (obj.typeId === 2) {
                 incomingCall(obj);
+
             } else if (obj.typeId === 1) {
                 outgoingCall(obj);
             }
         } else if (obj.status === 'Completed' || obj.isEnded) {
             cancelCall(obj.callId);
+        }
+    }
+
+    function updateProjectAndSourceUI(projectName, sourceName)
+    {
+        if (projectName) {
+            $('.cw-project_name').html(projectName).show();
+        } else {
+            $('.cw-project_name').html('').hide();
+        }
+        if (sourceName) {
+            $('.cw-source_name').html(sourceName);
+            $('.cw-source_name *').show();
+        } else {
+            $('.cw-source_name').html('');
+            $('.cw-source_name *').hide();
         }
     }
 

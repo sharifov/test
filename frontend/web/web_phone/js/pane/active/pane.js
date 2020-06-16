@@ -32,7 +32,9 @@ var PhoneWidgetPaneActive = function () {
             type,
             phone,
             name,
-            duration
+            duration,
+            projectName,
+            sourceName
         }
      */
     function load(data) {

@@ -16,8 +16,6 @@ var PhoneWidgetPaneIncoming = function () {
         $('#btn-accept-call').attr('data-from-internal', data.fromInternal).attr('data-call-id', data.callId);
         $('.call-pane-incoming .contact-info-card__label').html(data.type);
         $('#cw-client_name').html(data.name);
-        $('#cw-project_name').html(data.projectName);
-        $('#cw-source_name').html(data.sourceName);
         $('.call-pane-incoming .contact-info-card__call-type').html(data.phone);
     }
 
