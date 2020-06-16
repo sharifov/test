@@ -1125,7 +1125,9 @@ class Call extends \yii\db\ActiveRecord
 					'isIn' => $this->isIn(),
 					'phoneFrom' => $this->c_from,
 					'name' => $fromName,
-					'fromInternal' => $isInternal
+					'fromInternal' => $isInternal,
+					'projectName' => $this->cProject->name ?? '',
+					'sourceName' => $this->c_source_type_id ? $this->getSourceName() : ''
 				]
 			);
         }

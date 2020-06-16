@@ -258,4 +258,13 @@ class EmailService
 
 		return $clientEmail->client_id ?? null;
 	}
+
+    /**
+     * @param string $body
+     * @return string
+     */
+    public static function prepareEmailBody(string $body): string
+    {
+		return str_replace('class="editable"', 'class="editable" contenteditable="true" ', $body);
+	}
 }
