@@ -67,7 +67,7 @@ class Pricing implements ParseDumpInterface
                     for ($i = 0; $i < (int) $typeMatches[2]; $i++) {
                         $result[$j]['type'] = PricingService::passengerTypeMapping($typeMatches[1]);
                         $result[$j]['fare'] = $values[1] ?? null;
-                        $result[$j]['taxes'] = $values[2] ?? null;
+                        $result[$j]['taxes'] = $values[2] ?? '0.00';
                         $j ++;
                     }
                 }

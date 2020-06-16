@@ -63,38 +63,65 @@ class Pricing implements ParseDumpInterface
      */
     private function parsePriceSingleType(string $dump): ?array
     {
-        $result = null;
         $j = 0;
-        $countPattern = '/
-            ^01\s{1}P1\W*(\d*) # count passengers                                
-            /x';
-        preg_match($countPattern, $dump, $countMatches);
+        $result = null;
 
-        if (isset($countMatches[1])) {
-            $countPassengers = (is_numeric($countMatches[1])) ? $countMatches[1] : 1;
+        if ($countPassengers = self::getCountPassengers($dump)) {
             $ticketRows = explode("\n", $dump);
             $passengerType = self::getPassengerType($ticketRows);
 
             if (isset($countPassengers, $passengerType)) {
-
                 $fare = self::getFare($dump);
+                $taxes = self::getTaxes($ticketRows);
 
-                foreach ($ticketRows as $key => $row) {
-
-                    $taxesPattern = '/
-                        USD\s+(\d+.\d{2})\s+ # fare                              
-                        /x';
-                    preg_match_all($taxesPattern, $dump, $taxesMatches);
-
-                    \yii\helpers\VarDumper::dump($taxesMatches, 10, true); exit();
-                    /* FOR DEBUG:: must by remove */
-
-
+                for ($i = 0; $i < $countPassengers; $i++) {
+                    $result[$j]['type'] = $passengerType;
+                    $result[$j]['fare'] = $fare;
+                    $result[$j]['taxes'] = $taxes;
+                    $j ++;
                 }
             }
         }
         return $result;
     }
+
+    /**
+     * @param string $dump
+     * @return int|null
+     */
+    private static function getCountPassengers(string $dump): ?int
+    {
+        $countPattern = '/
+            ^01\s{1}P1\W*(\d*) # count passengers                                
+            /x';
+        preg_match($countPattern, $dump, $countMatches);
+        if (isset($countMatches[1])) {
+            return (is_numeric($countMatches[1])) ? $countMatches[1] : 1;
+        }
+        return null;
+    }
+
+    /**
+     * @param array $ticketRows
+     * @return float
+     */
+    private static function getTaxes(array $ticketRows): float
+    {
+        $result = 0.00;
+        foreach ($ticketRows as $key => $row) {
+            $row = trim($row);
+            $taxesPattern = '/
+                ^USD\s+(\d+.\d{2})\-{1}[A-Z]{2} # taxes                              
+                /x';
+            preg_match_all($taxesPattern, $row, $taxesMatches);
+
+            if (count($taxesMatches[1])) {
+                $result += $taxesMatches[1][0];
+            }
+        }
+        return $result;
+    }
+
 
     /**
      * @param string $string
