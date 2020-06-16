@@ -34,6 +34,7 @@ use sales\forms\cases\CasesChangeStatusForm;
 use sales\forms\cases\CasesClientUpdateForm;
 use sales\forms\cases\CasesCreateByWebForm;
 use sales\forms\cases\CasesSaleForm;
+use sales\helpers\setting\SettingHelper;
 use sales\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
 use sales\guards\cases\CaseManageSaleInfoGuard;
 use sales\model\cases\useCases\cases\updateInfo\Handler;
@@ -666,7 +667,22 @@ class CasesController extends FController
 
         //VarDumper::dump($dataProvider->allModels); exit;
 
-
+		$fromPhoneNumbers = [];
+		if (SettingHelper::isCaseCommunicationNewCallWidgetEnabled()) {
+			if ($model && $model->isDepartmentSupport()) {
+				$departmentPhones = DepartmentPhoneProject::find()->where(['dpp_project_id' => $model->cs_project_id, 'dpp_dep_id' => $model->cs_dep_id, 'dpp_default' => DepartmentPhoneProject::DPP_DEFAULT_TRUE])->withPhoneList()->all();
+				foreach ($departmentPhones as $departmentPhone) {
+					$fromPhoneNumbers[$departmentPhone->getPhone()] = $departmentPhone->dppProject->name . ' (' . $departmentPhone->getPhone() . ')';
+				}
+			} else if ($userParams = UserProjectParams::find()->where(['upp_user_id' => Auth::id()])->withPhoneList()->all()) {
+				foreach ($userParams as $param) {
+					if(!$param->getPhone()) {
+						continue;
+					}
+					$fromPhoneNumbers[$param->getPhone()] = $param->uppProject->name . ' (' . $param->getPhone() . ')';
+				}
+			}
+		}
 
         $enableCommunication = true;
         $isAdmin = true;
@@ -694,7 +710,9 @@ class CasesController extends FController
             'dataProviderNotes' => $dataProviderNotes,
 
 			'coupons' => $coupons,
-			'sendCouponsForm' => $sendCouponForm
+			'sendCouponsForm' => $sendCouponForm,
+
+			'fromPhoneNumbers' => $fromPhoneNumbers
         ]);
     }
 
