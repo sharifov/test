@@ -25,14 +25,13 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
 
             'cn_id',
-            'cn_call_id',
+            'cn_call_id:callLog',
             'cn_note',
-            'cn_created_dt',
-            'cn_updated_dt',
-            //'cn_created_user_id',
+            'cn_created_dt:byUserDateTime',
+            'cn_updated_dt:byUserDateTime',
+            'cn_created_user_id:username',
             //'cn_updated_user_id',
 
             ['class' => 'yii\grid\ActionColumn'],

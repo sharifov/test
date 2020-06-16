@@ -33,14 +33,14 @@ class CallNote extends \yii\db\ActiveRecord
 			'timestamp' => [
 				'class' => TimestampBehavior::class,
 				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['cn_created_dt', 'cn_updated_dt'],
+					ActiveRecord::EVENT_BEFORE_INSERT => ['cn_created_dt'],
 					ActiveRecord::EVENT_BEFORE_UPDATE => ['cn_updated_dt'],
 				],
 				'value' => date('Y-m-d H:i:s'),
 			],
 			'user' => [
 				'class' => BlameableBehavior::class,
-				'createdByAttribute' => 'cn_updated_user_id',
+				'createdByAttribute' => 'cn_created_user_id',
 				'updatedByAttribute' => 'cn_updated_user_id',
 			],
 		];
