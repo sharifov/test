@@ -22,12 +22,12 @@ use yii\helpers\Html;
                 <div class="contact-info-card__status">
                     <div class="contact-info-card__call-icon">
                         <?php if ($callType === CallLogType::IN): ?>
-                            <img src="img/pw-incoming.svg">
+                            <img src="/img/pw-incoming.svg">
                         <?php elseif ($callType === CallLogType::IN && (int)$call['cl_status_id'] === CallLogStatus::NOT_ANSWERED): ?>
-                            <img src="img/pw-missed.svg">
+                            <img src="/img/pw-missed.svg">
                         <?php else: ?>
                             <div class="contact-info-card__call-icon">
-                                <img src="img/pw-outgoing.svg">   
+                                <img src="/img/pw-outgoing.svg">
                             </div>
 						<?php endif; ?>
                     </div>

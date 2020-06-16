@@ -405,6 +405,31 @@ use yii\helpers\Html;
         }
     }
 
+    function hangupOutgoingCall(button, callId) {
+        button.html('<i class="fa fa-spinner fa-spin"></i>');
+        button.prop('disabled', true);
+        $.ajax({
+            type: 'post',
+            data: {
+                'id': callId,
+            },
+            url: ajaxHangupUrl
+        })
+            .done(function(data) {
+                if (data.error) {
+                    new PNotify({title: "Hangup", type: "error", text: data.message, hide: true});
+                }
+            })
+            .fail(function(error) {
+                console.error(error);
+            })
+            .always(function () {
+                button.html('<i class="fa fa-phone-slash"></i>');
+                button.prop('disabled', false);
+            });
+
+    }
+
     function conferenceComplete() {
         if (connection && connection.parameters.CallSid) {
             $('#button-hangup').prop('disabled', true);
@@ -592,7 +617,7 @@ use yii\helpers\Html;
         if (connection) {
             console.log("button-reject: " + JSON.stringify(connection.parameters));
             connection.reject();
-                $.get(ajaxSaveCallUrl + '?sid=' + connection.parameters.CallSid + '&user_id=' + userId, function (r) {
+                $.get(ajaxSaveCallUrl + '?sid=' + connection.parameters.CallSid, function (r) {
                 console.log(r);
             });
             //document.getElementById('call-controls2').style.display = 'none';
@@ -721,10 +746,11 @@ use yii\helpers\Html;
                     let btnHold = $('.btn-hold-call');
 
                     if (isJoin) {
-                        $('#wg-transfer-call').hide();
-                        $('#wg-add-person').hide();
-                        btnHold.prop('disabled', true);
-                        btnHold.html('<i class="fa fa-close"></i> <span>Hold</span>');
+
+                        if (typeof PhoneWidgetCall === 'object') {
+                            PhoneWidgetCall.panes.active.initInactiveControls();
+                        }
+
                         $('#btn-group-id-hold-call').hide();
                         joinConnection = conn;
                         isJoinCall = true;
@@ -738,16 +764,18 @@ use yii\helpers\Html;
                             $('#btn-group-id-mute').show();
                         }
                     } else {
-                        btnHold.prop('disabled', false);
-                        btnHold.html('<i class="fa fa-pause"></i> <span>Hold</span>');
-                        btnHold.data('mode', 'unhold');
 
                         if (conferenceBase) {
+                            btnHold.prop('disabled', false);
+                            btnHold.html('<i class="fa fa-pause"></i> <span>Hold</span>');
+                            btnHold.data('mode', 'unhold');
                             $('#btn-group-id-hold-call').show();
+
+                            if (typeof PhoneWidgetCall === 'object') {
+                                PhoneWidgetCall.panes.active.initActiveControls();
+                            }
                         }
 
-                        $('#wg-transfer-call').show();
-                        $('#wg-add-person').show();
                         joinConnection = null;
                         $('#web-call-from-number').text(conn.parameters.From);
                         $('#web-call-to-number').text(conn.parameters.To);
@@ -791,10 +819,6 @@ use yii\helpers\Html;
                     volumeIndicators.style.display = 'none';
                     cleanPhones();
 
-                    // if (typeof PhoneWidgetCall === "object") {
-                    //     PhoneWidgetCall.cancelCall();
-                    //     PhoneWidgetCall.clearCallLayersInfo();
-                    // }
                 });
 
                 // device.on('ringing', function (conn) {
@@ -1405,23 +1429,48 @@ $js = <<<JS
         }
          
         e.preventDefault();
-        let btn = $(this);
         let callSid = getActiveConnectionCallSid();
-        
         if (callSid) {
-            let mode = btn.data('mode');
+           let mode = $(this).data('mode');
             if (mode === 'unhold') {
-                holdCall(callSid, btn);   
+                holdCall(callSid);   
             } else {
-                unholdCall(callSid, btn);
+                unholdCall(callSid);
             }
         } else {
             alert('Error: Not found active Connection CallSid');
         }
     });
+    
+     $(document).on('click', '#wg-hold-call', function(e) {
+        if (!conferenceBase) {
+           return false;
+        }
+        
+        if (!PhoneWidgetCall.panes.active.buttons.hold.can()) {
+            return false;
+        }
+                
+        let callSid = getActiveConnectionCallSid();
+        if (!callSid) {
+            alert('Error: Not found active Connection CallSid');
+            return false;
+        }
+        
+        if ($(this).attr('data-mode') === 'unhold') {
+            holdCall(callSid);   
+        } else {
+            unholdCall(callSid);
+        }
+        
+    });
      
-     function holdCall(callSid, btn) {
-          $('.btn-hold-call').html('<i class="fa fa-spinner fa-spin"></i> <span>Hold</span>');
+     function holdCall(callSid) {
+          let holdBtn = PhoneWidgetCall.panes.active.buttons.hold; 
+          holdBtn.sendRequest();
+         
+          let btn = $('.btn-hold-call');
+          btn.html('<i class="fa fa-spinner fa-spin"></i> <span>Hold</span>');
           btn.prop('disabled', true);          
           
           $.ajax({
@@ -1434,24 +1483,32 @@ $js = <<<JS
             .done(function (data) {
                 if (data.error) {
                     new PNotify({title: "Hold", type: "error", text: data.message, hide: true});
-                    $('.btn-hold-call').html('<i class="fa fa-pause"></i> <span>Hold</span>');
+                    btn.html('<i class="fa fa-pause"></i> <span>Hold</span>');
                     btn.prop('disabled', false);
+                    holdBtn.hold();
+                    holdBtn.enable();
                 } else {
                     // new PNotify({title: "Hold", type: "success", text: 'Wait', hide: true});
                 }                
              })
              .fail(function (error) {
-                 $('.btn-hold-call').html('<i class="fa fa-pause"></i> <span>Hold</span>');
+                 btn.html('<i class="fa fa-pause"></i> <span>Hold</span>');
                  btn.prop('disabled', false);
-                console.error(error);
+                 holdBtn.hold();
+                 holdBtn.enable();
+                 new PNotify({title: "Hold", type: "error", text: 'Server error', hide: true});
              })
              .always(function() {
                 
              });
      }
      
-     function unholdCall(callSid, btn) {
-          $('.btn-hold-call').html('<i class="fa fa-spinner fa-spin"></i> <span>Unhold</span>');
+     function unholdCall(callSid) {
+          let holdBtn = PhoneWidgetCall.panes.active.buttons.hold; 
+          holdBtn.sendRequest();
+          
+          let btn = $('.btn-hold-call');
+          btn.html('<i class="fa fa-spinner fa-spin"></i> <span>Unhold</span>');
           btn.prop('disabled', true);          
           
           $.ajax({
@@ -1464,16 +1521,20 @@ $js = <<<JS
             .done(function (data) {
                 if (data.error) {
                     new PNotify({title: "Hold", type: "error", text: data.message, hide: true});
-                    $('.btn-hold-call').html('<i class="fa fa-play"></i> <span>Unhold</span>');
+                    btn.html('<i class="fa fa-play"></i> <span>Unhold</span>');
                     btn.prop('disabled', false);
+                    holdBtn.unhold();
+                    holdBtn.enable();
                 } else {
                     // new PNotify({title: "Hold", type: "success", text: 'Wait', hide: true});
                 }                
              })
              .fail(function (error) {
-                 $('.btn-hold-call').html('<i class="fa fa-play"></i> <span>Unhold</span>');
+                 btn.html('<i class="fa fa-play"></i> <span>Unhold</span>');
                  btn.prop('disabled', false);
-                console.error(error);
+                 holdBtn.unhold();
+                 holdBtn.enable();
+                 new PNotify({title: "Hold", type: "error", text: 'Server error', hide: true});
              })
              .always(function() {
                 
@@ -1486,28 +1547,18 @@ $js = <<<JS
          
          if (callSid && data.call.sid === callSid) {
              let btn = $('.btn-hold-call');
-             if (data.call.type_id === 3) {
-                 btn.prop('disabled', true);
-             } else {
-                 btn.prop('disabled', false);
-             }
+             let hld = PhoneWidgetCall.panes.active.buttons.hold;
              if (data.command === 'hold') {
-                 if (data.call.type_id === 3) {
-                    btn.html('<i class="fa fa-close"></i> <span>Unhold</span>'); 
-                 } else {
-                    btn.html('<i class="fa fa-play"></i> <span>Unhold</span>');    
-                 }                     
-                 btn.data('mode', 'hold');
-                 // new PNotify({title: "Hold", type: "success", text: 'Success', hide: true});    
+                hld.unhold();
+                btn.html('<i class="fa fa-play"></i> <span>Unhold</span>');
+                btn.data('mode', 'hold');
              } else if (data.command === 'unhold') {
-                 if (data.call.type_id === 3) {
-                     btn.html('<i class="fa fa-close"></i> <span>Hold</span>');
-                 } else {
-                    btn.html('<i class="fa fa-pause"></i> <span>Hold</span>');
-                 }
-                 btn.data('mode', 'unhold');
-                 // new PNotify({title: "Unhold", type: "success", text: 'Success', hide: true});    
+                 hld.hold();
+                btn.html('<i class="fa fa-pause"></i> <span>Hold</span>');
+                btn.data('mode', 'unhold');
              }
+             hld.enable();
+             btn.prop('disabled', false);
          }
      }
      

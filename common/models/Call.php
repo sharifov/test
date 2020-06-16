@@ -1156,31 +1156,31 @@ class Call extends \yii\db\ActiveRecord
             //Notifications::socket($this->c_created_user_id, $this->c_lead_id, 'callUpdate', ['id' => $this->c_id, 'status' => $this->getStatusName(), 'duration' => $this->c_call_duration, 'snr' => $this->c_sequence_number], true);
 
 			$isInternal = PhoneList::find()->byPhone($this->c_from)->enabled()->exists();
-            $fromName = '';
-            $phoneFrom = '';
+            $name = '';
+            $phone = '';
             if ($this->isIn()) {
-                $phoneFrom = $this->c_from;
+                $phone = $this->c_from;
             } elseif ($this->isOut()) {
                 if ($this->cParent) {
-                    $phoneFrom = $this->cParent->c_to;
+                    $phone = $this->cParent->c_to;
 //                }elseif ($this->cParent && $this->currentParticipant && $this->currentParticipant->isClient()) {
 //                    $phoneFrom = $this->c_to;
                 } else {
-                    $phoneFrom = $this->c_to;
+                    $phone = $this->c_to;
                 }
             }
 
 			if ($this->isJoin()) {
                 if ($this->cParent && $this->cParent->cCreatedUser) {
-                    $fromName = $this->cParent->cCreatedUser->username;
+                    $name = $this->cParent->cCreatedUser->username;
                     if ($this->cParent->isIn()) {
-                        $phoneFrom = $this->cParent->c_to;
+                        $phone = $this->cParent->c_to;
                     } elseif ($this->cParent->isOut()) {
-                        $phoneFrom = $this->cParent->c_from;
+                        $phone = $this->cParent->c_from;
                     }
                 }
             } else {
-                $fromName = $isInternal ? $this->getCallerName($this->isIn() ? $this->c_from : $this->c_to)  : 'ClientName';
+                $name = $isInternal ? $this->getCallerName($this->isIn() ? $this->c_from : $this->c_to)  : 'ClientName';
             }
 			$isHold = false;
 			$isListen = false;
@@ -1195,25 +1195,32 @@ class Call extends \yii\db\ActiveRecord
 			    $isListen = true;
                 $isMute = true;
             }
-            Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id],
-                [
-                	'id' => $this->c_id,
-					'status' => $this->getStatusName(),
-					'duration' => $this->c_call_duration,
-					'snr' => $this->c_sequence_number,
-					'leadId' => $this->c_lead_id,
-					'isIn' => $this->isIn(),
-					'type' => $this->c_call_type_id,
-					'type_description' => CallHelper::getTypeDescription($this),
-					'source_type_id' => $this->c_source_type_id,
-					'phoneFrom' => $phoneFrom,
-					'name' => $fromName,
-					'fromInternal' => $isInternal,
-                    'is_hold' => $isHold,
-                    'is_listen' => $isListen,
-                    'is_mute' => $isMute,
-				]
-			);
+			if (!$this->currentParticipant || $this->currentParticipant->isAgent() || $this->isEnded()) {
+                Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id],
+                    [
+                        'callId' => $this->c_id,
+                        'status' => $this->getStatusName(),
+                        'duration' => $this->c_call_duration,
+                        'snr' => $this->c_sequence_number,
+                        'leadId' => $this->c_lead_id,
+                        'typeId' => $this->c_call_type_id,
+                        'type' => CallHelper::getTypeDescription($this),
+                        'source_type_id' => $this->c_source_type_id,
+                        'phone' => $phone,
+                        'name' => $name,
+                        'fromInternal' => $isInternal,
+                        'isHold' => $isHold,
+                        'isListen' => $isListen,
+                        'isMute' => $isMute,
+                        'project' => $this->c_project_id ? $this->cProject->name : '',
+                        'to' => [
+                            'name' => $name,
+                            'phone' => $phone
+                        ],
+                        'isEnded' => $this->isEnded(),
+                    ]
+                );
+            }
         }
 
         if (($this->c_lead_id || $this->c_case_id) && !$this->isJoin()) {

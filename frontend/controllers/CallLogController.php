@@ -93,16 +93,10 @@ class CallLogController extends FController
 	{
 		if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
 
-			$userId = (int)Yii::$app->request->post('uid');
-
-			if (Auth::id() !== $userId) {
-                throw new ForbiddenHttpException();
-            }
-
 			$callSearch = new CallLogSearch();
 			$page = Yii::$app->request->post('page', 0);
 
-			$params['CallLogSearch']['cl_user_id'] = $userId;
+			$params['CallLogSearch']['cl_user_id'] = Auth::id();
 			$callHistory = $callSearch->getCallHistory($params);
 			$callHistory->pagination->setPage($page);
 

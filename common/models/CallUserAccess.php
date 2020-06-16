@@ -208,7 +208,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
                         $phone = $parent->c_to;
                     }
                 } else {
-                    $name = $call ? $call->getCallerName($call->c_from) : 'ClientName';
+                    $name = $call->getCallerName($call->c_from);
                     if ($call->isIn()) {
                         $phone = $call->c_from;
                     } elseif ($call->isOut()) {
@@ -217,12 +217,15 @@ class CallUserAccess extends \yii\db\ActiveRecord
                 }
 
 				$callInfo = [
-                    'type' => $call->c_call_type_id,
-                    'type_description' => CallHelper::getTypeDescription($this->cuaCall),
+                    'typeId' => $call->c_call_type_id,
+                    'type' => CallHelper::getTypeDescription($this->cuaCall),
+                    'callId' => $call->c_id,
                     'name' => $name,
-                    'phoneFrom' => $phone,
+                    'phone' => $phone,
 					'fromInternal' => PhoneList::find()->byPhone($this->cuaCall->c_from)->enabled()->exists(),
-                    'status' => $call->getStatusName(),
+                    'projectName' => $call->c_project_id ? $call->cProject->name : '',
+                    'sourceName' => $call->c_source_type_id ? $call->getSourceName() : '',
+                    'status' => $call->getStatusName()
 				];
 			}
             Notifications::publish('updateIncomingCall', ['user_id' => $this->cua_user_id], array_merge($this->attributes, $callInfo ?? []));

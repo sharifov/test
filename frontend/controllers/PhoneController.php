@@ -170,10 +170,11 @@ class PhoneController extends FController
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $out = ['error' => '', 'data' => []];
 
+        $userId = Auth::id();
+
         // update call status when agent reject call
         if (Yii::$app->request->getIsGet()) {
             //$get_sid = Yii::$app->request->get('sid');
-            $userId = (int)Yii::$app->request->get('user_id');
 
             $call = Call::find()->where(['c_created_user_id' => $userId])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
             if ($call) {
@@ -218,7 +219,7 @@ class PhoneController extends FController
                 $call->c_from = $call_from;
                 $call->c_to = $call_to;
                 $call->c_created_dt = date('Y-m-d H:i:s');
-                $call->c_created_user_id = Yii::$app->user->id;
+                $call->c_created_user_id = $userId;
                 $call->setTypeOut();
 
                 // $call->c_call_status = Call::CALL_STATUS_RINGING;
@@ -906,19 +907,26 @@ class PhoneController extends FController
             $sid = (string)Yii::$app->request->post('sid');
 
             if (!$sid) {
-                throw new BadRequestHttpException('Not found Call SID in request', 1);
-            }
-
-            if (!$call = Call::findOne(['c_call_sid' => $sid])) {
-                throw new BadRequestHttpException('Not found Call. Sid: ' . $sid, 2);
+                $id = (int)Yii::$app->request->post('id');
+                if (!$id) {
+                    throw new BadRequestHttpException('Not found Call SID or ID in request');
+                } else {
+                    if (!$call = Call::findOne(['c_id' => $id])) {
+                        throw new BadRequestHttpException('Not found Call. ID: ' . $id);
+                    }
+                }
+            } else {
+                if (!$call = Call::findOne(['c_call_sid' => $sid])) {
+                    throw new BadRequestHttpException('Not found Call. Sid: ' . $sid);
+                }
             }
 
             if (!$call->isOwner(Auth::id())) {
-                throw new BadRequestHttpException('Is not your Call', 3);
+                throw new BadRequestHttpException('Is not your Call');
             }
 
             if (!($call->isStatusInProgress() || $call->isStatusRinging())) {
-                throw new BadRequestHttpException('Call is not correct status', 4);
+                throw new BadRequestHttpException('Call status is not correct');
             }
 
             $result = Yii::$app->communication->hangUp($call->c_call_sid);
@@ -1121,6 +1129,10 @@ class PhoneController extends FController
             throw new BadRequestHttpException('Not found Call. Sid: ' . $sid);
         }
 
+        if (!$call->isStatusInProgress()) {
+            throw new BadRequestHttpException('Invalid Call status. Sid: ' . $sid);
+        }
+
         if (!($call->isIn() || $call->isOut())) {
             throw new BadRequestHttpException('Invalid Call Type. Sid: ' . $sid);
         }
@@ -1174,13 +1186,7 @@ class PhoneController extends FController
             throw new BadRequestHttpException('Invalid Call type');
         }
 
-        if (
-            ($call->isOut() && $call->isGeneralParent() && ($call->isStatusRinging()/* || $call->isStatusInProgress()*/))
-            || ($call->isOut() && !$call->isGeneralParent() && $call->isStatusInProgress())
-            || ($call->isIn() && $call->isStatusInProgress())
-        ) {
-
-        } else {
+        if (!$call->isStatusInProgress()) {
             throw new BadRequestHttpException('Invalid Call Status');
         }
 
@@ -1322,14 +1328,7 @@ class PhoneController extends FController
             throw new BadRequestHttpException('Invalid type of Participant');
         }
 
-        if (
-            ($call->isOut() && $call->isGeneralParent() && ($call->isStatusRinging()/* || $call->isStatusInProgress()*/))
-            || ($call->isOut() && !$call->isGeneralParent() && $call->isStatusInProgress())
-            || ($call->isIn() && $call->isStatusInProgress())
-            || ($call->isJoin() && $call->isStatusInProgress())
-        ) {
-
-        } else {
+        if (!$call->isStatusInProgress()) {
             throw new BadRequestHttpException('Invalid Call Status');
         }
 

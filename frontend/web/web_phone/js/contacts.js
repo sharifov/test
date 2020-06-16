@@ -393,7 +393,8 @@ let PhoneWidgetContacts = function () {
                 $("#list-of-contacts").html("").append(content);
                 simpleBar.recalculate();
             })
-            .fail(function () {
+            .fail(function (e) {
+                console.log(e);
                 hidePreloader();
                 new PNotify({title: "Search contacts", type: "error", text: 'Server Error. Try again later', hide: true});
             });

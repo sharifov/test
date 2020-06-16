@@ -179,7 +179,9 @@ $js = <<<JS
                                 refreshInboxCallWidget(obj);
                             }
                             if (typeof PhoneWidgetCall === 'object') {
-                                PhoneWidgetCall.initIncomingCall(obj);
+                                if (typeof obj.status !== 'undefined' && obj.status !== 'Hold') {
+                                     PhoneWidgetCall.incomingCall(obj);
+                                }
                             }
                         }
                         

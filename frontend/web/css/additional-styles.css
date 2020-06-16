@@ -1,5 +1,6 @@
 #btn-group-id-hold-call span {
     line-height: normal;
+}
 
 .wg-history-load {
     display: flex;
@@ -12,7 +13,27 @@
     bottom: 0;
     height: 100%;
     width: 100%;
-    background-color: rgba(255,255,255,0.5);
+    background-color: rgba(255, 255, 255, 0.5);
     z-index: 10;
     font-size: 4rem;
+}
+
+.in-call-controls  a {
+    color: indianred;
+}
+
+.phone-widget [data-active="false"] .in-call-controls__action:focus,
+.phone-widget  [data-active="false"] .in-call-controls__action:active,
+.phone-widget [data-active="false"] .in-call-controls__action:hover,
+.phone-widget  [data-active="false"] .in-call-controls__action:visited,
+.phone-widget  [data-active="false"] .in-call-controls__action:active:hover,
+.phone-widget [data-active="false"]  .in-call-controls__action:focus:active,
+.phone-widget [data-active="false"] .in-call-controls__action {
+    color: inherit;
+    cursor: default;
+}
+
+.call-pane__mute[data-active="false"] {
+    background: #6c757d;
+    cursor: default;
 }

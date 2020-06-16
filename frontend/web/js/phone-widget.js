@@ -18,7 +18,6 @@ $(document).ready(function() {
     }
 
     var tabHistoryLoaded = false;
-    var userId = $('#tab-history').attr('data-user-id');
     $phoneTabAnchor.on("click", function () {
         $current = "#" + $(this).data("toggle-tab");
 
@@ -37,7 +36,7 @@ $(document).ready(function() {
                 $.ajax({
                     url: '/call-log/ajax-get-call-history',
                     type: 'post',
-                    data: {uid: userId},
+                    data: {},
                     dataType: 'json',
                     beforeSend: function() {
                         $($current).append('<div class="wg-history-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
@@ -446,7 +445,20 @@ $(document).ready(function() {
             // clearTimeout(timeout)
 
        
-    })
+    });
+
+    $(document).on('click', '#cancel-outgoing-call', function(e) {
+
+        e.preventDefault();
+        let btn = $(this);
+        let callId = btn.attr('data-call-id');
+        if (!callId) {
+            new PNotify({title: "Hangup", type: "warning", text: "Please try again after some seconds.", hide: true});
+            return false;
+        }
+        hangupOutgoingCall(btn, callId);
+
+    });
 
     // $('.messages-modal__send-btn').on('click', function() {
     //     // var scroll = $(msgModalScroll.getContentElement());
@@ -561,6 +573,13 @@ $(document).ready(function() {
 
     // }
 
+    $('#wg-dialpad').on('click', function() {
+        if (!PhoneWidgetPaneActiveBtnDialpad.can()) {
+            return false;
+        }
+        $('.dial-popup').slideDown(150)
+    });
+
     // var widget = phoneWidgetBehavior('.phone-widget');
 
 
@@ -574,10 +593,6 @@ $(document).ready(function() {
 
     $('.call-pane__info').on('click', function() {
         $('.contact-info').slideDown(150);
-    })
-
-    $('.js-toggle-dial').on('click', function() {
-        $('.dial-popup').slideDown(150)
     })
 
     window.statusCheckbox = new widgetStatus('.call-status-switcher');

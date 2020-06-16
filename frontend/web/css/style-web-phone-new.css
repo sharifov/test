@@ -1314,32 +1314,45 @@
     border-radius: 0px 0px 6px 6px;
     flex-direction: column;
     display: flex; }
+  .phone-widget .call-pane-outgoing {
+    background: linear-gradient(180deg, #2e6da4 0%, #2a3f54 73.23%, #5A738E 100%);
+    border-radius: 0px 0px 6px 6px;
+    flex-direction: column;
+    display: flex; }
+    .phone-widget .call-pane-outgoing .incall-group,
     .phone-widget .call-pane-incoming .incall-group {
       transform: translateY(calc(50% - 24px)); }
+    .phone-widget .call-pane-outgoing .contact-info-card .agent-text-avatar,
     .phone-widget .call-pane-incoming .contact-info-card .agent-text-avatar {
       transform: none;
       top: 15px; }
+    .phone-widget .call-pane-outgoing .contact-info-card__details,
     .phone-widget .call-pane-incoming .contact-info-card__details {
       border: 0 none;
       padding-bottom: 0;
       margin: 0; }
+    .phone-widget .call-pane-outgoing .contact-info-card__line,
     .phone-widget .call-pane-incoming .contact-info-card__line {
       justify-content: center;
       flex-direction: column;
       align-items: center; }
+    .phone-widget .call-pane-outgoing .contact-info-card__name,
     .phone-widget .call-pane-incoming .contact-info-card__name {
       font-weight: normal;
       font-size: 22px;
       line-height: 26px;
       color: #fff;
       margin-bottom: 4px; }
+    .phone-widget .call-pane-outgoing .contact-info-card__call-type,
     .phone-widget .call-pane-incoming .contact-info-card__call-type {
       font-weight: normal;
       font-size: 16px;
       line-height: 18px;
       color: rgba(255, 255, 255, 0.6); }
+    .phone-widget .call-pane-outgoing .call-pane__call-btns,
     .phone-widget .call-pane-incoming .call-pane__call-btns {
       margin: 0; }
+    .phone-widget .call-pane-outgoing .call-pane__end-call,
     .phone-widget .call-pane-incoming .call-pane__end-call {
       display: flex; }
   .phone-widget .call-pane-calling {
@@ -1665,23 +1678,28 @@
       font-size: 12px;
       line-height: 14px;
       color: #fff; }
+  .phone-widget .call-pane-outgoing .contact-info-card,
   .phone-widget .call-pane-incoming .contact-info-card,
   .phone-widget .call-pane-calling .contact-info-card {
     padding-top: 0; }
+    .phone-widget .call-pane-outgoing .contact-info-card__details,
     .phone-widget .call-pane-incoming .contact-info-card__details,
     .phone-widget .call-pane-calling .contact-info-card__details {
       border: 0 none;
       padding-bottom: 38px;
       margin: 0; }
+    .phone-widget .call-pane-outgoing .contact-info-card__line,
     .phone-widget .call-pane-incoming .contact-info-card__line,
     .phone-widget .call-pane-calling .contact-info-card__line {
       justify-content: center;
       flex-direction: column;
       align-items: center; }
+    .phone-widget .call-pane-outgoing .contact-info-card__name,
     .phone-widget .call-pane-incoming .contact-info-card__name,
     .phone-widget .call-pane-calling .contact-info-card__name {
       display: flex;
       align-items: center; }
+      .phone-widget .call-pane-outgoing .contact-info-card__name strong,
       .phone-widget .call-pane-incoming .contact-info-card__name strong,
       .phone-widget .call-pane-calling .contact-info-card__name strong {
         font-weight: normal;
@@ -1689,6 +1707,7 @@
         line-height: 26px;
         color: #fff;
         margin-bottom: 0; }
+    .phone-widget .call-pane-outgoing .contact-info-card__call-type,
     .phone-widget .call-pane-incoming .contact-info-card__call-type,
     .phone-widget .call-pane-calling .contact-info-card__call-type {
       font-weight: normal;

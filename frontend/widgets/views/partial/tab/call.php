@@ -69,7 +69,8 @@ $sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
                 use frontend\widgets\newWebPhone\call\CallHelper;
                 use yii\bootstrap4\Html;
 				use yii\helpers\Url;
-				use yii\web\View;
+                use yii\helpers\VarDumper;
+                use yii\web\View;
                 use yii\widgets\ActiveForm;
 
                 $form = ActiveForm::begin([
@@ -198,7 +199,7 @@ $sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
               <i class="user-icon fa fa-user"></i>
               <i class="info-icon fa fa-info"></i>
             </button>
-              <strong>
+              <strong id="wg-active-call-name">
               <?php
                 $name = '';
                 if ($call) {
@@ -206,6 +207,8 @@ $sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
                         $name = $call->cClient ? $call->cClient->getFullName() : '------';
                     } elseif ($call->isJoin() && ($parentJoin = $call->cParent) && $parentJoin->cCreatedUser) {
                         $name = $parentJoin->cCreatedUser->username;
+                    } else {
+                        $name = '------';
                     }
                 }
                 echo Html::encode($name);
@@ -289,8 +292,8 @@ $sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
 
     </div>
     <ul class="in-call-controls">
-      <li class="in-call-controls__item">
-        <a href="#" class="in-call-controls__action btn-hold-call" data-mode="unhold">
+      <li class="in-call-controls__item" data-mode="unhold" id="wg-hold-call" data-disabled="true">
+        <a href="#" class="in-call-controls__action">
           <i class="fa fa-pause"></i>
           <span>Hold</span>
         </a>
@@ -301,13 +304,14 @@ $sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
           <span>Transfer Call</span>
         </a>
       </li>
-      <li class="in-call-controls__item">
-        <a href="#" class="in-call-controls__action js-add-to-conference" data-toggle-tab="tab-contacts">
+      <li class="in-call-controls__item" id="wg-add-person">
+<!--        <a href="#" class="in-call-controls__action js-add-to-conference" data-toggle-tab="tab-contacts">-->
+        <a href="#" class="in-call-controls__action js-add-to-conference" >
           <i class="fa fa-plus"></i>
           <span>Add Person</span>
         </a>
       </li>
-      <li class="in-call-controls__item">
+      <li class="in-call-controls__item" id="wg-dialpad">
         <a href="#" class="in-call-controls__action js-toggle-dial">
         <i class="fa fa-th"></i>
           <span>Dialpad</span>
@@ -378,13 +382,13 @@ $sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
       <div class="call-pane__call-btns ">
       
         <button class="call-pane__start-call calling-state-block" id="btn-accept-call">
-          <div class="call-in-action">
-            <span class="call-in-action__text">Calling</span>
-            <span class="call-in-action__time">00:00</span>
-          </div>
+<!--          <div class="call-in-action">-->
+<!--            <span class="call-in-action__text">Calling</span>-->
+<!--            <span class="call-in-action__time">00:00</span>-->
+<!--          </div>-->
           <i class="fas fa-phone"></i>
         </button>
-        <button class="call-pane__end-call" id="reject-incoming-call" data-user-id="<?= \sales\auth\Auth::id() ?>">
+        <button class="call-pane__end-call" id="reject-incoming-call">
           <i class="fa fa-phone-slash"></i>
         </button>
       </div>
@@ -392,6 +396,60 @@ $sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
     </div>
     
   </div>
+
+  <div class="call-pane-outgoing call-pane-initial">
+        <div class="calling-from-info">
+            <div class="static-number-indicator">
+
+                <span class="static-number-indicator__label" id="cw-outgoing-project_name"></span>
+                <?php /*if($call && $call->c_source_type_id):?>
+              <i class="static-number-indicator__separator"></i>
+              <span class="static-number-indicator__name" id="cw-source_name"><?= Html::encode($sourceName) ?> </span>
+          <?php endif;*/ ?>
+            </div>
+        </div>
+        <div class="incall-group">
+
+            <div class="contact-info-card">
+                <div class="contact-info-card__details">
+
+                    <div class="contact-info-card__line history-details">
+                        <span class="contact-info-card__label">Outgoing</span>
+                        <div class="contact-info-card__name">
+
+                                <button class="call-pane__info">
+                                    <i class="user-icon fa fa-user"></i>
+                                    <i class="info-icon fa fa-info"></i>
+                                </button>
+
+                            <strong id="cw-outgoing-name"></strong>
+                        </div>
+
+                    </div>
+
+                    <div class="contact-info-card__line history-details">
+                        <span class="contact-info-card__call-type"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="call-pane__call-btns ">
+
+                <button class="call-pane__start-call calling-state-block">
+                    <div class="call-in-action">
+                      <span class="call-in-action__text"></span>
+                      <span class="call-in-action__time">00:00</span>
+                    </div>
+                    <i class="fas fa-phone"></i>
+                </button>
+                <button class="call-pane__end-call" id="cancel-outgoing-call">
+                    <i class="fa fa-phone-slash"></i>
+                </button>
+            </div>
+
+        </div>
+
+    </div>
 
   <!-- Dial popup -->
   <div class="additional-info dial-popup">
@@ -459,62 +517,95 @@ $ajaxSaveCallUrl = Url::to(['phone/ajax-save-call']);
 $ajaxMuteUrl = Url::to(['phone/ajax-mute-participant']);
 $ajaxUnmuteUrl = Url::to(['phone/ajax-unmute-participant']);
 
-if ($call && ($call->isStatusRinging() || $call->isStatusInProgress() || $call->isStatusQueue())) {
-    $callDuration = 0;
-    if($call->c_updated_dt) {
-        $callDuration = time() - strtotime($call->c_updated_dt);
-        if (!$callDuration) {
-            $callDuration = 0;
-        }
-    }
-} else {
-    $callDuration = $call ? $call->c_call_duration : 0;
-}
-
-$isMute = 0;
-$isListen = 0;
-if ( $call && (
-                ($call->currentParticipant && $call->currentParticipant->isMute())
-                || ($call->isJoin() && $call->c_source_type_id === Call::SOURCE_LISTEN)
-            )
-) {
-    $isMute = 1;
-}
-if ($call && ($call->isJoin() && $call->c_source_type_id === Call::SOURCE_LISTEN)) {
-    $isListen = 1;
-}
-
-$callId = $call ? $call->c_id : null;
-$isHold = $isHold ? 1 : 0;
-
-$sourceTypeId = $call->c_source_type_id ?? null;
-$status = isset($call) ? $call->getStatusName() : null;
-
 $js = <<<JS
 PhoneWidgetCall.init({
-    'ajaxCallRedirectGetAgents': '{$ajaxCallRedirectGetAgents}',
-    'acceptCallUrl': '{$ajaxAcceptIncomingCall}',
-    'callStatusUrl': '{$callStatusUrl}',
-    'ajaxSaveCallUrl': '{$ajaxSaveCallUrl}',
-    'isCallRinging': '{$isCallRinging}',
-    'isCallInProgress': '{$isCallInProgress}',
-    'isIn': '{$isIn}',
-    'phoneFrom': '{$phoneFrom}',
-    'name': '{$name}',
-    'projectName': '{$projectName}',
-    'sourceName': '{$sourceName}',
-    'duration': '{$callDuration}',
-    'call_id': '{$callId}',
-    'type' : parseInt('{$type}'),
-    'type_description' : '{$type_description}',
-    'source_type_id' : '{$sourceTypeId}',
-    'is_hold': parseInt('{$isHold}'),
-    'status': '{$status}',
-    'muteUrl': '{$ajaxMuteUrl}',
-    'unmuteUrl': '{$ajaxUnmuteUrl}',
-    'is_mute': parseInt('{$isMute}'),
-    'is_listen': parseInt('{$isListen}')    
+    'ajaxCallRedirectGetAgents': '$ajaxCallRedirectGetAgents',
+    'acceptCallUrl': '$ajaxAcceptIncomingCall',
+    'callStatusUrl': '$callStatusUrl',
+    'ajaxSaveCallUrl': '$ajaxSaveCallUrl',
+    'muteUrl': '$ajaxMuteUrl',
+    'unmuteUrl': '$ajaxUnmuteUrl'
 });
-
 JS;
 $this->registerJs($js);
+
+if ($call) {
+    if ($call && ($call->isStatusRinging() || $call->isStatusInProgress() || $call->isStatusQueue())) {
+        $callDuration = 0;
+        if($call->c_updated_dt) {
+            $callDuration = time() - strtotime($call->c_updated_dt);
+            if (!$callDuration) {
+                $callDuration = 0;
+            }
+        }
+    } else {
+        $callDuration = $call ? $call->c_call_duration : 0;
+    }
+
+    $isMute = 'false';
+    $isListen = 'false';
+    if ( $call && (
+            ($call->currentParticipant && $call->currentParticipant->isMute())
+            || ($call->isJoin() && $call->c_source_type_id === Call::SOURCE_LISTEN)
+        )
+    ) {
+        $isMute = 'true';
+    }
+    if ($call && ($call->isJoin() && $call->c_source_type_id === Call::SOURCE_LISTEN)) {
+        $isListen = 'true';
+    }
+
+    $callId = $call ? $call->c_id : null;
+
+    $sourceTypeId = $call->c_source_type_id ?? null;
+    $status = isset($call) ? $call->getStatusName() : null;
+
+    $isHold = $isHold ? 'true' : 'false';
+
+    if ($call->isStatusInProgress()) {
+        $js = <<<JS
+PhoneWidgetCall.activeCall({
+    'callId': $callId,
+    'duration': $callDuration,
+    'phone': '{$phoneFrom}',
+    'name': '$name',
+    'type': '$type_description',
+    'typeId': $type,
+    'isHold': $isHold,
+    'isListen': $isListen,
+    'isMute': $isMute
+});
+JS;
+        $this->registerJs($js);
+    } elseif ($call->isStatusRinging() || $call->isStatusQueue()) {
+        if ($call->isIn()) {
+            $js = <<<JS
+PhoneWidgetCall.incomingCall({
+   'type': '{$type_description}',
+   'callId': $callId,
+   'fromInternal': false,
+   'name': '$name',
+   'projectName': '$projectName',
+   'sourceName': '$sourceName',
+   'phone': '$phoneFrom'
+});
+JS;
+            $this->registerJs($js);
+        } elseif ($call->isOut()) {
+            $js = <<<JS
+PhoneWidgetCall.outgoingCall({
+   'callId': $callId,
+   'type': '{$type_description}',
+   'status': '{$status}',
+   'duration': '{$callDuration}',
+   'project': '{$projectName}',
+   'to': {
+       'phone': '{$phoneFrom}',
+       'name': '{$name}'
+  }
+});
+JS;
+            $this->registerJs($js);
+        }
+    }
+}

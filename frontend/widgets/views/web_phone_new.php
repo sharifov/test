@@ -98,7 +98,17 @@ $js = <<<JS
 							} else { 
 								let params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': null, 'case_id': null, 'c_type': 'call-web', 'c_user_id': userId, 'is_conference_call': {$conferenceBase}};						
 								webPhoneParams = params;
-								PhoneWidgetCall.initCall({from: phoneNumbers.getData, to: data});
+								PhoneWidgetCall.outgoingCall({  
+									'callId': '',
+									'type': 'Outgoing',
+									'status': 'Dialing',  
+									'duration': 0,
+									'project': phoneNumbers.getData.project,
+									'to': {
+									     phone: data.phone,
+									     name: data.callToName
+									 } 
+								});
 								createNotify('Calling', 'Calling ' + params.To + '...', 'success');
 								updateAgentStatus(connection, false, 0);
 								connection = device.connect(params);
