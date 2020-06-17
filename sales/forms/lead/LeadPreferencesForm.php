@@ -41,7 +41,10 @@ class LeadPreferencesForm extends Model
      */
 	public $currency;
 
-    public ?string $clientLang;
+    /**
+     * @var string|null
+     */
+    public $clientLang;
 
     /**
 	 * LeadPreferencesForm constructor.
@@ -102,7 +105,7 @@ class LeadPreferencesForm extends Model
 			'notesForExperts' => 'Notes for Expert',
 			'delayedCharge' => 'Delayed charge',
             'currency'  => 'Currency',
-            'l_client_lang' => 'Client Lang',
+            'clientLang' => 'Client Lang',
 		];
 	}
 }
