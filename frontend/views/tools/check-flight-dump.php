@@ -11,7 +11,7 @@ use yii\helpers\Html;
 /* @var string $gds */
 /* @var bool|null $prepareSegment */
 
-$this->title = 'Check Flight dump - GDS WorldSpan';
+$this->title = 'Check GDS dump';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="check-flight-dump">
@@ -49,7 +49,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php echo (empty($data) && !empty($dump)) ? 'Parsing failed' : '' ?>
 
         <?php if ($data): ?>
-            <h2>Parse dump: <?php echo $type ?>.</h2>
+            <h2>Parse dump: <?php echo $type ?>. GDS: <?php echo $gds ?> </h2>
             <pre>
                 <?php \yii\helpers\VarDumper::dump($data, 10, true) ?>
             </pre>
