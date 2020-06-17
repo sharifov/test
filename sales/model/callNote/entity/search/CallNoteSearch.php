@@ -49,8 +49,8 @@ class CallNoteSearch extends CallNote
         $query->andFilterWhere([
             'cn_id' => $this->cn_id,
             'cn_call_id' => $this->cn_call_id,
-            'cn_created_dt' => $this->cn_created_dt,
-            'cn_updated_dt' => $this->cn_updated_dt,
+			'date_format(cn_created_dt, "%Y-%m-%d")' => $this->cn_created_dt,
+			'date_format(cn_updated_dt, "%Y-%m-%d")' => $this->cn_updated_dt,
             'cn_created_user_id' => $this->cn_created_user_id,
             'cn_updated_user_id' => $this->cn_updated_user_id,
         ]);

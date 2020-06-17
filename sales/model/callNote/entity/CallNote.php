@@ -91,8 +91,8 @@ class CallNote extends \yii\db\ActiveRecord
             'cn_note' => 'Note',
             'cn_created_dt' => 'Created Dt',
             'cn_updated_dt' => 'Updated Dt',
-            'cn_created_user_id' => 'Created User ID',
-            'cn_updated_user_id' => 'Updated User ID',
+            'cn_created_user_id' => 'Created User',
+            'cn_updated_user_id' => 'Updated User',
         ];
     }
 
