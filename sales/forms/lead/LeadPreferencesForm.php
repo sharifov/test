@@ -41,7 +41,10 @@ class LeadPreferencesForm extends Model
      */
 	public $currency;
 
-    public ?string $clientLang;
+    /**
+     * @var string|null
+     */
+    public $clientLang;
 
     /**
 	 * LeadPreferencesForm constructor.
