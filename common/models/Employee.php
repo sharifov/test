@@ -42,6 +42,8 @@ use yii\web\NotFoundHttpException;
  * @property string $last_activity
  * @property boolean $acl_rules_activated
  *
+ * @property bool $make_user_project_params
+ *
  * @property array $roles
  * @property array $roles_raw
  * @property array $rolesName
@@ -120,6 +122,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
     public $password;
     public $deleted;
+    public $make_user_project_params;
 
     public $roles = null;
     public $roles_raw = null;
@@ -369,13 +372,14 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             [['username', 'auth_key', 'password_hash', 'email', 'form_roles'], 'required'],
             [['password'], 'required', 'on' => self::SCENARIO_REGISTER],
             [['email', 'password', 'username'], 'trim'],
-            [['password'], 'string', 'min' => 6],
+            [['password'], 'string', 'min' => 8],
             [['status'], 'integer'],
             [['username', 'password_hash', 'password_reset_token', 'email'], 'string', 'max' => 255],
             [['auth_key'], 'string', 'max' => 32],
             [['username'], 'unique'],
             [['email'], 'unique'],
             ['email', 'email'],
+            [['make_user_project_params'], 'boolean'],
             [['password_reset_token'], 'unique'],
             [['created_at', 'updated_at', 'last_activity', 'acl_rules_activated', 'full_name', 'user_groups', 'user_projects', 'deleted', 'user_departments'], 'safe'],
         ];
@@ -399,7 +403,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             'user_groups' => 'User groups',
             'user_projects' => 'Projects access',
             'form_roles' => 'Roles',
-            'user_departments' => 'Departments'
+            'user_departments' => 'Departments',
+            'make_user_project_params' => 'Make user project params (automatic)'
         ];
     }
 
