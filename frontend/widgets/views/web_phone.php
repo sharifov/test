@@ -562,9 +562,14 @@ use yii\helpers\Html;
 
     // Activity log
     function log(message) {
+        let msg = '<p>&gt;&nbsp;' + message + '</p>';
         let logDiv = document.getElementById('call-log');
-        logDiv.innerHTML += '<p>&gt;&nbsp;' + message + '</p>';
+        logDiv.innerHTML += msg;
         logDiv.scrollTop = logDiv.scrollHeight;
+
+        let logDivWidget = $('.logs-block');
+        logDivWidget.append(msg);
+        logDivWidget.animate({ scrollTop: logDivWidget.prop("scrollHeight")}, 1000);
     }
 
 
@@ -572,6 +577,10 @@ use yii\helpers\Html;
         let logDiv = document.getElementById('call-log');
         logDiv.innerHTML = '';
         logDiv.scrollTop = logDiv.scrollHeight;
+
+        let logDivWidget = $('.logs-block');
+        logDivWidget.html('');
+        logDivWidget.animate({ scrollTop: logDivWidget.prop("scrollHeight")}, 1000);
     }
 
     // Set the client name in the UI

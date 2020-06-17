@@ -410,9 +410,7 @@ $isActiveWidget = $isCallInProgress ? ' is_active' : '';
             </li>
             <li class="tabs__item" id="tab-logs">
             <pre class="logs-block">
-                <p>&gt;&nbsp;Requesting Capability Token...</p>
-                <p>&gt;&nbsp;Got a token</p>
-                <p>&gt;&nbsp;Twilio.Device Ready!</p>
+
             </pre>
             </li>
         </ul>
