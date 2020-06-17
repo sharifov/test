@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use sales\forms\quotePrice\AddQuotePriceForm;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -57,6 +58,20 @@ class QuotePrice extends \yii\db\ActiveRecord
         $price->quote_id = $quoteId;
         $price->uid = uniqid(explode('.', $price->uid)[0] . '.');
         $price->toFloat();
+        return $price;
+    }
+
+    public static function manualCreation(AddQuotePriceForm $form): self
+    {
+        $price = new self();
+        $price->quote_id = $form->quote_id;
+        $price->passenger_type = $form->passenger_type;
+        $price->fare = $form->fare;
+        $price->taxes = $form->taxes;
+        $price->net = $form->net;
+        $price->mark_up = $form->mark_up;
+        $price->selling = $form->selling;
+        $price->service_fee = $form->service_fee;
         return $price;
     }
 
@@ -220,24 +235,13 @@ class QuotePrice extends \yii\db\ActiveRecord
         return [
             [['quote_id'], 'integer'],
             [['selling', 'net', 'fare', 'taxes', 'mark_up', 'service_fee'], 'number'],
-            [['extra_mark_up', 'service_fee'], 'number', 'min' => 0],
-
+            [['extra_mark_up'], 'number', 'min' => 0],
+            [['taxes'],'number','min' => 0.01, 'when' => function($model) {
+                return $model->passenger_type !== self::PASSENGER_INFANT;
+            }],
             [['created', 'updated', 'oldParams', 'uid'], 'safe'],
             [['passenger_type'], 'string', 'max' => 255],
             [['quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => Quote::class, 'targetAttribute' => ['quote_id' => 'id']],
-
-            [['selling', 'net'], 'compare', 'compareValue' => 0, 'operator' => '>', 'type' => 'number'],
-
-            ['fare', function ($attribute, $params) {
-                if (($this->net == 0 && $this->$attribute == 0) || $this->$attribute < 0) {
-                    $this->addError($attribute, 'Fare must be greater than zero');
-                }
-            }],
-            ['taxes', function ($attribute, $params) {
-                if (($this->net == 0 && $this->$attribute == 0) || $this->$attribute < 0) {
-                    $this->addError($attribute, 'Taxes must be greater than zero');
-                }
-            }],
         ];
     }
 

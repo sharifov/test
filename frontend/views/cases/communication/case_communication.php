@@ -407,13 +407,13 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
                             </div>
 
                             <div class="col-sm-3 form-group message-field-phone message-field-sms" id="phone-numbers-group" style="display: block;">
-                                <?= $form->field($comForm, 'c_phone_number')->dropDownList($clientPhones, ['class' => 'form-control', 'id' => !SettingHelper::isCaseCommunicationNewCallWidgetEnabled() ? 'c_phone_number' : 'call-to-number']) ?>
+                                <?= $form->field($comForm, 'c_phone_number')->dropDownList($clientPhones, ['prompt' => '---', 'class' => 'form-control', 'id' => !SettingHelper::isCaseCommunicationNewCallWidgetEnabled() ? 'c_phone_number' : 'call-to-number']) ?>
                             </div>
 
                             <?php if (SettingHelper::isCaseCommunicationNewCallWidgetEnabled()): ?>
                                 <div class="col-sm-3 form-group message-field-phone" style="display: block;">
                                     <?= Html::label('Phone from', null, ['class' => 'control-label']) ?>
-                                    <?= Html::dropDownList('call-from-number', null, $fromPhoneNumbers, ['id' => 'call-from-number', 'class' => 'form-control', 'label'])?>
+                                    <?= Html::dropDownList('call-from-number', null, $fromPhoneNumbers, ['prompt' => '---', 'id' => 'call-from-number', 'class' => 'form-control', 'label'])?>
                                 </div>
                                 <div class="col-sm-3 form-group message-field-phone" style="display: block;">
 									<?= Html::button('<i class="fa fa-phone-square"></i> Make Call', ['class' => 'btn btn-sm btn-success', 'id' => 'btn-new-make-call', 'data-case-id' => $model->cs_id, 'style' => 'margin-top: 28px'])?>
