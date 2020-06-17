@@ -107,6 +107,7 @@ var PhoneWidgetPaneActive = function () {
         $('.call-pane__call-btns').removeClass('is-pending').addClass('is-on-call');
         $('#tab-phone .call-pane-initial').removeClass('is_active');
         $('#tab-phone .call-pane-calling').addClass('is_active');
+        $('[data-toggle-tab="tab-phone"]').attr('data-call-in-progress', true);
     }
 
     function clear() {
@@ -115,6 +116,7 @@ var PhoneWidgetPaneActive = function () {
         $('#wg-active-call-name').html('');
         $('.call-in-action__text').html('');
         $('.call-in-action__time').html('').show().timer('remove');
+        $('[data-toggle-tab="tab-phone"]').attr('data-call-in-progress', false);
     }
 
     return {

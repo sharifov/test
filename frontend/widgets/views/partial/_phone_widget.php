@@ -39,7 +39,7 @@ $isActiveWidget = $isCallInProgress ? ' is_active' : '';
     </div>
     <ul class="phone-widget__header-actions">
       <li>
-        <a href="#" data-toggle-tab="tab-phone" class="is_active" data-call-in-progress="true">
+        <a href="#" data-toggle-tab="tab-phone" class="is_active" data-call-in-progress="false">
           <i class="fas fa-phone"></i>
           <span>Call</span>
         </a>
