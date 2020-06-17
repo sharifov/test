@@ -90,7 +90,7 @@
 
 function insertPhoneNumber(phone, title) {
     $('#call-pane__dial-number').val(phone).attr('readonly', 'readonly');
-    if (title.length > 0) {
+    if (title && title.length > 0) {
         $("#call-to-label").text(title);
     }
     soundNotification("button_tiny");

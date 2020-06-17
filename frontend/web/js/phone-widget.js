@@ -53,6 +53,10 @@ $(document).ready(function() {
                     }
                 });
             }
+            let countMissedCalls = parseInt($(this).attr('data-missed-calls'));
+            if (countMissedCalls > 0) {
+                PhoneWidgetCall.requestClearMissedCalls();
+            }
         }
 
         if ($current === '#tab-contacts') {

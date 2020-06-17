@@ -15,7 +15,8 @@ var PhoneWidgetCall = function () {
         'ajaxSaveCallUrl': '',
         'muteUrl': '',
         'unmuteUrl': '',
-        'callAddNoteUrl': ''
+        'callAddNoteUrl': '',
+        'clearMissedCallsUrl': ''
     };
 
     let panes = {
@@ -28,13 +29,7 @@ var PhoneWidgetCall = function () {
     {
         console.log(options);
 
-        settings.ajaxCallRedirectGetAgents = options.ajaxCallRedirectGetAgents;
-        settings.acceptCallUrl = options.acceptCallUrl;
-        settings.callStatusUrl = options.callStatusUrl;
-        settings.ajaxSaveCallUrl = options.ajaxSaveCallUrl;
-        settings.muteUrl = options.muteUrl;
-        settings.unmuteUrl = options.unmuteUrl;
-        settings.callAddNoteUrl = options.callAddNoteUrl;
+        Object.assign(settings, options);
 
         statusCheckbox = new widgetStatus('.call-status-switcher', options.updateStatusUrl);
 
@@ -536,6 +531,36 @@ var PhoneWidgetCall = function () {
         $('[data-toggle-tab="tab-history"]').attr('data-missed-calls', count);
     }
 
+    function addMissedCall() {
+        let count = $('[data-toggle-tab="tab-history"]').attr('data-missed-calls');
+        count++;
+        $('[data-toggle-tab="tab-history"]').attr('data-missed-calls', count);
+    }
+
+    function requestClearMissedCalls() {
+        $.ajax({type: 'post', data: {}, url: settings.clearMissedCallsUrl})
+            .done(function (data) {
+                setCountMissedCalls(data.count);
+            })
+            .fail(function () {
+                new PNotify({title: "Clear missed calls", type: "error", text: 'Server error', hide: true});
+            })
+            .always(function () {
+
+            });
+    }
+    
+    function socket(data) {
+        if (data.command === 'add_missed_call') {
+            addMissedCall();
+            return;
+        }
+        if (data.command === 'update_count_missed_calls') {
+            setCountMissedCalls(data.count);
+            return;
+        }
+    }
+
     return {
         init: init,
         cancelCall: cancelCall,
@@ -546,7 +571,9 @@ var PhoneWidgetCall = function () {
         incomingCall: incomingCall,
         activeCall: activeCall,
         outgoingCall: outgoingCall,
-        changeStatus: changeStatus
+        changeStatus: changeStatus,
+        requestClearMissedCalls: requestClearMissedCalls,
+        socket: socket
     };
 }();
 

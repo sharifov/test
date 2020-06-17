@@ -525,6 +525,8 @@ $ajaxMuteUrl = Url::to(['/phone/ajax-mute-participant']);
 $ajaxUnmuteUrl = Url::to(['/phone/ajax-unmute-participant']);
 $ajaxCallAddNoteUrl = Url::to(['/call/ajax-add-note']);
 $updateStatusUrl = Url::to(['/user-call-status/update-status']);
+$clearMissedCallsUrl = Url::to(['/call/clear-missed-calls']);
+
 
 $js = <<<JS
 PhoneWidgetCall.init({
@@ -536,7 +538,8 @@ PhoneWidgetCall.init({
     'unmuteUrl': '$ajaxUnmuteUrl',
     'callAddNoteUrl': '$ajaxCallAddNoteUrl',
     'updateStatusUrl': '$updateStatusUrl',
-    'countMissedCalls': $countMissedCalls
+    'countMissedCalls': $countMissedCalls,
+    'clearMissedCallsUrl': '$clearMissedCallsUrl' 
 });
 JS;
 $this->registerJs($js);

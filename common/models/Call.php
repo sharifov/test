@@ -6,6 +6,7 @@ use common\components\purifier\Purifier;
 use common\models\query\CallQuery;
 use frontend\controllers\ConferenceController;
 use frontend\widgets\newWebPhone\call\CallHelper;
+use frontend\widgets\newWebPhone\call\socket\MissedCallMessage;
 use frontend\widgets\notification\NotificationMessage;
 use sales\access\EmployeeDepartmentAccess;
 use sales\dispatchers\NativeEventDispatcher;
@@ -1040,6 +1041,10 @@ class Call extends \yii\db\ActiveRecord
 
             if ($this->c_created_user_id) {
                 $userListNotifications[$this->c_created_user_id] = $this->c_created_user_id;
+
+                $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? MissedCallMessage::add($this) : [];
+                Notifications::publish(MissedCallMessage::COMMAND, ['user_id' => $this->c_created_user_id], $dataNotification);
+
             }
 
             if ($changedAttributes['c_status_id'] !== self::STATUS_HOLD) {

@@ -9,6 +9,7 @@ use common\models\Department;
 use common\models\DepartmentPhoneProject;
 use common\models\Employee;
 use common\models\Lead;
+use common\models\Notifications;
 use common\models\Project;
 use common\models\search\LeadSearch;
 use common\models\search\UserConnectionSearch;
@@ -16,6 +17,7 @@ use common\models\Sources;
 use common\models\UserProjectParams;
 use frontend\widgets\CallBox;
 use frontend\widgets\IncomingCallWidget;
+use frontend\widgets\newWebPhone\call\socket\MissedCallMessage;
 use http\Exception\InvalidArgumentException;
 use sales\auth\Auth;
 
@@ -881,6 +883,26 @@ class CallController extends FController
         return $this->renderPartial('ajax_missed_calls', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    public function actionClearMissedCalls(): Response
+    {
+        $count = 0;
+        $missedCalls = Call::find()->byCreatedUser(Auth::id())->missed()->all();
+        foreach ($missedCalls as $missedCall) {
+            $missedCall->c_is_new = false;
+            if (!$missedCall->save()) {
+                Yii::error($missedCall->getErrors(), 'actionClearMissedCalls');
+                $count++;
+            }
+        }
+
+        $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? MissedCallMessage::updateCount($count) : [];
+        Notifications::publish(MissedCallMessage::COMMAND, ['user_id' => Auth::id()], $dataNotification);
+
+        return $this->asJson([
+            'count' => $count
         ]);
     }
 

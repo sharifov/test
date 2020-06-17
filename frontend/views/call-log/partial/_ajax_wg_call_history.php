@@ -21,10 +21,10 @@ use yii\helpers\Html;
             <li class="calls-history__item contact-info-card">
                 <div class="contact-info-card__status">
                     <div class="contact-info-card__call-icon">
-                        <?php if ($callType === CallLogType::IN): ?>
-                            <img src="/img/pw-incoming.svg">
-                        <?php elseif ($callType === CallLogType::IN && (int)$call['cl_status_id'] === CallLogStatus::NOT_ANSWERED): ?>
+                        <?php if ($callType === CallLogType::IN && (int)$call['cl_status_id'] === CallLogStatus::NOT_ANSWERED): ?>
                             <img src="/img/pw-missed.svg">
+                        <?php elseif ($callType === CallLogType::IN): ?>
+                            <img src="/img/pw-incoming.svg">
                         <?php else: ?>
                             <div class="contact-info-card__call-icon">
                                 <img src="/img/pw-outgoing.svg">
