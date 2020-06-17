@@ -9,6 +9,7 @@ use common\models\Language;
 use common\models\Lead;
 use common\models\Project;
 use sales\entities\cases\Cases;
+use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -80,6 +81,7 @@ class ClientChat extends \yii\db\ActiveRecord
             ['cch_ccr_id', 'exist', 'skipOnError' => true, 'targetClass' => ClientChatRequest::class, 'targetAttribute' => ['cch_ccr_id' => 'ccr_id']],
 
             ['cch_channel_id', 'integer'],
+			['cch_channel_id', 'exist', 'skipOnError' => true, 'targetClass' => ClientChatChannel::class, 'targetAttribute' => ['cch_channel_id' => 'ccc_id']],
 
             ['cch_client_id', 'integer'],
             ['cch_client_id', 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['cch_client_id' => 'id']],
@@ -135,6 +137,11 @@ class ClientChat extends \yii\db\ActiveRecord
     {
         return $this->hasOne(ClientChatRequest::class, ['ccr_id' => 'cch_ccr_id']);
     }
+
+	public function getCchChannel(): \yii\db\ActiveQuery
+	{
+		return $this->hasOne(ClientChatChannel::class, ['ccc_id' => 'cch_channel_id']);
+	}
 
     public function getCchClient(): \yii\db\ActiveQuery
     {
