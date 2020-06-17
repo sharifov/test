@@ -27,6 +27,12 @@ class m200617_093813_create_new_tables_for_client_chat extends Migration
 		'/client-chat-channel-crud/delete',
 		'/client-chat-channel-crud/view',
 		'/client-chat-channel-crud/index',
+
+		'/client-chat-status-log-crud/create',
+		'/client-chat-status-log-crud/update',
+		'/client-chat-status-log-crud/delete',
+		'/client-chat-status-log-crud/view',
+		'/client-chat-status-log-crud/index',
 	];
 
 	private $roles = [
@@ -116,6 +122,19 @@ class m200617_093813_create_new_tables_for_client_chat extends Migration
 		$this->addForeignKey('FK-ccc_updated_user_id', '{{%client_chat_channel}}', ['ccc_updated_user_id'], '{{%employees}}', ['id'], 'CASCADE', 'CASCADE');
 		$this->addForeignKey('FK-cch_channel_id', '{{%client_chat}}', ['cch_channel_id'], '{{%client_chat_channel}}', ['ccc_id'], 'CASCADE', 'CASCADE');
 
+		$this->createTable('{{%client_chat_status_log}}', [
+			'csl_id' => $this->primaryKey(),
+			'csl_cch_id' => $this->integer()->notNull(),
+			'csl_from_status' => $this->tinyInteger(),
+			'csl_to_status' => $this->tinyInteger(),
+			'csl_start_dt' => $this->dateTime(),
+			'csl_end_dt' => $this->dateTime(),
+			'csl_owner_id' => $this->integer(),
+			'csl_description' => $this->string()
+		]);
+		$this->addForeignKey('FK-csl_cch_id', '{{%client_chat_status_log}}', ['csl_cch_id'], '{{%client_chat}}', 'cch_id', 'CASCADE', 'CASCADE');
+		$this->addForeignKey('FK-csl_owner_id', '{{%client_chat_status_log}}', ['csl_owner_id'], '{{%employees}}', 'id', 'CASCADE', 'CASCADE');
+
 		(new RbacMigrationService())->up($this->routes, $this->roles);
 	}
 
@@ -124,11 +143,16 @@ class m200617_093813_create_new_tables_for_client_chat extends Migration
      */
     public function safeDown()
     {
+		$this->dropForeignKey('FK-csl_cch_id', '{{%client_chat_status_log}}');
+		$this->dropForeignKey('FK-csl_owner_id', '{{%client_chat_status_log}}');
+		$this->dropTable('{{%client_chat_status_log}}');
+
 		$this->dropForeignKey('FK-ccc_project_id', '{{%client_chat_channel}}');
 		$this->dropForeignKey('FK-ccc_dep_id', '{{%client_chat_channel}}');
 		$this->dropForeignKey('FK-ccc_ug_id', '{{%client_chat_channel}}');
 		$this->dropForeignKey('FK-ccc_created_user_id', '{{%client_chat_channel}}');
 		$this->dropForeignKey('FK-ccc_updated_user_id', '{{%client_chat_channel}}');
+		$this->dropForeignKey('FK-cch_channel_id', '{{%client_chat}}');
 		$this->dropTable('{{%client_chat_channel}}');
 
 		$this->dropForeignKey('FK-cch_ccr_id', '{{%client_chat}}');
@@ -141,7 +165,6 @@ class m200617_093813_create_new_tables_for_client_chat extends Migration
 		$this->dropForeignKey('FK-cch_language_id', '{{%client_chat}}');
 		$this->dropForeignKey('FK-cch_created_user_id', '{{%client_chat}}');
 		$this->dropForeignKey('FK-cch_updated_user_id', '{{%client_chat}}');
-		$this->dropForeignKey('FK-cch_channel_id', '{{%client_chat}}');
 		$this->dropTable('{{%client_chat}}');
 
 		$this->dropTable('{{%client_chat_request}}');
