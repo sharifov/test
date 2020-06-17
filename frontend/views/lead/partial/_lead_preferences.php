@@ -70,15 +70,16 @@ $manageLeadPreferencesAccess = LeadPreferencesAccess::isUserCanManageLeadPrefere
     </div>
     <div class="x_content" style="display: block">
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-7">
                 <table class="table table-bordered table-condensed">
                     <thead>
                     <tr>
                         <th class="bg-info" style="width: 25%">Market Price</th>
-                        <th class="bg-info" style="width: 80px" title="Client Budget">Budget</th>
-                        <th class="bg-info" style="width: 80px">Stops</th>
-                        <th class="bg-info" style="width: 80px">Currency</th>
+                        <th class="bg-info" style="width: 70px" title="Client Budget">Budget</th>
+                        <th class="bg-info" style="width: 70px">Stops</th>
+                        <th class="bg-info" style="width: 70px">Currency</th>
                         <th class="bg-info">Delayed Charge</th>
+                        <th class="bg-info">Language</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -98,11 +99,14 @@ $manageLeadPreferencesAccess = LeadPreferencesAccess::isUserCanManageLeadPrefere
                                 <?php endif; ?>
                             <?php endif; ?>
                         </td>
+                        <td class="text-center">
+                            <?= $lead->language ? $lead->language->name : '-' ?>
+                        </td>
                     </tr>
                     </tbody>
                 </table>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-5">
                 <table class="table table-bordered table-condensed" style="margin-bottom: 0;">
                     <thead>
                     <tr>

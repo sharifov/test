@@ -22,6 +22,7 @@ use yii\helpers\ArrayHelper;
  * @property Email[] $emails
  * @property LanguageTranslate[] $languageTranslates
  * @property LanguageSource[] $ids
+ * @property Lead[] $leads
  */
 class Language extends ActiveRecord
 {
@@ -116,11 +117,20 @@ class Language extends ActiveRecord
     }
 
     /**
+     * @return ActiveQuery
+     */
+    public function getLeads(): ActiveQuery
+    {
+        return $this->hasMany(Lead::class, ['l_client_lang' => 'language_id']);
+    }
+
+    /**
      * @return array
      */
     public static function getList(): array
 	{
-		return self::find()->select(['language_id'])->indexBy('language_id')->asArray()->column();
+        return ArrayHelper::map(
+            self::find()->orderBy(['name' => SORT_ASC])->asArray()->all(), 'language_id', 'name');
 	}
 
     /**
@@ -136,7 +146,7 @@ class Language extends ActiveRecord
             $query =  self::find();
         }
 
-        $data = ArrayHelper::map($query->asArray(true)->all(), 'language_id', 'language_id', $group);
+        $data = ArrayHelper::map($query->asArray(true)->all(), 'language_id', 'name', $group);
 
         return $data;
     }

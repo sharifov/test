@@ -37,12 +37,14 @@ $ajaxBlackList = Url::to(['/phone/check-black-phone']);
 
 $js = <<<JS
 	var data = JSON.parse('{$formattedPhoneProject}');
-	var phoneNumbers = toSelect($('.custom-phone-select'), data);
+	window.phoneNumbers = toSelect($('.custom-phone-select'), data);
 
     $(document).on('click', '#btn-new-make-call', function(e) {
         e.preventDefault();
         
 		let phone_to = $('#call-pane__dial-number').val();
+		let case_id = $(this).attr('data-case-id') || null;
+		let lead_id = $(this).attr('data-lead-id') || null;
 		
 		if (!phone_to) {
 			new PNotify({title: "Phone Widget", type: "error", text: 'Phone number not entered', hide: true});
@@ -58,15 +60,16 @@ $js = <<<JS
         $.post('{$ajaxCheckUserForCallUrl}', {user_id: userId}, function(data) {
             
             if(data && data.is_ready) {
-               let phone_from = phoneNumbers.getData.value;
-               let project_id = phoneNumbers.getData.projectId;
+               let phone_from = phoneNumbers.getPrimaryData.value || phoneNumbers.getData.value;
+               let project_id = phoneNumbers.getPrimaryData.projectId || phoneNumbers.getData.projectId;
 
                 $.post('{$ajaxBlackList}', {phone: phone_to}, function(data) {
                     if (data.success) {
 						if (device) {
-							let params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': null, 'case_id': null, 'c_type': 'call-web', 'c_user_id': userId};
+							let params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': lead_id, 'case_id': case_id, 'c_type': 'call-web', 'c_user_id': userId};
 							webPhoneParams = params;
-							PhoneWidgetCall.initCall({from: phoneNumbers.getData, to: data});
+							let PhoneNumbersData = phoneNumbers.getPrimaryData.value ? phoneNumbers.getPrimaryData : phoneNumbers.getData;
+							PhoneWidgetCall.initCall({from: PhoneNumbersData, to: data});
 							createNotify('Calling', 'Calling ' + params.To + '...', 'success');
 							connection = device.connect(params);
 							updateAgentStatus(connection, false, 0);
@@ -78,6 +81,8 @@ $js = <<<JS
                         }
                         new PNotify({title: "Make call", type: "error", text: text, hide: true});
                     }
+                    
+                    phoneNumbers.clearPrimaryData();
                 }, 'json');
                 
             } else {

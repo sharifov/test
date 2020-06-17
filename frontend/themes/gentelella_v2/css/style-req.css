@@ -1959,7 +1959,9 @@ input[disabled] + .radio-tab__text {
     overflow: auto;
     color: #596b7d;
 }
-
+.panel_toolbox>li>a {
+    z-index: 1048;
+}
 /*End Fix*/
 #client-phones .intl-tel-input {
   display: block;
