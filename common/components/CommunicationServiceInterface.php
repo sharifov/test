@@ -26,4 +26,6 @@ interface CommunicationServiceInterface
 	public function getJwtTokenCache($username = '', $deleteCache = false);
 
 	public function callRedirect($cid, $type, $from, $to, $firstTransferToNumber = false);
+
+    public function phoneNumberList(int $limit, int $offset) : array;
 }
