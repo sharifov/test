@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use sales\forms\quotePrice\AddQuotePriceForm;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -57,6 +58,20 @@ class QuotePrice extends \yii\db\ActiveRecord
         $price->quote_id = $quoteId;
         $price->uid = uniqid(explode('.', $price->uid)[0] . '.');
         $price->toFloat();
+        return $price;
+    }
+
+    public static function manualCreation(AddQuotePriceForm $form): self
+    {
+        $price = new self();
+        $price->quote_id = $form->quote_id;
+        $price->passenger_type = $form->passenger_type;
+        $price->fare = $form->fare;
+        $price->taxes = $form->taxes;
+        $price->net = $form->net;
+        $price->mark_up = $form->mark_up;
+        $price->selling = $form->selling;
+        $price->service_fee = $form->service_fee;
         return $price;
     }
 
