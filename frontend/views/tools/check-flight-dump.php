@@ -35,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'style' => 'margin-bottom: 12px;',
             ])
         ?>
-        <?= Html::textarea('dump', $dump, ['rows' => 22, 'style' => 'width: 100%']) ?><br><br>
+        <?= Html::textarea('dump', $dump, ['rows' => 22, 'style' => 'width: 100%;']) ?><br><br>
 
         <?php echo Html::checkbox('prepare_segment', $prepareSegment,
                     ['id' => 'prepare_segment', ]) ?> Reservation prepare segment<br><br>
@@ -55,3 +55,14 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php endif; ?>
     </div>
 </div>
+
+<?php
+$js = <<<JS
+    let textarea = document.querySelector('textarea');
+    textarea.addEventListener('keyup', function() {
+        if (this.scrollTop > 0) {
+            this.style.height = this.scrollHeight + 'px';
+        }
+    });  
+JS;
+$this->registerJs($js);
