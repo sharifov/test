@@ -33,6 +33,12 @@ class m200617_093813_create_new_tables_for_client_chat extends Migration
 		'/client-chat-status-log-crud/delete',
 		'/client-chat-status-log-crud/view',
 		'/client-chat-status-log-crud/index',
+
+		'/client-chat-user-channel-crud/create',
+		'/client-chat-user-channel-crud/update',
+		'/client-chat-user-channel-crud/delete',
+		'/client-chat-user-channel-crud/view',
+		'/client-chat-user-channel-crud/index',
 	];
 
 	private $roles = [
@@ -131,9 +137,21 @@ class m200617_093813_create_new_tables_for_client_chat extends Migration
 			'csl_end_dt' => $this->dateTime(),
 			'csl_owner_id' => $this->integer(),
 			'csl_description' => $this->string()
-		]);
+		], $tableOptions);
 		$this->addForeignKey('FK-csl_cch_id', '{{%client_chat_status_log}}', ['csl_cch_id'], '{{%client_chat}}', 'cch_id', 'CASCADE', 'CASCADE');
 		$this->addForeignKey('FK-csl_owner_id', '{{%client_chat_status_log}}', ['csl_owner_id'], '{{%employees}}', 'id', 'CASCADE', 'CASCADE');
+
+
+		$this->createTable('{{%client_chat_user_channel}}', [
+			'ccuc_user_id' => $this->integer()->notNull(),
+			'ccuc_channel_id' => $this->integer()->notNull(),
+			'ccuc_created_dt' => $this->dateTime(),
+			'ccuc_created_user_id' => $this->integer()
+		], $tableOptions);
+		$this->addPrimaryKey('PK-client_chat_user_channel-user_id-channel_id', '{{%client_chat_user_channel}}', ['ccuc_user_id', 'ccuc_channel_id']);
+		$this->addForeignKey('FK-ccuc_user_id', '{{%client_chat_user_channel}}', ['ccuc_user_id'], '{{%employees}}', ['id'], 'CASCADE', 'CASCADE');
+		$this->addForeignKey('FK-ccuc_channel_id', '{{%client_chat_user_channel}}', ['ccuc_channel_id'], '{{%client_chat_channel}}', ['ccc_id'], 'CASCADE', 'CASCADE');
+		$this->addForeignKey('FK-ccuc_created_user_id', '{{%client_chat_user_channel}}', ['ccuc_created_user_id'], '{{%employees}}', ['id'], 'CASCADE', 'CASCADE');
 
 		(new RbacMigrationService())->up($this->routes, $this->roles);
 	}
@@ -143,6 +161,10 @@ class m200617_093813_create_new_tables_for_client_chat extends Migration
      */
     public function safeDown()
     {
+    	$this->dropForeignKey('FK-ccuc_user_id', '{{%client_chat_user_channel}}');
+    	$this->dropForeignKey('FK-ccuc_channel_id', '{{%client_chat_user_channel}}');
+    	$this->dropTable('{{%client_chat_user_channel}}');
+
 		$this->dropForeignKey('FK-csl_cch_id', '{{%client_chat_status_log}}');
 		$this->dropForeignKey('FK-csl_owner_id', '{{%client_chat_status_log}}');
 		$this->dropTable('{{%client_chat_status_log}}');
