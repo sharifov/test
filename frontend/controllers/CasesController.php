@@ -672,14 +672,17 @@ class CasesController extends FController
 			if ($model && $model->isDepartmentSupport()) {
 				$departmentPhones = DepartmentPhoneProject::find()->where(['dpp_project_id' => $model->cs_project_id, 'dpp_dep_id' => $model->cs_dep_id, 'dpp_default' => DepartmentPhoneProject::DPP_DEFAULT_TRUE])->withPhoneList()->all();
 				foreach ($departmentPhones as $departmentPhone) {
-					$fromPhoneNumbers[$departmentPhone->getPhone()] = $departmentPhone->dppProject->name . ' (' . $departmentPhone->getPhone() . ')';
+					$phone = $departmentPhone->getPhone();
+					if ($phone) {
+						$fromPhoneNumbers[$phone] = $departmentPhone->dppProject->name . ' (' . $phone . ')';
+					}
 				}
 			} else if ($userParams = UserProjectParams::find()->where(['upp_user_id' => Auth::id()])->withPhoneList()->all()) {
 				foreach ($userParams as $param) {
-					if(!$param->getPhone()) {
-						continue;
+					$phone = $param->getPhone();
+					if ($phone) {
+						$fromPhoneNumbers[$phone] = $param->uppProject->name . ' (' . $phone . ')';
 					}
-					$fromPhoneNumbers[$param->getPhone()] = $param->uppProject->name . ' (' . $param->getPhone() . ')';
 				}
 			}
 		}

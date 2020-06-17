@@ -1205,10 +1205,10 @@ class LeadController extends FController
 		if (SettingHelper::isLeadCommunicationNewCallWidgetEnabled()) {
 			if ($userParams = UserProjectParams::find()->where(['upp_user_id' => Auth::id()])->withPhoneList()->all()) {
 				foreach ($userParams as $param) {
-					if(!$param->getPhone()) {
-						continue;
+					$phone = $param->getPhone();
+					if ($phone) {
+						$fromPhoneNumbers[$phone] = $param->uppProject->name . ' (' . $phone . ')';
 					}
-					$fromPhoneNumbers[$param->getPhone()] = $param->uppProject->name . ' (' . $param->getPhone() . ')';
 				}
 			}
 		}
