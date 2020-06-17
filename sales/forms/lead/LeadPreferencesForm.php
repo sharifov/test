@@ -102,7 +102,7 @@ class LeadPreferencesForm extends Model
 			'notesForExperts' => 'Notes for Expert',
 			'delayedCharge' => 'Delayed charge',
             'currency'  => 'Currency',
-            'l_client_lang' => 'Client Lang',
+            'clientLang' => 'Client Lang',
 		];
 	}
 }
