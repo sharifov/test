@@ -41,15 +41,17 @@ class AddQuotePriceForm extends Model
             [['passenger_type'], 'string', 'max' => 255],
             [['quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => Quote::class, 'targetAttribute' => ['quote_id' => 'id']],
 
+            [['fare', 'taxes', 'net'], 'filter', 'filter' => 'intval'],
+
             [['selling', 'net'], 'compare', 'compareValue' => 0, 'operator' => '>', 'type' => 'number'],
 
             ['fare', function ($attribute) {
-                if (($this->net == 0 && $this->$attribute == 0) || $this->$attribute < 0) {
+                if (($this->net === 0 && $this->$attribute === 0) || $this->$attribute < 0) {
                     $this->addError($attribute, 'Fare must be greater than zero');
                 }
             }],
             ['taxes', function ($attribute) {
-                if (($this->net == 0 && $this->$attribute == 0) || $this->$attribute < 0) {
+                if (($this->net === 0 && $this->$attribute === 0) || $this->$attribute < 0) {
                     $this->addError($attribute, 'Taxes must be greater than zero');
                 }
             }],
