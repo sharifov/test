@@ -14,6 +14,7 @@ use yii\web\View;
 /** @var bool $isCallInProgress */
 /** @var \common\models\Call|null $call */
 /** @var bool $isHold */
+/** @var int $countMissedCalls */
 
 NewWebPhoneAsset::register($this);
 ?>
@@ -27,6 +28,7 @@ NewWebPhoneAsset::register($this);
 	'isCallInProgress' => $isCallInProgress,
 	'call' => $call,
 	'isHold' => $isHold,
+	'countMissedCalls' => $countMissedCalls
 ]) ?>
 <?= $this->render('partial/_phone_widget_icon') ?>
 

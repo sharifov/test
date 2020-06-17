@@ -52,4 +52,9 @@ class CallQuery extends \yii\db\ActiveQuery
 	{
 		return $this->andWhere(['c_call_sid' => $callSid])->orWhere(['c_id' => $id]);
 	}
+
+    public function missed(): self
+    {
+        return $this->andWhere(['c_is_new' => true, 'c_call_type_id' => Call::CALL_TYPE_IN, 'c_status_id' => Call::STATUS_NO_ANSWER]);
+	}
 }

@@ -38,6 +38,8 @@ var PhoneWidgetCall = function () {
 
         statusCheckbox = new widgetStatus('.call-status-switcher', options.updateStatusUrl);
 
+        setCountMissedCalls(options.countMissedCalls);
+
         muteBtnEvent();
         transferCallBtnEvent();
         acceptCallBtnEvent();
@@ -528,6 +530,10 @@ var PhoneWidgetCall = function () {
 
     function changeStatus(status) {
         statusCheckbox.setStatus(status);
+    }
+
+    function setCountMissedCalls(count) {
+        $('[data-toggle-tab="tab-history"]').attr('data-missed-calls', count);
     }
 
     return {

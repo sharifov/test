@@ -11,6 +11,7 @@ use yii\web\View;
 /** @var bool $isCallInProgress */
 /** @var \common\models\Call|null $call */
 /** @var bool $isHold */
+/** @var int $countMissedCalls */
 
 $isActiveWidget = $isCallInProgress ? ' is_active' : '';
 ?>
@@ -45,7 +46,7 @@ $isActiveWidget = $isCallInProgress ? ' is_active' : '';
         </a>
       </li>
       <li>
-        <a href="#" data-toggle-tab="tab-history" data-missed-calls="3">
+        <a href="#" data-toggle-tab="tab-history" data-missed-calls="0">
           <i class="fas fa-file-invoice"></i>
           <span>history</span>
         </a>
@@ -66,6 +67,7 @@ $isActiveWidget = $isCallInProgress ? ' is_active' : '';
 		  'isCallInProgress' => $isCallInProgress,
 		  'call' => $call,
           'isHold' => $isHold,
+          'countMissedCalls' => $countMissedCalls
 	  ]); ?><?= $this->render('tab/contacts', ['userPhones' => $userPhones, 'userEmails' => $userEmails]); ?>
     <?= $this->render('tab/history'); ?>
     <div class="widget-phone__contact-info-modal widget-modal contact-modal-info"></div>

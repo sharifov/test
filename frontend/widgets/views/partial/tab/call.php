@@ -6,6 +6,7 @@
 /** @var bool $isCallInProgress */
 /** @var \common\models\Call|null $call */
 /** @var bool $isHold */
+/** @var int $countMissedCalls */
 
 //$name = $call && $call->cClient ? $call->cClient->getFullName() : 'ClientName';
 //$clientName = $call && $call->cClient ? $call->cClient->getFullName() : '------';
@@ -396,9 +397,9 @@ $sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
 <!--          </div>-->
           <i class="fas fa-phone"></i>
         </button>
-        <button class="call-pane__end-call" id="reject-incoming-call">
-          <i class="fa fa-phone-slash"></i>
-        </button>
+<!--        <button class="call-pane__end-call" id="reject-incoming-call">-->
+<!--          <i class="fa fa-phone-slash"></i>-->
+<!--        </button>-->
       </div>
 
     </div>
@@ -534,7 +535,8 @@ PhoneWidgetCall.init({
     'muteUrl': '$ajaxMuteUrl',
     'unmuteUrl': '$ajaxUnmuteUrl',
     'callAddNoteUrl': '$ajaxCallAddNoteUrl',
-    'updateStatusUrl': '$updateStatusUrl'
+    'updateStatusUrl': '$updateStatusUrl',
+    'countMissedCalls': $countMissedCalls
 });
 JS;
 $this->registerJs($js);

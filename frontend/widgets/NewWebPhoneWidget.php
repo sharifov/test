@@ -66,6 +66,8 @@ class NewWebPhoneWidget extends Widget
             $isHold = true;
         }
 
+		$countMissedCalls = Call::find()->byCreatedUser($this->userId)->missed()->count();
+
 		return $this->render('web_phone_new', [
 			'userPhoneProject' => $userPhoneProject,
             'formattedPhoneProject' => json_encode($this->formatDataForSelectList($userPhoneProject)),
@@ -76,7 +78,8 @@ class NewWebPhoneWidget extends Widget
 			'isCallInProgress' => ($call && $call->isStatusInProgress()) || ($lastCall && $lastCall->isStatusInProgress()),
 			'lastCall' => $lastCall,
 			'call' => $call ?? $lastCall,
-            'isHold' => $isHold
+            'isHold' => $isHold,
+            'countMissedCalls' => $countMissedCalls,
 		]);
 	}
 
