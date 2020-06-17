@@ -174,7 +174,7 @@ class PhoneListController extends FController
 
                 if($result['created']) {
                     $message = 'Synchronization successful<br>';
-                    $message .= 'Created Phones (' . count($result['created']) . '):<br> "'.implode(', ', $result['created']).'"<br>';
+                    $message .= 'Created Phones (' . count($result['created']) . '):<br> "'.Html::encode(implode(', ', $result['created'])).'"<br>';
                 } else {
                     $message = 'Synchronization: No new data<br>';
                 }
