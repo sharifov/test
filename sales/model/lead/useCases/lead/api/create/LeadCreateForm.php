@@ -2,6 +2,7 @@
 
 namespace sales\model\lead\useCases\lead\api\create;
 
+use common\models\Language;
 use common\models\Lead;
 use common\models\Sources;
 use sales\helpers\lead\LeadHelper;
@@ -27,6 +28,8 @@ use yii\base\Model;
  * @property array $segments
  * @property array $client
  * @property int $flight_id
+ * @property string|null $user_language
+ *
  * @property SegmentForm[] $segmentsForm
  * @property ClientForm $clientForm
  */
@@ -48,6 +51,7 @@ class LeadCreateForm extends Model
     public $segments;
     public $client;
     public $flight_id;
+    public ?string $user_language;
 
     public $segmentsForm;
     public $clientForm;
@@ -110,6 +114,10 @@ class LeadCreateForm extends Model
             ['flight_id', 'required'],
             ['flight_id', 'integer'],
             ['flight_id', 'filter', 'filter' => 'intval'],
+
+            ['user_language', 'string', 'max' => 5],
+            ['user_language', 'exist', 'skipOnError' => true, 'skipOnEmpty' => true,
+                'targetClass' => Language::class, 'targetAttribute' => ['user_language' => 'language_id']],
         ];
     }
 

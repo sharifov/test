@@ -18,6 +18,19 @@ class CaseCategoryRepository
     }
 
     /**
+     * @param int $depId
+     * @return array
+     */
+    public function getEnabledByDep(int $depId): array
+    {
+        return CaseCategory::find()
+            ->andWhere(['cc_dep_id' => $depId])
+            ->andWhere(['cc_enabled' => true])
+            ->orderBy(['cc_name' => SORT_ASC])
+            ->all();
+    }
+
+    /**
      * @param int $id
      * @return CaseCategory
      */

@@ -19,10 +19,14 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Create Phone List', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('<i class="fa fa-plus"></i> Create Phone List', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('<i class="fa fa-refresh"></i> Synchronization Phones from Communication', ['synchronization'], ['class' => 'btn btn-warning', 'data' => [
+            'confirm' => 'Are you sure you want synchronization all projects from Communication Server?',
+            'method' => 'post',
+        ],]) ?>
     </p>
 
-    <?php Pjax::begin(); ?>
+    <?php Pjax::begin(['timeout' => 5000]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([

@@ -70,14 +70,15 @@ class Pricing implements ParseDumpInterface
 
             if (isset($countPassengers, $passengerType)) {
                 $j = 0;
-                $fare = self::getFare($dump);
                 $taxes = self::getTaxes($ticketRows);
 
-                for ($i = 0; $i < $countPassengers; $i++) {
-                    $result[$j]['type'] = $passengerType;
-                    $result[$j]['fare'] = $fare;
-                    $result[$j]['taxes'] = $taxes;
-                    $j ++;
+                if ($fare = self::getFare($dump)) {
+                    for ($i = 0; $i < $countPassengers; $i++) {
+                        $result[$j]['type'] = $passengerType;
+                        $result[$j]['fare'] = $fare;
+                        $result[$j]['taxes'] = $taxes;
+                        $j ++;
+                    }
                 }
             }
         }
@@ -86,18 +87,29 @@ class Pricing implements ParseDumpInterface
 
     /**
      * @param string $dump
-     * @return int|null
+     * @return int
      */
-    private static function getCountPassengers(string $dump): ?int
+    private static function getCountPassengers(string $dump): int
     {
         $countPattern = '/
-            01\s{1}P1\W*(\d*) # count passengers                                
+            01\s{1}P([\d,\-]+)\s+ # count passengers                                
             /x';
         preg_match($countPattern, $dump, $countMatches);
+
         if (isset($countMatches[1])) {
-            return (is_numeric($countMatches[1])) ? $countMatches[1] : 1;
+            $commaItems = explode(',', $countMatches[1]);
+            $countPassengers = count($commaItems);
+
+            preg_match_all('/(\d+-\d+)/', $countMatches[1], $dashMatches);
+
+            if (!empty($dashMatches[1])) {
+                foreach ($dashMatches[1] as $item) {
+                    $dashItems = explode('-', $item);
+                    $countPassengers += $dashItems[1] - $dashItems[0];
+                }
+            }
         }
-        return null;
+        return $countPassengers ?? 1;
     }
 
     /**

@@ -14,6 +14,7 @@ use common\models\QuotePrice;
 use common\models\search\QuotePriceSearch;
 use common\models\search\QuoteSearch;
 use sales\auth\Auth;
+use sales\forms\quotePrice\AddQuotePriceForm;
 use sales\helpers\app\AppHelper;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
@@ -545,7 +546,7 @@ class QuoteController extends FController
                                 $price->net = $price->fare + $price->taxes;
                                 $price->selling = ($price->net + $price->mark_up)  * (1 + $serviceFee);
                                 $price->toFloat();
-                                $price->roundValue();
+                                $price->roundAttributesValue();
                                 $price->oldParams = serialize($price->attributes);
 
                                 $prices[] = $price;
@@ -641,7 +642,7 @@ class QuoteController extends FController
 
                     foreach ($post['QuotePrice'] as $key => $quotePrice) {
 
-                        if ($price = new QuotePrice()) {
+                        if ($price = new AddQuotePriceForm()) {
                             $price->quote_id = $quote->id;
                             $price->passenger_type = $quotePrice['passenger_type'];
                             $price->fare = $quotePrice['fare'];
@@ -650,10 +651,13 @@ class QuoteController extends FController
                             $price->mark_up = $quotePrice['mark_up'];
                             $price->selling = $quotePrice['selling'];
                             $price->service_fee = ($quote->check_payment) ? round($price->selling * (new Quote())->serviceFee, 2) : 0;
-                            $price->roundValue();
 
-                            if (!$price->save()) {
+                            if (!$price->validate()) {
                                 $response['errorsPrices'][$key] = $price->getErrors();
+                            } else {
+                                $quotePrice = QuotePrice::manualCreation($price);
+                                $quotePrice->roundAttributesValue();
+                                $quotePrice->save(false);
                             }
                         }
                     }

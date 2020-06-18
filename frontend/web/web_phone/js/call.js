@@ -46,6 +46,9 @@ var PhoneWidgetCall = function () {
         $('.call-in-action__text').html('Dialing');
         $('.call-pane-initial .contact-info-card__label').html('To');
         $('.call-in-action__time').html('').show().timer('remove').timer({format: '%M:%S', seconds: 0}).timer('start');
+        openWidget();
+        openCallTab();
+        updateProjectAndSourceUI(selectedNumber.from.project, selectedNumber.from.value);
     }
 
     function cancelCall()

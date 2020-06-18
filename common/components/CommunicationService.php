@@ -714,4 +714,40 @@ class CommunicationService extends Component implements CommunicationServiceInte
 
         return $out;
     }
+
+    /**
+     * @param int $limit
+     * @param int $offset
+     * @return array
+     * @throws Exception
+     */
+    public function phoneNumberList(int $limit = 0, int $offset = 0): array
+    {
+        $out = ['error' => false, 'data' => []];
+
+        $data = [];
+
+        if ($limit) {
+            $data['limit'] = $limit;
+        }
+
+        if ($offset) {
+            $data['offset'] = $offset;
+        }
+
+        $response = $this->sendRequest('phone-number/list', $data, 'get');
+
+        if ($response->isOk) {
+            if(empty($response->data['data']['response'])) {
+                $out['error'] = 'Not found in response array data key [data]';
+            } else {
+                $out['data'] = $response->data['data']['response'];
+            }
+        } else {
+            $out['error'] = $response->content;
+            \Yii::error(VarDumper::dumpAsString($out['error']), 'Component:CommunicationService::callRedirect');
+        }
+
+        return $out;
+    }
 }

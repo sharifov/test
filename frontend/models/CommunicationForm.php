@@ -48,9 +48,6 @@ class CommunicationForm extends Model
     public const TYPE_SMS   = 2;
     public const TYPE_VOICE = 3;
 
-
-
-
     public const TYPE_LIST = [
         self::TYPE_EMAIL    => 'Email',
         self::TYPE_SMS      => 'SMS',
@@ -103,6 +100,29 @@ class CommunicationForm extends Model
     public $offerList;
 
 
+    /**
+     * CommunicationForm constructor.
+     * @param string $languageId
+     * @param array $config
+     */
+    public function __construct(?string $languageId = null, $config = [])
+	{
+		$this->c_language_id = self::getDefaultLanguage($languageId);
+		parent::__construct($config);
+	}
+
+    /**
+     * @param string|null $languageId
+     * @return string
+     */
+    private static function getDefaultLanguage(?string $languageId = null): string
+    {
+        $activeLanguages = Language::getLanguages(true);
+        if (array_key_exists($languageId, $activeLanguages)) {
+            return $languageId;
+        }
+	    return array_key_first($activeLanguages);
+    }
 
     /**
      * @return array

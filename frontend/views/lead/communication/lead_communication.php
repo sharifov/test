@@ -8,13 +8,17 @@
  * @var $previewSmsForm LeadPreviewSmsForm
  * @var $isAdmin bool
  * @var $isCommunicationLogEnabled bool
+ * @var $lead Lead
+ * @var $fromPhoneNumbers array
  *
  */
 
+use common\models\Lead;
 use frontend\models\CommunicationForm;
 use frontend\models\LeadForm;
 use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
+use sales\helpers\setting\SettingHelper;
 use yii\helpers\Html;
 use yii\bootstrap4\Modal;
 use vova07\imperavi\Widget;
@@ -356,7 +360,9 @@ $listItemView = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled 
                             </div>
 
                             <div class="col-sm-3 form-group message-field-sms message-field-email" id="language-group" style="display: block;">
-                                <?= $form->field($comForm, 'c_language_id')->dropDownList(\lajax\translatemanager\models\Language::getLanguageNames(true), ['prompt' => '---', 'class' => 'form-control', 'id' => 'language']) ?>
+                                <?= $form->field($comForm, 'c_language_id')
+                                    ->dropDownList(\common\models\Language::getLanguages(true),
+                                    ['prompt' => '---', 'class' => 'form-control', 'id' => 'language']) ?>
                             </div>
 
                             <div class="col-sm-3 form-group message-field-email" id="email-address" style="display: none;">
@@ -369,8 +375,21 @@ $listItemView = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled 
                             </div>
 
                             <div class="col-sm-3 form-group message-field-phone message-field-sms" id="phone-numbers-group" style="display: block;">
-                                <?= $form->field($comForm, 'c_phone_number')->dropDownList($clientPhones, ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_phone_number']) ?>
+                                <?= $form->field($comForm, 'c_phone_number')->dropDownList($clientPhones, ['prompt' => '---', 'class' => 'form-control', 'id' => !SettingHelper::isLeadCommunicationNewCallWidgetEnabled() ? 'c_phone_number' : 'call-to-number']) ?>
                             </div>
+
+							<?php if (SettingHelper::isLeadCommunicationNewCallWidgetEnabled()): ?>
+                                <div class="col-sm-3 form-group message-field-phone" style="display: block;">
+									<?= Html::label('Phone from', null, ['class' => 'control-label']) ?>
+									<?= Html::dropDownList('call-from-number', null, $fromPhoneNumbers, ['prompt' => '---', 'id' => 'call-from-number', 'class' => 'form-control', 'label'])?>
+                                </div>
+                                <div class="col-sm-3 form-group message-field-phone" style="display: block;">
+									<?= Html::button('<i class="fa fa-phone-square"></i> Make Call', ['class' => 'btn btn-sm btn-success', 'id' => 'btn-new-make-call', 'data-lead-id' => $lead->id, 'style' => 'margin-top: 28px'])?>
+                                </div>
+								<?=Html::hiddenInput('call-lead-id', $lead->id, ['id' => 'call-lead-id'])?>
+								<?=Html::hiddenInput('call-case-id', null, ['id' => 'call-case-id'])?>
+								<?=Html::hiddenInput('call-project-id', $lead->project_id, ['id' => 'call-project-id'])?>
+							<?php endif; ?>
                         </div>
                         <div id="sms-input-box" class="message-field-sms" >
                             <div class="form-group" id="sms-textarea-div">
@@ -432,7 +451,8 @@ $listItemView = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled 
                                     ['class' => 'btn btn-lg btn-primary', 'id' => 'preview_email_btn']) ?>
                             </div>
                         </div>
-                        <div class="chat__call call-box message-field-phone" id="call-box" style="display: none;">
+						 <?php if (!SettingHelper::isLeadCommunicationNewCallWidgetEnabled()): ?>
+                         <div class="chat__call call-box message-field-phone" id="call-box" style="display: none;">
 
                             <div class="call-box__interlocutor">
                                 <div class="call-box__interlocutor-name"><?php echo Html::encode($leadForm->getClient()->first_name.' ' . $leadForm->getClient()->last_name); ?></div>
@@ -483,6 +503,7 @@ $listItemView = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled 
                                 </div>
                             <?php endif; ?>
                         </div>
+                         <?php endif; ?>
 
                         <?= $form2->field($comForm, 'c_voice_status')->hiddenInput(['id' => 'c_voice_status'])->label(false); ?>
                         <?= $form2->field($comForm, 'c_voice_sid')->hiddenInput(['id' => 'c_voice_sid'])->label(false); ?>
@@ -673,10 +694,15 @@ JS;
 $tpl_email_blank_key = CommunicationForm::TPL_TYPE_EMAIL_BLANK_KEY;
 $tpl_sms_blank_key = CommunicationForm::TPL_TYPE_SMS_BLANK_KEY;
 
+$projectId = $lead->project_id;
+$project = $lead->project->name ?? '';
+
 $js = <<<JS
 
     const tpl_email_blank_key = '$tpl_email_blank_key';
     const tpl_sms_blank_key = '$tpl_sms_blank_key';
+    let projectId = '{$projectId}';
+    let project = '{$project}';
 
     $('body').on("change", '#c_type_id', function () {
         initializeMessageType($(this).val());
@@ -684,6 +710,19 @@ $js = <<<JS
 
     $('body').on("change", '#c_phone_number', function () {
         $('#div-call-phone-number').text($(this).val());
+    });
+    
+    $(document).on("change", '#call-to-number', function () {
+        $('#call-pane__dial-number').val($(this).val());
+    });
+    
+    $(document).on("change", '#call-from-number', function () {
+        let value = $(this).val();
+        window.phoneNumbers.setPrimaryData({
+            value: value,
+            projectId: projectId,
+            project: project
+        })
     });
     
     $('body').on("change", '#c_sms_tpl_key', function () {
