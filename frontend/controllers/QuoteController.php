@@ -500,11 +500,9 @@ class QuoteController extends FController
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         $response = [
-            'status' => 1,
-            'error' => '',
-            'reservation_dump' => [],
-            'validating_carrier' => '',
-            'prices' => '',
+            'status' => 1, 'error' => '',
+            'reservation_dump' => [], 'prices' => '',
+            'validating_carrier' => '', 'trip_type' => Lead::TRIP_TYPE_ONE_WAY,
         ];
 
         try {
@@ -555,7 +553,6 @@ class QuoteController extends FController
                                 break;
                             }
                         }
-
                         if ($price === null) {
                             $price = new QuotePrice();
                             $price->createQPrice($type);
@@ -569,18 +566,20 @@ class QuoteController extends FController
                     ]);
 
                     $itinerary = [];
-                    if ((new ReservationService($gds))->parseReservation($post['prepare_dump'], true, $itinerary)) {
+                    $reservationService = new ReservationService($gds);
+                    $reservationService->parseReservation($post['prepare_dump'], true, $itinerary);
+                    if ($reservationService->parseStatus) {
                         $response['reservation_dump'] = Quote::createDump($itinerary);
-                    } elseif (!empty($post['reservation_result']) &&
-                        (new ReservationService('sabre'))->parseReservation($post['reservation_result'], true, $itinerary)) {
-                        $response['reservation_dump'] = Quote::createDump($itinerary);
+                        $response['trip_type'] ?: $reservationService->getTripType();
                     }
 
-                    if (empty($response['reservation_dump']) && empty($response['validating_carrier']) && empty($response['prices'])) {
+                    if (self::isFailed($response)) {
                         $response['status'] = 0;
                         $response['error'] = 'Parse GDS Dump failed';
                     }
                 }
+            } else {
+                throw new BadRequestHttpException('Not found POST request');
             }
         } catch (\Throwable $throwable) {
             $response['status'] = 0;
@@ -1191,5 +1190,16 @@ class QuoteController extends FController
                 GlobalLog::ACTION_TYPE_CREATE
             )
         );
+    }
+
+    /**
+     * @param array $response
+     * @return bool
+     */
+    private static function isFailed(array $response): bool
+    {
+        return (empty($response['reservation_dump']) &&
+            empty($response['validating_carrier']) &&
+            empty($response['prices']));
     }
 }

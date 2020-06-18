@@ -230,12 +230,14 @@ $js = <<<JS
     }
     
     $('#prepare_dump_btn').click(function (e) {
-        e.preventDefault();       
+        e.preventDefault(); 
+        
+        cleanErrors(); 
+        cleanData();      
         
         $('#save_dump_btn').hide();                            
         let form = $('#$formID');
-        
-        cleanErrors();
+                 
         loadingBtn($(this), true);        
         if (!checkPrepareDumpQuote()) {
             loadingBtn($(this), false); 
@@ -259,11 +261,14 @@ $js = <<<JS
                 if (dataResponse.prices.length) {
                    $('#price-table tbody').html(dataResponse.prices); 
                 }
+                if (dataResponse.trip_type.length) {
+                   $('#quote-trip_type').val(dataResponse.trip_type);
+                } 
                 if (dataResponse.reservation_dump.length) {                        
                     $('#reservation_result').val(dataResponse.reservation_dump.join("\\n"));
                     
                     var reservationDumpOut = dataResponse.reservation_dump.join("<br />");
-                    reservationDumpOut = '<h6>Imported reservation info</h6>' + reservationDumpOut; 
+                    $('#head_reservation_result').show();
                     $('#box_reservation_result').html(reservationDumpOut);
                 }                    
                 $('#save_dump_btn').show(500);                                                            
@@ -276,6 +281,7 @@ $js = <<<JS
                         hide: true
                     }); 
                 }    
+                $('#save_dump_btn').hide(500);      
             }
         })
         .fail(function(error) {
@@ -288,9 +294,10 @@ $js = <<<JS
     });
     
     $('#save_dump_btn').click(function (e) {
-        e.preventDefault();        
-                
-        cleanErrors();
+        e.preventDefault();
+        
+        cleanErrors();        
+         
         loadingBtn($(this), true);
         if (!checkPrepareDumpQuote()) {
             loadingBtn($(this), false);
@@ -357,29 +364,37 @@ $js = <<<JS
         } 
         if($('#quote-gds').val() === '') {
             message = 'Select GDS please';
-        } 
-        
+        }         
         if (message !== '') {
-            new PNotify({
-                title: "Error",
-                type: "error",
-                text: message,
-                hide: true
+            new PNotify({title: "Error", type: "error",
+                text: message, hide: true
             });
             return false;
         } 
         return true;   
     } 
     
+    function cleanData()  
+    {   
+        $('#head_reservation_result i').attr('class', 'fas fa-copy clipboard');
+        $('#box_reservation_result').text('');
+        $('#reservation_result').val('');
+    }
+    
     function cleanErrors() 
-    {
+    {    
         $('.field-error').each(function() {
             $(this).removeClass('field-error');
         });
-        $('.parent-error').removeClass('has-error');
-        
-        PNotify.removeAll(); 
+        $('.parent-error').removeClass('has-error');        
+        PNotify.removeAll();
     }
+    
+    let clipboard = new ClipboardJS('.clipboard');
+    clipboard.on('success', function(e) {
+        $('.clipboard').attr('class', 'fas fa-check');
+        e.clearSelection();
+    });   
 JS;
 $this->registerJs($js);
 ?>
@@ -389,6 +404,13 @@ $this->registerCss('
     .nav-tabs li a.active {
         font-weight: 900;
     } 
+    .clipboard {
+        cursor: pointer;
+    }
+    #box_reservation_result {
+        color: #7890a2;
+        margin-bottom: 8px;
+    }
 ');
 ?>
 
@@ -400,7 +422,13 @@ $this->registerCss('
 ]) ?>
 <!------------- Add/Edit Alternative Quote Form ------------->
 <div class="alternatives__item">
-    <div id="box_reservation_result" style="margin-bottom: 8px;"></div>
+
+    <h6 id="head_reservation_result" style="display: none;">
+        Imported reservation info
+        <i class="fas fa-copy clipboard" data-clipboard-target="#box_reservation_result"></i>
+    </h6>
+    <div id="box_reservation_result"></div>
+
     <?php echo Html::textarea('reservation_result', null,
         ['id' => 'reservation_result', 'style' => 'display:none;'])
     ?>
