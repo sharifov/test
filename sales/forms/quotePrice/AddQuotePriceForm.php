@@ -48,7 +48,7 @@ class AddQuotePriceForm extends Model
 
             [['selling', 'net'], 'compare', 'compareValue' => 0, 'operator' => '>', 'type' => 'number'],
 
-            [['taxes', 'fare'], function ($attribute) { /* TODO::  */
+            [['taxes', 'fare'], function ($attribute) {
                 $label = $this->getAttributeLabel($attribute);
                 if (($this->net === 0.00 && $this->$attribute === 0.00) || $this->$attribute < 0) {
                     $this->addError($attribute, $label . ' must be greater than zero');
