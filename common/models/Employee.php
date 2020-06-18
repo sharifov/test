@@ -2205,9 +2205,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $query->andWhere(['IN', 'user_connection.uc_user_id', $subQuery]);
         $query->groupBy(['user_connection.uc_user_id']);
 
-        if ($call->c_dep_id) {
-            $subQueryUd = UserDepartment::find()->usersByDep($call->c_dep_id);
-            $query->andWhere(['IN', 'user_connection.uc_user_id', $subQueryUd]);
+        $allow_cross_department_call_transfers = Yii::$app->params['settings']['allow_cross_department_call_transfers'] ?? false;
+
+        if (!$allow_cross_department_call_transfers) {
+            if ($call->c_dep_id) {
+                $subQueryUd = UserDepartment::find()->usersByDep($call->c_dep_id);
+                $query->andWhere(['IN', 'user_connection.uc_user_id', $subQueryUd]);
+            }
         }
 
         $generalQuery = new Query();
