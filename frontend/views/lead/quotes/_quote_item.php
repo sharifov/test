@@ -128,6 +128,13 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
                                 'data-content' => \yii\helpers\Html::encode($model->reservation_dump)
                             ]) ?>
 
+                            <?= Html::a('<i class="fa fa-camera"></i> Email capture', null, [
+                                'class' => 'btn-capture dropdown-item',
+                                //'data-id' => $model->id,
+                                'data-url' => Url::to(['quotes/ajax-capture', 'id' => $model->id, 'gid' => $model->lead->gid]),
+                                'title' => 'Email Capture link'
+                            ]) ?>
+
 
                         <?php if (!$appliedQuote): ?>
 
