@@ -73,8 +73,8 @@ class Reservation implements ParseDumpInterface
             (\s{1}[A-Z]{1}\s{1}|\s{1})* # ignore 
             \s*([A-Z]{3})([A-Z]{3}) # iata airport departure + arrival           
             (\W[A-Z]{2}\d{1}|\s{1})* # ignore
-            (\s+\d{1}|\s+\d{2})(\d{2})(N|N\+|A|A\+|P|P\+) # Departure time hours + min + (AM|PM)
-            (\s+\d{1}|\s+\d{2})(\d{2})(N|N\+|A|A\+|P|P\+) # Arrival time hours + min + (AM|PM)
+            (\s+\d{1}|\s+\d{2})(\d{2})(N||A||P)\+? # Departure time hours + min + (AM|PM)
+            (\s+\d{1}|\s+\d{2})(\d{2})(N||A||P)\+? # Arrival time hours + min + (AM|PM)
             \s+((\d{2})(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC))* # Arrival day + month
             /x';
     }
