@@ -68,13 +68,14 @@ class Reservation implements ParseDumpInterface
         return $pattern ?? '/^
             (\d{1,2}) # index
             \s+([A-Z]{2}|[A-Z]{1}\d{1}) # Airline
-            \s*(\d{1,4})\s+([A-Z]{1}) # Flight number + Booking Class 
+            \s*(\d{1,4}) # Flight number
+            \s+([A-Z]{1}) # Booking Class 
             \s+(\d{1,2})(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC) # Departure day + month
             \s+\w{1,2} # ignore
             \W*([A-Z]{3})([A-Z]{3}) # iata airport departure + arrival 
             \s+\w{1,4}\s+\w* # ignore  
             \s+(\d{1}|\d{2})(\d{2})(A|P) # Departure time hours + min + (AM|PM)
-            \s+(\d{1}|\d{2})(\d{2})(A|P) # Arrival time hours + min + (AM|PM) 
+            \s*(\d{1}|\d{2})(\d{2})(A|P) # Arrival time hours + min + (AM|PM) 
             \s+((\d{2})(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC))* # Arrival day + month                          
             /x';
     }
