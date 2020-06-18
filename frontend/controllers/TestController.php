@@ -1256,6 +1256,11 @@ class TestController extends FController
     {
         return $this->render('vue');
     }
+
+    public function actionReact()
+    {
+        return $this->render('react');
+    }
 }
 
 
