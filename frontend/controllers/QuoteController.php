@@ -546,7 +546,7 @@ class QuoteController extends FController
                                 $price->net = $price->fare + $price->taxes;
                                 $price->selling = ($price->net + $price->mark_up)  * (1 + $serviceFee);
                                 $price->toFloat();
-                                $price->roundValue();
+                                $price->roundAttributesValue();
                                 $price->oldParams = serialize($price->attributes);
 
                                 $prices[] = $price;
@@ -656,7 +656,7 @@ class QuoteController extends FController
                                 $response['errorsPrices'][$key] = $price->getErrors();
                             } else {
                                 $quotePrice = QuotePrice::manualCreation($price);
-                                $quotePrice->roundValue();
+                                $quotePrice->roundAttributesValue();
                                 $quotePrice->save(false);
                             }
                         }

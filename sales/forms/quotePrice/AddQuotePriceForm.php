@@ -3,6 +3,7 @@
 namespace sales\forms\quotePrice;
 
 use common\models\Quote;
+use common\models\QuotePrice;
 use yii\base\Model;
 
 /**
@@ -41,18 +42,16 @@ class AddQuotePriceForm extends Model
             [['passenger_type'], 'string', 'max' => 255],
             [['quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => Quote::class, 'targetAttribute' => ['quote_id' => 'id']],
 
-            [['fare', 'taxes', 'net'], 'filter', 'filter' => 'intval'],
+            [['fare', 'taxes', 'net'], 'filter', 'filter' => static function ($value) {
+                return (new QuotePrice())->roundValue($value);
+            }],
 
             [['selling', 'net'], 'compare', 'compareValue' => 0, 'operator' => '>', 'type' => 'number'],
 
-            ['fare', function ($attribute) {
-                if (($this->net === 0 && $this->$attribute === 0) || $this->$attribute < 0) {
-                    $this->addError($attribute, 'Fare must be greater than zero');
-                }
-            }],
-            ['taxes', function ($attribute) {
-                if (($this->net === 0 && $this->$attribute === 0) || $this->$attribute < 0) {
-                    $this->addError($attribute, 'Taxes must be greater than zero');
+            [['taxes', 'fare'], function ($attribute) { /* TODO::  */
+                $label = $this->getAttributeLabel($attribute);
+                if (($this->net === 0.00 && $this->$attribute === 0.00) || $this->$attribute < 0) {
+                    $this->addError($attribute, $label . ' must be greater than zero');
                 }
             }],
         ];
