@@ -39,22 +39,28 @@ class m200617_093813_create_new_tables_for_client_chat extends Migration
 		'/client-chat-user-channel-crud/delete',
 		'/client-chat-user-channel-crud/view',
 		'/client-chat-user-channel-crud/index',
+
+		'/client-chat-user-access-crud/create',
+		'/client-chat-user-access-crud/update',
+		'/client-chat-user-access-crud/delete',
+		'/client-chat-user-access-crud/view',
+		'/client-chat-user-access-crud/index',
 	];
 
 	private $roles = [
 		Employee::ROLE_ADMIN,
 		Employee::ROLE_SUPER_ADMIN,
-		Employee::ROLE_AGENT,
-		Employee::ROLE_SUPERVISION,
-		Employee::ROLE_QA,
-		Employee::ROLE_USER_MANAGER,
-		Employee::ROLE_SUP_AGENT,
-		Employee::ROLE_SUP_SUPER,
-		Employee::ROLE_EX_AGENT,
-		Employee::ROLE_EX_SUPER,
-		Employee::ROLE_SALES_SENIOR,
-		Employee::ROLE_EXCHANGE_SENIOR,
-		Employee::ROLE_SUPPORT_SENIOR,
+//		Employee::ROLE_AGENT,
+//		Employee::ROLE_SUPERVISION,
+//		Employee::ROLE_QA,
+//		Employee::ROLE_USER_MANAGER,
+//		Employee::ROLE_SUP_AGENT,
+//		Employee::ROLE_SUP_SUPER,
+//		Employee::ROLE_EX_AGENT,
+//		Employee::ROLE_EX_SUPER,
+//		Employee::ROLE_SALES_SENIOR,
+//		Employee::ROLE_EXCHANGE_SENIOR,
+//		Employee::ROLE_SUPPORT_SENIOR,
 	];
 
     /**
@@ -98,16 +104,16 @@ class m200617_093813_create_new_tables_for_client_chat extends Migration
 			'cch_updated_user_id' => $this->integer()
 		], $tableOptions);
 
-		$this->addForeignKey('FK-cch_ccr_id', '{{%client_chat}}', ['cch_ccr_id'], '{{%client_chat_request}}', ['ccr_id'], 'CASCADE', 'CASCADE');
-		$this->addForeignKey('FK-cch_project_id', '{{%client_chat}}', ['cch_project_id'], '{{%projects}}', ['id'], 'CASCADE', 'CASCADE');
-		$this->addForeignKey('FK-cch_dep_id', '{{%client_chat}}', ['cch_dep_id'], '{{%department}}', ['dep_id'], 'CASCADE', 'CASCADE');
-		$this->addForeignKey('FK-cch_client_id', '{{%client_chat}}', ['cch_client_id'], '{{%clients}}', ['id'], 'CASCADE', 'CASCADE');
-		$this->addForeignKey('FK-cch_owner_user_id', '{{%client_chat}}', ['cch_owner_user_id'], '{{%employees}}', ['id'], 'CASCADE', 'CASCADE');
-		$this->addForeignKey('FK-cch_case_id', '{{%client_chat}}', ['cch_case_id'], '{{%cases}}', ['cs_id'], 'CASCADE', 'CASCADE');
-		$this->addForeignKey('FK-cch_lead_id', '{{%client_chat}}', ['cch_lead_id'], '{{%leads}}', ['id'], 'CASCADE', 'CASCADE');
-		$this->addForeignKey('FK-cch_language_id', '{{%client_chat}}', ['cch_language_id'], '{{%language}}', ['language_id'], 'CASCADE', 'CASCADE');
-		$this->addForeignKey('FK-cch_created_user_id', '{{%client_chat}}', ['cch_created_user_id'], '{{%employees}}', ['id'], 'CASCADE', 'CASCADE');
-		$this->addForeignKey('FK-cch_updated_user_id', '{{%client_chat}}', ['cch_updated_user_id'], '{{%employees}}', ['id'], 'CASCADE', 'CASCADE');
+		$this->addForeignKey('FK-cch_ccr_id', '{{%client_chat}}', ['cch_ccr_id'], '{{%client_chat_request}}', ['ccr_id'], 'SET NULL', 'CASCADE');
+		$this->addForeignKey('FK-cch_project_id', '{{%client_chat}}', ['cch_project_id'], '{{%projects}}', ['id'], 'SET NULL', 'CASCADE');
+		$this->addForeignKey('FK-cch_dep_id', '{{%client_chat}}', ['cch_dep_id'], '{{%department}}', ['dep_id'], 'SET NULL', 'CASCADE');
+		$this->addForeignKey('FK-cch_client_id', '{{%client_chat}}', ['cch_client_id'], '{{%clients}}', ['id'], 'SET NULL', 'CASCADE');
+		$this->addForeignKey('FK-cch_owner_user_id', '{{%client_chat}}', ['cch_owner_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
+		$this->addForeignKey('FK-cch_case_id', '{{%client_chat}}', ['cch_case_id'], '{{%cases}}', ['cs_id'], 'SET NULL', 'CASCADE');
+		$this->addForeignKey('FK-cch_lead_id', '{{%client_chat}}', ['cch_lead_id'], '{{%leads}}', ['id'], 'SET NULL', 'CASCADE');
+		$this->addForeignKey('FK-cch_language_id', '{{%client_chat}}', ['cch_language_id'], '{{%language}}', ['language_id'], 'SET NULL', 'CASCADE');
+		$this->addForeignKey('FK-cch_created_user_id', '{{%client_chat}}', ['cch_created_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
+		$this->addForeignKey('FK-cch_updated_user_id', '{{%client_chat}}', ['cch_updated_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
 
 		$this->createTable('{{%client_chat_channel}}', [
 			'ccc_id' => $this->primaryKey(),
@@ -121,12 +127,12 @@ class m200617_093813_create_new_tables_for_client_chat extends Migration
 			'ccc_created_user_id' => $this->integer(),
 			'ccc_updated_user_id' => $this->integer()
 		], $tableOptions);
-		$this->addForeignKey('FK-ccc_project_id', '{{%client_chat_channel}}', ['ccc_project_id'], '{{%projects}}', ['id'], 'CASCADE', 'CASCADE');
-		$this->addForeignKey('FK-ccc_dep_id', '{{%client_chat_channel}}', ['ccc_dep_id'], '{{%department}}', ['dep_id'], 'CASCADE', 'CASCADE');
-		$this->addForeignKey('FK-ccc_ug_id', '{{%client_chat_channel}}', ['ccc_ug_id'], '{{%user_group}}', ['ug_id'], 'CASCADE', 'CASCADE');
-		$this->addForeignKey('FK-ccc_created_user_id', '{{%client_chat_channel}}', ['ccc_created_user_id'], '{{%employees}}', ['id'], 'CASCADE', 'CASCADE');
-		$this->addForeignKey('FK-ccc_updated_user_id', '{{%client_chat_channel}}', ['ccc_updated_user_id'], '{{%employees}}', ['id'], 'CASCADE', 'CASCADE');
-		$this->addForeignKey('FK-cch_channel_id', '{{%client_chat}}', ['cch_channel_id'], '{{%client_chat_channel}}', ['ccc_id'], 'CASCADE', 'CASCADE');
+		$this->addForeignKey('FK-ccc_project_id', '{{%client_chat_channel}}', ['ccc_project_id'], '{{%projects}}', ['id'], 'SET NULL', 'CASCADE');
+		$this->addForeignKey('FK-ccc_dep_id', '{{%client_chat_channel}}', ['ccc_dep_id'], '{{%department}}', ['dep_id'], 'SET NULL', 'CASCADE');
+		$this->addForeignKey('FK-ccc_ug_id', '{{%client_chat_channel}}', ['ccc_ug_id'], '{{%user_group}}', ['ug_id'], 'SET NULL', 'CASCADE');
+		$this->addForeignKey('FK-ccc_created_user_id', '{{%client_chat_channel}}', ['ccc_created_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
+		$this->addForeignKey('FK-ccc_updated_user_id', '{{%client_chat_channel}}', ['ccc_updated_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
+		$this->addForeignKey('FK-cch_channel_id', '{{%client_chat}}', ['cch_channel_id'], '{{%client_chat_channel}}', ['ccc_id'], 'SET NULL', 'CASCADE');
 
 		$this->createTable('{{%client_chat_status_log}}', [
 			'csl_id' => $this->primaryKey(),
@@ -139,7 +145,7 @@ class m200617_093813_create_new_tables_for_client_chat extends Migration
 			'csl_description' => $this->string()
 		], $tableOptions);
 		$this->addForeignKey('FK-csl_cch_id', '{{%client_chat_status_log}}', ['csl_cch_id'], '{{%client_chat}}', 'cch_id', 'CASCADE', 'CASCADE');
-		$this->addForeignKey('FK-csl_owner_id', '{{%client_chat_status_log}}', ['csl_owner_id'], '{{%employees}}', 'id', 'CASCADE', 'CASCADE');
+		$this->addForeignKey('FK-csl_owner_id', '{{%client_chat_status_log}}', ['csl_owner_id'], '{{%employees}}', 'id', 'SET NULL', 'CASCADE');
 
 
 		$this->createTable('{{%client_chat_user_channel}}', [
@@ -151,7 +157,20 @@ class m200617_093813_create_new_tables_for_client_chat extends Migration
 		$this->addPrimaryKey('PK-client_chat_user_channel-user_id-channel_id', '{{%client_chat_user_channel}}', ['ccuc_user_id', 'ccuc_channel_id']);
 		$this->addForeignKey('FK-ccuc_user_id', '{{%client_chat_user_channel}}', ['ccuc_user_id'], '{{%employees}}', ['id'], 'CASCADE', 'CASCADE');
 		$this->addForeignKey('FK-ccuc_channel_id', '{{%client_chat_user_channel}}', ['ccuc_channel_id'], '{{%client_chat_channel}}', ['ccc_id'], 'CASCADE', 'CASCADE');
-		$this->addForeignKey('FK-ccuc_created_user_id', '{{%client_chat_user_channel}}', ['ccuc_created_user_id'], '{{%employees}}', ['id'], 'CASCADE', 'CASCADE');
+		$this->addForeignKey('FK-ccuc_created_user_id', '{{%client_chat_user_channel}}', ['ccuc_created_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
+
+		$this->createTable('{{%client_chat_user_access}}', [
+			'ccua_cch_id' => $this->integer()->notNull(),
+			'ccua_user_id' => $this->integer()->notNull(),
+			'ccua_status_id' => $this->tinyInteger(1),
+			'ccua_created_dt' => $this->dateTime(),
+			'ccua_updated_dt' => $this->dateTime()
+		], $tableOptions);
+		$this->addPrimaryKey('PK-client_chat_user_access', '{{%client_chat_user_access}}', ['ccua_cch_id', 'ccua_user_id']);
+		$this->addForeignKey('FK-ccua_cch_id', '{{%client_chat_user_access}}', ['ccua_cch_id'], '{{%client_chat}}', ['cch_id'], 'CASCADE', 'CASCADE');
+		$this->addForeignKey('FK-ccua_user_id', '{{%client_chat_user_access}}', ['ccua_user_id'], '{{%employees}}', ['id'], 'CASCADE', 'CASCADE');
+		$this->createIndex('IND-ccua_user_id', '{{%client_chat_user_access}}', ['ccua_user_id']);
+		$this->createIndex('IND-ccua_status_id', '{{%client_chat_user_access}}', ['ccua_status_id']);
 
 		(new RbacMigrationService())->up($this->routes, $this->roles);
 	}
@@ -161,6 +180,10 @@ class m200617_093813_create_new_tables_for_client_chat extends Migration
      */
     public function safeDown()
     {
+    	$this->dropForeignKey('FK-ccua_cch_id', '{{%client_chat_user_access}}');
+    	$this->dropForeignKey('FK-ccua_user_id', '{{%client_chat_user_access}}');
+    	$this->dropTable('{{%client_chat_user_access}}');
+
     	$this->dropForeignKey('FK-ccuc_user_id', '{{%client_chat_user_channel}}');
     	$this->dropForeignKey('FK-ccuc_channel_id', '{{%client_chat_user_channel}}');
     	$this->dropTable('{{%client_chat_user_channel}}');
