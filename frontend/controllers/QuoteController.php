@@ -516,9 +516,10 @@ class QuoteController extends FController
                 }
 
                 $post = Yii::$app->request->post();
+                $quoteFormName = (new Quote())->formName();
 
-                if (isset($post['Quote'], $post['prepare_dump'])) {
-                    $postQuote = $post['Quote'];
+                if (isset($post[$quoteFormName], $post['prepare_dump'])) {
+                    $postQuote = $post[$quoteFormName];
 
                     if (!$gds = ParsingDump::getGdsByQuote($postQuote['gds'])) {
                         throw new \DomainException(  'This gds(' . $postQuote['gds'] . ') cannot be processed');

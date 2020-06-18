@@ -283,7 +283,7 @@ $js = <<<JS
             console.log(error);
         })
         .always(function() {
-            setTimeout(loadingBtn, 3000, $('#prepare_dump_btn'), false);     
+            setTimeout(loadingBtn, 4000, $('#prepare_dump_btn'), false);     
         });
     });
     
@@ -345,7 +345,7 @@ $js = <<<JS
             console.log(error);
         })
         .always(function() {
-            setTimeout(loadingBtn, 3000, $('#save_dump_btn'), false);     
+            setTimeout(loadingBtn, 4000, $('#save_dump_btn'), false);     
         });        
     });
     
