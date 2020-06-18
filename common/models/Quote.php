@@ -574,31 +574,24 @@ class Quote extends \yii\db\ActiveRecord
         return $elapsedTime;
     }
 
-    /**
-     * @param bool|null $enableGdsParsers
-     * @throws \Exception
-     */
-    public function checkReservationDump(?bool $enableGdsParsers = null): void
+    public function checkReservationDump(): void
     {
-        $enableGdsParsers = $enableGdsParsers !== null ?
-            $enableGdsParsers :
-            \Yii::$app->params['settings']['enable_gds_parsers_for_create_quote'];
+        $enableGdsParsers = \Yii::$app->params['settings']['enable_gds_parsers_for_create_quote'];
+        $dumpParser = [];
 
         if ($enableGdsParsers && $gds = ParsingDump::getGdsByQuote($this->gds)) {
-            $dumpParser = (new ReservationService($gds))->parseReservation($this->reservation_dump, true, $this->itinerary);
-        } else {
-            $validation = $this->gds === 'A' ? false : true ;
-            $dumpParser = self::parseDump($this->reservation_dump, $validation, $this->itinerary);
+            $dumpParser = (new ReservationService($gds))
+                ->parseReservation($this->reservation_dump, true, $this->itinerary);
+        }
+        if (empty($dumpParser)) {
+            $dumpParser = self::parseDump($this->reservation_dump, true, $this->itinerary);
         }
         if (empty($dumpParser)) {
             $this->addError('reservation_dump', 'Incorrect reservation dump!');
-            \Yii::info(
-                \yii\helpers\VarDumper::dumpAsString([
-                    'gds' => $this->gds,
-                    'dump' => $this->reservation_dump,
-                ], 20),
-                'info\Quote:checkReservationDump:IncorrectReservationDump'
-            );
+            \Yii::info(\yii\helpers\VarDumper::dumpAsString([
+                'gds' => $this->gds,
+                'dump' => $this->reservation_dump,
+            ], 20),'info\Quote:checkReservationDump:IncorrectReservationDump');
         }
     }
 
