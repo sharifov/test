@@ -132,9 +132,6 @@ class Baggage implements ParseDumpInterface
                     $itemRow = trim($items[$key]);
                     $itemRows = explode("\n", $itemRow);
 
-                    // BAG 1 - NO FEE UPTO50LB/23KG AND UPTO50LB/127LCM
-                    // BAG 2 - NO FEE UPTO45LI/115LCM
-                    // BAG 3 - NO FEE CARRYON HAND BAGGAGE ALLOWANCE
                     foreach ($itemRows as $keyBag => $valueBag) {
                         preg_match(
                             "/BAG\s(\d{1})
@@ -191,8 +188,7 @@ class Baggage implements ParseDumpInterface
                         if (strlen($valueBag) < 10) {
                             continue;
                         }
-                        // BAG 1 -  75.00 USD    UPTO50LB/23KG AND UPTO62LI/158LCM
-                        // BAG 2 - NO FEE UPTO50LB/23KG AND UPTO81LI/208LCM
+
                         preg_match(
                             "/BAG\s(\d{1})
                                 \s-\s+
@@ -251,5 +247,4 @@ class Baggage implements ParseDumpInterface
         }
         return $this;
     }
-
 }

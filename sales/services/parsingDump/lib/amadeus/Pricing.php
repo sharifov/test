@@ -70,14 +70,15 @@ class Pricing implements ParseDumpInterface
 
             if (isset($countPassengers, $passengerType)) {
                 $j = 0;
-                $fare = self::getFare($dump);
                 $taxes = self::getTaxes($ticketRows);
 
-                for ($i = 0; $i < $countPassengers; $i++) {
-                    $result[$j]['type'] = $passengerType;
-                    $result[$j]['fare'] = $fare;
-                    $result[$j]['taxes'] = $taxes;
-                    $j ++;
+                if ($fare = self::getFare($dump)) {
+                    for ($i = 0; $i < $countPassengers; $i++) {
+                        $result[$j]['type'] = $passengerType;
+                        $result[$j]['fare'] = $fare;
+                        $result[$j]['taxes'] = $taxes;
+                        $j ++;
+                    }
                 }
             }
         }
@@ -86,9 +87,9 @@ class Pricing implements ParseDumpInterface
 
     /**
      * @param string $dump
-     * @return int|null
+     * @return int
      */
-    private static function getCountPassengers(string $dump): ?int
+    private static function getCountPassengers(string $dump): int
     {
         $countPattern = '/
             01\s{1}P([\d,\-]+)\s+ # count passengers                                
@@ -108,7 +109,7 @@ class Pricing implements ParseDumpInterface
                 }
             }
         }
-        return $countPassengers ?? null;
+        return $countPassengers ?? 1;
     }
 
     /**
