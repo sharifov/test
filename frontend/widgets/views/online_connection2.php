@@ -228,6 +228,14 @@ $js = <<<JS
                                 }
                              }
                         }
+                        
+                        if(obj.cmd === 'removeIncomingRequest') {
+                            if (typeof obj.data !== 'undefined') {
+                                if (typeof PhoneWidgetCall === 'object') {
+                                    PhoneWidgetCall.removeIncomingRequest(obj.data.call.id);
+                                }
+                             }
+                        }
                     }
                     // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
                 } catch (error) {

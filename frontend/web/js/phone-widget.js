@@ -422,33 +422,7 @@ $(document).ready(function() {
     // });
 
     $(document).on('click', '#cancel-active-call', function(e) {
-
         hangup($('#cancel-active-call'));
-        // e.preventDefault();
-        //
-        // let twilioDevice = JSON.parse(window.localStorage.getItem('twilioDevice'));
-        //
-        // if (device || (device = twilioDevice)) {
-        //     updateAgentStatus(connection, false, 1);
-        //     device.disconnectAll();
-        //
-        //     PhoneWidgetCall.cancelCall();
-        //
-        //     clearTimeout(timeout)
-        // }
-        widgetIcon.update({
-            type: 'default', 
-            timer: false,
-            text: null,
-            currentCalls: null,
-            status: 'online'
-        })
-    
-            // PhoneWidgetCall.cancelCall();
-
-            // clearTimeout(timeout)
-
-       
     });
 
     $(document).on('click', '#cancel-outgoing-call', function(e) {

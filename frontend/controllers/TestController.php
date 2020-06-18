@@ -114,6 +114,7 @@ use sales\model\lead\useCases\lead\api\create\SegmentForm;
 use sales\model\lead\useCases\lead\import\LeadImportForm;
 use sales\model\lead\useCases\lead\import\LeadImportService;
 use sales\model\notification\events\NotificationEvents;
+use sales\model\phoneList\entity\PhoneList;
 use sales\model\user\entity\Access;
 use sales\model\user\entity\ShiftTime;
 use sales\model\user\entity\StartTime;
@@ -222,6 +223,32 @@ class TestController extends FController
 
     public function actionTest()
     {
+//        $tmp = 9;
+//        $callInfo = [
+//            'typeId' => 2,
+//            'type' => 'Incoming ' . $tmp,
+//            'callId' => $tmp,
+//            'name' => 'name ' . $tmp,
+//            'phone' => '+' . $tmp,
+//            'fromInternal' => false,
+//            'projectName' => '',
+//            'sourceName' => '',
+//            'status' => 'Ringing',
+//        ];
+//        Notifications::publish('callUpdate', ['user_id' => 295], $callInfo);
+//die;
+
+        $callInfo = [
+            'data' => [
+                'call' => [
+                    'id' => 1,
+                ],
+            ],
+        ];
+        Notifications::publish('removeIncomingRequest', ['user_id' => 295], $callInfo);
+
+
+
 //        $service = Yii::$app->communication;;
 //        $service->createCall('client:seller295', '+37369305726', '+14157693509', 295, 2);
 //        die;

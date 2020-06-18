@@ -1,5 +1,17 @@
 var PhoneWidgetPaneIncoming = function () {
 
+    let $pane = $('.call-pane-incoming');
+
+    function render(data) {
+        let html = '';
+        let template = incomingTpl;
+        $.each(data, function (k, v) {
+            html = template.split('{{' + k + '}}').join(v);
+            template = html;
+        });
+        return html;
+    }
+
     /*
         data = {
             fromInternal,
@@ -12,18 +24,19 @@ var PhoneWidgetPaneIncoming = function () {
         }
      */
     function load(data) {
+
         setCallId(data.callId);
-        $('#btn-accept-call').attr('data-from-internal', data.fromInternal).attr('data-call-id', data.callId);
-        $('.call-pane-incoming .contact-info-card__label').html(data.type);
-        $('#cw-client_name').html(data.name);
-        $('.call-pane-incoming .contact-info-card__call-type').html(data.phone);
-        let project = $('.call-pane-incoming .cw-project_name');
+        let html = render(data);
+        $pane.html(html);
+
+        let project = $pane.find('.cw-project_name');
         if (data.projectName) {
             project.html(data.projectName).show();
         } else {
             project.html('').hide();
         }
-        let source = $('.call-pane-incoming .cw-source_name');
+
+        let source = $pane.find('.cw-source_name');
         if (data.sourceName) {
             source.html(data.sourceName).show();
         } else {
@@ -32,26 +45,28 @@ var PhoneWidgetPaneIncoming = function () {
     }
 
     function show() {
-        $('#btn-accept-call').find('i').removeClass('fa fa-spinner fa-spin');
         $('#tab-phone .call-pane-initial').removeClass('is_active');
-        $('#tab-phone .call-pane-incoming').addClass('is_active');
-        $('#tab-phone .call-pane-incoming .call-pane__call-btns').removeClass('is-on-call').removeClass('is-pending');
+        $pane.addClass('is_active');
     }
 
     function hide() {
-        $('#tab-phone .call-pane-incoming').removeClass('is_active');
+        $pane.removeClass('is_active');
     }
 
     function setCallId(callId) {
-        $('.call-pane-incoming').attr('data-call-id', callId);
+        $pane.attr('data-call-id', callId);
     }
 
     function getCallId() {
-        return parseInt($('.call-pane-incoming').attr('data-call-id'));
+        return parseInt($pane.attr('data-call-id'));
     }
 
     function removeCallId() {
-        return $('.call-pane-incoming').attr('data-call-id', '');
+        return $pane.attr('data-call-id', '');
+    }
+
+    function isActive() {
+        return $pane.hasClass('is_active');
     }
 
     return {
@@ -59,7 +74,8 @@ var PhoneWidgetPaneIncoming = function () {
         show: show,
         hide: hide,
         getCallId: getCallId,
-        removeCallId: removeCallId
+        removeCallId: removeCallId,
+        isActive: isActive
     }
 
 }();

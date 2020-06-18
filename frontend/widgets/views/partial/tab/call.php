@@ -350,8 +350,8 @@ $sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
           </button>
       </div>
     </div>
-
   <div class="call-pane-incoming call-pane-initial">
+      <?php /*
     <div class="calling-from-info">
       <div class="static-number-indicator">
 
@@ -403,8 +403,9 @@ $sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
       </div>
 
     </div>
-    
+*/ ?>
   </div>
+
 
   <div class="call-pane-outgoing call-pane-initial">
         <div class="calling-from-info">

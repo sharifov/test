@@ -27,8 +27,12 @@ class NewWebPhoneAsset extends AssetBundle
         '/web_phone/js/pane/active/btn/transfer.js',
         '/web_phone/js/pane/active/pane.js',
 
+        '/web_phone/tpl/incoming.js',
         '/web_phone/js/pane/incoming/pane.js',
+
         '/web_phone/js/pane/outgoing/pane.js',
+
+        '/web_phone/js/queue.js',
 
 		'/js/phone-widget.js',
 		'/web_phone/js/status.js',
