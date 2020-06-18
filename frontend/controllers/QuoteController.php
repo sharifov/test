@@ -569,7 +569,9 @@ class QuoteController extends FController
                     $reservationService->parseReservation($post['prepare_dump'], true, $itinerary);
                     if ($reservationService->parseStatus) {
                         $response['reservation_dump'] = Quote::createDump($itinerary);
-                        $response['trip_type'] ?: $reservationService->getTripType();
+                        if ($tripType = $reservationService->getTripType()) {
+                            $response['trip_type'] = $tripType;
+                        }
                     }
 
                     if (self::isFailed($response, $prices)) {
