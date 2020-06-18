@@ -1971,7 +1971,7 @@ class Quote extends \yii\db\ActiveRecord
             'currency' => 'USD'
         ];
         foreach ($this->quotePrices as $price) {
-            $price->roundValue();
+            $price->roundAttributesValue();
 
             if (!isset($result['detail'][$price->passenger_type]['selling'])) {
                 $result['detail'][$price->passenger_type]['selling'] = $price->selling;

@@ -45,6 +45,7 @@ class QuotePrice extends \yii\db\ActiveRecord
     ];
 
     public $oldParams;
+    public int $defaultPrecision = 2;
 
     /**
      * @param array $attributes
@@ -157,7 +158,7 @@ class QuotePrice extends \yii\db\ActiveRecord
 
         $model->selling += $model->service_fee;
 
-        $model->roundValue();
+        $model->roundAttributesValue();
 
         $model->oldParams = serialize($model->attributes);
     }
@@ -191,7 +192,7 @@ class QuotePrice extends \yii\db\ActiveRecord
             return $this;
         }
 
-        $this->roundValue(2, true);
+        $this->roundAttributesValue();
         $this->oldParams = serialize($this->attributes);
 
         return $this;
@@ -216,16 +217,26 @@ class QuotePrice extends \yii\db\ActiveRecord
 
     /**
      * @param int $precision
-     * @param bool $setZero
      */
-    public function roundValue($precision = 2): void
+    public function roundAttributesValue($precision = 2): void
     {
         foreach ($this->attributes as $attr => $value) {
             if (in_array($attr, ['net', 'selling', 'extra_mark_up', 'mark_up', 'taxes', 'fare', 'service_fee'])) {
-                $this->$attr = round($value, $precision);
+                $this->$attr = $this->roundValue($value, $precision);
             }
         }
     }
+
+    /**
+     * @param $value
+     * @param int|null $precision
+     * @return false|float
+     */
+    public function roundValue($value, ?int $precision = null)
+     {
+        $precision = $precision ?? $this->defaultPrecision;
+        return round((float) $value, $precision);
+     }
 
     /**
      * {@inheritdoc}
@@ -355,7 +366,7 @@ class QuotePrice extends \yii\db\ActiveRecord
         $this->selling += $this->service_fee;
 
         $this->toFloat();
-        $this->roundValue();
+        $this->roundAttributesValue();
         $this->oldParams = serialize($this->attributes);
     }
 
