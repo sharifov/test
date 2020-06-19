@@ -30,7 +30,23 @@ use yii\bootstrap\Html;
                 <?php echo $segment['arrivalAirport'] ?>
             </td>
         </tr>
-        <tr colspan="5">
+    <div class="container">
+        <div class="row">
+            <div class="col border">
+              Одна из трёх колонок
+            </div>
+            <div class="col border">
+              Одна из трёх колонок
+            </div>
+            <div class="col border">
+              Одна из трёх колонок
+            </div>
+        </div>
+    </div>
+
+
+          <!---->
+        <!--<tr colspan="5">-->
            <!-- <table class="table table-sm">
                 <tr>
                     <td>Baggage Type</td>
@@ -40,7 +56,7 @@ use yii\bootstrap\Html;
                     <td>Cost</td>
                 </tr>
             </table>-->
-        </tr>
+        <!--</tr>-->
     <?php endforeach; ?>
     </tbody>
 </table>
