@@ -139,8 +139,6 @@ class Quote extends \yii\db\ActiveRecord
     public float $serviceFee = 0.035;
     public float $serviceFeePercent = 3.5;
 
-    public const SCENARIO_QUICK_SEARCH = 'quickSearch';
-
     /**
      * Quote constructor.
      * @param array $config
@@ -207,11 +205,10 @@ class Quote extends \yii\db\ActiveRecord
             [['uid', 'reservation_dump', 'main_airline_code'], 'required'],
             [['lead_id', 'status' ], 'integer'],
             [[ 'check_payment'], 'boolean'],
-            [['created', 'updated', 'reservation_dump', 'created_by_seller', 'employee_name', 'employee_id', 'pcc', 'gds', 'last_ticket_date', 'service_fee_percent'], 'safe'],
+            [['created', 'updated', 'created_by_seller', 'employee_name', 'employee_id', 'pcc', 'gds', 'last_ticket_date', 'service_fee_percent'], 'safe'],
             [['uid', 'record_locator', 'pcc', 'cabin', 'gds', 'trip_type', 'main_airline_code', 'fare_type', 'gds_offer_id'], 'string', 'max' => 255],
 
-            [['reservation_dump'], 'checkReservationDump', 'on' => self::SCENARIO_QUICK_SEARCH],
-            [['pricing_info', 'tickets', 'origin_search_data'], 'string'],
+            [['pricing_info', 'tickets', 'origin_search_data', 'reservation_dump'], 'string'],
             [['status'], 'checkStatus'],
 
             [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
@@ -574,18 +571,6 @@ class Quote extends \yii\db\ActiveRecord
             }
         }
         return $elapsedTime;
-    }
-
-    public function checkReservationDump(): void
-    {
-        $dumpParser = self::parseDump($this->reservation_dump, true, $this->itinerary);
-        if (empty($dumpParser)) {
-            $this->addError('reservation_dump', 'Incorrect reservation dump!');
-            \Yii::info(\yii\helpers\VarDumper::dumpAsString([
-                'gds' => $this->gds,
-                'dump' => $this->reservation_dump,
-            ], 20),'info\Quote:checkReservationDump:IncorrectReservationDump');
-        }
     }
 
     public function checkStatus()

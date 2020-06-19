@@ -379,6 +379,7 @@ $js = <<<JS
         $('#head_reservation_result i').attr('class', 'fas fa-copy clipboard');
         $('#box_reservation_result').text('');
         $('#reservation_result').val('');
+        $('#quote-main_airline_code').val('').trigger('change');
     }
     
     function cleanErrors() 

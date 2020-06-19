@@ -119,7 +119,6 @@ class QuoteController extends FController
                             $transaction = Quote::getDb()->beginTransaction();
 
                             $quote = new Quote();
-                            $quote->scenario = Quote::SCENARIO_QUICK_SEARCH;
                             $quote->uid = uniqid();
                             $quote->lead_id = $leadId;
                             $quote->cabin = $lead->cabin;
@@ -138,28 +137,7 @@ class QuoteController extends FController
 
                             if(isset($entry['tickets'])) {
                                 $quote->tickets = json_encode($entry['tickets']);
-                            } /*else {
-
-                                $tickets[] = ["trips" => [
-                                    [
-                                        "tripId"=> 1,
-                                        "segmentIds"=> [1,2]
-                                    ],
-                                    [
-                                        "tripId"=> 2,
-                                        "segmentIds"=> [1]
-                                    ],
-                                ]];
-
-                                $tickets[] = ["trips" => [
-                                    [
-                                        "tripId"=> 2,
-                                        "segmentIds" => [2]
-                                    ]
-                                ]];
-
-                                $quote->tickets = json_encode($tickets);
-                            }*/
+                            }
 
                             if ($lead->originalQuoteExist()) {
                                 $quote->alternative();
