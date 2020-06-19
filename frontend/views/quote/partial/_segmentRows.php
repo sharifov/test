@@ -6,58 +6,45 @@
  */
 
 use common\models\Airport;
+use sales\services\parsingDump\BaggageService;
 use yii\bootstrap\Html;
 
 ?>
-<table class="table table-bordered table-lm">
-    <tbody>
-    <?php foreach ($segments as $key => $segment) : ?>
-        <tr>
-            <td>Segment <?php echo $key+1 ?></td>
-            <td><?php echo $segment['airlineName'] ?></td>
-            <td>
-                <?php echo $segment['carrier'] ?>&nbsp;
-                <?php echo $segment['flightNumber'] ?>
-            </td>
-            <td>
-                <?php echo $segment['departureDateTime']->format('g:i A M d') ?>&nbsp;
-                <?php echo Airport::findOne($segment['departureAirport'])->getCityName() ?>&nbsp;
-                <?php echo $segment['departureAirport'] ?>
-            </td>
-            <td>
-                <?php echo $segment['arrivalDateTime']->format('g:i A M d') ?>&nbsp;
-                <?php echo Airport::findOne($segment['arrivalAirport'])->getCityName() ?>&nbsp;
-                <?php echo $segment['arrivalAirport'] ?>
-            </td>
-        </tr>
-    <div class="container">
-        <div class="row">
-            <div class="col border">
-              Одна из трёх колонок
-            </div>
-            <div class="col border">
-              Одна из трёх колонок
-            </div>
-            <div class="col border">
-              Одна из трёх колонок
-            </div>
+
+<?php foreach ($segments as $key => $segment) : ?>
+    <div class="row">
+        <div class="col-1 border p-1">
+            <strong>Segment <?php echo $key+1 ?></strong>
+        </div>
+        <div class="col-1 border p-1">
+            <?php echo $segment['airlineName'] ?>
+        </div>
+        <div class="col-1 border p-1">
+            <?php echo $segment['carrier'] ?>&nbsp;
+            <?php echo $segment['flightNumber'] ?>
+        </div>
+        <div class="col-3 border p-1">
+            <?php echo $segment['departureDateTime']->format('g:i A M d') ?>&nbsp;
+            <?php echo Airport::findOne($segment['departureAirport'])->getCityName() ?>&nbsp;
+            <?php echo $segment['departureAirport'] ?>
+        </div>
+        <div class="col border p-1">
+            <?php echo $segment['arrivalDateTime']->format('g:i A M d') ?>&nbsp;
+            <?php echo Airport::findOne($segment['arrivalAirport'])->getCityName() ?>&nbsp;
+            <?php echo $segment['arrivalAirport'] ?>
         </div>
     </div>
+    <div class="row">
+        <div class="col-1 border p-1">Baggage Type</div>
+        <div class="col-1 border p-1">Pieces</div>
+        <div class="col-1 border p-1">Max Size</div>
+        <div class="col-1 border p-1">Max Weight</div>
+        <div class="col-1 border p-1">Cost</div>
 
 
-          <!---->
-        <!--<tr colspan="5">-->
-           <!-- <table class="table table-sm">
-                <tr>
-                    <td>Baggage Type</td>
-                    <td>Pieces</td>
-                    <td>Max Size</td>
-                    <td>Max Weight</td>
-                    <td>Cost</td>
-                </tr>
-            </table>-->
-        <!--</tr>-->
-    <?php endforeach; ?>
-    </tbody>
-</table>
+
+    </div>
+    <br />
+<?php endforeach; ?>
+
 

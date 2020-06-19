@@ -18,6 +18,7 @@ use sales\forms\quotePrice\AddQuotePriceForm;
 use sales\helpers\app\AppHelper;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
+use sales\services\parsingDump\BaggageService;
 use sales\services\parsingDump\lib\ParsingDump;
 use sales\services\parsingDump\PricingService;
 use sales\services\parsingDump\ReservationService;
@@ -511,6 +512,18 @@ class QuoteController extends FController
 
                         if ($obj = ParsingDump::initClass($gds, ParsingDump::PARSING_TYPE_BAGGAGE)) { /* TODO:: baggage */
                             $baggageFromDump = $obj->parseDump($post['prepare_dump']);
+
+                            \yii\helpers\VarDumper::dump(
+                                BaggageService::searchByIata(
+                                    $baggageFromDump,
+                                    'SFO',
+                                    'DFW'
+                                ),
+                                10,
+                                true
+                            );
+                            exit();
+                            /* FOR DEBUG:: must by remove */
 
                             $response['segments'] = $this->renderAjax('partial/_segmentRows', [
                                 'segments' => $reservationService->parseResult,

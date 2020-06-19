@@ -1296,6 +1296,22 @@ class TestController extends FController
         $mailPreview = $communication->mailCapture($lead->project_id, ($tpl ? $tpl/*$tpl->etp_key*/ : ''), $mailFrom, $mailTo/*$comForm->c_email_to*/, $content_data, $language);
         VarDumper::dump($mailPreview, 10 , true); exit;
     }
+
+    public function actionZ()
+    {
+        $people = array(
+      2 => array(
+        'name' => 'John',
+        'fav_color' => 'green'
+      ),
+      5=> array(
+        'name' => 'Samuel',
+        'fav_color' => 'blue'
+      )
+    );
+
+    $found_key = array_search('blue', array_column($people, 'fav_color'));
+    }
 }
 
 
