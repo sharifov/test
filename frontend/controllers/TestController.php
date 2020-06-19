@@ -1296,6 +1296,22 @@ class TestController extends FController
         $mailPreview = $communication->mailCapture($lead->project_id, ($tpl ? $tpl/*$tpl->etp_key*/ : ''), $mailFrom, $mailTo/*$comForm->c_email_to*/, $content_data, $language);
         VarDumper::dump($mailPreview, 10 , true); exit;
     }
+
+    public function actionVue()
+    {
+        return $this->render('vue');
+    }
+
+    public function actionReact()
+    {
+        return $this->render('react');
+    }
+
+    public function actionCallWidget()
+    {
+        return $this->render('call-widget');
+    }
+    
 }
 
 
