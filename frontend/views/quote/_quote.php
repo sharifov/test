@@ -390,7 +390,7 @@ $js = <<<JS
         PNotify.removeAll();
     }
     
-    let clipboard = new ClipboardJS('.clipboard');
+    var clipboard = new ClipboardJS('.clipboard');
     clipboard.on('success', function(e) {
         $('.clipboard').attr('class', 'fas fa-check');
         e.clearSelection();
