@@ -139,6 +139,8 @@ class Quote extends \yii\db\ActiveRecord
     public float $serviceFee = 0.035;
     public float $serviceFeePercent = 3.5;
 
+    public const SCENARIO_QUICK_SEARCH = 'quickSearch';
+
     /**
      * Quote constructor.
      * @param array $config
@@ -208,7 +210,7 @@ class Quote extends \yii\db\ActiveRecord
             [['created', 'updated', 'reservation_dump', 'created_by_seller', 'employee_name', 'employee_id', 'pcc', 'gds', 'last_ticket_date', 'service_fee_percent'], 'safe'],
             [['uid', 'record_locator', 'pcc', 'cabin', 'gds', 'trip_type', 'main_airline_code', 'fare_type', 'gds_offer_id'], 'string', 'max' => 255],
 
-            [['reservation_dump'], 'checkReservationDump'],
+            [['reservation_dump'], 'checkReservationDump', 'on' => self::SCENARIO_QUICK_SEARCH],
             [['pricing_info', 'tickets', 'origin_search_data'], 'string'],
             [['status'], 'checkStatus'],
 
@@ -576,16 +578,7 @@ class Quote extends \yii\db\ActiveRecord
 
     public function checkReservationDump(): void
     {
-        $enableGdsParsers = \Yii::$app->params['settings']['enable_gds_parsers_for_create_quote'];
-        $dumpParser = [];
-
-        if ($enableGdsParsers && $gds = ParsingDump::getGdsByQuote($this->gds)) {
-            $dumpParser = (new ReservationService($gds))
-                ->parseReservation($this->reservation_dump, true, $this->itinerary);
-        }
-        if (empty($dumpParser)) {
-            $dumpParser = self::parseDump($this->reservation_dump, true, $this->itinerary);
-        }
+        $dumpParser = self::parseDump($this->reservation_dump, true, $this->itinerary);
         if (empty($dumpParser)) {
             $this->addError('reservation_dump', 'Incorrect reservation dump!');
             \Yii::info(\yii\helpers\VarDumper::dumpAsString([
