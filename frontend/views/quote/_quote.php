@@ -53,9 +53,11 @@ $this->registerCss($css);
 
     <h6 id="head_reservation_result" style="display: none;">
         Imported reservation info
-        <i class="fas fa-copy clipboard" data-clipboard-target="#box_reservation_result"></i>
+        <!--<i class="fas fa-copy clipboard" data-clipboard-target="#box_reservation_result"></i>-->
     </h6>
-    <div id="box_reservation_result"></div>
+    <div id="box_reservation_result" style="display: none;"></div>
+
+    <div id="box_segments" ></div>
 
     <?php echo Html::textarea('reservation_result', null,
         ['id' => 'reservation_result', 'style' => 'display:none;'])
@@ -674,6 +676,9 @@ $js = <<<JS
                 } 
                 if (dataResponse.prices.length) {
                    $('#price-table tbody').html(dataResponse.prices); 
+                }
+                if (dataResponse.segments.length) {
+                   $('#box_segments').html(dataResponse.segments); 
                 }
                 if (dataResponse.trip_type.length) {
                    $('#quote-trip_type').val(dataResponse.trip_type);

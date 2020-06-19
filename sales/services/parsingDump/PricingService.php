@@ -13,7 +13,6 @@ class PricingService
     public string $gds;
 
     /**
-     * ReservationService constructor.
      * @param string $gds
      */
     public function __construct(string $gds)

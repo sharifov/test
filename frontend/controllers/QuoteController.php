@@ -482,8 +482,8 @@ class QuoteController extends FController
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         $response = [
-            'status' => 1, 'error' => '',
-            'reservation_dump' => [], 'prices' => '',
+            'status' => 1, 'error' => '', 'prices' => '',
+            'reservation_dump' => [], 'segments' => '',
             'validating_carrier' => '', 'trip_type' => Lead::TRIP_TYPE_ONE_WAY,
         ];
 
@@ -508,10 +508,19 @@ class QuoteController extends FController
                         if ($tripType = $reservationService->getTripType()) {
                             $response['trip_type'] = $tripType;
                         }
+
+                        if ($obj = ParsingDump::initClass($gds, ParsingDump::PARSING_TYPE_BAGGAGE)) { /* TODO:: baggage */
+                            $baggageFromDump = $obj->parseDump($post['prepare_dump']);
+
+                            $response['segments'] = $this->renderAjax('partial/_segmentRows', [
+                                'segments' => $reservationService->parseResult,
+                                'baggage' => $baggageFromDump,
+                            ]);
+                        }
                     }
 
                     $pricesFromDump = [];
-                    if ($obj = ParsingDump::initClass($gds, 'Pricing')) {
+                    if ($obj = ParsingDump::initClass($gds, ParsingDump::PARSING_TYPE_PRICING)) {
                         if ($pricingData = $obj->parseDump($post['prepare_dump'])) {
                             $response['validating_carrier'] = $pricingData['validating_carrier'];
                             $pricesFromDump = $pricingData['prices'];
@@ -522,15 +531,6 @@ class QuoteController extends FController
                         'prices' => $prices,
                         'lead' => $lead,
                     ]);
-
-                    /* TODO:: baggage */
-                    $baggageFromDump = [];
-                    if ($obj = ParsingDump::initClass($gds, 'Baggage')) {
-                        $baggageFromDump = $obj->parseDump($post['prepare_dump']);
-                    }
-
-                    \yii\helpers\VarDumper::dump($baggageFromDump, 10, true); exit();
-                    /* FOR DEBUG:: must by remove */
 
                     if (self::isFailed($response, $prices)) {
                         $response['status'] = 0;
