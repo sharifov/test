@@ -393,6 +393,8 @@ class EmployeeController extends FController
                 }
 
 
+                // VarDumper::dump($model->form_roles, 10, true); exit;
+
                 $model->addRole(true);
 
                 if(isset($attr['user_groups'])) {

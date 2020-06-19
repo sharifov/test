@@ -991,11 +991,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         if (isset($attr['acl_rules_activated'])) {
             $this->acl_rules_activated = $attr['acl_rules_activated'];
         }
-        if (isset($attr['form_roles']) && $attr['form_roles']) {
-            foreach ($attr['form_roles'] as $role) {
-                $this->form_roles[] = $role;
-            }
-        }
+
+//        if (!empty($attr['form_roles'])) {
+//            foreach ($attr['form_roles'] as $role) {
+//                $this->form_roles[] = $role;
+//            }
+//        }
         
         if (!$this->auth_key) {
             $this->generateAuthKey();
