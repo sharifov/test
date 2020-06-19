@@ -21,6 +21,9 @@ use sales\logger\db\LogDTO;
 use sales\services\parsingDump\lib\ParsingDump;
 use sales\services\parsingDump\PricingService;
 use sales\services\parsingDump\ReservationService;
+use sales\services\quote\addQuote\guard\GdsByQuoteGuard;
+use sales\services\quote\addQuote\guard\LeadGuard;
+use sales\services\quote\addQuote\price\PreparePrices;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\filters\AccessControl;
@@ -488,60 +491,14 @@ class QuoteController extends FController
             if (Yii::$app->request->isPost) {
 
                 $leadId = (int) Yii::$app->request->get('lead_id');
-                if (!$lead = Lead::findOne(['id' => $leadId])) {
-                    throw new \DomainException( 'Lead id(' . $leadId . ') not found');
-                }
+                $lead = LeadGuard::guard($leadId);
 
                 $post = Yii::$app->request->post();
                 $quoteFormName = (new Quote())->formName();
 
                 if (isset($post[$quoteFormName], $post['prepare_dump'])) {
                     $postQuote = $post[$quoteFormName];
-
-                    if (!$gds = ParsingDump::getGdsByQuote($postQuote['gds'])) {
-                        throw new \DomainException(  'This gds(' . $postQuote['gds'] . ') cannot be processed');
-                    }
-
-                    $pricesFromDump = [];
-                    if ($obj = ParsingDump::initClass($gds, 'Pricing')) {
-                        if ($pricingData = $obj->parseDump($post['prepare_dump'])) {
-                            $response['validating_carrier'] = $pricingData['validating_carrier'];
-                            $pricesFromDump = $pricingData['prices'];
-                        }
-                    }
-
-                    $prices = [];
-                    $serviceFee = (new Quote())->serviceFee;
-                    foreach ($lead->getPaxTypes() as $type) {
-                        $price = null;
-
-                        foreach ($pricesFromDump as $key => $value) {
-                            if ($type === $value['type']) {
-                                $price = new QuotePrice();
-                                $price->passenger_type = $type;
-                                $price->fare = $value['fare'];
-                                $price->taxes = $value['taxes'];
-                                $price->net = $price->fare + $price->taxes;
-                                $price->selling = ($price->net + $price->mark_up)  * (1 + $serviceFee);
-                                $price->toFloat();
-                                $price->roundAttributesValue();
-                                $price->oldParams = serialize($price->attributes);
-
-                                $prices[] = $price;
-                                unset($pricesFromDump[$key]);
-                                break;
-                            }
-                        }
-                        if ($price === null) {
-                            $price = new QuotePrice();
-                            $price->createQPrice($type);
-                            $prices[] = $price;
-                        }
-                    }
-                    $response['prices'] = $this->renderAjax('partial/_priceRows', [
-                        'prices' => $prices,
-                        'lead' => $lead,
-                    ]);
+                    $gds = GdsByQuoteGuard::guard($postQuote['gds']);
 
                     $itinerary = [];
                     $reservationService = new ReservationService($gds);
@@ -552,6 +509,28 @@ class QuoteController extends FController
                             $response['trip_type'] = $tripType;
                         }
                     }
+
+                    $pricesFromDump = [];
+                    if ($obj = ParsingDump::initClass($gds, 'Pricing')) {
+                        if ($pricingData = $obj->parseDump($post['prepare_dump'])) {
+                            $response['validating_carrier'] = $pricingData['validating_carrier'];
+                            $pricesFromDump = $pricingData['prices'];
+                        }
+                    }
+                    $prices = PreparePrices::prepareByLeadPax($lead, $pricesFromDump);
+                    $response['prices'] = $this->renderAjax('partial/_priceRows', [
+                        'prices' => $prices,
+                        'lead' => $lead,
+                    ]);
+
+                    /* TODO:: baggage */
+                    $baggageFromDump = [];
+                    if ($obj = ParsingDump::initClass($gds, 'Baggage')) {
+                        $baggageFromDump = $obj->parseDump($post['prepare_dump']);
+                    }
+
+                    \yii\helpers\VarDumper::dump($baggageFromDump, 10, true); exit();
+                    /* FOR DEBUG:: must by remove */
 
                     if (self::isFailed($response, $prices)) {
                         $response['status'] = 0;
