@@ -85,6 +85,10 @@ class LeadPreferencesForm extends Model
             [['currency'], 'string', 'max' => 3],
             ['currency', 'default', 'value' => null],
             [['currency'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::class, 'targetAttribute' => ['currency' => 'cur_code']],
+
+            [['clientLang'], 'filter', 'filter' => static function ($value) {
+                return $value === '' ? null : $value;
+            }],
             [['clientLang'], 'string', 'max' => 5],
             ['clientLang', 'exist', 'skipOnError' => true, 'skipOnEmpty' => true,
                 'targetClass' => Language::class, 'targetAttribute' => ['clientLang' => 'language_id']],
