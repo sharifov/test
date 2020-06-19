@@ -42,7 +42,7 @@ class Baggage implements ParseDumpInterface
 
             if (isset($baggageMatches[1], $ticketRows[$numRow - 1])) {
                 $previewRow = trim($ticketRows[$numRow - 1]);
-                $iataPattern = '/^X([A-Z]{3})\s[A-Z]|([A-Z]{3})\s[A-Z]|([A-Z]{3})\z/';
+                $iataPattern = '/^([A-Z]{3})\z|([A-Z]{3})\s[A-Z]|X([A-Z]{3})\s[A-Z]|([A-Z]{3})\s+S U R F A C E/';
 
                 preg_match($iataPattern, $previewRow, $iataDepartureMatches);
                 preg_match($iataPattern, $row, $iataArrivalMatches);

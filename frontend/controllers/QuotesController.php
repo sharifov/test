@@ -2,9 +2,12 @@
 
 namespace frontend\controllers;
 
+use common\components\CommunicationService;
 use common\models\Lead;
 use common\models\LeadFlightSegment;
 use common\models\search\QuotePriceSearch;
+use common\models\UserProjectParams;
+use frontend\models\CommunicationForm;
 use sales\auth\Auth;
 use Yii;
 use common\models\Quote;
@@ -106,6 +109,35 @@ class QuotesController extends FController
         return $this->renderPartial('view-details', [
             'model' => $model,
         ]);
+    }
+
+    public function actionAjaxCapture()
+    {
+        $quoteID = Yii::$app->request->get('id');
+        $gid = mb_substr(Yii::$app->request->get('gid'), 0, 32);
+        $lead = Lead::find()->where(['gid' => $gid])->limit(1)->one();
+
+        /** @var CommunicationService $communication */
+        $communication = Yii::$app->communication;
+
+        $tpl = 'cl_offer';
+        $language = Yii::$app->language ?: 'en-US';
+        $mailFrom = '';
+        $mailTo = '';
+
+        $project = $lead->project;
+        $projectContactInfo = [];
+
+        if ($project && $project->contact_info) {
+            $projectContactInfo = @json_decode($project->contact_info, true);
+        }
+
+        $content_data = $lead->getEmailData2([$quoteID], $projectContactInfo);
+
+        $mailCapture = $communication->mailCapture($lead->project_id, $tpl , $mailFrom, $mailTo, $content_data, $language);
+        $url = $mailCapture['data'];
+
+        return $url['host'] . $url['dir'] . $url['img'];
     }
 
 

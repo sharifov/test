@@ -393,7 +393,7 @@ class EmployeeController extends FController
                 }
 
 
-               // $model->addRole(true);
+                $model->addRole(true);
 
                 if(isset($attr['user_groups'])) {
                     if($attr['user_groups']) {
