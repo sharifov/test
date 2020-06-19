@@ -6,6 +6,9 @@ use common\models\Airline;
 use common\models\Airport;
 use DateTime;
 use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
+use sales\forms\lead\SegmentForm;
+use sales\services\lead\calculator\LeadTripTypeCalculator;
+use sales\services\lead\calculator\SegmentDTO;
 use sales\services\parsingDump\lib\ParsingDump;
 use yii\helpers\VarDumper;
 
@@ -15,6 +18,9 @@ use yii\helpers\VarDumper;
 class ReservationService
 {
     public string $gds;
+    public array $parseResult = [];
+    public array $itinerary = [];
+    public bool $parseStatus;
 
     /**
      * ReservationService constructor.
@@ -36,7 +42,6 @@ class ReservationService
     public function parseReservation($string, $validation = true, &$itinerary = [], $onView = false): array
     {
         $i = 0;
-        $result = [];
         $parserReservation = ParsingDump::initClass($this->gds, ParsingDump::PARSING_TYPE_RESERVATION);
         $string = trim($string);
         $rows = explode("\n", $string);
@@ -51,46 +56,62 @@ class ReservationService
                 }
                 $parseData = $parserReservation->processingRow($rawData);
 
-                $result[$i]['carrier'] = $parseData['airline'];
-                $result[$i]['airlineName'] = $this->getAirlineName($parseData['airline'], $onView);
-                $result[$i]['departureAirport'] = $parseData['departure_airport_iata'];
-                $result[$i]['arrivalAirport'] = $parseData['arrival_airport_iata'];
-                $result[$i]['departureDateTime'] = $parseData['departure_date_time'];
-                $result[$i]['arrivalDateTime'] = $parseData['arrival_date_time'];
-                $result[$i]['flightNumber'] = $parseData['flight_number'];
-                $result[$i]['bookingClass'] = $parseData['booking_class'];
-                $result[$i]['departureCity'] = Airport::findIdentity($parseData['departure_airport_iata']);
-                $result[$i]['arrivalCity'] = Airport::findIdentity($parseData['arrival_airport_iata']);
-                $result[$i]['flightDuration'] = $this->getFlightDuration(
-                    $result[$i]['departureDateTime'],
-                    $result[$i]['arrivalDateTime'],
-                    $result[$i]['departureCity'],
-                    $result[$i]['arrivalCity']
+                $this->parseResult[$i]['carrier'] = $parseData['airline'];
+                $this->parseResult[$i]['airlineName'] = $this->getAirlineName($parseData['airline'], $onView);
+                $this->parseResult[$i]['departureAirport'] = $parseData['departure_airport_iata'];
+                $this->parseResult[$i]['arrivalAirport'] = $parseData['arrival_airport_iata'];
+                $this->parseResult[$i]['departureDateTime'] = $parseData['departure_date_time'];
+                $this->parseResult[$i]['arrivalDateTime'] = $parseData['arrival_date_time'];
+                $this->parseResult[$i]['flightNumber'] = $parseData['flight_number'];
+                $this->parseResult[$i]['bookingClass'] = $parseData['booking_class'];
+                $this->parseResult[$i]['departureCity'] = Airport::findIdentity($parseData['departure_airport_iata']);
+                $this->parseResult[$i]['arrivalCity'] = Airport::findIdentity($parseData['arrival_airport_iata']);
+                $this->parseResult[$i]['flightDuration'] = $this->getFlightDuration(
+                    $this->parseResult[$i]['departureDateTime'],
+                    $this->parseResult[$i]['arrivalDateTime'],
+                    $this->parseResult[$i]['departureCity'],
+                    $this->parseResult[$i]['arrivalCity']
                 );
-                $result[$i]['layoverDuration'] = $this->getLayoverDuration($result, $i);
+                $this->parseResult[$i]['layoverDuration'] = $this->getLayoverDuration($this->parseResult, $i);
 
                 if ($airline = Airline::findIdentity($parseData['airline'])) {
-                    $result[$i]['cabin'] = $airline->getCabinByClass($parseData['booking_class']);
+                    $this->parseResult[$i]['cabin'] = $airline->getCabinByClass($parseData['booking_class']);
                 }
+                $itinerary[] = $this->itinerary[] = (new ItineraryDumpDTO([]))
+                    ->feelByParsedReservationDump($this->parseResult[$i]);
 
-                $itinerary[] = (new ItineraryDumpDTO([]))->feelByParsedReservationDump($result[$i]);
                 $i ++;
-
             } catch (\Throwable $throwable) {
                 \Yii::error(VarDumper::dumpAsString([
                      'parseData' => $parseData,
                      'throwable' => $throwable,
-                ], 10),
-                'WorldSpanReservationService:parseReservation:Throwable');
-                $result['failed']['segment'][] = $row;
+                ], 20),
+                'ReservationService:parseReservation:Throwable');
+                $this->parseResult['failed']['segment'][] = $row;
             }
         }
 
-        if ($validation && isset($result['failed'])) {
-            $result = [];
+        $this->parseStatus = true;
+        if ($validation && isset($this->parseResult['failed'])) {
+            $this->parseResult = [];
+            $this->parseStatus = false;
         }
+        return $this->parseResult;
+    }
 
-        return $result;
+    /**
+     * @return string|null
+     */
+    public function getTripType(): ?string
+    {
+        if (empty($this->parseResult)) {
+            return null;
+        }
+        $segmentsDTO = [];
+        foreach ($this->parseResult as $segment) {
+            $segmentsDTO[] = new SegmentDTO($segment['departureAirport'], $segment['arrivalAirport']);
+        }
+        return LeadTripTypeCalculator::calculate(...$segmentsDTO);
     }
 
     /**
@@ -100,7 +121,7 @@ class ReservationService
      * @param Airport|null $arrivalCity
      * @return float|int
      */
-    public function getFlightDuration(DateTime $departureDateTime, DateTime $arrivalDateTime, ?Airport $departureCity, ?Airport $arrivalCity)
+    private function getFlightDuration(DateTime $departureDateTime, DateTime $arrivalDateTime, ?Airport $departureCity, ?Airport $arrivalCity)
     {
         if (isset($departureCity, $arrivalCity) && $departureCity->dst !== $arrivalCity->dst) {
             $flightDuration = ($arrivalDateTime->getTimestamp() - $departureDateTime->getTimestamp()) / 60;
@@ -118,11 +139,10 @@ class ReservationService
      */
     private function getLayoverDuration(array $data, int $index)
     {
-        $result = 0;
         if (isset($data[$index - 1])) {
             $result = ($data[$index]['departureDateTime']->getTimestamp() - $data[$index - 1]['arrivalDateTime']->getTimestamp()) / 60;
         }
-        return $result;
+        return $result ?? 0;
     }
 
     /**
