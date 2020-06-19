@@ -13,7 +13,7 @@ use yii\bootstrap\Widget;
 use yii\helpers\VarDumper;
 
 /**
- * Class NewWebPhoneWidget
+ * Class CallWidget
  *
  * @property int $userId
  */

@@ -1306,6 +1306,11 @@ class TestController extends FController
     {
         return $this->render('react');
     }
+
+    public function actionCallWidget()
+    {
+        return $this->render('call-widget');
+    }
     
 }
 
