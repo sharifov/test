@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\components\CommunicationService;
 use common\components\Purifier;
 use common\components\jobs\TelegramSendMessageJob;
 use common\components\SearchService;
@@ -16,7 +17,9 @@ use common\models\Department;
 use common\models\DepartmentEmailProject;
 use common\models\DepartmentPhoneProject;
 use common\models\Email;
+use common\models\EmailTemplateType;
 use common\models\Employee;
+use common\models\Language;
 use common\models\Lead;
 use common\models\LeadFlow;
 use common\models\LeadQcall;
@@ -39,6 +42,7 @@ use console\migrations\RbacMigrationService;
 use DateInterval;
 use DatePeriod;
 use DateTime;
+use frontend\models\CommunicationForm;
 use frontend\models\form\CreditCardForm;
 use frontend\models\UserFailedLogin;
 use frontend\widgets\lead\editTool\Form;
@@ -1252,6 +1256,47 @@ class TestController extends FController
 		print_r($service->sendAddedCreditCardToBO($saleOriginalData['projectApiKey'], $bookId, $saleId, $card));
 	}
 
+	public function actionPreview()
+    {
+        $gid = mb_substr('26958bc1be930b2213595af0ab40f586', 0, 32);
+        $lead = Lead::find()->where(['gid' => $gid])->limit(1)->one();
+
+        /** @var CommunicationService $communication */
+        $communication = Yii::$app->communication;
+
+        $comForm = new CommunicationForm();
+        $language = $comForm->c_language_id ?: 'en-US';
+        $comForm->c_preview_email = 1;
+        $tpl = 'cl_offer'/*EmailTemplateType::findOne($comForm->c_email_tpl_id)*/;
+        $mailFrom = 'test@gmail.com';
+        $mailTo = 'test2@gmail.com';
+
+        $content_data['email_body_text'] = '2';
+
+        $upp = null;
+        if ($lead->project_id) {
+            $upp = UserProjectParams::find()->where(['upp_project_id' => $lead->project_id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->one();
+            if ($upp) {
+                $mailFrom = $upp->getEmail();
+            }
+        }
+
+        $project = $lead->project;
+        $projectContactInfo = [];
+
+        if ($project && $project->contact_info) {
+            $projectContactInfo = @json_decode($project->contact_info, true);
+        }
+
+        $content_data = $lead->getEmailData2(['916469'], $projectContactInfo);
+
+        //VarDumper::dump($content_data, 10 , true); exit;
+
+
+        $mailPreview = $communication->mailCapture($lead->project_id, ($tpl ? $tpl/*$tpl->etp_key*/ : ''), $mailFrom, $mailTo/*$comForm->c_email_to*/, $content_data, $language);
+        VarDumper::dump($mailPreview, 10 , true); exit;
+    }
+
     public function actionVue()
     {
         return $this->render('vue');
@@ -1261,6 +1306,7 @@ class TestController extends FController
     {
         return $this->render('react');
     }
+    
 }
 
 

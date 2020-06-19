@@ -59,6 +59,8 @@ class LeadPreferencesManageService
 
 		$this->transactionManager->wrap( function () use($form, $lead, $leadPreferences) {
 			$lead->editDelayedChargeAndNote($form->delayedCharge, $form->notesForExperts);
+			$lead->l_client_lang = $form->clientLang;
+
 			$this->leadRepository->save($lead);
 
 			if ($leadPreferences) {

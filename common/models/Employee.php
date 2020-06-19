@@ -42,6 +42,8 @@ use yii\web\NotFoundHttpException;
  * @property string $last_activity
  * @property boolean $acl_rules_activated
  *
+ * @property bool $make_user_project_params
+ *
  * @property array $roles
  * @property array $roles_raw
  * @property array $rolesName
@@ -120,6 +122,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
     public $password;
     public $deleted;
+    public $make_user_project_params;
 
     public $roles = null;
     public $roles_raw = null;
@@ -369,13 +372,14 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             [['username', 'auth_key', 'password_hash', 'email', 'form_roles'], 'required'],
             [['password'], 'required', 'on' => self::SCENARIO_REGISTER],
             [['email', 'password', 'username'], 'trim'],
-            [['password'], 'string', 'min' => 6],
+            [['password'], 'string', 'min' => 8],
             [['status'], 'integer'],
             [['username', 'password_hash', 'password_reset_token', 'email'], 'string', 'max' => 255],
             [['auth_key'], 'string', 'max' => 32],
             [['username'], 'unique'],
             [['email'], 'unique'],
             ['email', 'email'],
+            [['make_user_project_params'], 'boolean'],
             [['password_reset_token'], 'unique'],
             [['created_at', 'updated_at', 'last_activity', 'acl_rules_activated', 'full_name', 'user_groups', 'user_projects', 'deleted', 'user_departments'], 'safe'],
         ];
@@ -399,7 +403,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             'user_groups' => 'User groups',
             'user_projects' => 'Projects access',
             'form_roles' => 'Roles',
-            'user_departments' => 'Departments'
+            'user_departments' => 'Departments',
+            'make_user_project_params' => 'Make user project params (automatic)'
         ];
     }
 
@@ -986,11 +991,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         if (isset($attr['acl_rules_activated'])) {
             $this->acl_rules_activated = $attr['acl_rules_activated'];
         }
-        if (isset($attr['form_roles']) && $attr['form_roles']) {
-            foreach ($attr['form_roles'] as $role) {
-                $this->form_roles[] = $role;
-            }
-        }
+
+//        if (!empty($attr['form_roles'])) {
+//            foreach ($attr['form_roles'] as $role) {
+//                $this->form_roles[] = $role;
+//            }
+//        }
         
         if (!$this->auth_key) {
             $this->generateAuthKey();
@@ -2200,9 +2206,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $query->andWhere(['IN', 'user_connection.uc_user_id', $subQuery]);
         $query->groupBy(['user_connection.uc_user_id']);
 
-        if ($call->c_dep_id) {
-            $subQueryUd = UserDepartment::find()->usersByDep($call->c_dep_id);
-            $query->andWhere(['IN', 'user_connection.uc_user_id', $subQueryUd]);
+        $allow_cross_department_call_transfers = Yii::$app->params['settings']['allow_cross_department_call_transfers'] ?? false;
+
+        if (!$allow_cross_department_call_transfers) {
+            if ($call->c_dep_id) {
+                $subQueryUd = UserDepartment::find()->usersByDep($call->c_dep_id);
+                $query->andWhere(['IN', 'user_connection.uc_user_id', $subQueryUd]);
+            }
         }
 
         $generalQuery = new Query();

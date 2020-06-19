@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use sales\forms\quotePrice\AddQuotePriceForm;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -31,7 +32,7 @@ use yii\db\ActiveRecord;
  */
 class QuotePrice extends \yii\db\ActiveRecord
 {
-    const
+    public const
         PASSENGER_ADULT = 'ADT',
         PASSENGER_CHILD = 'CHD',
         PASSENGER_INFANT = 'INF';
@@ -44,6 +45,7 @@ class QuotePrice extends \yii\db\ActiveRecord
     ];
 
     public $oldParams;
+    public int $defaultPrecision = 2;
 
     /**
      * @param array $attributes
@@ -57,6 +59,20 @@ class QuotePrice extends \yii\db\ActiveRecord
         $price->quote_id = $quoteId;
         $price->uid = uniqid(explode('.', $price->uid)[0] . '.');
         $price->toFloat();
+        return $price;
+    }
+
+    public static function manualCreation(AddQuotePriceForm $form): self
+    {
+        $price = new self();
+        $price->quote_id = $form->quote_id;
+        $price->passenger_type = $form->passenger_type;
+        $price->fare = $form->fare;
+        $price->taxes = $form->taxes;
+        $price->net = $form->net;
+        $price->mark_up = $form->mark_up;
+        $price->selling = $form->selling;
+        $price->service_fee = $form->service_fee;
         return $price;
     }
 
@@ -142,7 +158,7 @@ class QuotePrice extends \yii\db\ActiveRecord
 
         $model->selling += $model->service_fee;
 
-        $model->roundValue();
+        $model->roundAttributesValue();
 
         $model->oldParams = serialize($model->attributes);
     }
@@ -176,7 +192,7 @@ class QuotePrice extends \yii\db\ActiveRecord
             return $this;
         }
 
-        $this->roundValue(2, true);
+        $this->roundAttributesValue();
         $this->oldParams = serialize($this->attributes);
 
         return $this;
@@ -201,16 +217,26 @@ class QuotePrice extends \yii\db\ActiveRecord
 
     /**
      * @param int $precision
-     * @param bool $setZero
      */
-    public function roundValue($precision = 2): void
+    public function roundAttributesValue($precision = 2): void
     {
         foreach ($this->attributes as $attr => $value) {
             if (in_array($attr, ['net', 'selling', 'extra_mark_up', 'mark_up', 'taxes', 'fare', 'service_fee'])) {
-                $this->$attr = round($value, $precision);
+                $this->$attr = $this->roundValue($value, $precision);
             }
         }
     }
+
+    /**
+     * @param $value
+     * @param int|null $precision
+     * @return false|float
+     */
+    public function roundValue($value, ?int $precision = null)
+     {
+        $precision = $precision ?? $this->defaultPrecision;
+        return round((float) $value, $precision);
+     }
 
     /**
      * {@inheritdoc}
@@ -220,24 +246,13 @@ class QuotePrice extends \yii\db\ActiveRecord
         return [
             [['quote_id'], 'integer'],
             [['selling', 'net', 'fare', 'taxes', 'mark_up', 'service_fee'], 'number'],
-            [['extra_mark_up', 'service_fee'], 'number', 'min' => 0],
-
+            [['extra_mark_up'], 'number', 'min' => 0],
+            [['taxes'],'number','min' => 0.01, 'when' => function($model) {
+                return $model->passenger_type !== self::PASSENGER_INFANT;
+            }],
             [['created', 'updated', 'oldParams', 'uid'], 'safe'],
             [['passenger_type'], 'string', 'max' => 255],
             [['quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => Quote::class, 'targetAttribute' => ['quote_id' => 'id']],
-
-            [['selling', 'net'], 'compare', 'compareValue' => 0, 'operator' => '>', 'type' => 'number'],
-
-            ['fare', function ($attribute, $params) {
-                if (($this->net == 0 && $this->$attribute == 0) || $this->$attribute < 0) {
-                    $this->addError($attribute, 'Fare must be greater than zero');
-                }
-            }],
-            ['taxes', function ($attribute, $params) {
-                if (($this->net == 0 && $this->$attribute == 0) || $this->$attribute < 0) {
-                    $this->addError($attribute, 'Taxes must be greater than zero');
-                }
-            }],
         ];
     }
 
@@ -351,7 +366,7 @@ class QuotePrice extends \yii\db\ActiveRecord
         $this->selling += $this->service_fee;
 
         $this->toFloat();
-        $this->roundValue();
+        $this->roundAttributesValue();
         $this->oldParams = serialize($this->attributes);
     }
 

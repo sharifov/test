@@ -206,6 +206,7 @@ use yii\helpers\VarDumper;
  * @property mixed $sentCount
  * @property bool $calledExpert
  * @property $quoteType
+ * @property Language $language
  *
  */
 class Lead extends ActiveRecord implements Objectable
@@ -494,7 +495,6 @@ class Lead extends ActiveRecord implements Objectable
             [['l_client_first_name', 'l_client_last_name'], 'string', 'max' => 50],
             [['l_client_phone'], 'string', 'max' => 20],
             [['l_client_email'], 'string', 'max' => 160],
-            [['l_client_lang'], 'string', 'max' => 5],
             [['gid'], 'unique'],
             [['l_answered'], 'boolean'],
             [['status_description'], 'string'],
@@ -512,6 +512,9 @@ class Lead extends ActiveRecord implements Objectable
 
             ['l_visitor_log_id', 'integer'],
             ['l_visitor_log_id', 'exist', 'skipOnError' => true, 'targetClass' => VisitorLog::class, 'targetAttribute' => ['l_visitor_log_id' => 'vl_id']],
+
+            [['l_client_lang'], 'string', 'max' => 5],
+            ['l_client_lang', 'exist', 'skipOnError' => true, 'targetClass' => Language::class, 'targetAttribute' => ['l_client_lang' => 'language_id']],
         ];
     }
 
@@ -734,6 +737,7 @@ class Lead extends ActiveRecord implements Objectable
         $lead->bo_flight_id = $form->flight_id;
         $lead->l_dep_id = Department::DEPARTMENT_SALES;
         $lead->l_type_create = self::TYPE_CREATE_API;
+        $lead->l_client_lang = $form->user_language;
         return $lead;
     }
 
@@ -1972,6 +1976,14 @@ class Lead extends ActiveRecord implements Objectable
     public function getLeadFlightSegmentsCount(): int
     {
         return $this->hasMany(LeadFlightSegment::class, ['lead_id' => 'id'])->count();
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getLanguage(): ActiveQuery
+    {
+        return $this->hasOne(Language::class, ['language_id' => 'l_client_lang']);
     }
 
     /**

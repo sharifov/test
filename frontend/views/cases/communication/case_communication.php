@@ -8,6 +8,7 @@
  * @var $previewSmsForm CasePreviewSmsForm
  * @var $isAdmin bool
  * @var $isCommunicationLogEnabled bool
+ * @var $fromPhoneNumbers array
  */
 
 use common\models\DepartmentEmailProject;
@@ -16,6 +17,7 @@ use frontend\models\CaseCommunicationForm;
 use frontend\models\CasePreviewEmailForm;
 use frontend\models\CasePreviewSmsForm;
 use sales\entities\cases\Cases;
+use sales\helpers\setting\SettingHelper;
 use yii\helpers\Html;
 use yii\bootstrap4\Modal;
 use yii\helpers\VarDumper;
@@ -405,8 +407,21 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
                             </div>
 
                             <div class="col-sm-3 form-group message-field-phone message-field-sms" id="phone-numbers-group" style="display: block;">
-                                <?= $form->field($comForm, 'c_phone_number')->dropDownList($clientPhones, ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_phone_number']) ?>
+                                <?= $form->field($comForm, 'c_phone_number')->dropDownList($clientPhones, ['prompt' => '---', 'class' => 'form-control', 'id' => !SettingHelper::isCaseCommunicationNewCallWidgetEnabled() ? 'c_phone_number' : 'call-to-number']) ?>
                             </div>
+
+                            <?php if (SettingHelper::isCaseCommunicationNewCallWidgetEnabled()): ?>
+                                <div class="col-sm-3 form-group message-field-phone" style="display: block;">
+                                    <?= Html::label('Phone from', null, ['class' => 'control-label']) ?>
+                                    <?= Html::dropDownList('call-from-number', null, $fromPhoneNumbers, ['prompt' => '---', 'id' => 'call-from-number', 'class' => 'form-control', 'label'])?>
+                                </div>
+                                <div class="col-sm-3 form-group message-field-phone" style="display: block;">
+									<?= Html::button('<i class="fa fa-phone-square"></i> Make Call', ['class' => 'btn btn-sm btn-success', 'id' => 'btn-new-make-call', 'data-case-id' => $model->cs_id, 'style' => 'margin-top: 28px'])?>
+                                </div>
+								<?=Html::hiddenInput('call-lead-id', null, ['id' => 'call-lead-id'])?>
+								<?=Html::hiddenInput('call-case-id', $model->cs_id, ['id' => 'call-case-id'])?>
+								<?=Html::hiddenInput('call-project-id', $model->cs_project_id, ['id' => 'call-project-id'])?>
+                            <?php endif; ?>
 
                             <?php if ($model->isDepartmentSupport()): ?>
                                 <div class="col-md-3 form-group message-field-sms" id="sms-phone-numbers">
@@ -479,6 +494,7 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
                                     ['class' => 'btn btn-lg btn-primary', 'id' => 'preview_email_btn']) ?>
                             </div>
                         </div>
+                         <?php if (!SettingHelper::isCaseCommunicationNewCallWidgetEnabled()): ?>
                         <div class="chat__call call-box message-field-phone" id="call-box" style="display: none;">
 
                             <div class="call-box__interlocutor">
@@ -530,6 +546,7 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
                                 </div>
                             <?php endif; ?>
                         </div>
+                         <?php endif; ?>
 
                         <?= $form2->field($comForm, 'c_voice_status')->hiddenInput(['id' => 'c_voice_status'])->label(false); ?>
                         <?= $form2->field($comForm, 'c_voice_sid')->hiddenInput(['id' => 'c_voice_sid'])->label(false); ?>
@@ -716,6 +733,8 @@ $js = <<<JS
 
     const tpl_email_blank_key = '$tpl_email_blank_key';
     const tpl_sms_blank_key = '$tpl_sms_blank_key';
+    let projectId = '{$model->project->id}';
+    let project = '{$model->project->name}';
 
     $('body').on("change", '#c_type_id', function () {
         initializeMessageType($(this).val());
@@ -723,6 +742,19 @@ $js = <<<JS
 
     $('body').on("change", '#c_phone_number', function () {
         $('#div-call-phone-number').text($(this).val());
+    });
+    
+    $(document).on("change", '#call-to-number', function () {
+        $('#call-pane__dial-number').val($(this).val());
+    });
+    
+    $(document).on("change", '#call-from-number', function () {
+        let value = $(this).val();
+        window.phoneNumbers.setPrimaryData({
+            value: value,
+            projectId: projectId,
+            project: project
+        })
     });
     
      $('body').on("change", '#c_sms_tpl_key', function () {

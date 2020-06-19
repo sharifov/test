@@ -34,6 +34,7 @@ use sales\forms\cases\CasesChangeStatusForm;
 use sales\forms\cases\CasesClientUpdateForm;
 use sales\forms\cases\CasesCreateByWebForm;
 use sales\forms\cases\CasesSaleForm;
+use sales\helpers\setting\SettingHelper;
 use sales\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
 use sales\guards\cases\CaseManageSaleInfoGuard;
 use sales\model\cases\useCases\cases\updateInfo\Handler;
@@ -666,7 +667,25 @@ class CasesController extends FController
 
         //VarDumper::dump($dataProvider->allModels); exit;
 
-
+		$fromPhoneNumbers = [];
+		if (SettingHelper::isCaseCommunicationNewCallWidgetEnabled()) {
+			if ($model && $model->isDepartmentSupport()) {
+				$departmentPhones = DepartmentPhoneProject::find()->where(['dpp_project_id' => $model->cs_project_id, 'dpp_dep_id' => $model->cs_dep_id, 'dpp_default' => DepartmentPhoneProject::DPP_DEFAULT_TRUE])->withPhoneList()->all();
+				foreach ($departmentPhones as $departmentPhone) {
+					$phone = $departmentPhone->getPhone();
+					if ($phone) {
+						$fromPhoneNumbers[$phone] = $departmentPhone->dppProject->name . ' (' . $phone . ')';
+					}
+				}
+			} else if ($userParams = UserProjectParams::find()->where(['upp_user_id' => Auth::id()])->withPhoneList()->all()) {
+				foreach ($userParams as $param) {
+					$phone = $param->getPhone();
+					if ($phone) {
+						$fromPhoneNumbers[$phone] = $param->uppProject->name . ' (' . $phone . ')';
+					}
+				}
+			}
+		}
 
         $enableCommunication = true;
         $isAdmin = true;
@@ -694,7 +713,9 @@ class CasesController extends FController
             'dataProviderNotes' => $dataProviderNotes,
 
 			'coupons' => $coupons,
-			'sendCouponsForm' => $sendCouponForm
+			'sendCouponsForm' => $sendCouponForm,
+
+			'fromPhoneNumbers' => $fromPhoneNumbers
         ]);
     }
 
@@ -960,7 +981,7 @@ class CasesController extends FController
     {
         $id = (int)$id;
         $str = '';
-        if ($categories = $this->caseCategoryRepository->getAllByDep($id)) {
+        if ($categories = $this->caseCategoryRepository->getEnabledByDep($id)) {
             $str .= '<option>Choose a category</option>';
             foreach ($categories as $category) {
                 $str .= '<option value="' . Html::encode($category->cc_id) . '">' . Html::encode($category->cc_name) . '</option>';
@@ -1346,7 +1367,7 @@ class CasesController extends FController
 
         $form = new UpdateInfoForm(
             $case,
-            ArrayHelper::map($this->caseCategoryRepository->getAllByDep($case->cs_dep_id), 'cc_id', 'cc_name')
+            ArrayHelper::map($this->caseCategoryRepository->getEnabledByDep($case->cs_dep_id), 'cc_id', 'cc_name')
         );
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
