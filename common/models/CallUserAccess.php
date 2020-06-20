@@ -196,6 +196,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
         }
 
         if(($insert || isset($changedAttributes['cua_status_id'])) && $call && ($call->isIn() || $call->isHold())) {
+//        if(($insert || isset($changedAttributes['cua_status_id']))) {
             //Notifications::socket($this->cua_user_id, null, 'updateIncomingCall', $this->attributes);
 			if ($this->isPending()) {
 				$client = $this->cuaCall->cClient;

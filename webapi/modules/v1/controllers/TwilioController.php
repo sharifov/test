@@ -387,7 +387,14 @@ class TwilioController extends ApiBaseNoAuthController
                 if ($type === 'user') {
                     if ($id) {
                         $call->c_created_user_id = $id;
+                        if (!$call->save()) {
+                            Yii::error(VarDumper::dumpAsString($call->errors), 'API:Twilio:RedirectCall:Call:update:1');
+                        }
                         Call::applyCallToAgentAccess($call, $id);
+                    } else {
+                        if (!$call->save()) {
+                            Yii::error(VarDumper::dumpAsString($call->errors), 'API:Twilio:RedirectCall:Call:update:2');
+                        }
                     }
 
                     $responseTwml->say('You have been redirected to a call to another agent. Please wait for an answer', [
@@ -464,12 +471,15 @@ class TwilioController extends ApiBaseNoAuthController
                         throw new Exception('Not found DepartmentPhoneProject', 10);
                     }
 
+                    if (!$call->save()) {
+                        Yii::error(VarDumper::dumpAsString($call->errors), 'API:Twilio:RedirectCall:Call:update:3');
+                    }
 
                 }
 
-                if (!$call->save()) {
-                    Yii::error(VarDumper::dumpAsString($call->errors), 'API:Twilio:RedirectCall:Call:update');
-                }
+//                if (!$call->save()) {
+//                    Yii::error(VarDumper::dumpAsString($call->errors), 'API:Twilio:RedirectCall:Call:update');
+//                }
             }
 //            } else {
 //                Yii::error('Not found CallSid', 'API:Twilio:RedirectCalUser');
