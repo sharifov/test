@@ -19,6 +19,7 @@ class NewWebPhoneAsset extends AssetBundle
 	public $js = [
 		'https://cdn.jsdelivr.net/npm/simplebar@latest/dist/simplebar.min.js',
 
+        '/web_phone/tpl/active.js',
         '/web_phone/js/pane/active/btn/add_person.js',
         '/web_phone/js/pane/active/btn/dialpad.js',
         '/web_phone/js/pane/active/btn/hangup.js',
@@ -30,6 +31,7 @@ class NewWebPhoneAsset extends AssetBundle
         '/web_phone/tpl/incoming.js',
         '/web_phone/js/pane/incoming/pane.js',
 
+        '/web_phone/tpl/outgoing.js',
         '/web_phone/js/pane/outgoing/pane.js',
 
         '/web_phone/js/queue.js',

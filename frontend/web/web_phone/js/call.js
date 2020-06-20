@@ -1,12 +1,8 @@
 var PhoneWidgetCall = function () {
 
     this.connection = '';
-    this.obj;
 
     let statusCheckbox = null;
-
-    const $addNoteInput = $('#active_call_add_note');
-    const $addNoteSubmit = $('#active_call_add_note_submit');
 
     let settings = {
         'ajaxCallRedirectGetAgents': '',
@@ -38,6 +34,8 @@ var PhoneWidgetCall = function () {
         Object.assign(settings, options);
 
         statusCheckbox = new widgetStatus('.call-status-switcher', options.updateStatusUrl);
+        statusCheckbox.setStatus(options.status);
+        widgetIcon.update({type: 'default', timer: false, text: null, currentCalls: null, status: statusCheckbox.getStatus() === 1});
 
         setCountMissedCalls(options.countMissedCalls);
 
@@ -45,13 +43,15 @@ var PhoneWidgetCall = function () {
         transferCallBtnEvent();
         acceptCallBtnEvent();
         rejectIncomingCallEvent();
+        hideIncomingCallEvent();
         callAddNoteEvent();
     }
 
     function removeIncomingRequest(callId) {
         queues.incoming.remove(callId);
-        if (panes.incoming.isActive()) {
-            if (panes.incoming.getCallId() === callId) {
+        if (panes.incoming.getCallId() === callId) {
+            panes.incoming.removeCallId();
+            if (panes.incoming.isActive()) {
                 refreshPanes();
             }
         }
@@ -60,117 +60,117 @@ var PhoneWidgetCall = function () {
     function refreshPanes() {
         let incoming = queues.incoming.getLast();
         if (incoming !== null) {
-            panes.incoming.load(incoming);
-            panes.incoming.show();
-            widgetIcon.update({type: 'incoming', timer: false, text: null, currentCalls: '', status: 'online'});
-            openWidget();
-            openCallTab();
+            panes.incoming.init(incoming, queues.incoming.count(), queues.active.count());
             return;
         }
 
         let outgoing = queues.outgoing.getLast();
         if (outgoing !== null) {
-            panes.outgoing.load(outgoing);
-            panes.outgoing.show();
-            widgetIcon.update({type: 'outgoing', timer: false, text: 'calling', currentCalls: null, status: 'online'});
-            openWidget();
-            openCallTab();
+            let obj = Object.assign({}, outgoing);
+            if (obj.timeQueuePushed) {
+                obj.duration = Math.floor((Date.now() - parseInt(obj.timeQueuePushed)) / 1000) + parseInt(obj.duration || 0);
+            }
+            panes.outgoing.init(obj);
             return;
         }
 
         let active = queues.active.getLast();
         if (active !== null) {
-            panes.active.load(active);
-            panes.active.show();
-            widgetIcon.update({type: 'inProgress', timer: false, text: 'on call', currentCalls: '', status: 'online'});
-            openWidget();
-            openCallTab();
+            let obj = Object.assign({}, active);
+            if (obj.timeQueuePushed) {
+                obj.duration = Math.floor((Date.now() - parseInt(obj.timeQueuePushed)) / 1000) + parseInt(obj.duration || 0);
+            }
+            if (obj.holdStartTime) {
+                obj.holdDuration = Math.floor((Date.now() - parseInt(obj.holdStartTime)) / 1000);
+            } else {
+                obj.holdDuration = 0;
+            }
+            panes.active.init(obj);
             return;
         }
+
+        widgetIcon.update({type: 'default', timer: false, text: null, currentCalls: null, status: statusCheckbox.getStatus() === 1});
 
         $('#tab-phone .call-pane-initial').removeClass('is_active');
         $('#tab-phone .call-pane').addClass('is_active');
     }
 
-    function incomingCall(data) {
+    function requestIncomingCall(data) {
         console.log('incoming call');
-        // console.log(data);
-
         queues.incoming.push(data);
-
-        panes.incoming.load(data);
-        panes.incoming.show();
-
-        widgetIcon.update({type: 'incoming', timer: false, text: null, currentCalls: '', status: 'online'});
-
+        panes.incoming.init(data, queues.incoming.count(), queues.active.count());
         openWidget();
         openCallTab();
     }
 
-    function outgoingCall(data) {
+    function requestOutgoingCall(data) {
         console.log('outgoing call');
-        // console.log(data);
-
-        queues.outgoing.push(data);
-
-        panes.outgoing.load(data);
-        panes.outgoing.show();
-
-        widgetIcon.update({type: 'outgoing', timer: true, 'timerStamp': data.duration, text: 'calling', currentCalls: null, status: 'online'});
-
+        if (data.callId) {
+            queues.outgoing.push(data);
+        }
+        panes.outgoing.init(data);
         openWidget();
         openCallTab();
     }
 
-    function activeCall(data) {
+    function requestActiveCall(data) {
         console.log('active call');
-        // console.log(data);
-
         queues.incoming.remove(data.callId);
         queues.outgoing.remove(data.callId);
-        queues.active.push(data);
 
-        panes.active.load(data);
-        panes.active.show();
+        let obj = Object.assign({}, data);
+        if (obj.holdDuration && obj.isHold) {
+            obj.holdStartTime = Date.now() - (obj.holdDuration * 1000);
+        }
+        queues.active.push(obj);
 
-        widgetIcon.update({type: 'inProgress', timer: true, 'timerStamp': data.duration, text: 'on call', currentCalls: '', status: 'online'});
+        if (panes.outgoing.getCallId() === obj.callId) {
+            panes.outgoing.removeCallId();
+            panes.outgoing.hide();
+        }
 
+        panes.active.init(obj);
         openWidget();
         openCallTab();
     }
 
     function completeCall(callId)
     {
+        queues.active.remove(callId);
+        queues.incoming.remove(callId);
+        queues.outgoing.remove(callId);
+
+        let needRefresh = false;
+
         if (panes.active.getCallId() === callId) {
             panes.active.removeCallId();
-            panes.active.clear();
-            $('.phone-widget-icon').removeClass('is-on-call').removeClass('is-pending');
-            $('.call-pane__call-btns').removeClass('is-on-call').removeClass('is-pending');
-            $('.call-pane-initial').removeClass('is_active');
-            $('.call-pane').addClass('is_active');
-            $('.call-in-action__time').hide();
             window.connection = '';
+            if (panes.active.isActive()) {
+                needRefresh = true;
+            }
         }
+
         if (panes.outgoing.getCallId() === callId) {
             panes.outgoing.removeCallId();
-            panes.outgoing.hide();
+            if (panes.outgoing.isActive()) {
+                needRefresh = true;
+            }
         }
+
         if (panes.incoming.getCallId() === callId) {
             panes.incoming.removeCallId();
-            panes.incoming.hide();
+            if (panes.incoming.isActive()) {
+                needRefresh = true;
+            }
         }
 
-        if (panes.active.getCallId()) {
-            panes.active.show();
-        } else if (panes.outgoing.getCallId()) {
-            panes.outgoing.show();
-        } else if (queues.incoming.getLast()) {
-            incomingCall(queues.incoming.getLast());
+        if (needRefresh) {
+            refreshPanes();
         } else {
-            $('.call-pane').addClass('is_active');
+            if (panes.incoming.isActive()) {
+                panes.incoming.initWidgetIcon(queues.incoming.count(), queues.active.count());
+            }
         }
-
-        widgetIcon.update({type: 'default', timer: false, text: null, currentCalls: null, status: 'online'});
     }
 
     function rejectIncomingCallEvent()
@@ -185,19 +185,26 @@ var PhoneWidgetCall = function () {
         })
     }
 
+    function hideIncomingCallEvent()
+    {
+        $(document).on('click', '#hide-incoming-call', function(e) {
+            e.preventDefault();
+            let callId = parseInt($(this).attr('data-call-id'));
+            removeIncomingRequest(callId);
+        })
+    }
+
     function callAddNoteEvent() {
-        var _self = this;
-        $addNoteSubmit.on('click', function (e) {
+        $(document).on('click', '.call-pane-calling #active_call_add_note_submit', function (e) {
             e.preventDefault();
             let btnHtml = $(this).html();
-            let callSid = getActiveConnectionCallSid();
-            let callId = _self.obj ? _self.obj.id : null;
-            if (!callSid && !callId) {
-                createNotify('Warning', 'Call Sid & Call Id is undefined', 'warning');
+            let callId = $(this).data('call-id');
+            if (!callId) {
+                createNotify('Warning', 'Call Id is undefined', 'warning');
                 return false;
             }
 
-            let value = $addNoteInput.val().trim();
+            let value = $('.call-pane-calling #active_call_add_note').val().trim();
             if (!value) {
                 createNotify('Warning', 'Note value is empty', 'warning');
                 return false;
@@ -205,16 +212,17 @@ var PhoneWidgetCall = function () {
 
             $.ajax({
                 type: 'post',
-                data: {'callSid': callSid, note: value, callId: callId},
+                data: {note: value, callId: callId},
                 url: settings.callAddNoteUrl,
                 dataType: 'json',
                 beforeSend: function () {
-                    $addNoteSubmit.html('<i class="fa fa-spinner fa-spin" style="color: #fff;"></i>').attr('disabled', 'disabled');
+                    $('.call-pane-calling #active_call_add_note_submit').html('<i class="fa fa-spinner fa-spin" style="color: #fff;"></i>').attr('disabled', 'disabled');
                 },
                 success: function (data) {
                     if (data.error) {
                         createNotify('Error', data.message, 'error');
                     } else {
+                        $('.call-pane-calling #active_call_add_note').val('');
                         createNotify('Success', data.message, 'success');
                     }
                 },
@@ -222,7 +230,7 @@ var PhoneWidgetCall = function () {
                     createNotify('Error', error.responseText, 'error');
                 },
                 complete: function () {
-                    $addNoteSubmit.html(btnHtml).removeAttr('disabled');
+                    $('.call-pane-calling #active_call_add_note_submit').html(btnHtml).removeAttr('disabled');
                 }
             })
 
@@ -340,7 +348,7 @@ var PhoneWidgetCall = function () {
 
     function transferCallBtnEvent()
     {
-        $(document).on('click', '#wg-transfer-call', function(e) {
+        $(document).on('click', '.call-pane-calling #wg-transfer-call', function(e) {
             e.preventDefault();
             if (!panes.active.buttons.transfer.can()) {
                 return false;
@@ -390,117 +398,17 @@ var PhoneWidgetCall = function () {
     function refreshCallStatus(obj)
     {
         if (obj.status === 'In progress') {
-            activeCall(obj);
+            requestActiveCall(obj);
         } else if (obj.status === 'Ringing' || obj.status === 'Queued') {
             if (obj.typeId === 2) {
-                incomingCall(obj);
+                requestIncomingCall(obj);
             } else if (obj.typeId === 1) {
-                outgoingCall(obj);
+                requestOutgoingCall(obj);
             }
         } else if (obj.status === 'Completed' || obj.isEnded) {
             completeCall(obj.callId);
         }
-
-        this.obj = obj;
-
     }
-
-    function updateProjectAndSourceUI(projectName, sourceName)
-    {
-        if (projectName) {
-            $('.cw-project_name').html(projectName).show();
-        } else {
-            $('.cw-project_name').html('').hide();
-        }
-        if (sourceName) {
-            $('.cw-source_name').html(sourceName);
-            $('.cw-source_name *').show();
-        } else {
-            $('.cw-source_name').html('');
-            $('.cw-source_name *').hide();
-        }
-    }
-
-    // function refreshCallStatus(obj) {
-    //
-    //     $('.call-pane-initial .contact-info-card__label').html(obj.type_description);
-    //
-    //     if (obj.is_mute) {
-    //         panes.active.buttons.mute.mute();
-    //     } else {
-    //         panes.active.buttons.mute.unmute();
-    //     }
-    //
-    //     if (obj.is_listen) {
-    //         panes.active.buttons.mute.disable();
-    //     } else {
-    //         panes.active.buttons.mute.enable();
-    //     }
-    //
-    //     if (obj.status === 'In progress') {
-    //         openWidget();
-    //         obj.status = 'On Call';
-    //         $('.call-pane__call-btns').removeClass('is-pending').addClass('is-on-call');
-    //         $('.call-pane-initial .contact-info-card__call-type').html(obj.phoneFrom);
-    //         $('.call-pane-initial .contact-info-card__name_text').html(obj.name);
-    //
-    //         if ('type' in obj && obj.type && obj.type === 3) {
-    //             panes.active.initInactiveControls();
-    //         } else {
-    //             panes.active.initActiveControls();
-    //         }
-    //
-    //         if (obj.type === 3) {
-    //             if (obj.is_hold) {
-    //                 panes.active.buttons.hold.unhold();
-    //             } else {
-    //                 panes.active.buttons.hold.hold();
-    //             }
-    //         } else {
-    //             if (obj.is_hold) {
-    //                 panes.active.buttons.hold.unhold();
-    //             } else {
-    //                 panes.active.buttons.hold.hold();
-    //             }
-    //         }
-    //
-    //         showCallingPanel();
-    //         $('#cw-client_name').html(obj.name);
-    //         $('#cw-project_name').html(obj.projectName);
-    //         $('#cw-source_name').html(obj.sourceName);
-    //     }else if(['Ringing', 'Queued'].includes(obj.status)) {
-    //         openWidget();
-    //         $('.call-pane-incoming.call-pane-initial .contact-info-card__label').html(obj.type_description);
-    //         $('.call-pane-incoming.call-pane-initial .contact-info-card__name_text').html(obj.name);
-    //         $('.call-pane-calling .contact-info-card__label').html(obj.type_description);
-    //         $('.call-pane-calling .contact-info-card__name_text').html(obj.name);
-    //         if ('isIn' in obj && obj.isIn) {
-    //             initIncomingCall(obj);
-    //             showCallingPanel();
-    //         } else if ('isIn' in obj && !obj.isIn) {
-    //             initIncomingCall(obj);
-    //         } else {
-    //             showCallingPanel();
-    //         }
-    //         $('#cw-client-name').html(obj.name);
-    //         $('#cw-client_name').html(obj.name);
-    //         $('#cw-project_name').html(obj.projectName);
-    //         $('#cw-source_name').html(obj.sourceName);
-    //         // $('.call-pane__call-btns').addClass('is-pending');
-    //     }else if (obj.status === 'Completed') {
-    //         cancelCall();
-    //     }else {
-    //         $('.call-pane__call-btns').removeClass('is-on-call');
-    //     }
-    //     $('.call-in-action__text').html(obj.status);
-    //     $('.call-in-action__time').html('').show().timer('remove').timer({format: '%M:%S', seconds: obj.duration | 0}).timer('start');
-    //
-    //     // if ('isIn' in obj && obj.isIn) {
-    //     //     $('.call-pane-initial .contact-info-card__label').html('Incoming');
-    //     // } else {
-    //     //     $('.call-pane-initial .contact-info-card__label').html('Outgoing');
-    //     // }
-    // }
 
     function openWidget()
     {
@@ -513,33 +421,6 @@ var PhoneWidgetCall = function () {
         $('.phone-widget__tab').removeClass('is_active');
         $('[data-toggle-tab]').removeClass('is_active');
         $('#tab-phone').addClass('is_active');
-    }
-
-    function showIncomingCallPanel(phone, name, type_description, projectName, sourceName)
-    {
-        $('#tab-phone .call-pane-initial').removeClass('is_active');
-        $('#tab-phone .call-pane-incoming').addClass('is_active');
-        $('#btn-accept-call').find('i').removeClass('fa fa-spinner fa-spin').addClass('fas fa-check');
-        $('.call-pane-incoming .contact-info-card__label').html(type_description);
-        $('#cw-client_name').html(name);
-        updateProjectAndSourceUI(projectName, sourceName);
-        $('.call-pane-incoming .contact-info-card__call-type').html(phone);
-    }
-
-    function updateProjectAndSourceUI(pane, projectName, sourceName)
-    {
-        if (projectName) {
-            $('.cw-project_name').html(projectName).show();
-        } else {
-            $('.cw-project_name').html('').hide();
-        }
-        if (sourceName) {
-            $('.cw-source_name').html(sourceName);
-            $('.cw-source_name *').show();
-        } else {
-            $('.cw-source_name').html('');
-            $('.cw-source_name *').hide();
-        }
     }
 
     function showCallingPanel()
@@ -596,6 +477,9 @@ var PhoneWidgetCall = function () {
 
     function changeStatus(status) {
         statusCheckbox.setStatus(status);
+        if (!panes.active.isActive() && !panes.incoming.isActive() && !panes.outgoing.isActive()) {
+            widgetIcon.update({type: 'default', timer: false, text: null, currentCalls: null, status: statusCheckbox.getStatus() === 1});
+        }
     }
 
     function setCountMissedCalls(count) {
@@ -620,6 +504,53 @@ var PhoneWidgetCall = function () {
 
             });
     }
+
+    function hold(data) {
+        let call = queues.active.get(data.id);
+        if (call === null) {
+            return;
+        }
+        call.holdStartTime = Date.now();
+        call.isHold = true;
+        if (!(panes.active.getCallId() === call.callId && panes.active.isActive())) {
+            return;
+        }
+
+        let btn = $('.btn-hold-call');
+        btn.html('<i class="fa fa-play"></i> <span>Unhold</span>');
+        btn.data('mode', 'hold');
+        btn.prop('disabled', false);
+
+        panes.active.buttons.hold.hold();
+        if (panes.active.buttons.hold.isActive()) {
+            panes.active.buttons.hold.enable();
+        }
+        widgetIcon.update({type: 'hold', timer: true, 'timerStamp': 0, text: 'on hold', currentCalls: null, status: 'online'});
+    }
+
+    function unhold(data) {
+        let call = queues.active.get(data.id);
+        if (call === null) {
+            return;
+        }
+        call.holdStartTime = 0;
+        call.isHold = false;
+        if (!(panes.active.getCallId() === call.callId && panes.active.isActive())) {
+            return;
+        }
+
+        let btn = $('.btn-hold-call');
+        btn.html('<i class="fa fa-pause"></i> <span>Hold</span>');
+        btn.data('mode', 'unhold');
+        btn.prop('disabled', false);
+
+        panes.active.buttons.hold.unhold();
+        if (panes.active.buttons.hold.isActive()) {
+            panes.active.buttons.hold.enable();
+        }
+        let duration = Math.floor((Date.now() - parseInt(call.timeQueuePushed)) / 1000) + parseInt(call.duration || 0);
+        widgetIcon.update({type: 'inProgress', timer: true, 'timerStamp': duration, text: 'on call', currentCalls: '', status: 'online'});
+    }
     
     function socket(data) {
         if (data.command === 'add_missed_call') {
@@ -630,7 +561,14 @@ var PhoneWidgetCall = function () {
             setCountMissedCalls(data.count);
             return;
         }
-
+        if (data.command === 'hold') {
+            hold(data.call);
+            return;
+        }
+        if (data.command === 'unhold') {
+            unhold(data.call);
+            return;
+        }
     }
 
     return {
@@ -639,9 +577,9 @@ var PhoneWidgetCall = function () {
         updateConnection: updateConnection,
         refreshCallStatus: refreshCallStatus,
         panes: panes,
-        incomingCall: incomingCall,
-        activeCall: activeCall,
-        outgoingCall: outgoingCall,
+        requestIncomingCall: requestIncomingCall,
+        requestActiveCall: requestActiveCall,
+        requestOutgoingCall: requestOutgoingCall,
         changeStatus: changeStatus,
         requestClearMissedCalls: requestClearMissedCalls,
         socket: socket,

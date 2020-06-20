@@ -1,79 +1,77 @@
-var PhoneWidgetPaneActiveBtnHold = function () {
+function PhoneWidgetPaneActiveBtnHold(pane) {
+    let $pane = pane;
+    let $btn = null;
 
-    let btn = $('#wg-hold-call');
+    this.init = function () {
+        $btn = $pane.find('#wg-hold-call');
+        return this;
+    };
 
-    function sendRequest() {
-        disable();
+    this.sendRequest = function () {
+        this.disable();
         let text = 'Unhold';
-        if (btn.attr('data-mode') === 'unhold') {
+        if ($btn.attr('data-mode') === 'unhold') {
             text = 'Hold';
         }
-        btn.children().html('<i class="fa fa-spinner fa-spin"></i><span>' + text + '</span>');
-    }
+        $btn.children().html('<i class="fa fa-spinner fa-spin"></i><span>' + text + '</span>');
+        return this;
+    };
 
-    function hold() {
-        btn.attr('data-mode', 'unhold');
-        btn.children().html('<i class="fa fa-pause"></i><span>Hold</span>');
-    }
+    this.unhold = function () {
+        $btn.attr('data-mode', 'unhold');
+        $btn.children().html('<i class="fa fa-pause"></i><span>Hold</span>');
+        return this;
+    };
 
-    function unhold() {
-        btn.attr('data-mode', 'hold');
-        btn.children().html('<i class="fa fa-play"></i><span>Unhold</span>');
-    }
+    this.hold = function () {
+        $btn.attr('data-mode', 'hold');
+        $btn.children().html('<i class="fa fa-play"></i><span>Unhold</span>');
+        return this;
+    };
 
-    function show() {
-        btn.show();
-    }
+    this.show = function () {
+        $btn.show();
+        return this;
+    };
 
-    function hide() {
-        btn.hide();
-    }
+    this.hide = function () {
+        $btn.hide();
+        return this;
+    };
 
-    function disable() {
-        btn.attr('data-disabled', true);
-    }
+    this.disable = function () {
+        $btn.attr('data-disabled', true);
+        return this;
+    };
 
-    function enable() {
-        btn.attr('data-disabled', false);
-    }
+    this.enable = function () {
+        $btn.attr('data-disabled', false);
+        return this;
+    };
 
-    function active() {
-        btn.attr('data-active', true);
-    }
+    this.active = function () {
+        $btn.attr('data-active', true);
+        return this;
+    };
 
-    function inactive() {
-        btn.attr('data-active', false);
-    }
+    this.isActive = function () {
+        return $btn.attr('data-active') === 'true';
+    };
 
-    function can() {
-        return btn.attr('data-active') === 'true' && btn.attr('data-disabled') === 'false';
-    }
+    this.inactive = function () {
+        $btn.attr('data-active', false);
+        return this;
+    };
 
-    function initActive() {
-        active();
-        enable();
-        unhold();
-        show();
-    }
+    this.can = function () {
+        return $btn.attr('data-active') === 'true' && $btn.attr('data-disabled') === 'false';
+    };
 
-    function initInactive() {
-        inactive();
-        disable();
-        unhold();
-        show();
-    }
+    this.initActive = function () {
+        this.init().active().enable().unhold().show();
+    };
 
-    return {
-        sendRequest: sendRequest,
-        hold: hold,
-        unhold: unhold,
-        show: show,
-        hide: hide,
-        enable: enable,
-        disable: disable,
-        initActive: initActive,
-        initInactive: initInactive,
-        can: can
-    }
-
-}();
+    this.initInactive = function () {
+        this.init().inactive().disable().unhold().show();
+    };
+}

@@ -751,9 +751,13 @@ function handleWidgetIcon() {
             text = '.phone-widget-icon__text',
             time = '.phone-widget-icon__time';
 
-        clearInterval(interval)
+        if (props.timer) {
+            $(time).html(null);
+        }
 
-        $(inner).attr('data-wi-status', props.status)
+        clearInterval(interval);
+
+        $(inner).attr('data-wi-status', props.status);
         $(inner).attr('data-wi-type', props.type);
         $(ongoing).html(props.currentCalls);
         $(text).html(props.text);

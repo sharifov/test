@@ -7,6 +7,7 @@ use common\models\query\CallQuery;
 use frontend\controllers\ConferenceController;
 use frontend\widgets\newWebPhone\call\CallHelper;
 use frontend\widgets\newWebPhone\call\socket\MissedCallMessage;
+use frontend\widgets\newWebPhone\call\socket\RemoveIncomingRequestMessage;
 use frontend\widgets\notification\NotificationMessage;
 use sales\access\EmployeeDepartmentAccess;
 use sales\dispatchers\NativeEventDispatcher;
@@ -874,6 +875,7 @@ class Call extends \yii\db\ActiveRecord
                             Yii::error(VarDumper::dumpAsString($callAccess->errors),
                                 'Call:afterSave:CallUserAccess:update');
                         }
+                        Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $callAccess->cua_user_id], RemoveIncomingRequestMessage::create($this->c_id));
                     }
                 }
 
@@ -1190,8 +1192,10 @@ class Call extends \yii\db\ActiveRecord
 			$isHold = false;
 			$isListen = false;
 			$isMute = false;
+			$holdDuration = 0;
 			if ($this->currentParticipant && $this->currentParticipant->isHold()) {
 			    $isHold = true;
+                $holdDuration = 0;//todo
             }
 			if ($this->currentParticipant && $this->currentParticipant->isMute()) {
 			    $isMute = true;
@@ -1215,6 +1219,7 @@ class Call extends \yii\db\ActiveRecord
                         'name' => $name,
                         'fromInternal' => $isInternal,
                         'isHold' => $isHold,
+                        'holdDuration' => $holdDuration,
                         'isListen' => $isListen,
                         'isMute' => $isMute,
                         'projectName' => $this->c_project_id ? $this->cProject->name : '',
@@ -1356,9 +1361,10 @@ class Call extends \yii\db\ActiveRecord
                 if ($callUserAccessAny) {
                     foreach ($callUserAccessAny as $callAccess) {
                         $callAccess->noAnsweredCall();
-                        if (!$callAccess->update()) {
+                        if ($callAccess->update() === false) {
                             Yii::error(VarDumper::dumpAsString($callAccess->errors), 'Call:applyCallToAgent:CallUserAccess:save');
                         }
+                        Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $callAccess->cua_user_id], RemoveIncomingRequestMessage::create($call->c_id));
                     }
                 }
 
@@ -1372,6 +1378,7 @@ class Call extends \yii\db\ActiveRecord
                         $call->update();
                     }
                     $res = \Yii::$app->communication->acceptConferenceCall(
+                        $call->c_id,
                         $call->c_call_sid,
                         'client:seller' . $user_id,
                         $call->c_from,

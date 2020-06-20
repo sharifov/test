@@ -1072,6 +1072,9 @@ class CallController extends FController
 
 		try {
 			$call = $this->callRepository->findByCallSidOrCallId((string)$callSid, (int)$callId);
+			if (!$call->isOwner(Auth::id())) {
+                throw new \RuntimeException('Is not your call');
+            }
 			$this->callNoteRepository->add($call->c_id, $note);
 		} catch (\RuntimeException $e) {
 			$result['error'] = true;

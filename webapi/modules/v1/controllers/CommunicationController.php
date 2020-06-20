@@ -20,6 +20,7 @@ use common\models\Notifications;
 use common\models\Sms;
 use common\models\Sources;
 use common\models\UserProjectParams;
+use frontend\widgets\newWebPhone\call\socket\RemoveIncomingRequestMessage;
 use frontend\widgets\newWebPhone\sms\socket\Message;
 use frontend\widgets\notification\NotificationMessage;
 use sales\entities\cases\Cases;
@@ -855,6 +856,10 @@ class CommunicationController extends ApiBaseController
             if (!$call->save()) {
                 Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceDefault:Call:save');
                 $response['error'] = 'Error in method voiceDefault. ' . $call->getErrorSummary(false)[0];
+            }
+
+            if (!empty($callData['accepted_call_id']) && $call->c_created_user_id && $call->isStatusInProgress()) {
+                Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $call->c_created_user_id], RemoveIncomingRequestMessage::create($callData['accepted_call_id']));
             }
 
         } else {

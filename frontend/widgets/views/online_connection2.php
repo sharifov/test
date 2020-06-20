@@ -184,7 +184,7 @@ $js = <<<JS
                             }
                             if (typeof PhoneWidgetCall === 'object') {
                                 if (typeof obj.status !== 'undefined' && obj.status !== 'Hold') {
-                                     PhoneWidgetCall.incomingCall(obj);
+                                     PhoneWidgetCall.requestIncomingCall(obj);
                                 }
                             }
                         }
@@ -203,25 +203,27 @@ $js = <<<JS
                             hiddenLink[0].click();*/
                         }
                         
-                        if(obj.cmd === 'phoneWidgetSmsSocketMessage') {
+                        if (obj.cmd === 'phoneWidgetSmsSocketMessage') {
                             if (typeof obj.data !== 'undefined') {
                                 PhoneWidgetSms.socket(obj.data);
                              }
                         }
                         
-                        if(obj.cmd === 'holdCall') {
-                            if (typeof obj.data !== 'undefined') {
-                                holdEvent(obj.data);
+                        if (obj.cmd === 'holdCall') {
+                              if (typeof obj.data !== 'undefined') {
+                                if (typeof PhoneWidgetCall === 'object') {
+                                    PhoneWidgetCall.socket(obj.data);
+                                }
                              }
                         }
                         
-                        if(obj.cmd === 'muteCall') {
+                        if (obj.cmd === 'muteCall') {
                             if (typeof obj.data !== 'undefined') {
                                 muteEvent(obj.data);
                              }
                         }
                         
-                        if(obj.cmd === 'missedCall') {
+                        if (obj.cmd === 'missedCall') {
                             if (typeof obj.data !== 'undefined') {
                                 if (typeof PhoneWidgetCall === 'object') {
                                     PhoneWidgetCall.socket(obj.data);
@@ -229,7 +231,7 @@ $js = <<<JS
                              }
                         }
                         
-                        if(obj.cmd === 'removeIncomingRequest') {
+                        if (obj.cmd === 'removeIncomingRequest') {
                             if (typeof obj.data !== 'undefined') {
                                 if (typeof PhoneWidgetCall === 'object') {
                                     PhoneWidgetCall.removeIncomingRequest(obj.data.call.id);

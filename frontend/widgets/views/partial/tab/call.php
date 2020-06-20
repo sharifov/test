@@ -17,6 +17,7 @@ $sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
 
 ?>
 <div class="phone-widget__tab is_active" id="tab-phone">
+
   <div class="call-pane call-pane-initial is_active">
 
     <div class="calling-from-info">
@@ -156,7 +157,10 @@ $sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
     <!--            </button>-->
     <!--        </div>-->
   </div>
+
+
   <div class="call-pane-calling call-pane-initial">
+      <?php /*
     <div class="calling-from-info">
       <!-- <div class="current-number">
         <div class="custom-phone-select"></div>
@@ -349,7 +353,10 @@ $sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
             </svg>
           </button>
       </div>
-    </div>
+ */ ?>
+  </div>
+
+
   <div class="call-pane-incoming call-pane-initial">
       <?php /*
     <div class="calling-from-info">
@@ -406,8 +413,8 @@ $sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
 */ ?>
   </div>
 
-
   <div class="call-pane-outgoing call-pane-initial">
+      <?php /*
         <div class="calling-from-info">
             <div class="static-number-indicator">
 
@@ -456,7 +463,7 @@ $sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
             </div>
 
         </div>
-
+        */ ?>
     </div>
 
   <!-- Dial popup -->
@@ -507,7 +514,7 @@ $sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
                 <ul class="info-listing incoming-info">
                   <li>
                      <small class="incoming-info__label">Name</small>
-                     <span class="incoming-info__value"><?= Html::encode($name) ?></span>
+                     <span class="incoming-info__value"><?= Html::encode($name ?? '') ?></span>
                   </li>
                 </ul>
             </div>
@@ -528,6 +535,7 @@ $ajaxCallAddNoteUrl = Url::to(['/call/ajax-add-note']);
 $updateStatusUrl = Url::to(['/user-call-status/update-status']);
 $clearMissedCallsUrl = Url::to(['/call/clear-missed-calls']);
 
+$ucStatus = $userCallStatus->us_type_id;
 
 $js = <<<JS
 PhoneWidgetCall.init({
@@ -540,12 +548,15 @@ PhoneWidgetCall.init({
     'callAddNoteUrl': '$ajaxCallAddNoteUrl',
     'updateStatusUrl': '$updateStatusUrl',
     'countMissedCalls': $countMissedCalls,
-    'clearMissedCallsUrl': '$clearMissedCallsUrl' 
+    'clearMissedCallsUrl': '$clearMissedCallsUrl',
+    'status': $ucStatus
 });
 JS;
 $this->registerJs($js);
 
+/*
 if ($call) {
+
     if ($call && ($call->isStatusRinging() || $call->isStatusInProgress() || $call->isStatusQueue())) {
         $callDuration = 0;
         if($call->c_updated_dt) {
@@ -580,7 +591,7 @@ if ($call) {
 
     if ($call->isStatusInProgress()) {
         $js = <<<JS
-PhoneWidgetCall.activeCall({
+PhoneWidgetCall.requestActiveCall({
     'callId': $callId,
     'duration': $callDuration,
     'phone': '{$phoneFrom}',
@@ -598,7 +609,7 @@ JS;
     } elseif ($call->isStatusRinging() || $call->isStatusQueue()) {
         if ($call->isIn()) {
             $js = <<<JS
-PhoneWidgetCall.incomingCall({
+PhoneWidgetCall.requestIncomingCall({
    'type': '{$type_description}',
    'callId': $callId,
    'fromInternal': false,
@@ -611,7 +622,7 @@ JS;
             $this->registerJs($js);
         } elseif ($call->isOut()) {
             $js = <<<JS
-PhoneWidgetCall.outgoingCall({
+PhoneWidgetCall.requestOutgoingCall({
    'callId': $callId,
    'type': '{$type_description}',
    'status': '{$status}',
@@ -628,3 +639,4 @@ JS;
         }
     }
 }
+*/

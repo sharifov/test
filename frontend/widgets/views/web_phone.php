@@ -756,10 +756,6 @@ use yii\helpers\Html;
 
                     if (isJoin) {
 
-                        if (typeof PhoneWidgetCall === 'object') {
-                            PhoneWidgetCall.panes.active.initInactiveControls();
-                        }
-
                         $('#btn-group-id-hold-call').hide();
                         joinConnection = conn;
                         isJoinCall = true;
@@ -779,10 +775,6 @@ use yii\helpers\Html;
                             btnHold.html('<i class="fa fa-pause"></i> <span>Hold</span>');
                             btnHold.data('mode', 'unhold');
                             $('#btn-group-id-hold-call').show();
-
-                            if (typeof PhoneWidgetCall === 'object') {
-                                PhoneWidgetCall.panes.active.initActiveControls();
-                            }
                         }
 
                         joinConnection = null;
@@ -1549,28 +1541,7 @@ $js = <<<JS
                 
              });
      }
-     
-     function holdEvent(data)
-     {
-         let callSid = getActiveConnectionCallSid();
-         
-         if (callSid && data.call.sid === callSid) {
-             let btn = $('.btn-hold-call');
-             let hld = PhoneWidgetCall.panes.active.buttons.hold;
-             if (data.command === 'hold') {
-                hld.unhold();
-                btn.html('<i class="fa fa-play"></i> <span>Unhold</span>');
-                btn.data('mode', 'hold');
-             } else if (data.command === 'unhold') {
-                 hld.hold();
-                btn.html('<i class="fa fa-pause"></i> <span>Hold</span>');
-                btn.data('mode', 'unhold');
-             }
-             hld.enable();
-             btn.prop('disabled', false);
-         }
-     }
-     
+          
      function muteEvent(data)
      {
          let callSid = getActiveConnectionCallSid();

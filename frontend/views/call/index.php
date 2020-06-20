@@ -75,7 +75,12 @@ $user = Yii::$app->user->identity;
                     },
 
                     'join' => static function (Call $model, $key, $index) use ($user) {
-                        return ((bool)(Yii::$app->params['settings']['voip_conference_base'] ?? false) && Auth::can('/phone/ajax-join-to-conference'));
+                        return
+                            ((bool)(Yii::$app->params['settings']['voip_conference_base'] ?? false)
+                            && Auth::can('/phone/ajax-join-to-conference'))
+                            && (int)$model['cp_type_id'] === 1
+                            && ($model->isIn() || $model->isOut())
+                            && $model->isStatusInProgress();
                     },
                 ],
                 'buttons' => [

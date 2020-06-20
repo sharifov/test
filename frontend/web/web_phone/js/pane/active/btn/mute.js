@@ -1,59 +1,60 @@
-var PhoneWidgetPaneActiveBtnMute = function () {
+function PhoneWidgetPaneActiveBtnMute (pane) {
+    let $pane = pane;
+    let $btn = null;
 
-    let btn = $('#call-pane__mute');
+    this.init = function () {
+        $btn = $pane.find('#call-pane__mute');
+        return this;
+    };
+    
+    this.sendRequest = function () {
+        this.disable();
+        $btn.attr('data-is-muted', null);
+        $btn.html('<i class="fa fa-spinner fa-spin"></i>');
+        return this;
+    };
 
-    function sendRequest() {
-        disable();
-        btn.attr('data-is-muted', null);
-        btn.html('<i class="fa fa-spinner fa-spin"></i>');
-    }
+    this.mute = function () {
+        this.enable();
+        $btn.attr('data-is-muted', 'true');
+        $btn.html('<i class="fas fa-microphone-alt-slash"></i>');
+        return this;
+    };
 
-    function mute() {
-        enable();
-        btn.attr('data-is-muted', 'true');
-        btn.html('<i class="fas fa-microphone-alt-slash"></i>');
-    }
+    this.unmute = function () {
+        this.enable();
+        $btn.attr('data-is-muted', 'false');
+        $btn.html('<i class="fas fa-microphone"></i>');
+        return this;
+    };
 
-    function unmute() {
-        enable();
-        btn.attr('data-is-muted', 'false');
-        btn.html('<i class="fas fa-microphone"></i>');
-    }
+    this.show = function () {
+        $btn.show();
+        return this;
+    };
 
-    function show() {
-        btn.show();
-    }
+    this.hide = function () {
+        $btn.hide();
+        return this;
+    };
 
-    function hide() {
-        btn.hide();
-    }
+    this.disable = function () {
+        $btn.attr('disabled', true);
+        return this;
+    };
 
-    function disable() {
-        btn.attr('disabled', true);
-    }
+    this.enable = function () {
+        $btn.attr('disabled', false);
+        return this;
+    };
 
-    function enable() {
-        btn.attr('disabled', false);
-    }
+    this.active = function () {
+        $btn.attr('data-active', true);
+        return this;
+    };
 
-    function active() {
-        btn.attr('data-active', true);
-    }
-
-    function inactive() {
-        btn.attr('data-active', false);
-    }
-
-    return {
-        sendRequest: sendRequest,
-        mute: mute,
-        unmute: unmute,
-        show: show,
-        hide: hide,
-        disable: disable,
-        enable: enable,
-        active: active,
-        inactive: inactive
-    }
-
-}();
+    this.inactive = function () {
+        $btn.attr('data-active', false);
+        return this;
+    };
+}

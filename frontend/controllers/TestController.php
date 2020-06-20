@@ -46,6 +46,7 @@ use DateTime;
 use frontend\models\form\CreditCardForm;
 use frontend\models\UserFailedLogin;
 use frontend\widgets\lead\editTool\Form;
+use frontend\widgets\newWebPhone\call\socket\HoldMessage;
 use frontend\widgets\newWebPhone\sms\socket\Message;
 use frontend\widgets\notification\NotificationMessage;
 use frontend\widgets\notification\NotificationWidget;
@@ -223,20 +224,65 @@ class TestController extends FController
 
     public function actionTest()
     {
-//        $tmp = 9;
-//        $callInfo = [
-//            'typeId' => 2,
-//            'type' => 'Incoming ' . $tmp,
-//            'callId' => $tmp,
-//            'name' => 'name ' . $tmp,
-//            'phone' => '+' . $tmp,
-//            'fromInternal' => false,
-//            'projectName' => '',
-//            'sourceName' => '',
-//            'status' => 'Ringing',
-//        ];
-//        Notifications::publish('callUpdate', ['user_id' => 295], $callInfo);
-//die;
+
+//        Notifications::publish(HoldMessage::COMMAND, ['user_id' => 295], [
+//            'data' => [
+//                'command' => HoldMessage::COMMAND_HOLD,
+//                'call' => [
+//                    'id' => 1,
+//                ],
+//            ],
+//        ]);
+//        die;
+
+
+        $tmp = 1;
+        $callInfo = [
+            'typeId' => 2,
+            'type' => 'Incoming ' . $tmp,
+            'callId' => $tmp,
+            'name' => 'name ' . $tmp,
+            'phone' => '+' . $tmp,
+            'fromInternal' => false,
+            'projectName' => '',
+            'sourceName' => '',
+            'status' => 'In progress',
+            'isListen' => true
+        ];
+        Notifications::publish('callUpdate', ['user_id' => 295], $callInfo);
+
+
+die;
+
+        $tmp = 101;
+        Notifications::publish('callUpdate', ['user_id' => 295],
+            [
+                'callId' => $tmp,
+                'status' => 'Ringing',
+                'duration' => 10,
+                'snr' => 1,
+                'leadId' => 1,
+                'typeId' => 1,
+                'type' => 'Outgoing',
+                'source_type_id' => '',
+                'phone' => '+373 ' . $tmp,
+                'name' => 'Name ' . $tmp,
+                'fromInternal' => false,
+                'isHold' => false,
+                'isListen' => false,
+                'isMute' => false,
+                'projectName' => 'Project ' . $tmp,
+                'sourceName' => 'Source ' . $tmp,
+                'to' => [
+                    'name' => 'Name ' . $tmp,
+                    'phone' => 'Phone ' . $tmp
+                ],
+                'isEnded' => false,
+            ]
+        );
+        die;
+
+
 
         $callInfo = [
             'data' => [

@@ -6,6 +6,7 @@ function Queue() {
         if (this.getIndex(data.callId) !== null) {
             return;
         }
+        data.timeQueuePushed = Date.now();
         this.calls.push(data);
     };
 
@@ -37,6 +38,18 @@ function Queue() {
             return null;
         }
         return last;
+    };
+
+    this.get = function (callId) {
+        let index = this.getIndex(callId);
+        if (index !== null) {
+            return this.calls[index];
+        }
+        return null;
+    };
+
+    this.count = function () {
+        return this.calls.length;
     };
 
     this.showAll = function () {

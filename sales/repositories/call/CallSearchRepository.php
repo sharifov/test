@@ -6,6 +6,7 @@ use common\models\Call;
 use common\models\Employee;
 use common\models\Project;
 use common\models\ProjectEmployeeAccess;
+use common\models\search\CallSearch;
 use common\models\UserGroupAssign;
 use yii\db\ActiveQuery;
 
@@ -18,7 +19,7 @@ class CallSearchRepository
      */
     public function getSearchQuery($user): ActiveQuery
     {
-        $query = Call::find()->with('cCreatedUser', 'cProject');
+        $query = CallSearch::find()->select('*')->with('cCreatedUser', 'cProject');
 
         if ($user->isAdmin()) {
             return $query;

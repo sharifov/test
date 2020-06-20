@@ -1,52 +1,47 @@
-var PhoneWidgetPaneActiveBtnAddPerson = function () {
+function PhoneWidgetPaneActiveBtnAddPerson (pane) {
+    let $pane = pane;
+    let $btn = null;
 
-    let btn = $('#wg-add-person');
+    this.init = function () {
+        $btn = $pane.find('#wg-add-person');
+        return this;
+    };
+        
+    this.show = function () {
+        $btn.show();
+        return this;
+    };
 
-    function show() {
-        btn.show();
-    }
+    this.hide = function () {
+        $btn.hide();
+        return this;
+    };
 
-    function hide() {
-        btn.hide();
-    }
+    this.enable = function () {
+        $btn.attr('data-disabled', false);
+        return this;
+    };
 
-    function enable() {
-        btn.attr('data-disabled', false);
-    }
+    this.disable = function () {
+        $btn.attr('data-disabled', true);
+        return this;
+    };
 
-    function disable() {
-        btn.attr('data-disabled', true);
-    }
+    this.active = function () {
+        $btn.attr('data-active', true);
+        return this;
+    };
 
-    function active() {
-        btn.attr('data-active', true);
-    }
+    this.inactive = function () {
+        $btn.attr('data-active', false);
+        return this;
+    };
 
-    function inactive() {
-        btn.attr('data-active', false);
-    }
+    this.initActive = function () {
+        this.init().active().enable().show();
+    };
 
-    function initActive() {
-        active();
-        enable();
-        show();
-    }
-
-    function initInactive() {
-        inactive();
-        disable();
-        show();
-    }
-
-    return {
-        show: show,
-        hide: hide,
-        enable: enable,
-        disable: disable,
-        active: active,
-        inactive: inactive,
-        initActive: initActive,
-        initInactive: initInactive
-    }
-
-}();
+    this.initInactive = function () {
+        this.init().inactive().disable().show();
+    };
+}

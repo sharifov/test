@@ -16,6 +16,7 @@ use yii\base\Model;
  * @property int $lead_id
  * @property int $case_id
  * @property int $user_id
+ * @property int $accepted_call_id
  */
 class CallCustomParameters extends Model
 {
@@ -27,6 +28,7 @@ class CallCustomParameters extends Model
     public $lead_id;
     public $case_id;
     public $user_id;
+    public $accepted_call_id;
 
     public function rules(): array
     {
@@ -51,6 +53,8 @@ class CallCustomParameters extends Model
             ['case_id', 'integer'],
 
             ['user_id', 'integer'],
+
+            ['accepted_call_id', 'integer'],
         ];
     }
 
