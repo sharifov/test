@@ -16,6 +16,7 @@ use Yii;
  * @property string $cp_join_dt
  * @property string $cp_leave_dt
  * @property int|null $cp_type_id
+ * @property string $cp_hold_dt
  *
  * @property Call $cpCall
  * @property Conference $cpCf
@@ -76,6 +77,8 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
 
             ['cp_type_id', 'integer'],
             ['cp_type_id', 'in', 'range' => array_keys(self::TYPE_LIST)],
+
+            ['cp_hold_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
         ];
     }
 
@@ -93,6 +96,7 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
             'cp_join_dt' => 'Join Dt',
             'cp_leave_dt' => 'Leave Dt',
             'cp_type_id' => 'Type',
+            'cp_hold_dt' => 'Hold Dt',
         ];
     }
 
@@ -157,9 +161,10 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
         return $this->cp_status_id === self::STATUS_JOIN;
     }
 
-    public function hold(): void
+    public function hold(string $holdTime): void
     {
         $this->cp_status_id = self::STATUS_HOLD;
+        $this->cp_hold_dt = $holdTime;
     }
 
     public function isHold(): bool

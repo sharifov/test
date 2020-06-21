@@ -1,6 +1,8 @@
 var PhoneWidgetPaneIncoming = function () {
 
     let $pane = $('.call-pane-incoming');
+    let contactInfo = PhoneWidgetContactInfo;
+    let dialpad = PhoneWidgetDialpad;
 
     function render(data) {
         let html = '';
@@ -20,10 +22,15 @@ var PhoneWidgetPaneIncoming = function () {
             name,
             projectName,
             sourceName,
-            phone
+            phone,
+            contact = {
+                name
+            }
         }
      */
     function load(data) {
+        contactInfo.load(data.contact);
+
         let html = render(data);
         $pane.html(html);
 
@@ -43,6 +50,9 @@ var PhoneWidgetPaneIncoming = function () {
     }
 
     function show() {
+        contactInfo.hide();
+        dialpad.hide();
+
         $('#tab-phone .call-pane-initial').removeClass('is_active');
         $pane.addClass('is_active');
     }

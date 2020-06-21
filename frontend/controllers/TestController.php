@@ -236,29 +236,32 @@ class TestController extends FController
 //        die;
 
 
-        $tmp = 1;
-        $callInfo = [
-            'typeId' => 2,
-            'type' => 'Incoming ' . $tmp,
-            'callId' => $tmp,
-            'name' => 'name ' . $tmp,
-            'phone' => '+' . $tmp,
-            'fromInternal' => false,
-            'projectName' => '',
-            'sourceName' => '',
-            'status' => 'In progress',
-            'isListen' => true
-        ];
-        Notifications::publish('callUpdate', ['user_id' => 295], $callInfo);
-
-
-die;
+//        $tmp = 1;
+//        $callInfo = [
+//            'typeId' => 2,
+//            'type' => 'Inc ' . $tmp,
+//            'callId' => $tmp,
+//            'name' => 'name ' . $tmp,
+//            'phone' => '+' . $tmp,
+//            'fromInternal' => false,
+//            'projectName' => '',
+//            'sourceName' => '',
+//            'status' => 'Ringing',
+//            'isListen' => true,
+//            'contact' => [
+//                'name' => 'Xsss'
+//            ]
+//        ];
+//        Notifications::publish('callUpdate', ['user_id' => 295], $callInfo);
+//
+//
+//die;
 
         $tmp = 101;
         Notifications::publish('callUpdate', ['user_id' => 295],
             [
                 'callId' => $tmp,
-                'status' => 'Ringing',
+                'status' => 'In progress',
                 'duration' => 10,
                 'snr' => 1,
                 'leadId' => 1,
@@ -273,11 +276,10 @@ die;
                 'isMute' => false,
                 'projectName' => 'Project ' . $tmp,
                 'sourceName' => 'Source ' . $tmp,
-                'to' => [
-                    'name' => 'Name ' . $tmp,
-                    'phone' => 'Phone ' . $tmp
-                ],
                 'isEnded' => false,
+                'contact' => [
+                    'name' => 'Xqwewe'
+                ]
             ]
         );
         die;

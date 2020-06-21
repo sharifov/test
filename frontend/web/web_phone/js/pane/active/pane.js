@@ -1,6 +1,8 @@
 var PhoneWidgetPaneActive = function () {
 
     let $pane = $('.call-pane-calling');
+    let contactInfo = PhoneWidgetContactInfo;
+    let dialpad = PhoneWidgetDialpad;
 
     function render(data) {
         let html = '';
@@ -48,10 +50,15 @@ var PhoneWidgetPaneActive = function () {
             name,
             duration,
             projectName,
-            sourceName
+            sourceName,
+            contact = {
+                name
+            }
         }
      */
     function load(data) {
+        contactInfo.load(data.contact);
+
         let html = render(data);
         $pane.html(html);
 
@@ -60,6 +67,9 @@ var PhoneWidgetPaneActive = function () {
         } else {
             initActiveControls();
         }
+
+        //todo
+        buttons.addPerson.disable().inactive();
 
         if (data.isMute) {
             buttons.mute.mute();
@@ -106,6 +116,9 @@ var PhoneWidgetPaneActive = function () {
     }
 
     function show() {
+        contactInfo.hide();
+        dialpad.hide();
+
         $('#tab-phone .call-pane-initial').removeClass('is_active');
         $pane.addClass('is_active');
         $('[data-toggle-tab="tab-phone"]').attr('data-call-in-progress', true);
@@ -113,6 +126,10 @@ var PhoneWidgetPaneActive = function () {
 
     function hide() {
         $pane.removeClass('is_active');
+        removeCallInProgressIndicator();
+    }
+
+    function removeCallInProgressIndicator() {
         $('[data-toggle-tab="tab-phone"]').attr('data-call-in-progress', false);
     }
 
@@ -138,7 +155,8 @@ var PhoneWidgetPaneActive = function () {
         hide: hide,
         getCallId: getCallId,
         removeCallId: removeCallId,
-        isActive: isActive
+        isActive: isActive,
+        removeCallInProgressIndicator: removeCallInProgressIndicator
     }
 
 }();

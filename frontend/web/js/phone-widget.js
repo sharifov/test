@@ -551,27 +551,12 @@ $(document).ready(function() {
 
     // }
 
-    $('#wg-dialpad').on('click', function() {
-        if (!PhoneWidgetPaneActiveBtnDialpad.can()) {
-            return false;
-        }
-        $('.dial-popup').slideDown(150)
-    });
-
     // var widget = phoneWidgetBehavior('.phone-widget');
 
 
     // $(widget.control).on('pw-back-action', function () {
     //     console.log('here is a event for back button');
     // })
-
-    $('.additional-info__close').on('click', function() {
-        $('.additional-info').slideUp(150);
-    });
-
-    $('.call-pane__info').on('click', function() {
-        $('.contact-info').slideDown(150);
-    })
 
 });
 

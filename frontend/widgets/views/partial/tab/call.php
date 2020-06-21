@@ -2,18 +2,8 @@
 
 /** @var View $this */
 /** @var \common\models\UserCallStatus $userCallStatus */
-/** @var bool $isCallRinging */
-/** @var bool $isCallInProgress */
-/** @var \common\models\Call|null $call */
-/** @var bool $isHold */
 /** @var int $countMissedCalls */
-
-//$name = $call && $call->cClient ? $call->cClient->getFullName() : 'ClientName';
-//$clientName = $call && $call->cClient ? $call->cClient->getFullName() : '------';
-$isIn = $call ? $call->isIn() : false;
-$type = $call ? $call->c_call_type_id : null;
-$projectName = $call && $call->c_project_id? $call->cProject->name : '';
-$sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
+/** @var QueueCalls $queueCalls */
 
 ?>
 <div class="phone-widget__tab is_active" id="tab-phone">
@@ -68,6 +58,7 @@ $sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
 
                 use common\models\Call;
                 use frontend\widgets\newWebPhone\call\CallHelper;
+                use frontend\widgets\newWebPhone\call\QueueCalls;
                 use yii\bootstrap4\Html;
 				use yii\helpers\Url;
                 use yii\helpers\VarDumper;
@@ -157,7 +148,6 @@ $sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
     <!--            </button>-->
     <!--        </div>-->
   </div>
-
 
   <div class="call-pane-calling call-pane-initial">
       <?php /*
@@ -356,7 +346,6 @@ $sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
  */ ?>
   </div>
 
-
   <div class="call-pane-incoming call-pane-initial">
       <?php /*
     <div class="calling-from-info">
@@ -501,28 +490,9 @@ $sourceName = $call && $call->c_source_type_id? $call->getSourceName() : '';
     </div>
   </div>
 
-  <div class="additional-info contact-info">
-      <div class="additional-info__header">
-        <div class="agent-text-avatar"><span>T</span></div>
-        <span class="additional-info__header-title">Contact Info</span>
-        <a href="#" class="additional-info__close">
-        <i class="fas fa-times"></i>
-        </a>
-      </div>
-        <?php if($call && $call->cClient): ?>
-            <div class="additional-info__body scrollable-block">
-                <ul class="info-listing incoming-info">
-                  <li>
-                     <small class="incoming-info__label">Name</small>
-                     <span class="incoming-info__value"><?= Html::encode($name ?? '') ?></span>
-                  </li>
-                </ul>
-            </div>
-        <?php endif; ?>
-  </div>
-  </div>
+  <div class="additional-info contact-info"></div>
 
-
+  </div>
 
 <?php
 $ajaxCallRedirectGetAgents = Url::to(['/phone/ajax-call-get-agents']);
@@ -554,89 +524,57 @@ PhoneWidgetCall.init({
 JS;
 $this->registerJs($js);
 
-/*
-if ($call) {
-
-    if ($call && ($call->isStatusRinging() || $call->isStatusInProgress() || $call->isStatusQueue())) {
-        $callDuration = 0;
-        if($call->c_updated_dt) {
-            $callDuration = time() - strtotime($call->c_updated_dt);
-            if (!$callDuration) {
-                $callDuration = 0;
-            }
-        }
-    } else {
-        $callDuration = $call ? $call->c_call_duration : 0;
-    }
-
-    $isMute = 'false';
-    $isListen = 'false';
-    if ( $call && (
-            ($call->currentParticipant && $call->currentParticipant->isMute())
-            || ($call->isJoin() && $call->c_source_type_id === Call::SOURCE_LISTEN)
-        )
-    ) {
-        $isMute = 'true';
-    }
-    if ($call && ($call->isJoin() && $call->c_source_type_id === Call::SOURCE_LISTEN)) {
-        $isListen = 'true';
-    }
-
-    $callId = $call ? $call->c_id : null;
-
-    $sourceTypeId = $call->c_source_type_id ?? null;
-    $status = isset($call) ? $call->getStatusName() : null;
-
-    $isHold = $isHold ? 'true' : 'false';
-
-    if ($call->isStatusInProgress()) {
+if ($queueCalls->isActive()) {
+    foreach ($queueCalls->incoming as $incoming) {
+        $json = $incoming->toJson();
         $js = <<<JS
-PhoneWidgetCall.requestActiveCall({
-    'callId': $callId,
-    'duration': $callDuration,
-    'phone': '{$phoneFrom}',
-    'name': '$name',
-    'type': '$type_description',
-    'typeId': $type,
-    'isHold': $isHold,
-    'isListen': $isListen,
-    'isMute': $isMute,
-    'projectName': '{$projectName}',
-    'sourceName': '{$sourceName}'
-});
-JS;
+            PhoneWidgetCall.queues.incoming.push($json);
+        JS;
         $this->registerJs($js);
-    } elseif ($call->isStatusRinging() || $call->isStatusQueue()) {
-        if ($call->isIn()) {
+    }
+
+    foreach ($queueCalls->outgoing as $outgoing) {
+        $json = $outgoing->toJson();
+        $js = <<<JS
+            PhoneWidgetCall.queues.outgoing.push($json);
+        JS;
+        $this->registerJs($js);
+    }
+
+    if ($queueCalls->active) {
+        $js = <<<JS
+            let activeQueueCall = {};
+            let objActiveQueueCall = {};
+        JS;
+        $this->registerJs($js);
+        foreach ($queueCalls->active as $active) {
+            $json = $active->toJson();
             $js = <<<JS
-PhoneWidgetCall.requestIncomingCall({
-   'type': '{$type_description}',
-   'callId': $callId,
-   'fromInternal': false,
-   'name': '$name',
-   'projectName': '$projectName',
-   'sourceName': '$sourceName',
-   'phone': '$phoneFrom'
-});
-JS;
-            $this->registerJs($js);
-        } elseif ($call->isOut()) {
-            $js = <<<JS
-PhoneWidgetCall.requestOutgoingCall({
-   'callId': $callId,
-   'type': '{$type_description}',
-   'status': '{$status}',
-   'duration': '{$callDuration}',
-   'projectName': '{$projectName}',
-   'sourceName': '{$sourceName}',
-   'to': {
-       'phone': '{$phoneFrom}',
-       'name': '{$name}'
-  }
-});
-JS;
+                activeQueueCall = $json;
+                objActiveQueueCall = Object.assign({}, activeQueueCall);
+                if (objActiveQueueCall.holdDuration && objActiveQueueCall.isHold) {
+                    objActiveQueueCall.holdStartTime = Date.now() - (objActiveQueueCall.holdDuration * 1000);
+                }
+                PhoneWidgetCall.queues.active.push(objActiveQueueCall);
+            JS;
             $this->registerJs($js);
         }
+    }
+
+    if ($queueCalls->isLastIncoming()) {
+        $js = <<<JS
+            PhoneWidgetCall.refreshIncomingPane();
+        JS;
+        $this->registerJs($js);
+    } elseif ($queueCalls->isLastOutgoing()) {
+        $js = <<<JS
+            PhoneWidgetCall.refreshOutgoingPane();
+        JS;
+        $this->registerJs($js);
+    } elseif ($queueCalls->isLastActive()) {
+        $js = <<<JS
+            PhoneWidgetCall.refreshActivePane();
+        JS;
+        $this->registerJs($js);
     }
 }
-*/

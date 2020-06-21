@@ -1195,7 +1195,7 @@ class Call extends \yii\db\ActiveRecord
 			$holdDuration = 0;
 			if ($this->currentParticipant && $this->currentParticipant->isHold()) {
 			    $isHold = true;
-                $holdDuration = 0;//todo
+                $holdDuration = time() - strtotime($this->currentParticipant->cp_hold_dt);
             }
 			if ($this->currentParticipant && $this->currentParticipant->isMute()) {
 			    $isMute = true;
@@ -1224,11 +1224,10 @@ class Call extends \yii\db\ActiveRecord
                         'isMute' => $isMute,
                         'projectName' => $this->c_project_id ? $this->cProject->name : '',
                         'sourceName' => $this->c_source_type_id ? $this->getSourceName() : '',
-                        'to' => [
-                            'name' => $name,
-                            'phone' => $phone
-                        ],
                         'isEnded' => $this->isEnded(),
+                        'contact' => [
+                            'name' => $name
+                        ],
                     ]
                 );
             }

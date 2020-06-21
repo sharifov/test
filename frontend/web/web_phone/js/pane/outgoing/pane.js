@@ -1,6 +1,8 @@
 var PhoneWidgetPaneOutgoing = function () {
 
     let $pane = $('.call-pane-outgoing');
+    let contactInfo = PhoneWidgetContactInfo;
+    let dialpad = PhoneWidgetDialpad;
 
     function render(data) {
         let html = '';
@@ -20,30 +22,29 @@ var PhoneWidgetPaneOutgoing = function () {
            duration,
            projectName,
            sourceName,
-           to: {
-                phone,
+           phone,
+           name,
+           contact = {
                 name
-           },
+           }
         }
      */
     function load(data) {
-        let obj = Object.assign({}, data);
-        obj.name = data.to.name;
-        obj.phone = data.to.phone;
+        contactInfo.load(data.contact);
 
-        let html = render(obj);
+        let html = render(data);
         $pane.html(html);
 
         $pane.find('.call-in-action__time').html('').show().timer('remove').timer({
             format: '%M:%S',
-            seconds: obj.duration
+            seconds: data.duration
         }).timer('start');
 
-        if (!obj.projectName) {
+        if (!data.projectName) {
             $pane.find('.cw-project_name').hide();
         }
 
-        if (!obj.sourceName) {
+        if (!data.sourceName) {
             $pane.find('.cw-source_name').hide();
         }
 
@@ -51,10 +52,13 @@ var PhoneWidgetPaneOutgoing = function () {
             $pane.find('.static-number-indicator__separator').hide();
         }
 
-        setCallId(obj.callId);
+        setCallId(data.callId);
     }
 
     function show() {
+        contactInfo.hide();
+        dialpad.hide();
+
         $('#tab-phone .call-pane-initial').removeClass('is_active');
         $pane.addClass('is_active');
     }

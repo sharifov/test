@@ -227,6 +227,9 @@ class CallUserAccess extends \yii\db\ActiveRecord
                     'projectName' => $call->c_project_id ? $call->cProject->name : '',
                     'sourceName' => $call->c_source_type_id ? $call->getSourceName() : '',
                     'status' => $call->getStatusName(),
+                    'contact' => [
+                        'name' => $name,
+                    ],
 				];
 			}
             Notifications::publish('updateIncomingCall', ['user_id' => $this->cua_user_id], array_merge($this->attributes, $callInfo ?? []));

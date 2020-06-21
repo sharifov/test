@@ -29,7 +29,7 @@ class ConferenceParticipantHold
         ])->one();
 
         if ($participant) {
-            $participant->hold();
+            $participant->hold(date('Y-m-d H:i:s'));
             if ($participant->save()) {
                 if ($call = $participant->cpCall) {
                     $this->sendMessageToSocket($call, $participant);
@@ -48,7 +48,7 @@ class ConferenceParticipantHold
         $participant = new ConferenceParticipant();
         $participant->cp_cf_id = $conference->cf_id;
         $participant->cp_call_sid = $form->CallSid;
-        $participant->hold();
+        $participant->hold(date('Y-m-d H:i:s'));
         if ($call) {
             $participant->cp_call_id = $call->c_id;
         }

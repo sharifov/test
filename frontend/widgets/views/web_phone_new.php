@@ -1,5 +1,6 @@
 <?php
 
+use frontend\widgets\newWebPhone\call\QueueCalls;
 use frontend\widgets\newWebPhone\NewWebPhoneAsset;
 use yii\helpers\Url;
 use yii\web\View;
@@ -10,11 +11,8 @@ use yii\web\View;
 /* @var $this View */
 /** @var array $userPhones */
 /** @var array $userEmails */
-/** @var bool $isCallRinging */
-/** @var bool $isCallInProgress */
-/** @var \common\models\Call|null $call */
-/** @var bool $isHold */
 /** @var int $countMissedCalls */
+/** @var QueueCalls $queueCalls */
 
 NewWebPhoneAsset::register($this);
 ?>
@@ -24,11 +22,8 @@ NewWebPhoneAsset::register($this);
 	'userPhones' => $userPhones,
 	'userEmails' => $userEmails,
 	'userCallStatus' => $userCallStatus,
-	'isCallRinging' => $isCallRinging,
-	'isCallInProgress' => $isCallInProgress,
-	'call' => $call,
-	'isHold' => $isHold,
-	'countMissedCalls' => $countMissedCalls
+	'countMissedCalls' => $countMissedCalls,
+	'queueCalls' => $queueCalls
 ]) ?>
 <?= $this->render('partial/_phone_widget_icon') ?>
 
@@ -107,10 +102,11 @@ $js = <<<JS
 									'status': 'Dialing',  
 									'duration': 0,
 									'project': phoneNumbers.getData.project,
-									'to': {
-									     phone: data.phone,
-									     name: data.callToName
-									 } 
+									'phone': data.phone,
+									'name': data.callToName,
+									'contact': {
+									    'name': data.callToName
+									}
 								});
 								createNotify('Calling', 'Calling ' + params.To + '...', 'success');
 								updateAgentStatus(connection, false, 0);

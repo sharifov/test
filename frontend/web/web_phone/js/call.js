@@ -45,6 +45,8 @@ var PhoneWidgetCall = function () {
         rejectIncomingCallEvent();
         hideIncomingCallEvent();
         callAddNoteEvent();
+        dialpadEvent();
+        contactInfoEvent();
     }
 
     function removeIncomingRequest(callId) {
@@ -58,22 +60,28 @@ var PhoneWidgetCall = function () {
     }
 
     function refreshPanes() {
-        let incoming = queues.incoming.getLast();
-        if (incoming !== null) {
-            panes.incoming.init(incoming, queues.incoming.count(), queues.active.count());
+        PhoneWidgetContactInfo.hide();
+        PhoneWidgetDialpad.hide();
+
+        if (refreshIncomingPane()) {
             return;
         }
 
-        let outgoing = queues.outgoing.getLast();
-        if (outgoing !== null) {
-            let obj = Object.assign({}, outgoing);
-            if (obj.timeQueuePushed) {
-                obj.duration = Math.floor((Date.now() - parseInt(obj.timeQueuePushed)) / 1000) + parseInt(obj.duration || 0);
-            }
-            panes.outgoing.init(obj);
+        if (refreshOutgoingPane()) {
             return;
         }
 
+        if (refreshActivePane()) {
+            return;
+        }
+
+        widgetIcon.update({type: 'default', timer: false, text: null, currentCalls: null, status: statusCheckbox.getStatus() === 1});
+
+        $('#tab-phone .call-pane-initial').removeClass('is_active');
+        $('#tab-phone .call-pane').addClass('is_active');
+    }
+
+    function refreshActivePane() {
         let active = queues.active.getLast();
         if (active !== null) {
             let obj = Object.assign({}, active);
@@ -86,13 +94,31 @@ var PhoneWidgetCall = function () {
                 obj.holdDuration = 0;
             }
             panes.active.init(obj);
-            return;
+            return true;
         }
+        return false;
+    }
 
-        widgetIcon.update({type: 'default', timer: false, text: null, currentCalls: null, status: statusCheckbox.getStatus() === 1});
+    function refreshIncomingPane() {
+        let incoming = queues.incoming.getLast();
+        if (incoming !== null) {
+            panes.incoming.init(incoming, queues.incoming.count(), queues.active.count());
+            return true;
+        }
+        return false;
+    }
 
-        $('#tab-phone .call-pane-initial').removeClass('is_active');
-        $('#tab-phone .call-pane').addClass('is_active');
+    function refreshOutgoingPane() {
+        let outgoing = queues.outgoing.getLast();
+        if (outgoing !== null) {
+            let obj = Object.assign({}, outgoing);
+            if (obj.timeQueuePushed) {
+                obj.duration = Math.floor((Date.now() - parseInt(obj.timeQueuePushed)) / 1000) + parseInt(obj.duration || 0);
+            }
+            panes.outgoing.init(obj);
+            return true;
+        }
+        return false;
     }
 
     function requestIncomingCall(data) {
@@ -144,6 +170,7 @@ var PhoneWidgetCall = function () {
 
         if (panes.active.getCallId() === callId) {
             panes.active.removeCallId();
+            panes.active.removeCallInProgressIndicator();
             window.connection = '';
             if (panes.active.isActive()) {
                 needRefresh = true;
@@ -551,7 +578,32 @@ var PhoneWidgetCall = function () {
         let duration = Math.floor((Date.now() - parseInt(call.timeQueuePushed)) / 1000) + parseInt(call.duration || 0);
         widgetIcon.update({type: 'inProgress', timer: true, 'timerStamp': duration, text: 'on call', currentCalls: '', status: 'online'});
     }
-    
+
+    function dialpadEvent() {
+        $(document).on('click', '.call-pane-calling #wg-dialpad', function() {
+            if (!panes.active.buttons.dialpad.can()) {
+                return false;
+            }
+            $('.dial-popup').slideDown(150)
+        });
+        $(document).on('click', '.dial-popup .additional-info__close', function() {
+            $('.dial-popup').slideUp(150);
+        });
+    }
+
+    function contactInfoEvent() {
+        $(document).on('click', '.call-pane__info', function() {
+            $('.contact-info').slideDown(150);
+        });
+        $(document).on('click', '.additional-info.contact-info .additional-info__close', function() {
+            $('.contact-info').slideUp(150);
+        });
+    }
+
+    function dialpadHide() {
+        $('.dial-popup').slideUp(150);
+    }
+
     function socket(data) {
         if (data.command === 'add_missed_call') {
             addMissedCall();
@@ -584,7 +636,10 @@ var PhoneWidgetCall = function () {
         requestClearMissedCalls: requestClearMissedCalls,
         socket: socket,
         queues: queues,
-        removeIncomingRequest: removeIncomingRequest
+        removeIncomingRequest: removeIncomingRequest,
+        refreshIncomingPane: refreshIncomingPane,
+        refreshOutgoingPane: refreshOutgoingPane,
+        refreshActivePane: refreshActivePane
     };
 }();
 

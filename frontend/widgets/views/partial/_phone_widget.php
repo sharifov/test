@@ -1,5 +1,6 @@
 <?php
 
+use frontend\widgets\newWebPhone\call\QueueCalls;
 use yii\web\View;
 
 /** @var $showWidgetContent bool */
@@ -7,16 +8,12 @@ use yii\web\View;
 /** @var View $this */
 /** @var array $userPhones */
 /** @var array $userEmails */
-/** @var bool $isCallRinging */
-/** @var bool $isCallInProgress */
-/** @var \common\models\Call|null $call */
-/** @var bool $isHold */
 /** @var int $countMissedCalls */
+/** @var QueueCalls $queueCalls */
 
-$isActiveWidget = $isCallInProgress ? ' is_active' : '';
 ?>
 
-<div class="phone-widget<?= $isActiveWidget ?>" style="margin-bottom: 30px">
+<div class="phone-widget<?= $queueCalls->isActive() ? ' is_active' : '' ?>" style="margin-bottom: 30px">
   <?php if($showWidgetContent): ?>
   <div class="phone-widget__header">
     <div class="phone-widget__heading">
@@ -63,11 +60,8 @@ $isActiveWidget = $isCallInProgress ? ' is_active' : '';
   <div class="phone-widget__body">
       <?= $this->render('tab/call', [
 		  'userCallStatus' => $userCallStatus,
-		  'isCallRinging' => $isCallRinging,
-		  'isCallInProgress' => $isCallInProgress,
-		  'call' => $call,
-          'isHold' => $isHold,
-          'countMissedCalls' => $countMissedCalls
+          'countMissedCalls' => $countMissedCalls,
+          'queueCalls' => $queueCalls
 	  ]); ?><?= $this->render('tab/contacts', ['userPhones' => $userPhones, 'userEmails' => $userEmails]); ?>
     <?= $this->render('tab/history'); ?>
     <div class="widget-phone__contact-info-modal widget-modal contact-modal-info"></div>
