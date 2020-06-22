@@ -88,6 +88,17 @@ class CaseCategoryController extends FController
         return $this->redirect(['index']);
     }
 
+    public function actionReport()
+    {
+        $searchModel = new CaseCategorySearch();
+        $dataProvider = $searchModel->prepareReportData(Yii::$app->request->queryParams);
+
+        return $this->render('report', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
     /**
      * @param $id
      * @return CaseCategory

@@ -409,6 +409,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Agent Calls Report', 'url' => ['/stats/calls-stats'], 'icon' => 'table'],
                 ['label' => 'Leads Report', 'url' => ['/report/leads-report'], 'icon' => 'table'],
                 ['label' => 'Agent Leads Report', 'url' => ['/stats/leads-stats'], 'icon' => 'table'],
+                ['label' => 'Case Categories Report', 'url' => ['/case-category/report'], 'icon' => 'table'],
                 ['label' => 'Calls Stats', 'url' => ['/stats/calls-graph'], 'icon' => 'line-chart'],
                 ['label' => 'SMS Stats', 'url' => ['/stats/sms-graph'], 'icon' => 'line-chart'],
                 ['label' => 'Emails Stats', 'url' => ['/stats/emails-graph'], 'icon' => 'line-chart'],
