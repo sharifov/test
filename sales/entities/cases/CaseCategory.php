@@ -4,6 +4,7 @@ namespace sales\entities\cases;
 
 use common\models\Department;
 use common\models\Employee;
+use kartik\daterange\DateRangeBehavior;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -49,6 +50,13 @@ class CaseCategory extends ActiveRecord
                 'updatedByAttribute' => 'cc_updated_user_id',
                 'createdByAttribute' => 'cc_updated_user_id',
             ],
+
+            'datePickerRange' =>[
+                'class' => DateRangeBehavior::class,
+                'attribute' => 'createTimeRange',
+                'dateStartAttribute' => 'createTimeStart',
+                'dateEndAttribute' => 'createTimeEnd',
+            ]
         ];
     }
 

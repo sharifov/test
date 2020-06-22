@@ -161,6 +161,12 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                             ?>
 
                             <?php
+                                if ($model->isNewRecord) {
+                                    echo $form->field($model, 'make_user_project_params')->checkbox();
+                                }
+                            ?>
+
+                            <?php
                                 echo $form->field($model, 'user_departments')->widget(\kartik\select2\Select2::class, [
                                     'data' => \common\models\Department::getList(),
                                     'size' => \kartik\select2\Select2::SMALL,
@@ -472,14 +478,14 @@ JS;
 
                     //'upp_user_id',
                     //'upp_project_id',
-                    'upp_email:email',
+                    //'upp_email:email',
                     [
                         'class' => \common\components\grid\EmailSelect2Column::class,
                         'attribute' => 'upp_email_list_id',
                         'relation' => 'emailList',
                     ],
                     //'upp_phone_number',
-                    'upp_tw_phone_number',
+                    //'upp_tw_phone_number',
                     [
                         'class' => \common\components\grid\PhoneSelect2Column::class,
                         'attribute' => 'upp_phone_list_id',
@@ -490,9 +496,9 @@ JS;
                         'format' => 'raw',
                         'value' => function(\common\models\UserProjectParams $model) {
                             if ($model->upp_allow_general_line) {
-                                return '<span class="label label-success">Yes</span>';
+                                return '<i class="fa fa-check-square-o"></i>';
                             }
-                            return '<span class="label label-danger">No</span>';
+                            return '-';
                         }
                     ],
                     //'upp_tw_sip_id',
@@ -534,12 +540,10 @@ JS;
                         'controller' => 'user-project-params',
                         //'headerOptions' => ['width' => '20%', 'class' => '',],
                         'buttons' => [
-                            'update' => function ($url, $model, $key) {
+                            'update' => static function ($url, $model, $key) {
                                 return Html::a('<span class="glyphicon glyphicon-edit"></span>','#', [
-                                    'class' => 'act-update-upp',
+                                    'class' => 'act-update-upp text-warning',
                                     'title' => 'Update Project params',
-                                    //'data-toggle' => 'modal',
-                                    //'data-target' => '#activity-modal',
                                     'data-id' => $key,
                                     'data-pjax' => '0',
                                 ]);

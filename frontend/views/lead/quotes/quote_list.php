@@ -93,6 +93,28 @@ $previewEmailUrl = \yii\helpers\Url::to(['quote/preview-send-quotes']);
 $leadId = $leadForm->getLead()->id;?>
 
 <?php
+// Email Capture
+$js = <<<JS
+
+$(document).on('click','.btn-capture', function (e) {
+        e.preventDefault();
+        let url = $(this).data('url');
+        let modal = $('#modal-df');
+        let title = $(this).attr('title');
+        $('#modal-df-label').html(title);     
+        modal.find('.modal-body').html('');
+        $('#preloader').removeClass('hidden');        
+        $.ajax({
+            url: url,
+            success: function(response){              
+                let content = '<textarea rows="2" id="capture-url" readonly="readonly" style="width: 100%">' + response + '</textarea><br><br><div><button class="btn btn-primary btn-clipboard" data-clipboard-target="#capture-url"><i class="fas fa-copy"></i> Copy to clipboard</button></div>';
+                modal.find('.modal-body').html(content);
+                modal.modal('show'); 
+            }
+        });
+    }); 
+JS;
+$this->registerJs($js);
 
 // Menu details
 

@@ -14,6 +14,7 @@ use common\models\QuotePrice;
 use common\models\search\QuotePriceSearch;
 use common\models\search\QuoteSearch;
 use sales\auth\Auth;
+use sales\forms\quotePrice\AddQuotePriceForm;
 use sales\helpers\app\AppHelper;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
@@ -136,28 +137,7 @@ class QuoteController extends FController
 
                             if(isset($entry['tickets'])) {
                                 $quote->tickets = json_encode($entry['tickets']);
-                            } /*else {
-
-                                $tickets[] = ["trips" => [
-                                    [
-                                        "tripId"=> 1,
-                                        "segmentIds"=> [1,2]
-                                    ],
-                                    [
-                                        "tripId"=> 2,
-                                        "segmentIds"=> [1]
-                                    ],
-                                ]];
-
-                                $tickets[] = ["trips" => [
-                                    [
-                                        "tripId"=> 2,
-                                        "segmentIds" => [2]
-                                    ]
-                                ]];
-
-                                $quote->tickets = json_encode($tickets);
-                            }*/
+                            }
 
                             if ($lead->originalQuoteExist()) {
                                 $quote->alternative();
@@ -499,11 +479,9 @@ class QuoteController extends FController
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         $response = [
-            'status' => 1,
-            'error' => '',
-            'reservation_dump' => [],
-            'validating_carrier' => '',
-            'prices' => '',
+            'status' => 1, 'error' => '',
+            'reservation_dump' => [], 'prices' => '',
+            'validating_carrier' => '', 'trip_type' => Lead::TRIP_TYPE_ONE_WAY,
         ];
 
         try {
@@ -515,9 +493,10 @@ class QuoteController extends FController
                 }
 
                 $post = Yii::$app->request->post();
+                $quoteFormName = (new Quote())->formName();
 
-                if (isset($post['Quote'], $post['prepare_dump'])) {
-                    $postQuote = $post['Quote'];
+                if (isset($post[$quoteFormName], $post['prepare_dump'])) {
+                    $postQuote = $post[$quoteFormName];
 
                     if (!$gds = ParsingDump::getGdsByQuote($postQuote['gds'])) {
                         throw new \DomainException(  'This gds(' . $postQuote['gds'] . ') cannot be processed');
@@ -545,7 +524,7 @@ class QuoteController extends FController
                                 $price->net = $price->fare + $price->taxes;
                                 $price->selling = ($price->net + $price->mark_up)  * (1 + $serviceFee);
                                 $price->toFloat();
-                                $price->roundValue();
+                                $price->roundAttributesValue();
                                 $price->oldParams = serialize($price->attributes);
 
                                 $prices[] = $price;
@@ -553,32 +532,34 @@ class QuoteController extends FController
                                 break;
                             }
                         }
-
                         if ($price === null) {
                             $price = new QuotePrice();
                             $price->createQPrice($type);
                             $prices[] = $price;
                         }
                     }
-
                     $response['prices'] = $this->renderAjax('partial/_priceRows', [
                         'prices' => $prices,
                         'lead' => $lead,
                     ]);
 
                     $itinerary = [];
-                    if ((new ReservationService($gds))->parseReservation($post['prepare_dump'], true, $itinerary)) {
+                    $reservationService = new ReservationService($gds);
+                    $reservationService->parseReservation($post['prepare_dump'], true, $itinerary);
+                    if ($reservationService->parseStatus) {
                         $response['reservation_dump'] = Quote::createDump($itinerary);
-                    } elseif (!empty($post['reservation_result']) &&
-                        (new ReservationService('sabre'))->parseReservation($post['reservation_result'], true, $itinerary)) {
-                        $response['reservation_dump'] = Quote::createDump($itinerary);
+                        if ($tripType = $reservationService->getTripType()) {
+                            $response['trip_type'] = $tripType;
+                        }
                     }
 
-                    if (empty($response['reservation_dump']) && empty($response['validating_carrier']) && empty($response['prices'])) {
+                    if (self::isFailed($response, $prices)) {
                         $response['status'] = 0;
                         $response['error'] = 'Parse GDS Dump failed';
                     }
                 }
+            } else {
+                throw new BadRequestHttpException('Not found POST request');
             }
         } catch (\Throwable $throwable) {
             $response['status'] = 0;
@@ -622,7 +603,6 @@ class QuoteController extends FController
 
                     $quote = Quote::createQuote($postQuote, $lead->id, $lead->originalQuoteExist());
 
-                    $itinerary = [];
                     if ((new ReservationService($gds))->parseReservation($post['prepare_dump'], true, $quote->itinerary)) {
                         $itinerary = Quote::createDump($quote->itinerary);
                     } elseif (!empty($post['reservation_result']) &&
@@ -641,7 +621,7 @@ class QuoteController extends FController
 
                     foreach ($post['QuotePrice'] as $key => $quotePrice) {
 
-                        if ($price = new QuotePrice()) {
+                        if ($price = new AddQuotePriceForm()) {
                             $price->quote_id = $quote->id;
                             $price->passenger_type = $quotePrice['passenger_type'];
                             $price->fare = $quotePrice['fare'];
@@ -650,10 +630,13 @@ class QuoteController extends FController
                             $price->mark_up = $quotePrice['mark_up'];
                             $price->selling = $quotePrice['selling'];
                             $price->service_fee = ($quote->check_payment) ? round($price->selling * (new Quote())->serviceFee, 2) : 0;
-                            $price->roundValue();
 
-                            if (!$price->save()) {
+                            if (!$price->validate()) {
                                 $response['errorsPrices'][$key] = $price->getErrors();
+                            } else {
+                                $quotePrice = QuotePrice::manualCreation($price);
+                                $quotePrice->roundAttributesValue();
+                                $quotePrice->save(false);
                             }
                         }
                     }
@@ -1026,140 +1009,6 @@ class QuoteController extends FController
         return null;
     }
 
-//    public function actionClone($leadId, $qId)
-//    {
-//        $lead = Lead::findOne(['id' => $leadId]);
-//        $errors = [];
-//
-//        if ($lead !== null && !empty($qId)) {
-//            $currentQuote = Quote::findOne(['id' => $qId]);
-//
-//            if (Yii::$app->request->isAjax) {
-//                return $this->renderAjax('_clone', [
-//                    'lead' => $lead,
-//                    'quote' => $currentQuote,
-//                    'errors' => $errors,
-//                ]);
-//
-//            }elseif (Yii::$app->request->isPost) {
-//                $quote = new Quote();
-//                $quote->attributes = $currentQuote->attributes;
-//                $quote->uid = uniqid();
-//                $quote->status = Quote::STATUS_CREATED;
-//                $quote->save(false);
-//
-//                $quote->employee_id = $currentQuote->employee_id;
-//                $quote->update();
-//
-//                $selling = 0;
-//
-//                $quotePrices = $currentQuote->quotePrices;
-//                foreach ($quotePrices as $price){
-//                    $newPrice = new QuotePrice();
-//                    $newPrice->attributes = $price->attributes;
-//                    $newPrice->quote_id = $quote->id;
-//                    $newPrice->uid = uniqid(explode('.', $price->uid)[0] . '.');
-//                    $newPrice->toFloat();
-//                    $selling += $newPrice->selling;
-//                    if (!$newPrice->save()) {
-//                        $errors = array_merge($errors, $newPrice->getErrors());
-//                    }
-//                }
-//                $quoteTrips = $currentQuote->quoteTrips;
-//                if(!empty($quoteTrips)){
-//                    foreach ($quoteTrips as $trip){
-//                        $newTrip = new QuoteTrip();
-//                        $newTrip->attributes = $trip->attributes;
-//                        $newTrip->qt_quote_id = $quote->id;
-//                        $newTrip->save(false);
-//
-//                        $segments = $trip->quoteSegments;
-//                        if(!empty($segments)){
-//                            foreach ($segments as $segment){
-//                                $newSegment = new QuoteSegment();
-//                                $newSegment->attributes = $segment->attributes;
-//                                $newSegment->qs_trip_id = $newTrip->qt_id;
-//                                $newSegment->save(false);
-//
-//                                $stops = $segment->quoteSegmentStops;
-//                                if(!empty($stops)){
-//                                    foreach ($stops as $stop){
-//                                        $newStop = new QuoteSegmentStop();
-//                                        $newStop->attributes = $stop->attributes;
-//                                        $newStop->qss_segment_id = $newSegment->qs_id;
-//                                        $newStop->save(false);
-//                                    }
-//                                }
-//
-//                                $baggages = $segment->quoteSegmentBaggages;
-//                                if(!empty($baggages)){
-//                                    foreach ($baggages as $baggage){
-//                                        $newBaggage = new QuoteSegmentBaggage();
-//                                        $newBaggage->attributes = $baggage->attributes;
-//                                        $newBaggage->qsb_segment_id = $newSegment->qs_id;
-//                                        $newBaggage->save(false);
-//                                    }
-//                                }
-//
-//                                $baggageCharges = $segment->quoteSegmentBaggageCharges;
-//                                if(!empty($baggageCharges)){
-//                                    foreach ($baggageCharges as $baggage){
-//                                        $newBaggage = new QuoteSegmentBaggageCharge();
-//                                        $newBaggage->attributes = $baggage->attributes;
-//                                        $newBaggage->qsbc_segment_id = $newSegment->qs_id;
-//                                        $newBaggage->save(false);
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//
-//                if(!empty($errors)){
-//                    return $this->renderAjax('_clone', [
-//                        'lead' => $lead,
-//                        'quote' => $currentQuote,
-//                        'errors' => $errors,
-//                    ]);
-//                }
-//
-//                $changedAttributes = $quote->attributes;
-//                $changedAttributes['selling'] = 0;
-//
-//                $leadLog = new LeadLog((new LeadLogMessage()));
-//                $leadLog->logMessage->oldParams = $changedAttributes;
-//                $newParams = array_intersect_key($quote->attributes, $changedAttributes);
-//                $newParams['selling'] = round($selling, 2);
-//                $leadLog->logMessage->newParams = $newParams;
-//                $leadLog->logMessage->title = 'Created '.$quote->id.' (Clone from '.$qId.')';
-//                $leadLog->logMessage->model = sprintf('%s (%s)', $quote->formName(), $quote->uid);
-//                $leadLog->addLog([
-//                    'lead_id' => $quote->lead_id,
-//                ]);
-//
-//                if ($lead->called_expert) {
-//                    $data = $quote->getQuoteInformationForExpert(true);
-//                    $result = BackOffice::sendRequest('lead/update-quote', 'POST', json_encode($data));
-//                    if ($result['status'] != 'Success' || !empty($result['errors'])) {
-//                        Yii::$app->getSession()->setFlash('warning', sprintf(
-//                            'Update info quote [%s] for expert failed! %s',
-//                            $quote->uid,
-//                            print_r($result['errors'], true)
-//                            ));
-//                    }
-//                }
-//
-//                return $this->redirect([
-//                    'lead/view',
-//                    'gid' => $lead->gid
-//                ]);
-//            }
-//        }
-//
-//
-//        return null;
-//    }
-
     public function actionStatusLog($quoteId)
     {
         $quote = Quote::findOne(['id' => $quoteId]);
@@ -1186,5 +1035,15 @@ class QuoteController extends FController
                 GlobalLog::ACTION_TYPE_CREATE
             )
         );
+    }
+
+    /**
+     * @param array $response
+     * @param array $prices
+     * @return bool
+     */
+    private static function isFailed(array $response, array $prices): bool
+    {
+        return (empty($response['reservation_dump']) && empty($prices));
     }
 }

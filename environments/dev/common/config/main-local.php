@@ -22,5 +22,11 @@ return [
             'username' => 'sales',
             'password' => 'Sales2018!',
         ],
+        'airsearch' => [
+            'class' => \common\components\AirSearchService::class,
+            'url' => 'https://searchapi-dev.travel-dev.com/',
+            'username' => 'SAL101',
+            'password' => 'c940e3484fe9fcc73ed12a7fcec469b4',
+        ],
     ],
 ];

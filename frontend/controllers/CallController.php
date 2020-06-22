@@ -1057,4 +1057,14 @@ class CallController extends FController
 
 		return $this->asJson($result);
 	}
+
+    /**
+     * @return array|\yii\db\ActiveRecord|null
+     */
+	public function actionReactInitCallWidget()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $calls = Call::find()->where(['c_created_user_id' => Yii::$app->user->id])->orderBy(['c_id' => SORT_DESC])->limit(3)->all();
+        return ['calls' => $calls];
+    }
 }

@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use sales\auth\Auth;
+use sales\model\phoneList\services\PhoneListService;
 use Yii;
 use sales\model\phoneList\entity\PhoneList;
 use sales\model\phoneList\entity\search\PhoneListSearch;
@@ -156,5 +157,34 @@ class PhoneListController extends FController
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    /**
+     * @return Response
+     * @throws \yii\httpclient\Exception
+     */
+    public function actionSynchronization()
+    {
+        $result = PhoneListService::synchronizationPhoneNumbers();
+
+        if($result) {
+            if($result['error']) {
+                Yii::$app->getSession()->setFlash('error', $result['error']);
+            } else {
+
+                if($result['created']) {
+                    $message = 'Synchronization successful<br>';
+                    $message .= 'Created Phones (' . count($result['created']) . '):<br> "'.Html::encode(implode(', ', $result['created'])).'"<br>';
+                } else {
+                    $message = 'Synchronization: No new data<br>';
+                }
+                if($result['updated']) {
+                    $message .= 'Updated Phones: "'.implode(', ', $result['updated']).'"<br>';
+                }
+                Yii::$app->getSession()->setFlash('success', $message);
+            }
+        }
+
+        return $this->redirect(['index']);
     }
 }
