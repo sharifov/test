@@ -96,12 +96,14 @@ $js = <<<JS
 							} else { 
 								let params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': lead_id, 'case_id': case_id, 'c_type': 'call-web', 'c_user_id': userId, 'is_conference_call': {$conferenceBase}};						
 								webPhoneParams = params;
+								let PhoneNumbersData = phoneNumbers.getPrimaryData.value ? phoneNumbers.getPrimaryData : phoneNumbers.getData;
 								PhoneWidgetCall.requestOutgoingCall({  
 									'callId': '',
 									'type': 'Outgoing',
 									'status': 'Dialing',  
 									'duration': 0,
-									'project': phoneNumbers.getData.project,
+									'projectName': PhoneNumbersData.project,
+									'sourceName': '',
 									'phone': data.phone,
 									'name': data.callToName,
 									'contact': {
@@ -132,7 +134,7 @@ $js = <<<JS
 									currentCalls: null,
 									status: 'online',
 									timerStamp: 0
-								})
+								});
 								alert('You have active call');
 								$('.call-pane').removeClass('is_active');
 								$('.call-pane-calling').addClass('is_active');

@@ -1125,6 +1125,7 @@ class CallController extends FController
             'active' => $active,
             'lastActive' => $queue->lastActiveQueue
         ]);
+    }
 
     /**
      * @return array|\yii\db\ActiveRecord|null
