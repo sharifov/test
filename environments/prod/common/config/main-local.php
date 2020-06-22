@@ -139,6 +139,18 @@ return [
             'class' => \aki\telegram\Telegram::class,
             'botUsername' => '{{ common.config.main.components.telegram.botUsername:str }}',
             'botToken' => '{{ common.config.main.components.telegram.botToken:str }}',
-        ]
+        ],
+        'rchat' => [
+            'class' => \common\components\RocketChat::class,
+            'url' => '{{ common.config.main.components.rchat.url:str }}',
+            'username' => '{{ common.config.main.components.rchat.username:str }}',
+            'password' => '{{ common.config.main.components.rchat.password:str }}',
+        ],
+        'chatBot' => [
+            'class' => \common\components\ChatBot::class,
+            'url' => '{{ common.config.main.components.chatBot.url:str }}',
+            'username' => '{{ common.config.main.components.chatBot.username:str }}',
+            'password' => '{{ common.config.main.components.chatBot.password:str }}',
+        ],
     ],
 ];
