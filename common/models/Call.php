@@ -1205,9 +1205,16 @@ class Call extends \yii\db\ActiveRecord
                 $isMute = true;
             }
 			if (!$this->currentParticipant || $this->currentParticipant->isAgent() || $this->isEnded()) {
+			    $callId = $this->c_id;
+                $conferenceBase = (bool)(\Yii::$app->params['settings']['voip_conference_base'] ?? false);
+                if (!$conferenceBase) {
+                    if ($isChangedStatus && $this->isStatusInProgress() && $this->isOut() && $this->c_parent_id) {
+                        $callId = $this->c_parent_id;
+                    }
+                }
                 Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id],
                     [
-                        'callId' => $this->c_id,
+                        'callId' => $callId,
                         'status' => $this->getStatusName(),
                         'duration' => $this->c_call_duration,
                         'snr' => $this->c_sequence_number,
@@ -1399,6 +1406,8 @@ class Call extends \yii\db\ActiveRecord
                 } else {
                     $agent = 'seller' . $user_id;
                     $res = \Yii::$app->communication->callRedirect($call->c_call_sid, 'client', $call->c_from, $agent);
+
+                    Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $user_id], RemoveIncomingRequestMessage::create($call->c_id));
 
                     if ($res && isset($res['error']) && $res['error'] === false) {
                         if (isset($res['data']['is_error']) && $res['data']['is_error'] === true) {

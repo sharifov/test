@@ -192,8 +192,6 @@ use yii\helpers\Html;
     $ajaxPhoneDialUrl = Url::to(['phone/ajax-phone-dial']);
     $ajaxBlackList = Url::to(['phone/check-black-phone']);
     $ajaxConferenceCompleteUrl = Url::to(['/phone/ajax-conference-complete']);
-    $ajaxHoldConferenceCall = Url::to(['/phone/ajax-hold-conference-call']);
-    $ajaxUnholdConferenceCall = Url::to(['/phone/ajax-unhold-conference-call']);
     $ajaxUnholdConferenceDoubleCall = Url::to(['/phone/ajax-unhold-conference-double-call']);
     $ajaxJoinToConferenceUrl = Url::to(['/phone/ajax-join-to-conference']);
     $ajaxHangupUrl = Url::to(['/phone/ajax-hangup']);
@@ -223,8 +221,6 @@ use yii\helpers\Html;
     const ajaxPhoneDialUrl = '<?=$ajaxPhoneDialUrl?>';
     const ajaxBlackList = '<?=$ajaxBlackList?>';
     const ajaxConferenceCompleteUrl = '<?= $ajaxConferenceCompleteUrl ?>';
-    const ajaxHoldConferenceCall = '<?= $ajaxHoldConferenceCall ?>';
-    const ajaxUnholdConferenceCall = '<?= $ajaxUnholdConferenceCall ?>';
     const ajaxUnholdConferenceDoubleCall = '<?= $ajaxUnholdConferenceDoubleCall ?>';
     const conferenceBase = parseInt('<?= $conferenceBase ?>');
     const ajaxJoinToConferenceUrl = '<?= $ajaxJoinToConferenceUrl ?>';
@@ -1404,6 +1400,9 @@ $js = <<<JS
             if (connection) {
                 connection.mute(true);
                 if (connection.isMuted()) {
+                    if (typeof PhoneWidgetCall === 'object') { 
+                        PhoneWidgetCall.panes.active.buttons.mute.mute();
+                    }
                     $(this).html('<i class="fa fa-microphone"></i> Unmute').removeClass('btn-success').addClass('btn-warning');
                 } else {
                     new PNotify({title: "Mute", type: "error", text: "Error", hide: true});
@@ -1413,6 +1412,9 @@ $js = <<<JS
             if (connection) {
                 connection.mute(false);
                 if (!connection.isMuted()) {
+                    if (typeof PhoneWidgetCall === 'object') { 
+                        PhoneWidgetCall.panes.active.buttons.mute.unmute();
+                    }
                     $(this).html('<i class="fa fa-microphone"></i> Mute').removeClass('btn-warning').addClass('btn-success');
                 } else {
                     new PNotify({title: "Unmute", type: "error", text: "Error", hide: true});
@@ -1442,106 +1444,7 @@ $js = <<<JS
             alert('Error: Not found active Connection CallSid');
         }
     });
-    
-     $(document).on('click', '#wg-hold-call', function(e) {
-        if (!conferenceBase) {
-           return false;
-        }
-        
-        if (!PhoneWidgetCall.panes.active.buttons.hold.can()) {
-            return false;
-        }
-                
-        let callSid = getActiveConnectionCallSid();
-        if (!callSid) {
-            alert('Error: Not found active Connection CallSid');
-            return false;
-        }
-        
-        if ($(this).attr('data-mode') === 'unhold') {
-            holdCall(callSid);   
-        } else {
-            unholdCall(callSid);
-        }
-        
-    });
      
-     function holdCall(callSid) {
-          let holdBtn = PhoneWidgetCall.panes.active.buttons.hold; 
-          holdBtn.sendRequest();
-         
-          let btn = $('.btn-hold-call');
-          btn.html('<i class="fa fa-spinner fa-spin"></i> <span>Hold</span>');
-          btn.prop('disabled', true);          
-          
-          $.ajax({
-                type: 'post',
-                data: {
-                    'sid': callSid,
-                },
-                url: ajaxHoldConferenceCall
-            })
-            .done(function (data) {
-                if (data.error) {
-                    new PNotify({title: "Hold", type: "error", text: data.message, hide: true});
-                    btn.html('<i class="fa fa-pause"></i> <span>Hold</span>');
-                    btn.prop('disabled', false);
-                    holdBtn.hold();
-                    holdBtn.enable();
-                } else {
-                    // new PNotify({title: "Hold", type: "success", text: 'Wait', hide: true});
-                }                
-             })
-             .fail(function (error) {
-                 btn.html('<i class="fa fa-pause"></i> <span>Hold</span>');
-                 btn.prop('disabled', false);
-                 holdBtn.hold();
-                 holdBtn.enable();
-                 new PNotify({title: "Hold", type: "error", text: 'Server error', hide: true});
-             })
-             .always(function() {
-                
-             });
-     }
-     
-     function unholdCall(callSid) {
-          let holdBtn = PhoneWidgetCall.panes.active.buttons.hold; 
-          holdBtn.sendRequest();
-          
-          let btn = $('.btn-hold-call');
-          btn.html('<i class="fa fa-spinner fa-spin"></i> <span>Unhold</span>');
-          btn.prop('disabled', true);          
-          
-          $.ajax({
-                type: 'post',
-                data: {
-                    'sid': callSid,
-                },
-                url: ajaxUnholdConferenceCall
-            })
-            .done(function (data) {
-                if (data.error) {
-                    new PNotify({title: "Hold", type: "error", text: data.message, hide: true});
-                    btn.html('<i class="fa fa-play"></i> <span>Unhold</span>');
-                    btn.prop('disabled', false);
-                    holdBtn.unhold();
-                    holdBtn.enable();
-                } else {
-                    // new PNotify({title: "Hold", type: "success", text: 'Wait', hide: true});
-                }                
-             })
-             .fail(function (error) {
-                 btn.html('<i class="fa fa-play"></i> <span>Unhold</span>');
-                 btn.prop('disabled', false);
-                 holdBtn.unhold();
-                 holdBtn.enable();
-                 new PNotify({title: "Hold", type: "error", text: 'Server error', hide: true});
-             })
-             .always(function() {
-                
-             });
-     }
-          
      function muteEvent(data)
      {
          let callSid = getActiveConnectionCallSid();

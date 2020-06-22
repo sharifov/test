@@ -44,14 +44,42 @@ class CurrentQueueCallsService
         $calls = [];
         $last_time = 0;
 
-        $queue = Call::find()
-            ->with(['cProject', 'cClient'])
-            ->joinWith(['currentParticipant'])
-            ->byCreatedUser($this->userId)
-            ->inProgress()
-            ->andWhere(['cp_type_id' => ConferenceParticipant::TYPE_AGENT])
-            ->orderBy(['c_updated_dt' => SORT_ASC])
-            ->all();
+        $conferenceBase = (bool)(\Yii::$app->params['settings']['voip_conference_base'] ?? false);
+
+        if ($conferenceBase) {
+            $queue = Call::find()
+                ->with(['cProject', 'cClient'])
+                ->joinWith(['currentParticipant'])
+                ->byCreatedUser($this->userId)
+                ->inProgress()
+                ->andWhere(['cp_type_id' => ConferenceParticipant::TYPE_AGENT])
+                ->orderBy(['c_updated_dt' => SORT_ASC])
+                ->all();
+        } else {
+            $queue = Call::find()
+                ->with(['cProject', 'cClient'])
+                ->byCreatedUser($this->userId)
+                ->andWhere(['OR', ['c_status_id' => Call::STATUS_IN_PROGRESS], ['c_status_id' => Call::STATUS_RINGING]])
+                ->orderBy(['c_updated_dt' => SORT_ASC])
+                ->all();
+            foreach ($queue as $key => $call) {
+                if ($call->isStatusRinging()) {
+                    if ($call->isIn()) {
+                        unset($queue[$key]);
+                    }
+                    if ($call->isOut()) {
+                        $child = Call::find()->firstChild($call->c_id)->inProgress()->one();
+                        if (!$child) {
+                            unset($queue[$key]);
+                        }
+                    }
+                }
+                if ($call->isOut() && $call->isStatusInProgress()) {
+                    unset($queue[$key]);
+                }
+            }
+
+        }
 
         foreach ($queue as $call) {
             if ($call->isIn() || $call->isOut()) {
@@ -119,15 +147,38 @@ class CurrentQueueCallsService
         $calls = [];
         $last_time = 0;
 
-        $queue = Call::find()
-            ->with(['cProject', 'cClient'])
-            ->joinWith(['currentParticipant'])
-            ->byCreatedUser($this->userId)
-            ->out()
-            ->ringing()
-            ->andWhere(['cp_type_id' => ConferenceParticipant::TYPE_AGENT])
-            ->orderBy(['c_updated_dt' => SORT_ASC])
-            ->all();
+        $conferenceBase = (bool)(\Yii::$app->params['settings']['voip_conference_base'] ?? false);
+
+        if ($conferenceBase) {
+            $queue = Call::find()
+                ->with(['cProject', 'cClient'])
+                ->joinWith(['currentParticipant'])
+                ->byCreatedUser($this->userId)
+                ->out()
+                ->ringing()
+                ->andWhere(['cp_type_id' => ConferenceParticipant::TYPE_AGENT])
+                ->orderBy(['c_updated_dt' => SORT_ASC])
+                ->all();
+        } else {
+            $queue = Call::find()
+                ->with(['cProject', 'cClient'])
+                ->byCreatedUser($this->userId)
+                ->out()
+                ->ringing()
+                ->orderBy(['c_updated_dt' => SORT_ASC])
+                ->all();
+
+            foreach ($queue as $key => $call) {
+                if (!$call->isGeneralParent()) {
+                    unset($queue[$key]);
+                    continue;
+                }
+                $child = Call::find()->firstChild($call->c_id)->inProgress()->one();
+                if ($child) {
+                    unset($queue[$key]);
+                }
+            }
+        }
 
         foreach ($queue as $call) {
             $calls[] = new OutgoingQueueCall([
@@ -158,7 +209,7 @@ class CurrentQueueCallsService
         $last_time = 0;
 
         $queue = CallUserAccess::find()
-            ->with(['cuaCall', 'cuaCall.cProject', 'cuaCall.currentParticipant', 'cuaCall.cClient'])
+            ->with(['cuaCall', 'cuaCall.cProject', 'cuaCall', 'cuaCall.cClient'])
             ->joinWith(['cuaCall'])
             ->where(['cua_user_id' => $this->userId, 'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING])
             ->andWhere(['<>', 'c_status_id', Call::STATUS_HOLD])

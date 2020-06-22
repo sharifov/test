@@ -31,6 +31,9 @@ function PhoneWidgetPaneActiveBtnHold(pane) {
 
     this.show = function () {
         $btn.show();
+        if (!conferenceBase) {
+            this.disable().inactive();
+        }
         return this;
     };
 

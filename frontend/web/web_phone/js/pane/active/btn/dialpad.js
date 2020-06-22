@@ -8,6 +8,7 @@ function PhoneWidgetPaneActiveBtnDialpad (pane) {
     };
     
     this.show = function () {
+        this.inactive().disable();
         $btn.show();
         return this;
     };
