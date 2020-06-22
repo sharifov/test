@@ -15,6 +15,7 @@ use common\models\search\QuotePriceSearch;
 use common\models\search\QuoteSearch;
 use sales\auth\Auth;
 use sales\forms\quotePrice\AddQuotePriceForm;
+use sales\forms\segment\SegmentBaggageForm;
 use sales\helpers\app\AppHelper;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
@@ -512,10 +513,13 @@ class QuoteController extends FController
 
                         $baggageService = new BaggageService($gds);
                         $baggageService->setBaggageFromDump($post['prepare_dump']);
-                        $segments = $baggageService->attachBaggageToSegments($reservationService->parseResult);
+                        $segments = $baggageService->attachBaggageToSegments($reservationService->parseResult); /* TODO::  */
+
+
 
                         $response['segments'] = $this->renderAjax('partial/_segmentRows', [
                             'segments' => $segments,
+                            'segmentBaggageForm' => new SegmentBaggageForm(),
                         ]);
                     }
 
@@ -543,6 +547,8 @@ class QuoteController extends FController
         } catch (\Throwable $throwable) {
             $response['status'] = 0;
             $response['error'] = $throwable->getMessage();
+            \Yii::error(\yii\helpers\VarDumper::dumpAsString($throwable, 10, true),
+            'QuoteController:actionPrepareDump:Throwable'); /* TODO:: FOR DEBUG:: must by remove  */
         }
         return $response;
     }

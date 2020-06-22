@@ -41,8 +41,8 @@ class BaggageService
     public function attachBaggageToSegments(array $segments): array
     {
         foreach ($segments as $key => $segment) {
-            if ($baggage = $this->searchByIata($segment['departure_airport_iata'], $segment['arrival_airport_iata'])) {
-                $segments['baggage'] = $baggage;
+            if ($baggage = $this->searchByIata($segment['departureAirport'], $segment['arrivalAirport'])) {
+                $segments[$key]['baggage'] = $baggage;
             }
         }
         return $segments;
@@ -57,14 +57,16 @@ class BaggageService
     {
         $segmentIata = $departureIata . $arrivalIata;
 
-        foreach ($this->baggageFromDump as $key => $item) {
-            if ($item['segment'] === $segmentIata) {
-                $baggage = $this->baggageFromDump['baggage'][$key];
-                break;
-            }
-            if ((new Airport())->getCityByIata($departureIata) === (new Airport())->getCityByIata($arrivalIata)) {
-                $baggage = $this->baggageFromDump['baggage'][$key];
-                break;
+        if (!empty($this->baggageFromDump['baggage'])) {
+            foreach ($this->baggageFromDump['baggage'] as $key => $item) {
+                if ($item['segment'] === $segmentIata) {
+                    $baggage = $this->baggageFromDump['baggage'][$key];
+                    break;
+                }
+                if ((new Airport())->getCityByIata($departureIata) === (new Airport())->getCityByIata($arrivalIata)) {
+                    $baggage = $this->baggageFromDump['baggage'][$key];
+                    break;
+                }
             }
         }
         return $baggage ?? null;

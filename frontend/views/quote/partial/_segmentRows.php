@@ -6,8 +6,19 @@
  */
 
 use common\models\Airport;
+use sales\forms\segment\SegmentBaggageForm;
+use unclead\multipleinput\MultipleInput;
+use unclead\multipleinput\MultipleInputColumn;
+use \yii\widgets\ActiveForm;
+
+/* @var SegmentBaggageForm $segmentBaggageForm */
 
 ?>
+
+<?php $form = ActiveForm::begin([
+            'id' => 'segmentBaggageForm',
+            /*'enableClientValidation' => true,*/
+        ]) ?>
 
 <?php foreach ($segments as $key => $segment) : ?>
     <div class="row">
@@ -40,9 +51,37 @@ use common\models\Airport;
         <div class="col-1 border p-1">Cost</div>
 
         <?php if (isset($segment['baggage']['free_baggage'])) : ?>
-            <?php foreach ($segment['baggage']['free_baggage'] as $freeBaggage) : ?>
+            <?php $freeBaggage =  $segment['baggage']['free_baggage']; ?>
 
-            <?php endforeach; ?>
+                <?php echo $form->field($segmentBaggageForm, 'baggageData')->widget(MultipleInput::class, [
+                    'max' => 5,
+                    'enableError' => true,
+                    'columns' => [
+                        [
+                            'title' => 'Baggage Type',
+                            'name' => 'type',
+                            'type'  => 'dropDownList',
+                            'items' => $segmentBaggageForm::TYPE_LIST,
+                            'defaultValue' => $segmentBaggageForm::TYPE_FREE,
+                        ],
+                        [
+                            'title' => 'Pieces',
+                            'name' => 'piece',
+                            'defaultValue' => $freeBaggage['piece'],
+                        ],
+                        [
+                            'title' => 'Max Size',
+                            'name' => 'maxSize',
+                            'defaultValue' => $freeBaggage['height'],
+                        ],
+                        [
+                            'title' => 'Max Weight',
+                            'name' => 'maxWeight',
+                            'defaultValue' => $freeBaggage['weight'],
+                        ],
+                    ],
+                ])->label(false) ?>
+
         <?php else : ?>
 
         <?php endif; ?>
