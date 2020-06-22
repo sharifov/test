@@ -151,6 +151,51 @@ class CommunicationService extends Component implements CommunicationServiceInte
 
     /**
      * @param int $project_id
+     * @param string $template_type
+     * @param string $email_from
+     * @param string $email_to
+     * @param array $email_data
+     * @param string $language
+     * @return array
+     * @throws Exception
+     */
+    public function mailCapture(int $project_id, string $template_type, string $email_from, string $email_to, array $email_data = [], string $language = 'en-US') : array
+    {
+        $out = ['error' => false, 'data' => []];
+
+        $data['project_id'] = $project_id;
+        $data['mail']['email_from'] = $email_from;
+        $data['mail']['email_to'] = $email_to;
+        $data['mail']['type_key'] = $template_type;
+        $data['mail']['language_id'] = $language;
+        $data['mail']['email_data'] = $email_data;
+
+        if(isset($email_data['email_from_name']) && $email_data['email_from_name']) {
+            $data['mail']['email_from_name'] = $email_data['email_from_name'];
+        }
+
+        if(isset($email_data['email_to_name']) && $email_data['email_to_name']) {
+            $data['mail']['email_to_name'] = $email_data['email_to_name'];
+        }
+
+        $response = $this->sendRequest('email/capture', $data);
+
+        if ($response->isOk) {
+            if(isset($response->data['data']['response'])) {
+                $out['data'] = $response->data['data']['response'];
+            } else {
+                $out['error'] = 'Not found in response array data key [data][response]';
+            }
+        } else {
+            $out['error'] = $response->content;
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'Component:CommunicationService::mailCapture');
+        }
+
+        return $out;
+    }
+
+    /**
+     * @param int $project_id
      * @param string|null $template_type
      * @param string $email_from
      * @param string $email_to
@@ -923,6 +968,42 @@ class CommunicationService extends Component implements CommunicationServiceInte
             $out['error'] = true;
             $out['message'] = 'Server error. Try again later.';
             \Yii::error(VarDumper::dumpAsString($response->content), 'Component:CommunicationService::processConferenceResponse');
+		}
+
+	    return $out;
+	}
+	
+    /**
+     * @param int $limit
+     * @param int $offset
+     * @return array
+     * @throws Exception
+     */
+    public function phoneNumberList(int $limit = 0, int $offset = 0): array
+    {
+        $out = ['error' => false, 'data' => []];
+
+        $data = [];
+
+        if ($limit) {
+            $data['limit'] = $limit;
+        }
+
+        if ($offset) {
+            $data['offset'] = $offset;
+        }
+
+        $response = $this->sendRequest('phone-number/list', $data, 'get');
+
+        if ($response->isOk) {
+            if(empty($response->data['data']['response'])) {
+                $out['error'] = 'Not found in response array data key [data]';
+            } else {
+                $out['data'] = $response->data['data']['response'];
+            }
+        } else {
+            $out['error'] = $response->content;
+            \Yii::error(VarDumper::dumpAsString($out['error']), 'Component:CommunicationService::callRedirect');
         }
 
         return $out;

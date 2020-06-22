@@ -8,6 +8,7 @@ use common\models\Call;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Department;
+use common\models\DepartmentPhoneProject;
 use common\models\Email;
 use common\models\EmailTemplateType;
 use common\models\GlobalLog;
@@ -46,6 +47,7 @@ use sales\forms\lead\CloneReasonForm;
 use sales\forms\lead\ItineraryEditForm;
 use sales\forms\lead\LeadCreateForm;
 use sales\forms\leadflow\TakeOverReasonForm;
+use sales\helpers\setting\SettingHelper;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use sales\model\lead\useCases\lead\create\LeadManageForm;
@@ -548,12 +550,10 @@ class LeadController extends FController
             }
         }
 
-
-        $comForm = new CommunicationForm();
+        $comForm = new CommunicationForm($lead->l_client_lang);
         $comForm->c_preview_email = 0;
         $comForm->c_preview_sms = 0;
         $comForm->c_voice_status = 0;
-
 
         if ($comForm->load(Yii::$app->request->post())) {
 
@@ -1201,6 +1201,18 @@ class LeadController extends FController
 
         $tmpl = $isQA ? 'view_qa' : 'view';
 
+		$fromPhoneNumbers = [];
+		if (SettingHelper::isLeadCommunicationNewCallWidgetEnabled()) {
+			if ($userParams = UserProjectParams::find()->where(['upp_user_id' => Auth::id()])->withPhoneList()->all()) {
+				foreach ($userParams as $param) {
+					$phone = $param->getPhone();
+					if ($phone) {
+						$fromPhoneNumbers[$phone] = $param->uppProject->name . ' (' . $phone . ')';
+					}
+				}
+			}
+		}
+
         return $this->render($tmpl, [
             'leadForm' => $leadForm,
             'previewEmailForm' => $previewEmailForm,
@@ -1220,6 +1232,8 @@ class LeadController extends FController
 
             'dataProviderOffers'    => $dataProviderOffers,
             'dataProviderOrders'    => $dataProviderOrders,
+
+			'fromPhoneNumbers' => $fromPhoneNumbers
         ]);
 
     }

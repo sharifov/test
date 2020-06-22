@@ -99,6 +99,7 @@ class LeadController extends ApiBaseController
      * @apiParam {string{3..100}}       [lead.client_first_name]                            Client first name
      * @apiParam {string{3..100}}       [lead.client_last_name]                             Client last name
      * @apiParam {string{3..100}}       [lead.client_middle_name]                           Client middle name
+     * @apiParam {string{20}}           lead.user_language                                  User language
      *
      * @apiParam {object[]}             lead.visitor_log                                    Array of Visitor log
      * @apiParam {string{10}}           lead.visitor_log.vl_source_cid
@@ -148,6 +149,7 @@ class LeadController extends ApiBaseController
      *        "adults": 1,
      *        "client_first_name": "Alexandr",
      *        "client_last_name": "Freeman",
+     *        "user_language": "en-GB",
      *        "visitor_log": [
      *               {
      *                   "vl_source_cid": "string_abc",

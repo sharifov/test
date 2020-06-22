@@ -100,6 +100,9 @@ class CasesChangeStatusForm extends Model
 
     public function userList(): array
     {
+        if ($this->user->isAnyAgent()) {
+            return Employee::getActiveUsersListFromCommonGroups($this->user->id);
+        }
         return (new ListsAccess($this->user->id))->getEmployees();
     }
 
@@ -110,11 +113,11 @@ class CasesChangeStatusForm extends Model
     {
         $list = CasesStatusTransferList::getAllowTransferListByUser($this->case->cs_status, $this->user);
 
-        if (!$this->user->isAdmin() && !$this->user->isExSuper() && !$this->user->isSupSuper()) {
-            if (isset($list[CasesStatus::STATUS_PROCESSING])) {
-                unset($list[CasesStatus::STATUS_PROCESSING]);
-            }
-        }
+//        if (!$this->user->isAdmin() && !$this->user->isExSuper() && !$this->user->isSupSuper()) {
+//            if (isset($list[CasesStatus::STATUS_PROCESSING])) {
+//                unset($list[CasesStatus::STATUS_PROCESSING]);
+//            }
+//        }
 
         if ($this->case->isTrash() || $this->case->isFollowUp()) {
             if (isset($list[CasesStatus::STATUS_PENDING])) {

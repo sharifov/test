@@ -6,6 +6,7 @@ use common\models\Employee;
 use common\models\EmployeeAcl;
 use common\models\EmployeeContactInfo;
 use common\models\LoginForm;
+use common\models\Project;
 use common\models\ProjectEmployeeAccess;
 use common\models\search\EmployeeSearch;
 use common\models\search\UserProjectParamsSearch;
@@ -14,11 +15,13 @@ use common\models\UserGroupAssign;
 use common\models\UserParams;
 use common\models\UserProductType;
 use common\models\UserProfile;
+use common\models\UserProjectParams;
 use frontend\models\search\UserFailedLoginSearch;
 use frontend\models\UserFailedLogin;
 use frontend\models\UserMultipleForm;
 use sales\auth\Auth;
 use sales\helpers\app\AppHelper;
+use sales\model\emailList\entity\EmailList;
 use sales\model\userVoiceMail\entity\search\UserVoiceMailSearch;
 use Yii;
 use yii\bootstrap4\Html;
@@ -369,8 +372,10 @@ class EmployeeController extends FController
         $modelUserParams = new UserParams();
         $modelProfile = new UserProfile();
 
-        if (Yii::$app->request->isPost) {
+        if (Yii::$app->request->isPost && $model->load(Yii::$app->request->post())) {
             $attr = Yii::$app->request->post($model->formName());
+
+            //VarDumper::dump($model->make_user_project_params, 10, true); exit;
 
             $model->prepareSave($attr);
 
@@ -387,6 +392,8 @@ class EmployeeController extends FController
                     }
                 }
 
+
+                // VarDumper::dump($model->form_roles, 10, true); exit;
 
                 $model->addRole(true);
 
@@ -428,6 +435,57 @@ class EmployeeController extends FController
                     }
                 }
 
+
+                $emailArr = explode('@', $model->email);
+                $emailPrefix = $emailArr[0] ?? null;
+
+                //VarDumper::dump($emailPrefix, 10, true);
+
+                if ($model->make_user_project_params) {
+                    if (!empty($attr['user_projects'])) {
+                        foreach ($attr['user_projects'] as $projectId) {
+
+                            //VarDumper::dump($projectId, 10, true);
+
+                            $project = Project::findOne($projectId);
+                            if (!$project || $project->closed) {
+                                continue;
+                            }
+
+
+
+                            $emailId = null;
+                            if ($emailPrefix && $project->email_postfix) {
+                                $email = new EmailList();
+                                $email->el_email = $emailPrefix . '@' . $project->email_postfix;
+                                $email->el_title = $project->name . ' - ' . $model->username;
+                                $email->el_enabled = true;
+
+                                if ($email->save()) {
+                                    $emailId = $email->el_id;
+                                } else {
+                                    Yii::error(VarDumper::dumpAsString([$email->attributes, $email->errors]), 'Employee:Create:EmailList:save');
+                                }
+                            }
+
+                            //VarDumper::dump('EmId:' . $emailId, 10, true);
+
+                            $upp = new UserProjectParams();
+                            $upp->upp_user_id = $model->id;
+                            $upp->upp_project_id = (int) $projectId;
+                            $upp->upp_created_dt = date('Y-m-d H:i:s');
+                            if ($emailId) {
+                                $upp->upp_email_list_id = $emailId;
+                            }
+                            if (!$upp->save()) {
+                                Yii::error(VarDumper::dumpAsString([$upp->attributes, $upp->errors]), 'Employee:Create:UserProjectParams:save');
+                            }
+                        }
+                    }
+
+                }
+
+                //exit;
 
                 Yii::$app->getSession()->setFlash('success', 'User created');
 
@@ -565,7 +623,7 @@ class EmployeeController extends FController
 //        $userCache->flush();
 
 
-            if (Yii::$app->request->isPost) {
+            if (Yii::$app->request->isPost && $model->load(Yii::$app->request->post())) {
                 $attr = Yii::$app->request->post($model->formName());
 
                 $model->prepareSave($attr);

@@ -598,7 +598,7 @@ class PhoneController extends FController
                         continue;
                     }
                     $userModel = \common\models\Employee::findOne($agentId);
-                    if ($userModel->isAgent() || $userModel->isSupAgent() || $userModel->isExAgent() || $userModel->isSupervision() || $userModel->isSupSuper() || $userModel->isExSuper()) {
+                    if ($userModel && ($userModel->isAgent() || $userModel->isSupAgent() || $userModel->isExAgent() || $userModel->isSupervision() || $userModel->isSupSuper() || $userModel->isExSuper())) {
                         $users[] = $userModel;
                     }
                 }

@@ -1092,6 +1092,7 @@ class CallController extends FController
 		return $this->asJson($result);
 	}
 
+
 	public function actionCurrentQueueCalls(): Response
     {
         $queue = $this->currentQueueCalls->getQueuesCalls(Auth::id());
@@ -1124,5 +1125,14 @@ class CallController extends FController
             'active' => $active,
             'lastActive' => $queue->lastActiveQueue
         ]);
+
+    /**
+     * @return array|\yii\db\ActiveRecord|null
+     */
+	public function actionReactInitCallWidget()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $calls = Call::find()->where(['c_created_user_id' => Yii::$app->user->id])->orderBy(['c_id' => SORT_DESC])->limit(3)->all();
+        return ['calls' => $calls];
     }
 }

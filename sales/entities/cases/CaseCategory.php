@@ -4,6 +4,7 @@ namespace sales\entities\cases;
 
 use common\models\Department;
 use common\models\Employee;
+use kartik\daterange\DateRangeBehavior;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -21,6 +22,7 @@ use yii\helpers\ArrayHelper;
  * @property string $cc_created_dt
  * @property string $cc_updated_dt
  * @property int $cc_updated_user_id
+ * @property bool $cc_enabled
  *
  * @property Cases[] $cases
  * @property Department $dep
@@ -48,6 +50,13 @@ class CaseCategory extends ActiveRecord
                 'updatedByAttribute' => 'cc_updated_user_id',
                 'createdByAttribute' => 'cc_updated_user_id',
             ],
+
+            'datePickerRange' =>[
+                'class' => DateRangeBehavior::class,
+                'attribute' => 'createTimeRange',
+                'dateStartAttribute' => 'createTimeStart',
+                'dateEndAttribute' => 'createTimeEnd',
+            ]
         ];
     }
 
@@ -70,7 +79,8 @@ class CaseCategory extends ActiveRecord
             ['cc_dep_id', 'integer'],
             ['cc_dep_id', 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['cc_dep_id' => 'dep_id']],
 
-            ['cc_system', 'boolean'],
+            [['cc_system', 'cc_enabled'], 'boolean'],
+            ['cc_enabled', 'default', 'value' => true],
         ];
     }
 
@@ -89,6 +99,7 @@ class CaseCategory extends ActiveRecord
             'cc_created_dt' => 'Created Dt',
             'cc_updated_dt' => 'Updated Dt',
             'cc_updated_user_id' => 'Updated User ID',
+            'cc_enabled' => 'Enabled',
         ];
     }
 
@@ -118,17 +129,21 @@ class CaseCategory extends ActiveRecord
 
     /**
      * @param array|null $departments
+     * @param bool|null $enabled
      * @return array
      */
-    public static function getList(?array $departments = null) : array
+    public static function getList(?array $departments = null, ?bool $enabled = null) : array
     {
         $conditions = [];
 
         if ($departments) {
-            $conditions = ['cc_dep_id' => $departments];
+            $conditions['cc_dep_id'] = $departments;
+        }
+        if ($enabled) {
+            $conditions['cc_enabled'] = $enabled;
         }
 
-        $data = self::find()->select(['cc_name', 'cc_dep_id', 'cc_id'])
+        $data = self::find()->select(['cc_name', 'cc_dep_id', 'cc_id', 'cc_enabled'])
             ->andWhere($conditions)
             ->indexBy('cc_id')
             ->orderBy(['cc_created_dt' => SORT_ASC])

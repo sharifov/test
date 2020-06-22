@@ -11,7 +11,7 @@ use yii\helpers\Html;
 /* @var string $gds */
 /* @var bool|null $prepareSegment */
 
-$this->title = 'Check Flight dump - GDS WorldSpan';
+$this->title = 'Check GDS dump';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="check-flight-dump">
@@ -35,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'style' => 'margin-bottom: 12px;',
             ])
         ?>
-        <?= Html::textarea('dump', $dump, ['rows' => 10, 'style' => 'width: 100%']) ?><br><br>
+        <?= Html::textarea('dump', $dump, ['rows' => 22, 'style' => 'width: 100%;']) ?><br><br>
 
         <?php echo Html::checkbox('prepare_segment', $prepareSegment,
                     ['id' => 'prepare_segment', ]) ?> Reservation prepare segment<br><br>
@@ -44,17 +44,25 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::endForm() ?>
     </div>
 
-
     <div class="col-md-8">
-        <?php echo (empty($data) && !empty($dump)) ? 'Parsing failed' : '' ?>
+        <?php echo (empty($data) && !empty($dump)) ? '<h2>Parsing failed</h2>' : '' ?>
 
         <?php if ($data): ?>
-            <h2>Parse dump: <?php echo $type ?>.</h2>
+            <h2>Parse dump: <b><?php echo $type ?></b>. GDS: <b><?php echo $gds ?></b>.</h2>
             <pre>
                 <?php \yii\helpers\VarDumper::dump($data, 10, true) ?>
             </pre>
         <?php endif; ?>
     </div>
-
-
 </div>
+
+<?php
+$js = <<<JS
+    let textarea = document.querySelector('textarea');
+    textarea.addEventListener('keyup', function() {
+        if (this.scrollTop > 0) {
+            this.style.height = this.scrollHeight + 'px';
+        }
+    });  
+JS;
+$this->registerJs($js);
