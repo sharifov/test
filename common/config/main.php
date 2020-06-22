@@ -72,6 +72,12 @@ return [
             'username' => 'SAL101',
             'password' => 'c940e3484fe9fcc73ed12a7fcec469b4',
         ],
+        'rchat' => [
+            'class' => \common\components\RocketChat::class,
+            'url' => 'https://rocketchat.travel-dev.com/api/v1/',
+            'username' => '',
+            'password' => '',
+        ],
         'queue_sms_job' => [
             'class' => \yii\queue\beanstalk\Queue::class,
             'host' => 'localhost',
