@@ -5,6 +5,7 @@ namespace sales\services\parsingDump;
 
 
 use common\models\Airport;
+use common\models\QuotePrice;
 use sales\services\parsingDump\lib\ParsingDump;
 
 /**
@@ -78,5 +79,16 @@ class BaggageService
             }
         }
         return $baggage ?? null;
+    }
+
+    /**
+     * @param string|null $cost
+     * @return float
+     */
+    public static function prepareCost(?string $cost): float
+    {
+        $cost = $cost ?? '0.00';
+        $cost = preg_replace('/[^.0-9]/', '', $cost);
+        return (new QuotePrice())->roundValue($cost);
     }
 }

@@ -3,6 +3,7 @@
 namespace sales\services\parsingDump\lib\sabre;
 
 use sales\helpers\app\AppHelper;
+use sales\services\parsingDump\BaggageService;
 use sales\services\parsingDump\lib\ParseDumpInterface;
 
 /**
@@ -85,12 +86,17 @@ class Baggage implements ParseDumpInterface
                             $bagsString = explode('1STCHECKED', $val);
                             $detailBag = explode('/', $bagsString[1]);
                             if (stripos($detailBag[0], "USD") !== false) {
+
+                                $price = explode('-', $detailBag[0])[2];
+                                $price = BaggageService::prepareCost($price);
+
                                 $bagItem = [
                                     'ordinal' => '1st',
                                     'piece' => 1,
                                     'weight' => 'N/A',
                                     'height' => 'N/A',
-                                    'price' => explode('-', $detailBag[0])[2],
+                                    'price' => $price,
+                                    'currency' => 'USD',
                                 ];
                                 $detailVolume = explode('UP TO', $bagsString[1]);
                                 if (isset($detailVolume[1])) {
@@ -109,7 +115,8 @@ class Baggage implements ParseDumpInterface
                             'piece' => (int)str_replace('P', '', $detailBag[0]),
                             'weight' => 'N/A',
                             'height' => 'N/A',
-                            'price' => 'USD0'
+                            'price' => '0',
+                            'currency' => '',
                         ];
                         $detailVolume = explode('UP TO', $detail[2]);
                         if (isset($detailVolume[1])) {
@@ -127,7 +134,8 @@ class Baggage implements ParseDumpInterface
                         'piece' => 1,
                         'weight' => 'N/A',
                         'height' => 'N/A',
-                        'price' => $detailBag[0],
+                        'price' => BaggageService::prepareCost($detailBag[0]),
+                        'currency' => 'USD',
                     ];
 
                     $detailVolume = explode('UP TO', $detail[2]);

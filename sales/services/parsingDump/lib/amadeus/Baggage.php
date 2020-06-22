@@ -58,7 +58,8 @@ class Baggage implements ParseDumpInterface
                             'piece' => $baggageMatches[1],
                             'weight' => '',
                             'height' => '',
-                            'price' => 'USD0'
+                            'price' => '0',
+                            'currency' => '',
                         ],
                     ];
                 }

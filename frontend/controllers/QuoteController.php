@@ -517,7 +517,7 @@ class QuoteController extends FController
 
                         $response['segments'] = $this->renderAjax('partial/_segmentRows', [
                             'segments' => $segments,
-                            'segmentBaggageForm' => new SegmentBaggageForm(),
+                            /*'segmentBaggageForm' => new SegmentBaggageForm(),*/
                         ]);
                     }
 

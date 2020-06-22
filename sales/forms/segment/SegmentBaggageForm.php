@@ -3,6 +3,7 @@
 namespace sales\forms\segment;
 
 use common\models\QuotePrice;
+use sales\services\parsingDump\BaggageService;
 use yii\base\Model;
 
 /**
@@ -10,8 +11,8 @@ use yii\base\Model;
  * @property int $piece
  * @property string $paxCode
  * @property string $segmentIata
- * @property string $maxWeight
- * @property string $maxSize
+ * @property string $weight
+ * @property string $height
  * @property double|null $price
  * @property string $currency
  * @property array $baggageData
@@ -22,8 +23,8 @@ class SegmentBaggageForm extends Model
     public $segmentIata;
     public $piece;
     public $paxCode;
-    public $maxWeight;
-    public $maxSize;
+    public $weight; // maxWeight
+    public $height; // maxSize
     public $price;
     public $currency;
 
@@ -50,8 +51,13 @@ class SegmentBaggageForm extends Model
             [['paxCode'], 'in', 'range' => array_keys(QuotePrice::PASSENGER_TYPE_LIST)],
 
             [['segmentIata'], 'string', 'length' => 6],
-            [['maxWeight', 'maxSize'], 'string', 'max' => 100],
+            [['weight', 'height'], 'string', 'max' => 100],
+
+            ['price', 'filter', 'filter' => static function ($value) {
+                return BaggageService::prepareCost($value);
+            }],
             [['price'], 'number'],
+
             [['piece'], 'integer'],
 
             [['currency'], 'default', 'value' => 'USD'],

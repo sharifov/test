@@ -38,12 +38,19 @@ $css = <<<CSS
         color: #7890a2;
         margin-bottom: 8px;
     }
-    .multiple-input-list th,
+    
     .list-cell__piece,
     .list-cell__maxSize,
     .list-cell__maxWeight {
         width: 120px;
-    }    
+    }
+    .multiple-input-list th {
+        border-bottom: 1px solid #dee2e6!important;
+        font-weight: normal!important;
+    } 
+    .list-cell__button {
+        padding: 12px 3px 3px 3px!important;
+    }   
 CSS;
 $this->registerCss($css);
 ?>
