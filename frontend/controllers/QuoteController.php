@@ -510,26 +510,13 @@ class QuoteController extends FController
                             $response['trip_type'] = $tripType;
                         }
 
-                        if ($obj = ParsingDump::initClass($gds, ParsingDump::PARSING_TYPE_BAGGAGE)) { /* TODO:: baggage */
-                            $baggageFromDump = $obj->parseDump($post['prepare_dump']);
+                        $baggageService = new BaggageService($gds);
+                        $baggageService->setBaggageFromDump($post['prepare_dump']);
+                        $segments = $baggageService->attachBaggageToSegments($reservationService->parseResult);
 
-                            \yii\helpers\VarDumper::dump(
-                                BaggageService::searchByIata(
-                                    $baggageFromDump,
-                                    'SFO',
-                                    'DFW'
-                                ),
-                                10,
-                                true
-                            );
-                            exit();
-                            /* FOR DEBUG:: must by remove */
-
-                            $response['segments'] = $this->renderAjax('partial/_segmentRows', [
-                                'segments' => $reservationService->parseResult,
-                                'baggage' => $baggageFromDump,
-                            ]);
-                        }
+                        $response['segments'] = $this->renderAjax('partial/_segmentRows', [
+                            'segments' => $segments,
+                        ]);
                     }
 
                     $pricesFromDump = [];

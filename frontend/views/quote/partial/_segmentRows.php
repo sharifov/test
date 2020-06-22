@@ -6,8 +6,6 @@
  */
 
 use common\models\Airport;
-use sales\services\parsingDump\BaggageService;
-use yii\bootstrap\Html;
 
 ?>
 
@@ -41,7 +39,13 @@ use yii\bootstrap\Html;
         <div class="col-1 border p-1">Max Weight</div>
         <div class="col-1 border p-1">Cost</div>
 
+        <?php if (isset($segment['baggage']['free_baggage'])) : ?>
+            <?php foreach ($segment['baggage']['free_baggage'] as $freeBaggage) : ?>
 
+            <?php endforeach; ?>
+        <?php else : ?>
+
+        <?php endif; ?>
 
     </div>
     <br />

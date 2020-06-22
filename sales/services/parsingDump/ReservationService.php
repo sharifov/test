@@ -22,7 +22,6 @@ class ReservationService
     public bool $parseStatus;
 
     /**
-     * ReservationService constructor.
      * @param string $gds
      */
     public function __construct(string $gds)

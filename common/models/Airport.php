@@ -117,4 +117,15 @@ class Airport extends ActiveRecord
         }, $duration);
     }
 
+    /**
+     * @param $iata
+     * @return string|null
+     */
+    public function getCityByIata($iata): ?string
+    {
+        if ($airport = self::findIdentity($iata)) {
+            return $this->getCityName();
+        }
+        return null;
+    }
 }
