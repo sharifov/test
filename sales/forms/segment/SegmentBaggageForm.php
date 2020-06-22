@@ -43,7 +43,7 @@ class SegmentBaggageForm extends Model
     public function rules(): array
     {
         return [
-            [['type', 'segmentIata', 'paxCode'], 'required'],
+            [['type', 'segmentIata', 'paxCode', 'piece'], 'required'],
 
             [['type'], 'in', 'range' => array_keys(self::TYPE_LIST)],
             [['paxCode'], 'default', 'value' => QuotePrice::PASSENGER_ADULT],

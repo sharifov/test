@@ -13,6 +13,8 @@ use \yii\widgets\ActiveForm;
 
 /* @var SegmentBaggageForm $segmentBaggageForm */
 
+
+
 ?>
 
 <?php $form = ActiveForm::begin([
@@ -44,17 +46,11 @@ use \yii\widgets\ActiveForm;
         </div>
     </div>
     <div class="row">
-        <div class="col-1 border p-1">Baggage Type</div>
-        <div class="col-1 border p-1">Pieces</div>
-        <div class="col-1 border p-1">Max Size</div>
-        <div class="col-1 border p-1">Max Weight</div>
-        <div class="col-1 border p-1">Cost</div>
-
         <?php if (isset($segment['baggage']['free_baggage'])) : ?>
             <?php $freeBaggage =  $segment['baggage']['free_baggage']; ?>
 
                 <?php echo $form->field($segmentBaggageForm, 'baggageData')->widget(MultipleInput::class, [
-                    'max' => 5,
+                    'max' => 4,
                     'enableError' => true,
                     'columns' => [
                         [
@@ -81,8 +77,6 @@ use \yii\widgets\ActiveForm;
                         ],
                     ],
                 ])->label(false) ?>
-
-        <?php else : ?>
 
         <?php endif; ?>
 

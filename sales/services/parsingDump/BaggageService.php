@@ -41,7 +41,7 @@ class BaggageService
     public function attachBaggageToSegments(array $segments): array
     {
         foreach ($segments as $key => $segment) {
-            if ($baggage = $this->searchByIata($segment['departureAirport'], $segment['arrivalAirport'])) {
+            if ($baggage = $this->searchByIata($segment)) {
                 $segments[$key]['baggage'] = $baggage;
             }
         }
@@ -49,22 +49,30 @@ class BaggageService
     }
 
     /**
-     * @param string $departureIata
-     * @param string $arrivalIata
-     * @return null|array
+     * @param array $segment
+     * @return array|null
      */
-    public function searchByIata(string $departureIata, string $arrivalIata): ?array
+    public function searchByIata(array $segment): ?array
     {
-        $segmentIata = $departureIata . $arrivalIata;
+        $segmentIata = $segment['departureAirport'] . $segment['arrivalAirport'];
 
         if (!empty($this->baggageFromDump['baggage'])) {
-            foreach ($this->baggageFromDump['baggage'] as $key => $item) {
-                if ($item['segment'] === $segmentIata) {
+            foreach ($this->baggageFromDump['baggage'] as $key => $baggageItem) {
+                if ($baggageItem['segment'] === $segmentIata) {
                     $baggage = $this->baggageFromDump['baggage'][$key];
+                    unset($this->baggageFromDump['baggage'][$key]);
                     break;
                 }
-                if ((new Airport())->getCityByIata($departureIata) === (new Airport())->getCityByIata($arrivalIata)) {
+                $baggageDeparture = substr($baggageItem['segment'], 0, 3);
+                $baggageArrival = substr($baggageItem['segment'], 3, 3);
+
+                if (
+                    ($segment['departureCity']->city === Airport::getCityByIata($baggageDeparture))
+                    &&
+                    ($segment['arrivalCity']->city === Airport::getCityByIata($baggageArrival))
+                ) {
                     $baggage = $this->baggageFromDump['baggage'][$key];
+                    unset($this->baggageFromDump['baggage'][$key]);
                     break;
                 }
             }

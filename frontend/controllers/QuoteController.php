@@ -513,9 +513,7 @@ class QuoteController extends FController
 
                         $baggageService = new BaggageService($gds);
                         $baggageService->setBaggageFromDump($post['prepare_dump']);
-                        $segments = $baggageService->attachBaggageToSegments($reservationService->parseResult); /* TODO::  */
-
-
+                        $segments = $baggageService->attachBaggageToSegments($reservationService->parseResult);
 
                         $response['segments'] = $this->renderAjax('partial/_segmentRows', [
                             'segments' => $segments,
@@ -547,8 +545,8 @@ class QuoteController extends FController
         } catch (\Throwable $throwable) {
             $response['status'] = 0;
             $response['error'] = $throwable->getMessage();
-            \Yii::error(\yii\helpers\VarDumper::dumpAsString($throwable, 10, true),
-            'QuoteController:actionPrepareDump:Throwable'); /* TODO:: FOR DEBUG:: must by remove  */
+            \Yii::error(\yii\helpers\VarDumper::dumpAsString($throwable, 10),
+            'QuoteController:actionPrepareDump:Throwable');
         }
         return $response;
     }
@@ -640,7 +638,7 @@ class QuoteController extends FController
                             foreach ($parsedBaggage['baggage'] as $baggageAttr){
                                 $segmentKey = $baggageAttr['segment'];
                                 $origin = substr($segmentKey, 0, 3);
-                                $destination = substr($segmentKey, 2, 3);
+                                $destination = substr($segmentKey, 3, 3);
                                 $segment = QuoteSegment::find()->innerJoin(QuoteTrip::tableName(),'qs_trip_id = qt_id')
                                 ->andWhere(['qt_quote_id' =>  $quote->id])
                                 ->andWhere(['or',

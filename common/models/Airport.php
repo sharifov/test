@@ -121,10 +121,10 @@ class Airport extends ActiveRecord
      * @param $iata
      * @return string|null
      */
-    public function getCityByIata($iata): ?string
+    public static function getCityByIata($iata): ?string
     {
         if ($airport = self::findIdentity($iata)) {
-            return $airport->getCityName();
+            return $airport->city;
         }
         return null;
     }
