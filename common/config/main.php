@@ -78,6 +78,14 @@ return [
             'username' => '',
             'password' => '',
         ],
+
+        'chatBot' => [
+            'class' => \common\components\ChatBot::class,
+            'url' => 'https://chatbot.travel-dev.com/private/api/v1/',
+            'username' => '',
+            'password' => '',
+        ],
+
         'queue_sms_job' => [
             'class' => \yii\queue\beanstalk\Queue::class,
             'host' => 'localhost',

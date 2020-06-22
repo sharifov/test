@@ -345,7 +345,12 @@ class RocketChat extends Component
     }
 
 
-
+    /**
+     * @param string $rid
+     * @param array $attachments
+     * @return array
+     * @throws \yii\httpclient\Exception
+     */
     public function sendMessage(string $rid, array $attachments): array
     {
         $out = ['error' => false, 'data' => []];
