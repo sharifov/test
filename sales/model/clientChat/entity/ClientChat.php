@@ -43,6 +43,7 @@ use yii\db\ActiveRecord;
  * @property Cases $cchCase
  * @property ClientChatRequest $cchCcr
  * @property Client $cchClient
+ * @property ClientChatChannel $cchChannel
  * @property Department $cchDep
  * @property Lead $cchLead
  * @property Employee $cchOwnerUser
@@ -50,6 +51,19 @@ use yii\db\ActiveRecord;
  */
 class ClientChat extends \yii\db\ActiveRecord
 {
+	private const STATUS_GENERATED = 1;
+	private const STATUS_CLOSED = 9;
+
+	private const STATUS_LIST = [
+		self::STATUS_GENERATED => 'Generated',
+		self::STATUS_CLOSED => 'Closed'
+	];
+
+	private const STATUS_CLASS_LIST = [
+		self::STATUS_GENERATED => 'info',
+		self::STATUS_CLOSED => 'warning'
+	];
+
 	public function behaviors(): array
 	{
 		return [
@@ -66,7 +80,7 @@ class ClientChat extends \yii\db\ActiveRecord
 				'attributes' => [
 					ActiveRecord::EVENT_BEFORE_INSERT => ['cch_created_user_id', 'cch_updated_user_id'],
 					ActiveRecord::EVENT_BEFORE_UPDATE => ['cch_updated_user_id'],
-				]
+				],
 			],
 		];
 	}
@@ -183,12 +197,37 @@ class ClientChat extends \yii\db\ActiveRecord
 		return $this->hasOne(Employee::class, ['id' => 'cch_updated_user_id']);
 	}
 
+	public static function getStatusList(): array
+	{
+		return self::STATUS_LIST;
+	}
+
+	public function getStatusName(): ?string
+	{
+		return $this->cch_status_id ? self::getStatusList()[$this->cch_status_id] : null;
+	}
+
+	public function generated(): void
+	{
+		$this->cch_status_id = self::STATUS_GENERATED;
+	}
+
+	public static function getStatusClassList(): array
+	{
+		return self::STATUS_CLASS_LIST;
+	}
+
+	public function getStatusClass()
+	{
+		return self::getStatusClassList()[$this->cch_status_id] ?? 'secondary';
+	}
+
     public function attributeLabels(): array
     {
         return [
             'cch_id' => 'ID',
-            'cch_rid' => 'Rid',
-            'cch_ccr_id' => 'Ccr ID',
+            'cch_rid' => 'Rocket Chat ID',
+            'cch_ccr_id' => 'Client Chat Request ID',
             'cch_title' => 'Title',
             'cch_description' => 'Description',
             'cch_project_id' => 'Project ID',

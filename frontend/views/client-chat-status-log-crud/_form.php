@@ -24,7 +24,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'csl_end_dt')->widget(\sales\widgets\DateTimePicker::class, []) ?>
 
-        <?= $form->field($model, 'csl_owner_id')->textInput() ?>
+        <?= $form->field($model, 'csl_owner_id')->widget(\sales\widgets\UserSelect2Widget::class) ?>
 
         <?= $form->field($model, 'csl_description')->textarea(['maxlength' => true]) ?>
 

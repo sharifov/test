@@ -44,4 +44,24 @@ class ClientChatUserChannelSearch extends ClientChatUserChannel
 
         return $dataProvider;
     }
+
+    public function searchByUser(array $params)
+	{
+		$query = static::find();
+
+		$dataProvider = new ActiveDataProvider([
+			'query' => $query
+		]);
+
+		if (!$this->validate()) {
+			$query->where('0=1');
+			return $dataProvider;
+		}
+
+		$query->andFilterWhere([
+			'ccc_user_id' => $this->ccuc_user_id
+		]);
+
+		return $dataProvider;
+	}
 }

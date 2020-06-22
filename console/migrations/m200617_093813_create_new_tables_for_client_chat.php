@@ -75,10 +75,13 @@ class m200617_093813_create_new_tables_for_client_chat extends Migration
 
 		$this->createTable('{{%client_chat_request}}', [
 			'ccr_id' => $this->primaryKey(),
-			'ccr_event' => $this->string(50),
+			'ccr_event' => $this->tinyInteger(2),
+			'ccr_rid' => $this->string(150),
 			'ccr_json_data' => $this->text(),
 			'ccr_created_dt' => $this->dateTime()
 		], $tableOptions);
+		$this->createIndex('IND-ccr_event', '{{%client_chat_request}}', ['ccr_event']);
+		$this->createIndex('IND-ccr_rid', '{{%client_chat_request}}', ['ccr_rid']);
 
 		$this->createTable('{{%client_chat}}', [
 			'cch_id' => $this->primaryKey(),
@@ -103,6 +106,7 @@ class m200617_093813_create_new_tables_for_client_chat extends Migration
 			'cch_created_user_id' => $this->integer(),
 			'cch_updated_user_id' => $this->integer()
 		], $tableOptions);
+		$this->createIndex('IND-cch_rid', '{{%client_chat}}', ['cch_rid']);
 
 		$this->addForeignKey('FK-cch_ccr_id', '{{%client_chat}}', ['cch_ccr_id'], '{{%client_chat_request}}', ['ccr_id'], 'SET NULL', 'CASCADE');
 		$this->addForeignKey('FK-cch_project_id', '{{%client_chat}}', ['cch_project_id'], '{{%projects}}', ['id'], 'SET NULL', 'CASCADE');
@@ -122,6 +126,7 @@ class m200617_093813_create_new_tables_for_client_chat extends Migration
 			'ccc_dep_id' => $this->integer(),
 			'ccc_ug_id' => $this->integer(),
 			'ccc_disabled' => $this->boolean(),
+			'ccc_priority' => $this->tinyInteger()->unsigned(),
 			'ccc_created_dt' => $this->dateTime(),
 			'ccc_updated_dt' => $this->dateTime(),
 			'ccc_created_user_id' => $this->integer(),

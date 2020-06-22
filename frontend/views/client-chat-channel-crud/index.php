@@ -28,8 +28,6 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
-
             'ccc_id',
             'ccc_name',
             'ccc_project_id:projectName',
@@ -41,6 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
 				}
             ],
             'ccc_disabled:booleanByLabel',
+            'ccc_priority',
 			[
 				'class' => DateTimeColumn::class,
 				'attribute' => 'ccc_created_dt',

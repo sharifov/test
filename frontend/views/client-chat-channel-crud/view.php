@@ -43,6 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     }
                 ],
                 'ccc_disabled:booleanByLabel',
+                'ccc_priority',
                 'ccc_created_dt:byUserDateTime',
                 'ccc_updated_dt:byUserDateTime',
                 'ccc_created_user_id:username',

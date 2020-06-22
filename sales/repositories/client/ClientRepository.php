@@ -63,4 +63,16 @@ class ClientRepository extends Repository
         }
         $this->eventDispatcher->dispatchAll($client->releaseEvents());
     }
+
+	/**
+	 * @param string $uuid
+	 * @return Client
+	 */
+    public function findByUuid(string $uuid): Client
+	{
+		if ($client = Client::findOne(['uuid' => $uuid])) {
+			return $client;
+		}
+		throw new NotFoundException('Client is not found', ClientCodeException::CLIENT_NOT_FOUND);
+	}
 }

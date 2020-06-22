@@ -18,6 +18,8 @@ class ClientChatChannelSearch extends ClientChatChannel
 
             ['ccc_disabled', 'integer'],
 
+            ['ccc_priority', 'integer'],
+
             ['ccc_id', 'integer'],
 
             ['ccc_name', 'safe'],
@@ -53,6 +55,7 @@ class ClientChatChannelSearch extends ClientChatChannel
             'ccc_dep_id' => $this->ccc_dep_id,
             'ccc_ug_id' => $this->ccc_ug_id,
             'ccc_disabled' => $this->ccc_disabled,
+            'ccc_priority' => $this->ccc_priority,
             'date_format(ccc_created_dt, "%Y-%m-%d")' => $this->ccc_created_dt,
             'date_format(ccc_updated_dt, "%Y-%m-%d")' => $this->ccc_updated_dt,
             'ccc_created_user_id' => $this->ccc_created_user_id,

@@ -157,6 +157,12 @@ $isSuperAdmin = $user->isSuperAdmin();
             'icon' => 'user'
         ];
 
+		$menuItems[] = [
+			'label' => 'My Client Chat ' . '<span id="div-cnt-client-chat"><span class="label-success label pull-right cc-notification-counter"></span></span>',
+			'url' => ['/client-chat/index'],
+			'icon' => 'comments'
+		];
+
         $menuItems[] = [
             'label' => 'Data Lists',
             'url' => 'javascript:',

@@ -1,0 +1,105 @@
+._cc-wrapper {
+    border: 1px solid lightgrey;
+    border-radius: 3px;
+}
+
+._cc-wrapper ._cc-channel-select {
+    width: 100%;
+    padding: 5px;
+}
+
+._cc-list-wrapper ._cc-list-item {
+    width: 100%;
+    padding: 10px 10px 10px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    align-content: center;
+    border-top: 1px solid lightgrey;
+    /*border-bottom: 1px solid lightgrey;*/
+}
+._cc-list-wrapper ._cc-list-item:last-child {
+    border-bottom: 1px solid lightgrey;
+}
+
+._cc-list-wrapper ._cc-list-item ._cc-item-icon-wrapper {
+    display: flex;
+    align-content: center;
+    align-items: center;
+}
+
+._cc-list-wrapper ._cc-list-item ._cc-item-icon-wrapper ._cc-item-icon-round {
+    position: relative;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid lightgrey;
+    border-radius: 100%;
+    padding: 5px;
+    margin-right: 10px;
+}
+
+._cc-list-wrapper ._cc-list-item ._cc-item-icon-wrapper ._cc-item-icon-round .fa {
+    font-size: 26px;
+}
+
+._cc-list-wrapper ._cc-list-item ._cc-item-icon-wrapper ._cc-item-icon-round ._cc-status-wrapper {
+    position: absolute;
+    bottom: 0px;
+    right: 0;
+    width: 16px;
+    height: 16px;
+    border: 1px solid lightgrey;
+    border-radius: 100%;
+    padding: 5px;
+    background-color: #fff7f7f7;
+}
+
+._cc-list-wrapper ._cc-list-item ._cc-item-icon-wrapper ._cc-item-icon-round ._cc-status-wrapper ._cc-status {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    height: 9px;
+    width: 9px;
+    background-color: grey;
+    border-radius: 100%;
+    margin: 0 auto;
+    transform: translateY(2.5px);
+}
+
+._cc-list-wrapper ._cc-list-item ._cc-item-icon-wrapper ._cc-item-icon-round ._cc-status-wrapper ._cc-status.info {
+    background-color: cornflowerblue;
+}
+
+
+._cc-list-wrapper ._cc-list-item ._cc-item-icon-wrapper ._cc-title {
+    display: flex;
+    flex-direction: column;
+}
+._cc-list-wrapper ._cc-list-item ._cc-item-icon-wrapper ._cc-title p {
+    margin: 0;
+}
+
+#_channel_list_wrapper {
+
+}
+
+#_cc-load {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    height: 100%;
+    width: 100%;
+    background-color: rgba(255,255,255,0.5);
+    z-index: 10;
+    font-size: 1rem;
+}

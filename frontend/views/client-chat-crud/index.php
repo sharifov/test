@@ -27,21 +27,26 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
-
+            'cch_id',
             'cch_rid',
             'cch_ccr_id',
             'cch_title',
             'cch_description',
-            'cch_project_id',
-            'cch_dep_id',
+            'cch_project_id:projectName',
+            'cch_dep_id:department',
             'cch_channel_id',
-            'cch_client_id',
+            'cch_client_id:client',
             'cch_owner_user_id',
             'cch_case_id:case',
             'cch_lead_id:lead',
             'cch_note',
-            'cch_status_id',
+            [
+                'attribute' => 'cch_status_id',
+                'value' => static function (\sales\model\clientChat\entity\ClientChat $model) {
+                    return Html::tag('span', $model->getStatusName(), ['class' => 'badge badge-'.$model->getStatusClass()]);
+                },
+                'format' => 'raw'
+            ],
             'cch_ip',
             'cch_ua',
             'cch_language_id',
