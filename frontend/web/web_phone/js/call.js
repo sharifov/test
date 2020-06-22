@@ -12,7 +12,8 @@ var PhoneWidgetCall = function () {
         'muteUrl': '',
         'unmuteUrl': '',
         'callAddNoteUrl': '',
-        'clearMissedCallsUrl': ''
+        'clearMissedCallsUrl': '',
+        'currentQueueCallsUrl': ''
     };
 
     let panes = {
@@ -47,6 +48,7 @@ var PhoneWidgetCall = function () {
         callAddNoteEvent();
         dialpadEvent();
         contactInfoEvent();
+        loadCurrentQueueCalls();
     }
 
     function removeIncomingRequest(callId) {
@@ -335,10 +337,9 @@ var PhoneWidgetCall = function () {
                     // new PNotify({title: "Hold", type: "success", text: 'Wait', hide: true});
                 }
             })
-            .fail(function (error) {
-                new PNotify({title: "Hold", type: "error", text: data.message, hide: true});
+            .fail(function () {
+                new PNotify({title: "Hold", type: "error", text: 'Server error', hide: true});
                 btn.unmute();
-                console.error(error);
             })
             .always(function () {
 
@@ -358,10 +359,9 @@ var PhoneWidgetCall = function () {
                     // new PNotify({title: "Unmute", type: "success", text: 'Wait', hide: true});
                 }
             })
-            .fail(function (error) {
-                new PNotify({title: "Unmute", type: "error", text: data.message, hide: true});
+            .fail(function () {
+                new PNotify({title: "Unmute", type: "error", text: 'Server error', hide: true});
                 btn.mute();
-                console.error(error);
             })
             .always(function () {
 
@@ -552,6 +552,9 @@ var PhoneWidgetCall = function () {
         if (panes.active.buttons.hold.isActive()) {
             panes.active.buttons.hold.enable();
         }
+
+        panes.active.buttons.mute.disable().inactive();
+
         widgetIcon.update({type: 'hold', timer: true, 'timerStamp': 0, text: 'on hold', currentCalls: null, status: 'online'});
     }
 
@@ -575,6 +578,11 @@ var PhoneWidgetCall = function () {
         if (panes.active.buttons.hold.isActive()) {
             panes.active.buttons.hold.enable();
         }
+
+        if (!call.isListen) {
+            panes.active.buttons.mute.enable().active();
+        }
+
         let duration = Math.floor((Date.now() - parseInt(call.timeQueuePushed)) / 1000) + parseInt(call.duration || 0);
         widgetIcon.update({type: 'inProgress', timer: true, 'timerStamp': duration, text: 'on call', currentCalls: '', status: 'online'});
     }
@@ -621,6 +629,49 @@ var PhoneWidgetCall = function () {
             unhold(data.call);
             return;
         }
+    }
+
+    function loadCurrentQueueCalls() {
+        $(document).ready(function() {
+            $.ajax({type: 'post', data: {}, url: settings.currentQueueCallsUrl})
+                .done(function (data) {
+                    if (data.isEmpty) {
+                        return;
+                    }
+                    data.incoming.forEach(function (call) {
+                        queues.incoming.push(call);
+                    });
+                    data.outgoing.forEach(function (call) {
+                        queues.outgoing.push(call);
+                    });
+                    let activeCall = {};
+                    data.active.forEach(function (call) {
+                        activeCall = Object.assign({}, call);
+                        if (activeCall.holdDuration && activeCall.isHold) {
+                            activeCall.holdStartTime = Date.now() - (activeCall.holdDuration * 1000);
+                        }
+                        queues.active.push(activeCall);
+                    });
+
+                    $('.phone-widget').addClass('is_active');
+                    if (data.lastActive === 'incoming') {
+                        refreshIncomingPane();
+                        return;
+                    }
+                    if (data.lastActive === 'outgoing') {
+                        refreshOutgoingPane();
+                        return;
+                    }
+                    refreshActivePane();
+                })
+                .fail(function () {
+                    new PNotify({title: "Load current calls", type: "error", text: 'Server error', hide: true});
+                    btn.unmute();
+                })
+                .always(function () {
+
+                });
+        })
     }
 
     return {

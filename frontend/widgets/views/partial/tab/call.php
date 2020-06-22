@@ -3,7 +3,6 @@
 /** @var View $this */
 /** @var \common\models\UserCallStatus $userCallStatus */
 /** @var int $countMissedCalls */
-/** @var QueueCalls $queueCalls */
 
 ?>
 <div class="phone-widget__tab is_active" id="tab-phone">
@@ -56,12 +55,8 @@
                 <label class="call-pane-label" for="">Calling to <sapn id="call-to-label" style="color: white"></sapn></label>
                 <?php
 
-                use common\models\Call;
-                use frontend\widgets\newWebPhone\call\CallHelper;
-                use frontend\widgets\newWebPhone\call\QueueCalls;
                 use yii\bootstrap4\Html;
 				use yii\helpers\Url;
-                use yii\helpers\VarDumper;
                 use yii\web\View;
                 use yii\widgets\ActiveForm;
 
@@ -492,7 +487,7 @@
 
   <div class="additional-info contact-info"></div>
 
-  </div>
+</div>
 
 <?php
 $ajaxCallRedirectGetAgents = Url::to(['/phone/ajax-call-get-agents']);
@@ -504,6 +499,7 @@ $ajaxUnmuteUrl = Url::to(['/phone/ajax-unmute-participant']);
 $ajaxCallAddNoteUrl = Url::to(['/call/ajax-add-note']);
 $updateStatusUrl = Url::to(['/user-call-status/update-status']);
 $clearMissedCallsUrl = Url::to(['/call/clear-missed-calls']);
+$currentQueueCallsUrl = Url::to(['/call/current-queue-calls']);
 
 $ucStatus = $userCallStatus->us_type_id;
 
@@ -519,62 +515,8 @@ PhoneWidgetCall.init({
     'updateStatusUrl': '$updateStatusUrl',
     'countMissedCalls': $countMissedCalls,
     'clearMissedCallsUrl': '$clearMissedCallsUrl',
+    'currentQueueCallsUrl': '$currentQueueCallsUrl',
     'status': $ucStatus
 });
 JS;
 $this->registerJs($js);
-
-if ($queueCalls->isActive()) {
-    foreach ($queueCalls->incoming as $incoming) {
-        $json = $incoming->toJson();
-        $js = <<<JS
-            PhoneWidgetCall.queues.incoming.push($json);
-        JS;
-        $this->registerJs($js);
-    }
-
-    foreach ($queueCalls->outgoing as $outgoing) {
-        $json = $outgoing->toJson();
-        $js = <<<JS
-            PhoneWidgetCall.queues.outgoing.push($json);
-        JS;
-        $this->registerJs($js);
-    }
-
-    if ($queueCalls->active) {
-        $js = <<<JS
-            let activeQueueCall = {};
-            let objActiveQueueCall = {};
-        JS;
-        $this->registerJs($js);
-        foreach ($queueCalls->active as $active) {
-            $json = $active->toJson();
-            $js = <<<JS
-                activeQueueCall = $json;
-                objActiveQueueCall = Object.assign({}, activeQueueCall);
-                if (objActiveQueueCall.holdDuration && objActiveQueueCall.isHold) {
-                    objActiveQueueCall.holdStartTime = Date.now() - (objActiveQueueCall.holdDuration * 1000);
-                }
-                PhoneWidgetCall.queues.active.push(objActiveQueueCall);
-            JS;
-            $this->registerJs($js);
-        }
-    }
-
-    if ($queueCalls->isLastIncoming()) {
-        $js = <<<JS
-            PhoneWidgetCall.refreshIncomingPane();
-        JS;
-        $this->registerJs($js);
-    } elseif ($queueCalls->isLastOutgoing()) {
-        $js = <<<JS
-            PhoneWidgetCall.refreshOutgoingPane();
-        JS;
-        $this->registerJs($js);
-    } elseif ($queueCalls->isLastActive()) {
-        $js = <<<JS
-            PhoneWidgetCall.refreshActivePane();
-        JS;
-        $this->registerJs($js);
-    }
-}

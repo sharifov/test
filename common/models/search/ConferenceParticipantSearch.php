@@ -2,7 +2,7 @@
 
 namespace common\models\search;
 
-use yii\base\Model;
+use common\models\Employee;
 use yii\data\ActiveDataProvider;
 use common\models\ConferenceParticipant;
 
@@ -18,33 +18,17 @@ class ConferenceParticipantSearch extends ConferenceParticipant
     {
         return [
             [['cp_id', 'cp_cf_id', 'cp_call_id', 'cp_status_id'], 'integer'],
-            [['cp_call_sid', 'cp_join_dt', 'cp_leave_dt'], 'safe'],
+            [['cp_call_sid'], 'safe'],
 
             ['cp_type_id', 'integer'],
+
+            [['cp_leave_dt', 'cp_join_dt', 'cp_hold_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function scenarios()
-    {
-        // bypass scenarios() implementation in the parent class
-        return Model::scenarios();
-    }
-
-    /**
-     * Creates data provider instance with search query applied
-     *
-     * @param array $params
-     *
-     * @return ActiveDataProvider
-     */
-    public function search($params)
+    public function search($params, Employee $user)
     {
         $query = ConferenceParticipant::find();
-
-        // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -62,14 +46,24 @@ class ConferenceParticipantSearch extends ConferenceParticipant
             return $dataProvider;
         }
 
+        if ($this->cp_join_dt) {
+            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cp_join_dt', $this->cp_join_dt, $user->timezone);
+        }
+
+        if ($this->cp_leave_dt) {
+            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cp_leave_dt', $this->cp_leave_dt, $user->timezone);
+        }
+
+        if ($this->cp_hold_dt) {
+            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cp_hold_dt', $this->cp_hold_dt, $user->timezone);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'cp_id' => $this->cp_id,
             'cp_cf_id' => $this->cp_cf_id,
             'cp_call_id' => $this->cp_call_id,
             'cp_status_id' => $this->cp_status_id,
-            'cp_join_dt' => $this->cp_join_dt,
-            'cp_leave_dt' => $this->cp_leave_dt,
             'cp_type_id' => $this->cp_type_id,
         ]);
 

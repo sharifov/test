@@ -81,6 +81,7 @@ var PhoneWidgetPaneActive = function () {
 
         if (data.isHold) {
             buttons.hold.hold();
+            buttons.mute.disable().inactive();
         }
 
         setCallId(data.callId);

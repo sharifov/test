@@ -1,6 +1,6 @@
 <?php
 
-namespace frontend\widgets\newWebPhone\call;
+namespace sales\model\call\helper;
 
 use common\models\Call;
 

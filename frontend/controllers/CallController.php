@@ -22,6 +22,7 @@ use http\Exception\InvalidArgumentException;
 use sales\auth\Auth;
 
 use sales\helpers\call\CallHelper;
+use sales\model\call\services\currentQueueCalls\CurrentQueueCallsService;
 use sales\model\conference\useCase\DisconnectFromAllConferenceCalls;
 use sales\model\callNote\useCase\addNote\CallNoteRepository;
 use sales\repositories\call\CallRepository;
@@ -46,6 +47,7 @@ use yii\web\Response;
  * @property CallRepository $callRepository
  * @property CallUserAccessRepository $callUserAccessRepository
  * @property CallNoteRepository $callNoteRepository
+ * @property CurrentQueueCallsService $currentQueueCalls
  */
 class CallController extends FController
 {
@@ -53,14 +55,16 @@ class CallController extends FController
     private $callRepository;
     private $callUserAccessRepository;
 	private $callNoteRepository;
+    private $currentQueueCalls;
 
-	public function __construct(
+    public function __construct(
     	$id,
 		$module,
 		CallService $callService,
 		CallRepository $callRepository,
 		CallUserAccessRepository $callUserAccessRepository,
 		CallNoteRepository $callNoteRepository,
+		CurrentQueueCallsService $currentQueueCalls,
 		$config = []
 	) {
         parent::__construct($id, $module, $config);
@@ -68,7 +72,8 @@ class CallController extends FController
         $this->callRepository = $callRepository;
         $this->callUserAccessRepository = $callUserAccessRepository;
 		$this->callNoteRepository = $callNoteRepository;
-	}
+        $this->currentQueueCalls = $currentQueueCalls;
+    }
 
     public function behaviors()
     {
@@ -1086,4 +1091,38 @@ class CallController extends FController
 
 		return $this->asJson($result);
 	}
+
+	public function actionCurrentQueueCalls(): Response
+    {
+        $queue = $this->currentQueueCalls->getQueuesCalls(Auth::id());
+
+        if ($queue->isEmpty()) {
+            return $this->asJson([
+                'isEmpty' => true
+            ]);
+        }
+
+        $incoming = [];
+        foreach ($queue->incoming as $item) {
+            $incoming[] = $item->getData();
+        }
+
+        $outgoing = [];
+        foreach ($queue->outgoing as $item) {
+            $outgoing[] = $item->getData();
+        }
+
+        $active = [];
+        foreach ($queue->active as $item) {
+            $active[] = $item->getData();
+        }
+
+        return $this->asJson([
+            'isEmpty' => false,
+            'incoming' => $incoming,
+            'outgoing' => $outgoing,
+            'active' => $active,
+            'lastActive' => $queue->lastActiveQueue
+        ]);
+    }
 }

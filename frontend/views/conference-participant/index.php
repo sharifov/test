@@ -1,6 +1,8 @@
 <?php
 
 use common\components\grid\conferenceParticipant\ConferenceParticipantTypeColumn;
+use common\components\grid\DateTimeColumn;
+use common\models\ConferenceParticipant;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -59,52 +61,20 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'cp_status_id',
-                'value' => static function(\common\models\ConferenceParticipant $model) {
-                    return $model->getStatusName();
-                },
+                'format' => 'conferenceParticipantStatus',
                 'filter' => \common\models\ConferenceParticipant::getStatusList()
             ],
-            //'cp_status_id',
-            //'cp_join_dt',
-            //'cp_leave_dt',
-
             [
+                'class' => DateTimeColumn::class,
                 'attribute' => 'cp_join_dt',
-                'value' => function(\common\models\ConferenceParticipant $model) {
-                    return $model->cp_join_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->cp_join_dt)) : '-';
-                },
-                'format' => 'raw',
-                'filter' => \dosamigos\datepicker\DatePicker::widget([
-                    'model' => $searchModel,
-                    'attribute' => 'cp_join_dt',
-                    'clientOptions' => [
-                        'autoclose' => true,
-                        'format' => 'yyyy-mm-dd',
-                    ],
-                    'options' => [
-                        'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
-                    ],
-                ]),
             ],
             [
+                'class' => DateTimeColumn::class,
                 'attribute' => 'cp_leave_dt',
-                'value' => function(\common\models\ConferenceParticipant $model) {
-                    return $model->cp_leave_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->cp_leave_dt)) : '';
-                },
-                'format' => 'raw',
-                'filter' => \dosamigos\datepicker\DatePicker::widget([
-                    'model' => $searchModel,
-                    'attribute' => 'cp_leave_dt',
-                    'clientOptions' => [
-                        'autoclose' => true,
-                        'format' => 'yyyy-mm-dd',
-                    ],
-                    'options' => [
-                        'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
-                    ],
-                ]),
+            ],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'cp_hold_dt',
             ],
 
             ['class' => 'yii\grid\ActionColumn'],

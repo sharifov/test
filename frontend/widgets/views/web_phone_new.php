@@ -1,6 +1,6 @@
 <?php
 
-use frontend\widgets\newWebPhone\call\QueueCalls;
+use sales\model\call\services\currentQueueCalls\QueueCalls;
 use frontend\widgets\newWebPhone\NewWebPhoneAsset;
 use yii\helpers\Url;
 use yii\web\View;
@@ -12,7 +12,6 @@ use yii\web\View;
 /** @var array $userPhones */
 /** @var array $userEmails */
 /** @var int $countMissedCalls */
-/** @var QueueCalls $queueCalls */
 
 NewWebPhoneAsset::register($this);
 ?>
@@ -22,8 +21,7 @@ NewWebPhoneAsset::register($this);
 	'userPhones' => $userPhones,
 	'userEmails' => $userEmails,
 	'userCallStatus' => $userCallStatus,
-	'countMissedCalls' => $countMissedCalls,
-	'queueCalls' => $queueCalls
+	'countMissedCalls' => $countMissedCalls
 ]) ?>
 <?= $this->render('partial/_phone_widget_icon') ?>
 

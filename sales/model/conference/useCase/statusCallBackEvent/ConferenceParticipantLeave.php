@@ -26,8 +26,7 @@ class ConferenceParticipantLeave
         ])->one();
 
         if ($participant) {
-            $participant->leave();
-            $participant->cp_leave_dt = date('Y-m-d H:i:s');
+            $participant->leave(date('Y-m-d H:i:s'));
             if (!$participant->save()) {
                 Yii::error(VarDumper::dumpAsString([
                     'errors' => $participant->getErrors(),
@@ -43,8 +42,7 @@ class ConferenceParticipantLeave
         $participant->cp_type_id = $form->participant_type_id;
         $participant->cp_cf_id = $conference->cf_id;
         $participant->cp_call_sid = $form->CallSid;
-        $participant->leave();
-        $participant->cp_leave_dt = date('Y-m-d H:i:s');
+        $participant->leave(date('Y-m-d H:i:s'));
         if ($call) {
             $participant->cp_call_id = $call->c_id;
         }

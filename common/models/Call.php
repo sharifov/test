@@ -5,7 +5,7 @@ namespace common\models;
 use common\components\purifier\Purifier;
 use common\models\query\CallQuery;
 use frontend\controllers\ConferenceController;
-use frontend\widgets\newWebPhone\call\CallHelper;
+use sales\model\call\helper\CallHelper;
 use frontend\widgets\newWebPhone\call\socket\MissedCallMessage;
 use frontend\widgets\newWebPhone\call\socket\RemoveIncomingRequestMessage;
 use frontend\widgets\notification\NotificationMessage;

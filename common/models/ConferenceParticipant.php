@@ -3,7 +3,6 @@
 namespace common\models;
 
 use common\models\query\ConferenceParticipantQuery;
-use Yii;
 
 /**
  * This is the model class for table "conference_participant".
@@ -17,27 +16,21 @@ use Yii;
  * @property string $cp_leave_dt
  * @property int|null $cp_type_id
  * @property string $cp_hold_dt
+ * @property boolean $cp_mute
  *
  * @property Call $cpCall
  * @property Conference $cpCf
  */
 class ConferenceParticipant extends \yii\db\ActiveRecord
 {
-
     public const STATUS_JOIN    = 1;
     public const STATUS_LEAVE   = 2;
     public const STATUS_HOLD   = 3;
-    public const STATUS_UNHOLD   = 4;
-    public const STATUS_MUTE   = 5;
-    public const STATUS_UNMUTE   = 6;
 
     public const STATUS_LIST = [
         self::STATUS_JOIN   => 'Join',
         self::STATUS_LEAVE   => 'Leave',
         self::STATUS_HOLD   => 'Hold',
-        self::STATUS_UNHOLD   => 'UnHold',
-        self::STATUS_MUTE   => 'Mute',
-        self::STATUS_UNMUTE   => 'Unmute',
     ];
 
     public const TYPE_AGENT = 1;
@@ -69,7 +62,6 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
 
             [['cp_cf_id'], 'required'],
             [['cp_cf_id', 'cp_call_id'], 'integer'],
-            [['cp_join_dt', 'cp_leave_dt'], 'safe'],
             [['cp_call_sid'], 'string', 'max' => 34],
 //            [['cp_call_sid'], 'unique'],
             [['cp_call_id'], 'exist', 'skipOnError' => true, 'targetClass' => Call::class, 'targetAttribute' => ['cp_call_id' => 'c_id']],
@@ -78,7 +70,7 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
             ['cp_type_id', 'integer'],
             ['cp_type_id', 'in', 'range' => array_keys(self::TYPE_LIST)],
 
-            ['cp_hold_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+            [['cp_join_dt', 'cp_leave_dt', 'cp_hold_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
         ];
     }
 
@@ -125,12 +117,10 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
         return new ConferenceParticipantQuery(static::class);
     }
 
-    /**
-     * @return string
-     */
-    public function getStatusName(): string
+
+    public static function getStatusName($statusId): string
     {
-        return self::STATUS_LIST[$this->cp_status_id] ?? '';
+        return self::STATUS_LIST[$statusId] ?? '';
     }
 
     /**
@@ -172,19 +162,10 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
         return $this->cp_status_id === self::STATUS_HOLD;
     }
 
-    public function unhold(): void
-    {
-        $this->cp_status_id = self::STATUS_UNHOLD;
-    }
-
-    public function isUnhold(): bool
-    {
-        return $this->cp_status_id === self::STATUS_UNHOLD;
-    }
-
-    public function leave(): void
+    public function leave($leaveTime): void
     {
         $this->cp_status_id = self::STATUS_LEAVE;
+        $this->cp_leave_dt = $leaveTime;
     }
 
     public function isLeave(): bool
@@ -194,22 +175,22 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
 
     public function mute(): void
     {
-        $this->cp_status_id = self::STATUS_MUTE;
+        $this->cp_mute = true;
     }
 
     public function isMute(): bool
     {
-        return $this->cp_status_id === self::STATUS_MUTE;
+        return (bool)$this->cp_mute === true;
     }
 
     public function unmute(): void
     {
-        $this->cp_status_id = self::STATUS_UNMUTE;
+        $this->cp_mute = false;
     }
 
     public function isUnmute(): bool
     {
-        return $this->cp_status_id === self::STATUS_UNMUTE;
+        return (bool)$this->cp_mute === false;
     }
 
     public function isAgent(): bool

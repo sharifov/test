@@ -34,9 +34,10 @@ $this->params['breadcrumbs'][] = $this->title;
             'cp_cf_id',
             'cp_call_sid',
             'cp_call_id',
-            'cp_status_id',
-            'cp_join_dt',
-            'cp_leave_dt',
+            'cp_status_id:conferenceParticipantStatus',
+            'cp_join_dt:byUserDateTime',
+            'cp_leave_dt:byUserDateTime',
+            'cp_hold_dt:byUserDateTime',
         ],
     ]) ?>
 

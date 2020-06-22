@@ -1,6 +1,6 @@
 <?php
 
-namespace frontend\widgets\newWebPhone\call;
+namespace sales\model\call\services\currentQueueCalls;
 
 /**
  * Class QueueCalls
@@ -8,6 +8,7 @@ namespace frontend\widgets\newWebPhone\call;
  * @property IncomingQueueCall[] $incoming
  * @property OutgoingQueueCall[] $outgoing
  * @property ActiveQueueCall[] $active
+ * @property string $lastActiveQueue
  */
 class QueueCalls
 {
@@ -28,9 +29,9 @@ class QueueCalls
         $this->active = $active;
     }
 
-    public function isActive(): bool
+    public function isEmpty(): bool
     {
-        return $this->incoming || $this->outgoing || $this->active;
+        return !$this->incoming && !$this->outgoing && !$this->active;
     }
 
     public function isLastIncoming(): bool

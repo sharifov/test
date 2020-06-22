@@ -29,7 +29,7 @@ class ConferenceParticipantUnhold
         ])->one();
 
         if ($participant) {
-            $participant->unhold();
+            $participant->join();
             if ($participant->save()) {
                 if ($call = $participant->cpCall) {
                     $this->sendMessageToSocket($call, $participant);
@@ -48,7 +48,7 @@ class ConferenceParticipantUnhold
         $participant = new ConferenceParticipant();
         $participant->cp_cf_id = $conference->cf_id;
         $participant->cp_call_sid = $form->CallSid;
-        $participant->unhold();
+        $participant->join();
         if ($call) {
             $participant->cp_call_id = $call->c_id;
         }

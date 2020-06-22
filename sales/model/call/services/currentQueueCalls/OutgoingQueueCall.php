@@ -1,8 +1,7 @@
 <?php
 
-namespace frontend\widgets\newWebPhone\call;
+namespace sales\model\call\services\currentQueueCalls;
 
-use yii\base\BaseObject;
 use yii\base\Model;
 use yii\helpers\Json;
 
@@ -17,12 +16,17 @@ class OutgoingQueueCall extends Model
     public $phone;
     public $name;
 
-    public function toJson(): string
+    public function getData(): array
     {
         $attributes = $this->getAttributes();
         $attributes['contact'] = [
             'name' => $this->name
         ];
-        return Json::encode($attributes);
+        return $attributes;
+    }
+
+    public function toJson(): string
+    {
+        return Json::encode($this->getData());
     }
 }

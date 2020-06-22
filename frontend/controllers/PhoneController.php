@@ -962,7 +962,7 @@ class PhoneController extends FController
             $data = $this->getDataForHoldConferenceCall($sid);
             /** @var Call $call */
             $call = $data['call'];
-            if (!($call->currentParticipant->isJoin() || $call->currentParticipant->isUnhold() || $call->currentParticipant->isMute() || $call->currentParticipant->isUnmute())) {
+            if (!$call->currentParticipant->isJoin()) {
                 throw new \Exception('Invalid type of Participant');
             }
             $result = Yii::$app->communication->holdConferenceCall($data['conferenceSid'], $data['keeperSid']);
@@ -1088,8 +1088,8 @@ class PhoneController extends FController
         try {
             $sid = (string)Yii::$app->request->post('sid');
             $call = $this->getCallForMuteUnmuteParticipant($sid);
-            if (!($call->currentParticipant->isJoin() || $call->currentParticipant->isUnhold() || $call->currentParticipant->isUnmute())) {
-                throw new \Exception('Invalid type of Participant');
+            if ($call->currentParticipant->isMute()) {
+                throw new \Exception('Participant already is mute');
             }
             $result = Yii::$app->communication->muteParticipant($call->c_conference_sid, $call->c_call_sid);
         } catch (\Throwable $e) {
@@ -1106,8 +1106,8 @@ class PhoneController extends FController
         try {
             $sid = (string)Yii::$app->request->post('sid');
             $call = $this->getCallForMuteUnmuteParticipant($sid);
-            if (!$call->currentParticipant->isMute()) {
-                throw new \Exception('Invalid type of Participant');
+            if ($call->currentParticipant->isUnmute()) {
+                throw new \Exception('Participant already is unmute');
             }
             $result = Yii::$app->communication->unmuteParticipant($call->c_conference_sid, $call->c_call_sid);
         } catch (\Throwable $e) {
@@ -1136,7 +1136,7 @@ class PhoneController extends FController
         if (!($call->isIn() || $call->isOut())) {
             throw new BadRequestHttpException('Invalid Call Type. Sid: ' . $sid);
         }
-//
+
         if (!$call->isConferenceType()) {
             throw new BadRequestHttpException('Call is not conference Call. Sid: ' . $sid);
         }
@@ -1153,7 +1153,11 @@ class PhoneController extends FController
             throw new BadRequestHttpException('Invalid Participant type. Sid: ' . $sid);
         }
 
-        if (!($participant->isUnhold() || $participant->isJoin() || $participant->isMute() || $participant->isUnmute())) {
+        if ($participant->isHold()) {
+            throw new BadRequestHttpException('Participant status is Hold. Must be is Join');
+        }
+
+        if (!$participant->isJoin()) {
             throw new BadRequestHttpException('Participant status is not valid');
         }
 
@@ -1326,6 +1330,10 @@ class PhoneController extends FController
 
         if (!$participant->isAgent()) {
             throw new BadRequestHttpException('Invalid type of Participant');
+        }
+
+        if (!$participant->isJoin()) {
+            throw new BadRequestHttpException('Participant status is invalid');
         }
 
         if (!$call->isStatusInProgress()) {

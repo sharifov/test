@@ -5,7 +5,7 @@ namespace common\models;
 use common\components\jobs\AgentCallQueueJob;
 use common\components\purifier\Purifier;
 use common\models\query\CallUserAccessQuery;
-use frontend\widgets\newWebPhone\call\CallHelper;
+use sales\model\call\helper\CallHelper;
 use frontend\widgets\notification\NotificationMessage;
 use sales\dispatchers\NativeEventDispatcher;
 use sales\model\call\entity\callUserAccess\events\CallUserAccessEvents;

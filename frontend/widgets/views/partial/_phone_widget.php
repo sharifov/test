@@ -1,6 +1,5 @@
 <?php
 
-use frontend\widgets\newWebPhone\call\QueueCalls;
 use yii\web\View;
 
 /** @var $showWidgetContent bool */
@@ -9,11 +8,10 @@ use yii\web\View;
 /** @var array $userPhones */
 /** @var array $userEmails */
 /** @var int $countMissedCalls */
-/** @var QueueCalls $queueCalls */
 
 ?>
 
-<div class="phone-widget<?= $queueCalls->isActive() ? ' is_active' : '' ?>" style="margin-bottom: 30px">
+<div class="phone-widget" style="margin-bottom: 30px">
   <?php if($showWidgetContent): ?>
   <div class="phone-widget__header">
     <div class="phone-widget__heading">
@@ -58,11 +56,11 @@ use yii\web\View;
     </ul>
   </div>
   <div class="phone-widget__body">
-      <?= $this->render('tab/call', [
-		  'userCallStatus' => $userCallStatus,
-          'countMissedCalls' => $countMissedCalls,
-          'queueCalls' => $queueCalls
-	  ]); ?><?= $this->render('tab/contacts', ['userPhones' => $userPhones, 'userEmails' => $userEmails]); ?>
+    <?= $this->render('tab/call', [
+      'userCallStatus' => $userCallStatus,
+      'countMissedCalls' => $countMissedCalls,
+    ]); ?>
+    <?= $this->render('tab/contacts', ['userPhones' => $userPhones, 'userEmails' => $userEmails]); ?>
     <?= $this->render('tab/history'); ?>
     <div class="widget-phone__contact-info-modal widget-modal contact-modal-info"></div>
     <div class="widget-phone__messages-modal widget-modal messages-modal"></div>

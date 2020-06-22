@@ -700,4 +700,13 @@ class Formatter extends \yii\i18n\Formatter
         return $result;
     }
 
+    public function asConferenceParticipantStatus($statusId): string
+    {
+        if ($statusId === null) {
+            return $this->nullDisplay;
+        }
+
+        return ConferenceParticipant::getStatusName($statusId);
+    }
+
 }
