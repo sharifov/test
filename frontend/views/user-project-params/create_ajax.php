@@ -36,7 +36,10 @@ use borales\extensions\phoneInput\PhoneInput;
         <?=Html::input('text', 'username', $model->uppUser->username, ['class' => 'form-control', 'readonly' => true, 'disabled' => true]); ?>
     </div>
 
-    <?= $form->field($model, 'upp_project_id')->dropDownList($projectList, ['prompt' => '-']) ?>
+    <?= $form->field($model, 'upp_project_id')->dropDownList($projectList, [
+        'prompt' => '-',
+        'id' => 'project_id',
+    ]) ?>
 
     <?= $form->field($model, 'upp_dep_id')->dropDownList(\common\models\Department::getList(), ['prompt' => '-']) ?>
 

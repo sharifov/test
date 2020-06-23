@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\Project;
 use sales\auth\Auth;
 use sales\model\emailList\entity\EmailList;
 use sales\model\emailList\entity\search\EmailListSearch;
@@ -109,16 +110,11 @@ class EmailListController extends FController
     public function actionListAjax(?string $q = null, ?int $id = null): Response
     {
         $out = ['results' => ['id' => '', 'text' => '', 'selection' => '']];
-
+        $projectId = (int) Yii::$app->request->get('project');
+        $emailPostfix = (string) Project::getEmailPostfix($projectId);
+        
         if ($q !== null) {
-            $data = EmailList::find()->select(['id' => 'el_id', 'text' => 'el_email', 'enabled' => 'el_enabled', 'title' => 'el_title'])
-                ->where(['like', 'el_email', $q])
-                ->orWhere(['el_id' => (int)$q])
-                ->orWhere(['like', 'el_title', $q])
-                ->limit(20)
-                //->indexBy('id')
-                ->asArray()
-                ->all();
+            $data = EmailList::searchEmailList($q, $emailPostfix);
 
             if ($data) {
                 foreach ($data as $n => $item) {

@@ -2,6 +2,7 @@
 namespace common\components;
 
 use yii\base\Component;
+use yii\helpers\ArrayHelper;
 use yii\httpclient\Client;
 use yii\httpclient\CurlTransport;
 use yii\helpers\VarDumper;
@@ -22,6 +23,7 @@ class AirSearchService extends Component
     public string $username;
     public string $password;
     public string $url;
+    public array $options = [CURLOPT_ENCODING => 'gzip'];
     public Request $request;
 
     public function init() : void
@@ -29,7 +31,6 @@ class AirSearchService extends Component
         parent::init();
         $this->initRequest();
     }
-
 
     /**
      * @return bool
@@ -57,27 +58,33 @@ class AirSearchService extends Component
      * @param string $method
      * @param array $headers
      * @param array $options
+     * @param string|null $format
      * @return \yii\httpclient\Response
      * @throws \yii\httpclient\Exception
      */
-    private function sendRequest(string $action = '', array $data = [], string $method = 'post', array $headers = [], array $options = []) : Response
-    {
-        //$options = ['RETURNTRANSFER' => 1];
+    public function sendRequest(
+        string $action = '',
+        array $data = [],
+        string $method = 'post',
+        array $headers = [],
+        array $options = [],
+        ?string $format = null
+    ): Response {
 
         $this->request->setMethod($method)
             ->setUrl($this->url . $action)
             ->setData($data);
 
-        if($headers) {
+        if ($headers) {
             $this->request->addHeaders($headers);
         }
-
-        $this->request->setOptions([CURLOPT_ENCODING => 'gzip']);
-
-        if($options) {
-            $this->request->setOptions($options);
+        $this->request->setOptions(ArrayHelper::merge($this->options, $options));
+        if (isset(\Yii::$app->params['additionalCurlOptions'])) {
+            $this->request->addOptions(\Yii::$app->params['additionalCurlOptions']);
         }
-
+        if ($format) {
+            $this->request->setFormat($format);
+        }
         return $this->request->send();
     }
 
@@ -91,7 +98,6 @@ class AirSearchService extends Component
      */
     public function generateCoupons(int $count = 0, string $code = '')
     {
-
         $params = [
             'nr' => $count,
             'code' => $code
@@ -103,7 +109,9 @@ class AirSearchService extends Component
             return $response->data;
         }
 
-        \Yii::error('Params: ' . VarDumper::dumpAsString($params, 10) . ' Error: ' . VarDumper::dumpAsString($response->content, 10), 'AirSearchService::getCoupons');
+        \Yii::error('Params: ' . VarDumper::dumpAsString($params, 10) .
+            ' Error: ' . VarDumper::dumpAsString($response->content, 10),
+            'AirSearchService::generateCoupons');
         return null;
     }
 
@@ -125,7 +133,28 @@ class AirSearchService extends Component
             return $response->data;
         }
 
-        \Yii::error('Code: ' . $code . ', Error: ' . VarDumper::dumpAsString($response->content, 10), 'AirSearchService::validateCoupon');
+        \Yii::error('Code: ' . $code .
+            ', Error: ' . VarDumper::dumpAsString($response->content, 10),
+            'AirSearchService::validateCoupon');
+        return null;
+    }
+
+    /**
+     * @param array $params
+     * @return mixed|null
+     * @throws \yii\httpclient\Exception
+     */
+    public function getCoupons(array $params)
+    {
+        $result = null;
+        $response = $this->sendRequest('v1/discounts/coupons', $params, 'get');
+
+        if ($response->isOk) {
+            return $response->data;
+        }
+        \Yii::error('Params: ' . VarDumper::dumpAsString($params, 10) .
+            ' Error: ' . VarDumper::dumpAsString($response->content, 10),
+            'SearchService::getCoupons');
         return null;
     }
 

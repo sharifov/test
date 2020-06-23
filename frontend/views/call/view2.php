@@ -53,6 +53,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         return  $model->c_client_id ?: '-';
                     },
                 ],
+                'c_language_id',
 
                 //'format' => 'raw'
                 //'c_forwarded_from',

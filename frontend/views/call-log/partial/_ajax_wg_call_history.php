@@ -62,6 +62,13 @@ use yii\helpers\Html;
                         <span class="contact-info-card__call-type"><?= CallLogType::getName($callType) ?></span>
 <!--                        <small class="contact-info-card__call-length">--><?php // Yii::$app->formatter->asDuration($call['c_call_duration'] ?? 0) ?><!--</small>-->
                     </div>
+                    <?php if ($call['callNote']): ?>
+                    <div class="contact-info-card__line history-details">
+                        <div class="contact-info-card__note">
+                            <span class="contact-info-card__note-message"><?= Html::encode($call['callNote']) ?></span>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                 </div>
             </li>
     <?php endforeach; ?>

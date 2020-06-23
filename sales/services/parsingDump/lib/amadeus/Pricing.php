@@ -2,8 +2,10 @@
 
 namespace sales\services\parsingDump\lib\amadeus;
 
+use common\models\QuotePrice;
 use sales\helpers\app\AppHelper;
 use sales\services\parsingDump\lib\ParseDumpInterface;
+use sales\services\parsingDump\PricingService;
 
 /**
  * Class Pricing
@@ -23,7 +25,8 @@ class Pricing implements ParseDumpInterface
                 $result['prices'] = $prices;
             }
         } catch (\Throwable $throwable) {
-            \Yii::error(AppHelper::throwableFormatter($throwable), 'amadeus:Pricing:parseDump:Throwable');
+            \Yii::error(AppHelper::throwableFormatter($throwable),
+                'Amadeus:Pricing:parseDump:Throwable');
         }
         return $result;
     }
@@ -34,7 +37,7 @@ class Pricing implements ParseDumpInterface
      */
     private function parseValidatingCarrier(string $string): ?string
     {
-        $carrierPattern = "/VALIDATING\s+CARRIER\s+\W\s+([A-Z]+)/";
+        $carrierPattern = "/VALIDATING\s+CARRIER\s+([A-Z]+)/";
         preg_match($carrierPattern, $string, $carrierMatches);
 
         return $carrierMatches[1] ?? '';
@@ -44,62 +47,158 @@ class Pricing implements ParseDumpInterface
      * @param string $string
      * @return array|null
      */
-    public function parsePrice(string $string): ?array
+    private function parsePrice(string $string): ?array
     {
-        $result = null;
-        $ticketPricePattern = "/CHARGES\s+TOTAL\s(.*?)TTL/s";
-        preg_match($ticketPricePattern, $string, $ticketPriceMatches);
+        if ($priceMultipleType = $this->parsePriceMultipleType($string)) {
+            return $priceMultipleType;
+        }
+        if ($priceSingleType = $this->parsePriceSingleType($string)) {
+            return $priceSingleType;
+        }
+        return null;
+    }
 
-        if (isset($ticketPriceMatches[1]) && $ticketPriceText = trim($ticketPriceMatches[1])) {
-            $j = 0;
-            $ticketPrices = explode("\n", $ticketPriceText);
-            $pricePattern = '/
-                ^(\d{1,2})\- # count pas
-                \w|\s+USD(\d+.\d+) # fare
-                \s+((\d+.\d+)[A-Z]{1,3})? # taxes
-                \s+USD(\d+.\d+)([A-Z]{3}) # amount + type                         
-                /x';
+    /**
+     * @param string $dump
+     * @return array|null
+     */
+    private function parsePriceSingleType(string $dump): ?array
+    {
+        if ($countPassengers = self::getCountPassengers($dump)) {
+            $ticketRows = explode("\n", $dump);
+            $passengerType = self::getPassengerType($ticketRows);
 
-            foreach ($ticketPrices as $row) {
-                $row = trim($row);
+            if (isset($countPassengers, $passengerType)) {
+                $j = 0;
+                $taxes = self::getTaxes($ticketRows);
 
-                preg_match('/^(\d{1,2})-/', $row, $matchesCount);
-                preg_match($pricePattern, $row, $matches);
-
-                if (isset($matches[1], $matchesCount[1])) {
-
-                    for ($i = 0; $i < (int) $matchesCount[1]; $i++) {
-                        $type = $matches[6] ?? null;
-                        $result[$j]['type'] = $this->typeMapping($type);
-                        $result[$j]['fare'] = $matches[2] ?? null;
-                        $result[$j]['taxes'] = !empty($matches[4]) ? $matches[4] : '0.00';
+                if ($fare = self::getFare($dump)) {
+                    for ($i = 0; $i < $countPassengers; $i++) {
+                        $result[$j]['type'] = $passengerType;
+                        $result[$j]['fare'] = $fare;
+                        $result[$j]['taxes'] = $taxes;
                         $j ++;
                     }
                 }
+            }
+        }
+        return $result ?? null;
+    }
+
+    /**
+     * @param string $dump
+     * @return int
+     */
+    private static function getCountPassengers(string $dump): int
+    {
+        $countPattern = '/
+            01\s{1}P([\d,\-]+)\s+ # count passengers                                
+            /x';
+        preg_match($countPattern, $dump, $countMatches);
+
+        if (isset($countMatches[1])) {
+            $commaItems = explode(',', $countMatches[1]);
+            $countPassengers = count($commaItems);
+
+            preg_match_all('/(\d+-\d+)/', $countMatches[1], $dashMatches);
+
+            if (!empty($dashMatches[1])) {
+                foreach ($dashMatches[1] as $item) {
+                    $dashItems = explode('-', $item);
+                    $countPassengers += $dashItems[1] - $dashItems[0];
+                }
+            }
+        }
+        return $countPassengers ?? 1;
+    }
+
+    /**
+     * @param array $ticketRows
+     * @return float
+     */
+    private static function getTaxes(array $ticketRows): float
+    {
+        $result = 0.00;
+        foreach ($ticketRows as $key => $row) {
+            $row = trim($row);
+            $taxesPattern = '/
+                ^USD\s+(\d+.\d{2})\-{1}[A-Z]{2} # taxes                              
+                /x';
+            preg_match_all($taxesPattern, $row, $taxesMatches);
+
+            if (count($taxesMatches[1])) {
+                $result += $taxesMatches[1][0];
             }
         }
         return $result;
     }
 
     /**
-     * @param string|null $source
-     * @return string
+     * @param string $string
+     * @return string|null
      */
-    private function typeMapping(?string $source): string
+    private static function getFare(string $string): ?string
     {
-        switch ($source) {
-            case 'ADT': case 'JCB': case 'PFA': case 'ITX': case 'JWZ': case 'WEB':
-                $result = 'ADT';
+        $farePattern = '/
+            USD\s+(\d+.\d{2})\s+ # fare                              
+            /x';
+        preg_match($farePattern, $string, $fareMatches);
+        return $fareMatches[1] ?? null;
+    }
+
+    /**
+     * @param array $ticketRows
+     * @return string|null
+     */
+    private static function getPassengerType(array $ticketRows): ?string
+    {
+        foreach ($ticketRows as $numRow => $row) {
+            $row = trim($row);
+            if ((strpos($row, 'FARE BASIS') !== false) && isset($ticketRows[$numRow + 2])) {
+                $passengerTypeRow = $ticketRows[$numRow + 2];
+                if (strpos($passengerTypeRow, '/IN') !== false) {
+                    $result = QuotePrice::PASSENGER_INFANT;
+                } elseif (strpos($passengerTypeRow, '/CH') !== false) {
+                    $result = QuotePrice::PASSENGER_CHILD;
+                } else {
+                    $result = QuotePrice::PASSENGER_ADULT;
+                }
                 break;
-            case 'CNN': case 'JNN':case 'CBC': case 'INN': case 'PNN': case 'JWC': case 'UNN':
-                $result = 'CHD';
-                break;
-            case 'INF': case 'INS': case 'JNS':case 'CBI': case 'JNF': case 'PNF': case 'ITF': case 'ITS':
-                $result = 'INF';
-                break;
-            default:
-                $result = 'ADT';
+            }
         }
-        return $result;
+        return $result ?? null;
+    }
+
+    /**
+     * @param string $string
+     * @return array|null
+     */
+    private function parsePriceMultipleType(string $string): ?array
+    {
+        $j = 0;
+        $pricePattern = '/
+            ^\d{2}
+            \s+(\d+|\d+\-\d+) # ignore
+            \s+([A-Z]{3}) # type 
+            \s+(\d{1,2}) # count passengers
+            \s+(\d+.\d+) # fare    
+            \s+(\d+.\d+) # taxes                    
+            /x';
+        $ticketPrices = explode("\n", $string);
+
+        foreach ($ticketPrices as $row) {
+            $row = trim($row);
+            preg_match($pricePattern, $row, $priceMatches);
+
+            if (isset($priceMatches[2], $priceMatches[3])) {
+                for ($i = 0; $i < (int) $priceMatches[3]; $i++) {
+                    $result[$j]['type'] = PricingService::passengerTypeMapping($priceMatches[2]);
+                    $result[$j]['fare'] = $priceMatches[4] ?? null;
+                    $result[$j]['taxes'] = !empty($priceMatches[5]) ? $priceMatches[5] : '0.00';
+                    $j ++;
+                }
+            }
+        }
+        return $result ?? null;
     }
 }

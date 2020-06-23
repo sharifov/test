@@ -15,7 +15,7 @@ class ApiFlightQuoteSearchService extends ApiService
 		$out = ['error' => false, 'data' => []];
 
 		try {
-			$response = $this->sendRequest(\Yii::$app->params['searchApiUrl'], $data, 'GET');
+			$response = \Yii::$app->airsearch->sendRequest('v1/search', $data, 'GET');
 
 			if ($response->isOk) {
 				$out['data'] = $response->data;

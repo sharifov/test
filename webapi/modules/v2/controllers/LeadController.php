@@ -74,6 +74,7 @@ class LeadController extends BaseController
      * @apiParam {int{2}=14-BOOK_FAILED, 15-ALTERNATIVE}   lead.status              Status
      * @apiParam {string{1}=E-ECONOMY, B-BUSINESS, F-FIRST, P-PREMIUM} lead.cabin   Cabin
      * @apiParam {int}                  lead.flight_id                              BO Flight ID
+     * @apiParam {string{5}}            lead.user_language                          User Language
      *
      * @apiParamExample {json} Request-Example:
      *
@@ -93,6 +94,7 @@ class LeadController extends BaseController
      *           "discount_id": "123123",
      *           "user_agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36",
      *           "flight_id": 12457,
+     *           "user_language": "en-GB",
      *           "segments": [
      *               {
      *                   "origin": "NYC",
@@ -157,6 +159,7 @@ class LeadController extends BaseController
      *               "discount_id": "123123",
      *               "user_agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36",
      *               "flight_id": 12457,
+     *               "user_language": "en-GB",
      *               "segments": [
      *                   {
      *                       "origin": "NYC",

@@ -205,11 +205,10 @@ class Quote extends \yii\db\ActiveRecord
             [['uid', 'reservation_dump', 'main_airline_code'], 'required'],
             [['lead_id', 'status' ], 'integer'],
             [[ 'check_payment'], 'boolean'],
-            [['created', 'updated', 'reservation_dump', 'created_by_seller', 'employee_name', 'employee_id', 'pcc', 'gds', 'last_ticket_date', 'service_fee_percent'], 'safe'],
+            [['created', 'updated', 'created_by_seller', 'employee_name', 'employee_id', 'pcc', 'gds', 'last_ticket_date', 'service_fee_percent'], 'safe'],
             [['uid', 'record_locator', 'pcc', 'cabin', 'gds', 'trip_type', 'main_airline_code', 'fare_type', 'gds_offer_id'], 'string', 'max' => 255],
 
-            [['reservation_dump'], 'checkReservationDump'],
-            [['pricing_info', 'tickets', 'origin_search_data'], 'string'],
+            [['pricing_info', 'tickets', 'origin_search_data', 'reservation_dump'], 'string'],
             [['status'], 'checkStatus'],
 
             [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
@@ -572,34 +571,6 @@ class Quote extends \yii\db\ActiveRecord
             }
         }
         return $elapsedTime;
-    }
-
-    /**
-     * @param bool|null $enableGdsParsers
-     * @throws \Exception
-     */
-    public function checkReservationDump(?bool $enableGdsParsers = null): void
-    {
-        $enableGdsParsers = $enableGdsParsers !== null ?
-            $enableGdsParsers :
-            \Yii::$app->params['settings']['enable_gds_parsers_for_create_quote'];
-
-        if ($enableGdsParsers && $gds = ParsingDump::getGdsByQuote($this->gds)) {
-            $dumpParser = (new ReservationService($gds))->parseReservation($this->reservation_dump, true, $this->itinerary);
-        } else {
-            $validation = $this->gds === 'A' ? false : true ;
-            $dumpParser = self::parseDump($this->reservation_dump, $validation, $this->itinerary);
-        }
-        if (empty($dumpParser)) {
-            $this->addError('reservation_dump', 'Incorrect reservation dump!');
-            \Yii::info(
-                \yii\helpers\VarDumper::dumpAsString([
-                    'gds' => $this->gds,
-                    'dump' => $this->reservation_dump,
-                ], 20),
-                'Quote:checkReservationDump:IncorrectReservationDump'
-            );
-        }
     }
 
     public function checkStatus()
@@ -1971,7 +1942,7 @@ class Quote extends \yii\db\ActiveRecord
             'currency' => 'USD'
         ];
         foreach ($this->quotePrices as $price) {
-            $price->roundValue();
+            $price->roundAttributesValue();
 
             if (!isset($result['detail'][$price->passenger_type]['selling'])) {
                 $result['detail'][$price->passenger_type]['selling'] = $price->selling;

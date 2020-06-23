@@ -95,4 +95,23 @@ class EmailList extends \yii\db\ActiveRecord
     {
         return new Scopes(static::class);
     }
+
+    /**
+     * @param string $q
+     * @param string $emailPostfix
+     * @param int $limit
+     * @return array
+     */
+    public static function searchEmailList(string $q, string $emailPostfix, int $limit = 20): array
+    {
+        return self::find()
+            ->select(['id' => 'el_id', 'text' => 'el_email', 'enabled' => 'el_enabled', 'title' => 'el_title'])
+            ->where(['like', 'el_email', $q])
+            ->orWhere(['el_id' => (int) $q])
+            ->orWhere(['like', 'el_title', $q])
+            ->andWhere(['like', 'el_email', $emailPostfix])
+            ->limit($limit)
+            ->asArray()
+            ->all();
+    }
 }

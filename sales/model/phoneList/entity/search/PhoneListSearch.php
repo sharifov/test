@@ -13,13 +13,9 @@ class PhoneListSearch extends PhoneList
     {
         return [
             [['pl_id', 'pl_created_user_id', 'pl_updated_user_id'], 'integer'],
-
             ['pl_enabled', 'boolean'],
-
             ['pl_title', 'string'],
-
             ['pl_phone_number', 'string'],
-
             [['pl_created_dt', 'pl_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
@@ -30,6 +26,10 @@ class PhoneListSearch extends PhoneList
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> ['defaultOrder' => ['pl_id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
         ]);
 
         $this->load($params);

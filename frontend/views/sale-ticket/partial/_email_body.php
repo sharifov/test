@@ -11,13 +11,19 @@ use yii\helpers\Html;
 /** @var $saleTickets SaleTicket[] */
 /** @var $caseSale CaseSale */
 /** @var $creditCards CreditCard[] */
+/** @var $user Employee */
 
 $chargeSystem = null;
 $transactionIds = null;
 $fop = null;
 $isNeedAdditionalInfoForEmail = false;
 $saleData = $caseSale ? json_decode((string)$caseSale->css_sale_data, true) : [];
+$groups = $user->getUserGroupList();
 ?>
+<ul style="padding: 0;list-style: none;">
+    <li><b>Report by:</b> <?= $user->username ?></li>
+    <li><b>Reporter group:</b> <?= array_shift($groups) ?></li>
+</ul>
 <table width="100%" cellpadding="0" cellspacing="0" style="min-width:100%;">
     <thead>
         <tr>

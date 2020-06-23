@@ -515,7 +515,6 @@ class Formatter extends \yii\i18n\Formatter
         return Html::tag('i', '', ['class' => 'fa fa-user']) . ' ' . Html::encode($name);
     }
 
-
 	/**
 	 * @param $numberOfMonth
 	 * @return string
@@ -647,4 +646,49 @@ class Formatter extends \yii\i18n\Formatter
 
         return CouponType::asFormat($value);
     }
+
+
+    /**
+     * @param int|null $userId
+     * @return string
+     */
+    public function asUserNameLinkToUpdate(?int $userId): string
+    {
+        if ($user = Employee::find()->select(['username'])->where(['id' => $userId])->cache(3600)->one()) {
+            $result = Html::a(Html::tag('i', '', ['class' => 'fa fa-user']) . ' ' .
+                    Html::encode($user->username) . ' ID:' . $userId,
+                ['employee/update', 'id' => $userId],
+                ['target' => '_blank']);
+        } else {
+            $result = $this->nullDisplay;
+        }
+        return $result;
+    }
+
+    /**
+     * @param $status
+     * @return string
+     */
+    public function asEmployeeStatusLabel($status): string
+    {
+        if ($status === null) {
+            return $this->nullDisplay;
+        }
+
+        switch ($status) {
+			case Employee::STATUS_ACTIVE:
+			    $result = Html::tag('span', Employee::STATUS_LIST[Employee::STATUS_ACTIVE], ['class' => 'label label-success']);
+			    break;
+			case Employee::STATUS_DELETED:
+				$result = Html::tag('span', Employee::STATUS_LIST[Employee::STATUS_DELETED], ['class' => 'label label-danger']);
+				break;
+			case Employee::STATUS_BLOCKED:
+				$result = Html::tag('span', Employee::STATUS_LIST[Employee::STATUS_BLOCKED], ['class' => 'label label-warning']);
+				break;
+			default:
+				$result = Html::tag('span', 'not found', ['class' => 'label label-info']);
+		}
+        return $result;
+    }
+
 }

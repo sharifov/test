@@ -15,4 +15,14 @@ class SettingHelper
 	{
 		return self::getCaseSaleTicketEmailData()['sendTo'] ?? [];
 	}
+
+	public static function isCaseCommunicationNewCallWidgetEnabled()
+	{
+		return \Yii::$app->params['settings']['case_communication_new_call_widget'] ?? false;
+	}
+
+	public static function isLeadCommunicationNewCallWidgetEnabled()
+	{
+		return \Yii::$app->params['settings']['lead_communication_new_call_widget'] ?? false;
+	}
 }

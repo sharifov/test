@@ -42,6 +42,8 @@ use yii\web\NotFoundHttpException;
  * @property string $last_activity
  * @property boolean $acl_rules_activated
  *
+ * @property bool $make_user_project_params
+ *
  * @property array $roles
  * @property array $roles_raw
  * @property array $rolesName
@@ -100,6 +102,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
     public const STATUS_DELETED = 0;
     public const STATUS_ACTIVE = 10;
+    public const STATUS_BLOCKED = 20;
+
+    public const STATUS_LIST = [
+        self::STATUS_ACTIVE => 'Active',
+        self::STATUS_BLOCKED => 'Blocked',
+        self::STATUS_DELETED => 'Deleted',
+    ];
 
     public const PROFIT_BONUSES = [
         11000 => 500,
@@ -113,6 +122,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
     public $password;
     public $deleted;
+    public $make_user_project_params;
 
     public $roles = null;
     public $roles_raw = null;
@@ -257,6 +267,14 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * @return bool
      */
+    public function isOnlyAdmin(): bool
+    {
+        return in_array(self::ROLE_ADMIN, $this->getRoles(true), true);
+    }
+
+    /**
+     * @return bool
+     */
     public function isAgent(): bool
     {
         if (isset($this->permissionList[self::LEVEL_PERMISSION_IS_AGENT])) {
@@ -362,13 +380,14 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             [['username', 'auth_key', 'password_hash', 'email', 'form_roles'], 'required'],
             [['password'], 'required', 'on' => self::SCENARIO_REGISTER],
             [['email', 'password', 'username'], 'trim'],
-            [['password'], 'string', 'min' => 6],
+            [['password'], 'string', 'min' => 8],
             [['status'], 'integer'],
             [['username', 'password_hash', 'password_reset_token', 'email'], 'string', 'max' => 255],
             [['auth_key'], 'string', 'max' => 32],
             [['username'], 'unique'],
             [['email'], 'unique'],
             ['email', 'email'],
+            [['make_user_project_params'], 'boolean'],
             [['password_reset_token'], 'unique'],
             [['created_at', 'updated_at', 'last_activity', 'acl_rules_activated', 'full_name', 'user_groups', 'user_projects', 'deleted', 'user_departments'], 'safe'],
         ];
@@ -392,7 +411,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             'user_groups' => 'User groups',
             'user_projects' => 'Projects access',
             'form_roles' => 'Roles',
-            'user_departments' => 'Departments'
+            'user_departments' => 'Departments',
+            'make_user_project_params' => 'Make user project params (automatic)'
         ];
     }
 
@@ -470,6 +490,32 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function isActive()
     {
         return $this->status === self::STATUS_ACTIVE;
+    }
+
+    /**
+     * @return $this
+     */
+    public function setActive(): Employee
+    {
+        $this->status = self::STATUS_ACTIVE;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isBlocked(): bool
+    {
+        return $this->status === self::STATUS_BLOCKED;
+    }
+
+    /**
+     * @return $this
+     */
+    public function setBlocked(): Employee
+    {
+        $this->status = self::STATUS_BLOCKED;
+        return $this;
     }
 
     /**
@@ -591,7 +637,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function isDeleted() : bool
     {
-        return !(boolean)$this->status;
+        return $this->status === self::STATUS_DELETED;
     }
 
 
@@ -752,11 +798,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * Finds user by username
      *
      * @param string $username
+     * @param int $status
      * @return static|null
      */
-    public static function findByUsername($username)
+    public static function findByUsername(string $username, int $status = self::STATUS_ACTIVE): ?Employee
     {
-        return static::findOne(['username' => $username, 'status' => self::STATUS_ACTIVE]);
+        return static::findOne(['username' => $username, 'status' => $status]);
     }
 
     /**
@@ -803,9 +850,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $timestamp + $expire >= time();
     }
 
-    public static function getAllEmployees()
+    /**
+     * @return array
+     */
+    public static function getAllEmployees(): array
     {
-        return ArrayHelper::map(self::find()->where(['status' => self::STATUS_ACTIVE])->all(), 'id', 'username');
+        return ArrayHelper::map(self::find()->select(['id', 'username'])->where(['status' => [self::STATUS_ACTIVE, self::STATUS_BLOCKED]])->asArray()->all(), 'id', 'username');
     }
 
     /**
@@ -825,6 +875,16 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $roles = ArrayHelper::map($result, 'name', 'description');
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
+
+        if ($user->isUserManager()) {
+            if (isset($roles[self::ROLE_ADMIN])) {
+                unset($roles[self::ROLE_ADMIN]);
+            }
+            if (isset($roles[self::ROLE_SUPER_ADMIN])) {
+                unset($roles[self::ROLE_SUPER_ADMIN]);
+            }
+            return $roles;
+        }
 
         if((!$user->isAdmin() && !$user->isSuperAdmin()) || $user->isAnySenior()) {
             if(isset($roles[self::ROLE_ADMIN])) {
@@ -922,28 +982,43 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $this->password_reset_token = null;
     }
 
+    /**
+     * @param $attr
+     * @return bool
+     */
     public function prepareSave($attr)
     {
         $this->username = $attr['username'];
         $this->email = $attr['email'];
         $this->full_name = $attr['full_name'];
+
         $this->password = $attr['password'];
-        if (!empty($this->password)) {
-            $this->setPassword($this->password);
+        if (!empty($attr['password'])) {
+            $this->setPassword($attr['password']);
         }
-        if (isset($attr['deleted'])) {
+
+        /*if (isset($attr['deleted'])) {
             $this->status = empty($attr['deleted'])
                 ? self::STATUS_ACTIVE : self::STATUS_DELETED;
+        }*/
+
+        if (isset($attr['status']) && is_numeric($attr['status'])) {
+            $this->status = (int) $attr['status'];
         }
+
         if (isset($attr['acl_rules_activated'])) {
             $this->acl_rules_activated = $attr['acl_rules_activated'];
         }
-        if (isset($attr['form_roles']) && $attr['form_roles']) {
-            foreach ($attr['form_roles'] as $role) {
-                $this->form_roles[] = $role;
-            }
+
+//        if (!empty($attr['form_roles'])) {
+//            foreach ($attr['form_roles'] as $role) {
+//                $this->form_roles[] = $role;
+//            }
+//        }
+        
+        if (!$this->auth_key) {
+            $this->generateAuthKey();
         }
-        $this->generateAuthKey();
 
         return $this->isNewRecord;
     }
@@ -2149,9 +2224,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $query->andWhere(['IN', 'user_connection.uc_user_id', $subQuery]);
         $query->groupBy(['user_connection.uc_user_id']);
 
-        if ($call->c_dep_id) {
-            $subQueryUd = UserDepartment::find()->usersByDep($call->c_dep_id);
-            $query->andWhere(['IN', 'user_connection.uc_user_id', $subQueryUd]);
+        $allow_cross_department_call_transfers = Yii::$app->params['settings']['allow_cross_department_call_transfers'] ?? false;
+
+        if (!$allow_cross_department_call_transfers) {
+            if ($call->c_dep_id) {
+                $subQueryUd = UserDepartment::find()->usersByDep($call->c_dep_id);
+                $query->andWhere(['IN', 'user_connection.uc_user_id', $subQueryUd]);
+            }
         }
 
         $generalQuery = new Query();
@@ -2410,6 +2489,22 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public static function find(): EmployeeQuery
     {
         return new EmployeeQuery(static::class);
+    }
+
+    /**
+     * @return string[]
+     */
+    public static function getStatusList(): array
+    {
+        return self::STATUS_LIST;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatusName(): string
+    {
+        return self::STATUS_LIST[$this->status] ?? '-';
     }
 
     /**

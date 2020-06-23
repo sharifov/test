@@ -4,6 +4,7 @@ namespace sales\services\parsingDump\lib\worldSpan;
 
 use sales\helpers\app\AppHelper;
 use sales\services\parsingDump\lib\ParseDumpInterface;
+use sales\services\parsingDump\PricingService;
 
 /**
  * Class Pricing
@@ -64,9 +65,9 @@ class Pricing implements ParseDumpInterface
                     }
 
                     for ($i = 0; $i < (int) $typeMatches[2]; $i++) {
-                        $result[$j]['type'] = $this->typeMapping($typeMatches[1]);
+                        $result[$j]['type'] = PricingService::passengerTypeMapping($typeMatches[1]);
                         $result[$j]['fare'] = $values[1] ?? null;
-                        $result[$j]['taxes'] = $values[2] ?? null;
+                        $result[$j]['taxes'] = $values[2] ?? '0.00';
                         $j ++;
                     }
                 }
@@ -84,27 +85,5 @@ class Pricing implements ParseDumpInterface
         $value = trim($row);
         $value = preg_replace('|[\s]+|s', ' ', $value);
         return explode(' ', $value);
-    }
-
-    /**
-     * @param string|null $source
-     * @return string
-     */
-    private function typeMapping(?string $source): string
-    {
-        switch ($source) {
-            case 'ADT': case 'JCB': case 'PFA': case 'ITX': case 'JWZ': case 'WEB':
-                $result = 'ADT';
-                break;
-            case 'CNN': case 'JNN':case 'CBC': case 'INN': case 'PNN': case 'JWC': case 'UNN':
-                $result = 'CHD';
-                break;
-            case 'INF': case 'INS': case 'JNS':case 'CBI': case 'JNF': case 'PNF': case 'ITF': case 'ITS':
-                $result = 'INF';
-                break;
-            default:
-                $result = 'ADT';
-        }
-        return $result;
     }
 }
