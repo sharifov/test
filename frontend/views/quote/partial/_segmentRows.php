@@ -39,7 +39,7 @@ use \yii\widgets\ActiveForm;
         </div>
     </div>
     <div class="row">
-        <?php $form = ActiveForm::begin([
+        <?php $formBaggage = ActiveForm::begin([
             'id' => 'segmentBaggageForm_' . $segment['segmentIata'],
             'enableClientValidation' => true,
             'validateOnChange' => true,
@@ -56,10 +56,12 @@ use \yii\widgets\ActiveForm;
                 }
             ?>
 
-            <?php echo $form->field($segmentBaggageForm, 'baggageData')->widget(MultipleInput::class, [
+            <?php echo $formBaggage->field($segmentBaggageForm, 'baggageData')->widget(MultipleInput::class, [
                 'max' => 20,
-                /*'enableError' => true,
-                'showGeneralError' => true,*/
+                'enableError' => true,
+                'showGeneralError' => true,
+                'allowEmptyList'    => false,
+                'enableGuessTitle'  => true,
                 'columns' => [
                     [
                         'title' => 'Baggage Type',
