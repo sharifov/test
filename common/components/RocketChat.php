@@ -12,6 +12,7 @@ use yii\base\Component;
 use yii\helpers\VarDumper;
 use yii\httpclient\Client;
 use yii\httpclient\CurlTransport;
+use yii\httpclient\Exception;
 use yii\httpclient\Request;
 use yii\httpclient\Response;
 
@@ -74,7 +75,7 @@ class RocketChat extends Component
      * @param array $headers
      * @param array $options
      * @return \yii\httpclient\Response
-     * @throws \yii\httpclient\Exception
+     * @throws Exception
      */
     protected function sendRequest(string $action = '', array $data = [], string $method = 'post', array $headers = [], array $options = []) : Response
     {
@@ -106,7 +107,7 @@ class RocketChat extends Component
      * @param string|null $sourceCurrencyCode
      * @param array $rateCurrencyList
      * @return array
-     * @throws \yii\httpclient\Exception
+     * @throws Exception
      */
     public function systemLogin() : array
     {
@@ -143,7 +144,7 @@ class RocketChat extends Component
      * @param string $username
      * @param string $password
      * @return array
-     * @throws \yii\httpclient\Exception
+     * @throws Exception
      */
     public function login(string $username, string $password) : array
     {
@@ -178,13 +179,14 @@ class RocketChat extends Component
 
     /**
      * @return array
-     * @throws \yii\httpclient\Exception
+     * @throws Exception
      */
     public function getSystemAuthData(): array
     {
         $cache = \Yii::$app->cache;
-        $key = 'rocket_chat_system_authToken';
+        $key = 'rocket_chat_system_authToken_' . md5($this->url);
 
+        //$cache->delete($key);
         $authData = $cache->get($key);
 
         if ($authData === false) {
@@ -194,7 +196,8 @@ class RocketChat extends Component
                     'userId' => $response['data']['userId'],
                     'authToken' => $response['data']['authToken']
                 ];
-                $cache->set($key, $authData, 3600 * 24 * 30);
+                $duration = 3600 * 24 * 30;
+                $cache->set($key, $authData, $duration);
             }
         }
         return $authData;
@@ -202,7 +205,7 @@ class RocketChat extends Component
 
     /**
      * @return mixed|null
-     * @throws \yii\httpclient\Exception
+     * @throws Exception
      */
     public function getSystemUserId()
     {
@@ -215,7 +218,7 @@ class RocketChat extends Component
 
     /**
      * @return mixed|null
-     * @throws \yii\httpclient\Exception
+     * @throws Exception
      */
     public function getSystemAuthToken()
     {
@@ -245,7 +248,7 @@ class RocketChat extends Component
      * @param bool $active
      * @param bool $joinDefaultChannels
      * @return array
-     * @throws \yii\httpclient\Exception
+     * @throws Exception
      *
      *
      *
@@ -314,8 +317,77 @@ class RocketChat extends Component
 
 
     /**
+     * @param string $username
      * @return array
-     * @throws \yii\httpclient\Exception
+     * @throws Exception
+     */
+    public function deleteUser(string $username): array
+    {
+
+        $out = ['error' => false, 'data' => []];
+        $headers = [
+            'X-User-Id' => $this->getSystemUserId(),
+            'X-Auth-Token' => $this->getSystemAuthToken()
+        ];
+
+        $data['username'] = $username;
+
+        $response = $this->sendRequest('users.delete', $data, 'post', $headers);
+
+        if ($response->isOk) {
+            //VarDumper::dump($response->data, 10, true); exit;
+
+            if (empty($response->data['success'])) {
+                $out['error'] = 'Success => false';
+            } else {
+                $out['data'] = $response->data;
+            }
+        } else {
+            $out['error'] = $response->content;
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'RocketChat:deleteUser');
+        }
+
+        return $out;
+    }
+
+
+    /**
+     * @param string $userId
+     * @return array
+     * @throws Exception
+     */
+    public function deleteUserByUserId(string $userId): array
+    {
+
+        $out = ['error' => false, 'data' => []];
+        $headers = [
+            'X-User-Id' => $this->getSystemUserId(),
+            'X-Auth-Token' => $this->getSystemAuthToken()
+        ];
+
+        $data['userId'] = $userId;
+
+        $response = $this->sendRequest('users.delete', $data, 'post', $headers);
+
+        if ($response->isOk) {
+            //VarDumper::dump($response->data, 10, true); exit;
+
+            if (empty($response->data['success'])) {
+                $out['error'] = 'Success => false';
+            } else {
+                $out['data'] = $response->data;
+            }
+        } else {
+            $out['error'] = $response->content;
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'RocketChat:deleteUserByUserId');
+        }
+
+        return $out;
+    }
+
+    /**
+     * @return array
+     * @throws Exception
      */
     public function getAllDepartments(): array
     {
@@ -349,7 +421,7 @@ class RocketChat extends Component
      * @param string $rid
      * @param array $attachments
      * @return array
-     * @throws \yii\httpclient\Exception
+     * @throws Exception
      */
     public function sendMessage(string $rid, array $attachments): array
     {

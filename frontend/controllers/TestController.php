@@ -1430,9 +1430,10 @@ class TestController extends FController
 //	"joinDefaultChannels": false
 
         VarDumper::dump($chat->getSystemAuthData(), 10, true);
-        VarDumper::dump($chat->getAllDepartments(), 10, true);
+        //VarDumper::dump($chat->getAllDepartments(), 10, true);
 
-        //VarDumper::dump($chat->createUser('alex.connor3', 'alex.connor2', 'alex.connor2', 'alex.connor3@techork.com'), 10, true);
+        VarDumper::dump($chat->createUser('alex.connor3', 'alex.connor2', 'alex.connor2', 'alex.connor3@techork.com'), 10, true);
+        VarDumper::dump($chat->deleteUser('alex.connor3'), 10, true);
         //VarDumper::dump($chat->systemLogin(), 10, true);
     }
     
