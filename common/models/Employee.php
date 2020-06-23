@@ -267,6 +267,14 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * @return bool
      */
+    public function isOnlyAdmin(): bool
+    {
+        return in_array(self::ROLE_ADMIN, $this->getRoles(true), true);
+    }
+
+    /**
+     * @return bool
+     */
     public function isAgent(): bool
     {
         if (isset($this->permissionList[self::LEVEL_PERMISSION_IS_AGENT])) {
@@ -867,6 +875,16 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $roles = ArrayHelper::map($result, 'name', 'description');
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
+
+        if ($user->isUserManager()) {
+            if (isset($roles[self::ROLE_ADMIN])) {
+                unset($roles[self::ROLE_ADMIN]);
+            }
+            if (isset($roles[self::ROLE_SUPER_ADMIN])) {
+                unset($roles[self::ROLE_SUPER_ADMIN]);
+            }
+            return $roles;
+        }
 
         if((!$user->isAdmin() && !$user->isSuperAdmin()) || $user->isAnySenior()) {
             if(isset($roles[self::ROLE_ADMIN])) {
