@@ -40,6 +40,8 @@ abstract class BaseApplication extends yii\base\Application
  * @property \yii\queue\beanstalk\Queue $queue_job The beanstalk Queue. This property is read-only. Extended component.
  * @property \yii\caching\Cache $cacheFile FileCache.
  * @property \yii\redis\Connection $redis Redis Connection.
+ * @property \common\components\RocketChat $rchat Rocket Chat component
+ * @property \common\components\ChatBot $chatBot СhatBot component
  *
  *
  *

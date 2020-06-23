@@ -623,7 +623,7 @@ class EmployeeController extends FController
 //        $userCache->flush();
 
 
-            if (Yii::$app->request->isPost) {
+            if (Yii::$app->request->isPost && $model->load(Yii::$app->request->post())) {
                 $attr = Yii::$app->request->post($model->formName());
 
                 $model->prepareSave($attr);

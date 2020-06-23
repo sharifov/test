@@ -49,5 +49,11 @@ return [
             'username' => '{{ common.config.main.components.communication.username:str }}',
             'password' => '{{ common.config.main.components.communication.password:str }}',
         ],
+        'airsearch' => [
+            'class' => \common\components\AirSearchService::class,
+            'url' => 'https://airapi-test.travel-dev.com/',
+            'username' => 'SAL101',
+            'password' => 'c940e3484fe9fcc73ed12a7fcec469b4',
+        ],
     ],
 ];

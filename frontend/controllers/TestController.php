@@ -1296,6 +1296,43 @@ class TestController extends FController
         $mailPreview = $communication->mailCapture($lead->project_id, ($tpl ? $tpl/*$tpl->etp_key*/ : ''), $mailFrom, $mailTo/*$comForm->c_email_to*/, $content_data, $language);
         VarDumper::dump($mailPreview, 10 , true); exit;
     }
+
+    public function actionVue()
+    {
+        return $this->render('vue');
+    }
+
+    public function actionReact()
+    {
+        return $this->render('react');
+    }
+
+    public function actionCallWidget()
+    {
+        return $this->render('call-widget');
+    }
+
+    public function actionRchat()
+    {
+        $chat = Yii::$app->rchat;
+
+
+//        "email": "test@gmail.com",
+//	"name": "John Balon",
+//	"password": "test",
+//	"username": "test",
+//	"active": true,
+//	"roles": ["user", "livechat-agent"],
+//	"joinDefaultChannels": false
+
+        VarDumper::dump($chat->getSystemAuthData(), 10, true);
+        //VarDumper::dump($chat->getAllDepartments(), 10, true);
+
+        VarDumper::dump($chat->createUser('alex.connor3', 'alex.connor2', 'alex.connor2', 'alex.connor3@techork.com'), 10, true);
+        VarDumper::dump($chat->deleteUser('alex.connor3'), 10, true);
+        //VarDumper::dump($chat->systemLogin(), 10, true);
+    }
+    
 }
 
 
