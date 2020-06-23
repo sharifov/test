@@ -50,13 +50,14 @@ class CaseCategory extends ActiveRecord
                 'updatedByAttribute' => 'cc_updated_user_id',
                 'createdByAttribute' => 'cc_updated_user_id',
             ],
-
+            /*
             'datePickerRange' =>[
                 'class' => DateRangeBehavior::class,
                 'attribute' => 'createTimeRange',
                 'dateStartAttribute' => 'createTimeStart',
                 'dateEndAttribute' => 'createTimeEnd',
             ]
+            */
         ];
     }
 
