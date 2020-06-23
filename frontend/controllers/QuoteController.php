@@ -574,9 +574,6 @@ class QuoteController extends FController
 
                 $post = Yii::$app->request->post();
 
-                \yii\helpers\VarDumper::dump($_POST, 10, true); exit();
-                /* FOR DEBUG:: must by remove */
-
                 if (isset($post['Quote'])) {
                     $postQuote = $post['Quote'];
                     $postQuote['employee_id'] = Yii::$app->user->id;
