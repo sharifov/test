@@ -77,8 +77,9 @@ use \yii\widgets\ActiveForm;
                         'name' => 'height',
                         'type'  => AutoComplete::class,
                         'options' => [
+                            'placeholder' => '...',
                             'clientOptions' => [
-                                'source' => ['USA', 'RUS', 'AAA', 'VVV',],
+                                'source' => ['test', 'USA', 'RUS', 'AAA', 'VVV',], /* TODO:: FOR DEBUG:: must by remove  */
                             ],
                         ]
                     ],
