@@ -16,6 +16,7 @@ use yii\base\Model;
  * @property double|null $price
  * @property string $currency
  * @property array $baggageData
+ * @property int $segmentId
  */
 class SegmentBaggageForm extends Model
 {
@@ -27,6 +28,7 @@ class SegmentBaggageForm extends Model
     public $height; // maxSize
     public $price;
     public $currency;
+    public $segmentId;
 
     public $baggageData;
 
@@ -56,24 +58,26 @@ class SegmentBaggageForm extends Model
     public function rules(): array
     {
         return [
-            [['type', 'segmentIata', 'paxCode', 'piece'], 'required'],
+            [['type', 'segmentIata', 'piece'], 'required'],
 
             [['type'], 'in', 'range' => array_keys(BaggageService::TYPE_LIST)],
             [['paxCode'], 'default', 'value' => QuotePrice::PASSENGER_ADULT],
             [['paxCode'], 'in', 'range' => array_keys(QuotePrice::PASSENGER_TYPE_LIST)],
 
-            [['segmentIata'], 'string', 'length' => 6],
-            [['weight', 'height'], 'string', 'max' => 100],
-
             ['price', 'filter', 'filter' => static function ($value) {
                 return BaggageService::prepareCost($value);
             }],
-            [['price'], 'number'],
+            [['price'], 'number'], /* TODO:: add ref type  */
 
-            [['piece'], 'integer'],
+            [['segmentIata'], 'string', 'length' => 6],
+            [['weight', 'height'], 'string', 'max' => 100],
+
+            [['piece', 'segmentId'], 'integer'],
 
             [['currency'], 'default', 'value' => 'USD'],
             [['currency'], 'string', 'max' => 5],
+
+            [['baggageData'], 'safe']
         ];
     }
 

@@ -13,7 +13,6 @@ use unclead\multipleinput\MultipleInputColumn;
 use yii\jui\AutoComplete;
 use \yii\widgets\ActiveForm;
 
-
 ?>
 
 <?php foreach ($segments as $key => $segment) : ?>
@@ -58,9 +57,9 @@ use \yii\widgets\ActiveForm;
             ?>
 
             <?php echo $form->field($segmentBaggageForm, 'baggageData')->widget(MultipleInput::class, [
-                'max' => 4,
-                'enableError' => true,
-                'showGeneralError' => true,
+                'max' => 20,
+                /*'enableError' => true,
+                'showGeneralError' => true,*/
                 'columns' => [
                     [
                         'title' => 'Baggage Type',
@@ -75,13 +74,6 @@ use \yii\widgets\ActiveForm;
                     [
                         'title' => 'Max Size',
                         'name' => 'height',
-                        'type'  => AutoComplete::class,
-                        'options' => [
-                            'clientOptions' => [
-                                'placeholder' => '...',
-                                'source' => ['test', 'USA', 'RUS', 'AAA', 'VVV',], /* TODO:: FOR DEBUG:: must by remove  */
-                            ],
-                        ]
                     ],
                     [
                         'title' => 'Max Weight',
@@ -93,7 +85,8 @@ use \yii\widgets\ActiveForm;
                     ],
                     [
                         'name' => 'segmentIata',
-                        'type' => MultipleInputColumn::TYPE_HIDDEN_INPUT
+                        'type' => MultipleInputColumn::TYPE_HIDDEN_INPUT,
+                        'defaultValue' => $segment['segmentIata'],
                     ],
                 ],
             ])->label(false)  ?>
