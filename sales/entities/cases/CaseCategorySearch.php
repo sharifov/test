@@ -14,6 +14,7 @@ class CaseCategorySearch extends CaseCategory
     public $createTimeRange;
     public $createTimeStart;
     public $createTimeEnd;
+    public $depID;
 
     public const DEFAULT_RANGE = '-29 days';
 
@@ -27,7 +28,7 @@ class CaseCategorySearch extends CaseCategory
             [['cc_dep_id', 'cc_system'], 'integer'],
             ['cc_enabled', 'boolean'],
             [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
-            [['createTimeStart', 'createTimeEnd'], 'safe'],
+            [['createTimeStart', 'createTimeEnd', 'depID'], 'safe'],
         ];
     }
 
@@ -35,6 +36,19 @@ class CaseCategorySearch extends CaseCategory
     {
         parent::__construct($config);
         $this->createTimeRange = date('Y-m-d 00:00:00', strtotime(self::DEFAULT_RANGE)) . ' - ' . date('Y-m-d 23:59:59');
+        $initDates = explode(' - ', $this->createTimeRange);
+        $this->createTimeStart = $initDates[0];
+        $this->createTimeEnd = $initDates[1];
+    }
+
+    /**
+     * @return array
+     */
+    public function attributeLabels(): array
+    {
+        return [
+            'depID' => 'Department',
+        ];
     }
 
     /**
@@ -91,6 +105,10 @@ class CaseCategorySearch extends CaseCategory
             $dateTimeStart = Employee::convertTimeFromUserDtToUTC(strtotime($this->createTimeStart));
             $dateTimeEnd = Employee::convertTimeFromUserDtToUTC(strtotime($this->createTimeEnd));
             $query->andWhere(['between', 'cases.cs_created_dt', $dateTimeStart, $dateTimeEnd]);
+        }
+
+        if($this->depID){
+            $query->andWhere(['cc_dep_id' => $this->depID]);
         }
 
         $query->andFilterWhere([
