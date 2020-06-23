@@ -21,6 +21,8 @@ class ClientChatJob extends BaseObject implements JobInterface
 {
 	public int $priority = 1;
 
+	private int $maxPriority = 50;
+
 	/**
 	 * @var ClientChat
 	 */
@@ -50,13 +52,15 @@ class ClientChatJob extends BaseObject implements JobInterface
 		} catch (\RuntimeException $e) {
 			\Yii::info('ClientChatJob failed... ' . $e->getMessage(), 'info\ClientChatJob::execute');
 			$job = new self();
-			++$job->priority;
-			$job->clientChat = $this->clientChat;
-			\Yii::$app->queue_job->priority(90)->push($job);
+			$job->priority = $this->priority+1;
+
+			if ($job->priority < $this->maxPriority) {
+				$job->clientChat = $this->clientChat;
+				\Yii::$app->queue_job->priority(90)->push($job);
+			}
 			return false;
 		}
 
 		\Yii::info('ClientChatJob successfully finished...', 'info\ClientChatJob::execute');
-		return true;
 	}
 }

@@ -6,7 +6,7 @@ use sales\model\clientChat\entity\ClientChat;
 ?>
 
 <?php foreach($clientChats as $clientChat): ?>
-    <div class="_cc-list-item">
+    <div class="_cc-list-item" data-goto-param="/live/<?= $clientChat->cch_rid ?>?layout=embedded" data-rid="<?= $clientChat->cch_rid ?>" data-cch-id="<?= $clientChat->cch_id ?>">
         <div class="_cc-item-icon-wrapper">
                             <span class="_cc-item-icon-round">
                                 <i class="fa fa-comment"></i>

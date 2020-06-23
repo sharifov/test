@@ -70,7 +70,7 @@ class ClientChatChannel extends \yii\db\ActiveRecord
             ['ccc_dep_id', 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['ccc_dep_id' => 'dep_id']],
 
             ['ccc_disabled', 'integer'],
-            ['ccc_priority', 'integer', 'max' => 255, 'min' => 0],
+            ['ccc_priority', 'integer', 'max' => 50, 'min' => 1],
 
             ['ccc_name', 'required'],
             ['ccc_name', 'string', 'max' => 255],

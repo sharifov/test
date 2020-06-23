@@ -9,6 +9,7 @@ use sales\behaviors\BlameableBehaviorExceptApi;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\repositories\department\DepartmentRepository;
+use sales\repositories\NotFoundException;
 use sales\repositories\project\ProjectRepository;
 
 /**
@@ -65,5 +66,13 @@ class ClientChatRepository
 			throw new \RuntimeException($clientChat->getErrorSummary(false)[0]);
 		}
 		return $clientChat;
+	}
+
+	public function findById(int $id): ClientChat
+	{
+		if ($clientChat = ClientChat::findOne($id)) {
+			return $clientChat;
+		}
+		throw new NotFoundException('Client chat is not found');
 	}
 }

@@ -17,7 +17,6 @@ use yii\bootstrap\BootstrapAsset;
 use yii\bootstrap\BootstrapPluginAsset;
 use frontend\themes\gentelella\assets\AssetLeadCommunication;
 use frontend\themes\gentelella_v2\assets\ThemeAsset;
-
 $params = array_merge(
     require __DIR__ . '/../../common/config/params.php',
     require __DIR__ . '/../../common/config/params-local.php',
@@ -159,7 +158,7 @@ return [
         ],
 
 		'assetManager' => [
-			'forceCopy' => false,
+			'forceCopy' => true,
 			'appendTimestamp' => false,
             'hashCallback' => static function ($path) use ($appVersion) {
                 return hash('md4', $path . $appVersion);

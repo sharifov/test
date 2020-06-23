@@ -3,17 +3,35 @@ namespace frontend\controllers;
 
 use sales\auth\Auth;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\clientChatUserChannel\entity\search\ClientChatUserChannelSearch;
+use sales\repositories\NotFoundException;
 use yii\data\ActiveDataProvider;
 use yii\db\Expression;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 
+/**
+ * Class ClientChatController
+ * @package frontend\controllers
+ *
+ * @property ClientChatRepository $clientChatRepository
+ */
 class ClientChatController extends FController
 {
 	private const CLIENT_CHAT_PAGE_SIZE = 10;
+	/**
+	 * @var ClientChatRepository
+	 */
+	private ClientChatRepository $clientChatRepository;
+
+	public function __construct($id, $module, ClientChatRepository $clientChatRepository, $config = [])
+	{
+		parent::__construct($id, $module, $config);
+		$this->clientChatRepository = $clientChatRepository;
+	}
 
 	/**
 	 * @return array
@@ -30,7 +48,7 @@ class ClientChatController extends FController
 		];
 	}
 
-	public function actionIndex(int $channelId = null, int $page = 1)
+	public function actionIndex(int $channelId = null, int $page = 1, string $rid = '')
 	{
 		$channelsQuery = ClientChatChannel::find()
 			->joinWithCcuc(Auth::id());
@@ -77,12 +95,38 @@ class ClientChatController extends FController
 			return $this->asJson($response);
 		}
 
+		$clientChat = $this->clientChatRepository->findByRid($rid);
 
 		return $this->render('index', [
 			'channels' => $channels,
 			'dataProvider' => $dataProvider,
 			'channelId' => $channelId,
-			'page' => $page
+			'page' => $page,
+			'clientChat' => $clientChat,
+			'client' => $clientChat->cchClient ?? ''
 		]);
+	}
+
+	public function actionInfo()
+	{
+		$cchId = \Yii::$app->request->post('cch_id');
+
+		$result = [
+			'html' => '',
+			'message' => ''
+		];
+		try {
+			$clientChat = $this->clientChatRepository->findById($cchId);
+
+			$result['html'] = $this->renderPartial('partial/_client-chat-info', [
+				'clientChat' => $clientChat,
+				'client' => $clientChat->cchClient
+			]);
+
+		} catch (NotFoundException $e) {
+			$result['message'] = $e->getMessage();
+		}
+
+		return $this->asJson($result);
 	}
 }
