@@ -739,7 +739,7 @@ $js = <<<JS
         $.ajax({
             url: '/quote/save-from-dump?lead_id=' + leadId,
             type: 'POST',
-            data: $('#$formID').serialize(),
+            data: $('#$formID, .segment_baggage_forms').serialize(),
             dataType: 'json'
         })
         .done(function(dataResponse) {

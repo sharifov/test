@@ -517,7 +517,6 @@ class QuoteController extends FController
 
                         $response['segments'] = $this->renderAjax('partial/_segmentRows', [
                             'segments' => $segments,
-                            /*'segmentBaggageForm' => new SegmentBaggageForm(),*/
                         ]);
                     }
 
@@ -574,6 +573,9 @@ class QuoteController extends FController
                 }
 
                 $post = Yii::$app->request->post();
+
+                \yii\helpers\VarDumper::dump($_POST, 10, true); exit();
+                /* FOR DEBUG:: must by remove */
 
                 if (isset($post['Quote'])) {
                     $postQuote = $post['Quote'];

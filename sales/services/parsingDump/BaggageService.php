@@ -7,6 +7,7 @@ namespace sales\services\parsingDump;
 use common\models\Airport;
 use common\models\QuotePrice;
 use sales\services\parsingDump\lib\ParsingDump;
+use sales\forms\segment\SegmentBaggageForm;
 
 /**
  * Class BaggageService
@@ -15,6 +16,14 @@ class BaggageService
 {
     public string $gds;
     public array $baggageFromDump;
+
+    public CONST TYPE_FREE = 'free';
+    public CONST TYPE_PAID = 'paid';
+
+    public CONST TYPE_LIST = [
+        self::TYPE_FREE => 'Free',
+        self::TYPE_PAID => 'Paid'
+    ];
 
     /**
      * @param string $gds
@@ -42,7 +51,36 @@ class BaggageService
     public function attachBaggageToSegments(array $segments): array
     {
         foreach ($segments as $key => $segment) {
-            if ($baggage = $this->searchByIata($segment)) {
+            if ($baggageSource = $this->searchByIata($segment)) {
+
+                $baggage = [];
+
+                if (isset($baggageSource['paid_baggage'])) {
+                    foreach ($baggageSource['paid_baggage'] as $item) {
+                        $segmentBaggageForm = new SegmentBaggageForm();
+                        $segmentBaggageForm->segmentIata = $segment['segmentIata'];
+                        $segmentBaggageForm->type = self::TYPE_PAID;
+                        $segmentBaggageForm->piece = $item['piece'];
+                        $segmentBaggageForm->weight = $item['weight'];
+                        $segmentBaggageForm->height = $item['height'];
+                        $segmentBaggageForm->price = $item['price'];
+                        $segmentBaggageForm->currency = $item['currency'];
+
+                        $baggage[] = $segmentBaggageForm;
+                    }
+                }
+                if (isset($baggageSource['free_baggage'])) {
+                    $segmentBaggageForm = new SegmentBaggageForm();
+                    $segmentBaggageForm->segmentIata = $segment['segmentIata'];
+                    $segmentBaggageForm->type = self::TYPE_FREE;
+                    $segmentBaggageForm->piece = $baggageSource['free_baggage']['piece'];
+                    $segmentBaggageForm->weight = $baggageSource['free_baggage']['weight'];
+                    $segmentBaggageForm->height = $baggageSource['free_baggage']['height'];
+                    $segmentBaggageForm->price = $baggageSource['free_baggage']['price'];
+                    $segmentBaggageForm->currency = $baggageSource['free_baggage']['currency'];
+
+                    $baggage[] = $segmentBaggageForm;
+                }
                 $segments[$key]['baggage'] = $baggage;
             }
         }

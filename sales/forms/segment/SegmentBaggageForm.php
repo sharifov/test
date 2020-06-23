@@ -30,13 +30,25 @@ class SegmentBaggageForm extends Model
 
     public $baggageData;
 
-    public CONST TYPE_FREE = 'free';
-    public CONST TYPE_PAID = 'paid';
+    /**
+     * @param string|null $segmentIata
+     * @param array $config
+     */
+    public function __construct(?string $segmentIata = null, $config = [])
+	{
+		$this->segmentIata = $segmentIata;
+		parent::__construct($config);
+	}
 
-    public CONST TYPE_LIST = [
-        self::TYPE_FREE => 'Free',
-        self::TYPE_PAID => 'Paid'
-    ];
+    /**
+     * @return string
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function formName(): string
+    {
+        $formName = parent::formName();
+        return $this->segmentIata ? $formName . '_' . $this->segmentIata : $formName;
+    }
 
     /**
      * @return array
@@ -46,7 +58,7 @@ class SegmentBaggageForm extends Model
         return [
             [['type', 'segmentIata', 'paxCode', 'piece'], 'required'],
 
-            [['type'], 'in', 'range' => array_keys(self::TYPE_LIST)],
+            [['type'], 'in', 'range' => array_keys(BaggageService::TYPE_LIST)],
             [['paxCode'], 'default', 'value' => QuotePrice::PASSENGER_ADULT],
             [['paxCode'], 'in', 'range' => array_keys(QuotePrice::PASSENGER_TYPE_LIST)],
 
@@ -63,5 +75,13 @@ class SegmentBaggageForm extends Model
             [['currency'], 'default', 'value' => 'USD'],
             [['currency'], 'string', 'max' => 5],
         ];
+    }
+
+    /**
+     * @return array
+     */
+    public function attributeLabels(): array /* TODO::  */
+    {
+        return [];
     }
 }

@@ -58,6 +58,7 @@ class ReservationService
                 $this->parseResult[$i]['airlineName'] = $this->getAirlineName($parseData['airline'], $onView);
                 $this->parseResult[$i]['departureAirport'] = $parseData['departure_airport_iata'];
                 $this->parseResult[$i]['arrivalAirport'] = $parseData['arrival_airport_iata'];
+                $this->parseResult[$i]['segmentIata'] = $parseData['departure_airport_iata'] . $parseData['arrival_airport_iata'];
                 $this->parseResult[$i]['departureDateTime'] = $parseData['departure_date_time'];
                 $this->parseResult[$i]['arrivalDateTime'] = $parseData['arrival_date_time'];
                 $this->parseResult[$i]['flightNumber'] = $parseData['flight_number'];
