@@ -5,11 +5,12 @@ namespace sales\services\parsingDump\lib\worldSpan;
 use DateTime;
 use sales\helpers\app\AppHelper;
 use sales\services\parsingDump\lib\ParseDumpInterface;
+use sales\services\parsingDump\lib\ParseReservationInterface;
 
 /**
  * Class Reservation
  */
-class Reservation implements ParseDumpInterface
+class Reservation implements ParseDumpInterface, ParseReservationInterface
 {
     /**
      * @param string $string

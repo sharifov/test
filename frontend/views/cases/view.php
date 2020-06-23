@@ -32,7 +32,7 @@ use yii\bootstrap4\Modal;
  * @var $coupons \sales\model\coupon\entity\couponCase\CouponCase[]
  * @var $sendCouponsForm \sales\model\coupon\useCase\send\SendCouponsForm
  *
- *
+ * @var $fromPhoneNumbers array
  */
 
 $this->title = 'Case ' . $model->cs_id;
@@ -122,7 +122,8 @@ $user = Yii::$app->user->identity;
                         'comForm'       => $comForm,
                         'dataProvider'  => (bool)Yii::$app->params['settings']['new_communication_block_case'] ? $dataProviderCommunicationLog : $dataProviderCommunication,
                         'isAdmin'       => $isAdmin,
-                        'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_case']
+                        'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_case'],
+                        'fromPhoneNumbers' => $fromPhoneNumbers
                     ]);
                     ?>
             <?php else: ?>

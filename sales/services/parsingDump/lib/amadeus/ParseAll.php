@@ -6,7 +6,7 @@ use sales\helpers\app\AppHelper;
 use sales\services\parsingDump\lib\ParseDumpInterface;
 
 /**
- * Class Reservation
+ * Class ParseAll
  */
 class ParseAll implements ParseDumpInterface
 {
@@ -22,7 +22,7 @@ class ParseAll implements ParseDumpInterface
             $result[] = (new Pricing())->parseDump($string);
             $result[] = (new Baggage())->parseDump($string);
         } catch (\Throwable $throwable) {
-            \Yii::error(AppHelper::throwableFormatter($throwable), 'amadeus:ParseAll:parseDump:Throwable');
+            \Yii::error(AppHelper::throwableFormatter($throwable), 'Amadeus:ParseAll:parseDump:Throwable');
         }
         return $result;
     }

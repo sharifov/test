@@ -18,130 +18,64 @@ class Baggage implements ParseDumpInterface
     {
         $result = [];
         try {
-            if ($baggage = $this->getParseDump($string)) {
+            if ($baggage = self::parseRows($string)) {
                 $result['baggage'] = $baggage;
             }
         } catch (\Throwable $throwable) {
-            \Yii::error(AppHelper::throwableFormatter($throwable), 'amadeus:Baggage:parseDump:Throwable');
+            \Yii::error(AppHelper::throwableFormatter($throwable), 'Amadeus:Baggage:parseDump:Throwable');
         }
         return $result;
     }
 
-    public function getParseDump($priceDump)
+    /**
+     * @param string $dump
+     * @return array|null
+     */
+    private static function parseRows(string $dump): ?array
     {
-        $explodeDump = explode("\n", $priceDump);
+        $result = [];
+        $ticketRows = explode("\n", $dump);
 
-        $bagRows = [];
-        foreach ($explodeDump as $key => $row) {
+        foreach ($ticketRows as $numRow => $row) {
             $row = trim($row);
-            if (stripos($row, "«") !== false) {
-                continue;
-            }
+            preg_match('/(\d)P\z/', $row, $baggageMatches);
 
-            if (stripos($row, "BAG ALLOWANCE") !== false) {
-                $bagRows[] = $this->getBagString($explodeDump, $key);
+            if (isset($baggageMatches[1], $ticketRows[$numRow - 1])) {
+                $previewRow = trim($ticketRows[$numRow - 1]);
+                $iataPattern = '/^([A-Z]{3})\z|([A-Z]{3})\s[A-Z]|X([A-Z]{3})\s[A-Z]|([A-Z]{3})\s+S U R F A C E/';
+
+                preg_match($iataPattern, $previewRow, $iataDepartureMatches);
+                preg_match($iataPattern, $row, $iataArrivalMatches);
+
+                $iataDeparture = self::getIata($iataDepartureMatches);
+                $iataArrival = self::getIata($iataArrivalMatches);
+
+                if ($iataDeparture && $iataArrival) {
+                    $result[] = [
+                        'segment' => $iataDeparture . $iataArrival,
+                        'free_baggage' => [
+                            'piece' => $baggageMatches[1],
+                            'weight' => '',
+                            'height' => '',
+                            'price' => 'USD0'
+                        ],
+                    ];
+                }
             }
         }
-
-        return  $bagRows;
+        return count($result) ? $result : null;
     }
 
-    private function getBagString($array, $index)
+    /**
+     * @param array $matches
+     * @return string|null
+     */
+    private static function getIata(array $matches): ?string
     {
-        $bags = [];
-        foreach ($array as $key => $val) {
-            $val = trim($val);
-            if ($key < $index) {
-                continue;
-            }
-            if (stripos($val, "BAG ALLOWANCE") !== false && $key > $index){
-                break;
-            }
-            $bags[] = $val;
-            if (stripos($val, "**") !== false) {
-                if (!isset($array[($key + 1)]) || stripos($array[($key + 1)], "2NDCHECKED") === false) {
-                    break;
-                }
-            }
+        if (empty($matches) || !isset($matches[1])) {
+            return null;
         }
-
-        $bagsString = explode('2NDCHECKED', trim(implode(' ', $bags)));
-        $bags = [
-            'segment' => '',
-            'free_baggage' => [],
-            'paid_baggage' => []
-        ];
-
-        foreach ($bagsString as $key => $val) {
-            $val = str_replace('*', '', $val);
-            $detail = explode('-', $val);
-
-            if (stripos($val, "BAG ALLOWANCE") !== false) {
-                $bags['segment'] = $detail[1];
-                if (stripos($val, "NIL/") !== false ||
-                    stripos($val, "*/") !== false
-                    ) {
-                        if (stripos($val, "1STCHECKED") !== false) {
-                            $bagsString = explode('1STCHECKED', $val);
-                            $detailBag = explode('/', $bagsString[1]);
-                            if (stripos($detailBag[0], "USD") !== false) {
-                                $bagItem = [
-                                    'ordinal' => '1st',
-                                    'piece' => 1,
-                                    'weight' => 'N/A',
-                                    'height' => 'N/A',
-                                    'price' => explode('-', $detailBag[0])[2],
-                                ];
-                                $detailVolume = explode('UP TO', $bagsString[1]);
-                                if (isset($detailVolume[1])) {
-                                    $bagItem['weight'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[1])));
-                                }
-                                if (isset($detailVolume[2])) {
-                                    $bagItem['height'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[2])));
-                                }
-                                $bags['paid_baggage'][] = $bagItem;
-                            }
-                        }
-                    } else {
-
-                        $detailBag = explode('/', $detail[2]);
-                        $bags['free_baggage'] = [
-                            'piece' => (int)str_replace('P', '', $detailBag[0]),
-                            'weight' => 'N/A',
-                            'height' => 'N/A',
-                            'price' => 'USD0'
-                        ];
-                        $detailVolume = explode('UP TO', $detail[2]);
-                        if (isset($detailVolume[1])) {
-                            $bags['free_baggage']['weight'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[1])));
-                        }
-                        if (isset($detailVolume[2])) {
-                            $bags['free_baggage']['height'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[2])));
-                        }
-                    }
-            } else {
-                $detailBag = explode('/', $detail[2]);
-                if (stripos($detailBag[0], "USD") !== false) {
-                    $bagItem = [
-                        'ordinal' => '2nd',
-                        'piece' => 1,
-                        'weight' => 'N/A',
-                        'height' => 'N/A',
-                        'price' => $detailBag[0],
-                    ];
-
-                    $detailVolume = explode('UP TO', $detail[2]);
-                    if (isset($detailVolume[1])) {
-                        $bagItem['weight'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[1])));
-                    }
-                    if (isset($detailVolume[2])) {
-                        $bagItem['height'] = trim(sprintf('UP TO%s', str_replace('AND', '', $detailVolume[2])));
-                    }
-                    $bags['paid_baggage'][] = $bagItem;
-                }
-
-            }
-        }
-        return $bags;
+        $iata = end($matches);
+        return (strlen($iata) === 3) ? $iata : null;
     }
 }

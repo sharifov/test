@@ -1,8 +1,11 @@
 <?php
 
+use common\components\grid\DateTimeColumn;
 use common\models\UserProductType;
+use frontend\models\UserFailedLogin;
 use modules\product\src\entities\productType\ProductType;
 use sales\auth\Auth;
+use yii\helpers\Url;
 use yii\web\View;
 use yii\grid\ActionColumn;
 
@@ -16,6 +19,7 @@ use yii\grid\ActionColumn;
 /* @var $dataUserProductType yii\data\ActiveDataProvider */
 /* @var $model common\models\Employee */
 /* @var $userVoiceMailProvider \yii\data\ActiveDataProvider */
+/* @var UserFailedLogin[] $lastFailedLoginAttempts */
 
 use sales\access\EmployeeProjectAccess;
 use yii\bootstrap\Html;
@@ -50,19 +54,36 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 
 ?>
 
-
 <div class="col-sm-5">
     <?php $form = ActiveForm::begin([
         'successCssClass' => '',
-        'id' => sprintf('%s-ID', $model->formName())
+        'id' => sprintf('%s-ID', $model->formName()),
+        'enableClientValidation' => false,
+        'enableAjaxValidation' => true,
+        'validateOnChange' => false,
+		'validateOnBlur' => false,
+        'validationUrl' => Url::to(['employee/employee-validation', 'id' => (int) $model->id]),
     ]) ?>
             <div class="well">
+
+                <?php if ($model->isBlocked()) :?>
+                    <div class="alert alert-warning" role="alert">
+                        <i class="fa fa-warning"></i> This user is <strong>Blocked</strong>!
+                    </div>
+                <?php endif ?>
+
+                <?php if ($model->isDeleted()) :?>
+                    <div class="alert alert-danger" role="alert">
+                        <i class="fa fa-warning"></i> This user is <strong>Deleted</strong>!
+                    </div>
+                <?php endif ?>
+
                 <div class="row">
                     <div class="col-sm-6">
-                        <?= $form->field($model, 'username')->textInput(['autocomplete' => "new-user"]) ?>
+                        <?= $form->field($model, 'username')->textInput(['autocomplete' => "off"]) ?>
                     </div>
                     <div class="col-sm-6">
-                        <?= $form->field($model, 'password')->passwordInput(['autocomplete' => "new-password"]) ?>
+                        <?= $form->field($model, 'email')->input('email') ?>
                     </div>
                 </div>
                 <div class="row">
@@ -70,7 +91,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                         <?= $form->field($model, 'full_name')->textInput() ?>
                     </div>
                     <div class="col-sm-6">
-                        <?= $form->field($model, 'email')->input('email') ?>
+                        <?= $form->field($model, 'password')->passwordInput(['autocomplete' => "off"]) ?>
                     </div>
                 </div>
 
@@ -97,7 +118,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     </div>
                     <?php if (!$model->isNewRecord) : ?>
                         <div class="col-sm-6">
-                            <?= $form->field($model, 'deleted', ['template' => '{label}{input}'])->checkbox() ?>
+                            <?= $form->field($model, 'status')->dropDownList($model::getStatusList()) ?>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -137,6 +158,12 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                                 'options' => ['placeholder' => 'Select user projects', 'multiple' => true],
                                 'pluginOptions' => ['allowClear' => true],
                             ]);
+                            ?>
+
+                            <?php
+                                if ($model->isNewRecord) {
+                                    echo $form->field($model, 'make_user_project_params')->checkbox();
+                                }
                             ?>
 
                             <?php
@@ -192,7 +219,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 
                     <div class="row">
                         <div class="col-md-12">
-                            <?php echo $form->errorSummary($modelUserParams) ?>
+                            <?php  echo Html::errorSummary($modelUserParams) ?>
                         </div>
                     </div>
 
@@ -451,14 +478,14 @@ JS;
 
                     //'upp_user_id',
                     //'upp_project_id',
-                    'upp_email:email',
+                    //'upp_email:email',
                     [
                         'class' => \common\components\grid\EmailSelect2Column::class,
                         'attribute' => 'upp_email_list_id',
                         'relation' => 'emailList',
                     ],
                     //'upp_phone_number',
-                    'upp_tw_phone_number',
+                    //'upp_tw_phone_number',
                     [
                         'class' => \common\components\grid\PhoneSelect2Column::class,
                         'attribute' => 'upp_phone_list_id',
@@ -469,9 +496,9 @@ JS;
                         'format' => 'raw',
                         'value' => function(\common\models\UserProjectParams $model) {
                             if ($model->upp_allow_general_line) {
-                                return '<span class="label label-success">Yes</span>';
+                                return '<i class="fa fa-check-square-o"></i>';
                             }
-                            return '<span class="label label-danger">No</span>';
+                            return '-';
                         }
                     ],
                     //'upp_tw_sip_id',
@@ -513,12 +540,10 @@ JS;
                         'controller' => 'user-project-params',
                         //'headerOptions' => ['width' => '20%', 'class' => '',],
                         'buttons' => [
-                            'update' => function ($url, $model, $key) {
+                            'update' => static function ($url, $model, $key) {
                                 return Html::a('<span class="glyphicon glyphicon-edit"></span>','#', [
-                                    'class' => 'act-update-upp',
+                                    'class' => 'act-update-upp text-warning',
                                     'title' => 'Update Project params',
-                                    //'data-toggle' => 'modal',
-                                    //'data-target' => '#activity-modal',
                                     'data-id' => $key,
                                     'data-pjax' => '0',
                                 ]);
@@ -655,6 +680,48 @@ JS;
             </div>
         <?php endif ?>
 
+
+        <?php if (Auth::user()->isAdmin() || Auth::user()->isSuperAdmin()) :?>
+
+            <div class="user-failed-login">
+                <h5>User Failed Login</h5>
+
+                <?php /*if ($model->isBlocked()) :?>
+
+                        <?php echo Html::a('<i class="glyphicon glyphicon-remove-circle"></i> User Blocked',null,
+                            [
+                                'class' => 'btn btn-warning btn-xs unblock-user',
+                                'title' => 'Click to unblock user',
+                                'data-user_id' => $model->id,
+                                'data-pjax' => '0',
+                            ]
+                        )?>
+
+                <?php endif*/ ?>
+
+                <?php \yii\widgets\Pjax::begin(['id' => 'pjax-grid-user-failed']); ?>
+
+                <?= \yii\grid\GridView::widget([
+                    'dataProvider' => $lastFailedLoginAttempts,
+                    'rowOptions' => static function (UserFailedLogin $UserFailedLogin, $index, $widget, $grid) {
+                        if ($UserFailedLogin->ufl_created_dt > $UserFailedLogin->limitDateTime) {
+                            return ['class' => 'danger'];
+                        }
+                    },
+                    'columns' => [
+                        'ufl_ip',
+                        'ufl_ua',
+                        'ufl_session_id',
+                        'ufl_created_dt:byUserDateTime',
+                    ],
+                ]); ?>
+                <?php \yii\widgets\Pjax::end(); ?>
+            </div>
+
+
+
+        <?php endif ?>
+
         <?php /*
         <div class="card card-default">
             <div class="panel-heading collapsing-heading">
@@ -690,6 +757,53 @@ JS;
 
 <?php
 $js = <<<JS
+
+    //  $(document).on('click', '.unblock-user', function(e) {
+    //      e.preventDefault();
+    //    
+    //      if(!confirm('Are you sure un-block this user?')) {
+    //         return true;
+    //      }
+    //     
+    //      let objBtn = $(this);
+    //      let htmlInner = objBtn.html();
+    //         
+    //      $.ajax({
+    //         type: 'post',
+    //         url: '/user-failed-login/set-active-ajax',
+    //         dataType: 'json',
+    //         data: {id:objBtn.data('user_id')},                
+    //         beforeSend: function () {                    
+    //             objBtn.html('<span class="spinner-border spinner-border-sm"></span>');
+    //             objBtn.prop('disabled', true);    
+    //         },
+    //         success: function (dataResponse) {            
+    //             objBtn.prop('disabled', false);
+    //             objBtn.html(htmlInner); 
+    //              
+    //             if (dataResponse.status === 1) {                        
+    //                 objBtn.hide(); 
+    //                 new PNotify({
+    //                     title: "Success",
+    //                     type: "success",
+    //                     text: dataResponse.message,
+    //                     hide: true
+    //                 });                      
+    //             } else {                        
+    //                 new PNotify({
+    //                     title: "Error:",
+    //                     type: "error",
+    //                     text: dataResponse.message,
+    //                     hide: true
+    //                 });
+    //             }                       
+    //         },
+    //         error: function () {
+    //             objBtn.prop('disabled', false);
+    //             objBtn.html(htmlInner); 
+    //         }
+    //      });  
+    // });
 
     $('#modal-df').on('hidden.bs.modal', function () {
         $.pjax.reload({container:'#pjax-grid-upp', 'async': false});

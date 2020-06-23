@@ -8,6 +8,7 @@ use common\models\Call;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Department;
+use common\models\DepartmentPhoneProject;
 use common\models\Email;
 use common\models\EmailTemplateType;
 use common\models\GlobalLog;
@@ -22,6 +23,7 @@ use common\models\Note;
 use common\models\ProjectEmailTemplate;
 use common\models\search\LeadCallExpertSearch;
 use common\models\search\LeadChecklistSearch;
+use kivork\rbacExportImport\src\formatters\FileSizeFormatter;
 use modules\offer\src\entities\offer\search\OfferSearch;
 use modules\offer\src\entities\offerSendLog\CreateDto;
 use modules\offer\src\entities\offerSendLog\OfferSendLogType;
@@ -45,6 +47,7 @@ use sales\forms\lead\CloneReasonForm;
 use sales\forms\lead\ItineraryEditForm;
 use sales\forms\lead\LeadCreateForm;
 use sales\forms\leadflow\TakeOverReasonForm;
+use sales\helpers\setting\SettingHelper;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use sales\model\lead\useCases\lead\create\LeadManageForm;
@@ -55,6 +58,7 @@ use sales\model\lead\useCases\lead\import\LeadImportUploadForm;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\NotFoundException;
+use sales\services\email\EmailService;
 use sales\services\lead\LeadAssignService;
 use sales\services\lead\LeadCloneService;
 use sales\services\lead\LeadManageService;
@@ -546,12 +550,10 @@ class LeadController extends FController
             }
         }
 
-
-        $comForm = new CommunicationForm();
+        $comForm = new CommunicationForm($lead->l_client_lang);
         $comForm->c_preview_email = 0;
         $comForm->c_preview_sms = 0;
         $comForm->c_voice_status = 0;
-
 
         if ($comForm->load(Yii::$app->request->post())) {
 
@@ -660,7 +662,13 @@ class LeadController extends FController
                                     }
                                 }
 
-                                $previewEmailForm->e_email_message = $mailPreview['data']['email_body_html'];
+                                $emailBodyHtml = EmailService::prepareEmailBody($mailPreview['data']['email_body_html']);
+
+                                $keyCache = md5($emailBodyHtml);
+                                Yii::$app->cacheFile->set($keyCache, $emailBodyHtml, 60 * 60);
+                                $previewEmailForm->keyCache = $keyCache;
+                                $previewEmailForm->e_email_message = $emailBodyHtml;
+
                                 if (isset($mailPreview['data']['email_subject']) && $mailPreview['data']['email_subject']) {
                                     $previewEmailForm->e_email_subject = $mailPreview['data']['email_subject'];
                                 }
@@ -1193,6 +1201,18 @@ class LeadController extends FController
 
         $tmpl = $isQA ? 'view_qa' : 'view';
 
+		$fromPhoneNumbers = [];
+		if (SettingHelper::isLeadCommunicationNewCallWidgetEnabled()) {
+			if ($userParams = UserProjectParams::find()->where(['upp_user_id' => Auth::id()])->withPhoneList()->all()) {
+				foreach ($userParams as $param) {
+					$phone = $param->getPhone();
+					if ($phone) {
+						$fromPhoneNumbers[$phone] = $param->uppProject->name . ' (' . $phone . ')';
+					}
+				}
+			}
+		}
+
         return $this->render($tmpl, [
             'leadForm' => $leadForm,
             'previewEmailForm' => $previewEmailForm,
@@ -1212,6 +1232,8 @@ class LeadController extends FController
 
             'dataProviderOffers'    => $dataProviderOffers,
             'dataProviderOrders'    => $dataProviderOrders,
+
+			'fromPhoneNumbers' => $fromPhoneNumbers
         ]);
 
     }
@@ -2443,6 +2465,15 @@ class LeadController extends FController
 
         return $this->render('import', ['model' => $form, 'log' => $logResult]);
     }
+
+    /**
+     * @return mixed|null
+     */
+    public function actionGetTemplate()
+	{
+	    $keyCache =Yii::$app->request->get('key_cache');
+	    return Yii::$app->cacheFile->get($keyCache);
+	}
 
     /**
      * @param $id

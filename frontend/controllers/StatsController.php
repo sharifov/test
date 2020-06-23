@@ -240,6 +240,9 @@ class StatsController extends FController
             $rangeBy = Yii::$app->request->post('groupBy');
             $action = Yii::$app->request->post('action');
             $date = explode("/", $chartOptions['dateRange']);
+            if ($chartOptions['dateRange'] == ''){
+                $date[0] = $date[1] = date('Y-m-d', strtotime('-0 day'));
+            }
             $userApiId = $chartOptions['project'];
 
             if (date('Y-m-d', strtotime($date[0])) == date('Y-m-d', strtotime($date[1])) && $rangeBy != 'D' && $rangeBy != 'M'){

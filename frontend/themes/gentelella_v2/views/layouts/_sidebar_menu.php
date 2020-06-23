@@ -163,6 +163,7 @@ $isSuperAdmin = $user->isSuperAdmin();
             'icon' => 'th-list',
             'items' => [
                 ['label' => 'Call List', 'url' => ['/call/index'], 'icon' => 'phone'],
+                ['label' => 'Call Note', 'url' => ['/call-note-crud/index'], 'icon' => 'list'],
                 [
                     'label' => 'Call logs',
                     'url' => 'javascript:',
@@ -246,6 +247,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
                 ['label' => 'User Commission Rules', 'url' => ['/user-commission-rules-crud/index'], 'icon' => 'list'],
                 ['label' => 'User Bonus Rules', 'url' => ['/user-bonus-rules-crud/index'], 'icon' => 'list'],
+                ['label' => 'User Failed Login', 'url' => ['/user-failed-login/index'], 'icon' => 'list'],
             ]
         ];
 
@@ -407,6 +409,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Agent Calls Report', 'url' => ['/stats/calls-stats'], 'icon' => 'table'],
                 ['label' => 'Leads Report', 'url' => ['/report/leads-report'], 'icon' => 'table'],
                 ['label' => 'Agent Leads Report', 'url' => ['/stats/leads-stats'], 'icon' => 'table'],
+                ['label' => 'Case Categories Report', 'url' => ['/case-category/report'], 'icon' => 'table'],
                 ['label' => 'Calls Stats', 'url' => ['/stats/calls-graph'], 'icon' => 'line-chart'],
                 ['label' => 'SMS Stats', 'url' => ['/stats/sms-graph'], 'icon' => 'line-chart'],
                 ['label' => 'Emails Stats', 'url' => ['/stats/emails-graph'], 'icon' => 'line-chart'],

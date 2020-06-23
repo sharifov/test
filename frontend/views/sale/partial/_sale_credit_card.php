@@ -175,6 +175,8 @@ $js = <<<JS
             
        return false;
     });
+    
+    $('.sale-ticket-generate-email-btn').attr('data-credit-card-exist', '{$dataProvider->totalCount}');
 JS;
 $this->registerJs($js);
 

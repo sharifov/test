@@ -6,7 +6,7 @@ use sales\helpers\app\AppHelper;
 use sales\services\parsingDump\lib\ParseDumpInterface;
 
 /**
- * Class Reservation
+ * Class ParseAll
  */
 class ParseAll implements ParseDumpInterface
 {

@@ -2,6 +2,7 @@
 
 namespace sales\services\parsingDump;
 
+use common\models\QuotePrice;
 use sales\services\parsingDump\lib\ParsingDump;
 
 /**
@@ -44,6 +45,28 @@ class PricingService
                     ];
                 }
             }
+        }
+        return $result;
+    }
+
+    /**
+     * @param string|null $source
+     * @return string
+     */
+    public static function passengerTypeMapping(?string $source): string
+    {
+        switch ($source) {
+            case 'ADT': case 'JCB': case 'PFA': case 'ITX': case 'JWZ': case 'WEB':
+                $result = QuotePrice::PASSENGER_ADULT;
+                break;
+            case 'CHD': case 'CNN': case 'JNN':case 'CBC': case 'INN': case 'PNN': case 'JWC': case 'UNN':
+                $result = QuotePrice::PASSENGER_CHILD;
+                break;
+            case 'INF': case 'INS': case 'JNS':case 'CBI': case 'JNF': case 'PNF': case 'ITF': case 'ITS':
+                $result = QuotePrice::PASSENGER_INFANT;
+                break;
+            default:
+                $result = QuotePrice::PASSENGER_ADULT;
         }
         return $result;
     }

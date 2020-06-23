@@ -33,6 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'name:projectName',
             'link',
             'api_key',
+            'email_postfix',
             'contact_info:ntext',
             'closed:boolean',
             'last_update',

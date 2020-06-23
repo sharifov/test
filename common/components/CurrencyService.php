@@ -28,8 +28,8 @@ use yii\httpclient\Response;
 class CurrencyService extends Component
 {
     public $url;
-    public $username;
-    public $password;
+    public string $username;
+    public string $password;
 
     private $request;
 

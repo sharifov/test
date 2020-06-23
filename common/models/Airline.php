@@ -98,50 +98,61 @@ class Airline extends ActiveRecord
         return null;
     }
 
-    public function syncCabinClasses()
+    /**
+     * @throws \yii\httpclient\Exception
+     */
+    public static function syncCabinClasses(): void
     {
-        $url = \Yii::$app->params['syncAirlineClasses'];
-        if(!empty($url)){
-            $headers = get_headers($url,1);
-            $flgSync = true;
+        $flgSync = true;
+        $response = \Yii::$app->airsearch->sendRequest('airline/get-cabin-classes', [], 'GET');
 
-            if(!empty($headers) && isset($headers['Last-Modified'])){
-                $lastModified = new \DateTime($headers['Last-Modified']);
+        if ($response->isOk) {
+            $headers = $response->getHeaders()->toArray();
+            if ($lastModifiedHeader = $headers['last-modified'][0]) {
+                $lastModified = new \DateTime($lastModifiedHeader);
+                $lastUpdated = self::find()
+                    ->where(['NOT', ['updated_dt' => null]])
+                    ->orderBy(['updated_dt'  => SORT_DESC ])
+                    ->limit(1)
+                    ->asArray()
+                    ->all();
 
-                $lastUpdated = self::find(['NOT','updated_dt',null])->orderBy(['updated_dt'  => SORT_DESC ])->limit(1)->asArray()->all();
-                if(!empty($lastUpdated)){
-                    $lastUpdatedDate = new \DateTime($lastUpdated[0]['updated_dt']);
-
-                    if($lastUpdated >= $lastModified){
+                if(!empty($lastUpdated) && $lastUpdatedDT = new \DateTime($lastUpdated[0]['updated_dt'])){
+                    if ($lastUpdatedDT >= $lastModified) {
                         $flgSync = false;
                     }
                 }
             }
 
             if($flgSync){
-                $content = file_get_contents($url);
+                $content = $response->getContent();
                 if(!empty($content)){
-                    $data = json_decode($content, true);
-                    if(isset($data['results'])){
+                    try {
+                        $data = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
+                        if(isset($data['results'])){
 
-                        foreach ($data['results'] as $entry){
-                            $airline = Airline::findOne(['iata'=> $entry['airlineCode']]);
-                            if(empty($airline)){
-                                $airline = new Airline();
-                                $airline->iata = $entry['airlineCode'];
-                            }
-                            $airline->cl_economy = $entry['economy'];
-                            $airline->cl_premium_economy = $entry['premium-economy'];
-                            $airline->cl_business = $entry['business'];
-                            $airline->cl_premium_business = $entry['premium-business'];
-                            $airline->cl_first = $entry['first'];
-                            $airline->cl_premium_first = $entry['premium-first'];
-                            $airline->name = $entry['airlineName'];
-                            if (!$airline->save()) {
-                                var_dump($entry, $airline->getErrors());
-                                exit;
+                            foreach ($data['results'] as $entry){
+                                $airline = Airline::findOne(['iata'=> $entry['airlineCode']]);
+                                if($airline === null){
+                                    $airline = new Airline();
+                                    $airline->iata = $entry['airlineCode'];
+                                }
+                                $airline->cl_economy = $entry['economy'];
+                                $airline->cl_premium_economy = $entry['premium-economy'];
+                                $airline->cl_business = $entry['business'];
+                                $airline->cl_premium_business = $entry['premium-business'];
+                                $airline->cl_first = $entry['first'];
+                                $airline->cl_premium_first = $entry['premium-first'];
+                                $airline->name = $entry['airlineName'];
+                                if (!$airline->save()) {
+                                    \Yii::error(\yii\helpers\VarDumper::dumpAsString([$entry, $airline->getErrors()], 20),
+                                        'Airline:syncCabinClasses:notSaved');
+                                }
                             }
                         }
+                    } catch (\JsonException $e) {
+                        \Yii::error(\yii\helpers\VarDumper::dumpAsString($e->getMessage(), 20),
+                            'Airline:syncCabinClasses:noJsonDecode');
                     }
                 }
             }

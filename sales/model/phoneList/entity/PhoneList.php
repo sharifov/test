@@ -52,7 +52,7 @@ class PhoneList extends \yii\db\ActiveRecord
             'timestamp' => [
                 'class' => TimestampBehavior::class,
                 'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => ['pl_created_dt', 'pl_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['pl_created_dt'],
                     ActiveRecord::EVENT_BEFORE_UPDATE => ['pl_updated_dt'],
                 ],
                 'value' => date('Y-m-d H:i:s'),
@@ -60,7 +60,7 @@ class PhoneList extends \yii\db\ActiveRecord
             'attribute' => [
                 'class' => AttributeBehavior::class,
                 'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => ['pl_created_user_id', 'pl_updated_user_id'],
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['pl_created_user_id'],
                     ActiveRecord::EVENT_BEFORE_UPDATE => ['pl_updated_user_id'],
                 ],
                 'value' => \Yii::$app->user->id ?? null,

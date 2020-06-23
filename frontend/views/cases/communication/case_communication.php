@@ -8,6 +8,7 @@
  * @var $previewSmsForm CasePreviewSmsForm
  * @var $isAdmin bool
  * @var $isCommunicationLogEnabled bool
+ * @var $fromPhoneNumbers array
  */
 
 use common\models\DepartmentEmailProject;
@@ -16,6 +17,7 @@ use frontend\models\CaseCommunicationForm;
 use frontend\models\CasePreviewEmailForm;
 use frontend\models\CasePreviewSmsForm;
 use sales\entities\cases\Cases;
+use sales\helpers\setting\SettingHelper;
 use yii\helpers\Html;
 use yii\bootstrap4\Modal;
 use yii\helpers\VarDumper;
@@ -93,7 +95,7 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
 
                     <?php $form2 = \yii\bootstrap\ActiveForm::begin([
                         //'action' => ['index'],
-                        //'id' => 'email-preview-form',
+                        'id' => 'email-preview-form',
                         'method' => 'post',
                         'options' => [
                             'data-pjax' => 1,
@@ -136,22 +138,15 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
                         </div>
                     </div>
                     <div class="form-group">
-                        <?= $form2->field($previewEmailForm, 'e_email_message')->widget(\dosamigos\ckeditor\CKEditor::class, [
-                            'options' => [
-                                'rows' => 6,
-                                'readonly' => false
-                            ],
-                            'preset' => 'custom',
-                            'clientOptions' => [
-                                'height' => 500,
-                                'fullPage' => true,
 
-                                'allowedContent' => true,
-                                'resize_enabled' => false,
-                                'removeButtons' => 'Subscript,Superscript,Flash,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe',
-                                'removePlugins' => 'elementspath',
-                            ]
-                        ]) ?>
+                        <?php echo $form2->field($previewEmailForm, 'e_email_message')->textarea(
+                            ['style' => 'display:none', 'id' => 'e_email_message']) ?>
+
+                        <div style="max-height: 800px; overflow-x: auto;">
+                            <iframe id="email_view" src="/lead/get-template?key_cache=<?php echo $previewEmailForm->keyCache?>"
+                                style="width: 100%; height: 800px; border: 0;"></iframe>
+                        </div>
+
                     </div>
                     <?php if($isAdmin):?>
                     <div class="row" style="display: none" id="email-data-content-div">
@@ -176,7 +171,8 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
                     </div>
 
                     <div class="btn-wrapper text-right">
-                        <?= Html::submitButton('<i class="fa fa-envelope-o"></i> Send Email', ['class' => 'btn btn-lg btn-primary']) ?>
+                        <?= Html::submitButton('<i class="fa fa-envelope-o"></i> Send Email',
+                            ['class' => 'btn btn-lg btn-primary', 'id' => 'send_email_btn']) ?>
                         <?php if($isAdmin):?>
                             <?= Html::button('<i class="fa fa-list"></i> Show Email data (for Admins)', ['class' => 'btn btn-lg btn-warning', 'onclick' => '$("#email-data-content-div").toggle()']) ?>
                         <?php endif; ?>
@@ -194,7 +190,7 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
 
                         <?php $form3 = \yii\bootstrap\ActiveForm::begin([
                                 //'action' => ['index'],
-                                //'id' => 'email-preview-form',
+                                //'id' => 'sms-preview-form',
                                 'method' => 'post',
                                 'options' => [
                                     'data-pjax' => 1,
@@ -411,8 +407,21 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
                             </div>
 
                             <div class="col-sm-3 form-group message-field-phone message-field-sms" id="phone-numbers-group" style="display: block;">
-                                <?= $form->field($comForm, 'c_phone_number')->dropDownList($clientPhones, ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_phone_number']) ?>
+                                <?= $form->field($comForm, 'c_phone_number')->dropDownList($clientPhones, ['prompt' => '---', 'class' => 'form-control', 'id' => !SettingHelper::isCaseCommunicationNewCallWidgetEnabled() ? 'c_phone_number' : 'call-to-number']) ?>
                             </div>
+
+                            <?php if (SettingHelper::isCaseCommunicationNewCallWidgetEnabled()): ?>
+                                <div class="col-sm-3 form-group message-field-phone" style="display: block;">
+                                    <?= Html::label('Phone from', null, ['class' => 'control-label']) ?>
+                                    <?= Html::dropDownList('call-from-number', null, $fromPhoneNumbers, ['prompt' => '---', 'id' => 'call-from-number', 'class' => 'form-control', 'label'])?>
+                                </div>
+                                <div class="col-sm-3 form-group message-field-phone" style="display: block;">
+									<?= Html::button('<i class="fa fa-phone-square"></i> Make Call', ['class' => 'btn btn-sm btn-success', 'id' => 'btn-new-make-call', 'data-case-id' => $model->cs_id, 'style' => 'margin-top: 28px'])?>
+                                </div>
+								<?=Html::hiddenInput('call-lead-id', null, ['id' => 'call-lead-id'])?>
+								<?=Html::hiddenInput('call-case-id', $model->cs_id, ['id' => 'call-case-id'])?>
+								<?=Html::hiddenInput('call-project-id', $model->cs_project_id, ['id' => 'call-project-id'])?>
+                            <?php endif; ?>
 
                             <?php if ($model->isDepartmentSupport()): ?>
                                 <div class="col-md-3 form-group message-field-sms" id="sms-phone-numbers">
@@ -481,9 +490,11 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
 
                             </div>
                             <div class="btn-wrapper">
-                                <?= Html::submitButton('<i class="fa fa-envelope-o"></i> Preview and Send Email', ['class' => 'btn btn-lg btn-primary']) ?>
+                                <?= Html::submitButton('<i class="fa fa-envelope-o"></i> Preview and Send Email',
+                                    ['class' => 'btn btn-lg btn-primary', 'id' => 'preview_email_btn']) ?>
                             </div>
                         </div>
+                         <?php if (!SettingHelper::isCaseCommunicationNewCallWidgetEnabled()): ?>
                         <div class="chat__call call-box message-field-phone" id="call-box" style="display: none;">
 
                             <div class="call-box__interlocutor">
@@ -535,20 +546,51 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
                                 </div>
                             <?php endif; ?>
                         </div>
+                         <?php endif; ?>
 
                         <?= $form2->field($comForm, 'c_voice_status')->hiddenInput(['id' => 'c_voice_status'])->label(false); ?>
                         <?= $form2->field($comForm, 'c_voice_sid')->hiddenInput(['id' => 'c_voice_sid'])->label(false); ?>
                         <?= $form2->field($comForm, 'c_call_id')->hiddenInput(['id' => 'c_call_id'])->label(false); ?>
 
-                     <?php
-                        if ($comForm->c_preview_email) {
-                            $this->registerJs("$('#modal-email-preview').modal('show');");
-                         }
+<?php
+if ($comForm->c_preview_email) {
+    $js = <<<JS
+ 
+    $('#modal-email-preview').modal('show');
+    
+    var isProcessing = false;
+    
+    $(document).on('click', '#send_email_btn', function(e) {    
+        if (isProcessing) {
+            return;
+        } 
+        isProcessing = true; 
+    
+        e.preventDefault();
+        e.stopPropagation();
+        
+        let btn = $(this);
+        btn.prop('disabled', true);                
+        let loaderInner = '<span class="spinner-border spinner-border-sm"></span> Loading';
+        btn.html(loaderInner);
+        
+        let iframeEmail = document.getElementById('email_view');
+        let contentEmail = iframeEmail.contentWindow.document.documentElement.outerHTML;
+             
+        $('#e_email_message').val(contentEmail);        
+        $('#email-preview-form').submit(); 
+        return true;       
+    });
+JS;
+    $this->registerJs($js);
+}
+?>
 
-                         if ($comForm->c_preview_sms) {
-                            $this->registerJs("$('#modal-sms-preview').modal('show');");
-                         }
-                     ?>
+<?php
+     if ($comForm->c_preview_sms) {
+         $this->registerJs("$('#modal-sms-preview').modal('show');");
+     }
+?>
 
                     <?php
 $js = <<<JS
@@ -691,6 +733,8 @@ $js = <<<JS
 
     const tpl_email_blank_key = '$tpl_email_blank_key';
     const tpl_sms_blank_key = '$tpl_sms_blank_key';
+    let projectId = '{$model->project->id}';
+    let project = '{$model->project->name}';
 
     $('body').on("change", '#c_type_id', function () {
         initializeMessageType($(this).val());
@@ -698,6 +742,19 @@ $js = <<<JS
 
     $('body').on("change", '#c_phone_number', function () {
         $('#div-call-phone-number').text($(this).val());
+    });
+    
+    $(document).on("change", '#call-to-number', function () {
+        $('#call-pane__dial-number').val($(this).val());
+    });
+    
+    $(document).on("change", '#call-from-number', function () {
+        let value = $(this).val();
+        window.phoneNumbers.setPrimaryData({
+            value: value,
+            projectId: projectId,
+            project: project
+        })
     });
     
      $('body').on("change", '#c_sms_tpl_key', function () {
@@ -791,7 +848,12 @@ $js = <<<JS
         $('#c_quotes').val(jsonQuotes);
     });
     
-       
+    $(document).on('beforeSubmit', '#communication-form', function(e) {
+        let btn = $('#preview_email_btn'),
+            loaderInner = '<span class="spinner-border spinner-border-sm"></span> Loading';
+        btn.html(loaderInner).prop('disabled', true);
+    });
+           
     //startCallTimer();
     
     /*$('body').on('click', '#btn-start-call', function() {
