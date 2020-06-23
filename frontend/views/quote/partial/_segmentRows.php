@@ -10,6 +10,7 @@ use sales\forms\segment\SegmentBaggageForm;
 use sales\services\parsingDump\BaggageService;
 use unclead\multipleinput\MultipleInput;
 use unclead\multipleinput\MultipleInputColumn;
+use yii\jui\AutoComplete;
 use \yii\widgets\ActiveForm;
 
 
@@ -74,6 +75,12 @@ use \yii\widgets\ActiveForm;
                     [
                         'title' => 'Max Size',
                         'name' => 'height',
+                        'type'  => AutoComplete::class,
+                        'options' => [
+                            'clientOptions' => [
+                                'source' => ['USA', 'RUS', 'AAA', 'VVV',],
+                            ],
+                        ]
                     ],
                     [
                         'title' => 'Max Weight',
