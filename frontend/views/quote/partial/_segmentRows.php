@@ -2,7 +2,8 @@
 
 /**
  * @var $segments []
- * @var $baggage []
+ * @var $sourceHeight []
+ * @var $sourceWeight []
  */
 
 use common\models\Airport;
@@ -14,11 +15,6 @@ use yii\jui\AutoComplete;
 use \yii\widgets\ActiveForm;
 use yii\helpers\Url;
 
-?>
-
-<?php
-    $sourceHeight = ["c++", "java", "php", "coldfusion", "javascript", "asp", "ruby"]; /* TODO:: FOR DEBUG:: must by remove  */
-    $sourceWeight = []; /* TODO::  */
 ?>
 
 <?php foreach ($segments as $key => $segment) : ?>
@@ -67,75 +63,80 @@ use yii\helpers\Url;
                         $segmentBaggageForm->baggageData = $segment['baggage'];
                     }
 
-                    echo $formBaggage->field($segmentBaggageForm, 'baggageData')->widget(MultipleInput::class, [
-                        'id' => 'multiple_w_' . $key,
-                        'max' => 10,
-                        'theme' => MultipleInput::THEME_BS,
-                        'enableError' => true,
-                        'showGeneralError' => true,
-                        'allowEmptyList' => true,
-                        'columns' => [
-                            [
-                                'title' => 'Baggage Type',
-                                'name' => 'type',
-                                'type'  => 'dropDownList',
-                                'items' => BaggageService::TYPE_LIST,
-                                'headerOptions' => [
-                                    'style' => 'width: 120px;',
+                    $multipleInputId = 'multiple_w_' . $key;
+
+                    echo $formBaggage
+                        ->field($segmentBaggageForm, 'baggageData')
+                        ->label(false)
+                        ->widget(MultipleInput::class,
+                        [
+                            'id' => $multipleInputId,
+                            'max' => 10,
+                            'theme' => MultipleInput::THEME_BS,
+                            'enableError' => true,
+                            'showGeneralError' => true,
+                            'allowEmptyList' => true,
+                            'columns' => [
+                                [
+                                    'title' => 'Baggage Type',
+                                    'name' => 'type',
+                                    'type'  => 'dropDownList',
+                                    'items' => BaggageService::TYPE_LIST,
+                                    'headerOptions' => [
+                                        'style' => 'width: 120px;',
+                                    ],
+                                    'options' => [
+                                        'prompt' => '---'
+                                    ]
                                 ],
-                                'options' => [
-                                    'prompt' => '---'
-                                ]
-                            ],
-                            [
-                                'title' => 'Pieces',
-                                'name' => 'piece',
-                                'enableError' => true,
-                                'headerOptions' => [
-                                    'style' => 'width: 70px;',
-                                ],
-                            ],
-                            [
-                                'title' => 'Max Size',
-                                'name' => 'height',
-                                'type'  => AutoComplete::class,
-                                'options' => [
-                                    'class' => 'form-control',
-                                    'clientOptions' => [
-                                        'source' => $sourceHeight,
-                                        'appendTo' => '#modal-lg',
+                                [
+                                    'title' => 'Pieces',
+                                    'name' => 'piece',
+                                    'enableError' => true,
+                                    'headerOptions' => [
+                                        'style' => 'width: 70px;',
                                     ],
                                 ],
-                            ],
-                            [
-                                'title' => 'Max Weight',
-                                'name' => 'weight',
-                                'type'  => AutoComplete::class,
-                                'options' => [
-                                    'class' => 'form-control',
-                                    'clientOptions' => [
-                                        'source' => $sourceWeight,
-                                        'appendTo' => '#modal-lg',
+                                [
+                                    'title' => 'Max Size',
+                                    'name' => 'height',
+                                    'type'  => AutoComplete::class,
+                                    'options' => [
+                                        'class' => 'form-control',
+                                        'clientOptions' => [
+                                            'source' => $sourceHeight,
+                                            'appendTo' => '#modal-lg',
+                                        ],
                                     ],
                                 ],
+                                [
+                                    'title' => 'Max Weight',
+                                    'name' => 'weight',
+                                    'type'  => AutoComplete::class,
+                                    'options' => [
+                                        'class' => 'form-control',
+                                        'clientOptions' => [
+                                            'source' => $sourceWeight,
+                                            'appendTo' => '#modal-lg',
+                                        ],
+                                    ],
+                                ],
+                                [
+                                    'title' => 'Cost',
+                                    'name' => 'price',
+                                    'headerOptions' => [
+                                        'style' => 'width: 90px;',
+                                    ]
+                                ],
+                                [
+                                    'name' => 'segmentIata',
+                                    'type' => MultipleInputColumn::TYPE_HIDDEN_INPUT,
+                                    'defaultValue' => $segment['segmentIata'],
+                                ],
                             ],
-                            [
-                                'title' => 'Cost',
-                                'name' => 'price',
-                                'headerOptions' => [
-                                    'style' => 'width: 90px;',
-                                ]
-                            ],
-                            [
-                                'name' => 'segmentIata',
-                                'type' => MultipleInputColumn::TYPE_HIDDEN_INPUT,
-                                'defaultValue' => $segment['segmentIata'],
-                            ],
-                        ],
-                    ])->label(false)
+                        ])
                 ?>
             <?php ActiveForm::end(); ?>
-
         </div>
     </div>
     <br />
@@ -160,7 +161,11 @@ $js =<<<JS
                 $('#' + elementId).addClass('border-danger').prop('title', message);
             }           
         });      
-    });        
+    });  
+    
+    jQuery('#$multipleInputId').on('afterAddRow', function(){
+        $('.ui-autocomplete-input').addClass('form-control');   
+    });      
 JS;
 $this->registerJs($js);
 ?>

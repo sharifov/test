@@ -17,6 +17,7 @@ use sales\auth\Auth;
 use sales\forms\quotePrice\AddQuotePriceForm;
 use sales\forms\segment\SegmentBaggageForm;
 use sales\helpers\app\AppHelper;
+use sales\helpers\quote\BaggageHelper;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use sales\services\parsingDump\BaggageService;
@@ -519,6 +520,8 @@ class QuoteController extends FController
 
                         $response['segments'] = $this->renderAjax('partial/_segmentRows', [
                             'segments' => $segments,
+                            'sourceHeight' => BaggageHelper::getBaggageHeightValues(),
+                            'sourceWeight' => BaggageHelper::getBaggageWeightValues(),
                         ]);
                     }
 
@@ -651,14 +654,6 @@ class QuoteController extends FController
                                         $baggageObj = QuoteSegmentBaggage::creationFromForm($segmentBaggageForm);
                                     }
                                     $baggageObj->save(false);
-                                } else {
-                                    \Yii::info(
-                                        \yii\helpers\VarDumper::dumpAsString([
-                                            $segmentBaggageForm->getErrors(),
-                                        ], 20, true),
-                                        'info\Debug:' . self::class . ':' . __FUNCTION__
-                                    );
-                                    /* TODO: FOR DEBUG:: must by remove */
                                 }
                             }
                         }
