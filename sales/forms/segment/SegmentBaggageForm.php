@@ -71,7 +71,6 @@ class SegmentBaggageForm extends Model
             }, 'skipOnError' => true],
 
             [['price'], function($attribute) {
-                //if ($this->type === BaggageService::TYPE_FREE && ($this->$attribute !== '' || $this->$attribute !== 0)) {
                 if ($this->type === BaggageService::TYPE_FREE && !in_array($this->$attribute, ['', 0], false)) {
                     $this->addError($attribute, 'Baggage should be free');
                 }

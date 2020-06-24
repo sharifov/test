@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Employee;
+use common\models\SettingCategory;
 use console\migrations\RbacMigrationService;
 use yii\db\Migration;
 
@@ -26,6 +27,13 @@ class m200624_050518_add_permission_quote_baggage_validate extends Migration
      */
     public function safeUp()
     {
+        if ($settingCategory = SettingCategory::findOne(['sc_name' => 'Quote'])) {
+
+            $settingCategory = new SettingCategory();
+            $settingCategory->sc_name = 'Quote';
+            $settingCategory->save();
+        }
+
         (new RbacMigrationService())->up($this->routes, $this->roles);
     }
 
@@ -34,6 +42,8 @@ class m200624_050518_add_permission_quote_baggage_validate extends Migration
      */
     public function safeDown()
     {
+        SettingCategory::deleteAll(['sc_name' => 'Quote']);
+
         (new RbacMigrationService())->down($this->routes, $this->roles);
     }
 }

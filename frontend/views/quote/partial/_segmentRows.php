@@ -62,6 +62,8 @@ use yii\helpers\Url;
                         $segmentBaggageForm->baggageData = $segment['baggage'];
                     }
 
+                    $source = ["c++", "java", "php", "coldfusion", "javascript", "asp", "ruby"];
+
                     echo $formBaggage->field($segmentBaggageForm, 'baggageData')->widget(MultipleInput::class, [
                         'id' => 'multiple_w_' . $key,
                         'max' => 10,
@@ -93,10 +95,26 @@ use yii\helpers\Url;
                             [
                                 'title' => 'Max Size',
                                 'name' => 'height',
+                                'type'  => AutoComplete::class,
+                                'options' => [
+                                    'class' => 'form-control',
+                                    'clientOptions' => [
+                                        'source' => $source,
+                                        'appendTo' => '#modal-lg',
+                                    ],
+                                ],
                             ],
                             [
                                 'title' => 'Max Weight',
                                 'name' => 'weight',
+                                'type'  => AutoComplete::class,
+                                'options' => [
+                                    'class' => 'form-control',
+                                    'clientOptions' => [
+                                        'source' => $source,
+                                        'appendTo' => '#modal-lg',
+                                    ],
+                                ],
                             ],
                             [
                                 'title' => 'Cost',
@@ -114,8 +132,6 @@ use yii\helpers\Url;
                     ])->label(false)
                 ?>
             <?php ActiveForm::end(); ?>
-
-
 
         </div>
     </div>
@@ -147,3 +163,10 @@ $this->registerJs($js);
 ?>
 
 <?php endforeach; ?>
+
+<?php
+$js =<<<JS
+    $('.ui-autocomplete-input').addClass('form-control');        
+JS;
+$this->registerJs($js);
+?>
