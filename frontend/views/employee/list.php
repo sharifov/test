@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Employee;
+use sales\auth\Auth;
 use yii\grid\ActionColumn;
 use common\components\grid\DateTimeColumn;
 
@@ -147,8 +148,8 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                             || !($model->isAdmin() || $model->isSuperAdmin())
                         );
                     },
-                    'switch' => static function (\common\models\Employee $model, $key, $index)  use ($isSuperAdmin, $isOnlyAdmin) {
-                        return $isSuperAdmin || $isOnlyAdmin;
+                    'switch' => static function (\common\models\Employee $model, $key, $index) {
+                        return Auth::can('/employee/switch');
                     },
                 ],
                 'buttons' => [

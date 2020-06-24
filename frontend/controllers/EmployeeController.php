@@ -809,11 +809,6 @@ class EmployeeController extends FController
 
     public function actionSwitch()
     {
-        $auth = Auth::user();
-        if (!($auth->isOnlyAdmin() || $auth->isSuperAdmin())) {
-            throw new ForbiddenHttpException('Access denied.');
-        }
-
         $user_id = Yii::$app->request->get('id');
         $user = Employee::findOne($user_id);
         if($user) {
