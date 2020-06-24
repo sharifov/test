@@ -16,6 +16,11 @@ use yii\helpers\Url;
 
 ?>
 
+<?php
+    $sourceHeight = ["c++", "java", "php", "coldfusion", "javascript", "asp", "ruby"]; /* TODO:: FOR DEBUG:: must by remove  */
+    $sourceWeight = []; /* TODO::  */
+?>
+
 <?php foreach ($segments as $key => $segment) : ?>
     <div class="row">
         <div class="col-1 border p-1">
@@ -62,8 +67,6 @@ use yii\helpers\Url;
                         $segmentBaggageForm->baggageData = $segment['baggage'];
                     }
 
-                    $source = ["c++", "java", "php", "coldfusion", "javascript", "asp", "ruby"];
-
                     echo $formBaggage->field($segmentBaggageForm, 'baggageData')->widget(MultipleInput::class, [
                         'id' => 'multiple_w_' . $key,
                         'max' => 10,
@@ -99,7 +102,7 @@ use yii\helpers\Url;
                                 'options' => [
                                     'class' => 'form-control',
                                     'clientOptions' => [
-                                        'source' => $source,
+                                        'source' => $sourceHeight,
                                         'appendTo' => '#modal-lg',
                                     ],
                                 ],
@@ -111,7 +114,7 @@ use yii\helpers\Url;
                                 'options' => [
                                     'class' => 'form-control',
                                     'clientOptions' => [
-                                        'source' => $source,
+                                        'source' => $sourceWeight,
                                         'appendTo' => '#modal-lg',
                                     ],
                                 ],
