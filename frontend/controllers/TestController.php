@@ -266,10 +266,10 @@ class TestController extends FController
             [
                 'callId' => $tmp,
                 'status' => 'In progress',
-                'duration' => 10,
+                'duration' => 60,
                 'snr' => 1,
                 'leadId' => 1,
-                'typeId' => 1,
+                'typeId' => 3,
                 'type' => 'Outgoing',
                 'source_type_id' => '',
                 'phone' => '+373 ' . $tmp,

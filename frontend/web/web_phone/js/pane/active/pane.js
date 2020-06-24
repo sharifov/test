@@ -1,5 +1,9 @@
 var PhoneWidgetPaneActive = function () {
 
+    let state = {
+        'callId': null
+    };
+
     let $pane = $('.call-pane-calling');
     let contactInfo = PhoneWidgetContactInfo;
     let dialpad = PhoneWidgetDialpad;
@@ -57,51 +61,21 @@ var PhoneWidgetPaneActive = function () {
         }
      */
     function load(data) {
-        contactInfo.load(data.contact);
-
-        let html = render(data);
-        $pane.html(html);
-
         if (data.typeId === 3) {
-            initInactiveControls();
+            // initInactiveControls();
+            data.activeControls = false;
         } else {
-            initActiveControls();
+            // initActiveControls();
+            data.activeControls = true;
         }
 
-        //todo
-        buttons.addPerson.disable().inactive();
+        ReactDOM.render(
+            React.createElement(ActivePane, data),
+            document.getElementById('call-pane-calling')
+        );
 
-        if (data.isMute) {
-            buttons.mute.mute();
-        }
-
-        if (data.isListen) {
-            buttons.mute.mute().disable().inactive();
-        }
-
-        if (data.isHold) {
-            buttons.hold.hold();
-            buttons.mute.disable().inactive();
-        }
-
-        setCallId(data.callId);
-
-        $pane.find('.call-in-action__time').html('').show().timer('remove').timer({
-            format: '%M:%S',
-            seconds: data.duration
-        }).timer('start');
-
-        if (!data.projectName) {
-            $pane.find('.cw-project_name').hide();
-        }
-
-        if (!data.sourceName) {
-            $pane.find('.cw-source_name').hide();
-        }
-
-        if (!data.projectName || !data.sourceName) {
-            $pane.find('.static-number-indicator__separator').hide();
-        }
+        contactInfo.load(data.contact);
+        state.callId = data.callId;
     }
 
     function setCallId(callId) {

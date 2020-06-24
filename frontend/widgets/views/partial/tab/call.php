@@ -144,7 +144,7 @@
     <!--        </div>-->
   </div>
 
-  <div class="call-pane-calling call-pane-initial">
+  <div class="call-pane-calling call-pane-initial" id="call-pane-calling">
       <?php /*
     <div class="calling-from-info">
       <!-- <div class="current-number">

@@ -2,6 +2,7 @@
 
 namespace frontend\widgets\newWebPhone;
 
+use frontend\assets\ReactAsset;
 use frontend\assets\WebPhoneAsset;
 use yii\web\AssetBundle;
 
@@ -18,6 +19,10 @@ class NewWebPhoneAsset extends AssetBundle
 
 	public $js = [
 		'https://cdn.jsdelivr.net/npm/simplebar@latest/dist/simplebar.min.js',
+
+        ['/web_phone/component/pane/active/pane.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
+        ['/web_phone/component/pane/active/controls.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
+        ['/web_phone/component/pane/call_info.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
 
         '/web_phone/tpl/contact.js',
         '/web_phone/js/contact_info.js',
@@ -49,7 +54,8 @@ class NewWebPhoneAsset extends AssetBundle
 	];
 
 	public $depends = [
-		WebPhoneAsset::class
+		WebPhoneAsset::class,
+        ReactAsset::class
 	];
 
 	public $jsOptions = [
