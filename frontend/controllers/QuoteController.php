@@ -27,6 +27,7 @@ use sales\services\quote\addQuote\guard\GdsByQuoteGuard;
 use sales\services\quote\addQuote\guard\LeadGuard;
 use sales\services\quote\addQuote\price\PreparePrices;
 use Yii;
+use yii\base\Model;
 use yii\helpers\ArrayHelper;
 use yii\filters\AccessControl;
 use yii\helpers\Html;
@@ -48,6 +49,7 @@ use common\models\UserProjectParams;
 use frontend\models\PreviewEmailCommunicationForm;
 use common\models\Email;
 use common\models\EmailTemplateType;
+use yii\widgets\ActiveForm;
 
 /**
  * Quotes controller
@@ -649,6 +651,14 @@ class QuoteController extends FController
                                         $baggageObj = QuoteSegmentBaggage::creationFromForm($segmentBaggageForm);
                                     }
                                     $baggageObj->save(false);
+                                } else {
+                                    \Yii::info(
+                                        \yii\helpers\VarDumper::dumpAsString([
+                                            $segmentBaggageForm->getErrors(),
+                                        ], 20, true),
+                                        'info\Debug:' . self::class . ':' . __FUNCTION__
+                                    );
+                                    /* TODO: FOR DEBUG:: must by remove */
                                 }
                             }
                         }
@@ -963,6 +973,32 @@ class QuoteController extends FController
             ]);
         }
         return null;
+    }
+
+    /**
+     * @param string $iata
+     * @return array|null
+     * @throws BadRequestHttpException|\yii\base\InvalidConfigException
+     */
+    public function actionSegmentBaggageValidate(string $iata): ?array
+    {
+        if (Yii::$app->request->isAjax) {
+            $segmentBaggageForm = new SegmentBaggageForm($iata);
+            $formName = $segmentBaggageForm->formName();
+            $post = Yii::$app->request->post();
+
+            $models = [];
+            foreach ($post[$formName]['baggageData'] as $key => $value) {
+                $model = new SegmentBaggageForm($iata);
+                $model->setAttributes($value);
+                $models[$key] = $model;
+            }
+
+            Model::loadMultiple($models, Yii::$app->request->post());
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validateMultiple($models);
+        }
+        throw new BadRequestHttpException('Not found POST request');
     }
 
     private function logQuote(Quote $quote):void

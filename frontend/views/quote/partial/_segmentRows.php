@@ -12,6 +12,7 @@ use unclead\multipleinput\MultipleInput;
 use unclead\multipleinput\MultipleInputColumn;
 use yii\jui\AutoComplete;
 use \yii\widgets\ActiveForm;
+use yii\helpers\Url;
 
 ?>
 
@@ -40,77 +41,102 @@ use \yii\widgets\ActiveForm;
     </div>
     <div class="row">
         <div class="col-8">
+            <?php
+                $segmentBaggageForm = new SegmentBaggageForm($segment['segmentIata']);
+                $formName = $segmentBaggageForm->formName();
+            ?>
+
             <?php $formBaggage = ActiveForm::begin([
-                'id' => 'segmentBaggageForm_' . $segment['segmentIata'],
-                'enableClientValidation' => true,
+                'id' => $formName,
+                'enableClientValidation' => false,
+                'enableAjaxValidation' => true,
                 'validateOnChange' => true,
+                'validationUrl' => Url::to(['quote/segment-baggage-validate', 'iata' => $segment['segmentIata']]),
                 'options' => [
                     'class' => 'segment_baggage_forms'
-                 ]
+                ]
             ]) ?>
 
                 <?php
-                    $segmentBaggageForm = new SegmentBaggageForm($segment['segmentIata']);
-
                     if (isset($segment['baggage'])) {
                         $segmentBaggageForm->baggageData = $segment['baggage'];
                     }
-                ?>
 
-                <?php echo $formBaggage->field($segmentBaggageForm, 'baggageData')->widget(MultipleInput::class, [
-                    'id' => 'multiple_w_' . $key,
-                    'theme' => MultipleInput::THEME_BS,
-                    'max' => 10,
-                    'enableError' => true,
-                    'showGeneralError' => true,
-                    'allowEmptyList' => false,
-                    'layoutConfig' => [
-                        /*'wrapperClass' => 'col-12',
-                        'labelClass' => 'col-md-2',
-                        'errorClass' => 'col-md-12',
-                        'buttonActionClass' => 'col-md-2',*/
-                    ],
-                    'columns' => [
-                        [
-                            'title' => 'Baggage Type',
-                            'name' => 'type',
-                            'type'  => 'dropDownList',
-                            'items' => BaggageService::TYPE_LIST,
-                            'headerOptions' => [
-                                'style' => 'width: 120px;',
-                            ]
+                    echo $formBaggage->field($segmentBaggageForm, 'baggageData')->widget(MultipleInput::class, [
+                        'id' => 'multiple_w_' . $key,
+                        'max' => 10,
+                        'theme' => MultipleInput::THEME_BS,
+                        'enableError' => true,
+                        'showGeneralError' => true,
+                        'allowEmptyList' => false,
+                        'columns' => [
+                            [
+                                'title' => 'Baggage Type',
+                                'name' => 'type',
+                                'type'  => 'dropDownList',
+                                'items' => BaggageService::TYPE_LIST,
+                                'headerOptions' => [
+                                    'style' => 'width: 120px;',
+                                ]
+                            ],
+                            [
+                                'title' => 'Pieces',
+                                'name' => 'piece',
+                                'enableError' => true,
+                                'headerOptions' => [
+                                    'style' => 'width: 70px;',
+                                ],
+                            ],
+                            [
+                                'title' => 'Max Size',
+                                'name' => 'height',
+                            ],
+                            [
+                                'title' => 'Max Weight',
+                                'name' => 'weight',
+                            ],
+                            [
+                                'title' => 'Cost',
+                                'name' => 'price',
+                                'headerOptions' => [
+                                    'style' => 'width: 90px;',
+                                ]
+                            ],
+                            [
+                                'name' => 'segmentIata',
+                                'type' => MultipleInputColumn::TYPE_HIDDEN_INPUT,
+                                'defaultValue' => $segment['segmentIata'],
+                            ],
                         ],
-                        [
-                            'title' => 'Pieces',
-                            'name' => 'piece',
-                            'headerOptions' => [
-                                'style' => 'width: 70px;',
-                            ]
-                        ],
-                        [
-                            'title' => 'Max Size',
-                            'name' => 'height',
-                        ],
-                        [
-                            'title' => 'Max Weight',
-                            'name' => 'weight',
-                        ],
-                        [
-                            'title' => 'Cost',
-                            'name' => 'price',
-                            'headerOptions' => [
-                                'style' => 'width: 90px;',
-                            ]
-                        ],
-                        [
-                            'name' => 'segmentIata',
-                            'type' => MultipleInputColumn::TYPE_HIDDEN_INPUT,
-                            'defaultValue' => $segment['segmentIata'],
-                        ],
-                    ],
-                ])->label(false)  ?>
+                    ])->label(false)
+                ?>
             <?php ActiveForm::end(); ?>
+
+
+
         </div>
     </div>
     <br />
+
+<?php
+$js =<<<JS
+    $('#$formName').on('ajaxBeforeSend', function(event, jqXHR, settings) {        
+        $('#$formName .form-control').removeClass('border-danger').prop('title', '');       
+    }); 
+    
+    $('#$formName').on('ajaxComplete', function(event, jqXHR, textStatus) {        
+        $.each(jqXHR.responseJSON, function(keyEl, msgs) {
+            
+            var splitKeyEl = keyEl.split('-'); 
+            splitKeyEl[0] = splitKeyEl[0] + '-baggagedata';
+            elementId = splitKeyEl.join('-');
+                        
+            var message = msgs.join(',');
+            $('#' + elementId).addClass('border-danger').prop('title', message);            
+        });      
+    });        
+JS;
+$this->registerJs($js);
+?>
+
 <?php endforeach; ?>
