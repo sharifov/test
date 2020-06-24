@@ -68,7 +68,7 @@ use yii\helpers\Url;
                         'theme' => MultipleInput::THEME_BS,
                         'enableError' => true,
                         'showGeneralError' => true,
-                        'allowEmptyList' => false,
+                        'allowEmptyList' => true,
                         'columns' => [
                             [
                                 'title' => 'Baggage Type',
@@ -77,6 +77,9 @@ use yii\helpers\Url;
                                 'items' => BaggageService::TYPE_LIST,
                                 'headerOptions' => [
                                     'style' => 'width: 120px;',
+                                ],
+                                'options' => [
+                                    'prompt' => '---'
                                 ]
                             ],
                             [
@@ -120,19 +123,23 @@ use yii\helpers\Url;
 
 <?php
 $js =<<<JS
-    $('#$formName').on('ajaxBeforeSend', function(event, jqXHR, settings) {        
+    var formBaggage = $('#$formName');
+    
+    formBaggage.on('ajaxBeforeSend', function(event, jqXHR, settings) {        
         $('#$formName .form-control').removeClass('border-danger').prop('title', '');       
     }); 
     
-    $('#$formName').on('ajaxComplete', function(event, jqXHR, textStatus) {        
+    formBaggage.on('ajaxComplete', function(event, jqXHR, textStatus) {        
         $.each(jqXHR.responseJSON, function(keyEl, msgs) {
             
             var splitKeyEl = keyEl.split('-'); 
             splitKeyEl[0] = splitKeyEl[0] + '-baggagedata';
-            elementId = splitKeyEl.join('-');
-                        
-            var message = msgs.join(',');
-            $('#' + elementId).addClass('border-danger').prop('title', message);            
+            var elementId = splitKeyEl.join('-');
+            
+            if (msgs.length) {
+                var message = msgs.join(',');
+                $('#' + elementId).addClass('border-danger').prop('title', message);
+            }           
         });      
     });        
 JS;

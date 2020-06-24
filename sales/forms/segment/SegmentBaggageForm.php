@@ -59,33 +59,48 @@ class SegmentBaggageForm extends Model
     {
         return [
             [['type', 'segmentIata', 'piece'], 'required'],
+            [['piece', 'segmentId'], 'integer'],
 
             [['type'], 'in', 'range' => array_keys(BaggageService::TYPE_LIST)],
             [['paxCode'], 'default', 'value' => QuotePrice::PASSENGER_ADULT],
             [['paxCode'], 'in', 'range' => array_keys(QuotePrice::PASSENGER_TYPE_LIST)],
 
-            ['price', 'filter', 'filter' => static function ($value) {
-                return BaggageService::prepareCost($value);
+            [['price'], 'number', 'min' => 0, 'max' => 9999],
+            ['price', 'required', 'when' => function () {
+                return ($this->type === BaggageService::TYPE_PAID);
+            }, 'skipOnError' => true],
+
+            [['price'], function($attribute) {
+                //if ($this->type === BaggageService::TYPE_FREE && ($this->$attribute !== '' || $this->$attribute !== 0)) {
+                if ($this->type === BaggageService::TYPE_FREE && !in_array($this->$attribute, ['', 0], false)) {
+                    $this->addError($attribute, 'Baggage should be free');
+                }
             }],
-            [['price'], 'number'], /* TODO:: add ref type  */
 
             [['segmentIata'], 'string', 'length' => 6],
             [['weight', 'height'], 'string', 'max' => 100],
 
-            [['piece', 'segmentId'], 'integer'],
-
             [['currency'], 'default', 'value' => 'USD'],
             [['currency'], 'string', 'max' => 5],
 
-            [['baggageData'], 'safe']
+            [['baggageData'], 'safe'],
         ];
     }
 
     /**
      * @return array
      */
-    public function attributeLabels(): array /* TODO::  */
+    public function attributeLabels(): array
     {
-        return [];
+        return [
+            'type' => 'Type',
+            'segmentIata' => 'Segment Iata',
+            'piece' => 'Piece',
+            'paxCode' => 'Pax Code',
+            'price' => 'Cost',
+            'weight' => 'Max Weight',
+            'height' => 'Max Size',
+            'currency' => 'Currency',
+        ];
     }
 }
