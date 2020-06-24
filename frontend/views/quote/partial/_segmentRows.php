@@ -39,60 +39,78 @@ use \yii\widgets\ActiveForm;
         </div>
     </div>
     <div class="row">
-        <?php $formBaggage = ActiveForm::begin([
-            'id' => 'segmentBaggageForm_' . $segment['segmentIata'],
-            'enableClientValidation' => true,
-            'validateOnChange' => true,
-            'options' => [
-                'class' => 'segment_baggage_forms'
-             ]
-        ]) ?>
+        <div class="col-8">
+            <?php $formBaggage = ActiveForm::begin([
+                'id' => 'segmentBaggageForm_' . $segment['segmentIata'],
+                'enableClientValidation' => true,
+                'validateOnChange' => true,
+                'options' => [
+                    'class' => 'segment_baggage_forms'
+                 ]
+            ]) ?>
 
-            <?php
-                $segmentBaggageForm = new SegmentBaggageForm($segment['segmentIata']);
+                <?php
+                    $segmentBaggageForm = new SegmentBaggageForm($segment['segmentIata']);
 
-                if (isset($segment['baggage'])) {
-                    $segmentBaggageForm->baggageData = $segment['baggage'];
-                }
-            ?>
+                    if (isset($segment['baggage'])) {
+                        $segmentBaggageForm->baggageData = $segment['baggage'];
+                    }
+                ?>
 
-            <?php echo $formBaggage->field($segmentBaggageForm, 'baggageData')->widget(MultipleInput::class, [
-                'max' => 20,
-                'enableError' => true,
-                'showGeneralError' => true,
-                'allowEmptyList'    => false,
-                'enableGuessTitle'  => true,
-                'columns' => [
-                    [
-                        'title' => 'Baggage Type',
-                        'name' => 'type',
-                        'type'  => 'dropDownList',
-                        'items' => BaggageService::TYPE_LIST,
+                <?php echo $formBaggage->field($segmentBaggageForm, 'baggageData')->widget(MultipleInput::class, [
+                    'id' => 'multiple_w_' . $key,
+                    'theme' => MultipleInput::THEME_BS,
+                    'max' => 10,
+                    'enableError' => true,
+                    'showGeneralError' => true,
+                    'allowEmptyList' => false,
+                    'layoutConfig' => [
+                        /*'wrapperClass' => 'col-12',
+                        'labelClass' => 'col-md-2',
+                        'errorClass' => 'col-md-12',
+                        'buttonActionClass' => 'col-md-2',*/
                     ],
-                    [
-                        'title' => 'Pieces',
-                        'name' => 'piece',
+                    'columns' => [
+                        [
+                            'title' => 'Baggage Type',
+                            'name' => 'type',
+                            'type'  => 'dropDownList',
+                            'items' => BaggageService::TYPE_LIST,
+                            'headerOptions' => [
+                                'style' => 'width: 120px;',
+                            ]
+                        ],
+                        [
+                            'title' => 'Pieces',
+                            'name' => 'piece',
+                            'headerOptions' => [
+                                'style' => 'width: 70px;',
+                            ]
+                        ],
+                        [
+                            'title' => 'Max Size',
+                            'name' => 'height',
+                        ],
+                        [
+                            'title' => 'Max Weight',
+                            'name' => 'weight',
+                        ],
+                        [
+                            'title' => 'Cost',
+                            'name' => 'price',
+                            'headerOptions' => [
+                                'style' => 'width: 90px;',
+                            ]
+                        ],
+                        [
+                            'name' => 'segmentIata',
+                            'type' => MultipleInputColumn::TYPE_HIDDEN_INPUT,
+                            'defaultValue' => $segment['segmentIata'],
+                        ],
                     ],
-                    [
-                        'title' => 'Max Size',
-                        'name' => 'height',
-                    ],
-                    [
-                        'title' => 'Max Weight',
-                        'name' => 'weight',
-                    ],
-                    [
-                        'title' => 'Cost',
-                        'name' => 'price',
-                    ],
-                    [
-                        'name' => 'segmentIata',
-                        'type' => MultipleInputColumn::TYPE_HIDDEN_INPUT,
-                        'defaultValue' => $segment['segmentIata'],
-                    ],
-                ],
-            ])->label(false)  ?>
-        <?php ActiveForm::end(); ?>
+                ])->label(false)  ?>
+            <?php ActiveForm::end(); ?>
+        </div>
     </div>
     <br />
 <?php endforeach; ?>

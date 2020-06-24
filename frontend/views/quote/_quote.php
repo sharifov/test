@@ -38,12 +38,15 @@ $css = <<<CSS
         color: #7890a2;
         margin-bottom: 8px;
     }
-    
+    /*
     .list-cell__piece,
-    .list-cell__maxSize,
-    .list-cell__maxWeight {
-        width: 120px;
-    }
+    .list-cell__height,
+    .list-cell__weight,
+    .list-cell__price,
+    .list-cell__type {
+        width: 90px;
+    }    
+     */
     .multiple-input-list th {
         border-bottom: 1px solid #dee2e6!important;
         font-weight: normal!important;
