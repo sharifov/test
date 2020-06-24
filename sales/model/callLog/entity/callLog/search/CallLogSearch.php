@@ -13,6 +13,7 @@ use sales\model\callLog\entity\callLogQueue\CallLogQueue;
 use sales\model\callNote\entity\CallNote;
 use yii\data\ActiveDataProvider;
 use sales\model\callLog\entity\callLog\CallLog;
+use yii\db\Expression;
 use yii\db\Query;
 
 /**
@@ -223,7 +224,7 @@ class CallLogSearch extends CallLog
 		$query->select(['call_log.cl_type_id', 'cl_phone_from', 'cl_phone_to', 'cl_client_id', 'cl_call_created_dt', 'cl_status_id', 'cl_duration']);
 		$query->addSelect(['if (clients.first_name is not null, concat(clients.first_name, \' \', clients.last_name), null) as client_name', 'cn_note as callNote']);
 		$query->leftJoin(Client::tableName(), 'clients.id = cl_client_id');
-		$query->leftJoin(CallNote::tableName(), 'cn_call_id = cl_id');
+		$query->leftJoin(CallNote::tableName(), new Expression('cn_id = (select cn_id from call_note where cn_call_id = cl_id order by cn_created_dt desc limit 1)'));
 		$query->where(['cl_user_id' => $this->cl_user_id]);
         $query->groupBy(['cl_id', 'call_log.cl_type_id', 'cl_phone_from', 'cl_phone_to', 'cl_client_id', 'cl_call_created_dt', 'cl_status_id', 'cl_duration', 'callNote', 'client_name']);
 		$query->orderBy(['cl_call_created_dt' => SORT_DESC]);
