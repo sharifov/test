@@ -20,7 +20,7 @@ $this->params['breadcrumbs'][] = $this->title;
 $loadChannelsUrl = Url::to('/client-chat/index');
 ClientChatAsset::register($this);
 
-$rcUrl = Yii::$app->params['rcUrl'];
+$rcUrl = Yii::$app->rchat->host  . '/home';
 $userRcAuthToken = Auth::user()->userProfile ? Auth::user()->userProfile->up_rc_auth_token : '';
 $clientChatInfoUrl = Url::toRoute('/client-chat/info');
 ?>
