@@ -1447,18 +1447,15 @@ $js = <<<JS
      
      function muteEvent(data)
      {
-         let callSid = getActiveConnectionCallSid();
+         if (typeof PhoneWidgetCall !== 'object') {
+            return;
+         }
          
-         if (callSid && data.call.sid === callSid) {
-             let btn = $('#call-pane__mute');
+         if (PhoneWidgetCall.panes.active.getCallSid() === data.call.sid) {
              if (data.command === 'mute') {
-                    btn.prop('disabled', false);
-                    btn.attr('data-is-muted', 'true');
-                    btn.html('<i class="fas fa-microphone-alt-slash"></i>');
+                 PhoneWidgetCall.panes.active.mute();
              } else if (data.command === 'unmute') {
-                    btn.prop('disabled', false);
-                    btn.attr('data-is-muted', 'false');
-                    btn.html('<i class="fas fa-microphone"></i>');
+                 PhoneWidgetCall.panes.active.unMute();
              }
          }
      }

@@ -1,60 +1,40 @@
-function PhoneWidgetPaneActiveBtnMute (pane) {
-    let $pane = pane;
-    let $btn = null;
-
-    this.init = function () {
-        $btn = $pane.find('#call-pane__mute');
-        return this;
+class PhoneWidgetPaneActiveBtnMute extends PhoneWidgetPaneActiveBtn {
+    constructor(pane) {
+        super(pane, '#call-pane__mute');
     };
-    
-    this.sendRequest = function () {
+
+    sendRequest() {
         this.disable();
-        $btn.attr('data-is-muted', null);
-        $btn.html('<i class="fa fa-spinner fa-spin"></i>');
+        this.btn.attr('data-is-muted', null);
+        this.btn.html('<i class="fa fa-spinner fa-spin"> </i>');
         return this;
     };
 
-    this.mute = function () {
+    mute() {
         this.enable();
-        $btn.attr('data-is-muted', 'true');
-        $btn.html('<i class="fas fa-microphone-alt-slash"></i>');
+        this.btn.attr('data-is-muted', 'true');
+        this.btn.html('<i class="fas fa-microphone-alt-slash"> </i>');
         return this;
     };
 
-    this.unmute = function () {
+    isMute() {
+        return this.btn.attr('data-is-muted') === 'true';
+    };
+
+    unMute() {
         this.enable();
-        $btn.attr('data-is-muted', 'false');
-        $btn.html('<i class="fas fa-microphone"></i>');
+        this.btn.attr('data-is-muted', 'false');
+        this.btn.html('<i class="fas fa-microphone"> </i>');
         return this;
     };
 
-    this.show = function () {
-        $btn.show();
+    disable() {
+        this.btn.attr('disabled', true);
         return this;
     };
 
-    this.hide = function () {
-        $btn.hide();
-        return this;
-    };
-
-    this.disable = function () {
-        $btn.attr('disabled', true);
-        return this;
-    };
-
-    this.enable = function () {
-        $btn.attr('disabled', false);
-        return this;
-    };
-
-    this.active = function () {
-        $btn.attr('data-active', true);
-        return this;
-    };
-
-    this.inactive = function () {
-        $btn.attr('data-active', false);
+    enable() {
+        this.btn.attr('disabled', false);
         return this;
     };
 }

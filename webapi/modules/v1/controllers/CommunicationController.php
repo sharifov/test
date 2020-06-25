@@ -858,8 +858,8 @@ class CommunicationController extends ApiBaseController
                 $response['error'] = 'Error in method voiceDefault. ' . $call->getErrorSummary(false)[0];
             }
 
-            if (!empty($callData['accepted_call_id']) && $call->c_created_user_id && $call->isStatusInProgress()) {
-                Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $call->c_created_user_id], RemoveIncomingRequestMessage::create($callData['accepted_call_id']));
+            if (!empty($callData['accepted_call_id']) && !empty($callData['accepted_call_sid']) && $call->c_created_user_id && $call->isStatusInProgress()) {
+                Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $call->c_created_user_id], RemoveIncomingRequestMessage::create($callData['accepted_call_id'], $callData['accepted_call_sid']));
             }
 
         } else {

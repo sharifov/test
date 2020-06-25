@@ -28,10 +28,9 @@ class NewWebPhoneAsset extends AssetBundle
         '/web_phone/js/contact_info.js',
         '/web_phone/js/dialpad.js',
 
-        '/web_phone/tpl/active.js',
+        '/web_phone/js/pane/active/btn/btn.js',
         '/web_phone/js/pane/active/btn/add_person.js',
         '/web_phone/js/pane/active/btn/dialpad.js',
-        '/web_phone/js/pane/active/btn/hangup.js',
         '/web_phone/js/pane/active/btn/hold.js',
         '/web_phone/js/pane/active/btn/mute.js',
         '/web_phone/js/pane/active/btn/transfer.js',

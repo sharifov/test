@@ -269,7 +269,7 @@ class TestController extends FController
                 'duration' => 60,
                 'snr' => 1,
                 'leadId' => 1,
-                'typeId' => 3,
+                'typeId' => 1,
                 'type' => 'Outgoing',
                 'source_type_id' => '',
                 'phone' => '+373 ' . $tmp,

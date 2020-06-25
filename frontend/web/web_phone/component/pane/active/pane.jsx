@@ -1,16 +1,14 @@
-class ActivePane extends React.Component {
-    render() {
-        return (
-            <React.Fragment>
-                <CallInfo {...this.props} />
-                <ContactInfo {...this.props} />
-                <CallBtns {...this.props} />
-                <SoundIndication/>
-                <ActivePaneControls {...this.props} />
-                <AddNote {...this.props}/>
-            </React.Fragment>
-        );
-    }
+function ActivePane(props) {
+    return (
+        <React.Fragment>
+            <CallInfo {...props} />
+            <ContactInfo {...props} />
+            <CallBtns {...props} />
+            <SoundIndication/>
+            <ActivePaneControls {...props} />
+            <AddNote {...props}/>
+        </React.Fragment>
+    );
 }
 
 function ContactInfo(props) {
@@ -127,8 +125,8 @@ function SoundIndication() {
                 <i className="fa fa-volume-down"> </i>
                 <div className="sound-controls">
                     <div className="progres-wrap">
-                        <div className="sound-progress"> </div>
-                        <div className="sound-ovf" style={sound_ovf_100}> </div>
+                        <div className="sound-progress"></div>
+                        <div className="sound-ovf" style={sound_ovf_100}></div>
                     </div>
                 </div>
             </div>
@@ -136,8 +134,8 @@ function SoundIndication() {
                 <i className="fa fa-microphone"> </i>
                 <div className="sound-controls">
                     <div className="progres-wrap">
-                        <div className="sound-progress"> </div>
-                        <div className="sound-ovf" style={sound_ovf_30}> </div>
+                        <div className="sound-progress"></div>
+                        <div className="sound-ovf" style={sound_ovf_30}></div>
                     </div>
                 </div>
             </div>
@@ -154,7 +152,7 @@ function AddNote(props) {
             <div className="form-group">
                 <input type="text" className="call-pane__note-msg form-control" id="active_call_add_note"
                        placeholder="Add Note" autoComplete="off"/>
-                <div className="error-message"> </div>
+                <div className="error-message"></div>
             </div>
             <button className="call-pane__add-note" id="active_call_add_note_submit" data-call-id={props.callId}>
                 <svg width="17" height="12" viewBox="0 0 17 12" fill="none" xmlns="http://www.w3.org/2000/svg">

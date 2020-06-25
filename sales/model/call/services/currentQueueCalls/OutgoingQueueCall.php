@@ -8,6 +8,7 @@ use yii\helpers\Json;
 class OutgoingQueueCall extends Model
 {
     public $callId;
+    public $callSid;
     public $type;
     public $status;
     public $duration;

@@ -1206,15 +1206,18 @@ class Call extends \yii\db\ActiveRecord
             }
 			if (!$this->currentParticipant || $this->currentParticipant->isAgent() || $this->isEnded()) {
 			    $callId = $this->c_id;
+			    $callSid = $this->c_call_sid;
                 $conferenceBase = (bool)(\Yii::$app->params['settings']['voip_conference_base'] ?? false);
                 if (!$conferenceBase) {
                     if ($isChangedStatus && $this->isStatusInProgress() && $this->isOut() && $this->c_parent_id) {
                         $callId = $this->c_parent_id;
+                        $callSid = $this->c_parent_call_sid ?: $this->cParent->c_call_sid;
                     }
                 }
                 Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id],
                     [
                         'callId' => $callId,
+                        'callSid' => $callSid,
                         'status' => $this->getStatusName(),
                         'duration' => $this->c_call_duration,
                         'snr' => $this->c_sequence_number,

@@ -116,6 +116,7 @@ class CurrentQueueCallsService
             }
 
             $calls[] = new ActiveQueueCall([
+                'callSid' => $call->c_call_sid,
                 'callId' => $call->c_id,
                 'isMute' => $isMute,
                 'isListen' => $call->c_source_type_id === Call::SOURCE_LISTEN,
@@ -182,6 +183,7 @@ class CurrentQueueCallsService
 
         foreach ($queue as $call) {
             $calls[] = new OutgoingQueueCall([
+                'callSid' => $call->c_call_sid,
                 'callId' => $call->c_id,
                 'phone' => $call->c_to,
                 'sourceName' => $call->c_source_type_id ? $call->getSourceName() : '',
@@ -220,6 +222,7 @@ class CurrentQueueCallsService
             $call = $item->cuaCall;
             $calls[] = new IncomingQueueCall([
                 'callId' => $call->c_id,
+                'callSid' => $call->c_call_sid,
                 'sourceName' => $call->c_source_type_id ? $call->getSourceName() : '',
                 'phone' => $call->c_from,
                 'name' => $call->cClient ? $call->cClient->getFullName() : '------',

@@ -1,22 +1,17 @@
 var PhoneWidgetPaneActive = function () {
 
     let state = {
-        'callId': null
+        'callSid': null,
+        'callId': null,
+        'typeId': null,
+        'isHold': null,
+        'isMute': null,
+        'isListen': null
     };
 
     let $pane = $('.call-pane-calling');
     let contactInfo = PhoneWidgetContactInfo;
     let dialpad = PhoneWidgetDialpad;
-
-    function render(data) {
-        let html = '';
-        let template = activeTpl;
-        $.each(data, function (k, v) {
-            html = template.split('{{' + k + '}}').join(v);
-            template = html;
-        });
-        return html;
-    }
 
     let buttons = {
         'hold': new PhoneWidgetPaneActiveBtnHold($pane),
@@ -26,24 +21,17 @@ var PhoneWidgetPaneActive = function () {
         'mute': new PhoneWidgetPaneActiveBtnMute($pane)
     };
 
-    function initActiveControls() {
-        buttons.hold.initActive();
-        buttons.transfer.initActive();
-        buttons.addPerson.initActive();
-        buttons.dialpad.initActive();
-        buttons.mute.init();
-    }
-
-    function initInactiveControls() {
-        buttons.hold.initInactive();
-        buttons.transfer.initInactive();
-        buttons.addPerson.initInactive();
-        buttons.dialpad.initInactive();
+    function initControls() {
+        buttons.hold.init();
+        buttons.transfer.init();
+        buttons.addPerson.init();
+        buttons.dialpad.init();
         buttons.mute.init();
     }
 
     /*
         data = {
+            callSid,
             callId,
             isMute,
             isListen,
@@ -62,10 +50,8 @@ var PhoneWidgetPaneActive = function () {
      */
     function load(data) {
         if (data.typeId === 3) {
-            // initInactiveControls();
             data.activeControls = false;
         } else {
-            // initActiveControls();
             data.activeControls = true;
         }
 
@@ -75,19 +61,24 @@ var PhoneWidgetPaneActive = function () {
         );
 
         contactInfo.load(data.contact);
-        state.callId = data.callId;
-    }
-
-    function setCallId(callId) {
-        $pane.attr('data-call-id', callId);
+        Object.assign(state, data);
+        initControls();
     }
 
     function getCallId() {
-        return parseInt($pane.attr('data-call-id'));
+        return state.callId;
     }
 
     function removeCallId() {
-        return $pane.attr('data-call-id', '');
+        state.callId = null;
+    }
+
+    function getCallSid() {
+        return state.callSid;
+    }
+
+    function removeCallSid() {
+        state.callSid = null;
     }
 
     function show() {
@@ -112,6 +103,28 @@ var PhoneWidgetPaneActive = function () {
         return $pane.hasClass('is_active');
     }
 
+    function canTransfer() {
+        return state.typeId !== 3;
+    }
+
+    function canHold() {
+        return state.typeId !== 3 && !state.isHold;
+    }
+
+    function isMute() {
+        return state.isMute === true;
+    }
+
+    function mute() {
+        state.isMute = true;
+        buttons.mute.mute();
+    }
+
+    function unMute() {
+        state.isMute = false;
+        buttons.mute.unMute();
+    }
+
     function init(data) {
         load(data);
         show();
@@ -124,14 +137,21 @@ var PhoneWidgetPaneActive = function () {
 
     return {
         buttons: buttons,
+        canTransfer: canTransfer,
+        canHold: canHold,
+        isMute: isMute,
         init: init,
         load: load,
         show: show,
         hide: hide,
         getCallId: getCallId,
         removeCallId: removeCallId,
+        getCallSid: getCallSid,
+        removeCallSid: removeCallSid,
         isActive: isActive,
-        removeCallInProgressIndicator: removeCallInProgressIndicator
+        removeCallInProgressIndicator: removeCallInProgressIndicator,
+        mute: mute,
+        unMute: unMute
     }
 
 }();

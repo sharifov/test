@@ -99,6 +99,7 @@ $js = <<<JS
 								let PhoneNumbersData = phoneNumbers.getPrimaryData.value ? phoneNumbers.getPrimaryData : phoneNumbers.getData;
 								PhoneWidgetCall.requestOutgoingCall({  
 									'callId': '',
+									'callSid': '',
 									'type': 'Outgoing',
 									'status': 'Dialing',  
 									'duration': 0,

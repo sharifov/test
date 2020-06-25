@@ -221,6 +221,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
                     'typeId' => $call->c_call_type_id,
                     'type' => CallHelper::getTypeDescription($this->cuaCall),
                     'callId' => $call->c_id,
+                    'callSid' => $call->c_call_sid,
                     'name' => $name,
                     'phone' => $phone,
 					'fromInternal' => PhoneList::find()->byPhone($this->cuaCall->c_from)->enabled()->exists(),

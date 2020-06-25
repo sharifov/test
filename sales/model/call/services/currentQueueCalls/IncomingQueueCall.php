@@ -9,6 +9,7 @@ class IncomingQueueCall extends Model
 {
     public $fromInternal;
     public $callId;
+    public $callSid;
     public $type;
     public $name;
     public $projectName;

@@ -284,7 +284,7 @@ var PhoneWidgetCall = function () {
     function muteBtnEvent()
     {
         let _self = this;
-        $(document).on('click', '#call-pane__mute', function(e) {
+        $(document).on('click', '.call-pane-calling #call-pane__mute', function(e) {
 
             let muteBtn = $(this);
 
@@ -293,10 +293,10 @@ var PhoneWidgetCall = function () {
                 let callSid = getActiveConnectionCallSid();
 
                 if (callSid) {
-                    if (muteBtn.attr('data-is-muted') === 'false') {
-                       mute(callSid);
-                    } else if (muteBtn.attr('data-is-muted') === 'true') {
-                       unmute(callSid);
+                    if (panes.active.isMute()) {
+                        unmute(callSid);
+                    } else {
+                        mute(callSid);
                     }
                 } else {
                     alert('Error: Not found active Connection CallSid');
@@ -383,7 +383,7 @@ var PhoneWidgetCall = function () {
     {
         $(document).on('click', '.call-pane-calling #wg-transfer-call', function(e) {
             e.preventDefault();
-            if (!panes.active.buttons.transfer.can()) {
+            if (!panes.active.canTransfer()) {
                 return false;
             }
             initRedirectToAgent();
@@ -595,9 +595,8 @@ var PhoneWidgetCall = function () {
 
     function dialpadEvent() {
         $(document).on('click', '.call-pane-calling #wg-dialpad', function() {
-            if (!panes.active.buttons.dialpad.can()) {
-                return false;
-            }
+            //todo
+            return false;
             $('.dial-popup').slideDown(150)
         });
         $(document).on('click', '.dial-popup .additional-info__close', function() {
@@ -620,7 +619,7 @@ var PhoneWidgetCall = function () {
                 return false;
             }
 
-            if (!panes.active.buttons.hold.can()) {
+            if (!panes.active.canHold()) {
                 return false;
             }
 
