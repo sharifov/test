@@ -70,7 +70,7 @@ use yii\web\View;
     <div class="widget-phone__contact-info-modal widget-modal contact-modal-info"></div>
     <div class="widget-phone__messages-modal widget-modal messages-modal"></div>
     <div class="widget-phone__email-modal widget-modal email-modal"></div>
-    <div class="widget-line-overlay">
+    <div class="widget-line-overlay" style="display:none">
       <div class="widget-line-overlay__header">
           <div class="widget-line-overlay__queue-marker">
               <span data-queue-marker>Calls Queue</span>

@@ -710,6 +710,49 @@ $(document).ready(function() {
 
 });
 
+function stateTimer () {
+    var interval = null;
+
+    return {
+        start: function (el, timerStamp) {
+            var sec = Math.floor(timerStamp % 60);
+            var min = Math.floor((timerStamp - sec) / 60);
+            var hr = Math.floor((timerStamp - min) / 60);
+
+            interval = setInterval(function () {
+                sec = Math.floor(timerStamp % 60);
+                min = Math.floor(((timerStamp - sec) / 60) % 60);
+                hr = Math.floor(timerStamp / 3600);
+
+                if (timerStamp === 86399) {
+                    timerStamp = 0;
+                }
+
+                if (parseInt(sec) < 10) {
+                    sec = '0' + sec;
+                }
+
+                if (parseInt(min) < 10) {
+                    min = '0' + min;
+                }
+
+                if (parseInt(hr) < 10) {
+                    hr = '0' + hr;
+                }
+
+                timerStamp++
+                $(el).html(hr + ':' + min + ':' + sec)
+
+            }, 1000)
+        },
+        clear: function () {
+            clearInterval(interval);
+        }
+    }
+
+
+}
+
 function formatPhoneNumber(phoneNumberString) {
     let cleaned = ('' + phoneNumberString).replace(/\D/g, '')
     let match = cleaned.match(/^(1|)?(\d{3})(\d{3})(\d{4})$/)
@@ -956,6 +999,7 @@ function handleWidgetIcon() {
         }
     }
 }
+
 function callsFilter (object) {
     var queuesParent = '.queue-separator',
         queuesItem = '.queue-separator__item',
@@ -1231,6 +1275,7 @@ function callsFilter (object) {
             }
 
             $(document).on('click', filterToggle, function (e) {
+
                 e.preventDefault();
                 var markElement = $('.widget-line-overlay__queue-marker');
 
