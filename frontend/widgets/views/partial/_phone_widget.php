@@ -18,17 +18,15 @@ use yii\web\View;
       <div class="number-toggle">
         <input type="checkbox" id="number-status3" class="call-status-switcher" <?= ($userCallStatus && $userCallStatus->isReady() ? 'checked' : '') ?>>
         <label for="number-status3">ready</label>
-
         <div class="status-confirmation"></div>
-
-          <ul class="call-filter">
-              <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-hold" data-call-filter="hold">1</a></li>
-              <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-direct" data-call-filter="direct">1</a></li>
-              <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-general" data-call-filter="general">4</a></li>
-          </ul>
-
       </div>
-      <!-- <a href="#" class="phone-widget__dev header-action-small toggle-bar-logs"><i class="fas fa-tools"></i></a> -->
+        <ul class="call-filter">
+            <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-hold" data-call-filter="hold">1</a></li>
+            <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-direct" data-call-filter="direct">1</a></li>
+            <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-general" data-call-filter="general">4</a></li>
+        </ul>
+
+        <!-- <a href="#" class="phone-widget__dev header-action-small toggle-bar-logs"><i class="fas fa-tools"></i></a> -->
       <!-- <span class="phone-widget__title">Calls</span> -->
       <a href="#" class="phone-widget__settings header-action-small toggle-bar-settings"><i class="fa fa-cog"></i></a>
       <a href="#" class="phone-widget__close header-action-small">
