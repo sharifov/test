@@ -66,7 +66,7 @@ class ClientChatController extends Controller
 
 				printf("\n --- RC login error occurred: %s ---\n", $this->ansiFormat(VarDumper::dumpAsString($result), Console::FG_RED));
 			} else {
-				printf("\n --- RC create user error occurred: %s ---\n", $this->ansiFormat(VarDumper::dumpAsString($result), Console::FG_RED);
+				printf("\n --- RC create user error occurred: %s ---\n", $this->ansiFormat(VarDumper::dumpAsString($result), Console::FG_RED));
 			}
 		}
 
