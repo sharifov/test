@@ -66,7 +66,7 @@ class SegmentBaggageForm extends Model
             [['paxCode'], 'default', 'value' => QuotePrice::PASSENGER_ADULT],
             [['paxCode'], 'in', 'range' => array_keys(QuotePrice::PASSENGER_TYPE_LIST)],
 
-            [['price'],'number','min' => 0.01, 'max' => 9999 , 'when' => function() {
+            [['price'],'number','min' => 0.01, 'max' => 9999, 'when' => function() {
                 return $this->type === BaggageService::TYPE_PAID;
             }],
             ['price', 'required', 'when' => function () {

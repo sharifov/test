@@ -73,7 +73,7 @@ use yii\helpers\Html;
                                         <?php if(!empty($segment->quoteSegmentBaggages)):?>
                                             <?php foreach ($segment->quoteSegmentBaggages as $baggage):?>
                                             <span
-                                                title="<?php echo Html::encode($baggage->qsb_allow_max_weight) .
+                                                title="<?php echo Html::encode($baggage->qsb_allow_max_weight) . "\n" .
                                                     Html::encode($baggage->qsb_allow_max_size) ?>"
                                                 class="badge badge-primary">
                                                     <i class="fa fa-suitcase"></i>&nbsp;
