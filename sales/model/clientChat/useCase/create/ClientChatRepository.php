@@ -8,6 +8,7 @@ use common\models\Client;
 use sales\behaviors\BlameableBehaviorExceptApi;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
+use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\repositories\department\DepartmentRepository;
 use sales\repositories\NotFoundException;
 use sales\repositories\project\ProjectRepository;
@@ -74,5 +75,14 @@ class ClientChatRepository
 			return $clientChat;
 		}
 		throw new NotFoundException('Client chat is not found');
+	}
+
+	public function assignOwner(ClientChatUserAccess $clientChatUserAccess): void
+	{
+		if ($clientChatUserAccess->ccuaCch && $clientChatUserAccess->ccuaCch->cchOwnerUser) {
+			throw new \DomainException('Client Chat already assigned to: ' . $clientChatUserAccess->ccuaCch->cchOwnerUser->full_name);
+		}
+		$clientChatUserAccess->ccuaCch->cch_owner_user_id = $clientChatUserAccess->ccua_user_id;
+		$this->save($clientChatUserAccess->ccuaCch);
 	}
 }

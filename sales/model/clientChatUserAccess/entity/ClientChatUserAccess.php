@@ -3,7 +3,9 @@
 namespace sales\model\clientChatUserAccess\entity;
 
 use common\models\Employee;
+use sales\dispatchers\NativeEventDispatcher;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChatUserAccess\event\ClientChatUserAccessEvent;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 
@@ -21,6 +23,18 @@ use yii\db\ActiveRecord;
  */
 class ClientChatUserAccess extends \yii\db\ActiveRecord
 {
+	public const STATUS_PENDING = 1;
+	public const STATUS_ACCEPT = 2;
+	public const STATUS_BUSY = 3;
+	public const STATUS_SKIP = 4;
+
+	public const STATUS_LIST = [
+		self::STATUS_PENDING => 'Pending',
+		self::STATUS_ACCEPT => 'Accept',
+		self::STATUS_BUSY => 'Busy',
+		self::STATUS_SKIP => 'Skip'
+	];
+
 	public function behaviors(): array
 	{
 		return [
@@ -86,4 +100,52 @@ class ClientChatUserAccess extends \yii\db\ActiveRecord
     {
         return 'client_chat_user_access';
     }
+
+    public static function create(int $channelId, int $userId): self
+	{
+		$access = new self();
+		$access->ccua_cch_id = $channelId;
+		$access->ccua_user_id = $userId;
+
+		return $access;
+	}
+
+	public function pending(): void
+	{
+		$this->ccua_status_id = self::STATUS_PENDING;
+	}
+
+	/**
+	 * @param int $userId
+	 * @return array|ActiveRecord[]
+	 */
+	public static function pendingRequests(int $userId): array
+	{
+		return self::find()->byUserId($userId)->pending()->orderBy(['ccua_created_dt' => SORT_DESC])->all();
+	}
+
+	public static function statusExist(int $status): bool
+	{
+		return array_key_exists($status, self::STATUS_LIST);
+	}
+
+	public function setStatus(int $status): void
+	{
+		$this->ccua_status_id = $status;
+	}
+
+	public function isAccept(): bool
+	{
+		return $this->ccua_status_id === self::STATUS_ACCEPT;
+	}
+
+	public function isPending(): bool
+	{
+		return $this->ccua_status_id === self::STATUS_PENDING;
+	}
+
+	public function isSkip(): bool
+	{
+		return $this->ccua_status_id === self::STATUS_SKIP;
+	}
 }

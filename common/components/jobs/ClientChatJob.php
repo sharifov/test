@@ -4,6 +4,8 @@ namespace common\components\jobs;
 use common\models\Notifications;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
+use sales\model\clientChatChannel\entity\ClientChatChannel;
+use sales\repositories\NotFoundException;
 use sales\services\clientChatService\ClientChatService;
 use yii\base\BaseObject;
 use yii\queue\JobInterface;
@@ -20,8 +22,6 @@ use yii\queue\JobInterface;
 class ClientChatJob extends BaseObject implements JobInterface
 {
 	public int $priority = 1;
-
-	private int $maxPriority = 50;
 
 	/**
 	 * @var ClientChat
@@ -40,8 +40,6 @@ class ClientChatJob extends BaseObject implements JobInterface
 
 	public function execute($queue)
 	{
-		\Yii::info('ClientChatJob started...', 'info\ClientChatJob::execute');
-
 		$this->clientChatService = \Yii::createObject(ClientChatService::class);
 		$this->clientChatRepository = \Yii::createObject(ClientChatRepository::class);
 
@@ -49,18 +47,12 @@ class ClientChatJob extends BaseObject implements JobInterface
 			$this->clientChatService->assignClientChatChannel($this->clientChat, $this->priority);
 			$this->clientChatRepository->save($this->clientChat);
 			$this->clientChatService->sendNotificationToUsers($this->clientChat);
-		} catch (\RuntimeException $e) {
-			\Yii::info('ClientChatJob failed... ' . $e->getMessage(), 'info\ClientChatJob::execute');
-			$job = new self();
-			$job->priority = $this->priority+1;
-
-			if ($job->priority < $this->maxPriority) {
-				$job->clientChat = $this->clientChat;
-				\Yii::$app->queue_job->priority(90)->push($job);
-			}
+		} catch (\RuntimeException | NotFoundException $e) {
+			\Yii::info('ClientChatJob failed... ' . $e->getMessage() . '; File: ' . $e->getFile() . '; Line: ' . $e->getLine(), 'info\ClientChatJob::execute');
 			return false;
 		}
 
 		\Yii::info('ClientChatJob successfully finished...', 'info\ClientChatJob::execute');
+		return true;
 	}
 }

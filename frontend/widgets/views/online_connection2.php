@@ -8,6 +8,7 @@
 /* @var $ipAddress string */
 /* @var $webSocketHost string */
 /* @var $subList array */
+/* @var $this \yii\web\View */
 
 \frontend\assets\WebSocketAsset::register($this);
 
@@ -180,6 +181,12 @@ $js = <<<JS
                             }
                             if (typeof PhoneWidgetCall === 'object') {
                                 PhoneWidgetCall.initIncomingCall(obj);
+                            }
+                        }
+                        
+                        if (obj.cmd === 'clientChatRequest') {
+                            if (typeof refreshClientChatWidget === "function") {
+                                refreshClientChatWidget(obj);
                             }
                         }
                         

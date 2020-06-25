@@ -1,12 +1,15 @@
 <?php
 namespace frontend\controllers;
 
+use http\Exception\RuntimeException;
 use sales\auth\Auth;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
+use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\clientChatUserChannel\entity\search\ClientChatUserChannelSearch;
+use sales\repositories\ClientChatUserAccessRepository\ClientChatUserAccessRepository;
 use sales\repositories\NotFoundException;
 use yii\data\ActiveDataProvider;
 use yii\db\Expression;
@@ -18,6 +21,7 @@ use yii\helpers\ArrayHelper;
  * @package frontend\controllers
  *
  * @property ClientChatRepository $clientChatRepository
+ * @property ClientChatUserAccessRepository $clientChatUserAccessRepository
  */
 class ClientChatController extends FController
 {
@@ -26,11 +30,16 @@ class ClientChatController extends FController
 	 * @var ClientChatRepository
 	 */
 	private ClientChatRepository $clientChatRepository;
+	/**
+	 * @var ClientChatUserAccessRepository
+	 */
+	private ClientChatUserAccessRepository $clientChatUserAccessRepository;
 
-	public function __construct($id, $module, ClientChatRepository $clientChatRepository, $config = [])
+	public function __construct($id, $module, ClientChatRepository $clientChatRepository, ClientChatUserAccessRepository $clientChatUserAccessRepository, $config = [])
 	{
 		parent::__construct($id, $module, $config);
 		$this->clientChatRepository = $clientChatRepository;
+		$this->clientChatUserAccessRepository = $clientChatUserAccessRepository;
 	}
 
 	/**
@@ -59,7 +68,7 @@ class ClientChatController extends FController
 
 		/** @var $channels ClientChatChannel[] */
 		if ($channels) {
-			$query = ClientChat::find();
+			$query = ClientChat::find()->orderBy(['cch_created_dt' => SORT_DESC]);
 
 			if ($channelId) {
 				$query->byChannel($channelId);
@@ -124,6 +133,28 @@ class ClientChatController extends FController
 			]);
 
 		} catch (NotFoundException $e) {
+			$result['message'] = $e->getMessage();
+		}
+
+		return $this->asJson($result);
+	}
+
+	public function actionAccessManage(): \yii\web\Response
+	{
+		$cchId = \Yii::$app->request->post('cchId');
+		$accessAction = \Yii::$app->request->post('accessAction');
+
+		try {
+			$result = [
+				'success' => false,
+				'message' => ''
+			];
+
+			$cch = $this->clientChatUserAccessRepository->find($cchId);
+			$this->clientChatUserAccessRepository->updateStatus($cch, (int)$accessAction);
+
+			$result['success'] = true;
+		} catch (\RuntimeException $e) {
 			$result['message'] = $e->getMessage();
 		}
 

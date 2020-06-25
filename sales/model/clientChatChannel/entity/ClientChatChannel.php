@@ -37,6 +37,8 @@ use yii\db\ActiveRecord;
  */
 class ClientChatChannel extends \yii\db\ActiveRecord
 {
+	public const MAX_PRIORITY_VALUE = 100;
+
 	public function behaviors(): array
 	{
 		return [
@@ -70,7 +72,7 @@ class ClientChatChannel extends \yii\db\ActiveRecord
             ['ccc_dep_id', 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['ccc_dep_id' => 'dep_id']],
 
             ['ccc_disabled', 'integer'],
-            ['ccc_priority', 'integer', 'max' => 50, 'min' => 1],
+            ['ccc_priority', 'integer', 'max' => self::MAX_PRIORITY_VALUE, 'min' => 1],
             ['ccc_priority', 'default', 'value' => 1],
 
             ['ccc_name', 'required'],

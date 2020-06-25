@@ -19,6 +19,10 @@ $this->params['breadcrumbs'][] = $this->title;
 
 $loadChannelsUrl = Url::to('/client-chat/index');
 ClientChatAsset::register($this);
+
+$rcUrl = Yii::$app->params['rcUrl'];
+$userRcAuthToken = Auth::user()->userProfile ? Auth::user()->userProfile->up_rc_auth_token : '';
+$clientChatInfoUrl = Url::toRoute('/client-chat/info');
 ?>
 
 <?php if (empty($channels)): ?>
@@ -38,12 +42,16 @@ ClientChatAsset::register($this);
                 'dataProvider' => $dataProvider,
                 'loadChannelsUrl' => $loadChannelsUrl,
                 'page' => $page,
-                'channelId' => $channelId
+                'channelId' => $channelId,
+                'clientChatRid' => $clientChat ? $clientChat->cch_rid : null
             ]) ?>
         </div>
     </div>
     <div class="col-md-6">
         <div id="_rc-iframe-wrapper" style="height: 100%; width: 100%; position: relative;">
+            <?php if ($clientChat): ?>
+                <iframe class="_rc-iframe" src="<?= $rcUrl ?>?resumeToken=<?= $userRcAuthToken ?>&goto=<?= urlencode('/live/'. $clientChat->cch_rid . '?layout=embedded') ?>" id="_rc-<?= $clientChat->cch_rid ?>" style="border: none; width: 100%; height: 100%;" ></iframe>
+            <?php endif; ?>
         </div>
     </div>
     <div class="col-md-3">
@@ -56,9 +64,6 @@ ClientChatAsset::register($this);
 </div>
 
 <?php
-$rcUrl = Yii::$app->params['rcUrl'];
-$userRcAuthToken = Auth::user()->userProfile ? Auth::user()->userProfile->up_rc_auth_token : '';
-$clientChatInfoUrl = Url::toRoute('/client-chat/info');
 $js = <<<JS
 $('#btn-load-channels').on('click', function (e) {
     e.preventDefault();
@@ -100,6 +105,14 @@ $('#btn-load-channels').on('click', function (e) {
     });
 });
 
+if ($('#_rc-iframe-wrapper').find('._rc-iframe').length) {
+    let iframe = $($('#_rc-iframe-wrapper').find('._rc-iframe')[0]);
+    let windowHeight = $(window)[0].innerHeight;
+    let offsetTop = $("#_rc-iframe-wrapper").offset().top;
+    let iframeHeight = windowHeight - offsetTop - 20;
+    $(iframe).css('height', iframeHeight+'px');
+}
+
 $(document).on('click', '._cc-list-item', function () {
 
     if ($(this).hasClass('active')) {
@@ -110,7 +123,7 @@ $(document).on('click', '._cc-list-item', function () {
     let userRcAuthToken = '{$userRcAuthToken}';
     let gotoParam = encodeURIComponent($(this).attr('data-goto-param'));
     let rid = $(this).attr('data-rid');
-    let iframeHref = rcUrl + '?resumeToken=' + userRcAuthToken + '&goto' + gotoParam;
+    let iframeHref = rcUrl + '?resumeToken=' + userRcAuthToken + '&got=' + gotoParam;
     let windowHeight = $(window)[0].innerHeight;
     let offsetTop = $("#_rc-iframe-wrapper").offset().top;
     let iframeHeight = windowHeight - offsetTop - 20;

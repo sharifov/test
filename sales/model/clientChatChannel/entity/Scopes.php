@@ -13,12 +13,18 @@ class Scopes extends \yii\db\ActiveQuery
 {
 	public function byDepartment(?int $id): self
 	{
-		return $this->andWhere(['ccc_dep_id' => $id]);
+		if ($id) {
+			return $this->andWhere(['ccc_dep_id' => $id]);
+		}
+		return $this->andWhere(new Expression('ccc_dep_id is NULL'));
 	}
 
 	public function byProject(?int $id): self
 	{
-		return $this->andWhere(['ccc_project_id' => $id]);
+		if ($id) {
+			return $this->andWhere(['ccc_project_id' => $id]);
+		}
+		return $this->andWhere(new Expression('ccc_project_id is NULL'));
 	}
 
 	public function priority(int $priority)

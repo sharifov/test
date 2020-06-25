@@ -158,7 +158,7 @@ return [
         ],
 
 		'assetManager' => [
-			'forceCopy' => true,
+			'forceCopy' => false,
 			'appendTimestamp' => false,
             'hashCallback' => static function ($path) use ($appVersion) {
                 return hash('md4', $path . $appVersion);

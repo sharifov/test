@@ -9,6 +9,7 @@ use yii\helpers\ArrayHelper;
 /** @var $loadChannelsUrl string */
 /** @var $page int */
 /** @var $channelId int|null */
+/** @var $clientChatRid string|null */
 
 ?>
 
@@ -67,7 +68,7 @@ use yii\helpers\ArrayHelper;
 
 	<div class="_cc-list-wrapper">
         <?php if ($dataProvider): ?>
-		    <?= $this->render('_client-chat-item', ['clientChats' => $dataProvider->getModels()]) ?>
+		    <?= $this->render('_client-chat-item', ['clientChats' => $dataProvider->getModels(), 'clientChatRid' => $clientChatRid]) ?>
         <?php endif; ?>
 	</div>
 
