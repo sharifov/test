@@ -176,7 +176,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'up_work_minutes',
             //'up_inbox_show_limit_leads',
             'up_default_take_limit_leads',
-            'up_min_percent_for_take_leads',
+            'up_min_percent_for_take_leads'
             /*[
                 'attribute' => 'up_updated_dt',
                 'value' => function(\common\models\UserParams $model) {
@@ -199,6 +199,10 @@ $this->params['breadcrumbs'][] = $this->title;
             ],*/
             'up_telegram',
             'up_telegram_enable:boolean',
+			'up_rc_auth_token',
+			'up_rc_user_id',
+			'up_rc_user_password',
+			'up_rc_token_expired'
 
            /* @property int $up_user_id
  * @property int $up_call_type_id

@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use sales\widgets\ProjectSelect2Widget;
 use Yii;
 use common\models\Project;
 use common\models\search\ProjectSearch;
@@ -154,4 +155,49 @@ class ProjectController extends FController
 
         return $this->redirect(['project/index']);
     }
+
+    public function actionListAjax(?string $q = null, ?int $id = null, ?string $selection = 'id')
+	{
+		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+		$out = ['results' => ['id' => '', 'name' => '', 'selection' => '']];
+
+		ProjectSelect2Widget::checkSelection($selection);
+
+		if ($q !== null) {
+			$query = Project::find();
+			$data = $query->select(['id', 'name'])
+				->where(['like', 'name', $q])
+				->orWhere(['id' => (int) $q])
+				->limit(20)
+				//->indexBy('id')
+				->asArray()
+				->all();
+
+			if ($data) {
+				foreach ($data as $n => $item) {
+					$text = $item['name'] . ' ('.$item['id'].')';
+					$data[$n]['text'] = self::formatText($text, $q);
+					$data[$n]['selection'] = $item[$selection];
+				}
+			}
+
+			$out['results'] = $data; //array_values($data);
+		}
+		elseif ($id > 0) {
+			$project = Project::findOne($id);
+			$out['results'] = ['id' => $id, 'text' => $project ? $project->name : '', 'selection' => $project ? $project->{$selection} : ''];
+		}
+		return $out;
+	}
+
+	/**
+	 * @param string $str
+	 * @param string $term
+	 * @return string
+	 */
+	private static function formatText(string $str, string $term): string
+	{
+		return preg_replace('~'.$term.'~i', '<b style="color: #e15554"><u>$0</u></b>', $str);
+	}
 }

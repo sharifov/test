@@ -27,6 +27,11 @@ use yii\caching\TagDependency;
  *
  * @property string $up_join_date
  *
+ * @property string $up_rc_auth_token
+ * @property string $up_rc_user_id
+ * @property string $up_rc_user_password
+ * @property string $up_rc_token_expired
+ *
  * @property Employee $upUser
  */
 class UserProfile extends \yii\db\ActiveRecord
@@ -83,6 +88,11 @@ class UserProfile extends \yii\db\ActiveRecord
             [['up_2fa_secret'], 'string', 'max' => 50],
             [['up_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['up_user_id' => 'id']],
 
+			[['up_rc_auth_token'], 'string', 'max' => 50],
+			[['up_rc_user_id'], 'string', 'max' => 20],
+			[['up_rc_user_password'], 'string', 'max' => 50],
+			[['up_rc_token_expired'], 'safe' ],
+
             ['up_show_in_contact_list', 'default', 'value' => false],
             ['up_show_in_contact_list', 'boolean'],
         ];
@@ -117,6 +127,10 @@ class UserProfile extends \yii\db\ActiveRecord
             'up_2fa_secret'     => '2fa secret',
 			'up_join_date'		=> 'Join Date',
 			'up_show_in_contact_list' => 'Show in contact list',
+			'up_rc_auth_token' => 'Rocket Chat Auth Token',
+			'up_rc_user_id' => 'Rocket Chat User Id',
+			'up_rc_user_password' => 'Rocket Chat User Password',
+			'up_rc_token_expired' => 'Rocket Chat Token Expired',
         ];
     }
 

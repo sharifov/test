@@ -722,6 +722,31 @@ JS;
 
         <?php endif ?>
 
+		<?php if (Auth::user()->isAdmin() || Auth::user()->isSuperAdmin()) :?>
+
+            <div class="user-failed-login">
+                <h5>Rocket Chat Credentials</h5>
+
+
+
+				<?= \yii\widgets\DetailView::widget([
+					'model' => $user->userProfile,
+                    'options' => [
+                        ''
+                    ],
+                    'attributes' => [
+						'up_rc_auth_token',
+						'up_rc_user_id',
+						'up_rc_user_password',
+						'up_rc_token_expired'
+                    ]
+				]); ?>
+            </div>
+
+
+
+		<?php endif ?>
+
         <?php /*
         <div class="card card-default">
             <div class="panel-heading collapsing-heading">
