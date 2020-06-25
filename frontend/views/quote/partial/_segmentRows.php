@@ -93,6 +93,9 @@ use yii\helpers\Url;
                                         'style' => 'width: 70px;',
                                     ],
                                     'defaultValue' => 1,
+                                    'options' => [
+                                        'maxlength' => 10,
+                                    ],
                                 ],
                                 [
                                     'title' => 'Max Size',
@@ -125,7 +128,10 @@ use yii\helpers\Url;
                                     'name' => 'price',
                                     'headerOptions' => [
                                         'style' => 'width: 90px;',
-                                    ]
+                                    ],
+                                    'options' => [
+                                        'maxlength' => 10,
+                                    ],
                                 ],
                                 [
                                     'name' => 'segmentIata',

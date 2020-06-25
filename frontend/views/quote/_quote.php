@@ -766,8 +766,7 @@ $js = <<<JS
         });        
     });
     
-    function checkPrepareDumpQuote() 
-    {  
+    function checkPrepareDumpQuote() {  
         let message = '';        
         if($('#prepare_dump').val() === '') {
             message = 'Insert dump please';
@@ -784,16 +783,14 @@ $js = <<<JS
         return true;   
     } 
     
-    function cleanData()  
-    {   
+    function cleanData() {   
         $('#head_reservation_result i').attr('class', 'fas fa-copy clipboard');
         $('#box_reservation_result').text('');
         $('#reservation_result').val('');
         $('#quote-main_airline_code').val('').trigger('change');
     }
     
-    function cleanErrors() 
-    {    
+    function cleanErrors() {    
         $('.field-error').each(function() {
             $(this).removeClass('field-error');
         });
@@ -832,6 +829,9 @@ $css = <<<CSS
         -moz-box-shadow: 1px 1px 2px 0 rgba(0,0,0,0.75);
         box-shadow: 1px 1px 2px 0 rgba(0,0,0,0.75);
     }
+    .multiple-input-list__btn:hover .glyphicon {
+        color: #e8e8e8;
+    }    
     .multiple-input-list__item td {
         padding: 3px!important;
     }   
