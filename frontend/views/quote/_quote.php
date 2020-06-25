@@ -26,27 +26,6 @@ $paxCntTypes = [
     QuotePrice::PASSENGER_CHILD => $lead->children,
     QuotePrice::PASSENGER_INFANT => $lead->infants
 ];
-
-$css = <<<CSS
-    .nav-tabs li a.active {
-        font-weight: 900;
-    } 
-    .clipboard {
-        cursor: pointer;
-    }
-    #box_reservation_result {
-        color: #7890a2;
-        margin-bottom: 8px;
-    }    
-    .multiple-input-list th {
-        border-bottom: 1px solid #dee2e6!important;
-        font-weight: normal!important;
-    } 
-    .list-cell__button {
-        padding: 12px 3px 3px 3px!important;
-    }   
-CSS;
-$this->registerCss($css);
 ?>
 
 <?php $form = ActiveForm::begin([
@@ -60,9 +39,9 @@ $this->registerCss($css);
 
     <h6 id="head_reservation_result" style="display: none;">
         Imported reservation info
-        <!--<i class="fas fa-copy clipboard" data-clipboard-target="#box_reservation_result"></i>-->
+        <i class="fas fa-copy clipboard" data-clipboard-target="#box_reservation_result"></i>
     </h6>
-    <div id="box_reservation_result" style="display: none;"></div>
+    <div id="box_reservation_result" style="height: 1px; width: 1px; overflow: hidden;"></div>
 
     <div id="box_segments" ></div>
 
@@ -146,7 +125,8 @@ $this->registerCss($css);
                             ],
                             'template' => '<span class="input-group-addon">$</span>{input}'
                         ])->textInput([
-                            'class' => 'form-control alt-quote-price'
+                            'class' => 'form-control alt-quote-price',
+                            'maxlength' => 10,
                         ]) ?>
                     </td>
                     <td class="td-input">
@@ -157,7 +137,8 @@ $this->registerCss($css);
                             'template' => '<span class="input-group-addon">$</span>{input}'
                         ])->textInput([
                             'class' => 'form-control ',
-                            'readonly' => true
+                            'readonly' => true,
+                            'maxlength' => 10,
                         ]) ?>
                     </td>
                     <td class="td-input">
@@ -167,7 +148,8 @@ $this->registerCss($css);
                             ],
                             'template' => '<span class="input-group-addon">$</span>{input}'
                         ])->textInput([
-                            'class' => 'form-control alt-quote-price'
+                            'class' => 'form-control alt-quote-price',
+                            'maxlength' => 10,
                         ]) ?>
                     </td>
                     <td class="td-input">
@@ -178,6 +160,7 @@ $this->registerCss($css);
                             'template' => '<span class="input-group-addon">$</span>{input}'
                         ])->textInput([
                             'class' => 'form-control alt-quote-price',
+                            'maxlength' => 10,
                         ]) ?>
                     </td>
                     <td class="td-input">
@@ -187,7 +170,8 @@ $this->registerCss($css);
                             ],
                             'template' => '<span class="input-group-addon">$</span>{input}'
                         ])->textInput([
-                            'class' => 'form-control alt-quote-price mark-up'
+                            'class' => 'form-control alt-quote-price mark-up',
+                            'maxlength' => 10,
                         ]) ?>
                     </td>
                     <td class="td-input text-right">
@@ -824,3 +808,35 @@ $js = <<<JS
     });   
 JS;
 $this->registerJs($js);
+
+$css = <<<CSS
+    .nav-tabs li a.active {
+        font-weight: 900;
+    } 
+    .clipboard {
+        cursor: pointer;
+    }
+    #box_reservation_result {
+        color: #7890a2;
+        margin-bottom: 8px;
+    }    
+    .multiple-input-list th {
+        border-bottom: 1px solid #dee2e6!important;
+        font-weight: normal!important;
+    } 
+    .list-cell__button {
+        padding: 12px 3px 3px 3px!important;
+    }
+    .multiple-input-list__btn:hover {
+        -webkit-box-shadow: 1px 1px 2px 0 rgba(0,0,0,0.75);
+        -moz-box-shadow: 1px 1px 2px 0 rgba(0,0,0,0.75);
+        box-shadow: 1px 1px 2px 0 rgba(0,0,0,0.75);
+    }
+    .multiple-input-list__item td {
+        padding: 3px!important;
+    }   
+    .list-cell__button .js-input-remove {
+        margin-top: 4px;
+    }
+CSS;
+$this->registerCss($css);

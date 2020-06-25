@@ -51,7 +51,6 @@ use yii\helpers\Url;
                 'id' => $formName,
                 'enableClientValidation' => false,
                 'enableAjaxValidation' => true,
-                'validateOnChange' => true,
                 'validationUrl' => Url::to(['quote/segment-baggage-validate', 'iata' => $segment['segmentIata']]),
                 'options' => [
                     'class' => 'segment_baggage_forms'
@@ -85,9 +84,6 @@ use yii\helpers\Url;
                                     'headerOptions' => [
                                         'style' => 'width: 120px;',
                                     ],
-                                    'options' => [
-                                        'prompt' => '---'
-                                    ]
                                 ],
                                 [
                                     'title' => 'Pieces',
@@ -96,6 +92,7 @@ use yii\helpers\Url;
                                     'headerOptions' => [
                                         'style' => 'width: 70px;',
                                     ],
+                                    'defaultValue' => 1,
                                 ],
                                 [
                                     'title' => 'Max Size',
@@ -106,6 +103,7 @@ use yii\helpers\Url;
                                         'clientOptions' => [
                                             'source' => $sourceHeight,
                                             'appendTo' => '#modal-lg',
+                                            'minLength' => 0,
                                         ],
                                     ],
                                 ],
@@ -118,6 +116,7 @@ use yii\helpers\Url;
                                         'clientOptions' => [
                                             'source' => $sourceWeight,
                                             'appendTo' => '#modal-lg',
+                                            'minLength' => 0,
                                         ],
                                     ],
                                 ],
@@ -163,8 +162,12 @@ $js =<<<JS
         });      
     });  
     
-    jQuery('#$multipleInputId').on('afterAddRow', function(){
-        $('.ui-autocomplete-input').addClass('form-control');   
+    $('#$multipleInputId').on('afterAddRow', function() {
+        $('.ui-autocomplete-input')
+            .addClass('form-control')
+            .focus(function () {
+                $(this).autocomplete("search");
+            }); 
     });      
 JS;
 $this->registerJs($js);
@@ -174,7 +177,11 @@ $this->registerJs($js);
 
 <?php
 $js =<<<JS
-    $('.ui-autocomplete-input').addClass('form-control');        
+    $('.ui-autocomplete-input')
+        .addClass('form-control')
+        .focus(function () {
+            $(this).autocomplete("search");
+        });
 JS;
 $this->registerJs($js);
 ?>

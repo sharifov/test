@@ -65,11 +65,12 @@ class SegmentBaggageForm extends Model
             [['paxCode'], 'default', 'value' => QuotePrice::PASSENGER_ADULT],
             [['paxCode'], 'in', 'range' => array_keys(QuotePrice::PASSENGER_TYPE_LIST)],
 
-            [['price'], 'number', 'min' => 0, 'max' => 9999],
+            [['price'],'number','min' => 0.01, 'max' => 9999 , 'when' => function() {
+                return $this->type === BaggageService::TYPE_PAID;
+            }],
             ['price', 'required', 'when' => function () {
                 return ($this->type === BaggageService::TYPE_PAID);
             }, 'skipOnError' => true],
-
             [['price'], function($attribute) {
                 if ($this->type === BaggageService::TYPE_FREE && !in_array($this->$attribute, ['', 0], false)) {
                     $this->addError($attribute, 'Baggage should be free');

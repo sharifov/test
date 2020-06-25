@@ -641,7 +641,10 @@ class QuoteController extends FController
                         if (!isset($iataMatches[2])) {
                             continue;
                         }
-                        if ($segment = QuoteSegment::getByQuoteAndIata($quote->id, $iataMatches[1], $iataMatches[2])) {
+                        if (
+                            (isset($postValues['baggageData']) && is_array($postValues['baggageData'])) &&
+                            $segment = QuoteSegment::getByQuoteAndIata($quote->id, $iataMatches[1], $iataMatches[2])
+                        ) {
                             foreach ($postValues['baggageData'] as $key => $baggageData) {
                                 $segmentBaggageForm = new SegmentBaggageForm();
                                 $segmentBaggageForm->segmentId = $segment->qs_id;
@@ -675,6 +678,8 @@ class QuoteController extends FController
         } catch (\Throwable $throwable) {
             $transaction->rollBack();
             $response['errorMessage'] = $throwable->getMessage();
+            \Yii::error(\yii\helpers\VarDumper::dumpAsString($throwable, 10),
+            'QuoteController:actionSaveFromDump:Throwable');
         }
         return $response;
     }
