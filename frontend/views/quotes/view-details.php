@@ -78,7 +78,10 @@ use yii\helpers\Html;
                                                 class="badge badge-primary">
                                                     <i class="fa fa-suitcase"></i>&nbsp;
                                                 <?php if(isset($baggage->qsb_allow_pieces)):?>
-                                                    <?= \Yii::t('search', '{n, plural, =0{no baggage} one{# piece} other{# pieces}}', ['n' => $baggage->qsb_allow_pieces]);?>
+                                                    <?= \Yii::t(
+                                                        'search',
+                                                        '{n, plural, =0{no baggage} one{# piece} other{# pieces}}',
+                                                        ['n' => $baggage->qsb_allow_pieces]) ?>
                                                 <?php elseif(isset($baggage->qsb_allow_weight)):?>
                                                     <?= $baggage->qsb_allow_weight . $baggage->qsb_allow_unit?>
                                                 <?php endif;?>
@@ -87,16 +90,15 @@ use yii\helpers\Html;
                                         <?php endif;?>
 
                                         <?php if(!empty($segment->quoteSegmentBaggageCharges)):?>
-                                            <?php $paxCode = null;?>
                                             <?php foreach ($segment->quoteSegmentBaggageCharges as $baggageCh):?>
-                                                <?php if($paxCode == null){
-                                                    $paxCode = $baggageCh->qsbc_pax_code;
-                                                }elseif ($paxCode != $baggageCh->qsbc_pax_code){
-                                                    break;
-                                                }
-                                                ?>
-                                                <span title="<?= (isset($baggageCh->qsbc_max_size)?$baggageCh->qsbc_max_size:'').' '.(isset($baggageCh->qsbc_max_weight)?$baggageCh->qsbc_max_weight:'')?>"
-                                                      class="badge badge-light"><i class="fa fa-plus"></i>&nbsp;<i class="fa fa-suitcase"></i>&nbsp;<?= $baggageCh->qsbc_price?>$</span>
+                                                <span
+                                                    title="<?php echo Html::encode($baggageCh->qsbc_max_size) . "\n" .
+                                                        Html::encode($baggageCh->qsbc_max_weight) ?>"
+                                                    class="badge badge-light">
+                                                        <i class="fa fa-plus"></i>&nbsp;
+                                                        <i class="fa fa-suitcase"></i>&nbsp;
+                                                        <?= $baggageCh->qsbc_price?>$
+                                                </span>
                                             <?php endforeach;?>
                                         <?php endif;?>
 
