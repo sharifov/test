@@ -6,7 +6,9 @@ use common\components\CommunicationService;
 use common\components\Purifier;
 use common\components\jobs\TelegramSendMessageJob;
 use common\components\SearchService;
+use common\models\Airport;
 use common\models\Call;
+use common\models\CaseSale;
 use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
@@ -1332,7 +1334,12 @@ class TestController extends FController
         VarDumper::dump($chat->deleteUser('alex.connor3'), 10, true);
         //VarDumper::dump($chat->systemLogin(), 10, true);
     }
-    
+
+    public function actionZ()
+    {
+
+        return $this->render('z');
+    }
 }
 
 

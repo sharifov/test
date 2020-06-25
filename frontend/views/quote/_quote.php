@@ -26,393 +26,6 @@ $paxCntTypes = [
     QuotePrice::PASSENGER_CHILD => $lead->children,
     QuotePrice::PASSENGER_INFANT => $lead->infants
 ];
-
-$js = <<<JS
-
-    var leadId = '$lead->id';
-
-    $('[data-toggle="tooltip"]').tooltip();
-    
-    $(document).on('keyup', '.alt-quote-price', function(event){
-        var key = event.keyCode ? event.keyCode : event.which;
-        validatePriceField($(this), key);
-    });
-    
-    $(document).on('change', '.alt-quote-price', function(event){
-        
-        $('.alt-quote-price').prop('readonly', true);
-        $('.field-error').each(function() {
-            $(this).removeClass('field-error');
-        });
-        $('.parent-error').removeClass('has-error');
-        
-        if ($(this).val().length === 0) {
-            $(this).val(0);
-        }
-        
-        var form = $('#$formID');
-        $.ajax({
-            type: 'post',
-            url: '$quotePriceUrl',
-            data: form.serialize(),
-            success: function (data) {
-            
-                $.each(data, function( index, value ) {
-                    $('#'+index).val(value);
-                });
-                $('.alt-quote-price').prop('readonly', false);
-            },
-            error: function (error) {
-                console.log('Error: ' + error);
-                $('.alt-quote-price').prop('readonly', false);
-            }
-        });
-    });
-
-    /***  Cancel card  ***/
-    $('#cancel-alt-quote').click(function (e) {
-        e.preventDefault();
-        var editBlock = $('#$formID');
-        editBlock.parent().parent().removeClass('show');
-        editBlock.parent().html('');
-        $('#modal-lg').modal('hide');
-        if ($(this).data('type') == 'search') {
-            //$('#quick-search').modal('show');
-        }
-    });
-    $('#cancel-confirm-quote').click(function (e) {
-        e.preventDefault();
-        $('#modal-confirm-alt-itinerary').modal('hide');
-    });
-
-    function addEditAltQuote(form, url)
-    {
-        $('.field-error').each(function() {
-            $(this).removeClass('field-error');
-        });
-        $('.parent-error').removeClass('has-error');
-        
-        if($('#quote-gds').val() == '') {
-            alert('Select GDS please');
-            $('#quote-gds').focus();
-            return false;
-        }        
-        if($('#quote-main_airline_code').val() == '') {
-            alert('Select Validating Carrier please');
-            $('#quote-main_airline_code').focus();
-            return false;
-        } 
-                        
-        $('#preloader').removeClass('hidden');
-                
-        $.ajax({
-            url: url,
-            type: form.attr("method"),
-            data: form.serialize(),
-            success: function (data) {
-                var itineraryErr = false;
-                $('#preloader').addClass('hidden');
-                
-                $.each(data, function( index, value ) {
-                    $('#'+index).val(value);
-                    if(index == 'quote-main_airline_code'){
-                        $('#'+index).trigger('change');
-                    }
-                });
-                if (data.success == false) {
-                    $.each(data.errors, function( index, value ) {
-                        $('#quote-'+index).addClass('field-error');
-                        $('#quote-'+index).parent().addClass('has-error parent-error');
-                        if (index == 'reservation_dump') {
-                            itineraryErr = true;
-                        }
-                    });
-
-                    $.each(data.errorsPrices, function( index, value ) {
-                        $.each(value, function (idx, val){
-                            $('#quoteprice-'+index+'-'+idx).addClass('field-error');
-                            $('#quoteprice-'+index+'-'+idx).parent().addClass('has-error parent-error');
-                        });
-
-                    });
-
-                    if (data.itinerary.length != 0) {
-                        if (Object.keys(data.errors).length == 1 && itineraryErr) {
-                            $('#modal-confirm-alt-itinerary .diff-itinerary__content').html('');
-                            $.each(data.itinerary, function( index, value ) {
-                                var divCh = $("<div/>").addClass("diff-itinerary__item").appendTo($('#modal-confirm-alt-itinerary .diff-itinerary__content'));
-                                divCh.html('<div class="diff-itinerary__conf-number">'+ value +'</div>')
-                            });
-                            $('#modal-confirm-alt-itinerary').modal('show');
-                        }
-                    }
-	            } else {
-                    if (data.save == true) {
-                         window.location.reload();
-                    } else {
-                        $('#modal-confirm-alt-itinerary .diff-itinerary__content').html('');
-                        $.each(data.itinerary, function( index, value ) {
-                            var divCh = $("<div/>").addClass("diff-itinerary__item").appendTo($('#modal-confirm-alt-itinerary .diff-itinerary__content'));
-                            divCh.html('<div class="diff-itinerary__conf-number">'+ value +'</div>')
-                        });
-                        $('#modal-confirm-alt-itinerary').modal('show');
-                    }
-	            }
-            },
-            error: function (error) {
-                console.log('Error: ' + error);
-            }
-        });
-    }
-    
-    $('#save-alt-quote').click(function (e) {
-        e.preventDefault();
-        $('#alternativequote-status').val(1);
-        var form = $('#$formID');
-               
-        if($('#quote-reservation_dump').val() == '') {
-            alert('Insert Reservation dump please');
-            $('#quote-reservation_dump').focus();
-            return false;
-        }        
-        addEditAltQuote(form, form.attr("action"));
-    });
-    $('#confirm-alt-quote').click(function (e) {
-        e.preventDefault();
-        $('#modal-confirm-alt-itinerary').modal('hide');
-        $('#alternativequote-status').val(1);
-        var form = $('#$formID');
-        addEditAltQuote(form, form.attr("action") + '?save=true');
-    });
-    
-    $('.clone-alt-price-by-type').click(function(e) {
-        e.preventDefault();
-        $(this).blur();
-        var priceIndex = $(this).data('price-index');
-        var paxType = $(this).data('type');
-        var list = {};
-        $('#price-index-' + priceIndex + ' input').each(function() {
-            var field = $(this).attr('id').split('-')[2];
-            if ($.inArray(field, ['net', 'fare', 'mark_up', 'oldparams', 'selling', 'taxes']) != -1) {
-                list[field] = $(this).val();
-            }
-        });
-        $('.pax-type-' + paxType).each(function(index) {
-            if (index != 0) {
-                $(this).find('input').each(function() {
-                    var field = $(this).attr('id').split('-')[2];
-                    for (var key in list) {
-                        if (field == key) {
-                            $(this).val(list[field]);
-                            break;
-                        }
-                    }
-                });
-            }
-        });
-    });
-    
-    function loadingBtn(btnObj, loading)
-    {
-        if (loading === true) {
-            btnObj.removeClass()
-                .addClass('btn btn-default')
-                .html('<span class="spinner-border spinner-border-sm"></span> Loading')
-                .prop("disabled", true);
-        } else {
-            let origClass = btnObj.data('class');
-            let origInner = btnObj.data('inner');
-            btnObj.removeClass()
-                .addClass(origClass)
-                .html(origInner)
-                .prop("disabled", false);
-        }  
-    }
-    
-    $('#prepare_dump_btn').click(function (e) {
-        e.preventDefault(); 
-        
-        cleanErrors(); 
-        cleanData();      
-        
-        $('#save_dump_btn').hide();                            
-        let form = $('#$formID');
-                 
-        loadingBtn($(this), true);        
-        if (!checkPrepareDumpQuote()) {
-            loadingBtn($(this), false); 
-            return false;
-        }
-                        
-        $.ajax({
-            url: '/quote/prepare-dump?lead_id=' + leadId,
-            type: 'POST',
-            data: form.serialize(),
-            dataType: 'json'
-        })
-        .done(function(dataResponse) {
-            loadingBtn($('#prepare_dump_btn'), false);
-                
-            if (dataResponse.status === 1) {
-               
-                if (dataResponse.validating_carrier.length) {
-                   $('#quote-main_airline_code').val(dataResponse.validating_carrier).trigger('change');
-                } 
-                if (dataResponse.prices.length) {
-                   $('#price-table tbody').html(dataResponse.prices); 
-                }
-                if (dataResponse.trip_type.length) {
-                   $('#quote-trip_type').val(dataResponse.trip_type);
-                } 
-                if (dataResponse.reservation_dump.length) {                        
-                    $('#reservation_result').val(dataResponse.reservation_dump.join("\\n"));
-                    
-                    var reservationDumpOut = dataResponse.reservation_dump.join("<br />");
-                    $('#head_reservation_result').show();
-                    $('#box_reservation_result').html(reservationDumpOut);
-                }                    
-                $('#save_dump_btn').show(500);                                                            
-            } else {
-                if (dataResponse.error.length) {                        
-                    new PNotify({
-                        title: "Error",
-                        type: "error",
-                        text: dataResponse.error,
-                        hide: true
-                    }); 
-                }    
-                $('#save_dump_btn').hide(500);      
-            }
-        })
-        .fail(function(error) {
-            loadingBtn($('#prepare_dump_btn'), false);
-            console.log(error);
-        })
-        .always(function() {
-            setTimeout(loadingBtn, 4000, $('#prepare_dump_btn'), false);     
-        });
-    });
-    
-    $('#save_dump_btn').click(function (e) {
-        e.preventDefault();
-        
-        cleanErrors();        
-         
-        loadingBtn($(this), true);
-        if (!checkPrepareDumpQuote()) {
-            loadingBtn($(this), false);
-            return false;
-        }
-                        
-        $.ajax({
-            url: '/quote/save-from-dump?lead_id=' + leadId,
-            type: 'POST',
-            data: $('#$formID').serialize(),
-            dataType: 'json'
-        })
-        .done(function(dataResponse) {
-            loadingBtn($('#save_dump_btn'), false);
-                
-            if (dataResponse.status === 1) {                   
-                new PNotify({
-                    title: 'Success',
-                    type: 'success',
-                    text: 'Quote created',
-                    hide: true
-                });
-                window.location.reload();                                        
-            } else {
-            
-                $.each(dataResponse.errorsPrices, function( index, value ) {
-                    $.each(value, function (idx, val){                            
-                        $('#quoteprice-'+index+'-'+idx).addClass('field-error');
-                        $('#quoteprice-'+index+'-'+idx).parent().addClass('has-error parent-error');
-                    });
-                });
-                $.each(dataResponse.errors, function( index, value ) {
-                    $('#quote-'+index).addClass('field-error');
-                    $('#quote-'+index).parent().addClass('has-error parent-error');
-                    if (index == 'reservation_dump') {
-                        itineraryErr = true;
-                    }
-                });
-                                  
-                if (dataResponse.errorMessage.length) {                        
-                    new PNotify({
-                        title: "Error",
-                        type: "error",
-                        text: dataResponse.errorMessage,
-                        hide: true
-                    }); 
-                }    
-            }
-        })
-        .fail(function(error) {
-            loadingBtn($('#save_dump_btn'), false);
-            console.log(error);
-        })
-        .always(function() {
-            setTimeout(loadingBtn, 4000, $('#save_dump_btn'), false);     
-        });        
-    });
-    
-    function checkPrepareDumpQuote() 
-    {  
-        let message = '';        
-        if($('#prepare_dump').val() === '') {
-            message = 'Insert dump please';
-        } 
-        if($('#quote-gds').val() === '') {
-            message = 'Select GDS please';
-        }         
-        if (message !== '') {
-            new PNotify({title: "Error", type: "error",
-                text: message, hide: true
-            });
-            return false;
-        } 
-        return true;   
-    } 
-    
-    function cleanData()  
-    {   
-        $('#head_reservation_result i').attr('class', 'fas fa-copy clipboard');
-        $('#box_reservation_result').text('');
-        $('#reservation_result').val('');
-        $('#quote-main_airline_code').val('').trigger('change');
-    }
-    
-    function cleanErrors() 
-    {    
-        $('.field-error').each(function() {
-            $(this).removeClass('field-error');
-        });
-        $('.parent-error').removeClass('has-error');        
-        PNotify.removeAll();
-    }
-    
-    var clipboard = new ClipboardJS('.clipboard');
-    clipboard.on('success', function(e) {
-        $('.clipboard').attr('class', 'fas fa-check');
-        e.clearSelection();
-    });   
-JS;
-$this->registerJs($js);
-?>
-
-<?php
-$this->registerCss('
-    .nav-tabs li a.active {
-        font-weight: 900;
-    } 
-    .clipboard {
-        cursor: pointer;
-    }
-    #box_reservation_result {
-        color: #7890a2;
-        margin-bottom: 8px;
-    }
-');
 ?>
 
 <?php $form = ActiveForm::begin([
@@ -428,7 +41,9 @@ $this->registerCss('
         Imported reservation info
         <i class="fas fa-copy clipboard" data-clipboard-target="#box_reservation_result"></i>
     </h6>
-    <div id="box_reservation_result"></div>
+    <div id="box_reservation_result" style="height: 1px; width: 1px; overflow: hidden;"></div>
+
+    <div id="box_segments" ></div>
 
     <?php echo Html::textarea('reservation_result', null,
         ['id' => 'reservation_result', 'style' => 'display:none;'])
@@ -510,7 +125,8 @@ $this->registerCss('
                             ],
                             'template' => '<span class="input-group-addon">$</span>{input}'
                         ])->textInput([
-                            'class' => 'form-control alt-quote-price'
+                            'class' => 'form-control alt-quote-price',
+                            'maxlength' => 10,
                         ]) ?>
                     </td>
                     <td class="td-input">
@@ -521,7 +137,8 @@ $this->registerCss('
                             'template' => '<span class="input-group-addon">$</span>{input}'
                         ])->textInput([
                             'class' => 'form-control ',
-                            'readonly' => true
+                            'readonly' => true,
+                            'maxlength' => 10,
                         ]) ?>
                     </td>
                     <td class="td-input">
@@ -531,7 +148,8 @@ $this->registerCss('
                             ],
                             'template' => '<span class="input-group-addon">$</span>{input}'
                         ])->textInput([
-                            'class' => 'form-control alt-quote-price'
+                            'class' => 'form-control alt-quote-price',
+                            'maxlength' => 10,
                         ]) ?>
                     </td>
                     <td class="td-input">
@@ -542,6 +160,7 @@ $this->registerCss('
                             'template' => '<span class="input-group-addon">$</span>{input}'
                         ])->textInput([
                             'class' => 'form-control alt-quote-price',
+                            'maxlength' => 10,
                         ]) ?>
                     </td>
                     <td class="td-input">
@@ -551,7 +170,8 @@ $this->registerCss('
                             ],
                             'template' => '<span class="input-group-addon">$</span>{input}'
                         ])->textInput([
-                            'class' => 'form-control alt-quote-price mark-up'
+                            'class' => 'form-control alt-quote-price mark-up',
+                            'maxlength' => 10,
                         ]) ?>
                     </td>
                     <td class="td-input text-right">
@@ -813,3 +433,410 @@ $this->registerCss('
     </div>
 </div>
 
+<?php
+$js = <<<JS
+
+    var leadId = '$lead->id';
+
+    $('[data-toggle="tooltip"]').tooltip();
+    
+    $(document).on('keyup', '.alt-quote-price', function(event){
+        var key = event.keyCode ? event.keyCode : event.which;
+        validatePriceField($(this), key);
+    });
+    
+    $(document).on('change', '.alt-quote-price', function(event){
+        
+        $('.alt-quote-price').prop('readonly', true);
+        $('.field-error').each(function() {
+            $(this).removeClass('field-error');
+        });
+        $('.parent-error').removeClass('has-error');
+        
+        if ($(this).val().length === 0) {
+            $(this).val(0);
+        }
+        
+        var form = $('#$formID');
+        $.ajax({
+            type: 'post',
+            url: '$quotePriceUrl',
+            data: form.serialize(),
+            success: function (data) {
+            
+                $.each(data, function( index, value ) {
+                    $('#'+index).val(value);
+                });
+                $('.alt-quote-price').prop('readonly', false);
+            },
+            error: function (error) {
+                console.log('Error: ' + error);
+                $('.alt-quote-price').prop('readonly', false);
+            }
+        });
+    });
+
+    /***  Cancel card  ***/
+    $('#cancel-alt-quote').click(function (e) {
+        e.preventDefault();
+        var editBlock = $('#$formID');
+        editBlock.parent().parent().removeClass('show');
+        editBlock.parent().html('');
+        $('#modal-lg').modal('hide');
+        if ($(this).data('type') == 'search') {
+            //$('#quick-search').modal('show');
+        }
+    });
+    $('#cancel-confirm-quote').click(function (e) {
+        e.preventDefault();
+        $('#modal-confirm-alt-itinerary').modal('hide');
+    });
+
+    function addEditAltQuote(form, url)
+    {
+        $('.field-error').each(function() {
+            $(this).removeClass('field-error');
+        });
+        $('.parent-error').removeClass('has-error');
+        
+        if($('#quote-gds').val() == '') {
+            alert('Select GDS please');
+            $('#quote-gds').focus();
+            return false;
+        }        
+        if($('#quote-main_airline_code').val() == '') {
+            alert('Select Validating Carrier please');
+            $('#quote-main_airline_code').focus();
+            return false;
+        } 
+                        
+        $('#preloader').removeClass('hidden');
+                
+        $.ajax({
+            url: url,
+            type: form.attr("method"),
+            data: form.serialize(),
+            success: function (data) {
+                var itineraryErr = false;
+                $('#preloader').addClass('hidden');
+                
+                $.each(data, function( index, value ) {
+                    $('#'+index).val(value);
+                    if(index == 'quote-main_airline_code'){
+                        $('#'+index).trigger('change');
+                    }
+                });
+                if (data.success == false) {
+                    $.each(data.errors, function( index, value ) {
+                        $('#quote-'+index).addClass('field-error');
+                        $('#quote-'+index).parent().addClass('has-error parent-error');
+                        if (index == 'reservation_dump') {
+                            itineraryErr = true;
+                        }
+                    });
+
+                    $.each(data.errorsPrices, function( index, value ) {
+                        $.each(value, function (idx, val){
+                            $('#quoteprice-'+index+'-'+idx).addClass('field-error');
+                            $('#quoteprice-'+index+'-'+idx).parent().addClass('has-error parent-error');
+                        });
+
+                    });
+
+                    if (data.itinerary.length != 0) {
+                        if (Object.keys(data.errors).length == 1 && itineraryErr) {
+                            $('#modal-confirm-alt-itinerary .diff-itinerary__content').html('');
+                            $.each(data.itinerary, function( index, value ) {
+                                var divCh = $("<div/>").addClass("diff-itinerary__item").appendTo($('#modal-confirm-alt-itinerary .diff-itinerary__content'));
+                                divCh.html('<div class="diff-itinerary__conf-number">'+ value +'</div>')
+                            });
+                            $('#modal-confirm-alt-itinerary').modal('show');
+                        }
+                    }
+	            } else {
+                    if (data.save == true) {
+                         window.location.reload();
+                    } else {
+                        $('#modal-confirm-alt-itinerary .diff-itinerary__content').html('');
+                        $.each(data.itinerary, function( index, value ) {
+                            var divCh = $("<div/>").addClass("diff-itinerary__item").appendTo($('#modal-confirm-alt-itinerary .diff-itinerary__content'));
+                            divCh.html('<div class="diff-itinerary__conf-number">'+ value +'</div>')
+                        });
+                        $('#modal-confirm-alt-itinerary').modal('show');
+                    }
+	            }
+            },
+            error: function (error) {
+                console.log('Error: ' + error);
+            }
+        });
+    }
+    
+    $('#save-alt-quote').click(function (e) {
+        e.preventDefault();
+        $('#alternativequote-status').val(1);
+        var form = $('#$formID');
+               
+        if($('#quote-reservation_dump').val() == '') {
+            alert('Insert Reservation dump please');
+            $('#quote-reservation_dump').focus();
+            return false;
+        }        
+        addEditAltQuote(form, form.attr("action"));
+    });
+    $('#confirm-alt-quote').click(function (e) {
+        e.preventDefault();
+        $('#modal-confirm-alt-itinerary').modal('hide');
+        $('#alternativequote-status').val(1);
+        var form = $('#$formID');
+        addEditAltQuote(form, form.attr("action") + '?save=true');
+    });
+    
+    $('.clone-alt-price-by-type').click(function(e) {
+        e.preventDefault();
+        $(this).blur();
+        var priceIndex = $(this).data('price-index');
+        var paxType = $(this).data('type');
+        var list = {};
+        $('#price-index-' + priceIndex + ' input').each(function() {
+            var field = $(this).attr('id').split('-')[2];
+            if ($.inArray(field, ['net', 'fare', 'mark_up', 'oldparams', 'selling', 'taxes']) != -1) {
+                list[field] = $(this).val();
+            }
+        });
+        $('.pax-type-' + paxType).each(function(index) {
+            if (index != 0) {
+                $(this).find('input').each(function() {
+                    var field = $(this).attr('id').split('-')[2];
+                    for (var key in list) {
+                        if (field == key) {
+                            $(this).val(list[field]);
+                            break;
+                        }
+                    }
+                });
+            }
+        });
+    });
+    
+    function loadingBtn(btnObj, loading)
+    {
+        if (loading === true) {
+            btnObj.removeClass()
+                .addClass('btn btn-default')
+                .html('<span class="spinner-border spinner-border-sm"></span> Loading')
+                .prop("disabled", true);
+        } else {
+            let origClass = btnObj.data('class');
+            let origInner = btnObj.data('inner');
+            btnObj.removeClass()
+                .addClass(origClass)
+                .html(origInner)
+                .prop("disabled", false);
+        }  
+    }
+    
+    $('#prepare_dump_btn').click(function (e) {
+        e.preventDefault(); 
+        
+        cleanErrors(); 
+        cleanData();      
+        
+        $('#save_dump_btn').hide();                            
+        let form = $('#$formID');
+                 
+        loadingBtn($(this), true);        
+        if (!checkPrepareDumpQuote()) {
+            loadingBtn($(this), false); 
+            return false;
+        }
+                        
+        $.ajax({
+            url: '/quote/prepare-dump?lead_id=' + leadId,
+            type: 'POST',
+            data: form.serialize(),
+            dataType: 'json'
+        })
+        .done(function(dataResponse) {
+            loadingBtn($('#prepare_dump_btn'), false);
+                
+            if (dataResponse.status === 1) {
+               
+                if (dataResponse.validating_carrier.length) {
+                   $('#quote-main_airline_code').val(dataResponse.validating_carrier).trigger('change');
+                } 
+                if (dataResponse.prices.length) {
+                   $('#price-table tbody').html(dataResponse.prices); 
+                }
+                if (dataResponse.segments.length) {
+                   $('#box_segments').html(dataResponse.segments); 
+                }
+                if (dataResponse.trip_type.length) {
+                   $('#quote-trip_type').val(dataResponse.trip_type);
+                } 
+                if (dataResponse.reservation_dump.length) {                        
+                    $('#reservation_result').val(dataResponse.reservation_dump.join("\\n"));
+                    
+                    var reservationDumpOut = dataResponse.reservation_dump.join("<br />");
+                    $('#head_reservation_result').show();
+                    $('#box_reservation_result').html(reservationDumpOut);
+                }                    
+                $('#save_dump_btn').show(500);                                                            
+            } else {
+                if (dataResponse.error.length) {                        
+                    new PNotify({
+                        title: "Error",
+                        type: "error",
+                        text: dataResponse.error,
+                        hide: true
+                    }); 
+                }    
+                $('#save_dump_btn').hide(500);      
+            }
+        })
+        .fail(function(error) {
+            loadingBtn($('#prepare_dump_btn'), false);
+            console.log(error);
+        })
+        .always(function() {
+            setTimeout(loadingBtn, 4000, $('#prepare_dump_btn'), false);     
+        });
+    });
+    
+    $('#save_dump_btn').click(function (e) {
+        e.preventDefault();
+        
+        cleanErrors();        
+         
+        loadingBtn($(this), true);
+        if (!checkPrepareDumpQuote()) {
+            loadingBtn($(this), false);
+            return false;
+        }
+                        
+        $.ajax({
+            url: '/quote/save-from-dump?lead_id=' + leadId,
+            type: 'POST',
+            data: $('#$formID, .segment_baggage_forms').serialize(),
+            dataType: 'json'
+        })
+        .done(function(dataResponse) {
+            loadingBtn($('#save_dump_btn'), false);
+                
+            if (dataResponse.status === 1) {                   
+                new PNotify({
+                    title: 'Success',
+                    type: 'success',
+                    text: 'Quote created',
+                    hide: true
+                });
+                window.location.reload();                                        
+            } else {
+            
+                $.each(dataResponse.errorsPrices, function( index, value ) {
+                    $.each(value, function (idx, val){                            
+                        $('#quoteprice-'+index+'-'+idx).addClass('field-error');
+                        $('#quoteprice-'+index+'-'+idx).parent().addClass('has-error parent-error');
+                    });
+                });
+                $.each(dataResponse.errors, function( index, value ) {
+                    $('#quote-'+index).addClass('field-error');
+                    $('#quote-'+index).parent().addClass('has-error parent-error');
+                    if (index == 'reservation_dump') {
+                        itineraryErr = true;
+                    }
+                });
+                                  
+                if (dataResponse.errorMessage.length) {                        
+                    new PNotify({
+                        title: "Error",
+                        type: "error",
+                        text: dataResponse.errorMessage,
+                        hide: true
+                    }); 
+                }    
+            }
+        })
+        .fail(function(error) {
+            loadingBtn($('#save_dump_btn'), false);
+            console.log(error);
+        })
+        .always(function() {
+            setTimeout(loadingBtn, 4000, $('#save_dump_btn'), false);     
+        });        
+    });
+    
+    function checkPrepareDumpQuote() 
+    {  
+        let message = '';        
+        if($('#prepare_dump').val() === '') {
+            message = 'Insert dump please';
+        } 
+        if($('#quote-gds').val() === '') {
+            message = 'Select GDS please';
+        }         
+        if (message !== '') {
+            new PNotify({title: "Error", type: "error",
+                text: message, hide: true
+            });
+            return false;
+        } 
+        return true;   
+    } 
+    
+    function cleanData()  
+    {   
+        $('#head_reservation_result i').attr('class', 'fas fa-copy clipboard');
+        $('#box_reservation_result').text('');
+        $('#reservation_result').val('');
+        $('#quote-main_airline_code').val('').trigger('change');
+    }
+    
+    function cleanErrors() 
+    {    
+        $('.field-error').each(function() {
+            $(this).removeClass('field-error');
+        });
+        $('.parent-error').removeClass('has-error');        
+        PNotify.removeAll();
+    }
+    
+    var clipboard = new ClipboardJS('.clipboard');
+    clipboard.on('success', function(e) {
+        $('.clipboard').attr('class', 'fas fa-check');
+        e.clearSelection();
+    });   
+JS;
+$this->registerJs($js);
+
+$css = <<<CSS
+    .nav-tabs li a.active {
+        font-weight: 900;
+    } 
+    .clipboard {
+        cursor: pointer;
+    }
+    #box_reservation_result {
+        color: #7890a2;
+        margin-bottom: 8px;
+    }    
+    .multiple-input-list th {
+        border-bottom: 1px solid #dee2e6!important;
+        font-weight: normal!important;
+    } 
+    .list-cell__button {
+        padding: 12px 3px 3px 3px!important;
+    }
+    .multiple-input-list__btn:hover {
+        -webkit-box-shadow: 1px 1px 2px 0 rgba(0,0,0,0.75);
+        -moz-box-shadow: 1px 1px 2px 0 rgba(0,0,0,0.75);
+        box-shadow: 1px 1px 2px 0 rgba(0,0,0,0.75);
+    }
+    .multiple-input-list__item td {
+        padding: 3px!important;
+    }   
+    .list-cell__button .js-input-remove {
+        margin-top: 4px;
+    }
+CSS;
+$this->registerCss($css);

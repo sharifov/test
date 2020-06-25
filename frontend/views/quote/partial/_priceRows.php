@@ -32,6 +32,7 @@ foreach ($prices as $index => $price) : ?>
                 <span class="input-group-addon">$</span>
                 <?= Html::activeTextInput($price, '[' . $index . ']selling', [
                     'class' => 'input-group form-control alt-quote-price price_row',
+                    'maxlength' => 10,
                 ]) ?>
             </div>
         </td>
@@ -41,6 +42,7 @@ foreach ($prices as $index => $price) : ?>
                 <?= Html::activeTextInput($price, '[' . $index . ']net', [
                     'class' => 'input-group form-control price_row',
                     'readonly' => true,
+                    'maxlength' => 10,
                 ]) ?>
             </div>
         </td>
@@ -49,6 +51,7 @@ foreach ($prices as $index => $price) : ?>
                 <span class="input-group-addon">$</span>
                 <?= Html::activeTextInput($price, '[' . $index . ']fare', [
                     'class' => 'input-group form-control alt-quote-price price_row',
+                    'maxlength' => 10,
                 ]) ?>
             </div>
         </td>
@@ -57,6 +60,7 @@ foreach ($prices as $index => $price) : ?>
                 <span class="input-group-addon">$</span>
                 <?= Html::activeTextInput($price, '[' . $index . ']taxes', [
                     'class' => 'input-group form-control alt-quote-price price_row',
+                    'maxlength' => 10,
                 ]) ?>
             </div>
         </td>
@@ -65,6 +69,7 @@ foreach ($prices as $index => $price) : ?>
                 <span class="input-group-addon">$</span>
                 <?= Html::activeTextInput($price, '[' . $index . ']mark_up', [
                     'class' => 'input-group form-control alt-quote-price price_row',
+                    'maxlength' => 10,
                 ]) ?>
             </div>
         </td>
