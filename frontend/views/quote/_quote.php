@@ -670,10 +670,7 @@ $js = <<<JS
                 }
                 if (dataResponse.segments.length) {
                    $('#box_segments').html(dataResponse.segments); 
-                }
-                if (dataResponse.trip_type.length) {
-                   $('#quote-trip_type').val(dataResponse.trip_type);
-                } 
+                }                
                 if (dataResponse.reservation_dump.length) {                        
                     $('#reservation_result').val(dataResponse.reservation_dump.join("\\n"));
                     
