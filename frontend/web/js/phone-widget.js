@@ -508,7 +508,157 @@ $(document).ready(function() {
         clearEmailTab()
     });
 
+    var callsObj = [
+        {
+            project: 'ovago',
+            department: 'sales',
+            id: 1,
+            calls: [
+                {
+                    state: 'inProgress',
+                    length: 6001,
+                    id: 1,
+                    contact: {
+                        name: 'Geff Robertson1',
+                        company: 'LLC "DREAM TRAVEL"',
+                        number: '+123 321 234 432'
+                    }
+                },
+                {
+                    state: 'hold',
+                    length: 2201,
+                    id: 2,
+                    contact: {
+                        name: 'John Doe2',
+                        company: 'LLC "DREAM TRAVEL"',
+                        number: '+123 321 234 432'
+                    }
+                },
+                {
+                    state: 'direct',
+                    length: 3201,
+                    id: 3,
+                    contact: {
+                        name: 'John Doe6',
+                        company: 'LLC "DREAM TRAVEL"',
+                        number: '+123 321 234 432'
+                    }
+                },
+                {
+                    state: 'hold',
+                    length: 6201,
+                    id: 4,
+                    contact: {
+                        name: 'John Doe7',
+                        company: 'LLC "DREAM TRAVEL"',
+                        number: '+123 321 234 432'
+                    }
+                }
+            ]
+        },
+        {
+            project: null,
+            department: 'SALES',
+            id: 2,
+            calls: [
 
+                {
+                    state: 'general',
+                    length: 5301,
+                    id: 2,
+                    contact: {
+                        name: 'John Doe4',
+                        company: 'LLC "DREAM TRAVEL"',
+                        number: '+123 321 234 432'
+                    }
+                },
+
+                {
+                    state: 'general',
+                    length: 5301,
+                    id: 3,
+                    contact: {
+                        name: 'John Doe5',
+                        company: 'LLC "DREAM TRAVEL"',
+                        number: '+123 321 234 432'
+                    }
+                },
+                {
+                    state: 'direct',
+                    length: 5401,
+                    id: 4,
+                    contact: {
+                        name: 'John Doe8',
+                        company: 'LLC "DREAM TRAVEL"',
+                        number: '+123 321 234 432'
+                    }
+                },
+                {
+                    state: 'direct',
+                    length: 6241,
+                    id: 1,
+                    contact: {
+                        name: 'Gerrombo Saltison3',
+                        company: 'LLC "DREAM TRAVEL"',
+                        number: '+123 321 234 432'
+                    }
+                },
+            ]
+        },
+        {
+            project: 'wowfare',
+            department: null,
+            id: 2,
+            calls: [
+
+                {
+                    state: 'general',
+                    length: 5301,
+                    id: 2,
+                    contact: {
+                        name: 'John Doe4',
+                        company: 'LLC "DREAM TRAVEL"',
+                        number: '+123 321 234 432'
+                    }
+                },
+
+                {
+                    state: 'general',
+                    length: 5301,
+                    id: 3,
+                    contact: {
+                        name: 'John Doe5',
+                        company: 'LLC "DREAM TRAVEL"',
+                        number: '+123 321 234 432'
+                    }
+                },
+                {
+                    state: 'direct',
+                    length: 5401,
+                    id: 4,
+                    contact: {
+                        name: 'John Doe8',
+                        company: 'LLC "DREAM TRAVEL"',
+                        number: '+123 321 234 432'
+                    }
+                },
+                {
+                    state: 'direct',
+                    length: 6241,
+                    id: 1,
+                    contact: {
+                        name: 'Gerrombo Saltison3',
+                        company: 'LLC "DREAM TRAVEL"',
+                        number: '+123 321 234 432'
+                    }
+                },
+            ]
+        }
+    ];
+
+
+    var filterCalls = new callsFilter(callsObj);
+    filterCalls.init();
     
 
 
