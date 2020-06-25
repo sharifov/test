@@ -94,7 +94,7 @@ use yii\helpers\Url;
                                     ],
                                     'defaultValue' => 1,
                                     'options' => [
-                                        'maxlength' => 10,
+                                        'maxlength' => 2,
                                     ],
                                 ],
                                 [

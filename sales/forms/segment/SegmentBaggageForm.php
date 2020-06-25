@@ -59,7 +59,8 @@ class SegmentBaggageForm extends Model
     {
         return [
             [['type', 'segmentIata', 'piece'], 'required'],
-            [['piece', 'segmentId'], 'integer'],
+            [['segmentId'], 'integer'],
+            [['piece'], 'integer', 'min' => 1, 'max' => 99],
 
             [['type'], 'in', 'range' => array_keys(BaggageService::TYPE_LIST)],
             [['paxCode'], 'default', 'value' => QuotePrice::PASSENGER_ADULT],
