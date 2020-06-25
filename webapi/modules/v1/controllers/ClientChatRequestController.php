@@ -2,6 +2,7 @@
 
 namespace webapi\modules\v1\controllers;
 
+use common\models\ApiLog;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestApiForm;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestService;
@@ -14,6 +15,7 @@ use webapi\src\response\messages\MessageMessage;
 use webapi\src\response\messages\StatusCodeMessage;
 use webapi\src\response\Response;
 use webapi\src\response\SuccessResponse;
+use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\UnprocessableEntityHttpException;
@@ -75,6 +77,8 @@ class ClientChatRequestController extends ApiBaseController
 	 */
 	public function actionCreate()
 	{
+		$apiLog = $this->startApiLog($this->action->uniqueId);
+
 		if (!\Yii::$app->request->isPost) {
 			return new ErrorResponse(
 				new StatusCodeMessage(400),
@@ -111,34 +115,40 @@ class ClientChatRequestController extends ApiBaseController
 				$this->clientChatRequestService->create($form);
 
 				$transaction->commit();
-			} catch (\RuntimeException $e) {
+			} catch (\RuntimeException | \DomainException | NotFoundException $e) {
 				$transaction->rollBack();
-				return new ErrorResponse(
+				return $this->endApiLog($apiLog, new ErrorResponse(
 					new StatusCodeMessage(400),
 					new MessageMessage($e->getMessage()),
 					new CodeMessage(ApiCodeException::CLIENT_CHAT_REQUEST_CREATE_FAILED)
-				);
+				));
 			} catch (\Throwable $e) {
 				$transaction->rollBack();
 				\Yii::error($e->getMessage() . '; In File: ' . $e->getFile() . '; On Line: ' . $e->getLine(), 'Api::ClientChatRequestController::actionCreate::Throwable');
-				return new ErrorResponse(
+				return $this->endApiLog($apiLog, new ErrorResponse(
 					new StatusCodeMessage(500),
 					new MessageMessage('Internal Server Error'),
 					new CodeMessage(ApiCodeException::INTERNAL_SERVER_ERROR)
-				);
+				));
 			}
 
-			return new SuccessResponse(
+			return $this->endApiLog($apiLog, new SuccessResponse(
 				new StatusCodeMessage(200),
 				new MessageMessage('Client chat request created successfully'),
-			);
+			));
 		}
 
-		return new ErrorResponse(
+		return $this->endApiLog($apiLog, new ErrorResponse(
 			new StatusCodeMessage(400),
 			new MessageMessage('Some errors occurred while creating client chat request'),
 			new ErrorsMessage($form->getErrorSummary(true)),
 			new CodeMessage(ApiCodeException::NOT_FOUND_PROJECT_CURRENT_USER)
-		);
+		));
+	}
+
+	private function endApiLog(ApiLog $apiLog, Response $response): Response
+	{
+		$apiLog->endApiLog(ArrayHelper::toArray($response));
+		return $response;
 	}
 }

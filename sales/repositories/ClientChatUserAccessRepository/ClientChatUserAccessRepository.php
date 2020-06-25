@@ -19,29 +19,11 @@ class ClientChatUserAccessRepository extends Repository
 
 	public function save(ClientChatUserAccess $clientChatUserAccess): ClientChatUserAccess
 	{
-		\Yii::info('ClientChatUserAccessRepository1::save::ClientChatCache::invalidate userId: ' . $clientChatUserAccess->ccua_user_id, 'info\ClientChatUserAccessRepository::save');
 		if (!$clientChatUserAccess->save()) {
 			throw new \RuntimeException($clientChatUserAccess->getErrorSummary(false)[0]);
 		}
 
-
-//		$result = ClientChatCache::getCache()->getOrSet(ClientChatCache::getKey($clientChatUserAccess->ccua_user_id), function () use ($clientChatUserAccess) {
-//			return [
-//				'access' => ClientChatUserAccess::pendingRequests($clientChatUserAccess->ccua_user_id),
-//			];
-//		}, null, new TagDependency(['tags' => ClientChatCache::getTags($clientChatUserAccess->ccua_user_id)]));
-
-//		\Yii::info(ArrayHelper::toArray($result), 'info\ClientChatUserAccessRepository::save');
-
 		ClientChatCache::invalidate($clientChatUserAccess->ccua_user_id);
-
-//		$result = ClientChatCache::getCache()->getOrSet(ClientChatCache::getKey($clientChatUserAccess->ccua_user_id), function () use ($clientChatUserAccess) {
-//			return [
-//				'access' => ClientChatUserAccess::pendingRequests($clientChatUserAccess->ccua_user_id),
-//			];
-//		}, null, new TagDependency(['tags' => ClientChatCache::getTags($clientChatUserAccess->ccua_user_id)]));
-//
-//		\Yii::info(ArrayHelper::toArray($result), 'info\ClientChatUserAccessRepository::save');
 
 		NativeEventDispatcher::recordEvent(ClientChatUserAccessEvent::class, ClientChatUserAccessEvent::SEND_NOTIFICATIONS, [ClientChatUserAccessEvent::class, 'sendNotifications'], $clientChatUserAccess);
 		NativeEventDispatcher::triggerBy(ClientChatUserAccessEvent::class);

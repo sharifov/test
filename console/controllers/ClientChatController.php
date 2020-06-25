@@ -1,16 +1,14 @@
 <?php
 
-
 namespace console\controllers;
-
 
 use common\components\RocketChat;
 use common\models\Employee;
 use common\models\UserProfile;
-use frontend\controllers\FController;
+use yii\console\Controller;
 use yii\helpers\Console;
 
-class ClientChatController extends FController
+class ClientChatController extends Controller
 {
 	public function actionRcCreateUserProfile(?int $userId = null, int $limit = 5)
 	{

@@ -107,6 +107,7 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 			break;
 
 			case self::EVENT_ROOM_CONNECTED:
+				NativeEventDispatcher::recordEvent(ClientChatRequestEvents::class, ClientChatRequestEvents::ROOM_CONNECTED, [ClientChatRequestEvents::class, 'assignChannelToClientChat'], $_self);
 			break;
 
 			case self::EVENT_ROOM_DISCONNECTED:

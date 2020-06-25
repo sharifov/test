@@ -53,14 +53,17 @@ class ClientChat extends \yii\db\ActiveRecord
 {
 	private const STATUS_GENERATED = 1;
 	private const STATUS_CLOSED = 9;
+	private const STATUS_PENDING = 2;
 
 	private const STATUS_LIST = [
 		self::STATUS_GENERATED => 'Generated',
+		self::STATUS_PENDING => 'Pending',
 		self::STATUS_CLOSED => 'Closed'
 	];
 
 	private const STATUS_CLASS_LIST = [
 		self::STATUS_GENERATED => 'info',
+		self::STATUS_PENDING => 'warning',
 		self::STATUS_CLOSED => 'warning'
 	];
 
