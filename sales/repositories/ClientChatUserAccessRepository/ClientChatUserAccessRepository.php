@@ -7,8 +7,6 @@ use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatUserAccess\event\ClientChatUserAccessEvent;
 use sales\repositories\NotFoundException;
 use sales\repositories\Repository;
-use yii\caching\TagDependency;
-use yii\helpers\ArrayHelper;
 
 class ClientChatUserAccessRepository extends Repository
 {

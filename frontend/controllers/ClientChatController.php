@@ -154,7 +154,7 @@ class ClientChatController extends FController
 			$this->clientChatUserAccessRepository->updateStatus($cch, (int)$accessAction);
 
 			$result['success'] = true;
-		} catch (\RuntimeException $e) {
+		} catch (\RuntimeException | \DomainException $e) {
 			$result['message'] = $e->getMessage();
 		}
 
