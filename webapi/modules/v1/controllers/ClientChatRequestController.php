@@ -67,7 +67,9 @@ class ClientChatRequestController extends ApiBaseController
 				"channel": "livechat-channel",
 				"name": "Test 45",
 				"email": "test+45@mail.com",
-				"ip": "127.0.0.1"
+				"ip": "127.0.0.1",
+				"project": 'OVAGO',
+	 			"department": "department id optional"
 			}
 	 * }
 	 *
