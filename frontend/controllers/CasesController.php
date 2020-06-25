@@ -1418,7 +1418,7 @@ class CasesController extends FController
 
 					$difference = $this->casesSaleService->compareSaleData($decodedSaleData, $form->validatedData);
 					if (!$difference) {
-						throw new \Exception('Cannot save because value has not been changed');
+						throw new \RuntimeException('Cannot save because value has not been changed');
 					}
 
 					$this->casesSaleRepository->updateSaleData($caseSale, $decodedSaleData, $form->validatedData);
@@ -1428,7 +1428,7 @@ class CasesController extends FController
 
 					if (!$caseSale->save()) {
 						Yii::error(VarDumper::dumpAsString($caseSale->errors), 'CasesController:actionAjaxSaleListEditInfo:CaseSale:save');
-						throw new \Exception('Unsuccessful update');
+						throw new \RuntimeException('Unsuccessful update');
 					}
 
 					if ($sync) {
@@ -1443,6 +1443,8 @@ class CasesController extends FController
 				}
 			}
 
+		} catch (\RuntimeException $exception) {
+			$out['message'] = $exception->getMessage();
 		} catch (\Throwable $exception) {
 			$out['message'] = $exception->getMessage();
 			Yii::error($exception->getMessage() . '; File: ' . $exception->getFile() . '; On Line: ' . $exception->getLine(), 'CasesController:actionAjaxSaleListEditInfo:catch:Throwable');

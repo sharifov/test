@@ -157,6 +157,12 @@ $isSuperAdmin = $user->isSuperAdmin();
             'icon' => 'user'
         ];
 
+		$menuItems[] = [
+			'label' => 'My Client Chat ' . '<span id="div-cnt-client-chat"><span class="label-success label pull-right cc-notification-counter"></span></span>',
+			'url' => ['/client-chat/index'],
+			'icon' => 'comments'
+		];
+
         $menuItems[] = [
             'label' => 'Data Lists',
             'url' => 'javascript:',
@@ -175,6 +181,19 @@ $isSuperAdmin = $user->isSuperAdmin();
                         ['label' => 'Queue', 'url' => ['/call-log-queue/index'], 'icon' => 'list'],
                         ['label' => 'Record', 'url' => ['/call-log-record/index'], 'icon' => 'list'],
                     ],
+                ],
+                [
+                    'label' => 'Client Chat',
+                    'url' => 'javascript:',
+                    'icon' => 'comment',
+                    'items' => [
+                        ['label' => 'Client Chat', 'url' => ['/client-chat-crud/index'], 'icon' => 'list'],
+                        ['label' => 'Request', 'url' => ['/client-chat-request-crud/index'], 'icon' => 'list'],
+                        ['label' => 'Channel', 'url' => ['/client-chat-channel-crud/index'], 'icon' => 'list'],
+                        ['label' => 'Status Log', 'url' => ['/client-chat-status-log-crud/index'], 'icon' => 'list'],
+                        ['label' => 'User Channel', 'url' => ['/client-chat-user-channel-crud/index'], 'icon' => 'list'],
+                        ['label' => 'User Access', 'url' => ['/client-chat-user-access-crud/index'], 'icon' => 'list'],
+                    ]
                 ],
                 ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'comments-o'],
                 ['label' => 'SMS Distrib List', 'url' => ['/sms-distribution-list/index'], 'icon' => 'comments warning'],

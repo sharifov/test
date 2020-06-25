@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use sales\widgets\UserGroupSelect2Widget;
 use Yii;
 use common\models\UserGroup;
 use common\models\search\UserGroupSearch;
@@ -126,4 +127,50 @@ class UserGroupController extends FController
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
+
+	public function actionListAjax(?string $q = null, ?int $id = null, ?string $selection = 'dep_id')
+	{
+		\Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+		$out = ['results' => ['id' => '', 'text' => '', 'selection' => '']];
+
+		UserGroupSelect2Widget::checkSelection($selection);
+
+		if ($q !== null) {
+			$query = UserGroup::find();
+			$data = $query->select(['ug_id', 'ug_name'])
+				->where(['like', 'ug_name', $q])
+				->orWhere(['ug_id' => (int) $q])
+				->limit(20)
+				//->indexBy('id')
+				->asArray()
+				->all();
+
+			if ($data) {
+				foreach ($data as $n => $item) {
+					$text = $item['ug_name'] . ' ('.$item['ug_id'].')';
+					$data[$n]['id'] = $item['ug_id'];
+					$data[$n]['text'] = self::formatText($text, $q);
+					$data[$n]['selection'] = $item[$selection];
+				}
+			}
+
+			$out['results'] = $data; //array_values($data);
+		}
+		elseif ($id > 0) {
+			$userGroup = UserGroup::findOne($id);
+			$out['results'] = ['id' => $id, 'text' => $userGroup ? $userGroup->ug_name : '', 'selection' => $userGroup ? $userGroup->{$selection} : ''];
+		}
+		return $out;
+	}
+
+	/**
+	 * @param string $str
+	 * @param string $term
+	 * @return string
+	 */
+	private static function formatText(string $str, string $term): string
+	{
+		return preg_replace('~'.$term.'~i', '<b style="color: #e15554"><u>$0</u></b>', $str);
+	}
 }

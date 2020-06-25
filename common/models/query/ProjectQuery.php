@@ -16,4 +16,9 @@ class ProjectQuery extends ActiveQuery
     {
         return $this->andWhere(['closed' => false]);
     }
+
+    public function byName(string $name): self
+	{
+		return $this->andWhere(['name' => $name]);
+	}
 }
