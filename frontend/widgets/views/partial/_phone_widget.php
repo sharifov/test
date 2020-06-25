@@ -20,6 +20,13 @@ use yii\web\View;
         <label for="number-status3">ready</label>
 
         <div class="status-confirmation"></div>
+
+          <ul class="call-filter">
+              <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-hold" data-call-filter="hold">1</a></li>
+              <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-direct" data-call-filter="direct">1</a></li>
+              <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-general" data-call-filter="general">4</a></li>
+          </ul>
+
       </div>
       <!-- <a href="#" class="phone-widget__dev header-action-small toggle-bar-logs"><i class="fas fa-tools"></i></a> -->
       <!-- <span class="phone-widget__title">Calls</span> -->
@@ -65,6 +72,17 @@ use yii\web\View;
     <div class="widget-phone__contact-info-modal widget-modal contact-modal-info"></div>
     <div class="widget-phone__messages-modal widget-modal messages-modal"></div>
     <div class="widget-phone__email-modal widget-modal email-modal"></div>
+    <div class="widget-line-overlay">
+      <div class="widget-line-overlay__header">
+          <div class="widget-line-overlay__queue-marker">
+              <span data-queue-marker>Calls Queue</span>
+              <a href="#" class="widget-line-overlay__show-all-queues" data-call-filter="all" >All Calls</a>
+          </div>
+      </div>
+      <div class="widget-line-overlay__body scrollable-block">
+          <ul class="queue-separator"> </ul>
+      </div>
+    </div>
 
         <?php /*
         <div class="widget-phone__contact-info-modal widget-modal contact-modal-info">
