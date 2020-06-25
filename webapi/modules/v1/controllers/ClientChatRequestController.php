@@ -57,6 +57,29 @@ class ClientChatRequestController extends ApiBaseController
 	 *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
 	 *  }
 	 *
+	 *
+	 *
+	 * @apiParamExample {json} Request-Example GUEST_CONNECTED:
+	 * {
+			"event": "GUEST_CONNECTED",
+			"data": {
+				"rid": "292a9961-asdas-4d66-bhnjm-sdvsdv",
+				"channel": "livechat-channel",
+				"name": "Test 45",
+				"email": "test+45@mail.com",
+				"ip": "127.0.0.1"
+			}
+	 * }
+	 *
+	 * @apiParamExample {json} Request-Example ROOM_CONNECTED:
+	 * {
+			"event": 'ROOM_CONNECTED',
+			"data": {
+				"rid": '9e563c67-fe10-42d5-a664-6e30d2974201',
+				"visitor": { "_id": 'pnjNRHsnnWXhW5LBn', "username": 'guest-81' }
+			}
+	 * }
+	 *
 	 * @apiSuccessExample Success-Response:
 	 *  HTTP/1.1 200 OK
 	 *  {
