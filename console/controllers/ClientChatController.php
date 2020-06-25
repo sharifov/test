@@ -65,7 +65,7 @@ class ClientChatController extends Controller
 
 				printf("\n --- RC login error occurred: %s ---\n", $this->ansiFormat(json_decode($result['error'], true, 512, JSON_THROW_ON_ERROR)['error'], Console::FG_RED));
 			} else {
-				printf("\n --- RC create user error occurred: %s ---\n", $this->ansiFormat(json_decode($result['error'], true, 512, JSON_THROW_ON_ERROR)['error'], Console::FG_RED));
+				printf("\n --- RC create user error occurred: %s ---\n", $this->ansiFormat(json_decode($result['error'], true, 512, JSON_THROW_ON_ERROR), Console::FG_RED));
 			}
 		}
 
