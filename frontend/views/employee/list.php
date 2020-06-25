@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Employee;
+use sales\auth\Auth;
 use yii\grid\ActionColumn;
 use common\components\grid\DateTimeColumn;
 
@@ -25,6 +26,7 @@ $user = Yii::$app->user->identity;
 
 $isUM = $user->isUserManager();
 $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
+$isOnlyAdmin = $user->isOnlyAdmin();
 $isSuperAdmin = $user->isSuperAdmin();
 
 if ($isAdmin || $isSuperAdmin) {
@@ -126,16 +128,28 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                         return User::hasPermission('viewOrder');
                     },*/
                     'update' => static function (\common\models\Employee $model, $key, $index) use ($isAdmin, $isUM) {
-                        return ($isAdmin || !($model->isAdmin() || $model->isSuperAdmin()));
+                        return (
+                                $isAdmin
+                                || ($isUM && (!$model->isOnlyAdmin() && !$model->isSuperAdmin()))
+                                || !($model->isAdmin() || $model->isSuperAdmin())
+                        );
                     },
                     'projects' => static function (\common\models\Employee $model, $key, $index) use ($isAdmin, $isUM)  {
-                        return ($isAdmin || !($model->isAdmin() || $model->isSuperAdmin()));
+                        return (
+                            $isAdmin
+                            || ($isUM && (!$model->isOnlyAdmin() && !$model->isSuperAdmin()))
+                            || !($model->isAdmin() || $model->isSuperAdmin())
+                        );
                     },
                     'groups' => static function (\common\models\Employee $model, $key, $index) use ($isAdmin, $isUM)  {
-                        return ($isAdmin || !($model->isAdmin() || $model->isSuperAdmin()));
+                        return (
+                            $isAdmin
+                            || ($isUM && (!$model->isOnlyAdmin() && !$model->isSuperAdmin()))
+                            || !($model->isAdmin() || $model->isSuperAdmin())
+                        );
                     },
-                    'switch' => static function (\common\models\Employee $model, $key, $index)  use ($isAdmin, $isUM) {
-                        return ($isAdmin && !($model->isAdmin() || $model->isSuperAdmin()));
+                    'switch' => static function (\common\models\Employee $model, $key, $index) {
+                        return Auth::can('/employee/switch');
                     },
                 ],
                 'buttons' => [
