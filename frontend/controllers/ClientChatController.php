@@ -97,7 +97,10 @@ class ClientChatController extends FController
 			];
 
 			if ($dataProvider->getCount()) {
-				$response['html'] = $this->renderPartial('partial/_client-chat-item', ['clientChats' => $dataProvider->getModels()]);
+				$response['html'] = $this->renderPartial('partial/_client-chat-item', [
+					'clientChats' => $dataProvider->getModels(),
+					'client' => $clientChat->cchClient ?? ''
+				]);
 				$response['page'] = $page+1;
 			}
 
