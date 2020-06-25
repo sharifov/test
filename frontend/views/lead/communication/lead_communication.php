@@ -571,6 +571,7 @@ JS;
                 $('.message-field-sms').hide();
                 $('.message-field-phone').hide();
                 $('.message-field-email').hide();
+                $("#c_email_tpl_key").val($("#c_email_tpl_key option:first").val());
             }
             
             $('#c_sms_tpl_key').trigger('change');

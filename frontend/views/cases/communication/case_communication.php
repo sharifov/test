@@ -613,11 +613,13 @@ $js = <<<JS
         } else {
             $('.message-field-sms').hide();
             $('.message-field-phone').hide();
-            $('.message-field-email').hide();
+            $('.message-field-email').hide();          
+            $("#c_email_tpl_key").val($("#c_email_tpl_key option:first").val());
         }
         
         $('#c_sms_tpl_id').trigger('change');
-        $('#c_email_tpl_id').trigger('change');
+        $('#c_email_tpl_key').trigger('change');
+        //$('#c_email_tpl_id').trigger('change');
                 
         $('#sms-message').countSms('#sms-counter');
         $('#preview-sms-message').countSms('#preview-sms-counter');
@@ -630,8 +632,6 @@ JS;
 
     $this->registerJs($js);
     ?>
-
-
 
                     <?php \yii\bootstrap\ActiveForm::end(); ?>
 
@@ -727,17 +727,19 @@ JS;
 
 <?php
 $tpl_email_blank_key = \frontend\models\CommunicationForm::TPL_TYPE_EMAIL_BLANK_KEY;
+$tpl_email_support_blank_page_key = \frontend\models\CommunicationForm::TPL_TYPE_EMAIL_SUPPORT_BLANK_PAGE_KEY;
 $tpl_sms_blank_key = \frontend\models\CommunicationForm::TPL_TYPE_SMS_BLANK_KEY;
 
 $js = <<<JS
 
+    const tpl_email_support_blank_page_key = '$tpl_email_support_blank_page_key';
     const tpl_email_blank_key = '$tpl_email_blank_key';
     const tpl_sms_blank_key = '$tpl_sms_blank_key';
     let projectId = '{$model->project->id}';
     let project = '{$model->project->name}';
 
     $('body').on("change", '#c_type_id', function () {
-        initializeMessageType($(this).val());
+        initializeMessageType($(this).val());        
     });
 
     $('body').on("change", '#c_phone_number', function () {
@@ -801,6 +803,9 @@ $js = <<<JS
             if($(this).val() == tpl_email_blank_key) {
                 $('#email-textarea-div').show();
                 $('#email-subtitle-group').show();
+            } else if($(this).val() == tpl_email_support_blank_page_key) {
+                $('#email-textarea-div').show();
+                $('#email-subtitle-group').show();
             } else {
                 $('#email-textarea-div').hide();
                 $('#email-subtitle-group').hide();
@@ -827,8 +832,6 @@ $js = <<<JS
         popup.modal('show');
         return false;
     });
-    
-    
     
     $('body').on('change', '.quotes-uid', function() {
         
@@ -881,8 +884,7 @@ $js = <<<JS
 
     $('[data-toggle="popover"]').on('click', function (e) {
         $('[data-toggle="popover"]').not(this).popover('hide');
-    });*/
-   
+    });*/   
 
 
 JS;
