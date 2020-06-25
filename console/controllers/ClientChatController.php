@@ -7,6 +7,7 @@ use common\models\Employee;
 use common\models\UserProfile;
 use yii\console\Controller;
 use yii\helpers\Console;
+use yii\helpers\VarDumper;
 
 class ClientChatController extends Controller
 {
@@ -38,7 +39,7 @@ class ClientChatController extends Controller
 				$user['email']
 			);
 
-			if (!$result['error']) {
+			if (!empty($result['error'])) {
 				$userProfile = UserProfile::findOne(['up_user_id' => $user['id']]);
 				if ($userProfile && $userProfile->up_rc_user_id) {
 					continue;
@@ -63,9 +64,9 @@ class ClientChatController extends Controller
 					continue;
 				}
 
-				printf("\n --- RC login error occurred: %s ---\n", $this->ansiFormat(json_decode($result['error'], true, 512, JSON_THROW_ON_ERROR)['error'], Console::FG_RED));
+				printf("\n --- RC login error occurred: %s ---\n", $this->ansiFormat(VarDumper::dumpAsString($result), Console::FG_RED));
 			} else {
-				printf("\n --- RC create user error occurred: %s ---\n", $this->ansiFormat(json_decode($result['error'], true, 512, JSON_THROW_ON_ERROR), Console::FG_RED));
+				printf("\n --- RC create user error occurred: %s ---\n", $this->ansiFormat(VarDumper::dumpAsString($result), Console::FG_RED);
 			}
 		}
 
