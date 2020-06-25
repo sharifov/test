@@ -1109,3 +1109,13 @@ function callsFilter (object) {
         }
     }
 }
+
+$(document).on('click', '.call-item-menu__close', function (e) {
+    e.preventDefault();
+    $(this).closest('.call-list-item').removeClass('call-list-item--menu')
+})
+
+$(document).on('click', '.call-info-action__more', function (e) {
+    e.preventDefault();
+    $(this).closest('.call-list-item').addClass('call-list-item--menu')
+})
