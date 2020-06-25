@@ -51,7 +51,14 @@ class ClientChatController extends Controller
 				}
 
 				$userProfile->up_rc_user_password = $pass;
+
+				if (empty($result['data']['_id'])) {
+                    printf("\n --- Empty result[data][_id]: %s ---\n", $this->ansiFormat(VarDumper::dumpAsString(['user' => $user, 'data' => $result['data']]), Console::FG_RED));
+				    continue;
+                }
+
 				$userProfile->up_rc_user_id = $result['data']['_id'];
+
 				$userProfile->save();
 
 				$login = $rocketChat->login($user['username'], $pass);
