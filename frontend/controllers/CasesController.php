@@ -473,7 +473,7 @@ class CasesController extends FController
                                 }
                                 $previewEmailForm->e_email_from = $mailFrom; //$mailPreview['data']['email_from'];
                                 $previewEmailForm->e_email_to = $comForm->c_email_to; //$mailPreview['data']['email_to'];
-                                $previewEmailForm->e_email_from_name = $userModel->username;
+                                $previewEmailForm->e_email_from_name = $userModel->full_name;
                                 $previewEmailForm->e_email_to_name = $model->client ? $model->client->full_name : '';
                                 $previewEmailForm->e_quote_list = @json_encode($comForm->quoteList);
                             }
@@ -485,7 +485,7 @@ class CasesController extends FController
                         $previewEmailForm->e_email_subject = $comForm->c_email_subject;
                         $previewEmailForm->e_email_from = $mailFrom;
                         $previewEmailForm->e_email_to = $comForm->c_email_to;
-                        $previewEmailForm->e_email_from_name = $userModel->username;
+                        $previewEmailForm->e_email_from_name = $userModel->full_name;
                         $previewEmailForm->e_email_to_name = $model->client ? $model->client->full_name : '';
                     }
 
