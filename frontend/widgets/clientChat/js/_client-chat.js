@@ -32,7 +32,7 @@ $(document).on('click', '._cc-access-action', function (e) {
                 $btn.closest('._cc-box-item-wrapper').remove();
                 return false;
             }
-            createNotify(data.title, data.message, 'data.type');
+            createNotify(data.notifyTitle, data.notifyMessage, data.notifyType);
         },
         error: function (xhr) {
             console.log(xhr);

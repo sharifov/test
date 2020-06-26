@@ -34,7 +34,7 @@ class ClientChatUserAccessEvent extends Component
 			$clientChatRepository = \Yii::createObject(ClientChatRepository::class);
 			try {
 				$clientChatRepository->assignOwner(self::$access);
-			} catch (\DomainException $e) {
+			} catch (\DomainException | \RuntimeException $e) {
 				$userAccessRepository->updateStatus(self::$access, ClientChatUserAccess::STATUS_SKIP);
 				throw new $e;
 			}

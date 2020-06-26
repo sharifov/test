@@ -79,7 +79,7 @@ class ClientChatRepository
 
 	public function assignOwner(ClientChatUserAccess $clientChatUserAccess): void
 	{
-		if ($clientChatUserAccess->ccuaCch && $clientChatUserAccess->ccuaCch->cchOwnerUser) {
+		if ($clientChatUserAccess->ccuaCch && $clientChatUserAccess->ccuaCch->cchOwnerUser && $clientChatUserAccess->ccuaCch->cch_owner_user_id !== $clientChatUserAccess->ccua_user_id) {
 			throw new \DomainException('Client Chat already assigned to: ' . $clientChatUserAccess->ccuaCch->cchOwnerUser->full_name);
 		}
 		$clientChatUserAccess->ccuaCch->cch_owner_user_id = $clientChatUserAccess->ccua_user_id;
