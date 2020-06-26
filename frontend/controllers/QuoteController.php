@@ -3,40 +3,28 @@
 namespace frontend\controllers;
 
 use common\components\BackOffice;
-use common\components\GTTGlobal;
 use common\models\GlobalLog;
-//use common\models\LeadLog;
-use common\models\local\ChangeMarkup;
 use common\models\Lead;
-use common\models\local\LeadLogMessage;
 use common\models\Quote;
 use common\models\QuotePrice;
-use common\models\search\QuotePriceSearch;
-use common\models\search\QuoteSearch;
 use sales\auth\Auth;
 use sales\forms\quotePrice\AddQuotePriceForm;
 use sales\forms\segment\SegmentBaggageForm;
-use sales\helpers\app\AppHelper;
 use sales\helpers\quote\BaggageHelper;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use sales\services\parsingDump\BaggageService;
 use sales\services\parsingDump\lib\ParsingDump;
-use sales\services\parsingDump\PricingService;
 use sales\services\parsingDump\ReservationService;
 use sales\services\quote\addQuote\guard\GdsByQuoteGuard;
 use sales\services\quote\addQuote\guard\LeadGuard;
 use sales\services\quote\addQuote\price\PreparePrices;
 use Yii;
 use yii\base\Model;
-use yii\helpers\ArrayHelper;
-use yii\filters\AccessControl;
 use yii\helpers\Html;
 use yii\helpers\Json;
-use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\web\BadRequestHttpException;
-use frontend\models\PreviewEmailQuotesForm;
 use common\models\Employee;
 use common\components\SearchService;
 use common\models\QuoteTrip;
@@ -45,11 +33,6 @@ use common\models\QuoteSegment;
 use common\models\QuoteSegmentStop;
 use common\models\QuoteSegmentBaggage;
 use common\models\QuoteSegmentBaggageCharge;
-use common\components\CommunicationService;
-use common\models\UserProjectParams;
-use frontend\models\PreviewEmailCommunicationForm;
-use common\models\Email;
-use common\models\EmailTemplateType;
 use yii\widgets\ActiveForm;
 
 /**
@@ -510,9 +493,7 @@ class QuoteController extends FController
                     $reservationService = new ReservationService($gds);
                     $reservationService->parseReservation($post['prepare_dump'], true, $itinerary);
                     if ($reservationService->parseStatus) {
-                        $response['reservation_dump'] = Quote::createDump($itinerary);
-
-                        if (!empty($response['reservation_dump'])) {
+                        if ($response['reservation_dump'] = Quote::createDump($itinerary)) {
                             $baggageService = new BaggageService($gds);
                             $baggageService->setBaggageFromDump($post['prepare_dump']);
                             $segments = $baggageService->attachBaggageToSegments($reservationService->parseResult);
@@ -525,20 +506,17 @@ class QuoteController extends FController
                         }
                     }
 
-                    $pricesFromDump = [];
                     if ($obj = ParsingDump::initClass($gds, ParsingDump::PARSING_TYPE_PRICING)) {
                         if ($pricingData = $obj->parseDump($post['prepare_dump'])) {
                             $response['validating_carrier'] = $pricingData['validating_carrier'];
-                            $pricesFromDump = $pricingData['prices'];
+                            if ($pricesFromDump = $pricingData['prices']) {
+                                $prices = PreparePrices::prepareByLeadPax($lead, $pricesFromDump);
+                                $response['prices'] = $this->renderAjax('partial/_priceRows', [
+                                    'prices' => $prices,
+                                    'lead' => $lead,
+                                ]);
+                            }
                         }
-                    }
-
-                    if (!empty($pricesFromDump)) {
-                        $prices = PreparePrices::prepareByLeadPax($lead, $pricesFromDump);
-                        $response['prices'] = $this->renderAjax('partial/_priceRows', [
-                            'prices' => $prices,
-                            'lead' => $lead,
-                        ]);
                     }
 
                     if (self::isFailed($response, $prices)) {
