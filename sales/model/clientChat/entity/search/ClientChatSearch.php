@@ -60,11 +60,10 @@ class ClientChatSearch extends ClientChat
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-			'sort' => [
-				'defaultOrder' => [
-					'cch_id' => SORT_DESC
-				]
-			]
+            'sort'=> ['defaultOrder' => ['cch_id' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
         ]);
 
         $this->load($params);
