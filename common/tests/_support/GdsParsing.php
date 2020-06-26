@@ -38,7 +38,7 @@ class GdsParsing extends Unit
             $parsed = [];
         }
         self::assertArrayHasKey('baggage', $parsed);
-        self::assertCount($this->expectedSegmentsCount, $parsed['baggage']);
+        self::assertCount($this->expectedBaggageCount, $parsed['baggage']);
     }
 
     public function testParsePricing(): void
