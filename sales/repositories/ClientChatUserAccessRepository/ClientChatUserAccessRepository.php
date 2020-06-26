@@ -8,8 +8,24 @@ use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\repositories\NotFoundException;
 use sales\repositories\Repository;
 
+/**
+ * Class ClientChatUserAccessRepository
+ * @package sales\repositories\ClientChatUserAccessRepository
+ *
+ * @property ClientChatRepository $clientChatRepository
+ */
 class ClientChatUserAccessRepository extends Repository
 {
+	/**
+	 * @var ClientChatRepository
+	 */
+	private ClientChatRepository $clientChatRepository;
+
+	public function __construct(ClientChatRepository $clientChatRepository)
+	{
+		$this->clientChatRepository = $clientChatRepository;
+	}
+
 	public function create(int $cchId, int $userId): void
 	{
 		$clientChatUserAccess = ClientChatUserAccess::create($cchId, $userId);
@@ -59,9 +75,8 @@ class ClientChatUserAccessRepository extends Repository
 	{
 		$data = [];
 		if ($access->isAccept()) {
-			$clientChatRepository = \Yii::createObject(ClientChatRepository::class);
 			try {
-				$clientChatRepository->assignOwner($access);
+				$this->clientChatRepository->assignOwner($access);
 			} catch (\DomainException | \RuntimeException $e) {
 				\Yii::error($e->getMessage(), 'ClientChatUserAccessEvent::sendNotifications');
 				$this->updateStatus($access, ClientChatUserAccess::STATUS_SKIP);
