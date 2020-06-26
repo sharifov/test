@@ -642,6 +642,9 @@ class QuoteController extends FController
                             (isset($postValues['baggageData']) && is_array($postValues['baggageData'])) &&
                             $segment = QuoteSegment::getByQuoteAndIata($quote->id, $iataMatches[1], $iataMatches[2])
                         ) {
+
+                            $firstPiece = $lastPiece = 0;
+
                             foreach ($postValues['baggageData'] as $key => $baggageData) {
                                 $segmentBaggageForm = new SegmentBaggageForm();
                                 $segmentBaggageForm->segmentId = $segment->qs_id;
@@ -649,7 +652,15 @@ class QuoteController extends FController
 
                                 if ($segmentBaggageForm->validate()) {
                                     if ($segmentBaggageForm->type === BaggageService::TYPE_PAID) {
-                                        $baggageObj = QuoteSegmentBaggageCharge::creationFromForm($segmentBaggageForm);
+
+                                        if ($segmentBaggageForm->piece === 1) {
+                                            ++$firstPiece;
+                                            $lastPiece = $firstPiece;
+                                        } else {
+                                            $firstPiece = $lastPiece + 1;
+                                            $lastPiece = $firstPiece + $segmentBaggageForm->piece - 1;
+                                        }
+                                        $baggageObj = QuoteSegmentBaggageCharge::creationFromForm($segmentBaggageForm, $firstPiece, $lastPiece);
                                     } else {
                                         $baggageObj = QuoteSegmentBaggage::creationFromForm($segmentBaggageForm);
                                     }
