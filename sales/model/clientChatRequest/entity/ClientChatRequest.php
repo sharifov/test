@@ -144,6 +144,14 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 		return array_keys(self::getEventList(), $name)[0] ?? null;
 	}
 
+    /**
+     * @return string|null
+     */
+    public function getEventName(): ?string
+    {
+        return self::EVENT_LIST[$this->ccr_event] ?? '-';
+    }
+
 	public function getProjectNameFromData(): string
 	{
 		return $this->decodedData['project'] ?? '';

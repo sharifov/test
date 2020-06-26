@@ -1,5 +1,6 @@
 <?php
 
+use sales\model\clientChatRequest\entity\ClientChatRequest;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -25,10 +26,17 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
+            //['class' => 'yii\grid\SerialColumn'],
 
             'ccr_id',
-            'ccr_event',
+            //'ccr_event',
+            [
+                'attribute' => 'ccr_event',
+                'value' => static function(ClientChatRequest $model) {
+                    return $model->getEventName();
+                },
+                'filter' => ClientChatRequest::getEventList()
+            ],
             'ccr_json_data:ntext',
 			[
 				'class' => \common\components\grid\DateTimeColumn::class,

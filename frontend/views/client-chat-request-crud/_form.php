@@ -14,7 +14,7 @@ use yii\widgets\ActiveForm;
 
         <?php $form = ActiveForm::begin(); ?>
 
-        <?= $form->field($model, 'ccr_event')->textInput(['maxlength' => true]) ?>
+        <?= $form->field($model, 'ccr_event')->dropDownList(\sales\model\clientChatRequest\entity\ClientChatRequest::getEventList(), ['prompt' => '-']) ?>
 
         <?= $form->field($model, 'ccr_json_data')->textarea(['rows' => 6]) ?>
 
