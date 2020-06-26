@@ -156,15 +156,17 @@ class ClientChatController extends FController
 				'notifyType' => ''
 			];
 
-			$cch = $this->clientChatUserAccessRepository->find($cchId);
+			$cch = $this->clientChatUserAccessRepository->findByPrimaryKeys($cchId, Auth::id());
 			$this->clientChatUserAccessRepository->updateStatus($cch, (int)$accessAction);
 
 			$result['success'] = true;
 		} catch (\RuntimeException | \DomainException | NotFoundException $e) {
+			\Yii::error($e->getMessage(), 'ClientChatController::actionAccessManage::RuntimeException|DomainException|NotFoundException');
 			$result['notifyMessage'] = $e->getMessage();
 			$result['notifyTitle'] = 'Warning';
 			$result['notifyType'] = 'warning';
 		} catch (\Throwable $e) {
+			\Yii::error($e->getMessage(), 'ClientChatController::actionAccessManage::Throwable');
 			$result['notifyMessage'] = $e->getMessage();
 			$result['notifyTitle'] = 'Error';
 			$result['notifyType'] = 'error';

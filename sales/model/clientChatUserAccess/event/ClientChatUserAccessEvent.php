@@ -19,34 +19,31 @@ class ClientChatUserAccessEvent extends Component
 {
 	public const SEND_NOTIFICATIONS = 'send_notification';
 
-	/**
-	 * @var ClientChatUserAccess $access
-	 */
-	private static ClientChatUserAccess $access;
-
 	public static function sendNotifications(Event $event): void
 	{
-		self::$access = $event->data;
-
+		/**
+		 * @var ClientChatUserAccess $access
+		 */
+		$access = $event->data;
 		$data = [];
-		if (self::$access->isAccept()) {
+		if ($access->isAccept()) {
 			$userAccessRepository = \Yii::createObject(ClientChatUserAccessRepository::class);
 			$clientChatRepository = \Yii::createObject(ClientChatRepository::class);
 			try {
-				$clientChatRepository->assignOwner(self::$access);
+				$clientChatRepository->assignOwner($access);
 			} catch (\DomainException | \RuntimeException $e) {
-				$userAccessRepository->updateStatus(self::$access, ClientChatUserAccess::STATUS_SKIP);
-				throw new $e;
+				\Yii::error($e->getMessage(), 'ClientChatUserAccessEvent::sendNotifications');
+				$userAccessRepository->updateStatus($access, ClientChatUserAccess::STATUS_SKIP);
+				throw $e;
 			}
-			$userAccessRepository->disableAccessForOtherUsers(self::$access);
-
-			$data = ClientChatAccessMessage::accept(self::$access);
-		} else if (self::$access->isPending()) {
-			$data = ClientChatAccessMessage::pending(self::$access);
-		} else if (self::$access->isSkip()) {
-			$data = ClientChatAccessMessage::skip(self::$access);
+			$userAccessRepository->disableAccessForOtherUsers($access);
+			$data = ClientChatAccessMessage::accept($access);
+		} else if ($access->isPending()) {
+			$data = ClientChatAccessMessage::pending($access);
+		} else if ($access->isSkip()) {
+			$data = ClientChatAccessMessage::skip($access);
 		}
 
-		Notifications::publish('clientChatRequest', ['user_id' => self::$access->ccua_user_id], ['data' => $data]);
+		Notifications::publish('clientChatRequest', ['user_id' => $access->ccua_user_id], ['data' => $data]);
 	}
 }
