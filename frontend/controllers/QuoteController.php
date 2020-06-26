@@ -497,6 +497,7 @@ class QuoteController extends FController
 
                 $leadId = (int) Yii::$app->request->get('lead_id');
                 $lead = LeadGuard::guard($leadId);
+                $prices = [];
 
                 $post = Yii::$app->request->post();
                 $quoteFormName = (new Quote())->formName();
@@ -511,15 +512,17 @@ class QuoteController extends FController
                     if ($reservationService->parseStatus) {
                         $response['reservation_dump'] = Quote::createDump($itinerary);
 
-                        $baggageService = new BaggageService($gds);
-                        $baggageService->setBaggageFromDump($post['prepare_dump']);
-                        $segments = $baggageService->attachBaggageToSegments($reservationService->parseResult);
+                        if (!empty($response['reservation_dump'])) {
+                            $baggageService = new BaggageService($gds);
+                            $baggageService->setBaggageFromDump($post['prepare_dump']);
+                            $segments = $baggageService->attachBaggageToSegments($reservationService->parseResult);
 
-                        $response['segments'] = $this->renderAjax('partial/_segmentRows', [
-                            'segments' => $segments,
-                            'sourceHeight' => BaggageHelper::getBaggageHeightValues(),
-                            'sourceWeight' => BaggageHelper::getBaggageWeightValues(),
-                        ]);
+                            $response['segments'] = $this->renderAjax('partial/_segmentRows', [
+                                'segments' => $segments,
+                                'sourceHeight' => BaggageHelper::getBaggageHeightValues(),
+                                'sourceWeight' => BaggageHelper::getBaggageWeightValues(),
+                            ]);
+                        }
                     }
 
                     $pricesFromDump = [];
@@ -529,11 +532,14 @@ class QuoteController extends FController
                             $pricesFromDump = $pricingData['prices'];
                         }
                     }
-                    $prices = PreparePrices::prepareByLeadPax($lead, $pricesFromDump);
-                    $response['prices'] = $this->renderAjax('partial/_priceRows', [
-                        'prices' => $prices,
-                        'lead' => $lead,
-                    ]);
+
+                    if (!empty($pricesFromDump)) {
+                        $prices = PreparePrices::prepareByLeadPax($lead, $pricesFromDump);
+                        $response['prices'] = $this->renderAjax('partial/_priceRows', [
+                            'prices' => $prices,
+                            'lead' => $lead,
+                        ]);
+                    }
 
                     if (self::isFailed($response, $prices)) {
                         $response['status'] = 0;
@@ -1028,10 +1034,10 @@ class QuoteController extends FController
 
     /**
      * @param array $response
-     * @param array $prices
+     * @param array|null $prices
      * @return bool
      */
-    private static function isFailed(array $response, array $prices): bool
+    private static function isFailed(array $response, ?array $prices = null): bool
     {
         return (empty($response['reservation_dump']) && empty($prices));
     }
