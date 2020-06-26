@@ -13,6 +13,7 @@ use yii\helpers\ArrayHelper;
  * @property int $cp_client_id
  * @property int $cp_project_id
  * @property string|null $cp_created_dt
+ * @property bool $cp_unsubscribe
  *
  * @property Client $cpClient
  * @property Project $cpProject
@@ -34,7 +35,7 @@ class ClientProject extends \yii\db\ActiveRecord
     {
         return [
             [['cp_client_id', 'cp_project_id'], 'required'],
-            [['cp_client_id', 'cp_project_id'], 'integer'],
+            [['cp_client_id', 'cp_project_id', 'cp_unsubscribe'], 'integer'],
             [['cp_created_dt'], 'safe'],
             [['cp_client_id', 'cp_project_id'], 'unique', 'targetAttribute' => ['cp_client_id', 'cp_project_id']],
             [['cp_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['cp_project_id' => 'id']],
@@ -51,6 +52,7 @@ class ClientProject extends \yii\db\ActiveRecord
             'cp_client_id' => 'Client ID',
             'cp_project_id' => 'Project',
             'cp_created_dt' => 'Created',
+            'cp_unsubscribe' => 'Unsubscribe',
         ];
     }
 

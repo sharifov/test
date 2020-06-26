@@ -54,6 +54,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ]),
             ],
+            'cp_unsubscribe',
             ['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>
