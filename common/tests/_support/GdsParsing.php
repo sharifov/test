@@ -13,6 +13,7 @@ class GdsParsing extends Unit
     public string $gds;
     public int $expectedSegmentsCount;
     public int $expectedPricesCount;
+    public int $expectedBaggageCount;
 
     public function testParseReservation(): void
     {
