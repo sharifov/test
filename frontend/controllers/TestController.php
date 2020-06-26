@@ -1327,11 +1327,14 @@ class TestController extends FController
 //	"roles": ["user", "livechat-agent"],
 //	"joinDefaultChannels": false
 
-        VarDumper::dump($chat->getSystemAuthData(), 10, true);
+        //VarDumper::dump($chat->getSystemAuthData(), 10, true);
         //VarDumper::dump($chat->getAllDepartments(), 10, true);
 
-        VarDumper::dump($chat->createUser('alex.connor3', 'alex.connor2', 'alex.connor2', 'alex.connor3@techork.com'), 10, true);
-        VarDumper::dump($chat->deleteUser('alex.connor3'), 10, true);
+        VarDumper::dump($chat->createUser('alex.connor4', 'alex.connor4', 'alex.connor4', 'alex.connor4@techork.com'), 10, true);
+        //VarDumper::dump($chat->createUser('alex.connor5', 'alex.connor5', 'alex.connor5', 'alex.connor5@techork.com'), 10, true);
+
+        VarDumper::dump($chat->deleteUser('alex.connor4'), 10, true);
+        //VarDumper::dump($chat->deleteUser('alex.connor5'), 10, true);
         //VarDumper::dump($chat->systemLogin(), 10, true);
     }
 

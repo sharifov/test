@@ -41,6 +41,7 @@ class RocketChat extends Component
 
     private string $currentUserId;
     private string $currentAuthToken;
+    private array $systemAuthData = [];
 
     private Request $request;
 
@@ -91,7 +92,7 @@ class RocketChat extends Component
             ->setData($data);
 
         if ($headers) {
-            $this->request->addHeaders($headers);
+            $this->request->setHeaders($headers);
         }
 
         $this->request->setOptions([CURLOPT_ENCODING => 'gzip']);
@@ -99,7 +100,6 @@ class RocketChat extends Component
         if ($options) {
             $this->request->setOptions($options);
         }
-
         return $this->request->send();
     }
 
@@ -180,15 +180,19 @@ class RocketChat extends Component
 
 
     /**
+     * @param bool $cacheEnable
      * @return array
      * @throws Exception
      */
-    public function getSystemAuthData(): array
+    public function getSystemAuthData(bool $cacheEnable = true): array
     {
+
         $cache = \Yii::$app->cache;
         $key = 'rocket_chat_system_authToken_' . md5($this->url);
 
-        //$cache->delete($key);
+        if (!$cacheEnable) {
+            $cache->delete($key);
+        }
         $authData = $cache->get($key);
 
         if ($authData === false) {
@@ -205,28 +209,25 @@ class RocketChat extends Component
         return $authData;
     }
 
+
     /**
      * @return mixed|null
-     * @throws Exception
      */
     public function getSystemUserId()
     {
-        $authData = $this->getSystemAuthData();
-        if (!empty($authData['userId'])) {
-            return $authData['userId'];
+        if (!empty($this->systemAuthData['userId'])) {
+            return $this->systemAuthData['userId'];
         }
         return null;
     }
 
     /**
      * @return mixed|null
-     * @throws Exception
      */
     public function getSystemAuthToken()
     {
-        $authData = $this->getSystemAuthData();
-        if (!empty($authData['authToken'])) {
-            return $authData['authToken'];
+        if (!empty($this->systemAuthData['authToken'])) {
+            return $this->systemAuthData['authToken'];
         }
         return null;
     }
@@ -240,6 +241,32 @@ class RocketChat extends Component
         $this->currentUserId = $userId;
         $this->currentAuthToken = $authToken;
     }
+
+    /**
+     * @param bool $cacheEnable
+     * @return array
+     * @throws Exception
+     */
+    public function updateSystemAuth(bool $cacheEnable = true): array
+    {
+        $this->systemAuthData = $this->getSystemAuthData($cacheEnable);
+        return $this->systemAuthData;
+    }
+
+    /**
+     * @return array
+     * @throws Exception
+     */
+    public function getSystemAuthDataHeader(): array
+    {
+        $this->updateSystemAuth();
+
+        return [
+            'X-User-Id' => $this->systemAuthData['userId'],
+            'X-Auth-Token' => $this->systemAuthData['authToken']
+        ];
+    }
+
 
     /**
      * @param string $username
@@ -286,10 +313,11 @@ class RocketChat extends Component
     {
 
         $out = ['error' => false, 'data' => []];
-        $headers = [
-            'X-User-Id' => $this->getSystemUserId(),
-            'X-Auth-Token' => $this->getSystemAuthToken()
-        ];
+        $headers = $this->getSystemAuthDataHeader();
+
+        //return $headers;
+
+        //VarDumper::dump($headers);
 
         $data['username'] = $username;
         $data['password'] = $password;
@@ -318,6 +346,8 @@ class RocketChat extends Component
     }
 
 
+
+
     /**
      * @param string $username
      * @return array
@@ -327,10 +357,7 @@ class RocketChat extends Component
     {
 
         $out = ['error' => false, 'data' => []];
-        $headers = [
-            'X-User-Id' => $this->getSystemUserId(),
-            'X-Auth-Token' => $this->getSystemAuthToken()
-        ];
+        $headers = $this->getSystemAuthDataHeader();
 
         $data['username'] = $username;
 
@@ -362,10 +389,7 @@ class RocketChat extends Component
     {
 
         $out = ['error' => false, 'data' => []];
-        $headers = [
-            'X-User-Id' => $this->getSystemUserId(),
-            'X-Auth-Token' => $this->getSystemAuthToken()
-        ];
+        $headers = $this->getSystemAuthDataHeader();
 
         $data['userId'] = $userId;
 
@@ -394,10 +418,7 @@ class RocketChat extends Component
     public function getAllDepartments(): array
     {
         $out = ['error' => false, 'data' => []];
-        $headers = [
-            'X-User-Id' => $this->getSystemUserId(),
-            'X-Auth-Token' => $this->getSystemAuthToken()
-        ];
+        $headers = $this->getSystemAuthDataHeader();
 
        $data = [];
 
