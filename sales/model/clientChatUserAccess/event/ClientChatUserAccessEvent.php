@@ -4,13 +4,11 @@ namespace sales\model\clientChatUserAccess\event;
 
 use common\models\Notifications;
 use frontend\widgets\clientChat\ClientChatAccessMessage;
-use frontend\widgets\clientChat\ClientChatCache;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\repositories\ClientChatUserAccessRepository\ClientChatUserAccessRepository;
 use yii\base\Component;
 use yii\base\Event;
-use yii\helpers\ArrayHelper;
 
 /**
  * Class ClientChatUserAccessEvent
@@ -34,7 +32,12 @@ class ClientChatUserAccessEvent extends Component
 		if (self::$access->isAccept()) {
 			$userAccessRepository = \Yii::createObject(ClientChatUserAccessRepository::class);
 			$clientChatRepository = \Yii::createObject(ClientChatRepository::class);
-			$clientChatRepository->assignOwner(self::$access);
+			try {
+				$clientChatRepository->assignOwner(self::$access);
+			} catch (\DomainException $e) {
+				$userAccessRepository->updateStatus(self::$access, ClientChatUserAccess::STATUS_SKIP);
+				throw new $e;
+			}
 			$userAccessRepository->disableAccessForOtherUsers(self::$access);
 
 			$data = ClientChatAccessMessage::accept(self::$access);
