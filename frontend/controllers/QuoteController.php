@@ -489,7 +489,7 @@ class QuoteController extends FController
         $response = [
             'status' => 1, 'error' => '', 'prices' => '',
             'reservation_dump' => [], 'segments' => '',
-            'validating_carrier' => '', 'trip_type' => Lead::TRIP_TYPE_ONE_WAY,
+            'validating_carrier' => '',
         ];
 
         try {
@@ -510,9 +510,6 @@ class QuoteController extends FController
                     $reservationService->parseReservation($post['prepare_dump'], true, $itinerary);
                     if ($reservationService->parseStatus) {
                         $response['reservation_dump'] = Quote::createDump($itinerary);
-                        if ($tripType = $reservationService->getTripType()) {
-                            $response['trip_type'] = $tripType;
-                        }
 
                         $baggageService = new BaggageService($gds);
                         $baggageService->setBaggageFromDump($post['prepare_dump']);

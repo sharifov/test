@@ -282,6 +282,20 @@ define({ "api": [
         }
       ]
     },
+    "parameter": {
+      "examples": [
+        {
+          "title": "Request-Example GUEST_CONNECTED:",
+          "content": "{\n\t\t\t\"event\": \"GUEST_CONNECTED\",\n\t\t\t\"data\": {\n\t\t\t\t\"rid\": \"292a9961-asdas-4d66-bhnjm-sdvsdv\",\n\t\t\t\t\"channel\": \"livechat-channel\",\n\t\t\t\t\"name\": \"Test 45\",\n\t\t\t\t\"email\": \"test+45@mail.com\",\n\t\t\t\t\"ip\": \"127.0.0.1\",\n\t\t\t\t\"project\": 'OVAGO',\n\t \t\t\t\"department\": \"department id optional\"\n\t\t\t}\n}",
+          "type": "json"
+        },
+        {
+          "title": "Request-Example ROOM_CONNECTED:",
+          "content": "{\n\t\t\t\"event\": 'ROOM_CONNECTED',\n\t\t\t\"data\": {\n\t\t\t\t\"rid\": '9e563c67-fe10-42d5-a664-6e30d2974201',\n\t\t\t\t\"visitor\": { \"_id\": 'pnjNRHsnnWXhW5LBn', \"username\": 'guest-81' }\n\t\t\t}\n}",
+          "type": "json"
+        }
+      ]
+    },
     "success": {
       "examples": [
         {

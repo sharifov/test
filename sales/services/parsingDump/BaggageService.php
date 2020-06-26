@@ -55,7 +55,7 @@ class BaggageService
 
                 $baggage = [];
 
-                if (isset($baggageSource['paid_baggage'])) {
+                if (!empty($baggageSource['paid_baggage'])) {
                     foreach ($baggageSource['paid_baggage'] as $item) {
                         $segmentBaggageForm = new SegmentBaggageForm();
                         $segmentBaggageForm->segmentIata = $segment['segmentIata'];
@@ -69,7 +69,7 @@ class BaggageService
                         $baggage[] = $segmentBaggageForm;
                     }
                 }
-                if (isset($baggageSource['free_baggage'])) {
+                if (!empty($baggageSource['free_baggage'])) {
                     $segmentBaggageForm = new SegmentBaggageForm();
                     $segmentBaggageForm->segmentIata = $segment['segmentIata'];
                     $segmentBaggageForm->type = self::TYPE_FREE;

@@ -30,8 +30,6 @@ class ClientChatUserAccessEvent extends Component
 	{
 		self::$access = $event->data;
 
-		\Yii::info(ArrayHelper::toArray(self::$access), 'info\ClientChatUserAccessEvent::sendNotifications');
-
 		$data = [];
 		if (self::$access->isAccept()) {
 			$userAccessRepository = \Yii::createObject(ClientChatUserAccessRepository::class);

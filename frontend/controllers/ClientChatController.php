@@ -83,6 +83,8 @@ class ClientChatController extends FController
 			}
 		}
 
+		$clientChat = $this->clientChatRepository->findByRid($rid);
+
 		if ($dataProvider && \Yii::$app->request->isPost) {
 
 			if (\Yii::$app->request->post('loadingChannels')) {
@@ -97,14 +99,16 @@ class ClientChatController extends FController
 			];
 
 			if ($dataProvider->getCount()) {
-				$response['html'] = $this->renderPartial('partial/_client-chat-item', ['clientChats' => $dataProvider->getModels()]);
+				$response['html'] = $this->renderPartial('partial/_client-chat-item', [
+					'clientChats' => $dataProvider->getModels(),
+					'clientChatRid' => $clientChat ? $clientChat->cch_rid : ''
+				]);
 				$response['page'] = $page+1;
 			}
 
 			return $this->asJson($response);
 		}
 
-		$clientChat = $this->clientChatRepository->findByRid($rid);
 
 		return $this->render('index', [
 			'channels' => $channels,
@@ -154,7 +158,7 @@ class ClientChatController extends FController
 			$this->clientChatUserAccessRepository->updateStatus($cch, (int)$accessAction);
 
 			$result['success'] = true;
-		} catch (\RuntimeException $e) {
+		} catch (\RuntimeException | \DomainException $e) {
 			$result['message'] = $e->getMessage();
 		}
 

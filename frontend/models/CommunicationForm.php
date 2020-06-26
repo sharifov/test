@@ -57,10 +57,12 @@ class CommunicationForm extends Model
     public const TPL_TYPE_EMAIL_BLANK       = 8;
 
 
-    public const TPL_TYPE_EMAIL_OFFER_KEY               = 'cl_offer';
-    public const TPL_TYPE_EMAIL_OFFER_VIEW_KEY          = 'offer_quote_view';
-    public const TPL_TYPE_EMAIL_BLANK_KEY               = 'cl_agent_blank';
-    public const TPL_TYPE_EMAIL_PRODUCT_OFFER_KEY       = 'cl_product_offer';
+    public const TPL_TYPE_EMAIL_OFFER_KEY                = 'cl_offer';
+    public const TPL_TYPE_EMAIL_OFFER_VIEW_KEY           = 'offer_quote_view';
+    public const TPL_TYPE_EMAIL_BLANK_KEY                = 'cl_agent_blank';
+    public const TPL_TYPE_EMAIL_PRODUCT_OFFER_KEY        = 'cl_product_offer';
+    public const TPL_TYPE_EMAIL_SUPPORT_BLANK_PAGE_KEY   = 'support_blank_page';
+    public const TPL_TYPE_EMAIL_EXCHANGE_BLANK_PAGE_KEY  = 'exchange_blank_page';
 
     public const TPL_TYPE_SMS_OFFER_KEY                 = 'sms_client_offer';
     public const TPL_TYPE_SMS_PRODUCT_OFFER_KEY         = 'sms_product_offer';
@@ -231,8 +233,6 @@ class CommunicationForm extends Model
             [['c_email_tpl_id'], 'exist', 'skipOnError' => true, 'targetClass' => EmailTemplateType::class, 'targetAttribute' => ['c_email_tpl_id' => 'etp_id']],
             [['c_sms_tpl_id'], 'exist', 'skipOnError' => true, 'targetClass' => SmsTemplateType::class, 'targetAttribute' => ['c_sms_tpl_id' => 'stp_id']],
             [['c_call_id'], 'exist', 'skipOnError' => true, 'targetClass' => Call::class, 'targetAttribute' => ['c_call_id' => 'c_id']],
-
-
 
         ];
     }

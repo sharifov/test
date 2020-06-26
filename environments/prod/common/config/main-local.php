@@ -145,7 +145,8 @@ return [
             'url' => '{{ common.config.main.components.rchat.url:str }}',
             'username' => '{{ common.config.main.components.rchat.username:str }}',
             'password' => '{{ common.config.main.components.rchat.password:str }}',
-        ],
+			'host' => '{{ common.config.main.components.rchat.host:str }}',
+		],
         'chatBot' => [
             'class' => \common\components\ChatBot::class,
             'url' => '{{ common.config.main.components.chatBot.url:str }}',
