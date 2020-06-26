@@ -36,7 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 </div>
                 <div class="row">
                     <div class="col-sm-6">
-                        <?= $form->field($userProfileForm, 'full_name')->textInput() ?>
+                        <?= $form->field($userProfileForm, 'full_name')->textInput(['maxlength' => true]) ?>
                     </div>
                     <div class="col-sm-6">
                         <?= $form->field($userProfileForm, 'email')->input('email') ?>
