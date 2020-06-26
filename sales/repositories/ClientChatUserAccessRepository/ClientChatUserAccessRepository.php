@@ -1,15 +1,31 @@
 <?php
 namespace sales\repositories\ClientChatUserAccessRepository;
 
-use frontend\widgets\clientChat\ClientChatCache;
-use sales\dispatchers\NativeEventDispatcher;
+use common\models\Notifications;
+use frontend\widgets\clientChat\ClientChatAccessMessage;
+use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
-use sales\model\clientChatUserAccess\event\ClientChatUserAccessEvent;
 use sales\repositories\NotFoundException;
 use sales\repositories\Repository;
 
+/**
+ * Class ClientChatUserAccessRepository
+ * @package sales\repositories\ClientChatUserAccessRepository
+ *
+ * @property ClientChatRepository $clientChatRepository
+ */
 class ClientChatUserAccessRepository extends Repository
 {
+	/**
+	 * @var ClientChatRepository
+	 */
+	private ClientChatRepository $clientChatRepository;
+
+	public function __construct(ClientChatRepository $clientChatRepository)
+	{
+		$this->clientChatRepository = $clientChatRepository;
+	}
+
 	public function create(int $cchId, int $userId): void
 	{
 		$clientChatUserAccess = ClientChatUserAccess::create($cchId, $userId);
@@ -23,17 +39,16 @@ class ClientChatUserAccessRepository extends Repository
 			throw new \RuntimeException($clientChatUserAccess->getErrorSummary(false)[0]);
 		}
 
-		ClientChatCache::invalidate($clientChatUserAccess->ccua_user_id);
+		$this->sendNotifications($clientChatUserAccess);
 
-		NativeEventDispatcher::recordEvent(ClientChatUserAccessEvent::class, ClientChatUserAccessEvent::SEND_NOTIFICATIONS, [ClientChatUserAccessEvent::class, 'sendNotifications'], $clientChatUserAccess);
-		NativeEventDispatcher::triggerBy(ClientChatUserAccessEvent::class);
+//		ClientChatCache::invalidate($clientChatUserAccess->ccua_user_id);
 
 		return $clientChatUserAccess;
 	}
 
-	public function find(int $id): ClientChatUserAccess
+	public function findByPrimaryKeys(int $cchId, int $userId): ClientChatUserAccess
 	{
-		if ($access = ClientChatUserAccess::findOne($id)) {
+		if ($access = ClientChatUserAccess::findOne(['ccua_cch_id' => $cchId, 'ccua_user_id' => $userId])) {
 			return $access;
 		}
 		throw new NotFoundException('Client Chat User Access is not found');
@@ -54,5 +69,28 @@ class ClientChatUserAccessRepository extends Repository
 		foreach ($users as $user) {
 			$this->updateStatus($user, ClientChatUserAccess::STATUS_SKIP);
 		}
+	}
+
+	public function sendNotifications(ClientChatUserAccess $access): void
+	{
+		$data = [];
+		if ($access->isAccept()) {
+			try {
+				$this->clientChatRepository->assignOwner($access);
+			} catch (\DomainException | \RuntimeException $e) {
+				\Yii::error($e->getMessage(), 'ClientChatUserAccessEvent::sendNotifications');
+				$this->updateStatus($access, ClientChatUserAccess::STATUS_SKIP);
+				throw $e;
+			}
+			$this->disableAccessForOtherUsers($access);
+
+			$data = ClientChatAccessMessage::accept($access);
+		} else if ($access->isPending()) {
+			$data = ClientChatAccessMessage::pending($access);
+		} else if ($access->isSkip()) {
+			$data = ClientChatAccessMessage::skip($access);
+		}
+
+		Notifications::publish('clientChatRequest', ['user_id' => $access->ccua_user_id], ['data' => $data]);
 	}
 }

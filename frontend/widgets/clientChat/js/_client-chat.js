@@ -58,17 +58,15 @@ function refreshClientChatWidget(obj) {
         return false;
     }
 
-    var id = '#ccr_'+data.cch_id + '_' + data.user_id;
     switch (data.command) {
         case 'accept':
-
-            $(id).remove();
-            pjaxReload({container: '#client-chat-box-pjax'});
             if (document.visibilityState == "visible") {
                 window.open(data.url);
             }
+            pjaxReload({container: '#client-chat-box-pjax'});
             break;
         case 'skip':
+            pjaxReload({container: '#client-chat-box-pjax'});
             break;
         case 'pending':
             pjaxReload({container: '#client-chat-box-pjax'});
