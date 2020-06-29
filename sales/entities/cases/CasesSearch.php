@@ -48,6 +48,7 @@ use yii\helpers\VarDumper;
  * @property $userGroup
  *
  * @property array $cacheSaleData
+ * @property array $csStatuses
  */
 class CasesSearch extends Cases
 {
@@ -78,6 +79,7 @@ class CasesSearch extends Cases
 
     public $sentEmailBy;
     public $userGroup;
+    public $csStatuses;
 
     private $cacheSaleData = [];
 
@@ -92,6 +94,7 @@ class CasesSearch extends Cases
             ['cs_subject', 'string'],
             ['cs_category_id', 'integer'],
             ['cs_status', 'integer'],
+            ['csStatuses', 'in', 'range' => array_keys(CasesStatus::STATUS_LIST), 'allowArray' => true],
             ['cs_user_id', 'integer'],
             ['cs_lead_id', 'string'],
             ['cs_dep_id', 'integer'],
@@ -157,6 +160,7 @@ class CasesSearch extends Cases
 			'saleTicketSendEmailDate' => 'Send Email Date',
 			'sentEmailBy' => 'Sent Email By User',
 			'userGroup' => 'User Group',
+			'csStatuses' => 'Status',
         ];
     }
 
@@ -217,6 +221,8 @@ class CasesSearch extends Cases
             'cs_need_action' => $this->cs_need_action,
             'cs_client_id' => $this->cs_client_id,
         ]);
+
+        $query->andFilterWhere(['IN', 'cs_status', $this->csStatuses]);
 
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
         $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
@@ -395,11 +401,13 @@ class CasesSearch extends Cases
             'cs_project_id' => $this->cs_project_id,
             'cs_dep_id' => $this->cs_dep_id,
             'cs_category_id' => $this->cs_category_id,
-            'cs_status' => $this->cs_status,
             'cs_client_id' => $this->cs_client_id,
             'cs_source_type_id' => $this->cs_source_type_id,
             'cs_need_action' => $this->cs_need_action,
+            'cs_status' => $this->cs_status,
         ]);
+
+        $query->andFilterWhere(['IN', 'cs_status', $this->csStatuses]);
 
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
         $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);

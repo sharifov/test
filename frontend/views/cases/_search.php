@@ -2,6 +2,7 @@
 
 use common\models\Airport;
 use common\models\CaseSale;
+use dosamigos\multiselect\MultiSelect;
 use kartik\select2\Select2;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
@@ -10,6 +11,7 @@ use sales\entities\cases\CasesSourceType;
 use sales\entities\cases\CasesStatus;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
+use yii\web\View;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
@@ -21,6 +23,7 @@ use yii\widgets\ActiveForm;
 <div class="cases-search">
     <?php $form = ActiveForm::begin([
         'action' => ['index'],
+        'id' => 'cases_search_form',
         'method' => 'get',
         'options' => [
             'data-pjax' => 1
@@ -45,7 +48,15 @@ use yii\widgets\ActiveForm;
                     <?= $form->field($model, 'cs_category_id')->dropDownList(CaseCategory::getList(array_keys(EmployeeDepartmentAccess::getDepartments())), ['prompt' => '-']) ?>
                 </div>
                 <div class="col-md-1">
-                    <?= $form->field($model, 'cs_status')->dropDownList(CasesStatus::STATUS_LIST, ['prompt' => '-']) ?>
+                    <?php /* echo $form->field($model, 'cs_status')->dropDownList(CasesStatus::STATUS_LIST, ['prompt' => '-']) */ ?>
+                    <?php echo $form->field($model, 'csStatuses')
+                        ->widget(MultiSelect::class,
+                        [
+                            'data' => CasesStatus::STATUS_LIST,
+                            'options' => ['multiple' => 'multiple'],
+                            'clientOptions' => ['numberDisplayed' => 1],
+                        ]
+                    )  ?>
                 </div>
                 <div class="col-md-1">
                     <?= $form->field($model, 'cs_subject') ?>
@@ -198,10 +209,12 @@ use yii\widgets\ActiveForm;
 			])->label('Send Email Date') ?>
 
         </div>
+        
+
     </div>
 
     <div class="form-group text-center">
-        <?= Html::submitButton('<i class="fa fa-search"></i> Search cases', ['class' => 'btn btn-primary']) ?>
+        <?= Html::submitButton('<i class="fa fa-search"></i> Search cases', ['class' => 'btn btn-primary search_cases_btn']) /* TODO:: add loader */ ?>
         <?= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset form', ['cases/index'], ['class' => 'btn btn-warning']) ?>
         <?php if ($model->saleTicketSendEmailDate) : ?>
 			<?php echo \kartik\export\ExportMenu::widget([
@@ -241,3 +254,26 @@ use yii\widgets\ActiveForm;
 
     <?php ActiveForm::end(); ?>
 </div>
+
+<?php
+$js = <<<JS
+    $(document).on('beforeSubmit', '#cases_search_form', function(event) {
+        let btn = $(this).find('.search_cases_btn');
+        
+        btn.html('<span class="spinner-border spinner-border-sm"></span> Loading');        
+        btn.prop("disabled", true)
+    });
+JS;
+$this->registerJs($js, View::POS_READY);
+?>
+
+<?php
+$css = <<<CSS
+    .field-casessearch-csstatuses .btn-group {
+        width: 124px;
+    } 
+    .field-casessearch-csstatuses .multiselect-container>li>a>label {
+        padding: 3px 20px 3px 10px;
+    }
+CSS;
+$this->registerCss($css);
