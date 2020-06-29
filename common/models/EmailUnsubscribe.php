@@ -69,6 +69,7 @@ class EmailUnsubscribe extends \yii\db\ActiveRecord
             'user' => [
                 'class' => BlameableBehavior::class,
                 'createdByAttribute' => 'eu_created_user_id',
+                'updatedByAttribute' => 'eu_created_user_id',
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);

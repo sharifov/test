@@ -3,6 +3,7 @@
 namespace sales\forms\api\clientEmail;
 
 
+use sales\repositories\emailUnsubscribe\EmailUnsubscribeRepository;
 use yii\base\Model;
 
 /**
@@ -26,12 +27,9 @@ class SubscribeForm extends Model
         $this->project_id = $project_id;
     }
 
-    /**
-     * @return string
-     */
-    public static function tableName(): string
+    public function formName(): string
     {
-        return 'email_unsubscribe';
+        return '';
     }
 
     /**
@@ -41,9 +39,15 @@ class SubscribeForm extends Model
     {
         return [
             ['email', 'required'],
-            ['email', 'email', 'max' => 160],
+            ['email', 'email'],
+            ['email', 'string', 'max' => 160],
 
-            [['email', 'project_id'], 'exist', 'targetAttribute' => ['email', 'project_id']],
+            ['email', function ($attribute) {
+                if (!(new EmailUnsubscribeRepository())->find($this->email, $this->project_id)) {
+                    $this->addError($attribute,
+                    'Database entry (email : ' . $this->email . ', project : ' . $this->project_id . ') not exists');
+                }
+            }],
         ];
     }
 }

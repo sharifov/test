@@ -28,7 +28,7 @@ class ClientEmailController extends BaseController
 {
 
     /**
-     * @api {get} /v2/client-email/subscribe Client Email Unsubscribe
+     * @api {get} /v2/client-email/subscribe Client Email Subscribe
      * @apiVersion 0.2.0
      * @apiName Client Email Subscribe
      * @apiGroup ClientEmail
@@ -49,6 +49,7 @@ class ClientEmailController extends BaseController
      *      "If-Modified-Since": "Mon, 23 Dec 2019 08:17:54 GMT"
      *  }
      *
+     * @apiParam {string{160}}           email                    Email
      *
      * @apiSuccessExample {json} Success-Response:
      *
@@ -88,6 +89,26 @@ class ClientEmailController extends BaseController
      *       "type": "yii\\web\\MethodNotAllowedHttpException"
      *   }
      *
+     *
+     * @apiErrorExample {json} Error-Response(Validation error) (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     *   {
+     *       "status": 422,
+     *       "message": "Validation error",
+     *       "errors": {
+     *           "email": [
+     *               "Contact Email cannot be blank."
+     *           ]
+     *       },
+     *       "code": "21301",
+     *       "technical": {
+     *          ...
+     *       },
+     *       "request": {
+     *          ...
+     *       }
+     *   }
      */
 
     /**
@@ -110,7 +131,7 @@ class ClientEmailController extends BaseController
             return new ErrorResponse(
                 new StatusCodeMessage(400),
                 new MessageMessage(Messages::LOAD_DATA_ERROR),
-                new ErrorsMessage('Not found Case data on POST request'),
+                new ErrorsMessage('POST data not loaded'),
                 new CodeMessage(ApiCodeException::POST_DATA_NOT_LOADED)
             );
         }
@@ -125,8 +146,9 @@ class ClientEmailController extends BaseController
 
         try {
             $repository = new EmailUnsubscribeRepository();
-            $model = $repository->find($form->email, $form->project_id);
-            $repository->remove($model);
+            if ($model = $repository->find($form->email, $form->project_id)) {
+                $repository->remove($model);
+            }
         } catch (\Throwable $e) {
             return new ErrorResponse(
                 new MessageMessage($e->getMessage()),
@@ -165,6 +187,7 @@ class ClientEmailController extends BaseController
      *      "If-Modified-Since": "Mon, 23 Dec 2019 08:17:54 GMT"
      *  }
      *
+     * @apiParam {string{160}}           email                    Email
      *
      * @apiSuccessExample {json} Success-Response:
      *
@@ -204,6 +227,26 @@ class ClientEmailController extends BaseController
      *       "type": "yii\\web\\MethodNotAllowedHttpException"
      *   }
      *
+     * @apiErrorExample {json} Error-Response(Validation error) (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     *   {
+     *       "status": 422,
+     *       "message": "Validation error",
+     *       "errors": {
+     *           "email": [
+     *               "Contact Email cannot be blank."
+     *           ]
+     *       },
+     *       "code": "21301",
+     *       "technical": {
+     *          ...
+     *       },
+     *       "request": {
+     *          ...
+     *       }
+     *   }
+     *
      */
 
     /**
@@ -226,7 +269,7 @@ class ClientEmailController extends BaseController
             return new ErrorResponse(
                 new StatusCodeMessage(400),
                 new MessageMessage(Messages::LOAD_DATA_ERROR),
-                new ErrorsMessage('Not found Case data on POST request'),
+                new ErrorsMessage('POST data not loaded'),
                 new CodeMessage(ApiCodeException::POST_DATA_NOT_LOADED)
             );
         }

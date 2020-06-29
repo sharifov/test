@@ -16,12 +16,12 @@ class EmailUnsubscribeRepository extends Repository
      * @param int $projectId
      * @return EmailUnsubscribe
      */
-    public function find(string $email, int $projectId): EmailUnsubscribe
+    public function find(string $email, int $projectId): ?EmailUnsubscribe
     {
         if ($source = EmailUnsubscribe::findOne(['eu_email' => $email, 'eu_project_id' => $projectId])) {
             return $source;
         }
-        throw new NotFoundException('EmailUnsubscribe is not found');
+        return null;
     }
 
     /**
