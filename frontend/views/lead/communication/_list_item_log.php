@@ -171,20 +171,3 @@ $fromType = 'client';
 		</div>
 	<?php endif;?>
 <?php endif;?>
-<?php
-$unsubscribedEmails = @json_encode($unsubscribedEmails);
-
-$js = <<<JS
-    let emails = '$unsubscribedEmails';
-    $(document).ready(function() {
-        $('#email option').each(function() {             
-            if (emails.includes($(this).attr('value'))){                
-                $(this).attr('disabled', 'disabled');
-            }
-            if ($(this).attr('value') == ""){
-                $(this).removeAttr('disabled')
-            }
-        });
-    });
-JS;
-$this->registerJs($js);

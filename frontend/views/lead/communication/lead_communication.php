@@ -35,6 +35,8 @@ if (isset($clientProjectInfo[0]['cp_unsubscribe'])){
     $unsubscribe = false;
 }
 
+$unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscribes, 'eu_email'));
+
 ?>
 
     <div class="x_panel">
@@ -868,5 +870,20 @@ $js = <<<JS
     
 JS;
 
+$this->registerJs($js);
+
+$js = <<<JS
+    let emails = '$unsubscribedEmails';
+    $(document).ready(function() {
+        $('#email option').each(function() {             
+            if (emails.includes($(this).attr('value'))){                
+                $(this).attr('disabled', 'disabled');
+            }
+            if ($(this).attr('value') == ""){
+                $(this).removeAttr('disabled')
+            }
+        });
+    });
+JS;
 $this->registerJs($js);
 
