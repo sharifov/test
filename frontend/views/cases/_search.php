@@ -9,6 +9,7 @@ use sales\access\EmployeeProjectAccess;
 use sales\entities\cases\CaseCategory;
 use sales\entities\cases\CasesSourceType;
 use sales\entities\cases\CasesStatus;
+use sales\model\saleTicket\entity\SaleTicket;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\web\View;
@@ -207,9 +208,10 @@ use yii\widgets\ActiveForm;
 					'format' => 'yyyy-mm-dd',
 				]
 			])->label('Send Email Date') ?>
-
         </div>
-        
+        <div class="col-md-1">
+            <?= $form->field($model, 'airlinePenalty')->dropDownList(SaleTicket::getAirlinePenaltyList(), ['prompt' => '---']) ?>
+        </div>
 
     </div>
 

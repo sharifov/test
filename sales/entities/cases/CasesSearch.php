@@ -14,6 +14,7 @@ use common\models\UserGroupAssign;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\helpers\setting\SettingHelper;
+use sales\model\saleTicket\entity\SaleTicket;
 use yii\data\ActiveDataProvider;
 use yii\db\Expression;
 use yii\helpers\VarDumper;
@@ -49,6 +50,7 @@ use yii\helpers\VarDumper;
  *
  * @property array $cacheSaleData
  * @property array $csStatuses
+ * @property int|null $airlinePenalty
  */
 class CasesSearch extends Cases
 {
@@ -80,6 +82,7 @@ class CasesSearch extends Cases
     public $sentEmailBy;
     public $userGroup;
     public $csStatuses;
+    public $airlinePenalty;
 
     private $cacheSaleData = [];
 
@@ -121,6 +124,7 @@ class CasesSearch extends Cases
             [['cssOutDate', 'cssInDate'], 'date'],
             [['cssChargeType'], 'string', 'max' => 100],
             [['departureAirport', 'arrivalAirport', 'departureCountries', 'arrivalCountries', 'cssInOutDate', 'saleTicketSendEmailDate'], 'safe'],
+            ['airlinePenalty', 'integer'],
         ];
     }
 
@@ -161,6 +165,8 @@ class CasesSearch extends Cases
 			'sentEmailBy' => 'Sent Email By User',
 			'userGroup' => 'User Group',
 			'csStatuses' => 'Status',
+			'airlinePenalty' => 'Airline Penalty',
+			'cs_order_uid' => 'Order uid',
         ];
     }
 
@@ -429,6 +435,14 @@ class CasesSearch extends Cases
             } else {
                 $query->where('0=1');
             }
+        }
+
+        if ($this->airlinePenalty) {
+            $query->andWhere([
+                    'cs_id' => SaleTicket::find()->select('st_case_id')
+                        ->andWhere(['st_penalty_type' => $this->airlinePenalty])
+                ]
+            );
         }
 
         if ($this->clientId){
