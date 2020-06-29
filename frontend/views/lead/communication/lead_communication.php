@@ -28,8 +28,8 @@ $c_type_id = $comForm->c_type_id;
 $pjaxContainerId = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled ? 'pjax-lead-communication-log' : 'pjax-lead-communication';
 $listItemView = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled ? '_list_item_log' : '_list_item';
 
-/*$clientProject = $lead->client->projects;
-var_dump($clientProject); die();*/
+$clientProjectInfo = $lead->client->clientProjects;
+
 ?>
 
     <div class="x_panel">
@@ -88,7 +88,16 @@ var_dump($clientProject); die();*/
                     ]) ?>
 
                     <?php if(!Yii::$app->user->identity->canRole('qa')) : ?>
-                        <div class="chat__form panel">
+                        <?php if ($clientProjectInfo[0]['cp_unsubscribe']) : ?>
+                            <div class="chat__form panel">
+                                <div class="alert alert-warning" role="alert">
+                                    <h4 class="alert-heading">Warning!</h4>
+                                    <p>Client communication restricted. By client request...</p>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+
+                        <div class="chat__form panel <?= $clientProjectInfo[0]['cp_unsubscribe'] ? 'd-none' : '' ?> ">
 
                             <?php Modal::begin(['id' => 'modal-email-preview',
                                 'title' => 'Email preview',
@@ -235,9 +244,6 @@ var_dump($clientProject); die();*/
                             <?php Modal::end()?>
 
 
-
-
-
                             <?php $form = \yii\bootstrap\ActiveForm::begin([
                                 //'action' => ['index'],
                                 'id' => 'communication-form',
@@ -298,7 +304,6 @@ var_dump($clientProject); die();*/
                                     } else {
                                         $call_type_id = \common\models\UserProfile::CALL_TYPE_OFF;
                                     }
-
 
                                     //\yii\helpers\VarDumper::dump($leadForm->getLead()->id, 10, true); exit;
 
@@ -482,7 +487,6 @@ var_dump($clientProject); die();*/
                                     <?php endif;?>
 
 
-
                                     <?php if($call_type_id == \common\models\UserProfile::CALL_TYPE_WEB): ?>
                                         <div class="call-box__btns">
 
@@ -581,20 +585,14 @@ JS;
             $('#sms-message').countSms('#sms-counter');
             $('#preview-sms-message').countSms('#preview-sms-counter');
             
-        }
-            
+        }            
     
-        initializeMessageType($c_type_id);
-        
+        initializeMessageType($c_type_id);        
 
 JS;
 
                             $this->registerJs($js);
                             ?>
-
-
-
-
 
 
                             <?php \yii\bootstrap\ActiveForm::end(); ?>
@@ -641,7 +639,6 @@ $jsPath = Yii::$app->request->baseUrl.'/js/sounds/';
             stopCallTimer(duration);
         }
 
-
         function startCall() {
 
             $('#div-call-img').addClass('call-box__img--waiting');
@@ -652,7 +649,6 @@ $jsPath = Yii::$app->request->baseUrl.'/js/sounds/';
 
             //startCallTimer();
         }
-
 
         function callUpdate(obj) {
             console.log(obj);
@@ -686,11 +682,9 @@ $jsPath = Yii::$app->request->baseUrl.'/js/sounds/';
             $('#div-call-timer').timer({format: '%M:%S', seconds: sec}).timer('pause');
         }
 
-
     </script>
 
     <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/timer.jquery/0.9.0/timer.jquery.min.js"></script>-->
-
 <?php
 
 $tpl_email_blank_key = CommunicationForm::TPL_TYPE_EMAIL_BLANK_KEY;
@@ -757,16 +751,13 @@ $js = <<<JS
             );
         } else {
             alert('Warning: Select client phone number');
-        }
-        
-    });
-    
+        }        
+    });    
     
     
     $('body').on("change", '#c_email_tpl_key', function () {
                 
-        //var type_id = $('#c_type_id').val();
-        
+        //var type_id = $('#c_type_id').val();        
         //alert($(this).val());
         
         //if(type_id != 2) {
@@ -799,8 +790,7 @@ $js = <<<JS
         //previewPopup.find('.modal-body').html(data);
         popup.modal('show');
         return false;
-    });
-    
+    });    
     
     
     $('body').on('change', '.quotes-uid', function() {
@@ -863,10 +853,7 @@ $js = <<<JS
         $('#div-call-time').hide();
         $(this).attr('disabled', true);
         $('#btn-start-call').attr('disabled', false);
-    });*/
-    
-    
-    
+    });*/ 
     
     /*$('[data-toggle="tooltip"]').tooltip();
 

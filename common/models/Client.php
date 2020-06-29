@@ -202,7 +202,7 @@ class Client extends ActiveRecord
      */
     public function getClientProjects()
     {
-        return $this->hasMany(ClientProject::class(), ['cp_client_id' => 'id']);
+        return $this->hasMany(ClientProject::class, ['cp_client_id' => 'id']);
     }
 
     /**

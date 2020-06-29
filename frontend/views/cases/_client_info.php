@@ -4,6 +4,7 @@ use common\models\ClientEmail;
 use common\models\ClientPhone;
 use sales\entities\cases\Cases;
 use yii\helpers\Html;
+use \yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $caseModel \sales\entities\cases\Cases */
@@ -23,6 +24,16 @@ use yii\helpers\Html;
                     </li>
                     <li>
                         <?= \yii\bootstrap\Html::a('<i class="fa fa-edit warning"></i> Update', '#', ['id' => 'btn-client-update', 'title' => 'Update Client Info'])?>
+                    </li>
+                    <li>
+                        <?=Html::a('<i class="far fa-bell-slash info"></i> Unsubscribe', '#',  [
+                            'id' => 'client-unsubscribe-button',
+                            'title' => 'Restrict communication with client',
+                            'data-unsubscribe-url' => Url::to(['client-project/unsubscribe-client-ajax',
+                                'clientID' => $caseModel->cs_client_id,
+                                'projectID' => $caseModel->cs_project_id
+                            ]),
+                        ])?>
                     </li>
                 <?php endif;?>
                 <li>
