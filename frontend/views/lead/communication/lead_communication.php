@@ -715,7 +715,7 @@ $js = <<<JS
     });
     
     $(document).on("change", '#call-to-number', function () {
-        $('#call-pane__dial-number').val($(this).val());
+        insertPhoneNumber($(this).val());
     });
     
     $(document).on("change", '#call-from-number', function () {
