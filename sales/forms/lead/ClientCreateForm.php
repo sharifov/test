@@ -32,7 +32,7 @@ class ClientCreateForm extends Model
             [['firstName', 'middleName', 'lastName'], 'string', 'max' => 100],
             [['firstName', 'middleName', 'lastName'], 'match', 'pattern' => "/^[a-z-\s\']+$/i"],
             [['firstName', 'middleName', 'lastName'], 'filter', 'filter' => 'trim'],
-			[['uuid', 'string', 'max' => 36]]
+			['uuid', 'string', 'max' => 36]
         ];
     }
 

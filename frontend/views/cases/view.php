@@ -230,6 +230,22 @@ Modal::end();
             
            return false;
      });
+    
+    $(document).on('click','#client-unsubscribe-button', function (e) {
+        e.preventDefault();
+        let url = $(this).data('unsubscribe-url');        
+              
+        $.ajax({
+            url: url,
+            //method: 'POST',           
+            success: function(response){
+                if (response){
+                    new PNotify({title: "Communication", type: "info", text: 'Client communication restricted', hide: true});
+                }
+                updateCommunication();                
+            }
+        });
+    });
 JS;
 
 $this->registerJs($js);

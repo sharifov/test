@@ -64,13 +64,11 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
                     <li>
                         <?=Html::a('<i class="far fa-bell-slash info"></i> Unsubscribe', '#',  [
                             'id' => 'client-unsubscribe-button',
-                            //'data-modal_id' => 'client-manage-info',
-                            'title' => 'Restrict email communication with client',
+                            'title' => 'Restrict communication with client',
                             'data-unsubscribe-url' => Url::to(['client-project/unsubscribe-client-ajax',
                                  'clientID' => $lead->client_id,
                                  'projectID' => $lead->project_id
                             ]),
-                            //'class' => 'showModalButton'
                         ])?>
                     </li>
 

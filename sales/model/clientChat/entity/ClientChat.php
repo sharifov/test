@@ -229,15 +229,15 @@ class ClientChat extends \yii\db\ActiveRecord
     {
         return [
             'cch_id' => 'ID',
-            'cch_rid' => 'Rocket Chat ID',
-            'cch_ccr_id' => 'Client Chat Request ID',
+            'cch_rid' => 'Room ID',
+            'cch_ccr_id' => 'Request ID',
             'cch_title' => 'Title',
             'cch_description' => 'Description',
-            'cch_project_id' => 'Project ID',
-            'cch_dep_id' => 'Dep ID',
-            'cch_channel_id' => 'Channel ID',
-            'cch_client_id' => 'Client ID',
-            'cch_owner_user_id' => 'Owner User ID',
+            'cch_project_id' => 'Project',
+            'cch_dep_id' => 'Department',
+            'cch_channel_id' => 'Channel',
+            'cch_client_id' => 'Client',
+            'cch_owner_user_id' => 'Owner User',
             'cch_case_id' => 'Case ID',
             'cch_lead_id' => 'Lead ID',
             'cch_note' => 'Note',
@@ -247,8 +247,8 @@ class ClientChat extends \yii\db\ActiveRecord
             'cch_language_id' => 'Language ID',
             'cch_created_dt' => 'Created Dt',
             'cch_updated_dt' => 'Updated Dt',
-            'cch_created_user_id' => 'Created User ID',
-            'cch_updated_user_id' => 'Updated User ID',
+            'cch_created_user_id' => 'Created User',
+            'cch_updated_user_id' => 'Updated User',
         ];
     }
 
