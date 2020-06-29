@@ -37,8 +37,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'cch_channel_id',
             'cch_client_id:client',
             'cch_owner_user_id',
-            'cch_case_id:case',
-            'cch_lead_id:lead',
+            'cchCase:case',
+            'cchLead:lead',
             'cch_note',
             [
                 'attribute' => 'cch_status_id',
