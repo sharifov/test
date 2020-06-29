@@ -360,45 +360,94 @@ use yii\helpers\Html;
             //     device.disconnectAll();
             // }
             // updateAgentStatus(connection, false, 1);
-            hangup($('#button-hangup'));
+            let callSid = getActiveConnectionCallSid();
+            hangup(callSid);
         } else {
             log('Device is null');
         }
     };
 
-    function hangup(button) {
-        let callSid = getActiveConnectionCallSid();
+    function hangup(callSid) {
 
-        if (callSid) {
-            let btn = $('#cancel-active-call');
-            if (btn.length > 0) {
-                btn.html('<i class="fa fa-spinner fa-spin"></i>');
-            }
-            button.prop('disabled', true);
-            $.ajax({
-                type: 'post',
-                data: {
-                    'sid': callSid,
-                },
-                url: ajaxHangupUrl
-            })
-                .done(function(data) {
-                    if (data.error) {
-                        new PNotify({title: "Hangup", type: "error", text: data.message, hide: true});
-                    }
-                })
-                .fail(function(error) {
-                    console.error(error);
-                })
-                .always(function () {
-                    if (btn.length > 0) {
-                        btn.html('<i class="fa fa-phone-slash"></i>');
-                    }
-                    button.prop('disabled', false);
-                });
-        } else {
-            new PNotify({title: "Hangup", type: "error", text: 'Not found active connection Sid', hide: true});
+        if (!callSid) {
+            new PNotify({title: "Hangup", type: "error", text: 'Not found Call Sid', hide: true});
+            return false;
         }
+
+        let call = null;
+        if (typeof  PhoneWidgetCall === 'object') {
+            let call = PhoneWidgetCall.queues.active.oneBySid(callSid);
+            if (call !== null) {
+                if (call.isBlocked) {
+                    return false;
+                }
+                call.isBlocked = true;
+                PhoneWidgetCall.panes.queue.refresh();
+            }
+        }
+
+        let activeCallBtn = $(document).find('#cancel-active-call');
+        if (activeCallBtn.length > 0) {
+            if (activeCallBtn.attr('data-call-sid') !== callSid) {
+                activeCallBtn = null;
+            } else {
+                activeCallBtn.prop('disabled', true);
+                activeCallBtn.html('<i class="fa fa-spinner fa-spin"> </i>');
+            }
+        } else {
+            activeCallBtn = null;
+        }
+
+        let oldActiveCallBtn = $(document).find('#button-hangup');
+        if (oldActiveCallBtn.length > 0) {
+            if (getActiveConnectionCallSid() !== callSid) {
+                oldActiveCallBtn = null;
+            } else {
+                oldActiveCallBtn.prop('disabled', true);
+            }
+        } else {
+            oldActiveCallBtn = null;
+        }
+
+        $.ajax({
+            type: 'post',
+            data: {
+                'sid': callSid,
+            },
+            url: ajaxHangupUrl
+        })
+            .done(function(data) {
+                if (data.error) {
+                    new PNotify({title: "Hangup", type: "error", text: data.message, hide: true});
+                    if (oldActiveCallBtn !== null) {
+                        oldActiveCallBtn.prop('disabled', false);
+                    }
+                    if (activeCallBtn !== null) {
+                        activeCallBtn.prop('disabled', false);
+                        activeCallBtn.html('<i class="fa fa-phone-slash"> </i>');
+                    }
+                    if (call !== null) {
+                        call.isBlocked = false;
+                        PhoneWidgetCall.panes.queue.refresh();
+                    }
+                }
+            })
+            .fail(function(error) {
+                console.error(error);
+            })
+            .always(function () {
+                if (oldActiveCallBtn !== null) {
+                    oldActiveCallBtn.prop('disabled', false);
+                }
+                if (activeCallBtn !== null) {
+                    activeCallBtn.prop('disabled', false);
+                    activeCallBtn.html('<i class="fa fa-phone-slash"> </i>');
+                }
+                if (call !== null) {
+                    call.isBlocked = false;
+                    PhoneWidgetCall.panes.queue.refresh();
+                }
+            });
     }
 
     function hangupOutgoingCall(button, callId) {
@@ -1132,36 +1181,38 @@ $js = <<<JS
         let modal = $('#web-phone-redirect-agents-modal');
         modal.find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
         
-        let callSid = getActiveConnectionCallSid();
+        let callSid = $(this).attr('data-call-sid');
         
-        if (callSid) {                                    
-            if (objValue && objType) {
-                $.ajax({
-                    type: 'post',
-                    data: {
-                        'sid': callSid,
-                        'id': objValue,
-                        'type': objType
-                    },
-                    url: ajaxCallTransferUrl,
-                    success: function (data) {
-                        if (data.error) {
-                            alert(data.message);
-                        }
-                        modal.modal('hide').find('.modal-body').html('');
-                    },
-                    error: function (error) {
-                        console.error(error);
-                        modal.modal('hide').find('.modal-body').html('');
-                    }
-                });
-            } else {
-                new PNotify({title: "Transfer call", type: "error", text: "Please try again after some seconds", hide: true});
-            }
-                    
-        } else {
-            alert('Error: Not found active connection Call SID!');
+        if (!callSid) {
+            new PNotify({title: "Transfer call", type: "error", text: "Not found Call SID!", hide: true});
+            return false;
         }
+        
+        if (!(objValue && objType)) {
+            new PNotify({title: "Transfer call", type: "error", text: "Please try again after some seconds", hide: true});
+            return false;
+        }
+        
+        $.ajax({
+            type: 'post',
+            data: {
+                'sid': callSid,
+                'id': objValue,
+                'type': objType
+            },
+            url: ajaxCallTransferUrl,
+            success: function (data) {
+                if (data.error) {
+                    alert(data.message);
+                }
+                modal.modal('hide').find('.modal-body').html('');
+            },
+            error: function (error) {
+                console.error(error);
+                modal.modal('hide').find('.modal-body').html('');
+            }
+        });
+    
         // if(connection && connection.parameters.CallSid) {
         //     updateAgentStatus(connection, false, 1);
         //    
@@ -1207,49 +1258,50 @@ $js = <<<JS
         
         obj.attr('disabled', true);
         
-        let callSid = null;
+        let callSid = $(this).attr('data-call-sid');
         let to = null;
         let activeConnection = getActiveConnection();
         if (activeConnection) {
-            callSid = activeConnection.CallSid;
+            // callSid = activeConnection.CallSid;
             to = activeConnection.To;
         }
         
-        if (callSid) {
-            if(objValue.length < 2) {
-                console.error('Error call forward param TO');
-                return false;
-            }
-            
-            let modal = $('#web-phone-redirect-agents-modal');
-            modal.find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
-            // connection.accept();
-            
-            $.ajax({
-                type: 'post',
-                data: {
-                    'sid': callSid,
-                    'type': objType,
-                    'from': to,
-                    'to': objValue,
-                },
-                url: ajaxCallRedirectUrl,
-                success: function (data) {
-                    // updateAgentStatus(connection, false, 1);
-                    //console.log(data);
-                    if (data.error) {
-                        alert(data.message);
-                    }
-                    modal.modal('hide').find('.modal-body').html('');
-                },
-                error: function (error) {
-                    console.error(error);
-                    modal.modal('hide').find('.modal-body').html('');
-                }
-            });
-        } else {
-            alert('Error: Not found active Connection CallSid');
+        if (!callSid) {
+            new PNotify({title: "Transfer call", type: "error", text: "Not found active Connection CallSid", hide: true});
+            return false;
         }
+        
+        if (objValue.length < 2) {
+            console.error('Error call forward param TO');
+            return false;
+        }
+        
+        let modal = $('#web-phone-redirect-agents-modal');
+        modal.find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+        // connection.accept();
+        
+        $.ajax({
+            type: 'post',
+            data: {
+                'sid': callSid,
+                'type': objType,
+                'from': to,
+                'to': objValue,
+            },
+            url: ajaxCallRedirectUrl,
+            success: function (data) {
+                // updateAgentStatus(connection, false, 1);
+                //console.log(data);
+                if (data.error) {
+                    alert(data.message);
+                }
+                modal.modal('hide').find('.modal-body').html('');
+            },
+            error: function (error) {
+                console.error(error);
+                modal.modal('hide').find('.modal-body').html('');
+            }
+        });
         
 //        console.log(connection.parameters);
 //        

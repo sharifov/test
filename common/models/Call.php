@@ -875,7 +875,7 @@ class Call extends \yii\db\ActiveRecord
                             Yii::error(VarDumper::dumpAsString($callAccess->errors),
                                 'Call:afterSave:CallUserAccess:update');
                         }
-                        Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $callAccess->cua_user_id], RemoveIncomingRequestMessage::create($this->c_id));
+                        Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $callAccess->cua_user_id], RemoveIncomingRequestMessage::create($this->c_id, $this->c_call_sid));
                     }
                 }
 
@@ -1159,7 +1159,11 @@ class Call extends \yii\db\ActiveRecord
         }
 
 
-        if ($this->c_created_user_id && ($insert || $isChangedStatus))  {
+        if (
+            $this->c_created_user_id && ($insert || $isChangedStatus)
+            && (!($this->isIn() && $this->isStatusQueue()))
+            && (!($this->isIn() && $this->isStatusDelay()))
+        )  {
             //Notifications::socket($this->c_created_user_id, $this->c_lead_id, 'callUpdate', ['id' => $this->c_id, 'status' => $this->getStatusName(), 'duration' => $this->c_call_duration, 'snr' => $this->c_sequence_number], true);
 
 			$isInternal = PhoneList::find()->byPhone($this->c_from)->enabled()->exists();
@@ -1236,8 +1240,12 @@ class Call extends \yii\db\ActiveRecord
                         'sourceName' => $this->c_source_type_id ? $this->getSourceName() : '',
                         'isEnded' => $this->isEnded(),
                         'contact' => [
-                            'name' => $name
+                            'name' => $name,
+                            'phone' => $phone,
+                            'company' => '',
                         ],
+                        'departmentName' => $this->c_dep_id ? Department::getName($this->c_dep_id) : '',
+                        'state' => self::formatState($this)
                     ]
                 );
             }
@@ -1288,6 +1296,23 @@ class Call extends \yii\db\ActiveRecord
 //            }
         }
 
+    }
+
+    public static function formatState(Call $call): string
+    {
+        if ($call->isStatusInProgress()) {
+            return 'inProgress';
+        }
+        if ($call->isHold()) {
+            return 'hold';
+        }
+        if ($call->c_source_type_id === self::SOURCE_GENERAL_LINE) {
+            return 'general';
+        }
+        if ($call->c_source_type_id === self::SOURCE_DIRECT_CALL) {
+            return 'direct';
+        }
+        return '';
     }
 
     public function isTwFinishStatus(): bool
@@ -1373,7 +1398,7 @@ class Call extends \yii\db\ActiveRecord
                         if ($callAccess->update() === false) {
                             Yii::error(VarDumper::dumpAsString($callAccess->errors), 'Call:applyCallToAgent:CallUserAccess:save');
                         }
-                        Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $callAccess->cua_user_id], RemoveIncomingRequestMessage::create($call->c_id));
+                        Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $callAccess->cua_user_id], RemoveIncomingRequestMessage::create($call->c_id, $call->c_call_sid));
                     }
                 }
 

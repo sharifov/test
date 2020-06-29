@@ -12,7 +12,7 @@ function ActivePaneControls(props) {
 function ButtonHold(props) {
     return (
         <li className="in-call-controls__item" data-mode={props.isHold ? 'hold' : 'unhold'} id="wg-hold-call"
-            data-call-id={props.callId} data-active={props.activeControls}>
+            data-call-id={props.callId} data-call-sid={props.callSid} data-active={props.activeControls}>
             <a href="#" className="in-call-controls__action">
                 <i className="fa fa-pause"> </i>
                 <span>Hold</span>
@@ -23,7 +23,7 @@ function ButtonHold(props) {
 
 function ButtonTransfer(props) {
     return (
-        <li className="in-call-controls__item" id="wg-transfer-call" data-active={props.activeControls}>
+        <li className="in-call-controls__item wg-transfer-call" data-call-id={props.callId} data-call-sid={props.callSid} data-active={props.activeControls}>
             <a href="#" className="in-call-controls__action">
                 <i className="fa fa-random"> </i>
                 <span>Transfer Call</span>

@@ -30,6 +30,8 @@ $(document).ready(function() {
 
         $('.collapsible-container').collapse('hide');
 
+        filterCalls.reset();
+
         if ($(this).data("toggle-tab") === 'tab-history') {
             if (!tabHistoryLoaded) {
                 tabHistoryLoaded = true;
@@ -422,7 +424,7 @@ $(document).ready(function() {
     // });
 
     $(document).on('click', '#cancel-active-call', function(e) {
-        hangup($('#cancel-active-call'));
+        hangup($(this).attr('data-call-sid'));
     });
 
     $(document).on('click', '#cancel-outgoing-call', function(e) {
@@ -507,6 +509,59 @@ $(document).ready(function() {
         $('.collapsible-container').collapse('hide');
         clearEmailTab()
     });
+
+    var callsData = [
+        {
+            id: 1,
+            state: 'inProgress',
+            project: 'ovago',
+            department: 'sales',
+            length: 100,
+            contact: {
+                name: 'Geff Robertson1',
+                company: 'LLC "DREAM TRAVEL"',
+                number: '+123 321 234 432'
+            }
+        },
+        {
+            id: 2,
+            state: 'hold',
+            project: 'wowfare',
+            department: 'sales',
+            length: 30,
+            contact: {
+                name: 'New name',
+                company: '"Rrtsa TRAVEL"',
+                number: '+373 45 45'
+            }
+        },
+        {
+            id: 3,
+            state: 'direct',
+            project: 'arangrant',
+            department: 'sales',
+            length: 30,
+            contact: {
+                name: 'New name',
+                company: '"Rrtsa TRAVEL"',
+                number: '+373 45 45'
+            }
+        },
+        {
+            id: 4,
+            state: 'general',
+            project: 'hop2',
+            department: 'sales',
+            length: 30,
+            contact: {
+                name: 'New name',
+                company: '"Rrtsa TRAVEL"',
+                number: '+373 45 45'
+            }
+        }
+    ];
+
+
 
     var callsObj = [
         {
@@ -657,8 +712,8 @@ $(document).ready(function() {
     ];
 
 
-    var filterCalls = new callsFilter(callsObj);
-    filterCalls.init();
+   var filterCalls = new callsFilter(callsObj);
+    //filterCalls.init();
     
 
 
@@ -1009,298 +1064,314 @@ function callsFilter (object) {
         listingItem = '.calls-separator__list-item',
         callItem = '.call-in-progress__list-item';
 
-    function getQueueItem (string, data) {
-        var queueItem = '<li class="queue-separator__item" data-queue-type="' + data + '">' +
-            '<div class="queue-separator__name">' + string + '</div>' +
-            '<ul class="calls-separator"></ul>' +
-            '</li>';
-        return queueItem;
-    }
-
-    function getListingItem (props) {
-
-        function getProjectBinding (data) {
-            if (data.project && data.department) {
-                return '<div class="static-number-indicator">' +
-                    '<span class="static-number-indicator__label">' + props.project + '</span>' +
-                    '<i class="static-number-indicator__separator"></i>' +
-                    '<span class="static-number-indicator__name">' + props.department + '</span>' +
-                    '</div>'
-            } else if (data.project && !data.department) {
-                return '<div class="static-number-indicator">' +
-                    '<span class="static-number-indicator__label">' + props.project + '</span>' +
-                    '</div>'
-            } else {
-                return '<div class="static-number-indicator">' +
-                    '<span class="static-number-indicator__name">Exteral contact</span>' +
-                    '</div>'
-            }
-        }
-
-
-
-        var listing = '<li class="calls-separator__list-item" id="' + props.id + '">' +
-            getProjectBinding(props) +
-            '<ul class="call-in-progress">' +
-            '</ul>' +
-            '</li>';
-
-        return listing;
-
-    }
-
-    function getCallNode (props) {
-
-        var item = '<li class="call-in-progress__list-item" id="' + props.id + '">' +
-            '<div class="call-in-progress__call-item call-list-item" data-call-status="' + props.state + '">' +
-            '<div class="call-list-item__info">' +
-            '<ul class="call-list-item__info-list call-info-list">' +
-            '<li class="call-info-list__item">' +
-            '<b class="call-info-list__contact-icon">' +
-            '<i class="fa fa-user"></i>' +
-            '</b>' +
-            '<span class="call-info-list__name">' + props.contact.name + '</span>' +
-            '</li>' +
-            '<li class="call-info-list__item">' +
-            '<span class="call-info-list__company">' + props.contact.company + '</span>' +
-            '</li>' +
-            '<li class="call-info-list__item">' +
-            '<span class="call-info-list__number">' + props.contact.number + '</span>' +
-            '</li>' +
-            '</ul>' +
-            '<div class="call-list-item__info-action call-info-action">' +
-            '<span class="call-info-action__timer"></span>' +
-            '<a href="#" class="call-info-action__more"><i class="fa fa-ellipsis-h"></i></a>' +
-            '' +
-            '</div>' +
-            '<ul class="call-list-item__menu call-item-menu">' +
-            '<li class="call-item-menu__list-item">' +
-            '<a href="#" class="call-item-menu__close">' +
-            '<i class="fa fa-chevron-right"></i>' +
-            '</a>' +
-            '</li>' +
-            '<li class="call-item-menu__list-item">' +
-            '<a href="#" class="call-item-menu__transfer">' +
-            '<i class="fa fa-random"></i>' +
-            '</a>' +
-            '</li>' +
-            '<li class="call-item-menu__list-item">' +
-            '<a href="#" class="call-item-menu__transfer">' +
-            '<i class="fa fa-pause"></i>' +
-            '</a>' +
-            '</li>' +
-            '<li class="call-item-menu__list-item">' +
-            '<a href="#" class="call-item-menu__transfer">' +
-            '<i class="fas fa-phone-slash"></i>' +
-            '</a>' +
-            '</li>' +
-            '</ul>' +
-            '</div>' +
-            '<div class="call-list-item__main-action">' +
-            '<a href="#" class="call-list-item__main-action-trigger">' +
-            '<i class="phone-icon phone-icon--start fa fa-phone"></i>' +
-            '<i class="phone-icon phone-icon--end fa fa-phone-slash"></i>' +
-
-            '</a>' +
-            '</div>' +
-            '</div>' +
-            '</li>';
-
-
-        return item;
-    }
-
-    function filterData (handler, dataObj) {
-        var obj = JSON.parse(JSON.stringify(dataObj))
-        var filtered = [];
-
-        for (const item in obj) {
-            if (obj.hasOwnProperty(item)) {
-                filtered.push(obj[item])
-            }
-        }
-
-        filtered.forEach(function (el, i) {
-
-            if ($(handler).attr('data-call-filter') === 'all') {
-                return filtered;
-            }
-
-            el.calls = el.calls.filter(function (call, i) {
-                if (call.state === $(handler).attr('data-call-filter')) {
-                    return call
-                }
-            })
-        })
-
-        return filtered;
-    }
-
-    function renderData (incomingData) {
-        var refData = JSON.parse(JSON.stringify(incomingData));
-        var callsList = [];
-        var queues = [];
-
-
-        $(queuesItem).detach();
-        $(listingItem).detach();
-
-        refData.forEach(function (element, i) {
-            element.calls.forEach(function (call) {
-                if (queues.indexOf(call.state) === -1) {
-                    queues.push(call.state)
-                }
-
-                if (callsList.indexOf(call) === -1) {
-                    callsList.push(call)
-                }
-            })
-        })
-
-        callsList.forEach(function (call, i) {
-            var timer = new stateTimer();
-            timer.start($('.call-info-action__timer')[i], call.length);
-
-        })
-
-        function objRemaster(list, obj) {
-            var data = {};
-            var foo = [];
-            var tmpArr;
-
-            list.forEach(function(listItem, i) {
-
-                data[listItem] = [];
-                obj.forEach(function (objEl, i) {
-                    var tmpArr = [];
-                    objEl.calls.filter(function(call){
-                        if (call.state === listItem) {
-                            tmpArr.push(call)
-                        }
-                        return call
-                    })
-                    for (var key in data) {
-                        data[key] = obj
-                    }
-                    foo.push(tmpArr)
-
-                })
-
-            })
-
-
-            for (var key in data) {
-
-                data[key].forEach(function(obj) {
-                    var arr = [];
-                    obj.calls.filter(function(item, i) {
-                        arr = obj.calls;
-                        if (item.state !== key) {
-                            // console.log(item)
-                            // console.log(data[key],obj)
-                            // obj.calls.splice(obj.calls.indexOf(item), 1)
-                        }
-                    })
-
-
-                })
-            }
-            return data
-
-        }
-
-
-        var queueName = {
-            'hold': 'On Hold',
-            'direct': 'Direct Calls',
-            'general': 'General Line',
-            'inProgress': 'Active'
-        }
-
-
-        var rData = objRemaster(queues, refData);
-
-        for (var key in rData) {
-            $(queuesParent).append(getQueueItem(queueName[key], key))
-
-            var section = $('[data-queue-type="'+ key +'"]');
-
-            rData[key].forEach(function (listing) {
-
-                $(section).find(listingParent).append(getListingItem(listing))
-
-                listing.calls.forEach(function(call) {
-
-                    if ($(section).attr('data-queue-type') === call.state) {
-                        $(section).find(listingItem).append(getCallNode(call))
-                    }
-                })
-            })
-        }
-
-
-
-    }
+    // function getQueueItem (string, data) {
+    //     var queueItem = '<li class="queue-separator__item" data-queue-type="' + data + '">' +
+    //         '<div class="queue-separator__name">' + string + '</div>' +
+    //         '<ul class="calls-separator"> </ul>' +
+    //         '</li>';
+    //     return queueItem;
+    // }
+    //
+    // function getListingItem (props) {
+    //
+    //     function getProjectBinding (data) {
+    //         if (data.project && data.department) {
+    //             return '<div class="static-number-indicator">' +
+    //                 '<span class="static-number-indicator__label">' + props.project + '</span>' +
+    //                 '<i class="static-number-indicator__separator"></i>' +
+    //                 '<span class="static-number-indicator__name">' + props.department + '</span>' +
+    //                 '</div>'
+    //         } else if (data.project && !data.department) {
+    //             return '<div class="static-number-indicator">' +
+    //                 '<span class="static-number-indicator__label">' + props.project + '</span>' +
+    //                 '</div>'
+    //         } else {
+    //             return '<div class="static-number-indicator">' +
+    //                 '<span class="static-number-indicator__name">Exteral contact</span>' +
+    //                 '</div>'
+    //         }
+    //     }
+    //
+    //
+    //
+    //     var listing = '<li class="calls-separator__list-item" id="' + props.id + '">' +
+    //         getProjectBinding(props) +
+    //         '<ul class="call-in-progress">' +
+    //         '</ul>' +
+    //         '</li>';
+    //
+    //     return listing;
+    //
+    // }
+    //
+    // function getCallNode (props) {
+    //
+    //     var item = '<li class="call-in-progress__list-item" id="' + props.id + '">' +
+    //         '<div class="call-in-progress__call-item call-list-item" data-call-status="' + props.state + '">' +
+    //         '<div class="call-list-item__info">' +
+    //         '<ul class="call-list-item__info-list call-info-list">' +
+    //         '<li class="call-info-list__item">' +
+    //         '<b class="call-info-list__contact-icon">' +
+    //         '<i class="fa fa-user"></i>' +
+    //         '</b>' +
+    //         '<span class="call-info-list__name">' + props.contact.name + '</span>' +
+    //         '</li>' +
+    //         '<li class="call-info-list__item">' +
+    //         '<span class="call-info-list__company">' + props.contact.company + '</span>' +
+    //         '</li>' +
+    //         '<li class="call-info-list__item">' +
+    //         '<span class="call-info-list__number">' + props.contact.number + '</span>' +
+    //         '</li>' +
+    //         '</ul>' +
+    //         '<div class="call-list-item__info-action call-info-action">' +
+    //         '<span class="call-info-action__timer"></span>' +
+    //         '<a href="#" class="call-info-action__more"><i class="fa fa-ellipsis-h"></i></a>' +
+    //         '' +
+    //         '</div>' +
+    //         '<ul class="call-list-item__menu call-item-menu">' +
+    //         '<li class="call-item-menu__list-item">' +
+    //         '<a href="#" class="call-item-menu__close">' +
+    //         '<i class="fa fa-chevron-right"></i>' +
+    //         '</a>' +
+    //         '</li>' +
+    //         '<li class="call-item-menu__list-item">' +
+    //         '<a href="#" class="call-item-menu__transfer">' +
+    //         '<i class="fa fa-random"></i>' +
+    //         '</a>' +
+    //         '</li>' +
+    //         '<li class="call-item-menu__list-item">' +
+    //         '<a href="#" class="call-item-menu__transfer">' +
+    //         '<i class="fa fa-pause"></i>' +
+    //         '</a>' +
+    //         '</li>' +
+    //         '<li class="call-item-menu__list-item">' +
+    //         '<a href="#" class="call-item-menu__transfer">' +
+    //         '<i class="fas fa-phone-slash"></i>' +
+    //         '</a>' +
+    //         '</li>' +
+    //         '</ul>' +
+    //         '</div>' +
+    //         '<div class="call-list-item__main-action">' +
+    //         '<a href="#" class="call-list-item__main-action-trigger">' +
+    //         '<i class="phone-icon phone-icon--start fa fa-phone"></i>' +
+    //         '<i class="phone-icon phone-icon--end fa fa-phone-slash"></i>' +
+    //
+    //         '</a>' +
+    //         '</div>' +
+    //         '</div>' +
+    //         '</li>';
+    //
+    //
+    //     return item;
+    // }
+    //
+    // function filterData (handler, dataObj) {
+    //     var obj = JSON.parse(JSON.stringify(dataObj))
+    //     var filtered = [];
+    //
+    //     for (const item in obj) {
+    //         if (obj.hasOwnProperty(item)) {
+    //             filtered.push(obj[item])
+    //         }
+    //     }
+    //
+    //     filtered.forEach(function (el, i) {
+    //
+    //         if ($(handler).attr('data-call-filter') === 'all') {
+    //             return filtered;
+    //         }
+    //
+    //         el.calls = el.calls.filter(function (call, i) {
+    //             if (call.state === $(handler).attr('data-call-filter')) {
+    //                 return call
+    //             }
+    //         })
+    //     })
+    //
+    //     return filtered;
+    // }
+    //
+    // function renderData (incomingData) {
+    //     var refData = JSON.parse(JSON.stringify(incomingData));
+    //     var callsList = [];
+    //     var queues = [];
+    //
+    //
+    //     $(queuesItem).detach();
+    //     $(listingItem).detach();
+    //
+    //     refData.forEach(function (element, i) {
+    //         element.calls.forEach(function (call) {
+    //             if (queues.indexOf(call.state) === -1) {
+    //                 queues.push(call.state)
+    //             }
+    //
+    //             if (callsList.indexOf(call) === -1) {
+    //                 callsList.push(call)
+    //             }
+    //         })
+    //     })
+    //
+    //     callsList.forEach(function (call, i) {
+    //         var timer = new stateTimer();
+    //         timer.start($('.call-info-action__timer')[i], call.length);
+    //
+    //     })
+    //
+    //     function objRemaster(list, obj) {
+    //         var data = {};
+    //         var foo = [];
+    //         var tmpArr;
+    //
+    //         list.forEach(function(listItem, i) {
+    //
+    //             data[listItem] = [];
+    //             obj.forEach(function (objEl, i) {
+    //                 var tmpArr = [];
+    //                 objEl.calls.filter(function(call){
+    //                     if (call.state === listItem) {
+    //                         tmpArr.push(call)
+    //                     }
+    //                     return call
+    //                 })
+    //                 for (var key in data) {
+    //                     data[key] = obj
+    //                 }
+    //                 foo.push(tmpArr)
+    //
+    //             })
+    //
+    //         })
+    //
+    //
+    //         for (var key in data) {
+    //
+    //             data[key].forEach(function(obj) {
+    //                 var arr = [];
+    //                 obj.calls.filter(function(item, i) {
+    //                     arr = obj.calls;
+    //                     if (item.state !== key) {
+    //                         // console.log(item)
+    //                         // console.log(data[key],obj)
+    //                         // obj.calls.splice(obj.calls.indexOf(item), 1)
+    //                     }
+    //                 })
+    //
+    //
+    //             })
+    //         }
+    //         return data
+    //
+    //     }
+    //
+    //
+    //     var queueName = {
+    //         'hold': 'On Hold',
+    //         'direct': 'Direct Calls',
+    //         'general': 'General Line',
+    //         'inProgress': 'Active'
+    //     }
+    //
+    //
+    //     var rData = objRemaster(queues, refData);
+    //
+    //     for (var key in rData) {
+    //         $(queuesParent).append(getQueueItem(queueName[key], key))
+    //
+    //         var section = $('[data-queue-type="'+ key +'"]');
+    //
+    //         rData[key].forEach(function (listing) {
+    //
+    //             $(section).find(listingParent).append(getListingItem(listing))
+    //
+    //             listing.calls.forEach(function(call) {
+    //
+    //                 if ($(section).attr('data-queue-type') === call.state) {
+    //                     $(section).find(listingItem).append(getCallNode(call))
+    //                 }
+    //             })
+    //         })
+    //     }
+    //
+    //
+    //
+    // }
 
     return {
         init: function () {
-            renderData(object);
+            // renderData(object);
 
 
-            function clearIndicators (target) {
-                var markElement = $('.widget-line-overlay__queue-marker');
+            // function clearIndicators (target) {
+            //     var markElement = $('.widget-line-overlay__queue-marker');
+            //
+            //     markElement.removeClass('tab-hold');
+            //     markElement.removeClass('tab-direct');
+            //     markElement.removeClass('tab-general');
+            //     markElement.removeClass('tab-all');
+            //
+            //     switch ($(target).attr('data-call-filter')) {
+            //         case 'hold':
+            //             $('[data-queue-marker]').html('Calls On Hold');
+            //             markElement.addClass('tab-hold')
+            //             break;
+            //         case 'direct':
+            //             $('[data-queue-marker]').html('Direct Calls')
+            //             markElement.addClass('tab-direct')
+            //             break;
+            //         case 'general':
+            //             $('[data-queue-marker]').html('General Lines')
+            //             markElement.addClass('tab-general')
+            //             break;
+            //         case 'all':
+            //             $('[data-queue-marker]').html('Calls Queue')
+            //             break;
+            //     }
+            // }
 
-                markElement.removeClass('tab-hold');
-                markElement.removeClass('tab-direct');
-                markElement.removeClass('tab-general');
-                markElement.removeClass('tab-all');
+            // $(document).on('click', filterToggle, function (e) {
+            //     e.preventDefault();
+            //
+            //     $('.widget-line-overlay').show();
+            //     var activeClass = 'is-checked';
+            //     var localObj = filterData($(this), object);
+            //     renderData(localObj);
+            //     $(filterToggle).removeClass(activeClass);
+            //     $(this).addClass(activeClass);
+            //     clearIndicators($(this));
+            // });
 
-                switch ($(target).attr('data-call-filter')) {
-                    case 'hold':
-                        $('[data-queue-marker]').html('Calls On Hold');
-                        markElement.addClass('tab-hold')
-                        break;
-                    case 'direct':
-                        $('[data-queue-marker]').html('Direct Calls')
-                        markElement.addClass('tab-direct')
-                        break;
-                    case 'general':
-                        $('[data-queue-marker]').html('General Lines')
-                        markElement.addClass('tab-general')
-                        break;
-                    case 'all':
-                        $('[data-queue-marker]').html('Calls Queue')
-                        break;
-                }
-            }
+            // $(document).on('click', filterToggle, function (e) {
+            //     $('.widget-line-overlay').show();
+            //
+            //     e.preventDefault();
+            //     var markElement = $('.widget-line-overlay__queue-marker');
+            //
+            //     var activeClass = 'is-checked';
+            //     var localObj = filterData($(this), object)
+            //     renderData(localObj);
+            //
+            //     $(filterToggle).removeClass(activeClass)
+            //     $(this).addClass(activeClass)
+            //
+            //     clearIndicators($(this));
+            // });
 
-            $(document).on('click', filterToggle, function (e) {
+            // $(document).on('click', '.widget-line-overlay__show-all-queues', function (e) {
+            //     e.preventDefault();
+            //     $(filterToggle).addClass('is-checked');
+            //     var localObj = filterData($(this), object)
+            //     renderData(localObj);
+            //
+            //    // clearIndicators($(this));
+            //
+            // })
 
-                e.preventDefault();
-                var markElement = $('.widget-line-overlay__queue-marker');
-
-                var activeClass = 'is-checked';
-                var localObj = filterData($(this), object)
-                renderData(localObj);
-
-                $(filterToggle).removeClass(activeClass)
-                $(this).addClass(activeClass)
-
-                clearIndicators($(this));
-
-
-            })
-
-            $(document).on('click', '.widget-line-overlay__show-all-queues', function (e) {
-                e.preventDefault();
-                $(filterToggle).addClass('is-checked');
-                var localObj = filterData($(this), object)
-                renderData(localObj);
-
-                clearIndicators($(this));
-
-            })
-
+        },
+        reset: function () {
+            $('.widget-line-overlay').hide();
+            var activeClass = 'is-checked';
+            $(filterToggle).removeClass(activeClass);
         }
     }
 }

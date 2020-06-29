@@ -67,7 +67,7 @@ let activeTpl =
     '          <span>Hold</span>' +
     '        </a>' +
     '      </li>' +
-    '      <li class="in-call-controls__item" id="wg-transfer-call">' +
+    '      <li class="in-call-controls__item wg-transfer-call" data-call-id="{{callId}}">' +
     '        <a href="#" class="in-call-controls__action">' +
     '        <i class="fa fa-random"></i>' +
     '          <span>Transfer Call</span>' +

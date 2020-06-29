@@ -5,6 +5,7 @@ namespace common\models;
 use common\components\jobs\AgentCallQueueJob;
 use common\components\purifier\Purifier;
 use common\models\query\CallUserAccessQuery;
+use frontend\widgets\newWebPhone\call\socket\RemoveIncomingRequestMessage;
 use sales\model\call\helper\CallHelper;
 use frontend\widgets\notification\NotificationMessage;
 use sales\dispatchers\NativeEventDispatcher;
@@ -230,10 +231,18 @@ class CallUserAccess extends \yii\db\ActiveRecord
                     'status' => $call->getStatusName(),
                     'contact' => [
                         'name' => $name,
+                        'phone' => $phone,
+                        'company' => '',
                     ],
+                    'state' => Call::formatState($call),
+                    'departmentName' => $call->c_dep_id ? Department::getName($call->c_dep_id) : '',
 				];
 			}
             Notifications::publish('updateIncomingCall', ['user_id' => $this->cua_user_id], array_merge($this->attributes, $callInfo ?? []));
+        }
+
+        if(isset($changedAttributes['cua_status_id']) && $call && ($call->isIn() || $call->isHold()) && $this->cua_status_id === self::STATUS_TYPE_NO_ANSWERED) {
+            Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $this->cua_user_id], RemoveIncomingRequestMessage::create($call->c_id, $call->c_call_sid));
         }
 
         if (!$insert && isset($changedAttributes['cua_status_id'])) {
@@ -242,7 +251,6 @@ class CallUserAccess extends \yii\db\ActiveRecord
         }
         
     }
-
 
     /**
      * @return bool

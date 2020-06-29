@@ -320,7 +320,7 @@
 	&.is_active {
 		visibility: visible;
 		opacity: 1;
-		z-index: 1049;
+		z-index: 25;
 	}
 
 	.fa-phone {
@@ -345,7 +345,9 @@
 		position: relative;
 		margin-bottom: 12px;
 		padding: 0 $sp2;
-	
+
+		display: flex;
+		align-items: center;
 	}
 
 	&__header-actions {
@@ -357,7 +359,11 @@
 		align-items: center;
 		color: $white;
 
-		background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 2.6%);
+		background: linear-gradient(
+										180deg,
+										rgba(255, 255, 255, 0.2) 0%,
+										rgba(255, 255, 255, 0) 2.6%
+		);
 
 		li {
 			flex-basis: 100%;
@@ -369,7 +375,7 @@
 			}
 		}
 		i {
-			color: rgba($white, .3);
+			color: rgba($white, 0.3);
 			font-size: 12px !important;
 		}
 
@@ -378,7 +384,7 @@
 			font-size: 14px;
 			line-height: 18px;
 			text-transform: capitalize;
-			color: rgba($white, .3);
+			color: rgba($white, 0.3);
 			position: relative;
 			&:hover,
 			&:focus,
@@ -400,10 +406,10 @@
 			&[data-call-in-progress="true"] {
 				$size: 6px;
 				&:before {
-					content: '';
+					content: "";
 					width: $size;
 					height: $size;
-					background-color: #82BA3A;
+					background-color: #82ba3a;
 					top: 2px;
 					right: -#{$size};
 					border-radius: 50%;
@@ -427,7 +433,7 @@
 					font-size: 9px;
 					line-height: $size;
 					text-align: center;
-					background-color: #D15151;
+					background-color: #d15151;
 					top: 2px;
 					left: 50%;
 					transform: translateX(-50%);
@@ -511,7 +517,6 @@
 			z-index: 4;
 			transition: opacity 0.1s;
 		}
-
 	}
 
 	&__list-item {
@@ -906,7 +911,6 @@
 			> li {
 				border-bottom: 1px solid rgba(#3877b5, 0.5);
 			}
-		
 
 			select {
 				appearance: button;
@@ -943,56 +947,51 @@
 
 	// .contacts-list--selection {
 
-	
 	// }
-.contacts-list--selection {
-	padding-bottom: 52px;
-	.select-contact {
-		display: block;
-	}
+	.contacts-list--selection {
+		padding-bottom: 52px;
+		.select-contact {
+			display: block;
+		}
 
-	.contact-options-list {
-		display: none;
-	}
+		.contact-options-list {
+			display: none;
+		}
 
-	.select-contact {
-		position: absolute;
-		right: $sp;
-	}
+		.select-contact {
+			position: absolute;
+			right: $sp;
+		}
 
-	.contact-info-card  {
-		.contact-full-info {
-
-			&__email {
-				display: none;
-			}
-			.actions-list {
-				&__option {
+		.contact-info-card {
+			.contact-full-info {
+				&__email {
 					display: none;
-					cursor: auto;
-					// &:hover {
-					// 	background-color: transparent;
-					// }
-		
-					&--if-selectable {
-						display: flex;
-						justify-content: center;
-						align-items: center;
-						position: relative;
-						right: -1px;
+				}
+				.actions-list {
+					&__option {
+						display: none;
 						cursor: auto;
-						&:hover {
-							background-color: transparent;
+						// &:hover {
+						// 	background-color: transparent;
+						// }
+
+						&--if-selectable {
+							display: flex;
+							justify-content: center;
+							align-items: center;
+							position: relative;
+							right: -1px;
+							cursor: auto;
+							&:hover {
+								background-color: transparent;
+							}
 						}
 					}
 				}
 			}
 		}
 	}
-
-
-}
-	
 
 	.contact-modal-info {
 		@media (min-width: 768px) {
@@ -1586,7 +1585,7 @@
 			padding: 5px;
 			border-radius: 50%;
 
-			color: rgba($white, .6);
+			color: rgba($white, 0.6);
 
 			right: 0;
 			bottom: $sp;
@@ -1950,8 +1949,8 @@
 	}
 
 	.additional-info {
-		$this: '.additional-info';
-		$callPane: '.call-pane';
+		$this: ".additional-info";
+		$callPane: ".call-pane";
 		&.dial-popup {
 			background-color: $color-steel;
 			height: 335px;
@@ -1971,10 +1970,10 @@
 				#{$callPane}__dial-clear-all {
 					bottom: auto;
 					top: $sp05;
-					background-color: rgba($white, .2);
+					background-color: rgba($white, 0.2);
 					svg {
 						path {
-							fill: rgba($color-theme-dark, .2);
+							fill: rgba($color-theme-dark, 0.2);
 						}
 					}
 				}
@@ -2001,13 +2000,13 @@
 		}
 	}
 
-
-	.call-pane-incoming {
+	.call-pane-incoming,
+	.call-pane-outgoing	{
 		background: linear-gradient(
-			180deg,
-			#6caa62 0%,
-			#227758 73.23%,
-			#374d63 100%
+										180deg,
+										#6caa62 0%,
+										#227758 73.23%,
+										#374d63 100%
 		);
 		border-radius: 0px 0px 6px 6px;
 		// justify-content: center;
@@ -2072,6 +2071,10 @@
 				display: flex;
 			}
 		}
+	}
+
+	.call-pane-outgoing {
+		background: linear-gradient(180deg, #477586 0%, #223858 73.23%, #254d68 100%);
 	}
 
 	.call-pane-calling {
@@ -2227,7 +2230,6 @@
 		line-height: 16px;
 		color: $white;
 
-
 		position: absolute;
 		top: 50%;
 		right: 10px;
@@ -2253,7 +2255,7 @@
 			transform: translateY(-50%);
 			left: $sp;
 			i {
-				color: rgba($white, .8);
+				color: rgba($white, 0.8);
 				font-size: $sp2;
 			}
 		}
@@ -2266,10 +2268,10 @@
 			font-size: 14px;
 
 			background-color: $widget-secondary;
-			color: rgba($white, .8);
+			color: rgba($white, 0.8);
 
 			&::placeholder {
-				color: rgba($white, .8);
+				color: rgba($white, 0.8);
 			}
 		}
 	}
@@ -2331,8 +2333,6 @@
 				top: 10px;
 			}
 		}
-
-	
 	}
 
 	.number-toggle {
@@ -2393,11 +2393,11 @@
 			width: 100%;
 
 			a {
-				color: $white
+				color: $white;
 			}
 
 			.status-confirmation-tooltip {
-				background-color: #8F97A4;
+				background-color: #8f97a4;
 				border-radius: 3px;
 				color: $white;
 				min-width: 280px;
@@ -2406,7 +2406,8 @@
 				justify-content: space-between;
 				align-items: center;
 
-				&:after, &:before {
+				&:after,
+				&:before {
 					bottom: 100%;
 					left: 50%;
 					border: solid transparent;
@@ -2416,16 +2417,16 @@
 					position: absolute;
 					pointer-events: none;
 				}
-				
+
 				&:after {
 					border-color: rgba(143, 151, 164, 0);
-					border-bottom-color: #8F97A4;
+					border-bottom-color: #8f97a4;
 					border-width: 6px;
 					margin-left: -6px;
 				}
 				&:before {
 					border-color: rgba(143, 151, 164, 0);
-					border-bottom-color: #8F97A4;
+					border-bottom-color: #8f97a4;
 					border-width: 8px;
 					margin-left: -8px;
 				}
@@ -2446,9 +2447,9 @@
 						&.occupied {
 							background-color: $red;
 						}
-	
+
 						&.online {
-							background-color: #77B984;
+							background-color: #77b984;
 						}
 					}
 				}
@@ -2471,21 +2472,21 @@
 						&:active:hover,
 						&:focus:active {
 							text-decoration: underline;
-						}	
+						}
 					}
-					
+
 					&[data-status-action="true"] {
 						$size: 30px;
 						width: $size;
 						height: $size;
 						display: inline-block;
 						vertical-align: middle;
-						background-color: #77B984;
+						background-color: #77b984;
 						border-radius: 4px;
 						margin-right: -4px;
 						line-height: $size;
 					}
-					
+
 					&:hover,
 					&:active,
 					&:focus,
@@ -2493,7 +2494,7 @@
 					&:focus:active {
 						text-decoration: none;
 						color: $white;
-					}	
+					}
 				}
 			}
 		}
@@ -2547,6 +2548,7 @@
 	}
 
 	.call-pane-incoming,
+	.call-pane-outgoing,
 	.call-pane-calling {
 		.contact-info-card {
 			padding-top: 0;
@@ -2597,18 +2599,17 @@
 				width: $size;
 				height: $size;
 				border-radius: 3px;
-				background-color: #FBFBFB;
-				border: 1px solid #CECECE;
+				background-color: #fbfbfb;
+				border: 1px solid #cecece;
 				right: 50%;
 				top: 50%;
 				transform: translate(50%, -50%);
 			}
 
-
 			cursor: pointer;
 
 			&:after {
-				content: '';
+				content: "";
 				width: 6px;
 				height: 10px;
 				border-width: 0 2px 2px 0;
@@ -2619,7 +2620,7 @@
 				top: 7px;
 				transform: translate(-50%, -50%) rotate(45deg);
 				opacity: 0;
-				transition: opacity, .1s;
+				transition: opacity, 0.1s;
 			}
 
 			&[data-area-label] {
@@ -2627,7 +2628,6 @@
 				position: absolute;
 				width: 100%;
 				height: 100%;
-			
 			}
 		}
 		input {
@@ -2647,8 +2647,6 @@
 				}
 			}
 		}
-
-	
 	}
 }
 
@@ -2937,6 +2935,402 @@
 	}
 }
 
+.call-filter {
+	$size: $sp3;
+	display: flex;
+	margin: 0 -10px;
+
+	list-style-type: none;
+
+	padding: 0 0 0 $sp6;
+
+	li {
+		opacity: 0;
+
+		&.is-visible {
+			opacity: 1;
+
+			margin: 0 5px;
+		}
+	}
+
+	&__toggle {
+		box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+		width: $size;
+		height: $size;
+		border-radius: 50%;
+		display: block;
+		line-height: 20px;
+		border-width: 2px;
+		border-style: solid;
+		overflow: hidden;
+		text-align: center;
+
+		color: $white;
+		font-size: 13px;
+		font-weight: 600;
+
+		&:hover,
+		&:focus,
+		&:active,
+		&:visited,
+		&:active:focus,
+		&:focus:hover {
+			color: $white;
+		}
+
+		&--line-hold {
+			border-color: $widget-grapefruit;
+
+			&.is-checked {
+				background-color: $widget-grapefruit;
+			}
+		}
+
+		&--line-direct {
+			border-color: $widget-steel;
+			&.is-checked {
+				background-color: $widget-steel;
+			}
+		}
+
+		&--line-general {
+			border-color: $widget-grey-m;
+			&.is-checked {
+				background-color: $widget-grey-m;
+			}
+		}
+	}
+}
+
+.widget-line-overlay {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background: $screen-gradient;
+	z-index: 100;
+
+	&__queue-marker {
+		$this: &;
+		display: flex;
+		justify-content: center;
+		padding: 12px;
+		box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1);
+		background-color: $widget-grey-m;
+
+		&.tab-hold {
+			background-color: $widget-grapefruit;
+		}
+		&.tab-direct {
+			background-color: $widget-steel;
+		}
+		&.tab-general {
+			background-color: $widget-secondary;
+		}
+
+		span {
+			font-weight: 600;
+			font-size: 13px;
+			line-height: 18px;
+			color: $white;
+		}
+
+		a {
+			font-weight: 600;
+			font-size: 13px;
+			line-height: 18px;
+			display: none;
+			color: #fff8b6;
+			text-decoration: underline;
+			&:hover,
+			&:active,
+			&:focus,
+			&:active:hover,
+			&:focus:active {
+				color: #fff8b6;
+			}
+		}
+
+		&.tab-hold,
+		&.tab-direct,
+		&.tab-general {
+			justify-content: space-between;
+			a {
+				display: inline-block;
+			}
+		}
+	}
+
+	&__body {
+		height: calc(100% - 38px);
+		overflow: auto hidden;
+
+		padding: $sp2;
+	}
+
+	.calls-separator,
+	.call-in-progress,
+	.call-info-list,
+	.queue-separator {
+		list-style-type: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	.queue-separator {
+		&__name {
+			background-color: $widget-secondary;
+			box-shadow: inset 0px 3px 4px rgba(0, 0, 0, 0.15);
+			font-weight: 600;
+			font-size: 11px;
+			line-height: 18px;
+			padding: 6px $sp2;
+			color: $white;
+			margin: 0 -#{$sp2} $sp2;
+		}
+	}
+
+	.calls-separator {
+		.static-number-indicator {
+			margin-bottom: $sp;
+			justify-content: flex-start;
+
+			&__label {
+				margin-left: 0;
+			}
+
+			&__name {
+				text-transform: uppercase;
+			}
+		}
+
+		&__list-item {
+			&:not(:last-child) {
+				margin-bottom: 20px;
+			}
+		}
+	}
+
+	.call-in-progress {
+		&__list-item {
+			margin-bottom: $sp05;
+		}
+	}
+
+	.call-item-menu {
+		// display: none;
+		transform: translateX(100%);
+		position: absolute;
+		left: -3px;
+		top: 0;
+		width: calc(100% + 3px);
+		height: 100%;
+		background-color: rgba($color-steel, 0.9);
+
+		list-style-type: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+
+		transition: 0.15s;
+
+		li {
+			&:first-child {
+				flex-basis: 100%;
+			}
+
+			a {
+				color: $white;
+				font-size: $sp2;
+				padding: $sp;
+				margin: 0 $sp05;
+			}
+		}
+	}
+
+	.call-list-item {
+		$this: ".call-list-item";
+		$action-w: 38px;
+		$min: 65px;
+
+		min-height: $min;
+		display: flex;
+		color: $white;
+
+		border-radius: $sp05;
+		overflow: hidden;
+
+		background-color: rgba($white, 0.15);
+
+		.phone-icon {
+			font-size: 14px;
+			color: #fff;
+		}
+
+		&--menu {
+			.call-item-menu {
+				transform: translateX(0);
+			}
+
+			#{$this}__main-action {
+				background-color: $widget-green;
+			}
+		}
+
+		// &[data-call-status] {
+
+		// }
+
+		.phone-icon {
+			&--start {
+				display: block;
+			}
+			&--end {
+				display: none;
+			}
+		}
+		&[data-call-status="isActive"] {
+		}
+
+		&__info {
+			position: relative;
+			flex-basis: 100%;
+			display: flex;
+			justify-content: space-between;
+			padding: $sp05 $sp;
+
+			border-width: 0 0 0 3px;
+			border-style: solid;
+			border-radius: 6px 0 0 6px;
+
+			overflow: hidden;
+		}
+
+		&[data-call-status="inProgress"] {
+			background-color: $widget-green;
+
+			#{$this}__info {
+				border-color: #c3e79f;
+			}
+
+			.phone-icon {
+				&--start {
+					display: none;
+				}
+				&--end {
+					display: block;
+				}
+			}
+		}
+
+		&[data-call-status="general"],
+		&[data-call-status="direct"] {
+			#{$this}__info {
+				border-color: #6da46a;
+			}
+		}
+
+		&[data-call-status="hold"] {
+			#{$this}__info {
+				border-color: #e7826c;
+			}
+		}
+
+		&__info-action {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+		}
+
+		&__main-action {
+			width: $action-w;
+			min-width: $action-w;
+			text-align: center;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background-color: rgba($white, 0.2);
+		}
+	}
+
+	.call-info-action {
+		&__timer {
+			font-size: 10px;
+			font-weight: 500;
+			line-height: 14px;
+			padding: 2px 4px;
+			background-color: rgba($white, 0.05);
+			border-radius: 2px;
+			&:empty {
+				opacity: 0;
+			}
+		}
+
+		&__more,
+		&__timer {
+			height: $sp2;
+		}
+
+		&__more {
+			font-size: $sp2;
+			color: $white;
+
+			&:hover,
+			&:active,
+			&:focus,
+			&:visited,
+			&:active:focus,
+			&:focus:hover {
+				color: $white;
+			}
+		}
+	}
+
+	.call-info-list {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+
+		&__item {
+			padding-left: 28px;
+			position: relative;
+		}
+
+		&__contact-icon {
+			position: absolute;
+			left: -#{$sp};
+			top: 50%;
+			transform: translateY(-50%);
+			font-size: 10px;
+			padding: 2px $sp;
+			border-radius: 0 20px 20px 0;
+			background-color: #937db7;
+		}
+
+		&__name {
+			font-size: 14px;
+			line-height: 18px;
+			font-weight: 600;
+		}
+
+		&__company {
+			font-size: 10px;
+			line-height: 16px;
+			color: rgba($white, 0.8);
+		}
+
+		&__number {
+			font-size: 12px;
+			line-height: 16px;
+		}
+	}
+}
+
 @keyframes callAnimation {
 	0% {
 		box-shadow: 0px 0px 0px 3px rgba(255, 255, 255, 0.2);
@@ -2954,17 +3348,17 @@
 
 		25% {
 			box-shadow: 0px 0px 0px 4px rgba($color, 0.3),
-				0px 0px 0px 0px rgba($color, 0.1);
+			0px 0px 0px 0px rgba($color, 0.1);
 		}
 
 		50% {
 			box-shadow: 0px 0px 0px 2px rgba($color, 0.1),
-				0px 0px 0px 12px rgba($color, 0.1);
+			0px 0px 0px 12px rgba($color, 0.1);
 		}
 
 		75% {
 			box-shadow: 0px 0px 0px 6px rgba($color, 0.3),
-				0px 0px 0px 6px rgba($color, 0.1);
+			0px 0px 0px 6px rgba($color, 0.1);
 		}
 
 		100% {

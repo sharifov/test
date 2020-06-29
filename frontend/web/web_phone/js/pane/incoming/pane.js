@@ -1,5 +1,9 @@
 var PhoneWidgetPaneIncoming = function () {
 
+    let state = {
+        callId: null
+    };
+
     let $pane = $('.call-pane-incoming');
     let contactInfo = PhoneWidgetContactInfo;
     let dialpad = PhoneWidgetDialpad;
@@ -62,14 +66,16 @@ var PhoneWidgetPaneIncoming = function () {
     }
 
     function setCallId(callId) {
+        state.callId = callId;
         $pane.attr('data-call-id', callId);
     }
 
     function getCallId() {
-        return parseInt($pane.attr('data-call-id'));
+        return state.callId;
     }
 
     function removeCallId() {
+        state.callId = null;
         return $pane.attr('data-call-id', '');
     }
 

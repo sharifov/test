@@ -40,3 +40,7 @@
 .phone-widget-icon__ongoing {
     font-size: 12px;
 }
+
+.phone-widget .call-list-item__main-action-trigger .fa {
+    color: #fff;
+}

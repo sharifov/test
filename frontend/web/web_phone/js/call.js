@@ -18,16 +18,22 @@ var PhoneWidgetCall = function () {
         'unholdUrl': '',
     };
 
-    let panes = {
-        'active': PhoneWidgetPaneActive,
-        'incoming': PhoneWidgetPaneIncoming,
-        'outgoing': PhoneWidgetPaneOutgoing
-    };
+    let waitQueue = new window.callWidget.queue.Queue();
 
     let queues = {
-        'active': new Queue(),
-        'incoming': new Queue(),
-        'outgoing': new Queue()
+        'wait': waitQueue,
+        'direct': new window.callWidget.queue.Direct(waitQueue),
+        'hold': new window.callWidget.queue.Hold(waitQueue),
+        'general': new window.callWidget.queue.General(waitQueue),
+        'outgoing': new window.callWidget.queue.Queue(),
+        'active': window.callWidget.queue.Active()
+    };
+
+    let panes = {
+        'active': PhoneWidgetPaneActive,
+        'outgoing': PhoneWidgetPaneOutgoing,
+        'incoming': PhoneWidgetPaneIncoming,
+        'queue': new PhoneWidgetPaneQueue(queues)
     };
 
     function init(options)
@@ -55,10 +61,12 @@ var PhoneWidgetCall = function () {
     }
 
     function removeIncomingRequest(callId) {
-        queues.incoming.remove(callId);
+        waitQueue.remove(callId);
+        panes.queue.refresh();
         if (panes.incoming.getCallId() === callId) {
             panes.incoming.removeCallId();
             if (panes.incoming.isActive()) {
+                panes.incoming.hide();
                 refreshPanes();
             }
         }
@@ -67,10 +75,6 @@ var PhoneWidgetCall = function () {
     function refreshPanes() {
         PhoneWidgetContactInfo.hide();
         PhoneWidgetDialpad.hide();
-
-        if (refreshIncomingPane()) {
-            return;
-        }
 
         if (refreshOutgoingPane()) {
             return;
@@ -84,6 +88,19 @@ var PhoneWidgetCall = function () {
 
         $('#tab-phone .call-pane-initial').removeClass('is_active');
         $('#tab-phone .call-pane').addClass('is_active');
+    }
+
+    function refreshOutgoingPane() {
+        let outgoing = queues.outgoing.getLast();
+        if (outgoing !== null) {
+            let obj = Object.assign({}, outgoing);
+            if (obj.timeQueuePushed) {
+                obj.duration = Math.floor((Date.now() - parseInt(obj.timeQueuePushed)) / 1000) + parseInt(obj.duration || 0);
+            }
+            panes.outgoing.init(obj);
+            return true;
+        }
+        return false;
     }
 
     function refreshActivePane() {
@@ -104,32 +121,13 @@ var PhoneWidgetCall = function () {
         return false;
     }
 
-    function refreshIncomingPane() {
-        let incoming = queues.incoming.getLast();
-        if (incoming !== null) {
-            panes.incoming.init(incoming, queues.incoming.count(), queues.active.count());
-            return true;
-        }
-        return false;
-    }
-
-    function refreshOutgoingPane() {
-        let outgoing = queues.outgoing.getLast();
-        if (outgoing !== null) {
-            let obj = Object.assign({}, outgoing);
-            if (obj.timeQueuePushed) {
-                obj.duration = Math.floor((Date.now() - parseInt(obj.timeQueuePushed)) / 1000) + parseInt(obj.duration || 0);
-            }
-            panes.outgoing.init(obj);
-            return true;
-        }
-        return false;
-    }
-
     function requestIncomingCall(data) {
         console.log('incoming call');
-        queues.incoming.push(data);
-        panes.incoming.init(data, queues.incoming.count(), queues.active.count());
+        data.isBlocked = false;
+        waitQueue.add(data);
+        panes.queue.refresh();
+        panes.queue.hide();
+        panes.incoming.init(data, (queues.direct.count() + queues.general.count()), queues.active.count());
         openWidget();
         openCallTab();
     }
@@ -137,7 +135,7 @@ var PhoneWidgetCall = function () {
     function requestOutgoingCall(data) {
         console.log('outgoing call');
         if (data.callId) {
-            queues.outgoing.push(data);
+            queues.outgoing.add(data);
         }
         panes.outgoing.init(data);
         openWidget();
@@ -146,14 +144,15 @@ var PhoneWidgetCall = function () {
 
     function requestActiveCall(data) {
         console.log('active call');
-        queues.incoming.remove(data.callId);
-        queues.outgoing.remove(data.callId);
+
+        waitQueue.remove(data.callId);
+        panes.queue.refresh();
 
         let obj = Object.assign({}, data);
         if (obj.holdDuration && obj.isHold) {
             obj.holdStartTime = Date.now() - (obj.holdDuration * 1000);
         }
-        queues.active.push(obj);
+        queues.active.add(obj);
 
         if (panes.outgoing.getCallId() === obj.callId) {
             panes.outgoing.removeCallId();
@@ -163,13 +162,16 @@ var PhoneWidgetCall = function () {
         panes.active.init(obj);
         openWidget();
         openCallTab();
+        panes.queue.hide();
     }
 
     function completeCall(callId)
     {
         queues.active.remove(callId);
-        queues.incoming.remove(callId);
         queues.outgoing.remove(callId);
+        waitQueue.remove(callId);
+
+        panes.queue.refresh();
 
         let needRefresh = false;
 
@@ -200,7 +202,7 @@ var PhoneWidgetCall = function () {
             refreshPanes();
         } else {
             if (panes.incoming.isActive()) {
-                panes.incoming.initWidgetIcon(queues.incoming.count(), queues.active.count());
+                panes.incoming.initWidgetIcon((queues.direct.count() + queues.general.count()), queues.active.count());
             }
         }
     }
@@ -222,7 +224,13 @@ var PhoneWidgetCall = function () {
         $(document).on('click', '#hide-incoming-call', function(e) {
             e.preventDefault();
             let callId = parseInt($(this).attr('data-call-id'));
-            removeIncomingRequest(callId);
+            if (panes.incoming.getCallId() === callId) {
+                panes.incoming.removeCallId();
+                if (panes.incoming.isActive()) {
+                    panes.incoming.hide();
+                    refreshPanes();
+                }
+            }
         })
     }
 
@@ -381,35 +389,35 @@ var PhoneWidgetCall = function () {
 
     function transferCallBtnEvent()
     {
-        $(document).on('click', '.call-pane-calling #wg-transfer-call', function(e) {
+        $(document).on('click', '.wg-transfer-call', function(e) {
             e.preventDefault();
-            if (!panes.active.canTransfer()) {
+            // if (!panes.active.canTransfer()) {
+            //     return false;
+            // }
+            let callSid = $(this).attr('data-call-sid');
+            if (!callSid) {
+                new PNotify({title: "Transfer call", type: "error", text: 'Not found call SID', hide: true});
                 return false;
             }
-            initRedirectToAgent();
+            initRedirectToAgent(callSid);
         });
     }
 
-    function initRedirectToAgent()
+    function initRedirectToAgent(callSid)
     {
         if (settings.ajaxCallRedirectGetAgents === undefined) {
             alert('Ajax call redirect url is not set');
             return false;
         }
 
-        let callSid = getActiveConnectionCallSid();
-        if (callSid) {
-            let modal = $('#web-phone-redirect-agents-modal');
-            modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
-            $('#web-phone-redirect-agents-modal-label').html('Transfer Call');
+        let modal = $('#web-phone-redirect-agents-modal');
+        modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+        $('#web-phone-redirect-agents-modal-label').html('Transfer Call');
 
-            $.post(settings.ajaxCallRedirectGetAgents, { sid: callSid }) // , user_id: userId
-                .done(function(data) {
-                    modal.find('.modal-body').html(data);
-                });
-        } else {
-            alert('Error: Not found active connection Call SID!');
-        }
+        $.post(settings.ajaxCallRedirectGetAgents, { sid: callSid }) // , user_id: userId
+            .done(function(data) {
+                modal.find('.modal-body').html(data);
+            });
 
         // let connection = this.connection;
         // if (connection && connection.parameters.CallSid) {
@@ -425,7 +433,6 @@ var PhoneWidgetCall = function () {
         // } else {
         //     alert('Error: Not found Call connection or Call SID!');
         // }
-        return false;
     }
 
     function refreshCallStatus(obj)
@@ -438,7 +445,7 @@ var PhoneWidgetCall = function () {
             } else if (obj.typeId === 1) {
                 requestOutgoingCall(obj);
             }
-        } else if (obj.status === 'Completed' || obj.isEnded) {
+        } else if (obj.status === 'Completed' || obj.isEnded || obj.cua_status_id === 5) {
             completeCall(obj.callId);
         }
     }
@@ -454,6 +461,11 @@ var PhoneWidgetCall = function () {
         $('.phone-widget__tab').removeClass('is_active');
         $('[data-toggle-tab]').removeClass('is_active');
         $('#tab-phone').addClass('is_active');
+        $('[data-toggle-tab]').each(function( index ) {
+            if ($(this).data('toggle-tab') === 'tab-phone') {
+                $(this).addClass('is_active');
+            }
+        });
     }
 
     function showCallingPanel()
@@ -465,47 +477,84 @@ var PhoneWidgetCall = function () {
     function acceptCallBtnEvent()
     {
         $(document).on('click', '#btn-accept-call', function () {
-
-            if (typeof device == "undefined" || device == null || (device && device._status !== 'ready')) {
-                new PNotify({title: "Accept call", type: "warning", text: "Please try again after some seconds. Device is not ready.", hide: true});
+            let btn = $(this);
+            acceptCall(btn.attr('data-call-id'), btn.attr('data-from-internal'));
+        });
+        $(document).on('click', '.call-list-item__main-action-trigger', function () {
+            let btn = $(this);
+            let action = $(this).attr('data-type-action');
+            if (action === 'accept') {
+                acceptCall(btn.attr('data-call-id'), btn.attr('data-from-internal'));
                 return false;
             }
+            if (action === 'hangup') {
+                hangup(btn.attr('data-call-sid'));
+                return false;
+            }
+            new PNotify({title: "Accept call", type: "warning", text: "Please try again after some seconds. Device is not ready.", hide: true});
+        });
+    }
 
-            var btn = $(this);
-            var fromInternal = btn.attr('data-from-internal');
-            if (fromInternal !== 'false' && window.connection) {
-                window.connection.accept();
-                showCallingPanel();
-                $('#call-controls2').hide();
-            } else {
-                $.ajax({
-                    type: 'post',
-                    url: settings.acceptCallUrl,
-                    dataType: 'json',
-                    data: {act: 'accept', call_id: btn.attr('data-call-id')},
-                    beforeSend: function () {
-                        btn.addClass('disabled');
-                        btn.find('i').removeClass('fas fa-check').addClass('fa fa-spinner fa-spin');
-                    },
-                    success: function (data) {
-                        if (data.error) {
-                             new PNotify({
-                                title: "Error",
-                                type: "error",
-                                text: data.message,
-                                hide: true
-                            });
-                        } else {
-                            // showCallingPanel();
+    function acceptCall(callId, fromInternal)
+    {
+        callId = parseInt(callId);
+
+        if (typeof device == "undefined" || device == null || (device && device._status !== 'ready')) {
+            new PNotify({title: "Accept call", type: "warning", text: "Please try again after some seconds. Device is not ready.", hide: true});
+            return false;
+        }
+
+        if (fromInternal !== 'false' && window.connection) {
+            window.connection.accept();
+            showCallingPanel();
+            $('#call-controls2').hide();
+        } else {
+            let call = waitQueue.one(callId);
+            if (call === null) {
+                new PNotify({title: "Error", type: "error", text: 'Not found call on queue', hide: true});
+                return;
+            }
+            if (call.isBlocked) {
+                // new PNotify({title: "Error", type: "error", text: 'Call is blocked. Please wait some seconds.', hide: true});
+                return;
+            }
+            call.isBlocked = true;
+            panes.queue.refresh();
+            let btn = null;
+            if (panes.incoming.getCallId() === callId) {
+                btn = $(document).find('#btn-accept-call');
+                btn.prop('disabled', '');
+                btn.find('i').removeClass('fas fa-phone').addClass('fa fa-spinner fa-spin');
+            }
+            $.ajax({
+                type: 'post',
+                url: settings.acceptCallUrl,
+                dataType: 'json',
+                data: {act: 'accept', call_id: callId}
+            })
+                .done(function (data) {
+                    if (data.error) {
+                        call.isBlocked = false;
+                        panes.queue.refresh();
+                        new PNotify({title: "Error", type: "error", text: data.message, hide: true});
+                        if (btn !== null) {
+                            btn.prop('disabled', '');
+                            btn.find('i').addClass('fas fa-phone').removeClass('fa fa-spinner fa-spin');
                         }
-                    },
-                    complete: function () {
-                        // btn.removeClass('disabled');
-                        // btn.find('i').addClass('fas fa-check').removeClass('fa fa-spinner fa-spin');
+                    } else {
+                        // showCallingPanel();
                     }
                 })
-            };
-        });
+                .fail(function () {
+                    call.isBlocked = false;
+                    panes.queue.refresh();
+                    new PNotify({title: "Error", type: "error", text: 'Server error', hide: true});
+                    if (btn !== null) {
+                        btn.prop('disabled', '');
+                        btn.find('i').addClass('fas fa-phone').removeClass('fa fa-spinner fa-spin');
+                    }
+                })
+        }
     }
 
     function changeStatus(status) {
@@ -539,7 +588,7 @@ var PhoneWidgetCall = function () {
     }
 
     function hold(data) {
-        let call = queues.active.get(data.id);
+        let call = queues.active.one(data.id);
         if (call === null) {
             return;
         }
@@ -565,7 +614,7 @@ var PhoneWidgetCall = function () {
     }
 
     function unhold(data) {
-        let call = queues.active.get(data.id);
+        let call = queues.active.one(data.id);
         if (call === null) {
             return;
         }
@@ -745,7 +794,7 @@ var PhoneWidgetCall = function () {
                         return;
                     }
                     data.incoming.forEach(function (call) {
-                        queues.incoming.push(call);
+                        waitQueue.add(call);
                     });
                     data.outgoing.forEach(function (call) {
                         queues.outgoing.push(call);
@@ -756,14 +805,10 @@ var PhoneWidgetCall = function () {
                         if (activeCall.holdDuration && activeCall.isHold) {
                             activeCall.holdStartTime = Date.now() - (activeCall.holdDuration * 1000);
                         }
-                        queues.active.push(activeCall);
+                        queues.active.add(activeCall);
                     });
 
                     $('.phone-widget').addClass('is_active');
-                    if (data.lastActive === 'incoming') {
-                        refreshIncomingPane();
-                        return;
-                    }
                     if (data.lastActive === 'outgoing') {
                         refreshOutgoingPane();
                         return;
@@ -793,10 +838,7 @@ var PhoneWidgetCall = function () {
         requestClearMissedCalls: requestClearMissedCalls,
         socket: socket,
         queues: queues,
-        removeIncomingRequest: removeIncomingRequest,
-        refreshIncomingPane: refreshIncomingPane,
-        refreshOutgoingPane: refreshOutgoingPane,
-        refreshActivePane: refreshActivePane
+        removeIncomingRequest: removeIncomingRequest
     };
 }();
 

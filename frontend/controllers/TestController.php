@@ -233,67 +233,84 @@ class TestController extends FController
 //            'data' => [
 //                'command' => HoldMessage::COMMAND_HOLD,
 //                'call' => [
-//                    'id' => 1,
+//                    'id' => 13,
 //                ],
 //            ],
 //        ]);
 //        die;
-
-
-//        $tmp = 1;
-//        $callInfo = [
-//            'typeId' => 2,
-//            'type' => 'Inc ' . $tmp,
-//            'callId' => $tmp,
-//            'name' => 'name ' . $tmp,
-//            'phone' => '+' . $tmp,
-//            'fromInternal' => false,
-//            'projectName' => '',
-//            'sourceName' => '',
-//            'status' => 'Ringing',
-//            'isListen' => true,
-//            'contact' => [
-//                'name' => 'Xsss'
-//            ]
+//
+//
+//         $callInfo = [
+//            'data' => [
+//                'call' => [
+//                    'id' => 5,
+//                ],
+//            ],
 //        ];
-//        Notifications::publish('callUpdate', ['user_id' => 295], $callInfo);
-//
-//
-//die;
-
-        $tmp = 101;
-        Notifications::publish('callUpdate', ['user_id' => 295],
-            [
-                'callId' => $tmp,
-                'status' => 'In progress',
-                'duration' => 60,
-                'snr' => 1,
-                'leadId' => 1,
-                'typeId' => 1,
-                'type' => 'Outgoing',
-                'source_type_id' => '',
-                'phone' => '+373 ' . $tmp,
+//        Notifications::publish('removeIncomingRequest', ['user_id' => 295], $callInfo);
+//        die;
+////
+        $tmp = 1;
+        $callInfo = [
+            'typeId' => 2,
+            'type' => 'Inc ' . $tmp,
+            'callId' => $tmp,
+            'callSid' => 'sid' . $tmp,
+            'name' => 'name ' . $tmp,
+            'phone' => '+' . $tmp,
+            'fromInternal' => false,
+            'projectName' => '',
+            'sourceName' => 'Source',
+//            'status' => 'Ringing',
+            'status' => 'In progress',
+            'isListen' => false,
+            'isMute' => false,
+            'contact' => [
                 'name' => 'Name ' . $tmp,
-                'fromInternal' => false,
-                'isHold' => false,
-                'isListen' => false,
-                'isMute' => false,
-                'projectName' => 'Project ' . $tmp,
-                'sourceName' => 'Source ' . $tmp,
-                'isEnded' => false,
-                'contact' => [
-                    'name' => 'Xqwewe'
-                ]
-            ]
-        );
+                'company' => 'Company ' . $tmp,
+                'phone' => '+00 ' . $tmp
+            ],
+            'departmentName' => 'Sales',
+            'state' => 'inProgress',
+            'duration' => 120,
+        ];
+        Notifications::publish('callUpdate', ['user_id' => 295], $callInfo);
         die;
+
+//
+//        $tmp = 101;
+//        Notifications::publish('callUpdate', ['user_id' => 295],
+//            [
+//                'callId' => $tmp,
+//                'status' => 'In progress',
+//                'duration' => 60,
+//                'snr' => 1,
+//                'leadId' => 1,
+//                'typeId' => 1,
+//                'type' => 'Outgoing',
+//                'source_type_id' => '',
+//                'phone' => '+373 ' . $tmp,
+//                'name' => 'Name ' . $tmp,
+//                'fromInternal' => false,
+//                'isHold' => false,
+//                'isListen' => false,
+//                'isMute' => false,
+//                'projectName' => 'Project ' . $tmp,
+//                'sourceName' => 'Source ' . $tmp,
+//                'isEnded' => false,
+//                'contact' => [
+//                    'name' => 'Xqwewe'
+//                ]
+//            ]
+//        );
+//        die;
 
 
 
         $callInfo = [
             'data' => [
                 'call' => [
-                    'id' => 1,
+                    'id' => 13,
                 ],
             ],
         ];

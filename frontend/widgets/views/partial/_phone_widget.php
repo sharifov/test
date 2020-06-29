@@ -21,9 +21,9 @@ use yii\web\View;
         <div class="status-confirmation"></div>
       </div>
         <ul class="call-filter">
-            <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-hold" data-call-filter="hold">1</a></li>
-            <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-direct" data-call-filter="direct">1</a></li>
-            <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-general" data-call-filter="general">4</a></li>
+            <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-hold" data-call-filter="hold">0</a></li>
+            <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-direct" data-call-filter="direct">0</a></li>
+            <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-general" data-call-filter="general">0</a></li>
         </ul>
 
         <!-- <a href="#" class="phone-widget__dev header-action-small toggle-bar-logs"><i class="fas fa-tools"></i></a> -->
@@ -70,6 +70,7 @@ use yii\web\View;
     <div class="widget-phone__contact-info-modal widget-modal contact-modal-info"></div>
     <div class="widget-phone__messages-modal widget-modal messages-modal"></div>
     <div class="widget-phone__email-modal widget-modal email-modal"></div>
+
     <div class="widget-line-overlay" style="display:none">
       <div class="widget-line-overlay__header">
           <div class="widget-line-overlay__queue-marker">
@@ -78,7 +79,7 @@ use yii\web\View;
           </div>
       </div>
       <div class="widget-line-overlay__body scrollable-block">
-          <ul class="queue-separator"> </ul>
+          <ul class="queue-separator" id="queue-separator"> </ul>
       </div>
     </div>
 

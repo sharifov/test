@@ -559,7 +559,7 @@ class PhoneController extends FController
         $sid = Yii::$app->request->post('sid');
         // $userId = (int) Yii::$app->request->post('user_id');
 
-        $userId = Yii::$app->user->id;
+        $userId = Auth::id();
         $users = [];
         $error = null;
 
@@ -569,15 +569,16 @@ class PhoneController extends FController
                 throw new \Exception('Error: CallSID is empty', 2);
             }
 
-            if (!$userId) {
-                throw new \Exception('Error: UserID is empty', 3);
-            }
+//            $call = Call::findOne(['c_call_sid' => $sid]);
 
-            $call = Call::findOne(['c_call_sid' => $sid]);
-
-            if (!$call) {
-                $call = Call::find()->where(['c_created_user_id' => $userId])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
-            }
+//            if (!$call) {
+                $call = Call::find()
+                    ->bySid($sid)
+                    ->byCreatedUser($userId)
+                    //todo status
+//                    ->andWhere(['c_status_id' => [Call::STATUS_IN_PROGRESS]])
+                    ->limit(1)->one();
+//            }
 
             if (!$call) {
                 throw new \Exception('Call not found by callSID: ' . $sid, 5);
@@ -613,7 +614,10 @@ class PhoneController extends FController
         }
 
 
-        $departments = DepartmentPhoneProject::find()->where(['dpp_project_id' => $call->c_project_id, 'dpp_enable' => true])->andWhere(['>', 'dpp_dep_id', 0])->withPhoneList()->orderBy(['dpp_dep_id' => SORT_ASC])->all();
+        $departments = [];
+        if ($call) {
+            $departments = DepartmentPhoneProject::find()->where(['dpp_project_id' => $call->c_project_id, 'dpp_enable' => true])->andWhere(['>', 'dpp_dep_id', 0])->withPhoneList()->orderBy(['dpp_dep_id' => SORT_ASC])->all();
+        }
         $phones = \Yii::$app->params['settings']['support_phone_numbers'] ?? [];
 
         return $this->renderAjax('ajax_redirect_call', [
@@ -656,7 +660,12 @@ class PhoneController extends FController
 
             //$originCall = Call::find()->where(['c_created_user_id' => Yii::$app->user->id/*, 'c_call_status' => Call::CALL_STATUS_IN_PROGRESS*/])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
 
-            $originCall = Call::find()->where(['c_call_sid' => $sid])->one();
+            $originCall = Call::find()
+                ->bySid($sid)
+                ->byCreatedUser(Auth::id())
+                //todo status
+//                ->andWhere(['c_status_id' => [Call::STATUS_IN_PROGRESS]])
+                ->limit(1)->one();
 
             if (!$originCall) {
                 throw new BadRequestHttpException('Not found Call', 5);
@@ -902,6 +911,7 @@ class PhoneController extends FController
 
     public function actionAjaxHangup(): Response
     {
+
         try {
 
             $sid = (string)Yii::$app->request->post('sid');
