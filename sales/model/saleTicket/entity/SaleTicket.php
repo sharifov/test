@@ -48,13 +48,17 @@ class SaleTicket extends \yii\db\ActiveRecord
 	private const AIRLINE_PENALTY_APFR 	= 3;
 	private const AIRLINE_PENALTY_CA 	= 4;
 	private const AIRLINE_PENALTY_NP 	= 5;
+	private const AIRLINE_PENALTY_CWRT 	= 6;
+	private const AIRLINE_PENALTY_SCP 	= 7;
 
 	private const AIRLINE_PENALTY_LIST = [
 		self::AIRLINE_PENALTY_W 	=> 'Waived',
 		self::AIRLINE_PENALTY_WIC 	=> 'Waived, if cancelled',
 		self::AIRLINE_PENALTY_APFR 	=> 'As per fare rules',
 		self::AIRLINE_PENALTY_CA 	=> 'Contact Airline',
-		self::AIRLINE_PENALTY_NP 	=> 'Not permitted'
+		self::AIRLINE_PENALTY_NP 	=> 'Not permitted',
+        self::AIRLINE_PENALTY_CWRT => 'Check with Ref Team',
+        self::AIRLINE_PENALTY_SCP => 'SCHD CHG policy',
 	];
 
 	private const CHARGE_SYSTEM_VALUE_LIST = [
@@ -283,4 +287,25 @@ class SaleTicket extends \yii\db\ActiveRecord
 	{
 		return $this->st_original_fop === 'CP' ? 'CK' : $this->st_original_fop;
 	}
+
+    /**
+     * @return bool
+     */
+    public function isPenaltyCheckWithRefTeam(): bool
+    {
+        return $this->st_penalty_type === self::AIRLINE_PENALTY_CWRT;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPenaltyHideChargeAndAmount(): bool
+    {
+        return in_array($this->st_penalty_type, [
+            self::AIRLINE_PENALTY_CWRT,
+            self::AIRLINE_PENALTY_SCP,
+            self::AIRLINE_PENALTY_CA,
+            self::AIRLINE_PENALTY_NP,
+        ], true);
+    }
 }
