@@ -138,7 +138,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                 <th>Record Locator</th>
                                 <th>Original FOP</th>
                                 <th>Charge System</th>
-                                <th>Airline Penalty</th>
+                                <th width="152">Airline Penalty</th>
                                 <th>Penalty Amount</th>
                                 <th>Selling</th>
                                 <th>Service Fee</th>
