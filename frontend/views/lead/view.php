@@ -328,6 +328,30 @@ $jsCode = <<<JS
         });
        return false;
     });
+
+$(document).on('click','#client-unsubscribe-button', function (e) {
+        e.preventDefault();
+        let url = $(this).data('unsubscribe-url');        
+        //let modal = $('#modal-df');
+        //let title = $(this).attr('title');
+        //$('#modal-df-label').html(title);     
+        //modal.find('.modal-body').html('');
+        //$('#preloader').removeClass('hidden');        
+        $.ajax({
+            url: url,
+            //method: 'POST',           
+            success: function(response){              
+                /*let content = '<textarea rows="2" id="capture-url" readonly="readonly" style="width: 100%">' + response + '</textarea><br><br><div><button class="btn btn-primary btn-clipboard" data-clipboard-target="#capture-url"><i class="fas fa-copy"></i> Copy to clipboard</button></div>';
+                modal.find('.modal-body').html(content);
+                modal.modal('show'); */
+                if (response){
+                    new PNotify({title: "Communication", type: "info", text: 'Client communication restricted', hide: true});
+                }
+                
+                console.log(response);
+            }
+        });
+    });
     
 JS;
 
