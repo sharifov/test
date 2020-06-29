@@ -169,120 +169,86 @@ $isSuperAdmin = $user->isSuperAdmin();
             'icon' => 'th-list',
             'items' => [
                 ['label' => 'Call List', 'url' => ['/call/index'], 'icon' => 'phone'],
-                ['label' => 'Call Note', 'url' => ['/call-note-crud/index'], 'icon' => 'list'],
+
                 [
                     'label' => 'Call logs',
                     'url' => 'javascript:',
                     'icon' => 'phone',
                     'items' => [
-                        ['label' => 'Log', 'url' => ['/call-log/index'], 'icon' => 'list'],
-                        ['label' => 'Cases', 'url' => ['/call-log-case/index'], 'icon' => 'list'],
-                        ['label' => 'Leads', 'url' => ['/call-log-lead/index'], 'icon' => 'list'],
-                        ['label' => 'Queue', 'url' => ['/call-log-queue/index'], 'icon' => 'list'],
-                        ['label' => 'Record', 'url' => ['/call-log-record/index'], 'icon' => 'list'],
+                        ['label' => 'Log', 'url' => ['/call-log/index']],
+                        ['label' => 'Cases', 'url' => ['/call-log-case/index']],
+                        ['label' => 'Leads', 'url' => ['/call-log-lead/index']],
+                        ['label' => 'Queue', 'url' => ['/call-log-queue/index']],
+                        ['label' => 'Record', 'url' => ['/call-log-record/index']],
                     ],
                 ],
                 [
                     'label' => 'Client Chat',
                     'url' => 'javascript:',
-                    'icon' => 'comment',
+                    'icon' => 'comments warning',
                     'items' => [
-                        ['label' => 'Client Chat', 'url' => ['/client-chat-crud/index'], 'icon' => 'list'],
-                        ['label' => 'Request', 'url' => ['/client-chat-request-crud/index'], 'icon' => 'list'],
-                        ['label' => 'Channel', 'url' => ['/client-chat-channel-crud/index'], 'icon' => 'list'],
-                        ['label' => 'Status Log', 'url' => ['/client-chat-status-log-crud/index'], 'icon' => 'list'],
-                        ['label' => 'User Channel', 'url' => ['/client-chat-user-channel-crud/index'], 'icon' => 'list'],
-                        ['label' => 'User Access', 'url' => ['/client-chat-user-access-crud/index'], 'icon' => 'list'],
+                        ['label' => 'Client Chat', 'url' => ['/client-chat-crud/index']],
+                        ['label' => 'Request', 'url' => ['/client-chat-request-crud/index']],
+                        ['label' => 'Channel', 'url' => ['/client-chat-channel-crud/index']],
+                        ['label' => 'Status Log', 'url' => ['/client-chat-status-log-crud/index']],
+                        ['label' => 'User Channel', 'url' => ['/client-chat-user-channel-crud/index']],
+                        ['label' => 'User Access', 'url' => ['/client-chat-user-access-crud/index']],
                     ]
                 ],
-                ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'comments-o'],
-                ['label' => 'SMS Distrib List', 'url' => ['/sms-distribution-list/index'], 'icon' => 'comments warning'],
-                ['label' => 'Mail List', 'url' => ['/email/index'], 'icon' => 'envelope'],
+                ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'list'],
+                ['label' => 'SMS Distrib List', 'url' => ['/sms-distribution-list/index'], 'icon' => 'list'],
+                ['label' => 'Emails', 'url' => ['/email/index'], 'icon' => 'envelope'],
                 ['label' => 'Notification List', 'url' => ['/notifications/index'], 'icon' => 'comment-o'],
-                ['label' => 'Conference Room', 'url' => ['/conference-room/index'], 'icon' => 'comment'],
-                ['label' => 'Conferences', 'url' => ['/conference/index'], 'icon' => 'comment'],
-                ['label' => 'Conference Participant', 'url' => ['/conference-participant/index'], 'icon' => 'phone'],
-                ['label' => 'User Voice Mail', 'url' => ['/user-voice-mail/index'], 'icon' => 'microphone'],
-            ]
-        ];
 
-
-
-        $menuQCall = [
-            'label' => 'QCall',
-            'url' => 'javascript:',
-            'icon' => 'phone',
-            'items' => [
-                ['label' => 'Lead QCall List', 'url' => ['/lead-qcall/list'], 'icon' => 'list'],
-                ['label' => 'Lead QCall All', 'url' => ['/lead-qcall/index'], 'icon' => 'list'],
-                ['label' => 'QCall Config', 'url' => ['/qcall-config/index'], 'icon' => 'list'],
-                ['label' => 'Project Weight', 'url' => ['/project-weight/index'], 'icon' => 'list'],
-                ['label' => 'Status Weight', 'url' => ['/status-weight/index'], 'icon' => 'list'],
-            ]
-        ];
-
-        $menuItems[] = [
-            'label' => 'Additional',
-            'url' => 'javascript:',
-            'icon' => 'list',
-            'items' => [
-                $menuQCall,
-                ['label' => 'User Call Statuses', 'url' => ['/user-call-status/index'], 'icon' => 'list'],
-                ['label' => 'Lead Call Experts', 'url' => ['/lead-call-expert/index'], 'icon' => 'bell'],
-                ['label' => 'Flight Segments', 'url' => ['/lead-flight-segment/index'], 'icon' => 'plane'],
-                ['label' => 'Quote List', 'url' => ['/quotes/index'], 'icon' => 'quora', 'iconPrefix' => 'fab'],
-                ['label' => 'Quote Price List', 'url' => ['/quote-price/index'], 'icon' => 'dollar'],
-                ['label' => 'Export Leads', 'url' => ['/leads/export'], 'icon' => 'export'],
-                ['label' => 'Duplicate Leads', 'url' => ['/leads/duplicate'], 'icon' => 'copy'],
-                ['label' => 'Stats Agents & Leads', 'url' => ['/report/agents'], 'icon' => 'users'],
-                ['label' => 'Lead Status History', 'url' => ['/lead-flow/index'], 'icon' => 'list'],
-                ['label' => 'Lead Check Lists', 'url' => ['/lead-checklist/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('manageLeadChecklist')],
-                ['label' => 'LF Checklist Status History', 'url' => ['/lead-flow-checklist/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('viewLeadFlowChecklist')],
-                ['label' => 'Call User Access', 'url' => ['/call-user-access/index'], 'icon' => 'list'],
-                ['label' => 'Phone Blacklist', 'url' => ['/phone-blacklist/index'], 'icon' => 'phone'],
-
-            ]
-        ];
-
-        $menuItems[] = [
-            'label' => 'Users',
-            'url' => 'javascript:',
-            'icon' => 'user',
-            'items' => [
-                ['label' => 'Users', 'url' => ['/employee/list'], 'icon' => 'user'],
-                ['label' => 'User Groups', 'url' => ['/user-group/index'], 'icon' => 'users'],
-                ['label' => 'User Groups Set', 'url' => ['/user-group-set/index'], 'icon' => 'users'],
-                ['label' => 'User Params', 'url' => ['/user-params/index'], 'icon' => 'bars'],
-                ['label' => 'User Project Params', 'url' => ['/user-project-params/index'], 'icon' => 'list'],
-                ['label' => 'User Groups Assignments', 'url' => ['/user-group-assign/index'], 'icon' => 'list'],
                 [
-                    'label' => 'User Product Type',
-                    'url' => ['/user-product-type/index'],
-                    'icon' => 'list',
-                    'visible' => Yii::$app->user->can('user-product-type/list')
+                    'label' => 'Conferences',
+                    'url' => 'javascript:',
+                    'icon' => 'comments',
+                    'items' => [
+                        ['label' => 'Conference Room', 'url' => ['/conference-room/index']],
+                        ['label' => 'Conferences', 'url' => ['/conference/index']],
+                        ['label' => 'Conference Participant', 'url' => ['/conference-participant/index']],
+                    ]
                 ],
-                ['label' => 'User Status', 'url' => ['/user-status/index'], 'icon' => 'sliders'],
-                ['label' => 'User Online', 'url' => ['/user-online/index'], 'icon' => 'plug'],
-                ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
-                ['label' => 'User Commission Rules', 'url' => ['/user-commission-rules-crud/index'], 'icon' => 'list'],
-                ['label' => 'User Bonus Rules', 'url' => ['/user-bonus-rules-crud/index'], 'icon' => 'list'],
-                ['label' => 'User Failed Login', 'url' => ['/user-failed-login/index'], 'icon' => 'list'],
+                ['label' => 'Call Note', 'url' => ['/call-note-crud/index'], 'icon' => 'list'],
+                ['label' => 'User Voice Mail', 'url' => ['/user-voice-mail/index'], 'icon' => 'microphone'],
+                [
+                    'label' => 'QCall',
+                    'url' => 'javascript:',
+                    'icon' => 'phone',
+                    'items' => [
+                        ['label' => 'Lead QCall List', 'url' => ['/lead-qcall/list']],
+                        ['label' => 'Lead QCall All', 'url' => ['/lead-qcall/index']],
+                        ['label' => 'QCall Config', 'url' => ['/qcall-config/index']],
+                        ['label' => 'Project Weight', 'url' => ['/project-weight/index']],
+                        ['label' => 'Status Weight', 'url' => ['/status-weight/index']],
+                    ]
+                ],
+                ['label' => 'User Call Statuses', 'url' => ['/user-call-status/index'], 'icon' => 'list'],
+                ['label' => 'Flight Segments', 'url' => ['/lead-flight-segment/index'], 'icon' => 'plane'],
+                ['label' => 'Quote List', 'url' => ['/quotes/index'], 'icon' => 'list'],
+                ['label' => 'Quote Price List', 'url' => ['/quote-price/index'], 'icon' => 'list'],
+
+                ['label' => 'Call User Access', 'url' => ['/call-user-access/index'], 'icon' => 'list'],
+                [
+                    'label' => 'Leads',
+                    'url' => 'javascript:',
+                    'icon' => 'list',
+                    'items' => [
+                        ['label' => 'Lead Call Experts', 'url' => ['/lead-call-expert/index']],
+                        ['label' => 'Lead Status History', 'url' => ['/lead-flow/index']],
+                        ['label' => 'Lead Check Lists', 'url' => ['/lead-checklist/index'], 'visible' => Yii::$app->user->can('manageLeadChecklist')],
+                        ['label' => 'Checklist Status History', 'url' => ['/lead-flow-checklist/index'], 'visible' => Yii::$app->user->can('viewLeadFlowChecklist')],
+                        ['label' => 'Duplicate Leads', 'url' => ['/leads/duplicate']],
+                        ['label' => 'Export Leads', 'url' => ['/leads/export']],
+                    ]
+                ]
             ]
         ];
 
-        $menuItems[] = [
-            'label' => 'Clients',
-            'url' => 'javascript:',
-            'icon' => 'users',
-            'items' => [
-                ['label' => 'Clients', 'url' => ['/client/index'], 'icon' => 'users'],
-                ['label' => 'Clients phones', 'url' => ['/client-phone/index'], 'icon' => 'phone'],
-                ['label' => 'Clients emails', 'url' => ['/client-email/index'], 'icon' => 'envelope '],
-                ['label' => 'Visitor Log', 'url' => ['/visitor-log/index'], 'icon' => 'list'],
-                ['label' => 'User Contact Lists', 'url' => ['/user-contact-list/index'], 'icon' => 'list'],
-                ['label' => 'Client Project', 'url' => ['/client-project/index'], 'icon' => 'list'],
-            ]
-        ];
+
+
+
 
         $menuNewData = [
             'label' => 'New Data',
@@ -340,30 +306,109 @@ $isSuperAdmin = $user->isSuperAdmin();
             'icon' => 'list',
             'items' => [
                     $menuNewData,
-                ['label' => 'Projects', 'url' => ['/project/index'], 'icon' => 'product-hunt'],
-                ['label' => 'Project Sources', 'url' => ['/sources/index'], 'icon' => 'product-hunt'],
-                ['label' => 'Phone List', 'url' => ['/phone-list/index'], 'icon' => 'list'],
-                ['label' => 'Email List', 'url' => ['/email-list/index'], 'icon' => 'list'],
-                ['label' => 'Departments', 'url' => ['/department/index'], 'icon' => 'sitemap'],
-                ['label' => 'Department Emails', 'url' => ['/department-email-project/index'], 'icon' => 'envelope'],
-                ['label' => 'Department Phones', 'url' => ['/department-phone-project/index'], 'icon' => 'phone'],
+
+                [
+                    'label' => 'Projects',
+                    'url' => 'javascript:',
+                    'icon' => 'product-hunt',
+                    'items' => [
+                        ['label' => 'Projects', 'url' => ['/project/index']],
+                        ['label' => 'Project Sources', 'url' => ['/sources/index']],
+                        ['label' => 'Project Settings', 'url' => ['/settings/projects']],
+                    ]
+                ],
+
+                [
+                    'label' => 'Departments',
+                    'url' => 'javascript:',
+                    'icon' => 'sitemap',
+                    'items' => [
+                        ['label' => 'Departments', 'url' => ['/department/index']],
+                        ['label' => 'Department Emails', 'url' => ['/department-email-project/index']],
+                        ['label' => 'Department Phones', 'url' => ['/department-phone-project/index']],
+                    ]
+                ],
+
+
+
+                ['label' => 'Phone List', 'url' => ['/phone-list/index'], 'icon' => 'phone'],
+                ['label' => 'Phone Blacklist', 'url' => ['/phone-blacklist/index'], 'icon' => 'phone'],
+                ['label' => 'Email List', 'url' => ['/email-list/index'], 'icon' => 'envelope-o'],
+
                 ['label' => 'Airlines', 'url' => ['/settings/airlines'], 'icon' => 'plane'],
                 ['label' => 'Airports', 'url' => ['/settings/airports'], 'icon' => 'plane'],
-                ['label' => 'ACL', 'url' => ['/settings/acl'], 'icon' => 'user-secret'],
+                ['label' => 'ACL (IP)', 'url' => ['/settings/acl'], 'icon' => 'user-secret'],
                 ['label' => 'API Users', 'url' => ['/api-user/index'], 'icon' => 'users'],
                 ['label' => 'Tasks', 'url' => ['/task/index'], 'icon' => 'list'],
                 ['label' => 'Lead Tasks', 'url' => ['/lead-task/index'], 'icon' => 'list'],
-                ['label' => 'Email template types', 'url' => ['/email-template-type/index'], 'icon' => 'envelope-o'],
-                ['label' => 'SMS template types', 'url' => ['/sms-template-type/index'], 'icon' => 'comments-o'],
-                ['label' => 'Case Sales', 'url' => ['/case-sale/index'], 'icon' => 'list'],
-                ['label' => 'Case Notes', 'url' => ['/case-note/index'], 'icon' => 'list'],
-                ['label' => 'Sale Ticket', 'url' => ['/sale-ticket/index'], 'icon' => 'list'],
-                ['label' => 'Project Settings', 'url' => ['/settings/projects'], 'icon' => 'product-hunt'],
+
                 ['label' => 'Check List Types', 'url' => ['/lead-checklist-type/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('manageLeadChecklistType')],
-                ['label' => 'Case status history', 'url' => ['/case-status-log/index'], 'icon' => 'bars'],
-                ['label' => 'Case categories', 'url' => ['/case-category/index'], 'icon' => 'list'],
                 ['label' => 'Coupons', 'url' => ['/coupon/index'], 'icon' => 'list'],
-                ['label' => 'Coupon Cases', 'url' => ['/coupon-case/index'], 'icon' => 'list'],
+
+                [
+                    'label' => 'Cases & Sale',
+                    'url' => 'javascript:',
+                    'icon' => 'list',
+                    'items' => [
+                        ['label' => 'Case Sales', 'url' => ['/case-sale/index'], 'icon' => 'list'],
+                        ['label' => 'Case Notes', 'url' => ['/case-note/index'], 'icon' => 'list'],
+                        ['label' => 'Case status history', 'url' => ['/case-status-log/index'], 'icon' => 'bars'],
+                        ['label' => 'Case categories', 'url' => ['/case-category/index'], 'icon' => 'list'],
+                        ['label' => 'Coupon Cases', 'url' => ['/coupon-case/index'], 'icon' => 'list'],
+                        ['label' => 'Sale Ticket', 'url' => ['/sale-ticket/index'], 'icon' => 'list'],
+                    ]
+                ],
+
+                [
+                    'label' => 'Template types',
+                    'url' => 'javascript:',
+                    'icon' => 'list',
+                    'items' => [
+                        ['label' => 'Email template types', 'url' => ['/email-template-type/index']],
+                        ['label' => 'SMS template types', 'url' => ['/sms-template-type/index']],
+                    ]
+                ],
+
+            ]
+        ];
+
+        $menuItems[] = [
+            'label' => 'Users',
+            'url' => 'javascript:',
+            'icon' => 'user',
+            'items' => [
+                ['label' => 'Users', 'url' => ['/employee/list'], 'icon' => 'user'],
+                ['label' => 'User Groups', 'url' => ['/user-group/index'], 'icon' => 'users'],
+                ['label' => 'User Groups Set', 'url' => ['/user-group-set/index'], 'icon' => 'users'],
+                ['label' => 'User Params', 'url' => ['/user-params/index'], 'icon' => 'bars'],
+                ['label' => 'User Project Params', 'url' => ['/user-project-params/index'], 'icon' => 'list'],
+                ['label' => 'User Groups Assignments', 'url' => ['/user-group-assign/index'], 'icon' => 'list'],
+                [
+                    'label' => 'User Product Type',
+                    'url' => ['/user-product-type/index'],
+                    'icon' => 'list',
+                    'visible' => Yii::$app->user->can('user-product-type/list')
+                ],
+                ['label' => 'User Status', 'url' => ['/user-status/index'], 'icon' => 'sliders'],
+                ['label' => 'User Online', 'url' => ['/user-online/index'], 'icon' => 'plug'],
+                ['label' => 'User Connections', 'url' => ['/user-connection/index'], 'icon' => 'plug'],
+                ['label' => 'User Commission Rules', 'url' => ['/user-commission-rules-crud/index'], 'icon' => 'list'],
+                ['label' => 'User Bonus Rules', 'url' => ['/user-bonus-rules-crud/index'], 'icon' => 'list'],
+                ['label' => 'User Failed Login', 'url' => ['/user-failed-login/index'], 'icon' => 'list'],
+            ]
+        ];
+
+        $menuItems[] = [
+            'label' => 'Clients',
+            'url' => 'javascript:',
+            'icon' => 'users',
+            'items' => [
+                ['label' => 'Clients', 'url' => ['/client/index'], 'icon' => 'users'],
+                ['label' => 'Clients phones', 'url' => ['/client-phone/index'], 'icon' => 'phone'],
+                ['label' => 'Clients emails', 'url' => ['/client-email/index'], 'icon' => 'envelope '],
+                ['label' => 'Visitor Log', 'url' => ['/visitor-log/index'], 'icon' => 'list'],
+                ['label' => 'User Contact Lists', 'url' => ['/user-contact-list/index'], 'icon' => 'list'],
+                ['label' => 'Client Project', 'url' => ['/client-project/index'], 'icon' => 'list'],
             ]
         ];
 
@@ -438,6 +483,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Call User Map', 'url' => ['/call/user-map'], 'icon' => 'map'],
                 ['label' => 'Real-time User Map', 'url' => ['/call/realtime-user-map'], 'icon' => 'map'],
                 ['label' => 'Agents Ratings', 'url' => ['/stats/agent-ratings'], 'icon' => 'star-half-empty'],
+                ['label' => 'Stats Agents & Leads', 'url' => ['/report/agents'], 'icon' => 'users'],
             ]
         ];
 
