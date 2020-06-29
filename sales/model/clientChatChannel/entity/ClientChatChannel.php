@@ -12,6 +12,7 @@ use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "client_chat_channel".
@@ -139,13 +140,28 @@ class ClientChatChannel extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * @return Scopes
+     */
     public static function find(): Scopes
     {
         return new Scopes(static::class);
     }
 
+    /**
+     * @return string
+     */
     public static function tableName(): string
     {
         return 'client_chat_channel';
+    }
+
+    /**
+     * @return array
+     */
+    public static function getList() : array
+    {
+        $data = self::find()->orderBy(['ccc_name' => SORT_ASC])->asArray()->all();
+        return ArrayHelper::map($data,'ccc_id', 'ccc_name');
     }
 }
