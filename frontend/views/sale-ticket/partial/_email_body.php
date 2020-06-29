@@ -54,7 +54,7 @@ $groups = $user->getUserGroupList();
                 <td style="border: 1px solid; padding: 10px;"><?=Html::encode($ticket->getFormattedOriginalFop())?></td>
                 <td style="border: 1px solid; padding: 10px;"><?=Html::encode($ticket->st_charge_system)?></td>
                 <td style="border: 1px solid; padding: 10px;"><?=Html::encode(SaleTicket::getPenaltyTypeName($ticket->st_penalty_type))?></td>
-                <td style="border: 1px solid; padding: 10px;"><?=Html::encode(empty($ticket->st_refund_waiver) ? ('$'.$ticket->st_penalty_amount) : $ticket->st_refund_waiver)?></td>
+                <td style="border: 1px solid; padding: 10px;"><?=Html::encode('$'.$ticket->st_penalty_amount)?></td>
                 <td style="border: 1px solid; padding: 10px;">$<?=Html::encode($ticket->st_selling)?></td>
                 <td style="border: 1px solid; padding: 10px;">$<?=Html::encode($ticket->st_service_fee)?></td>
                 <td style="border: 1px solid; padding: 10px;">$<?=Html::encode($ticket->st_recall_commission)?></td>

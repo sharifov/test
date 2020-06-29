@@ -41,6 +41,9 @@ if (!empty($caseSaleModel)) {
 
 $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_id' => !empty($caseModel) ? $caseModel->cs_id : 0, 'sale_id' => $data['saleId'], 'booking_id' => $data['bookingId']]);
 ?>
+
+
+
 <div class="sale-view">
     <h3><?= Html::encode($title) ?></h3>
     <div class="row">
@@ -153,7 +156,31 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                     <td><?=Html::encode($ticket->st_record_locator)?></td>
                                     <td><?=Html::encode($ticket->getFormattedOriginalFop())?></td>
                                     <td><?=Html::encode($ticket->st_charge_system)?></td>
-                                    <td><?=Html::encode(SaleTicket::getPenaltyTypeName($ticket->st_penalty_type))?></td>
+                                    <td>
+                                        <?php if (!$canManageSaleInfo && $ticket->isPenaltyCheckWithRefTeam()):
+											echo Editable::widget([
+												'model' => $ticket,
+												'attribute' => 'st_penalty_type',
+												'header' => 'Airline Penalty',
+												'asPopover' => false,
+												'inputType' => Editable::INPUT_DROPDOWN_LIST,
+												'data' => SaleTicket::getAirlinePenaltyList(),
+												'displayValue' => Html::encode(SaleTicket::getPenaltyTypeName($ticket->st_penalty_type)),
+												'formOptions' => ['action' => [Url::to(['/sale-ticket/ajax-sale-ticket-edit-info/', 'st_id' => $ticket->st_id])]],
+												'options' => [
+													'id' => 'sale-ticket-penalty-type-' . $key . '-' . $ticket->st_case_sale_id
+												],
+												'pluginEvents' => [
+													'editableSuccess' => 'function (event, val, form, data) {
+                                                        pjaxReload({container: "#' . $pjaxCaseSaleTicketContainerId . '"});
+                                                    }',
+												],
+											]);
+										else:
+											echo Html::encode(SaleTicket::getPenaltyTypeName($ticket->st_penalty_type));
+										endif;
+										?>
+                                    </td>
                                     <td>
 										<?php if (!$canManageSaleInfo):
 											echo Editable::widget([
@@ -173,7 +200,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
 												],
 											]);
 										else:
-											echo Html::encode(empty($ticket->st_refund_waiver) ? $ticket->st_penalty_amount : $ticket->st_refund_waiver);
+											echo Html::encode($ticket->st_penalty_amount);
 										endif;
 										?>
                                     </td>
@@ -225,9 +252,20 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
 										endif;
 										?>
                                     </td>
-
-                                    <td><?=Html::encode($ticket->st_upfront_charge)?></td>
-                                    <td><?=Html::encode($ticket->st_refundable_amount)?></td>
+                                    <td>
+                                        <?php if ($ticket->isPenaltyHideChargeAndAmount()) : ?>
+                                            N/A
+                                        <?php else: ?>
+                                            <?=Html::encode($ticket->st_upfront_charge)?>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <?php if ($ticket->isPenaltyHideChargeAndAmount()) : ?>
+                                            N/A
+                                        <?php else: ?>
+                                            <?=Html::encode($ticket->st_refundable_amount)?>
+                                        <?php endif; ?>
+                                    </td>
                                 </tr>
 							<?php endforeach;?>
                         </table>
