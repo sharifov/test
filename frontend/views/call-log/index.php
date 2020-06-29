@@ -108,7 +108,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => 'yii\grid\ActionColumn',
                 'buttons' => [
                     'view' => static function ($url, CallLog $model) {
-                        return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', ['/call-log/view', 'id' => $model->cl_id], [
+                        return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', ['/call-log/view', 'id' => $model->cl_id, 'breadcrumbsPreviousPage' => 'index'], [
                             'target' => '_blank',
                             'data-pjax' => 0,
                             'title' => 'View',
