@@ -162,14 +162,14 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 		return (int)($this->decodedData['department'] ?? null);
 	}
 
-	public function getEmailFromData(): string
+	public function getEmailFromData(): ?string
 	{
-		return $this->decodedData['email'] ?? '';
+		return $this->decodedData['email'] ?? null;
 	}
 
 	public function getNameFromData():string
 	{
-		return $this->decodedData['name'] ?? '';
+		return $this->decodedData['name'] ?? 'ClientName';
 	}
 
 	public function getVisitorOrUserIdFromData(): string
