@@ -622,8 +622,7 @@ $js = <<<JS
         //$('#c_email_tpl_id').trigger('change');
                 
         $('#sms-message').countSms('#sms-counter');
-        $('#preview-sms-message').countSms('#preview-sms-counter');
-        
+        $('#preview-sms-message').countSms('#preview-sms-counter');        
     }
 
     initializeMessageType($c_type_id);
@@ -728,11 +727,13 @@ JS;
 <?php
 $tpl_email_blank_key = \frontend\models\CommunicationForm::TPL_TYPE_EMAIL_BLANK_KEY;
 $tpl_email_support_blank_page_key = \frontend\models\CommunicationForm::TPL_TYPE_EMAIL_SUPPORT_BLANK_PAGE_KEY;
+$tpl_email_exchange_blank_page_key = \frontend\models\CommunicationForm::TPL_TYPE_EMAIL_EXCHANGE_BLANK_PAGE_KEY;
 $tpl_sms_blank_key = \frontend\models\CommunicationForm::TPL_TYPE_SMS_BLANK_KEY;
 
 $js = <<<JS
 
     const tpl_email_support_blank_page_key = '$tpl_email_support_blank_page_key';
+    const tpl_email_exchange_blank_page_key = '$tpl_email_exchange_blank_page_key';
     const tpl_email_blank_key = '$tpl_email_blank_key';
     const tpl_sms_blank_key = '$tpl_sms_blank_key';
     let projectId = '{$model->project->id}';
@@ -747,7 +748,7 @@ $js = <<<JS
     });
     
     $(document).on("change", '#call-to-number', function () {
-        $('#call-pane__dial-number').val($(this).val());
+        insertPhoneNumber($(this).val());
     });
     
     $(document).on("change", '#call-from-number', function () {
@@ -804,6 +805,9 @@ $js = <<<JS
                 $('#email-textarea-div').show();
                 $('#email-subtitle-group').show();
             } else if($(this).val() == tpl_email_support_blank_page_key) {
+                $('#email-textarea-div').show();
+                $('#email-subtitle-group').show();
+            } else if($(this).val() == tpl_email_exchange_blank_page_key) {
                 $('#email-textarea-div').show();
                 $('#email-subtitle-group').show();
             } else {

@@ -156,16 +156,18 @@ class QuoteSegmentBaggageCharge extends \yii\db\ActiveRecord
 
     /**
      * @param SegmentBaggageForm $form
+     * @param int $firstPiece
+     * @param int $lastPiece
      * @return static
      */
-    public static function creationFromForm(SegmentBaggageForm $form): self
+    public static function creationFromForm(SegmentBaggageForm $form, int $firstPiece = 1, int $lastPiece = 1): self
     {
         $item = new self();
         $item->qsbc_price = $form->price;
         $item->qsbc_pax_code = $form->paxCode;
         $item->qsbc_segment_id = $form->segmentId;
-        $item->qsbc_first_piece = $form->piece;
-        $item->qsbc_last_piece = $form->piece;
+        $item->qsbc_first_piece = $firstPiece;
+        $item->qsbc_last_piece = $lastPiece;
         $item->qsbc_max_size = $form->height;
         $item->qsbc_max_weight = $form->weight;
         $item->qsbc_currency = $form->currency;

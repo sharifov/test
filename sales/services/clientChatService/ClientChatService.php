@@ -51,14 +51,7 @@ class ClientChatService
 			if ($userChannel) {
 				/** @var ClientChatUserChannel $user */
 				foreach ($userChannel as $user) {
-
-					\Yii::error('clientChatUserAccessRepository::create');
 					$this->clientChatUserAccessRepository->create($clientChat->cch_id, $user->ccuc_user_id);
-
-//					if ($ntf = Notifications::create($user->ccuc_user_id, $title, $message, Notifications::TYPE_INFO, true)) {
-//						$dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-//						Notifications::publish('getNewNotification', ['user_id' => $user->ccuc_user_id], $dataNotification);
-//					}
 				}
 			}
 		}

@@ -140,6 +140,12 @@ class CallQueueJob extends BaseObject implements JobInterface
 //							}
 
                             $call->c_lead_id = $lead->id ?? null;
+
+                            if (!$createLeadOnIncoming) {
+								$client = $this->clientManageService->getOrCreateByPhones([new PhoneCreateForm(['phone' => $call->c_from, 'comments' => 'incoming'])]);
+								$call->c_client_id = $client->id;
+							}
+
                             if (!$call->c_client_id) {
                                 $call->c_client_id = $lead->client_id ?? null;
                             }
@@ -168,6 +174,12 @@ class CallQueueJob extends BaseObject implements JobInterface
 							$createCaseOnIncoming
                         );
                         $call->c_case_id = $case->cs_id ?? null;
+
+						if (!$createCaseOnIncoming) {
+							$client = $this->clientManageService->getOrCreateByPhones([new PhoneCreateForm(['phone' => $call->c_from])]);
+							$call->c_client_id = $client->id;
+						}
+
                         if (!$call->c_client_id) {
                             $call->c_client_id = $case->cs_client_id ?? null;
                         }

@@ -17,6 +17,8 @@ class ClientChatRequestEvents extends Component
 {
 	public const CREATE = 'create';
 
+	public const ROOM_CONNECTED = 'room_connected';
+
 	/**
 	 * @param Event $event
 	 * @throws \yii\base\InvalidConfigException
@@ -33,6 +35,14 @@ class ClientChatRequestEvents extends Component
 
 		$clientChat->cch_client_id = $client->id;
 		$clientChatRepository->save($clientChat);
+	}
+
+	public static function assignChannelToClientChat(Event $event): void
+	{
+		/** @var ClientChatRequest */
+		$clientChatRequest = $event->data;
+		$clientChatRepository = \Yii::createObject(ClientChatRepository::class);
+		$clientChat = $clientChatRepository->getOrCreateByRequest($clientChatRequest);
 
 		$job = new ClientChatJob();
 		$job->priority = 1;

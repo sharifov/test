@@ -92,7 +92,9 @@ use yii\helpers\Html;
                                         <?php if(!empty($segment->quoteSegmentBaggageCharges)):?>
                                             <?php foreach ($segment->quoteSegmentBaggageCharges as $baggageCh):?>
                                                 <span
-                                                    title="<?php echo Html::encode($baggageCh->qsbc_max_size) . "\n" .
+                                                    title="<?php echo
+                                                        'Piece ' . $baggageCh->qsbc_first_piece . ' - ' . $baggageCh->qsbc_last_piece . "\n" .
+                                                        Html::encode($baggageCh->qsbc_max_size) . "\n" .
                                                         Html::encode($baggageCh->qsbc_max_weight) ?>"
                                                     class="badge badge-light">
                                                         <i class="fa fa-plus"></i>&nbsp;

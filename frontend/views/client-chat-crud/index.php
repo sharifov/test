@@ -27,53 +27,103 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            'cch_id',
+            [
+                    'attribute' => 'cch_id',
+                'options' => ['style' => 'width:100px']
+            ],
             'cch_rid',
-            'cch_ccr_id',
-            'cch_title',
-            'cch_description',
-            'cch_project_id:projectName',
-            'cch_dep_id:department',
-            'cch_channel_id',
-            'cch_client_id:client',
-            'cch_owner_user_id',
-            'cch_case_id:case',
-            'cch_lead_id:lead',
-            'cch_note',
+            //'cch_ccr_id',
+            [
+                'attribute' => 'cch_ccr_id',
+                'value' => static function (\sales\model\clientChat\entity\ClientChat $model) {
+                    return $model->cch_ccr_id ? Html::a('<i class="fa fa-link"></i> ' . $model->cch_ccr_id, ['client-chat-request-crud/view', 'id' => $model->cch_ccr_id], ['target' => '_blank', 'data-pjax' => 0]) : '-';
+                },
+                'format' => 'raw',
+                'options' => ['style' => 'width:100px']
+            ],
+            //'cch_title',
+            //'cch_description',
+            //'cch_project_id:projectName',
             [
                 'attribute' => 'cch_status_id',
                 'value' => static function (\sales\model\clientChat\entity\ClientChat $model) {
                     return Html::tag('span', $model->getStatusName(), ['class' => 'badge badge-'.$model->getStatusClass()]);
                 },
-                'format' => 'raw'
+                'format' => 'raw',
+                'filter' => \sales\model\clientChat\entity\ClientChat::getStatusList()
             ],
-            'cch_ip',
-            'cch_ua',
-            'cch_language_id',
+            [
+                'class' => \common\components\grid\project\ProjectColumn::class,
+                'attribute' => 'cch_project_id',
+                'relation' => 'cchProject',
+            ],
+            //'cch_dep_id:department',
+            [
+                'attribute' => 'cch_dep_id',
+                'format' => 'department',
+                'filter' => \common\models\Department::getList()
+            ],
+//            'cch_channel_id',
+            [
+                'attribute' => 'cch_channel_id',
+                'value' => static function (\sales\model\clientChat\entity\ClientChat $model) {
+                    return $model->cch_channel_id ? Html::a(Html::encode($model->cchChannel->ccc_name), ['client-chat-channel-crud/view', 'id' => $model->cch_channel_id], ['target' => '_blank', 'data-pjax' => 0]) : '-';
+                },
+                'format' => 'raw',
+                'filter' => \sales\model\clientChatChannel\entity\ClientChatChannel::getList()
+            ],
+            //'cch_client_id:client',
+            [
+                'attribute' => 'cch_client_id',
+                'value' => static function (\sales\model\clientChat\entity\ClientChat $model) {
+                    return $model->cch_client_id ? Html::a('<i class="fa fa-link"></i> ' . $model->cch_client_id, ['client/view', 'id' => $model->cch_client_id], ['target' => '_blank', 'data-pjax' => 0]) : '-';
+                },
+                'format' => 'raw',
+            ],
+            //'cch_owner_user_id',
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'cch_owner_user_id',
+                'relation' => 'cchOwnerUser',
+                'format' => 'username',
+                'options' => ['style' => 'width:200px']
+                //'placeholder' => 'Select User'
+            ],
+            'cchCase:case',
+            'cchLead:lead',
+            //'cch_note',
+
+            //'cch_ip',
+            //'cch_ua',
+            [
+                'attribute' => 'cch_language_id',
+                'filter' => \common\models\Language::getLanguages()
+                //'format' => 'byUserDateTime'
+            ],
             [
 				'class' => DateTimeColumn::class,
 				'attribute' => 'cch_created_dt',
 				'format' => 'byUserDateTime'
             ],
-            [
-				'class' => DateTimeColumn::class,
-				'attribute' => 'cch_updated_dt',
-				'format' => 'byUserDateTime'
-            ],
-			[
-				'class' => UserSelect2Column::class,
-				'attribute' => 'cch_created_user_id',
-				'relation' => 'cchCreatedUser',
-				'format' => 'username',
-				'placeholder' => 'Select User'
-			],
-			[
-				'class' => UserSelect2Column::class,
-				'attribute' => 'cch_updated_user_id',
-				'relation' => 'cchUpdatedUser',
-				'format' => 'username',
-				'placeholder' => 'Select User'
-			],
+//            [
+//				'class' => DateTimeColumn::class,
+//				'attribute' => 'cch_updated_dt',
+//				'format' => 'byUserDateTime'
+//            ],
+//			[
+//				'class' => UserSelect2Column::class,
+//				'attribute' => 'cch_created_user_id',
+//				'relation' => 'cchCreatedUser',
+//				'format' => 'username',
+//				'placeholder' => 'Select User'
+//			],
+//			[
+//				'class' => UserSelect2Column::class,
+//				'attribute' => 'cch_updated_user_id',
+//				'relation' => 'cchUpdatedUser',
+//				'format' => 'username',
+//				'placeholder' => 'Select User'
+//			],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

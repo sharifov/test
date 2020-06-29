@@ -3,6 +3,7 @@
 use frontend\themes\gentelella_v2\assets\ClientChatAsset;
 use sales\auth\Auth;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
+use yii\bootstrap4\Alert;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Url;
 
@@ -26,12 +27,19 @@ $clientChatInfoUrl = Url::toRoute('/client-chat/info');
 ?>
 
 <?php if (empty($channels)): ?>
-    <?php echo \yii\bootstrap4\Alert::widget([
+    <?php echo Alert::widget([
 		'options' => [
 			'class' => 'alert-warning',
 		],
 		'body' => 'You have no assigned channels.'
     ]); ?>
+<?php elseif (empty($userRcAuthToken)): ?>
+	<?php echo Alert::widget([
+		'options' => [
+			'class' => 'alert-warning',
+		],
+		'body' => 'You have no assigned token or the token is not valid.'
+	]); ?>
 <?php else: ?>
 
 <div class="row">

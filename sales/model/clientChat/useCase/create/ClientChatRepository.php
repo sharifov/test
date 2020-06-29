@@ -4,7 +4,6 @@
 namespace sales\model\clientChat\useCase\create;
 
 
-use common\models\Client;
 use sales\behaviors\BlameableBehaviorExceptApi;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatRequest\entity\ClientChatRequest;

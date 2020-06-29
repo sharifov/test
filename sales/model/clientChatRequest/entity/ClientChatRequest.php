@@ -107,6 +107,7 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 			break;
 
 			case self::EVENT_ROOM_CONNECTED:
+				NativeEventDispatcher::recordEvent(ClientChatRequestEvents::class, ClientChatRequestEvents::ROOM_CONNECTED, [ClientChatRequestEvents::class, 'assignChannelToClientChat'], $_self);
 			break;
 
 			case self::EVENT_ROOM_DISCONNECTED:
@@ -143,6 +144,14 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 		return array_keys(self::getEventList(), $name)[0] ?? null;
 	}
 
+    /**
+     * @return string|null
+     */
+    public function getEventName(): ?string
+    {
+        return self::EVENT_LIST[$this->ccr_event] ?? '-';
+    }
+
 	public function getProjectNameFromData(): string
 	{
 		return $this->decodedData['project'] ?? '';
@@ -153,14 +162,14 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 		return (int)($this->decodedData['department'] ?? null);
 	}
 
-	public function getEmailFromData(): string
+	public function getEmailFromData(): ?string
 	{
-		return $this->decodedData['email'] ?? '';
+		return $this->decodedData['email'] ?? null;
 	}
 
 	public function getNameFromData():string
 	{
-		return $this->decodedData['name'] ?? '';
+		return $this->decodedData['name'] ?? 'ClientName';
 	}
 
 	public function getVisitorOrUserIdFromData(): string

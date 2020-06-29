@@ -275,30 +275,35 @@ class ClientManageService
         return $client;
     }
 
+	/**
+	 * @param ClientCreateForm $clientForm
+	 * @return Client
+	 * @throws NotFoundException
+	 */
     public function getOrCreateByUuid(ClientCreateForm $clientForm): Client
 	{
 		if ($client = $this->clientRepository->findByUuid($clientForm->uuid)) {
 			return $client;
 		}
-
-		return $this->create($clientForm);
 	}
 
 	/**
-	 * @param string $uuid
-	 * @param EmailCreateForm[] $emails
+	 * @param EmailCreateForm $email
 	 * @param ClientCreateForm|null $clientForm
 	 * @return Client
 	 */
-    public function getOrCreateByUuidOrEmails(array $emails, ClientCreateForm $clientForm): Client
+    public function getOrCreateByUuidOrEmails(EmailCreateForm $email, ClientCreateForm $clientForm): Client
 	{
 		try {
 			$client = $this->getOrCreateByUuid($clientForm);
 		} catch (\DomainException | NotFoundException $e) {
-			$client = $this->getOrCreateByEmails($emails, $clientForm);
+			if ($email->email) {
+				$client = $this->getOrCreateByEmails([$email], $clientForm);
+			} else {
+				$client = $this->create($clientForm);
+			}
 		}
-
-		$this->addEmails($client, $emails);
+		$this->addEmail($client, $email);
 		return $client;
 	}
 
@@ -309,7 +314,7 @@ class ClientManageService
 
 		$clientForm = new ClientCreateForm(['firstName' => $clientChatRequest->getNameFromData(), 'uuid' => $clientChatRequest->getVisitorOrUserIdFromData()]);
 
-		return $this->getOrCreateByUuidOrEmails([$clientEmailForm], $clientForm);
+		return $this->getOrCreateByUuidOrEmails($clientEmailForm, $clientForm);
 	}
 
     /**

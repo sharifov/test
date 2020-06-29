@@ -83,6 +83,8 @@ class ClientChatController extends FController
 			}
 		}
 
+		$clientChat = $this->clientChatRepository->findByRid($rid);
+
 		if ($dataProvider && \Yii::$app->request->isPost) {
 
 			if (\Yii::$app->request->post('loadingChannels')) {
@@ -97,14 +99,16 @@ class ClientChatController extends FController
 			];
 
 			if ($dataProvider->getCount()) {
-				$response['html'] = $this->renderPartial('partial/_client-chat-item', ['clientChats' => $dataProvider->getModels()]);
+				$response['html'] = $this->renderPartial('partial/_client-chat-item', [
+					'clientChats' => $dataProvider->getModels(),
+					'clientChatRid' => $clientChat ? $clientChat->cch_rid : ''
+				]);
 				$response['page'] = $page+1;
 			}
 
 			return $this->asJson($response);
 		}
 
-		$clientChat = $this->clientChatRepository->findByRid($rid);
 
 		return $this->render('index', [
 			'channels' => $channels,
@@ -147,15 +151,25 @@ class ClientChatController extends FController
 		try {
 			$result = [
 				'success' => false,
-				'message' => ''
+				'notifyMessage' => '',
+				'notifyTitle' => '',
+				'notifyType' => ''
 			];
 
-			$cch = $this->clientChatUserAccessRepository->find($cchId);
+			$cch = $this->clientChatUserAccessRepository->findByPrimaryKeys($cchId, Auth::id());
 			$this->clientChatUserAccessRepository->updateStatus($cch, (int)$accessAction);
 
 			$result['success'] = true;
-		} catch (\RuntimeException | \DomainException $e) {
-			$result['message'] = $e->getMessage();
+		} catch (\RuntimeException | \DomainException | NotFoundException $e) {
+			\Yii::error($e->getMessage(), 'ClientChatController::actionAccessManage::RuntimeException|DomainException|NotFoundException');
+			$result['notifyMessage'] = $e->getMessage();
+			$result['notifyTitle'] = 'Warning';
+			$result['notifyType'] = 'warning';
+		} catch (\Throwable $e) {
+			\Yii::error($e->getMessage(), 'ClientChatController::actionAccessManage::Throwable');
+			$result['notifyMessage'] = $e->getMessage();
+			$result['notifyTitle'] = 'Error';
+			$result['notifyType'] = 'error';
 		}
 
 		return $this->asJson($result);

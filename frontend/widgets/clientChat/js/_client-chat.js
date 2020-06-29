@@ -32,7 +32,7 @@ $(document).on('click', '._cc-access-action', function (e) {
                 $btn.closest('._cc-box-item-wrapper').remove();
                 return false;
             }
-            createNotify('Error', data.message, 'error');
+            createNotify(data.notifyTitle, data.notifyMessage, data.notifyType);
         },
         error: function (xhr) {
             console.log(xhr);
@@ -58,17 +58,15 @@ function refreshClientChatWidget(obj) {
         return false;
     }
 
-    var id = '#ccr_'+data.cch_id + '_' + data.user_id;
     switch (data.command) {
         case 'accept':
-
-            $(id).remove();
-            pjaxReload({container: '#client-chat-box-pjax'});
             if (document.visibilityState == "visible") {
                 window.open(data.url);
             }
+            pjaxReload({container: '#client-chat-box-pjax'});
             break;
         case 'skip':
+            pjaxReload({container: '#client-chat-box-pjax'});
             break;
         case 'pending':
             pjaxReload({container: '#client-chat-box-pjax'});
