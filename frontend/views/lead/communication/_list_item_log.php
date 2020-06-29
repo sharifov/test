@@ -98,6 +98,7 @@ $fromType = 'client';
 <?php if($model['type'] === 'email'):
 	$mail = Email::findOne($model['id']);
 	if($mail):
+        $unsubscribedEmails = array_column($mail->eProject->emailUnsubscribes, 'eu_email');
 
 		if($mail->e_status_id == Email::STATUS_DONE) {
 			$statusClass = 'success';
@@ -120,7 +121,7 @@ $fromType = 'client';
 						to (<?=Html::encode($mail->e_email_to_name)?> <<strong><?=Html::encode($mail->e_email_to)?></strong>>)</div>
 				<?php else: ?>
 					<div class="chat__sender">Email from <?=($mail->eCreatedUser ? Html::encode($mail->eCreatedUser->username) : '-') ?>, (<?=Html::encode($mail->e_email_from_name)?> <<strong><?=Html::encode($mail->e_email_from)?></strong>>) to
-						(<?=Html::encode($mail->e_email_to_name)?> <<strong><?=Html::encode($mail->e_email_to)?></strong>>)</div>
+						(<?=Html::encode($mail->e_email_to_name)?> <<strong class="<?= in_array($mail->e_email_to ,$unsubscribedEmails) ? 'text-line-through' : ''?>" ><?=Html::encode($mail->e_email_to)?></strong>>)</div>
 				<?php endif;?>
 				<div class="chat__date"><?=Yii::$app->formatter->asDatetime(strtotime($mail->e_created_dt))?> <?=$mail->e_language_id ? '('.$mail->e_language_id.')' : ''?></div> <?php //11:01AM | June 9?>
 			</div>
@@ -170,3 +171,20 @@ $fromType = 'client';
 		</div>
 	<?php endif;?>
 <?php endif;?>
+<?php
+$unsubscribedEmails = @json_encode($unsubscribedEmails);
+
+$js = <<<JS
+    let emails = '$unsubscribedEmails';
+    $(document).ready(function() {
+        $('#email option').each(function() {             
+            if (emails.includes($(this).attr('value'))){                
+                $(this).attr('disabled', 'disabled');
+            }
+            if ($(this).attr('value') == ""){
+                $(this).removeAttr('disabled')
+            }
+        });
+    });
+JS;
+$this->registerJs($js);

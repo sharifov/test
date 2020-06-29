@@ -298,7 +298,7 @@ class Project extends \yii\db\ActiveRecord
      */
     public function getEmailUnsubscribes()
     {
-        return $this->hasMany(EmailUnsubscribe::class(), ['eu_project_id' => 'id']);
+        return $this->hasMany(EmailUnsubscribe::class, ['eu_project_id' => 'id']);
     }
 
     /**
