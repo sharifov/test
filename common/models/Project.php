@@ -25,6 +25,9 @@ use yii\httpclient\CurlTransport;
  *
  * @property Sources[] $sources
  * @property ContactInfo $contactInfo
+ * @property EmailUnsubscribe[] $emailUnsubscribes
+ * @property ClientProject[] $clientProjects
+ * @property Clients[] $cpClients
  */
 class Project extends \yii\db\ActiveRecord
 {
@@ -286,5 +289,35 @@ class Project extends \yii\db\ActiveRecord
     {
         $emailPostfix = self::find()->select('email_postfix')->where(['id' => $id])->asArray()->one();
         return $emailPostfix['email_postfix'];
+    }
+
+    /**
+     * Gets query for [[EmailUnsubscribes]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getEmailUnsubscribes()
+    {
+        return $this->hasMany(EmailUnsubscribe::class(), ['eu_project_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[ClientProjects]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getClientProjects()
+    {
+        return $this->hasMany(ClientProject::class(), ['cp_project_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[CpClients]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCpClients()
+    {
+        return $this->hasMany(Clients::class(), ['id' => 'cp_client_id'])->viaTable('client_project', ['cp_project_id' => 'id']);
     }
 }

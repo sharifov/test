@@ -35,11 +35,12 @@ class ClientProject extends \yii\db\ActiveRecord
     {
         return [
             [['cp_client_id', 'cp_project_id'], 'required'],
-            [['cp_client_id', 'cp_project_id', 'cp_unsubscribe'], 'integer'],
+            [['cp_client_id', 'cp_project_id'], 'integer'],
             [['cp_created_dt'], 'safe'],
             [['cp_client_id', 'cp_project_id'], 'unique', 'targetAttribute' => ['cp_client_id', 'cp_project_id']],
             [['cp_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['cp_project_id' => 'id']],
             [['cp_client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['cp_client_id' => 'id']],
+            [['cp_unsubscribe'], 'boolean'],
         ];
     }
 
@@ -88,5 +89,25 @@ class ClientProject extends \yii\db\ActiveRecord
     public function getCpProject()
     {
         return $this->hasOne(Project::class, ['id' => 'cp_project_id']);
+    }
+
+    /**
+     * @param int $cID
+     * @param int $pID
+     * @return bool
+     */
+    public static function unSubScribe(int $cID, int $pID):bool
+    {
+        $model = self::find()->where(['cp_client_id'=>$cID, 'cp_project_id'=>$pID])->one();
+        if ($model){
+            $model->cp_unsubscribe = true;
+        } else {
+            $model = new self();
+            $model->cp_client_id = $cID;
+            $model->cp_project_id = $pID;
+            $model->cp_unsubscribe = true;
+        }
+
+        return $model->save();
     }
 }
