@@ -89,8 +89,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'options' => ['style' => 'width:200px']
                 //'placeholder' => 'Select User'
             ],
-            'cch_case_id:case',
-            'cch_lead_id:lead',
+            'cchCase:case',
+            'cchLead:lead',
             //'cch_note',
 
             //'cch_ip',
