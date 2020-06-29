@@ -29,6 +29,11 @@ $pjaxContainerId = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabl
 $listItemView = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled ? '_list_item_log' : '_list_item';
 
 $clientProjectInfo = $lead->client->clientProjects;
+if (isset($clientProjectInfo[0]['cp_unsubscribe'])){
+    $unsubscribe = $clientProjectInfo[0]['cp_unsubscribe'];
+} else {
+    $unsubscribe = false;
+}
 
 ?>
 
@@ -88,7 +93,7 @@ $clientProjectInfo = $lead->client->clientProjects;
                     ]) ?>
 
                     <?php if(!Yii::$app->user->identity->canRole('qa')) : ?>
-                        <?php if ($clientProjectInfo[0]['cp_unsubscribe']) : ?>
+                        <?php if ($unsubscribe) : ?>
                             <div class="chat__form panel">
                                 <div class="alert alert-warning" role="alert">
                                     <h4 class="alert-heading">Warning!</h4>
@@ -97,7 +102,7 @@ $clientProjectInfo = $lead->client->clientProjects;
                             </div>
                         <?php endif; ?>
 
-                        <div class="chat__form panel <?= $clientProjectInfo[0]['cp_unsubscribe'] ? 'd-none' : '' ?> ">
+                        <div class="chat__form panel <?= $unsubscribe ? 'd-none' : '' ?> ">
 
                             <?php Modal::begin(['id' => 'modal-email-preview',
                                 'title' => 'Email preview',

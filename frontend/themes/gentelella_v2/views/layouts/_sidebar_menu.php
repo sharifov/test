@@ -281,6 +281,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Visitor Log', 'url' => ['/visitor-log/index'], 'icon' => 'list'],
                 ['label' => 'User Contact Lists', 'url' => ['/user-contact-list/index'], 'icon' => 'list'],
                 ['label' => 'Client Project', 'url' => ['/client-project/index'], 'icon' => 'list'],
+                ['label' => 'Unsubscribed Clients', 'url' => ['/email-unsubscribe/index'], 'icon' => 'bell-slash'],
             ]
         ];
 
