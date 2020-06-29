@@ -3,7 +3,11 @@
 namespace webapi\modules\v1\controllers;
 
 use common\models\ApiLog;
-use sales\model\clientChatRequest\entity\ClientChatRequest;
+use DateTime;
+use sales\helpers\app\AppHelper;
+use sales\model\clientChat\useCase\create\ClientChatRepository;
+use sales\model\clientChatMessage\ClientChatMessageRepository;
+use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestApiForm;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestService;
 use sales\repositories\NotFoundException;
@@ -28,7 +32,9 @@ use yii\web\UnprocessableEntityHttpException;
  */
 class ClientChatRequestController extends ApiBaseController
 {
-	private ClientChatRequestService $clientChatRequestService;
+	private const category = "ClientChatRequestController";
+
+    private ClientChatRequestService $clientChatRequestService;
 
 	public function __construct($id, $module, ClientChatRequestService $clientChatRequestService, $config = [])
 	{
@@ -134,34 +140,50 @@ class ClientChatRequestController extends ApiBaseController
 		$form = (new ClientChatRequestApiForm())->fillIn($event, $data);
 
 		if ($form->validate()) {
-			try {
-				$transaction = \Yii::$app->db->beginTransaction();
+		    if ($form->isMessageEvent()) {
+                try {
+                    $this->saveMessage($form);
+                    return $this->endApiLog($apiLog, new SuccessResponse(
+                        new StatusCodeMessage(200),
+                        new MessageMessage('OK'),
+                    ));
+                }catch (\Throwable $e) {
+                    \Yii::error("failed to store client chat message". AppHelper::throwableFormatter($e), self::category);
+                    return new ErrorResponse(
+                        new StatusCodeMessage(500),
+                        new MessageMessage('Failed to store client chat message'),
+                        new CodeMessage(ApiCodeException::INTERNAL_SERVER_ERROR)
+                    );
+                }
+            } else {
+                try {
+                    $transaction = \Yii::$app->db->beginTransaction();
 
-				$this->clientChatRequestService->create($form);
+                    $this->clientChatRequestService->create($form);
 
-				$transaction->commit();
-			} catch (\RuntimeException | \DomainException | NotFoundException $e) {
-				$transaction->rollBack();
-				return $this->endApiLog($apiLog, new ErrorResponse(
-					new StatusCodeMessage(400),
-					new MessageMessage($e->getMessage()),
-					new CodeMessage(ApiCodeException::CLIENT_CHAT_REQUEST_CREATE_FAILED)
-				));
-			} catch (\Throwable $e) {
-				$transaction->rollBack();
-				\Yii::error($e->getMessage() . '; In File: ' . $e->getFile() . '; On Line: ' . $e->getLine(), 'Api::ClientChatRequestController::actionCreate::Throwable');
-				return $this->endApiLog($apiLog, new ErrorResponse(
-					new StatusCodeMessage(500),
-					new MessageMessage('Internal Server Error'),
-					new CodeMessage(ApiCodeException::INTERNAL_SERVER_ERROR)
-				));
-			}
+                    $transaction->commit();
+                } catch (\RuntimeException | \DomainException | NotFoundException $e) {
+                    $transaction->rollBack();
+                    return $this->endApiLog($apiLog, new ErrorResponse(
+                        new StatusCodeMessage(400),
+                        new MessageMessage($e->getMessage()),
+                        new CodeMessage(ApiCodeException::CLIENT_CHAT_REQUEST_CREATE_FAILED)
+                    ));
+                } catch (\Throwable $e) {
+                    $transaction->rollBack();
+                    \Yii::error($e->getMessage() . '; In File: ' . $e->getFile() . '; On Line: ' . $e->getLine(), 'Api::ClientChatRequestController::actionCreate::Throwable');
+                    return $this->endApiLog($apiLog, new ErrorResponse(
+                        new StatusCodeMessage(500),
+                        new MessageMessage('Internal Server Error'),
+                        new CodeMessage(ApiCodeException::INTERNAL_SERVER_ERROR)
+                    ));
+                }
 
 			return $this->endApiLog($apiLog, new SuccessResponse(
 				new StatusCodeMessage(200),
 				new MessageMessage('Client chat request created successfully'),
 			));
-		}
+		}}
 
 		return $this->endApiLog($apiLog, new ErrorResponse(
 			new StatusCodeMessage(400),
@@ -176,4 +198,46 @@ class ClientChatRequestController extends ApiBaseController
 		$apiLog->endApiLog(ArrayHelper::toArray($response));
 		return $response;
 	}
+
+    /**
+     * Save message into db
+     * @param ClientChatRequestApiForm $form
+     */
+    public function saveMessage(ClientChatRequestApiForm $form): void
+    {
+        $message = self::messageFromData($form);
+        $clientChat = ClientChatRepository::findByRid($message->ccm_rid);
+        if (is_null($clientChat)) {
+            \Yii::error("unable to find client chat by rid: ". $message->ccm_rid, self::category);
+            return;
+        }
+
+        $message->ccm_client_id = $clientChat->cch_client_id;
+        //if agent message fill also agent id
+        if ($form->isAgentUttered()) {
+            $message->ccm_user_id = $clientChat->cch_owner_user_id;
+        }
+
+        ClientChatMessageRepository::saveMessage($message);
+        return;
+    }
+
+    /**
+     * @param ClientChatRequestApiForm $formData
+     * @return ClientChatMessage
+     */
+    public static function messageFromData(ClientChatRequestApiForm $formData) : ClientChatMessage {
+        $message = new ClientChatMessage();
+        $message->ccm_rid = $formData->data['rid'];
+        $date = new DateTime();
+        $date->setTimestamp($formData->data['ts']['$date']/1000);
+        $message->ccm_sent_dt = $date->format('Y-m-d H:i:s');
+        $message->ccm_body = $formData->data;
+
+        if (array_key_exists('file', $formData->data)) {
+            $message->ccm_has_attachment = 1;
+        }
+
+        return $message;
+    }
 }

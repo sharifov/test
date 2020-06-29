@@ -103,6 +103,7 @@ function getEnvironmentList($root, $paths)
 function saveEnvironmentList($envList, $root, $file)
 {
     $lines = [];
+    ksort($envList);
     if ($envList) {
         foreach ($envList as $key => $value) {
             $lines[] = $key . '=' . $value;
