@@ -56,19 +56,24 @@ class RocketChat extends Component
      */
     private function initRequest() : bool
     {
-        //$authStr = base64_encode($this->username . ':' . $this->password);
+        $this->request = $this->getNewRequest();
+        return $this->request != null;
+    }
 
+    /**
+     * @return null|Request
+     */
+    private function getNewRequest() : ?\yii\httpclient\Request
+    {
         try {
             $client = new Client();
             $client->setTransport(CurlTransport::class);
-            $this->request = $client->createRequest();
-            //$this->request->addHeaders(['Authorization' => 'Basic ' . $authStr]);
-            return true;
+            return $client->createRequest();
         } catch (\Throwable $error) {
             \Yii::error(VarDumper::dumpAsString($error, 10), 'RocketChat::initRequest:Exception');
         }
 
-        return false;
+        return null;
     }
 
     /**
@@ -477,6 +482,29 @@ class RocketChat extends Component
         return $out;
     }
 
-    //public function
+    /**
+     * @param string $url
+     * @throws \Exception
+     */
+    public function downloadFile(string $url)
+    {
+        $out = ['error' => false, 'data' => []];
+        $request = $this->getNewRequest();
+        if ($request == null) {
+            throw new \Exception("unable to create rocket chat request");
+        }
+        $request->setMethod("get")->setUrl($this->url.$url);
+        $headers =  $this->getSystemAuthDataHeader();
+        $request->setHeaders($headers);
+        $response = $request->send();
+        if ($response->isOk) {
+            $out['data'] = $response->getContent();
+        } else {
+            $out['data'] = $response->content;
+            $out['error'] = true;
+            \Yii::error(VarDumper::dumpAsString($response, 10), 'RocketChat');
+        }
+        return $out;
+    }
 
 }

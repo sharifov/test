@@ -36,6 +36,15 @@ return [
                 ],
             ],
         ],
+        'db_postgres' => [
+            'class' => 'yii\db\Connection',
+            'dsn' => 'pgsql:host={{ common.config.main.components.db_postgres.dsn.host:str }};port={{ common.config.main.components.db_postgres.dsn.port:int }};dbname={{ common.config.main.components.db_postgres.dsn.dbname:str }}',
+            'username' => '{{ common.config.main.components.db_postgres.username:str }}',
+            'password' => '{{ common.config.main.components.db_postgres.password:str }}',
+            'charset' => 'utf8',
+            'enableSchemaCache' => true,
+            'schemaCacheDuration' => 3600,
+        ],
         'formatter' => [
             'class' => 'yii\i18n\Formatter',
             'timeZone' => 'Europe/Chisinau',

@@ -193,6 +193,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                         ['label' => 'Status Log', 'url' => ['/client-chat-status-log-crud/index']],
                         ['label' => 'User Channel', 'url' => ['/client-chat-user-channel-crud/index']],
                         ['label' => 'User Access', 'url' => ['/client-chat-user-access-crud/index']],
+                        ['label' => 'Chat Messages', 'url' => ['/client-chat-message-crud/index'], 'icon' => 'list'],
                     ]
                 ],
                 ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'list'],
