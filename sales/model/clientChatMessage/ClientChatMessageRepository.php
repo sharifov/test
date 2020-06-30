@@ -3,25 +3,16 @@
 namespace sales\model\clientChatMessage;
 
 use sales\model\clientChatMessage\entity\ClientChatMessage;
+use sales\repositories\Repository;
 
-class ClientChatMessageRepository
+class ClientChatMessageRepository extends Repository
 {
-    /**
-     * @param ClientChatMessage $message
-     * @return ClientChatMessage
-     */
-	public static function saveMessage(ClientChatMessage $message): ClientChatMessage
-    {
-		return self::save($message, 0);
-    }
-
     /**
      * @param ClientChatMessage $model
      * @param int $attempts
      * @return ClientChatMessage
-     * @throws \Exception
      */
-	public static function save(ClientChatMessage $model, int $attempts): ?ClientChatMessage
+	public function save(ClientChatMessage $model, int $attempts): ?ClientChatMessage
 	{
         try {
             $model->save(false);
@@ -36,7 +27,7 @@ class ClientChatMessageRepository
                     throw new \RuntimeException("unable to create client_chat_message partition");
                 }
 
-                self::save($model, ++$attempts);
+                $this->save($model, ++$attempts);
             }
         }
 		return $model;

@@ -38,26 +38,29 @@ class ClientChatRepository
 
 	public function getOrCreateByRequest(ClientChatRequest $clientChatRequest): ClientChat
 	{
-		if ($clientChat = $this->findByRid($clientChatRequest->ccr_rid)) {
+		try {
+			$clientChat = $this->findByRid($clientChatRequest->ccr_rid);
 			$clientChat->attachBehavior('user', BlameableBehaviorExceptApi::class);
-			return $clientChat;
+		} catch (NotFoundException $e) {
+			$clientChat = new ClientChat();
+			$clientChat->cch_rid = $clientChatRequest->ccr_rid;
+			$clientChat->cch_ccr_id = $clientChatRequest->ccr_id;
+			$clientChat->cch_project_id = $this->projectRepository->getIdByName($clientChatRequest->getProjectNameFromData());
+			$department = $this->departmentRepository->find($clientChatRequest->getDepartmentIdFromData());
+			$clientChat->cch_dep_id = $department ? $department->dep_id : null;
+			$clientChat->generated();
+			$clientChat->attachBehavior('user', BlameableBehaviorExceptApi::class);
 		}
-
-		$clientChat = new ClientChat();
-		$clientChat->cch_rid = $clientChatRequest->ccr_rid;
-		$clientChat->cch_ccr_id = $clientChatRequest->ccr_id;
-		$clientChat->cch_project_id = $this->projectRepository->getIdByName($clientChatRequest->getProjectNameFromData());
-		$department = $this->departmentRepository->find($clientChatRequest->getDepartmentIdFromData());
-		$clientChat->cch_dep_id = $department ? $department->dep_id : null;
-		$clientChat->generated();
-		$clientChat->attachBehavior('user', BlameableBehaviorExceptApi::class);
 
 		return $clientChat;
 	}
 
-	public static function findByRid(string $rid): ?ClientChat
+	public function findByRid(string $rid): ClientChat
 	{
-		return ClientChat::findOne(['cch_rid' => $rid]);
+		if ($clientChat = ClientChat::findOne(['cch_rid' => $rid])) {
+			return $clientChat;
+		}
+		throw new NotFoundException('unable to find client chat by rid: ' . $rid);
 	}
 
 	public function save(ClientChat $clientChat): ClientChat

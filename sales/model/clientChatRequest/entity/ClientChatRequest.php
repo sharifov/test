@@ -20,15 +20,15 @@ use yii\db\ActiveRecord;
  */
 class ClientChatRequest extends \yii\db\ActiveRecord
 {
-	public const EVENT_GUEST_CONNECTED = 1;
-    public const EVENT_ROOM_CONNECTED = 2;
-    public const EVENT_ROOM_DISCONNECTED = 3;
-    public const EVENT_GUEST_UTTERED = 4;
-    public const EVENT_AGENT_UTTERED = 5;
-    public const EVENT_DEPARTMENT_TRANSFER = 6;
-    public const EVENT_AGENT_LEFT_ROOM = 7;
-    public const EVENT_AGENT_JOINED_ROOM = 8;
-    public const EVENT_USER_DEPARTMENT_TRANSFER = 9;
+	private const EVENT_GUEST_CONNECTED = 1;
+    private const EVENT_ROOM_CONNECTED = 2;
+    private const EVENT_ROOM_DISCONNECTED = 3;
+    private const EVENT_GUEST_UTTERED = 4;
+    private const EVENT_AGENT_UTTERED = 5;
+    private const EVENT_DEPARTMENT_TRANSFER = 6;
+    private const EVENT_AGENT_LEFT_ROOM = 7;
+    private const EVENT_AGENT_JOINED_ROOM = 8;
+    private const EVENT_USER_DEPARTMENT_TRANSFER = 9;
 
 	private const EVENT_LIST = [
 		self::EVENT_GUEST_CONNECTED => 'GUEST_CONNECTED',
@@ -101,32 +101,32 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 		$_self->ccr_json_data = json_encode($form->data, JSON_THROW_ON_ERROR);
 		$_self->ccr_rid = $form->rid;
 
-		switch ($_self->ccr_event) {
-			case self::EVENT_GUEST_CONNECTED:
-				NativeEventDispatcher::recordEvent(ClientChatRequestEvents::class, ClientChatRequestEvents::CREATE, [ClientChatRequestEvents::class, 'createClientChatByApi'], $_self);
-			break;
-
-			case self::EVENT_ROOM_CONNECTED:
-				NativeEventDispatcher::recordEvent(ClientChatRequestEvents::class, ClientChatRequestEvents::ROOM_CONNECTED, [ClientChatRequestEvents::class, 'assignChannelToClientChat'], $_self);
-			break;
-
-			case self::EVENT_ROOM_DISCONNECTED:
-			break;
-
-			case self::EVENT_GUEST_UTTERED:
-			break;
-
-			case self::EVENT_AGENT_UTTERED:
-			break;
-
-			case self::EVENT_DEPARTMENT_TRANSFER:
-			break;
-
-			default:
-				throw new \RuntimeException('Unknown event provided');
-		}
-
 		return $_self;
+	}
+
+	public function isGuestConnected(): bool
+	{
+		return self::EVENT_GUEST_CONNECTED === $this->ccr_event;
+	}
+
+	public function isRoomConnected(): bool
+	{
+		return self::EVENT_ROOM_CONNECTED === $this->ccr_event;
+	}
+
+	public function isGuestUttered(): bool
+	{
+		return self::EVENT_GUEST_UTTERED === $this->ccr_event;
+	}
+
+	public function isAgentUttered(): bool
+	{
+		return self::EVENT_AGENT_UTTERED === $this->ccr_event;
+	}
+
+	public function isDepartmentTransfer(): bool
+	{
+		return self::EVENT_DEPARTMENT_TRANSFER === $this->ccr_event;
 	}
 
     public static function getEventList(): array

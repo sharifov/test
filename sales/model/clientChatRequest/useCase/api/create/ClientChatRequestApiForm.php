@@ -42,17 +42,6 @@ class ClientChatRequestApiForm extends Model
 		$this->data = $data;
 		$this->eventId = ClientChatRequest::getEventIdByName($event);
 		$this->rid = $data['rid'] ?? null;
-
-//		$this->load(ArrayHelper::toArray($this));
-
 		return $this;
 	}
-
-	public function isMessageEvent() {
-       return $this->eventId == ClientChatRequest::EVENT_AGENT_UTTERED || $this->eventId == ClientChatRequest::EVENT_GUEST_UTTERED;
-    }
-
-    public function isAgentUttered() {
-        return $this->eventId == ClientChatRequest::EVENT_AGENT_UTTERED;
-    }
 }

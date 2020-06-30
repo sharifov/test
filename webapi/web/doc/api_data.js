@@ -300,7 +300,74 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n   \"status\": 200\n   \"message\": \"Client chat request created\"\n}",
+          "content": "HTTP/1.1 200 OK\n{\n   \"status\": 200\n   \"message\": \"Ok\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response (400):",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n\t\"status\":400,\n\t\"message\":\"Some errors occurred while creating client chat request\",\n\t\"code\":\"13104\",\n\t\"errors\":[\"Event is invalid.\"]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v1/controllers/ClientChatRequestController.php",
+    "groupTitle": "ClientChat"
+  },
+  {
+    "type": "post",
+    "url": "/v1/client-chat-request/create-message",
+    "title": "Client Chat Request Create Message",
+    "version": "0.1.0",
+    "name": "ClientChatRequestCreateMessage",
+    "group": "ClientChat",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "examples": [
+        {
+          "title": "Request-Example GUEST_UTTERED:",
+          "content": "{\n\t\t\t\"event\": \"GUEST_UTTERED\",\n\t\t\t\"data\": {\n\t\t\t\t\"_id\": \"XipJ2fqumzr3n3Nhh\",\n\t\t\t\t\"rid\": \"292a9961-asdas-4d66-bhnjm-sdgadg\",\n\t\t\t\t\"msg\": \"hello\",\n\t\t\t\t\"token\": \"292a9961-asdas-4d66-bhnjm-sdvsdu\",\n\t\t\t\t\"alias\": \"jora\",\n\t\t\t\t\"ts\": {\n\t\t\t\t\t\"$date\": 1592924833106\n\t\t\t\t},\n\t\t\t\t\"u\": {\n\t\t\t\t\t\"_id\": \"pvS87aeQxfqgnzsFW\",\n\t\t\t\t\t\"username\": \"guest-124\",\n\t\t\t\t\t\"name\": \"jora\"\n\t\t\t\t},\n\t\t\t\t\"groupable\": false,\n\t\t\t\t\"mentions\": [],\n\t\t\t\t\"channels\": [],\n\t\t\t\t\"_updatedAt\": {\n\t\t\t\t\t\"$date\": 1592924833113\n\t\t\t\t}\n\t\t\t}\n}",
+          "type": "json"
+        },
+        {
+          "title": "Request-Example GUEST_UTTERED with Attachment:",
+          "content": "{\n\t\t\t\"event\": \"GUEST_UTTERED\",\n\t\t\t\"data\": {\n\t\t\t\t\"_id\": \"XipJ2fqumzr3n3Nhh\",\n\t\t\t\t\"rid\": \"292a9961-asdas-4d66-bhnjm-sdgadg\",\n\t\t\t\t\"msg\": \"hello\",\n\t\t\t\t\"token\": \"292a9961-asdas-4d66-bhnjm-sdvsdu\",\n\t\t\t\t\"alias\": \"jora\",\n\t\t\t\t\"ts\": {\n\t\t\t\t\t\"$date\": 1592924833106\n\t\t\t\t},\n\t\t\t\t\"file\": {\n\t\t\t\t\t\"_id\": \"EKSp7qfb7LqQxjA3N\",\n\t\t\t\t\t\"name\": \"469_5263_9274dc35-1390-4b95-9767-fa4b71adc7a2-c26e70f8-0eff-4558-8005-73a699c7d7f8.mp4\",\n\t\t\t\t\t\"type\": \"video/mp4\"\n\t\t\t\t},\n\t\t\t\t\"attachments\": [\n\t\t\t\t\t{\n\t\t\t\t\t\t\"title\": \"469_5263_9274dc35-1390-4b95-9767-fa4b71adc7a2-c26e70f8-0eff-4558-8005-73a699c7d7f8.mp4\",\n\t\t\t\t\t\t\"type\": \"file\",\n\t\t\t\t\t\t\"title_link\": \"/file-upload/EKSp7qfb7LqQxjA3N/469_5263_9274dc35-1390-4b95-9767-fa4b71adc7a2-c26e70f8-0eff-4558-8005-73a699c7d7f8.mp4\",\n\t\t\t\t\t\t\"title_link_download\": true,\n\t\t\t\t\t\t\"video_url\": \"/file-upload/EKSp7qfb7LqQxjA3N/469_5263_9274dc35-1390-4b95-9767-fa4b71adc7a2-c26e70f8-0eff-4558-8005-73a699c7d7f8.mp4\",\n\t\t\t\t\t\t\"video_type\": \"video/mp4\",\n\t\t\t\t\t\t\"video_size\": 5276\n\t\t\t\t\t}\n\t\t\t\t],\n\t\t\t\t\"u\": {\n\t\t\t\t\t\"_id\": \"pvS87aeQxfqgnzsFW\",\n\t\t\t\t\t\"username\": \"guest-124\",\n\t\t\t\t\t\"name\": \"jora\"\n\t\t\t\t},\n\t\t\t\t\"groupable\": false,\n\t\t\t\t\"mentions\": [],\n\t\t\t\t\"channels\": [],\n\t\t\t\t\"_updatedAt\": {\n\t\t\t\t\t\"$date\": 1592924833113\n\t\t\t\t}\n\t\t\t}\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n   \"status\": 200\n   \"message\": \"Ok\"\n}",
           "type": "json"
         }
       ]
