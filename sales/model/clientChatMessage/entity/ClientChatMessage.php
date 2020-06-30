@@ -120,7 +120,7 @@ class ClientChatMessage extends \yii\db\ActiveRecord
 		$message = new self();
 		$message->ccm_rid = $form->data['rid'] ?? '';
 		$date = new DateTime();
-		$date->setTimestamp($form->data['ts']['$date']/1000);
+		$date->setTimestamp($form->data['timestamp']/1000);
 		$message->ccm_sent_dt = $date->format('Y-m-d H:i:s');
 		$message->ccm_body = $form->data;
 		$message->ccm_client_id = $clientChat->cch_client_id;

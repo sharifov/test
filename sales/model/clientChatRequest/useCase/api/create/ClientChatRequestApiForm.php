@@ -48,12 +48,8 @@ class ClientChatRequestApiForm extends Model
 
 	public function validateTsParam($attributes): void
 	{
-		if (!isset($this->data['ts'])) {
-			$this->addError('data', 'Undefined index: ts in data request');
-		}
-
-		if (!isset($this->data['ts']['$date'])) {
-			$this->addError('data', 'Undefined index: $date in data request');
+		if (!isset($this->data['timestamp'])) {
+			$this->addError('data', 'Undefined index: timestamp in data request');
 		}
 	}
 }
