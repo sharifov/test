@@ -28,9 +28,10 @@ class ClientChatUserAccessRepository extends Repository
 	 */
 	private ClientChatService $clientChatService;
 
-	public function __construct(ClientChatRepository $clientChatRepository)
+	public function __construct(ClientChatRepository $clientChatRepository, ClientChatService $clientChatService)
 	{
 		$this->clientChatRepository = $clientChatRepository;
+		$this->clientChatService = $clientChatService;
 	}
 
 	public function create(int $cchId, int $userId): void
