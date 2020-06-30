@@ -29,7 +29,7 @@ class CasesSaleRepository
 	 */
 	public function updateSaleData(CaseSale $caseSale, array $oldCaseSaleData, array $newCaseSaleData): void
 	{
-		$caseSale->css_sale_data_updated = json_encode( array_replace_recursive($oldCaseSaleData, $newCaseSaleData) );
+		$caseSale->css_sale_data_updated = array_replace_recursive($oldCaseSaleData, $newCaseSaleData);
 	}
 
 	/**
@@ -64,12 +64,12 @@ class CasesSaleRepository
 	{
 		$caseSale->css_cs_id = $case->cs_id;
 		$caseSale->css_sale_id = $saleData['saleId'];
-		$caseSale->css_sale_data = json_encode($saleData);
+		$caseSale->css_sale_data = $saleData;
 		$caseSale->css_sale_pnr = $saleData['pnr'] ?? null;
 		$caseSale->css_sale_created_dt = $saleData['created'] ?? null;
 		$caseSale->css_sale_book_id = $saleData['bookingId'] ?? null;
 		$caseSale->css_sale_pax = isset($saleData['passengers']) && is_array($saleData['passengers']) ? count($saleData['passengers']) : null;
-		$caseSale->css_sale_data_updated = json_encode($saleData);
+		$caseSale->css_sale_data_updated = $saleData;
 		$caseSale->css_need_sync_bo = 0;
 		$caseSale->css_fare_rules = isset($saleData['fareRules']) ?
 		    @json_encode($saleData['fareRules']) : null;

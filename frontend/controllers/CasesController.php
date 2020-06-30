@@ -830,7 +830,7 @@ class CasesController extends FController
                 $cs = new CaseSale();
                 $cs->css_cs_id = $model->cs_id;
                 $cs->css_sale_id = $saleData['saleId'];
-                $cs->css_sale_data = json_encode($saleData);
+                $cs->css_sale_data = $saleData;
                 $cs->css_sale_pnr = $saleData['pnr'] ?? null;
                 $cs->css_sale_created_dt = $saleData['created'] ?? null;
                 $cs->css_sale_book_id = $saleData['bookingId'] ?? null;

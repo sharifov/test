@@ -314,7 +314,7 @@ class CasesSaleService
     public function saveAdditionalData(CaseSale $caseSale, Cases $case, array $saleData): ?CaseSale
     {
         if ((isset($saleData['saleId']) && (int)$saleData['saleId'] === (int)$caseSale->css_sale_id) && isset($saleData['bookingId'])) {
-            $caseSale->css_sale_data = json_encode($saleData, JSON_THROW_ON_ERROR);
+            $caseSale->css_sale_data = $saleData;
             $caseSale->css_sale_data_updated = $caseSale->css_sale_data;
 
             $caseSale = $this->prepareAdditionalData($caseSale, $saleData);
@@ -535,7 +535,7 @@ class CasesSaleService
                 $caseSale = new CaseSale();
                 $caseSale->css_cs_id = $csId;
                 $caseSale->css_sale_id = $saleId;
-                $caseSale->css_sale_data = json_encode($saleData, JSON_THROW_ON_ERROR);
+                $caseSale->css_sale_data = $saleData;
 
                 if (!$caseSale->save()) {
                     throw new \RuntimeException('Error. CaseSale not saved.');
