@@ -38,13 +38,41 @@ $this->params['breadcrumbs'][] = $this->title;
                 'cch_description',
                 'cch_project_id:projectName',
                 'cch_dep_id:department',
-                'cch_channel_id',
+                //'cch_channel_id',
+                [
+                    'attribute' => 'cch_channel_id',
+                    'value' => static function (\sales\model\clientChat\entity\ClientChat $model) {
+                        return $model->cch_channel_id ? Html::a(Html::encode($model->cchChannel->ccc_name), ['client-chat-channel-crud/view', 'id' => $model->cch_channel_id], ['target' => '_blank', 'data-pjax' => 0]) : '-';
+                    },
+                    'format' => 'raw',
+                ],
                 'cch_client_id:client',
-                'cch_owner_user_id',
-                'cchCase:case',
-                'cchLead:lead',
+                [
+                    'class' => \common\components\grid\UserSelect2Column::class,
+                    'attribute' => 'cch_owner_user_id',
+                    'relation' => 'cchOwnerUser',
+                    'format' => 'username',
+                ],
+                [
+                    'label' => 'Case',
+                    'attribute' => 'cchCase',
+                    'format' => 'case'
+                ],
+
+                [
+                    'label' => 'Lead',
+                    'attribute' => 'cchLead',
+                    'format' => 'lead'
+                ],
                 'cch_note',
-                'cch_status_id',
+
+                [
+                    'attribute' => 'cch_status_id',
+                    'value' => static function (\sales\model\clientChat\entity\ClientChat $model) {
+                        return Html::tag('span', $model->getStatusName(), ['class' => 'badge badge-'.$model->getStatusClass()]);
+                    },
+                    'format' => 'raw',
+                ],
                 'cch_ip',
                 'cch_ua',
                 'cch_language_id',

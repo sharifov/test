@@ -35,6 +35,13 @@ class ClientChatUserAccess extends \yii\db\ActiveRecord
 		self::STATUS_SKIP => 'Skip'
 	];
 
+    public const STATUS_CLASS_LIST = [
+        self::STATUS_PENDING => 'info',
+        self::STATUS_ACCEPT => 'success',
+        self::STATUS_BUSY => 'warning',
+        self::STATUS_SKIP => 'danger'
+    ];
+
 	public function behaviors(): array
 	{
 		return [
@@ -83,7 +90,7 @@ class ClientChatUserAccess extends \yii\db\ActiveRecord
     public function attributeLabels(): array
     {
         return [
-            'ccua_cch_id' => 'Cch ID',
+            'ccua_cch_id' => 'Chat ID',
             'ccua_user_id' => 'User',
             'ccua_status_id' => 'Status',
             'ccua_created_dt' => 'Created Dt',

@@ -262,7 +262,6 @@ $isSuperAdmin = $user->isSuperAdmin();
             ]
         ];
 
-
         $menuNewData = [
             'label' => 'New Data',
             'url' => 'javascript:',
@@ -410,21 +409,6 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'User Failed Login', 'url' => ['/user-failed-login/index'], 'icon' => 'list'],
             ]
         ];
-
-        $menuItems[] = [
-            'label' => 'Clients',
-            'url' => 'javascript:',
-            'icon' => 'users',
-            'items' => [
-                ['label' => 'Clients', 'url' => ['/client/index'], 'icon' => 'users'],
-                ['label' => 'Clients phones', 'url' => ['/client-phone/index'], 'icon' => 'phone'],
-                ['label' => 'Clients emails', 'url' => ['/client-email/index'], 'icon' => 'envelope '],
-                ['label' => 'Visitor Log', 'url' => ['/visitor-log/index'], 'icon' => 'list'],
-                ['label' => 'User Contact Lists', 'url' => ['/user-contact-list/index'], 'icon' => 'list'],
-                ['label' => 'Client Project', 'url' => ['/client-project/index'], 'icon' => 'list'],
-            ]
-        ];
-
 
         $menuModuleItems = [];
 

@@ -14,7 +14,11 @@ use yii\widgets\ActiveForm;
 
         <?php $form = ActiveForm::begin(); ?>
 
-        <?= $form->field($model, 'ccuc_user_id')->widget(\sales\widgets\UserSelect2Widget::class) ?>
+        <?= $form->field($model, 'ccuc_user_id')->widget(\sales\widgets\UserSelect2Widget::class, [
+            'data' => $model->ccuc_user_id ? [
+                $model->ccuc_user_id => $model->ccucUser->username
+            ] : [],
+        ]) ?>
 
         <?= $form->field($model, 'ccuc_channel_id')->textInput() ?>
 

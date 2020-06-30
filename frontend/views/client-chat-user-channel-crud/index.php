@@ -41,7 +41,6 @@ $this->params['breadcrumbs'][] = $this->title;
 				'attribute' => 'ccuc_created_dt',
 				'format' => 'byUserDateTime'
 			],
-            'ccuc_created_user_id',
 			[
 				'class' => UserSelect2Column::class,
 				'attribute' => 'ccuc_created_user_id',

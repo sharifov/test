@@ -17,11 +17,15 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'ccc_name')->textInput(['maxlength' => true]) ?>
 
-        <?= $form->field($model, 'ccc_project_id')->widget(\sales\widgets\ProjectSelect2Widget::class) ?>
+        <?= $form->field($model, 'ccc_project_id')->dropDownList(\common\models\Project::getList(), ['prompt' => '---'])?>
 
-        <?= $form->field($model, 'ccc_dep_id')->widget(\sales\widgets\DepartmentSelect2Widget::class) ?>
+        <?= $form->field($model, 'ccc_dep_id')->dropDownList(\common\models\Department::getList(), ['prompt' => '---']) ?>
 
-        <?= $form->field($model, 'ccc_ug_id')->widget(\sales\widgets\UserGroupSelect2Widget::class) ?>
+        <?= $form->field($model, 'ccc_ug_id')->widget(\sales\widgets\UserGroupSelect2Widget::class, [
+            'data' => $model->ccc_ug_id ? [
+                $model->ccc_ug_id => $model->cccUg->ug_name
+            ] : [],
+        ]) ?>
 
         <?= $form->field($model, 'ccc_disabled')->checkbox() ?>
 
