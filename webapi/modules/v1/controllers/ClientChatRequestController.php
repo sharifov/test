@@ -15,6 +15,7 @@ use webapi\src\response\messages\StatusCodeMessage;
 use webapi\src\response\Response;
 use webapi\src\response\SuccessResponse;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 use yii\web\UnprocessableEntityHttpException;
 
@@ -150,6 +151,7 @@ class ClientChatRequestController extends ApiBaseController
                 } catch (\Throwable $e) {
                     $transaction->rollBack();
                     \Yii::error($e->getMessage() . '; In File: ' . $e->getFile() . '; On Line: ' . $e->getLine(), 'Api::ClientChatRequestController::actionCreate::Throwable');
+                    \Yii::error(VarDumper::dumpAsString($form->data), 'Api::ClientChatRequestController::actionCreate::RequestData');
                     return $this->endApiLog($apiLog, new ErrorResponse(
                         new StatusCodeMessage(500),
                         new MessageMessage('Internal Server Error'),
