@@ -83,7 +83,11 @@ class ClientChatController extends FController
 			}
 		}
 
-		$clientChat = $this->clientChatRepository->findByRid($rid);
+		try {
+			$clientChat = $this->clientChatRepository->findByRid($rid);
+		} catch (NotFoundException $e) {
+			$clientChat = null;
+		}
 
 		if ($dataProvider && \Yii::$app->request->isPost) {
 

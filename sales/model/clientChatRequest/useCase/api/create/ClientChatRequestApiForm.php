@@ -11,14 +11,14 @@ use yii\helpers\ArrayHelper;
  *
  * @property string $event
  * @property int $eventId
- * @property string $data
+ * @property array $data
  * @property string|null $rid
  */
 class ClientChatRequestApiForm extends Model
 {
 	public string $event;
 	public ?int $eventId;
-	public string $data;
+	public array $data;
 	public ?string $rid;
 
 	public function rules(): array
@@ -39,12 +39,9 @@ class ClientChatRequestApiForm extends Model
 	public function fillIn(string $event, array $data): self
 	{
 		$this->event = $event;
-		$this->data = json_encode($data, JSON_THROW_ON_ERROR);
+		$this->data = $data;
 		$this->eventId = ClientChatRequest::getEventIdByName($event);
 		$this->rid = $data['rid'] ?? null;
-
-//		$this->load(ArrayHelper::toArray($this));
-
 		return $this;
 	}
 }
