@@ -17,7 +17,6 @@ use sales\helpers\setting\SettingHelper;
 use sales\model\saleTicket\entity\SaleTicket;
 use yii\data\ActiveDataProvider;
 use yii\db\Expression;
-use yii\helpers\VarDumper;
 
 /**
  * Class CasesSearch
@@ -51,6 +50,7 @@ use yii\helpers\VarDumper;
  * @property array $cacheSaleData
  * @property array $csStatuses
  * @property int|null $airlinePenalty
+ * @property string|null $validatingCarrier
  */
 class CasesSearch extends Cases
 {
@@ -83,6 +83,7 @@ class CasesSearch extends Cases
     public $userGroup;
     public $csStatuses;
     public $airlinePenalty;
+    public $validatingCarrier;
 
     private $cacheSaleData = [];
 
@@ -125,6 +126,7 @@ class CasesSearch extends Cases
             [['cssChargeType'], 'string', 'max' => 100],
             [['departureAirport', 'arrivalAirport', 'departureCountries', 'arrivalCountries', 'cssInOutDate', 'saleTicketSendEmailDate'], 'safe'],
             ['airlinePenalty', 'integer'],
+            ['validatingCarrier', 'string', 'length' => 2],
         ];
     }
 
@@ -167,6 +169,7 @@ class CasesSearch extends Cases
 			'csStatuses' => 'Status',
 			'airlinePenalty' => 'Airline Penalty',
 			'cs_order_uid' => 'Order uid',
+			'validatingCarrier' => 'Validating Carrier',
         ];
     }
 
@@ -379,6 +382,7 @@ class CasesSearch extends Cases
     /**
      * @param $params
      * @return ActiveDataProvider
+     * @throws \JsonException
      */
     private function searchByAdmin($params): ActiveDataProvider
     {
@@ -436,6 +440,13 @@ class CasesSearch extends Cases
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $this->cssSaleId])]);
         }
 
+        if ($this->validatingCarrier) {
+            if ($saleId = $this->getSaleIdByValidatingCarrier($this->validatingCarrier)) {
+                $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
+            } else {
+                $query->where('0=1');
+            }
+        }
         if ($this->ticketNumber) {
             if ($saleId = $this->getSaleIdByTicket($this->ticketNumber)) {
                 $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
@@ -608,6 +619,20 @@ class CasesSearch extends Cases
         return null;
     }
 
+    private function getSaleIdByValidatingCarrier(string $validatingCarrier)
+    {
+        foreach ($this->getCaseSaleData($validatingCarrier) as $sale) {
+            $decodeSale = json_decode($sale['css_sale_data'], false, 512, JSON_THROW_ON_ERROR);
+            if (
+                isset($decodeSale->validatingCarrier) &&
+                strcasecmp($decodeSale->validatingCarrier, $validatingCarrier) === 0
+            ) {
+                return $decodeSale->saleId;
+            }
+        }
+        return null;
+    }
+
     /**
      * @param $firstName
      * @return int|null
@@ -660,5 +685,4 @@ class CasesSearch extends Cases
         }
         return null;
     }
-
 }
