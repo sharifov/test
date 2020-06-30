@@ -626,9 +626,17 @@ class CasesSearch extends Cases
         return null;
     }
 
-    private function getSaleIdByValidatingCarrier(string $validatingCarrier)
+
+    /**
+     * @param string $validatingCarrier
+     * @return int|null
+     * @throws \JsonException
+     */
+    private function getSaleIdByValidatingCarrier(string $validatingCarrier): ?int
     {
-        foreach ($this->getCaseSaleData($validatingCarrier) as $sale) {
+        $validatingCarrierParam = 'validatingCarrier\":\"' . $validatingCarrier;
+
+        foreach ($this->getCaseSaleData($validatingCarrierParam) as $sale) {
             $decodeSale = json_decode($sale['css_sale_data'], false, 512, JSON_THROW_ON_ERROR);
             if (
                 isset($decodeSale->validatingCarrier) &&
