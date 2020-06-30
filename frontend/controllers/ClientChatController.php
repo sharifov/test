@@ -2,6 +2,7 @@
 namespace frontend\controllers;
 
 use sales\auth\Auth;
+use sales\helpers\app\AppHelper;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
@@ -161,7 +162,7 @@ class ClientChatController extends FController
 
 			$result['success'] = true;
 		} catch (\RuntimeException | \DomainException | NotFoundException $e) {
-			\Yii::error($e->getMessage(), 'ClientChatController::actionAccessManage::RuntimeException|DomainException|NotFoundException');
+			\Yii::error(AppHelper::throwableFormatter($e), 'ClientChatController::actionAccessManage::RuntimeException|DomainException|NotFoundException');
 			$result['notifyMessage'] = $e->getMessage();
 			if (ClientChatCodeException::isWarningMessage($e)) {
 				$result['notifyTitle'] = 'Warning';
@@ -171,7 +172,7 @@ class ClientChatController extends FController
 				$result['notifyType'] = 'error';
 			}
 		} catch (\Throwable $e) {
-			\Yii::error($e->getMessage(), 'ClientChatController::actionAccessManage::Throwable');
+			\Yii::error(AppHelper::throwableFormatter($e), 'ClientChatController::actionAccessManage::Throwable');
 			$result['notifyMessage'] = 'Internal Server Error';
 			$result['notifyTitle'] = 'Error';
 			$result['notifyType'] = 'error';
