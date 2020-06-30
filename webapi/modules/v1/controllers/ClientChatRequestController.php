@@ -285,6 +285,8 @@ class ClientChatRequestController extends ApiBaseController
 	 */
 	public function actionCreateMessage()
 	{
+		$apiLog = $this->startApiLog($this->action->uniqueId);
+
 		if (!\Yii::$app->request->isPost) {
 			return new ErrorResponse(
 				new StatusCodeMessage(400),
@@ -318,33 +320,33 @@ class ClientChatRequestController extends ApiBaseController
 			try {
 				$this->clientChatRequestService->createMessage($form);
 			} catch (\RuntimeException | \DomainException | NotFoundException $e) {
-				return new ErrorResponse(
+				return $this->endApiLog($apiLog, new ErrorResponse(
 					new StatusCodeMessage(400),
 					new MessageMessage($e->getMessage()),
 					new CodeMessage(ApiCodeException::CLIENT_CHAT_REQUEST_CREATE_FAILED)
-				);
+				));
 			} catch (\Throwable $e) {
 				\Yii::error(AppHelper::throwableFormatter($e), 'Api::ClientChatRequestController::actionCreateMessage::Throwable');
 				\Yii::error(VarDumper::dumpAsString($form->data), 'Api::ClientChatRequestController::actionCreateMessage::RequestData');
-				return  new ErrorResponse(
+				return $this->endApiLog($apiLog, new ErrorResponse(
 					new StatusCodeMessage(500),
 					new MessageMessage('Internal Server Error'),
 					new CodeMessage(ApiCodeException::INTERNAL_SERVER_ERROR)
-				);
+				));
 			}
 
-			return  new SuccessResponse(
+			return $this->endApiLog($apiLog, new SuccessResponse(
 				new StatusCodeMessage(200),
 				new MessageMessage('Ok'),
-			);
+			));
 		}
 
-		return new ErrorResponse(
+		return $this->endApiLog($apiLog, new ErrorResponse(
 			new StatusCodeMessage(400),
 			new MessageMessage('Some errors occurred while creating client chat request'),
 			new ErrorsMessage($form->getErrorSummary(true)),
 			new CodeMessage(ApiCodeException::NOT_FOUND_PROJECT_CURRENT_USER)
-		);
+		));
 	}
 
 	private function endApiLog(ApiLog $apiLog, Response $response): Response
