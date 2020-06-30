@@ -58,7 +58,7 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
     {
         return [
             'csl_id' => 'ID',
-            'csl_cch_id' => 'Cch ID',
+            'csl_cch_id' => 'Client Chat ID',
             'csl_from_status' => 'From Status',
             'csl_to_status' => 'To Status',
             'csl_start_dt' => 'Start Dt',

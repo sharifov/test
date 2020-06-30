@@ -16,9 +16,13 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'ccua_cch_id')->textInput() ?>
 
-        <?= $form->field($model, 'ccua_user_id')->widget(\sales\widgets\UserSelect2Widget::class) ?>
+        <?= $form->field($model, 'ccua_user_id')->widget(\sales\widgets\UserSelect2Widget::class, [
+            'data' => $model->ccua_user_id ? [
+                $model->ccua_user_id => $model->ccuaUser->username
+            ] : [],
+        ]) ?>
 
-        <?= $form->field($model, 'ccua_status_id')->textInput() ?>
+        <?= $form->field($model, 'ccua_status_id')->dropDownList($model::STATUS_LIST, ['prompt' => '---']) ?>
 
         <?= $form->field($model, 'ccua_created_dt')->widget(\sales\widgets\DateTimePicker::class) ?>
 

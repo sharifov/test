@@ -2,6 +2,7 @@
 
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
+use sales\model\clientChatRequest\entity\ClientChatRequest;
 
 /* @var $this yii\web\View */
 /* @var $model sales\model\clientChatRequest\entity\ClientChatRequest */
@@ -32,7 +33,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'model' => $model,
             'attributes' => [
                 'ccr_id',
-                'ccr_event',
+                [
+                    'attribute' => 'ccr_event',
+                    'value' => static function(ClientChatRequest $model) {
+                        return $model->getEventName();
+                    },
+                    //'filter' => ClientChatRequest::getEventList()
+                ],
                 'ccr_json_data:ntext',
                 'ccr_created_dt:username',
             ],
