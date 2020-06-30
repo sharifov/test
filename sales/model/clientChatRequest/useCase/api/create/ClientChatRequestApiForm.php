@@ -48,7 +48,7 @@ class ClientChatRequestApiForm extends Model
 
 	public function validateTsParam($attributes): void
 	{
-		if (!isset($this->data['timestamp'])) {
+		if (ClientChatRequest::isMessage($this->eventId) && !isset($this->data['timestamp'])) {
 			$this->addError('data', 'Undefined index: timestamp in data request');
 		}
 	}

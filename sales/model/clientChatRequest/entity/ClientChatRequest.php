@@ -119,6 +119,11 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 		return self::EVENT_GUEST_UTTERED === $this->ccr_event;
 	}
 
+	public static function isMessage(?int $eventId): bool
+	{
+		return self::EVENT_AGENT_UTTERED === $eventId || self::EVENT_GUEST_UTTERED === $eventId;
+	}
+
 	public function isAgentUttered(): bool
 	{
 		return self::EVENT_AGENT_UTTERED === $this->ccr_event;
