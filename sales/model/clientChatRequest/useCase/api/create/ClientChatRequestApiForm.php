@@ -28,6 +28,7 @@ class ClientChatRequestApiForm extends Model
 			[['event'], 'in', 'range' => ClientChatRequest::getEventList()],
 
 			['data', 'safe'],
+			['data', 'validateTsParam'],
 
 			[['event'], 'required'],
 
@@ -43,5 +44,16 @@ class ClientChatRequestApiForm extends Model
 		$this->eventId = ClientChatRequest::getEventIdByName($event);
 		$this->rid = $data['rid'] ?? null;
 		return $this;
+	}
+
+	public function validateTsParam($attributes): void
+	{
+		if (!isset($this->data['ts'])) {
+			$this->addError('data', 'Undefined index: ts in data request');
+		}
+
+		if (!isset($this->data['ts']['$date'])) {
+			$this->addError('data', 'Undefined index: $date in data request');
+		}
 	}
 }
