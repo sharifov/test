@@ -3,16 +3,19 @@ namespace sales\repositories\ClientChatUserAccessRepository;
 
 use common\models\Notifications;
 use frontend\widgets\clientChat\ClientChatAccessMessage;
+use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\repositories\NotFoundException;
 use sales\repositories\Repository;
+use sales\services\clientChatService\ClientChatService;
 
 /**
  * Class ClientChatUserAccessRepository
  * @package sales\repositories\ClientChatUserAccessRepository
  *
  * @property ClientChatRepository $clientChatRepository
+ * @property clientChatService $clientChatService
  */
 class ClientChatUserAccessRepository extends Repository
 {
@@ -20,6 +23,10 @@ class ClientChatUserAccessRepository extends Repository
 	 * @var ClientChatRepository
 	 */
 	private ClientChatRepository $clientChatRepository;
+	/**
+	 * @var ClientChatService
+	 */
+	private ClientChatService $clientChatService;
 
 	public function __construct(ClientChatRepository $clientChatRepository)
 	{
@@ -71,13 +78,18 @@ class ClientChatUserAccessRepository extends Repository
 		}
 	}
 
-	public function sendNotifications(ClientChatUserAccess $access): void
+	private function sendNotifications(ClientChatUserAccess $access): void
 	{
 		$data = [];
 		if ($access->isAccept()) {
 			try {
+				$this->clientChatService->assignAgentToRcChannel($access->ccuaCch->cch_rid, $access->ccuaUser->userProfile->up_rc_user_id);
 				$this->clientChatRepository->assignOwner($access);
 			} catch (\DomainException | \RuntimeException $e) {
+				if (ClientChatCodeException::isRcAssignAgentFailed($e)) {
+					throw new \RuntimeException($e->getMessage(), $e->getCode());
+				}
+
 				\Yii::error($e->getMessage(), 'ClientChatUserAccessEvent::sendNotifications');
 				$this->updateStatus($access, ClientChatUserAccess::STATUS_SKIP);
 				throw $e;

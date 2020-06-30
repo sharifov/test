@@ -1,18 +1,14 @@
 <?php
 namespace frontend\controllers;
 
-use http\Exception\RuntimeException;
 use sales\auth\Auth;
+use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
-use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
-use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
-use sales\model\clientChatUserChannel\entity\search\ClientChatUserChannelSearch;
 use sales\repositories\ClientChatUserAccessRepository\ClientChatUserAccessRepository;
 use sales\repositories\NotFoundException;
 use yii\data\ActiveDataProvider;
-use yii\db\Expression;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 
@@ -167,11 +163,16 @@ class ClientChatController extends FController
 		} catch (\RuntimeException | \DomainException | NotFoundException $e) {
 			\Yii::error($e->getMessage(), 'ClientChatController::actionAccessManage::RuntimeException|DomainException|NotFoundException');
 			$result['notifyMessage'] = $e->getMessage();
-			$result['notifyTitle'] = 'Warning';
-			$result['notifyType'] = 'warning';
+			if (ClientChatCodeException::isWarningMessage($e)) {
+				$result['notifyTitle'] = 'Warning';
+				$result['notifyType'] = 'warning';
+			} else {
+				$result['notifyTitle'] = 'Error';
+				$result['notifyType'] = 'error';
+			}
 		} catch (\Throwable $e) {
 			\Yii::error($e->getMessage(), 'ClientChatController::actionAccessManage::Throwable');
-			$result['notifyMessage'] = $e->getMessage();
+			$result['notifyMessage'] = 'Internal Server Error';
 			$result['notifyTitle'] = 'Error';
 			$result['notifyType'] = 'error';
 		}

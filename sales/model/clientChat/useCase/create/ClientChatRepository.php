@@ -5,6 +5,7 @@ namespace sales\model\clientChat\useCase\create;
 
 
 use sales\behaviors\BlameableBehaviorExceptApi;
+use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
@@ -82,7 +83,7 @@ class ClientChatRepository
 	public function assignOwner(ClientChatUserAccess $clientChatUserAccess): void
 	{
 		if ($clientChatUserAccess->ccuaCch && $clientChatUserAccess->ccuaCch->cchOwnerUser) {
-			throw new \DomainException('Client Chat already assigned to: ' . $clientChatUserAccess->ccuaCch->cchOwnerUser->full_name);
+			throw new \DomainException('Client Chat already assigned to: ' . $clientChatUserAccess->ccuaCch->cchOwnerUser->full_name, ClientChatCodeException::CC_OWNER_ALREADY_ASSIGNED);
 		}
 		$clientChatUserAccess->ccuaCch->cch_owner_user_id = $clientChatUserAccess->ccua_user_id;
 		$this->save($clientChatUserAccess->ccuaCch);

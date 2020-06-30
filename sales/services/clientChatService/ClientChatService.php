@@ -1,14 +1,13 @@
 <?php
 namespace sales\services\clientChatService;
 
-use common\models\Notifications;
-use frontend\widgets\notification\NotificationMessage;
+use http\Exception\RuntimeException;
+use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\repositories\clientChatChannel\ClientChatChannelRepository;
 use sales\repositories\ClientChatUserAccessRepository\ClientChatUserAccessRepository;
-use yii\helpers\VarDumper;
+use yii\helpers\Json;
 
 /**
  * Class ClientChatService
@@ -54,6 +53,20 @@ class ClientChatService
 					$this->clientChatUserAccessRepository->create($clientChat->cch_id, $user->ccuc_user_id);
 				}
 			}
+		}
+	}
+
+	/**
+	 * @param string $rid
+	 * @param string $userId
+	 * @throws \yii\httpclient\Exception
+	 */
+	public function assignAgentToRcChannel(string $rid, string $userId): void
+	{
+		$response = \Yii::$app->chatBot->assignAgent($rid, $userId);
+		if ($response['error']) {
+			$error = Json::decode($response['error']);
+			throw new \RuntimeException($error['data']['error'], ClientChatCodeException::RC_ASSIGN_AGENT_FAILED);
 		}
 	}
 }
