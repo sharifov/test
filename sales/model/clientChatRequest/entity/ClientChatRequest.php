@@ -20,15 +20,15 @@ use yii\db\ActiveRecord;
  */
 class ClientChatRequest extends \yii\db\ActiveRecord
 {
-	private const EVENT_GUEST_CONNECTED = 1;
-	private const EVENT_ROOM_CONNECTED = 2;
-	private const EVENT_ROOM_DISCONNECTED = 3;
-	private const EVENT_GUEST_UTTERED = 4;
-	private const EVENT_AGENT_UTTERED = 5;
-	private const EVENT_DEPARTMENT_TRANSFER = 6;
-	private const EVENT_AGENT_LEFT_ROOM = 7;
-	private const EVENT_AGENT_JOINED_ROOM = 8;
-	private const EVENT_USER_DEPARTMENT_TRANSFER = 9;
+	public const EVENT_GUEST_CONNECTED = 1;
+    public const EVENT_ROOM_CONNECTED = 2;
+    public const EVENT_ROOM_DISCONNECTED = 3;
+    public const EVENT_GUEST_UTTERED = 4;
+    public const EVENT_AGENT_UTTERED = 5;
+    public const EVENT_DEPARTMENT_TRANSFER = 6;
+    public const EVENT_AGENT_LEFT_ROOM = 7;
+    public const EVENT_AGENT_JOINED_ROOM = 8;
+    public const EVENT_USER_DEPARTMENT_TRANSFER = 9;
 
 	private const EVENT_LIST = [
 		self::EVENT_GUEST_CONNECTED => 'GUEST_CONNECTED',
@@ -98,7 +98,7 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 	{
 		$_self = new self();
 		$_self->ccr_event = $form->eventId;
-		$_self->ccr_json_data = $form->data;
+		$_self->ccr_json_data = json_encode($form->data, JSON_THROW_ON_ERROR);
 		$_self->ccr_rid = $form->rid;
 
 		switch ($_self->ccr_event) {

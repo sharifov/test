@@ -55,7 +55,7 @@ class ClientChatRepository
 		return $clientChat;
 	}
 
-	public function findByRid(string $rid): ?ClientChat
+	public static function findByRid(string $rid): ?ClientChat
 	{
 		return ClientChat::findOne(['cch_rid' => $rid]);
 	}

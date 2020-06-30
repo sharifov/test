@@ -8,6 +8,15 @@ return [
             'password' => 'SalePasswd1!',
             'charset' => 'utf8mb4',
         ],
+        'db_postgres' => [
+            'class' => 'yii\db\Connection',
+            'dsn' => 'pgsql:host=127.0.0.1;port=5432;dbname=crm',
+            'username' => 'postgres',
+            'password' => 'postgres',
+            'charset' => 'utf8',
+            'enableSchemaCache' => false,
+            'schemaCacheDuration' => 3600,
+        ],
         'mailer' => [
             'class' => 'yii\swiftmailer\Mailer',
             'viewPath' => '@common/mail',
