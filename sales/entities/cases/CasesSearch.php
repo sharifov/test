@@ -190,6 +190,7 @@ class CasesSearch extends Cases
      * @param $params
      * @param Employee $user
      * @return ActiveDataProvider
+     * @throws \JsonException
      */
     public function searchByAgent($params, $user): ActiveDataProvider
     {
@@ -244,6 +245,13 @@ class CasesSearch extends Cases
         if ($this->cssSaleId) {
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $this->cssSaleId])]);
         }
+         if ($this->validatingCarrier) {
+            if ($saleId = $this->getSaleIdByValidatingCarrier($this->validatingCarrier)) {
+                $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
+            } else {
+                $query->where('0=1');
+            }
+        }
         if ($this->ticketNumber) {
             if ($saleId = $this->getSaleIdByTicket($this->ticketNumber)) {
                 $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
@@ -251,7 +259,6 @@ class CasesSearch extends Cases
                 $query->where('0=1');
             }
         }
-
         if ($this->clientId){
             $query->andWhere(['cs_client_id' => $this->clientId]);
         }
