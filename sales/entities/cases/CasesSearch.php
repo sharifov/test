@@ -366,6 +366,13 @@ class CasesSearch extends Cases
 					->andWhere(['date_format(css_send_email_dt, "%Y-%m-%d")' => $this->saleTicketSendEmailDate]);
 			}
 		}
+		if ($this->airlinePenalty) {
+            $query->andWhere([
+                    'cs_id' => SaleTicket::find()->select('st_case_id')
+                        ->andWhere(['st_penalty_type' => $this->airlinePenalty])
+                ]
+            );
+        }
         return $dataProvider;
     }
 
@@ -436,15 +443,6 @@ class CasesSearch extends Cases
                 $query->where('0=1');
             }
         }
-
-        if ($this->airlinePenalty) {
-            $query->andWhere([
-                    'cs_id' => SaleTicket::find()->select('st_case_id')
-                        ->andWhere(['st_penalty_type' => $this->airlinePenalty])
-                ]
-            );
-        }
-
         if ($this->clientId){
             $query->andWhere(['cs_client_id' => $this->clientId]);
         }
@@ -568,7 +566,13 @@ class CasesSearch extends Cases
                 ->where(['IN', 'airports.country', $this->arrivalCountries])
             ]);
         }
-
+        if ($this->airlinePenalty) {
+            $query->andWhere([
+                    'cs_id' => SaleTicket::find()->select('st_case_id')
+                        ->andWhere(['st_penalty_type' => $this->airlinePenalty])
+                ]
+            );
+        }
         return $dataProvider;
     }
 

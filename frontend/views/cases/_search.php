@@ -49,15 +49,15 @@ use yii\widgets\ActiveForm;
                     <?= $form->field($model, 'cs_category_id')->dropDownList(CaseCategory::getList(array_keys(EmployeeDepartmentAccess::getDepartments())), ['prompt' => '-']) ?>
                 </div>
                 <div class="col-md-1">
-                    <?php /* echo $form->field($model, 'cs_status')->dropDownList(CasesStatus::STATUS_LIST, ['prompt' => '-']) */ ?>
                     <?php echo $form->field($model, 'csStatuses')
                         ->widget(MultiSelect::class,
-                        [
-                            'data' => CasesStatus::STATUS_LIST,
-                            'options' => ['multiple' => 'multiple'],
-                            'clientOptions' => ['numberDisplayed' => 1],
-                        ]
-                    )  ?>
+                            [
+                                'data' => CasesStatus::STATUS_LIST,
+                                'options' => ['multiple' => 'multiple'],
+                                'clientOptions' => ['numberDisplayed' => 1],
+                            ]
+                        )
+                    ?>
                 </div>
                 <div class="col-md-1">
                     <?= $form->field($model, 'cs_subject') ?>
@@ -216,7 +216,7 @@ use yii\widgets\ActiveForm;
     </div>
 
     <div class="form-group text-center">
-        <?= Html::submitButton('<i class="fa fa-search"></i> Search cases', ['class' => 'btn btn-primary search_cases_btn']) /* TODO:: add loader */ ?>
+        <?= Html::submitButton('<i class="fa fa-search"></i> Search cases', ['class' => 'btn btn-primary search_cases_btn']) ?>
         <?= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset form', ['cases/index'], ['class' => 'btn btn-warning']) ?>
         <?php if ($model->saleTicketSendEmailDate) : ?>
 			<?php echo \kartik\export\ExportMenu::widget([
