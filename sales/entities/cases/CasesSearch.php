@@ -245,13 +245,20 @@ class CasesSearch extends Cases
         if ($this->cssSaleId) {
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $this->cssSaleId])]);
         }
-         if ($this->validatingCarrier) {
-            if ($saleId = $this->getSaleIdByValidatingCarrier($this->validatingCarrier)) {
-                $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
-            } else {
-                $query->where('0=1');
-            }
+
+        if ($this->validatingCarrier) {
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('css_cs_id')
+                ->andFilterWhere(
+                    [
+                        '=',
+                        new Expression("JSON_EXTRACT(JSON_UNQUOTE(css_sale_data),'$.validatingCarrier')"),
+                        $this->validatingCarrier
+                    ]
+                )
+            ]);
         }
+
         if ($this->ticketNumber) {
             if ($saleId = $this->getSaleIdByTicket($this->ticketNumber)) {
                 $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
@@ -432,7 +439,6 @@ class CasesSearch extends Cases
         ]);
 
         $query->andFilterWhere(['IN', 'cs_status', $this->csStatuses]);
-
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
         $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
 
@@ -448,12 +454,18 @@ class CasesSearch extends Cases
         }
 
         if ($this->validatingCarrier) {
-            if ($saleId = $this->getSaleIdByValidatingCarrier($this->validatingCarrier)) {
-                $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
-            } else {
-                $query->where('0=1');
-            }
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('css_cs_id')
+                ->andFilterWhere(
+                    [
+                        '=',
+                        new Expression("JSON_EXTRACT(JSON_UNQUOTE(css_sale_data),'$.validatingCarrier')"),
+                        $this->validatingCarrier
+                    ]
+                )
+            ]);
         }
+
         if ($this->ticketNumber) {
             if ($saleId = $this->getSaleIdByTicket($this->ticketNumber)) {
                 $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);

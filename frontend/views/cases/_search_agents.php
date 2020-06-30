@@ -171,11 +171,9 @@ use yii\widgets\ActiveForm;
         <div class="col-md-1">
             <?= $form->field($model, 'airlinePenalty')->dropDownList(SaleTicket::getAirlinePenaltyList(), ['prompt' => '---']) ?>
         </div>
-        <?php /*
         <div class="col-md-1">
             <?= $form->field($model, 'validatingCarrier')->textInput(['maxlength' => true]) ?>
         </div>
-        */ ?>
     </div>
 
     <div class="form-group text-center">
