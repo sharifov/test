@@ -39,7 +39,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'st_record_locator',
                 'st_original_fop',
                 'st_charge_system',
-                'st_penalty_type',
+                [
+                    'attribute' => 'st_penalty_type',
+                    'format' => 'raw',
+                    'value' => static function(SaleTicket $model) {
+                        return $model->getPenaltyTypeName($model->st_penalty_type);
+                    },
+                ],
                 'st_penalty_amount',
                 'st_selling',
                 'st_service_fee',
