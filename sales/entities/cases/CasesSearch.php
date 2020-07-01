@@ -11,6 +11,7 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\UserGroup;
 use common\models\UserGroupAssign;
+use frontend\helpers\JsonHelper;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\helpers\setting\SettingHelper;
@@ -631,7 +632,7 @@ class CasesSearch extends Cases
     private function getSaleIdByTicket($tickerNum): ?int
     {
         foreach ($this->getCaseSaleData($tickerNum) as $sale) {
-            $decodeSale = (is_string($sale['css_sale_data'])) ? json_decode($sale['css_sale_data'], false) : $sale['css_sale_data'];
+            $decodeSale = JsonHelper::decode($sale['css_sale_data'], false);
             foreach ($decodeSale->passengers as $passenger) {
                 if (strcasecmp($passenger->ticket_number, $tickerNum) === 0) {
                     return $decodeSale->saleId;
@@ -652,9 +653,7 @@ class CasesSearch extends Cases
         $validatingCarrierParam = 'validatingCarrier\":\"' . $validatingCarrier;
 
         foreach ($this->getCaseSaleData($validatingCarrierParam) as $sale) {
-            $decodeSale = (is_string($sale['css_sale_data'])) ?
-                json_decode($sale['css_sale_data'], false, 512, JSON_THROW_ON_ERROR) :
-                $sale['css_sale_data'];
+            $decodeSale = JsonHelper::decode($sale['css_sale_data'], false);
             if (
                 isset($decodeSale->validatingCarrier) &&
                 strcasecmp($decodeSale->validatingCarrier, $validatingCarrier) === 0
@@ -672,7 +671,7 @@ class CasesSearch extends Cases
     private function getSaleIdByPaxFirstName($firstName): ?int
     {
         foreach ($this->getCaseSaleData($firstName) as $sale) {
-            $decodeSale = (is_string($sale['css_sale_data'])) ? json_decode($sale['css_sale_data'], false) : $sale['css_sale_data'];
+            $decodeSale = JsonHelper::decode($sale['css_sale_data'], false);
             foreach ($decodeSale->passengers as $passenger) {
                 if (strcasecmp($passenger->first_name, $firstName) === 0) {
                     return $decodeSale->saleId;
@@ -689,7 +688,7 @@ class CasesSearch extends Cases
     private function getSaleIdByPaxLastName($lastName): ?int
     {
         foreach ($this->getCaseSaleData($lastName) as $sale) {
-            $decodeSale = (is_string($sale['css_sale_data'])) ? json_decode($sale['css_sale_data'], false) : $sale['css_sale_data'];
+            $decodeSale = JsonHelper::decode($sale['css_sale_data'], false);
             foreach ($decodeSale->passengers as $passenger) {
                 if (strcasecmp($passenger->last_name, $lastName) === 0) {
                     return $decodeSale->saleId;
@@ -706,7 +705,7 @@ class CasesSearch extends Cases
     private function getSaleIdByAcn($acn): ?int
     {
         foreach ($this->getCaseSaleData($acn) as $sale) {
-            $decodeSale = (is_string($sale['css_sale_data'])) ? json_decode($sale['css_sale_data'], false) : $sale['css_sale_data'];
+            $decodeSale = JsonHelper::decode($sale['css_sale_data'], false);
             foreach ($decodeSale->itinerary as $itinerary) {
                 foreach ($itinerary->segments as $segment) {
                     if (strcasecmp($segment->airlineRecordLocator, $acn) === 0) {

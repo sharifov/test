@@ -5,6 +5,7 @@ namespace sales\services\cases;
 use common\components\BackOffice;
 use common\models\CaseSale;
 use Exception;
+use frontend\helpers\JsonHelper;
 use frontend\models\form\CreditCardForm;
 use http\Exception\RuntimeException;
 use sales\entities\cases\Cases;
@@ -67,8 +68,8 @@ class CasesSaleService
 	 */
 	public function prepareSaleData(CaseSale $caseSale): array
 	{
-		$originalData = json_decode( (string)$caseSale->css_sale_data, true );
-		$updatedData = json_decode( (string)$caseSale->css_sale_data_updated, true );
+		$originalData = JsonHelper::decode($caseSale->css_sale_data);
+		$updatedData = JsonHelper::decode($caseSale->css_sale_data_updated);
 
 		$difference = $this->compareSaleData($originalData, $updatedData);
 
@@ -87,7 +88,7 @@ class CasesSaleService
 	 */
 	public function getSegments(CaseSale $caseSale): array
 	{
-		$updatedData = json_decode((string)$caseSale->css_sale_data_updated, true);
+		$updatedData = JsonHelper::decode($caseSale->css_sale_data_updated);
 
 		$segments = [];
 
@@ -117,7 +118,7 @@ class CasesSaleService
 	 */
 	public function setValidatingCarrier(CaseSale $caseSale): CasesSaleService
 	{
-		$updatedData = json_decode((string)$caseSale->css_sale_data_updated, true);
+		$updatedData = JsonHelper::decode($caseSale->css_sale_data_updated);
 
 		$this->validatingCarrier = $updatedData['validatingCarrier'];
 
@@ -130,8 +131,9 @@ class CasesSaleService
 	 */
 	public function isDataBackedUpToOriginal(CaseSale $caseSale): bool
 	{
-		$oldData = json_decode((string)$caseSale->css_sale_data, true);
-		$newData = json_decode((string)$caseSale->css_sale_data_updated, true);
+		$oldData = JsonHelper::decode($caseSale->css_sale_data);
+		$newData = JsonHelper::decode($caseSale->css_sale_data_updated);
+
 		$difference = $this->compareSaleData($oldData, $newData);
 
 		return !$difference ? true : false;

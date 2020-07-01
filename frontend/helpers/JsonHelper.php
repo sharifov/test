@@ -15,17 +15,18 @@ class JsonHelper
      */
     public static function encode($data): string
     {
-        if (!is_string($data)) {
+        if ($data && !is_string($data)) {
             return Json::htmlEncode($data);
         }
-        return $data;
+        return $data ?? '';
     }
 
     /**
      * @param $data
+     * @param bool $asArray
      * @return mixed|null
      */
-    public static function decode($data)
+    public static function decode($data, bool $asArray = true)
     {
         if (is_string($data)) {
             return Json::decode($data);

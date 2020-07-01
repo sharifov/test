@@ -3,6 +3,7 @@
 namespace sales\repositories\cases;
 
 use common\models\CaseSale;
+use frontend\helpers\JsonHelper;
 use sales\entities\cases\Cases;
 use sales\repositories\NotFoundException;
 
@@ -48,7 +49,7 @@ class CasesSaleRepository
 	public function updateOriginalSaleData(CaseSale $caseSale, string $newData = ''): void
 	{
 		if (!empty($newData)) {
-			$caseSale->css_sale_data = $newData;
+			$caseSale->css_sale_data = JsonHelper::decode($newData);
 		} else {
 			$caseSale->css_sale_data = $caseSale->css_sale_data_updated;
 		}
@@ -72,7 +73,7 @@ class CasesSaleRepository
 		$caseSale->css_sale_data_updated = $saleData;
 		$caseSale->css_need_sync_bo = 0;
 		$caseSale->css_fare_rules = isset($saleData['fareRules']) ?
-		    @json_encode($saleData['fareRules']) : null;
+		    @JsonHelper::encode($saleData['fareRules']) : null;
 
 		return $caseSale;
 	}
@@ -91,7 +92,7 @@ class CasesSaleRepository
 
 	public function getProjectApiKey(CaseSale $caseSale)
 	{
-		return @json_decode((string)$caseSale->css_sale_data, true)['projectApiKey'] ?? '';
+		return @JsonHelper::decode($caseSale->css_sale_data)['projectApiKey'] ?? '';
 	}
 
 	public function getFirstDepartureDtFromItinerary(array $saleData): string

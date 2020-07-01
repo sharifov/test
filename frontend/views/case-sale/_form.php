@@ -1,5 +1,6 @@
 <?php
 
+use frontend\helpers\JsonHelper;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -25,7 +26,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'css_sale_created_dt')->textInput() ?>
 
-    <?= $form->field($model, 'css_sale_data')->textInput() ?>
+    <?= $form->field($model, 'css_sale_data')->textInput(['value' => JsonHelper::encode($model->css_sale_data)]) ?>
 
     <?php //= $form->field($model, 'css_created_user_id')->textInput() ?>
 

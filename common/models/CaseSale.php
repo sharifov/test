@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\models\query\CaseSaleQuery;
+use frontend\helpers\JsonHelper;
 use sales\entities\cases\Cases;
 use sales\model\saleTicket\entity\SaleTicket;
 use Yii;
@@ -130,7 +131,11 @@ class CaseSale extends \yii\db\ActiveRecord
             [['css_out_date', 'css_in_date', 'css_fare_rules', 'css_departure_dt', 'css_send_email_dt'], 'string'],
             [['css_out_date', 'css_in_date', 'css_departure_dt'],  'datetime', 'format' => 'php:Y-m-d H:i:s'],
             [['css_charge_type'], 'string', 'max' => 100],
-			['css_penalty_type', 'in', 'range' => array_keys(SaleTicket::getAirlinePenaltyList()), 'skipOnEmpty' => true,]
+			['css_penalty_type', 'in', 'range' => array_keys(SaleTicket::getAirlinePenaltyList()), 'skipOnEmpty' => true,],
+
+			[['css_sale_data'], 'filter', 'filter' => static function($value) {
+                return JsonHelper::decode($value);
+            }],
         ];
     }
 

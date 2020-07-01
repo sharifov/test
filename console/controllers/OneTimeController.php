@@ -381,7 +381,7 @@ class OneTimeController extends Controller
         }
 
         $left = CaseSale::find()
-            ->andFilterWhere(['=', new Expression('JSON_TYPE(css_sale_data)'), 'STRING'])
+            ->andWhere(['=', new Expression('JSON_TYPE(css_sale_data)'), 'STRING'])
             ->count();
 
         $time_end = microtime(true);
