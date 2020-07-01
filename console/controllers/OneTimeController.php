@@ -351,7 +351,23 @@ class OneTimeController extends Controller
         $toDate = date('Y-m-d', strtotime($toDate));
 
         try {
-            $processed = $this->convertCaseSaleToJson($fromDate, $toDate);
+            $processed = Yii::$app->db->createCommand(
+                'UPDATE
+                        case_sale
+                    SET 
+                        css_sale_data = JSON_UNQUOTE(css_sale_data),
+                        css_sale_data_updated = JSON_UNQUOTE(css_sale_data_updated)
+                    WHERE                    
+                        DATE(css_created_dt) BETWEEN :from_date AND :to_date
+                        AND
+                        JSON_TYPE(css_sale_data) = :json_type
+                ',
+                [
+                    ':from_date' => $fromDate,
+                    ':to_date' => $toDate,
+                    ':json_type' => 'STRING',
+                ]
+            )->execute();
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableFormatter($throwable),
                 'OneTimeController:actionSaleDataToJson:Throwable' );
@@ -364,33 +380,6 @@ class OneTimeController extends Controller
             ' s] %g Processed: %w[' . $processed . '] %n'), PHP_EOL;
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
-    }
-
-    /**
-     * @param string $fromDate
-     * @param string $toDate
-     * @return int
-     * @throws \yii\db\Exception
-     */
-    protected function convertCaseSaleToJson(string $fromDate, string $toDate): int
-    {
-        return Yii::$app->db->createCommand(
-            'UPDATE
-                    case_sale
-                SET 
-                    css_sale_data = JSON_UNQUOTE(css_sale_data),
-                    css_sale_data_updated = JSON_UNQUOTE(css_sale_data_updated)
-                WHERE                    
-                    DATE(css_created_dt) BETWEEN :from_date AND :to_date
-                    AND
-                    JSON_TYPE(css_sale_data) = :json_type
-            ',
-            [
-                ':from_date' => $fromDate,
-                ':to_date' => $toDate,
-                ':json_type' => 'STRING',
-            ]
-        )->execute();
     }
 
     /**
