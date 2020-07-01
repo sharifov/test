@@ -356,6 +356,8 @@ class OneTimeController extends Controller
         $fromDate = date('Y-m-d', strtotime($fromDate));
         $toDate = date('Y-m-d', strtotime($toDate));
 
+        $transaction = Yii::$app->db->beginTransaction();
+
         try {
             $processed = Yii::$app->db->createCommand(
                 'UPDATE
@@ -374,7 +376,10 @@ class OneTimeController extends Controller
                     ':json_type' => 'STRING',
                 ]
             )->execute();
+
+            $transaction->commit();
         } catch (\Throwable $throwable) {
+            $transaction->rollBack();
             Yii::error(AppHelper::throwableFormatter($throwable),
                 'OneTimeController:actionSaleDataToJson:Throwable' );
             echo Console::renderColoredString('%r --- Error : ' . $throwable->getMessage() . ' %n'), PHP_EOL;
