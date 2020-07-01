@@ -233,7 +233,6 @@ class CasesSearch extends Cases
         ]);
 
         $query->andFilterWhere(['IN', 'cs_status', $this->csStatuses]);
-
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
         $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
 
@@ -245,51 +244,54 @@ class CasesSearch extends Cases
         if ($this->cssSaleId) {
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $this->cssSaleId])]);
         }
-
-        if ($this->validatingCarrier) {
-            $query->andWhere(['cs_id' =>
-                CaseSale::find()->select('css_cs_id')
-                ->andFilterWhere(
-                    [
-                        '=',
-                        new Expression("JSON_EXTRACT(JSON_UNQUOTE(css_sale_data),'$.validatingCarrier')"),
-                        $this->validatingCarrier
-                    ]
-                )
-            ]);
-        }
-
-        if ($this->ticketNumber) {
-            if ($saleId = $this->getSaleIdByTicket($this->ticketNumber)) {
-                $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
-            } else {
-                $query->where('0=1');
-            }
-        }
         if ($this->clientId){
             $query->andWhere(['cs_client_id' => $this->clientId]);
         }
 
+        if ($this->validatingCarrier) {
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('css_cs_id')
+                ->andWhere(['=',
+                        new Expression("JSON_EXTRACT(css_sale_data,'$.validatingCarrier')"),
+                        $this->validatingCarrier
+                ])
+            ]);
+        }
+        if ($this->ticketNumber) {
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('css_cs_id')
+                ->where(
+                    new Expression("JSON_CONTAINS(css_sale_data->'$.passengers[*].ticket_number', JSON_ARRAY(:ticket_number))"),
+                    [':ticket_number' => $this->ticketNumber]
+                )
+            ]);
+        }
         if ($this->paxFirstName) {
-            if ($saleId = $this->getSaleIdByPaxFirstName($this->paxFirstName)) {
-                $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
-            } else {
-                $query->where('0=1');
-            }
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('css_cs_id')
+                ->where(
+                    new Expression("JSON_CONTAINS(css_sale_data->'$.passengers[*].first_name', JSON_ARRAY(:first_name))"),
+                    [':first_name' => $this->paxFirstName]
+                )
+            ]);
         }
         if ($this->paxLastName) {
-            if ($saleId = $this->getSaleIdByPaxLastName($this->paxLastName)) {
-                $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
-            } else {
-                $query->where('0=1');
-            }
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('css_cs_id')
+                ->where(
+                    new Expression("JSON_CONTAINS(css_sale_data->'$.passengers[*].last_name', JSON_ARRAY(:last_name))"),
+                    [':last_name' => $this->paxLastName]
+                )
+            ]);
         }
         if ($this->airlineConfirmationNumber) {
-            if ($saleId = $this->getSaleIdByAcn($this->airlineConfirmationNumber)) {
-                $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
-            } else {
-                $query->where('0=1');
-            }
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('css_cs_id')
+                ->where(
+                    new Expression("JSON_CONTAINS(css_sale_data->'$.itinerary[*].segments[*].airlineRecordLocator', JSON_ARRAY(:airlineRecordLocator))"),
+                    [':airlineRecordLocator' => $this->airlineConfirmationNumber]
+                )
+            ]);
         }
         if ($this->cssBookId) {
             $query->andWhere(['OR',
@@ -452,6 +454,9 @@ class CasesSearch extends Cases
         if ($this->cssSaleId) {
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $this->cssSaleId])]);
         }
+        if ($this->clientId){
+            $query->andWhere(['cs_client_id' => $this->clientId]);
+        }
 
         if ($this->validatingCarrier) {
             $query->andWhere(['cs_id' =>
@@ -471,32 +476,32 @@ class CasesSearch extends Cases
                 )
             ]);
         }
-        if ($this->clientId){
-            $query->andWhere(['cs_client_id' => $this->clientId]);
-        }
-
         if ($this->paxFirstName) {
-            if ($saleId = $this->getSaleIdByPaxFirstName($this->paxFirstName)) {
-                $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
-            } else {
-                $query->where('0=1');
-            }
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('css_cs_id')
+                ->where(
+                    new Expression("JSON_CONTAINS(css_sale_data->'$.passengers[*].first_name', JSON_ARRAY(:first_name))"),
+                    [':first_name' => $this->paxFirstName]
+                )
+            ]);
         }
-
         if ($this->paxLastName) {
-            if ($saleId = $this->getSaleIdByPaxLastName($this->paxLastName)) {
-                $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
-            } else {
-                $query->where('0=1');
-            }
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('css_cs_id')
+                ->where(
+                    new Expression("JSON_CONTAINS(css_sale_data->'$.passengers[*].last_name', JSON_ARRAY(:last_name))"),
+                    [':last_name' => $this->paxLastName]
+                )
+            ]);
         }
-
         if ($this->airlineConfirmationNumber) {
-            if ($saleId = $this->getSaleIdByAcn($this->airlineConfirmationNumber)) {
-                $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
-            } else {
-                $query->where('0=1');
-            }
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('css_cs_id')
+                ->where(
+                    new Expression("JSON_CONTAINS(css_sale_data->'$.itinerary[*].segments[*].airlineRecordLocator', JSON_ARRAY(:airlineRecordLocator))"),
+                    [':airlineRecordLocator' => $this->airlineConfirmationNumber]
+                )
+            ]);
         }
         if ($this->cssBookId) {
             $query->andWhere(['OR',
@@ -626,7 +631,7 @@ class CasesSearch extends Cases
     private function getSaleIdByTicket($tickerNum): ?int
     {
         foreach ($this->getCaseSaleData($tickerNum) as $sale) {
-            $decodeSale = json_decode($sale['css_sale_data'], false);
+            $decodeSale = (is_string($sale['css_sale_data'])) ? json_decode($sale['css_sale_data'], false) : $sale['css_sale_data'];
             foreach ($decodeSale->passengers as $passenger) {
                 if (strcasecmp($passenger->ticket_number, $tickerNum) === 0) {
                     return $decodeSale->saleId;
@@ -647,7 +652,9 @@ class CasesSearch extends Cases
         $validatingCarrierParam = 'validatingCarrier\":\"' . $validatingCarrier;
 
         foreach ($this->getCaseSaleData($validatingCarrierParam) as $sale) {
-            $decodeSale = json_decode($sale['css_sale_data'], false, 512, JSON_THROW_ON_ERROR);
+            $decodeSale = (is_string($sale['css_sale_data'])) ?
+                json_decode($sale['css_sale_data'], false, 512, JSON_THROW_ON_ERROR) :
+                $sale['css_sale_data'];
             if (
                 isset($decodeSale->validatingCarrier) &&
                 strcasecmp($decodeSale->validatingCarrier, $validatingCarrier) === 0
@@ -665,7 +672,7 @@ class CasesSearch extends Cases
     private function getSaleIdByPaxFirstName($firstName): ?int
     {
         foreach ($this->getCaseSaleData($firstName) as $sale) {
-            $decodeSale = json_decode($sale['css_sale_data'], false);
+            $decodeSale = (is_string($sale['css_sale_data'])) ? json_decode($sale['css_sale_data'], false) : $sale['css_sale_data'];
             foreach ($decodeSale->passengers as $passenger) {
                 if (strcasecmp($passenger->first_name, $firstName) === 0) {
                     return $decodeSale->saleId;
@@ -682,7 +689,7 @@ class CasesSearch extends Cases
     private function getSaleIdByPaxLastName($lastName): ?int
     {
         foreach ($this->getCaseSaleData($lastName) as $sale) {
-            $decodeSale = json_decode($sale['css_sale_data'], false);
+            $decodeSale = (is_string($sale['css_sale_data'])) ? json_decode($sale['css_sale_data'], false) : $sale['css_sale_data'];
             foreach ($decodeSale->passengers as $passenger) {
                 if (strcasecmp($passenger->last_name, $lastName) === 0) {
                     return $decodeSale->saleId;
@@ -699,7 +706,7 @@ class CasesSearch extends Cases
     private function getSaleIdByAcn($acn): ?int
     {
         foreach ($this->getCaseSaleData($acn) as $sale) {
-            $decodeSale = json_decode($sale['css_sale_data'], false);
+            $decodeSale = (is_string($sale['css_sale_data'])) ? json_decode($sale['css_sale_data'], false) : $sale['css_sale_data'];
             foreach ($decodeSale->itinerary as $itinerary) {
                 foreach ($itinerary->segments as $segment) {
                     if (strcasecmp($segment->airlineRecordLocator, $acn) === 0) {
