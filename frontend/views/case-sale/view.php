@@ -38,7 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'css_sale_data',
                 'value' => static function($model) {
-                    return $model->getSaleDataEncoded() ;
+                    return $model->getSaleDataEncoded();
                 },
             ],
             'css_created_user_id',
