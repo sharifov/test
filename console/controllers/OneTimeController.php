@@ -3,6 +3,7 @@
 namespace console\controllers;
 
 use common\components\jobs\CreateSaleFromBOJob;
+use common\models\CaseSale;
 use common\models\Client;
 use common\models\DepartmentEmailProject;
 use common\models\DepartmentPhoneProject;
@@ -13,6 +14,7 @@ use sales\model\phoneList\entity\PhoneList;
 use thamtech\uuid\helpers\UuidHelper;
 use Yii;
 use yii\console\Controller;
+use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
@@ -341,11 +343,16 @@ class OneTimeController extends Controller
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g'. self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
     }
 
-    public function actionSaleDataToJson(string $fromDate, string $toDate): void
+    public function actionSaleDataToJson(?string $fromDate = null, ?string $toDate = null): void
     {
         echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
+
+        $processed = 0;
         $time_start = microtime(true);
+
+        $fromDate = $fromDate ?? CaseSale::find()->min('css_sale_created_dt');
+        $toDate = $toDate ?? CaseSale::find()->max('css_sale_created_dt');
 
         $fromDate = date('Y-m-d', strtotime($fromDate));
         $toDate = date('Y-m-d', strtotime($toDate));
@@ -371,13 +378,17 @@ class OneTimeController extends Controller
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableFormatter($throwable),
                 'OneTimeController:actionSaleDataToJson:Throwable' );
-            echo Console::renderColoredString('%r --- Error : '. $throwable->getMessage() .' %n'), PHP_EOL;
+            echo Console::renderColoredString('%r --- Error : ' . $throwable->getMessage() .' %n'), PHP_EOL;
         }
+
+        $left = CaseSale::find()
+            ->andFilterWhere(['=', new Expression('JSON_TYPE(css_sale_data)'), 'STRING'])
+            ->count();
 
         $time_end = microtime(true);
         $time = number_format(round($time_end - $time_start, 2), 2);
         echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .
-            ' s] %g Processed: %w[' . $processed . '] %n'), PHP_EOL;
+            ' s] %g Processed: %w[' . $processed . '] %g How many records left %w[' . $left . '] %g %n'), PHP_EOL;
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
     }
