@@ -5,7 +5,9 @@ namespace sales\model\call\services\currentQueueCalls;
 use common\models\Call;
 use common\models\CallUserAccess;
 use common\models\ConferenceParticipant;
+use common\models\Department;
 use sales\model\call\helper\CallHelper;
+use sales\model\phoneList\entity\PhoneList;
 
 class CurrentQueueCallsService
 {
@@ -15,11 +17,13 @@ class CurrentQueueCallsService
     {
         $this->userId = $userId;
 
+        $holdQueue = $this->getHoldCalls();
         $incomingQueue = $this->getIncomingCalls();
         $outgoingQueue = $this->getOutgoingCalls();
         $activeQueue = $this->getActiveCalls();
 
         $queueCalls = new QueueCalls(
+            $holdQueue,
             $incomingQueue['calls'],
             $outgoingQueue['calls'],
             $activeQueue['calls'],
@@ -78,10 +82,10 @@ class CurrentQueueCallsService
                     unset($queue[$key]);
                 }
             }
-
         }
 
         foreach ($queue as $call) {
+
             if ($call->isIn() || $call->isOut()) {
                 $name = $call->cClient ? $call->cClient->getFullName() : '------';
             } elseif ($call->isJoin() && ($parentJoin = $call->cParent) && $parentJoin->cCreatedUser) {
@@ -103,32 +107,51 @@ class CurrentQueueCallsService
                 if ($parentJoin->isIn()) {
                     $phone = $parentJoin->c_to;
                 } elseif ($parentJoin->isOut()) {
-                    $phone = $parentJoin->c_from;
+                    if (isset($parentJoin->cParent)) {
+                        $phone = $parentJoin->cParent->c_from;
+                    } else {
+                        $phone = $parentJoin->c_from;
+                    }
                 }
             }
 
             $isMute = false;
+            $isListen = false;
             if ($call->currentParticipant && $call->currentParticipant->isMute()) {
                 $isMute = true;
             }
             if ($call->isJoin() && $call->c_source_type_id === Call::SOURCE_LISTEN) {
                 $isMute = true;
+                $isListen = true;
             }
+            $isHold = false;
+            $holdDuration = 0;
+            if ($call->currentParticipant && $call->currentParticipant->isHold()) {
+                $isHold = true;
+                $holdDuration = time() - strtotime($call->currentParticipant->cp_hold_dt);
+            }
+
+            $isInternal = PhoneList::find()->byPhone($call->c_from)->enabled()->exists();
 
             $calls[] = new ActiveQueueCall([
                 'callSid' => $call->c_call_sid,
-                'callId' => $call->c_id,
+                'status' => $call->getStatusName(),
+                'leadId' => $call->c_lead_id,
+                'source_type_id' => $call->c_source_type_id,
+                'fromInternal' => $isInternal,
                 'isMute' => $isMute,
-                'isListen' => $call->c_source_type_id === Call::SOURCE_LISTEN,
+                'isListen' => $isListen,
+                'isHold' => $isHold,
+                'holdDuration' => $holdDuration,
                 'typeId' => $call->c_call_type_id,
                 'type' => CallHelper::getTypeDescription($call),
                 'phone' => $phone,
                 'name' => $name,
+                'company' => '',
                 'duration' => time() - strtotime($call->c_updated_dt),
-                'projectName' => $call->c_project_id ? $call->cProject->name : '',
-                'sourceName' => $call->c_source_type_id ? $call->getSourceName() : '',
-                'isHold' => $call->currentParticipant && $call->currentParticipant->isHold(),
-                'holdDuration' => $call->currentParticipant && $call->currentParticipant->isHold() ? (time() - strtotime($call->currentParticipant->cp_hold_dt)) : 0,
+                'project' => $call->c_project_id ? $call->cProject->name : '',
+                'source' => $call->c_source_type_id ? $call->getSourceName() : '',
+                'department' => $call->c_dep_id ? Department::getName($call->c_dep_id) : '',
             ]);
 
             $last_time = strtotime($call->c_updated_dt);
@@ -184,14 +207,15 @@ class CurrentQueueCallsService
         foreach ($queue as $call) {
             $calls[] = new OutgoingQueueCall([
                 'callSid' => $call->c_call_sid,
-                'callId' => $call->c_id,
-                'phone' => $call->c_to,
-                'sourceName' => $call->c_source_type_id ? $call->getSourceName() : '',
-                'projectName' => $call->c_project_id ? $call->cProject->name : '',
-                'name' => $call->cClient ? $call->cClient->getFullName() : '------',
                 'type' => CallHelper::getTypeDescription($call),
                 'status' => $call->getStatusName(),
-                'duration' => time() - strtotime($call->c_updated_dt)
+                'duration' => time() - strtotime($call->c_updated_dt),
+                'project' => $call->c_project_id ? $call->cProject->name : '',
+                'source' => $call->c_source_type_id ? $call->getSourceName() : '',
+                'name' => $call->cClient ? $call->cClient->getFullName() : '------',
+                'phone' => $call->c_to,
+                'company' => '',
+                'department' => $call->c_dep_id ? Department::getName($call->c_dep_id) : '',
             ]);
             $last_time = strtotime($call->c_updated_dt);
         }
@@ -221,14 +245,24 @@ class CurrentQueueCallsService
         foreach ($queue as $item) {
             $call = $item->cuaCall;
             $calls[] = new IncomingQueueCall([
-                'callId' => $call->c_id,
                 'callSid' => $call->c_call_sid,
-                'sourceName' => $call->c_source_type_id ? $call->getSourceName() : '',
+                'status' => $call->getStatusName(),
+                'duration' => time() - strtotime($call->c_updated_dt),
+                'typeId' => $call->c_call_type_id,
+                'type' => CallHelper::getTypeDescription($call),
+                'source_type_id' => $call->c_source_type_id,
+                'fromInternal' => false,
+                'isHold' => false,
+                'holdDuration' => 0,
+                'isListen' => false,
+                'isMute' => false,
+                'project' => $call->c_project_id ? $call->cProject->name : '',
+                'source' => $call->c_source_type_id ? $call->getSourceName() : '',
                 'phone' => $call->c_from,
                 'name' => $call->cClient ? $call->cClient->getFullName() : '------',
-                'projectName' => $call->c_project_id ? $call->cProject->name : '',
-                'type' => CallHelper::getTypeDescription($call),
-                'fromInternal' => false
+                'company' => '',
+                'department' => $call->c_dep_id ? Department::getName($call->c_dep_id) : '',
+                'queue' => Call::getQueueName($call),
             ]);
             $last_time = strtotime($item->cua_updated_dt);
         }
@@ -237,5 +271,53 @@ class CurrentQueueCallsService
             'calls' => $calls,
             'last_time' => $last_time,
         ];
+    }
+
+    /**
+     * @return IncomingQueueCall[]
+     */
+    private function getHoldCalls(): array
+    {
+        $calls = [];
+
+        $queue = CallUserAccess::find()
+            ->with(['cuaCall', 'cuaCall.cProject', 'cuaCall', 'cuaCall.cClient'])
+            ->joinWith(['cuaCall'])
+            ->where(['cua_user_id' => $this->userId, 'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING])
+            ->andWhere(['c_status_id' => Call::STATUS_HOLD])
+            ->orderBy(['cua_updated_dt' => SORT_ASC])
+            ->all();
+
+        foreach ($queue as $item) {
+            $call = $item->cuaCall;
+            $phone = '';
+            if ($call->isIn()) {
+                $phone = $call->c_from;
+            } elseif ($call->isOut()) {
+                $phone = $call->c_to;
+            }
+            $calls[] = new IncomingQueueCall([
+                'callSid' => $call->c_call_sid,
+                'status' => $call->getStatusName(),
+                'duration' => time() - strtotime($call->c_updated_dt),
+                'typeId' => $call->c_call_type_id,
+                'type' => CallHelper::getTypeDescription($call),
+                'source_type_id' => $call->c_source_type_id,
+                'fromInternal' => false,
+                'isHold' => false,
+                'holdDuration' => 0,
+                'isListen' => false,
+                'isMute' => false,
+                'project' => $call->c_project_id ? $call->cProject->name : '',
+                'source' => $call->c_source_type_id ? $call->getSourceName() : '',
+                'phone' => $phone,
+                'name' => $call->cClient ? $call->cClient->getFullName() : '------',
+                'company' => '',
+                'department' => $call->c_dep_id ? Department::getName($call->c_dep_id) : '',
+                'queue' => Call::getQueueName($call),
+            ]);
+        }
+
+      return $calls;
     }
 }

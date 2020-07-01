@@ -950,21 +950,6 @@ class PhoneController extends FController
         return $this->asJson($result);
     }
 
-    public function actionAjaxHoldConferenceDoubleCall(): Response
-    {
-        try {
-            $sid = (string)Yii::$app->request->post('sid');
-            $data = $this->getDataForHoldUnholdConferenceDoubleCall($sid);
-            $result = Yii::$app->communication->holdConferenceDoubleCall($data['conferenceSid'], $data['holderSid'], $data['keeperSid']);
-        } catch (\Throwable $e) {
-            $result = [
-                'error' => true,
-                'message' => $e->getMessage(),
-            ];
-        }
-        return $this->asJson($result);
-    }
-
     public function actionAjaxHoldConferenceCall(): Response
     {
         try {
@@ -996,21 +981,6 @@ class PhoneController extends FController
                 throw new \Exception('Invalid type of Participant');
             }
             $result = Yii::$app->communication->unholdConferenceCall($data['conferenceSid'], $data['keeperSid']);
-        } catch (\Throwable $e) {
-            $result = [
-                'error' => true,
-                'message' => $e->getMessage(),
-            ];
-        }
-        return $this->asJson($result);
-    }
-
-    public function actionAjaxUnholdConferenceDoubleCall(): Response
-    {
-        try {
-            $sid = (string)Yii::$app->request->post('sid');
-            $data = $this->getDataForHoldUnholdConferenceDoubleCall($sid);
-            $result = Yii::$app->communication->unholdConferenceDoubleCall($data['conferenceSid'], $data['holderSid'], $data['keeperSid']);
         } catch (\Throwable $e) {
             $result = [
                 'error' => true,
@@ -1243,76 +1213,6 @@ class PhoneController extends FController
             'conferenceSid' => $conference->cf_sid,
             'keeperSid' => $keeperSid,
             'call' => $call,
-        ];
-    }
-
-    private function getDataForHoldUnholdConferenceDoubleCall(string $sid): array
-    {
-        if (!$sid) {
-            throw new BadRequestHttpException('Not found Call SID in request', 1);
-        }
-
-        if (!$call = Call::findOne(['c_call_sid' => $sid])) {
-            throw new BadRequestHttpException('Not found Call. Sid: ' . $sid, 2);
-        }
-
-        $keeperCallId = $call->c_id;
-
-        if ($call->isOut()) {
-            if (!$call = Call::find()->firstChild($call->c_id)->one()) {
-                throw new BadRequestHttpException('Not found first child for Out Call: ' . $call->c_call_sid, 3);
-            }
-        }
-
-        if (!$call->isOwner(Auth::id())) {
-            throw new BadRequestHttpException('Is not your Call', 3);
-        }
-
-        if (!$call->isStatusInProgress()) {
-            throw new BadRequestHttpException('Call is not InProgress', 4);
-        }
-
-        if (!$call->isConferenceType()) {
-            throw new BadRequestHttpException('Call is not conference Call. Sid: ' . $sid, 5);
-        }
-
-        if (!$call->c_conference_sid) {
-            throw new BadRequestHttpException('Call not updated. Please wait some seconds.', 6);
-        }
-
-        if (!$conference = Conference::findOne(['cf_sid' => $call->c_conference_sid])) {
-            throw new BadRequestHttpException('Not found conference Sid: ' . $call->c_conference_sid, 7);
-        }
-
-        if (!$participants = $conference->conferenceParticipants) {
-            throw new BadRequestHttpException('Not found participants on Conference Sid: ' . $call->c_conference_sid, 8);
-        }
-
-        if (($pCount = count($participants)) !== 2) {
-            throw new BadRequestHttpException('Participants count (' . $pCount . ') . Must be only 2 count. Conference Sid: ' . $call->c_conference_sid, 9);
-        }
-
-        $holderSid = null;
-        $keeperSid = null;
-
-        $callIsOneOfParticipants = false;
-        foreach ($participants as $participant) {
-            if ($participant->cp_call_id === $keeperCallId) {
-                $callIsOneOfParticipants = true;
-                $keeperSid = $participant->cp_call_sid;
-            } else {
-                $holderSid = $participant->cp_call_sid;
-            }
-        }
-
-        if (!$callIsOneOfParticipants) {
-            throw new BadRequestHttpException('Call is not One of participants on Conference Sid: ' . $call->c_conference_sid, 10);
-        }
-
-        return [
-            'conferenceSid' => $conference->cf_sid,
-            'holderSid' => $holderSid,
-            'keeperSid' => $keeperSid,
         ];
     }
 

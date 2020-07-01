@@ -1,20 +1,16 @@
 function AllQueues(props) {
     return (
         <React.Fragment>
-            {props.queues.active.count() > 0
-                ? <QueueItem groups={props.queues.active.all()} name="Active" type="active"/>
+            {countProperties(props.active) > 0
+                ? <QueueItem groups={props.active} name="Active Calls" type="active"/>
                 : ''
             }
-            {props.queues.hold.count() > 0
-                ? <QueueItem groups={props.queues.hold.all()} name="On Hold" type="hold"/>
+            {countProperties(props.direct) > 0
+                ? <QueueItem groups={props.direct} name="Direct Calls" type="direct"/>
                 : ''
             }
-            {props.queues.direct.count() > 0
-                ? <QueueItem groups={props.queues.direct.all()} name="Direct Calls" type="direct"/>
-                : ''
-            }
-            {props.queues.general.count() > 0
-                ? <QueueItem groups={props.queues.general.all()} name="General Lines" type="general"/>
+            {countProperties(props.general) > 0
+                ? <QueueItem groups={props.general} name="General Lines" type="general"/>
                 : ''
             }
         </React.Fragment>
@@ -31,4 +27,16 @@ function QueueItem(props) {
             <Groups groups={props.groups}/>
         </li>
     );
+}
+
+function countProperties(obj) {
+    let count = 0;
+
+    for (let prop in obj) {
+        if (obj.hasOwnProperty(prop)) {
+            ++count;
+        }
+    }
+
+    return count;
 }

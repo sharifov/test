@@ -21,14 +21,18 @@ class NewWebPhoneAsset extends AssetBundle
 		'https://cdn.jsdelivr.net/npm/simplebar@latest/dist/simplebar.min.js',
 
         ['/web_phone/js/init.js'],
+        ['/web_phone/js/call_object.js'],
 
+        ['/web_phone/component/pane/call_action_timer.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
         ['/web_phone/component/pane/active/pane.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
+        ['/web_phone/component/pane/incoming/pane.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
         ['/web_phone/component/pane/active/controls.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
         ['/web_phone/component/pane/call_info.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
         ['/web_phone/component/pane/queue/list_item.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
         ['/web_phone/component/pane/queue/groups.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
         ['/web_phone/component/pane/queue/group_item.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
         ['/web_phone/component/pane/queue/queues.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
+        ['/web_phone/component/pane/outgoing/pane.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
 
         '/web_phone/tpl/contact.js',
         '/web_phone/js/contact_info.js',
@@ -49,7 +53,6 @@ class NewWebPhoneAsset extends AssetBundle
         '/web_phone/js/pane/outgoing/pane.js',
 
         '/web_phone/js/pane/queue/pane.js',
-
 
         '/web_phone/js/queue/queue.js',
         '/web_phone/js/queue/test.js',

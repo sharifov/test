@@ -3,30 +3,40 @@
 namespace sales\model\call\services\currentQueueCalls;
 
 use yii\base\Model;
-use yii\helpers\Json;
 
 class IncomingQueueCall extends Model
 {
-    public $fromInternal;
-    public $callId;
     public $callSid;
+    public $status;
+    public $duration;
+    public $typeId;
     public $type;
-    public $name;
-    public $projectName;
-    public $sourceName;
+    public $source_type_id;
+    public $fromInternal;
+    public $isHold;
+    public $holdDuration;
+    public $isListen;
+    public $isMute;
+    public $project;
+    public $source;
     public $phone;
+    public $name;
+    public $company;
+    public $department;
+    public $queue;
 
     public function getData(): array
     {
         $attributes = $this->getAttributes();
-        $attributes['contact'] = [
-            'name' => $this->name
-        ];
-        return $attributes;
-    }
 
-    public function toJson(): string
-    {
-        return Json::encode($this->getData());
+        $attributes['contact'] = [
+            'name' => $this->name,
+            'phone' => $this->phone,
+            'company' => $this->company
+        ];
+
+        unset($attributes['name'], $attributes['phone'], $attributes['company']);
+
+        return $attributes;
     }
 }

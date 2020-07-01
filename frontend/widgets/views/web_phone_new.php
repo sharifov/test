@@ -1,6 +1,5 @@
 <?php
 
-use sales\model\call\services\currentQueueCalls\QueueCalls;
 use frontend\widgets\newWebPhone\NewWebPhoneAsset;
 use yii\helpers\Url;
 use yii\web\View;
@@ -98,16 +97,14 @@ $js = <<<JS
 								webPhoneParams = params;
 								let PhoneNumbersData = phoneNumbers.getPrimaryData.value ? phoneNumbers.getPrimaryData : phoneNumbers.getData;
 								PhoneWidgetCall.requestOutgoingCall({  
-									'callId': '',
 									'callSid': '',
 									'type': 'Outgoing',
 									'status': 'Dialing',  
 									'duration': 0,
-									'projectName': PhoneNumbersData.project,
-									'sourceName': '',
-									'phone': data.phone,
-									'name': data.callToName,
+									'project': PhoneNumbersData.project,
+									'source': '',
 									'contact': {
+									    'phone': data.phone,
 									    'name': data.callToName
 									}
 								});

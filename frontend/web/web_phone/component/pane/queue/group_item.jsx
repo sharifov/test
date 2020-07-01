@@ -2,22 +2,22 @@ function GroupItem(props) {
     return (
         <li className="calls-separator__list-item">
             <div className="static-number-indicator">
-                {props.group.projectName
-                    ? <span className="static-number-indicator__label">{props.group.projectName}</span>
+                {props.group.project
+                    ? <span className="static-number-indicator__label">{props.group.project}</span>
                     : ''
                 }
-                {props.group.projectName && props.group.departmentName
+                {props.group.project && props.group.department
                     ? <i className="static-number-indicator__separator"> </i>
                     : ''
                 }
-                {props.group.departmentName
-                    ? <span className="static-number-indicator__name">{props.group.departmentName}</span>
+                {props.group.department
+                    ? <span className="static-number-indicator__name">{props.group.department}</span>
                     : ''
                 }
             </div>
             <ul className="call-in-progress">
                 {props.group.calls.map((call) =>
-                    <ListItem key={call.callId} call={call}/>
+                    <ListItem key={call.data.callSid} call={call}/>
                 )}
             </ul>
         </li>

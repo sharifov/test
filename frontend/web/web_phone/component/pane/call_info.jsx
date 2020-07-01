@@ -2,16 +2,16 @@ function CallInfo(props) {
     return (
         <div className="calling-from-info">
             <div className="static-number-indicator">
-                {props.projectName
-                    ? <span className="static-number-indicator__label">{props.projectName}</span>
+                {props.project
+                    ? <span className="static-number-indicator__label">{props.project}</span>
                     : ''
                 }
-                {props.projectName && props.sourceName
+                {props.project && props.source
                     ? <i className="static-number-indicator__separator"> </i>
                     : ''
                 }
-                {props.sourceName
-                    ? <span className="static-number-indicator__name">{props.sourceName}</span>
+                {props.source
+                    ? <span className="static-number-indicator__name">{props.source}</span>
                     : ''
                 }
             </div>

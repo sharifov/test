@@ -219,30 +219,28 @@ class CallUserAccess extends \yii\db\ActiveRecord
                 }
 
 				$callInfo = [
+                    'id' => $call->c_id,
+                    'callSid' => $call->c_call_sid,
                     'typeId' => $call->c_call_type_id,
                     'type' => CallHelper::getTypeDescription($this->cuaCall),
-                    'callId' => $call->c_id,
-                    'callSid' => $call->c_call_sid,
-                    'name' => $name,
-                    'phone' => $phone,
 					'fromInternal' => PhoneList::find()->byPhone($this->cuaCall->c_from)->enabled()->exists(),
-                    'projectName' => $call->c_project_id ? $call->cProject->name : '',
-                    'sourceName' => $call->c_source_type_id ? $call->getSourceName() : '',
+                    'project' => $call->c_project_id ? $call->cProject->name : '',
+                    'source' => $call->c_source_type_id ? $call->getSourceName() : '',
                     'status' => $call->getStatusName(),
                     'contact' => [
                         'name' => $name,
                         'phone' => $phone,
                         'company' => '',
                     ],
-                    'state' => Call::formatState($call),
-                    'departmentName' => $call->c_dep_id ? Department::getName($call->c_dep_id) : '',
+                    'queue' => Call::getQueueName($call),
+                    'department' => $call->c_dep_id ? Department::getName($call->c_dep_id) : '',
 				];
 			}
             Notifications::publish('updateIncomingCall', ['user_id' => $this->cua_user_id], array_merge($this->attributes, $callInfo ?? []));
         }
 
-        if(isset($changedAttributes['cua_status_id']) && $call && ($call->isIn() || $call->isHold()) && $this->cua_status_id === self::STATUS_TYPE_NO_ANSWERED) {
-            Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $this->cua_user_id], RemoveIncomingRequestMessage::create($call->c_id, $call->c_call_sid));
+        if (isset($changedAttributes['cua_status_id']) && $call && ($call->isIn() || $call->isHold()) && $this->cua_status_id === self::STATUS_TYPE_NO_ANSWERED) {
+            Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $this->cua_user_id], RemoveIncomingRequestMessage::create($call->c_call_sid));
         }
 
         if (!$insert && isset($changedAttributes['cua_status_id'])) {

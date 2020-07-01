@@ -27,14 +27,14 @@ let incomingTpl =
     '        </div>' +
     '    </div>' +
     '    <div class="call-pane__call-btns ">' +
-    '        <button class="call-pane__start-call calling-state-block" id="btn-accept-call" data-from-internal="{{fromInternal}}" data-call-id="{{callId}}">' +
+    '        <button class="call-pane__start-call calling-state-block" id="btn-accept-call" data-from-internal="{{fromInternal}}" data-call-sid="{{callSid}}">' +
     '            <!--          <div class="call-in-action">-->' +
     '            <!--            <span class="call-in-action__text">Calling</span>-->' +
     '            <!--            <span class="call-in-action__time">00:00</span>-->' +
     '            <!--          </div>-->' +
     '            <i class="fas fa-phone"> </i>' +
     '        </button>' +
-    '        <button class="call-pane__end-call" id="hide-incoming-call" data-call-id="{{callId}}">' +
+    '        <button class="call-pane__end-call" id="hide-incoming-call" data-call-sid="{{callSid}}">' +
     '           <i class="fa fa-angle-double-right"> </i>' +
     '        </button>' +
     '    </div>' +

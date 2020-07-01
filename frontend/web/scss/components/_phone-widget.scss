@@ -3023,6 +3023,9 @@
 		&.tab-hold {
 			background-color: $widget-grapefruit;
 		}
+		&.tab-active {
+			background-color: $widget-grapefruit;
+		}
 		&.tab-direct {
 			background-color: $widget-steel;
 		}
@@ -3054,6 +3057,7 @@
 		}
 
 		&.tab-hold,
+		&.tab-active,
 		&.tab-direct,
 		&.tab-general {
 			justify-content: space-between;

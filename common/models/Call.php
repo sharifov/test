@@ -875,7 +875,7 @@ class Call extends \yii\db\ActiveRecord
                             Yii::error(VarDumper::dumpAsString($callAccess->errors),
                                 'Call:afterSave:CallUserAccess:update');
                         }
-                        Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $callAccess->cua_user_id], RemoveIncomingRequestMessage::create($this->c_id, $this->c_call_sid));
+                        Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $callAccess->cua_user_id], RemoveIncomingRequestMessage::create($this->c_call_sid));
                     }
                 }
 
@@ -1187,7 +1187,11 @@ class Call extends \yii\db\ActiveRecord
                     if ($this->cParent->isIn()) {
                         $phone = $this->cParent->c_to;
                     } elseif ($this->cParent->isOut()) {
-                        $phone = $this->cParent->c_from;
+                        if (isset($this->cParent->cParent)) {
+                            $phone = $this->cParent->cParent->c_from;
+                        } else {
+                            $phone = $this->cParent->c_from;
+                        }
                     }
                 }
             } else {
@@ -1209,18 +1213,16 @@ class Call extends \yii\db\ActiveRecord
                 $isMute = true;
             }
 			if (!$this->currentParticipant || $this->currentParticipant->isAgent() || $this->isEnded()) {
-			    $callId = $this->c_id;
 			    $callSid = $this->c_call_sid;
                 $conferenceBase = (bool)(\Yii::$app->params['settings']['voip_conference_base'] ?? false);
                 if (!$conferenceBase) {
                     if ($isChangedStatus && $this->isStatusInProgress() && $this->isOut() && $this->c_parent_id) {
-                        $callId = $this->c_parent_id;
                         $callSid = $this->c_parent_call_sid ?: $this->cParent->c_call_sid;
                     }
                 }
                 Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id],
                     [
-                        'callId' => $callId,
+                        'id' => $this->c_id,
                         'callSid' => $callSid,
                         'status' => $this->getStatusName(),
                         'duration' => $this->c_call_duration,
@@ -1229,23 +1231,21 @@ class Call extends \yii\db\ActiveRecord
                         'typeId' => $this->c_call_type_id,
                         'type' => CallHelper::getTypeDescription($this),
                         'source_type_id' => $this->c_source_type_id,
-                        'phone' => $phone,
-                        'name' => $name,
                         'fromInternal' => $isInternal,
                         'isHold' => $isHold,
                         'holdDuration' => $holdDuration,
                         'isListen' => $isListen,
                         'isMute' => $isMute,
-                        'projectName' => $this->c_project_id ? $this->cProject->name : '',
-                        'sourceName' => $this->c_source_type_id ? $this->getSourceName() : '',
+                        'project' => $this->c_project_id ? $this->cProject->name : '',
+                        'source' => $this->c_source_type_id ? $this->getSourceName() : '',
                         'isEnded' => $this->isEnded(),
                         'contact' => [
                             'name' => $name,
                             'phone' => $phone,
                             'company' => '',
                         ],
-                        'departmentName' => $this->c_dep_id ? Department::getName($this->c_dep_id) : '',
-                        'state' => self::formatState($this)
+                        'department' => $this->c_dep_id ? Department::getName($this->c_dep_id) : '',
+                        'queue' => self::getQueueName($this)
                     ]
                 );
             }
@@ -1298,7 +1298,7 @@ class Call extends \yii\db\ActiveRecord
 
     }
 
-    public static function formatState(Call $call): string
+    public static function getQueueName(Call $call): string
     {
         if ($call->isStatusInProgress()) {
             return 'inProgress';
@@ -1398,7 +1398,7 @@ class Call extends \yii\db\ActiveRecord
                         if ($callAccess->update() === false) {
                             Yii::error(VarDumper::dumpAsString($callAccess->errors), 'Call:applyCallToAgent:CallUserAccess:save');
                         }
-                        Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $callAccess->cua_user_id], RemoveIncomingRequestMessage::create($call->c_id, $call->c_call_sid));
+                        Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $callAccess->cua_user_id], RemoveIncomingRequestMessage::create($call->c_call_sid));
                     }
                 }
 
@@ -1435,7 +1435,7 @@ class Call extends \yii\db\ActiveRecord
                     $agent = 'seller' . $user_id;
                     $res = \Yii::$app->communication->callRedirect($call->c_call_sid, 'client', $call->c_from, $agent);
 
-                    Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $user_id], RemoveIncomingRequestMessage::create($call->c_id));
+                    Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $user_id], RemoveIncomingRequestMessage::create($call->c_call_sid));
 
                     if ($res && isset($res['error']) && $res['error'] === false) {
                         if (isset($res['data']['is_error']) && $res['data']['is_error'] === true) {

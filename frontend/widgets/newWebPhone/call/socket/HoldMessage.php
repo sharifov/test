@@ -16,7 +16,6 @@ class HoldMessage
             'data' => [
                 'command' => self::COMMAND_HOLD,
                 'call' => [
-                    'id' => $call->c_id,
                     'sid' => $call->c_call_sid,
                     'user_id' => $call->c_created_user_id,
                     'type_id' => $call->c_call_type_id,
@@ -31,7 +30,6 @@ class HoldMessage
             'data' => [
                 'command' => self::COMMAND_UNHOLD,
                 'call' => [
-                    'id' => $call->c_id,
                     'sid' => $call->c_call_sid,
                     'user_id' => $call->c_created_user_id,
                     'type_id' => $call->c_call_type_id,

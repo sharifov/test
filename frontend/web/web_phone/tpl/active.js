@@ -36,7 +36,7 @@ let activeTpl =
     '                </div>' +
     '                <!-- <i class="fas fa-phone"></i> -->' +
     '            </button>' +
-    '            <button class="call-pane__end-call" id="cancel-active-call" data-call-id="{{callId}}">' +
+    '            <button class="call-pane__end-call" id="cancel-active-call" data-call-sid="{{callSid}}">' +
     '                <i class="fa fa-phone-slash"></i>' +
     '            </button>' +
     '        </div>' +
@@ -61,13 +61,13 @@ let activeTpl =
     '        </div>' +
     '    </div>' +
     '    <ul class="in-call-controls">' +
-    '      <li class="in-call-controls__item" data-mode="unhold" id="wg-hold-call" data-call-id="{{callId}}">' +
+    '      <li class="in-call-controls__item" data-mode="unhold" id="wg-hold-call" data-call-sid="{{callSid}}">' +
     '        <a href="#" class="in-call-controls__action">' +
     '          <i class="fa fa-pause"></i>' +
     '          <span>Hold</span>' +
     '        </a>' +
     '      </li>' +
-    '      <li class="in-call-controls__item wg-transfer-call" data-call-id="{{callId}}">' +
+    '      <li class="in-call-controls__item wg-transfer-call" data-call-sid="{{callSid}}">' +
     '        <a href="#" class="in-call-controls__action">' +
     '        <i class="fa fa-random"></i>' +
     '          <span>Transfer Call</span>' +
@@ -92,7 +92,7 @@ let activeTpl =
     '              <input type="text" class="call-pane__note-msg form-control" id="active_call_add_note" placeholder="Add Note" autocomplete="off">' +
     '              <div class="error-message"></div>' +
     '          </div>' +
-    '          <button class="call-pane__add-note" id="active_call_add_note_submit" data-call-id="{{callId}}">' +
+    '          <button class="call-pane__add-note" id="active_call_add_note_submit" data-call-sid="{{callSid}}">' +
     '            <svg width="17" height="12" viewBox="0 0 17 12" fill="none" xmlns="http://www.w3.org/2000/svg">' +
     '                <path fill-rule="evenodd" clip-rule="evenodd"' +
     '                d="M16.7072 1.70718L6.50008 11.9143L0.292969 5.70718L1.70718 4.29297L6.50008 9.08586L15.293 0.292969L16.7072 1.70718Z"' +

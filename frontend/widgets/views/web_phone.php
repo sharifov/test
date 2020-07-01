@@ -88,10 +88,6 @@ use yii\helpers\Html;
                         <div class="btn-group" id="btn-group-id-mute" style="display: none;">
                             <?= Html::button('<i class="fa fa-microphone"></i> Mute', ['id' => 'btn-mute-microphone', 'class' => 'btn btn-sm btn-success']) ?>
                         </div>
-                      <?php /*  <div class="btn-group" id="btn-group-id-hold-double-call" style="display: none;">
-                            <?= Html::button('<i class="fa fa-pause"></i> Hold', ['id' => 'btn-hold-double-call', 'class' => 'btn btn-sm btn-success', 'data-call-sid' => '', 'data-is-hold' => false]) ?>
-                        </div>
-                        */ ?>
 
                         <div class="btn-group" id="btn-group-id-hold-call" style="display: none;">
                             <?= Html::button('<i class="fa fa-pause"></i> <span>On Hold</span>', ['class' => 'btn btn-sm btn-success btn-hold-call', 'data-mode' => 'unhold']) ?>
@@ -375,15 +371,22 @@ use yii\helpers\Html;
         }
 
         let call = null;
-        if (typeof  PhoneWidgetCall === 'object') {
-            let call = PhoneWidgetCall.queues.active.oneBySid(callSid);
-            if (call !== null) {
-                if (call.isBlocked) {
-                    return false;
-                }
-                call.isBlocked = true;
-                PhoneWidgetCall.panes.queue.refresh();
+        if (typeof PhoneWidgetCall === 'object') {
+            let call = PhoneWidgetCall.queues.active.one(callSid);
+
+            if (call === null) {
+                createNotify('Hangup', 'Not found Call on Active Queue', 'error');
+                return false;
             }
+
+            if (call.isBlocked()) {
+                createNotify('Hangup', 'Call is blocked. Please wait some seconds.', 'error');
+                return false;
+            }
+
+            call.block();
+            call.sendHangupRequest();
+            PhoneWidgetCall.panes.queue.refresh();
         }
 
         let activeCallBtn = $(document).find('#cancel-active-call');
@@ -418,7 +421,7 @@ use yii\helpers\Html;
         })
             .done(function(data) {
                 if (data.error) {
-                    new PNotify({title: "Hangup", type: "error", text: data.message, hide: true});
+                    createNotify('Hangup', data.message, 'error');
                     if (oldActiveCallBtn !== null) {
                         oldActiveCallBtn.prop('disabled', false);
                     }
@@ -426,16 +429,18 @@ use yii\helpers\Html;
                         activeCallBtn.prop('disabled', false);
                         activeCallBtn.html('<i class="fa fa-phone-slash"> </i>');
                     }
-                    if (call !== null) {
-                        call.isBlocked = false;
-                        PhoneWidgetCall.panes.queue.refresh();
+                    if (typeof PhoneWidgetCall === 'object') {
+                        call = PhoneWidgetCall.queues.active.one(callSid);
+                        if (call !== null) {
+                            call.unBlock();
+                            call.unSendHangupRequest();
+                            PhoneWidgetCall.panes.queue.refresh();
+                        }
                     }
                 }
             })
-            .fail(function(error) {
-                console.error(error);
-            })
-            .always(function () {
+            .fail(function(jqXHR, textStatus, errorThrown) {
+                createNotify('Hangup', 'Server error', 'error');
                 if (oldActiveCallBtn !== null) {
                     oldActiveCallBtn.prop('disabled', false);
                 }
@@ -443,36 +448,42 @@ use yii\helpers\Html;
                     activeCallBtn.prop('disabled', false);
                     activeCallBtn.html('<i class="fa fa-phone-slash"> </i>');
                 }
-                if (call !== null) {
-                    call.isBlocked = false;
-                    PhoneWidgetCall.panes.queue.refresh();
+                if (typeof PhoneWidgetCall === 'object') {
+                    call = PhoneWidgetCall.queues.active.one(callSid);
+                    if (call !== null) {
+                        call.unBlock();
+                        call.unSendHangupRequest();
+                        PhoneWidgetCall.panes.queue.refresh();
+                    }
                 }
+            })
+            .always(function () {
+
             });
     }
 
-    function hangupOutgoingCall(button, callId) {
-        button.html('<i class="fa fa-spinner fa-spin"></i>');
+    function hangupOutgoingCall(button, callSid) {
+        button.html('<i class="fa fa-spinner fa-spin"> </i>');
         button.prop('disabled', true);
         $.ajax({
             type: 'post',
             data: {
-                'id': callId,
+                'sid': callSid,
             },
             url: ajaxHangupUrl
         })
             .done(function(data) {
                 if (data.error) {
-                    new PNotify({title: "Hangup", type: "error", text: data.message, hide: true});
+                    createNotify('Hangup', data.message, 'error');
+                    button.html('<i class="fa fa-phone-slash"> </i>');
+                    button.prop('disabled', false);
                 }
             })
-            .fail(function(error) {
-                console.error(error);
-            })
-            .always(function () {
-                button.html('<i class="fa fa-phone-slash"></i>');
+            .fail(function() {
+                createNotify('Hangup', 'Server error', 'error');
+                button.html('<i class="fa fa-phone-slash"> </i>');
                 button.prop('disabled', false);
-            });
-
+            })
     }
 
     function conferenceComplete() {
@@ -680,22 +691,14 @@ use yii\helpers\Html;
     };
 
 
-    function initRedirectToAgent() {
-
-        if (connection && connection.parameters.CallSid) {
-            let callSid = connection.parameters.CallSid;
-            let modal = $('#web-phone-redirect-agents-modal');
-            modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
-            $('#web-phone-redirect-agents-modal-label').html('Transfer Call');
-
-            $.post(ajaxCallRedirectGetAgents, { sid: callSid }) // , user_id: userId
-                .done(function(data) {
-                    modal.find('.modal-body').html(data);
-                });
-        } else {
-             alert('Error: Not found Call connection or Call SID!');
-        }
-        return false;
+    function initRedirectToAgent(callSid) {
+        let modal = $('#web-phone-redirect-agents-modal');
+        modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"> </i> Loading ...</div>');
+        $('#web-phone-redirect-agents-modal-label').html('Transfer Call');
+        $.post(ajaxCallRedirectGetAgents, { sid: callSid }) // , user_id: userId
+            .done(function(data) {
+                modal.find('.modal-body').html(data);
+            });
     }
 
 
@@ -782,9 +785,9 @@ use yii\helpers\Html;
                     //console.info(conn.parameters);
                     //alert(clientId + ' - ' + conn.parameters.From);
                     $('#btn-group-id-hangup').show();
+                    $('#button-hangup').attr('data-call-sid', connection.parameters.CallSid);
+                    $('#button-hangup').prop('disabled', false);
                     $('#btn-mute-microphone').html('<i class="fa fa-microphone"></i> Mute').removeClass('btn-warning').addClass('btn-success');
-                     // $('.btn-hold-double-call').attr('data-call-sid', connection.parameters.CallSid).attr('data-is-hold', false).html('<i class="fa fa-pause"></i> Hold');
-                    // $('#btn-group-id-hold-double-call').show();
 
                     let isJoin = false;
                     let sourceTypeId = null;
@@ -796,8 +799,6 @@ use yii\helpers\Html;
                             sourceTypeId = value;
                         }
                     });
-
-                    let btnHold = $('.btn-hold-call');
 
                     if (isJoin) {
 
@@ -816,9 +817,11 @@ use yii\helpers\Html;
                     } else {
 
                         if (conferenceBase) {
+                            let btnHold = $('.btn-hold-call');
                             btnHold.prop('disabled', false);
                             btnHold.html('<i class="fa fa-pause"></i> <span>Hold</span>');
                             btnHold.data('mode', 'unhold');
+                            btnHold.attr('data-call-sid', connection.parameters.CallSid);
                             $('#btn-group-id-hold-call').show();
                         }
 
@@ -827,6 +830,7 @@ use yii\helpers\Html;
                         $('#web-call-to-number').text(conn.parameters.To);
                         $('#btn-group-id-mute').show();
                         isJoinCall = false;
+                        $('#btn-show-transfer-call').attr('data-call-sid', connection.parameters.CallSid);
                         if (conn.parameters.From === undefined) {
                             $('#btn-group-id-redirect').show();
                         } else {
@@ -858,8 +862,6 @@ use yii\helpers\Html;
 
                     $('#join-source-type').html();
                     $('#join-source-type').hide();
-                    // $('#btn-group-id-hold-double-call').hide();
-                    // $('#btn-hold-double-call').attr('data-call-sid', '').attr('data-is-hold', false);
                     $('#btn-group-id-hold-call').hide();
 
                     volumeIndicators.style.display = 'none';
@@ -1166,7 +1168,12 @@ $js = <<<JS
 
     $(document).on('click', '#btn-show-transfer-call', function(e) {
         e.preventDefault();
-        initRedirectToAgent();
+        let callSid = $(this).attr('data-call-sid');
+        if (callSid) {
+            initRedirectToAgent(callSid);   
+        } else {
+            new PNotify({title: "Transfer call", type: "error", text: "Not found Call SID!", hide: true});
+        }
     });
     
     $(document).on('click', '.btn-transfer', function(e) {
@@ -1465,7 +1472,7 @@ $js = <<<JS
                 connection.mute(false);
                 if (!connection.isMuted()) {
                     if (typeof PhoneWidgetCall === 'object') { 
-                        PhoneWidgetCall.panes.active.buttons.mute.unmute();
+                        PhoneWidgetCall.panes.active.buttons.mute.unMute();
                     }
                     $(this).html('<i class="fa fa-microphone"></i> Mute').removeClass('btn-warning').addClass('btn-success');
                 } else {
@@ -1484,13 +1491,13 @@ $js = <<<JS
         }
          
         e.preventDefault();
-        let callSid = getActiveConnectionCallSid();
+        let callSid = $(this).attr('data-call-sid');
         if (callSid) {
-           let mode = $(this).data('mode');
+           let mode = $(this).attr('data-mode');
             if (mode === 'unhold') {
-                holdCall(callSid);   
+                PhoneWidgetCall.holdCall(callSid);   
             } else {
-                unholdCall(callSid);
+                PhoneWidgetCall.unholdCall(callSid);
             }
         } else {
             alert('Error: Not found active Connection CallSid');
@@ -1505,109 +1512,23 @@ $js = <<<JS
          
          if (PhoneWidgetCall.panes.active.getCallSid() === data.call.sid) {
              if (data.command === 'mute') {
-                 PhoneWidgetCall.panes.active.mute();
+                 PhoneWidgetCall.panes.active.buttons.mute.mute();
              } else if (data.command === 'unmute') {
-                 PhoneWidgetCall.panes.active.unMute();
+                PhoneWidgetCall.panes.active.buttons.mute.unMute();
              }
          }
-     }
-    
-     $(document).on('click', '#btn-hold-double-call', function(e) {
-        let btn = $(this);
-        let isHold = btn.attr('data-is-hold');
-        let callSid = btn.attr('data-call-sid');
-        
-        e.preventDefault();
-        
-        if ((currentConnection && currentConnection.parameters.CallSid)) {
-            updateAgentStatus(currentConnection, false, 1);
-            
-            if(currentConnection.status() !== 'open') {
-                currentConnection.accept();
+         
+        let call = PhoneWidgetCall.queues.active.one(data.call.sid);
+        if (call !== null) {
+            if (data.command === 'mute') {
+                call.data.isMute = true;
+            } else if (data.command === 'unmute') {
+                call.data.isMute = false;
             }
-            
-            if (!callSid) {
-                callSid = currentConnection.parameters.CallSid;
-                btn.attr('data-call-sid', callSid);
-            }
-                         
-            if (isHold === 'false') {
-                holdDoubleCall(callSid, btn);
-            } else {
-                unHoldDoubleCall(callSid, btn);
-            }
-                     
-        } else {
-            alert('Error: Not found active connection or CallSid');
+            call.unSendMuteRequest();
+            call.unBlock();
         }
-    });
-     
-     function holdDoubleCall(callSid, btn) {
-          let spinner = '<i class="fa fa-spinner fa-spin"></i> Hold'; 
-          let oldValue = btn.html();
-          
-          btn.html(spinner);
-          btn.prop('disabled', true);
-          
-          $.ajax({
-                type: 'post',
-                data: {
-                    'sid': callSid,
-                },
-                url: ajaxHoldConferenceDoubleCall
-            })
-            .done(function (data) {
-                if (data.error) {
-                    new PNotify({title: "Hold", type: "error", text: data.message, hide: true});
-                    btn.html(oldValue);
-                } else {
-                    btn.html('<i class="fa fa-angle-double-right"></i> UnHold');
-                    btn.attr('data-is-hold', true);
-                    new PNotify({title: "Hold", type: "success", text: 'Success', hide: true});
-                }                
-             })
-             .fail(function (error) {
-                console.error(error);
-                btn.html(oldValue);
-             })
-             .always(function() {
-                btn.prop('disabled', false);
-             });
      }
-     
-     function unHoldDoubleCall(callSid, btn) {
-          let spinner = '<i class="fa fa-spinner fa-spin"></i> UnHold'; 
-          let oldValue = btn.html();
-          
-          btn.html(spinner);
-          btn.prop('disabled', true);
-          
-          $.ajax({
-                type: 'post',
-                data: {
-                    'sid': callSid,
-                },
-                url: ajaxUnholdConferenceDoubleCall
-            })
-            .done(function (data) {
-                if (data.error) {
-                    new PNotify({title: "Unhold", type: "error", text: data.message, hide: true});
-                     btn.html(oldValue);
-                } else {
-                    btn.html('<i class="fa fa-pause"></i> Hold');
-                    btn.attr('data-is-hold', false);
-                    new PNotify({title: "UnHold", type: "success", text: 'Success', hide: true});
-                }                
-             })
-             .fail(function (error) {
-                console.error(error);
-                 btn.html(oldValue);
-             })
-             .always(function() {
-                btn.prop('disabled', false);
-             });
-     }
-     
      
     //setInterval('renewTwDevice();', 50000);
 

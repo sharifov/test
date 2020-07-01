@@ -256,25 +256,27 @@ class TestController extends FController
             'type' => 'Inc ' . $tmp,
             'callId' => $tmp,
             'callSid' => 'sid' . $tmp,
-            'name' => 'name ' . $tmp,
-            'phone' => '+' . $tmp,
             'fromInternal' => false,
-            'projectName' => '',
-            'sourceName' => 'Source',
-//            'status' => 'Ringing',
-            'status' => 'In progress',
-            'isListen' => false,
-            'isMute' => false,
+            'project' => 'wow',
+            'source' => 'Source',
+            'status' => 'Ringing',
+//            'status' => 'In progress',
+//            'status' => 'Hold',
+//            'isListen' => false,
+//            'isMute' => false,
+//            'isHold' => false,
             'contact' => [
                 'name' => 'Name ' . $tmp,
                 'company' => 'Company ' . $tmp,
                 'phone' => '+00 ' . $tmp
             ],
-            'departmentName' => 'Sales',
-            'state' => 'inProgress',
-            'duration' => 120,
+            'department' => 'Sales',
+//            'queue' => 'hold',
+            'queue' => 'direct',
+            'duration' => 0,
         ];
-        Notifications::publish('callUpdate', ['user_id' => 295], $callInfo);
+        Notifications::publish('updateIncomingCall', ['user_id' => 295], $callInfo);
+//        Notifications::publish('callUpdate', ['user_id' => 295], $callInfo);
         die;
 
 //
@@ -310,7 +312,7 @@ class TestController extends FController
         $callInfo = [
             'data' => [
                 'call' => [
-                    'id' => 13,
+                    'sid' => 13,
                 ],
             ],
         ];

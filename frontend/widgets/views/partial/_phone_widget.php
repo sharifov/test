@@ -21,7 +21,7 @@ use yii\web\View;
         <div class="status-confirmation"></div>
       </div>
         <ul class="call-filter">
-            <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-hold" data-call-filter="hold">0</a></li>
+            <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-active" data-call-filter="active">0</a></li>
             <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-direct" data-call-filter="direct">0</a></li>
             <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-general" data-call-filter="general">0</a></li>
         </ul>

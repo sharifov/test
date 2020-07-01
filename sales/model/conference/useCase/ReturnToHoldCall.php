@@ -4,11 +4,14 @@ namespace sales\model\conference\useCase;
 
 use common\components\CommunicationService;
 use common\models\Call;
+use common\models\CallUserAccess;
 use common\models\Conference;
+use common\models\Notifications;
+use frontend\widgets\newWebPhone\call\socket\RemoveIncomingRequestMessage;
 use yii\helpers\VarDumper;
 
 /**
- * Class ManageCurrentCallsService
+ * Class ReturnToHoldCall
  *
  * @property CommunicationService $communication
  * @property array $messages
@@ -101,6 +104,24 @@ class ReturnToHoldCall
         }
 
         return true;
+    }
+
+    public function acceptHoldCall(CallUserAccess $callUserAccess): bool
+    {
+        $callUserAccess->acceptCall();
+        if (!$callUserAccess->save()) {
+            return false;
+        }
+        if ($call = $callUserAccess->cuaCall) {
+            $call->setStatusDelay();
+            if ($call->save()) {
+                Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $callUserAccess->cua_user_id], RemoveIncomingRequestMessage::create($call->c_call_sid));
+                Notifications::pingUserMap();
+                return true;
+            }
+            \Yii::error(VarDumper::dumpAsString($call->getErrors()), 'ReturnToHoldCall:acceptHoldCall');
+        }
+        return false;
     }
 
     private function log($message): void

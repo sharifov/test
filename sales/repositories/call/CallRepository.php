@@ -109,4 +109,15 @@ class CallRepository extends Repository
 		return $call;
 	}
 
+    /**
+     * @param $sid
+     * @return Call
+     */
+    public function findBySid($sid): Call
+    {
+        if ($call = Call::findOne(['c_call_sid' => $sid])) {
+            return $call;
+        }
+        throw new NotFoundException('Call is not found');
+    }
 }

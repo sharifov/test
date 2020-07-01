@@ -1950,9 +1950,11 @@
   font-weight: 600; }
 .call-filter__toggle:hover, .call-filter__toggle:focus, .call-filter__toggle:active, .call-filter__toggle:visited, .call-filter__toggle:active:focus, .call-filter__toggle:focus:hover {
   color: #fff; }
-.call-filter__toggle--line-hold {
+.call-filter__toggle--line-hold,
+.call-filter__toggle--line-active {
   border-color: #E7826C; }
-.call-filter__toggle--line-hold.is-checked {
+.call-filter__toggle--line-hold.is-checked,
+.call-filter__toggle--line-active.is-checked {
   background-color: #E7826C; }
 .call-filter__toggle--line-direct {
   border-color: #668BAF; }
@@ -1977,7 +1979,8 @@
   padding: 12px;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1);
   background-color: #8F97A4; }
-.widget-line-overlay__queue-marker.tab-hold {
+.widget-line-overlay__queue-marker.tab-hold,
+.widget-line-overlay__queue-marker.tab-active {
   background-color: #E7826C; }
 .widget-line-overlay__queue-marker.tab-direct {
   background-color: #668BAF; }
@@ -1997,9 +2000,9 @@
   text-decoration: underline; }
 .widget-line-overlay__queue-marker a:hover, .widget-line-overlay__queue-marker a:active, .widget-line-overlay__queue-marker a:focus, .widget-line-overlay__queue-marker a:active:hover, .widget-line-overlay__queue-marker a:focus:active {
   color: #fff8b6; }
-.widget-line-overlay__queue-marker.tab-hold, .widget-line-overlay__queue-marker.tab-direct, .widget-line-overlay__queue-marker.tab-general {
+.widget-line-overlay__queue-marker.tab-hold, .widget-line-overlay__queue-marker.tab-active, .widget-line-overlay__queue-marker.tab-direct, .widget-line-overlay__queue-marker.tab-general {
   justify-content: space-between; }
-.widget-line-overlay__queue-marker.tab-hold a, .widget-line-overlay__queue-marker.tab-direct a, .widget-line-overlay__queue-marker.tab-general a {
+.widget-line-overlay__queue-marker.tab-hold a, .widget-line-overlay__queue-marker.tab-active a, .widget-line-overlay__queue-marker.tab-direct a, .widget-line-overlay__queue-marker.tab-general a {
   display: inline-block; }
 .widget-line-overlay__body {
   height: calc(100% - 38px);

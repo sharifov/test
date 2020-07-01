@@ -1,58 +1,35 @@
 var PhoneWidgetPaneOutgoing = function () {
 
-    let $pane = $('.call-pane-outgoing');
+    let callSid = null;
+
+    const containerId = 'call-pane-outgoing';
+    let $container = $('#' + containerId);
+
     let contactInfo = PhoneWidgetContactInfo;
     let dialpad = PhoneWidgetDialpad;
 
-    function render(data) {
-        let html = '';
-        let template = outgoingTpl;
-        $.each(data, function (k, v) {
-            html = template.split('{{' + k + '}}').join(v);
-            template = html;
-        });
-        return html;
-    }
-
     /*
         data = {
-           callId,
+           callSid,
            type,
            status,
            duration,
-           projectName,
-           sourceName,
-           phone,
-           name,
+           project,
+           source,
            contact = {
-                name
+                name,
+                phone
            }
         }
      */
-    function load(data) {
-        contactInfo.load(data.contact);
+    function load(call) {
+        contactInfo.load(call.data.contact);
 
-        let html = render(data);
-        $pane.html(html);
+        let container = document.getElementById(containerId);
+        ReactDOM.unmountComponentAtNode(container);
+        ReactDOM.render(React.createElement(OutgoingPane, {call: call}), container);
 
-        $pane.find('.call-in-action__time').html('').show().timer('remove').timer({
-            format: '%M:%S',
-            seconds: data.duration
-        }).timer('start');
-
-        if (!data.projectName) {
-            $pane.find('.cw-project_name').hide();
-        }
-
-        if (!data.sourceName) {
-            $pane.find('.cw-source_name').hide();
-        }
-
-        if (!data.projectName || !data.sourceName) {
-            $pane.find('.static-number-indicator__separator').hide();
-        }
-
-        setCallId(data.callId);
+        setCallSid(call.data.callSid);
     }
 
     function show() {
@@ -60,35 +37,33 @@ var PhoneWidgetPaneOutgoing = function () {
         dialpad.hide();
 
         $('#tab-phone .call-pane-initial').removeClass('is_active');
-        $pane.addClass('is_active');
+        $container.addClass('is_active');
     }
 
     function hide() {
-        $pane.removeClass('is_active');
+        $container.removeClass('is_active');
     }
 
-    function setCallId(callId) {
-        $pane.find('#cancel-outgoing-call').attr('data-call-id', callId);
-        $pane.attr('data-call-id', callId);
+    function setCallSid(sid) {
+        callSid = sid;
     }
 
-    function getCallId() {
-        return parseInt($pane.attr('data-call-id'));
+    function getCallSid() {
+        return callSid;
     }
 
-    function removeCallId() {
-        $pane.find('#cancel-outgoing-call').attr('data-call-id', '');
-        $pane.attr('data-call-id', '');
+    function removeCallSid() {
+        callSid = null;
     }
 
     function isActive() {
-        return $pane.hasClass('is_active');
+        return $container.hasClass('is_active');
     }
 
-    function init(data) {
-        load(data);
+    function init(call) {
+        load(call);
         show();
-        widgetIcon.update({type: 'outgoing', timer: true, 'timerStamp': data.duration, text: data.status, currentCalls: null, status: 'online'});
+        widgetIcon.update({type: 'outgoing', timer: true, 'timerStamp': call.getDuration(), text: call.data.status, currentCalls: null, status: 'online'});
     }
 
     return {
@@ -96,8 +71,8 @@ var PhoneWidgetPaneOutgoing = function () {
         load: load,
         show: show,
         hide: hide,
-        getCallId: getCallId,
-        removeCallId: removeCallId,
+        getCallSid: getCallSid,
+        removeCallSid: removeCallSid,
         isActive: isActive
     }
 

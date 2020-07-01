@@ -183,7 +183,7 @@ $js = <<<JS
                                 refreshInboxCallWidget(obj);
                             }
                             if (typeof PhoneWidgetCall === 'object') {
-                                if ((typeof obj.status !== 'undefined' && obj.status !== 'Hold')) {
+                                if ((typeof obj.status !== 'undefined')) {
                                      PhoneWidgetCall.requestIncomingCall(obj);
                                 }
                             }
@@ -234,7 +234,7 @@ $js = <<<JS
                         if (obj.cmd === 'removeIncomingRequest') {
                             if (typeof obj.data !== 'undefined') {
                                 if (typeof PhoneWidgetCall === 'object') {
-                                    PhoneWidgetCall.removeIncomingRequest(obj.data.call.id);
+                                    PhoneWidgetCall.removeIncomingRequest(obj.data.call.sid);
                                 }
                              }
                         }

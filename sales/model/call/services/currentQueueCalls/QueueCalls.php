@@ -5,6 +5,7 @@ namespace sales\model\call\services\currentQueueCalls;
 /**
  * Class QueueCalls
  *
+ * @property IncomingQueueCall[] $hold
  * @property IncomingQueueCall[] $incoming
  * @property OutgoingQueueCall[] $outgoing
  * @property ActiveQueueCall[] $active
@@ -16,14 +17,16 @@ class QueueCalls
     public const LAST_ACTIVE_OUTGOING = 'outgoing';
     public const LAST_ACTIVE_ACTIVE = 'active';
 
+    public array $hold;
     public array $incoming;
     public array $outgoing;
     public array $active;
 
     public string $lastActiveQueue;
 
-    public function __construct(array $incoming, array $outgoing, array $active)
+    public function __construct(array $hold, array $incoming, array $outgoing, array $active)
     {
+        $this->hold = $hold;
         $this->incoming = $incoming;
         $this->outgoing = $outgoing;
         $this->active = $active;
@@ -31,7 +34,7 @@ class QueueCalls
 
     public function isEmpty(): bool
     {
-        return !$this->incoming && !$this->outgoing && !$this->active;
+        return !$this->incoming && !$this->outgoing && !$this->active && !$this->hold;
     }
 
     public function isLastIncoming(): bool

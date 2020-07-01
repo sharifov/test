@@ -341,7 +341,7 @@
  */ ?>
   </div>
 
-  <div class="call-pane-incoming call-pane-initial">
+  <div class="call-pane-incoming call-pane-initial" id="call-pane-incoming">
       <?php /*
     <div class="calling-from-info">
       <div class="static-number-indicator">
@@ -397,7 +397,7 @@
 */ ?>
   </div>
 
-  <div class="call-pane-outgoing call-pane-initial">
+  <div class="call-pane-outgoing call-pane-initial" id="call-pane-outgoing">
       <?php /*
         <div class="calling-from-info">
             <div class="static-number-indicator">
@@ -502,6 +502,7 @@ $clearMissedCallsUrl = Url::to(['/call/clear-missed-calls']);
 $currentQueueCallsUrl = Url::to(['/call/current-queue-calls']);
 $holdUrl = Url::to(['/phone/ajax-hold-conference-call']);
 $unholdUrl = Url::to(['/phone/ajax-unhold-conference-call']);
+$returnHoldCallUrl = Url::to(['/call/return-hold-call']);
 
 $ucStatus = $userCallStatus->us_type_id;
 
@@ -521,6 +522,7 @@ PhoneWidgetCall.init({
     'status': $ucStatus,
     'holdUrl': '$holdUrl',
     'unholdUrl': '$unholdUrl',
+    'returnHoldCallUrl': '$returnHoldCallUrl'
 });
 JS;
 $this->registerJs($js);

@@ -9,8 +9,8 @@ function PhoneWidgetPaneQueue(initQueues) {
         let type = $(this).attr('data-call-filter');
 
         switch (type) {
-            case 'hold':
-                holdShow();
+            case 'active':
+                activeShow();
                 break;
             case 'direct':
                 directShow();
@@ -34,12 +34,37 @@ function PhoneWidgetPaneQueue(initQueues) {
         allShow();
     });
 
-    function holdShow() {
+    this.openAllCalls = function () {
+        let target = $('.widget-line-overlay__show-all-queues');
+        $(filterToggle).addClass('is-checked');
+        clearIndicators(target);
+        $('[data-toggle-tab]').removeClass('is_active');
+        allShow();
+        self.show();
+    };
+
+    function mergeActiveCalls() {
+        let activeCollection = Object.assign({}, queues.active.all());
+        let holdCollection = Object.assign({}, queues.hold.all());
+
+        for (let key in holdCollection) {
+            if (typeof activeCollection[key] === 'undefined') {
+                activeCollection[key] = holdCollection[key];
+            } else {
+                holdCollection[key].calls.forEach(function (call) {
+                    activeCollection[key].calls.push(call);
+                });
+            }
+        }
+        return activeCollection;
+    }
+
+    function activeShow() {
         ReactDOM.render(
-            React.createElement(QueueItem, {groups: queues.hold.all(), type: 'hold', name: ''}),
+            React.createElement(QueueItem, {groups: mergeActiveCalls(), type: 'active', name: ''}),
             document.getElementById('queue-separator')
         );
-        activeQueue = 'hold';
+        activeQueue = 'active';
     }
 
     function directShow() {
@@ -60,14 +85,18 @@ function PhoneWidgetPaneQueue(initQueues) {
 
     function allShow() {
         ReactDOM.render(
-            React.createElement(AllQueues, {queues: queues}),
+            React.createElement(AllQueues, {
+                active: mergeActiveCalls(),
+                direct: queues.direct.all(),
+                general: queues.general.all()
+            }),
             document.getElementById('queue-separator')
         );
         activeQueue = 'all';
     }
 
-    function isHoldActive() {
-        return activeQueue === 'hold';
+    function isActiveActive() {
+        return activeQueue === 'active';
     }
 
     function isDirectActive() {
@@ -84,8 +113,8 @@ function PhoneWidgetPaneQueue(initQueues) {
 
     this.refresh = function () {
         updateCounters();
-        if (isHoldActive()) {
-            holdShow();
+        if (isActiveActive()) {
+            activeShow();
         } else if (isDirectActive()) {
             directShow();
         } else if (isGeneralActive()) {
@@ -100,7 +129,7 @@ function PhoneWidgetPaneQueue(initQueues) {
     };
 
     function updateCounters() {
-        $('.call-filter__toggle--line-hold').html(queues.hold.count());
+        $('.call-filter__toggle--line-active').html(queues.hold.count() + queues.active.count());
         $('.call-filter__toggle--line-direct').html(queues.direct.count());
         $('.call-filter__toggle--line-general').html(queues.general.count());
     }
@@ -108,15 +137,15 @@ function PhoneWidgetPaneQueue(initQueues) {
     function clearIndicators (target) {
         var markElement = $('.widget-line-overlay__queue-marker');
 
-        markElement.removeClass('tab-hold');
+        markElement.removeClass('tab-active');
         markElement.removeClass('tab-direct');
         markElement.removeClass('tab-general');
         markElement.removeClass('tab-all');
 
         switch ($(target).attr('data-call-filter')) {
-            case 'hold':
-                $('[data-queue-marker]').html('Calls On Hold');
-                markElement.addClass('tab-hold');
+            case 'active':
+                $('[data-queue-marker]').html('Active Calls');
+                markElement.addClass('tab-active');
                 break;
             case 'direct':
                 $('[data-queue-marker]').html('Direct Calls');

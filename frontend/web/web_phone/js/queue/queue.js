@@ -3,33 +3,33 @@
 
         this.calls = [];
 
-        this.add = function (data) {
-            if (this.getIndexByCallId(data.callId) !== null) {
-                return;
-            }
+        function init(data) {
             data.timeQueuePushed = Date.now();
+            data.blocked = false;
+            data.sentHoldRequest = false;
+            data.sentMuteRequest = false;
+            data.sentHangupRequest = false;
+            data.sentReturnHoldCallRequest = false;
+            data.sentAcceptCallRequest = false;
+        }
+
+        this.add = function (data) {
+            if (this.getIndex(data.callSid) !== null) {
+                return null;
+            }
+            init(data);
             this.calls.unshift(data);
+            return new window.callWidget.call.Call(data);
         };
 
-        this.remove = function (callId) {
-            let index = this.getIndexByCallId(callId);
+        this.remove = function (callSid) {
+            let index = this.getIndex(callSid);
             if (index !== null) {
                 this.calls.splice(index, 1);
             }
         };
 
-        this.getIndexByCallId = function (callId) {
-            let index = null;
-            this.calls.forEach(function (call, i) {
-                if (call.callId === callId) {
-                    index = i;
-                    return false;
-                }
-            });
-            return index;
-        };
-
-        this.getIndexByCallSid = function (callSid) {
+        this.getIndex = function (callSid) {
             let index = null;
             this.calls.forEach(function (call, i) {
                 if (call.callSid === callSid) {
@@ -38,10 +38,6 @@
                 }
             });
             return index;
-        };
-
-        this.pop = function () {
-            return this.calls.pop();
         };
 
         this.getLast = function () {
@@ -55,7 +51,7 @@
             if (typeof call == 'undefined' || call === null) {
                 return null;
             }
-            return call;
+            return new window.callWidget.call.Call(call);
         };
 
         this.getFirst = function () {
@@ -71,21 +67,13 @@
             if (typeof call == 'undefined' || call === null) {
                 return null;
             }
-            return call;
+            return new window.callWidget.call.Call(call);
         };
 
-        this.one = function (callId) {
-            let index = this.getIndexByCallId(callId);
+        this.one = function (callSid) {
+            let index = this.getIndex(callSid);
             if (index !== null) {
-                return this.calls[index];
-            }
-            return null;
-        };
-
-        this.oneBySid = function (callSid) {
-            let index = this.getIndexByCallSid(callSid);
-            if (index !== null) {
-                return this.calls[index];
+                return new window.callWidget.call.Call(this.calls[index]);
             }
             return null;
         };
@@ -95,7 +83,11 @@
         };
 
         this.all = function () {
-            return this.calls;
+            let calls = [];
+            this.calls.forEach(function (call) {
+                calls.push(new window.callWidget.call.Call(call));
+            });
+            return calls;
         };
 
         this.showAll = function () {
@@ -106,39 +98,35 @@
     }
 
     class QueueItem {
-        constructor(queue, state) {
+        constructor(queue, queueName) {
             this.queue = queue;
-            this.state = state;
+            this.queueName = queueName;
         };
 
         getList() {
             let calls = [];
             let self = this;
             this.queue.all().forEach(function (call) {
-                if (call.state === self.state) {
+                if (call.data.queue === self.queueName) {
                     calls.push(call);
                 }
             });
             return calls;
         }
 
-        one(callId) {
-            return this.queue.one(callId);
-        }
-
-        oneBySid(callSid) {
-            return this.queue.oneBySid(callSid);
+        one(callSid) {
+            return this.queue.one(callSid);
         }
 
         all() {
             let calls = this.getList();
             if (calls.length < 1) {
-                return calls;
+                return [];
             }
             let groups = [];
             let key = '';
             calls.forEach(function (call) {
-                if (!call.projectName) {
+                if (!call.data.project) {
                     if (!groups['external']) {
                         groups['external'] = {
                             'calls': []
@@ -147,11 +135,11 @@
                     groups['external'].calls.push(call);
                     return;
                 }
-                key = call.projectName + call.departmentName;
+                key = call.data.project + call.data.department;
                 if (!groups[key]) {
                     groups[key] = {
-                        projectName: call.projectName,
-                        departmentName: call.departmentName,
+                        project: call.data.project,
+                        department: call.data.department,
                         calls: []
                     };
                 }
@@ -165,7 +153,7 @@
         }
 
         add(data) {
-            this.queue.add(data);
+            return this.queue.add(data);
         }
 
         getLast() {
@@ -176,8 +164,8 @@
             return this.queue.getFirst();
         }
 
-        remove (callId) {
-            this.queue.remove(callId);
+        remove (callSid) {
+            this.queue.remove(callSid);
         }
     }
 

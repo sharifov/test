@@ -81,7 +81,7 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
                                 if ($disconnect->disconnect($userModel->id)) {
                                     $return = new ReturnToHoldCall();
                                     if ($return->return($call, $userModel->id)) {
-                                        $this->acceptHoldCall($callUserAccess, $userModel);
+                                        $return->acceptHoldCall($callUserAccess);
                                     }
                                 }
                                 break;
@@ -158,31 +158,6 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
             'onSound' => $onSound,
         ]);
     }
-
-    private function acceptHoldCall(CallUserAccess $callUserAccess, Employee $user): bool
-    {
-        $callUserAccess->acceptCall();
-
-        if ($callUserAccess->save()) {
-
-            if ($call = $callUserAccess->cuaCall) {
-
-                $call->setStatusDelay();
-
-                if ($call->save()) {
-                    Notifications::pingUserMap();
-                    return true;
-                } else  {
-                    Yii::error(VarDumper::dumpAsString($call->errors), 'IncomingCallWidget:acceptHoldCall:Call:save');
-                }
-
-            }
-
-        }
-
-        return false;
-    }
-
 
     /**
      * @param CallUserAccess $callUserAccess

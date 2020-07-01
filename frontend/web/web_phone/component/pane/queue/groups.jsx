@@ -4,7 +4,7 @@ function Groups(props) {
 
     const externalKey = 'external';
     if (typeof data.groups[externalKey] !== 'undefined') {
-        items.push(<GroupItem key={externalKey} group={{'calls': data.groups[externalKey].calls, 'projectName': '', 'departmentName': 'External Contacts'}}/>);
+        items.push(<GroupItem key={externalKey} group={{'calls': data.groups[externalKey].calls, 'project': '', 'department': 'External Contacts'}}/>);
         delete data.groups[externalKey];
     }
 

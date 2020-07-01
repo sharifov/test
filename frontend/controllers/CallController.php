@@ -25,6 +25,7 @@ use sales\helpers\call\CallHelper;
 use sales\model\call\services\currentQueueCalls\CurrentQueueCallsService;
 use sales\model\conference\useCase\DisconnectFromAllConferenceCalls;
 use sales\model\callNote\useCase\addNote\CallNoteRepository;
+use sales\model\conference\useCase\ReturnToHoldCall;
 use sales\repositories\call\CallRepository;
 use sales\repositories\call\CallUserAccessRepository;
 use sales\repositories\NotFoundException;
@@ -996,15 +997,15 @@ class CallController extends FController
     public function actionAjaxAcceptIncomingCall(): Response
 	{
 		$action = \Yii::$app->request->post('act');
-		$call_id = \Yii::$app->request->post('call_id');
+		$call_sid = \Yii::$app->request->post('call_sid');
 
 		$response = [
 			'error' => true,
 			'message' => 'Internal Server Error'
 		];
-		if ($action && $call_id) {
+		if ($action && $call_sid) {
 			try {
-				$call = $this->callRepository->find($call_id);
+				$call = $this->callRepository->findBySid($call_sid);
 				$callUserAccess = $this->callUserAccessRepository->getByUserAndCallId(Auth::id(), $call->c_id);
 				switch ($action) {
 					case 'accept':
@@ -1022,6 +1023,48 @@ class CallController extends FController
 						break;
 				}
 			} catch (\RuntimeException | NotFoundException $e) {
+				$response['message'] = $e->getMessage();
+			}
+		}
+
+		return $this->asJson($response);
+	}
+
+    public function actionReturnHoldCall(): Response
+	{
+		$call_sid = \Yii::$app->request->post('call_sid');
+
+		$response = [
+			'error' => true,
+			'message' => 'Internal Server Error'
+		];
+
+		if ($call_sid) {
+			try {
+				$call = $this->callRepository->findBySid($call_sid);
+                $callUserAccess = CallUserAccess::find()->where(['cua_user_id' => Auth::id(), 'cua_call_id' => $call->c_id, 'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING])->one();
+                if (!$callUserAccess) {
+                    throw new \DomainException('Not found call user access');
+                }
+                $disconnect = new DisconnectFromAllConferenceCalls();
+                if (!$disconnect->disconnect(Auth::id())) {
+                    throw new \DomainException('Disconnect from current calls error');
+                }
+
+                $return = new ReturnToHoldCall();
+                if (!$return->return($call, Auth::id())) {
+                    throw new \DomainException('Return Hold call error');
+                }
+
+                if (!$return->acceptHoldCall($callUserAccess)) {
+                    throw new \DomainException('Accept Hold call error');
+                }
+
+                $response = [
+                    'error' => false,
+                    'message' => ''
+                ];
+			} catch (\DomainException $e) {
 				$response['message'] = $e->getMessage();
 			}
 		}
@@ -1092,7 +1135,6 @@ class CallController extends FController
 		return $this->asJson($result);
 	}
 
-
 	public function actionCurrentQueueCalls(): Response
     {
         $queue = $this->currentQueueCalls->getQueuesCalls(Auth::id());
@@ -1101,6 +1143,11 @@ class CallController extends FController
             return $this->asJson([
                 'isEmpty' => true
             ]);
+        }
+
+        $hold = [];
+        foreach ($queue->hold as $item) {
+            $hold[] = $item->getData();
         }
 
         $incoming = [];
@@ -1120,6 +1167,7 @@ class CallController extends FController
 
         return $this->asJson([
             'isEmpty' => false,
+            'hold' => $hold,
             'incoming' => $incoming,
             'outgoing' => $outgoing,
             'active' => $active,

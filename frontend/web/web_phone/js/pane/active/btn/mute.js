@@ -12,7 +12,7 @@ class PhoneWidgetPaneActiveBtnMute extends PhoneWidgetPaneActiveBtn {
 
     mute() {
         this.enable();
-        this.btn.attr('data-is-muted', 'true');
+        this.btn.attr('data-is-muted', true);
         this.btn.html('<i class="fas fa-microphone-alt-slash"> </i>');
         return this;
     };
@@ -23,7 +23,7 @@ class PhoneWidgetPaneActiveBtnMute extends PhoneWidgetPaneActiveBtn {
 
     unMute() {
         this.enable();
-        this.btn.attr('data-is-muted', 'false');
+        this.btn.attr('data-is-muted', false);
         this.btn.html('<i class="fas fa-microphone"> </i>');
         return this;
     };

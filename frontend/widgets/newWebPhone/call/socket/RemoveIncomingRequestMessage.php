@@ -6,12 +6,11 @@ class RemoveIncomingRequestMessage
 {
     public const COMMAND = 'removeIncomingRequest';
 
-    public static function create(int $callId, string $callSid): array
+    public static function create(string $callSid): array
     {
         return [
             'data' => [
                 'call' => [
-                    'id' => $callId,
                     'sid' => $callSid,
                 ],
             ],

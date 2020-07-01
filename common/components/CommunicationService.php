@@ -814,19 +814,6 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $this->processConferenceResponse($response);
     }
 
-    public function holdConferenceDoubleCall(string $conferenceSid, string $holderSid, string $keeperSid): array
-    {
-        $data = [
-            'conferenceSid' => $conferenceSid,
-            'holderSid' => $holderSid,
-            'keeperSid' => $keeperSid,
-        ];
-
-        $response = $this->sendRequest('twilio-conference/hold-double-call', $data);
-
-        return $this->processConferenceResponse($response);
-    }
-
     public function holdConferenceCall(string $conferenceSid, string $keeperSid): array
     {
         $data = [
@@ -882,19 +869,6 @@ class CommunicationService extends Component implements CommunicationServiceInte
         ];
 
         $response = $this->sendRequest('twilio-conference/return-to-conference-call', $data);
-
-        return $this->processConferenceResponse($response);
-    }
-
-    public function unholdConferenceDoubleCall(string $conferenceSid, string $holderSid, string $keeperSid): array
-    {
-        $data = [
-            'conferenceSid' => $conferenceSid,
-            'holderSid' => $holderSid,
-            'keeperSid' => $keeperSid,
-        ];
-
-        $response = $this->sendRequest('twilio-conference/unhold-double-call', $data);
 
         return $this->processConferenceResponse($response);
     }

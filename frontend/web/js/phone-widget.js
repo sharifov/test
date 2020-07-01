@@ -431,12 +431,12 @@ $(document).ready(function() {
 
         e.preventDefault();
         let btn = $(this);
-        let callId = btn.attr('data-call-id');
-        if (!callId) {
+        let callSid = btn.attr('data-call-sid');
+        if (!callSid) {
             new PNotify({title: "Hangup", type: "warning", text: "Please try again after some seconds.", hide: true});
             return false;
         }
-        hangupOutgoingCall(btn, callId);
+        hangupOutgoingCall(btn, callSid);
 
     });
 
