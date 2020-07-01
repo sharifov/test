@@ -1,11 +1,13 @@
 <?php
 
+use frontend\helpers\JsonHelper;
 use sales\auth\Auth;
 use common\models\CreditCard;
 use common\models\search\CreditCardSearch;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\Json;
 use yii\widgets\Pjax;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\CaseSaleSearch */
@@ -133,12 +135,9 @@ $userCanDeleteSaleData = Auth::can('/sale/delete-ajax');
                     $label .= '</tr></table>';
 
                     $content = '';
+                    $dataSale = JsonHelper::decode($item->css_sale_data_updated);
 
-                    $dataSale = @json_decode($item->css_sale_data_updated, true);
-//                    echo '<pre>';
-//                    print_r($dataSale);die;
                     if(is_array($dataSale)) {
-
                         $dataProviderCc = new ActiveDataProvider([
                             'query' => CreditCard::find()->innerJoin('sale_credit_card', 'scc_cc_id=cc_id')->where(['scc_sale_id' => $item->css_sale_id]),
                         ]);
@@ -152,11 +151,7 @@ $userCanDeleteSaleData = Auth::can('/sale/delete-ajax');
                                 'caseModel' => $caseModel,
                                 'additionalData' => [],
                         ]);
-                        //echo '******';
-                        //\yii\helpers\VarDumper::dump($content); exit;
                     }
-
-
 
                     $itemColls[] = [
                         'label' => $label,
