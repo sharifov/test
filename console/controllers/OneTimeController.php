@@ -353,7 +353,6 @@ class OneTimeController extends Controller
 
         $fromDate = $fromDate ?? CaseSale::find()->min('css_sale_created_dt');
         $toDate = $toDate ?? CaseSale::find()->max('css_sale_created_dt');
-
         $fromDate = date('Y-m-d', strtotime($fromDate));
         $toDate = date('Y-m-d', strtotime($toDate));
 
@@ -378,7 +377,7 @@ class OneTimeController extends Controller
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableFormatter($throwable),
                 'OneTimeController:actionSaleDataToJson:Throwable' );
-            echo Console::renderColoredString('%r --- Error : ' . $throwable->getMessage() .' %n'), PHP_EOL;
+            echo Console::renderColoredString('%r --- Error : ' . $throwable->getMessage() . ' %n'), PHP_EOL;
         }
 
         $left = CaseSale::find()

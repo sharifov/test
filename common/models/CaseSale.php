@@ -10,6 +10,7 @@ use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\helpers\Json;
 
 /**
  * This is the model class for table "case_sale".
@@ -230,6 +231,17 @@ class CaseSale extends \yii\db\ActiveRecord
 	{
 		if (is_string($this->css_sale_data)) {
 			return json_decode((string)$this->css_sale_data, true);
+		}
+		return $this->css_sale_data;
+	}
+
+    /**
+     * @return string
+     */
+    public function getSaleDataEncoded(): string
+	{
+		if (!is_string($this->css_sale_data)) {
+			return Json::encode($this->css_sale_data);
 		}
 		return $this->css_sale_data;
 	}

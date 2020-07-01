@@ -456,22 +456,20 @@ class CasesSearch extends Cases
         if ($this->validatingCarrier) {
             $query->andWhere(['cs_id' =>
                 CaseSale::find()->select('css_cs_id')
-                ->andFilterWhere(
-                    [
-                        '=',
-                        new Expression("JSON_EXTRACT(JSON_UNQUOTE(css_sale_data),'$.validatingCarrier')"),
+                ->andWhere(['=',
+                        new Expression("JSON_EXTRACT(css_sale_data,'$.validatingCarrier')"),
                         $this->validatingCarrier
-                    ]
-                )
+                ])
             ]);
         }
-
         if ($this->ticketNumber) {
-            if ($saleId = $this->getSaleIdByTicket($this->ticketNumber)) {
-                $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
-            } else {
-                $query->where('0=1');
-            }
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('css_cs_id')
+                ->where(
+                    new Expression("JSON_CONTAINS(css_sale_data->'$.passengers[*].ticket_number', JSON_ARRAY(:ticket_number))"),
+                    [':ticket_number' => $this->ticketNumber]
+                )
+            ]);
         }
         if ($this->clientId){
             $query->andWhere(['cs_client_id' => $this->clientId]);
