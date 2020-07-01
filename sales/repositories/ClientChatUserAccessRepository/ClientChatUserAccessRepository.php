@@ -34,23 +34,19 @@ class ClientChatUserAccessRepository extends Repository
 		$this->clientChatService = $clientChatService;
 	}
 
-	public function create(int $cchId, int $userId): void
+	public function create(int $cchId, int $userId): ClientChatUserAccess
 	{
 		$clientChatUserAccess = ClientChatUserAccess::create($cchId, $userId);
 		$clientChatUserAccess->pending();
-		$this->save($clientChatUserAccess);
+		return $clientChatUserAccess;
 	}
 
 	public function save(ClientChatUserAccess $clientChatUserAccess): ClientChatUserAccess
 	{
 		if (!$clientChatUserAccess->save()) {
-			throw new \RuntimeException($clientChatUserAccess->getErrorSummary(false)[0]);
+			throw new \RuntimeException($clientChatUserAccess->getErrorSummary(false)[0], ClientChatCodeException::CC_USER_ACCESS_SAVE_FAILED);
 		}
-
 		$this->sendNotifications($clientChatUserAccess);
-
-//		ClientChatCache::invalidate($clientChatUserAccess->ccua_user_id);
-
 		return $clientChatUserAccess;
 	}
 
@@ -68,6 +64,19 @@ class ClientChatUserAccessRepository extends Repository
 			throw new \RuntimeException('User access status is unknown');
 		}
 		$ccua->setStatus($status);
+
+		if ($ccua->isAccept()) {
+			try {
+				$this->clientChatRepository->assignOwner($ccua->ccuaCch, $ccua->ccua_user_id);
+				$this->clientChatService->assignAgentToRcChannel($ccua->ccuaCch->cch_rid, $ccua->ccuaUser->userProfile->up_rc_user_id ?? '');
+			} catch (\DomainException | \RuntimeException $e) {
+				if (ClientChatCodeException::isRcAssignAgentFailed($e)) {
+					$this->clientChatRepository->removeOwner($ccua->ccuaCch);
+				}
+				throw $e;
+			}
+			$this->disableAccessForOtherUsers($ccua);
+		}
 		$this->save($ccua);
 	}
 
@@ -79,24 +88,10 @@ class ClientChatUserAccessRepository extends Repository
 		}
 	}
 
-	private function sendNotifications(ClientChatUserAccess $access): void
+	public function sendNotifications(ClientChatUserAccess $access): void
 	{
 		$data = [];
 		if ($access->isAccept()) {
-			try {
-				$this->clientChatService->assignAgentToRcChannel($access->ccuaCch->cch_rid, $access->ccuaUser->userProfile->up_rc_user_id);
-				$this->clientChatRepository->assignOwner($access);
-			} catch (\DomainException | \RuntimeException $e) {
-				if (ClientChatCodeException::isRcAssignAgentFailed($e)) {
-					throw new \RuntimeException($e->getMessage(), $e->getCode());
-				}
-
-				\Yii::error($e->getMessage(), 'ClientChatUserAccessEvent::sendNotifications');
-				$this->updateStatus($access, ClientChatUserAccess::STATUS_SKIP);
-				throw $e;
-			}
-			$this->disableAccessForOtherUsers($access);
-
 			$data = ClientChatAccessMessage::accept($access);
 		} else if ($access->isPending()) {
 			$data = ClientChatAccessMessage::pending($access);

@@ -80,12 +80,18 @@ class ClientChatRepository
 		throw new NotFoundException('Client chat is not found');
 	}
 
-	public function assignOwner(ClientChatUserAccess $clientChatUserAccess): void
+	public function assignOwner(ClientChat $clientChat, int $userId): void
 	{
-		if ($clientChatUserAccess->ccuaCch && $clientChatUserAccess->ccuaCch->cchOwnerUser) {
-			throw new \DomainException('Client Chat already assigned to: ' . $clientChatUserAccess->ccuaCch->cchOwnerUser->full_name, ClientChatCodeException::CC_OWNER_ALREADY_ASSIGNED);
+		if ($clientChat->cchOwnerUser && $clientChat->cch_owner_user_id !== $userId) {
+			throw new \DomainException('Client Chat already assigned to: ' . $clientChat->cchOwnerUser->username, ClientChatCodeException::CC_OWNER_ALREADY_ASSIGNED);
 		}
-		$clientChatUserAccess->ccuaCch->cch_owner_user_id = $clientChatUserAccess->ccua_user_id;
-		$this->save($clientChatUserAccess->ccuaCch);
+		$clientChat->cch_owner_user_id = $userId;
+		$this->save($clientChat);
+	}
+
+	public function removeOwner(ClientChat $clientChat): void
+	{
+		$clientChat->cch_owner_user_id = null;
+		$this->save($clientChat);
 	}
 }

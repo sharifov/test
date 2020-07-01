@@ -74,6 +74,7 @@ class ClientChatUserAccess extends \yii\db\ActiveRecord
             ['ccua_user_id', 'required'],
             ['ccua_user_id', 'integer'],
             ['ccua_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ccua_user_id' => 'id']],
+			['ccua_status_id', 'checkIfAlreadyAccepted']
         ];
     }
 
@@ -154,5 +155,12 @@ class ClientChatUserAccess extends \yii\db\ActiveRecord
 	public function isSkip(): bool
 	{
 		return $this->ccua_status_id === self::STATUS_SKIP;
+	}
+
+	public function checkIfAlreadyAccepted($attributes): void
+	{
+		if ($this->isAccept() && self::find()->byClientChat($this->ccua_cch_id)->accepted()->exists()) {
+			$this->addError('ccua_status_id', 'Chat request already accepted');
+		}
 	}
 }

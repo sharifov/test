@@ -14,7 +14,6 @@ use yii\helpers\Json;
  * @package sales\services\clientChatService
  *
  * @property ClientChatChannelRepository $clientChatChannelRepository
- * @property ClientChatUserAccessRepository $clientChatUserAccessRepository
  */
 class ClientChatService
 {
@@ -22,15 +21,10 @@ class ClientChatService
 	 * @var ClientChatChannelRepository
 	 */
 	private ClientChatChannelRepository $clientChatChannelRepository;
-	/**
-	 * @var ClientChatUserAccessRepository
-	 */
-	private ClientChatUserAccessRepository $clientChatUserAccessRepository;
 
-	public function __construct(ClientChatChannelRepository $clientChatChannelRepository, ClientChatUserAccessRepository $clientChatUserAccessRepository)
+	public function __construct(ClientChatChannelRepository $clientChatChannelRepository)
 	{
 		$this->clientChatChannelRepository = $clientChatChannelRepository;
-		$this->clientChatUserAccessRepository = $clientChatUserAccessRepository;
 	}
 
 	public function assignClientChatChannel(ClientChat $clientChat, int $priority): void
@@ -41,8 +35,9 @@ class ClientChatService
 
 	/**
 	 * @param ClientChat $clientChat
+	 * @param ClientChatUserAccessRepository $clientChatUserAccessRepository
 	 */
-	public function sendNotificationToUsers(ClientChat $clientChat): void
+	public function sendNotificationToUsers(ClientChat $clientChat, ClientChatUserAccessRepository $clientChatUserAccessRepository): void
 	{
 		if ($channel = $clientChat->cchChannel) {
 			$userChannel = ClientChatUserChannel::find()->byChannelId($channel->ccc_id)->all();
@@ -50,7 +45,8 @@ class ClientChatService
 			if ($userChannel) {
 				/** @var ClientChatUserChannel $user */
 				foreach ($userChannel as $user) {
-					$this->clientChatUserAccessRepository->create($clientChat->cch_id, $user->ccuc_user_id);
+					$access = $clientChatUserAccessRepository->create($clientChat->cch_id, $user->ccuc_user_id);
+					$clientChatUserAccessRepository->save($access);
 				}
 			}
 		}
