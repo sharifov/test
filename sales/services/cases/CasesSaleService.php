@@ -398,10 +398,6 @@ class CasesSaleService
                     $lastSaleId = max(array_keys($result['items']));
                     return $result['items'][$lastSaleId];
                 }
-//                else {
-//                    \Yii::info(VarDumper::dumpAsString(['params' => $params, 'response' => $response->content], 20),
-//                        'info\CasesSaleService:searchRequestToBackOffice:empty');
-//                }
             } else {
                 $responseStr = VarDumper::dumpAsString($response->content);
                 throw new \RuntimeException('BO request Error: ' . $responseStr, 20);
@@ -546,11 +542,13 @@ class CasesSaleService
                     $caseSale->css_sale_created_dt = $saleData['created'] ?? null;
                     $caseSale->css_sale_book_id = $saleData['confirmationNumber'] ?? null;
                     $caseSale->css_sale_pax = $saleData['requestDetail']['passengersCnt'] ?? null;
+                    $caseSale->css_sale_data = $saleData; /* TODO::  */
 
                     $caseSale = $this->saveAdditionalData($caseSale, $case, $refreshSaleData);
 
                     if (!$caseSale->save(false)) {
-                        \Yii::error(VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]),'CasesSaleService:createSale:Update');
+                        \Yii::error(VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]),
+                        'CasesSaleService:createSale:Update');
                         throw new \RuntimeException('Error. CaseSale not updated from detailRequestToBackOffice.');
                     }
                 } else {
