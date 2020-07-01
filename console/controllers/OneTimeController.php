@@ -351,8 +351,8 @@ class OneTimeController extends Controller
         $processed = 0;
         $time_start = microtime(true);
 
-        $fromDate = $fromDate ?? CaseSale::find()->min('css_sale_created_dt');
-        $toDate = $toDate ?? CaseSale::find()->max('css_sale_created_dt');
+        $fromDate = $fromDate ?? CaseSale::find()->min('css_created_dt');
+        $toDate = $toDate ?? CaseSale::find()->max('css_created_dt');
         $fromDate = date('Y-m-d', strtotime($fromDate));
         $toDate = date('Y-m-d', strtotime($toDate));
 
