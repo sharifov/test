@@ -118,7 +118,7 @@ class ClientProjectController extends FController
     {
         $data = Yii::$app->request->get();
         ClientProject::unSubScribe($data['clientID'], $data['projectID'], $data['action']);
-        //var_dump($data['action']); die();
+
         return $this->asJson(['data' => ['action' => $data['action']]]);
     }
 
