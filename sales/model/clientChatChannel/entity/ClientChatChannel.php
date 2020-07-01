@@ -77,6 +77,7 @@ class ClientChatChannel extends \yii\db\ActiveRecord
             ['ccc_priority', 'default', 'value' => 1],
 
             ['ccc_name', 'required'],
+            ['ccc_name', 'filter', 'filter' => 'trim'],
             ['ccc_name', 'string', 'max' => 255],
             ['ccc_name', 'unique'],
 
