@@ -99,7 +99,6 @@ class ClientProject extends \yii\db\ActiveRecord
      */
     public static function unSubScribe(int $cID, int $pID, bool $action):bool
     {
-        //var_dump($action); die();
         $model = self::find()->where(['cp_client_id'=>$cID, 'cp_project_id'=>$pID])->one();
         if ($model){
             $model->cp_unsubscribe = $action;
