@@ -17,14 +17,12 @@ class m200701_095636_add_permissions_lead_view_client_info_unsubscribe extends M
 
         $admin = $auth->getRole(Employee::ROLE_ADMIN);
         $superAdmin = $auth->getRole(Employee::ROLE_SUPER_ADMIN);
-        $agent = $auth->getRole(Employee::ROLE_AGENT);
 
         $checkList = $auth->createPermission('client-project/unsubscribe-client-ajax');
         $checkList->description = 'Lead View Unsubscribe Client';
         $auth->add($checkList);
         $auth->addChild($admin, $checkList);
         $auth->addChild($superAdmin, $checkList);
-        $auth->addChild($agent, $checkList);
 
     }
 
