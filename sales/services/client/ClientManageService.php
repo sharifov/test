@@ -275,35 +275,36 @@ class ClientManageService
         return $client;
     }
 
-	/**
-	 * @param ClientCreateForm $clientForm
-	 * @return Client
-	 * @throws NotFoundException
-	 */
-    public function getOrCreateByUuid(ClientCreateForm $clientForm): Client
+    public function getOrCreateByClientId(ClientCreateForm $form): Client
 	{
-		if ($client = $this->clientRepository->findByUuid($clientForm->uuid)) {
+		if ($client = Client::findOne($form->id)) {
 			return $client;
 		}
+		return $this->create($form);
 	}
 
 	/**
 	 * @param EmailCreateForm $email
+	 * @param PhoneCreateForm $phone
 	 * @param ClientCreateForm|null $clientForm
 	 * @return Client
 	 */
-    public function getOrCreateByUuidOrEmails(EmailCreateForm $email, ClientCreateForm $clientForm): Client
+    public function getOrCreateByUuidOrEmails(EmailCreateForm $email, PhoneCreateForm $phone, ClientCreateForm $clientForm): Client
 	{
 		try {
-			$client = $this->getOrCreateByUuid($clientForm);
+			$client = $this->clientRepository->findByUuid($clientForm->uuid);
 		} catch (\DomainException | NotFoundException $e) {
-			if ($email->email) {
+
+			if ($clientForm->id) {
+				$client = $this->getOrCreateByClientId($clientForm);
+			} else if ($email->email) {
 				$client = $this->getOrCreateByEmails([$email], $clientForm);
 			} else {
 				$client = $this->create($clientForm);
 			}
 		}
 		$this->addEmail($client, $email);
+		$this->addPhone($client, $phone);
 		return $client;
 	}
 
@@ -312,9 +313,14 @@ class ClientManageService
 		$clientEmailForm = (new EmailCreateForm());
 		$clientEmailForm->email = $clientChatRequest->getEmailFromData();
 
-		$clientForm = new ClientCreateForm(['firstName' => $clientChatRequest->getNameFromData(), 'uuid' => $clientChatRequest->getVisitorOrUserIdFromData()]);
+		$clientPhoneForm = new PhoneCreateForm();
+		$clientPhoneForm->phone = $clientChatRequest->getPhoneFromData();
 
-		return $this->getOrCreateByUuidOrEmails($clientEmailForm, $clientForm);
+		$clientForm = new ClientCreateForm([
+			'firstName' => $clientChatRequest->getNameFromData(),
+			'uuid' => $clientChatRequest->getUserIdFromData(),
+			'id' => $clientChatRequest->getCrmClientId()]);
+		return $this->getOrCreateByUuidOrEmails($clientEmailForm, $clientPhoneForm, $clientForm);
 	}
 
     /**

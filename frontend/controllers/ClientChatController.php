@@ -1,6 +1,7 @@
 <?php
 namespace frontend\controllers;
 
+use common\models\VisitorLog;
 use sales\auth\Auth;
 use sales\helpers\app\AppHelper;
 use sales\model\clientChat\ClientChatCodeException;
@@ -179,5 +180,23 @@ class ClientChatController extends FController
 		}
 
 		return $this->asJson($result);
+	}
+
+	public function actionAjaxDataInfo()
+	{
+		$cchId = \Yii::$app->request->post('cchId');
+
+		try {
+			$clientChat = $this->clientChatRepository->findById($cchId);
+			$visitorLog = VisitorLog::find()->byClient($clientChat->cch_client_id ?: 0)->orderBy(['vl_created_dt' => SORT_DESC])->one();
+		} catch (NotFoundException $e) {
+			$clientChat = null;
+			$visitorLog = null;
+		}
+
+		return $this->renderAjax('partial/_data_info', [
+			'clientChat' => $clientChat,
+			'visitorLog' => $visitorLog
+		]);
 	}
 }

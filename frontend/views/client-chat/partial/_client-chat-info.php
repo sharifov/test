@@ -13,9 +13,6 @@ use yii\web\View;
 ?>
 
 <div class="_rc-client-chat-info-wrapper">
-    <div class="_rc-block-wrapper">
-        <h3 style="margin: 0;">Client info</h3>
-    </div>
 	<div class="_rc-block-wrapper">
         <div style="display: flex">
             <span class="_rc-client-icon">
@@ -53,6 +50,7 @@ use yii\web\View;
 
     <div class="_rc-block-wrapper">
         <h3 style="margin: 0;">Chat info</h3>
+        <?= Html::button('<i class="fa fa-info"></i>', ['class' => 'btn btn-info cc_full_info', 'data-cch-id' => $clientChat->cch_id]) ?>
     </div>
 
     <div class="_rc-block-wrapper">
@@ -71,6 +69,26 @@ use yii\web\View;
             ])
         ?>
     </div>
+
+    <?php if ($clientChat->cchData): ?>
+        <div class="_rc-block-wrapper">
+            <h3 style="margin: 0;">Additional Data</h3>
+        </div>
+
+        <div class="_rc-block-wrapper">
+            <?=
+            \yii\widgets\DetailView::widget([
+                'model' => $clientChat->cchData,
+                'attributes' => [
+                    'ccd_country',
+                    'ccd_region',
+                    'ccd_city',
+                    'ccd_timezone',
+                ]
+            ])
+            ?>
+        </div>
+    <?php endif; ?>
 </div>
 
 

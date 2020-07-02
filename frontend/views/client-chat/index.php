@@ -24,6 +24,7 @@ ClientChatAsset::register($this);
 $rcUrl = Yii::$app->rchat->host  . '/home';
 $userRcAuthToken = Auth::user()->userProfile ? Auth::user()->userProfile->up_rc_auth_token : '';
 $clientChatInfoUrl = Url::toRoute('/client-chat/info');
+$clintChatDataIUrl = Url::toRoute('/client-chat/ajax-data-info');
 ?>
 
 <?php if (empty($channels)): ?>
@@ -58,7 +59,7 @@ $clientChatInfoUrl = Url::toRoute('/client-chat/info');
     <div class="col-md-6">
         <div id="_rc-iframe-wrapper" style="height: 100%; width: 100%; position: relative;">
             <?php if ($clientChat): ?>
-                <iframe class="_rc-iframe" src="<?= $rcUrl ?>?resumeToken=<?= $userRcAuthToken ?>&goto=<?= urlencode('/live/'. $clientChat->cch_rid . '?layout=embedded') ?>" id="_rc-<?= $clientChat->cch_rid ?>" style="border: none; width: 100%; height: 100%;" ></iframe>
+                <iframe class="_rc-iframe" src="<?= $rcUrl ?>?layout=embedded&resumeToken=<?= $userRcAuthToken ?>&goto=<?= urlencode('/live/'. $clientChat->cch_rid . '?layout=embedded') ?>" id="_rc-<?= $clientChat->cch_rid ?>" style="border: none; width: 100%; height: 100%;" ></iframe>
             <?php endif; ?>
         </div>
     </div>
@@ -131,7 +132,7 @@ $(document).on('click', '._cc-list-item', function () {
     let userRcAuthToken = '{$userRcAuthToken}';
     let gotoParam = encodeURIComponent($(this).attr('data-goto-param'));
     let rid = $(this).attr('data-rid');
-    let iframeHref = rcUrl + '?resumeToken=' + userRcAuthToken + '&got=' + gotoParam;
+    let iframeHref = rcUrl + '?layout=embedded&resumeToken=' + userRcAuthToken + '&goto=' + gotoParam;
     let windowHeight = $(window)[0].innerHeight;
     let offsetTop = $("#_rc-iframe-wrapper").offset().top;
     let iframeHeight = windowHeight - offsetTop - 20;
@@ -141,6 +142,7 @@ $(document).on('click', '._cc-list-item', function () {
     $(this).addClass('active');
     
     if (!$('#_rc-'+rid).length) {
+        $("#_rc-iframe-wrapper").find('#_cc-load').remove();
         $("#_rc-iframe-wrapper").append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
         
         let iframe = document.createElement('iframe');
@@ -166,13 +168,38 @@ $(document).on('click', '._cc-list-item', function () {
         cache: false,
         data: {cch_id: cch_id},
         beforeSend: function () {
-            $('#_client-chat-info').html('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
+            $('#_client-chat-info').append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
         },
         success: function (data) {
             $('#_client-chat-info').html(data.html);
         },
         error: function (xhr) {
             
+        },
+    });
+});
+
+$(document).on('click', '.cc_full_info', function (e) {
+    e.preventDefault();
+    let cchId = $(this).attr('data-cch-id');
+    let modal = $('#modal-lg');
+    
+    $.ajax({
+        type: 'post',
+        url: '{$clintChatDataIUrl}',
+        dataType: 'html',
+        cache: false,
+        data: {cchId: cchId},
+        beforeSend: function () {
+            modal.find('.modal-body').html('<div><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
+            modal.find('.modal-title').html('Client Chat Info');
+            modal.modal('show');
+        },
+        success: function (data) {
+            modal.find('.modal-body').html(data);
+        },
+        error: function (xhr) {
+            createNotify('Error', 'Server Internal Error', 'error');  
         },
     });
 });
