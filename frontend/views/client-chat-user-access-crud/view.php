@@ -2,6 +2,7 @@
 
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
+use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 
 /* @var $this yii\web\View */
 /* @var $model sales\model\clientChatUserAccess\entity\ClientChatUserAccess */
@@ -33,7 +34,14 @@ $this->params['breadcrumbs'][] = $this->title;
             'attributes' => [
                 'ccua_cch_id',
                 'ccua_user_id:username',
-                'ccua_status_id',
+                //'ccua_status_id',
+                [
+                    'attribute' => 'ccua_status_id',
+                    'value' => static function (ClientChatUserAccess $model) {
+                        return $model->ccua_status_id ?  Html::tag('span', ClientChatUserAccess::STATUS_LIST[$model->ccua_status_id], ['class' => 'badge badge-'.ClientChatUserAccess::STATUS_CLASS_LIST[$model->ccua_status_id]]) : null;
+                    },
+                    'format' => 'raw',
+                ],
                 'ccua_created_dt:byUserDateTime',
                 'ccua_updated_dt:byUserDateTime',
             ],

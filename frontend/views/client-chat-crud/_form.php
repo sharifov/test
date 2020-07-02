@@ -22,15 +22,19 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'cch_description')->textInput(['maxlength' => true]) ?>
 
-        <?= $form->field($model, 'cch_project_id')->textInput() ?>
+        <?= $form->field($model, 'cch_project_id')->dropDownList(\common\models\Project::getList(), ['prompt' => '---'])?>
 
-        <?= $form->field($model, 'cch_dep_id')->textInput() ?>
+        <?= $form->field($model, 'cch_dep_id')->dropDownList(\common\models\Department::getList(), ['prompt' => '---']) ?>
 
-        <?= $form->field($model, 'cch_channel_id')->textInput() ?>
+        <?= $form->field($model, 'cch_channel_id')->dropDownList(\sales\model\clientChatChannel\entity\ClientChatChannel::getList(), ['prompt' => '---']) ?>
 
         <?= $form->field($model, 'cch_client_id')->textInput() ?>
 
-        <?= $form->field($model, 'cch_owner_user_id')->textInput() ?>
+        <?= $form->field($model, 'cch_owner_user_id')->widget(\sales\widgets\UserSelect2Widget::class, [
+            'data' => $model->cch_owner_user_id ? [
+                $model->cch_owner_user_id => $model->cchOwnerUser->username
+            ] : [],
+        ]) ?>
 
         <?= $form->field($model, 'cch_case_id')->textInput() ?>
 
@@ -38,7 +42,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'cch_note')->textInput(['maxlength' => true]) ?>
 
-        <?= $form->field($model, 'cch_status_id')->textInput() ?>
+        <?= $form->field($model, 'cch_status_id')->dropDownList(\sales\model\clientChat\entity\ClientChat::getStatusList(), ['prompt' => '---']) ?>
 
         <?= $form->field($model, 'cch_ip')->textInput(['maxlength' => true]) ?>
 

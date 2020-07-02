@@ -46,6 +46,19 @@ $bundle = \frontend\themes\gentelella\assets\AssetLeadCommunication::register($t
 /** @var Employee $user */
 $user = Yii::$app->user->identity;
 
+$clientProjectInfo = $model->client->clientProjects;
+$unsubscribe = false;
+if (isset($clientProjectInfo) && $clientProjectInfo){
+    foreach ($clientProjectInfo as $item){
+        if ($model->cs_project_id == $item['cp_project_id']){
+            $unsubscribe = $item['cp_unsubscribe'];
+        }
+    }
+} else {
+    $unsubscribe = false;
+}
+?>
+
 ?>
 <div class="cases-view">
 
@@ -88,11 +101,14 @@ $user = Yii::$app->user->identity;
             ?>
         </div>
         <div class="col-md-4">
+            <?php yii\widgets\Pjax::begin(['id' => 'pjax-client-info', 'enablePushState' => false, 'enableReplaceState' => false]) ?>
             <?= $this->render('_client_info', [
                 'caseModel'      => $model,
-                'isAdmin'       => $isAdmin
+                'isAdmin'       => $isAdmin,
+                'unsubscribe' => $unsubscribe
             ])
             ?>
+            <?php \yii\widgets\Pjax::end(); ?>
         </div>
         <div class="col-md-4">
             <?= $this->render('lead/_lead_info', [
@@ -231,16 +247,18 @@ Modal::end();
            return false;
      });
     
+    
     $(document).on('click','#client-unsubscribe-button', function (e) {
         e.preventDefault();
         let url = $(this).data('unsubscribe-url');        
-              
         $.ajax({
-            url: url,
-            //method: 'POST',           
+            url: url,               
             success: function(response){
-                if (response){
+                $.pjax.reload({container: '#pjax-client-info', timeout: 10000, async: false});
+                if (Boolean(Number(response.data.action))){
                     new PNotify({title: "Communication", type: "info", text: 'Client communication restricted', hide: true});
+                } else {
+                    new PNotify({title: "Communication", type: "info", text: 'Client communication allowed', hide: true});
                 }
                 updateCommunication();                
             }

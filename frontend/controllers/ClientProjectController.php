@@ -117,8 +117,9 @@ class ClientProjectController extends FController
     public function actionUnsubscribeClientAjax()
     {
         $data = Yii::$app->request->get();
+        ClientProject::unSubScribe($data['clientID'], $data['projectID'], $data['action']);
 
-        return $this->asJson(ClientProject::unSubScribe($data['clientID'], $data['projectID']));
+        return $this->asJson(['data' => ['action' => $data['action']]]);
     }
 
     /**

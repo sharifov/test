@@ -28,13 +28,6 @@ $c_type_id = $comForm->c_type_id;
 $pjaxContainerId = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled ? 'pjax-lead-communication-log' : 'pjax-lead-communication';
 $listItemView = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled ? '_list_item_log' : '_list_item';
 
-$clientProjectInfo = $lead->client->clientProjects;
-if (isset($clientProjectInfo[0]['cp_unsubscribe'])){
-    $unsubscribe = $clientProjectInfo[0]['cp_unsubscribe'];
-} else {
-    $unsubscribe = false;
-}
-
 $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscribes, 'eu_email'));
 
 ?>
@@ -594,7 +587,18 @@ JS;
             
         }            
     
-        initializeMessageType($c_type_id);        
+        initializeMessageType($c_type_id);
+
+var emails = '$unsubscribedEmails';
+$('#email option').each(function() {             
+    if (emails.includes($(this).attr('value'))){                
+        $(this).attr('disabled', 'disabled');
+    }
+    if ($(this).attr('value') == ""){
+        $(this).removeAttr('disabled')
+    }
+});    
+            
 
 JS;
 
@@ -759,7 +763,7 @@ $js = <<<JS
         } else {
             alert('Warning: Select client phone number');
         }        
-    });    
+    });   
     
     
     $('body').on("change", '#c_email_tpl_key', function () {
@@ -797,8 +801,7 @@ $js = <<<JS
         //previewPopup.find('.modal-body').html(data);
         popup.modal('show');
         return false;
-    });    
-    
+    });      
     
     $('body').on('change', '.quotes-uid', function() {
         
@@ -871,19 +874,3 @@ $js = <<<JS
 JS;
 
 $this->registerJs($js);
-
-$js = <<<JS
-    let emails = '$unsubscribedEmails';
-    $(document).ready(function() {
-        $('#email option').each(function() {             
-            if (emails.includes($(this).attr('value'))){                
-                $(this).attr('disabled', 'disabled');
-            }
-            if ($(this).attr('value') == ""){
-                $(this).removeAttr('disabled')
-            }
-        });
-    });
-JS;
-$this->registerJs($js);
-
