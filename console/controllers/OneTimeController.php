@@ -344,6 +344,11 @@ class OneTimeController extends Controller
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g'. self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
     }
 
+    /**
+     * @param string $fromDate
+     * @param string $toDate
+     * @throws \yii\db\Exception
+     */
     public function actionSaleRefundRulesToCase(string $fromDate, string $toDate): void
     {
         echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
