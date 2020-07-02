@@ -10,6 +10,7 @@ use common\models\Lead;
 use common\models\Project;
 use sales\entities\cases\Cases;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
+use sales\model\clientChatData\entity\ClientChatData;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -48,6 +49,8 @@ use yii\db\ActiveRecord;
  * @property Lead $cchLead
  * @property Employee $cchOwnerUser
  * @property Project $cchProject
+ * @property ClientChatData $cchData
+ *
  */
 class ClientChat extends \yii\db\ActiveRecord
 {
@@ -198,6 +201,11 @@ class ClientChat extends \yii\db\ActiveRecord
 	public function getCchUpdatedUser(): \yii\db\ActiveQuery
 	{
 		return $this->hasOne(Employee::class, ['id' => 'cch_updated_user_id']);
+	}
+
+	public function getCchData(): \yii\db\ActiveQuery
+	{
+		return $this->hasOne(ClientChatData::class, ['ccd_cch_id' => 'cch_id']);
 	}
 
 	public static function getStatusList(): array
