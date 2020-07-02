@@ -16,6 +16,7 @@ use yii\queue\Queue;
  * @property string|null $order_uid
  * @property string|null $email
  * @property string|null $phone
+ * @property bool $update
  * @property CasesSaleService $casesSaleService
  */
 class CreateSaleFromBOJob extends BaseObject implements JobInterface
@@ -24,6 +25,7 @@ class CreateSaleFromBOJob extends BaseObject implements JobInterface
     public $order_uid;
     public $email;
     public $phone;
+    public bool $update = false;
 
     private $casesSaleService;
 
@@ -45,7 +47,12 @@ class CreateSaleFromBOJob extends BaseObject implements JobInterface
 
                     if ($existCasesSale === false) {
                         Yii::$app->cache->set($keyCasesSale, $keyCasesSale, 60);
-                        $this->casesSaleService->createSale($this->case_id, $saleData);
+
+                        if ($this->update) {
+                            $this->casesSaleService->updateCaseSale($this->case_id, $saleData);
+                        } else {
+                            $this->casesSaleService->createSale($this->case_id, $saleData);
+                        }
                     }
                 }
             } else {

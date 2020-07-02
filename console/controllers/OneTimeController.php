@@ -372,7 +372,7 @@ class OneTimeController extends Controller
                 (client_phone.type NOT IN (:not_type) OR client_phone.type IS NULL)
             WHERE
                 DATE(cases.cs_created_dt) BETWEEN :from_date AND :to_date
-                AND cases.cs_status IN (:status)
+                AND cases.cs_status IN (:status)                
             GROUP BY 
                 cases.cs_id,
                 cases.cs_client_id',
@@ -391,6 +391,7 @@ class OneTimeController extends Controller
 
             foreach ($cases as $key => $value) {
                 $job = new CreateSaleFromBOJob();
+                $job->update = true;
                 $job->case_id = $value['cs_id'];
                 $job->phone = $this->getPhoneByClient($value['cs_client_id'])['phone'];
                 Yii::$app->queue_job->priority(100)->push($job);

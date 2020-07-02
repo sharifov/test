@@ -427,7 +427,7 @@ class CasesSaleService
 
             if ($response->isOk) {
                 $result = $response->data;
-                if (is_array($result) && count($result) && array_key_exists('bookingId', $result)) {
+                if (is_array($result) && array_key_exists('bookingId', $result)) {
                     return $result;
                 }
                 throw new \RuntimeException('BO request Error. Broken data. : ' . VarDumper::dumpAsString($response));
@@ -542,7 +542,7 @@ class CasesSaleService
                     $caseSale->css_sale_created_dt = $saleData['created'] ?? null;
                     $caseSale->css_sale_book_id = $saleData['confirmationNumber'] ?? null;
                     $caseSale->css_sale_pax = $saleData['requestDetail']['passengersCnt'] ?? null;
-                    $caseSale->css_sale_data = $saleData; /* TODO::  */
+                    $caseSale->css_sale_data = json_encode($refreshSaleData, JSON_THROW_ON_ERROR);
 
                     $caseSale = $this->saveAdditionalData($caseSale, $case, $refreshSaleData);
 
@@ -565,6 +565,29 @@ class CasesSaleService
             Yii::error(AppHelper::throwableFormatter($throwable), 'CasesSaleService:createSale:Throwable' );
         }
 
+        return null;
+    }
+
+    public function updateCaseSale(int $csId, array $saleData): ?CaseSale
+    {
+        $saleId = !empty($saleData['saleId']) ? (int) $saleData['saleId'] : 0;
+        try {
+			if ($caseSale = CaseSale::findOne(['css_cs_id' => $csId, 'css_sale_id' => $saleId])) {
+                if ($refreshSaleData = $this->detailRequestToBackOffice($saleId, 0, 120, 1)) {
+                    $caseSale->css_sale_data = json_encode($refreshSaleData, JSON_THROW_ON_ERROR); /* TODO:: not convert after SL-1864 */
+
+                    if (!$caseSale->save(false)) {
+                        throw new \RuntimeException('Error. CaseSale not updated from detailRequestToBackOffice.');
+                    }
+                } else {
+                    throw new \RuntimeException('Error. Broken response from detailRequestToBackOffice. CaseSale not updated.');
+                }
+                return $caseSale;
+            }
+            throw new \RuntimeException('Error. Params csId and saleId is required');
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableFormatter($throwable), 'CasesSaleService:updateCaseSale:Throwable' );
+        }
         return null;
     }
 
