@@ -27,8 +27,8 @@ use sales\auth\Auth;
                         <?= \yii\bootstrap\Html::a('<i class="fa fa-edit warning"></i> Update', '#', ['id' => 'btn-client-update', 'title' => 'Update Client Info'])?>
                     </li>
 
-                    <?php if (Auth::can('client-project/unsubscribe-client-ajax')): ?>
-                        <?php if($unsubscribe): ?>
+                    <?php if($unsubscribe): ?>
+                        <?php if (Auth::can('client-project/subscribe-client-ajax')): ?>
                             <li>
                                 <?=Html::a('<i class="far fa-bell-slash info"></i> Subscribe', '#',  [
                                     'id' => 'client-unsubscribe-button',
@@ -40,7 +40,9 @@ use sales\auth\Auth;
                                     ]),
                                 ])?>
                             </li>
-                        <?php else: ?>
+                        <?php endif; ?>
+                    <?php else: ?>
+                        <?php if (Auth::can('client-project/unsubscribe-client-ajax')): ?>
                             <li>
                                 <?=Html::a('<i class="far fa-bell-slash info"></i> Unsubscribe', '#',  [
                                     'id' => 'client-unsubscribe-button',

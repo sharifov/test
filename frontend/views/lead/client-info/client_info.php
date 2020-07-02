@@ -61,8 +61,9 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
                             'class' => 'showModalButton'
                         ])?>
                     </li>
-                    <?php if (Auth::can('client-project/unsubscribe-client-ajax')): ?>
-                        <?php if($unsubscribe): ?>
+
+                    <?php if($unsubscribe): ?>
+                        <?php if (Auth::can('client-project/subscribe-client-ajax')): ?>
                             <li>
                                 <?=Html::a('<i class="far fa-bell-slash info"></i> Subscribe', '#',  [
                                     'id' => 'client-unsubscribe-button',
@@ -74,7 +75,9 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
                                     ]),
                                 ])?>
                             </li>
-                        <?php else: ?>
+                        <?php endif; ?>
+                    <?php else: ?>
+                        <?php if (Auth::can('client-project/unsubscribe-client-ajax')): ?>
                             <li>
                                 <?=Html::a('<i class="far fa-bell-slash info"></i> Unsubscribe', '#',  [
                                     'id' => 'client-unsubscribe-button',
@@ -88,8 +91,8 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
                             </li>
                         <?php endif; ?>
                     <?php endif; ?>
-
                 <?php endif; ?>
+
                 <li>
                     <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                 </li>
