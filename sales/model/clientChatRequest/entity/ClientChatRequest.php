@@ -42,6 +42,8 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 		self::EVENT_USER_DEPARTMENT_TRANSFER => 'USER_DEPARTMENT_TRANSFER'
 	];
 
+	private array $decodedJsonData = [];
+
     public function rules(): array
     {
         return [
@@ -91,7 +93,10 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 
     public function getDecodedData(): array
 	{
-		return json_decode($this->ccr_json_data, true);
+		if (!$this->decodedJsonData) {
+			return $this->decodedJsonData = json_decode($this->ccr_json_data, true);
+		}
+		return $this->decodedJsonData;
 	}
 
     public static function createByApi(ClientChatRequestApiForm $form): self
@@ -169,25 +174,26 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 
 	public function getEmailFromData(): ?string
 	{
-		return $this->decodedData['email'] ?? null;
+		return $this->decodedData['visitor']['email'] ?? null;
+	}
+
+	public function getPhoneFromData(): ?string
+	{
+		return $this->decodedData['visitor']['phone'] ?? null;
 	}
 
 	public function getNameFromData():string
 	{
-		return $this->decodedData['name'] ?? 'ClientName';
+		return $this->decodedData['visitor']['name'] ?? 'ClientName';
 	}
 
-	public function getVisitorOrUserIdFromData(): string
+	public function getUserIdFromData(): string
 	{
-		$data = $this->decodedData;
-		if (isset($data['visitor'])) {
-			return $data['visitor']['_id'] ?? '';
-		}
+		return $this->decodedData['visitor']['user_id'] ?? '';
+	}
 
-		if (isset($data['user'])) {
-			return $data['user']['_id'] ?? '';
-		}
-
-		return '';
+	public function getCrmClientId(): ?string
+	{
+		return $this->decodedData['visitor']['crm_client_id'] ?? null;
 	}
 }
