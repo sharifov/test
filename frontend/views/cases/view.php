@@ -59,7 +59,6 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
 }
 ?>
 
-?>
 <div class="cases-view">
 
 
