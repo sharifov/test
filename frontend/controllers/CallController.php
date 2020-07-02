@@ -939,7 +939,7 @@ class CallController extends FController
         $model = $this->findModel($id);
         $this->checkAccess($model);
 
-        if ($model->isStatusRinging() || $model->isStatusInProgress() || $model->isStatusQueue()) {
+        if ($model->isStatusRinging() || $model->isStatusInProgress()) {
             $model->setStatusFailed();
             $model->update();
         }
