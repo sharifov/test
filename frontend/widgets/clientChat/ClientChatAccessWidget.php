@@ -4,6 +4,7 @@
 namespace frontend\widgets\clientChat;
 
 
+use sales\helpers\setting\SettingHelper;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use yii\base\Widget;
 use yii\caching\TagDependency;
@@ -28,6 +29,10 @@ class ClientChatAccessWidget extends Widget
 	public function run(): ?string
 	{
 		$_self = $this;
+
+		if (!SettingHelper::isClientChatEnabled()) {
+			return false;
+		}
 //		$result = ClientChatCache::getCache()->getOrSet(ClientChatCache::getKey($this->userId), static function () use ($_self) {
 //			return [
 //				'access' => ClientChatUserAccess::pendingRequests($_self->userId),
