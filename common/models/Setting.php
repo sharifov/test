@@ -3,11 +3,14 @@
 namespace common\models;
 
 use common\models\query\SettingQuery;
+use sales\auth\Auth;
 use Yii;
 use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\db\Expression;
+use yii\helpers\VarDumper;
+use yii\helpers\Url;
 
 /**
  * This is the model class for table "setting".
@@ -131,5 +134,22 @@ class Setting extends \yii\db\ActiveRecord
     public static function find()
     {
         return new SettingQuery(static::class);
+    }
+
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+        if (!$insert && isset($changedAttributes['s_value'])){
+            $url = Url::to(['setting/view', 'id' => $this->s_id]);
+            $staff = Employee::getAllEmployeesByRole([Employee::ROLE_SUPER_ADMIN, Employee::ROLE_ADMIN]);
+            foreach ($staff as $unit){
+                Notifications::create(
+                    $unit->id,
+                    'Setting Changed: ('. $this->s_id .')',
+                    'Site setting: '. $this->s_name .' (<a href='.$url.'>'. $this->s_id. '</a>) has been changed <br>from <pre><code>' . $changedAttributes['s_value'] .'</code></pre> to <pre><code>'. $this->s_value .'</code></pre> by '. $this->sUpdatedUser->username,
+                    Notifications::TYPE_INFO, true
+                );
+            }
+        }
     }
 }
