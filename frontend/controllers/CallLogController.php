@@ -43,15 +43,19 @@ class CallLogController extends FController
         ]);
     }
 
-    /**
-     * @param $id
-     * @return string
-     * @throws NotFoundHttpException
-     */
-    public function actionView($id): string
+	/**
+	 * @param $id
+	 * @param string $breadcrumbsPreviousPage
+	 * @return string
+	 * @throws NotFoundHttpException
+	 */
+    public function actionView($id, $breadcrumbsPreviousPage = 'list'): string
     {
+    	$breadcrumbsPreviousLabel = $breadcrumbsPreviousPage === 'index' ? 'Call Logs' : 'My Call Logs';
         return $this->render('view', [
             'model' => $this->findModel($id),
+			'breadcrumbsPreviousPage' => $breadcrumbsPreviousPage,
+			'breadcrumbsPreviousLabel' => $breadcrumbsPreviousLabel
         ]);
     }
 

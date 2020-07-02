@@ -12,6 +12,7 @@ use frontend\models\LeadForm;
 use yii\web\View;
 use \yii\helpers\Url;
 use yii\bootstrap4\Modal;
+use sales\auth\Auth;
 
 /** @var Employee $user */
 $user = Yii::$app->user->identity;
@@ -61,7 +62,37 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
                         ])?>
                     </li>
 
+                    <?php if($unsubscribe): ?>
+                        <?php if (Auth::can('client-project/subscribe-client-ajax')): ?>
+                            <li>
+                                <?=Html::a('<i class="far fa-bell-slash info"></i> Subscribe', '#',  [
+                                    'id' => 'client-unsubscribe-button',
+                                    'title' => 'Allow communication with client',
+                                    'data-unsubscribe-url' => Url::to(['client-project/unsubscribe-client-ajax',
+                                        'clientID' => $lead->client_id,
+                                        'projectID' => $lead->project_id,
+                                        'action' => false
+                                    ]),
+                                ])?>
+                            </li>
+                        <?php endif; ?>
+                    <?php else: ?>
+                        <?php if (Auth::can('client-project/unsubscribe-client-ajax')): ?>
+                            <li>
+                                <?=Html::a('<i class="far fa-bell-slash info"></i> Unsubscribe', '#',  [
+                                    'id' => 'client-unsubscribe-button',
+                                    'title' => 'Restrict communication with client',
+                                    'data-unsubscribe-url' => Url::to(['client-project/unsubscribe-client-ajax',
+                                        'clientID' => $lead->client_id,
+                                        'projectID' => $lead->project_id,
+                                        'action' => true
+                                    ]),
+                                ])?>
+                            </li>
+                        <?php endif; ?>
+                    <?php endif; ?>
                 <?php endif; ?>
+
                 <li>
                     <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                 </li>

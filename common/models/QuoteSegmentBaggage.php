@@ -2,7 +2,12 @@
 
 namespace common\models;
 
+use sales\forms\segment\SegmentBaggageForm;
 use Yii;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "quote_segment_baggage".
@@ -25,20 +30,6 @@ use Yii;
  */
 class QuoteSegmentBaggage extends \yii\db\ActiveRecord
 {
-
-    /**
-     * @param array $attributes
-     * @param int $qsId
-     * @return static
-     */
-    public static function clone(array $attributes, int $qsId): self
-    {
-        $baggage = new self();
-        $baggage->attributes = $attributes;
-        $baggage->qsb_segment_id = $qsId;
-        return $baggage;
-    }
-    
     /**
      * {@inheritdoc}
      */
@@ -85,6 +76,42 @@ class QuoteSegmentBaggage extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return array
+     */
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['qsb_created_dt', 'qsb_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['qsb_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s')
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'createdByAttribute' => 'qsb_updated_user_id',
+                'updatedByAttribute' => 'qsb_updated_user_id',
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
+    /**
+     * @param array $attributes
+     * @param int $qsId
+     * @return static
+     */
+    public static function clone(array $attributes, int $qsId): self
+    {
+        $baggage = new self();
+        $baggage->attributes = $attributes;
+        $baggage->qsb_segment_id = $qsId;
+        return $baggage;
+    }
+
+    /**
      * @return \yii\db\ActiveQuery
      */
     public function getQsbSegment()
@@ -124,5 +151,20 @@ class QuoteSegmentBaggage extends \yii\db\ActiveRecord
         }
 
         return $data;
+    }
+
+    /**
+     * @param SegmentBaggageForm $form
+     * @return QuoteSegmentBaggage
+     */
+    public static function creationFromForm(SegmentBaggageForm $form): QuoteSegmentBaggage
+    {
+        $item = new self();
+        $item->qsb_pax_code = $form->paxCode;
+        $item->qsb_segment_id = $form->segmentId;
+        $item->qsb_allow_pieces = $form->piece;
+        $item->qsb_allow_max_weight = $form->height;
+        $item->qsb_allow_max_size = $form->weight;
+        return $item;
     }
 }

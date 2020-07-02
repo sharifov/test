@@ -51,14 +51,24 @@ class SaleTicketService
 		}
 		$refundRules = $saleData['refundRules'];
 		$penaltyTypeId = SaleTicket::getPenaltyTypeId(trim($refundRules['airline_penalty'] ?? ''));
-		foreach ($refundRules['rules'] as $rule) {
-			$firstLastName = $this->getPassengerName($rule , $saleData['passengers']);
-			$isPassengerInfant = $this->isPassengerInfant((string)$rule['ticket_number'], $saleData['passengers']);
-			$cntPassengers = CaseSaleHelper::getPassengersCountExceptInf($saleData['passengers']);
-			$dto = (new SaleTicketCreateDTO())->feelBySaleData($caseSale->css_cs_id, $caseSale->css_sale_id, $saleData['pnr'] ?? '', $firstLastName, $isPassengerInfant, $cntPassengers, $penaltyTypeId, $rule, $refundRules);
-			$saleTicket = SaleTicket::createBySaleData($dto);
-			$this->saleTicketRepository->save($saleTicket);
-		}
+        foreach ($refundRules['rules'] as $rule) {
+            $firstLastName = $this->getPassengerName($rule, $saleData['passengers']);
+            $isPassengerInfant = $this->isPassengerInfant((string)$rule['ticket_number'], $saleData['passengers']);
+            $cntPassengers = CaseSaleHelper::getPassengersCountExceptInf($saleData['passengers']);
+            $dto = (new SaleTicketCreateDTO())->feelBySaleData(
+                $caseSale->css_cs_id,
+                $caseSale->css_sale_id,
+                $saleData['pnr'] ?? '',
+                $firstLastName,
+                $isPassengerInfant,
+                $cntPassengers,
+                $penaltyTypeId,
+                $rule,
+                $refundRules
+            );
+            $saleTicket = SaleTicket::createBySaleData($dto);
+            $this->saleTicketRepository->save($saleTicket);
+        }
 
 		$departureDt = $this->casesSaleRepository->getFirstDepartureDtFromItinerary($saleData);
 		$this->casesSaleRepository->setPenaltyTypeAndDepartureDt($penaltyTypeId, $departureDt, $caseSale);

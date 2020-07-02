@@ -22,7 +22,8 @@ class Baggage implements ParseDumpInterface
                 $result['baggage'] = $baggage;
             }
         } catch (\Throwable $throwable) {
-            \Yii::error(AppHelper::throwableFormatter($throwable), 'Amadeus:Baggage:parseDump:Throwable');
+            \Yii::error(AppHelper::throwableFormatter($throwable),
+            'Amadeus:Baggage:parseDump:Throwable');
         }
         return $result;
     }
@@ -57,7 +58,8 @@ class Baggage implements ParseDumpInterface
                             'piece' => $baggageMatches[1],
                             'weight' => '',
                             'height' => '',
-                            'price' => 'USD0'
+                            'price' => '0',
+                            'currency' => '',
                         ],
                     ];
                 }

@@ -18,7 +18,7 @@
 	},
 	"minimum-stability" : "stable",
 	"require" : {
-		"php" : ">=7.2.0",
+		"php" : ">=7.4",
 		"yiisoft/yii2" : "~2.0.24",
 		"yiisoft/yii2-bootstrap" : "^2.0.10",
 		"yiisoft/yii2-swiftmailer" : "^2.1",
@@ -74,7 +74,8 @@
 		"2amigos/2fa-library": "^2.0",
 		"yiisoft/yii2-redis": "~2.0.0",
 		"centrifugal/phpcent": "~3.0",
-		"kivork/yii2-bootstrap4-glyphicons": "*"
+		"kivork/yii2-bootstrap4-glyphicons": "*",
+		"2amigos/yii2-multi-select-widget": "*"
 
 	},
 	"require-dev" : {

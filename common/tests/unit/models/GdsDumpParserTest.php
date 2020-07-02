@@ -9,10 +9,8 @@ use Yii;
  */
 class GdsDumpParserTest extends \Codeception\Test\Unit
 {
-
-    public function testSabreParser()
+    /*public function testSabreParser()
     {
-
         $data = include(codecept_data_dir() . 'dump.sabre.php');
         foreach ($data as $n => $item) {
             expect('Item-' . $n, $item)->array();
@@ -31,6 +29,5 @@ class GdsDumpParserTest extends \Codeception\Test\Unit
 
         //expect('error message should be set', $model->errors)->hasKey('password');
         expect('Need True', true)->true();
-    }
-
+    }*/
 }

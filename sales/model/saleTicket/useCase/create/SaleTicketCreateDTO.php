@@ -44,7 +44,7 @@ class SaleTicketCreateDTO
 		$dto->originalFop = $refundRules['original_FOP'] ?? null;
 		$dto->chargeSystem = (string)($refundRules['charge_system'] ?? null);
 		$dto->penaltyType = $penaltyTypeId;
-		$dto->penaltyAmount = trim($refundRules['refund_waiver'] ?? 0);
+		$dto->penaltyAmount = trim(self::getPenaltyAmount($rule, $refundRules));
 		$dto->selling = $rule['selling_price'] ?? null;
 		$dto->serviceFee = $rule['original_service_fee'] ?? null;
 		$dto->recallCommission = ($refundRules['recall_commission'] ?? 0) / ($cntPassengers ?: 1);
@@ -57,4 +57,20 @@ class SaleTicketCreateDTO
 
 		return $dto;
 	}
+
+    /**
+     * @param array $rule
+     * @param array $refundRules
+     * @return string
+     */
+    private static function getPenaltyAmount(array $rule, array $refundRules): string
+    {
+        if (!empty($rule['refund_amount'])) {
+            return $rule['refund_amount'];
+        }
+        if (!empty($refundRules['refund_waiver'])) {
+            return $refundRules['refund_waiver'];
+        }
+        return '0';
+    }
 }

@@ -267,6 +267,14 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * @return bool
      */
+    public function isOnlyAdmin(): bool
+    {
+        return in_array(self::ROLE_ADMIN, $this->getRoles(true), true);
+    }
+
+    /**
+     * @return bool
+     */
     public function isAgent(): bool
     {
         if (isset($this->permissionList[self::LEVEL_PERMISSION_IS_AGENT])) {
@@ -369,19 +377,22 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function rules()
     {
         return [
-            [['username', 'auth_key', 'password_hash', 'email', 'form_roles'], 'required'],
+            [['username', 'auth_key', 'password_hash', 'email', 'form_roles', 'full_name'], 'required'],
             [['password'], 'required', 'on' => self::SCENARIO_REGISTER],
-            [['email', 'password', 'username'], 'trim'],
+            [['email', 'password', 'username', 'full_name'], 'trim'],
             [['password'], 'string', 'min' => 8],
             [['status'], 'integer'],
-            [['username', 'password_hash', 'password_reset_token', 'email'], 'string', 'max' => 255],
+            [['password_hash', 'password_reset_token', 'email'], 'string', 'max' => 255],
+            [['username', 'full_name'], 'string', 'min' => 3, 'max' => 50],
             [['auth_key'], 'string', 'max' => 32],
             [['username'], 'unique'],
             [['email'], 'unique'],
-            ['email', 'email'],
+            [['email'], 'email'],
+            ['email', 'filter', 'filter' => 'strtolower', 'skipOnEmpty' => true],
+            [['username'], 'match' ,'pattern'=>'/^[a-z0-9_\-\.]+$/i', 'message'=>'Username can contain only characters ("a-z", "0-9", "_", "-", ".")'],
             [['make_user_project_params'], 'boolean'],
             [['password_reset_token'], 'unique'],
-            [['created_at', 'updated_at', 'last_activity', 'acl_rules_activated', 'full_name', 'user_groups', 'user_projects', 'deleted', 'user_departments'], 'safe'],
+            [['created_at', 'updated_at', 'last_activity', 'acl_rules_activated', 'user_groups', 'user_projects', 'deleted', 'user_departments'], 'safe'],
         ];
     }
 
@@ -404,7 +415,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             'user_projects' => 'Projects access',
             'form_roles' => 'Roles',
             'user_departments' => 'Departments',
-            'make_user_project_params' => 'Make user project params (automatic)'
+            'make_user_project_params' => 'Make user project params (automatic)',
+            'full_name' => 'Full Name'
         ];
     }
 
@@ -867,6 +879,16 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $roles = ArrayHelper::map($result, 'name', 'description');
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
+
+        if ($user->isUserManager()) {
+            if (isset($roles[self::ROLE_ADMIN])) {
+                unset($roles[self::ROLE_ADMIN]);
+            }
+            if (isset($roles[self::ROLE_SUPER_ADMIN])) {
+                unset($roles[self::ROLE_SUPER_ADMIN]);
+            }
+            return $roles;
+        }
 
         if((!$user->isAdmin() && !$user->isSuperAdmin()) || $user->isAnySenior()) {
             if(isset($roles[self::ROLE_ADMIN])) {

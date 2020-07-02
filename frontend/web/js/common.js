@@ -86,6 +86,10 @@
         }
     });
 
+    window.clientChatRequest = function () {
+
+    }
+
 })(window, $);
 
 function insertPhoneNumber(phone, title) {

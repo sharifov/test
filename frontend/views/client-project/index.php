@@ -54,6 +54,15 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ]),
             ],
+
+            [
+                'attribute' => 'cp_unsubscribe',
+                'value' => static function (ClientProject $model) {
+
+                    return $model->cp_unsubscribe ? '<span class="label label-success">true</span>' : '<span class="label label-danger">false</span>';
+                },
+                'format' => 'raw',
+            ],
             ['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>

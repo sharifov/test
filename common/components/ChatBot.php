@@ -9,6 +9,7 @@
 namespace common\components;
 
 use yii\base\Component;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\httpclient\Client;
 use yii\httpclient\CurlTransport;
@@ -81,7 +82,7 @@ class ChatBot extends Component
             ->setData($data);
 
         if ($headers) {
-            $this->request->addHeaders($headers);
+            $this->request->setHeaders($headers);
         }
 
         $this->request->setOptions([CURLOPT_ENCODING => 'gzip']);

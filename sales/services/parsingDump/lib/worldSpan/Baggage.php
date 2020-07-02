@@ -147,7 +147,8 @@ class Baggage implements ParseDumpInterface
                             $heightAlt = $bagMatches[7] ?? '';
 
                             $result[$segment][$keyBag]['piece'] = (int) $info['allow_pieces'];
-                            $result[$segment][$keyBag]['price'] = 'USD0';
+                            $result[$segment][$keyBag]['price'] = '0';
+                            $result[$segment][$keyBag]['currency'] = '';
                             $result[$segment][$keyBag]['weight'] = $bagMatches[4] . $weightAlt;
                             $result[$segment][$keyBag]['height'] = $bagMatches[5] . $heightAlt;
                             if (isset($bagMatches[8])) {
@@ -204,7 +205,8 @@ class Baggage implements ParseDumpInterface
                             $currency = !empty($bagMatches[5]) ? trim($bagMatches[5]) : 'USD';
 
                             $result[$segment][$keyBag]['piece'] = (int) $info['allow_pieces'];
-                            $result[$segment][$keyBag]['price'] = $currency . trim($price);
+                            $result[$segment][$keyBag]['price'] = trim($price);
+                            $result[$segment][$keyBag]['currency'] = $currency;
                             $result[$segment][$keyBag]['weight'] = isset($bagMatches[6]) ? trim($bagMatches[6]) : null;
                             $result[$segment][$keyBag]['height'] = isset($bagMatches[7]) ? trim($bagMatches[7]) : null;
                         }

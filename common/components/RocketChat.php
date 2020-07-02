@@ -23,6 +23,7 @@ use yii\httpclient\Response;
  * @property string $url
  * @property string $username
  * @property string $password
+ * @property string $host
  *
  * @property string $currentUserId
  * @property string $currentAuthToken
@@ -36,9 +37,11 @@ class RocketChat extends Component
     public string $url;
     public string $username;
     public string $password;
+    public string $host;
 
     private string $currentUserId;
     private string $currentAuthToken;
+    private array $systemAuthData = [];
 
     private Request $request;
 
@@ -53,19 +56,24 @@ class RocketChat extends Component
      */
     private function initRequest() : bool
     {
-        //$authStr = base64_encode($this->username . ':' . $this->password);
+        $this->request = $this->getNewRequest();
+        return $this->request != null;
+    }
 
+    /**
+     * @return null|Request
+     */
+    private function getNewRequest() : ?\yii\httpclient\Request
+    {
         try {
             $client = new Client();
             $client->setTransport(CurlTransport::class);
-            $this->request = $client->createRequest();
-            //$this->request->addHeaders(['Authorization' => 'Basic ' . $authStr]);
-            return true;
+            return $client->createRequest();
         } catch (\Throwable $error) {
             \Yii::error(VarDumper::dumpAsString($error, 10), 'RocketChat::initRequest:Exception');
         }
 
-        return false;
+        return null;
     }
 
     /**
@@ -89,7 +97,7 @@ class RocketChat extends Component
             ->setData($data);
 
         if ($headers) {
-            $this->request->addHeaders($headers);
+            $this->request->setHeaders($headers);
         }
 
         $this->request->setOptions([CURLOPT_ENCODING => 'gzip']);
@@ -97,7 +105,6 @@ class RocketChat extends Component
         if ($options) {
             $this->request->setOptions($options);
         }
-
         return $this->request->send();
     }
 
@@ -178,15 +185,19 @@ class RocketChat extends Component
 
 
     /**
+     * @param bool $cacheEnable
      * @return array
      * @throws Exception
      */
-    public function getSystemAuthData(): array
+    public function getSystemAuthData(bool $cacheEnable = true): array
     {
+
         $cache = \Yii::$app->cache;
         $key = 'rocket_chat_system_authToken_' . md5($this->url);
 
-        //$cache->delete($key);
+        if (!$cacheEnable) {
+            $cache->delete($key);
+        }
         $authData = $cache->get($key);
 
         if ($authData === false) {
@@ -203,28 +214,25 @@ class RocketChat extends Component
         return $authData;
     }
 
+
     /**
      * @return mixed|null
-     * @throws Exception
      */
     public function getSystemUserId()
     {
-        $authData = $this->getSystemAuthData();
-        if (!empty($authData['userId'])) {
-            return $authData['userId'];
+        if (!empty($this->systemAuthData['userId'])) {
+            return $this->systemAuthData['userId'];
         }
         return null;
     }
 
     /**
      * @return mixed|null
-     * @throws Exception
      */
     public function getSystemAuthToken()
     {
-        $authData = $this->getSystemAuthData();
-        if (!empty($authData['authToken'])) {
-            return $authData['authToken'];
+        if (!empty($this->systemAuthData['authToken'])) {
+            return $this->systemAuthData['authToken'];
         }
         return null;
     }
@@ -238,6 +246,32 @@ class RocketChat extends Component
         $this->currentUserId = $userId;
         $this->currentAuthToken = $authToken;
     }
+
+    /**
+     * @param bool $cacheEnable
+     * @return array
+     * @throws Exception
+     */
+    public function updateSystemAuth(bool $cacheEnable = true): array
+    {
+        $this->systemAuthData = $this->getSystemAuthData($cacheEnable);
+        return $this->systemAuthData;
+    }
+
+    /**
+     * @return array
+     * @throws Exception
+     */
+    public function getSystemAuthDataHeader(): array
+    {
+        $this->updateSystemAuth();
+
+        return [
+            'X-User-Id' => $this->systemAuthData['userId'],
+            'X-Auth-Token' => $this->systemAuthData['authToken']
+        ];
+    }
+
 
     /**
      * @param string $username
@@ -284,10 +318,11 @@ class RocketChat extends Component
     {
 
         $out = ['error' => false, 'data' => []];
-        $headers = [
-            'X-User-Id' => $this->getSystemUserId(),
-            'X-Auth-Token' => $this->getSystemAuthToken()
-        ];
+        $headers = $this->getSystemAuthDataHeader();
+
+        //return $headers;
+
+        //VarDumper::dump($headers);
 
         $data['username'] = $username;
         $data['password'] = $password;
@@ -316,6 +351,8 @@ class RocketChat extends Component
     }
 
 
+
+
     /**
      * @param string $username
      * @return array
@@ -325,10 +362,7 @@ class RocketChat extends Component
     {
 
         $out = ['error' => false, 'data' => []];
-        $headers = [
-            'X-User-Id' => $this->getSystemUserId(),
-            'X-Auth-Token' => $this->getSystemAuthToken()
-        ];
+        $headers = $this->getSystemAuthDataHeader();
 
         $data['username'] = $username;
 
@@ -360,10 +394,7 @@ class RocketChat extends Component
     {
 
         $out = ['error' => false, 'data' => []];
-        $headers = [
-            'X-User-Id' => $this->getSystemUserId(),
-            'X-Auth-Token' => $this->getSystemAuthToken()
-        ];
+        $headers = $this->getSystemAuthDataHeader();
 
         $data['userId'] = $userId;
 
@@ -392,10 +423,7 @@ class RocketChat extends Component
     public function getAllDepartments(): array
     {
         $out = ['error' => false, 'data' => []];
-        $headers = [
-            'X-User-Id' => $this->getSystemUserId(),
-            'X-Auth-Token' => $this->getSystemAuthToken()
-        ];
+        $headers = $this->getSystemAuthDataHeader();
 
        $data = [];
 
@@ -454,6 +482,29 @@ class RocketChat extends Component
         return $out;
     }
 
-    //public function
+    /**
+     * @param string $url
+     * @throws \Exception
+     */
+    public function downloadFile(string $url)
+    {
+        $out = ['error' => false, 'data' => []];
+        $request = $this->getNewRequest();
+        if ($request == null) {
+            throw new \Exception("unable to create rocket chat request");
+        }
+        $request->setMethod("get")->setUrl($this->url.$url);
+        $headers =  $this->getSystemAuthDataHeader();
+        $request->setHeaders($headers);
+        $response = $request->send();
+        if ($response->isOk) {
+            $out['data'] = $response->getContent();
+        } else {
+            $out['data'] = $response->content;
+            $out['error'] = true;
+            \Yii::error(VarDumper::dumpAsString($response, 10), 'RocketChat');
+        }
+        return $out;
+    }
 
 }

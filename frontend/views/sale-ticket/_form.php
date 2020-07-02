@@ -36,7 +36,7 @@ use yii\widgets\Pjax;
 
     </div>
     <div class="col-md-2">
-        <?= $form->field($model, 'st_penalty_type')->textInput(['maxlength' => true]) ?>
+        <?= $form->field($model, 'st_penalty_type')->dropDownList(SaleTicket::getAirlinePenaltyList()) ?>
 
         <?= $form->field($model, 'st_penalty_amount')->input('number', ['maxlength' => true]) ?>
 

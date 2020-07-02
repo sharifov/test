@@ -139,7 +139,7 @@ if($is_admin || $is_supervision) {
                         'leadId'        => $lead->id,
                         'dataProvider'  => $dataProviderCommunication,
                         'isAdmin'       => $is_admin,
-                        'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_lead'],
+                        'lead'          => $lead
                     ]);
                     ?>
                 <?php else: ?>

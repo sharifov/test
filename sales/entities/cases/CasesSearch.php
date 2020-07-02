@@ -14,9 +14,9 @@ use common\models\UserGroupAssign;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\helpers\setting\SettingHelper;
+use sales\model\saleTicket\entity\SaleTicket;
 use yii\data\ActiveDataProvider;
 use yii\db\Expression;
-use yii\helpers\VarDumper;
 
 /**
  * Class CasesSearch
@@ -48,6 +48,9 @@ use yii\helpers\VarDumper;
  * @property $userGroup
  *
  * @property array $cacheSaleData
+ * @property array $csStatuses
+ * @property int|null $airlinePenalty
+ * @property string|null $validatingCarrier
  */
 class CasesSearch extends Cases
 {
@@ -78,6 +81,9 @@ class CasesSearch extends Cases
 
     public $sentEmailBy;
     public $userGroup;
+    public $csStatuses;
+    public $airlinePenalty;
+    public $validatingCarrier;
 
     private $cacheSaleData = [];
 
@@ -92,6 +98,7 @@ class CasesSearch extends Cases
             ['cs_subject', 'string'],
             ['cs_category_id', 'integer'],
             ['cs_status', 'integer'],
+            ['csStatuses', 'in', 'range' => array_keys(CasesStatus::STATUS_LIST), 'allowArray' => true],
             ['cs_user_id', 'integer'],
             ['cs_lead_id', 'string'],
             ['cs_dep_id', 'integer'],
@@ -118,6 +125,8 @@ class CasesSearch extends Cases
             [['cssOutDate', 'cssInDate'], 'date'],
             [['cssChargeType'], 'string', 'max' => 100],
             [['departureAirport', 'arrivalAirport', 'departureCountries', 'arrivalCountries', 'cssInOutDate', 'saleTicketSendEmailDate'], 'safe'],
+            ['airlinePenalty', 'integer'],
+            ['validatingCarrier', 'string', 'length' => 2],
         ];
     }
 
@@ -157,6 +166,10 @@ class CasesSearch extends Cases
 			'saleTicketSendEmailDate' => 'Send Email Date',
 			'sentEmailBy' => 'Sent Email By User',
 			'userGroup' => 'User Group',
+			'csStatuses' => 'Status',
+			'airlinePenalty' => 'Airline Penalty',
+			'cs_order_uid' => 'Order uid',
+			'validatingCarrier' => 'Validating Carrier',
         ];
     }
 
@@ -177,6 +190,7 @@ class CasesSearch extends Cases
      * @param $params
      * @param Employee $user
      * @return ActiveDataProvider
+     * @throws \JsonException
      */
     public function searchByAgent($params, $user): ActiveDataProvider
     {
@@ -218,6 +232,8 @@ class CasesSearch extends Cases
             'cs_client_id' => $this->cs_client_id,
         ]);
 
+        $query->andFilterWhere(['IN', 'cs_status', $this->csStatuses]);
+
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
         $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
 
@@ -229,6 +245,20 @@ class CasesSearch extends Cases
         if ($this->cssSaleId) {
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $this->cssSaleId])]);
         }
+
+        if ($this->validatingCarrier) {
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('css_cs_id')
+                ->andFilterWhere(
+                    [
+                        '=',
+                        new Expression("JSON_EXTRACT(JSON_UNQUOTE(css_sale_data),'$.validatingCarrier')"),
+                        $this->validatingCarrier
+                    ]
+                )
+            ]);
+        }
+
         if ($this->ticketNumber) {
             if ($saleId = $this->getSaleIdByTicket($this->ticketNumber)) {
                 $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
@@ -236,7 +266,6 @@ class CasesSearch extends Cases
                 $query->where('0=1');
             }
         }
-
         if ($this->clientId){
             $query->andWhere(['cs_client_id' => $this->clientId]);
         }
@@ -354,12 +383,20 @@ class CasesSearch extends Cases
 					->andWhere(['date_format(css_send_email_dt, "%Y-%m-%d")' => $this->saleTicketSendEmailDate]);
 			}
 		}
+		if ($this->airlinePenalty) {
+            $query->andWhere([
+                    'cs_id' => SaleTicket::find()->select('st_case_id')
+                        ->andWhere(['st_penalty_type' => $this->airlinePenalty])
+                ]
+            );
+        }
         return $dataProvider;
     }
 
     /**
      * @param $params
      * @return ActiveDataProvider
+     * @throws \JsonException
      */
     private function searchByAdmin($params): ActiveDataProvider
     {
@@ -395,12 +432,13 @@ class CasesSearch extends Cases
             'cs_project_id' => $this->cs_project_id,
             'cs_dep_id' => $this->cs_dep_id,
             'cs_category_id' => $this->cs_category_id,
-            'cs_status' => $this->cs_status,
             'cs_client_id' => $this->cs_client_id,
             'cs_source_type_id' => $this->cs_source_type_id,
             'cs_need_action' => $this->cs_need_action,
+            'cs_status' => $this->cs_status,
         ]);
 
+        $query->andFilterWhere(['IN', 'cs_status', $this->csStatuses]);
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
         $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
 
@@ -415,6 +453,19 @@ class CasesSearch extends Cases
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $this->cssSaleId])]);
         }
 
+        if ($this->validatingCarrier) {
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('css_cs_id')
+                ->andFilterWhere(
+                    [
+                        '=',
+                        new Expression("JSON_EXTRACT(JSON_UNQUOTE(css_sale_data),'$.validatingCarrier')"),
+                        $this->validatingCarrier
+                    ]
+                )
+            ]);
+        }
+
         if ($this->ticketNumber) {
             if ($saleId = $this->getSaleIdByTicket($this->ticketNumber)) {
                 $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
@@ -422,7 +473,6 @@ class CasesSearch extends Cases
                 $query->where('0=1');
             }
         }
-
         if ($this->clientId){
             $query->andWhere(['cs_client_id' => $this->clientId]);
         }
@@ -546,7 +596,13 @@ class CasesSearch extends Cases
                 ->where(['IN', 'airports.country', $this->arrivalCountries])
             ]);
         }
-
+        if ($this->airlinePenalty) {
+            $query->andWhere([
+                    'cs_id' => SaleTicket::find()->select('st_case_id')
+                        ->andWhere(['st_penalty_type' => $this->airlinePenalty])
+                ]
+            );
+        }
         return $dataProvider;
     }
 
@@ -577,6 +633,28 @@ class CasesSearch extends Cases
                 if (strcasecmp($passenger->ticket_number, $tickerNum) === 0) {
                     return $decodeSale->saleId;
                 }
+            }
+        }
+        return null;
+    }
+
+
+    /**
+     * @param string $validatingCarrier
+     * @return int|null
+     * @throws \JsonException
+     */
+    private function getSaleIdByValidatingCarrier(string $validatingCarrier): ?int
+    {
+        $validatingCarrierParam = 'validatingCarrier\":\"' . $validatingCarrier;
+
+        foreach ($this->getCaseSaleData($validatingCarrierParam) as $sale) {
+            $decodeSale = json_decode($sale['css_sale_data'], false, 512, JSON_THROW_ON_ERROR);
+            if (
+                isset($decodeSale->validatingCarrier) &&
+                strcasecmp($decodeSale->validatingCarrier, $validatingCarrier) === 0
+            ) {
+                return $decodeSale->saleId;
             }
         }
         return null;
@@ -634,5 +712,4 @@ class CasesSearch extends Cases
         }
         return null;
     }
-
 }

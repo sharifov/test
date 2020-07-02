@@ -133,7 +133,7 @@ class PhoneController extends FController
 
         $dataProvider->sort = false;*/
 
-        $currentCall = Call::find()->where(['c_created_user_id' => Yii::$app->user->id, 'c_status_id' => [Call::STATUS_RINGING, Call::STATUS_QUEUE, Call::STATUS_IN_PROGRESS]])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+        $currentCall = Call::find()->where(['c_created_user_id' => Yii::$app->user->id, 'c_status_id' => [Call::STATUS_RINGING, Call::STATUS_IN_PROGRESS]])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
         //$currentCall = Call::find()->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
 
 

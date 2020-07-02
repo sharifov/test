@@ -392,8 +392,16 @@ class EmployeeController extends FController
                     }
                 }
 
-
                 // VarDumper::dump($model->form_roles, 10, true); exit;
+
+                if ($model->form_roles) {
+                    $availableRoles = Employee::getAllRoles();
+                    foreach ($model->form_roles as $keyItem => $roleItem) {
+                        if (!array_key_exists($roleItem, $availableRoles)) {
+                            unset($model->form_roles[$keyItem]);
+                        }
+                    }
+                }
 
                 $model->addRole(true);
 
@@ -574,7 +582,13 @@ class EmployeeController extends FController
                 }
             }
 
-            if($user->isUserManager() || $user->isAnySupervision()) {
+            if ($user->isUserManager()) {
+                if ($model->isOnlyAdmin()) {
+                    throw new NotFoundHttpException('Access denied for Admin user: ' . $model->id);
+                }
+            }
+
+            if($user->isAnySupervision()) {
                 if($model->isAdmin()) {
                     throw new NotFoundHttpException('Access denied for Admin user: '.$model->id);
                 }

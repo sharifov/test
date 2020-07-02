@@ -19,4 +19,9 @@ class ClientQuery extends ActiveQuery
     {
         return $this->andWhere(['id' => $id]);
     }
+
+    public function byUuid(string $uuid): self
+	{
+		return $this->andWhere(['uuid' => $uuid]);
+	}
 }
