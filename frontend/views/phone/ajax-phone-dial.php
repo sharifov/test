@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Employee;
+use sales\auth\Auth;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -107,12 +108,14 @@ $user = Yii::$app->user->identity;
 
             </div>
 
-            <div class="text-center">
-                <?=Html::a('<i class="fa fa-remove"></i> Emergency Cancel Call Process', ['call/ajax-call-cancel', 'id' => $currentCall->c_id], ['class' => 'btn btn-sm btn-danger', 'data' => [
-                    'confirm' => 'Attention! This function is used only for emergency cases. ' . "\r\n". 'Are you sure you want to cancel this Call?',
-                    'method' => 'post',
-                ] ])?>
-            </div>
+            <?php if (Auth::can('/call/ajax-call-cancel')): ?>
+                <div class="text-center">
+                    <?=Html::a('<i class="fa fa-remove"></i> Emergency Cancel Call Process', ['/call/ajax-call-cancel', 'id' => $currentCall->c_id], ['class' => 'btn btn-sm btn-danger', 'data' => [
+                        'confirm' => 'Attention! This function is used only for emergency cases. ' . "\r\n". 'Are you sure you want to cancel this Call?',
+                        'method' => 'post',
+                    ] ])?>
+                </div>
+            <?php endif; ?>
 
             <div>
                 <h2>Current Call (<?=$currentCall->c_id?>)</h2>

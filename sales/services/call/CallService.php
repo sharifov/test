@@ -45,6 +45,10 @@ class CallService
             throw new \DomainException('Call not found');
         }
 
+        if (!($call->isStatusRinging() || $call->isStatusInProgress())) {
+            throw new \DomainException('Call status is invalid');
+        }
+
         if ($call->isEnded()) {
             throw new \DomainException('Cannot cancel call in current status.');
         }
