@@ -29,7 +29,7 @@ class JsonHelper
     public static function decode($data, bool $asArray = true)
     {
         if (is_string($data)) {
-            return Json::decode($data);
+            return Json::decode($data, $asArray);
         }
         return $data;
     }

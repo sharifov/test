@@ -317,7 +317,7 @@ class CasesSaleService
      */
     public function saveAdditionalData(CaseSale $caseSale, Cases $case, array $saleData, bool $createTicket = true): ?CaseSale
     {
-        if ((isset($saleData['saleId']) && (int)$saleData['saleId'] === (int)$caseSale->css_sale_id) && isset($saleData['bookingId'])) {
+        if (isset($saleData['saleId'], $saleData['bookingId']) && (int) $saleData['saleId'] === (int) $caseSale->css_sale_id) {
             $caseSale->css_sale_data = $saleData;
             $caseSale->css_sale_data_updated = $caseSale->css_sale_data;
 
@@ -548,7 +548,7 @@ class CasesSaleService
                     $caseSale->css_sale_created_dt = $saleData['created'] ?? null;
                     $caseSale->css_sale_book_id = $saleData['confirmationNumber'] ?? null;
                     $caseSale->css_sale_pax = $saleData['requestDetail']['passengersCnt'] ?? null;
-                    $caseSale->css_sale_data = json_encode($refreshSaleData, JSON_THROW_ON_ERROR);
+                    $caseSale->css_sale_data = $refreshSaleData;
 
                     $caseSale = $this->saveAdditionalData($caseSale, $case, $refreshSaleData);
 

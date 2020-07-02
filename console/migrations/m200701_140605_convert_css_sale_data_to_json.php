@@ -12,6 +12,7 @@ class m200701_140605_convert_css_sale_data_to_json extends Migration
      */
     public function safeUp()
     {
+        return true;
         Yii::$app->db->createCommand(
             'UPDATE
                     case_sale
@@ -32,6 +33,7 @@ class m200701_140605_convert_css_sale_data_to_json extends Migration
      */
     public function safeDown()
     {
+        return true;
         Yii::$app->db->createCommand(
             'UPDATE
                     case_sale
