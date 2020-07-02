@@ -22,6 +22,7 @@ use common\models\Sms;
 use common\models\SmsTemplateType;
 use common\models\UserProjectParams;
 use common\widgets\Alert;
+use frontend\helpers\JsonHelper;
 use frontend\models\CaseCommunicationForm;
 use frontend\models\CasePreviewEmailForm;
 use frontend\models\CasePreviewSmsForm;
@@ -830,7 +831,7 @@ class CasesController extends FController
                 $cs = new CaseSale();
                 $cs->css_cs_id = $model->cs_id;
                 $cs->css_sale_id = $saleData['saleId'];
-                $cs->css_sale_data = json_encode($saleData);
+                $cs->css_sale_data = $saleData;
                 $cs->css_sale_pnr = $saleData['pnr'] ?? null;
                 $cs->css_sale_created_dt = $saleData['created'] ?? null;
                 $cs->css_sale_book_id = $saleData['bookingId'] ?? null;
@@ -1414,7 +1415,7 @@ class CasesController extends FController
 				$form = new CasesSaleForm($caseSale, $this->casesSaleService);
 
 				if ($form->load(Yii::$app->request->post(), 'cssSaleData') && $form->validate()) {
-					$decodedSaleData = json_decode( (string)($form->caseSale->css_sale_data_updated), true );
+					$decodedSaleData = JsonHelper::decode($form->caseSale->css_sale_data_updated);
 
 					$difference = $this->casesSaleService->compareSaleData($decodedSaleData, $form->validatedData);
 					if (!$difference) {
@@ -1542,7 +1543,7 @@ class CasesController extends FController
 		$canManageSaleInfo = $caseGuard->canManageSaleInfo(
 			$caseSale,
 			Yii::$app->user->identity,
-			json_decode((string)$caseSale->css_sale_data, true)['passengers'] ?? [], $isRefresh);
+			JsonHelper::decode($caseSale->css_sale_data)['passengers'] ?? [], $isRefresh);
 
 		if ($canManageSaleInfo) {
 			throw new \DomainException($canManageSaleInfo, -3);

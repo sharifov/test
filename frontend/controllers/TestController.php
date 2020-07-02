@@ -45,6 +45,7 @@ use console\migrations\RbacMigrationService;
 use DateInterval;
 use DatePeriod;
 use DateTime;
+use frontend\helpers\JsonHelper;
 use frontend\models\CommunicationForm;
 use frontend\models\form\CreditCardForm;
 use frontend\models\UserFailedLogin;
@@ -1253,7 +1254,7 @@ class TestController extends FController
 
 		$caseSale = $repository->getSaleByPrimaryKeys(135814, $saleId);
 
-		$saleOriginalData = json_decode((string)$caseSale->css_sale_data, true);
+		$saleOriginalData = JsonHelper::decode($caseSale->css_sale_data);
 
 		$service = Yii::createObject(CasesSaleService::class);
 		echo '<pre>';

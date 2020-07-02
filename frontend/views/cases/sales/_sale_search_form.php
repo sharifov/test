@@ -1,6 +1,7 @@
 <?php
 
 use yii\helpers\Html;
+use yii\web\View;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
@@ -13,6 +14,7 @@ use yii\widgets\ActiveForm;
 <div class="sale-search">
 
     <?php $form = ActiveForm::begin([
+        'id' => 'sales_search_form',
         'action' => ['cases/view', 'gid' => $caseModel->cs_gid],
         'method' => 'get',
         'options' => [
@@ -86,7 +88,7 @@ use yii\widgets\ActiveForm;
         <div class="col-md-12">
             <br>
             <div class="form-group text-center">
-                <?= Html::submitButton('<i class="fa fa-search"></i> Search sales', ['class' => 'btn btn-primary']) ?>
+                <?= Html::submitButton('<i class="fa fa-search"></i> Search sales', ['class' => 'btn btn-primary search_sales_btn']) ?>
                 <?php //= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset data', [''], ['class' => 'btn btn-warning']) ?>
                 <?php //= Html::resetButton('<i class="fa fa-close"></i> Reset form', ['class' => 'btn btn-warning']) ?>
             </div>
@@ -95,4 +97,15 @@ use yii\widgets\ActiveForm;
     <?php ActiveForm::end(); ?>
 
 </div>
+
+<?php
+$js = <<<JS
+    $(document).on('beforeSubmit', '#sales_search_form', function() {
+        let btn = $(this).find('.search_sales_btn');        
+        btn.html('<span class="spinner-border spinner-border-sm"></span> Loading')
+            .prop("disabled", true);
+    });
+JS;
+$this->registerJs($js, View::POS_READY);
+?>
 
