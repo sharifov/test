@@ -309,9 +309,11 @@ class CasesSaleService
      * @param CaseSale $caseSale
      * @param Cases $case
      * @param array $saleData
+     * @param bool $createTicket
      * @return CaseSale
+     * @throws \JsonException
      */
-    public function saveAdditionalData(CaseSale $caseSale, Cases $case, array $saleData): ?CaseSale
+    public function saveAdditionalData(CaseSale $caseSale, Cases $case, array $saleData, bool $createTicket = true): ?CaseSale
     {
         if ((isset($saleData['saleId']) && (int)$saleData['saleId'] === (int)$caseSale->css_sale_id) && isset($saleData['bookingId'])) {
             $caseSale->css_sale_data = json_encode($saleData, JSON_THROW_ON_ERROR);
@@ -324,7 +326,9 @@ class CasesSaleService
                 throw new \RuntimeException('Error. Additional data not saved');
             }
             $case->updateLastAction();
-			$this->saleTicketService->createSaleTicketBySaleData($caseSale, $saleData);
+            if ($createTicket) {
+			    $this->saleTicketService->createSaleTicketBySaleData($caseSale, $saleData);
+			}
             return $caseSale;
         }
         throw new \RuntimeException('Error. Additional data not saved. Broken saleData params');

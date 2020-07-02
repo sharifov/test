@@ -3,6 +3,8 @@
 namespace common\components\jobs;
 
 use common\models\CaseSale;
+use sales\entities\cases\Cases;
+use sales\model\saleTicket\useCase\create\SaleTicketService;
 use sales\services\cases\CasesSaleService;
 use yii\base\BaseObject;
 use yii\helpers\VarDumper;
@@ -33,6 +35,8 @@ class UpdateSaleFromBOJob extends BaseObject implements JobInterface
             if($this->checkParams()) {
                 /** @var CasesSaleService $casesSaleService */
                 $casesSaleService = Yii::createObject(CasesSaleService::class);
+                /** @var SaleTicketService $saleTicketService */
+                $saleTicketService = Yii::createObject(SaleTicketService::class);
 
                 $cacheKeySale = 'detailRequestToBackOffice_' . $this->saleId;
                 $refreshSaleData = Yii::$app->cache->get($cacheKeySale);
@@ -46,21 +50,23 @@ class UpdateSaleFromBOJob extends BaseObject implements JobInterface
                     ) {
                         Yii::$app->cache->set($cacheKeySale, $refreshSaleData, $this->cacheDuration);
                     }
-                    throw new \RuntimeException('Error. Response from detailRequestToBackOffice is empty');
+                    throw new \RuntimeException('Error. Response from detailRequestToBackOffice is empty. SaleId (' . $this->saleId . ')', 101);
                 }
                 if ($caseSale = CaseSale::findOne(['css_cs_id' => $this->caseId, 'css_sale_id' => $this->saleId])) {
-                    $caseSale->css_sale_data = json_encode($refreshSaleData, JSON_THROW_ON_ERROR); /* TODO:: not convert after SL-1864 */
-                    if (!$caseSale->save(false)) {
-                        throw new \RuntimeException('Error. CaseSale not updated from detailRequestToBackOffice.');
-                    }
+                    $casesSaleService->saveAdditionalData($caseSale, Cases::findOne($this->caseId), $refreshSaleData, false);
+                    $saleTicketService->refreshSaleTicketBySaleData($this->caseId, $caseSale, $refreshSaleData);
                 } else {
-                    throw new \RuntimeException('Error. CaseSale (' . $this->caseId . '/' . $this->saleId . ') not found.');
+                    throw new \RuntimeException('Error. CaseSale (' . $this->caseId . '/' . $this->saleId . ') not found.', 102);
                 }
             } else {
-                throw new \RuntimeException('Error. Params "caseId" and "saleId" is required');
+                throw new \RuntimeException('Error. Params "caseId" and "saleId" is required', 103);
             }
-        } catch (\Throwable $e) {
-            Yii::error(VarDumper::dumpAsString($e->getMessage()), 'UpdateSaleFromBOJob:execute:Throwable');
+        } catch (\Throwable $throwable) {
+            if ($throwable->getCode() > 100) {
+                Yii::info(VarDumper::dumpAsString($throwable->getMessage()), 'info\UpdateSaleFromBOJob:execute:Throwable');
+            } else {
+                Yii::error(VarDumper::dumpAsString($throwable->getMessage()), 'UpdateSaleFromBOJob:execute:Throwable');
+            }
         }
         return false;
     }
