@@ -555,7 +555,7 @@ class QuoteController extends FController
 
                 $leadId = (int) Yii::$app->request->get('lead_id');
                 if (!$lead = Lead::findOne(['id' => $leadId])) {
-                    throw new \DomainException( 'Lead id(' . $leadId . ') not found');
+                    throw new \DomainException( 'Lead id(' . $leadId . ') not found', -1);
                 }
 
                 $post = Yii::$app->request->post();
@@ -566,7 +566,7 @@ class QuoteController extends FController
                     $postQuote['employee_name'] = Yii::$app->user->identity->username;
 
                     if (!$gds = ParsingDump::getGdsByQuote($postQuote['gds'])) {
-                        throw new \DomainException(  'This gds(' . $postQuote['gds'] . ') cannot be processed');
+                        throw new \DomainException(  'This gds(' . $postQuote['gds'] . ') cannot be processed', -2);
                     }
 
                     $quote = Quote::createQuote($postQuote, $lead->id, $lead->originalQuoteExist());
@@ -577,14 +577,14 @@ class QuoteController extends FController
                         (new ReservationService('sabre'))->parseReservation(str_replace('&nbsp;', ' ', $post['reservation_result']), true, $quote->itinerary)) {
                             $itinerary = Quote::createDump($quote->itinerary);
                     } else {
-                        throw new \DomainException(  'Parse "reservation dump" failed');
+                        throw new \DomainException(  'Parse "reservation dump" failed', -3);
                     }
 
                     $quote->reservation_dump = str_replace('&nbsp;', ' ', implode("\n", $itinerary));
 
                     if (!$quote->save(false)) {
                         $response['errors'] = $quote->getErrors();
-                        throw new \DomainException(  'Quote not saved. Error: ' . $quote->getErrorSummary(false)[0]);
+                        throw new \DomainException(  'Quote not saved. Error: ' . $quote->getErrorSummary(false)[0], -4);
                     }
 
                     foreach ($post['QuotePrice'] as $key => $quotePrice) {
@@ -610,8 +610,7 @@ class QuoteController extends FController
                     }
 
                     if (count($response['errorsPrices'])) {
-                        throw new \DomainException(  'QuotePrice not saved. Errors:' .
-                            \yii\helpers\VarDumper::dumpAsString($response['errorsPrices'], 10));
+                        throw new \DomainException(  'QuotePrice not saved.', -5);
                     }
 
                     $this->logQuote($quote);
@@ -666,13 +665,15 @@ class QuoteController extends FController
                     $response['errorMessage'] = 'POST data Quote required';
                 }
             } else {
-                throw new \DomainException(  'POST data required');
+                throw new \DomainException(  'POST data required', -6);
             }
         } catch (\Throwable $throwable) {
             $transaction->rollBack();
             $response['errorMessage'] = $throwable->getMessage();
-            \Yii::error(\yii\helpers\VarDumper::dumpAsString($throwable, 10),
-            'QuoteController:actionSaveFromDump:Throwable');
+            if ($throwable->getCode() > 0) {
+                \Yii::error(\yii\helpers\VarDumper::dumpAsString($throwable, 10),
+                'QuoteController:actionSaveFromDump:Throwable');
+            }
         }
         return $response;
     }
