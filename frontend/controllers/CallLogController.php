@@ -112,9 +112,11 @@ class CallLogController extends FController
 
 			$rows = $callHistory->getModels();
 
+            $userTimezone = Auth::user()->userParams->up_timezone ?? 'UTC';
+
 			$result = [
 				'html'  => $this->renderAjax('partial/_ajax_wg_call_history', [
-					'callHistory' => CallHelper::formatCallHistoryByDate($rows),
+					'callHistory' => CallHelper::formatCallHistoryByDate($rows, $userTimezone),
 				]),
 				'page' => $page+1,
 				'rows' => empty($rows)
