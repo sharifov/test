@@ -88,12 +88,7 @@ class QuoteSegmentBaggage extends \yii\db\ActiveRecord
                     ActiveRecord::EVENT_BEFORE_UPDATE => ['qsb_updated_dt'],
                 ],
                 'value' => date('Y-m-d H:i:s')
-            ],
-            'user' => [
-                'class' => BlameableBehavior::class,
-                'createdByAttribute' => 'qsb_updated_user_id',
-                'updatedByAttribute' => 'qsb_updated_user_id',
-            ],
+            ]
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
