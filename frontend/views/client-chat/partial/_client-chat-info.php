@@ -24,7 +24,7 @@ use yii\web\View;
 
                 <span class="_rc-client-name">
                     <i class="fa fa-user"></i>
-                    <span><?= Html::encode($client->full_name) ?></span>
+                    <span><?= Html::encode($client->full_name ?: 'Guest-' . $client->id) ?></span>
                 </span>
 
                 <?php if($emails = $client->clientEmails): ?>

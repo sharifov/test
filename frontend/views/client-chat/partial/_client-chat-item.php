@@ -22,12 +22,14 @@ use sales\model\clientChat\entity\ClientChat;
         </div>
         <div>
             <?php if ($clientChat->cchDep): ?>
-                <span class="badge badge-info"><?= $clientChat->cchDep->dep_name ?></span>
+                <span class="label label-info"><?= $clientChat->cchDep->dep_name ?></span>
             <?php endif; ?>
 
             <?php if ($clientChat->cchProject): ?>
-                <span class="badge badge-green"><?= $clientChat->cchProject->name ?></span>
+                <span class="label label-success"><?= $clientChat->cchProject->name ?></span>
             <?php endif; ?>
+
+            <span class="label label-default label-"><?= $clientChat->cchChannel->ccc_name ?></span>
         </div>
     </div>
 <?php endforeach; ?>

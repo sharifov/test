@@ -184,7 +184,7 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 
 	public function getNameFromData():string
 	{
-		return $this->decodedData['visitor']['name'] ?? 'ClientName';
+		return $this->decodedData['visitor']['name'] ?? '';
 	}
 
 	public function getUserIdFromData(): string

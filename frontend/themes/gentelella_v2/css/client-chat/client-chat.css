@@ -4,8 +4,15 @@
 }
 ._cc-list-wrapper {
     height: auto;
-    max-height: 450px;
     overflow: scroll;
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+}
+._cc-wrapper {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 ._cc-list-wrapper ._cc-list-item {
     width: 100%;
@@ -97,6 +104,7 @@
 #_channel_list_wrapper {
     border: 1px solid lightgrey;
     border-radius: 3px;
+    height: calc(100vh - 138px);
 }
 
 #_cc-load {
@@ -159,4 +167,14 @@
     font-size: 16px;
     font-weight: 600;
     text-transform: capitalize;
+}
+._cc-list-item-info {
+    display: flex;
+    flex-direction: column;
+}
+._cc-list-item-info span {
+    margin-bottom: 5px;
+}
+._cc-list-item-info span:last-child {
+    margin-bottom: 0;
 }
