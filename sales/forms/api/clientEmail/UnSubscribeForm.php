@@ -13,7 +13,7 @@ use yii\base\Model;
  */
 class UnSubscribeForm extends Model
 {
-    public string $email;
+    public $email;
     public int $project_id;
 
     /**
