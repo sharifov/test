@@ -185,6 +185,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 'format' => 'raw'
             ],
             'username:userName',
+            'nickname',
             [
                 'attribute' => 'roles',
                 'label' => 'Role',

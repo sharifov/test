@@ -46,7 +46,7 @@ class TelegramSendMessageJob extends BaseObject implements JobInterface
 
                     $tgm->sendMessage([
                         'chat_id' => $profile->up_telegram,
-                        'text' => $this->text,
+                        'text' => strip_tags($this->text),
                     ]);
 
                     unset($tgm, $profile);

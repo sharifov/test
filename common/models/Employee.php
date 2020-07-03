@@ -32,6 +32,7 @@ use yii\web\NotFoundHttpException;
  * @property int $id
  * @property string $username
  * @property string $full_name
+ * @property string $nickname
  * @property string $auth_key
  * @property string $password_hash
  * @property string $password_reset_token
@@ -377,13 +378,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function rules()
     {
         return [
-            [['username', 'auth_key', 'password_hash', 'email', 'form_roles', 'full_name'], 'required'],
+            [['username', 'auth_key', 'password_hash', 'email', 'form_roles', 'full_name', 'nickname'], 'required'],
             [['password'], 'required', 'on' => self::SCENARIO_REGISTER],
-            [['email', 'password', 'username', 'full_name'], 'trim'],
+            [['email', 'password', 'username', 'full_name', 'nickname'], 'trim'],
             [['password'], 'string', 'min' => 8],
             [['status'], 'integer'],
             [['password_hash', 'password_reset_token', 'email'], 'string', 'max' => 255],
-            [['username', 'full_name'], 'string', 'min' => 3, 'max' => 50],
+            [['username', 'full_name', 'nickname'], 'string', 'min' => 3, 'max' => 50],
             [['auth_key'], 'string', 'max' => 32],
             [['username'], 'unique'],
             [['email'], 'unique'],
