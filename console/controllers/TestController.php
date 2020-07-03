@@ -4,6 +4,7 @@ namespace console\controllers;
 
 use common\components\jobs\CreateSaleFromBOJob;
 use common\models\Email;
+use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
 use sales\services\cases\CasesManageService;
 use sales\services\cases\CasesSaleService;
@@ -91,6 +92,41 @@ class TestController extends Controller
 
         } catch (\Throwable $e) {
             \Yii::error($e, 'TEST:ReceiveEmailsJob:execute');
+        }
+
+        Console::endProgress(false);
+        $time_end = microtime(true);
+        $time = number_format(round($time_end - $time_start, 2), 2);
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .
+            ' s] %gFind Items: %w[' . $countItems . '] %g Added to queue: %w[' . $processed . '] %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
+    }
+
+    public function actionCasesUpdateLastAction(int $limit = 10)
+    {
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
+
+        $time_start = microtime(true);
+
+
+        $cases = Cases::find()->limit($limit)->orderBy(['cs_last_action_dt' => SORT_DESC])->all();
+        $countItems = count($cases);
+        $processed = 0;
+        Console::startProgress(0, $countItems);
+
+        try {
+            foreach ($cases as $case) {
+                /** @var Cases $case */
+                $case->updateLastAction();
+
+                $processed ++;
+                Console::updateProgress($processed, $countItems);
+            }
+
+        } catch (\Throwable $e) {
+            \Yii::error($e, 'TEST:actionCasesUpdateLastAction');
         }
 
         Console::endProgress(false);
