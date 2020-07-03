@@ -142,7 +142,7 @@ class LeadManageService
      * @return Lead
      * @throws \Throwable
      */
-    public function createByIncomingCall(string $phoneNumber = '', int $projectId = 0, int $sourceId = 0, $gmt = ''): Lead
+    public function createByIncomingCall(string $phoneNumber = '', ?int $projectId = null, ?int $sourceId = null, $gmt = ''): Lead
     {
         $lead = $this->transaction->wrap(function () use ($phoneNumber, $projectId, $sourceId, $gmt) {
 
@@ -225,17 +225,17 @@ class LeadManageService
     }
 
     /**
-     * @param int $sourceId
-     * @param int $projectId
-     * @return int
+     * @param int|null $sourceId
+     * @param int|null $projectId
+     * @return int|null
      */
-    private function getSourceId(int $sourceId, int $projectId): int
+    private function getSourceId(?int $sourceId, ?int $projectId): ?int
     {
         if ($sourceId && ($source = Sources::findOne(['id' => $sourceId]))) {
             return $source->id;
         }
 
-        if ($source = Sources::find()->select('id')->where(['project_id' => $projectId, 'default' => true])->one()) {
+        if ($projectId && $source = Sources::find()->select('id')->where(['project_id' => $projectId, 'default' => true])->one()) {
             return $source->id;
         }
 
