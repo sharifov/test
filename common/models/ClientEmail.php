@@ -33,7 +33,7 @@ class ClientEmail extends \yii\db\ActiveRecord
     public const EMAIL_NOT_SET = 0;
 
 	public const EMAIL_TYPE = [
-		self::EMAIL_NOT_SET => 'Not set',
+		self::EMAIL_NOT_SET => '-',
 		self::EMAIL_VALID => 'Valid',
 		self::EMAIL_FAVORITE => 'Favorite',
 		self::EMAIL_INVALID => 'Invalid',
@@ -50,7 +50,7 @@ class ClientEmail extends \yii\db\ActiveRecord
 		self::EMAIL_VALID => '<span class="label label-success">{type}</span>',
 		self::EMAIL_FAVORITE => '<span class="label label-warning">{type}</span>',
 		self::EMAIL_INVALID => '<span class="label label-danger">{type}</span>',
-		self::EMAIL_NOT_SET => '<span class="label label-primary">{type}</span>'
+		self::EMAIL_NOT_SET => '{type}'
 	];
 
 	public const EMAIL_TYPE_TEXT_DECORATION = [
