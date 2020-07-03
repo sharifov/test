@@ -324,7 +324,8 @@ class CasesSaleService
             $caseSale = $this->prepareAdditionalData($caseSale, $saleData);
 
             if(!$caseSale->save()) {
-                \Yii::error(VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]), 'CasesSaleService:saveAdditionalData');
+                \Yii::error(VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]),
+                'CasesSaleService:saveAdditionalData');
                 throw new \RuntimeException('Error. Additional data not saved');
             }
             $case->updateLastAction();
@@ -343,6 +344,10 @@ class CasesSaleService
      */
     public function prepareAdditionalData(CaseSale $caseSale, array $saleData): CaseSale
     {
+        $caseSale->css_sale_pnr = $saleData['pnr'] ?? null;
+        $caseSale->css_sale_created_dt = $saleData['created'] ?? null;
+        $caseSale->css_sale_book_id = $saleData['confirmationNumber'] ?? null;
+        $caseSale->css_sale_pax = $saleData['requestDetail']['passengersCnt'] ?? null;
         if (isset($saleData['price']['priceQuotes'])) {
             $amountCharged = 0;
             foreach ($saleData['price']['priceQuotes'] as $priceQuote) {
@@ -529,48 +534,32 @@ class CasesSaleService
             return null;
         }
 
-        $transaction = Yii::$app->db->beginTransaction();
         try {
 			if (!empty($saleData['saleId']) && $case = Cases::findOne($csId)) {
                 $saleId = (int)$saleData['saleId'];
 
-                $caseSale = new CaseSale();
-                $caseSale->css_cs_id = $csId;
-                $caseSale->css_sale_id = $saleId;
-                $caseSale->css_sale_data = $saleData;
-
-                if (!$caseSale->save()) {
-                    throw new \RuntimeException('Error. CaseSale not saved.');
-                }
-
                 if ($refreshSaleData = $this->detailRequestToBackOffice($saleId, 0, 120, 1)) {
-                    $caseSale->css_sale_pnr = $saleData['pnr'] ?? null;
-                    $caseSale->css_sale_created_dt = $saleData['created'] ?? null;
-                    $caseSale->css_sale_book_id = $saleData['confirmationNumber'] ?? null;
-                    $caseSale->css_sale_pax = $saleData['requestDetail']['passengersCnt'] ?? null;
-                    $caseSale->css_sale_data = $refreshSaleData;
+                    $caseSale = new CaseSale();
+                    $caseSale->css_cs_id = $csId;
+                    $caseSale->css_sale_id = $saleId;
 
                     $caseSale = $this->saveAdditionalData($caseSale, $case, $refreshSaleData);
 
                     if (!$caseSale->save(false)) {
-                        \Yii::error(VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]),
+                        \Yii::error(VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $refreshSaleData]),
                         'CasesSaleService:createSale:Update');
-                        throw new \RuntimeException('Error. CaseSale not updated from detailRequestToBackOffice.');
+                        throw new \RuntimeException('Error. CaseSale not saved from detailRequestToBackOffice.');
                     }
                 } else {
                     throw new \RuntimeException('Error. Broken response from detailRequestToBackOffice. CaseSale not updated.');
                 }
-                $transaction->commit();
-
                 return $caseSale;
             }
-
-            throw new \RuntimeException('Error. Params csId and saleId is required');
+            throw new \RuntimeException('Error. Param saleId is empty or Case not found');
         } catch (\Throwable $throwable) {
-            $transaction->rollBack();
-            Yii::error(AppHelper::throwableFormatter($throwable), 'CasesSaleService:createSale:Throwable' );
+            Yii::error(AppHelper::throwableFormatter($throwable),
+            'CasesSaleService:createSale:Throwable' );
         }
-
         return null;
     }
 
