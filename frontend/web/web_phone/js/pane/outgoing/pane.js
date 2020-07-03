@@ -4,6 +4,7 @@ var PhoneWidgetPaneOutgoing = function () {
 
     const containerId = 'call-pane-outgoing';
     let $container = $('#' + containerId);
+    let $reactContainer = document.getElementById(containerId);
 
     let contactInfo = PhoneWidgetContactInfo;
     let dialpad = PhoneWidgetDialpad;
@@ -25,9 +26,8 @@ var PhoneWidgetPaneOutgoing = function () {
     function load(call) {
         contactInfo.load(call.data.contact);
 
-        let container = document.getElementById(containerId);
-        ReactDOM.unmountComponentAtNode(container);
-        ReactDOM.render(React.createElement(OutgoingPane, {call: call}), container);
+        ReactDOM.unmountComponentAtNode($reactContainer);
+        ReactDOM.render(React.createElement(OutgoingPane, {call: call}), $reactContainer);
 
         setCallSid(call.data.callSid);
     }

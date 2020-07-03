@@ -1,16 +1,8 @@
 var PhoneWidgetContactInfo = function () {
 
-    let $pane = $('.contact-info');
-
-    function render(data) {
-        let html = '';
-        let template = contactTpl;
-        $.each(data, function (k, v) {
-            html = template.split('{{' + k + '}}').join(v);
-            template = html;
-        });
-        return html;
-    }
+    let containerId = 'contact-info';
+    let $container = $('#contact-info');
+    let $reactContainer = document.getElementById(containerId);
 
     /*
         data = {
@@ -20,12 +12,12 @@ var PhoneWidgetContactInfo = function () {
     function load(data) {
         data.avatar = data.name.charAt(0);
         data.avatar.toUpperCase();
-        let html = render(data);
-        $pane.html(html);
+
+        ReactDOM.render(React.createElement(ContactInfo, data), $reactContainer);
     }
 
     function hide() {
-        $pane.hide();
+        $container.hide();
     }
 
     return {

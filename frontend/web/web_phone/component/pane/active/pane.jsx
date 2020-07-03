@@ -3,7 +3,7 @@ function ActivePane(props) {
     return (
         <React.Fragment>
             <CallInfo project={call.data.project} source={call.data.source}/>
-            <ContactInfo {...call.data} />
+            <ActiveContactInfo {...call.data} />
             <CallBtns {...props} />
             <SoundIndication/>
             <ActivePaneControls {...props} />
@@ -12,7 +12,7 @@ function ActivePane(props) {
     );
 }
 
-function ContactInfo(props) {
+function ActiveContactInfo(props) {
     return (
         <div className="contact-info-card">
             <div className="contact-info-card__details">

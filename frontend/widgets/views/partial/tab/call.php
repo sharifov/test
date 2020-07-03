@@ -485,7 +485,7 @@
     </div>
   </div>
 
-  <div class="additional-info contact-info"></div>
+  <div class="additional-info contact-info" id="contact-info"></div>
 
 </div>
 

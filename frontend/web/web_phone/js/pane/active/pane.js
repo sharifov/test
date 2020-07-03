@@ -4,6 +4,7 @@ var PhoneWidgetPaneActive = function () {
 
     const containerId = 'call-pane-calling';
     let $container = $('#' + containerId);
+    let $reactContainer = document.getElementById(containerId);
 
     let contactInfo = PhoneWidgetContactInfo;
     let dialpad = PhoneWidgetDialpad;
@@ -42,9 +43,8 @@ var PhoneWidgetPaneActive = function () {
         }
      */
     function load(call) {
-        let container = document.getElementById(containerId);
-        ReactDOM.unmountComponentAtNode(container);
-        ReactDOM.render(React.createElement(ActivePane, {call: call, controls: getControls(call)}), container);
+        ReactDOM.unmountComponentAtNode($reactContainer);
+        ReactDOM.render(React.createElement(ActivePane, {call: call, controls: getControls(call)}), $reactContainer);
 
         contactInfo.load(call.data.contact);
         setCallSid(call.data.callSid);
