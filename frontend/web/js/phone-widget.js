@@ -297,11 +297,25 @@ $(document).ready(function() {
     var context = new AudioContext();
 
     var dtmf = new Tone(context, 350, 440);
+    var dialpadCurrentValue = null;
+    var dialpadButtonTimer = null;
 
     $('.dial__btn').on("mousedown touchstart", function(e){
         e.preventDefault();
 
         var keyPressed = $(this).val();
+        dialpadCurrentValue = keyPressed;
+        dialpadButtonTimer = setInterval(function () {
+            if (dialpadCurrentValue === '0') {
+                let currentVal = $('.call-pane__dial-number').val();
+                if (currentVal) {
+                    currentVal = currentVal.substring(0, currentVal.length - 1);
+                    currentVal = currentVal + '+';
+                    $('.call-pane__dial-number').val(currentVal);
+                }
+            }
+            clearInterval(dialpadButtonTimer);
+        }, 700);
         var frequencyPair = dtmfFrequencies[keyPressed];
 
         // this sets the freq1 and freq2 properties
@@ -325,6 +339,7 @@ $(document).ready(function() {
         if (typeof dtmf !== "undefined" && dtmf.status){
             dtmf.stop();
         }
+        clearInterval(dialpadButtonTimer);
     });
 
     //---------------------------------------------------

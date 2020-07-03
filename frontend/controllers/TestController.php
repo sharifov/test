@@ -255,7 +255,7 @@ class TestController extends FController
 //        Notifications::publish('removeIncomingRequest', ['user_id' => 295], $callInfo);
 //        die;
 ////
-        $tmp = 6;
+        $tmp = 1;
         $callInfo = [
             'typeId' => 2,
             'type' => 'Inc ' . $tmp,
@@ -264,8 +264,8 @@ class TestController extends FController
             'fromInternal' => false,
             'project' => 'wow',
             'source' => 'Source',
-            'status' => 'Ringing',
-//            'status' => 'In progress',
+//            'status' => 'Ringing',
+            'status' => 'In progress',
 //            'status' => 'Hold',
             'isListen' => false,
             'isMute' => false,
@@ -276,12 +276,12 @@ class TestController extends FController
                 'phone' => '+00 ' . $tmp
             ],
             'department' => 'Sales',
-            'queue' => 'direct',
-//            'queue' => 'inProgress',
+//            'queue' => 'direct',
+            'queue' => 'inProgress',
             'duration' => 0,
         ];
-        Notifications::publish('updateIncomingCall', ['user_id' => 295], $callInfo);
-//        Notifications::publish('callUpdate', ['user_id' => 295], $callInfo);
+//        Notifications::publish('updateIncomingCall', ['user_id' => 295], $callInfo);
+        Notifications::publish('callUpdate', ['user_id' => 295], $callInfo);
         die;
 
 //
