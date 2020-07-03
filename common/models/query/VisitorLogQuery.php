@@ -28,4 +28,9 @@ class VisitorLogQuery extends \yii\db\ActiveQuery
     {
         return $this->andWhere(['vl_id' => $id]);
     }
+
+    public function byClient(int $id): self
+	{
+		return $this->andWhere(['vl_client_id' => $id]);
+	}
 }

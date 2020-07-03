@@ -41,13 +41,6 @@ class UnSubscribeForm extends Model
             ['email', 'required'],
             ['email', 'email'],
             ['email', 'string', 'max' => 160],
-
-            ['email', function ($attribute) {
-                if ((new EmailUnsubscribeRepository())->find($this->email, $this->project_id)) {
-                    $this->addError($attribute,
-                    'Database entry (email : ' . $this->email . ', project : ' . $this->project_id . ') already exists');
-                }
-            }],
         ];
     }
 }

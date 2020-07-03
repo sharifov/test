@@ -610,7 +610,8 @@ class QuoteController extends FController
                     }
 
                     if (count($response['errorsPrices'])) {
-                        throw new \DomainException(  'QuotePrice not saved.');
+                        throw new \DomainException(  'QuotePrice not saved. Errors:' .
+                            \yii\helpers\VarDumper::dumpAsString($response['errorsPrices'], 10));
                     }
 
                     $this->logQuote($quote);

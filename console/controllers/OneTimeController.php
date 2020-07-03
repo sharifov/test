@@ -3,16 +3,20 @@
 namespace console\controllers;
 
 use common\components\jobs\CreateSaleFromBOJob;
+use common\models\CaseSale;
+use common\components\jobs\UpdateSaleFromBOJob;
 use common\models\Client;
 use common\models\DepartmentEmailProject;
 use common\models\DepartmentPhoneProject;
 use common\models\UserProjectParams;
+use sales\entities\cases\CasesStatus;
 use sales\helpers\app\AppHelper;
 use sales\model\emailList\entity\EmailList;
 use sales\model\phoneList\entity\PhoneList;
 use thamtech\uuid\helpers\UuidHelper;
 use Yii;
 use yii\console\Controller;
+use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
@@ -307,7 +311,8 @@ class OneTimeController extends Controller
      */
     public function actionSaleToCase(string $fromDate, string $toDate, int $status): void
     {
-        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g'. self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
         $time_start = microtime(true);
 
         $fromDate = date('Y-m-d', strtotime($fromDate));
@@ -341,6 +346,129 @@ class OneTimeController extends Controller
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g'. self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
     }
 
+    /**
+     * @param string $fromDate
+     * @param string $toDate
+     * @throws \yii\db\Exception
+     */
+    public function actionSaleRefundRulesToCase(string $fromDate, string $toDate): void
+    {
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+        $time_start = microtime(true);
+
+        $fromDate = date('Y-m-d', strtotime($fromDate));
+        $toDate = date('Y-m-d', strtotime($toDate));
+        $processed = $countItems = 0;
+        $statuses = [
+            CasesStatus::STATUS_PENDING,
+            CasesStatus::STATUS_PROCESSING,
+            CasesStatus::STATUS_FOLLOW_UP,
+        ];
+
+        $caseSales = Yii::$app->db->createCommand(
+        '
+            SELECT 
+                case_sale.css_cs_id,
+                case_sale.css_sale_id
+            FROM
+                case_sale
+            INNER JOIN 
+                cases
+                ON
+                cases.cs_id = case_sale.css_cs_id
+                AND 
+                cases.cs_status IN (:status) 
+                AND
+                DATE(cases.cs_created_dt) BETWEEN :from_date AND :to_date
+            ',
+            [
+                ':from_date' => $fromDate,
+                ':to_date' => $toDate,
+                ':status' => $statuses,
+            ]
+        )->queryAll();
+
+        try {
+            $countItems = count($caseSales);
+            Console::startProgress(0, $countItems);
+
+            foreach ($caseSales as $key => $value) {
+                $job = new UpdateSaleFromBOJob();
+                $job->caseId = $value['css_cs_id'];
+                $job->saleId = $value['css_sale_id'];
+                Yii::$app->queue_job->priority(100)->push($job);
+                $processed ++;
+                Console::updateProgress($processed, $countItems);
+            }
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableFormatter($throwable),
+                'OneTimeController:actionSaleRefundRulesToCase:Throwable' );
+            echo Console::renderColoredString('%r --- Error : '. $throwable->getMessage() .' %n'), PHP_EOL;
+        }
+
+        Console::endProgress(false);
+        $time_end = microtime(true);
+        $time = number_format(round($time_end - $time_start, 2), 2);
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .
+            ' s] %gFind caseSales: %w[' . $countItems . '] %g Added to queue: %w[' . $processed . '] %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
+    }
+
+    public function actionSaleDataToJson(?string $fromDate = null, ?string $toDate = null): void
+    {
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
+
+        $processed = 0;
+        $time_start = microtime(true);
+
+        $fromDate = $fromDate ?? CaseSale::find()->min('css_created_dt');
+        $toDate = $toDate ?? CaseSale::find()->max('css_created_dt');
+        $fromDate = date('Y-m-d', strtotime($fromDate));
+        $toDate = date('Y-m-d', strtotime($toDate));
+
+        $transaction = Yii::$app->db->beginTransaction();
+
+        try {
+            $processed = Yii::$app->db->createCommand(
+                'UPDATE
+                        case_sale
+                    SET 
+                        css_sale_data = JSON_UNQUOTE(css_sale_data),
+                        css_sale_data_updated = JSON_UNQUOTE(css_sale_data_updated)
+                    WHERE                    
+                        DATE(css_created_dt) BETWEEN :from_date AND :to_date
+                        AND
+                        JSON_TYPE(css_sale_data) = :json_type
+                ',
+                [
+                    ':from_date' => $fromDate,
+                    ':to_date' => $toDate,
+                    ':json_type' => 'STRING',
+                ]
+            )->execute();
+
+            $transaction->commit();
+        } catch (\Throwable $throwable) {
+            $transaction->rollBack();
+            Yii::error(AppHelper::throwableFormatter($throwable),
+                'OneTimeController:actionSaleDataToJson:Throwable' );
+            echo Console::renderColoredString('%r --- Error : ' . $throwable->getMessage() . ' %n'), PHP_EOL;
+        }
+
+        $left = CaseSale::find()
+            ->andWhere(['=', new Expression('JSON_TYPE(css_sale_data)'), 'STRING'])
+            ->count();
+
+        $time_end = microtime(true);
+        $time = number_format(round($time_end - $time_start, 2), 2);
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .
+            ' s] %g Processed: %w[' . $processed . '] %g How many records left %w[' . $left . '] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+    }
 
     /**
      * @param string $fromDate

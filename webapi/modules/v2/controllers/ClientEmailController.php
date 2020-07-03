@@ -144,6 +144,14 @@ class ClientEmailController extends BaseController
             );
         }
 
+        if (!(new EmailUnsubscribeRepository())->find($form->email, $form->project_id)) {
+            return new SuccessResponse(
+                new DataMessage(
+                    new Message('email', 'Database entry (email : ' . $form->email . ', project : ' . $form->project_id . ') not exists'),
+                )
+            );
+        }
+
         try {
             $repository = new EmailUnsubscribeRepository();
             if ($model = $repository->find($form->email, $form->project_id)) {
@@ -279,6 +287,14 @@ class ClientEmailController extends BaseController
                 new MessageMessage(Messages::VALIDATION_ERROR),
                 new ErrorsMessage($form->getErrors()),
                 new CodeMessage(ApiCodeException::FAILED_FORM_VALIDATE)
+            );
+        }
+
+        if ((new EmailUnsubscribeRepository())->find($form->email, $form->project_id)) {
+            return new SuccessResponse(
+                new DataMessage(
+                    new Message('email', 'Database entry (email : ' . $form->email . ', project : ' . $form->project_id . ') already exists'),
+                )
             );
         }
 

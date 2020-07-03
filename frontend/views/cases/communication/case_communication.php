@@ -85,7 +85,7 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
 
                 ]) ?>
 
-                <?php if($model->isProcessing()):?>
+                <?php if($model->isProcessing() || $model->isSolved()):?>
                      <div class="chat__form panel">
 
                     <?php Modal::begin(['id' => 'modal-email-preview',

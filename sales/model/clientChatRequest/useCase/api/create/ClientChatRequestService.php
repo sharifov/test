@@ -3,11 +3,14 @@
 namespace sales\model\clientChatRequest\useCase\api\create;
 
 use common\components\jobs\ClientChatJob;
+use common\models\VisitorLog;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
+use sales\model\clientChatData\entity\ClientChatData;
 use sales\model\clientChatMessage\ClientChatMessageRepository;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\services\client\ClientManageService;
+use yii\helpers\VarDumper;
 
 /**
  * Class ClientChatRequestService
@@ -67,7 +70,7 @@ class ClientChatRequestService
 		$clientChatRequest = $this->clientChatRequestRepository->create($form);
 
 		if ($clientChatRequest->isGuestConnected()) {
-			$this->guestConnected($clientChatRequest);
+			$this->guestConnected($clientChatRequest, $form);
 		} else if ($clientChatRequest->isRoomConnected()) {
 			$this->roomConnected($clientChatRequest);
 		} else {
@@ -92,13 +95,41 @@ class ClientChatRequestService
 
 	/**
 	 * @param ClientChatRequest $clientChatRequest
+	 * @param ClientChatRequestApiForm $form
 	 */
-	private function guestConnected(ClientChatRequest $clientChatRequest): void
+	private function guestConnected(ClientChatRequest $clientChatRequest, ClientChatRequestApiForm $form): void
 	{
 		$clientChat = $this->clientChatRepository->getOrCreateByRequest($clientChatRequest);
 		$client = $this->clientManageService->createByClientChatRequest($clientChatRequest);
 		$clientChat->cch_client_id = $client->id;
 		$this->clientChatRepository->save($clientChat);
+
+		$visitorLog = VisitorLog::createByClientChatRequest($clientChat, $form->data);
+		if (!$visitorLog->validate()) {
+			foreach ($visitorLog->errors as $attribute => $error) {
+				$visitorLog->{$attribute} = null;
+			}
+			\Yii::error('VisitorLog validation failed: ' . VarDumper::dumpAsString($visitorLog->errors), 'ClientChatRequestService::guestConnected::visitorLog::validation');
+		}
+
+		if (!$visitorLog->save(false)) {
+			\Yii::error('VisitorLog save failed: ' . VarDumper::dumpAsString($visitorLog->errors), 'ClientChatRequestService::guestConnected::visitorLog::save');
+		}
+
+
+		if (!ClientChatData::find()->byCchId($clientChat->cch_id)->exists()) {
+			$clientChatData = ClientChatData::createByClientChatRequest($clientChat->cch_id, $form->data);
+			if (!$clientChatData->validate()) {
+				foreach ($clientChatData->errors as $attribute => $error) {
+					$clientChatData->{$attribute} = null;
+				}
+				\Yii::error('ClientChatData validation failed: ' . VarDumper::dumpAsString($clientChatData->errors), 'ClientChatRequestService::guestConnected::clientChatData::validation');
+			}
+
+			if (!$clientChatData->save(false)) {
+				\Yii::error('ClientChatData save failed: ' . VarDumper::dumpAsString($clientChatData->errors), 'ClientChatRequestService::guestConnected::clientChatData::save');
+			}
+		}
 	}
 
 	/**

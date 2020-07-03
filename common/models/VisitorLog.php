@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\models\query\VisitorLogQuery;
+use sales\model\clientChat\entity\ClientChat;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -178,4 +179,26 @@ class VisitorLog extends \yii\db\ActiveRecord
     {
         return new VisitorLogQuery(static::class);
     }
+
+    public static function createByClientChatRequest(ClientChat $clientChat, array $data): self
+	{
+		$log = new self();
+		$log->vl_project_id = $clientChat->cch_project_id;
+		$log->vl_source_cid = $data['sources']['cid'] ?? null;
+		$log->vl_utm_source = $data['sources']['utm_source'] ?? null;
+		$log->vl_ga_client_id = $data['visitor']['ga_client_id'] ?? null;
+		$log->vl_client_id = $clientChat->cch_client_id;
+		$log->vl_lead_id = $clientChat->cch_lead_id;
+		$log->vl_gclid = $data['sources']['gclid'] ?? null;
+		$log->vl_dclid = $data['sources']['dclid'] ?? null;
+		$log->vl_utm_source = $data['sources']['utm_source'] ?? null;
+		$log->vl_utm_medium = $data['sources']['utm_medium'] ?? null;
+		$log->vl_utm_content = $data['sources']['utm_content'] ?? null;
+		$log->vl_utm_term = $data['sources']['utm_term'] ?? null;
+		$log->vl_utm_campaign = $data['sources']['utm_campaign'] ?? null;
+		$log->vl_user_agent = $data['system']['user_agent'] ?? null;
+		$log->vl_ip_address = $data['system']['ip_address'] ?? null;
+
+		return $log;
+	}
 }
