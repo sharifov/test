@@ -88,10 +88,16 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 </div>
                 <div class="row">
                     <div class="col-sm-6">
-                        <?= $form->field($model, 'full_name')->textInput() ?>
+                        <?= $form->field($model, 'nickname')->textInput() ?>
                     </div>
                     <div class="col-sm-6">
                         <?= $form->field($model, 'password')->passwordInput(['autocomplete' => "off"]) ?>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-6">
+                        <?= $form->field($model, 'full_name')->textInput() ?>
                     </div>
                 </div>
 
