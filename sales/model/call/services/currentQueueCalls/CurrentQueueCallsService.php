@@ -133,6 +133,8 @@ class CurrentQueueCallsService
 
             $isInternal = PhoneList::find()->byPhone($call->c_from)->enabled()->exists();
 
+            //todo remove after removed not conference call
+            $call->c_status_id = Call::STATUS_IN_PROGRESS;
             $calls[] = new ActiveQueueCall([
                 'callSid' => $call->c_call_sid,
                 'status' => $call->getStatusName(),

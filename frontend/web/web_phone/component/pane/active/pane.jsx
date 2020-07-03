@@ -6,7 +6,7 @@ function ActivePane(props) {
             <ContactInfo {...call.data} />
             <CallBtns {...props} />
             <SoundIndication/>
-            <ActivePaneControls {...call.data} />
+            <ActivePaneControls {...props} />
             <AddNote call={call}/>
         </React.Fragment>
     );

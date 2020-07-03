@@ -42,19 +42,35 @@ var PhoneWidgetPaneActive = function () {
         }
      */
     function load(call) {
-        if (call.data.typeId === 3) {
-            call.data.activeControls = false;
-        } else {
-            call.data.activeControls = true;
-        }
-
         let container = document.getElementById(containerId);
         ReactDOM.unmountComponentAtNode(container);
-        ReactDOM.render(React.createElement(ActivePane, {call: call}), container);
+        ReactDOM.render(React.createElement(ActivePane, {call: call, controls: getControls(call)}), container);
 
         contactInfo.load(call.data.contact);
         setCallSid(call.data.callSid);
         initControls();
+    }
+
+    function getControls(call) {
+        let controls = {
+            hold: {active: true},
+            transfer: {active: true},
+            addPerson: {active: false},
+            dialpad: {active: false},
+        };
+        if (call.data.typeId === 3) {
+            controls.hold.active = false;
+            controls.transfer.active = false;
+            controls.addPerson.active = false;
+            controls.dialpad.active = false;
+        }
+        if (!conferenceBase) {
+            controls.hold.active = false;
+            controls.transfer.active = true;
+            controls.addPerson.active = false;
+            controls.dialpad.active = false;
+        }
+        return controls;
     }
 
     function setCallSid(sid) {

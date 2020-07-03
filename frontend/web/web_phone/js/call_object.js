@@ -4,6 +4,9 @@
         this.data = data;
 
         this.canTransfer = function () {
+            if (!conferenceBase) {
+                return this.data.status === 'In progress';
+            }
             return this.data.typeId !== 3 && this.data.status === 'In progress';
         };
 

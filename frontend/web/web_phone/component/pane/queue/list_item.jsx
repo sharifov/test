@@ -55,17 +55,24 @@ function ListItemMenu(props) {
             <li className="call-item-menu__list-item wg-transfer-call" data-call-sid={call.data.callSid}>
                 <a href="#" className="call-item-menu__transfer"><i className="fa fa-random"> </i></a>
             </li>
-            <li className="call-item-menu__list-item list_item_hold" data-mode={call.data.isHold ? 'hold' : 'unhold'}
-                data-call-sid={call.data.callSid}>
-                <a href="#" className="call-item-menu__transfer">
-                    {call.isSentHoldRequest()
-                        ? <i className="fa fa-spinner fa-spin"> </i>
-                        : call.data.isHold
-                            ? <i className="fa fa-play"> </i>
-                            : <i className="fa fa-pause"> </i>
-                    }
-                </a>
-            </li>
+            {conferenceBase
+                ?
+                    <React.Fragment>
+                        <li className="call-item-menu__list-item list_item_hold"
+                            data-mode={call.data.isHold ? 'hold' : 'unhold'}
+                            data-call-sid={call.data.callSid}>
+                            <a href="#" className="call-item-menu__transfer">
+                                {call.isSentHoldRequest()
+                                    ? <i className="fa fa-spinner fa-spin"> </i>
+                                    : call.data.isHold
+                                        ? <i className="fa fa-play"> </i>
+                                        : <i className="fa fa-pause"> </i>
+                                }
+                            </a>
+                        </li>
+                    </React.Fragment>
+                : ''
+            }
             {call.data.queue !== 'inProgress'
                 ? <React.Fragment>
                     <li className="call-item-menu__list-item"><a href="#" className="call-item-menu__transfer"><i

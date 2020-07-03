@@ -263,12 +263,12 @@ class TestController extends FController
             'fromInternal' => false,
             'project' => 'wow',
             'source' => 'Source',
-            'status' => 'Ringing',
-//            'status' => 'In progress',
+//            'status' => 'Ringing',
+            'status' => 'In progress',
 //            'status' => 'Hold',
-//            'isListen' => false,
-//            'isMute' => false,
-//            'isHold' => false,
+            'isListen' => false,
+            'isMute' => false,
+            'isHold' => false,
             'contact' => [
                 'name' => 'Name ' . $tmp,
                 'company' => 'Company ' . $tmp,
@@ -276,11 +276,11 @@ class TestController extends FController
             ],
             'department' => 'Sales',
 //            'queue' => 'hold',
-            'queue' => 'direct',
+            'queue' => 'inProgress',
             'duration' => 0,
         ];
-        Notifications::publish('updateIncomingCall', ['user_id' => 295], $callInfo);
-//        Notifications::publish('callUpdate', ['user_id' => 295], $callInfo);
+//        Notifications::publish('updateIncomingCall', ['user_id' => 295], $callInfo);
+        Notifications::publish('callUpdate', ['user_id' => 295], $callInfo);
         die;
 
 //
