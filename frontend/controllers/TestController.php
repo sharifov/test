@@ -1341,12 +1341,6 @@ class TestController extends FController
         //VarDumper::dump($chat->systemLogin(), 10, true);
     }
 
-    public function actionZ()
-    {
-
-        return $this->render('z');
-    }
-
     public function actionTestRcAssignUserToChannel()
 	{
 
@@ -1363,6 +1357,11 @@ class TestController extends FController
 
 		echo 'success';
 	}
+
+	public function actionZ()
+    {
+        return $this->render('z');
+    }
 }
 
 
