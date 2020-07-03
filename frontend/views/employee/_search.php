@@ -49,6 +49,10 @@ use yii\widgets\ActiveForm;
                 <?= $form->field($model, 'username') ?>
             </div>
 
+                <div class="col-md-2">
+                    <?= $form->field($model, 'nickname') ?>
+                </div>
+
             <div class="col-md-2">
                 <?php echo $form->field($model, 'email') ?>
             </div>
