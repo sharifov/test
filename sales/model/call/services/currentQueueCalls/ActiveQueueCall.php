@@ -8,24 +8,24 @@ class ActiveQueueCall extends Model
 {
     public $callSid;
     public $status;
+    public $duration;
     public $leadId;
-    public $source_type_id;
-    public $fromInternal;
-    public $isMute;
-    public $isListen;
-    public $isHold;
-    public $holdDuration;
     public $typeId;
     public $type;
+    public $source_type_id;
+    public $fromInternal;
+    public $isHold;
+    public $holdDuration;
+    public $isListen;
+    public $isMute;
+    public $project;
+    public $source;
+    public $isEnded = false;
     public $phone;
     public $name;
     public $company;
-    public $duration;
-    public $project;
-    public $source;
     public $department;
     public $queue = 'inProgress';
-    public $isEnded = false;
 
     public function getData(): array
     {

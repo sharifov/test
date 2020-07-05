@@ -6,11 +6,12 @@
         function init(data) {
             data.timeQueuePushed = Date.now();
             data.blocked = false;
-            data.sentHoldRequest = false;
-            data.sentMuteRequest = false;
+            data.sentHoldUnHoldRequest = false;
+            data.sentMuteUnMuteRequest = false;
             data.sentHangupRequest = false;
             data.sentReturnHoldCallRequest = false;
             data.sentAcceptCallRequest = false;
+            data.sentAddNoteRequest = false;
         }
 
         this.add = function (data) {
@@ -18,8 +19,11 @@
                 return null;
             }
             init(data);
+            if (data.isHold) {
+                data.holdStartTime = Date.now() - (parseInt(data.holdDuration) * 1000);
+            }
             this.calls.unshift(data);
-            return new window.callWidget.call.Call(data);
+            return new window.phoneWidget.call.Call(data);
         };
 
         this.remove = function (callSid) {
@@ -51,7 +55,7 @@
             if (typeof call == 'undefined' || call === null) {
                 return null;
             }
-            return new window.callWidget.call.Call(call);
+            return new window.phoneWidget.call.Call(call);
         };
 
         this.getFirst = function () {
@@ -67,13 +71,13 @@
             if (typeof call == 'undefined' || call === null) {
                 return null;
             }
-            return new window.callWidget.call.Call(call);
+            return new window.phoneWidget.call.Call(call);
         };
 
         this.one = function (callSid) {
             let index = this.getIndex(callSid);
             if (index !== null) {
-                return new window.callWidget.call.Call(this.calls[index]);
+                return new window.phoneWidget.call.Call(this.calls[index]);
             }
             return null;
         };
@@ -85,7 +89,7 @@
         this.all = function () {
             let calls = [];
             this.calls.forEach(function (call) {
-                calls.push(new window.callWidget.call.Call(call));
+                calls.push(new window.phoneWidget.call.Call(call));
             });
             return calls;
         };
@@ -191,7 +195,7 @@
         return new QueueItem(new Queue(), 'inProgress');
     }
 
-    window.callWidget.queue = {
+    window.phoneWidget.queue = {
         Queue: Queue,
         Direct: Direct,
         Hold: Hold,

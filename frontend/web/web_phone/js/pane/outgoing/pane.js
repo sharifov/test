@@ -9,20 +9,7 @@ var PhoneWidgetPaneOutgoing = function () {
     let contactInfo = PhoneWidgetContactInfo;
     let dialpad = PhoneWidgetDialpad;
 
-    /*
-        data = {
-           callSid,
-           type,
-           status,
-           duration,
-           project,
-           source,
-           contact = {
-                name,
-                phone
-           }
-        }
-     */
+    // call => window.phoneWidget.call.Call
     function load(call) {
         contactInfo.load(call.data.contact);
 
@@ -41,6 +28,7 @@ var PhoneWidgetPaneOutgoing = function () {
     }
 
     function hide() {
+        ReactDOM.unmountComponentAtNode($reactContainer);
         $container.removeClass('is_active');
     }
 

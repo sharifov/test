@@ -9,6 +9,7 @@ class IncomingQueueCall extends Model
     public $callSid;
     public $status;
     public $duration;
+    public $leadId;
     public $typeId;
     public $type;
     public $source_type_id;
@@ -19,6 +20,7 @@ class IncomingQueueCall extends Model
     public $isMute;
     public $project;
     public $source;
+    public $isEnded = false;
     public $phone;
     public $name;
     public $company;

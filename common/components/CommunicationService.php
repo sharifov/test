@@ -792,17 +792,6 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $this->processConferenceResponse($response);
     }
 
-    public function completeConference(string $sid): array
-    {
-        $data = [
-            'sid' => $sid,
-        ];
-
-        $response = $this->sendRequest('twilio-conference/complete-conference', $data);
-
-        return $this->processConferenceResponse($response);
-    }
-
     public function hangUp(string $sid): array
     {
         $data = [

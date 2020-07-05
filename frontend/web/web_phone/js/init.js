@@ -1,1 +1,1 @@
-window.callWidget = {};
+window.phoneWidget = {};

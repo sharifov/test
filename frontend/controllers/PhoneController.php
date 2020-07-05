@@ -872,46 +872,8 @@ class PhoneController extends FController
         return $result;
     }
 
-    public function actionAjaxConferenceComplete(): Response
-    {
-        try {
-
-            $sid = (string)Yii::$app->request->post('sid');
-
-            if (!$sid) {
-                throw new BadRequestHttpException('Not found Call SID in request', 1);
-            }
-
-            if (!$call = Call::findOne(['c_call_sid' => $sid])) {
-                throw new BadRequestHttpException('Not found Call. Sid: ' . $sid, 1);
-            }
-
-            if (!$call->isOwner(Auth::id())) {
-                throw new BadRequestHttpException('Is not your Call', 3);
-            }
-
-            if (!$call->isConferenceType()) {
-                throw new BadRequestHttpException('Call is not conference Call. Sid: ' . $sid, 1);
-            }
-
-            if (!$call->c_conference_sid) {
-                throw new BadRequestHttpException('Call not updated. Please wait some seconds.', 1);
-            }
-
-            $result = Yii::$app->communication->completeConference($call->c_conference_sid);
-
-        } catch (\Throwable $e) {
-            $result = [
-                'error' => true,
-                'message' => $e->getMessage(),
-            ];
-        }
-        return $this->asJson($result);
-    }
-
     public function actionAjaxHangup(): Response
     {
-
         try {
 
             $sid = (string)Yii::$app->request->post('sid');

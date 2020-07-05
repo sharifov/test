@@ -438,23 +438,6 @@ $(document).ready(function() {
     //
     // });
 
-    $(document).on('click', '#cancel-active-call', function(e) {
-        hangup($(this).attr('data-call-sid'));
-    });
-
-    $(document).on('click', '#cancel-outgoing-call', function(e) {
-
-        e.preventDefault();
-        let btn = $(this);
-        let callSid = btn.attr('data-call-sid');
-        if (!callSid) {
-            new PNotify({title: "Hangup", type: "warning", text: "Please try again after some seconds.", hide: true});
-            return false;
-        }
-        hangupOutgoingCall(btn, callSid);
-
-    });
-
     // $('.messages-modal__send-btn').on('click', function() {
     //     // var scroll = $(msgModalScroll.getContentElement());
     //     var scroll = $('.messages-modal__messages-scroll').find($('.simplebar-content-wrapper'))[0];

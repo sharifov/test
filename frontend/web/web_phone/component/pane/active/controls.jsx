@@ -14,11 +14,13 @@ function ButtonHold(props) {
         <li className="in-call-controls__item" data-mode={props.call.data.isHold ? 'hold' : 'unhold'} id="wg-hold-call"
              data-call-sid={props.call.data.callSid} data-active={props.controls.hold.active}>
             <a href="#" className="in-call-controls__action">
-                {props.call.data.isHold
-                    ? <i className="fa fa-play"> </i>
-                    : <i className="fa fa-pause"> </i>
+                {props.call.isSentHoldUnHoldRequestState()
+                    ?  <i className="fa fa-spinner fa-spin"> </i>
+                    : props.call.data.isHold
+                        ? <i className="fa fa-play"> </i>
+                        : <i className="fa fa-pause"> </i>
                 }
-                <span>{props.call.data.isHold ? 'Unhold' : 'Hold'}</span>
+                <span>{props.call.data.isHold ? 'UnHold' : 'Hold'}</span>
             </a>
         </li>
     );

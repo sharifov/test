@@ -6,28 +6,23 @@ var PhoneWidgetCall = function () {
 
     let settings = {
         'ajaxCallRedirectGetAgents': '',
-        'acceptCallUrl': '',
         'callStatusUrl': '',
         'ajaxSaveCallUrl': '',
-        'muteUrl': '',
-        'unmuteUrl': '',
-        'callAddNoteUrl': '',
         'clearMissedCallsUrl': '',
         'currentQueueCallsUrl': '',
-        'holdUrl': '',
-        'unholdUrl': '',
-        'returnHoldCallUrl': ''
     };
 
-    let waitQueue = new window.callWidget.queue.Queue();
+    let callRequester = new window.phoneWidget.requesters.CallRequester();
+
+    let waitQueue = new window.phoneWidget.queue.Queue();
 
     let queues = {
         'wait': waitQueue,
-        'direct': new window.callWidget.queue.Direct(waitQueue),
-        'hold': new window.callWidget.queue.Hold(waitQueue),
-        'general': new window.callWidget.queue.General(waitQueue),
-        'outgoing': new window.callWidget.queue.Queue(),
-        'active': window.callWidget.queue.Active()
+        'direct': new window.phoneWidget.queue.Direct(waitQueue),
+        'hold': new window.phoneWidget.queue.Hold(waitQueue),
+        'general': new window.phoneWidget.queue.General(waitQueue),
+        'outgoing': new window.phoneWidget.queue.Queue(),
+        'active': window.phoneWidget.queue.Active()
     };
 
     let panes = {
@@ -41,6 +36,8 @@ var PhoneWidgetCall = function () {
     {
         console.log(options);
 
+        callRequester.init(options);
+
         Object.assign(settings, options);
 
         statusCheckbox = new widgetStatus('.call-status-switcher', options.updateStatusUrl);
@@ -49,16 +46,18 @@ var PhoneWidgetCall = function () {
 
         setCountMissedCalls(options.countMissedCalls);
 
-        muteBtnEvent();
-        transferCallBtnEvent();
-        acceptCallBtnEvent();
-        rejectIncomingCallEvent();
-        hideIncomingCallEvent();
-        callAddNoteEvent();
-        dialpadEvent();
-        contactInfoEvent();
+        muteBtnClickEvent();
+        transferCallBtnClickEvent();
+        acceptCallBtnClickEvent();
+        rejectIncomingCallClickEvent();
+        hideIncomingCallClickEvent();
+        callAddNoteCLickEvent();
+        dialpadCLickEvent();
+        contactInfoClickEvent();
+        holdClickEvent();
+        hangupClickEvent();
+
         loadCurrentQueueCalls();
-        holdEvent();
     }
 
     function removeIncomingRequest(callSid) {
@@ -111,6 +110,7 @@ var PhoneWidgetCall = function () {
 
     function requestIncomingCall(data) {
         console.log('incoming call');
+
         let call = waitQueue.add(data);
         if (call === null) {
             console.log('Call is already exist in Wait Queue');
@@ -138,7 +138,7 @@ var PhoneWidgetCall = function () {
                 return false;
             }
         } else {
-            call = new window.callWidget.call.Call(data);
+            call = new window.phoneWidget.call.Call(data);
         }
         panes.outgoing.init(call);
         openWidget();
@@ -150,10 +150,6 @@ var PhoneWidgetCall = function () {
 
         waitQueue.remove(data.callSid);
         queues.outgoing.remove(data.callSid);
-
-        if (data.isHold) {
-            data.holdStartTime = Date.now() - (parseInt(data.holdDuration) * 1000);
-        }
 
         let call = queues.active.add(data);
         if (call === null) {
@@ -216,7 +212,7 @@ var PhoneWidgetCall = function () {
         }
     }
 
-    function rejectIncomingCallEvent()
+    function rejectIncomingCallClickEvent()
     {
         $(document).on('click', '#reject-incoming-call', function(e) {
             e.preventDefault();
@@ -228,7 +224,7 @@ var PhoneWidgetCall = function () {
         })
     }
 
-    function hideIncomingCallEvent()
+    function hideIncomingCallClickEvent()
     {
         $(document).on('click', '#hide-incoming-call', function(e) {
             e.preventDefault();
@@ -247,46 +243,34 @@ var PhoneWidgetCall = function () {
         })
     }
 
-    function callAddNoteEvent() {
+    function callAddNoteCLickEvent() {
         $(document).on('click', '.call-pane-calling #active_call_add_note_submit', function (e) {
             e.preventDefault();
-            let btnHtml = $(this).html();
+
             let callSid = $(this).data('call-sid');
             if (!callSid) {
                 createNotify('Warning', 'Call SID is undefined', 'warning');
                 return false;
             }
 
-            let value = $('.call-pane-calling #active_call_add_note').val().trim();
+            let call = queues.active.one(callSid);
+            if (call === null) {
+                createNotify('Error', 'Not found Call on Active Queue', 'error');
+                return false;
+            }
+
+            let $container = $('.call-pane-calling #active_call_add_note');
+            let value = $container.val().trim();
             if (!value) {
                 createNotify('Warning', 'Note value is empty', 'warning');
                 return false;
             }
 
-            $.ajax({
-                type: 'post',
-                data: {note: value, callSid: callSid},
-                url: settings.callAddNoteUrl,
-                dataType: 'json',
-                beforeSend: function () {
-                    $('.call-pane-calling #active_call_add_note_submit').html('<i class="fa fa-spinner fa-spin" style="color: #fff;"></i>').attr('disabled', 'disabled');
-                },
-                success: function (data) {
-                    if (data.error) {
-                        createNotify('Error', data.message, 'error');
-                    } else {
-                        $('.call-pane-calling #active_call_add_note').val('');
-                        createNotify('Success', data.message, 'success');
-                    }
-                },
-                error: function (error) {
-                    createNotify('Error', error.responseText, 'error');
-                },
-                complete: function () {
-                    $('.call-pane-calling #active_call_add_note_submit').html(btnHtml).removeAttr('disabled');
-                }
-            })
+            if (!call.setAddNoteRequestState()) {
+                return false;
+            }
 
+            callRequester.addNote(call, value, $container);
         });
     }
     
@@ -302,7 +286,7 @@ var PhoneWidgetCall = function () {
         $('#wg-call-volume .sound-ovf').css('right', -Math.floor(outputVolume*100) + '%');
     }
 
-    function muteBtnEvent()
+    function muteBtnClickEvent()
     {
         let _self = this;
         $(document).on('click', '.call-pane-calling #call-pane__mute', function(e) {
@@ -324,9 +308,15 @@ var PhoneWidgetCall = function () {
                 }
 
                 if (call.data.isMute) {
-                    unmute(call);
+                    if (!call.setUnMuteRequestState()) {
+                        return false;
+                    }
+                    callRequester.unMute(call);
                 } else {
-                    mute(call);
+                    if (!call.setMuteRequestState()) {
+                        return false;
+                    }
+                    callRequester.mute(call);
                 }
 
             } else {
@@ -357,68 +347,12 @@ var PhoneWidgetCall = function () {
         });
     }
 
-    function mute(call) {
-        if (call.isBlocked()) {
-            createNotify('Error', 'Call is blocked. Please try again later.', 'error');
-            return false;
-        }
-        call.block();
-        call.sendMuteRequest();
-
-        let btn = panes.active.buttons.mute;
-        btn.sendRequest();
-
-        $.ajax({type: 'post', data: {'sid': call.data.callSid}, url: settings.muteUrl})
-            .done(function (data) {
-                if (data.error) {
-                    createNotify('Mute', data.message, 'error');
-                    call.unBlock();
-                    btn.unMute();
-                }
-            })
-            .fail(function () {
-                createNotify('Mute', 'Server error', 'error');
-                call.unBlock();
-                btn.unMute();
-            })
-    }
-
-    function unmute(call) {
-        if (call.isBlocked()) {
-            createNotify('Error', 'Call is blocked. Please try again later.', 'error');
-            return false;
-        }
-        call.block();
-        call.sendMuteRequest();
-
-        let btn = panes.active.buttons.mute;
-        btn.sendRequest();
-
-        $.ajax({type: 'post', data: {'sid': call.data.callSid}, url: settings.unmuteUrl})
-            .done(function (data) {
-                if (data.error) {
-                    createNotify('Unmute', data.message, 'error');
-                    call.unBlock();
-                    call.unSendMuteRequest();
-                    btn.mute();
-                } else {
-                    // new PNotify({title: "Unmute", type: "success", text: 'Wait', hide: true});
-                }
-            })
-            .fail(function () {
-                createNotify('Unmute', 'Server error', 'error');
-                call.unBlock();
-                call.unSendMuteRequest();
-                btn.mute();
-            })
-    }
-
     function updateConnection(conn)
     {
         this.connection = conn;
     }
 
-    function transferCallBtnEvent()
+    function transferCallBtnClickEvent()
     {
         $(document).on('click', '.wg-transfer-call', function(e) {
             e.preventDefault();
@@ -515,7 +449,7 @@ var PhoneWidgetCall = function () {
         $('#tab-phone .call-pane-calling').addClass('is_active');
     }
 
-    function acceptCallBtnEvent()
+    function acceptCallBtnClickEvent()
     {
         $(document).on('click', '#btn-accept-call', function () {
             let btn = $(this);
@@ -555,35 +489,11 @@ var PhoneWidgetCall = function () {
             return false;
         }
 
-        if (call.isBlocked()) {
-            createNotify('Error', 'Call is blocked. Please try again later.', 'error');
+        if (!call.setReturnHoldCallRequestState()) {
             return false;
         }
 
-        call.block();
-        call.sendReturnHoldCallRequest();
-        panes.queue.refresh();
-
-        $.ajax({
-            type: 'post',
-            url: settings.returnHoldCallUrl,
-            dataType: 'json',
-            data: {call_sid: call.data.callSid}
-        })
-            .done(function (data) {
-                if (data.error) {
-                    call.unBlock();
-                    call.unSendReturnHoldCallRequest();
-                    panes.queue.refresh();
-                    createNotify('Return Hold Call', data.message, 'error');
-                }
-            })
-            .fail(function () {
-                call.unBlock();
-                call.unSendReturnHoldCallRequest();
-                panes.queue.refresh();
-                createNotify('Return Hold Call', 'Server error', 'error');
-            })
+        callRequester.returnHoldCall(call);
     }
 
     function checkDevice(title) {
@@ -611,52 +521,11 @@ var PhoneWidgetCall = function () {
                 return false;
             }
 
-            if (call.isBlocked()) {
-                createNotify('Error', 'Call is blocked. Please wait some seconds.', 'error');
+            if (!call.setAcceptCallRequestState()) {
                 return false;
             }
 
-            call.block();
-            call.sendAcceptCallRequest();
-            panes.queue.refresh();
-            let btn = null;
-
-            if (panes.incoming.getCallSid() === callSid) {
-                btn = $(document).find('#btn-accept-call');
-                btn.prop('disabled', '');
-                btn.find('i').removeClass('fas fa-phone').addClass('fa fa-spinner fa-spin');
-            }
-
-            $.ajax({
-                type: 'post',
-                url: settings.acceptCallUrl,
-                dataType: 'json',
-                data: {act: 'accept', call_sid: call.data.callSid}
-            })
-                .done(function (data) {
-                    if (data.error) {
-                        call.unBlock();
-                        call.unSendAcceptCallRequest();
-                        panes.queue.refresh();
-                        createNotify('Accept Call', data.message, 'error');
-                        if (btn !== null) {
-                            btn.prop('disabled', '');
-                            btn.find('i').addClass('fas fa-phone').removeClass('fa fa-spinner fa-spin');
-                        }
-                    } else {
-                        // showCallingPanel();
-                    }
-                })
-                .fail(function () {
-                    call.unBlock();
-                    call.unSendAcceptCallRequest();
-                    panes.queue.refresh();
-                    createNotify('Accept Call', 'Server error', 'error');
-                    if (btn !== null) {
-                        btn.prop('disabled', '');
-                        btn.find('i').addClass('fas fa-phone').removeClass('fa fa-spinner fa-spin');
-                    }
-                })
+            callRequester.accept(call);
         }
     }
 
@@ -687,67 +556,39 @@ var PhoneWidgetCall = function () {
             })
     }
 
-    function hold(data) {
-        let call = queues.active.one(data.sid);
+    function hold(callSid) {
+        let call = queues.active.one(callSid);
         if (call === null) {
             return;
         }
-        call.data.holdStartTime = Date.now();
-        call.data.isHold = true;
-        call.unSendHoldRequest();
-        call.unBlock();
-        panes.queue.refresh();
+        call.hold();
+
+        //todo remove after removed old widget
         if (!(panes.active.getCallSid() === call.data.callSid && panes.active.isActive())) {
             return;
         }
-
-        let btn = $('.btn-hold-call');
-        btn.html('<i class="fa fa-play"> </i> <span>Unhold</span>');
-        btn.attr('data-mode', 'hold');
-        btn.prop('disabled', false);
-
-        panes.active.buttons.hold.hold();
-        if (panes.active.buttons.hold.isActive()) {
-            panes.active.buttons.hold.enable();
-        }
-
-        panes.active.buttons.mute.disable().inactive();
+        window.phoneWidget.oldWidget.hold();
 
         widgetIcon.update({type: 'hold', timer: true, 'timerStamp': 0, text: 'on hold', currentCalls: null, status: 'online'});
     }
 
-    function unhold(data) {
-        let call = queues.active.one(data.sid);
+    function unhold(callSid) {
+        let call = queues.active.one(callSid);
         if (call === null) {
             return;
         }
-        call.data.holdStartTime = 0;
-        call.data.isHold = false;
-        call.unSendHoldRequest();
-        call.unBlock();
-        panes.queue.refresh();
+        call.unHold();
+
+        //todo remove after removed old widget
         if (!(panes.active.getCallSid() === call.data.callSid && panes.active.isActive())) {
             return;
         }
-
-        let btn = $('.btn-hold-call');
-        btn.html('<i class="fa fa-pause"> </i> <span>Hold</span>');
-        btn.attr('data-mode', 'unhold');
-        btn.prop('disabled', false);
-
-        panes.active.buttons.hold.unhold();
-        if (panes.active.buttons.hold.isActive()) {
-            panes.active.buttons.hold.enable();
-        }
-
-        if (!call.data.isListen) {
-            panes.active.buttons.mute.enable().active();
-        }
+        window.phoneWidget.oldWidget.unHold();
 
         widgetIcon.update({type: 'inProgress', timer: true, 'timerStamp': call.getDuration(), text: 'on call', currentCalls: '', status: 'online'});
     }
 
-    function dialpadEvent() {
+    function dialpadCLickEvent() {
         $(document).on('click', '.call-pane-calling #wg-dialpad', function() {
             //todo
             return false;
@@ -758,7 +599,7 @@ var PhoneWidgetCall = function () {
         });
     }
 
-    function contactInfoEvent() {
+    function contactInfoClickEvent() {
         $(document).on('click', '.call-pane__info', function() {
             $('.contact-info').slideDown(150);
         });
@@ -767,7 +608,35 @@ var PhoneWidgetCall = function () {
         });
     }
 
-    function holdEvent() {
+    function hangupClickEvent() {
+        $(document).on('click', '#cancel-active-call', function(e) {
+            hangup($(this).attr('data-call-sid'));
+        });
+
+        $(document).on('click', '#cancel-outgoing-call', function(e) {
+            e.preventDefault();
+            let btn = $(this);
+            let callSid = btn.attr('data-call-sid');
+            if (!callSid) {
+                createNotify('Hangup', 'Please try again after some seconds.', 'warning');
+                return false;
+            }
+
+            let call = queues.outgoing.one(callSid);
+            if (call === null) {
+                createNotify('Error', 'Not found Call on Outgoing Queue', 'error');
+                return false;
+            }
+
+            if (!call.setHangupRequestState()) {
+                return false;
+            }
+
+            callRequester.hangupOutgoingCall(call);
+        });
+    }
+
+    function holdClickEvent() {
         $(document).on('click', '#wg-hold-call', function(e) {
             if (!conferenceBase) {
                 return false;
@@ -786,9 +655,9 @@ var PhoneWidgetCall = function () {
             }
 
             if (call.data.isHold) {
-                unholdCall(call.data.callSid);
+                sendUnHoldRequest(call.data.callSid);
             } else {
-                holdCall(call.data.callSid);
+                sendHoldRequest(call.data.callSid);
             }
         });
         $(document).on('click', '.list_item_hold', function(e) {
@@ -809,149 +678,39 @@ var PhoneWidgetCall = function () {
             }
 
             if (call.data.isHold) {
-                unholdCall(call.data.callSid);
+                sendUnHoldRequest(call.data.callSid);
             } else {
-                holdCall(call.data.callSid);
+                sendHoldRequest(call.data.callSid);
             }
         });
     }
 
-    function holdCall(callSid) {
+    function sendHoldRequest(callSid) {
         let call = queues.active.one(callSid);
         if (call === null) {
             createNotify('Error', 'Not found Call on Active Queue', 'error');
             return false;
         }
 
-        if (call.isBlocked()) {
-            createNotify('Error', 'Call is blocked. Please wait some seconds.', 'error');
+        if (!call.setHoldRequestState()) {
             return false;
         }
 
-        if (!call.canHoldUnHold()) {
-            // createNotify('Error', 'Hold disallow.', 'error');
-            return false;
-        }
-
-        if (call.data.isHold) {
-            createNotify('Error', 'Call is already Hold.', 'error');
-            return false;
-        }
-
-        call.block();
-        call.sendHoldRequest();
-        panes.queue.refresh();
-
-        let holdBtn = panes.active.buttons.hold;
-        holdBtn.sendRequest();
-
-        let btn = $('.btn-hold-call');
-        btn.html('<i class="fa fa-spinner fa-spin"> </i> <span>Hold</span>');
-        btn.prop('disabled', true);
-
-        $.ajax({
-            type: 'post',
-            data: {
-                'sid': call.data.callSid,
-            },
-            url: settings.holdUrl
-        })
-            .done(function (data) {
-                if (data.error) {
-                    createNotify('Hold', data.message, 'error');
-                    btn.html('<i class="fa fa-pause"> </i> <span>Hold</span>');
-                    btn.prop('disabled', false);
-                    holdBtn.unhold();
-                    holdBtn.enable();
-
-                    call.unSendHoldRequest();
-                    call.unBlock();
-                    panes.queue.refresh();
-                }
-            })
-            .fail(function () {
-                btn.html('<i class="fa fa-pause"> </i> <span>Hold</span>');
-                btn.prop('disabled', false);
-                holdBtn.unhold();
-                holdBtn.enable();
-                createNotify('Hold', 'Server error', 'error');
-
-                call.unSendHoldRequest();
-                call.unBlock();
-                panes.queue.refresh();
-            })
+        callRequester.hold(call);
     }
 
-    function unholdCall(callSid) {
+    function sendUnHoldRequest(callSid) {
         let call = queues.active.one(callSid);
         if (call === null) {
             createNotify('Error', 'Not found Call on Active Queue', 'error');
             return false;
         }
 
-        if (call.isBlocked()) {
-            createNotify('Error', 'Call is blocked. Please wait some seconds.', 'error');
+        if (!call.setUnHoldRequestState()) {
             return false;
         }
 
-        if (!call.canHoldUnHold()) {
-            // createNotify('Error', 'UnHold disallow.', 'error');
-            return false;
-        }
-
-        if (!call.data.isHold) {
-            createNotify('Error', 'Call is already UnHold.', 'error');
-            return false;
-        }
-
-        call.block();
-        call.sendHoldRequest();
-        panes.queue.refresh();
-
-        let holdBtn = panes.active.buttons.hold;
-        holdBtn.sendRequest();
-
-        let btn = $('.btn-hold-call');
-        btn.html('<i class="fa fa-spinner fa-spin"> </i> <span>Unhold</span>');
-        btn.prop('disabled', true);
-
-        $.ajax({
-            type: 'post',
-            data: {
-                'sid': call.data.callSid,
-            },
-            url: settings.unholdUrl
-        })
-            .done(function (data) {
-                if (data.error) {
-                    createNotify('UnHold', data.message, 'error');
-                    btn.html('<i class="fa fa-play"> </i> <span>Unhold</span>');
-                    btn.prop('disabled', false);
-                    holdBtn.hold();
-                    holdBtn.enable();
-
-                    call.unSendHoldRequest();
-                    call.unBlock();
-                    panes.queue.refresh();
-
-                } else {
-                    // new PNotify({title: "Hold", type: "success", text: 'Wait', hide: true});
-                }
-            })
-            .fail(function () {
-                btn.html('<i class="fa fa-play"> </i> <span>Unhold</span>');
-                btn.prop('disabled', false);
-                holdBtn.hold();
-                holdBtn.enable();
-                createNotify('UnHold', 'Server error', 'error');
-
-                call.unSendHoldRequest();
-                call.unBlock();
-                panes.queue.refresh();
-            })
-            .always(function() {
-
-            });
+        callRequester.unHold(call);
     }
 
     function dialpadHide() {
@@ -968,11 +727,11 @@ var PhoneWidgetCall = function () {
             return;
         }
         if (data.command === 'hold') {
-            hold(data.call);
+            hold(data.call.sid);
             return;
         }
         if (data.command === 'unhold') {
-            unhold(data.call);
+            unhold(data.call.sid);
             return;
         }
     }
@@ -1008,9 +767,6 @@ var PhoneWidgetCall = function () {
                     let activeCall = {};
                     data.active.forEach(function (call) {
                         activeCall = Object.assign({}, call);
-                        if (activeCall.isHold) {
-                            activeCall.holdStartTime = Date.now() - (parseInt(activeCall.holdDuration) * 1000);
-                        }
                         queues.active.add(activeCall);
                         activeExist = true;
                     });
@@ -1053,8 +809,8 @@ var PhoneWidgetCall = function () {
         socket: socket,
         queues: queues,
         removeIncomingRequest: removeIncomingRequest,
-        holdCall: holdCall,
-        unholdCall: unholdCall
+        sendHoldRequest: sendHoldRequest,
+        sendUnHoldRequest: sendUnHoldRequest
     };
 }();
 

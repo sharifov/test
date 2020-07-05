@@ -1,15 +1,42 @@
-function ActivePane(props) {
-    let call = props.call;
-    return (
-        <React.Fragment>
-            <CallInfo project={call.data.project} source={call.data.source}/>
-            <ActiveContactInfo {...call.data} />
-            <CallBtns {...props} />
-            <SoundIndication/>
-            <ActivePaneControls {...props} />
-            <AddNote call={call}/>
-        </React.Fragment>
-    );
+class ActivePane extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            call: props.call
+        };
+    }
+
+    componentDidMount() {
+        window.phoneWidget.eventDispatcher.addListener(this.state.call.getEventUpdateName(), this.callUpdateHandler());
+    }
+
+    componentWillUnmount() {
+        window.phoneWidget.eventDispatcher.removeListener(this.state.call.getEventUpdateName(), this.callUpdateHandler());
+    }
+
+    callUpdateHandler() {
+        let self = this;
+        return function (event) {
+            //active
+            self.setState({
+                call: event.call
+            });
+        }
+    }
+
+    render() {
+        let call = this.state.call;
+        return (
+            <React.Fragment>
+                <CallInfo project={call.data.project} source={call.data.source}/>
+                <ActiveContactInfo {...call.data} />
+                <CallBtns call={call}/>
+                <SoundIndication/>
+                <ActivePaneControls call={call} controls={this.props.controls}/>
+                <AddNote call={call}/>
+            </React.Fragment>
+        );
+    }
 }
 
 function ActiveContactInfo(props) {
@@ -35,23 +62,32 @@ function ActiveContactInfo(props) {
 }
 
 function CallBtns(props) {
+    let call = props.call;
     return (
         <div className="call-pane__call-btns is-on-call">
-            <button className="call-pane__mute" id="call-pane__mute" disabled={props.call.data.isListen || props.call.data.isHold}
-                    data-call-sid={props.call.data.callSid} data-is-muted={props.call.data.isMute} data-active={!(props.call.data.isListen || props.call.data.isHold)}>
-                {props.call.data.isMute
-                    ? <i className="fas fa-microphone-alt-slash"> </i>
-                    : <i className="fas fa-microphone"> </i>
+            <button className="call-pane__mute" id="call-pane__mute"
+                    disabled={call.data.isListen || call.data.isHold || call.isSentMuteUnMuteRequestState()}
+                    data-call-sid={call.data.callSid} data-is-muted={call.data.isMute}
+                    data-active={!(call.data.isListen || call.data.isHold)}>
+                {call.isSentMuteUnMuteRequestState()
+                    ? <i className="fa fa-spinner fa-spin"> </i>
+                    : call.data.isMute
+                        ? <i className="fas fa-microphone-alt-slash"> </i>
+                        : <i className="fas fa-microphone"> </i>
                 }
             </button>
             <button className="call-pane__start-call calling-state-block">
                 <div className="call-in-action">
                     <span className="call-in-action__text">on call</span>
-                    <CallActionTimer duration={props.call.getDuration()} timeStart={Date.now()}/>
+                    <CallActionTimer duration={call.getDuration()} timeStart={Date.now()}/>
                 </div>
             </button>
-            <button className="call-pane__end-call" id="cancel-active-call" data-call-sid={props.call.data.callSid}>
-                <i className="fa fa-phone-slash"> </i>
+            <button className="call-pane__end-call" id="cancel-active-call" data-call-sid={call.data.callSid}
+                    disabled={call.isSentHangupRequestState()}>
+                {call.isSentHangupRequestState()
+                    ? <i className="fa fa-spinner fa-spin"> </i>
+                    : <i className="fa fa-phone-slash"> </i>
+                }
             </button>
         </div>
     );
@@ -89,6 +125,7 @@ function SoundIndication() {
 }
 
 function AddNote(props) {
+    let call = props.call;
     const rule = 'evenodd';
     const d = 'M16.7072 1.70718L6.50008 11.9143L0.292969 5.70718L1.70718 4.29297L6.50008 9.08586L15.293 0.292969L16.7072 1.70718Z';
     const fill = 'white';
@@ -99,10 +136,14 @@ function AddNote(props) {
                        placeholder="Add Note" autoComplete="off"/>
                 <div className="error-message"> </div>
             </div>
-            <button className="call-pane__add-note" id="active_call_add_note_submit" data-call-sid={props.call.data.callSid}>
-                <svg width="17" height="12" viewBox="0 0 17 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path fillRule={rule} clipRule={rule} d={d} fill={fill}/>
-                </svg>
+            <button className="call-pane__add-note" id="active_call_add_note_submit"
+                    data-call-sid={call.data.callSid} disabled={call.isSentAddNoteRequestState()}>
+                {call.isSentAddNoteRequestState()
+                    ? <i className="fa fa-spinner fa-spin" style={{color: '#fff'}}> </i>
+                    : <svg width="17" height="12" viewBox="0 0 17 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fillRule={rule} clipRule={rule} d={d} fill={fill}/>
+                    </svg>
+                }
             </button>
         </div>
     );

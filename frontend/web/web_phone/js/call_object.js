@@ -26,64 +26,210 @@
             return this.data.typeId !== 3 && this.data.status === 'In progress';
         };
 
-        this.sendHoldRequest = function () {
-            this.data.sentHoldRequest = true;
+        this.setHoldRequestState = function () {
+            if (this.isBlocked()) {
+                // createNotify('Error', 'Call is blocked. Please wait some seconds.', 'error');
+                return false;
+            }
+            if (!this.canHoldUnHold()) {
+                // createNotify('Error', 'Hold or UnHold disallow.', 'error');
+                return false;
+            }
+            if (this.data.isHold) {
+                createNotify('Error', 'Call is already Hold.', 'error');
+                return false;
+            }
+            this.data.sentHoldUnHoldRequest = true;
+            this.block();
+            this.dispatchEvent();
+            return true;
         };
 
-        this.unSendHoldRequest = function () {
-            this.data.sentHoldRequest = false;
+        this.setUnHoldRequestState = function () {
+            if (this.isBlocked()) {
+                // createNotify('Error', 'Call is blocked. Please wait some seconds.', 'error');
+                return false;
+            }
+            if (!this.canHoldUnHold()) {
+                // createNotify('Error', 'Hold or UnHold disallow.', 'error');
+                return false;
+            }
+            if (!this.data.isHold) {
+                createNotify('Error', 'Call is already UnHold.', 'error');
+                return false;
+            }
+            this.data.sentHoldUnHoldRequest = true;
+            this.block();
+            this.dispatchEvent();
+            return true;
         };
 
-        this.isSentHoldRequest = function () {
-            return this.data.sentHoldRequest === true;
+        this.unSetHoldUnHoldRequestState = function () {
+            this.data.sentHoldUnHoldRequest = false;
+            this.unBlock();
+            this.dispatchEvent();
         };
 
-        this.sendMuteRequest = function () {
-            this.data.sentMuteRequest = true;
+        this.isSentHoldUnHoldRequestState = function () {
+            return this.data.sentHoldUnHoldRequest === true;
         };
 
-        this.unSendMuteRequest = function () {
-            this.data.sentMuteRequest = false;
+        this.hold = function () {
+            this.unBlock();
+            this.data.sentHoldUnHoldRequest = false;
+            this.data.holdStartTime = Date.now();
+            this.data.isHold = true;
+            this.dispatchEvent();
         };
 
-        this.isSentMuteRequest = function () {
-            return this.data.sentMuteRequest === true;
+        this.unHold = function () {
+            this.unBlock();
+            this.data.sentHoldUnHoldRequest = false;
+            this.data.holdStartTime = 0;
+            this.data.isHold = false;
+            this.dispatchEvent();
         };
 
-        this.sendHangupRequest = function () {
+        this.setMuteRequestState = function () {
+            if (this.isBlocked()) {
+                // createNotify('Error', 'Call is blocked. Please wait some seconds.', 'error');
+                return false;
+            }
+            if (this.data.isMute) {
+                createNotify('Error', 'Call is already Mute.', 'error');
+                return false;
+            }
+            this.data.sentMuteUnMuteRequest = true;
+            this.block();
+            this.dispatchEvent();
+            return true;
+        };
+
+        this.setUnMuteRequestState = function () {
+            if (this.isBlocked()) {
+                // createNotify('Error', 'Call is blocked. Please wait some seconds.', 'error');
+                return false;
+            }
+            if (!this.data.isMute) {
+                createNotify('Error', 'Call is already UnMute.', 'error');
+                return false;
+            }
+            this.data.sentMuteUnMuteRequest = true;
+            this.block();
+            this.dispatchEvent();
+            return true;
+        };
+
+        this.unSetMuteUnMuteRequestState = function () {
+            this.data.sentMuteUnMuteRequest = false;
+            this.unBlock();
+            this.dispatchEvent();
+        };
+
+        this.isSentMuteUnMuteRequestState = function () {
+            return this.data.sentMuteUnMuteRequest === true;
+        };
+
+        this.mute = function () {
+            this.unBlock();
+            this.data.sentMuteUnMuteRequest = false;
+            this.data.isMute = true;
+            this.dispatchEvent();
+        };
+
+        this.unMute = function () {
+            this.unBlock();
+            this.data.sentMuteUnMuteRequest = false;
+            this.data.isMute = false;
+            this.dispatchEvent();
+        };
+
+        this.setHangupRequestState = function () {
+            if (this.isBlocked()) {
+                // createNotify('Error', 'Call is blocked. Please wait some seconds.', 'error');
+                return false;
+            }
             this.data.sentHangupRequest = true;
+            this.block();
+            this.dispatchEvent();
+            return true;
         };
 
-        this.unSendHangupRequest = function () {
+        this.unSetHangupRequestState = function () {
             this.data.sentHangupRequest = false;
+            this.unBlock();
+            this.dispatchEvent();
         };
 
-        this.isSentHangupRequest = function () {
+        this.isSentHangupRequestState = function () {
             return this.data.sentHangupRequest === true;
         };
 
-        this.sendReturnHoldCallRequest = function () {
+        this.setReturnHoldCallRequestState = function () {
+            if (this.isBlocked()) {
+                // createNotify('Error', 'Call is blocked. Please wait some seconds.', 'error');
+                return false;
+            }
+            if (this.data.status !== 'Hold') {
+                createNotify('Error', 'Call is not in status Hold.', 'error');
+                return false;
+            }
             this.data.sentReturnHoldCallRequest = true;
+            this.block();
+            this.dispatchEvent();
+            return true;
         };
 
-        this.unSendReturnHoldCallRequest = function () {
+        this.unSetReturnHoldCallRequestState = function () {
             this.data.sentReturnHoldCallRequest = false;
+            this.unBlock();
+            this.dispatchEvent();
         };
 
-        this.isSentReturnHoldCallRequest = function () {
+        this.isSentReturnHoldCallRequestState = function () {
             return this.data.sentReturnHoldCallRequest === true;
         };
 
-        this.sendAcceptCallRequest = function () {
+        this.setAcceptCallRequestState = function () {
+            if (this.isBlocked()) {
+                // createNotify('Error', 'Call is blocked. Please wait some seconds.', 'error');
+                return false;
+            }
             this.data.sentAcceptCallRequest = true;
+            this.block();
+            this.dispatchEvent();
+            return true;
         };
 
-        this.unSendAcceptCallRequest = function () {
+        this.unSetAcceptCallRequestState = function () {
             this.data.sentAcceptCallRequest = false;
+            this.unBlock();
+            this.dispatchEvent();
         };
 
-        this.isSentAcceptCallRequest = function () {
+        this.isSentAcceptCallRequestState = function () {
             return this.data.sentAcceptCallRequest === true;
+        };
+
+        this.setAddNoteRequestState = function () {
+            if (this.isBlocked()) {
+                createNotify('Error', 'Call is blocked. Please wait some seconds.', 'error');
+                return false;
+            }
+            this.data.sentAddNoteRequest = true;
+            this.block();
+            this.dispatchEvent();
+            return true;
+        };
+
+        this.unSetAddNoteRequestState = function () {
+            this.data.sentAddNoteRequest = false;
+            this.unBlock();
+            this.dispatchEvent();
+        };
+
+        this.isSentAddNoteRequestState = function () {
+            return this.data.sentAddNoteRequest === true;
         };
 
         this.getDuration = function () {
@@ -101,9 +247,21 @@
             }
             return duration;
         };
+
+        this.clone = function () {
+            return new Call(this.data);
+        };
+
+        this.getEventUpdateName = function () {
+            return window.phoneWidget.events.callUpdate + this.data.callSid;
+        };
+
+        this.dispatchEvent = function () {
+            window.phoneWidget.eventDispatcher.dispatch(this.getEventUpdateName(),{call: this});
+        };
     }
 
-    window.callWidget.call = {
+    window.phoneWidget.call = {
         Call: Call
     }
 })();

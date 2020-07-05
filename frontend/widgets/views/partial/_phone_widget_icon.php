@@ -1,4 +1,4 @@
-<div class="phone-widget-icon js-toggle-phone-widget is-mirror">
+<div class="phone-widget-icon js-toggle-phone-widget is-mirror" id="phone-widget-icon">
 	
 	<!-- <button class="calling-state-block">
 		

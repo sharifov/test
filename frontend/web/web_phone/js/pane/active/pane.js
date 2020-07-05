@@ -11,37 +11,15 @@ var PhoneWidgetPaneActive = function () {
 
     let buttons = {
         'hold': new PhoneWidgetPaneActiveBtnHold($container),
-        'transfer': new PhoneWidgetPaneActiveBtnTransfer($container),
-        'addPerson': new PhoneWidgetPaneActiveBtnAddPerson($container),
-        'dialpad': new PhoneWidgetPaneActiveBtnDialpad($container),
         'mute': new PhoneWidgetPaneActiveBtnMute($container)
     };
 
     function initControls() {
         buttons.hold.init();
-        buttons.transfer.init();
-        buttons.addPerson.init();
-        buttons.dialpad.init();
         buttons.mute.init();
     }
 
-    /*
-        data = {
-            callSid,
-            isMute,
-            isListen,
-            isHold,
-            typeId,
-            type,
-            duration,
-            project,
-            source,
-            contact = {
-                name,
-                phone,
-            }
-        }
-     */
+    // call => window.phoneWidget.call.Call
     function load(call) {
         ReactDOM.unmountComponentAtNode($reactContainer);
         ReactDOM.render(React.createElement(ActivePane, {call: call, controls: getControls(call)}), $reactContainer);

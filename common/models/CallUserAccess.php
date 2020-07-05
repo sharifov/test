@@ -221,19 +221,27 @@ class CallUserAccess extends \yii\db\ActiveRecord
 				$callInfo = [
                     'id' => $call->c_id,
                     'callSid' => $call->c_call_sid,
+                    'status' => $call->getStatusName(),
+                    'duration' => 0,
+                    'leadId' => $call->c_lead_id,
                     'typeId' => $call->c_call_type_id,
                     'type' => CallHelper::getTypeDescription($this->cuaCall),
-					'fromInternal' => PhoneList::find()->byPhone($this->cuaCall->c_from)->enabled()->exists(),
+                    'source_type_id' => $call->c_source_type_id,
+                    'fromInternal' => PhoneList::find()->byPhone($this->cuaCall->c_from)->enabled()->exists(),
+                    'isHold' => false,
+                    'holdDuration' => 0,
+                    'isListen' => false,
+                    'isMute' => false,
                     'project' => $call->c_project_id ? $call->cProject->name : '',
                     'source' => $call->c_source_type_id ? $call->getSourceName() : '',
-                    'status' => $call->getStatusName(),
+                    'isEnded' => false,
                     'contact' => [
                         'name' => $name,
                         'phone' => $phone,
                         'company' => '',
                     ],
-                    'queue' => Call::getQueueName($call),
                     'department' => $call->c_dep_id ? Department::getName($call->c_dep_id) : '',
+                    'queue' => Call::getQueueName($call),
 				];
 			}
             Notifications::publish('updateIncomingCall', ['user_id' => $this->cua_user_id], array_merge($this->attributes, $callInfo ?? []));

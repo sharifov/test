@@ -7,15 +7,25 @@ use yii\base\Model;
 class OutgoingQueueCall extends Model
 {
     public $callSid;
-    public $type;
     public $status;
     public $duration;
+    public $leadId;
+    public $typeId;
+    public $type;
+    public $source_type_id;
+    public $fromInternal;
+    public $isHold;
+    public $holdDuration;
+    public $isListen;
+    public $isMute;
     public $project;
     public $source;
-    public $name;
+    public $isEnded = false;
     public $phone;
+    public $name;
     public $company;
     public $department;
+    public $queue;
 
     public function getData(): array
     {

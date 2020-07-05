@@ -49,7 +49,7 @@ $wsUrl = $webSocketHost . '/?' . $urlParamsStr;
 
 $js = <<<JS
    
-    var socket   = null;
+    window.socket = null;
 
     /**
      * Send a message to the WebSocket server
@@ -73,6 +73,7 @@ $js = <<<JS
     
             //const socket = new WebSocket(wsUrl);
             var socket = new ReconnectingWebSocket(wsUrl, null, {debug: false, reconnectInterval: 15000});
+            window.socket = socket;
             
             socket.onopen = function (e) {
                 //socket.send('{"user2_id":' + user_id + '}');

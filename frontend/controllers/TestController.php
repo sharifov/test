@@ -55,6 +55,7 @@ use frontend\models\form\CreditCardForm;
 use frontend\models\UserFailedLogin;
 use frontend\widgets\lead\editTool\Form;
 use frontend\widgets\newWebPhone\call\socket\HoldMessage;
+use frontend\widgets\newWebPhone\call\socket\MuteMessage;
 use frontend\widgets\newWebPhone\sms\socket\Message;
 use frontend\widgets\notification\NotificationMessage;
 use frontend\widgets\notification\NotificationWidget;
@@ -236,9 +237,9 @@ class TestController extends FController
 
 //        Notifications::publish(HoldMessage::COMMAND, ['user_id' => 295], [
 //            'data' => [
-//                'command' => HoldMessage::COMMAND_HOLD,
+//                'command' => HoldMessage::COMMAND_UNHOLD,
 //                'call' => [
-//                    'id' => 13,
+//                    'sid' => 'sid12',
 //                ],
 //            ],
 //        ]);
@@ -254,8 +255,8 @@ class TestController extends FController
 //        ];
 //        Notifications::publish('removeIncomingRequest', ['user_id' => 295], $callInfo);
 //        die;
-////
-        $tmp = 1;
+//
+        $tmp = 2;
         $callInfo = [
             'typeId' => 2,
             'type' => 'Inc ' . $tmp,
@@ -266,6 +267,7 @@ class TestController extends FController
             'source' => 'Source',
 //            'status' => 'Ringing',
             'status' => 'In progress',
+//            'status' => 'Completed',
 //            'status' => 'Hold',
             'isListen' => false,
             'isMute' => false,
@@ -277,6 +279,7 @@ class TestController extends FController
             ],
             'department' => 'Sales',
 //            'queue' => 'direct',
+//            'queue' => 'hold',
             'queue' => 'inProgress',
             'duration' => 0,
         ];
@@ -317,7 +320,7 @@ class TestController extends FController
         $callInfo = [
             'data' => [
                 'call' => [
-                    'sid' => 13,
+                    'sid' => 'sid1',
                 ],
             ],
         ];

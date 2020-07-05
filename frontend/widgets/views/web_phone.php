@@ -187,7 +187,6 @@ use yii\helpers\Html;
     $ajaxCheckUserForCallUrl = Url::to(['phone/ajax-check-user-for-call']);
     $ajaxPhoneDialUrl = Url::to(['phone/ajax-phone-dial']);
     $ajaxBlackList = Url::to(['phone/check-black-phone']);
-    $ajaxConferenceCompleteUrl = Url::to(['/phone/ajax-conference-complete']);
     $ajaxUnholdConferenceDoubleCall = Url::to(['/phone/ajax-unhold-conference-double-call']);
     $ajaxJoinToConferenceUrl = Url::to(['/phone/ajax-join-to-conference']);
     $ajaxHangupUrl = Url::to(['/phone/ajax-hangup']);
@@ -216,7 +215,6 @@ use yii\helpers\Html;
     const ajaxCallRedirectGetAgents = '<?=$ajaxCallRedirectGetAgents?>';
     const ajaxPhoneDialUrl = '<?=$ajaxPhoneDialUrl?>';
     const ajaxBlackList = '<?=$ajaxBlackList?>';
-    const ajaxConferenceCompleteUrl = '<?= $ajaxConferenceCompleteUrl ?>';
     const ajaxUnholdConferenceDoubleCall = '<?= $ajaxUnholdConferenceDoubleCall ?>';
     const conferenceBase = parseInt('<?= $conferenceBase ?>');
     const ajaxJoinToConferenceUrl = '<?= $ajaxJoinToConferenceUrl ?>';
@@ -341,21 +339,6 @@ use yii\helpers\Html;
     document.getElementById('button-hangup').onclick = function () {
         log('Hanging up...');
         if (device) {
-            // $('#join-source-type').html();
-            // $('#join-source-type').hide();
-            // if (conferenceBase) {
-            //     if (isJoinCall) {
-            //         updateAgentStatus(joinConnection, false, 1);
-            //         joinConnection.disconnect();
-            //     } else {
-            //         updateAgentStatus(connection, false, 1);
-            //         conferenceComplete();
-            //     }
-            // } else {
-            //     updateAgentStatus(connection, false, 1);
-            //     device.disconnectAll();
-            // }
-            // updateAgentStatus(connection, false, 1);
             let callSid = getActiveConnectionCallSid();
             hangup(callSid);
         } else {
@@ -366,11 +349,10 @@ use yii\helpers\Html;
     function hangup(callSid) {
 
         if (!callSid) {
-            new PNotify({title: "Hangup", type: "error", text: 'Not found Call Sid', hide: true});
+            createNotify('Hangup', 'Not found Call Sid', 'error');
             return false;
         }
 
-        let call = null;
         if (typeof PhoneWidgetCall === 'object') {
             let call = PhoneWidgetCall.queues.active.one(callSid);
 
@@ -379,26 +361,9 @@ use yii\helpers\Html;
                 return false;
             }
 
-            if (call.isBlocked()) {
-                createNotify('Hangup', 'Call is blocked. Please wait some seconds.', 'error');
+            if (!call.setHangupRequestState()) {
                 return false;
             }
-
-            call.block();
-            call.sendHangupRequest();
-            PhoneWidgetCall.panes.queue.refresh();
-        }
-
-        let activeCallBtn = $(document).find('#cancel-active-call');
-        if (activeCallBtn.length > 0) {
-            if (activeCallBtn.attr('data-call-sid') !== callSid) {
-                activeCallBtn = null;
-            } else {
-                activeCallBtn.prop('disabled', true);
-                activeCallBtn.html('<i class="fa fa-spinner fa-spin"> </i>');
-            }
-        } else {
-            activeCallBtn = null;
         }
 
         let oldActiveCallBtn = $(document).find('#button-hangup');
@@ -425,16 +390,11 @@ use yii\helpers\Html;
                     if (oldActiveCallBtn !== null) {
                         oldActiveCallBtn.prop('disabled', false);
                     }
-                    if (activeCallBtn !== null) {
-                        activeCallBtn.prop('disabled', false);
-                        activeCallBtn.html('<i class="fa fa-phone-slash"> </i>');
-                    }
+
                     if (typeof PhoneWidgetCall === 'object') {
-                        call = PhoneWidgetCall.queues.active.one(callSid);
+                        let call = PhoneWidgetCall.queues.active.one(callSid);
                         if (call !== null) {
-                            call.unBlock();
-                            call.unSendHangupRequest();
-                            PhoneWidgetCall.panes.queue.refresh();
+                            call.unSetHangupRequestState();
                         }
                     }
                 }
@@ -444,77 +404,13 @@ use yii\helpers\Html;
                 if (oldActiveCallBtn !== null) {
                     oldActiveCallBtn.prop('disabled', false);
                 }
-                if (activeCallBtn !== null) {
-                    activeCallBtn.prop('disabled', false);
-                    activeCallBtn.html('<i class="fa fa-phone-slash"> </i>');
-                }
                 if (typeof PhoneWidgetCall === 'object') {
-                    call = PhoneWidgetCall.queues.active.one(callSid);
+                    let call = PhoneWidgetCall.queues.active.one(callSid);
                     if (call !== null) {
-                        call.unBlock();
-                        call.unSendHangupRequest();
-                        PhoneWidgetCall.panes.queue.refresh();
+                        call.unSetHangupRequestState();
                     }
                 }
             })
-            .always(function () {
-
-            });
-    }
-
-    function hangupOutgoingCall(button, callSid) {
-        button.html('<i class="fa fa-spinner fa-spin"> </i>');
-        button.prop('disabled', true);
-        $.ajax({
-            type: 'post',
-            data: {
-                'sid': callSid,
-            },
-            url: ajaxHangupUrl
-        })
-            .done(function(data) {
-                if (data.error) {
-                    createNotify('Hangup', data.message, 'error');
-                    button.html('<i class="fa fa-phone-slash"> </i>');
-                    button.prop('disabled', false);
-                }
-            })
-            .fail(function() {
-                createNotify('Hangup', 'Server error', 'error');
-                button.html('<i class="fa fa-phone-slash"> </i>');
-                button.prop('disabled', false);
-            })
-    }
-
-    function conferenceComplete() {
-        if (connection && connection.parameters.CallSid) {
-            $('#button-hangup').prop('disabled', true);
-            if (connection.status() !== 'open') {
-                connection.accept();
-            }
-
-            $.ajax({
-                type: 'post',
-                data: {
-                    'sid': connection.parameters.CallSid,
-                },
-                url: ajaxConferenceCompleteUrl
-            })
-            .done(function(data) {
-                if (data.error) {
-                    new PNotify({title: "Hangup", type: "error", text: data.message, hide: true});
-                }
-            })
-            .fail(function(error) {
-                console.error(error);
-            })
-            .always(function () {
-                $('#button-hangup').prop('disabled', false);
-            });
-
-        } else {
-            new PNotify({title: "Hangup", type: "error", text: 'Not found active connection or CallSid', hide: true});
-        }
     }
 
     /*document.getElementById('get-devices').onclick = function () {
@@ -1495,9 +1391,9 @@ $js = <<<JS
         if (callSid) {
            let mode = $(this).attr('data-mode');
             if (mode === 'unhold') {
-                PhoneWidgetCall.holdCall(callSid);   
+                PhoneWidgetCall.sendHoldRequest(callSid);   
             } else {
-                PhoneWidgetCall.unholdCall(callSid);
+                PhoneWidgetCall.sendUnHoldRequest(callSid);
             }
         } else {
             alert('Error: Not found active Connection CallSid');
@@ -1509,24 +1405,15 @@ $js = <<<JS
          if (typeof PhoneWidgetCall !== 'object') {
             return;
          }
-         
-         if (PhoneWidgetCall.panes.active.getCallSid() === data.call.sid) {
-             if (data.command === 'mute') {
-                 PhoneWidgetCall.panes.active.buttons.mute.mute();
-             } else if (data.command === 'unmute') {
-                PhoneWidgetCall.panes.active.buttons.mute.unMute();
-             }
-         }
-         
+                  
         let call = PhoneWidgetCall.queues.active.one(data.call.sid);
-        if (call !== null) {
-            if (data.command === 'mute') {
-                call.data.isMute = true;
-            } else if (data.command === 'unmute') {
-                call.data.isMute = false;
-            }
-            call.unSendMuteRequest();
-            call.unBlock();
+        if (call === null) {
+            return;
+        }
+        if (data.command === 'mute') {
+            call.mute();
+        } else if (data.command === 'unmute') {
+            call.unMute();
         }
      }
      
