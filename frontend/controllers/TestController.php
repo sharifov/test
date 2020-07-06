@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\components\CommunicationService;
+use common\components\jobs\CreateSaleFromBOJob;
 use common\components\Purifier;
 use common\components\jobs\TelegramSendMessageJob;
 use common\components\RocketChat;
@@ -139,6 +140,7 @@ use sales\services\cases\CasesManageService;
 use sales\services\cases\CasesSaleService;
 use sales\services\client\ClientManageService;
 use sales\services\clientChatService\ClientChatService;
+use sales\services\email\EmailService;
 use sales\services\email\incoming\EmailIncomingService;
 use sales\services\lead\LeadCreateApiService;
 use sales\services\lead\LeadManageService;
@@ -1467,12 +1469,6 @@ class TestController extends FController
         //VarDumper::dump($chat->systemLogin(), 10, true);
     }
 
-    public function actionZ()
-    {
-
-        return $this->render('z');
-    }
-
     public function actionTestRcAssignUserToChannel()
 	{
 
@@ -1489,6 +1485,11 @@ class TestController extends FController
 
 		echo 'success';
 	}
+
+	public function actionZ()
+    {
+        return $this->render('z');
+    }
 }
 
 

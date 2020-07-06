@@ -656,11 +656,12 @@ class Cases extends ActiveRecord implements Objectable
     }
 
     /**
-     * @return int
+     * @return bool
      */
-    public function updateLastAction(): int
+    public function updateLastAction(): bool
     {
-        return self::updateAll(['cs_last_action_dt' => date('Y-m-d H:i:s')], ['cs_id' => $this->cs_id]);
+        $this->cs_last_action_dt = date('Y-m-d H:i:s');
+        return $this->save(false);
     }
 
     public function getProjectId(): ?int
