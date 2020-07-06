@@ -50,6 +50,18 @@ if($is_admin || $is_supervision) {
 }
 
 $lead = $leadForm->getLead();
+
+$clientProjectInfo = $lead->client->clientProjects;
+$unsubscribe = false;
+if (isset($clientProjectInfo) && $clientProjectInfo){
+    foreach ($clientProjectInfo as $item){
+        if ($lead->project_id == $item['cp_project_id']){
+            $unsubscribe = $item['cp_unsubscribe'];
+        }
+    }
+} else {
+    $unsubscribe = false;
+}
 ?>
 
 <?= $this->render('partial/_view_header', [
@@ -113,13 +125,14 @@ $lead = $leadForm->getLead();
                 </div>
 
             <?php else: ?>
-
+                <?php yii\widgets\Pjax::begin(['id' => 'pjax-client-info', 'enablePushState' => false, 'enableReplaceState' => false]) ?>
                 <?= $this->render('client-info/client_info', [
                     'lead' => $lead,
                     'leadForm' => $leadForm,
                     'is_manager' => $is_manager,
+                    'unsubscribe' => $unsubscribe
                 ]) ?>
-
+                <?php \yii\widgets\Pjax::end(); ?>
             <?php endif;?>
 
 
@@ -172,7 +185,8 @@ $lead = $leadForm->getLead();
                     'isAdmin'       => $is_admin,
                     'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_lead'],
                     'lead' => $lead,
-                    'fromPhoneNumbers' => $fromPhoneNumbers
+                    'fromPhoneNumbers' => $fromPhoneNumbers,
+                    'unsubscribe' => $unsubscribe
                 ]); ?>
             <?php else: ?>
                 <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
@@ -241,28 +255,19 @@ $lead = $leadForm->getLead();
 //                ]); ?>
 
 
-
-
-
                 <?= $this->render('notes/agent_notes', [
                     'lead' => $lead,
                     'dataProviderNotes'  => $dataProviderNotes,
                     'modelNote'  => $modelNote,
                 ]) ?>
 
-
         </div>
-
-
-
 
         <div class="clearfix"></div>
         <br/>
         <br/>
 
     </div>
-
-
 </div>
 
 <?php
@@ -327,6 +332,23 @@ $jsCode = <<<JS
             $('#modal-' + id).find('.modal-body').html(data);
         });
        return false;
+    });
+
+$(document).on('click','#client-unsubscribe-button', function (e) {
+        e.preventDefault();
+        let url = $(this).data('unsubscribe-url');        
+        $.ajax({
+            url: url,               
+            success: function(response){
+                $.pjax.reload({container: '#pjax-client-info', timeout: 10000, async: false});
+                if (Boolean(Number(response.data.action))){
+                    new PNotify({title: "Communication", type: "info", text: 'Client communication restricted', hide: true});
+                } else {
+                    new PNotify({title: "Communication", type: "info", text: 'Client communication allowed', hide: true});
+                }
+                updateCommunication();                
+            }
+        });
     });
     
 JS;

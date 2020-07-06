@@ -60,6 +60,7 @@ var PhoneWidgetCall = function () {
         $('.call-pane-initial').removeClass('is_active');
         $('.call-pane').addClass('is_active');
         $('.call-in-action__time').hide();
+        $('.call-pane__dial-clear-all').trigger('click');
         window.connection = '';
     }
 

@@ -252,6 +252,332 @@ define({ "api": [
   },
   {
     "type": "post",
+    "url": "/v1/client-chat-request/create",
+    "title": "Client Chat Request",
+    "version": "0.1.0",
+    "name": "ClientChatRequest",
+    "group": "ClientChat",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "examples": [
+        {
+          "title": "Request-Example GUEST_CONNECTED:",
+          "content": "{\n\t\t\t\"event\": \"GUEST_CONNECTED\",\n\t\t\t\"data\": {\n\t\t\t\t\"rid\": \"292a9961-asdas-4d66-bhnjm-sdvsdv\",\n\t\t\t\t\"channel\": \"livechat-channel\",\n\t\t\t\t\"name\": \"Test 45\",\n\t\t\t\t\"email\": \"test+45@mail.com\",\n\t\t\t\t\"ip\": \"127.0.0.1\",\n\t\t\t\t\"project\": 'OVAGO',\n\t \t\t\t\"department\": \"department id optional\"\n\t\t\t}\n}",
+          "type": "json"
+        },
+        {
+          "title": "Request-Example ROOM_CONNECTED:",
+          "content": "{\n\t\t\t\"event\": 'ROOM_CONNECTED',\n\t\t\t\"data\": {\n\t\t\t\t\"rid\": '9e563c67-fe10-42d5-a664-6e30d2974201',\n\t\t\t\t\"visitor\": { \"_id\": 'pnjNRHsnnWXhW5LBn', \"username\": 'guest-81' }\n\t\t\t}\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n   \"status\": 200\n   \"message\": \"Ok\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response (400):",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n\t\"status\":400,\n\t\"message\":\"Some errors occurred while creating client chat request\",\n\t\"code\":\"13104\",\n\t\"errors\":[\"Event is invalid.\"]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v1/controllers/ClientChatRequestController.php",
+    "groupTitle": "ClientChat"
+  },
+  {
+    "type": "post",
+    "url": "/v1/client-chat-request/create-message",
+    "title": "Client Chat Request Create Message",
+    "version": "0.1.0",
+    "name": "ClientChatRequestCreateMessage",
+    "group": "ClientChat",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "examples": [
+        {
+          "title": "Request-Example GUEST_UTTERED:",
+          "content": "{\n\t\t\t\"event\": \"GUEST_UTTERED\",\n\t\t\t\"data\": {\n\t\t\t\t\"_id\": \"XipJ2fqumzr3n3Nhh\",\n\t\t\t\t\"rid\": \"292a9961-asdas-4d66-bhnjm-sdgadg\",\n\t\t\t\t\"msg\": \"hello\",\n\t\t\t\t\"token\": \"292a9961-asdas-4d66-bhnjm-sdvsdu\",\n\t\t\t\t\"alias\": \"jora\",\n\t\t\t\t\"ts\": {\n\t\t\t\t\t\"$date\": 1592924833106\n\t\t\t\t},\n\t\t\t\t\"u\": {\n\t\t\t\t\t\"_id\": \"pvS87aeQxfqgnzsFW\",\n\t\t\t\t\t\"username\": \"guest-124\",\n\t\t\t\t\t\"name\": \"jora\"\n\t\t\t\t},\n\t\t\t\t\"groupable\": false,\n\t\t\t\t\"mentions\": [],\n\t\t\t\t\"channels\": [],\n\t\t\t\t\"_updatedAt\": {\n\t\t\t\t\t\"$date\": 1592924833113\n\t\t\t\t}\n\t\t\t}\n}",
+          "type": "json"
+        },
+        {
+          "title": "Request-Example GUEST_UTTERED with Attachment:",
+          "content": "{\n\t\t\t\"event\": \"GUEST_UTTERED\",\n\t\t\t\"data\": {\n\t\t\t\t\"_id\": \"XipJ2fqumzr3n3Nhh\",\n\t\t\t\t\"rid\": \"292a9961-asdas-4d66-bhnjm-sdgadg\",\n\t\t\t\t\"msg\": \"hello\",\n\t\t\t\t\"token\": \"292a9961-asdas-4d66-bhnjm-sdvsdu\",\n\t\t\t\t\"alias\": \"jora\",\n\t\t\t\t\"ts\": {\n\t\t\t\t\t\"$date\": 1592924833106\n\t\t\t\t},\n\t\t\t\t\"file\": {\n\t\t\t\t\t\"_id\": \"EKSp7qfb7LqQxjA3N\",\n\t\t\t\t\t\"name\": \"469_5263_9274dc35-1390-4b95-9767-fa4b71adc7a2-c26e70f8-0eff-4558-8005-73a699c7d7f8.mp4\",\n\t\t\t\t\t\"type\": \"video/mp4\"\n\t\t\t\t},\n\t\t\t\t\"attachments\": [\n\t\t\t\t\t{\n\t\t\t\t\t\t\"title\": \"469_5263_9274dc35-1390-4b95-9767-fa4b71adc7a2-c26e70f8-0eff-4558-8005-73a699c7d7f8.mp4\",\n\t\t\t\t\t\t\"type\": \"file\",\n\t\t\t\t\t\t\"title_link\": \"/file-upload/EKSp7qfb7LqQxjA3N/469_5263_9274dc35-1390-4b95-9767-fa4b71adc7a2-c26e70f8-0eff-4558-8005-73a699c7d7f8.mp4\",\n\t\t\t\t\t\t\"title_link_download\": true,\n\t\t\t\t\t\t\"video_url\": \"/file-upload/EKSp7qfb7LqQxjA3N/469_5263_9274dc35-1390-4b95-9767-fa4b71adc7a2-c26e70f8-0eff-4558-8005-73a699c7d7f8.mp4\",\n\t\t\t\t\t\t\"video_type\": \"video/mp4\",\n\t\t\t\t\t\t\"video_size\": 5276\n\t\t\t\t\t}\n\t\t\t\t],\n\t\t\t\t\"u\": {\n\t\t\t\t\t\"_id\": \"pvS87aeQxfqgnzsFW\",\n\t\t\t\t\t\"username\": \"guest-124\",\n\t\t\t\t\t\"name\": \"jora\"\n\t\t\t\t},\n\t\t\t\t\"groupable\": false,\n\t\t\t\t\"mentions\": [],\n\t\t\t\t\"channels\": [],\n\t\t\t\t\"_updatedAt\": {\n\t\t\t\t\t\"$date\": 1592924833113\n\t\t\t\t}\n\t\t\t}\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n   \"status\": 200\n   \"message\": \"Ok\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response (400):",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n\t\"status\":400,\n\t\"message\":\"Some errors occurred while creating client chat request\",\n\t\"code\":\"13104\",\n\t\"errors\":[\"Event is invalid.\"]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v1/controllers/ClientChatRequestController.php",
+    "groupTitle": "ClientChat"
+  },
+  {
+    "type": "get",
+    "url": "/v2/client-email/subscribe",
+    "title": "Client Email Subscribe",
+    "version": "0.2.0",
+    "name": "Client_Email_Subscribe",
+    "group": "ClientEmail",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          },
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Accept-Encoding",
+            "description": ""
+          },
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "If-Modified-Since",
+            "description": "<p>Format <code> day-name, day month year hour:minute:second GMT</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Header-Example (If-Modified-Since):",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\",\n    \"If-Modified-Since\": \"Mon, 23 Dec 2019 08:17:54 GMT\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "160",
+            "optional": false,
+            "field": "email",
+            "description": "<p>Email</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n     \"status\": 200,\n     \"message\": \"OK\",\n     \"data\": {\n         \"email\" : \"example@email.com\"\n     },\n     \"technical\": {\n         \"action\": \"v2/client-email/subscribe\",\n         \"response_id\": 11926631,\n         \"request_dt\": \"2020-03-16 11:26:34\",\n         \"response_dt\": \"2020-03-16 11:26:34\",\n         \"execution_time\": 0.076,\n         \"memory_usage\": 506728\n     },\n     \"request\": []\n }",
+          "type": "json"
+        },
+        {
+          "title": "Not Modified-Response (304):",
+          "content": "\nHTTP/1.1 304 Not Modified\nCache-Control: public, max-age=3600\nLast-Modified: Mon, 23 Dec 2019 08:17:53 GMT",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response (405):",
+          "content": "\nHTTP/1.1 405 Method Not Allowed\n  {\n      \"name\": \"Method Not Allowed\",\n      \"message\": \"Method Not Allowed. This URL can only handle the following request methods: GET.\",\n      \"code\": 0,\n      \"status\": 405,\n      \"type\": \"yii\\\\web\\\\MethodNotAllowedHttpException\"\n  }",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response(Validation error) (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n  {\n      \"status\": 422,\n      \"message\": \"Validation error\",\n      \"errors\": {\n          \"email\": [\n              \"Contact Email cannot be blank.\"\n          ]\n      },\n      \"code\": \"21301\",\n      \"technical\": {\n         ...\n      },\n      \"request\": {\n         ...\n      }\n  }",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/ClientEmailController.php",
+    "groupTitle": "ClientEmail"
+  },
+  {
+    "type": "get",
+    "url": "/v2/client-email/unsubscribe",
+    "title": "Client Email Unsubscribe",
+    "version": "0.2.0",
+    "name": "Client_Email_Unsubscribe",
+    "group": "ClientEmail",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          },
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Accept-Encoding",
+            "description": ""
+          },
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "If-Modified-Since",
+            "description": "<p>Format <code> day-name, day month year hour:minute:second GMT</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Header-Example (If-Modified-Since):",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\",\n    \"If-Modified-Since\": \"Mon, 23 Dec 2019 08:17:54 GMT\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "160",
+            "optional": false,
+            "field": "email",
+            "description": "<p>Email</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n     \"status\": 200,\n     \"message\": \"OK\",\n     \"data\": {\n         \"email\" : \"example@email.com\"\n     },\n     \"technical\": {\n         \"action\": \"v2/client-email/unsubscribe\",\n         \"response_id\": 11926631,\n         \"request_dt\": \"2020-03-16 11:26:34\",\n         \"response_dt\": \"2020-03-16 11:26:34\",\n         \"execution_time\": 0.076,\n         \"memory_usage\": 506728\n     },\n     \"request\": []\n }",
+          "type": "json"
+        },
+        {
+          "title": "Not Modified-Response (304):",
+          "content": "\nHTTP/1.1 304 Not Modified\nCache-Control: public, max-age=3600\nLast-Modified: Mon, 23 Dec 2019 08:17:53 GMT",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response (405):",
+          "content": "\nHTTP/1.1 405 Method Not Allowed\n  {\n      \"name\": \"Method Not Allowed\",\n      \"message\": \"Method Not Allowed. This URL can only handle the following request methods: GET.\",\n      \"code\": 0,\n      \"status\": 405,\n      \"type\": \"yii\\\\web\\\\MethodNotAllowedHttpException\"\n  }",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response(Validation error) (422):",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n  {\n      \"status\": 422,\n      \"message\": \"Validation error\",\n      \"errors\": {\n          \"email\": [\n              \"Contact Email cannot be blank.\"\n          ]\n      },\n      \"code\": \"21301\",\n      \"technical\": {\n         ...\n      },\n      \"request\": {\n         ...\n      }\n  }",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v2/controllers/ClientEmailController.php",
+    "groupTitle": "ClientEmail"
+  },
+  {
+    "type": "post",
     "url": "/v1/communication/email",
     "title": "Communication Email",
     "version": "0.1.0",

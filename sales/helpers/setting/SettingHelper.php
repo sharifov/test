@@ -25,4 +25,9 @@ class SettingHelper
 	{
 		return \Yii::$app->params['settings']['lead_communication_new_call_widget'] ?? false;
 	}
+
+	public static function isClientChatEnabled(): bool
+	{
+		return \Yii::$app->params['settings']['enable_client_chat'] ?? false;
+	}
 }

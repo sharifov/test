@@ -4,6 +4,8 @@ use common\models\ClientEmail;
 use common\models\ClientPhone;
 use sales\entities\cases\Cases;
 use yii\helpers\Html;
+use \yii\helpers\Url;
+use sales\auth\Auth;
 
 /* @var $this yii\web\View */
 /* @var $caseModel \sales\entities\cases\Cases */
@@ -24,6 +26,36 @@ use yii\helpers\Html;
                     <li>
                         <?= \yii\bootstrap\Html::a('<i class="fa fa-edit warning"></i> Update', '#', ['id' => 'btn-client-update', 'title' => 'Update Client Info'])?>
                     </li>
+
+                    <?php if($unsubscribe): ?>
+                        <?php if (Auth::can('client-project/subscribe-client-ajax')): ?>
+                            <li>
+                                <?=Html::a('<i class="far fa-bell-slash info"></i> Subscribe', '#',  [
+                                    'id' => 'client-unsubscribe-button',
+                                    'title' => 'Allow communication with client',
+                                    'data-unsubscribe-url' => Url::to(['client-project/unsubscribe-client-ajax',
+                                        'clientID' => $caseModel->cs_client_id,
+                                        'projectID' => $caseModel->cs_project_id,
+                                        'action' => false
+                                    ]),
+                                ])?>
+                            </li>
+                        <?php endif; ?>
+                    <?php else: ?>
+                        <?php if (Auth::can('client-project/unsubscribe-client-ajax')): ?>
+                            <li>
+                                <?=Html::a('<i class="far fa-bell-slash info"></i> Unsubscribe', '#',  [
+                                    'id' => 'client-unsubscribe-button',
+                                    'title' => 'Restrict communication with client',
+                                    'data-unsubscribe-url' => Url::to(['client-project/unsubscribe-client-ajax',
+                                        'clientID' => $caseModel->cs_client_id,
+                                        'projectID' => $caseModel->cs_project_id,
+                                        'action' => true
+                                    ]),
+                                ])?>
+                            </li>
+                        <?php endif; ?>
+                    <?php endif; ?>
                 <?php endif;?>
                 <li>
                     <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>

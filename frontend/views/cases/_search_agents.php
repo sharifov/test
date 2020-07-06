@@ -2,12 +2,14 @@
 
 use common\models\Airport;
 use common\models\CaseSale;
+use dosamigos\multiselect\MultiSelect;
 use kartik\select2\Select2;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\entities\cases\CaseCategory;
 use sales\entities\cases\CasesSourceType;
 use sales\entities\cases\CasesStatus;
+use sales\model\saleTicket\entity\SaleTicket;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
@@ -45,7 +47,15 @@ use yii\widgets\ActiveForm;
                     <?= $form->field($model, 'cs_category_id')->dropDownList(CaseCategory::getList(array_keys(EmployeeDepartmentAccess::getDepartments())), ['prompt' => '-']) ?>
                 </div>
                 <div class="col-md-1">
-                    <?= $form->field($model, 'cs_status')->dropDownList(CasesStatus::STATUS_LIST, ['prompt' => '-']) ?>
+                    <?php echo $form->field($model, 'csStatuses')
+                        ->widget(MultiSelect::class,
+                            [
+                                'data' => CasesStatus::STATUS_LIST,
+                                'options' => ['multiple' => 'multiple'],
+                                'clientOptions' => ['numberDisplayed' => 1],
+                            ]
+                        )
+                    ?>
                 </div>
                 <div class="col-md-1">
                     <?= $form->field($model, 'clientId') ?>
@@ -157,7 +167,12 @@ use yii\widgets\ActiveForm;
 					'format' => 'yyyy-mm-dd',
 				]
 			])->label('Send Email Date') ?>
-
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'airlinePenalty')->dropDownList(SaleTicket::getAirlinePenaltyList(), ['prompt' => '---']) ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'validatingCarrier')->textInput(['maxlength' => true]) ?>
         </div>
     </div>
 

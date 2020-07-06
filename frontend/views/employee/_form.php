@@ -379,43 +379,66 @@ JS;
                 </div>
             <?php endif; ?>
 
-            <h4>Profile Settings</h4>
-
+    <h5>Profile Settings</h5>
+    <div class="well">
+        <div class="form-group">
             <div class="row">
                 <div class="col-md-3">
                     <?php if ($modelProfile->up_join_date === null): $modelProfile->up_join_date = date('Y-m-d'); endif; ?>
                     <?= $form->field($modelProfile, 'up_join_date')->widget(\dosamigos\datepicker\DatePicker::class, [
-						'clientOptions' => [
-							'autoclose' => true,
-							'format' => 'yyyy-mm-dd',
-						],
-						'options' => [
-							'autocomplete' => 'off',
-							'placeholder' =>'Choose Date',
-						],
+                        'clientOptions' => [
+                            'autoclose' => true,
+                            'format' => 'yyyy-mm-dd',
+                        ],
+                        'options' => [
+                            'autocomplete' => 'off',
+                            'placeholder' =>'Choose Date',
+                        ],
                     ]) ?>
+                    <?= $form->field($modelProfile, 'up_skill')->dropDownList(\common\models\UserProfile::SKILL_TYPE_LIST, ['prompt' => '---']) ?>
                 </div>
                 <div class="col-md-3">
                     <?= $form->field($modelProfile, 'up_call_type_id')->dropDownList(\common\models\UserProfile::CALL_TYPE_LIST) ?>
+                    <?= $form->field($modelProfile, 'up_2fa_secret')->textInput(['maxlength' => true, 'title' => 'Clean for reset'])->label('2fa secret') ?>
                 </div>
                 <div class="col-md-3">
                     <?= $form->field($modelProfile, 'up_sip')->textInput(['maxlength' => true]) ?>
+                    <?= $form->field($modelProfile, 'up_2fa_enable')->checkbox() ?>
                 </div>
                 <div class="col-md-3">
                     <?= $form->field($modelProfile, 'up_telegram')->textInput(['maxlength' => true]) ?>
                     <?= $form->field($modelProfile, 'up_telegram_enable')->checkbox() ?>
+
                 </div>
                 <div class="col-md-3">
-                    <?= $form->field($modelProfile, 'up_skill')->dropDownList(\common\models\UserProfile::SKILL_TYPE_LIST, ['prompt' => '---']) ?>
                     <?= $form->field($modelProfile, 'up_auto_redial')->checkbox() ?>
                     <?= $form->field($modelProfile, 'up_kpi_enable')->checkbox() ?>
                     <?= $form->field($modelProfile, 'up_show_in_contact_list')->checkbox() ?>
                 </div>
-                <div class="col-md-3">
-                    <?= $form->field($modelProfile, 'up_2fa_enable')->checkbox() ?>
-                    <?= $form->field($modelProfile, 'up_2fa_secret')->textInput(['maxlength' => true])->label('2fa secret. Clean for reset') ?>
+            </div>
+        </div>
+    </div>
+    <?php if (Auth::user()->isAdmin() || Auth::user()->isSuperAdmin()) : ?>
+        <h5>Rocket Chat Credentials</h5>
+        <div class="well">
+            <div class="form-group">
+                <div class="row">
+                    <div class="col-md-5">
+                        <?= $form->field($modelProfile, 'up_rc_user_id')->widget(\sales\widgets\UserSelect2Widget::class, [
+                            'data' => $modelProfile->up_rc_user_id ? [
+                                $modelProfile->up_rc_user_id => $modelProfile->upUser->username
+                            ] : [],
+                        ]) ?>
+                        <?= $form->field($modelProfile, 'up_rc_token_expired')->widget(\sales\widgets\DateTimePicker::class) ?>
+                    </div>
+                    <div class="col-md-7">
+                        <?= $form->field($modelProfile, 'up_rc_user_password')->passwordInput(['autocomplete' => "off"]) ?>
+                        <?= $form->field($modelProfile, 'up_rc_auth_token')->textInput(['maxlength' => true]) ?>
+                    </div>
                 </div>
             </div>
+        </div>
+    <?php endif; ?>
 
             <div class="form-group text-center">
                 <?= Html::submitButton(($model->isNewRecord ? '<i class="fa fa-plus"></i> Create User' : '<i class="fa fa-save"></i> Update & Save User data'), ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-warning']) ?>
@@ -423,13 +446,10 @@ JS;
     <?php ActiveForm::end() ?>
 </div>
 
-
 <div class="col-sm-7">
 
     <?php if (!$model->isNewRecord) : ?>
-
         <div class="user-project-params-index">
-
             <h4>Project Params</h4>
 
             <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
@@ -718,9 +738,27 @@ JS;
                 <?php \yii\widgets\Pjax::end(); ?>
             </div>
 
-
-
         <?php endif ?>
+
+		<?php /*if (Auth::user()->isAdmin() || Auth::user()->isSuperAdmin()) :*/?><!--
+            <div class="user-failed-login">
+                <h5>Rocket Chat Credentials</h5>
+
+				<?/*= \yii\widgets\DetailView::widget([
+					'model' => $user->userProfile,
+                    'options' => [
+                        ''
+                    ],
+                    'attributes' => [
+						'up_rc_auth_token',
+						'up_rc_user_id',
+						'up_rc_user_password',
+						'up_rc_token_expired'
+                    ]
+				]); */?>
+            </div>
+
+		--><?php /*endif */?>
 
         <?php /*
         <div class="card card-default">

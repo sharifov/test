@@ -2,7 +2,12 @@
 
 namespace common\models;
 
+use sales\forms\segment\SegmentBaggageForm;
 use Yii;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "quote_segment_baggage_charge".
@@ -25,20 +30,6 @@ use Yii;
  */
 class QuoteSegmentBaggageCharge extends \yii\db\ActiveRecord
 {
-
-    /**
-     * @param array $attributes
-     * @param int $qsId
-     * @return QuoteSegmentBaggageCharge
-     */
-    public static function clone(array $attributes, int $qsId): self
-    {
-        $baggageCharge = new self();
-        $baggageCharge->attributes = $attributes;
-        $baggageCharge->qsbc_segment_id = $qsId;
-        return $baggageCharge;
-    }
-
     /**
      * {@inheritdoc}
      */
@@ -85,6 +76,37 @@ class QuoteSegmentBaggageCharge extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * @return array
+     */
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['qsbc_created_dt', 'qsbc_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['qsbc_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s')
+            ]
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
+    /**
+     * @param array $attributes
+     * @param int $qsId
+     * @return QuoteSegmentBaggageCharge
+     */
+    public static function clone(array $attributes, int $qsId): self
+    {
+        $baggageCharge = new self();
+        $baggageCharge->attributes = $attributes;
+        $baggageCharge->qsbc_segment_id = $qsId;
+        return $baggageCharge;
+    }
+
     public function getInfo()
     {
         $data = [];
@@ -125,5 +147,25 @@ class QuoteSegmentBaggageCharge extends \yii\db\ActiveRecord
     public function getQsbcUpdatedUser()
     {
         return $this->hasOne(Employee::class, ['id' => 'qsbc_updated_user_id']);
+    }
+
+    /**
+     * @param SegmentBaggageForm $form
+     * @param int $firstPiece
+     * @param int $lastPiece
+     * @return static
+     */
+    public static function creationFromForm(SegmentBaggageForm $form, int $firstPiece = 1, int $lastPiece = 1): self
+    {
+        $item = new self();
+        $item->qsbc_price = $form->price;
+        $item->qsbc_pax_code = $form->paxCode;
+        $item->qsbc_segment_id = $form->segmentId;
+        $item->qsbc_first_piece = $firstPiece;
+        $item->qsbc_last_piece = $lastPiece;
+        $item->qsbc_max_size = $form->height;
+        $item->qsbc_max_weight = $form->weight;
+        $item->qsbc_currency = $form->currency;
+        return $item;
     }
 }

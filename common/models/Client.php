@@ -36,6 +36,7 @@ use yii\db\ActiveQuery;
  * @property ClientEmail[] $clientEmails
  * @property ClientPhone[] $clientPhones
  * @property ClientPhone[] $clientPhonesByType
+ * @property ClientProject[] $clientProjects
  * @property Lead[] $leads
  * @property string $nameByType
  * @property array $phoneNumbersSms
@@ -192,6 +193,16 @@ class Client extends ActiveRecord
     public function getProjects(): ActiveQuery
     {
          return $this->hasMany(Project::class, ['id' => 'cp_project_id'])->viaTable('client_project', ['cp_client_id' => 'id']);
+    }
+
+    /**
+     * Gets query for [[ClientProjects]].
+     *
+     * @return ActiveQuery
+     */
+    public function getClientProjects()
+    {
+        return $this->hasMany(ClientProject::class, ['cp_client_id' => 'id']);
     }
 
     /**

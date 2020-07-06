@@ -51,7 +51,7 @@ class LeadCreateForm extends Model
     public $segments;
     public $client;
     public $flight_id;
-    public ?string $user_language;
+    public ?string $user_language = null;
 
     public $segmentsForm;
     public $clientForm;

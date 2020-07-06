@@ -4,6 +4,7 @@
 /* @var $content string */
 
 use common\models\Employee;
+use frontend\widgets\clientChat\ClientChatAccessWidget;
 use frontend\widgets\notification\NotificationSocketWidget;
 use frontend\widgets\notification\NotificationWidget;
 use sales\auth\Auth;
@@ -235,6 +236,7 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
 <?= frontend\widgets\CallBox::widget() ?>
 <?= frontend\widgets\WebPhone::widget() ?>
 <?= frontend\widgets\NewWebPhoneWidget::widget(['userId' => Auth::id()]) ?>
+<?= ClientChatAccessWidget::widget(['userId' => Auth::id()]) ?>
 
 <?php $this->endBody(); ?>
 </body>

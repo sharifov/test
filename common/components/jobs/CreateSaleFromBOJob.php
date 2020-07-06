@@ -46,7 +46,6 @@ class CreateSaleFromBOJob extends BaseObject implements JobInterface
                     if ($existCasesSale === false) {
                         Yii::$app->cache->set($keyCasesSale, $keyCasesSale, 60);
                         $this->casesSaleService->createSale($this->case_id, $saleData);
-
                     }
                 }
             } else {

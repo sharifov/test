@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Call;
+use sales\auth\Auth;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\DetailView;
@@ -18,10 +19,10 @@ $this->title = 'Call Id: ' . $model->c_id;
     <h2>
         <i class="fa fa-phone-square"></i> <?= Html::encode($this->title) ?>
         <?=$model->getStatusLabel()?>
-        <?php if (!$model->isEnded()): ?>
+        <?php if (($model->isStatusRinging() || $model->isStatusInProgress()) && Auth::can('/call/cancel-manual')): ?>
             <?= Html::button('Cancel Call', ['class' => 'btn btn-danger cancel-call-btn']) ?>
-            <?php
-        $callCancelUrl = Url::to(['call/cancel-manual']);
+        <?php
+        $callCancelUrl = Url::to(['/call/cancel-manual']);
         $callId = $model->c_id;
         $cancelStatus = Call::STATUS_CANCELED;
 

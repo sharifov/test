@@ -90,28 +90,37 @@ class CallHelper
 		return Html::tag('div', $dropdownBtn . $widget, ['class' => 'dropdown']);
 	}
 
-	public static function formatCallHistoryByDate(array $callHistory): array
-	{
-		$result = [
-			'Today' => [],
-			'Yesterday' => [],
-		];
+    public static function formatCallHistoryByDate(array $callHistory, string $userTimezone): array
+    {
+        $result = [
+            'Today' => [],
+            'Yesterday' => [],
+        ];
 
-		foreach ($callHistory as $call) {
-			$currentDate = new DateTime();
-			$callDate = new DateTime($call['cl_call_created_dt']);
-			$dDiff = $currentDate->diff($callDate);
+        foreach ($callHistory as $call) {
+            $currentDate = new DateTime('now', new \DateTimeZone('UTC'));
+            $currentDate->setTimezone(new \DateTimeZone($userTimezone));
+            $currentDate->setTime(0, 0, 0);
 
+            $callDate = new DateTime($call['cl_call_created_dt'], new \DateTimeZone('UTC'));
+            $callDate->setTimezone(new \DateTimeZone($userTimezone));
+            $callDate->setTime(0, 0, 0);
 
-			if ($dDiff->d === 0 && $dDiff->m === 0) {
-				$result['Today'][] = $call;
-			} elseif ($dDiff->d === 1 && $dDiff->m === 0) {
-				$result['Yesterday'][] = $call;
-			} else {
-				$result[date('Y-m-d', strtotime($call['cl_call_created_dt']))][] = $call;
-			}
-		}
+            $diff = $currentDate->diff($callDate);
+            $diffDays = (int)$diff->format("%R%a");
 
-		return $result;
-	}
+            switch ($diffDays) {
+                case 0:
+                    $result['Today'][] = $call;
+                    break;
+                case -1:
+                    $result['Yesterday'][] = $call;
+                    break;
+                default:
+                    $result[date('Y-m-d', strtotime($call['cl_call_created_dt']))][] = $call;
+            }
+        }
+
+        return $result;
+    }
 }
