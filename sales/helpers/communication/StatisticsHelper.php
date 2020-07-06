@@ -13,20 +13,23 @@ use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 
 /**
- * Class CommunicationStatisticsHelper
+ * Class StatisticsHelper
  * @property int $id
  */
-class CommunicationStatisticsHelper
+class StatisticsHelper
 {
     public int $emailCount = 0;
     public int $smsCount = 0;
     public int $callCount = 0;
     public int $clientChatCount = 0;
 
+    public const TYPE_LEAD = 'lead';
+    public const TYPE_CASE = 'case';
+
     protected $id;
     protected string $type = 'lead';
-    protected int $cacheDuration = 60 * 20; // noCache mode = "-1"
-    protected const ALLOWED_TYPES = ['lead', 'case'];
+    protected int $cacheDuration = 60 * 2; // noCache mode = "-1"
+    protected const ALLOWED_TYPES = [self::TYPE_LEAD, self::TYPE_CASE];
 
     /**
      * @param int $id
@@ -44,7 +47,7 @@ class CommunicationStatisticsHelper
     /**
      * @return $this
      */
-    public function setEmailCount(): CommunicationStatisticsHelper
+    public function setEmailCount(): StatisticsHelper
     {
         $column = $this->type === 'lead' ? 'e_lead_id' : 'e_case_id';
         $this->emailCount = (int) Email::find()
@@ -57,7 +60,7 @@ class CommunicationStatisticsHelper
     /**
      * @return $this
      */
-    public function setSmsCount(): CommunicationStatisticsHelper
+    public function setSmsCount(): StatisticsHelper
     {
         $column = $this->type === 'lead' ? 's_lead_id' : 's_case_id';
         $this->smsCount = (int) Sms::find()
@@ -70,7 +73,7 @@ class CommunicationStatisticsHelper
     /**
      * @return $this
      */
-    public function setCallCount(): CommunicationStatisticsHelper
+    public function setCallCount(): StatisticsHelper
     {
         if ($this->type === 'lead') {
             $this->callCount = $this->getLeadCallCount();
@@ -119,7 +122,7 @@ class CommunicationStatisticsHelper
     /**
      * @return $this
      */
-    public function setClientChatCount(): CommunicationStatisticsHelper
+    public function setClientChatCount(): StatisticsHelper
     {
         $column = $this->type === 'lead' ? 'cch_lead_id' : 'cch_case_id';
         $this->clientChatCount = (int) ClientChat::find()
@@ -132,7 +135,7 @@ class CommunicationStatisticsHelper
     /**
      * @return $this
      */
-    public function setCountAll(): CommunicationStatisticsHelper
+    public function setCountAll(): StatisticsHelper
     {
         $this->setEmailCount()
             ->setSmsCount()
@@ -151,9 +154,9 @@ class CommunicationStatisticsHelper
 
     /**
      * @param int $cacheDuration
-     * @return CommunicationStatisticsHelper
+     * @return StatisticsHelper
      */
-    public function setCacheDuration($cacheDuration): CommunicationStatisticsHelper
+    public function setCacheDuration($cacheDuration): StatisticsHelper
     {
         $this->cacheDuration = $cacheDuration;
         return $this;
