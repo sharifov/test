@@ -61,7 +61,7 @@ class LeadPreviewEmailForm extends Model
             [['e_email_to', 'e_email_from'], 'email'],
             [['e_email_tpl_id', 'e_lead_id'], 'integer'],
             [['e_email_message', 'e_quote_list'], 'string'],
-            [['e_email_subject'], 'string', 'max' => 80, 'min' => 5],
+            [['e_email_subject'], 'string', 'max' => 200, 'min' => 5],
             [['e_email_from_name', 'e_email_to_name'], 'string', 'max' => 50],
             [['e_language_id'], 'string', 'max' => 5],
             [['e_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['e_user_id' => 'id']],
