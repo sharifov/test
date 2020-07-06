@@ -43,15 +43,19 @@ class CallLogController extends FController
         ]);
     }
 
-    /**
-     * @param $id
-     * @return string
-     * @throws NotFoundHttpException
-     */
-    public function actionView($id): string
+	/**
+	 * @param $id
+	 * @param string $breadcrumbsPreviousPage
+	 * @return string
+	 * @throws NotFoundHttpException
+	 */
+    public function actionView($id, $breadcrumbsPreviousPage = 'list'): string
     {
+    	$breadcrumbsPreviousLabel = $breadcrumbsPreviousPage === 'index' ? 'Call Logs' : 'My Call Logs';
         return $this->render('view', [
             'model' => $this->findModel($id),
+			'breadcrumbsPreviousPage' => $breadcrumbsPreviousPage,
+			'breadcrumbsPreviousLabel' => $breadcrumbsPreviousLabel
         ]);
     }
 
@@ -108,9 +112,11 @@ class CallLogController extends FController
 
 			$rows = $callHistory->getModels();
 
+            $userTimezone = Auth::user()->userParams->up_timezone ?? 'UTC';
+
 			$result = [
 				'html'  => $this->renderAjax('partial/_ajax_wg_call_history', [
-					'callHistory' => CallHelper::formatCallHistoryByDate($rows),
+					'callHistory' => CallHelper::formatCallHistoryByDate($rows, $userTimezone),
 				]),
 				'page' => $page+1,
 				'rows' => empty($rows)

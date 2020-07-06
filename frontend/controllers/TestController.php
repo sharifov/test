@@ -5,8 +5,11 @@ namespace frontend\controllers;
 use common\components\CommunicationService;
 use common\components\Purifier;
 use common\components\jobs\TelegramSendMessageJob;
+use common\components\RocketChat;
 use common\components\SearchService;
+use common\models\Airport;
 use common\models\Call;
+use common\models\CaseSale;
 use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
@@ -125,6 +128,7 @@ use sales\repositories\Repository;
 use sales\services\cases\CasesManageService;
 use sales\services\cases\CasesSaleService;
 use sales\services\client\ClientManageService;
+use sales\services\clientChatService\ClientChatService;
 use sales\services\email\incoming\EmailIncomingService;
 use sales\services\lead\LeadCreateApiService;
 use sales\services\lead\LeadManageService;
@@ -1311,7 +1315,53 @@ class TestController extends FController
     {
         return $this->render('call-widget');
     }
-    
+
+    public function actionRchat()
+    {
+        $chat = Yii::$app->rchat;
+
+
+//        "email": "test@gmail.com",
+//	"name": "John Balon",
+//	"password": "test",
+//	"username": "test",
+//	"active": true,
+//	"roles": ["user", "livechat-agent"],
+//	"joinDefaultChannels": false
+
+        //VarDumper::dump($chat->getSystemAuthData(), 10, true);
+        //VarDumper::dump($chat->getAllDepartments(), 10, true);
+
+        VarDumper::dump($chat->createUser('alex.connor4', 'alex.connor4', 'alex.connor4', 'alex.connor4@techork.com'), 10, true);
+        //VarDumper::dump($chat->createUser('alex.connor5', 'alex.connor5', 'alex.connor5', 'alex.connor5@techork.com'), 10, true);
+
+        VarDumper::dump($chat->deleteUser('alex.connor4'), 10, true);
+        //VarDumper::dump($chat->deleteUser('alex.connor5'), 10, true);
+        //VarDumper::dump($chat->systemLogin(), 10, true);
+    }
+
+    public function actionZ()
+    {
+
+        return $this->render('z');
+    }
+
+    public function actionTestRcAssignUserToChannel()
+	{
+
+//		$response = Yii::$app->rchat->setActiveStatus('Wvuk6YpiZJdgWeiaL', '9HFxzz2zfZsN7eMhv', 'juHeZVXwDSR4wLuap2fC5dqS4tR39M4CcAHwVeeph2O');
+//		$response = Yii::$app->rchat->setStatus(RocketChat::STATUS_ONLINE, 'Wvuk6YpiZJdgWeiaL', '9oUd_DynNc1Rc-in9ZUPrSBh62fNhwl-bR4oj-23tYy');
+//		var_dump($response);die;
+
+		try {
+			$clientChatService = Yii::createObject(ClientChatService::class);
+			$clientChatService->assignAgentToRcChannel('0a0aed99-a191-436c-8c79-cb5a55770bbe', 'Wvuk6YpiZJdgWeiaL');
+		} catch (\RuntimeException $e) {
+			echo $e->getMessage();die;
+		}
+
+		echo 'success';
+	}
 }
 
 

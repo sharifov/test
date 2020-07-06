@@ -5,9 +5,11 @@ use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $model sales\model\callLog\entity\callLog\CallLog */
+/* @var $breadcrumbsPreviousPage string */
+/* @var $breadcrumbsPreviousLabel string */
 
 $this->title = $model->cl_id;
-$this->params['breadcrumbs'][] = ['label' => 'My Call Logs', 'url' => ['list']];
+$this->params['breadcrumbs'][] = ['label' => $breadcrumbsPreviousLabel, 'url' => [$breadcrumbsPreviousPage]];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 ?>

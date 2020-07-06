@@ -6,7 +6,6 @@ use common\models\Airline;
 use common\models\Airport;
 use DateTime;
 use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
-use sales\forms\lead\SegmentForm;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
 use sales\services\lead\calculator\SegmentDTO;
 use sales\services\parsingDump\lib\ParsingDump;
@@ -23,7 +22,6 @@ class ReservationService
     public bool $parseStatus;
 
     /**
-     * ReservationService constructor.
      * @param string $gds
      */
     public function __construct(string $gds)
@@ -60,6 +58,7 @@ class ReservationService
                 $this->parseResult[$i]['airlineName'] = $this->getAirlineName($parseData['airline'], $onView);
                 $this->parseResult[$i]['departureAirport'] = $parseData['departure_airport_iata'];
                 $this->parseResult[$i]['arrivalAirport'] = $parseData['arrival_airport_iata'];
+                $this->parseResult[$i]['segmentIata'] = $parseData['departure_airport_iata'] . $parseData['arrival_airport_iata'];
                 $this->parseResult[$i]['departureDateTime'] = $parseData['departure_date_time'];
                 $this->parseResult[$i]['arrivalDateTime'] = $parseData['arrival_date_time'];
                 $this->parseResult[$i]['flightNumber'] = $parseData['flight_number'];
@@ -77,6 +76,7 @@ class ReservationService
                 if ($airline = Airline::findIdentity($parseData['airline'])) {
                     $this->parseResult[$i]['cabin'] = $airline->getCabinByClass($parseData['booking_class']);
                 }
+
                 $itinerary[] = $this->itinerary[] = (new ItineraryDumpDTO([]))
                     ->feelByParsedReservationDump($this->parseResult[$i]);
 

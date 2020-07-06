@@ -114,6 +114,14 @@ class ClientProjectController extends FController
         return $this->redirect(['index']);
     }
 
+    public function actionUnsubscribeClientAjax()
+    {
+        $data = Yii::$app->request->get();
+        ClientProject::unSubScribe($data['clientID'], $data['projectID'], $data['action']);
+
+        return $this->asJson(['data' => ['action' => $data['action']]]);
+    }
+
     /**
      * Finds the ClientProject model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.

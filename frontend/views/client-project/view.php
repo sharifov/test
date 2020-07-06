@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use common\models\ClientProject;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\ClientProject */
@@ -31,6 +32,14 @@ $this->params['breadcrumbs'][] = $this->title;
         'attributes' => [
             'cp_client_id:client',
             'cp_project_id:projectName',
+            [
+                'attribute' => 'cp_unsubscribe',
+                'value' => static function (ClientProject $model) {
+
+                    return $model->cp_unsubscribe ? '<span class="label label-success">true</span>' : '<span class="label label-danger">false</span>';
+                },
+                'format' => 'raw',
+            ],
             'cp_created_dt:byUserDateTime',
         ],
     ]) ?>

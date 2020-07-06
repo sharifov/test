@@ -3,6 +3,7 @@
 namespace common\models;
 
 use Yii;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "quote_segment".
@@ -287,4 +288,19 @@ class QuoteSegment extends \yii\db\ActiveRecord
         return self::TICKET_COLOR_LIST[$this->qs_ticket_id] ?? '#FFFFFF';
     }
 
+    /**
+     * @param int $quoteId
+     * @param string $departure
+     * @param string $arrival
+     * @return ActiveRecord|null
+     */
+    public static function getByQuoteAndIata(int $quoteId, string $departure, string $arrival): ?ActiveRecord
+    {
+        return self::find()
+            ->innerJoin(QuoteTrip::tableName(),'qs_trip_id = qt_id')
+            ->andWhere(['qt_quote_id' => $quoteId])
+            ->andWhere(['qs_departure_airport_code' => $departure])
+            ->andWhere(['qs_arrival_airport_code' => $arrival])
+            ->one();
+    }
 }

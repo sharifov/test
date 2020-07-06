@@ -10,9 +10,11 @@ use sales\forms\lead\ClientCreateForm;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
 use sales\model\client\ClientCodeException;
+use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\repositories\client\ClientEmailRepository;
 use sales\repositories\client\ClientPhoneRepository;
 use sales\repositories\client\ClientRepository;
+use sales\repositories\NotFoundException;
 use sales\services\ServiceFinder;
 
 /**
@@ -272,6 +274,48 @@ class ClientManageService
 
         return $client;
     }
+
+	/**
+	 * @param ClientCreateForm $clientForm
+	 * @return Client
+	 * @throws NotFoundException
+	 */
+    public function getOrCreateByUuid(ClientCreateForm $clientForm): Client
+	{
+		if ($client = $this->clientRepository->findByUuid($clientForm->uuid)) {
+			return $client;
+		}
+	}
+
+	/**
+	 * @param EmailCreateForm $email
+	 * @param ClientCreateForm|null $clientForm
+	 * @return Client
+	 */
+    public function getOrCreateByUuidOrEmails(EmailCreateForm $email, ClientCreateForm $clientForm): Client
+	{
+		try {
+			$client = $this->getOrCreateByUuid($clientForm);
+		} catch (\DomainException | NotFoundException $e) {
+			if ($email->email) {
+				$client = $this->getOrCreateByEmails([$email], $clientForm);
+			} else {
+				$client = $this->create($clientForm);
+			}
+		}
+		$this->addEmail($client, $email);
+		return $client;
+	}
+
+	public function createByClientChatRequest(ClientChatRequest $clientChatRequest): Client
+	{
+		$clientEmailForm = (new EmailCreateForm());
+		$clientEmailForm->email = $clientChatRequest->getEmailFromData();
+
+		$clientForm = new ClientCreateForm(['firstName' => $clientChatRequest->getNameFromData(), 'uuid' => $clientChatRequest->getVisitorOrUserIdFromData()]);
+
+		return $this->getOrCreateByUuidOrEmails($clientEmailForm, $clientForm);
+	}
 
     /**
      * Find or create Client

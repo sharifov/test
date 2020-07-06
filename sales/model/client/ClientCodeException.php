@@ -29,4 +29,6 @@ class ClientCodeException
     public const CLIENT_CREATE_NOT_ADD_EMAILS = Module::CLIENT . 501;
     public const CLIENT_PHONES_EMPTY = Module::CLIENT . 502;
     public const CLIENT_EMAILS_EMPTY = Module::CLIENT . 503;
+
+    public const CLIENT_UUID_EMPTY = Module::CLIENT . 504;
 }

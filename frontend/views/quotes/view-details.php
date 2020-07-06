@@ -69,31 +69,43 @@ use yii\helpers\Html;
                                     </div>
                                     <div class="segment__note">
                                         <?php if($segment->qs_operating_airline != $segment->qs_marketing_airline):?>Operated by <?php $airline = Airline::findIdentity($segment->qs_operating_airline);if($airline) echo $airline->name; else echo $segment->qs_operating_airline?>.<?php endif;?>
+
                                         <?php if(!empty($segment->quoteSegmentBaggages)):?>
-                                            <span class="badge badge-primary"><i class="fa fa-suitcase"></i>&nbsp;
-                                    <?php foreach ($segment->quoteSegmentBaggages as $baggage):?>
-                                        <?php if(isset($baggage->qsb_allow_pieces)):?>
-                                            <?= \Yii::t('search', '{n, plural, =0{no baggage} one{# piece} other{# pieces}}', ['n' => $baggage->qsb_allow_pieces]);?>
-                                        <?php elseif(isset($baggage->qsb_allow_weight)):?>
-                                            <?= $baggage->qsb_allow_weight.$baggage->qsb_allow_unit?>
-                                        <?php endif;?>
-                                        <?php break; endforeach;?>
-                                    </span>
-                                        <?php endif;?>
-                                        <?php if(!empty($segment->quoteSegmentBaggageCharges)):?>
-                                            <?php $paxCode = null;?>
-                                            <?php foreach ($segment->quoteSegmentBaggageCharges as $baggageCh):?>
-                                                <?php if($paxCode == null){
-                                                    $paxCode = $baggageCh->qsbc_pax_code;
-                                                }elseif ($paxCode != $baggageCh->qsbc_pax_code){
-                                                    break;
-                                                }
-                                                ?>
-                                                <span title="<?= (isset($baggageCh->qsbc_max_size)?$baggageCh->qsbc_max_size:'').' '.(isset($baggageCh->qsbc_max_weight)?$baggageCh->qsbc_max_weight:'')?>"
-                                                      class="badge badge-light"><i class="fa fa-plus"></i>&nbsp;<i class="fa fa-suitcase"></i>&nbsp;<?= $baggageCh->qsbc_price?>$</span>
+                                            <?php foreach ($segment->quoteSegmentBaggages as $baggage):?>
+                                            <span
+                                                title="<?php echo Html::encode($baggage->qsb_allow_max_weight) . "\n" .
+                                                    Html::encode($baggage->qsb_allow_max_size) ?>"
+                                                class="badge badge-primary">
+                                                    <i class="fa fa-suitcase"></i>&nbsp;
+                                                <?php if(isset($baggage->qsb_allow_pieces)):?>
+                                                    <?= \Yii::t(
+                                                        'search',
+                                                        '{n, plural, =0{no baggage} one{# piece} other{# pieces}}',
+                                                        ['n' => $baggage->qsb_allow_pieces]) ?>
+                                                <?php elseif(isset($baggage->qsb_allow_weight)):?>
+                                                    <?= $baggage->qsb_allow_weight . $baggage->qsb_allow_unit?>
+                                                <?php endif;?>
+                                            </span>
                                             <?php endforeach;?>
                                         <?php endif;?>
+
+                                        <?php if(!empty($segment->quoteSegmentBaggageCharges)):?>
+                                            <?php foreach ($segment->quoteSegmentBaggageCharges as $baggageCh):?>
+                                                <span
+                                                    title="<?php echo
+                                                        'Piece ' . $baggageCh->qsbc_first_piece . ' - ' . $baggageCh->qsbc_last_piece . "\n" .
+                                                        Html::encode($baggageCh->qsbc_max_size) . "\n" .
+                                                        Html::encode($baggageCh->qsbc_max_weight) ?>"
+                                                    class="badge badge-light">
+                                                        <i class="fa fa-plus"></i>&nbsp;
+                                                        <i class="fa fa-suitcase"></i>&nbsp;
+                                                        <?= $baggageCh->qsbc_price?>$
+                                                </span>
+                                            <?php endforeach;?>
+                                        <?php endif;?>
+
                                         <?php if(isset($segment->qs_meal)):?><span class="badge badge-light" title="<?= $segment->qs_meal?>"><i class="fa fa-cutlery"></i></span><?php endif;?>
+
                                         <?php if ($segment->qs_recheck_baggage == true && $segment->qs_recheck_baggage !== null):?> <h5 class="danger"><i class="fa fa-warning"></i> Bag re-check may be required</h5> <?php endif;?>
                                         <?php if(isset($segment->qs_stop) && $segment->qs_stop > 0):?>
 

@@ -157,7 +157,7 @@ class CouponController extends FController
     {
         $caseId = Yii::$app->request->get('caseId', '0');
 
-        $form = new RequestForm($caseId);
+        $form = new RequestForm($caseId, Auth::id());
 
         if ($form->load(Yii::$app->request->post())) {
             if ($form->validate()) {
@@ -199,7 +199,7 @@ class CouponController extends FController
 						
 					} else {
 						$previewEmailForm = new CasePreviewEmailForm($result['data']);
-						$previewEmailForm->e_email_from_name = Auth::user()->username;
+						$previewEmailForm->e_email_from_name = Auth::user()->full_name;
 						$previewEmailForm->coupon_list = json_encode($form->couponIds);
 
 						$emailTemplateType = EmailTemplateType::findOne(['etp_key' => $form->emailTemplateType]);

@@ -370,6 +370,7 @@ CRONs
 */4 * * * *     php /var/www/sale/yii service/send-sms
 */10   *  *  *  *   run-this-one php /var/www/sale/yii call/terminator
 30 11 * * * php /var/www/sale/yii log/cleaner
+0 9 27 * * php /var/www/sale/yii postgres-db/create-chat-message-partition
 ```
 Note: php /var/www/sale/yii db/compress-email - Временный скрипт. Удалить запись после дополнительного тикета по :
 ALTER TABLE "email" DROP "e_email_body_text";  
