@@ -3,12 +3,14 @@
 namespace sales\entities\cases;
 
 use common\models\Airport;
+use common\models\Call;
 use common\models\CaseSale;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Email;
 use common\models\Employee;
 use common\models\Lead;
+use common\models\Sms;
 use common\models\UserGroup;
 use common\models\UserGroupAssign;
 use frontend\helpers\JsonHelper;
@@ -52,6 +54,10 @@ use yii\db\Expression;
  * @property array $csStatuses
  * @property int|null $airlinePenalty
  * @property string|null $validatingCarrier
+ * @property bool|null $emailsExist
+ * @property bool|null $callExist
+ * @property bool|null $smsExist
+ * @property bool|null $chatExist
  */
 class CasesSearch extends Cases
 {
@@ -85,8 +91,14 @@ class CasesSearch extends Cases
     public $csStatuses;
     public $airlinePenalty;
     public $validatingCarrier;
+    public $emailsExist;
+    public $callExist;
+    public $smsExist;
+    public $chatExist;
 
     private $cacheSaleData = [];
+
+    public int $cacheDuration = 60 * 1; // noCache mode = "-1"
 
     /**
      * @return array
@@ -128,6 +140,7 @@ class CasesSearch extends Cases
             [['departureAirport', 'arrivalAirport', 'departureCountries', 'arrivalCountries', 'cssInOutDate', 'saleTicketSendEmailDate'], 'safe'],
             ['airlinePenalty', 'integer'],
             ['validatingCarrier', 'string', 'length' => 2],
+            [['emailsExist', 'callExist', 'smsExist', 'chatExist'], 'boolean'],
         ];
     }
 
@@ -171,6 +184,10 @@ class CasesSearch extends Cases
 			'airlinePenalty' => 'Airline Penalty',
 			'cs_order_uid' => 'Order uid',
 			'validatingCarrier' => 'Validating Carrier',
+			'emailsExist' => 'Emails Exist',
+			'callExist' => 'Calls Exist',
+			'smsExist' => 'Sms Exist',
+			'chatExist' => 'Chat Exist',
         ];
     }
 
@@ -607,6 +624,40 @@ class CasesSearch extends Cases
                 ]
             );
         }
+
+        if ($this->emailsExist !== '') {
+            $query->leftJoin([
+                'emails' => Email::find()
+                    ->select([
+                        'e_case_id',
+                        new Expression('COUNT(e_case_id) AS cnt')
+                    ])
+                    ->groupBy(['e_case_id'])
+                    ->cache($this->cacheDuration)
+            ], 'cases.cs_id = emails.e_case_id');
+
+            if ((bool) $this->emailsExist) {
+                $query->andWhere(['>', 'emails.cnt', 0]);
+            } else {
+                $query->andWhere(['OR',
+                    ['emails.cnt' => 0],
+                    ['IS', 'emails.e_case_id', NULL]
+                ]);
+            }
+        }
+        if ($this->smsExist) { /* TODO::  */
+
+        }
+        if ($this->callExist) { /* TODO::  */
+
+        }
+        if ($this->chatExist) { /* TODO::  */
+
+        }
+
+        //\yii\helpers\VarDumper::dump($query->createCommand()->rawSql, 10, true); exit();
+        ///* FOR DEBUG:: must by remove */
+
         return $dataProvider;
     }
 

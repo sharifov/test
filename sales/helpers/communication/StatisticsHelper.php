@@ -97,18 +97,13 @@ class StatisticsHelper
     {
         if ((bool) Yii::$app->params['settings']['new_communication_block_lead']) {
             return (int) CallLogLead::find()
-                ->select(['id' => new Expression('cl_group_id')])
-                ->addSelect(['lead_id' => 'call_log_lead.cll_lead_id'])
                 ->innerJoin(CallLog::tableName(), 'call_log.cl_id = call_log_lead.cll_cl_id')
                 ->where(['cll_lead_id' => $this->id])
-                ->groupBy(['id', 'lead_id'])
                 ->cache($this->cacheDuration)
                 ->count();
         }
         return (int) Call::find()
-            ->select(['id' => new Expression('if (c_parent_id IS NULL, c_id, c_parent_id)')])
             ->where(['c_lead_id' => $this->id])
-            ->addGroupBy(['id'])
             ->cache($this->cacheDuration)
             ->count();
     }
@@ -119,9 +114,7 @@ class StatisticsHelper
     protected function getCaseCallCount(): int
      {
         return (int) Call::find()
-            ->select(['id' => new Expression('if (c_parent_id IS NULL, c_id, c_parent_id)')])
             ->where(['c_case_id' => $this->id])
-            ->addGroupBy(['id'])
             ->cache($this->cacheDuration)
             ->count();
     }
