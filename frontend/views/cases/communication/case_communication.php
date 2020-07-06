@@ -17,6 +17,7 @@ use frontend\models\CaseCommunicationForm;
 use frontend\models\CasePreviewEmailForm;
 use frontend\models\CasePreviewSmsForm;
 use sales\entities\cases\Cases;
+use sales\helpers\communication\StatisticsHelper;
 use sales\helpers\setting\SettingHelper;
 use yii\helpers\Html;
 use yii\bootstrap4\Modal;
@@ -52,7 +53,12 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
     </div>
     <div class="x_content" style="display: block;">
     <?php yii\widgets\Pjax::begin(['id' => $pjaxContainerId ,'enablePushState' => false]) ?>
-        <?php /*<h1><?=random_int(1, 100)?></h1>*/ ?>
+
+        <?php $statistics = (new StatisticsHelper($model->cs_id, StatisticsHelper::TYPE_CASE))->setCountAll() ?>
+        <?php if ($statistics->isEnableByStatus($model->cs_status) && $statistics->setCountAll()) : ?>
+            <?php echo $this->render('/partial/_communication_statistic', ['statistics' => $statistics]) ?>
+        <?php endif ?>
+
         <div class="panel">
             <div class="chat__list">
 

@@ -4,7 +4,10 @@ namespace sales\helpers\communication;
 
 use common\models\Call;
 use common\models\Email;
+use common\models\Lead;
 use common\models\Sms;
+use sales\entities\cases\Cases;
+use sales\entities\cases\CasesStatus;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\callLog\entity\callLogLead\CallLogLead;
 use sales\model\clientChat\entity\ClientChat;
@@ -25,10 +28,14 @@ class StatisticsHelper
 
     public const TYPE_LEAD = 'lead';
     public const TYPE_CASE = 'case';
+    public const HINT_EMAILS = 'Emails';
+    public const HINT_SMS = 'Sms';
+    public const HINT_CALLS = 'Calls';
+    public const HINT_CHATS = 'Chats';
 
     protected $id;
     protected string $type = 'lead';
-    protected int $cacheDuration = 60 * 2; // noCache mode = "-1"
+    protected int $cacheDuration = 60 * 1; // noCache mode = "-1"
     protected const ALLOWED_TYPES = [self::TYPE_LEAD, self::TYPE_CASE];
 
     /**
@@ -49,7 +56,7 @@ class StatisticsHelper
      */
     public function setEmailCount(): StatisticsHelper
     {
-        $column = $this->type === 'lead' ? 'e_lead_id' : 'e_case_id';
+        $column = $this->type === self::TYPE_LEAD ? 'e_lead_id' : 'e_case_id';
         $this->emailCount = (int) Email::find()
             ->where([$column => $this->id])
             ->cache($this->cacheDuration)
@@ -62,7 +69,7 @@ class StatisticsHelper
      */
     public function setSmsCount(): StatisticsHelper
     {
-        $column = $this->type === 'lead' ? 's_lead_id' : 's_case_id';
+        $column = $this->type === self::TYPE_LEAD ? 's_lead_id' : 's_case_id';
         $this->smsCount = (int) Sms::find()
             ->where([$column => $this->id])
             ->cache($this->cacheDuration)
@@ -75,7 +82,7 @@ class StatisticsHelper
      */
     public function setCallCount(): StatisticsHelper
     {
-        if ($this->type === 'lead') {
+        if ($this->type === self::TYPE_LEAD) {
             $this->callCount = $this->getLeadCallCount();
         } else {
             $this->callCount = $this->getCaseCallCount();
@@ -124,7 +131,7 @@ class StatisticsHelper
      */
     public function setClientChatCount(): StatisticsHelper
     {
-        $column = $this->type === 'lead' ? 'cch_lead_id' : 'cch_case_id';
+        $column = $this->type === self::TYPE_LEAD ? 'cch_lead_id' : 'cch_case_id';
         $this->clientChatCount = (int) ClientChat::find()
             ->where([$column => $this->id])
             ->cache($this->cacheDuration)
@@ -142,6 +149,27 @@ class StatisticsHelper
             ->setCallCount()
             ->setClientChatCount();
         return $this;
+    }
+
+    /**
+     * @param int $statusId
+     * @return bool
+     */
+    public function isEnableByStatus(int $statusId): bool
+    {
+        if ($this->type === self::TYPE_LEAD) {
+            return ArrayHelper::isIn($statusId, [
+                Lead::STATUS_PROCESSING,
+                Lead::STATUS_FOLLOW_UP,
+                Lead::STATUS_TRASH,
+            ]);
+        }
+        return ArrayHelper::isIn($statusId, [
+            CasesStatus::STATUS_PROCESSING,
+            CasesStatus::STATUS_FOLLOW_UP,
+            CasesStatus::STATUS_SOLVED,
+            CasesStatus::STATUS_TRASH,
+        ]);
     }
 
     /**

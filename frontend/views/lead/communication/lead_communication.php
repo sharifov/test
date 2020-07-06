@@ -55,12 +55,13 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
         </div>
         <div class="x_content" style="display: block;">
 
-            <?php $statistics = (new StatisticsHelper($lead->id, StatisticsHelper::TYPE_LEAD))->setCountAll() ?>
-
-            <?php echo $this->render('/partial/_communication_statistic', ['statistics' => $statistics]) ?>
-
             <?php yii\widgets\Pjax::begin(['id' => $pjaxContainerId , 'timeout' => 5000]) ?>
-            <?php /*<h1><?=random_int(1, 100)?></h1>*/ ?>
+
+            <?php $statistics = (new StatisticsHelper($lead->id, StatisticsHelper::TYPE_LEAD)) ?>
+            <?php if ($statistics->isEnableByStatus($lead->status) && $statistics->setCountAll()) : ?>
+                <?php echo $this->render('/partial/_communication_statistic', ['statistics' => $statistics]) ?>
+            <?php endif ?>
+
             <div class="panel">
                 <div class="chat__list">
 

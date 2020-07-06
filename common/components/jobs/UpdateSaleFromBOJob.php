@@ -53,8 +53,9 @@ class UpdateSaleFromBOJob extends BaseObject implements JobInterface
                         throw new \RuntimeException('Response from detailRequestToBackOffice is empty. SaleId (' . $this->saleId . ')', 101);
                     }
                 }
-                if ($caseSale = CaseSale::findOne(['css_cs_id' => $this->caseId, 'css_sale_id' => $this->saleId])) {
-                    $casesSaleService->saveAdditionalData($caseSale, Cases::findOne($this->caseId), $refreshSaleData, true);
+                $case = Cases::findOne($this->caseId);
+                if ($case && $caseSale = CaseSale::findOne(['css_cs_id' => $this->caseId, 'css_sale_id' => $this->saleId])) {
+                    $casesSaleService->saveAdditionalData($caseSale, $case, $refreshSaleData, true);
                 } else {
                     throw new \RuntimeException('CaseSale (' . $this->caseId . '/' . $this->saleId . ') not found.', 102);
                 }
