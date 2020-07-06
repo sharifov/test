@@ -55,6 +55,7 @@
                 <label class="call-pane-label" for="">Calling to <sapn id="call-to-label" style="color: white"></sapn></label>
                 <?php
 
+                use common\models\UserCallStatus;
                 use yii\bootstrap4\Html;
 				use yii\helpers\Url;
                 use yii\web\View;
@@ -504,7 +505,7 @@ $unHoldUrl = Url::to(['/phone/ajax-unhold-conference-call']);
 $returnHoldCallUrl = Url::to(['/call/return-hold-call']);
 $ajaxHangupUrl = Url::to(['/phone/ajax-hangup']);
 
-$ucStatus = $userCallStatus->us_type_id;
+$ucStatus = $userCallStatus->us_type_id ?? UserCallStatus::STATUS_TYPE_OCCUPIED;
 
 $js = <<<JS
 PhoneWidgetCall.init({
