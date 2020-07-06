@@ -57,7 +57,7 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
 
             <?php $statistics = (new StatisticsHelper($lead->id, StatisticsHelper::TYPE_LEAD))->setCountAll() ?>
 
-            <?php echo $this->render() /* TODO::  */ ?>
+            <?php //echo $this->render() /* TODO::  */ ?>
 
             <?php yii\widgets\Pjax::begin(['id' => $pjaxContainerId , 'timeout' => 5000]) ?>
             <?php /*<h1><?=random_int(1, 100)?></h1>*/ ?>
