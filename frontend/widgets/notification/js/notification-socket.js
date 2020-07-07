@@ -212,8 +212,9 @@ function notificationPNotify(id, type, title, message, desktopMessage) {
     soundNotification();
 }
 
-function notificationCount(count) {
+function notificationCount(count, totalUnreadMessages) {
     $(".notification-counter").text(count);
+    $("._cc_unread_messages").text(totalUnreadMessages);
 }
 
 function notificationShow(element) {

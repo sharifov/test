@@ -139,6 +139,7 @@ use sales\repositories\Repository;
 use sales\services\cases\CasesManageService;
 use sales\services\cases\CasesSaleService;
 use sales\services\client\ClientManageService;
+use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatService\ClientChatService;
 use sales\services\email\EmailService;
 use sales\services\email\incoming\EmailIncomingService;
@@ -1482,6 +1483,27 @@ class TestController extends FController
 		} catch (\RuntimeException $e) {
 			echo $e->getMessage();die;
 		}
+
+		echo 'success';
+	}
+
+
+	public function actionTestRedis()
+	{
+		$redis = Yii::$app->redis;
+
+		$redis->flushall();
+
+		$cache = Yii::$app->cache;
+		$cache->flush();
+
+		$clientChatMessageService = Yii::createObject(ClientChatMessageService::class);
+
+//		$clientChatMessageService->increaseUnreadMessages(1, 464);
+//
+//		echo $clientChatMessageService->getCountOfTotalUnreadMessages( 464);
+
+//		$clientChatMessageService->discardUnreadMessages(1, 464);
 
 		echo 'success';
 	}

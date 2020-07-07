@@ -1,5 +1,6 @@
 <?php
 
+use sales\helpers\clientChat\ClientChatMessageHelper;
 use sales\model\clientChat\entity\ClientChat;
 
 /** @var $clientChats ClientChat[] */
@@ -9,16 +10,22 @@ use sales\model\clientChat\entity\ClientChat;
 <?php foreach($clientChats as $clientChat): ?>
     <div class="_cc-list-item <?= $clientChatRid && $clientChatRid === $clientChat->cch_rid ? 'active' : '' ?>" data-goto-param="/live/<?= $clientChat->cch_rid ?>?layout=embedded" data-rid="<?= $clientChat->cch_rid ?>" data-cch-id="<?= $clientChat->cch_id ?>">
         <div class="_cc-item-icon-wrapper">
-                            <span class="_cc-item-icon-round">
-                                <i class="fa fa-comment"></i>
-                                <span class="_cc-status-wrapper">
-                                    <span class="_cc-status <?= $clientChat->getStatusClass() ?>"></span>
-                                </span>
-                            </span>
+            <span class="_cc-item-icon-round">
+                <i class="fa fa-comment"></i>
+                <span class="_cc-status-wrapper">
+                    <span class="_cc-status <?= $clientChat->getStatusClass() ?>"></span>
+                </span>
+                <?php $unreadMessages = ClientChatMessageHelper::getCountOfChatUnreadMessage($clientChat->cch_id, $clientChat->cch_owner_user_id) ?>
+                <?php if ($unreadMessages): ?>
+                    <span class="_cc-chat-unread-message">
+                        <span class="badge badge-info _cc_unread_messages"><?= $unreadMessages ?></span>
+                    </span>
+                <?php endif; ?>
+            </span>
             <span class="_cc-title">
-                                <p><?= $clientChat->cch_title ?: 'Client Chat' ?></p>
-                                <p><?= Yii::$app->formatter->format($clientChat->cch_created_dt,'byUserDateTime') ?></p>
-                            </span>
+                <p><?= $clientChat->cch_title ?: 'Client Chat' ?></p>
+                <p><?= Yii::$app->formatter->format($clientChat->cch_created_dt,'byUserDateTime') ?></p>
+            </span>
         </div>
         <div>
             <?php if ($clientChat->cchDep): ?>
