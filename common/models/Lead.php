@@ -13,6 +13,7 @@ use frontend\widgets\notification\NotificationMessage;
 use modules\offer\src\entities\offer\Offer;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\product\Product;
+use sales\auth\Auth;
 use sales\entities\EventTrait;
 use sales\events\lead\LeadBookedEvent;
 use sales\events\lead\LeadCallExpertRequestEvent;
@@ -63,6 +64,7 @@ use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use common\components\SearchService;
+use yii\helpers\Url;
 use yii\helpers\VarDumper;
 
 /**
@@ -4561,19 +4563,51 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     {
         return new LeadQuery(static::class);
     }
-    
+
     /**
+     * @param bool $linkMode
      * @return string
      */
-    public function getCommunicationInfo(): string
+    public function getCommunicationInfo(bool $linkMode = true): string
     {
         $str = '';
-        $str .= '<span title="Calls Out / In / Join"><i class="fa fa-phone success"></i> '. $this->getCountCalls(\common\models\Call::CALL_TYPE_OUT) .'/'.  $this->getCountCalls(\common\models\Call::CALL_TYPE_IN) .'/'.  $this->getCountCalls(\common\models\Call::CALL_TYPE_JOIN) .'</span> | ';
-        $str .= '<span title="SMS Out / In"><i class="fa fa-comments info"></i> '. $this->getCountSms(\common\models\Sms::TYPE_OUTBOX) .'/'.  $this->getCountSms(\common\models\Sms::TYPE_INBOX) .'</span> | ';
-        $str .= '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> '. $this->getCountEmails(\common\models\Email::TYPE_OUTBOX) .'/'.  $this->getCountEmails(\common\models\Email::TYPE_INBOX) .'</span> | ';
-        $str .= '<span title="Client Chat">
+
+        if ($linkMode) {
+            $callsText = '<span title="Calls Out / In / Join"><i class="fa fa-phone success"></i> ' . $this->getCountCalls(Call::CALL_TYPE_OUT) . '/' .
+                $this->getCountCalls(Call::CALL_TYPE_IN) . '/' . $this->getCountCalls(Call::CALL_TYPE_JOIN) . '</span> | ';
+            if (Auth::can('/call/index')) {
+                $str .= Html::a($callsText, Url::to(['/call/index', 'CallSearch[c_lead_id]' => $this->id]), ['target' => '_blank', 'data-pjax'=> '0']);
+            } else {
+                $str .= $callsText;
+            }
+            $smsText = '<span title="SMS Out / In"><i class="fa fa-comments info"></i> ' .
+                $this->getCountSms(Sms::TYPE_OUTBOX) . '/' .  $this->getCountSms(Sms::TYPE_INBOX) . '</span> | ';
+            if (Auth::can('/sms/index')) {
+                $str .= Html::a($smsText, Url::to(['/sms/index', 'SmsSearch[s_lead_id]' => $this->id]), ['target' => '_blank', 'data-pjax'=> '0']);
+            } else {
+                $str .= $smsText;
+            }
+            $emilText = '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> ' .
+                $this->getCountEmails(Email::TYPE_OUTBOX) .'/'.  $this->getCountEmails(Email::TYPE_INBOX) .'</span> | ';
+            if (Auth::can('/email/index')) {
+                $str .= Html::a($emilText,
+                    Url::to(['/email/index', 'EmailSearch[e_lead_id]'  => $this->id]),
+                    ['target' => '_blank', 'data-pjax'=> '0']);
+            } else {
+                 $str .= $emilText;
+            }
+            /* TODO::  */
+
+        } else {
+
+            $str .= '<span title="Calls Out / In / Join"><i class="fa fa-phone success"></i> '. $this->getCountCalls(\common\models\Call::CALL_TYPE_OUT) .'/'.  $this->getCountCalls(\common\models\Call::CALL_TYPE_IN) .'/'.  $this->getCountCalls(\common\models\Call::CALL_TYPE_JOIN) .'</span> | ';
+            $str .= '<span title="SMS Out / In"><i class="fa fa-comments info"></i> '. $this->getCountSms(\common\models\Sms::TYPE_OUTBOX) .'/'.  $this->getCountSms(\common\models\Sms::TYPE_INBOX) .'</span> | ';
+            $str .= '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> '. $this->getCountEmails(\common\models\Email::TYPE_OUTBOX) .'/'.  $this->getCountEmails(\common\models\Email::TYPE_INBOX) .'</span> | ';
+            $str .= '<span title="Client Chat">
                     <i class="fa fa-weixin warning"></i> 
                         ' . $this->getCountClientChat() . '</span>';
+        }
+
         return $str;
     }
 

@@ -9,6 +9,7 @@ use sales\helpers\communication\StatisticsHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
+$linkAttributes = ['target' => '_blank', 'data-pjax'=> '0'];
 ?>
 
 <div class="box-statistics">
@@ -19,7 +20,7 @@ use yii\helpers\Url;
             $paramName = $statistics->isTypeCase() ? 'c_case_id' : 'c_lead_id';
             echo Html::a($text,
                 Url::to(['/call/index', 'CallSearch[' . $paramName . ']' => $statistics->getId()]),
-                ['target' => '_blank', 'data-pjax'=> '0']);
+                $linkAttributes);
         } else {
              echo $text;
         }
@@ -31,7 +32,7 @@ use yii\helpers\Url;
             $paramName = $statistics->isTypeCase() ? 's_case_id' : 's_lead_id';
             echo Html::a($text,
                 Url::to(['/sms/index', 'SmsSearch[' . $paramName . ']' => $statistics->getId()]),
-                ['target' => '_blank', 'data-pjax'=> '0']);
+                $linkAttributes);
         } else {
              echo $text;
         }
@@ -43,7 +44,7 @@ use yii\helpers\Url;
             $paramName = $statistics->isTypeCase() ? 'e_case_id' : 'e_lead_id';
             echo Html::a($text,
                 Url::to(['/email/index', 'EmailSearch[' . $paramName . ']'  => $statistics->getId()]),
-                ['target' => '_blank', 'data-pjax'=> '0']);
+                $linkAttributes);
         } else {
              echo $text;
         }
@@ -55,7 +56,7 @@ use yii\helpers\Url;
             $paramName = $statistics->isTypeCase() ? 'cch_case_id' : 'cch_lead_id';
             echo Html::a($text,
                 Url::to(['/client-chat-crud/index', 'ClientChatSearch[' . $paramName . ']'  => $statistics->getId()]),
-                ['target' => '_blank', 'data-pjax'=> '0']);
+                $linkAttributes);
         } else {
              echo $text;
         }
