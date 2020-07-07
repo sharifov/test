@@ -54,10 +54,8 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
     <div class="x_content" style="display: block;">
     <?php yii\widgets\Pjax::begin(['id' => $pjaxContainerId ,'enablePushState' => false]) ?>
 
-        <?php $statistics = (new StatisticsHelper($model->cs_id, StatisticsHelper::TYPE_CASE))->setCountAll() ?>
-        <?php if ($statistics->isEnableByStatus($model->cs_status) && $statistics->setCountAll()) : ?>
-            <?php echo $this->render('/partial/_communication_statistic', ['statistics' => $statistics]) ?>
-        <?php endif ?>
+        <?php $statistics = new StatisticsHelper($model->cs_id, StatisticsHelper::TYPE_CASE) ?>
+        <?php echo $this->render('/partial/_communication_statistic', ['statistics' => $statistics->setCountAll()]) ?>
 
         <div class="panel">
             <div class="chat__list">

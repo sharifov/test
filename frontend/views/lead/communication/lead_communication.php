@@ -57,10 +57,8 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
 
             <?php yii\widgets\Pjax::begin(['id' => $pjaxContainerId , 'timeout' => 5000]) ?>
 
-            <?php $statistics = (new StatisticsHelper($lead->id, StatisticsHelper::TYPE_LEAD)) ?>
-            <?php if ($statistics->isEnableByStatus($lead->status) && $statistics->setCountAll()) : ?>
-                <?php echo $this->render('/partial/_communication_statistic', ['statistics' => $statistics]) ?>
-            <?php endif ?>
+            <?php $statistics = new StatisticsHelper($lead->id, StatisticsHelper::TYPE_LEAD) ?>
+            <?php echo $this->render('/partial/_communication_statistic', ['statistics' => $statistics->setCountAll()]) ?>
 
             <div class="panel">
                 <div class="chat__list">

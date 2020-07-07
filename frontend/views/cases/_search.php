@@ -215,9 +215,14 @@ use yii\widgets\ActiveForm;
         <div class="col-md-1">
             <?= $form->field($model, 'validatingCarrier')->textInput(['maxlength' => true]) ?>
         </div>
+    </div>
 
+    <div class="row">
         <div class="col-md-1">
-            <?= $form->field($model, 'emailsExist')->dropDownList([1 => 'Yes', 0 => 'No'], ['prompt' => '']) ?>
+            <?= $form->field($model, 'emailsQtyFrom')->textInput() ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'emailsQtyTo')->textInput() ?>
         </div>
 
     </div>

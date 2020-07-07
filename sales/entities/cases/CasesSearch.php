@@ -54,10 +54,9 @@ use yii\db\Expression;
  * @property array $csStatuses
  * @property int|null $airlinePenalty
  * @property string|null $validatingCarrier
- * @property bool|null $emailsExist
- * @property bool|null $callExist
- * @property bool|null $smsExist
- * @property bool|null $chatExist
+ *
+ * @property int|null $emailsQtyFrom
+ * @property int|null $emailsQtyTo
  */
 class CasesSearch extends Cases
 {
@@ -91,14 +90,13 @@ class CasesSearch extends Cases
     public $csStatuses;
     public $airlinePenalty;
     public $validatingCarrier;
-    public $emailsExist;
-    public $callExist;
-    public $smsExist;
-    public $chatExist;
+
+    public $emailsQtyFrom;
+    public $emailsQtyTo;
 
     private $cacheSaleData = [];
 
-    public int $cacheDuration = 60 * 1; // noCache mode = "-1"
+    public int $cacheDuration = 60 * 1;
 
     /**
      * @return array
@@ -138,9 +136,11 @@ class CasesSearch extends Cases
             [['cssOutDate', 'cssInDate'], 'date'],
             [['cssChargeType'], 'string', 'max' => 100],
             [['departureAirport', 'arrivalAirport', 'departureCountries', 'arrivalCountries', 'cssInOutDate', 'saleTicketSendEmailDate'], 'safe'],
+
             ['airlinePenalty', 'integer'],
             ['validatingCarrier', 'string', 'length' => 2],
-            [['emailsExist', 'callExist', 'smsExist', 'chatExist'], 'boolean'],
+
+            [['emailsQtyFrom', 'emailsQtyTo'], 'integer', 'min' => 0, 'max' => 1000],
         ];
     }
 
@@ -184,10 +184,7 @@ class CasesSearch extends Cases
 			'airlinePenalty' => 'Airline Penalty',
 			'cs_order_uid' => 'Order uid',
 			'validatingCarrier' => 'Validating Carrier',
-			'emailsExist' => 'Emails Exist',
-			'callExist' => 'Calls Exist',
-			'smsExist' => 'Sms Exist',
-			'chatExist' => 'Chat Exist',
+			'emailsQtyFrom' => 'Emails From', 'emailsQtyTo' => 'Emails To',
         ];
     }
 
@@ -625,7 +622,7 @@ class CasesSearch extends Cases
             );
         }
 
-        if ($this->emailsExist !== '') {
+        if ($this->emailsQtyFrom !== '' || $this->emailsQtyTo !== '') {
             $query->leftJoin([
                 'emails' => Email::find()
                     ->select([
@@ -633,27 +630,46 @@ class CasesSearch extends Cases
                         new Expression('COUNT(e_case_id) AS cnt')
                     ])
                     ->groupBy(['e_case_id'])
-                    ->cache($this->cacheDuration)
             ], 'cases.cs_id = emails.e_case_id');
 
-            if ((bool) $this->emailsExist) {
-                $query->andWhere(['>', 'emails.cnt', 0]);
-            } else {
-                $query->andWhere(['OR',
-                    ['emails.cnt' => 0],
-                    ['IS', 'emails.e_case_id', NULL]
-                ]);
+            if ($this->emailsQtyFrom !== '') {
+                $query->andWhere(['>=', 'emails.cnt', $this->emailsQtyFrom]);
+                if ((int) $this->emailsQtyFrom === 0) {
+                    $query->orWhere(['IS', 'emails.e_case_id', NULL]);
+                }
+            }
+            if ($this->emailsQtyTo !== '') {
+                $query->andWhere(['<=', 'emails.cnt', $this->emailsQtyTo]);
+                if ((int) $this->emailsQtyTo === 0) {
+                    $query->orWhere(['IS', 'emails.e_case_id', NULL]);
+                }
             }
         }
-        if ($this->smsExist) { /* TODO::  */
+        /*if ($this->smsExist !== '' || $this->smsQuantity) {
+            $query->leftJoin([
+                'sms' => Sms::find()
+                    ->select([
+                        's_case_id',
+                        new Expression('COUNT(s_case_id) AS cnt')
+                    ])
+                    ->groupBy(['s_case_id'])
+                    ->cache($this->cacheDuration)
+            ], 'cases.cs_id = sms.s_case_id');
 
-        }
-        if ($this->callExist) { /* TODO::  */
-
-        }
-        if ($this->chatExist) { /* TODO::  */
-
-        }
+            if ($this->smsExist !== '') {
+                if ((bool) $this->emailsExist) {
+                    $query->andWhere(['>', 'sms.cnt', 0]);
+                } else {
+                    $query->andWhere(['OR',
+                        ['sms.cnt' => 0],
+                        ['IS', 'sms.s_case_id', NULL]
+                    ]);
+                }
+            }
+            if ($this->smsQuantity) {
+                $query->andWhere(['sms.cnt' => $this->smsQuantity]);
+            }
+        }*/
 
         //\yii\helpers\VarDumper::dump($query->createCommand()->rawSql, 10, true); exit();
         ///* FOR DEBUG:: must by remove */

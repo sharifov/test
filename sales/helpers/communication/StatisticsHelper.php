@@ -35,7 +35,7 @@ class StatisticsHelper
 
     protected $id;
     protected string $type = 'lead';
-    protected int $cacheDuration = 60 * 1; // noCache mode = "-1"
+    protected int $cacheDuration = -1; // noCache mode = "-1"
     protected const ALLOWED_TYPES = [self::TYPE_LEAD, self::TYPE_CASE];
 
     /**
