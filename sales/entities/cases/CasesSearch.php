@@ -3,6 +3,7 @@
 namespace sales\entities\cases;
 
 use common\models\Airport;
+use common\models\Call;
 use common\models\CaseSale;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
@@ -58,6 +59,8 @@ use yii\db\Expression;
  * @property int|null $emailsQtyTo
  * @property int|null $smsQtyFrom
  * @property int|null $smsQtyTo
+ * @property int|null $callsQtyFrom
+ * @property int|null $callsQtyTo
  */
 class CasesSearch extends Cases
 {
@@ -96,6 +99,8 @@ class CasesSearch extends Cases
     public $emailsQtyTo;
     public $smsQtyFrom;
     public $smsQtyTo;
+    public $callsQtyFrom;
+    public $callsQtyTo;
 
     private $cacheSaleData = [];
 
@@ -142,8 +147,13 @@ class CasesSearch extends Cases
 
             ['airlinePenalty', 'integer'],
             ['validatingCarrier', 'string', 'length' => 2],
-
-            [['emailsQtyFrom', 'emailsQtyTo', 'smsQtyFrom', 'smsQtyTo'], 'integer', 'min' => 0, 'max' => 1000],
+            [
+                [
+                    'emailsQtyFrom', 'emailsQtyTo', 'smsQtyFrom', 'smsQtyTo',
+                    'callsQtyFrom', 'callsQtyTo',
+                ],
+                'integer', 'min' => 0, 'max' => 1000
+            ],
         ];
     }
 
@@ -189,6 +199,7 @@ class CasesSearch extends Cases
 			'validatingCarrier' => 'Validating Carrier',
 			'emailsQtyFrom' => 'Emails From', 'emailsQtyTo' => 'Emails To',
 			'smsQtyFrom' => 'Sms From', 'smsQtyTo' => 'Sms To',
+			'callsQtyFrom' => 'Calls From', 'callsQtyTo' => 'Calls To',
         ];
     }
 
@@ -726,7 +737,57 @@ class CasesSearch extends Cases
             }
         }
 
-        
+        if ($this->callsQtyFrom !== '' || $this->callsQtyTo !== '') {
+            $query->leftJoin([
+                'calls' => Call::find()
+                    ->select([
+                        'c_case_id',
+                        new Expression('COUNT(c_case_id) AS cnt')
+                    ])
+                    ->groupBy(['c_case_id'])
+            ], 'cases.cs_id = calls.c_case_id');
+
+            if ('' !== $this->callsQtyFrom) {
+                if ((int)$this->callsQtyFrom === 0) {
+                    $query->andWhere(
+                        [
+                            'OR',
+                            ['>=', 'calls.cnt', $this->callsQtyFrom],
+                            ['IS', 'calls.c_case_id', null]
+                        ]
+                    );
+                } else {
+                    $query->andWhere(
+                        [
+                            'AND',
+                            ['>=', 'calls.cnt', $this->callsQtyFrom],
+                            ['IS NOT', 'calls.c_case_id', null]
+                        ]
+                    );
+                }
+            }
+            if ('' !== $this->callsQtyTo) {
+                if ((int)$this->callsQtyTo === 0) {
+                    $query->andWhere(
+                        [
+                            'OR',
+                            ['<=', 'calls.cnt', $this->callsQtyTo],
+                            ['IS', 'calls.c_case_id', null]
+                        ]
+                    );
+                } else {
+                    $query->andWhere(
+                        [
+                            'AND',
+                            ['<=', 'calls.cnt', $this->callsQtyTo],
+                            ['IS NOT', 'calls.c_case_id', null]
+                        ]
+                    );
+                }
+            }
+        }
+
+
         return $dataProvider;
     }
 

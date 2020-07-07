@@ -230,6 +230,12 @@ use yii\widgets\ActiveForm;
         <div class="col-md-1">
             <?= $form->field($model, 'smsQtyTo')->textInput() ?>
         </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'callsQtyFrom')->textInput() ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'callsQtyTo')->textInput() ?>
+        </div>
     </div>
 
     <div class="form-group text-center">
