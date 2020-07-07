@@ -5,19 +5,73 @@
  *
  */
 
+use sales\auth\Auth;
 use sales\helpers\communication\StatisticsHelper;
+use yii\helpers\Html;
+use yii\helpers\Url;
 
 ?>
-
-<div class="box-statistics">
-    <i class="fa fa-phone success" aria-hidden="true" title="<?php echo $statistics::HINT_CALLS?>"></i>
-        <sup><?php echo $statistics->callCount ?></sup>&nbsp;|&nbsp;
-    <i class="fa fa-comments info" aria-hidden="true" title="<?php echo $statistics::HINT_SMS?>"></i>
-        <sup><?php echo $statistics->smsCount ?></sup>&nbsp;|&nbsp;
-    <i class="fa fa-envelope danger" aria-hidden="true" title="<?php echo $statistics::HINT_EMAILS?>"></i>
-        <sup><?php echo $statistics->emailCount ?></sup>&nbsp;|&nbsp;
-    <i class="fa fa-weixin warning" aria-hidden="true" title="<?php echo $statistics::HINT_CHATS?>"></i>
-        <sup><?php echo $statistics->clientChatCount ?></sup>
+<div class="row box-statistics">
+    <div class="col-3">
+        <strong><?php echo $statistics::HINT_CALLS ?>: </strong>
+        <?php
+            $text = $statistics->callCount .
+                '&nbsp;&nbsp;<i class="fa fa-phone success" aria-hidden="true" title="' . $statistics::HINT_CALLS . '"></i>';
+            if (Auth::can('/call/index')) {
+                $paramName = $statistics->isTypeCase() ? 'c_case_id' : 'c_lead_id';
+                echo Html::a($text,
+                    Url::to(['/call/index', 'CallSearch[' . $paramName . ']' => $statistics->getId()]),
+                    ['target' => '_blank', 'data-pjax'=> '0']);
+            } else {
+                 echo $text;
+            }
+        ?>
+    </div>
+    <div class="col-3">
+        <strong><?php echo $statistics::HINT_SMS ?>: </strong>
+        <?php
+            $text = $statistics->smsCount .
+                '&nbsp;&nbsp;<i class="fa fa-comments info" aria-hidden="true" title="' . $statistics::HINT_SMS . '"></i>';
+            if (Auth::can('/sms/index')) {
+                $paramName = $statistics->isTypeCase() ? 's_case_id' : 's_lead_id';
+                echo Html::a($text,
+                    Url::to(['/sms/index', 'SmsSearch[' . $paramName . ']' => $statistics->getId()]),
+                    ['target' => '_blank', 'data-pjax'=> '0']);
+            } else {
+                 echo $text;
+            }
+        ?>
+    </div>
+    <div class="col-3">
+        <strong><?php echo $statistics::HINT_EMAILS ?></strong>
+        <?php
+            $text = $statistics->emailCount .
+                '&nbsp;&nbsp;<i class="fa fa-envelope danger" aria-hidden="true" title="' . $statistics::HINT_EMAILS . '"></i>';
+            if (Auth::can('/email/index')) {
+                $paramName = $statistics->isTypeCase() ? 'e_case_id' : 'e_lead_id';
+                echo Html::a($text,
+                    Url::to(['/email/index', 'EmailSearch[' . $paramName . ']'  => $statistics->getId()]),
+                    ['target' => '_blank', 'data-pjax'=> '0']);
+            } else {
+                 echo $text;
+            }
+        ?>
+    </div>
+    <div class="col-3">
+        <strong><?php echo $statistics::HINT_CHATS ?></strong>
+        <?php
+            $text = $statistics->clientChatCount .
+                '&nbsp;&nbsp;<i class="fa fa-weixin warning" aria-hidden="true" title="' . $statistics::HINT_CHATS . '"></i>';
+            if (Auth::can('/client-chat-crud/index')) {
+                $paramName = $statistics->isTypeCase() ? 'cch_case_id' : 'cch_lead_id';
+                echo Html::a($text,
+                    Url::to(['/client-chat-crud/index', 'ClientChatSearch[' . $paramName . ']'  => $statistics->getId()]),
+                    ['target' => '_blank', 'data-pjax'=> '0']);
+            } else {
+                 echo $text;
+            }
+        ?>
+    </div>
 </div>
 
 <?php
