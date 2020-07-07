@@ -182,4 +182,36 @@ class StatisticsHelper
         $this->cacheDuration = $cacheDuration;
         return $this;
     }
+
+    /**
+     * @return int
+     */
+    public function getId(): int
+    {
+        return $this->id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getType(): string
+    {
+        return $this->type;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isTypeLead(): bool
+    {
+        return $this->type === self::TYPE_LEAD;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isTypeCase(): bool
+    {
+        return $this->type === self::TYPE_CASE;
+    }
 }
