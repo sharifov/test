@@ -124,6 +124,10 @@ class CurrentQueueCallsService
                 $isMute = true;
                 $isListen = true;
             }
+            $isCoach = false;
+            if ($call->isJoin() && $call->c_source_type_id === Call::SOURCE_COACH) {
+                $isCoach = true;
+            }
             $isHold = false;
             $holdDuration = 0;
             if ($call->currentParticipant && $call->currentParticipant->isHold()) {
@@ -148,6 +152,7 @@ class CurrentQueueCallsService
                 'holdDuration' => $holdDuration,
                 'isListen' => $isListen,
                 'isMute' => $isMute,
+                'isCoach' => $isCoach,
                 'project' => $call->c_project_id ? $call->cProject->name : '',
                 'source' => $call->c_source_type_id ? $call->getSourceName() : '',
                 'name' => $name,
@@ -220,6 +225,7 @@ class CurrentQueueCallsService
                 'holdDuration' => 0,
                 'isListen' => false,
                 'isMute' => false,
+                'isCoach' => false,
                 'project' => $call->c_project_id ? $call->cProject->name : '',
                 'source' => $call->c_source_type_id ? $call->getSourceName() : '',
                 'phone' => $call->c_to,
@@ -268,6 +274,7 @@ class CurrentQueueCallsService
                 'holdDuration' => 0,
                 'isListen' => false,
                 'isMute' => false,
+                'isCoach' => false,
                 'project' => $call->c_project_id ? $call->cProject->name : '',
                 'source' => $call->c_source_type_id ? $call->getSourceName() : '',
                 'phone' => $call->c_from,
@@ -321,6 +328,7 @@ class CurrentQueueCallsService
                 'holdDuration' => 0,
                 'isListen' => false,
                 'isMute' => false,
+                'isCoach' => false,
                 'project' => $call->c_project_id ? $call->cProject->name : '',
                 'source' => $call->c_source_type_id ? $call->getSourceName() : '',
                 'phone' => $phone,

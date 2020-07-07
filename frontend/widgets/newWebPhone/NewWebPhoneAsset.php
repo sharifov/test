@@ -24,9 +24,11 @@ class NewWebPhoneAsset extends AssetBundle
         ['/web_phone/js/event_dispatcher.js'],
         ['/web_phone/js/events.js'],
         ['/web_phone/js/call_object.js'],
+        ['/web_phone/js/conference_object.js'],
         ['/web_phone/js/requesters.js'],
         ['/web_phone/js/old_widget.js'],
 
+        ['/web_phone/component/timer.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
         ['/web_phone/component/pane/call_action_timer.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
         ['/web_phone/component/pane/active/pane.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
         ['/web_phone/component/pane/incoming/pane.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
@@ -38,6 +40,7 @@ class NewWebPhoneAsset extends AssetBundle
         ['/web_phone/component/pane/queue/queues.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
         ['/web_phone/component/pane/outgoing/pane.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
         ['/web_phone/component/pane/contact_info.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
+        ['/web_phone/component/pane/conference/pane.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
 
         '/web_phone/js/contact_info.js',
         '/web_phone/js/dialpad.js',
@@ -46,6 +49,7 @@ class NewWebPhoneAsset extends AssetBundle
         '/web_phone/js/pane/active/btn/hold.js',
         '/web_phone/js/pane/active/btn/mute.js',
 
+        '/web_phone/js/pane/conference/pane.js',
 
         '/web_phone/js/pane/active/pane.js',
         '/web_phone/js/pane/incoming/pane.js',
@@ -53,6 +57,7 @@ class NewWebPhoneAsset extends AssetBundle
         '/web_phone/js/pane/queue/pane.js',
 
         '/web_phone/js/queue/queue.js',
+        '/web_phone/js/storage/conference.js',
 
 		'/js/phone-widget.js',
 		'/web_phone/js/status.js',

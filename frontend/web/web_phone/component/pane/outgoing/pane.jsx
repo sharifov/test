@@ -51,7 +51,7 @@ class OutgoingPane extends React.Component {
                         <button className="call-pane__start-call calling-state-block">
                             <div className="call-in-action">
                                 <span className="call-in-action__text">{call.data.status}</span>
-                                <CallActionTimer duration={call.getDuration()} timeStart={Date.now()}/>
+                                <span className="call-in-action__time"><PhoneWidgetTimer duration={call.getDuration()} timeStart={Date.now()}/></span>
                             </div>
                             <i className="fas fa-phone"> </i>
                         </button>

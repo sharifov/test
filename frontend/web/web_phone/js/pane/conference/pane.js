@@ -1,4 +1,4 @@
-var PhoneWidgetPaneActive = function () {
+var PhoneWidgetPaneConference = function () {
 
     let callSid = null;
 
@@ -20,10 +20,10 @@ var PhoneWidgetPaneActive = function () {
     }
 
     // call => window.phoneWidget.call.Call
-    function load(call) {
-        $container.removeClass('call-pane-calling--conference');
+    function load(call, conference) {
+        $container.addClass('call-pane-calling--conference');
         ReactDOM.unmountComponentAtNode($reactContainer);
-        ReactDOM.render(React.createElement(ActivePane, {call: call, controls: getControls(call)}), $reactContainer);
+        ReactDOM.render(React.createElement(ConferencePane, {call: call, controls: getControls(call), conference: conference}), $reactContainer);
 
         contactInfo.load(call.data.contact);
         setCallSid(call.data.callSid);
@@ -90,8 +90,8 @@ var PhoneWidgetPaneActive = function () {
         return $container.hasClass('is_active');
     }
 
-    function init(call) {
-        load(call);
+    function init(call, conference) {
+        load(call, conference);
         show();
         if (call.getHoldDuration()) {
             widgetIcon.update({type: 'hold', timer: true, 'timerStamp': call.getHoldDuration(), text: 'on hold', currentCalls: null, status: 'online'});

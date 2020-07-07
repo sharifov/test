@@ -231,6 +231,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
                     'isHold' => false,
                     'holdDuration' => 0,
                     'isListen' => false,
+                    'isCoach' => false,
                     'isMute' => false,
                     'project' => $call->c_project_id ? $call->cProject->name : '',
                     'source' => $call->c_source_type_id ? $call->getSourceName() : '',

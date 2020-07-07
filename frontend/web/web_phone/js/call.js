@@ -25,11 +25,16 @@ var PhoneWidgetCall = function () {
         'active': window.phoneWidget.queue.Active()
     };
 
+    let storage = {
+        'conference': window.phoneWidget.storage.conference
+    };
+
     let panes = {
         'active': PhoneWidgetPaneActive,
         'outgoing': PhoneWidgetPaneOutgoing,
         'incoming': PhoneWidgetPaneIncoming,
-        'queue': new PhoneWidgetPaneQueue(queues)
+        'queue': new PhoneWidgetPaneQueue(queues),
+        'conference': PhoneWidgetPaneConference
     };
 
     function init(options)
@@ -168,6 +173,26 @@ var PhoneWidgetCall = function () {
 
         panes.queue.refresh();
         panes.queue.hide();
+    }
+
+    function conferenceUpdate(data) {
+        console.log('conference update');
+
+        let call = queues.active.one(data.call.sid);
+        if (call === null) {
+            console.log('not found call in active queue');
+            return;
+        }
+
+        storage.conference.remove(data.conferenceInfo.sid);
+        let conference = storage.conference.add(data.conferenceInfo);
+
+        if (conference === null) {
+            console.log('conference is exist. not updated');
+            return;
+        }
+
+        panes.conference.init(call, conference);
     }
 
     function completeCall(callSid)
@@ -734,6 +759,10 @@ var PhoneWidgetCall = function () {
             unhold(data.call.sid);
             return;
         }
+        if (data.command === 'conferenceUpdate') {
+            conferenceUpdate(data);
+            return;
+        }
     }
 
     function loadCurrentQueueCalls() {
@@ -810,7 +839,8 @@ var PhoneWidgetCall = function () {
         queues: queues,
         removeIncomingRequest: removeIncomingRequest,
         sendHoldRequest: sendHoldRequest,
-        sendUnHoldRequest: sendUnHoldRequest
+        sendUnHoldRequest: sendUnHoldRequest,
+        storage: storage
     };
 }();
 

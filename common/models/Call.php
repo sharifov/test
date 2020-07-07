@@ -1214,6 +1214,10 @@ class Call extends \yii\db\ActiveRecord
 			    $isListen = true;
                 $isMute = true;
             }
+            $isCoach = false;
+			if ($this->isJoin() && $this->c_source_type_id === self::SOURCE_COACH) {
+			    $isCoach = true;
+            }
 			if (!$this->currentParticipant || $this->currentParticipant->isAgent() || $this->isEnded()) {
 			    $callSid = $this->c_call_sid;
 			    $callId = $this->c_id;
@@ -1239,6 +1243,7 @@ class Call extends \yii\db\ActiveRecord
                         'isHold' => $isHold,
                         'holdDuration' => $holdDuration,
                         'isListen' => $isListen,
+                        'isCoach' => $isCoach,
                         'isMute' => $isMute,
                         'project' => $this->c_project_id ? $this->cProject->name : '',
                         'source' => $this->c_source_type_id ? $this->getSourceName() : '',

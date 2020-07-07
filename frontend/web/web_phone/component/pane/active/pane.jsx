@@ -76,10 +76,18 @@ function CallBtns(props) {
                         : <i className="fas fa-microphone"> </i>
                 }
             </button>
-            <button className="call-pane__start-call calling-state-block">
+            <button className={call.data.isListen || call.data.isCoach ? 'call-pane__start-call calling-state-block join' : 'call-pane__start-call calling-state-block'}>
                 <div className="call-in-action">
-                    <span className="call-in-action__text">on call</span>
-                    <CallActionTimer duration={call.getDuration()} timeStart={Date.now()}/>
+                    {call.data.isListen || call.data.isCoach ? <i className="fa fa-headphones-alt"> </i> : ''}
+                    <span className="call-in-action__text">
+                        {call.data.isCoach
+                            ? 'Coaching'
+                            : call.data.isListen
+                                ? 'Listening'
+                                : 'on call'
+                        }
+                    </span>
+                    <span className="call-in-action__time"><PhoneWidgetTimer duration={call.getDuration()} timeStart={Date.now()}/></span>
                 </div>
             </button>
             <button className="call-pane__end-call" id="cancel-active-call" data-call-sid={call.data.callSid}

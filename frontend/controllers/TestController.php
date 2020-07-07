@@ -258,8 +258,9 @@ class TestController extends FController
 //        Notifications::publish('removeIncomingRequest', ['user_id' => 295], $callInfo);
 //        die;
 //
-        $tmp = 2;
+        $tmp = 3;
         $callInfo = [
+
             'typeId' => 2,
             'type' => 'Inc ' . $tmp,
             'callId' => $tmp,
@@ -272,6 +273,7 @@ class TestController extends FController
 //            'status' => 'Completed',
 //            'status' => 'Hold',
             'isListen' => false,
+            'isCoach' => false,
             'isMute' => false,
             'isHold' => false,
             'contact' => [
@@ -287,6 +289,120 @@ class TestController extends FController
         ];
 //        Notifications::publish('updateIncomingCall', ['user_id' => 295], $callInfo);
         Notifications::publish('callUpdate', ['user_id' => 295], $callInfo);
+//        die;
+
+        $confData = [
+            'data' => [
+                'command' => 'conferenceUpdate',
+                'call' => [
+                    'sid' => 'sid3',
+                ],
+                'conferenceInfo' => [
+                    'sid' => 'conf' . $tmp,
+                    'duration' => 0,
+                    'participants' => [
+                        [
+                            'callSid' => 'callSid1',
+                            'avatar' => 'N',
+                            'name' => 'Name 1',
+                            'phone' => '+373 1',
+                            'type' => 'coaching',
+                            'duration' => 1
+                        ],
+                        [
+                            'callSid' => 'callSid2',
+                            'avatar' => 'N',
+                            'name' => 'Name 2',
+                            'phone' => '+373 2',
+                            'type' => '',
+                            'duration' => 2
+                        ],
+                        [
+                            'callSid' => 'callSid3',
+                            'avatar' => 'N',
+                            'name' => 'Name 3',
+                            'phone' => '+373 3',
+                            'type' => '',
+                            'duration' => 3
+                        ],
+                        [
+                            'callSid' => 'callSid4',
+                            'avatar' => 'N',
+                            'name' => 'Name 1',
+                            'phone' => '+373 1',
+                            'type' => 'coaching',
+                            'duration' => 4
+                        ],
+                        [
+                            'callSid' => 'callSid5',
+                            'avatar' => 'N',
+                            'name' => 'Name 2',
+                            'phone' => '+373 2',
+                            'type' => '',
+                            'duration' => 5
+                        ],
+                        [
+                            'callSid' => 'callSid6',
+                            'avatar' => 'N',
+                            'name' => 'Name 3',
+                            'phone' => '+373 3',
+                            'type' => '',
+                            'duration' => 6
+                        ],
+                        [
+                            'callSid' => 'callSid7',
+                            'avatar' => 'N',
+                            'name' => 'Name 1',
+                            'phone' => '+373 1',
+                            'type' => 'coaching',
+                            'duration' => 7
+                        ],
+                        [
+                            'callSid' => 'callSid8',
+                            'avatar' => 'N',
+                            'name' => 'Name 2',
+                            'phone' => '+373 2',
+                            'type' => '',
+                            'duration' => 8
+                        ],
+                        [
+                            'callSid' => 'callSid9',
+                            'avatar' => 'N',
+                            'name' => 'Name 3',
+                            'phone' => '+373 3',
+                            'type' => '',
+                            'duration' => 9
+                        ],
+                        [
+                            'callSid' => 'callSid10',
+                            'avatar' => 'N',
+                            'name' => 'Name 1',
+                            'phone' => '+373 1',
+                            'type' => 'coaching',
+                            'duration' => 10
+                        ],
+                        [
+                            'callSid' => 'callSid11',
+                            'avatar' => 'N',
+                            'name' => 'Name 2',
+                            'phone' => '+373 2',
+                            'type' => '',
+                            'duration' => 11
+                        ],
+                        [
+                            'callSid' => 'callSid12',
+                            'avatar' => 'N',
+                            'name' => 'Name 3',
+                            'phone' => '+373 3',
+                            'type' => '',
+                            'duration' => 12
+                        ],
+                    ]
+                ],
+            ],
+        ];
+
+        Notifications::publish('conferenceUpdate', ['user_id' => 295], $confData);
         die;
 
 //

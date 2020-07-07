@@ -246,6 +246,15 @@ $js = <<<JS
                                 }
                              }
                         }
+                        
+                        if (obj.cmd === 'conferenceUpdate') {
+                            if (typeof obj.data !== 'undefined') {
+                                if (typeof PhoneWidgetCall === 'object') {
+                                    PhoneWidgetCall.socket(obj.data);
+                                }
+                             }
+                        }
+                        
                     }
                     // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
                 } catch (error) {

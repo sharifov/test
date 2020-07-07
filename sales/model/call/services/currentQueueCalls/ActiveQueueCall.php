@@ -18,6 +18,7 @@ class ActiveQueueCall extends Model
     public $holdDuration;
     public $isListen;
     public $isMute;
+    public $isCoach;
     public $project;
     public $source;
     public $isEnded = false;

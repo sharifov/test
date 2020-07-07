@@ -58,3 +58,14 @@ function ButtonDialpad(props) {
         </li>
     );
 }
+
+function ButtonAddNote(props) {
+    return(
+        <li className="in-call-controls__item" id="wg-add-note">
+            <a href="#" className="in-call-controls__action add-note-action">
+                <i className="fa fa-newspaper-o"> </i>
+                <span>Add Note</span>
+            </a>
+        </li>
+    );
+}

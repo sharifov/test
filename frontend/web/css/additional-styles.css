@@ -44,3 +44,15 @@
 .phone-widget .call-list-item__main-action-trigger .fa {
     color: #fff;
 }
+.phone-widget .call-pane-calling--conference .call-pane__start-call {
+    background: #fff;
+}
+.phone-widget .call-pane-calling--conference .call-pane__start-call.join {
+    background-color: #fff7ac;
+}
+.phone-widget .call-pane-calling .call-pane__start-call {
+    background: #fff;
+}
+.phone-widget .call-pane-calling .call-pane__start-call.join {
+    background-color: #fff7ac;
+}
