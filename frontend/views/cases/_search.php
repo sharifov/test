@@ -224,7 +224,12 @@ use yii\widgets\ActiveForm;
         <div class="col-md-1">
             <?= $form->field($model, 'emailsQtyTo')->textInput() ?>
         </div>
-
+        <div class="col-md-1">
+            <?= $form->field($model, 'smsQtyFrom')->textInput() ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'smsQtyTo')->textInput() ?>
+        </div>
     </div>
 
     <div class="form-group text-center">

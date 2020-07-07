@@ -3,7 +3,6 @@
 namespace sales\entities\cases;
 
 use common\models\Airport;
-use common\models\Call;
 use common\models\CaseSale;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
@@ -57,6 +56,8 @@ use yii\db\Expression;
  *
  * @property int|null $emailsQtyFrom
  * @property int|null $emailsQtyTo
+ * @property int|null $smsQtyFrom
+ * @property int|null $smsQtyTo
  */
 class CasesSearch extends Cases
 {
@@ -93,6 +94,8 @@ class CasesSearch extends Cases
 
     public $emailsQtyFrom;
     public $emailsQtyTo;
+    public $smsQtyFrom;
+    public $smsQtyTo;
 
     private $cacheSaleData = [];
 
@@ -140,7 +143,7 @@ class CasesSearch extends Cases
             ['airlinePenalty', 'integer'],
             ['validatingCarrier', 'string', 'length' => 2],
 
-            [['emailsQtyFrom', 'emailsQtyTo'], 'integer', 'min' => 0, 'max' => 1000],
+            [['emailsQtyFrom', 'emailsQtyTo', 'smsQtyFrom', 'smsQtyTo'], 'integer', 'min' => 0, 'max' => 1000],
         ];
     }
 
@@ -185,6 +188,7 @@ class CasesSearch extends Cases
 			'cs_order_uid' => 'Order uid',
 			'validatingCarrier' => 'Validating Carrier',
 			'emailsQtyFrom' => 'Emails From', 'emailsQtyTo' => 'Emails To',
+			'smsQtyFrom' => 'Sms From', 'smsQtyTo' => 'Sms To',
         ];
     }
 
@@ -632,20 +636,47 @@ class CasesSearch extends Cases
                     ->groupBy(['e_case_id'])
             ], 'cases.cs_id = emails.e_case_id');
 
-            if ($this->emailsQtyFrom !== '') {
-                $query->andWhere(['>=', 'emails.cnt', $this->emailsQtyFrom]);
-                if ((int) $this->emailsQtyFrom === 0) {
-                    $query->orWhere(['IS', 'emails.e_case_id', NULL]);
+            if ('' !== $this->emailsQtyFrom) {
+                if ((int)$this->emailsQtyFrom === 0) {
+                    $query->andWhere(
+                        [
+                            'OR',
+                            ['>=', 'emails.cnt', $this->emailsQtyFrom],
+                            ['IS', 'emails.e_case_id', null]
+                        ]
+                    );
+                } else {
+                    $query->andWhere(
+                        [
+                            'AND',
+                            ['>=', 'emails.cnt', $this->emailsQtyFrom],
+                            ['IS NOT', 'emails.e_case_id', null]
+                        ]
+                    );
                 }
             }
-            if ($this->emailsQtyTo !== '') {
-                $query->andWhere(['<=', 'emails.cnt', $this->emailsQtyTo]);
-                if ((int) $this->emailsQtyTo === 0) {
-                    $query->orWhere(['IS', 'emails.e_case_id', NULL]);
+            if ('' !== $this->emailsQtyTo) {
+                if ((int)$this->emailsQtyTo === 0) {
+                    $query->andWhere(
+                        [
+                            'OR',
+                            ['<=', 'emails.cnt', $this->emailsQtyTo],
+                            ['IS', 'emails.e_case_id', null]
+                        ]
+                    );
+                } else {
+                    $query->andWhere(
+                        [
+                            'AND',
+                            ['<=', 'emails.cnt', $this->emailsQtyTo],
+                            ['IS NOT', 'emails.e_case_id', null]
+                        ]
+                    );
                 }
             }
         }
-        /*if ($this->smsExist !== '' || $this->smsQuantity) {
+
+        if ($this->smsQtyFrom !== '' || $this->smsQtyTo !== '') {
             $query->leftJoin([
                 'sms' => Sms::find()
                     ->select([
@@ -653,27 +684,49 @@ class CasesSearch extends Cases
                         new Expression('COUNT(s_case_id) AS cnt')
                     ])
                     ->groupBy(['s_case_id'])
-                    ->cache($this->cacheDuration)
             ], 'cases.cs_id = sms.s_case_id');
 
-            if ($this->smsExist !== '') {
-                if ((bool) $this->emailsExist) {
-                    $query->andWhere(['>', 'sms.cnt', 0]);
+            if ('' !== $this->smsQtyFrom) {
+                if ((int)$this->smsQtyFrom === 0) {
+                    $query->andWhere(
+                        [
+                            'OR',
+                            ['>=', 'sms.cnt', $this->smsQtyFrom],
+                            ['IS', 'sms.s_case_id', null]
+                        ]
+                    );
                 } else {
-                    $query->andWhere(['OR',
-                        ['sms.cnt' => 0],
-                        ['IS', 'sms.s_case_id', NULL]
-                    ]);
+                    $query->andWhere(
+                        [
+                            'AND',
+                            ['>=', 'sms.cnt', $this->smsQtyFrom],
+                            ['IS NOT', 'sms.s_case_id', null]
+                        ]
+                    );
                 }
             }
-            if ($this->smsQuantity) {
-                $query->andWhere(['sms.cnt' => $this->smsQuantity]);
+            if ('' !== $this->smsQtyTo) {
+                if ((int)$this->smsQtyTo === 0) {
+                    $query->andWhere(
+                        [
+                            'OR',
+                            ['<=', 'sms.cnt', $this->smsQtyTo],
+                            ['IS', 'sms.s_case_id', null]
+                        ]
+                    );
+                } else {
+                    $query->andWhere(
+                        [
+                            'AND',
+                            ['<=', 'sms.cnt', $this->smsQtyTo],
+                            ['IS NOT', 'sms.s_case_id', null]
+                        ]
+                    );
+                }
             }
-        }*/
+        }
 
-        //\yii\helpers\VarDumper::dump($query->createCommand()->rawSql, 10, true); exit();
-        ///* FOR DEBUG:: must by remove */
-
+        
         return $dataProvider;
     }
 
