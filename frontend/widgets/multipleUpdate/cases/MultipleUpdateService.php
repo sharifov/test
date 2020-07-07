@@ -2,9 +2,14 @@
 
 namespace frontend\widgets\multipleUpdate\cases;
 
+use common\components\purifier\Purifier;
+use common\models\Notifications;
+use frontend\widgets\notification\NotificationMessage;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
 use sales\services\cases\CasesManageService;
+use Yii;
+use yii\helpers\Html;
 
 /**
  * Class MultipleUpdateService
@@ -46,6 +51,19 @@ class MultipleUpdateService
         try {
             $this->service->processing($case, $form->userId, $form->getCreatorId());
             $this->addSuccessMessage($this->movedProcessingMessage($case));
+
+            if ($form->userId !== $form->getCreatorId()) {
+                $creator = $form->getCreator();
+                $title = 'Title: New Case Assigned';
+                $linkToCase = Purifier::createCaseShortLink($case);
+                $message = 'Message: Case (' . $linkToCase . ') has been assigned to you by user ' . Html::encode($creator->username);
+
+                if ($ntf = Notifications::create($form->userId, $title, $message, Notifications::TYPE_WARNING, true)) {
+                    $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                    Notifications::publish('getNewNotification', ['user_id' => $form->userId], $dataNotification);
+                }
+            }
+
         } catch (\DomainException $e) {
             $this->addErrorMessage('ID ' . $case->cs_id . ' ' . $e->getMessage());
         }
