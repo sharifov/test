@@ -7,6 +7,7 @@ use common\models\CallUserAccess;
 use common\models\ConferenceParticipant;
 use common\models\Department;
 use sales\model\call\helper\CallHelper;
+use sales\model\conference\service\ConferenceDataService;
 use sales\model\phoneList\entity\PhoneList;
 
 class CurrentQueueCallsService
@@ -21,12 +22,14 @@ class CurrentQueueCallsService
         $incomingQueue = $this->getIncomingCalls();
         $outgoingQueue = $this->getOutgoingCalls();
         $activeQueue = $this->getActiveCalls();
+        $conferences = $this->getActiveConferences($activeQueue['calls']);
 
         $queueCalls = new QueueCalls(
             $holdQueue,
             $incomingQueue['calls'],
             $outgoingQueue['calls'],
             $activeQueue['calls'],
+            $conferences,
         );
 
         if ($incomingQueue['last_time'] > $outgoingQueue['last_time'] && $incomingQueue['last_time'] > $activeQueue['last_time']) {
@@ -38,6 +41,32 @@ class CurrentQueueCallsService
         }
 
         return $queueCalls;
+    }
+
+    /**
+     * @param ActiveQueueCall[] $calls
+     * @return ActiveConference[]
+     */
+    private function getActiveConferences($calls): array
+    {
+        $conferences = [];
+        foreach ($calls as $call) {
+            if ($data = ConferenceDataService::getDataBySid($call->conferenceSid)) {
+                $participants = [];
+                foreach ($data['participants'] as $key => $part) {
+                    if (!$part['userId'] || $part['userId'] === $this->userId) {
+                        unset($part['userId']);
+                        $participants[] = $part;
+                    }
+                }
+                $conferences[] = new ActiveConference([
+                    'sid' => $data['conference']['sid'],
+                    'duration' => $data['conference']['duration'],
+                    'participants' => $participants,
+                ]);
+            }
+        }
+        return $conferences;
     }
 
     /**
@@ -89,13 +118,13 @@ class CurrentQueueCallsService
             if ($call->isIn() || $call->isOut()) {
                 $name = $call->cClient ? $call->cClient->getFullName() : '------';
             } elseif ($call->isJoin() && ($parentJoin = $call->cParent) && $parentJoin->cCreatedUser) {
-                $name = $parentJoin->cCreatedUser->username;
+                $name = $parentJoin->cCreatedUser->nickname;
             } else {
                 $name = '------';
             }
 
             $phone = '';
-            if ($call->isIn() ) {
+            if ($call->isIn()) {
                 $phone = $call->c_from;
             } elseif ($call->isOut()) {
                 if ($call->cParent && $call->currentParticipant && $call->currentParticipant->isAgent()) {
@@ -128,6 +157,10 @@ class CurrentQueueCallsService
             if ($call->isJoin() && $call->c_source_type_id === Call::SOURCE_COACH) {
                 $isCoach = true;
             }
+            $isBarge = false;
+            if ($call->isJoin() && $call->c_source_type_id === Call::SOURCE_BARGE) {
+                $isBarge = true;
+            }
             $isHold = false;
             $holdDuration = 0;
             if ($call->currentParticipant && $call->currentParticipant->isHold()) {
@@ -137,10 +170,17 @@ class CurrentQueueCallsService
 
             $isInternal = PhoneList::find()->byPhone($call->c_from)->enabled()->exists();
 
+            if ($call->isJoin()) {
+                $source = $call->c_parent_call_sid ? $call->cParent->getSourceName() : '';
+            } else {
+                $source = $call->isJoin() ? $call->getSourceName() : '';
+            }
+
             //todo remove after removed not conference call
             $call->c_status_id = Call::STATUS_IN_PROGRESS;
             $calls[] = new ActiveQueueCall([
                 'callSid' => $call->c_call_sid,
+                'conferenceSid' => $call->c_conference_sid,
                 'status' => $call->getStatusName(),
                 'duration' => time() - strtotime($call->c_updated_dt),
                 'leadId' => $call->c_lead_id,
@@ -153,8 +193,9 @@ class CurrentQueueCallsService
                 'isListen' => $isListen,
                 'isMute' => $isMute,
                 'isCoach' => $isCoach,
+                'isBarge' => $isBarge,
                 'project' => $call->c_project_id ? $call->cProject->name : '',
-                'source' => $call->c_source_type_id ? $call->getSourceName() : '',
+                'source' => $source,
                 'name' => $name,
                 'phone' => $phone,
                 'company' => '',
@@ -214,6 +255,7 @@ class CurrentQueueCallsService
         foreach ($queue as $call) {
             $calls[] = new OutgoingQueueCall([
                 'callSid' => $call->c_call_sid,
+                'conferenceSid' => $call->c_conference_sid,
                 'status' => $call->getStatusName(),
                 'duration' => time() - strtotime($call->c_updated_dt),
                 'leadId' => $call->c_lead_id,
@@ -226,6 +268,7 @@ class CurrentQueueCallsService
                 'isListen' => false,
                 'isMute' => false,
                 'isCoach' => false,
+                'isBarge' => false,
                 'project' => $call->c_project_id ? $call->cProject->name : '',
                 'source' => $call->c_source_type_id ? $call->getSourceName() : '',
                 'phone' => $call->c_to,
@@ -263,6 +306,7 @@ class CurrentQueueCallsService
             $call = $item->cuaCall;
             $calls[] = new IncomingQueueCall([
                 'callSid' => $call->c_call_sid,
+                'conferenceSid' => $call->c_conference_sid,
                 'status' => $call->getStatusName(),
                 'duration' => time() - strtotime($call->c_updated_dt),
                 'leadId' => $call->c_lead_id,
@@ -275,6 +319,7 @@ class CurrentQueueCallsService
                 'isListen' => false,
                 'isMute' => false,
                 'isCoach' => false,
+                'isBarge' => false,
                 'project' => $call->c_project_id ? $call->cProject->name : '',
                 'source' => $call->c_source_type_id ? $call->getSourceName() : '',
                 'phone' => $call->c_from,
@@ -317,6 +362,7 @@ class CurrentQueueCallsService
             }
             $calls[] = new IncomingQueueCall([
                 'callSid' => $call->c_call_sid,
+                'conferenceSid' => $call->c_conference_sid,
                 'status' => $call->getStatusName(),
                 'duration' => time() - strtotime($call->c_updated_dt),
                 'leadId' => $call->c_lead_id,
@@ -329,6 +375,7 @@ class CurrentQueueCallsService
                 'isListen' => false,
                 'isMute' => false,
                 'isCoach' => false,
+                'isBarge' => false,
                 'project' => $call->c_project_id ? $call->cProject->name : '',
                 'source' => $call->c_source_type_id ? $call->getSourceName() : '',
                 'phone' => $phone,
@@ -339,6 +386,6 @@ class CurrentQueueCallsService
             ]);
         }
 
-      return $calls;
+        return $calls;
     }
 }

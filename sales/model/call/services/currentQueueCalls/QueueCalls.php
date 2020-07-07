@@ -9,6 +9,7 @@ namespace sales\model\call\services\currentQueueCalls;
  * @property IncomingQueueCall[] $incoming
  * @property OutgoingQueueCall[] $outgoing
  * @property ActiveQueueCall[] $active
+ * @property ActiveConference[] $conference
  * @property string $lastActiveQueue
  */
 class QueueCalls
@@ -21,15 +22,17 @@ class QueueCalls
     public array $incoming;
     public array $outgoing;
     public array $active;
+    public array $conference;
 
     public string $lastActiveQueue;
 
-    public function __construct(array $hold, array $incoming, array $outgoing, array $active)
+    public function __construct(array $hold, array $incoming, array $outgoing, array $active, array $conference)
     {
         $this->hold = $hold;
         $this->incoming = $incoming;
         $this->outgoing = $outgoing;
         $this->active = $active;
+        $this->conference = $conference;
     }
 
     public function isEmpty(): bool

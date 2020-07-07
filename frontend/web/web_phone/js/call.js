@@ -107,6 +107,13 @@ var PhoneWidgetCall = function () {
     function refreshActivePane() {
         let call = queues.active.getLast();
         if (call !== null) {
+            let conference = storage.conference.one(call.data.conferenceSid);
+            if (conference !== null) {
+                if (conference.getCountParticipants() > 2) {
+                    panes.conference.init(call, conference);
+                    return true;
+                }
+            }
             panes.active.init(call);
             return true;
         }
@@ -167,10 +174,25 @@ var PhoneWidgetCall = function () {
             panes.outgoing.hide();
         }
 
+        if (typeof data.conference !== 'undefined' && data.conference !== null) {
+            let conference = storage.conference.add(data.conference);
+            if (conference === null) {
+                console.log('conference not added');
+            } else {
+                if (conference.getCountParticipants() > 2) {
+                    panes.conference.init(call, conference);
+                    openWidget();
+                    openCallTab();
+                    panes.queue.refresh();
+                    panes.queue.hide();
+                    return;
+                }
+            }
+        }
+
         panes.active.init(call);
         openWidget();
         openCallTab();
-
         panes.queue.refresh();
         panes.queue.hide();
     }
@@ -178,21 +200,57 @@ var PhoneWidgetCall = function () {
     function conferenceUpdate(data) {
         console.log('conference update');
 
-        let call = queues.active.one(data.call.sid);
+        let call = null;
+        data.conference.participants.forEach(function (participant) {
+            if (call === null) {
+                call = queues.active.one(participant.callSid);
+            }
+        });
+
         if (call === null) {
             console.log('not found call in active queue');
             return;
         }
 
-        storage.conference.remove(data.conferenceInfo.sid);
-        let conference = storage.conference.add(data.conferenceInfo);
+        let newConferenceCountParticipant = data.conference.participants.length;
 
-        if (conference === null) {
-            console.log('conference is exist. not updated');
+        let conference = storage.conference.one(data.conference.sid);
+        if (conference !== null) {
+            let oldConferenceCountParticipant = conference.getCountParticipants();
+            if (oldConferenceCountParticipant < 3 && newConferenceCountParticipant < 3) {
+                //todo
+                storage.conference.remove(data.conference.sid);
+                conference = storage.conference.add(data.conference);
+                return;
+            }
+            if (oldConferenceCountParticipant < 3 && newConferenceCountParticipant > 2) {
+                storage.conference.remove(data.conference.sid);
+                conference = storage.conference.add(data.conference);
+                panes.conference.init(call, conference);
+                return;
+            }
+            if (oldConferenceCountParticipant > 2 && newConferenceCountParticipant > 2) {
+                storage.conference.update(data.conference);
+                return;
+            }
+            if (oldConferenceCountParticipant > 2 && newConferenceCountParticipant < 3) {
+                storage.conference.remove(data.conference.sid);
+                storage.conference.add(data.conference);
+                panes.active.init(call);
+                return;
+            }
+            console.log('not found rule for conference update');
             return;
         }
 
-        panes.conference.init(call, conference);
+        conference = storage.conference.add(data.conference);
+
+        if (conference.getCountParticipants() > 2) {
+            panes.conference.init(call, conference);
+            return;
+        }
+
+        panes.active.init(call);
     }
 
     function completeCall(callSid)
@@ -200,6 +258,7 @@ var PhoneWidgetCall = function () {
         queues.active.remove(callSid);
         queues.outgoing.remove(callSid);
         waitQueue.remove(callSid);
+        storage.conference.removeByParticipantCallSid(callSid);
 
         panes.queue.refresh();
 
@@ -210,6 +269,15 @@ var PhoneWidgetCall = function () {
             panes.active.removeCallInProgressIndicator();
             window.connection = '';
             if (panes.active.isActive()) {
+                needRefresh = true;
+            }
+        }
+
+        if (panes.conference.getCallSid() === callSid) {
+            panes.conference.removeCallSid();
+            panes.conference.removeCallInProgressIndicator();
+            window.connection = '';
+            if (panes.conference.isActive()) {
                 needRefresh = true;
             }
         }
@@ -269,7 +337,7 @@ var PhoneWidgetCall = function () {
     }
 
     function callAddNoteCLickEvent() {
-        $(document).on('click', '.call-pane-calling #active_call_add_note_submit', function (e) {
+        $(document).on('click', '#active_call_add_note_submit', function (e) {
             e.preventDefault();
 
             let callSid = $(this).data('call-sid');
@@ -284,8 +352,8 @@ var PhoneWidgetCall = function () {
                 return false;
             }
 
-            let $container = $('.call-pane-calling #active_call_add_note');
-            let value = $container.val().trim();
+            let $container = document.getElementById('active_call_add_note');
+            let value = $container.value.trim();
             if (!value) {
                 createNotify('Warning', 'Note value is empty', 'warning');
                 return false;
@@ -296,6 +364,13 @@ var PhoneWidgetCall = function () {
             }
 
             callRequester.addNote(call, value, $container);
+        });
+        $(document).on('click', '#wg-add-note', function(e) {
+            e.preventDefault();
+            $('.additional-info.add-note').slideDown(200)
+        });
+        $(document).on('click', '.additional-info.add-note .additional-info__close', function() {
+            $('.add-note').slideUp(150);
         });
     }
     
@@ -314,6 +389,31 @@ var PhoneWidgetCall = function () {
     function muteBtnClickEvent()
     {
         let _self = this;
+        $(document).on('click', '.queue-separator .list_item_mute', function(e) {
+            let callSid = $(this).attr('data-call-sid');
+            if (!callSid) {
+                createNotify('Error', 'Not found Call SID', 'error');
+                return false;
+            }
+
+            let call = queues.active.one(callSid);
+            if (call === null) {
+                createNotify('Error', 'Not found Call on Active Queue', 'error');
+                return false;
+            }
+
+            if (call.data.isMute) {
+                if (!call.setUnMuteRequestState()) {
+                    return false;
+                }
+                callRequester.unMute(call);
+            } else {
+                if (!call.setMuteRequestState()) {
+                    return false;
+                }
+                callRequester.mute(call);
+            }
+        });
         $(document).on('click', '.call-pane-calling #call-pane__mute', function(e) {
 
             let muteBtn = $(this);
@@ -590,8 +690,11 @@ var PhoneWidgetCall = function () {
 
         //todo remove after removed old widget
         if (!(panes.active.getCallSid() === call.data.callSid && panes.active.isActive())) {
-            return;
+            if (!(panes.conference.getCallSid() === call.data.callSid && panes.conference.isActive())) {
+                return;
+            }
         }
+
         window.phoneWidget.oldWidget.hold();
 
         widgetIcon.update({type: 'hold', timer: true, 'timerStamp': 0, text: 'on hold', currentCalls: null, status: 'online'});
@@ -606,8 +709,11 @@ var PhoneWidgetCall = function () {
 
         //todo remove after removed old widget
         if (!(panes.active.getCallSid() === call.data.callSid && panes.active.isActive())) {
-            return;
+            if (!(panes.conference.getCallSid() === call.data.callSid && panes.conference.isActive())) {
+                return;
+            }
         }
+
         window.phoneWidget.oldWidget.unHold();
 
         widgetIcon.update({type: 'inProgress', timer: true, 'timerStamp': call.getDuration(), text: 'on call', currentCalls: '', status: 'online'});
@@ -793,11 +899,12 @@ var PhoneWidgetCall = function () {
                     });
 
                     let activeExist = false;
-                    let activeCall = {};
                     data.active.forEach(function (call) {
-                        activeCall = Object.assign({}, call);
-                        queues.active.add(activeCall);
+                        queues.active.add(call);
                         activeExist = true;
+                    });
+                    data.conferences.forEach(function (conference) {
+                        storage.conference.add(conference);
                     });
 
                     openWidget();
@@ -960,5 +1067,4 @@ var PhoneWidgetCall = function () {
         insertPhoneNumber(phone, title);
         $('.suggested-contacts').removeClass('is_active');
     });
-
 })();

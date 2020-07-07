@@ -7,6 +7,7 @@ use yii\base\Model;
 class OutgoingQueueCall extends Model
 {
     public $callSid;
+    public $conferenceSid;
     public $status;
     public $duration;
     public $leadId;
@@ -19,6 +20,7 @@ class OutgoingQueueCall extends Model
     public $isListen;
     public $isMute;
     public $isCoach;
+    public $isBarge;
     public $project;
     public $source;
     public $isEnded = false;

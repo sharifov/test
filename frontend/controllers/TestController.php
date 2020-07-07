@@ -258,10 +258,10 @@ class TestController extends FController
 //        Notifications::publish('removeIncomingRequest', ['user_id' => 295], $callInfo);
 //        die;
 //
-        $tmp = 3;
+        $tmp = 4;
         $callInfo = [
 
-            'typeId' => 2,
+            'typeId' => 3,
             'type' => 'Inc ' . $tmp,
             'callId' => $tmp,
             'callSid' => 'sid' . $tmp,
@@ -272,8 +272,9 @@ class TestController extends FController
             'status' => 'In progress',
 //            'status' => 'Completed',
 //            'status' => 'Hold',
-            'isListen' => false,
+            'isListen' => true,
             'isCoach' => false,
+            'isBarge' => false,
             'isMute' => false,
             'isHold' => false,
             'contact' => [
@@ -289,15 +290,15 @@ class TestController extends FController
         ];
 //        Notifications::publish('updateIncomingCall', ['user_id' => 295], $callInfo);
         Notifications::publish('callUpdate', ['user_id' => 295], $callInfo);
-//        die;
+        die;
 
         $confData = [
             'data' => [
                 'command' => 'conferenceUpdate',
                 'call' => [
-                    'sid' => 'sid3',
+                    'sid' => 'sid6',
                 ],
-                'conferenceInfo' => [
+                'conference' => [
                     'sid' => 'conf' . $tmp,
                     'duration' => 0,
                     'participants' => [

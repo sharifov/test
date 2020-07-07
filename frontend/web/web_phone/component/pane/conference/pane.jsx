@@ -9,18 +9,30 @@ class ConferencePane extends React.Component {
 
     componentDidMount() {
         window.phoneWidget.eventDispatcher.addListener(this.state.call.getEventUpdateName(), this.callUpdateHandler());
+        window.phoneWidget.eventDispatcher.addListener(this.state.conference.getEventUpdateName(), this.conferenceUpdateHandler());
     }
 
     componentWillUnmount() {
         window.phoneWidget.eventDispatcher.removeListener(this.state.call.getEventUpdateName(), this.callUpdateHandler());
+        window.phoneWidget.eventDispatcher.removeListener(this.state.conference.getEventUpdateName(), this.conferenceUpdateHandler());
     }
 
     callUpdateHandler() {
         let self = this;
         return function (event) {
-            //conference
+            //conference call
             self.setState({
                 call: event.call
+            });
+        }
+    }
+
+    conferenceUpdateHandler() {
+        let self = this;
+        return function (event) {
+            //conference conference
+            self.setState({
+                conference: event.conference
             });
         }
     }
@@ -55,13 +67,7 @@ class ConferencePane extends React.Component {
 
                 </div>
 
-                <ul className="in-call-controls">
-                    <ButtonHold call={call} controls={this.props.controls}/>
-                    <ButtonTransfer call={call} controls={this.props.controls}/>
-                    <ButtonAddPerson  call={call} controls={this.props.controls}/>
-                    <ButtonDialpad  call={call} controls={this.props.controls}/>
-                    <ButtonAddNote  call={call} controls={this.props.controls}/>
-                </ul>
+                <ActivePaneControls call={call} controls={this.props.controls}/>
 
                 <div className="conference-call-details">
 

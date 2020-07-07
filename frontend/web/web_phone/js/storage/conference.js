@@ -34,12 +34,41 @@
             return index;
         };
 
+        this.removeByParticipantCallSid = function (sid) {
+            let index = this.getIndexByParticipantCallSid(sid);
+            if (index !== null) {
+                this.conferences.splice(index, 1);
+            }
+        };
+
+        this.getIndexByParticipantCallSid = function (callSid) {
+            let index = null;
+            this.conferences.forEach(function (conference, i) {
+                conference.participants.forEach(function (participant) {
+                    if (participant.callSid === callSid) {
+                        index = i;
+                    }
+                });
+            });
+            return index;
+        };
+
         this.one = function (sid) {
             let index = this.getIndex(sid);
             if (index !== null) {
                 return new window.phoneWidget.conference.Conference(this.conferences[index]);
             }
             return null;
+        };
+
+        this.update = function (conference) {
+            this.remove(conference.sid);
+            let conf = this.add(conference);
+            if (conf === null) {
+                console.log('conference not added to storage');
+                return;
+            }
+            conf.dispatchEvent();
         };
 
         this.showAll = function () {
