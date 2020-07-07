@@ -63,7 +63,7 @@ if (!$count) {
 
     <a href="javascript:;" class="dropdown-toggle info-number" title="Notifications" data-toggle="dropdown"
        aria-expanded="false">
-        <i class="fa fa-comment-o"></i><span class="badge bg-green notification-counter"><?= $count ?></span>
+        <i class="fa fa-bell-o"></i><span class="badge bg-green notification-counter"><?= $count ?></span>
     </a>
 
     <ul id="notification-menu" class="dropdown-menu list-unstyled msg_list" role="menu" x-placement="bottom-end">
