@@ -42,6 +42,7 @@ use sales\events\lead\LeadTaskEvent;
 use sales\events\lead\LeadTrashEvent;
 use sales\helpers\lead\LeadHelper;
 use sales\interfaces\Objectable;
+use sales\model\clientChat\entity\ClientChat;
 use sales\model\lead\useCases\lead\api\create\LeadCreateForm;
 use sales\model\lead\useCases\lead\import\LeadImportForm;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
@@ -4463,6 +4464,16 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         return (int) $count;
     }
 
+    /**
+     * @return int
+     */
+    public function getCountClientChat(): int
+    {
+        return (int) ClientChat::find()
+            ->where(['cch_lead_id' => $this->id])
+            ->count();
+    }
+
 
     /**
      * @param int|null $user_id
@@ -4559,7 +4570,10 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         $str = '';
         $str .= '<span title="Calls Out / In / Join"><i class="fa fa-phone success"></i> '. $this->getCountCalls(\common\models\Call::CALL_TYPE_OUT) .'/'.  $this->getCountCalls(\common\models\Call::CALL_TYPE_IN) .'/'.  $this->getCountCalls(\common\models\Call::CALL_TYPE_JOIN) .'</span> | ';
         $str .= '<span title="SMS Out / In"><i class="fa fa-comments info"></i> '. $this->getCountSms(\common\models\Sms::TYPE_OUTBOX) .'/'.  $this->getCountSms(\common\models\Sms::TYPE_INBOX) .'</span> | ';
-        $str .= '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> '. $this->getCountEmails(\common\models\Email::TYPE_OUTBOX) .'/'.  $this->getCountEmails(\common\models\Email::TYPE_INBOX) .'</span>';
+        $str .= '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> '. $this->getCountEmails(\common\models\Email::TYPE_OUTBOX) .'/'.  $this->getCountEmails(\common\models\Email::TYPE_INBOX) .'</span> | ';
+        $str .= '<span title="Client Chat">
+                    <i class="fa fa-weixin warning"></i> 
+                        ' . $this->getCountClientChat() . '</span>';
         return $str;
     }
 

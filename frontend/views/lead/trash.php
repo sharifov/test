@@ -174,7 +174,10 @@ $this->params['breadcrumbs'][] = $this->title;
                     $clientName = '-';
                 }
 
-                return $clientName;
+                $communicationInfo = '<br /><br />';
+                $communicationInfo .= $model->getCommunicationInfo();
+
+                return $clientName . $communicationInfo;
             },
             'options' => [
                 'style' => 'width:220px'
