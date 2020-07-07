@@ -236,6 +236,12 @@ use yii\widgets\ActiveForm;
         <div class="col-md-1">
             <?= $form->field($model, 'callsQtyTo')->textInput() ?>
         </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'chatsQtyFrom')->textInput() ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'chatsQtyTo')->textInput() ?>
+        </div>
     </div>
 
     <div class="form-group text-center">

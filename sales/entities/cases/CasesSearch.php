@@ -17,6 +17,7 @@ use frontend\helpers\JsonHelper;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\helpers\setting\SettingHelper;
+use sales\model\clientChat\entity\ClientChat;
 use sales\model\saleTicket\entity\SaleTicket;
 use yii\data\ActiveDataProvider;
 use yii\db\Expression;
@@ -61,6 +62,8 @@ use yii\db\Expression;
  * @property int|null $smsQtyTo
  * @property int|null $callsQtyFrom
  * @property int|null $callsQtyTo
+ * @property int|null $chatsQtyFrom
+ * @property int|null $chatsQtyTo
  */
 class CasesSearch extends Cases
 {
@@ -101,6 +104,8 @@ class CasesSearch extends Cases
     public $smsQtyTo;
     public $callsQtyFrom;
     public $callsQtyTo;
+    public $chatsQtyFrom;
+    public $chatsQtyTo;
 
     private $cacheSaleData = [];
 
@@ -150,7 +155,7 @@ class CasesSearch extends Cases
             [
                 [
                     'emailsQtyFrom', 'emailsQtyTo', 'smsQtyFrom', 'smsQtyTo',
-                    'callsQtyFrom', 'callsQtyTo',
+                    'callsQtyFrom', 'callsQtyTo', 'chatsQtyFrom', 'chatsQtyTo',
                 ],
                 'integer', 'min' => 0, 'max' => 1000
             ],
@@ -200,6 +205,7 @@ class CasesSearch extends Cases
 			'emailsQtyFrom' => 'Emails From', 'emailsQtyTo' => 'Emails To',
 			'smsQtyFrom' => 'Sms From', 'smsQtyTo' => 'Sms To',
 			'callsQtyFrom' => 'Calls From', 'callsQtyTo' => 'Calls To',
+			'chatsQtyFrom' => 'Chats From', 'chatsQtyTo' => 'Chats To',
         ];
     }
 
@@ -648,7 +654,7 @@ class CasesSearch extends Cases
             ], 'cases.cs_id = emails.e_case_id');
 
             if ('' !== $this->emailsQtyFrom) {
-                if ((int)$this->emailsQtyFrom === 0) {
+                if ((int) $this->emailsQtyFrom === 0 || (int) $this->emailsQtyTo === 0) {
                     $query->andWhere(
                         [
                             'OR',
@@ -657,17 +663,11 @@ class CasesSearch extends Cases
                         ]
                     );
                 } else {
-                    $query->andWhere(
-                        [
-                            'AND',
-                            ['>=', 'emails.cnt', $this->emailsQtyFrom],
-                            ['IS NOT', 'emails.e_case_id', null]
-                        ]
-                    );
+                    $query->andWhere(['>=', 'emails.cnt', $this->emailsQtyFrom]);
                 }
             }
             if ('' !== $this->emailsQtyTo) {
-                if ((int)$this->emailsQtyTo === 0) {
+                if ((int) $this->emailsQtyTo === 0 || (int) $this->emailsQtyFrom === 0) {
                     $query->andWhere(
                         [
                             'OR',
@@ -676,13 +676,7 @@ class CasesSearch extends Cases
                         ]
                     );
                 } else {
-                    $query->andWhere(
-                        [
-                            'AND',
-                            ['<=', 'emails.cnt', $this->emailsQtyTo],
-                            ['IS NOT', 'emails.e_case_id', null]
-                        ]
-                    );
+                    $query->andWhere(['<=', 'emails.cnt', $this->emailsQtyTo]);
                 }
             }
         }
@@ -698,7 +692,7 @@ class CasesSearch extends Cases
             ], 'cases.cs_id = sms.s_case_id');
 
             if ('' !== $this->smsQtyFrom) {
-                if ((int)$this->smsQtyFrom === 0) {
+                if ((int) $this->smsQtyFrom === 0 || (int) $this->smsQtyTo === 0) {
                     $query->andWhere(
                         [
                             'OR',
@@ -707,17 +701,11 @@ class CasesSearch extends Cases
                         ]
                     );
                 } else {
-                    $query->andWhere(
-                        [
-                            'AND',
-                            ['>=', 'sms.cnt', $this->smsQtyFrom],
-                            ['IS NOT', 'sms.s_case_id', null]
-                        ]
-                    );
+                    $query->andWhere(['>=', 'sms.cnt', $this->smsQtyFrom]);
                 }
             }
             if ('' !== $this->smsQtyTo) {
-                if ((int)$this->smsQtyTo === 0) {
+                if ((int) $this->smsQtyTo === 0 || (int) $this->smsQtyFrom === 0) {
                     $query->andWhere(
                         [
                             'OR',
@@ -726,13 +714,7 @@ class CasesSearch extends Cases
                         ]
                     );
                 } else {
-                    $query->andWhere(
-                        [
-                            'AND',
-                            ['<=', 'sms.cnt', $this->smsQtyTo],
-                            ['IS NOT', 'sms.s_case_id', null]
-                        ]
-                    );
+                    $query->andWhere(['<=', 'sms.cnt', $this->smsQtyTo]);
                 }
             }
         }
@@ -748,7 +730,7 @@ class CasesSearch extends Cases
             ], 'cases.cs_id = calls.c_case_id');
 
             if ('' !== $this->callsQtyFrom) {
-                if ((int)$this->callsQtyFrom === 0) {
+                if ((int) $this->callsQtyFrom === 0 || (int) $this->callsQtyTo === 0) {
                     $query->andWhere(
                         [
                             'OR',
@@ -757,17 +739,11 @@ class CasesSearch extends Cases
                         ]
                     );
                 } else {
-                    $query->andWhere(
-                        [
-                            'AND',
-                            ['>=', 'calls.cnt', $this->callsQtyFrom],
-                            ['IS NOT', 'calls.c_case_id', null]
-                        ]
-                    );
+                    $query->andWhere(['>=', 'calls.cnt', $this->callsQtyFrom]);
                 }
             }
             if ('' !== $this->callsQtyTo) {
-                if ((int)$this->callsQtyTo === 0) {
+                if ((int) $this->callsQtyTo === 0 || (int) $this->callsQtyFrom === 0) {
                     $query->andWhere(
                         [
                             'OR',
@@ -776,17 +752,48 @@ class CasesSearch extends Cases
                         ]
                     );
                 } else {
-                    $query->andWhere(
-                        [
-                            'AND',
-                            ['<=', 'calls.cnt', $this->callsQtyTo],
-                            ['IS NOT', 'calls.c_case_id', null]
-                        ]
-                    );
+                    $query->andWhere(['<=', 'calls.cnt', $this->callsQtyTo]);
                 }
             }
         }
 
+        if ($this->chatsQtyFrom !== '' || $this->chatsQtyTo !== '') {
+            $query->leftJoin([
+                'chats' => ClientChat::find()
+                    ->select([
+                        'cch_case_id',
+                        new Expression('COUNT(cch_case_id) AS cnt')
+                    ])
+                    ->groupBy(['cch_case_id'])
+            ], 'cases.cs_id = chats.cch_case_id');
+
+            if ('' !== $this->chatsQtyFrom) {
+                if ((int) $this->chatsQtyFrom === 0 || (int) $this->chatsQtyTo === 0) {
+                    $query->andWhere(
+                        [
+                            'OR',
+                            ['>=', 'chats.cnt', $this->chatsQtyFrom],
+                            ['IS', 'chats.cch_case_id', null]
+                        ]
+                    );
+                } else {
+                    $query->andWhere(['>=', 'chats.cnt', $this->chatsQtyFrom]);
+                }
+            }
+            if ('' !== $this->chatsQtyTo) {
+                if ((int) $this->chatsQtyTo === 0 || (int) $this->chatsQtyFrom === 0) {
+                    $query->andWhere(
+                        [
+                            'OR',
+                            ['<=', 'chats.cnt', $this->chatsQtyTo],
+                            ['IS', 'chats.cch_case_id', null]
+                        ]
+                    );
+                } else {
+                    $query->andWhere(['<=', 'chats.cnt', $this->chatsQtyTo]);
+                }
+            }
+        }
 
         return $dataProvider;
     }
