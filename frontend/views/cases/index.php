@@ -8,6 +8,7 @@ use sales\access\EmployeeProjectAccess;
 use sales\entities\cases\CaseCategory;
 use common\components\grid\cases\CasesSourceTypeColumn;
 use common\components\grid\cases\CasesStatusColumn;
+use sales\helpers\communication\StatisticsHelper;
 use yii\helpers\Html;
 use kartik\grid\GridView;
 use sales\entities\cases\Cases;
@@ -127,6 +128,11 @@ $gridId = 'cases-grid-id';
                         $str .= $case->client->clientEmails ? '<i class="fa fa-envelope"></i> ' . implode(' <br><i class="fa fa-envelope"></i> ', ArrayHelper::map($case->client->clientEmails, 'email', 'email')) . '' : '';
                         $str .= $case->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', ArrayHelper::map($case->client->clientPhones, 'phone', 'phone')) . '' : '';
                     }
+
+                    $statistics = new StatisticsHelper($case->cs_id, StatisticsHelper::TYPE_CASE);
+                    $str .= '<br /><br />';
+                    $str .= Yii::$app->getView()->render('/partial/_communication_statistic_list',
+                        ['statistics' => $statistics->setCountAll()]);
 
                     return $str ?? '-';
                 },

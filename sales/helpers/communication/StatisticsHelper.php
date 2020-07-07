@@ -91,21 +91,19 @@ class StatisticsHelper
     }
 
     /**
+     * @param bool $onlyParent
      * @return int
      */
-    protected function getLeadCallCount(): int
+    protected function getLeadCallCount(bool $onlyParent = true): int
     {
-        if ((bool) Yii::$app->params['settings']['new_communication_block_lead']) {
-            return (int) CallLogLead::find()
-                ->innerJoin(CallLog::tableName(), 'call_log.cl_id = call_log_lead.cll_cl_id')
-                ->where(['cll_lead_id' => $this->id])
-                ->cache($this->cacheDuration)
-                ->count();
-        }
-        return (int) Call::find()
+        $query = Call::find()
             ->where(['c_lead_id' => $this->id])
-            ->cache($this->cacheDuration)
-            ->count();
+            ->cache($this->cacheDuration);
+
+        if ($onlyParent) {
+            $query->andWhere(['c_parent_id' => null]);
+        }
+        return (int) $query->count();
     }
 
     /**

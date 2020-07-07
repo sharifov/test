@@ -219,10 +219,10 @@ use yii\widgets\ActiveForm;
 
     <div class="row">
         <div class="col-md-1">
-            <?= $form->field($model, 'emailsQtyFrom')->textInput() ?>
+            <?= $form->field($model, 'callsQtyFrom')->textInput() ?>
         </div>
         <div class="col-md-1">
-            <?= $form->field($model, 'emailsQtyTo')->textInput() ?>
+            <?= $form->field($model, 'callsQtyTo')->textInput() ?>
         </div>
         <div class="col-md-1">
             <?= $form->field($model, 'smsQtyFrom')->textInput() ?>
@@ -231,10 +231,10 @@ use yii\widgets\ActiveForm;
             <?= $form->field($model, 'smsQtyTo')->textInput() ?>
         </div>
         <div class="col-md-1">
-            <?= $form->field($model, 'callsQtyFrom')->textInput() ?>
+            <?= $form->field($model, 'emailsQtyFrom')->textInput() ?>
         </div>
         <div class="col-md-1">
-            <?= $form->field($model, 'callsQtyTo')->textInput() ?>
+            <?= $form->field($model, 'emailsQtyTo')->textInput() ?>
         </div>
         <div class="col-md-1">
             <?= $form->field($model, 'chatsQtyFrom')->textInput() ?>
