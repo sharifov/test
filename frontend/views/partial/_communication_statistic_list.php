@@ -2,7 +2,6 @@
 
 /**
  * @var StatisticsHelper $statistics
- *
  */
 
 use sales\auth\Auth;
