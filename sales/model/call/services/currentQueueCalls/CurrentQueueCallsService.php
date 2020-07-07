@@ -174,6 +174,9 @@ class CurrentQueueCallsService
                 $source = $call->c_parent_call_sid ? $call->cParent->getSourceName() : '';
             } else {
                 $source = $call->isJoin() ? $call->getSourceName() : '';
+                if ($source === '-') {
+                    $source = '';
+                }
             }
 
             //todo remove after removed not conference call

@@ -1237,7 +1237,9 @@ class Call extends \yii\db\ActiveRecord
                 if ($this->isJoin()) {
                     $source = $this->c_parent_call_sid ? $this->cParent->getSourceName() : '';
                 } else {
-                    $source = $this->getSourceName();
+                    if (($source = $this->getSourceName()) === '-') {
+                        $source = '';
+                    }
                 }
 
                 $conference = null;
