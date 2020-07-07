@@ -75,7 +75,8 @@ class CasesStatus
         self::STATUS_TRASH => [
             'Wrong Number' => 'Wrong Number',
             'No assistance needed' => 'No assistance needed',
-            'Other' => 'Other'
+            'Duplicate' => 'Duplicate',
+            'Other' => 'Other',
         ]
     ];
 
