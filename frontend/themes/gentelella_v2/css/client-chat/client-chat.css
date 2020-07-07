@@ -84,11 +84,8 @@
      border-radius: 100%;
      width: 15px;
      height: 15px;
-     line-height: initial;
-     display: flex;
-     align-content: center;
-     align-items: center;
-     justify-content: center;
+     line-height: 0.9;
+    font-size: 10px;
 }
 ._cc-list-wrapper ._cc-list-item ._cc-item-icon-wrapper ._cc-item-icon-round ._cc-status-wrapper ._cc-status {
     position: absolute;
