@@ -349,7 +349,7 @@ class OneTimeController extends Controller
      * @param string $toDate
      * @throws \yii\db\Exception
      */
-    public function actionSaleRefundRulesToCase(string $fromDate, string $toDate): void
+    public function actionSaleRefundRulesToCase(string $fromDate = '2010-01-01', string $toDate = '2021-01-01'): void
     {
         echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
@@ -358,58 +358,82 @@ class OneTimeController extends Controller
         $fromDate = date('Y-m-d', strtotime($fromDate));
         $toDate = date('Y-m-d', strtotime($toDate));
         $processed = $countItems = 0;
-        $statuses = [
-            CasesStatus::STATUS_PENDING,
-            CasesStatus::STATUS_PROCESSING,
-            CasesStatus::STATUS_FOLLOW_UP,
-        ];
 
-        $caseSales = Yii::$app->db->createCommand(
+        $cases = Yii::$app->db->createCommand(
         '
             SELECT 
-                case_sale.css_cs_id,
+                cases.cs_id,
+                cases.cs_client_id,
                 case_sale.css_sale_id
             FROM
-                case_sale
-            INNER JOIN 
                 cases
+            INNER JOIN
+                client_phone 
+                ON 
+                client_phone.client_id = cases.cs_client_id
+                AND 
+                (client_phone.type NOT IN (:not_type) OR client_phone.type IS NULL)
+            LEFT JOIN 
+                case_sale
                 ON
                 cases.cs_id = case_sale.css_cs_id
-                AND 
-                cases.cs_status IN (:status) 
-                AND
+            WHERE
                 DATE(cases.cs_created_dt) BETWEEN :from_date AND :to_date
+                AND 
+                (
+                    cases.cs_status = :statuses_pending
+                    OR
+                    cases.cs_status = :statuses_processing
+                    OR 
+                    cases.cs_status = :statuses_follow_up
+                )
+            GROUP BY 
+                cases.cs_id,
+                cases.cs_client_id,
+                case_sale.css_sale_id
             ',
             [
                 ':from_date' => $fromDate,
                 ':to_date' => $toDate,
-                ':status' => $statuses,
+                ':statuses_pending' => CasesStatus::STATUS_PENDING,
+                ':statuses_processing' => CasesStatus::STATUS_PROCESSING,
+                ':statuses_follow_up' => CasesStatus::STATUS_FOLLOW_UP,
+                ':not_type' => 9,
             ]
         )->queryAll();
 
         try {
-            $countItems = count($caseSales);
+            $countItems = count($cases);
             Console::startProgress(0, $countItems);
 
-            foreach ($caseSales as $key => $value) {
-                $job = new UpdateSaleFromBOJob();
-                $job->caseId = $value['css_cs_id'];
-                $job->saleId = $value['css_sale_id'];
-                Yii::$app->queue_job->priority(100)->push($job);
+            foreach ($cases as $key => $value) {
+                if (empty($value['css_sale_id'])) {
+                    $job = new CreateSaleFromBOJob();
+                    $job->case_id = $value['cs_id'];
+                    $job->phone = $this->getPhoneByClient($value['cs_client_id'])['phone'];
+                    Yii::$app->queue_job->priority(10)->push($job);
+                } else {
+                    $job = new UpdateSaleFromBOJob();
+                    $job->caseId = $value['cs_id'];
+                    $job->saleId = $value['css_sale_id'];
+                    Yii::$app->queue_job->priority(10)->push($job);
+                }
+
                 $processed ++;
                 Console::updateProgress($processed, $countItems);
             }
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableFormatter($throwable),
-                'OneTimeController:actionSaleRefundRulesToCase:Throwable' );
+                'OneTimeController:actionSaleToCase:Throwable' );
             echo Console::renderColoredString('%r --- Error : '. $throwable->getMessage() .' %n'), PHP_EOL;
         }
-
         Console::endProgress(false);
+
         $time_end = microtime(true);
         $time = number_format(round($time_end - $time_start, 2), 2);
+
         echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .
-            ' s] %gFind caseSales: %w[' . $countItems . '] %g Added to queue: %w[' . $processed . '] %n'), PHP_EOL;
+            ' s] %gFind cases: %w[' . $countItems . '] %g Added to queue: %w[' . $processed . '] %n'), PHP_EOL;
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
     }
