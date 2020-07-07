@@ -81,6 +81,11 @@ class MultipleUpdateForm extends Model
         return $this->user->id;
     }
 
+    public function getCreator(): Employee
+    {
+        return $this->user;
+    }
+
     public function getConvertedDeadline(): ?string
     {
         if ($this->deadline === null) {
