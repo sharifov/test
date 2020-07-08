@@ -173,7 +173,7 @@ class CurrentQueueCallsService
             if ($call->isJoin()) {
                 $source = $call->c_parent_call_sid ? $call->cParent->getSourceName() : '';
             } else {
-                $source = $call->isJoin() ? $call->getSourceName() : '';
+                $source = $call->getSourceName();
 
             }
             if ($source === '-') {

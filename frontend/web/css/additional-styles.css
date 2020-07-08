@@ -61,3 +61,41 @@
     border-color: #E7826C; }
 .call-filter__toggle--line-active.is-checked {
     background-color: #E7826C; }
+
+.phone-widget .call-pane__call-btns.is-on-call .calling-state-block i.fa-headphones-alt {
+    display: block;
+    transform: none;
+    color: #2a3f54;
+    font-size: 15px;
+}
+
+.phone-widget .call-pane-outgoing .contact-info-card {
+    padding-top: 0; }
+.phone-widget .call-pane-outgoing .contact-info-card__details {
+    border: 0 none;
+    padding-bottom: 0;
+    margin: 0; }
+.phone-widget .call-pane-outgoing .contact-info-card__line {
+    justify-content: center;
+    flex-direction: column;
+    align-items: center; }
+.phone-widget .call-pane-outgoing .contact-info-card__name {
+    display: flex;
+    align-items: center; }
+.phone-widget .call-pane-outgoing .contact-info-card__name strong  {
+    font-weight: normal;
+    font-size: 22px;
+    line-height: 26px;
+    color: #fff;
+    margin-bottom: 0; }
+.phone-widget .call-pane-outgoing .contact-info-card__call-type  {
+    font-weight: normal;
+    font-size: 16px;
+    line-height: 18px;
+    color: rgba(255, 255, 255, 0.6); }
+.phone-widget__header-actions a[data-call-in-progress="true"]:before {
+    right: -12px;
+}
+.phone-widget .call-pane .calling-state-block .call-in-action__time, .phone-widget .call-pane__start-call .call-in-action__time .more {
+    font-size: 12px;
+}

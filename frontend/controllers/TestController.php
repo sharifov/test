@@ -259,21 +259,21 @@ class TestController extends FController
 //        Notifications::publish('removeIncomingRequest', ['user_id' => 295], $callInfo);
 //        die;
 //
-        $tmp = 4;
+        $tmp = 2;
         $callInfo = [
 
-            'typeId' => 3,
+            'typeId' => 1,
             'type' => 'Inc ' . $tmp,
             'callId' => $tmp,
             'callSid' => 'sid' . $tmp,
             'fromInternal' => false,
-            'project' => 'wow',
-            'source' => 'Source',
+            'project' => 'hop',
+            'source' => 'Source new ',
 //            'status' => 'Ringing',
             'status' => 'In progress',
 //            'status' => 'Completed',
 //            'status' => 'Hold',
-            'isListen' => true,
+            'isListen' => false,
             'isCoach' => false,
             'isBarge' => false,
             'isMute' => false,
@@ -284,10 +284,10 @@ class TestController extends FController
                 'phone' => '+00 ' . $tmp
             ],
             'department' => 'Sales',
-//            'queue' => 'direct',
+//            'queue' => 'general',
 //            'queue' => 'hold',
             'queue' => 'inProgress',
-            'duration' => 0,
+            'duration' => 3595,
             'conference' => [
                     'sid' => 'conf' . $tmp,
                     'duration' => 0,
@@ -393,51 +393,28 @@ class TestController extends FController
         ];
 //        Notifications::publish('updateIncomingCall', ['user_id' => 295], $callInfo);
 //        Notifications::publish('callUpdate', ['user_id' => 295], $callInfo);
-        Notifications::publish('callUpdate', ['user_id' => 167], $callInfo);
-        die;
+//        Notifications::publish('callUpdate', ['user_id' => 295], $callInfo);
+//        die;
 
         $confData = [
             'data' => [
                 'command' => 'conferenceUpdate',
                 'call' => [
-                    'sid' => 'sid6',
+                    'sid' => 'sid2',
                 ],
                 'conference' => [
                     'sid' => 'conf' . $tmp,
                     'duration' => 0,
                     'participants' => [
                         [
-                            'callSid' => 'callSid1',
+                            'callSid' => 'sid2',
                             'avatar' => 'N',
                             'name' => 'Name 1',
                             'phone' => '+373 1',
                             'type' => 'coaching',
                             'duration' => 1
                         ],
-                        [
-                            'callSid' => 'callSid2',
-                            'avatar' => 'N',
-                            'name' => 'Name 2',
-                            'phone' => '+373 2',
-                            'type' => '',
-                            'duration' => 2
-                        ],
-                        [
-                            'callSid' => 'callSid3',
-                            'avatar' => 'N',
-                            'name' => 'Name 3',
-                            'phone' => '+373 3',
-                            'type' => '',
-                            'duration' => 3
-                        ],
-                        [
-                            'callSid' => 'callSid4',
-                            'avatar' => 'N',
-                            'name' => 'Name 1',
-                            'phone' => '+373 1',
-                            'type' => 'coaching',
-                            'duration' => 4
-                        ],
+
                         [
                             'callSid' => 'callSid5',
                             'avatar' => 'N',

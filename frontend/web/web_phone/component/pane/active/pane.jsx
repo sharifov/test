@@ -30,8 +30,10 @@ class ActivePane extends React.Component {
             <React.Fragment>
                 <CallInfo project={call.data.project} source={call.data.source}/>
                 <ActiveContactInfo call={call} />
-                <CallBtns call={call}/>
-                <SoundIndication/>
+                <div className="actions-container">
+                    <CallBtns call={call}/>
+                    <SoundIndication/>
+                </div>
                 <ActivePaneControls call={call} controls={this.props.controls}/>
             </React.Fragment>
         );
@@ -92,7 +94,7 @@ function CallBtns(props) {
                                     : 'on call'
                         }
                     </span>
-                    <span className="call-in-action__time"><PhoneWidgetTimer duration={call.getDuration()} timeStart={Date.now()}/></span>
+                    <span className="call-in-action__time"><PhoneWidgetTimer duration={call.getDuration()} timeStart={Date.now()} styleClass="more"/></span>
                 </div>
             </button>
             <button className="call-pane__end-call" id="cancel-active-call" data-call-sid={call.data.callSid}

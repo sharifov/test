@@ -45,6 +45,9 @@ class PhoneWidgetTimer extends React.Component {
     }
 
     render() {
+        if (this.props.styleClass && this.state.duration > 3599) {
+            return <span className={this.props.styleClass}>{this.formatDuration(this.state.duration)}</span>;
+        }
         return this.formatDuration(this.state.duration);
     }
 }

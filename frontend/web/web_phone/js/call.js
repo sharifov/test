@@ -174,6 +174,7 @@ var PhoneWidgetCall = function () {
         }
 
         if (typeof data.conference !== 'undefined' && data.conference !== null) {
+            storage.conference.remove(data.conference.sid);
             let conference = storage.conference.add(data.conference);
             if (conference === null) {
                 console.log('conference not added');
@@ -211,10 +212,9 @@ var PhoneWidgetCall = function () {
             return;
         }
 
-        let newConferenceCountParticipant = data.conference.participants.length;
-
         let conference = storage.conference.one(data.conference.sid);
         if (conference !== null) {
+            let newConferenceCountParticipant = data.conference.participants.length;
             let oldConferenceCountParticipant = conference.getCountParticipants();
             if (oldConferenceCountParticipant < 3 && newConferenceCountParticipant < 3) {
                 //todo
