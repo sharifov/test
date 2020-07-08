@@ -19,6 +19,7 @@ use common\models\UserProfile;
 use Faker\Provider\DateTime;
 use sales\access\EmployeeGroupAccess;
 use sales\access\EmployeeProjectAccess;
+use sales\model\clientChat\entity\ClientChat;
 use sales\repositories\lead\LeadBadgesRepository;
 use Yii;
 use yii\base\Model;
@@ -51,6 +52,15 @@ use sales\auth\Auth;
  * @property $emailOffers
  * @property $quoteType
  * @property int $l_is_test
+ *
+ * @property int|null $emailsQtyFrom
+ * @property int|null $emailsQtyTo
+ * @property int|null $smsQtyFrom
+ * @property int|null $smsQtyTo
+ * @property int|null $callsQtyFrom
+ * @property int|null $callsQtyTo
+ * @property int|null $chatsQtyFrom
+ * @property int|null $chatsQtyTo
  */
 class LeadSearch extends Lead
 {
@@ -118,6 +128,15 @@ class LeadSearch extends Lead
     public $departmentId;
     public $projectId;
 
+    public $emailsQtyFrom;
+    public $emailsQtyTo;
+    public $smsQtyFrom;
+    public $smsQtyTo;
+    public $callsQtyFrom;
+    public $callsQtyTo;
+    public $chatsQtyFrom;
+    public $chatsQtyTo;
+
     private $leadBadgesRepository;
 
     public function __construct($config = [])
@@ -160,26 +179,27 @@ class LeadSearch extends Lead
             ['l_call_status_id', 'integer'],
             [['defaultUserTz', 'reportTimezone', 'timeFrom', 'timeTo'], 'string'],
             [['quote_pnr'], 'string', 'min' => 5],
+            [
+                [
+                    'emailsQtyFrom', 'emailsQtyTo', 'smsQtyFrom', 'smsQtyTo',
+                    'callsQtyFrom', 'callsQtyTo', 'chatsQtyFrom', 'chatsQtyTo',
+                ],
+                'integer', 'min' => 0, 'max' => 1000
+            ],
         ];
     }
 
-    /**
-     * @inheritdoc
-     */
-    /*public function attributeLabels()
+
+    public function attributeLabels(): array
     {
-        $labels = parent::attributeLabels();
-
         $labels2 = [
-            'statuses' => 'Statuses',
-            'created_date_from' => 'Created date from',
-            'created_date_to' => 'Created date to',
+            'emailsQtyFrom' => 'Emails From', 'emailsQtyTo' => 'Emails To',
+			'smsQtyFrom' => 'Sms From', 'smsQtyTo' => 'Sms To',
+			'callsQtyFrom' => 'Calls From', 'callsQtyTo' => 'Calls To',
+			'chatsQtyFrom' => 'Chats From', 'chatsQtyTo' => 'Chats To',
         ];
-
-        $labels = array_merge($labels, $labels2);
-
-        return $labels;
-    }*/
+        return array_merge(parent::attributeLabels(), $labels2);
+    }
 
     /**
      * {@inheritdoc}
@@ -439,9 +459,159 @@ class LeadSearch extends Lead
 
             $query->andWhere(['IN', 'leads.id', $subQuery2]);
         }
-        /*  $sqlRaw = $query->createCommand()->getRawSql();
 
-        VarDumper::dump($sqlRaw, 10, true); exit; */
+        if ($this->emailsQtyFrom !== '' || $this->emailsQtyTo !== '') {
+            $query->leftJoin([
+                'emails' => Email::find()
+                    ->select([
+                        'e_lead_id',
+                        new Expression('COUNT(e_lead_id) AS cnt')
+                    ])
+                    ->groupBy(['e_lead_id'])
+            ], 'leads.id = emails.e_lead_id');
+
+            if ('' !== $this->emailsQtyFrom) {
+                if ((int) $this->emailsQtyFrom === 0 || (int) $this->emailsQtyTo === 0) {
+                    $query->andWhere(
+                        [
+                            'OR',
+                            ['>=', 'emails.cnt', $this->emailsQtyFrom],
+                            ['IS', 'emails.e_lead_id', null]
+                        ]
+                    );
+                } else {
+                    $query->andWhere(['>=', 'emails.cnt', $this->emailsQtyFrom]);
+                }
+            }
+            if ('' !== $this->emailsQtyTo) {
+                if ((int) $this->emailsQtyTo === 0 || (int) $this->emailsQtyFrom === 0) {
+                    $query->andWhere(
+                        [
+                            'OR',
+                            ['<=', 'emails.cnt', $this->emailsQtyTo],
+                            ['IS', 'emails.e_lead_id', null]
+                        ]
+                    );
+                } else {
+                    $query->andWhere(['<=', 'emails.cnt', $this->emailsQtyTo]);
+                }
+            }
+        }
+
+        if ($this->smsQtyFrom !== '' || $this->smsQtyTo !== '') {
+            $query->leftJoin([
+                'sms' => Sms::find()
+                    ->select([
+                        's_lead_id',
+                        new Expression('COUNT(s_lead_id) AS cnt')
+                    ])
+                    ->groupBy(['s_lead_id'])
+            ], 'leads.id = sms.s_lead_id');
+
+            if ('' !== $this->smsQtyFrom) {
+                if ((int) $this->smsQtyFrom === 0 || (int) $this->smsQtyTo === 0) {
+                    $query->andWhere(
+                        [
+                            'OR',
+                            ['>=', 'sms.cnt', $this->smsQtyFrom],
+                            ['IS', 'sms.s_lead_id', null]
+                        ]
+                    );
+                } else {
+                    $query->andWhere(['>=', 'sms.cnt', $this->smsQtyFrom]);
+                }
+            }
+            if ('' !== $this->smsQtyTo) {
+                if ((int) $this->smsQtyTo === 0 || (int) $this->smsQtyFrom === 0) {
+                    $query->andWhere(
+                        [
+                            'OR',
+                            ['<=', 'sms.cnt', $this->smsQtyTo],
+                            ['IS', 'sms.s_lead_id', null]
+                        ]
+                    );
+                } else {
+                    $query->andWhere(['<=', 'sms.cnt', $this->smsQtyTo]);
+                }
+            }
+        }
+
+        if ($this->chatsQtyFrom !== '' || $this->chatsQtyTo !== '') {
+            $query->leftJoin([
+                'chats' => ClientChat::find()
+                    ->select([
+                        'cch_lead_id',
+                        new Expression('COUNT(cch_lead_id) AS cnt')
+                    ])
+                    ->groupBy(['cch_lead_id'])
+            ], 'leads.id = chats.cch_lead_id');
+
+            if ('' !== $this->chatsQtyFrom) {
+                if ((int) $this->chatsQtyFrom === 0 || (int) $this->chatsQtyTo === 0) {
+                    $query->andWhere(
+                        [
+                            'OR',
+                            ['>=', 'chats.cnt', $this->chatsQtyFrom],
+                            ['IS', 'chats.cch_lead_id', null]
+                        ]
+                    );
+                } else {
+                    $query->andWhere(['>=', 'chats.cnt', $this->chatsQtyFrom]);
+                }
+            }
+            if ('' !== $this->chatsQtyTo) {
+                if ((int) $this->chatsQtyTo === 0 || (int) $this->chatsQtyFrom === 0) {
+                    $query->andWhere(
+                        [
+                            'OR',
+                            ['<=', 'chats.cnt', $this->chatsQtyTo],
+                            ['IS', 'chats.cch_lead_id', null]
+                        ]
+                    );
+                } else {
+                    $query->andWhere(['<=', 'chats.cnt', $this->chatsQtyTo]);
+                }
+            }
+        }
+
+        if ($this->callsQtyFrom !== '' || $this->callsQtyTo !== '') {
+            $query->leftJoin([
+                'calls' => Call::find()
+                    ->select([
+                        'c_lead_id',
+                        new Expression('COUNT(c_lead_id) AS cnt')
+                    ])
+                    ->where(['c_parent_id' => null])
+                    ->groupBy(['c_lead_id'])
+            ], 'leads.id = calls.c_lead_id');
+
+            if ('' !== $this->callsQtyFrom) {
+                if ((int) $this->callsQtyFrom === 0 || (int) $this->callsQtyTo === 0) {
+                    $query->andWhere(
+                        [
+                            'OR',
+                            ['>=', 'calls.cnt', $this->callsQtyFrom],
+                            ['IS', 'calls.c_lead_id', null]
+                        ]
+                    );
+                } else {
+                    $query->andWhere(['>=', 'calls.cnt', $this->callsQtyFrom]);
+                }
+            }
+            if ('' !== $this->callsQtyTo) {
+                if ((int) $this->callsQtyTo === 0 || (int) $this->callsQtyFrom === 0) {
+                    $query->andWhere(
+                        [
+                            'OR',
+                            ['<=', 'calls.cnt', $this->callsQtyTo],
+                            ['IS', 'calls.c_lead_id', null]
+                        ]
+                    );
+                } else {
+                    $query->andWhere(['<=', 'calls.cnt', $this->callsQtyTo]);
+                }
+            }
+        }
 
         return $dataProvider;
     }

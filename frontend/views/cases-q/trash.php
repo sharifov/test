@@ -9,6 +9,7 @@ use sales\auth\Auth;
 use sales\entities\cases\CaseCategory;
 use sales\entities\cases\CasesQSearch;
 use common\components\grid\cases\NeedActionColumn;
+use sales\helpers\communication\StatisticsHelper;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use sales\entities\cases\Cases;
@@ -119,6 +120,17 @@ $lists = new ListsAccess($user->id);
 					]
 				]),
 			],
+			[
+                'label' => 'Communication',
+                'value' => static function (CasesQSearch $model) {
+                    $statistics = new StatisticsHelper($model->cs_id, StatisticsHelper::TYPE_CASE);
+                    return Yii::$app->getView()->render('/partial/_communication_statistic_list', ['statistics' => $statistics->setCountAll()]);
+                },
+                'format' => 'raw',
+                'contentOptions' => [
+                    'class' => 'text-center'
+                ]
+            ],
 			[
 				'attribute' => 'cs_last_action_dt',
 				'label' => 'Last Action',

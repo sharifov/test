@@ -23,7 +23,7 @@ class UpdateSaleFromBOJob extends BaseObject implements JobInterface
     public int $requestTime = 120;
     public int $withFareRules = 0;
     public int $withRefundRules = 1;
-    public int $cacheDuration = 120;
+    public int $cacheDuration = 3 * 60;
 
     /**
      * @param Queue $queue
@@ -53,8 +53,10 @@ class UpdateSaleFromBOJob extends BaseObject implements JobInterface
                         throw new \RuntimeException('Response from detailRequestToBackOffice is empty. SaleId (' . $this->saleId . ')', 101);
                     }
                 }
-                if ($caseSale = CaseSale::findOne(['css_cs_id' => $this->caseId, 'css_sale_id' => $this->saleId])) {
-                    $casesSaleService->saveAdditionalData($caseSale, Cases::findOne($this->caseId), $refreshSaleData, true);
+                $case = Cases::findOne($this->caseId);
+                if ($case && $caseSale = CaseSale::findOne(['css_cs_id' => $this->caseId, 'css_sale_id' => $this->saleId])) {
+                    $casesSaleService->saveAdditionalData($caseSale, $case, $refreshSaleData, false);
+                    $saleTicketService->refreshSaleTicketBySaleData((int) $this->caseId, $caseSale, $refreshSaleData);
                 } else {
                     throw new \RuntimeException('CaseSale (' . $this->caseId . '/' . $this->saleId . ') not found.', 102);
                 }

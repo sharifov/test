@@ -4,8 +4,15 @@
 }
 ._cc-list-wrapper {
     height: auto;
-    max-height: 450px;
     overflow: scroll;
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+}
+._cc-wrapper {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 ._cc-list-wrapper ._cc-list-item {
     width: 100%;
@@ -66,7 +73,20 @@
     padding: 5px;
     background-color: #fff7f7f7;
 }
-
+._cc-list-wrapper ._cc-list-item ._cc-item-icon-wrapper ._cc-item-icon-round ._cc-chat-unread-message {
+    position: absolute;
+    top: -5px;
+    right: 0;
+    width: 16px;
+    height: 16px;
+}._cc-list-wrapper ._cc-list-item ._cc-item-icon-wrapper ._cc-item-icon-round ._cc-chat-unread-message .badge {
+     padding: 3px;
+     border-radius: 100%;
+     width: 15px;
+     height: 15px;
+     line-height: 0.9;
+    font-size: 10px;
+}
 ._cc-list-wrapper ._cc-list-item ._cc-item-icon-wrapper ._cc-item-icon-round ._cc-status-wrapper ._cc-status {
     position: absolute;
     top: 0;
@@ -97,6 +117,7 @@
 #_channel_list_wrapper {
     border: 1px solid lightgrey;
     border-radius: 3px;
+    height: calc(100vh - 138px);
 }
 
 #_cc-load {
@@ -159,4 +180,14 @@
     font-size: 16px;
     font-weight: 600;
     text-transform: capitalize;
+}
+._cc-list-item-info {
+    display: flex;
+    flex-direction: column;
+}
+._cc-list-item-info span {
+    margin-bottom: 5px;
+}
+._cc-list-item-info span:last-child {
+    margin-bottom: 0;
 }

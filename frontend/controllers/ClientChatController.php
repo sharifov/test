@@ -1,6 +1,7 @@
 <?php
 namespace frontend\controllers;
 
+use common\models\Notifications;
 use common\models\VisitorLog;
 use sales\auth\Auth;
 use sales\helpers\app\AppHelper;
@@ -10,6 +11,7 @@ use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\repositories\ClientChatUserAccessRepository\ClientChatUserAccessRepository;
 use sales\repositories\NotFoundException;
+use sales\services\clientChatMessage\ClientChatMessageService;
 use yii\data\ActiveDataProvider;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
@@ -20,6 +22,7 @@ use yii\helpers\ArrayHelper;
  *
  * @property ClientChatRepository $clientChatRepository
  * @property ClientChatUserAccessRepository $clientChatUserAccessRepository
+ * @property ClientChatMessageService $clientChatMessageService
  */
 class ClientChatController extends FController
 {
@@ -32,12 +35,23 @@ class ClientChatController extends FController
 	 * @var ClientChatUserAccessRepository
 	 */
 	private ClientChatUserAccessRepository $clientChatUserAccessRepository;
+	/**
+	 * @var ClientChatMessageService
+	 */
+	private ClientChatMessageService $clientChatMessageService;
 
-	public function __construct($id, $module, ClientChatRepository $clientChatRepository, ClientChatUserAccessRepository $clientChatUserAccessRepository, $config = [])
+	public function __construct(
+		$id,
+		$module,
+		ClientChatRepository $clientChatRepository,
+		ClientChatUserAccessRepository $clientChatUserAccessRepository,
+		ClientChatMessageService $clientChatMessageService,
+		$config = [])
 	{
 		parent::__construct($id, $module, $config);
 		$this->clientChatRepository = $clientChatRepository;
 		$this->clientChatUserAccessRepository = $clientChatUserAccessRepository;
+		$this->clientChatMessageService = $clientChatMessageService;
 	}
 
 	/**
@@ -66,7 +80,7 @@ class ClientChatController extends FController
 
 		/** @var $channels ClientChatChannel[] */
 		if ($channels) {
-			$query = ClientChat::find()->orderBy(['cch_created_dt' => SORT_DESC]);
+			$query = ClientChat::find()->orderBy(['cch_created_dt' => SORT_DESC])->byOwner(Auth::id());
 
 			if ($channelId) {
 				$query->byChannel($channelId);
@@ -83,6 +97,7 @@ class ClientChatController extends FController
 
 		try {
 			$clientChat = $this->clientChatRepository->findByRid($rid);
+			$this->clientChatMessageService->discardUnreadMessages($clientChat->cch_id, $clientChat->cch_owner_user_id);
 		} catch (NotFoundException $e) {
 			$clientChat = null;
 		}
@@ -132,6 +147,7 @@ class ClientChatController extends FController
 		];
 		try {
 			$clientChat = $this->clientChatRepository->findById($cchId);
+			$this->clientChatMessageService->discardUnreadMessages($clientChat->cch_id, $clientChat->cch_owner_user_id);
 
 			$result['html'] = $this->renderPartial('partial/_client-chat-info', [
 				'clientChat' => $clientChat,

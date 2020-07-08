@@ -299,6 +299,33 @@ use frontend\extensions\DatePicker;
     </div>
 
     <div class="row">
+        <div class="col-md-1">
+            <?= $form->field($model, 'callsQtyFrom')->textInput() ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'callsQtyTo')->textInput() ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'smsQtyFrom')->textInput() ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'smsQtyTo')->textInput() ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'emailsQtyFrom')->textInput() ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'emailsQtyTo')->textInput() ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'chatsQtyFrom')->textInput() ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'chatsQtyTo')->textInput() ?>
+        </div>
+    </div>
+
+    <div class="row">
         <div class="col-md-12">
             <br>
             <div class="form-group text-center">

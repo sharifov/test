@@ -3,6 +3,8 @@
 namespace frontend\widgets\notification;
 
 use common\models\Notifications;
+use sales\model\clientChat\entity\ClientChat;
+use sales\services\clientChatMessage\ClientChatMessageService;
 use yii\bootstrap\Widget;
 use yii\caching\TagDependency;
 
@@ -26,7 +28,16 @@ class NotificationWidget extends Widget
 
         $notifications = $this->processPopupNotifications($result['notifications']);
 
-        return $this->render('notifications', ['notifications' => $notifications, 'count' => $result['count']]);
+		$clientChatMessageService = \Yii::createObject(ClientChatMessageService::class);
+		$totalUnreadMessages = $clientChatMessageService->getCountOfTotalUnreadMessages($this->userId) ?: '';
+		$chatsWithUnreadMessages = ClientChat::find()->byIds($clientChatMessageService->getChatWithUnreadMessages($this->userId))->all();
+
+        return $this->render('notifications', [
+        	'notifications' => $notifications,
+			'count' => $result['count'],
+			'totalUnreadMessages' => $totalUnreadMessages,
+			'chatsWithUnreadMessages' => $chatsWithUnreadMessages
+		]);
     }
 
     /**

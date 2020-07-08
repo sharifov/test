@@ -5,6 +5,7 @@ $(document).on('click', '#_cc-access-wg', function () {
 function toggleClientChatAccess() {
     $('._cc-box').toggleClass('is-visible');
     $('.fab').toggleClass('is-visible');
+    window.enableTimer();
 }
 
 $(document).on('click', '._cc-access-action', function (e) {

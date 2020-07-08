@@ -3,13 +3,16 @@
 namespace sales\model\clientChatRequest\useCase\api\create;
 
 use common\components\jobs\ClientChatJob;
+use common\models\Notifications;
 use common\models\VisitorLog;
+use frontend\widgets\clientChat\ClientChatAccessMessage;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatData\entity\ClientChatData;
 use sales\model\clientChatMessage\ClientChatMessageRepository;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\services\client\ClientManageService;
+use sales\services\clientChatMessage\ClientChatMessageService;
 use yii\helpers\VarDumper;
 
 /**
@@ -20,6 +23,7 @@ use yii\helpers\VarDumper;
  * @property ClientChatRepository $clientChatRepository
  * @property ClientManageService $clientManageService
  * @property ClientChatMessageRepository $clientChatMessageRepository
+ * @property ClientChatMessageService $clientChatMessageService
  */
 class ClientChatRequestService
 {
@@ -40,6 +44,10 @@ class ClientChatRequestService
 	 * @var ClientChatMessageRepository
 	 */
 	private ClientChatMessageRepository $clientChatMessageRepository;
+	/**
+	 * @var ClientChatMessageService
+	 */
+	private ClientChatMessageService $clientChatMessageService;
 
 	/**
 	 * ClientChatRequestService constructor.
@@ -52,13 +60,15 @@ class ClientChatRequestService
 		ClientChatRequestRepository $clientChatRequestRepository,
 		ClientChatRepository $clientChatRepository,
 		ClientManageService $clientManageService,
-		ClientChatMessageRepository $clientChatMessageRepository
+		ClientChatMessageRepository $clientChatMessageRepository,
+		ClientChatMessageService $clientChatMessageService
 	)
 	{
 		$this->clientChatRequestRepository = $clientChatRequestRepository;
 		$this->clientChatRepository = $clientChatRepository;
 		$this->clientManageService = $clientManageService;
 		$this->clientChatMessageRepository = $clientChatMessageRepository;
+		$this->clientChatMessageService = $clientChatMessageService;
 	}
 
 	/**
@@ -154,5 +164,8 @@ class ClientChatRequestService
 		$clientChat = $this->clientChatRepository->findByRid($form->data['rid'] ?? '');
 		$message = ClientChatMessage::createByApi($form, $clientChat, $clientChatRequest);
 		$this->clientChatMessageRepository->save($message, 0);
+		if ($clientChat->cch_owner_user_id && $clientChatRequest->isGuestUttered()) {
+			$this->clientChatMessageService->increaseUnreadMessages($clientChat->cch_id, $clientChat->cch_owner_user_id);
+		}
 	}
 }
