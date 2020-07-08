@@ -29,23 +29,28 @@ class EmailSelect2Widget extends Select2
     public $delay = 300;
     public $placeholder = '';
     public $url;
+    public $withProject = false;
     public int $projectId = 0;
 
     public function init(): void
     {
         parent::init();
 
-        if ($this->projectId > 0) {
-            $js = 'function(params) { return {q:params.term, project:' . $this->projectId . '}; }';
+        if ($this->withProject) {
+            if ($this->projectId > 0) {
+                $js = 'function(params) { return {q:params.term, project:' . $this->projectId . '}; }';
+            } else {
+                $js = 'function(params) { 
+                    let projectId = $("#project_id").val();                
+                    if (projectId.length === 0) {
+                        alert("Please select a project first");
+                        return false;
+                    }    
+                    return {q:params.term, project:projectId}; 
+                }';
+            }
         } else {
-            $js = 'function(params) { 
-                let projectId = $("#project_id").val();                
-                if (projectId.length === 0) {
-                    alert("Please select a project first");
-                    return false;
-                }    
-                return {q:params.term, project:projectId}; 
-            }';
+            $js = 'function(params) { return {q:params.term}; }';
         }
 
         $this->url = $this->url ?: Url::to(['/email-list/list-ajax']);
