@@ -18,16 +18,9 @@ $isSuperAdmin = $user->isSuperAdmin();
 ?>
 <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
     <div class="menu_section">
-<!--        <br>-->
-<!--        <br>-->
-<!--        <br>-->
         <?php
 
         $menuItems = [];
-
-
-
-
 //        if ($user->canCall()) {
 //            $menuItems[] = ['label' => 'Auto redial', 'url' => ['/call/auto-redial'], 'icon' => 'tty'];
 //        }
@@ -103,10 +96,8 @@ $isSuperAdmin = $user->isSuperAdmin();
         }
 
 
-
         $menuItems[] = ['label' => 'Search Sale', 'url' => ['/sale/search'], 'icon' => 'search'];
         //$menuItems[] = ['label' => 'Search Cases', 'url' => ['/cases/index'], 'icon' => 'search'];
-
 
         if ($isAdmin || $user->isKpiEnable()) {
             $menuItems[] = ['label' => 'KPI <span id="kpi" class="label-info label pull-right"></span> ', 'url' => ['/kpi/index'], 'icon' => 'money'];
@@ -473,11 +464,12 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Leads Report', 'url' => ['/report/leads-report'], 'icon' => 'table'],
                 ['label' => 'Agent Leads Report', 'url' => ['/stats/leads-stats'], 'icon' => 'table'],
                 ['label' => 'Case Categories Report', 'url' => ['/case-category/report'], 'icon' => 'table'],
+                ['label' => 'Clients Chat Report', 'url' => ['/client-chat/report'], 'icon' => 'table'],
                 ['label' => 'Calls Stats', 'url' => ['/stats/calls-graph'], 'icon' => 'line-chart'],
                 ['label' => 'SMS Stats', 'url' => ['/stats/sms-graph'], 'icon' => 'line-chart'],
                 ['label' => 'Emails Stats', 'url' => ['/stats/emails-graph'], 'icon' => 'line-chart'],
+                ['label' => 'Clients Chat Stats', 'url' => ['/client-chat/stats'], 'icon' => 'line-chart'],
                 ['label' => 'Stats Employees', 'url' => ['/stats/index'], 'icon' => 'users'],
-
                 ['label' => 'User Stats', 'url' => ['/user-connection/stats'], 'icon' => 'area-chart'],
                 ['label' => 'Call User Map', 'url' => ['/call/user-map'], 'icon' => 'map'],
                 ['label' => 'Real-time User Map', 'url' => ['/call/realtime-user-map'], 'icon' => 'map'],

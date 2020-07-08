@@ -54,9 +54,9 @@ use yii\db\ActiveRecord;
  */
 class ClientChat extends \yii\db\ActiveRecord
 {
-	private const STATUS_GENERATED = 1;
-	private const STATUS_CLOSED = 9;
-	private const STATUS_PENDING = 2;
+	public const STATUS_GENERATED = 1;
+    public const STATUS_CLOSED = 9;
+    public const STATUS_PENDING = 2;
 
 	private const STATUS_LIST = [
 		self::STATUS_GENERATED => 'Generated',
