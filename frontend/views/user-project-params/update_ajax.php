@@ -49,7 +49,8 @@ use borales\extensions\phoneInput\PhoneInput;
         'data' => $model->upp_email_list_id ? [
             $model->upp_email_list_id => $model->emailList->el_email
         ] : [],
-        'projectId' => $model->uppProject->id
+        'projectId' => $model->uppProject->id,
+        'withProject' => true,
     ]) ?>
 
     <?php /* = $form->field($model, 'upp_tw_phone_number')->widget(PhoneInput::class, [
