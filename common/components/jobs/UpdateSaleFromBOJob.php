@@ -35,6 +35,8 @@ class UpdateSaleFromBOJob extends BaseObject implements JobInterface
             if($this->checkParams()) {
                 /** @var CasesSaleService $casesSaleService */
                 $casesSaleService = Yii::createObject(CasesSaleService::class);
+                /** @var SaleTicketService $saleTicketService */
+                $saleTicketService = Yii::createObject(SaleTicketService::class);
 
                 $cacheKeySale = 'detailRequestToBackOffice_' . $this->saleId;
                 $refreshSaleData = Yii::$app->cache->get($cacheKeySale);
@@ -53,7 +55,8 @@ class UpdateSaleFromBOJob extends BaseObject implements JobInterface
                 }
                 $case = Cases::findOne($this->caseId);
                 if ($case && $caseSale = CaseSale::findOne(['css_cs_id' => $this->caseId, 'css_sale_id' => $this->saleId])) {
-                    $casesSaleService->saveAdditionalData($caseSale, $case, $refreshSaleData, true);
+                    $casesSaleService->saveAdditionalData($caseSale, $case, $refreshSaleData, false);
+                    $saleTicketService->refreshSaleTicketBySaleData((int) $this->caseId, $caseSale, $refreshSaleData);
                 } else {
                     throw new \RuntimeException('CaseSale (' . $this->caseId . '/' . $this->saleId . ') not found.', 102);
                 }
