@@ -4601,7 +4601,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
             }
 
             $chatText = '<span title="Client Chat"><i class="fa fa-weixin warning"></i> ' .
-                $this->getCountEmails(Email::TYPE_OUTBOX) .'/'.  $this->getCountEmails(Email::TYPE_INBOX) . '</span>';
+                $this->getCountClientChat() . '</span>';
             if (Auth::can('/client-chat-crud/index')) {
                 $str .= Html::a($chatText,
                     Url::to(['/client-chat-crud/index', 'ClientChatSearch[cch_lead_id]'  => $this->id]), $linkAttributes);

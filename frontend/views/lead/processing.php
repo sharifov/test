@@ -139,9 +139,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 return $clientName . $str;
             },
-            'options' => [
-                'style' => 'width:160px'
-            ]
+            'contentOptions' => [
+                'style' => 'width:210px',
+            ],
         ],
         /*[
             'attribute' => 'clientTime',
