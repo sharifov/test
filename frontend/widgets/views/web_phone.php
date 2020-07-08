@@ -353,14 +353,16 @@ use yii\helpers\Html;
             return false;
         }
 
+        let call = null;
         if (typeof PhoneWidgetCall === 'object') {
-            let call = PhoneWidgetCall.queues.active.one(callSid);
-
+            call = PhoneWidgetCall.queues.active.one(callSid);
             if (call === null) {
-                createNotify('Hangup', 'Not found Call on Active Queue', 'error');
-                return false;
+                call = PhoneWidgetCall.queues.outgoing.one(callSid);
+                if (call === null) {
+                    createNotify('Hangup', 'Not found Call on Active or Outgoing Queue', 'error');
+                    return false;
+                }
             }
-
             if (!call.setHangupRequestState()) {
                 return false;
             }
@@ -391,11 +393,8 @@ use yii\helpers\Html;
                         oldActiveCallBtn.prop('disabled', false);
                     }
 
-                    if (typeof PhoneWidgetCall === 'object') {
-                        let call = PhoneWidgetCall.queues.active.one(callSid);
-                        if (call !== null) {
-                            call.unSetHangupRequestState();
-                        }
+                    if (call !== null) {
+                        call.unSetHangupRequestState();
                     }
                 }
             })
@@ -404,11 +403,9 @@ use yii\helpers\Html;
                 if (oldActiveCallBtn !== null) {
                     oldActiveCallBtn.prop('disabled', false);
                 }
-                if (typeof PhoneWidgetCall === 'object') {
-                    let call = PhoneWidgetCall.queues.active.one(callSid);
-                    if (call !== null) {
-                        call.unSetHangupRequestState();
-                    }
+
+                if (call !== null) {
+                    call.unSetHangupRequestState();
                 }
             })
     }

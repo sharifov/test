@@ -16,4 +16,14 @@ class Scopes extends \yii\db\ActiveQuery
 	{
 		return $this->andWhere(['IN', 'cch_channel_id', $ids]);
 	}
+
+	public function byIds(array $ids): self
+	{
+		return $this->andWhere(['IN', 'cch_id', $ids]);
+	}
+
+	public function byOwner(int $userId): self
+	{
+		return $this->andWhere(['cch_owner_user_id' => $userId]);
+	}
 }

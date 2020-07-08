@@ -246,6 +246,14 @@ $js = <<<JS
                                 }
                              }
                         }
+                        
+                        if (obj.cmd === 'clientChatUnreadMessage') {
+                            if(obj.data.totalUnreadMessages) {
+                                $('._cc_unread_messages').html(obj.data.totalUnreadMessages);
+                            } else {
+                                $('._cc_unread_messages').html('');
+                            }
+                        }
                     }
                     // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
                 } catch (error) {

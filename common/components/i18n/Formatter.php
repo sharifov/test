@@ -449,6 +449,22 @@ class Formatter extends \yii\i18n\Formatter
 		return '--';
 	}
 
+	public function asTimer(string $dateTime, string $timerSpanClass = 'label label-info')
+	{
+		if (!$dateTime) {
+			return $this->nullDisplay;
+		}
+
+		$currentTime = time();
+		$dateTime = strtotime($dateTime);
+
+		$diff = abs($currentTime-$dateTime);
+
+		$icon = Html::tag('i', '', ['class' => 'fas fa-hourglass-end']);
+		$timerSpan = Html::tag('span', '', ['class' => 'enable-timer ' . $timerSpanClass, 'data-seconds' => $diff]);
+		return Html::tag('span', $icon . ' ' . $timerSpan);
+	}
+
 	/**
 	 * @param $statusId
 	 * @return string|null

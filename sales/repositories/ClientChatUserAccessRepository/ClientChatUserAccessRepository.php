@@ -88,7 +88,7 @@ class ClientChatUserAccessRepository extends Repository
 		}
 	}
 
-	public function sendNotifications(ClientChatUserAccess $access): void
+	private function sendNotifications(ClientChatUserAccess $access): void
 	{
 		$data = [];
 		if ($access->isAccept()) {

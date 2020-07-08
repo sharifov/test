@@ -86,8 +86,12 @@
         }
     });
 
-    window.clientChatRequest = function () {
+    window.enableTimer = function () {
+        $('.enable-timer').each( function (i, e) {
+            let seconds = $(e).attr('data-seconds');
 
+            $(e).timer({format: '%H:%M:%S', seconds: seconds}).timer('start');
+        });
     }
 
 })(window, $);

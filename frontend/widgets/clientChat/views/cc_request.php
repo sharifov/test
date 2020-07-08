@@ -1,5 +1,6 @@
 <?php
 
+use common\components\i18n\Formatter;
 use frontend\widgets\clientChat\ClientChatAsset;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 
@@ -32,7 +33,7 @@ $accessUrl = \yii\helpers\Url::to('/client-chat/access-manage');
                             <div class="_cc-client-info">
                                 <span class="_cc-client-name">
                                     <i class="fa fa-user"></i>
-                                    <?= $item->ccuaCch->cchClient ? $item->ccuaCch->cchClient->full_name : 'ClientName' ?>
+                                    <?= $item->ccuaCch->cchClient && $item->ccuaCch->cchClient->full_name ? $item->ccuaCch->cchClient->full_name : 'Guest-' . $item->ccuaCch->cch_id ?>
                                 </span>
 
                                 <?php if ($item->ccuaCch->cchClient && $item->ccuaCch->cchClient->clientEmails): ?>
@@ -52,6 +53,20 @@ $accessUrl = \yii\helpers\Url::to('/client-chat/access-manage');
                                         </span>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
+
+                                <span class="_cc-request-created">
+                                    <?php if (Yii::$app->formatter instanceof Formatter): ?>
+                                        <?= Yii::$app->formatter->asByUserDateTime($item->ccua_created_dt) ?>
+                                    <?php else: ?>
+										<?= Yii::$app->formatter->asDatetime($item->ccua_created_dt) ?>
+									<?php endif; ?>
+                                </span>
+
+                                    <?php if (Yii::$app->formatter instanceof Formatter): ?>
+                                    <span>
+                                        <?= Yii::$app->formatter->asTimer($item->ccua_created_dt) ?>
+                                    </span>
+                                    <?php endif; ?>
                             </div>
 
                             <div class="_cc-data">
@@ -62,6 +77,8 @@ $accessUrl = \yii\helpers\Url::to('/client-chat/access-manage');
                                 <?php if ($item->ccuaCch->cchProject): ?>
                                     <span class="label label-default"><?= $item->ccuaCch->cchProject->name ?></span>
                                 <?php endif; ?>
+
+                                <span class="label label-default"><?= $item->ccuaCch->cchChannel->ccc_name ?></span>
                             </div>
 
                             <div class="_cc-action">

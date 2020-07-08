@@ -98,7 +98,7 @@ $fromType = 'client';
 <?php if($model['type'] === 'email'):
 	$mail = Email::findOne($model['id']);
 	if($mail):
-        $unsubscribedEmails = array_column($mail->eProject->emailUnsubscribes, 'eu_email');
+        $unsubscribedEmails = array_column($mail->eProject ? $mail->eProject->emailUnsubscribes : [], 'eu_email');
 
 		if($mail->e_status_id == Email::STATUS_DONE) {
 			$statusClass = 'success';
