@@ -140,13 +140,12 @@ class Setting extends \yii\db\ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
         if (!$insert && isset($changedAttributes['s_value'])){
-            $url = Url::to(['setting/view', 'id' => $this->s_id]);
             $staff = Employee::getAllEmployeesByRole([Employee::ROLE_SUPER_ADMIN, Employee::ROLE_ADMIN]);
             foreach ($staff as $unit){
                 Notifications::create(
                     $unit->id,
                     'Setting Changed: ('. $this->s_id .')',
-                    'Site setting: '. $this->s_name .' (<a href='.$url.'>'. $this->s_id. '</a>) has been changed <br>from <pre><code>' . $changedAttributes['s_value'] .'</code></pre> to <pre><code>'. $this->s_value .'</code></pre> by '. $this->sUpdatedUser->username,
+                    'Site setting: '. $this->s_name .' (id:'. $this->s_id .') has been changed from '. $changedAttributes['s_value'] .' to '. $this->s_value .' by '. $this->sUpdatedUser->username,
                     Notifications::TYPE_INFO, true
                 );
             }
