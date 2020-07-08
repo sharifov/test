@@ -6,6 +6,7 @@
  */
 
 use yii\bootstrap4\Alert;
+use yii\widgets\DetailView;
 
 ?>
 
@@ -13,16 +14,19 @@ use yii\bootstrap4\Alert;
 	<div class="col-md-6">
         <?php if ($clientChat && $clientChat->cchData): ?>
             <h4>Client chat additional data</h4>
-            <?= \yii\widgets\DetailView::widget([
+            <?= DetailView::widget([
                 'model' => $clientChat->cchData,
                 'attributes' => [
-                    'cch_title',
-                    'cch_description',
-                    'cch_case_id',
-                    'cch_lead_id',
-                    'cch_status_id',
-                    'cch_note',
-                    'cch_ua'
+                    'ccd_title',
+                    'ccd_country',
+                    'ccd_region',
+                    'ccd_city',
+                    'ccd_latitude',
+                    'ccd_longitude',
+                    'ccd_url',
+                    'ccd_referrer',
+                    'ccd_timezone',
+                    'ccd_local_time'
                 ]
             ]) ?>
         <?php else: ?>
@@ -37,7 +41,7 @@ use yii\bootstrap4\Alert;
     <div class="col-md-6">
         <?php if ($visitorLog): ?>
             <h4>Visitor log</h4>
-			<?= \yii\widgets\DetailView::widget([
+			<?= DetailView::widget([
 				'model' => $visitorLog,
 				'attributes' => [
 					'vl_project_id:projectName',

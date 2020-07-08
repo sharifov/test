@@ -109,6 +109,9 @@ $js = <<<JS
  if ({$accessExist}) {
     toggleClientChatAccess();
  }
+$("#client-chat-box-pjax").on("pjax:end", function() {
+    window.enableTimer();
+});
 JS;
 
 $this->registerJs($js);

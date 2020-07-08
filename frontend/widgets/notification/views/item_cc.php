@@ -14,16 +14,20 @@ if ($clientChat->cchDep) {
 if ($clientChat->cchProject) {
     $message .= Html::tag('span', $clientChat->cchProject->name, ['class' => 'label label-success']);
 }
+
+$countMessages = ClientChatMessageHelper::getCountOfChatUnreadMessage($clientChat->cch_id, $clientChat->cch_owner_user_id);
 ?>
 
+<?php if ($countMessages): ?>
 <li>
-	<a href="<?= Url::to(['/client-chat/index', 'rid' => $clientChat->cch_rid]) ?>">
+	<a href="<?= Url::to(['/client-chat/index', 'chid' => $clientChat->cch_id]) ?>">
 		<span class="glyphicon glyphicon-info-sign"> </span>
 		<span>
-            <span>You have unread messages: <?= Html::tag('span', ClientChatMessageHelper::getCountOfChatUnreadMessage($clientChat->cch_id, $clientChat->cch_owner_user_id), ['class' => 'label label-default']) ?> from <?= $clientChat->cchClient->full_name ?></span>
+            <span>You have unread messages: <?= Html::tag('span', $countMessages, ['class' => 'label label-default']) ?> from <?= $clientChat->cchClient->full_name ?></span>
         </span>
         <?php if ($message): ?>
         <span class="message"><?= $message ?></span>
         <?php endif; ?>
     </a>
 </li>
+<?php endif; ?>

@@ -13,11 +13,14 @@ use Yii;
  *
  * @property int $ccm_id
  * @property string $ccm_rid
+ * @property int $ccm_cch_id
  * @property int|null $ccm_client_id
  * @property int|null $ccm_user_id
  * @property string $ccm_sent_dt
  * @property array $ccm_body
  * @property int $ccm_has_attachment
+ * @property string $message
+ * @property string $username
  */
 class ClientChatMessage extends \yii\db\ActiveRecord
 {
@@ -62,7 +65,7 @@ class ClientChatMessage extends \yii\db\ActiveRecord
         return [
             [['ccm_rid', 'ccm_sent_dt', 'ccm_body'], 'required'],
             [['ccm_client_id', 'ccm_user_id'], 'default', 'value' => null],
-            [['ccm_client_id', 'ccm_user_id', 'ccm_has_attachment'], 'integer'],
+            [['ccm_client_id', 'ccm_user_id', 'ccm_has_attachment', 'ccm_cch_id'], 'integer'],
             [['ccm_sent_dt', 'ccm_body'], 'safe'],
             [['ccm_rid'], 'string', 'max' => 150],
         ];
@@ -119,6 +122,7 @@ class ClientChatMessage extends \yii\db\ActiveRecord
 	{
 		$message = new self();
 		$message->ccm_rid = $form->data['rid'] ?? '';
+		$message->ccm_cch_id = $clientChat->cch_id;
 		$date = new DateTime();
 		$date->setTimestamp($form->data['timestamp']/1000);
 		$message->ccm_sent_dt = $date->format('Y-m-d H:i:s');
@@ -136,7 +140,27 @@ class ClientChatMessage extends \yii\db\ActiveRecord
 		return $message;
 	}
 
-    /**
+	public function isMessageFromClient(): bool
+	{
+		return $this->ccm_client_id && !$this->ccm_user_id;
+	}
+
+	public function getMessage(): string
+	{
+		return $this->ccm_body['msg'] ?? '';
+	}
+
+	public function getUsername(): string
+	{
+		return $this->ccm_body['u']['username'] ?? 'NoName';
+	}
+
+	public static function find(): Scopes
+	{
+		return new Scopes(static::class);
+	}
+
+	/**
      * {@inheritdoc}
      */
     public function attributeLabels()
@@ -144,6 +168,7 @@ class ClientChatMessage extends \yii\db\ActiveRecord
         return [
             'ccm_id' => 'ID',
             'ccm_rid' => 'Room ID',
+            'ccm_cch_id' => 'Client Chat ID',
             'ccm_client_id' => 'Client ID',
             'ccm_user_id' => 'User ID',
             'ccm_sent_dt' => 'Sent',

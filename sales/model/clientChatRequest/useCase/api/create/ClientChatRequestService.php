@@ -3,14 +3,14 @@
 namespace sales\model\clientChatRequest\useCase\api\create;
 
 use common\components\jobs\ClientChatJob;
-use common\models\Notifications;
 use common\models\VisitorLog;
-use frontend\widgets\clientChat\ClientChatAccessMessage;
+use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatData\entity\ClientChatData;
 use sales\model\clientChatMessage\ClientChatMessageRepository;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
+use sales\repositories\NotFoundException;
 use sales\services\client\ClientManageService;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use yii\helpers\VarDumper;
@@ -113,7 +113,51 @@ class ClientChatRequestService
 		$client = $this->clientManageService->createByClientChatRequest($clientChatRequest);
 		$clientChat->cch_client_id = $client->id;
 		$this->clientChatRepository->save($clientChat);
+		$this->saveAdditionalData($clientChat, $form);
+	}
 
+	/**
+	 * @param ClientChatRequest $clientChatRequest
+	 */
+	private function roomConnected(ClientChatRequest $clientChatRequest): void
+	{
+		$clientChat = $this->clientChatRepository->getOrCreateByRequest($clientChatRequest);
+		$this->assignClientChatToChannel($clientChat);
+	}
+
+	private function assignClientChatToChannel(ClientChat $clientChat): void
+	{
+		$job = new ClientChatJob();
+		$job->priority = 1;
+		$job->clientChat = $clientChat;
+		\Yii::$app->queue_job->priority(90)->push($job);
+	}
+
+	/**
+	 * @param ClientChatRequestApiForm $form
+	 * @param ClientChatRequest $clientChatRequest
+	 */
+	private function saveMessage(ClientChatRequestApiForm $form, ClientChatRequest $clientChatRequest): void
+	{
+		try {
+			$clientChat = $this->clientChatRepository->findNotClosed($form->data['rid'] ?? '');
+		} catch (NotFoundException $e) {
+			$clientChat = $this->clientChatRepository->findByRid($form->data['rid'] ?? '');
+			$clientChat = $this->clientChatRepository->clone($clientChat, $clientChatRequest);
+			$this->clientChatRepository->save($clientChat);
+			$this->saveAdditionalData($clientChat, $form);
+			$this->assignClientChatToChannel($clientChat);
+		}
+
+		$message = ClientChatMessage::createByApi($form, $clientChat, $clientChatRequest);
+		$this->clientChatMessageRepository->save($message, 0);
+		if ($clientChat->cch_owner_user_id && $clientChatRequest->isGuestUttered()) {
+			$this->clientChatMessageService->increaseUnreadMessages($clientChat->cch_id, $clientChat->cch_owner_user_id);
+		}
+	}
+
+	private function saveAdditionalData(ClientChat $clientChat, ClientChatRequestApiForm $form): void
+	{
 		$visitorLog = VisitorLog::createByClientChatRequest($clientChat, $form->data);
 		if (!$visitorLog->validate()) {
 			foreach ($visitorLog->errors as $attribute => $error) {
@@ -139,33 +183,6 @@ class ClientChatRequestService
 			if (!$clientChatData->save(false)) {
 				\Yii::error('ClientChatData save failed: ' . VarDumper::dumpAsString($clientChatData->errors), 'ClientChatRequestService::guestConnected::clientChatData::save');
 			}
-		}
-	}
-
-	/**
-	 * @param ClientChatRequest $clientChatRequest
-	 */
-	private function roomConnected(ClientChatRequest $clientChatRequest): void
-	{
-		$clientChat = $this->clientChatRepository->getOrCreateByRequest($clientChatRequest);
-
-		$job = new ClientChatJob();
-		$job->priority = 1;
-		$job->clientChat = $clientChat;
-		\Yii::$app->queue_job->priority(90)->push($job);
-	}
-
-	/**
-	 * @param ClientChatRequestApiForm $form
-	 * @param ClientChatRequest $clientChatRequest
-	 */
-	private function saveMessage(ClientChatRequestApiForm $form, ClientChatRequest $clientChatRequest): void
-	{
-		$clientChat = $this->clientChatRepository->findByRid($form->data['rid'] ?? '');
-		$message = ClientChatMessage::createByApi($form, $clientChat, $clientChatRequest);
-		$this->clientChatMessageRepository->save($message, 0);
-		if ($clientChat->cch_owner_user_id && $clientChatRequest->isGuestUttered()) {
-			$this->clientChatMessageService->increaseUnreadMessages($clientChat->cch_id, $clientChat->cch_owner_user_id);
 		}
 	}
 }

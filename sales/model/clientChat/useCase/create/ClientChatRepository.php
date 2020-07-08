@@ -56,12 +56,33 @@ class ClientChatRepository
 		return $clientChat;
 	}
 
+	public function clone(ClientChat $clientChat, ClientChatRequest $clientChatRequest): ClientChat
+	{
+		$chat = new ClientChat();
+		$chat->cch_rid = $clientChat->cch_rid;
+		$chat->cch_ccr_id = $clientChatRequest->ccr_id;
+		$chat->cch_project_id = $clientChat->cch_project_id;
+		$chat->cch_dep_id = $clientChat->cch_dep_id;
+		$chat->cch_client_id = $clientChat->cch_client_id;
+		$chat->generated();
+		$chat->attachBehavior('user', BlameableBehaviorExceptApi::class);
+		return $chat;
+	}
+
 	public function findByRid(string $rid): ClientChat
 	{
 		if ($clientChat = ClientChat::findOne(['cch_rid' => $rid])) {
 			return $clientChat;
 		}
 		throw new NotFoundException('unable to find client chat by rid: ' . $rid);
+	}
+
+	public function findNotClosed(string $rid): ClientChat
+	{
+		if ($clientChat = ClientChat::find()->byRid($rid)->notClosed()->orderBy(['cch_id' => SORT_DESC])->one()) {
+			return $clientChat;
+		}
+		throw new NotFoundException('unable to find client chat that is not closed by rid: ' . $rid);
 	}
 
 	public function save(ClientChat $clientChat): ClientChat

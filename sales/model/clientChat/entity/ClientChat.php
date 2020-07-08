@@ -55,8 +55,8 @@ use yii\db\ActiveRecord;
 class ClientChat extends \yii\db\ActiveRecord
 {
 	public const STATUS_GENERATED = 1;
-    public const STATUS_CLOSED = 9;
-    public const STATUS_PENDING = 2;
+	public const STATUS_CLOSED = 9;
+	public const STATUS_PENDING = 2;
 
 	private const STATUS_LIST = [
 		self::STATUS_GENERATED => 'Generated',
@@ -67,7 +67,7 @@ class ClientChat extends \yii\db\ActiveRecord
 	private const STATUS_CLASS_LIST = [
 		self::STATUS_GENERATED => 'info',
 		self::STATUS_PENDING => 'warning',
-		self::STATUS_CLOSED => 'warning'
+		self::STATUS_CLOSED => 'danger'
 	];
 
 	public function behaviors(): array
@@ -221,6 +221,16 @@ class ClientChat extends \yii\db\ActiveRecord
 	public function generated(): void
 	{
 		$this->cch_status_id = self::STATUS_GENERATED;
+	}
+
+	public function close(): void
+	{
+		$this->cch_status_id = self::STATUS_CLOSED;
+	}
+
+	public function isClosed(): bool
+	{
+		return $this->cch_status_id === self::STATUS_CLOSED;
 	}
 
 	public static function getStatusClassList(): array

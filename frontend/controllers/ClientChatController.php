@@ -1,7 +1,6 @@
 <?php
 namespace frontend\controllers;
 
-use common\models\Notifications;
 use common\models\VisitorLog;
 use sales\auth\Auth;
 use sales\entities\chat\ChatGraphsSearch;
@@ -11,6 +10,7 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\entity\search\ClientChatSearch;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
+use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\repositories\ClientChatUserAccessRepository\ClientChatUserAccessRepository;
 use sales\repositories\NotFoundException;
 use sales\services\clientChatMessage\ClientChatMessageService;
@@ -73,7 +73,7 @@ class ClientChatController extends FController
 		];
 	}
 
-	public function actionIndex(int $channelId = null, int $page = 1, string $rid = '')
+	public function actionIndex(int $channelId = null, int $page = 1, int $chid = 0)
 	{
 		$channelsQuery = ClientChatChannel::find()
 			->joinWithCcuc(Auth::id());
@@ -94,15 +94,22 @@ class ClientChatController extends FController
 
 			$dataProvider = new ActiveDataProvider(['query' => $query, 'pagination' => ['pageSize' => self::CLIENT_CHAT_PAGE_SIZE]]);
 			if (\Yii::$app->request->isGet) {
-				$dataProvider->pagination->pageSize = $page*self::CLIENT_CHAT_PAGE_SIZE;
+				$dataProvider->pagination->pageSize = $page * self::CLIENT_CHAT_PAGE_SIZE;
 				$dataProvider->pagination->page = 0;
 			}
 		}
 
 		try {
-			$clientChat = $this->clientChatRepository->findByRid($rid);
+			$clientChat = $this->clientChatRepository->findById($chid);
 			$this->clientChatMessageService->discardUnreadMessages($clientChat->cch_id, $clientChat->cch_owner_user_id);
+
+			if ($clientChat->isClosed()) {
+				$history = ClientChatMessage::find()->byChhId($clientChat->cch_id)->all();
+			}
+
 		} catch (NotFoundException $e) {
+			$clientChat = null;
+		} catch (\DomainException $e) {
 			$clientChat = null;
 		}
 
@@ -124,7 +131,7 @@ class ClientChatController extends FController
 					'clientChats' => $dataProvider->getModels(),
 					'clientChatRid' => $clientChat ? $clientChat->cch_rid : ''
 				]);
-				$response['page'] = $page+1;
+				$response['page'] = $page + 1;
 			}
 
 			return $this->asJson($response);
@@ -137,7 +144,8 @@ class ClientChatController extends FController
 			'channelId' => $channelId,
 			'page' => $page,
 			'clientChat' => $clientChat,
-			'client' => $clientChat->cchClient ?? ''
+			'client' => $clientChat->cchClient ?? '',
+			'history' => $history ?? null
 		]);
 	}
 
@@ -258,4 +266,44 @@ class ClientChatController extends FController
             'dataProvider' => $dataProvider
         ]);
     }
+
+	public function actionAjaxClose()
+	{
+		$cchId = \Yii::$app->request->post('cchId');
+
+		$result = [
+			'error' => false,
+			'message' => ''
+		];
+
+		try {
+			$clientChat = $this->clientChatRepository->findById($cchId);
+			$clientChat->close();
+			$this->clientChatRepository->save($clientChat);
+		} catch (NotFoundException | \RuntimeException $e) {
+			$result['error'] = true;
+			$result['message'] = $e->getMessage();
+		}
+
+		return $this->asJson($result);
+	}
+
+	public function actionAjaxHistory()
+	{
+		$chatId = \Yii::$app->request->post('cchId');
+
+		try {
+			$clientChat = $this->clientChatRepository->findById($chatId);
+			if ($clientChat->isClosed()) {
+				$history = ClientChatMessage::find()->byChhId($clientChat->cch_id)->all();
+			}
+		} catch (NotFoundException $e) {
+			$clientChat = null;
+		}
+
+		return $this->renderAjax('partial/_chat_history', [
+			'history' => $history ?? null,
+			'clientChat' => $clientChat
+		]);
+	}
 }

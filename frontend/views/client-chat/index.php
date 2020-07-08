@@ -3,9 +3,11 @@
 use frontend\themes\gentelella_v2\assets\ClientChatAsset;
 use sales\auth\Auth;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
+use sales\model\clientChatMessage\entity\ClientChatMessage;
 use yii\bootstrap4\Alert;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Url;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $channels ClientChatChannel[] */
@@ -14,6 +16,7 @@ use yii\helpers\Url;
 /* @var $channelId int|null */
 /* @var $client \common\models\Client|null */
 /* @var $clientChat \sales\model\clientChat\entity\ClientChat|null */
+/* @var $history ClientChatMessage|null */
 
 $this->title = 'My Client Chat';
 $this->params['breadcrumbs'][] = $this->title;
@@ -25,6 +28,8 @@ $rcUrl = Yii::$app->rchat->host  . '/home';
 $userRcAuthToken = Auth::user()->userProfile ? Auth::user()->userProfile->up_rc_auth_token : '';
 $clientChatInfoUrl = Url::toRoute('/client-chat/info');
 $clintChatDataIUrl = Url::toRoute('/client-chat/ajax-data-info');
+$clientChatCloseUrl = Url::toRoute('/client-chat/ajax-close');
+$chatHistoryUrl = Url::toRoute('/client-chat/ajax-history');
 ?>
 
 <?php if (empty($channels)): ?>
@@ -45,6 +50,7 @@ $clintChatDataIUrl = Url::toRoute('/client-chat/ajax-data-info');
 
 <div class="row">
     <div class="col-md-3">
+        <?php Pjax::begin(['id' => 'pjax-client-chat-channel-list'])?>
         <div id="_channel_list_wrapper">
             <?= $this->render('partial/_channel_list', [
                 'channels' => $channels,
@@ -52,14 +58,17 @@ $clintChatDataIUrl = Url::toRoute('/client-chat/ajax-data-info');
                 'loadChannelsUrl' => $loadChannelsUrl,
                 'page' => $page,
                 'channelId' => $channelId,
-                'clientChatRid' => $clientChat ? $clientChat->cch_rid : null
+                'clientChatId' => $clientChat ? $clientChat->cch_id : null
             ]) ?>
         </div>
+		<?php Pjax::end() ?>
     </div>
     <div class="col-md-6">
         <div id="_rc-iframe-wrapper" style="height: 100%; width: 100%; position: relative;">
-            <?php if ($clientChat): ?>
-                <iframe class="_rc-iframe" src="<?= $rcUrl ?>?layout=embedded&resumeToken=<?= $userRcAuthToken ?>&goto=<?= urlencode('/live/'. $clientChat->cch_rid . '?layout=embedded') ?>" id="_rc-<?= $clientChat->cch_rid ?>" style="border: none; width: 100%; height: 100%;" ></iframe>
+            <?php if ($clientChat && !$clientChat->isClosed()): ?>
+                <iframe class="_rc-iframe" src="<?= $rcUrl ?>?layout=embedded&resumeToken=<?= $userRcAuthToken ?>&goto=<?= urlencode('/live/'. $clientChat->cch_rid . '?layout=embedded') ?>" id="_rc-<?= $clientChat->cch_id ?>" style="border: none; width: 100%; height: 100%;" ></iframe>
+            <?php elseif ($clientChat && $clientChat->isClosed()): ?>
+                <?= $this->render('partial/_chat_history', ['history' => $history, 'clientChat' => $clientChat]) ?>
             <?php endif; ?>
         </div>
     </div>
@@ -131,36 +140,41 @@ $(document).on('click', '._cc-list-item', function () {
     let rcUrl = '{$rcUrl}';
     let userRcAuthToken = '{$userRcAuthToken}';
     let gotoParam = encodeURIComponent($(this).attr('data-goto-param'));
-    let rid = $(this).attr('data-rid');
     let iframeHref = rcUrl + '?layout=embedded&resumeToken=' + userRcAuthToken + '&goto=' + gotoParam;
     let windowHeight = $(window)[0].innerHeight;
     let offsetTop = $("#_rc-iframe-wrapper").offset().top;
     let iframeHeight = windowHeight - offsetTop - 20;
     let cch_id = $(this).attr('data-cch-id');
+    let isClosed = $(this).attr('data-is-closed');
     $("#_rc-iframe-wrapper").find('._rc-iframe').hide();
     $('._cc-list-item').removeClass('active');
     $(this).addClass('active');
     
-    if (!$('#_rc-'+rid).length) {
-        $("#_rc-iframe-wrapper").find('#_cc-load').remove();
-        $("#_rc-iframe-wrapper").append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
-        
-        let iframe = document.createElement('iframe');
-        iframe.setAttribute('src', iframeHref);
-        iframe.setAttribute('style', 'width: 100%; height: '+iframeHeight+'px; border: none;');
-        iframe.onload = function () {
-            $('#_rc-iframe-wrapper').find('#_cc-load').remove();
+    if (!$('#_rc-'+cch_id).length) {
+    
+        if (isClosed) {
+            getChatHistory(cch_id);
+        } else {
+            $("#_rc-iframe-wrapper").find('#_cc-load').remove();
+            $("#_rc-iframe-wrapper").append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
+            
+            let iframe = document.createElement('iframe');
+            iframe.setAttribute('src', iframeHref);
+            iframe.setAttribute('style', 'width: 100%; height: '+iframeHeight+'px; border: none;');
+            iframe.onload = function () {
+                $('#_rc-iframe-wrapper').find('#_cc-load').remove();
+            }
+            iframe.setAttribute('class', '_rc-iframe');
+            iframe.setAttribute('id', '_rc-'+cch_id);
+            $('#_rc-iframe-wrapper').append(iframe);
         }
-        iframe.setAttribute('class', '_rc-iframe');
-        iframe.setAttribute('id', '_rc-'+rid);
-        $('#_rc-iframe-wrapper').append(iframe);
     }
     
-    $('#_rc-'+rid).show();
     let params = new URLSearchParams(window.location.search);
-    params.set('rid', rid);
+    params.set('chid', cch_id);
     window.history.replaceState({}, '', '{$loadChannelsUrl}?'+params.toString());
     
+    $('#_rc-'+cch_id).show();
     $.ajax({
         type: 'post',
         url: '{$clientChatInfoUrl}',
@@ -174,7 +188,7 @@ $(document).on('click', '._cc-list-item', function () {
             $('#_client-chat-info').html(data.html);
         },
         error: function (xhr) {
-            
+            createNotify('Error', xhr.responseText, 'error');
         },
     });
 });
@@ -199,10 +213,53 @@ $(document).on('click', '.cc_full_info', function (e) {
             modal.find('.modal-body').html(data);
         },
         error: function (xhr) {
-            createNotify('Error', 'Server Internal Error', 'error');  
+            createNotify('Error', xhr.responseText, 'error');
         },
     });
 });
+
+$(document).on('click', '.cc_close', function (e) {
+    e.preventDefault();
+    let btn = $(this);
+    let cchId = btn.attr('data-cch-id');
+    let btnHtml = btn.html();
+    
+    if (confirm('Confirm close chat')) {
+        $.ajax({
+            type: 'post',
+            url: '{$clientChatCloseUrl}',
+            dataType: 'html',
+            cache: false,
+            data: {cchId: cchId},
+            beforeSend: function () {
+                btn.html('<i class="fa fa-spin fa-spinner"></i>');
+            },
+            success: function () {
+                
+                pjaxReload({container: '#pjax-client-chat-channel-list'});
+                $('#_rc-'+cchId).remove();
+                btn.remove();
+                getChatHistory(cchId);
+            },
+            complete: function () {
+                btn.html(btnHtml);
+            },
+            error: function (xhr) {
+                createNotify('Error', xhr.responseText, 'error');
+            }
+        })
+    }
+});
+
+function getChatHistory (cchId) {
+    $("#_rc-iframe-wrapper").find('._rc-iframe').hide();
+    $("#_rc-iframe-wrapper").find('#_cc-load').remove();
+    $("#_rc-iframe-wrapper").append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
+    $.post('{$chatHistoryUrl}', {cchId: cchId}, function(data) {
+        $("#_rc-iframe-wrapper").append(data);
+        $("#_rc-iframe-wrapper").find('#_cc-load').remove();
+    });
+}
 JS;
 $this->registerJs($js);
 endif;

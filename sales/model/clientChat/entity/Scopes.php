@@ -26,4 +26,14 @@ class Scopes extends \yii\db\ActiveQuery
 	{
 		return $this->andWhere(['cch_owner_user_id' => $userId]);
 	}
+
+	public function byRid(string $rid): self
+	{
+		return $this->andWhere(['cch_rid' => $rid]);
+	}
+
+	public function notClosed(): self
+	{
+		return $this->andWhere(['<>', 'cch_status_id', ClientChat::STATUS_CLOSED]);
+	}
 }

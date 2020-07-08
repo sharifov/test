@@ -20,8 +20,6 @@ use yii\web\View;
             </span>
             <div class="_rc-client-info">
 
-
-
                 <span class="_rc-client-name">
                     <i class="fa fa-user"></i>
                     <span><?= Html::encode($client->full_name ?: 'Guest-' . $client->id) ?></span>
@@ -50,7 +48,12 @@ use yii\web\View;
 
     <div class="_rc-block-wrapper">
         <h3 style="margin: 0;">Chat info</h3>
-        <?= Html::button('<i class="fa fa-info"></i>', ['class' => 'btn btn-info cc_full_info', 'data-cch-id' => $clientChat->cch_id]) ?>
+        <div class="d-flex align-content-center justify-content-center">
+            <?= Html::button('<i class="fa fa-info"></i>', ['class' => 'btn btn-info cc_full_info', 'data-cch-id' => $clientChat->cch_id]) ?>
+            <?php if (!$clientChat->isClosed()): ?>
+                <?= Html::button('<i class="fa fa-close"></i>', ['class' => 'btn btn-danger cc_close', 'data-cch-id' => $clientChat->cch_id]) ?>
+            <?php endif; ?>
+        </div>
     </div>
 
     <div class="_rc-block-wrapper">
@@ -60,11 +63,17 @@ use yii\web\View;
                 'attributes' => [
                     'cch_title',
                     'cch_description',
-                    'cch_case_id',
-                    'cch_lead_id',
-                    'cch_status_id',
+					'cchCase:case',
+					'cchLead:lead',
+					[
+						'attribute' => 'cch_status_id',
+						'value' => static function (ClientChat $model) {
+							return Html::tag('span', $model->getStatusName(), ['class' => 'badge badge-'.$model->getStatusClass()]);
+						},
+						'format' => 'raw',
+						'filter' => ClientChat::getStatusList()
+					],
                     'cch_note',
-                    'cch_ua'
                 ]
             ])
         ?>

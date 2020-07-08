@@ -4,11 +4,11 @@ use sales\helpers\clientChat\ClientChatMessageHelper;
 use sales\model\clientChat\entity\ClientChat;
 
 /** @var $clientChats ClientChat[] */
-/** @var $clientChatRid string|null */
+/** @var $clientChatId int|null */
 ?>
 
 <?php foreach($clientChats as $clientChat): ?>
-    <div class="_cc-list-item <?= $clientChatRid && $clientChatRid === $clientChat->cch_rid ? 'active' : '' ?>" data-goto-param="/live/<?= $clientChat->cch_rid ?>?layout=embedded" data-rid="<?= $clientChat->cch_rid ?>" data-cch-id="<?= $clientChat->cch_id ?>">
+    <div class="_cc-list-item <?= $clientChatId && $clientChatId === $clientChat->cch_id ? 'active' : '' ?>" data-goto-param="/live/<?= $clientChat->cch_rid ?>?layout=embedded" data-rid="<?= $clientChat->cch_rid ?>" data-cch-id="<?= $clientChat->cch_id ?>" data-is-closed="<?= $clientChat->isClosed() ?>">
         <div class="_cc-item-icon-wrapper">
             <span class="_cc-item-icon-round">
                 <i class="fa fa-comment"></i>
