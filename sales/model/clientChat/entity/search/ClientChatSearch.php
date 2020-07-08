@@ -2,14 +2,32 @@
 
 namespace sales\model\clientChat\entity\search;
 
+use common\models\Employee;
+use sales\model\clientChatMessage\entity\ClientChatMessage;
 use yii\data\ActiveDataProvider;
 use sales\model\clientChat\entity\ClientChat;
+use yii\data\ArrayDataProvider;
+use yii\data\SqlDataProvider;
 
 class ClientChatSearch extends ClientChat
 {
+    public string $timeRange;
+    public string $timeStart;
+    public string $timeEnd;
+
+    public function __construct($config = [])
+    {
+        parent::__construct($config);
+        $this->timeRange = date('Y-m-d 00:00:00', strtotime('-29 days')) . ' - ' . date('Y-m-d 23:59:59');
+        $range = explode(' - ', $this->timeRange);
+        $this->timeStart = $range[0];
+        $this->timeEnd = $range[1];
+    }
+
     public function rules(): array
     {
         return [
+            [['timeRange', 'timeStart', 'timeEnd'], 'string' ],
             ['cch_case_id', 'integer'],
 
             ['cch_ccr_id', 'integer'],
@@ -99,5 +117,80 @@ class ClientChatSearch extends ClientChat
             ->andFilterWhere(['like', 'cch_language_id', $this->cch_language_id]);
 
         return $dataProvider;
+    }
+
+    public function report($params)
+    {
+        $this->load($params);
+        if ($this->timeRange) {
+            $range = explode(' - ', $this->timeRange);
+            $this->timeStart = $range[0];
+            $this->timeEnd = $range[1];
+        }
+
+        $query = static::find()->joinWith('cchOwnerUser');
+        $query->select([
+            'username',
+            'cch_owner_user_id AS owner',
+            'SUM(IF(cch_status_id = '. ClientChat::STATUS_GENERATED .', 1, 0)) AS generated',
+            'SUM(IF(cch_status_id = '. ClientChat::STATUS_CLOSED .', 1, 0)) AS closed',
+        ]);
+
+        $query->where('cch_owner_user_id IS NOT NULL');
+        $query->andWhere([
+            'between',
+            'cch_created_dt',
+            Employee::convertTimeFromUserDtToUTC(strtotime($this->timeStart)),
+            Employee::convertTimeFromUserDtToUTC(strtotime($this->timeEnd))
+        ]);
+
+        $query->groupBy(['owner']);
+
+        $queryMessages = ClientChatMessage::find();
+        $queryMessages->select([
+            'ccm_user_id AS user',
+            'SUM(CASE WHEN ccm_user_id IS NOT NULL THEN 1 ELSE 0 END) AS messages',
+        ]);
+
+        $queryMessages->andWhere([
+            'between',
+            'ccm_sent_dt',
+            Employee::convertTimeFromUserDtToUTC(strtotime($this->timeStart)),
+            Employee::convertTimeFromUserDtToUTC(strtotime($this->timeEnd))
+        ]);
+
+        $queryMessages->groupBy(['user']);
+
+        $clientChat = $query->createCommand()->queryAll();
+        $clientChatMsg = $queryMessages->createCommand()->queryAll();
+
+        foreach ($clientChat as $key => $item)
+        {
+            $clientChat[$key]['msg'] = '';
+            foreach ($clientChatMsg as $msg)
+            {
+                if ($item['owner'] == $msg['user']){
+                    $clientChat[$key]['msg'] = (string)$msg['messages'];
+                }
+            }
+        }
+
+        $paramsData = [
+            'allModels' => $clientChat,
+            'sort' => [
+                //'defaultOrder' => ['username' => SORT_ASC],
+                'attributes' => [
+                    'username',
+                    'generated',
+                    'closed',
+                    'msg',
+                ],
+            ],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
+        ];
+
+        return new ArrayDataProvider($paramsData);
     }
 }

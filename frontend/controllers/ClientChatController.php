@@ -7,6 +7,7 @@ use sales\entities\chat\ChatGraphsSearch;
 use sales\helpers\app\AppHelper;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChat\entity\search\ClientChatSearch;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\repositories\ClientChatUserAccessRepository\ClientChatUserAccessRepository;
@@ -229,5 +230,16 @@ class ClientChatController extends FController
         ];
 
         return $this->asJson($response);
+    }
+
+    public function actionReport()
+    {
+        $searchModel = new ClientChatSearch();
+        $dataProvider = $searchModel->report(Yii::$app->request->queryParams);
+
+        return $this->render('report', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider
+        ]);
     }
 }
