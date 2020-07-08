@@ -35,6 +35,7 @@ class FilterShortCodeToLink implements Filter
         $this->processLead();
         $this->processCase();
         $this->processQaTask();
+        $this->processNotification();
         return $this->content;
     }
 
@@ -56,6 +57,20 @@ class FilterShortCodeToLink implements Filter
     {
         $this->content = preg_replace_callback('|{qa-task-([\d]+)-([a-z0-9]+)}|iU', function ($matches) {
             return Html::a($matches[1], $this->host . '/qa-task/qa-task/view?gid=' . $matches[2]);
+        }, $this->content);
+    }
+    private function processNotification(): void
+    {
+        $this->content = preg_replace_callback('|id:([\d]+)|', function ($matches) {
+            return Html::a($matches[1], $this->host . '/setting/view?id=' . $matches[1]);
+        }, $this->content);
+
+        $this->content = preg_replace_callback('/from(.*?)to/', function ($matches) {
+            return '<br><pre><code>from: ' . $matches[1] . '</pre></code>to';
+        }, $this->content);
+
+        $this->content = preg_replace_callback('/to(.*?)by/', function ($matches) {
+            return '<br><pre><code>to: ' . $matches[1] . '</pre></code>by';
         }, $this->content);
     }
 }

@@ -9,13 +9,14 @@ use sales\entities\cases\events\CasesTrashStatusEvent;
 use sales\listeners\cases\CasesFollowUpStatusEventLogListener;
 use sales\listeners\cases\CasesPendingStatusEventLogListener;
 use sales\listeners\cases\CasesProcessingStatusEventLogListener;
+use sales\listeners\cases\CasesProcessingStatusEventNotificationsListener;
 use sales\listeners\cases\CasesSolvedStatusEventLogListener;
 use sales\listeners\cases\CasesTrashStatusEventLogListener;
 
 return [
     CasesCreatedEvent::class => [],
     CasesPendingStatusEvent::class => [CasesPendingStatusEventLogListener::class],
-    CasesProcessingStatusEvent::class => [CasesProcessingStatusEventLogListener::class],
+    CasesProcessingStatusEvent::class => [CasesProcessingStatusEventLogListener::class, CasesProcessingStatusEventNotificationsListener::class],
     CasesFollowUpStatusEvent::class => [CasesFollowUpStatusEventLogListener::class],
     CasesSolvedStatusEvent::class => [CasesSolvedStatusEventLogListener::class],
     CasesTrashStatusEvent::class => [CasesTrashStatusEventLogListener::class],

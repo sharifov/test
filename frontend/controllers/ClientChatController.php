@@ -4,17 +4,21 @@ namespace frontend\controllers;
 use common\models\Notifications;
 use common\models\VisitorLog;
 use sales\auth\Auth;
+use sales\entities\chat\ChatGraphsSearch;
 use sales\helpers\app\AppHelper;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChat\entity\search\ClientChatSearch;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\repositories\ClientChatUserAccessRepository\ClientChatUserAccessRepository;
 use sales\repositories\NotFoundException;
 use sales\services\clientChatMessage\ClientChatMessageService;
+use sales\viewModel\chat\ViewModelChatGraph;
 use yii\data\ActiveDataProvider;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
+use Yii;
 
 /**
  * Class ClientChatController
@@ -215,4 +219,43 @@ class ClientChatController extends FController
 			'visitorLog' => $visitorLog
 		]);
 	}
+
+	public function actionStats()
+    {
+        $model = new ChatGraphsSearch();
+        $model->load(\Yii::$app->request->queryParams);
+
+        return $this->render('stats', ['model' => $model]);
+    }
+
+    public function actionAjaxGetChartStats(): \yii\web\Response
+    {
+        $statsSearch = new ChatGraphsSearch();
+        $statsSearch->load(Yii::$app->request->post());
+        if ($statsSearch->validate()) {
+
+            $html = $this->renderAjax('partial/_stats_chart', [
+                'viewModel' => new ViewModelChatGraph($statsSearch->stats(), $statsSearch),
+            ]);
+        }
+
+        $response = [
+            'html' => $html ?? '',
+            'error' => $statsSearch->hasErrors(),
+            'message' => $statsSearch->getErrorSummary(true)
+        ];
+
+        return $this->asJson($response);
+    }
+
+    public function actionReport()
+    {
+        $searchModel = new ClientChatSearch();
+        $dataProvider = $searchModel->report(Yii::$app->request->queryParams);
+
+        return $this->render('report', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider
+        ]);
+    }
 }

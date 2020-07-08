@@ -68,7 +68,7 @@ use common\models\Employee;
         </div>
     </div>
 
-    <dinv class="row">
+    <div class="row">
         <div class="col-md-3">
             <div class="row">
                 <div class="col-md-6">
@@ -99,7 +99,7 @@ use common\models\Employee;
                 </div>
             </div>
         </div>
-    </dinv>
+    </div>
 
     <div class="row">
         <div class="col-md-12">

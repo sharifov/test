@@ -8,6 +8,7 @@
 
 namespace common\components;
 
+use Yii;
 use yii\base\Component;
 use yii\helpers\VarDumper;
 use yii\httpclient\Client;
@@ -507,4 +508,44 @@ class RocketChat extends Component
         return $out;
     }
 
+    /**
+     * @param int $length
+     * @return string
+     * @throws \yii\base\Exception
+     */
+    public static function generatePassword(int $length = 20): string
+    {
+        return Yii::$app->security->generateRandomString(20);
+    }
+
+    /**
+     * @param int $days
+     * @return false|string
+     */
+    public static function generateTokenExpired(int $days = 60)
+    {
+        return date('Y-m-d H:i:s', strtotime('+' . $days . ' days'));
+    }
+
+    /**
+     * @param $result
+     * @return string
+     * @throws \JsonException
+     */
+    public static function getErrorMessageFromResult($result): string
+    {
+        if (!empty($result['error'])) {
+            $errorArr = @json_decode($result['error'], true, 512, JSON_THROW_ON_ERROR);
+            if (isset($errorArr['message'])) {
+                $errorMessage = $errorArr['message'];
+            } elseif (isset($errorArr['error'])) {
+                $errorMessage = $errorArr['error'];
+            } else {
+                $errorMessage = VarDumper::dumpAsString($result['error']);
+            }
+        } else {
+            $errorMessage = VarDumper::dumpAsString($result);
+        }
+        return $errorMessage;
+    }
 }
