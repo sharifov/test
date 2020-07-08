@@ -1966,9 +1966,8 @@ class CommunicationController extends ApiBaseController
 
 
             $job->request_data = $data;
-            /** @var Queue $queue */
-            $queue = \Yii::$app->queue_email_job;
-            $jobId = $queue->push($job);
+
+            $jobId = \Yii::$app->queue_email_job->push($job);
             $response = [
                 'job_id' => $jobId,
                 'last_id' => $filter['last_id'],
@@ -1977,8 +1976,8 @@ class CommunicationController extends ApiBaseController
             //Yii::info('JOB (' .VarDumper::dumpAsString($response).') Push ' . VarDumper::dumpAsString($data) . ' last_id: ' . $last_id, 'info\API:newEmailMessagesReceived');
 
         } catch (\Throwable $e) {
-            Yii::error($e->getTraceAsString(), 'API:Communication:newEmailMessagesReceived:Email:try');
-            $message = $this->debug ? $e->getTraceAsString() : $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
+            $message = AppHelper::throwableFormatter($e);
+            Yii::error($message, 'API:Communication:newEmailMessagesReceived:Email:try');
             $response['error'] = $message;
             $response['error_code'] = 15;
         }
