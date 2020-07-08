@@ -52,7 +52,7 @@ class ClientChatController extends Controller
 
 		foreach ($users as $user) {
 
-			$pass = \Yii::$app->security->generateRandomString(20);
+			$pass = $rocketChat::generatePassword();
 
 			$result = $rocketChat->createUser(
 				$user['username'],
@@ -105,7 +105,7 @@ class ClientChatController extends Controller
 				if (!empty($login['data']['authToken'])) {
 
                     $userProfile->up_rc_auth_token = $login['data']['authToken'];
-                    $userProfile->up_rc_token_expired = date('Y-m-d H:i:s', strtotime("+60 days"));
+                    $userProfile->up_rc_token_expired = $rocketChat::generateTokenExpired();
                     if(!$userProfile->save()) {
                         $errorMessage = VarDumper::dumpAsString(['profile' => $userProfile->attributes, 'errors' => $userProfile->errors]);
                         \Yii::error($errorMessage, 'Console:ClientChat:RcCreateUserProfile:UserProfile:save:login');
@@ -115,20 +115,7 @@ class ClientChatController extends Controller
                 }
 
 			} else {
-			    if (isset($result['error'])) {
-
-			        $errorArr = @json_decode($result['error'], true, 512, JSON_THROW_ON_ERROR);
-
-			        if (isset($errorArr['message'])) {
-                        $errorMessage = $errorArr['message'];
-                    } elseif (isset($errorArr['error'])) {
-                        $errorMessage = $errorArr['error'];
-                    } else {
-                        $errorMessage = VarDumper::dumpAsString($result['error']);
-                    }
-                } else {
-                    $errorMessage = VarDumper::dumpAsString($result);
-                }
+			    $errorMessage = $rocketChat::getErrorMessageFromResult($result);
 				printf(" - Error2: %s\n", $this->ansiFormat($errorMessage, Console::FG_RED));
 			}
 		}
@@ -202,20 +189,7 @@ class ClientChatController extends Controller
 
 
             } else {
-                if (isset($result['error'])) {
-
-                    $errorArr = @json_decode($result['error'], true, 512, JSON_THROW_ON_ERROR);
-
-                    if (isset($errorArr['message'])) {
-                        $errorMessage = $errorArr['message'];
-                    } elseif (isset($errorArr['error'])) {
-                        $errorMessage = $errorArr['error'];
-                    } else {
-                        $errorMessage = VarDumper::dumpAsString($result['error']);
-                    }
-                } else {
-                    $errorMessage = VarDumper::dumpAsString($result);
-                }
+                $errorMessage = $rocketChat::getErrorMessageFromResult($result);
                 printf(" - Error2: %s\n", $this->ansiFormat($errorMessage, Console::FG_RED));
             }
         }
