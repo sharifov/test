@@ -33,8 +33,7 @@ var PhoneWidgetCall = function () {
         'active': PhoneWidgetPaneActive,
         'outgoing': PhoneWidgetPaneOutgoing,
         'incoming': PhoneWidgetPaneIncoming,
-        'queue': new PhoneWidgetPaneQueue(queues),
-        'conference': PhoneWidgetPaneConference
+        'queue': new PhoneWidgetPaneQueue(queues)
     };
 
     function init(options)
@@ -110,7 +109,7 @@ var PhoneWidgetCall = function () {
             let conference = storage.conference.one(call.data.conferenceSid);
             if (conference !== null) {
                 if (conference.getCountParticipants() > 2) {
-                    panes.conference.init(call, conference);
+                    panes.active.init(call, conference);
                     return true;
                 }
             }
@@ -180,7 +179,7 @@ var PhoneWidgetCall = function () {
                 console.log('conference not added');
             } else {
                 if (conference.getCountParticipants() > 2) {
-                    panes.conference.init(call, conference);
+                    panes.active.init(call, conference);
                     openWidget();
                     openCallTab();
                     panes.queue.refresh();
@@ -226,7 +225,7 @@ var PhoneWidgetCall = function () {
             if (oldConferenceCountParticipant < 3 && newConferenceCountParticipant > 2) {
                 storage.conference.remove(data.conference.sid);
                 conference = storage.conference.add(data.conference);
-                panes.conference.init(call, conference);
+                panes.active.init(call, conference);
                 return;
             }
             if (oldConferenceCountParticipant > 2 && newConferenceCountParticipant > 2) {
@@ -246,7 +245,7 @@ var PhoneWidgetCall = function () {
         conference = storage.conference.add(data.conference);
 
         if (conference.getCountParticipants() > 2) {
-            panes.conference.init(call, conference);
+            panes.active.init(call, conference);
             return;
         }
 
@@ -269,15 +268,6 @@ var PhoneWidgetCall = function () {
             panes.active.removeCallInProgressIndicator();
             window.connection = '';
             if (panes.active.isActive()) {
-                needRefresh = true;
-            }
-        }
-
-        if (panes.conference.getCallSid() === callSid) {
-            panes.conference.removeCallSid();
-            panes.conference.removeCallInProgressIndicator();
-            window.connection = '';
-            if (panes.conference.isActive()) {
                 needRefresh = true;
             }
         }
@@ -690,9 +680,7 @@ var PhoneWidgetCall = function () {
 
         //todo remove after removed old widget
         if (!(panes.active.getCallSid() === call.data.callSid && panes.active.isActive())) {
-            if (!(panes.conference.getCallSid() === call.data.callSid && panes.conference.isActive())) {
-                return;
-            }
+            return;
         }
 
         window.phoneWidget.oldWidget.hold();
@@ -709,9 +697,7 @@ var PhoneWidgetCall = function () {
 
         //todo remove after removed old widget
         if (!(panes.active.getCallSid() === call.data.callSid && panes.active.isActive())) {
-            if (!(panes.conference.getCallSid() === call.data.callSid && panes.conference.isActive())) {
-                return;
-            }
+            return;
         }
 
         window.phoneWidget.oldWidget.unHold();
