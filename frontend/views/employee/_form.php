@@ -424,8 +424,24 @@ JS;
             </div>
         </div>
     </div>
-    <?php if (Auth::user()->isAdmin() || Auth::user()->isSuperAdmin()) : ?>
+    <?php if (!$model->isNewRecord && (Auth::user()->isAdmin() || Auth::user()->isSuperAdmin())) : ?>
         <h5>Rocket Chat Credentials</h5>
+
+        <?php if ($modelProfile->up_rc_user_id) : ?>
+            <?php
+                echo 'TODO';
+            ?>
+        <?php else :?>
+            <?php
+                echo Html::a('<i class="fa fa-rocket"></i> Register to Rocket Chat', '#', [
+                    'class' => 'register_to_rc',
+                    'title' => 'Register to Rocket Chat',
+                    'data-pjax' => '0',
+                    'data-user_id' => $model->getId(),
+                    'data-inner' => '',
+                ]);
+            ?>
+        <?php endif ?>
         <div class="well">
             <div class="form-group">
                 <div class="row">
@@ -977,5 +993,52 @@ $js = <<<JS
             }
         );
     });
+    
+    $(document).on('click', '.register_to_rc', function (e) { 
+        e.preventDefault();
+        
+        let btn = $(this);
+        loadingBtn(btn, true);    
+        
+        $.ajax({
+            url: '/employee/register-to-rocket-chat',
+            type: 'GET',
+            data: {id: btn.data('user_id')},
+            dataType: 'json'    
+        })
+        .done(function(dataResponse) {
+            if (dataResponse.status === 1) {
+                $('#userprofile-up_rc_user_password').val(dataResponse.rc_user_password);
+                $('#userprofile-up_rc_auth_token').val(dataResponse.rc_token_expired);
+                $('#userprofile-up_rc_user_id').val(dataResponse.rc_user_id).trigger('change');
+                $('#userprofile-up_rc_token_expired').val(dataResponse.rc_token_expired);
+            } else {
+                createNotify('Error', dataResponse.message, 'error');
+            } 
+            loadingBtn($('.register_to_rc'), false);      
+        })
+        .fail(function(error) {
+            loadingBtn($('.register_to_rc'), false);    
+            console.log('Error: ' + error);
+        })
+        .always(function() {
+            setTimeout(loadingBtn, 3000, $('.register_to_rc'), false);     
+        });
+        
+    });
+    
+    function loadingBtn(btnObj, loading)
+    {
+        if (loading === true) {
+            btnObj.html('<i class="fa fa-cog fa-spin fa-3x fa-fw"></i> Loading...')
+                .prop("disabled", true);
+        } else {
+            let origInner = btnObj.data('inner');
+            btnObj.html(origInner)
+                .prop("disabled", false);
+        }  
+    }
+    
+    
 JS;
 $this->registerJs($js);

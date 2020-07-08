@@ -8,6 +8,7 @@
 
 namespace common\components;
 
+use Yii;
 use yii\base\Component;
 use yii\helpers\VarDumper;
 use yii\httpclient\Client;
@@ -507,4 +508,13 @@ class RocketChat extends Component
         return $out;
     }
 
+    /**
+     * @param int $length
+     * @return string
+     * @throws \yii\base\Exception
+     */
+    public static function generatePassword(int $length = 20): string
+    {
+        return Yii::$app->security->generateRandomString(20);
+    }
 }

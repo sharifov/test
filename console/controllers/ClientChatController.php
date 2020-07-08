@@ -51,7 +51,7 @@ class ClientChatController extends Controller
 
 		foreach ($users as $user) {
 
-			$pass = \Yii::$app->security->generateRandomString(20);
+			$pass = $rocketChat::generatePassword();
 
 			$result = $rocketChat->createUser(
 				$user['username'],
