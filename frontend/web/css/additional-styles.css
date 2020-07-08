@@ -56,3 +56,8 @@
 .phone-widget .call-pane-calling .call-pane__start-call.join {
     background-color: #fff7ac;
 }
+
+.call-filter__toggle--line-active {
+    border-color: #E7826C; }
+.call-filter__toggle--line-active.is-checked {
+    background-color: #E7826C; }
