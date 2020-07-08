@@ -911,7 +911,7 @@ class EmployeeController extends FController
 
                     if (!empty($login['data']['authToken'])) {
                         $userProfile->up_rc_auth_token = $login['data']['authToken'];
-                        $userProfile->up_rc_token_expired = date('Y-m-d H:i:s', strtotime("+60 days"));
+                        $userProfile->up_rc_token_expired = $rocketChat::generateTokenExpired();
                     }
 
                     if(!$userProfile->save()) {
@@ -919,18 +919,7 @@ class EmployeeController extends FController
                     }
 
                 } else {
-                    if (!empty($result['error'])) {
-                        $errorArr = @json_decode($result['error'], true, 512, JSON_THROW_ON_ERROR);
-                        if (isset($errorArr['message'])) {
-                            $errorMessage = $errorArr['message'];
-                        } elseif (isset($errorArr['error'])) {
-                            $errorMessage = $errorArr['error'];
-                        } else {
-                            $errorMessage = VarDumper::dumpAsString($result['error']);
-                        }
-                    } else {
-                        $errorMessage = VarDumper::dumpAsString($result);
-                    }
+                    $errorMessage = $rocketChat::getErrorMessageFromResult($result);
                     throw new \RuntimeException('Error from RocketChat. ' . $errorMessage);
                 }
                 $out['status'] = 1;
@@ -941,7 +930,7 @@ class EmployeeController extends FController
 
             } catch (\Throwable $throwable) {
                 Yii::error(AppHelper::throwableFormatter($throwable),
-                'EmployeeController:actionRegisterToRocketChat:Throwable' );
+                'EmployeeController:actionRegisterToRocketChat:Throwable');
                 $out['message'] = $throwable->getMessage();
             }
             return $out;
@@ -950,9 +939,51 @@ class EmployeeController extends FController
         throw new BadRequestHttpException();
     }
 
-    public function actionUnRegisterToRocketChat(int $id): array
+    /**
+     * @param int $id
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function actionUnRegisterFromRocketChat(int $id): array
     {
-        return []; /* TODO::  */
+        \Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $user = Employee::findOne($id);
+
+        if (Yii::$app->request->isAjax && $user && $userProfile = $user->userProfile) {
+            $out = ['status' => 0, 'message' => ''];
+
+            try {
+                $rocketChat = \Yii::$app->rchat;
+                $rocketChat->updateSystemAuth(false);
+
+                $result = $rocketChat->deleteUser($user->username);
+
+                if (isset($result['error']) && !$result['error']) {
+
+                    $userProfile->up_rc_user_password = null;
+                    $userProfile->up_rc_user_id = null;
+                    $userProfile->up_rc_auth_token = null;
+                    $userProfile->up_rc_token_expired = null;
+
+                    if(!$userProfile->save()) {
+                        throw new \RuntimeException($userProfile->getErrorSummary(false)[0]);
+                    }
+                } else {
+                    $errorMessage = $rocketChat::getErrorMessageFromResult($result);
+                    throw new \RuntimeException('Error from RocketChat. ' . $errorMessage);
+                }
+                $out['status'] = 1;
+
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableFormatter($throwable),
+                'EmployeeController:actionUnRegisterFromRocketChat:Throwable');
+                $out['message'] = $throwable->getMessage();
+            }
+            return $out;
+        }
+
+        throw new BadRequestHttpException('User or userProfile is required.');
     }
 
     /**

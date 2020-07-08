@@ -10,7 +10,7 @@ class m200708_111355_add_permission_employee_rc extends Migration
 {
     public $route = [
         '/employee/register-to-rocket-chat',
-        '/employee/un-register-to-rocket-chat'
+        '/employee/un-register-from-rocket-chat'
     ];
 
     public $roles = [
