@@ -47,7 +47,7 @@ class UserSiteActivityLog extends Behavior
                 if($requestCount > $settings['user_site_activity_count']) {
                     // Yii::warning(VarDumper::dumpAsString(['usa_user_id' => Yii::$app->user->id, 'usa_request_url' => $request_url]), 'UserSiteActivityLog:block');
 //                    throw new NotAcceptableHttpException('Many requests for this url. With frequent requests, the system may block you. Please wait any time ...', 111);
-                    throw new ForbiddenHttpException('Many requests for this url. With frequent requests, the system may block you. Please wait any time ...', 111);
+                    throw new ForbiddenHttpException('You\'ve made too many requests recently. Please wait and try your request again later.', 111);
                 }
             }
 
