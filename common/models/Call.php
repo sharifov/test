@@ -1245,7 +1245,7 @@ class Call extends \yii\db\ActiveRecord
 
                 $conference = null;
 
-                if ($this->isStatusInProgress() && $data = ConferenceDataService::getDataById($this->c_conference_id)) {
+                if ($this->c_conference_id && $this->isStatusInProgress() && $data = ConferenceDataService::getDataById($this->c_conference_id)) {
                     $participants = [];
                     foreach ($data['participants'] as $key => $part) {
                         if (!$part['userId'] || $part['userId'] === $this->c_created_user_id) {
