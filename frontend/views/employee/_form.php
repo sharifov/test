@@ -424,17 +424,18 @@ JS;
             </div>
         </div>
     </div>
-    <?php if (Auth::user()->isAdmin() || Auth::user()->isSuperAdmin()) : ?>
+    <?php if (!$model->isNewRecord && (Auth::user()->isAdmin() || Auth::user()->isSuperAdmin())) : ?>
         <h5>Rocket Chat Credentials</h5>
         <div class="well">
             <div class="form-group">
                 <div class="row">
                     <div class="col-md-5">
-                        <?= $form->field($modelProfile, 'up_rc_user_id')->widget(\sales\widgets\UserSelect2Widget::class, [
+                        <?php /* echo $form->field($modelProfile, 'up_rc_user_id')->widget(\sales\widgets\UserSelect2Widget::class, [
                             'data' => $modelProfile->up_rc_user_id ? [
                                 $modelProfile->up_rc_user_id => $modelProfile->upUser->username
                             ] : [],
-                        ]) ?>
+                        ]) */ ?>
+                        <?= $form->field($modelProfile, 'up_rc_user_id')->textInput(['maxlength' => true]) ?>
                         <?= $form->field($modelProfile, 'up_rc_token_expired')->widget(\sales\widgets\DateTimePicker::class) ?>
                     </div>
                     <div class="col-md-7">
@@ -442,6 +443,38 @@ JS;
                         <?= $form->field($modelProfile, 'up_rc_auth_token')->textInput(['maxlength' => true]) ?>
                     </div>
                 </div>
+                <?php
+                    $displayRegister = ($modelProfile->up_rc_user_id) ? 'block' : 'none';
+                    echo Html::button(
+                        '<i class="fa fa-rocket fa-flip-horizontal"></i>  UnRegister from Rocket Chat',
+                        [
+                            'id' => 'un_register_from_rc',
+                            'class' => 'btn btn-success rc_btns',
+                            'data-inner' => '',
+                            'data-class' => 'btn btn-success rc_btns',
+                            'data-pjax' => '0',
+                            'data-user_id' => $model->getId(),
+                            'title' => 'UnRegister from Rocket Chat',
+                            'style' => 'width: 200px; display:' . $displayRegister,
+                        ]
+                    )
+                ?>
+                <?php
+                    $displayUnRegister = ($modelProfile->up_rc_user_id) ? 'none' : 'block';
+                    echo Html::button(
+                        '<i class="fa fa-rocket"></i>  Register to Rocket Chat',
+                        [
+                            'id' => 'register_to_rc',
+                            'class' => 'btn btn-success rc_btns',
+                            'data-inner' => '',
+                            'data-class' => 'btn btn-success rc_btns',
+                            'data-pjax' => '0',
+                            'data-user_id' => $model->getId(),
+                            'title' => 'Register to Rocket Chat',
+                            'style' => 'width: 170px; margin-left: 0; display:' . $displayUnRegister,
+                        ]
+                    )
+                ?>
             </div>
         </div>
     <?php endif; ?>
@@ -977,5 +1010,98 @@ $js = <<<JS
             }
         );
     });
+    
+    $(document).on('click', '#register_to_rc', function (e) { 
+        e.preventDefault();
+        
+        let btn = $(this);
+        loadingBtn(btn, true);    
+        
+        $.ajax({
+            url: '/employee/register-to-rocket-chat',
+            type: 'GET',
+            data: {id: btn.data('user_id')},
+            dataType: 'json'    
+        })
+        .done(function(dataResponse) {
+            if (dataResponse.status === 1) {
+                $('#userprofile-up_rc_user_password').val(dataResponse.rc_user_password);
+                $('#userprofile-up_rc_auth_token').val(dataResponse.rc_token_expired);
+                $('#userprofile-up_rc_user_id').val(dataResponse.rc_user_id);
+                $('#userprofile-up_rc_token_expired').val(dataResponse.rc_token_expired);
+                
+                createNotify('Success', 'The request was successful', 'success');
+                $('#register_to_rc').hide();
+                $('#un_register_from_rc').show();
+            } else {
+                createNotify('Error', dataResponse.message, 'error');
+            } 
+            loadingBtn($('#register_to_rc'), false);      
+        })
+        .fail(function(error) {
+            loadingBtn($('#register_to_rc'), false);    
+            createNotify('Error', 'Server error. Please try again later', 'error');
+        })
+        .always(function() {
+            setTimeout(loadingBtn, 4000, $('#register_to_rc'), false);     
+        });        
+    });
+    
+    $(document).on('click', '#un_register_from_rc', function (e) { 
+        e.preventDefault();
+        
+        let btn = $(this);
+        loadingBtn(btn, true);    
+        
+        $.ajax({
+            url: '/employee/un-register-from-rocket-chat',
+            type: 'GET',
+            data: {id: btn.data('user_id')},
+            dataType: 'json'    
+        })
+        .done(function(dataResponse) {
+            if (dataResponse.status === 1) {
+                $('#userprofile-up_rc_user_password').val('');
+                $('#userprofile-up_rc_auth_token').val('');
+                $('#userprofile-up_rc_user_id').val('');
+                $('#userprofile-up_rc_token_expired').val('');
+                
+                createNotify('Success', 'The request was successful', 'success');
+                $('#un_register_from_rc').hide();
+                $('#register_to_rc').show();                
+            } else {
+                createNotify('Error', dataResponse.message, 'error');
+            } 
+            loadingBtn($('#un_register_from_rc'), false);      
+        })
+        .fail(function(error) {
+            loadingBtn($('#un_register_from_rc'), false);
+            createNotify('Error', 'Server error. Please try again later', 'error');
+        })
+        .always(function() {
+            setTimeout(loadingBtn, 4000, $('#un_register_from_rc'), false);     
+        });        
+    });
+    
+    function loadingBtn(btnObj, loading) {
+        if (loading === true) {
+            btnObj.removeClass()
+                .addClass('btn btn-default')
+                .html('<i class="fa fa-cog fa-spin"></i> Loading...')
+                .prop('disabled', true);
+        } else {            
+            btnObj.removeClass()
+                .addClass(btnObj.data('class'))
+                .html(btnObj.data('inner'))
+                .prop('disabled', false);
+        }  
+    }
+    
+    $(document).ready( function () {
+        $(".rc_btns").each(function( index ) {
+            $(this).data('inner', $(this).html());            
+        });
+    });    
+    
 JS;
 $this->registerJs($js);
