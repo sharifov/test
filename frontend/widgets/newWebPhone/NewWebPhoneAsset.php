@@ -50,8 +50,6 @@ class NewWebPhoneAsset extends AssetBundle
         '/web_phone/js/pane/active/btn/hold.js',
         '/web_phone/js/pane/active/btn/mute.js',
 
-        '/web_phone/js/pane/conference/pane.js',
-
         '/web_phone/js/pane/active/pane.js',
         '/web_phone/js/pane/incoming/pane.js',
         '/web_phone/js/pane/outgoing/pane.js',
