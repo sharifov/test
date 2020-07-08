@@ -29,6 +29,7 @@ class ClientChatController extends Controller
 
 		$query = Employee::find()->select(['id', 'username', 'full_name', 'email'])->leftJoin('user_profile', 'id=up_user_id');
         $query->where(['up_rc_user_id' => null]);
+        $query->orWhere(['up_rc_user_id' => '']);
 
         //echo $query->createCommand()->getRawSql(); exit;
 
