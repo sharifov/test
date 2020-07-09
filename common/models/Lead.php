@@ -3317,17 +3317,15 @@ Reason: {reason}',
         );
     }
 
-
-
-
     public function getFirstFlightSegment()
     {
         return LeadFlightSegment::find()->where(['lead_id' => $this->id])->orderBy(['departure' => 'ASC'])->one();
     }
 
-
-
-
+    public function getLastFlightSegment()
+    {
+        return LeadFlightSegment::find()->where(['lead_id' => $this->id])->orderBy(['id' => SORT_DESC])->one();
+    }
 
     public function beforeSave($insert): bool
     {
@@ -4580,4 +4578,14 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     {
         return $this->l_dep_id;
     }
+
+    public function isMultiDestination(): bool
+	{
+		return $this->trip_type === self::TRIP_TYPE_MULTI_DESTINATION;
+	}
+
+	public function isRoundTrip(): bool
+	{
+		return $this->trip_type === self::TRIP_TYPE_ROUND_TRIP;
+	}
 }
