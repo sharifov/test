@@ -9,11 +9,13 @@ use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\entity\search\ClientChatSearch;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
+use sales\model\clientChat\useCase\transfer\ClientChatTransferForm;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\repositories\ClientChatUserAccessRepository\ClientChatUserAccessRepository;
 use sales\repositories\NotFoundException;
 use sales\services\clientChatMessage\ClientChatMessageService;
+use sales\services\clientChatService\ClientChatService;
 use sales\viewModel\chat\ViewModelChatGraph;
 use yii\data\ActiveDataProvider;
 use yii\filters\VerbFilter;
@@ -27,6 +29,7 @@ use Yii;
  * @property ClientChatRepository $clientChatRepository
  * @property ClientChatUserAccessRepository $clientChatUserAccessRepository
  * @property ClientChatMessageService $clientChatMessageService
+ * @property ClientChatService $clientChatService
  */
 class ClientChatController extends FController
 {
@@ -43,6 +46,10 @@ class ClientChatController extends FController
 	 * @var ClientChatMessageService
 	 */
 	private ClientChatMessageService $clientChatMessageService;
+	/**
+	 * @var ClientChatService
+	 */
+	private ClientChatService $clientChatService;
 
 	public function __construct(
 		$id,
@@ -50,12 +57,14 @@ class ClientChatController extends FController
 		ClientChatRepository $clientChatRepository,
 		ClientChatUserAccessRepository $clientChatUserAccessRepository,
 		ClientChatMessageService $clientChatMessageService,
+		ClientChatService $clientChatService,
 		$config = [])
 	{
 		parent::__construct($id, $module, $config);
 		$this->clientChatRepository = $clientChatRepository;
 		$this->clientChatUserAccessRepository = $clientChatUserAccessRepository;
 		$this->clientChatMessageService = $clientChatMessageService;
+		$this->clientChatService = $clientChatService;
 	}
 
 	/**
@@ -101,7 +110,9 @@ class ClientChatController extends FController
 
 		try {
 			$clientChat = $this->clientChatRepository->findById($chid);
-			$this->clientChatMessageService->discardUnreadMessages($clientChat->cch_id, $clientChat->cch_owner_user_id);
+			if ($clientChat->cch_owner_user_id) {
+				$this->clientChatMessageService->discardUnreadMessages($clientChat->cch_id, $clientChat->cch_owner_user_id);
+			}
 
 			if ($clientChat->isClosed()) {
 				$history = ClientChatMessage::find()->byChhId($clientChat->cch_id)->all();
@@ -129,7 +140,7 @@ class ClientChatController extends FController
 			if ($dataProvider->getCount()) {
 				$response['html'] = $this->renderPartial('partial/_client-chat-item', [
 					'clientChats' => $dataProvider->getModels(),
-					'clientChatRid' => $clientChat ? $clientChat->cch_rid : ''
+					'clientChatId' => $clientChat ? $clientChat->cch_id : ''
 				]);
 				$response['page'] = $page + 1;
 			}
@@ -305,5 +316,33 @@ class ClientChatController extends FController
 			'history' => $history ?? null,
 			'clientChat' => $clientChat
 		]);
+	}
+
+	public function actionAjaxTransferView(): string
+	{
+		$cchId = Yii::$app->request->post('cchId');
+
+		$clientChat = ClientChat::findOne($cchId);
+
+		$form = new ClientChatTransferForm();
+
+		if ($clientChat) {
+			$form->cchId = $clientChat->cch_id;
+			$form->depId = $clientChat->cch_dep_id;
+		}
+
+		try {
+			if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+				$this->clientChatService->transfer($form);
+				return '<script>$("#modal-sm").modal("hide"); window.location.reload();</script>';
+			}
+		} catch (\DomainException $e) {
+			$form->addError('depId', $e->getMessage());
+		} catch (\Throwable $e) {
+			$form->addError('general', 'Internal Server Error');
+			Yii::error(AppHelper::throwableFormatter($e), 'ClientChatController::actionAjaxTransferView::Throwable');
+		}
+
+		return $this->renderAjax('partial/_transfer_view', ['clientChat' => $clientChat, 'transferForm' => $form]);
 	}
 }

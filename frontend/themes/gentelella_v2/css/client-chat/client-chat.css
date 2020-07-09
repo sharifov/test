@@ -179,7 +179,15 @@
 ._rc-block-wrapper:last-child {
     border-bottom: none;
 }
+._rc-block-wrapper .btn {
+    border-radius: 100%;
+    width: 25px;
+    height: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
+}
 ._rc-client-icon {
     width: 45px;
     height: 45px;

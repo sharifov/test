@@ -2,18 +2,18 @@
 
 namespace sales\model\clientChatRequest\useCase\api\create;
 
-use common\components\jobs\ClientChatJob;
-use common\models\VisitorLog;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
-use sales\model\clientChatData\entity\ClientChatData;
+use sales\model\clientChatData\ClientChatDataRepository;
 use sales\model\clientChatMessage\ClientChatMessageRepository;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\repositories\NotFoundException;
+use sales\repositories\visitorLog\VisitorLogRepository;
 use sales\services\client\ClientManageService;
 use sales\services\clientChatMessage\ClientChatMessageService;
-use yii\helpers\VarDumper;
+use sales\services\clientChatService\ClientChatService;
 
 /**
  * Class ClientChatRequestService
@@ -24,6 +24,9 @@ use yii\helpers\VarDumper;
  * @property ClientManageService $clientManageService
  * @property ClientChatMessageRepository $clientChatMessageRepository
  * @property ClientChatMessageService $clientChatMessageService
+ * @property ClientChatService $clientChatService
+ * @property VisitorLogRepository $visitorLogRepository
+ * @property ClientChatDataRepository $clientChatDataRepository
  */
 class ClientChatRequestService
 {
@@ -48,6 +51,18 @@ class ClientChatRequestService
 	 * @var ClientChatMessageService
 	 */
 	private ClientChatMessageService $clientChatMessageService;
+	/**
+	 * @var ClientChatService
+	 */
+	private ClientChatService $clientChatService;
+	/**
+	 * @var VisitorLogRepository
+	 */
+	private VisitorLogRepository $visitorLogRepository;
+	/**
+	 * @var ClientChatDataRepository
+	 */
+	private ClientChatDataRepository $clientChatDataRepository;
 
 	/**
 	 * ClientChatRequestService constructor.
@@ -55,13 +70,20 @@ class ClientChatRequestService
 	 * @param ClientChatRepository $clientChatRepository
 	 * @param ClientManageService $clientManageService
 	 * @param ClientChatMessageRepository $clientChatMessageRepository
+	 * @param ClientChatMessageService $clientChatMessageService
+	 * @param ClientChatService $clientChatService
+	 * @param VisitorLogRepository $visitorLogRepository
+	 * @param ClientChatDataRepository $clientChatDataRepository
 	 */
 	public function __construct(
 		ClientChatRequestRepository $clientChatRequestRepository,
 		ClientChatRepository $clientChatRepository,
 		ClientManageService $clientManageService,
 		ClientChatMessageRepository $clientChatMessageRepository,
-		ClientChatMessageService $clientChatMessageService
+		ClientChatMessageService $clientChatMessageService,
+		ClientChatService $clientChatService,
+		VisitorLogRepository $visitorLogRepository,
+		ClientChatDataRepository $clientChatDataRepository
 	)
 	{
 		$this->clientChatRequestRepository = $clientChatRequestRepository;
@@ -69,6 +91,9 @@ class ClientChatRequestService
 		$this->clientManageService = $clientManageService;
 		$this->clientChatMessageRepository = $clientChatMessageRepository;
 		$this->clientChatMessageService = $clientChatMessageService;
+		$this->clientChatService = $clientChatService;
+		$this->visitorLogRepository = $visitorLogRepository;
+		$this->clientChatDataRepository = $clientChatDataRepository;
 	}
 
 	/**
@@ -122,15 +147,7 @@ class ClientChatRequestService
 	private function roomConnected(ClientChatRequest $clientChatRequest): void
 	{
 		$clientChat = $this->clientChatRepository->getOrCreateByRequest($clientChatRequest);
-		$this->assignClientChatToChannel($clientChat);
-	}
-
-	private function assignClientChatToChannel(ClientChat $clientChat): void
-	{
-		$job = new ClientChatJob();
-		$job->priority = 1;
-		$job->clientChat = $clientChat;
-		\Yii::$app->queue_job->priority(90)->push($job);
+		$this->clientChatService->assignToChannel($clientChat);
 	}
 
 	/**
@@ -143,10 +160,12 @@ class ClientChatRequestService
 			$clientChat = $this->clientChatRepository->findNotClosed($form->data['rid'] ?? '');
 		} catch (NotFoundException $e) {
 			$clientChat = $this->clientChatRepository->findByRid($form->data['rid'] ?? '');
-			$clientChat = $this->clientChatRepository->clone($clientChat, $clientChatRequest);
+
+			$dto = ClientChatCloneDto::feelInOnCreateMessage($clientChat, $clientChatRequest->ccr_id);
+			$clientChat = $this->clientChatRepository->clone($dto);
 			$this->clientChatRepository->save($clientChat);
 			$this->saveAdditionalData($clientChat, $form);
-			$this->assignClientChatToChannel($clientChat);
+			$this->clientChatService->assignToChannel($clientChat);
 		}
 
 		$message = ClientChatMessage::createByApi($form, $clientChat, $clientChatRequest);
@@ -158,31 +177,10 @@ class ClientChatRequestService
 
 	private function saveAdditionalData(ClientChat $clientChat, ClientChatRequestApiForm $form): void
 	{
-		$visitorLog = VisitorLog::createByClientChatRequest($clientChat, $form->data);
-		if (!$visitorLog->validate()) {
-			foreach ($visitorLog->errors as $attribute => $error) {
-				$visitorLog->{$attribute} = null;
-			}
-			\Yii::error('VisitorLog validation failed: ' . VarDumper::dumpAsString($visitorLog->errors), 'ClientChatRequestService::guestConnected::visitorLog::validation');
-		}
+		$this->visitorLogRepository->createByClientChatRequest($clientChat, $form->data);
 
-		if (!$visitorLog->save(false)) {
-			\Yii::error('VisitorLog save failed: ' . VarDumper::dumpAsString($visitorLog->errors), 'ClientChatRequestService::guestConnected::visitorLog::save');
-		}
-
-
-		if (!ClientChatData::find()->byCchId($clientChat->cch_id)->exists()) {
-			$clientChatData = ClientChatData::createByClientChatRequest($clientChat->cch_id, $form->data);
-			if (!$clientChatData->validate()) {
-				foreach ($clientChatData->errors as $attribute => $error) {
-					$clientChatData->{$attribute} = null;
-				}
-				\Yii::error('ClientChatData validation failed: ' . VarDumper::dumpAsString($clientChatData->errors), 'ClientChatRequestService::guestConnected::clientChatData::validation');
-			}
-
-			if (!$clientChatData->save(false)) {
-				\Yii::error('ClientChatData save failed: ' . VarDumper::dumpAsString($clientChatData->errors), 'ClientChatRequestService::guestConnected::clientChatData::save');
-			}
+		if (!$this->clientChatDataRepository->exist($clientChat->cch_id)) {
+			$this->clientChatDataRepository->createByClientChatRequest($clientChat, $form->data);
 		}
 	}
 }

@@ -15,7 +15,6 @@ use sales\services\clientChatService\ClientChatService;
  * @package sales\repositories\ClientChatUserAccessRepository
  *
  * @property ClientChatRepository $clientChatRepository
- * @property clientChatService $clientChatService
  */
 class ClientChatUserAccessRepository extends Repository
 {
@@ -23,15 +22,10 @@ class ClientChatUserAccessRepository extends Repository
 	 * @var ClientChatRepository
 	 */
 	private ClientChatRepository $clientChatRepository;
-	/**
-	 * @var ClientChatService
-	 */
-	private ClientChatService $clientChatService;
 
-	public function __construct(ClientChatRepository $clientChatRepository, ClientChatService $clientChatService)
+	public function __construct(ClientChatRepository $clientChatRepository)
 	{
 		$this->clientChatRepository = $clientChatRepository;
-		$this->clientChatService = $clientChatService;
 	}
 
 	public function create(int $cchId, int $userId): ClientChatUserAccess
@@ -68,7 +62,8 @@ class ClientChatUserAccessRepository extends Repository
 		if ($ccua->isAccept()) {
 			try {
 				$this->clientChatRepository->assignOwner($ccua->ccuaCch, $ccua->ccua_user_id);
-				$this->clientChatService->assignAgentToRcChannel($ccua->ccuaCch->cch_rid, $ccua->ccuaUser->userProfile->up_rc_user_id ?? '');
+				$clientChatService = \Yii::createObject(ClientChatService::class);
+				$clientChatService->assignAgentToRcChannel($ccua->ccuaCch->cch_rid, $ccua->ccuaUser->userProfile->up_rc_user_id ?? '');
 			} catch (\DomainException | \RuntimeException $e) {
 				if (ClientChatCodeException::isRcAssignAgentFailed($e)) {
 					$this->clientChatRepository->removeOwner($ccua->ccuaCch);

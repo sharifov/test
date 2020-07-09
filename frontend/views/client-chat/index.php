@@ -30,6 +30,7 @@ $clientChatInfoUrl = Url::toRoute('/client-chat/info');
 $clintChatDataIUrl = Url::toRoute('/client-chat/ajax-data-info');
 $clientChatCloseUrl = Url::toRoute('/client-chat/ajax-close');
 $chatHistoryUrl = Url::toRoute('/client-chat/ajax-history');
+$chatTransferUrl = Url::toRoute('/client-chat/ajax-transfer-view');
 ?>
 
 <?php if (empty($channels)): ?>
@@ -218,6 +219,31 @@ $(document).on('click', '.cc_full_info', function (e) {
     });
 });
 
+$(document).on('click', '.cc_transfer', function (e) {
+    e.preventDefault();
+    let cchId = $(this).attr('data-cch-id');
+    let modal = $('#modal-sm');
+    
+    $.ajax({
+        type: 'post',
+        url: '{$chatTransferUrl}',
+        dataType: 'html',
+        cache: false,
+        data: {cchId: cchId},
+        beforeSend: function () {
+            modal.find('.modal-body').html('<div><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
+            modal.find('.modal-title').html('Client Chat Transfer');
+            modal.modal('show');
+        },
+        success: function (data) {
+            modal.find('.modal-body').html(data);
+        },
+        error: function (xhr) {
+            createNotify('Error', xhr.responseText, 'error');
+        },
+    });
+});
+
 $(document).on('click', '.cc_close', function (e) {
     e.preventDefault();
     let btn = $(this);
@@ -238,6 +264,7 @@ $(document).on('click', '.cc_close', function (e) {
                 
                 pjaxReload({container: '#pjax-client-chat-channel-list'});
                 $('#_rc-'+cchId).remove();
+                $('.cc_transfer').remove();
                 btn.remove();
                 getChatHistory(cchId);
             },

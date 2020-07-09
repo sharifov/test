@@ -7,6 +7,7 @@ namespace sales\model\clientChat\useCase\create;
 use sales\behaviors\BlameableBehaviorExceptApi;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\repositories\department\DepartmentRepository;
@@ -56,14 +57,15 @@ class ClientChatRepository
 		return $clientChat;
 	}
 
-	public function clone(ClientChat $clientChat, ClientChatRequest $clientChatRequest): ClientChat
+	public function clone(ClientChatCloneDto $dto): ClientChat
 	{
 		$chat = new ClientChat();
-		$chat->cch_rid = $clientChat->cch_rid;
-		$chat->cch_ccr_id = $clientChatRequest->ccr_id;
-		$chat->cch_project_id = $clientChat->cch_project_id;
-		$chat->cch_dep_id = $clientChat->cch_dep_id;
-		$chat->cch_client_id = $clientChat->cch_client_id;
+		$chat->cch_rid = $dto->cchRid;
+		$chat->cch_ccr_id = $dto->cchCcrId;
+		$chat->cch_project_id = $dto->cchProjectId;
+		$chat->cch_dep_id = $dto->cchDepId;
+		$chat->cch_client_id = $dto->cchClientId;
+		$chat->cch_owner_user_id = $dto->ownerId;
 		$chat->generated();
 		$chat->attachBehavior('user', BlameableBehaviorExceptApi::class);
 		return $chat;
