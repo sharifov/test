@@ -471,7 +471,7 @@ class LeadSearch extends Lead
             ], 'leads.id = emails.e_lead_id');
 
             if ('' !== $this->emailsQtyFrom) {
-                if ((int) $this->emailsQtyFrom === 0 || (int) $this->emailsQtyTo === 0) {
+                if ((int) $this->emailsQtyFrom === 0) {
                     $query->andWhere(
                         [
                             'OR',
@@ -509,7 +509,7 @@ class LeadSearch extends Lead
             ], 'leads.id = sms.s_lead_id');
 
             if ('' !== $this->smsQtyFrom) {
-                if ((int) $this->smsQtyFrom === 0 || (int) $this->smsQtyTo === 0) {
+                if ((int) $this->smsQtyFrom === 0) {
                     $query->andWhere(
                         [
                             'OR',
@@ -547,7 +547,7 @@ class LeadSearch extends Lead
             ], 'leads.id = chats.cch_lead_id');
 
             if ('' !== $this->chatsQtyFrom) {
-                if ((int) $this->chatsQtyFrom === 0 || (int) $this->chatsQtyTo === 0) {
+                if ((int) $this->chatsQtyFrom === 0) {
                     $query->andWhere(
                         [
                             'OR',
@@ -586,7 +586,7 @@ class LeadSearch extends Lead
             ], 'leads.id = calls.c_lead_id');
 
             if ('' !== $this->callsQtyFrom) {
-                if ((int) $this->callsQtyFrom === 0 || (int) $this->callsQtyTo === 0) {
+                if ((int) $this->callsQtyFrom === 0) {
                     $query->andWhere(
                         [
                             'OR',
