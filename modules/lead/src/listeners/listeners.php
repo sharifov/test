@@ -90,7 +90,10 @@ return [
     LeadCallExpertRequestEvent::class => [LeadCallExpertRequestEventListener::class],
     LeadTaskEvent::class => [LeadTaskEventListener::class],
     LeadCountPassengersChangedEvent::class => [LeadCountPassengersChangedEventListener::class],
-    LeadCreatedCloneByUserEvent::class => [LeadCreatedCloneByUserEventListener::class],
+    LeadCreatedCloneByUserEvent::class => [
+        LeadCreatedCloneByUserEventListener::class,
+        LeadSendToGaListener::class,
+    ],
 
     LeadPendingEvent::class => [LeadPendingEventLogListener::class],
     LeadProcessingEvent::class => [

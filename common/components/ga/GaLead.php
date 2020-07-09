@@ -39,7 +39,7 @@ class GaLead
         $gaCreateLead = (bool) (Yii::$app->params['settings']['ga_create_lead'] ?? false);
 
         if (!$gaEnable || !$gaCreateLead) {
-            throw new \RuntimeException('Service disabled. Please, check GA settings.');
+            throw new \RuntimeException('Service "GaLead" disabled. Please, check GA settings.');
         }
     }
 
@@ -76,17 +76,19 @@ class GaLead
             $this->postData['cd5'] = date('Y-m-d', strtotime($firstSegment->departure));
             $this->postData['cd6'] = $this->lead->isRoundTrip() ? date('Y-m-d', strtotime($lastSegment->departure)) : '';
             $this->postData['cd7'] = $this->lead->getCabinClassName();
-            $this->postData['cd8'] = /* TODO:: уточнить */ ''; //маршрут пользователя. Направления указываем через дефис. Пример: LAX-RNO-LAX
+            $this->postData['cd8'] = implode('-', LeadHelper::getAllIataByLead($this->lead));
             $this->postData['cd9'] = $this->lead->getFlightTypeName();
-            $this->postData['cd10'] = /* TODO:: уточнить */ ''; //operating airline. Если несколько - указываем через запятую
-            $this->postData['cd11'] = /* TODO::  уточнить */ ''; // marketing airline. Если несколько - указываем через запятую
+            $this->postData['cd10'] = '';
+            $this->postData['cd11'] = '';
             $this->postData['cd12'] = '';
-            $this->postData['cd13'] = /* TODO::  уточнить */ ''; // Lead Source CID
+            $this->postData['cd13'] = $this->lead->source ? $this->lead->source->cid : '';
             $this->postData['cd14'] = '';
             $this->postData['cd15'] = $this->lead->uid;
             $this->postData['cm1'] = $this->lead->adults;
             $this->postData['cm2'] = $this->lead->children;
             $this->postData['cm3'] = $this->lead->infants;
+
+            /* TODO:: add from clone */
 
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableFormatter($throwable),
