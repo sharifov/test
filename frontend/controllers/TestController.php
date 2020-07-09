@@ -1362,6 +1362,21 @@ class TestController extends FController
 
 	public function actionZ()
     {
+        $data = [
+            'cid' => 'test_15',
+            't' => 'event',
+            'ec' => 'leads'
+        ];
+
+        try {
+            $gaResponse = \Yii::$app->gaRequestService->sendRequest($data);
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableFormatter($throwable), self::class . ':' . __FUNCTION__ . ':Example failed' );  /* TODO: add category */
+        }
+
+        \yii\helpers\VarDumper::dump($gaResponse, 10, true); exit();
+        /* FOR DEBUG:: must by remove */
+
         return $this->render('z');
     }
 }
