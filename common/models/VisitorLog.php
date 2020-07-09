@@ -201,4 +201,19 @@ class VisitorLog extends \yii\db\ActiveRecord
 
 		return $log;
 	}
+
+    /**
+     * @param int $clientId
+     * @return array|ActiveRecord|null
+     */
+    public static function getLastGaClientIdByClient(int $clientId)
+    {
+        return self::find()
+            ->where(['NOT', ['vl_ga_client_id' => null]])
+            ->andWhere(['!=', 'vl_ga_client_id', ''])
+            ->andWhere(['vl_client_id' => $clientId])
+            ->orderBy(['vl_created_dt' => SORT_DESC])
+            ->limit(1)
+            ->one();
+    }
 }

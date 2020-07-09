@@ -3,6 +3,7 @@
 namespace sales\helpers\lead;
 
 use common\models\Lead;
+use common\models\LeadFlightSegment;
 use yii\helpers\ArrayHelper;
 
 class LeadHelper
@@ -89,6 +90,32 @@ class LeadHelper
     public static function adultsChildrenInfantsList(): array
     {
         return array_combine(range(0, 9), range(0, 9));
+    }
+
+    /**
+     * @param Lead $lead
+     * @return array
+     */
+    public static function getAllOriginsByLead(Lead $lead): array
+    {
+        $result = [];
+        foreach ($lead->leadFlightSegments as $segment) {
+            $result[] = $segment->origin;
+        }
+        return $result;
+    }
+
+    /**
+     * @param Lead $lead
+     * @return array
+     */
+    public static function getAllDestinationByLead(Lead $lead): array
+    {
+        $result = [];
+        foreach ($lead->leadFlightSegments as $segment) {
+            $result[] = $segment->destination;
+        }
+        return $result;
     }
 
 }
