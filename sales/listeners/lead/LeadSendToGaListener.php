@@ -8,9 +8,9 @@ use sales\helpers\app\AppHelper;
 use Yii;
 
 /**
- * Class LeadSendToQaListener
+ * Class LeadSendToGaListener
  */
-class LeadSendToQaListener
+class LeadSendToGaListener
 {
     /**
      * @param LeadableEventInterface $event
@@ -25,7 +25,7 @@ class LeadSendToQaListener
             }
         } catch (\Throwable $throwable) {
             \Yii::error(AppHelper::throwableFormatter($throwable),
-            'LeadSendToQaListener:Throwable');
+            'LeadSendToGaListener:Throwable');
         }
     }
 }
