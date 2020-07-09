@@ -11,7 +11,7 @@ use common\models\Lead;
  * @property int|null $owner
  * @property int|null $ownerOfOriginalLead
  */
-class LeadCreatedCloneByUserEvent
+class LeadCreatedCloneByUserEvent implements LeadableEventInterface
 {
     public $lead;
     public $owner;
@@ -22,5 +22,10 @@ class LeadCreatedCloneByUserEvent
         $this->lead = $lead;
         $this->owner = $owner;
         $this->ownerOfOriginalLead = $ownerOfOriginalLead;
+    }
+
+    public function getLead(): Lead
+    {
+        return $this->lead;
     }
 }

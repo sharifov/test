@@ -1364,27 +1364,10 @@ class TestController extends FController
 
 	public function actionZ()
     {
-
-        $lead = Lead::findOne(370882);
-        $xxx = VisitorLog::getLastGaClientIdByClient($lead->client_id);
-        \yii\helpers\VarDumper::dump($xxx->vl_ga_client_id, 10, true); exit();
-        /* FOR DEBUG:: must by remove */
-
-        $data = [
-            'cid' => 'test_15',
-            't' => 'event',
-            'ec' => 'leads'
-        ];
-
-        try {
-            $gaResponse = \Yii::$app->gaRequestService->sendRequest($data);
-        } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableFormatter($throwable), self::class . ':' . __FUNCTION__ . ':Example failed' );  /* TODO: add category */
+        if ($lead = Lead::findOne(367010)) {
+            $xxx = LeadHelper::getAllIataByLead($lead);
         }
-
-        \yii\helpers\VarDumper::dump($gaResponse, 10, true); exit();
-        /* FOR DEBUG:: must by remove */
-
+        
         return $this->render('z');
     }
 }

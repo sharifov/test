@@ -118,4 +118,17 @@ class LeadHelper
         return $result;
     }
 
+    /**
+     * @param Lead $lead
+     * @return array
+     */
+    public static function getAllIataByLead(Lead $lead): array
+    {
+        $result = [];
+        foreach ($lead->leadFlightSegments as $segment) {
+            $result[] = $segment->origin;
+            $result[] = $segment->destination;
+        }
+        return $result;
+    }
 }
