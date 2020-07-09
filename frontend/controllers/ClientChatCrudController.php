@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use sales\auth\Auth;
 use Yii;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\entity\search\ClientChatSearch;
@@ -62,6 +63,8 @@ class ClientChatCrudController extends FController
         $model = new ClientChat();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        	$model->cch_created_user_id = Auth::id();
+        	$model->cch_updated_user_id = Auth::id();
             return $this->redirect(['view', 'id' => $model->cch_id]);
         }
 
@@ -80,7 +83,8 @@ class ClientChatCrudController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->cch_id]);
+			$model->cch_updated_user_id = Auth::id();
+			return $this->redirect(['view', 'id' => $model->cch_id]);
         }
 
         return $this->render('update', [

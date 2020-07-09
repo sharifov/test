@@ -1,16 +1,17 @@
 <?php
 namespace sales\services\clientChatService;
 
-use common\components\jobs\ClientChatJob;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChat\useCase\transfer\ClientChatTransferForm;
 use sales\model\clientChatData\ClientChatDataRepository;
+use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\repositories\clientChatChannel\ClientChatChannelRepository;
-use sales\repositories\ClientChatUserAccessRepository\ClientChatUserAccessRepository;
+use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessRepository;
+use sales\repositories\NotFoundException;
 use sales\repositories\visitorLog\VisitorLogRepository;
 use sales\services\TransactionManager;
 use yii\helpers\Json;
@@ -24,6 +25,7 @@ use yii\helpers\Json;
  * @property TransactionManager $transactionManager
  * @property VisitorLogRepository $visitorLogRepository
  * @property ClientChatDataRepository $clientChatDataRepository
+ * @property ClientChatUserAccessRepository $clientChatUserAccessRepository
  */
 class ClientChatService
 {
@@ -47,19 +49,25 @@ class ClientChatService
 	 * @var ClientChatDataRepository
 	 */
 	private ClientChatDataRepository $clientChatDataRepository;
+	/**
+	 * @var ClientChatUserAccessRepository
+	 */
+	private ClientChatUserAccessRepository $clientChatUserAccessRepository;
 
 	public function __construct(
 		ClientChatChannelRepository $clientChatChannelRepository,
 		ClientChatRepository $clientChatRepository,
 		TransactionManager $transactionManager,
 		VisitorLogRepository $visitorLogRepository,
-		ClientChatDataRepository $clientChatDataRepository
+		ClientChatDataRepository $clientChatDataRepository,
+		ClientChatUserAccessRepository $clientChatUserAccessRepository
 	){
 		$this->clientChatChannelRepository = $clientChatChannelRepository;
 		$this->clientChatRepository = $clientChatRepository;
 		$this->transactionManager = $transactionManager;
 		$this->visitorLogRepository = $visitorLogRepository;
 		$this->clientChatDataRepository = $clientChatDataRepository;
+		$this->clientChatUserAccessRepository = $clientChatUserAccessRepository;
 	}
 
 	public function assignClientChatChannel(ClientChat $clientChat, int $priority): void
@@ -70,9 +78,8 @@ class ClientChatService
 
 	/**
 	 * @param ClientChat $clientChat
-	 * @param ClientChatUserAccessRepository $clientChatUserAccessRepository
 	 */
-	public function sendNotificationToUsers(ClientChat $clientChat, ClientChatUserAccessRepository $clientChatUserAccessRepository): void
+	public function sendNotificationToUsers(ClientChat $clientChat): void
 	{
 		if ($channel = $clientChat->cchChannel) {
 			$userChannel = ClientChatUserChannel::find()->byChannelId($channel->ccc_id)->all();
@@ -80,8 +87,9 @@ class ClientChatService
 			if ($userChannel) {
 				/** @var ClientChatUserChannel $user */
 				foreach ($userChannel as $user) {
-					$access = $clientChatUserAccessRepository->create($clientChat->cch_id, $user->ccuc_user_id);
-					$clientChatUserAccessRepository->save($access);
+					$clientChatUserAccess = ClientChatUserAccess::create($clientChat->cch_id, $user->ccuc_user_id);
+					$clientChatUserAccess->pending();
+					$this->clientChatUserAccessRepository->save($clientChatUserAccess);
 				}
 			}
 		}
@@ -130,10 +138,14 @@ class ClientChatService
 
 	public function assignToChannel(ClientChat $clientChat): void
 	{
-		$job = new ClientChatJob();
-		$job->priority = 1;
-		$job->clientChat = $clientChat;
-		\Yii::$app->queue_job->priority(90)->push($job);
+		try {
+			$this->assignClientChatChannel($clientChat, 1);
+			$this->clientChatRepository->save($clientChat);
+			$this->sendNotificationToUsers($clientChat);
+		} catch (\RuntimeException | NotFoundException $e) {
+			\Yii::info('Send notification to users failed... ' . $e->getMessage() . '; File: ' . $e->getFile() . '; Line: ' . $e->getLine(), 'ClientChatService::assignToChannel::RuntimeException|NotFoundException');
+		}
+		\Yii::info('Send notification to users successfully finished...', 'ClientChatService::assignToChannel');
 	}
 
 	private function cloneAdditionalData(ClientChat $newClientChat, ClientChat $oldClientChat): void

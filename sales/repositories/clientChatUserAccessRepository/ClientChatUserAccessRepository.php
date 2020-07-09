@@ -1,5 +1,5 @@
 <?php
-namespace sales\repositories\ClientChatUserAccessRepository;
+namespace sales\repositories\clientChatUserAccessRepository;
 
 use common\models\Notifications;
 use frontend\widgets\clientChat\ClientChatAccessMessage;
@@ -12,7 +12,7 @@ use sales\services\clientChatService\ClientChatService;
 
 /**
  * Class ClientChatUserAccessRepository
- * @package sales\repositories\ClientChatUserAccessRepository
+ * @package sales\repositories\clientChatUserAccessRepository
  *
  * @property ClientChatRepository $clientChatRepository
  */
@@ -26,13 +26,6 @@ class ClientChatUserAccessRepository extends Repository
 	public function __construct(ClientChatRepository $clientChatRepository)
 	{
 		$this->clientChatRepository = $clientChatRepository;
-	}
-
-	public function create(int $cchId, int $userId): ClientChatUserAccess
-	{
-		$clientChatUserAccess = ClientChatUserAccess::create($cchId, $userId);
-		$clientChatUserAccess->pending();
-		return $clientChatUserAccess;
 	}
 
 	public function save(ClientChatUserAccess $clientChatUserAccess): ClientChatUserAccess
@@ -50,37 +43,6 @@ class ClientChatUserAccessRepository extends Repository
 			return $access;
 		}
 		throw new NotFoundException('Client Chat User Access is not found');
-	}
-
-	public function updateStatus(ClientChatUserAccess $ccua, int $status): void
-	{
-		if (!ClientChatUserAccess::statusExist($status)) {
-			throw new \RuntimeException('User access status is unknown');
-		}
-		$ccua->setStatus($status);
-
-		if ($ccua->isAccept()) {
-			try {
-				$this->clientChatRepository->assignOwner($ccua->ccuaCch, $ccua->ccua_user_id);
-				$clientChatService = \Yii::createObject(ClientChatService::class);
-				$clientChatService->assignAgentToRcChannel($ccua->ccuaCch->cch_rid, $ccua->ccuaUser->userProfile->up_rc_user_id ?? '');
-			} catch (\DomainException | \RuntimeException $e) {
-				if (ClientChatCodeException::isRcAssignAgentFailed($e)) {
-					$this->clientChatRepository->removeOwner($ccua->ccuaCch);
-				}
-				throw $e;
-			}
-			$this->disableAccessForOtherUsers($ccua);
-		}
-		$this->save($ccua);
-	}
-
-	public function disableAccessForOtherUsers(ClientChatUserAccess $ccua): void
-	{
-		$users = ClientChatUserAccess::find()->whichShouldBeDisabled($ccua->ccua_user_id, $ccua->ccua_cch_id)->all();
-		foreach ($users as $user) {
-			$this->updateStatus($user, ClientChatUserAccess::STATUS_SKIP);
-		}
 	}
 
 	private function sendNotifications(ClientChatUserAccess $access): void

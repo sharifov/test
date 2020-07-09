@@ -9,6 +9,7 @@ use common\models\Language;
 use common\models\Lead;
 use common\models\Project;
 use sales\entities\cases\Cases;
+use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatData\entity\ClientChatData;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
@@ -80,13 +81,6 @@ class ClientChat extends \yii\db\ActiveRecord
 					ActiveRecord::EVENT_BEFORE_UPDATE => ['cch_updated_dt'],
 				],
 				'value' => date('Y-m-d H:i:s'),
-			],
-			'user' => [
-				'class' => BlameableBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['cch_created_user_id', 'cch_updated_user_id'],
-					ActiveRecord::EVENT_BEFORE_UPDATE => ['cch_updated_user_id'],
-				],
 			],
 		];
 	}
@@ -241,6 +235,19 @@ class ClientChat extends \yii\db\ActiveRecord
 	public function getStatusClass()
 	{
 		return self::getStatusClassList()[$this->cch_status_id] ?? 'secondary';
+	}
+
+	public function assignOwner(int $userId): void
+	{
+		if ($this->cchOwnerUser && $this->cch_owner_user_id !== $userId) {
+			throw new \DomainException('Client Chat already assigned to: ' . $this->cchOwnerUser->username, ClientChatCodeException::CC_OWNER_ALREADY_ASSIGNED);
+		}
+		$this->cch_owner_user_id = $userId;
+	}
+
+	public function removeOwner(): void
+	{
+		$this->cch_owner_user_id = null;
 	}
 
     public function attributeLabels(): array

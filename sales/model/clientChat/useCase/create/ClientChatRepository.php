@@ -42,7 +42,6 @@ class ClientChatRepository
 	{
 		try {
 			$clientChat = $this->findNotClosed($clientChatRequest->ccr_rid);
-			$clientChat->attachBehavior('user', BlameableBehaviorExceptApi::class);
 		} catch (NotFoundException $e) {
 			$clientChat = new ClientChat();
 			$clientChat->cch_rid = $clientChatRequest->ccr_rid;
@@ -51,7 +50,6 @@ class ClientChatRepository
 			$department = $this->departmentRepository->find($clientChatRequest->getDepartmentIdFromData());
 			$clientChat->cch_dep_id = $department ? $department->dep_id : null;
 			$clientChat->generated();
-			$clientChat->attachBehavior('user', BlameableBehaviorExceptApi::class);
 		}
 
 		return $clientChat;
@@ -109,12 +107,5 @@ class ClientChatRepository
 			throw new \DomainException('Client Chat already assigned to: ' . $clientChat->cchOwnerUser->username, ClientChatCodeException::CC_OWNER_ALREADY_ASSIGNED);
 		}
 		$clientChat->cch_owner_user_id = $userId;
-		$this->save($clientChat);
-	}
-
-	public function removeOwner(ClientChat $clientChat): void
-	{
-		$clientChat->cch_owner_user_id = null;
-		$this->save($clientChat);
 	}
 }

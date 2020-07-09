@@ -13,10 +13,11 @@ use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChat\useCase\transfer\ClientChatTransferForm;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
-use sales\repositories\ClientChatUserAccessRepository\ClientChatUserAccessRepository;
+use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessRepository;
 use sales\repositories\NotFoundException;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatService\ClientChatService;
+use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
 use sales\viewModel\chat\ViewModelChatGraph;
 use yii\data\ActiveDataProvider;
 use yii\filters\VerbFilter;
@@ -31,6 +32,7 @@ use Yii;
  * @property ClientChatUserAccessRepository $clientChatUserAccessRepository
  * @property ClientChatMessageService $clientChatMessageService
  * @property ClientChatService $clientChatService
+ * @property ClientChatUserAccessService $clientChatUserAccessService
  */
 class ClientChatController extends FController
 {
@@ -51,6 +53,10 @@ class ClientChatController extends FController
 	 * @var ClientChatService
 	 */
 	private ClientChatService $clientChatService;
+	/**
+	 * @var ClientChatUserAccessService
+	 */
+	private ClientChatUserAccessService $clientChatUserAccessService;
 
 	public function __construct(
 		$id,
@@ -59,6 +65,7 @@ class ClientChatController extends FController
 		ClientChatUserAccessRepository $clientChatUserAccessRepository,
 		ClientChatMessageService $clientChatMessageService,
 		ClientChatService $clientChatService,
+		ClientChatUserAccessService $clientChatUserAccessService,
 		$config = [])
 	{
 		parent::__construct($id, $module, $config);
@@ -66,6 +73,7 @@ class ClientChatController extends FController
 		$this->clientChatUserAccessRepository = $clientChatUserAccessRepository;
 		$this->clientChatMessageService = $clientChatMessageService;
 		$this->clientChatService = $clientChatService;
+		$this->clientChatUserAccessService = $clientChatUserAccessService;
 	}
 
 	/**
@@ -198,8 +206,8 @@ class ClientChatController extends FController
 				'notifyType' => ''
 			];
 
-			$cch = $this->clientChatUserAccessRepository->findByPrimaryKeys($cchId, Auth::id());
-			$this->clientChatUserAccessRepository->updateStatus($cch, (int)$accessAction);
+			$ccua = $this->clientChatUserAccessRepository->findByPrimaryKeys($cchId, Auth::id());
+			$this->clientChatUserAccessService->updateStatus($ccua, (int)$accessAction);
 
 			$result['success'] = true;
 		} catch (\RuntimeException | \DomainException | NotFoundException $e) {
