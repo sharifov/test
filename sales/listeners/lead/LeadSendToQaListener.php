@@ -2,48 +2,30 @@
 
 namespace sales\listeners\lead;
 
+use common\components\jobs\SendLeadInfoToGaJob;
 use sales\events\lead\LeadableEventInterface;
-use sales\services\lead\qcall\Config;
-use sales\services\lead\qcall\FindPhoneParams;
-use sales\services\lead\qcall\FindWeightParams;
-use sales\services\lead\qcall\QCallService;
+use sales\helpers\app\AppHelper;
+use Yii;
 
 /**
- * Class LeadQcallAddListener
- *
- * @property  QCallService $service
+ * Class LeadSendToQaListener
  */
-class LeadQcallAddListener
+class LeadSendToQaListener
 {
-    private $service;
-
-    /**
-     * @param QCallService $service
-     */
-    public function __construct(QCallService $service)
-    {
-        $this->service = $service;
-    }
-
     /**
      * @param LeadableEventInterface $event
      */
     public function handle(LeadableEventInterface $event): void
     {
-        $lead = $event->getLead();
         try {
-            $this->service->create(
-                $lead->id,
-                new Config(
-                    $lead->status,
-                    $lead->getCountOutCallsLastFlow()
-                ),
-                new FindWeightParams($lead->project_id, $lead->status),
-                $lead->offset_gmt,
-                new FindPhoneParams($lead->project_id, $lead->l_dep_id)
-            );
-        } catch (\Throwable $e) {
-            \Yii::error($e, 'LeadQcallAddListener');
+            if ($lead = $event->getLead()) {
+                $job = new SendLeadInfoToGaJob();
+                $job->lead = $lead;
+                Yii::$app->queue_job->priority(20)->push($job);
+            }
+        } catch (\Throwable $throwable) {
+            \Yii::error(AppHelper::throwableFormatter($throwable),
+            'LeadSendToQaListener:Throwable');
         }
     }
 }
