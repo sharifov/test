@@ -1165,12 +1165,18 @@ class CallController extends FController
             $active[] = $item->getData();
         }
 
+        $conferences = [];
+        foreach ($queue->conference as $item) {
+            $conferences[] = $item->getData();
+        }
+
         return $this->asJson([
             'isEmpty' => false,
             'hold' => $hold,
             'incoming' => $incoming,
             'outgoing' => $outgoing,
             'active' => $active,
+            'conferences' => $conferences,
             'lastActive' => $queue->lastActiveQueue
         ]);
     }

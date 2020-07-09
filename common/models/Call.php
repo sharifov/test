@@ -19,6 +19,7 @@ use sales\helpers\cases\CasesUrlHelper;
 use sales\helpers\lead\LeadUrlHelper;
 use sales\model\call\entity\call\events\CallEvents;
 use sales\model\callLog\services\CallLogTransferService;
+use sales\model\conference\service\ConferenceDataService;
 use sales\model\phoneList\entity\PhoneList;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
@@ -1185,7 +1186,7 @@ class Call extends \yii\db\ActiveRecord
 
 			if ($this->isJoin()) {
                 if ($this->cParent && $this->cParent->cCreatedUser) {
-                    $name = $this->cParent->cCreatedUser->username;
+                    $name = $this->cParent->cCreatedUser->nickname;
                     if ($this->cParent->isIn()) {
                         $phone = $this->cParent->c_to;
                     } elseif ($this->cParent->isOut()) {
@@ -1214,6 +1215,14 @@ class Call extends \yii\db\ActiveRecord
 			    $isListen = true;
                 $isMute = true;
             }
+            $isCoach = false;
+			if ($this->isJoin() && $this->c_source_type_id === self::SOURCE_COACH) {
+			    $isCoach = true;
+            }
+            $isBarge = false;
+			if ($this->isJoin() && $this->c_source_type_id === self::SOURCE_BARGE) {
+                $isBarge = true;
+            }
 			if (!$this->currentParticipant || $this->currentParticipant->isAgent() || $this->isEnded()) {
 			    $callSid = $this->c_call_sid;
 			    $callId = $this->c_id;
@@ -1224,10 +1233,38 @@ class Call extends \yii\db\ActiveRecord
                         $callId = $this->c_parent_call_sid ?: $this->cParent->c_id;
                     }
                 }
+
+                if ($this->isJoin()) {
+                    $source = $this->c_parent_call_sid ? $this->cParent->getSourceName() : '';
+                } else {
+                    $source = $this->getSourceName();
+                }
+                if ($source === '-') {
+                    $source = '';
+                }
+
+                $conference = null;
+
+                if ($this->c_conference_id && $this->isStatusInProgress() && $data = ConferenceDataService::getDataById($this->c_conference_id)) {
+                    $participants = [];
+                    foreach ($data['participants'] as $key => $part) {
+                        if (!$part['userId'] || $part['userId'] === $this->c_created_user_id) {
+                            unset($part['userId']);
+                            $participants[] = $part;
+                        }
+                    }
+                    $conference = [
+                        'sid' => $data['conference']['sid'],
+                        'duration' => $data['conference']['duration'],
+                        'participants' => $participants,
+                    ];
+                }
+
                 Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id],
                     [
                         'id' => $callId,
                         'callSid' => $callSid,
+                        'conferenceSid' => $this->c_conference_sid,
                         'status' => $this->getStatusName(),
                         'duration' => $this->c_call_duration,
                         'snr' => $this->c_sequence_number,
@@ -1239,9 +1276,11 @@ class Call extends \yii\db\ActiveRecord
                         'isHold' => $isHold,
                         'holdDuration' => $holdDuration,
                         'isListen' => $isListen,
+                        'isCoach' => $isCoach,
                         'isMute' => $isMute,
+                        'isBarge' => $isBarge,
                         'project' => $this->c_project_id ? $this->cProject->name : '',
-                        'source' => $this->c_source_type_id ? $this->getSourceName() : '',
+                        'source' => $source,
                         'isEnded' => $this->isEnded(),
                         'contact' => [
                             'name' => $name,
@@ -1249,7 +1288,8 @@ class Call extends \yii\db\ActiveRecord
                             'company' => '',
                         ],
                         'department' => $this->c_dep_id ? Department::getName($this->c_dep_id) : '',
-                        'queue' => self::getQueueName($this)
+                        'queue' => self::getQueueName($this),
+                        'conference' => $conference
                     ]
                 );
             }

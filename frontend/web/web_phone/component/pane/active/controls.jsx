@@ -1,10 +1,11 @@
 function ActivePaneControls(props) {
     return (
         <ul className="in-call-controls">
-            <ButtonHold {...props}/>
-            <ButtonTransfer {...props}/>
-            <ButtonAddPerson {...props}/>
-            <ButtonDialpad {...props}/>
+            <ButtonHold call={props.call} controls={props.controls}/>
+            <ButtonTransfer call={props.call} controls={props.controls}/>
+            <ButtonAddPerson call={props.call} controls={props.controls}/>
+            <ButtonDialpad call={props.call} controls={props.controls}/>
+            <ButtonAddNote call={props.call} controls={props.controls}/>
         </ul>
     );
 }
@@ -54,6 +55,17 @@ function ButtonDialpad(props) {
             <a href="#" className="in-call-controls__action js-toggle-dial">
                 <i className="fa fa-th"> </i>
                 <span>Dialpad</span>
+            </a>
+        </li>
+    );
+}
+
+function ButtonAddNote(props) {
+    return(
+        <li className="in-call-controls__item" id="wg-add-note">
+            <a href="#" className="in-call-controls__action">
+                <i className="fa fa-newspaper-o"> </i>
+                <span>Add Note</span>
             </a>
         </li>
     );

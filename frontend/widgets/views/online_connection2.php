@@ -246,7 +246,15 @@ $js = <<<JS
                                 }
                              }
                         }
-                        
+
+                        if (obj.cmd === 'conferenceUpdate') {
+                            if (typeof obj.data !== 'undefined') {
+                                if (typeof PhoneWidgetCall === 'object') {
+                                    PhoneWidgetCall.socket(obj.data);
+                                }
+                             }
+                        }
+
                         if (obj.cmd === 'clientChatUnreadMessage') {
                             if(obj.data.totalUnreadMessages) {
                                 $('._cc_unread_messages').html(obj.data.totalUnreadMessages);

@@ -1,3 +1,4 @@
 window.phoneWidget.events = {
-    callUpdate: 'callUpdate'
+    callUpdate: 'callUpdate',
+    conferenceUpdate: 'conferenceUpdate',
 };

@@ -16,7 +16,7 @@ class IncomingPane extends React.Component {
 
     callUpdateHandler() {
         let self = this;
-        return function(event) {
+        return function (event) {
             //incoming
             self.setState({
                 call: event.call
@@ -29,11 +29,11 @@ class IncomingPane extends React.Component {
         return (
             <React.Fragment>
                 <CallInfo project={call.data.project} source={call.data.source}/>
-                <div className="incall-group">
-                    <div className="contact-info-card">
-                        <div className="contact-info-card__details">
-                            <div className="contact-info-card__line history-details">
-                                <span className="contact-info-card__label">{call.data.type}</span>
+                <div className="contact-info-card">
+                    <div className="contact-info-card__details">
+                        <div className="contact-info-card__line history-details">
+                            <span className="contact-info-card__label">{call.data.type}</span>
+                            <div className="credential">
                                 <div className="contact-info-card__name">
                                     <button className="call-pane__info">
                                         <i className="user-icon fa fa-user"> </i>
@@ -41,15 +41,21 @@ class IncomingPane extends React.Component {
                                     </button>
                                     <strong>{call.data.contact.name}</strong>
                                 </div>
-                            </div>
-                            <div className="contact-info-card__line history-details">
-                                <span className="contact-info-card__call-type">{call.data.contact.phone}</span>
+                                <div className="contact-info-card__phone">
+                                    <span> </span>
+                                </div>
                             </div>
                         </div>
+                        <div className="contact-info-card__line history-details">
+                            <span className="contact-info-card__call-type">{call.data.contact.phone}</span>
+                        </div>
                     </div>
-                    <div className="call-pane__call-btns ">
+                </div>
+                <div className="actions-container">
+                    <div className="call-pane__call-btns">
                         <button className="call-pane__start-call calling-state-block" id="btn-accept-call"
-                                data-from-internal={call.data.fromInternal} data-call-sid={call.data.callSid} disabled={call.isSentAcceptCallRequestState()}>
+                                data-from-internal={call.data.fromInternal} data-call-sid={call.data.callSid}
+                                disabled={call.isSentAcceptCallRequestState()}>
                             {call.isSentAcceptCallRequestState()
                                 ? <i className="fa fa-spinner fa-spin"> </i>
                                 : <i className="fas fa-phone"> </i>

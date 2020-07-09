@@ -1383,3 +1383,13 @@ $(document).on('click', '.call-info-action__more', function (e) {
     e.preventDefault();
     $(this).closest('.call-list-item').addClass('call-list-item--menu')
 })
+
+$(document).on('click', '.call-details__nav-btn--more', function(e) {
+    e.preventDefault();
+    $('.conference-call-details').addClass('is_active')
+});
+
+$(document).on('click', '.call-details__nav-btn--back', function(e) {
+    e.preventDefault();
+    $('.conference-call-details').removeClass('is_active')
+});

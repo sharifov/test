@@ -16,7 +16,7 @@ class ListItem extends React.Component {
 
     callUpdateHandler() {
         let self = this;
-        return function(event) {
+        return function (event) {
             //queue
             self.setState({
                 call: event.call
@@ -24,7 +24,7 @@ class ListItem extends React.Component {
         }
     }
 
-    render () {
+    render() {
         let call = this.state.call;
         return (
             <li className="call-in-progress__list-item">
@@ -44,10 +44,15 @@ class ListItem extends React.Component {
                                 className="call-info-list__number">{call.data.contact.phone}</span></li>
                         </ul>
                         <div className="call-list-item__info-action call-info-action">
-                            <CallDurationTimer duration={call.getDuration()}/>
-                            {(call.data.queue === 'inProgress' && call.data.typeId !== 3)
-                                ?
-                                <a href="#" className="call-info-action__more"><i className="fa fa-ellipsis-h"> </i></a>
+                            <span className="call-info-action__timer">
+                                <PhoneWidgetTimer duration={call.getDuration()} timeStart={Date.now()}/>
+                            </span>
+                            {
+                                (
+                                    (call.data.queue === 'inProgress' && call.data.typeId !== 3)
+                                    || (call.data.typeId === 3 && !call.data.isListen && !call.data.isHold)
+                                )
+                                ? <a href="#" className="call-info-action__more"><i className="fa fa-ellipsis-h"> </i></a>
                                 : ''
                             }
                         </div>
@@ -72,39 +77,25 @@ class ListItem extends React.Component {
 
 function ListItemMenu(props) {
     let call = props.call;
-    if (call.data.queue !== 'inProgress' || call.data.typeId === 3) {
+    if (call.data.queue !== 'inProgress') {
         return null;
     }
+
+    if (call.data.typeId === 3) {
+        return <ListItemMenuJoinCall call={call}/>
+    }
+
     return (
         <ul className="call-list-item__menu call-item-menu">
             <li className="call-item-menu__list-item">
                 <a href="#" className="call-item-menu__close"><i className="fa fa-chevron-right"> </i></a>
             </li>
-            <li className="call-item-menu__list-item wg-transfer-call" data-call-sid={call.data.callSid}>
-                <a href="#" className="call-item-menu__transfer"><i className="fa fa-random"> </i></a>
-            </li>
+            <ListItemBtnTransfer call={call}/>
             {conferenceBase
                 ?
-                    <React.Fragment>
-                        <li className="call-item-menu__list-item list_item_hold"
-                            data-mode={call.data.isHold ? 'hold' : 'unhold'}
-                            data-call-sid={call.data.callSid}>
-                            <a href="#" className="call-item-menu__transfer">
-                                {call.isSentHoldUnHoldRequestState()
-                                    ? <i className="fa fa-spinner fa-spin"> </i>
-                                    : call.data.isHold
-                                        ? <i className="fa fa-play"> </i>
-                                        : <i className="fa fa-pause"> </i>
-                                }
-                            </a>
-                        </li>
-                    </React.Fragment>
-                : ''
-            }
-            {call.data.queue !== 'inProgress'
-                ? <React.Fragment>
-                    <li className="call-item-menu__list-item"><a href="#" className="call-item-menu__transfer"><i
-                        className="fas fa-phone-slash"> </i></a></li>
+                <React.Fragment>
+                    <ListItemBtnHold call={call}/>
+                    <ListItemBtnMute call={call}/>
                 </React.Fragment>
                 : ''
             }
@@ -112,50 +103,65 @@ function ListItemMenu(props) {
     );
 }
 
-class CallDurationTimer extends React.Component {
+function ListItemBtnTransfer(props) {
+    return (
+        <li className="call-item-menu__list-item wg-transfer-call" data-call-sid={props.call.data.callSid}>
+            <a href="#" className="call-item-menu__transfer"><i className="fa fa-random"> </i></a>
+        </li>
+    );
+}
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            duration: 0
-        };
+function ListItemBtnHold(props) {
+    let call = props.call;
+    return (
+        <li className="call-item-menu__list-item list_item_hold"
+            data-mode={call.data.isHold ? 'hold' : 'unhold'}
+            data-call-sid={call.data.callSid}>
+            <a href="#" className="call-item-menu__transfer">
+                {call.isSentHoldUnHoldRequestState()
+                    ? <i className="fa fa-spinner fa-spin"> </i>
+                    : call.data.isHold
+                        ? <i className="fa fa-play"> </i>
+                        : <i className="fa fa-pause"> </i>
+                }
+            </a>
+        </li>
+    );
+}
+
+function ListItemBtnMute(props) {
+    let call = props.call;
+    if (call.data.isHold) {
+        return null;
+    }
+    return (
+        <li className="call-item-menu__list-item list_item_mute"
+            data-call-sid={call.data.callSid} data-is-muted={call.data.isMute}>
+            <a href="#" className="call-item-menu__transfer">
+                {call.isSentMuteUnMuteRequestState()
+                    ? <i className="fa fa-spinner fa-spin"> </i>
+                    : call.data.isMute
+                        ? <i className="fas fa-microphone-alt-slash"> </i>
+                        : <i className="fas fa-microphone"> </i>
+                }
+            </a>
+        </li>
+    );
+}
+
+function ListItemMenuJoinCall(props) {
+    let call = props.call;
+
+    if (call.data.isListen) {
+        return null;
     }
 
-    componentDidMount() {
-        this.startTimer();
-    }
-
-    componentWillUnmount() {
-        clearInterval(this.timer);
-    }
-
-    startTimer() {
-        clearInterval(this.timer);
-        this.setState({
-            duration: this.props.duration
-        });
-        this.timer = setInterval(() => this.setState({
-            duration: this.state.duration + 1
-        }), 1000);
-    }
-
-    formatDuration(duration) {
-        let out = '';
-        let hours = Math.floor(duration / 60 / 60);
-        let minutes = Math.floor(duration / 60) - (hours * 60);
-        let seconds = duration % 60;
-        if (hours > 0) {
-            out = hours.toString().padStart(2, '0') + ':';
-        }
-        out += minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
-        return out;
-    }
-
-    render() {
-        return (
-            <React.Fragment>
-                <span className="call-info-action__timer">{this.formatDuration(this.state.duration)}</span>
-            </React.Fragment>
-        );
-    }
+    return (
+        <ul className="call-list-item__menu call-item-menu">
+            <li className="call-item-menu__list-item">
+                <a href="#" className="call-item-menu__close"><i className="fa fa-chevron-right"> </i></a>
+            </li>
+            <ListItemBtnMute call={call}/>
+        </ul>
+    );
 }

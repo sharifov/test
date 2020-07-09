@@ -4,6 +4,9 @@ namespace sales\model\conference\useCase\statusCallBackEvent;
 
 use common\models\Conference;
 use common\models\ConferenceParticipant;
+use common\models\Notifications;
+use sales\model\conference\service\ConferenceDataService;
+use sales\model\conference\socket\SocketCommands;
 use Yii;
 use yii\helpers\VarDumper;
 
@@ -36,6 +39,17 @@ class ConferenceParticipantJoin
                 'errors' => $participant->getErrors(),
                 'model' => $participant->getAttributes(),
             ]), static::class);
+            return;
         }
+        $this->sendMessageToSocket($participant);
+    }
+
+    private function sendMessageToSocket(ConferenceParticipant $participant): void
+    {
+        if (!$data = ConferenceDataService::getDataById($participant->cp_cf_id)) {
+            return;
+        }
+
+        SocketCommands::sendToAllUsers($data);
     }
 }

@@ -221,6 +221,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
 				$callInfo = [
                     'id' => $call->c_id,
                     'callSid' => $call->c_call_sid,
+                    'conferenceSid' => $call->c_conference_sid,
                     'status' => $call->getStatusName(),
                     'duration' => 0,
                     'leadId' => $call->c_lead_id,
@@ -231,6 +232,8 @@ class CallUserAccess extends \yii\db\ActiveRecord
                     'isHold' => false,
                     'holdDuration' => 0,
                     'isListen' => false,
+                    'isCoach' => false,
+                    'isBarge' => false,
                     'isMute' => false,
                     'project' => $call->c_project_id ? $call->cProject->name : '',
                     'source' => $call->c_source_type_id ? $call->getSourceName() : '',

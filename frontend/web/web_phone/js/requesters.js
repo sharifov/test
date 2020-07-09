@@ -195,7 +195,7 @@
                         createNotify('Add Note', data.message, 'error');
                     } else {
                         createNotify('Add Note', data.message, 'success');
-                        $container.val('');
+                        $container.value = '';
                     }
                     call.unSetAddNoteRequestState();
                 })
