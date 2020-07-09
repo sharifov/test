@@ -42,6 +42,7 @@ use common\models\UserGroupAssign;
 use common\models\UserGroupSet;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
+use common\models\VisitorLog;
 use console\migrations\RbacMigrationService;
 use DateInterval;
 use DatePeriod;
@@ -102,6 +103,7 @@ use sales\forms\leadflow\TakeOverReasonForm;
 use sales\guards\ClientPhoneGuard;
 use sales\helpers\app\AppHelper;
 use sales\helpers\call\CallHelper;
+use sales\helpers\lead\LeadHelper;
 use sales\helpers\lead\LeadUrlHelper;
 use sales\helpers\payment\CreditCardHelper;
 use sales\helpers\query\QueryHelper;
@@ -1362,6 +1364,12 @@ class TestController extends FController
 
 	public function actionZ()
     {
+
+        $lead = Lead::findOne(370882);
+        $xxx = VisitorLog::getLastGaClientIdByClient($lead->client_id);
+        \yii\helpers\VarDumper::dump($xxx->vl_ga_client_id, 10, true); exit();
+        /* FOR DEBUG:: must by remove */
+
         $data = [
             'cid' => 'test_15',
             't' => 'event',
