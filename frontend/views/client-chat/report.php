@@ -3,7 +3,7 @@ use kartik\grid\GridView;
 use yii\helpers\Html;
 
 
-$this->title = 'Chat Report';
+$this->title = 'Client Chat Users';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="chat-report">

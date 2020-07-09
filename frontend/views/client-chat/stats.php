@@ -2,80 +2,85 @@
 
 use sales\entities\chat\ChatGraphsSearch;
 use yii\bootstrap4\ActiveForm;
+use yii\helpers\Html;
 
 /**
  * @var ChatGraphsSearch $model
  */
 
-$this->title = 'Client Chat Stats';
+$this->title = 'Client Chat';
+$this->params['breadcrumbs'][] = $this->title;
 ?>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<div class="chat-stats">
+    <h1><i class=""></i> <?= Html::encode($this->title) ?></h1>
 
-<div class="row">
-    <div class="col-md-12">
-        <div class="x_panel">
-            <div class="x_title">
-                <h2>Search</h2>
-                <div class="clearfix"></div>
-            </div>
-            <div class="x_content">
-                <?php $form = ActiveForm::begin([
-                    'id' => 'chat-chart-search-form',
-                    'options' => ['data-pjax' => '#client-chat-chart'],
-                    'action' => \yii\helpers\Url::to('/stats/ajax-get-total-chart'),
-                    'enableClientValidation' => false,
-                ]) ?>
-
-                <div class="row">
-                    <div class="col-md-4">
-                        <?= $form->field($model, 'createTimeRange', [
-                            'options' => ['class' => 'form-group'],
-                        ])->widget(\kartik\daterange\DateRangePicker::class, [
-                            'presetDropdown' => false,
-                            'hideInput' => true,
-                            'convertFormat' => true,
-                            'pluginOptions' => [
-                                'timePicker' => true,
-                                'timePickerIncrement' => 1,
-                                'timePicker24Hour' => true,
-                                'locale' => [
-                                    'format' => 'Y-m-d H:i:s',
-                                    'separator' => ' - '
-                                ]
-                            ]
-                        ])->label('Created From / To'); ?>
-                    </div>
-
-                    <div class="col-md-2">
-                        <?= $form->field($model, 'graphGroupBy', [
-                            'options' => ['class' => 'form-group']
-                        ])->dropDownList($model::getDateFormatTextList())->label('Group By')?>
-                    </div>
-
+    <div class="row">
+        <div class="col-md-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Search</h2>
+                    <div class="clearfix"></div>
                 </div>
+                <div class="x_content">
+                    <?php $form = ActiveForm::begin([
+                        'id' => 'chat-chart-search-form',
+                        'options' => ['data-pjax' => '#client-chat-chart'],
+                        'action' => \yii\helpers\Url::to('/stats/ajax-get-total-chart'),
+                        'enableClientValidation' => false,
+                    ]) ?>
 
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="d-flex justify-content-center">
-                            <?= \yii\helpers\Html::button('<i class="fa fa-search"></i> Search', ['type' => 'submit', 'class' => 'btn btn-default', 'id' => 'chat-chart-from-btn']) ?>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <?= $form->field($model, 'createTimeRange', [
+                                'options' => ['class' => 'form-group'],
+                            ])->widget(\kartik\daterange\DateRangePicker::class, [
+                                'presetDropdown' => false,
+                                'hideInput' => true,
+                                'convertFormat' => true,
+                                'pluginOptions' => [
+                                    'timePicker' => true,
+                                    'timePickerIncrement' => 1,
+                                    'timePicker24Hour' => true,
+                                    'locale' => [
+                                        'format' => 'Y-m-d H:i:s',
+                                        'separator' => ' - '
+                                    ]
+                                ]
+                            ])->label('Created From / To'); ?>
+                        </div>
+
+                        <div class="col-md-2">
+                            <?= $form->field($model, 'graphGroupBy', [
+                                'options' => ['class' => 'form-group']
+                            ])->dropDownList($model::getDateFormatTextList())->label('Group By')?>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="d-flex justify-content-center">
+                                <?= \yii\helpers\Html::button('<i class="fa fa-search"></i> Search', ['type' => 'submit', 'class' => 'btn btn-default', 'id' => 'chat-chart-from-btn']) ?>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <?php ActiveForm::end() ?>
+                    <?php ActiveForm::end() ?>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="card card-default">
-    <div class="card-header"><i class="fa fa-bar-chart"></i> Chats state Chart</div>
-    <div class="card-body">
-        <div class="row">
-            <div class="col-md-12 col-sm-6 col-xs-12">
-                <div class="x_panel" id="client-chat-chart">
-                    <div id="loading" style="text-align:center;font-size: 40px;">
-                        <i class="fa fa-spin fa-spinner"></i> Loading ...
+    <div class="card card-default">
+        <div class="card-header"><i class="fa fa-bar-chart"></i> Chats state Chart</div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-12 col-sm-6 col-xs-12">
+                    <div class="x_panel" id="client-chat-chart">
+                        <div id="loading" style="text-align:center;font-size: 40px;">
+                            <i class="fa fa-spin fa-spinner"></i> Loading ...
+                        </div>
                     </div>
                 </div>
             </div>
