@@ -26,10 +26,8 @@ class SendLeadInfoToGaJob extends BaseObject implements JobInterface
     public function execute($queue) : bool
     {
         try {
-            if($this->checkParams()) {
-                if ($gaLead = new GaLead($this->lead)) {
-                    $gaLead->send();
-                }
+            if($this->checkParams() && $gaLead = new GaLead($this->lead)) {
+                $gaLead->send();
             }
         } catch (\Throwable $throwable) {
             if ($throwable->getCode() < 0) {

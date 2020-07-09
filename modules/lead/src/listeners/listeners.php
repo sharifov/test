@@ -48,6 +48,7 @@ use sales\listeners\lead\LeadProcessingEventLogListener;
 use sales\listeners\lead\LeadQcallAddListener;
 use sales\listeners\lead\LeadQuoteCloneEventListener;
 use sales\listeners\lead\LeadRejectEventLogListener;
+use sales\listeners\lead\LeadSendToQaListener;
 use sales\listeners\lead\LeadSnoozeEventLogListener;
 use sales\listeners\lead\LeadSnoozeNotificationsListener;
 use sales\listeners\lead\LeadSoldEventLogListener;
@@ -57,10 +58,11 @@ use sales\listeners\lead\LeadTrashEventLogListener;
 
 return [
     LeadCreatedEvent::class => [LeadCreatedEventListener::class],
-    LeadCreatedManuallyEvent::class => [],
+    LeadCreatedManuallyEvent::class => [LeadSendToQaListener::class],
     LeadCreatedByIncomingCallEvent::class => [
         LeadCreatedByIncomingCallLogListener::class,
         LeadQcallAddListener::class,
+        LeadSendToQaListener::class,
     ],
     LeadCreatedByApiEvent::class => [
         LeadCreatedByApiLogEventListener::class,
@@ -70,10 +72,17 @@ return [
         LeadCreatedByApiBOLogEventListener::class,
         LeadQcallAddListener::class,
     ],
-    LeadCreatedByIncomingSmsEvent::class => [LeadCreatedByIncomingSmsLogListener::class],
-    LeadCreatedByIncomingEmailEvent::class => [LeadCreatedByIncomingEmailLogListener::class],
+    LeadCreatedByIncomingSmsEvent::class => [
+        LeadCreatedByIncomingSmsLogListener::class,
+        LeadSendToQaListener::class,
+    ],
+    LeadCreatedByIncomingEmailEvent::class => [
+        LeadCreatedByIncomingEmailLogListener::class,
+        LeadSendToQaListener::class,
+    ],
     LeadCreatedNewEvent::class => [
         LeadCreatedNewEventLogListener::class,
+        LeadSendToQaListener::class,
     ],
 
     LeadDuplicateDetectedEvent::class => [LeadDuplicateDetectedEventListener::class],
