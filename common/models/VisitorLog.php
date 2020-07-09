@@ -32,6 +32,7 @@ use yii\db\ActiveRecord;
  * @property string|null $vl_ip_address
  * @property string|null $vl_visit_dt
  * @property string|null $vl_created_dt
+ * @property int|null $vl_cch_id
  *
  * @property Client $client
  * @property Lead $lead
@@ -95,7 +96,10 @@ class VisitorLog extends \yii\db\ActiveRecord
             ['vl_user_agent', 'string', 'max' => 500],
 
             ['vl_ip_address', 'string', 'max' => 39],
-        ];
+
+			['vl_cch_id', 'integer'],
+			['vl_cch_id', 'exist', 'skipOnError' => true, 'targetClass' => ClientChat::class, 'targetAttribute' => ['vl_cch_id' => 'cch_id']],
+		];
     }
 
     public function behaviors(): array
@@ -147,6 +151,7 @@ class VisitorLog extends \yii\db\ActiveRecord
             'vl_ip_address' => 'Ip Address',
             'vl_visit_dt' => 'Visit Dt',
             'vl_created_dt' => 'Created Dt',
+			'vl_cch_id' => 'Client Chat Id'
         ];
     }
 
@@ -198,6 +203,7 @@ class VisitorLog extends \yii\db\ActiveRecord
 		$log->vl_utm_campaign = $data['sources']['utm_campaign'] ?? null;
 		$log->vl_user_agent = $data['system']['user_agent'] ?? null;
 		$log->vl_ip_address = $data['system']['ip_address'] ?? null;
+		$log->vl_cch_id = $clientChat->cch_id;
 
 		return $log;
 	}

@@ -138,8 +138,14 @@ class ClientChatService
 
 	private function cloneAdditionalData(ClientChat $newClientChat, ClientChat $oldClientChat): void
 	{
+		if ($log = $this->visitorLogRepository->findByCchId($oldClientChat->cch_id)) {
+			$newLog = $this->visitorLogRepository->clone($log);
+			$this->visitorLogRepository->save($newLog);
+		}
+
 		if ($data = $this->clientChatDataRepository->findByCchId($oldClientChat->cch_id)) {
-			$this->clientChatDataRepository->clone($newClientChat, $data);
+			$newData = $this->clientChatDataRepository->clone($newClientChat, $data);
+			$this->clientChatDataRepository->save($newData);
 		}
 	}
 }

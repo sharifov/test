@@ -92,12 +92,12 @@ $this->params['breadcrumbs'][] = $this->title;
             //'cchCase:case',
             [
                 'label' => 'Case ID',
-                'attribute' => 'cch_case_id',
+                'attribute' => 'cchCase',
                 'format' => 'case'
             ],
             [
                 'label' => 'Lead ID',
-                'attribute' => 'cch_lead_id',
+                'attribute' => 'cchLead',
                 'format' => 'lead'
             ],
             //'cchLead:lead',

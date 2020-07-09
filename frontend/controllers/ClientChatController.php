@@ -2,6 +2,7 @@
 namespace frontend\controllers;
 
 use common\models\VisitorLog;
+use frontend\widgets\clientChat\ClientChatAccessWidget;
 use sales\auth\Auth;
 use sales\entities\chat\ChatGraphsSearch;
 use sales\helpers\app\AppHelper;
@@ -344,5 +345,12 @@ class ClientChatController extends FController
 		}
 
 		return $this->renderAjax('partial/_transfer_view', ['clientChat' => $clientChat, 'transferForm' => $form]);
+	}
+
+	public function actionPjaxUpdateChatWidget()
+	{
+		$widget = ClientChatAccessWidget::getInstance();
+		$widget->userId = Auth::id();
+		return $widget->run();
 	}
 }

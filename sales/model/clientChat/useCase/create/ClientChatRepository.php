@@ -41,7 +41,7 @@ class ClientChatRepository
 	public function getOrCreateByRequest(ClientChatRequest $clientChatRequest): ClientChat
 	{
 		try {
-			$clientChat = $this->findByRid($clientChatRequest->ccr_rid);
+			$clientChat = $this->findNotClosed($clientChatRequest->ccr_rid);
 			$clientChat->attachBehavior('user', BlameableBehaviorExceptApi::class);
 		} catch (NotFoundException $e) {
 			$clientChat = new ClientChat();

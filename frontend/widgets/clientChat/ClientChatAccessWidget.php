@@ -7,8 +7,6 @@ namespace frontend\widgets\clientChat;
 use sales\helpers\setting\SettingHelper;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use yii\base\Widget;
-use yii\caching\TagDependency;
-use yii\helpers\ArrayHelper;
 
 /**
  * Class ClientChatAccessWidget
@@ -19,9 +17,22 @@ use yii\helpers\ArrayHelper;
 class ClientChatAccessWidget extends Widget
 {
 	/**
+	 * @var self
+	 */
+	private static $instance;
+
+	/**
 	 * @var int $userId
 	 */
 	public int $userId;
+
+	public static function getInstance(): ClientChatAccessWidget
+	{
+		if (null === self::$instance) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
 
 	/**
 	 * @return string|null
