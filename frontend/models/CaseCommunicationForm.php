@@ -181,7 +181,7 @@ class CaseCommunicationForm extends Model
             [['c_email_message', 'c_sms_message'], 'string'],
             [['c_sms_tpl_key', 'c_email_tpl_key'], 'string', 'max' => 50],
             [['c_sms_message'], 'string', 'max' => 500],
-            [['c_email_subject'], 'string', 'max' => 80, 'min' => 5],
+            [['c_email_subject'], 'string', 'max' => 200, 'min' => 5],
 
             [['c_language_id'], 'string', 'max' => 5],
 
