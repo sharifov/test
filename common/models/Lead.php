@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\components\EmailService;
+use common\components\ga\GaHelper;
 use common\components\jobs\UpdateLeadBOJob;
 use common\components\purifier\Purifier;
 use common\models\local\LeadAdditionalInformation;
@@ -4594,7 +4595,6 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
 
 	public function isReadyForGa(): bool
 	{
-		/* TODO::  */
-		return false;
+		return (GaHelper::getTrackingIdByLead($this) && GaHelper::getClientIdByLead($this));
 	}
 }
