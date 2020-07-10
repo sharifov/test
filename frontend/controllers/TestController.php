@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\components\CommunicationService;
+use common\components\ga\GaLead;
 use common\components\jobs\CreateSaleFromBOJob;
 use common\components\Purifier;
 use common\components\jobs\TelegramSendMessageJob;
@@ -1365,9 +1366,22 @@ class TestController extends FController
 	public function actionZ()
     {
         if ($lead = Lead::findOne(367010)) {
-            $xxx = LeadHelper::getAllIataByLead($lead);
+
+            try {
+                $gaLead = new GaLead($lead);
+                $response = $gaLead->send();
+
+                Yii::info(VarDumper::dumpAsString($response),
+                'info\SendLeadInfoToGaJob:response');
+
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableFormatter($throwable), self::class . ':' . __FUNCTION__ . ':Example failed' );  /* TODO: add category */
+            }
         }
-        
+
+        \yii\helpers\VarDumper::dump(isset($response) ? $response->content : 'failed', 10, true); exit();
+        /* FOR DEBUG:: must by remove */
+
         return $this->render('z');
     }
 }
