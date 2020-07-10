@@ -2,6 +2,7 @@
 
 namespace common\components\jobs;
 
+use common\components\ga\GaHelper;
 use common\components\ga\GaLead;
 use common\models\Lead;
 use common\models\VisitorLog;
@@ -46,7 +47,12 @@ class SendLeadInfoToGaJob extends BaseObject implements JobInterface
      */
     protected function checkParams(): bool
     {
-        if (!$visitorLog = VisitorLog::getLastGaClientIdByClient($this->lead->client_id)) {
+        /* TODO::
+        create method in Lead - isReadyForGa
+
+         */
+
+        if (!$visitorLog = GaHelper::getLastGaClientIdByClient($this->lead->client_id)) { /* TODO:: check Tracking ID */
             throw new \RuntimeException('Ga Client Id not found.', -10);
         }
         return true;

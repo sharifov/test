@@ -3,8 +3,8 @@
 namespace common\components\ga;
 
 use common\models\Lead;
+use common\models\Quote;
 use sales\helpers\app\AppHelper;
-use sales\helpers\lead\LeadHelper;
 use Yii;
 use yii\httpclient\Response;
 
@@ -15,22 +15,24 @@ use yii\httpclient\Response;
  * @property string $tid
  * @property array $postData
  */
-class GaQuote /* TODO::  */
+class GaQuote /* TODO:: add interface */
 {
     private $cid; // Client ID
     private $tid; // Tracking ID
-    private $postData;
+    private array $postData = [];
 
+    private Quote $quote;
     private Lead $lead;
 
     /**
-     * @param Lead $lead
+     * @param Quote $quote
      */
-    public function __construct(Lead $lead)
+    public function __construct(Quote $quote)
     {
-        GaHelper::checkSettings(GaHelper::TYPE_LEAD);
+        GaHelper::checkSettings(GaHelper::TYPE_QUOTE);
 
-        $this->lead = $lead;
+        $this->quote = $quote;
+        $this->lead = $quote->lead;
 
         $this->setCid()
             ->setTid()
@@ -39,7 +41,7 @@ class GaQuote /* TODO::  */
 
     private function setTid(): GaQuote
     {
-        if ($this->lead->project && $this->tid = $this->lead->project->ga_tracking_id) {
+        if ($this->tid = GaHelper::getTrackingIdByLead($this->lead)) {
             return $this;
         }
         throw new \DomainException('GA Tracking ID not found.', -4);
@@ -47,11 +49,10 @@ class GaQuote /* TODO::  */
 
     private function setCid(): GaQuote
     {
-        if (!$visitorLog = GaHelper::getLastGaClientIdByClient($this->lead->client_id)) {
-            throw new \DomainException('GA Client Id not found.', -2);
+        if ($this->cid = GaHelper::getClientIdByLead($this->lead)) {
+            return $this;
         }
-        $this->cid = $visitorLog->vl_ga_client_id;
-        return $this;
+        throw new \DomainException('GA Client Id not found.', -2);
     }
 
     /**
@@ -66,34 +67,20 @@ class GaQuote /* TODO::  */
                 't' => 'event',
                 'ec' => 'leads',
                 'ea' => 'phone-to-book',
-                'el' => 'crm-generated-lead',
+                'el' => 'mail-sent',
                 'cd1' => $this->cid,
                 'cd2' => '',
             ];
 
-            $firstSegment = $this->lead->getFirstFlightSegment();
-            $lastSegment = $this->lead->getLastFlightSegment();
+            $this->postData['cd10'] = implode(',', $this->getOperatingAirlines());
+            $this->postData['cd11'] = implode(',', $this->getMarketingAirlines());
 
-            $this->postData['cd3'] = implode(',', LeadHelper::getAllOriginsByLead($this->lead));
-            $this->postData['cd4'] = implode(',', LeadHelper::getAllDestinationByLead($this->lead));
-            $this->postData['cd5'] = date('Y-m-d', strtotime($firstSegment->departure));
-            $this->postData['cd6'] = $this->lead->isRoundTrip() ? date('Y-m-d', strtotime($lastSegment->departure)) : '';
-            $this->postData['cd7'] = $this->lead->getCabinClassName();
-            $this->postData['cd8'] = implode('-', LeadHelper::getAllIataByLead($this->lead));
-            $this->postData['cd9'] = $this->lead->getFlightTypeName();
-            $this->postData['cd10'] = '';
-            $this->postData['cd11'] = '';
-            $this->postData['cd12'] = '';
-            $this->postData['cd13'] = $this->lead->source ? $this->lead->source->cid : '';
-            $this->postData['cd14'] = '';
-            $this->postData['cd15'] = $this->lead->uid;
-            $this->postData['cm1'] = $this->lead->adults;
-            $this->postData['cm2'] = $this->lead->children;
-            $this->postData['cm3'] = $this->lead->infants;
+            $this->postData = GaHelper::preparePostData($this->postData, $this->lead);
 
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableFormatter($throwable),
             'GaQuote:prepareData:Throwable');
+            $this->postData = [];
         }
         return $this;
     }
@@ -121,5 +108,36 @@ class GaQuote /* TODO::  */
             throw new \RuntimeException('Post data is required.', -3);
         }
         return true;
+    }
+
+    /**
+     * @return array
+     */
+    private function getOperatingAirlines(): array   /* TODO:: test is */
+    {
+        $result = [];
+        foreach ($this->quote->quoteTrips as $trip) {
+            foreach ($trip->quoteSegments as $segment) {
+                if (empty($segment->qs_operating_airline)) {
+                    continue;
+                }
+                $result[$segment->qs_operating_airline] = $segment->qs_operating_airline;
+            }
+        }
+        return $result;
+    }
+
+    private function getMarketingAirlines(): array   /* TODO:: test is */
+    {
+        $result = [];
+        foreach ($this->quote->quoteTrips as $trip) {
+            foreach ($trip->quoteSegments as $segment) {
+                if (empty($segment->qs_marketing_airline)) {
+                    continue;
+                }
+                $result[$segment->qs_marketing_airline] = $segment->qs_marketing_airline;
+            }
+        }
+        return $result;
     }
 }

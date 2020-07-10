@@ -3322,6 +3322,9 @@ Reason: {reason}',
         return LeadFlightSegment::find()->where(['lead_id' => $this->id])->orderBy(['departure' => 'ASC'])->one();
     }
 
+    /**
+     * @return array|ActiveRecord|null
+     */
     public function getLastFlightSegment()
     {
         return LeadFlightSegment::find()->where(['lead_id' => $this->id])->orderBy(['id' => SORT_DESC])->one();
@@ -4587,5 +4590,11 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
 	public function isRoundTrip(): bool
 	{
 		return $this->trip_type === self::TRIP_TYPE_ROUND_TRIP;
+	}
+
+	public function isReadyForGa(): bool
+	{
+		/* TODO::  */
+		return false;
 	}
 }

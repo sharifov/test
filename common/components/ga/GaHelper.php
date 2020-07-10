@@ -2,7 +2,9 @@
 
 namespace common\components\ga;
 
+use common\models\Lead;
 use common\models\VisitorLog;
+use sales\helpers\lead\LeadHelper;
 use Yii;
 use yii\db\ActiveRecord;
 
@@ -20,8 +22,128 @@ class GaHelper
         $gaQbjEnable = $type === self::TYPE_LEAD ? self::checkLeadEnable() : self::checkQuoteEnable() ;
 
         if (!$gaEnable || !$gaQbjEnable) {
-            throw new \DomainException('Service disabled. Please, check GA settings.', -1);
+            throw new \DomainException('Service disabled. Please, check Google Analytics settings.', -1);
         }
+    }
+
+    /**
+     * @param int $clientId
+     * @return array|ActiveRecord|null
+     */
+    public static function getLastGaClientIdByClient(int $clientId)
+    {
+        return VisitorLog::find()
+            ->where(['NOT', ['vl_ga_client_id' => null]])
+            ->andWhere(['!=', 'vl_ga_client_id', ''])
+            ->andWhere(['vl_client_id' => $clientId])
+            ->orderBy(['vl_created_dt' => SORT_DESC])
+            ->limit(1)
+            ->one();
+    }
+
+    /**
+     * @param Lead $lead
+     * @return string|null
+     */
+    public static function getTrackingIdByLead(Lead $lead): ?string
+    {
+        if ($lead->project && $trackingId = $lead->project->ga_tracking_id) {
+            return $trackingId;
+        }
+        return null;
+    }
+
+    /**
+     * @param Lead $lead
+     * @return string|null
+     */
+    public static function getClientIdByLead(Lead $lead): ?string
+    {
+        $visitorLog = self::getLastGaClientIdByClient($lead->client_id);
+        if ($visitorLog && $clientId = $visitorLog->vl_ga_client_id) {
+            return $clientId;
+        }
+        return null;
+    }
+
+    /**
+     * @param Lead $lead
+     * @return string|null
+     */
+    public static function getOriginByLead(Lead $lead): ?string /* TODO:: test it */
+    {
+        if ($lead->isMultiDestination()) {
+            return implode(',', LeadHelper::getAllOriginsByLead($lead));
+        }
+        $allOrigins = LeadHelper::getAllOriginsByLead($lead);
+        return current($allOrigins);
+    }
+
+    /**
+     * @param Lead $lead
+     * @return string|null
+     */
+    public static function getDestinationByLead(Lead $lead): ?string /* TODO:: test it */
+    {
+        if ($lead->isMultiDestination()) {
+            return implode(',', LeadHelper::getAllDestinationByLead($lead));
+        }
+        $allOrigins = LeadHelper::getAllOriginsByLead($lead);
+        return end($allOrigins);
+    }
+
+    /**
+     * @param array $postData
+     * @param Lead $lead
+     * @return array
+     */
+    public static function preparePostData(array $postData, Lead $lead): array
+    {
+        $postData['cd3'] = self::getOriginByLead($lead);
+        $postData['cd4'] = self::getDestinationByLead($lead);
+        $postData['cd5'] = self::getDateDeparture($lead);
+        $postData['cd6'] = self::getDateDepartureRoundTrip($lead);
+        $postData['cd7'] = $lead->getCabinClassName();
+        $postData['cd8'] = implode('-', LeadHelper::getAllIataByLead($lead));
+        $postData['cd9'] = $lead->getFlightTypeName();
+
+        $postData['cd12'] = '';
+        $postData['cd13'] = $lead->source ? $lead->source->cid : '';
+        $postData['cd14'] = '';
+        $postData['cd15'] = $lead->uid;
+        $postData['cm1'] = $lead->adults;
+        $postData['cm2'] = $lead->children;
+        $postData['cm3'] = $lead->infants;
+
+        return $postData;
+    }
+
+    /**
+     * @param Lead $lead
+     * @return string
+     */
+    private static function getDateDepartureRoundTrip(Lead $lead): string
+    {
+        if ($lead->isRoundTrip() && $lastSegment = $lead->getLastFlightSegment()) {
+            if ($lastDateDeparture = date('Y-m-d', strtotime($lastSegment->departure))) {
+                return $lastDateDeparture;
+            }
+        }
+        return '';
+    }
+
+    /**
+     * @param Lead $lead
+     * @return string
+     */
+    private static function getDateDeparture(Lead $lead): string
+    {
+        if ($firstSegment = $lead->getFirstFlightSegment()) {
+            if ($dateDeparture = date('Y-m-d', strtotime($firstSegment->departure))) {
+                return $dateDeparture;
+            }
+        }
+        return '';
     }
 
     /**
@@ -38,20 +160,5 @@ class GaHelper
     private static function checkQuoteEnable(): bool
     {
         return (bool) (Yii::$app->params['settings']['ga_send_quote'] ?? false);
-    }
-
-    /**
-     * @param int $clientId
-     * @return array|ActiveRecord|null
-     */
-    public static function getLastGaClientIdByClient(int $clientId)
-    {
-        return VisitorLog::find()
-            ->where(['NOT', ['vl_ga_client_id' => null]])
-            ->andWhere(['!=', 'vl_ga_client_id', ''])
-            ->andWhere(['vl_client_id' => $clientId])
-            ->orderBy(['vl_created_dt' => SORT_DESC])
-            ->limit(1)
-            ->one();
     }
 }
