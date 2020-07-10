@@ -75,7 +75,7 @@ use yii\web\View;
                                 return null;
                             }
                             $out = Yii::$app->formatter->format($model->cchLead, 'lead');
-                            $out .= ' ' . Html::button('Offer', ['class' => 'btn btn-pri chat-offer']);
+                            $out .= ' ' . Html::button('Offer', ['class' => 'btn btn-info chat-offer', 'data-cch-id' => $model->cch_id]);
                             return $out;
                         },
                         'format' => 'raw',

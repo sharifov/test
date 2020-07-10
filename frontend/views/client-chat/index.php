@@ -31,6 +31,7 @@ $clintChatDataIUrl = Url::toRoute('/client-chat/ajax-data-info');
 $clientChatCloseUrl = Url::toRoute('/client-chat/ajax-close');
 $chatHistoryUrl = Url::toRoute('/client-chat/ajax-history');
 $chatTransferUrl = Url::toRoute('/client-chat/ajax-transfer-view');
+$chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
 ?>
 
 <?php if (empty($channels)): ?>
@@ -287,10 +288,29 @@ function getChatHistory (cchId) {
         $("#_rc-iframe-wrapper").find('#_cc-load').remove();
     });
 }
+
+$(document).on('click', '.chat-offer', function(e) {
+    e.preventDefault();
+    let cchId = $(this).attr('data-cch-id');
+    let modal = $('#modal-df');
+    
+    modal.find('.modal-body').html('<div><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
+    modal.find('.modal-title').html('Send Offer');
+    modal.modal('show');
+
+    $.ajax({
+        type: 'post',
+        url: '{$chatSendOfferUrl}',
+        data: {cchId: cchId},
+        dataType: 'html'
+    })
+    .done(function(data) { 
+            modal.find('.modal-body').html(data);
+    })
+    .fail(function () {
+            createNotify('Error', 'Server error', 'error');
+    });
+});
 JS;
 $this->registerJs($js);
 endif;
-
-
-
-

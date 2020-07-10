@@ -82,7 +82,7 @@ class ChatBot extends Component
             ->setData($data);
 
         if ($headers) {
-            $this->request->setHeaders($headers);
+            $this->request->addHeaders($headers);
         }
 
         $this->request->setOptions([CURLOPT_ENCODING => 'gzip']);
@@ -153,5 +153,23 @@ class ChatBot extends Component
         return $out;
     }
 
+    public function sendMessage(array $data, array $headers = []) : array
+    {
+        $out = ['error' => false, 'data' => []];
 
+        $response = $this->sendRequest('chat.sendMessage', $data, 'post', $headers);
+
+        if ($response->isOk) {
+            if (!empty($response->data)) {
+                $out['data'] = $response->data;
+            } else {
+                $out['error'] = 'Not found in response array data key [data]';
+            }
+        } else {
+            $out['error'] = $response->content;
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'ChatBot:sendMessage');
+        }
+
+        return $out;
+    }
 }

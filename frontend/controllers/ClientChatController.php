@@ -361,4 +361,62 @@ class ClientChatController extends FController
 		$widget->userId = Auth::id();
 		return $widget->run();
 	}
+
+	public function actionSendOffer()
+    {
+        $chatBot = Yii::$app->chatBot;
+
+        $data = [
+            'message' => [
+                'rid' => 'f93a9c3e-e04a-4e0f-b39e-5be30f938da4',
+                'attachments' => [
+                    [
+                        'image_url' => 'https://ichef.bbci.co.uk/news/1024/branded_news/12A9B/production/_111434467_gettyimages-1143489763.jpg',
+                        'title' => 'Title',
+                        'fields' => [
+                            [
+                                'short' => true,
+                                'title' => '11111Test',
+                                'value' => 'Testing out something22222222 or other',
+                            ],
+                            [
+                                'short' => true,
+                                'title' => 'A111111111nother Test',
+                                'value' => '[Link](https://google.com/) something and this and that.',
+                            ]
+                        ]
+                    ],
+                    [
+                        'image_url' => 'https://ichef.bbci.co.uk/news/1024/cpsprodpb/83D7/production/_111515733_gettyimages-1208779325.jpg',
+                        'title' => 'Title 2',
+                    ],
+                ],
+                'customTemplate' => 'carousel',
+            ]
+        ];
+
+//        $rocketUserId = Auth::user()->userProfile->up_rc_user_id;
+//        $rocketToken = Auth::user()->userProfile->up_rc_auth_token;
+//        $headers =  [
+//            'X-User-Id' => $rocketUserId,
+//            'X-Auth-Token' => $rocketToken,
+//        ];
+
+//        $headers = Yii::$app->rchat->getSystemAuthDataHeader();
+//        $chatBot->sendMessage($data, $headers);
+
+        Yii::$app->rchat->sendMessage($data);
+
+        $chatId = \Yii::$app->request->post('cchId');
+
+        try {
+            $clientChat = $this->clientChatRepository->findById($chatId);
+        } catch (NotFoundException $e) {
+            $clientChat = null;
+        }
+
+        return $this->renderAjax('partial/_send_offer', [
+            'clientChat' => $clientChat
+        ]);
+    }
 }
