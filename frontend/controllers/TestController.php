@@ -1365,74 +1365,43 @@ class TestController extends FController
 		echo 'success';
 	}
 
+	public function actionGaSendQuote(int $id = 733986) // test/ga-send-quote
+    {
+        try {
+            $quote = Quote::findOne($id);
+            $gaQbj = new GaQuote($quote);
+            $response = $gaQbj->send();
+
+            Yii::info(VarDumper::dumpAsString($response),'info\actionGaSendQuote:response');
+
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableFormatter($throwable),
+            self::class . ':' . __FUNCTION__ . ':Example failed' );
+        }
+        VarDumper::dump(isset($response) ? $response->content : 'failed', 10, true); exit();
+    }
+
+    public function actionGaSendLead(int $id = 367010) // test/ga-send-lead
+    {
+        try {
+            $lead = Lead::findOne($id);
+            $gaLead = new GaLead($lead);
+            $response = $gaLead->send();
+
+            Yii::info(VarDumper::dumpAsString($response),
+            'info\actionGaLeadQuote:response');
+
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableFormatter($throwable),
+            self::class . ':' . __FUNCTION__ . ':Example failed' );
+        }
+        VarDumper::dump(isset($response) ? $response->content : 'failed', 10, true); exit();
+    }
+
 	public function actionZ()
     {
-        // quote 733986
-
-        /*if ($quote = Quote::findOne(733986)) {
-
-            try {
-                $gaQbj = new GaQuote($quote);
-                //$response = $gaQbj->send();
-
-                // Yii::info(VarDumper::dumpAsString($response),'info\SendLeadInfoToGaJob:response');
-
-            } catch (\Throwable $throwable) {
-                Yii::error(AppHelper::throwableFormatter($throwable), self::class . ':' . __FUNCTION__ . ':Example failed' );
-            }
-        }*/
-
-        if ($lead = Lead::findOne(367010)) {
-
-            $xxx = LeadHelper::getIataByLead($lead);
-
-            \yii\helpers\VarDumper::dump($xxx, 10, true); exit();
-            /* FOR DEBUG:: must by remove */
-
-            try {
-                $gaLead = new GaLead($lead);
-                $response = $gaLead->send();
-
-                Yii::info(VarDumper::dumpAsString($response),
-                'info\SendLeadInfoToGaJob:response');
-
-            } catch (\Throwable $throwable) {
-                Yii::error(AppHelper::throwableFormatter($throwable), self::class . ':' . __FUNCTION__ . ':Example failed' );  /* TODO: add category */
-            }
-        }
-
-        \yii\helpers\VarDumper::dump(isset($response) ? $response->content : 'failed', 10, true); exit();
-        /* FOR DEBUG:: must by remove */
-
+        /* TODO:: add component to configs (env etc.) */
         return $this->render('z');
-    }
-
-    private function getOperatingAirlines(Quote $quote): array   /* TODO:: test is */
-    {
-        $result = [];
-        foreach ($quote->quoteTrips as $trip) {
-            foreach ($trip->quoteSegments as $segment) {
-                if (empty($segment->qs_operating_airline)) {
-                    continue;
-                }
-                $result[$segment->qs_operating_airline] = $segment->qs_operating_airline;
-            }
-        }
-        return $result;
-    }
-
-    private function getMarketingAirlines(Quote $quote): array   /* TODO:: test is */
-    {
-        $result = [];
-        foreach ($quote->quoteTrips as $trip) {
-            foreach ($trip->quoteSegments as $segment) {
-                if (empty($segment->qs_marketing_airline)) {
-                    continue;
-                }
-                $result[$segment->qs_marketing_airline] = $segment->qs_marketing_airline;
-            }
-        }
-        return $result;
     }
 }
 

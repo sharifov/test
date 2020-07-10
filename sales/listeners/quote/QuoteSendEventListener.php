@@ -18,9 +18,9 @@ class QuoteSendEventListener
     public function handle(QuoteSendEvent $event): void
     {
         try {
-            if ($quote = $event->quote) {
+            if ($event->quote->lead->isReadyForGa()) {
                 $job = new SendQuoteInfoToGaJob();
-                $job->quote = $quote;
+                $job->quote = $event->quote;
                 Yii::$app->queue_job->priority(20)->push($job);
             }
         } catch (\Throwable $throwable) {
