@@ -49,7 +49,7 @@ class ClientChatMessageService
 			$this->redis->set($this->totalUnreadMessagesByUserKey($userId), $total - $chatUnreadMessages);
 			$this->removeChatWithUnreadMessages($cchId, $userId);
 
-			NotificationCache::invalidateCc($userId);
+//			NotificationCache::invalidateCc($userId);
 
 			Notifications::publish('clientChatUnreadMessage', ['user_id' => $userId], ['data' => ['totalUnreadMessages' => $this->getCountOfTotalUnreadMessages($userId) ?: '']]);
 		}
@@ -68,7 +68,7 @@ class ClientChatMessageService
 
 		$this->setChatWithUnreadMessages($cchId, $userId);
 
-		NotificationCache::invalidateCc($userId);
+//		NotificationCache::invalidateCc($userId);
 	}
 
 	private function unreadMessageChatKey(int $cchId, int $userId): string
