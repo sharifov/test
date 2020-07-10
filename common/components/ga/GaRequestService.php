@@ -17,13 +17,11 @@ use yii\httpclient\Response;
  *
  * @property string $url
  * @property int $v
- * @property string $tid
  */
 class GaRequestService extends Component
 {
     public $url;
     public $v;
-    public $tid;
 
     public array $options = [CURLOPT_ENCODING => 'gzip'];
 
@@ -44,7 +42,6 @@ class GaRequestService extends Component
             $this->curlRequest->setUrl($this->url);
             $this->curlRequest->setData([
                 'v' => $this->v,
-                'tid' => $this->tid,
             ]);
             return true;
         } catch (Throwable $throwable) {

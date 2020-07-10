@@ -9,13 +9,13 @@ use Yii;
 use yii\httpclient\Response;
 
 /**
- * Class GaLead
+ * Class GaQuote
  *
  * @property string $cid
  * @property string $tid
  * @property array $postData
  */
-class GaLead
+class GaQuote /* TODO::  */
 {
     private $cid; // Client ID
     private $tid; // Tracking ID
@@ -37,7 +37,7 @@ class GaLead
             ->setPostData();
     }
 
-    private function setTid(): GaLead
+    private function setTid(): GaQuote
     {
         if ($this->lead->project && $this->tid = $this->lead->project->ga_tracking_id) {
             return $this;
@@ -45,7 +45,7 @@ class GaLead
         throw new \DomainException('GA Tracking ID not found.', -4);
     }
 
-    private function setCid(): GaLead
+    private function setCid(): GaQuote
     {
         if (!$visitorLog = GaHelper::getLastGaClientIdByClient($this->lead->client_id)) {
             throw new \DomainException('GA Client Id not found.', -2);
@@ -55,9 +55,9 @@ class GaLead
     }
 
     /**
-     * @return GaLead
+     * @return GaQuote
      */
-    private function setPostData(): GaLead
+    private function setPostData(): GaQuote
     {
         try {
             $this->postData = [
@@ -93,7 +93,7 @@ class GaLead
 
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableFormatter($throwable),
-            'GaLead:prepareData:Throwable');
+            'GaQuote:prepareData:Throwable');
         }
         return $this;
     }
@@ -107,7 +107,7 @@ class GaLead
             $this->checkPostData();
             return \Yii::$app->gaRequestService->sendRequest($this->postData);
         } catch (\Throwable $throwable) {
-            AppHelper::throwableLogger($throwable, 'GaLead:prepareData:Throwable');
+            AppHelper::throwableLogger($throwable, 'GaQuote:prepareData:Throwable');
         }
         return null;
     }
