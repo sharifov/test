@@ -18,9 +18,9 @@ class LeadSendToGaListener
     public function handle(LeadableEventInterface $event): void
     {
         try {
-            if ($lead = $event->getLead()) {
+            if ($event->getLead()->isReadyForGa()) {
                 $job = new SendLeadInfoToGaJob();
-                $job->lead = $lead;
+                $job->lead = $event->getLead();
                 Yii::$app->queue_job->priority(20)->push($job);
             }
         } catch (\Throwable $throwable) {

@@ -76,7 +76,7 @@ class GaQuote
             $this->postData['cd4'] = self::getDestinationByQuote($this->quote);
             $this->postData['cd5'] = self::getDateDeparture($this->quote);
             $this->postData['cd6'] = self::getDateDepartureRoundTrip($this->quote);
-            $this->postData['cd8'] = self::getAirportCodes($this->quote);
+            $this->postData['cd8'] = implode('-', self::getAirportCodes($this->quote));
             $this->postData['cd9'] = Lead::getFlightType($this->quote->trip_type);
 
             $this->postData['cd10'] = implode(',', $this->getOperatingAirlines());
