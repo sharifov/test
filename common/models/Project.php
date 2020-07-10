@@ -22,6 +22,7 @@ use yii\httpclient\CurlTransport;
  * @property string $custom_data
  * @property int $sort_order
  * @property string $email_postfix
+ * @property string $ga_tracking_id
  *
  * @property Sources[] $sources
  * @property ContactInfo $contactInfo
@@ -51,7 +52,7 @@ class Project extends \yii\db\ActiveRecord
             [['contact_info','custom_data'], 'string'],
             [['closed'], 'boolean'],
             [['last_update'], 'safe'],
-            [['name', 'link', 'api_key'], 'string', 'max' => 255],
+            [['name', 'link', 'api_key', 'ga_tracking_id'], 'string', 'max' => 255],
             [['email_postfix'], 'string', 'max' => 100],
         ];
     }
@@ -72,6 +73,7 @@ class Project extends \yii\db\ActiveRecord
             'custom_data' => 'Custom Data',
             'sort_order' => 'Sort',
             'email_postfix' => 'Email postfix',
+            'ga_tracking_id' => 'GA Tracking Id',
         ];
     }
 
