@@ -27,4 +27,9 @@ class StartTime
             $this->second = $time[2];
         }
     }
+
+    public function toSeconds(): int
+    {
+        return (int)$this->hour * 3600 + (int)$this->minute * 60 + (int)$this->second;
+    }
 }
