@@ -14,6 +14,8 @@ namespace sales\model\user\entity;
  */
 class ShiftTime
 {
+    private const SECONDS_ON_DAY = 86400;
+
     public $startUtcTs;
     public $endUtcTs;
     public $endLastPeriodTs;
@@ -27,28 +29,32 @@ class ShiftTime
             return;
         }
 
-        $currentTimeUTC = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
+        $currentTimeUser = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))
+            ->setTimezone(new \DateTimeZone($timeZone));
 
-        $startShiftTimeUTC = (new \DateTimeImmutable('now', new \DateTimeZone($timeZone)))
-            ->setTime($startTime->hour, $startTime->minute, $startTime->second)
-            ->setTimezone(new \DateTimeZone('UTC'));
+        $currentTimeUserSeconds = (int)$currentTimeUser->format('H') * 3600 + (int)$currentTimeUser->format('i') * 60 + (int)$currentTimeUser->format('s');
 
-        $endShiftTimeUTC = $startShiftTimeUTC->add(new \DateInterval('PT' . $workSeconds . 'S'));
-
-        $endShiftMinutes = (int)($endShiftTimeUTC->format('H')) * 60 + (int)$endShiftTimeUTC->format('i');
-        $currentMinutes = (int)($currentTimeUTC->format('H')) * 60 + (int)$currentTimeUTC->format('i');
-
-        if (
-            ($currentMinutes >= 0 && $endShiftMinutes >= $currentMinutes)
-            && $startShiftTimeUTC->format('d') !== $endShiftTimeUTC->format('d')
-        ) {
-            $startShiftTimeUTC = $startShiftTimeUTC->modify('-1 day');
-            $endShiftTimeUTC = $endShiftTimeUTC->modify('-1 day');
+        $endTimeSeconds = $startTime->toSeconds() + $workSeconds;
+        if ($endTimeSeconds > self::SECONDS_ON_DAY) {
+            if ($currentTimeUserSeconds > ($endTimeSeconds - self::SECONDS_ON_DAY)) {
+                $startShiftTimeUser = $currentTimeUser->setTime($startTime->hour, $startTime->minute, $startTime->second);
+            } else {
+                $startShiftTimeUser = $currentTimeUser->setTime($startTime->hour, $startTime->minute, $startTime->second)->modify('-1 day');
+            }
+        } else {
+            if ($currentTimeUserSeconds <= $endTimeSeconds) {
+                $startShiftTimeUser = $currentTimeUser->setTime($startTime->hour, $startTime->minute, $startTime->second);
+            } else {
+                $startShiftTimeUser = $currentTimeUser->setTime($startTime->hour, $startTime->minute, $startTime->second)->modify('+1 day');
+            }
         }
+
+        $startShiftTimeUTC = $startShiftTimeUser->setTimezone(new \DateTimeZone('UTC'));
+        $endShiftTimeUTC = $startShiftTimeUTC->add(new \DateInterval('PT' . $workSeconds . 'S'));
 
         $this->startUtcTs = $startShiftTimeUTC->getTimestamp();
         $this->endUtcTs = $endShiftTimeUTC->getTimestamp();
-        $this->endLastPeriodTs = $this->endUtcTs - (24 * 60 * 60);
+        $this->endLastPeriodTs = $this->endUtcTs - self::SECONDS_ON_DAY;
 
         $this->startUtcDt = $startShiftTimeUTC->format('Y-m-d H:i:s');
         $this->endUtcDt = $endShiftTimeUTC->format('Y-m-d H:i:s');
