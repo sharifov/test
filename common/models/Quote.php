@@ -8,6 +8,7 @@ use common\models\local\FlightSegment;
 use common\models\local\LeadLogMessage;
 use common\models\query\QuoteQuery;
 use sales\entities\EventTrait;
+use sales\events\quote\QuoteSendEvent;
 use sales\services\parsingDump\lib\ParsingDump;
 use sales\services\parsingDump\ReservationService;
 use Yii;
@@ -2451,5 +2452,11 @@ class Quote extends \yii\db\ActiveRecord
     public static function find(): QuoteQuery
     {
         return new QuoteQuery(get_called_class());
+    }
+
+    public function setStatusSend(): void
+    {
+        $this->status = self::STATUS_SEND;
+        $this->recordEvent(new QuoteSendEvent($this), QuoteSendEvent::class);
     }
 }
