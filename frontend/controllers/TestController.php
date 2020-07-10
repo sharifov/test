@@ -1378,7 +1378,7 @@ class TestController extends FController
             Yii::error(AppHelper::throwableFormatter($throwable),
             self::class . ':' . __FUNCTION__ . ':Example failed' );
         }
-        VarDumper::dump(isset($response) ? $response->content : 'failed', 10, true); exit();
+        VarDumper::dump($response ?? 'failed', 10, true); exit();
     }
 
     public function actionGaSendLead(int $id = 367010) // test/ga-send-lead
@@ -1395,7 +1395,7 @@ class TestController extends FController
             Yii::error(AppHelper::throwableFormatter($throwable),
             self::class . ':' . __FUNCTION__ . ':Example failed' );
         }
-        VarDumper::dump(isset($response) ? $response->content : 'failed', 10, true); exit();
+        VarDumper::dump($response ?? 'failed', 10, true); exit();
     }
 
 	public function actionZ()
