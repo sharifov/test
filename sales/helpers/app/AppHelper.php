@@ -8,6 +8,10 @@
 namespace sales\helpers\app;
 
 
+use Throwable;
+use Yii;
+use yii\helpers\VarDumper;
+
 class AppHelper
 {
 
@@ -19,6 +23,19 @@ class AppHelper
     {
         $str = 'Message: ' . $throwable->getMessage() . ' (code: '.$throwable->getCode().'), File: ' . $throwable->getFile() . ': line ' . $throwable->getLine();
         return $str;
+    }
+
+    /**
+     * @param Throwable $throwable
+     * @param string $category
+     */
+    public static function throwableLogger(\Throwable $throwable, string $category): void
+    {
+        if ($throwable->getCode() < 0) {
+            Yii::info(self::throwableFormatter($throwable),"info\{$category}");
+        } else {
+            Yii::error(self::throwableFormatter($throwable), $category);
+        }
     }
 
 	/**

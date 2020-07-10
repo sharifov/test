@@ -58,6 +58,7 @@ use sales\model\lead\useCases\lead\import\LeadImportUploadForm;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\NotFoundException;
+use sales\repositories\quote\QuoteRepository;
 use sales\services\email\EmailService;
 use sales\services\lead\LeadAssignService;
 use sales\services\lead\LeadCloneService;
@@ -97,6 +98,7 @@ use common\models\local\LeadLogMessage;
  * @property CasesRepository $casesRepository
  * @property LeadImportParseService $leadImportParseService
  * @property LeadImportService $leadImportService
+ * @property QuoteRepository $quoteRepository
  */
 class LeadController extends FController
 {
@@ -107,6 +109,7 @@ class LeadController extends FController
     private $casesRepository;
     private $leadImportParseService;
     private $leadImportService;
+    private $quoteRepository;
 
     public function __construct(
         $id,
@@ -118,6 +121,7 @@ class LeadController extends FController
         CasesRepository $casesRepository,
         LeadImportParseService $leadImportParseService,
         LeadImportService $leadImportService,
+        QuoteRepository $quoteRepository,
         $config = []
     )
     {
@@ -129,6 +133,7 @@ class LeadController extends FController
         $this->casesRepository = $casesRepository;
         $this->leadImportParseService = $leadImportParseService;
         $this->leadImportService = $leadImportService;
+        $this->quoteRepository = $quoteRepository;
     }
 
     public function behaviors(): array
@@ -458,8 +463,8 @@ class LeadController extends FController
                                     $quoteId = (int)$quoteId;
                                     $quote = Quote::findOne($quoteId);
                                     if ($quote) {
-                                        $quote->status = Quote::STATUS_SEND;
-                                        if (!$quote->save()) {
+                                        $quote->setStatusSend();
+                                        if (!$this->quoteRepository->save($quote)) {
                                             Yii::error($quote->errors, 'LeadController:view:Email:Quote:save');
                                         }
                                     }
@@ -528,8 +533,8 @@ class LeadController extends FController
                                     $quoteId = (int)$quoteId;
                                     $quote = Quote::findOne($quoteId);
                                     if ($quote) {
-                                        $quote->status = Quote::STATUS_SEND;
-                                        if (!$quote->save()) {
+                                        $quote->setStatusSend();
+                                        if (!$this->quoteRepository->save($quote)) {
                                             Yii::error($quote->errors, 'LeadController:view:Sms:Quote:save');
                                         }
                                     }

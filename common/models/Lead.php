@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\components\EmailService;
+use common\components\ga\GaHelper;
 use common\components\jobs\UpdateLeadBOJob;
 use common\components\purifier\Purifier;
 use common\models\local\LeadAdditionalInformation;
@@ -3317,17 +3318,18 @@ Reason: {reason}',
         );
     }
 
-
-
-
     public function getFirstFlightSegment()
     {
         return LeadFlightSegment::find()->where(['lead_id' => $this->id])->orderBy(['departure' => 'ASC'])->one();
     }
 
-
-
-
+    /**
+     * @return array|ActiveRecord|null
+     */
+    public function getLastFlightSegment()
+    {
+        return LeadFlightSegment::find()->where(['lead_id' => $this->id])->orderBy(['id' => SORT_DESC])->one();
+    }
 
     public function beforeSave($insert): bool
     {
@@ -4580,4 +4582,19 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     {
         return $this->l_dep_id;
     }
+
+    public function isMultiDestination(): bool
+	{
+		return $this->trip_type === self::TRIP_TYPE_MULTI_DESTINATION;
+	}
+
+	public function isRoundTrip(): bool
+	{
+		return $this->trip_type === self::TRIP_TYPE_ROUND_TRIP;
+	}
+
+	public function isReadyForGa(): bool
+	{
+		return (GaHelper::getTrackingIdByLead($this) && GaHelper::getClientIdByLead($this));
+	}
 }
