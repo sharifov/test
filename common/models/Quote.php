@@ -2457,6 +2457,9 @@ class Quote extends \yii\db\ActiveRecord
     public function setStatusSend(): void
     {
         $this->status = self::STATUS_SEND;
-        $this->recordEvent(new QuoteSendEvent($this), QuoteSendEvent::class);
+
+        if ($this->lead->isReadyForGa()) {
+            $this->recordEvent(new QuoteSendEvent($this), QuoteSendEvent::class);
+        }
     }
 }
