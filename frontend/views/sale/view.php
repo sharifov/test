@@ -157,7 +157,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                     <td><?=Html::encode($ticket->getFormattedOriginalFop())?></td>
                                     <td><?=Html::encode($ticket->st_charge_system)?></td>
                                     <td>
-                                        <?php if (!$canManageSaleInfo && $ticket->isPenaltyCheckWithRefTeam()):
+                                        <?php if ($ticket->isPenaltyCheckWithRefTeam()):
 											echo Editable::widget([
 												'model' => $ticket,
 												'attribute' => 'st_penalty_type',
@@ -182,7 +182,7 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
 										?>
                                     </td>
                                     <td>
-										<?php if (!$canManageSaleInfo):
+										<?php
 											echo Editable::widget([
 												'model' => $ticket,
 												'attribute' => 'st_penalty_amount',
@@ -199,15 +199,12 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                                     }',
 												],
 											]);
-										else:
-											echo Html::encode($ticket->st_penalty_amount);
-										endif;
 										?>
                                     </td>
                                     <td><?=Html::encode($ticket->st_selling)?></td>
                                     <td><?=Html::encode($ticket->st_service_fee)?></td>
                                     <td>
-										<?php if (!$canManageSaleInfo):
+										<?php
 											echo Editable::widget([
 												'model' => $ticket,
 												'attribute' => 'st_recall_commission',
@@ -224,13 +221,10 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                                     }',
 												],
 											]);
-										else:
-											echo Html::encode($ticket->st_recall_commission);
-										endif;
 										?>
                                     </td>
                                     <td>
-										<?php if (!$canManageSaleInfo):
+										<?php
 											echo Editable::widget([
 												'model' => $ticket,
 												'attribute' => 'st_markup',
@@ -247,9 +241,6 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                                                     }',
 												],
 											]);
-										else:
-											echo Html::encode($ticket->st_markup);
-										endif;
 										?>
                                     </td>
                                     <td>
