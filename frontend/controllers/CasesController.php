@@ -46,6 +46,7 @@ use sales\repositories\cases\CaseCategoryRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\cases\CasesSaleRepository;
 use sales\repositories\client\ClientEmailRepository;
+use sales\repositories\quote\QuoteRepository;
 use sales\services\cases\CasesSaleService;
 use sales\services\cases\CasesCommunicationService;
 use sales\repositories\user\UserRepository;
@@ -85,6 +86,7 @@ use yii\widgets\ActiveForm;
  * @property ClientUpdateFromEntityService $clientUpdateFromEntityService
  * @property Handler $updateHandler
  * @property SaleTicketService $saleTicketService
+ * @property QuoteRepository $quoteRepository
  */
 class CasesController extends FController
 {
@@ -100,6 +102,7 @@ class CasesController extends FController
     private $clientUpdateFromEntityService;
     private $updateHandler;
     private $saleTicketService;
+    private $quoteRepository;
 
     public function __construct(
         $id,
@@ -115,6 +118,7 @@ class CasesController extends FController
         ClientUpdateFromEntityService $clientUpdateFromEntityService,
         Handler $updateHandler,
         SaleTicketService $saleTicketService,
+        QuoteRepository $quoteRepository,
         $config = []
     )
     {
@@ -130,6 +134,7 @@ class CasesController extends FController
         $this->clientUpdateFromEntityService = $clientUpdateFromEntityService;
         $this->saleTicketService = $saleTicketService;
         $this->updateHandler = $updateHandler;
+        $this->quoteRepository = $quoteRepository;
     }
 
     public function behaviors(): array
@@ -257,8 +262,9 @@ class CasesController extends FController
                                     $quoteId = (int)$quoteId;
                                     $quote = Quote::findOne($quoteId);
                                     if ($quote) {
-                                        $quote->status = Quote::STATUS_SEND;
-                                        if (!$quote->save()) {
+                                        $quote->setStatusSend();
+                                        $this->quoteRepository->save($quote);
+                                        if (!$this->quoteRepository->save($quote)) {
                                             Yii::error($quote->errors, 'CaseController:view:Email:Quote:save');
                                         }
                                     }
@@ -327,8 +333,8 @@ class CasesController extends FController
                                     $quoteId = (int)$quoteId;
                                     $quote = Quote::findOne($quoteId);
                                     if ($quote) {
-                                        $quote->status = Quote::STATUS_SEND;
-                                        if (!$quote->save()) {
+                                        $quote->setStatusSend();
+                                        if (!$this->quoteRepository->save($quote)) {
                                             Yii::error($quote->errors, 'CaseController:view:Sms:Quote:save');
                                         }
                                     }
