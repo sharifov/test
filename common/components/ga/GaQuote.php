@@ -15,7 +15,7 @@ use yii\httpclient\Response;
  * @property string $tid
  * @property array $postData
  */
-class GaQuote /* TODO:: add interface */
+class GaQuote
 {
     private $cid; // Client ID
     private $tid; // Tracking ID
@@ -72,6 +72,13 @@ class GaQuote /* TODO:: add interface */
                 'cd2' => '',
             ];
 
+            $this->postData['cd3'] = self::getOriginByQuote($this->quote);
+            $this->postData['cd4'] = self::getDestinationByQuote($this->quote);
+            $this->postData['cd5'] = self::getDateDeparture($this->quote);
+            $this->postData['cd6'] = self::getDateDepartureRoundTrip($this->quote);
+            $this->postData['cd8'] = self::getAirportCodes($this->quote);
+            $this->postData['cd9'] = Lead::getFlightType($this->quote->trip_type);
+
             $this->postData['cd10'] = implode(',', $this->getOperatingAirlines());
             $this->postData['cd11'] = implode(',', $this->getMarketingAirlines());
 
@@ -83,6 +90,23 @@ class GaQuote /* TODO:: add interface */
             $this->postData = [];
         }
         return $this;
+    }
+
+    public static function getAirportCodes(Quote $quote): array
+    {
+        $result = [];
+        foreach ($quote->quoteTrips as $trpKey => $trip) {
+            foreach ($trip->quoteSegments as  $segmentKey => $segment) {
+                if ($trpKey === 0) {
+                    $result[] = $segment->qs_departure_airport_code;
+                }
+                if ($trpKey > 0 && $result[count($result) - 1] !== $segment->qs_departure_airport_code) {
+                    $result[] = $segment->qs_departure_airport_code;
+                }
+                $result[] = $segment->qs_arrival_airport_code;
+            }
+        }
+        return $result;
     }
 
     /**
@@ -111,9 +135,45 @@ class GaQuote /* TODO:: add interface */
     }
 
     /**
+     * @param Quote $quote
+     * @return string
+     */
+    public static function getDateDepartureRoundTrip(Quote $quote): string
+    {
+        if ($quote->trip_type === Lead::TRIP_TYPE_ROUND_TRIP) {
+            return '';
+        }
+        $result = [];
+        foreach ($quote->quoteTrips as $trip) {
+            foreach ($trip->quoteSegments as $segment) {
+                if (!empty($segment->qs_arrival_time)) {
+                    $result[] = $segment->qs_arrival_time;
+                }
+            }
+        }
+        $lastArrivalTime = end($result);
+        if ($dateDeparture = date('Y-m-d', strtotime($lastArrivalTime))) {
+            return $dateDeparture;
+        }
+        return '';
+    }
+
+    private static function getDateDeparture(Quote $quote): string
+    {
+        foreach ($quote->quoteTrips as $trip) {
+            foreach ($trip->quoteSegments as $segment) {
+                if ($dateDeparture = date('Y-m-d', strtotime($segment->qs_departure_time))) {
+                    return $dateDeparture;
+                }
+            }
+        }
+        return '';
+    }
+
+    /**
      * @return array
      */
-    private function getOperatingAirlines(): array   /* TODO:: test is */
+    private function getOperatingAirlines(): array
     {
         $result = [];
         foreach ($this->quote->quoteTrips as $trip) {
@@ -127,7 +187,7 @@ class GaQuote /* TODO:: add interface */
         return $result;
     }
 
-    private function getMarketingAirlines(): array   /* TODO:: test is */
+    private function getMarketingAirlines(): array
     {
         $result = [];
         foreach ($this->quote->quoteTrips as $trip) {
@@ -139,5 +199,50 @@ class GaQuote /* TODO:: add interface */
             }
         }
         return $result;
+    }
+
+    public static function getOriginByQuote(Quote $quote): ?string
+    {
+        if ($quote->trip_type === Lead::TRIP_TYPE_MULTI_DESTINATION) {
+            return implode(',', self::getAllOriginsByQuote($quote));
+        }
+        $allOrigins = self::getAllOriginsByQuote($quote);
+        return current($allOrigins);
+    }
+
+    public static function getAllOriginsByQuote(Quote $quote): array
+    {
+        $result = [];
+        foreach ($quote->quoteTrips as $trip) {
+            foreach ($trip->quoteSegments as $segment) {
+                if (empty($segment->qs_departure_airport_code)) {
+                    continue;
+                }
+                $result[] = $segment->qs_departure_airport_code;
+            }
+        }
+        return $result;
+    }
+
+    public static function getAllDestinationByQuote(Quote $quote): array
+    {
+        $result = [];
+        foreach ($quote->quoteTrips as $trip) {
+            foreach ($trip->quoteSegments as $segment) {
+                if (empty($segment->qs_arrival_airport_code)) {
+                    continue;
+                }
+                $result[] = $segment->qs_arrival_airport_code;
+            }
+        }
+        return $result;
+    }
+
+    public static function getDestinationByQuote(Quote $quote): string
+    {
+        if ($quote->trip_type === Lead::TRIP_TYPE_MULTI_DESTINATION) {
+            return implode(',', self::getAllDestinationByQuote($quote));
+        }
+        return count(self::getAllDestinationByQuote($quote)) ? self::getAllDestinationByQuote($quote)[0] : '';
     }
 }

@@ -122,11 +122,16 @@ class LeadHelper
      * @param Lead $lead
      * @return array
      */
-    public static function getAllIataByLead(Lead $lead): array
+    public static function getIataByLead(Lead $lead): array
     {
         $result = [];
-        foreach ($lead->leadFlightSegments as $segment) {
-            $result[] = $segment->origin;
+        foreach ($lead->leadFlightSegments as $key => $segment) {
+            if ($key === 0) {
+                $result[] = $segment->origin;
+            }
+            if ($key > 0 && $result[count($result) - 1] !== $segment->origin) {
+                $result[] = $segment->origin;
+            }
             $result[] = $segment->destination;
         }
         return $result;

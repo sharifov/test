@@ -30,7 +30,7 @@ class SendQuoteInfoToGaJob extends BaseObject implements JobInterface
 
                 if ($response = $gaQuote->send()) {
                     Yii::info(VarDumper::dumpAsString($response->content),
-                    'info\SendLeadInfoToGaJob:response'); /* TODO:: FOR DEBUG:: must by remove  */
+                    'info\SendQuoteInfoToGaJob:response'); /* TODO:: FOR DEBUG:: must by remove  */
                 }
             }
         } catch (\Throwable $throwable) {

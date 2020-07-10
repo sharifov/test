@@ -67,46 +67,13 @@ class GaHelper
     }
 
     /**
-     * @param Lead $lead
-     * @return string|null
-     */
-    public static function getOriginByLead(Lead $lead): ?string /* TODO:: test it */
-    {
-        if ($lead->isMultiDestination()) {
-            return implode(',', LeadHelper::getAllOriginsByLead($lead));
-        }
-        $allOrigins = LeadHelper::getAllOriginsByLead($lead);
-        return current($allOrigins);
-    }
-
-    /**
-     * @param Lead $lead
-     * @return string|null
-     */
-    public static function getDestinationByLead(Lead $lead): ?string /* TODO:: test it */
-    {
-        if ($lead->isMultiDestination()) {
-            return implode(',', LeadHelper::getAllDestinationByLead($lead));
-        }
-        $allOrigins = LeadHelper::getAllOriginsByLead($lead);
-        return end($allOrigins);
-    }
-
-    /**
      * @param array $postData
      * @param Lead $lead
      * @return array
      */
     public static function preparePostData(array $postData, Lead $lead): array
     {
-        $postData['cd3'] = self::getOriginByLead($lead);
-        $postData['cd4'] = self::getDestinationByLead($lead);
-        $postData['cd5'] = self::getDateDeparture($lead);
-        $postData['cd6'] = self::getDateDepartureRoundTrip($lead);
         $postData['cd7'] = $lead->getCabinClassName();
-        $postData['cd8'] = implode('-', LeadHelper::getAllIataByLead($lead));
-        $postData['cd9'] = $lead->getFlightTypeName();
-
         $postData['cd12'] = '';
         $postData['cd13'] = $lead->source ? $lead->source->cid : '';
         $postData['cd14'] = '';
@@ -116,34 +83,6 @@ class GaHelper
         $postData['cm3'] = $lead->infants;
 
         return $postData;
-    }
-
-    /**
-     * @param Lead $lead
-     * @return string
-     */
-    private static function getDateDepartureRoundTrip(Lead $lead): string
-    {
-        if ($lead->isRoundTrip() && $lastSegment = $lead->getLastFlightSegment()) {
-            if ($lastDateDeparture = date('Y-m-d', strtotime($lastSegment->departure))) {
-                return $lastDateDeparture;
-            }
-        }
-        return '';
-    }
-
-    /**
-     * @param Lead $lead
-     * @return string
-     */
-    private static function getDateDeparture(Lead $lead): string
-    {
-        if ($firstSegment = $lead->getFirstFlightSegment()) {
-            if ($dateDeparture = date('Y-m-d', strtotime($firstSegment->departure))) {
-                return $dateDeparture;
-            }
-        }
-        return '';
     }
 
     /**
