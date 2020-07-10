@@ -87,8 +87,25 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
     <?php if($user->isAdmin() || $user->isSupervision()) : ?>
         <p>
             <?php //= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
-            <?= \yii\helpers\Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-warning', 'data-toggle'=> 'modal', 'data-target'=>'#modalUpdate' ])?>
+            <?php // \yii\helpers\Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-warning', 'data-toggle'=> 'modal', 'data-target'=>'#modalUpdate' ])?>
+
+            <div class="btn-group">
+                <?php echo Html::button('<span class="fa fa-square-o"></span> Check All', ['class' => 'btn btn-default', 'id' => 'btn-check-all']); ?>
+
+                <?php // if (\webvimark\modules\UserManagement\models\User::canRoute('/email-layout/delete-selected')): ?>
+                    <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="sr-only">Toggle Dropdown</span>
+                    </button>
+                    <div class="dropdown-menu">
+                        <div class="dropdown-divider"></div>
+                        <?= \yii\helpers\Html::a('<i class="fa fa-edit text-warning"></i> Multiple update', null, ['class' => 'dropdown-item','data-toggle'=> 'modal', 'data-target'=>'#modalUpdate' ])?>
+                    </div>
+                <?php //endif; ?>
+            </div>
+
         </p>
+
+        <?= Html::textarea('selected-ids', '', ['rows' => 10, 'id' => "selected-ids", 'style' => 'display: none']); ?>
     <?php endif; ?>
 
     <?php /*php if($isAdmin):?>
@@ -649,6 +666,13 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 
         <?php \yii\bootstrap\ActiveForm::end(); ?>
 
+        <?php
+            $selectAllUrl = \yii\helpers\Url::to(array_merge(['employee/list'], Yii::$app->getRequest()->getQueryParams(), ['act' => 'select-all']));
+        ?>
+        <script>
+            var selectAllUrl = '<?=$selectAllUrl?>';
+        </script>
+
         <?php Pjax::end(); ?>
 
         <?php
@@ -664,6 +688,96 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
     $(document).on('pjax:start', function() {
         $("#modalUpdate .close").click();
     });
+    
+    $(document).on('click', '#btn-check-all',  function (e) {
+        let el = $(this).find('span');
+        let btn = $(this);
+        
+        if ($(this).hasClass('checked')) {
+            //el.removeClass('fa-check-square-o').addClass('fa-square-o');
+            btn.removeClass('btn-warning').addClass('btn-default');
+            btn.removeClass('checked');
+            btn.html('<span class="fa fa-square-o"></span> Check All');
+            $('#btn-remove-selected').hide();
+            $('#selected-ids').val('');
+            //$('.select-on-check-all').trigger('click');
+            $('.select-on-check-all').prop('checked', false);
+            $("input[name='UserMultipleForm[user_list][]']:checked").prop('checked', false);
+            sessionStorage.removeItem('selectedUsers');
+        } else {
+            
+            //alert(selectAllUrl);
+            
+            $.ajax({
+             type: 'post',
+             dataType: 'json',
+             //data: {selection:data, source: 'email-layout'},
+             url: selectAllUrl,
+             success: function (data) {
+                //console.log(data);
+                
+                let cnt = data.length;
+                if (cnt > 0) {
+                    
+                    let jsonData = JSON.stringify(data);
+                    $('#selected-ids').val(jsonData);
+                    
+                    sessionStorage.selectedUsers = jsonData;
+                    // sessionStorage.getItem('selectedUsers');
+                    //sessionStorage.user = JSON.stringify({name: "John"});
+                    
+                     btn.removeClass('btn-default').addClass('btn-warning');
+                    //el.removeClass('fa-square-o').addClass('fa-check-square-o');
+                    btn.addClass('checked');
+                    
+                    
+                     
+                    btn.html('<span class="fa fa-check-square-o"></span> Uncheck All (' + cnt + ')');
+                    $('#btn-remove-selected').show();
+                    
+                    $('.select-on-check-all').prop('checked', 'checked'); //.trigger('click');
+                    $("input[name='UserMultipleForm[user_list][]']").prop('checked', 'checked');
+                }
+                
+                // element.prop("disabled", false);
+                // if(res.file_id) {
+                //     var downloadUrl = '/bpanel/email-category/get-file/?id=' + res.file_id;
+                //     window.location.href = downloadUrl;
+                // }
+             },
+             error: function (error) {
+                    console.error(error);
+                    // element.prop("disabled", false);
+                    // alert('Request Error');
+                 }
+             });
+        }
+    });
+    
+    
+    function setUserSelectedState() {
+        
+    }
+    
+    if (sessionStorage.selectedUsers) {
+        let data = jQuery.parseJSON( sessionStorage.selectedUsers );
+        if (data.length > 0) {
+            
+            $.each( data, function( key, value ) {
+              //alert( key + ": " + value );
+              $("input[name='UserMultipleForm[user_list][]'][value=" + value + "]").prop('checked', 'checked');
+              //UserMultipleForm[user_list][]
+            });
+            
+            let btn = $('#btn-check-all');
+            btn.removeClass('btn-default').addClass('btn-warning');
+                    //el.removeClass('fa-square-o').addClass('fa-check-square-o');
+            btn.addClass('checked');
+            btn.html('<span class="fa fa-check-square-o"></span> Uncheck All (' + data.length + ')');
+            $('#btn-remove-selected').show();
+        }
+        
+    }
 
     /*$(document).on('pjax:end', function() {
          $('[data-toggle="tooltip"]').tooltip();
