@@ -3,7 +3,9 @@
 namespace frontend\controllers;
 
 use common\components\CommunicationService;
+use common\components\ga\GaHelper;
 use common\components\ga\GaLead;
+use common\components\ga\GaQuote;
 use common\components\jobs\CreateSaleFromBOJob;
 use common\components\Purifier;
 use common\components\jobs\TelegramSendMessageJob;
@@ -1365,7 +1367,27 @@ class TestController extends FController
 
 	public function actionZ()
     {
+        // quote 733986
+
+        /*if ($quote = Quote::findOne(733986)) {
+
+            try {
+                $gaQbj = new GaQuote($quote);
+                //$response = $gaQbj->send();
+
+                // Yii::info(VarDumper::dumpAsString($response),'info\SendLeadInfoToGaJob:response');
+
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableFormatter($throwable), self::class . ':' . __FUNCTION__ . ':Example failed' );
+            }
+        }*/
+
         if ($lead = Lead::findOne(367010)) {
+
+            $xxx = LeadHelper::getIataByLead($lead);
+
+            \yii\helpers\VarDumper::dump($xxx, 10, true); exit();
+            /* FOR DEBUG:: must by remove */
 
             try {
                 $gaLead = new GaLead($lead);
@@ -1383,6 +1405,34 @@ class TestController extends FController
         /* FOR DEBUG:: must by remove */
 
         return $this->render('z');
+    }
+
+    private function getOperatingAirlines(Quote $quote): array   /* TODO:: test is */
+    {
+        $result = [];
+        foreach ($quote->quoteTrips as $trip) {
+            foreach ($trip->quoteSegments as $segment) {
+                if (empty($segment->qs_operating_airline)) {
+                    continue;
+                }
+                $result[$segment->qs_operating_airline] = $segment->qs_operating_airline;
+            }
+        }
+        return $result;
+    }
+
+    private function getMarketingAirlines(Quote $quote): array   /* TODO:: test is */
+    {
+        $result = [];
+        foreach ($quote->quoteTrips as $trip) {
+            foreach ($trip->quoteSegments as $segment) {
+                if (empty($segment->qs_marketing_airline)) {
+                    continue;
+                }
+                $result[$segment->qs_marketing_airline] = $segment->qs_marketing_airline;
+            }
+        }
+        return $result;
     }
 }
 
