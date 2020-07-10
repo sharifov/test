@@ -162,5 +162,10 @@ return [
             'username' => '{{ common.config.main.components.chatBot.username:str }}',
             'password' => '{{ common.config.main.components.chatBot.password:str }}',
         ],
+        'gaRequestService' => [
+            'class' => \common\components\ga\GaRequestService::class,
+            'url' => '{{ common.config.main.components.gaRequestService.url:str }}',
+            'v' => '{{ common.config.main.components.gaRequestService.v:int }}',
+        ],
     ],
 ];

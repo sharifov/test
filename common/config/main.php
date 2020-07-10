@@ -115,8 +115,12 @@ return [
             'class' => \aki\telegram\Telegram::class,
             'botUsername' => 'CrmKivorkBot',
             'botToken' => '817992632:AAE6UXJRqDscAZc9gUBScEpaT_T4zGukdos',
-        ]
-
+        ],
+        'gaRequestService' => [
+            'class' => \common\components\ga\GaRequestService::class,
+            'url' => 'https://www.google-analytics.com/collect',  // For test : debug/collect
+            'v' => 1,
+        ],
     ],
     'bootstrap' => [
         'queue_sms_job',

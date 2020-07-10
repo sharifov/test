@@ -31,5 +31,10 @@ return [
             'username' => 'sales',
             'password' => 'Sales2018!',
         ],
+        'gaRequestService' => [
+            'class' => \common\components\ga\GaRequestService::class,
+            'url' => 'https://www.google-analytics.com/collect',
+            'v' => 1,
+        ],
     ],
 ];
