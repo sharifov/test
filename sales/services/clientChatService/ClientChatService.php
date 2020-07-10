@@ -85,11 +85,13 @@ class ClientChatService
 			$userChannel = ClientChatUserChannel::find()->byChannelId($channel->ccc_id)->all();
 
 			if ($userChannel) {
-				/** @var ClientChatUserChannel $user */
-				foreach ($userChannel as $user) {
-					$clientChatUserAccess = ClientChatUserAccess::create($clientChat->cch_id, $user->ccuc_user_id);
-					$clientChatUserAccess->pending();
-					$this->clientChatUserAccessRepository->save($clientChatUserAccess);
+				/** @var ClientChatUserChannel $item */
+				foreach ($userChannel as $item) {
+					if ($item->ccucUser->userProfile && $item->ccucUser->userProfile->isRegisteredInRc()) {
+						$clientChatUserAccess = ClientChatUserAccess::create($clientChat->cch_id, $item->ccuc_user_id);
+						$clientChatUserAccess->pending();
+						$this->clientChatUserAccessRepository->save($clientChatUserAccess);
+					}
 				}
 			}
 		}
