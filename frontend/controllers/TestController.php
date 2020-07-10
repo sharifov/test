@@ -1365,15 +1365,19 @@ class TestController extends FController
 		echo 'success';
 	}
 
-	public function actionGaSendQuote(int $id = 733986) // test/ga-send-quote
+	public function actionGaSendQuote(int $id = 733986, int $debug = 1) // test/ga-send-quote
     {
         try {
             $quote = Quote::findOne($id);
             $gaQbj = new GaQuote($quote);
-            $response = $gaQbj->send();
+            $gaRequestService = \Yii::$app->gaRequestService;
+            if ($debug === 1) {
+                $gaRequestService->url = 'https://www.google-analytics.com/debug/collect';
+            }
+            $response = $gaRequestService->sendRequest($gaQbj->getPostData());
 
-            Yii::info(VarDumper::dumpAsString($response),'info\actionGaSendQuote:response');
-
+            Yii::info(VarDumper::dumpAsString($response),
+            'info\actionGaSendQuote:response');
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableFormatter($throwable),
             self::class . ':' . __FUNCTION__ . ':Example failed' );
@@ -1381,16 +1385,19 @@ class TestController extends FController
         VarDumper::dump($response ?? 'failed', 10, true); exit();
     }
 
-    public function actionGaSendLead(int $id = 367010) // test/ga-send-lead
+    public function actionGaSendLead(int $id = 367010, int $debug = 1) // test/ga-send-lead
     {
         try {
             $lead = Lead::findOne($id);
-            $gaLead = new GaLead($lead);
-            $response = $gaLead->send();
+            $gaQbj = new GaLead($lead);
+            $gaRequestService = \Yii::$app->gaRequestService;
+            if ($debug === 1) {
+                $gaRequestService->url = 'https://www.google-analytics.com/debug/collect';
+            }
+            $response = $gaRequestService->sendRequest($gaQbj->getPostData());
 
             Yii::info(VarDumper::dumpAsString($response),
             'info\actionGaLeadQuote:response');
-
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableFormatter($throwable),
             self::class . ':' . __FUNCTION__ . ':Example failed' );

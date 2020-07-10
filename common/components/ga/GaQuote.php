@@ -245,4 +245,12 @@ class GaQuote
         }
         return count(self::getAllDestinationByQuote($quote)) ? self::getAllDestinationByQuote($quote)[0] : '';
     }
+
+    /**
+     * @return array
+     */
+    public function getPostData(): array
+    {
+        return $this->postData;
+    }
 }

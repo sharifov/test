@@ -171,4 +171,12 @@ class GaLead
         }
         return '';
     }
+
+    /**
+     * @return array
+     */
+    public function getPostData(): array
+    {
+        return $this->postData;
+    }
 }
