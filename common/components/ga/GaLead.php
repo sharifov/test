@@ -4,7 +4,6 @@ namespace common\components\ga;
 
 use common\models\Lead;
 use sales\helpers\app\AppHelper;
-use sales\helpers\lead\LeadHelper;
 use Yii;
 use yii\httpclient\Response;
 
@@ -19,7 +18,7 @@ class GaLead
 {
     private $cid; // Client ID
     private $tid; // Tracking ID
-    private $postData;
+    private array $postData = [];
 
     private Lead $lead;
 
@@ -39,7 +38,7 @@ class GaLead
 
     private function setTid(): GaLead
     {
-        if ($this->lead->project && $this->tid = $this->lead->project->ga_tracking_id) {
+        if ($this->tid = GaHelper::getTrackingIdByLead($this->lead)) {
             return $this;
         }
         throw new \DomainException('GA Tracking ID not found.', -4);
@@ -47,11 +46,10 @@ class GaLead
 
     private function setCid(): GaLead
     {
-        if (!$visitorLog = GaHelper::getLastGaClientIdByClient($this->lead->client_id)) {
-            throw new \DomainException('GA Client Id not found.', -2);
+        if ($this->cid = GaHelper::getClientIdByLead($this->lead)) {
+            return $this;
         }
-        $this->cid = $visitorLog->vl_ga_client_id;
-        return $this;
+        throw new \DomainException('GA Client Id not found.', -2);
     }
 
     /**
@@ -69,31 +67,16 @@ class GaLead
                 'el' => 'crm-generated-lead',
                 'cd1' => $this->cid,
                 'cd2' => '',
+                'cd10' => '',
+                'cd11' => '',
             ];
 
-            $firstSegment = $this->lead->getFirstFlightSegment();
-            $lastSegment = $this->lead->getLastFlightSegment();
-
-            $this->postData['cd3'] = implode(',', LeadHelper::getAllOriginsByLead($this->lead));
-            $this->postData['cd4'] = implode(',', LeadHelper::getAllDestinationByLead($this->lead));
-            $this->postData['cd5'] = date('Y-m-d', strtotime($firstSegment->departure));
-            $this->postData['cd6'] = $this->lead->isRoundTrip() ? date('Y-m-d', strtotime($lastSegment->departure)) : '';
-            $this->postData['cd7'] = $this->lead->getCabinClassName();
-            $this->postData['cd8'] = implode('-', LeadHelper::getAllIataByLead($this->lead));
-            $this->postData['cd9'] = $this->lead->getFlightTypeName();
-            $this->postData['cd10'] = '';
-            $this->postData['cd11'] = '';
-            $this->postData['cd12'] = '';
-            $this->postData['cd13'] = $this->lead->source ? $this->lead->source->cid : '';
-            $this->postData['cd14'] = '';
-            $this->postData['cd15'] = $this->lead->uid;
-            $this->postData['cm1'] = $this->lead->adults;
-            $this->postData['cm2'] = $this->lead->children;
-            $this->postData['cm3'] = $this->lead->infants;
+            $this->postData = GaHelper::preparePostData($this->postData, $this->lead);
 
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableFormatter($throwable),
             'GaLead:prepareData:Throwable');
+            $this->postData = [];
         }
         return $this;
     }
