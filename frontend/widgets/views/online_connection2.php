@@ -260,6 +260,9 @@ $js = <<<JS
                                 $('._cc_unread_messages').html(obj.data.totalUnreadMessages);
                             } else {
                                 $('._cc_unread_messages').html('');
+                                if (obj.data.refreshPage) {
+                                    window.location.reload();
+                                }
                             }
                         }
                     }

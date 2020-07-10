@@ -23,6 +23,9 @@ use sales\auth\Auth;
 use sales\helpers\app\AppHelper;
 use sales\model\emailList\entity\EmailList;
 use sales\model\userVoiceMail\entity\search\UserVoiceMailSearch;
+use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessRepository;
+use sales\services\clientChatMessage\ClientChatMessageService;
+use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
 use Yii;
 use yii\bootstrap4\Html;
 use yii\data\ActiveDataProvider;
@@ -38,10 +41,22 @@ use yii\widgets\ActiveForm;
 
 /**
  * EmployeeController controller
+ *
+ * @property ClientChatUserAccessService $clientChatUserAccessService
+ * @property ClientChatMessageService $clientChatMessageService
  */
 class EmployeeController extends FController
 {
-    /**
+	/**
+	 * @var ClientChatUserAccessService
+	 */
+	private ClientChatUserAccessService $clientChatUserAccessService;
+	/**
+	 * @var ClientChatMessageService
+	 */
+	private ClientChatMessageService $clientChatMessageService;
+
+	/**
      * @return array
      */
     public function behaviors()
@@ -56,6 +71,13 @@ class EmployeeController extends FController
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
+
+    public function __construct($id, $module, ClientChatUserAccessService $clientChatUserAccessService, ClientChatMessageService $clientChatMessageService, $config = [])
+	{
+		parent::__construct($id, $module, $config);
+		$this->clientChatUserAccessService = $clientChatUserAccessService;
+		$this->clientChatMessageService = $clientChatMessageService;
+	}
 
     public function actionSellerContactInfo($employeeId)
     {
@@ -939,11 +961,12 @@ class EmployeeController extends FController
         throw new BadRequestHttpException();
     }
 
-    /**
-     * @param int $id
-     * @return array
-     * @throws BadRequestHttpException
-     */
+	/**
+	 * @param int $id
+	 * @param ClientChatUserAccessService $clientChatUserAccessService
+	 * @return array
+	 * @throws BadRequestHttpException
+	 */
     public function actionUnRegisterFromRocketChat(int $id): array
     {
         \Yii::$app->response->format = Response::FORMAT_JSON;
@@ -969,6 +992,9 @@ class EmployeeController extends FController
                     if(!$userProfile->save()) {
                         throw new \RuntimeException($userProfile->getErrorSummary(false)[0]);
                     }
+
+                    $this->clientChatUserAccessService->removeUserAccess($userProfile->up_user_id);
+                    $this->clientChatMessageService->discardAllUnreadMessagesForUser($userProfile->up_user_id);
                 } else {
                     $errorMessage = $rocketChat::getErrorMessageFromResult($result);
                     throw new \RuntimeException('Error from RocketChat. ' . $errorMessage);

@@ -49,7 +49,7 @@ class ClientChatUserAccessService
 			try {
 				$ccua->ccuaCch->assignOwner($ccua->ccua_user_id);
 				$this->clientChatRepository->save($ccua->ccuaCch);
-				$this->clientChatService->assignAgentToRcChannel($ccua->ccuaCch->cch_rid, $ccua->ccuaUser->userProfile->up_rc_user_id ?? '');
+//				$this->clientChatService->assignAgentToRcChannel($ccua->ccuaCch->cch_rid, $ccua->ccuaUser->userProfile->up_rc_user_id ?? '');
 			} catch (\DomainException | \RuntimeException $e) {
 				if (ClientChatCodeException::isRcAssignAgentFailed($e)) {
 					$ccua->ccuaCch->removeOwner();
@@ -64,9 +64,21 @@ class ClientChatUserAccessService
 
 	public function disableAccessForOtherUsers(ClientChatUserAccess $ccua): void
 	{
-		$users = ClientChatUserAccess::find()->whichShouldBeDisabled($ccua->ccua_user_id, $ccua->ccua_cch_id)->all();
-		foreach ($users as $user) {
-			$this->updateStatus($user, ClientChatUserAccess::STATUS_SKIP);
+		$usersAccess = ClientChatUserAccess::find()->exceptUser($ccua->ccua_user_id)->byChatId( $ccua->ccua_cch_id)->all();
+		foreach ($usersAccess as $access) {
+			$this->updateStatus($access, ClientChatUserAccess::STATUS_SKIP);
+		}
+	}
+
+	/**
+	 * @param int $userId
+	 */
+	public function removeUserAccess(int $userId): void
+	{
+		/** @var ClientChatUserAccess[] $userAccess  */
+		$userAccess = ClientChatUserAccess::find()->byUserId($userId)->pending()->all();
+		foreach ($userAccess as $access) {
+			$this->updateStatus($access, ClientChatUserAccess::STATUS_SKIP);
 		}
 	}
 }
