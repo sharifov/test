@@ -39,14 +39,14 @@ class GaLead
         $gaCreateLead = (bool) (Yii::$app->params['settings']['ga_create_lead'] ?? false);
 
         if (!$gaEnable || !$gaCreateLead) {
-            throw new \RuntimeException('Service "GaLead" disabled. Please, check GA settings.');
+            throw new \DomainException('Service "GaLead" disabled. Please, check GA settings.', -1);
         }
     }
 
     private function setCid(): GaLead
     {
         if (!$visitorLog = VisitorLog::getLastGaClientIdByClient($this->lead->client_id)) {
-            throw new \RuntimeException('Ga Client Id not found.');
+            throw new \DomainException('Ga Client Id not found.', -2);
         }
         $this->cid = $visitorLog->vl_ga_client_id;
         return $this;
@@ -88,8 +88,6 @@ class GaLead
             $this->postData['cm2'] = $this->lead->children;
             $this->postData['cm3'] = $this->lead->infants;
 
-            /* TODO:: add from clone */
-
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableFormatter($throwable),
             'GaLead:prepareData:Throwable');
@@ -106,8 +104,7 @@ class GaLead
             $this->checkPostData();
             return \Yii::$app->gaRequestService->sendRequest($this->postData);
         } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableFormatter($throwable),
-            'GaLead:prepareData:Throwable');
+            AppHelper::throwableLogger($throwable, 'GaLead:prepareData:Throwable');
         }
         return null;
     }
@@ -118,7 +115,7 @@ class GaLead
     public function checkPostData(): bool
     {
         if (empty($this->postData)) {
-            throw new \RuntimeException('Post data is required.');
+            throw new \RuntimeException('Post data is required.', -3);
         }
         return true;
     }

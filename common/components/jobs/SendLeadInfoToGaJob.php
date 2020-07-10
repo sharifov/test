@@ -5,6 +5,7 @@ namespace common\components\jobs;
 use common\components\ga\GaLead;
 use common\models\Lead;
 use common\models\VisitorLog;
+use sales\helpers\app\AppHelper;
 use yii\base\BaseObject;
 use yii\helpers\VarDumper;
 use yii\queue\JobInterface;
@@ -27,16 +28,15 @@ class SendLeadInfoToGaJob extends BaseObject implements JobInterface
     {
         try {
             if($this->checkParams() && $gaLead = new GaLead($this->lead)) {
-                $gaLead->send();
+
+                if ($response = $gaLead->send()) {
+
+                    Yii::info(VarDumper::dumpAsString($response->content),
+                    'info\SendLeadInfoToGaJob:response'); /* TODO:: FOR DEBUG:: must by remove  */
+                }
             }
         } catch (\Throwable $throwable) {
-            if ($throwable->getCode() < 0) {
-                Yii::info(VarDumper::dumpAsString($throwable->getMessage()),
-                'info\SendLeadInfoToGaJob:execute:Throwable');
-            } else {
-                Yii::error(VarDumper::dumpAsString($throwable->getMessage()),
-                'SendLeadInfoToGaJob:execute:Throwable');
-            }
+            AppHelper::throwableLogger($throwable, 'SendLeadInfoToGaJob:execute:Throwable');
         }
         return false;
     }
