@@ -10,6 +10,7 @@ use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\entity\search\ClientChatSearch;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
+use sales\model\clientChat\useCase\sendOffer\GenerateImagesForm;
 use sales\model\clientChat\useCase\transfer\ClientChatTransferForm;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
@@ -23,6 +24,10 @@ use yii\data\ActiveDataProvider;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use Yii;
+use yii\helpers\VarDumper;
+use yii\web\BadRequestHttpException;
+use yii\web\NotFoundHttpException;
+use yii\web\Response;
 
 /**
  * Class ClientChatController
@@ -362,38 +367,91 @@ class ClientChatController extends FController
 		return $widget->run();
 	}
 
-	public function actionSendOffer()
+	public function actionSendOfferList(): string
     {
-        $chatBot = Yii::$app->chatBot;
+        $chatId = (int)\Yii::$app->request->post('cchId');
+        $errorMessage = '';
+        $dataProvider = null;
 
-        $data = [
-            'message' => [
-                'rid' => 'f93a9c3e-e04a-4e0f-b39e-5be30f938da4',
-                'attachments' => [
-                    [
-                        'image_url' => 'https://ichef.bbci.co.uk/news/1024/branded_news/12A9B/production/_111434467_gettyimages-1143489763.jpg',
-                        'title' => 'Title',
-                        'fields' => [
-                            [
-                                'short' => true,
-                                'title' => '11111Test',
-                                'value' => 'Testing out something22222222 or other',
-                            ],
-                            [
-                                'short' => true,
-                                'title' => 'A111111111nother Test',
-                                'value' => '[Link](https://google.com/) something and this and that.',
-                            ]
-                        ]
-                    ],
-                    [
-                        'image_url' => 'https://ichef.bbci.co.uk/news/1024/cpsprodpb/83D7/production/_111515733_gettyimages-1208779325.jpg',
-                        'title' => 'Title 2',
-                    ],
-                ],
-                'customTemplate' => 'carousel',
-            ]
-        ];
+        try {
+            $clientChat = $this->clientChatRepository->findById($chatId);
+            if (!$this->sendOfferCheckAccess($clientChat, Auth::user())) {
+                throw new \DomainException('Access denied.');
+            }
+            if (!$clientChat->cch_lead_id) {
+                throw new \DomainException('Chat not assigned to Lead');
+            }
+            $dataProvider = $this->getSendOfferProvider($clientChat);
+
+        } catch (\DomainException $e) {
+            $errorMessage = $e->getMessage();
+        }
+
+        return $this->renderAjax('partial/_send_offer_list', [
+            'dataProvider' => $dataProvider,
+            'errorMessage' => $errorMessage,
+            'chatId' => $chatId
+        ]);
+    }
+
+    public function actionSendOfferGenerate(): string
+    {
+        $errorMessage = '';
+        $captures = [];
+
+        $form = new GenerateImagesForm();
+
+        if (!$form->load(Yii::$app->request->post())) {
+            return $this->renderAjax('partial/_send_offer_generate', [
+                'errorMessage' => 'Cant load Data',
+                'form' => $form,
+                'captures' => $captures,
+            ]);
+        }
+
+        if (!$form->validate()) {
+            return $this->renderAjax('partial/_send_offer_generate', [
+                'errorMessage' => '',
+                'form' => $form,
+                'captures' => $captures,
+            ]);
+        }
+
+        try {
+            if (!$this->sendOfferCheckAccess($form->chat, Auth::user())) {
+                throw new \DomainException('Access denied.');
+            }
+            foreach ($form->quotes as $quote) {
+                $captures[] = $this->generateQuoterCapture();
+            }
+            if (!$this->saveQuoteCaptures($captures, Auth::id(), $form->cchId)) {
+                throw new \DomainException('Cant tmp save quotes. Please try again later.');
+            }
+        } catch (\DomainException $e) {
+            $errorMessage = $e->getMessage();
+        }
+
+        return $this->renderAjax('partial/_send_offer_generate', [
+            'errorMessage' => $errorMessage,
+            'form' => $form,
+            'captures' => $captures,
+        ]);
+    }
+
+    public function actionSendOffer(): Response
+    {
+        $out = ['error' => false, 'message' => ''];
+        $chatId = (int)\Yii::$app->request->post('cchId');
+
+        try {
+            $clientChat = $this->clientChatRepository->findById($chatId);
+            if (!$captures = $this->getQuoteCaptures(Auth::id(), $clientChat->cch_id)) {
+                throw new \DomainException('Not found saved quote captures. Please try again.');
+            }
+
+            $message = $this->createOfferMessage($clientChat, $captures);
+
+//        $chatBot = Yii::$app->chatBot;
 
 //        $rocketUserId = Auth::user()->userProfile->up_rc_user_id;
 //        $rocketToken = Auth::user()->userProfile->up_rc_auth_token;
@@ -405,18 +463,88 @@ class ClientChatController extends FController
 //        $headers = Yii::$app->rchat->getSystemAuthDataHeader();
 //        $chatBot->sendMessage($data, $headers);
 
-        Yii::$app->rchat->sendMessage($data);
+            Yii::$app->rchat->sendMessage($message);
+            $this->removeQuoteCaptures(Auth::id(), $chatId);
 
-        $chatId = \Yii::$app->request->post('cchId');
-
-        try {
-            $clientChat = $this->clientChatRepository->findById($chatId);
-        } catch (NotFoundException $e) {
-            $clientChat = null;
+        } catch (\DomainException $e) {
+            $out['error'] = true;
+            $out['message'] = $e->getMessage();
         }
 
-        return $this->renderAjax('partial/_send_offer', [
-            'clientChat' => $clientChat
-        ]);
+        return $this->asJson($out);
+    }
+
+    private function createOfferMessage(ClientChat $chat, array $captures): array
+    {
+        $data = [
+            'message' => [
+                'rid' => 'f93a9c3e-e04a-4e0f-b39e-5be30f938da4',
+                'attachments' => [
+                    [
+                        'image_url' => 'https://ichef.bbci.co.uk/news/1024/cpsprodpb/83D7/production/_111515733_gettyimages-1208779325.jpg',
+                        'title' => 'Title 2',
+                        'message_link' => 'https://google.com',
+                        'fields' => [
+                            [
+                                'short' => true,
+                                'title' => '1',
+                                'value' => '[Link](https://google.com/) Testing out something22222222 or other',
+                            ],
+                        ],
+                    ],
+                ],
+                'customTemplate' => 'carousel',
+            ]
+        ];
+        return $data;
+    }
+
+    //todo
+    private function sendOfferCheckAccess($chat, $user): bool
+    {
+        return true;
+    }
+
+    //todo
+    private function getSendOfferProvider(ClientChat $chat): ActiveDataProvider
+    {
+        return $chat->cchLead->getQuotesProvider([]);
+    }
+
+    //todo
+    private function generateQuoterCapture(): array
+    {
+        return [
+            'img' => 'https://ichef.bbci.co.uk/news/1024/cpsprodpb/83D7/production/_111515733_gettyimages-1208779325.jpg',
+            'hybridUrl' => 'https://google.com'
+        ];
+    }
+
+    private function saveQuoteCaptures(array $captures, int $userId, int $chatId): bool
+    {
+        return Yii::$app->cache->set($this->getQuoteCaptureCacheKey($userId, $chatId), $captures, 600);
+    }
+
+    private function getQuoteCaptures(int $userId, int $chatId)
+    {
+        return Yii::$app->cache->get($this->getQuoteCaptureCacheKey($userId, $chatId));
+    }
+
+    private function removeQuoteCaptures(int $userId, int $chatId): void
+    {
+        if (!Yii::$app->cache->delete($this->getQuoteCaptureCacheKey($userId, $chatId))) {
+            Yii::error(VarDumper::dumpAsString([
+                    'message' => 'Cant remove tmp quotes captures',
+                    'userId' => $userId,
+                    'chatId' => $chatId
+                ]),
+                'ClientChatController:removeQuoteCaptures'
+            );
+        }
+    }
+
+    private function getQuoteCaptureCacheKey(int $userId, int $chatId): string
+    {
+        return 'chatQuoteCapture' . $userId . '.' . $chatId;
     }
 }

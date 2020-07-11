@@ -31,6 +31,9 @@ $clintChatDataIUrl = Url::toRoute('/client-chat/ajax-data-info');
 $clientChatCloseUrl = Url::toRoute('/client-chat/ajax-close');
 $chatHistoryUrl = Url::toRoute('/client-chat/ajax-history');
 $chatTransferUrl = Url::toRoute('/client-chat/ajax-transfer-view');
+$chatSendOfferListUrl = Url::toRoute('/client-chat/send-offer-list');
+$chatSendOfferPreviewUrl = Url::toRoute('/client-chat/send-offer-preview');
+$chatSendOfferGenerateUrl = Url::toRoute('/client-chat/send-offer-generate');
 $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
 ?>
 
@@ -292,7 +295,7 @@ function getChatHistory (cchId) {
 $(document).on('click', '.chat-offer', function(e) {
     e.preventDefault();
     let cchId = $(this).attr('data-cch-id');
-    let modal = $('#modal-df');
+    let modal = $('#modal-lg');
     
     modal.find('.modal-body').html('<div><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
     modal.find('.modal-title').html('Send Offer');
@@ -300,7 +303,7 @@ $(document).on('click', '.chat-offer', function(e) {
 
     $.ajax({
         type: 'post',
-        url: '{$chatSendOfferUrl}',
+        url: '{$chatSendOfferListUrl}',
         data: {cchId: cchId},
         dataType: 'html'
     })
@@ -310,6 +313,76 @@ $(document).on('click', '.chat-offer', function(e) {
     .fail(function () {
             createNotify('Error', 'Server error', 'error');
     });
+});
+
+$(document).on('click', '.quotes-uid-chat-generate', function(e) {
+    e.preventDefault();
+     let cchId = $(this).attr('data-cch-id');
+     if (!cchId) {
+         createNotify('Send Offer', 'Not found Chat Id', 'error');
+     }
+    
+    let quotes = [];
+       
+    $('input[type=checkbox].quotes-uid:checked').each(function() {
+        quotes.push($(this).data('id'));
+    });
+    
+    if (quotes.length < 1) {
+        createNotify('Send Offer', 'Not found selected quotes', 'error');
+        return false;
+    }
+    
+    let modal = $('#modal-lg');
+    modal.find('.modal-body').html('<div><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');    
+    
+     $.ajax({
+        type: 'post',
+        url: '{$chatSendOfferGenerateUrl}',
+        data: {cchId: cchId, quotes: quotes},
+        dataType: 'html'
+    })
+    .done(function(data) { 
+            modal.find('.modal-body').html(data);
+    })
+    .fail(function () {
+            createNotify('Error', 'Server error', 'error');
+    });    
+        
+});
+
+$(document).on('click', '.client-chat-send-offer', function(e) {
+    e.preventDefault();
+     let cchId = $(this).attr('data-cch-id');
+     if (!cchId) {
+         createNotify('Send Offer', 'Not found Chat Id', 'error');
+     }
+     
+     let modal = $('#modal-lg');
+     modal.find('.modal-body').html('<div><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');    
+    
+     $.ajax({
+        type: 'post',
+        url: '{$chatSendOfferUrl}',
+        data: {cchId: cchId},
+        dataType: 'json'
+    })
+    .done(function(data) {
+        if (data.error) {
+            modal.find('.modal-body').html(data.message);
+            return false;
+        }
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('');
+        modal.modal('hide');
+    })
+    .fail(function () {
+        modal.find('.modal-body').html('');
+        modal.find('.modal-title').html('');
+        modal.modal('hide');
+        createNotify('Error', 'Server error', 'error');
+    });    
+        
 });
 JS;
 $this->registerJs($js);

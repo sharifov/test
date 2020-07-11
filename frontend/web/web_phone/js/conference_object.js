@@ -33,7 +33,7 @@
             return window.phoneWidget.events.conferenceUpdate + this.data.sid;
         };
 
-        this.dispatchEvent = function () {
+        this.save = function () {
             window.phoneWidget.eventDispatcher.dispatch(this.getEventUpdateName(),{conference: this});
         };
     }
