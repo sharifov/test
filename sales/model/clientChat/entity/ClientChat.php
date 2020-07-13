@@ -251,9 +251,9 @@ class ClientChat extends \yii\db\ActiveRecord
 		$this->cch_owner_user_id = null;
 	}
 
-    public function getLastMessageByOwner(): ?ClientChatMessage
+    public function getLastMessage(): ?ClientChatMessage
     {
-        return ClientChatMessage::find()->andWhere(['ccm_cch_id' => $this->cch_id, 'ccm_user_id' => $this->cch_owner_user_id])->orderBy(['ccm_id' => SORT_DESC])->limit(1)->one();
+        return ClientChatMessage::find()->andWhere(['ccm_cch_id' => $this->cch_id])->orderBy(['ccm_id' => SORT_DESC])->limit(1)->one();
     }
 
     public function attributeLabels(): array
