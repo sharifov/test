@@ -100,7 +100,8 @@ class StatisticsHelper
     {
         if ((bool) Yii::$app->params['settings']['new_communication_block_lead']) {
             $query = CallLogLead::find()
-                ->innerJoin(CallLog::tableName(), 'call_log.cl_id = call_log_lead.cll_cl_id')
+                ->innerJoin(CallLog::tableName(),
+                    CallLog::tableName() . '.cl_id = ' . CallLogLead::tableName() . '.cll_cl_id')
                 ->where(['cll_lead_id' => $this->id])
                 ->andWhere(['IN', 'cl_type_id', [CallLogType::IN, CallLogType::OUT]])
                 ->cache($this->cacheDuration);
@@ -128,7 +129,8 @@ class StatisticsHelper
     {
         if ((bool) Yii::$app->params['settings']['new_communication_block_lead']) {
             $query = CallLogCase::find()
-                ->innerJoin(CallLog::tableName(), 'call_log.cl_id = call_log_case.clc_cl_id')
+                ->innerJoin(CallLog::tableName(),
+                    CallLog::tableName() . '.cl_id = ' . CallLogCase::tableName() . '.clc_cl_id')
                 ->where(['clc_case_id' => $this->id])
                 ->andWhere(['IN', 'cl_type_id', [CallLogType::IN, CallLogType::OUT]])
                 ->cache($this->cacheDuration);
