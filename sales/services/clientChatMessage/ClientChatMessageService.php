@@ -2,7 +2,6 @@
 namespace sales\services\clientChatMessage;
 
 use common\models\Notifications;
-use frontend\widgets\notification\NotificationCache;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use yii\redis\Connection;
@@ -60,6 +59,16 @@ class ClientChatMessageService
 		return Json::decode($this->redis->get($this->chatWithUnreadMessagesKey($userId))) ?? [];
 	}
 
+	public function discardAllUnreadMessagesForUser(int $userId): void
+	{
+		$chats = $this->getChatWithUnreadMessages($userId);
+		foreach ($chats as $chat) {
+			$this->redis->del($this->unreadMessageChatKey((int)$chat, $userId));
+		}
+		$this->redis->del($this->totalUnreadMessagesByUserKey($userId), $this->chatWithUnreadMessagesKey($userId));
+		Notifications::publish('clientChatUnreadMessage', ['user_id' => $userId], ['data' => ['totalUnreadMessages' => $this->getCountOfTotalUnreadMessages($userId) ?: '', 'refreshPage' => 1]]);
+	}
+
 	private function setUnreadMessages(int $cchId, int $userId, int $count): void
 	{
 		$this->redis->set($this->unreadMessageChatKey($cchId, $userId), $count);
@@ -84,6 +93,7 @@ class ClientChatMessageService
 			$this->redis->set($this->chatWithUnreadMessagesKey($userId), Json::encode($chats));
 		}
 	}
+
 	private function removeChatWithUnreadMessages(int $cchId, int $userId): void
 	{
 		$chats = $this->getChatWithUnreadMessages($userId);
@@ -92,7 +102,6 @@ class ClientChatMessageService
 			$this->redis->set($this->chatWithUnreadMessagesKey($userId), Json::encode($chats));
 		}
 	}
-
 
 	private function totalUnreadMessagesByUserKey(int $userId): string
 	{
