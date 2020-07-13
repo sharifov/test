@@ -16,11 +16,9 @@ use sales\model\clientChat\entity\ClientChat;
                     <span class="_cc-status <?= $clientChat->getStatusClass() ?>"></span>
                 </span>
                 <?php $unreadMessages = ClientChatMessageHelper::getCountOfChatUnreadMessage($clientChat->cch_id, $clientChat->cch_owner_user_id) ?>
-                <?php if ($unreadMessages): ?>
                     <span class="_cc-chat-unread-message">
-                        <span class="badge badge-info _cc_unread_messages"><?= $unreadMessages ?></span>
+                        <span class="badge badge-info _cc_item_unread_messages" data-cch-id="<?= $clientChat->cch_id ?>"><?php if ($unreadMessages): ?><?= $unreadMessages ?><?php endif; ?></span>
                     </span>
-                <?php endif; ?>
             </span>
             <span class="_cc-title">
                 <p><?= $clientChat->cch_title ?: 'Client Chat' ?></p>

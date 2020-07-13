@@ -17,9 +17,14 @@ class Scopes extends \yii\db\ActiveQuery
 		return $this->andWhere(['ccua_status_id' => ClientChatUserAccess::STATUS_PENDING]);
 	}
 
-	public function whichShouldBeDisabled(int $userId, int $cchid): self
+	public function exceptUser(int $userId): self
 	{
-		return $this->andWhere(['<>', 'ccua_user_id', $userId])->andWhere(['ccua_cch_id' => $cchid]);
+		return $this->andWhere(['<>', 'ccua_user_id', $userId]);
+	}
+
+	public function byChatId(int $id): self
+	{
+		return $this->andWhere(['ccua_cch_id' => $id]);
 	}
 
 	public function accepted(): self

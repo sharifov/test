@@ -9,6 +9,8 @@ use common\models\Sms;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
 use sales\model\callLog\entity\callLog\CallLog;
+use sales\model\callLog\entity\callLog\CallLogType;
+use sales\model\callLog\entity\callLogCase\CallLogCase;
 use sales\model\callLog\entity\callLogLead\CallLogLead;
 use sales\model\clientChat\entity\ClientChat;
 use Yii;
@@ -96,10 +98,23 @@ class StatisticsHelper
      */
     protected function getLeadCallCount(bool $onlyParent = true): int
     {
+        if ((bool) Yii::$app->params['settings']['new_communication_block_lead']) {
+            $query = CallLogLead::find()
+                ->innerJoin(CallLog::tableName(),
+                    CallLog::tableName() . '.cl_id = ' . CallLogLead::tableName() . '.cll_cl_id')
+                ->where(['cll_lead_id' => $this->id])
+                ->andWhere(['IN', 'cl_type_id', [CallLogType::IN, CallLogType::OUT]])
+                ->cache($this->cacheDuration);
+            if ($onlyParent) {
+                $query->andWhere(['cl_group_id' => null]);
+            }
+            return (int) $query->count();
+        }
+
         $query = Call::find()
             ->where(['c_lead_id' => $this->id])
+            ->andWhere(['IN', 'c_call_type_id', [Call::CALL_TYPE_IN, Call::CALL_TYPE_OUT]])
             ->cache($this->cacheDuration);
-
         if ($onlyParent) {
             $query->andWhere(['c_parent_id' => null]);
         }
@@ -107,14 +122,32 @@ class StatisticsHelper
     }
 
     /**
-     * @return int
-     */
-    protected function getCaseCallCount(): int
-     {
-        return (int) Call::find()
+    * @param bool $onlyParent
+    * @return int
+    */
+    protected function getCaseCallCount(bool $onlyParent = true): int
+    {
+        if ((bool) Yii::$app->params['settings']['new_communication_block_lead']) {
+            $query = CallLogCase::find()
+                ->innerJoin(CallLog::tableName(),
+                    CallLog::tableName() . '.cl_id = ' . CallLogCase::tableName() . '.clc_cl_id')
+                ->where(['clc_case_id' => $this->id])
+                ->andWhere(['IN', 'cl_type_id', [CallLogType::IN, CallLogType::OUT]])
+                ->cache($this->cacheDuration);
+            if ($onlyParent) {
+                $query->andWhere(['cl_group_id' => null]);
+            }
+            return (int) $query->count();
+        }
+
+        $query = Call::find()
             ->where(['c_case_id' => $this->id])
-            ->cache($this->cacheDuration)
-            ->count();
+            ->andWhere(['IN', 'c_call_type_id', [Call::CALL_TYPE_IN, Call::CALL_TYPE_OUT]])
+            ->cache($this->cacheDuration);
+        if ($onlyParent) {
+            $query->andWhere(['c_parent_id' => null]);
+        }
+        return (int) $query->count();
     }
 
     /**

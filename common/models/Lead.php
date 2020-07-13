@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\components\EmailService;
+use common\components\ga\GaHelper;
 use common\components\jobs\UpdateLeadBOJob;
 use common\components\purifier\Purifier;
 use common\models\local\LeadAdditionalInformation;
@@ -43,6 +44,9 @@ use sales\events\lead\LeadTaskEvent;
 use sales\events\lead\LeadTrashEvent;
 use sales\helpers\lead\LeadHelper;
 use sales\interfaces\Objectable;
+use sales\model\callLog\entity\callLog\CallLog;
+use sales\model\callLog\entity\callLog\CallLogType;
+use sales\model\callLog\entity\callLogLead\CallLogLead;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\lead\useCases\lead\api\create\LeadCreateForm;
 use sales\model\lead\useCases\lead\import\LeadImportForm;
@@ -3320,17 +3324,18 @@ Reason: {reason}',
         );
     }
 
-
-
-
     public function getFirstFlightSegment()
     {
         return LeadFlightSegment::find()->where(['lead_id' => $this->id])->orderBy(['departure' => 'ASC'])->one();
     }
 
-
-
-
+    /**
+     * @return array|ActiveRecord|null
+     */
+    public function getLastFlightSegment()
+    {
+        return LeadFlightSegment::find()->where(['lead_id' => $this->id])->orderBy(['id' => SORT_DESC])->one();
+    }
 
     public function beforeSave($insert): bool
     {
@@ -4418,6 +4423,20 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
      */
     public function getCountCalls(int $type_id = 0, ?bool $onlyParent = true): int
     {
+        if ((bool) Yii::$app->params['settings']['new_communication_block_lead']) {
+            $query = CallLogLead::find()
+                ->innerJoin(CallLog::tableName(), 'call_log.cl_id = call_log_lead.cll_cl_id')
+                ->where(['cll_lead_id' => $this->id]);
+
+            if ($onlyParent) {
+                $query->andWhere(['cl_group_id' => null]);
+            }
+            if ($type_id !== 0) {
+                $query->andWhere(['cl_type_id' => $type_id]);
+            }
+            return (int) $query->count();
+        }
+
         $query = Call::find();
         $query->where(['c_lead_id' => $this->id]);
 
@@ -4577,8 +4596,8 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         $linkAttributes = ['target' => '_blank', 'data-pjax'=> '0'];
 
         if ($linkMode) {
-            $callsText = '<span title="Calls Out / In / Join"><i class="fa fa-phone success"></i> ' . $this->getCountCalls(Call::CALL_TYPE_OUT) . '/' .
-                $this->getCountCalls(Call::CALL_TYPE_IN) . '/' . $this->getCountCalls(Call::CALL_TYPE_JOIN) . '</span> | ';
+            $callsText = '<span title="Calls Out / In"><i class="fa fa-phone success"></i> ' . $this->getCountCalls(Call::CALL_TYPE_OUT) . '/' .
+                $this->getCountCalls(Call::CALL_TYPE_IN) . '</span> | ';
             if (Auth::can('/call/index')) {
                 $str .= Html::a($callsText, Url::to(['/call/index', 'CallSearch[c_lead_id]' => $this->id]), $linkAttributes);
             } else {
@@ -4638,4 +4657,19 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     {
         return $this->l_dep_id;
     }
+
+    public function isMultiDestination(): bool
+	{
+		return $this->trip_type === self::TRIP_TYPE_MULTI_DESTINATION;
+	}
+
+	public function isRoundTrip(): bool
+	{
+		return $this->trip_type === self::TRIP_TYPE_ROUND_TRIP;
+	}
+
+	public function isReadyForGa(): bool
+	{
+		return (GaHelper::getTrackingIdByLead($this) && GaHelper::getClientIdByLead($this));
+	}
 }

@@ -135,10 +135,12 @@ class ClientChatRequestService
 	private function guestConnected(ClientChatRequest $clientChatRequest, ClientChatRequestApiForm $form): void
 	{
 		$clientChat = $this->clientChatRepository->getOrCreateByRequest($clientChatRequest);
-		$client = $this->clientManageService->createByClientChatRequest($clientChatRequest);
-		$clientChat->cch_client_id = $client->id;
-		$this->clientChatRepository->save($clientChat);
-		$this->saveAdditionalData($clientChat, $form);
+		if (!$clientChat->cch_client_id) {
+			$client = $this->clientManageService->createByClientChatRequest($clientChatRequest);
+			$clientChat->cch_client_id = $client->id;
+			$this->clientChatRepository->save($clientChat);
+			$this->saveAdditionalData($clientChat, $form);
+		}
 	}
 
 	/**
@@ -170,7 +172,7 @@ class ClientChatRequestService
 
 		$message = ClientChatMessage::createByApi($form, $clientChat, $clientChatRequest);
 		$this->clientChatMessageRepository->save($message, 0);
-		if ($clientChat->cch_owner_user_id && $clientChatRequest->isGuestUttered()) {
+		if ($clientChat->cch_owner_user_id && $clientChatRequest->isGuestUttered() && $clientChat->cchOwnerUser->userProfile && $clientChat->cchOwnerUser->userProfile->isRegisteredInRc()) {
 			$this->clientChatMessageService->increaseUnreadMessages($clientChat->cch_id, $clientChat->cch_owner_user_id);
 		}
 	}

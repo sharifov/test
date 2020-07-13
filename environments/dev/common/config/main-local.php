@@ -37,5 +37,9 @@ return [
             'username' => 'SAL101',
             'password' => 'c940e3484fe9fcc73ed12a7fcec469b4',
         ],
+        'gaRequestService' => [
+            'class' => \common\components\ga\GaRequestService::class,
+            'url' => 'https://www.google-analytics.com/collect',
+        ],
     ],
 ];

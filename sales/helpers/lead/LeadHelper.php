@@ -3,6 +3,7 @@
 namespace sales\helpers\lead;
 
 use common\models\Lead;
+use common\models\LeadFlightSegment;
 use yii\helpers\ArrayHelper;
 
 class LeadHelper
@@ -91,4 +92,48 @@ class LeadHelper
         return array_combine(range(0, 9), range(0, 9));
     }
 
+    /**
+     * @param Lead $lead
+     * @return array
+     */
+    public static function getAllOriginsByLead(Lead $lead): array
+    {
+        $result = [];
+        foreach ($lead->leadFlightSegments as $segment) {
+            $result[] = $segment->origin;
+        }
+        return $result;
+    }
+
+    /**
+     * @param Lead $lead
+     * @return array
+     */
+    public static function getAllDestinationByLead(Lead $lead): array
+    {
+        $result = [];
+        foreach ($lead->leadFlightSegments as $segment) {
+            $result[] = $segment->destination;
+        }
+        return $result;
+    }
+
+    /**
+     * @param Lead $lead
+     * @return array
+     */
+    public static function getIataByLead(Lead $lead): array
+    {
+        $result = [];
+        foreach ($lead->leadFlightSegments as $key => $segment) {
+            if ($key === 0) {
+                $result[] = $segment->origin;
+            }
+            if ($key > 0 && $result[count($result) - 1] !== $segment->origin) {
+                $result[] = $segment->origin;
+            }
+            $result[] = $segment->destination;
+        }
+        return $result;
+    }
 }
