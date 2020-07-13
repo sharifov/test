@@ -7,6 +7,7 @@ use common\components\ga\GaHelper;
 use common\components\ga\GaLead;
 use common\components\ga\GaQuote;
 use common\components\jobs\CreateSaleFromBOJob;
+use common\components\jobs\SendLeadInfoToGaJob;
 use common\components\Purifier;
 use common\components\jobs\TelegramSendMessageJob;
 use common\components\RocketChat;
@@ -1372,9 +1373,7 @@ class TestController extends FController
             $gaQbj = new GaQuote($quote);
 
             $gaRequestService = \Yii::$app->gaRequestService;
-            if ($debug === 1) {
-                \Yii::configure($gaRequestService, ['debugMod' => true]);
-            }
+            \Yii::configure($gaRequestService, ['debugMod' => (bool) $debug]);
             $response = $gaRequestService->sendRequest($gaQbj->getPostData());
 
             VarDumper::dump([
@@ -1395,9 +1394,7 @@ class TestController extends FController
             $gaQbj = new GaLead($lead);
 
             $gaRequestService = \Yii::$app->gaRequestService;
-            if ($debug === 1) {
-                \Yii::configure($gaRequestService, ['debugMod' => true]);
-            }
+            \Yii::configure($gaRequestService, ['debugMod' => (bool) $debug]);
             $response = $gaRequestService->sendRequest($gaQbj->getPostData());
 
             VarDumper::dump([
