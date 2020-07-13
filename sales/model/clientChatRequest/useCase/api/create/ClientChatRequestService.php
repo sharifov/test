@@ -135,10 +135,12 @@ class ClientChatRequestService
 	private function guestConnected(ClientChatRequest $clientChatRequest, ClientChatRequestApiForm $form): void
 	{
 		$clientChat = $this->clientChatRepository->getOrCreateByRequest($clientChatRequest);
-		$client = $this->clientManageService->createByClientChatRequest($clientChatRequest);
-		$clientChat->cch_client_id = $client->id;
-		$this->clientChatRepository->save($clientChat);
-		$this->saveAdditionalData($clientChat, $form);
+		if (!$clientChat->cch_client_id) {
+			$client = $this->clientManageService->createByClientChatRequest($clientChatRequest);
+			$clientChat->cch_client_id = $client->id;
+			$this->clientChatRepository->save($clientChat);
+			$this->saveAdditionalData($clientChat, $form);
+		}
 	}
 
 	/**
