@@ -40,7 +40,6 @@ return [
         'gaRequestService' => [
             'class' => \common\components\ga\GaRequestService::class,
             'url' => 'https://www.google-analytics.com/collect',
-            'v' => 1,
         ],
     ],
 ];
