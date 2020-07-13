@@ -532,6 +532,18 @@ class ClientChatController extends FController
         }
 
         $content_data = $quote->lead->getEmailData2([$quote->id], $projectContactInfo);
+        if (isset($content_data['quotes'])) {
+            if (count($content_data['quotes']) > 1) {
+                throw new \DomainException('Count quotes > 1');
+            }
+            if (isset($content_data['quotes'][0])) {
+                $tmp = $content_data['quotes'][0];
+                unset($content_data['quotes']);
+                $content_data['quote'] = $tmp;
+            }
+        } else {
+            throw new \DomainException('Not found quote');
+        }
 
         try {
             $mailCapture = $communication->mailCapture(
