@@ -62,6 +62,7 @@ class GaQuote
     {
         try {
             $this->postData = [
+                'v' => 1,
                 'tid' => $this->tid,
                 'cid' => $this->cid,
                 't' => 'event',
@@ -140,7 +141,7 @@ class GaQuote
      */
     public static function getDateDepartureRoundTrip(Quote $quote): string
     {
-        if ($quote->trip_type === Lead::TRIP_TYPE_ROUND_TRIP) {
+        if ($quote->trip_type !== Lead::TRIP_TYPE_ROUND_TRIP) {
             return '';
         }
         $result = [];

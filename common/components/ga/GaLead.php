@@ -60,6 +60,7 @@ class GaLead
     {
         try {
             $this->postData = [
+                'v' => 1,
                 'tid' => $this->tid,
                 'cid' => $this->cid,
                 't' => 'event',
