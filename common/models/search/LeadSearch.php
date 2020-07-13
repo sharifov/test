@@ -586,11 +586,12 @@ class LeadSearch extends Lead
                             'cll_lead_id AS c_lead_id',
                             new Expression('COUNT(cll_lead_id) AS cnt')
                         ])
-                        ->innerJoin(CallLog::tableName(), 'call_log.cl_id = call_log_lead.cll_cl_id')
+                        ->innerJoin(CallLog::tableName(),
+                            CallLog::tableName() . '.cl_id = ' . CallLogLead::tableName() . '.cll_cl_id')
                         ->where(['cl_group_id' => null])
                         ->andWhere(['IN', 'cl_type_id', [CallLogType::IN, CallLogType::OUT]])
                         ->groupBy(['cll_lead_id'])
-                ], 'leads.id = calls.c_lead_id');
+                ], Lead::tableName() . '.id = calls.c_lead_id');
 
             } else {
                 $query->leftJoin([
