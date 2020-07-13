@@ -17,8 +17,12 @@ use frontend\helpers\JsonHelper;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\helpers\setting\SettingHelper;
+use sales\model\callLog\entity\callLog\CallLog;
+use sales\model\callLog\entity\callLog\CallLogType;
+use sales\model\callLog\entity\callLogCase\CallLogCase;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\saleTicket\entity\SaleTicket;
+use Yii;
 use yii\data\ActiveDataProvider;
 use yii\db\Expression;
 
@@ -734,14 +738,32 @@ class CasesSearch extends Cases
         }
 
         if ($this->callsQtyFrom !== '' || $this->callsQtyTo !== '') {
-            $query->leftJoin([
-                'calls' => Call::find()
-                    ->select([
-                        'c_case_id',
-                        new Expression('COUNT(c_case_id) AS cnt')
-                    ])
-                    ->groupBy(['c_case_id'])
-            ], 'cases.cs_id = calls.c_case_id');
+
+            if ((bool) Yii::$app->params['settings']['new_communication_block_lead']) {
+                $query->leftJoin([
+                    'calls' => CallLogCase::find()
+                        ->select([
+                            'clc_case_id AS c_case_id',
+                            new Expression('COUNT(clc_case_id) AS cnt')
+                        ])
+                        ->innerJoin(CallLog::tableName(), 'call_log.cl_id = call_log_case.clc_cl_id')
+                        ->where(['cl_group_id' => null])
+                        ->andWhere(['IN', 'cl_type_id', [CallLogType::IN, CallLogType::OUT]])
+                        ->groupBy(['clc_case_id'])
+                ], 'cases.cs_id = calls.c_case_id');
+
+            } else {
+                $query->leftJoin([
+                    'calls' => Call::find()
+                        ->select([
+                            'c_case_id',
+                            new Expression('COUNT(c_case_id) AS cnt')
+                        ])
+                        ->where(['c_parent_id' => null])
+                        ->andWhere(['IN', 'c_call_type_id', [Call::CALL_TYPE_IN, Call::CALL_TYPE_OUT]])
+                        ->groupBy(['c_case_id'])
+                ], 'cases.cs_id = calls.c_case_id');
+            }
 
             if ('' !== $this->callsQtyFrom) {
                 if ((int) $this->callsQtyFrom === 0) {

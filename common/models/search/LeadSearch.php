@@ -19,6 +19,10 @@ use common\models\UserProfile;
 use Faker\Provider\DateTime;
 use sales\access\EmployeeGroupAccess;
 use sales\access\EmployeeProjectAccess;
+use sales\model\callLog\entity\callLog\CallLog;
+use sales\model\callLog\entity\callLog\CallLogType;
+use sales\model\callLog\entity\callLogCase\CallLogCase;
+use sales\model\callLog\entity\callLogLead\CallLogLead;
 use sales\model\clientChat\entity\ClientChat;
 use sales\repositories\lead\LeadBadgesRepository;
 use Yii;
@@ -575,15 +579,31 @@ class LeadSearch extends Lead
         }
 
         if ($this->callsQtyFrom !== '' || $this->callsQtyTo !== '') {
-            $query->leftJoin([
-                'calls' => Call::find()
-                    ->select([
-                        'c_lead_id',
-                        new Expression('COUNT(c_lead_id) AS cnt')
-                    ])
-                    ->where(['c_parent_id' => null])
-                    ->groupBy(['c_lead_id'])
-            ], 'leads.id = calls.c_lead_id');
+            if ((bool) Yii::$app->params['settings']['new_communication_block_lead']) {
+                $query->leftJoin([
+                    'calls' => CallLogLead::find()
+                        ->select([
+                            'cll_lead_id AS c_lead_id',
+                            new Expression('COUNT(cll_lead_id) AS cnt')
+                        ])
+                        ->innerJoin(CallLog::tableName(), 'call_log.cl_id = call_log_lead.cll_cl_id')
+                        ->where(['cl_group_id' => null])
+                        ->andWhere(['IN', 'cl_type_id', [CallLogType::IN, CallLogType::OUT]])
+                        ->groupBy(['cll_lead_id'])
+                ], 'leads.id = calls.c_lead_id');
+
+            } else {
+                $query->leftJoin([
+                    'calls' => Call::find()
+                        ->select([
+                            'c_lead_id',
+                            new Expression('COUNT(c_lead_id) AS cnt')
+                        ])
+                        ->where(['c_parent_id' => null])
+                        ->andWhere(['IN', 'c_call_type_id', [Call::CALL_TYPE_IN, Call::CALL_TYPE_OUT]])
+                        ->groupBy(['c_lead_id'])
+                ], 'leads.id = calls.c_lead_id');
+            }
 
             if ('' !== $this->callsQtyFrom) {
                 if ((int) $this->callsQtyFrom === 0) {

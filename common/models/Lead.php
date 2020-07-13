@@ -44,6 +44,9 @@ use sales\events\lead\LeadTaskEvent;
 use sales\events\lead\LeadTrashEvent;
 use sales\helpers\lead\LeadHelper;
 use sales\interfaces\Objectable;
+use sales\model\callLog\entity\callLog\CallLog;
+use sales\model\callLog\entity\callLog\CallLogType;
+use sales\model\callLog\entity\callLogLead\CallLogLead;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\lead\useCases\lead\api\create\LeadCreateForm;
 use sales\model\lead\useCases\lead\import\LeadImportForm;
@@ -4417,6 +4420,20 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
      */
     public function getCountCalls(int $type_id = 0, ?bool $onlyParent = true): int
     {
+        if ((bool) Yii::$app->params['settings']['new_communication_block_lead']) {
+            $query = CallLogLead::find()
+                ->innerJoin(CallLog::tableName(), 'call_log.cl_id = call_log_lead.cll_cl_id')
+                ->where(['cll_lead_id' => $this->id]);
+
+            if ($onlyParent) {
+                $query->andWhere(['cl_group_id' => null]);
+            }
+            if ($type_id !== 0) {
+                $query->andWhere(['cl_type_id' => $type_id]);
+            }
+            return (int) $query->count();
+        }
+
         $query = Call::find();
         $query->where(['c_lead_id' => $this->id]);
 
