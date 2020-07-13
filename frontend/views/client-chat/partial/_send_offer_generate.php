@@ -17,7 +17,8 @@ use yii\helpers\VarDumper;
     <?= Html::button('Back', ['class' => 'btn btn-info chat-offer', 'data-cch-id' => $form->cchId])?>
 <?php else: ?>
     <?php foreach ($captures as $capture): ?>
-        <?= Html::img($capture) ?> <br><br>
+        <?= Html::img($capture['img']) ?> <br><br>
+        <?= $capture['checkoutUrl'] ?> <br><br>
     <?php endforeach;?>
     <br>
     <?= Html::button('Back', ['class' => 'btn btn-info chat-offer', 'data-cch-id' => $form->cchId])?>

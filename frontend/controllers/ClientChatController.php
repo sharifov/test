@@ -1,6 +1,9 @@
 <?php
 namespace frontend\controllers;
 
+use common\components\CommunicationService;
+use common\models\Lead;
+use common\models\Quote;
 use common\models\VisitorLog;
 use frontend\widgets\clientChat\ClientChatAccessWidget;
 use sales\auth\Auth;
@@ -382,7 +385,6 @@ class ClientChatController extends FController
                 throw new \DomainException('Chat not assigned to Lead');
             }
             $dataProvider = $this->getSendOfferProvider($clientChat);
-
         } catch (\DomainException $e) {
             $errorMessage = $e->getMessage();
         }
@@ -422,7 +424,12 @@ class ClientChatController extends FController
                 throw new \DomainException('Access denied.');
             }
             foreach ($form->quotes as $quote) {
-                $captures[] = $this->generateQuoterCapture();
+                if ($capture = $this->generateQuoteCapture($quote)) {
+                    $captures[] = $capture;
+                }
+            }
+            if (!$captures) {
+                throw new \DomainException('Not generated captures. Try again.');
             }
             if (!$this->saveQuoteCaptures($captures, Auth::id(), $form->cchId)) {
                 throw new \DomainException('Cant tmp save quotes. Please try again later.');
@@ -476,23 +483,26 @@ class ClientChatController extends FController
 
     private function createOfferMessage(ClientChat $chat, array $captures): array
     {
+        $attachments = [];
+
+        foreach ($captures as $capture) {
+            $attachments[] = [
+                'image_url' => $capture['img'],
+                'actions' => [
+                    [
+                        'type' => 'button',
+                        'msg_in_chat_window' => true,
+                        'text' => 'Offer',
+                        'msg' => $capture['checkoutUrl']
+                    ]
+                ],
+            ];
+        }
+
         $data = [
             'message' => [
-                'rid' => 'f93a9c3e-e04a-4e0f-b39e-5be30f938da4',
-                'attachments' => [
-                    [
-                        'image_url' => 'https://ichef.bbci.co.uk/news/1024/cpsprodpb/83D7/production/_111515733_gettyimages-1208779325.jpg',
-                        'title' => 'Title 2',
-                        'message_link' => 'https://google.com',
-                        'fields' => [
-                            [
-                                'short' => true,
-                                'title' => '1',
-                                'value' => '[Link](https://google.com/) Testing out something22222222 or other',
-                            ],
-                        ],
-                    ],
-                ],
+                'rid' => $chat->cch_rid,
+                'attachments' => $attachments,
                 'customTemplate' => 'carousel',
             ]
         ];
@@ -505,19 +515,45 @@ class ClientChatController extends FController
         return true;
     }
 
-    //todo
     private function getSendOfferProvider(ClientChat $chat): ActiveDataProvider
     {
-        return $chat->cchLead->getQuotesProvider([]);
+        return $chat->cchLead->getQuotesProvider([], [Quote::STATUS_CREATED, Quote::STATUS_SEND, Quote::STATUS_OPENED]);
     }
 
-    //todo
-    private function generateQuoterCapture(): array
+    private function generateQuoteCapture(Quote $quote): array
     {
-        return [
-            'img' => 'https://ichef.bbci.co.uk/news/1024/cpsprodpb/83D7/production/_111515733_gettyimages-1208779325.jpg',
-            'hybridUrl' => 'https://google.com'
-        ];
+        $communication = Yii::$app->communication;
+
+        $project = $quote->lead->project;
+        $projectContactInfo = [];
+
+        if ($project && $project->contact_info) {
+            $projectContactInfo = @json_decode($project->contact_info, true);
+        }
+
+        $content_data = $quote->lead->getEmailData2([$quote->id], $projectContactInfo);
+
+        try {
+            $mailCapture = $communication->mailCapture(
+                $quote->lead->project_id,
+                'chat_offer',
+                '',
+                '',
+                $content_data,
+                Yii::$app->language ?: 'en-US'
+            );
+            $url = $mailCapture['data'];
+            return [
+                'img' => $url['host'] . $url['dir'] . $url['img'],
+                'checkoutUrl' => $quote->getCheckoutUrlPage()
+            ];
+        } catch (\Throwable $e) {
+            Yii::error(VarDumper::dumpAsString([
+                'error' => AppHelper::throwableFormatter($e),
+                'quote' => $quote->getAttributes(),
+            ]),'ClientChatController:generateQuoteCapture');
+        }
+        return [];
     }
 
     private function saveQuoteCaptures(array $captures, int $userId, int $chatId): bool

@@ -4362,9 +4362,10 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
 
     /**
      * @param $params
+     * @param array $quoteStatus
      * @return ActiveDataProvider
      */
-    public function getQuotesProvider($params)
+    public function getQuotesProvider($params, array $quoteStatus = [])
     {
         $query = Quote::find()->where(['lead_id' => $this->id]);
         $dataProvider = new ActiveDataProvider([
@@ -4388,6 +4389,8 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
 
         $query->with(['mainAirline', 'quoteTrips.quoteSegments.marketingAirline', 'quoteTrips.quoteSegments.quoteSegmentBaggages',
             'quoteTrips.quoteSegments.quoteSegmentBaggageCharges', 'quoteTrips.quoteSegments.quoteSegmentStops']);
+
+        $query->andFilterWhere(['status' => $quoteStatus]);
 
         return $dataProvider;
     }

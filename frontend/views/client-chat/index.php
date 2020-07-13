@@ -339,7 +339,7 @@ $(document).on('click', '.quotes-uid-chat-generate', function(e) {
      $.ajax({
         type: 'post',
         url: '{$chatSendOfferGenerateUrl}',
-        data: {cchId: cchId, quotes: quotes},
+        data: {cchId: cchId, quotesIds: quotes},
         dataType: 'html'
     })
     .done(function(data) { 

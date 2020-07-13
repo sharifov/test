@@ -2,6 +2,7 @@
 
 namespace sales\model\clientChat\useCase\sendOffer;
 
+use common\models\Quote;
 use sales\model\clientChat\entity\ClientChat;
 use yii\base\Model;
 
@@ -9,12 +10,14 @@ use yii\base\Model;
  * Class GenerateImagesForm
  *
  * @property int|null $cchId
+ * @property array $quotesIds
  * @property array $quotes
  * @property ClientChat $chat
  */
 class GenerateImagesForm extends Model
 {
     public $cchId;
+    public $quotesIds;
     public $quotes;
 
     public $chat;
@@ -26,10 +29,10 @@ class GenerateImagesForm extends Model
             ['cchId', 'integer'],
             ['cchId', 'validateChat', 'skipOnError' => true],
 
-            ['quotes', 'required'],
-            ['quotes', \common\components\validators\IsArrayValidator::class, 'skipOnError' => true],
-            ['quotes', 'each', 'rule' => ['integer'], 'skipOnError' => true],
-            ['quotes', 'validateQuotes', 'skipOnError' => true],
+            ['quotesIds', 'required'],
+            ['quotesIds', \common\components\validators\IsArrayValidator::class, 'skipOnError' => true],
+            ['quotesIds', 'each', 'rule' => ['integer'], 'skipOnError' => true],
+            ['quotesIds', 'validateQuotes', 'skipOnError' => true],
         ];
     }
 
@@ -46,19 +49,22 @@ class GenerateImagesForm extends Model
         }
     }
 
+    /**
+     * @return Quote[]
+     */
     public function getAvailableQuotes(): array
     {
         if (!$this->chat) {
             return [];
         }
 
-        if (!$quotesList = $this->chat->cchLead->getQuotesProvider([])->getModels()) {
+        if (!$quotesList = $this->chat->cchLead->getQuotesProvider([], [Quote::STATUS_CREATED, Quote::STATUS_SEND, Quote::STATUS_OPENED])->getModels()) {
             return [];
         }
 
         $quotes = [];
         foreach ($quotesList as $quote) {
-            $quotes[] = $quote->id;
+            $quotes[$quote->id] = $quote;
         }
         return $quotes;
     }
@@ -69,11 +75,12 @@ class GenerateImagesForm extends Model
             $this->addError('cchId', 'Not found available quotes. Chad Id: ' . $this->cchId);
             return;
         }
-        foreach ($this->quotes as $quote) {
-            if (!in_array($quote, $availableQuotes, false)) {
-                $this->addError('quotes', 'Quote Id ' . $quote . ' not in Available quotes');
+        foreach ($this->quotesIds as $quoteId) {
+            if (!array_key_exists($quoteId, $availableQuotes)) {
+                $this->addError('quotes', 'Quote Id ' . $quoteId . ' not in Available quotes');
                 return;
             }
+            $this->quotes[] = $availableQuotes[$quoteId];
         }
     }
 
@@ -86,7 +93,7 @@ class GenerateImagesForm extends Model
     {
         return [
             'cchId' => 'Chat Id',
-            'quotes' => 'Quotes'
+            'quotesIds' => 'Quotes'
         ];
     }
 }
