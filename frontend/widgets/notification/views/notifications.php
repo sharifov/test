@@ -26,7 +26,6 @@ if (!$count) {
     'class' => 'dropdown open',
     'role' => 'presentation',
 ]])?>
-    <li class="dropdown open" role="presentation">
         <a href="javascript:;" class="dropdown-toggle info-number" title="Chat Notifications" data-toggle="dropdown"
            aria-expanded="false" >
             <i class="fa fa-comments"></i><span class="badge bg-green _cc_unread_messages"><?= $totalUnreadMessages ?></span>
@@ -49,7 +48,6 @@ if (!$count) {
                 </li>
 			<?php endif; ?>
         </ul>
-    </li>
 
 <?php Pjax::end() ?>
 
@@ -86,7 +84,7 @@ if (!$count) {
         <?php endforeach; ?>
 
         <?php $this->registerJs($pNotifiers, View::POS_END); ?>
-        <?php $this->registerJs('notificationCount(\'' . $count . '\');', View::POS_END); ?>
+        <?php $this->registerJs('notificationCount(\'' . $count . '\', "'.$totalUnreadMessages.'");', View::POS_END); ?>
 
         <li>
             <div class="text-center">
@@ -127,15 +125,15 @@ $("#notify-pjax").on('pjax:timeout', function(event) {
 
 
 $("#notify-pjax-cc").on("pjax:beforeSend", function() {
-    $('#notify-pjax-cc .info-number i').removeClass('fa-comment-o').addClass('fa-spin fa-spinner');
+    $('#notify-pjax-cc .info-number i').removeClass('fa-comments').addClass('fa-spin fa-spinner');
 });
 
 $("#notify-pjax-cc").on("pjax:complete", function() {
-    $('#notify-pjax-cc .info-number i').removeClass('fa-spin fa-spinner').addClass('fa-comment-o');
+    $('#notify-pjax-cc .info-number i').removeClass('fa-spin fa-spinner').addClass('fa-comments');
 });
 
 $("#notify-pjax-cc").on('pjax:timeout', function(event) {
-    $('#notify-pjax-cc .info-number i').removeClass('fa-spin fa-spinner').addClass('fa-comment-o');
+    $('#notify-pjax-cc .info-number i').removeClass('fa-spin fa-spinner').addClass('fa-comments');
     event.preventDefault()
 });
  
@@ -157,8 +155,9 @@ function notificationPNotify(type, title, message, desktopMessage) {
     soundNotification();
 }
 
-function notificationCount(count) {
-    $(".notification-counter").text(count);   
+function notificationCount(count, totalUnreadMessages) {
+    $(".notification-counter").text(count);
+    $("._cc_unread_messages").text(totalUnreadMessages);
 }
 
 JS;

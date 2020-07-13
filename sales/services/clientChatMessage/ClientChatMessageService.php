@@ -25,7 +25,7 @@ class ClientChatMessageService
 	{
 		$unreadMessages = $this->getCountOfChatUnreadMessages($cchId, $userId);
 		$this->setUnreadMessages($cchId, $userId, ++$unreadMessages);
-		Notifications::publish('clientChatUnreadMessage', ['user_id' => $userId], ['data' => ['totalUnreadMessages' => $this->getCountOfTotalUnreadMessages($userId) ?: '']]);
+		Notifications::publish('clientChatUnreadMessage', ['user_id' => $userId], ['data' => ['totalUnreadMessages' => $this->getCountOfTotalUnreadMessages($userId) ?: '', 'cchId' => $cchId, 'cchUnreadMessages' => $unreadMessages]]);
 		return $this;
 	}
 
@@ -50,7 +50,7 @@ class ClientChatMessageService
 
 //			NotificationCache::invalidateCc($userId);
 
-			Notifications::publish('clientChatUnreadMessage', ['user_id' => $userId], ['data' => ['totalUnreadMessages' => $this->getCountOfTotalUnreadMessages($userId) ?: '']]);
+			Notifications::publish('clientChatUnreadMessage', ['user_id' => $userId], ['data' => ['totalUnreadMessages' => $this->getCountOfTotalUnreadMessages($userId) ?: '', 'cchId' => $cchId, 'cchUnreadMessages' => null]]);
 		}
 	}
 
@@ -98,8 +98,12 @@ class ClientChatMessageService
 	{
 		$chats = $this->getChatWithUnreadMessages($userId);
 		if (in_array($cchId, $chats, false)) {
-			$chats = ArrayHelper::removeValue($chats, $cchId);
-			$this->redis->set($this->chatWithUnreadMessagesKey($userId), Json::encode($chats));
+			ArrayHelper::removeValue($chats, $cchId);
+			if (!empty($chats)) {
+				$this->redis->set($this->chatWithUnreadMessagesKey($userId), Json::encode($chats));
+			} else {
+				$this->redis->del($this->chatWithUnreadMessagesKey($userId));
+			}
 		}
 	}
 
