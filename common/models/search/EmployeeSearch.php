@@ -18,6 +18,7 @@ use common\models\Employee;
 use kartik\daterange\DateRangeBehavior;
 use yii\data\ArrayDataProvider;
 use yii\db\Query;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use sales\auth\Auth;
 
@@ -200,7 +201,7 @@ class EmployeeSearch extends Employee
      * @param $params
      * @return array
      */
-    public function searchIds($params)
+    public function searchIds($params): array
     {
         $query = Employee::find()->with('ugsGroups', 'userParams', 'userProfile', 'userProjectParams.phoneList');
 
@@ -211,8 +212,8 @@ class EmployeeSearch extends Employee
         }
         $query->select('employees.id');
         $this->filterQuery($query);
-        return $query->asArray()->column();
 
+        return ArrayHelper::map($query->asArray()->all(), 'id', 'id');
     }
 
 

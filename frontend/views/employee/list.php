@@ -97,8 +97,8 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                         <span class="sr-only">Toggle Dropdown</span>
                     </button>
                     <div class="dropdown-menu">
-                        <div class="dropdown-divider"></div>
-                        <?= \yii\helpers\Html::a('<i class="fa fa-edit text-warning"></i> Multiple update', null, ['class' => 'dropdown-item','data-toggle'=> 'modal', 'data-target'=>'#modalUpdate' ])?>
+<!--                        <div class="dropdown-divider"></div>-->
+                        <?= \yii\helpers\Html::a('<i class="fa fa-edit text-warning"></i> Multiple update', null, ['class' => 'dropdown-item btn-multiple-update','data-toggle'=> 'modal', 'data-target'=>'#modalUpdate' ])?>
                     </div>
                 <?php //endif; ?>
             </div>
@@ -114,12 +114,12 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             </p>
         <?php endif;*/?>
 
-    <?= GridView::widget([
+    <?= \yii\grid\GridView::widget([
         'id' => 'user-list-grid',
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         //'layout'=>'{summary}'.Html::activeDropDownList($searchModel, 'perpage', [10 => 10, 30 => 30, 20 => 20, 50 => 50, 100 => 100],['id'=>'perpage'])."{items}<br/>{pager}",
-        'pjax' => false,
+        //'pjax' => false,
         //'layout' => $template,
         'rowOptions' => static function (\common\models\Employee $model, $index, $widget, $grid) {
             if ($model->isDeleted() || $model->isBlocked()) {
@@ -127,11 +127,15 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             }
         },
         'columns' => [
+//            [
+//                'class' => \kartik\grid\CheckboxColumn::class,
+//                'name' => 'UserMultipleForm[user_list]',
+//                //'pageSummary' => true,
+//                'rowSelectedClass' => \kartik\grid\GridView::TYPE_INFO,
+//            ],
             [
-                'class' => \kartik\grid\CheckboxColumn::class,
-                'name' => 'UserMultipleForm[user_list]',
-                //'pageSummary' => true,
-                'rowSelectedClass' => \kartik\grid\GridView::TYPE_INFO,
+                'class' => 'yii\grid\CheckboxColumn',
+                'cssClass' => 'multiple-checkbox'
             ],
             [
                 'attribute' => 'id',
@@ -219,7 +223,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             [
                 'attribute' => 'status',
                 'filter' => $searchModel::STATUS_LIST,
-                'value' => function(\common\models\Employee $model) {
+                'value' => static function (\common\models\Employee $model) {
                     return Yii::$app->formatter->asEmployeeStatusLabel($model->status);
                 },
                 'format' => 'raw'
@@ -247,7 +251,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 },
                 'format' => 'raw',
                 'filter' => \common\models\UserProfile::CALL_TYPE_LIST
-            ], 
+            ],
             [
                 'label' => 'Call Ready',
                 'filter' => false,
@@ -416,7 +420,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             [
                 'label' => 'IP filter',
                 'attribute' => 'acl_rules_activated',
-                'value' => function(\common\models\Employee $model) {
+                'value' => static function (\common\models\Employee $model) {
                     return $model->acl_rules_activated ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
                 },
                 'format' => 'raw',
@@ -678,16 +682,45 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
         <?php
         $js = <<<JS
 
-    $(document).ready(function () {
-        $(document).on('click', '#btn-submit-multiple-update', function() {
-            var keys = $('#user-list-grid').yiiGridView('getSelectedRows');
-            $('#user_list_json').attr('value', JSON.stringify(keys));
+   // $(document).ready(function () {
+        $(document).on('click', '.btn-multiple-update', function() {
+            //alert(sessionStorage.selectedUsers);
+            $('#user_list_json').attr('value', sessionStorage.selectedUsers);
+            //var keys = $('#user-list-grid').yiiGridView('getSelectedRows');
+            //$('#user_list_json').attr('value', JSON.stringify(keys));
         });
-    }); 
+    //}); 
 
     $(document).on('pjax:start', function() {
         $("#modalUpdate .close").click();
     });
+    
+    // $(document).on('click', "input[name='selection[]']",  function (e) {
+    //     let ch = $(this);
+    //     let jsonData = sessionStorage.getItem('selectedUsers');
+    //     let data = [];
+    //    
+    //     if (jsonData) {
+    //         data = jQuery.parseJSON( jsonData );
+    //     }
+    //     console.info('==============================');
+    //     console.info(data);
+    //     if (ch.is(':checked') == true) {
+    //         if( data.indexOf(ch.val()) == -1) {
+    //             data.push(ch.val());
+    //         }
+    //     } else {
+    //         let index = data.indexOf(ch.val());
+    //         if (index !== -1) {
+    //             data.splice(index, 1);
+    //         }
+    //     }
+    //     console.info(data);
+    //     jsonData = JSON.stringify(data);
+    //     sessionStorage.selectedUsers = jsonData;
+    //     //refreshUserSelectedState();
+    // });
+    
     
     $(document).on('click', '#btn-check-all',  function (e) {
         let el = $(this).find('span');
@@ -698,15 +731,16 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             btn.removeClass('btn-warning').addClass('btn-default');
             btn.removeClass('checked');
             btn.html('<span class="fa fa-square-o"></span> Check All');
-            $('#btn-remove-selected').hide();
             $('#selected-ids').val('');
             //$('.select-on-check-all').trigger('click');
             $('.select-on-check-all').prop('checked', false);
-            $("input[name='UserMultipleForm[user_list][]']:checked").prop('checked', false);
+            $("input[name='selection[]']:checked").prop('checked', false);
             sessionStorage.removeItem('selectedUsers');
         } else {
             
             //alert(selectAllUrl);
+            
+            btn.html('<span class="fa fa-spinner fa-spin"></span> Loading ...');
             
             $.ajax({
              type: 'post',
@@ -714,9 +748,11 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
              //data: {selection:data, source: 'email-layout'},
              url: selectAllUrl,
              success: function (data) {
-                //console.log(data);
-                
+                console.info(data);
                 let cnt = data.length;
+                
+                alert(data.length);
+                
                 if (cnt > 0) {
                     
                     let jsonData = JSON.stringify(data);
@@ -733,19 +769,17 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     
                      
                     btn.html('<span class="fa fa-check-square-o"></span> Uncheck All (' + cnt + ')');
-                    $('#btn-remove-selected').show();
                     
-                    $('.select-on-check-all').prop('checked', 'checked'); //.trigger('click');
-                    $("input[name='UserMultipleForm[user_list][]']").prop('checked', 'checked');
+                    $('.select-on-check-all').prop('checked', true); //.trigger('click');
+                    $("input[name='selection[]']").prop('checked', true);
+                } else {
+                    btn.html('<span class="fa fa-square-o"></span> Check All');
                 }
-                
-                // element.prop("disabled", false);
-                // if(res.file_id) {
-                //     var downloadUrl = '/bpanel/email-category/get-file/?id=' + res.file_id;
-                //     window.location.href = downloadUrl;
-                // }
+               
+
              },
              error: function (error) {
+                    btn.html('<span class="fa fa-error text-danger"></span> Error ...');
                     console.error(error);
                     // element.prop("disabled", false);
                     // alert('Request Error');
@@ -755,29 +789,72 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
     });
     
     
-    function setUserSelectedState() {
-        
+    function refreshUserSelectedState() {
+         if (sessionStorage.selectedUsers) {
+            let data = jQuery.parseJSON( sessionStorage.selectedUsers );
+            let btn = $('#btn-check-all');
+            
+            if (data.length > 0) {
+                
+                $.each( data, function( key, value ) {
+                  //alert( key + ": " + value );
+                  $("input[name='selection[]'][value=" + value + "]").prop('checked', 'checked');
+                  //UserMultipleForm[user_list][]
+                });
+                
+                
+                btn.removeClass('btn-default').addClass('btn-warning');
+                        //el.removeClass('fa-square-o').addClass('fa-check-square-o');
+                btn.addClass('checked');
+                btn.html('<span class="fa fa-check-square-o"></span> Uncheck All (' + data.length + ')');
+            } else {
+                btn.removeClass('btn-warning').addClass('btn-default');
+                //btn.removeClass('checked');
+                btn.html('<span class="fa fa-square-o"></span> Check All');
+                
+                $('.select-on-check-all').prop('checked', false);
+                //$("input[name='selection[]']:checked").prop('checked', false);
+            }
+        }
+         
+         //$('#user_list_json').attr('value', sessionStorage.selectedUsers);
+         //$('#user_list_json')
     }
     
-    if (sessionStorage.selectedUsers) {
-        let data = jQuery.parseJSON( sessionStorage.selectedUsers );
-        if (data.length > 0) {
+    
+    $('.select-on-check-all').on('change', function(e){
+       //refreshUserSelectedState();
+       //alert(123);
+       var checked = $('#user-list-grid').yiiGridView('getSelectedRows');
+       var unchecked = $("input[name='selection[]']:not(:checked)").map(function () {
+            return this.value; 
+        }).get();
+       
+       if (sessionStorage.selectedUsers) {
+            let data = jQuery.parseJSON( sessionStorage.selectedUsers );
+       }
+       console.log('1 --------------------------');
+       console.log(checked);
+       console.log('2 --------------------------');
+       console.log(unchecked);
+       console.log('3 --------------------------');
+       console.log(data);
+       
+       //let jsonData = JSON.stringify(data);
+       
+        $.each( checked, function( key, value ) {
+          //selectedUsers
+        });
+       
             
-            $.each( data, function( key, value ) {
-              //alert( key + ": " + value );
-              $("input[name='UserMultipleForm[user_list][]'][value=" + value + "]").prop('checked', 'checked');
-              //UserMultipleForm[user_list][]
-            });
-            
-            let btn = $('#btn-check-all');
-            btn.removeClass('btn-default').addClass('btn-warning');
-                    //el.removeClass('fa-square-o').addClass('fa-check-square-o');
-            btn.addClass('checked');
-            btn.html('<span class="fa fa-check-square-o"></span> Uncheck All (' + data.length + ')');
-            $('#btn-remove-selected').show();
-        }
-        
-    }
+       //alert(keys);
+       //refreshUserSelectedState();
+    });
+    
+    
+    refreshUserSelectedState();
+    
+
 
     /*$(document).on('pjax:end', function() {
          $('[data-toggle="tooltip"]').tooltip();
