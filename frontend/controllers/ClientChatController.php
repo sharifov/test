@@ -458,8 +458,6 @@ class ClientChatController extends FController
 
             $message = $this->createOfferMessage($clientChat, $captures);
 
-//        $chatBot = Yii::$app->chatBot;
-
 //        $rocketUserId = Auth::user()->userProfile->up_rc_user_id;
 //        $rocketToken = Auth::user()->userProfile->up_rc_auth_token;
 //        $headers =  [
@@ -467,8 +465,8 @@ class ClientChatController extends FController
 //            'X-Auth-Token' => $rocketToken,
 //        ];
 
-//        $headers = Yii::$app->rchat->getSystemAuthDataHeader();
-//        $chatBot->sendMessage($data, $headers);
+//            $headers = Yii::$app->rchat->getSystemAuthDataHeader();
+//            Yii::$app->chatBot->sendMessage($message, $headers);
 
             Yii::$app->rchat->sendMessage($message);
             $this->removeQuoteCaptures(Auth::id(), $chatId);
