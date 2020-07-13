@@ -105,7 +105,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 
         </p>
 
-        <?= Html::textarea('selected-ids', '', ['rows' => 10, 'id' => "selected-ids", 'style' => 'display: none']); ?>
+        <?php //= Html::textarea('selected-ids', '', ['rows' => 10, 'id' => "selected-ids", 'style' => 'display: none']); ?>
     <?php endif; ?>
 
     <?php /*php if($isAdmin):?>
@@ -728,10 +728,8 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
         
         if ($(this).hasClass('checked')) {
             //el.removeClass('fa-check-square-o').addClass('fa-square-o');
-            btn.removeClass('btn-warning').addClass('btn-default');
-            btn.removeClass('checked');
-            btn.html('<span class="fa fa-square-o"></span> Check All');
-            $('#selected-ids').val('');
+            btn.removeClass('btn-warning').removeClass('checked').addClass('btn-default').html('<span class="fa fa-square-o"></span> Check All');
+            //$('#selected-ids').val('');
             //$('.select-on-check-all').trigger('click');
             $('.select-on-check-all').prop('checked', false);
             $("input[name='selection[]']:checked").prop('checked', false);
@@ -749,26 +747,21 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
              url: selectAllUrl,
              success: function (data) {
                 console.info(data);
-                let cnt = data.length;
+                let cnt = Object.keys(data).length
                 
-                alert(data.length);
+                alert(cnt);
                 
-                if (cnt > 0) {
+                if (data) {
                     
                     let jsonData = JSON.stringify(data);
-                    $('#selected-ids').val(jsonData);
+                    //$('#selected-ids').val(jsonData);
                     
                     sessionStorage.selectedUsers = jsonData;
                     // sessionStorage.getItem('selectedUsers');
                     //sessionStorage.user = JSON.stringify({name: "John"});
                     
-                     btn.removeClass('btn-default').addClass('btn-warning');
+                     btn.removeClass('btn-default').addClass('btn-warning').addClass('checked').html('<span class="fa fa-check-square-o"></span> Uncheck All (' + cnt + ')');
                     //el.removeClass('fa-square-o').addClass('fa-check-square-o');
-                    btn.addClass('checked');
-                    
-                    
-                     
-                    btn.html('<span class="fa fa-check-square-o"></span> Uncheck All (' + cnt + ')');
                     
                     $('.select-on-check-all').prop('checked', true); //.trigger('click');
                     $("input[name='selection[]']").prop('checked', true);
@@ -825,13 +818,13 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
     $('.select-on-check-all').on('change', function(e){
        //refreshUserSelectedState();
        //alert(123);
-       var checked = $('#user-list-grid').yiiGridView('getSelectedRows');
-       var unchecked = $("input[name='selection[]']:not(:checked)").map(function () {
+       let checked = $('#user-list-grid').yiiGridView('getSelectedRows');
+       let unchecked = $("input[name='selection[]']:not(:checked)").map(function () {
             return this.value; 
         }).get();
-       
+       let data = [];
        if (sessionStorage.selectedUsers) {
-            let data = jQuery.parseJSON( sessionStorage.selectedUsers );
+            data = jQuery.parseJSON( sessionStorage.selectedUsers );
        }
        console.log('1 --------------------------');
        console.log(checked);
@@ -841,11 +834,37 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
        console.log(data);
        
        //let jsonData = JSON.stringify(data);
-       
+       console.log('4 --------------------------');
         $.each( checked, function( key, value ) {
-          //selectedUsers
+          //console.log(value);
+          if (typeof data[value] === 'undefined') {
+              data[value] = value;
+          }
+        });
+        
+        console.log('5 --------------------------');
+       $.each( unchecked, function( key, value ) {
+          // console.log(value);
+          if (typeof data[value] !== 'undefined') {
+              
+                delete(data[value]);
+                let index = data.indexOf(value);
+                if (index > -1) {
+                  data.splice(index, 1);
+                }
+          }
         });
        
+       console.log('6 --------------------------');
+       console.log(data);
+       
+       let jsonData = JSON.stringify(data);
+                    
+       sessionStorage.selectedUsers = jsonData;
+       // $.each( data, function( key, value ) {
+       //    
+       //      console.log(key);
+       //  });
             
        //alert(keys);
        //refreshUserSelectedState();
