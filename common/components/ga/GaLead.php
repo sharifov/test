@@ -99,7 +99,7 @@ class GaLead
             $this->checkPostData();
             return \Yii::$app->gaRequestService->sendRequest($this->postData);
         } catch (\Throwable $throwable) {
-            AppHelper::throwableLogger($throwable, 'GaLead:prepareData:Throwable');
+            AppHelper::throwableLogger($throwable, 'GaLead:send:Throwable');
         }
         return null;
     }

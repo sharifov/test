@@ -6,6 +6,7 @@ use common\models\Lead;
 use common\models\Quote;
 use sales\helpers\app\AppHelper;
 use Yii;
+use yii\helpers\VarDumper;
 use yii\httpclient\Response;
 
 /**
@@ -119,7 +120,7 @@ class GaQuote
             $this->checkPostData();
             return \Yii::$app->gaRequestService->sendRequest($this->postData);
         } catch (\Throwable $throwable) {
-            AppHelper::throwableLogger($throwable, 'GaQuote:prepareData:Throwable');
+            AppHelper::throwableLogger($throwable, 'GaQuote:send:Throwable');
         }
         return null;
     }
