@@ -262,8 +262,15 @@ $js = <<<JS
                                 $('._cc_unread_messages').html('');
                                 if (obj.data.refreshPage) {
                                     window.location.reload();
+                                    return false;
                                 }
                             }
+                            
+                            if (obj.data.cchId) {
+                                $("._cc-chat-unread-message").find("[data-cch-id='"+obj.data.cchId+"']").html(obj.data.cchUnreadMessages);
+                            }
+                            
+                            pjaxReload({container: '#notify-pjax-cc'});
                         }
                     }
                     // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');

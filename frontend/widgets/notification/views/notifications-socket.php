@@ -5,6 +5,7 @@ use frontend\widgets\notification\NotificationSocketAsset;
 use sales\model\clientChat\entity\ClientChat;
 use yii\bootstrap4\Html;
 use yii\web\View;
+use yii\widgets\Pjax;
 
 /* @var Notifications[] $notifications */
 /* @var ClientChat[] $chatsWithUnreadMessages */
@@ -20,7 +21,11 @@ NotificationSocketAsset::register($this);
 
 ?>
 
-<li class="dropdown open" role="presentation">
+<?php Pjax::begin(['id' => 'notify-pjax-cc', 'timeout' => false, 'enablePushState' => false, 'enableReplaceState' => false, 'options' => [
+    'tag' => 'li',
+    'class' => 'dropdown open',
+    'role' => 'presentation',
+]])?>
     <a href="javascript:;" class="dropdown-toggle info-number" title="Chat Notifications" data-toggle="dropdown"
        aria-expanded="false" >
         <i class="fa fa-comments"></i><span class="badge bg-green _cc_unread_messages"><?= $totalUnreadMessages ?></span>
@@ -43,7 +48,7 @@ NotificationSocketAsset::register($this);
             </li>
         <?php endif; ?>
     </ul>
-</li>
+<?php Pjax::end() ?>
 
 <li class="dropdown open" role="presentation">
 

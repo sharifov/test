@@ -18,9 +18,8 @@ if ($clientChat->cchProject) {
 $countMessages = ClientChatMessageHelper::getCountOfChatUnreadMessage($clientChat->cch_id, $clientChat->cch_owner_user_id);
 ?>
 
-<?php if ($countMessages): ?>
 <li>
-	<a href="<?= Url::to(['/client-chat/index', 'chid' => $clientChat->cch_id]) ?>">
+	<a href="<?= Url::to(['/client-chat/index', 'chid' => $clientChat->cch_id]) ?>" data-pjax="0">
 		<span class="glyphicon glyphicon-info-sign"> </span>
 		<span>
             <span>You have unread messages: <?= Html::tag('span', $countMessages, ['class' => 'label label-default']) ?> from <?= $clientChat->cchClient->full_name ?></span>
@@ -30,4 +29,3 @@ $countMessages = ClientChatMessageHelper::getCountOfChatUnreadMessage($clientCha
         <?php endif; ?>
     </a>
 </li>
-<?php endif; ?>
