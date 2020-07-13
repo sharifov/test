@@ -49,7 +49,7 @@ class ClientChatUserAccessService
 			try {
 				$ccua->ccuaCch->assignOwner($ccua->ccua_user_id);
 				$this->clientChatRepository->save($ccua->ccuaCch);
-//				$this->clientChatService->assignAgentToRcChannel($ccua->ccuaCch->cch_rid, $ccua->ccuaUser->userProfile->up_rc_user_id ?? '');
+				$this->clientChatService->assignAgentToRcChannel($ccua->ccuaCch->cch_rid, $ccua->ccuaUser->userProfile->up_rc_user_id ?? '');
 			} catch (\DomainException | \RuntimeException $e) {
 				if (ClientChatCodeException::isRcAssignAgentFailed($e)) {
 					$ccua->ccuaCch->removeOwner();
