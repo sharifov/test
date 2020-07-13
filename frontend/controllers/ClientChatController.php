@@ -548,7 +548,7 @@ class ClientChatController extends FController
         try {
             $mailCapture = $communication->mailCapture(
                 $quote->lead->project_id,
-                'cl_offer',
+                'chat_offer',
                 '',
                 '',
                 $content_data,
