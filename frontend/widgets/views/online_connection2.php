@@ -272,6 +272,12 @@ $js = <<<JS
                             
                             pjaxReload({container: '#notify-pjax-cc'});
                         }
+
+                        if (obj.cmd === 'clientChatUpdateTimeLastMessage') {                            
+                            if (obj.data.cchId) {                                
+                                $("._cc-item-last-message-time[data-cch-id='"+obj.data.cchId+"']").html(obj.data.dateTime);
+                            }
+                        }
                     }
                     // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
                 } catch (error) {

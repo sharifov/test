@@ -12,6 +12,7 @@ use sales\entities\cases\Cases;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatData\entity\ClientChatData;
+use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -249,6 +250,11 @@ class ClientChat extends \yii\db\ActiveRecord
 	{
 		$this->cch_owner_user_id = null;
 	}
+
+    public function getLastMessageByOwner(): ?ClientChatMessage
+    {
+        return ClientChatMessage::find()->andWhere(['ccm_cch_id' => $this->cch_id, 'ccm_user_id' => $this->cch_owner_user_id])->orderBy(['ccm_id' => SORT_DESC])->limit(1)->one();
+    }
 
     public function attributeLabels(): array
     {
