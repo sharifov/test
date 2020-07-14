@@ -346,12 +346,13 @@ class ClientChatController extends FController
 		if ($clientChat) {
 			$form->cchId = $clientChat->cch_id;
 			$form->depId = $clientChat->cch_dep_id;
+			$form->isOnline = $clientChat->cch_client_online;
 		}
 
 		try {
 			if ($form->load(Yii::$app->request->post()) && $form->validate()) {
 				$this->clientChatService->transfer($form);
-				return '<script>$("#modal-sm").modal("hide"); window.location.reload();</script>';
+				return '<script>$("#modal-sm").modal("hide"); refreshChatPage('.$form->cchId.');</script>';
 			}
 		} catch (\DomainException $e) {
 			$form->addError('depId', $e->getMessage());

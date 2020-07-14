@@ -9,6 +9,7 @@ use yii\base\Model;
  *
  * @property int $cchId
  * @property int|null $depId
+ * @property int|null $isOnline
  */
 class ClientChatTransferForm extends Model
 {
@@ -22,12 +23,18 @@ class ClientChatTransferForm extends Model
 	 */
 	public $depId;
 
+	/**
+	 * @var int|null
+	 */
+	public $isOnline;
+
 	public function rules(): array
 	{
 		return [
-			[['cchId', 'depId'], 'integer'],
-			[['cchId', 'depId'], 'default', 'value' => null],
+			[['cchId', 'depId', 'isOnline'], 'integer'],
+			[['cchId', 'depId', 'isOnline'], 'default', 'value' => null],
 			[['cchId', 'depId'], 'required'],
+			[['cchId', 'depId', 'isOnline'], 'filter', 'filter' => 'intval'],
 		];
 	}
 
@@ -35,7 +42,8 @@ class ClientChatTransferForm extends Model
 	{
 		return [
 			'cchId' => 'Client Chat Id',
-			'depId' => 'Department'
+			'depId' => 'Department',
+			'isOnline' => 'Client Network Status'
 		];
 	}
 }

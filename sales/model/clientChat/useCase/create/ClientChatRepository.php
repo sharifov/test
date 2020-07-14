@@ -64,6 +64,7 @@ class ClientChatRepository
 		$chat->cch_dep_id = $dto->cchDepId;
 		$chat->cch_client_id = $dto->cchClientId;
 		$chat->cch_owner_user_id = $dto->ownerId;
+		$chat->cch_client_online = $dto->isOnline;
 		$chat->generated();
 		$chat->attachBehavior('user', BlameableBehaviorExceptApi::class);
 		return $chat;

@@ -9,6 +9,7 @@ use common\models\Language;
 use common\models\Lead;
 use common\models\Project;
 use sales\entities\cases\Cases;
+use sales\helpers\clientChat\ClientChatHelper;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatData\entity\ClientChatData;
@@ -17,6 +18,7 @@ use sales\model\clientChatRequest\entity\ClientChatRequest;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\Html;
 
 /**
  * This is the model class for table "client_chat".
@@ -42,6 +44,7 @@ use yii\db\ActiveRecord;
  * @property string|null $cch_updated_dt
  * @property int|null $cch_created_user_id
  * @property int|null $cch_updated_user_id
+ * @property int|null $cch_client_online
  *
  * @property Cases $cchCase
  * @property ClientChatRequest $cchCcr
@@ -135,6 +138,7 @@ class ClientChat extends \yii\db\ActiveRecord
             ['cch_title', 'string', 'max' => 50],
 
             ['cch_ua', 'integer'],
+            ['cch_client_online', 'integer'],
 
             ['cch_updated_dt', 'safe'],
 
@@ -221,6 +225,7 @@ class ClientChat extends \yii\db\ActiveRecord
 	public function close(): void
 	{
 		$this->cch_status_id = self::STATUS_CLOSED;
+		$this->cch_client_online = 0;
 	}
 
 	public function isClosed(): bool
@@ -235,7 +240,12 @@ class ClientChat extends \yii\db\ActiveRecord
 
 	public function getStatusClass()
 	{
-		return self::getStatusClassList()[$this->cch_status_id] ?? 'secondary';
+		return self::getStatusClassList()[$this->cch_status_id] ?? '';
+	}
+
+	public function getClientStatusMessage(): string
+	{
+		return ClientChatHelper::getClientName($this) . ClientChatHelper::getClientStatusMessage($this);
 	}
 
 	public function assignOwner(int $userId): void
@@ -280,6 +290,7 @@ class ClientChat extends \yii\db\ActiveRecord
             'cch_updated_dt' => 'Updated Dt',
             'cch_created_user_id' => 'Created User',
             'cch_updated_user_id' => 'Updated User',
+            'cch_client_online' => 'Client Online',
         ];
     }
 

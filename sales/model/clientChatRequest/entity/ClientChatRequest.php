@@ -21,6 +21,7 @@ use yii\db\ActiveRecord;
 class ClientChatRequest extends \yii\db\ActiveRecord
 {
 	private const EVENT_GUEST_CONNECTED = 1;
+	private const EVENT_GUEST_DISCONNECTED = 11;
     private const EVENT_ROOM_CONNECTED = 2;
     private const EVENT_ROOM_DISCONNECTED = 3;
     private const EVENT_GUEST_UTTERED = 4;
@@ -32,6 +33,7 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 
 	private const EVENT_LIST = [
 		self::EVENT_GUEST_CONNECTED => 'GUEST_CONNECTED',
+		self::EVENT_GUEST_DISCONNECTED => 'GUEST_DISCONNECTED',
 		self::EVENT_ROOM_CONNECTED => 'ROOM_CONNECTED',
 		self::EVENT_ROOM_DISCONNECTED => 'ROOM_DISCONNECTED',
 		self::EVENT_GUEST_UTTERED => 'GUEST_UTTERED',
@@ -117,6 +119,11 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 	public function isRoomConnected(): bool
 	{
 		return self::EVENT_ROOM_CONNECTED === $this->ccr_event;
+	}
+
+	public function isGuestDisconnected(): bool
+	{
+		return self::EVENT_GUEST_DISCONNECTED === $this->ccr_event;
 	}
 
 	public function isGuestUttered(): bool

@@ -20,6 +20,8 @@ use yii\widgets\Pjax;
 
                 <?= $form->field($transferForm, 'cchId')->hiddenInput()->label(false) ?>
 
+                <?= $form->field($transferForm, 'isOnline')->hiddenInput()->label(false) ?>
+
                 <?= $form->field($transferForm, 'depId')->dropDownList(Department::getList(), ['prompt' => ' -- Select department --']) ?>
 
                 <div class="text-center" style="width: 100%">

@@ -2,6 +2,7 @@
 namespace sales\repositories\visitorLog;
 
 use common\models\VisitorLog;
+use sales\model\clientChatData\entity\ClientChatData;
 use sales\repositories\Repository;
 use yii\helpers\VarDumper;
 
@@ -22,6 +23,11 @@ class VisitorLogRepository extends Repository
 		} catch (\RuntimeException $e) {
 			\Yii::error('VisitorLog save failed: ' . VarDumper::dumpAsString($visitorLog->errors), 'ClientChatRequestService::guestConnected::visitorLog::save');
 		}
+	}
+
+	public function exist(int $cchId): bool
+	{
+		return VisitorLog::find()->byCchId($cchId)->exists();
 	}
 
 	public function save(VisitorLog $visitorLog): VisitorLog

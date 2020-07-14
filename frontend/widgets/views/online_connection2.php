@@ -272,6 +272,13 @@ $js = <<<JS
                             
                             pjaxReload({container: '#notify-pjax-cc'});
                         }
+                        
+                        if (obj.cmd === 'clientChatUpdateClientStatus') {
+                            if (obj.cchId) {
+                                $('._cc-list-wrapper').find('[data-cch-id="'+obj.cchId+'"]').find('._cc-status').attr('data-is-online', obj.isOnline);
+                            }
+                            createNotify('Client Chat Notification', obj.statusMessage, obj.isOnline ? 'success' : 'warning');
+                        }
 
                         if (obj.cmd === 'clientChatUpdateTimeLastMessage') {                            
                             if (obj.data.cchId) {                                

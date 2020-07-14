@@ -138,7 +138,7 @@ if ($('#_rc-iframe-wrapper').find('._rc-iframe').length) {
 
 $(document).on('click', '._cc-list-item', function () {
 
-    if ($(this).hasClass('active')) {
+    if ($(this).hasClass('_cc_active')) {
         return false;
     }
     
@@ -152,8 +152,8 @@ $(document).on('click', '._cc-list-item', function () {
     let cch_id = $(this).attr('data-cch-id');
     let isClosed = $(this).attr('data-is-closed');
     $("#_rc-iframe-wrapper").find('._rc-iframe').hide();
-    $('._cc-list-item').removeClass('active');
-    $(this).addClass('active');
+    $('._cc-list-item').removeClass('_cc_active');
+    $(this).addClass('_cc_active');
     
     if (!$('#_rc-'+cch_id).length) {
     
@@ -265,12 +265,7 @@ $(document).on('click', '.cc_close', function (e) {
                 btn.html('<i class="fa fa-spin fa-spinner"></i>');
             },
             success: function () {
-                
-                pjaxReload({container: '#pjax-client-chat-channel-list'});
-                $('#_rc-'+cchId).remove();
-                $('.cc_transfer').remove();
-                btn.remove();
-                getChatHistory(cchId);
+                refreshChatPage(cchId);
             },
             complete: function () {
                 btn.html(btnHtml);
@@ -282,7 +277,7 @@ $(document).on('click', '.cc_close', function (e) {
     }
 });
 
-function getChatHistory (cchId) {
+window.getChatHistory = function (cchId) {
     $("#_rc-iframe-wrapper").find('._rc-iframe').hide();
     $("#_rc-iframe-wrapper").find('#_cc-load').remove();
     $("#_rc-iframe-wrapper").append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
@@ -290,6 +285,14 @@ function getChatHistory (cchId) {
         $("#_rc-iframe-wrapper").append(data);
         $("#_rc-iframe-wrapper").find('#_cc-load').remove();
     });
+}
+
+window.refreshChatPage = function (cchId) {
+    pjaxReload({container: '#pjax-client-chat-channel-list'});
+    $('#_rc-'+cchId).remove();
+    $('.cc_transfer').remove();
+    $('.cc_close').remove();
+    getChatHistory(cchId);
 }
 
 $(document).on('click', '.chat-offer', function(e) {
