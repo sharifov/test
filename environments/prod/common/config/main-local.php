@@ -165,7 +165,6 @@ return [
         'gaRequestService' => [
             'class' => \common\components\ga\GaRequestService::class,
             'url' => '{{ common.config.main.components.gaRequestService.url:str }}',
-            'v' => '{{ common.config.main.components.gaRequestService.v:int }}',
         ],
     ],
 ];

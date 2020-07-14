@@ -9,7 +9,7 @@ use common\models\Lead;
  *
  * @property Lead $lead
  */
-class LeadCreatedCloneEvent
+class LeadCreatedCloneEvent implements LeadableEventInterface
 {
     public $lead;
 
@@ -21,4 +21,8 @@ class LeadCreatedCloneEvent
         $this->lead = $lead;
     }
 
+    public function getLead(): Lead
+    {
+        return $this->lead;
+    }
 }

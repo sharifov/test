@@ -6,6 +6,7 @@ use common\models\Lead;
 use common\models\Quote;
 use sales\helpers\app\AppHelper;
 use Yii;
+use yii\helpers\VarDumper;
 use yii\httpclient\Response;
 
 /**
@@ -62,6 +63,7 @@ class GaQuote
     {
         try {
             $this->postData = [
+                'v' => 1,
                 'tid' => $this->tid,
                 'cid' => $this->cid,
                 't' => 'event',
@@ -118,7 +120,7 @@ class GaQuote
             $this->checkPostData();
             return \Yii::$app->gaRequestService->sendRequest($this->postData);
         } catch (\Throwable $throwable) {
-            AppHelper::throwableLogger($throwable, 'GaQuote:prepareData:Throwable');
+            AppHelper::throwableLogger($throwable, 'GaQuote:send:Throwable');
         }
         return null;
     }
@@ -140,7 +142,7 @@ class GaQuote
      */
     public static function getDateDepartureRoundTrip(Quote $quote): string
     {
-        if ($quote->trip_type === Lead::TRIP_TYPE_ROUND_TRIP) {
+        if ($quote->trip_type !== Lead::TRIP_TYPE_ROUND_TRIP) {
             return '';
         }
         $result = [];

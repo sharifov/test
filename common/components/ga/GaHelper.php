@@ -16,7 +16,11 @@ class GaHelper
     public const TYPE_LEAD = 'lead';
     public const TYPE_QUOTE = 'quote';
 
-    public static function checkSettings(string $type): void
+    /**
+     * @param string $type
+     * @return bool
+     */
+    public static function checkSettings(string $type): bool
     {
         $gaEnable = (bool) (Yii::$app->params['settings']['ga_enable'] ?? false);
         $gaQbjEnable = $type === self::TYPE_LEAD ? self::checkLeadEnable() : self::checkQuoteEnable() ;
@@ -24,6 +28,7 @@ class GaHelper
         if (!$gaEnable || !$gaQbjEnable) {
             throw new \DomainException('Service disabled. Please, check Google Analytics settings.', -1);
         }
+        return true;
     }
 
     /**

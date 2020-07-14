@@ -7,6 +7,7 @@ use common\components\ga\GaHelper;
 use common\components\ga\GaLead;
 use common\components\ga\GaQuote;
 use common\components\jobs\CreateSaleFromBOJob;
+use common\components\jobs\SendLeadInfoToGaJob;
 use common\components\Purifier;
 use common\components\jobs\TelegramSendMessageJob;
 use common\components\RocketChat;
@@ -1365,49 +1366,55 @@ class TestController extends FController
 		echo 'success';
 	}
 
-	public function actionGaSendQuote(int $id = 733986, int $debug = 1) // test/ga-send-quote
+	public function actionGaSendQuote($id = 733986, int $debug = 1) // test/ga-send-quote?id=733986&debug=1
     {
         try {
-            $quote = Quote::findOne($id);
-            $gaQbj = new GaQuote($quote);
-            $gaRequestService = \Yii::$app->gaRequestService;
-            if ($debug === 1) {
-                $gaRequestService->url = 'https://www.google-analytics.com/debug/collect';
+            if (is_int($id)) {
+                $params = ['id' => $id];
+            } else {
+                $params = ['uid' => $id];
             }
+            $quote = Quote::findOne($params);
+            $gaQbj = new GaQuote($quote);
+
+            $gaRequestService = \Yii::$app->gaRequestService;
+            \Yii::configure($gaRequestService, ['debugMod' => (bool) $debug]);
             $response = $gaRequestService->sendRequest($gaQbj->getPostData());
 
-            Yii::info(VarDumper::dumpAsString($response),
-            'info\actionGaSendQuote:response');
+            VarDumper::dump([
+                'post Data' => $gaQbj->getPostData(),
+                'response' => $response,
+            ], 10, true);
+
         } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableFormatter($throwable),
-            self::class . ':' . __FUNCTION__ . ':Example failed' );
+            VarDumper::dump(AppHelper::throwableFormatter($throwable), 10, true);
         }
-        VarDumper::dump($response ?? 'failed', 10, true); exit();
+        exit();
     }
 
-    public function actionGaSendLead(int $id = 367010, int $debug = 1) // test/ga-send-lead
+    public function actionGaSendLead(int $id = 367010, int $debug = 1) // test/ga-send-lead?id=367010&debug=1
     {
         try {
             $lead = Lead::findOne($id);
             $gaQbj = new GaLead($lead);
+
             $gaRequestService = \Yii::$app->gaRequestService;
-            if ($debug === 1) {
-                $gaRequestService->url = 'https://www.google-analytics.com/debug/collect';
-            }
+            \Yii::configure($gaRequestService, ['debugMod' => (bool) $debug]);
             $response = $gaRequestService->sendRequest($gaQbj->getPostData());
 
-            Yii::info(VarDumper::dumpAsString($response),
-            'info\actionGaLeadQuote:response');
+            VarDumper::dump([
+                'post Data' => $gaQbj->getPostData(),
+                'response' => $response,
+            ], 10, true);
+
         } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableFormatter($throwable),
-            self::class . ':' . __FUNCTION__ . ':Example failed' );
+            VarDumper::dump(AppHelper::throwableFormatter($throwable), 10, true);
         }
-        VarDumper::dump($response ?? 'failed', 10, true); exit();
+        exit();
     }
 
 	public function actionZ()
     {
-        /* TODO:: add component to configs (env etc.) */
         return $this->render('z');
     }
 }

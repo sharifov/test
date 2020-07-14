@@ -14,6 +14,7 @@ use frontend\widgets\notification\NotificationMessage;
 use modules\offer\src\entities\offer\Offer;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\product\Product;
+use sales\auth\Auth;
 use sales\entities\EventTrait;
 use sales\events\lead\LeadBookedEvent;
 use sales\events\lead\LeadCallExpertRequestEvent;
@@ -63,6 +64,7 @@ use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use common\components\SearchService;
+use yii\helpers\Url;
 use yii\helpers\VarDumper;
 
 /**

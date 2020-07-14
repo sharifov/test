@@ -23,6 +23,8 @@ class GaRequestService extends Component
     public $url;
     public $v;
 
+    public bool $debugMod = false;
+    public string $debugUrl = 'https://www.google-analytics.com/debug/collect';
     public array $options = [CURLOPT_ENCODING => 'gzip'];
 
     private Request $curlRequest;
@@ -40,9 +42,7 @@ class GaRequestService extends Component
             $client->setTransport(CurlTransport::class);
             $this->curlRequest = $client->createRequest();
             $this->curlRequest->setUrl($this->url);
-            $this->curlRequest->setData([
-                'v' => $this->v,
-            ]);
+
             return true;
         } catch (Throwable $throwable) {
             Yii::error(AppHelper::throwableFormatter($throwable),
@@ -83,6 +83,9 @@ class GaRequestService extends Component
         }
         if ($format) {
             $this->curlRequest->setFormat($format);
+        }
+        if ($this->debugMod) {
+            $this->curlRequest->setUrl($this->debugUrl);
         }
         return $this->curlRequest->send();
     }
