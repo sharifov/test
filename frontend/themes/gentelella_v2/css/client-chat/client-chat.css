@@ -334,6 +334,7 @@
     display: flex;
     flex-direction: column;
     align-self: flex-start;
+    align-items: flex-end;
 }
 ._cc_item_data span {
     margin-bottom: 5px;
