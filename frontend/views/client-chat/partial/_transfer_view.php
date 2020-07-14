@@ -14,7 +14,7 @@ use yii\widgets\Pjax;
 <script>pjaxOffFormSubmit('#pjax-cc-submit-transfer')</script>
 <div class="row">
 	<div class="col-md-12">
-        <?php Pjax::begin(['id' => 'pjax-cc-submit-transfer', 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false]) ?>
+        <?php Pjax::begin(['id' => 'pjax-cc-submit-transfer', 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false, 'clientOptions' => ['async' => false]]) ?>
             <?php $form = ActiveForm::begin(['options' => ['data-pjax' => 1]]); ?>
                 <?= $form->errorSummary($transferForm) ?>
 
@@ -38,17 +38,15 @@ use yii\widgets\Pjax;
 $js = <<<JS
 (function() {
     let btnHtml = '';
-    $('#pjax-cc-submit-transfer').on('pjax:start', function () {
-        btnHtml = $('._cc_submit_transfer').html();
-        $('._cc_submit_transfer').html('<i class="fa fa-spin fa-spinner"></i>');
-    });
-    
     $('#pjax-cc-submit-transfer').on('pjax:end', function (data, xhr) {
         $('._cc_submit_transfer').html(btnHtml);
-        
         if (xhr.status === 500) {
             createNotify('Error', 'Internal Server Error', 'error');
         }
+    });
+    $('#pjax-cc-submit-transfer').on('pjax:beforeSend', function () {
+        btnHtml = $('._cc_submit_transfer').html();
+        $('._cc_submit_transfer').html('<i class="fa fa-spin fa-spinner"></i>');
     });
 })();
 JS;
