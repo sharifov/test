@@ -10,10 +10,12 @@ use common\components\grid\DateTimeColumn;
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $multipleForm \frontend\models\UserMultipleForm */
 /* @var $employees [] */
+/* @var array $multipleErrors */
 
 use sales\access\EmployeeProjectAccess;
 use yii\bootstrap\Html;
 use kartik\grid\GridView;
+use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
 use dosamigos\datepicker\DatePicker;
 use yii\bootstrap4\Modal;
@@ -83,6 +85,32 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
         )
     )*/
     ?>
+
+    <?php if ($multipleErrors || $multipleForm->getErrors()): ?>
+        <div class="card multiple-update-summary" style="margin-bottom: 10px;">
+            <div class="card-header">
+                <span class="pull-right clickable close-icon"><i class="fa fa-times"> </i></span>
+                 Errors:
+            </div>
+            <div class="card-body">
+                <?php
+                foreach ($multipleErrors as $userId => $multipleError) {
+                    echo 'UserId: ' . $userId . ' <br>';
+                    echo VarDumper::dumpAsString($multipleError) . ' <br><br>';
+                }
+                ?>
+                <?= VarDumper::dumpAsString($multipleForm->getErrorSummary(true))?>
+            </div>
+        </div>
+        <?php
+$js = <<<JS
+$('.close-icon').on('click', function(){    
+    $('.multiple-update-summary').slideUp();
+})
+JS;
+$this->registerJs($js);
+        ?>
+    <?php endif;?>
 
     <?php if($user->isAdmin() || $user->isSupervision()) : ?>
         <p>
@@ -622,8 +650,18 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <?= $form->field($multipleForm, 'userDepartment')->dropDownList(\common\models\Department::getList(), ['prompt' => '']) ?>
-                            <?= $form->field($multipleForm, 'userRole')->dropDownList(\common\models\Employee::getAllRoles(), ['prompt' => '']) ?>
+                            <?= $form->field($multipleForm, 'userDepartments')->widget(\kartik\select2\Select2::class, [
+                                'data' => $multipleForm->getDepartments(),
+                                'size' => \kartik\select2\Select2::SMALL,
+                                'options' => ['placeholder' => 'Select user Departments', 'multiple' => true],
+                                'pluginOptions' => ['allowClear' => true],
+                            ]) ?>
+                            <?= $form->field($multipleForm, 'userRoles')->widget(\kartik\select2\Select2::class, [
+                                'data' => $multipleForm->getRoles(),
+                                'size' => \kartik\select2\Select2::SMALL,
+                                'options' => ['placeholder' => 'Select user roles', 'multiple' => true],
+                                'pluginOptions' => ['allowClear' => true],
+                            ]) ?>
                             <?= $form->field($multipleForm, 'status')->dropDownList([$searchModel::STATUS_ACTIVE => 'Active', $searchModel::STATUS_DELETED => 'Deleted'], ['prompt' => '']) ?>
                             <?= $form->field($multipleForm, 'workStart')->widget(
                                 \kartik\time\TimePicker::class, [
@@ -644,6 +682,12 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                             ?>
                             <?= $form->field($multipleForm, 'inboxShowLimitLeads')->input('number', ['step' => 1, 'min' => 0, 'max' => 500]) ?>
                             <?= $form->field($multipleForm, 'defaultTakeLimitLeads')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
+                            <?= $form->field($multipleForm, 'userClientChatChanels')->widget(\kartik\select2\Select2::class, [
+                                'data' => $multipleForm->getClientChatChanels(),
+                                'size' => \kartik\select2\Select2::SMALL,
+                                'options' => ['placeholder' => 'Select Client Chat Chanels', 'multiple' => true],
+                                'pluginOptions' => ['allowClear' => true],
+                            ]) ?>
                         </div>
                         <div class="col-md-6">
                             <?= $form->field($multipleForm, 'minPercentForTakeLeads')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
@@ -701,10 +745,10 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             }
             
             //$('#user_list_json').attr('value', sessionStorage.selectedUsers);
-            let keys = $('#user-list-grid').yiiGridView('getSelectedRows');
+            // let keys = $('#user-list-grid').yiiGridView('getSelectedRows');
             //alert(JSON.stringify(keys));
             //alert(JSON.stringify(arrIds));
-            $('#user_list_json').attr('value', JSON.stringify(keys));
+            // $('#user_list_json').attr('value', JSON.stringify(keys));
         });
     //}); 
 

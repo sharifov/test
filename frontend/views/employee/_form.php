@@ -5,6 +5,8 @@ use common\models\UserProductType;
 use frontend\models\UserFailedLogin;
 use modules\product\src\entities\productType\ProductType;
 use sales\auth\Auth;
+use sales\model\clientChatChannel\entity\ClientChatChannel;
+use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\grid\ActionColumn;
@@ -177,6 +179,15 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                                     'data' => \common\models\Department::getList(),
                                     'size' => \kartik\select2\Select2::SMALL,
                                     'options' => ['placeholder' => 'Select departments', 'multiple' => true],
+                                    'pluginOptions' => ['allowClear' => true],
+                                ]);
+                            ?>
+
+                            <?php
+                                echo $form->field($model, 'client_chat_user_channel')->widget(\kartik\select2\Select2::class, [
+                                    'data' => ClientChatChannel::getList(),
+                                    'size' => \kartik\select2\Select2::SMALL,
+                                    'options' => ['placeholder' => 'Select Client Chat Chanel', 'multiple' => true],
                                     'pluginOptions' => ['allowClear' => true],
                                 ]);
                             ?>
