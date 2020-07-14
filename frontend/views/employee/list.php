@@ -689,11 +689,13 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             let arrIds = [];
             if (sessionStorage.selectedUsers) {
                 let data = jQuery.parseJSON( sessionStorage.selectedUsers );
-                if (data) {
+                arrIds = Object.values(data);
+                /*if (data) {
                      $.each( data, function( key, value ) {
                         arrIds.push(value);
                      });
-                }
+                }*/
+                
                 $('#user_list_json').val(JSON.stringify(arrIds));
                 //alert(arrIds.join(', '));
             }
@@ -781,11 +783,12 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             data = jQuery.parseJSON( sessionStorage.selectedUsers );
             let arrIds = [];
             if (data) {
-                 $.each( data, function( key, value ) {
-                    arrIds.push(value);
-                 });
+                arrIds = Object.values(data);
+                 // $.each( data, function( key, value ) {
+                 //    arrIds.push(value);
+                 // });
             }
-            alert(arrIds.join(', '));
+            alert('User IDs (' + arrIds.length + ' items): ' + arrIds.join(', '));
        } else {
            alert('sessionStorage.selectedUsers = null');
        }
