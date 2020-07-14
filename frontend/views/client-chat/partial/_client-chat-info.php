@@ -1,7 +1,9 @@
 <?php
 use common\models\Client;
 use sales\model\clientChat\entity\ClientChat;
+use yii\bootstrap4\Button;
 use yii\helpers\Html;
+use yii\helpers\VarDumper;
 use yii\web\View;
 
 /***
@@ -64,8 +66,20 @@ use yii\web\View;
                 'attributes' => [
                     'cch_title',
                     'cch_description',
-					'cchCase:case',
-					'cchLead:lead',
+					'cchCase:case:Case',
+					[
+					    'attribute' => 'cch_lead_id',
+                        'label' => 'Lead',
+                        'value' => static function(ClientChat $model) {
+                            if (!$model->cch_lead_id) {
+                                return null;
+                            }
+                            $out = Yii::$app->formatter->format($model->cchLead, 'lead');
+                            $out .= ' ' . Html::button('Offer', ['class' => 'btn btn-info chat-offer', 'data-cch-id' => $model->cch_id]);
+                            return $out;
+                        },
+                        'format' => 'raw',
+                    ],
 					[
 						'attribute' => 'cch_status_id',
 						'value' => static function (ClientChat $model) {

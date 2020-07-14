@@ -1,6 +1,9 @@
 <?php
 namespace frontend\controllers;
 
+use common\components\CommunicationService;
+use common\models\Lead;
+use common\models\Quote;
 use common\models\VisitorLog;
 use frontend\widgets\clientChat\ClientChatAccessWidget;
 use sales\auth\Auth;
@@ -10,6 +13,7 @@ use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\entity\search\ClientChatSearch;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
+use sales\model\clientChat\useCase\sendOffer\GenerateImagesForm;
 use sales\model\clientChat\useCase\transfer\ClientChatTransferForm;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
@@ -23,6 +27,10 @@ use yii\data\ActiveDataProvider;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use Yii;
+use yii\helpers\VarDumper;
+use yii\web\BadRequestHttpException;
+use yii\web\NotFoundHttpException;
+use yii\web\Response;
 
 /**
  * Class ClientChatController
@@ -361,4 +369,228 @@ class ClientChatController extends FController
 		$widget->userId = Auth::id();
 		return $widget->run();
 	}
+
+	public function actionSendOfferList(): string
+    {
+        $chatId = (int)\Yii::$app->request->post('cchId');
+        $errorMessage = '';
+        $dataProvider = null;
+
+        try {
+            $clientChat = $this->clientChatRepository->findById($chatId);
+            if (!$this->sendOfferCheckAccess($clientChat, Auth::user())) {
+                throw new \DomainException('Access denied.');
+            }
+            if (!$clientChat->cch_lead_id) {
+                throw new \DomainException('Chat not assigned to Lead');
+            }
+            $dataProvider = $this->getSendOfferProvider($clientChat);
+        } catch (\DomainException $e) {
+            $errorMessage = $e->getMessage();
+        }
+
+        return $this->renderAjax('partial/_send_offer_list', [
+            'dataProvider' => $dataProvider,
+            'errorMessage' => $errorMessage,
+            'chatId' => $chatId
+        ]);
+    }
+
+    public function actionSendOfferGenerate(): string
+    {
+        $errorMessage = '';
+        $captures = [];
+
+        $form = new GenerateImagesForm();
+
+        if (!$form->load(Yii::$app->request->post())) {
+            return $this->renderAjax('partial/_send_offer_generate', [
+                'errorMessage' => 'Cant load Data',
+                'form' => $form,
+                'captures' => $captures,
+            ]);
+        }
+
+        if (!$form->validate()) {
+            return $this->renderAjax('partial/_send_offer_generate', [
+                'errorMessage' => '',
+                'form' => $form,
+                'captures' => $captures,
+            ]);
+        }
+
+        try {
+            if (!$this->sendOfferCheckAccess($form->chat, Auth::user())) {
+                throw new \DomainException('Access denied.');
+            }
+            foreach ($form->quotes as $quote) {
+                if ($capture = $this->generateQuoteCapture($quote)) {
+                    $captures[] = $capture;
+                }
+            }
+            if (!$captures) {
+                throw new \DomainException('Not generated captures. Try again.');
+            }
+            if (!$this->saveQuoteCaptures($captures, Auth::id(), $form->cchId)) {
+                throw new \DomainException('Cant tmp save quotes. Please try again later.');
+            }
+        } catch (\DomainException $e) {
+            $errorMessage = $e->getMessage();
+        }
+
+        return $this->renderAjax('partial/_send_offer_generate', [
+            'errorMessage' => $errorMessage,
+            'form' => $form,
+            'captures' => $captures,
+        ]);
+    }
+
+    public function actionSendOffer(): Response
+    {
+        $out = ['error' => false, 'message' => ''];
+        $chatId = (int)\Yii::$app->request->post('cchId');
+
+        try {
+            $clientChat = $this->clientChatRepository->findById($chatId);
+            if (!$captures = $this->getQuoteCaptures(Auth::id(), $clientChat->cch_id)) {
+                throw new \DomainException('Not found saved quote captures. Please try again.');
+            }
+
+            $message = $this->createOfferMessage($clientChat, $captures);
+
+//        $rocketUserId = Auth::user()->userProfile->up_rc_user_id;
+//        $rocketToken = Auth::user()->userProfile->up_rc_auth_token;
+//        $headers =  [
+//            'X-User-Id' => $rocketUserId,
+//            'X-Auth-Token' => $rocketToken,
+//        ];
+
+//            $headers = Yii::$app->rchat->getSystemAuthDataHeader();
+//            Yii::$app->chatBot->sendMessage($message, $headers);
+
+            Yii::$app->rchat->sendMessage($message);
+            $this->removeQuoteCaptures(Auth::id(), $chatId);
+
+        } catch (\DomainException $e) {
+            $out['error'] = true;
+            $out['message'] = $e->getMessage();
+        }
+
+        return $this->asJson($out);
+    }
+
+    private function createOfferMessage(ClientChat $chat, array $captures): array
+    {
+        $attachments = [];
+
+        foreach ($captures as $capture) {
+            $attachments[] = [
+                'image_url' => $capture['img'],
+                'actions' => [
+                    [
+                        'type' => 'button',
+                        'msg_in_chat_window' => true,
+                        'text' => 'Offer',
+                        'msg' => $capture['checkoutUrl']
+                    ]
+                ],
+            ];
+        }
+
+        $data = [
+            'message' => [
+                'rid' => $chat->cch_rid,
+                'attachments' => $attachments,
+                'customTemplate' => 'carousel',
+            ]
+        ];
+        return $data;
+    }
+
+    //todo
+    private function sendOfferCheckAccess($chat, $user): bool
+    {
+        return true;
+    }
+
+    private function getSendOfferProvider(ClientChat $chat): ActiveDataProvider
+    {
+        return $chat->cchLead->getQuotesProvider([], [Quote::STATUS_CREATED, Quote::STATUS_SEND, Quote::STATUS_OPENED]);
+    }
+
+    private function generateQuoteCapture(Quote $quote): array
+    {
+        $communication = Yii::$app->communication;
+
+        $project = $quote->lead->project;
+        $projectContactInfo = [];
+
+        if ($project && $project->contact_info) {
+            $projectContactInfo = @json_decode($project->contact_info, true);
+        }
+
+        $content_data = $quote->lead->getEmailData2([$quote->id], $projectContactInfo);
+        if (isset($content_data['quotes'])) {
+            if (count($content_data['quotes']) > 1) {
+                throw new \DomainException('Count quotes > 1');
+            }
+            if (isset($content_data['quotes'][0])) {
+                $tmp = $content_data['quotes'][0];
+                unset($content_data['quotes']);
+                $content_data['quote'] = $tmp;
+            }
+        } else {
+            throw new \DomainException('Not found quote');
+        }
+
+        try {
+            $mailCapture = $communication->mailCapture(
+                $quote->lead->project_id,
+                'chat_offer',
+                '',
+                '',
+                $content_data,
+                Yii::$app->language ?: 'en-US'
+            );
+            $url = $mailCapture['data'];
+            return [
+                'img' => $url['host'] . $url['dir'] . $url['img'],
+                'checkoutUrl' => $quote->getCheckoutUrlPage()
+            ];
+        } catch (\Throwable $e) {
+            Yii::error(VarDumper::dumpAsString([
+                'error' => AppHelper::throwableFormatter($e),
+                'quote' => $quote->getAttributes(),
+            ]),'ClientChatController:generateQuoteCapture');
+        }
+        return [];
+    }
+
+    private function saveQuoteCaptures(array $captures, int $userId, int $chatId): bool
+    {
+        return Yii::$app->cache->set($this->getQuoteCaptureCacheKey($userId, $chatId), $captures, 600);
+    }
+
+    private function getQuoteCaptures(int $userId, int $chatId)
+    {
+        return Yii::$app->cache->get($this->getQuoteCaptureCacheKey($userId, $chatId));
+    }
+
+    private function removeQuoteCaptures(int $userId, int $chatId): void
+    {
+        if (!Yii::$app->cache->delete($this->getQuoteCaptureCacheKey($userId, $chatId))) {
+            Yii::error(VarDumper::dumpAsString([
+                    'message' => 'Cant remove tmp quotes captures',
+                    'userId' => $userId,
+                    'chatId' => $chatId
+                ]),
+                'ClientChatController:removeQuoteCaptures'
+            );
+        }
+    }
+
+    private function getQuoteCaptureCacheKey(int $userId, int $chatId): string
+    {
+        return 'chatQuoteCapture' . $userId . '.' . $chatId;
+    }
 }

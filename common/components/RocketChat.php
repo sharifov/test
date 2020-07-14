@@ -447,26 +447,16 @@ class RocketChat extends Component
 
 
     /**
-     * @param string $rid
-     * @param array $attachments
+     * @param array $$message
      * @return array
      * @throws Exception
      */
-    public function sendMessage(string $rid, array $attachments): array
+    public function sendMessage(array $message): array
     {
         $out = ['error' => false, 'data' => []];
-        $headers = [
-            'X-User-Id' => $this->currentUserId,
-            'X-Auth-Token' => $this->currentAuthToken
-        ];
+        $headers = $this->getSystemAuthDataHeader();
 
-        $message['rid'] = $rid;
-
-        $data['message'] = $message;
-        $data['attachments'] = $attachments;
-        $data['customTemplate'] = 'carousel';
-
-        $response = $this->sendRequest('chat.sendMessage', $data, 'get', $headers);
+        $response = $this->sendRequest('chat.sendMessage', $message, 'post', $headers);
 
         if ($response->isOk) {
 

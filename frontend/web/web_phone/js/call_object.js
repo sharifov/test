@@ -41,7 +41,7 @@
             }
             this.data.sentHoldUnHoldRequest = true;
             this.block();
-            this.dispatchEvent();
+            this.save();
             return true;
         };
 
@@ -60,14 +60,14 @@
             }
             this.data.sentHoldUnHoldRequest = true;
             this.block();
-            this.dispatchEvent();
+            this.save();
             return true;
         };
 
         this.unSetHoldUnHoldRequestState = function () {
             this.data.sentHoldUnHoldRequest = false;
             this.unBlock();
-            this.dispatchEvent();
+            this.save();
         };
 
         this.isSentHoldUnHoldRequestState = function () {
@@ -79,7 +79,7 @@
             this.data.sentHoldUnHoldRequest = false;
             this.data.holdStartTime = Date.now();
             this.data.isHold = true;
-            this.dispatchEvent();
+            this.save();
         };
 
         this.unHold = function () {
@@ -87,7 +87,7 @@
             this.data.sentHoldUnHoldRequest = false;
             this.data.holdStartTime = 0;
             this.data.isHold = false;
-            this.dispatchEvent();
+            this.save();
         };
 
         this.setMuteRequestState = function () {
@@ -101,7 +101,7 @@
             }
             this.data.sentMuteUnMuteRequest = true;
             this.block();
-            this.dispatchEvent();
+            this.save();
             return true;
         };
 
@@ -116,14 +116,14 @@
             }
             this.data.sentMuteUnMuteRequest = true;
             this.block();
-            this.dispatchEvent();
+            this.save();
             return true;
         };
 
         this.unSetMuteUnMuteRequestState = function () {
             this.data.sentMuteUnMuteRequest = false;
             this.unBlock();
-            this.dispatchEvent();
+            this.save();
         };
 
         this.isSentMuteUnMuteRequestState = function () {
@@ -134,14 +134,14 @@
             this.unBlock();
             this.data.sentMuteUnMuteRequest = false;
             this.data.isMute = true;
-            this.dispatchEvent();
+            this.save();
         };
 
         this.unMute = function () {
             this.unBlock();
             this.data.sentMuteUnMuteRequest = false;
             this.data.isMute = false;
-            this.dispatchEvent();
+            this.save();
         };
 
         this.setHangupRequestState = function () {
@@ -151,14 +151,14 @@
             }
             this.data.sentHangupRequest = true;
             this.block();
-            this.dispatchEvent();
+            this.save();
             return true;
         };
 
         this.unSetHangupRequestState = function () {
             this.data.sentHangupRequest = false;
             this.unBlock();
-            this.dispatchEvent();
+            this.save();
         };
 
         this.isSentHangupRequestState = function () {
@@ -176,14 +176,14 @@
             }
             this.data.sentReturnHoldCallRequest = true;
             this.block();
-            this.dispatchEvent();
+            this.save();
             return true;
         };
 
         this.unSetReturnHoldCallRequestState = function () {
             this.data.sentReturnHoldCallRequest = false;
             this.unBlock();
-            this.dispatchEvent();
+            this.save();
         };
 
         this.isSentReturnHoldCallRequestState = function () {
@@ -197,14 +197,14 @@
             }
             this.data.sentAcceptCallRequest = true;
             this.block();
-            this.dispatchEvent();
+            this.save();
             return true;
         };
 
         this.unSetAcceptCallRequestState = function () {
             this.data.sentAcceptCallRequest = false;
             this.unBlock();
-            this.dispatchEvent();
+            this.save();
         };
 
         this.isSentAcceptCallRequestState = function () {
@@ -218,14 +218,14 @@
             }
             this.data.sentAddNoteRequest = true;
             this.block();
-            this.dispatchEvent();
+            this.save();
             return true;
         };
 
         this.unSetAddNoteRequestState = function () {
             this.data.sentAddNoteRequest = false;
             this.unBlock();
-            this.dispatchEvent();
+            this.save();
         };
 
         this.isSentAddNoteRequestState = function () {
@@ -252,12 +252,12 @@
             return new Call(this.data);
         };
 
-        this.getEventUpdateName = function () {
-            return window.phoneWidget.events.callUpdate + this.data.callSid;
+        this.save = function () {
+            window.phoneWidget.eventDispatcher.dispatch(this.getEventUpdateName(),{call: this});
         };
 
-        this.dispatchEvent = function () {
-            window.phoneWidget.eventDispatcher.dispatch(this.getEventUpdateName(),{call: this});
+        this.getEventUpdateName = function () {
+            return window.phoneWidget.events.callUpdate + this.data.callSid;
         };
     }
 

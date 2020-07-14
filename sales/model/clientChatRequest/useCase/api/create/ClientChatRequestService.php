@@ -2,6 +2,8 @@
 
 namespace sales\model\clientChatRequest\useCase\api\create;
 
+use common\components\i18n\Formatter;
+use common\models\Notifications;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
@@ -174,6 +176,7 @@ class ClientChatRequestService
 		$this->clientChatMessageRepository->save($message, 0);
 		if ($clientChat->cch_owner_user_id && $clientChatRequest->isGuestUttered() && $clientChat->cchOwnerUser->userProfile && $clientChat->cchOwnerUser->userProfile->isRegisteredInRc()) {
 			$this->clientChatMessageService->increaseUnreadMessages($clientChat->cch_id, $clientChat->cch_owner_user_id);
+			$this->updateDateTimeLastMessageNotification($clientChat, $message);
 		}
 	}
 
@@ -185,4 +188,23 @@ class ClientChatRequestService
 			$this->clientChatDataRepository->createByClientChatRequest($clientChat, $form->data);
 		}
 	}
+
+	public function updateDateTimeLastMessageNotification(ClientChat $clientChat, ClientChatMessage $message): void
+    {
+        $user = $clientChat->cchOwnerUser;
+        $dateTime = $message->ccm_sent_dt;
+        if ($user->timezone) {
+            try {
+                $dateTime = (new Formatter(['timeZone' => $user->timezone]))->asByUserDateTime($dateTime);
+            } catch (\Throwable $e) {
+                \Yii::error('Format date', 'ClientChatRequestService:updateDateTimeLastMessageNotification');
+            }
+        }
+        Notifications::publish('clientChatUpdateTimeLastMessage', ['user_id' => $clientChat->cch_owner_user_id], [
+            'data' => [
+                'dateTime' =>  $dateTime,
+                'cchId' => $clientChat->cch_id,
+            ]
+        ]);
+    }
 }

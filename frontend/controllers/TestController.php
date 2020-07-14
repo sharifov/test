@@ -149,6 +149,7 @@ use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatService\ClientChatService;
 use sales\services\email\EmailService;
 use sales\services\email\incoming\EmailIncomingService;
+use sales\services\lead\LeadCloneService;
 use sales\services\lead\LeadCreateApiService;
 use sales\services\lead\LeadManageService;
 use sales\services\lead\LeadRedialService;
@@ -243,6 +244,49 @@ class TestController extends FController
 
     public function actionTest()
     {
+        VarDumper::dump( Json::decode('{
+    "message": {
+        "rid": "f93a9c3e-e04a-4e0f-b39e-5be30f938da4",
+        "attachments": [
+            {
+                "image_url": "https://ichef.bbci.co.uk/news/1024/branded_news/12A9B/production/_111434467_gettyimages-1143489763.jpg",
+                "title": "Title",
+                "actions": [
+                    {
+                        "type": "button",
+                        "msg_in_chat_window": true,
+                        "text": "button 1",
+                        "msg": "/payload"
+                    },
+                    {
+                        "type": "button",
+                        "msg_in_chat_window": true,
+                        "text": "button 2",
+                        "msg": "/payload"
+                    }
+                ],
+                "fields": [
+                    {
+                        "short": true,
+                        "title": "Test",
+                        "value": "Testing out something or other"
+                    },
+                    {
+                        "short": true,
+                        "title": "Another Test",
+                        "value": "[Link](https://google.com/) something and this and that."
+                    }
+                ]
+            },
+            {
+                "image_url": "https://ichef.bbci.co.uk/news/1024/cpsprodpb/83D7/production/_111515733_gettyimages-1208779325.jpg",
+                "title": "Title 2"
+            }
+        ],
+        "customTemplate": "carousel"
+    }
+}'));
+        die;
 
 //        Notifications::publish(HoldMessage::COMMAND, ['user_id' => 295], [
 //            'data' => [

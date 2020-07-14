@@ -22,7 +22,15 @@ use sales\model\clientChat\entity\ClientChat;
             </span>
             <span class="_cc-title">
                 <p><?= $clientChat->cch_title ?: 'Client Chat' ?></p>
-                <p><?= Yii::$app->formatter->format($clientChat->cch_created_dt,'byUserDateTime') ?></p>
+                <p class="_cc-item-last-message-time" data-cch-id="<?= $clientChat->cch_id ?>">
+                    <?php
+                        if ($lastMessage = $clientChat->getLastMessageByClient()) {
+                            echo Yii::$app->formatter->format($lastMessage->ccm_sent_dt, 'byUserDateTime');
+                        } else {
+                            echo Yii::$app->formatter->format($clientChat->cch_created_dt, 'byUserDateTime');
+                        }
+                    ?>
+                </p>
             </span>
         </div>
         <div>

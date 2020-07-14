@@ -68,7 +68,7 @@
                 console.log('conference not added to storage');
                 return;
             }
-            conf.dispatchEvent();
+            conf.save();
         };
 
         this.showAll = function () {
