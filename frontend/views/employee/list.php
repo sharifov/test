@@ -93,12 +93,13 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 <?php echo Html::button('<span class="fa fa-square-o"></span> Check All', ['class' => 'btn btn-default', 'id' => 'btn-check-all']); ?>
 
                 <?php // if (\webvimark\modules\UserManagement\models\User::canRoute('/email-layout/delete-selected')): ?>
-                    <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <button type="button" class="btn btn-default dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <span class="sr-only">Toggle Dropdown</span>
                     </button>
                     <div class="dropdown-menu">
-<!--                        <div class="dropdown-divider"></div>-->
-                        <?= \yii\helpers\Html::a('<i class="fa fa-edit text-warning"></i> Multiple update', null, ['class' => 'dropdown-item btn-multiple-update','data-toggle'=> 'modal', 'data-target'=>'#modalUpdate' ])?>
+                        <?= \yii\helpers\Html::a('<i class="fa fa-edit text-warning"></i> Multiple update', null, ['class' => 'dropdown-item btn-multiple-update', 'data-toggle'=> 'modal', 'data-target'=>'#modalUpdate' ])?>
+                        <div class="dropdown-divider"></div>
+                        <?= \yii\helpers\Html::a('<i class="fa fa-info text-info"></i> Show Checked IDs', null, ['class' => 'dropdown-item btn-show-checked-ids'])?>
                     </div>
                 <?php //endif; ?>
             </div>
@@ -602,7 +603,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 
     <?php if($isAdmin) : ?>
     <p>
-        <?= \yii\helpers\Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-warning','data-toggle' => 'modal','data-target' => '#modalUpdate'])?>
+        <?php //= \yii\helpers\Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-warning','data-toggle' => 'modal','data-target' => '#modalUpdate'])?>
     </p>
 
     <?= $form->errorSummary($multipleForm) ?>
@@ -684,10 +685,24 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 
    // $(document).ready(function () {
         $(document).on('click', '.btn-multiple-update', function() {
-            //alert(sessionStorage.selectedUsers);
-            $('#user_list_json').attr('value', sessionStorage.selectedUsers);
-            //var keys = $('#user-list-grid').yiiGridView('getSelectedRows');
-            //$('#user_list_json').attr('value', JSON.stringify(keys));
+            
+            let arrIds = [];
+            if (sessionStorage.selectedUsers) {
+                let data = jQuery.parseJSON( sessionStorage.selectedUsers );
+                if (data) {
+                     $.each( data, function( key, value ) {
+                        arrIds.push(value);
+                     });
+                }
+                $('#user_list_json').val(JSON.stringify(arrIds));
+                //alert(arrIds.join(', '));
+            }
+            
+            //$('#user_list_json').attr('value', sessionStorage.selectedUsers);
+            let keys = $('#user-list-grid').yiiGridView('getSelectedRows');
+            //alert(JSON.stringify(keys));
+            //alert(JSON.stringify(arrIds));
+            $('#user_list_json').attr('value', JSON.stringify(keys));
         });
     //}); 
 
@@ -695,185 +710,112 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
         $("#modalUpdate .close").click();
     });
     
-    // $(document).on('click', "input[name='selection[]']",  function (e) {
-    //     let ch = $(this);
-    //     let jsonData = sessionStorage.getItem('selectedUsers');
-    //     let data = [];
-    //    
-    //     if (jsonData) {
-    //         data = jQuery.parseJSON( jsonData );
-    //     }
-    //     console.info('==============================');
-    //     console.info(data);
-    //     if (ch.is(':checked') == true) {
-    //         if( data.indexOf(ch.val()) == -1) {
-    //             data.push(ch.val());
-    //         }
-    //     } else {
-    //         let index = data.indexOf(ch.val());
-    //         if (index !== -1) {
-    //             data.splice(index, 1);
-    //         }
-    //     }
-    //     console.info(data);
-    //     jsonData = JSON.stringify(data);
-    //     sessionStorage.selectedUsers = jsonData;
-    //     //refreshUserSelectedState();
-    // });
+    $('#user-pjax-list').on('pjax:end', function() {
+        refreshUserSelectedState();
+    });
     
     
-    $(document).on('click', '#btn-check-all',  function (e) {
-        let el = $(this).find('span');
+    $('body').on('click', '#btn-check-all',  function (e) {
         let btn = $(this);
         
         if ($(this).hasClass('checked')) {
-            //el.removeClass('fa-check-square-o').addClass('fa-square-o');
-            btn.removeClass('btn-warning').removeClass('checked').addClass('btn-default').html('<span class="fa fa-square-o"></span> Check All');
-            //$('#selected-ids').val('');
-            //$('.select-on-check-all').trigger('click');
+            btn.removeClass(['btn-warning', 'checked']).addClass('btn-default').html('<span class="fa fa-square-o"></span> Check All');
             $('.select-on-check-all').prop('checked', false);
             $("input[name='selection[]']:checked").prop('checked', false);
-            sessionStorage.removeItem('selectedUsers');
+            sessionStorage.selectedUsers = '{}';
+            //sessionStorage.removeItem('selectedUsers');
         } else {
-            
-            //alert(selectAllUrl);
-            
             btn.html('<span class="fa fa-spinner fa-spin"></span> Loading ...');
             
             $.ajax({
              type: 'post',
              dataType: 'json',
-             //data: {selection:data, source: 'email-layout'},
+             //data: {},
              url: selectAllUrl,
              success: function (data) {
                 console.info(data);
                 let cnt = Object.keys(data).length
-                
-                alert(cnt);
-                
                 if (data) {
-                    
                     let jsonData = JSON.stringify(data);
-                    //$('#selected-ids').val(jsonData);
-                    
                     sessionStorage.selectedUsers = jsonData;
-                    // sessionStorage.getItem('selectedUsers');
-                    //sessionStorage.user = JSON.stringify({name: "John"});
-                    
-                     btn.removeClass('btn-default').addClass('btn-warning').addClass('checked').html('<span class="fa fa-check-square-o"></span> Uncheck All (' + cnt + ')');
-                    //el.removeClass('fa-square-o').addClass('fa-check-square-o');
+                    btn.removeClass('btn-default').addClass(['btn-warning', 'checked']).html('<span class="fa fa-check-square-o"></span> Uncheck All (' + cnt + ')');
                     
                     $('.select-on-check-all').prop('checked', true); //.trigger('click');
                     $("input[name='selection[]']").prop('checked', true);
                 } else {
                     btn.html('<span class="fa fa-square-o"></span> Check All');
                 }
-               
-
              },
              error: function (error) {
                     btn.html('<span class="fa fa-error text-danger"></span> Error ...');
                     console.error(error);
-                    // element.prop("disabled", false);
-                    // alert('Request Error');
+                    alert('Request Error');
                  }
              });
         }
     });
-    
+
     
     function refreshUserSelectedState() {
          if (sessionStorage.selectedUsers) {
             let data = jQuery.parseJSON( sessionStorage.selectedUsers );
             let btn = $('#btn-check-all');
             
-            if (data.length > 0) {
-                
+            let cnt = Object.keys(data).length;
+            if (cnt > 0) {
                 $.each( data, function( key, value ) {
-                  //alert( key + ": " + value );
-                  $("input[name='selection[]'][value=" + value + "]").prop('checked', 'checked');
-                  //UserMultipleForm[user_list][]
+                  $("input[name='selection[]'][value=" + value + "]").prop('checked', true);
                 });
+                btn.removeClass('btn-default').addClass(['btn-warning', 'checked']).html('<span class="fa fa-check-square-o"></span> Uncheck All (' + cnt + ')');
                 
-                
-                btn.removeClass('btn-default').addClass('btn-warning');
-                        //el.removeClass('fa-square-o').addClass('fa-check-square-o');
-                btn.addClass('checked');
-                btn.html('<span class="fa fa-check-square-o"></span> Uncheck All (' + data.length + ')');
             } else {
-                btn.removeClass('btn-warning').addClass('btn-default');
-                //btn.removeClass('checked');
-                btn.html('<span class="fa fa-square-o"></span> Check All');
-                
+                btn.removeClass(['btn-warning', 'checked']).addClass('btn-default').html('<span class="fa fa-square-o"></span> Check All');
                 $('.select-on-check-all').prop('checked', false);
-                //$("input[name='selection[]']:checked").prop('checked', false);
             }
         }
-         
-         //$('#user_list_json').attr('value', sessionStorage.selectedUsers);
-         //$('#user_list_json')
     }
     
-    
-    $('.select-on-check-all').on('change', function(e){
-       //refreshUserSelectedState();
-       //alert(123);
-       let checked = $('#user-list-grid').yiiGridView('getSelectedRows');
-       let unchecked = $("input[name='selection[]']:not(:checked)").map(function () {
-            return this.value; 
-        }).get();
+    $('body').on('click', '.btn-show-checked-ids', function(e) {
        let data = [];
        if (sessionStorage.selectedUsers) {
             data = jQuery.parseJSON( sessionStorage.selectedUsers );
+            let arrIds = [];
+            if (data) {
+                 $.each( data, function( key, value ) {
+                    arrIds.push(value);
+                 });
+            }
+            alert(arrIds.join(', '));
+       } else {
+           alert('sessionStorage.selectedUsers = null');
        }
-       console.log('1 --------------------------');
-       console.log(checked);
-       console.log('2 --------------------------');
-       console.log(unchecked);
-       console.log('3 --------------------------');
-       console.log(data);
-       
-       //let jsonData = JSON.stringify(data);
-       console.log('4 --------------------------');
-        $.each( checked, function( key, value ) {
-          //console.log(value);
-          if (typeof data[value] === 'undefined') {
-              data[value] = value;
-          }
-        });
-        
-        console.log('5 --------------------------');
-       $.each( unchecked, function( key, value ) {
-          // console.log(value);
-          if (typeof data[value] !== 'undefined') {
-              
-                delete(data[value]);
-                let index = data.indexOf(value);
-                if (index > -1) {
-                  data.splice(index, 1);
-                }
-          }
-        });
-       
-       console.log('6 --------------------------');
-       console.log(data);
-       
-       let jsonData = JSON.stringify(data);
-                    
-       sessionStorage.selectedUsers = jsonData;
-       // $.each( data, function( key, value ) {
-       //    
-       //      console.log(key);
-       //  });
-            
-       //alert(keys);
-       //refreshUserSelectedState();
     });
     
+    $('body').on('change', '.select-on-check-all', function(e) {
+        let checked = $('#user-list-grid').yiiGridView('getSelectedRows');
+        let unchecked = $("input[name='selection[]']:not(:checked)").map(function () { return this.value; }).get();
+        let data = [];
+        if (sessionStorage.selectedUsers) {
+            data = jQuery.parseJSON( sessionStorage.selectedUsers );
+        }
+       
+        $.each( checked, function( key, value ) {
+            if (typeof data[value] === 'undefined') {
+              data[value] = value;
+            }
+        });
+        
+       $.each( unchecked, function( key, value ) {
+          if (typeof data[value] !== 'undefined') {
+                delete(data[value]);
+          }
+        });
+       
+       sessionStorage.selectedUsers = JSON.stringify(data);
+       refreshUserSelectedState();
+    });
     
     refreshUserSelectedState();
-    
-
 
     /*$(document).on('pjax:end', function() {
          $('[data-toggle="tooltip"]').tooltip();
@@ -881,7 +823,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 
 JS;
 
-        $this->registerJs($js, \yii\web\View::POS_READY);
-        ?>
+$this->registerJs($js, \yii\web\View::POS_READY);
+?>
     </div>
 </div>

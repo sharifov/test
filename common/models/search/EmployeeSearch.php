@@ -88,7 +88,7 @@ class EmployeeSearch extends Employee
             'query' => $query,
             'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
             'pagination' => [
-                'pageSize' => isset($params['per-page']) ? (int)$params['per-page'] : 30,
+                'pageSize' => isset($params['per-page']) ? (int)$params['per-page'] : 20,
             ],
         ]);
 
