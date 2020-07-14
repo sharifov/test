@@ -244,6 +244,7 @@ class TestController extends FController
 
     public function actionTest()
     {
+        die;
         VarDumper::dump( Json::decode('{
     "message": {
         "rid": "f93a9c3e-e04a-4e0f-b39e-5be30f938da4",
