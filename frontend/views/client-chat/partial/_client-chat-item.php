@@ -24,12 +24,7 @@ use yii\helpers\Html;
             </span>
             <span class="_cc-title">
                 <p><b><?= Html::encode(ClientChatHelper::getClientName($clientChat)) ?></b></p>
-                <p><small><?= Yii::$app->formatter->format($clientChat->cch_created_dt,'byUserDateTime') ?></small></p>
-                <?php if ($lastMessage = $clientChat->getLastMessageByClient()): ?>
-                    <p class="_cc-item-last-message-time" data-cch-id="<?= $clientChat->cch_id ?>">
-                        <?= Yii::$app->formatter->format($lastMessage->ccm_sent_dt, 'byUserDateTime'); ?>
-                    </p>
-                <?php endif; ?>
+                <p title="Сhat creation date"><small><?= Yii::$app->formatter->asDate($clientChat->cch_created_dt,'php:Y-M-d') ?></small></p>
             </span>
         </div>
         <div class="_cc_item_data">
@@ -41,7 +36,13 @@ use yii\helpers\Html;
                 <span class="label label-success"><?= Html::encode($clientChat->cchProject->name) ?></span>
             <?php endif; ?>
 
-            <span class="label label-default label-"><?= Html::encode($clientChat->cchChannel->ccc_name) ?></span>
+            <span class="label label-default"><?= Html::encode($clientChat->cchChannel->ccc_name) ?></span>
+
+			<?php if ($lastMessage = $clientChat->getLastMessageByClient()): ?>
+                <p class="_cc-item-last-message-time" data-cch-id="<?= $clientChat->cch_id ?>" title="Last message from client">
+					<small><?= Yii::$app->formatter->asRelativeTime($lastMessage->ccm_sent_dt ); ?></small>
+                </p>
+			<?php endif; ?>
         </div>
     </div>
 <?php endforeach; ?>
