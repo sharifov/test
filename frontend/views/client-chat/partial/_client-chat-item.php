@@ -40,7 +40,7 @@ use yii\helpers\Html;
 
 			<?php if ($lastMessage = $clientChat->getLastMessageByClient()): ?>
                 <span class="_cc-item-last-message-time" data-cch-id="<?= $clientChat->cch_id ?>" title="Last message from client">
-					<small><?= Yii::$app->formatter->asRelativeTime($lastMessage->ccm_sent_dt ); ?></small>
+					<small><?= Yii::$app->formatter->asRelativeTime(strtotime($lastMessage->ccm_sent_dt)); ?></small>
                 </span>
 			<?php endif; ?>
         </div>
