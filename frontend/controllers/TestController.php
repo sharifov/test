@@ -1755,10 +1755,15 @@ class TestController extends FController
 		echo 'success';
 	}
 
-	public function actionGaSendQuote(int $id = 733986, int $debug = 1) // test/ga-send-quote?id=733986&debug=1
+	public function actionGaSendQuote($id = 733986, int $debug = 1) // test/ga-send-quote?id=733986&debug=1
     {
         try {
-            $quote = Quote::findOne($id);
+            if (is_int($id)) {
+                $params = ['id' => $id];
+            } else {
+                $params = ['uid' => $id];
+            }
+            $quote = Quote::findOne($params);
             $gaQbj = new GaQuote($quote);
 
             $gaRequestService = \Yii::$app->gaRequestService;
