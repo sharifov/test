@@ -23,7 +23,7 @@ $iDate = null;
             <?php if($date != $iDate): ?>
                 <div class="_cc_date_wrapper">
                     <hr>
-                    <span class="_cc-date">20 Jule, 2020</span>
+                    <span class="_cc-date"><?= Yii::$app->formatter->asDatetime($iDate, 'php:d M, Y') ?></span>
                 </div>
             <?php $date = $iDate; ?>
             <?php endif; ?>
