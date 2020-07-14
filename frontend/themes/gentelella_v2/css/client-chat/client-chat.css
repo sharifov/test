@@ -55,7 +55,7 @@
 ._cc-list-wrapper ._cc-list-item ._cc-item-icon-wrapper {
     display: flex;
     align-content: center;
-    align-items: center;
+    align-items: flex-start;
 }
 
 ._cc-list-wrapper ._cc-list-item ._cc-item-icon-wrapper ._cc-item-icon-round {
@@ -333,6 +333,7 @@
 ._cc_item_data {
     display: flex;
     flex-direction: column;
+    align-self: flex-start;
 }
 ._cc_item_data span {
     margin-bottom: 5px;
