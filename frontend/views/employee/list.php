@@ -87,8 +87,26 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
     <?php if($user->isAdmin() || $user->isSupervision()) : ?>
         <p>
             <?php //= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
-            <?= \yii\helpers\Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-warning', 'data-toggle'=> 'modal', 'data-target'=>'#modalUpdate' ])?>
+            <?php // \yii\helpers\Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-warning', 'data-toggle'=> 'modal', 'data-target'=>'#modalUpdate' ])?>
+
+            <div class="btn-group">
+                <?php echo Html::button('<span class="fa fa-square-o"></span> Check All', ['class' => 'btn btn-default', 'id' => 'btn-check-all']); ?>
+
+                <?php // if (\webvimark\modules\UserManagement\models\User::canRoute('/email-layout/delete-selected')): ?>
+                    <button type="button" class="btn btn-default dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="sr-only">Toggle Dropdown</span>
+                    </button>
+                    <div class="dropdown-menu">
+                        <?= \yii\helpers\Html::a('<i class="fa fa-edit text-warning"></i> Multiple update', null, ['class' => 'dropdown-item btn-multiple-update', 'data-toggle'=> 'modal', 'data-target'=>'#modalUpdate' ])?>
+                        <div class="dropdown-divider"></div>
+                        <?= \yii\helpers\Html::a('<i class="fa fa-info text-info"></i> Show Checked IDs', null, ['class' => 'dropdown-item btn-show-checked-ids'])?>
+                    </div>
+                <?php //endif; ?>
+            </div>
+
         </p>
+
+        <?php //= Html::textarea('selected-ids', '', ['rows' => 10, 'id' => "selected-ids", 'style' => 'display: none']); ?>
     <?php endif; ?>
 
     <?php /*php if($isAdmin):?>
@@ -97,12 +115,12 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             </p>
         <?php endif;*/?>
 
-    <?= GridView::widget([
+    <?= \yii\grid\GridView::widget([
         'id' => 'user-list-grid',
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         //'layout'=>'{summary}'.Html::activeDropDownList($searchModel, 'perpage', [10 => 10, 30 => 30, 20 => 20, 50 => 50, 100 => 100],['id'=>'perpage'])."{items}<br/>{pager}",
-        'pjax' => false,
+        //'pjax' => false,
         //'layout' => $template,
         'rowOptions' => static function (\common\models\Employee $model, $index, $widget, $grid) {
             if ($model->isDeleted() || $model->isBlocked()) {
@@ -110,11 +128,15 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             }
         },
         'columns' => [
+//            [
+//                'class' => \kartik\grid\CheckboxColumn::class,
+//                'name' => 'UserMultipleForm[user_list]',
+//                //'pageSummary' => true,
+//                'rowSelectedClass' => \kartik\grid\GridView::TYPE_INFO,
+//            ],
             [
-                'class' => \kartik\grid\CheckboxColumn::class,
-                'name' => 'UserMultipleForm[user_list]',
-                //'pageSummary' => true,
-                'rowSelectedClass' => \kartik\grid\GridView::TYPE_INFO,
+                'class' => 'yii\grid\CheckboxColumn',
+                'cssClass' => 'multiple-checkbox'
             ],
             [
                 'attribute' => 'id',
@@ -202,7 +224,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             [
                 'attribute' => 'status',
                 'filter' => $searchModel::STATUS_LIST,
-                'value' => function(\common\models\Employee $model) {
+                'value' => static function (\common\models\Employee $model) {
                     return Yii::$app->formatter->asEmployeeStatusLabel($model->status);
                 },
                 'format' => 'raw'
@@ -230,7 +252,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 },
                 'format' => 'raw',
                 'filter' => \common\models\UserProfile::CALL_TYPE_LIST
-            ], 
+            ],
             [
                 'label' => 'Call Ready',
                 'filter' => false,
@@ -399,7 +421,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             [
                 'label' => 'IP filter',
                 'attribute' => 'acl_rules_activated',
-                'value' => function(\common\models\Employee $model) {
+                'value' => static function (\common\models\Employee $model) {
                     return $model->acl_rules_activated ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>';
                 },
                 'format' => 'raw',
@@ -581,7 +603,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 
     <?php if($isAdmin) : ?>
     <p>
-        <?= \yii\helpers\Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-warning','data-toggle' => 'modal','data-target' => '#modalUpdate'])?>
+        <?php //= \yii\helpers\Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-warning','data-toggle' => 'modal','data-target' => '#modalUpdate'])?>
     </p>
 
     <?= $form->errorSummary($multipleForm) ?>
@@ -649,21 +671,151 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 
         <?php \yii\bootstrap\ActiveForm::end(); ?>
 
+        <?php
+            $selectAllUrl = \yii\helpers\Url::to(array_merge(['employee/list'], Yii::$app->getRequest()->getQueryParams(), ['act' => 'select-all']));
+        ?>
+        <script>
+            var selectAllUrl = '<?=$selectAllUrl?>';
+        </script>
+
         <?php Pjax::end(); ?>
 
         <?php
         $js = <<<JS
 
-    $(document).ready(function () {
-        $(document).on('click', '#btn-submit-multiple-update', function() {
-            var keys = $('#user-list-grid').yiiGridView('getSelectedRows');
+   // $(document).ready(function () {
+        $(document).on('click', '.btn-multiple-update', function() {
+            
+            let arrIds = [];
+            if (sessionStorage.selectedUsers) {
+                let data = jQuery.parseJSON( sessionStorage.selectedUsers );
+                if (data) {
+                     $.each( data, function( key, value ) {
+                        arrIds.push(value);
+                     });
+                }
+                $('#user_list_json').val(JSON.stringify(arrIds));
+                //alert(arrIds.join(', '));
+            }
+            
+            //$('#user_list_json').attr('value', sessionStorage.selectedUsers);
+            let keys = $('#user-list-grid').yiiGridView('getSelectedRows');
+            //alert(JSON.stringify(keys));
+            //alert(JSON.stringify(arrIds));
             $('#user_list_json').attr('value', JSON.stringify(keys));
         });
-    }); 
+    //}); 
 
     $(document).on('pjax:start', function() {
         $("#modalUpdate .close").click();
     });
+    
+    $('#user-pjax-list').on('pjax:end', function() {
+        refreshUserSelectedState();
+    });
+    
+    
+    $('body').on('click', '#btn-check-all',  function (e) {
+        let btn = $(this);
+        
+        if ($(this).hasClass('checked')) {
+            btn.removeClass(['btn-warning', 'checked']).addClass('btn-default').html('<span class="fa fa-square-o"></span> Check All');
+            $('.select-on-check-all').prop('checked', false);
+            $("input[name='selection[]']:checked").prop('checked', false);
+            sessionStorage.selectedUsers = '{}';
+            //sessionStorage.removeItem('selectedUsers');
+        } else {
+            btn.html('<span class="fa fa-spinner fa-spin"></span> Loading ...');
+            
+            $.ajax({
+             type: 'post',
+             dataType: 'json',
+             //data: {},
+             url: selectAllUrl,
+             success: function (data) {
+                console.info(data);
+                let cnt = Object.keys(data).length
+                if (data) {
+                    let jsonData = JSON.stringify(data);
+                    sessionStorage.selectedUsers = jsonData;
+                    btn.removeClass('btn-default').addClass(['btn-warning', 'checked']).html('<span class="fa fa-check-square-o"></span> Uncheck All (' + cnt + ')');
+                    
+                    $('.select-on-check-all').prop('checked', true); //.trigger('click');
+                    $("input[name='selection[]']").prop('checked', true);
+                } else {
+                    btn.html('<span class="fa fa-square-o"></span> Check All');
+                }
+             },
+             error: function (error) {
+                    btn.html('<span class="fa fa-error text-danger"></span> Error ...');
+                    console.error(error);
+                    alert('Request Error');
+                 }
+             });
+        }
+    });
+
+    
+    function refreshUserSelectedState() {
+         if (sessionStorage.selectedUsers) {
+            let data = jQuery.parseJSON( sessionStorage.selectedUsers );
+            let btn = $('#btn-check-all');
+            
+            let cnt = Object.keys(data).length;
+            if (cnt > 0) {
+                $.each( data, function( key, value ) {
+                  $("input[name='selection[]'][value=" + value + "]").prop('checked', true);
+                });
+                btn.removeClass('btn-default').addClass(['btn-warning', 'checked']).html('<span class="fa fa-check-square-o"></span> Uncheck All (' + cnt + ')');
+                
+            } else {
+                btn.removeClass(['btn-warning', 'checked']).addClass('btn-default').html('<span class="fa fa-square-o"></span> Check All');
+                $('.select-on-check-all').prop('checked', false);
+            }
+        }
+    }
+    
+    $('body').on('click', '.btn-show-checked-ids', function(e) {
+       let data = [];
+       if (sessionStorage.selectedUsers) {
+            data = jQuery.parseJSON( sessionStorage.selectedUsers );
+            let arrIds = [];
+            if (data) {
+                 $.each( data, function( key, value ) {
+                    arrIds.push(value);
+                 });
+            }
+            alert(arrIds.join(', '));
+       } else {
+           alert('sessionStorage.selectedUsers = null');
+       }
+    });
+    
+    $('body').on('change', '.select-on-check-all', function(e) {
+        let checked = $('#user-list-grid').yiiGridView('getSelectedRows');
+        let unchecked = $("input[name='selection[]']:not(:checked)").map(function () { return this.value; }).get();
+        let data = [];
+        if (sessionStorage.selectedUsers) {
+            data = jQuery.parseJSON( sessionStorage.selectedUsers );
+        }
+       
+        $.each( checked, function( key, value ) {
+            if (typeof data[value] === 'undefined') {
+              data[value] = value;
+            }
+        });
+        
+       $.each( unchecked, function( key, value ) {
+          if (typeof data[value] !== 'undefined') {
+                delete(data[value]);
+          }
+        });
+       
+       sessionStorage.selectedUsers = JSON.stringify(data);
+       refreshUserSelectedState();
+    });
+    
+    refreshUserSelectedState();
 
     /*$(document).on('pjax:end', function() {
          $('[data-toggle="tooltip"]').tooltip();
@@ -671,7 +823,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 
 JS;
 
-        $this->registerJs($js, \yii\web\View::POS_READY);
-        ?>
+$this->registerJs($js, \yii\web\View::POS_READY);
+?>
     </div>
 </div>

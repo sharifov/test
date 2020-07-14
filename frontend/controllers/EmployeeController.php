@@ -375,6 +375,11 @@ class EmployeeController extends FController
             $params['EmployeeSearch']['supervision_id'] = $auth->id;
         }
 
+        if (Yii::$app->request->get('act') === 'select-all') {
+            $data = $searchModel->searchIds(Yii::$app->request->queryParams);
+            return $this->asJson($data);
+        }
+
         $dataProvider = $searchModel->search($params);
 
         return $this->render('list', [
