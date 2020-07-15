@@ -1037,7 +1037,7 @@ $js = <<<JS
         .done(function(dataResponse) {
             if (dataResponse.status === 1) {
                 $('#userprofile-up_rc_user_password').val(dataResponse.rc_user_password);
-                $('#userprofile-up_rc_auth_token').val(dataResponse.rc_token_expired);
+                $('#userprofile-up_rc_auth_token').val(dataResponse.rc_auth_token);
                 $('#userprofile-up_rc_user_id').val(dataResponse.rc_user_id);
                 $('#userprofile-up_rc_token_expired').val(dataResponse.rc_token_expired);
                 
