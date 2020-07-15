@@ -2,6 +2,8 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use kartik\select2\Select2;
+use common\models\Project;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\search\EmployeeSearch */
@@ -41,48 +43,70 @@ use yii\widgets\ActiveForm;
                 ],
             ]); ?>
             <div class="row">
-            <div class="col-md-1">
-                <?= $form->field($model, 'id') ?>
-            </div>
+                <div class="col-md-1">
+                    <?= $form->field($model, 'id') ?>
+                </div>
 
-            <div class="col-md-2">
-                <?= $form->field($model, 'username') ?>
-            </div>
+                <div class="col-md-2">
+                    <?= $form->field($model, 'username') ?>
+                </div>
 
                 <div class="col-md-2">
                     <?= $form->field($model, 'nickname') ?>
                 </div>
 
-            <div class="col-md-2">
-                <?php echo $form->field($model, 'email') ?>
+                <div class="col-md-2">
+                    <?php echo $form->field($model, 'email') ?>
+                </div>
+
+                <div class="col-md-1">
+                    <?php echo $form->field($model, 'status')->dropDownList(
+                        \common\models\Employee::STATUS_LIST, ['prompt' => '---']) ?>
+                </div>
+
+                <div class="col-md-1">
+                    <?php echo $form->field($model, 'online')->dropDownList([1 => 'Online', 2 => 'Offline'], ['prompt' => '---']) ?>
+                </div>
+
+                <div class="col-md-2">
+                    <?php echo $form->field($model, 'user_group_id')->dropDownList(\common\models\UserGroup::getList(), ['prompt' => '---']) ?>
+                </div>
+
+                <div class="col-md-1">
+                    <?php echo $form->field($model, 'twoFaEnable')->dropDownList([1 => 'Enable', 0 => 'Disable'], ['prompt' => '---']) ?>
+                </div>
+
+                <?php // echo $form->field($model, 'status') ?>
+
+                <?php // echo $form->field($model, 'last_activity') ?>
+
+                <?php // echo $form->field($model, 'acl_rules_activated') ?>
+
+                <?php // echo $form->field($model, 'created_at') ?>
+
+                <?php // echo $form->field($model, 'updated_at') ?>
             </div>
-
-            <div class="col-md-1">
-                <?php echo $form->field($model, 'status')->dropDownList(
-                    \common\models\Employee::STATUS_LIST, ['prompt' => '---']) ?>
-            </div>
-
-            <div class="col-md-1">
-                <?php echo $form->field($model, 'online')->dropDownList([1 => 'Online', 2 => 'Offline'], ['prompt' => '---']) ?>
-            </div>
-
-            <div class="col-md-2">
-                <?php echo $form->field($model, 'user_group_id')->dropDownList(\common\models\UserGroup::getList(), ['prompt' => '---']) ?>
-            </div>
-
-            <div class="col-md-1">
-                <?php echo $form->field($model, 'twoFaEnable')->dropDownList([1 => 'Enable', 0 => 'Disable'], ['prompt' => '---']) ?>
-            </div>
-
-            <?php // echo $form->field($model, 'status') ?>
-
-            <?php // echo $form->field($model, 'last_activity') ?>
-
-            <?php // echo $form->field($model, 'acl_rules_activated') ?>
-
-            <?php // echo $form->field($model, 'created_at') ?>
-
-            <?php // echo $form->field($model, 'updated_at') ?>
+            <div class="row">
+                <div class="col-md-2">
+                    <?= $form->field($model, 'projectAccessIds', [
+                        'options' => ['class' => 'form-group']
+                    ])->widget(Select2::class, [
+                        'data' => Project::getList(),
+                        'size' => Select2::SMALL,
+                        'options' => ['placeholder' => 'Select Project', 'multiple' => true],
+                        'pluginOptions' => ['allowClear' => true],
+                    ])->label('User Project Access') ?>
+                </div>
+                <div class="col-md-2">
+                    <?= $form->field($model, 'projectParamsIds', [
+                        'options' => ['class' => 'form-group']
+                    ])->widget(Select2::class, [
+                        'data' => Project::getList(),
+                        'size' => Select2::SMALL,
+                        'options' => ['placeholder' => 'Select Project', 'multiple' => true],
+                        'pluginOptions' => ['allowClear' => true],
+                    ])->label('User Project Params') ?>
+                </div>
             </div>
             <div class="row">
                 <div class="col-md-12">
