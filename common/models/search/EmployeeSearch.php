@@ -47,6 +47,8 @@ class EmployeeSearch extends Employee
 
     public $twoFaEnable;
 
+    public $projectAccessIds = [];
+    public $projectParamsIds = [];
     /**
      * {@inheritdoc}
      */
@@ -58,6 +60,7 @@ class EmployeeSearch extends Employee
             [['timeStart', 'timeEnd', 'roles', 'twoFaEnable', 'joinDate'], 'safe'],
 			[['joinDate'], 'date', 'format' => 'php:Y-m-d', 'skipOnEmpty' => true],
             [['timeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+            [['projectParamsIds', 'projectAccessIds'], 'each', 'rule' => ['integer']]
         ];
     }
 
@@ -256,6 +259,11 @@ class EmployeeSearch extends Employee
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
 
+        if ($this->projectParamsIds) {
+            $subQuery = UserProjectParams::find()->select(['DISTINCT(upp_user_id)'])->where(['upp_project_id' => $this->projectParamsIds]);
+            $query->andWhere(['IN', 'employees.id', $subQuery]);
+        }
+
         if ($this->user_call_type_id > 0 || $this->user_call_type_id === '0') {
             $subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['=', 'up_call_type_id', $this->user_call_type_id]);
             $query->andWhere(['IN', 'employees.id', $subQuery]);
@@ -270,6 +278,11 @@ class EmployeeSearch extends Employee
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
 
+
+        if ($this->projectAccessIds) {
+            $subQuery = ProjectEmployeeAccess::find()->select(['DISTINCT(employee_id)'])->where(['project_id' => $this->projectAccessIds]);
+            $query->andWhere(['IN', 'employees.id', $subQuery]);
+        }
 
         if ($this->user_project_id > 0) {
             $subQuery = ProjectEmployeeAccess::find()->select(['DISTINCT(employee_id)'])->where(['=', 'project_id', $this->user_project_id]);

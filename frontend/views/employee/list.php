@@ -38,7 +38,6 @@ if ($isAdmin || $isSuperAdmin) {
 }
 $projectList = EmployeeProjectAccess::getProjects($user->id);
 
-
 ?>
 <div class="employee-index">
 
@@ -90,7 +89,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
         <div class="card multiple-update-summary" style="margin-bottom: 10px;">
             <div class="card-header">
                 <span class="pull-right clickable close-icon"><i class="fa fa-times"> </i></span>
-                 Errors:
+                Errors:
             </div>
             <div class="card-body">
                 <?php
@@ -103,12 +102,12 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             </div>
         </div>
         <?php
-$js = <<<JS
-$('.close-icon').on('click', function(){    
-    $('.multiple-update-summary').slideUp();
-})
-JS;
-$this->registerJs($js);
+        $js = <<<JS
+            $('.close-icon').on('click', function(){    
+                $('.multiple-update-summary').slideUp();
+            })
+        JS;
+        $this->registerJs($js);
         ?>
     <?php endif;?>
 
@@ -117,20 +116,20 @@ $this->registerJs($js);
             <?php //= Html::a('Create Lead', ['create'], ['class' => 'btn btn-success']) ?>
             <?php // \yii\helpers\Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-warning', 'data-toggle'=> 'modal', 'data-target'=>'#modalUpdate' ])?>
 
-            <div class="btn-group">
-                <?php echo Html::button('<span class="fa fa-square-o"></span> Check All', ['class' => 'btn btn-default', 'id' => 'btn-check-all']); ?>
+        <div class="btn-group">
+            <?php echo Html::button('<span class="fa fa-square-o"></span> Check All', ['class' => 'btn btn-default', 'id' => 'btn-check-all']); ?>
 
-                <?php // if (\webvimark\modules\UserManagement\models\User::canRoute('/email-layout/delete-selected')): ?>
-                    <button type="button" class="btn btn-default dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <span class="sr-only">Toggle Dropdown</span>
-                    </button>
-                    <div class="dropdown-menu">
-                        <?= \yii\helpers\Html::a('<i class="fa fa-edit text-warning"></i> Multiple update', null, ['class' => 'dropdown-item btn-multiple-update', 'data-toggle'=> 'modal', 'data-target'=>'#modalUpdate' ])?>
-                        <div class="dropdown-divider"></div>
-                        <?= \yii\helpers\Html::a('<i class="fa fa-info text-info"></i> Show Checked IDs', null, ['class' => 'dropdown-item btn-show-checked-ids'])?>
-                    </div>
-                <?php //endif; ?>
+            <?php // if (\webvimark\modules\UserManagement\models\User::canRoute('/email-layout/delete-selected')): ?>
+            <button type="button" class="btn btn-default dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="sr-only">Toggle Dropdown</span>
+            </button>
+            <div class="dropdown-menu">
+                <?= \yii\helpers\Html::a('<i class="fa fa-edit text-warning"></i> Multiple update', null, ['class' => 'dropdown-item btn-multiple-update', 'data-toggle'=> 'modal', 'data-target'=>'#modalUpdate' ])?>
+                <div class="dropdown-divider"></div>
+                <?= \yii\helpers\Html::a('<i class="fa fa-info text-info"></i> Show Checked IDs', null, ['class' => 'dropdown-item btn-show-checked-ids'])?>
             </div>
+            <?php //endif; ?>
+        </div>
 
         </p>
 
@@ -179,9 +178,9 @@ $this->registerJs($js);
                     },*/
                     'update' => static function (\common\models\Employee $model, $key, $index) use ($isAdmin, $isUM) {
                         return (
-                                $isAdmin
-                                || ($isUM && (!$model->isOnlyAdmin() && !$model->isSuperAdmin()))
-                                || !($model->isAdmin() || $model->isSuperAdmin())
+                            $isAdmin
+                            || ($isUM && (!$model->isOnlyAdmin() && !$model->isSuperAdmin()))
+                            || !($model->isAdmin() || $model->isSuperAdmin())
                         );
                     },
                     'projects' => static function (\common\models\Employee $model, $key, $index) use ($isAdmin, $isUM)  {
@@ -716,7 +715,7 @@ $this->registerJs($js);
         <?php \yii\bootstrap\ActiveForm::end(); ?>
 
         <?php
-            $selectAllUrl = \yii\helpers\Url::to(array_merge(['employee/list'], Yii::$app->getRequest()->getQueryParams(), ['act' => 'select-all']));
+        $selectAllUrl = \yii\helpers\Url::to(array_merge(['employee/list'], Yii::$app->getRequest()->getQueryParams(), ['act' => 'select-all']));
         ?>
         <script>
             var selectAllUrl = '<?=$selectAllUrl?>';
@@ -870,7 +869,7 @@ $this->registerJs($js);
 
 JS;
 
-$this->registerJs($js, \yii\web\View::POS_READY);
-?>
+        $this->registerJs($js, \yii\web\View::POS_READY);
+        ?>
     </div>
 </div>
