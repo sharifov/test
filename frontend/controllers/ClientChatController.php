@@ -6,6 +6,8 @@ use common\models\Lead;
 use common\models\Quote;
 use common\models\VisitorLog;
 use frontend\widgets\clientChat\ClientChatAccessWidget;
+use frontend\widgets\notification\NotificationSocketWidget;
+use frontend\widgets\notification\NotificationWidget;
 use sales\auth\Auth;
 use sales\entities\chat\ChatGraphsSearch;
 use sales\helpers\app\AppHelper;
@@ -99,7 +101,7 @@ class ClientChatController extends FController
 		];
 	}
 
-	public function actionIndex(int $channelId = null, int $page = 1, int $chid = 0)
+	public function actionIndex(int $channelId = null, int $page = 1, int $chid = 0, int $tab = ClientChat::TAB_ACTIVE)
 	{
 		$channelsQuery = ClientChatChannel::find()
 			->joinWithCcuc(Auth::id());
@@ -116,6 +118,12 @@ class ClientChatController extends FController
 				$query->byChannel($channelId);
 			} else {
 				$query->byChannelIds(ArrayHelper::getColumn($channels, 'ccc_id'));
+			}
+
+			if (ClientChat::isTabActive($tab)) {
+				$query->active();
+			} else {
+				$query->archive();
 			}
 
 			$dataProvider = new ActiveDataProvider(['query' => $query, 'pagination' => ['pageSize' => self::CLIENT_CHAT_PAGE_SIZE]]);
@@ -183,6 +191,7 @@ class ClientChatController extends FController
 			'clientChat' => $clientChat,
 			'client' => $clientChat->cchClient ?? '',
 			'history' => $history ?? null,
+			'tab' => $tab,
             'existAvailableLeadQuotes' => $existAvailableLeadQuotes
 		]);
 	}
@@ -387,6 +396,17 @@ class ClientChatController extends FController
 	public function actionPjaxUpdateChatWidget()
 	{
 		$widget = ClientChatAccessWidget::getInstance();
+		$widget->userId = Auth::id();
+		return $widget->run();
+	}
+
+	public function actionRefreshNotification(): string
+	{
+		if (Yii::$app->params['settings']['notification_web_socket']) {
+			$widget = new NotificationSocketWidget();
+		} else {
+			$widget = new NotificationWidget();
+		}
 		$widget->userId = Auth::id();
 		return $widget->run();
 	}

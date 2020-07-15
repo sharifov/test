@@ -1,6 +1,32 @@
 ._cc-wrapper ._cc-channel-select {
     width: 100%;
     padding: 5px;
+    border-top: 1px solid lightgray;
+}
+._cc-wrapper ._cc_tabs_wrapper {
+    display: flex;
+    align-items: center;
+    height: 50px;
+    width: 100%;
+}
+._cc-wrapper ._cc_tabs_wrapper ._cc_tab {
+    width: 50%;
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid lightgray;
+    font-weight: 600;
+    cursor: pointer;
+}
+._cc-wrapper ._cc_tabs_wrapper ._cc_tab:hover {
+    background-color: rgba(191, 191, 191, 0.53);
+}
+._cc-wrapper ._cc_tabs_wrapper ._cc_tab:last-child {
+    border-right: 0;
+}
+._cc-wrapper ._cc_tabs_wrapper ._cc_tab.active {
+    background-color: rgba(191, 191, 191, 0.53);
 }
 
 ._cc-list-wrapper {
@@ -162,13 +188,13 @@
     /*height: 100%;*/
     position: relative;
     width: 100%;
-    border: 1px solid lightgrey;
     border-radius: 3px;
 }
 
 ._rc-client-chat-info-wrapper {
     width: 100%;
     height: 100%;
+    border: 1px solid lightgrey;
 }
 
 ._rc-block-wrapper {

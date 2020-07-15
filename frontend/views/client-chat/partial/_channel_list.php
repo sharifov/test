@@ -1,5 +1,6 @@
 <?php
 
+use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use yii\helpers\ArrayHelper;
 
@@ -10,11 +11,17 @@ use yii\helpers\ArrayHelper;
 /** @var $page int */
 /** @var $channelId int|null */
 /** @var $clientChatId int|null */
+/** @var $tab int */
 
 ?>
 
 
 <div class="_cc-wrapper">
+    <div class="_cc_tabs_wrapper">
+        <?php foreach (ClientChat::getTabList() as $key => $item): ?>
+            <div class="_cc_tab <?= $key === $tab ? 'active' : '' ?>" data-tab-id="<?= $key ?>"><?= $item ?></div>
+        <?php endforeach; ?>
+    </div>
 	<div class="_cc-channel-select">
 		<?= \yii\helpers\Html::label('Channel list:', null, ['class' => 'control-label']) ?>
 		<?= \kartik\select2\Select2::widget([
@@ -27,9 +34,11 @@ use yii\helpers\ArrayHelper;
                     let btn = $("#btn-load-channels");
                     let params = new URLSearchParams(window.location.search);
                     let url = "'.$loadChannelsUrl.'";
+                    let tab = params.get("tab") | '.$tab.';
                     
+                    url = url + "?tab="+tab;
                     if (selectedChannel > 0) {
-                        url = url + "?channelId="+selectedChannel;
+                        url = url + "&channelId="+selectedChannel;
                     }
 
 				    $.ajax({

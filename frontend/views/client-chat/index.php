@@ -17,6 +17,7 @@ use yii\widgets\Pjax;
 /* @var $client \common\models\Client|null */
 /* @var $clientChat \sales\model\clientChat\entity\ClientChat|null */
 /* @var $history ClientChatMessage|null */
+/* @var $tab int */
 /** @var bool $existAvailableLeadQuotes */
 
 $this->title = 'My Client Chat';
@@ -64,7 +65,8 @@ $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
                 'loadChannelsUrl' => $loadChannelsUrl,
                 'page' => $page,
                 'channelId' => $channelId,
-                'clientChatId' => $clientChat ? $clientChat->cch_id : null
+                'clientChatId' => $clientChat ? $clientChat->cch_id : null,
+                'tab' => $tab
             ]) ?>
         </div>
 		<?php Pjax::end() ?>
@@ -89,7 +91,7 @@ $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
 
 <?php
 $js = <<<JS
-$('#btn-load-channels').on('click', function (e) {
+$(document).on('click', '#btn-load-channels', function (e) {
     e.preventDefault();
     
     let page = $(this).attr('data-page');
@@ -136,6 +138,28 @@ if ($('#_rc-iframe-wrapper').find('._rc-iframe').length) {
     let iframeHeight = windowHeight - offsetTop - 20;
     $(iframe).css('height', iframeHeight+'px');
 }
+
+$(document).on('click', '._cc_tab', function () {
+    let tab = $(this);
+    let params = new URLSearchParams(window.location.search);
+    let selectedTab = tab.attr('data-tab-id');
+    
+    let currentTab = params.get('tab');
+    if (currentTab == selectedTab) {
+        return false;
+    }
+    
+    params.delete('chid');
+    params.delete('channelId');
+    params.delete('page');
+    params.set('tab', selectedTab);
+    window.history.replaceState({}, '', '{$loadChannelsUrl}?'+params.toString());
+    $('._cc_tab').removeClass('active');
+    tab.addClass('active');
+    $('._rc-iframe').hide();
+    $('#_client-chat-info').html('');
+    pjaxReload({container: '#pjax-client-chat-channel-list'});
+});
 
 $(document).on('click', '._cc-list-item', function () {
 
@@ -267,6 +291,7 @@ $(document).on('click', '.cc_close', function (e) {
             },
             success: function () {
                 refreshChatPage(cchId);
+                let params = new URLSearchParams(window.location.search);
             },
             complete: function () {
                 btn.html(btnHtml);

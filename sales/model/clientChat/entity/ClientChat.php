@@ -75,6 +75,14 @@ class ClientChat extends \yii\db\ActiveRecord
 		self::STATUS_CLOSED => 'danger'
 	];
 
+	public const TAB_ACTIVE = 1;
+	public const TAB_ARCHIVE = 2;
+
+	public const TAB_LIST_NAME = [
+		self::TAB_ACTIVE => 'Active',
+		self::TAB_ARCHIVE => 'Archive'
+	];
+
 	public function behaviors(): array
 	{
 		return [
@@ -313,4 +321,14 @@ class ClientChat extends \yii\db\ActiveRecord
     {
         return 'client_chat';
     }
+
+    public static function getTabList(): array
+	{
+		return self::TAB_LIST_NAME;
+	}
+
+	public static function isTabActive(int $tab): bool
+	{
+		return $tab === self::TAB_ACTIVE;
+	}
 }

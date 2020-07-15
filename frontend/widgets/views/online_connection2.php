@@ -1,5 +1,8 @@
 <?php
 /* @var $leadId integer */
+
+use yii\helpers\Url;
+
 /* @var $caseId integer */
 /* @var $userId integer */
 /* @var $controllerId string */
@@ -46,7 +49,7 @@ if ($caseId) {
 $urlParamsStr = http_build_query($urlParams);
 
 $wsUrl = $webSocketHost . '/?' . $urlParamsStr;
-
+$ccNotificationUpdateUrl = Url::to(['/client-chat/refresh-notification']);
 $js = <<<JS
    
     window.socket = null;
@@ -275,7 +278,7 @@ $js = <<<JS
                                 $("._cc-chat-unread-message").find("[data-cch-id='"+obj.data.cchId+"']").html(obj.data.cchUnreadMessages);
                             }
                             
-                            pjaxReload({container: '#notify-pjax-cc'});
+                            pjaxReload({container: '#notify-pjax-cc', url: '{$ccNotificationUpdateUrl}'});
                         }
                         
                         if (obj.cmd === 'clientChatUpdateClientStatus') {
