@@ -249,7 +249,7 @@ class ClientChatRequestService
         }
         Notifications::publish('clientChatUpdateTimeLastMessage', ['user_id' => $clientChat->cch_owner_user_id], [
             'data' => [
-                'dateTime' =>  \Yii::$app->formatter->asRelativeTime(strtotime($dateTime)),
+                'dateTime' =>  \Yii::$app->formatter->asRelativeTime($dateTime),
                 'cchId' => $clientChat->cch_id,
             ]
         ]);
