@@ -1204,7 +1204,8 @@ class LeadController extends FController
 
         //$dataProviderCommunication = $lead->getQuotesProvider([]);
 
-        $tmpl = $isQA ? 'view_qa' : 'view';
+//        $tmpl = $isQA ? 'view_qa' : 'view';
+        $tmpl = 'view';
 
 		$fromPhoneNumbers = [];
 		if (SettingHelper::isLeadCommunicationNewCallWidgetEnabled()) {
