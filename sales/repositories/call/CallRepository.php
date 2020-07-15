@@ -120,4 +120,12 @@ class CallRepository extends Repository
         }
         throw new NotFoundException('Call is not found');
     }
+
+    public function isUserHasActiveCalls(int $userId): bool
+	{
+		return Call::find()
+			->byCreatedUser($userId)
+			->andWhere(['OR', ['c_status_id' => Call::STATUS_IN_PROGRESS], ['c_status_id' => Call::STATUS_RINGING]])
+			->exists();
+	}
 }

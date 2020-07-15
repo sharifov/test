@@ -2,7 +2,6 @@
 
 namespace sales\model\clientChatRequest\useCase\api\create;
 
-use common\components\i18n\Formatter;
 use common\models\Notifications;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
@@ -240,17 +239,13 @@ class ClientChatRequestService
     {
         $user = $clientChat->cchOwnerUser;
         $dateTime = $message->ccm_sent_dt;
+        $formatter = new \Yii::$app->formatter;
         if ($user->timezone) {
-        	\Yii::$app->formatter->timeZone = $user->timezone;
-//            try {
-//                $dateTime = (new Formatter(['timeZone' => $user->timezone]))->asDatetime(strtotime($dateTime), 'php:Y-m-d H:i:s');
-//            } catch (\Throwable $e) {
-//                \Yii::error('Format date', 'ClientChatRequestService:updateDateTimeLastMessageNotification');
-//            }
+        	$formatter->timeZone = $user->timezone;
         }
         Notifications::publish('clientChatUpdateTimeLastMessage', ['user_id' => $clientChat->cch_owner_user_id], [
             'data' => [
-                'dateTime' =>  \Yii::$app->formatter->asRelativeTime(strtotime($dateTime)),
+                'dateTime' =>  $formatter->asRelativeTime(strtotime($dateTime)),
                 'cchId' => $clientChat->cch_id,
             ]
         ]);

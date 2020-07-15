@@ -256,6 +256,11 @@ $js = <<<JS
                         }
 
                         if (obj.cmd === 'clientChatUnreadMessage') {
+                        
+                            if (obj.data.soundNotification) {
+                                soundNotification('incoming_message');
+                            }
+                            
                             if(obj.data.totalUnreadMessages) {
                                 $('._cc_unread_messages').html(obj.data.totalUnreadMessages);
                             } else {

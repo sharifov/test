@@ -2,6 +2,8 @@
 namespace sales\services\clientChatMessage;
 
 use common\models\Notifications;
+use sales\helpers\setting\SettingHelper;
+use sales\repositories\call\CallRepository;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use yii\redis\Connection;
@@ -11,21 +13,31 @@ use yii\redis\Connection;
  * @package sales\services\clientChatMessage
  *
  * @property Connection $redis
+ * @property CallRepository $callRepository
  */
 class ClientChatMessageService
 {
 	private Connection $redis;
+	/**
+	 * @var CallRepository
+	 */
+	private CallRepository $callRepository;
 
-	public function __construct()
+	/**
+	 * ClientChatMessageService constructor.
+	 * @param CallRepository $callRepository
+	 */
+	public function __construct(CallRepository $callRepository)
 	{
 		$this->redis = \Yii::$app->redis;
+		$this->callRepository = $callRepository;
 	}
 
 	public function increaseUnreadMessages(int $cchId, int $userId): self
 	{
 		$unreadMessages = $this->getCountOfChatUnreadMessages($cchId, $userId);
 		$this->setUnreadMessages($cchId, $userId, ++$unreadMessages);
-		Notifications::publish('clientChatUnreadMessage', ['user_id' => $userId], ['data' => ['totalUnreadMessages' => $this->getCountOfTotalUnreadMessages($userId) ?: '', 'cchId' => $cchId, 'cchUnreadMessages' => $unreadMessages]]);
+		Notifications::publish('clientChatUnreadMessage', ['user_id' => $userId], ['data' => ['totalUnreadMessages' => $this->getCountOfTotalUnreadMessages($userId) ?: '', 'cchId' => $cchId, 'cchUnreadMessages' => $unreadMessages, 'soundNotification' => $this->soundNotification($userId)]]);
 		return $this;
 	}
 
@@ -115,5 +127,10 @@ class ClientChatMessageService
 	private function chatWithUnreadMessagesKey(int $userId): string
 	{
 		return '_user_' . $userId . '_chat_unread_messages';
+	}
+
+	private function soundNotification(int $userId): bool
+	{
+		return SettingHelper::isCcSoundNotificationEnabled() && !$this->callRepository->isUserHasActiveCalls($userId);
 	}
 }
