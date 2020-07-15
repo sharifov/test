@@ -1,5 +1,6 @@
 <?php
 use common\models\Client;
+use common\models\Quote;
 use sales\model\clientChat\entity\ClientChat;
 use yii\bootstrap4\Button;
 use yii\helpers\Html;
@@ -10,12 +11,12 @@ use yii\web\View;
  * @var ClientChat $clientChat
  * @var Client $client
  * @var View $this
- *
+ * @var bool $existAvailableLeadQuotes
  */
 ?>
 
 <div class="_rc-client-chat-info-wrapper">
-	<div class="_rc-block-wrapper">
+    <div class="_rc-block-wrapper">
         <div style="display: flex">
             <span class="_rc-client-icon">
                 <i class="fa fa-user"></i>
@@ -46,7 +47,7 @@ use yii\web\View;
                 <?php endif; ?>
             </div>
         </div>
-	</div>
+    </div>
 
     <div class="_rc-block-wrapper">
         <h3 style="margin: 0;">Chat info</h3>
@@ -61,36 +62,48 @@ use yii\web\View;
 
     <div class="_rc-block-wrapper">
         <?=
-            \yii\widgets\DetailView::widget([
-                'model' => $clientChat,
-                'attributes' => [
-                    'cch_title',
-                    'cch_description',
-					'cchCase:case:Case',
-					[
-					    'attribute' => 'cch_lead_id',
-                        'label' => 'Lead',
-                        'value' => static function(ClientChat $model) {
-                            if (!$model->cch_lead_id) {
-                                return null;
-                            }
-                            $out = Yii::$app->formatter->format($model->cchLead, 'lead');
+        \yii\widgets\DetailView::widget([
+            'model' => $clientChat,
+            'attributes' => [
+                'cch_title',
+                'cch_description',
+                [
+                    'attribute' => 'cch_case_id',
+                    'label' => 'Case',
+                    'value' => static function(ClientChat $model) {
+                        if (!$model->cch_case_id) {
+                            return Html::a('Create Case', ['/cases/create', 'chat_id' => $model->cch_id],  ['target' => '_blank']);
+                        }
+                        return Yii::$app->formatter->format($model->cchCase, 'case');
+                    },
+                    'format' => 'raw',
+                ],
+                [
+                    'attribute' => 'cch_lead_id',
+                    'label' => 'Lead',
+                    'value' => static function(ClientChat $model) use ($existAvailableLeadQuotes) {
+                        if (!$model->cch_lead_id) {
+                            return Html::a('Create Lead', ['/lead/create', 'chat_id' => $model->cch_id],  ['target' => '_blank']);
+                        }
+                        $out = Yii::$app->formatter->format($model->cchLead, 'lead');
+                        if ($existAvailableLeadQuotes) {
                             $out .= ' ' . Html::button('Offer', ['class' => 'btn btn-info chat-offer', 'data-cch-id' => $model->cch_id]);
-                            return $out;
-                        },
-                        'format' => 'raw',
-                    ],
-					[
-						'attribute' => 'cch_status_id',
-						'value' => static function (ClientChat $model) {
-							return Html::tag('span', $model->getStatusName(), ['class' => 'badge badge-'.$model->getStatusClass()]);
-						},
-						'format' => 'raw',
-						'filter' => ClientChat::getStatusList()
-					],
-                    'cch_note',
-                ]
-            ])
+                        }
+                        return $out;
+                    },
+                    'format' => 'raw',
+                ],
+                [
+                    'attribute' => 'cch_status_id',
+                    'value' => static function (ClientChat $model) {
+                        return Html::tag('span', $model->getStatusName(), ['class' => 'badge badge-'.$model->getStatusClass()]);
+                    },
+                    'format' => 'raw',
+                    'filter' => ClientChat::getStatusList()
+                ],
+                'cch_note',
+            ]
+        ])
         ?>
     </div>
 

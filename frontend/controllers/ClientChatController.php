@@ -165,6 +165,15 @@ class ClientChatController extends FController
 			return $this->asJson($response);
 		}
 
+		$existAvailableLeadQuotes = false;
+		if ($clientChat) {
+		    if ($clientChat->cch_lead_id) {
+                $existAvailableLeadQuotes = Quote::find()
+                    ->andWhere(['lead_id' => $clientChat->cch_lead_id])
+                    ->andWhere(['status' => [Quote::STATUS_CREATED, Quote::STATUS_SEND, Quote::STATUS_OPENED]])
+                    ->exists();
+            }
+        }
 
 		return $this->render('index', [
 			'channels' => $channels,
@@ -173,7 +182,8 @@ class ClientChatController extends FController
 			'page' => $page,
 			'clientChat' => $clientChat,
 			'client' => $clientChat->cchClient ?? '',
-			'history' => $history ?? null
+			'history' => $history ?? null,
+            'existAvailableLeadQuotes' => $existAvailableLeadQuotes
 		]);
 	}
 
@@ -189,9 +199,19 @@ class ClientChatController extends FController
 			$clientChat = $this->clientChatRepository->findById($cchId);
 			$this->clientChatMessageService->discardUnreadMessages($clientChat->cch_id, $clientChat->cch_owner_user_id);
 
+            $existAvailableLeadQuotes = false;
+            if ($clientChat) {
+                if ($clientChat->cch_lead_id) {
+                    $existAvailableLeadQuotes = Quote::find()
+                        ->andWhere(['lead_id' => $clientChat->cch_lead_id])
+                        ->andWhere(['status' => [Quote::STATUS_CREATED, Quote::STATUS_SEND, Quote::STATUS_OPENED]])
+                        ->exists();
+                }
+            }
 			$result['html'] = $this->renderPartial('partial/_client-chat-info', [
 				'clientChat' => $clientChat,
-				'client' => $clientChat->cchClient
+				'client' => $clientChat->cchClient,
+                'existAvailableLeadQuotes' => $existAvailableLeadQuotes
 			]);
 
 		} catch (NotFoundException $e) {
@@ -543,8 +563,6 @@ class ClientChatController extends FController
         } else {
             throw new \DomainException('Not found quote');
         }
-
-//        VarDumper::dump($content_data);die;
 
         try {
             $mailCapture = $communication->mailCapture(
