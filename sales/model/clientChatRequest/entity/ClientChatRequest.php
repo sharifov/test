@@ -174,9 +174,9 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 		return $this->decodedData['project'] ?? '';
 	}
 
-	public function getDepartmentIdFromData(): ?int
+	public function getDepartmentFromData(): ?string
 	{
-		return (int)($this->decodedData['department'] ?? null);
+		return $this->decodedData['department'] ?? '';
 	}
 
 	public function getEmailFromData(): ?string
