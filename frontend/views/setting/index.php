@@ -33,7 +33,14 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            's_id',
+            [
+                'attribute' => 's_id',
+                'options' => ['style' => 'width: 100px']
+            ],
+            [
+                'class' => 'yii\grid\ActionColumn',
+                'template' => '{view} {update}'
+            ],
             's_key',
             's_name',
             //'s_type',
@@ -97,10 +104,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw'
             ],
 
-            [
-                'class' => 'yii\grid\ActionColumn',
-                'template' => '{view} {update}'
-            ],
+
         ],
     ]); ?>
 
