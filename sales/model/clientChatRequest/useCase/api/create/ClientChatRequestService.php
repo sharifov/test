@@ -242,14 +242,14 @@ class ClientChatRequestService
         $dateTime = $message->ccm_sent_dt;
         if ($user->timezone) {
             try {
-                $dateTime = (new Formatter(['timeZone' => $user->timezone]))->asByUserDateTime($dateTime);
+                $dateTime = (new Formatter(['timeZone' => $user->timezone]))->asDatetime(strtotime($dateTime));
             } catch (\Throwable $e) {
                 \Yii::error('Format date', 'ClientChatRequestService:updateDateTimeLastMessageNotification');
             }
         }
         Notifications::publish('clientChatUpdateTimeLastMessage', ['user_id' => $clientChat->cch_owner_user_id], [
             'data' => [
-                'dateTime' =>  \Yii::$app->formatter->asRelativeTime($dateTime),
+                'dateTime' =>  \Yii::$app->formatter->asRelativeTime(strtotime($dateTime)),
                 'cchId' => $clientChat->cch_id,
             ]
         ]);
