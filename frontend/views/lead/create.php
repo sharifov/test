@@ -23,11 +23,11 @@ $this->title = 'Create Lead';
             'validationUrl' =>
                 $leadForm->caseGid
                     ? ['/lead/validate-lead-create', 'depId' => $leadForm->depId, 'case_gid' => $leadForm->caseGid]
-                    : ['/lead/validate-lead-create', 'depId' => $leadForm->depId],
+                    : ['/lead/validate-lead-create', 'depId' => $leadForm->depId, 'chat_id' => $leadForm->chatId ?: null],
             'action' =>
                 $leadForm->caseGid
                     ? ['/lead/create-case', 'case_gid' => $leadForm->caseGid]
-                    : ['/lead/create'],
+                    : ['/lead/create', 'chat_id' => $leadForm->chatId ?: null],
         ]) ?>
         <div class="row">
             <div class="col-md-12 col-sm-12">

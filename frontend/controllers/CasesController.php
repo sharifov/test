@@ -39,6 +39,7 @@ use sales\helpers\setting\SettingHelper;
 use sales\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
 use sales\guards\cases\CaseManageSaleInfoGuard;
 use sales\model\cases\useCases\cases\updateInfo\Handler;
+use sales\model\clientChat\services\ClientChatAssignService;
 use sales\model\coupon\entity\couponCase\CouponCase;
 use sales\model\coupon\useCase\send\SendCouponsForm;
 use sales\model\saleTicket\useCase\create\SaleTicketService;
@@ -54,6 +55,7 @@ use sales\services\cases\CasesCreateService;
 use sales\services\cases\CasesManageService;
 use sales\services\client\ClientUpdateFromEntityService;
 use sales\services\email\EmailService;
+use sales\services\TransactionManager;
 use Yii;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesSearch;
@@ -87,6 +89,8 @@ use yii\widgets\ActiveForm;
  * @property Handler $updateHandler
  * @property SaleTicketService $saleTicketService
  * @property QuoteRepository $quoteRepository
+ * @property ClientChatAssignService $chatAssignService
+ * @property TransactionManager $transaction
  */
 class CasesController extends FController
 {
@@ -103,6 +107,8 @@ class CasesController extends FController
     private $updateHandler;
     private $saleTicketService;
     private $quoteRepository;
+    private $chatAssignService;
+    private $transaction;
 
     public function __construct(
         $id,
@@ -119,6 +125,8 @@ class CasesController extends FController
         Handler $updateHandler,
         SaleTicketService $saleTicketService,
         QuoteRepository $quoteRepository,
+        ClientChatAssignService $chatAssignService,
+        TransactionManager $transaction,
         $config = []
     )
     {
@@ -135,6 +143,8 @@ class CasesController extends FController
         $this->saleTicketService = $saleTicketService;
         $this->updateHandler = $updateHandler;
         $this->quoteRepository = $quoteRepository;
+        $this->chatAssignService = $chatAssignService;
+        $this->transaction = $transaction;
     }
 
     public function behaviors(): array
@@ -922,10 +932,18 @@ class CasesController extends FController
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
         $form = new CasesCreateByWebForm($user);
+        $chatId = (int)Yii::$app->request->get('chat_id');
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
-                $case = $this->casesCreateService->createByWeb($form, $user->id);
-                $this->casesManageService->processing($case->cs_id, Yii::$app->user->id, Yii::$app->user->id);
+                /** @var Cases $case */
+                $case = $this->transaction->wrap(function () use ($form, $user, $chatId) {
+                    $case = $this->casesCreateService->createByWeb($form, $user->id);
+                    $this->casesManageService->processing($case->cs_id, Yii::$app->user->id, Yii::$app->user->id);
+                    if ($chatId) {
+                        $this->chatAssignService->assignCase($chatId, $case->cs_id);
+                    }
+                    return $case;
+                });
                 Yii::$app->session->setFlash('success', 'Case created');
                 return $this->redirect(['view', 'gid' => $case->cs_gid]);
             } catch (\Throwable $e){

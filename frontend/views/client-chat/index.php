@@ -17,6 +17,7 @@ use yii\widgets\Pjax;
 /* @var $client \common\models\Client|null */
 /* @var $clientChat \sales\model\clientChat\entity\ClientChat|null */
 /* @var $history ClientChatMessage|null */
+/** @var bool $existAvailableLeadQuotes */
 
 $this->title = 'My Client Chat';
 $this->params['breadcrumbs'][] = $this->title;
@@ -80,7 +81,7 @@ $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
     <div class="col-md-3">
         <div id="_client-chat-info">
             <?php if ($clientChat): ?>
-                <?= $this->render('partial/_client-chat-info', ['clientChat' => $clientChat, 'client' => $client]) ?>
+                <?= $this->render('partial/_client-chat-info', ['clientChat' => $clientChat, 'client' => $client, 'existAvailableLeadQuotes' => $existAvailableLeadQuotes]) ?>
             <?php endif; ?>
         </div>
     </div>

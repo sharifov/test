@@ -50,6 +50,7 @@ use sales\forms\leadflow\TakeOverReasonForm;
 use sales\helpers\setting\SettingHelper;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
+use sales\model\clientChat\services\ClientChatAssignService;
 use sales\model\lead\useCases\lead\create\LeadManageForm;
 use sales\model\lead\useCases\lead\import\LeadImportForm;
 use sales\model\lead\useCases\lead\import\LeadImportParseService;
@@ -63,6 +64,7 @@ use sales\services\email\EmailService;
 use sales\services\lead\LeadAssignService;
 use sales\services\lead\LeadCloneService;
 use sales\services\lead\LeadManageService;
+use sales\services\TransactionManager;
 use Yii;
 use yii\caching\DbDependency;
 use yii\data\ActiveDataProvider;
@@ -99,6 +101,8 @@ use common\models\local\LeadLogMessage;
  * @property LeadImportParseService $leadImportParseService
  * @property LeadImportService $leadImportService
  * @property QuoteRepository $quoteRepository
+ * @property TransactionManager $transaction
+ * @property ClientChatAssignService $chatAssignService
  */
 class LeadController extends FController
 {
@@ -110,6 +114,8 @@ class LeadController extends FController
     private $leadImportParseService;
     private $leadImportService;
     private $quoteRepository;
+    private $transaction;
+    private $chatAssignService;
 
     public function __construct(
         $id,
@@ -122,6 +128,8 @@ class LeadController extends FController
         LeadImportParseService $leadImportParseService,
         LeadImportService $leadImportService,
         QuoteRepository $quoteRepository,
+        TransactionManager $transaction,
+        ClientChatAssignService $chatAssignService,
         $config = []
     )
     {
@@ -134,6 +142,8 @@ class LeadController extends FController
         $this->leadImportParseService = $leadImportParseService;
         $this->leadImportService = $leadImportService;
         $this->quoteRepository = $quoteRepository;
+        $this->transaction = $transaction;
+        $this->chatAssignService = $chatAssignService;
     }
 
     public function behaviors(): array
@@ -2028,6 +2038,7 @@ class LeadController extends FController
      */
     public function actionCreate()
     {
+        $chatId = (int)Yii::$app->request->get('chat_id');
         $data = CompositeFormHelper::prepareDataForMultiInput(
             Yii::$app->request->post(),
             'LeadCreateForm',
@@ -2035,15 +2046,23 @@ class LeadController extends FController
         );
         $form = new LeadCreateForm(count($data['post']['EmailCreateForm']), count($data['post']['PhoneCreateForm']), count($data['post']['SegmentCreateForm']));
         $form->assignDep(Department::DEPARTMENT_SALES);
+        $form->assignChatId($chatId);
         if ($form->load($data['post']) && $form->validate()) {
             try {
-                $lead = $this->leadManageService->createManuallyByDefault($form, Yii::$app->user->id, Yii::$app->user->id, LeadFlow::DESCRIPTION_MANUAL_CREATE);
+                /** @var Lead $lead */
+                $lead = $this->transaction->wrap(function () use ($form, $chatId) {
+                    $lead = $this->leadManageService->createManuallyByDefault($form, Yii::$app->user->id, Yii::$app->user->id, LeadFlow::DESCRIPTION_MANUAL_CREATE);
+                    if ($chatId) {
+                        $this->chatAssignService->assignLead($chatId, $lead->id);
+                    }
+                    return $lead;
+                });
                 Yii::$app->session->setFlash('success', 'Lead save');
                 return $this->redirect(['/lead/view', 'gid' => $lead->gid]);
             } catch (\Throwable $e) {
                 Yii::$app->errorHandler->logException($e);
                 Yii::$app->session->setFlash('error', $e->getMessage());
-                return $this->redirect(['/lead/create']);
+                return $this->redirect(['/lead/create', 'chat_id' => $chatId ?: null]);
             }
         }
         return $this->render('create', ['leadForm' => $form]);
@@ -2141,6 +2160,7 @@ class LeadController extends FController
         $form->load($data['post']);
         $form->assignCase((string)Yii::$app->request->get('case_gid'));
         $form->assignDep((int)Yii::$app->request->get('depId'));
+        $form->assignChatId((int)Yii::$app->request->get('chat_id'));
         return CompositeFormHelper::ajaxValidate($form, $data['keys']);
     }
 

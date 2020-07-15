@@ -266,6 +266,16 @@ class ClientChat extends \yii\db\ActiveRecord
         return ClientChatMessage::find()->andWhere(['ccm_cch_id' => $this->cch_id])->andWhere(['is', 'ccm_user_id', null])->orderBy(['ccm_id' => SORT_DESC])->limit(1)->one();
     }
 
+    public function assignCase(int $caseId): void
+    {
+        $this->cch_case_id = $caseId;
+    }
+
+    public function assignLead(int $leadId): void
+    {
+        $this->cch_lead_id = $leadId;
+    }
+
     public function attributeLabels(): array
     {
         return [
