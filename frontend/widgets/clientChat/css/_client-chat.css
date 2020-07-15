@@ -22,7 +22,10 @@
     border-bottom: none;
 }
 
-
+#client-chat-box-pjax {
+    position: relative;
+    z-index: 1040;
+}
 ._cc-fabs {
     bottom: 260px;
     position: fixed;
