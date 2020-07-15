@@ -134,7 +134,7 @@ class QuotesController extends FController
 
         $content_data = $lead->getEmailData2([$quoteID], $projectContactInfo);
 
-        $mailCapture = $communication->mailCapture($lead->project_id, $tpl , $mailFrom, $mailTo, $content_data, $language);
+        $mailCapture = $communication->mailCapture($lead->project_id, $tpl , $mailFrom, $mailTo, $content_data, $language, []);
         $url = $mailCapture['data'];
 
         return $url['host'] . $url['dir'] . $url['img'];

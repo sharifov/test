@@ -156,10 +156,11 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @param string $email_to
      * @param array $email_data
      * @param string $language
+     * @param array $capture_options
      * @return array
      * @throws Exception
      */
-    public function mailCapture(int $project_id, string $template_type, string $email_from, string $email_to, array $email_data = [], string $language = 'en-US') : array
+    public function mailCapture(int $project_id, string $template_type, string $email_from, string $email_to, array $email_data = [], string $language = 'en-US', array $capture_options = []) : array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -169,6 +170,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
         $data['mail']['type_key'] = $template_type;
         $data['mail']['language_id'] = $language;
         $data['mail']['email_data'] = $email_data;
+        $data['mail']['capture_options'] = $capture_options;
 
         if(isset($email_data['email_from_name']) && $email_data['email_from_name']) {
             $data['mail']['email_from_name'] = $email_data['email_from_name'];

@@ -544,6 +544,8 @@ class ClientChatController extends FController
             throw new \DomainException('Not found quote');
         }
 
+//        VarDumper::dump($content_data);die;
+
         try {
             $mailCapture = $communication->mailCapture(
                 $quote->lead->project_id,
@@ -551,7 +553,13 @@ class ClientChatController extends FController
                 '',
                 '',
                 $content_data,
-                Yii::$app->language ?: 'en-US'
+                Yii::$app->language ?: 'en-US',
+                [
+                    'img_width' => 800,
+                    'img_height' => 60,
+                    'img_format' => 'png',
+                    'img_update' => 1
+                ]
             );
             $url = $mailCapture['data'];
             return [
