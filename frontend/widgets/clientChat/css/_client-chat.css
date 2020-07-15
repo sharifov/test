@@ -21,6 +21,9 @@
 ._cc-access-request-item:last-child {
     border-bottom: none;
 }
+._сс-box-header.active {
+    background-color: #78c286;
+}
 
 #client-chat-box-pjax {
     position: relative;
@@ -86,10 +89,10 @@
     font-weight: 500;
     color: #f3f3f3;
     height: 55px;
-    background: #42a5f5;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     padding-top: 8px;
+    background-color: #d5b24c
 }
 ._cc-box-option {
     float: left;

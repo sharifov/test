@@ -17,7 +17,7 @@ $accessUrl = \yii\helpers\Url::to('/client-chat/access-manage');
 <?php yii\widgets\Pjax::begin(['id' => 'client-chat-box-pjax', 'timeout' => 10000, 'enablePushState' => false, 'options' => []])?>
 <div class="_cc-fabs">
     <div class="_cc-box <?= $isPjax && $access ? 'is-visible' : '' ?>">
-        <div class="_сс-box-header" style="<?= $access ? 'background: #78c286' : 'background: #d5b24c' ?>">
+        <div class="_сс-box-header <?= $access ? 'active' : '' ?>">
             <div class="_cc-box-option">
                 <div class="header_img">
 					<?=\yii\helpers\Html::img('/img/user.png')?>
