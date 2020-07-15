@@ -242,7 +242,7 @@ class ClientChatRequestService
         $dateTime = $message->ccm_sent_dt;
         if ($user->timezone) {
             try {
-                $dateTime = (new Formatter(['timeZone' => $user->timezone]))->asDatetime(strtotime($dateTime));
+                $dateTime = (new Formatter(['timeZone' => $user->timezone]))->asDatetime(strtotime($dateTime), 'php:Y-m-d H:i:s');
             } catch (\Throwable $e) {
                 \Yii::error('Format date', 'ClientChatRequestService:updateDateTimeLastMessageNotification');
             }
