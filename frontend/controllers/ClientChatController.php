@@ -555,7 +555,7 @@ class ClientChatController extends FController
                 $content_data,
                 Yii::$app->language ?: 'en-US',
                 [
-                    'img_width' => 270,
+                    'img_width' => 220,
                     'img_height' => 60,
                     'img_format' => 'png',
                     'img_update' => 1
