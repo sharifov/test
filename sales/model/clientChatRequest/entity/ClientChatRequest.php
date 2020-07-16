@@ -171,12 +171,12 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 
 	public function getProjectNameFromData(): string
 	{
-		return $this->decodedData['project'] ?? '';
+		return $this->decodedData['visitor']['project'] ?? '';
 	}
 
 	public function getDepartmentFromData(): ?string
 	{
-		return $this->decodedData['department'] ?? '';
+		return $this->decodedData['visitor']['department'] ?? '';
 	}
 
 	public function getEmailFromData(): ?string
@@ -199,8 +199,13 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 		return $this->decodedData['visitor']['user_id'] ?? '';
 	}
 
-	public function getCrmClientId(): ?string
+	public function getRcId(): ?string
 	{
-		return $this->decodedData['visitor']['crm_client_id'] ?? null;
+		return $this->decodedData['visitor']['id'] ?? null;
+	}
+
+	public function getVisitorId(): string
+	{
+		return $this->decodedData['visitorId'] ?? '';
 	}
 }

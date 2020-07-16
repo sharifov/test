@@ -7,17 +7,6 @@ use sales\model\clientChatRequest\entity\ClientChatRequest;
 class ClientChatRequestRepository
 {
 	/**
-	 * @param ClientChatRequestApiForm $form
-	 * @return ClientChatRequest
-	 * @throws \JsonException
-	 */
-	public function create(ClientChatRequestApiForm $form): ClientChatRequest
-	{
-		$clientChatRequest = ClientChatRequest::createByApi($form);
-		return $this->save($clientChatRequest);
-	}
-
-	/**
 	 * @param ClientChatRequest $model
 	 * @return ClientChatRequest
 	 */

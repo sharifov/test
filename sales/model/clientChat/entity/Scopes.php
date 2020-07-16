@@ -46,4 +46,9 @@ class Scopes extends \yii\db\ActiveQuery
 	{
 		return $this->andWhere(['cch_status_id' => ClientChat::STATUS_CLOSED]);
 	}
+
+	public function byClientId(int $id): self
+	{
+		return $this->andWhere(['cch_client_id' => $id]);
+	}
 }

@@ -9,7 +9,6 @@ use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
-use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\repositories\department\DepartmentRepository;
 use sales\repositories\NotFoundException;
 use sales\repositories\project\ProjectRepository;
@@ -66,7 +65,6 @@ class ClientChatRepository
 		$chat->cch_owner_user_id = $dto->ownerId;
 		$chat->cch_client_online = $dto->isOnline;
 		$chat->generated();
-		$chat->attachBehavior('user', BlameableBehaviorExceptApi::class);
 		return $chat;
 	}
 
@@ -108,5 +106,17 @@ class ClientChatRepository
 			throw new \DomainException('Client Chat already assigned to: ' . $clientChat->cchOwnerUser->username, ClientChatCodeException::CC_OWNER_ALREADY_ASSIGNED);
 		}
 		$clientChat->cch_owner_user_id = $userId;
+	}
+
+	/**
+	 * @param int $id
+	 * @return ClientChat[]
+	 */
+	public function findByClientId(int $id): array
+	{
+		if ($chats = ClientChat::find()->byClientId($id)->all()) {
+			return $chats;
+		}
+		throw new NotFoundException('Client Chats are not found by client id: ' . $id);
 	}
 }

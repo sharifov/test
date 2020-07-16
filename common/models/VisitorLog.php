@@ -202,7 +202,7 @@ class VisitorLog extends \yii\db\ActiveRecord
 		$log->vl_utm_term = $data['sources']['utm_term'] ?? null;
 		$log->vl_utm_campaign = $data['sources']['utm_campaign'] ?? null;
 		$log->vl_user_agent = $data['system']['user_agent'] ?? null;
-		$log->vl_ip_address = $data['system']['ip_address'] ?? null;
+		$log->vl_ip_address = $data['geo']['ip'] ?? null;
 		$log->vl_cch_id = $clientChat->cch_id;
 
 		return $log;
