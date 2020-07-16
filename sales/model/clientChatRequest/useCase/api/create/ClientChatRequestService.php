@@ -245,8 +245,9 @@ class ClientChatRequestService
         }
         Notifications::publish('clientChatUpdateTimeLastMessage', ['user_id' => $clientChat->cch_owner_user_id], [
             'data' => [
-                'dateTime' =>  round((time() - strtotime($dateTime))),
-                'cchId' => $clientChat->cch_id,
+                'dateTime' =>  $formatter->asRelativeTime(strtotime($dateTime)),
+				'moment' =>  round((time() - strtotime($dateTime))),
+				'cchId' => $clientChat->cch_id,
             ]
         ]);
     }
