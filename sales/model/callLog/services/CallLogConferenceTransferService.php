@@ -3,6 +3,7 @@
 namespace sales\model\callLog\services;
 
 use common\models\Call;
+use common\models\CallUserAccess;
 use common\models\Conference;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\callLog\entity\callLogCase\CallLogCase;
@@ -107,17 +108,26 @@ class CallLogConferenceTransferService
                 }
             }
 
-//            if ($call->isIn()) {
-//                $callQueue = new CallLogQueue([
-//                    'clq_cl_id' => $log->cl_id,
-////                'clq_is_transfer' => $this->queue['clq_is_transfer'] ?? null,//todo
-//                    'clq_access_count' => $this->queue['clq_access_count'] ?? null,
-//                    'clq_queue_time' => abs(strtotime($call->c_created_dt) - strtotime($call->c_queue_start_dt))
-//                ]);
-//                if (!$callQueue->save()) {
-//                    throw new \RuntimeException(VarDumper::dumpAsString(['model' => $callQueue->toArray(), 'message' => $callQueue->getErrors()]));
-//                }
-//            }
+            if ($call->isIn()) {
+                if ($parentCall = $call->cParent) {
+                    $queueTime = abs(strtotime($parentCall->c_created_dt) - strtotime($parentCall->c_queue_start_dt));
+                    $callQueue = new CallLogQueue([
+                        'clq_cl_id' => $log->cl_id,
+                        'clq_is_transfer' => $parentCall->c_is_transfer,
+                        'clq_queue_time' => $queueTime,
+                        'clq_access_count' => (int)CallUserAccess::find()
+                            ->andWhere(['cua_call_id' => $parentCall->c_id])
+                            ->andWhere(['>=', 'cua_updated_dt', $queueTime])
+                            ->andWhere(['<=', 'cua_created_dt', $parentCall->c_created_dt])
+                            ->count()
+                    ]);
+                    if (!$callQueue->save()) {
+                        throw new \RuntimeException(VarDumper::dumpAsString(['model' => $callQueue->toArray(), 'message' => $callQueue->getErrors()]));
+                    }
+                } else {
+                    Yii::error(VarDumper::dumpAsString(['error' => 'Not found Parent Call', 'call' => $call->getAttributes()]), 'CallLogConferenceTransferService');
+                }
+            }
 
             $transaction->commit();
         } catch (\Throwable $e) {

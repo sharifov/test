@@ -1327,7 +1327,7 @@ class Call extends \yii\db\ActiveRecord
                 Yii::$app->id === 'app-webapi'
                 && $this->isTwFinishStatus()
                 && ($insert || $isChangedTwStatus || $isChangedDuration)
-                && (!$conferenceBase || ($conferenceBase && !$this->c_conference_id))
+//                && (!$conferenceBase || ($conferenceBase && !$this->c_conference_id))
             ) {
                 (Yii::createObject(CallLogTransferService::class))->transfer($this);
             }

@@ -546,10 +546,10 @@ class CommunicationController extends ApiBaseController
                     $logEnable = Yii::$app->params['settings']['call_log_enable'] ?? false;
                     if ($logEnable) {
                         if ($call->c_recording_sid) {
-                            $conferenceBase = (bool)(\Yii::$app->params['settings']['voip_conference_base'] ?? false);
-                            if (!$conferenceBase || ($conferenceBase && !$call->c_conference_id)) {
+//                            $conferenceBase = (bool)(\Yii::$app->params['settings']['voip_conference_base'] ?? false);
+//                            if (!$conferenceBase || ($conferenceBase && !$call->c_conference_id)) {
                                 (Yii::createObject(CallLogTransferService::class))->saveRecord($call);
-                            }
+//                            }
                         }
                     }
                 }
@@ -2502,8 +2502,8 @@ class CommunicationController extends ApiBaseController
 
         if ($conference->save()) {
             $response['conference'] = $conference->getAttributes();
-            $service = \Yii::createObject(CallLogConferenceTransferService::class);
-            $service->saveRecord($conference->cf_id, $form);
+//            $service = \Yii::createObject(CallLogConferenceTransferService::class);
+//            $service->saveRecord($conference->cf_id, $form);
         } else {
             Yii::error(VarDumper::dumpAsString([
                 'errors' => $conference->getErrors(),

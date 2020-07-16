@@ -38,8 +38,8 @@ class ConferenceStatusCallbackHandler
         if (!$call = $conference->call) {
             return;
         }
-        $service = \Yii::createObject(CallLogConferenceTransferService::class);
-        $service->transfer($call, $conference);
+//        $service = \Yii::createObject(CallLogConferenceTransferService::class);
+//        $service->transfer($call, $conference);
     }
 
     public function join(Conference $conference, ConferenceStatusCallbackForm $form): void
