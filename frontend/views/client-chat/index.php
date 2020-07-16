@@ -90,7 +90,28 @@ $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
 </div>
 
 <?php
+$this->registerJsFile('/js/moment.min.js', [
+    'position' => \yii\web\View::POS_HEAD,
+    'depends' => [
+        \yii\web\JqueryAsset::class
+    ]
+]);
 $js = <<<JS
+
+$(document).ready( function () {
+    $('._cc-item-last-message-time[data-moment]').each( function (i, elem) {
+        $(elem).html(moment.duration(-$(elem).data('moment'), 'seconds').humanize(true));
+    });
+    let interval = 60;
+    setInterval(function () {
+         $('._cc-item-last-message-time[data-moment]').each( function (i, elem) {
+             let seconds = +($(elem).attr('data-moment')) + interval;
+             $(elem).attr('data-moment', seconds);
+             $(elem).html(moment.duration(-seconds, 'seconds').humanize(true));
+         });
+    }, interval*1000); 
+});
+
 $(document).on('click', '#btn-load-channels', function (e) {
     e.preventDefault();
     

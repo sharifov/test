@@ -39,8 +39,9 @@ use yii\helpers\Html;
             <span class="label label-default"><?= Html::encode($clientChat->cchChannel->ccc_name) ?></span>
 
 			<?php if ($lastMessage = $clientChat->getLastMessageByClient()): ?>
-                <span class="_cc-item-last-message-time" data-cch-id="<?= $clientChat->cch_id ?>" title="Last message from client">
-					<small><?= Yii::$app->formatter->asRelativeTime(strtotime($lastMessage->ccm_sent_dt)); ?></small>
+                <span title="Last message from client">
+                    <?php $period = round((time() - strtotime($lastMessage->ccm_sent_dt))); ?>
+					<small class="_cc-item-last-message-time" data-moment="<?= $period ?>" data-cch-id="<?= $clientChat->cch_id ?>"></small><br>
                 </span>
 			<?php endif; ?>
         </div>
