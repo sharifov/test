@@ -120,7 +120,7 @@ class QuotesController extends FController
         /** @var CommunicationService $communication */
         $communication = Yii::$app->communication;
 
-        $tpl = 'cl_offer';
+        $tpl = 'chat_offer';
         $language = Yii::$app->language ?: 'en-US';
         $mailFrom = '';
         $mailTo = '';
@@ -134,7 +134,19 @@ class QuotesController extends FController
 
         $content_data = $lead->getEmailData2([$quoteID], $projectContactInfo);
 
-        $mailCapture = $communication->mailCapture($lead->project_id, $tpl , $mailFrom, $mailTo, $content_data, $language, []);
+        $mailCapture = $communication->mailCapture(
+            $lead->project_id,
+            $tpl ,
+            $mailFrom,
+            $mailTo,
+            $content_data,
+            $language, [
+                'img_width' => 265,
+                'img_height' => 60,
+                'img_update' => 1
+            ]
+        );
+
         $url = $mailCapture['data'];
 
         return $url['host'] . $url['dir'] . $url['img'];
