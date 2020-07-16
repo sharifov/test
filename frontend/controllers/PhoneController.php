@@ -388,6 +388,8 @@ class PhoneController extends FController
                     $lastChild->c_source_type_id = Call::SOURCE_TRANSFER_CALL;
                     $lastChild->c_created_user_id = null;
                     $lastChild->c_dep_id = null;
+                    $lastChild->c_conference_id = null;
+                    $lastChild->c_conference_sid = null;
                     $lastChild->c_is_transfer = true;
                     $sid = $lastChild->c_call_sid;
                     $firstTransferToNumber = true;
@@ -406,6 +408,8 @@ class PhoneController extends FController
                 $createdUserId = $parent->c_created_user_id;
                 $parent->c_created_user_id = null;
                 $parent->c_dep_id = null;
+                $parent->c_conference_id = null;
+                $parent->c_conference_sid = null;
                 $parent->c_is_transfer = true;
                 $parent->c_source_type_id = Call::SOURCE_TRANSFER_CALL;
                 if (!$parent->c_group_id) {
@@ -742,6 +746,8 @@ class PhoneController extends FController
                     }
 
                     $parent->c_created_user_id = null;
+                    $parent->c_conference_id = null;
+                    $parent->c_conference_sid = null;
 
                     if ($createdUserId) {
                         UserStatus::updateIsOnnCall($createdUserId, $groupId);
@@ -779,6 +785,8 @@ class PhoneController extends FController
                     }
 
                     $childCall->c_created_user_id = null;
+                    $childCall->c_conference_id = null;
+                    $childCall->c_conference_sid = null;
 
                     if ($createdUserId) {
                         UserStatus::updateIsOnnCall($createdUserId, $groupId);
@@ -1048,8 +1056,8 @@ class PhoneController extends FController
         try {
             $sid = (string)Yii::$app->request->post('sid');
             $call = $this->getCallForMuteUnmuteParticipant($sid);
-            if ($call->currentParticipant->isUnmute()) {
-                throw new \Exception('Participant already is unmute');
+            if ($call->currentParticipant->isUnMute()) {
+                throw new \Exception('Participant already is unMute');
             }
             $result = Yii::$app->communication->unmuteParticipant($call->c_conference_sid, $call->c_call_sid);
         } catch (\Throwable $e) {

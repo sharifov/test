@@ -36,6 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'cl_id',
                     'cl_group_id',
                     'cl_call_sid',
+                    'cl_conference_id',
                     'cl_type_id:callLogType',
                     'cl_category_id:callLogCategory',
                     'cl_is_transfer:booleanByLabel',

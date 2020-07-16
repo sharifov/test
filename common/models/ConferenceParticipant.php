@@ -183,12 +183,12 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
         return (bool)$this->cp_mute === true;
     }
 
-    public function unmute(): void
+    public function unMute(): void
     {
         $this->cp_mute = false;
     }
 
-    public function isUnmute(): bool
+    public function isUnMute(): bool
     {
         return (bool)$this->cp_mute === false;
     }

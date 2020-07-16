@@ -1,5 +1,7 @@
 <?php
 
+use common\models\Conference;
+use sales\widgets\DateTimePicker;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -10,26 +12,33 @@ use yii\widgets\ActiveForm;
 
 <div class="conference-form">
 
-    <?php $form = ActiveForm::begin(); ?>
+    <div class="col-md-4">
 
-    <?= $form->field($model, 'cf_cr_id')->textInput() ?>
+        <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'cf_sid')->textInput(['maxlength' => true]) ?>
+        <?= $form->field($model, 'cf_cr_id')->textInput() ?>
 
-    <?= $form->field($model, 'cf_status_id')->textInput() ?>
+        <?= $form->field($model, 'cf_sid')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'cf_options')->textarea(['rows' => 6]) ?>
+        <?= $form->field($model, 'cf_status_id')->dropDownList(Conference::STATUS_LIST, ['prompt' => 'Select status']) ?>
 
-    <?= $form->field($model, 'cf_created_dt')->textInput() ?>
+        <?= $form->field($model, 'cf_options')->textarea(['rows' => 6]) ?>
 
-    <?= $form->field($model, 'cf_updated_dt')->textInput() ?>
+        <?= $form->field($model, 'cf_start_dt')->widget(DateTimePicker::class) ?>
 
-    <?= $form->field($model, 'cf_created_user_id')->textInput() ?>
+        <?= $form->field($model, 'cf_end_dt')->widget(DateTimePicker::class) ?>
 
-    <div class="form-group">
-        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+        <?= $form->field($model, 'cf_created_dt')->widget(DateTimePicker::class) ?>
+
+        <?= $form->field($model, 'cf_updated_dt')->widget(DateTimePicker::class) ?>
+
+        <?= $form->field($model, 'cf_created_user_id')->textInput() ?>
+
+        <div class="form-group">
+            <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+        </div>
+
+        <?php ActiveForm::end(); ?>
+
     </div>
-
-    <?php ActiveForm::end(); ?>
-
 </div>

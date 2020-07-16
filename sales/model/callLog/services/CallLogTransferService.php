@@ -152,7 +152,7 @@ class CallLogTransferService
             return;
         }
 
-        Yii::error(VarDumper::dumpAsString(['message' => 'Call Id: ' . $call->c_id . ' not found rule for transfer Call to Call Log', 'Call' => $this->call]), 'CallLogTransferService');
+        Yii::info(VarDumper::dumpAsString(['message' => 'Call Id: ' . $call->c_id . ' not found rule for transfer Call to Call Log', 'Call' => $this->call]), 'info\CallLogTransferService');
         $this->createCallLogs();
     }
 
