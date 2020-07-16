@@ -398,23 +398,19 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 },
                 'format' => 'raw'
             ],*/
-            [
+
+            /*[
                 'label' => 'Projects Params',
                 'attribute' => 'user_params_project_id',
                 'value' => static function (\common\models\Employee $model) {
 
                     $str = '<small><table class="table table-bordered">';
 
-                    //$projects = $model->uppProjects;
                     $projectParams = $model->userProjectParams;
-                    //$projectsValueArr = [];
-
                     if($projectParams) {
                         foreach ($projectParams as $projectParam) {
                             $str .= '<tr>';
-//                                $str.='<td>'.Html::encode($projectParam->upp_project_id).'</td>';
                             $str .= '<td>'.Html::encode($projectParam->uppProject->name).'</td>';
-//                            $str .= '<td>'.Html::encode($projectParam->upp_tw_phone_number).'</td>';
                             $str .= '<td>'.Html::encode($projectParam->getPhone()).'</td>';
                             $str .= '<td title="' . ($projectParam->uppDep ? $projectParam->uppDep->dep_name : '-') . '">' . Html::encode($projectParam->upp_dep_id) . '</td>';
 
@@ -424,22 +420,17 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                                 $str .= '<td><span class="label label-danger">No</span></td>';
                             }
 
-                            //$str.='<td>'.Html::encode($projectParam->upp_tw_sip_id).'</td>';
-                            //$str.='<td>'.Html::encode($model->userProfile->up_sip ?? null).'</td>';
-                            //$projectsValueArr[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-list']) . ' ' . Html::encode($project->name), ['class' => 'label label-default']);
                             $str.='</tr>';
                         }
                     }
 
                     $str .= '</table></small>';
 
-                    //$projectsValue = implode(' ', $projectsValueArr);
-
-                    return $str; //$projectsValue;
+                    return $str;
                 },
                 'format' => 'raw',
                 'filter' => $projectList
-            ],
+            ],*/
 
             //'created_at:datetime',
             //'updated_at:datetime',
