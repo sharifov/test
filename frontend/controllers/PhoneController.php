@@ -1048,8 +1048,8 @@ class PhoneController extends FController
         try {
             $sid = (string)Yii::$app->request->post('sid');
             $call = $this->getCallForMuteUnmuteParticipant($sid);
-            if ($call->currentParticipant->isUnmute()) {
-                throw new \Exception('Participant already is unmute');
+            if ($call->currentParticipant->isUnMute()) {
+                throw new \Exception('Participant already is unMute');
             }
             $result = Yii::$app->communication->unmuteParticipant($call->c_conference_sid, $call->c_call_sid);
         } catch (\Throwable $e) {

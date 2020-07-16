@@ -1,5 +1,6 @@
 <?php
 
+use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -61,6 +62,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => ['class' => 'text-right'],
                 'options' => ['style' => 'width: 80px']
 
+            ],
+            [
+                'class' => \common\components\grid\DateTimeColumn::class,
+                'attribute' => 'cf_start_dt',
+            ],
+            [
+                'class' => \common\components\grid\DateTimeColumn::class,
+                'attribute' => 'cf_end_dt',
             ],
 
             [

@@ -25,9 +25,12 @@ use yii\db\ActiveRecord;
  * @property string $cf_friendly_name
  * @property string $cf_call_sid
  * @property int|null $cf_created_user_id
+ * @property string|null $cf_start_dt
+ * @property string|null $cf_end_dt
  *
  * @property ConferenceRoom $cfCr
  * @property ConferenceParticipant[] $conferenceParticipants
+ * @property Call $call
  */
 class Conference extends \yii\db\ActiveRecord
 {
@@ -76,6 +79,10 @@ class Conference extends \yii\db\ActiveRecord
             [['cf_cr_id'], 'exist', 'skipOnError' => true, 'targetClass' => ConferenceRoom::class, 'targetAttribute' => ['cf_cr_id' => 'cr_id']],
 
             ['cf_created_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['cf_created_user_id' => 'id']],
+
+            [['cf_start_dt', 'cf_end_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+
+//            [['cf_call_sid'], 'exist', 'skipOnError' => true, 'targetClass' => Call::class, 'targetAttribute' => ['cf_call_sid' => 'c_call_sid']],
         ];
     }
 
@@ -94,6 +101,9 @@ class Conference extends \yii\db\ActiveRecord
             'cf_updated_dt' => 'Updated Dt',
             'cf_friendly_name' => 'Friendly name',
             'cf_created_user_id' => 'Created User',
+            'cf_start_dt' => 'Start',
+            'cf_end_dt' => 'End',
+            'cf_call_sid' => 'Call Sid',
         ];
     }
 
@@ -135,6 +145,11 @@ class Conference extends \yii\db\ActiveRecord
         return $this->hasMany(ConferenceParticipant::class, ['cp_cf_id' => 'cf_id']);
     }
 
+    public function getCall(): ActiveQuery
+    {
+        return $this->hasOne(Call::class, ['c_call_sid' => 'cf_call_sid']);
+    }
+
     /**
      * {@inheritdoc}
      * @return ConferenceQuery the active query used by this AR class.
@@ -160,8 +175,9 @@ class Conference extends \yii\db\ActiveRecord
         return self::STATUS_LIST;
     }
 
-    public function start(): void
+    public function start(string $dateTime = ''): void
     {
+        $this->cf_start_dt = $dateTime;
         $this->cf_status_id = self::STATUS_START;
     }
 
@@ -180,8 +196,9 @@ class Conference extends \yii\db\ActiveRecord
         return $this->cf_status_id === self::STATUS_DELAY;
     }
 
-    public function end(): void
+    public function end(string $dateTime = ''): void
     {
+        $this->cf_end_dt = $dateTime;
         $this->cf_status_id = self::STATUS_END;
     }
 

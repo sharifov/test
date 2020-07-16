@@ -4,6 +4,7 @@ namespace sales\model\callLog\entity\callLog;
 
 use common\components\validators\PhoneValidator;
 use common\models\Client;
+use common\models\Conference;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Lead;
@@ -39,6 +40,7 @@ use yii\db\ActiveQuery;
  * @property float|null $cl_price
  * @property int $cl_year
  * @property int $cl_month
+ * @property int|null $cl_conference_id
  *
  * @property Client $client
  * @property Department $department
@@ -104,6 +106,8 @@ class CallLog extends \yii\db\ActiveRecord
 //            [['cl_group_id'], 'exist', 'skipOnError' => true, 'targetClass' => self::class, 'targetAttribute' => ['cl_group_id' => 'cl_id']],
 
             [['cl_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['cl_project_id' => 'id']],
+
+            [['cl_conference_id'], 'exist', 'skipOnError' => true, 'targetClass' => Conference::class, 'targetAttribute' => ['cl_conference_id' => 'cf_id']],
         ];
     }
 
@@ -130,6 +134,7 @@ class CallLog extends \yii\db\ActiveRecord
             'cl_status_id' => 'Status',
             'cl_client_id' => 'Client',
             'cl_price' => 'Price',
+            'cl_conference_id' => 'Conference Id',
         ];
     }
 
@@ -205,6 +210,11 @@ class CallLog extends \yii\db\ActiveRecord
 			->orWhere(['cl_id' => $this->cl_id])
 			->orderBy(['cl_call_created_dt' => SORT_ASC])->all();
 	}
+
+    public function getConference(): ActiveQuery
+    {
+        return $this->hasOne(Conference::class, ['cf_id' => 'cl_conference_id']);
+    }
 
     public static function find(): Scopes
     {

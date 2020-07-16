@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\Employee;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Conference;
@@ -20,6 +21,7 @@ class ConferenceSearch extends Conference
             [['cf_id', 'cf_cr_id', 'cf_status_id', 'cf_created_user_id'], 'integer'],
             [['cf_sid', 'cf_options', 'cf_created_dt', 'cf_updated_dt'], 'safe'],
             ['cf_friendly_name', 'string'],
+            [['cf_start_dt', 'cf_end_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -31,15 +33,8 @@ class ConferenceSearch extends Conference
         // bypass scenarios() implementation in the parent class
         return Model::scenarios();
     }
-
-    /**
-     * Creates data provider instance with search query applied
-     *
-     * @param array $params
-     *
-     * @return ActiveDataProvider
-     */
-    public function search($params)
+    
+    public function search($params, Employee $user): ActiveDataProvider
     {
         $query = Conference::find()->with(['createdUser']);
 
@@ -59,6 +54,14 @@ class ConferenceSearch extends Conference
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
+        }
+
+        if ($this->cf_start_dt) {
+            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cf_start_dt', $this->cf_start_dt, $user->timezone);
+        }
+
+        if ($this->cf_end_dt) {
+            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cf_end_dt', $this->cf_end_dt, $user->timezone);
         }
 
         // grid filtering conditions

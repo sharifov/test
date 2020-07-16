@@ -26,16 +26,11 @@ use frontend\widgets\notification\NotificationMessage;
 use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
 use sales\model\call\form\CallCustomParameters;
+use sales\model\callLog\services\CallLogConferenceTransferService;
 use sales\model\callLog\services\CallLogTransferService;
 use sales\model\conference\useCase\recordingStatusCallBackEvent\ConferenceRecordingStatusCallbackForm;
-use sales\model\conference\useCase\statusCallBackEvent\ConferenceParticipantMute;
-use sales\model\conference\useCase\statusCallBackEvent\ConferenceParticipantUnmute;
 use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackForm;
-use sales\model\conference\useCase\statusCallBackEvent\ConferenceEnd;
-use sales\model\conference\useCase\statusCallBackEvent\ConferenceParticipantHold;
-use sales\model\conference\useCase\statusCallBackEvent\ConferenceParticipantJoin;
-use sales\model\conference\useCase\statusCallBackEvent\ConferenceParticipantLeave;
-use sales\model\conference\useCase\statusCallBackEvent\ConferenceParticipantUnhold;
+use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackHandler;
 use sales\model\emailList\entity\EmailList;
 use sales\model\phoneList\entity\PhoneList;
 use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
@@ -61,6 +56,7 @@ use yii\queue\Queue;
  * Class CommunicationController
  *
  * @property CallService $callService
+ * @property ConferenceStatusCallbackHandler $conferenceStatusCallbackHandler
  */
 class CommunicationController extends ApiBaseController
 {
@@ -85,10 +81,9 @@ class CommunicationController extends ApiBaseController
     public const TYPE_NEW_SMS_MESSAGES_RECEIVED = 'new_sms_messages_received';
 
     public const TYPE_SMS_FINISH        = 'sms_finish';
-    /**
-     * @var CallService
-     */
+
     private $callService;
+    private $conferenceStatusCallbackHandler;
 
     /**
      * @param $id
@@ -96,10 +91,11 @@ class CommunicationController extends ApiBaseController
      * @param CallService $callService
      * @param array $config
      */
-    public function __construct($id, $module, CallService $callService, $config = [])
+    public function __construct($id, $module, CallService $callService, ConferenceStatusCallbackHandler $conferenceStatusCallbackHandler,  $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->callService = $callService;
+        $this->conferenceStatusCallbackHandler = $conferenceStatusCallbackHandler;
     }
 
     /**
@@ -550,7 +546,10 @@ class CommunicationController extends ApiBaseController
                     $logEnable = Yii::$app->params['settings']['call_log_enable'] ?? false;
                     if ($logEnable) {
                         if ($call->c_recording_sid) {
-                            (Yii::createObject(CallLogTransferService::class))->saveRecord($call);
+                            $conferenceBase = (bool)(\Yii::$app->params['settings']['voip_conference_base'] ?? false);
+                            if (!$conferenceBase || ($conferenceBase && !$call->c_conference_id)) {
+                                (Yii::createObject(CallLogTransferService::class))->saveRecord($call);
+                            }
                         }
                     }
                 }
@@ -2387,7 +2386,7 @@ class CommunicationController extends ApiBaseController
             $conference->start();
             $conference->cf_sid = $form->ConferenceSid;
             $conference->cf_friendly_name = $form->friendly_name;
-            $conference->cf_call_sid = $form->friendly_name;
+            $conference->cf_call_sid = $form->CallSid;
             $conference->cf_created_user_id = $form->conference_created_user_id;
 
             try {
@@ -2411,33 +2410,37 @@ class CommunicationController extends ApiBaseController
             return $response;
         }
 
-        if ($form->StatusCallbackEvent === Conference::EVENT_CONFERENCE_END) {
+        if ($form->StatusCallbackEvent === Conference::EVENT_CONFERENCE_START) {
 
-            (new ConferenceEnd($conference))();
+            $this->conferenceStatusCallbackHandler->start($conference, $form);
+
+        } elseif ($form->StatusCallbackEvent === Conference::EVENT_CONFERENCE_END) {
+
+            $this->conferenceStatusCallbackHandler->end($conference, $form);
 
         } elseif ($form->StatusCallbackEvent === Conference::EVENT_PARTICIPANT_JOIN) {
 
-            (new ConferenceParticipantJoin($conference))($form);
+            $this->conferenceStatusCallbackHandler->join($conference, $form);
 
         } elseif ($form->StatusCallbackEvent === Conference::EVENT_PARTICIPANT_HOLD) {
 
-            (new ConferenceParticipantHold($conference))($form);
+            $this->conferenceStatusCallbackHandler->hold($conference, $form);
 
         } elseif ($form->StatusCallbackEvent === Conference::EVENT_PARTICIPANT_UNHOLD) {
 
-            (new ConferenceParticipantUnhold($conference))($form);
+            $this->conferenceStatusCallbackHandler->unHold($conference, $form);
 
         } elseif ($form->StatusCallbackEvent === Conference::EVENT_PARTICIPANT_LEAVE) {
 
-            (new ConferenceParticipantLeave($conference))($form);
+            $this->conferenceStatusCallbackHandler->leave($conference, $form);
 
         } elseif ($form->StatusCallbackEvent === Conference::EVENT_PARTICIPANT_MUTE) {
 
-            (new ConferenceParticipantMute($conference))($form);
+            $this->conferenceStatusCallbackHandler->mute($conference, $form);
 
         } elseif ($form->StatusCallbackEvent === Conference::EVENT_PARTICIPANT_UNMUTE) {
 
-            (new ConferenceParticipantUnmute($conference))($form);
+            $this->conferenceStatusCallbackHandler->unMute($conference, $form);
 
         }
 
@@ -2499,6 +2502,8 @@ class CommunicationController extends ApiBaseController
 
         if ($conference->save()) {
             $response['conference'] = $conference->getAttributes();
+            $service = \Yii::createObject(CallLogConferenceTransferService::class);
+            $service->saveRecord($conference->cf_id, $form);
         } else {
             Yii::error(VarDumper::dumpAsString([
                 'errors' => $conference->getErrors(),
