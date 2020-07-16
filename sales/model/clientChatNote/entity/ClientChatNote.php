@@ -44,13 +44,13 @@ class ClientChatNote extends ActiveRecord
     public function attributeLabels(): array
     {
         return [
-            'ccn_id' => 'Ccn ID',
-            'ccn_chat_id' => 'Ccn Chat ID',
-            'ccn_user_id' => 'Ccn User ID',
-            'ccn_note' => 'Ccn Note',
-            'ccn_deleted' => 'Ccn Deleted',
-            'ccn_created_dt' => 'Ccn Created Dt',
-            'ccn_updated_dt' => 'Ccn Updated Dt',
+            'ccn_id' => 'ID',
+            'ccn_chat_id' => 'Chat ID',
+            'ccn_user_id' => 'User ID',
+            'ccn_note' => 'Note',
+            'ccn_deleted' => 'Deleted',
+            'ccn_created_dt' => 'Created Dt',
+            'ccn_updated_dt' => 'Updated Dt',
         ];
     }
 
