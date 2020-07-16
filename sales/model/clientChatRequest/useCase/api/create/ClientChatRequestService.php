@@ -156,7 +156,7 @@ class ClientChatRequestService
 
 	private function guestDisconnected(ClientChatRequest $clientChatRequest): void
 	{
-		$visitor = $this->clientChatVisitorRepository->findByVisitorId($clientChatRequest->getVisitorId());
+		$visitor = $this->clientChatVisitorRepository->findByVisitorId($clientChatRequest->getRcId());
 
 		if ($visitor->ccvClient) {
 			$clientChats = $this->clientChatRepository->findByClientId($visitor->ccv_client_id);
