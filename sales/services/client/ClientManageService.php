@@ -317,9 +317,14 @@ class ClientManageService
 		$clientPhoneForm = new PhoneCreateForm();
 		$clientPhoneForm->phone = $clientChatRequest->getPhoneFromData();
 
+		$rcId = $clientChatRequest->getClientRcId();
+		if (empty($rcId)) {
+			throw new \RuntimeException('Client Rocket Chat id is not provided');
+		}
+
 		$clientForm = new ClientCreateForm([
 			'firstName' => $clientChatRequest->getNameFromData(),
-			'rcId' => $clientChatRequest->getRcId(),
+			'rcId' => $rcId,
 		]);
 
 		$client = $this->getOrCreateByRcId($clientForm);

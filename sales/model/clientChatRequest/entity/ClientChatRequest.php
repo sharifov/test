@@ -199,7 +199,7 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 		return $this->decodedData['visitor']['user_id'] ?? '';
 	}
 
-	public function getRcId(): ?string
+	public function getClientRcId(): ?string
 	{
 		return $this->decodedData['visitor']['id'] ?? null;
 	}
