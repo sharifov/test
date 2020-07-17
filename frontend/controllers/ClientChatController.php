@@ -499,17 +499,16 @@ class ClientChatController extends FController
 
             $message = $this->createOfferMessage($clientChat, $captures);
 
-//        $rocketUserId = Auth::user()->userProfile->up_rc_user_id;
-//        $rocketToken = Auth::user()->userProfile->up_rc_auth_token;
-//        $headers =  [
-//            'X-User-Id' => $rocketUserId,
-//            'X-Auth-Token' => $rocketToken,
-//        ];
+            if (($rocketUserId = Auth::user()->userProfile->up_rc_user_id) && ($rocketToken = Auth::user()->userProfile->up_rc_auth_token)) {
+                $headers =  [
+                    'X-User-Id' => $rocketUserId,
+                    'X-Auth-Token' => $rocketToken,
+                ];
+            } else {
+                $headers = Yii::$app->rchat->getSystemAuthDataHeader();
+            }
 
-//            $headers = Yii::$app->rchat->getSystemAuthDataHeader();
-//            Yii::$app->chatBot->sendMessage($message, $headers);
-
-            Yii::$app->rchat->sendMessage($message);
+            Yii::$app->chatBot->sendMessage($message, $headers);
             $this->removeQuoteCaptures(Auth::id(), $chatId);
 
         } catch (\DomainException $e) {
