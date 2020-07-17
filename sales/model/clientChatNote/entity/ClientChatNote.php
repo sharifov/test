@@ -4,9 +4,11 @@ namespace sales\model\clientChatNote\entity;
 
 use common\models\Employee;
 use sales\model\clientChat\entity\ClientChat;
-use Yii;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "client_chat_note".
@@ -27,7 +29,7 @@ class ClientChatNote extends ActiveRecord
 
     public static function tableName(): string
     {
-        return 'client_chat_note';
+        return '{{%client_chat_note}}';
     }
 
     public function rules(): array
@@ -52,6 +54,26 @@ class ClientChatNote extends ActiveRecord
             'ccn_created_dt' => 'Created Dt',
             'ccn_updated_dt' => 'Updated Dt',
         ];
+    }
+
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['ccn_created_dt', 'ccn_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['ccn_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s')
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'createdByAttribute' => 'ccn_created_dt',
+                'updatedByAttribute' => 'ccn_updated_dt',
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     public function getChat(): ActiveQuery
