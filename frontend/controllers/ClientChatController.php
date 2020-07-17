@@ -528,7 +528,7 @@ class ClientChatController extends FController
                 'image_url' => $capture['img'],
                 'actions' => [
                     [
-                        'type' => 'button',
+                        'type' => 'web_url',
                         'msg_in_chat_window' => true,
                         'text' => 'Offer',
                         'msg' => $capture['checkoutUrl']
@@ -541,7 +541,9 @@ class ClientChatController extends FController
             'message' => [
                 'rid' => $chat->cch_rid,
                 'attachments' => $attachments,
-                'customTemplate' => 'carousel',
+                'file' => [
+                    'customTemplate' => 'carousel',
+                ]
             ]
         ];
         return $data;
