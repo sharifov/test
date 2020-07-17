@@ -15,6 +15,9 @@ class m200716_124723_create_tbl_client_chat_note extends Migration
 		'/client-chat-note-crud/create',
 		'/client-chat-note-crud/delete',
 		'/client-chat-note-crud/view',
+		'/client-chat/note',
+		'/client-chat/create-note',
+		'/client-chat/delete-note',
 	];
 
 	private array $roles = [

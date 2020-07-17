@@ -35,8 +35,9 @@ class ClientChatNote extends ActiveRecord
     public function rules(): array
     {
         return [
+            [['ccn_note', 'ccn_chat_id'], 'required'],
             [['ccn_chat_id', 'ccn_user_id', 'ccn_deleted'], 'integer'],
-            [['ccn_note'], 'string'],
+            [['ccn_note'], 'string', 'min' => 1, 'max' => 1000],
             [['ccn_created_dt', 'ccn_updated_dt'], 'safe'],
             [['ccn_chat_id'], 'exist', 'skipOnError' => true, 'targetClass' => ClientChat::class, 'targetAttribute' => ['ccn_chat_id' => 'cch_id']],
             [['ccn_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ccn_user_id' => 'id']],
@@ -69,8 +70,8 @@ class ClientChatNote extends ActiveRecord
             ],
             'user' => [
                 'class' => BlameableBehavior::class,
-                'createdByAttribute' => 'ccn_created_dt',
-                'updatedByAttribute' => 'ccn_updated_dt',
+                'createdByAttribute' => 'ccn_user_id',
+                'updatedByAttribute' => 'ccn_user_id',
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);

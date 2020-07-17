@@ -4,6 +4,7 @@ use frontend\themes\gentelella_v2\assets\ClientChatAsset;
 use sales\auth\Auth;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
+use sales\model\clientChatNote\entity\ClientChatNote;
 use yii\bootstrap4\Alert;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Url;
@@ -84,6 +85,15 @@ $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
         <div id="_client-chat-info">
             <?php if ($clientChat): ?>
                 <?= $this->render('partial/_client-chat-info', ['clientChat' => $clientChat, 'client' => $client, 'existAvailableLeadQuotes' => $existAvailableLeadQuotes]) ?>
+            <?php endif; ?>
+        </div>
+
+        <div id="_client-chat-note">
+            <?php if ($clientChat): ?>
+                <?php echo $this->render('partial/_client-chat-note', [
+                    'clientChat' => $clientChat,
+                    'model' => new ClientChatNote(),
+                ]) ?>
             <?php endif; ?>
         </div>
     </div>
