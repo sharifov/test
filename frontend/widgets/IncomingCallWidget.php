@@ -70,7 +70,12 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
 
                     //VarDumper::dump($action); exit;
 
-                    $callUserAccess = CallUserAccess::find()->where(['cua_user_id' => $userModel->id, 'cua_call_id' => $call->c_id])->one();
+                    $callUserAccess = CallUserAccess::find()->where([
+                        'cua_user_id' => $userModel->id,
+                        'cua_call_id' => $call->c_id,
+                        'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING
+                    ])->one();
+
                     if ($callUserAccess) {
 
                         //VarDumper::dump($action); exit;
@@ -86,9 +91,15 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
                                 }
                                 break;
                             case 'accept':
-                                $disconnect = new DisconnectFromAllConferenceCalls();
-                                if ($disconnect->disconnect($userModel->id)) {
-                                    $this->acceptCall($callUserAccess, $userModel);
+                                $key = 'accept_call_' . $callUserAccess->cua_call_id;
+                                Yii::$app->redis->setnx($key, $userModel->id);
+                                $value = Yii::$app->redis->get($key);
+                                if ((int)$value === (int)$userModel->id) {
+                                    $disconnect = new DisconnectFromAllConferenceCalls();
+                                    if ($disconnect->disconnect($userModel->id)) {
+                                        $this->acceptCall($callUserAccess, $userModel);
+                                    }
+                                    Yii::$app->redis->expire($key, 10);
                                 }
                                 break;
 //                            case 'skip':

@@ -1009,9 +1009,15 @@ class CallController extends FController
 				$callUserAccess = $this->callUserAccessRepository->getByUserAndCallId(Auth::id(), $call->c_id);
 				switch ($action) {
 					case 'accept':
-                        $disconnect = new DisconnectFromAllConferenceCalls();
-                        if ($disconnect->disconnect(Auth::id())) {
-                            $this->callService->acceptCall($callUserAccess, Auth::user());
+                        $key = 'accept_call_' . $callUserAccess->cua_call_id;
+                        Yii::$app->redis->setnx($key, Auth::id());
+                        $value = Yii::$app->redis->get($key);
+                        if ((int)$value === (int)Auth::id()) {
+                            $disconnect = new DisconnectFromAllConferenceCalls();
+                            if ($disconnect->disconnect(Auth::id())) {
+                                $this->callService->acceptCall($callUserAccess, Auth::user());
+                            }
+                            Yii::$app->redis->expire($key, 10);
                         }
 						$response['error'] = false;
 						$response['message'] = 'success';
