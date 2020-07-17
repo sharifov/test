@@ -237,6 +237,27 @@ class ClientChatController extends FController
 		return $this->asJson($result);
 	}
 
+	public function actionNote(): Response
+    {
+        $cchId = \Yii::$app->request->post('cch_id');
+
+		$result = [
+			'html' => '',
+			'message' => ''
+		];
+		try {
+			$clientChat = $this->clientChatRepository->findById($cchId);
+
+			$result['html'] = $this->renderPartial('partial/_client-chat-note', [
+                'clientChat' => $clientChat,
+                'model' => new ClientChatNote(),
+            ]);
+
+		} catch (NotFoundException $e) {}
+
+		return $this->asJson($result);
+	}
+
     public function actionCreateNote(): string
     {
         $cchId = Yii::$app->request->get('cch_id');
