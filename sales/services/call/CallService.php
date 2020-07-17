@@ -120,6 +120,7 @@ class CallService
 		$this->callUserAccessRepository->save($callUserAccess);
 		if (($call = $callUserAccess->cuaCall) && Call::applyCallToAgent($call, $user->id)) {
 			Notifications::pingUserMap();
+			return true;
 		}
 		return false;
 	}

@@ -249,6 +249,10 @@ $js = <<<JS
                                 }
                              }
                         }
+                        
+                        if (obj.cmd === 'noAnsweredCall') {
+                            createNotify('No answered call', 'No answered call', 'warning');
+                        }
 
                         if (obj.cmd === 'conferenceUpdate') {
                             if (typeof obj.data !== 'undefined') {
