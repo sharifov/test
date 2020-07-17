@@ -534,6 +534,13 @@ class ClientChatController extends FController
                         'msg' => $capture['checkoutUrl']
                     ]
                 ],
+                'fields' => [
+                    [
+                        'short' => true,
+                        'title' =>  'Offer',
+                        'value' => '[' . $capture['checkoutUrl'] . '](' . $capture['checkoutUrl'] . ')'
+                    ],
+                ],
             ];
         }
 
