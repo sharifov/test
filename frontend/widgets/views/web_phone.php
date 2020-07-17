@@ -709,13 +709,15 @@ use yii\helpers\Html;
                         }
                     } else {
 
-                        if (conferenceBase) {
-                            let btnHold = $('.btn-hold-call');
-                            btnHold.prop('disabled', false);
-                            btnHold.html('<i class="fa fa-pause"></i> <span>Hold</span>');
-                            btnHold.data('mode', 'unhold');
-                            btnHold.attr('data-call-sid', connection.parameters.CallSid);
-                            $('#btn-group-id-hold-call').show();
+                        if (typeof  PhoneWidgetCall === 'object') {
+                            if (conferenceBase) {
+                                let btnHold = $('.btn-hold-call');
+                                btnHold.prop('disabled', false);
+                                btnHold.html('<i class="fa fa-pause"></i> <span>Hold</span>');
+                                btnHold.data('mode', 'unhold');
+                                btnHold.attr('data-call-sid', connection.parameters.CallSid);
+                                $('#btn-group-id-hold-call').show();
+                            }
                         }
 
                         joinConnection = null;
