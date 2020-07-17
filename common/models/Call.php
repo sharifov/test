@@ -4,7 +4,6 @@ namespace common\models;
 
 use common\components\purifier\Purifier;
 use common\models\query\CallQuery;
-use frontend\controllers\ConferenceController;
 use sales\model\call\helper\CallHelper;
 use frontend\widgets\newWebPhone\call\socket\MissedCallMessage;
 use frontend\widgets\newWebPhone\call\socket\RemoveIncomingRequestMessage;
@@ -766,6 +765,7 @@ class Call extends \yii\db\ActiveRecord
 
         $leadRepository = Yii::createObject(LeadRepository::class);
         $qCallService = Yii::createObject(QCallService::class);
+        $conferenceBase = (bool)(\Yii::$app->params['settings']['voip_conference_base'] ?? false);
 
 //        $userListSocketNotification = [];
         $isChangedStatus = isset($changedAttributes['c_status_id']);
@@ -1226,7 +1226,6 @@ class Call extends \yii\db\ActiveRecord
 			if (!$this->currentParticipant || $this->currentParticipant->isAgent() || $this->isEnded()) {
 			    $callSid = $this->c_call_sid;
 			    $callId = $this->c_id;
-                $conferenceBase = (bool)(\Yii::$app->params['settings']['voip_conference_base'] ?? false);
                 if (!$conferenceBase) {
                     if ($isChangedStatus && $this->isStatusInProgress() && $this->isOut() && $this->c_parent_id) {
                         $callSid = $this->c_parent_call_sid ?: $this->cParent->c_call_sid;
@@ -1320,6 +1319,7 @@ class Call extends \yii\db\ActiveRecord
         Notifications::pingUserMap();
 
         $logEnable = Yii::$app->params['settings']['call_log_enable'] ?? false;
+
         if ($logEnable) {
             $isChangedTwStatus = array_key_exists('c_call_status', $changedAttributes);
             $isChangedDuration = array_key_exists('c_call_duration', $changedAttributes);
@@ -1327,6 +1327,7 @@ class Call extends \yii\db\ActiveRecord
                 Yii::$app->id === 'app-webapi'
                 && $this->isTwFinishStatus()
                 && ($insert || $isChangedTwStatus || $isChangedDuration)
+//                && (!$conferenceBase || ($conferenceBase && !$this->c_conference_id))
             ) {
                 (Yii::createObject(CallLogTransferService::class))->transfer($this);
             }

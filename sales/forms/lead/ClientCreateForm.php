@@ -10,6 +10,7 @@ use yii\base\Model;
  * @property string $middleName
  * @property string $lastName
  * @property string $uuid
+ * @property string $rcId
  */
 class ClientCreateForm extends Model
 {
@@ -19,6 +20,7 @@ class ClientCreateForm extends Model
     public $middleName;
     public $lastName;
     public $uuid;
+    public $rcId;
 
     /**
      * @return array
@@ -32,7 +34,8 @@ class ClientCreateForm extends Model
             [['firstName', 'middleName', 'lastName'], 'string', 'max' => 100],
             [['firstName', 'middleName', 'lastName'], 'match', 'pattern' => "/^[a-z-\s\']+$/i"],
             [['firstName', 'middleName', 'lastName'], 'filter', 'filter' => 'trim'],
-			['uuid', 'string', 'max' => 36]
+			['uuid', 'string', 'max' => 36],
+			['rcId', 'string', 'max' => 50],
         ];
     }
 
