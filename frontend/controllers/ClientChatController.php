@@ -574,11 +574,11 @@ class ClientChatController extends FController
             if (count($content_data['quotes']) > 1) {
                 throw new \DomainException('Count quotes > 1');
             }
-            if (isset($content_data['quotes'][0])) {
-                $tmp = $content_data['quotes'][0];
-                unset($content_data['quotes']);
-                $content_data['quote'] = $tmp;
-            }
+//            if (isset($content_data['quotes'][0])) {
+//                $tmp = $content_data['quotes'][0];
+//                unset($content_data['quotes']);
+//                $content_data['quote'] = $tmp;
+//            }
         } else {
             throw new \DomainException('Not found quote');
         }
