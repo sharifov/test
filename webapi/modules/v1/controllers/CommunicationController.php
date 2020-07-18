@@ -2405,6 +2405,23 @@ class CommunicationController extends ApiBaseController
 
         }
 
+        if (
+            $conference
+            && !$conference->cf_call_sid
+            && $form->CallSid
+            && ($form->StatusCallbackEvent === Conference::EVENT_PARTICIPANT_JOIN || $form->StatusCallbackEvent === Conference::EVENT_PARTICIPANT_LEAVE)
+        ) {
+            $conference->cf_call_sid = $form->CallSid;
+            if (!$conference->save()) {
+                Yii::error(VarDumper::dumpAsString([
+                    'errors' => $conference->getErrors(),
+                    'model' => $conference->getAttributes(),
+                    'post' => $post,
+                    'form' => $form->getAttributes(),
+                ]), 'API:Communication:voiceConferenceCallCallback:SecondTry');
+            }
+        }
+
         if (!$conference) {
             $response['error'] = 'Not found and not saved Conference';
             return $response;
