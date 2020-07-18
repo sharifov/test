@@ -99,7 +99,12 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
                                     if ($disconnect->disconnect($userModel->id)) {
                                         $this->acceptCall($callUserAccess, $userModel);
                                     }
-                                    Yii::$app->redis->expire($key, 10);
+                                    Yii::$app->redis->expire($key, 5);
+                                } else {
+                                    Yii::info(VarDumper::dumpAsString([
+                                        'callId' => $callUserAccess->cua_call_id,
+                                        'userId' => $userModel->id
+                                    ]), 'info\IncomingCallWidgetRedisReservation');
                                 }
                                 break;
 //                            case 'skip':

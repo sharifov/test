@@ -1017,7 +1017,12 @@ class CallController extends FController
                             if ($disconnect->disconnect(Auth::id())) {
                                 $this->callService->acceptCall($callUserAccess, Auth::user());
                             }
-                            Yii::$app->redis->expire($key, 10);
+                            Yii::$app->redis->expire($key, 5);
+                        } else {
+                            Yii::info(VarDumper::dumpAsString([
+                                'callId' => $callUserAccess->cua_call_id,
+                                'userId' => Auth::id()
+                            ]), 'info\NewPhoneWidgetAcceptRedisReservation');
                         }
 						$response['error'] = false;
 						$response['message'] = 'success';
