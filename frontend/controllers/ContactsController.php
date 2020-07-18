@@ -22,6 +22,7 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\StringHelper;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\web\HttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -457,13 +458,17 @@ class ContactsController extends FController
      *
      * @param string|null $q
      * @return Response
-     * @throws BadRequestHttpException
+     * @throws ForbiddenHttpException
      */
     public function actionListCallsAjax(?string $q = null): Response
     {
 //        if (!(Yii::$app->request->isAjax && Yii::$app->request->isPost)) {
 //            throw new BadRequestHttpException();
 //        }
+
+        if (!Auth::can('PhoneWidget_DialpadSearch')) {
+            throw new ForbiddenHttpException('Access denied');
+        }
 
         $out = ['results' => []];
 

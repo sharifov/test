@@ -10,6 +10,7 @@ var PhoneWidgetCall = function () {
         'ajaxSaveCallUrl': '',
         'clearMissedCallsUrl': '',
         'currentQueueCallsUrl': '',
+        'dialpadEnabled': true
     };
 
     let callRequester = new window.phoneWidget.requesters.CallRequester();
@@ -60,6 +61,7 @@ var PhoneWidgetCall = function () {
         contactInfoClickEvent();
         holdClickEvent();
         hangupClickEvent();
+        insertPhoneNumberEvent();
 
         loadCurrentQueueCalls();
     }
@@ -800,6 +802,31 @@ var PhoneWidgetCall = function () {
                 sendHoldRequest(call.data.callSid);
             }
         });
+    }
+
+    function insertPhoneNumberEvent() {
+        $(document).on('click', '.phone-dial-history', function(e) {
+            e.preventDefault();
+            if (settings.dialpadEnabled) {
+                phoneDialInsertNumber(this);
+            }
+        });
+
+        $(document).on('click', '.phone-dial-contacts', function(e) {
+            e.preventDefault();
+            phoneDialInsertNumber(this);
+        });
+
+        function phoneDialInsertNumber(self) {
+            let phone = $(self).data('phone');
+            let title = $(self).data('title');
+            $(".widget-phone__contact-info-modal").hide();
+            $('.phone-widget__header-actions a[data-toggle-tab]').removeClass('is_active');
+            $('.phone-widget__tab').removeClass('is_active');
+            $('.phone-widget__header-actions a[data-toggle-tab="tab-phone"]').addClass('is_active');
+            $('#tab-phone').addClass('is_active');
+            insertPhoneNumber(phone, title);
+        }
     }
 
     function sendHoldRequest(callSid) {

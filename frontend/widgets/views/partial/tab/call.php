@@ -1,8 +1,15 @@
 <?php
 
+use sales\auth\Auth;
+
 /** @var View $this */
 /** @var \common\models\UserCallStatus $userCallStatus */
 /** @var int $countMissedCalls */
+
+$canDialpad = true;
+if (!Auth::can('PhoneWidget_Dialpad')) {
+    $canDialpad = false;
+}
 
 ?>
 <div class="phone-widget__tab is_active" id="tab-phone">
@@ -28,65 +35,85 @@
                 use yii\web\View;
                 use yii\widgets\ActiveForm;
 
-                $form = ActiveForm::begin([
-                    'id' => 'contact-list-calls-ajax',
-                    'action' => ['/contacts/list-calls-ajax'],
-                    'method' => 'get',
-                ]);
+                $canDialpadSearch = Auth::can('PhoneWidget_DialpadSearch');
+                if ($canDialpadSearch) {
+                    $form = ActiveForm::begin([
+                        'id' => 'contact-list-calls-ajax',
+                        'action' => ['/contacts/list-calls-ajax'],
+                        'method' => 'get',
+                    ]);
+                }
 
                 echo Html::textInput('q', null, [
                     'id' => 'call-pane__dial-number',
                     'class' => 'call-pane__dial-number',
                     'placeholder' => 'Name, company, phone...',
                     'autocomplete' => 'off',
-                    'maxlength' => 16
+                    'maxlength' => 16,
+                    'disabled' => !$canDialpad,
+                    'readonly' => !$canDialpad,
                 ]);
 
-                ActiveForm::end()
+                if ($canDialpadSearch) {
+                    ActiveForm::end();
+                }
 
                 ?>
             </div>
 
-            <a href="#" class="call-pane__dial-clear-all is-shown">
+        <?php if ($canDialpad): ?>
+            <a href="#" class="call-pane__dial-clear-all is-shown call_pane_dialpad_clear_number">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path
-                        d="M7 8.20625L12.7937 14L13.9999 12.7938L8.2062 7.00004L14 1.20621L12.7938 0L7 5.79383L1.2062 0L0 1.20621L5.7938 7.00004L7.97135e-05 12.7938L1.20628 14L7 8.20625Z"
-                        fill="white" />
+                            d="M7 8.20625L12.7937 14L13.9999 12.7938L8.2062 7.00004L14 1.20621L12.7938 0L7 5.79383L1.2062 0L0 1.20621L5.7938 7.00004L7.97135e-05 12.7938L1.20628 14L7 8.20625Z"
+                            fill="white" />
                 </svg>
             </a>
+        <?php else: ?>
+            <a href="#" class="call-pane__dial-clear-all is-shown call_pane_dialpad_clear_number_disabled">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                            d="M7 8.20625L12.7937 14L13.9999 12.7938L8.2062 7.00004L14 1.20621L12.7938 0L7 5.79383L1.2062 0L0 1.20621L5.7938 7.00004L7.97135e-05 12.7938L1.20628 14L7 8.20625Z"
+                            fill="white" />
+                </svg>
+            </a>
+        <?php endif; ?>
+
 
     </div>
+      <?php
+        $dialPadButtonDisabledClass = '';
+        if (!$canDialpad) {
+            $dialPadButtonDisabledClass = ' disabled="disabled"';
+        }
+      ?>
     <div class="call-pane__dial-block">
       <ul class="call-pane__dial dial">
-        <li class="dial__item"><button class="dial__btn" value="1">1</button></li>
-        <li class="dial__item"><button class="dial__btn" value="2">2</button></li>
-        <li class="dial__item"><button class="dial__btn" value="3">3</button></li>
-        <li class="dial__item"><button class="dial__btn" value="4">4</button></li>
-        <li class="dial__item"><button class="dial__btn" value="5">5</button></li>
-        <li class="dial__item"><button class="dial__btn" value="6">6</button></li>
-        <li class="dial__item"><button class="dial__btn" value="7">7</button></li>
-        <li class="dial__item"><button class="dial__btn" value="8">8</button></li>
-        <li class="dial__item"><button class="dial__btn" value="9">9</button></li>
-        <li class="dial__item"><button class="dial__btn" value="✱">✱</button></li>
-        <li class="dial__item"><button class="dial__btn" value="0">0 +</button></li>
-        <li class="dial__item"><button class="dial__btn" value="#">#</button></li>
+        <li class="dial__item"><button class="dial__btn" value="1"<?= $dialPadButtonDisabledClass?>>1</button></li>
+        <li class="dial__item"><button class="dial__btn" value="2"<?= $dialPadButtonDisabledClass?>>2</button></li>
+        <li class="dial__item"><button class="dial__btn" value="3"<?= $dialPadButtonDisabledClass?>>3</button></li>
+        <li class="dial__item"><button class="dial__btn" value="4"<?= $dialPadButtonDisabledClass?>>4</button></li>
+        <li class="dial__item"><button class="dial__btn" value="5"<?= $dialPadButtonDisabledClass?>>5</button></li>
+        <li class="dial__item"><button class="dial__btn" value="6"<?= $dialPadButtonDisabledClass?>>6</button></li>
+        <li class="dial__item"><button class="dial__btn" value="7"<?= $dialPadButtonDisabledClass?>>7</button></li>
+        <li class="dial__item"><button class="dial__btn" value="8"<?= $dialPadButtonDisabledClass?>>8</button></li>
+        <li class="dial__item"><button class="dial__btn" value="9"<?= $dialPadButtonDisabledClass?>>9</button></li>
+        <li class="dial__item"><button class="dial__btn" value="✱"<?= $dialPadButtonDisabledClass?>>✱</button></li>
+        <li class="dial__item"><button class="dial__btn" value="0"<?= $dialPadButtonDisabledClass?>>0 +</button></li>
+        <li class="dial__item"><button class="dial__btn" value="#"<?= $dialPadButtonDisabledClass?>>#</button></li>
       </ul>
       <div class="call-pane__call-btns">
         <button class="call-pane__start-call calling-state-block" id="btn-new-make-call">
-          <div class="call-in-action">
-            <span class="call-in-action__text">Calling</span>
-            <span class="call-in-action__time">00:00</span>
-          </div>
-          <i class="fas fa-phone"></i>
+          <i class="fas fa-phone"> </i>
         </button>
-        <button class="call-pane__end-call">
-          <i class="fas fa-phone-slash"></i>
-        </button>
-        <button class="call-pane__correction">
-          <i class="fas fa-backspace"></i>
-        </button>
+        <?php if ($canDialpad): ?>
+            <button class="call-pane__correction">
+              <i class="fas fa-backspace"> </i>
+            </button>
+        <?php endif;?>
       </div>
     </div>
+
     <!--        <div class="call-pane__note-block">-->
     <!--            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">-->
     <!--                <path fill-rule="evenodd" clip-rule="evenodd"-->
@@ -129,7 +156,7 @@
 
       <form id="contact-list-calls-ajax" action="/contacts/list-calls-ajax" method="get">
         <input type="text" id="call-pane__dial-number" class="call-pane__dial-number" name="q" maxlength="16" placeholder="Name, company, phone..." autocomplete="off" readonly="readonly">
-        <a href="#" class="call-pane__dial-clear-all is-shown">
+        <a href="#" class="call-pane__dial-clear-all is-shown call_pane_dialpad_clear_number">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M7 8.20625L12.7937 14L13.9999 12.7938L8.2062 7.00004L14 1.20621L12.7938 0L7 5.79383L1.2062 0L0 1.20621L5.7938 7.00004L7.97135e-05 12.7938L1.20628 14L7 8.20625Z" fill="white"></path>
           </svg>
@@ -176,6 +203,8 @@ $ajaxHangupUrl = Url::to(['/phone/ajax-hangup']);
 
 $ucStatus = $userCallStatus->us_type_id ?? UserCallStatus::STATUS_TYPE_OCCUPIED;
 
+$canDialpad = $canDialpad ? 'true' : 'false';
+
 $js = <<<JS
 PhoneWidgetCall.init({
     'ajaxCallRedirectGetAgents': '$ajaxCallRedirectGetAgents',
@@ -193,7 +222,8 @@ PhoneWidgetCall.init({
     'holdUrl': '$holdUrl',
     'unHoldUrl': '$unHoldUrl',
     'returnHoldCallUrl': '$returnHoldCallUrl',
-    'ajaxHangupUrl': '$ajaxHangupUrl'
+    'ajaxHangupUrl': '$ajaxHangupUrl',
+    'dialpadEnabled': $canDialpad,
 });
 JS;
 $this->registerJs($js);

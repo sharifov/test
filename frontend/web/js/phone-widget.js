@@ -344,7 +344,7 @@ $(document).ready(function() {
 
     //---------------------------------------------------
 
-    $('.call-pane__dial-clear-all').on('click', function(e) {
+    $('.call_pane_dialpad_clear_number').on('click', function(e) {
         e.preventDefault();
         $('.call-pane__dial-number').val('').attr('readonly', false).prop('readonly', false);
         $('#call-to-label').text('');
@@ -353,6 +353,12 @@ $(document).ready(function() {
         $('.dial__btn').attr('disabled', false).removeClass('disabled');
 
         // $(this).removeClass('is-shown')
+    });
+    $('.call_pane_dialpad_clear_number_disabled').on('click', function(e) {
+        e.preventDefault();
+        $('.call-pane__dial-number').val('').attr('readonly', true).prop('readonly', true);
+        $('#call-to-label').text('');
+        $('.suggested-contacts').removeClass('is_active');
     });
 
     $('.call-pane__correction').on('click', function(e) {
