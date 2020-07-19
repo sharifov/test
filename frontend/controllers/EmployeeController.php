@@ -382,158 +382,182 @@ class EmployeeController extends FController
         $modelProfile = new UserProfile();
 
         if (Yii::$app->request->isPost && $model->load(Yii::$app->request->post())) {
-            $attr = Yii::$app->request->post($model->formName());
 
-            //VarDumper::dump($model->make_user_project_params, 10, true); exit;
+                $attr = Yii::$app->request->post($model->formName());
 
-            $model->prepareSave($attr);
+                //VarDumper::dump($model->make_user_project_params, 10, true); exit;
 
-            if ($model->validate() && $model->save()) {
+                $model->prepareSave($attr);
 
-                $modelProfile->up_user_id = $model->id;
+                $transaction = Yii::$app->db->beginTransaction();
 
-                if ($modelProfile->load(Yii::$app->request->post())) {
+                try {
 
-                    $modelProfile->up_updated_dt = date('Y-m-d H:i:s');
+                    if ($model->save()) {
 
-                    if(!$modelProfile->save()) {
-                        Yii::error(VarDumper::dumpAsString($modelProfile->errors, 10), 'EmployeeController:actionCreate:modelProfile:save');
-                    }
-                }
-
-                // VarDumper::dump($model->form_roles, 10, true); exit;
-
-                if ($model->form_roles) {
-                    $availableRoles = Employee::getAllRoles();
-                    foreach ($model->form_roles as $keyItem => $roleItem) {
-                        if (!array_key_exists($roleItem, $availableRoles)) {
-                            unset($model->form_roles[$keyItem]);
+                        $modelProfile->up_user_id = $model->id;
+                        if ($modelProfile->load(Yii::$app->request->post())) {
+                            $modelProfile->up_updated_dt = date('Y-m-d H:i:s');
+                            if (!$modelProfile->save()) {
+                                Yii::error(VarDumper::dumpAsString($modelProfile->errors), 'EmployeeController:actionCreate:modelProfile:save');
+                                throw new \Exception('Profile settings error');
+                            }
+                        } else {
+                            throw new \Exception('Profile settings is empty');
                         }
-                    }
-                }
 
-                $model->addRole(true);
+                        // VarDumper::dump($model->form_roles, 10, true); exit;
 
-                if(isset($attr['user_groups'])) {
-                    if($attr['user_groups']) {
-                        foreach ($attr['user_groups'] as $ugId) {
-                            $uga = new UserGroupAssign();
-                            $uga->ugs_user_id = $model->id;
-                            $uga->ugs_group_id = (int) $ugId;
-                            $uga->save();
-                        }
-                    }
-                }
-
-
-                if(isset($attr['user_departments'])) {
-                    if($attr['user_departments']) {
-                        foreach ($attr['user_departments'] as $udId) {
-                            $ud = new UserDepartment();
-                            $ud->ud_user_id = $model->id;
-                            $ud->ud_dep_id = (int) $udId;
-                            if(!$ud->save()) {
-                                Yii::error(VarDumper::dumpAsString($ud->errors), 'Employee:Create:UserDepartment:save');
+                        if ($model->form_roles) {
+                            $availableRoles = Employee::getAllRoles();
+                            foreach ($model->form_roles as $keyItem => $roleItem) {
+                                if (!array_key_exists($roleItem, $availableRoles)) {
+                                    unset($model->form_roles[$keyItem]);
+                                }
                             }
                         }
-                    }
-                }
 
+                        $model->addRole(true);
 
-                if(isset($attr['user_projects'])) {
-                    if($attr['user_projects']) {
-                        foreach ($attr['user_projects'] as $ugId) {
-                            $up = new ProjectEmployeeAccess();
-                            $up->employee_id = $model->id;
-                            $up->project_id = (int) $ugId;
-                            $up->created = date('Y-m-d H:i:s');
-                            $up->save();
+                        if (!\Yii::$app->authManager->getRolesByUser($model->id)) {
+                            throw new \Exception('Roles is empty');
                         }
-                    }
-                }
 
-
-                $emailArr = explode('@', $model->email);
-                $emailPrefix = $emailArr[0] ?? null;
-
-                //VarDumper::dump($emailPrefix, 10, true);
-
-                if ($model->make_user_project_params) {
-                    if (!empty($attr['user_projects'])) {
-                        foreach ($attr['user_projects'] as $projectId) {
-
-                            //VarDumper::dump($projectId, 10, true);
-
-                            $project = Project::findOne($projectId);
-                            if (!$project || $project->closed) {
-                                continue;
+                        if (isset($attr['user_groups'])) {
+                            if ($attr['user_groups']) {
+                                foreach ($attr['user_groups'] as $ugId) {
+                                    $uga = new UserGroupAssign();
+                                    $uga->ugs_user_id = $model->id;
+                                    $uga->ugs_group_id = (int)$ugId;
+                                    if (!$uga->save()) {
+                                        Yii::error(VarDumper::dumpAsString($uga->getErrors()), 'Employee:Create:UserGroupAssign:save');
+                                        throw new \Exception('User groups error. ' . VarDumper::dumpAsString($uga->getErrors()));
+                                    }
+                                }
                             }
+                        }
 
 
+                        if (isset($attr['user_departments'])) {
+                            if ($attr['user_departments']) {
+                                foreach ($attr['user_departments'] as $udId) {
+                                    $ud = new UserDepartment();
+                                    $ud->ud_user_id = $model->id;
+                                    $ud->ud_dep_id = (int)$udId;
+                                    if (!$ud->save()) {
+                                        Yii::error(VarDumper::dumpAsString($ud->getErrors()), 'Employee:Create:UserDepartment:save');
+                                        throw new \Exception('User Department error. ' . VarDumper::dumpAsString($ud->getErrors()));
+                                    }
+                                }
+                            }
+                        }
 
-                            $emailId = null;
-                            if ($emailPrefix && $project->email_postfix) {
-                                $email = new EmailList();
-                                $email->el_email = $emailPrefix . '@' . $project->email_postfix;
-                                $email->el_title = $project->name . ' - ' . $model->username;
-                                $email->el_enabled = true;
 
-                                if ($email->save()) {
-                                    $emailId = $email->el_id;
-                                } else {
-                                    Yii::error(VarDumper::dumpAsString([$email->attributes, $email->errors]), 'Employee:Create:EmailList:save');
+                        if (isset($attr['user_projects'])) {
+                            if ($attr['user_projects']) {
+                                foreach ($attr['user_projects'] as $ugId) {
+                                    $up = new ProjectEmployeeAccess();
+                                    $up->employee_id = $model->id;
+                                    $up->project_id = (int)$ugId;
+                                    $up->created = date('Y-m-d H:i:s');
+                                    if (!$up->save()) {
+                                        Yii::error(VarDumper::dumpAsString($up->getErrors()), 'Employee:Create:ProjectEmployeeAccess:save');
+                                        throw new \Exception('Project Access error. ' . VarDumper::dumpAsString($up->getErrors()));
+                                    }
+                                }
+                            }
+                        }
+
+
+                        $emailArr = explode('@', $model->email);
+                        $emailPrefix = $emailArr[0] ?? null;
+
+                        //VarDumper::dump($emailPrefix, 10, true);
+
+                        if ($model->make_user_project_params) {
+                            if (!empty($attr['user_projects'])) {
+                                foreach ($attr['user_projects'] as $projectId) {
+
+                                    //VarDumper::dump($projectId, 10, true);
+
+                                    $project = Project::findOne($projectId);
+                                    if (!$project || $project->closed) {
+                                        continue;
+                                    }
+
+
+                                    $emailId = null;
+                                    if ($emailPrefix && $project->email_postfix) {
+                                        $email = new EmailList();
+                                        $email->el_email = $emailPrefix . '@' . $project->email_postfix;
+                                        $email->el_title = $project->name . ' - ' . $model->username;
+                                        $email->el_enabled = true;
+
+                                        if ($email->save()) {
+                                            $emailId = $email->el_id;
+                                        } else {
+                                            Yii::error(VarDumper::dumpAsString([$email->attributes, $email->errors]), 'Employee:Create:EmailList:save');
+                                            throw new \Exception('EmailList error. ' . VarDumper::dumpAsString($email->getErrors()));
+                                        }
+                                    }
+
+                                    //VarDumper::dump('EmId:' . $emailId, 10, true);
+
+                                    $upp = new UserProjectParams();
+                                    $upp->upp_user_id = $model->id;
+                                    $upp->upp_project_id = (int)$projectId;
+                                    $upp->upp_created_dt = date('Y-m-d H:i:s');
+                                    if ($emailId) {
+                                        $upp->upp_email_list_id = $emailId;
+                                    }
+                                    if (!$upp->save()) {
+                                        Yii::error(VarDumper::dumpAsString([$upp->attributes, $upp->errors]), 'Employee:Create:UserProjectParams:save');
+                                        throw new \Exception('Project Params error. ' . VarDumper::dumpAsString($upp->getErrors()));
+                                    }
                                 }
                             }
 
-                            //VarDumper::dump('EmId:' . $emailId, 10, true);
+                        }
 
-                            $upp = new UserProjectParams();
-                            $upp->upp_user_id = $model->id;
-                            $upp->upp_project_id = (int) $projectId;
-                            $upp->upp_created_dt = date('Y-m-d H:i:s');
-                            if ($emailId) {
-                                $upp->upp_email_list_id = $emailId;
+                        if ($modelUserParams->load(Yii::$app->request->post())) {
+                            $modelUserParams->up_user_id = $model->id;
+                            $modelUserParams->up_updated_user_id = Yii::$app->user->id;
+                            if (!$modelUserParams->save()) {
+                                Yii::error(VarDumper::dumpAsString($modelUserParams->getErrors()), 'Employee:Create:modelUserParams:save');
+                                throw new \Exception('User Params error. ' . VarDumper::dumpAsString($modelUserParams->getErrors()));
                             }
-                            if (!$upp->save()) {
-                                Yii::error(VarDumper::dumpAsString([$upp->attributes, $upp->errors]), 'Employee:Create:UserProjectParams:save');
+                        } else {
+                            throw new \Exception('User Params is empty');
+                        }
+
+                        if ($modelUserParams->up_timezone == null) {
+                            $modelUserParams->up_user_id = $model->id;
+                            $modelUserParams->up_updated_user_id = Yii::$app->user->id;
+
+                            $modelUserParams->up_timezone = "Europe/Chisinau";
+                            $modelUserParams->up_work_minutes = 8 * 60;
+                            $modelUserParams->up_base_amount = 0;
+                            $modelUserParams->up_commission_percent = 0;
+                            $modelUserParams->up_work_start_tm = "16:00";
+
+                            if (!$modelUserParams->save()) {
+                                Yii::error(VarDumper::dumpAsString($modelUserParams->getErrors()), 'Employee:Create:modelUserParams:timeZone:save');
+                                throw new \Exception('User Params error. ' . VarDumper::dumpAsString($modelUserParams->getErrors()));
                             }
                         }
-                    }
 
+                        $transaction->commit();
+                        Yii::$app->getSession()->setFlash('success', 'User created');
+                        return $this->redirect(['update', 'id' => $model->id]);
+                    }
+                    $transaction->rollBack();
+                } catch (\Throwable $e) {
+                    $transaction->rollBack();
+                    $model->id = 0;
+                    $model->setIsNewRecord(true);
+                    Yii::$app->session->addFlash('error', $e->getMessage());
                 }
 
-                //exit;
-
-                Yii::$app->getSession()->setFlash('success', 'User created');
-
-                if ($modelUserParams->load(Yii::$app->request->post())) {
-
-                    //VarDumper::dump(Yii::$app->request->post()); exit;
-                    $modelUserParams->up_user_id = $model->id;
-                    $modelUserParams->up_updated_user_id = Yii::$app->user->id;
-
-                    if($modelUserParams->save()) {
-                        //return $this->refresh();
-                    }
-                }
-
-                if($modelUserParams->up_timezone == null){
-                    $modelUserParams->up_user_id = $model->id;
-                    $modelUserParams->up_updated_user_id = Yii::$app->user->id;
-
-                    $modelUserParams->up_timezone = "Europe/Chisinau";
-                    $modelUserParams->up_work_minutes = 8 * 60;
-                    $modelUserParams->up_base_amount = 0;
-                    $modelUserParams->up_commission_percent = 0;
-                    $modelUserParams->up_work_start_tm = "16:00";
-
-                    if($modelUserParams->save()) {
-                    }
-                }
-
-                return $this->redirect(['update','id' => $model->id]);
-
-            }
         } else {
 
             $modelUserParams->up_timezone = 'Europe/Chisinau';

@@ -48,7 +48,9 @@ class UserMultipleForm extends Model
             ['userClientChatChanels', IsArrayValidator::class],
             ['userClientChatChanels', 'clientChatChanelsValidate', 'skipOnError' => true, 'skipOnEmpty' => true],
 
-            ['status', 'string'],
+            ['status', 'integer'],
+            ['status', 'in', 'range' => array_keys(Employee::STATUS_LIST)],
+
             [['user_list_json'], 'required'],
             [['baseAmount', 'commissionPercent'], 'number'],
             [['up_call_expert_limit', 'status_id', 'inboxShowLimitLeads', 'defaultTakeLimitLeads', 'minPercentForTakeLeads', 'frequencyMinutes'], 'integer'],
