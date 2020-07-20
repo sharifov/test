@@ -1,8 +1,14 @@
 function ActivePaneControls(props) {
     return (
         <ul className="in-call-controls">
-            <ButtonHold call={props.call} controls={props.controls}/>
-            <ButtonTransfer call={props.call} controls={props.controls}/>
+            {props.controls.hold.show
+                ? <ButtonHold call={props.call} controls={props.controls}/>
+                : ''
+            }
+            {props.controls.transfer.show
+                ? <ButtonTransfer call={props.call} controls={props.controls}/>
+                : ''
+            }
             <ButtonAddPerson call={props.call} controls={props.controls}/>
             <ButtonDialpad call={props.call} controls={props.controls}/>
             <ButtonAddNote call={props.call} controls={props.controls}/>

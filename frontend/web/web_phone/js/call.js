@@ -51,6 +51,8 @@ var PhoneWidgetCall = function () {
 
         setCountMissedCalls(options.countMissedCalls);
 
+        panes.active.setup(options.btnHoldShow, options.btnTransferShow);
+
         muteBtnClickEvent();
         transferCallBtnClickEvent();
         acceptCallBtnClickEvent();
