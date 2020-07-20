@@ -1735,27 +1735,6 @@ class TestController extends FController
 		echo 'success';
 	}
 
-
-	public function actionTestRedis()
-	{
-		$redis = Yii::$app->redis;
-
-		$redis->flushall();
-
-		$cache = Yii::$app->cache;
-		$cache->flush();
-
-		$clientChatMessageService = Yii::createObject(ClientChatMessageService::class);
-
-//		$clientChatMessageService->increaseUnreadMessages(1, 464);
-//
-//		echo $clientChatMessageService->getCountOfTotalUnreadMessages( 464);
-
-//		$clientChatMessageService->discardUnreadMessages(1, 464);
-
-		echo 'success';
-	}
-
 	public function actionGaSendQuote($id = 733986, int $debug = 1) // test/ga-send-quote?id=733986&debug=1
     {
         try {
