@@ -19,6 +19,8 @@ use sales\model\clientChat\useCase\sendOffer\GenerateImagesForm;
 use sales\model\clientChat\useCase\transfer\ClientChatTransferForm;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
+use sales\model\clientChatNote\ClientChatNoteRepository;
+use sales\model\clientChatNote\entity\ClientChatNote;
 use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessRepository;
 use sales\repositories\NotFoundException;
 use sales\services\clientChatMessage\ClientChatMessageService;
@@ -43,6 +45,7 @@ use yii\web\Response;
  * @property ClientChatMessageService $clientChatMessageService
  * @property ClientChatService $clientChatService
  * @property ClientChatUserAccessService $clientChatUserAccessService
+ * @property ClientChatNoteRepository $clientChatNoteRepository
  */
 class ClientChatController extends FController
 {
@@ -68,7 +71,9 @@ class ClientChatController extends FController
 	 */
 	private ClientChatUserAccessService $clientChatUserAccessService;
 
-	public function __construct(
+    private ClientChatNoteRepository $clientChatNoteRepository;
+
+    public function __construct(
 		$id,
 		$module,
 		ClientChatRepository $clientChatRepository,
@@ -76,6 +81,7 @@ class ClientChatController extends FController
 		ClientChatMessageService $clientChatMessageService,
 		ClientChatService $clientChatService,
 		ClientChatUserAccessService $clientChatUserAccessService,
+		ClientChatNoteRepository $clientChatNoteRepository,
 		$config = [])
 	{
 		parent::__construct($id, $module, $config);
@@ -84,6 +90,7 @@ class ClientChatController extends FController
 		$this->clientChatMessageService = $clientChatMessageService;
 		$this->clientChatService = $clientChatService;
 		$this->clientChatUserAccessService = $clientChatUserAccessService;
+		$this->clientChatNoteRepository = $clientChatNoteRepository;
 	}
 
 	/**
@@ -230,7 +237,74 @@ class ClientChatController extends FController
 		return $this->asJson($result);
 	}
 
-	public function actionAccessManage(): \yii\web\Response
+	public function actionNote(): Response
+    {
+        $cchId = \Yii::$app->request->post('cch_id');
+
+		$result = [
+			'html' => '',
+			'message' => ''
+		];
+		try {
+			$clientChat = $this->clientChatRepository->findById($cchId);
+
+			$result['html'] = $this->renderPartial('partial/_client-chat-note', [
+                'clientChat' => $clientChat,
+                'model' => new ClientChatNote(),
+            ]);
+
+		} catch (NotFoundException $e) {}
+
+		return $this->asJson($result);
+	}
+
+    public function actionCreateNote(): string
+    {
+        $cchId = Yii::$app->request->get('cch_id');
+        $model = new ClientChatNote();
+
+        if (Yii::$app->request->isAjax && $model->load(Yii::$app->request->post())) {
+            try {
+                $this->clientChatNoteRepository->save($model);
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableFormatter($throwable),
+                'ClientChatController:actionCreateNote:save');
+            }
+        }
+
+        $clientChat = $this->clientChatRepository->findById($cchId);
+
+        return $this->renderAjax('partial/_client-chat-note', [
+            'clientChat' => $clientChat,
+            'model' => $model,
+            'showContent' => true,
+        ]);
+	}
+
+	public function actionDeleteNote(): string
+    {
+		try {
+	        $cchId = Yii::$app->request->get('cch_id');
+		    $ccnId = Yii::$app->request->get('ccn_id');
+
+            $clientChat = $this->clientChatRepository->findById($cchId);
+
+            if ($clientChatNote = $this->clientChatNoteRepository->findById($ccnId)) {
+                $this->clientChatNoteRepository->toggleDeleted($clientChatNote);
+            }
+		} catch (\Throwable $throwable) {
+		    Yii::error(AppHelper::throwableFormatter($throwable),
+		    'ClientChatController:actionDeleteNote:delete');
+		}
+
+        return $this->renderAjax('partial/_client-chat-note', [
+            'clientChat' => $clientChat ?? null,
+            'model' => new ClientChatNote(),
+            'showContent' => true,
+        ]);
+	}
+
+    public function actionAccessManage(): \yii\web\Response
 	{
 		$cchId = \Yii::$app->request->post('cchId');
 		$accessAction = \Yii::$app->request->post('accessAction');

@@ -4,6 +4,7 @@ use frontend\themes\gentelella_v2\assets\ClientChatAsset;
 use sales\auth\Auth;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
+use sales\model\clientChatNote\entity\ClientChatNote;
 use yii\bootstrap4\Alert;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Url;
@@ -29,6 +30,7 @@ ClientChatAsset::register($this);
 $rcUrl = Yii::$app->rchat->host  . '/home';
 $userRcAuthToken = Auth::user()->userProfile ? Auth::user()->userProfile->up_rc_auth_token : '';
 $clientChatInfoUrl = Url::toRoute('/client-chat/info');
+$clientChatNoteUrl = Url::toRoute('/client-chat/note');
 $clintChatDataIUrl = Url::toRoute('/client-chat/ajax-data-info');
 $clientChatCloseUrl = Url::toRoute('/client-chat/ajax-close');
 $chatHistoryUrl = Url::toRoute('/client-chat/ajax-history');
@@ -84,6 +86,15 @@ $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
         <div id="_client-chat-info">
             <?php if ($clientChat): ?>
                 <?= $this->render('partial/_client-chat-info', ['clientChat' => $clientChat, 'client' => $client, 'existAvailableLeadQuotes' => $existAvailableLeadQuotes]) ?>
+            <?php endif; ?>
+        </div>
+
+        <div id="_client-chat-note">
+            <?php if ($clientChat): ?>
+                <?php echo $this->render('partial/_client-chat-note', [
+                    'clientChat' => $clientChat,
+                    'model' => new ClientChatNote(),
+                ]) ?>
             <?php endif; ?>
         </div>
     </div>
@@ -183,6 +194,7 @@ $(document).on('click', '._cc_tab', function () {
     tab.addClass('active');
     $('._rc-iframe').hide();
     $('#_client-chat-info').html('');
+    $('#_client-chat-note').html('');
     pjaxReload({container: '#pjax-client-chat-channel-list'});
 });
 
@@ -241,6 +253,22 @@ $(document).on('click', '._cc-list-item', function () {
         },
         success: function (data) {
             $('#_client-chat-info').html(data.html);
+        },
+        error: function (xhr) {
+            createNotify('Error', xhr.responseText, 'error');
+        },
+    });
+    $.ajax({
+        type: 'post',
+        url: '{$clientChatNoteUrl}',
+        dataType: 'json',
+        cache: false,
+        data: {cch_id: cch_id},
+        beforeSend: function () {
+            $('#_client-chat-note').append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
+        },
+        success: function (data) {
+            $('#_client-chat-note').html(data.html);
         },
         error: function (xhr) {
             createNotify('Error', xhr.responseText, 'error');

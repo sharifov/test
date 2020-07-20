@@ -101,7 +101,6 @@ use yii\web\View;
                     'format' => 'raw',
                     'filter' => ClientChat::getStatusList()
                 ],
-                'cch_note',
             ]
         ])
         ?>

@@ -14,9 +14,11 @@ use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatData\entity\ClientChatData;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
+use sales\model\clientChatNote\entity\ClientChatNote;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\Html;
 
@@ -55,7 +57,7 @@ use yii\helpers\Html;
  * @property Employee $cchOwnerUser
  * @property Project $cchProject
  * @property ClientChatData $cchData
- *
+ * @property ClientChatNote[] $notes
  */
 class ClientChat extends \yii\db\ActiveRecord
 {
@@ -213,6 +215,11 @@ class ClientChat extends \yii\db\ActiveRecord
 	public function getCchData(): \yii\db\ActiveQuery
 	{
 		return $this->hasOne(ClientChatData::class, ['ccd_cch_id' => 'cch_id']);
+	}
+
+	public function getNotes(): ActiveQuery
+	{
+		return $this->hasMany(ClientChatNote::class, ['ccn_chat_id' => 'cch_id']);
 	}
 
 	public static function getStatusList(): array
