@@ -1,6 +1,15 @@
 <?php
 
+use common\components\grid\UserSelect2Column;
+use common\models\Department;
+use common\models\Employee;
+use common\models\Language;
+use common\models\Project;
+use kartik\select2\Select2;
+use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\entity\search\ClientChatQaSearch;
+use sales\model\clientChatChannel\entity\ClientChatChannel;
+use sales\model\clientChatData\entity\ClientChatData;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -24,7 +33,8 @@ use yii\widgets\ActiveForm;
             </ul>
             <div class="clearfix"></div>
         </div>
-        <div class="x_content" style="display: <?=(Yii::$app->request->isPjax) ? 'block' : 'none'?>">
+        <?php /* TODO::  style="display: <?=(Yii::$app->request->isPjax) ? 'block' : 'none'?>"  */ ?>
+        <div class="x_content" >
             <?php $form = ActiveForm::begin([
                 'action' => ['index'],
                 'method' => 'get',
@@ -36,7 +46,59 @@ use yii\widgets\ActiveForm;
             <div class="row">
                 <div class="col-md-2">
                     <?php echo $form->field($model, 'cch_id') ?>
+                    <?php echo $form->field($model, 'cch_channel_id')->dropDownList(ClientChatChannel::getList(), ['prompt' => '-']) ?>
+
+                    <?= $form->field($model, 'createdRangeDate', [
+                        'options' => ['class' => 'form-group']
+                    ])->widget(\kartik\daterange\DateRangePicker::class, [
+                        'presetDropdown' => false,
+                        'hideInput' => true,
+                        'convertFormat' => true,
+                        'pluginOptions' => [
+                            'timePicker' => false,
+                            'locale' => [
+                                'format' => 'd-M-Y',
+                                'separator' => ' - '
+                            ]
+                        ]
+                    ])->label('Created From / To') ?>
+
+                </div>
+                <div class="col-md-2">
                     <?php echo $form->field($model, 'cch_rid') ?>
+                    <?php echo $form->field($model, 'cch_client_id') ?>
+                </div>
+                <div class="col-md-2">
+                    <?php echo $form->field($model, 'cch_ccr_id') ?>
+
+                    <?php echo $form->field($model, 'cch_owner_user_id')->widget(Select2::class, [
+                            'data' => Employee::getList(),
+                            'size' => Select2::SMALL,
+                            'options' => ['multiple' => false],
+                            'pluginOptions' => ['allowClear' => true, 'placeholder' => '', 'id' => 'user_id'],
+                    ]) ?>
+                </div>
+                <div class="col-md-2">
+                    <?php echo $form->field($model, 'cch_status_id')->dropDownList(ClientChat::getStatusList(), ['prompt' => '-']) ?>
+                    <?php echo $form->field($model, 'cch_case_id') ?>
+                </div>
+                <div class="col-md-2">
+                    <?php echo $form->field($model, 'cch_project_id')->dropDownList(Project::getList(), ['prompt' => '-']) ?>
+                    <?php echo $form->field($model, 'cch_lead_id') ?>
+
+                </div>
+                <div class="col-md-2">
+                    <?php echo $form->field($model, 'cch_dep_id')->dropDownList(Department::getList(), ['prompt' => '-']) ?>
+                    <?php echo $form->field($model, 'cch_language_id')->dropDownList(Language::getLanguages(), ['prompt' => '-']) ?>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-2">
+                    <?php echo $form->field($model, 'dataCountry')->dropDownList(ClientChatData::getCountryList(), ['prompt' => '-']) ?>
+                </div>
+                <div class="col-md-2">
+                    <?php echo $form->field($model, 'dataCity')->dropDownList(ClientChatData::getCityList(), ['prompt' => '-']) ?>
                 </div>
 
             </div>

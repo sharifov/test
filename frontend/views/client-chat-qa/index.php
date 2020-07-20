@@ -1,9 +1,9 @@
 <?php
 
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChatChannel\entity\ClientChatChannel;
 use yii\grid\ActionColumn;
 use common\components\grid\DateTimeColumn;
-use common\components\grid\UserSelect2Column;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -64,7 +64,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $model->cch_channel_id ? Html::a(Html::encode($model->cchChannel->ccc_name), ['client-chat-channel-crud/view', 'id' => $model->cch_channel_id], ['target' => '_blank', 'data-pjax' => 0]) : '-';
                 },
                 'format' => 'raw',
-                'filter' => \sales\model\clientChatChannel\entity\ClientChatChannel::getList()
+                'filter' => ClientChatChannel::getList()
             ],
             [
                 'attribute' => 'cch_client_id',
@@ -74,11 +74,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
             ],
             [
-                'class' => UserSelect2Column::class,
                 'attribute' => 'cch_owner_user_id',
+                'class' => \common\components\grid\UserColumn::class,
                 'relation' => 'cchOwnerUser',
-                'format' => 'username',
-                'options' => ['style' => 'width:200px']
             ],
             [
                 'label' => 'Case ID',

@@ -6,6 +6,7 @@ use sales\model\clientChat\entity\ClientChat;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "client_chat_data".
@@ -122,4 +123,16 @@ class ClientChatData extends \yii\db\ActiveRecord
 
 		return $_self;
 	}
+
+	public static function getCountryList(): array
+    {
+        return ArrayHelper::map(self::find()->orderBy(['ccd_country' => SORT_ASC])->distinct()->asArray()->all(),
+        'ccd_country', 'ccd_country');
+    }
+
+    public static function getCityList(): array
+    {
+        return ArrayHelper::map(self::find()->orderBy(['ccd_city' => SORT_ASC])->distinct()->asArray()->all(),
+        'ccd_city', 'ccd_city');
+    }
 }

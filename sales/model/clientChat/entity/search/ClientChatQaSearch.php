@@ -7,20 +7,40 @@ use yii\data\ActiveDataProvider;
 use sales\model\clientChat\entity\ClientChat;
 
 /**
- * ClientChatQaSearch represents the model behind the search form of `sales\model\clientChat\entity\ClientChat`.
+ * ClientChatQaSearch represents the model behind the search form of `ClientChat`.
+ *
+ * @property $createdRangeDate
+ * @property string|null $dataCountry
+ * @property string|null $dataCity
  */
 class ClientChatQaSearch extends ClientChat
 {
+    public $createdRangeDate;
+    public $dataCountry;
+    public $dataCity;
 
     public function rules(): array
     {
         return [
-            [['cch_id', 'cch_ccr_id', 'cch_project_id',
-                'cch_dep_id', 'cch_channel_id', 'cch_client_id',
-                'cch_owner_user_id', 'cch_case_id', 'cch_lead_id',
-                'cch_status_id', 'cch_ua', 'cch_created_user_id',
-                'cch_updated_user_id', 'cch_client_online'], 'integer'],
-            [['cch_rid', 'cch_title', 'cch_description', 'cch_note', 'cch_ip', 'cch_language_id', 'cch_created_dt', 'cch_updated_dt'], 'safe'],
+            [
+                [
+                    'cch_id', 'cch_ccr_id', 'cch_project_id',
+                    'cch_dep_id', 'cch_channel_id', 'cch_client_id',
+                    'cch_owner_user_id', 'cch_case_id', 'cch_lead_id',
+                    'cch_status_id', 'cch_ua', 'cch_created_user_id',
+                    'cch_updated_user_id', 'cch_client_online'
+                ],
+                'integer'
+            ],
+            [
+                [
+                    'cch_rid', 'cch_title', 'cch_description',
+                    'cch_note', 'cch_ip', 'cch_language_id',
+                    'cch_created_dt', 'cch_updated_dt', 'createdRangeDate',
+                    'dataCountry', 'dataCity',
+                ],
+                'safe'
+            ],
         ];
     }
 
@@ -39,13 +59,13 @@ class ClientChatQaSearch extends ClientChat
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> ['defaultOrder' => ['cch_id' => SORT_DESC]],
         ]);
 
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 
@@ -68,6 +88,15 @@ class ClientChatQaSearch extends ClientChat
             'cch_updated_user_id' => $this->cch_updated_user_id,
             'cch_client_online' => $this->cch_client_online,
         ]);
+
+        if ($this->createdRangeDate) {
+			$dateRange = explode(' - ', $this->createdRangeDate);
+			if ($dateRange[0] && $dateRange[1]) {
+				$fromDate = date('Y-m-d', strtotime($dateRange[0]));
+				$toDate = date('Y-m-d', strtotime($dateRange[1]));
+				$query->andWhere(['BETWEEN', 'DATE(cch_created_dt)', $fromDate, $toDate]);
+			}
+		}
 
         $query->andFilterWhere(['like', 'cch_rid', $this->cch_rid])
             ->andFilterWhere(['like', 'cch_title', $this->cch_title])
