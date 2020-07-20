@@ -1,9 +1,12 @@
 <?php
 namespace sales\model\lead\useCases\lead\create;
 
+use common\models\Client;
 use common\models\Lead;
+use common\models\LeadFlow;
 use common\models\LeadPreferences;
 use sales\forms\lead\PreferencesCreateForm;
+use sales\model\clientChat\entity\ClientChat;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadPreferencesRepository;
 use sales\repositories\lead\LeadRepository;
@@ -11,6 +14,7 @@ use sales\services\cases\CasesManageService;
 use sales\services\client\ClientManageService;
 use sales\services\lead\LeadHashGenerator;
 use sales\services\TransactionManager;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class LeadManageService
@@ -176,4 +180,57 @@ class LeadManageService
 		);
 		$this->leadPreferencesRepository->save($preferences);
 	}
+
+    public function createByClientChat(LeadCreateByChatForm $form, ClientChat $chat, int $userId): Lead
+    {
+        $lead = $this->transactionManager->wrap(function () use ($form, $chat, $userId) {
+
+            if (!$client = $chat->cchClient) {
+                throw new \DomainException('Client Chat not assigned with Client');
+            }
+
+            $lead = Lead::createManually(
+                $client->id,
+                $client->first_name,
+                $client->last_name,
+                null,
+                null,
+                null,
+                null,
+                $chat->geo,
+                $form->source,
+                $form->projectId,
+                null,
+                null,
+                null,
+                $chat->cch_dep_id,
+                null
+            );
+
+            $lead->processing($userId, $userId, LeadFlow::DESCRIPTION_CLIENT_CHAT_CREATE);
+
+            $clientPhones = ArrayHelper::getColumn($client->clientPhones, 'phone');
+
+            $hash = $this->leadHashGenerator->generate(
+                null,
+                $form->projectId,
+                null,
+                null,
+                null,
+                null,
+                $clientPhones,
+                null
+            );
+
+            $lead->setRequestHash($hash);
+
+            $leadId = $this->leadRepository->save($lead);
+
+            $this->createLeadPreferences($leadId, new PreferencesCreateForm());
+
+            return $lead;
+        });
+
+        return $lead;
+    }
 }

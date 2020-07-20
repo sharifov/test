@@ -466,6 +466,40 @@ $(document).on('click', '.client-chat-send-offer', function(e) {
     });    
         
 });
+$('.create_lead').on('click', function (e) {
+    e.preventDefault();
+    let url = $(this).attr('href');
+    let modal = $('#modal-md');
+    let modalTitle = 'Create Lead';
+    $.ajax({
+        type: 'post',
+        url: url,
+        data: {},
+        dataType: 'html',
+        beforeSend: function () {
+            modal.find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+            modal.find('.modal-title').html(modalTitle);
+            modal.modal('show');
+        },
+        success: function (data) {
+            modal.find('.modal-body').html(data);
+            modal.find('.modal-title').html(modalTitle);
+            $('#preloader').addClass('d-none');
+        },
+        error: function () {
+            new PNotify({
+                title: 'Error',
+                type: 'error',
+                text: 'Internal Server Error. Try again letter.',
+                hide: true
+            });
+            setTimeout(function () {
+                $('#modal-md').modal('hide');
+            }, 300)
+        },
+    })
+
+});
 JS;
 $this->registerJs($js);
 endif;

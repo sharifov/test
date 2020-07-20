@@ -47,11 +47,14 @@ use sales\forms\lead\CloneReasonForm;
 use sales\forms\lead\ItineraryEditForm;
 use sales\forms\lead\LeadCreateForm;
 use sales\forms\leadflow\TakeOverReasonForm;
+use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use sales\model\callLog\entity\callLog\CallLogType;
+use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\services\ClientChatAssignService;
+use sales\model\lead\useCases\lead\create\LeadCreateByChatForm;
 use sales\model\lead\useCases\lead\create\LeadManageForm;
 use sales\model\lead\useCases\lead\import\LeadImportForm;
 use sales\model\lead\useCases\lead\import\LeadImportParseService;
@@ -2097,6 +2100,61 @@ class LeadController extends FController
 			return $this->renderAjax('partial/_lead_create', ['leadForm' => $form]);
 		}
 		throw new NotFoundHttpException('Page not exist');
+	}
+
+	public function actionCreateByChat()
+	{
+		if (!(Yii::$app->request->isAjax || Yii::$app->request->isPjax)) {
+            throw new NotFoundHttpException('Page not exist');
+        }
+
+        $chatId = (int)Yii::$app->request->get('chat_id');
+        $chat = ClientChat::findOne(['cch_id' => $chatId]);
+
+        if (!$chat) {
+            throw new NotFoundHttpException('Client chat not found');
+        }
+
+        if ($chat->isClosed()) {
+            return 'Client Chat is closed';
+        }
+
+        if (!$chat->cchClient) {
+            return 'Client not found';
+        }
+
+        $userId = Auth::id();
+        $form = new LeadCreateByChatForm($userId, $chat);
+
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            try {
+                $leadManageService = Yii::createObject(\sales\model\lead\useCases\lead\create\LeadManageService::class);
+                $lead = $leadManageService->createByClientChat($form, $chat, $userId);
+            } catch (\Throwable $e) {
+                Yii::error(AppHelper::throwableFormatter($e), 'LeadController:actionCreateByChat');
+                Yii::$app->session->setFlash('error', $e->getMessage());
+            }
+        }
+
+//        $data = CompositeFormHelper::prepareDataForMultiInput(
+//            Yii::$app->request->post(),
+//            'LeadManageForm',
+//            []
+//        );
+//        $form = new LeadManageForm(0);
+//        $form->assignDep(Department::DEPARTMENT_SALES);
+//        if (Yii::$app->request->isPjax && $form->load($data['post']) && $form->validate()) {
+//            try {
+//                $leadManageService = Yii::createObject(\sales\model\lead\useCases\lead\create\LeadManageService::class);
+//                $lead = $leadManageService->createManuallyByDefault($form, Yii::$app->user->id, Yii::$app->user->id, LeadFlow::DESCRIPTION_MANUAL_CREATE);
+//                Yii::$app->session->setFlash('success', 'Lead save');
+//                return $this->redirect(['/lead/view', 'gid' => $lead->gid]);
+//            } catch (\Throwable $e) {
+//                Yii::$app->errorHandler->logException($e);
+//                Yii::$app->session->setFlash('error', $e->getMessage());
+//            }
+//        }
+        return $this->renderAjax('partial/_lead_create_by_chat', ['chat' => $chat, 'form' => $form]);
 	}
 
 	/**

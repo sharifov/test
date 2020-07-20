@@ -82,13 +82,11 @@ use yii\web\View;
                     'attribute' => 'cch_lead_id',
                     'label' => 'Lead',
                     'value' => static function(ClientChat $model) use ($existAvailableLeadQuotes) {
-                        if (!$model->cch_lead_id) {
-                            return Html::a('Create Lead', ['/lead/create', 'chat_id' => $model->cch_id],  ['target' => '_blank']);
-                        }
-                        $out = Yii::$app->formatter->format($model->cchLead, 'lead');
-                        if ($existAvailableLeadQuotes) {
-                            $out .= ' ' . Html::button('Offer', ['class' => 'btn btn-info chat-offer', 'data-cch-id' => $model->cch_id]);
-                        }
+//                        $out = Yii::$app->formatter->format($model->cchLead, 'lead');
+//                        if ($existAvailableLeadQuotes) {
+//                            $out .= ' ' . Html::button('Offer', ['class' => 'btn btn-info chat-offer', 'data-cch-id' => $model->cch_id]);
+//                        }
+                        $out = Html::a('Create Lead', ['/lead/create-by-chat', 'chat_id' => $model->cch_id],  ['class' => 'create_lead']);
                         return $out;
                     },
                     'format' => 'raw',
