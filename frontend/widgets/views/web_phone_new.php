@@ -96,21 +96,21 @@ $js = <<<JS
 								let params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': lead_id, 'case_id': case_id, 'c_type': 'call-web', 'c_user_id': userId, 'is_conference_call': {$conferenceBase}};						
 								webPhoneParams = params;
 								let PhoneNumbersData = phoneNumbers.getPrimaryData.value ? phoneNumbers.getPrimaryData : phoneNumbers.getData;
-								PhoneWidgetCall.requestOutgoingCall({  
-									'callSid': '',
-									'type': 'Outgoing',
-									'status': 'Dialing',  
-									'duration': 0,
-									'project': PhoneNumbersData.project,
-									'source': '',
-									'contact': {
-									    'phone': data.phone,
-									    'name': data.callToName
-									}
-								});
 								createNotify('Calling', 'Calling ' + params.To + '...', 'success');
 								updateAgentStatus(connection, false, 0);
 								connection = device.connect(params);
+								// 	 PhoneWidgetCall.requestOutgoingCall({  
+								// 		'callSid': '',
+								// 		'type': 'Outgoing',
+								// 		'status': 'Dialing',  
+								// 		'duration': 0,
+								// 		'project': PhoneNumbersData.project,
+								// 		'source': '',
+								// 		'contact': {
+								// 			'phone': data.phone,
+								// 			'name': data.callToName
+								// 		}
+								// 	});   
 							}
 						}      
                     } else {

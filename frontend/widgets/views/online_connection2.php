@@ -188,8 +188,11 @@ $js = <<<JS
                                 refreshInboxCallWidget(obj);
                             }
                             if (typeof PhoneWidgetCall === 'object') {
-                                if ((typeof obj.status !== 'undefined')) {
+                                if (typeof obj.status !== 'undefined') {
                                      PhoneWidgetCall.requestIncomingCall(obj);
+                                }
+                                if (obj.cua_status_id === 2) {
+                                     PhoneWidgetCall.removeIncomingRequest(obj.callSid);
                                 }
                             }
                         }
@@ -248,6 +251,10 @@ $js = <<<JS
                                     PhoneWidgetCall.removeIncomingRequest(obj.data.call.sid);
                                 }
                              }
+                        }
+                        
+                        if (obj.cmd === 'noAnsweredCall') {
+                            createNotify('No answered call', 'No answered call', 'warning');
                         }
 
                         if (obj.cmd === 'conferenceUpdate') {

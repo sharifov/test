@@ -1,5 +1,6 @@
 <?php
 
+use sales\auth\Auth;
 use yii\web\View;
 
 /** @var $showWidgetContent bool */
@@ -45,18 +46,22 @@ use yii\web\View;
           <span>Call</span>
         </a>
       </li>
-      <li>
-        <a href="#" data-toggle-tab="tab-history" data-missed-calls="0">
-          <i class="fas fa-file-invoice"></i>
-          <span>history</span>
-        </a>
-      </li>
-      <li>
-        <a href="#" data-toggle-tab="tab-contacts" >
-          <i class="far fa-address-book"></i>
-          <span>Contacts</span>
-        </a>
-      </li>
+        <?php if (Auth::can('PhoneWidget_HistoryTab')): ?>
+            <li>
+                <a href="#" data-toggle-tab="tab-history" data-missed-calls="0">
+                    <i class="fas fa-file-invoice"></i>
+                    <span>history</span>
+                </a>
+            </li>
+        <?php endif;?>
+        <?php if (Auth::can('PhoneWidget_ContactsTab')): ?>
+              <li>
+                <a href="#" data-toggle-tab="tab-contacts" >
+                  <i class="far fa-address-book"></i>
+                  <span>Contacts</span>
+                </a>
+              </li>
+        <?php endif;?>
    
     </ul>
   </div>

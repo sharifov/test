@@ -247,7 +247,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
                     'queue' => Call::getQueueName($call),
 				];
 			}
-            Notifications::publish('updateIncomingCall', ['user_id' => $this->cua_user_id], array_merge($this->attributes, $callInfo ?? []));
+            Notifications::publish('updateIncomingCall', ['user_id' => $this->cua_user_id], array_merge($this->attributes, $callInfo ?? ['callSid' => $call->c_call_sid]));
         }
 
         if (isset($changedAttributes['cua_status_id']) && $call && ($call->isIn() || $call->isHold()) && $this->cua_status_id === self::STATUS_TYPE_NO_ANSWERED) {

@@ -573,17 +573,16 @@ class ClientChatController extends FController
 
             $message = $this->createOfferMessage($clientChat, $captures);
 
-//        $rocketUserId = Auth::user()->userProfile->up_rc_user_id;
-//        $rocketToken = Auth::user()->userProfile->up_rc_auth_token;
-//        $headers =  [
-//            'X-User-Id' => $rocketUserId,
-//            'X-Auth-Token' => $rocketToken,
-//        ];
+            if (($rocketUserId = Auth::user()->userProfile->up_rc_user_id) && ($rocketToken = Auth::user()->userProfile->up_rc_auth_token)) {
+                $headers =  [
+                    'X-User-Id' => $rocketUserId,
+                    'X-Auth-Token' => $rocketToken,
+                ];
+            } else {
+                $headers = Yii::$app->rchat->getSystemAuthDataHeader();
+            }
 
-//            $headers = Yii::$app->rchat->getSystemAuthDataHeader();
-//            Yii::$app->chatBot->sendMessage($message, $headers);
-
-            Yii::$app->rchat->sendMessage($message);
+            Yii::$app->chatBot->sendMessage($message, $headers);
             $this->removeQuoteCaptures(Auth::id(), $chatId);
 
         } catch (\DomainException $e) {
@@ -603,11 +602,18 @@ class ClientChatController extends FController
                 'image_url' => $capture['img'],
                 'actions' => [
                     [
-                        'type' => 'button',
+                        'type' => 'web_url',
                         'msg_in_chat_window' => true,
                         'text' => 'Offer',
                         'msg' => $capture['checkoutUrl']
                     ]
+                ],
+                'fields' => [
+                    [
+                        'short' => true,
+                        'title' =>  'Offer',
+                        'value' => '[' . $capture['checkoutUrl'] . '](' . $capture['checkoutUrl'] . ')'
+                    ],
                 ],
             ];
         }
@@ -616,7 +622,9 @@ class ClientChatController extends FController
             'message' => [
                 'rid' => $chat->cch_rid,
                 'attachments' => $attachments,
-                'customTemplate' => 'carousel',
+                'file' => [
+                    'customTemplate' => 'carousel',
+                ]
             ]
         ];
         return $data;
@@ -649,11 +657,11 @@ class ClientChatController extends FController
             if (count($content_data['quotes']) > 1) {
                 throw new \DomainException('Count quotes > 1');
             }
-            if (isset($content_data['quotes'][0])) {
-                $tmp = $content_data['quotes'][0];
-                unset($content_data['quotes']);
-                $content_data['quote'] = $tmp;
-            }
+//            if (isset($content_data['quotes'][0])) {
+//                $tmp = $content_data['quotes'][0];
+//                unset($content_data['quotes']);
+//                $content_data['quote'] = $tmp;
+//            }
         } else {
             throw new \DomainException('Not found quote');
         }

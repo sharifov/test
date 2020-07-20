@@ -3,6 +3,7 @@
 /** @var int $page */
 
 use common\models\Call;
+use sales\auth\Auth;
 use sales\model\callLog\entity\callLog\CallLogStatus;
 use sales\model\callLog\entity\callLog\CallLogType;
 use yii\helpers\Html;
@@ -34,7 +35,7 @@ use yii\helpers\Html;
                 </div>
                 <div class="contact-info-card__details">
                     <div class="contact-info-card__line history-details">
-                        <strong class="contact-info-card__name phone-dial" style="cursor:pointer;" data-phone="<?= Html::encode(($callType === CallLogType::IN ? $call['cl_phone_from'] : $call['cl_phone_to'])) ?>"><?= Html::encode($call['client_name'] ?? ($callType === Call::CALL_TYPE_IN ? $call['cl_phone_from'] : $call['cl_phone_to'])) ?></strong>
+                        <strong class="contact-info-card__name phone-dial-history"<?php if (Auth::can('PhoneWidget_Dialpad')) {echo ' style="cursor:pointer;"';} ?> data-phone="<?= Html::encode(($callType === CallLogType::IN ? $call['cl_phone_from'] : $call['cl_phone_to'])) ?>"><?= Html::encode($call['client_name'] ?? ($callType === Call::CALL_TYPE_IN ? $call['cl_phone_from'] : $call['cl_phone_to'])) ?></strong>
                         <small class="contact-info-card__timestamp"><?= Yii::$app->formatter->asDate(strtotime($call['cl_call_created_dt']), 'php:h:i A') ?></small>
                     </div>
                     <div class="contact-info-card__line history-details">

@@ -25,6 +25,7 @@ use yii\queue\Queue;
  *
  * @property int $call_id
  * @property int $delay
+ * @property bool $isExceptUsers
  *
  * @property CasesCreateService $casesCreateService
  * @property ClientManageService $clientManageService
@@ -35,6 +36,7 @@ class CallUserAccessJob extends BaseObject implements JobInterface
 {
     public $call_id;
     public $delay;
+    public $isExceptUsers = true;
 
     private $casesCreateService;
     private $casesRepository;
@@ -79,7 +81,11 @@ class CallUserAccessJob extends BaseObject implements JobInterface
                     $last_hours = (int)(Yii::$app->params['settings']['general_line_last_hours'] ?? 1);
                     $limitCallUsers = (int)(Yii::$app->params['settings']['general_line_user_limit'] ?? 1);
 
-                    $exceptUserIds = ArrayHelper::map($call->callUserAccesses, 'cua_user_id', 'cua_user_id');
+                    if ($this->isExceptUsers) {
+                        $exceptUserIds = ArrayHelper::map($call->callUserAccesses, 'cua_user_id', 'cua_user_id');
+                    } else {
+                        $exceptUserIds = [];
+                    }
 
                     $users = Employee::getUsersForCallQueue($call, $limitCallUsers, $last_hours, $exceptUserIds);
 

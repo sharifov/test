@@ -50,6 +50,7 @@ use sales\forms\leadflow\TakeOverReasonForm;
 use sales\helpers\setting\SettingHelper;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
+use sales\model\callLog\entity\callLog\CallLogType;
 use sales\model\clientChat\services\ClientChatAssignService;
 use sales\model\lead\useCases\lead\create\LeadManageForm;
 use sales\model\lead\useCases\lead\import\LeadImportForm;
@@ -1061,6 +1062,7 @@ class LeadController extends FController
 			->from('call_log_lead')
 			->innerJoin('call_log', 'call_log.cl_id = call_log_lead.cll_cl_id')
 			->where(['cll_lead_id' => $lead->id])
+			->andWhere(['call_log.cl_type_id' => [CallLogType::IN,CallLogType::OUT]])
 			->orderBy(['created_dt' => SORT_ASC])
 			->groupBy(['id', 'type', 'lead_id']);
 

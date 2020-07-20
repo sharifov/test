@@ -262,7 +262,7 @@ let PhoneWidgetContacts = function () {
             '<div class="form-group"><label for="">Phone </label><input readonly="" type="text" class="form-control"'+
             'value="+37369271516" autocomplete="off"></div>'+
             '<ul class="actions-list">'+
-            '<li class="actions-list__option actions-list__option--phone js-call-tab-trigger"><i class="fa fa-phone phone-dial"'+
+            '<li class="actions-list__option actions-list__option--phone js-call-tab-trigger"><i class="fa fa-phone phone-dial-contacts"'+
             'data-phone="+37369271516"></i></li>'+
             '<li title="" class="actions-list__option js-trigger-messages-modal" data-contact-id="44"'+
             'data-contact-phone="+37369271516" data-contact-type="2"><i class="fa fa-comment-alt"></i></li>'+
@@ -351,7 +351,7 @@ let PhoneWidgetContacts = function () {
             '</div>' +
             '<ul class="actions-list">' +
             '<li class="actions-list__option actions-list__option--phone js-call-tab-trigger">' +
-            '<i class="fa fa-phone phone-dial" data-phone="' + phone + '" data-title="' + contact['name'] + '"></i>' +
+            '<i class="fa fa-phone phone-dial-contacts" data-phone="' + phone + '" data-title="' + contact['name'] + '"></i>' +
             '</li>' +
             '<li title="' + titleAccessGetMessages + '" class="actions-list__option js-trigger-messages-modal' + disabledClass + '" ' +
                     'data-contact-id="' + contact['id'] + '" data-contact-phone="' + phone + '" data-contact-type="' + contact['type'] + '">' +
@@ -567,19 +567,6 @@ $(document).on('click', ".js-toggle-contact-info", function () {
     let data = PhoneWidgetContacts.viewContact(contact);
     $(".widget-phone__contact-info-modal").html(data);
     $(".widget-phone__contact-info-modal").show();
-});
-
-$(document).on('click', '.phone-dial', function(e) {
-    e.preventDefault();
-    let phone = $(this).data('phone');
-    let title = $(this).data('title');
-    $(".widget-phone__contact-info-modal").hide();
-    $('.phone-widget__header-actions a[data-toggle-tab]').removeClass('is_active');
-    $('.phone-widget__tab').removeClass('is_active');
-    $('.phone-widget__header-actions a[data-toggle-tab="tab-phone"]').addClass('is_active');
-    $('#tab-phone').addClass('is_active');
-    insertPhoneNumber(phone, title);
-
 });
 
 // $('.js-add-to-conference').on('click', function() {

@@ -110,6 +110,10 @@ $this->registerJsFile('/js/moment.min.js', [
 $js = <<<JS
 
 $(document).ready( function () {
+    window.name = 'chat';
+});
+
+$(document).ready( function () {
     $('._cc-item-last-message-time[data-moment]').each( function (i, elem) {
         $(elem).html(moment.duration(-$(elem).data('moment'), 'seconds').humanize(true));
     });

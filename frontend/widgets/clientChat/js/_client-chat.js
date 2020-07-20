@@ -60,7 +60,11 @@ function refreshClientChatWidget(obj) {
     switch (data.command) {
         case 'accept':
             if (document.visibilityState == "visible") {
-                window.open(data.url);
+                if (window.name === 'chat') {
+                    window.location.href = data.url;
+                } else {
+                    window.open(data.url);
+                }
             }
             pjaxReload({container: '#client-chat-box-pjax', url: data.pjaxUrl});
             break;

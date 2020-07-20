@@ -98,7 +98,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     echo VarDumper::dumpAsString($multipleError) . ' <br><br>';
                 }
                 ?>
-                <?= VarDumper::dumpAsString($multipleForm->getErrorSummary(true))?>
+                <?= $multipleForm->getErrors() ? VarDumper::dumpAsString($multipleForm->getErrorSummary(true)) : '' ?>
             </div>
         </div>
         <?php

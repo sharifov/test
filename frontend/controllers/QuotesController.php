@@ -149,7 +149,7 @@ class QuotesController extends FController
 
         $url = $mailCapture['data'];
 
-        return $url['host'] . $url['dir'] . $url['img'];
+        return isset($url['host']) ? $url['host'] : '' . $url['dir'] . $url['img'];
     }
 
 

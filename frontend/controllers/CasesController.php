@@ -36,6 +36,7 @@ use sales\forms\cases\CasesClientUpdateForm;
 use sales\forms\cases\CasesCreateByWebForm;
 use sales\forms\cases\CasesSaleForm;
 use sales\helpers\setting\SettingHelper;
+use sales\model\callLog\entity\callLog\CallLogType;
 use sales\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
 use sales\guards\cases\CaseManageSaleInfoGuard;
 use sales\model\cases\useCases\cases\updateInfo\Handler;
@@ -801,6 +802,7 @@ class CasesController extends FController
 			->from('call_log_case')
 			->innerJoin('call_log', 'call_log.cl_id = call_log_case.clc_cl_id')
 			->where(['clc_case_id' => $model->cs_id])
+			->andWhere(['call_log.cl_type_id' => [CallLogType::IN,CallLogType::OUT]])
 			->orderBy(['created_dt' => SORT_ASC])
 			->groupBy(['id', 'type', 'case_id']);
 

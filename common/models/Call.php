@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\components\jobs\CheckClientCallJoinToConferenceJob;
 use common\components\purifier\Purifier;
 use common\models\query\CallQuery;
 use sales\model\call\helper\CallHelper;
@@ -1444,11 +1445,22 @@ class Call extends \yii\db\ActiveRecord
                             Yii::error(VarDumper::dumpAsString($callAccess->errors), 'Call:applyCallToAgent:CallUserAccess:save');
                         }
                         Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $callAccess->cua_user_id], RemoveIncomingRequestMessage::create($call->c_call_sid));
+                        Notifications::publish('noAnsweredCall', ['user_id' => $callAccess->cua_user_id], ['callId' => $call->c_call_sid]);
                     }
                 }
 
                 if ($call->update() === false) {
                     Yii::error(VarDumper::dumpAsString(['call' => $call->getAttributes(), 'error' => $call->getErrors()]), 'Call:applyCallToAgent:call:update');
+                } else {
+                    if ($conferenceBase) {
+                        $delay = abs((int)(Yii::$app->params['settings']['call_accept_check_conference_status_seconds'] ?? 0));
+                        if ($delay) {
+                            $checkJob = new CheckClientCallJoinToConferenceJob();
+                            $checkJob->callId = $call->c_id;
+                            $checkJob->dateTime = date('Y-m-d H:i:s');
+                            Yii::$app->queue_job->delay($delay)->push($checkJob);
+                        }
+                    }
                 }
 
                 if ($conferenceBase) {
@@ -1520,24 +1532,20 @@ class Call extends \yii\db\ActiveRecord
     public static function applyCallToAgentAccess(Call $call, int $user_id): bool
     {
         try {
-            if ($call) {
-                $callUserAccess = CallUserAccess::find()->where(['cua_user_id' => $user_id, 'cua_call_id' => $call->c_id])->one();
-                if(!$callUserAccess) {
-                    $callUserAccess = new CallUserAccess();
-                    $callUserAccess->cua_call_id = $call->c_id;
-                    $callUserAccess->cua_user_id = $user_id;
-                    $callUserAccess->acceptPending();
+            $callUserAccess = CallUserAccess::find()->where(['cua_user_id' => $user_id, 'cua_call_id' => $call->c_id])->one();
+            if(!$callUserAccess) {
+                $callUserAccess = new CallUserAccess();
+                $callUserAccess->cua_call_id = $call->c_id;
+                $callUserAccess->cua_user_id = $user_id;
+                $callUserAccess->acceptPending();
+            } else {
+                $callUserAccess->acceptPending();
+            }
 
-                } else {
-
-                    $callUserAccess->acceptPending();
-                }
-
-                if(!$callUserAccess->save()) {
-                    Yii::error(VarDumper::dumpAsString($callUserAccess->errors), 'CallQueueJob:execute:CallUserAccess:save');
-                } else {
-                    return true;
-                }
+            if(!$callUserAccess->save()) {
+                Yii::error(VarDumper::dumpAsString($callUserAccess->errors), 'CallQueueJob:execute:CallUserAccess:save');
+            } else {
+                return true;
             }
         } catch (\Throwable $e) {
             \Yii::error($e, 'Call:applyCallToAgentAccess');

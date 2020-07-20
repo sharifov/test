@@ -5,6 +5,7 @@ use common\components\jobs\CallQueueJob;
 use common\components\TwilioClient;
 use common\models\Call;
 use common\models\CallUserGroup;
+use common\models\ClientPhone;
 use common\models\Conference;
 use common\models\DepartmentPhoneProject;
 use common\models\Sms;
@@ -1335,5 +1336,20 @@ class TwilioController extends ApiBaseNoAuthController
 			$responseVoiceResponse->reject(array('reason' => 'busy'));
 		}
 		return (string) $responseVoiceResponse;
+	}
+
+	public function actionCheckOutNumber(): array
+	{
+	    $number = (string)Yii::$app->request->post('number');
+
+        if (!$number) {
+            return ['error' => 'Not found number'];
+        }
+
+        if (ClientPhone::find()->andWhere(['phone' => $number])->exists()) {
+            return ['available' => true];
+        }
+
+        return ['available' => false];
 	}
 }
