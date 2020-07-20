@@ -18,7 +18,7 @@ $showContent = $showContent ?? false;
 ?>
 
 <?php Pjax::begin(['id' => 'pjax-notes', 'enablePushState' => false, 'timeout' => 10000]) ?>
-    <div class="x_panel m-2">
+    <div class="x_panel" style="margin-top: 10px;">
         <div class="x_title">
             <h2><i class="fa fa-sticky-note-o"></i>  Chat notes (<?php echo count($clientChat->notes) ?>) </h2>
             <ul class="nav navbar-right panel_toolbox">
@@ -75,7 +75,7 @@ $showContent = $showContent ?? false;
             <?php endif ?>
         </div>
 
-        <div class="box_note_form" style="padding: 10px; <?php echo $showContent ? '' : 'display: none;' ?>">
+        <div class="box_note_form" style="padding: 10px; display: none;">
             <?php $form = ActiveForm::begin([
                     'id' => 'note-form',
                     'action' => ['client-chat/create-note', 'cch_id' => $clientChat->cch_id],
