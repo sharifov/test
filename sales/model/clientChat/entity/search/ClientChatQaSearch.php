@@ -2,6 +2,8 @@
 
 namespace sales\model\clientChat\entity\search;
 
+use sales\model\clientChatData\entity\ClientChatData;
+use sales\model\clientChatMessage\entity\ClientChatMessage;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use sales\model\clientChat\entity\ClientChat;
@@ -12,12 +14,24 @@ use sales\model\clientChat\entity\ClientChat;
  * @property $createdRangeDate
  * @property string|null $dataCountry
  * @property string|null $dataCity
+ * @property int|null $messageBy
+ * @property string|null $messageBody
  */
 class ClientChatQaSearch extends ClientChat
 {
     public $createdRangeDate;
     public $dataCountry;
     public $dataCity;
+    public $messageBy;
+    public $messageBody;
+
+    public const MESSAGE_BY_CLIENT = 1;
+    public const MESSAGE_BY_USER = 2;
+
+    public const MESSAGE_BY_LIST = [
+        self::MESSAGE_BY_CLIENT => 'Client',
+        self::MESSAGE_BY_USER=> 'User',
+    ];
 
     public function rules(): array
     {
@@ -37,10 +51,10 @@ class ClientChatQaSearch extends ClientChat
                     'cch_rid', 'cch_title', 'cch_description',
                     'cch_note', 'cch_ip', 'cch_language_id',
                     'cch_created_dt', 'cch_updated_dt', 'createdRangeDate',
-                    'dataCountry', 'dataCity',
                 ],
                 'safe'
             ],
+            [['dataCountry', 'dataCity'], 'string', 'max' => 50],
         ];
     }
 
@@ -89,6 +103,13 @@ class ClientChatQaSearch extends ClientChat
             'cch_client_online' => $this->cch_client_online,
         ]);
 
+        $query->andFilterWhere(['like', 'cch_rid', $this->cch_rid])
+            ->andFilterWhere(['like', 'cch_title', $this->cch_title])
+            ->andFilterWhere(['like', 'cch_description', $this->cch_description])
+            ->andFilterWhere(['like', 'cch_note', $this->cch_note])
+            ->andFilterWhere(['like', 'cch_ip', $this->cch_ip]) /* TODO::  */
+            ->andFilterWhere(['like', 'cch_language_id', $this->cch_language_id]);
+
         if ($this->createdRangeDate) {
 			$dateRange = explode(' - ', $this->createdRangeDate);
 			if ($dateRange[0] && $dateRange[1]) {
@@ -97,13 +118,36 @@ class ClientChatQaSearch extends ClientChat
 				$query->andWhere(['BETWEEN', 'DATE(cch_created_dt)', $fromDate, $toDate]);
 			}
 		}
+		if ($this->dataCountry) {
+            $query->andWhere(['cch_id' =>
+                ClientChatData::find()->select('ccd_cch_id')->andWhere(['ccd_country' => $this->dataCountry])]);
+        }
+        if ($this->dataCity) {
+            $query->andWhere(['cch_id' =>
+                ClientChatData::find()->select('ccd_cch_id')->andWhere(['ccd_city' => $this->dataCity])]);
+        }
+        if ($this->messageBody) {
+            if ($this->messageBy === self::MESSAGE_BY_CLIENT) {
+                $query->andWhere(['cch_id' =>
+                    ClientChatMessage::find()
+                        ->select('ccm_cch_id')
+                        ->andWhere(['IS NOT', 'ccm_client_id', null])
+                        ->andWhere(['like', 'ccm_body', $this->messageBody])]);
 
-        $query->andFilterWhere(['like', 'cch_rid', $this->cch_rid])
-            ->andFilterWhere(['like', 'cch_title', $this->cch_title])
-            ->andFilterWhere(['like', 'cch_description', $this->cch_description])
-            ->andFilterWhere(['like', 'cch_note', $this->cch_note])
-            ->andFilterWhere(['like', 'cch_ip', $this->cch_ip])
-            ->andFilterWhere(['like', 'cch_language_id', $this->cch_language_id]);
+            } elseif ($this->messageBy === self::MESSAGE_BY_USER) {
+                $query->andWhere(['cch_id' =>
+                    ClientChatMessage::find()
+                        ->select('ccm_cch_id')
+                        ->andWhere(['IS NOT', 'ccm_user_id', null])
+                        ->andWhere(['like', 'ccm_body', $this->messageBody])]);
+
+            } else {
+                $query->andWhere(['cch_id' =>
+                    ClientChatMessage::find()
+                        ->select('ccm_cch_id')
+                        ->andWhere(['like', 'ccm_body', $this->messageBody])]);
+            }
+        }
 
         return $dataProvider;
     }
