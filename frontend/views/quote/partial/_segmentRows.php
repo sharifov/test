@@ -31,12 +31,14 @@ use yii\helpers\Url;
         </div>
         <div class="col-3 border p-1">
             <?php echo $segment['departureDateTime']->format('g:i A M d') ?>&nbsp;
-            <?php echo Airport::findOne($segment['departureAirport'])->getCityName() ?>&nbsp;
+            <?php echo Airport::findOne($segment['departureAirport']) ?
+                Airport::findOne($segment['departureAirport'])->getCityName() : $segment['departureAirport'] ?>&nbsp;
             <?php echo $segment['departureAirport'] ?>
         </div>
         <div class="col border p-1">
             <?php echo $segment['arrivalDateTime']->format('g:i A M d') ?>&nbsp;
-            <?php echo Airport::findOne($segment['arrivalAirport'])->getCityName() ?>&nbsp;
+            <?php echo Airport::findOne($segment['arrivalAirport']) ?
+                Airport::findOne($segment['arrivalAirport'])->getCityName() : $segment['arrivalAirport'] ?>&nbsp;
             <?php echo $segment['arrivalAirport'] ?>
         </div>
     </div>
