@@ -222,7 +222,12 @@ class CreditCardController extends FController
 						throw new \RuntimeException($saleCreditCard->getErrorSummary(false)[0]);
 					} else {
 						$apiKey = $this->casesSaleRepository->getProjectApiKey($caseSale);
-						$result = $this->casesSaleService->sendAddedCreditCardToBO($apiKey, $caseSale->css_sale_book_id, $caseSale->css_sale_id, $form);
+
+						if (!$bookId = $caseSale->css_sale_book_id) {
+						    $bookId = $caseSale->css_sale_data['bookingId'] ?? '';
+						}
+
+						$result = $this->casesSaleService->sendAddedCreditCardToBO($apiKey, $bookId, $caseSale->css_sale_id, $form);
 
 						$notify = '';
 						if ($result['error']) {
