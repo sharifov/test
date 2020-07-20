@@ -11,24 +11,17 @@ use sales\model\clientChat\entity\ClientChat;
  */
 class ClientChatQaSearch extends ClientChat
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function rules()
+
+    public function rules(): array
     {
         return [
-            [['cch_id', 'cch_ccr_id', 'cch_project_id', 'cch_dep_id', 'cch_channel_id', 'cch_client_id', 'cch_owner_user_id', 'cch_case_id', 'cch_lead_id', 'cch_status_id', 'cch_ua', 'cch_created_user_id', 'cch_updated_user_id', 'cch_client_online'], 'integer'],
+            [['cch_id', 'cch_ccr_id', 'cch_project_id',
+                'cch_dep_id', 'cch_channel_id', 'cch_client_id',
+                'cch_owner_user_id', 'cch_case_id', 'cch_lead_id',
+                'cch_status_id', 'cch_ua', 'cch_created_user_id',
+                'cch_updated_user_id', 'cch_client_online'], 'integer'],
             [['cch_rid', 'cch_title', 'cch_description', 'cch_note', 'cch_ip', 'cch_language_id', 'cch_created_dt', 'cch_updated_dt'], 'safe'],
         ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function scenarios()
-    {
-        // bypass scenarios() implementation in the parent class
-        return Model::scenarios();
     }
 
     /**
