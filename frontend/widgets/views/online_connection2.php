@@ -144,6 +144,10 @@ $js = <<<JS
                              if (typeof webCallLeadRedialUpdate === "function") {
                                 webCallLeadRedialUpdate(obj);
                             }
+                             
+                             if (obj.status === 'In progress') {
+                                 $("#incomingCallAudio").prop('muted', true);
+                             }
                         }
                         
                         if(obj.cmd === 'webCallUpdate') {
