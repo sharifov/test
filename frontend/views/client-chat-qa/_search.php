@@ -100,12 +100,17 @@ use yii\widgets\ActiveForm;
                 <div class="col-md-2">
                     <?php echo $form->field($model, 'dataCity')->dropDownList(ClientChatData::getCityList(), ['prompt' => '-']) ?>
                 </div>
+                <div class="col-md-2">
+                    <?php echo $form->field($model, 'cch_ip') ?>
+                </div>
             </div>
 
             <div class="row">
-                <div class="col-md-2">
+                <div class="col-md-1">
                     <?php echo $form->field($model, 'messageBy')->dropDownList(ClientChatQaSearch::MESSAGE_BY_LIST, ['prompt' => '-']) ?>
-                    <?php echo $form->field($model, 'messageBody') ?>
+                </div>
+                <div class="col-md-2">
+                    <?php echo $form->field($model, 'messageText') ?>
                 </div>
             </div>
 

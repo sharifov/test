@@ -4,9 +4,11 @@ namespace sales\model\clientChat\entity\search;
 
 use sales\model\clientChatData\entity\ClientChatData;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
+use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use sales\model\clientChat\entity\ClientChat;
+use yii\helpers\ArrayHelper;
 
 /**
  * ClientChatQaSearch represents the model behind the search form of `ClientChat`.
@@ -15,7 +17,7 @@ use sales\model\clientChat\entity\ClientChat;
  * @property string|null $dataCountry
  * @property string|null $dataCity
  * @property int|null $messageBy
- * @property string|null $messageBody
+ * @property string|null $messageText
  */
 class ClientChatQaSearch extends ClientChat
 {
@@ -23,7 +25,7 @@ class ClientChatQaSearch extends ClientChat
     public $dataCountry;
     public $dataCity;
     public $messageBy;
-    public $messageBody;
+    public $messageText;
 
     public const MESSAGE_BY_CLIENT = 1;
     public const MESSAGE_BY_USER = 2;
@@ -42,7 +44,7 @@ class ClientChatQaSearch extends ClientChat
                     'cch_dep_id', 'cch_channel_id', 'cch_client_id',
                     'cch_owner_user_id', 'cch_case_id', 'cch_lead_id',
                     'cch_status_id', 'cch_ua', 'cch_created_user_id',
-                    'cch_updated_user_id', 'cch_client_online'
+                    'cch_updated_user_id', 'cch_client_online', 'messageBy',
                 ],
                 'integer'
             ],
@@ -54,7 +56,7 @@ class ClientChatQaSearch extends ClientChat
                 ],
                 'safe'
             ],
-            [['dataCountry', 'dataCity'], 'string', 'max' => 50],
+            [['dataCountry', 'dataCity', 'messageText'], 'string', 'max' => 100],
         ];
     }
 
@@ -107,7 +109,7 @@ class ClientChatQaSearch extends ClientChat
             ->andFilterWhere(['like', 'cch_title', $this->cch_title])
             ->andFilterWhere(['like', 'cch_description', $this->cch_description])
             ->andFilterWhere(['like', 'cch_note', $this->cch_note])
-            ->andFilterWhere(['like', 'cch_ip', $this->cch_ip]) /* TODO::  */
+            ->andFilterWhere(['like', 'cch_ip', $this->cch_ip])
             ->andFilterWhere(['like', 'cch_language_id', $this->cch_language_id]);
 
         if ($this->createdRangeDate) {
@@ -126,29 +128,56 @@ class ClientChatQaSearch extends ClientChat
             $query->andWhere(['cch_id' =>
                 ClientChatData::find()->select('ccd_cch_id')->andWhere(['ccd_city' => $this->dataCity])]);
         }
-        if ($this->messageBody) {
-            if ($this->messageBy === self::MESSAGE_BY_CLIENT) {
-                $query->andWhere(['cch_id' =>
-                    ClientChatMessage::find()
-                        ->select('ccm_cch_id')
-                        ->andWhere(['IS NOT', 'ccm_client_id', null])
-                        ->andWhere(['like', 'ccm_body', $this->messageBody])]);
-
-            } elseif ($this->messageBy === self::MESSAGE_BY_USER) {
-                $query->andWhere(['cch_id' =>
-                    ClientChatMessage::find()
-                        ->select('ccm_cch_id')
-                        ->andWhere(['IS NOT', 'ccm_user_id', null])
-                        ->andWhere(['like', 'ccm_body', $this->messageBody])]);
-
-            } else {
-                $query->andWhere(['cch_id' =>
-                    ClientChatMessage::find()
-                        ->select('ccm_cch_id')
-                        ->andWhere(['like', 'ccm_body', $this->messageBody])]);
-            }
+        if ($this->messageText) {
+            $by = ArrayHelper::isIn($this->messageBy, self::MESSAGE_BY_LIST) ? $this->messageBy : null;
+            $query->andWhere(['cch_id' => self::getIdsByChatMessage($this->messageText, $by)]);
         }
 
         return $dataProvider;
+    }
+
+    public static function getIdsByCreatorType(int $by): array
+    {
+        /* TODO::  */
+
+        $sql = 'SELECT 
+                    ccm_cch_id
+                FROM
+                    client_chat_message';
+
+        if ($by === ClientChatQaSearch::MESSAGE_BY_CLIENT) {
+            $sql .= ' WHERE ccm_client_id IS NOT NULL';
+        } elseif ($by === ClientChatQaSearch::MESSAGE_BY_USER) {
+            $sql .= ' WHERE ccm_user_id IS NOT NULL';
+        }
+        $sql .= ' GROUP BY ccm_cch_id';
+
+        return ArrayHelper::getColumn(
+            Yii::$app->db_postgres->createCommand($sql)->queryAll(),
+        'ccm_cch_id');
+    }
+
+    public static function getIdsByChatMessage(string $msg, ?int $by = null): array
+    {
+        $sql = "SELECT 
+                    ccm_cch_id
+                FROM
+                    client_chat_message
+                WHERE 
+                    ccm_body->>'msg' LIKE :msg";
+
+        if ($by === ClientChatQaSearch::MESSAGE_BY_CLIENT) {
+            $sql .= ' AND ccm_client_id IS NOT NULL';
+        } elseif ($by === ClientChatQaSearch::MESSAGE_BY_USER) {
+            $sql .= ' AND ccm_user_id IS NOT NULL';
+        }
+        $sql .= ' GROUP BY ccm_cch_id';
+
+        return ArrayHelper::getColumn(
+            Yii::$app->db_postgres->createCommand(
+                $sql,
+                [':msg' => '%' . $msg . '%']
+            )->queryAll(),
+        'ccm_cch_id');
     }
 }

@@ -7,6 +7,7 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestApiForm;
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "client_chat_message".
