@@ -84,7 +84,7 @@ class ClientChat extends \yii\db\ActiveRecord
 
 	public const TAB_LIST_NAME = [
 		self::TAB_ACTIVE => 'Active',
-		self::TAB_ARCHIVE => 'Archive'
+		self::TAB_ARCHIVE => 'Closed'
 	];
 
 	public function behaviors(): array
