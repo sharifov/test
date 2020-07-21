@@ -106,7 +106,11 @@ $lists = new ListsAccess($user->id);
                 'label' => 'Communication',
                 'value' => static function (CasesQSearch $model) {
                     $statistics = new StatisticsHelper($model->cs_id, StatisticsHelper::TYPE_CASE);
-                    return Yii::$app->getView()->render('/partial/_communication_statistic_list', ['statistics' => $statistics->setCountAll()]);
+                    return Yii::$app->getView()->render('/partial/_communication_statistic_list',
+                        [
+                            'statistics' => $statistics->setCountAll(),
+                            'lastCommunication' => $statistics::getLastCommunicationByCaseId($model->cs_id),
+                        ]);
                 },
                 'format' => 'raw',
                 'contentOptions' => [

@@ -14,7 +14,9 @@ use sales\model\callLog\entity\callLogCase\CallLogCase;
 use sales\model\callLog\entity\callLogLead\CallLogLead;
 use sales\model\clientChat\entity\ClientChat;
 use Yii;
+use yii\data\ActiveDataProvider;
 use yii\db\Expression;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -244,5 +246,93 @@ class StatisticsHelper
     public function isTypeCase(): bool
     {
         return $this->type === self::TYPE_CASE;
+    }
+
+    public static function getLastCommunicationByCaseId(int $caseId): array
+    {
+        $queryEmailIn = (new Query())
+			->select([
+			    new Expression('"email" AS type'),
+			    new Expression('"In" AS direction'),
+			    'e_case_id AS case_id',
+			    'MAX(e_created_dt) AS created_dt'
+			])
+			->from(Email::tableName())
+			->where(['e_case_id' => $caseId])
+			->andWhere(['e_type_id' => Email::TYPE_INBOX]);
+
+	    $queryEmailOut = (new Query())
+			->select([
+			    new Expression('"email" AS type'),
+			    new Expression('"Out" AS direction'),
+			    'e_case_id AS case_id',
+			    'MAX(e_created_dt) AS created_dt'
+			])
+			->from(Email::tableName())
+			->where(['e_case_id' => $caseId])
+			->andWhere(['e_type_id' => Email::TYPE_OUTBOX]);
+
+		$querySmsIn = (new Query())
+			->select([
+			    new Expression('"sms" AS type'),
+			    new Expression('"In" AS direction'),
+			    's_case_id AS case_id',
+			    'MAX(s_created_dt) AS created_dt'
+			])
+			->from(Sms::tableName())
+			->where(['s_case_id' => $caseId])
+			->andWhere(['s_type_id' => Sms::TYPE_INBOX]);
+
+		$querySmsOut = (new Query())
+			->select([
+			    new Expression('"sms" AS type'),
+			    new Expression('"Out" AS direction'),
+			    's_case_id AS case_id',
+			    'MAX(s_created_dt) AS created_dt'
+			])
+			->from(Sms::tableName())
+			->where(['s_case_id' => $caseId])
+			->andWhere(['s_type_id' => Sms::TYPE_OUTBOX]);
+
+        $queryCallIn = (new Query())
+			->select([
+			    new Expression('"call" AS type'),
+			    new Expression('"In" AS direction'),
+			    'clc_case_id AS case_id',
+			    'MAX(cl_call_created_dt) AS created_dt'
+			])
+			->from(CallLogCase::tableName())
+			->innerJoin(CallLog::tableName(),
+                    CallLog::tableName() . '.cl_id = ' . CallLogCase::tableName() . '.clc_cl_id')
+			->where(['clc_case_id' => $caseId])
+			->andWhere(['cl_group_id' => null])
+			->andWhere(['cl_type_id' => CallLogType::IN]);
+
+		$queryCallOut = (new Query())
+			->select([
+			    new Expression('"call" AS type'),
+			    new Expression('"Out" AS direction'),
+			    'clc_case_id AS case_id',
+			    'MAX(cl_call_created_dt) AS created_dt'
+			])
+			->from(CallLogCase::tableName())
+			->innerJoin(CallLog::tableName(),
+                    CallLog::tableName() . '.cl_id = ' . CallLogCase::tableName() . '.clc_cl_id')
+			->where(['clc_case_id' => $caseId])
+			->andWhere(['cl_group_id' => null])
+			->andWhere(['cl_type_id' => CallLogType::OUT]);
+
+        $unionQuery = (new Query())
+			->from(['union_table' =>
+			        $queryCallIn
+			        ->union($queryCallOut)
+			        ->union($queryEmailIn)
+			        ->union($queryEmailOut)
+			        ->union($querySmsIn)
+			        ->union($querySmsOut)
+			])
+			->all();
+
+	    return $unionQuery;
     }
 }
