@@ -13,6 +13,7 @@ use sales\model\callLog\entity\callLog\CallLogType;
 use sales\model\callLog\entity\callLogCase\CallLogCase;
 use sales\model\callLog\entity\callLogLead\CallLogLead;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChatLead\entity\ClientChatLead;
 use Yii;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
@@ -155,9 +156,16 @@ class StatisticsHelper
      */
     public function setClientChatCount(): StatisticsHelper
     {
-        $column = $this->type === self::TYPE_LEAD ? 'cch_lead_id' : 'cch_case_id';
+        if ($this->type === self::TYPE_LEAD) {
+            $this->clientChatCount = (int) ClientChatLead::find()
+                ->andWhere(['ccl_lead_id' => $this->id])
+                ->cache($this->cacheDuration)
+                ->count();
+            return $this;
+        }
+
         $this->clientChatCount = (int) ClientChat::find()
-            ->where([$column => $this->id])
+            ->where(['cch_case_id' => $this->id])
             ->cache($this->cacheDuration)
             ->count();
         return $this;

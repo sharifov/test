@@ -35,7 +35,6 @@ class ClientChatSearch extends ClientChat
     {
         return [
             [['timeRange', 'timeStart', 'timeEnd'], 'string' ],
-            ['cch_case_id', 'integer'],
 
             ['cch_ccr_id', 'integer'],
 
@@ -108,7 +107,6 @@ class ClientChatSearch extends ClientChat
             'cch_channel_id' => $this->cch_channel_id,
             'cch_client_id' => $this->cch_client_id,
             'cch_owner_user_id' => $this->cch_owner_user_id,
-            'cch_case_id' => $this->cch_case_id,
             'cch_status_id' => $this->cch_status_id,
             'cch_ua' => $this->cch_ua,
             'date_format(cch_created_dt, "%Y-%m-%d")' => $this->cch_created_dt,

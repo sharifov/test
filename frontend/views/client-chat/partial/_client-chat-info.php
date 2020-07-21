@@ -68,18 +68,17 @@ use yii\web\View;
                 'cch_title',
                 'cch_description',
                 [
-                    'attribute' => 'cch_case_id',
+//                    'attribute' => 'cch_case_id',
                     'label' => 'Case',
                     'value' => static function(ClientChat $model) {
-                        if (!$model->cch_case_id) {
+//                        if (!$model->cch_case_id) {
                             return Html::a('Create Case', ['/cases/create', 'chat_id' => $model->cch_id],  ['target' => '_blank']);
-                        }
-                        return Yii::$app->formatter->format($model->cchCase, 'case');
+//                        }
+//                        return Yii::$app->formatter->format($model->cchCase, 'case');
                     },
                     'format' => 'raw',
                 ],
                 [
-                    'attribute' => 'cch_lead_id',
                     'label' => 'Lead',
                     'value' => static function(ClientChat $model) {
                         $out = '<span id="chat-info-lead-info">';

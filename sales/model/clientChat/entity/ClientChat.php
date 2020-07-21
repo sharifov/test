@@ -36,8 +36,6 @@ use yii\helpers\Html;
  * @property int|null $cch_channel_id
  * @property int|null $cch_client_id
  * @property int|null $cch_owner_user_id
- * @property int|null $cch_case_id
- * @property int|null $cch_lead_id
  * @property string|null $cch_note
  * @property int|null $cch_status_id
  * @property string|null $cch_ip
@@ -54,7 +52,6 @@ use yii\helpers\Html;
  * @property Client $cchClient
  * @property ClientChatChannel $cchChannel
  * @property Department $cchDep
- * @property Lead $cchLead
  * @property Employee $cchOwnerUser
  * @property Project $cchProject
  * @property ClientChatData $cchData
@@ -104,9 +101,6 @@ class ClientChat extends \yii\db\ActiveRecord
     public function rules(): array
     {
         return [
-            ['cch_case_id', 'integer'],
-            ['cch_case_id', 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['cch_case_id' => 'cs_id']],
-
             ['cch_ccr_id', 'integer'],
             ['cch_ccr_id', 'exist', 'skipOnError' => true, 'targetClass' => ClientChatRequest::class, 'targetAttribute' => ['cch_ccr_id' => 'ccr_id']],
 
@@ -131,9 +125,6 @@ class ClientChat extends \yii\db\ActiveRecord
 			['cch_language_id', 'string', 'max' => 5],
 			['cch_language_id', 'default', 'value' => null],
 			['cch_language_id', 'exist', 'skipOnError' => true, 'targetClass' => Language::class, 'targetAttribute' => ['cch_language_id' => 'language_id']],
-
-            ['cch_lead_id', 'integer'],
-            ['cch_lead_id', 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['cch_lead_id' => 'id']],
 
             ['cch_note', 'string', 'max' => 255],
 
@@ -188,11 +179,6 @@ class ClientChat extends \yii\db\ActiveRecord
 	{
 		return $this->hasOne(Language::class, ['language_id' => 'cch_language_id']);
 	}
-
-    public function getCchLead(): \yii\db\ActiveQuery
-    {
-        return $this->hasOne(Lead::class, ['id' => 'cch_lead_id']);
-    }
 
     public function getCchOwnerUser(): \yii\db\ActiveQuery
     {
@@ -306,8 +292,6 @@ class ClientChat extends \yii\db\ActiveRecord
             'cch_channel_id' => 'Channel',
             'cch_client_id' => 'Client',
             'cch_owner_user_id' => 'Owner User',
-            'cch_case_id' => 'Case ID',
-            'cch_lead_id' => 'Lead ID',
             'cch_note' => 'Note',
             'cch_status_id' => 'Status ID',
             'cch_ip' => 'IP',
