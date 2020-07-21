@@ -404,7 +404,7 @@ class ClientChatController extends FController
 
 		$result = [
 			'error' => false,
-			'message' => ''
+			'message' => 'Room successfully closed'
 		];
 
 		try {

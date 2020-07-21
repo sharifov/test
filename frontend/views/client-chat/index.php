@@ -362,6 +362,7 @@ $(document).on('click', '.cc_close', function (e) {
                     params.set('tab', data.tab);
                     window.history.replaceState({}, '', '{$loadChannelsUrl}?'+params.toString());
                     refreshChatPage(cchId);
+                    createNotify('Success', data.message, 'success');
                 }
             },
             complete: function () {
