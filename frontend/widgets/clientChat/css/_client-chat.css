@@ -112,6 +112,10 @@
     margin: -30px 20px 10px 20px;
     border: 4px solid rgba(0, 0, 0, 0.21);
 }
+._cc-box-item-wrapper {
+    position: relative;
+    z-index: 10;
+}
 ._cc-box-body {
     background: #fff;
     width: 100%;
@@ -127,12 +131,36 @@
     margin-bottom: 10px;
     justify-content: space-between;
     align-items: start;
+    height: auto;
+    /*max-height: 65px;*/
+    /*overflow: hidden;*/
+    /*transition: max-height .7s ease-in-out;*/
+}
+._cc-box-item.active {
+    max-height: 1000px;
 }
 ._cc-client-info {
     display: flex;
     flex-direction: column;
-    justify-content: start;
-    align-items: start;
+    justify-content: flex-start;
+    align-items: flex-start;
+    text-align: left;
+    width: 80%;
+}
+._cc_chevron {
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    z-index: 100;
+    background-color: #fff;
+    width: 40px;
+    cursor: pointer;
+    transition: transform .7s ease-in-out;
+}
+._cc-box-item.active ._cc_chevron .fa {
+    transform: rotate(180deg);
 }
 ._cc-client-name {
     text-transform: capitalize;
@@ -146,10 +174,11 @@
     margin-top: 10px;
 }
 ._cc-data {
-    display: flex;flex-direction: column; align-items: start; justify-content: start;
+    display: flex;flex-direction: row; align-items: start; justify-content: start;
 }
 ._cc-data .label {
-    margin-bottom: 5px;
+    margin-top: 5px;
+    margin-right: 5px;
 }
 ._cc-data .label:last-child {
     margin-bottom: 0;
@@ -159,6 +188,7 @@
     flex-direction: column;
     justify-content: flex-end;
     align-items: flex-end;
+    width: 22%;
 }
 
 @keyframes scaling {

@@ -50,6 +50,7 @@ $urlParamsStr = http_build_query($urlParams);
 
 $wsUrl = $webSocketHost . '/?' . $urlParamsStr;
 $ccNotificationUpdateUrl = Url::to(['/client-chat/refresh-notification']);
+$discardUnreadMessageUrl = Url::to(['/client-chat/discard-unread-messages']);
 $js = <<<JS
    
     window.socket = null;
@@ -144,6 +145,10 @@ $js = <<<JS
                              if (typeof webCallLeadRedialUpdate === "function") {
                                 webCallLeadRedialUpdate(obj);
                             }
+                             
+                             if (obj.status === 'In progress') {
+                                 $("#incomingCallAudio").prop('muted', true);
+                             }
                         }
                         
                         if(obj.cmd === 'webCallUpdate') {
@@ -266,6 +271,13 @@ $js = <<<JS
                         }
 
                         if (obj.cmd === 'clientChatUnreadMessage') {
+                        
+                            let activeChatId = localStorage.getItem('activeChatId');
+                            
+                            if (activeChatId == obj.data.cchId && obj.data.cchUnreadMessages) {
+                                $.post('{$discardUnreadMessageUrl}', {cchId: activeChatId});
+                                return false;
+                            }
                         
                             if (obj.data.soundNotification) {
                                 soundNotification('incoming_message');
