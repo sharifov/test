@@ -408,12 +408,18 @@ class ClientChatController extends FController
 		];
 
 		try {
-			$clientChat = $this->clientChatRepository->findById($cchId);
-			$clientChat->close();
-			$this->clientChatRepository->save($clientChat);
+
+			$this->clientChatService->closeConversation($cchId);
+
+			$result['tab'] = ClientChat::TAB_ARCHIVE;
+
 		} catch (NotFoundException | \RuntimeException $e) {
 			$result['error'] = true;
 			$result['message'] = $e->getMessage();
+		} catch (\Throwable $e) {
+			Yii::error(AppHelper::throwableFormatter($e), 'ClientChatController::actionAjaxClose::Throwable');
+			$result['error'] = true;
+			$result['message'] = 'Internal Server Error';
 		}
 
 		return $this->asJson($result);

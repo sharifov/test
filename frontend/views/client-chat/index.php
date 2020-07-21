@@ -348,15 +348,21 @@ $(document).on('click', '.cc_close', function (e) {
         $.ajax({
             type: 'post',
             url: '{$clientChatCloseUrl}',
-            dataType: 'html',
+            dataType: 'json',
             cache: false,
             data: {cchId: cchId},
             beforeSend: function () {
                 btn.html('<i class="fa fa-spin fa-spinner"></i>');
             },
-            success: function () {
-                refreshChatPage(cchId);
-                let params = new URLSearchParams(window.location.search);
+            success: function (data) {
+                if (data.error) {
+                    createNotify('Error', data.message, 'error');
+                } else {
+                    let params = new URLSearchParams(window.location.search);
+                    params.set('tab', data.tab);
+                    window.history.replaceState({}, '', '{$loadChannelsUrl}?'+params.toString());
+                    refreshChatPage(cchId);
+                }
             },
             complete: function () {
                 btn.html(btnHtml);

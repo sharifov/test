@@ -1,6 +1,8 @@
 <?php
 namespace sales\services\clientChatService;
 
+use common\components\ChatBot;
+use http\Exception\RuntimeException;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
@@ -15,6 +17,7 @@ use sales\repositories\NotFoundException;
 use sales\repositories\visitorLog\VisitorLogRepository;
 use sales\services\TransactionManager;
 use yii\helpers\Json;
+use yii\helpers\VarDumper;
 
 /**
  * Class ClientChatService
@@ -148,6 +151,25 @@ class ClientChatService
 			\Yii::info('Send notification to users failed... ' . $e->getMessage() . '; File: ' . $e->getFile() . '; Line: ' . $e->getLine(), 'ClientChatService::assignToChannel::RuntimeException|NotFoundException');
 		}
 		\Yii::info('Send notification to users successfully finished...', 'ClientChatService::assignToChannel');
+	}
+
+	public function closeConversation(int $chhId): void
+	{
+		$clientChat = $this->clientChatRepository->findById($chhId);
+
+		if (!$clientChat->ccv || !$clientChat->ccv->ccv_visitor_rc_id) {
+			throw new \RuntimeException('Visitor RC id is not found');
+		}
+
+		$botCloseChatResult = \Yii::$app->chatBot->endConversation($clientChat->cch_rid, $clientChat->ccv->ccv_visitor_rc_id);
+		\Yii::info(VarDumper::dumpAsString($botCloseChatResult, 70), 'info\closeConversation');
+		if ($botCloseChatResult['error']) {
+			throw new \RuntimeException('[Chat Bot] ' . $botCloseChatResult['error']);
+		}
+
+		$clientChat->close();
+
+		$this->clientChatRepository->save($clientChat);
 	}
 
 	private function cloneAdditionalData(ClientChat $newClientChat, ClientChat $oldClientChat): void
