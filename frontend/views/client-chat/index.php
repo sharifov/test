@@ -107,10 +107,20 @@ $this->registerJsFile('/js/moment.min.js', [
         \yii\web\JqueryAsset::class
     ]
 ]);
+$clientChatId = $clientChat ? $clientChat->cch_id : 0;
 $js = <<<JS
 
 $(document).ready( function () {
+    let clientChatId = {$clientChatId};
+
     window.name = 'chat';
+    if (clientChatId) {
+        localStorage.setItem('activeChatId', clientChatId);
+    }
+    
+    $(window).on("beforeunload", function() { 
+        localStorage.removeItem('activeChatId');
+    })
 });
 
 $(document).ready( function () {
@@ -240,6 +250,8 @@ $(document).on('click', '._cc-list-item', function () {
     let params = new URLSearchParams(window.location.search);
     params.set('chid', cch_id);
     window.history.replaceState({}, '', '{$loadChannelsUrl}?'+params.toString());
+    
+    localStorage.setItem('activeChatId', cch_id);
     
     $('#_rc-'+cch_id).show();
     $.ajax({

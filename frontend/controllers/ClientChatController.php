@@ -485,6 +485,13 @@ class ClientChatController extends FController
 		return $widget->run();
 	}
 
+	public function actionDiscardUnreadMessages(): void
+	{
+		$cchId = Yii::$app->request->post('cchId');
+		$userId = Auth::id();
+		$this->clientChatMessageService->discardUnreadMessages($cchId, $userId);
+	}
+
 	public function actionSendOfferList(): string
     {
         $chatId = (int)\Yii::$app->request->post('cchId');
