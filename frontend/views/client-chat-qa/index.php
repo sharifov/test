@@ -117,6 +117,9 @@ $this->params['breadcrumbs'][] = $this->title;
                         ]);
                     },
                     'messages' => static function ($url, ClientChat $model) { /* TODO:: add count */
+
+
+
                         return Html::a('<span class="glyphicon glyphicon-comment"></span>',
                         ['/client-chat-qa/view', 'id' => $model->cch_id, '#' => 'messages'],
                         [

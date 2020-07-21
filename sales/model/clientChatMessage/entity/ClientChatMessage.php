@@ -178,4 +178,9 @@ class ClientChatMessage extends \yii\db\ActiveRecord
             'files' => 'Files',
         ];
     }
+
+    public static function countBy(): Scopes
+	{
+		return new Scopes(static::class);
+	}
 }
