@@ -39,8 +39,6 @@ var PhoneWidgetCall = function () {
 
     function init(options)
     {
-        console.log(options);
-
         callRequester.init(options);
 
         Object.assign(settings, options);

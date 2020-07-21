@@ -12,6 +12,7 @@ use common\models\CallUserAccess;
 use common\models\Employee;
 use common\models\Notifications;
 use common\models\UserCallStatus;
+use sales\auth\Auth;
 use sales\model\conference\useCase\DisconnectFromAllConferenceCalls;
 use sales\model\conference\useCase\ReturnToHoldCall;
 use Yii;
@@ -101,6 +102,7 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
                                     }
                                     Yii::$app->redis->expire($key, 5);
                                 } else {
+                                    Notifications::publish('callAlreadyTaken', ['user_id' => $userModel->id], ['callSid' => $call->c_call_sid]);
                                     Yii::info(VarDumper::dumpAsString([
                                         'callId' => $callUserAccess->cua_call_id,
                                         'userId' => $userModel->id
@@ -114,6 +116,8 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
                                 $this->busyCall($callUserAccess, $userModel);
                                 break;
                         }
+                    } else {
+                        Notifications::publish('callAlreadyTaken', ['user_id' => $userModel->id], ['callSid' => $call->c_call_sid]);
                     }
                 }
             } catch (\Throwable $exception) {

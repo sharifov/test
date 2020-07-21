@@ -970,7 +970,9 @@ class CallController extends FController
 
         if ($model->isStatusRinging() || $model->isStatusInProgress()) {
             $model->setStatusFailed();
-            $model->update();
+            if ($model->update() !== false) {
+                $model->cancelCall();
+            }
         }
 
         return $this->redirect(Yii::$app->request->referrer);
@@ -1006,33 +1008,48 @@ class CallController extends FController
 		if ($action && $call_sid) {
 			try {
 				$call = $this->callRepository->findBySid($call_sid);
-				$callUserAccess = $this->callUserAccessRepository->getByUserAndCallId(Auth::id(), $call->c_id);
-				switch ($action) {
-					case 'accept':
-                        $key = 'accept_call_' . $callUserAccess->cua_call_id;
-                        Yii::$app->redis->setnx($key, Auth::id());
-                        $value = Yii::$app->redis->get($key);
-                        if ((int)$value === (int)Auth::id()) {
-                            $disconnect = new DisconnectFromAllConferenceCalls();
-                            if ($disconnect->disconnect(Auth::id())) {
-                                $this->callService->acceptCall($callUserAccess, Auth::user());
+
+				$callUserAccess = CallUserAccess::find()->where([
+                    'cua_user_id' => Auth::id(),
+                    'cua_call_id' => $call->c_id,
+                    'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING
+                ])->one();
+
+				if ($callUserAccess) {
+                    switch ($action) {
+                        case 'accept':
+                            $key = 'accept_call_' . $callUserAccess->cua_call_id;
+                            Yii::$app->redis->setnx($key, Auth::id());
+                            $value = Yii::$app->redis->get($key);
+                            if ((int)$value === (int)Auth::id()) {
+                                $disconnect = new DisconnectFromAllConferenceCalls();
+                                if ($disconnect->disconnect(Auth::id())) {
+                                    $this->callService->acceptCall($callUserAccess, Auth::user());
+                                }
+                                Yii::$app->redis->expire($key, 5);
+                            } else {
+                                Notifications::publish('callAlreadyTaken', ['user_id' => Auth::id()], ['callSid' => $call->c_call_sid]);
+                                Yii::info(VarDumper::dumpAsString([
+                                    'callId' => $callUserAccess->cua_call_id,
+                                    'userId' => Auth::id()
+                                ]), 'info\NewPhoneWidgetAcceptRedisReservation');
                             }
-                            Yii::$app->redis->expire($key, 5);
-                        } else {
-                            Yii::info(VarDumper::dumpAsString([
-                                'callId' => $callUserAccess->cua_call_id,
-                                'userId' => Auth::id()
-                            ]), 'info\NewPhoneWidgetAcceptRedisReservation');
-                        }
-						$response['error'] = false;
-						$response['message'] = 'success';
-						break;
-					case 'busy':
-						$this->callService->busyCall($callUserAccess, Auth::user());
-						$response['error'] = false;
-						$response['message'] = 'success';
-						break;
-				}
+                            $response['error'] = false;
+                            $response['message'] = 'success';
+                            break;
+                        case 'busy':
+                            $this->callService->busyCall($callUserAccess, Auth::user());
+                            $response['error'] = false;
+                            $response['message'] = 'success';
+                            break;
+                    }
+                } else {
+                    Notifications::publish('callAlreadyTaken', ['user_id' => Auth::id()], ['callSid' => $call->c_call_sid]);
+                    $response = [
+                        'error' => false,
+                        'message' => '',
+                    ];
+                }
 			} catch (\RuntimeException | NotFoundException $e) {
 				$response['message'] = $e->getMessage();
 			}

@@ -1445,7 +1445,6 @@ class Call extends \yii\db\ActiveRecord
                             Yii::error(VarDumper::dumpAsString($callAccess->errors), 'Call:applyCallToAgent:CallUserAccess:save');
                         }
                         Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $callAccess->cua_user_id], RemoveIncomingRequestMessage::create($call->c_call_sid));
-                        Notifications::publish('noAnsweredCall', ['user_id' => $callAccess->cua_user_id], ['callId' => $call->c_call_sid]);
                     }
                 }
 
