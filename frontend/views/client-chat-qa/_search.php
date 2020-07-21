@@ -20,8 +20,6 @@ use yii\widgets\ActiveForm;
 
 <div class="client-chat-search">
 
-    <?php /* TODO::  */ ?>
-
     <div class="x_panel">
         <div class="x_title">
             <h2><i class="fa fa-search"></i> Search</h2>
@@ -33,8 +31,8 @@ use yii\widgets\ActiveForm;
             </ul>
             <div class="clearfix"></div>
         </div>
-        <?php /* TODO::  style="display: <?=(Yii::$app->request->isPjax) ? 'block' : 'none'?>"  */ ?>
-        <div class="x_content" >
+
+        <div class="x_content" style="display: <?=(Yii::$app->request->isPjax) ? 'block' : 'none'?>">
             <?php $form = ActiveForm::begin([
                 'action' => ['index'],
                 'method' => 'get',

@@ -78,7 +78,7 @@ $accessUrl = \yii\helpers\Url::to('/client-chat/access-manage');
                                     <span class="label label-default"><?= $item->ccuaCch->cchProject->name ?></span>
                                 <?php endif; ?>
 
-                                <span class="label label-default"><?= $item->ccuaCch->cchChannel->ccc_name ?></span>
+                                <span class="label label-default"><?= $item->ccuaCch->cchChannel ? $item->ccuaCch->cchChannel->ccc_name : '' ?></span>
                             </div>
 
                             <div class="_cc-action">

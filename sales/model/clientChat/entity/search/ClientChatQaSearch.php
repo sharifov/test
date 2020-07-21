@@ -132,22 +132,23 @@ class ClientChatQaSearch extends ClientChat
             $by = ArrayHelper::isIn($this->messageBy, self::MESSAGE_BY_LIST) ? $this->messageBy : null;
             $query->andWhere(['cch_id' => self::getIdsByChatMessage($this->messageText, $by)]);
         }
+        if ($this->messageBy && !$this->messageText) {
+            $query->andWhere(['cch_id' => self::getIdsByCreatorType($this->messageBy)]);
+        }
 
         return $dataProvider;
     }
 
-    public static function getIdsByCreatorType(int $by): array
+    protected static function getIdsByCreatorType(int $by): array
     {
-        /* TODO::  */
-
         $sql = 'SELECT 
                     ccm_cch_id
                 FROM
                     client_chat_message';
 
-        if ($by === ClientChatQaSearch::MESSAGE_BY_CLIENT) {
+        if ($by === self::MESSAGE_BY_CLIENT) {
             $sql .= ' WHERE ccm_client_id IS NOT NULL';
-        } elseif ($by === ClientChatQaSearch::MESSAGE_BY_USER) {
+        } elseif ($by === self::MESSAGE_BY_USER) {
             $sql .= ' WHERE ccm_user_id IS NOT NULL';
         }
         $sql .= ' GROUP BY ccm_cch_id';
@@ -157,7 +158,7 @@ class ClientChatQaSearch extends ClientChat
         'ccm_cch_id');
     }
 
-    public static function getIdsByChatMessage(string $msg, ?int $by = null): array
+    protected static function getIdsByChatMessage(string $msg, ?int $by = null): array
     {
         $sql = "SELECT 
                     ccm_cch_id
@@ -166,9 +167,9 @@ class ClientChatQaSearch extends ClientChat
                 WHERE 
                     ccm_body->>'msg' LIKE :msg";
 
-        if ($by === ClientChatQaSearch::MESSAGE_BY_CLIENT) {
+        if ($by === self::MESSAGE_BY_CLIENT) {
             $sql .= ' AND ccm_client_id IS NOT NULL';
-        } elseif ($by === ClientChatQaSearch::MESSAGE_BY_USER) {
+        } elseif ($by === self::MESSAGE_BY_USER) {
             $sql .= ' AND ccm_user_id IS NOT NULL';
         }
         $sql .= ' GROUP BY ccm_cch_id';

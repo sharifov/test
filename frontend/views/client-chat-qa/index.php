@@ -35,7 +35,10 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'cch_ccr_id',
                 'value' => static function (ClientChat $model) {
-                    return $model->cch_ccr_id ? Html::a('<i class="fa fa-link"></i> ' . $model->cch_ccr_id, ['client-chat-request-crud/view', 'id' => $model->cch_ccr_id], ['target' => '_blank', 'data-pjax' => 0]) : '-';
+                    return $model->cch_ccr_id ?
+                        Html::a('<i class="fa fa-link"></i> ' . $model->cch_ccr_id,
+                        ['client-chat-request-crud/view', 'id' => $model->cch_ccr_id],
+                        ['target' => '_blank', 'data-pjax' => 0]) : '-';
                 },
                 'format' => 'raw',
                 'options' => ['style' => 'width:100px']
@@ -61,7 +64,9 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'cch_channel_id',
                 'value' => static function (ClientChat $model) {
-                    return $model->cch_channel_id ? Html::a(Html::encode($model->cchChannel->ccc_name), ['client-chat-channel-crud/view', 'id' => $model->cch_channel_id], ['target' => '_blank', 'data-pjax' => 0]) : '-';
+                    return $model->cch_channel_id ? Html::a(Html::encode($model->cchChannel->ccc_name),
+                        ['client-chat-channel-crud/view', 'id' => $model->cch_channel_id],
+                        ['target' => '_blank', 'data-pjax' => 0]) : '-';
                 },
                 'format' => 'raw',
                 'filter' => ClientChatChannel::getList()
@@ -69,7 +74,9 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'cch_client_id',
                 'value' => static function (ClientChat $model) {
-                    return $model->cch_client_id ? Html::a('<i class="fa fa-link"></i> ' . $model->cch_client_id, ['client/view', 'id' => $model->cch_client_id], ['target' => '_blank', 'data-pjax' => 0]) : '-';
+                    return $model->cch_client_id ? Html::a('<i class="fa fa-link"></i> ' . $model->cch_client_id,
+                        ['client/view', 'id' => $model->cch_client_id],
+                        ['target' => '_blank', 'data-pjax' => 0]) : '-';
                 },
                 'format' => 'raw',
             ],

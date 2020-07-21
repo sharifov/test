@@ -57,6 +57,7 @@ use yii\helpers\Html;
  * @property Employee $cchOwnerUser
  * @property Project $cchProject
  * @property ClientChatData $cchData
+ * @property Language $language
  * @property ClientChatNote[] $notes
  */
 class ClientChat extends \yii\db\ActiveRecord
@@ -182,7 +183,7 @@ class ClientChat extends \yii\db\ActiveRecord
         return $this->hasOne(Department::class, ['dep_id' => 'cch_dep_id']);
     }
 
-	public function getCchLanguage(): \yii\db\ActiveQuery
+	public function getLanguage(): \yii\db\ActiveQuery
 	{
 		return $this->hasOne(Language::class, ['language_id' => 'cch_language_id']);
 	}

@@ -2,10 +2,14 @@
 
 namespace frontend\controllers;
 
+use frontend\helpers\JsonHelper;
+use sales\model\clientChatMessage\entity\ClientChatMessage;
+use sales\model\clientChatMessage\entity\search\ClientChatMessageSearch;
 use Yii;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\entity\search\ClientChatQaSearch;
 use frontend\controllers\FController;
+use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -50,8 +54,13 @@ class ClientChatQaController extends FController
      */
     public function actionView($id)
     {
+        $searchModel = new ClientChatMessageSearch();
+        $dataProvider = $searchModel->search(['ccm_cch_id' => $id]);
+
         return $this->render('view', [
             'model' => $this->findModel($id),
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
         ]);
     }
 
@@ -72,6 +81,15 @@ class ClientChatQaController extends FController
         ]);
     }
 
+    /**
+     * @param $id
+     * @return string
+     */
+    public function actionMessageBodyView($id): string
+    {
+        $model = ClientChatMessage::findOne($id);
+        return $model ? '<pre>' . VarDumper::dumpAsString($model->ccm_body, 10, true) . '</pre>' : '-';
+    }
 
     /**
      * Finds the ClientChat model based on its primary key value.
