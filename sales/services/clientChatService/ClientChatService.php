@@ -167,6 +167,11 @@ class ClientChatService
 			throw new \RuntimeException('[Chat Bot] ' . $botCloseChatResult['error']);
 		}
 
+		$success = $botCloseChatResult['data']['data']['success'] ?? false;
+		if (!$success) {
+			throw new \RuntimeException('[Chat Bot] ' . ($botCloseChatResult['data']['data']['message'] ?? 'Unknown error message'));
+		}
+
 		$clientChat->close();
 
 		$this->clientChatRepository->save($clientChat);
