@@ -64,7 +64,7 @@ $linkAttributes = ['target' => '_blank', 'data-pjax'=> '0'];
             $text = $statistics->clientChatCount .
                 '&nbsp;&nbsp;<i class="fa fa-weixin warning" aria-hidden="true" title="' . $statistics::HINT_CHATS . '"></i>';
             if (Auth::can('/client-chat-crud/index')) {
-                $paramName = $statistics->isTypeCase() ? 'cch_case_id' : 'cch_lead_id';
+                $paramName = $statistics->isTypeCase() ? 'cch_case_id' : 'lead_id';
                 echo Html::a($text,
                     Url::to(['/client-chat-crud/index', 'ClientChatSearch[' . $paramName . ']'  => $statistics->getId()]),
                     $linkAttributes);

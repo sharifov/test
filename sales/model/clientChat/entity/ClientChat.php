@@ -13,6 +13,7 @@ use sales\helpers\clientChat\ClientChatHelper;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatData\entity\ClientChatData;
+use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatNote\entity\ClientChatNote;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
@@ -58,6 +59,7 @@ use yii\helpers\Html;
  * @property Project $cchProject
  * @property ClientChatData $cchData
  * @property ClientChatNote[] $notes
+ * @property Lead[] $leads
  */
 class ClientChat extends \yii\db\ActiveRecord
 {
@@ -222,6 +224,11 @@ class ClientChat extends \yii\db\ActiveRecord
 		return $this->hasMany(ClientChatNote::class, ['ccn_chat_id' => 'cch_id']);
 	}
 
+	public function getLeads(): ActiveQuery
+	{
+		return $this->hasMany(Lead::class, ['id' => 'ccl_lead_id'])->viaTable('client_chat_lead', ['ccl_chat_id' => 'cch_id']);
+	}
+
 	public static function getStatusList(): array
 	{
 		return self::STATUS_LIST;
@@ -286,11 +293,6 @@ class ClientChat extends \yii\db\ActiveRecord
         $this->cch_case_id = $caseId;
     }
 
-    public function assignLead(int $leadId): void
-    {
-        $this->cch_lead_id = $leadId;
-    }
-
     public function attributeLabels(): array
     {
         return [
@@ -337,5 +339,15 @@ class ClientChat extends \yii\db\ActiveRecord
 	public static function isTabActive(int $tab): bool
 	{
 		return $tab === self::TAB_ACTIVE;
+	}
+
+    public function isAssignedLead(int $leadId): bool
+    {
+        foreach ($this->leads as $lead) {
+            if ($lead->id === $leadId) {
+                return true;
+            }
+        }
+        return false;
 	}
 }

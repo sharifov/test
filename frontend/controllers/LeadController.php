@@ -2043,7 +2043,6 @@ class LeadController extends FController
      */
     public function actionCreate()
     {
-        $chatId = (int)Yii::$app->request->get('chat_id');
         $data = CompositeFormHelper::prepareDataForMultiInput(
             Yii::$app->request->post(),
             'LeadCreateForm',
@@ -2051,23 +2050,15 @@ class LeadController extends FController
         );
         $form = new LeadCreateForm(count($data['post']['EmailCreateForm']), count($data['post']['PhoneCreateForm']), count($data['post']['SegmentCreateForm']));
         $form->assignDep(Department::DEPARTMENT_SALES);
-        $form->assignChatId($chatId);
         if ($form->load($data['post']) && $form->validate()) {
             try {
-                /** @var Lead $lead */
-                $lead = $this->transaction->wrap(function () use ($form, $chatId) {
-                    $lead = $this->leadManageService->createManuallyByDefault($form, Yii::$app->user->id, Yii::$app->user->id, LeadFlow::DESCRIPTION_MANUAL_CREATE);
-                    if ($chatId) {
-                        $this->chatAssignService->assignLead($chatId, $lead->id);
-                    }
-                    return $lead;
-                });
+                $lead = $this->leadManageService->createManuallyByDefault($form, Yii::$app->user->id, Yii::$app->user->id, LeadFlow::DESCRIPTION_MANUAL_CREATE);
                 Yii::$app->session->setFlash('success', 'Lead save');
                 return $this->redirect(['/lead/view', 'gid' => $lead->gid]);
             } catch (\Throwable $e) {
                 Yii::$app->errorHandler->logException($e);
                 Yii::$app->session->setFlash('error', $e->getMessage());
-                return $this->redirect(['/lead/create', 'chat_id' => $chatId ?: null]);
+                return $this->redirect(['/lead/create']);
             }
         }
         return $this->render('create', ['leadForm' => $form]);
@@ -2130,30 +2121,14 @@ class LeadController extends FController
             try {
                 $leadManageService = Yii::createObject(\sales\model\lead\useCases\lead\create\LeadManageService::class);
                 $lead = $leadManageService->createByClientChat($form, $chat, $userId);
+                $out = Yii::$app->formatter->format($lead, 'lead');
+                return "<script> $('#modal-md').modal('hide');$('#chat-info-lead-info').append(' " . $out . "')</script>";
             } catch (\Throwable $e) {
                 Yii::error(AppHelper::throwableFormatter($e), 'LeadController:actionCreateByChat');
-                Yii::$app->session->setFlash('error', $e->getMessage());
+                return "<script> $('#modal-md').modal('hide');createNotify('Create Lead', '" . $e->getMessage() . "', 'error');</script>";
             }
         }
 
-//        $data = CompositeFormHelper::prepareDataForMultiInput(
-//            Yii::$app->request->post(),
-//            'LeadManageForm',
-//            []
-//        );
-//        $form = new LeadManageForm(0);
-//        $form->assignDep(Department::DEPARTMENT_SALES);
-//        if (Yii::$app->request->isPjax && $form->load($data['post']) && $form->validate()) {
-//            try {
-//                $leadManageService = Yii::createObject(\sales\model\lead\useCases\lead\create\LeadManageService::class);
-//                $lead = $leadManageService->createManuallyByDefault($form, Yii::$app->user->id, Yii::$app->user->id, LeadFlow::DESCRIPTION_MANUAL_CREATE);
-//                Yii::$app->session->setFlash('success', 'Lead save');
-//                return $this->redirect(['/lead/view', 'gid' => $lead->gid]);
-//            } catch (\Throwable $e) {
-//                Yii::$app->errorHandler->logException($e);
-//                Yii::$app->session->setFlash('error', $e->getMessage());
-//            }
-//        }
         return $this->renderAjax('partial/_lead_create_by_chat', ['chat' => $chat, 'form' => $form]);
 	}
 
@@ -2220,7 +2195,6 @@ class LeadController extends FController
         $form->load($data['post']);
         $form->assignCase((string)Yii::$app->request->get('case_gid'));
         $form->assignDep((int)Yii::$app->request->get('depId'));
-        $form->assignChatId((int)Yii::$app->request->get('chat_id'));
         return CompositeFormHelper::ajaxValidate($form, $data['keys']);
     }
 

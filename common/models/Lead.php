@@ -48,6 +48,7 @@ use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\callLog\entity\callLog\CallLogType;
 use sales\model\callLog\entity\callLogLead\CallLogLead;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\lead\useCases\lead\api\create\LeadCreateForm;
 use sales\model\lead\useCases\lead\import\LeadImportForm;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
@@ -4493,8 +4494,8 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
      */
     public function getCountClientChat(): int
     {
-        return (int) ClientChat::find()
-            ->where(['cch_lead_id' => $this->id])
+        return (int) ClientChatLead::find()
+            ->where(['ccl_lead_id' => $this->id])
             ->count();
     }
 
@@ -4626,7 +4627,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
                 $this->getCountClientChat() . '</span>';
             if (Auth::can('/client-chat-crud/index')) {
                 $str .= Html::a($chatText,
-                    Url::to(['/client-chat-crud/index', 'ClientChatSearch[cch_lead_id]'  => $this->id]), $linkAttributes);
+                    Url::to(['/client-chat-crud/index', 'ClientChatSearch[lead_id]'  => $this->id]), $linkAttributes);
             } else {
                 $str .= $chatText;
             }
@@ -4671,5 +4672,13 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
 	public function isReadyForGa(): bool
 	{
 		return (GaHelper::getTrackingIdByLead($this) && GaHelper::getClientIdByLead($this));
+	}
+
+    public function isExistQuotesForSend(): bool
+    {
+        return Quote::find()
+            ->andWhere(['lead_id' => $this->id])
+            ->andWhere(['status' => [Quote::STATUS_CREATED, Quote::STATUS_SEND, Quote::STATUS_OPENED]])
+            ->exists();
 	}
 }

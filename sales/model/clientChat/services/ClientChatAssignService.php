@@ -28,11 +28,4 @@ class ClientChatAssignService
         $chat->assignCase($caseId);
         $this->chatRepository->save($chat);
     }
-
-    public function assignLead(int $chatId, int $leadId): void
-    {
-        $chat = $this->chatRepository->findById($chatId);
-        $chat->assignLead($leadId);
-        $this->chatRepository->save($chat);
-    }
 }

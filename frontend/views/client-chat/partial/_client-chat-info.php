@@ -81,12 +81,16 @@ use yii\web\View;
                 [
                     'attribute' => 'cch_lead_id',
                     'label' => 'Lead',
-                    'value' => static function(ClientChat $model) use ($existAvailableLeadQuotes) {
-//                        $out = Yii::$app->formatter->format($model->cchLead, 'lead');
-//                        if ($existAvailableLeadQuotes) {
-//                            $out .= ' ' . Html::button('Offer', ['class' => 'btn btn-info chat-offer', 'data-cch-id' => $model->cch_id]);
-//                        }
-                        $out = Html::a('Create Lead', ['/lead/create-by-chat', 'chat_id' => $model->cch_id],  ['class' => 'create_lead']);
+                    'value' => static function(ClientChat $model) {
+                        $out = '<span id="chat-info-lead-info">';
+                        foreach ($model->leads as $lead) {
+                            $out .= Yii::$app->formatter->format($lead, 'lead') . ' ';
+                            if ($lead->isExistQuotesForSend()) {
+                                $out .= ' ' . Html::button('Offer', ['class' => 'btn btn-info chat-offer', 'data-chat-id' => $model->cch_id, 'data-lead-id' => $lead->id]) . ' ';
+                            }
+                        }
+                        $out .= '</span>';
+                        $out .= Html::a(' [ Create ] ', ['/lead/create-by-chat', 'chat_id' => $model->cch_id],  ['class' => 'create_lead']);
                         return $out;
                     },
                     'format' => 'raw',

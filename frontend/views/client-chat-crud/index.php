@@ -2,6 +2,7 @@
 
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
+use sales\model\clientChat\entity\ClientChat;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -96,9 +97,16 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'case'
             ],
             [
-                'label' => 'Lead ID',
-                'attribute' => 'cchLead',
-                'format' => 'lead'
+                'attribute' => 'lead_id',
+                'label' => 'Lead',
+                'value' => static function (ClientChat $chat) {
+                    $out = '';
+                    foreach ($chat->leads as $lead) {
+                        $out .= Yii::$app->formatter->format($lead,  'lead') . ' ';
+                    }
+                    return $out;
+                },
+                'format' => 'raw'
             ],
             //'cchLead:lead',
             //'cch_note',
