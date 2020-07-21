@@ -72,8 +72,8 @@ class CasesSaleRepository
 		$caseSale->css_sale_pax = isset($saleData['passengers']) && is_array($saleData['passengers']) ? count($saleData['passengers']) : null;
 		$caseSale->css_sale_data_updated = $saleData;
 		$caseSale->css_need_sync_bo = 0;
-		$caseSale->css_fare_rules = isset($saleData['fareRules']) ?
-		    @JsonHelper::encode($saleData['fareRules']) : null;
+		$caseSale->css_fare_rules = !empty($saleData['fareRules']) ?
+		    JsonHelper::encode($saleData['fareRules']) : null;
 
 		return $caseSale;
 	}

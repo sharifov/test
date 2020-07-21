@@ -15,10 +15,13 @@ class JsonHelper
      */
     public static function encode($data): string
     {
-        if ($data && !is_string($data)) {
+        if (is_string($data)) {
+            return $data;
+        }
+        if (!empty($data) && !is_string($data)) {
             return Json::htmlEncode($data);
         }
-        return $data ?? '';
+        return '';
     }
 
     /**
