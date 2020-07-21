@@ -179,8 +179,12 @@ class ClientChatMessage extends \yii\db\ActiveRecord
         ];
     }
 
-    public static function countBy(): Scopes
-	{
-		return new Scopes(static::class);
+    /**
+     * @param int $chatId
+     * @return int|null
+     */
+    public static function countByChatId(int $chatId): ?int
+    {
+		return self::find()->where(['ccm_cch_id' => $chatId])->count();
 	}
 }

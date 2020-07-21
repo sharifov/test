@@ -2,6 +2,7 @@
 
 use frontend\helpers\JsonHelper;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChatData\entity\ClientChatData;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
@@ -81,7 +82,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="col-md-4">
             <h5>Additional Data</h5>
             <?= DetailView::widget([
-                'model' => $model->cchData,
+                'model' => $model->cchData ?: new ClientChatData(),
                 'attributes' => [
                     'ccd_country',
                     'ccd_region',

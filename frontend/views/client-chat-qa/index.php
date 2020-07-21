@@ -2,6 +2,7 @@
 
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
+use sales\model\clientChatMessage\entity\ClientChatMessage;
 use yii\grid\ActionColumn;
 use common\components\grid\DateTimeColumn;
 use yii\bootstrap4\Html;
@@ -97,36 +98,36 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'class' => ActionColumn::class,
                 'template' => '{view}<br />{room}<br />{messages}',
+                'contentOptions' => ['style' => 'width:50px; white-space: normal;'],
                 'buttons' => [
                     'view' => static function ($url, ClientChat $model) {
                         return Html::a('<span class="glyphicon glyphicon-eye-open"></span>',
-                        ['/client-chat-qa/view', 'id' => $model->cch_id],
-                        [
-                            'target' => '_blank',
-                            'data-pjax' => 0,
-                            'title' => 'View',
-                        ]);
+                            ['/client-chat-qa/view', 'id' => $model->cch_id],
+                            [
+                                'target' => '_blank',
+                                'data-pjax' => 0,
+                                'title' => 'View',
+                            ]);
                     },
                     'room' => static function ($url, ClientChat $model) {
                         return Html::a('<span class="glyphicon glyphicon-list-alt"></span>',
-                        ['/client-chat-qa/room', 'id' => $model->cch_id],
-                        [
-                            'target' => '_blank',
-                            'data-pjax' => 0,
-                            'title' => 'Room',
-                        ]);
+                            ['/client-chat-qa/room', 'id' => $model->cch_id],
+                            [
+                                'target' => '_blank',
+                                'data-pjax' => 0,
+                                'title' => 'Room',
+                            ]);
                     },
-                    'messages' => static function ($url, ClientChat $model) { /* TODO:: add count */
+                    'messages' => static function ($url, ClientChat $model) {
 
-
-
-                        return Html::a('<span class="glyphicon glyphicon-comment"></span>',
-                        ['/client-chat-qa/view', 'id' => $model->cch_id, '#' => 'messages'],
-                        [
-                            'target' => '_blank',
-                            'data-pjax' => 0,
-                            'title' => 'Messages',
-                        ]);
+                        $count = ClientChatMessage::countByChatId($model->cch_id);
+                        return Html::a('<span class="glyphicon glyphicon-comment"></span> <sup>' . $count . '</sup>',
+                            ['/client-chat-qa/view', 'id' => $model->cch_id, '#' => 'messages'],
+                            [
+                                'target' => '_blank',
+                                'data-pjax' => 0,
+                                'title' => 'Messages',
+                            ]);
                     },
                 ],
             ],

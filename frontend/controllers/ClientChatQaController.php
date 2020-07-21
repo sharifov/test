@@ -55,7 +55,8 @@ class ClientChatQaController extends FController
     public function actionView($id)
     {
         $searchModel = new ClientChatMessageSearch();
-        $dataProvider = $searchModel->search(['ccm_cch_id' => $id]);
+        $data[$searchModel->formName()]['ccm_cch_id'] = $id;
+        $dataProvider = $searchModel->search($data);
 
         return $this->render('view', [
             'model' => $this->findModel($id),
