@@ -68,6 +68,7 @@ use yii\db\Expression;
  * @property int|null $callsQtyTo
  * @property int|null $chatsQtyFrom
  * @property int|null $chatsQtyTo
+ * @property int|null $caseUserGroup
  */
 class CasesSearch extends Cases
 {
@@ -110,6 +111,7 @@ class CasesSearch extends Cases
     public $callsQtyTo;
     public $chatsQtyFrom;
     public $chatsQtyTo;
+    public $caseUserGroup;
 
     private $cacheSaleData = [];
 
@@ -154,7 +156,7 @@ class CasesSearch extends Cases
             [['cssChargeType'], 'string', 'max' => 100],
             [['departureAirport', 'arrivalAirport', 'departureCountries', 'arrivalCountries', 'cssInOutDate', 'saleTicketSendEmailDate'], 'safe'],
 
-            ['airlinePenalty', 'integer'],
+            [['airlinePenalty', 'caseUserGroup'], 'integer'],
             ['validatingCarrier', 'string', 'length' => 2],
             [
                 [
@@ -210,6 +212,7 @@ class CasesSearch extends Cases
 			'smsQtyFrom' => 'Sms From', 'smsQtyTo' => 'Sms To',
 			'callsQtyFrom' => 'Calls From', 'callsQtyTo' => 'Calls To',
 			'chatsQtyFrom' => 'Chats From', 'chatsQtyTo' => 'Chats To',
+            'caseUserGroup' => 'Case User Group',
         ];
     }
 
@@ -646,6 +649,16 @@ class CasesSearch extends Cases
             $query->andWhere([
                     'cs_id' => SaleTicket::find()->select('st_case_id')
                         ->andWhere(['st_penalty_type' => $this->airlinePenalty])
+                ]
+            );
+        }
+        if ($this->caseUserGroup) {
+            $query->andWhere([
+                    'cs_user_id' => Employee::find()->select('id')
+                        ->innerJoin(UserGroupAssign::tableName() . ' AS user_group_assign',
+                            new Expression('user_group_assign.ugs_user_id = employees.id'))
+                        ->andWhere(['user_group_assign.ugs_group_id' => $this->caseUserGroup])
+                        ->groupBy('employees.id')
                 ]
             );
         }

@@ -2,6 +2,7 @@
 
 use common\models\Airport;
 use common\models\CaseSale;
+use common\models\UserGroup;
 use dosamigos\multiselect\MultiSelect;
 use kartik\select2\Select2;
 use sales\access\EmployeeDepartmentAccess;
@@ -214,6 +215,9 @@ use yii\widgets\ActiveForm;
         </div>
         <div class="col-md-1">
             <?= $form->field($model, 'validatingCarrier')->textInput(['maxlength' => true]) ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'caseUserGroup')->dropDownList(UserGroup::getList(), ['prompt' => '---'])?>
         </div>
     </div>
 
