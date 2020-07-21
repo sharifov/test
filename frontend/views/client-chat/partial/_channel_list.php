@@ -19,7 +19,11 @@ use yii\helpers\ArrayHelper;
 <div class="_cc-wrapper">
     <div class="_cc_tabs_wrapper">
         <?php foreach (ClientChat::getTabList() as $key => $item): ?>
-            <div class="_cc_tab <?= $key === $tab ? 'active' : '' ?>" data-tab-id="<?= $key ?>"><?= $item ?></div>
+            <div class="_cc_tab <?= $key === $tab ? 'active' : '' ?>" data-tab-id="<?= $key ?>"> <?= $item ?>
+                <?php if (ClientChat::isTabActive($key)): ?>
+                    <sup class="_cc_unread_messages"></sup>
+                <?php endif; ?>
+            </div>
         <?php endforeach; ?>
     </div>
 	<div class="_cc-channel-select">
