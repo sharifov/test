@@ -100,7 +100,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <div class="row">
         <div class="col-md-12">
-            <h5>Messages</h5>
+            <h5>Messages</h5><a name="messages"></a>
             <?= GridView::widget([
                 'dataProvider' => $dataProvider,
                 'filterModel' => $searchModel,
@@ -108,7 +108,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'attribute' => 'message',
                         'value' => static function(ClientChatMessage $model) {
-                            if (!isset($model->ccm_body) || is_null($model->ccm_body) || is_null($model->ccm_body['msg'])) {
+                            if (empty($model->ccm_body) || is_null($model->ccm_body['msg'])) {
                                 return '';
                             }
                             return $model->ccm_body['msg'];

@@ -86,16 +86,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'relation' => 'cchOwnerUser',
             ],
             [
-                'label' => 'Case ID',
-                'attribute' => 'cchCase',
-                'format' => 'case'
-            ],
-            [
-                'label' => 'Lead ID',
-                'attribute' => 'cchLead',
-                'format' => 'lead'
-            ],
-            [
                 'attribute' => 'cch_language_id',
                 'filter' => \common\models\Language::getLanguages()
             ],
@@ -106,7 +96,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'class' => ActionColumn::class,
-                'template' => '{view}<br />{room}',
+                'template' => '{view}<br />{room}<br />{messages}',
                 'buttons' => [
                     'view' => static function ($url, ClientChat $model) {
                         return Html::a('<span class="glyphicon glyphicon-eye-open"></span>',
@@ -124,6 +114,15 @@ $this->params['breadcrumbs'][] = $this->title;
                             'target' => '_blank',
                             'data-pjax' => 0,
                             'title' => 'Room',
+                        ]);
+                    },
+                    'messages' => static function ($url, ClientChat $model) { /* TODO:: add count */
+                        return Html::a('<span class="glyphicon glyphicon-comment"></span>',
+                        ['/client-chat-qa/view', 'id' => $model->cch_id, '#' => 'messages'],
+                        [
+                            'target' => '_blank',
+                            'data-pjax' => 0,
+                            'title' => 'Messages',
                         ]);
                     },
                 ],
