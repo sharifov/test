@@ -258,8 +258,11 @@ $js = <<<JS
                              }
                         }
                         
-                        if (obj.cmd === 'noAnsweredCall') {
-                            createNotify('No answered call', 'No answered call', 'warning');
+                        if (obj.cmd === 'callAlreadyTaken') {
+                            createNotify('Accept Call', 'The call has already been taken by another agent', 'warning');
+                            if (typeof PhoneWidgetCall === 'object') {
+                                PhoneWidgetCall.removeIncomingRequest(obj.callSid);
+                            }
                         }
 
                         if (obj.cmd === 'conferenceUpdate') {

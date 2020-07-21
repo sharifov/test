@@ -59,6 +59,8 @@ class CallService
 
         $call->cancel();
         $this->callRepository->save($call);
+
+        $call->cancelCall();
     }
 
     public function guardDeclined(?string $clientPhoneNumber, array $data, int $typeId): void
