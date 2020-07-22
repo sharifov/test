@@ -3,7 +3,7 @@
 namespace common\models;
 
 use common\models\query\VisitorLogQuery;
-use sales\model\clientChat\entity\ClientChat;
+use sales\model\ClientChatVisitorData\entity\ClientChatVisitorData;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -32,6 +32,7 @@ use yii\db\ActiveRecord;
  * @property string|null $vl_ip_address
  * @property string|null $vl_visit_dt
  * @property string|null $vl_created_dt
+ * @property int|null $vl_cvd_id
  *
  * @property Client $client
  * @property Lead $lead
@@ -96,6 +97,8 @@ class VisitorLog extends \yii\db\ActiveRecord
 
             ['vl_ip_address', 'string', 'max' => 39],
 
+            ['vl_cvd_id', 'integer'],
+			['vl_cvd_id', 'exist', 'skipOnError' => true, 'targetClass' => ClientChatVisitorData::class, 'targetAttribute' => ['vl_cvd_id' => 'cvd_id']],
 		];
     }
 
@@ -148,6 +151,7 @@ class VisitorLog extends \yii\db\ActiveRecord
             'vl_ip_address' => 'Ip Address',
             'vl_visit_dt' => 'Visit Dt',
             'vl_created_dt' => 'Created Dt',
+            'vl_cvd_id' => 'Client Chat Visitor Data',
         ];
     }
 
@@ -181,10 +185,10 @@ class VisitorLog extends \yii\db\ActiveRecord
         return new VisitorLogQuery(static::class);
     }
 
-    public static function createByClientChatRequest(int $clientId, array $data): self
+    public static function createByClientChatRequest(int $cvdId, array $data): self
 	{
 		$log = new self();
-		$log->vl_client_id = $clientId;
+		$log->vl_cvd_id = $cvdId;
 		self::fillInData($log, $data);
 		return $log;
 	}

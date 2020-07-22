@@ -10,9 +10,9 @@ use sales\repositories\Repository;
 
 class ClientChatVisitorRepository extends Repository
 {
-	public function create(int $clientId, string $visitorId): ClientChatVisitor
+	public function create(int $cchId, int $visitorDataId, ?int $clientId): ClientChatVisitor
 	{
-		$clientChatVisitor = ClientChatVisitor::create($clientId, $visitorId);
+		$clientChatVisitor = ClientChatVisitor::create($cchId, $visitorDataId, $clientId);
 		$this->save($clientChatVisitor);
 		return $clientChatVisitor;
 	}

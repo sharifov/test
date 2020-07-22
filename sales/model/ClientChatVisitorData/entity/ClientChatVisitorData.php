@@ -2,15 +2,17 @@
 
 namespace sales\model\ClientChatVisitorData\entity;
 
+use sales\model\clientChat\entity\ClientChat;
 use sales\model\ClientChatVisitor\entity\ClientChatVisitor;
-use Yii;
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
 use yii\helpers\Json;
 
 /**
  * This is the model class for table "client_chat_visitor_data".
  *
  * @property int $cvd_id
- * @property int|null $cvd_ccv_id
+ * @property string|null $cvd_visitor_rc_id
  * @property string|null $cvd_country
  * @property string|null $cvd_region
  * @property string|null $cvd_city
@@ -25,16 +27,28 @@ use yii\helpers\Json;
  * @property string|null $cvd_created_dt
  * @property string|null $cvd_updated_dt
  *
- * @property ClientChatVisitor $cvdCcv
+ * @property ClientChat[] $ccvCches
+ * @property ClientChatVisitor[] $clientChatVisitors
  */
 class ClientChatVisitorData extends \yii\db\ActiveRecord
 {
+	public function behaviors(): array
+	{
+		return [
+			'timestamp' => [
+				'class' => TimestampBehavior::class,
+				'attributes' => [
+					ActiveRecord::EVENT_BEFORE_INSERT => ['cvd_created_dt', 'cvd_updated_dt'],
+					ActiveRecord::EVENT_BEFORE_UPDATE => ['cvd_updated_dt'],
+				],
+				'value' => date('Y-m-d H:i:s'),
+			],
+		];
+	}
+
     public function rules(): array
     {
         return [
-            ['cvd_ccv_id', 'integer'],
-            ['cvd_ccv_id', 'unique'],
-            ['cvd_ccv_id', 'exist', 'skipOnError' => true, 'targetClass' => ClientChatVisitor::class, 'targetAttribute' => ['cvd_ccv_id' => 'ccv_id']],
 
             ['cvd_city', 'string', 'max' => 50],
 
@@ -61,13 +75,21 @@ class ClientChatVisitorData extends \yii\db\ActiveRecord
             ['cvd_updated_dt', 'safe'],
 
             ['cvd_url', 'string', 'max' => 255],
-        ];
+
+			['cvd_visitor_rc_id', 'string', 'max' => 50],
+			['cvd_visitor_rc_id', 'unique'],
+		];
     }
 
-    public function getCvdCcv(): \yii\db\ActiveQuery
+    public function getCcvCches(): \yii\db\ActiveQuery
     {
-        return $this->hasOne(ClientChatVisitor::class, ['ccv_id' => 'cvd_ccv_id']);
+		return $this->hasMany(ClientChat::class, ['cch_id' => 'ccv_cch_id'])->viaTable('client_chat_visitor', ['ccv_cvd_id' => 'cvd_id']);
     }
+
+	public function getClientChatVisitors(): \yii\db\ActiveQuery
+	{
+		return $this->hasMany(ClientChatVisitor::class, ['ccv_cvd_id' => 'cvd_id']);
+	}
 
     public function attributeLabels(): array
     {
@@ -87,6 +109,7 @@ class ClientChatVisitorData extends \yii\db\ActiveRecord
             'cvd_data' => 'Data',
             'cvd_created_dt' => 'Created Dt',
             'cvd_updated_dt' => 'Updated Dt',
+			'cvd_visitor_rc_id' => 'Cvd Visitor Rc ID',
         ];
     }
 
@@ -100,10 +123,10 @@ class ClientChatVisitorData extends \yii\db\ActiveRecord
         return 'client_chat_visitor_data';
     }
 
-	public static function createByClientChatRequest(int $ccvId, array $data): self
+	public static function createByClientChatRequest(string $visitorRcId, array $data): self
 	{
 		$_self = new self();
-		$_self->cvd_ccv_id = $ccvId;
+		$_self->cvd_visitor_rc_id = $visitorRcId;
 		self::fillInData($_self, $data);
 
 		return $_self;

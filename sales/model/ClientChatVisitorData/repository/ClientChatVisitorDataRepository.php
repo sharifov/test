@@ -9,17 +9,35 @@ use yii\helpers\VarDumper;
 
 class ClientChatVisitorDataRepository extends Repository
 {
-	public function findByCcvId(int $id): ClientChatVisitorData
+	public function findOrCreateByVisitorId(string $visitorRcId): ClientChatVisitorData
 	{
-		if ($visitorData = ClientChatVisitorData::findOne(['cvd_ccv_id' => $id])) {
-			return $visitorData;
+		try {
+			$visitorData = $this->findByVisitorRcId($visitorRcId);
+		} catch (NotFoundException $e) {
+			$visitorData = $this->createByVisitorId($visitorRcId);
 		}
-		throw new NotFoundException('Client Chat Visitor Data not found by id: ' . $id);
+		return $visitorData;
 	}
 
-	public function createByClientChatRequest(int $ccvId, array $data): void
+	public function findByVisitorRcId(string $id): ClientChatVisitorData
 	{
-		$visitorData = ClientChatVisitorData::createByClientChatRequest($ccvId, $data);
+		if ($visitorData = ClientChatVisitorData::findOne(['cvd_visitor_rc_id' => $id])) {
+			return $visitorData;
+		}
+		throw new NotFoundException('Client Chat Visitor Data not found by cvd_visitor_rc_id: ' . $id);
+	}
+
+	public function createByVisitorId(string $id): ClientChatVisitorData
+	{
+		$visitorData = new ClientChatVisitorData();
+		$visitorData->cvd_visitor_rc_id = $id;
+		$this->save($visitorData);
+		return $visitorData;
+	}
+
+	public function createByClientChatRequest(string $visitorRcId, array $data): ClientChatVisitorData
+	{
+		$visitorData = ClientChatVisitorData::createByClientChatRequest($visitorRcId, $data);
 		if (!$visitorData->validate()) {
 			foreach ($visitorData->errors as $attribute => $error) {
 				$visitorData->{$attribute} = null;
@@ -32,6 +50,7 @@ class ClientChatVisitorDataRepository extends Repository
 		} catch (\RuntimeException $e) {
 			\Yii::error('Client Chat Visitor save failed: ' . VarDumper::dumpAsString($visitorData->errors), 'ClientChatVisitorDataRepository::createByClientChatRequest::save');
 		}
+		return $visitorData;
 	}
 
 	public function updateByClientChatRequest(ClientChatVisitorData $visitorData, array $data): void
@@ -49,6 +68,11 @@ class ClientChatVisitorDataRepository extends Repository
 		} catch (\RuntimeException $e) {
 			\Yii::error('Client Chat Visitor Data save failed: ' . VarDumper::dumpAsString($visitorData->errors), 'ClientChatVisitorDataRepository::updateByClientChatRequest::save');
 		}
+	}
+
+	public function existByVisitorRcId(string $id): bool
+	{
+		return ClientChatVisitorData::find()->byVisitorId($id)->exists();
 	}
 
 	public function save(ClientChatVisitorData $clientChatVisitorData): int

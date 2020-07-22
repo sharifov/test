@@ -6,11 +6,9 @@ use common\models\Notifications;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
-use sales\model\clientChatData\ClientChatDataRepository;
 use sales\model\clientChatMessage\ClientChatMessageRepository;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
-use sales\model\ClientChatVisitor\entity\ClientChatVisitor;
 use sales\model\ClientChatVisitor\repository\ClientChatVisitorRepository;
 use sales\model\ClientChatVisitorData\repository\ClientChatVisitorDataRepository;
 use sales\repositories\NotFoundException;
@@ -32,7 +30,6 @@ use yii\helpers\Html;
  * @property ClientChatMessageService $clientChatMessageService
  * @property ClientChatService $clientChatService
  * @property VisitorLogRepository $visitorLogRepository
- * @property ClientChatDataRepository $clientChatDataRepository
  * @property TransactionManager $transactionManager
  * @property ClientChatVisitorRepository $clientChatVisitorRepository
  * @property ClientChatVisitorDataRepository $clientChatVisitorDataRepository
@@ -69,10 +66,6 @@ class ClientChatRequestService
 	 */
 	private VisitorLogRepository $visitorLogRepository;
 	/**
-	 * @var ClientChatDataRepository
-	 */
-	private ClientChatDataRepository $clientChatDataRepository;
-	/**
 	 * @var TransactionManager
 	 */
 	private TransactionManager $transactionManager;
@@ -94,7 +87,6 @@ class ClientChatRequestService
 	 * @param ClientChatMessageService $clientChatMessageService
 	 * @param ClientChatService $clientChatService
 	 * @param VisitorLogRepository $visitorLogRepository
-	 * @param ClientChatDataRepository $clientChatDataRepository
 	 * @param TransactionManager $transactionManager
 	 * @param ClientChatVisitorRepository $clientChatVisitorRepository
 	 * @param ClientChatVisitorDataRepository $clientChatVisitorDataRepository
@@ -107,7 +99,6 @@ class ClientChatRequestService
 		ClientChatMessageService $clientChatMessageService,
 		ClientChatService $clientChatService,
 		VisitorLogRepository $visitorLogRepository,
-		ClientChatDataRepository $clientChatDataRepository,
 		TransactionManager $transactionManager,
 		ClientChatVisitorRepository $clientChatVisitorRepository,
 		ClientChatVisitorDataRepository $clientChatVisitorDataRepository
@@ -120,7 +111,6 @@ class ClientChatRequestService
 		$this->clientChatMessageService = $clientChatMessageService;
 		$this->clientChatService = $clientChatService;
 		$this->visitorLogRepository = $visitorLogRepository;
-		$this->clientChatDataRepository = $clientChatDataRepository;
 		$this->transactionManager = $transactionManager;
 		$this->clientChatVisitorRepository = $clientChatVisitorRepository;
 		$this->clientChatVisitorDataRepository = $clientChatVisitorDataRepository;
@@ -207,10 +197,10 @@ class ClientChatRequestService
 		$clientChat->cch_client_online = 1;
 		$this->clientChatRepository->save($clientChat);
 
-		$clientRcId = $clientChatRequest->getClientRcId();
-		if (!$this->clientChatVisitorRepository->existByClientRcId($clientRcId)) {
-			$this->clientChatVisitorRepository->create($clientChat->cch_client_id, $clientRcId);
-		}
+		$visitorRcId = $clientChatRequest->getClientRcId();
+
+		$visitorData = $this->clientChatVisitorDataRepository->findOrCreateByVisitorId($visitorRcId);
+		$this->clientChatVisitorRepository->create($clientChat->cch_id, $visitorData->cvd_id, $clientChat->cch_client_id);
 
 		if ($clientChat->cch_owner_user_id) {
 			Notifications::publish('clientChatUpdateClientStatus', ['user_id' => $clientChat->cch_owner_user_id], [
@@ -248,19 +238,14 @@ class ClientChatRequestService
 
 	public function createOrUpdateVisitorData(ClientChatRequestApiForm $form, ClientChatRequest $request): void
 	{
-		$visitor = $this->clientChatVisitorRepository->findByVisitorId($request->getClientRcId());
-		try {
-			$cchVisitorData = $this->clientChatVisitorDataRepository->findByCcvId($visitor->ccv_id);
-			$this->clientChatVisitorDataRepository->updateByClientChatRequest($cchVisitorData, $form->data);
-		} catch (NotFoundException $e) {
-			$this->clientChatVisitorDataRepository->createByClientChatRequest($visitor->ccv_id, $form->data);
-		}
+		$cchVisitorData = $this->clientChatVisitorDataRepository->findByVisitorRcId($request->getClientRcId());
+		$this->clientChatVisitorDataRepository->updateByClientChatRequest($cchVisitorData, $form->data);
 
 		try {
-			$visitorLog = $this->visitorLogRepository->findByClientId($visitor->ccv_client_id);
+			$visitorLog = $this->visitorLogRepository->findByVisitorDataId($cchVisitorData->cvd_id);
 			$this->visitorLogRepository->updateByClientChatRequest($visitorLog, $form->data);
 		} catch (NotFoundException $e) {
-			$this->visitorLogRepository->createByClientChatRequest($visitor->ccv_client_id, $form->data);
+			$this->visitorLogRepository->createByClientChatRequest($cchVisitorData->cvd_id, $form->data);
 		}
 	}
 

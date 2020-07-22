@@ -8,9 +8,9 @@ use yii\helpers\VarDumper;
 
 class VisitorLogRepository extends Repository
 {
-	public function createByClientChatRequest(int $clientId, array $data): void
+	public function createByClientChatRequest(int $cvdId, array $data): void
 	{
-		$visitorLog = VisitorLog::createByClientChatRequest($clientId, $data);
+		$visitorLog = VisitorLog::createByClientChatRequest($cvdId, $data);
 		if (!$visitorLog->validate()) {
 			foreach ($visitorLog->errors as $attribute => $error) {
 				$visitorLog->{$attribute} = null;
@@ -55,9 +55,9 @@ class VisitorLogRepository extends Repository
 		return $visitorLog;
 	}
 
-	public function findByClientId(int $id): VisitorLog
+	public function findByVisitorDataId(int $id): VisitorLog
 	{
-		if ($log = VisitorLog::find()->byClient($id)->orderBy(['vl_id' => SORT_DESC])->one()) {
+		if ($log = VisitorLog::find()->byCvdId($id)->orderBy(['vl_id' => SORT_DESC])->one()) {
 			return $log;
 		}
 		throw new NotFoundException('Visitor Log not found by client: ' . $id);

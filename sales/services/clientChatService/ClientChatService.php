@@ -1,23 +1,20 @@
 <?php
 namespace sales\services\clientChatService;
 
-use common\components\ChatBot;
-use http\Exception\RuntimeException;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChat\useCase\transfer\ClientChatTransferForm;
-use sales\model\clientChatData\ClientChatDataRepository;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
+use sales\model\ClientChatVisitor\repository\ClientChatVisitorRepository;
 use sales\repositories\clientChatChannel\ClientChatChannelRepository;
 use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessRepository;
 use sales\repositories\NotFoundException;
 use sales\repositories\visitorLog\VisitorLogRepository;
 use sales\services\TransactionManager;
 use yii\helpers\Json;
-use yii\helpers\VarDumper;
 
 /**
  * Class ClientChatService
@@ -27,8 +24,8 @@ use yii\helpers\VarDumper;
  * @property ClientChatRepository $clientChatRepository
  * @property TransactionManager $transactionManager
  * @property VisitorLogRepository $visitorLogRepository
- * @property ClientChatDataRepository $clientChatDataRepository
  * @property ClientChatUserAccessRepository $clientChatUserAccessRepository
+ * @property ClientChatVisitorRepository $clientChatVisitorRepository
  */
 class ClientChatService
 {
@@ -49,28 +46,28 @@ class ClientChatService
 	 */
 	private VisitorLogRepository $visitorLogRepository;
 	/**
-	 * @var ClientChatDataRepository
-	 */
-	private ClientChatDataRepository $clientChatDataRepository;
-	/**
 	 * @var ClientChatUserAccessRepository
 	 */
 	private ClientChatUserAccessRepository $clientChatUserAccessRepository;
+	/**
+	 * @var ClientChatVisitorRepository
+	 */
+	private ClientChatVisitorRepository $clientChatVisitorRepository;
 
 	public function __construct(
 		ClientChatChannelRepository $clientChatChannelRepository,
 		ClientChatRepository $clientChatRepository,
 		TransactionManager $transactionManager,
 		VisitorLogRepository $visitorLogRepository,
-		ClientChatDataRepository $clientChatDataRepository,
-		ClientChatUserAccessRepository $clientChatUserAccessRepository
+		ClientChatUserAccessRepository $clientChatUserAccessRepository,
+		ClientChatVisitorRepository $clientChatVisitorRepository
 	){
 		$this->clientChatChannelRepository = $clientChatChannelRepository;
 		$this->clientChatRepository = $clientChatRepository;
 		$this->transactionManager = $transactionManager;
 		$this->visitorLogRepository = $visitorLogRepository;
-		$this->clientChatDataRepository = $clientChatDataRepository;
 		$this->clientChatUserAccessRepository = $clientChatUserAccessRepository;
+		$this->clientChatVisitorRepository = $clientChatVisitorRepository;
 	}
 
 	public function assignClientChatChannel(ClientChat $clientChat, int $priority): void
@@ -137,7 +134,13 @@ class ClientChatService
 			$newClientChat = $this->clientChatRepository->clone($dto);
 			$this->clientChatRepository->save($newClientChat);
 			$this->assignToChannel($newClientChat);
-//			$this->cloneAdditionalData($newClientChat, $clientChat);
+
+			$oldVisitor = $clientChat->ccv->ccvCvd ?? null;
+
+			if ($oldVisitor) {
+				$this->clientChatVisitorRepository->create($newClientChat->cch_id, $oldVisitor->cvd_id, $newClientChat->cch_client_id);
+			}
+
 		});
 	}
 
@@ -157,12 +160,11 @@ class ClientChatService
 	{
 		$clientChat = $this->clientChatRepository->findById($chhId);
 
-		if (!$clientChat->ccv || !$clientChat->ccv->ccv_visitor_rc_id) {
+		if (!$clientChat->ccv || !$clientChat->ccv->ccvCvd || !$clientChat->ccv->ccvCvd->cvd_visitor_rc_id) {
 			throw new \RuntimeException('Visitor RC id is not found');
 		}
 
-		$botCloseChatResult = \Yii::$app->chatBot->endConversation($clientChat->cch_rid, $clientChat->ccv->ccv_visitor_rc_id);
-		\Yii::info(VarDumper::dumpAsString($botCloseChatResult, 70), 'info\closeConversation');
+		$botCloseChatResult = \Yii::$app->chatBot->endConversation($clientChat->cch_rid, $clientChat->ccv->ccvCvd->cvd_visitor_rc_id);
 		if ($botCloseChatResult['error']) {
 			throw new \RuntimeException('[Chat Bot] ' . $botCloseChatResult['error']);
 		}
@@ -175,18 +177,5 @@ class ClientChatService
 		$clientChat->close();
 
 		$this->clientChatRepository->save($clientChat);
-	}
-
-	private function cloneAdditionalData(ClientChat $newClientChat, ClientChat $oldClientChat): void
-	{
-//		if ($log = $this->visitorLogRepository->findByCchId($oldClientChat->cch_id)) {
-//			$newLog = $this->visitorLogRepository->clone($log);
-//			$this->visitorLogRepository->save($newLog);
-//		}
-//
-//		if ($data = $this->clientChatDataRepository->findByCchId($oldClientChat->cch_id)) {
-//			$newData = $this->clientChatDataRepository->clone($newClientChat, $data);
-//			$this->clientChatDataRepository->save($newData);
-//		}
 	}
 }
