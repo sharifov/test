@@ -482,9 +482,53 @@ $(document).on('click', '.client-chat-send-offer', function(e) {
         modal.find('.modal-title').html('');
         modal.modal('hide');
         createNotify('Error', 'Server error', 'error');
-    });    
-        
+    }); 
 });
+
+    $(document).on('click', '.btn_toggle_form', function (e) {
+        
+        e.preventDefault();
+        e.stopPropagation(); 
+           
+        $(this).find('i').toggleClass('fa-minus').toggleClass('fa-plus');
+        $(this).toggleClass('btn-secondary').toggleClass('btn-success');
+        
+        $('.box_note_form').toggle();
+        
+        var onContent = $('.box_note_form').is(':visible');
+        if (onContent) {
+             $('.x_content').show();
+        } else {
+            $('.x_content').hide();
+        } 
+    });
+    
+    $("#pjax-notes").on("pjax:start", function () {            
+        $("#btn-submit-note").prop("disabled", true).addClass("disabled");
+        $("#btn-submit-note i").attr("class", "fa fa-cog fa-spin fa-fw");
+    });
+    
+    $("#pjax-notes").on("pjax:end", function () {           
+        $("#btn-submit-note").prop("disabled", false).removeClass("disabled");
+        $("#btn-submit-note i").attr("class", "fa fa-plus");
+    }); 
+
 JS;
 $this->registerJs($js);
+
+$css = <<<CSS
+    .panel_toolbox .btn {
+        border-radius: 100%;
+        width: 25px;
+        height: 25px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    #pjax-notes .x_panel {
+        margin-top: 10px;
+    }    
+CSS;
+$this->registerCss($css);
+
 endif;
