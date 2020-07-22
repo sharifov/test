@@ -9,8 +9,17 @@ use sales\model\clientChat\entity\ClientChat;
 use yii\data\ArrayDataProvider;
 use yii\data\SqlDataProvider;
 
+/**
+ * Class ClientChatSearch
+ *
+ * @property int|null $lead_id
+ * @property int|null $case_id
+ */
 class ClientChatSearch extends ClientChat
 {
+    public $lead_id;
+    public $case_id;
+
     public string $timeRange;
     public string $timeStart;
     public string $timeEnd;
@@ -28,7 +37,6 @@ class ClientChatSearch extends ClientChat
     {
         return [
             [['timeRange', 'timeStart', 'timeEnd'], 'string' ],
-            ['cch_case_id', 'integer'],
 
             ['cch_ccr_id', 'integer'],
 
@@ -50,8 +58,6 @@ class ClientChatSearch extends ClientChat
 
             ['cch_language_id', 'safe'],
 
-            ['cch_lead_id', 'integer'],
-
             ['cch_note', 'safe'],
 
             ['cch_owner_user_id', 'integer'],
@@ -69,12 +75,18 @@ class ClientChatSearch extends ClientChat
             ['cch_updated_dt', 'safe'],
 
             ['cch_updated_user_id', 'integer'],
+
+            ['lead_id', 'integer'],
+
+            ['case_id', 'integer'],
         ];
     }
 
     public function search($params): ActiveDataProvider
     {
         $query = static::find();
+
+        $query->joinWith(['leads', 'cases']);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -99,14 +111,14 @@ class ClientChatSearch extends ClientChat
             'cch_channel_id' => $this->cch_channel_id,
             'cch_client_id' => $this->cch_client_id,
             'cch_owner_user_id' => $this->cch_owner_user_id,
-            'cch_case_id' => $this->cch_case_id,
-            'cch_lead_id' => $this->cch_lead_id,
             'cch_status_id' => $this->cch_status_id,
             'cch_ua' => $this->cch_ua,
             'date_format(cch_created_dt, "%Y-%m-%d")' => $this->cch_created_dt,
             'date_format(cch_updated_dt, "%Y-%m-%d")' => $this->cch_updated_dt,
             'cch_created_user_id' => $this->cch_created_user_id,
             'cch_updated_user_id' => $this->cch_updated_user_id,
+            'ccl_lead_id' => $this->lead_id,
+            'cccs_case_id' => $this->case_id,
         ]);
 
         $query->andFilterWhere(['like', 'cch_rid', $this->cch_rid])

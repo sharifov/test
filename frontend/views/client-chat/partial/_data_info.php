@@ -3,8 +3,10 @@
  * @var $this \yii\web\View
  * @var $clientChat \sales\model\clientChat\entity\ClientChat|null
  * @var $visitorLog \common\models\VisitorLog|null
+ * @var $clientChatVisitorData ClientChatVisitorData|null
  */
 
+use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use yii\bootstrap4\Alert;
 use yii\widgets\DetailView;
 
@@ -12,21 +14,20 @@ use yii\widgets\DetailView;
 
 <div class="row">
 	<div class="col-md-6">
-        <?php if ($clientChat && $clientChat->cchData): ?>
+        <?php if ($clientChatVisitorData): ?>
             <h4>Client chat additional data</h4>
             <?= DetailView::widget([
-                'model' => $clientChat->cchData,
+                'model' => $clientChatVisitorData,
                 'attributes' => [
-                    'ccd_title',
-                    'ccd_country',
-                    'ccd_region',
-                    'ccd_city',
-                    'ccd_latitude',
-                    'ccd_longitude',
-                    'ccd_url',
-                    'ccd_referrer',
-                    'ccd_timezone',
-                    'ccd_local_time'
+                    'cvd_country',
+                    'cvd_region',
+                    'cvd_city',
+                    'cvd_latitude',
+                    'cvd_longitude',
+                    'cvd_url',
+                    'cvd_referrer',
+                    'cvd_timezone',
+                    'cvd_local_time'
                 ]
             ]) ?>
         <?php else: ?>

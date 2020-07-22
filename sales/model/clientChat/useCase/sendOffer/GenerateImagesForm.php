@@ -2,6 +2,7 @@
 
 namespace sales\model\clientChat\useCase\sendOffer;
 
+use common\models\Lead;
 use common\models\Quote;
 use sales\model\clientChat\entity\ClientChat;
 use yii\base\Model;
@@ -9,25 +10,33 @@ use yii\base\Model;
 /**
  * Class GenerateImagesForm
  *
- * @property int|null $cchId
+ * @property int|null $chatId
+ * @property int|null $leadId
  * @property array $quotesIds
  * @property array $quotes
  * @property ClientChat $chat
+ * @property Lead $lead
  */
 class GenerateImagesForm extends Model
 {
-    public $cchId;
+    public $chatId;
+    public $leadId;
     public $quotesIds;
     public $quotes;
 
     public $chat;
+    public $lead;
 
     public function rules(): array
     {
         return [
-            ['cchId', 'required'],
-            ['cchId', 'integer'],
-            ['cchId', 'validateChat', 'skipOnError' => true],
+            ['chatId', 'required'],
+            ['chatId', 'integer'],
+            ['chatId', 'validateChat', 'skipOnError' => true],
+
+            ['leadId', 'required'],
+            ['leadId', 'integer'],
+            ['leadId', 'validateLead', 'skipOnError' => true],
 
             ['quotesIds', 'required'],
             ['quotesIds', \common\components\validators\IsArrayValidator::class, 'skipOnError' => true],
@@ -38,13 +47,30 @@ class GenerateImagesForm extends Model
 
     public function validateChat(): void
     {
-        if (!$this->chat = ClientChat::findOne($this->cchId)) {
-            $this->addError('cchId', 'Not found Client Chad with Id: ' . $this->cchId);
+        if (!$this->chat = ClientChat::findOne($this->chatId)) {
+            $this->addError('chatId', 'Not found Client Chad with Id: ' . $this->chatId);
             return;
         }
-        if (!$this->chat->cchLead) {
-            $this->chat = null;
-            $this->addError('cchId', 'Not found Lead relation. Chad Id: ' . $this->cchId);
+    }
+
+    public function validateLead(): void
+    {
+        if (!$this->chat) {
+            return;
+        }
+
+        if (!$this->lead = Lead::findOne($this->leadId)) {
+            $this->addError('leadId', 'Not found Lead. Client Chad with Id: ' . $this->chatId);
+            return;
+        }
+
+        if (!$this->chat->isAssignedLead($this->lead->id)) {
+            $this->addError('leadId', 'Lead (' . $this->lead->id . ') is not assigned to Client Chat. Client Chad with Id: ' . $this->chatId);
+            return;
+        }
+
+        if (!$this->lead->isExistQuotesForSend()) {
+            $this->addError('leadId', 'Lead (' . $this->lead->id . '). Not found Quote for Send. Client Chad with Id: ' . $this->chatId);
             return;
         }
     }
@@ -54,11 +80,11 @@ class GenerateImagesForm extends Model
      */
     public function getAvailableQuotes(): array
     {
-        if (!$this->chat) {
+        if (!$this->chat || !$this->lead) {
             return [];
         }
 
-        if (!$quotesList = $this->chat->cchLead->getQuotesProvider([], [Quote::STATUS_CREATED, Quote::STATUS_SEND, Quote::STATUS_OPENED])->getModels()) {
+        if (!$quotesList = $this->lead->getQuotesProvider([], [Quote::STATUS_CREATED, Quote::STATUS_SEND, Quote::STATUS_OPENED])->getModels()) {
             return [];
         }
 
@@ -72,7 +98,7 @@ class GenerateImagesForm extends Model
     public function validateQuotes(): void
     {
         if (!$availableQuotes = $this->getAvailableQuotes()) {
-            $this->addError('cchId', 'Not found available quotes. Chad Id: ' . $this->cchId);
+            $this->addError('chatId', 'Not found available quotes. Chad Id: ' . $this->chatId);
             return;
         }
         foreach ($this->quotesIds as $quoteId) {
@@ -92,7 +118,8 @@ class GenerateImagesForm extends Model
     public function attributeLabels(): array
     {
         return [
-            'cchId' => 'Chat Id',
+            'chatId' => 'Chat Id',
+            'leadId' => 'Lead Id',
             'quotesIds' => 'Quotes'
         ];
     }

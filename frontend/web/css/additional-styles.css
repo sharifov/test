@@ -99,7 +99,7 @@
 .phone-widget .call-pane .calling-state-block .call-in-action__time, .phone-widget .call-pane__start-call .call-in-action__time .more {
     font-size: 12px;
 }
-._rc-block-wrapper .btn.chat-offer {
+._rc-block-wrapper .btn.default {
     border-radius: unset;
     width: auto;
     display:  inline;

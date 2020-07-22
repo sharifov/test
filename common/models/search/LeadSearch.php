@@ -24,6 +24,7 @@ use sales\model\callLog\entity\callLog\CallLogType;
 use sales\model\callLog\entity\callLogCase\CallLogCase;
 use sales\model\callLog\entity\callLogLead\CallLogLead;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\repositories\lead\LeadBadgesRepository;
 use Yii;
 use yii\base\Model;
@@ -542,13 +543,13 @@ class LeadSearch extends Lead
 
         if ($this->chatsQtyFrom !== '' || $this->chatsQtyTo !== '') {
             $query->leftJoin([
-                'chats' => ClientChat::find()
+                'chats' => ClientChatLead::find()
                     ->select([
-                        'cch_lead_id',
-                        new Expression('COUNT(cch_lead_id) AS cnt')
+                        'ccl_lead_id',
+                        new Expression('COUNT(ccl_lead_id) AS cnt')
                     ])
-                    ->groupBy(['cch_lead_id'])
-            ], 'leads.id = chats.cch_lead_id');
+                    ->groupBy(['ccl_lead_id'])
+            ], 'leads.id = chats.ccl_lead_id');
 
             if ('' !== $this->chatsQtyFrom) {
                 if ((int) $this->chatsQtyFrom === 0) {
@@ -556,7 +557,7 @@ class LeadSearch extends Lead
                         [
                             'OR',
                             ['>=', 'chats.cnt', $this->chatsQtyFrom],
-                            ['IS', 'chats.cch_lead_id', null]
+                            ['IS', 'chats.ccl_lead_id', null]
                         ]
                     );
                 } else {
@@ -569,7 +570,7 @@ class LeadSearch extends Lead
                         [
                             'OR',
                             ['<=', 'chats.cnt', $this->chatsQtyTo],
-                            ['IS', 'chats.cch_lead_id', null]
+                            ['IS', 'chats.ccl_lead_id', null]
                         ]
                     );
                 } else {

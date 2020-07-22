@@ -9,7 +9,6 @@ use sales\access\EmployeeProjectAccess;
 use sales\forms\CompositeForm;
 use sales\helpers\lead\LeadHelper;
 use sales\access\ListsAccess;
-use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\NotFoundException;
 
@@ -29,7 +28,6 @@ use sales\repositories\NotFoundException;
  * @property int $depId
  * @property boolean $delayedCharge
  * @property int|null $userId
- * @property int|null $chatId
  * @property ClientCreateForm $client
  * @property EmailCreateForm[] $emails
  * @property PhoneCreateForm[] $phones
@@ -52,7 +50,6 @@ class LeadCreateForm extends CompositeForm
     public $caseGid;
     public $depId;
     public $delayedCharge = 0;
-    public $chatId;
 
     private $userId;
 
@@ -181,20 +178,6 @@ class LeadCreateForm extends CompositeForm
                 }
             }],
 
-            ['chatId', 'integer'],
-            ['chatId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['chatId', function () {
-                if (!$this->chatId) {
-                    return;
-                }
-                $repo = \Yii::createObject(ClientChatRepository::class);
-                try {
-                    $chat = $repo->findById($this->chatId);
-                } catch (NotFoundException $e) {
-                    $this->addError('chatId', 'Chat Id not found');
-                }
-            }],
-
             ['depId', 'required'],
             ['depId', 'in', 'range' => [Department::DEPARTMENT_SALES, Department::DEPARTMENT_EXCHANGE]],
 
@@ -316,14 +299,6 @@ class LeadCreateForm extends CompositeForm
     public function assignCase(string $caseGid): void
     {
         $this->caseGid = $caseGid;
-    }
-
-    /**
-     * @param int $chatId
-     */
-    public function assignChatId(int $chatId): void
-    {
-        $this->chatId = $chatId;
     }
 
     public function validate($attributeNames = null, $clearErrors = true): bool

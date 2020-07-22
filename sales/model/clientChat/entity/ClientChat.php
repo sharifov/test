@@ -11,17 +11,16 @@ use common\models\Project;
 use sales\entities\cases\Cases;
 use sales\helpers\clientChat\ClientChatHelper;
 use sales\model\clientChat\ClientChatCodeException;
+use sales\model\clientChatCase\entity\ClientChatCase;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
-use sales\model\clientChatData\entity\ClientChatData;
+use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatNote\entity\ClientChatNote;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
-use sales\model\ClientChatVisitor\entity\ClientChatVisitor;
-use yii\behaviors\BlameableBehavior;
+use sales\model\clientChatVisitor\entity\ClientChatVisitor;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
-use yii\helpers\Html;
 
 /**
  * This is the model class for table "client_chat".
@@ -36,8 +35,6 @@ use yii\helpers\Html;
  * @property int|null $cch_channel_id
  * @property int|null $cch_client_id
  * @property int|null $cch_owner_user_id
- * @property int|null $cch_case_id
- * @property int|null $cch_lead_id
  * @property string|null $cch_note
  * @property int|null $cch_status_id
  * @property string|null $cch_ip
@@ -49,18 +46,16 @@ use yii\helpers\Html;
  * @property int|null $cch_updated_user_id
  * @property int|null $cch_client_online
  *
- * @property Cases $cchCase
  * @property ClientChatRequest $cchCcr
  * @property Client $cchClient
  * @property ClientChatChannel $cchChannel
  * @property Department $cchDep
- * @property Lead $cchLead
  * @property Employee $cchOwnerUser
  * @property Project $cchProject
- * @property ClientChatData $cchData
- * @property Language $language
  * @property ClientChatNote[] $notes
  * @property ClientChatVisitor $ccv
+ * @property Lead[] $leads
+ * @property Cases[] $cases
  */
 class ClientChat extends \yii\db\ActiveRecord
 {
@@ -105,9 +100,6 @@ class ClientChat extends \yii\db\ActiveRecord
     public function rules(): array
     {
         return [
-            ['cch_case_id', 'integer'],
-            ['cch_case_id', 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['cch_case_id' => 'cs_id']],
-
             ['cch_ccr_id', 'integer'],
             ['cch_ccr_id', 'exist', 'skipOnError' => true, 'targetClass' => ClientChatRequest::class, 'targetAttribute' => ['cch_ccr_id' => 'ccr_id']],
 
@@ -133,9 +125,6 @@ class ClientChat extends \yii\db\ActiveRecord
 			['cch_language_id', 'default', 'value' => null],
 			['cch_language_id', 'exist', 'skipOnError' => true, 'targetClass' => Language::class, 'targetAttribute' => ['cch_language_id' => 'language_id']],
 
-            ['cch_lead_id', 'integer'],
-            ['cch_lead_id', 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['cch_lead_id' => 'id']],
-
             ['cch_note', 'string', 'max' => 255],
 
             ['cch_owner_user_id', 'integer'],
@@ -158,11 +147,6 @@ class ClientChat extends \yii\db\ActiveRecord
             ['cch_updated_user_id', 'integer'],
 			['cch_updated_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['cch_updated_user_id' => 'id']],
 		];
-    }
-
-    public function getCchCase(): \yii\db\ActiveQuery
-    {
-        return $this->hasOne(Cases::class, ['cs_id' => 'cch_case_id']);
     }
 
     public function getCchCcr(): \yii\db\ActiveQuery
@@ -190,11 +174,6 @@ class ClientChat extends \yii\db\ActiveRecord
 		return $this->hasOne(Language::class, ['language_id' => 'cch_language_id']);
 	}
 
-    public function getCchLead(): \yii\db\ActiveQuery
-    {
-        return $this->hasOne(Lead::class, ['id' => 'cch_lead_id']);
-    }
-
     public function getCchOwnerUser(): \yii\db\ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'cch_owner_user_id']);
@@ -215,11 +194,6 @@ class ClientChat extends \yii\db\ActiveRecord
 		return $this->hasOne(Employee::class, ['id' => 'cch_updated_user_id']);
 	}
 
-	public function getCchData(): \yii\db\ActiveQuery
-	{
-		return $this->hasOne(ClientChatData::class, ['ccd_cch_id' => 'cch_id']);
-	}
-
 	public function getNotes(): ActiveQuery
 	{
 		return $this->hasMany(ClientChatNote::class, ['ccn_chat_id' => 'cch_id']);
@@ -227,7 +201,17 @@ class ClientChat extends \yii\db\ActiveRecord
 
 	public function getCcv(): ActiveQuery
 	{
-		return $this->hasOne(ClientChatVisitor::class, ['ccv_client_id' => 'cch_client_id']);
+		return $this->hasOne(ClientChatVisitor::class, ['ccv_client_id' => 'cch_client_id', 'ccv_cch_id' => 'cch_id']);
+	}
+
+	public function getLeads(): ActiveQuery
+	{
+		return $this->hasMany(Lead::class, ['id' => 'ccl_lead_id'])->viaTable(ClientChatLead::tableName(), ['ccl_chat_id' => 'cch_id']);
+	}
+
+	public function getCases(): ActiveQuery
+	{
+		return $this->hasMany(Cases::class, ['cs_id' => 'cccs_case_id'])->viaTable(ClientChatCase::tableName(), ['cccs_chat_id' => 'cch_id']);
 	}
 
 	public static function getStatusList(): array
@@ -289,16 +273,6 @@ class ClientChat extends \yii\db\ActiveRecord
         return ClientChatMessage::find()->andWhere(['ccm_cch_id' => $this->cch_id])->andWhere(['is', 'ccm_user_id', null])->orderBy(['ccm_id' => SORT_DESC])->limit(1)->one();
     }
 
-    public function assignCase(int $caseId): void
-    {
-        $this->cch_case_id = $caseId;
-    }
-
-    public function assignLead(int $leadId): void
-    {
-        $this->cch_lead_id = $leadId;
-    }
-
     public function attributeLabels(): array
     {
         return [
@@ -312,8 +286,6 @@ class ClientChat extends \yii\db\ActiveRecord
             'cch_channel_id' => 'Channel',
             'cch_client_id' => 'Client',
             'cch_owner_user_id' => 'Owner User',
-            'cch_case_id' => 'Case ID',
-            'cch_lead_id' => 'Lead ID',
             'cch_note' => 'Note',
             'cch_status_id' => 'Status ID',
             'cch_ip' => 'IP',
@@ -345,5 +317,15 @@ class ClientChat extends \yii\db\ActiveRecord
 	public static function isTabActive(int $tab): bool
 	{
 		return $tab === self::TAB_ACTIVE;
+	}
+
+    public function isAssignedLead(int $leadId): bool
+    {
+        foreach ($this->leads as $lead) {
+            if ($lead->id === $leadId) {
+                return true;
+            }
+        }
+        return false;
 	}
 }

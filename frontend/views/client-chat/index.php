@@ -19,7 +19,6 @@ use yii\widgets\Pjax;
 /* @var $clientChat \sales\model\clientChat\entity\ClientChat|null */
 /* @var $history ClientChatMessage|null */
 /* @var $tab int */
-/** @var bool $existAvailableLeadQuotes */
 
 $this->title = 'My Client Chat';
 $this->params['breadcrumbs'][] = $this->title;
@@ -85,7 +84,7 @@ $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
     <div class="col-md-3">
         <div id="_client-chat-info">
             <?php if ($clientChat): ?>
-                <?= $this->render('partial/_client-chat-info', ['clientChat' => $clientChat, 'client' => $client, 'existAvailableLeadQuotes' => $existAvailableLeadQuotes]) ?>
+                <?= $this->render('partial/_client-chat-info', ['clientChat' => $clientChat, 'client' => $client]) ?>
             <?php endif; ?>
         </div>
 
@@ -395,7 +394,8 @@ window.refreshChatPage = function (cchId) {
 
 $(document).on('click', '.chat-offer', function(e) {
     e.preventDefault();
-    let cchId = $(this).attr('data-cch-id');
+    let chatId = $(this).attr('data-chat-id');
+    let leadId = $(this).attr('data-lead-id');
     let modal = $('#modal-lg');
     
     modal.find('.modal-body').html('<div><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
@@ -405,7 +405,7 @@ $(document).on('click', '.chat-offer', function(e) {
     $.ajax({
         type: 'post',
         url: '{$chatSendOfferListUrl}',
-        data: {cchId: cchId},
+        data: {chat_id: chatId, lead_id: leadId},
         dataType: 'html'
     })
     .done(function(data) { 
@@ -418,9 +418,15 @@ $(document).on('click', '.chat-offer', function(e) {
 
 $(document).on('click', '.quotes-uid-chat-generate', function(e) {
     e.preventDefault();
-     let cchId = $(this).attr('data-cch-id');
-     if (!cchId) {
+     let chatId = $(this).attr('data-chat-id');
+     let leadId = $(this).attr('data-lead-id');
+     if (!chatId) {
          createNotify('Send Offer', 'Not found Chat Id', 'error');
+         return;
+     }
+     if (!leadId) {
+         createNotify('Send Offer', 'Not found Lead Id', 'error');
+         return;
      }
     
     let quotes = [];
@@ -440,7 +446,7 @@ $(document).on('click', '.quotes-uid-chat-generate', function(e) {
      $.ajax({
         type: 'post',
         url: '{$chatSendOfferGenerateUrl}',
-        data: {cchId: cchId, quotesIds: quotes},
+        data: {chatId: chatId, leadId: leadId, quotesIds: quotes},
         dataType: 'html'
     })
     .done(function(data) { 
@@ -454,9 +460,15 @@ $(document).on('click', '.quotes-uid-chat-generate', function(e) {
 
 $(document).on('click', '.client-chat-send-offer', function(e) {
     e.preventDefault();
-     let cchId = $(this).attr('data-cch-id');
-     if (!cchId) {
+     let chatId = $(this).attr('data-chat-id');
+     let leadId = $(this).attr('data-lead-id');
+     if (!chatId) {
          createNotify('Send Offer', 'Not found Chat Id', 'error');
+         return;
+     }
+     if (!leadId) {
+         createNotify('Send Offer', 'Not found Lead Id', 'error');
+         return;
      }
      
      let modal = $('#modal-lg');
@@ -465,7 +477,7 @@ $(document).on('click', '.client-chat-send-offer', function(e) {
      $.ajax({
         type: 'post',
         url: '{$chatSendOfferUrl}',
-        data: {cchId: cchId},
+        data: {chatId: chatId, leadId: leadId},
         dataType: 'json'
     })
     .done(function(data) {
@@ -513,6 +525,74 @@ $(document).on('click', '.client-chat-send-offer', function(e) {
         $("#btn-submit-note i").attr("class", "fa fa-plus");
     }); 
 
+$(document).on('click', '.create_lead', function (e) {
+    e.preventDefault();
+    let url = $(this).attr('data-link');
+    let modal = $('#modal-md');
+    let modalTitle = 'Create Lead';
+    $.ajax({
+        type: 'post',
+        url: url,
+        data: {},
+        dataType: 'html',
+        beforeSend: function () {
+            modal.find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+            modal.find('.modal-title').html(modalTitle);
+            modal.modal('show');
+        },
+        success: function (data) {
+            modal.find('.modal-body').html(data);
+            modal.find('.modal-title').html(modalTitle);
+            $('#preloader').addClass('d-none');
+        },
+        error: function () {
+            new PNotify({
+                title: 'Error',
+                type: 'error',
+                text: 'Internal Server Error. Try again letter.',
+                hide: true
+            });
+            setTimeout(function () {
+                $('#modal-md').modal('hide');
+            }, 300)
+        },
+    })
+
+});
+$(document).on('click', '.create_case', function (e) {
+    e.preventDefault();
+    let url = $(this).attr('data-link');
+    let modal = $('#modal-md');
+    let modalTitle = 'Create Case';
+    $.ajax({
+        type: 'post',
+        url: url,
+        data: {},
+        dataType: 'html',
+        beforeSend: function () {
+            modal.find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+            modal.find('.modal-title').html(modalTitle);
+            modal.modal('show');
+        },
+        success: function (data) {
+            modal.find('.modal-body').html(data);
+            modal.find('.modal-title').html(modalTitle);
+            $('#preloader').addClass('d-none');
+        },
+        error: function () {
+            new PNotify({
+                title: 'Error',
+                type: 'error',
+                text: 'Internal Server Error. Try again letter.',
+                hide: true
+            });
+            setTimeout(function () {
+                $('#modal-md').modal('hide');
+            }, 300)
+        },
+    })
+
+});
 JS;
 $this->registerJs($js);
 

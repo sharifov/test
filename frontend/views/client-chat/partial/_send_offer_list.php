@@ -6,6 +6,7 @@ use yii\widgets\ListView;
 
 /** @var string $errorMessage */
 /** @var int $chatId */
+/** @var int $leadId */
 /** @var ActiveDataProvider $dataProvider */
 
 ?>
@@ -22,5 +23,5 @@ use yii\widgets\ListView;
             'tag' => false,
         ],
     ]);?>
-    <?= Html::button('Generate', ['class' => 'btn btn-info quotes-uid-chat-generate', 'data-cch-id' => $chatId])?>
+    <?= Html::button('Generate', ['class' => 'btn btn-info quotes-uid-chat-generate', 'data-chat-id' => $chatId, 'data-lead-id' => $leadId])?>
 <?php endif; ?>

@@ -3,9 +3,13 @@
 namespace sales\services\cases;
 
 use sales\entities\cases\Cases;
+use sales\forms\cases\CasesCreateByChatForm;
 use sales\forms\cases\CasesCreateByWebForm;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
+use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChatCase\entity\ClientChatCase;
+use sales\model\clientChatCase\entity\ClientChatCaseRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\services\client\ClientManageService;
 use sales\services\TransactionManager;
@@ -17,33 +21,29 @@ use sales\services\TransactionManager;
  * @property ClientManageService $clientManageService
  * @property TransactionManager $transaction
  * @property CasesSaleService $casesSaleService
+ * @property ClientChatCaseRepository $chatCaseRepository
  */
 class CasesCreateService
 {
-
     private $casesRepository;
     private $clientManageService;
     private $transaction;
     private $casesSaleService;
+    private $chatCaseRepository;
 
-    /**
-     * CasesCreateService constructor.
-     * @param CasesRepository $casesRepository
-     * @param ClientManageService $clientManageService
-     * @param TransactionManager $transaction
-     * @param CasesSaleService $casesSaleService
-     */
     public function __construct(
         CasesRepository $casesRepository,
         ClientManageService $clientManageService,
         TransactionManager $transaction,
-        CasesSaleService $casesSaleService
+        CasesSaleService $casesSaleService,
+        ClientChatCaseRepository $chatCaseRepository
     )
     {
         $this->casesRepository = $casesRepository;
         $this->clientManageService = $clientManageService;
         $this->transaction = $transaction;
         $this->casesSaleService = $casesSaleService;
+        $this->chatCaseRepository = $chatCaseRepository;
     }
 
     /**
@@ -118,7 +118,8 @@ class CasesCreateService
                 $form->description,
                 $creatorId,
                 $form->sourceTypeId,
-                $form->orderUid
+                $form->orderUid,
+                'Created by web'
             );
             $this->casesRepository->save($case);
 
@@ -180,6 +181,38 @@ class CasesCreateService
             } else {
                 //\Yii::info('Find case: ' . $case->cs_id . ' - ' . VarDumper::dumpAsString(['ClientId' => $client->id, 'projectId' => $projectId, 'depId' => $depId]), 'info\getByClientProjectDepartment');
             }
+            return $case;
+
+        });
+
+        return $case;
+    }
+
+    public function createByChat(CasesCreateByChatForm $form, ClientChat $chat, int $creatorId): Cases
+    {
+        $case = $this->transaction->wrap(function () use ($form, $chat, $creatorId) {
+
+            if (!$client = $chat->cchClient) {
+                throw new \DomainException('Client Chat not assigned with Client');
+            }
+
+            $case = Cases::createByWeb(
+                $form->projectId,
+                $form->categoryId,
+                $client->id,
+                $form->depId,
+                $form->subject,
+                $form->description,
+                $creatorId,
+                $form->sourceTypeId,
+                $form->orderUid,
+                'Created by Chat'
+            );
+            $this->casesRepository->save($case);
+
+            $clientChatCase = ClientChatCase::create($chat->cch_id, $case->cs_id, new \DateTimeImmutable('now'));
+            $this->chatCaseRepository->save($clientChatCase);
+
             return $case;
 
         });
