@@ -760,8 +760,7 @@ class CasesSearch extends Cases
                             new Expression('COUNT(clc_case_id) AS cnt')
                         ])
                         ->innerJoin(CallLog::tableName(), 'call_log.cl_id = call_log_case.clc_cl_id')
-                        ->where(['cl_group_id' => null])
-                        ->andWhere(['IN', 'cl_type_id', [CallLogType::IN, CallLogType::OUT]])
+                        ->where(['IN', 'cl_type_id', [CallLogType::IN, CallLogType::OUT]])
                         ->groupBy(['clc_case_id'])
                 ], 'cases.cs_id = calls.c_case_id');
 

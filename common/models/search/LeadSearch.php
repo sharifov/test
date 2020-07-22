@@ -588,8 +588,7 @@ class LeadSearch extends Lead
                         ])
                         ->innerJoin(CallLog::tableName(),
                             CallLog::tableName() . '.cl_id = ' . CallLogLead::tableName() . '.cll_cl_id')
-                        ->where(['cl_group_id' => null])
-                        ->andWhere(['IN', 'cl_type_id', [CallLogType::IN, CallLogType::OUT]])
+                        ->where(['IN', 'cl_type_id', [CallLogType::IN, CallLogType::OUT]])
                         ->groupBy(['cll_lead_id'])
                 ], Lead::tableName() . '.id = calls.c_lead_id');
 

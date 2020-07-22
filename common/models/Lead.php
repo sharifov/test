@@ -4428,9 +4428,6 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
                 ->innerJoin(CallLog::tableName(), 'call_log.cl_id = call_log_lead.cll_cl_id')
                 ->where(['cll_lead_id' => $this->id]);
 
-            if ($onlyParent) {
-                $query->andWhere(['cl_group_id' => null]);
-            }
             if ($type_id !== 0) {
                 $query->andWhere(['cl_type_id' => $type_id]);
             }
