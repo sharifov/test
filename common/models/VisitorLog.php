@@ -32,7 +32,6 @@ use yii\db\ActiveRecord;
  * @property string|null $vl_ip_address
  * @property string|null $vl_visit_dt
  * @property string|null $vl_created_dt
- * @property int|null $vl_cch_id
  *
  * @property Client $client
  * @property Lead $lead
@@ -97,8 +96,6 @@ class VisitorLog extends \yii\db\ActiveRecord
 
             ['vl_ip_address', 'string', 'max' => 39],
 
-			['vl_cch_id', 'integer'],
-			['vl_cch_id', 'exist', 'skipOnError' => true, 'targetClass' => ClientChat::class, 'targetAttribute' => ['vl_cch_id' => 'cch_id']],
 		];
     }
 
@@ -151,7 +148,6 @@ class VisitorLog extends \yii\db\ActiveRecord
             'vl_ip_address' => 'Ip Address',
             'vl_visit_dt' => 'Visit Dt',
             'vl_created_dt' => 'Created Dt',
-			'vl_cch_id' => 'Client Chat Id'
         ];
     }
 
@@ -185,26 +181,32 @@ class VisitorLog extends \yii\db\ActiveRecord
         return new VisitorLogQuery(static::class);
     }
 
-    public static function createByClientChatRequest(ClientChat $clientChat, array $data): self
+    public static function createByClientChatRequest(int $clientId, array $data): self
 	{
 		$log = new self();
-		$log->vl_project_id = $clientChat->cch_project_id;
-		$log->vl_source_cid = $data['sources']['cid'] ?? null;
-		$log->vl_utm_source = $data['sources']['utm_source'] ?? null;
-		$log->vl_ga_client_id = $data['visitor']['ga_client_id'] ?? null;
-		$log->vl_client_id = $clientChat->cch_client_id;
-		$log->vl_lead_id = $clientChat->cch_lead_id;
-		$log->vl_gclid = $data['sources']['gclid'] ?? null;
-		$log->vl_dclid = $data['sources']['dclid'] ?? null;
-		$log->vl_utm_source = $data['sources']['utm_source'] ?? null;
-		$log->vl_utm_medium = $data['sources']['utm_medium'] ?? null;
-		$log->vl_utm_content = $data['sources']['utm_content'] ?? null;
-		$log->vl_utm_term = $data['sources']['utm_term'] ?? null;
-		$log->vl_utm_campaign = $data['sources']['utm_campaign'] ?? null;
-		$log->vl_user_agent = $data['system']['user_agent'] ?? null;
-		$log->vl_ip_address = $data['geo']['ip'] ?? null;
-		$log->vl_cch_id = $clientChat->cch_id;
-
+		$log->vl_client_id = $clientId;
+		self::fillInData($log, $data);
 		return $log;
+	}
+
+	public function updateByClientChatRequest(array $data): void
+	{
+		self::fillInData($this, $data);
+	}
+
+	private static function fillInData(self $_self, $data): void
+	{
+		$_self->vl_source_cid = $data['sources']['cid'] ?? null;
+		$_self->vl_utm_source = $data['sources']['utm_source'] ?? null;
+		$_self->vl_ga_client_id = $data['visitor']['ga_client_id'] ?? null;
+		$_self->vl_gclid = $data['sources']['gclid'] ?? null;
+		$_self->vl_dclid = $data['sources']['dclid'] ?? null;
+		$_self->vl_utm_source = $data['sources']['utm_source'] ?? null;
+		$_self->vl_utm_medium = $data['sources']['utm_medium'] ?? null;
+		$_self->vl_utm_content = $data['sources']['utm_content'] ?? null;
+		$_self->vl_utm_term = $data['sources']['utm_term'] ?? null;
+		$_self->vl_utm_campaign = $data['sources']['utm_campaign'] ?? null;
+		$_self->vl_user_agent = $data['system']['user_agent'] ?? null;
+		$_self->vl_ip_address = $data['geo']['ip'] ?? null;
 	}
 }

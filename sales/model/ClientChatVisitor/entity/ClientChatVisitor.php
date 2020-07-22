@@ -57,4 +57,34 @@ class ClientChatVisitor extends \yii\db\ActiveRecord
 		$_self->ccv_visitor_rc_id = $visitorId;
 		return $_self;
 	}
+
+//	public static function createByClientChatRequest(int $cchId, int $clientId, string $visitorRcId, array $data): self
+//	{
+//		$_self = new self();
+//		$_self->ccv_cch_id = $cchId;
+//		$_self->ccv_visitor_rc_id = $visitorRcId;
+//		$_self->ccv_client_id = $clientId;
+//		self::fillInData($_self, $data);
+//
+//		return $_self;
+//	}
+
+//	public function updateByClientChatRequest(array $data): void
+//	{
+//		self::fillInData($this, $data);
+//	}
+
+//	private static function fillInData(self $_self, array $data): void
+//	{
+//		$_self->ccv_country = $data['geo']['country'] ?? '';
+//		$_self->ccv_region = $data['geo']['region'] ?? '';
+//		$_self->ccv_city = $data['geo']['city'] ?? '';
+//		$_self->ccv_latitude = (float)($data['geo']['latitude'] ?? 0);
+//		$_self->ccv_longitude = (float)($data['geo']['longitude'] ?? 0);
+//		$_self->ccv_url = $data['page']['url'] ?? '';
+//		$_self->ccv_title = $data['page']['title'] ?? '';
+//		$_self->ccv_referrer = $data['page']['referer'] ?? '';
+//		$_self->ccv_timezone = $data['page']['timezone'] ?? '';
+//		$_self->ccv_local_time = $data['page']['local_time'] ?? '';
+//	}
 }

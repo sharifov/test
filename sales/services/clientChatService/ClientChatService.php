@@ -137,7 +137,7 @@ class ClientChatService
 			$newClientChat = $this->clientChatRepository->clone($dto);
 			$this->clientChatRepository->save($newClientChat);
 			$this->assignToChannel($newClientChat);
-			$this->cloneAdditionalData($newClientChat, $clientChat);
+//			$this->cloneAdditionalData($newClientChat, $clientChat);
 		});
 	}
 
@@ -179,14 +179,14 @@ class ClientChatService
 
 	private function cloneAdditionalData(ClientChat $newClientChat, ClientChat $oldClientChat): void
 	{
-		if ($log = $this->visitorLogRepository->findByCchId($oldClientChat->cch_id)) {
-			$newLog = $this->visitorLogRepository->clone($log);
-			$this->visitorLogRepository->save($newLog);
-		}
-
-		if ($data = $this->clientChatDataRepository->findByCchId($oldClientChat->cch_id)) {
-			$newData = $this->clientChatDataRepository->clone($newClientChat, $data);
-			$this->clientChatDataRepository->save($newData);
-		}
+//		if ($log = $this->visitorLogRepository->findByCchId($oldClientChat->cch_id)) {
+//			$newLog = $this->visitorLogRepository->clone($log);
+//			$this->visitorLogRepository->save($newLog);
+//		}
+//
+//		if ($data = $this->clientChatDataRepository->findByCchId($oldClientChat->cch_id)) {
+//			$newData = $this->clientChatDataRepository->clone($newClientChat, $data);
+//			$this->clientChatDataRepository->save($newData);
+//		}
 	}
 }

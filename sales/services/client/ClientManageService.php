@@ -304,8 +304,6 @@ class ClientManageService
 
 		$this->clientRepository->save($client);
 
-		$this->clientChatVisitorRepository->create($client->id, $form->rcId);
-
 		return $client;
 	}
 
