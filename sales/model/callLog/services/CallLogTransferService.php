@@ -365,6 +365,8 @@ class CallLogTransferService
                 $log->cl_month = date('m', $time);
             }
 
+            $log->cl_conference_id = $this->call['c_conference_id'];
+
             if (!$log->save()) {
                 throw new \RuntimeException(VarDumper::dumpAsString(['model' => $log->toArray(), 'message' => $log->getErrors()]));
             }
