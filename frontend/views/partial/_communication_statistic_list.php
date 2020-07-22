@@ -25,7 +25,7 @@ $classMap = [
     <?php
         $text = '<i class="fa fa-phone success" aria-hidden="true" title="' . $statistics::HINT_CALLS . '"></i>
             <sup>' . $statistics->callCount . '</sup>';
-        if (Auth::can('/call-log/index')) {
+        if (Auth::can('/call/index')) {
             $paramName = $statistics->isTypeCase() ? 'case_id' : 'lead_id';
             echo Html::a($text,
                 Url::to(['/call-log/index', 'CallLogSearch[' . $paramName . ']' => $statistics->getId()]),

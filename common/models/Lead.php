@@ -4595,7 +4595,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         if ($linkMode) {
             $callsText = '<span title="Calls Out / In"><i class="fa fa-phone success"></i> ' . $this->getCountCalls(Call::CALL_TYPE_OUT) . '/' .
                 $this->getCountCalls(Call::CALL_TYPE_IN) . '</span> | ';
-            if (Auth::can('/call-log/index')) {
+            if (Auth::can('/call/index')) {
                 $str .= Html::a($callsText, Url::to(['/call-log/index', 'CallLogSearch[lead_id]' => $this->id]), $linkAttributes);
             } else {
                 $str .= $callsText;
