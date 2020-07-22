@@ -1,9 +1,9 @@
 <?php
 
-namespace sales\model\ClientChatVisitorData\entity;
+namespace sales\model\clientChatVisitorData\entity;
 
 use sales\model\clientChat\entity\ClientChat;
-use sales\model\ClientChatVisitor\entity\ClientChatVisitor;
+use sales\model\clientChatVisitor\entity\ClientChatVisitor;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\Json;

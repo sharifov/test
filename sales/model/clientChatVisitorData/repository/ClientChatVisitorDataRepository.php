@@ -1,8 +1,8 @@
 <?php
 
-namespace sales\model\ClientChatVisitorData\repository;
+namespace sales\model\clientChatVisitorData\repository;
 
-use sales\model\ClientChatVisitorData\entity\ClientChatVisitorData;
+use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use sales\repositories\NotFoundException;
 use sales\repositories\Repository;
 use yii\helpers\VarDumper;

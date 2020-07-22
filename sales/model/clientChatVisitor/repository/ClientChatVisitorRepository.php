@@ -1,10 +1,10 @@
 <?php
 
 
-namespace sales\model\ClientChatVisitor\repository;
+namespace sales\model\clientChatVisitor\repository;
 
 
-use sales\model\ClientChatVisitor\entity\ClientChatVisitor;
+use sales\model\clientChatVisitor\entity\ClientChatVisitor;
 use sales\repositories\NotFoundException;
 use sales\repositories\Repository;
 

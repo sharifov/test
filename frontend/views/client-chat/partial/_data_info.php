@@ -6,7 +6,7 @@
  * @var $clientChatVisitorData ClientChatVisitorData|null
  */
 
-use sales\model\ClientChatVisitorData\entity\ClientChatVisitorData;
+use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use yii\bootstrap4\Alert;
 use yii\widgets\DetailView;
 

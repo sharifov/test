@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\model\ClientChatVisitorData\entity;
+namespace sales\model\clientChatVisitorData\entity;
 
 use yii\db\ActiveQuery;
 
