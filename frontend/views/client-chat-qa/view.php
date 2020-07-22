@@ -1,20 +1,24 @@
 <?php
 
 use frontend\helpers\JsonHelper;
+use frontend\helpers\OutHelper;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatData\entity\ClientChatData;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
+use sales\model\clientChatMessage\entity\search\ClientChatMessageSearch;
+use sales\model\clientChatNote\entity\ClientChatNote;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\helpers\StringHelper;
 use yii\helpers\Url;
 use yii\widgets\DetailView;
 
+/* @var ClientChat $model */
 /* @var yii\web\View $this */
-/* @var sales\model\clientChat\entity\ClientChat $model */
 /* @var ClientChatMessage $messageModel */
-/* @var sales\model\clientChatMessage\entity\search\ClientChatMessageSearch $searchModel */
+/* @var ClientChatMessageSearch $searchModel */
 /* @var yii\data\ActiveDataProvider $dataProvider */
+/* @var yii\data\ActiveDataProvider $dataProviderNotes */
 
 
 $this->title = $model->cch_id;
@@ -65,13 +69,6 @@ $this->params['breadcrumbs'][] = $this->title;
                         },
                         'format' => 'raw',
                     ],
-                    [
-                        'attribute' => 'cch_status_id',
-                        'value' => static function (ClientChat $model) {
-                            return Html::tag('span', $model->getStatusName(), ['class' => 'badge badge-'.$model->getStatusClass()]);
-                        },
-                        'format' => 'raw',
-                    ],
                     'cch_created_dt:byUserDateTime',
                     'cch_updated_dt:byUserDateTime',
                     'cch_created_user_id:username',
@@ -97,6 +94,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
             ]) ?>
         </div>
+
     </div>
 
     <div class="row">
@@ -109,7 +107,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'attribute' => 'message',
                         'value' => static function(ClientChatMessage $model) {
-                            if (empty($model->ccm_body) || is_null($model->ccm_body['msg'])) {
+                            if (empty($model->ccm_body) || empty($model->ccm_body['msg'])) {
                                 return '';
                             }
                             return $model->ccm_body['msg'];
@@ -152,6 +150,27 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ],
             ]) ?>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <h5>Chat notes</h5>
+            <?php echo GridView::widget([
+                'dataProvider' => $dataProviderNotes,
+                'filterModel' => false,
+                'columns' => [
+                    [
+                        'attribute' => 'ccn_note',
+                        'value' => static function (ClientChatNote $note) {
+                            return OutHelper::formattedChatNote($note);
+                        },
+                        'format' => 'raw',
+                    ],
+                    'ccn_user_id:userName',
+                    'ccn_created_dt:byUserDateTime',
+                ],
+            ]);  ?>
         </div>
     </div>
 </div>

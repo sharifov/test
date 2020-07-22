@@ -1,5 +1,6 @@
 <?php
 
+use frontend\helpers\OutHelper;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatNote\entity\ClientChatNote;
 use yii\helpers\Html;
@@ -64,9 +65,7 @@ $showContent = $showContent ?? false;
                         </tr>
                         <tr>
                             <td>
-                                <?php if($note->ccn_deleted) :?><s><?php endif?>
-                                    <?php echo $note->ccn_note ? nl2br(Html::encode($note->ccn_note)) : '-' ?>
-                                <?php if($note->ccn_deleted) :?></s><?php endif?>
+                                <?php echo OutHelper::formattedChatNote($note) ?>
                             </td>
                         </tr>
                     </table>

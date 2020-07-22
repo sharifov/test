@@ -6,6 +6,8 @@ use frontend\helpers\JsonHelper;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatMessage\entity\search\ClientChatMessageSearch;
+use sales\model\clientChatNote\entity\ClientChatNote;
+use sales\model\clientChatNote\entity\ClientChatNoteSearch;
 use sales\repositories\NotFoundException;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use Yii;
@@ -77,10 +79,16 @@ class ClientChatQaController extends FController
         $data[$searchModel->formName()]['ccm_cch_id'] = $id;
         $dataProvider = $searchModel->search($data);
 
+        $searchModelNotes = new ClientChatNoteSearch();
+        $data[$searchModelNotes->formName()]['ccn_chat_id'] = $id;
+        $dataProviderNotes = $searchModelNotes->search($data);
+        $dataProviderNotes->setPagination(['pageSize' => 20]);
+
         return $this->render('view', [
             'model' => $this->findModel($id),
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'dataProviderNotes' => $dataProviderNotes,
         ]);
     }
 

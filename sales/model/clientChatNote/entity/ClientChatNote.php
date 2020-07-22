@@ -48,12 +48,12 @@ class ClientChatNote extends ActiveRecord
     {
         return [
             'ccn_id' => 'ID',
-            'ccn_chat_id' => 'Chat ID',
-            'ccn_user_id' => 'User ID',
+            'ccn_chat_id' => 'Chat',
+            'ccn_user_id' => 'User',
             'ccn_note' => 'Note',
             'ccn_deleted' => 'Deleted',
-            'ccn_created_dt' => 'Created Dt',
-            'ccn_updated_dt' => 'Updated Dt',
+            'ccn_created_dt' => 'Created',
+            'ccn_updated_dt' => 'Updated',
         ];
     }
 
