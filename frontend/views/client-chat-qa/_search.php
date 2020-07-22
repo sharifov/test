@@ -10,6 +10,7 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\entity\search\ClientChatQaSearch;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatData\entity\ClientChatData;
+use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -78,11 +79,11 @@ use yii\widgets\ActiveForm;
                 </div>
                 <div class="col-md-2">
                     <?php echo $form->field($model, 'cch_status_id')->dropDownList(ClientChat::getStatusList(), ['prompt' => '-']) ?>
-                    <?php echo $form->field($model, 'cch_case_id') ?>
+                    <?php echo $form->field($model, 'caseId') ?>
                 </div>
                 <div class="col-md-2">
                     <?php echo $form->field($model, 'cch_project_id')->dropDownList(Project::getList(), ['prompt' => '-']) ?>
-                    <?php echo $form->field($model, 'cch_lead_id') ?>
+                    <?php echo $form->field($model, 'leadId') ?>
 
                 </div>
                 <div class="col-md-2">
@@ -93,13 +94,13 @@ use yii\widgets\ActiveForm;
 
             <div class="row">
                 <div class="col-md-2">
-                    <?php echo $form->field($model, 'dataCountry')->dropDownList(ClientChatData::getCountryList(), ['prompt' => '-']) ?>
-                </div>
-                <div class="col-md-2">
-                    <?php echo $form->field($model, 'dataCity')->dropDownList(ClientChatData::getCityList(), ['prompt' => '-']) ?>
-                </div>
-                <div class="col-md-2">
                     <?php echo $form->field($model, 'cch_ip') ?>
+                </div>
+                <div class="col-md-2">
+                    <?php echo $form->field($model, 'dataCountry')->dropDownList(ClientChatVisitorData::getCountryList(), ['prompt' => '-']) ?>
+                </div>
+                <div class="col-md-2">
+                    <?php echo $form->field($model, 'dataCity')->dropDownList(ClientChatVisitorData::getCityList(), ['prompt' => '-']) ?>
                 </div>
             </div>
 

@@ -30,10 +30,6 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'cch_owner_user_id')->textInput() ?>
 
-    <?= $form->field($model, 'cch_case_id')->textInput() ?>
-
-    <?= $form->field($model, 'cch_lead_id')->textInput() ?>
-
     <?= $form->field($model, 'cch_note')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'cch_status_id')->textInput() ?>

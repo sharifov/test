@@ -3,7 +3,9 @@
 namespace sales\model\clientChat\entity\search;
 
 use sales\model\clientChatData\entity\ClientChatData;
+use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
+use sales\model\clientChatVisitor\entity\ClientChatVisitor;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -18,6 +20,8 @@ use yii\helpers\ArrayHelper;
  * @property string|null $dataCity
  * @property int|null $messageBy
  * @property string|null $messageText
+ * @property int|null $leadId
+ * @property int|null $caseId
  */
 class ClientChatQaSearch extends ClientChat
 {
@@ -26,6 +30,8 @@ class ClientChatQaSearch extends ClientChat
     public $dataCity;
     public $messageBy;
     public $messageText;
+    public $leadId;
+    public $caseId;
 
     public const MESSAGE_BY_CLIENT = 1;
     public const MESSAGE_BY_USER = 2;
@@ -42,11 +48,11 @@ class ClientChatQaSearch extends ClientChat
                 [
                     'cch_id', 'cch_ccr_id', 'cch_project_id',
                     'cch_dep_id', 'cch_channel_id', 'cch_client_id',
-                    'cch_owner_user_id', 'cch_case_id', 'cch_lead_id',
                     'cch_status_id', 'cch_ua', 'cch_created_user_id',
                     'cch_updated_user_id', 'cch_client_online', 'messageBy',
+                    'cch_owner_user_id', 'caseId', 'leadId',
                 ],
-                'integer'
+                'integer',
             ],
             [
                 [
@@ -54,7 +60,7 @@ class ClientChatQaSearch extends ClientChat
                     'cch_note', 'cch_ip', 'cch_language_id',
                     'cch_created_dt', 'cch_updated_dt', 'createdRangeDate',
                 ],
-                'safe'
+                'safe',
             ],
             [['dataCountry', 'dataCity', 'messageText'], 'string', 'max' => 100],
         ];
@@ -94,8 +100,6 @@ class ClientChatQaSearch extends ClientChat
             'cch_channel_id' => $this->cch_channel_id,
             'cch_client_id' => $this->cch_client_id,
             'cch_owner_user_id' => $this->cch_owner_user_id,
-            'cch_case_id' => $this->cch_case_id,
-            'cch_lead_id' => $this->cch_lead_id,
             'cch_status_id' => $this->cch_status_id,
             'cch_ua' => $this->cch_ua,
             'cch_created_dt' => $this->cch_created_dt,
@@ -120,13 +124,29 @@ class ClientChatQaSearch extends ClientChat
 				$query->andWhere(['BETWEEN', 'DATE(cch_created_dt)', $fromDate, $toDate]);
 			}
 		}
+		if ($this->leadId) {
+            $query->andWhere(['cch_id' =>
+                ClientChatLead::find()->select('ccl_chat_id')
+                    ->andWhere(['ccl_lead_id' => $this->leadId])->distinct()]);
+        }
+        if ($this->caseId) {
+            $query->andWhere(['cch_id' =>
+                ClientChatLead::find()->select('cccs_chat_id')
+                    ->andWhere(['cccs_case_id' => $this->caseId])->distinct()]);
+        }
 		if ($this->dataCountry) {
             $query->andWhere(['cch_id' =>
-                ClientChatData::find()->select('ccd_cch_id')->andWhere(['ccd_country' => $this->dataCountry])]);
+                ClientChatVisitor::find()->select('ccv_cch_id')])
+                    ->innerJoinWith('ccvCvd')
+                    ->andWhere(['cvd_country' => $this->dataCountry])
+                    ->distinct();
         }
         if ($this->dataCity) {
             $query->andWhere(['cch_id' =>
-                ClientChatData::find()->select('ccd_cch_id')->andWhere(['ccd_city' => $this->dataCity])]);
+                ClientChatVisitor::find()->select('ccv_cch_id')])
+                    ->innerJoinWith('ccvCvd')
+                    ->andWhere(['cvd_city' => $this->dataCity])
+                    ->distinct();
         }
         if ($this->messageText) {
             $by = ArrayHelper::isIn($this->messageBy, self::MESSAGE_BY_LIST) ? $this->messageBy : null;

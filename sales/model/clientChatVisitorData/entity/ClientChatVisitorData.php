@@ -6,6 +6,7 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatVisitor\entity\ClientChatVisitor;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 
 /**
@@ -155,4 +156,16 @@ class ClientChatVisitorData extends \yii\db\ActiveRecord
 		$_self->cvd_local_time = $data['page']['local_time'] ?? '';
 		$_self->cvd_data = Json::encode($data);
 	}
+
+	public static function getCountryList(): array
+    {
+        return ArrayHelper::map(self::find()->orderBy(['cvd_country' => SORT_ASC])->distinct()->asArray()->all(),
+        'cvd_country', 'cvd_country');
+    }
+
+    public static function getCityList(): array
+    {
+        return ArrayHelper::map(self::find()->orderBy(['cvd_city' => SORT_ASC])->distinct()->asArray()->all(),
+        'cvd_city', 'cvd_city');
+    }
 }
