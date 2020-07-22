@@ -193,7 +193,7 @@ class VisitorLog extends \yii\db\ActiveRecord
 		$log->vl_utm_source = $data['sources']['utm_source'] ?? null;
 		$log->vl_ga_client_id = $data['visitor']['ga_client_id'] ?? null;
 		$log->vl_client_id = $clientChat->cch_client_id;
-		$log->vl_lead_id = $clientChat->cch_lead_id;
+		$log->vl_lead_id = null;
 		$log->vl_gclid = $data['sources']['gclid'] ?? null;
 		$log->vl_dclid = $data['sources']['dclid'] ?? null;
 		$log->vl_utm_source = $data['sources']['utm_source'] ?? null;

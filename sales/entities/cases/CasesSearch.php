@@ -21,6 +21,7 @@ use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\callLog\entity\callLog\CallLogType;
 use sales\model\callLog\entity\callLogCase\CallLogCase;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChatCase\entity\ClientChatCase;
 use sales\model\saleTicket\entity\SaleTicket;
 use Yii;
 use yii\data\ActiveDataProvider;
@@ -807,13 +808,13 @@ class CasesSearch extends Cases
 
         if ($this->chatsQtyFrom !== '' || $this->chatsQtyTo !== '') {
             $query->leftJoin([
-                'chats' => ClientChat::find()
+                'chats' => ClientChatCase::find()
                     ->select([
-                        'cch_case_id',
-                        new Expression('COUNT(cch_case_id) AS cnt')
+                        'cccs_case_id',
+                        new Expression('COUNT(cccs_case_id) AS cnt')
                     ])
-                    ->groupBy(['cch_case_id'])
-            ], 'cases.cs_id = chats.cch_case_id');
+                    ->groupBy(['cccs_case_id'])
+            ], 'cases.cs_id = chats.cccs_case_id');
 
             if ('' !== $this->chatsQtyFrom) {
                 if ((int) $this->chatsQtyFrom === 0) {
@@ -821,7 +822,7 @@ class CasesSearch extends Cases
                         [
                             'OR',
                             ['>=', 'chats.cnt', $this->chatsQtyFrom],
-                            ['IS', 'chats.cch_case_id', null]
+                            ['IS', 'chats.cccs_case_id', null]
                         ]
                     );
                 } else {
@@ -834,7 +835,7 @@ class CasesSearch extends Cases
                         [
                             'OR',
                             ['<=', 'chats.cnt', $this->chatsQtyTo],
-                            ['IS', 'chats.cch_case_id', null]
+                            ['IS', 'chats.cccs_case_id', null]
                         ]
                     );
                 } else {

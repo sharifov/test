@@ -187,6 +187,7 @@ class Cases extends ActiveRecord implements Objectable
      * @param int|null $creatorId
      * @param int|null $sourceTypeId
      * @param string|null $orderUid
+     * @param string|null $targetMessage
      * @return Cases
      */
     public static function createByWeb(
@@ -198,7 +199,8 @@ class Cases extends ActiveRecord implements Objectable
         ?string $description,
         ?int $creatorId,
         ?int $sourceTypeId,
-        ?string $orderUid
+        ?string $orderUid,
+        ?string $targetMessage
     ): self
     {
         $case = self::create();
@@ -210,7 +212,7 @@ class Cases extends ActiveRecord implements Objectable
         $case->cs_description = $description;
         $case->cs_source_type_id = $sourceTypeId;
         $case->cs_order_uid = $orderUid;
-        $case->pending($creatorId, 'Created by web');
+        $case->pending($creatorId, $targetMessage);
         return $case;
     }
 

@@ -22,6 +22,7 @@ use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatNote\ClientChatNoteRepository;
 use sales\model\clientChatNote\entity\ClientChatNote;
 use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessRepository;
+use sales\repositories\lead\LeadRepository;
 use sales\repositories\NotFoundException;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatService\ClientChatService;
@@ -46,6 +47,7 @@ use yii\web\Response;
  * @property ClientChatService $clientChatService
  * @property ClientChatUserAccessService $clientChatUserAccessService
  * @property ClientChatNoteRepository $clientChatNoteRepository
+ * @property LeadRepository $leadRepository
  */
 class ClientChatController extends FController
 {
@@ -72,6 +74,10 @@ class ClientChatController extends FController
 	private ClientChatUserAccessService $clientChatUserAccessService;
 
     private ClientChatNoteRepository $clientChatNoteRepository;
+    /**
+     * @var LeadRepository
+     */
+    private $leadRepository;
 
     public function __construct(
 		$id,
@@ -82,6 +88,7 @@ class ClientChatController extends FController
 		ClientChatService $clientChatService,
 		ClientChatUserAccessService $clientChatUserAccessService,
 		ClientChatNoteRepository $clientChatNoteRepository,
+		LeadRepository $leadRepository,
 		$config = [])
 	{
 		parent::__construct($id, $module, $config);
@@ -91,7 +98,8 @@ class ClientChatController extends FController
 		$this->clientChatService = $clientChatService;
 		$this->clientChatUserAccessService = $clientChatUserAccessService;
 		$this->clientChatNoteRepository = $clientChatNoteRepository;
-	}
+        $this->leadRepository = $leadRepository;
+    }
 
 	/**
 	 * @return array
@@ -180,16 +188,6 @@ class ClientChatController extends FController
 			return $this->asJson($response);
 		}
 
-		$existAvailableLeadQuotes = false;
-		if ($clientChat) {
-		    if ($clientChat->cch_lead_id) {
-                $existAvailableLeadQuotes = Quote::find()
-                    ->andWhere(['lead_id' => $clientChat->cch_lead_id])
-                    ->andWhere(['status' => [Quote::STATUS_CREATED, Quote::STATUS_SEND, Quote::STATUS_OPENED]])
-                    ->exists();
-            }
-        }
-
 		return $this->render('index', [
 			'channels' => $channels,
 			'dataProvider' => $dataProvider,
@@ -199,7 +197,6 @@ class ClientChatController extends FController
 			'client' => $clientChat->cchClient ?? '',
 			'history' => $history ?? null,
 			'tab' => $tab,
-            'existAvailableLeadQuotes' => $existAvailableLeadQuotes
 		]);
 	}
 
@@ -215,19 +212,9 @@ class ClientChatController extends FController
 			$clientChat = $this->clientChatRepository->findById($cchId);
 			$this->clientChatMessageService->discardUnreadMessages($clientChat->cch_id, $clientChat->cch_owner_user_id);
 
-            $existAvailableLeadQuotes = false;
-            if ($clientChat) {
-                if ($clientChat->cch_lead_id) {
-                    $existAvailableLeadQuotes = Quote::find()
-                        ->andWhere(['lead_id' => $clientChat->cch_lead_id])
-                        ->andWhere(['status' => [Quote::STATUS_CREATED, Quote::STATUS_SEND, Quote::STATUS_OPENED]])
-                        ->exists();
-                }
-            }
 			$result['html'] = $this->renderPartial('partial/_client-chat-info', [
 				'clientChat' => $clientChat,
 				'client' => $clientChat->cchClient,
-                'existAvailableLeadQuotes' => $existAvailableLeadQuotes
 			]);
 
 		} catch (NotFoundException $e) {
@@ -491,6 +478,7 @@ class ClientChatController extends FController
 		return $widget->run();
 	}
 
+
 	public function actionDiscardUnreadMessages(): void
 	{
 		$cchId = Yii::$app->request->post('cchId');
@@ -500,19 +488,28 @@ class ClientChatController extends FController
 
 	public function actionSendOfferList(): string
     {
-        $chatId = (int)\Yii::$app->request->post('cchId');
+        $chatId = (int)\Yii::$app->request->post('chat_id');
+        $leadId = (int)\Yii::$app->request->post('lead_id');
         $errorMessage = '';
         $dataProvider = null;
 
         try {
             $clientChat = $this->clientChatRepository->findById($chatId);
+            $lead = $this->leadRepository->find($leadId);
+
             if (!$this->sendOfferCheckAccess($clientChat, Auth::user())) {
                 throw new \DomainException('Access denied.');
             }
-            if (!$clientChat->cch_lead_id) {
-                throw new \DomainException('Chat not assigned to Lead');
+
+            if (!$clientChat->isAssignedLead($lead->id)) {
+                throw new \DomainException('Lead is not assigned to Client Chat');
             }
-            $dataProvider = $this->getSendOfferProvider($clientChat);
+
+            if (!$lead->isExistQuotesForSend()) {
+                throw new \DomainException('Not found Quote for Send');
+            }
+
+            $dataProvider = $this->getSendOfferProvider($lead);
         } catch (\DomainException $e) {
             $errorMessage = $e->getMessage();
         }
@@ -520,7 +517,8 @@ class ClientChatController extends FController
         return $this->renderAjax('partial/_send_offer_list', [
             'dataProvider' => $dataProvider,
             'errorMessage' => $errorMessage,
-            'chatId' => $chatId
+            'chatId' => $chatId,
+            'leadId' => $leadId,
         ]);
     }
 
@@ -559,7 +557,7 @@ class ClientChatController extends FController
             if (!$captures) {
                 throw new \DomainException('Not generated captures. Try again.');
             }
-            if (!$this->saveQuoteCaptures($captures, Auth::id(), $form->cchId)) {
+            if (!$this->saveQuoteCaptures($captures, Auth::id(), $form->chatId, $form->leadId)) {
                 throw new \DomainException('Cant tmp save quotes. Please try again later.');
             }
         } catch (\DomainException $e) {
@@ -576,11 +574,14 @@ class ClientChatController extends FController
     public function actionSendOffer(): Response
     {
         $out = ['error' => false, 'message' => ''];
-        $chatId = (int)\Yii::$app->request->post('cchId');
+        $chatId = (int)\Yii::$app->request->post('chatId');
+        $leadId = (int)\Yii::$app->request->post('leadId');
 
         try {
             $clientChat = $this->clientChatRepository->findById($chatId);
-            if (!$captures = $this->getQuoteCaptures(Auth::id(), $clientChat->cch_id)) {
+            $lead = $this->leadRepository->find($leadId);
+
+            if (!$captures = $this->getQuoteCaptures(Auth::id(), $clientChat->cch_id, $lead->id)) {
                 throw new \DomainException('Not found saved quote captures. Please try again.');
             }
 
@@ -596,7 +597,7 @@ class ClientChatController extends FController
             }
 
             Yii::$app->chatBot->sendMessage($message, $headers);
-            $this->removeQuoteCaptures(Auth::id(), $chatId);
+            $this->removeQuoteCaptures(Auth::id(), $clientChat->cch_id, $lead->id);
 
         } catch (\DomainException $e) {
             $out['error'] = true;
@@ -649,9 +650,9 @@ class ClientChatController extends FController
         return true;
     }
 
-    private function getSendOfferProvider(ClientChat $chat): ActiveDataProvider
+    private function getSendOfferProvider(Lead $lead): ActiveDataProvider
     {
-        return $chat->cchLead->getQuotesProvider([], [Quote::STATUS_CREATED, Quote::STATUS_SEND, Quote::STATUS_OPENED]);
+        return $lead->getQuotesProvider([], [Quote::STATUS_CREATED, Quote::STATUS_SEND, Quote::STATUS_OPENED]);
     }
 
     private function generateQuoteCapture(Quote $quote): array
@@ -708,31 +709,32 @@ class ClientChatController extends FController
         return [];
     }
 
-    private function saveQuoteCaptures(array $captures, int $userId, int $chatId): bool
+    private function saveQuoteCaptures(array $captures, int $userId, int $chatId, int $leadId): bool
     {
-        return Yii::$app->cache->set($this->getQuoteCaptureCacheKey($userId, $chatId), $captures, 600);
+        return Yii::$app->cache->set($this->getQuoteCaptureCacheKey($userId, $chatId, $leadId), $captures, 600);
     }
 
-    private function getQuoteCaptures(int $userId, int $chatId)
+    private function getQuoteCaptures(int $userId, int $chatId, int $leadId)
     {
-        return Yii::$app->cache->get($this->getQuoteCaptureCacheKey($userId, $chatId));
+        return Yii::$app->cache->get($this->getQuoteCaptureCacheKey($userId, $chatId, $leadId));
     }
 
-    private function removeQuoteCaptures(int $userId, int $chatId): void
+    private function removeQuoteCaptures(int $userId, int $chatId, int $leadId): void
     {
-        if (!Yii::$app->cache->delete($this->getQuoteCaptureCacheKey($userId, $chatId))) {
+        if (!Yii::$app->cache->delete($this->getQuoteCaptureCacheKey($userId, $chatId, $leadId))) {
             Yii::error(VarDumper::dumpAsString([
                     'message' => 'Cant remove tmp quotes captures',
                     'userId' => $userId,
-                    'chatId' => $chatId
+                    'chatId' => $chatId,
+                    'leadId' => $leadId,
                 ]),
                 'ClientChatController:removeQuoteCaptures'
             );
         }
     }
 
-    private function getQuoteCaptureCacheKey(int $userId, int $chatId): string
+    private function getQuoteCaptureCacheKey(int $userId, int $chatId, int $leadId): string
     {
-        return 'chatQuoteCapture' . $userId . '.' . $chatId;
+        return 'chatQuoteCapture' . $userId . '.' . $chatId . '.' . $leadId;
     }
 }

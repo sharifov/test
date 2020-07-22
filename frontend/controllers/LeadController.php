@@ -47,11 +47,13 @@ use sales\forms\lead\CloneReasonForm;
 use sales\forms\lead\ItineraryEditForm;
 use sales\forms\lead\LeadCreateForm;
 use sales\forms\leadflow\TakeOverReasonForm;
+use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use sales\model\callLog\entity\callLog\CallLogType;
-use sales\model\clientChat\services\ClientChatAssignService;
+use sales\model\clientChat\entity\ClientChat;
+use sales\model\lead\useCases\lead\create\LeadCreateByChatForm;
 use sales\model\lead\useCases\lead\create\LeadManageForm;
 use sales\model\lead\useCases\lead\import\LeadImportForm;
 use sales\model\lead\useCases\lead\import\LeadImportParseService;
@@ -103,7 +105,6 @@ use common\models\local\LeadLogMessage;
  * @property LeadImportService $leadImportService
  * @property QuoteRepository $quoteRepository
  * @property TransactionManager $transaction
- * @property ClientChatAssignService $chatAssignService
  */
 class LeadController extends FController
 {
@@ -116,7 +117,6 @@ class LeadController extends FController
     private $leadImportService;
     private $quoteRepository;
     private $transaction;
-    private $chatAssignService;
 
     public function __construct(
         $id,
@@ -130,7 +130,6 @@ class LeadController extends FController
         LeadImportService $leadImportService,
         QuoteRepository $quoteRepository,
         TransactionManager $transaction,
-        ClientChatAssignService $chatAssignService,
         $config = []
     )
     {
@@ -144,7 +143,6 @@ class LeadController extends FController
         $this->leadImportService = $leadImportService;
         $this->quoteRepository = $quoteRepository;
         $this->transaction = $transaction;
-        $this->chatAssignService = $chatAssignService;
     }
 
     public function behaviors(): array
@@ -2040,7 +2038,6 @@ class LeadController extends FController
      */
     public function actionCreate()
     {
-        $chatId = (int)Yii::$app->request->get('chat_id');
         $data = CompositeFormHelper::prepareDataForMultiInput(
             Yii::$app->request->post(),
             'LeadCreateForm',
@@ -2048,23 +2045,15 @@ class LeadController extends FController
         );
         $form = new LeadCreateForm(count($data['post']['EmailCreateForm']), count($data['post']['PhoneCreateForm']), count($data['post']['SegmentCreateForm']));
         $form->assignDep(Department::DEPARTMENT_SALES);
-        $form->assignChatId($chatId);
         if ($form->load($data['post']) && $form->validate()) {
             try {
-                /** @var Lead $lead */
-                $lead = $this->transaction->wrap(function () use ($form, $chatId) {
-                    $lead = $this->leadManageService->createManuallyByDefault($form, Yii::$app->user->id, Yii::$app->user->id, LeadFlow::DESCRIPTION_MANUAL_CREATE);
-                    if ($chatId) {
-                        $this->chatAssignService->assignLead($chatId, $lead->id);
-                    }
-                    return $lead;
-                });
+                $lead = $this->leadManageService->createManuallyByDefault($form, Yii::$app->user->id, Yii::$app->user->id, LeadFlow::DESCRIPTION_MANUAL_CREATE);
                 Yii::$app->session->setFlash('success', 'Lead save');
                 return $this->redirect(['/lead/view', 'gid' => $lead->gid]);
             } catch (\Throwable $e) {
                 Yii::$app->errorHandler->logException($e);
                 Yii::$app->session->setFlash('error', $e->getMessage());
-                return $this->redirect(['/lead/create', 'chat_id' => $chatId ?: null]);
+                return $this->redirect(['/lead/create']);
             }
         }
         return $this->render('create', ['leadForm' => $form]);
@@ -2097,6 +2086,45 @@ class LeadController extends FController
 			return $this->renderAjax('partial/_lead_create', ['leadForm' => $form]);
 		}
 		throw new NotFoundHttpException('Page not exist');
+	}
+
+	public function actionCreateByChat()
+	{
+		if (!(Yii::$app->request->isAjax || Yii::$app->request->isPjax)) {
+            throw new NotFoundHttpException('Page not exist');
+        }
+
+        $chatId = (int)Yii::$app->request->get('chat_id');
+        $chat = ClientChat::findOne(['cch_id' => $chatId]);
+
+        if (!$chat) {
+            throw new NotFoundHttpException('Client chat not found');
+        }
+
+        if ($chat->isClosed()) {
+            return 'Client Chat is closed';
+        }
+
+        if (!$chat->cchClient) {
+            return 'Client not found';
+        }
+
+        $userId = Auth::id();
+        $form = new LeadCreateByChatForm($userId, $chat);
+
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            try {
+                $leadManageService = Yii::createObject(\sales\model\lead\useCases\lead\create\LeadManageService::class);
+                $lead = $leadManageService->createByClientChat($form, $chat, $userId);
+                $out = Yii::$app->formatter->format($lead, 'lead');
+                return "<script> $('#modal-md').modal('hide');$('#chat-info-lead-info').append(' " . $out . "')</script>";
+            } catch (\Throwable $e) {
+                Yii::error(AppHelper::throwableFormatter($e), 'LeadController:actionCreateByChat');
+                return "<script> $('#modal-md').modal('hide');createNotify('Create Lead', '" . $e->getMessage() . "', 'error');</script>";
+            }
+        }
+
+        return $this->renderAjax('partial/_lead_create_by_chat', ['chat' => $chat, 'form' => $form]);
 	}
 
 	/**
@@ -2162,7 +2190,6 @@ class LeadController extends FController
         $form->load($data['post']);
         $form->assignCase((string)Yii::$app->request->get('case_gid'));
         $form->assignDep((int)Yii::$app->request->get('depId'));
-        $form->assignChatId((int)Yii::$app->request->get('chat_id'));
         return CompositeFormHelper::ajaxValidate($form, $data['keys']);
     }
 

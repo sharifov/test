@@ -1,9 +1,15 @@
 <?php
 namespace sales\model\lead\useCases\lead\create;
 
+use common\models\Client;
 use common\models\Lead;
+use common\models\LeadFlow;
 use common\models\LeadPreferences;
 use sales\forms\lead\PreferencesCreateForm;
+use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChatLead\entity\ClientChatLead;
+use sales\model\clientChatLead\entity\ClientChatLeadRepository;
+use sales\model\clientChatRequest\ClientShortInfo;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadPreferencesRepository;
 use sales\repositories\lead\LeadRepository;
@@ -11,6 +17,8 @@ use sales\services\cases\CasesManageService;
 use sales\services\client\ClientManageService;
 use sales\services\lead\LeadHashGenerator;
 use sales\services\TransactionManager;
+use yii\helpers\ArrayHelper;
+use yii\helpers\Json;
 
 /**
  * Class LeadManageService
@@ -23,6 +31,7 @@ use sales\services\TransactionManager;
  * @property LeadHashGenerator $leadHashGenerator
  * @property LeadRepository $leadRepository
  * @property LeadPreferencesRepository $leadPreferencesRepository
+ * @property ClientChatLeadRepository $clientChatLeadRepository
  */
 class LeadManageService
 {
@@ -54,8 +63,12 @@ class LeadManageService
 	 * @var LeadPreferencesRepository
 	 */
 	private $leadPreferencesRepository;
+    /**
+     * @var ClientChatLeadRepository
+     */
+    private $clientChatLeadRepository;
 
-	/**
+    /**
 	 * LeadManageService constructor.
 	 * @param TransactionManager $transactionManager
 	 * @param CasesManageService $casesManageService
@@ -64,6 +77,7 @@ class LeadManageService
 	 * @param LeadHashGenerator $leadHashGenerator
 	 * @param LeadRepository $leadRepository
 	 * @param LeadPreferencesRepository $leadPreferencesRepository
+	 * @param ClientChatLeadRepository $clientChatLeadRepository
 	 */
 	public function __construct(
 		TransactionManager $transactionManager,
@@ -72,7 +86,8 @@ class LeadManageService
 		ClientManageService $clientManageService,
 		LeadHashGenerator $leadHashGenerator,
 		LeadRepository $leadRepository,
-		LeadPreferencesRepository $leadPreferencesRepository
+		LeadPreferencesRepository $leadPreferencesRepository,
+        ClientChatLeadRepository $clientChatLeadRepository
 	)
 	{
 		$this->transactionManager = $transactionManager;
@@ -82,7 +97,8 @@ class LeadManageService
 		$this->leadHashGenerator = $leadHashGenerator;
 		$this->leadRepository = $leadRepository;
 		$this->leadPreferencesRepository = $leadPreferencesRepository;
-	}
+        $this->clientChatLeadRepository = $clientChatLeadRepository;
+    }
 
 	/**
 	 * @param LeadManageForm $form
@@ -176,4 +192,65 @@ class LeadManageService
 		);
 		$this->leadPreferencesRepository->save($preferences);
 	}
+
+    public function createByClientChat(LeadCreateByChatForm $form, ClientChat $chat, int $userId): Lead
+    {
+        $lead = $this->transactionManager->wrap(function () use ($form, $chat, $userId) {
+
+            if (!$client = $chat->cchClient) {
+                throw new \DomainException('Client Chat not assigned with Client');
+            }
+
+            $lead = Lead::createManually(
+                $client->id,
+                $client->first_name,
+                $client->last_name,
+                null,
+                null,
+                null,
+                null,
+                $chat->cch_ip,
+                $form->source,
+                $form->projectId,
+                null,
+                null,
+                null,
+                $chat->cch_dep_id,
+                null
+            );
+//            $clientShortInfo = new ClientShortInfo($chat->cchCcr);
+//            $lead->offset_gmt = $clientShortInfo->utc_offset;
+//            $lead->l_client_ua = $clientShortInfo->userAgent;
+//            $lead->request_ip_detail = Json::encode($clientShortInfo->geo);
+
+            $lead->processing($userId, $userId, LeadFlow::DESCRIPTION_CLIENT_CHAT_CREATE);
+
+            $clientPhones = ArrayHelper::getColumn($client->clientPhones, 'phone');
+
+            $hash = $this->leadHashGenerator->generate(
+                null,
+                $form->projectId,
+                null,
+                null,
+                null,
+                null,
+                $clientPhones,
+                null
+            );
+
+            $lead->setRequestHash($hash);
+
+            $leadId = $this->leadRepository->save($lead);
+
+            $this->createLeadPreferences($leadId, new PreferencesCreateForm());
+
+            $clientChatLead = ClientChatLead::create($chat->cch_id, $lead->id, new \DateTimeImmutable('now'));
+
+            $this->clientChatLeadRepository->save($clientChatLead);
+
+            return $lead;
+        });
+
+        return $lead;
+    }
 }

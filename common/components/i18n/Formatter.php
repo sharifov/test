@@ -45,6 +45,7 @@ use sales\entities\cases\CasesSourceType;
 use sales\model\callLog\entity\callLog\CallLogCategory;
 use sales\model\callLog\entity\callLog\CallLogStatus;
 use sales\model\callLog\entity\callLog\CallLogType;
+use sales\model\clientChat\entity\ClientChat;
 use sales\model\coupon\entity\coupon\CouponStatus;
 use sales\model\coupon\entity\coupon\CouponType;
 use sales\model\emailList\entity\EmailList;
@@ -725,4 +726,12 @@ class Formatter extends \yii\i18n\Formatter
         return ConferenceParticipant::getStatusName($statusId);
     }
 
+    public function asClientChat(?ClientChat $chat): string
+    {
+        if ($chat === null) {
+            return $this->nullDisplay;
+        }
+
+        return \sales\model\clientChat\Formatter::asClientChat($chat);
+    }
 }
