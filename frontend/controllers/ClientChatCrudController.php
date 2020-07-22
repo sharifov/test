@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use sales\auth\Auth;
+use sales\model\clientChatMessage\entity\search\ClientChatMessageSearch;
 use Yii;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\entity\search\ClientChatSearch;
@@ -50,8 +51,14 @@ class ClientChatCrudController extends FController
      */
     public function actionView($id): string
     {
-        return $this->render('view', [
+       $searchModel = new ClientChatMessageSearch();
+        $data[$searchModel->formName()]['ccm_cch_id'] = $id;
+        $dataProvider = $searchModel->search($data);
+
+        return $this->render('../client-chat-qa/view', [
             'model' => $this->findModel($id),
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
         ]);
     }
 
