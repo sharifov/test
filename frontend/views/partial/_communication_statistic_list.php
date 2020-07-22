@@ -25,10 +25,10 @@ $classMap = [
     <?php
         $text = '<i class="fa fa-phone success" aria-hidden="true" title="' . $statistics::HINT_CALLS . '"></i>
             <sup>' . $statistics->callCount . '</sup>';
-        if (Auth::can('/call/index')) {
-            $paramName = $statistics->isTypeCase() ? 'c_case_id' : 'c_lead_id';
+        if (Auth::can('/call-log/index')) {
+            $paramName = $statistics->isTypeCase() ? 'case_id' : 'lead_id';
             echo Html::a($text,
-                Url::to(['/call/index', 'CallSearch[' . $paramName . ']' => $statistics->getId()]),
+                Url::to(['/call-log/index', 'CallLogSearch[' . $paramName . ']' => $statistics->getId()]),
                 $linkAttributes);
         } else {
              echo $text;
