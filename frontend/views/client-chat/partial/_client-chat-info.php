@@ -110,7 +110,7 @@ use yii\web\View;
         ?>
     </div>
 
-    <?php if ($clientChat->cchData): ?>
+    <?php if ($clientChat->ccv && $clientChat->ccv->ccvCvd): ?>
         <div class="_rc-block-wrapper">
             <h3 style="margin: 0;">Additional Data</h3>
         </div>
@@ -118,12 +118,12 @@ use yii\web\View;
         <div class="_rc-block-wrapper">
             <?=
             \yii\widgets\DetailView::widget([
-                'model' => $clientChat->cchData,
+                'model' => $clientChat->ccv->ccvCvd,
                 'attributes' => [
-                    'ccd_country',
-                    'ccd_region',
-                    'ccd_city',
-                    'ccd_timezone',
+                    'cvd_country',
+                    'cvd_region',
+                    'cvd_city',
+                    'cvd_timezone',
                 ]
             ])
             ?>

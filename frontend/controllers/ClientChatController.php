@@ -332,16 +332,19 @@ class ClientChatController extends FController
 	{
 		$cchId = \Yii::$app->request->post('cchId');
 
+		$clientChat = null;
+		$visitorLog = null;
 		try {
 			$clientChat = $this->clientChatRepository->findById($cchId);
-			$visitorLog = VisitorLog::find()->byClient($clientChat->cch_client_id ?: 0)->orderBy(['vl_created_dt' => SORT_DESC])->one();
+			if ($clientChat->ccv && $clientChat->ccv->ccv_cvd_id) {
+				$visitorLog = VisitorLog::find()->byCvdId($clientChat->ccv->ccv_cvd_id)->orderBy(['vl_created_dt' => SORT_DESC])->one();
+			}
 		} catch (NotFoundException $e) {
-			$clientChat = null;
-			$visitorLog = null;
 		}
 
 		return $this->renderAjax('partial/_data_info', [
 			'clientChat' => $clientChat,
+			'clientChatVisitorData' => $clientChat->ccv->ccvCvd ?? null,
 			'visitorLog' => $visitorLog
 		]);
 	}

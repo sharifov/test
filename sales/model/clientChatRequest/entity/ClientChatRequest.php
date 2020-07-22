@@ -30,6 +30,7 @@ class ClientChatRequest extends \yii\db\ActiveRecord
     private const EVENT_AGENT_LEFT_ROOM = 7;
     private const EVENT_AGENT_JOINED_ROOM = 8;
     private const EVENT_USER_DEPARTMENT_TRANSFER = 9;
+    private const EVENT_TRACK = 10;
 
 	private const EVENT_LIST = [
 		self::EVENT_GUEST_CONNECTED => 'GUEST_CONNECTED',
@@ -41,7 +42,8 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 		self::EVENT_DEPARTMENT_TRANSFER => 'DEPARTMENT_TRANSFER',
 		self::EVENT_AGENT_LEFT_ROOM => 'AGENT_LEFT_ROOM',
 		self::EVENT_AGENT_JOINED_ROOM => 'AGENT_JOINED_ROOM',
-		self::EVENT_USER_DEPARTMENT_TRANSFER => 'USER_DEPARTMENT_TRANSFER'
+		self::EVENT_USER_DEPARTMENT_TRANSFER => 'USER_DEPARTMENT_TRANSFER',
+		self::EVENT_TRACK => 'TRACK_EVENT',
 	];
 
 	private array $decodedJsonData = [];
@@ -146,6 +148,11 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 		return self::EVENT_DEPARTMENT_TRANSFER === $this->ccr_event;
 	}
 
+	public function isTrackEvent(): bool
+	{
+		return self::EVENT_TRACK === $this->ccr_event;
+	}
+
     public static function getEventList(): array
 	{
 		return self::EVENT_LIST;
@@ -199,9 +206,9 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 		return $this->decodedData['visitor']['user_id'] ?? '';
 	}
 
-	public function getClientRcId(): ?string
+	public function getClientRcId(): string
 	{
-		return $this->decodedData['visitor']['id'] ?? null;
+		return $this->decodedData['visitor']['id'] ?? '';
 	}
 
 	public function getVisitorId(): string

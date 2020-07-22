@@ -13,17 +13,14 @@ use sales\helpers\clientChat\ClientChatHelper;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChatCase\entity\ClientChatCase;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
-use sales\model\clientChatData\entity\ClientChatData;
 use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatNote\entity\ClientChatNote;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\ClientChatVisitor\entity\ClientChatVisitor;
-use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
-use yii\helpers\Html;
 
 /**
  * This is the model class for table "client_chat".
@@ -55,7 +52,6 @@ use yii\helpers\Html;
  * @property Department $cchDep
  * @property Employee $cchOwnerUser
  * @property Project $cchProject
- * @property ClientChatData $cchData
  * @property ClientChatNote[] $notes
  * @property ClientChatVisitor $ccv
  * @property Lead[] $leads
@@ -198,11 +194,6 @@ class ClientChat extends \yii\db\ActiveRecord
 		return $this->hasOne(Employee::class, ['id' => 'cch_updated_user_id']);
 	}
 
-	public function getCchData(): \yii\db\ActiveQuery
-	{
-		return $this->hasOne(ClientChatData::class, ['ccd_cch_id' => 'cch_id']);
-	}
-
 	public function getNotes(): ActiveQuery
 	{
 		return $this->hasMany(ClientChatNote::class, ['ccn_chat_id' => 'cch_id']);
@@ -210,7 +201,7 @@ class ClientChat extends \yii\db\ActiveRecord
 
 	public function getCcv(): ActiveQuery
 	{
-		return $this->hasOne(ClientChatVisitor::class, ['ccv_client_id' => 'cch_client_id']);
+		return $this->hasOne(ClientChatVisitor::class, ['ccv_client_id' => 'cch_client_id', 'ccv_cch_id' => 'cch_id']);
 	}
 	
 	public function getLeads(): ActiveQuery

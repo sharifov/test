@@ -10,9 +10,9 @@ use sales\repositories\Repository;
 
 class ClientChatVisitorRepository extends Repository
 {
-	public function create(int $clientId, string $visitorId): ClientChatVisitor
+	public function create(int $cchId, int $visitorDataId, ?int $clientId): ClientChatVisitor
 	{
-		$clientChatVisitor = ClientChatVisitor::create($clientId, $visitorId);
+		$clientChatVisitor = ClientChatVisitor::create($cchId, $visitorDataId, $clientId);
 		$this->save($clientChatVisitor);
 		return $clientChatVisitor;
 	}
@@ -23,6 +23,11 @@ class ClientChatVisitorRepository extends Repository
 			throw new \RuntimeException($clientChatVisitor->getErrorSummary(false)[0]);
 		}
 		return $clientChatVisitor->ccv_id;
+	}
+
+	public function existByClientRcId(string $rcId): bool
+	{
+		return ClientChatVisitor::find()->byVisitorRcId($rcId)->exists();
 	}
 
 	public function findByVisitorId(string $id): ClientChatVisitor

@@ -2,32 +2,49 @@
 namespace sales\repositories\visitorLog;
 
 use common\models\VisitorLog;
-use sales\model\clientChatData\entity\ClientChatData;
+use sales\repositories\NotFoundException;
 use sales\repositories\Repository;
 use yii\helpers\VarDumper;
 
 class VisitorLogRepository extends Repository
 {
-	public function createByClientChatRequest($clientChat, array $data): void
+	public function createByClientChatRequest(int $cvdId, array $data): void
 	{
-		$visitorLog = VisitorLog::createByClientChatRequest($clientChat, $data);
+		$visitorLog = VisitorLog::createByClientChatRequest($cvdId, $data);
 		if (!$visitorLog->validate()) {
 			foreach ($visitorLog->errors as $attribute => $error) {
 				$visitorLog->{$attribute} = null;
 			}
-			\Yii::error('VisitorLog validation failed: ' . VarDumper::dumpAsString($visitorLog->errors), 'ClientChatRequestService::guestConnected::visitorLog::validation');
+			\Yii::error('VisitorLog validation failed: ' . VarDumper::dumpAsString($visitorLog->errors), 'ClientChatRequestService::createByClientChatRequest::visitorLog::validation');
 		}
 
 		try {
 			$this->save($visitorLog);
 		} catch (\RuntimeException $e) {
-			\Yii::error('VisitorLog save failed: ' . VarDumper::dumpAsString($visitorLog->errors), 'ClientChatRequestService::guestConnected::visitorLog::save');
+			\Yii::error('VisitorLog save failed: ' . VarDumper::dumpAsString($visitorLog->errors), 'ClientChatRequestService::createByClientChatRequest::visitorLog::save');
 		}
 	}
 
-	public function exist(int $cchId): bool
+	public function updateByClientChatRequest(VisitorLog $visitorLog, array $data): void
 	{
-		return VisitorLog::find()->byCchId($cchId)->exists();
+		$visitorLog->updateByClientChatRequest($data);
+		if (!$visitorLog->validate()) {
+			foreach ($visitorLog->errors as $attribute => $error) {
+				$visitorLog->{$attribute} = null;
+			}
+			\Yii::error('VisitorLog validation failed: ' . VarDumper::dumpAsString($visitorLog->errors), 'ClientChatRequestService::updateByClientChatRequest::visitorLog::validation');
+		}
+
+		try {
+			$this->save($visitorLog);
+		} catch (\RuntimeException $e) {
+			\Yii::error('VisitorLog save failed: ' . VarDumper::dumpAsString($visitorLog->errors), 'ClientChatRequestService::updateByClientChatRequest::visitorLog::save');
+		}
+	}
+
+	public function existByClientId(int $id): bool
+	{
+		return VisitorLog::find()->byClient($id)->exists();
 	}
 
 	public function save(VisitorLog $visitorLog): VisitorLog
@@ -38,9 +55,12 @@ class VisitorLogRepository extends Repository
 		return $visitorLog;
 	}
 
-	public function findByCchId(int $cchId): ?VisitorLog
+	public function findByVisitorDataId(int $id): VisitorLog
 	{
-		return VisitorLog::find()->where(['vl_cch_id' => $cchId])->orderBy(['vl_id' => SORT_DESC])->one();
+		if ($log = VisitorLog::find()->byCvdId($id)->orderBy(['vl_id' => SORT_DESC])->one()) {
+			return $log;
+		}
+		throw new NotFoundException('Visitor Log not found by client: ' . $id);
 	}
 
 	public function clone(VisitorLog $visitorLog): VisitorLog
@@ -65,7 +85,6 @@ class VisitorLogRepository extends Repository
 		$_visitorLog->vl_user_agent = $visitorLog->vl_user_agent;
 		$_visitorLog->vl_ip_address = $visitorLog->vl_ip_address;
 		$_visitorLog->vl_visit_dt = $visitorLog->vl_visit_dt;
-		$_visitorLog->vl_cch_id = $visitorLog->vl_cch_id;
 		return $_visitorLog;
 	}
 

@@ -293,7 +293,7 @@ class ClientManageService
 
 	public function getOrCreateByRcId(ClientCreateForm $form): Client
 	{
-		if ($client = Client::find()->joinWithCcVisitorBy($form->rcId)->one()) {
+		if ($client = Client::find()->joinWithCcVisitor()->joinWithCcVisitorData($form->rcId)->one()) {
 			return $client;
 		}
 		$client = Client::create(
@@ -303,8 +303,6 @@ class ClientManageService
 		);
 
 		$this->clientRepository->save($client);
-
-		$this->clientChatVisitorRepository->create($client->id, $form->rcId);
 
 		return $client;
 	}
