@@ -107,9 +107,6 @@ class StatisticsHelper
                 ->where(['cll_lead_id' => $this->id])
                 ->andWhere(['IN', 'cl_type_id', [CallLogType::IN, CallLogType::OUT]])
                 ->cache($this->cacheDuration);
-            if ($onlyParent) {
-                $query->andWhere(['cl_group_id' => null]);
-            }
             return (int) $query->count();
         }
 
@@ -136,9 +133,6 @@ class StatisticsHelper
                 ->where(['clc_case_id' => $this->id])
                 ->andWhere(['IN', 'cl_type_id', [CallLogType::IN, CallLogType::OUT]])
                 ->cache($this->cacheDuration);
-            if ($onlyParent) {
-                $query->andWhere(['cl_group_id' => null]);
-            }
             return (int) $query->count();
         }
 
@@ -305,7 +299,6 @@ class StatisticsHelper
 			->innerJoin(CallLog::tableName(),
                     CallLog::tableName() . '.cl_id = ' . CallLogCase::tableName() . '.clc_cl_id')
 			->where(['clc_case_id' => $caseId])
-			->andWhere(['cl_group_id' => null])
 			->andWhere(['cl_type_id' => CallLogType::IN]);
 
 		$queryCallOut = (new Query())
@@ -319,7 +312,6 @@ class StatisticsHelper
 			->innerJoin(CallLog::tableName(),
                     CallLog::tableName() . '.cl_id = ' . CallLogCase::tableName() . '.clc_cl_id')
 			->where(['clc_case_id' => $caseId])
-			->andWhere(['cl_group_id' => null])
 			->andWhere(['cl_type_id' => CallLogType::OUT]);
 
         $unionQuery = (new Query())
