@@ -3,8 +3,11 @@
 namespace frontend\controllers;
 
 use frontend\helpers\JsonHelper;
+use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatMessage\entity\search\ClientChatMessageSearch;
+use sales\repositories\NotFoundException;
+use sales\services\clientChatMessage\ClientChatMessageService;
 use Yii;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\entity\search\ClientChatQaSearch;
@@ -15,9 +18,25 @@ use yii\filters\VerbFilter;
 
 /**
  * ClientChatQaController implements the CRUD actions for ClientChat model.
+ *
+ * @property ClientChatRepository $clientChatRepository
+ * @property ClientChatMessageService $clientChatMessageService
  */
 class ClientChatQaController extends FController
 {
+    private ClientChatRepository $clientChatRepository;
+    private ClientChatMessageService $clientChatMessageService;
+
+    public function __construct(
+		$id,
+		$module,
+		ClientChatRepository $clientChatRepository,
+		ClientChatMessageService $clientChatMessageService,
+		$config = [])
+	{
+		parent::__construct($id, $module, $config);
+		$this->clientChatRepository = $clientChatRepository;
+	}
 
     public function behaviors(): array
     {
@@ -68,17 +87,22 @@ class ClientChatQaController extends FController
     /**
      * Updates an existing ClientChat model.
      * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
+     * @param string $rid
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionRoom($id)
+    public function actionRoom($rid)
     {
-        $model = $this->findModel($id);
 
-        return $this->render(
-            'room', [
-            'model' => $model,
+        $clientChat = $this->clientChatRepository->findByRid($rid);
+
+        if ($clientChat->isClosed()) {
+            $history = ClientChatMessage::find()->byChhId($clientChat->cch_id)->all();
+        }
+
+		return $this->render('room', [
+            'clientChat' => $clientChat,
+            'history' => $history ?? null,
         ]);
     }
 

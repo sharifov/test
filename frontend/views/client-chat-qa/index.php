@@ -111,7 +111,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     },
                     'room' => static function ($url, ClientChat $model) {
                         return Html::a('<span class="glyphicon glyphicon-list-alt"></span>',
-                            ['/client-chat-qa/room', 'id' => $model->cch_id],
+                            ['/client-chat-qa/room', 'rid' => $model->cch_rid],
                             [
                                 'target' => '_blank',
                                 'data-pjax' => 0,
