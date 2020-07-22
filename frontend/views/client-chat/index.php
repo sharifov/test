@@ -525,7 +525,7 @@ $(document).on('click', '.client-chat-send-offer', function(e) {
         $("#btn-submit-note i").attr("class", "fa fa-plus");
     }); 
 
-$('.create_lead').on('click', function (e) {
+$(document).on('click', '.create_lead', function (e) {
     e.preventDefault();
     let url = $(this).attr('data-link');
     let modal = $('#modal-md');
@@ -559,7 +559,7 @@ $('.create_lead').on('click', function (e) {
     })
 
 });
-$('.create_case').on('click', function (e) {
+$(document).on('click', '.create_case', function (e) {
     e.preventDefault();
     let url = $(this).attr('data-link');
     let modal = $('#modal-md');
