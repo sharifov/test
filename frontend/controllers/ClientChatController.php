@@ -593,6 +593,17 @@ class ClientChatController extends FController
         return $this->asJson($out);
     }
 
+    public function actionMonitor()
+    {
+        if(Yii::$app->request->isPost){
+
+        } else {
+            $this->layout = '@frontend/themes/gentelella_v2/views/layouts/main_tv';
+
+            return $this->render('monitor');
+        }
+    }
+
     private function createOfferMessage(ClientChat $chat, array $captures): array
     {
         $attachments = [];

@@ -5890,3 +5890,28 @@ input[disabled] + .radio-tab__text {
 .email-list a {
   color:red;
 }
+
+
+.block.client-chat-monitor-message-block{
+  margin-left: 400px;
+}
+/*
+.client-chat-monitor-info-block {
+  margin-left: 30px;
+}*/
+
+.client-chat-monitor-info-block {
+  position: relative;
+  top: 15px;
+  right: 315px;
+  width: 300px;
+  /*float: right;*/
+}
+
+.timeline .block {
+  min-height: 131px;
+}
+
+.timeline .tags {
+  width: 250px;
+}
