@@ -301,18 +301,6 @@ use yii\helpers\Html;
         }
     }
 
-    function createNotify(title, message, type) {
-        new PNotify({
-            title: title,
-            type: type,
-            text: message,
-            icon: true,
-            hide: true,
-            delay: 4000,
-            mouse_reset: false
-        });
-    }
-
     var webPhoneParams = {};
     var call_acc_sid = '';
     var isJoinCall = false;
