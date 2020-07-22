@@ -8,7 +8,7 @@ use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChat\useCase\transfer\ClientChatTransferForm;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
-use sales\model\ClientChatVisitor\repository\ClientChatVisitorRepository;
+use sales\model\clientChatVisitor\repository\ClientChatVisitorRepository;
 use sales\repositories\clientChatChannel\ClientChatChannelRepository;
 use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessRepository;
 use sales\repositories\NotFoundException;

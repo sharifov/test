@@ -1,7 +1,7 @@
 <?php
 
 
-namespace sales\model\ClientChatVisitor\repository;
+namespace sales\model\clientChatVisitor\repository;
 
 
 use sales\model\clientChatVisitor\entity\ClientChatVisitor;

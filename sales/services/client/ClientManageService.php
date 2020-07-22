@@ -11,7 +11,7 @@ use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
 use sales\model\client\ClientCodeException;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
-use sales\model\ClientChatVisitor\repository\ClientChatVisitorRepository;
+use sales\model\clientChatVisitor\repository\ClientChatVisitorRepository;
 use sales\repositories\client\ClientEmailRepository;
 use sales\repositories\client\ClientPhoneRepository;
 use sales\repositories\client\ClientRepository;
