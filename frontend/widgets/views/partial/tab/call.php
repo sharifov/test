@@ -205,6 +205,9 @@ $ucStatus = $userCallStatus->us_type_id ?? UserCallStatus::STATUS_TYPE_OCCUPIED;
 
 $canDialpad = $canDialpad ? 'true' : 'false';
 
+$btnHoldShow = Auth::can('PhoneWidget_OnHold') ? 'true' : 'false';
+$btnTransferShow = Auth::can('PhoneWidget_Transfer') ? 'true' : 'false';
+
 $js = <<<JS
 PhoneWidgetCall.init({
     'ajaxCallRedirectGetAgents': '$ajaxCallRedirectGetAgents',
@@ -224,6 +227,8 @@ PhoneWidgetCall.init({
     'returnHoldCallUrl': '$returnHoldCallUrl',
     'ajaxHangupUrl': '$ajaxHangupUrl',
     'dialpadEnabled': $canDialpad,
+    'btnHoldShow': $btnHoldShow,
+    'btnTransferShow': $btnTransferShow    
 });
 JS;
 $this->registerJs($js);

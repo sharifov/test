@@ -39,8 +39,6 @@ var PhoneWidgetCall = function () {
 
     function init(options)
     {
-        console.log(options);
-
         callRequester.init(options);
 
         Object.assign(settings, options);
@@ -50,6 +48,8 @@ var PhoneWidgetCall = function () {
         widgetIcon.update({type: 'default', timer: false, text: null, currentCalls: null, status: statusCheckbox.getStatus() === 1});
 
         setCountMissedCalls(options.countMissedCalls);
+
+        panes.active.setup(options.btnHoldShow, options.btnTransferShow);
 
         muteBtnClickEvent();
         transferCallBtnClickEvent();

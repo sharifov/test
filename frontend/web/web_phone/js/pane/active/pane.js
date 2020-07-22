@@ -15,6 +15,14 @@ var PhoneWidgetPaneActive = function () {
         'mute': new PhoneWidgetPaneActiveBtnMute($container)
     };
 
+    let btnHoldShow = true;
+    let btnTransferShow = true;
+
+    function setup(btnHoldShowInit, btnTransferShowInit) {
+        btnHoldShow = btnHoldShowInit;
+        btnTransferShow = btnTransferShowInit;
+    }
+
     function initControls() {
         buttons.hold.init();
         buttons.mute.init();
@@ -43,8 +51,14 @@ var PhoneWidgetPaneActive = function () {
 
     function getControls(call) {
         let controls = {
-            hold: {active: true},
-            transfer: {active: true},
+            hold: {
+                active: true,
+                show: btnHoldShow
+            },
+            transfer: {
+                active: true,
+                show: btnTransferShow
+            },
             addPerson: {active: false},
             dialpad: {active: false},
         };
@@ -112,6 +126,7 @@ var PhoneWidgetPaneActive = function () {
     }
 
     return {
+        setup: setup,
         buttons: buttons,
         init: init,
         load: load,

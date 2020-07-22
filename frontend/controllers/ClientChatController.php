@@ -404,16 +404,22 @@ class ClientChatController extends FController
 
 		$result = [
 			'error' => false,
-			'message' => ''
+			'message' => 'Room successfully closed'
 		];
 
 		try {
-			$clientChat = $this->clientChatRepository->findById($cchId);
-			$clientChat->close();
-			$this->clientChatRepository->save($clientChat);
+
+			$this->clientChatService->closeConversation($cchId);
+
+			$result['tab'] = ClientChat::TAB_ARCHIVE;
+
 		} catch (NotFoundException | \RuntimeException $e) {
 			$result['error'] = true;
 			$result['message'] = $e->getMessage();
+		} catch (\Throwable $e) {
+			Yii::error(AppHelper::throwableFormatter($e), 'ClientChatController::actionAjaxClose::Throwable');
+			$result['error'] = true;
+			$result['message'] = 'Internal Server Error';
 		}
 
 		return $this->asJson($result);
@@ -483,6 +489,13 @@ class ClientChatController extends FController
 		}
 		$widget->userId = Auth::id();
 		return $widget->run();
+	}
+
+	public function actionDiscardUnreadMessages(): void
+	{
+		$cchId = Yii::$app->request->post('cchId');
+		$userId = Auth::id();
+		$this->clientChatMessageService->discardUnreadMessages($cchId, $userId);
 	}
 
 	public function actionSendOfferList(): string

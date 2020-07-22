@@ -124,6 +124,22 @@ class CallController extends Controller
                         'old_status' => $old_status,
                         'new_status' => $call->getStatusName(),
                     ];
+                    try {
+                        $result = Yii::$app->communication->hangUp($call->c_call_sid);
+                        if ($result['error']) {
+                            Yii::error(VarDumper::dumpAsString([
+                                'result' => $result,
+                                'call' => $call->getAttributes(),
+                            ]), 'CallController:actionTerminator:HangUpResult');
+                        } else {
+                            Yii::info(VarDumper::dumpAsString(['callId' => $call->c_id]), 'info\CallTerminatorCompleteCall');
+                        }
+                    } catch (\Throwable $e) {
+                        Yii::error(VarDumper::dumpAsString([
+                            'error' => AppHelper::throwableFormatter($e),
+                            'call' => $call->getAttributes()
+                        ]), 'CallController:actionTerminator:HangUp');
+                    }
                 } else {
                     $errors[] = $call->errors;
                 }

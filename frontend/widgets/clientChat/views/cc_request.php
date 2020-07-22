@@ -67,24 +67,26 @@ $accessUrl = \yii\helpers\Url::to('/client-chat/access-manage');
                                         <?= Yii::$app->formatter->asTimer($item->ccua_created_dt) ?>
                                     </span>
                                     <?php endif; ?>
+                                <div class="_cc-data">
+                                    <?php if ($item->ccuaCch->cchDep): ?>
+                                        <span class="label label-default"><?= $item->ccuaCch->cchDep->dep_name ?></span>
+                                    <?php endif; ?>
+
+                                    <?php if ($item->ccuaCch->cchProject): ?>
+                                        <span class="label label-default"><?= $item->ccuaCch->cchProject->name ?></span>
+                                    <?php endif; ?>
+
+                                    <span class="label label-default"><?= $item->ccuaCch->cchChannel ? $item->ccuaCch->cchChannel->ccc_name : '' ?></span>
+                                </div>
                             </div>
 
-                            <div class="_cc-data">
-                                <?php if ($item->ccuaCch->cchDep): ?>
-                                    <span class="label label-default"><?= $item->ccuaCch->cchDep->dep_name ?></span>
-                                <?php endif; ?>
-
-                                <?php if ($item->ccuaCch->cchProject): ?>
-                                    <span class="label label-default"><?= $item->ccuaCch->cchProject->name ?></span>
-                                <?php endif; ?>
-
-                                <span class="label label-default"><?= $item->ccuaCch->cchChannel ? $item->ccuaCch->cchChannel->ccc_name : '' ?></span>
-                            </div>
 
                             <div class="_cc-action">
                                 <button class="btn btn-sm btn-success _cc-access-action" data-cch-id="<?= $item->ccua_cch_id ?>" data-ajax-url="<?= $accessUrl ?>" data-access-action="<?= ClientChatUserAccess::STATUS_ACCEPT ?>"><i class="fa fa-check"></i> Accept</button>
                                 <button class="btn btn-sm btn-warning _cc-access-action" data-cch-id="<?= $item->ccua_cch_id ?>" data-ajax-url="<?= $accessUrl ?>" data-access-action="<?= ClientChatUserAccess::STATUS_SKIP ?>"><i class="fa fa-close"></i> Skip</button>
                             </div>
+
+<!--                            <span class="_cc_chevron"><i class="fa fa-chevron-down"></i></span>-->
                         </div>
                         <hr>
                     </div>
@@ -112,6 +114,9 @@ $js = <<<JS
 $("#client-chat-box-pjax").on("pjax:end", function() {
     window.enableTimer();
 });
+// $(document).on('click', '._cc_chevron', function () {
+//     $(this).closest('._cc-box-item').toggleClass('active');
+// });
 JS;
 
 $this->registerJs($js);

@@ -13,6 +13,7 @@ use Yii;
 use common\models\CreditCard;
 use common\models\search\CreditCardSearch;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
@@ -222,17 +223,23 @@ class CreditCardController extends FController
 						throw new \RuntimeException($saleCreditCard->getErrorSummary(false)[0]);
 					} else {
 						$apiKey = $this->casesSaleRepository->getProjectApiKey($caseSale);
-						$result = $this->casesSaleService->sendAddedCreditCardToBO($apiKey, $caseSale->css_sale_book_id, $caseSale->css_sale_id, $form);
 
-						$notify = '';
-						if ($result['error']) {
-							$notify = 'createNotify("B/O add card notice", "'.$result['message'].'", "warning")';
-						} else {
-							$model->cc_is_sync_bo = 1;
-							$model->save();
+						if (!$bookId = $caseSale->css_sale_book_id) {
+						    $bookId = $caseSale->css_sale_data['bookingId'] ?? '';
 						}
 
-						return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#'.$pjaxId.'"}); createNotify("Success", "Credit Card Successfully created", "success"); '.$notify.'</script>';
+						$result = $this->casesSaleService->sendAddedCreditCardToBO($apiKey, $bookId, $caseSale->css_sale_id, $form);
+
+						if ($result['error']) {
+						    $message = Html::encode(str_replace(['"', "'"], '', $result['message']));
+							$notify = 'createNotify("B/O add card notice", "' . $message . '", "warning")';
+							return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#'.$pjaxId.'"}); ' . $notify . '</script>';
+						}
+
+                        $model->cc_is_sync_bo = 1;
+                        $model->save();
+
+                        return '<script>$("#modal-df").modal("hide"); pjaxReload({container: "#'.$pjaxId.'"}); createNotify("Success", "Credit Card Successfully created", "success");</script>';
 					}
 				}
 			}

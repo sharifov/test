@@ -4428,9 +4428,6 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
                 ->innerJoin(CallLog::tableName(), 'call_log.cl_id = call_log_lead.cll_cl_id')
                 ->where(['cll_lead_id' => $this->id]);
 
-            if ($onlyParent) {
-                $query->andWhere(['cl_group_id' => null]);
-            }
             if ($type_id !== 0) {
                 $query->andWhere(['cl_type_id' => $type_id]);
             }
@@ -4599,7 +4596,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
             $callsText = '<span title="Calls Out / In"><i class="fa fa-phone success"></i> ' . $this->getCountCalls(Call::CALL_TYPE_OUT) . '/' .
                 $this->getCountCalls(Call::CALL_TYPE_IN) . '</span> | ';
             if (Auth::can('/call/index')) {
-                $str .= Html::a($callsText, Url::to(['/call/index', 'CallSearch[c_lead_id]' => $this->id]), $linkAttributes);
+                $str .= Html::a($callsText, Url::to(['/call-log/index', 'CallLogSearch[lead_id]' => $this->id]), $linkAttributes);
             } else {
                 $str .= $callsText;
             }

@@ -8,6 +8,7 @@
 
 namespace common\components;
 
+use sales\auth\Auth;
 use yii\base\Component;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
@@ -95,19 +96,22 @@ class ChatBot extends Component
     }
 
 
-    /**
-     * @param string $rid
-     * @return array
-     * @throws \yii\httpclient\Exception
-     */
-    public function endConversation(string $rid) : array
+	/**
+	 * @param string $rid
+	 * @param string $visitorId
+	 * @return array
+	 * @throws \yii\httpclient\Exception
+	 */
+    public function endConversation(string $rid, string $visitorId) : array
     {
         $out = ['error' => false, 'data' => []];
         $data = [
             'rid' => $rid,
+			'visitorId' => $visitorId
         ];
 
-        $response = $this->sendRequest('livechat/end-conversation', $data, 'post');
+		$headers = \Yii::$app->rchat->getSystemAuthDataHeader();
+        $response = $this->sendRequest('livechat/end-conversation', $data, 'post', $headers);
 
         if ($response->isOk) {
             if (!empty($response->data)) {

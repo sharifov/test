@@ -18,7 +18,7 @@ $showContent = $showContent ?? false;
 ?>
 
 <?php Pjax::begin(['id' => 'pjax-notes', 'enablePushState' => false, 'timeout' => 10000]) ?>
-    <div class="x_panel" style="margin-top: 10px;">
+    <div class="x_panel">
         <div class="x_title">
             <h2><i class="fa fa-sticky-note-o"></i>  Chat notes (<?php echo count($clientChat->notes) ?>) </h2>
             <ul class="nav navbar-right panel_toolbox">

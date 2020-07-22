@@ -2,14 +2,23 @@
 
 /**
  * @var StatisticsHelper $statistics
+ * @var array $lastCommunication
  */
 
+use frontend\helpers\OutHelper;
 use sales\auth\Auth;
 use sales\helpers\communication\StatisticsHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
 $linkAttributes = ['target' => '_blank', 'data-pjax'=> '0'];
+
+$classMap = [
+    'call' => 'fa-phone',
+    'email' => 'fa-envelope',
+    'sms' => 'fa-comments',
+];
+
 ?>
 
 <div class="box-statistics">
@@ -17,9 +26,9 @@ $linkAttributes = ['target' => '_blank', 'data-pjax'=> '0'];
         $text = '<i class="fa fa-phone success" aria-hidden="true" title="' . $statistics::HINT_CALLS . '"></i>
             <sup>' . $statistics->callCount . '</sup>';
         if (Auth::can('/call/index')) {
-            $paramName = $statistics->isTypeCase() ? 'c_case_id' : 'c_lead_id';
+            $paramName = $statistics->isTypeCase() ? 'case_id' : 'lead_id';
             echo Html::a($text,
-                Url::to(['/call/index', 'CallSearch[' . $paramName . ']' => $statistics->getId()]),
+                Url::to(['/call-log/index', 'CallLogSearch[' . $paramName . ']' => $statistics->getId()]),
                 $linkAttributes);
         } else {
              echo $text;
@@ -62,6 +71,21 @@ $linkAttributes = ['target' => '_blank', 'data-pjax'=> '0'];
         }
     ?>
 </div>
+
+<?php if (isset($lastCommunication)) :?>
+    <div class="last-communication" style="text-align: left;">
+        <?php foreach ($lastCommunication as $item) :?>
+            <?php if (!empty($item['created_dt'])) :?>
+                <?php
+                    $out = '<i class="fa ' . $classMap[$item['type']] . '"></i>';
+                    $out .= ' (' . $item['direction'] . ')';
+                    $out .= ' ' . OutHelper::diffHoursMinutes(strtotime($item['created_dt'])) . ' ago<br /> ';
+                    echo $out;
+                ?>
+            <?php endif ?>
+        <?php endforeach ?>
+    </div>
+<?php endif ?>
 
 <?php
 $css = <<<CSS

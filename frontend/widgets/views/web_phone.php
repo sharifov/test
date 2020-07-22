@@ -308,7 +308,7 @@ use yii\helpers\Html;
             text: message,
             icon: true,
             hide: true,
-            delay: 3000,
+            delay: 4000,
             mouse_reset: false
         });
     }
