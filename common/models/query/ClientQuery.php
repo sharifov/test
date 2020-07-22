@@ -3,8 +3,8 @@
 namespace common\models\query;
 
 use common\models\Client;
-use sales\model\ClientChatVisitor\entity\ClientChatVisitor;
-use sales\model\ClientChatVisitorData\entity\ClientChatVisitorData;
+use sales\model\clientChatVisitor\entity\ClientChatVisitor;
+use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use yii\db\ActiveQuery;
 
 /**

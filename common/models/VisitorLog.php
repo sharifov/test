@@ -3,7 +3,7 @@
 namespace common\models;
 
 use common\models\query\VisitorLogQuery;
-use sales\model\ClientChatVisitorData\entity\ClientChatVisitorData;
+use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;

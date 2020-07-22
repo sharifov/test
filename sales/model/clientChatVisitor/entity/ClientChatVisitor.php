@@ -1,10 +1,10 @@
 <?php
 
-namespace sales\model\ClientChatVisitor\entity;
+namespace sales\model\clientChatVisitor\entity;
 
 use common\models\Client;
 use sales\model\clientChat\entity\ClientChat;
-use sales\model\ClientChatVisitorData\entity\ClientChatVisitorData;
+use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
 
 /**
  * This is the model class for table "client_chat_visitor".
