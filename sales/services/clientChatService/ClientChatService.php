@@ -1,6 +1,7 @@
 <?php
 namespace sales\services\clientChatService;
 
+use common\models\Department;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
@@ -15,6 +16,7 @@ use sales\repositories\NotFoundException;
 use sales\repositories\visitorLog\VisitorLogRepository;
 use sales\services\TransactionManager;
 use yii\helpers\Json;
+use yii\helpers\VarDumper;
 
 /**
  * Class ClientChatService
@@ -127,6 +129,29 @@ class ClientChatService
 			if ($clientChat->cch_dep_id === $form->depId) {
 				throw new \DomainException('Chat already assigned to this department; Choose another;');
 			}
+
+			if (!$clientChat->ccv || !$clientChat->ccv->ccvCvd || !$clientChat->ccv->ccvCvd->cvd_visitor_rc_id) {
+				throw new \RuntimeException('Visitor RC id is not found');
+			}
+
+			$oldDepartment = $clientChat->cchDep->dep_name ?? null;
+			$newDepartment = Department::findOne(['dep_id' => $form->depId]);
+
+			if (!$oldDepartment || !$newDepartment) {
+				throw new \RuntimeException('Old or New department name is undefined');
+			}
+
+			$botTransferChatResult = \Yii::$app->chatBot->transferDepartment($clientChat->cch_rid, $clientChat->ccv->ccvCvd->cvd_visitor_rc_id, $oldDepartment, $newDepartment->dep_name);
+			\Yii::info(VarDumper::dumpAsString($botTransferChatResult), 'info\transferDepartment');
+			if ($botTransferChatResult['error']) {
+				throw new \RuntimeException('[Chat Bot] ' . $botTransferChatResult['error']['message'] ?? 'Cant read error message from Chat Bot response');
+			}
+
+			$success = $botTransferChatResult['data']['data']['data']['success'] ?? false;
+			if (!$success) {
+				throw new \RuntimeException('[Chat Bot] ' . ($botTransferChatResult['data']['data']['data']['message'] ?? 'Cant read error message from Chat Bot response'));
+			}
+
 			$clientChat->close();
 			$this->clientChatRepository->save($clientChat);
 
