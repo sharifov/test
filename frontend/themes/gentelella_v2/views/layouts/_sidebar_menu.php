@@ -187,6 +187,8 @@ $isSuperAdmin = $user->isSuperAdmin();
                         ['label' => 'Chat Messages', 'url' => ['/client-chat-message-crud/index']],
                         ['label' => 'Chat Data', 'url' => ['/client-chat-data-crud/index']],
                         ['label' => 'Chat Note', 'url' => ['/client-chat-note-crud/index']],
+                        ['label' => 'Chat Leads', 'url' => ['/client-chat-lead/index']],
+                        ['label' => 'Chat Cases', 'url' => ['/client-chat-case/index']],
                     ]
                 ],
                 ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'list'],

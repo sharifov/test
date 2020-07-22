@@ -13,10 +13,12 @@ use yii\data\SqlDataProvider;
  * Class ClientChatSearch
  *
  * @property int|null $lead_id
+ * @property int|null $case_id
  */
 class ClientChatSearch extends ClientChat
 {
     public $lead_id;
+    public $case_id;
 
     public string $timeRange;
     public string $timeStart;
@@ -75,6 +77,8 @@ class ClientChatSearch extends ClientChat
             ['cch_updated_user_id', 'integer'],
 
             ['lead_id', 'integer'],
+
+            ['case_id', 'integer'],
         ];
     }
 
@@ -82,7 +86,7 @@ class ClientChatSearch extends ClientChat
     {
         $query = static::find();
 
-        $query->joinWith('leads');
+        $query->joinWith(['leads', 'cases']);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -113,7 +117,8 @@ class ClientChatSearch extends ClientChat
             'date_format(cch_updated_dt, "%Y-%m-%d")' => $this->cch_updated_dt,
             'cch_created_user_id' => $this->cch_created_user_id,
             'cch_updated_user_id' => $this->cch_updated_user_id,
-            'ccl_lead_id' => $this->lead_id
+            'ccl_lead_id' => $this->lead_id,
+            'cccs_case_id' => $this->case_id,
         ]);
 
         $query->andFilterWhere(['like', 'cch_rid', $this->cch_rid])

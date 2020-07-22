@@ -13,6 +13,9 @@ use yii\db\ActiveRecord;
  * @property int $ccl_chat_id
  * @property int $ccl_lead_id
  * @property string $ccl_created_dt
+ *
+ * @property Lead $lead
+ * @property ClientChat $chat
  */
 class ClientChatLead extends ActiveRecord
 {
@@ -25,7 +28,9 @@ class ClientChatLead extends ActiveRecord
 
             ['ccl_lead_id', 'integer'],
             ['ccl_lead_id', 'required'],
-            ['ccl_lead_id', 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['ccl_cch_id' => 'id']],
+            ['ccl_lead_id', 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['ccl_lead_id' => 'id']],
+
+            [['ccl_chat_id', 'ccl_lead_id'], 'unique', 'targetAttribute' => ['ccl_chat_id', 'ccl_lead_id']],
 
             ['ccl_created_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
         ];
@@ -44,8 +49,8 @@ class ClientChatLead extends ActiveRecord
     public function attributeLabels(): array
     {
         return [
-            'ccl_chat_id' => 'Chat Id',
-            'ccl_lead_id' => 'Lead Id',
+            'ccl_chat_id' => 'Chat',
+            'ccl_lead_id' => 'Lead',
             'ccl_created_dt' => 'Created Dt',
         ];
     }

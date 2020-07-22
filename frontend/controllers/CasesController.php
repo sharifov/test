@@ -27,19 +27,23 @@ use frontend\models\CaseCommunicationForm;
 use frontend\models\CasePreviewEmailForm;
 use frontend\models\CasePreviewSmsForm;
 use sales\auth\Auth;
+use sales\entities\cases\CasesSourceType;
 use sales\entities\cases\CasesStatus;
 use sales\entities\cases\CaseStatusLogSearch;
 use sales\forms\cases\CasesAddEmailForm;
 use sales\forms\cases\CasesAddPhoneForm;
 use sales\forms\cases\CasesChangeStatusForm;
 use sales\forms\cases\CasesClientUpdateForm;
+use sales\forms\cases\CasesCreateByChatForm;
 use sales\forms\cases\CasesCreateByWebForm;
 use sales\forms\cases\CasesSaleForm;
+use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\model\callLog\entity\callLog\CallLogType;
 use sales\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
 use sales\guards\cases\CaseManageSaleInfoGuard;
 use sales\model\cases\useCases\cases\updateInfo\Handler;
+use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\services\ClientChatAssignService;
 use sales\model\coupon\entity\couponCase\CouponCase;
 use sales\model\coupon\useCase\send\SendCouponsForm;
@@ -90,7 +94,6 @@ use yii\widgets\ActiveForm;
  * @property Handler $updateHandler
  * @property SaleTicketService $saleTicketService
  * @property QuoteRepository $quoteRepository
- * @property ClientChatAssignService $chatAssignService
  * @property TransactionManager $transaction
  */
 class CasesController extends FController
@@ -108,7 +111,6 @@ class CasesController extends FController
     private $updateHandler;
     private $saleTicketService;
     private $quoteRepository;
-    private $chatAssignService;
     private $transaction;
 
     public function __construct(
@@ -126,7 +128,6 @@ class CasesController extends FController
         Handler $updateHandler,
         SaleTicketService $saleTicketService,
         QuoteRepository $quoteRepository,
-        ClientChatAssignService $chatAssignService,
         TransactionManager $transaction,
         $config = []
     )
@@ -144,7 +145,6 @@ class CasesController extends FController
         $this->saleTicketService = $saleTicketService;
         $this->updateHandler = $updateHandler;
         $this->quoteRepository = $quoteRepository;
-        $this->chatAssignService = $chatAssignService;
         $this->transaction = $transaction;
     }
 
@@ -934,18 +934,11 @@ class CasesController extends FController
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
         $form = new CasesCreateByWebForm($user);
-        $chatId = (int)Yii::$app->request->get('chat_id');
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
                 /** @var Cases $case */
-                $case = $this->transaction->wrap(function () use ($form, $user, $chatId) {
-                    $case = $this->casesCreateService->createByWeb($form, $user->id);
-                    $this->casesManageService->processing($case->cs_id, Yii::$app->user->id, Yii::$app->user->id);
-                    if ($chatId) {
-                        $this->chatAssignService->assignCase($chatId, $case->cs_id);
-                    }
-                    return $case;
-                });
+                $case = $this->casesCreateService->createByWeb($form, $user->id);
+                $this->casesManageService->processing($case->cs_id, Yii::$app->user->id, Yii::$app->user->id);
                 Yii::$app->session->setFlash('success', 'Case created');
                 return $this->redirect(['view', 'gid' => $case->cs_gid]);
             } catch (\Throwable $e){
@@ -954,6 +947,43 @@ class CasesController extends FController
             }
         }
         return $this->render('create', [
+            'model' => $form,
+        ]);
+    }
+
+    public function actionCreateByChat()
+    {
+        if (!(Yii::$app->request->isAjax || Yii::$app->request->isPjax)) {
+            throw new NotFoundHttpException('Page not exist');
+        }
+
+        $chatId = (int)Yii::$app->request->get('chat_id');
+        $chat = ClientChat::findOne(['cch_id' => $chatId]);
+
+        if (!$chat) {
+            throw new NotFoundHttpException('Client chat not found');
+        }
+
+        $user = Auth::user();
+        $form = new CasesCreateByChatForm($user, $chat);
+
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            try {
+                /** @var Cases $case */
+                $case = $this->transaction->wrap(function () use ($form, $chat, $user) {
+                    $case = $this->casesCreateService->createByChat($form, $chat, $user->id);
+                    $this->casesManageService->processing($case->cs_id, $user->id, $user->id);
+                    return $case;
+                });
+                $out = Yii::$app->formatter->format($case, 'case');
+                return "<script> $('#modal-md').modal('hide');$('#chat-info-case-info').append(' " . $out . "')</script>";
+            } catch (\Throwable $e){
+                Yii::error(AppHelper::throwableFormatter($e), 'CasesController:actionCreateByChat');
+                return "<script> $('#modal-md').modal('hide');createNotify('Create Case', '" . $e->getMessage() . "', 'error');</script>";
+            }
+        }
+
+        return $this->renderAjax('create_by_chat', [
             'model' => $form,
         ]);
     }

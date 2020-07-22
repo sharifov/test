@@ -13,6 +13,7 @@ use sales\model\callLog\entity\callLog\CallLogType;
 use sales\model\callLog\entity\callLogCase\CallLogCase;
 use sales\model\callLog\entity\callLogLead\CallLogLead;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChatCase\entity\ClientChatCase;
 use sales\model\clientChatLead\entity\ClientChatLead;
 use Yii;
 use yii\db\Expression;
@@ -163,9 +164,8 @@ class StatisticsHelper
                 ->count();
             return $this;
         }
-
-        $this->clientChatCount = (int) ClientChat::find()
-            ->where(['cch_case_id' => $this->id])
+        $this->clientChatCount = (int) ClientChatCase::find()
+            ->andWhere(['cccs_case_id' => $this->id])
             ->cache($this->cacheDuration)
             ->count();
         return $this;

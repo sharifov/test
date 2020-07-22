@@ -11,6 +11,7 @@ use common\models\Project;
 use sales\entities\cases\Cases;
 use sales\helpers\clientChat\ClientChatHelper;
 use sales\model\clientChat\ClientChatCodeException;
+use sales\model\clientChatCase\entity\ClientChatCase;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatData\entity\ClientChatData;
 use sales\model\clientChatLead\entity\ClientChatLead;
@@ -47,7 +48,6 @@ use yii\helpers\Html;
  * @property int|null $cch_updated_user_id
  * @property int|null $cch_client_online
  *
- * @property Cases $cchCase
  * @property ClientChatRequest $cchCcr
  * @property Client $cchClient
  * @property ClientChatChannel $cchChannel
@@ -57,6 +57,7 @@ use yii\helpers\Html;
  * @property ClientChatData $cchData
  * @property ClientChatNote[] $notes
  * @property Lead[] $leads
+ * @property Cases[] $cases
  */
 class ClientChat extends \yii\db\ActiveRecord
 {
@@ -150,11 +151,6 @@ class ClientChat extends \yii\db\ActiveRecord
 		];
     }
 
-    public function getCchCase(): \yii\db\ActiveQuery
-    {
-        return $this->hasOne(Cases::class, ['cs_id' => 'cch_case_id']);
-    }
-
     public function getCchCcr(): \yii\db\ActiveQuery
     {
         return $this->hasOne(ClientChatRequest::class, ['ccr_id' => 'cch_ccr_id']);
@@ -212,7 +208,12 @@ class ClientChat extends \yii\db\ActiveRecord
 
 	public function getLeads(): ActiveQuery
 	{
-		return $this->hasMany(Lead::class, ['id' => 'ccl_lead_id'])->viaTable('client_chat_lead', ['ccl_chat_id' => 'cch_id']);
+		return $this->hasMany(Lead::class, ['id' => 'ccl_lead_id'])->viaTable(ClientChatLead::tableName(), ['ccl_chat_id' => 'cch_id']);
+	}
+
+	public function getCases(): ActiveQuery
+	{
+		return $this->hasMany(Cases::class, ['cs_id' => 'cccs_case_id'])->viaTable(ClientChatCase::tableName(), ['cccs_chat_id' => 'cch_id']);
 	}
 
 	public static function getStatusList(): array
@@ -272,11 +273,6 @@ class ClientChat extends \yii\db\ActiveRecord
     public function getLastMessageByClient(): ?ClientChatMessage
     {
         return ClientChatMessage::find()->andWhere(['ccm_cch_id' => $this->cch_id])->andWhere(['is', 'ccm_user_id', null])->orderBy(['ccm_id' => SORT_DESC])->limit(1)->one();
-    }
-
-    public function assignCase(int $caseId): void
-    {
-        $this->cch_case_id = $caseId;
     }
 
     public function attributeLabels(): array

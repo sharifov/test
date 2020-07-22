@@ -53,7 +53,6 @@ use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use sales\model\callLog\entity\callLog\CallLogType;
 use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChat\services\ClientChatAssignService;
 use sales\model\lead\useCases\lead\create\LeadCreateByChatForm;
 use sales\model\lead\useCases\lead\create\LeadManageForm;
 use sales\model\lead\useCases\lead\import\LeadImportForm;
@@ -106,7 +105,6 @@ use common\models\local\LeadLogMessage;
  * @property LeadImportService $leadImportService
  * @property QuoteRepository $quoteRepository
  * @property TransactionManager $transaction
- * @property ClientChatAssignService $chatAssignService
  */
 class LeadController extends FController
 {
@@ -119,7 +117,6 @@ class LeadController extends FController
     private $leadImportService;
     private $quoteRepository;
     private $transaction;
-    private $chatAssignService;
 
     public function __construct(
         $id,
@@ -133,7 +130,6 @@ class LeadController extends FController
         LeadImportService $leadImportService,
         QuoteRepository $quoteRepository,
         TransactionManager $transaction,
-        ClientChatAssignService $chatAssignService,
         $config = []
     )
     {
@@ -147,7 +143,6 @@ class LeadController extends FController
         $this->leadImportService = $leadImportService;
         $this->quoteRepository = $quoteRepository;
         $this->transaction = $transaction;
-        $this->chatAssignService = $chatAssignService;
     }
 
     public function behaviors(): array

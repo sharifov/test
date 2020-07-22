@@ -56,10 +56,15 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
                 [
                     'label' => 'Case',
-                    'attribute' => 'cchCase',
-                    'format' => 'case'
+                    'value' => static function (ClientChat $chat) {
+                        $out = '';
+                        foreach ($chat->cases as $case) {
+                            $out .= Yii::$app->formatter->format($case,  'case') . ' ';
+                        }
+                        return $out;
+                    },
+                    'format' => 'raw'
                 ],
-
                 [
                     'label' => 'Lead',
                     'value' => static function (ClientChat $chat) {

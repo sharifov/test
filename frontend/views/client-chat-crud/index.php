@@ -90,11 +90,17 @@ $this->params['breadcrumbs'][] = $this->title;
                 'options' => ['style' => 'width:200px']
                 //'placeholder' => 'Select User'
             ],
-            //'cchCase:case',
             [
-                'label' => 'Case ID',
-                'attribute' => 'cchCase',
-                'format' => 'case'
+                'attribute' => 'case_id',
+                'label' => 'Case',
+                'value' => static function (ClientChat $chat) {
+                    $out = '';
+                    foreach ($chat->cases as $case) {
+                        $out .= Yii::$app->formatter->format($case,  'case') . ' ';
+                    }
+                    return $out;
+                },
+                'format' => 'raw'
             ],
             [
                 'attribute' => 'lead_id',

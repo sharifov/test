@@ -4,6 +4,7 @@ use common\models\Quote;
 use sales\model\clientChat\entity\ClientChat;
 use yii\bootstrap4\Button;
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\helpers\VarDumper;
 use yii\web\View;
 
@@ -68,13 +69,15 @@ use yii\web\View;
                 'cch_title',
                 'cch_description',
                 [
-//                    'attribute' => 'cch_case_id',
                     'label' => 'Case',
                     'value' => static function(ClientChat $model) {
-//                        if (!$model->cch_case_id) {
-                            return Html::a('Create Case', ['/cases/create', 'chat_id' => $model->cch_id],  ['target' => '_blank']);
-//                        }
-//                        return Yii::$app->formatter->format($model->cchCase, 'case');
+                        $out = '<span id="chat-info-case-info">';
+                        foreach ($model->cases as $case) {
+                            $out .= Yii::$app->formatter->format($case, 'case') . ' ';
+                        }
+                        $out .= '</span>';
+                        $out .= Html::button(' [ Create ] ', ['class' => 'btn btn-link default create_case', 'data-link' => Url::to(['/cases/create-by-chat', 'chat_id' => $model->cch_id])]);
+                        return $out;
                     },
                     'format' => 'raw',
                 ],
@@ -85,11 +88,11 @@ use yii\web\View;
                         foreach ($model->leads as $lead) {
                             $out .= Yii::$app->formatter->format($lead, 'lead') . ' ';
                             if ($lead->isExistQuotesForSend()) {
-                                $out .= ' ' . Html::button('Offer', ['class' => 'btn btn-info chat-offer', 'data-chat-id' => $model->cch_id, 'data-lead-id' => $lead->id]) . ' ';
+                                $out .= ' ' . Html::button('Offer', ['class' => 'btn btn-info chat-offer default', 'data-chat-id' => $model->cch_id, 'data-lead-id' => $lead->id]) . ' ';
                             }
                         }
                         $out .= '</span>';
-                        $out .= Html::a(' [ Create ] ', ['/lead/create-by-chat', 'chat_id' => $model->cch_id],  ['class' => 'create_lead']);
+                        $out .= Html::button(' [ Create ] ', ['class' => 'btn btn-link default create_lead', 'data-link' => Url::to(['/lead/create-by-chat', 'chat_id' => $model->cch_id])]);
                         return $out;
                     },
                     'format' => 'raw',
