@@ -147,7 +147,7 @@ class ClientChatService
 				throw new \RuntimeException('[Chat Bot] ' . $botTransferChatResult['error']['message'] ?? 'Cant read error message from Chat Bot response');
 			}
 
-			$success = $botTransferChatResult['data']['data']['data']['success'] ?? false;
+			$success = $botTransferChatResult['data']['success'] ?? false;
 			if (!$success) {
 				throw new \RuntimeException('[Chat Bot] ' . ($botTransferChatResult['data']['data']['data']['message'] ?? 'Cant read error message from Chat Bot response'));
 			}
