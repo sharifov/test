@@ -7,6 +7,7 @@ use sales\model\clientChatData\entity\ClientChatData;
 use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatVisitor\entity\ClientChatVisitor;
+use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -67,18 +68,21 @@ class ClientChatQaSearch extends ClientChat
         ];
     }
 
+    public function attributeLabels(): array
+    {
+        $labels = [
+            'cch_client_id' => 'Client ID',
+        ];
+        return ArrayHelper::merge(parent::attributeLabels(), $labels);
+    }
+
     /**
-     * Creates data provider instance with search query applied
-     *
-     * @param array $params
-     *
+     * @param $params
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search($params): ActiveDataProvider
     {
         $query = ClientChat::find();
-
-        // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -92,7 +96,6 @@ class ClientChatQaSearch extends ClientChat
             return $dataProvider;
         }
 
-        // grid filtering conditions
         $query->andFilterWhere([
             'cch_id' => $this->cch_id,
             'cch_ccr_id' => $this->cch_ccr_id,
@@ -137,17 +140,17 @@ class ClientChatQaSearch extends ClientChat
         }
 		if ($this->dataCountry) {
             $query->andWhere(['cch_id' =>
-                ClientChatVisitor::find()->select('ccv_cch_id')])
-                    ->innerJoinWith('ccvCvd')
+                ClientChatVisitor::find()->select('ccv_cch_id')
+                    ->innerJoin(ClientChatVisitorData::tableName(), 'ccv_cvd_id = cvd_id')
                     ->andWhere(['cvd_country' => $this->dataCountry])
-                    ->distinct();
+                    ->distinct()]);
         }
         if ($this->dataCity) {
             $query->andWhere(['cch_id' =>
-                ClientChatVisitor::find()->select('ccv_cch_id')])
-                    ->innerJoinWith('ccvCvd')
+                ClientChatVisitor::find()->select('ccv_cch_id')
+                    ->innerJoin(ClientChatVisitorData::tableName(), 'ccv_cvd_id = cvd_id')
                     ->andWhere(['cvd_city' => $this->dataCity])
-                    ->distinct();
+                    ->distinct()]);
         }
         if ($this->messageText) {
             $by = ArrayHelper::isIn($this->messageBy, self::MESSAGE_BY_LIST) ? $this->messageBy : null;

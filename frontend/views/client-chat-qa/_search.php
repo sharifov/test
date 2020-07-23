@@ -14,6 +14,7 @@ use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use yii\helpers\Html;
 use yii\web\View;
 use yii\widgets\ActiveForm;
+use yii\widgets\Pjax;
 
 /* @var yii\web\View $this */
 /* @var ClientChatQaSearch $model */
@@ -29,12 +30,13 @@ use yii\widgets\ActiveForm;
                 <li>
                     <a class="collapse-link"><i class="fa fa-chevron-down"></i></a>
                 </li>
-
             </ul>
             <div class="clearfix"></div>
         </div>
 
-        <div class="x_content" style="display: <?=(Yii::$app->request->isPjax) ? 'block' : 'none'?>">
+        <?php $display = (Yii::$app->request->isPjax || Yii::$app->request->get('ClientChatQaSearch'))
+            ? 'block' : 'none'; ?>
+        <div class="x_content" style="display: <?php echo $display ?>">
             <?php $form = ActiveForm::begin([
                 'action' => ['index'],
                 'id' => 'qa_search_form',
@@ -114,7 +116,7 @@ use yii\widgets\ActiveForm;
                     <div class="form-group text-center">
                         <?= Html::submitButton('<i class="fa fa-search"></i> Search', ['class' => 'btn btn-primary search_qa_btn']) ?>
                         <?= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset',
-                            ['client-chat-qa/index'], ['class' => 'btn btn-outline-secondary']) ?>
+                            ['index'], ['class' => 'btn btn-outline-secondary']) ?>
                     </div>
                 </div>
             </div>
@@ -129,8 +131,7 @@ $js = <<<JS
     $(document).on('beforeSubmit', '#qa_search_form', function(event) {
         let btn = $(this).find('.search_qa_btn');
         
-        btn.html('<span class="spinner-border spinner-border-sm"></span> Loading')
-            .addClass('btn btn-default')
+        btn.html('<i class="fa fa-cog fa-spin"></i>  Loading')            
             .prop("disabled", true);
     });
 JS;

@@ -13,7 +13,7 @@ use yii\widgets\Pjax;
 /* @var sales\model\clientChat\entity\search\ClientChatSearch $searchModel */
 /* @var yii\data\ActiveDataProvider $dataProvider */
 
-$this->title = 'Client Chats QA';
+$this->title = 'Client Chats';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="client-chat-index">
@@ -21,7 +21,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
 
-    <?php Pjax::begin(); ?>
+    <?php Pjax::begin(['id' => 'client_chat_search_pjax', 'timeout' => 5000, 'enablePushState' => true]); ?>
+
     <?php echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
@@ -101,19 +102,26 @@ $this->params['breadcrumbs'][] = $this->title;
                 'relation' => 'cchOwnerUser',
             ],
             [
-                'label' => 'Lead/Case',
-                'value' => static function(ClientChat $model) {
-                    $out = '<span id="chat-info-lead-info">';
-                    foreach ($model->leads as $lead) {
-                        $out .= Yii::$app->formatter->format($lead, 'lead') . '<br />';
+                'attribute' => 'caseId',
+                'label' => 'Case',
+                'value' => static function (ClientChat $chat) {
+                    $out = '';
+                    foreach ($chat->cases as $case) {
+                        $out .= Yii::$app->formatter->format($case,  'case') . '<br />';
                     }
-                    $out .= '</span>';
-
-                    $out .= '<span id="chat-info-case-info">';
-                    foreach ($model->cases as $case) {
-                        $out .= Yii::$app->formatter->format($case, 'case') . '<br />';
+                    return $out;
+                },
+                'format' => 'raw',
+                'contentOptions' => ['style' => 'width:120px; white-space: normal;'],
+            ],
+            [
+                'attribute' => 'leadId',
+                'label' => 'Lead',
+                'value' => static function (ClientChat $chat) {
+                    $out = '';
+                    foreach ($chat->leads as $lead) {
+                        $out .= Yii::$app->formatter->format($lead,  'lead') . '<br />';
                     }
-                    $out .= '</span>';
                     return $out;
                 },
                 'format' => 'raw',

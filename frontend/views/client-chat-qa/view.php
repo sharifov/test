@@ -24,7 +24,7 @@ use yii\widgets\DetailView;
 /* @var ClientChatVisitorData|null $clientChatVisitorData */
 
 $this->title = $model->cch_id;
-$this->params['breadcrumbs'][] = ['label' => 'Client Chats QA', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Client Chats', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
