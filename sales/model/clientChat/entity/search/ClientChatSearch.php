@@ -193,4 +193,47 @@ class ClientChatSearch extends ClientChat
 
         return new ArrayDataProvider($paramsData);
     }
+
+    public function searchRealtimeClientChatActivity()
+    {
+        $queryChats = static::find()->joinWith(['cchOwnerUser', 'cchClient as c', 'cchProject as p', 'cchDep as d', 'cchChannel as ch']);
+        $queryChats->select([
+            'cch_id',
+            'username',
+            'CONCAT(c.first_name, " ", c.last_name ) as clientName',
+            'p.name as project',
+            'd.dep_name as department',
+            'ch.ccc_name as channel'
+            ]);
+        $queryChats->where(['cch_status_id' => ClientChat::STATUS_GENERATED]);
+        $queryChats->limit(10);
+        $chatCmd = $queryChats->createCommand();
+        $clientChats = $chatCmd->queryAll();
+
+        $queryMessages = ClientChatMessage::find();
+        $queryMessages->select([
+            'ccm_cch_id AS chatId',
+            'SUM(CASE WHEN ccm_user_id IS NOT NULL THEN 1 ELSE 0 END) AS outMsg',
+            'SUM(CASE WHEN ccm_user_id IS NULL THEN 1 ELSE 0 END) AS inMsg',
+        ]);
+        $queryMessages->groupBy('ccm_cch_id');
+        $msgCmd = $queryMessages->createCommand();
+        $chatMessages = $msgCmd->queryAll();
+
+        //var_dump($chatMessages); die();
+
+        foreach ($clientChats as $key => $chat){
+            $clientChats[$key]['outMsg'] = 0;
+            $clientChats[$key]['inMsg'] = 0;
+            foreach ($chatMessages as $message){
+                if ($chat['cch_id'] == $message['chatId'])
+                {
+                    $clientChats[$key]['outMsg'] = $message['outMsg'];
+                    $clientChats[$key]['inMsg'] = $message['inMsg'];
+                }
+            }
+        }
+
+        return $clientChats;
+    }
 }

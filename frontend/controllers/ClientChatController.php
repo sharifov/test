@@ -1,6 +1,7 @@
 <?php
 namespace frontend\controllers;
 
+use common\components\CentrifugoService;
 use common\components\CommunicationService;
 use common\models\Lead;
 use common\models\Quote;
@@ -596,6 +597,12 @@ class ClientChatController extends FController
     public function actionMonitor()
     {
         if(Yii::$app->request->isPost){
+            $searchModel = new ClientChatSearch();
+            $chatsData = $searchModel->searchRealtimeClientChatActivity();
+
+            CentrifugoService::sendMsg(json_encode([
+                'chatsData' => $chatsData,
+            ]), 'realtimeClientChatChannel#' . Auth::id());
 
         } else {
             $this->layout = '@frontend/themes/gentelella_v2/views/layouts/main_tv';

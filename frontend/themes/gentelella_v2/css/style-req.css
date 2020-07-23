@@ -5891,27 +5891,10 @@ input[disabled] + .radio-tab__text {
   color:red;
 }
 
-
-.block.client-chat-monitor-message-block{
-  margin-left: 400px;
-}
-/*
-.client-chat-monitor-info-block {
-  margin-left: 30px;
-}*/
-
-.client-chat-monitor-info-block {
-  position: relative;
-  top: 15px;
-  right: 315px;
-  width: 300px;
-  /*float: right;*/
+.table.table-condensed.table-client-chat-monitor {
+  margin-bottom: 0rem;
 }
 
-.timeline .block {
-  min-height: 131px;
-}
-
-.timeline .tags {
-  width: 250px;
+.table.table-condensed.table-client-chat-monitor td {
+  padding: 0.50rem;
 }
