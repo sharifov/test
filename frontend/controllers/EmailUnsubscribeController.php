@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use Yii;
 use common\models\EmailUnsubscribe;
 use common\models\search\EmailUnsubscribeSearch;
+use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -12,14 +13,14 @@ use yii\filters\VerbFilter;
 /**
  * EmailUnsubscribeController implements the CRUD actions for EmailUnsubscribe model.
  */
-class EmailUnsubscribeController extends Controller
+class EmailUnsubscribeController extends FController
 {
     /**
      * {@inheritdoc}
      */
     public function behaviors()
     {
-        return [
+        $behaviors = [
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
@@ -27,6 +28,7 @@ class EmailUnsubscribeController extends Controller
                 ],
             ],
         ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**
