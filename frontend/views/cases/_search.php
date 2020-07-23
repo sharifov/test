@@ -221,32 +221,32 @@ use yii\widgets\ActiveForm;
         </div>
     </div>
 
-    <div class="row">
+    <!--<div class="row">
         <div class="col-md-1">
-            <?= $form->field($model, 'callsQtyFrom')->textInput() ?>
+            <?/*= $form->field($model, 'callsQtyFrom')->textInput() */?>
         </div>
         <div class="col-md-1">
-            <?= $form->field($model, 'callsQtyTo')->textInput() ?>
+            <?/*= $form->field($model, 'callsQtyTo')->textInput() */?>
         </div>
         <div class="col-md-1">
-            <?= $form->field($model, 'smsQtyFrom')->textInput() ?>
+            <?/*= $form->field($model, 'smsQtyFrom')->textInput() */?>
         </div>
         <div class="col-md-1">
-            <?= $form->field($model, 'smsQtyTo')->textInput() ?>
+            <?/*= $form->field($model, 'smsQtyTo')->textInput() */?>
         </div>
         <div class="col-md-1">
-            <?= $form->field($model, 'emailsQtyFrom')->textInput() ?>
+            <?/*= $form->field($model, 'emailsQtyFrom')->textInput() */?>
         </div>
         <div class="col-md-1">
-            <?= $form->field($model, 'emailsQtyTo')->textInput() ?>
+            <?/*= $form->field($model, 'emailsQtyTo')->textInput() */?>
         </div>
         <div class="col-md-1">
-            <?= $form->field($model, 'chatsQtyFrom')->textInput() ?>
+            <?/*= $form->field($model, 'chatsQtyFrom')->textInput() */?>
         </div>
         <div class="col-md-1">
-            <?= $form->field($model, 'chatsQtyTo')->textInput() ?>
+            <?/*= $form->field($model, 'chatsQtyTo')->textInput() */?>
         </div>
-    </div>
+    </div>-->
 
     <div class="form-group text-center">
         <?= Html::submitButton('<i class="fa fa-search"></i> Search cases', ['class' => 'btn btn-primary search_cases_btn']) ?>

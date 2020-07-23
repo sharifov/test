@@ -437,7 +437,7 @@ class CasesSearch extends Cases
             );
         }
 
-        $query = $this->prepareCommunicationQuery($query);
+        //$query = $this->prepareCommunicationQuery($query);
 
         return $dataProvider;
     }
@@ -664,7 +664,7 @@ class CasesSearch extends Cases
             );
         }
 
-        $query = $this->prepareCommunicationQuery($query);
+        //$query = $this->prepareCommunicationQuery($query);
 
         return $dataProvider;
     }

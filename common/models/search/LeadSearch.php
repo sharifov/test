@@ -465,6 +465,7 @@ class LeadSearch extends Lead
             $query->andWhere(['IN', 'leads.id', $subQuery2]);
         }
 
+        /*
         if ($this->emailsQtyFrom !== '' || $this->emailsQtyTo !== '') {
             $query->leftJoin([
                 'emails' => Email::find()
@@ -633,6 +634,7 @@ class LeadSearch extends Lead
                 }
             }
         }
+        */
 
         return $dataProvider;
     }
