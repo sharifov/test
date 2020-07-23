@@ -825,11 +825,16 @@
 		}
 
 		> li {
-			margin-bottom: $sp2;
+			margin-bottom:0;
 			display: flex;
-			align-items: flex-end;
+			align-items: center;
 			padding: $sp $sp2;
 			border-bottom: 1px solid $widget-neutral-light;
+
+			&:last-child {
+				margin-bottom: 0;
+				border: 0 none;
+			}
 		}
 
 		.actions-list {
@@ -838,11 +843,11 @@
 			margin: 0 0 -3px;
 			padding: 0;
 
-			width: 25%;
+			width: 45%;
 			justify-content: flex-end;
 
 			&__option {
-				$size: 28px;
+				$size: 36px;
 				width: $size;
 				height: $size;
 				display: flex;
@@ -850,7 +855,7 @@
 				justify-content: center;
 
 				background-color: $section-bg;
-				border-radius: 50%;
+				border-radius: 4px;
 
 				margin-left: 10px;
 				cursor: pointer;
@@ -934,7 +939,7 @@
 
 		.form-group {
 			margin-bottom: 0px;
-			max-width: 75%;
+			max-width: 55%;
 			width: 100%;
 		}
 
@@ -1016,7 +1021,7 @@
 		}
 
 		&__body {
-			padding: 0 $sp2;
+			padding: 0;
 		}
 
 		&__actions {
@@ -1032,14 +1037,15 @@
 			font-weight: 500;
 			font-size: 20px;
 			line-height: $sp3;
-			color: $color-theme-text-dark;
+			color: $white;
 		}
 		&__user {
 			display: flex;
 			align-items: center;
 			flex-direction: column;
 			padding: 26px $sp4 0;
-			margin-bottom: 20px;
+			margin-bottom: 0px;
+			background: $screen-gradient;
 		}
 	}
 

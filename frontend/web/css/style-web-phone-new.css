@@ -561,26 +561,29 @@
     .phone-widget .contact-full-info select {
       appearance: initial; }
     .phone-widget .contact-full-info > li {
-      margin-bottom: 16px;
+      margin-bottom: 0;
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       padding: 8px 16px;
       border-bottom: 1px solid #F3F3F3; }
+      .phone-widget .contact-full-info > li:last-child {
+        margin-bottom: 0;
+        border: 0 none; }
     .phone-widget .contact-full-info .actions-list {
       display: flex;
       list-style-type: none;
       margin: 0 0 -3px;
       padding: 0;
-      width: 25%;
+      width: 45%;
       justify-content: flex-end; }
       .phone-widget .contact-full-info .actions-list__option {
-        width: 28px;
-        height: 28px;
+        width: 36px;
+        height: 36px;
         display: flex;
         align-items: center;
         justify-content: center;
         background-color: #f3f3f3;
-        border-radius: 50%;
+        border-radius: 4px;
         margin-left: 10px;
         cursor: pointer; }
         .phone-widget .contact-full-info .actions-list__option i {
@@ -622,7 +625,7 @@
       margin: 0; }
     .phone-widget .contact-full-info .form-group {
       margin-bottom: 0px;
-      max-width: 75%;
+      max-width: 55%;
       width: 100%; }
     .phone-widget .contact-full-info .form-control {
       border: 0 none;
@@ -670,7 +673,7 @@
     font-size: 11px;
     line-height: 18px; }
   .phone-widget .contact-modal-info__body {
-    padding: 0 16px; }
+    padding: 0; }
   .phone-widget .contact-modal-info__actions {
     width: 100%; }
     .phone-widget .contact-modal-info__actions .contact-options-list {
@@ -681,13 +684,14 @@
     font-weight: 500;
     font-size: 20px;
     line-height: 24px;
-    color: #363c45; }
+    color: #fff; }
   .phone-widget .contact-modal-info__user {
     display: flex;
     align-items: center;
     flex-direction: column;
     padding: 26px 32px 0;
-    margin-bottom: 20px; }
+    margin-bottom: 0px;
+    background: linear-gradient(180deg, #446586 0%, #364B61 100%); }
   .phone-widget .modal-messaging__contact-info {
     background: #66798b;
     text-align: center;
