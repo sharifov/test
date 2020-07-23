@@ -11,6 +11,7 @@ use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 ClientChatAsset::register($this);
 
 $accessUrl = \yii\helpers\Url::to('/client-chat/access-manage');
+$totalRequest = count($access);
 ?>
 
 
@@ -99,18 +100,26 @@ $accessUrl = \yii\helpers\Url::to('/client-chat/access-manage');
 <!--        <div class="fab_field">-->
 <!--        </div>-->
     </div>
-    <a id="_cc-access-wg" class="_cc-fab " style="<?= $access ? '' : 'background: #d5b24c' ?>">
+    <a id="_cc-access-wg" class="_cc-fab <?= $isPjax && $access ? 'is-visible' : '' ?>" style="<?= $access ? '' : 'background: #d5b24c' ?>">
         <i class="fa fa-comments-o"></i>
+        <?php if ($totalRequest): ?>
+            <span class="_cc_total_request_wrapper">
+                <?= $totalRequest ?>
+            </span>
+            <span class="circle" style="animation-delay: 0s"></span>
+            <span class="circle" style="animation-delay: 1s"></span>
+            <span class="circle" style="animation-delay: 2s"></span>
+            <span class="circle" style="animation-delay: 3s"></span>
+        <?php endif; ?>
     </a>
 </div>
 <?php yii\widgets\Pjax::end() ?>
 
 <?php
-$accessExist = count($access);
 $js = <<<JS
     
 let _ccWgStatus = localStorage.getItem('_cc_wg_status');
-let _access = {$accessExist} > 0 ? true : false;
+let _access = {$totalRequest} > 0 ? true : false;
 if (_ccWgStatus === 'true' && _access) {
     toggleClientChatAccess();
 }
