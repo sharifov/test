@@ -858,18 +858,20 @@ class EmployeeController extends FController
     {
         $user_id = Yii::$app->request->get('id');
         $user = Employee::findOne($user_id);
-        if($user) {
-            //VarDumper::dump($user->attributes, 10, true);
-            //exit;
+        if ($user) {
+            if ($user->isOnlyAdmin() || $user->isSuperAdmin()) {
+                return $this->redirect(['site/index']);
+            }
 
-            if(Yii::$app->user->login($user)) {
+            if (Yii::$app->user->login($user)) {
                 LoginForm::sendWsIdentityCookie(Yii::$app->user->identity, 0);
             } else {
-                echo 'Not logined'; exit;
+                echo 'Not logined';
+                exit;
             }
             //$this->redirect(['site/index']);
         }
-        $this->redirect(['site/index']);
+        return $this->redirect(['site/index']);
     }
 
     /**

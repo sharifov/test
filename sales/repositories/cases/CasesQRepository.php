@@ -69,7 +69,7 @@ class CasesQRepository
             $conditions = $this->freeCase();
         }
 
-        $query->andWhere($this->createSubQuery($user->id, $conditions));
+        $query->andWhere($this->createSubQuery($user->id, $conditions, $checkDepPermission = false));
 
         return $query;
     }
@@ -107,7 +107,7 @@ class CasesQRepository
             ['cs_status' => CasesStatus::STATUS_SOLVED],
         ];
 
-        $query->andWhere($this->createSubQuery($user->id, $condition));
+        $query->andWhere($this->createSubQuery($user->id, $condition, $checkDepPermission = false));
 
         return $query;
     }
@@ -135,7 +135,7 @@ class CasesQRepository
 
         $conditions = [];
 
-        $query->andWhere($this->createSubQuery($user->id, $conditions));
+        $query->andWhere($this->createSubQuery($user->id, $conditions, $checkDepPermission = false));
 
         return $query;
     }
@@ -173,7 +173,7 @@ class CasesQRepository
             ];
         }
 
-        $query->andWhere($this->createSubQuery($user->id, $conditions));
+        $query->andWhere($this->createSubQuery($user->id, $conditions, $checkDepPermission = false));
 
         return $query;
     }
@@ -211,7 +211,7 @@ class CasesQRepository
             ];
         }
 
-        $query->andWhere($this->createSubQuery($user->id, $conditions));
+        $query->andWhere($this->createSubQuery($user->id, $conditions, $checkDepPermission = false));
 
         return $query;
     }
@@ -239,7 +239,7 @@ class CasesQRepository
 
         $conditions = [];
 
-        $query->andWhere($this->createSubQuery($user->id, $conditions));
+        $query->andWhere($this->createSubQuery($user->id, $conditions, $checkDepPermission = false));
 
         return $query;
     }
@@ -338,24 +338,22 @@ class CasesQRepository
         ];
     }
 
-    /**
-     * @param $userId
-     * @param $conditions
-     * @return array
-     */
-    private function createSubQuery($userId, $conditions): array
+    private function createSubQuery($userId, $conditions, $checkDepPermission = true): array
     {
+        $depConditions = [];
+        if ($checkDepPermission) {
+            $depConditions = $this->inDepartment($userId);
+        }
+
         return [
             'or',
             $this->isOwner($userId),
             [
                 'and',
                 $this->inProject($userId),
-                $this->inDepartment($userId),
+                $depConditions,
                 $conditions
             ]
         ];
     }
-
-
 }

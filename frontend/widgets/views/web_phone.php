@@ -301,18 +301,6 @@ use yii\helpers\Html;
         }
     }
 
-    function createNotify(title, message, type) {
-        new PNotify({
-            title: title,
-            type: type,
-            text: message,
-            icon: true,
-            hide: true,
-            delay: 4000,
-            mouse_reset: false
-        });
-    }
-
     var webPhoneParams = {};
     var call_acc_sid = '';
     var isJoinCall = false;
@@ -575,6 +563,7 @@ use yii\helpers\Html;
         if (connection) {
             console.log("button-reject: " + JSON.stringify(connection.parameters));
             connection.reject();
+            incomingSoundOff();
                 $.get(ajaxSaveCallUrl + '?sid=' + connection.parameters.CallSid, function (r) {
                 console.log(r);
             });
@@ -641,6 +630,7 @@ use yii\helpers\Html;
 
     // let currentConnection;
 
+    var connectCallSid = null;
 
     function initDevice() {
         clearLog();
@@ -654,6 +644,9 @@ use yii\helpers\Html;
                 //console.log('Token: ' + data.token);
                 device = new Twilio.Device(data.token, {codecPreferences: ['opus', 'pcmu'], closeProtection: true, enableIceRestart: true, enableRingingState: false, debug: false});
 
+                device.audio.incoming(false);
+                device.audio.disconnect(false);
+
                 //console.log([data, device]);
                 device.on('ready', function (device) {
                     log('Twilio.Device Ready!');
@@ -663,6 +656,7 @@ use yii\helpers\Html;
                 device.on('error', function (error) {
                     updateAgentStatus(connection, false, 1);
                     log('Twilio.Device Error: ' + error.message);
+                    incomingSoundOff();
                 });
 
                 device.on('connect', function (conn) {
@@ -739,7 +733,10 @@ use yii\helpers\Html;
                         PhoneWidgetCall.updateConnection(conn);
                     }
 
+                    connectCallSid = connection.parameters.CallSid;
                     setActiveConnection(conn);
+                    incomingSoundOff();
+                    soundConnect();
                 });
 
                 device.on('disconnect', function (conn) {
@@ -762,6 +759,11 @@ use yii\helpers\Html;
                     volumeIndicators.style.display = 'none';
                     cleanPhones();
 
+                    if (connectCallSid === conn.parameters.CallSid) {
+                        soundDisconnect();
+                    }
+
+                    incomingSoundOff();
                 });
 
                 // device.on('ringing', function (conn) {
@@ -770,15 +772,19 @@ use yii\helpers\Html;
                 // });
 
                 device.on('incoming', function (conn) {
+                    // console.log({"action":"incoming", "cid":conn.parameters.CallSid});
                     connection = conn;
                     $('#call-controls2').hide();
+                    incomingSoundOff();
                     if ("autoAccept" in connection.message && connection.message.autoAccept === 'false') {
                         $('#call-controls2').show();
+                        startTimerSoundIncomingCall();
                     } else {
                         if (document.visibilityState === 'visible') {
                             conn.accept();
                         } else {
                             $('#call-controls2').show();
+                            startTimerSoundIncomingCall();
                         }
                     }
 
@@ -833,11 +839,13 @@ use yii\helpers\Html;
                     saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To, 'canceled');
                     $('#call-controls2').hide();
                     $('#btn-group-id-redirect').hide();
+                    incomingSoundOff();
                 });
 
                 device.on('offline', function (device) {
                     console.log('Phone device: status Offline');
                     // createNotify('Status Offline', 'Phone device: status Offline', 'error');
+                    incomingSoundOff();
                 });
 
                 //setClientNameUI(data.client);
@@ -861,6 +869,20 @@ use yii\helpers\Html;
                 log('Could not get a token from server!');
                 createNotify('Call Token error!', 'Could not get a token from server!', 'error');
             });
+    }
+
+    var incomingSoundInterval = null;
+
+    function startTimerSoundIncomingCall() {
+        incomingSoundInterval = setInterval(function () {
+            incomingAudio.play();
+            clearInterval(incomingSoundInterval);
+        }, 2500);
+    }
+
+    function incomingSoundOff() {
+        clearInterval(incomingSoundInterval);
+        incomingAudio.pause();
     }
 
     //$(function () {

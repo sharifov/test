@@ -1,6 +1,7 @@
 <?php
 
 use common\models\CaseSale;
+use common\models\Department;
 use common\models\Employee;
 use frontend\widgets\multipleUpdate\button\MultipleUpdateButtonWidget;
 use sales\access\EmployeeDepartmentAccess;
@@ -153,7 +154,8 @@ $gridId = 'cases-grid-id';
                 'value' => static function (Cases $model) {
                     return $model->department ? $model->department->dep_name : '';
                 },
-                'filter' => EmployeeDepartmentAccess::getDepartments()
+//                'filter' => EmployeeDepartmentAccess::getDepartments()
+                'filter' => Department::getList(),
             ],
             [
                 'attribute' => 'cs_category_id',

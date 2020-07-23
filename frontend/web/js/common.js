@@ -110,3 +110,15 @@ function soundNotification(fileName = 'button_tiny', volume = 0.3) {
     audio.volume = volume;
     audio.play();
 }
+
+function soundDisconnect() {
+    soundNotification('disconnect_sound', 0.3);
+}
+
+function soundConnect() {
+    soundNotification('connect_sound', 0.3);
+}
+
+let incomingAudio = new Audio('/js/sounds/incoming_sound.mp3');
+incomingAudio.volume = 0.3;
+incomingAudio.loop = true;

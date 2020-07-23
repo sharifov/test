@@ -21,6 +21,18 @@ PNotify.desktop.permission();
     volume: 0.8
 })*/
 
+function createNotify (title, message, type) {
+    new PNotify({
+        title: title,
+        type: type,
+        text: message,
+        icon: true,
+        hide: true,
+        delay: 4000,
+        mouse_reset: false
+    });
+}
+
 $("document").ready(function(){
     $(document).on('click', '.btn-recording_url', function() {
         let modal = $('#modal-lg');

@@ -240,7 +240,7 @@ class CasesSearch extends Cases
     {
         $query = self::find()->with(['project', 'department', 'category']);
 
-        $query->andWhere(['cs_dep_id' => array_keys(EmployeeDepartmentAccess::getDepartments())]);
+//        $query->andWhere(['cs_dep_id' => array_keys(EmployeeDepartmentAccess::getDepartments())]);
         $query->andWhere(['cs_project_id' => array_keys(EmployeeProjectAccess::getProjects())]);
 
         $dataProvider = new ActiveDataProvider([
@@ -451,7 +451,7 @@ class CasesSearch extends Cases
     {
         $query = self::find()->with(['project', 'department', 'category']);
 
-        $query->andWhere(['cs_dep_id' => array_keys(EmployeeDepartmentAccess::getDepartments())]);
+//        $query->andWhere(['cs_dep_id' => array_keys(EmployeeDepartmentAccess::getDepartments())]);
         $query->andWhere(['cs_project_id' => array_keys(EmployeeProjectAccess::getProjects())]);
 
         $dataProvider = new ActiveDataProvider([

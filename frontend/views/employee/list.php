@@ -198,7 +198,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                         );
                     },
                     'switch' => static function (\common\models\Employee $model, $key, $index) {
-                        return Auth::can('/employee/switch');
+                        return !$model->isOnlyAdmin() && !$model->isSuperAdmin() && Auth::can('/employee/switch');
                     },
                 ],
                 'buttons' => [
