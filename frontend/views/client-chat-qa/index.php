@@ -34,6 +34,20 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'cch_rid',
             [
+                'label' => 'Messages',
+                'value' => static function (ClientChat $model) {
+                    $count = ClientChatMessage::countByChatId($model->cch_id);
+                    return Html::a('<span class="glyphicon glyphicon-comment"></span> <sup>' . $count . '</sup>',
+                        ['/client-chat-qa/view', 'id' => $model->cch_id, '#' => 'messages'],
+                        [
+                            'target' => '_blank',
+                            'data-pjax' => 0,
+                            'title' => 'Messages',
+                        ]);
+                },
+                'format' => 'raw',
+            ],
+            [
                 'attribute' => 'cch_ccr_id',
                 'value' => static function (ClientChat $model) {
                     return $model->cch_ccr_id ?
@@ -108,11 +122,11 @@ $this->params['breadcrumbs'][] = $this->title;
             [
 				'class' => DateTimeColumn::class,
 				'attribute' => 'cch_created_dt',
-				'format' => 'byUserDateTime'
+				'format' => 'byUserDateTime',
             ],
             [
                 'class' => ActionColumn::class,
-                'template' => '{view}<br />{room}<br />{messages}',
+                'template' => '{view}<br />{room}',
                 'contentOptions' => ['style' => 'width:50px; white-space: normal;'],
                 'buttons' => [
                     'view' => static function ($url, ClientChat $model) {
@@ -131,17 +145,6 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'target' => '_blank',
                                 'data-pjax' => 0,
                                 'title' => 'Room',
-                            ]);
-                    },
-                    'messages' => static function ($url, ClientChat $model) {
-
-                        $count = ClientChatMessage::countByChatId($model->cch_id);
-                        return Html::a('<span class="glyphicon glyphicon-comment"></span> <sup>' . $count . '</sup>',
-                            ['/client-chat-qa/view', 'id' => $model->cch_id, '#' => 'messages'],
-                            [
-                                'target' => '_blank',
-                                'data-pjax' => 0,
-                                'title' => 'Messages',
                             ]);
                     },
                 ],

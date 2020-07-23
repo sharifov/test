@@ -18,10 +18,10 @@ $userRcAuthToken = Auth::user()->userProfile ? Auth::user()->userProfile->up_rc_
 $rcUrl = Yii::$app->rchat->host  . '/live/' . urlencode($clientChat->cch_rid) . '?layout=embedded&readonly';
 ?>
 
-<h5><?= Html::encode($this->title) ?></h5>
-
 <div class="row room_box">
+    <div class="col-md-3"></div>
     <div class="col-md-6">
+        <h5><?= Html::encode($this->title) ?></h5>
         <div id="_rc-iframe-wrapper" style="height: 100%; width: 100%; position: relative; min-height: 740px;">
             <?php if ($clientChat && !$clientChat->isClosed()): ?>
                 <iframe
@@ -34,5 +34,5 @@ $rcUrl = Yii::$app->rchat->host  . '/live/' . urlencode($clientChat->cch_rid) . 
             <?php endif; ?>
         </div>
     </div>
-
+    <div class="col-md-3"></div>
 </div>
