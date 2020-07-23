@@ -17,7 +17,7 @@ $accessUrl = \yii\helpers\Url::to('/client-chat/access-manage');
 <?php yii\widgets\Pjax::begin(['id' => 'client-chat-box-pjax', 'timeout' => 10000, 'enablePushState' => false, 'options' => []])?>
 <div class="_cc-fabs">
     <div class="_cc-box <?= $isPjax && $access ? 'is-visible' : '' ?>">
-        <div class="_сс-box-header <?= $access ? 'active' : '' ?>">
+        <div class="_cc-box-header <?= $access ? 'active' : '' ?>">
             <div class="_cc-box-option">
                 <div class="header_img">
 					<?=\yii\helpers\Html::img('/img/user.png')?>
@@ -108,9 +108,24 @@ $accessUrl = \yii\helpers\Url::to('/client-chat/access-manage');
 <?php
 $accessExist = count($access);
 $js = <<<JS
- if ({$accessExist}) {
+    
+let _ccWgStatus = localStorage.getItem('_cc_wg_status');
+let _access = {$accessExist} > 0 ? true : false;
+if (_ccWgStatus === 'true' && _access) {
     toggleClientChatAccess();
- }
+}
+
+window.addEventListener('storage', function (event) {
+    if (event.key === '_cc_wg_status') {
+        let _ccWgStatus = localStorage.getItem('_cc_wg_status');
+        if (_ccWgStatus === 'true') {
+            toggleClientChatAccess(true);
+        } else {
+            toggleClientChatAccess(false);
+        }
+    }
+});
+
 $("#client-chat-box-pjax").on("pjax:end", function() {
     window.enableTimer();
 });

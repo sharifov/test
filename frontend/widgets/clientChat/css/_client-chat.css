@@ -21,7 +21,7 @@
 ._cc-access-request-item:last-child {
     border-bottom: none;
 }
-._сс-box-header.active {
+._cc-box-header.active {
     background-color: #78c286;
 }
 
@@ -84,7 +84,7 @@
     display: block;
 }
 
-._сс-box-header {
+._cc-box-header {
     font-size: 13px;
     font-weight: 500;
     color: #f3f3f3;

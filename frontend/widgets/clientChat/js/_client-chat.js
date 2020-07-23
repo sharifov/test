@@ -1,11 +1,26 @@
 $(document).on('click', '#_cc-access-wg', function () {
-    toggleClientChatAccess();
+    let promise = new Promise( (resolve, reject) => {
+        toggleClientChatAccess();
+        resolve();
+    });
+    promise.then( () => {
+        localStorage.setItem('_cc_wg_status', $('._cc-box').hasClass('is-visible'))}
+    );
 });
 
-function toggleClientChatAccess() {
-    $('._cc-box').toggleClass('is-visible');
-    $('.fab').toggleClass('is-visible');
-    window.enableTimer();
+function toggleClientChatAccess(status) {
+
+    if (status === true) {
+        $('._cc-box').addClass('is-visible');
+        $('.fab').addClass('is-visible');
+        window.enableTimer();
+    } else if (status === false) {
+        $('._cc-box').removeClass('is-visible');
+        $('.fab').removeClass('is-visible');
+    } else {
+        $('._cc-box').toggleClass('is-visible');
+        $('.fab').toggleClass('is-visible');
+    }
 }
 
 $(document).on('click', '._cc-access-action', function (e) {
