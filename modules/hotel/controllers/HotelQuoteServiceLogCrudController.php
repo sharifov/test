@@ -2,9 +2,11 @@
 
 namespace modules\hotel\controllers;
 
+use frontend\controllers\FController;
 use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLog;
 use modules\hotel\src\entities\hotelQuoteServiceLog\search\HotelQuoteServiceLogCrudSearch;
 use Yii;
+use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -12,14 +14,14 @@ use yii\filters\VerbFilter;
 /**
  * HotelQuoteServiceLogCrudController implements the CRUD actions for HotelQuoteServiceLog model.
  */
-class HotelQuoteServiceLogCrudController extends Controller
+class HotelQuoteServiceLogCrudController extends FController
 {
     /**
      * {@inheritdoc}
      */
     public function behaviors()
     {
-        return [
+        $behaviors = [
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
@@ -27,6 +29,7 @@ class HotelQuoteServiceLogCrudController extends Controller
                 ],
             ],
         ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**
