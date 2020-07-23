@@ -3,7 +3,7 @@
 namespace modules\flight\models;
 
 use common\models\Airline;
-use common\models\Airport;
+use common\models\Airports;
 use modules\flight\src\entities\flightQuoteSegment\serializer\FlightQuoteSegmentSerializer;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentDTO;
 use Yii;
@@ -42,8 +42,8 @@ use Yii;
  * @property FlightQuoteSegmentPaxBaggageCharge[] $flightQuoteSegmentPaxBaggageCharges
  * @property FlightQuoteSegmentStop[] $flightQuoteSegmentStops
  * @property Airline $marketingAirline
- * @property Airport $departureAirport
- * @property Airport $arrivalAirport
+ * @property Airports $departureAirport
+ * @property Airports $arrivalAirport
  */
 class FlightQuoteSegment extends \yii\db\ActiveRecord
 {
@@ -144,7 +144,7 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
      */
     public function getDepartureAirport()
     {
-        return $this->hasOne(Airport::class, ['iata' => 'fqs_departure_airport_iata']);
+        return $this->hasOne(Airports::class, ['iata' => 'fqs_departure_airport_iata']);
     }
 
     /**
@@ -152,7 +152,7 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
      */
     public function getArrivalAirport()
     {
-        return $this->hasOne(Airport::class, ['iata' => 'fqs_arrival_airport_iata']);
+        return $this->hasOne(Airports::class, ['iata' => 'fqs_arrival_airport_iata']);
     }
 
     /**

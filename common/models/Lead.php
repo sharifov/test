@@ -2504,7 +2504,7 @@ class Lead extends ActiveRecord implements Objectable
 
                 if(!$this->offset_gmt && $this->leadFlightSegments) {
                     $firstSegment = $this->leadFlightSegments[0];
-                    $airport = Airport::findIdentity($firstSegment->origin);
+                    $airport = Airports::findByIata($firstSegment->origin);
                     if ($airport && $airport->dst) {
                         $offset = $airport->dst;
                         if(is_numeric($offset)) {
@@ -3120,7 +3120,7 @@ Reason: {reason}',
             $offset = $model->offset_gmt;
         } elseif (count($model->leadFlightSegments)) {
             $firstSegment = $model->leadFlightSegments[0];
-            $airport = Airport::findIdentity($firstSegment->origin);
+            $airport = Airports::findByIata($firstSegment->origin);
             if ($airport !== null && !empty($airport->dst)) {
                 $offset = $airport->dst;
             }
@@ -3156,7 +3156,7 @@ Reason: {reason}',
             $offset = str_replace('.', ':', $this->offset_gmt);
         } elseif ($this->leadFlightSegments) {
             $firstSegment = $this->leadFlightSegments[0] ?? null;
-            if ($firstSegment && ($airport = Airport::findIdentity($firstSegment->origin)) && $airport->dst) {
+            if ($firstSegment && ($airport = Airports::findByIata($firstSegment->origin)) && $airport->dst) {
                 $offset = $airport->dst;
             }
         }
@@ -3200,7 +3200,7 @@ Reason: {reason}',
         } elseif ($this->leadFlightSegments) {
 
             $firstSegment = $this->leadFlightSegments[0];
-            $airport = Airport::findIdentity($firstSegment->origin);
+            $airport = Airports::findByIata($firstSegment->origin);
             if ($airport && $airport->dst) {
                 $offset = $airport->dst;
                 //$offset_gmt = $airport->dst;
@@ -3720,12 +3720,12 @@ Reason: {reason}',
 
         $view = sprintf('/tmpEmail/quote/%s', $fileName);
 
-        $airport = Airport::findIdentity($this->leadFlightSegments[0]->origin);
+        $airport = Airports::findByIata($this->leadFlightSegments[0]->origin);
         $origin = ($airport !== null)
             ? $airport->city :
             $this->leadFlightSegments[0]->origin;
 
-        $airport = Airport::findIdentity($this->leadFlightSegments[0]->destination);
+        $airport = Airports::findByIata($this->leadFlightSegments[0]->destination);
         $destination = ($airport !== null)
             ? $airport->city
             : $this->leadFlightSegments[0]->destination;
@@ -3863,7 +3863,7 @@ Reason: {reason}',
             $departIATA = $firstSegment->origin;
             $arriveIATA = $lastSegment->destination;
 
-            $departAirport = Airport::find()->where(['iata' => $firstSegment->origin])->one();
+            $departAirport = Airports::find()->where(['iata' => $firstSegment->origin])->one();
             if($departAirport) {
                 $departCity = $departAirport->city;
             } else {
@@ -3871,7 +3871,7 @@ Reason: {reason}',
             }
 
 
-            $arriveAirport = Airport::find()->where(['iata' => $firstSegment->destination])->one();
+            $arriveAirport = Airports::find()->where(['iata' => $firstSegment->destination])->one();
             if($arriveAirport) {
                 $arriveCity = $arriveAirport->city;
             } else {
@@ -3892,8 +3892,8 @@ Reason: {reason}',
 
             foreach($leadSegments as $segmentModel) {
 
-                $destAirport = Airport::find()->where(['iata' => $segmentModel->destination])->one();
-                $origAirport = Airport::find()->where(['iata' => $segmentModel->origin])->one();
+                $destAirport = Airports::find()->where(['iata' => $segmentModel->destination])->one();
+                $origAirport = Airports::find()->where(['iata' => $segmentModel->origin])->one();
 
                 $requestSegments[] = [
                     'departureDate' => $segmentModel->departure,

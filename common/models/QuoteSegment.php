@@ -40,8 +40,8 @@ use yii\db\ActiveRecord;
  * @property QuoteSegmentBaggage[] $quoteSegmentBaggages
  * @property QuoteSegmentBaggageCharge[] $quoteSegmentBaggageCharges
  * @property QuoteSegmentStop[] $quoteSegmentStops
- * @property Airport $arrivalAirport
- * @property Airport $departureAirport
+ * @property Airports $arrivalAirport
+ * @property Airports $departureAirport
  * @property Airline $marketingAirline
  * @property Airline $operatingAirline
  */
@@ -98,8 +98,8 @@ class QuoteSegment extends \yii\db\ActiveRecord
             [['qs_operating_airline'], 'string', 'max' => 100],
             [['qs_fare_code'], 'string', 'max' => 15],
             [['qs_key'], 'string', 'max' => 255],
-            [['qs_arrival_airport_code'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['qs_arrival_airport_code' => 'iata']],
-            [['qs_departure_airport_code'], 'exist', 'skipOnError' => true, 'targetClass' => Airport::class, 'targetAttribute' => ['qs_departure_airport_code' => 'iata']],
+            [['qs_arrival_airport_code'], 'exist', 'skipOnError' => true, 'targetClass' => Airports::class, 'targetAttribute' => ['qs_arrival_airport_code' => 'iata']],
+            [['qs_departure_airport_code'], 'exist', 'skipOnError' => true, 'targetClass' => Airports::class, 'targetAttribute' => ['qs_departure_airport_code' => 'iata']],
             [['qs_trip_id'], 'exist', 'skipOnError' => true, 'targetClass' => QuoteTrip::class, 'targetAttribute' => ['qs_trip_id' => 'qt_id']],
             [['qs_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['qs_updated_user_id' => 'id']],
             [['qs_recheck_baggage'], 'boolean']
@@ -162,7 +162,7 @@ class QuoteSegment extends \yii\db\ActiveRecord
      */
     public function getArrivalAirport()
     {
-        return $this->hasOne(Airport::class, ['iata' => 'qs_arrival_airport_code']);
+        return $this->hasOne(Airports::class, ['iata' => 'qs_arrival_airport_code']);
     }
 
     /**
@@ -170,7 +170,7 @@ class QuoteSegment extends \yii\db\ActiveRecord
      */
     public function getDepartureAirport()
     {
-        return $this->hasOne(Airport::class, ['iata' => 'qs_departure_airport_code']);
+        return $this->hasOne(Airports::class, ['iata' => 'qs_departure_airport_code']);
     }
 
     /**

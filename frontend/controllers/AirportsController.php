@@ -3,21 +3,20 @@
 namespace frontend\controllers;
 
 use Yii;
-use common\models\Setting;
-use common\models\search\SettingSearch;
-use yii\filters\AccessControl;
+use common\models\Airports;
+use common\models\search\AirportsSearch;
+use frontend\controllers\FController;
 use yii\helpers\ArrayHelper;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
- * SettingController implements the CRUD actions for Setting model.
+ * AirportsController implements the CRUD actions for Airports model.
  */
-class SettingController extends FController
+class AirportsController extends FController
 {
     /**
-     * {@inheritdoc}
+     * @return array
      */
     public function behaviors()
     {
@@ -25,7 +24,7 @@ class SettingController extends FController
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
-                    'delete' => ['POST'],
+                    'delete' => ['POST']
                 ],
             ],
         ];
@@ -33,12 +32,12 @@ class SettingController extends FController
     }
 
     /**
-     * Lists all Setting models.
+     * Lists all Airports models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new SettingSearch();
+        $searchModel = new AirportsSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -48,20 +47,8 @@ class SettingController extends FController
     }
 
     /**
-     * @return string
-     */
-    public function actionEnv()
-    {
-        return $this->render('env', [
-
-        ]);
-    }
-
-
-
-    /**
-     * Displays a single Setting model.
-     * @param integer $id
+     * Displays a single Airports model.
+     * @param string $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
@@ -73,16 +60,16 @@ class SettingController extends FController
     }
 
     /**
-     * Creates a new Setting model.
+     * Creates a new Airports model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new Setting();
+        $model = new Airports();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->s_id]);
+            return $this->redirect(['view', 'id' => $model->iata]);
         }
 
         return $this->render('create', [
@@ -91,9 +78,9 @@ class SettingController extends FController
     }
 
     /**
-     * Updates an existing Setting model.
+     * Updates an existing Airports model.
      * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
+     * @param string $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
@@ -102,7 +89,7 @@ class SettingController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->s_id]);
+            return $this->redirect(['view', 'id' => $model->iata]);
         }
 
         return $this->render('update', [
@@ -111,9 +98,9 @@ class SettingController extends FController
     }
 
     /**
-     * Deletes an existing Setting model.
+     * Deletes an existing Airports model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
+     * @param string $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
@@ -124,28 +111,54 @@ class SettingController extends FController
         return $this->redirect(['index']);
     }
 
+
     /**
      * @return \yii\web\Response
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\httpclient\Exception
      */
-    public function actionClean(): \yii\web\Response
+    public function actionSynchronization()
     {
-        $cache = Yii::$app->cache;
-        $cache->delete('site_settings');
-        Yii::$app->session->setFlash('success', 'Cache is flushed');
+        $result = Airports::synchronization(10000);
 
-        return $this->redirect(Yii::$app->request->referrer ?? ['index']);
+        if($result) {
+            if($result['error']) {
+                Yii::$app->getSession()->setFlash('error', $result['error']);
+            } else {
+
+                if($result['created']) {
+                    $message = 'Synchronization successful<br>';
+                    $message .= 'Created Airports (' . count($result['created']) . '): "'.implode(', ', $result['created']);
+                    Yii::$app->getSession()->setFlash('success', $message);
+                }
+                if($result['updated']) {
+                    $message = 'Synchronization successful<br>';
+                    $message .= 'Updated Airports (' . count($result['updated']) . '): "'.implode(', ', $result['updated']);
+                    Yii::$app->getSession()->setFlash('warning', $message);
+                }
+                if($result['errored']) {
+                    $message = 'Synchronization error<br>';
+                    $message .= 'Errored Airports (' . count($result['errored']) . '): "'.implode(', ', $result['errored']);
+                    Yii::$app->getSession()->setFlash('error', $message);
+                }
+
+
+            }
+        }
+
+        return $this->redirect(['index']);
     }
 
     /**
-     * Finds the Setting model based on its primary key value.
+     * Finds the Airports model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return Setting the loaded model
+     * @param string $id
+     * @return Airports the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = Setting::findOne($id)) !== null) {
+        if (($model = Airports::findOne($id)) !== null) {
             return $model;
         }
 

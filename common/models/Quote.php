@@ -829,11 +829,11 @@ class Quote extends \yii\db\ActiveRecord
 					/*if ($depDateTime > $arrDateTime) {
 						$arrDateTime->add(\DateInterval::createFromDateString('+1 year'));
 					}*/
-					$depCity = Airport::findIdentity($depAirport);
+					$depCity = Airports::findByIata($depAirport);
 					/*$timezone = ($depCity !== null && !empty($depCity->timezone))
 					? new \DateTimeZone($depCity->timezone)
 					: new \DateTimeZone("UTC");*/
-					$arrCity = Airport::findIdentity($arrAirport);
+					$arrCity = Airports::findByIata($arrAirport);
 					/*$timezone = ($arrCity !== null && !empty($arrCity->timezone))
 						? new \DateTimeZone($arrCity->timezone)
 						: new \DateTimeZone("UTC");*/
@@ -1061,11 +1061,11 @@ class Quote extends \yii\db\ActiveRecord
 				/*if ($depDateTime > $arrDateTime) {
 					$arrDateTime->add(\DateInterval::createFromDateString('+1 year'));
 				}*/
-				$depCity = Airport::findIdentity($depAirport);
+				$depCity = Airports::findByIata($depAirport);
 				/*$timezone = ($depCity !== null && !empty($depCity->timezone))
 				? new \DateTimeZone($depCity->timezone)
 				: new \DateTimeZone("UTC");*/
-				$arrCity = Airport::findIdentity($arrAirport);
+				$arrCity = Airports::findByIata($arrAirport);
 				/*$timezone = ($arrCity !== null && !empty($arrCity->timezone))
 					? new \DateTimeZone($arrCity->timezone)
 					: new \DateTimeZone("UTC");*/
@@ -1125,8 +1125,8 @@ class Quote extends \yii\db\ActiveRecord
             $firstSegment = $trip['segments'][0];
             $lastSegment = $trip['segments'][count($trip['segments']) - 1];
 
-            $depCity = Airport::findIdentity($firstSegment['qs_departure_airport_code']);
-            $arrCity = Airport::findIdentity($lastSegment['qs_arrival_airport_code']);
+            $depCity = Airports::findByIata($firstSegment['qs_departure_airport_code']);
+            $arrCity = Airports::findByIata($lastSegment['qs_arrival_airport_code']);
             $arrivalTime = new \DateTime($lastSegment['qs_arrival_time']);
             $departureTime = new \DateTime($firstSegment['qs_departure_time']);
 
@@ -1796,8 +1796,8 @@ class Quote extends \yii\db\ActiveRecord
             $firstSegment = $trip['segments'][0];
             $lastSegment = $trip['segments'][count($trip['segments']) - 1];
 
-            $depCity = Airport::findIdentity($firstSegment['departureAirportCode']);
-            $arrCity = Airport::findIdentity($lastSegment['arrivalAirportCode']);
+            $depCity = Airports::findByIata($firstSegment['departureAirportCode']);
+            $arrCity = Airports::findByIata($lastSegment['arrivalAirportCode']);
 
             $arrDt = new \DateTime($lastSegment['arrivalTime']);
             $depDt = new \DateTime($firstSegment['departureTime']);
@@ -1850,8 +1850,8 @@ class Quote extends \yii\db\ActiveRecord
             $firstSegment = $trip['segments'][0];
             $lastSegment = $trip['segments'][count($trip['segments']) - 1];
 
-            $depCity = Airport::findIdentity($firstSegment['departureAirport']);
-            $arrCity = Airport::findIdentity($lastSegment['arrivalAirport']);
+            $depCity = Airports::findByIata($firstSegment['departureAirport']);
+            $arrCity = Airports::findByIata($lastSegment['arrivalAirport']);
 
             if ($depCity !== null && $arrCity !== null && $depCity->dst != $arrCity->dst) {
                 $flightDuration = ($lastSegment['arrivalDateTime']->getTimestamp() - $firstSegment['departureDateTime']->getTimestamp()) / 60;
@@ -1863,8 +1863,8 @@ class Quote extends \yii\db\ActiveRecord
             foreach ($trip['segments'] as $segment) {
                 $routing[] = $segment['arrivalAirport'];
             }
-            $src = Airport::findIdentity($routing[min(array_keys($routing))]);
-            $dst = Airport::findIdentity($routing[max(array_keys($routing))]);
+            $src = Airports::findByIata($routing[min(array_keys($routing))]);
+            $dst = Airports::findByIata($routing[max(array_keys($routing))]);
             $trips[$key]['routing'] = implode('-', $routing);
             $trips[$key]['title'] = sprintf('%s - %s',
                 ($src !== null) ? $src->city : $src,

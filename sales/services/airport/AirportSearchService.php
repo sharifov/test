@@ -2,7 +2,7 @@
 
 namespace sales\services\airport;
 
-use common\models\Airport;
+use common\models\Airports;
 use sales\repositories\airport\AirportRepository;
 
 /**
@@ -31,7 +31,7 @@ class AirportSearchService
         $out = [];
         if ($term) {
             $term = mb_strtolower(trim($term));
-            /** @var Airport[] $airports */
+            /** @var Airports[] $airports */
             $airports = $this->airports->getListForSearch($term);
             $data = [];
             foreach ($airports as $key => $airport) {

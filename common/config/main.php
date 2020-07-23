@@ -87,6 +87,13 @@ return [
             'password' => '',
         ],
 
+        'travelServices' => [
+            'class' => \common\components\TravelServices::class,
+            'url' => 'https://geonames.travelinsides.com/api/v1/',
+            'username' => '',
+            'password' => '',
+        ],
+
         'queue_sms_job' => [
             'class' => \yii\queue\beanstalk\Queue::class,
             'host' => 'localhost',

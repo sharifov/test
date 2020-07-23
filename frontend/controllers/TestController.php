@@ -12,7 +12,7 @@ use common\components\Purifier;
 use common\components\jobs\TelegramSendMessageJob;
 use common\components\RocketChat;
 use common\components\SearchService;
-use common\models\Airport;
+use common\models\Airports;
 use common\models\Call;
 use common\models\CaseSale;
 use common\models\Client;
@@ -1785,6 +1785,15 @@ class TestController extends FController
 	public function actionZ()
     {
         return $this->render('z');
+    }
+
+    /**
+     * @throws \yii\httpclient\Exception
+     */
+    public function actionAirportExport()
+    {
+        $airline = Yii::$app->travelServices->airportExport(0, 20000);
+        VarDumper::dump($airline, 10, true);
     }
 }
 
