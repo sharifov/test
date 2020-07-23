@@ -24,7 +24,7 @@ use yii\helpers\ArrayHelper;
  * @property string $dst
  *
  */
-class Airport extends ActiveRecord
+class AirportOld extends ActiveRecord
 {
 
     /**
