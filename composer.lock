@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "78d425f3e341283414eb547aede6b0f1",
+    "content-hash": "786fc6e85ebac95dda3f141abe1c24ca",
     "packages": [
         {
             "name": "2amigos/2fa-library",
@@ -2634,16 +2634,16 @@
         },
         {
             "name": "kartik-v/yii2-widget-select2",
-            "version": "dev-master",
+            "version": "v2.1.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/kartik-v/yii2-widget-select2.git",
-                "reference": "78efbcd1ae87b87803f9beb5e692acf790106cfb"
+                "reference": "b8cdb76b8dcc363e1e25b8f04f69aeabe98c6be3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/kartik-v/yii2-widget-select2/zipball/78efbcd1ae87b87803f9beb5e692acf790106cfb",
-                "reference": "78efbcd1ae87b87803f9beb5e692acf790106cfb",
+                "url": "https://api.github.com/repos/kartik-v/yii2-widget-select2/zipball/b8cdb76b8dcc363e1e25b8f04f69aeabe98c6be3",
+                "reference": "b8cdb76b8dcc363e1e25b8f04f69aeabe98c6be3",
                 "shasum": ""
             },
             "require": {
@@ -2684,7 +2684,7 @@
                 "widget",
                 "yii2"
             ],
-            "time": "2020-07-22T10:40:59+00:00"
+            "time": "2019-11-15T16:16:16+00:00"
         },
         {
             "name": "kartik-v/yii2-widget-timepicker",
@@ -9403,7 +9403,6 @@
     "minimum-stability": "stable",
     "stability-flags": {
         "andrewblake1/yii2-credit-card": 20,
-        "kartik-v/yii2-widget-select2": 20,
         "yii2tech/csv-grid": 20,
         "keltstr/yii2-simplehtmldom": 20,
         "kartik-v/yii2-grid": 20,
