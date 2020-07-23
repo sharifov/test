@@ -6,6 +6,7 @@ use Yii;
 use modules\twilio\src\entities\voiceLog\VoiceLog;
 use modules\twilio\src\entities\voiceLog\search\VoiceLogSearch;
 use frontend\controllers\FController;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -19,7 +20,7 @@ class VoiceLogController extends FController
      */
     public function behaviors()
     {
-        return [
+        $behaviors = [
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
@@ -27,6 +28,7 @@ class VoiceLogController extends FController
                 ],
             ],
         ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**
