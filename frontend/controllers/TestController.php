@@ -12,7 +12,7 @@ use common\components\Purifier;
 use common\components\jobs\TelegramSendMessageJob;
 use common\components\RocketChat;
 use common\components\SearchService;
-use common\models\Airport;
+use common\models\Airports;
 use common\models\Call;
 use common\models\CaseSale;
 use common\models\Client;

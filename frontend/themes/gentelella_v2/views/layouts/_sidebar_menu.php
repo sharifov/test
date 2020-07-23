@@ -530,6 +530,7 @@ $isSuperAdmin = $user->isSuperAdmin();
 
                 ['label' => 'Site Settings Category', 'url' => ['/setting-category/index'], 'icon' => 'list'],
                 ['label' => 'Site Settings', 'url' => ['/setting/index'], 'icon' => 'cogs'],
+                ['label' => 'Site ENV', 'url' => ['/setting/env'], 'icon' => 'info-circle'],
             ]
         ];
 

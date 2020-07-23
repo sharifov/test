@@ -2,7 +2,7 @@
 
 namespace common\models\search;
 
-use common\models\Airport;
+use common\models\Airports;
 use common\models\Call;
 use common\models\Client;
 use common\models\ClientEmail;
@@ -1194,22 +1194,22 @@ class LeadSearch extends Lead
         $query->addSelect([
             'originCityFullName' => (new Query())
                 ->select(['SUBSTRING_INDEX(group_concat(city SEPARATOR "--"),'. '"--"' . ',1)'])
-                ->from(LeadFlightSegment::tableName())->leftJoin(Airport::tableName(), LeadFlightSegment::tableName().'.origin =' . Airport::tableName(). '.iata')
+                ->from(LeadFlightSegment::tableName())->leftJoin(Airports::tableName(), LeadFlightSegment::tableName().'.origin =' . Airports::tableName(). '.iata')
                 ->where(LeadFlightSegment::tableName() . '.lead_id=' . Lead::tableName() . '.id' ),
             'destinationCityFullName' => (new Query())
                 ->select(['SUBSTRING_INDEX(group_concat(city SEPARATOR "--"),'. '"--"' . ',1)'])
-                ->from(LeadFlightSegment::tableName())->leftJoin(Airport::tableName(), LeadFlightSegment::tableName().'.destination =' . Airport::tableName(). '.iata')
+                ->from(LeadFlightSegment::tableName())->leftJoin(Airports::tableName(), LeadFlightSegment::tableName().'.destination =' . Airports::tableName(). '.iata')
                 ->where(LeadFlightSegment::tableName() . '.lead_id=' . Lead::tableName() . '.id' ),
         ]);
 
         $query->addSelect([
             'originCountry' => (new Query())
                 ->select(['SUBSTRING_INDEX(group_concat(countryId SEPARATOR "-"),'. '"-"' . ',1)'])
-                ->from(LeadFlightSegment::tableName())->leftJoin(Airport::tableName(), LeadFlightSegment::tableName().'.origin =' . Airport::tableName(). '.iata')
+                ->from(LeadFlightSegment::tableName())->leftJoin(Airports::tableName(), LeadFlightSegment::tableName().'.origin =' . Airports::tableName(). '.iata')
                 ->where(LeadFlightSegment::tableName() . '.lead_id=' . Lead::tableName() . '.id' ),
             'destinationCountry' => (new Query())
                 ->select(['SUBSTRING_INDEX(group_concat(countryId SEPARATOR "-"),'. '"-"' . ',1)'])
-                ->from(LeadFlightSegment::tableName())->leftJoin(Airport::tableName(), LeadFlightSegment::tableName().'.destination =' . Airport::tableName(). '.iata')
+                ->from(LeadFlightSegment::tableName())->leftJoin(Airports::tableName(), LeadFlightSegment::tableName().'.destination =' . Airports::tableName(). '.iata')
                 ->where(LeadFlightSegment::tableName() . '.lead_id=' . Lead::tableName() . '.id' )
         ]);
 
@@ -2008,7 +2008,7 @@ class LeadSearch extends Lead
             ->createCommand()->getSql();
         $nowQuery = (new Query())
             ->select(new Expression("if (a.dst is not null, if (cast(a.dst as signed) >= 0, concat('+', if (length(a.dst) < 2, concat(0, a.dst), a.dst),':00'), concat(a.dst, ':00')), '+00:00')"))
-            ->from(['a' => Airport::tableName()])
+            ->from(['a' => Airports::tableName()])
             ->andWhere('a.iata = (' .
                 (new Query())
                     ->select(['lfs.origin'])
@@ -2151,7 +2151,7 @@ class LeadSearch extends Lead
             ->createCommand()->getSql();
         $nowQuery = (new Query())
             ->select(new Expression("if (a.dst is not null, if (cast(a.dst as signed) >= 0, concat('+', if (length(a.dst) < 2, concat(0, a.dst), a.dst),':00'), concat(a.dst, ':00')), '+00:00')"))
-            ->from(['a' => Airport::tableName()])
+            ->from(['a' => Airports::tableName()])
             ->andWhere('a.iata = (' .
                 (new Query())
                     ->select(['lfs.origin'])

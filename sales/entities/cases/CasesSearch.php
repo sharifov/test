@@ -2,7 +2,7 @@
 
 namespace sales\entities\cases;
 
-use common\models\Airport;
+use common\models\Airports;
 use common\models\Call;
 use common\models\CaseSale;
 use common\models\ClientEmail;
@@ -398,7 +398,7 @@ class CasesSearch extends Cases
         if ($this->departureCountries) {
             $query->andWhere(['cs_id' =>
                 CaseSale::find()->select('case_sale.css_cs_id')
-                ->innerJoin(Airport::tableName() . 'AS airports',
+                ->innerJoin(Airports::tableName() . 'AS airports',
                     'case_sale.css_out_departure_airport = airports.iata OR case_sale.css_in_departure_airport = airports.iata')
                 ->where(['IN', 'airports.country', $this->departureCountries])
             ]);
@@ -406,7 +406,7 @@ class CasesSearch extends Cases
         if ($this->arrivalCountries) {
             $query->andWhere(['cs_id' =>
                 CaseSale::find()->select('case_sale.css_cs_id')
-                ->innerJoin(Airport::tableName() . 'AS airports',
+                ->innerJoin(Airports::tableName() . 'AS airports',
                     'case_sale.css_out_departure_airport = airports.iata OR case_sale.css_in_departure_airport = airports.iata')
                 ->where(['IN', 'airports.country', $this->arrivalCountries])
             ]);
@@ -632,7 +632,7 @@ class CasesSearch extends Cases
         if ($this->departureCountries) {
             $query->andWhere(['cs_id' =>
                 CaseSale::find()->select('case_sale.css_cs_id')
-                ->innerJoin(Airport::tableName() . ' AS airports',
+                ->innerJoin(Airports::tableName() . ' AS airports',
                     'case_sale.css_out_departure_airport = airports.iata OR case_sale.css_in_departure_airport = airports.iata')
                 ->where(['IN', 'airports.country', $this->departureCountries])
             ]);
@@ -640,7 +640,7 @@ class CasesSearch extends Cases
         if ($this->arrivalCountries) {
             $query->andWhere(['cs_id' =>
                 CaseSale::find()->select('case_sale.css_cs_id')
-                ->innerJoin(Airport::tableName() . ' AS airports',
+                ->innerJoin(Airports::tableName() . ' AS airports',
                     'case_sale.css_out_departure_airport = airports.iata OR case_sale.css_in_departure_airport = airports.iata')
                 ->where(['IN', 'airports.country', $this->arrivalCountries])
             ]);

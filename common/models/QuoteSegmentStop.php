@@ -17,7 +17,7 @@ use Yii;
  * @property int $qss_segment_id
  *
  * @property QuoteSegment $qssSegment
- * @property Airport $locationAirport
+ * @property Airports $locationAirport
  */
 class QuoteSegmentStop extends \yii\db\ActiveRecord
 {
@@ -111,7 +111,7 @@ class QuoteSegmentStop extends \yii\db\ActiveRecord
      */
     public function getLocationAirport()
     {
-        return $this->hasOne(Airport::class, ['iata' => 'qss_location_code']);
+        return $this->hasOne(Airports::class, ['iata' => 'qss_location_code']);
     }
 
 

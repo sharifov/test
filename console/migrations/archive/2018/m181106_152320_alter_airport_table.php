@@ -14,7 +14,7 @@ class m181106_152320_alter_airport_table extends Migration
      */
     public function safeUp()
     {
-        $airports = \common\models\Airport::find()->orderBy([
+        $airports = \common\models\Airports::find()->orderBy([
             'iata' => SORT_ASC
         ])->all();
         $iata = null;

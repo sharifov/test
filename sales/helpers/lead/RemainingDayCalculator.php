@@ -2,18 +2,18 @@
 
 namespace sales\helpers\lead;
 
-use common\models\Airport;
+use common\models\Airports;
 
 class RemainingDayCalculator
 {
 
     /**
-     * @param Airport $airport
+     * @param Airports $airport
      * @param $departure
      * @return mixed|string
      * @throws \Exception
      */
-    public static function calculate(Airport $airport, $departure)
+    public static function calculate(Airports $airport, $departure)
     {
         if (!$airport) {
             return 'Airport not found';

@@ -4,7 +4,7 @@ namespace console\controllers;
 
 use common\components\BackOffice;
 use common\models\Airline;
-use common\models\Airport;
+use common\models\Airports;
 use common\models\Airports;
 use common\models\Client;
 use common\models\ClientEmail;
@@ -63,9 +63,9 @@ class SyncController extends Controller
         $result = BackOffice::sendRequest('default/airports');
         if (isset($result['data'])) {
             foreach ($result['data'] as $airportId => $airportAttr) {
-                $airport = Airport::findOne($airportAttr['iata']);
+                $airport = Airports::findOne($airportAttr['iata']);
                 if ($airport === null) {
-                    $airport = new Airport();
+                    $airport = new Airports();
                 }
                 $airport->attributes = $airportAttr;
                 if (!$airport->save()) {

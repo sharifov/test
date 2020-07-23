@@ -11,7 +11,7 @@ use yii\data\ActiveDataProvider;
 use yii\grid\GridView;
 use yii\helpers\Url;
 use frontend\models\search\AirportForm;
-use common\models\Airport;
+use common\models\Airports;
 use yii\widgets\Pjax;
 
 

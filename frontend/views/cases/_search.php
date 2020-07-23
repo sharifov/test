@@ -1,6 +1,6 @@
 <?php
 
-use common\models\Airport;
+use common\models\Airports;
 use common\models\CaseSale;
 use common\models\UserGroup;
 use dosamigos\multiselect\MultiSelect;
@@ -133,7 +133,7 @@ use yii\widgets\ActiveForm;
         <div class="col-md-1">
             <?php
                 echo $form->field($model, 'departureAirport')->widget(Select2::class, [
-                    'data' => Airport::getIataList(),
+                    'data' => Airports::getIataList(),
                     'size' => Select2::SMALL,
                     'options' => ['multiple' => true],
                     'pluginOptions' => ['allowClear' => true],
@@ -143,7 +143,7 @@ use yii\widgets\ActiveForm;
         <div class="col-md-1">
             <?php
                 echo $form->field($model, 'arrivalAirport')->widget(Select2::class, [
-                    'data' => Airport::getIataList(),
+                    'data' => Airports::getIataList(),
                     'size' => Select2::SMALL,
                     'options' => ['multiple' => true],
                     'pluginOptions' => ['allowClear' => true],
@@ -153,7 +153,7 @@ use yii\widgets\ActiveForm;
         <div class="col-md-1">
             <?php
                 echo $form->field($model, 'departureCountries')->widget(Select2::class, [
-                    'data' => Airport::getCountryList(),
+                    'data' => Airports::getCountryList(),
                     'size' => Select2::SMALL,
                     'options' => ['multiple' => true],
                     'pluginOptions' => ['allowClear' => true],
@@ -163,7 +163,7 @@ use yii\widgets\ActiveForm;
         <div class="col-md-1">
             <?php
                 echo $form->field($model, 'arrivalCountries')->widget(Select2::class, [
-                    'data' => Airport::getCountryList(),
+                    'data' => Airports::getCountryList(),
                     'size' => Select2::SMALL,
                     'options' => ['multiple' => true],
                     'pluginOptions' => ['allowClear' => true],

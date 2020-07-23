@@ -143,7 +143,11 @@ class Airports extends \yii\db\ActiveRecord
         return $this->hasOne(Employee::class, ['id' => 'a_updated_user_id']);
     }
 
-    public static function findIdentity(string $iata)
+    /**
+     * @param string $iata
+     * @return Airports|null
+     */
+    public static function findByIata(string $iata): ?Airports
     {
         return static::findOne(['iata' => $iata]);
     }
@@ -172,12 +176,18 @@ class Airports extends \yii\db\ActiveRecord
      * @param array $iata
      * @return array
      */
-    public static function getAirportListByIata($iata = [])
+    public static function getAirportListByIata(array $iata = []): array
     {
         $data = [];
-        $airports = self::find()->where(['iata' => $iata])->all();
-        foreach ($airports as $airport) {
-            $data[$airport['iata']] = ['name' => $airport['name'], 'city' => $airport['city'], 'country' => $airport['country']];
+        $airports = self::find()->select(['iata', 'name', 'city', 'country'])->where(['iata' => $iata])->asArray()->all();
+        if ($airports) {
+            foreach ($airports as $airport) {
+                $data[$airport['iata']] = [
+                    'name' => $airport['name'],
+                    'city' => $airport['city'],
+                    'country' => $airport['country']
+                ];
+            }
         }
 
         return $data;
@@ -241,7 +251,7 @@ class Airports extends \yii\db\ActiveRecord
      */
     public static function getCityByIata($iata): ?string
     {
-        if ($airport = self::findIdentity($iata)) {
+        if ($airport = self::findByIata($iata)) {
             return $airport->city;
         }
         return null;

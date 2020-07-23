@@ -4,7 +4,7 @@ namespace sales\services\parsingDump;
 
 
 
-use common\models\Airport;
+use common\models\Airports;
 use common\models\QuotePrice;
 use sales\services\parsingDump\lib\ParsingDump;
 use sales\forms\segment\SegmentBaggageForm;
@@ -106,9 +106,9 @@ class BaggageService
                 $baggageArrival = substr($baggageItem['segment'], 3, 3);
 
                 if (
-                    ($segment['departureCity']->city === Airport::getCityByIata($baggageDeparture))
+                    ($segment['departureCity']->city === Airports::getCityByIata($baggageDeparture))
                     &&
-                    ($segment['arrivalCity']->city === Airport::getCityByIata($baggageArrival))
+                    ($segment['arrivalCity']->city === Airports::getCityByIata($baggageArrival))
                 ) {
                     $baggage = $this->baggageFromDump['baggage'][$key];
                     unset($this->baggageFromDump['baggage'][$key]);

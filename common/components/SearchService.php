@@ -7,7 +7,7 @@ use common\models\local\FlightSegment;
 use common\models\Quote;
 use Yii;
 use common\models\Airline;
-use common\models\Airport;
+use common\models\Airports;
 use yii\httpclient\Client;
 use yii\httpclient\CurlTransport;
 use yii\helpers\VarDumper;
@@ -215,7 +215,7 @@ class SearchService
         }
 
         $airlines = Airline::getAirlinesListByIata($airlinesIata);
-        $locations = Airport::getAirportListByIata($locationsIata);
+        $locations = Airports::getAirportListByIata($locationsIata);
 
         return ['airlines' => $airlines, 'locations' => $locations];
     }
@@ -247,7 +247,7 @@ class SearchService
         }
 
         $airlines = Airline::getAirlinesListByIata($airlinesIata);
-        $locations = Airport::getAirportListByIata($locationsIata);
+        $locations = Airports::getAirportListByIata($locationsIata);
 
         return ['airlines' => $airlines, 'locations' => $locations];
     }

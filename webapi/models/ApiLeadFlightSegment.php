@@ -2,7 +2,7 @@
 
 namespace webapi\models;
 
-use common\models\Airport;
+use common\models\Airports;
 use common\models\Lead;
 use Yii;
 
@@ -57,7 +57,7 @@ class ApiLeadFlightSegment extends \yii\db\ActiveRecord
 
     public function checkOriginIata() : void
     {
-        $origin = Airport::findIdentity($this->origin);
+        $origin = Airports::findByIata($this->origin);
         if ($origin) {
             $this->origin_label = sprintf('%s (%s)', $origin->name, $origin->iata);
         } else {
@@ -69,7 +69,7 @@ class ApiLeadFlightSegment extends \yii\db\ActiveRecord
 
     public function checkDestinationIata() : void
     {
-        $destination = Airport::findIdentity($this->destination);
+        $destination = Airports::findByIata($this->destination);
         if ($destination) {
             $this->destination_label = sprintf('%s (%s)', $destination->name, $destination->iata);
         } else {
