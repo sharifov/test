@@ -1,12 +1,13 @@
 <?php
 
+use common\models\VisitorLog;
 use frontend\helpers\JsonHelper;
 use frontend\helpers\OutHelper;
 use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChatData\entity\ClientChatData;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatMessage\entity\search\ClientChatMessageSearch;
 use sales\model\clientChatNote\entity\ClientChatNote;
+use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\helpers\StringHelper;
@@ -15,11 +16,12 @@ use yii\widgets\DetailView;
 
 /* @var ClientChat $model */
 /* @var yii\web\View $this */
+/* @var VisitorLog|null $visitorLog */
 /* @var ClientChatMessage $messageModel */
 /* @var ClientChatMessageSearch $searchModel */
 /* @var yii\data\ActiveDataProvider $dataProvider */
 /* @var yii\data\ActiveDataProvider $dataProviderNotes */
-
+/* @var ClientChatVisitorData|null $clientChatVisitorData */
 
 $this->title = $model->cch_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Chats QA', 'url' => ['index']];
@@ -29,8 +31,16 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="client-chat-view">
     <div class="row">
         <div class="col-md-4">
-            <h5>Chat info</h5>
-            <?= DetailView::widget([
+            <?php $room = Html::a('<span class="glyphicon glyphicon-list-alt"></span>',
+                ['/client-chat-qa/room', 'rid' => $model->cch_rid],
+                [
+                    'target' => '_blank',
+                    'data-pjax' => 0,
+                    'title' => 'Room',
+                ]
+            ) ?>
+            <h5>Chat info <?php echo $room ?></h5>
+            <?php echo DetailView::widget([
                 'model' => $model,
                 'attributes' => [
                     'cch_id',
@@ -43,7 +53,10 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'attribute' => 'cch_channel_id',
                         'value' => static function (ClientChat $model) {
-                            return $model->cch_channel_id ? Html::a(Html::encode($model->cchChannel->ccc_name), ['client-chat-channel-crud/view', 'id' => $model->cch_channel_id], ['target' => '_blank', 'data-pjax' => 0]) : '-';
+                            return $model->cch_channel_id ?
+                                Html::a(Html::encode($model->cchChannel->ccc_name),
+                                    ['client-chat-channel-crud/view', 'id' => $model->cch_channel_id],
+                                    ['target' => '_blank', 'data-pjax' => 0]) : '-';
                         },
                         'format' => 'raw',
                     ],
@@ -57,7 +70,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'attribute' => 'cch_status_id',
                         'value' => static function (ClientChat $model) {
-                            return Html::tag('span', $model->getStatusName(), ['class' => 'badge badge-'.$model->getStatusClass()]);
+                            return Html::tag('span', $model->getStatusName(),
+                                ['class' => 'badge badge-'.$model->getStatusClass()]);
                         },
                         'format' => 'raw',
                     ],
@@ -78,21 +92,82 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
         <div class="col-md-4">
             <h5>Additional Data</h5>
-            <?= DetailView::widget([
-                'model' => $model->cchData ?: new ClientChatData(),
+            <?php if ($clientChatVisitorData) :?>
+                <?php echo DetailView::widget([
+                    'model' => $clientChatVisitorData,
+                    'attributes' => [
+                        'cvd_country',
+                        'cvd_region',
+                        'cvd_city',
+                        'cvd_latitude',
+                        'cvd_longitude',
+                        'cvd_url',
+                        'cvd_referrer',
+                        'cvd_timezone',
+                        'cvd_local_time'
+                    ]
+                ])  ?>
+            <?php else: ?>
+                <p>Additional Data not found</p>
+            <?php endif ?>
+
+            <h5>Leads and case</h5>
+            <?php echo DetailView::widget([
+                'model' => $model,
                 'attributes' => [
-                    'ccd_country',
-                    'ccd_region',
-                    'ccd_city',
-                    'ccd_latitude',
-                    'ccd_longitude',
-                    'ccd_url:url',
-                    'ccd_title',
-                    'ccd_referrer',
-                    'ccd_timezone',
-                    'ccd_local_time',
+                    [
+                        'label' => 'Case',
+                        'value' => static function(ClientChat $model) {
+                            $out = '<span id="chat-info-case-info">';
+                            foreach ($model->cases as $case) {
+                                $out .= Yii::$app->formatter->format($case, 'case') . ' ';
+                            }
+                            $out .= '</span>';
+                            return $out;
+                        },
+                        'format' => 'raw',
+                    ],
+                    [
+                        'label' => 'Lead',
+                        'value' => static function(ClientChat $model) {
+                            $out = '<span id="chat-info-lead-info">';
+                            foreach ($model->leads as $lead) {
+                                $out .= Yii::$app->formatter->format($lead, 'lead') . ' ';
+                            }
+                            $out .= '</span>';
+                            return $out;
+                        },
+                        'format' => 'raw',
+                    ],
                 ],
             ]) ?>
+        </div>
+
+        <div class="col-md-4">
+            <h5>Visitor log</h5>
+            <?php if ($visitorLog) :?>
+                <?= DetailView::widget([
+                    'model' => $visitorLog,
+                    'attributes' => [
+                        'vl_project_id:projectName',
+                        'vl_ga_client_id',
+                        'vl_ga_user_id',
+                        'vl_customer_id',
+                        'vl_gclid',
+                        'vl_dclid',
+                        'vl_utm_source',
+                        'vl_utm_medium',
+                        'vl_utm_campaign',
+                        'vl_utm_term',
+                        'vl_utm_content',
+                        'vl_referral_url:url',
+                        'vl_user_agent',
+                        'vl_ip_address'
+                    ]
+                ]) ?>
+            <?php else: ?>
+                <p>Visitor log not found</p>
+            <?php endif ?>
         </div>
 
     </div>

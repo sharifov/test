@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\VisitorLog;
 use frontend\helpers\JsonHelper;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
@@ -75,6 +76,8 @@ class ClientChatQaController extends FController
      */
     public function actionView($id)
     {
+        $clientChat = $this->clientChatRepository->findById($id);
+
         $searchModel = new ClientChatMessageSearch();
         $data[$searchModel->formName()]['ccm_cch_id'] = $id;
         $dataProvider = $searchModel->search($data);
@@ -84,11 +87,17 @@ class ClientChatQaController extends FController
         $dataProviderNotes = $searchModelNotes->search($data);
         $dataProviderNotes->setPagination(['pageSize' => 20]);
 
+        if ($clientChat->ccv && $clientChat->ccv->ccv_cvd_id) {
+            $visitorLog = VisitorLog::find()->byCvdId($clientChat->ccv->ccv_cvd_id)->orderBy(['vl_created_dt' => SORT_DESC])->one();
+        }
+
         return $this->render('view', [
             'model' => $this->findModel($id),
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'dataProviderNotes' => $dataProviderNotes,
+            'visitorLog' => $visitorLog ?? null,
+            'clientChatVisitorData' => $clientChat->ccv->ccvCvd ?? null,
         ]);
     }
 
