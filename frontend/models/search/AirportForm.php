@@ -1,13 +1,13 @@
 <?php
 namespace frontend\models\search;
 
-use common\models\Airport;
+use common\models\Airports;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use yii\db\Query;
 
-class AirportForm extends Airport
+class AirportForm extends Airports
 {
     /**
      * @inheritdoc
@@ -36,7 +36,7 @@ class AirportForm extends Airport
      */
     public function search($params)
     {
-        $query = Airport::find();
+        $query = Airports::find();
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'pagination' => [

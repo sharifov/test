@@ -3,7 +3,7 @@
 namespace modules\flight\src\useCases\api\searchQuote;
 
 use common\models\Airline;
-use common\models\Airport;
+use common\models\Airports;
 
 /**
  * Class FlightQuoteSearchHelper
@@ -44,7 +44,7 @@ class FlightQuoteSearchHelper
 		}
 
 		$airlines = Airline::getAirlinesListByIata($airlinesIata);
-		$locations = Airport::getAirportListByIata($locationsIata);
+		$locations = Airports::getAirportListByIata($locationsIata);
 
 		return ['airlines' => $airlines, 'locations' => $locations];
 	}

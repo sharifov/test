@@ -4,7 +4,7 @@ namespace modules\flight\src\helpers;
 
 use common\components\SearchService;
 use common\models\Airline;
-use common\models\Airport;
+use common\models\Airports;
 use common\models\QuoteSegment;
 use DateTime;
 use modules\flight\models\Flight;
@@ -490,11 +490,11 @@ class FlightQuoteHelper
 					/*if ($depDateTime > $arrDateTime) {
 						$arrDateTime->add(\DateInterval::createFromDateString('+1 year'));
 					}*/
-					$depCity = Airport::findIdentity($depAirport);
+					$depCity = Airports::findByIata($depAirport);
 					/*$timezone = ($depCity !== null && !empty($depCity->timezone))
 					? new \DateTimeZone($depCity->timezone)
 					: new \DateTimeZone("UTC");*/
-					$arrCity = Airport::findIdentity($arrAirport);
+					$arrCity = Airports::findByIata($arrAirport);
 					/*$timezone = ($arrCity !== null && !empty($arrCity->timezone))
 						? new \DateTimeZone($arrCity->timezone)
 						: new \DateTimeZone("UTC");*/
@@ -937,11 +937,11 @@ class FlightQuoteHelper
 				/*if ($depDateTime > $arrDateTime) {
 					$arrDateTime->add(\DateInterval::createFromDateString('+1 year'));
 				}*/
-				$depCity = Airport::findIdentity($depAirport);
+				$depCity = Airports::findByIata($depAirport);
 				/*$timezone = ($depCity !== null && !empty($depCity->timezone))
 				? new \DateTimeZone($depCity->timezone)
 				: new \DateTimeZone("UTC");*/
-				$arrCity = Airport::findIdentity($arrAirport);
+				$arrCity = Airports::findByIata($arrAirport);
 				/*$timezone = ($arrCity !== null && !empty($arrCity->timezone))
 					? new \DateTimeZone($arrCity->timezone)
 					: new \DateTimeZone("UTC");*/
@@ -1005,8 +1005,8 @@ class FlightQuoteHelper
 			$firstSegment = $trip['segments'][0];
 			$lastSegment = $trip['segments'][count($trip['segments']) - 1];
 
-			$depCity = Airport::findIdentity($firstSegment['departureAirport']);
-			$arrCity = Airport::findIdentity($lastSegment['arrivalAirport']);
+			$depCity = Airports::findByIata($firstSegment['departureAirport']);
+			$arrCity = Airports::findByIata($lastSegment['arrivalAirport']);
 			$arrivalTime = $lastSegment['arrivalDateTime'];
 			$departureTime = $firstSegment['departureDateTime'];
 

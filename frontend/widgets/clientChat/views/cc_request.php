@@ -11,13 +11,14 @@ use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 ClientChatAsset::register($this);
 
 $accessUrl = \yii\helpers\Url::to('/client-chat/access-manage');
+$totalRequest = count($access);
 ?>
 
 
 <?php yii\widgets\Pjax::begin(['id' => 'client-chat-box-pjax', 'timeout' => 10000, 'enablePushState' => false, 'options' => []])?>
 <div class="_cc-fabs">
     <div class="_cc-box <?= $isPjax && $access ? 'is-visible' : '' ?>">
-        <div class="_сс-box-header <?= $access ? 'active' : '' ?>">
+        <div class="_cc-box-header <?= $access ? 'active' : '' ?>">
             <div class="_cc-box-option">
                 <div class="header_img">
 					<?=\yii\helpers\Html::img('/img/user.png')?>
@@ -99,18 +100,41 @@ $accessUrl = \yii\helpers\Url::to('/client-chat/access-manage');
 <!--        <div class="fab_field">-->
 <!--        </div>-->
     </div>
-    <a id="_cc-access-wg" class="_cc-fab " style="<?= $access ? '' : 'background: #d5b24c' ?>">
+    <a id="_cc-access-wg" class="_cc-fab <?= $isPjax && $access ? 'is-visible' : '' ?>" style="<?= $access ? '' : 'background: #d5b24c' ?>">
         <i class="fa fa-comments-o"></i>
+        <?php if ($totalRequest): ?>
+            <span class="_cc_total_request_wrapper">
+                <?= $totalRequest ?>
+            </span>
+            <span class="circle" style="animation-delay: 0s"></span>
+            <span class="circle" style="animation-delay: 1s"></span>
+            <span class="circle" style="animation-delay: 2s"></span>
+            <span class="circle" style="animation-delay: 3s"></span>
+        <?php endif; ?>
     </a>
 </div>
 <?php yii\widgets\Pjax::end() ?>
 
 <?php
-$accessExist = count($access);
 $js = <<<JS
- if ({$accessExist}) {
+    
+let _ccWgStatus = localStorage.getItem('_cc_wg_status');
+let _access = {$totalRequest} > 0 ? true : false;
+if (_ccWgStatus === 'true' && _access) {
     toggleClientChatAccess();
- }
+}
+
+window.addEventListener('storage', function (event) {
+    if (event.key === '_cc_wg_status') {
+        let _ccWgStatus = localStorage.getItem('_cc_wg_status');
+        if (_ccWgStatus === 'true') {
+            toggleClientChatAccess(true);
+        } else {
+            toggleClientChatAccess(false);
+        }
+    }
+});
+
 $("#client-chat-box-pjax").on("pjax:end", function() {
     window.enableTimer();
 });

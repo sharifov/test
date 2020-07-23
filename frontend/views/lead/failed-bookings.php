@@ -18,12 +18,6 @@ use common\models\Lead;
 
 $this->title = 'Failed Bookings Queue';
 
-$this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jQuery-Knob/1.2.13/jquery.knob.min.js', [
-    //'position' => \yii\web\View::POS_HEAD,
-    'depends' => [
-        \yii\web\JqueryAsset::class
-    ]
-]);
 $this->registerJsFile('/js/moment.min.js', [
     'position' => \yii\web\View::POS_HEAD,
     'depends' => [
@@ -367,10 +361,6 @@ $this->params['breadcrumbs'][] = $this->title;
         ?>
         <?php Pjax::end(); ?>
     </div>
-
-<?php //if($isAccessNewLead):?>
-<?php $this->registerJs('$(".dial").knob();', \yii\web\View::POS_READY); ?>
-<?php //endif; ?>
 
 
 <?php
