@@ -342,8 +342,8 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Email List', 'url' => ['/email-list/index'], 'icon' => 'envelope-o'],
 
                 ['label' => 'Airlines', 'url' => ['/settings/airlines'], 'icon' => 'plane'],
-                ['label' => 'Airports', 'url' => ['/settings/airports'], 'icon' => 'plane'],
-                ['label' => 'Airports2', 'url' => ['/airports/index'], 'icon' => 'plane'],
+                //['label' => 'Airports', 'url' => ['/settings/airports'], 'icon' => 'plane'],
+                ['label' => 'Airports', 'url' => ['/airports/index'], 'icon' => 'plane'],
                 ['label' => 'ACL (IP)', 'url' => ['/settings/acl'], 'icon' => 'user-secret'],
                 ['label' => 'API Users', 'url' => ['/api-user/index'], 'icon' => 'users'],
                 ['label' => 'Tasks', 'url' => ['/task/index'], 'icon' => 'list'],
