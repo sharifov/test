@@ -42,7 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         ['target' => '_blank', 'data-pjax' => 0]) : '-';
                 },
                 'format' => 'raw',
-                'options' => ['style' => 'width:100px']
+                'options' => ['style' => 'width:100px'],
             ],
             [
                 'attribute' => 'cch_status_id',
@@ -87,8 +87,23 @@ $this->params['breadcrumbs'][] = $this->title;
                 'relation' => 'cchOwnerUser',
             ],
             [
-                'attribute' => 'cch_language_id',
-                'filter' => \common\models\Language::getLanguages()
+                'label' => 'Lead/Case',
+                'value' => static function(ClientChat $model) {
+                    $out = '<span id="chat-info-lead-info">';
+                    foreach ($model->leads as $lead) {
+                        $out .= Yii::$app->formatter->format($lead, 'lead') . '<br />';
+                    }
+                    $out .= '</span>';
+
+                    $out .= '<span id="chat-info-case-info">';
+                    foreach ($model->cases as $case) {
+                        $out .= Yii::$app->formatter->format($case, 'case') . '<br />';
+                    }
+                    $out .= '</span>';
+                    return $out;
+                },
+                'format' => 'raw',
+                'contentOptions' => ['style' => 'width:120px; white-space: normal;'],
             ],
             [
 				'class' => DateTimeColumn::class,

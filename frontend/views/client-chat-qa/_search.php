@@ -12,6 +12,7 @@ use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatData\entity\ClientChatData;
 use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use yii\helpers\Html;
+use yii\web\View;
 use yii\widgets\ActiveForm;
 
 /* @var yii\web\View $this */
@@ -36,6 +37,7 @@ use yii\widgets\ActiveForm;
         <div class="x_content" style="display: <?=(Yii::$app->request->isPjax) ? 'block' : 'none'?>">
             <?php $form = ActiveForm::begin([
                 'action' => ['index'],
+                'id' => 'qa_search_form',
                 'method' => 'get',
                 'options' => [
                     'data-pjax' => 1
@@ -94,17 +96,11 @@ use yii\widgets\ActiveForm;
 
             <div class="row">
                 <div class="col-md-2">
-                    <?php echo $form->field($model, 'cch_ip') ?>
-                </div>
-                <div class="col-md-2">
                     <?php echo $form->field($model, 'dataCountry')->dropDownList(ClientChatVisitorData::getCountryList(), ['prompt' => '-']) ?>
                 </div>
                 <div class="col-md-2">
                     <?php echo $form->field($model, 'dataCity')->dropDownList(ClientChatVisitorData::getCityList(), ['prompt' => '-']) ?>
                 </div>
-            </div>
-
-            <div class="row">
                 <div class="col-md-1">
                     <?php echo $form->field($model, 'messageBy')->dropDownList(ClientChatQaSearch::MESSAGE_BY_LIST, ['prompt' => '-']) ?>
                 </div>
@@ -116,8 +112,9 @@ use yii\widgets\ActiveForm;
             <div class="row">
                 <div class="col-md-12">
                     <div class="form-group text-center">
-                        <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
-                        <?= Html::resetButton('Reset', ['class' => 'btn btn-outline-secondary']) ?>
+                        <?= Html::submitButton('<i class="fa fa-search"></i> Search', ['class' => 'btn btn-primary search_qa_btn']) ?>
+                        <?= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset',
+                            ['client-chat-qa/index'], ['class' => 'btn btn-outline-secondary']) ?>
                     </div>
                 </div>
             </div>
@@ -126,3 +123,16 @@ use yii\widgets\ActiveForm;
         </div>
     </div>
 </div>
+
+<?php
+$js = <<<JS
+    $(document).on('beforeSubmit', '#qa_search_form', function(event) {
+        let btn = $(this).find('.search_qa_btn');
+        
+        btn.html('<span class="spinner-border spinner-border-sm"></span> Loading')
+            .addClass('btn btn-default')
+            .prop("disabled", true);
+    });
+JS;
+$this->registerJs($js, View::POS_READY);
+?>

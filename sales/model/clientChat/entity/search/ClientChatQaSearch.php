@@ -2,6 +2,7 @@
 
 namespace sales\model\clientChat\entity\search;
 
+use sales\model\clientChatCase\entity\ClientChatCase;
 use sales\model\clientChatData\entity\ClientChatData;
 use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
@@ -131,7 +132,7 @@ class ClientChatQaSearch extends ClientChat
         }
         if ($this->caseId) {
             $query->andWhere(['cch_id' =>
-                ClientChatLead::find()->select('cccs_chat_id')
+                ClientChatCase::find()->select('cccs_chat_id')
                     ->andWhere(['cccs_case_id' => $this->caseId])->distinct()]);
         }
 		if ($this->dataCountry) {
