@@ -106,7 +106,7 @@ class ClientChatController extends FController
 	 */
 	public function behaviors(): array
 	{
-		return [
+		$behaviors = [
 			'verbs' => [
 				'class' => VerbFilter::class,
 				'actions' => [
@@ -114,6 +114,7 @@ class ClientChatController extends FController
 				],
 			],
 		];
+		return ArrayHelper::merge(parent::behaviors(), $behaviors);
 	}
 
 	public function actionIndex(int $channelId = null, int $page = 1, int $chid = 0, int $tab = ClientChat::TAB_ACTIVE)
