@@ -13,7 +13,6 @@ function toggleClientChatAccess(status) {
     if (status === true) {
         $('._cc-box').addClass('is-visible');
         $('.fab').addClass('is-visible');
-        window.enableTimer();
     } else if (status === false) {
         $('._cc-box').removeClass('is-visible');
         $('.fab').removeClass('is-visible');
@@ -21,6 +20,7 @@ function toggleClientChatAccess(status) {
         $('._cc-box').toggleClass('is-visible');
         $('.fab').toggleClass('is-visible');
     }
+    window.enableTimer();
 }
 
 $(document).on('click', '._cc-access-action', function (e) {
