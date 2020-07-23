@@ -1786,6 +1786,15 @@ class TestController extends FController
     {
         return $this->render('z');
     }
+
+    /**
+     * @throws \yii\httpclient\Exception
+     */
+    public function actionAirportExport()
+    {
+        $airline = Yii::$app->travelServices->airportExport(0, 20000);
+        VarDumper::dump($airline, 10, true);
+    }
 }
 
 
