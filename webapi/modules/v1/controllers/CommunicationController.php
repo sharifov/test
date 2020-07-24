@@ -2397,6 +2397,7 @@ class CommunicationController extends ApiBaseController
                         'post' => $post,
                         'form' => $form->getAttributes(),
                     ]), 'API:Communication:voiceConferenceCallCallback');
+                    $conference = Conference::findOne(['cf_sid' => $form->ConferenceSid]);
                 }
             } catch (\Throwable $e) {
                 $conference = Conference::findOne(['cf_sid' => $form->ConferenceSid]);
@@ -2423,6 +2424,10 @@ class CommunicationController extends ApiBaseController
         }
 
         if (!$conference) {
+            Yii::error(VarDumper::dumpAsString([
+                'post' => $post,
+                'form' => $form->getAttributes(),
+            ]), 'API:Communication:voiceConferenceCallCallback:Not:SavedFound');
             $response['error'] = 'Not found and not saved Conference';
             return $response;
         }

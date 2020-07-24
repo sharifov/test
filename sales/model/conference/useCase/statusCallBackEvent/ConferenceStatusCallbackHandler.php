@@ -29,15 +29,17 @@ class ConferenceStatusCallbackHandler
     public function end(Conference $conference, ConferenceStatusCallbackForm $form): void
     {
         $conference->end($form->getFormattedTimestamp());
+
         if (!$conference->save()) {
             \Yii::error(VarDumper::dumpAsString([
                 'errors' => $conference->getErrors(),
                 'model' => $conference->getAttributes(),
             ]), 'ConferenceStatusCallbackHandler:end');
         }
-        if (!$call = $conference->call) {
-            return;
-        }
+
+//        if (!$call = $conference->call) {
+//            return;
+//        }
 //        $service = \Yii::createObject(CallLogConferenceTransferService::class);
 //        $service->transfer($call, $conference);
     }
