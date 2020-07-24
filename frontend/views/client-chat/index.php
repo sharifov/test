@@ -112,16 +112,17 @@ $clientChatId = $clientChat ? $clientChat->cch_id : 0;
 $discardUnreadMessageUrl = Url::to(['/client-chat/discard-unread-messages']);
 $js = <<<JS
 
+window.name = 'chat';
 $(document).ready( function () {
     let clientChatId = {$clientChatId};
 
-    window.name = 'chat';
     if (clientChatId) {
         localStorage.setItem('activeChatId', clientChatId);
     }
     
     $(window).on("beforeunload", function() { 
         localStorage.removeItem('activeChatId');
+        window.name = '';
     })
     
     document.addEventListener("visibilitychange", function () {
