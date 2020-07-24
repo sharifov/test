@@ -199,8 +199,13 @@ class ClientChatRequestService
 
 		$visitorRcId = $clientChatRequest->getClientRcId();
 
-		$visitorData = $this->clientChatVisitorDataRepository->findOrCreateByVisitorId($visitorRcId);
-		$this->clientChatVisitorRepository->create($clientChat->cch_id, $visitorData->cvd_id, $clientChat->cch_client_id);
+		try {
+			$this->clientChatVisitorDataRepository->findByVisitorRcId($visitorRcId);
+		} catch (NotFoundException $e) {
+			$visitorData = $this->clientChatVisitorDataRepository->createByVisitorId($visitorRcId);
+			$this->clientChatVisitorRepository->create($clientChat->cch_id, $visitorData->cvd_id, $clientChat->cch_client_id);
+		}
+
 
 		if ($clientChat->cch_owner_user_id) {
 			Notifications::publish('clientChatUpdateClientStatus', ['user_id' => $clientChat->cch_owner_user_id], [
