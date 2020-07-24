@@ -107,6 +107,7 @@ $this->registerJsFile('/js/moment.min.js', [
     ]
 ]);
 $clientChatId = $clientChat ? $clientChat->cch_id : 0;
+$discardUnreadMessageUrl = Url::to(['/client-chat/discard-unread-messages']);
 $js = <<<JS
 
 $(document).ready( function () {
@@ -119,6 +120,17 @@ $(document).ready( function () {
     
     $(window).on("beforeunload", function() { 
         localStorage.removeItem('activeChatId');
+    })
+    
+    document.addEventListener("visibilitychange", function () {
+        if (window.name === 'chat') {
+            let activeChatId = localStorage.getItem('activeChatId');
+            let params = new URLSearchParams(window.location.search);
+            let chatId = params.get('chid');
+            if (activeChatId == chatId) {
+                $.post('{$discardUnreadMessageUrl}', {cchId: activeChatId});
+            }
+        }
     })
 });
 
