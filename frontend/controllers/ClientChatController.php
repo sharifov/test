@@ -217,6 +217,10 @@ class ClientChatController extends FController
 				'clientChat' => $clientChat,
 				'client' => $clientChat->cchClient,
 			]);
+			$result['noteHtml'] = $this->renderPartial('partial/_client-chat-note', [
+				'clientChat' => $clientChat,
+				'model' => new ClientChatNote(),
+			]);
 
 		} catch (NotFoundException $e) {
 			$result['message'] = $e->getMessage();

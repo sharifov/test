@@ -82,19 +82,21 @@ $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
         </div>
     </div>
     <div class="col-md-3">
-        <div id="_client-chat-info">
-            <?php if ($clientChat): ?>
-                <?= $this->render('partial/_client-chat-info', ['clientChat' => $clientChat, 'client' => $client]) ?>
-            <?php endif; ?>
-        </div>
+        <div id="_cc_additional_info_wrapper" style="position: relative;">
+            <div id="_client-chat-info">
+                <?php if ($clientChat): ?>
+                    <?= $this->render('partial/_client-chat-info', ['clientChat' => $clientChat, 'client' => $client]) ?>
+                <?php endif; ?>
+            </div>
 
-        <div id="_client-chat-note">
-            <?php if ($clientChat): ?>
-                <?php echo $this->render('partial/_client-chat-note', [
-                    'clientChat' => $clientChat,
-                    'model' => new ClientChatNote(),
-                ]) ?>
-            <?php endif; ?>
+            <div id="_client-chat-note">
+                <?php if ($clientChat): ?>
+                    <?php echo $this->render('partial/_client-chat-note', [
+                        'clientChat' => $clientChat,
+                        'model' => new ClientChatNote(),
+                    ]) ?>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 </div>
@@ -272,30 +274,18 @@ $(document).on('click', '._cc-list-item', function () {
         cache: false,
         data: {cch_id: cch_id},
         beforeSend: function () {
-            $('#_client-chat-info').append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
+            $('#_cc_additional_info_wrapper').append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
         },
         success: function (data) {
             $('#_client-chat-info').html(data.html);
+            $('#_client-chat-note').html(data.noteHtml);
         },
         error: function (xhr) {
             createNotify('Error', xhr.responseText, 'error');
         },
-    });
-    $.ajax({
-        type: 'post',
-        url: '{$clientChatNoteUrl}',
-        dataType: 'json',
-        cache: false,
-        data: {cch_id: cch_id},
-        beforeSend: function () {
-            $('#_client-chat-note').append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
-        },
-        success: function (data) {
-            $('#_client-chat-note').html(data.html);
-        },
-        error: function (xhr) {
-            createNotify('Error', xhr.responseText, 'error');
-        },
+        complete: function () {
+            $('#_cc_additional_info_wrapper #_cc-load').remove();
+        }
     });
 });
 
