@@ -3,42 +3,45 @@
 namespace frontend\controllers;
 
 use common\models\VisitorLog;
-use sales\auth\Auth;
-use sales\model\clientChat\entity\search\ClientChatQaSearch;
+use frontend\helpers\JsonHelper;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
+use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatMessage\entity\search\ClientChatMessageSearch;
+use sales\model\clientChatNote\entity\ClientChatNote;
 use sales\model\clientChatNote\entity\ClientChatNoteSearch;
+use sales\repositories\NotFoundException;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use Yii;
 use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChat\entity\search\ClientChatSearch;
+use sales\model\clientChat\entity\search\ClientChatQaSearch;
 use frontend\controllers\FController;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use yii\web\Response;
-use yii\db\StaleObjectException;
 
-class ClientChatCrudController extends FController
+/**
+ * ClientChatQaController implements the CRUD actions for ClientChat model.
+ *
+ * @property ClientChatRepository $clientChatRepository
+ * @property ClientChatMessageService $clientChatMessageService
+ */
+class ClientChatQaController extends FController
 {
     private ClientChatRepository $clientChatRepository;
+    private ClientChatMessageService $clientChatMessageService;
 
-    /**
-     * ClientChatCrudController constructor.
-     * @param $id
-     * @param $module
-     * @param ClientChatRepository $clientChatRepository
-     * @param array $config
-     */
-    public function __construct($id, $module, ClientChatRepository $clientChatRepository, $config = [])
+    public function __construct(
+		$id,
+		$module,
+		ClientChatRepository $clientChatRepository,
+		ClientChatMessageService $clientChatMessageService,
+		$config = [])
 	{
 		parent::__construct($id, $module, $config);
 		$this->clientChatRepository = $clientChatRepository;
 	}
 
-    /**
-    * @return array
-    */
     public function behaviors(): array
     {
         $behaviors = [
@@ -53,26 +56,27 @@ class ClientChatCrudController extends FController
     }
 
     /**
-     * @return string
+     * Lists all ClientChat models.
+     * @return mixed
      */
-    public function actionIndex(): string
+    public function actionIndex()
     {
         $searchModel = new ClientChatQaSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-        return $this->render('../client-chat-qa/index', [
+        return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
     }
 
     /**
-     * @param $id
-     * @return string
-     * @throws NotFoundHttpException
-     * @throws \yii\base\InvalidConfigException
+     * Displays a single ClientChat model.
+     * @param integer $id
+     * @return mixed
+     * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($id): string
+    public function actionView($id)
     {
         $clientChat = $this->clientChatRepository->findById($id);
 
@@ -89,7 +93,7 @@ class ClientChatCrudController extends FController
             $visitorLog = VisitorLog::find()->byCvdId($clientChat->ccv->ccv_cvd_id)->orderBy(['vl_created_dt' => SORT_DESC])->one();
         }
 
-        return $this->render('../client-chat-qa/view', [
+        return $this->render('view', [
             'model' => $this->findModel($id),
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
@@ -100,62 +104,45 @@ class ClientChatCrudController extends FController
     }
 
     /**
-     * @return string|Response
+     * Updates an existing ClientChat model.
+     * If update is successful, the browser will be redirected to the 'view' page.
+     * @param string $rid
+     * @return mixed
+     * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionCreate()
+    public function actionRoom($rid)
     {
-        $model = new ClientChat();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-        	$model->cch_created_user_id = Auth::id();
-        	$model->cch_updated_user_id = Auth::id();
-            return $this->redirect(['view', 'id' => $model->cch_id]);
+        $clientChat = $this->clientChatRepository->findByRid($rid);
+
+        if ($clientChat->isClosed()) {
+            $history = ClientChatMessage::find()->byChhId($clientChat->cch_id)->all();
         }
 
-        return $this->render('create', [
-            'model' => $model,
+		return $this->render('room', [
+            'clientChat' => $clientChat,
+            'history' => $history ?? null,
         ]);
     }
 
     /**
-     * @param integer $id
-     * @return string|Response
-     * @throws NotFoundHttpException
+     * @param $id
+     * @return string
      */
-    public function actionUpdate($id)
+    public function actionMessageBodyView($id): string
     {
-        $model = $this->findModel($id);
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			$model->cch_updated_user_id = Auth::id();
-			return $this->redirect(['view', 'id' => $model->cch_id]);
-        }
-
-        return $this->render('update', [
-            'model' => $model,
-        ]);
+        $model = ClientChatMessage::findOne($id);
+        return $model ? '<pre>' . VarDumper::dumpAsString($model->ccm_body, 10, true) . '</pre>' : '-';
     }
 
     /**
+     * Finds the ClientChat model based on its primary key value.
+     * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return Response
-     * @throws NotFoundHttpException
-     * @throws \Throwable
-     * @throws StaleObjectException
+     * @return ClientChat the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($id): Response
-    {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
-    }
-
-    /**
-     * @param integer $id
-     * @return ClientChat
-     * @throws NotFoundHttpException
-     */
-    protected function findModel($id): ClientChat
+    protected function findModel($id)
     {
         if (($model = ClientChat::findOne($id)) !== null) {
             return $model;

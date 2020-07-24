@@ -190,7 +190,8 @@ $isSuperAdmin = $user->isSuperAdmin();
                         ['label' => 'Chat Cases', 'url' => ['/client-chat-case/index']],
                         ['label' => 'Visitor', 'url' => ['/client-chat-visitor-crud/index']],
                         ['label' => 'Visitor Data', 'url' => ['/client-chat-visitor-data-crud/index']],
-                    ]
+                        ['label' => 'Client Chat QA', 'url' => ['/client-chat-qa/index']],
+                    ],
                 ],
                 ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'list'],
                 ['label' => 'SMS Distrib List', 'url' => ['/sms-distribution-list/index'], 'icon' => 'list'],
