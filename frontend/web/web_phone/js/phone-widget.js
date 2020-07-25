@@ -126,7 +126,7 @@ $(document).ready(function() {
             historySimpleBar = simpleBar;
         }
 
-        if ($(el).attr('id') === 'tab-contacts') {
+        if ($(el).attr('id') === 'tab-contacts' && typeof PhoneWidgetContacts !== 'undefined') {
            PhoneWidgetContacts.initLazyLoadFullList(simpleBar);
         }
     });
