@@ -5,7 +5,6 @@ namespace console\controllers;
 use common\components\BackOffice;
 use common\models\Airline;
 use common\models\Airports;
-use common\models\Airports;
 use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
