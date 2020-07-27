@@ -18,10 +18,11 @@ channels.forEach(channelConnector)
 
 function channelConnector(chName)
 {      
-    centrifuge.subscribe(chName, function(message) {    
-        let messageObj = JSON.parse(message.data.message);
-        console.log(messageObj.chatsData)
-        $("#card-live-chat").text('');
+    centrifuge.subscribe(chName, function(message) {           
+        let messageObj = JSON.parse(message.data.message);        
+        if(messageObj.chatsData){
+            console.log(messageObj.chatsData)
+            $("#card-live-chat").text('');
             messageObj.chatsData.forEach(function (chat, index) {
                 $("#card-live-chat").append(renderChat(chat));
                 /*if(!chat.c_parent_id){
@@ -33,13 +34,30 @@ function channelConnector(chName)
                     });
                 }*/                
             });
+        }
+        
+        if(messageObj.chatMessageData){
+            let newMsg = messageObj.chatMessageData
+            
+            if(newMsg.client_id && !newMsg.user_id){
+                console.log(newMsg)
+                renderNewClientMessage(newMsg.chat_id, newMsg.client_id, newMsg.msg, newMsg.sent_dt)                
+            }
+            
+            if (newMsg.client_id && newMsg.user_id){
+                console.log("Agent Message")
+                console.log(newMsg)
+                renderNewAgentMessage(newMsg.chat_id, newMsg.user_id, newMsg.msg, newMsg.sent_dt)
+            }             
+            updateMessagesRelativeTime()
+        }
     });
 }
 
 centrifuge.connect();
 
 centrifuge.on('connect', function(context) {        
-    console.info('Client connected to Centrifugo and authorized')
+    //console.info('Client connected to Centrifugo and authorized')
     contentUpdate()    
 });
 
@@ -61,45 +79,23 @@ function renderChat(chat) {
                     '<tbody id="chat-'+ chat.cch_id +'">' +
                     '<tr class="warning">' +
                         '<td class="text-center" style="width:150px">' + 
-                            renderGeneralInfo(chat.cch_id, chat.inMsg, chat.outMsg) +
+                            renderGeneralInfo(chat.cch_id) +
                         '</td>' +
                         '<td class="text-left" style="width:250px">' +
-                             renderAgentInfo(chat.username) +
+                            renderAgentInfo(chat.cch_id, chat.cch_owner_user_id, chat.username, chat.outMsg) +
                         '</td>' +
                         '<td class="text-left" style="width:250px">' +
-                            renderClientInfo(chat.clientName) +
+                            renderClientInfo(chat.cch_id, chat.cch_client_id, chat.clientName, chat.inMsg) +
                         '</td>' +
                         '<td class="text-center" style="width:130px">' +
                             renderProjectInfo(chat.project, chat.department, chat.channel) +
                         '</td>' +
                         
-                        '<td class="text-left" style="width:450px">' +
-                        
-                            '<div class="media event">' +
-                                  
-                                  '<div class="media-body">' +
-                                        /*'<a class="title" href="#">test </a>' +*/
-                                       /* '<p><i class="fa fa-comment-o red"></i> <strong>$2300. </strong> Client Payed </p>' +*/
-                                       '<p><i class="fa fa-comment-o red"></i> ' +
-                                            '<span>by John Smith</span>' +
-                                            '<span class="time">3 mins ago</span>' +
-                                        '</p>' +
-                                        '<p> <small>Film festivals used to be do-or-die moments for movie makers. They were where you met the producers that could fund your project, and if the buyers liked your flick, they’d pay…</small>' +
-                                        '</p>' +
-                                  '</div>' +
-                              '</div>'+
+                        '<td class="text-left" style="width:450px">' +                        
+                            renderAgentMessage(chat.cch_id, chat.cch_owner_user_id, chat.username) +
                         '</td>' +
-                        '<td class="text-left" style="width:450px">' +
-                            
-                            '<div class="media event">' +
-                                  
-                                  '<div class="media-body">' +
-                                       /* '<a class="title" href="#">test </a>' +*/
-                                        '<p><i class="fa fa-comment-o red"></i> <strong>$2300. </strong> Client Payed </p>' +
-                                        '<p> <small>Film festivals used to be do-or-die moments for movie makers. They were where you met the producers that could fund your project, and if the buyers liked your flick, they’d pay…' +
-                                        '</p>' +
-                                  '</div>' +
-                              '</div>'+
+                        '<td class="text-left" style="width:450px">' +                            
+                            renderClientMessage(chat.cch_id, chat.cch_client_id, chat.clientName) +
                         '</td>' +
                         
                         /*'<td class="text-left"><i>l:<a href="/lead/view/0fb7b8b6cb49f458be2cc5fb5b4f4aa1" target="_blank">503669</a></i><br></td>' +*/
@@ -110,6 +106,97 @@ function renderChat(chat) {
                     '</tbody>' +
                 '</table>' +
             '</div>';
+}
+
+
+function renderAgentMessage(chatID, agentID, agentName){
+    let html = '';
+    
+    if(!agentName){
+      agentName = "...";
+    }
+    
+    if(!agentID){
+      agentID = "";
+    }
+    
+    let msgLocator = chatID + '-' + agentID;    
+        
+    html+= '<div class="media event">' +                                  
+                '<div class="media-body">' +
+                /*'<a class="title" href="#">test </a>' +*/
+                     '<p><i class="fa fa-comment-o red"></i> last send by '+ agentName +' <strong title="" id="time-'+ msgLocator +'" class="chat-relative-time first"> </strong></p>' +
+                     '<p> <small id="'+ msgLocator +'">No new message from agent ...</small>' +
+                     '</p>' +
+                '</div>' +
+            '</div>';
+    return html;                                    
+}
+
+function renderClientMessage(chatID, clientID, clientName){
+    let html = '';
+    let msgLocator = chatID + '-' + clientID;
+    html+= '<div class="media event">' +                                  
+                '<div class="media-body">' +
+                     /* '<a class="title" href="#">test </a>' +*/
+                      '<p><i class="fa fa-comment-o red"></i> last send by '+ clientName +' <strong title="" id="time-'+ msgLocator +'" class="chat-relative-time"> </strong></p>' +
+                      '<p> <small id="'+ msgLocator +'">No new message from client ...</small>' +
+                      '</p>' +
+                '</div>' +
+            '</div>';
+    return html;
+}
+
+function renderNewClientMessage(chatID, clientID, msgBody, createdDt) {
+    let msgLocator = chatID + '-' + clientID;
+    $('#' + msgLocator).text(msgBody);
+    $('#time-' + msgLocator).prop('title', createdDt);
+    $('#count-' + msgLocator).text(parseInt($('#count-' + msgLocator).text()) + 1)
+    $('#icn-' + msgLocator).addClass('icon-pulse')
+    removePulse()
+}
+
+function renderNewAgentMessage(chatID, agentID, msgBody, createdDt) {
+    let msgLocator = chatID + '-' + agentID;
+    $('#' + msgLocator).text(msgBody);
+    $('#time-' + msgLocator).prop('title', createdDt);   
+    $('#count-' + msgLocator).text(parseInt($('#count-' + msgLocator).text()) + 1)
+    $('#icn-' + msgLocator).addClass('icon-pulse')
+    removePulse()
+}
+
+function updateMessagesRelativeTime() {
+    $('.chat-relative-time').each(function(i, obj) {
+        if(obj.title){
+            $(this).text(calculateRelativeTime(obj.title))
+        }                
+    }); 
+}
+
+function calculateRelativeTime(date) {
+    let current = new Date();
+    let previous = new Date(date).getTime();
+    let msPerMinute = 60 * 1000;
+    let msPerHour = msPerMinute * 60;
+    let msPerDay = msPerHour * 24;
+    let msPerMonth = msPerDay * 30;
+    let msPerYear = msPerDay * 365;
+
+    let elapsed = current - previous;
+
+    if (elapsed < msPerMinute) {
+        return Math.round(elapsed/1000) + ' seconds ago';
+    } else if (elapsed < msPerHour) {
+        return Math.round(elapsed/msPerMinute) + ' minutes ago';
+    } else if (elapsed < msPerDay ) {
+        return Math.round(elapsed/msPerHour ) + ' hours ago';
+    } else if (elapsed < msPerMonth) {
+        return Math.round(elapsed/msPerDay) + ' days ago';
+    } else if (elapsed < msPerYear) {
+        return Math.round(elapsed/msPerMonth) + ' months ago';
+    } else {
+        return Math.round(elapsed/msPerYear ) + ' years ago';
+    }
 }
 
 function renderProjectInfo(projectName, departmentName, channelName){
@@ -130,9 +217,9 @@ function renderProjectInfo(projectName, departmentName, channelName){
     return html;
 }
 
-function renderClientInfo(clientName){
+function renderClientInfo(chatID, clientID, clientName, inMsgCount){
    let html = '';
-    
+   let countLocator = chatID + '-' + clientID; 
    if(!clientName){
       clientName = "...";
    }
@@ -142,18 +229,18 @@ function renderClientInfo(clientName){
                   '<i class="fa fa-user blue"></i>' +
               '</a>' +
               '<div class="media-body">' +
-                    '<a class="title" href="#">'+clientName +' </a>' +
-                    '<p><strong>$2300. </strong> Client Payed </p>' +
-                    '<p> <small>12 Sales Today</small>' +
+                    '<a class="title" href="/client/view?id='+ clientID +'" target="_blank">'+ clientName +'</a>' +
+                    '<p><i id="icn-'+ countLocator +'" class="fa fa-arrow-down red"></i> Sent Messages: <strong id="count-'+ countLocator +'">'+ inMsgCount +'</strong> </p>' +
+                    /*'<p> <small>12 Sales Today</small>' +*/
                     '</p>' +
               '</div>' +
           '</div>';
     return html; 
 }
 
-function renderAgentInfo(agentName) {
+function renderAgentInfo(chatID, agentID,  agentName, outMsgCount) {
    let html = '';
-   
+   let countLocator = chatID + '-' + agentID;
    if(!agentName){
       agentName = "...";
    }
@@ -164,26 +251,33 @@ function renderAgentInfo(agentName) {
                '</a>' +
                '<div class="media-body">' +
                      '<a class="title" href="#">'+ agentName +'</a>' +
-                         '<p><strong>$2300. </strong> Agent Avarage Sales </p>' +
-                         '<p> <small>12 Sales Today</small></p>' +
+                         '<p><i id="icn-'+ countLocator +'" class="fa fa-arrow-up green"></i> Sent Messages: <strong id="count-'+ countLocator +'">'+ outMsgCount +'</strong> </p>' +
+                         /*'<p> <small>12 Sales Today</small></p>' +*/
                '</div>' +
           '</div>'
    return html
 }
 
-function renderGeneralInfo(id, inMsgCount, outMsgCount) {
+function renderGeneralInfo(id) {
     let html = '';
     html+='<div class="media event d-flex justify-content-center">' +
-               '<a class="pull-left border-green profile_thumb">' +
+               /*'<a class="pull-left border-green profile_thumb">' +
                    '<i class="fa fa-comment green"></i>' +
-               '</a>' +
+               '</a>' +*/
                '<div class="">' +
-                    '<u><a href="/call/view?id=3260694" target="_blank">'+ id +'</a></u><br>' +
-                    '<span class="label label-danger" title="In messages">'+ inMsgCount +'</span> <br>' +
-                    '<span class="label label-info" title="Out messages">'+ outMsgCount +'</span>' +
+                    '<i class="fa fa-comment green"></i> <u><a href="/client-chat-crud/view?id='+ id +'" target="_blank">'+ id +'</a></u><br>' +
+                    /*'<span class="label label-danger" title="In messages">'+ inMsgCount +'</span> <br>' +
+                    '<span class="label label-info" title="Out messages">'+ outMsgCount +'</span>' +*/
                '</div>' +
           '</div>';
     return html;
+}
+
+function removePulse() {
+  setTimeout(function(){
+            $("i").removeClass('icon-pulse');
+            //....and whatever else you need to do
+    }, 10000);
 }
     
 JS;
@@ -196,8 +290,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
     <div class="card card-default">
         <div class="card-header"><i class="fa fa-list"></i> CLIENT CHAT REAL-TIME MONITORING (Updated: <i class="fa fa-clock-o"></i> <span id="page-updated-time">10:19:29</span>)</div>
         <div id="card-live-chat" class="card-body">
-
-
+        <!-- real-time content -->
         </div>
     </div>
 </div>

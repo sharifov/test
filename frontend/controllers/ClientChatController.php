@@ -602,7 +602,7 @@ class ClientChatController extends FController
 
             CentrifugoService::sendMsg(json_encode([
                 'chatsData' => $chatsData,
-            ]), 'realtimeClientChatChannel#' . Auth::id());
+            ]), 'realtimeClientChatChannel');
 
         } else {
             $this->layout = '@frontend/themes/gentelella_v2/views/layouts/main_tv';

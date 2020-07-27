@@ -8,6 +8,7 @@ use yii\data\ActiveDataProvider;
 use sales\model\clientChat\entity\ClientChat;
 use yii\data\ArrayDataProvider;
 use yii\data\SqlDataProvider;
+use yii\db\Query;
 
 class ClientChatSearch extends ClientChat
 {
@@ -199,6 +200,9 @@ class ClientChatSearch extends ClientChat
         $queryChats = static::find()->joinWith(['cchOwnerUser', 'cchClient as c', 'cchProject as p', 'cchDep as d', 'cchChannel as ch']);
         $queryChats->select([
             'cch_id',
+            'cch_client_id',
+            'cch_created_dt',
+            'cch_owner_user_id',
             'username',
             'CONCAT(c.first_name, " ", c.last_name ) as clientName',
             'p.name as project',
@@ -207,6 +211,7 @@ class ClientChatSearch extends ClientChat
             ]);
         $queryChats->where(['cch_status_id' => ClientChat::STATUS_GENERATED]);
         $queryChats->limit(10);
+        $queryChats->orderBy('cch_created_dt ASC');
         $chatCmd = $queryChats->createCommand();
         $clientChats = $chatCmd->queryAll();
 
@@ -216,11 +221,12 @@ class ClientChatSearch extends ClientChat
             'SUM(CASE WHEN ccm_user_id IS NOT NULL THEN 1 ELSE 0 END) AS outMsg',
             'SUM(CASE WHEN ccm_user_id IS NULL THEN 1 ELSE 0 END) AS inMsg',
         ]);
+
         $queryMessages->groupBy('ccm_cch_id');
         $msgCmd = $queryMessages->createCommand();
         $chatMessages = $msgCmd->queryAll();
 
-        //var_dump($chatMessages); die();
+        //var_dump($msgCmd); die();
 
         foreach ($clientChats as $key => $chat){
             $clientChats[$key]['outMsg'] = 0;
