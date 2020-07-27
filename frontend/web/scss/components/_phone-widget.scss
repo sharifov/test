@@ -178,18 +178,22 @@
 		top: 14px;
 		width: 100%;
 		.fa {
-			position: absolute;
-			right: 10px;
-			top: 50%;
-			transform: translateY(-50%);
+			// position: absolute;
+			// right: 10px;
+			// top: 50%;
+			// transform: translateY(-50%);
 			color: $white;
 			pointer-events: none;
+			margin: 0 10px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
 		}
 
 		&__phone {
 			font-size: 14px;
 			line-height: 18px;
-			width: calc(100% - #{$sp9});
+			width: calc(100% - 92px);
 
 			overflow: hidden;
     	text-overflow: ellipsis;
@@ -210,6 +214,7 @@
 			text-overflow: ellipsis;
 			overflow: hidden;
 			white-space: nowrap;
+			// margin-right: 30px;
 		}
 
 		// &__selected-project {
@@ -231,6 +236,9 @@
 			background: transparent;
 			height: 22px;
 
+			display: flex;
+			align-items: center;
+
 			.dropdown-menu {
 				background-color: $color-secondary-bg;
 				border: 0 none;
@@ -241,6 +249,7 @@
 
 				.current-number__identifier {
 					margin-left: 0;
+					// margin-right: 0;
 				}
 			}
 

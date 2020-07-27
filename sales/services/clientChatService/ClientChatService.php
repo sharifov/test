@@ -115,11 +115,12 @@ class ClientChatService
 
 	/**
 	 * @param ClientChatTransferForm $form
+	 * @return Department
 	 * @throws \Throwable
 	 */
-	public function transfer(ClientChatTransferForm $form): void
+	public function transfer(ClientChatTransferForm $form): Department
 	{
-		$this->transactionManager->wrap( function () use ($form) {
+		return $this->transactionManager->wrap( function () use ($form) {
 			$clientChat = $this->clientChatRepository->findById($form->cchId);
 
 			if ($clientChat->isClosed()) {
@@ -142,7 +143,6 @@ class ClientChatService
 			}
 
 			$botTransferChatResult = \Yii::$app->chatBot->transferDepartment($clientChat->cch_rid, $clientChat->ccv->ccvCvd->cvd_visitor_rc_id, $oldDepartment, $newDepartment->dep_name);
-			\Yii::info(VarDumper::dumpAsString($botTransferChatResult), 'info\transferDepartment');
 			if ($botTransferChatResult['error']) {
 				throw new \RuntimeException('[Chat Bot] ' . $botTransferChatResult['error']['message'] ?? 'Cant read error message from Chat Bot response');
 			}
@@ -166,6 +166,7 @@ class ClientChatService
 				$this->clientChatVisitorRepository->create($newClientChat->cch_id, $oldVisitor->cvd_id, $newClientChat->cch_client_id);
 			}
 
+			return $newDepartment;
 		});
 	}
 
