@@ -71,7 +71,7 @@ $userRcAuthToken = Auth::user()->userProfile ? Auth::user()->userProfile->up_rc_
     ]) ?>
 <?php endif; */ ?>
 <?php if ($clientChat): ?>
-    <iframe class="_rc-iframe" src="<?= $rcUrl ?>?readonly=true&layout=embedded&resumeToken=<?= $userRcAuthToken ?>&goto=<?= urlencode('/live/'. $clientChat->cch_rid . '?layout=embedded') ?>" id="_rc-<?= $clientChat->cch_id ?>" style="border: none; width: 100%; height: 100%;" ></iframe>
+    <iframe class="_rc-iframe" onload="removeCcLoadFromIframe()" src="<?= $rcUrl ?>?readonly=true&layout=embedded&resumeToken=<?= $userRcAuthToken ?>&goto=<?= urlencode('/live/'. $clientChat->cch_rid . '?layout=embedded') ?>" id="_rc-<?= $clientChat->cch_id ?>" style="border: none; width: 100%; height: 100%;" ></iframe>
 <?php else: ?>
 	<?= \yii\bootstrap4\Alert::widget([
 		'options' => [
