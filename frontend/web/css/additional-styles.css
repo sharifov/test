@@ -104,3 +104,7 @@
     width: auto;
     display:  inline;
 }
+.phone-widget__header-actions a[data-missed-calls]:before {
+    top: 1px;
+    left: 120%;
+}
