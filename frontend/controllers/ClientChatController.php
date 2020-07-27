@@ -208,6 +208,7 @@ class ClientChatController extends FController
 			'tab' => $tab,
 			'dep' => $dep,
 			'project' => $project,
+			'totalUnreadMessages' => $this->clientChatMessageService->getCountOfTotalUnreadMessages(Auth::id())
 		]);
 	}
 

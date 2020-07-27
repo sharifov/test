@@ -18,6 +18,7 @@ use yii\helpers\Html;
 /** @var $tab int */
 /** @var $dep int */
 /** @var $project int */
+/** @var $totalUnreadMessages int */
 
 ?>
 
@@ -27,7 +28,7 @@ use yii\helpers\Html;
         <?php foreach (ClientChat::getTabList() as $key => $item): ?>
             <div class="_cc_tab <?= $key === $tab ? 'active' : '' ?>" data-tab-id="<?= $key ?>"> <?= $item ?>
                 <?php if (ClientChat::isTabActive($key)): ?>
-                    <sup class="_cc_unread_messages"></sup>
+                    <sup class="_cc_unread_messages label label-danger" ><?= $totalUnreadMessages ?: '' ?></sup>
                 <?php endif; ?>
             </div>
         <?php endforeach; ?>

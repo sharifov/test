@@ -232,6 +232,7 @@ class ClientChatRequestService
 
 			$dto = ClientChatCloneDto::feelInOnCreateMessage($clientChat, $clientChatRequest->ccr_id);
 			$clientChat = $this->clientChatRepository->clone($dto);
+			$clientChat->cch_client_online = 1;
 			$this->clientChatRepository->save($clientChat);
 			$this->clientChatService->assignToChannel($clientChat);
 		}

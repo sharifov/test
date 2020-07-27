@@ -21,6 +21,7 @@ use yii\widgets\Pjax;
 /* @var $tab int */
 /* @var $dep int */
 /** @var $project int */
+/** @var $totalUnreadMessages int */
 
 $this->title = 'My Client Chat';
 //$this->params['breadcrumbs'][] = $this->title;
@@ -71,7 +72,8 @@ $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
                 'clientChatId' => $clientChat ? $clientChat->cch_id : null,
                 'tab' => $tab,
                 'dep' => $dep,
-                'project' => $project
+                'project' => $project,
+                'totalUnreadMessages' => $totalUnreadMessages,
             ]) ?>
         </div>
 		<?php Pjax::end() ?>
