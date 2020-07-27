@@ -363,10 +363,7 @@ $(document).on('click', '.cc_close', function (e) {
                 if (data.error) {
                     createNotify('Error', data.message, 'error');
                 } else {
-                    let params = new URLSearchParams(window.location.search);
-                    params.set('tab', data.tab);
-                    window.history.replaceState({}, '', '{$loadChannelsUrl}?'+params.toString());
-                    refreshChatPage(cchId);
+                    refreshChatPage(cchId, data.tab);
                     createNotify('Success', data.message, 'success');
                 }
             },
@@ -390,7 +387,12 @@ window.getChatHistory = function (cchId) {
     });
 }
 
-window.refreshChatPage = function (cchId) {
+window.refreshChatPage = function (cchId, tab) {
+    if (tab) {
+        let params = new URLSearchParams(window.location.search);
+        params.set('tab', tab);
+        window.history.replaceState({}, '', '{$loadChannelsUrl}?'+params.toString());
+    }
     pjaxReload({container: '#pjax-client-chat-channel-list'});
     $('#_rc-'+cchId).remove();
     $('.cc_transfer').remove();

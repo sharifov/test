@@ -465,8 +465,8 @@ class ClientChatController extends FController
 
 		try {
 			if ($form->load(Yii::$app->request->post()) && $form->validate()) {
-				$this->clientChatService->transfer($form);
-				return '<script>$("#modal-sm").modal("hide"); refreshChatPage('.$form->cchId.');</script>';
+				$newDepartment = $this->clientChatService->transfer($form);
+				return '<script>$("#modal-sm").modal("hide"); refreshChatPage('.$form->cchId.', '.ClientChat::TAB_ARCHIVE.'); createNotify("Success", "Chat successfully transferred to '.$newDepartment->dep_name.' department. ", "success")</script>';
 			}
 		} catch (\DomainException $e) {
 			$form->addError('depId', $e->getMessage());
