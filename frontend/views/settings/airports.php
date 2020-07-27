@@ -11,53 +11,45 @@ use yii\data\ActiveDataProvider;
 use yii\grid\GridView;
 use yii\helpers\Url;
 use frontend\models\search\AirportForm;
-use common\models\Airport;
+use common\models\Airports;
+use yii\widgets\Pjax;
 
-$template = <<<HTML
-<div class="pagination-container row" style="margin-bottom: 10px;">
-    <div class="col-sm-4" style="/*padding-top: 20px;*/">
-        {summary}
-    </div>
-    <div class="col-sm-8" style="text-align: right;">
-       {pager}
-    </div>
-</div>
-<div class="table-responsive">
-    {items}
-</div>
-HTML;
 
-/** @var Employee $user */
-$user = Yii::$app->user->identity;
+$this->title = 'Airports';
+$this->params['breadcrumbs'][] = $this->title;
 
 ?>
+<div class="settings-airports">
+<h1><?= Html::encode($this->title) ?></h1>
+<?php Pjax::begin(); ?>
 
-<div class="card card-default">
-    <div class="card-header">Airports</div>
-    <div class="card-body">
-        <?php if ($user->isAdmin()) : ?>
-            <div class="mb-20">
-                <?= Html::a('Sync Airports', '#', [
-                    'class' => 'btn-success btn sync',
-                    'data-url' => Url::to([
-                        'settings/sync',
-                        'type' => 'airports'
-                    ])
-                ]) ?>
-            </div>
-        <?php endif; ?>
-        <?= GridView::widget([
-            'dataProvider' => $dataProvider,
-            //'layout' => $template,
-            'filterModel' => $searchModel,
-            'columns' => [
-                'iata',
-                'name',
-                'city',
-                'country',
-                'dst'
-            ]
-        ])
-        ?>
-    </div>
+    <p>
+        <?= Html::a('Sync Airports', '#', [
+            'class' => 'btn-success btn sync',
+            'data-url' => Url::to([
+                'settings/sync',
+                'type' => 'airports'
+            ])
+        ]) ?>
+
+        <?= Html::a('Synchronization Airports from TravelServices', ['synchronization'], ['class' => 'btn btn-warning', 'data' => [
+            'confirm' => 'Are you sure you want synchronization all airports from TravelServices?',
+            'method' => 'post',
+        ],]) ?>
+
+    </p>
+
+    <?= GridView::widget([
+        'dataProvider' => $dataProvider,
+        'filterModel' => $searchModel,
+        'columns' => [
+            'iata',
+            'name',
+            'city',
+            'country',
+            'dst'
+        ]
+    ])
+    ?>
+    <?php Pjax::end(); ?>
 </div>

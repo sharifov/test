@@ -28,13 +28,18 @@ class AppHelper
     /**
      * @param Throwable $throwable
      * @param string $category
+     * @param bool $formatted
      */
-    public static function throwableLogger(\Throwable $throwable, string $category): void
+    public static function throwableLogger(\Throwable $throwable, string $category, bool $formatted = false): void
     {
+        $errorMessage = $formatted ?
+            self::throwableFormatter($throwable) :
+            VarDumper::dumpAsString($throwable, 20);
+
         if ($throwable->getCode() < 0) {
-            Yii::info(self::throwableFormatter($throwable),"info\{$category}");
+            Yii::info($errorMessage,"info\{$category}");
         } else {
-            Yii::error(self::throwableFormatter($throwable), $category);
+            Yii::error($errorMessage, $category);
         }
     }
 

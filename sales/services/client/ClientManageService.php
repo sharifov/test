@@ -293,7 +293,7 @@ class ClientManageService
 
 	public function getOrCreateByRcId(ClientCreateForm $form): Client
 	{
-		if ($client = Client::find()->joinWithCcVisitor()->joinWithCcVisitorData($form->rcId)->one()) {
+		if ($client = Client::find()->joinWithCcVisitor($form->rcId)->one()) {
 			return $client;
 		}
 		$client = Client::create(

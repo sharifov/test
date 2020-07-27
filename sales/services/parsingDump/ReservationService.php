@@ -3,7 +3,7 @@
 namespace sales\services\parsingDump;
 
 use common\models\Airline;
-use common\models\Airport;
+use common\models\Airports;
 use DateTime;
 use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
@@ -63,8 +63,8 @@ class ReservationService
                 $this->parseResult[$i]['arrivalDateTime'] = $parseData['arrival_date_time'];
                 $this->parseResult[$i]['flightNumber'] = $parseData['flight_number'];
                 $this->parseResult[$i]['bookingClass'] = $parseData['booking_class'];
-                $this->parseResult[$i]['departureCity'] = Airport::findIdentity($parseData['departure_airport_iata']);
-                $this->parseResult[$i]['arrivalCity'] = Airport::findIdentity($parseData['arrival_airport_iata']);
+                $this->parseResult[$i]['departureCity'] = Airports::findByIata($parseData['departure_airport_iata']);
+                $this->parseResult[$i]['arrivalCity'] = Airports::findByIata($parseData['arrival_airport_iata']);
                 $this->parseResult[$i]['flightDuration'] = $this->getFlightDuration(
                     $this->parseResult[$i]['departureDateTime'],
                     $this->parseResult[$i]['arrivalDateTime'],
@@ -117,11 +117,11 @@ class ReservationService
     /**
      * @param DateTime $departureDateTime
      * @param DateTime $arrivalDateTime
-     * @param Airport|null $departureCity
-     * @param Airport|null $arrivalCity
+     * @param Airports|null $departureCity
+     * @param Airports|null $arrivalCity
      * @return float|int
      */
-    private function getFlightDuration(DateTime $departureDateTime, DateTime $arrivalDateTime, ?Airport $departureCity, ?Airport $arrivalCity)
+    private function getFlightDuration(DateTime $departureDateTime, DateTime $arrivalDateTime, ?Airports $departureCity, ?Airports $arrivalCity)
     {
         if (isset($departureCity, $arrivalCity) && $departureCity->dst !== $arrivalCity->dst) {
             $flightDuration = ($arrivalDateTime->getTimestamp() - $departureDateTime->getTimestamp()) / 60;

@@ -2,11 +2,18 @@
 
 namespace frontend\controllers;
 
+use common\models\VisitorLog;
 use sales\auth\Auth;
+use sales\model\clientChat\entity\search\ClientChatQaSearch;
+use sales\model\clientChat\useCase\create\ClientChatRepository;
+use sales\model\clientChatMessage\entity\search\ClientChatMessageSearch;
+use sales\model\clientChatNote\entity\ClientChatNoteSearch;
+use sales\services\clientChatMessage\ClientChatMessageService;
 use Yii;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\entity\search\ClientChatSearch;
 use frontend\controllers\FController;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -14,12 +21,27 @@ use yii\db\StaleObjectException;
 
 class ClientChatCrudController extends FController
 {
+    private ClientChatRepository $clientChatRepository;
+
+    /**
+     * ClientChatCrudController constructor.
+     * @param $id
+     * @param $module
+     * @param ClientChatRepository $clientChatRepository
+     * @param array $config
+     */
+    public function __construct($id, $module, ClientChatRepository $clientChatRepository, $config = [])
+	{
+		parent::__construct($id, $module, $config);
+		$this->clientChatRepository = $clientChatRepository;
+	}
+
     /**
     * @return array
     */
     public function behaviors(): array
     {
-        return [
+        $behaviors = [
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
@@ -27,6 +49,7 @@ class ClientChatCrudController extends FController
                 ],
             ],
         ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**
@@ -34,24 +57,45 @@ class ClientChatCrudController extends FController
      */
     public function actionIndex(): string
     {
-        $searchModel = new ClientChatSearch();
+        $searchModel = new ClientChatQaSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-        return $this->render('index', [
+        return $this->render('../client-chat-qa/index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
     }
 
     /**
-     * @param integer $id
+     * @param $id
      * @return string
-     * @throws NotFoundHttpException if the model cannot be found
+     * @throws NotFoundHttpException
+     * @throws \yii\base\InvalidConfigException
      */
     public function actionView($id): string
     {
-        return $this->render('view', [
+        $clientChat = $this->clientChatRepository->findById($id);
+
+        $searchModel = new ClientChatMessageSearch();
+        $data[$searchModel->formName()]['ccm_cch_id'] = $id;
+        $dataProvider = $searchModel->search($data);
+
+        $searchModelNotes = new ClientChatNoteSearch();
+        $data[$searchModelNotes->formName()]['ccn_chat_id'] = $id;
+        $dataProviderNotes = $searchModelNotes->search($data);
+        $dataProviderNotes->setPagination(['pageSize' => 20]);
+
+        if ($clientChat->ccv && $clientChat->ccv->ccv_cvd_id) {
+            $visitorLog = VisitorLog::find()->byCvdId($clientChat->ccv->ccv_cvd_id)->orderBy(['vl_created_dt' => SORT_DESC])->one();
+        }
+
+        return $this->render('../client-chat-qa/view', [
             'model' => $this->findModel($id),
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'dataProviderNotes' => $dataProviderNotes,
+            'visitorLog' => $visitorLog ?? null,
+            'clientChatVisitorData' => $clientChat->ccv->ccvCvd ?? null,
         ]);
     }
 

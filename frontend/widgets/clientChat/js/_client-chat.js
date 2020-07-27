@@ -13,12 +13,15 @@ function toggleClientChatAccess(status) {
     if (status === true) {
         $('._cc-box').addClass('is-visible');
         $('.fab').addClass('is-visible');
+        $('#_cc-access-wg').addClass('is-visible');
     } else if (status === false) {
         $('._cc-box').removeClass('is-visible');
         $('.fab').removeClass('is-visible');
+        $('#_cc-access-wg').removeClass('is-visible');
     } else {
         $('._cc-box').toggleClass('is-visible');
         $('.fab').toggleClass('is-visible');
+        $('#_cc-access-wg').toggleClass('is-visible');
     }
     window.enableTimer();
 }

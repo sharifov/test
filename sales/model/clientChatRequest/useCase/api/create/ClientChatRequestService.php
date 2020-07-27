@@ -157,12 +157,11 @@ class ClientChatRequestService
 
 	private function guestDisconnected(ClientChatRequest $clientChatRequest): void
 	{
-		$visitor = $this->clientChatVisitorRepository->findByVisitorId($clientChatRequest->getClientRcId());
+		$visitorData = $this->clientChatVisitorDataRepository->findByVisitorRcId($clientChatRequest->getClientRcId());
 
-		if ($visitor->ccvClient) {
-			$clientChats = $this->clientChatRepository->findByClientId($visitor->ccv_client_id);
-
-			foreach ($clientChats as $clientChat) {
+		if ($visitorData->clientChatVisitors) {
+			foreach ($visitorData->clientChatVisitors as $chatVisitor) {
+				$clientChat = $this->clientChatRepository->findById($chatVisitor->ccv_cch_id);
 				if ($clientChat->cch_client_online) {
 					$clientChat->cch_client_online = 0;
 					$this->clientChatRepository->save($clientChat);
@@ -175,6 +174,7 @@ class ClientChatRequestService
 					}
 				}
 			}
+
 		}
 	}
 
@@ -199,8 +199,13 @@ class ClientChatRequestService
 
 		$visitorRcId = $clientChatRequest->getClientRcId();
 
-		$visitorData = $this->clientChatVisitorDataRepository->findOrCreateByVisitorId($visitorRcId);
-		$this->clientChatVisitorRepository->create($clientChat->cch_id, $visitorData->cvd_id, $clientChat->cch_client_id);
+		try {
+			$this->clientChatVisitorDataRepository->findByVisitorRcId($visitorRcId);
+		} catch (NotFoundException $e) {
+			$visitorData = $this->clientChatVisitorDataRepository->createByVisitorId($visitorRcId);
+			$this->clientChatVisitorRepository->create($clientChat->cch_id, $visitorData->cvd_id, $clientChat->cch_client_id);
+		}
+
 
 		if ($clientChat->cch_owner_user_id) {
 			Notifications::publish('clientChatUpdateClientStatus', ['user_id' => $clientChat->cch_owner_user_id], [

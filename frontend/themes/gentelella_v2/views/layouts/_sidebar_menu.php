@@ -190,7 +190,8 @@ $isSuperAdmin = $user->isSuperAdmin();
                         ['label' => 'Chat Cases', 'url' => ['/client-chat-case/index']],
                         ['label' => 'Visitor', 'url' => ['/client-chat-visitor-crud/index']],
                         ['label' => 'Visitor Data', 'url' => ['/client-chat-visitor-data-crud/index']],
-                    ]
+                        ['label' => 'Client Chat QA', 'url' => ['/client-chat-qa/index']],
+                    ],
                 ],
                 ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'list'],
                 ['label' => 'SMS Distrib List', 'url' => ['/sms-distribution-list/index'], 'icon' => 'list'],
@@ -345,7 +346,8 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Email List', 'url' => ['/email-list/index'], 'icon' => 'envelope-o'],
 
                 ['label' => 'Airlines', 'url' => ['/settings/airlines'], 'icon' => 'plane'],
-                ['label' => 'Airports', 'url' => ['/settings/airports'], 'icon' => 'plane'],
+                //['label' => 'Airports', 'url' => ['/settings/airports'], 'icon' => 'plane'],
+                ['label' => 'Airports', 'url' => ['/airports/index'], 'icon' => 'plane'],
                 ['label' => 'ACL (IP)', 'url' => ['/settings/acl'], 'icon' => 'user-secret'],
                 ['label' => 'API Users', 'url' => ['/api-user/index'], 'icon' => 'users'],
                 ['label' => 'Tasks', 'url' => ['/task/index'], 'icon' => 'list'],
@@ -532,6 +534,7 @@ $isSuperAdmin = $user->isSuperAdmin();
 
                 ['label' => 'Site Settings Category', 'url' => ['/setting-category/index'], 'icon' => 'list'],
                 ['label' => 'Site Settings', 'url' => ['/setting/index'], 'icon' => 'cogs'],
+                ['label' => 'Site ENV', 'url' => ['/setting/env'], 'icon' => 'info-circle'],
             ]
         ];
 

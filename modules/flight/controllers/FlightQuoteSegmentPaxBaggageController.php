@@ -6,6 +6,7 @@ use Yii;
 use modules\flight\models\FlightQuoteSegmentPaxBaggage;
 use modules\flight\models\search\FlightQuoteSegmentPaxBaggageSearch;
 use frontend\controllers\FController;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -19,7 +20,7 @@ class FlightQuoteSegmentPaxBaggageController extends FController
      */
     public function behaviors()
     {
-        return [
+        $behaviors = [
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
@@ -27,6 +28,7 @@ class FlightQuoteSegmentPaxBaggageController extends FController
                 ],
             ],
         ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**

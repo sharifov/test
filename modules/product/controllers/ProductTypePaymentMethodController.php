@@ -2,9 +2,11 @@
 
 namespace modules\product\controllers;
 
+use frontend\controllers\FController;
 use Yii;
 use modules\product\src\entities\productTypePaymentMethod\ProductTypePaymentMethod;
 use modules\product\src\entities\productTypePaymentMethod\search\ProductTypePaymentMethodSearch;
+use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -12,14 +14,14 @@ use yii\filters\VerbFilter;
 /**
  * ProductTypePaymentMethodController implements the CRUD actions for ProductTypePaymentMethod model.
  */
-class ProductTypePaymentMethodController extends Controller
+class ProductTypePaymentMethodController extends FController
 {
     /**
      * {@inheritdoc}
      */
     public function behaviors()
     {
-        return [
+        $behaviors = [
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
@@ -27,6 +29,7 @@ class ProductTypePaymentMethodController extends Controller
                 ],
             ],
         ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**

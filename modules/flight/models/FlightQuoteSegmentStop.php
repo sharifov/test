@@ -1,7 +1,7 @@
 <?php
 
 namespace modules\flight\models;
-use common\models\Airport;
+use common\models\Airports;
 use modules\flight\src\entities\flightQuoteSegmentStop\serializer\FlightQuoteSegmentStopSerializer;
 use modules\flight\src\useCases\flightQuote\create\FlightQuoteSegmentStopDTO;
 use Yii;
@@ -20,7 +20,7 @@ use yii\db\ActiveQuery;
  * @property string|null $qss_arrival_dt
  *
  * @property FlightQuoteSegment $qssQuoteSegment
- * @property Airport $locationAirport
+ * @property Airports $locationAirport
  */
 class FlightQuoteSegmentStop extends \yii\db\ActiveRecord
 {
@@ -116,7 +116,7 @@ class FlightQuoteSegmentStop extends \yii\db\ActiveRecord
 	 */
 	public function getLocationAirport(): ActiveQuery
 	{
-		return $this->hasOne(Airport::class, ['iata' => 'qss_location_iata']);
+		return $this->hasOne(Airports::class, ['iata' => 'qss_location_iata']);
 	}
 	
     public function serialize(): array

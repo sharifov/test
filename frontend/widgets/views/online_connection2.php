@@ -277,12 +277,12 @@ $js = <<<JS
                         
                             let activeChatId = localStorage.getItem('activeChatId');
                             
-                            if (activeChatId == obj.data.cchId && obj.data.cchUnreadMessages) {
+                            if (document.visibilityState == "visible" && window.name === 'chat' && activeChatId == obj.data.cchId && obj.data.cchUnreadMessages) {
                                 $.post('{$discardUnreadMessageUrl}', {cchId: activeChatId});
                                 return false;
                             }
                         
-                            if (obj.data.soundNotification) {
+                            if (document.visibilityState == "visible" && obj.data.soundNotification) {
                                 soundNotification('incoming_message');
                             }
                             

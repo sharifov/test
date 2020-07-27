@@ -8,6 +8,7 @@ use Yii;
 use frontend\models\UserFailedLogin;
 use frontend\models\search\UserFailedLoginSearch;
 use frontend\controllers\FController;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -23,7 +24,7 @@ class UserFailedLoginController extends FController
      */
     public function behaviors()
     {
-        return [
+        $behaviors = [
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
@@ -31,6 +32,7 @@ class UserFailedLoginController extends FController
                 ],
             ],
         ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**

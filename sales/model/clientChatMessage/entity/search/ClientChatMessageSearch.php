@@ -17,7 +17,7 @@ class ClientChatMessageSearch extends ClientChatMessage
     public function rules()
     {
         return [
-            [['ccm_id', 'ccm_client_id', 'ccm_user_id'], 'integer'],
+            [['ccm_id', 'ccm_client_id', 'ccm_user_id', 'ccm_cch_id'], 'integer'],
             [['ccm_rid', 'ccm_sent_dt', 'ccm_body'], 'safe'],
         ];
     }
@@ -56,7 +56,7 @@ class ClientChatMessageSearch extends ClientChatMessage
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 
@@ -66,6 +66,7 @@ class ClientChatMessageSearch extends ClientChatMessage
             'ccm_client_id' => $this->ccm_client_id,
             'ccm_user_id' => $this->ccm_user_id,
             'ccm_sent_dt' => $this->ccm_sent_dt,
+            'ccm_cch_id' => $this->ccm_cch_id,
         ]);
 
         $query->andFilterWhere(['ilike', 'ccm_rid', $this->ccm_rid])

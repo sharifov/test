@@ -6,7 +6,7 @@ use sales\access\ListsAccess;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use common\models\Lead;
-use common\models\Airport;
+use common\models\Airports;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\LeadSearch */
@@ -176,7 +176,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 $segments = $model->leadFlightSegments;
                 if ($segments) {
                     foreach ($segments as $sk => $segment) {
-                        $airport = Airport::findIdentity($segment->destination);
+                        $airport = Airports::findByIata($segment->destination);
                         if ($airport) {
                             return $airport->city . " (" . $segment->destination . ")";
                         }

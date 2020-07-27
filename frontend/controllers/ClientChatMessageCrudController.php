@@ -5,21 +5,21 @@ namespace frontend\controllers;
 use Yii;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatMessage\entity\search\ClientChatMessageSearch;
-use yii\web\Controller;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
  * ClientChatMessageCrudController implements the CRUD actions for ClientChatMessage model.
  */
-class ClientChatMessageCrudController extends Controller
+class ClientChatMessageCrudController extends FController
 {
     /**
      * {@inheritdoc}
      */
     public function behaviors()
     {
-        return [
+        $behaviors = [
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
@@ -27,6 +27,7 @@ class ClientChatMessageCrudController extends Controller
                 ],
             ],
         ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**

@@ -25,8 +25,7 @@ class LeadSendToGaListener
                 Yii::$app->queue_job->priority(20)->push($job);
             }
         } catch (\Throwable $throwable) {
-            \Yii::error(AppHelper::throwableFormatter($throwable),
-            'LeadSendToGaListener:Throwable');
+            AppHelper::throwableLogger($throwable, 'LeadSendToGaListener:Throwable');
         }
     }
 }
