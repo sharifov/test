@@ -206,4 +206,9 @@ class Conference extends \yii\db\ActiveRecord
     {
         return $this->cf_status_id === self::STATUS_END;
     }
+
+    public function isCreator(int $userId): bool
+    {
+        return $this->cf_created_user_id === $userId;
+    }
 }

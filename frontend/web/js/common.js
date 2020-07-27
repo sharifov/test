@@ -102,7 +102,7 @@ function insertPhoneNumber(phone, title) {
         $("#call-to-label").text(title);
     }
     soundNotification("button_tiny");
-    $('.dial__btn').attr('disabled', 'disabled').addClass('disabled');
+    $('.dialpad_btn_init').attr('disabled', 'disabled').addClass('disabled');
 }
 
 function soundNotification(fileName = 'button_tiny', volume = 0.3) {

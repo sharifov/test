@@ -1254,4 +1254,41 @@ class PhoneController extends FController
 
         return $call;
     }
+
+    public function actionSendDigit(): Response
+    {
+        try {
+            $sid = (string)Yii::$app->request->post('conference_sid');
+            $digit = (string)Yii::$app->request->post('digit');
+
+            if (!$sid) {
+                throw new BadRequestHttpException('Not found Conference SID in request');
+            }
+
+            if (!$digit && $digit !== '0') {
+                throw new BadRequestHttpException('Not found Digit in request');
+            }
+
+            if (!$conference = Conference::findOne(['cf_sid' => $sid])) {
+                throw new BadRequestHttpException('Not found Conference. Sid: ' . $sid);
+            }
+
+            if ($conference->isEnd()) {
+                throw new BadRequestHttpException('Conference is completed. Sid: ' . $sid);
+            }
+
+            if (!$conference->isCreator(Auth::id())) {
+                throw new BadRequestHttpException('You are not conference creator. Sid: ' . $sid);
+            }
+
+            $result = Yii::$app->communication->sendDigitToConference($sid, $digit);
+
+        } catch (\Throwable $e) {
+            $result = [
+                'error' => true,
+                'message' => $e->getMessage(),
+            ];
+        }
+        return $this->asJson($result);
+    }
 }

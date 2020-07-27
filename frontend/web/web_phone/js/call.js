@@ -709,9 +709,9 @@ var PhoneWidgetCall = function () {
 
     function dialpadCLickEvent() {
         $(document).on('click', '.call-pane-calling #wg-dialpad', function() {
-            //todo
-            return false;
-            $('.dial-popup').slideDown(150)
+            if ($(this).attr('data-active') === 'true') {
+                $('.dial-popup').slideDown(150)
+            }
         });
         $(document).on('click', '.dial-popup .additional-info__close', function() {
             $('.dial-popup').slideUp(150);
@@ -960,7 +960,8 @@ var PhoneWidgetCall = function () {
         removeIncomingRequest: removeIncomingRequest,
         sendHoldRequest: sendHoldRequest,
         sendUnHoldRequest: sendUnHoldRequest,
-        storage: storage
+        storage: storage,
+        callRequester: callRequester
     };
 }();
 
