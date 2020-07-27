@@ -19,9 +19,11 @@ use yii\widgets\Pjax;
 /* @var $clientChat \sales\model\clientChat\entity\ClientChat|null */
 /* @var $history ClientChatMessage|null */
 /* @var $tab int */
+/* @var $dep int */
+/** @var $project int */
 
 $this->title = 'My Client Chat';
-$this->params['breadcrumbs'][] = $this->title;
+//$this->params['breadcrumbs'][] = $this->title;
 
 $loadChannelsUrl = Url::to('/client-chat/index');
 ClientChatAsset::register($this);
@@ -67,7 +69,9 @@ $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
                 'page' => $page,
                 'channelId' => $channelId,
                 'clientChatId' => $clientChat ? $clientChat->cch_id : null,
-                'tab' => $tab
+                'tab' => $tab,
+                'dep' => $dep,
+                'project' => $project
             ]) ?>
         </div>
 		<?php Pjax::end() ?>
@@ -210,7 +214,6 @@ $(document).on('click', '._cc_tab', function () {
     }
     
     params.delete('chid');
-    params.delete('channelId');
     params.delete('page');
     params.set('tab', selectedTab);
     window.history.replaceState({}, '', '{$loadChannelsUrl}?'+params.toString());
