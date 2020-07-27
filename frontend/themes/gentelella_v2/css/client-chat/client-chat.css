@@ -6,9 +6,26 @@
 ._cc-wrapper ._cc_tabs_wrapper {
     display: flex;
     align-items: center;
-    height: 50px;
+    height: 30px;
     width: 100%;
 }
+._cc-wrapper ._cc_filter_wrapper {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+._cc-wrapper ._cc_filter_wrapper ._cc_filter {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    align-items: start;
+    justify-content: start;
+    border-right: 1px solid lightgray;
+    border-top: 1px solid lightgray;
+    padding: 5px;
+}
+
 ._cc-wrapper ._cc_tabs_wrapper ._cc_tab {
     width: 50%;
     display: flex;
@@ -164,7 +181,7 @@
 #_channel_list_wrapper {
     border: 1px solid lightgrey;
     border-radius: 3px;
-    height: calc(100vh - 138px);
+    height: calc(100vh - 85px);
 }
 
 #_cc-load {

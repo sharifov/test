@@ -19,9 +19,11 @@ use yii\widgets\Pjax;
 /* @var $clientChat \sales\model\clientChat\entity\ClientChat|null */
 /* @var $history ClientChatMessage|null */
 /* @var $tab int */
+/* @var $dep int */
+/** @var $project int */
 
 $this->title = 'My Client Chat';
-$this->params['breadcrumbs'][] = $this->title;
+//$this->params['breadcrumbs'][] = $this->title;
 
 $loadChannelsUrl = Url::to('/client-chat/index');
 ClientChatAsset::register($this);
@@ -67,7 +69,9 @@ $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
                 'page' => $page,
                 'channelId' => $channelId,
                 'clientChatId' => $clientChat ? $clientChat->cch_id : null,
-                'tab' => $tab
+                'tab' => $tab,
+                'dep' => $dep,
+                'project' => $project
             ]) ?>
         </div>
 		<?php Pjax::end() ?>
@@ -82,19 +86,21 @@ $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
         </div>
     </div>
     <div class="col-md-3">
-        <div id="_client-chat-info">
-            <?php if ($clientChat): ?>
-                <?= $this->render('partial/_client-chat-info', ['clientChat' => $clientChat, 'client' => $client]) ?>
-            <?php endif; ?>
-        </div>
+        <div id="_cc_additional_info_wrapper" style="position: relative;">
+            <div id="_client-chat-info">
+                <?php if ($clientChat): ?>
+                    <?= $this->render('partial/_client-chat-info', ['clientChat' => $clientChat, 'client' => $client]) ?>
+                <?php endif; ?>
+            </div>
 
-        <div id="_client-chat-note">
-            <?php if ($clientChat): ?>
-                <?php echo $this->render('partial/_client-chat-note', [
-                    'clientChat' => $clientChat,
-                    'model' => new ClientChatNote(),
-                ]) ?>
-            <?php endif; ?>
+            <div id="_client-chat-note">
+                <?php if ($clientChat): ?>
+                    <?php echo $this->render('partial/_client-chat-note', [
+                        'clientChat' => $clientChat,
+                        'model' => new ClientChatNote(),
+                    ]) ?>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 </div>
@@ -110,16 +116,17 @@ $clientChatId = $clientChat ? $clientChat->cch_id : 0;
 $discardUnreadMessageUrl = Url::to(['/client-chat/discard-unread-messages']);
 $js = <<<JS
 
+window.name = 'chat';
 $(document).ready( function () {
     let clientChatId = {$clientChatId};
 
-    window.name = 'chat';
     if (clientChatId) {
         localStorage.setItem('activeChatId', clientChatId);
     }
     
     $(window).on("beforeunload", function() { 
         localStorage.removeItem('activeChatId');
+        window.name = '';
     })
     
     document.addEventListener("visibilitychange", function () {
@@ -207,7 +214,6 @@ $(document).on('click', '._cc_tab', function () {
     }
     
     params.delete('chid');
-    params.delete('channelId');
     params.delete('page');
     params.set('tab', selectedTab);
     window.history.replaceState({}, '', '{$loadChannelsUrl}?'+params.toString());
@@ -272,30 +278,18 @@ $(document).on('click', '._cc-list-item', function () {
         cache: false,
         data: {cch_id: cch_id},
         beforeSend: function () {
-            $('#_client-chat-info').append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
+            $('#_cc_additional_info_wrapper').append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
         },
         success: function (data) {
             $('#_client-chat-info').html(data.html);
+            $('#_client-chat-note').html(data.noteHtml);
         },
         error: function (xhr) {
             createNotify('Error', xhr.responseText, 'error');
         },
-    });
-    $.ajax({
-        type: 'post',
-        url: '{$clientChatNoteUrl}',
-        dataType: 'json',
-        cache: false,
-        data: {cch_id: cch_id},
-        beforeSend: function () {
-            $('#_client-chat-note').append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
-        },
-        success: function (data) {
-            $('#_client-chat-note').html(data.html);
-        },
-        error: function (xhr) {
-            createNotify('Error', xhr.responseText, 'error');
-        },
+        complete: function () {
+            $('#_cc_additional_info_wrapper #_cc-load').remove();
+        }
     });
 });
 

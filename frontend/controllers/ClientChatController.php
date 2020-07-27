@@ -117,7 +117,7 @@ class ClientChatController extends FController
 		return ArrayHelper::merge(parent::behaviors(), $behaviors);
 	}
 
-	public function actionIndex(int $channelId = null, int $page = 1, int $chid = 0, int $tab = ClientChat::TAB_ACTIVE)
+	public function actionIndex(int $channelId = null, int $page = 1, int $chid = 0, int $tab = ClientChat::TAB_ACTIVE, int $dep = 0, int $project = 0)
 	{
 		$channelsQuery = ClientChatChannel::find()
 			->joinWithCcuc(Auth::id());
@@ -134,6 +134,14 @@ class ClientChatController extends FController
 				$query->byChannel($channelId);
 			} else {
 				$query->byChannelIds(ArrayHelper::getColumn($channels, 'ccc_id'));
+			}
+
+			if ($dep) {
+				$query->byDepartment($dep);
+			}
+
+			if ($project) {
+				$query->byProject($project);
 			}
 
 			if (ClientChat::isTabActive($tab)) {
@@ -198,6 +206,8 @@ class ClientChatController extends FController
 			'client' => $clientChat->cchClient ?? '',
 			'history' => $history ?? null,
 			'tab' => $tab,
+			'dep' => $dep,
+			'project' => $project,
 		]);
 	}
 
@@ -216,6 +226,10 @@ class ClientChatController extends FController
 			$result['html'] = $this->renderPartial('partial/_client-chat-info', [
 				'clientChat' => $clientChat,
 				'client' => $clientChat->cchClient,
+			]);
+			$result['noteHtml'] = $this->renderPartial('partial/_client-chat-note', [
+				'clientChat' => $clientChat,
+				'model' => new ClientChatNote(),
 			]);
 
 		} catch (NotFoundException $e) {
@@ -489,7 +503,7 @@ class ClientChatController extends FController
 	{
 		$cchId = Yii::$app->request->post('cchId');
 		$userId = Auth::id();
-		$this->clientChatMessageService->discardUnreadMessages($cchId, $userId);
+		$this->clientChatMessageService->discardUnreadMessages((int)$cchId, $userId);
 	}
 
 	public function actionSendOfferList(): string

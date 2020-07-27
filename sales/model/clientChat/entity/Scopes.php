@@ -85,6 +85,16 @@ class Scopes extends \yii\db\ActiveQuery
 		return $this->andWhere(['cch_client_id' => $id]);
 	}
 
+	public function byDepartment(int $dep): self
+	{
+		return $this->andWhere(['cch_dep_id' => $dep]);
+	}
+
+	public function byProject(int $id): self
+	{
+		return $this->andWhere(['cch_project_id' => $id]);
+	}
+
 	public function byUserGroupsRestriction(): self
     {
         if (!$this->fullAccess) {
@@ -129,4 +139,5 @@ class Scopes extends \yii\db\ActiveQuery
 	{
 		return $this->andWhere(['cch_id' => $id]);
 	}
+
 }

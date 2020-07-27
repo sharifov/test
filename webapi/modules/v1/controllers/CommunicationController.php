@@ -1176,7 +1176,14 @@ class CommunicationController extends ApiBaseController
 
         } else {*/
 
-        $call->c_call_status = $callData['CallStatus'];
+        if (isset($callData['Command']) && $callData['Command'] === 'change_call_status') {
+            if ($call->isStatusRinging()) {
+                $call->c_call_status = $callData['CallStatus'];
+            }
+        } else {
+            $call->c_call_status = $callData['CallStatus'];
+        }
+
         $call->setStatusByTwilioStatus($call->c_call_status);
             //$statusId = $call->setStatusByTwilioStatus($call->c_call_status);
             //$call->c_status_id = $statusId;
@@ -2397,6 +2404,7 @@ class CommunicationController extends ApiBaseController
                         'post' => $post,
                         'form' => $form->getAttributes(),
                     ]), 'API:Communication:voiceConferenceCallCallback');
+                    $conference = Conference::findOne(['cf_sid' => $form->ConferenceSid]);
                 }
             } catch (\Throwable $e) {
                 $conference = Conference::findOne(['cf_sid' => $form->ConferenceSid]);
@@ -2423,6 +2431,10 @@ class CommunicationController extends ApiBaseController
         }
 
         if (!$conference) {
+            Yii::error(VarDumper::dumpAsString([
+                'post' => $post,
+                'form' => $form->getAttributes(),
+            ]), 'API:Communication:voiceConferenceCallCallback:Not:SavedFound');
             $response['error'] = 'Not found and not saved Conference';
             return $response;
         }
