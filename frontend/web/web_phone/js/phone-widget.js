@@ -845,11 +845,16 @@ function toSelect(elem, obj, cb) {
     };
 
     // nodes
-    function selectedNode(value, project, id, projectId) {
+    function selectedNode(value, project, id, projectId, length) {
+        let chevronDown = '';
+        if (length > 1) {
+            chevronDown = '<i class="fa fa-chevron-down"></i>';
+        }
         return (
             '<button value="' + value + '" data-info-project="' + project + '" data-info-project-id="'+ projectId +'" class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+
             '<small class="current-number__phone current-number__selected-nr">' + formatPhoneNumber(value) + '</small>'+
             '<span class="current-number__identifier current-number__selected-project">' + project + '</span>'+
+            chevronDown +
             '</button>'
         );
     }
@@ -875,17 +880,18 @@ function toSelect(elem, obj, cb) {
             '<div class="dropdown-menu" >' +
             arr +
             '</div>';
-        if (optionList.length > 1) {
-            str = str + '<i class="fa fa-chevron-down"></i>';
-        }
+        // if (optionList.length > 1) {
+        //     str = str + '<i class="fa fa-chevron-down"></i>';
+        // }
         str = str + '</div>';
 
         return str;
     }
 
     function generateSelect(obj) {
+        let length = obj.options.length;
         $element.append(
-            containerNode(selectedNode(obj.selected.value, obj.selected.project, obj.selected.id, obj.selected.projectId), obj.options)
+            containerNode(selectedNode(obj.selected.value, obj.selected.project, obj.selected.id, obj.selected.projectId, length), obj.options)
         )
     }
 
