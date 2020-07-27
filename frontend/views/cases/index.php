@@ -1,6 +1,7 @@
 <?php
 
 use common\models\CaseSale;
+use common\models\Department;
 use common\models\Employee;
 use frontend\widgets\multipleUpdate\button\MultipleUpdateButtonWidget;
 use sales\access\EmployeeDepartmentAccess;
@@ -8,6 +9,7 @@ use sales\access\EmployeeProjectAccess;
 use sales\entities\cases\CaseCategory;
 use common\components\grid\cases\CasesSourceTypeColumn;
 use common\components\grid\cases\CasesStatusColumn;
+use sales\helpers\communication\StatisticsHelper;
 use yii\helpers\Html;
 use kartik\grid\GridView;
 use sales\entities\cases\Cases;
@@ -128,6 +130,11 @@ $gridId = 'cases-grid-id';
                         $str .= $case->client->clientPhones ? '<br><i class="fa fa-phone"></i> ' . implode(' <br><i class="fa fa-phone"></i> ', ArrayHelper::map($case->client->clientPhones, 'phone', 'phone')) . '' : '';
                     }
 
+                    $statistics = new StatisticsHelper($case->cs_id, StatisticsHelper::TYPE_CASE);
+                    $str .= '<br /><br />';
+                    $str .= Yii::$app->getView()->render('/partial/_communication_statistic_list',
+                        ['statistics' => $statistics->setCountAll()]);
+
                     return $str ?? '-';
                 },
                 'options' => [
@@ -147,7 +154,8 @@ $gridId = 'cases-grid-id';
                 'value' => static function (Cases $model) {
                     return $model->department ? $model->department->dep_name : '';
                 },
-                'filter' => EmployeeDepartmentAccess::getDepartments()
+//                'filter' => EmployeeDepartmentAccess::getDepartments()
+                'filter' => Department::getList(),
             ],
             [
                 'attribute' => 'cs_category_id',

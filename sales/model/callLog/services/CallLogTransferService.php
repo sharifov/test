@@ -58,7 +58,7 @@ class CallLogTransferService
                 Yii::error(VarDumper::dumpAsString([
                     'category' => 'saveRecord',
                     'model' => $callLogRecord->toArray(),
-                    'message' => $callLogRecord->getErrors()
+                    'errors' => $callLogRecord->getErrors()
                 ]), 'CallLogTransferService');
             }
         } catch (\Throwable $e) {
@@ -152,7 +152,7 @@ class CallLogTransferService
             return;
         }
 
-        Yii::error(VarDumper::dumpAsString(['message' => 'Call Id: ' . $call->c_id . ' not found rule for transfer Call to Call Log', 'Call' => $this->call]), 'CallLogTransferService');
+        Yii::info(VarDumper::dumpAsString(['message' => 'Call Id: ' . $call->c_id . ' not found rule for transfer Call to Call Log', 'Call' => $this->call]), 'info\CallLogTransferService');
         $this->createCallLogs();
     }
 
@@ -317,7 +317,7 @@ class CallLogTransferService
                 in_array(
                     $this->call['c_source_type_id'],
                     [
-                        Call::SOURCE_GENERAL_LINE, Call::SOURCE_DIRECT_CALL, Call::SOURCE_REDIRECT_CALL, Call::SOURCE_TRANSFER_CALL, Call::SOURCE_CONFERENCE_CALL, Call::SOURCE_REDIAL_CALL
+                        Call::SOURCE_GENERAL_LINE, Call::SOURCE_DIRECT_CALL, Call::SOURCE_REDIRECT_CALL, Call::SOURCE_TRANSFER_CALL, Call::SOURCE_CONFERENCE_CALL, Call::SOURCE_REDIAL_CALL,
                     ], false
                 )
                 ) {
@@ -364,6 +364,8 @@ class CallLogTransferService
                 $log->cl_year = date('Y', $time);
                 $log->cl_month = date('m', $time);
             }
+
+            $log->cl_conference_id = $this->call['c_conference_id'];
 
             if (!$log->save()) {
                 throw new \RuntimeException(VarDumper::dumpAsString(['model' => $log->toArray(), 'message' => $log->getErrors()]));

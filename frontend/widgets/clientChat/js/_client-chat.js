@@ -5,6 +5,7 @@ $(document).on('click', '#_cc-access-wg', function () {
 function toggleClientChatAccess() {
     $('._cc-box').toggleClass('is-visible');
     $('.fab').toggleClass('is-visible');
+    window.enableTimer();
 }
 
 $(document).on('click', '._cc-access-action', function (e) {
@@ -44,8 +45,6 @@ $(document).on('click', '._cc-access-action', function (e) {
 })
 
 function refreshClientChatWidget(obj) {
-    console.log(obj);
-
     if ((typeof obj !== "object") && !('data' in obj)) {
         console.error('refreshClientChatWidget:: provided param is not object or property data is undefined');
         return false;
@@ -61,15 +60,19 @@ function refreshClientChatWidget(obj) {
     switch (data.command) {
         case 'accept':
             if (document.visibilityState == "visible") {
-                window.open(data.url);
+                if (window.name === 'chat') {
+                    window.location.href = data.url;
+                } else {
+                    window.open(data.url);
+                }
             }
-            pjaxReload({container: '#client-chat-box-pjax'});
+            pjaxReload({container: '#client-chat-box-pjax', url: data.pjaxUrl});
             break;
         case 'skip':
-            pjaxReload({container: '#client-chat-box-pjax'});
+            pjaxReload({container: '#client-chat-box-pjax', url: data.pjaxUrl});
             break;
         case 'pending':
-            pjaxReload({container: '#client-chat-box-pjax'});
+            pjaxReload({container: '#client-chat-box-pjax', url: data.pjaxUrl});
             break;
         default:
             console.error('refreshClientChatWidget:: unknown command');

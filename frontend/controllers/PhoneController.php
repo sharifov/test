@@ -4,7 +4,10 @@ namespace frontend\controllers;
 
 use common\components\CommunicationService;
 use common\models\Call;
+use common\models\CallUserAccess;
 use common\models\ClientPhone;
+use common\models\Conference;
+use common\models\ConferenceParticipant;
 use common\models\Department;
 use common\models\DepartmentPhoneProject;
 use common\models\Employee;
@@ -15,6 +18,7 @@ use common\models\UserProfile;
 use common\models\UserProjectParams;
 use sales\auth\Auth;
 use sales\entities\cases\Cases;
+use sales\model\call\useCase\conference\create\CreateCallForm;
 use sales\model\user\entity\userStatus\UserStatus;
 use yii\base\Exception;
 use yii\helpers\Html;
@@ -49,7 +53,7 @@ class PhoneController extends FController
         }*/
 
         $tw_number = '+15596489977';
-        $client = 'seller'.$user->id;
+        $client = 'seller' . $user->id;
         return $this->render('index', [
             'client' => $client,
             'fromAgentPhone' => $tw_number,
@@ -78,25 +82,25 @@ class PhoneController extends FController
         $project = Project::findOne($project_id);
 
         $userId = \Yii::$app->user->id; //identity;
-		$case = Cases::findOne(['cs_id' => $case_id]);
+        $case = Cases::findOne(['cs_id' => $case_id]);
 
         $fromPhoneNumbers = [];
         if ($case && $case->isDepartmentSupport()) {
-			$departmentPhones = DepartmentPhoneProject::find()->where(['dpp_project_id' => $project_id, 'dpp_dep_id' => $case->cs_dep_id, 'dpp_default' => DepartmentPhoneProject::DPP_DEFAULT_TRUE])->withPhoneList()->all();
-			foreach ($departmentPhones as $departmentPhone) {
+            $departmentPhones = DepartmentPhoneProject::find()->where(['dpp_project_id' => $project_id, 'dpp_dep_id' => $case->cs_dep_id, 'dpp_default' => DepartmentPhoneProject::DPP_DEFAULT_TRUE])->withPhoneList()->all();
+            foreach ($departmentPhones as $departmentPhone) {
 //				$fromPhoneNumbers[$departmentPhone->dpp_phone_number] = $departmentPhone->dppProject->name . ' (' . $departmentPhone->dpp_phone_number . ')';
-				$fromPhoneNumbers[$departmentPhone->getPhone()] = $departmentPhone->dppProject->name . ' (' . $departmentPhone->getPhone() . ')';
-			}
-		} else if ($userParams = UserProjectParams::find()->where(['upp_user_id' => $userId])->withPhoneList()->all()) {
+                $fromPhoneNumbers[$departmentPhone->getPhone()] = $departmentPhone->dppProject->name . ' (' . $departmentPhone->getPhone() . ')';
+            }
+        } else if ($userParams = UserProjectParams::find()->where(['upp_user_id' => $userId])->withPhoneList()->all()) {
             foreach ($userParams as $param) {
 //                if(!$param->upp_tw_phone_number) {
-                if(!$param->getPhone()) {
+                if (!$param->getPhone()) {
                     continue;
                 }
 //                $fromPhoneNumbers[$param->upp_tw_phone_number] = $param->uppProject->name . ' (' . $param->upp_tw_phone_number . ')';
                 $fromPhoneNumbers[$param->getPhone()] = $param->uppProject->name . ' (' . $param->getPhone() . ')';
 
-                if($project_id  && $project_id == $param->upp_project_id) {
+                if ($project_id && $project_id == $param->upp_project_id) {
 //                    $selectProjectPhone = $param->upp_tw_phone_number;
                     $selectProjectPhone = $param->getPhone();
                 }
@@ -107,7 +111,7 @@ class PhoneController extends FController
         $model = null;
 
         $userPhone = ClientPhone::find()->where(['phone' => $phone_number])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-        if($userPhone) {
+        if ($userPhone) {
             $model = $userPhone->client;
         }
 
@@ -152,7 +156,7 @@ class PhoneController extends FController
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
 
-        $username = 'seller'. $user->id;
+        $username = 'seller' . $user->id;
         //VarDumper::dump($username, 10, true); exit;
         $data = Yii::$app->communication->getJwtTokenCache($username, true);
         return $data;
@@ -166,10 +170,11 @@ class PhoneController extends FController
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $out = ['error' => '', 'data' => []];
 
+        $userId = Auth::id();
+
         // update call status when agent reject call
         if (Yii::$app->request->getIsGet()) {
             //$get_sid = Yii::$app->request->get('sid');
-            $userId = (int) Yii::$app->request->get('user_id');
 
             $call = Call::find()->where(['c_created_user_id' => $userId])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
             if ($call) {
@@ -206,16 +211,16 @@ class PhoneController extends FController
         }
 
 
-        if($call_sid && $call_from && $call_to) {
+        if ($call_sid && $call_from && $call_to) {
             $call = Call::find()->where(['c_call_sid' => $call_sid])->limit(1)->one();
-            if(!$call) {
+            if (!$call) {
                 $call = new Call();
                 $call->c_call_sid = $call_sid;
                 $call->c_from = $call_from;
                 $call->c_to = $call_to;
                 $call->c_created_dt = date('Y-m-d H:i:s');
-                $call->c_created_user_id = Yii::$app->user->id;
-                $call->c_call_type_id = Call::CALL_TYPE_OUT;
+                $call->c_created_user_id = $userId;
+                $call->setTypeOut();
 
                 // $call->c_call_status = Call::CALL_STATUS_RINGING;
 
@@ -226,22 +231,22 @@ class PhoneController extends FController
 
             }
 
-            if(!$call->c_lead_id && $lead_id) {
-                $call->c_lead_id = (int) $lead_id;
+            if (!$call->c_lead_id && $lead_id) {
+                $call->c_lead_id = (int)$lead_id;
             }
 
-            if(!$call->c_case_id && $case_id) {
-                $call->c_case_id = (int) $case_id;
+            if (!$call->c_case_id && $case_id) {
+                $call->c_case_id = (int)$case_id;
             }
 
-            if(!$call->c_project_id && $project_id) {
-                $call->c_project_id = (int) $project_id;
+            if (!$call->c_project_id && $project_id) {
+                $call->c_project_id = (int)$project_id;
             }
 
             $call->c_call_status = $call_status;
             $call->setStatusByTwilioStatus($call->c_call_status);
 
-            if(!$call->save()) {
+            if (!$call->save()) {
                 $out['error'] = VarDumper::dumpAsString($call->errors);
                 Yii::error($out['error'], 'PhoneController:actionAjaxSaveCall:Call:save');
             } else {
@@ -269,14 +274,14 @@ class PhoneController extends FController
             return $this->asJson(['success' => false, 'message' => 'Declined Call. Reason: Blacklisted']);
         }
         $callTo = ClientPhone::findOne(['phone' => $phone]);
-		$response = [
-			'callToName' => '',
-			'phone' => $phone,
-			'success' => true
-		];
+        $response = [
+            'callToName' => '',
+            'phone' => $phone,
+            'success' => true
+        ];
         if ($callTo) {
-			$response['callToName'] = $callTo->client->first_name . ' ' . $callTo->client->last_name;
-		}
+            $response['callToName'] = $callTo->client->first_name . ' ' . $callTo->client->last_name;
+        }
         return $this->asJson($response);
     }
 
@@ -289,7 +294,7 @@ class PhoneController extends FController
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         //sleep(1);
         try {
-            $userId = (int) Yii::$app->request->post('user_id');
+            $userId = (int)Yii::$app->request->post('user_id');
             $isReady = false;
 
             if ($userId) {
@@ -351,6 +356,17 @@ class PhoneController extends FController
                 throw new Exception('Error: Not found Call To (actionAjaxCallRedirect)', 5);
             }
 
+            if (!$originalCall = Call::find()->andWhere(['c_call_sid' => $sid])->one()) {
+                throw new Exception('Error: Not found Call ' . $sid . '(actionAjaxCallRedirect)', 6);
+            }
+
+            if ($originalCall->isJoin()) {
+                throw new Exception('Error: Cant redirect Join Call', 7);
+            }
+
+            if (!$originalCall->isOwner(Auth::id())) {
+                throw new BadRequestHttpException('Is not your Call', 8);
+            }
 
 //            $to_id = (int)Yii::$app->request->post('to_id');
 //            $projectId = (int)Yii::$app->request->post('project_id');
@@ -360,7 +376,6 @@ class PhoneController extends FController
 
             $firstTransferToNumber = false;
 
-            $originalCall = Call::find()->andWhere(['c_call_sid' => $sid])->one();
             $originalCall->c_is_transfer = true;
 
             $lastChild = null;
@@ -368,25 +383,39 @@ class PhoneController extends FController
             $createdUserId = null;
 
             if ($originalCall->isGeneralParent()) {
-                if ($lastChild = Call::find()->lastChild($originalCall->c_id)->one()) {
+                if ($lastChild = Call::find()->lastChild($originalCall->c_id)->andWhere(['<>', 'c_call_type_id', Call::CALL_TYPE_JOIN])->one()) {
                     $createdUserId = $lastChild->c_created_user_id;
                     $lastChild->c_source_type_id = Call::SOURCE_TRANSFER_CALL;
                     $lastChild->c_created_user_id = null;
                     $lastChild->c_dep_id = null;
+                    $lastChild->c_conference_id = null;
+                    $lastChild->c_conference_sid = null;
                     $lastChild->c_is_transfer = true;
                     $sid = $lastChild->c_call_sid;
                     $firstTransferToNumber = true;
                 }
             } else {
-                $createdUserId = $originalCall->cParent->c_created_user_id;
-                $originalCall->cParent->c_created_user_id = null;
-                $originalCall->cParent->c_dep_id = null;
-                $originalCall->cParent->c_is_transfer = true;
-                $originalCall->cParent->c_source_type_id = Call::SOURCE_TRANSFER_CALL;
-                if (!$originalCall->cParent->c_group_id) {
-                    $originalCall->cParent->c_group_id = $originalCall->c_id;
+                if ($originalCall->isOut()) {
+                    if (!$parent = Call::find()->firstChild($originalCall->c_parent_id)->one()) {
+                        return [
+                            'error' => true,
+                            'message' => 'Not found Out Parent Call',
+                        ];
+                    }
+                } else {
+                    $parent = $originalCall->cParent;
                 }
-                if (!$originalCall->cParent->save()) {
+                $createdUserId = $parent->c_created_user_id;
+                $parent->c_created_user_id = null;
+                $parent->c_dep_id = null;
+                $parent->c_conference_id = null;
+                $parent->c_conference_sid = null;
+                $parent->c_is_transfer = true;
+                $parent->c_source_type_id = Call::SOURCE_TRANSFER_CALL;
+                if (!$parent->c_group_id) {
+                    $parent->c_group_id = $originalCall->c_id;
+                }
+                if (!$parent->save()) {
                     Yii::error('Can save parent call', 'PhoneController:actionAjaxCallRedirect');
                 }
             }
@@ -421,18 +450,52 @@ class PhoneController extends FController
             }
 
             $communication = \Yii::$app->communication;
-            $resultApi = $communication->callRedirect($sid, $type, $from, $to, $firstTransferToNumber);
 
-            if ($resultApi && isset($resultApi['data']['result']['sid'])) {
+//            Yii::error(VarDumper::dumpAsString([$sid, $type, $from, $to, $firstTransferToNumber]));
 
-                $result = [
-                    'error' => false,
-                    'message' => 'ok',
-                    'sid' => $resultApi['data']['result']['sid']
-                ];
+            if ($originalCall->isConferenceType()) {
+
+                if ($originalCall->cParent) {
+                    if ($originalCall->isOut()) {
+                        if (!$firstChild = Call::find()->firstChild($originalCall->c_parent_id)->andWhere(['<>', 'c_call_type_id', Call::CALL_TYPE_JOIN])->one()) {
+                            throw new Exception('API Error: PhoneController/actionAjaxCallRedirect: Not found first child out conference call ', 10);
+                        }
+                        $sid = $firstChild->c_call_sid;
+                    } else {
+                        $sid = $originalCall->cParent->c_call_sid;
+                    }
+
+                } else {
+                    if (!$firstChild = Call::find()->firstChild($originalCall->c_id)->andWhere(['<>', 'c_call_type_id', Call::CALL_TYPE_JOIN])->one()) {
+                        throw new Exception('API Error: PhoneController/actionAjaxCallRedirect: Not found first child conference call ', 10);
+                    }
+                    $sid = $firstChild->c_call_sid;
+                }
+
+                $resultApi = $communication->callForward($sid, $from, $to);
+                if ($resultApi && isset($resultApi['result']['sid'])) {
+                    $result = [
+                        'error' => false,
+                        'message' => 'ok',
+                        'sid' => $resultApi['result']['sid']
+                    ];
+                } else {
+                    throw new Exception('API Error: PhoneController/actionAjaxCallRedirect: Not found resultApi[result][sid] - ' . VarDumper::dumpAsString($resultApi), 10);
+                }
 
             } else {
-                throw new Exception('API Error: PhoneController/actionAjaxCallRedirect: Not found resultApi[data][result][sid] - ' . VarDumper::dumpAsString($resultApi), 10);
+                $resultApi = $communication->callRedirect($sid, $type, $from, $to, $firstTransferToNumber);
+                if ($resultApi && isset($resultApi['data']['result']['sid'])) {
+
+                    $result = [
+                        'error' => false,
+                        'message' => 'ok',
+                        'sid' => $resultApi['data']['result']['sid']
+                    ];
+
+                } else {
+                    throw new Exception('API Error: PhoneController/actionAjaxCallRedirect: Not found resultApi[data][result][sid] - ' . VarDumper::dumpAsString($resultApi), 10);
+                }
             }
 
 //            if ($to_id > 0) {
@@ -475,7 +538,7 @@ class PhoneController extends FController
 
         } catch (\Throwable $e) {
 
-            $message = 'Error: ' . $e->getMessage() . ', Code: ' . $e->getCode() .  ',   ' . $e->getFile() . ':' . $e->getLine();
+            $message = 'Error: ' . $e->getMessage() . ', Code: ' . $e->getCode() . ',   ' . $e->getFile() . ':' . $e->getLine();
             $result = [
                 'error' => true,
                 'message' => $message,
@@ -500,7 +563,7 @@ class PhoneController extends FController
         $sid = Yii::$app->request->post('sid');
         // $userId = (int) Yii::$app->request->post('user_id');
 
-        $userId = Yii::$app->user->id;
+        $userId = Auth::id();
         $users = [];
         $error = null;
 
@@ -510,21 +573,22 @@ class PhoneController extends FController
                 throw new \Exception('Error: CallSID is empty', 2);
             }
 
-            if (!$userId) {
-                throw new \Exception('Error: UserID is empty', 3);
-            }
+//            $call = Call::findOne(['c_call_sid' => $sid]);
 
-            $call = Call::findOne(['c_call_sid' => $sid]);
-
-            if (!$call) {
-                $call = Call::find()->where(['c_created_user_id' => $userId])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
-            }
+//            if (!$call) {
+                $call = Call::find()
+                    ->bySid($sid)
+                    ->byCreatedUser($userId)
+                    //todo status
+//                    ->andWhere(['c_status_id' => [Call::STATUS_IN_PROGRESS]])
+                    ->limit(1)->one();
+//            }
 
             if (!$call) {
                 throw new \Exception('Call not found by callSID: ' . $sid, 5);
             }
 
-            $project_id =  $call->c_project_id;
+            $project_id = $call->c_project_id;
 
             if (!$project_id) {
                 throw new \Exception('Project id not found in call by callSID: ' . $sid);
@@ -532,10 +596,10 @@ class PhoneController extends FController
 
             $userList = Employee::getUsersForRedirectCall($call);
 
-            if($userList) {
+            if ($userList) {
                 foreach ($userList as $userItem) {
-                    $agentId = (int) $userItem['tbl_user_id'];
-                    if($agentId === $userId) {
+                    $agentId = (int)$userItem['tbl_user_id'];
+                    if ($agentId === $userId) {
                         continue;
                     }
                     $userModel = \common\models\Employee::findOne($agentId);
@@ -554,7 +618,10 @@ class PhoneController extends FController
         }
 
 
-        $departments = DepartmentPhoneProject::find()->where(['dpp_project_id' => $call->c_project_id, 'dpp_enable' => true])->andWhere(['>', 'dpp_dep_id', 0])->withPhoneList()->orderBy(['dpp_dep_id' => SORT_ASC])->all();
+        $departments = [];
+        if ($call) {
+            $departments = DepartmentPhoneProject::find()->where(['dpp_project_id' => $call->c_project_id, 'dpp_enable' => true])->andWhere(['>', 'dpp_dep_id', 0])->withPhoneList()->orderBy(['dpp_dep_id' => SORT_ASC])->all();
+        }
         $phones = \Yii::$app->params['settings']['support_phone_numbers'] ?? [];
 
         return $this->renderAjax('ajax_redirect_call', [
@@ -579,7 +646,7 @@ class PhoneController extends FController
 
             $sid = Yii::$app->request->post('sid');
             $type = Yii::$app->request->post('type');
-            $id = (int) Yii::$app->request->post('id');
+            $id = (int)Yii::$app->request->post('id');
 
             //$userId = Yii::$app->request->post('user_id');
 
@@ -595,19 +662,26 @@ class PhoneController extends FController
                 throw new BadRequestHttpException('Not found Type in request', 4);
             }
 
-
             //$originCall = Call::find()->where(['c_created_user_id' => Yii::$app->user->id/*, 'c_call_status' => Call::CALL_STATUS_IN_PROGRESS*/])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
 
-            $originCall = Call::find()->where(['c_call_sid' => $sid])->one();
-
-            if (!$originCall) {
-                $originCall = Call::find()->where(['c_call_sid' => $sid])->one();
-            }
+            $originCall = Call::find()
+                ->bySid($sid)
+                ->byCreatedUser(Auth::id())
+                //todo status
+//                ->andWhere(['c_status_id' => [Call::STATUS_IN_PROGRESS]])
+                ->limit(1)->one();
 
             if (!$originCall) {
                 throw new BadRequestHttpException('Not found Call', 5);
             }
 
+            if ($originCall->isJoin()) {
+                throw new Exception('Error: Cant redirect Join Call', 7);
+            }
+
+            if (!$originCall->isOwner(Auth::id())) {
+                throw new BadRequestHttpException('Is not your Call', 8);
+            }
 
             $data = [];
 
@@ -635,14 +709,15 @@ class PhoneController extends FController
 
             $communication = \Yii::$app->communication;
 
-            $communication->updateRecordingStatus($sid, Call::TW_RECORDING_STATUS_PAUSED);
+            if (!$originCall->isConferenceType()) {
+                $communication->updateRecordingStatus($sid, Call::TW_RECORDING_STATUS_PAUSED);
+            }
 
             //$updateData = ['status' => 'completed'];
             /*$updateData = [
                 'method'    =>  'POST',
                 'url'       =>  Yii::$app->params['url_api_address'] . '/twilio/redirect-call-user?user_id='.$user->id
             ];*/
-
 
 
             $callbackUrl = Yii::$app->params['url_api_address'] . '/twilio/redirect-call?id=' . $id . '&type=' . $type;
@@ -654,32 +729,49 @@ class PhoneController extends FController
 
             if ($originCall->cParent) {
 
-                $originCall->c_is_transfer = true;
-                $originCall->cParent->c_is_transfer = true;
-
-                if (!$originCall->c_group_id) {
-                    $groupId = $originCall->c_id;
-                    $originCall->c_group_id = $groupId;
-                    $originCall->cParent->c_group_id = $groupId;
+                if ($originCall->isOut()) {
+                    $parent = Call::find()->firstChild($originCall->c_parent_id)->one();
+                } else {
+                    $parent = $originCall->cParent;
                 }
 
-                $originCall->cParent->c_created_user_id = null;
+                if ($parent) {
+                    $originCall->c_is_transfer = true;
+                    $parent->c_is_transfer = true;
 
-                if ($createdUserId) {
-                    UserStatus::updateIsOnnCall($createdUserId, $groupId);
+                    if (!$originCall->c_group_id) {
+                        $groupId = $originCall->c_id;
+                        $originCall->c_group_id = $groupId;
+                        $parent->c_group_id = $groupId;
+                    }
+
+                    $parent->c_created_user_id = null;
+                    $parent->c_conference_id = null;
+                    $parent->c_conference_sid = null;
+
+                    if ($createdUserId) {
+                        UserStatus::updateIsOnnCall($createdUserId, $groupId);
+                    }
+
+                    if (!$originCall->save()) {
+                        Yii::error('Cant save original call', 'PhoneController:AjaxCallTransfer');
+                    }
+                    if (!$parent->save()) {
+                        Yii::error('Cant save original->parent call', 'PhoneController:AjaxCallTransfer');
+                    }
+
+                    $callSid = $parent->c_call_sid;
+                    $result = $communication->redirectCall($callSid, $data, $callbackUrl);
+                } else {
+                    $result['error'] = 'Not found originCall->cParent->firstChild, Origin CallSid: ' . $originCall->c_call_sid;
                 }
 
-                if (!$originCall->save()) {
-                    Yii::error('Cant save original call', 'PhoneController:AjaxCallTransfer');
-                }
-                if (!$originCall->cParent->save()) {
-                    Yii::error('Cant save original->parent call', 'PhoneController:AjaxCallTransfer');
-                }
 
-                $callSid = $originCall->cParent->c_call_sid;
-                $result = $communication->redirectCall($callSid, $data, $callbackUrl);
             } else {
-                $childCall = Call::find()->where(['c_parent_id' => $originCall->c_id])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
+                $childCall = Call::find()
+                    ->andWhere(['c_parent_id' => $originCall->c_id])
+                    ->andWhere(['<>', 'c_call_type_id', Call::CALL_TYPE_JOIN])
+                    ->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
 
                 if ($childCall) {
 
@@ -693,6 +785,8 @@ class PhoneController extends FController
                     }
 
                     $childCall->c_created_user_id = null;
+                    $childCall->c_conference_id = null;
+                    $childCall->c_conference_sid = null;
 
                     if ($createdUserId) {
                         UserStatus::updateIsOnnCall($createdUserId, $groupId);
@@ -728,15 +822,14 @@ class PhoneController extends FController
 
             $call = null;
 
-            if(!isset($result['error'])) {
+            if (!isset($result['error'])) {
                 $result['error'] = false;
             }
 
-           // \Yii::info(VarDumper::dumpAsString([$result, \Yii::$app->request->post()]), 'PhoneController:actionAjaxCallRedirectToAgent');
+            // \Yii::info(VarDumper::dumpAsString([$result, \Yii::$app->request->post()]), 'PhoneController:actionAjaxCallRedirectToAgent');
 
 
-
-                //$call = Call::findOne(['c_id' => $sid]);
+            //$call = Call::findOne(['c_id' => $sid]);
 //                if ($result && isset($result['data'], $result['data']['call'], $result['data']['call']['sid'])) {
 //
 //                    $dataCall = $result['data']['call'];
@@ -771,12 +864,12 @@ class PhoneController extends FController
 //
 //                }
 
-                /*if($call) {
-                    Notifications::socket(null, $call->c_lead_id, 'incomingCall', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'snr' => $call->c_sequence_number], true);
-                }*/
+            /*if($call) {
+                Notifications::socket(null, $call->c_lead_id, 'incomingCall', ['status' => $call->c_call_status, 'duration' => $call->c_call_duration, 'snr' => $call->c_sequence_number], true);
+            }*/
 
 
-           // \Yii::info(VarDumper::dumpAsString(['call' => $call ? $call->attributes  : null, 'sid' => $sid, 'updateData' => $updateData, 'result' => $result, 'post' => \Yii::$app->request->post()]), 'info\PhoneController:actionAjaxCallRedirectToAgent');
+            // \Yii::info(VarDumper::dumpAsString(['call' => $call ? $call->attributes  : null, 'sid' => $sid, 'updateData' => $updateData, 'result' => $result, 'post' => \Yii::$app->request->post()]), 'info\PhoneController:actionAjaxCallRedirectToAgent');
 
         } catch (\Throwable $e) {
             $result = [
@@ -787,4 +880,378 @@ class PhoneController extends FController
         return $result;
     }
 
+    public function actionAjaxHangup(): Response
+    {
+        try {
+
+            $sid = (string)Yii::$app->request->post('sid');
+
+            if (!$sid) {
+                $id = (int)Yii::$app->request->post('id');
+                if (!$id) {
+                    throw new BadRequestHttpException('Not found Call SID or ID in request');
+                } else {
+                    if (!$call = Call::findOne(['c_id' => $id])) {
+                        throw new BadRequestHttpException('Not found Call. ID: ' . $id);
+                    }
+                }
+            } else {
+                if (!$call = Call::findOne(['c_call_sid' => $sid])) {
+                    throw new BadRequestHttpException('Not found Call. Sid: ' . $sid);
+                }
+            }
+
+            if (!$call->isOwner(Auth::id())) {
+                throw new BadRequestHttpException('Is not your Call');
+            }
+
+            if (!($call->isStatusInProgress() || $call->isStatusRinging())) {
+                throw new BadRequestHttpException('Call status is not correct');
+            }
+
+            $result = Yii::$app->communication->hangUp($call->c_call_sid);
+
+        } catch (\Throwable $e) {
+            $result = [
+                'error' => true,
+                'message' => $e->getMessage(),
+            ];
+        }
+        return $this->asJson($result);
+    }
+
+    public function actionAjaxHoldConferenceCall(): Response
+    {
+        try {
+            $sid = (string)Yii::$app->request->post('sid');
+            $data = $this->getDataForHoldConferenceCall($sid);
+            /** @var Call $call */
+            $call = $data['call'];
+            if (!$call->currentParticipant->isJoin()) {
+                throw new \Exception('Invalid type of Participant');
+            }
+            $result = Yii::$app->communication->holdConferenceCall($data['conferenceSid'], $data['keeperSid']);
+        } catch (\Throwable $e) {
+            $result = [
+                'error' => true,
+                'message' => $e->getMessage(),
+            ];
+        }
+        return $this->asJson($result);
+    }
+
+    public function actionAjaxUnholdConferenceCall(): Response
+    {
+        try {
+            $sid = (string)Yii::$app->request->post('sid');
+            $data = $this->getDataForHoldConferenceCall($sid);
+            /** @var Call $call */
+            $call = $data['call'];
+            if (!$call->currentParticipant->isHold()) {
+                throw new \Exception('Invalid type of Participant');
+            }
+            $result = Yii::$app->communication->unholdConferenceCall($data['conferenceSid'], $data['keeperSid']);
+        } catch (\Throwable $e) {
+            $result = [
+                'error' => true,
+                'message' => $e->getMessage(),
+            ];
+        }
+        return $this->asJson($result);
+    }
+
+    public function actionAjaxJoinToConference(): Response
+    {
+        try {
+            $isOnCall = UserStatus::findOne(['us_user_id' => Auth::id(), 'us_is_on_call' => true]);
+            if ($isOnCall) {
+                throw new BadRequestHttpException('Already exist active call');
+            }
+
+            $call_sid = (string)Yii::$app->request->post('call_sid');
+            $source_type_id = (string)Yii::$app->request->post('source_type_id');
+
+            $call = $this->getJoinCall($call_sid);
+
+            $key = 'conference-call-join';
+
+            $diff = time() - (int)(Yii::$app->session->get($key, 0));
+            /** 15 sec diff between requests */
+            if ($diff < 15) {
+                throw new \Exception('Please wait ' . (15 - $diff) . ' seconds.');
+            }
+
+            $from = $call->cParent->c_to ?? $call->c_from;
+
+            $result = Yii::$app->communication->joinToConference(
+                $call->c_call_sid,
+                $call->c_conference_sid,
+                $call->c_project_id,
+                $from,
+                'client:seller' . Auth::id(),
+                $source_type_id
+            );
+            Yii::$app->session->set($key, time());
+        } catch (\Throwable $e) {
+            $result = [
+                'error' => true,
+                'message' => $e->getMessage(),
+            ];
+        }
+        return $this->asJson($result);
+    }
+
+    public function actionAjaxCreateCall()
+    {
+        try {
+            $isOnCall = UserStatus::findOne(['us_user_id' => Auth::id(), 'us_is_on_call' => true]);
+            if ($isOnCall) {
+                throw new BadRequestHttpException('Already exist active call');
+            }
+
+            $form = new CreateCallForm();
+
+            if (!$form->load(Yii::$app->request->post())) {
+                throw new BadRequestHttpException('Cant load data');
+            }
+
+            $form->user_id = Auth::id();
+            $form->caller = 'client:seller' . Auth::id();
+
+            if (!$form->validate()) {
+                throw new BadRequestHttpException('Request error: ' . VarDumper::dumpAsString($form->getErrors()));
+            }
+
+            $result = Yii::$app->communication->createCall($form);
+
+        } catch (\Throwable $e) {
+            $result = [
+                'error' => true,
+                'message' => $e->getMessage(),
+            ];
+        }
+        return $this->asJson($result);
+    }
+
+    public function actionAjaxMuteParticipant(): Response
+    {
+        try {
+            $sid = (string)Yii::$app->request->post('sid');
+            $call = $this->getCallForMuteUnmuteParticipant($sid);
+            if ($call->currentParticipant->isMute()) {
+                throw new \Exception('Participant already is mute');
+            }
+            $result = Yii::$app->communication->muteParticipant($call->c_conference_sid, $call->c_call_sid);
+        } catch (\Throwable $e) {
+            $result = [
+                'error' => true,
+                'message' => $e->getMessage(),
+            ];
+        }
+        return $this->asJson($result);
+    }
+
+    public function actionAjaxUnmuteParticipant(): Response
+    {
+        try {
+            $sid = (string)Yii::$app->request->post('sid');
+            $call = $this->getCallForMuteUnmuteParticipant($sid);
+            if ($call->currentParticipant->isUnMute()) {
+                throw new \Exception('Participant already is unMute');
+            }
+            $result = Yii::$app->communication->unmuteParticipant($call->c_conference_sid, $call->c_call_sid);
+        } catch (\Throwable $e) {
+            $result = [
+                'error' => true,
+                'message' => $e->getMessage(),
+            ];
+        }
+        return $this->asJson($result);
+    }
+
+    private function getJoinCall(string $sid): Call
+    {
+        if (!$sid) {
+            throw new BadRequestHttpException('Not found Call SID in request');
+        }
+
+        if (!$call = Call::findOne(['c_call_sid' => $sid])) {
+            throw new BadRequestHttpException('Not found Call. Sid: ' . $sid);
+        }
+
+        if (!$call->isStatusInProgress()) {
+            throw new BadRequestHttpException('Invalid Call status. Sid: ' . $sid);
+        }
+
+        if (!($call->isIn() || $call->isOut())) {
+            throw new BadRequestHttpException('Invalid Call Type. Sid: ' . $sid);
+        }
+
+        if (!$call->isConferenceType()) {
+            throw new BadRequestHttpException('Call is not conference Call. Sid: ' . $sid);
+        }
+
+        if (!$call->c_conference_id) {
+            throw new BadRequestHttpException('Call not updated. Please wait some seconds.');
+        }
+
+        if (!$participant = $call->currentParticipant) {
+            throw new BadRequestHttpException('Not found Participant. Sid: ' . $sid);
+        }
+
+        if (!$participant->isAgent()) {
+            throw new BadRequestHttpException('Invalid Participant type. Sid: ' . $sid);
+        }
+
+        if ($participant->isHold()) {
+            throw new BadRequestHttpException('Participant status is Hold. Must be is Join');
+        }
+
+        if (!$participant->isJoin()) {
+            throw new BadRequestHttpException('Participant status is not valid');
+        }
+
+        return $call;
+    }
+
+    private function getDataForHoldConferenceCall(string $sid): array
+    {
+        if (!$sid) {
+            throw new BadRequestHttpException('Not found Call SID in request');
+        }
+
+        if (!$call = Call::findOne(['c_call_sid' => $sid])) {
+            throw new BadRequestHttpException('Not found Call. Sid: ' . $sid);
+        }
+
+        if (!$call->isOwner(Auth::id())) {
+            throw new BadRequestHttpException('Is not your Call');
+        }
+
+        if (!$participant = $call->currentParticipant) {
+            throw new BadRequestHttpException('Not found Participant');
+        }
+
+        if (!$participant->isAgent()) {
+            throw new BadRequestHttpException('Invalid type of Participant');
+        }
+
+        if (!($call->isIn() || $call->isOut())) {
+            throw new BadRequestHttpException('Invalid Call type');
+        }
+
+        if (!$call->isStatusInProgress()) {
+            throw new BadRequestHttpException('Invalid Call Status');
+        }
+
+        if (!$call->isConferenceType()) {
+            throw new BadRequestHttpException('Call is not conference Call. Sid: ' . $sid);
+        }
+
+        if (!$call->c_conference_id) {
+            throw new BadRequestHttpException('Call not updated. Please wait some seconds.');
+        }
+
+        if (!$conference = Conference::findOne(['cf_id' => $call->c_conference_id])) {
+            throw new BadRequestHttpException('Not found conference. SID: ' . $call->c_conference_sid);
+        }
+
+        if (!$participants = $conference->conferenceParticipants) {
+            throw new BadRequestHttpException('Not found participants on Conference Sid: ' . $call->c_conference_sid);
+        }
+
+        if (count($participants) < 2) {
+            throw new BadRequestHttpException('Please wait. Count participant must be more then 2');
+        }
+
+        $keeperSid = null;
+
+        $callIsOneOfParticipants = false;
+        foreach ($participants as $participant) {
+            if ($participant->cp_call_id === $call->c_id) {
+                $callIsOneOfParticipants = true;
+                $keeperSid = $participant->cp_call_sid;
+                break;
+            }
+        }
+
+        if (!$callIsOneOfParticipants) {
+            throw new BadRequestHttpException('Call is not One of participants on Conference Sid: ' . $call->c_conference_sid);
+        }
+
+        return [
+            'conferenceSid' => $conference->cf_sid,
+            'keeperSid' => $keeperSid,
+            'call' => $call,
+        ];
+    }
+
+    private function getCallForMuteUnmuteParticipant(string $sid): Call
+    {
+        if (!$sid) {
+            throw new BadRequestHttpException('Not found Call SID in request');
+        }
+
+        if (!$call = Call::findOne(['c_call_sid' => $sid])) {
+            throw new BadRequestHttpException('Not found Call. Sid: ' . $sid);
+        }
+
+        if (!$call->isOwner(Auth::id())) {
+            throw new BadRequestHttpException('Is not your Call');
+        }
+
+        if ($call->isJoin() && $call->c_source_type_id === Call::SOURCE_LISTEN) {
+            throw new BadRequestHttpException('Invalid type of Call');
+        }
+
+        if (!$participant = $call->currentParticipant) {
+            throw new BadRequestHttpException('Not found Participant');
+        }
+
+        if (!$participant->isAgent()) {
+            throw new BadRequestHttpException('Invalid type of Participant');
+        }
+
+        if (!$participant->isJoin()) {
+            throw new BadRequestHttpException('Participant status is invalid');
+        }
+
+        if (!$call->isStatusInProgress()) {
+            throw new BadRequestHttpException('Invalid Call Status');
+        }
+
+        if (!$call->isConferenceType()) {
+            throw new BadRequestHttpException('Call is not conference Call. Sid: ' . $sid);
+        }
+
+        if (!$call->c_conference_id) {
+            throw new BadRequestHttpException('Call not updated. Please wait some seconds.');
+        }
+
+        if (!$conference = Conference::findOne(['cf_id' => $call->c_conference_id])) {
+            throw new BadRequestHttpException('Not found conference. SID: ' . $call->c_conference_sid);
+        }
+
+        if ($conference->isEnd()) {
+            throw new BadRequestHttpException('Invalid Conference status. SID: ' . $call->c_conference_sid);
+        }
+
+        if (!$participants = $conference->conferenceParticipants) {
+            throw new BadRequestHttpException('Not found participants on Conference Sid: ' . $call->c_conference_sid);
+        }
+
+        $callIsOneOfParticipants = false;
+        foreach ($participants as $participant) {
+            if ($participant->cp_call_id === $call->c_id) {
+                $callIsOneOfParticipants = true;
+                break;
+            }
+        }
+
+        if (!$callIsOneOfParticipants) {
+            throw new BadRequestHttpException('Call is not One of participants on Conference Sid: ' . $call->c_conference_sid);
+        }
+
+        return $call;
+    }
 }

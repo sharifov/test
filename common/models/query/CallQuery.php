@@ -29,6 +29,20 @@ class CallQuery extends \yii\db\ActiveQuery
         return $this->andWhere(['c_parent_id' => $parentId])->orderBy(['c_id' => SORT_DESC])->limit(1);
     }
 
+    public function bySid(string $sid): self
+    {
+        return $this->andWhere(['c_call_sid' => $sid]);
+    }
+
+    public function byCreatedUser(int $userId): self
+    {
+        return $this->andWhere(['c_created_user_id' => $userId]);
+    }
+
+    public function inProgress(): self
+    {
+        return $this->andWhere(['c_status_id' => Call::STATUS_IN_PROGRESS]);
+    }
 	/**
 	 * @param string $callSid
 	 * @param int $id
@@ -38,4 +52,19 @@ class CallQuery extends \yii\db\ActiveQuery
 	{
 		return $this->andWhere(['c_call_sid' => $callSid])->orWhere(['c_id' => $id]);
 	}
+
+    public function missed(): self
+    {
+        return $this->andWhere(['c_is_new' => true, 'c_call_type_id' => Call::CALL_TYPE_IN, 'c_status_id' => Call::STATUS_NO_ANSWER]);
+	}
+
+	public function out(): self
+    {
+        return $this->andWhere(['c_call_type_id' => Call::CALL_TYPE_OUT]);
+    }
+
+    public function ringing(): self
+    {
+        return $this->andWhere(['c_status_id' => Call::STATUS_RINGING]);
+    }
 }

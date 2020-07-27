@@ -11,10 +11,10 @@ use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
 use sales\model\client\ClientCodeException;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
+use sales\model\clientChatVisitor\repository\ClientChatVisitorRepository;
 use sales\repositories\client\ClientEmailRepository;
 use sales\repositories\client\ClientPhoneRepository;
 use sales\repositories\client\ClientRepository;
-use sales\repositories\NotFoundException;
 use sales\services\ServiceFinder;
 
 /**
@@ -25,6 +25,7 @@ use sales\services\ServiceFinder;
  * @property ClientEmailRepository $clientEmailRepository
  * @property InternalPhoneGuard $internalPhoneGuard
  * @property ServiceFinder $finder
+ * @property ClientChatVisitorRepository $clientChatVisitorRepository
  */
 class ClientManageService
 {
@@ -33,21 +34,27 @@ class ClientManageService
     private $clientEmailRepository;
     private $internalPhoneGuard;
     private $finder;
+	/**
+	 * @var ClientChatVisitorRepository
+	 */
+	private ClientChatVisitorRepository $clientChatVisitorRepository;
 
-    /**
-     * ClientManageService constructor.
-     * @param ClientRepository $clientRepository
-     * @param ClientPhoneRepository $clientPhoneRepository
-     * @param ClientEmailRepository $clientEmailRepository
-     * @param InternalPhoneGuard $internalPhoneGuard
-     * @param ServiceFinder $finder
-     */
+	/**
+	 * ClientManageService constructor.
+	 * @param ClientRepository $clientRepository
+	 * @param ClientPhoneRepository $clientPhoneRepository
+	 * @param ClientEmailRepository $clientEmailRepository
+	 * @param InternalPhoneGuard $internalPhoneGuard
+	 * @param ServiceFinder $finder
+	 * @param ClientChatVisitorRepository $clientChatVisitorRepository
+	 */
     public function __construct(
         ClientRepository $clientRepository,
         ClientPhoneRepository $clientPhoneRepository,
         ClientEmailRepository $clientEmailRepository,
         InternalPhoneGuard $internalPhoneGuard,
-        ServiceFinder $finder
+        ServiceFinder $finder,
+		ClientChatVisitorRepository $clientChatVisitorRepository
     )
     {
         $this->clientRepository = $clientRepository;
@@ -55,7 +62,8 @@ class ClientManageService
         $this->clientEmailRepository = $clientEmailRepository;
         $this->internalPhoneGuard = $internalPhoneGuard;
         $this->finder = $finder;
-    }
+		$this->clientChatVisitorRepository = $clientChatVisitorRepository;
+	}
 
     /**
      * @param ClientCreateForm $clientForm
@@ -275,46 +283,53 @@ class ClientManageService
         return $client;
     }
 
-	/**
-	 * @param ClientCreateForm $clientForm
-	 * @return Client
-	 * @throws NotFoundException
-	 */
-    public function getOrCreateByUuid(ClientCreateForm $clientForm): Client
+    public function getOrCreateByClientId(ClientCreateForm $form): Client
 	{
-		if ($client = $this->clientRepository->findByUuid($clientForm->uuid)) {
+		if ($client = Client::findOne($form->id)) {
 			return $client;
 		}
+		return $this->create($form);
 	}
 
-	/**
-	 * @param EmailCreateForm $email
-	 * @param ClientCreateForm|null $clientForm
-	 * @return Client
-	 */
-    public function getOrCreateByUuidOrEmails(EmailCreateForm $email, ClientCreateForm $clientForm): Client
+	public function getOrCreateByRcId(ClientCreateForm $form): Client
 	{
-		try {
-			$client = $this->getOrCreateByUuid($clientForm);
-		} catch (\DomainException | NotFoundException $e) {
-			if ($email->email) {
-				$client = $this->getOrCreateByEmails([$email], $clientForm);
-			} else {
-				$client = $this->create($clientForm);
-			}
+		if ($client = Client::find()->joinWithCcVisitor()->joinWithCcVisitorData($form->rcId)->one()) {
+			return $client;
 		}
-		$this->addEmail($client, $email);
+		$client = Client::create(
+			$form->firstName,
+			$form->middleName,
+			$form->lastName
+		);
+
+		$this->clientRepository->save($client);
+
 		return $client;
 	}
 
-	public function createByClientChatRequest(ClientChatRequest $clientChatRequest): Client
+	public function getOrCreateByClientChatRequest(ClientChatRequest $clientChatRequest): Client
 	{
 		$clientEmailForm = (new EmailCreateForm());
 		$clientEmailForm->email = $clientChatRequest->getEmailFromData();
 
-		$clientForm = new ClientCreateForm(['firstName' => $clientChatRequest->getNameFromData(), 'uuid' => $clientChatRequest->getVisitorOrUserIdFromData()]);
+		$clientPhoneForm = new PhoneCreateForm();
+		$clientPhoneForm->phone = $clientChatRequest->getPhoneFromData();
 
-		return $this->getOrCreateByUuidOrEmails($clientEmailForm, $clientForm);
+		$rcId = $clientChatRequest->getClientRcId();
+		if (empty($rcId)) {
+			throw new \RuntimeException('Client Rocket Chat id is not provided');
+		}
+
+		$clientForm = new ClientCreateForm([
+			'firstName' => $clientChatRequest->getNameFromData(),
+			'rcId' => $rcId,
+		]);
+
+		$client = $this->getOrCreateByRcId($clientForm);
+
+		$this->addEmail($client, $clientEmailForm);
+		$this->addPhone($client, $clientPhoneForm);
+		return $client;
 	}
 
     /**

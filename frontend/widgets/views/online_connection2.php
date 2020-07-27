@@ -1,5 +1,8 @@
 <?php
 /* @var $leadId integer */
+
+use yii\helpers\Url;
+
 /* @var $caseId integer */
 /* @var $userId integer */
 /* @var $controllerId string */
@@ -46,10 +49,11 @@ if ($caseId) {
 $urlParamsStr = http_build_query($urlParams);
 
 $wsUrl = $webSocketHost . '/?' . $urlParamsStr;
-
+$ccNotificationUpdateUrl = Url::to(['/client-chat/refresh-notification']);
+$discardUnreadMessageUrl = Url::to(['/client-chat/discard-unread-messages']);
 $js = <<<JS
    
-    var socket   = null;
+    window.socket = null;
 
     /**
      * Send a message to the WebSocket server
@@ -73,6 +77,7 @@ $js = <<<JS
     
             //const socket = new WebSocket(wsUrl);
             var socket = new ReconnectingWebSocket(wsUrl, null, {debug: false, reconnectInterval: 15000});
+            window.socket = socket;
             
             socket.onopen = function (e) {
                 //socket.send('{"user2_id":' + user_id + '}');
@@ -140,6 +145,10 @@ $js = <<<JS
                              if (typeof webCallLeadRedialUpdate === "function") {
                                 webCallLeadRedialUpdate(obj);
                             }
+                             
+                             if (obj.status === 'In progress') {
+                                 $("#incomingCallAudio").prop('muted', true);
+                             }
                         }
                         
                         if(obj.cmd === 'webCallUpdate') {
@@ -168,6 +177,10 @@ $js = <<<JS
                                 updateUserCallStatus(obj);
                             }*/
                             
+                             if (typeof PhoneWidgetCall === 'object') {
+                                 PhoneWidgetCall.changeStatus(obj.type_id);
+                            }
+                            
                             if (typeof refreshCallBox === "function") {
                                 refreshCallBox(obj);
                             }
@@ -180,7 +193,12 @@ $js = <<<JS
                                 refreshInboxCallWidget(obj);
                             }
                             if (typeof PhoneWidgetCall === 'object') {
-                                PhoneWidgetCall.initIncomingCall(obj);
+                                if (typeof obj.status !== 'undefined') {
+                                     PhoneWidgetCall.requestIncomingCall(obj);
+                                }
+                                if (obj.cua_status_id === 2) {
+                                     PhoneWidgetCall.removeIncomingRequest(obj.callSid);
+                                }
                             }
                         }
                         
@@ -204,10 +222,98 @@ $js = <<<JS
                             hiddenLink[0].click();*/
                         }
                         
-                        if(obj.cmd === 'phoneWidgetSmsSocketMessage') {
+                        if (obj.cmd === 'phoneWidgetSmsSocketMessage') {
                             if (typeof obj.data !== 'undefined') {
                                 PhoneWidgetSms.socket(obj.data);
                              }
+                        }
+                        
+                        if (obj.cmd === 'holdCall') {
+                              if (typeof obj.data !== 'undefined') {
+                                if (typeof PhoneWidgetCall === 'object') {
+                                    PhoneWidgetCall.socket(obj.data);
+                                }
+                             }
+                        }
+                        
+                        if (obj.cmd === 'muteCall') {
+                            if (typeof obj.data !== 'undefined') {
+                                muteEvent(obj.data);
+                             }
+                        }
+                        
+                        if (obj.cmd === 'missedCall') {
+                            if (typeof obj.data !== 'undefined') {
+                                if (typeof PhoneWidgetCall === 'object') {
+                                    PhoneWidgetCall.socket(obj.data);
+                                }
+                             }
+                        }
+                        
+                        if (obj.cmd === 'removeIncomingRequest') {
+                            if (typeof obj.data !== 'undefined') {
+                                if (typeof PhoneWidgetCall === 'object') {
+                                    PhoneWidgetCall.removeIncomingRequest(obj.data.call.sid);
+                                }
+                             }
+                        }
+                        
+                        if (obj.cmd === 'callAlreadyTaken') {
+                            createNotify('Accept Call', 'The call has already been taken by another agent', 'warning');
+                            if (typeof PhoneWidgetCall === 'object') {
+                                PhoneWidgetCall.removeIncomingRequest(obj.callSid);
+                            }
+                        }
+
+                        if (obj.cmd === 'conferenceUpdate') {
+                            if (typeof obj.data !== 'undefined') {
+                                if (typeof PhoneWidgetCall === 'object') {
+                                    PhoneWidgetCall.socket(obj.data);
+                                }
+                             }
+                        }
+
+                        if (obj.cmd === 'clientChatUnreadMessage') {
+                        
+                            let activeChatId = localStorage.getItem('activeChatId');
+                            
+                            if (activeChatId == obj.data.cchId && obj.data.cchUnreadMessages) {
+                                $.post('{$discardUnreadMessageUrl}', {cchId: activeChatId});
+                                return false;
+                            }
+                        
+                            if (obj.data.soundNotification) {
+                                soundNotification('incoming_message');
+                            }
+                            
+                            if(obj.data.totalUnreadMessages) {
+                                $('._cc_unread_messages').html(obj.data.totalUnreadMessages);
+                            } else {
+                                $('._cc_unread_messages').html('');
+                                if (obj.data.refreshPage) {
+                                    window.location.reload();
+                                    return false;
+                                }
+                            }
+                            
+                            if (obj.data.cchId) {
+                                $("._cc-chat-unread-message").find("[data-cch-id='"+obj.data.cchId+"']").html(obj.data.cchUnreadMessages);
+                            }
+                            
+                            pjaxReload({container: '#notify-pjax-cc', url: '{$ccNotificationUpdateUrl}'});
+                        }
+                        
+                        if (obj.cmd === 'clientChatUpdateClientStatus') {
+                            if (obj.cchId) {
+                                $('._cc-list-wrapper').find('[data-cch-id="'+obj.cchId+'"]').find('._cc-status').attr('data-is-online', obj.isOnline);
+                            }
+                            createNotify('Client Chat Notification', obj.statusMessage, obj.isOnline ? 'success' : 'warning');
+                        }
+
+                        if (obj.cmd === 'clientChatUpdateTimeLastMessage') {                            
+                            if (obj.data.cchId) {                                
+                                $("._cc-item-last-message-time[data-cch-id='"+obj.data.cchId+"']").attr('data-moment', obj.data.moment).html(obj.data.dateTime);
+                            }
                         }
                     }
                     // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');

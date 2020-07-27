@@ -6,6 +6,7 @@ use common\models\Call;
 use common\models\Client;
 use common\models\Employee;
 use kartik\daterange\DateRangeBehavior;
+use sales\auth\Auth;
 use sales\model\callLog\entity\callLog\CallLogCategory;
 use sales\model\callLog\entity\callLog\CallLogStatus;
 use sales\model\callLog\entity\callLog\CallLogType;
@@ -92,7 +93,9 @@ class CallLogSearch extends CallLog
     public function __construct($config = [])
     {
         parent::__construct($config);
-        $this->createTimeRange = date('Y-m-d 00:00:00', strtotime(self::CREATE_TIME_START_DEFAULT_RANGE)) . ' - ' . date('Y-m-d 23:59:59');
+        $userTimezone = Auth::user()->userParams->up_timezone ?? 'UTC';
+        $currentDate = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->setTimezone(new \DateTimeZone($userTimezone));
+        $this->createTimeRange = ($currentDate->modify(self::CREATE_TIME_START_DEFAULT_RANGE))->format('Y-m-d') . ' 00:00:00 - ' . $currentDate->format('Y-m-d') . ' 23:59:59';
     }
 
     public function behaviors()
@@ -226,7 +229,7 @@ class CallLogSearch extends CallLog
 		$query->leftJoin(Client::tableName(), 'clients.id = cl_client_id');
 		$query->leftJoin(CallNote::tableName(), new Expression('cn_id = (select cn_id from call_note where cn_call_id = cl_id order by cn_created_dt desc limit 1)'));
 		$query->where(['cl_user_id' => $this->cl_user_id]);
-        $query->groupBy(['cl_id', 'call_log.cl_type_id', 'cl_phone_from', 'cl_phone_to', 'cl_client_id', 'cl_call_created_dt', 'cl_status_id', 'cl_duration', 'callNote', 'client_name']);
+		$query->groupBy(['cl_id', 'call_log.cl_type_id', 'cl_phone_from', 'cl_phone_to', 'cl_client_id', 'cl_call_created_dt', 'cl_status_id', 'cl_duration', 'callNote', 'client_name']);
 		$query->orderBy(['cl_call_created_dt' => SORT_DESC]);
 
 		return $dataProvider;

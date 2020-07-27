@@ -7,16 +7,18 @@
 
 <script type = "text/babel">
 
-    function CallWidget() {
-        return (
-            <div class="col-md-6">
-                <CallTab />
-                <hr/>
-                <ContactsTab />
-                <hr/>
-                <HistoryTab />
-            </div>
-        );
+    class CallWidget extends React.Component {
+        render() {
+            return (
+                <div className="col-md-6">
+                    <CallTab/>
+                    <hr/>
+                    <ContactsTab/>
+                    <hr/>
+                    <HistoryTab/>
+                </div>
+            );
+        }
     }
 
     ReactDOM.render(

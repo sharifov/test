@@ -3,6 +3,7 @@
 namespace sales\repositories\cases;
 
 use common\models\CaseSale;
+use frontend\helpers\JsonHelper;
 use sales\entities\cases\Cases;
 use sales\repositories\NotFoundException;
 
@@ -29,7 +30,7 @@ class CasesSaleRepository
 	 */
 	public function updateSaleData(CaseSale $caseSale, array $oldCaseSaleData, array $newCaseSaleData): void
 	{
-		$caseSale->css_sale_data_updated = json_encode( array_replace_recursive($oldCaseSaleData, $newCaseSaleData) );
+		$caseSale->css_sale_data_updated = array_replace_recursive($oldCaseSaleData, $newCaseSaleData);
 	}
 
 	/**
@@ -48,7 +49,7 @@ class CasesSaleRepository
 	public function updateOriginalSaleData(CaseSale $caseSale, string $newData = ''): void
 	{
 		if (!empty($newData)) {
-			$caseSale->css_sale_data = $newData;
+			$caseSale->css_sale_data = JsonHelper::decode($newData);
 		} else {
 			$caseSale->css_sale_data = $caseSale->css_sale_data_updated;
 		}
@@ -64,15 +65,15 @@ class CasesSaleRepository
 	{
 		$caseSale->css_cs_id = $case->cs_id;
 		$caseSale->css_sale_id = $saleData['saleId'];
-		$caseSale->css_sale_data = json_encode($saleData);
+		$caseSale->css_sale_data = $saleData;
 		$caseSale->css_sale_pnr = $saleData['pnr'] ?? null;
 		$caseSale->css_sale_created_dt = $saleData['created'] ?? null;
 		$caseSale->css_sale_book_id = $saleData['bookingId'] ?? null;
 		$caseSale->css_sale_pax = isset($saleData['passengers']) && is_array($saleData['passengers']) ? count($saleData['passengers']) : null;
-		$caseSale->css_sale_data_updated = json_encode($saleData);
+		$caseSale->css_sale_data_updated = $saleData;
 		$caseSale->css_need_sync_bo = 0;
-		$caseSale->css_fare_rules = isset($saleData['fareRules']) ?
-		    @json_encode($saleData['fareRules']) : null;
+		$caseSale->css_fare_rules = !empty($saleData['fareRules']) ?
+		    JsonHelper::encode($saleData['fareRules']) : null;
 
 		return $caseSale;
 	}
@@ -91,7 +92,7 @@ class CasesSaleRepository
 
 	public function getProjectApiKey(CaseSale $caseSale)
 	{
-		return @json_decode((string)$caseSale->css_sale_data, true)['projectApiKey'] ?? '';
+		return @JsonHelper::decode($caseSale->css_sale_data)['projectApiKey'] ?? '';
 	}
 
 	public function getFirstDepartureDtFromItinerary(array $saleData): string

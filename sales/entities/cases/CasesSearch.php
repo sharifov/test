@@ -3,18 +3,27 @@
 namespace sales\entities\cases;
 
 use common\models\Airport;
+use common\models\Call;
 use common\models\CaseSale;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Email;
 use common\models\Employee;
 use common\models\Lead;
+use common\models\Sms;
 use common\models\UserGroup;
 use common\models\UserGroupAssign;
+use frontend\helpers\JsonHelper;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\helpers\setting\SettingHelper;
+use sales\model\callLog\entity\callLog\CallLog;
+use sales\model\callLog\entity\callLog\CallLogType;
+use sales\model\callLog\entity\callLogCase\CallLogCase;
+use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChatCase\entity\ClientChatCase;
 use sales\model\saleTicket\entity\SaleTicket;
+use Yii;
 use yii\data\ActiveDataProvider;
 use yii\db\Expression;
 
@@ -51,6 +60,16 @@ use yii\db\Expression;
  * @property array $csStatuses
  * @property int|null $airlinePenalty
  * @property string|null $validatingCarrier
+ *
+ * @property int|null $emailsQtyFrom
+ * @property int|null $emailsQtyTo
+ * @property int|null $smsQtyFrom
+ * @property int|null $smsQtyTo
+ * @property int|null $callsQtyFrom
+ * @property int|null $callsQtyTo
+ * @property int|null $chatsQtyFrom
+ * @property int|null $chatsQtyTo
+ * @property int|null $caseUserGroup
  */
 class CasesSearch extends Cases
 {
@@ -85,7 +104,19 @@ class CasesSearch extends Cases
     public $airlinePenalty;
     public $validatingCarrier;
 
+    public $emailsQtyFrom;
+    public $emailsQtyTo;
+    public $smsQtyFrom;
+    public $smsQtyTo;
+    public $callsQtyFrom;
+    public $callsQtyTo;
+    public $chatsQtyFrom;
+    public $chatsQtyTo;
+    public $caseUserGroup;
+
     private $cacheSaleData = [];
+
+    public int $cacheDuration = 60 * 1;
 
     /**
      * @return array
@@ -125,8 +156,16 @@ class CasesSearch extends Cases
             [['cssOutDate', 'cssInDate'], 'date'],
             [['cssChargeType'], 'string', 'max' => 100],
             [['departureAirport', 'arrivalAirport', 'departureCountries', 'arrivalCountries', 'cssInOutDate', 'saleTicketSendEmailDate'], 'safe'],
-            ['airlinePenalty', 'integer'],
+
+            [['airlinePenalty', 'caseUserGroup'], 'integer'],
             ['validatingCarrier', 'string', 'length' => 2],
+            [
+                [
+                    'emailsQtyFrom', 'emailsQtyTo', 'smsQtyFrom', 'smsQtyTo',
+                    'callsQtyFrom', 'callsQtyTo', 'chatsQtyFrom', 'chatsQtyTo',
+                ],
+                'integer', 'min' => 0, 'max' => 1000
+            ],
         ];
     }
 
@@ -170,6 +209,11 @@ class CasesSearch extends Cases
 			'airlinePenalty' => 'Airline Penalty',
 			'cs_order_uid' => 'Order uid',
 			'validatingCarrier' => 'Validating Carrier',
+			'emailsQtyFrom' => 'Emails From', 'emailsQtyTo' => 'Emails To',
+			'smsQtyFrom' => 'Sms From', 'smsQtyTo' => 'Sms To',
+			'callsQtyFrom' => 'Calls From', 'callsQtyTo' => 'Calls To',
+			'chatsQtyFrom' => 'Chats From', 'chatsQtyTo' => 'Chats To',
+            'caseUserGroup' => 'Case User Group',
         ];
     }
 
@@ -196,7 +240,7 @@ class CasesSearch extends Cases
     {
         $query = self::find()->with(['project', 'department', 'category']);
 
-        $query->andWhere(['cs_dep_id' => array_keys(EmployeeDepartmentAccess::getDepartments())]);
+//        $query->andWhere(['cs_dep_id' => array_keys(EmployeeDepartmentAccess::getDepartments())]);
         $query->andWhere(['cs_project_id' => array_keys(EmployeeProjectAccess::getProjects())]);
 
         $dataProvider = new ActiveDataProvider([
@@ -233,7 +277,6 @@ class CasesSearch extends Cases
         ]);
 
         $query->andFilterWhere(['IN', 'cs_status', $this->csStatuses]);
-
         $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
         $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
 
@@ -245,51 +288,54 @@ class CasesSearch extends Cases
         if ($this->cssSaleId) {
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $this->cssSaleId])]);
         }
-
-        if ($this->validatingCarrier) {
-            $query->andWhere(['cs_id' =>
-                CaseSale::find()->select('css_cs_id')
-                ->andFilterWhere(
-                    [
-                        '=',
-                        new Expression("JSON_EXTRACT(JSON_UNQUOTE(css_sale_data),'$.validatingCarrier')"),
-                        $this->validatingCarrier
-                    ]
-                )
-            ]);
-        }
-
-        if ($this->ticketNumber) {
-            if ($saleId = $this->getSaleIdByTicket($this->ticketNumber)) {
-                $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
-            } else {
-                $query->where('0=1');
-            }
-        }
         if ($this->clientId){
             $query->andWhere(['cs_client_id' => $this->clientId]);
         }
 
+        if ($this->validatingCarrier) {
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('css_cs_id')
+                ->andWhere(['=',
+                        new Expression("JSON_EXTRACT(css_sale_data,'$.validatingCarrier')"),
+                        $this->validatingCarrier
+                ])
+            ]);
+        }
+        if ($this->ticketNumber) {
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('css_cs_id')
+                ->where(
+                    new Expression("JSON_CONTAINS(css_sale_data->'$.passengers[*].ticket_number', JSON_ARRAY(:ticket_number))"),
+                    [':ticket_number' => $this->ticketNumber]
+                )
+            ]);
+        }
         if ($this->paxFirstName) {
-            if ($saleId = $this->getSaleIdByPaxFirstName($this->paxFirstName)) {
-                $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
-            } else {
-                $query->where('0=1');
-            }
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('css_cs_id')
+                ->where(
+                    new Expression("JSON_CONTAINS(css_sale_data->'$.passengers[*].first_name', JSON_ARRAY(:first_name))"),
+                    [':first_name' => $this->paxFirstName]
+                )
+            ]);
         }
         if ($this->paxLastName) {
-            if ($saleId = $this->getSaleIdByPaxLastName($this->paxLastName)) {
-                $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
-            } else {
-                $query->where('0=1');
-            }
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('css_cs_id')
+                ->where(
+                    new Expression("JSON_CONTAINS(css_sale_data->'$.passengers[*].last_name', JSON_ARRAY(:last_name))"),
+                    [':last_name' => $this->paxLastName]
+                )
+            ]);
         }
         if ($this->airlineConfirmationNumber) {
-            if ($saleId = $this->getSaleIdByAcn($this->airlineConfirmationNumber)) {
-                $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
-            } else {
-                $query->where('0=1');
-            }
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('css_cs_id')
+                ->where(
+                    new Expression("JSON_CONTAINS(css_sale_data->'$.itinerary[*].segments[*].airlineRecordLocator', JSON_ARRAY(:airlineRecordLocator))"),
+                    [':airlineRecordLocator' => $this->airlineConfirmationNumber]
+                )
+            ]);
         }
         if ($this->cssBookId) {
             $query->andWhere(['OR',
@@ -390,6 +436,9 @@ class CasesSearch extends Cases
                 ]
             );
         }
+
+        $query = $this->prepareCommunicationQuery($query);
+
         return $dataProvider;
     }
 
@@ -402,7 +451,7 @@ class CasesSearch extends Cases
     {
         $query = self::find()->with(['project', 'department', 'category']);
 
-        $query->andWhere(['cs_dep_id' => array_keys(EmployeeDepartmentAccess::getDepartments())]);
+//        $query->andWhere(['cs_dep_id' => array_keys(EmployeeDepartmentAccess::getDepartments())]);
         $query->andWhere(['cs_project_id' => array_keys(EmployeeProjectAccess::getProjects())]);
 
         $dataProvider = new ActiveDataProvider([
@@ -452,53 +501,54 @@ class CasesSearch extends Cases
         if ($this->cssSaleId) {
             $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $this->cssSaleId])]);
         }
-
-        if ($this->validatingCarrier) {
-            $query->andWhere(['cs_id' =>
-                CaseSale::find()->select('css_cs_id')
-                ->andFilterWhere(
-                    [
-                        '=',
-                        new Expression("JSON_EXTRACT(JSON_UNQUOTE(css_sale_data),'$.validatingCarrier')"),
-                        $this->validatingCarrier
-                    ]
-                )
-            ]);
-        }
-
-        if ($this->ticketNumber) {
-            if ($saleId = $this->getSaleIdByTicket($this->ticketNumber)) {
-                $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
-            } else {
-                $query->where('0=1');
-            }
-        }
         if ($this->clientId){
             $query->andWhere(['cs_client_id' => $this->clientId]);
         }
 
+        if ($this->validatingCarrier) {
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('css_cs_id')
+                ->andWhere(['=',
+                        new Expression("JSON_EXTRACT(css_sale_data,'$.validatingCarrier')"),
+                        $this->validatingCarrier
+                ])
+            ]);
+        }
+        if ($this->ticketNumber) {
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('css_cs_id')
+                ->where(
+                    new Expression("JSON_CONTAINS(css_sale_data->'$.passengers[*].ticket_number', JSON_ARRAY(:ticket_number))"),
+                    [':ticket_number' => $this->ticketNumber]
+                )
+            ]);
+        }
         if ($this->paxFirstName) {
-            if ($saleId = $this->getSaleIdByPaxFirstName($this->paxFirstName)) {
-                $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
-            } else {
-                $query->where('0=1');
-            }
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('css_cs_id')
+                ->where(
+                    new Expression("JSON_CONTAINS(css_sale_data->'$.passengers[*].first_name', JSON_ARRAY(:first_name))"),
+                    [':first_name' => $this->paxFirstName]
+                )
+            ]);
         }
-
         if ($this->paxLastName) {
-            if ($saleId = $this->getSaleIdByPaxLastName($this->paxLastName)) {
-                $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
-            } else {
-                $query->where('0=1');
-            }
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('css_cs_id')
+                ->where(
+                    new Expression("JSON_CONTAINS(css_sale_data->'$.passengers[*].last_name', JSON_ARRAY(:last_name))"),
+                    [':last_name' => $this->paxLastName]
+                )
+            ]);
         }
-
         if ($this->airlineConfirmationNumber) {
-            if ($saleId = $this->getSaleIdByAcn($this->airlineConfirmationNumber)) {
-                $query->andWhere(['cs_id' => CaseSale::find()->select('css_cs_id')->andWhere(['css_sale_id' => $saleId])]);
-            } else {
-                $query->where('0=1');
-            }
+            $query->andWhere(['cs_id' =>
+                CaseSale::find()->select('css_cs_id')
+                ->where(
+                    new Expression("JSON_CONTAINS(css_sale_data->'$.itinerary[*].segments[*].airlineRecordLocator', JSON_ARRAY(:airlineRecordLocator))"),
+                    [':airlineRecordLocator' => $this->airlineConfirmationNumber]
+                )
+            ]);
         }
         if ($this->cssBookId) {
             $query->andWhere(['OR',
@@ -583,7 +633,7 @@ class CasesSearch extends Cases
         if ($this->departureCountries) {
             $query->andWhere(['cs_id' =>
                 CaseSale::find()->select('case_sale.css_cs_id')
-                ->innerJoin(Airport::tableName() . 'AS airports',
+                ->innerJoin(Airport::tableName() . ' AS airports',
                     'case_sale.css_out_departure_airport = airports.iata OR case_sale.css_in_departure_airport = airports.iata')
                 ->where(['IN', 'airports.country', $this->departureCountries])
             ]);
@@ -591,7 +641,7 @@ class CasesSearch extends Cases
         if ($this->arrivalCountries) {
             $query->andWhere(['cs_id' =>
                 CaseSale::find()->select('case_sale.css_cs_id')
-                ->innerJoin(Airport::tableName() . 'AS airports',
+                ->innerJoin(Airport::tableName() . ' AS airports',
                     'case_sale.css_out_departure_airport = airports.iata OR case_sale.css_in_departure_airport = airports.iata')
                 ->where(['IN', 'airports.country', $this->arrivalCountries])
             ]);
@@ -603,7 +653,198 @@ class CasesSearch extends Cases
                 ]
             );
         }
+        if ($this->caseUserGroup) {
+            $query->andWhere([
+                    'cs_user_id' => Employee::find()->select('id')
+                        ->innerJoin(UserGroupAssign::tableName() . ' AS user_group_assign',
+                            new Expression('user_group_assign.ugs_user_id = employees.id'))
+                        ->andWhere(['user_group_assign.ugs_group_id' => $this->caseUserGroup])
+                        ->groupBy('employees.id')
+                ]
+            );
+        }
+
+        $query = $this->prepareCommunicationQuery($query);
+
         return $dataProvider;
+    }
+
+    /**
+     * @param $query
+     * @return mixed
+     */
+    private function prepareCommunicationQuery($query)
+    {
+        if (!empty($this->emailsQtyFrom) || !empty($this->emailsQtyTo)) {
+            $query->leftJoin([
+                'emails' => Email::find()
+                    ->select([
+                        'e_case_id',
+                        new Expression('COUNT(e_case_id) AS cnt')
+                    ])
+                    ->groupBy(['e_case_id'])
+            ], 'cases.cs_id = emails.e_case_id');
+
+            if (!empty($this->emailsQtyFrom)) {
+                if ((int) $this->emailsQtyFrom === 0) {
+                    $query->andWhere(
+                        [
+                            'OR',
+                            ['>=', 'emails.cnt', $this->emailsQtyFrom],
+                            ['IS', 'emails.e_case_id', null]
+                        ]
+                    );
+                } else {
+                    $query->andWhere(['>=', 'emails.cnt', $this->emailsQtyFrom]);
+                }
+            }
+            if (!empty($this->emailsQtyTo)) {
+                if ((int) $this->emailsQtyTo === 0 || (int) $this->emailsQtyFrom === 0) {
+                    $query->andWhere(
+                        [
+                            'OR',
+                            ['<=', 'emails.cnt', $this->emailsQtyTo],
+                            ['IS', 'emails.e_case_id', null]
+                        ]
+                    );
+                } else {
+                    $query->andWhere(['<=', 'emails.cnt', $this->emailsQtyTo]);
+                }
+            }
+        }
+
+        if (!empty($this->smsQtyFrom) || !empty($this->smsQtyTo)) {
+            $query->leftJoin([
+                'sms' => Sms::find()
+                    ->select([
+                        's_case_id',
+                        new Expression('COUNT(s_case_id) AS cnt')
+                    ])
+                    ->groupBy(['s_case_id'])
+            ], 'cases.cs_id = sms.s_case_id');
+
+            if (!empty($this->smsQtyFrom)) {
+                if ((int) $this->smsQtyFrom === 0) {
+                    $query->andWhere(
+                        [
+                            'OR',
+                            ['>=', 'sms.cnt', $this->smsQtyFrom],
+                            ['IS', 'sms.s_case_id', null]
+                        ]
+                    );
+                } else {
+                    $query->andWhere(['>=', 'sms.cnt', $this->smsQtyFrom]);
+                }
+            }
+            if (!empty($this->smsQtyTo)) {
+                if ((int) $this->smsQtyTo === 0 || (int) $this->smsQtyFrom === 0) {
+                    $query->andWhere(
+                        [
+                            'OR',
+                            ['<=', 'sms.cnt', $this->smsQtyTo],
+                            ['IS', 'sms.s_case_id', null]
+                        ]
+                    );
+                } else {
+                    $query->andWhere(['<=', 'sms.cnt', $this->smsQtyTo]);
+                }
+            }
+        }
+
+        if (!empty($this->callsQtyFrom) || !empty($this->callsQtyTo)) {
+
+            if ((bool) Yii::$app->params['settings']['new_communication_block_lead']) {
+                $query->leftJoin([
+                    'calls' => CallLogCase::find()
+                        ->select([
+                            'clc_case_id AS c_case_id',
+                            new Expression('COUNT(clc_case_id) AS cnt')
+                        ])
+                        ->innerJoin(CallLog::tableName(), 'call_log.cl_id = call_log_case.clc_cl_id')
+                        ->where(['IN', 'cl_type_id', [CallLogType::IN, CallLogType::OUT]])
+                        ->groupBy(['clc_case_id'])
+                ], 'cases.cs_id = calls.c_case_id');
+
+            } else {
+                $query->leftJoin([
+                    'calls' => Call::find()
+                        ->select([
+                            'c_case_id',
+                            new Expression('COUNT(c_case_id) AS cnt')
+                        ])
+                        ->where(['c_parent_id' => null])
+                        ->andWhere(['IN', 'c_call_type_id', [Call::CALL_TYPE_IN, Call::CALL_TYPE_OUT]])
+                        ->groupBy(['c_case_id'])
+                ], 'cases.cs_id = calls.c_case_id');
+            }
+
+            if (!empty($this->callsQtyFrom)) {
+                if ((int) $this->callsQtyFrom === 0) {
+                    $query->andWhere(
+                        [
+                            'OR',
+                            ['>=', 'calls.cnt', $this->callsQtyFrom],
+                            ['IS', 'calls.c_case_id', null]
+                        ]
+                    );
+                } else {
+                    $query->andWhere(['>=', 'calls.cnt', $this->callsQtyFrom]);
+                }
+            }
+            if (!empty($this->callsQtyTo)) {
+                if ((int) $this->callsQtyTo === 0 || (int) $this->callsQtyFrom === 0) {
+                    $query->andWhere(
+                        [
+                            'OR',
+                            ['<=', 'calls.cnt', $this->callsQtyTo],
+                            ['IS', 'calls.c_case_id', null]
+                        ]
+                    );
+                } else {
+                    $query->andWhere(['<=', 'calls.cnt', $this->callsQtyTo]);
+                }
+            }
+        }
+
+        if (!empty($this->chatsQtyFrom) || !empty($this->chatsQtyTo)) {
+            $query->leftJoin([
+                'chats' => ClientChatCase::find()
+                    ->select([
+                        'cccs_case_id',
+                        new Expression('COUNT(cccs_case_id) AS cnt')
+                    ])
+                    ->groupBy(['cccs_case_id'])
+            ], 'cases.cs_id = chats.cccs_case_id');
+
+            if (!empty($this->chatsQtyFrom)) {
+                if ((int) $this->chatsQtyFrom === 0) {
+                    $query->andWhere(
+                        [
+                            'OR',
+                            ['>=', 'chats.cnt', $this->chatsQtyFrom],
+                            ['IS', 'chats.cccs_case_id', null]
+                        ]
+                    );
+                } else {
+                    $query->andWhere(['>=', 'chats.cnt', $this->chatsQtyFrom]);
+                }
+            }
+            if (!empty($this->chatsQtyTo)) {
+                if ((int) $this->chatsQtyTo === 0 || (int) $this->chatsQtyFrom === 0) {
+                    $query->andWhere(
+                        [
+                            'OR',
+                            ['<=', 'chats.cnt', $this->chatsQtyTo],
+                            ['IS', 'chats.cccs_case_id', null]
+                        ]
+                    );
+                } else {
+                    $query->andWhere(['<=', 'chats.cnt', $this->chatsQtyTo]);
+                }
+            }
+        }
+
+        return $query;
     }
 
     /**
@@ -628,7 +869,7 @@ class CasesSearch extends Cases
     private function getSaleIdByTicket($tickerNum): ?int
     {
         foreach ($this->getCaseSaleData($tickerNum) as $sale) {
-            $decodeSale = json_decode($sale['css_sale_data'], false);
+            $decodeSale = JsonHelper::decode($sale['css_sale_data'], false);
             foreach ($decodeSale->passengers as $passenger) {
                 if (strcasecmp($passenger->ticket_number, $tickerNum) === 0) {
                     return $decodeSale->saleId;
@@ -649,7 +890,7 @@ class CasesSearch extends Cases
         $validatingCarrierParam = 'validatingCarrier\":\"' . $validatingCarrier;
 
         foreach ($this->getCaseSaleData($validatingCarrierParam) as $sale) {
-            $decodeSale = json_decode($sale['css_sale_data'], false, 512, JSON_THROW_ON_ERROR);
+            $decodeSale = JsonHelper::decode($sale['css_sale_data'], false);
             if (
                 isset($decodeSale->validatingCarrier) &&
                 strcasecmp($decodeSale->validatingCarrier, $validatingCarrier) === 0
@@ -667,7 +908,7 @@ class CasesSearch extends Cases
     private function getSaleIdByPaxFirstName($firstName): ?int
     {
         foreach ($this->getCaseSaleData($firstName) as $sale) {
-            $decodeSale = json_decode($sale['css_sale_data'], false);
+            $decodeSale = JsonHelper::decode($sale['css_sale_data'], false);
             foreach ($decodeSale->passengers as $passenger) {
                 if (strcasecmp($passenger->first_name, $firstName) === 0) {
                     return $decodeSale->saleId;
@@ -684,7 +925,7 @@ class CasesSearch extends Cases
     private function getSaleIdByPaxLastName($lastName): ?int
     {
         foreach ($this->getCaseSaleData($lastName) as $sale) {
-            $decodeSale = json_decode($sale['css_sale_data'], false);
+            $decodeSale = JsonHelper::decode($sale['css_sale_data'], false);
             foreach ($decodeSale->passengers as $passenger) {
                 if (strcasecmp($passenger->last_name, $lastName) === 0) {
                     return $decodeSale->saleId;
@@ -701,7 +942,7 @@ class CasesSearch extends Cases
     private function getSaleIdByAcn($acn): ?int
     {
         foreach ($this->getCaseSaleData($acn) as $sale) {
-            $decodeSale = json_decode($sale['css_sale_data'], false);
+            $decodeSale = JsonHelper::decode($sale['css_sale_data'], false);
             foreach ($decodeSale->itinerary as $itinerary) {
                 foreach ($itinerary->segments as $segment) {
                     if (strcasecmp($segment->airlineRecordLocator, $acn) === 0) {

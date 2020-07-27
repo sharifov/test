@@ -22,10 +22,12 @@ if($client) {
 $client_phone = '';
 
 if($lastCall) {
-    if ($lastCall->c_call_type_id === \common\models\Call::CALL_TYPE_IN) {
+    if ($lastCall->isIn()) {
         $client_phone = $lastCall->c_from;
-    } else {
+    } elseif ($lastCall->isOut()) {
         $client_phone = $lastCall->c_to;
+    } elseif ($lastCall->isJoin()) {
+        $client_phone = $lastCall->c_from;
     }
 }
 

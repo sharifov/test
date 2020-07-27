@@ -1,4 +1,7 @@
 $(document).ready(function() {
+    window.widgetIcon = new handleWidgetIcon();
+    widgetIcon.init();
+
 
     $phoneTabAnchor = $('[data-toggle-tab]');
     var historySimpleBar;
@@ -15,7 +18,6 @@ $(document).ready(function() {
     }
 
     var tabHistoryLoaded = false;
-    var userId = $('#tab-history').attr('data-user-id');
     $phoneTabAnchor.on("click", function () {
         $current = "#" + $(this).data("toggle-tab");
 
@@ -28,13 +30,15 @@ $(document).ready(function() {
 
         $('.collapsible-container').collapse('hide');
 
+        filterCalls.reset();
+
         if ($(this).data("toggle-tab") === 'tab-history') {
             if (!tabHistoryLoaded) {
                 tabHistoryLoaded = true;
                 $.ajax({
                     url: '/call-log/ajax-get-call-history',
                     type: 'post',
-                    data: {uid: userId},
+                    data: {},
                     dataType: 'json',
                     beforeSend: function() {
                         $($current).append('<div class="wg-history-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
@@ -51,12 +55,30 @@ $(document).ready(function() {
                     }
                 });
             }
+            let countMissedCalls = parseInt($(this).attr('data-missed-calls'));
+            if (countMissedCalls > 0) {
+                PhoneWidgetCall.requestClearMissedCalls();
+            }
         }
 
         if ($current === '#tab-contacts') {
             if (PhoneWidgetContacts.fullListIsEmpty()) {
-                PhoneWidgetContacts.requestFullList();
             }
+
+            if ($(this).hasClass('js-add-to-conference')) {
+                window.localStorage.setItem('contactSelectableState', 1);
+                $('.contacts-list').addClass('contacts-list--selection');
+                $('.selection-amount').show();
+
+            } else {
+                window.localStorage.setItem('contactSelectableState', 0);
+                $('.contacts-list').removeClass('contacts-list--selection');
+                $('.submit-selected-contacts').slideUp(10);
+                $('.selection-amount').hide();
+            }
+
+            PhoneWidgetContacts.requestFullList();
+
         }
 
     });
@@ -108,6 +130,8 @@ $(document).ready(function() {
            PhoneWidgetContacts.initLazyLoadFullList(simpleBar);
         }
     });
+
+    
 
 
 
@@ -187,11 +211,26 @@ $(document).ready(function() {
         $(this).parents('.additional-bar').slideUp(150);
     })
 
+    var activeSettingTab = $('.tab-trigger.active-tab').attr('href');
+
+    $(activeSettingTab).show()
+
+    $('.tab-trigger').on('click', function(e) {
+        e.preventDefault()
+        $('.tab-trigger').removeClass('active-tab');
+        $(this).addClass('active-tab');
+
+        $('.tabs__item').hide()
+        $($(this).attr('href')).show()
+
+    })
+
 
     $(elemScrollable).each(function(i, elem) {
         var el = new SimpleBar(elem);
         el.getContentElement();
     })
+
 
 
     //--------------------------------------------------------------------------
@@ -258,11 +297,25 @@ $(document).ready(function() {
     var context = new AudioContext();
 
     var dtmf = new Tone(context, 350, 440);
+    var dialpadCurrentValue = null;
+    var dialpadButtonTimer = null;
 
     $('.dial__btn').on("mousedown touchstart", function(e){
         e.preventDefault();
 
         var keyPressed = $(this).val();
+        dialpadCurrentValue = keyPressed;
+        dialpadButtonTimer = setInterval(function () {
+            if (dialpadCurrentValue === '0') {
+                let currentVal = $('.call-pane__dial-number').val();
+                if (currentVal) {
+                    currentVal = currentVal.substring(0, currentVal.length - 1);
+                    currentVal = currentVal + '+';
+                    $('.call-pane__dial-number').val(currentVal);
+                }
+            }
+            clearInterval(dialpadButtonTimer);
+        }, 700);
         var frequencyPair = dtmfFrequencies[keyPressed];
 
         // this sets the freq1 and freq2 properties
@@ -286,15 +339,12 @@ $(document).ready(function() {
         if (typeof dtmf !== "undefined" && dtmf.status){
             dtmf.stop();
         }
+        clearInterval(dialpadButtonTimer);
     });
 
     //---------------------------------------------------
 
-
-
-
-
-    $('.call-pane__dial-clear-all').on('click', function(e) {
+    $('.call_pane_dialpad_clear_number').on('click', function(e) {
         e.preventDefault();
         $('.call-pane__dial-number').val('').attr('readonly', false).prop('readonly', false);
         $('#call-to-label').text('');
@@ -303,6 +353,12 @@ $(document).ready(function() {
         $('.dial__btn').attr('disabled', false).removeClass('disabled');
 
         // $(this).removeClass('is-shown')
+    });
+    $('.call_pane_dialpad_clear_number_disabled').on('click', function(e) {
+        e.preventDefault();
+        $('.call-pane__dial-number').val('').attr('readonly', true).prop('readonly', true);
+        $('#call-to-label').text('');
+        $('.suggested-contacts').removeClass('is_active');
     });
 
     $('.call-pane__correction').on('click', function(e) {
@@ -388,21 +444,6 @@ $(document).ready(function() {
     //
     // });
 
-    $(document).on('click', '#cancel-active-call', function(e) {
-        e.preventDefault();
-
-        let twilioDevice = JSON.parse(window.localStorage.getItem('twilioDevice'));
-
-        if (device || (device = twilioDevice)) {
-            updateAgentStatus(connection, false, 1);
-            device.disconnectAll();
-
-            PhoneWidgetCall.cancelCall();
-
-            clearTimeout(timeout)
-        }
-    })
-
     // $('.messages-modal__send-btn').on('click', function() {
     //     // var scroll = $(msgModalScroll.getContentElement());
     //     var scroll = $('.messages-modal__messages-scroll').find($('.simplebar-content-wrapper'))[0];
@@ -473,8 +514,211 @@ $(document).ready(function() {
         clearEmailTab()
     });
 
+    var callsData = [
+        {
+            id: 1,
+            state: 'inProgress',
+            project: 'ovago',
+            department: 'sales',
+            length: 100,
+            contact: {
+                name: 'Geff Robertson1',
+                company: 'LLC "DREAM TRAVEL"',
+                number: '+123 321 234 432'
+            }
+        },
+        {
+            id: 2,
+            state: 'hold',
+            project: 'wowfare',
+            department: 'sales',
+            length: 30,
+            contact: {
+                name: 'New name',
+                company: '"Rrtsa TRAVEL"',
+                number: '+373 45 45'
+            }
+        },
+        {
+            id: 3,
+            state: 'direct',
+            project: 'arangrant',
+            department: 'sales',
+            length: 30,
+            contact: {
+                name: 'New name',
+                company: '"Rrtsa TRAVEL"',
+                number: '+373 45 45'
+            }
+        },
+        {
+            id: 4,
+            state: 'general',
+            project: 'hop2',
+            department: 'sales',
+            length: 30,
+            contact: {
+                name: 'New name',
+                company: '"Rrtsa TRAVEL"',
+                number: '+373 45 45'
+            }
+        }
+    ];
 
 
+
+    var callsObj = [
+        {
+            project: 'ovago',
+            department: 'sales',
+            id: 1,
+            calls: [
+                {
+                    state: 'inProgress',
+                    length: 6001,
+                    id: 1,
+                    contact: {
+                        name: 'Geff Robertson1',
+                        company: 'LLC "DREAM TRAVEL"',
+                        number: '+123 321 234 432'
+                    }
+                },
+                {
+                    state: 'hold',
+                    length: 2201,
+                    id: 2,
+                    contact: {
+                        name: 'John Doe2',
+                        company: 'LLC "DREAM TRAVEL"',
+                        number: '+123 321 234 432'
+                    }
+                },
+                {
+                    state: 'direct',
+                    length: 3201,
+                    id: 3,
+                    contact: {
+                        name: 'John Doe6',
+                        company: 'LLC "DREAM TRAVEL"',
+                        number: '+123 321 234 432'
+                    }
+                },
+                {
+                    state: 'hold',
+                    length: 6201,
+                    id: 4,
+                    contact: {
+                        name: 'John Doe7',
+                        company: 'LLC "DREAM TRAVEL"',
+                        number: '+123 321 234 432'
+                    }
+                }
+            ]
+        },
+        {
+            project: null,
+            department: 'SALES',
+            id: 2,
+            calls: [
+
+                {
+                    state: 'general',
+                    length: 5301,
+                    id: 2,
+                    contact: {
+                        name: 'John Doe4',
+                        company: 'LLC "DREAM TRAVEL"',
+                        number: '+123 321 234 432'
+                    }
+                },
+
+                {
+                    state: 'general',
+                    length: 5301,
+                    id: 3,
+                    contact: {
+                        name: 'John Doe5',
+                        company: 'LLC "DREAM TRAVEL"',
+                        number: '+123 321 234 432'
+                    }
+                },
+                {
+                    state: 'direct',
+                    length: 5401,
+                    id: 4,
+                    contact: {
+                        name: 'John Doe8',
+                        company: 'LLC "DREAM TRAVEL"',
+                        number: '+123 321 234 432'
+                    }
+                },
+                {
+                    state: 'direct',
+                    length: 6241,
+                    id: 1,
+                    contact: {
+                        name: 'Gerrombo Saltison3',
+                        company: 'LLC "DREAM TRAVEL"',
+                        number: '+123 321 234 432'
+                    }
+                },
+            ]
+        },
+        {
+            project: 'wowfare',
+            department: null,
+            id: 2,
+            calls: [
+
+                {
+                    state: 'general',
+                    length: 5301,
+                    id: 2,
+                    contact: {
+                        name: 'John Doe4',
+                        company: 'LLC "DREAM TRAVEL"',
+                        number: '+123 321 234 432'
+                    }
+                },
+
+                {
+                    state: 'general',
+                    length: 5301,
+                    id: 3,
+                    contact: {
+                        name: 'John Doe5',
+                        company: 'LLC "DREAM TRAVEL"',
+                        number: '+123 321 234 432'
+                    }
+                },
+                {
+                    state: 'direct',
+                    length: 5401,
+                    id: 4,
+                    contact: {
+                        name: 'John Doe8',
+                        company: 'LLC "DREAM TRAVEL"',
+                        number: '+123 321 234 432'
+                    }
+                },
+                {
+                    state: 'direct',
+                    length: 6241,
+                    id: 1,
+                    contact: {
+                        name: 'Gerrombo Saltison3',
+                        company: 'LLC "DREAM TRAVEL"',
+                        number: '+123 321 234 432'
+                    }
+                },
+            ]
+        }
+    ];
+
+
+   var filterCalls = new callsFilter(callsObj);
+    //filterCalls.init();
+    
 
 
     // function phoneWidgetBehavior(elem) {
@@ -523,17 +767,50 @@ $(document).ready(function() {
     //     console.log('here is a event for back button');
     // })
 
-    $('.additional-info__close').on('click', function() {
-        $('.additional-info').slideUp(150);
-    });
-
-    $('.call-pane__info').on('click', function() {
-        $('.additional-info').slideDown(150);
-    })
-
 });
 
+function stateTimer () {
+    var interval = null;
 
+    return {
+        start: function (el, timerStamp) {
+            var sec = Math.floor(timerStamp % 60);
+            var min = Math.floor((timerStamp - sec) / 60);
+            var hr = Math.floor((timerStamp - min) / 60);
+
+            interval = setInterval(function () {
+                sec = Math.floor(timerStamp % 60);
+                min = Math.floor(((timerStamp - sec) / 60) % 60);
+                hr = Math.floor(timerStamp / 3600);
+
+                if (timerStamp === 86399) {
+                    timerStamp = 0;
+                }
+
+                if (parseInt(sec) < 10) {
+                    sec = '0' + sec;
+                }
+
+                if (parseInt(min) < 10) {
+                    min = '0' + min;
+                }
+
+                if (parseInt(hr) < 10) {
+                    hr = '0' + hr;
+                }
+
+                timerStamp++
+                $(el).html(hr + ':' + min + ':' + sec)
+
+            }, 1000)
+        },
+        clear: function () {
+            clearInterval(interval);
+        }
+    }
+
+
+}
 
 function formatPhoneNumber(phoneNumberString) {
     let cleaned = ('' + phoneNumberString).replace(/\D/g, '')
@@ -683,3 +960,442 @@ function toSelect(elem, obj, cb) {
     }
 
 }
+
+function handleWidgetIcon() {
+    var $parent = $('.phone-widget-icon'),
+        $inner = '.widget-icon-inner',
+        animationClass = 'animate',
+        initialNode;
+
+    var interval = null;
+    
+    function createInitialIcon(type,status) {
+        initialNode = '<div class="widget-icon-inner" data-wi-type="'+ type +'" data-wi-status="'+ status +'">'+
+            '<div class="standby-phone">'+
+            '<i class="fa fa-phone-volume icon-phone-answer"></i>' +
+            '<div class="phone-widget-icon__state">'+
+            '<span class="phone-widget-icon__ongoing"></span>'+
+            '<span class="phone-widget-icon__text"></span>'+
+            '<span class="phone-widget-icon__time"></span>'+
+            '</div>'+
+            '<i class="fa fa-phone icon-phone"></i>'+
+            
+            '</div>'+
+            '</div>';
+
+        $($parent).append(initialNode)
+    }
+
+    function stateTimer(el, timerStamp) {
+
+
+        var sec = Math.floor(timerStamp % 60);
+        var min = Math.floor((timerStamp - sec) / 60);
+        var hr = Math.floor((timerStamp - min) / 60);
+        
+        interval = setInterval(function() {
+            sec = Math.floor(timerStamp % 60);
+            min = Math.floor(((timerStamp - sec) / 60) % 60);
+            hr = Math.floor(timerStamp / 3600);
+            
+            if (timerStamp === 86399) {
+                timerStamp = 0;
+            }
+            
+            if (parseInt(sec) < 10) {
+                sec = '0' + sec;
+            }
+
+            if (parseInt(min) < 10) {
+                min = '0' + min;
+            }
+
+            if (parseInt(hr) < 10) {
+                hr = '0' + hr;
+            }
+
+            timerStamp++
+            $(el).html(hr + ':' + min + ':' + sec)
+
+        }, 1000)
+
+    }
+
+    function updateIcon(props) {
+        $($inner).removeClass(animationClass);
+        var inner = '.widget-icon-inner',
+            ongoing = '.phone-widget-icon__ongoing',
+            text = '.phone-widget-icon__text',
+            time = '.phone-widget-icon__time';
+
+        if (props.timer) {
+            $(time).html(null);
+        }
+
+        clearInterval(interval);
+
+        $(inner).attr('data-wi-status', props.status);
+        $(inner).attr('data-wi-type', props.type);
+        $(ongoing).html(props.currentCalls);
+        $(text).html(props.text);
+
+        if (props.timer) {
+            stateTimer(time, props.timerStamp)
+        } else {
+            $(time).html(null)
+        }
+
+        props = null;
+        $($inner).addClass(animationClass);
+    }
+
+    return {
+        init: function() {
+            createInitialIcon('default', false) 
+        },
+        update: function(props) {
+            updateIcon(props)
+        }
+    }
+}
+
+function callsFilter (object) {
+    var queuesParent = '.queue-separator',
+        queuesItem = '.queue-separator__item',
+        listingParent = '.calls-separator',
+        callsParent = '.call-in-progress',
+        filterToggle = '.call-filter__toggle',
+        listingItem = '.calls-separator__list-item',
+        callItem = '.call-in-progress__list-item';
+
+    // function getQueueItem (string, data) {
+    //     var queueItem = '<li class="queue-separator__item" data-queue-type="' + data + '">' +
+    //         '<div class="queue-separator__name">' + string + '</div>' +
+    //         '<ul class="calls-separator"> </ul>' +
+    //         '</li>';
+    //     return queueItem;
+    // }
+    //
+    // function getListingItem (props) {
+    //
+    //     function getProjectBinding (data) {
+    //         if (data.project && data.department) {
+    //             return '<div class="static-number-indicator">' +
+    //                 '<span class="static-number-indicator__label">' + props.project + '</span>' +
+    //                 '<i class="static-number-indicator__separator"></i>' +
+    //                 '<span class="static-number-indicator__name">' + props.department + '</span>' +
+    //                 '</div>'
+    //         } else if (data.project && !data.department) {
+    //             return '<div class="static-number-indicator">' +
+    //                 '<span class="static-number-indicator__label">' + props.project + '</span>' +
+    //                 '</div>'
+    //         } else {
+    //             return '<div class="static-number-indicator">' +
+    //                 '<span class="static-number-indicator__name">Exteral contact</span>' +
+    //                 '</div>'
+    //         }
+    //     }
+    //
+    //
+    //
+    //     var listing = '<li class="calls-separator__list-item" id="' + props.id + '">' +
+    //         getProjectBinding(props) +
+    //         '<ul class="call-in-progress">' +
+    //         '</ul>' +
+    //         '</li>';
+    //
+    //     return listing;
+    //
+    // }
+    //
+    // function getCallNode (props) {
+    //
+    //     var item = '<li class="call-in-progress__list-item" id="' + props.id + '">' +
+    //         '<div class="call-in-progress__call-item call-list-item" data-call-status="' + props.state + '">' +
+    //         '<div class="call-list-item__info">' +
+    //         '<ul class="call-list-item__info-list call-info-list">' +
+    //         '<li class="call-info-list__item">' +
+    //         '<b class="call-info-list__contact-icon">' +
+    //         '<i class="fa fa-user"></i>' +
+    //         '</b>' +
+    //         '<span class="call-info-list__name">' + props.contact.name + '</span>' +
+    //         '</li>' +
+    //         '<li class="call-info-list__item">' +
+    //         '<span class="call-info-list__company">' + props.contact.company + '</span>' +
+    //         '</li>' +
+    //         '<li class="call-info-list__item">' +
+    //         '<span class="call-info-list__number">' + props.contact.number + '</span>' +
+    //         '</li>' +
+    //         '</ul>' +
+    //         '<div class="call-list-item__info-action call-info-action">' +
+    //         '<span class="call-info-action__timer"></span>' +
+    //         '<a href="#" class="call-info-action__more"><i class="fa fa-ellipsis-h"></i></a>' +
+    //         '' +
+    //         '</div>' +
+    //         '<ul class="call-list-item__menu call-item-menu">' +
+    //         '<li class="call-item-menu__list-item">' +
+    //         '<a href="#" class="call-item-menu__close">' +
+    //         '<i class="fa fa-chevron-right"></i>' +
+    //         '</a>' +
+    //         '</li>' +
+    //         '<li class="call-item-menu__list-item">' +
+    //         '<a href="#" class="call-item-menu__transfer">' +
+    //         '<i class="fa fa-random"></i>' +
+    //         '</a>' +
+    //         '</li>' +
+    //         '<li class="call-item-menu__list-item">' +
+    //         '<a href="#" class="call-item-menu__transfer">' +
+    //         '<i class="fa fa-pause"></i>' +
+    //         '</a>' +
+    //         '</li>' +
+    //         '<li class="call-item-menu__list-item">' +
+    //         '<a href="#" class="call-item-menu__transfer">' +
+    //         '<i class="fas fa-phone-slash"></i>' +
+    //         '</a>' +
+    //         '</li>' +
+    //         '</ul>' +
+    //         '</div>' +
+    //         '<div class="call-list-item__main-action">' +
+    //         '<a href="#" class="call-list-item__main-action-trigger">' +
+    //         '<i class="phone-icon phone-icon--start fa fa-phone"></i>' +
+    //         '<i class="phone-icon phone-icon--end fa fa-phone-slash"></i>' +
+    //
+    //         '</a>' +
+    //         '</div>' +
+    //         '</div>' +
+    //         '</li>';
+    //
+    //
+    //     return item;
+    // }
+    //
+    // function filterData (handler, dataObj) {
+    //     var obj = JSON.parse(JSON.stringify(dataObj))
+    //     var filtered = [];
+    //
+    //     for (const item in obj) {
+    //         if (obj.hasOwnProperty(item)) {
+    //             filtered.push(obj[item])
+    //         }
+    //     }
+    //
+    //     filtered.forEach(function (el, i) {
+    //
+    //         if ($(handler).attr('data-call-filter') === 'all') {
+    //             return filtered;
+    //         }
+    //
+    //         el.calls = el.calls.filter(function (call, i) {
+    //             if (call.state === $(handler).attr('data-call-filter')) {
+    //                 return call
+    //             }
+    //         })
+    //     })
+    //
+    //     return filtered;
+    // }
+    //
+    // function renderData (incomingData) {
+    //     var refData = JSON.parse(JSON.stringify(incomingData));
+    //     var callsList = [];
+    //     var queues = [];
+    //
+    //
+    //     $(queuesItem).detach();
+    //     $(listingItem).detach();
+    //
+    //     refData.forEach(function (element, i) {
+    //         element.calls.forEach(function (call) {
+    //             if (queues.indexOf(call.state) === -1) {
+    //                 queues.push(call.state)
+    //             }
+    //
+    //             if (callsList.indexOf(call) === -1) {
+    //                 callsList.push(call)
+    //             }
+    //         })
+    //     })
+    //
+    //     callsList.forEach(function (call, i) {
+    //         var timer = new stateTimer();
+    //         timer.start($('.call-info-action__timer')[i], call.length);
+    //
+    //     })
+    //
+    //     function objRemaster(list, obj) {
+    //         var data = {};
+    //         var foo = [];
+    //         var tmpArr;
+    //
+    //         list.forEach(function(listItem, i) {
+    //
+    //             data[listItem] = [];
+    //             obj.forEach(function (objEl, i) {
+    //                 var tmpArr = [];
+    //                 objEl.calls.filter(function(call){
+    //                     if (call.state === listItem) {
+    //                         tmpArr.push(call)
+    //                     }
+    //                     return call
+    //                 })
+    //                 for (var key in data) {
+    //                     data[key] = obj
+    //                 }
+    //                 foo.push(tmpArr)
+    //
+    //             })
+    //
+    //         })
+    //
+    //
+    //         for (var key in data) {
+    //
+    //             data[key].forEach(function(obj) {
+    //                 var arr = [];
+    //                 obj.calls.filter(function(item, i) {
+    //                     arr = obj.calls;
+    //                     if (item.state !== key) {
+    //                         // console.log(item)
+    //                         // console.log(data[key],obj)
+    //                         // obj.calls.splice(obj.calls.indexOf(item), 1)
+    //                     }
+    //                 })
+    //
+    //
+    //             })
+    //         }
+    //         return data
+    //
+    //     }
+    //
+    //
+    //     var queueName = {
+    //         'hold': 'On Hold',
+    //         'direct': 'Direct Calls',
+    //         'general': 'General Line',
+    //         'inProgress': 'Active'
+    //     }
+    //
+    //
+    //     var rData = objRemaster(queues, refData);
+    //
+    //     for (var key in rData) {
+    //         $(queuesParent).append(getQueueItem(queueName[key], key))
+    //
+    //         var section = $('[data-queue-type="'+ key +'"]');
+    //
+    //         rData[key].forEach(function (listing) {
+    //
+    //             $(section).find(listingParent).append(getListingItem(listing))
+    //
+    //             listing.calls.forEach(function(call) {
+    //
+    //                 if ($(section).attr('data-queue-type') === call.state) {
+    //                     $(section).find(listingItem).append(getCallNode(call))
+    //                 }
+    //             })
+    //         })
+    //     }
+    //
+    //
+    //
+    // }
+
+    return {
+        init: function () {
+            // renderData(object);
+
+
+            // function clearIndicators (target) {
+            //     var markElement = $('.widget-line-overlay__queue-marker');
+            //
+            //     markElement.removeClass('tab-hold');
+            //     markElement.removeClass('tab-direct');
+            //     markElement.removeClass('tab-general');
+            //     markElement.removeClass('tab-all');
+            //
+            //     switch ($(target).attr('data-call-filter')) {
+            //         case 'hold':
+            //             $('[data-queue-marker]').html('Calls On Hold');
+            //             markElement.addClass('tab-hold')
+            //             break;
+            //         case 'direct':
+            //             $('[data-queue-marker]').html('Direct Calls')
+            //             markElement.addClass('tab-direct')
+            //             break;
+            //         case 'general':
+            //             $('[data-queue-marker]').html('General Lines')
+            //             markElement.addClass('tab-general')
+            //             break;
+            //         case 'all':
+            //             $('[data-queue-marker]').html('Calls Queue')
+            //             break;
+            //     }
+            // }
+
+            // $(document).on('click', filterToggle, function (e) {
+            //     e.preventDefault();
+            //
+            //     $('.widget-line-overlay').show();
+            //     var activeClass = 'is-checked';
+            //     var localObj = filterData($(this), object);
+            //     renderData(localObj);
+            //     $(filterToggle).removeClass(activeClass);
+            //     $(this).addClass(activeClass);
+            //     clearIndicators($(this));
+            // });
+
+            // $(document).on('click', filterToggle, function (e) {
+            //     $('.widget-line-overlay').show();
+            //
+            //     e.preventDefault();
+            //     var markElement = $('.widget-line-overlay__queue-marker');
+            //
+            //     var activeClass = 'is-checked';
+            //     var localObj = filterData($(this), object)
+            //     renderData(localObj);
+            //
+            //     $(filterToggle).removeClass(activeClass)
+            //     $(this).addClass(activeClass)
+            //
+            //     clearIndicators($(this));
+            // });
+
+            // $(document).on('click', '.widget-line-overlay__show-all-queues', function (e) {
+            //     e.preventDefault();
+            //     $(filterToggle).addClass('is-checked');
+            //     var localObj = filterData($(this), object)
+            //     renderData(localObj);
+            //
+            //    // clearIndicators($(this));
+            //
+            // })
+
+        },
+        reset: function () {
+            $('.widget-line-overlay').hide();
+            var activeClass = 'is-checked';
+            $(filterToggle).removeClass(activeClass);
+        }
+    }
+}
+
+$(document).on('click', '.call-item-menu__close', function (e) {
+    e.preventDefault();
+    $(this).closest('.call-list-item').removeClass('call-list-item--menu')
+})
+
+$(document).on('click', '.call-info-action__more', function (e) {
+    e.preventDefault();
+    $(this).closest('.call-list-item').addClass('call-list-item--menu')
+})
+
+$(document).on('click', '.call-details__nav-btn--more', function(e) {
+    e.preventDefault();
+    $('.conference-call-details').addClass('is_active')
+});
+
+$(document).on('click', '.call-details__nav-btn--back', function(e) {
+    e.preventDefault();
+    $('.conference-call-details').removeClass('is_active')
+});

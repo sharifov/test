@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\components\EmailService;
+use common\components\ga\GaHelper;
 use common\components\jobs\UpdateLeadBOJob;
 use common\components\purifier\Purifier;
 use common\models\local\LeadAdditionalInformation;
@@ -13,6 +14,7 @@ use frontend\widgets\notification\NotificationMessage;
 use modules\offer\src\entities\offer\Offer;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\product\Product;
+use sales\auth\Auth;
 use sales\entities\EventTrait;
 use sales\events\lead\LeadBookedEvent;
 use sales\events\lead\LeadCallExpertRequestEvent;
@@ -42,6 +44,11 @@ use sales\events\lead\LeadTaskEvent;
 use sales\events\lead\LeadTrashEvent;
 use sales\helpers\lead\LeadHelper;
 use sales\interfaces\Objectable;
+use sales\model\callLog\entity\callLog\CallLog;
+use sales\model\callLog\entity\callLog\CallLogType;
+use sales\model\callLog\entity\callLogLead\CallLogLead;
+use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\lead\useCases\lead\api\create\LeadCreateForm;
 use sales\model\lead\useCases\lead\import\LeadImportForm;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
@@ -62,6 +69,7 @@ use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use common\components\SearchService;
+use yii\helpers\Url;
 use yii\helpers\VarDumper;
 
 /**
@@ -3317,17 +3325,18 @@ Reason: {reason}',
         );
     }
 
-
-
-
     public function getFirstFlightSegment()
     {
         return LeadFlightSegment::find()->where(['lead_id' => $this->id])->orderBy(['departure' => 'ASC'])->one();
     }
 
-
-
-
+    /**
+     * @return array|ActiveRecord|null
+     */
+    public function getLastFlightSegment()
+    {
+        return LeadFlightSegment::find()->where(['lead_id' => $this->id])->orderBy(['id' => SORT_DESC])->one();
+    }
 
     public function beforeSave($insert): bool
     {
@@ -3825,6 +3834,7 @@ Reason: {reason}',
         $content_data['agent'] = [
             'name'  => Yii::$app->user->identity->full_name,
             'username'  => Yii::$app->user->identity->username,
+            'nickname' => Yii::$app->user->identity->nickname,
 //            'phone' => $upp && $upp->upp_tw_phone_number ? $upp->upp_tw_phone_number : '',
             'phone' => $upp && $upp->getPhone() ? $upp->getPhone() : '',
 //            'email' => $upp && $upp->upp_email ? $upp->upp_email : '',
@@ -3956,6 +3966,7 @@ Reason: {reason}',
         $content_data['agent'] = [
             'name'  => Yii::$app->user->identity->full_name,
             'username'  => Yii::$app->user->identity->username,
+            'nickname' => Yii::$app->user->identity->nickname,
 //            'phone' => $upp && $upp->upp_tw_phone_number ? $upp->upp_tw_phone_number : '',
             'phone' => $upp && $upp->getPhone() ? $upp->getPhone() : '',
 //            'email' => $upp && $upp->upp_email ? $upp->upp_email : '',
@@ -4357,9 +4368,10 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
 
     /**
      * @param $params
+     * @param array $quoteStatus
      * @return ActiveDataProvider
      */
-    public function getQuotesProvider($params)
+    public function getQuotesProvider($params, array $quoteStatus = [])
     {
         $query = Quote::find()->where(['lead_id' => $this->id]);
         $dataProvider = new ActiveDataProvider([
@@ -4383,6 +4395,8 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
 
         $query->with(['mainAirline', 'quoteTrips.quoteSegments.marketingAirline', 'quoteTrips.quoteSegments.quoteSegmentBaggages',
             'quoteTrips.quoteSegments.quoteSegmentBaggageCharges', 'quoteTrips.quoteSegments.quoteSegmentStops']);
+
+        $query->andFilterWhere(['status' => $quoteStatus]);
 
         return $dataProvider;
     }
@@ -4410,6 +4424,17 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
      */
     public function getCountCalls(int $type_id = 0, ?bool $onlyParent = true): int
     {
+        if ((bool) Yii::$app->params['settings']['new_communication_block_lead']) {
+            $query = CallLogLead::find()
+                ->innerJoin(CallLog::tableName(), 'call_log.cl_id = call_log_lead.cll_cl_id')
+                ->where(['cll_lead_id' => $this->id]);
+
+            if ($type_id !== 0) {
+                $query->andWhere(['cl_type_id' => $type_id]);
+            }
+            return (int) $query->count();
+        }
+
         $query = Call::find();
         $query->where(['c_lead_id' => $this->id]);
 
@@ -4459,6 +4484,16 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         $count = $query->count();
 
         return (int) $count;
+    }
+
+    /**
+     * @return int
+     */
+    public function getCountClientChat(): int
+    {
+        return (int) ClientChatLead::find()
+            ->where(['ccl_lead_id' => $this->id])
+            ->count();
     }
 
 
@@ -4548,16 +4583,58 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     {
         return new LeadQuery(static::class);
     }
-    
+
     /**
+     * @param bool $linkMode
      * @return string
      */
-    public function getCommunicationInfo(): string
+    public function getCommunicationInfo(bool $linkMode = true): string
     {
         $str = '';
-        $str .= '<span title="Calls Out / In"><i class="fa fa-phone success"></i> '. $this->getCountCalls(\common\models\Call::CALL_TYPE_OUT) .'/'.  $this->getCountCalls(\common\models\Call::CALL_TYPE_IN) .'</span> | ';
-        $str .= '<span title="SMS Out / In"><i class="fa fa-comments info"></i> '. $this->getCountSms(\common\models\Sms::TYPE_OUTBOX) .'/'.  $this->getCountSms(\common\models\Sms::TYPE_INBOX) .'</span> | ';
-        $str .= '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> '. $this->getCountEmails(\common\models\Email::TYPE_OUTBOX) .'/'.  $this->getCountEmails(\common\models\Email::TYPE_INBOX) .'</span>';
+        $linkAttributes = ['target' => '_blank', 'data-pjax'=> '0'];
+
+        if ($linkMode) {
+            $callsText = '<span title="Calls Out / In"><i class="fa fa-phone success"></i> ' . $this->getCountCalls(Call::CALL_TYPE_OUT) . '/' .
+                $this->getCountCalls(Call::CALL_TYPE_IN) . '</span> | ';
+            if (Auth::can('/call/index')) {
+                $str .= Html::a($callsText, Url::to(['/call-log/index', 'CallLogSearch[lead_id]' => $this->id]), $linkAttributes);
+            } else {
+                $str .= $callsText;
+            }
+
+            $smsText = '<span title="SMS Out / In"><i class="fa fa-comments info"></i> ' .
+                $this->getCountSms(Sms::TYPE_OUTBOX) . '/' .  $this->getCountSms(Sms::TYPE_INBOX) . '</span> | ';
+
+            if (Auth::can('/sms/index')) {
+                $str .= Html::a($smsText, Url::to(['/sms/index', 'SmsSearch[s_lead_id]' => $this->id]), $linkAttributes);
+            } else {
+                $str .= $smsText;
+            }
+
+            $emilText = '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> ' .
+                $this->getCountEmails(Email::TYPE_OUTBOX) .'/'.  $this->getCountEmails(Email::TYPE_INBOX) . '</span> | ';
+            if (Auth::can('/email/index')) {
+                $str .= Html::a($emilText,
+                    Url::to(['/email/index', 'EmailSearch[e_lead_id]'  => $this->id]), $linkAttributes);
+            } else {
+                 $str .= $emilText;
+            }
+
+            $chatText = '<span title="Client Chat"><i class="fa fa-weixin warning"></i> ' .
+                $this->getCountClientChat() . '</span>';
+            if (Auth::can('/client-chat-crud/index')) {
+                $str .= Html::a($chatText,
+                    Url::to(['/client-chat-crud/index', 'ClientChatSearch[lead_id]'  => $this->id]), $linkAttributes);
+            } else {
+                $str .= $chatText;
+            }
+        } else {
+            $str .= '<span title="Calls Out / In / Join"><i class="fa fa-phone success"></i> '. $this->getCountCalls(\common\models\Call::CALL_TYPE_OUT) .'/'.  $this->getCountCalls(\common\models\Call::CALL_TYPE_IN) .'/'.  $this->getCountCalls(\common\models\Call::CALL_TYPE_JOIN) .'</span> | ';
+            $str .= '<span title="SMS Out / In"><i class="fa fa-comments info"></i> '. $this->getCountSms(\common\models\Sms::TYPE_OUTBOX) .'/'.  $this->getCountSms(\common\models\Sms::TYPE_INBOX) .'</span> | ';
+            $str .= '<span title="Email Out / In"><i class="fa fa-envelope danger"></i> '. $this->getCountEmails(\common\models\Email::TYPE_OUTBOX) .'/'.  $this->getCountEmails(\common\models\Email::TYPE_INBOX) .'</span> | ';
+            $str .= '<span title="Client Chat"><i class="fa fa-weixin warning"></i> ' . $this->getCountClientChat() . '</span>';
+        }
+
         return $str;
     }
 
@@ -4578,4 +4655,27 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     {
         return $this->l_dep_id;
     }
+
+    public function isMultiDestination(): bool
+	{
+		return $this->trip_type === self::TRIP_TYPE_MULTI_DESTINATION;
+	}
+
+	public function isRoundTrip(): bool
+	{
+		return $this->trip_type === self::TRIP_TYPE_ROUND_TRIP;
+	}
+
+	public function isReadyForGa(): bool
+	{
+		return (GaHelper::getTrackingIdByLead($this) && GaHelper::getClientIdByLead($this));
+	}
+
+    public function isExistQuotesForSend(): bool
+    {
+        return Quote::find()
+            ->andWhere(['lead_id' => $this->id])
+            ->andWhere(['status' => [Quote::STATUS_CREATED, Quote::STATUS_SEND, Quote::STATUS_OPENED]])
+            ->exists();
+	}
 }

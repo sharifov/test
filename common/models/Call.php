@@ -2,8 +2,12 @@
 
 namespace common\models;
 
+use common\components\jobs\CheckClientCallJoinToConferenceJob;
 use common\components\purifier\Purifier;
 use common\models\query\CallQuery;
+use sales\model\call\helper\CallHelper;
+use frontend\widgets\newWebPhone\call\socket\MissedCallMessage;
+use frontend\widgets\newWebPhone\call\socket\RemoveIncomingRequestMessage;
 use frontend\widgets\notification\NotificationMessage;
 use sales\access\EmployeeDepartmentAccess;
 use sales\dispatchers\NativeEventDispatcher;
@@ -15,6 +19,7 @@ use sales\helpers\cases\CasesUrlHelper;
 use sales\helpers\lead\LeadUrlHelper;
 use sales\model\call\entity\call\events\CallEvents;
 use sales\model\callLog\services\CallLogTransferService;
+use sales\model\conference\service\ConferenceDataService;
 use sales\model\phoneList\entity\PhoneList;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
@@ -76,6 +81,9 @@ use Locale;
  * @property bool $c_is_transfer
  * @property string $c_queue_start_dt
  * @property int|null $c_group_id
+ * @property string|null $c_conference_sid
+ * @property int|null $c_conference_id
+ * @property string $c_is_conference
  * @property string|null $c_language_id
  *
  * @property string $c_recording_url
@@ -97,6 +105,8 @@ use Locale;
  * @property UserGroup[] $cugUgs
  * @property Cases[] $cases
  * @property ConferenceParticipant[] $conferenceParticipants
+ * @property ConferenceParticipant $currentParticipant
+ * @property Conference[] $conferences
  */
 class Call extends \yii\db\ActiveRecord
 {
@@ -136,6 +146,7 @@ class Call extends \yii\db\ActiveRecord
     public const STATUS_CANCELED       = 9;
     public const STATUS_DELAY          = 10;
     public const STATUS_DECLINED       = 11;
+    public const STATUS_HOLD           = 12;
 
     public const STATUS_LIST = [
         self::STATUS_IVR           => 'IVR',
@@ -149,6 +160,7 @@ class Call extends \yii\db\ActiveRecord
         self::STATUS_CANCELED      => 'Canceled',
         self::STATUS_DELAY         => 'Delay',
         self::STATUS_DECLINED      => 'Declined',
+        self::STATUS_HOLD          => 'Hold',
     ];
 
 
@@ -164,15 +176,18 @@ class Call extends \yii\db\ActiveRecord
         self::STATUS_CANCELED       => '<span class="label label-danger"><i class="fa fa-close"></i> ' . self::STATUS_LIST[self::STATUS_CANCELED] . '</span>',
         self::STATUS_DELAY          => '<span class="label label-danger"><i class="fa fa-pause"></i> ' . self::STATUS_LIST[self::STATUS_DELAY] . '</span>',
         self::STATUS_DECLINED       => '<span class="label label-danger"><i class="fa fa-pause"></i> ' . self::STATUS_LIST[self::STATUS_DECLINED] . '</span>',
+        self::STATUS_HOLD           => '<span class="label label-warning"><i class="fa fa-pause"></i> ' . self::STATUS_LIST[self::STATUS_HOLD] . '</span>',
     ];
 
 
     public const CALL_TYPE_OUT  = 1;
     public const CALL_TYPE_IN   = 2;
+    public const CALL_TYPE_JOIN   = 3;
 
-    public const CALL_TYPE_LIST = [
+    public const TYPE_LIST = [
         self::CALL_TYPE_OUT => 'Outgoing',
         self::CALL_TYPE_IN  => 'Incoming',
+        self::CALL_TYPE_JOIN  => 'Join',
     ];
 
 
@@ -182,6 +197,9 @@ class Call extends \yii\db\ActiveRecord
     public const SOURCE_TRANSFER_CALL   = 4;
     public const SOURCE_CONFERENCE_CALL = 5;
     public const SOURCE_REDIAL_CALL     = 6;
+    public const SOURCE_LISTEN          = 7;
+    public const SOURCE_COACH           = 8;
+    public const SOURCE_BARGE           = 9;
 
     public const SOURCE_LIST = [
         self::SOURCE_GENERAL_LINE => 'General Line',
@@ -190,6 +208,9 @@ class Call extends \yii\db\ActiveRecord
         self::SOURCE_TRANSFER_CALL  => 'Transfer Call',
         self::SOURCE_CONFERENCE_CALL  => 'Conference Call',
         self::SOURCE_REDIAL_CALL  => 'Redial Call',
+        self::SOURCE_LISTEN  => 'Listen',
+        self::SOURCE_COACH  => 'Coach',
+        self::SOURCE_BARGE  => 'Barge',
     ];
 
     public const SHORT_SOURCE_LIST = [
@@ -257,6 +278,14 @@ class Call extends \yii\db\ActiveRecord
             ['c_queue_start_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
 
             ['c_group_id', 'integer'],
+
+            ['c_conference_id', 'integer'],
+            ['c_conference_id', 'exist', 'skipOnError' => true, 'targetClass' => Conference::class, 'targetAttribute' => ['c_conference_id' => 'cf_id']],
+
+            ['c_conference_sid', 'string', 'max' => 34],
+
+            ['c_is_conference', 'default', 'value' => false],
+            ['c_is_conference', 'boolean'],
         ];
     }
 
@@ -299,6 +328,9 @@ class Call extends \yii\db\ActiveRecord
             'c_is_transfer' => 'Transfer',
             'c_queue_start_dt' => 'Queue start dt',
             'c_group_id' => 'Group ID',
+            'c_is_conference' => 'Is conference',
+            'c_conference_id' => 'Conference ID',
+            'c_conference_sid' => 'Conference SID',
             'c_language_id' => 'Language ID',
         ];
     }
@@ -499,6 +531,16 @@ class Call extends \yii\db\ActiveRecord
         return $this->hasMany(ConferenceParticipant::class, ['cp_call_id' => 'c_id']);
     }
 
+    public function getCurrentParticipant(): ActiveQuery
+    {
+        return $this->hasOne(ConferenceParticipant::class, ['cp_call_id' => 'c_id'])->orderBy(['cp_id' => SORT_DESC])->limit(1);
+    }
+
+    public function getConferences(): ActiveQuery
+    {
+        return $this->hasMany(Conference::class, ['cf_created_user_id' => 'c_created_user_id']);
+    }
+
 
     /**
      * @return ActiveQuery
@@ -642,12 +684,12 @@ class Call extends \yii\db\ActiveRecord
      */
     public function getCallTypeName()
     {
-        return self::CALL_TYPE_LIST[$this->c_call_type_id] ?? '-';
+        return self::TYPE_LIST[$this->c_call_type_id] ?? '-';
     }
 
     public static function getCallTypeNameById(int $type)
 	{
-		return self::CALL_TYPE_LIST[$type] ?? '-';
+		return self::TYPE_LIST[$type] ?? '-';
 	}
 
     /**
@@ -724,6 +766,7 @@ class Call extends \yii\db\ActiveRecord
 
         $leadRepository = Yii::createObject(LeadRepository::class);
         $qCallService = Yii::createObject(QCallService::class);
+        $conferenceBase = (bool)(\Yii::$app->params['settings']['voip_conference_base'] ?? false);
 
 //        $userListSocketNotification = [];
         $isChangedStatus = isset($changedAttributes['c_status_id']);
@@ -830,10 +873,11 @@ class Call extends \yii\db\ActiveRecord
                 if ($callUserAccessAny) {
                     foreach ($callUserAccessAny as $callAccess) {
                         $callAccess->noAnsweredCall();
-                        if (!$callAccess->update()) {
+                        if ($callAccess->update() === false) {
                             Yii::error(VarDumper::dumpAsString($callAccess->errors),
                                 'Call:afterSave:CallUserAccess:update');
                         }
+                        Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $callAccess->cua_user_id], RemoveIncomingRequestMessage::create($this->c_call_sid));
                     }
                 }
 
@@ -983,6 +1027,8 @@ class Call extends \yii\db\ActiveRecord
                             // Notifications::publish('openUrl', ['user_id' => $case->cs_user_id], ['url' => $host . '/cases/view/' . $case->cs_gid], false);
                             $pubChannel = UserConnection::getLastUserChannel($this->c_created_user_id);
                             Notifications::pub([$pubChannel], 'openUrl', ['url' => $host . '/cases/view/' . $case->cs_gid]);
+                        } catch (\DomainException $e) {
+
                         } catch (\Throwable $e) {
                             Yii::error($e->getMessage(), 'Call:afterSave:Case:update');
                         }
@@ -1001,19 +1047,26 @@ class Call extends \yii\db\ActiveRecord
 
             if ($this->c_created_user_id) {
                 $userListNotifications[$this->c_created_user_id] = $this->c_created_user_id;
+
+                $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? MissedCallMessage::add($this) : [];
+                Notifications::publish(MissedCallMessage::COMMAND, ['user_id' => $this->c_created_user_id], $dataNotification);
+
             }
 
-            if ($this->c_lead_id && $this->cLead && $this->cLead->employee_id) {
-                $userListNotifications[$this->cLead->employee_id] = $this->cLead->employee_id;
-            }
+            if ($changedAttributes['c_status_id'] !== self::STATUS_HOLD) {
+                if ($this->c_lead_id && $this->cLead && $this->cLead->employee_id) {
+                    $userListNotifications[$this->cLead->employee_id] = $this->cLead->employee_id;
+                }
 
-            if ($this->c_case_id && $this->cCase && $this->cCase->cs_user_id) {
-                $userListNotifications[$this->cCase->cs_user_id] = $this->cCase->cs_user_id;
+                if ($this->c_case_id && $this->cCase && $this->cCase->cs_user_id) {
+                    $userListNotifications[$this->cCase->cs_user_id] = $this->cCase->cs_user_id;
+                }
             }
 
             if ($userListNotifications) {
-                $title = 'Missed Call (' . $this->getSourceName() . ')';
-                $message = 'Missed Call (' . $this->getSourceName() . ')  from ' . $this->c_from . ' to ' . $this->c_to;
+                $holdMessage = $changedAttributes['c_status_id'] === self::STATUS_HOLD ? ' Hold' : '';
+                $title = 'Missed' . $holdMessage . ' Call (' . $this->getSourceName() . ')';
+                $message = 'Missed' . $holdMessage . ' Call (' . $this->getSourceName() . ')  from ' . $this->c_from . ' to ' . $this->c_to;
                 if ($this->c_lead_id && $this->cLead) {
                     $message .= ', Lead (Id: ' . Purifier::createLeadShortLink($this->cLead) . ')';
                 }
@@ -1110,29 +1163,139 @@ class Call extends \yii\db\ActiveRecord
         }
 
 
-        if ($this->c_created_user_id && ($insert || $isChangedStatus))  {
+        if (
+            $this->c_created_user_id && ($insert || $isChangedStatus)
+            && (!($this->isIn() && $this->isStatusQueue()))
+            && (!($this->isIn() && $this->isStatusDelay()))
+        )  {
             //Notifications::socket($this->c_created_user_id, $this->c_lead_id, 'callUpdate', ['id' => $this->c_id, 'status' => $this->getStatusName(), 'duration' => $this->c_call_duration, 'snr' => $this->c_sequence_number], true);
 
 			$isInternal = PhoneList::find()->byPhone($this->c_from)->enabled()->exists();
-			$fromName = $isInternal ? $this->getCallerName($this->isIn() ? $this->c_from : $this->c_to)  : 'ClientName';
-            Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id, 'lead_id' => $this->c_lead_id, 'case_id' => $this->c_case_id],
-                [
-                	'id' => $this->c_id,
-					'status' => $this->getStatusName(),
-					'duration' => $this->c_call_duration,
-					'snr' => $this->c_sequence_number,
-					'leadId' => $this->c_lead_id,
-					'isIn' => $this->isIn(),
-					'phoneFrom' => $this->c_from,
-					'name' => $fromName,
-					'fromInternal' => $isInternal,
-					'projectName' => $this->cProject->name ?? '',
-					'sourceName' => $this->c_source_type_id ? $this->getSourceName() : ''
-				]
-			);
+            $name = '';
+            $phone = '';
+            if ($this->isIn()) {
+                $phone = $this->c_from;
+            } elseif ($this->isOut()) {
+                if ($this->cParent) {
+                    $phone = $this->cParent->c_to;
+//                }elseif ($this->cParent && $this->currentParticipant && $this->currentParticipant->isClient()) {
+//                    $phoneFrom = $this->c_to;
+                } else {
+                    $phone = $this->c_to;
+                }
+            }
+
+			if ($this->isJoin()) {
+                if ($this->cParent && $this->cParent->cCreatedUser) {
+                    $name = $this->cParent->cCreatedUser->nickname;
+                    if ($this->cParent->isIn()) {
+                        $phone = $this->cParent->c_to;
+                    } elseif ($this->cParent->isOut()) {
+                        if (isset($this->cParent->cParent)) {
+                            $phone = $this->cParent->cParent->c_from;
+                        } else {
+                            $phone = $this->cParent->c_from;
+                        }
+                    }
+                }
+            } else {
+                $name = $isInternal ? $this->getCallerName($this->isIn() ? $this->c_from : $this->c_to)  : 'ClientName';
+            }
+			$isHold = false;
+			$isListen = false;
+			$isMute = false;
+			$holdDuration = 0;
+			if ($this->currentParticipant && $this->currentParticipant->isHold()) {
+			    $isHold = true;
+                $holdDuration = time() - strtotime($this->currentParticipant->cp_hold_dt);
+            }
+			if ($this->currentParticipant && $this->currentParticipant->isMute()) {
+			    $isMute = true;
+            }
+			if ($this->isJoin() && $this->c_source_type_id === self::SOURCE_LISTEN) {
+			    $isListen = true;
+                $isMute = true;
+            }
+            $isCoach = false;
+			if ($this->isJoin() && $this->c_source_type_id === self::SOURCE_COACH) {
+			    $isCoach = true;
+            }
+            $isBarge = false;
+			if ($this->isJoin() && $this->c_source_type_id === self::SOURCE_BARGE) {
+                $isBarge = true;
+            }
+			if (!$this->currentParticipant || $this->currentParticipant->isAgent() || $this->isEnded()) {
+			    $callSid = $this->c_call_sid;
+			    $callId = $this->c_id;
+                if (!$conferenceBase) {
+                    if ($isChangedStatus && $this->isStatusInProgress() && $this->isOut() && $this->c_parent_id) {
+                        $callSid = $this->c_parent_call_sid ?: $this->cParent->c_call_sid;
+                        $callId = $this->c_parent_call_sid ?: $this->cParent->c_id;
+                    }
+                }
+
+                if ($this->isJoin()) {
+                    $source = $this->c_parent_call_sid ? $this->cParent->getSourceName() : '';
+                } else {
+                    $source = $this->getSourceName();
+                }
+                if ($source === '-') {
+                    $source = '';
+                }
+
+                $conference = null;
+
+                if ($this->c_conference_id && $this->isStatusInProgress() && $data = ConferenceDataService::getDataById($this->c_conference_id)) {
+                    $participants = [];
+                    foreach ($data['participants'] as $key => $part) {
+                        if (!$part['userId'] || $part['userId'] === $this->c_created_user_id) {
+                            unset($part['userId']);
+                            $participants[] = $part;
+                        }
+                    }
+                    $conference = [
+                        'sid' => $data['conference']['sid'],
+                        'duration' => $data['conference']['duration'],
+                        'participants' => $participants,
+                    ];
+                }
+
+                Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id],
+                    [
+                        'id' => $callId,
+                        'callSid' => $callSid,
+                        'conferenceSid' => $this->c_conference_sid,
+                        'status' => $this->getStatusName(),
+                        'duration' => $this->c_call_duration,
+                        'snr' => $this->c_sequence_number,
+                        'leadId' => $this->c_lead_id,
+                        'typeId' => $this->c_call_type_id,
+                        'type' => CallHelper::getTypeDescription($this),
+                        'source_type_id' => $this->c_source_type_id,
+                        'fromInternal' => $isInternal,
+                        'isHold' => $isHold,
+                        'holdDuration' => $holdDuration,
+                        'isListen' => $isListen,
+                        'isCoach' => $isCoach,
+                        'isMute' => $isMute,
+                        'isBarge' => $isBarge,
+                        'project' => $this->c_project_id ? $this->cProject->name : '',
+                        'source' => $source,
+                        'isEnded' => $this->isEnded(),
+                        'contact' => [
+                            'name' => $name,
+                            'phone' => $phone,
+                            'company' => '',
+                        ],
+                        'department' => $this->c_dep_id ? Department::getName($this->c_dep_id) : '',
+                        'queue' => self::getQueueName($this),
+                        'conference' => $conference
+                    ]
+                );
+            }
         }
 
-        if ($this->c_lead_id || $this->c_case_id) {
+        if (($this->c_lead_id || $this->c_case_id) && !$this->isJoin()) {
             //Notifications::socket(null, $this->c_lead_id, 'updateCommunication', ['lead_id' => $this->c_lead_id, 'status_id' => $this->c_status_id, 'status' => $this->getStatusName()], true);
 
             $socketParams = [];
@@ -1157,6 +1320,7 @@ class Call extends \yii\db\ActiveRecord
         Notifications::pingUserMap();
 
         $logEnable = Yii::$app->params['settings']['call_log_enable'] ?? false;
+
         if ($logEnable) {
             $isChangedTwStatus = array_key_exists('c_call_status', $changedAttributes);
             $isChangedDuration = array_key_exists('c_call_duration', $changedAttributes);
@@ -1164,6 +1328,7 @@ class Call extends \yii\db\ActiveRecord
                 Yii::$app->id === 'app-webapi'
                 && $this->isTwFinishStatus()
                 && ($insert || $isChangedTwStatus || $isChangedDuration)
+//                && (!$conferenceBase || ($conferenceBase && !$this->c_conference_id))
             ) {
                 (Yii::createObject(CallLogTransferService::class))->transfer($this);
             }
@@ -1179,6 +1344,23 @@ class Call extends \yii\db\ActiveRecord
 
     }
 
+    public static function getQueueName(Call $call): string
+    {
+        if ($call->isStatusInProgress()) {
+            return 'inProgress';
+        }
+        if ($call->isHold()) {
+            return 'hold';
+        }
+        if ($call->c_source_type_id === self::SOURCE_GENERAL_LINE) {
+            return 'general';
+        }
+        if ($call->c_source_type_id === self::SOURCE_DIRECT_CALL) {
+            return 'direct';
+        }
+        return '';
+    }
+
     public function isTwFinishStatus(): bool
     {
         return $this->isCompletedTw() || $this->isBusyTw() || $this->isNoAnswerTw() || $this->isFailedTw() || $this->isCanceledTw();
@@ -1192,6 +1374,9 @@ class Call extends \yii\db\ActiveRecord
     public static function applyCallToAgent(Call $call, int $user_id): bool
     {
         try {
+
+            $conferenceBase = (bool)(Yii::$app->params['settings']['voip_conference_base'] ?? false);
+
             if ($call) {
 
                 // \Yii::info('INFO: Call ('.$call->getStatusName().', '.$call->c_call_status.') CallId: ' . $call->c_id. ',  User: ' . $user_id, 'info\Call:applyCallToAgent:callRedirect');
@@ -1256,34 +1441,76 @@ class Call extends \yii\db\ActiveRecord
                 if ($callUserAccessAny) {
                     foreach ($callUserAccessAny as $callAccess) {
                         $callAccess->noAnsweredCall();
-                        if (!$callAccess->update()) {
+                        if ($callAccess->update() === false) {
                             Yii::error(VarDumper::dumpAsString($callAccess->errors), 'Call:applyCallToAgent:CallUserAccess:save');
+                        }
+                        Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $callAccess->cua_user_id], RemoveIncomingRequestMessage::create($call->c_call_sid));
+                    }
+                }
+
+                if ($call->update() === false) {
+                    Yii::error(VarDumper::dumpAsString(['call' => $call->getAttributes(), 'error' => $call->getErrors()]), 'Call:applyCallToAgent:call:update');
+                } else {
+                    if ($conferenceBase) {
+                        $delay = abs((int)(Yii::$app->params['settings']['call_accept_check_conference_status_seconds'] ?? 0));
+                        if ($delay) {
+                            $checkJob = new CheckClientCallJoinToConferenceJob();
+                            $checkJob->callId = $call->c_id;
+                            $checkJob->dateTime = date('Y-m-d H:i:s');
+                            Yii::$app->queue_job->delay($delay)->push($checkJob);
                         }
                     }
                 }
 
-                $call->update();
-
-
-                $agent = 'seller' . $user_id;
-                $res = \Yii::$app->communication->callRedirect($call->c_call_sid, 'client', $call->c_from, $agent);
-
-                if ($res && isset($res['error']) && $res['error'] === false) {
-                    if (isset($res['data']['is_error']) && $res['data']['is_error'] === true) {
-                        $call->c_call_status = self::TW_STATUS_CANCELED;
-                        $call->setStatusByTwilioStatus($call->c_call_status);
-                        $call->c_created_user_id = null;
+                if ($conferenceBase) {
+                    if (!$call->isConferenceType()) {
+                        $call->setConferenceType();
                         $call->update();
-                        return false;
+                    }
+                    $res = \Yii::$app->communication->acceptConferenceCall(
+                        $call->c_id,
+                        $call->c_call_sid,
+                        'client:seller' . $user_id,
+                        $call->c_from,
+                        $user_id
+                    );
+
+                    if ($res) {
+                        $isError = (bool)($res['error'] ?? true);
+                        if ($isError) {
+                            $call->c_call_status = self::TW_STATUS_CANCELED;
+                            $call->setStatusByTwilioStatus($call->c_call_status);
+                            $call->c_created_user_id = null;
+                            $call->update();
+                            return false;
+                        }
+                        return true;
                     }
 
-                    /*$call->c_call_status = self::CALL_STATUS_RINGING;
-                    $call->c_created_user_id = $user_id;
-                    $call->update();*/
+                } else {
+                    $agent = 'seller' . $user_id;
+                    $res = \Yii::$app->communication->callRedirect($call->c_call_sid, 'client', $call->c_from, $agent);
 
-                    // \Yii::info(VarDumper::dumpAsString($res), 'info\Call:applyCallToAgent:callRedirect');
-                    return true;
+                    Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $user_id], RemoveIncomingRequestMessage::create($call->c_call_sid));
+
+                    if ($res && isset($res['error']) && $res['error'] === false) {
+                        if (isset($res['data']['is_error']) && $res['data']['is_error'] === true) {
+                            $call->c_call_status = self::TW_STATUS_CANCELED;
+                            $call->setStatusByTwilioStatus($call->c_call_status);
+                            $call->c_created_user_id = null;
+                            $call->update();
+                            return false;
+                        }
+
+                        /*$call->c_call_status = self::CALL_STATUS_RINGING;
+                        $call->c_created_user_id = $user_id;
+                        $call->update();*/
+
+                        // \Yii::info(VarDumper::dumpAsString($res), 'info\Call:applyCallToAgent:callRedirect');
+                        return true;
+                    }
                 }
+
                 \Yii::warning('Error: ' . VarDumper::dumpAsString($res), 'Call:applyCallToAgent:callRedirect');
             } else {
                 \Yii::warning('Error: Not found Call' . VarDumper::dumpAsString($call), 'Call:applyCallToAgent:callRedirect');
@@ -1304,24 +1531,20 @@ class Call extends \yii\db\ActiveRecord
     public static function applyCallToAgentAccess(Call $call, int $user_id): bool
     {
         try {
-            if ($call) {
-                $callUserAccess = CallUserAccess::find()->where(['cua_user_id' => $user_id, 'cua_call_id' => $call->c_id])->one();
-                if(!$callUserAccess) {
-                    $callUserAccess = new CallUserAccess();
-                    $callUserAccess->cua_call_id = $call->c_id;
-                    $callUserAccess->cua_user_id = $user_id;
-                    $callUserAccess->acceptPending();
+            $callUserAccess = CallUserAccess::find()->where(['cua_user_id' => $user_id, 'cua_call_id' => $call->c_id])->one();
+            if(!$callUserAccess) {
+                $callUserAccess = new CallUserAccess();
+                $callUserAccess->cua_call_id = $call->c_id;
+                $callUserAccess->cua_user_id = $user_id;
+                $callUserAccess->acceptPending();
+            } else {
+                $callUserAccess->acceptPending();
+            }
 
-                } else {
-
-                    $callUserAccess->acceptPending();
-                }
-
-                if(!$callUserAccess->save()) {
-                    Yii::error(VarDumper::dumpAsString($callUserAccess->errors), 'CallQueueJob:execute:CallUserAccess:save');
-                } else {
-                    return true;
-                }
+            if(!$callUserAccess->save()) {
+                Yii::error(VarDumper::dumpAsString($callUserAccess->errors), 'CallQueueJob:execute:CallUserAccess:save');
+            } else {
+                return true;
             }
         } catch (\Throwable $e) {
             \Yii::error($e, 'Call:applyCallToAgentAccess');
@@ -1614,20 +1837,34 @@ class Call extends \yii\db\ActiveRecord
         return $this->c_call_status === self::TW_STATUS_FAILED;
     }
 
-    /**
-     * @return bool
-     */
+    public function setTypeIn(): void
+    {
+        $this->c_call_type_id = self::CALL_TYPE_IN;
+    }
+
     public function isIn(): bool
     {
         return (int) $this->c_call_type_id === self::CALL_TYPE_IN;
     }
 
-    /**
-     * @return bool
-     */
+    public function setTypeOut(): void
+    {
+        $this->c_call_type_id = self::CALL_TYPE_OUT;
+    }
+
     public function isOut(): bool
     {
         return (int) $this->c_call_type_id === self::CALL_TYPE_OUT;
+    }
+
+    public function setTypeJoin(): void
+    {
+        $this->c_call_type_id = self::CALL_TYPE_JOIN;
+    }
+
+    public function isJoin(): bool
+    {
+        return (int) $this->c_call_type_id === self::CALL_TYPE_JOIN;
     }
 
 
@@ -1827,6 +2064,16 @@ class Call extends \yii\db\ActiveRecord
         return $this->c_status_id === self::STATUS_DECLINED;
     }
 
+    public function hold(): void
+    {
+        $this->c_status_id = self::STATUS_HOLD;
+    }
+
+    public function isHold(): bool
+    {
+        return $this->c_status_id === self::STATUS_HOLD;
+    }
+
     /**
      * @return bool
      */
@@ -1916,6 +2163,16 @@ class Call extends \yii\db\ActiveRecord
         return $this->c_recording_sid ? Yii::$app->communication->recording_url . $this->c_recording_sid : '';
     }
 
+    public function isConferenceType(): bool
+    {
+        return $this->c_is_conference ? true : false;
+    }
+
+    public function setConferenceType(): void
+    {
+        $this->c_is_conference = true;
+    }
+
     public function getCallerName(string $fromNumber)
 	{
 		if ($this->cClient) {
@@ -1937,4 +2194,5 @@ class Call extends \yii\db\ActiveRecord
 
 		return 'ClientName';
 	}
+
 }

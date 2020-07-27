@@ -2,6 +2,7 @@
 
 use common\models\Airport;
 use common\models\CaseSale;
+use common\models\UserGroup;
 use dosamigos\multiselect\MultiSelect;
 use kartik\select2\Select2;
 use sales\access\EmployeeDepartmentAccess;
@@ -214,6 +215,36 @@ use yii\widgets\ActiveForm;
         </div>
         <div class="col-md-1">
             <?= $form->field($model, 'validatingCarrier')->textInput(['maxlength' => true]) ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'caseUserGroup')->dropDownList(UserGroup::getList(), ['prompt' => '---'])?>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-1">
+            <?= $form->field($model, 'callsQtyFrom')->textInput() ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'callsQtyTo')->textInput() ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'smsQtyFrom')->textInput() ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'smsQtyTo')->textInput() ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'emailsQtyFrom')->textInput() ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'emailsQtyTo')->textInput() ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'chatsQtyFrom')->textInput() ?>
+        </div>
+        <div class="col-md-1">
+            <?= $form->field($model, 'chatsQtyTo')->textInput() ?>
         </div>
     </div>
 

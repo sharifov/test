@@ -2,6 +2,7 @@
 
 namespace common\models\search;
 
+use common\models\ConferenceParticipant;
 use common\models\Department;
 use common\models\Employee;
 use Faker\Provider\DateTime;
@@ -64,6 +65,8 @@ class CallSearch extends Call
 
     private $callSearchRepository;
 
+    public $cp_type_id;
+
     /**
      * user groups id's
      *
@@ -101,7 +104,9 @@ class CallSearch extends Call
             ['c_queue_start_dt', 'date', 'format' => 'php:Y-m-d'],
             ['c_group_id', 'integer'],
 
-			['phoneList', 'safe']
+			['phoneList', 'safe'],
+
+            ['cp_type_id', 'integer'],
         ];
     }
 
@@ -147,6 +152,8 @@ class CallSearch extends Call
                 'pageSize' => 30,
             ],
         ]);
+
+        $query->leftJoin(ConferenceParticipant::tableName(), 'cp_call_id = c_id AND cp_type_id = ' . ConferenceParticipant::TYPE_AGENT);
 
         $this->load($params);
 

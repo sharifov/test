@@ -14,10 +14,11 @@ class ClientChatAccessMessage
 	{
 		return [
 			'command' => self::COMMAND_ACCEPT,
-			'url' => Url::toRoute(['/client-chat/index', 'rid' => $access->ccuaCch->cch_rid]),
+			'url' => Url::toRoute(['/client-chat/index', 'chid' => $access->ccuaCch->cch_id]),
 			'status_id' => $access->ccua_status_id,
 			'user_id' => $access->ccua_user_id,
-			'cch_id' => $access->ccua_cch_id
+			'cch_id' => $access->ccua_cch_id,
+			'pjaxUrl' => Url::to('/client-chat/pjax-update-chat-widget')
 		];
 	}
 
@@ -27,7 +28,8 @@ class ClientChatAccessMessage
 			'command' => self::COMMAND_PENDING,
 			'status_id' => $access->ccua_status_id,
 			'user_id' => $access->ccua_user_id,
-			'cch_id' => $access->ccua_cch_id
+			'cch_id' => $access->ccua_cch_id,
+			'pjaxUrl' => Url::to('/client-chat/pjax-update-chat-widget')
 		];
 	}
 
@@ -37,7 +39,8 @@ class ClientChatAccessMessage
 			'command' => self::COMMAND_SKIP,
 			'status_id' => $access->ccua_status_id,
 			'user_id' => $access->ccua_user_id,
-			'cch_id' => $access->ccua_cch_id
+			'cch_id' => $access->ccua_cch_id,
+			'pjaxUrl' => Url::to('/client-chat/pjax-update-chat-widget')
 		];
 	}
 }

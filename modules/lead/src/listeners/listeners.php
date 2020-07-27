@@ -48,6 +48,7 @@ use sales\listeners\lead\LeadProcessingEventLogListener;
 use sales\listeners\lead\LeadQcallAddListener;
 use sales\listeners\lead\LeadQuoteCloneEventListener;
 use sales\listeners\lead\LeadRejectEventLogListener;
+use sales\listeners\lead\LeadSendToGaListener;
 use sales\listeners\lead\LeadSnoozeEventLogListener;
 use sales\listeners\lead\LeadSnoozeNotificationsListener;
 use sales\listeners\lead\LeadSoldEventLogListener;
@@ -57,10 +58,11 @@ use sales\listeners\lead\LeadTrashEventLogListener;
 
 return [
     LeadCreatedEvent::class => [LeadCreatedEventListener::class],
-    LeadCreatedManuallyEvent::class => [],
+    LeadCreatedManuallyEvent::class => [LeadSendToGaListener::class],
     LeadCreatedByIncomingCallEvent::class => [
         LeadCreatedByIncomingCallLogListener::class,
         LeadQcallAddListener::class,
+        LeadSendToGaListener::class,
     ],
     LeadCreatedByApiEvent::class => [
         LeadCreatedByApiLogEventListener::class,
@@ -70,10 +72,17 @@ return [
         LeadCreatedByApiBOLogEventListener::class,
         LeadQcallAddListener::class,
     ],
-    LeadCreatedByIncomingSmsEvent::class => [LeadCreatedByIncomingSmsLogListener::class],
-    LeadCreatedByIncomingEmailEvent::class => [LeadCreatedByIncomingEmailLogListener::class],
+    LeadCreatedByIncomingSmsEvent::class => [
+        LeadCreatedByIncomingSmsLogListener::class,
+        LeadSendToGaListener::class,
+    ],
+    LeadCreatedByIncomingEmailEvent::class => [
+        LeadCreatedByIncomingEmailLogListener::class,
+        LeadSendToGaListener::class,
+    ],
     LeadCreatedNewEvent::class => [
         LeadCreatedNewEventLogListener::class,
+        LeadSendToGaListener::class,
     ],
 
     LeadDuplicateDetectedEvent::class => [LeadDuplicateDetectedEventListener::class],
@@ -81,7 +90,10 @@ return [
     LeadCallExpertRequestEvent::class => [LeadCallExpertRequestEventListener::class],
     LeadTaskEvent::class => [LeadTaskEventListener::class],
     LeadCountPassengersChangedEvent::class => [LeadCountPassengersChangedEventListener::class],
-    LeadCreatedCloneByUserEvent::class => [LeadCreatedCloneByUserEventListener::class],
+    LeadCreatedCloneByUserEvent::class => [
+        LeadCreatedCloneByUserEventListener::class,
+        LeadSendToGaListener::class,
+    ],
 
     LeadPendingEvent::class => [LeadPendingEventLogListener::class],
     LeadProcessingEvent::class => [

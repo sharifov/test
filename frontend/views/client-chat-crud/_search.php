@@ -38,10 +38,6 @@ use common\components\bootstrap4\activeForm\ActiveForm;
 
     <?php // echo $form->field($model, 'cch_owner_user_id') ?>
 
-    <?php // echo $form->field($model, 'cch_case_id') ?>
-
-    <?php // echo $form->field($model, 'cch_lead_id') ?>
-
     <?php // echo $form->field($model, 'cch_note') ?>
 
     <?php // echo $form->field($model, 'cch_status_id') ?>

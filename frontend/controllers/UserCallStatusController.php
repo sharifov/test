@@ -139,12 +139,12 @@ class UserCallStatusController extends FController
     public function actionUpdateStatus(): array
     {
         $type_id = (int) Yii::$app->request->post('type_id');
-        if($type_id > 0) {
+        if ($type_id > 0) {
             $ucs = new UserCallStatus();
             $ucs->us_type_id = $type_id;
             $ucs->us_user_id = Yii::$app->user->id;
             $ucs->us_created_dt = date('Y-m-d H:i:s');
-            if(!$ucs->save()) {
+            if (!$ucs->save()) {
                 Yii::error(VarDumper::dumpAsString($ucs->errors), 'UserCallStatusController:actionUpdateStatus:save');
             } else {
                 // Notifications::socket($ucs->us_user_id, null, 'updateUserCallStatus', ['id' => 'ucs'.$ucs->us_id, 'type_id' => $type_id]);

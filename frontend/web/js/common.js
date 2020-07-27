@@ -86,8 +86,12 @@
         }
     });
 
-    window.clientChatRequest = function () {
+    window.enableTimer = function () {
+        $('.enable-timer').each( function (i, e) {
+            let seconds = $(e).attr('data-seconds');
 
+            $(e).timer({format: '%H:%M:%S', seconds: seconds}).timer('start');
+        });
     }
 
 })(window, $);
@@ -106,3 +110,17 @@ function soundNotification(fileName = 'button_tiny', volume = 0.3) {
     audio.volume = volume;
     audio.play();
 }
+
+function soundDisconnect() {
+    return;
+    soundNotification('disconnect_sound', 0.3);
+}
+
+function soundConnect() {
+    return;
+    soundNotification('connect_sound', 0.3);
+}
+
+let incomingAudio = new Audio('/js/sounds/incoming_sound.mp3');
+incomingAudio.volume = 0.3;
+incomingAudio.loop = true;

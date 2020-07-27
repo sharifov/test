@@ -8,15 +8,18 @@ class CallLogType
 {
     public const OUT = 1;
     public const IN = 2;
+    public const JOIN = 3;
 
     private const LIST = [
         self::OUT => 'Out',
         self::IN => 'In',
+        self::JOIN => 'Join',
     ];
 
     private const CSS_CLASS_LIST = [
         self::OUT => 'warning',
         self::IN => 'info',
+        self::JOIN => 'success',
     ];
 
     public static function getList(): array

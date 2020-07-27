@@ -1,5 +1,6 @@
 <?php
 
+use common\components\i18n\Formatter;
 use frontend\widgets\clientChat\ClientChatAsset;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 
@@ -16,7 +17,7 @@ $accessUrl = \yii\helpers\Url::to('/client-chat/access-manage');
 <?php yii\widgets\Pjax::begin(['id' => 'client-chat-box-pjax', 'timeout' => 10000, 'enablePushState' => false, 'options' => []])?>
 <div class="_cc-fabs">
     <div class="_cc-box <?= $isPjax && $access ? 'is-visible' : '' ?>">
-        <div class="_сс-box-header" style="<?= $access ? 'background: #78c286' : 'background: #d5b24c' ?>">
+        <div class="_сс-box-header <?= $access ? 'active' : '' ?>">
             <div class="_cc-box-option">
                 <div class="header_img">
 					<?=\yii\helpers\Html::img('/img/user.png')?>
@@ -32,7 +33,7 @@ $accessUrl = \yii\helpers\Url::to('/client-chat/access-manage');
                             <div class="_cc-client-info">
                                 <span class="_cc-client-name">
                                     <i class="fa fa-user"></i>
-                                    <?= $item->ccuaCch->cchClient ? $item->ccuaCch->cchClient->full_name : 'ClientName' ?>
+                                    <?= $item->ccuaCch->cchClient && $item->ccuaCch->cchClient->full_name ? $item->ccuaCch->cchClient->full_name : 'Guest-' . $item->ccuaCch->cch_id ?>
                                 </span>
 
                                 <?php if ($item->ccuaCch->cchClient && $item->ccuaCch->cchClient->clientEmails): ?>
@@ -52,22 +53,40 @@ $accessUrl = \yii\helpers\Url::to('/client-chat/access-manage');
                                         </span>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
+
+                                <span class="_cc-request-created">
+                                    <?php if (Yii::$app->formatter instanceof Formatter): ?>
+                                        <?= Yii::$app->formatter->asByUserDateTime($item->ccua_created_dt) ?>
+                                    <?php else: ?>
+										<?= Yii::$app->formatter->asDatetime($item->ccua_created_dt) ?>
+									<?php endif; ?>
+                                </span>
+
+                                    <?php if (Yii::$app->formatter instanceof Formatter): ?>
+                                    <span>
+                                        <?= Yii::$app->formatter->asTimer($item->ccua_created_dt) ?>
+                                    </span>
+                                    <?php endif; ?>
+                                <div class="_cc-data">
+                                    <?php if ($item->ccuaCch->cchDep): ?>
+                                        <span class="label label-default"><?= $item->ccuaCch->cchDep->dep_name ?></span>
+                                    <?php endif; ?>
+
+                                    <?php if ($item->ccuaCch->cchProject): ?>
+                                        <span class="label label-default"><?= $item->ccuaCch->cchProject->name ?></span>
+                                    <?php endif; ?>
+
+                                    <span class="label label-default"><?= $item->ccuaCch->cchChannel->ccc_name ?></span>
+                                </div>
                             </div>
 
-                            <div class="_cc-data">
-                                <?php if ($item->ccuaCch->cchDep): ?>
-                                    <span class="label label-default"><?= $item->ccuaCch->cchDep->dep_name ?></span>
-                                <?php endif; ?>
-
-                                <?php if ($item->ccuaCch->cchProject): ?>
-                                    <span class="label label-default"><?= $item->ccuaCch->cchProject->name ?></span>
-                                <?php endif; ?>
-                            </div>
 
                             <div class="_cc-action">
                                 <button class="btn btn-sm btn-success _cc-access-action" data-cch-id="<?= $item->ccua_cch_id ?>" data-ajax-url="<?= $accessUrl ?>" data-access-action="<?= ClientChatUserAccess::STATUS_ACCEPT ?>"><i class="fa fa-check"></i> Accept</button>
                                 <button class="btn btn-sm btn-warning _cc-access-action" data-cch-id="<?= $item->ccua_cch_id ?>" data-ajax-url="<?= $accessUrl ?>" data-access-action="<?= ClientChatUserAccess::STATUS_SKIP ?>"><i class="fa fa-close"></i> Skip</button>
                             </div>
+
+<!--                            <span class="_cc_chevron"><i class="fa fa-chevron-down"></i></span>-->
                         </div>
                         <hr>
                     </div>
@@ -92,6 +111,12 @@ $js = <<<JS
  if ({$accessExist}) {
     toggleClientChatAccess();
  }
+$("#client-chat-box-pjax").on("pjax:end", function() {
+    window.enableTimer();
+});
+// $(document).on('click', '._cc_chevron', function () {
+//     $(this).closest('._cc-box-item').toggleClass('active');
+// });
 JS;
 
 $this->registerJs($js);

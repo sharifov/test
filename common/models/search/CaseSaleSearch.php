@@ -87,8 +87,7 @@ class CaseSaleSearch extends CaseSale
         ]);
 
         $query->andFilterWhere(['like', 'css_sale_book_id', $this->css_sale_book_id])
-            ->andFilterWhere(['like', 'css_sale_pnr', $this->css_sale_pnr])
-            ->andFilterWhere(['like', 'css_sale_data', $this->css_sale_data]);
+            ->andFilterWhere(['like', 'css_sale_pnr', $this->css_sale_pnr]);
 
         return $dataProvider;
     }
@@ -133,8 +132,7 @@ class CaseSaleSearch extends CaseSale
         ]);
 
         $query->andFilterWhere(['like', 'css_sale_book_id', $this->css_sale_book_id])
-            ->andFilterWhere(['like', 'css_sale_pnr', $this->css_sale_pnr])
-            ->andFilterWhere(['like', 'css_sale_data', $this->css_sale_data]);
+            ->andFilterWhere(['like', 'css_sale_pnr', $this->css_sale_pnr]);
 
         return $dataProvider;
     }

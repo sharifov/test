@@ -143,7 +143,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => static function (\common\models\Call $model) {
                     return $model->getCallTypeName();
                 },
-                'filter' => \common\models\Call::CALL_TYPE_LIST
+                'filter' => \common\models\Call::TYPE_LIST
             ],
 
             [

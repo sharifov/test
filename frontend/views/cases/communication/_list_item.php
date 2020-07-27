@@ -49,9 +49,9 @@ use \common\models\Call;
         <i class="chat__status chat__status--<?=$statusClass?> fa fa-circle" data-toggle="tooltip" title="<?=Html::encode($statusTitle)?>" data-placement="right" data-original-title="<?=Html::encode($statusTitle)?>"></i>
         <div class="chat__message-heading">
 
-            <?php if($call->c_call_type_id == Call::CALL_TYPE_IN):?>
+            <?php if($call->isIn()):?>
                 <div class="chat__sender">Call from (<strong><?=Html::encode($call->c_from)?>) </strong> to (<strong><?=Html::encode($call->c_to)?></strong>)</div>
-            <?php else: ?>
+            <?php elseif ($call->isOut()): ?>
                 <div class="chat__sender">Call from <b><?=($call->cCreatedUser ? Html::encode($call->cCreatedUser->username) : '-') ?></b>, (<strong><?=Html::encode($call->c_from)?>) </strong> to (<strong><?=Html::encode($call->c_to)?></strong>)</div>
             <?php endif;?>
 
@@ -102,7 +102,7 @@ use \common\models\Call;
                 <div class="chat__date"><?=Yii::$app->formatter->asDatetime(strtotime($mail->e_created_dt))?> <?=$mail->e_language_id ? '('.$mail->e_language_id.')' : ''?></div> <?php //11:01AM | June 9?>
             </div>
             <div class="card-body">
-                <h5 class="chat__subtitle"><?=Html::encode($mail->e_email_subject)?></h5>
+                <h5 class="chat__subtitle"><?= wordwrap(Html::encode($mail->e_email_subject), 60, '<br />', true) ?></h5>
                 <div class="">
                     <?php echo \yii\helpers\StringHelper::truncate(Email::strip_html_tags($mail->getEmailBodyHtml()), 300, '...', null, true)?>
                 </div>

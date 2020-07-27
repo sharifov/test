@@ -1,5 +1,7 @@
 <?php
 
+use common\components\grid\DateTimeColumn;
+use common\components\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -27,17 +29,10 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
 
-            'cf_id',
+            ['attribute' => 'cf_id', 'options' => ['style' => 'width: 110px']],
 
-            [
-                'attribute' => 'cf_cr_id',
-                'value' => function(\common\models\Conference $model) {
-                    return $model->cfCr ? Html::a(Html::encode($model->cfCr->cr_name),['conference-room/view', 'id' => $model->cf_cr_id], ['target' => '_blank', 'data-pjax' => 0])  : '-';
-                },
-                'filter' => \common\models\ConferenceRoom::getList(),
-                'format' => 'raw'
-            ],
             'cf_sid',
+            'cf_friendly_name',
             [
                 'label' => 'Participants',
                 'value' => static function(\common\models\Conference $model) {
@@ -68,6 +63,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'options' => ['style' => 'width: 80px']
 
             ],
+            [
+                'class' => \common\components\grid\DateTimeColumn::class,
+                'attribute' => 'cf_start_dt',
+            ],
+            [
+                'class' => \common\components\grid\DateTimeColumn::class,
+                'attribute' => 'cf_end_dt',
+            ],
 
             [
                 'attribute' => 'cf_created_dt',
@@ -87,6 +90,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
+                'options' => ['style' => 'width: 250px'],
             ],
             [
                 'attribute' => 'cf_updated_dt',
@@ -106,7 +110,19 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
+                'options' => ['style' => 'width: 250px'],
             ],
+            [
+                'attribute' => 'cf_cr_id',
+                'value' => function(\common\models\Conference $model) {
+                    return $model->cfCr ? Html::a(Html::encode($model->cfCr->cr_name),['conference-room/view', 'id' => $model->cf_cr_id], ['target' => '_blank', 'data-pjax' => 0])  : '-';
+                },
+                'filter' => \common\models\ConferenceRoom::getList(),
+                'format' => 'raw',
+                'options' => ['style' => 'width: 100px']
+            ],
+
+            ['class' => UserSelect2Column::class, 'attribute' => 'cf_created_user_id', 'relation' => 'createdUser'],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

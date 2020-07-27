@@ -30,4 +30,9 @@ class SettingHelper
 	{
 		return \Yii::$app->params['settings']['enable_client_chat'] ?? false;
 	}
+
+	public static function isCcSoundNotificationEnabled(): bool
+	{
+		return \Yii::$app->params['settings']['cc_sound_notification_enable'] ?? false;
+	}
 }

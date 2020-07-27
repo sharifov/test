@@ -5,6 +5,7 @@ namespace sales\services\cases;
 use common\components\BackOffice;
 use common\models\CaseSale;
 use Exception;
+use frontend\helpers\JsonHelper;
 use frontend\models\form\CreditCardForm;
 use http\Exception\RuntimeException;
 use sales\entities\cases\Cases;
@@ -67,8 +68,8 @@ class CasesSaleService
 	 */
 	public function prepareSaleData(CaseSale $caseSale): array
 	{
-		$originalData = json_decode( (string)$caseSale->css_sale_data, true );
-		$updatedData = json_decode( (string)$caseSale->css_sale_data_updated, true );
+		$originalData = JsonHelper::decode($caseSale->css_sale_data);
+		$updatedData = JsonHelper::decode($caseSale->css_sale_data_updated);
 
 		$difference = $this->compareSaleData($originalData, $updatedData);
 
@@ -87,7 +88,7 @@ class CasesSaleService
 	 */
 	public function getSegments(CaseSale $caseSale): array
 	{
-		$updatedData = json_decode((string)$caseSale->css_sale_data_updated, true);
+		$updatedData = JsonHelper::decode($caseSale->css_sale_data_updated);
 
 		$segments = [];
 
@@ -117,7 +118,7 @@ class CasesSaleService
 	 */
 	public function setValidatingCarrier(CaseSale $caseSale): CasesSaleService
 	{
-		$updatedData = json_decode((string)$caseSale->css_sale_data_updated, true);
+		$updatedData = JsonHelper::decode($caseSale->css_sale_data_updated);
 
 		$this->validatingCarrier = $updatedData['validatingCarrier'];
 
@@ -130,8 +131,9 @@ class CasesSaleService
 	 */
 	public function isDataBackedUpToOriginal(CaseSale $caseSale): bool
 	{
-		$oldData = json_decode((string)$caseSale->css_sale_data, true);
-		$newData = json_decode((string)$caseSale->css_sale_data_updated, true);
+		$oldData = JsonHelper::decode($caseSale->css_sale_data);
+		$newData = JsonHelper::decode($caseSale->css_sale_data_updated);
+
 		$difference = $this->compareSaleData($oldData, $newData);
 
 		return !$difference ? true : false;
@@ -293,7 +295,8 @@ class CasesSaleService
 			$caseSale = $this->prepareAdditionalData($caseSale, $saleData);
 
 			if(!$caseSale->save()) {
-				\Yii::error(VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]), 'CasesController:actionAddSale:CaseSale:save');
+				\Yii::error(VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]),
+				'CasesController:actionAddSale:CaseSale:save');
 				throw new \RuntimeException('An error occurred while trying to refresh original sale info;');
 			}
 
@@ -315,14 +318,15 @@ class CasesSaleService
      */
     public function saveAdditionalData(CaseSale $caseSale, Cases $case, array $saleData, bool $createTicket = true): ?CaseSale
     {
-        if ((isset($saleData['saleId']) && (int)$saleData['saleId'] === (int)$caseSale->css_sale_id) && isset($saleData['bookingId'])) {
-            $caseSale->css_sale_data = json_encode($saleData, JSON_THROW_ON_ERROR);
+        if (isset($saleData['saleId'], $saleData['bookingId']) && (int) $saleData['saleId'] === (int) $caseSale->css_sale_id) {
+            $caseSale->css_sale_data = $saleData;
             $caseSale->css_sale_data_updated = $caseSale->css_sale_data;
 
             $caseSale = $this->prepareAdditionalData($caseSale, $saleData);
 
             if(!$caseSale->save()) {
-                \Yii::error(VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]), 'CasesSaleService:saveAdditionalData');
+                \Yii::error(VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]),
+                'CasesSaleService:saveAdditionalData');
                 throw new \RuntimeException('Error. Additional data not saved');
             }
             $case->updateLastAction();
@@ -341,6 +345,10 @@ class CasesSaleService
      */
     public function prepareAdditionalData(CaseSale $caseSale, array $saleData): CaseSale
     {
+        $caseSale->css_sale_pnr = $saleData['pnr'] ?? null;
+        $caseSale->css_sale_created_dt = $saleData['created'] ?? null;
+        $caseSale->css_sale_book_id = $saleData['confirmationNumber'] ?? null;
+        $caseSale->css_sale_pax = $saleData['requestDetail']['passengersCnt'] ?? null;
         if (isset($saleData['price']['priceQuotes'])) {
             $amountCharged = 0;
             foreach ($saleData['price']['priceQuotes'] as $priceQuote) {
@@ -527,48 +535,32 @@ class CasesSaleService
             return null;
         }
 
-        $transaction = Yii::$app->db->beginTransaction();
         try {
 			if (!empty($saleData['saleId']) && $case = Cases::findOne($csId)) {
                 $saleId = (int)$saleData['saleId'];
 
-                $caseSale = new CaseSale();
-                $caseSale->css_cs_id = $csId;
-                $caseSale->css_sale_id = $saleId;
-                $caseSale->css_sale_data = json_encode($saleData, JSON_THROW_ON_ERROR);
-
-                if (!$caseSale->save()) {
-                    throw new \RuntimeException('Error. CaseSale not saved.');
-                }
-
                 if ($refreshSaleData = $this->detailRequestToBackOffice($saleId, 0, 120, 1)) {
-                    $caseSale->css_sale_pnr = $saleData['pnr'] ?? null;
-                    $caseSale->css_sale_created_dt = $saleData['created'] ?? null;
-                    $caseSale->css_sale_book_id = $saleData['confirmationNumber'] ?? null;
-                    $caseSale->css_sale_pax = $saleData['requestDetail']['passengersCnt'] ?? null;
-                    $caseSale->css_sale_data = json_encode($refreshSaleData, JSON_THROW_ON_ERROR);
+                    $caseSale = new CaseSale();
+                    $caseSale->css_cs_id = $csId;
+                    $caseSale->css_sale_id = $saleId;
 
                     $caseSale = $this->saveAdditionalData($caseSale, $case, $refreshSaleData);
 
                     if (!$caseSale->save(false)) {
-                        \Yii::error(VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $saleData]),
+                        \Yii::error(VarDumper::dumpAsString(['errors' => $caseSale->errors, 'saleData' => $refreshSaleData]),
                         'CasesSaleService:createSale:Update');
-                        throw new \RuntimeException('Error. CaseSale not updated from detailRequestToBackOffice.');
+                        throw new \RuntimeException('Error. CaseSale not saved from detailRequestToBackOffice.');
                     }
                 } else {
                     throw new \RuntimeException('Error. Broken response from detailRequestToBackOffice. CaseSale not updated.');
                 }
-                $transaction->commit();
-
                 return $caseSale;
             }
-
-            throw new \RuntimeException('Error. Params csId and saleId is required');
+            throw new \RuntimeException('Error. Param saleId is empty or Case not found');
         } catch (\Throwable $throwable) {
-            $transaction->rollBack();
-            Yii::error(AppHelper::throwableFormatter($throwable), 'CasesSaleService:createSale:Throwable' );
+            Yii::error(AppHelper::throwableFormatter($throwable),
+            'CasesSaleService:createSale:Throwable' );
         }
-
         return null;
     }
 

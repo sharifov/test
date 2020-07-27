@@ -35,7 +35,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'css_sale_pnr',
             'css_sale_pax',
             'css_sale_created_dt',
-            'css_sale_data',
+            [
+                'attribute' => 'css_sale_data',
+                'value' => static function($model) {
+                    return $model->getSaleDataEncoded();
+                },
+            ],
             'css_created_user_id',
             'css_updated_user_id',
             'css_created_dt',

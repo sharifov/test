@@ -16,7 +16,7 @@ class CallUserAccessRepository
 
 	public function getByUserAndCallId(int $userId, int $callId): CallUserAccess
 	{
-		if ($callUserAccess = CallUserAccess::find()->where(['cua_user_id' => $userId, 'cua_call_id' => $callId])->one()) {
+		if ($callUserAccess = CallUserAccess::find()->where(['cua_user_id' => $userId, 'cua_call_id' => $callId, 'cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING])->one()) {
 			return $callUserAccess;
 		}
 		throw new NotFoundException('Call User Access is not found');

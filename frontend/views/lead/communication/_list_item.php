@@ -122,7 +122,7 @@ $fromType = 'client';
                 <div class="chat__date"><?=Yii::$app->formatter->asDatetime(strtotime($mail->e_created_dt))?> <?=$mail->e_language_id ? '('.$mail->e_language_id.')' : ''?></div> <?php //11:01AM | June 9?>
             </div>
             <div class="card-body">
-                <h5 class="chat__subtitle"><?=Html::encode($mail->e_email_subject)?></h5>
+                <h5 class="chat__subtitle"><?= wordwrap(Html::encode($mail->e_email_subject), 60, '<br />', true)?></h5>
                 <div class="">
                     <?php echo \yii\helpers\StringHelper::truncate(Email::strip_html_tags($mail->getEmailBodyHtml()), 300, '...', null, true)?>
                 </div>

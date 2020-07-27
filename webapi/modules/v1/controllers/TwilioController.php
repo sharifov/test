@@ -5,6 +5,7 @@ use common\components\jobs\CallQueueJob;
 use common\components\TwilioClient;
 use common\models\Call;
 use common\models\CallUserGroup;
+use common\models\ClientPhone;
 use common\models\Conference;
 use common\models\DepartmentPhoneProject;
 use common\models\Sms;
@@ -361,7 +362,7 @@ class TwilioController extends ApiBaseNoAuthController
                 } else {
                     $call->c_source_type_id = Call::SOURCE_TRANSFER_CALL;
                 }
-                $call->c_call_type_id = Call::CALL_TYPE_IN;
+                $call->setTypeIn();
             }
 
             // Yii::info(VarDumper::dumpAsString($callData), 'info\API:Twilio:RedirectCall:callData');
@@ -387,7 +388,14 @@ class TwilioController extends ApiBaseNoAuthController
                 if ($type === 'user') {
                     if ($id) {
                         $call->c_created_user_id = $id;
+                        if (!$call->save()) {
+                            Yii::error(VarDumper::dumpAsString($call->errors), 'API:Twilio:RedirectCall:Call:update:1');
+                        }
                         Call::applyCallToAgentAccess($call, $id);
+                    } else {
+                        if (!$call->save()) {
+                            Yii::error(VarDumper::dumpAsString($call->errors), 'API:Twilio:RedirectCall:Call:update:2');
+                        }
                     }
 
                     $responseTwml->say('You have been redirected to a call to another agent. Please wait for an answer', [
@@ -464,12 +472,15 @@ class TwilioController extends ApiBaseNoAuthController
                         throw new Exception('Not found DepartmentPhoneProject', 10);
                     }
 
+                    if (!$call->save()) {
+                        Yii::error(VarDumper::dumpAsString($call->errors), 'API:Twilio:RedirectCall:Call:update:3');
+                    }
 
                 }
 
-                if (!$call->save()) {
-                    Yii::error(VarDumper::dumpAsString($call->errors), 'API:Twilio:RedirectCall:Call:update');
-                }
+//                if (!$call->save()) {
+//                    Yii::error(VarDumper::dumpAsString($call->errors), 'API:Twilio:RedirectCall:Call:update');
+//                }
             }
 //            } else {
 //                Yii::error('Not found CallSid', 'API:Twilio:RedirectCalUser');
@@ -1198,9 +1209,9 @@ class TwilioController extends ApiBaseNoAuthController
 			} else {
 
 				if (strpos($call->c_from, 'client:') !== false) {
-					$call->c_call_type_id = Call::CALL_TYPE_OUT;
+					$call->setTypeOut();
 				} else {
-					$call->c_call_type_id = Call::CALL_TYPE_IN;
+					$call->setTypeIn();
 				}
 			}
 
@@ -1325,5 +1336,20 @@ class TwilioController extends ApiBaseNoAuthController
 			$responseVoiceResponse->reject(array('reason' => 'busy'));
 		}
 		return (string) $responseVoiceResponse;
+	}
+
+	public function actionCheckOutNumber(): array
+	{
+	    $number = (string)Yii::$app->request->post('number');
+
+        if (!$number) {
+            return ['error' => 'Not found number'];
+        }
+
+        if (ClientPhone::find()->andWhere(['phone' => $number])->exists()) {
+            return ['available' => true];
+        }
+
+        return ['available' => false];
 	}
 }

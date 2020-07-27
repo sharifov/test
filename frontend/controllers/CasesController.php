@@ -22,22 +22,29 @@ use common\models\Sms;
 use common\models\SmsTemplateType;
 use common\models\UserProjectParams;
 use common\widgets\Alert;
+use frontend\helpers\JsonHelper;
 use frontend\models\CaseCommunicationForm;
 use frontend\models\CasePreviewEmailForm;
 use frontend\models\CasePreviewSmsForm;
 use sales\auth\Auth;
+use sales\entities\cases\CasesSourceType;
 use sales\entities\cases\CasesStatus;
 use sales\entities\cases\CaseStatusLogSearch;
 use sales\forms\cases\CasesAddEmailForm;
 use sales\forms\cases\CasesAddPhoneForm;
 use sales\forms\cases\CasesChangeStatusForm;
 use sales\forms\cases\CasesClientUpdateForm;
+use sales\forms\cases\CasesCreateByChatForm;
 use sales\forms\cases\CasesCreateByWebForm;
 use sales\forms\cases\CasesSaleForm;
+use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
+use sales\model\callLog\entity\callLog\CallLogType;
 use sales\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
 use sales\guards\cases\CaseManageSaleInfoGuard;
 use sales\model\cases\useCases\cases\updateInfo\Handler;
+use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChat\services\ClientChatAssignService;
 use sales\model\coupon\entity\couponCase\CouponCase;
 use sales\model\coupon\useCase\send\SendCouponsForm;
 use sales\model\saleTicket\useCase\create\SaleTicketService;
@@ -45,6 +52,7 @@ use sales\repositories\cases\CaseCategoryRepository;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\cases\CasesSaleRepository;
 use sales\repositories\client\ClientEmailRepository;
+use sales\repositories\quote\QuoteRepository;
 use sales\services\cases\CasesSaleService;
 use sales\services\cases\CasesCommunicationService;
 use sales\repositories\user\UserRepository;
@@ -52,6 +60,7 @@ use sales\services\cases\CasesCreateService;
 use sales\services\cases\CasesManageService;
 use sales\services\client\ClientUpdateFromEntityService;
 use sales\services\email\EmailService;
+use sales\services\TransactionManager;
 use Yii;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesSearch;
@@ -84,6 +93,8 @@ use yii\widgets\ActiveForm;
  * @property ClientUpdateFromEntityService $clientUpdateFromEntityService
  * @property Handler $updateHandler
  * @property SaleTicketService $saleTicketService
+ * @property QuoteRepository $quoteRepository
+ * @property TransactionManager $transaction
  */
 class CasesController extends FController
 {
@@ -99,6 +110,8 @@ class CasesController extends FController
     private $clientUpdateFromEntityService;
     private $updateHandler;
     private $saleTicketService;
+    private $quoteRepository;
+    private $transaction;
 
     public function __construct(
         $id,
@@ -114,6 +127,8 @@ class CasesController extends FController
         ClientUpdateFromEntityService $clientUpdateFromEntityService,
         Handler $updateHandler,
         SaleTicketService $saleTicketService,
+        QuoteRepository $quoteRepository,
+        TransactionManager $transaction,
         $config = []
     )
     {
@@ -129,6 +144,8 @@ class CasesController extends FController
         $this->clientUpdateFromEntityService = $clientUpdateFromEntityService;
         $this->saleTicketService = $saleTicketService;
         $this->updateHandler = $updateHandler;
+        $this->quoteRepository = $quoteRepository;
+        $this->transaction = $transaction;
     }
 
     public function behaviors(): array
@@ -256,8 +273,9 @@ class CasesController extends FController
                                     $quoteId = (int)$quoteId;
                                     $quote = Quote::findOne($quoteId);
                                     if ($quote) {
-                                        $quote->status = Quote::STATUS_SEND;
-                                        if (!$quote->save()) {
+                                        $quote->setStatusSend();
+                                        $this->quoteRepository->save($quote);
+                                        if (!$this->quoteRepository->save($quote)) {
                                             Yii::error($quote->errors, 'CaseController:view:Email:Quote:save');
                                         }
                                     }
@@ -326,8 +344,8 @@ class CasesController extends FController
                                     $quoteId = (int)$quoteId;
                                     $quote = Quote::findOne($quoteId);
                                     if ($quote) {
-                                        $quote->status = Quote::STATUS_SEND;
-                                        if (!$quote->save()) {
+                                        $quote->setStatusSend();
+                                        if (!$this->quoteRepository->save($quote)) {
                                             Yii::error($quote->errors, 'CaseController:view:Sms:Quote:save');
                                         }
                                     }
@@ -473,7 +491,7 @@ class CasesController extends FController
                                 }
                                 $previewEmailForm->e_email_from = $mailFrom; //$mailPreview['data']['email_from'];
                                 $previewEmailForm->e_email_to = $comForm->c_email_to; //$mailPreview['data']['email_to'];
-                                $previewEmailForm->e_email_from_name = $userModel->full_name;
+                                $previewEmailForm->e_email_from_name = $userModel->nickname;
                                 $previewEmailForm->e_email_to_name = $model->client ? $model->client->full_name : '';
                                 $previewEmailForm->e_quote_list = @json_encode($comForm->quoteList);
                             }
@@ -485,7 +503,7 @@ class CasesController extends FController
                         $previewEmailForm->e_email_subject = $comForm->c_email_subject;
                         $previewEmailForm->e_email_from = $mailFrom;
                         $previewEmailForm->e_email_to = $comForm->c_email_to;
-                        $previewEmailForm->e_email_from_name = $userModel->full_name;
+                        $previewEmailForm->e_email_from_name = $userModel->nickname;
                         $previewEmailForm->e_email_to_name = $model->client ? $model->client->full_name : '';
                     }
 
@@ -784,6 +802,7 @@ class CasesController extends FController
 			->from('call_log_case')
 			->innerJoin('call_log', 'call_log.cl_id = call_log_case.clc_cl_id')
 			->where(['clc_case_id' => $model->cs_id])
+			->andWhere(['call_log.cl_type_id' => [CallLogType::IN,CallLogType::OUT]])
 			->orderBy(['created_dt' => SORT_ASC])
 			->groupBy(['id', 'type', 'case_id']);
 
@@ -830,7 +849,7 @@ class CasesController extends FController
                 $cs = new CaseSale();
                 $cs->css_cs_id = $model->cs_id;
                 $cs->css_sale_id = $saleData['saleId'];
-                $cs->css_sale_data = json_encode($saleData);
+                $cs->css_sale_data = $saleData;
                 $cs->css_sale_pnr = $saleData['pnr'] ?? null;
                 $cs->css_sale_created_dt = $saleData['created'] ?? null;
                 $cs->css_sale_book_id = $saleData['bookingId'] ?? null;
@@ -917,6 +936,7 @@ class CasesController extends FController
         $form = new CasesCreateByWebForm($user);
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
+                /** @var Cases $case */
                 $case = $this->casesCreateService->createByWeb($form, $user->id);
                 $this->casesManageService->processing($case->cs_id, Yii::$app->user->id, Yii::$app->user->id);
                 Yii::$app->session->setFlash('success', 'Case created');
@@ -927,6 +947,43 @@ class CasesController extends FController
             }
         }
         return $this->render('create', [
+            'model' => $form,
+        ]);
+    }
+
+    public function actionCreateByChat()
+    {
+        if (!(Yii::$app->request->isAjax || Yii::$app->request->isPjax)) {
+            throw new NotFoundHttpException('Page not exist');
+        }
+
+        $chatId = (int)Yii::$app->request->get('chat_id');
+        $chat = ClientChat::findOne(['cch_id' => $chatId]);
+
+        if (!$chat) {
+            throw new NotFoundHttpException('Client chat not found');
+        }
+
+        $user = Auth::user();
+        $form = new CasesCreateByChatForm($user, $chat);
+
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            try {
+                /** @var Cases $case */
+                $case = $this->transaction->wrap(function () use ($form, $chat, $user) {
+                    $case = $this->casesCreateService->createByChat($form, $chat, $user->id);
+                    $this->casesManageService->processing($case->cs_id, $user->id, $user->id);
+                    return $case;
+                });
+                $out = Yii::$app->formatter->format($case, 'case');
+                return "<script> $('#modal-md').modal('hide');$('#chat-info-case-info').append(' " . $out . "')</script>";
+            } catch (\Throwable $e){
+                Yii::error(AppHelper::throwableFormatter($e), 'CasesController:actionCreateByChat');
+                return "<script> $('#modal-md').modal('hide');createNotify('Create Case', '" . $e->getMessage() . "', 'error');</script>";
+            }
+        }
+
+        return $this->renderAjax('create_by_chat', [
             'model' => $form,
         ]);
     }
@@ -1414,7 +1471,7 @@ class CasesController extends FController
 				$form = new CasesSaleForm($caseSale, $this->casesSaleService);
 
 				if ($form->load(Yii::$app->request->post(), 'cssSaleData') && $form->validate()) {
-					$decodedSaleData = json_decode( (string)($form->caseSale->css_sale_data_updated), true );
+					$decodedSaleData = JsonHelper::decode($form->caseSale->css_sale_data_updated);
 
 					$difference = $this->casesSaleService->compareSaleData($decodedSaleData, $form->validatedData);
 					if (!$difference) {
@@ -1542,7 +1599,7 @@ class CasesController extends FController
 		$canManageSaleInfo = $caseGuard->canManageSaleInfo(
 			$caseSale,
 			Yii::$app->user->identity,
-			json_decode((string)$caseSale->css_sale_data, true)['passengers'] ?? [], $isRefresh);
+			JsonHelper::decode($caseSale->css_sale_data)['passengers'] ?? [], $isRefresh);
 
 		if ($canManageSaleInfo) {
 			throw new \DomainException($canManageSaleInfo, -3);
@@ -1590,7 +1647,7 @@ class CasesController extends FController
 			}
 			Yii::error(
 			    \yii\helpers\VarDumper::dumpAsString($throwable->getMessage(), 20),
-			    'CaseController:actionAjaxSyncWithBackOffice:catch:Throwable'
+			    'CaseController:actionAjaxRefreshSaleInfo:Throwable'
 			);
 		}
 

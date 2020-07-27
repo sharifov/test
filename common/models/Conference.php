@@ -6,6 +6,7 @@ use common\models\query\ConferenceQuery;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
 /**
@@ -23,12 +24,26 @@ use yii\db\ActiveRecord;
  * @property string $cf_updated_dt
  * @property string $cf_friendly_name
  * @property string $cf_call_sid
+ * @property int|null $cf_created_user_id
+ * @property string|null $cf_start_dt
+ * @property string|null $cf_end_dt
  *
  * @property ConferenceRoom $cfCr
  * @property ConferenceParticipant[] $conferenceParticipants
+ * @property Call $call
  */
 class Conference extends \yii\db\ActiveRecord
 {
+    public const EVENT_CONFERENCE_END = 'conference-end';
+    public const EVENT_CONFERENCE_START = 'conference-start';
+    public const EVENT_PARTICIPANT_LEAVE = 'participant-leave';
+    public const EVENT_PARTICIPANT_JOIN = 'participant-join';
+    public const EVENT_PARTICIPANT_MUTE = 'participant-mute';
+    public const EVENT_PARTICIPANT_UNMUTE = 'participant-unmute';
+    public const EVENT_PARTICIPANT_HOLD = 'participant-hold';
+    public const EVENT_PARTICIPANT_UNHOLD = 'participant-unhold';
+    public const EVENT_PARTICIPANT_SPEECH_START = 'participant-speech-start';
+    public const EVENT_PARTICIPANT_SPEECH_STOP = 'participant-speech-stop';
 
     public const STATUS_START   = 1;
     public const STATUS_DELAY   = 2;
@@ -54,7 +69,7 @@ class Conference extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['cf_cr_id'], 'required'],
+//            [['cf_cr_id'], 'required'],
             [['cf_cr_id', 'cf_status_id', 'cf_recording_duration'], 'integer'],
             [['cf_options'], 'string'],
             [['cf_created_dt', 'cf_updated_dt'], 'safe'],
@@ -62,6 +77,12 @@ class Conference extends \yii\db\ActiveRecord
             [['cf_sid', 'cf_recording_sid'], 'unique'],
             [['cf_recording_url'], 'string', 'max' => 200],
             [['cf_cr_id'], 'exist', 'skipOnError' => true, 'targetClass' => ConferenceRoom::class, 'targetAttribute' => ['cf_cr_id' => 'cr_id']],
+
+            ['cf_created_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['cf_created_user_id' => 'id']],
+
+            [['cf_start_dt', 'cf_end_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+
+//            [['cf_call_sid'], 'exist', 'skipOnError' => true, 'targetClass' => Call::class, 'targetAttribute' => ['cf_call_sid' => 'c_call_sid']],
         ];
     }
 
@@ -78,6 +99,11 @@ class Conference extends \yii\db\ActiveRecord
             'cf_options' => 'Options',
             'cf_created_dt' => 'Created Dt',
             'cf_updated_dt' => 'Updated Dt',
+            'cf_friendly_name' => 'Friendly name',
+            'cf_created_user_id' => 'Created User',
+            'cf_start_dt' => 'Start',
+            'cf_end_dt' => 'End',
+            'cf_call_sid' => 'Call Sid',
         ];
     }
 
@@ -98,6 +124,11 @@ class Conference extends \yii\db\ActiveRecord
         ];
     }
 
+    public function getCreatedUser(): ActiveQuery
+    {
+        return $this->hasOne(Employee::class, ['id' => 'cf_created_user_id']);
+    }
+
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -112,6 +143,11 @@ class Conference extends \yii\db\ActiveRecord
     public function getConferenceParticipants()
     {
         return $this->hasMany(ConferenceParticipant::class, ['cp_cf_id' => 'cf_id']);
+    }
+
+    public function getCall(): ActiveQuery
+    {
+        return $this->hasOne(Call::class, ['c_call_sid' => 'cf_call_sid']);
     }
 
     /**
@@ -137,5 +173,37 @@ class Conference extends \yii\db\ActiveRecord
     public static function getList(): array
     {
         return self::STATUS_LIST;
+    }
+
+    public function start(string $dateTime = ''): void
+    {
+        $this->cf_start_dt = $dateTime;
+        $this->cf_status_id = self::STATUS_START;
+    }
+
+    public function isStart(): bool
+    {
+        return $this->cf_status_id === self::STATUS_START;
+    }
+
+    public function delay(): void
+    {
+        $this->cf_status_id = self::STATUS_DELAY;
+    }
+
+    public function isDelay(): bool
+    {
+        return $this->cf_status_id === self::STATUS_DELAY;
+    }
+
+    public function end(string $dateTime = ''): void
+    {
+        $this->cf_end_dt = $dateTime;
+        $this->cf_status_id = self::STATUS_END;
+    }
+
+    public function isEnd(): bool
+    {
+        return $this->cf_status_id === self::STATUS_END;
     }
 }

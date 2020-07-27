@@ -1,13 +1,16 @@
 <?php
 
 use common\models\Notifications;
+use sales\model\clientChat\entity\ClientChat;
 use yii\bootstrap4\Html;
 use yii\helpers\Url;
 use yii\web\View;
 use yii\widgets\Pjax;
 
 /* @var Notifications[] $notifications */
+/* @var ClientChat[] $chatsWithUnreadMessages */
 /* @var integer $count */
+/* @var integer $totalUnreadMessages */
 /** @var View $this */
 
 if (!$count) {
@@ -15,6 +18,39 @@ if (!$count) {
 }
 
 ?>
+
+
+
+<?php Pjax::begin(['id' => 'notify-pjax-cc', 'timeout' => false, 'enablePushState' => false, 'enableReplaceState' => false, 'options' => [
+    'tag' => 'li',
+    'class' => 'dropdown open',
+    'role' => 'presentation',
+]])?>
+        <a href="javascript:;" class="dropdown-toggle info-number" title="Chat Notifications" data-toggle="dropdown"
+           aria-expanded="false" >
+            <i class="fa fa-comments"></i><span class="badge bg-green _cc_unread_messages"><?= $totalUnreadMessages ?></span>
+        </a>
+
+        <ul id="cc-notification-menu" class="dropdown-menu list-unstyled msg_list" role="menu" x-placement="bottom-end">
+
+			<?php if ($chatsWithUnreadMessages): ?>
+				<?php foreach ($chatsWithUnreadMessages as $clientChat): ?>
+					<?= $this->render('item_cc', [
+						'clientChat' => $clientChat
+					]) ?>
+				<?php endforeach; ?>
+
+			<?php else: ?>
+                <li>
+                    <div class="text-center">
+						<?= Html::a('<i class="fa fa-warning"></i> <strong>You have no new notifications</strong>', ['#']) ?>
+                    </div>
+                </li>
+			<?php endif; ?>
+        </ul>
+
+<?php Pjax::end() ?>
+
 <?php Pjax::begin(['id' => 'notify-pjax', 'timeout' => false, 'enablePushState' => false, 'enableReplaceState' => false, 'options' => [
     'tag' => 'li',
     'class' => 'dropdown open',
@@ -25,7 +61,7 @@ if (!$count) {
 
     <a href="javascript:;" class="dropdown-toggle info-number" title="Notifications" data-toggle="dropdown"
        aria-expanded="false">
-        <i class="fa fa-comment-o"></i><span class="badge bg-green notification-counter"><?= $count ?></span>
+        <i class="fa fa-bell-o"></i><span class="badge bg-green notification-counter"><?= $count ?></span>
     </a>
 
     <ul id="notification-menu" class="dropdown-menu list-unstyled msg_list" role="menu" x-placement="bottom-end">
@@ -48,7 +84,7 @@ if (!$count) {
         <?php endforeach; ?>
 
         <?php $this->registerJs($pNotifiers, View::POS_END); ?>
-        <?php $this->registerJs('notificationCount(\'' . $count . '\');', View::POS_END); ?>
+        <?php $this->registerJs('notificationCount(\'' . $count . '\', "'.$totalUnreadMessages.'");', View::POS_END); ?>
 
         <li>
             <div class="text-center">
@@ -70,6 +106,10 @@ function updatePjaxNotify() {
     $.pjax.reload({url: notifyUrl, container : '#notify-pjax', push: false, replace: false, timeout: 10000, scrollTo: false, async: false});
 }
 
+function updatePjaxCcNotify() {
+    $.pjax.reload({url: notifyUrl, container : '#notify-pjax-cc', push: false, replace: false, timeout: 10000, scrollTo: false, async: false});
+}
+
 $("#notify-pjax").on("pjax:beforeSend", function() {
     $('#notify-pjax .info-number i').removeClass('fa-comment-o').addClass('fa-spin fa-spinner');
 });
@@ -80,6 +120,20 @@ $("#notify-pjax").on("pjax:complete", function() {
 
 $("#notify-pjax").on('pjax:timeout', function(event) {
     $('#notify-pjax .info-number i').removeClass('fa-spin fa-spinner').addClass('fa-comment-o');
+    event.preventDefault()
+});
+
+
+$("#notify-pjax-cc").on("pjax:beforeSend", function() {
+    $('#notify-pjax-cc .info-number i').removeClass('fa-comments').addClass('fa-spin fa-spinner');
+});
+
+$("#notify-pjax-cc").on("pjax:complete", function() {
+    $('#notify-pjax-cc .info-number i').removeClass('fa-spin fa-spinner').addClass('fa-comments');
+});
+
+$("#notify-pjax-cc").on('pjax:timeout', function(event) {
+    $('#notify-pjax-cc .info-number i').removeClass('fa-spin fa-spinner').addClass('fa-comments');
     event.preventDefault()
 });
  
@@ -101,8 +155,9 @@ function notificationPNotify(type, title, message, desktopMessage) {
     soundNotification();
 }
 
-function notificationCount(count) {
-    $(".notification-counter").text(count);   
+function notificationCount(count, totalUnreadMessages) {
+    $(".notification-counter").text(count);
+    $("._cc_unread_messages").text(totalUnreadMessages);
 }
 
 JS;

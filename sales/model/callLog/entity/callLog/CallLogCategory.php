@@ -12,6 +12,7 @@ class CallLogCategory
     public const TRANSFER_CALL   = 4;
     public const CONFERENCE_CALL = 5;
     public const REDIAL_CALL = 6;
+    public const COACH_CALL = 7;
 
     private const LIST = [
         self::GENERAL_LINE => 'General Line',
@@ -20,6 +21,7 @@ class CallLogCategory
         self::TRANSFER_CALL => 'Transfer Call',
         self::CONFERENCE_CALL => 'Conference Call',
         self::REDIAL_CALL => 'Redial Call',
+        self::COACH_CALL => 'Coach Call',
     ];
 
     private const CSS_CLASS_LIST = [
@@ -29,6 +31,7 @@ class CallLogCategory
         self::TRANSFER_CALL => 'light',
         self::CONFERENCE_CALL => 'dark',
         self::REDIAL_CALL => 'success',
+        self::COACH_CALL => 'info',
     ];
 
     public static function getList(): array

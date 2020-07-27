@@ -11,6 +11,7 @@ use frontend\widgets\multipleUpdate\redial\MultipleUpdateForm;
 use frontend\widgets\multipleUpdate\redialAll\UpdateAllForm;
 use frontend\widgets\multipleUpdate\redialAll\UpdateAllService;
 use sales\access\ListsAccess;
+use sales\auth\Auth;
 use sales\guards\lead\TakeGuard;
 use sales\services\lead\LeadRedialService;
 use frontend\widgets\multipleUpdate\redial\MultipleUpdateService;
@@ -224,12 +225,19 @@ class LeadRedialController extends FController
 
         $dataProvider = (new LeadQcallSearch())->searchByRedial([], $user);
         $query = $dataProvider->query;
-        $query->addOrderBy(($dataProvider->sort)->getOrders())->limit(1);
+        $query->addOrderBy(($dataProvider->sort)->getOrders())->limit(100);
 //        VarDumper::dump($query->createCommand()->getRawSql());die;
 
         foreach ($query->all() as $model) {
             try {
                 $lead = $this->findLeadById($model->lqc_lead_id);
+
+                try {
+                    $this->guardQueueReservation($lead->id, Auth::id());
+                } catch (\DomainException $e) {
+                    continue;
+                }
+
                 $this->leadRedialService->redial($lead, $user);
                 return $this->asJson([
                     'success' => true,
@@ -284,6 +292,7 @@ class LeadRedialController extends FController
         }
 
         try {
+            $this->guardQueueReservation($lead->id, Auth::id());
             $this->leadRedialService->redial($lead, $user);
         } catch (\DomainException $e) {
             return $this->asJson([
@@ -302,6 +311,7 @@ class LeadRedialController extends FController
     /**
      * @return Response
      * @throws NotFoundHttpException
+     * @throws \Throwable
      */
     public function actionReservation(): Response
     {
@@ -311,6 +321,7 @@ class LeadRedialController extends FController
         $user = Yii::$app->user->identity;
 
         try {
+            $this->guardQueueReservation($lead->id, Auth::id());
             $this->leadRedialService->reservationBeforeCall($lead, $user);
             return $this->asJson(['success' => true]);
         } catch (\DomainException $e) {
@@ -495,5 +506,20 @@ class LeadRedialController extends FController
             return $model;
         }
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    private function guardQueueReservation(int $leadId, int $userId): void
+    {
+        $key = 'lead_redial_reservation_' . $leadId;
+        Yii::$app->redis->setnx($key, $userId);
+        $value = Yii::$app->redis->get($key);
+        if ((int)$value !== $userId) {
+            Yii::info(VarDumper::dumpAsString([
+                'leadId' => $leadId,
+                'userId' => $userId
+            ]), 'info\LeadRedialRedisReservation');
+            throw new \DomainException('Lead reserved. Try again later.');
+        }
+        Yii::$app->redis->expire($key, 5);
     }
 }

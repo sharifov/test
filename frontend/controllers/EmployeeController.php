@@ -21,13 +21,18 @@ use frontend\models\UserFailedLogin;
 use frontend\models\UserMultipleForm;
 use sales\auth\Auth;
 use sales\helpers\app\AppHelper;
+use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\emailList\entity\EmailList;
 use sales\model\userVoiceMail\entity\search\UserVoiceMailSearch;
+use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessRepository;
+use sales\services\clientChatMessage\ClientChatMessageService;
+use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
 use Yii;
 use yii\bootstrap4\Html;
 use yii\data\ActiveDataProvider;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Console;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
@@ -37,10 +42,22 @@ use yii\widgets\ActiveForm;
 
 /**
  * EmployeeController controller
+ *
+ * @property ClientChatUserAccessService $clientChatUserAccessService
+ * @property ClientChatMessageService $clientChatMessageService
  */
 class EmployeeController extends FController
 {
-    /**
+	/**
+	 * @var ClientChatUserAccessService
+	 */
+	private ClientChatUserAccessService $clientChatUserAccessService;
+	/**
+	 * @var ClientChatMessageService
+	 */
+	private ClientChatMessageService $clientChatMessageService;
+
+	/**
      * @return array
      */
     public function behaviors()
@@ -55,6 +72,13 @@ class EmployeeController extends FController
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
+
+    public function __construct($id, $module, ClientChatUserAccessService $clientChatUserAccessService, ClientChatMessageService $clientChatMessageService, $config = [])
+	{
+		parent::__construct($id, $module, $config);
+		$this->clientChatUserAccessService = $clientChatUserAccessService;
+		$this->clientChatMessageService = $clientChatMessageService;
+	}
 
     public function actionSellerContactInfo($employeeId)
     {
@@ -165,6 +189,7 @@ class EmployeeController extends FController
     public function actionList()
     {
         $multipleForm = new UserMultipleForm();
+        $multipleErrors = [];
 
         if ($multipleForm->load(Yii::$app->request->post()) && $multipleForm->validate()) {
 
@@ -177,165 +202,143 @@ class EmployeeController extends FController
                     $user = Employee::findOne($user_id);
 
                     if ($user) {
-                        $is_save = false;
 
-//                            if ($multipleForm->status_id) {
-//                                $lead->status = $multipleForm->status_id;
-//                                $is_save = true;
-//                            }
+                        if (!$uParams = $user->userParams) {
+                            Yii::error('User Id: ' . $user->id . ' Error. Please create UserParams for this user.', 'Employee:list:multipleUpdate');
+                            $multipleErrors[$user_id][] = 'User Id:' . $user->id . ' Error. Please create UserParams for this user.';
+                            continue;
+                        }
+
+                        $uParamsNeedSave = false;
+                        $uProfileNeedSave = false;
+
+                        if (!$uProfile = $user->userProfile) {
+                            $uProfile = new UserProfile();
+                            $uProfile->up_user_id = $user->id;
+                            $uProfileNeedSave = true;
+                        }
 
                         if (is_numeric($multipleForm->up_call_expert_limit)) {
-                            $up = $user->userParams;
-                            if($up) {
-                                $up->up_call_expert_limit = (int) $multipleForm->up_call_expert_limit;
-                                if(!$up->save()) {
-                                    Yii::error(VarDumper::dumpAsString($up->errors), 'Employee:list:multipleupdate:userParams:save');
-                                }
-                            }
+                            $uParams->up_call_expert_limit = (int) $multipleForm->up_call_expert_limit;
+                            $uParamsNeedSave = true;
                         }
 
                         if ($multipleForm->workStart != ""){
-                            $upWT = $user->userParams;
-                            if($upWT) {
-                                $upWT->up_work_start_tm = $multipleForm->workStart . ':00';
-                                if(!$upWT->save()) {
-                                    Yii::error(VarDumper::dumpAsString($upWT->errors), 'Employee:list:multipleupdate:userParams:save');
-                                }
-                            }
+                            $uParams->up_work_start_tm = $multipleForm->workStart . ':00';
+                            $uParamsNeedSave = true;
                         }
 
                         if ($multipleForm->timeZone != ""){
-                            $upTZ = $user->userParams;
-                            if($upTZ) {
-                                $upTZ->up_timezone = $multipleForm->timeZone;
-                                if(!$upTZ->save()) {
-                                    Yii::error(VarDumper::dumpAsString($upTZ->errors), 'Employee:list:multipleupdate:userParams:save');
-                                }
-                            }
+                            $uParams->up_timezone = $multipleForm->timeZone;
+                            $uParamsNeedSave = true;
                         }
 
                         if (is_numeric($multipleForm->workMinutes)) {
-                            $upWM = $user->userParams;
-                            if($upWM) {
-                                $upWM->up_work_minutes = (int)$multipleForm->workMinutes;
-                                if(!$upWM->save()) {
-                                    Yii::error(VarDumper::dumpAsString($upWM->errors), 'Employee:list:multipleupdate:userParams:save');
-                                }
-                            }
+                            $uParams->up_work_minutes = (int)$multipleForm->workMinutes;
+                            $uParamsNeedSave = true;
                         }
 
                         if (is_numeric($multipleForm->inboxShowLimitLeads)) {
-                            $upSLL = $user->userParams;
-                            if($upSLL) {
-                                $upSLL->up_inbox_show_limit_leads = (int)$multipleForm->inboxShowLimitLeads;
-                                if(!$upSLL->save()) {
-                                    Yii::error(VarDumper::dumpAsString($upSLL->errors), 'Employee:list:multipleupdate:userParams:save');
-                                }
-                            }
+                            $uParams->up_inbox_show_limit_leads = (int)$multipleForm->inboxShowLimitLeads;
+                            $uParamsNeedSave = true;
                         }
 
                         if (is_numeric($multipleForm->defaultTakeLimitLeads)) {
-                            $upDTLL = $user->userParams;
-                            if($upDTLL) {
-                                $upDTLL->up_default_take_limit_leads = (int)$multipleForm->defaultTakeLimitLeads;
-                                if(!$upDTLL->save()) {
-                                    Yii::error(VarDumper::dumpAsString($upDTLL->errors), 'Employee:list:multipleupdate:userParams:save');
-                                }
-                            }
+                            $uParams->up_default_take_limit_leads = (int)$multipleForm->defaultTakeLimitLeads;
+                            $uParamsNeedSave = true;
                         }
 
                         if (is_numeric($multipleForm->minPercentForTakeLeads)) {
-                            $upMPTL = $user->userParams;
-                            if($upMPTL) {
-                                $upMPTL->up_min_percent_for_take_leads = (int)$multipleForm->minPercentForTakeLeads;
-                                if(!$upMPTL->save()) {
-                                    Yii::error(VarDumper::dumpAsString($upMPTL->errors), 'Employee:list:multipleupdate:userParams:save');
-                                }
-                            }
+                            $uParams->up_min_percent_for_take_leads = (int)$multipleForm->minPercentForTakeLeads;
+                            $uParamsNeedSave = true;
                         }
 
                         if (is_numeric($multipleForm->frequencyMinutes)) {
-                            $upFM = $user->userParams;
-                            if($upFM) {
-                                $upFM->up_frequency_minutes = (int)$multipleForm->frequencyMinutes;
-                                if(!$upFM->save()) {
-                                    Yii::error(VarDumper::dumpAsString($upFM->errors), 'Employee:list:multipleupdate:userParams:save');
-                                }
-                            }
+                            $uParams->up_frequency_minutes = (int)$multipleForm->frequencyMinutes;
+                            $uParamsNeedSave = true;
                         }
 
                         if (is_numeric($multipleForm->baseAmount)) {
-                            $upBA = $user->userParams;
-                            if($upBA) {
-                                $upBA->up_base_amount = $multipleForm->baseAmount;
-                                if(!$upBA->save()) {
-                                    Yii::error(VarDumper::dumpAsString($upBA->errors), 'Employee:list:multipleupdate:userParams:save');
-                                }
-                            }
+                            $uParams->up_base_amount = $multipleForm->baseAmount;
+                            $uParamsNeedSave = true;
                         }
 
                         if (is_numeric($multipleForm->autoRedial)) {
-                            $upAR = $user->userProfile;
-                            if($upAR) {
-                                $upAR->up_auto_redial = $multipleForm->autoRedial;
-                                if(!$upAR->save()) {
-                                    Yii::error(VarDumper::dumpAsString($upAR->errors), 'Employee:list:multipleupdate:userProfileSettings:save');
-                                }
-                            }
+                            $uProfile->up_auto_redial = $multipleForm->autoRedial;
+                            $uProfileNeedSave = true;
                         }
 
                         if (is_numeric($multipleForm->kpiEnable)) {
-                            $upKpi = $user->userProfile;
-                            if($upKpi) {
-                                $upKpi->up_kpi_enable = $multipleForm->kpiEnable;
-                                if(!$upKpi->save()) {
-                                    Yii::error(VarDumper::dumpAsString($upKpi->errors), 'Employee:list:multipleupdate:userProfileSettings:save');
-                                }
-                            }
+                            $uProfile->up_kpi_enable = $multipleForm->kpiEnable;
+                            $uProfileNeedSave = true;
                         }
 
                         if (is_numeric($multipleForm->leaderBoardEnabled)) {
-                            $upLde = $user->userParams;
-                            if($upLde) {
-                                $upLde->up_leaderboard_enabled = $multipleForm->leaderBoardEnabled;
-                                if(!$upLde->save()) {
-                                    Yii::error(VarDumper::dumpAsString($upLde->errors), 'Employee:list:multipleupdate:userParams:save');
-                                }
-                            }
+                            $uParams->up_leaderboard_enabled = $multipleForm->leaderBoardEnabled;
+                            $uParamsNeedSave = true;
                         }
 
                         if (is_numeric($multipleForm->commissionPercent)) {
-                            $upCP = $user->userParams;
-                            if($upCP) {
-                                $upCP->up_commission_percent = $multipleForm->commissionPercent;
-                                if(!$upCP->save()) {
-                                    Yii::error(VarDumper::dumpAsString($upCP->errors), 'Employee:list:multipleupdate:userParams:save');
-                                }
+                            $uParams->up_commission_percent = $multipleForm->commissionPercent;
+                            $uParamsNeedSave = true;
+                        }
+
+                        if ($multipleForm->userDepartments) {
+                            $transaction = Yii::$app->db->beginTransaction();
+                            try {
+                                $user->removeAllDepartments();
+                                $user->addNewDepartments($multipleForm->userDepartments);
+                                $transaction->commit();
+                            } catch (\Throwable $e) {
+                                $transaction->rollBack();
+                                Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:userDepartments');
+                                $multipleErrors[$user_id][] = $e->getMessage();
                             }
                         }
 
-                        if(is_numeric($multipleForm->userDepartment)){
-                            $uD = $user->userDepartments[0];
-                            $uD->ud_dep_id = $multipleForm->userDepartment;
-                            if(!$uD->save()) {
-                                Yii::error(VarDumper::dumpAsString($uD->errors), 'Employee:list:multipleupdate:userDepartment:save');
+                        if ($multipleForm->userClientChatChanels) {
+                            $transaction = Yii::$app->db->beginTransaction();
+                            try {
+                                $user->removeAllClientChatChanels();
+                                $user->addClientChatChanels($multipleForm->userClientChatChanels, Auth::id());
+                                $transaction->commit();
+                            } catch (\Throwable $e) {
+                                $transaction->rollBack();
+                                Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:clientChatChanels');
+                                $multipleErrors[$user_id][] = $e->getMessage();
                             }
                         }
 
-                        if ($multipleForm->userRole){
-                            Employee::roleUpdate($user->id, $multipleForm->userRole);
+                        if ($uParamsNeedSave && !$uParams->save()) {
+                            Yii::error(VarDumper::dumpAsString($uParams->getErrors()), 'Employee:list:multipleUpdate:userParams:save');
+                            $multipleErrors[$user_id][] = $uParams->getErrors();
                         }
 
-                        if (is_numeric($multipleForm->status)){
+                        if ($uProfileNeedSave && !$uProfile->save()) {
+                            Yii::error(VarDumper::dumpAsString($uProfile->getErrors()), 'Employee:list:multipleUpdate:userProfile:save');
+                            $multipleErrors[$user_id][] = $uProfile->getErrors();
+                        }
+
+                        if ($multipleForm->userRoles) {
+                            $transaction = Yii::$app->db->beginTransaction();
+                            try {
+                                $user->removeAllRoles();
+                                $user->addNewRoles($multipleForm->userRoles);
+                                $transaction->commit();
+                            } catch (\Throwable $e) {
+                                $transaction->rollBack();
+                                Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:userRoles');
+                                $multipleErrors[$user_id][] = $e->getMessage();
+                            }
+                        }
+
+                        if (is_numeric($multipleForm->status)) {
                             $user->status = $multipleForm->status;
                             $user->form_roles = ArrayHelper::map(Yii::$app->authManager->getRolesByUser($user->id), 'name', 'name');
-                            if(!$user->save()) {
+                            if (!$user->save()) {
                                 Yii::error(VarDumper::dumpAsString($user->errors), 'Employee:list:multipleupdate:userParams:save');
+                                $multipleErrors[$user_id][] = $user->getErrors();
                             }
-                        }
-
-                        if ($is_save) {
-                            $user->save();
                         }
                     }
                 }
@@ -352,12 +355,18 @@ class EmployeeController extends FController
             $params['EmployeeSearch']['supervision_id'] = $auth->id;
         }
 
+        if (Yii::$app->request->get('act') === 'select-all') {
+            $data = $searchModel->searchIds(Yii::$app->request->queryParams);
+            return $this->asJson($data);
+        }
+
         $dataProvider = $searchModel->search($params);
 
         return $this->render('list', [
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
             'multipleForm' => $multipleForm,
+            'multipleErrors' => $multipleErrors,
         ]);
     }
 
@@ -373,158 +382,182 @@ class EmployeeController extends FController
         $modelProfile = new UserProfile();
 
         if (Yii::$app->request->isPost && $model->load(Yii::$app->request->post())) {
-            $attr = Yii::$app->request->post($model->formName());
 
-            //VarDumper::dump($model->make_user_project_params, 10, true); exit;
+                $attr = Yii::$app->request->post($model->formName());
 
-            $model->prepareSave($attr);
+                //VarDumper::dump($model->make_user_project_params, 10, true); exit;
 
-            if ($model->validate() && $model->save()) {
+                $model->prepareSave($attr);
 
-                $modelProfile->up_user_id = $model->id;
+                $transaction = Yii::$app->db->beginTransaction();
 
-                if ($modelProfile->load(Yii::$app->request->post())) {
+                try {
 
-                    $modelProfile->up_updated_dt = date('Y-m-d H:i:s');
+                    if ($model->save()) {
 
-                    if(!$modelProfile->save()) {
-                        Yii::error(VarDumper::dumpAsString($modelProfile->errors, 10), 'EmployeeController:actionCreate:modelProfile:save');
-                    }
-                }
-
-                // VarDumper::dump($model->form_roles, 10, true); exit;
-
-                if ($model->form_roles) {
-                    $availableRoles = Employee::getAllRoles();
-                    foreach ($model->form_roles as $keyItem => $roleItem) {
-                        if (!array_key_exists($roleItem, $availableRoles)) {
-                            unset($model->form_roles[$keyItem]);
+                        $modelProfile->up_user_id = $model->id;
+                        if ($modelProfile->load(Yii::$app->request->post())) {
+                            $modelProfile->up_updated_dt = date('Y-m-d H:i:s');
+                            if (!$modelProfile->save()) {
+                                Yii::error(VarDumper::dumpAsString($modelProfile->errors), 'EmployeeController:actionCreate:modelProfile:save');
+                                throw new \Exception('Profile settings error');
+                            }
+                        } else {
+                            throw new \Exception('Profile settings is empty');
                         }
-                    }
-                }
 
-                $model->addRole(true);
+                        // VarDumper::dump($model->form_roles, 10, true); exit;
 
-                if(isset($attr['user_groups'])) {
-                    if($attr['user_groups']) {
-                        foreach ($attr['user_groups'] as $ugId) {
-                            $uga = new UserGroupAssign();
-                            $uga->ugs_user_id = $model->id;
-                            $uga->ugs_group_id = (int) $ugId;
-                            $uga->save();
-                        }
-                    }
-                }
-
-
-                if(isset($attr['user_departments'])) {
-                    if($attr['user_departments']) {
-                        foreach ($attr['user_departments'] as $udId) {
-                            $ud = new UserDepartment();
-                            $ud->ud_user_id = $model->id;
-                            $ud->ud_dep_id = (int) $udId;
-                            if(!$ud->save()) {
-                                Yii::error(VarDumper::dumpAsString($ud->errors), 'Employee:Create:UserDepartment:save');
+                        if ($model->form_roles) {
+                            $availableRoles = Employee::getAllRoles();
+                            foreach ($model->form_roles as $keyItem => $roleItem) {
+                                if (!array_key_exists($roleItem, $availableRoles)) {
+                                    unset($model->form_roles[$keyItem]);
+                                }
                             }
                         }
-                    }
-                }
 
+                        $model->addRole(true);
 
-                if(isset($attr['user_projects'])) {
-                    if($attr['user_projects']) {
-                        foreach ($attr['user_projects'] as $ugId) {
-                            $up = new ProjectEmployeeAccess();
-                            $up->employee_id = $model->id;
-                            $up->project_id = (int) $ugId;
-                            $up->created = date('Y-m-d H:i:s');
-                            $up->save();
+                        if (!\Yii::$app->authManager->getRolesByUser($model->id)) {
+                            throw new \Exception('Roles is empty');
                         }
-                    }
-                }
 
-
-                $emailArr = explode('@', $model->email);
-                $emailPrefix = $emailArr[0] ?? null;
-
-                //VarDumper::dump($emailPrefix, 10, true);
-
-                if ($model->make_user_project_params) {
-                    if (!empty($attr['user_projects'])) {
-                        foreach ($attr['user_projects'] as $projectId) {
-
-                            //VarDumper::dump($projectId, 10, true);
-
-                            $project = Project::findOne($projectId);
-                            if (!$project || $project->closed) {
-                                continue;
+                        if (isset($attr['user_groups'])) {
+                            if ($attr['user_groups']) {
+                                foreach ($attr['user_groups'] as $ugId) {
+                                    $uga = new UserGroupAssign();
+                                    $uga->ugs_user_id = $model->id;
+                                    $uga->ugs_group_id = (int)$ugId;
+                                    if (!$uga->save()) {
+                                        Yii::error(VarDumper::dumpAsString($uga->getErrors()), 'Employee:Create:UserGroupAssign:save');
+                                        throw new \Exception('User groups error. ' . VarDumper::dumpAsString($uga->getErrors()));
+                                    }
+                                }
                             }
+                        }
 
 
+                        if (isset($attr['user_departments'])) {
+                            if ($attr['user_departments']) {
+                                foreach ($attr['user_departments'] as $udId) {
+                                    $ud = new UserDepartment();
+                                    $ud->ud_user_id = $model->id;
+                                    $ud->ud_dep_id = (int)$udId;
+                                    if (!$ud->save()) {
+                                        Yii::error(VarDumper::dumpAsString($ud->getErrors()), 'Employee:Create:UserDepartment:save');
+                                        throw new \Exception('User Department error. ' . VarDumper::dumpAsString($ud->getErrors()));
+                                    }
+                                }
+                            }
+                        }
 
-                            $emailId = null;
-                            if ($emailPrefix && $project->email_postfix) {
-                                $email = new EmailList();
-                                $email->el_email = $emailPrefix . '@' . $project->email_postfix;
-                                $email->el_title = $project->name . ' - ' . $model->username;
-                                $email->el_enabled = true;
 
-                                if ($email->save()) {
-                                    $emailId = $email->el_id;
-                                } else {
-                                    Yii::error(VarDumper::dumpAsString([$email->attributes, $email->errors]), 'Employee:Create:EmailList:save');
+                        if (isset($attr['user_projects'])) {
+                            if ($attr['user_projects']) {
+                                foreach ($attr['user_projects'] as $ugId) {
+                                    $up = new ProjectEmployeeAccess();
+                                    $up->employee_id = $model->id;
+                                    $up->project_id = (int)$ugId;
+                                    $up->created = date('Y-m-d H:i:s');
+                                    if (!$up->save()) {
+                                        Yii::error(VarDumper::dumpAsString($up->getErrors()), 'Employee:Create:ProjectEmployeeAccess:save');
+                                        throw new \Exception('Project Access error. ' . VarDumper::dumpAsString($up->getErrors()));
+                                    }
+                                }
+                            }
+                        }
+
+
+                        $emailArr = explode('@', $model->email);
+                        $emailPrefix = $emailArr[0] ?? null;
+
+                        //VarDumper::dump($emailPrefix, 10, true);
+
+                        if ($model->make_user_project_params) {
+                            if (!empty($attr['user_projects'])) {
+                                foreach ($attr['user_projects'] as $projectId) {
+
+                                    //VarDumper::dump($projectId, 10, true);
+
+                                    $project = Project::findOne($projectId);
+                                    if (!$project || $project->closed) {
+                                        continue;
+                                    }
+
+
+                                    $emailId = null;
+                                    if ($emailPrefix && $project->email_postfix) {
+                                        $email = new EmailList();
+                                        $email->el_email = $emailPrefix . '@' . $project->email_postfix;
+                                        $email->el_title = $project->name . ' - ' . $model->username;
+                                        $email->el_enabled = true;
+
+                                        if ($email->save()) {
+                                            $emailId = $email->el_id;
+                                        } else {
+                                            Yii::error(VarDumper::dumpAsString([$email->attributes, $email->errors]), 'Employee:Create:EmailList:save');
+                                            throw new \Exception('EmailList error. ' . VarDumper::dumpAsString($email->getErrors()));
+                                        }
+                                    }
+
+                                    //VarDumper::dump('EmId:' . $emailId, 10, true);
+
+                                    $upp = new UserProjectParams();
+                                    $upp->upp_user_id = $model->id;
+                                    $upp->upp_project_id = (int)$projectId;
+                                    $upp->upp_created_dt = date('Y-m-d H:i:s');
+                                    if ($emailId) {
+                                        $upp->upp_email_list_id = $emailId;
+                                    }
+                                    if (!$upp->save()) {
+                                        Yii::error(VarDumper::dumpAsString([$upp->attributes, $upp->errors]), 'Employee:Create:UserProjectParams:save');
+                                        throw new \Exception('Project Params error. ' . VarDumper::dumpAsString($upp->getErrors()));
+                                    }
                                 }
                             }
 
-                            //VarDumper::dump('EmId:' . $emailId, 10, true);
+                        }
 
-                            $upp = new UserProjectParams();
-                            $upp->upp_user_id = $model->id;
-                            $upp->upp_project_id = (int) $projectId;
-                            $upp->upp_created_dt = date('Y-m-d H:i:s');
-                            if ($emailId) {
-                                $upp->upp_email_list_id = $emailId;
+                        if ($modelUserParams->load(Yii::$app->request->post())) {
+                            $modelUserParams->up_user_id = $model->id;
+                            $modelUserParams->up_updated_user_id = Yii::$app->user->id;
+                            if (!$modelUserParams->save()) {
+                                Yii::error(VarDumper::dumpAsString($modelUserParams->getErrors()), 'Employee:Create:modelUserParams:save');
+                                throw new \Exception('User Params error. ' . VarDumper::dumpAsString($modelUserParams->getErrors()));
                             }
-                            if (!$upp->save()) {
-                                Yii::error(VarDumper::dumpAsString([$upp->attributes, $upp->errors]), 'Employee:Create:UserProjectParams:save');
+                        } else {
+                            throw new \Exception('User Params is empty');
+                        }
+
+                        if ($modelUserParams->up_timezone == null) {
+                            $modelUserParams->up_user_id = $model->id;
+                            $modelUserParams->up_updated_user_id = Yii::$app->user->id;
+
+                            $modelUserParams->up_timezone = "Europe/Chisinau";
+                            $modelUserParams->up_work_minutes = 8 * 60;
+                            $modelUserParams->up_base_amount = 0;
+                            $modelUserParams->up_commission_percent = 0;
+                            $modelUserParams->up_work_start_tm = "16:00";
+
+                            if (!$modelUserParams->save()) {
+                                Yii::error(VarDumper::dumpAsString($modelUserParams->getErrors()), 'Employee:Create:modelUserParams:timeZone:save');
+                                throw new \Exception('User Params error. ' . VarDumper::dumpAsString($modelUserParams->getErrors()));
                             }
                         }
-                    }
 
+                        $transaction->commit();
+                        Yii::$app->getSession()->setFlash('success', 'User created');
+                        return $this->redirect(['update', 'id' => $model->id]);
+                    }
+                    $transaction->rollBack();
+                } catch (\Throwable $e) {
+                    $transaction->rollBack();
+                    $model->id = 0;
+                    $model->setIsNewRecord(true);
+                    Yii::$app->session->addFlash('error', $e->getMessage());
                 }
 
-                //exit;
-
-                Yii::$app->getSession()->setFlash('success', 'User created');
-
-                if ($modelUserParams->load(Yii::$app->request->post())) {
-
-                    //VarDumper::dump(Yii::$app->request->post()); exit;
-                    $modelUserParams->up_user_id = $model->id;
-                    $modelUserParams->up_updated_user_id = Yii::$app->user->id;
-
-                    if($modelUserParams->save()) {
-                        //return $this->refresh();
-                    }
-                }
-
-                if($modelUserParams->up_timezone == null){
-                    $modelUserParams->up_user_id = $model->id;
-                    $modelUserParams->up_updated_user_id = Yii::$app->user->id;
-
-                    $modelUserParams->up_timezone = "Europe/Chisinau";
-                    $modelUserParams->up_work_minutes = 8 * 60;
-                    $modelUserParams->up_base_amount = 0;
-                    $modelUserParams->up_commission_percent = 0;
-                    $modelUserParams->up_work_start_tm = "16:00";
-
-                    if($modelUserParams->save()) {
-                    }
-                }
-
-                return $this->redirect(['update','id' => $model->id]);
-
-            }
         } else {
 
             $modelUserParams->up_timezone = 'Europe/Chisinau';
@@ -698,7 +731,6 @@ class EmployeeController extends FController
                         }
                     }
 
-
                     if(isset($attr['user_projects'])) {
                         ProjectEmployeeAccess::deleteAll(['employee_id' => $model->id]);
                         if($attr['user_projects']) {
@@ -708,6 +740,20 @@ class EmployeeController extends FController
                                 $up->project_id = (int) $ugId;
                                 $up->created = date('Y-m-d H:i:s');
                                 $up->save();
+                            }
+                        }
+                    }
+
+                    if (isset($attr['client_chat_user_channel'])) {
+                        ClientChatUserChannel::deleteAll(['ccuc_user_id' => $model->id]);
+                        if ($attr['client_chat_user_channel']) {
+                            foreach ($attr['client_chat_user_channel'] as $chId) {
+                                $clientChatChanel = new ClientChatUserChannel();
+                                $clientChatChanel->ccuc_user_id = $model->id;
+                                $clientChatChanel->ccuc_channel_id = (int)$chId;
+                                $clientChatChanel->ccuc_created_dt = date('Y-m-d H:i:s');
+                                $clientChatChanel->ccuc_created_user_id = Auth::id();
+                                $clientChatChanel->save();
                             }
                         }
                     }
@@ -744,6 +790,7 @@ class EmployeeController extends FController
             $model->user_groups = ArrayHelper::map($model->userGroupAssigns, 'ugs_group_id', 'ugs_group_id');
             $model->user_projects = ArrayHelper::map($model->projects, 'id', 'id');
             $model->user_departments = ArrayHelper::map($model->userDepartments, 'ud_dep_id', 'ud_dep_id');
+            $model->client_chat_user_channel = ArrayHelper::map($model->clientChatUserChannel, 'ccuc_channel_id', 'ccuc_channel_id');
 
             $searchModel = new UserProjectParamsSearch();
             $params = Yii::$app->request->queryParams;
@@ -811,18 +858,20 @@ class EmployeeController extends FController
     {
         $user_id = Yii::$app->request->get('id');
         $user = Employee::findOne($user_id);
-        if($user) {
-            //VarDumper::dump($user->attributes, 10, true);
-            //exit;
+        if ($user) {
+            if ($user->isOnlyAdmin() || $user->isSuperAdmin()) {
+                return $this->redirect(['site/index']);
+            }
 
-            if(Yii::$app->user->login($user)) {
+            if (Yii::$app->user->login($user)) {
                 LoginForm::sendWsIdentityCookie(Yii::$app->user->identity, 0);
             } else {
-                echo 'Not logined'; exit;
+                echo 'Not logined';
+                exit;
             }
             //$this->redirect(['site/index']);
         }
-        $this->redirect(['site/index']);
+        return $this->redirect(['site/index']);
     }
 
     /**
@@ -861,6 +910,132 @@ class EmployeeController extends FController
             $out['results'] = ['id' => $id, 'text' => $user ? $user->username : '', 'selection' => $user ? $user->username : ''];
         }
         return $out;
+    }
+
+    /**
+     * @param int $id
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function actionRegisterToRocketChat(int $id): array
+    {
+        \Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $user = Employee::findOne($id);
+
+        if (Yii::$app->request->isAjax && $user) {
+            $out = ['status' => 0, 'message' => ''];
+
+            try {
+                $rocketChat = \Yii::$app->rchat;
+                $rocketChat->updateSystemAuth(false);
+                $password = $rocketChat::generatePassword();
+
+                $result = $rocketChat->createUser(
+                    $user->username,
+                    $password,
+                    $user->full_name ?: $user->username,
+                    $user->email
+                );
+
+                if (isset($result['error']) && !$result['error']) {
+
+                    if (empty($result['data']['_id'])) {
+                        throw new \RuntimeException('Empty result[data][_id]. ' .
+                            VarDumper::dumpAsString(['userId' => $id, 'data' => $result]));
+                    }
+                    if (!$userProfile = UserProfile::findOne(['up_user_id' => $id])) {
+                        $userProfile = new UserProfile();
+                        $userProfile->up_user_id = $id;
+				    }
+				    $userProfile->up_rc_user_password = $password;
+                    $userProfile->up_rc_user_id = $result['data']['_id'];
+
+                    $login = $rocketChat->login($user->username, $password);
+
+                    if (isset($login['error']) && $login['error']) {
+                        throw new \RuntimeException(VarDumper::dumpAsString($login['error']));
+                    }
+
+                    if (!empty($login['data']['authToken'])) {
+                        $userProfile->up_rc_auth_token = $login['data']['authToken'];
+                        $userProfile->up_rc_token_expired = $rocketChat::generateTokenExpired();
+                    }
+
+                    if(!$userProfile->save()) {
+                        throw new \RuntimeException($userProfile->getErrorSummary(false)[0]);
+                    }
+
+                } else {
+                    $errorMessage = $rocketChat::getErrorMessageFromResult($result);
+                    throw new \RuntimeException('Error from RocketChat. ' . $errorMessage);
+                }
+                $out['status'] = 1;
+                $out['rc_user_id'] = $userProfile->up_rc_user_id;
+                $out['rc_user_password'] = $password;
+                $out['rc_token_expired'] = $userProfile->up_rc_token_expired;
+                $out['rc_auth_token'] = $userProfile->up_rc_auth_token;
+
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableFormatter($throwable),
+                'EmployeeController:actionRegisterToRocketChat:Throwable');
+                $out['message'] = $throwable->getMessage();
+            }
+            return $out;
+        }
+
+        throw new BadRequestHttpException();
+    }
+
+	/**
+	 * @param int $id
+	 * @param ClientChatUserAccessService $clientChatUserAccessService
+	 * @return array
+	 * @throws BadRequestHttpException
+	 */
+    public function actionUnRegisterFromRocketChat(int $id): array
+    {
+        \Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $user = Employee::findOne($id);
+
+        if (Yii::$app->request->isAjax && $user && $userProfile = $user->userProfile) {
+            $out = ['status' => 0, 'message' => ''];
+
+            try {
+                $rocketChat = \Yii::$app->rchat;
+                $rocketChat->updateSystemAuth(false);
+
+                $result = $rocketChat->deleteUser($user->username);
+
+                if (isset($result['error']) && !$result['error']) {
+
+                    $userProfile->up_rc_user_password = null;
+                    $userProfile->up_rc_user_id = null;
+                    $userProfile->up_rc_auth_token = null;
+                    $userProfile->up_rc_token_expired = null;
+
+                    if(!$userProfile->save()) {
+                        throw new \RuntimeException($userProfile->getErrorSummary(false)[0]);
+                    }
+
+                    $this->clientChatUserAccessService->removeUserAccess($userProfile->up_user_id);
+                    $this->clientChatMessageService->discardAllUnreadMessagesForUser($userProfile->up_user_id);
+                } else {
+                    $errorMessage = $rocketChat::getErrorMessageFromResult($result);
+                    throw new \RuntimeException('Error from RocketChat. ' . $errorMessage);
+                }
+                $out['status'] = 1;
+
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableFormatter($throwable),
+                'EmployeeController:actionUnRegisterFromRocketChat:Throwable');
+                $out['message'] = $throwable->getMessage();
+            }
+            return $out;
+        }
+
+        throw new BadRequestHttpException('User or userProfile is required.');
     }
 
     /**

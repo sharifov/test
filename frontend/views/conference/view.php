@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Conference;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -32,10 +33,20 @@ $this->params['breadcrumbs'][] = $this->title;
             'cf_id',
             'cf_cr_id',
             'cf_sid',
-            'cf_status_id',
+            'cf_call_sid',
+            'cf_friendly_name',
+            [
+                'attribute' => 'cf_status_id',
+                'value' => static function (Conference $model) {
+                    return $model->getStatusName();
+                }
+            ],
             'cf_options:ntext',
-            'cf_created_dt',
-            'cf_updated_dt',
+            'cf_start_dt:byUserDateTime',
+            'cf_end_dt:byUserDateTime',
+            'cf_created_dt:byUserDateTime',
+            'cf_updated_dt:byUserDateTime',
+            'createdUser:userName'
         ],
     ]) ?>
 

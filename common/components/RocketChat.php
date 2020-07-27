@@ -8,6 +8,7 @@
 
 namespace common\components;
 
+use Yii;
 use yii\base\Component;
 use yii\helpers\VarDumper;
 use yii\httpclient\Client;
@@ -446,26 +447,16 @@ class RocketChat extends Component
 
 
     /**
-     * @param string $rid
-     * @param array $attachments
+     * @param array $$message
      * @return array
      * @throws Exception
      */
-    public function sendMessage(string $rid, array $attachments): array
+    public function sendMessage(array $message): array
     {
         $out = ['error' => false, 'data' => []];
-        $headers = [
-            'X-User-Id' => $this->currentUserId,
-            'X-Auth-Token' => $this->currentAuthToken
-        ];
+        $headers = $this->getSystemAuthDataHeader();
 
-        $message['rid'] = $rid;
-
-        $data['message'] = $message;
-        $data['attachments'] = $attachments;
-        $data['customTemplate'] = 'carousel';
-
-        $response = $this->sendRequest('chat.sendMessage', $data, 'get', $headers);
+        $response = $this->sendRequest('chat.sendMessage', $message, 'post', $headers);
 
         if ($response->isOk) {
 
@@ -507,4 +498,44 @@ class RocketChat extends Component
         return $out;
     }
 
+    /**
+     * @param int $length
+     * @return string
+     * @throws \yii\base\Exception
+     */
+    public static function generatePassword(int $length = 20): string
+    {
+        return Yii::$app->security->generateRandomString(20);
+    }
+
+    /**
+     * @param int $days
+     * @return false|string
+     */
+    public static function generateTokenExpired(int $days = 60)
+    {
+        return date('Y-m-d H:i:s', strtotime('+' . $days . ' days'));
+    }
+
+    /**
+     * @param $result
+     * @return string
+     * @throws \JsonException
+     */
+    public static function getErrorMessageFromResult($result): string
+    {
+        if (!empty($result['error'])) {
+            $errorArr = @json_decode($result['error'], true, 512, JSON_THROW_ON_ERROR);
+            if (isset($errorArr['message'])) {
+                $errorMessage = $errorArr['message'];
+            } elseif (isset($errorArr['error'])) {
+                $errorMessage = $errorArr['error'];
+            } else {
+                $errorMessage = VarDumper::dumpAsString($result['error']);
+            }
+        } else {
+            $errorMessage = VarDumper::dumpAsString($result);
+        }
+        return $errorMessage;
+    }
 }

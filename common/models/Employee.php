@@ -8,6 +8,8 @@ use common\models\query\EmployeeQuery;
 use common\models\search\EmployeeSearch;
 use modules\product\src\entities\productType\ProductType;
 use sales\access\EmployeeGroupAccess;
+use sales\model\clientChatChannel\entity\ClientChatChannel;
+use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\user\entity\Access;
 use sales\model\user\entity\AccessCache;
 use sales\model\user\entity\ShiftTime;
@@ -32,6 +34,7 @@ use yii\web\NotFoundHttpException;
  * @property int $id
  * @property string $username
  * @property string $full_name
+ * @property string $nickname
  * @property string $auth_key
  * @property string $password_hash
  * @property string $password_reset_token
@@ -60,6 +63,7 @@ use yii\web\NotFoundHttpException;
  * @property EmployeeAcl[] $employeeAcl
  * @property ProjectEmployeeAccess[] $projectEmployeeAccesses
  * @property Project[] $projects
+ * @property ClientChatUserChannel[] $clientChatUserChannel
  *
  * @property UserGroupAssign[] $userGroupAssigns
  * @property UserGroup[] $ugsGroups
@@ -134,6 +138,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public $user_groups;
     public $user_projects;
     public $user_departments;
+    public $client_chat_user_channel;
 
     private $shiftTime;
     public $currentShiftTaskInfoSummary = [];
@@ -377,13 +382,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function rules()
     {
         return [
-            [['username', 'auth_key', 'password_hash', 'email', 'form_roles', 'full_name'], 'required'],
+            [['username', 'auth_key', 'password_hash', 'email', 'form_roles', 'full_name', 'nickname'], 'required'],
             [['password'], 'required', 'on' => self::SCENARIO_REGISTER],
-            [['email', 'password', 'username', 'full_name'], 'trim'],
+            [['email', 'password', 'username', 'full_name', 'nickname'], 'trim'],
             [['password'], 'string', 'min' => 8],
             [['status'], 'integer'],
             [['password_hash', 'password_reset_token', 'email'], 'string', 'max' => 255],
-            [['username', 'full_name'], 'string', 'min' => 3, 'max' => 50],
+            [['username', 'full_name', 'nickname'], 'string', 'min' => 3, 'max' => 50],
             [['auth_key'], 'string', 'max' => 32],
             [['username'], 'unique'],
             [['email'], 'unique'],
@@ -392,7 +397,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             [['username'], 'match' ,'pattern'=>'/^[a-z0-9_\-\.]+$/i', 'message'=>'Username can contain only characters ("a-z", "0-9", "_", "-", ".")'],
             [['make_user_project_params'], 'boolean'],
             [['password_reset_token'], 'unique'],
-            [['created_at', 'updated_at', 'last_activity', 'acl_rules_activated', 'user_groups', 'user_projects', 'deleted', 'user_departments'], 'safe'],
+            [['created_at', 'updated_at', 'last_activity', 'acl_rules_activated', 'user_groups', 'user_projects', 'deleted', 'user_departments', 'client_chat_user_channel'], 'safe'],
         ];
     }
 
@@ -416,7 +421,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             'form_roles' => 'Roles',
             'user_departments' => 'Departments',
             'make_user_project_params' => 'Make user project params (automatic)',
-            'full_name' => 'Full Name'
+            'full_name' => 'Full Name',
+            'client_chat_user_channel' => 'Client chat user channel'
         ];
     }
 
@@ -478,6 +484,14 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function getUserDepartments()
     {
         return $this->hasMany(UserDepartment::class, ['ud_user_id' => 'id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getClientChatUserChannel()
+    {
+        return $this->hasMany(ClientChatUserChannel::class, ['ccuc_user_id' => 'id']);
     }
 
     /**
@@ -1095,6 +1109,60 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
     public function roleUpdate($uID, $role){
         Yii::$app->db->createCommand()->update('auth_assignment', ['item_name' => $role], "user_id = $uID" )->execute();
+    }
+
+    public function removeAllRoles()
+    {
+        Yii::$app->db->createCommand()->delete('auth_assignment', 'user_id = :user_id', [':user_id' => $this->id])->execute();
+    }
+
+    public function addNewRoles(array $roles)
+    {
+        $data = [];
+        foreach ($roles as $role) {
+            $data[] = [
+                'item_name' => $role,
+                'user_id' => $this->id
+            ];
+        }
+        Yii::$app->db->createCommand()->batchInsert('auth_assignment', ['item_name', 'user_id'], $data)->execute();
+    }
+
+    public function removeAllDepartments()
+    {
+        Yii::$app->db->createCommand()->delete(UserDepartment::tableName(), 'ud_user_id = :ud_user_id', [':ud_user_id' => $this->id])->execute();
+    }
+
+    public function addNewDepartments(array $departments)
+    {
+        $data = [];
+        foreach ($departments as $department) {
+            $data[] = [
+                'ud_user_id' => $this->id,
+                'ud_dep_id' => (int)$department,
+                'ud_updated_dt' => date('Y-m-d H:i:s')
+            ];
+        }
+        Yii::$app->db->createCommand()->batchInsert(UserDepartment::tableName(), ['ud_user_id', 'ud_dep_id', 'ud_updated_dt'], $data)->execute();
+    }
+
+    public function removeAllClientChatChanels()
+    {
+        Yii::$app->db->createCommand()->delete(ClientChatUserChannel::tableName(), 'ccuc_user_id = :ccuc_user_id', [':ccuc_user_id' => $this->id])->execute();
+    }
+
+    public function addClientChatChanels(array $chanels, ?int $createdUserId = null)
+    {
+        $data = [];
+        foreach ($chanels as $chanel) {
+            $data[] = [
+                'ccuc_user_id' => $this->id,
+                'ccuc_channel_id' => (int)$chanel,
+                'ccuc_created_dt' => date('Y-m-d H:i:s'),
+                'ccuc_created_user_id' => $createdUserId,
+            ];
+        }
+        Yii::$app->db->createCommand()->batchInsert(ClientChatUserChannel::tableName(), ['ccuc_user_id', 'ccuc_channel_id', 'ccuc_created_dt', 'ccuc_created_user_id'], $data)->execute();
     }
 
     public function getRolesRaw()

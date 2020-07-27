@@ -4,6 +4,7 @@ namespace common\components\i18n;
 
 use common\components\purifier\Purifier;
 use common\models\CaseSale;
+use common\models\ConferenceParticipant;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Lead;
@@ -44,6 +45,7 @@ use sales\entities\cases\CasesSourceType;
 use sales\model\callLog\entity\callLog\CallLogCategory;
 use sales\model\callLog\entity\callLog\CallLogStatus;
 use sales\model\callLog\entity\callLog\CallLogType;
+use sales\model\clientChat\entity\ClientChat;
 use sales\model\coupon\entity\coupon\CouponStatus;
 use sales\model\coupon\entity\coupon\CouponType;
 use sales\model\emailList\entity\EmailList;
@@ -448,6 +450,22 @@ class Formatter extends \yii\i18n\Formatter
 		return '--';
 	}
 
+	public function asTimer(string $dateTime, string $timerSpanClass = 'label label-info')
+	{
+		if (!$dateTime) {
+			return $this->nullDisplay;
+		}
+
+		$currentTime = time();
+		$dateTime = strtotime($dateTime);
+
+		$diff = abs($currentTime-$dateTime);
+
+		$icon = Html::tag('i', '', ['class' => 'fas fa-hourglass-end']);
+		$timerSpan = Html::tag('span', '', ['class' => 'enable-timer ' . $timerSpanClass, 'data-seconds' => $diff]);
+		return Html::tag('span', $icon . ' ' . $timerSpan);
+	}
+
 	/**
 	 * @param $statusId
 	 * @return string|null
@@ -647,6 +665,14 @@ class Formatter extends \yii\i18n\Formatter
         return CouponType::asFormat($value);
     }
 
+    public function asConferenceParticipantType($value): string
+    {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        return ConferenceParticipant::getTypeName($value);
+    }
 
     /**
      * @param int|null $userId
@@ -691,4 +717,21 @@ class Formatter extends \yii\i18n\Formatter
         return $result;
     }
 
+    public function asConferenceParticipantStatus($statusId): string
+    {
+        if ($statusId === null) {
+            return $this->nullDisplay;
+        }
+
+        return ConferenceParticipant::getStatusName($statusId);
+    }
+
+    public function asClientChat(?ClientChat $chat): string
+    {
+        if ($chat === null) {
+            return $this->nullDisplay;
+        }
+
+        return \sales\model\clientChat\Formatter::asClientChat($chat);
+    }
 }

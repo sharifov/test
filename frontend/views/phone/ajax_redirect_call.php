@@ -40,6 +40,7 @@ use yii\helpers\Html;
                                 'class' => 'btn btn-xs btn-success btn-transfer-number',
                                 'data-type' => 'number',
                                 'data-value' => Html::encode($phone),
+                                'data-call-sid' => $call->c_call_sid
                                ])?>
                         </td>
                     </tr>
@@ -90,6 +91,7 @@ use yii\helpers\Html;
                                 'class' => 'btn btn-xs btn-success btn-transfer',
                                 'data-type' => 'department',
                                 'data-value' => $department->dpp_id,
+                                'data-call-sid' => $call->c_call_sid
                             ])?>
                         </td>
                     </tr>
@@ -137,6 +139,7 @@ use yii\helpers\Html;
                                     'data-value' => $userModel->id,
                                     // 'data-project_id' => $call->c_project_id,
                                     // 'data-dep_id' => $call->c_dep_id
+                                'data-call-sid' => $call->c_call_sid
                             ])?>
                         </td>
                     </tr>

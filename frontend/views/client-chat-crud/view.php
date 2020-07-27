@@ -1,5 +1,6 @@
 <?php
 
+use sales\model\clientChat\entity\ClientChat;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
@@ -55,14 +56,25 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
                 [
                     'label' => 'Case',
-                    'attribute' => 'cchCase',
-                    'format' => 'case'
+                    'value' => static function (ClientChat $chat) {
+                        $out = '';
+                        foreach ($chat->cases as $case) {
+                            $out .= Yii::$app->formatter->format($case,  'case') . ' ';
+                        }
+                        return $out;
+                    },
+                    'format' => 'raw'
                 ],
-
                 [
                     'label' => 'Lead',
-                    'attribute' => 'cchLead',
-                    'format' => 'lead'
+                    'value' => static function (ClientChat $chat) {
+                        $out = '';
+                        foreach ($chat->leads as $lead) {
+                            $out .= Yii::$app->formatter->format($lead,  'lead') . ' ';
+                        }
+                        return $out;
+                    },
+                    'format' => 'raw'
                 ],
                 'cch_note',
 

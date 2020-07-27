@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\models\query\CaseSaleQuery;
+use frontend\helpers\JsonHelper;
 use sales\entities\cases\Cases;
 use sales\model\saleTicket\entity\SaleTicket;
 use Yii;
@@ -10,6 +11,7 @@ use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\helpers\Json;
 
 /**
  * This is the model class for table "case_sale".
@@ -129,7 +131,11 @@ class CaseSale extends \yii\db\ActiveRecord
             [['css_out_date', 'css_in_date', 'css_fare_rules', 'css_departure_dt', 'css_send_email_dt'], 'string'],
             [['css_out_date', 'css_in_date', 'css_departure_dt'],  'datetime', 'format' => 'php:Y-m-d H:i:s'],
             [['css_charge_type'], 'string', 'max' => 100],
-			['css_penalty_type', 'in', 'range' => array_keys(SaleTicket::getAirlinePenaltyList()), 'skipOnEmpty' => true,]
+			['css_penalty_type', 'in', 'range' => array_keys(SaleTicket::getAirlinePenaltyList()), 'skipOnEmpty' => true,],
+
+			[['css_sale_data'], 'filter', 'filter' => static function($value) {
+                return JsonHelper::decode($value);
+            }],
         ];
     }
 
@@ -230,6 +236,17 @@ class CaseSale extends \yii\db\ActiveRecord
 	{
 		if (is_string($this->css_sale_data)) {
 			return json_decode((string)$this->css_sale_data, true);
+		}
+		return $this->css_sale_data;
+	}
+
+    /**
+     * @return string
+     */
+    public function getSaleDataEncoded(): string
+	{
+		if (!is_string($this->css_sale_data)) {
+			return Json::encode($this->css_sale_data);
 		}
 		return $this->css_sale_data;
 	}

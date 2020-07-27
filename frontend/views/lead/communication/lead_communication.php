@@ -18,6 +18,7 @@ use frontend\models\CommunicationForm;
 use frontend\models\LeadForm;
 use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
+use sales\helpers\communication\StatisticsHelper;
 use sales\helpers\setting\SettingHelper;
 use yii\helpers\Html;
 use yii\bootstrap4\Modal;
@@ -53,8 +54,12 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
             <div class="clearfix"></div>
         </div>
         <div class="x_content" style="display: block;">
+
             <?php yii\widgets\Pjax::begin(['id' => $pjaxContainerId , 'timeout' => 5000]) ?>
-            <?php /*<h1><?=random_int(1, 100)?></h1>*/ ?>
+
+            <?php $statistics = new StatisticsHelper($lead->id, StatisticsHelper::TYPE_LEAD) ?>
+            <?php echo $this->render('/partial/_communication_statistic', ['statistics' => $statistics->setCountAll()]) ?>
+
             <div class="panel">
                 <div class="chat__list">
 

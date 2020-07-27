@@ -4,6 +4,7 @@ namespace common\models\search;
 
 use common\models\Call;
 use common\models\ProjectEmployeeAccess;
+use common\models\query\EmployeeQuery;
 use common\models\UserConnection;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
@@ -17,6 +18,7 @@ use common\models\Employee;
 use kartik\daterange\DateRangeBehavior;
 use yii\data\ArrayDataProvider;
 use yii\db\Query;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use sales\auth\Auth;
 
@@ -45,6 +47,8 @@ class EmployeeSearch extends Employee
 
     public $twoFaEnable;
 
+    public $projectAccessIds = [];
+    public $projectParamsIds = [];
     /**
      * {@inheritdoc}
      */
@@ -52,10 +56,11 @@ class EmployeeSearch extends Employee
     {
         return [
             [['id', 'status', 'acl_rules_activated', 'supervision_id', 'user_group_id', 'user_project_id', 'user_params_project_id', 'online', 'user_call_type_id', 'user_department_id', 'experienceMonth'], 'integer'],
-            [['username', 'full_name', 'auth_key', 'password_hash', 'password_reset_token', 'email', 'last_activity', 'created_at', 'updated_at', 'user_sip', 'pageSize'], 'safe'],
+            [['username', 'nickname', 'full_name', 'auth_key', 'password_hash', 'password_reset_token', 'email', 'last_activity', 'created_at', 'updated_at', 'user_sip', 'pageSize'], 'safe'],
             [['timeStart', 'timeEnd', 'roles', 'twoFaEnable', 'joinDate'], 'safe'],
 			[['joinDate'], 'date', 'format' => 'php:Y-m-d', 'skipOnEmpty' => true],
             [['timeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+            [['projectParamsIds', 'projectAccessIds'], 'each', 'rule' => ['integer']]
         ];
     }
 
@@ -86,7 +91,7 @@ class EmployeeSearch extends Employee
             'query' => $query,
             'sort' => ['defaultOrder' => ['id' => SORT_DESC]],
             'pagination' => [
-                'pageSize' => isset($params['per-page']) ? (int)$params['per-page'] : 30,
+                'pageSize' => isset($params['per-page']) ? (int)$params['per-page'] : 20,
             ],
         ]);
 
@@ -100,6 +105,126 @@ class EmployeeSearch extends Employee
             return $dataProvider;
         }
 
+//        // grid filtering conditions
+//        $query->andFilterWhere([
+//            'id' => $this->id,
+//            'status' => $this->status,
+//            'last_activity' => $this->last_activity,
+//            'acl_rules_activated' => $this->acl_rules_activated,
+//            'created_at' => $this->created_at,
+//            //'updated_at' => $this->updated_at,
+//        ]);
+//
+//        if ($this->updated_at){
+//            $query->andFilterWhere(['>=', 'updated_at', Employee::convertTimeFromUserDtToUTC(strtotime($this->updated_at))])
+//                ->andFilterWhere(['<=', 'updated_at', Employee::convertTimeFromUserDtToUTC(strtotime($this->updated_at) + 3600 * 24)]);
+//        }
+//
+//        if ($this->roles){
+//            $query->andWhere(['IN', 'employees.id', array_keys(Employee::getListByRole($this->roles))]);
+//        }
+//
+//        if ($this->user_group_id > 0) {
+//            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['=', 'ugs_group_id', $this->user_group_id]);
+//            $query->andWhere(['IN', 'employees.id', $subQuery]);
+//        }
+//
+//        if ($this->user_department_id > 0) {
+//            $subQuery = UserDepartment::find()->usersByDep($this->user_department_id);
+//            $query->andWhere(['IN', 'employees.id', $subQuery]);
+//        }
+//
+//        if ($this->user_params_project_id > 0) {
+//            $subQuery = UserProjectParams::find()->select(['DISTINCT(upp_user_id)'])->where(['=', 'upp_project_id', $this->user_params_project_id]);
+//            $query->andWhere(['IN', 'employees.id', $subQuery]);
+//        }
+//
+//        if ($this->user_call_type_id > 0 || $this->user_call_type_id === '0') {
+//            $subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['=', 'up_call_type_id', $this->user_call_type_id]);
+//            $query->andWhere(['IN', 'employees.id', $subQuery]);
+//        }
+//
+//        if (strlen($this->user_sip) > 0) {
+//            $subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['like', 'up_sip', $this->user_sip]);
+//            $query->andWhere(['IN', 'employees.id', $subQuery]);
+//        }
+//        if (strlen($this->twoFaEnable) > 0) {
+//            $subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['=', 'up_2fa_enable', $this->twoFaEnable]);
+//            $query->andWhere(['IN', 'employees.id', $subQuery]);
+//        }
+//
+//
+//        if ($this->user_project_id > 0) {
+//            $subQuery = ProjectEmployeeAccess::find()->select(['DISTINCT(employee_id)'])->where(['=', 'project_id', $this->user_project_id]);
+//            $query->andWhere(['IN', 'employees.id', $subQuery]);
+//        }
+//
+//        if ($this->supervision_id > 0) {
+//            $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
+//            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
+//            $query->andWhere(['IN', 'employees.id', $subQuery]);
+//        }
+//
+//        if ($this->online > 0) {
+//            if ($this->online == 1) {
+//                $subQuery = UserOnline::find()->select(['uo_user_id']);
+//                $query->andWhere(['IN', 'employees.id', $subQuery]);
+//            } elseif ($this->online == 2) {
+//                $subQuery = UserOnline::find()->select(['uo_user_id']);
+//                $query->andWhere(['NOT IN', 'employees.id', $subQuery]);
+//            }
+//        }
+//
+//        if ($this->experienceMonth > 0) {
+//			$subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['=', 'ABS(TIMESTAMPDIFF(MONTH, curdate(), up_join_date))', $this->experienceMonth]);
+//			$query->andWhere(['IN', 'employees.id', $subQuery]);
+//		}
+//
+//        if (!empty($this->joinDate)) {
+//			$subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['=', 'up_join_date', $this->joinDate]);
+//			$query->andWhere(['IN', 'employees.id', $subQuery]);
+//		}
+//
+//
+//        $query->andFilterWhere(['like', 'username', $this->username])
+//            ->andFilterWhere(['like', 'nickname', $this->nickname])
+//            ->andFilterWhere(['like', 'full_name', $this->full_name])
+//            ->andFilterWhere(['like', 'auth_key', $this->auth_key])
+//            ->andFilterWhere(['like', 'password_hash', $this->password_hash])
+//            ->andFilterWhere(['like', 'password_reset_token', $this->password_reset_token])
+//            ->andFilterWhere(['like', 'email', $this->email]);
+
+        $this->filterQuery($query);
+
+        return $dataProvider;
+    }
+
+
+    /**
+     * @param $params
+     * @return array
+     */
+    public function searchIds($params): array
+    {
+        $query = Employee::find()->with('ugsGroups', 'userParams', 'userProfile', 'userProjectParams.phoneList');
+
+        $this->load($params);
+        if (!$this->validate()) {
+            $query->where('0=1');
+            return [];
+        }
+        $query->select('employees.id');
+        $this->filterQuery($query);
+
+        return ArrayHelper::map($query->asArray()->all(), 'id', 'id');
+    }
+
+
+    /**
+     * @param EmployeeQuery $query
+     */
+    private function filterQuery(EmployeeQuery $query)
+    {
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
@@ -134,6 +259,11 @@ class EmployeeSearch extends Employee
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
 
+        if ($this->projectParamsIds) {
+            $subQuery = UserProjectParams::find()->select(['DISTINCT(upp_user_id)'])->where(['upp_project_id' => $this->projectParamsIds]);
+            $query->andWhere(['IN', 'employees.id', $subQuery]);
+        }
+
         if ($this->user_call_type_id > 0 || $this->user_call_type_id === '0') {
             $subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['=', 'up_call_type_id', $this->user_call_type_id]);
             $query->andWhere(['IN', 'employees.id', $subQuery]);
@@ -148,6 +278,11 @@ class EmployeeSearch extends Employee
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
 
+
+        if ($this->projectAccessIds) {
+            $subQuery = ProjectEmployeeAccess::find()->select(['DISTINCT(employee_id)'])->where(['project_id' => $this->projectAccessIds]);
+            $query->andWhere(['IN', 'employees.id', $subQuery]);
+        }
 
         if ($this->user_project_id > 0) {
             $subQuery = ProjectEmployeeAccess::find()->select(['DISTINCT(employee_id)'])->where(['=', 'project_id', $this->user_project_id]);
@@ -171,25 +306,26 @@ class EmployeeSearch extends Employee
         }
 
         if ($this->experienceMonth > 0) {
-			$subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['=', 'ABS(TIMESTAMPDIFF(MONTH, curdate(), up_join_date))', $this->experienceMonth]);
-			$query->andWhere(['IN', 'employees.id', $subQuery]);
-		}
+            $subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['=', 'ABS(TIMESTAMPDIFF(MONTH, curdate(), up_join_date))', $this->experienceMonth]);
+            $query->andWhere(['IN', 'employees.id', $subQuery]);
+        }
 
         if (!empty($this->joinDate)) {
-			$subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['=', 'up_join_date', $this->joinDate]);
-			$query->andWhere(['IN', 'employees.id', $subQuery]);
-		}
+            $subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['=', 'up_join_date', $this->joinDate]);
+            $query->andWhere(['IN', 'employees.id', $subQuery]);
+        }
 
 
         $query->andFilterWhere(['like', 'username', $this->username])
+            ->andFilterWhere(['like', 'nickname', $this->nickname])
             ->andFilterWhere(['like', 'full_name', $this->full_name])
             ->andFilterWhere(['like', 'auth_key', $this->auth_key])
             ->andFilterWhere(['like', 'password_hash', $this->password_hash])
             ->andFilterWhere(['like', 'password_reset_token', $this->password_reset_token])
             ->andFilterWhere(['like', 'email', $this->email]);
 
-        return $dataProvider;
     }
+
 
     /**
      * Creates data provider instance with search query applied

@@ -34,6 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'link',
             'api_key',
             'email_postfix',
+            'ga_tracking_id',
             'contact_info:ntext',
             'closed:boolean',
             'last_update',

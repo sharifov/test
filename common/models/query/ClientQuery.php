@@ -3,6 +3,8 @@
 namespace common\models\query;
 
 use common\models\Client;
+use sales\model\clientChatVisitor\entity\ClientChatVisitor;
+use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use yii\db\ActiveQuery;
 
 /**
@@ -23,5 +25,15 @@ class ClientQuery extends ActiveQuery
     public function byUuid(string $uuid): self
 	{
 		return $this->andWhere(['uuid' => $uuid]);
+	}
+
+	public function joinWithCcVisitor(): self
+	{
+		return $this->join('INNER JOIN', ClientChatVisitor::tableName(), 'ccv_client_id = id');
+	}
+
+	public function joinWithCcVisitorData(string $visitorId): self
+	{
+		return $this->join('INNER JOIN', ClientChatVisitorData::tableName(), 'cvd_visitor_rc_id = :visitorId', ['visitorId' => $visitorId]);
 	}
 }

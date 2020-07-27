@@ -1,5 +1,6 @@
 <?php
 
+use sales\auth\Auth;
 use yii\web\View;
 
 /** @var $showWidgetContent bool */
@@ -7,59 +8,85 @@ use yii\web\View;
 /** @var View $this */
 /** @var array $userPhones */
 /** @var array $userEmails */
-/** @var bool $isCallRinging */
-/** @var bool $isCallInProgress */
-/** @var \common\models\Call|null $call */
+/** @var int $countMissedCalls */
+
 ?>
 
 <div class="phone-widget" style="margin-bottom: 30px">
   <?php if($showWidgetContent): ?>
   <div class="phone-widget__header">
     <div class="phone-widget__heading">
+      <div class="number-toggle">
+        <input type="checkbox" id="number-status3" class="call-status-switcher" <?= ($userCallStatus && $userCallStatus->isReady() ? 'checked' : '') ?>>
+        <label for="number-status3">ready</label>
+        <div class="status-confirmation"></div>
+      </div>
+        <ul class="call-filter">
+            <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-active" data-call-filter="active">0</a></li>
+            <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-direct" data-call-filter="direct">0</a></li>
+            <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-general" data-call-filter="general">0</a></li>
+        </ul>
 
-      <a href="#" class="phone-widget__dev header-action-small toggle-bar-logs"><i class="fas fa-tools"></i></a>
-      <span class="phone-widget__title">Calls</span>
+        <!-- <a href="#" class="phone-widget__dev header-action-small toggle-bar-logs"><i class="fas fa-tools"></i></a> -->
+      <!-- <span class="phone-widget__title">Calls</span> -->
       <a href="#" class="phone-widget__settings header-action-small toggle-bar-settings"><i class="fa fa-cog"></i></a>
       <a href="#" class="phone-widget__close header-action-small">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path
             d="M7 8.20625L12.7937 14L13.9999 12.7938L8.2062 7.00004L14 1.20621L12.7938 0L7 5.79383L1.2062 0L0 1.20621L5.7938 7.00004L7.97135e-05 12.7938L1.20628 14L7 8.20625Z"
             fill="white" />
-        </svg>
+        </svg> -->
+        <i class="fa fa-times"></i>
       </a>
     </div>
     <ul class="phone-widget__header-actions">
       <li>
-        <a href="#" data-toggle-tab="tab-phone" class="is_active">
+        <a href="#" data-toggle-tab="tab-phone" class="is_active" data-call-in-progress="false">
           <i class="fas fa-phone"></i>
           <span>Call</span>
         </a>
       </li>
-      <li>
-        <a href="#" data-toggle-tab="tab-contacts">
-          <i class="far fa-address-book"></i>
-          <span>Contacts</span>
-        </a>
-      </li>
-      <li>
-        <a href="#" data-toggle-tab="tab-history">
-          <i class="fas fa-file-invoice"></i>
-          <span>history</span>
-        </a>
-      </li>
+        <?php if (Auth::can('PhoneWidget_HistoryTab')): ?>
+            <li>
+                <a href="#" data-toggle-tab="tab-history" data-missed-calls="0">
+                    <i class="fas fa-file-invoice"></i>
+                    <span>history</span>
+                </a>
+            </li>
+        <?php endif;?>
+        <?php if (Auth::can('PhoneWidget_ContactsTab')): ?>
+              <li>
+                <a href="#" data-toggle-tab="tab-contacts" >
+                  <i class="far fa-address-book"></i>
+                  <span>Contacts</span>
+                </a>
+              </li>
+        <?php endif;?>
+   
     </ul>
   </div>
   <div class="phone-widget__body">
-      <?= $this->render('tab/call', [
-		  'userCallStatus' => $userCallStatus,
-		  'isCallRinging' => $isCallRinging,
-		  'isCallInProgress' => $isCallInProgress,
-		  'call' => $call
-	  ]); ?><?= $this->render('tab/contacts', ['userPhones' => $userPhones, 'userEmails' => $userEmails]); ?>
+    <?= $this->render('tab/call', [
+      'userCallStatus' => $userCallStatus,
+      'countMissedCalls' => $countMissedCalls,
+    ]); ?>
+    <?= $this->render('tab/contacts', ['userPhones' => $userPhones, 'userEmails' => $userEmails]); ?>
     <?= $this->render('tab/history'); ?>
     <div class="widget-phone__contact-info-modal widget-modal contact-modal-info"></div>
     <div class="widget-phone__messages-modal widget-modal messages-modal"></div>
     <div class="widget-phone__email-modal widget-modal email-modal"></div>
+
+    <div class="widget-line-overlay" style="display:none">
+      <div class="widget-line-overlay__header">
+          <div class="widget-line-overlay__queue-marker">
+              <span data-queue-marker>Calls Queue</span>
+              <a href="#" class="widget-line-overlay__show-all-queues" data-call-filter="all" >All Calls</a>
+          </div>
+      </div>
+      <div class="widget-line-overlay__body scrollable-block">
+          <ul class="queue-separator" id="queue-separator"> </ul>
+      </div>
+    </div>
 
         <?php /*
         <div class="widget-phone__contact-info-modal widget-modal contact-modal-info">
@@ -360,7 +387,7 @@ use yii\web\View;
   </div>
 
 
-  <div class="phone-widget__additional-bar additional-bar" id="bar-logs">
+  <!-- <div class="phone-widget__additional-bar additional-bar" id="bar-logs">
     <div class="additional-bar__header">
       <span class="additional-bar__header-title">
         Logs
@@ -370,13 +397,9 @@ use yii\web\View;
       </a>
     </div>
     <div class="additional-bar__body">
-      <pre class="logs-block">
-        <p>&gt;&nbsp;Requesting Capability Token...</p>
-        <p>&gt;&nbsp;Got a token</p>
-        <p>&gt;&nbsp;Twilio.Device Ready!</p>
-      </pre>
+      
     </div>
-  </div>
+  </div> -->
 
   <div class="phone-widget__additional-bar additional-bar" id="bar-settings">
     <div class="additional-bar__header">
@@ -387,14 +410,29 @@ use yii\web\View;
         <i class="fas fa-times"></i>
       </a>
     </div>
-    <div class="additional-bar__body">
-        <div id="output-selection">
-            <label>Ringtone Devices</label>
-            <select id="ringtone-devices" class="ringtone-devices" multiple></select>
-            <label>Speaker Devices</label>
-            <select id="speaker-devices" class="speaker-devices" multiple></select><br/>
+    <div class="additional-bar__body tabs">
+        <ul class="tabs__nav tab-nav">
+            <li><a href="#tab-device" class="tab-trigger active-tab">Devices</a></li>
+            <li><a href="#tab-logs" class="tab-trigger">Logs</a></li>
+        </ul>
+        <ul class="tabs__container tab-container">
+            <li class="tabs__item" id="tab-device">
+                <div id="output-selection">
+                <label>Ringtone Devices</label>
+                <select id="ringtone-devices" class="ringtone-devices form-control" multiple></select>
+                <label>Speaker Devices</label>
+                <select id="speaker-devices" class="speaker-devices form-control" multiple></select><br/>
+                </div>
+            </li>
+            <li class="tabs__item" id="tab-logs">
+            <pre class="logs-block">
 
-        </div>
+            </pre>
+            </li>
+        </ul>
+       
+
+        
 
     </div>
 

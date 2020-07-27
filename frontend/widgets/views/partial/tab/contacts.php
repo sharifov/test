@@ -39,7 +39,9 @@ echo $this->render('@frontend/widgets/newWebPhone/view/email', ['userEmails' => 
         ActiveForm::end()
 
         ?>
-
+        <div class="selection-amount">
+            <i class="selection-amount__selected">0</i>/<i class="selection-amount__contact-amount">386</i>
+        </div>
     </div>
 
     <?php
@@ -60,6 +62,12 @@ JS;
     $this->registerJs($js);
     ?>
 
-    <div class="contacts-list" id="list-of-contacts"></div>
+    <div class="contacts-list contacts-list--selection" id="list-of-contacts"></div>
 
+    <div class="submit-selected-contacts">
+        <button type="submit" class="js-add-contacts">
+            <i class="fa fa-check"></i>
+            <span>Confirm</span>
+        </button>
+    </div>
 </div>

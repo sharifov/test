@@ -137,20 +137,16 @@ class ClientChatRequestController extends ApiBaseController
 
 		if ($form->validate()) {
                 try {
-                    $transaction = \Yii::$app->db->beginTransaction();
 
                     $this->clientChatRequestService->create($form);
 
-                    $transaction->commit();
                 } catch (\RuntimeException | \DomainException | NotFoundException $e) {
-                    $transaction->rollBack();
                     return $this->endApiLog($apiLog, new ErrorResponse(
                         new StatusCodeMessage(400),
                         new MessageMessage($e->getMessage()),
                         new CodeMessage(ApiCodeException::CLIENT_CHAT_REQUEST_CREATE_FAILED)
                     ));
                 } catch (\Throwable $e) {
-                    $transaction->rollBack();
                     \Yii::error(AppHelper::throwableFormatter($e), 'Api::ClientChatRequestController::actionCreate::Throwable');
                     \Yii::error(VarDumper::dumpAsString($form->data), 'Api::ClientChatRequestController::actionCreate::RequestData');
                     return $this->endApiLog($apiLog, new ErrorResponse(

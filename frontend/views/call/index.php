@@ -7,6 +7,7 @@ use common\models\Call;
 use common\models\Employee;
 use dosamigos\datepicker\DatePicker;
 use common\components\grid\call\CallDurationColumn;
+use sales\auth\Auth;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -36,7 +37,7 @@ $user = Yii::$app->user->identity;
         'filterModel' => $searchModel,
         //'tableOptions' => ['class' => 'table table-bordered table-condensed table-hover'],
         'rowOptions' => function (\common\models\Call $model, $index, $widget, $grid) {
-            if ((int) $model->c_call_type_id === \common\models\Call::CALL_TYPE_OUT) {
+            if ($model->isOut()) {
                 if ($model->isStatusBusy() || $model->isStatusNoAnswer()) {
                     return ['class' => 'danger'];
                 } elseif ($model->isStatusRinging() || $model->isStatusQueue()) {
@@ -56,7 +57,7 @@ $user = Yii::$app->user->identity;
                 'options' => ['style' => 'width: 80px']
             ],
             ['class' => 'yii\grid\ActionColumn',
-                'template' => '{view} {update} {delete} {cancel}',
+                'template' => '{view} {update} {delete} {cancel} {join}',
                 'visibleButtons' => [
                     /*'view' => function ($model, $key, $index) {
                         return User::hasPermission('viewOrder');
@@ -72,6 +73,15 @@ $user = Yii::$app->user->identity;
                     'cancel' => static function (Call $model, $key, $index) use ($user) {
                         return $user->isAdmin() && $model->isIn() && ($model->isStatusIvr() || $model->isStatusQueue() || $model->isStatusRinging() || $model->isStatusInProgress());
                     },
+
+                    'join' => static function (Call $model, $key, $index) use ($user) {
+                        return
+                            ((bool)(Yii::$app->params['settings']['voip_conference_base'] ?? false)
+                            && Auth::can('/phone/ajax-join-to-conference'))
+                            && (int)$model['cp_type_id'] === 1
+                            && ($model->isIn() || $model->isOut())
+                            && $model->isStatusInProgress();
+                    },
                 ],
                 'buttons' => [
                     'cancel' => static function ($url, Call $model) {
@@ -85,6 +95,18 @@ $user = Yii::$app->user->identity;
                                 //'method' => 'post',
                             ],
                         ]);
+                    },
+                    'join' => static function ($url, Call $model) {
+                        return'<div class="dropdown">
+                              <button class="btn btn-success dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fa fa-rss"></i>
+                              </button>
+                              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <a class="dropdown-item conference-coach" href="#" onclick="joinListen(\'' . $model->c_call_sid . '\');">Listen</a>
+                                <a class="dropdown-item conference-coach" href="#" onclick="joinCoach(\'' . $model->c_call_sid . '\');">Coach</a>
+                                <a class="dropdown-item conference-coach" href="#" onclick="joinBarge(\'' . $model->c_call_sid . '\');">Barge</a>
+                              </div>
+                            </div>';
                     }
                 ],
             ],
@@ -204,7 +226,7 @@ $user = Yii::$app->user->identity;
                 'value' => static function (\common\models\Call $model) {
                     return $model->getCallTypeName();
                 },
-                'filter' => \common\models\Call::CALL_TYPE_LIST
+                'filter' => \common\models\Call::TYPE_LIST
             ],
 
             [

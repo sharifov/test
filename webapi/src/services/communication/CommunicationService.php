@@ -620,7 +620,7 @@ class CommunicationService
 			$call = new Call();
 			$call->c_call_sid = $requestDataDTO->CallSid ?? null;
 			$call->c_parent_call_sid = $requestDataDTO->ParentCallSid ?? null;
-			$call->c_call_type_id = Call::CALL_TYPE_IN;
+			$call->setTypeIn();
 
 			if ($parentCall) {
 				$call->c_parent_id = $parentCall->c_id;
@@ -931,7 +931,7 @@ class CommunicationService
 
 			$callModel = new Call();
 			$callModel->c_project_id = $projectId;
-			$callModel->c_call_type_id = Call::CALL_TYPE_OUT;
+			$callModel->setTypeOut();
 			$callModel->c_call_sid = $requestDataDTO->CallSid;
 			$callModel->c_parent_call_sid = $requestDataDTO->ParentCallSid ?? null;
 			$callModel->c_to = $requestDataDTO->To;

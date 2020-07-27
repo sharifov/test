@@ -20,11 +20,17 @@ use common\models\Notifications;
 use common\models\Sms;
 use common\models\Sources;
 use common\models\UserProjectParams;
+use frontend\widgets\newWebPhone\call\socket\RemoveIncomingRequestMessage;
 use frontend\widgets\newWebPhone\sms\socket\Message;
 use frontend\widgets\notification\NotificationMessage;
 use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
+use sales\model\call\form\CallCustomParameters;
+use sales\model\callLog\services\CallLogConferenceTransferService;
 use sales\model\callLog\services\CallLogTransferService;
+use sales\model\conference\useCase\recordingStatusCallBackEvent\ConferenceRecordingStatusCallbackForm;
+use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackForm;
+use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackHandler;
 use sales\model\emailList\entity\EmailList;
 use sales\model\phoneList\entity\PhoneList;
 use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
@@ -50,6 +56,7 @@ use yii\queue\Queue;
  * Class CommunicationController
  *
  * @property CallService $callService
+ * @property ConferenceStatusCallbackHandler $conferenceStatusCallbackHandler
  */
 class CommunicationController extends ApiBaseController
 {
@@ -59,8 +66,12 @@ class CommunicationController extends ApiBaseController
     public const TYPE_VOIP_GATHER       = 'voip_gather';
     public const TYPE_VOIP_CLIENT       = 'voip_client';
     public const TYPE_VOIP_FINISH       = 'voip_finish';
+
     public const TYPE_VOIP_CONFERENCE   = 'voip_conference';
     public const TYPE_VOIP_CONFERENCE_RECORD   = 'voip_conference_record';
+
+    public const TYPE_VOIP_CONFERENCE_CALL   = 'voip_conference_call';
+    public const TYPE_VOIP_CONFERENCE_CALL_RECORD   = 'voip_conference_call_record';
 
 
     public const TYPE_UPDATE_EMAIL_STATUS = 'update_email_status';
@@ -70,10 +81,9 @@ class CommunicationController extends ApiBaseController
     public const TYPE_NEW_SMS_MESSAGES_RECEIVED = 'new_sms_messages_received';
 
     public const TYPE_SMS_FINISH        = 'sms_finish';
-    /**
-     * @var CallService
-     */
+
     private $callService;
+    private $conferenceStatusCallbackHandler;
 
     /**
      * @param $id
@@ -81,10 +91,11 @@ class CommunicationController extends ApiBaseController
      * @param CallService $callService
      * @param array $config
      */
-    public function __construct($id, $module, CallService $callService, $config = [])
+    public function __construct($id, $module, CallService $callService, ConferenceStatusCallbackHandler $conferenceStatusCallbackHandler,  $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->callService = $callService;
+        $this->conferenceStatusCallbackHandler = $conferenceStatusCallbackHandler;
     }
 
     /**
@@ -249,6 +260,12 @@ class CommunicationController extends ApiBaseController
                 break;
             case self::TYPE_VOIP_CONFERENCE_RECORD:
                 $response = $this->voiceConferenceRecordCallback($post);
+                break;
+            case self::TYPE_VOIP_CONFERENCE_CALL:
+                $response = $this->voiceConferenceCallCallback($post);
+                break;
+            case self::TYPE_VOIP_CONFERENCE_CALL_RECORD:
+                $response = $this->voiceConferenceCallRecordCallback($post);
                 break;
             case self::TYPE_VOIP_FINISH:
                 $response = $this->voiceFinish($post);
@@ -496,9 +513,15 @@ class CommunicationController extends ApiBaseController
                 $call = Call::find()->where(['c_call_sid' => $callData['CallSid']])->orderBy(['c_id' => SORT_ASC])->limit(1)->one();
             }
 
-            if ($call->isGeneralParent()) {
-                $call = Call::find()->firstChild($call->c_id)->one();
+            if (!$call->isConferenceType()) {
+                if ($call->isGeneralParent()) {
+                    if ($child = Call::find()->firstChild($call->c_id)->one()) {
+                        $call = $child;
+                    }
+                }
             }
+
+//            Yii::error(VarDumper::dumpAsString(['post' => $post, 'model' => $call->getAttributes()]));;
 
             if ($call && $callData['RecordingUrl']) {
 
@@ -523,7 +546,10 @@ class CommunicationController extends ApiBaseController
                     $logEnable = Yii::$app->params['settings']['call_log_enable'] ?? false;
                     if ($logEnable) {
                         if ($call->c_recording_sid) {
-                            (Yii::createObject(CallLogTransferService::class))->saveRecord($call);
+//                            $conferenceBase = (bool)(\Yii::$app->params['settings']['voip_conference_base'] ?? false);
+//                            if (!$conferenceBase || ($conferenceBase && !$call->c_conference_id)) {
+                                (Yii::createObject(CallLogTransferService::class))->saveRecord($call);
+//                            }
                         }
                     }
                 }
@@ -698,6 +724,10 @@ class CommunicationController extends ApiBaseController
                 Yii::warning('Not found status Call: ' . $callSid . ', ' . VarDumper::dumpAsString($callOriginalData), 'API:Communication:voiceClient:Call::status');
             }
 
+            if (!empty($callOriginalData['is_conference_call']) && !$call->isConferenceType()) {
+                $call->setConferenceType();
+            }
+
 
 //            if ($call->c_parent_call_sid) {
 //
@@ -787,18 +817,22 @@ class CommunicationController extends ApiBaseController
             $callData = $post['callData'];
             $call = $this->findOrCreateCallByData($callData);
 
-            if($call->isStatusNoAnswer() || $call->isStatusBusy() || $call->isStatusCanceled() || $call->isStatusFailed()) {
-                if ($call->c_lead_id) {
-                    if (($lead = $call->cLead) && !$lead->isCallCancel()) {
-                        try {
-                            $leadRepository = Yii::createObject(LeadRepository::class);
-                            $lead->callCancel();
-                            $leadRepository->save($lead);
-                        } catch (\Throwable $e) {
-                            Yii::error('LeadId: ' . $lead->id . ' Message: ' . $e->getMessage() ,'API:Communication:voiceDefault:Lead:save');
-                            $response['error'] = 'Error in method voiceDefault. LeadId: ' . $lead->id . ' Message: ' . $e->getMessage();
+            if (!$call->isJoin()) {
+
+                if ($call->isStatusNoAnswer() || $call->isStatusBusy() || $call->isStatusCanceled() || $call->isStatusFailed()) {
+                    if ($call->c_lead_id) {
+                        if (($lead = $call->cLead) && !$lead->isCallCancel()) {
+                            try {
+                                $leadRepository = Yii::createObject(LeadRepository::class);
+                                $lead->callCancel();
+                                $leadRepository->save($lead);
+                            } catch (\Throwable $e) {
+                                Yii::error('LeadId: ' . $lead->id . ' Message: ' . $e->getMessage(), 'API:Communication:voiceDefault:Lead:save');
+                                $response['error'] = 'Error in method voiceDefault. LeadId: ' . $lead->id . ' Message: ' . $e->getMessage();
+                            }
                         }
                     }
+
                 }
 
             }
@@ -821,6 +855,10 @@ class CommunicationController extends ApiBaseController
             if (!$call->save()) {
                 Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceDefault:Call:save');
                 $response['error'] = 'Error in method voiceDefault. ' . $call->getErrorSummary(false)[0];
+            }
+
+            if (!empty($callData['accepted_call_sid']) && $call->c_created_user_id && $call->isStatusInProgress()) {
+                Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $call->c_created_user_id], RemoveIncomingRequestMessage::create($callData['accepted_call_sid']));
             }
 
         } else {
@@ -874,7 +912,7 @@ class CommunicationController extends ApiBaseController
 
             $call = new Call();
             $call->c_call_sid = $calData['CallSid'] ?? null;
-            $call->c_call_type_id = Call::CALL_TYPE_IN;
+            $call->setTypeIn();
             // $call->c_call_status = Call::TW_STATUS_IVR; //$calData['CallStatus'] ?? Call::CALL_STATUS_QUEUE;
 			if (!$callFromInternalPhone) {
             	$call->setStatusIvr();
@@ -896,16 +934,16 @@ class CommunicationController extends ApiBaseController
                 $call->c_group_id = $parentCall->c_group_id;
                 $call->c_queue_start_dt = $parentCall->c_queue_start_dt;
 
-                if ($parentCall->callUserGroups && !$call->callUserGroups) {
-                    foreach ($parentCall->callUserGroups as $cugItem) {
-                        $cug = new CallUserGroup();
-                        $cug->cug_ug_id = $cugItem->cug_ug_id;
-                        $cug->cug_c_id = $call->c_id;
-                        if (!$cug->save()) {
-                            \Yii::error(VarDumper::dumpAsString($cug->errors), 'API:CommunicationController:findOrCreateCall:CallUserGroup:save');
-                        }
-                    }
-                }
+//                if ($parentCall->callUserGroups && !$call->callUserGroups) {
+//                    foreach ($parentCall->callUserGroups as $cugItem) {
+//                        $cug = new CallUserGroup();
+//                        $cug->cug_ug_id = $cugItem->cug_ug_id;
+//                        $cug->cug_c_id = $call->c_id;
+//                        if (!$cug->save()) {
+//                            \Yii::error(VarDumper::dumpAsString($cug->errors), 'API:CommunicationController:findOrCreateCall:CallUserGroup:save');
+//                        }
+//                    }
+//                }
                     //$call->c_u_id = $parentCall->c_dep_id;
             }
 
@@ -942,6 +980,17 @@ class CommunicationController extends ApiBaseController
             if (!$call->save()) {
                 \Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:findOrCreateCall:Call:save');
                 throw new \Exception('findOrCreateCall: Can not save call in db', 1);
+            } else {
+                if ($parentCall && $parentCall->callUserGroups && !$call->callUserGroups) {
+                    foreach ($parentCall->callUserGroups as $cugItem) {
+                        $cug = new CallUserGroup();
+                        $cug->cug_ug_id = $cugItem->cug_ug_id;
+                        $cug->cug_c_id = $call->c_id;
+                        if (!$cug->save()) {
+                            \Yii::error(VarDumper::dumpAsString($cug->errors), 'API:CommunicationController:findOrCreateCall:CallUserGroup:save');
+                        }
+                    }
+                }
             }
         }
 
@@ -968,7 +1017,6 @@ class CommunicationController extends ApiBaseController
 //        }
 
         $callSid = $callData['CallSid'] ?? '';
-        $parentCallSid = $callData['ParentCallSid'] ?? '';
 
         if ($callSid) {
             $call = Call::find()->where(['c_call_sid' => $callSid])->limit(1)->one();
@@ -978,18 +1026,32 @@ class CommunicationController extends ApiBaseController
             }
         }
 
+        $custom_parameters = new CallCustomParameters();
+        $custom_parameters->load($callData);
+        if (!$custom_parameters->validate()) {
+            Yii::error(VarDumper::dumpAsString([
+                'message' => 'Call custom parameters error',
+                'errors' => $custom_parameters->getErrors(),
+                'model' => $custom_parameters->getAttributes(),
+            ]), 'API:CommunicationController:findOrCreateCallByData');
+        }
+        $custom_parameters->resetErrorsAttribute();
+
+        $parentCallSid = $callData['ParentCallSid'] ?? null;
+        if (!$parentCallSid && $custom_parameters->parent_call_sid) {
+            $parentCallSid = $custom_parameters->parent_call_sid;
+        }
         if ($parentCallSid) {
             $parentCall = Call::find()->where(['c_call_sid' => $parentCallSid])->orderBy(['c_id' => SORT_DESC])->limit(1)->one();
         }
-
 
         if (!$call) {
 
             $call = new Call();
             $call->c_call_sid = $callData['CallSid'] ?? null;
-            $call->c_parent_call_sid = $callData['ParentCallSid'] ?? null;
+            $call->c_parent_call_sid = $parentCallSid;
             $call->c_com_call_id = $callData['c_com_call_id'] ?? null;
-            $call->c_call_type_id = Call::CALL_TYPE_IN;
+            $call->setTypeIn();
 
 
             if ($parentCall) {
@@ -1013,16 +1075,16 @@ class CommunicationController extends ApiBaseController
 
                 }*/
 
-                if ($parentCall->callUserGroups && !$call->callUserGroups) {
-                    foreach ($parentCall->callUserGroups as $cugItem) {
-                        $cug = new CallUserGroup();
-                        $cug->cug_ug_id = $cugItem->cug_ug_id;
-                        $cug->cug_c_id = $call->c_id;
-                        if (!$cug->save()) {
-                            \Yii::error(VarDumper::dumpAsString($cug->errors), 'API:CommunicationController:findOrCreateCall:CallUserGroup:save');
-                        }
-                    }
-                }
+//                if ($parentCall->callUserGroups && !$call->callUserGroups) {
+//                    foreach ($parentCall->callUserGroups as $cugItem) {
+//                        $cug = new CallUserGroup();
+//                        $cug->cug_ug_id = $cugItem->cug_ug_id;
+//                        $cug->cug_c_id = $call->c_id;
+//                        if (!$cug->save()) {
+//                            \Yii::error(VarDumper::dumpAsString($cug->errors), 'API:CommunicationController:findOrCreateCall:CallUserGroup:save');
+//                        }
+//                    }
+//                }
                 //$call->c_u_id = $parentCall->c_dep_id;
             }
 
@@ -1056,6 +1118,55 @@ class CommunicationController extends ApiBaseController
                 \Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:findOrCreateCallByData:Call:save');
                 throw new \Exception('findOrCreateCallByData: Can not save call in db', 1);
             }*/
+
+            if ($custom_parameters->type_id) {
+                if ($custom_parameters->type_id === Call::CALL_TYPE_JOIN) {
+                    $call->setTypeJoin();
+                } elseif ($custom_parameters->type_id === Call::CALL_TYPE_OUT) {
+                    $call->setTypeOut();
+                } elseif ($custom_parameters->type_id === Call::CALL_TYPE_IN) {
+                    $call->setTypeIn();
+                }
+            }
+
+            if ($custom_parameters->is_conference_call) {
+                $call->setConferenceType();
+            }
+
+            if ($custom_parameters->source_type_id) {
+                $call->c_source_type_id = $custom_parameters->source_type_id;
+            }
+
+            if ($custom_parameters->project_id) {
+                $call->c_project_id = $custom_parameters->project_id;
+            }
+
+            if ($custom_parameters->lead_id) {
+                $call->c_lead_id = $custom_parameters->lead_id;
+            }
+
+            if ($custom_parameters->case_id) {
+                $call->c_case_id = $custom_parameters->case_id;
+            }
+
+            if ($custom_parameters->user_id) {
+                $call->c_created_user_id = $custom_parameters->user_id;
+            }
+
+            if (!$call->save()) {
+                \Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:findOrCreateCallByData:Call:save');
+            } else {
+                if ($parentCall && $parentCall->callUserGroups && !$call->callUserGroups) {
+                    foreach ($parentCall->callUserGroups as $cugItem) {
+                        $cug = new CallUserGroup();
+                        $cug->cug_ug_id = $cugItem->cug_ug_id;
+                        $cug->cug_c_id = $call->c_id;
+                        if (!$cug->save()) {
+                            \Yii::error(VarDumper::dumpAsString($cug->errors), 'API:CommunicationController:findOrCreateCallByData:CallUserGroup:save');
+                        }
+                    }
+                }
+            }
         }
 
 
@@ -1065,7 +1176,14 @@ class CommunicationController extends ApiBaseController
 
         } else {*/
 
-        $call->c_call_status = $callData['CallStatus'];
+        if (isset($callData['Command']) && $callData['Command'] === 'change_call_status') {
+            if ($call->isStatusRinging()) {
+                $call->c_call_status = $callData['CallStatus'];
+            }
+        } else {
+            $call->c_call_status = $callData['CallStatus'];
+        }
+
         $call->setStatusByTwilioStatus($call->c_call_status);
             //$statusId = $call->setStatusByTwilioStatus($call->c_call_status);
             //$call->c_status_id = $statusId;
@@ -1086,8 +1204,12 @@ class CommunicationController extends ApiBaseController
             }
         }
 
-        if ($agentId) {
-            $call->c_created_user_id = $agentId;
+        if ($custom_parameters->user_id) {
+            $call->c_created_user_id = $custom_parameters->user_id;
+        } else {
+            if ($agentId) {
+                $call->c_created_user_id = $agentId;
+            }
         }
 
         if (!$call->c_created_user_id && $parentCall && $call->isOut()) {
@@ -1109,6 +1231,10 @@ class CommunicationController extends ApiBaseController
 
         if (!$call->c_recording_sid && isset($callData['RecordingSid']) && $callData['RecordingSid']) {
             $call->c_recording_sid = $callData['RecordingSid'];
+        }
+
+        if ($custom_parameters->is_conference_call && !$call->isConferenceType()) {
+            $call->setConferenceType();
         }
 
         return $call;
@@ -2227,7 +2353,192 @@ class CommunicationController extends ApiBaseController
         return $this->getResponseChownData($vr);
     }
 
+    private function voiceConferenceCallCallback(array $post = []): array
+    {
+        $response = [];
 
+        if (empty($post['conferenceData'])) {
+            $response['error'] = 'Not found POST[conferenceData]';
+            Yii::error($response['error'] . ' - ' . VarDumper::dumpAsString($post), 'API:Communication:voiceConferenceCallCallback');
+            return $response;
+        }
+
+        $form = new ConferenceStatusCallbackForm();
+
+        if (!$form->load($post['conferenceData'])) {
+            $response['error'] = 'POST[conferenceData] cant load data';
+            Yii::error(VarDumper::dumpAsString([
+                'message' => $response['error'],
+                'post' => $post,
+            ]), 'API:Communication:voiceConferenceCallCallback');
+            return $response;
+        }
+
+        if (!$form->validate()) {
+            $response['error'] = 'POST[conferenceData] validate error';
+            Yii::error(VarDumper::dumpAsString([
+                'message' => $response['error'],
+                'errors' => $form->getErrors(),
+                'form' => $form->getAttributes(),
+                'post' => $post,
+            ]), 'API:Communication:voiceConferenceCallCallback');
+            return $response;
+        }
+
+        $conference = Conference::findOne(['cf_sid' => $form->ConferenceSid]);
+
+        if (!$conference) {
+
+            $conference = new Conference();
+            $conference->start();
+            $conference->cf_sid = $form->ConferenceSid;
+            $conference->cf_friendly_name = $form->friendly_name;
+            $conference->cf_call_sid = $form->CallSid;
+            $conference->cf_created_user_id = $form->conference_created_user_id;
+
+            try {
+                if (!$conference->save()) {
+                    Yii::error(VarDumper::dumpAsString([
+                        'errors' => $conference->getErrors(),
+                        'model' => $conference->getAttributes(),
+                        'post' => $post,
+                        'form' => $form->getAttributes(),
+                    ]), 'API:Communication:voiceConferenceCallCallback');
+                }
+            } catch (\Throwable $e) {
+                $conference = Conference::findOne(['cf_sid' => $form->ConferenceSid]);
+                Yii::error($e->getMessage(), 'API:CommunicationController:voiceConferenceCallCallback');
+            }
+
+        }
+
+        if (
+            $conference
+            && !$conference->cf_call_sid
+            && $form->CallSid
+            && ($form->StatusCallbackEvent === Conference::EVENT_PARTICIPANT_JOIN || $form->StatusCallbackEvent === Conference::EVENT_PARTICIPANT_LEAVE)
+        ) {
+            $conference->cf_call_sid = $form->CallSid;
+            if (!$conference->save()) {
+                Yii::error(VarDumper::dumpAsString([
+                    'errors' => $conference->getErrors(),
+                    'model' => $conference->getAttributes(),
+                    'post' => $post,
+                    'form' => $form->getAttributes(),
+                ]), 'API:Communication:voiceConferenceCallCallback:SecondTry');
+            }
+        }
+
+        if (!$conference) {
+            $response['error'] = 'Not found and not saved Conference';
+            return $response;
+        }
+
+        if ($form->StatusCallbackEvent === Conference::EVENT_CONFERENCE_START) {
+
+            $this->conferenceStatusCallbackHandler->start($conference, $form);
+
+        } elseif ($form->StatusCallbackEvent === Conference::EVENT_CONFERENCE_END) {
+
+            $this->conferenceStatusCallbackHandler->end($conference, $form);
+
+        } elseif ($form->StatusCallbackEvent === Conference::EVENT_PARTICIPANT_JOIN) {
+
+            $this->conferenceStatusCallbackHandler->join($conference, $form);
+
+        } elseif ($form->StatusCallbackEvent === Conference::EVENT_PARTICIPANT_HOLD) {
+
+            $this->conferenceStatusCallbackHandler->hold($conference, $form);
+
+        } elseif ($form->StatusCallbackEvent === Conference::EVENT_PARTICIPANT_UNHOLD) {
+
+            $this->conferenceStatusCallbackHandler->unHold($conference, $form);
+
+        } elseif ($form->StatusCallbackEvent === Conference::EVENT_PARTICIPANT_LEAVE) {
+
+            $this->conferenceStatusCallbackHandler->leave($conference, $form);
+
+        } elseif ($form->StatusCallbackEvent === Conference::EVENT_PARTICIPANT_MUTE) {
+
+            $this->conferenceStatusCallbackHandler->mute($conference, $form);
+
+        } elseif ($form->StatusCallbackEvent === Conference::EVENT_PARTICIPANT_UNMUTE) {
+
+            $this->conferenceStatusCallbackHandler->unMute($conference, $form);
+
+        }
+
+        return $response;
+    }
+
+    private function voiceConferenceCallRecordCallback(array $post = []): array
+    {
+        $response = [];
+
+        if (empty($post['conferenceData'])) {
+            $response['error'] = 'Not found POST[conferenceData]';
+            Yii::error($response['error'] . ' - ' . VarDumper::dumpAsString($post), 'API:Communication:voiceConferenceCallRecordCallback');
+            return $response;
+        }
+
+        $form = new ConferenceRecordingStatusCallbackForm();
+
+        if (!$form->load($post['conferenceData'])) {
+            $response['error'] = 'POST[conferenceData] cant load data';
+            Yii::error(VarDumper::dumpAsString([
+                'message' => $response['error'],
+                'post' => $post,
+            ]), 'API:Communication:voiceConferenceCallRecordCallback');
+            return $response;
+        }
+
+        if (!$form->validate()) {
+            $response['error'] = 'POST[conferenceData] validate error';
+            Yii::error(VarDumper::dumpAsString([
+                'message' => $response['error'],
+                'errors' => $form->getErrors(),
+                'form' => $form->getAttributes(),
+                'post' => $post,
+            ]), 'API:Communication:voiceConferenceCallRecordCallback');
+            return $response;
+        }
+
+        if (!$conference = Conference::findOne(['cf_sid' => $form->ConferenceSid])) {
+            $response['error'] = 'Not found Conference SID ' . $form->ConferenceSid;
+            Yii::error(VarDumper::dumpAsString([
+                'message' => $response['error'],
+                'form' => $form->getAttributes(),
+                'post' => $post,
+            ]), 'API:Communication:voiceConferenceCallRecordCallback');
+            return $response;
+        }
+
+        if ($form->RecordingUrl) {
+            $conference->cf_recording_url = $form->RecordingUrl;
+        }
+        if ($form->RecordingDuration) {
+            $conference->cf_recording_duration = $form->RecordingDuration;
+        }
+        if ($form->RecordingSid) {
+            $conference->cf_recording_sid = $form->RecordingSid;
+        }
+        $conference->cf_updated_dt = date('Y-m-d H:i:s');
+
+        if ($conference->save()) {
+            $response['conference'] = $conference->getAttributes();
+//            $service = \Yii::createObject(CallLogConferenceTransferService::class);
+//            $service->saveRecord($conference->cf_id, $form);
+        } else {
+            Yii::error(VarDumper::dumpAsString([
+                'errors' => $conference->getErrors(),
+                'model' => $conference->getAttributes(),
+                'post' => $post,
+            ]), 'API:Communication:voiceConferenceCallRecordCallback');
+            $response['error'] = VarDumper::dumpAsString($conference->getErrors());
+        }
+
+        return $response;
+    }
 
     private function voiceConferenceCallback(array $post = []): array
     {
@@ -2243,29 +2554,54 @@ class CommunicationController extends ApiBaseController
             $conferenceData = $post['conferenceData'];
             $conferenceSid = mb_substr($conferenceData['ConferenceSid'], 0, 34);
 
-
             $conference = Conference::findOne(['cf_sid' => $conferenceSid]);
 
             if (!$conference) {
 
-                $conferenceRoom = ConferenceRoom::find()->where(['cr_key' => $conferenceData['FriendlyName'], 'cr_enabled' => true])->limit(1)->one();
+                $without_room_id = $conferenceData['without_room_id'] ?? false;
 
-                if ($conferenceRoom) {
+                if ($without_room_id) {
                     $conference = new Conference();
-                    $conference->cf_cr_id = $conferenceRoom->cr_id;
-                    $conference->cf_options = @json_encode($conferenceRoom->attributes);
                     $conference->cf_status_id = Conference::STATUS_START;
                     $conference->cf_sid = $conferenceSid;
-                    if (!$conference->save()) {
-                        Yii::error(VarDumper::dumpAsString($conference->errors),
-                            'API:CommunicationController:startConference:Conference:save');
-                    }
-                } else {
-                    Yii::warning('Not found ConferenceRoom by key: conferenceData - ' . VarDumper::dumpAsString($conferenceData),
-                        'API:CommunicationController:startConference:conferenceData:notfound');
-                }
-            }
+                    $conference->cf_friendly_name = $conferenceData['friendly_name'] ?? null;
+                    $conference->cf_call_sid = $conferenceData['friendly_name'] ?? null;
 
+                    try {
+                        if (!$conference->save()) {
+                            Yii::error(VarDumper::dumpAsString($conference->errors),
+                                'API:CommunicationController:startConference:Conference:without_room_id:save');
+                        }
+                    } catch (\Throwable $e) {
+                        $conference = Conference::findOne(['cf_sid' => $conferenceSid]);
+                        Yii::error($e->getMessage(), 'API:CommunicationController:startConference:Conference:without_room_id:throwable:save');
+                    }
+
+                } else {
+                    $conferenceRoom = ConferenceRoom::find()->where(['cr_key' => $conferenceData['FriendlyName'], 'cr_enabled' => true])->limit(1)->one();
+
+                    if ($conferenceRoom) {
+                        $conference = new Conference();
+                        $conference->cf_cr_id = $conferenceRoom->cr_id;
+                        $conference->cf_options = @json_encode($conferenceRoom->attributes);
+                        $conference->cf_status_id = Conference::STATUS_START;
+                        $conference->cf_sid = $conferenceSid;
+                        try {
+                            if (!$conference->save()) {
+                                Yii::error(VarDumper::dumpAsString($conference->errors),
+                                    'API:CommunicationController:startConference:Conference:save');
+                            }
+                        } catch (\Throwable $e) {
+                            $conference = Conference::findOne(['cf_sid' => $conferenceSid]);
+                            Yii::error($e->getMessage(), 'API:CommunicationController:startConference:Conference:with_room_id:throwable:save');
+                        }
+                    } else {
+                        Yii::warning('Not found ConferenceRoom by key: conferenceData - ' . VarDumper::dumpAsString($conferenceData),
+                            'API:CommunicationController:startConference:conferenceData:notfound');
+                    }
+                }
+
+            }
 
             if ($conference) {
 
@@ -2293,6 +2629,13 @@ class CommunicationController extends ApiBaseController
                 } elseif ($conferenceData['StatusCallbackEvent'] === 'participant-join') {
 
                     $call = Call::find()->where(['c_call_sid' => $conferenceData['CallSid']])->one();
+                    if ($call && $call->c_conference_sid !== $conference->cf_sid) {
+                        $call->c_conference_sid = $conference->cf_sid;
+                        if (!$call->save()) {
+                            Yii::error(VarDumper::dumpAsString($call->errors),
+                                'API:CommunicationController:voiceConferenceCallback:participant-join:call:save');
+                        }
+                    }
 
                     $cPart = new ConferenceParticipant();
                     $cPart->cp_cf_id = $conference->cf_id;
@@ -2300,30 +2643,114 @@ class CommunicationController extends ApiBaseController
                     if ($call) {
                         $cPart->cp_call_id = $call->c_id;
                     }
-                    $cPart->cp_status_id = ConferenceParticipant::STATUS_JOIN;
+                    $cPart->join();
                     $cPart->cp_join_dt = date('Y-m-d H:i:s');
                     if(!$cPart->save()) {
                         Yii::error(VarDumper::dumpAsString($cPart->errors), 'API:Communication:voiceConferenceCallback:ConferenceParticipant:save-join');
                     }
 
                     // $conference->cf_status_id = Conference::STATUS_START;
+                } elseif ($conferenceData['StatusCallbackEvent'] === 'participant-hold') {
+                    $cPart = ConferenceParticipant::find()->where([
+                        'cp_cf_id' => $conference->cf_id,
+                        'cp_call_sid' => $conferenceData['CallSid'],
+
+                    ])->one();
+
+                    if ($cPart) {
+                        $cPart->hold(date('Y-m-d H:i:s'));
+                        if (!$cPart->save()) {
+                            Yii::error(VarDumper::dumpAsString($cPart->errors),'API:Communication:voiceConferenceCallback:ConferenceParticipant:save-hold');
+                        }
+                    } else {
+                        $call = Call::find()->where(['c_call_sid' => $conferenceData['CallSid']])->one();
+                        if ($call && $call->c_conference_sid !== $conference->cf_sid) {
+                            $call->c_conference_sid = $conference->cf_sid;
+                            if (!$call->save()) {
+                                Yii::error(VarDumper::dumpAsString($call->errors),
+                                    'API:CommunicationController:voiceConferenceCallback:participant-hold:call:save');
+                            }
+                        }
+
+                        $cPart = new ConferenceParticipant();
+                        $cPart->cp_cf_id = $conference->cf_id;
+                        $cPart->cp_call_sid = $conferenceData['CallSid'];
+                        $cPart->hold(date('Y-m-d H:i:s'));
+                        if ($call) {
+                            $cPart->cp_call_id = $call->c_id;
+                        }
+                        if(!$cPart->save()) {
+                            Yii::error(VarDumper::dumpAsString($cPart->errors), 'API:Communication:voiceConferenceCallback:ConferenceParticipant:save-hold');
+                        }
+                    }
+                } elseif ($conferenceData['StatusCallbackEvent'] === 'participant-unhold') {
+                    $cPart = ConferenceParticipant::find()->where([
+                        'cp_cf_id' => $conference->cf_id,
+                        'cp_call_sid' => $conferenceData['CallSid'],
+
+                    ])->one();
+
+                    if ($cPart) {
+                        $cPart->join();
+                        if (!$cPart->save()) {
+                            Yii::error(VarDumper::dumpAsString($cPart->errors),'API:Communication:voiceConferenceCallback:ConferenceParticipant:save-hold');
+                        }
+                    } else {
+                        $call = Call::find()->where(['c_call_sid' => $conferenceData['CallSid']])->one();
+                        if ($call && $call->c_conference_sid !== $conference->cf_sid) {
+                            $call->c_conference_sid = $conference->cf_sid;
+                            if (!$call->save()) {
+                                Yii::error(VarDumper::dumpAsString($call->errors),
+                                    'API:CommunicationController:voiceConferenceCallback:participant-hold:call:save');
+                            }
+                        }
+
+                        $cPart = new ConferenceParticipant();
+                        $cPart->cp_cf_id = $conference->cf_id;
+                        $cPart->cp_call_sid = $conferenceData['CallSid'];
+                        $cPart->join();
+                        if ($call) {
+                            $cPart->cp_call_id = $call->c_id;
+                        }
+                        if(!$cPart->save()) {
+                            Yii::error(VarDumper::dumpAsString($cPart->errors), 'API:Communication:voiceConferenceCallback:ConferenceParticipant:save-hold');
+                        }
+                    }
                 } elseif ($conferenceData['StatusCallbackEvent'] === 'participant-leave') {
                     //$conference->cf_status_id = Conference::STATUS_START;
 
-                    //$call = Call::find()->where(['c_call_sid' => $conferenceData['CallSid']])->one();
+                    $cPart = ConferenceParticipant::find()->where([
+                        'cp_cf_id' => $conference->cf_id,
+                        'cp_call_sid' => $conferenceData['CallSid'],
 
-                    $cPart = ConferenceParticipant::find()->where(['cp_call_sid' => $conferenceData['CallSid']])->one();
+                    ])->one();
 
                     if ($cPart) {
-                        $cPart->cp_status_id = ConferenceParticipant::STATUS_LEAVE;
-                        $cPart->cp_leave_dt = date('Y-m-d H:i:s');
+                        $cPart->leave(date('Y-m-d H:i:s'));
                         if (!$cPart->save()) {
                             Yii::error(VarDumper::dumpAsString($cPart->errors),
                                 'API:Communication:voiceConferenceCallback:ConferenceParticipant:save-leave');
                         }
                     } else {
-                        Yii::warning('Not found ConferenceParticipant by callSid: conferenceData - ' . VarDumper::dumpAsString($conferenceData),
-                            'API:CommunicationController:voiceConferenceCallback:conferenceData:notfound');
+                        $call = Call::find()->where(['c_call_sid' => $conferenceData['CallSid']])->one();
+                        if ($call && $call->c_conference_sid !== $conference->cf_sid) {
+                            $call->c_conference_sid = $conference->cf_sid;
+                            if (!$call->save()) {
+                                Yii::error(VarDumper::dumpAsString($call->errors),
+                                    'API:CommunicationController:voiceConferenceCallback:participant-leave:call:save');
+                            }
+                        }
+
+                        $cPart = new ConferenceParticipant();
+                        $cPart->cp_cf_id = $conference->cf_id;
+                        $cPart->cp_call_sid = $conferenceData['CallSid'];
+                        $cPart->leave(date('Y-m-d H:i:s'));
+                        if ($call) {
+                            $cPart->cp_call_id = $call->c_id;
+                        }
+                        if(!$cPart->save()) {
+                            Yii::error(VarDumper::dumpAsString($cPart->errors), 'API:Communication:voiceConferenceCallback:ConferenceParticipant:save-leave');
+                        }
                     }
                 }
 
@@ -2412,7 +2839,6 @@ class CommunicationController extends ApiBaseController
 
         return $response;
     }
-
 
     /**
      * @param VoiceResponse $vr

@@ -89,7 +89,7 @@ class QuoteSegmentBaggageCharge extends \yii\db\ActiveRecord
                     ActiveRecord::EVENT_BEFORE_UPDATE => ['qsbc_updated_dt'],
                 ],
                 'value' => date('Y-m-d H:i:s')
-            ]
+            ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }

@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use sales\auth\Auth;
 use Yii;
 use common\models\ConferenceParticipant;
 use common\models\search\ConferenceParticipantSearch;
@@ -38,7 +39,7 @@ class ConferenceParticipantController extends FController
     public function actionIndex()
     {
         $searchModel = new ConferenceParticipantSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Auth::user());
 
         return $this->render('index', [
             'searchModel' => $searchModel,

@@ -73,4 +73,40 @@ class ClientChatMessageSearch extends ClientChatMessage
 
         return $dataProvider;
     }
+
+    public function history(array $params): ActiveDataProvider
+	{
+		$query = self::find();
+
+		// add conditions that should always apply here
+
+		$dataProvider = new ActiveDataProvider([
+			'query' => $query,
+			'sort'=> ['defaultOrder' => ['ccm_sent_dt' => SORT_ASC]],
+			'pagination' => [
+				'pageSize' => null,
+			],
+		]);
+
+		$this->load($params);
+
+		if (!$this->validate()) {
+			// uncomment the following line if you do not want to return any records when validation fails
+			// $query->where('0=1');
+			return $dataProvider;
+		}
+
+		// grid filtering conditions
+		$query->andFilterWhere([
+			'ccm_id' => $this->ccm_id,
+			'ccm_client_id' => $this->ccm_client_id,
+			'ccm_user_id' => $this->ccm_user_id,
+			'ccm_sent_dt' => $this->ccm_sent_dt,
+		]);
+
+		$query->andFilterWhere(['ilike', 'ccm_rid', $this->ccm_rid])
+			->andFilterWhere(['ilike', 'ccm_body', $this->ccm_body]);
+
+		return $dataProvider;
+	}
 }

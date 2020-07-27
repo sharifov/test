@@ -44,10 +44,15 @@ class UserCallStatus extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['us_type_id', 'us_user_id'], 'integer'],
-            [['us_type_id', 'us_user_id'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            [['us_created_dt'], 'safe'],
-            [['us_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['us_user_id' => 'id']],
+            ['us_type_id','integer'],
+            ['us_type_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['us_type_id', 'in', 'range' => array_keys(self::STATUS_TYPE_LIST)],
+
+            ['us_created_dt', 'safe'],
+
+            ['us_user_id', 'integer'],
+            ['us_user_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['us_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['us_user_id' => 'id']],
         ];
     }
 

@@ -21,6 +21,12 @@ class ClientChatRequestApiForm extends Model
 	public array $data;
 	public ?string $rid;
 
+	private const SCENARIO_ROOM_CONNECTED = 'ROOM_CONNECTED';
+
+	private const SCENARIO_LIST = [
+		self::SCENARIO_ROOM_CONNECTED
+	];
+
 	public function rules(): array
 	{
 		return [
@@ -31,9 +37,11 @@ class ClientChatRequestApiForm extends Model
 			['data', 'validateTsParam'],
 
 			[['event'], 'required'],
+			[['rid'], 'required', 'on' => self::SCENARIO_ROOM_CONNECTED],
 
 			[['eventId'], 'integer'],
 			[['eventId'], 'in', 'range' => ClientChatRequest::getEventIdList()],
+
 		];
 	}
 
@@ -43,6 +51,7 @@ class ClientChatRequestApiForm extends Model
 		$this->data = $data;
 		$this->eventId = ClientChatRequest::getEventIdByName($event);
 		$this->rid = $data['rid'] ?? null;
+		$this->scenario = in_array($this->event, self::SCENARIO_LIST) ? $this->event : 'default';
 		return $this;
 	}
 

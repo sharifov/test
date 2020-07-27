@@ -9,7 +9,7 @@ use common\models\Lead;
  *
  * @property Lead $lead
  */
-class LeadCreatedManuallyEvent
+class LeadCreatedManuallyEvent implements LeadableEventInterface
 {
     public $lead;
 
@@ -21,4 +21,8 @@ class LeadCreatedManuallyEvent
         $this->lead = $lead;
     }
 
+    public function getLead(): Lead
+    {
+        return $this->lead;
+    }
 }

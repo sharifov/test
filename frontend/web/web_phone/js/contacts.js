@@ -7,10 +7,15 @@ let PhoneWidgetContacts = function () {
     let simpleBar = null;
     let currentFullListContainer = true;
 
+    let selectedContacts = [];
+   
+
     function init(titleAccessGetMessagesInit, disabledClassInit, urlFullListInit) {
         titleAccessGetMessages = titleAccessGetMessagesInit;
         disabledClass = disabledClassInit;
         urlFullList = urlFullListInit;
+
+        window.localStorage.setItem('contactSelectableState', 0);
     }
 
     function getUrlFullList() {
@@ -62,9 +67,88 @@ let PhoneWidgetContacts = function () {
         $($current).find('.wg-history-load').remove();
     }
 
+    function showCheckbox(contact, index) {
+        // handleContactSelection($('[data-selected-contact]'),contact);
+
+        if (window.localStorage.getItem('contactSelectableState') == '1' && contact.phones.length <= 1) {
+            return '<div class="select-contact">' +
+            '<div class="checkbox">'+
+            '<input type="checkbox" name="checkedContact'+ contact.id +'" id="checkedContact'+ contact.id +'" value="'+ contact.phones[0] +'" data-selected-contact="'+ contact.id +'">'+
+            '<label for="checkedContact'+ contact.id +'"></label>'+
+            '<label for="checkedContact'+ contact.id +'" data-area-label></label>'+
+            '</div>' +
+            '</div>'
+        }
+
+        return '<a href="#" class="collapsible-arrow"><i class="fas fa-chevron-right"></i></a>'
+    }
+
+
+    function showCheckboxMultiple(contact, index) {
+        handleContactSelection('[data-selected-contact]',contact);
+        if (window.localStorage.getItem('contactSelectableState') == '1' && contact.phones.length >= 2) {
+            return '<li class="actions-list__option actions-list__option--if-selectable">'+
+            '<div class="checkbox">'+
+            '<input type="checkbox" name="checkedContact'+ index + 2 +'" id="checkedContact'+ index + 2 +'" value="'+ contact.phones[index] +'" data-selected-contact="'+ contact.id +'">'+
+            '<label for="checkedContact'+ index + 2 +'"></label>'+
+            '<label for="checkedContact'+ index + 2 +'" data-area-label></label>'+
+
+            '</div>' +
+            '</li>'
+        } 
+        
+        return ''
+    }
+
+    function cleanSelectedContacts(elem, elemData) {
+        for (var i = 0; i < selectedContacts.length; i++) {
+            if (selectedContacts[i].id === parseInt($(elem).attr(elemData))) {
+                selectedContacts.splice(selectedContacts.indexOf(selectedContacts[i]), 1);
+            }
+        }
+    }
+
+    function handleContactSelection(current, contact) {
+        var elemData = 'data-selected-contact';
+
+        $(document).on('change', current, function() {
+           
+            
+            if ($(this).is(':checked')) {
+                $('.submit-selected-contacts').slideDown(250);
+                var selected = $('['+ elemData +'="'+ $(this).attr(elemData) +'"]');
+                $(selected).prop('checked', false);
+               
+                $(this).prop('checked', true);
+
+                if (contact.hasOwnProperty('id')  && contact['id'] === parseInt($(this).attr(elemData))) {
+                    
+                    cleanSelectedContacts($(this), elemData)
+                    selectedContacts.push(contact);
+                }
+            }
+            else {
+                cleanSelectedContacts($(this), elemData)
+            }
+            if (selectedContacts.length === 0) {
+                $('.submit-selected-contacts').slideUp(150);
+            }
+
+            $('.selection-amount__selected').html(selectedContacts.length);
+            console.log(selectedContacts)
+        })
+    }
+
+    function getSelectableState(contact) {
+        if (window.localStorage.getItem('contactSelectableState') == '1' && contact.phones.length < 2) {
+            return ''
+        }
+        return 'collapse'
+    }
+
     function getContactItem(contact) {
         let content = '<li class="calls-history__item contact-info-card is-collapsible">' +
-            '<div class="collapsible-toggler collapsed" data-toggle="collapse" data-target="#collapse' + contact['id'] + '" aria-expanded="false" aria-controls="collapse' + contact['id'] + '">' +
+            '<div class="collapsible-toggler collapsed" data-toggle="'+ getSelectableState(contact) +'" data-target="#collapse' + contact['id'] + '" aria-expanded="false" aria-controls="collapse' + contact['id'] + '">' +
             '<div class="contact-info-card__status">' +
             '<div class="agent-text-avatar">' +
             '<span>' + contact['avatar'] + '</span>' +
@@ -77,7 +161,7 @@ let PhoneWidgetContacts = function () {
             '<div class="contact-info-card__line history-details">' +
             '<span class="contact-info-card__call-type">' + contact['description'] + '</span>' +
             '</div>' +
-            '<a href="#" class="collapsible-arrow"><i class="fas fa-chevron-right"></i></a>' +
+            showCheckbox(contact) +
             '</div>' +
             '</div>' +
             '<div id="collapse' + contact['id'] + '" class="collapse collapsible-container" aria-labelledby="headingOne" data-parent="#contacts-tab">' +
@@ -141,6 +225,64 @@ let PhoneWidgetContacts = function () {
             //                '</div>' +
             '</div>' +
             '<div class="contact-modal-info__body">' +
+            // added markup 
+            '<span class="section-separator">General info</span>' +
+
+            '<ul class="contact-modal-info__contacts contact-full-info">' +
+
+
+            '<li>'+
+            '<div class="form-group"><label for="">Type</label>'+
+            '<div class="form-control-wrap" data-type="person"><select readonly="" type="text"'+
+            'class="form-control select-contact-type" autocomplete="off" disabled="">'+
+            '<option value="company">Company</option>'+
+            '<option value="person" selected="selected">Person</option>'+
+            '</select></div>'+
+            '</div>'+
+            '</li>' +
+
+
+            '<li>'+
+            '<div class="form-group"><label for="">Date of Birth</label><input readonly="" type="text" class="form-control"'+
+            'value="24/07/1970" autocomplete="off"></div>'+
+            '</li>' +
+            '</ul>' +
+            '<span class="section-separator">Project - Wowfare</span>' +
+
+            '<ul class="contact-modal-info__contacts contact-full-info">' +
+
+
+            '<li>'+
+            '<div class="form-group"><label for="">Role</label><input readonly="" type="text" class="form-control"'+
+            'value="Supervisor" autocomplete="off"></div>'+
+            '</li>'+
+
+
+            '<li>'+
+            '<div class="form-group"><label for="">Phone </label><input readonly="" type="text" class="form-control"'+
+            'value="+37369271516" autocomplete="off"></div>'+
+            '<ul class="actions-list">'+
+            '<li class="actions-list__option actions-list__option--phone js-call-tab-trigger"><i class="fa fa-phone phone-dial-contacts"'+
+            'data-phone="+37369271516"></i></li>'+
+            '<li title="" class="actions-list__option js-trigger-messages-modal" data-contact-id="44"'+
+            'data-contact-phone="+37369271516" data-contact-type="2"><i class="fa fa-comment-alt"></i></li>'+
+            '</ul>'+
+            '</li>' +
+
+            '<li>'+
+            '<div class="form-group"><label for="">Email </label><input readonly="" type="email" class="form-control"'+
+            'value="tandroid@gmail.com" autocomplete="off"></div>'+
+            '<ul class="actions-list">'+
+            '<li class="actions-list__option js-trigger-email-modal"'+
+            'data-contact="eyJncm91cCI6IlQiLCJpZCI6NDQsIm5hbWUiOiJUZXN0IDIiLCJkZXNjcmlwdGlvbiI6IkFuZHJldyB0ZXN0IiwiYXZhdGFyIjoiVCIsImlzX2NvbXBhbnkiOmZhbHNlLCJ0eXBlIjoyLCJwaG9uZXMiOlsiKzM3MzY5MjcxNTE2Il0sImVtYWlscyI6WyJ0YW5kcm9pZEBnbWFpbC5jb20iXX0="'+
+            'data-contact-email="tandroid@gmail.com"><i class="fa fa-envelope"></i></li>'+
+            '</ul>'+
+            '</li>' +
+            '</ul>'+
+
+
+            '<span class="section-separator">Project - Arangrant</span>' +
+            // end added markup
             '<ul class="contact-modal-info__contacts contact-full-info">' +
             '<li>' +
             '<div class="form-group">' +
@@ -152,11 +294,11 @@ let PhoneWidgetContacts = function () {
             }
 
             content += '<div class="form-control-wrap" data-type="' + type + '">';
-            if (type === 'person') {
-                content += '<i class="fa fa-user contact-type-person"></i>';
-            } else {
-                content += '<i class="fa fa-building contact-type-company"></i>';
-            }
+            // if (type === 'person') {
+            //     content += '<i class="fa fa-user contact-type-person"></i>';
+            // } else {
+            //     content += '<i class="fa fa-building contact-type-company"></i>';
+            // }
 
             content += '<select readonly type="text" class="form-control select-contact-type" autocomplete="off" readonly disabled>';
         if (contact['is_company']) {
@@ -187,7 +329,7 @@ let PhoneWidgetContacts = function () {
     }
 
     function getEmailItem(email, index, contact) {
-        return '<li>' +
+        return '<li class="contact-full-info__email">' +
             '<div class="form-group">' +
             '<label for="">Email ' + (index + 1) + '</label>' +
             '<input readonly type="email" class="form-control" value="' + email + '" autocomplete="off">' +
@@ -200,20 +342,22 @@ let PhoneWidgetContacts = function () {
             '</li>';
     }
 
+
     function getPhoneItem(phone, index, contact) {
-        let content = '<li>' +
+        let content = '<li class="contact-full-info__phone">' +
             '<div class="form-group">' +
             '<label for="">Phone ' + (index + 1) + '</label>' +
             '<input readonly type="text" class="form-control" value="' + phone + '" autocomplete="off">' +
             '</div>' +
             '<ul class="actions-list">' +
             '<li class="actions-list__option actions-list__option--phone js-call-tab-trigger">' +
-            '<i class="fa fa-phone phone-dial" data-phone="' + phone + '" data-title="' + contact['name'] + '"></i>' +
+            '<i class="fa fa-phone phone-dial-contacts" data-phone="' + phone + '" data-title="' + contact['name'] + '"></i>' +
             '</li>' +
             '<li title="' + titleAccessGetMessages + '" class="actions-list__option js-trigger-messages-modal' + disabledClass + '" ' +
                     'data-contact-id="' + contact['id'] + '" data-contact-phone="' + phone + '" data-contact-type="' + contact['type'] + '">' +
             '<i class="fa fa-comment-alt"></i>' +
             '</li>' +
+            showCheckboxMultiple(contact, index) +
             '</ul>' +
             '</li>';
         return content;
@@ -226,6 +370,7 @@ let PhoneWidgetContacts = function () {
     function noResultsTemplate() {
         return '<div style="width:100%;text-align:center;margin-top:20px">No results found</div>';
     }
+
 
     function requestFullList() {
         showPreloader();
@@ -248,7 +393,8 @@ let PhoneWidgetContacts = function () {
                 $("#list-of-contacts").html("").append(content);
                 simpleBar.recalculate();
             })
-            .fail(function () {
+            .fail(function (e) {
+                console.log(e);
                 hidePreloader();
                 new PNotify({title: "Search contacts", type: "error", text: 'Server Error. Try again later', hide: true});
             });
@@ -279,17 +425,22 @@ let PhoneWidgetContacts = function () {
             });
     }
 
+    
+
     function addContactsToListOfContacts(list) {
         let data = '';
         $.each(list, function (i, item) {
             if (!i || !item) {
                 return;
             }
+
             let content = '<span class="section-separator">' + i + '</span>';
             content += '<ul class="phone-widget__list-item calls-history" id="contacts-tab">';
+         
             $.each(list[i], function (j, contact) {
                 content += getContactItem(contact);
             });
+       
             content += '</ul>';
             data += content;
         });
@@ -418,15 +569,8 @@ $(document).on('click', ".js-toggle-contact-info", function () {
     $(".widget-phone__contact-info-modal").show();
 });
 
-$(document).on('click', '.phone-dial', function(e) {
-    e.preventDefault();
-    let phone = $(this).data('phone');
-    let title = $(this).data('title');
-    $(".widget-phone__contact-info-modal").hide();
-    $('.phone-widget__header-actions a[data-toggle-tab]').removeClass('is_active');
-    $('.phone-widget__tab').removeClass('is_active');
-    $('.phone-widget__header-actions a[data-toggle-tab="tab-phone"]').addClass('is_active');
-    $('#tab-phone').addClass('is_active');
-    insertPhoneNumber(phone, title);
+// $('.js-add-to-conference').on('click', function() {
+//     console.log(window.localStorage)
 
-});
+//     $(this).trigger('selection-contacts');
+// });

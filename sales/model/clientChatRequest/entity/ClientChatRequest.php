@@ -21,6 +21,7 @@ use yii\db\ActiveRecord;
 class ClientChatRequest extends \yii\db\ActiveRecord
 {
 	private const EVENT_GUEST_CONNECTED = 1;
+	private const EVENT_GUEST_DISCONNECTED = 11;
     private const EVENT_ROOM_CONNECTED = 2;
     private const EVENT_ROOM_DISCONNECTED = 3;
     private const EVENT_GUEST_UTTERED = 4;
@@ -29,9 +30,11 @@ class ClientChatRequest extends \yii\db\ActiveRecord
     private const EVENT_AGENT_LEFT_ROOM = 7;
     private const EVENT_AGENT_JOINED_ROOM = 8;
     private const EVENT_USER_DEPARTMENT_TRANSFER = 9;
+    private const EVENT_TRACK = 10;
 
 	private const EVENT_LIST = [
 		self::EVENT_GUEST_CONNECTED => 'GUEST_CONNECTED',
+		self::EVENT_GUEST_DISCONNECTED => 'GUEST_DISCONNECTED',
 		self::EVENT_ROOM_CONNECTED => 'ROOM_CONNECTED',
 		self::EVENT_ROOM_DISCONNECTED => 'ROOM_DISCONNECTED',
 		self::EVENT_GUEST_UTTERED => 'GUEST_UTTERED',
@@ -39,8 +42,11 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 		self::EVENT_DEPARTMENT_TRANSFER => 'DEPARTMENT_TRANSFER',
 		self::EVENT_AGENT_LEFT_ROOM => 'AGENT_LEFT_ROOM',
 		self::EVENT_AGENT_JOINED_ROOM => 'AGENT_JOINED_ROOM',
-		self::EVENT_USER_DEPARTMENT_TRANSFER => 'USER_DEPARTMENT_TRANSFER'
+		self::EVENT_USER_DEPARTMENT_TRANSFER => 'USER_DEPARTMENT_TRANSFER',
+		self::EVENT_TRACK => 'TRACK_EVENT',
 	];
+
+	private array $decodedJsonData = [];
 
     public function rules(): array
     {
@@ -91,7 +97,10 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 
     public function getDecodedData(): array
 	{
-		return json_decode($this->ccr_json_data, true);
+		if (!$this->decodedJsonData) {
+			return $this->decodedJsonData = json_decode($this->ccr_json_data, true);
+		}
+		return $this->decodedJsonData;
 	}
 
     public static function createByApi(ClientChatRequestApiForm $form): self
@@ -114,6 +123,11 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 		return self::EVENT_ROOM_CONNECTED === $this->ccr_event;
 	}
 
+	public function isGuestDisconnected(): bool
+	{
+		return self::EVENT_GUEST_DISCONNECTED === $this->ccr_event;
+	}
+
 	public function isGuestUttered(): bool
 	{
 		return self::EVENT_GUEST_UTTERED === $this->ccr_event;
@@ -132,6 +146,11 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 	public function isDepartmentTransfer(): bool
 	{
 		return self::EVENT_DEPARTMENT_TRANSFER === $this->ccr_event;
+	}
+
+	public function isTrackEvent(): bool
+	{
+		return self::EVENT_TRACK === $this->ccr_event;
 	}
 
     public static function getEventList(): array
@@ -159,35 +178,41 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 
 	public function getProjectNameFromData(): string
 	{
-		return $this->decodedData['project'] ?? '';
+		return $this->decodedData['visitor']['project'] ?? '';
 	}
 
-	public function getDepartmentIdFromData(): ?int
+	public function getDepartmentFromData(): ?string
 	{
-		return (int)($this->decodedData['department'] ?? null);
+		return $this->decodedData['visitor']['department'] ?? '';
 	}
 
 	public function getEmailFromData(): ?string
 	{
-		return $this->decodedData['email'] ?? null;
+		return $this->decodedData['visitor']['email'] ?? null;
 	}
 
-	public function getNameFromData():string
+	public function getPhoneFromData(): ?string
 	{
-		return $this->decodedData['name'] ?? 'ClientName';
+		return $this->decodedData['visitor']['phone'] ?? null;
 	}
 
-	public function getVisitorOrUserIdFromData(): string
+	public function getNameFromData():?string
 	{
-		$data = $this->decodedData;
-		if (isset($data['visitor'])) {
-			return $data['visitor']['_id'] ?? '';
-		}
+		return $this->decodedData['visitor']['name'] ?? null;
+	}
 
-		if (isset($data['user'])) {
-			return $data['user']['_id'] ?? '';
-		}
+	public function getUserIdFromData(): string
+	{
+		return $this->decodedData['visitor']['user_id'] ?? '';
+	}
 
-		return '';
+	public function getClientRcId(): string
+	{
+		return $this->decodedData['visitor']['id'] ?? '';
+	}
+
+	public function getVisitorId(): string
+	{
+		return $this->decodedData['visitorId'] ?? '';
 	}
 }

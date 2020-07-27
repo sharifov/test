@@ -10,4 +10,9 @@ class DepartmentRepository extends Repository
 	{
 		return Department::findOne($id);
 	}
+
+	public function findByName(string $name)
+	{
+		return Department::findOne(['dep_name' => $name]);
+	}
 }

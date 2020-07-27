@@ -10,7 +10,7 @@ use common\models\Lead;
  * @property Lead $lead
  * @property string $created
  */
-class LeadCreatedByIncomingSmsEvent
+class LeadCreatedByIncomingSmsEvent  implements LeadableEventInterface
 {
     public $lead;
     public $created;
@@ -22,5 +22,10 @@ class LeadCreatedByIncomingSmsEvent
     {
         $this->lead = $lead;
         $this->created = date('Y-m-d H:i:s');
+    }
+
+    public function getLead(): Lead
+    {
+        return $this->lead;
     }
 }

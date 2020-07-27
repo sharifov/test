@@ -47,9 +47,13 @@ use sales\forms\lead\CloneReasonForm;
 use sales\forms\lead\ItineraryEditForm;
 use sales\forms\lead\LeadCreateForm;
 use sales\forms\leadflow\TakeOverReasonForm;
+use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
+use sales\model\callLog\entity\callLog\CallLogType;
+use sales\model\clientChat\entity\ClientChat;
+use sales\model\lead\useCases\lead\create\LeadCreateByChatForm;
 use sales\model\lead\useCases\lead\create\LeadManageForm;
 use sales\model\lead\useCases\lead\import\LeadImportForm;
 use sales\model\lead\useCases\lead\import\LeadImportParseService;
@@ -58,10 +62,12 @@ use sales\model\lead\useCases\lead\import\LeadImportUploadForm;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\NotFoundException;
+use sales\repositories\quote\QuoteRepository;
 use sales\services\email\EmailService;
 use sales\services\lead\LeadAssignService;
 use sales\services\lead\LeadCloneService;
 use sales\services\lead\LeadManageService;
+use sales\services\TransactionManager;
 use Yii;
 use yii\caching\DbDependency;
 use yii\data\ActiveDataProvider;
@@ -97,6 +103,8 @@ use common\models\local\LeadLogMessage;
  * @property CasesRepository $casesRepository
  * @property LeadImportParseService $leadImportParseService
  * @property LeadImportService $leadImportService
+ * @property QuoteRepository $quoteRepository
+ * @property TransactionManager $transaction
  */
 class LeadController extends FController
 {
@@ -107,6 +115,8 @@ class LeadController extends FController
     private $casesRepository;
     private $leadImportParseService;
     private $leadImportService;
+    private $quoteRepository;
+    private $transaction;
 
     public function __construct(
         $id,
@@ -118,6 +128,8 @@ class LeadController extends FController
         CasesRepository $casesRepository,
         LeadImportParseService $leadImportParseService,
         LeadImportService $leadImportService,
+        QuoteRepository $quoteRepository,
+        TransactionManager $transaction,
         $config = []
     )
     {
@@ -129,6 +141,8 @@ class LeadController extends FController
         $this->casesRepository = $casesRepository;
         $this->leadImportParseService = $leadImportParseService;
         $this->leadImportService = $leadImportService;
+        $this->quoteRepository = $quoteRepository;
+        $this->transaction = $transaction;
     }
 
     public function behaviors(): array
@@ -458,8 +472,8 @@ class LeadController extends FController
                                     $quoteId = (int)$quoteId;
                                     $quote = Quote::findOne($quoteId);
                                     if ($quote) {
-                                        $quote->status = Quote::STATUS_SEND;
-                                        if (!$quote->save()) {
+                                        $quote->setStatusSend();
+                                        if (!$this->quoteRepository->save($quote)) {
                                             Yii::error($quote->errors, 'LeadController:view:Email:Quote:save');
                                         }
                                     }
@@ -528,8 +542,8 @@ class LeadController extends FController
                                     $quoteId = (int)$quoteId;
                                     $quote = Quote::findOne($quoteId);
                                     if ($quote) {
-                                        $quote->status = Quote::STATUS_SEND;
-                                        if (!$quote->save()) {
+                                        $quote->setStatusSend();
+                                        if (!$this->quoteRepository->save($quote)) {
                                             Yii::error($quote->errors, 'LeadController:view:Sms:Quote:save');
                                         }
                                     }
@@ -674,7 +688,7 @@ class LeadController extends FController
                                 }
                                 $previewEmailForm->e_email_from = $mailFrom; //$mailPreview['data']['email_from'];
                                 $previewEmailForm->e_email_to = $comForm->c_email_to; //$mailPreview['data']['email_to'];
-                                $previewEmailForm->e_email_from_name = Yii::$app->user->identity->full_name;
+                                $previewEmailForm->e_email_from_name = Yii::$app->user->identity->nickname;
                                 $previewEmailForm->e_email_to_name = $lead->client ? $lead->client->full_name : '';
                                 $previewEmailForm->e_quote_list = @json_encode($comForm->quoteList);
                             }
@@ -686,7 +700,7 @@ class LeadController extends FController
                         $previewEmailForm->e_email_subject = $comForm->c_email_subject;
                         $previewEmailForm->e_email_from = $mailFrom;
                         $previewEmailForm->e_email_to = $comForm->c_email_to;
-                        $previewEmailForm->e_email_from_name = Yii::$app->user->identity->full_name;
+                        $previewEmailForm->e_email_from_name = Yii::$app->user->identity->nickname;
                         $previewEmailForm->e_email_to_name = $lead->client ? $lead->client->full_name : '';
                     }
 
@@ -1046,6 +1060,7 @@ class LeadController extends FController
 			->from('call_log_lead')
 			->innerJoin('call_log', 'call_log.cl_id = call_log_lead.cll_cl_id')
 			->where(['cll_lead_id' => $lead->id])
+			->andWhere(['call_log.cl_type_id' => [CallLogType::IN,CallLogType::OUT]])
 			->orderBy(['created_dt' => SORT_ASC])
 			->groupBy(['id', 'type', 'lead_id']);
 
@@ -1199,7 +1214,7 @@ class LeadController extends FController
 
         //$dataProviderCommunication = $lead->getQuotesProvider([]);
 
-        //        $tmpl = $isQA ? 'view_qa' : 'view';
+//        $tmpl = $isQA ? 'view_qa' : 'view';
         $tmpl = 'view';
 
 		$fromPhoneNumbers = [];
@@ -2071,6 +2086,45 @@ class LeadController extends FController
 			return $this->renderAjax('partial/_lead_create', ['leadForm' => $form]);
 		}
 		throw new NotFoundHttpException('Page not exist');
+	}
+
+	public function actionCreateByChat()
+	{
+		if (!(Yii::$app->request->isAjax || Yii::$app->request->isPjax)) {
+            throw new NotFoundHttpException('Page not exist');
+        }
+
+        $chatId = (int)Yii::$app->request->get('chat_id');
+        $chat = ClientChat::findOne(['cch_id' => $chatId]);
+
+        if (!$chat) {
+            throw new NotFoundHttpException('Client chat not found');
+        }
+
+        if ($chat->isClosed()) {
+            return 'Client Chat is closed';
+        }
+
+        if (!$chat->cchClient) {
+            return 'Client not found';
+        }
+
+        $userId = Auth::id();
+        $form = new LeadCreateByChatForm($userId, $chat);
+
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            try {
+                $leadManageService = Yii::createObject(\sales\model\lead\useCases\lead\create\LeadManageService::class);
+                $lead = $leadManageService->createByClientChat($form, $chat, $userId);
+                $out = Yii::$app->formatter->format($lead, 'lead');
+                return "<script> $('#modal-md').modal('hide');$('#chat-info-lead-info').append(' " . $out . "')</script>";
+            } catch (\Throwable $e) {
+                Yii::error(AppHelper::throwableFormatter($e), 'LeadController:actionCreateByChat');
+                return "<script> $('#modal-md').modal('hide');createNotify('Create Lead', '" . $e->getMessage() . "', 'error');</script>";
+            }
+        }
+
+        return $this->renderAjax('partial/_lead_create_by_chat', ['chat' => $chat, 'form' => $form]);
 	}
 
 	/**

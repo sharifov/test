@@ -8,8 +8,12 @@
 
 namespace common\components;
 
+use common\models\Conference;
+use common\models\ConferenceRoom;
+use sales\model\call\useCase\conference\create\CreateCallForm;
 use Yii;
 use yii\base\Component;
+use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\httpclient\Client;
 use yii\httpclient\CurlTransport;
@@ -152,10 +156,11 @@ class CommunicationService extends Component implements CommunicationServiceInte
      * @param string $email_to
      * @param array $email_data
      * @param string $language
+     * @param array $capture_options
      * @return array
      * @throws Exception
      */
-    public function mailCapture(int $project_id, string $template_type, string $email_from, string $email_to, array $email_data = [], string $language = 'en-US') : array
+    public function mailCapture(int $project_id, string $template_type, string $email_from, string $email_to, array $email_data = [], string $language = 'en-US', array $capture_options = []) : array
     {
         $out = ['error' => false, 'data' => []];
 
@@ -165,6 +170,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
         $data['mail']['type_key'] = $template_type;
         $data['mail']['language_id'] = $language;
         $data['mail']['email_data'] = $email_data;
+        $data['mail']['capture_options'] = $capture_options;
 
         if(isset($email_data['email_from_name']) && $email_data['email_from_name']) {
             $data['mail']['email_from_name'] = $email_data['email_from_name'];
@@ -760,6 +766,178 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $out;
     }
 
+    public function callForward($sid, $from, $to): array
+    {
+        $data = [
+            'sid' => $sid,
+            'from' => $from,
+            'to' => $to,
+        ];
+
+        $response = $this->sendRequest('twilio-conference/forward', $data);
+
+        return $this->processConferenceResponse($response);
+    }
+
+    public function acceptConferenceCall($id, $sid, $to, $from, $userId): array
+    {
+        $data = [
+            'call_id' => $id,
+            'call_sid' => $sid,
+            'to' => $to,
+            'from' => $from,
+            'user_id' => $userId
+        ];
+
+        $response = $this->sendRequest('twilio-conference/accept-call', $data);
+
+        return $this->processConferenceResponse($response);
+    }
+
+    public function hangUp(string $sid): array
+    {
+        $data = [
+            'sid' => $sid,
+        ];
+
+        $response = $this->sendRequest('twilio-conference/hangup', $data);
+
+        return $this->processConferenceResponse($response);
+    }
+
+    public function holdConferenceCall(string $conferenceSid, string $keeperSid): array
+    {
+        $data = [
+            'conferenceSid' => $conferenceSid,
+            'keeperSid' => $keeperSid,
+        ];
+
+        $response = $this->sendRequest('twilio-conference/hold-call', $data);
+
+        return $this->processConferenceResponse($response);
+    }
+
+    public function unholdConferenceCall(string $conferenceSid, string $keeperSid): array
+    {
+        $data = [
+            'conferenceSid' => $conferenceSid,
+            'keeperSid' => $keeperSid,
+        ];
+
+        $response = $this->sendRequest('twilio-conference/unhold-call', $data);
+
+        return $this->processConferenceResponse($response);
+    }
+
+    public function disconnectFromConferenceCall(string $conferenceSid, string $keeperSid): array
+    {
+        $data = [
+            'conferenceSid' => $conferenceSid,
+            'keeperSid' => $keeperSid,
+        ];
+
+        $response = $this->sendRequest('twilio-conference/disconnect-from-conference-call', $data);
+
+        return $this->processConferenceResponse($response);
+    }
+
+    public function returnToConferenceCall(
+        string $callSid,
+        string $parentCallSid,
+        string $friendlyName,
+        string $conferenceSid,
+        string $to,
+        int $userId
+    ): array
+    {
+        $data = [
+            'callSid' => $callSid,
+            'parentCallSid' => $parentCallSid,
+            'friendlyName' => $friendlyName,
+            'conferenceSid' => $conferenceSid,
+            'to' => $to,
+            'user_id' => $userId
+        ];
+
+        $response = $this->sendRequest('twilio-conference/return-to-conference-call', $data);
+
+        return $this->processConferenceResponse($response);
+    }
+
+    public function muteParticipant(string $conferenceSid, string $callSid): array
+    {
+        $data = [
+            'conferenceSid' => $conferenceSid,
+            'callSid' => $callSid,
+        ];
+
+        $response = $this->sendRequest('twilio-conference/mute-participant', $data);
+
+        return $this->processConferenceResponse($response);
+    }
+
+    public function unmuteParticipant(string $conferenceSid, string $callSid): array
+    {
+        $data = [
+            'conferenceSid' => $conferenceSid,
+            'callSid' => $callSid,
+        ];
+
+        $response = $this->sendRequest('twilio-conference/unmute-participant', $data);
+
+        return $this->processConferenceResponse($response);
+    }
+
+    public function joinToConference(string $callSid, string $conferenceSid, int $projectId, string $from, string $to, string $source_type_id): array
+    {
+        $data = [
+            'callSid' => $callSid,
+            'conferenceSid' => $conferenceSid,
+            'projectId' => $projectId,
+            'from' => $from,
+            'to' => $to,
+            'source_type_id' => $source_type_id,
+        ];
+
+        $response = $this->sendRequest('twilio-conference/join-to-conference', $data);
+
+        return $this->processConferenceResponse($response);
+    }
+
+    public function createCall(CreateCallForm $form): array
+    {
+        $response = $this->sendRequest('twilio-conference/create-call', $form->getAttributes());
+
+        return $this->processConferenceResponse($response);
+    }
+
+    private function processConferenceResponse(\yii\httpclient\Response $response): array
+    {
+        $out = ['error' => false, 'message' => '', 'result' => []];
+
+        if ($response->isOk) {
+            if (isset($response->data['data'])) {
+                $data = $response->data['data'];
+                $isError = (bool)($data['is_error'] ?? false);
+                if ($isError) {
+                    $out['error'] = true;
+                    $out['message'] = $data['message'] ?? 'Undefined error message';
+                    \Yii::error(VarDumper::dumpAsString($response->data), 'Component:CommunicationService::processConferenceResponse:response');
+                }
+                $out['result'] = $data['result'] ?? [];
+            } else {
+                $out['error'] = true;
+                $out['message'] = 'Not found in response array data';
+            }
+        } else {
+            $out['error'] = true;
+            $out['message'] = 'Server error. Try again later.';
+            \Yii::error(VarDumper::dumpAsString($response->content), 'Component:CommunicationService::processConferenceResponse');
+		}
+
+	    return $out;
+	}
+	
     /**
      * @param int $limit
      * @param int $offset

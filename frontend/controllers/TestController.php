@@ -3,6 +3,11 @@
 namespace frontend\controllers;
 
 use common\components\CommunicationService;
+use common\components\ga\GaHelper;
+use common\components\ga\GaLead;
+use common\components\ga\GaQuote;
+use common\components\jobs\CreateSaleFromBOJob;
+use common\components\jobs\SendLeadInfoToGaJob;
 use common\components\Purifier;
 use common\components\jobs\TelegramSendMessageJob;
 use common\components\RocketChat;
@@ -13,6 +18,8 @@ use common\models\CaseSale;
 use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
+use common\models\Conference;
+use common\models\ConferenceParticipant;
 use common\models\CreditCard;
 use common\models\Currency;
 use common\models\CurrencyHistory;
@@ -30,6 +37,8 @@ use common\models\Notifications;
 use common\models\PhoneBlacklist;
 use common\models\Project;
 use common\models\ProjectEmployeeAccess;
+use common\models\query\ConferenceParticipantQuery;
+use common\models\query\ConferenceQuery;
 use common\models\Quote;
 use common\models\search\ContactsSearch;
 use common\models\Sms;
@@ -41,14 +50,18 @@ use common\models\UserGroupAssign;
 use common\models\UserGroupSet;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
+use common\models\VisitorLog;
 use console\migrations\RbacMigrationService;
 use DateInterval;
 use DatePeriod;
 use DateTime;
+use frontend\helpers\JsonHelper;
 use frontend\models\CommunicationForm;
 use frontend\models\form\CreditCardForm;
 use frontend\models\UserFailedLogin;
 use frontend\widgets\lead\editTool\Form;
+use frontend\widgets\newWebPhone\call\socket\HoldMessage;
+use frontend\widgets\newWebPhone\call\socket\MuteMessage;
 use frontend\widgets\newWebPhone\sms\socket\Message;
 use frontend\widgets\notification\NotificationMessage;
 use frontend\widgets\notification\NotificationWidget;
@@ -100,11 +113,14 @@ use sales\forms\leadflow\TakeOverReasonForm;
 use sales\guards\ClientPhoneGuard;
 use sales\helpers\app\AppHelper;
 use sales\helpers\call\CallHelper;
+use sales\helpers\lead\LeadHelper;
 use sales\helpers\lead\LeadUrlHelper;
 use sales\helpers\payment\CreditCardHelper;
 use sales\helpers\query\QueryHelper;
 use sales\helpers\user\UserFinder;
 use sales\model\callLog\entity\callLog\CallLog;
+use sales\model\conference\service\ManageCurrentCallsByUserService;
+use sales\model\conference\useCase\DisconnectFromAllConferenceCalls;
 use sales\model\coupon\useCase\request\CouponForm;
 use sales\model\emailList\entity\EmailList;
 use sales\model\lead\useCase\lead\api\create\Handler;
@@ -115,6 +131,7 @@ use sales\model\lead\useCases\lead\api\create\SegmentForm;
 use sales\model\lead\useCases\lead\import\LeadImportForm;
 use sales\model\lead\useCases\lead\import\LeadImportService;
 use sales\model\notification\events\NotificationEvents;
+use sales\model\phoneList\entity\PhoneList;
 use sales\model\user\entity\Access;
 use sales\model\user\entity\ShiftTime;
 use sales\model\user\entity\StartTime;
@@ -128,8 +145,11 @@ use sales\repositories\Repository;
 use sales\services\cases\CasesManageService;
 use sales\services\cases\CasesSaleService;
 use sales\services\client\ClientManageService;
+use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatService\ClientChatService;
+use sales\services\email\EmailService;
 use sales\services\email\incoming\EmailIncomingService;
+use sales\services\lead\LeadCloneService;
 use sales\services\lead\LeadCreateApiService;
 use sales\services\lead\LeadManageService;
 use sales\services\lead\LeadRedialService;
@@ -224,10 +244,365 @@ class TestController extends FController
 
     public function actionTest()
     {
+        die;
+        VarDumper::dump( Json::decode('{
+    "message": {
+        "rid": "f93a9c3e-e04a-4e0f-b39e-5be30f938da4",
+        "attachments": [
+            {
+                "image_url": "https://ichef.bbci.co.uk/news/1024/branded_news/12A9B/production/_111434467_gettyimages-1143489763.jpg",
+                "title": "Title",
+                "actions": [
+                    {
+                        "type": "button",
+                        "msg_in_chat_window": true,
+                        "text": "button 1",
+                        "msg": "/payload"
+                    },
+                    {
+                        "type": "button",
+                        "msg_in_chat_window": true,
+                        "text": "button 2",
+                        "msg": "/payload"
+                    }
+                ],
+                "fields": [
+                    {
+                        "short": true,
+                        "title": "Test",
+                        "value": "Testing out something or other"
+                    },
+                    {
+                        "short": true,
+                        "title": "Another Test",
+                        "value": "[Link](https://google.com/) something and this and that."
+                    }
+                ]
+            },
+            {
+                "image_url": "https://ichef.bbci.co.uk/news/1024/cpsprodpb/83D7/production/_111515733_gettyimages-1208779325.jpg",
+                "title": "Title 2"
+            }
+        ],
+        "customTemplate": "carousel"
+    }
+}'));
+        die;
+
+//        Notifications::publish(HoldMessage::COMMAND, ['user_id' => 295], [
+//            'data' => [
+//                'command' => HoldMessage::COMMAND_UNHOLD,
+//                'call' => [
+//                    'sid' => 'sid12',
+//                ],
+//            ],
+//        ]);
+//        die;
+//
+//
+//         $callInfo = [
+//            'data' => [
+//                'call' => [
+//                    'id' => 5,
+//                ],
+//            ],
+//        ];
+//        Notifications::publish('removeIncomingRequest', ['user_id' => 295], $callInfo);
+//        die;
+//
+        $tmp = 2;
+        $callInfo = [
+
+            'typeId' => 1,
+            'type' => 'Inc ' . $tmp,
+            'callId' => $tmp,
+            'callSid' => 'sid' . $tmp,
+            'fromInternal' => false,
+            'project' => 'hop',
+            'source' => 'Source new ',
+//            'status' => 'Ringing',
+            'status' => 'In progress',
+//            'status' => 'Completed',
+//            'status' => 'Hold',
+            'isListen' => false,
+            'isCoach' => false,
+            'isBarge' => false,
+            'isMute' => false,
+            'isHold' => false,
+            'contact' => [
+                'name' => 'Name ' . $tmp,
+                'company' => 'Company ' . $tmp,
+                'phone' => '+00 ' . $tmp
+            ],
+            'department' => 'Sales',
+//            'queue' => 'general',
+//            'queue' => 'hold',
+            'queue' => 'inProgress',
+            'duration' => 3595,
+            'conference' => [
+                    'sid' => 'conf' . $tmp,
+                    'duration' => 0,
+                    'participants' => [
+                        [
+                            'callSid' => 'callSid1',
+                            'avatar' => 'N',
+                            'name' => 'Name 1',
+                            'phone' => '+373 1',
+                            'type' => 'coaching',
+                            'duration' => 1
+                        ],
+                        [
+                            'callSid' => 'callSid2',
+                            'avatar' => 'N',
+                            'name' => 'Name 2',
+                            'phone' => '+373 2',
+                            'type' => '',
+                            'duration' => 2
+                        ],
+                        [
+                            'callSid' => 'callSid3',
+                            'avatar' => 'N',
+                            'name' => 'Name 3',
+                            'phone' => '+373 3',
+                            'type' => '',
+                            'duration' => 3
+                        ],
+                        [
+                            'callSid' => 'callSid4',
+                            'avatar' => 'N',
+                            'name' => 'Name 1',
+                            'phone' => '+373 1',
+                            'type' => 'coaching',
+                            'duration' => 4
+                        ],
+                        [
+                            'callSid' => 'callSid5',
+                            'avatar' => 'N',
+                            'name' => 'Name 2',
+                            'phone' => '+373 2',
+                            'type' => '',
+                            'duration' => 5
+                        ],
+                        [
+                            'callSid' => 'callSid6',
+                            'avatar' => 'N',
+                            'name' => 'Name 3',
+                            'phone' => '+373 3',
+                            'type' => '',
+                            'duration' => 6
+                        ],
+                        [
+                            'callSid' => 'callSid7',
+                            'avatar' => 'N',
+                            'name' => 'Name 1',
+                            'phone' => '+373 1',
+                            'type' => 'coaching',
+                            'duration' => 7
+                        ],
+                        [
+                            'callSid' => 'callSid8',
+                            'avatar' => 'N',
+                            'name' => 'Name 2',
+                            'phone' => '+373 2',
+                            'type' => '',
+                            'duration' => 8
+                        ],
+                        [
+                            'callSid' => 'callSid9',
+                            'avatar' => 'N',
+                            'name' => 'Name 3',
+                            'phone' => '+373 3',
+                            'type' => '',
+                            'duration' => 9
+                        ],
+                        [
+                            'callSid' => 'callSid10',
+                            'avatar' => 'N',
+                            'name' => 'Name 1',
+                            'phone' => '+373 1',
+                            'type' => 'coaching',
+                            'duration' => 10
+                        ],
+                        [
+                            'callSid' => 'callSid11',
+                            'avatar' => 'N',
+                            'name' => 'Name 2',
+                            'phone' => '+373 2',
+                            'type' => '',
+                            'duration' => 11
+                        ],
+                        [
+                            'callSid' => 'callSid12',
+                            'avatar' => 'N',
+                            'name' => 'Name 3',
+                            'phone' => '+373 3',
+                            'type' => '',
+                            'duration' => 12
+                        ],
+                ],
+            ]
+        ];
+//        Notifications::publish('updateIncomingCall', ['user_id' => 295], $callInfo);
+//        Notifications::publish('callUpdate', ['user_id' => 295], $callInfo);
+//        Notifications::publish('callUpdate', ['user_id' => 295], $callInfo);
+//        die;
+
+        $confData = [
+            'data' => [
+                'command' => 'conferenceUpdate',
+                'call' => [
+                    'sid' => 'sid2',
+                ],
+                'conference' => [
+                    'sid' => 'conf' . $tmp,
+                    'duration' => 0,
+                    'participants' => [
+                        [
+                            'callSid' => 'sid2',
+                            'avatar' => 'N',
+                            'name' => 'Name 1',
+                            'phone' => '+373 1',
+                            'type' => 'coaching',
+                            'duration' => 1
+                        ],
+
+                        [
+                            'callSid' => 'callSid5',
+                            'avatar' => 'N',
+                            'name' => 'Name 2',
+                            'phone' => '+373 2',
+                            'type' => '',
+                            'duration' => 5
+                        ],
+                        [
+                            'callSid' => 'callSid6',
+                            'avatar' => 'N',
+                            'name' => 'Name 3',
+                            'phone' => '+373 3',
+                            'type' => '',
+                            'duration' => 6
+                        ],
+                        [
+                            'callSid' => 'callSid7',
+                            'avatar' => 'N',
+                            'name' => 'Name 1',
+                            'phone' => '+373 1',
+                            'type' => 'coaching',
+                            'duration' => 7
+                        ],
+                        [
+                            'callSid' => 'callSid8',
+                            'avatar' => 'N',
+                            'name' => 'Name 2',
+                            'phone' => '+373 2',
+                            'type' => '',
+                            'duration' => 8
+                        ],
+                        [
+                            'callSid' => 'callSid9',
+                            'avatar' => 'N',
+                            'name' => 'Name 3',
+                            'phone' => '+373 3',
+                            'type' => '',
+                            'duration' => 9
+                        ],
+                        [
+                            'callSid' => 'callSid10',
+                            'avatar' => 'N',
+                            'name' => 'Name 1',
+                            'phone' => '+373 1',
+                            'type' => 'coaching',
+                            'duration' => 10
+                        ],
+                        [
+                            'callSid' => 'callSid11',
+                            'avatar' => 'N',
+                            'name' => 'Name 2',
+                            'phone' => '+373 2',
+                            'type' => '',
+                            'duration' => 11
+                        ],
+                        [
+                            'callSid' => 'callSid12',
+                            'avatar' => 'N',
+                            'name' => 'Name 3',
+                            'phone' => '+373 3',
+                            'type' => '',
+                            'duration' => 12
+                        ],
+                    ]
+                ],
+            ],
+        ];
+
+        Notifications::publish('conferenceUpdate', ['user_id' => 295], $confData);
+        die;
+
+//
+//        $tmp = 101;
+//        Notifications::publish('callUpdate', ['user_id' => 295],
+//            [
+//                'callId' => $tmp,
+//                'status' => 'In progress',
+//                'duration' => 60,
+//                'snr' => 1,
+//                'leadId' => 1,
+//                'typeId' => 1,
+//                'type' => 'Outgoing',
+//                'source_type_id' => '',
+//                'phone' => '+373 ' . $tmp,
+//                'name' => 'Name ' . $tmp,
+//                'fromInternal' => false,
+//                'isHold' => false,
+//                'isListen' => false,
+//                'isMute' => false,
+//                'projectName' => 'Project ' . $tmp,
+//                'sourceName' => 'Source ' . $tmp,
+//                'isEnded' => false,
+//                'contact' => [
+//                    'name' => 'Xqwewe'
+//                ]
+//            ]
+//        );
+//        die;
 
 
-        $search = new ContactsSearch(295);
-        $search->searchContactsByWidget('373');
+
+        $callInfo = [
+            'data' => [
+                'call' => [
+                    'sid' => 'sid1',
+                ],
+            ],
+        ];
+        Notifications::publish('removeIncomingRequest', ['user_id' => 295], $callInfo);
+
+
+
+//        $service = Yii::$app->communication;;
+//        $service->createCall('client:seller295', '+37369305726', '+14157693509', 295, 2);
+//        die;
+//
+//
+//
+//        die;
+//
+//        if ($call = Call::findOne(3371922)) {
+//            VarDumper::dump($call->currentParticipant);
+//        }
+//
+//        die;
+//        $service = Yii::$app->communication;
+//
+//        $call = Call::findOne(['c_call_sid' => 'CA78c6d347bc1db1e33550997bb9b0b6c2']);
+////
+////        $service->disconnectFromConferenceCall($call->c_conference_sid, $call->c_call_sid);
+////
+//        $conference = Conference::findOne(['cf_sid' => $call->c_conference_sid]);
+//        $service->returnToConferenceCall($call->c_call_sid,$conference->cf_friendly_name,$conference->cf_sid,'client:seller295');
+////
+////        $search = new ContactsSearch(295);
+////        $search->searchContactsByWidget('373');
         die;
 
 
@@ -236,7 +611,10 @@ class TestController extends FController
 
     public function actionTestNew()
     {
-
+        $userId = 295;
+        $s = new DisconnectFromAllConferenceCalls();
+        $s->disconnect($userId);
+         die;
     }
 
     private function getPathForTable($actions, $controller, &$batchTmpTableItem, &$batchTmpTableItemChild, $role)
@@ -1253,7 +1631,7 @@ class TestController extends FController
 
 		$caseSale = $repository->getSaleByPrimaryKeys(135814, $saleId);
 
-		$saleOriginalData = json_decode((string)$caseSale->css_sale_data, true);
+		$saleOriginalData = JsonHelper::decode($caseSale->css_sale_data);
 
 		$service = Yii::createObject(CasesSaleService::class);
 		echo '<pre>';
@@ -1340,12 +1718,6 @@ class TestController extends FController
         //VarDumper::dump($chat->systemLogin(), 10, true);
     }
 
-    public function actionZ()
-    {
-
-        return $this->render('z');
-    }
-
     public function actionTestRcAssignUserToChannel()
 	{
 
@@ -1362,6 +1734,58 @@ class TestController extends FController
 
 		echo 'success';
 	}
+
+	public function actionGaSendQuote($id = 733986, int $debug = 1) // test/ga-send-quote?id=733986&debug=1
+    {
+        try {
+            if (is_int($id)) {
+                $params = ['id' => $id];
+            } else {
+                $params = ['uid' => $id];
+            }
+            $quote = Quote::findOne($params);
+            $gaQbj = new GaQuote($quote);
+
+            $gaRequestService = \Yii::$app->gaRequestService;
+            \Yii::configure($gaRequestService, ['debugMod' => (bool) $debug]);
+            $response = $gaRequestService->sendRequest($gaQbj->getPostData());
+
+            VarDumper::dump([
+                'post Data' => $gaQbj->getPostData(),
+                'response' => $response,
+            ], 10, true);
+
+        } catch (\Throwable $throwable) {
+            VarDumper::dump(AppHelper::throwableFormatter($throwable), 10, true);
+        }
+        exit();
+    }
+
+    public function actionGaSendLead(int $id = 367010, int $debug = 1) // test/ga-send-lead?id=367010&debug=1
+    {
+        try {
+            $lead = Lead::findOne($id);
+            $gaQbj = new GaLead($lead);
+
+            $gaRequestService = \Yii::$app->gaRequestService;
+            \Yii::configure($gaRequestService, ['debugMod' => (bool) $debug]);
+            $response = $gaRequestService->sendRequest($gaQbj->getPostData());
+
+            VarDumper::dump([
+                'post Data' => $gaQbj->getPostData(),
+                'response' => $response,
+            ], 10, true);
+
+        } catch (\Throwable $throwable) {
+            VarDumper::dump(AppHelper::throwableFormatter($throwable), 10, true);
+        }
+        exit();
+    }
+
+	public function actionZ()
+    {
+        return $this->render('z');
+    }
 }
 
 

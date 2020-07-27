@@ -8,8 +8,10 @@
 
 namespace common\components;
 
+use sales\auth\Auth;
 use yii\base\Component;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\httpclient\Client;
 use yii\httpclient\CurlTransport;
@@ -82,7 +84,7 @@ class ChatBot extends Component
             ->setData($data);
 
         if ($headers) {
-            $this->request->setHeaders($headers);
+            $this->request->addHeaders($headers);
         }
 
         $this->request->setOptions([CURLOPT_ENCODING => 'gzip']);
@@ -95,19 +97,22 @@ class ChatBot extends Component
     }
 
 
-    /**
-     * @param string $rid
-     * @return array
-     * @throws \yii\httpclient\Exception
-     */
-    public function endConversation(string $rid) : array
+	/**
+	 * @param string $rid
+	 * @param string $visitorId
+	 * @return array
+	 * @throws \yii\httpclient\Exception
+	 */
+    public function endConversation(string $rid, string $visitorId) : array
     {
         $out = ['error' => false, 'data' => []];
         $data = [
             'rid' => $rid,
+			'visitorId' => $visitorId
         ];
 
-        $response = $this->sendRequest('livechat/end-conversation', $data, 'post');
+		$headers = \Yii::$app->rchat->getSystemAuthDataHeader();
+        $response = $this->sendRequest('livechat/end-conversation', $data, 'post', $headers);
 
         if ($response->isOk) {
             if (!empty($response->data)) {
@@ -122,6 +127,41 @@ class ChatBot extends Component
 
         return $out;
     }
+
+	/**
+	 * @param string $rid
+	 * @param string $visitorId
+	 * @param string $oldDepartment
+	 * @param string $newDepartment
+	 * @return array
+	 * @throws \yii\httpclient\Exception
+	 */
+	public function transferDepartment(string $rid, string $visitorId, string $oldDepartment, string $newDepartment) : array
+	{
+		$out = ['error' => false, 'data' => []];
+		$data = [
+			'rid' => $rid,
+			'visitorId' => $visitorId,
+			'oldDepartment' => $oldDepartment,
+			'newDepartment' => $newDepartment
+		];
+
+		$headers = \Yii::$app->rchat->getSystemAuthDataHeader();
+		$response = $this->sendRequest('livechat/transfer-department', $data, 'post', $headers);
+
+		if ($response->isOk) {
+			if (!empty($response->data)) {
+				$out['data'] = $response->data;
+			} else {
+				$out['error'] = 'Not found in response array';
+			}
+		} else {
+			$out['error'] = Json::decode($response->content);
+			\Yii::error(VarDumper::dumpAsString(['rid' => $rid, 'error' => $out['error']], 10), 'ChatBot:endConversation');
+		}
+
+		return $out;
+	}
 
     /**
      * @param string $rid
@@ -153,5 +193,23 @@ class ChatBot extends Component
         return $out;
     }
 
+    public function sendMessage(array $data, array $headers = []) : array
+    {
+        $out = ['error' => false, 'data' => []];
 
+        $response = $this->sendRequest('chat.sendMessage', $data, 'post', $headers);
+
+        if ($response->isOk) {
+            if (!empty($response->data)) {
+                $out['data'] = $response->data;
+            } else {
+                $out['error'] = 'Not found in response array data key [data]';
+            }
+        } else {
+            $out['error'] = $response->content;
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'ChatBot:sendMessage');
+        }
+
+        return $out;
+    }
 }

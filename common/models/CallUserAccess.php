@@ -5,6 +5,8 @@ namespace common\models;
 use common\components\jobs\AgentCallQueueJob;
 use common\components\purifier\Purifier;
 use common\models\query\CallUserAccessQuery;
+use frontend\widgets\newWebPhone\call\socket\RemoveIncomingRequestMessage;
+use sales\model\call\helper\CallHelper;
 use frontend\widgets\notification\NotificationMessage;
 use sales\dispatchers\NativeEventDispatcher;
 use sales\model\call\entity\callUserAccess\events\CallUserAccessEvents;
@@ -172,37 +174,84 @@ class CallUserAccess extends \yii\db\ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
 
+        $call = $this->cuaCall;
+
         if ($insert) {
-            $message = 'New incoming Call (' . $this->cua_call_id . ')';
-            if (isset($this->cuaCall->cLead)) {
-                $message .= ', Lead (Id: ' . Purifier::createLeadShortLink($this->cuaCall->cLead) . ')';
-            }
-            if (isset($this->cuaCall->cCase)) {
-                $message .= ', Case (Id: ' . Purifier::createCaseShortLink($this->cuaCall->cCase) . ')';
-            }
-            if ($ntf = Notifications::create($this->cua_user_id, 'New incoming Call (' . $this->cua_call_id . ')', $message, Notifications::TYPE_SUCCESS, true)) {
-                //Notifications::socket($this->cua_user_id, null, 'getNewNotification', [], true);
-                $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                Notifications::publish('getNewNotification', ['user_id' => $this->cua_user_id], $dataNotification);
+            if ($call && !$call->isHold()) {
+                $message = 'New incoming Call' . ' (' . $this->cua_call_id . ')';
+                if (isset($call->cLead)) {
+                    $message .= ', Lead (Id: ' . Purifier::createLeadShortLink($call->cLead) . ')';
+                }
+                if (isset($call->cCase)) {
+                    $message .= ', Case (Id: ' . Purifier::createCaseShortLink($call->cCase) . ')';
+                }
+                if ($ntf = Notifications::create($this->cua_user_id, 'New incoming Call (' . $this->cua_call_id . ')', $message, Notifications::TYPE_SUCCESS, true)) {
+                    //Notifications::socket($this->cua_user_id, null, 'getNewNotification', [], true);
+                    $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                    Notifications::publish('getNewNotification', ['user_id' => $this->cua_user_id], $dataNotification);
+                }
             }
 
             NativeEventDispatcher::recordEvent(CallUserAccessEvents::class, CallUserAccessEvents::INSERT, [CallUserAccessEvents::class, 'updateUserStatus'], $this);
             NativeEventDispatcher::trigger(CallUserAccessEvents::class, CallUserAccessEvents::INSERT);
         }
 
-        if($insert || isset($changedAttributes['cua_status_id'])) {
+        if(($insert || isset($changedAttributes['cua_status_id'])) && $call && ($call->isIn() || $call->isHold())) {
+//        if(($insert || isset($changedAttributes['cua_status_id']))) {
             //Notifications::socket($this->cua_user_id, null, 'updateIncomingCall', $this->attributes);
 			if ($this->isPending()) {
 				$client = $this->cuaCall->cClient;
-				$callFromInfo = [
-					'phoneFrom' => $this->cuaCall->c_from,
-					'name' => $this->cuaCall ? $this->cuaCall->getCallerName($this->cuaCall->c_from) : 'ClientName',
-					'fromInternal' => PhoneList::find()->byPhone($this->cuaCall->c_from)->enabled()->exists(),
-					'projectName' => $this->cuaCall && $this->cuaCall->cProject ? $this->cuaCall->cProject->name : '',
-					'sourceName' => $this->cuaCall && $this->cuaCall->c_source_type_id ? $this->cuaCall->getSourceName() : ''
+
+				$name = '';
+				$phone = '';
+                if ($call->isJoin()) {
+                    if (($parent = $call->cParent) && $parent->cCreatedUser) {
+                        $name = $parent->cCreatedUser->username;
+                        $phone = $parent->c_to;
+                    }
+                } else {
+                    $name = $call->getCallerName($call->c_from);
+                    if ($call->isIn()) {
+                        $phone = $call->c_from;
+                    } elseif ($call->isOut()) {
+                        $phone = $call->c_to;
+                    }
+                }
+
+				$callInfo = [
+                    'id' => $call->c_id,
+                    'callSid' => $call->c_call_sid,
+                    'conferenceSid' => $call->c_conference_sid,
+                    'status' => $call->getStatusName(),
+                    'duration' => 0,
+                    'leadId' => $call->c_lead_id,
+                    'typeId' => $call->c_call_type_id,
+                    'type' => CallHelper::getTypeDescription($this->cuaCall),
+                    'source_type_id' => $call->c_source_type_id,
+                    'fromInternal' => PhoneList::find()->byPhone($this->cuaCall->c_from)->enabled()->exists(),
+                    'isHold' => false,
+                    'holdDuration' => 0,
+                    'isListen' => false,
+                    'isCoach' => false,
+                    'isBarge' => false,
+                    'isMute' => false,
+                    'project' => $call->c_project_id ? $call->cProject->name : '',
+                    'source' => $call->c_source_type_id ? $call->getSourceName() : '',
+                    'isEnded' => false,
+                    'contact' => [
+                        'name' => $name,
+                        'phone' => $phone,
+                        'company' => '',
+                    ],
+                    'department' => $call->c_dep_id ? Department::getName($call->c_dep_id) : '',
+                    'queue' => Call::getQueueName($call),
 				];
 			}
-            Notifications::publish('updateIncomingCall', ['user_id' => $this->cua_user_id], array_merge($this->attributes, $callFromInfo ?? []));
+            Notifications::publish('updateIncomingCall', ['user_id' => $this->cua_user_id], array_merge($this->attributes, $callInfo ?? ['callSid' => $call->c_call_sid]));
+        }
+
+        if (isset($changedAttributes['cua_status_id']) && $call && ($call->isIn() || $call->isHold()) && $this->cua_status_id === self::STATUS_TYPE_NO_ANSWERED) {
+            Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $this->cua_user_id], RemoveIncomingRequestMessage::create($call->c_call_sid));
         }
 
         if (!$insert && isset($changedAttributes['cua_status_id'])) {
@@ -211,7 +260,6 @@ class CallUserAccess extends \yii\db\ActiveRecord
         }
         
     }
-
 
     /**
      * @return bool

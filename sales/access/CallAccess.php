@@ -2,6 +2,7 @@
 namespace sales\access;
 
 use common\models\UserProjectParams;
+use sales\auth\Auth;
 use Yii;
 use yii\caching\TagDependency;
 
@@ -11,6 +12,10 @@ class CallAccess
 
 	public static function isUserCanDial(int $userId, int $callType): bool
 	{
+	    if (!Auth::can('PhoneWidget')) {
+	        return false;
+        }
+
 		return Yii::$app->cache->getOrSet('user-'.$userId, static function () use ($userId, $callType) {
 			return UserProjectParams::find()
 				->byUserId($userId)

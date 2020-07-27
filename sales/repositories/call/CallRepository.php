@@ -109,4 +109,23 @@ class CallRepository extends Repository
 		return $call;
 	}
 
+    /**
+     * @param $sid
+     * @return Call
+     */
+    public function findBySid($sid): Call
+    {
+        if ($call = Call::findOne(['c_call_sid' => $sid])) {
+            return $call;
+        }
+        throw new NotFoundException('Call is not found');
+    }
+
+    public function isUserHasActiveCalls(int $userId): bool
+	{
+		return Call::find()
+			->byCreatedUser($userId)
+			->andWhere(['OR', ['c_status_id' => Call::STATUS_IN_PROGRESS], ['c_status_id' => Call::STATUS_RINGING]])
+			->exists();
+	}
 }

@@ -1,5 +1,8 @@
 <?php
 
+use common\models\ConferenceParticipant;
+use frontend\extensions\DatePicker;
+use sales\widgets\DateTimePicker;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -10,6 +13,8 @@ use yii\widgets\ActiveForm;
 
 <div class="conference-participant-form">
 
+    <div class="col-md-4">
+
     <?php $form = ActiveForm::begin(); ?>
 
     <?= $form->field($model, 'cp_cf_id')->textInput() ?>
@@ -18,16 +23,22 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'cp_call_id')->textInput() ?>
 
-    <?= $form->field($model, 'cp_status_id')->textInput() ?>
+    <?= $form->field($model, 'cp_status_id')->dropDownList(ConferenceParticipant::STATUS_LIST, ['prompt' => 'Select status']) ?>
 
-    <?= $form->field($model, 'cp_join_dt')->textInput() ?>
+    <?= $form->field($model, 'cp_join_dt')->widget(DateTimePicker::class) ?>
 
-    <?= $form->field($model, 'cp_leave_dt')->textInput() ?>
+    <?= $form->field($model, 'cp_leave_dt')->widget(DateTimePicker::class) ?>
+
+    <?= $form->field($model, 'cp_hold_dt')->widget(DateTimePicker::class) ?>
+
+    <?= $form->field($model, 'cp_type_id')->dropDownList(ConferenceParticipant::TYPE_LIST, ['prompt' => 'Select type']) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>
 
     <?php ActiveForm::end(); ?>
+
+    </div>
 
 </div>

@@ -1,0 +1,140 @@
+class ActivePane extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            call: props.call
+        };
+    }
+
+    componentDidMount() {
+        window.phoneWidget.eventDispatcher.addListener(this.state.call.getEventUpdateName(), this.callUpdateHandler());
+    }
+
+    componentWillUnmount() {
+        window.phoneWidget.eventDispatcher.removeListener(this.state.call.getEventUpdateName(), this.callUpdateHandler());
+    }
+
+    callUpdateHandler() {
+        let self = this;
+        return function (event) {
+            //active
+            self.setState({
+                call: event.call
+            });
+        }
+    }
+
+    render() {
+        let call = this.state.call;
+        return (
+            <React.Fragment>
+                <CallInfo project={call.data.project} source={call.data.source}/>
+                <ActiveContactInfo call={call} />
+                <div className="actions-container">
+                    <CallBtns call={call}/>
+                    <SoundIndication/>
+                </div>
+                <ActivePaneControls call={call} controls={this.props.controls}/>
+            </React.Fragment>
+        );
+    }
+}
+
+function ActiveContactInfo(props) {
+    let call = props.call;
+    return (
+        <div className="contact-info-card">
+            <div className="contact-info-card__details">
+                <div className="contact-info-card__line history-details">
+                    {call.data.typeId !== 3
+                        ? <span className="contact-info-card__label">{call.data.type}</span>
+                        : ''
+                    }
+                    <div className="contact-info-card__name">
+                        <button className="call-pane__info">
+                            <i className="user-icon fa fa-user"> </i>
+                            <i className="info-icon fa fa-info"> </i>
+                        </button>
+                        <strong>{call.data.contact.name}</strong>
+                    </div>
+                </div>
+                <div className="contact-info-card__line history-details">
+                    <span className="contact-info-card__call-type">{call.data.contact.phone}</span>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function CallBtns(props) {
+    let call = props.call;
+    return (
+        <div className="call-pane__call-btns is-on-call">
+            <button className="call-pane__mute" id="call-pane__mute"
+                    disabled={call.data.isListen || call.data.isHold || call.isSentMuteUnMuteRequestState()}
+                    data-call-sid={call.data.callSid} data-is-muted={call.data.isMute}
+                    data-active={!(call.data.isListen || call.data.isHold)}>
+                {call.isSentMuteUnMuteRequestState()
+                    ? <i className="fa fa-spinner fa-spin"> </i>
+                    : call.data.isMute
+                        ? <i className="fas fa-microphone-alt-slash"> </i>
+                        : <i className="fas fa-microphone"> </i>
+                }
+            </button>
+            <button className={call.data.isListen || call.data.isCoach ? 'call-pane__start-call calling-state-block join' : 'call-pane__start-call calling-state-block'}>
+                <div className="call-in-action">
+                    {call.data.isListen || call.data.isCoach ? <i className="fa fa-headphones-alt"> </i> : ''}
+                    <span className="call-in-action__text">
+                        {call.data.isCoach
+                            ? 'Coaching'
+                            : call.data.isListen
+                                ? 'Listening'
+                                : call.data.isBarge
+                                    ? 'Barge'
+                                    : 'on call'
+                        }
+                    </span>
+                    <span className="call-in-action__time"><PhoneWidgetTimer duration={call.getDuration()} timeStart={Date.now()} styleClass="more"/></span>
+                </div>
+            </button>
+            <button className="call-pane__end-call" id="cancel-active-call" data-call-sid={call.data.callSid}
+                    disabled={call.isSentHangupRequestState()}>
+                {call.isSentHangupRequestState()
+                    ? <i className="fa fa-spinner fa-spin"> </i>
+                    : <i className="fa fa-phone-slash"> </i>
+                }
+            </button>
+        </div>
+    );
+}
+
+function SoundIndication() {
+    const sound_ovf_100 = {
+        'right': '-100%'
+    };
+    const sound_ovf_30 = {
+        'right': '-30%'
+    };
+    return (
+        <div className="sound-indication">
+            <div className="sound-control-wrap" id="wg-call-volume">
+                <i className="fa fa-volume-down"> </i>
+                <div className="sound-controls">
+                    <div className="progres-wrap">
+                        <div className="sound-progress"> </div>
+                        <div className="sound-ovf" style={sound_ovf_100}> </div>
+                    </div>
+                </div>
+            </div>
+            <div className="sound-control-wrap" id="wg-call-microphone">
+                <i className="fa fa-microphone"> </i>
+                <div className="sound-controls">
+                    <div className="progres-wrap">
+                        <div className="sound-progress"> </div>
+                        <div className="sound-ovf" style={sound_ovf_30}> </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
