@@ -1,6 +1,7 @@
 <?php
 namespace frontend\widgets\clientChat;
 
+use sales\auth\Auth;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use yii\helpers\Url;
 
@@ -18,7 +19,8 @@ class ClientChatAccessMessage
 			'status_id' => $access->ccua_status_id,
 			'user_id' => $access->ccua_user_id,
 			'cch_id' => $access->ccua_cch_id,
-			'pjaxUrl' => Url::to('/client-chat/pjax-update-chat-widget')
+			'pjaxUrl' => Url::to('/client-chat/pjax-update-chat-widget'),
+			'html' => self::refresh($access->ccua_user_id)
 		];
 	}
 
@@ -29,7 +31,8 @@ class ClientChatAccessMessage
 			'status_id' => $access->ccua_status_id,
 			'user_id' => $access->ccua_user_id,
 			'cch_id' => $access->ccua_cch_id,
-			'pjaxUrl' => Url::to('/client-chat/pjax-update-chat-widget')
+			'pjaxUrl' => Url::to('/client-chat/pjax-update-chat-widget'),
+			'html' => self::refresh($access->ccua_user_id)
 		];
 	}
 
@@ -40,7 +43,16 @@ class ClientChatAccessMessage
 			'status_id' => $access->ccua_status_id,
 			'user_id' => $access->ccua_user_id,
 			'cch_id' => $access->ccua_cch_id,
-			'pjaxUrl' => Url::to('/client-chat/pjax-update-chat-widget')
+			'pjaxUrl' => Url::to('/client-chat/pjax-update-chat-widget'),
+			'html' => self::refresh($access->ccua_user_id)
 		];
+	}
+
+	private static function refresh(int $userId)
+	{
+		$widget = ClientChatAccessWidget::getInstance();
+		$widget->userId = $userId;
+		$widget->open = true;
+		return $widget->run();
 	}
 }

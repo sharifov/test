@@ -84,13 +84,16 @@ function refreshClientChatWidget(obj) {
                     window.open(data.url);
                 }
             }
-            pjaxReload({container: '#client-chat-box-pjax', url: data.pjaxUrl});
+            $('#_client_chat_access_widget').html(data.html);
+            window.enableTimer();
             break;
         case 'skip':
-            pjaxReload({container: '#client-chat-box-pjax', url: data.pjaxUrl});
+            $('#_client_chat_access_widget').html(data.html);
+            window.enableTimer();
             break;
         case 'pending':
-            pjaxReload({container: '#client-chat-box-pjax', url: data.pjaxUrl});
+            $('#_client_chat_access_widget').html(data.html);
+            window.enableTimer();
             break;
         default:
             console.error('refreshClientChatWidget:: unknown command');
