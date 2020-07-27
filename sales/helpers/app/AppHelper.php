@@ -37,7 +37,7 @@ class AppHelper
             VarDumper::dumpAsString($throwable, 20);
 
         if ($throwable->getCode() < 0) {
-            Yii::info($errorMessage,"info\{$category}");
+            Yii::info($errorMessage,'info\\"' . $category . '"');
         } else {
             Yii::error($errorMessage, $category);
         }
