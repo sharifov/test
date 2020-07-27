@@ -288,8 +288,12 @@ $js = <<<JS
                             
                             if(obj.data.totalUnreadMessages) {
                                 $('._cc_unread_messages').html(obj.data.totalUnreadMessages);
+                                if (window.name === 'chat') {
+                                    faviconChat.badge(obj.data.totalUnreadMessages);
+                                }
                             } else {
                                 $('._cc_unread_messages').html('');
+                                faviconChat.reset();
                                 if (obj.data.refreshPage) {
                                     window.location.reload();
                                     return false;

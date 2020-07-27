@@ -1,6 +1,14 @@
 favicon = new Favico({
     animation : 'slide'
 });
+faviconChat = new Favico({
+    animation : 'slide',
+    position : 'up',
+    bgColor : '#5CB85C',
+    textColor : '#ff0'
+});
+
+
 
 PNotify.prototype.options.styling = "bootstrap3";
 // PNotify.defaults.styling = 'bootstrap3'; // Bootstrap version 3

@@ -215,6 +215,11 @@ function notificationPNotify(id, type, title, message, desktopMessage) {
 function notificationCount(count, totalUnreadMessages) {
     $(".notification-counter").text(count);
     $("._cc_unread_messages").text(totalUnreadMessages);
+    if (totalUnreadMessages && window.name === 'chat') {
+        faviconChat.badge(totalUnreadMessages);
+    } else {
+        faviconChat.reset();
+    }
 }
 
 function notificationShow(element) {
