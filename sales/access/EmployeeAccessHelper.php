@@ -2,6 +2,8 @@
 
 namespace sales\access;
 
+use common\models\Employee;
+use sales\auth\Auth;
 use yii\helpers\VarDumper;
 
 class EmployeeAccessHelper
@@ -50,6 +52,17 @@ class EmployeeAccessHelper
             $hash .= VarDumper::dumpAsString($param);
         }
         return $hash;
+    }
+
+    /**
+     * @param Employee $user
+     * @param array $roles
+     * @return bool
+     */
+    public static function entryInRoles(Employee $user, array $roles): bool
+    {
+        $result = array_intersect($user->getRoles(true), $roles);
+        return !empty($result);
     }
 
 }

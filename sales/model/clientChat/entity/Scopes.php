@@ -2,11 +2,28 @@
 
 namespace sales\model\clientChat\entity;
 
+use common\models\Employee;
+use sales\access\EmployeeAccessHelper;
+use sales\access\EmployeeGroupAccess;
+
 /**
  * @see ClientChat
  */
 class Scopes extends \yii\db\ActiveQuery
 {
+	public const ROLES_FULL_ACCESS = [
+        Employee::ROLE_ADMIN,
+		Employee::ROLE_SUPER_ADMIN,
+		Employee::ROLE_QA,
+        Employee::ROLE_QA_SUPER,
+    ];
+
+    public const ROLES_MANAGERS = [
+        Employee::ROLE_USER_MANAGER,
+        Employee::ROLE_SUP_AGENT,
+        Employee::ROLE_SUP_SUPER,
+    ];
+
 	public function byChannel(int $id): self
 	{
 		return $this->andWhere(['cch_channel_id' => $id]);
@@ -50,5 +67,29 @@ class Scopes extends \yii\db\ActiveQuery
 	public function byClientId(int $id): self
 	{
 		return $this->andWhere(['cch_client_id' => $id]);
+	}
+
+	public function byUserRestriction(Employee $user): self
+    {
+        $fullAccess = EmployeeAccessHelper::entryInRoles($user, self::ROLES_FULL_ACCESS);
+        $isManager = EmployeeAccessHelper::entryInRoles($user, self::ROLES_MANAGERS);
+
+        if (!$fullAccess) {
+            if ($isManager) {
+                $this->andWhere([
+                    'IN',
+                    'cch_owner_user_id',
+                    EmployeeGroupAccess::usersIdsInCommonGroupsSubQuery($user->getId())
+                ]);
+            } else {
+                $this->andWhere(['cch_owner_user_id' => $user->getId()]);
+            }
+        }
+        return $this;
+    }
+
+    public function byId(int $id): self
+	{
+		return $this->andWhere(['cch_id' => $id]);
 	}
 }
