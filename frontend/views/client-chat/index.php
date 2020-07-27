@@ -131,7 +131,7 @@ $(document).ready( function () {
     
     document.addEventListener("visibilitychange", function () {
         if (window.name === 'chat') {
-            let activeChatId = localStorage.getItem('activeChatId');
+            let activeChatId = $('._cc-list-wrapper').find('._cc-list-item._cc_active').attr('data-cch-id');
             let params = new URLSearchParams(window.location.search);
             let chatId = params.get('chid');
             if (activeChatId == chatId) {
