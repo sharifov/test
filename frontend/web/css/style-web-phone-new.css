@@ -138,16 +138,16 @@
     top: 14px;
     width: 100%; }
     .phone-widget .current-number .fa {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
       color: #fff;
-      pointer-events: none; }
+      pointer-events: none;
+      margin: 0 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center; }
     .phone-widget .current-number__phone {
       font-size: 14px;
       line-height: 18px;
-      width: calc(100% - 72px);
+      width: calc(100% - 92px);
       overflow: hidden;
       text-overflow: ellipsis; }
     .phone-widget .current-number__identifier {
@@ -175,7 +175,9 @@
       font-size: 14px;
       line-height: 18px;
       background: transparent;
-      height: 22px; }
+      height: 22px;
+      display: flex;
+      align-items: center; }
       .phone-widget .current-number .dropdown .dropdown-menu {
         background-color: #6986a6;
         border: 0 none;
