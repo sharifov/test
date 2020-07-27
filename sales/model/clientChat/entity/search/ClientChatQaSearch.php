@@ -86,8 +86,10 @@ class ClientChatQaSearch extends ClientChat
      */
     public function search($params): ActiveDataProvider
     {
-        $query = ClientChat::find();
-        $query->byUserRestriction(Auth::user());
+        $query = ClientChat::find()
+            ->byUserGroupsRestriction()
+            ->byProjectRestriction()
+            ->byDepartmentRestriction();
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

@@ -80,7 +80,13 @@ class ClientChatQaController extends FController
      */
     public function actionView($id): string
     {
-        $clientChat = ClientChat::find()->byId($id)->byUserRestriction(Auth::user())->one();
+        $clientChat = ClientChat::find()
+            ->byId($id)
+            ->byUserGroupsRestriction()
+            ->byProjectRestriction()
+            ->byDepartmentRestriction()
+            ->one();
+
         if (!$clientChat) {
             throw new NotFoundException('Client chat not found or access denied');
         }
@@ -114,7 +120,13 @@ class ClientChatQaController extends FController
      */
     public function actionRoom($rid): string
     {
-        $clientChat = ClientChat::find()->byRid($rid)->byUserRestriction(Auth::user())->one();
+        $clientChat = ClientChat::find()
+            ->byRid($rid)
+            ->byUserGroupsRestriction()
+            ->byProjectRestriction()
+            ->byDepartmentRestriction()
+            ->one();
+
         if (!$clientChat) {
             throw new NotFoundException('Client chat not found or access denied');
         }
