@@ -81,7 +81,8 @@ $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
             <?php if ($clientChat && !$clientChat->isClosed()): ?>
                 <iframe class="_rc-iframe" src="<?= $rcUrl ?>?layout=embedded&resumeToken=<?= $userRcAuthToken ?>&goto=<?= urlencode('/live/'. $clientChat->cch_rid . '?layout=embedded') ?>" id="_rc-<?= $clientChat->cch_id ?>" style="border: none; width: 100%; height: 100%;" ></iframe>
             <?php elseif ($clientChat && $clientChat->isClosed()): ?>
-                <?= $this->render('partial/_chat_history', ['history' => $history, 'clientChat' => $clientChat]) ?>
+                <iframe class="_rc-iframe" src="<?= $rcUrl ?>?readonly=true&layout=embedded&resumeToken=<?= $userRcAuthToken ?>&goto=<?= urlencode('/live/'. $clientChat->cch_rid . '?layout=embedded') ?>" id="_rc-<?= $clientChat->cch_id ?>" style="border: none; width: 100%; height: 100%;" ></iframe>
+<!--				--><?//= $this->render('partial/_chat_history', ['history' => $history, 'clientChat' => $clientChat]) ?>
             <?php endif; ?>
         </div>
     </div>
