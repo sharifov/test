@@ -1176,7 +1176,14 @@ class CommunicationController extends ApiBaseController
 
         } else {*/
 
-        $call->c_call_status = $callData['CallStatus'];
+        if (isset($callData['Command']) && $callData['Command'] === 'change_call_status') {
+            if ($call->isStatusRinging()) {
+                $call->c_call_status = $callData['CallStatus'];
+            }
+        } else {
+            $call->c_call_status = $callData['CallStatus'];
+        }
+
         $call->setStatusByTwilioStatus($call->c_call_status);
             //$statusId = $call->setStatusByTwilioStatus($call->c_call_status);
             //$call->c_status_id = $statusId;

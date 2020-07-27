@@ -465,7 +465,8 @@ class LeadSearch extends Lead
             $query->andWhere(['IN', 'leads.id', $subQuery2]);
         }
 
-        if ($this->emailsQtyFrom !== '' || $this->emailsQtyTo !== '') {
+
+        if (!empty($this->emailsQtyFrom) || !empty($this->emailsQtyTo)) {
             $query->leftJoin([
                 'emails' => Email::find()
                     ->select([
@@ -475,7 +476,7 @@ class LeadSearch extends Lead
                     ->groupBy(['e_lead_id'])
             ], 'leads.id = emails.e_lead_id');
 
-            if ('' !== $this->emailsQtyFrom) {
+            if (!empty($this->emailsQtyFrom)) {
                 if ((int) $this->emailsQtyFrom === 0) {
                     $query->andWhere(
                         [
@@ -488,7 +489,7 @@ class LeadSearch extends Lead
                     $query->andWhere(['>=', 'emails.cnt', $this->emailsQtyFrom]);
                 }
             }
-            if ('' !== $this->emailsQtyTo) {
+            if (!empty($this->emailsQtyTo)) {
                 if ((int) $this->emailsQtyTo === 0 || (int) $this->emailsQtyFrom === 0) {
                     $query->andWhere(
                         [
@@ -503,7 +504,7 @@ class LeadSearch extends Lead
             }
         }
 
-        if ($this->smsQtyFrom !== '' || $this->smsQtyTo !== '') {
+        if (!empty($this->smsQtyFrom) || !empty($this->smsQtyTo)) {
             $query->leftJoin([
                 'sms' => Sms::find()
                     ->select([
@@ -513,7 +514,7 @@ class LeadSearch extends Lead
                     ->groupBy(['s_lead_id'])
             ], 'leads.id = sms.s_lead_id');
 
-            if ('' !== $this->smsQtyFrom) {
+            if (!empty($this->smsQtyFrom)) {
                 if ((int) $this->smsQtyFrom === 0) {
                     $query->andWhere(
                         [
@@ -526,7 +527,7 @@ class LeadSearch extends Lead
                     $query->andWhere(['>=', 'sms.cnt', $this->smsQtyFrom]);
                 }
             }
-            if ('' !== $this->smsQtyTo) {
+            if (!empty($this->smsQtyTo)) {
                 if ((int) $this->smsQtyTo === 0 || (int) $this->smsQtyFrom === 0) {
                     $query->andWhere(
                         [
@@ -541,7 +542,7 @@ class LeadSearch extends Lead
             }
         }
 
-        if ($this->chatsQtyFrom !== '' || $this->chatsQtyTo !== '') {
+        if (!empty($this->chatsQtyFrom) || !empty($this->chatsQtyTo)) {
             $query->leftJoin([
                 'chats' => ClientChatLead::find()
                     ->select([
@@ -551,7 +552,7 @@ class LeadSearch extends Lead
                     ->groupBy(['ccl_lead_id'])
             ], 'leads.id = chats.ccl_lead_id');
 
-            if ('' !== $this->chatsQtyFrom) {
+            if (!empty($this->chatsQtyFrom)) {
                 if ((int) $this->chatsQtyFrom === 0) {
                     $query->andWhere(
                         [
@@ -564,7 +565,7 @@ class LeadSearch extends Lead
                     $query->andWhere(['>=', 'chats.cnt', $this->chatsQtyFrom]);
                 }
             }
-            if ('' !== $this->chatsQtyTo) {
+            if (!empty($this->chatsQtyTo)) {
                 if ((int) $this->chatsQtyTo === 0 || (int) $this->chatsQtyFrom === 0) {
                     $query->andWhere(
                         [
@@ -579,7 +580,7 @@ class LeadSearch extends Lead
             }
         }
 
-        if ($this->callsQtyFrom !== '' || $this->callsQtyTo !== '') {
+        if (!empty($this->callsQtyFrom) || !empty($this->callsQtyTo)) {
             if ((bool) Yii::$app->params['settings']['new_communication_block_lead']) {
                 $query->leftJoin([
                     'calls' => CallLogLead::find()
@@ -606,7 +607,7 @@ class LeadSearch extends Lead
                 ], 'leads.id = calls.c_lead_id');
             }
 
-            if ('' !== $this->callsQtyFrom) {
+            if (!empty($this->callsQtyFrom)) {
                 if ((int) $this->callsQtyFrom === 0) {
                     $query->andWhere(
                         [
@@ -619,7 +620,7 @@ class LeadSearch extends Lead
                     $query->andWhere(['>=', 'calls.cnt', $this->callsQtyFrom]);
                 }
             }
-            if ('' !== $this->callsQtyTo) {
+            if (!empty($this->callsQtyTo)) {
                 if ((int) $this->callsQtyTo === 0 || (int) $this->callsQtyFrom === 0) {
                     $query->andWhere(
                         [
@@ -633,6 +634,7 @@ class LeadSearch extends Lead
                 }
             }
         }
+
 
         return $dataProvider;
     }
