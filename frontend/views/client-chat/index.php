@@ -21,6 +21,7 @@ use yii\widgets\Pjax;
 /* @var $tab int */
 /* @var $dep int */
 /** @var $project int */
+/** @var $totalUnreadMessages int */
 
 $this->title = 'My Client Chat';
 //$this->params['breadcrumbs'][] = $this->title;
@@ -71,7 +72,8 @@ $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
                 'clientChatId' => $clientChat ? $clientChat->cch_id : null,
                 'tab' => $tab,
                 'dep' => $dep,
-                'project' => $project
+                'project' => $project,
+                'totalUnreadMessages' => $totalUnreadMessages,
             ]) ?>
         </div>
 		<?php Pjax::end() ?>
@@ -81,8 +83,7 @@ $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
             <?php if ($clientChat && !$clientChat->isClosed()): ?>
                 <iframe class="_rc-iframe" src="<?= $rcUrl ?>?layout=embedded&resumeToken=<?= $userRcAuthToken ?>&goto=<?= urlencode('/live/'. $clientChat->cch_rid . '?layout=embedded') ?>" id="_rc-<?= $clientChat->cch_id ?>" style="border: none; width: 100%; height: 100%;" ></iframe>
             <?php elseif ($clientChat && $clientChat->isClosed()): ?>
-                <iframe class="_rc-iframe" src="<?= $rcUrl ?>?readonly=true&layout=embedded&resumeToken=<?= $userRcAuthToken ?>&goto=<?= urlencode('/live/'. $clientChat->cch_rid . '?layout=embedded') ?>" id="_rc-<?= $clientChat->cch_id ?>" style="border: none; width: 100%; height: 100%;" ></iframe>
-<!--				--><?//= $this->render('partial/_chat_history', ['history' => $history, 'clientChat' => $clientChat]) ?>
+				<?= $this->render('partial/_chat_history', ['clientChat' => $clientChat]) ?>
             <?php endif; ?>
         </div>
     </div>
@@ -132,7 +133,7 @@ $(document).ready( function () {
     
     document.addEventListener("visibilitychange", function () {
         if (window.name === 'chat') {
-            let activeChatId = localStorage.getItem('activeChatId');
+            let activeChatId = $('._cc-list-wrapper').find('._cc-list-item._cc_active').attr('data-cch-id');
             let params = new URLSearchParams(window.location.search);
             let chatId = params.get('chid');
             if (activeChatId == chatId) {
@@ -378,13 +379,16 @@ $(document).on('click', '.cc_close', function (e) {
     }
 });
 
+window.removeCcLoadFromIframe = function () {
+    $('#_rc-iframe-wrapper').find('#_cc-load').remove();
+}
+
 window.getChatHistory = function (cchId) {
     $("#_rc-iframe-wrapper").find('._rc-iframe').hide();
     $("#_rc-iframe-wrapper").find('#_cc-load').remove();
     $("#_rc-iframe-wrapper").append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
     $.post('{$chatHistoryUrl}', {cchId: cchId}, function(data) {
         $("#_rc-iframe-wrapper").append(data);
-        $("#_rc-iframe-wrapper").find('#_cc-load').remove();
     });
 }
 
