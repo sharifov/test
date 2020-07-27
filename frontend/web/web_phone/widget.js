@@ -5730,7 +5730,59 @@ let PhoneWidgetContacts = function () {
     //                    '</ul>' +
     //                '</div>' +
     '</div>' + '<div class="contact-modal-info__body">' + // added markup 
-    '<span class="section-separator">General info</span>' + '<ul class="contact-modal-info__contacts contact-full-info">' + '<li>' + '<div class="form-group"><label for="">Type</label>' + '<div class="form-control-wrap" data-type="person"><select readonly="" type="text"' + 'class="form-control select-contact-type" autocomplete="off" disabled="">' + '<option value="company">Company</option>' + '<option value="person" selected="selected">Person</option>' + '</select></div>' + '</div>' + '</li>' + '<li>' + '<div class="form-group"><label for="">Date of Birth</label><input readonly="" type="text" class="form-control"' + 'value="24/07/1970" autocomplete="off"></div>' + '</li>' + '</ul>' + '<span class="section-separator">Project - Wowfare</span>' + '<ul class="contact-modal-info__contacts contact-full-info">' + '<li>' + '<div class="form-group"><label for="">Role</label><input readonly="" type="text" class="form-control"' + 'value="Supervisor" autocomplete="off"></div>' + '</li>' + '<li>' + '<div class="form-group"><label for="">Phone </label><input readonly="" type="text" class="form-control"' + 'value="+37369271516" autocomplete="off"></div>' + '<ul class="actions-list">' + '<li class="actions-list__option actions-list__option--phone js-call-tab-trigger"><i class="fa fa-phone phone-dial-contacts"' + 'data-phone="+37369271516"></i></li>' + '<li title="" class="actions-list__option js-trigger-messages-modal" data-contact-id="44"' + 'data-contact-phone="+37369271516" data-contact-type="2"><i class="fa fa-comment-alt"></i></li>' + '</ul>' + '</li>' + '<li>' + '<div class="form-group"><label for="">Email </label><input readonly="" type="email" class="form-control"' + 'value="tandroid@gmail.com" autocomplete="off"></div>' + '<ul class="actions-list">' + '<li class="actions-list__option js-trigger-email-modal"' + 'data-contact="eyJncm91cCI6IlQiLCJpZCI6NDQsIm5hbWUiOiJUZXN0IDIiLCJkZXNjcmlwdGlvbiI6IkFuZHJldyB0ZXN0IiwiYXZhdGFyIjoiVCIsImlzX2NvbXBhbnkiOmZhbHNlLCJ0eXBlIjoyLCJwaG9uZXMiOlsiKzM3MzY5MjcxNTE2Il0sImVtYWlscyI6WyJ0YW5kcm9pZEBnbWFpbC5jb20iXX0="' + 'data-contact-email="tandroid@gmail.com"><i class="fa fa-envelope"></i></li>' + '</ul>' + '</li>' + '</ul>' + '<span class="section-separator">Project - Arangrant</span>' + // end added markup
+    '<span class="section-separator">General info</span>' + // '<ul class="contact-modal-info__contacts contact-full-info">' +
+    //
+    //
+    // '<li>'+
+    // '<div class="form-group"><label for="">Type</label>'+
+    // '<div class="form-control-wrap" data-type="person"><select readonly="" type="text"'+
+    // ' class="form-control select-contact-type" autocomplete="off" disabled="">'+
+    // '<option value="company">Company</option>'+
+    // '<option value="person" selected="selected">Person</option>'+
+    // '</select></div>'+
+    // '</div>'+
+    // '</li>' +
+    //
+    //
+    // '<li>'+
+    // '<div class="form-group"><label for="">Date of Birth</label><input readonly="" type="text" class="form-control"'+
+    // ' value="24/07/1970" autocomplete="off"></div>'+
+    // '</li>' +
+    // '</ul>' +
+    // '<span class="section-separator">Project - Wowfare</span>' +
+    //
+    // '<ul class="contact-modal-info__contacts contact-full-info">' +
+    //
+    // //
+    // // '<li>'+
+    // // '<div class="form-group"><label for="">Role</label><input readonly="" type="text" class="form-control"'+
+    // // ' value="Supervisor" autocomplete="off"></div>'+
+    // // '</li>'+
+    //
+    //
+    // '<li>'+
+    // '<div class="form-group"><label for="">Phone </label><input readonly="" type="text" class="form-control"'+
+    // 'value="+37369271516" autocomplete="off"></div>'+
+    // '<ul class="actions-list">'+
+    // '<li class="actions-list__option actions-list__option--phone js-call-tab-trigger"><i class="fa fa-phone phone-dial-contacts"'+
+    // 'data-phone="+37369271516"></i></li>'+
+    // '<li title="" class="actions-list__option js-trigger-messages-modal" data-contact-id="44"'+
+    // 'data-contact-phone="+37369271516" data-contact-type="2"><i class="fa fa-comment-alt"></i></li>'+
+    // '</ul>'+
+    // '</li>' +
+    //
+    // '<li>'+
+    // '<div class="form-group"><label for="">Email </label><input readonly="" type="email" class="form-control"'+
+    // 'value="tandroid@gmail.com" autocomplete="off"></div>'+
+    // '<ul class="actions-list">'+
+    // '<li class="actions-list__option js-trigger-email-modal"'+
+    // 'data-contact="eyJncm91cCI6IlQiLCJpZCI6NDQsIm5hbWUiOiJUZXN0IDIiLCJkZXNjcmlwdGlvbiI6IkFuZHJldyB0ZXN0IiwiYXZhdGFyIjoiVCIsImlzX2NvbXBhbnkiOmZhbHNlLCJ0eXBlIjoyLCJwaG9uZXMiOlsiKzM3MzY5MjcxNTE2Il0sImVtYWlscyI6WyJ0YW5kcm9pZEBnbWFpbC5jb20iXX0="'+
+    // 'data-contact-email="tandroid@gmail.com"><i class="fa fa-envelope"></i></li>'+
+    // '</ul>'+
+    // '</li>' +
+    // '</ul>'+
+    // '<span class="section-separator">Project - Arangrant</span>' +
+    // end added markup
     '<ul class="contact-modal-info__contacts contact-full-info">' + '<li>' + '<div class="form-group">' + '<label for="">Type</label>';
     let type = 'person';
 
