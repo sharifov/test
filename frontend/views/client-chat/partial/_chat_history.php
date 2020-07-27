@@ -2,15 +2,18 @@
 /** @var $history ClientChatMessage[]|null */
 /** @var $clientChat ClientChat|null */
 
+use sales\auth\Auth;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 
 $date = $history[0]->ccm_sent_dt ?? null;
 $iDate = null;
+$rcUrl = Yii::$app->rchat->host  . '/home';
+$userRcAuthToken = Auth::user()->userProfile ? Auth::user()->userProfile->up_rc_auth_token : '';
+
 ?>
 
-<div class="_rc-iframe" id="_rc-<?= $clientChat->cch_id ?>">
-<?php if ($history && $clientChat): ?>
+<?php /* if ($history && $clientChat): ?>
 <div class="row">
 	<div class="col-md-12">
         <div class="_cc_history">
@@ -66,6 +69,18 @@ $iDate = null;
 		'body' => 'Chat is undefined or unable to find chat history',
         'closeButton' => false
     ]) ?>
+<?php endif; */ ?>
+<?php if ($clientChat): ?>
+    <iframe class="_rc-iframe" src="<?= $rcUrl ?>?readonly=true&layout=embedded&resumeToken=<?= $userRcAuthToken ?>&goto=<?= urlencode('/live/'. $clientChat->cch_rid . '?layout=embedded') ?>" id="_rc-<?= $clientChat->cch_id ?>" style="border: none; width: 100%; height: 100%;" ></iframe>
+<?php else: ?>
+	<?= \yii\bootstrap4\Alert::widget([
+		'options' => [
+			'class' => 'alert-danger',
+			'delay' => 4000
+
+		],
+		'body' => 'Chat is undefined or unable to find chat history',
+		'closeButton' => false
+	]) ?>
 <?php endif; ?>
-</div>
 

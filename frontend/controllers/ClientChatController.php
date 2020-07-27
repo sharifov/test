@@ -436,15 +436,15 @@ class ClientChatController extends FController
 
 		try {
 			$clientChat = $this->clientChatRepository->findById($chatId);
-			if ($clientChat->isClosed()) {
-				$history = ClientChatMessage::find()->byChhId($clientChat->cch_id)->all();
-			}
+//			if ($clientChat->isClosed()) {
+//				$history = ClientChatMessage::find()->byChhId($clientChat->cch_id)->all();
+//			}
 		} catch (NotFoundException $e) {
 			$clientChat = null;
 		}
 
 		return $this->renderAjax('partial/_chat_history', [
-			'history' => $history ?? null,
+//			'history' => $history ?? null,
 			'clientChat' => $clientChat
 		]);
 	}
