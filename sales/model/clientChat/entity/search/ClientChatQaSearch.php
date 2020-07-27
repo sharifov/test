@@ -2,6 +2,10 @@
 
 namespace sales\model\clientChat\entity\search;
 
+use common\models\Employee;
+use sales\access\EmployeeAccessHelper;
+use sales\access\EmployeeGroupAccess;
+use sales\auth\Auth;
 use sales\model\clientChatCase\entity\ClientChatCase;
 use sales\model\clientChatData\entity\ClientChatData;
 use sales\model\clientChatLead\entity\ClientChatLead;
@@ -82,7 +86,10 @@ class ClientChatQaSearch extends ClientChat
      */
     public function search($params): ActiveDataProvider
     {
-        $query = ClientChat::find();
+        $query = ClientChat::find()
+            ->byUserGroupsRestriction()
+            ->byProjectRestriction()
+            ->byDepartmentRestriction();
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

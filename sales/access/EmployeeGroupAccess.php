@@ -11,16 +11,21 @@ class EmployeeGroupAccess
 
     /**
      * @param int $userId
+     * @param int $cacheDuration // Cache disable = "-1"
      * @return ActiveQuery
      *
      * Ex.
      * $cases = Cases::find()->andWhere(['cs_user_id' => EmployeeGroupAccess::usersIdsInCommonGroupsSubQuery($userId)])->all();
      */
-    public static function usersIdsInCommonGroupsSubQuery(int $userId): ActiveQuery
+    public static function usersIdsInCommonGroupsSubQuery(int $userId, int $cacheDuration = -1): ActiveQuery
     {
-        return UserGroupAssign::find()->select('ugs_user_id')->distinct()->andWhere([
-            'ugs_group_id' => UserGroupAssign::find()->select(['ugs_group_id'])->andWhere(['ugs_user_id' => $userId])
-        ]);
+        return UserGroupAssign::find()
+            ->select('related_users.ugs_user_id')
+            ->innerJoin(UserGroupAssign::tableName(). ' AS related_users',
+                UserGroupAssign::tableName() . '.ugs_group_id = related_users.ugs_group_id')
+            ->where([UserGroupAssign::tableName() . '.ugs_user_id' => $userId])
+            ->groupBy('related_users.ugs_user_id')
+            ->cache($cacheDuration);
     }
 
     /**

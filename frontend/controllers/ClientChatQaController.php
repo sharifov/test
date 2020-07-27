@@ -3,18 +3,15 @@
 namespace frontend\controllers;
 
 use common\models\VisitorLog;
-use frontend\helpers\JsonHelper;
+use sales\auth\Auth;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatMessage\entity\search\ClientChatMessageSearch;
-use sales\model\clientChatNote\entity\ClientChatNote;
 use sales\model\clientChatNote\entity\ClientChatNoteSearch;
 use sales\repositories\NotFoundException;
-use sales\services\clientChatMessage\ClientChatMessageService;
 use Yii;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\entity\search\ClientChatQaSearch;
-use frontend\controllers\FController;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
@@ -24,18 +21,23 @@ use yii\filters\VerbFilter;
  * ClientChatQaController implements the CRUD actions for ClientChat model.
  *
  * @property ClientChatRepository $clientChatRepository
- * @property ClientChatMessageService $clientChatMessageService
+ *
  */
 class ClientChatQaController extends FController
 {
     private ClientChatRepository $clientChatRepository;
-    private ClientChatMessageService $clientChatMessageService;
 
+    /**
+     * ClientChatQaController constructor.
+     * @param $id
+     * @param $module
+     * @param ClientChatRepository $clientChatRepository
+     * @param array $config
+     */
     public function __construct(
 		$id,
 		$module,
 		ClientChatRepository $clientChatRepository,
-		ClientChatMessageService $clientChatMessageService,
 		$config = [])
 	{
 		parent::__construct($id, $module, $config);
@@ -71,14 +73,23 @@ class ClientChatQaController extends FController
     }
 
     /**
-     * Displays a single ClientChat model.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
+     * @param $id
+     * @return string
+     * @throws NotFoundHttpException
+     * @throws \yii\base\InvalidConfigException
      */
-    public function actionView($id)
+    public function actionView($id): string
     {
-        $clientChat = $this->clientChatRepository->findById($id);
+        $clientChat = ClientChat::find()
+            ->byId($id)
+            ->byUserGroupsRestriction()
+            ->byProjectRestriction()
+            ->byDepartmentRestriction()
+            ->one();
+
+        if (!$clientChat) {
+            throw new NotFoundException('Client chat not found or access denied');
+        }
 
         $searchModel = new ClientChatMessageSearch();
         $data[$searchModel->formName()]['ccm_cch_id'] = $id;
@@ -104,16 +115,21 @@ class ClientChatQaController extends FController
     }
 
     /**
-     * Updates an existing ClientChat model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param string $rid
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
+     * @param $rid
+     * @return string
      */
-    public function actionRoom($rid)
+    public function actionRoom($rid): string
     {
+        $clientChat = ClientChat::find()
+            ->byRid($rid)
+            ->byUserGroupsRestriction()
+            ->byProjectRestriction()
+            ->byDepartmentRestriction()
+            ->one();
 
-        $clientChat = $this->clientChatRepository->findByRid($rid);
+        if (!$clientChat) {
+            throw new NotFoundException('Client chat not found or access denied');
+        }
 
         if ($clientChat->isClosed()) {
             $history = ClientChatMessage::find()->byChhId($clientChat->cch_id)->all();
