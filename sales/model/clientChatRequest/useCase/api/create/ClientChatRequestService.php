@@ -200,7 +200,10 @@ class ClientChatRequestService
 		$visitorRcId = $clientChatRequest->getClientRcId();
 
 		try {
-			$this->clientChatVisitorDataRepository->findByVisitorRcId($visitorRcId);
+			$visitorData = $this->clientChatVisitorDataRepository->findByVisitorRcId($visitorRcId);
+			if (!$this->clientChatVisitorRepository->exists($clientChat->cch_id, $visitorData->cvd_id)) {
+				$this->clientChatVisitorRepository->create($clientChat->cch_id, $visitorData->cvd_id, $clientChat->cch_client_id);
+			}
 		} catch (NotFoundException $e) {
 			$visitorData = $this->clientChatVisitorDataRepository->createByVisitorId($visitorRcId);
 			$this->clientChatVisitorRepository->create($clientChat->cch_id, $visitorData->cvd_id, $clientChat->cch_client_id);

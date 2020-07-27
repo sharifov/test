@@ -23,4 +23,9 @@ class ClientChatVisitorRepository extends Repository
 		}
 		return $clientChatVisitor->ccv_id;
 	}
+
+	public function exists(int $cchId, int $cvdId): bool
+	{
+		return ClientChatVisitor::find()->byUniqueFields($cchId, $cvdId)->exists();
+	}
 }
