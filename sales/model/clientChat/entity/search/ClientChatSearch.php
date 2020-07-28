@@ -227,7 +227,7 @@ class ClientChatSearch extends ClientChat
         } else {
             $queryChats->limit(10);
         }
-        $queryChats->orderBy('cch_created_dt ASC');
+        $queryChats->orderBy('cch_created_dt DESC');
         $chatCmd = $queryChats->createCommand();
         $clientChats = $chatCmd->queryAll();
 
