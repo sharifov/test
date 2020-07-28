@@ -178,6 +178,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                     'url' => 'javascript:',
                     'icon' => 'comments warning',
                     'items' => [
+                        ['label' => 'Project config', 'url' => ['/client-chat-project-config/index']],
                         ['label' => 'Client Chat', 'url' => ['/client-chat-crud/index']],
                         ['label' => 'Request', 'url' => ['/client-chat-request-crud/index']],
                         ['label' => 'Channel', 'url' => ['/client-chat-channel-crud/index']],
@@ -191,6 +192,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                         ['label' => 'Visitor', 'url' => ['/client-chat-visitor-crud/index']],
                         ['label' => 'Visitor Data', 'url' => ['/client-chat-visitor-data-crud/index']],
                         ['label' => 'Client Chat QA', 'url' => ['/client-chat-qa/index']],
+
                     ],
                 ],
                 ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'list'],
