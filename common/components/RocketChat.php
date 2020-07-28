@@ -211,7 +211,7 @@ class RocketChat extends Component
                 $duration = 3600 * 24 * 30;
                 $cache->set($key, $authData, $duration);
             } else {
-                Yii::error(VarDumper::dumpAsString(['message' => 'Error: empty response[data][userId] or response[data][authToken]', 'response' => $response]), 'RocketChat:getSystemAuthData:systemLogin');
+                Yii::error(VarDumper::dumpAsString(['message' => 'Error: empty response[data][userId] or response[data][authToken]', 'response' => $response, 'url' => $this->url, 'username' => $this->username]), 'RocketChat:getSystemAuthData:systemLogin');
             }
         }
 
