@@ -212,7 +212,7 @@ class RocketChat extends Component
                 $cache->set($key, $authData, $duration);
             }
         }
-        return $authData;
+        return is_array($authData) ? $authData : [];
     }
 
 
