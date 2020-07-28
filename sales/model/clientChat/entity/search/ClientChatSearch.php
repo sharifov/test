@@ -204,7 +204,7 @@ class ClientChatSearch extends ClientChat
             'cch_created_dt',
             'cch_owner_user_id',
             'username',
-            'CONCAT(c.first_name, " ", c.last_name ) as clientName',
+            'CONCAT(COALESCE(c.first_name, " "), " ", COALESCE(c.last_name, " ") ) as clientName',
             'p.name as project',
             'd.dep_name as department',
             'ch.ccc_name as channel'
