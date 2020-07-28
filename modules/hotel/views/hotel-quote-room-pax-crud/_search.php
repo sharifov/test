@@ -17,7 +17,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'hqrp_id') ?>
 
-    <?= $form->field($model, 'hqrp_hotel_room_id') ?>
+    <?= $form->field($model, 'hqrp_hotel_quote_room_id') ?>
 
     <?= $form->field($model, 'hqrp_type_id') ?>
 

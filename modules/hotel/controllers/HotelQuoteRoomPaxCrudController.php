@@ -7,6 +7,7 @@ use Yii;
 use modules\hotel\models\HotelQuoteRoomPax;
 use modules\hotel\models\search\HotelQuoteRoomPaxSearch;
 use frontend\controllers\FController;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -20,7 +21,7 @@ class HotelQuoteRoomPaxCrudController extends FController
      */
     public function behaviors()
     {
-        return [
+        $behaviors = [
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
@@ -28,6 +29,7 @@ class HotelQuoteRoomPaxCrudController extends FController
                 ],
             ],
         ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**

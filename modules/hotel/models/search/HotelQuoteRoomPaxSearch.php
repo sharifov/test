@@ -17,7 +17,7 @@ class HotelQuoteRoomPaxSearch extends HotelQuoteRoomPax
     public function rules()
     {
         return [
-            [['hqrp_id', 'hqrp_hotel_room_id', 'hqrp_type_id', 'hqrp_age'], 'integer'],
+            [['hqrp_id', 'hqrp_hotel_quote_room_id', 'hqrp_type_id', 'hqrp_age'], 'integer'],
             [['hqrp_first_name', 'hqrp_last_name', 'hqrp_dob'], 'safe'],
         ];
     }
@@ -59,7 +59,7 @@ class HotelQuoteRoomPaxSearch extends HotelQuoteRoomPax
         // grid filtering conditions
         $query->andFilterWhere([
             'hqrp_id' => $this->hqrp_id,
-            'hqrp_hotel_room_id' => $this->hqrp_hotel_room_id,
+            'hqrp_hotel_quote_room_id' => $this->hqrp_hotel_quote_room_id,
             'hqrp_type_id' => $this->hqrp_type_id,
             'hqrp_age' => $this->hqrp_age,
             'hqrp_dob' => $this->hqrp_dob,
