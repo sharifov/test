@@ -211,7 +211,7 @@ class ClientChatSearch extends ClientChat
             ]);
         $queryChats->where(['cch_status_id' => ClientChat::STATUS_GENERATED]);
         $queryChats->limit(10);
-        $queryChats->orderBy('cch_created_dt ASC');
+        $queryChats->orderBy('cch_created_dt DESC');
         $chatCmd = $queryChats->createCommand();
         $clientChats = $chatCmd->queryAll();
 

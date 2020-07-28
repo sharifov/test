@@ -24,15 +24,7 @@ function channelConnector(chName)
             console.log(messageObj.chatsData)
             $("#card-live-chat").text('');
             messageObj.chatsData.forEach(function (chat, index) {
-                $("#card-live-chat").append(renderChat(chat));
-                /*if(!chat.c_parent_id){
-                    $("#card-live-calls").append(renderParentCalls(chat));
-                    messageObj.realtimeCalls.forEach(function (child, childIndex) {
-                        if (chat.c_id == child.c_parent_id){                            
-                            $('#parent-' + chat.c_id).append(renderChildCalls(child));
-                        }
-                    });
-                }*/                
+                $("#card-live-chat").append(renderChat(chat));                              
             });
         }
         
@@ -74,7 +66,7 @@ function contentUpdate() {
 }
 
 function renderChat(chat) {
-    return '<div class="col-md-12" style="margin-bottom:2px">' +
+    return '<div id="ch-'+ chat.cch_id +'" class="col-md-12" style="margin-bottom:2px">' +
                 '<table class="table table-condensed table-client-chat-monitor">' +
                     '<tbody id="chat-'+ chat.cch_id +'">' +
                     '<tr class="warning">' +
@@ -277,7 +269,19 @@ function removePulse() {
   setTimeout(function(){
             $("i").removeClass('icon-pulse');
             //....and whatever else you need to do
+            pushChatOnTop()
     }, 10000);
+}
+
+function pushChatOnTop() {    
+  let parentElement = document.getElementById('card-live-chat')
+  let childElement = document.getElementById('ch-6')  
+ 
+  $("#ch-6").hide('slow', function() {
+    parentElement.insertBefore(childElement, parentElement.firstChild)
+  }); 
+  
+  $("#ch-6").show('slow');
 }
     
 JS;
@@ -286,11 +290,10 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
 ?>
 
 <div id="client-chat-page" class="col-md-12">
-
     <div class="card card-default">
         <div class="card-header"><i class="fa fa-list"></i> CLIENT CHAT REAL-TIME MONITORING (Updated: <i class="fa fa-clock-o"></i> <span id="page-updated-time">10:19:29</span>)</div>
         <div id="card-live-chat" class="card-body">
-        <!-- real-time content -->
+            <!-- real-time content -->
         </div>
     </div>
 </div>
