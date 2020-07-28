@@ -35,4 +35,9 @@ class SettingHelper
 	{
 		return \Yii::$app->params['settings']['cc_sound_notification_enable'] ?? false;
 	}
+
+	public static function isClientChatRealTimeMonitoringEnabled()
+    {
+        return \Yii::$app->params['settings']['client_chat_real_time_monitoring'] ?? false;
+    }
 }

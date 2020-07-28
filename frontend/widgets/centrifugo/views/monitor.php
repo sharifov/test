@@ -1,5 +1,5 @@
 <?php
-
+use sales\helpers\setting\SettingHelper;
 /**
  * @var $centrifugoUrl
  * @var $token
@@ -7,9 +7,12 @@
  * @var $this yii\web\View
  */
 
+$realtimeMonitorEnable = SettingHelper::isClientChatRealTimeMonitoringEnabled();
+
 $passChannelsToJs ='["' . implode('", "', $channels) . '"]';
 
 $js = <<<JS
+let enableLiveUpdate = '$realtimeMonitorEnable'
 let channels = $passChannelsToJs;
 var centrifuge = new Centrifuge('$centrifugoUrl');
 centrifuge.setToken('$token');
@@ -26,7 +29,7 @@ function channelConnector(chName)
             messageObj.chatsData.forEach(function (chat, index) {
                 $("#card-live-chat").prepend(renderChat(chat));                              
             });
-            getLastChatsUpdate()
+            getLastChatsUpdate(enableLiveUpdate)
             updateLocalTime()
         }
         
@@ -64,17 +67,17 @@ function contentUpdate(chatsFromDateTime) {
         type: 'POST',
         data: {"formDate": chatsFromDateTime},
         success: function(data) { 
-            //console.info('Request data on connect');            
-            //$("#page-updated-time").text('').text(data.updatedTime); 
-            //startTimers();                
+            //console.info('Request data on connect'); 
         }
     });
 }
 
-function getLastChatsUpdate() {
-    setTimeout(function(){
+function getLastChatsUpdate() {    
+    if(enableLiveUpdate){
+        setTimeout(function(){
          contentUpdate(getLastCreatedChatDate())  
     }, 10000);
+    }    
 }
 
 function getLastCreatedChatDate()
@@ -138,32 +141,31 @@ function renderChat(chat) {
     return '<div id="ch-'+ chat.cch_id +'" class="col-md-12" style="margin-bottom:2px">' +
                 '<table class="table table-condensed table-client-chat-monitor">' +
                     '<tbody id="chat-'+ chat.cch_id +'">' +
-                    '<tr class="warning">' +
-                        '<td class="text-center" style="width:150px">' + 
-                            renderGeneralInfo(chat.cch_id, chat.cch_created_dt) +
-                        '</td>' +
-                        '<td class="text-left" style="width:250px">' +
-                            renderAgentInfo(chat.cch_id, chat.cch_owner_user_id, chat.username, chat.outMsg) +
-                        '</td>' +
-                        '<td class="text-left" style="width:250px">' +
-                            renderClientInfo(chat.cch_id, chat.cch_client_id, chat.clientName, chat.inMsg) +
-                        '</td>' +
-                        '<td class="text-center" style="width:130px">' +
-                            renderProjectInfo(chat.project, chat.department, chat.channel) +
-                        '</td>' +
-                        
-                        '<td class="text-left" style="width:450px">' +                        
-                            renderAgentMessage(chat.cch_id, chat.cch_owner_user_id, chat.username) +
-                        '</td>' +
-                        '<td class="text-left" style="width:450px">' +                            
-                            renderClientMessage(chat.cch_id, chat.cch_client_id, chat.clientName) +
-                        '</td>' +
-                     '</tr>' +
+                        '<tr class="warning">' +
+                            '<td class="text-center" style="width:150px">' + 
+                                renderGeneralInfo(chat.cch_id, chat.cch_created_dt) +
+                            '</td>' +
+                            '<td class="text-left" style="width:250px">' +
+                                renderAgentInfo(chat.cch_id, chat.cch_owner_user_id, chat.username, chat.outMsg) +
+                            '</td>' +
+                            '<td class="text-left" style="width:250px">' +
+                                renderClientInfo(chat.cch_id, chat.cch_client_id, chat.clientName, chat.inMsg) +
+                            '</td>' +
+                            '<td class="text-center" style="width:130px">' +
+                                renderProjectInfo(chat.project, chat.department, chat.channel) +
+                            '</td>' +
+                            
+                            '<td class="text-left" style="width:450px">' +                        
+                                renderAgentMessage(chat.cch_id, chat.cch_owner_user_id, chat.username) +
+                            '</td>' +
+                            '<td class="text-left" style="width:450px">' +                            
+                                renderClientMessage(chat.cch_id, chat.cch_client_id, chat.clientName) +
+                            '</td>' +
+                        '</tr>' +
                     '</tbody>' +
                 '</table>' +
-            '</div>';
+           '</div>';
 }
-
 
 function renderAgentMessage(chatID, agentID, agentName){
     let html = '';
@@ -298,8 +300,8 @@ function renderClientInfo(chatID, clientID, clientName, inMsgCount){
               '<div class="media-body">' +
                     '<a class="title" href="/client/view?id='+ clientID +'" target="_blank">'+ clientName +'</a>' +
                     '<p><i id="icn-'+ countLocator +'" class="fa fa-arrow-down red"></i> Sent Messages: <strong id="count-'+ countLocator +'">'+ inMsgCount +'</strong> </p>' +
-                    /*'<p> <small>12 Sales Today</small>' +*/
-                    '</p>' +
+                    /*'<p> <small>12 Sales Today</small>' +
+                    '</p>' + */
               '</div>' +
           '</div>';
     return html; 
@@ -345,8 +347,8 @@ function renderGeneralInfo(id, chatCreateDate) {
 
 function removePulse() {
   setTimeout(function(){
-            $("i").removeClass('icon-pulse');                        
-    }, 10000);
+      $("i").removeClass('icon-pulse');                        
+  }, 10000);
 }
 
 function pushChatOnTop(chatID) {    
