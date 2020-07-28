@@ -34,13 +34,14 @@ function channelConnector(chName)
             let newMsg = messageObj.chatMessageData
             
             if(newMsg.client_id && !newMsg.user_id){
-                //console.log(newMsg)
+                console.log("Chats Data")
+                console.log(newMsg)
                 renderNewClientMessage(newMsg.chat_id, newMsg.client_id, newMsg.msg, newMsg.sent_dt)                
             }
             
             if (newMsg.client_id && newMsg.user_id){
-                //console.log("Agent Message")
-                //console.log(newMsg)
+                console.log("Agent Messages ")
+                console.log(newMsg)
                 renderNewAgentMessage(newMsg.chat_id, newMsg.user_id, newMsg.msg, newMsg.sent_dt)
             }             
             updateMessagesRelativeTime()
@@ -195,6 +196,15 @@ function renderAgentMessage(chatID, agentID, agentName){
 
 function renderClientMessage(chatID, clientID, clientName){
     let html = '';
+    
+    if(!clientName){
+      clientName = "...";
+    }
+    
+    if(!clientID){
+      clientID = "";
+    }
+    
     let msgLocator = chatID + '-' + clientID;
     html+= '<div class="media event">' +                                  
                 '<div class="media-body">' +
