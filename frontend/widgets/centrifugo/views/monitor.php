@@ -21,7 +21,7 @@ function channelConnector(chName)
     centrifuge.subscribe(chName, function(message) {           
         let messageObj = JSON.parse(message.data.message);        
         if(messageObj.chatsData){
-            //console.log(messageObj.chatsData)
+            console.log(messageObj.chatsData)
             //$("#card-live-chat").text('');
             messageObj.chatsData.forEach(function (chat, index) {
                 $("#card-live-chat").prepend(renderChat(chat));                              
@@ -34,7 +34,7 @@ function channelConnector(chName)
             let newMsg = messageObj.chatMessageData
             
             if(newMsg.client_id && !newMsg.user_id){
-                console.log("Chats Data")
+                console.log("Client Messages")
                 console.log(newMsg)
                 renderNewClientMessage(newMsg.chat_id, newMsg.client_id, newMsg.msg, newMsg.sent_dt)                
             }
@@ -158,12 +158,7 @@ function renderChat(chat) {
                         '<td class="text-left" style="width:450px">' +                            
                             renderClientMessage(chat.cch_id, chat.cch_client_id, chat.clientName) +
                         '</td>' +
-                        
-                        /*'<td class="text-left"><i>l:<a href="/lead/view/0fb7b8b6cb49f458be2cc5fb5b4f4aa1" target="_blank">503669</a></i><br></td>' +*/
-                        /*'<td class="text-center"><i class="fa fa-pause text-success"></i> Delay<br><span class="badge badge-warning timer" data-sec="10965160" data-control="start" data-format="%M:%S">59:50</span></td>' +*/
-                        /*'<td class="text-center" style="width:160px"><i class="fa fa-clock-o"></i> 11:26:49<br></td>' +*/
-                        /*'<td class="text-left" style="width:160px"><i class="fa fa-fax fa-1x fa-border"></i> +18552068194<i class="fa fa-user fa-1x fa-border"></i> Linda</td>' +*/
-                    '</tr>' +
+                     '</tr>' +
                     '</tbody>' +
                 '</table>' +
             '</div>';
