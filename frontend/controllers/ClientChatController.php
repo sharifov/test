@@ -597,8 +597,9 @@ class ClientChatController extends FController
     public function actionMonitor()
     {
         if(Yii::$app->request->isPost){
+            $params = Yii::$app->request->post();
             $searchModel = new ClientChatSearch();
-            $chatsData = $searchModel->searchRealtimeClientChatActivity();
+            $chatsData = $searchModel->searchRealtimeClientChatActivity($params);
 
             CentrifugoService::sendMsg(json_encode([
                 'chatsData' => $chatsData,

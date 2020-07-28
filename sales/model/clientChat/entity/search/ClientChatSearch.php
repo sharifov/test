@@ -195,7 +195,7 @@ class ClientChatSearch extends ClientChat
         return new ArrayDataProvider($paramsData);
     }
 
-    public function searchRealtimeClientChatActivity()
+    public function searchRealtimeClientChatActivity($params)
     {
         $queryChats = static::find()->joinWith(['cchOwnerUser', 'cchClient as c', 'cchProject as p', 'cchDep as d', 'cchChannel as ch']);
         $queryChats->select([
@@ -210,7 +210,11 @@ class ClientChatSearch extends ClientChat
             'ch.ccc_name as channel'
             ]);
         $queryChats->where(['cch_status_id' => ClientChat::STATUS_GENERATED]);
-        $queryChats->limit(10);
+        if($params['formDate']){
+            $queryChats->where(['between','cch_created_dt', $params['formDate'], date('Y-m-d H:i:s')]);
+        } else {
+            $queryChats->limit(10);
+        }
         $queryChats->orderBy('cch_created_dt DESC');
         $chatCmd = $queryChats->createCommand();
         $clientChats = $chatCmd->queryAll();
