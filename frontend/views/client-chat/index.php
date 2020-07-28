@@ -79,7 +79,7 @@ $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
 		<?php Pjax::end() ?>
     </div>
     <div class="col-md-6">
-        <div id="_rc-iframe-wrapper" style="height: 100%; width: 100%; position: relative;">
+        <div id="_rc-iframe-wrapper">
             <?php if ($clientChat && !$clientChat->isClosed()): ?>
                 <iframe class="_rc-iframe" src="<?= $rcUrl ?>?layout=embedded&resumeToken=<?= $userRcAuthToken ?>&goto=<?= urlencode('/live/'. $clientChat->cch_rid . '?layout=embedded') ?>" id="_rc-<?= $clientChat->cch_id ?>" style="border: none; width: 100%; height: 100%;" ></iframe>
             <?php elseif ($clientChat && $clientChat->isClosed()): ?>
@@ -197,13 +197,13 @@ $(document).on('click', '#btn-load-channels', function (e) {
     });
 });
 
-if ($('#_rc-iframe-wrapper').find('._rc-iframe').length) {
-    let iframe = $($('#_rc-iframe-wrapper').find('._rc-iframe')[0]);
-    let windowHeight = $(window)[0].innerHeight;
-    let offsetTop = $("#_rc-iframe-wrapper").offset().top;
-    let iframeHeight = windowHeight - offsetTop - 20;
-    $(iframe).css('height', iframeHeight+'px');
-}
+// if ($('#_rc-iframe-wrapper').find('._rc-iframe').length) {
+//     let iframe = $($('#_rc-iframe-wrapper').find('._rc-iframe')[0]);
+//     let windowHeight = $(window)[0].innerHeight;
+//     let offsetTop = $("#_rc-iframe-wrapper").offset().top;
+//     let iframeHeight = windowHeight - offsetTop - 20;
+//     $(iframe).css('height', iframeHeight+'px');
+// }
 
 $(document).on('click', '._cc_tab', function () {
     let tab = $(this);
@@ -237,9 +237,9 @@ $(document).on('click', '._cc-list-item', function () {
     let userRcAuthToken = '{$userRcAuthToken}';
     let gotoParam = encodeURIComponent($(this).attr('data-goto-param'));
     let iframeHref = rcUrl + '?layout=embedded&resumeToken=' + userRcAuthToken + '&goto=' + gotoParam;
-    let windowHeight = $(window)[0].innerHeight;
-    let offsetTop = $("#_rc-iframe-wrapper").offset().top;
-    let iframeHeight = windowHeight - offsetTop - 20;
+    // let windowHeight = $(window)[0].innerHeight;
+    // let offsetTop = $("#_rc-iframe-wrapper").offset().top;
+    // let iframeHeight = windowHeight - offsetTop - 20;
     let cch_id = $(this).attr('data-cch-id');
     let isClosed = $(this).attr('data-is-closed');
     $("#_rc-iframe-wrapper").find('._rc-iframe').hide();
@@ -256,7 +256,7 @@ $(document).on('click', '._cc-list-item', function () {
             
             let iframe = document.createElement('iframe');
             iframe.setAttribute('src', iframeHref);
-            iframe.setAttribute('style', 'width: 100%; height: '+iframeHeight+'px; border: none;');
+            // iframe.setAttribute('style', 'width: 100%; height: '+iframeHeight+'px; border: none;');
             iframe.onload = function () {
                 $('#_rc-iframe-wrapper').find('#_cc-load').remove();
             }

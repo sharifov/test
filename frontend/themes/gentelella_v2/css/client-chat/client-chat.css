@@ -24,6 +24,16 @@
     border-top: 1px solid lightgray;
     padding: 5px;
 }
+#_rc-iframe-wrapper {
+    height: 100%;
+    width: 100%;
+    position: relative;
+}
+#_rc-iframe-wrapper ._rc-iframe {
+    border: none;
+    width: 100%;
+    height: calc(100vh - 85px);
+}
 
 ._cc-wrapper ._cc_tabs_wrapper ._cc_tab {
     width: 50%;
