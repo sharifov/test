@@ -1,23 +1,19 @@
 <?php
 
+
 namespace frontend\widgets\centrifugo;
 
-use yii\bootstrap\Widget;
 use phpcent\Client;
-use Yii;
 use yii\base\InvalidConfigException;
+use yii\bootstrap\Widget;
+use yii;
 
-/**
- * @author vincent.barnes
- * @since 2.20
- */
-
-class CentrifugoNotificationWidget extends Widget
+class RealtimeClientChatMonitorWidget extends Widget
 {
-    public $userId;
-    public $userAllowedChannels;
-    private $centrifugoUrl;
-    private $tokenHmacSecretKey;
+    public int $userId;
+    public array $userAllowedChannels;
+    private string $centrifugoUrl;
+    private string $tokenHmacSecretKey;
 
     public function init()
     {
@@ -40,23 +36,13 @@ class CentrifugoNotificationWidget extends Widget
 
     public function run()
     {
-        $this->registerAssets();
         $client = new Client($this->centrifugoUrl);
-        $token = $client->setSecret($this->tokenHmacSecretKey)->generateConnectionToken('',  '');
+        $token = $client->setSecret($this->tokenHmacSecretKey)->generateConnectionToken($this->userId,  '');
 
-        return $this->render('index',[
+        return $this->render('monitor',[
             'channels' => $this->userAllowedChannels,
             'centrifugoUrl' => $this->centrifugoUrl,
             'token' => $token
         ]);
-    }
-
-    /**
-     * Register assets.
-     */
-    protected function registerAssets()
-    {
-        $view = $this->getView(); // получаем объект вида, в который рендерится виджет
-        CentrifugoNotificationAssets::register($view);// регестрируем файл с классом наборов css, js.
     }
 }

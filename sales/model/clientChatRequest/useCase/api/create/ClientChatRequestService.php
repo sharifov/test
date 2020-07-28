@@ -17,6 +17,7 @@ use sales\services\client\ClientManageService;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatService\ClientChatService;
 use sales\services\TransactionManager;
+use common\components\CentrifugoService;
 use yii\helpers\Html;
 
 /**
@@ -239,6 +240,7 @@ class ClientChatRequestService
 
 		$message = ClientChatMessage::createByApi($form, $clientChat, $clientChatRequest);
 		$this->clientChatMessageRepository->save($message, 0);
+        $this->sendLastChatMessageToMonitor($clientChat, $message);
 		if ($clientChat->cch_owner_user_id && $clientChatRequest->isGuestUttered() && $clientChat->cchOwnerUser->userProfile && $clientChat->cchOwnerUser->userProfile->isRegisteredInRc()) {
 			$this->clientChatMessageService->increaseUnreadMessages($clientChat->cch_id, $clientChat->cch_owner_user_id);
 			$this->updateDateTimeLastMessageNotification($clientChat, $message);
@@ -273,5 +275,32 @@ class ClientChatRequestService
 				'cchId' => $clientChat->cch_id,
             ]
         ]);
+    }
+
+    public function sendLastChatMessageToMonitor(ClientChat $clientChat, ClientChatMessage $message): void
+    {
+        $data = [];
+        $data['chat_id'] = $message->ccm_cch_id;
+        $data['client_id'] = $message->ccm_client_id;
+        $data['user_id'] = $message->ccm_user_id;
+        $data['sent_dt'] = $message->ccm_sent_dt;
+        $data['msg'] = $message->message;
+        CentrifugoService::sendMsg(json_encode([
+            'chatMessageData' => $data,
+        ]), 'realtimeClientChatChannel');
+
+        /*$user = $clientChat->cchOwnerUser;
+        $dateTime = $message->ccm_sent_dt;
+        $formatter = new \Yii::$app->formatter;
+        if ($user->timezone) {
+            $formatter->timeZone = $user->timezone;
+        }
+        Notifications::publish('clientChatUpdateTimeLastMessage', ['user_id' => $clientChat->cch_owner_user_id], [
+            'data' => [
+                'dateTime' =>  $formatter->asRelativeTime(strtotime($dateTime)),
+                'moment' =>  round((time() - strtotime($dateTime))),
+                'cchId' => $clientChat->cch_id,
+            ]
+        ]);*/
     }
 }
