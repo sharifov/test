@@ -6,6 +6,7 @@ use Yii;
 use modules\flight\models\FlightQuoteSegmentStop;
 use modules\flight\models\search\FlightQuoteSegmentStopSearch;
 use frontend\controllers\FController;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -19,14 +20,15 @@ class FlightQuoteSegmentStopController extends FController
      */
     public function behaviors()
     {
-        return [
+        $behaviors = [
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class' => VerbFilter::class,
                 'actions' => [
                     'delete' => ['POST'],
                 ],
             ],
         ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**

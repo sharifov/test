@@ -6,6 +6,7 @@ use Yii;
 use sales\model\clientChatVisitor\entity\ClientChatVisitor;
 use sales\model\clientChatVisitor\entity\search\ClientChatVisitorSearch;
 use frontend\controllers\FController;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -16,9 +17,9 @@ class ClientChatVisitorCrudController extends FController
     /**
     * @return array
     */
-    public function behaviors(): array
+    public function behaviors()
     {
-        return [
+        $behaviors = [
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
@@ -26,6 +27,7 @@ class ClientChatVisitorCrudController extends FController
                 ],
             ],
         ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**

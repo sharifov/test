@@ -27,7 +27,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\SerialColumn'],
 
             'hqrp_id',
-            'hqrp_hotel_room_id',
+            'hqrp_hotel_quote_room_id',
             'hqrp_type_id',
             'hqrp_age',
             'hqrp_first_name',

@@ -12,7 +12,7 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'hqrp_hotel_room_id')->textInput() ?>
+    <?= $form->field($model, 'hqrp_hotel_quote_room_id')->textInput() ?>
 
     <?= $form->field($model, 'hqrp_type_id')->textInput() ?>
 
