@@ -283,7 +283,7 @@ class ClientChatRequestService
         $data['chat_id'] = $message->ccm_cch_id;
         $data['client_id'] = $message->ccm_client_id;
         $data['user_id'] = $message->ccm_user_id;
-        $data['sent_dt'] = $message->ccm_sent_dt;
+        $data['sent_dt'] = \Yii::$app->formatter->asDatetime(strtotime($message->ccm_sent_dt), 'php: Y-m-d H:i:s');
         $data['msg'] = $message->message;
         CentrifugoService::sendMsg(json_encode([
             'chatMessageData' => $data,

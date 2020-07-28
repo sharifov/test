@@ -345,22 +345,22 @@ function renderGeneralInfo(id, chatCreateDate) {
 
 function removePulse() {
   setTimeout(function(){
-            $("i").removeClass('icon-pulse');
-            //....and whatever else you need to do            
+            $("i").removeClass('icon-pulse');                        
     }, 10000);
 }
 
 function pushChatOnTop(chatID) {    
-  let parentElement = document.getElementById('card-live-chat')
-  let childElement = document.getElementById('ch-' + chatID)  
- 
-   setTimeout(function(){
-      $("#ch-" + chatID).hide('slow', function() {
-        parentElement.insertBefore(childElement, parentElement.firstChild)
-      }); 
-      
-      $("#ch-" + chatID).show('slow');
-   }, 10000);
+   let parentElement = document.getElementById('card-live-chat')
+   let childElement = document.getElementById('ch-' + chatID)
+   let topChatId = document.getElementById("card-live-chat").firstChild.id
+    
+   if (chatID != topChatId.split("-")[1]){       
+       $("#ch-" + chatID).hide('slow', function() {
+            parentElement.insertBefore(childElement, parentElement.firstChild)
+       }); 
+              
+       $("#ch-" + chatID).show('slow');       
+    }   
 }
     
 JS;
