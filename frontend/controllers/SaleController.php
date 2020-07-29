@@ -96,6 +96,7 @@ class SaleController extends FController
     {
         $hash = Yii::$app->request->get('h', '');
         $withFareRules = (int) Yii::$app->request->get('wfr', 0);
+        $saleData = [];
 
         try {
             $arr = explode('|', base64_decode($hash));
