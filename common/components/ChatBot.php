@@ -207,7 +207,8 @@ class ChatBot extends Component
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10) . '; Request Data: ' . VarDumper::dumpAsString($data, 10) . '; Headers: ' . VarDumper::dumpAsString($response->headers, 10), 'ChatBot:sendMessage');
+			\Yii::info('ChatBot send headers: ' . VarDumper::dumpAsString($this->request->headers, 10), 'info\ChatBotSendRequest');
+			\Yii::error(VarDumper::dumpAsString($out['error'], 10) . '; Request Data: ' . VarDumper::dumpAsString($data, 10) . '; Headers: ' . VarDumper::dumpAsString($response->headers, 10), 'ChatBot:sendMessage');
         }
 
         return $out;
