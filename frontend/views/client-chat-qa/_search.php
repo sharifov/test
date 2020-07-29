@@ -103,9 +103,9 @@ use yii\widgets\Pjax;
                 <div class="col-md-2">
                     <?php echo $form->field($model, 'dataCity')->dropDownList(ClientChatVisitorData::getCityList(), ['prompt' => '-']) ?>
                 </div>
-                <div class="col-md-1">
-                    <?php echo $form->field($model, 'messageBy')->dropDownList(ClientChatQaSearch::MESSAGE_BY_LIST, ['prompt' => '-']) ?>
-                </div>
+                <!--<div class="col-md-1">
+                    <?php /* echo $form->field($model, 'messageBy')->dropDownList(ClientChatQaSearch::MESSAGE_BY_LIST, ['prompt' => '-']) */ ?>
+                </div>-->
                 <div class="col-md-2">
                     <?php echo $form->field($model, 'messageText') ?>
                 </div>
