@@ -221,7 +221,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     }
                                     if (array_key_exists('image_url', $attachment)) {
                                         $titleLink = explode('.', $attachment['image_url']);
-                                        $title = '[' . StringHelper::truncate($titleLink[0], 20) . '].' . end($titleLink);
+                                        $title = '[' . StringHelper::truncate($attachment['image_url'], 20) . '].' . end($titleLink);
                                         $view .= Html::a($title, $attachment['image_url'], ['target'=>'_blank']) . '<br /> ';
                                     }
                                 }
