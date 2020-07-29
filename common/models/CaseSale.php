@@ -123,7 +123,7 @@ class CaseSale extends \yii\db\ActiveRecord
             [['css_cs_id', 'css_sale_id', 'css_sale_data'], 'required'],
             [['css_cs_id', 'css_sale_id', 'css_sale_pax', 'css_penalty_type'], 'integer'],
             [['css_sale_created_dt', 'css_sale_data', 'css_created_dt', 'css_updated_dt', 'css_created_user_id', 'css_updated_user_id', 'css_fare_rules'], 'safe'],
-            [['css_sale_book_id', 'css_sale_pnr'], 'string', 'max' => 8],
+            [['css_sale_book_id', 'css_sale_pnr'], 'string', 'max' => 20],
             [['css_cs_id', 'css_sale_id'], 'unique', 'targetAttribute' => ['css_cs_id', 'css_sale_id']],
             [['css_cs_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['css_cs_id' => 'cs_id']],
             [['css_profit', 'css_charged'], 'number'],
