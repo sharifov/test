@@ -212,11 +212,13 @@ $this->params['breadcrumbs'][] = $this->title;
                             $view = '';
                             if (array_key_exists('attachments', $model->ccm_body)) {
                                 foreach ($model->ccm_body['attachments'] as $attachment) {
-                                    $titleLink = explode('.', $attachment['title_link']);
-                                    $title = '[' . StringHelper::truncate($attachment['title'], 30) . '].' . end($titleLink);
-                                    $view .= Html::a($title,
-                                        '/client-chat-message-crud/download?url=' . base64_encode($attachment['title_link']),
-                                        ['target'=>'_blank']) . '<br /> ';
+                                    if (array_key_exists('title_link', $attachment) && array_key_exists('title', $attachment)) {
+                                        $titleLink = explode('.', $attachment['title_link']);
+                                        $title = '[' . StringHelper::truncate($attachment['title'], 30) . '].' . end($titleLink);
+                                        $view .= Html::a($title,
+                                            '/client-chat-message-crud/download?url=' . base64_encode($attachment['title_link']),
+                                            ['target'=>'_blank']) . '<br /> ';
+                                    }
                                 }
                             }
                             return $view;
