@@ -23,14 +23,15 @@ class NewWebPhoneAsset extends AssetBundle
     public function init()
     {
         if (YII_ENV === 'prod' || YII_ENV === 'stage') {
+            $version = \Yii::$app->params['release']['version'] ?? '';
             $this->js = [
                 'https://cdn.jsdelivr.net/npm/simplebar@latest/dist/simplebar.min.js',
-                'web_phone/widget-min.js',
+                'web_phone/widget-min.js?v=' . $version,
             ];
 
             $this->css = [
                 'https://cdn.jsdelivr.net/npm/simplebar@latest/dist/simplebar.css',
-                'web_phone/widget.css',
+                'web_phone/widget.css?v=' . $version,
             ];
 
         } else {
