@@ -21,7 +21,7 @@ class m200729_084318_add_permition_to_message_body_view extends Migration
     ];
 
     private array $routes = [
-        'client-chat-qa/message-body-view',
+        '/client-chat-qa/message-body-view',
     ];
 
     /**
