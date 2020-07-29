@@ -251,6 +251,103 @@
     "groupTitle": "Cases"
   },
   {
+    "type": "get",
+    "url": "/v1/client-chat-request/project-config",
+    "title": "Client Chat Request Project Config",
+    "version": "0.1.0",
+    "name": "ClientChatProjectConfig",
+    "group": "ClientChat",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "project_id",
+            "description": "<p>Project ID</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n    \"project_id\": 1,\n}",
+          "type": "get"
+        }
+      ]
+    },
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          },
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Accept-Encoding",
+            "description": ""
+          },
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "If-Modified-Since",
+            "description": "<p>Format <code> day-name, day month year hour:minute:second GMT</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Header-Example (If-Modified-Since):",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\",\n    \"If-Modified-Since\": \"Mon, 23 Dec 2019 08:17:54 GMT\",\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n\n{\n\"status\": 200,\n\"message\": \"OK\",\n\"data\": {\n\"endpoint\": \"chatbot.travel-dev.com\",\n\"enabled\": true,\n\"project\": \"HOP2\",\n\"notificationSound\": \"https://cdn.travelinsides.com/npmstatic/assets/chime.mp3\",\n\"theme\": {\n\"theme\": \"linear-gradient(270deg, #0AAB99 0%, #1E71D1 100%)\",\n\"primary\": \"#0C89DF\",\n\"primaryDark\": \"#0066BA\",\n\"accent\": \"#0C89DF\",\n\"accentDark\": \"#0066BA\"\n},\n\"registration\": {\n\"enabled\": true,\n\"departments\": [\n\"Sales\",\n\"Support\"\n],\n\"registrationTitle\": \"Registration title if registration is enabled\",\n\"registrationSubtitle\": \"Registration subtitle if it is enabled\",\n\"formFields\": {\n\"name\": {\n\"enabled\": true,\n\"required\": true,\n\"maxLength\": 40,\n\"minLength\": 3\n},\n\"email\": {\n\"enabled\": true,\n\"required\": true,\n\"maxLength\": 40,\n\"minLength\": 3\n},\n\"department\": {\n\"enabled\": true,\n\"required\": true\n}\n}\n},\n\"settings\": {\n\"fileUpload\": true,\n\"maxMessageLength\": 500\n}\n}\n}",
+          "type": "json"
+        },
+        {
+          "title": "Not Modified-Response (304):",
+          "content": "\nHTTP/1.1 304 Not Modified\nCache-Control: public, max-age=3600\nLast-Modified: Mon, 23 Dec 2019 08:17:53 GMT",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response (400):",
+          "content": "\nHTTP/1.1 400 Bad Request\n  {\n\"status\": 400,\n\"message\": \"Project Config not found\",\n\"code\": \"13108\",\n\"errors\": []\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v1/controllers/ClientChatRequestController.php",
+    "groupTitle": "ClientChat"
+  },
+  {
     "type": "post",
     "url": "/v1/client-chat-request/create",
     "title": "Client Chat Request",

@@ -8,6 +8,7 @@ class ApiCodeException
 {
     public const BO_ERROR = Module::API . 100;
     public const NOT_FOUND_PROJECT_CURRENT_USER = Module::API . 101;
+    public const NOT_FOUND_PROJECT_CONFIG = Module::API . 108;
     public const EVENT_OR_DATA_IS_NOT_PROVIDED = Module::API . 102;
     public const INTERNAL_SERVER_ERROR = Module::API . 500;
     public const CLIENT_CHAT_REQUEST_CREATE_FAILED = Module::API . 103;
