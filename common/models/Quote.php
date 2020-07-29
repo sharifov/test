@@ -1013,11 +1013,16 @@ class Quote extends \yii\db\ActiveRecord
             $rowTime = $rowExpl[1];
             preg_match_all('/([0-9]{3,4})(N|A|P)?(\+([0-9])?)?/', $rowTime, $matches);
 			if (!empty($matches)) {
+
+			    if (!isset($matches[1][0], $matches[1][1])) {
+                    throw new \Exception('Quote:getTripsSegmentsData:Date:notParsed');
+			    }
+
 				$now = new \DateTime();
 				$matches[1][0] = substr_replace($matches[1][0], ':', -2, 0);
 				$matches[1][1] = substr_replace($matches[1][1], ':', -2, 0);
 				$date = $depDate . ' ' . $matches[1][0];
-				if ($matches[2][0] != '') {
+				if (isset($matches[2][0]) && $matches[2][0] != '') {
 					$date = $date . strtolower(str_replace('N', 'P', $matches[2][0])) . 'm';
 					$dateFormat = 'jM g:ia';
 				}
@@ -1035,8 +1040,9 @@ class Quote extends \yii\db\ActiveRecord
 					$dateFormat = 'Y' . $dateFormat;
 					$depDateTime = \DateTime::createFromFormat($dateFormat, $date);
 				}
+
 				$date = $arrDate . ' ' . $matches[1][1];
-				if ($matches[2][1] != '') {
+				if (isset($matches[2][1]) && $matches[2][1] != '') {
 					$date = $date . strtolower(str_replace('N', 'P', $matches[2][1])) . 'm';
 					$dateFormat = 'jM g:ia';
 				}
@@ -1052,7 +1058,7 @@ class Quote extends \yii\db\ActiveRecord
 					$arrDateTime = \DateTime::createFromFormat($dateFormat, $date);
 				}
 				$arrDepDiff = $depDateTime->diff($arrDateTime);
-				if ($arrDepDiff->d == 0 && !$arrDateInRow && !empty($matches[3][1])) {
+				if ($arrDepDiff->d == 0 && !$arrDateInRow && isset($matches[3][1]) && !empty($matches[3][1])) {
 					if ($matches[3][1] == "+") {
 						$matches[3][1] .= 1;
 					}
