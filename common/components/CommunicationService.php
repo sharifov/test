@@ -984,4 +984,16 @@ class CommunicationService extends Component implements CommunicationServiceInte
 
         return $out;
     }
+
+    public function sendDigitToConference(string $conferenceSid, string $digit): array
+    {
+        $data = [
+            'conferenceSid' => $conferenceSid,
+            'digit' => $digit,
+        ];
+
+        $response = $this->sendRequest('twilio-conference/send-digit', $data);
+
+        return $this->processConferenceResponse($response);
+    }
 }

@@ -9,6 +9,7 @@
             'returnHoldCallUrl': '',
             'ajaxHangupUrl': '',
             'callAddNoteUrl': '',
+            'sendDigitUrl': '',
         };
 
         this.init = function (settings) {
@@ -202,6 +203,26 @@
                 .fail(function () {
                     createNotify('Add Note', 'Server error', 'error');
                     call.unSetAddNoteRequestState();
+                });
+        };
+
+        this.sendDigit = function (conferenceSid, digit) {
+            $.ajax({
+                type: 'post',
+                data: {
+                    conference_sid: conferenceSid,
+                    digit: digit
+                },
+                url: this.settings.sendDigitUrl,
+                dataType: 'json'
+            })
+                .done(function (data) {
+                    if (data.error) {
+                        createNotify('Send digit', data.message, 'error');
+                    }
+                })
+                .fail(function () {
+                    createNotify('Send digit', 'Server error', 'error');
                 });
         };
     }

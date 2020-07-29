@@ -424,7 +424,8 @@ window.phoneWidget.events = {
       'unMuteUrl': '',
       'returnHoldCallUrl': '',
       'ajaxHangupUrl': '',
-      'callAddNoteUrl': ''
+      'callAddNoteUrl': '',
+      'sendDigitUrl': ''
     };
 
     this.init = function (settings) {
@@ -597,6 +598,24 @@ window.phoneWidget.events = {
       }).fail(function () {
         createNotify('Add Note', 'Server error', 'error');
         call.unSetAddNoteRequestState();
+      });
+    };
+
+    this.sendDigit = function (conferenceSid, digit) {
+      $.ajax({
+        type: 'post',
+        data: {
+          conference_sid: conferenceSid,
+          digit: digit
+        },
+        url: this.settings.sendDigitUrl,
+        dataType: 'json'
+      }).done(function (data) {
+        if (data.error) {
+          createNotify('Send digit', data.message, 'error');
+        }
+      }).fail(function () {
+        createNotify('Send digit', 'Server error', 'error');
       });
     };
   }
@@ -1945,6 +1964,8 @@ var PhoneWidgetPaneActive = function () {
     ReactDOM.render(React.createElement(AddNote, {
       call: call
     }), $addNoteContainer);
+    $(".dialpad_btn_active").attr('data-conference-sid', call.data.conferenceSid);
+    $("#call-pane__dial-number_active_dialpad").val('');
     contactInfo.load(call.data.contact);
     setCallSid(call.data.callSid);
     initControls();
@@ -1964,7 +1985,7 @@ var PhoneWidgetPaneActive = function () {
         active: false
       },
       dialpad: {
-        active: false
+        active: true
       }
     };
 
@@ -3010,7 +3031,7 @@ $(document).ready(function () {
   var dtmf = new Tone(context, 350, 440);
   var dialpadCurrentValue = null;
   var dialpadButtonTimer = null;
-  $('.dial__btn').on("mousedown touchstart", function (e) {
+  $('.dialpad_btn_init').on("mousedown touchstart", function (e) {
     e.preventDefault();
     var keyPressed = $(this).val();
     dialpadCurrentValue = keyPressed;
@@ -3043,6 +3064,24 @@ $(document).ready(function () {
 
     $('.call-pane__dial-number').focus();
   });
+  $('.dialpad_btn_active').on("mousedown touchstart", function (e) {
+    e.preventDefault();
+    var keyPressedFormatted = $(this).val();
+    var keyPressed = keyPressedFormatted === '✱' ? '*' : keyPressedFormatted;
+    let conferenceSid = $(this).attr('data-conference-sid'); // var frequencyPair = dtmfFrequencies[keyPressed];
+    // this sets the freq1 and freq2 properties
+    // dtmf.freq1 = frequencyPair.f1;
+    // dtmf.freq2 = frequencyPair.f2;
+    // if (dtmf.status == 0){
+    //     dtmf.start();
+    // }
+
+    let currentVal = $('#call-pane__dial-number_active_dialpad').val();
+    $('#call-pane__dial-number_active_dialpad').val(currentVal + keyPressedFormatted);
+    $('.call-pane__dial-clear-all').addClass('is-shown');
+    $('#call-pane__dial-number_active_dialpad').focus();
+    PhoneWidgetCall.callRequester.sendDigit(conferenceSid, keyPressed);
+  });
   $(window).on("mouseup touchend", function () {
     if (typeof dtmf !== "undefined" && dtmf.status) {
       dtmf.stop();
@@ -3051,12 +3090,16 @@ $(document).ready(function () {
     clearInterval(dialpadButtonTimer);
   }); //---------------------------------------------------
 
+  $('.call_pane_dialpad_clear_number_active_dialpad').on('click', function (e) {
+    e.preventDefault();
+    $('#call-pane__dial-number_active_dialpad').val('');
+  });
   $('.call_pane_dialpad_clear_number').on('click', function (e) {
     e.preventDefault();
     $('.call-pane__dial-number').val('').attr('readonly', false).prop('readonly', false);
     $('#call-to-label').text('');
     $('.suggested-contacts').removeClass('is_active');
-    $('.dial__btn').attr('disabled', false).removeClass('disabled'); // $(this).removeClass('is-shown')
+    $('.dialpad_btn_init').attr('disabled', false).removeClass('disabled'); // $(this).removeClass('is-shown')
   });
   $('.call_pane_dialpad_clear_number_disabled').on('click', function (e) {
     e.preventDefault();
@@ -4853,9 +4896,9 @@ var PhoneWidgetCall = function () {
 
   function dialpadCLickEvent() {
     $(document).on('click', '.call-pane-calling #wg-dialpad', function () {
-      //todo
-      return false;
-      $('.dial-popup').slideDown(150);
+      if ($(this).attr('data-active') === 'true') {
+        $('.dial-popup').slideDown(150);
+      }
     });
     $(document).on('click', '.dial-popup .additional-info__close', function () {
       $('.dial-popup').slideUp(150);
@@ -5113,7 +5156,8 @@ var PhoneWidgetCall = function () {
     removeIncomingRequest: removeIncomingRequest,
     sendHoldRequest: sendHoldRequest,
     sendUnHoldRequest: sendUnHoldRequest,
-    storage: storage
+    storage: storage,
+    callRequester: callRequester
   };
 }();
 

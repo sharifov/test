@@ -300,7 +300,7 @@ $(document).ready(function() {
     var dialpadCurrentValue = null;
     var dialpadButtonTimer = null;
 
-    $('.dial__btn').on("mousedown touchstart", function(e){
+    $('.dialpad_btn_init').on("mousedown touchstart", function(e){
         e.preventDefault();
 
         var keyPressed = $(this).val();
@@ -335,6 +335,31 @@ $(document).ready(function() {
         $('.call-pane__dial-number').focus();
     });
 
+    $('.dialpad_btn_active').on("mousedown touchstart", function(e){
+        e.preventDefault();
+
+        var keyPressedFormatted = $(this).val();
+        var keyPressed = keyPressedFormatted === '✱' ? '*' : keyPressedFormatted;
+        let conferenceSid = $(this).attr('data-conference-sid');
+
+        // var frequencyPair = dtmfFrequencies[keyPressed];
+        // this sets the freq1 and freq2 properties
+        // dtmf.freq1 = frequencyPair.f1;
+        // dtmf.freq2 = frequencyPair.f2;
+
+        // if (dtmf.status == 0){
+        //     dtmf.start();
+        // }
+
+        let currentVal = $('#call-pane__dial-number_active_dialpad').val();
+
+        $('#call-pane__dial-number_active_dialpad').val(currentVal + keyPressedFormatted);
+        $('.call-pane__dial-clear-all').addClass('is-shown');
+        $('#call-pane__dial-number_active_dialpad').focus();
+
+        PhoneWidgetCall.callRequester.sendDigit(conferenceSid, keyPressed);
+    });
+
     $(window).on("mouseup touchend", function(){
         if (typeof dtmf !== "undefined" && dtmf.status){
             dtmf.stop();
@@ -344,13 +369,17 @@ $(document).ready(function() {
 
     //---------------------------------------------------
 
+    $('.call_pane_dialpad_clear_number_active_dialpad').on('click', function(e) {
+        e.preventDefault();
+        $('#call-pane__dial-number_active_dialpad').val('');
+    });
     $('.call_pane_dialpad_clear_number').on('click', function(e) {
         e.preventDefault();
         $('.call-pane__dial-number').val('').attr('readonly', false).prop('readonly', false);
         $('#call-to-label').text('');
         $('.suggested-contacts').removeClass('is_active');
 
-        $('.dial__btn').attr('disabled', false).removeClass('disabled');
+        $('.dialpad_btn_init').attr('disabled', false).removeClass('disabled');
 
         // $(this).removeClass('is-shown')
     });

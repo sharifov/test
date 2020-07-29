@@ -44,6 +44,9 @@ var PhoneWidgetPaneActive = function () {
         ReactDOM.unmountComponentAtNode($addNoteContainer);
         ReactDOM.render(React.createElement(AddNote, {call: call}), $addNoteContainer);
 
+        $(".dialpad_btn_active").attr('data-conference-sid', call.data.conferenceSid);
+        $("#call-pane__dial-number_active_dialpad").val('');
+
         contactInfo.load(call.data.contact);
         setCallSid(call.data.callSid);
         initControls();
@@ -60,7 +63,7 @@ var PhoneWidgetPaneActive = function () {
                 show: btnTransferShow
             },
             addPerson: {active: false},
-            dialpad: {active: false},
+            dialpad: {active: true},
         };
         if (call.data.typeId === 3) {
             controls.hold.active = false;
