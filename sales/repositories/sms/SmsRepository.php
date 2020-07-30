@@ -36,6 +36,18 @@ class SmsRepository extends Repository
     }
 
     /**
+     * @param $sid
+     * @return Sms
+     */
+    public function findBySid($sid): Sms
+    {
+        if ($sms = Sms::findOne(['s_tw_message_sid' => $sid])) {
+            return $sms;
+        }
+        throw new NotFoundException('Sms is not found');
+    }
+
+    /**
      * @param Sms $sms
      * @return int
      */

@@ -924,6 +924,11 @@ class CommunicationService extends Component implements CommunicationServiceInte
 
     private function processConferenceResponse(\yii\httpclient\Response $response): array
     {
+        return $this->processResponse($response);
+    }
+
+    private function processResponse(\yii\httpclient\Response $response): array
+    {
         $out = ['error' => false, 'message' => '', 'result' => []];
 
         if ($response->isOk) {
@@ -932,8 +937,8 @@ class CommunicationService extends Component implements CommunicationServiceInte
                 $isError = (bool)($data['is_error'] ?? false);
                 if ($isError) {
                     $out['error'] = true;
-                    $out['message'] = $data['message'] ?? 'Undefined error message';
-                    \Yii::error(VarDumper::dumpAsString($response->data), 'Component:CommunicationService::processConferenceResponse:response');
+                    $out['message'] = (string)($data['message'] ?? 'Undefined error message');
+                    \Yii::error(VarDumper::dumpAsString($response->data), 'Component:CommunicationService::processResponse:response');
                 }
                 $out['result'] = $data['result'] ?? [];
             } else {
@@ -943,7 +948,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
         } else {
             $out['error'] = true;
             $out['message'] = 'Server error. Try again later.';
-            \Yii::error(VarDumper::dumpAsString($response->content), 'Component:CommunicationService::processConferenceResponse');
+            \Yii::error(VarDumper::dumpAsString($response->content), 'Component:CommunicationService::processResponse');
 		}
 
 	    return $out;
@@ -995,5 +1000,27 @@ class CommunicationService extends Component implements CommunicationServiceInte
         $response = $this->sendRequest('twilio-conference/send-digit', $data);
 
         return $this->processConferenceResponse($response);
+    }
+
+    public function getCallPrice(string $callSid): array
+    {
+        $data = [
+            'callSid' => $callSid,
+        ];
+
+       $response = $this->sendRequest('twilio/get-call-price', $data);
+
+       return $this->processResponse($response);
+    }
+
+    public function getSmsPrice(string $smsSid): array
+    {
+        $data = [
+            'smsSid' => $smsSid,
+        ];
+
+       $response = $this->sendRequest('twilio/get-sms-price', $data);
+
+       return $this->processResponse($response);
     }
 }
