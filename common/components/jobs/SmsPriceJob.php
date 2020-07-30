@@ -19,7 +19,7 @@ class SmsPriceJob implements JobInterface
         try {
             (\Yii::createObject(UpdateSmsPrice::class))->update($this->smsSid);
         } catch (\Throwable $e) {
-            \Yii::error($e->getMessage(), 'SmsPriceJob');
+            \Yii::info($e->getMessage(), 'info\SmsPriceJob');
         }
     }
 }

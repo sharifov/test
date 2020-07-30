@@ -19,7 +19,7 @@ class CallPriceJob implements JobInterface
         try {
             (\Yii::createObject(UpdateCallPrice::class))->update($this->callSid);
         } catch (\Throwable $e) {
-            \Yii::error($e->getMessage(), 'CallPriceJob');
+            \Yii::info($e->getMessage(), 'info\CallPriceJob');
         }
     }
 }
