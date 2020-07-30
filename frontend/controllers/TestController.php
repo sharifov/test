@@ -6,8 +6,10 @@ use common\components\CommunicationService;
 use common\components\ga\GaHelper;
 use common\components\ga\GaLead;
 use common\components\ga\GaQuote;
+use common\components\jobs\CallPriceJob;
 use common\components\jobs\CreateSaleFromBOJob;
 use common\components\jobs\SendLeadInfoToGaJob;
+use common\components\jobs\SmsPriceJob;
 use common\components\Purifier;
 use common\components\jobs\TelegramSendMessageJob;
 use common\components\RocketChat;
@@ -118,6 +120,7 @@ use sales\helpers\lead\LeadUrlHelper;
 use sales\helpers\payment\CreditCardHelper;
 use sales\helpers\query\QueryHelper;
 use sales\helpers\user\UserFinder;
+use sales\model\call\useCase\UpdateCallPrice;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\conference\service\ManageCurrentCallsByUserService;
 use sales\model\conference\useCase\DisconnectFromAllConferenceCalls;
@@ -244,6 +247,18 @@ class TestController extends FController
 
     public function actionTest()
     {
+//        $job = new SmsPriceJob();
+//        $job->smsSid = 'SMbf59aed897c2b059a9fcb995746f5b9c';
+//        Yii::$app->queue_job->push($job);
+
+        $job = new CallPriceJob();
+        $job->callSid = 'CA14e5d6623df4a3d428a95117bd175359';
+        Yii::$app->queue_job->push($job);
+
+//        $job = new CallPriceJob();
+//        $job->callSid = 'CAd6a42a1e827f8ef00cec041d6c6bc8b3';
+//        Yii::$app->queue_job->push($job);
+
         die;
         VarDumper::dump( Json::decode('{
     "message": {

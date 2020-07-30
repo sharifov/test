@@ -4,6 +4,7 @@ namespace common\models;
 
 use common\components\ChartTools;
 use common\components\CommunicationService;
+use common\components\jobs\SmsPriceJob;
 use common\models\query\SmsQuery;
 use DateTime;
 use modules\twilio\components\TwilioCommunicationService;
@@ -746,6 +747,17 @@ class Sms extends \yii\db\ActiveRecord
         if ($this->s_case_id && $this->sCase) {
             $this->sCase->updateLastAction();
         }
+
+        $isChangedStatus = array_key_exists('s_status_id', $changedAttributes);
+
+        if (($isChangedStatus || ($insert && $this->isIn())) && $this->s_tw_message_sid && $this->isEnded()) {
+            $createJob = (bool)(Yii::$app->params['settings']['sms_price_job'] ?? false);
+            if ($createJob) {
+                $job = new SmsPriceJob();
+                $job->smsSid = $this->s_tw_message_sid;
+                Yii::$app->queue_job->delay(60)->priority(10)->push($job);
+            }
+        }
     }
 
     public function isOut(): bool
@@ -761,5 +773,30 @@ class Sms extends \yii\db\ActiveRecord
     public function isDraft(): bool
     {
         return $this->s_type_id === self::TYPE_DRAFT;
+    }
+
+    public function setPrice($price): void
+    {
+        $this->s_tw_price = $price;
+    }
+
+    public function isDone(): bool
+    {
+        return $this->s_status_id === self::STATUS_DONE;
+    }
+
+    public function isCancel(): bool
+    {
+        return $this->s_status_id === self::STATUS_CANCEL;
+    }
+
+    public function isError(): bool
+    {
+        return $this->s_status_id === self::STATUS_ERROR;
+    }
+
+    public function isEnded(): bool
+    {
+        return $this->isDone() || $this->isCancel() || $this->isError();
     }
 }

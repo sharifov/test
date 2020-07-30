@@ -2,6 +2,7 @@
 
 namespace common\models;
 
+use common\components\jobs\CallPriceJob;
 use common\components\jobs\CheckClientCallJoinToConferenceJob;
 use common\components\purifier\Purifier;
 use common\models\query\CallQuery;
@@ -1319,10 +1320,10 @@ class Call extends \yii\db\ActiveRecord
 
         Notifications::pingUserMap();
 
-        $logEnable = Yii::$app->params['settings']['call_log_enable'] ?? false;
+        $isChangedTwStatus = array_key_exists('c_call_status', $changedAttributes);
 
+        $logEnable = Yii::$app->params['settings']['call_log_enable'] ?? false;
         if ($logEnable) {
-            $isChangedTwStatus = array_key_exists('c_call_status', $changedAttributes);
             $isChangedDuration = array_key_exists('c_call_duration', $changedAttributes);
             if (
                 Yii::$app->id === 'app-webapi'
@@ -1342,6 +1343,14 @@ class Call extends \yii\db\ActiveRecord
 //            }
         }
 
+        if ($isChangedTwStatus && $this->isCompletedTw()) {
+            $createJob = (bool)(Yii::$app->params['settings']['call_price_job'] ?? false);
+            if ($createJob) {
+                $job = new CallPriceJob();
+                $job->callSid = $this->c_call_sid;
+                Yii::$app->queue_job->delay(60)->priority(10)->push($job);
+            }
+        }
     }
 
     public static function getQueueName(Call $call): string
