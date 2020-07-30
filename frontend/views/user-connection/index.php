@@ -24,6 +24,13 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        //'tableOptions' => ['class' => 'table table-bordered table-condensed table-hover'],
+
+        'rowOptions' => static function (\common\models\UserConnection $model) {
+            if (!$model->uc_idle_state) {
+                return ['class' => 'danger'];
+            }
+        },
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
             'uc_id',
@@ -62,6 +69,22 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
             ],
             'uc_ip',
+            'uc_window_state:boolean',
+            [
+                'attribute' => 'uc_window_state_dt',
+                'value' => static function (\common\models\UserConnection $model) {
+                    return $model->uc_window_state_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->uc_window_state_dt), 'php: Y-m-d H:i:s') : $model->uc_window_state_dt;
+                },
+                'format' => 'raw',
+            ],
+            'uc_idle_state:boolean',
+            [
+                'attribute' => 'uc_idle_state_dt',
+                'value' => static function (\common\models\UserConnection $model) {
+                    return $model->uc_idle_state_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->uc_idle_state_dt), 'php: Y-m-d H:i:s') : $model->uc_idle_state_dt;
+                },
+                'format' => 'raw',
+            ],
             [
                 'attribute' => 'uc_created_dt',
                 'value' => static function (\common\models\UserConnection $model) {

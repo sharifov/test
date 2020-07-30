@@ -17,18 +17,22 @@ use yii\helpers\VarDumper;
  *
  * @property int $uc_id
  * @property int $uc_connection_id
- * @property int $uc_user_id
- * @property int $uc_lead_id
- * @property string $uc_user_agent
- * @property string $uc_controller_id
- * @property string $uc_action_id
- * @property string $uc_page_url
- * @property string $uc_ip
- * @property string $uc_created_dt
- * @property int $uc_case_id
- * @property string $uc_connection_uid
- * @property string $uc_app_instance
- * @property string $uc_sub_list
+ * @property int|null $uc_user_id
+ * @property int|null $uc_lead_id
+ * @property string|null $uc_user_agent
+ * @property string|null $uc_controller_id
+ * @property string|null $uc_action_id
+ * @property string|null $uc_page_url
+ * @property string|null $uc_ip
+ * @property string|null $uc_created_dt
+ * @property int|null $uc_case_id
+ * @property string|null $uc_connection_uid
+ * @property string|null $uc_app_instance
+ * @property string|null $uc_sub_list
+ * @property int|null $uc_window_state
+ * @property string|null $uc_window_state_dt
+ * @property int|null $uc_idle_state
+ * @property string|null $uc_idle_state_dt
  *
  * @property Cases $ucCase
  * @property Lead $ucLead
@@ -52,6 +56,7 @@ class UserConnection extends \yii\db\ActiveRecord
         return [
             [['uc_connection_id'], 'required'],
             [['uc_connection_id', 'uc_user_id', 'uc_lead_id', 'uc_case_id'], 'integer'],
+            [['uc_window_state', 'uc_idle_state'], 'boolean'],
             [['uc_connection_uid'], 'string', 'max' => 30],
             [['uc_connection_uid'], 'unique'],
             [['uc_user_agent', 'uc_sub_list'], 'string', 'max' => 255],
@@ -59,7 +64,7 @@ class UserConnection extends \yii\db\ActiveRecord
             [['uc_page_url'], 'string', 'max' => 500],
             [['uc_ip'], 'string', 'max' => 40],
             [['uc_app_instance'], 'string', 'max' => 20],
-            [['uc_created_dt'], 'safe'],
+            [['uc_created_dt', 'uc_window_state_dt', 'uc_idle_state_dt'], 'safe'],
             [['uc_case_id'], 'exist', 'skipOnError' => true, 'targetClass' => Cases::class, 'targetAttribute' => ['uc_case_id' => 'cs_id']],
             [['uc_lead_id'], 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['uc_lead_id' => 'id']],
             [['uc_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['uc_user_id' => 'id']],
@@ -86,6 +91,10 @@ class UserConnection extends \yii\db\ActiveRecord
             'uc_connection_uid' => 'Connection UID',
             'uc_app_instance' => 'App Instance',
             'uc_sub_list' => 'Subscribe List',
+            'uc_window_state' => 'Window State',
+            'uc_window_state_dt' => 'Window State Dt',
+            'uc_idle_state' => 'IDLE State',
+            'uc_idle_state_dt' => 'IDLE State Dt',
         ];
     }
 
@@ -205,6 +214,22 @@ class UserConnection extends \yii\db\ActiveRecord
             return 'con-' . $uc->uc_id;
         }
         return null;
+    }
+
+    /**
+     * @return bool
+     */
+    public static function isIdleMonitorEnabled(): bool
+    {
+        return \Yii::$app->params['settings']['idle_monitor_enabled'] ?? false;
+    }
+
+    /**
+     * @return int
+     */
+    public static function idleSeconds(): int
+    {
+        return \Yii::$app->params['settings']['idle_seconds'] ?? 0;
     }
 
 }

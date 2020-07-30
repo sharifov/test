@@ -332,10 +332,15 @@ class WebsocketServerController extends Controller
 
         $server->on('message', static function(Server $server, \Swoole\WebSocket\Frame $frame) {
             echo "- received message: {$frame->data}\n";
+
+            $data = json_decode($frame->data, true);
+
+            var_dump($data);
+
             $data['connection_info'] = $server->connection_info($frame->fd);
             //$data['client_info'] = $server->getClientInfo($frame->fd);
             $data['connection_list'] = $server->connection_list();
-            $data['data'] = $frame->data;
+            $data['data'] = $data;
             $data['dt'] = date('Y-m-d H:i:s');
             $server->push($frame->fd, json_encode($data));
         });

@@ -35,8 +35,8 @@ class UserConnectionSearch extends UserConnection
     public function rules()
     {
         return [
-            [['uc_id', 'uc_connection_id', 'uc_user_id', 'uc_lead_id', 'uc_case_id', 'dep_id'], 'integer'],
-            [['uc_user_agent', 'uc_controller_id', 'uc_action_id', 'uc_page_url', 'uc_ip', 'uc_created_dt', 'uc_connection_uid', 'uc_app_instance', 'uc_sub_list'], 'safe'],
+            [['uc_id', 'uc_connection_id', 'uc_user_id', 'uc_lead_id', 'uc_case_id', 'dep_id', 'uc_window_state', 'uc_idle_state'], 'integer'],
+            [['uc_user_agent', 'uc_controller_id', 'uc_action_id', 'uc_page_url', 'uc_ip', 'uc_created_dt', 'uc_connection_uid', 'uc_app_instance', 'uc_sub_list', 'uc_window_state_dt', 'uc_idle_state_dt'], 'safe'],
             ['ug_ids', 'each', 'rule' => ['integer']],
         ];
     }
@@ -86,6 +86,14 @@ class UserConnectionSearch extends UserConnection
                 ->andFilterWhere(['<=', 'uc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->uc_created_dt) + 3600 * 24)]);
         }
 
+        if (!empty($this->uc_idle_state_dt)) {
+            $query->andFilterWhere(['>=','uc_idle_state_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->uc_idle_state_dt))]);
+        }
+
+        if (!empty($this->uc_window_state_dt)) {
+            $query->andFilterWhere(['>=','uc_window_state_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->uc_window_state_dt))]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'uc_id' => $this->uc_id,
@@ -95,6 +103,8 @@ class UserConnectionSearch extends UserConnection
             'uc_case_id' => $this->uc_case_id,
             'uc_connection_uid' => $this->uc_connection_uid,
             'uc_app_instance' => $this->uc_app_instance,
+            'uc_idle_state' => $this->uc_idle_state,
+            'uc_window_state' => $this->uc_window_state,
 
         ]);
 

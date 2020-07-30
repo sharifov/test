@@ -14,6 +14,9 @@ use yii\helpers\Url;
 /* @var $this \yii\web\View */
 
 \frontend\assets\WebSocketAsset::register($this);
+if (\common\models\UserConnection::isIdleMonitorEnabled()) {
+    \frontend\assets\IdleAsset::register($this);
+}
 
 ?>
     <li>
@@ -23,6 +26,16 @@ use yii\helpers\Url;
                 <span class="badge" title="Open tabs"></span>
             <?php //php endif;*/?>
         </a>
+        <script>
+            function socketSend2(controller, action, params) {
+                let data = {};
+                data.с = controller;
+                data.a = action;
+                data.p = params;
+                console.log(data);
+                socket.send(JSON.stringify(data));
+            }
+        </script>
     </li>
 <?php
 // $userAgent = urlencode(Yii::$app->request->userAgent);
@@ -66,6 +79,7 @@ $js = <<<JS
         var msg = document.getElementById("message").value;
         socket.send(msg);
     }
+    
 
     const userId = '$userId';
     const wsUrl = '$wsUrl';
@@ -373,8 +387,30 @@ JS;
 } else {*/
 
     //if (Yii::$app->controller->module->id != 'user-management') {
-$this->registerJs($js, \yii\web\View::POS_READY);
-    //}
+$this->registerJs($js, \yii\web\View::POS_READY, 'connection-js');
+
+if (\common\models\UserConnection::isIdleMonitorEnabled()) {
+    $idleMs = \common\models\UserConnection::idleSeconds() * 1000;
+$js = <<<JS
+$(document).idle({
+    onIdle: function(){
+        console.log('I\'m idle');
+    },
+    onActive: function(){
+        console.log('Hey, I\'m back!');
+    },
+    onHide: function(){
+        console.log('I\'m hidden');
+    },
+    onShow: function(){
+        console.log('Hey, I\'m visible!');
+    },
+    idle: $idleMs
+});
+JS;
+
+    $this->registerJs($js, \yii\web\View::POS_READY, 'idle-js');
+}
 //}
 
 
