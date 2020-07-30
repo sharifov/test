@@ -707,7 +707,7 @@ use yii\helpers\Html;
                             if (conferenceBase) {
                                 let btnHold = $('.btn-hold-call');
                                 btnHold.prop('disabled', false);
-                                btnHold.html('<i class="fa fa-pause"></i> <span>Hold</span>');
+                                btnHold.html('<i class="fa fa-pause"></i> <span>On Hold</span>');
                                 btnHold.data('mode', 'unhold');
                                 btnHold.attr('data-call-sid', connection.parameters.CallSid);
                                 $('#btn-group-id-hold-call').show();

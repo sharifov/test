@@ -19,7 +19,7 @@
         this.hold = function (call) {
             //todo remove after removed old widget
             let btn = $('.btn-hold-call');
-            btn.html('<i class="fa fa-spinner fa-spin"> </i> <span>Hold</span>');
+            btn.html('<i class="fa fa-spinner fa-spin"> </i> <span>On Hold</span>');
             btn.prop('disabled', true);
 
             $.ajax({
@@ -50,7 +50,7 @@
         this.unHold = function (call) {
             //todo remove after removed old widget
             let btn = $('.btn-hold-call');
-            btn.html('<i class="fa fa-spinner fa-spin"> </i> <span>Unhold</span>');
+            btn.html('<i class="fa fa-spinner fa-spin"> </i> <span>Resume</span>');
             btn.prop('disabled', true);
 
             $.ajax({
@@ -62,16 +62,16 @@
             })
                 .done(function (data) {
                     if (data.error) {
-                        createNotify('UnHold', data.message, 'error');
-                        btn.html('<i class="fa fa-play"> </i> <span>Unhold</span>');
+                        createNotify('Resume', data.message, 'error');
+                        btn.html('<i class="fa fa-play"> </i> <span>Resume</span>');
                         btn.prop('disabled', false);
 
                         call.unSetHoldUnHoldRequestState();
                     }
                 })
                 .fail(function () {
-                    createNotify('UnHold', 'Server error', 'error');
-                    btn.html('<i class="fa fa-play"> </i> <span>Unhold</span>');
+                    createNotify('Resume', 'Server error', 'error');
+                    btn.html('<i class="fa fa-play"> </i> <span>Resume</span>');
                     btn.prop('disabled', false);
 
                     call.unSetHoldUnHoldRequestState();
