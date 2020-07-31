@@ -18,6 +18,7 @@ use common\models\UserProfile;
 use common\models\UserProjectParams;
 use sales\auth\Auth;
 use sales\entities\cases\Cases;
+use sales\helpers\UserCallIdentity;
 use sales\model\call\useCase\conference\create\CreateCallForm;
 use sales\model\user\entity\userStatus\UserStatus;
 use yii\base\Exception;
@@ -53,7 +54,7 @@ class PhoneController extends FController
         }*/
 
         $tw_number = '+15596489977';
-        $client = 'seller' . $user->id;
+        $client = UserCallIdentity::getId($user->id);
         return $this->render('index', [
             'client' => $client,
             'fromAgentPhone' => $tw_number,
@@ -153,10 +154,7 @@ class PhoneController extends FController
     public function actionGetToken()
     {
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        /** @var Employee $user */
-        $user = Yii::$app->user->identity;
-
-        $username = 'seller' . $user->id;
+        $username = UserCallIdentity::getId(Auth::id());
         //VarDumper::dump($username, 10, true); exit;
         $data = Yii::$app->communication->getJwtTokenCache($username, true);
         return $data;
@@ -446,7 +444,7 @@ class PhoneController extends FController
             }
 
             if (!$from) {
-                $from = 'client:seller' . Yii::$app->user->id;
+                $from = UserCallIdentity::getClientId(Auth::id());
             }
 
             $communication = \Yii::$app->communication;
@@ -854,7 +852,7 @@ class PhoneController extends FController
 //                    $call->c_is_new = true;
 //                    $call->c_created_dt = date('Y-m-d H:i:s');
 //                    $call->c_from = $dataCall['from']; //$from;
-//                    $call->c_to = 'client:seller' . $userId;//$result['data']['result']['forwardedFrom'] ?? null;
+//                    $call->c_to = UserCallIdentity::getClientId($userId);//$result['data']['result']['forwardedFrom'] ?? null;
 //                    $call->c_created_user_id = $userId;
 //                    // $call->c_lead_id = ($lead_id > 0) ? $lead_id : null;
 //                    // $call->c_case_id = ($case_id > 0) ? $case_id : null;
@@ -988,7 +986,7 @@ class PhoneController extends FController
                 $call->c_conference_sid,
                 $call->c_project_id,
                 $from,
-                'client:seller' . Auth::id(),
+                UserCallIdentity::getClientId(Auth::id()),
                 $source_type_id
             );
             Yii::$app->session->set($key, time());
@@ -1016,7 +1014,7 @@ class PhoneController extends FController
             }
 
             $form->user_id = Auth::id();
-            $form->caller = 'client:seller' . Auth::id();
+            $form->caller = UserCallIdentity::getClientId(Auth::id());
 
             if (!$form->validate()) {
                 throw new BadRequestHttpException('Request error: ' . VarDumper::dumpAsString($form->getErrors()));

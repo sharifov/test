@@ -8,6 +8,7 @@ use common\models\CallUserAccess;
 use common\models\Conference;
 use common\models\Notifications;
 use frontend\widgets\newWebPhone\call\socket\RemoveIncomingRequestMessage;
+use sales\helpers\UserCallIdentity;
 use yii\helpers\VarDumper;
 
 /**
@@ -80,7 +81,7 @@ class ReturnToHoldCall
                 $parentCallSid,
                 $conference->cf_friendly_name,
                 $conference->cf_sid,
-                'client:seller' . $userId,
+                UserCallIdentity::getClientId($userId),
                 $userId
             );
             $isError = (bool)($result['error'] ?? true);

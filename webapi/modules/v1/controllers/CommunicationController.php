@@ -25,6 +25,7 @@ use frontend\widgets\newWebPhone\sms\socket\Message;
 use frontend\widgets\notification\NotificationMessage;
 use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
+use sales\helpers\UserCallIdentity;
 use sales\model\call\form\CallCustomParameters;
 use sales\model\callLog\services\CallLogConferenceTransferService;
 use sales\model\callLog\services\CallLogTransferService;
@@ -645,7 +646,11 @@ class CommunicationController extends ApiBaseController
                 $call->c_from = $callOriginalData['From'] ?? null;
                 $call->c_to = $callOriginalData['To'] ?? null;
                 $call->c_caller_name = $callOriginalData['Caller'] ?? null;
-                $agentId = (int) str_replace('client:seller', '', $call->c_from);
+                if (UserCallIdentity::canParse($call->c_from)) {
+                    $agentId = UserCallIdentity::parseUserId($call->c_from);
+                } else {
+                    $agentId = null;
+                }
 
                 if(isset($callData['c_project_id']) && $callData['c_project_id']) {
                     $call->c_project_id = (int) $callData['c_project_id'];
@@ -853,7 +858,7 @@ class CommunicationController extends ApiBaseController
             }*/
 
             if (!$call->save()) {
-                Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceDefault:Call:save');
+                Yii::error(VarDumper::dumpAsString(['errors' => $call->errors, 'call' => $call->getAttributes()]), 'API:Communication:voiceDefault:Call:save');
                 $response['error'] = 'Error in method voiceDefault. ' . $call->getErrorSummary(false)[0];
             }
 
@@ -1193,8 +1198,8 @@ class CommunicationController extends ApiBaseController
         $agentId = null;
 
         if (isset($callData['Called']) && $callData['Called']) {
-            if(strpos($callData['Called'], 'client:seller') !== false) {
-                $agentId = (int) str_replace('client:seller', '', $callData['Called']);
+            if (UserCallIdentity::canParse($callData['Called'])) {
+                $agentId = UserCallIdentity::parseUserId($callData['Called']);
             }
         }
 
@@ -1305,8 +1310,8 @@ class CommunicationController extends ApiBaseController
 //				'record' => 'record-from-answer-dual',
 //				'recordingStatusCallback' =>  Yii::$app->params['host'] . '/v1/twilio-jwt/recording-callback',
 //			]);
-//			$dial->client('seller'.$user->id);
-			$response['agent_username'][] = 'seller'.$user->id;
+//			$dial->client(UserCallIdentity::getId($user->id));
+			$response['agent_username'][] = UserCallIdentity::getId($user->id);
 			$responseTwml = null;
 		}
 
