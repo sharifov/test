@@ -540,12 +540,6 @@ $(document).on('click', '.client-chat-send-offer', function(e) {
         if (xhr.status != 200) {
             createNotify('Error', xhr.responseText, 'error');
         }
-    });
-    
-    $("#pjax-cc-submit-transfer").on("pjax:end", function (obj, xhr) {           
-        if (xhr.status != 200) {
-            createNotify('Error', xhr.responseText, 'error');
-        }
     }); 
 
 $(document).on('click', '.create_lead', function (e) {
