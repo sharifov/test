@@ -177,6 +177,8 @@ class ChatBot extends Component
             'userId' => $userId
         ];
 
+        \Yii::info(VarDumper::dumpAsString($data, 10), 'ChatBotComponent');
+
         $response = $this->sendRequest('livechat/assign-agent', $data, 'post');
 
         if ($response->isOk) {
