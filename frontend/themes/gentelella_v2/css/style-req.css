@@ -5900,24 +5900,15 @@ input[disabled] + .radio-tab__text {
 }
 
 .chat-relative-time {
-  font-size: 11px;
   font-style: italic;
-  font-weight: bold;
-  position: absolute;
-  right: 30px;
 }
 
 .chat-relative-time.first {
-  font-size: 11px;
-  font-style: italic;
-  font-weight: bold;
-  position: absolute;
-  right: 500px;
+
 }
 
 i.icon-pulse{
   text-decoration:none;
-  /*color:#f00;*/
 }
 .icon-pulse{
   -webkit-animation: pulse 2s ease-in;
@@ -5948,4 +5939,35 @@ i.icon-pulse{
     -webkit-transform: scale(2.4);
     opacity: 0.0;
   }
+}
+
+.card-body.card-monitor {
+  padding: 0;
+}
+.chat-monitor-th {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.blinking{
+  animation:blinkingText 1.2s infinite;
+}
+
+@keyframes blinkingText{
+  0%{     color: #FF0000;    }
+  49%{    color: #FF0000; }
+  60%{    color: transparent; }
+  99%{    color:transparent;  }
+  100%{   color: #FF0000;    }
+}
+
+td.selected-cell {
+  -webkit-animation: pulse-border 1s infinite !important;
+  position: relative;
+  z-index: 1;
+}
+
+@-webkit-keyframes pulse-border {
+  from, to { box-shadow: 0 0 0 0 red;}
+  0% { box-shadow: 0 0 0 2px red; }
 }
