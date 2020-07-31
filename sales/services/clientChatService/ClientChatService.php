@@ -107,6 +107,7 @@ class ClientChatService
 	public function assignAgentToRcChannel(string $rid, string $userId): void
 	{
 		$response = \Yii::$app->chatBot->assignAgent($rid, $userId);
+		\Yii::error(VarDumper::dumpAsString($response, 10), 'ChatBotService:assignAgent');
 		if ($response['error']) {
 			$error = Json::decode($response['error']);
 			throw new \RuntimeException('[Chat Bot] ' . $error['data']['error'] ?? 'Unknown error...', ClientChatCodeException::RC_ASSIGN_AGENT_FAILED);
