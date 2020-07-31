@@ -121,7 +121,7 @@ class ChatBot extends Component
                 $out['error'] = 'Not found in response array';
             }
         } else {
-            $out['error'] = $response->content;
+            $out['error'] = Json::decode($response->content);
             \Yii::error(VarDumper::dumpAsString(['rid' => $rid, 'error' => $out['error']], 10), 'ChatBot:endConversation');
         }
 

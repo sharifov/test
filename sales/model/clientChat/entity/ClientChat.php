@@ -328,4 +328,9 @@ class ClientChat extends \yii\db\ActiveRecord
         }
         return false;
 	}
+
+	public function isOwner(int $userId): bool
+	{
+		return $this->cch_owner_user_id === $userId;
+	}
 }
