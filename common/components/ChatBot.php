@@ -178,6 +178,7 @@ class ChatBot extends Component
         ];
 
         \Yii::info(VarDumper::dumpAsString($data, 10), 'info\ChatBotComponent');
+        \Yii::info(VarDumper::dumpAsString($this->request->getHeaders(), 10), 'info\ChatBotComponent');
 
         $response = $this->sendRequest('livechat/assign-agent', $data, 'post');
 
