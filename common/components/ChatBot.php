@@ -179,9 +179,7 @@ class ChatBot extends Component
 
         $response = $this->sendRequest('livechat/assign-agent', $data, 'post');
 
-
         if ($response->isOk) {
-        	var_dump($response->isOk);die;
             if (!empty($response->data)) {
                 $out['data'] = $response->data;
             } else {
