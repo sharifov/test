@@ -181,6 +181,7 @@ class ChatBot extends Component
 
 
         if ($response->isOk) {
+        	var_dump($response->data);die;
             if (!empty($response->data)) {
                 $out['data'] = $response->data;
             } else {
@@ -190,7 +191,6 @@ class ChatBot extends Component
             $out['error'] = $response->content;
             \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'ChatBot:assignAgent');
         }
-		\Yii::error(VarDumper::dumpAsString($out), 'ChatBot:assignAgent');
 
         return $out;
     }
