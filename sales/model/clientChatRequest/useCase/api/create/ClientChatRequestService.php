@@ -273,19 +273,5 @@ class ClientChatRequestService
         CentrifugoService::sendMsg(json_encode([
             'chatMessageData' => $data,
         ]), 'realtimeClientChatChannel');
-
-        /*$user = $clientChat->cchOwnerUser;
-        $dateTime = $message->ccm_sent_dt;
-        $formatter = new \Yii::$app->formatter;
-        if ($user->timezone) {
-            $formatter->timeZone = $user->timezone;
-        }
-        Notifications::publish('clientChatUpdateTimeLastMessage', ['user_id' => $clientChat->cch_owner_user_id], [
-            'data' => [
-                'dateTime' =>  $formatter->asRelativeTime(strtotime($dateTime)),
-                'moment' =>  round((time() - strtotime($dateTime))),
-                'cchId' => $clientChat->cch_id,
-            ]
-        ]);*/
     }
 }
