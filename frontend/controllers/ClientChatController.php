@@ -336,6 +336,7 @@ class ClientChatController extends FController
 				$result['notifyType'] = 'error';
 			}
 		} catch (\Throwable $e) {
+			\Yii::error(VarDumper::dumpAsString($e), 'ClientChatController::actionAccessManage::Throwable');
 			\Yii::error(AppHelper::throwableFormatter($e), 'ClientChatController::actionAccessManage::Throwable');
 			$result['notifyMessage'] = 'Internal Server Error';
 			$result['notifyTitle'] = 'Error';

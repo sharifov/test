@@ -109,7 +109,7 @@ class ClientChatService
 		$response = \Yii::$app->chatBot->assignAgent($rid, $userId);
 		if ($response['error']) {
 			$error = Json::decode($response['error']);
-			throw new \RuntimeException($error['data']['error'], ClientChatCodeException::RC_ASSIGN_AGENT_FAILED);
+			throw new \RuntimeException('[Chat Bot] ' . $error['data']['error'], ClientChatCodeException::RC_ASSIGN_AGENT_FAILED);
 		}
 	}
 
