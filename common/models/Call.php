@@ -6,6 +6,7 @@ use common\components\jobs\CallPriceJob;
 use common\components\jobs\CheckClientCallJoinToConferenceJob;
 use common\components\purifier\Purifier;
 use common\models\query\CallQuery;
+use sales\helpers\UserCallIdentity;
 use sales\model\call\helper\CallHelper;
 use frontend\widgets\newWebPhone\call\socket\MissedCallMessage;
 use frontend\widgets\newWebPhone\call\socket\RemoveIncomingRequestMessage;
@@ -1479,7 +1480,7 @@ class Call extends \yii\db\ActiveRecord
                     $res = \Yii::$app->communication->acceptConferenceCall(
                         $call->c_id,
                         $call->c_call_sid,
-                        'client:seller' . $user_id,
+                        UserCallIdentity::getClientId($user_id),
                         $call->c_from,
                         $user_id
                     );
@@ -1497,7 +1498,7 @@ class Call extends \yii\db\ActiveRecord
                     }
 
                 } else {
-                    $agent = 'seller' . $user_id;
+                    $agent = UserCallIdentity::getId($user_id);
                     $res = \Yii::$app->communication->callRedirect($call->c_call_sid, 'client', $call->c_from, $agent);
 
                     Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $user_id], RemoveIncomingRequestMessage::create($call->c_call_sid));

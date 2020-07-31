@@ -28,5 +28,7 @@ return [
         'method'    => 'aes-256-cbc',
         'password'  => '{{ common.config.params.crypt.password:str }}',
         'iv'        => '{{ common.config.params.crypt.iv:str }}',
-    ]
+    ],
+
+    'appEnv' => 'stage',
 ];

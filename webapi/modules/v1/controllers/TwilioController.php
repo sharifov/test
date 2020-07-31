@@ -12,6 +12,7 @@ use common\models\Sms;
 use modules\twilio\src\entities\conferenceLog\ConferenceLog;
 use modules\twilio\src\services\sms\SmsCommunicationService;
 use sales\helpers\app\AppHelper;
+use sales\helpers\UserCallIdentity;
 use sales\model\user\entity\userStatus\UserStatus;
 use sales\model\phoneList\entity\PhoneList;
 use Twilio\TwiML\MessagingResponse;
@@ -1208,7 +1209,7 @@ class TwilioController extends ApiBaseNoAuthController
 				$call->c_call_type_id = $parentCall->c_call_type_id;
 			} else {
 
-				if (strpos($call->c_from, 'client:') !== false) {
+				if (strpos($call->c_from, UserCallIdentity::getClientPrefix()) !== false) {
 					$call->setTypeOut();
 				} else {
 					$call->setTypeIn();

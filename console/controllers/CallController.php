@@ -9,6 +9,7 @@ use common\models\Sources;
 use common\models\UserProfile;
 use console\helpers\OutputHelper;
 use sales\helpers\app\AppHelper;
+use sales\helpers\UserCallIdentity;
 use yii\console\Controller;
 use Yii;
 use yii\helpers\Console;
@@ -230,7 +231,7 @@ class CallController extends Controller
                                 if($projectUser && $projectUser->userProfile && $projectUser->userProfile->up_call_type_id === UserProfile::CALL_TYPE_WEB) {
                                         $user = $projectUser;
                                         if ($user->isOnline() && $user->isCallStatusReady() && $user->isCallFree()) {
-                                            $agent = 'seller' . $user->id;
+                                            $agent = UserCallIdentity::getId($user->id);
                                             echo 'Find agent:'. $agent . PHP_EOL;
                                             $res = $communicationService->callRedirect($call->c_call_sid, 'client', $call->c_from, $agent);
                                             if($res && isset($res['error']) && $res['error'] === false) {
