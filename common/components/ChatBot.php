@@ -181,7 +181,7 @@ class ChatBot extends Component
 
 
         if ($response->isOk) {
-        	var_dump($response->data);die;
+        	var_dump($response->isOk);die;
             if (!empty($response->data)) {
                 $out['data'] = $response->data;
             } else {
