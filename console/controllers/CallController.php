@@ -50,6 +50,34 @@ class CallController extends Controller
 	}
 
     /**
+     * @param int $days
+     */
+    public function actionCleaner(int $days = 10): void
+    {
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
+
+        $processed = 0;
+        $timeStart = microtime(true);
+        $dtOlder = (new \DateTime('now'))->modify('-' . $days . ' days')->format('Y-m-d H:i:s');
+
+        try {
+            $processed = Call::deleteAll(['<=', 'c_created_dt', $dtOlder]);
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableFormatter($throwable),
+            'CallController:actionCleaner');
+            echo Console::renderColoredString('%r --- Error : ' . $throwable->getMessage() . ' %n'), PHP_EOL;
+        }
+
+        $timeEnd = microtime(true);
+        $time = number_format(round($timeEnd - $timeStart, 2), 2);
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .
+            ' s] %g Processed: %w[' . $processed . '] %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+    }
+
+    /**
      * @param int|null $ringingMinutes
      * @param int|null $queueMinutes
      * @param int|null $inProgressMinutes
