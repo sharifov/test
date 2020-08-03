@@ -31,23 +31,22 @@ function channelConnector(chName)
             getLastChatsUpdate(enableLiveUpdate)
             if (messageObj.chatsData.length > 0){               
                 updateLocalTime()
-                updateMessagesRelativeTime()
+                //updateMessagesRelativeTime()
             }           
         }
         
         if(messageObj.chatMessageData){
-            let newMsg = messageObj.chatMessageData
-            
+            let newMsg = messageObj.chatMessageData            
             if(newMsg.client_id && !newMsg.user_id){               
                 //console.log(newMsg)
-                renderNewClientMessage(newMsg.chat_id, newMsg.client_id, newMsg.msg, newMsg.sent_dt)                
+                renderNewClientMessage(newMsg.chat_id, newMsg.client_id, newMsg.msg, newMsg.sent_dt, newMsg.period)                
             }
             
             if (newMsg.client_id && newMsg.user_id){               
                 //console.log(newMsg)
-                renderNewAgentMessage(newMsg.chat_id, newMsg.user_id, newMsg.msg, newMsg.sent_dt)
+                renderNewAgentMessage(newMsg.chat_id, newMsg.user_id, newMsg.msg, newMsg.sent_dt, newMsg.period)
             }             
-            updateMessagesRelativeTime()
+            //updateMessagesRelativeTime()
             updateLocalTime()
         }
     });
@@ -152,13 +151,13 @@ function renderChat(chat) {
                                 renderAgentInfo(chat.cch_id, chat.cch_owner_user_id, chat.username, chat.outMsg, chat.email) +
                             '</td>' +                            
                             '<td id=m-cell-'+ chat.cch_id + '-'+ chat.cch_owner_user_id + ' class="text-left" style="width:450px">' +                        
-                                renderAgentMessage(chat.cch_id, chat.cch_owner_user_id, chat.username, chat.agent_msg_date, chat.latest_agent_msg) +
+                                renderAgentMessage(chat.cch_id, chat.cch_owner_user_id, chat.username, chat.agent_msg_date, chat.latest_agent_msg, chat.agent_msg_period) +
                             '</td>' +
                             '<td class="text-left" style="width:250px">' +
                                 renderClientInfo(chat.cch_id, chat.cch_client_id, chat.clientName, chat.inMsg) +
                             '</td>' + 
                             '<td id=m-cell-'+ chat.cch_id + '-'+ chat.cch_client_id + ' class="text-left" style="width:450px">' +                            
-                                renderClientMessage(chat.cch_id, chat.cch_client_id, chat.clientName, chat.client_msg_date, chat.latest_client_msg) +
+                                renderClientMessage(chat.cch_id, chat.cch_client_id, chat.clientName, chat.client_msg_date, chat.latest_client_msg, chat.client_msg_period) +
                             '</td>' +
                         '</tr>' +
                     '</tbody>' +
@@ -203,22 +202,26 @@ function renderAdditionalInfo(departmentName, channelName){
     return html;
 }
 
-function renderAgentMessage(chatID, agentID, agentName, msgDate, latestMsg){
+function renderAgentMessage(chatID, agentID, agentName, msgDate, latestMsg, period){
     let html = '';
     
     if(!agentName){
-      agentName = "...";
+       agentName = "...";
     }
     
     if(!agentID){
-      agentID = "";
+       agentID = "";
+    }
+    
+    if(!period){
+       period = "";
     }
     
     let msgLocator = chatID + '-' + agentID;    
         
     html+= '<div class="media event">' +                                  
                 '<div class="media-body">' +                
-                     '<p><i class="fa fa-clock"></i> '+ msgDate +' <strong title="'+ msgDate +'" id="time-'+ msgLocator +'" class="chat-relative-time first"> </strong></p>' +
+                     '<p><i class="fa fa-clock"></i> '+ msgDate +' <strong id="time-'+ msgLocator +'" class="chat-relative-time first">'+ period +'</strong></p>' +
                      '<p><i id="icn-'+ msgLocator +'" class="fa fa-comment-o blue"></i> <small id="'+ msgLocator +'">'+ latestMsg +'</small>' +
                      '</p>' +
                 '</div>' +
@@ -226,7 +229,7 @@ function renderAgentMessage(chatID, agentID, agentName, msgDate, latestMsg){
     return html;                                    
 }
 
-function renderClientMessage(chatID, clientID, clientName, msgDate, latestMsg){
+function renderClientMessage(chatID, clientID, clientName, msgDate, latestMsg, period){
     let html = '';
     
     if(!clientName){
@@ -237,10 +240,14 @@ function renderClientMessage(chatID, clientID, clientName, msgDate, latestMsg){
       clientID = "";
     }
     
+    if(!period){
+       period = "";
+    }
+    
     let msgLocator = chatID + '-' + clientID;
     html+= '<div class="media event">' +                                  
                 '<div class="media-body">' +                     
-                      '<p><i class="fa fa-clock"></i> '+ msgDate +' <strong title="'+ msgDate +'" id="time-'+ msgLocator +'" class="chat-relative-time"> </strong></p>' +
+                      '<p><i class="fa fa-clock"></i> '+ msgDate +' <strong id="time-'+ msgLocator +'" class="chat-relative-time">'+ period +'</strong></p>' +
                       '<p><i id="icn-'+ msgLocator +'" class="fa fa-comment-o blue"></i> <small id="'+ msgLocator +'">'+ latestMsg +'</small>' +
                       '</p>' +
                 '</div>' +
@@ -248,10 +255,12 @@ function renderClientMessage(chatID, clientID, clientName, msgDate, latestMsg){
     return html;
 }
 
-function renderNewClientMessage(chatID, clientID, msgBody, createdDt) {
+function renderNewClientMessage(chatID, clientID, msgBody, createdDt, period) {
     let msgLocator = chatID + '-' + clientID;
+    console.log(period)
     $('#' + msgLocator).text(msgBody);
-    $('#time-' + msgLocator).prop('title', createdDt);
+    //$('#time-' + msgLocator).prop('title', createdDt);
+    $('#time-' + msgLocator).text(period);
     $('#count-' + msgLocator).text(parseInt($('#count-' + msgLocator).text()) + 1)
     //$('#icn-' + msgLocator).addClass('blinking')
     //removeBlinking(msgLocator)
@@ -264,10 +273,11 @@ function renderNewClientMessage(chatID, clientID, msgBody, createdDt) {
     pushChatOnTop(chatID)
 }
 
-function renderNewAgentMessage(chatID, agentID, msgBody, createdDt) {
+function renderNewAgentMessage(chatID, agentID, msgBody, createdDt, period) {
     let msgLocator = chatID + '-' + agentID;
     $('#' + msgLocator).text(msgBody);
-    $('#time-' + msgLocator).prop('title', createdDt);   
+    //$('#time-' + msgLocator).prop('title', createdDt);   
+    $('#time-' + msgLocator).text(period);   
     $('#count-' + msgLocator).text(parseInt($('#count-' + msgLocator).text()) + 1)
     //$('#icn-' + msgLocator).addClass('blinking')
     //removeBlinking(msgLocator) 
@@ -280,7 +290,7 @@ function renderNewAgentMessage(chatID, agentID, msgBody, createdDt) {
     pushChatOnTop(chatID)
 }
 
-function updateMessagesRelativeTime() {
+/*function updateMessagesRelativeTime() {
     $('.chat-relative-time').each(function(i, obj) {
         if(obj.title){
             $(this).text(calculateRelativeTime(obj.title))
@@ -312,7 +322,7 @@ function calculateRelativeTime(date) {
     } else {
         return Math.round(elapsed/msPerYear ) + ' years ago';
     }
-}
+}*/
 
 function renderClientInfo(chatID, clientID, clientName, inMsgCount){
    let html = '';

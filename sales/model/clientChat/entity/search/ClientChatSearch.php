@@ -265,7 +265,9 @@ class ClientChatSearch extends ClientChat
             $clientChats[$key]['inMsg'] = 0;
 
             $clientChats[$key]['client_msg_date'] = '';
+            $clientChats[$key]['client_msg_date'] = '';
             $clientChats[$key]['latest_client_msg'] = '';
+            $clientChats[$key]['agent_msg_period'] = '';
             $clientChats[$key]['agent_msg_date'] = '';
             $clientChats[$key]['latest_agent_msg'] = '';
 
@@ -281,11 +283,13 @@ class ClientChatSearch extends ClientChat
                 if ($chat['cch_id'] == $msg['ccm_cch_id'])
                 {
                     if (!is_null($msg['ccm_client_id']) && is_null($msg['ccm_user_id'])){
+                        $clientChats[$key]['client_msg_period'] = \Yii::$app->formatter->asRelativeTime(strtotime($msg['latest_data']));
                         $clientChats[$key]['client_msg_date'] = \Yii::$app->formatter->asDatetime(strtotime($msg['latest_data']), 'php: Y-m-d H:i:s');
                         $clientChats[$key]['latest_client_msg'] = $msg['msg'];
                     }
 
                     if (!is_null($msg['ccm_client_id']) && !is_null($msg['ccm_user_id'])) {
+                        $clientChats[$key]['agent_msg_period'] = \Yii::$app->formatter->asRelativeTime(strtotime($msg['latest_data']));
                         $clientChats[$key]['agent_msg_date'] = \Yii::$app->formatter->asDatetime(strtotime($msg['latest_data']), 'php: Y-m-d H:i:s');
                         $clientChats[$key]['latest_agent_msg'] = $msg['msg'];
                     }
