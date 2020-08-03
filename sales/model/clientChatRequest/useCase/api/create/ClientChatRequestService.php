@@ -262,7 +262,7 @@ class ClientChatRequestService
         ]);
     }
 
-    public function sendLastChatMessageToMonitor(ClientChatMessage $message): void
+    public function sendLastChatMessageToMonitor(ClientChat $clientChat, ClientChatMessage $message): void
     {
         $data = [];
         $data['chat_id'] = $message->ccm_cch_id;
