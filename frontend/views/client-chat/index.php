@@ -340,6 +340,7 @@ $(document).on('click', '.cc_transfer', function (e) {
             modal.find('.modal-body').html(data);
         },
         error: function (xhr) {
+            modal.modal('hide');
             createNotify('Error', xhr.responseText, 'error');
         },
     });
@@ -533,9 +534,12 @@ $(document).on('click', '.client-chat-send-offer', function(e) {
         $("#btn-submit-note i").attr("class", "fa fa-cog fa-spin fa-fw");
     });
     
-    $("#pjax-notes").on("pjax:end", function () {           
+    $("#pjax-notes").on("pjax:end", function (obj, xhr) {           
         $("#btn-submit-note").prop("disabled", false).removeClass("disabled");
         $("#btn-submit-note i").attr("class", "fa fa-plus");
+        if (xhr.status != 200) {
+            createNotify('Error', xhr.responseText, 'error');
+        }
     }); 
 
 $(document).on('click', '.create_lead', function (e) {
@@ -558,13 +562,12 @@ $(document).on('click', '.create_lead', function (e) {
             modal.find('.modal-title').html(modalTitle);
             $('#preloader').addClass('d-none');
         },
-        error: function () {
-            new PNotify({
-                title: 'Error',
-                type: 'error',
-                text: 'Internal Server Error. Try again letter.',
-                hide: true
-            });
+        error: function (xhr) {
+            if (xhr.status === 403) {
+                createNotify('Error', xhr.responseText, 'error');
+            } else {
+                createNotify('Error', 'Internal Server Error. Try again letter.', 'error');
+            }
             setTimeout(function () {
                 $('#modal-md').modal('hide');
             }, 300)
@@ -592,13 +595,12 @@ $(document).on('click', '.create_case', function (e) {
             modal.find('.modal-title').html(modalTitle);
             $('#preloader').addClass('d-none');
         },
-        error: function () {
-            new PNotify({
-                title: 'Error',
-                type: 'error',
-                text: 'Internal Server Error. Try again letter.',
-                hide: true
-            });
+        error: function (xhr) {
+            if (xhr.status === 403) {
+                createNotify('Error', xhr.responseText, 'error');
+            } else {
+                createNotify('Error', 'Internal Server Error. Try again letter.', 'error');
+            }
             setTimeout(function () {
                 $('#modal-md').modal('hide');
             }, 300)

@@ -121,7 +121,7 @@ class ChatBot extends Component
                 $out['error'] = 'Not found in response array';
             }
         } else {
-            $out['error'] = $response->content;
+            $out['error'] = Json::decode($response->content);
             \Yii::error(VarDumper::dumpAsString(['rid' => $rid, 'error' => $out['error']], 10), 'ChatBot:endConversation');
         }
 
@@ -207,8 +207,7 @@ class ChatBot extends Component
             }
         } else {
             $out['error'] = $response->content;
-			\Yii::info('ChatBot send headers: ' . VarDumper::dumpAsString($this->request->headers, 10), 'info\ChatBotSendRequest');
-			\Yii::error(VarDumper::dumpAsString($out['error'], 10) . '; Request Data: ' . VarDumper::dumpAsString($data, 10) . '; Headers: ' . VarDumper::dumpAsString($response->headers, 10), 'ChatBot:sendMessage');
+			\Yii::error(VarDumper::dumpAsString($out['error'], 10), 'ChatBot:sendMessage');
         }
 
         return $out;

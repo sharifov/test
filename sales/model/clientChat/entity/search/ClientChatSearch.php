@@ -8,6 +8,7 @@ use yii\data\ActiveDataProvider;
 use sales\model\clientChat\entity\ClientChat;
 use yii\data\ArrayDataProvider;
 use yii\data\SqlDataProvider;
+use yii\db\Expression;
 use yii\db\Query;
 
 /**
@@ -216,6 +217,7 @@ class ClientChatSearch extends ClientChat
             'cch_created_dt',
             'cch_owner_user_id',
             'username',
+            'COALESCE(MD5(email), " ") as email',
             'CONCAT(COALESCE(c.first_name, " "), " ", COALESCE(c.last_name, " ") ) as clientName',
             'p.name as project',
             'd.dep_name as department',
@@ -242,16 +244,63 @@ class ClientChatSearch extends ClientChat
         $msgCmd = $queryMessages->createCommand();
         $chatMessages = $msgCmd->queryAll();
 
-        //var_dump($msgCmd); die();
+        $queryLastClientMsg = ClientChatMessage::find();
+        $queryLastClientMsg->select([
+            'each_item.ccm_cch_id',
+            'latest_data',
+            'ccm_client_id',
+            'ccm_user_id',
+            new Expression("ccm_body->>'msg' as msg")
+        ]);
+        $queryLastClientMsg->innerJoin('(SELECT ccm_cch_id, MAX(ccm_sent_dt) AS latest_data FROM client_chat_message AS st 
+                       where ccm_client_id IS NOT NULL and ccm_user_id IS NULL GROUP BY ccm_cch_id) AS each_item', 'each_item.latest_data = client_chat_message.ccm_sent_dt AND each_item.ccm_cch_id = client_chat_message.ccm_cch_id');
+
+        $queryLastAgentMsg = ClientChatMessage::find();
+        $queryLastAgentMsg->select([
+            'each_item.ccm_cch_id',
+            'latest_data',
+            'ccm_client_id',
+            'ccm_user_id',
+            new Expression("ccm_body->>'msg' as msg")
+        ]);
+        $queryLastAgentMsg->innerJoin('(SELECT ccm_cch_id, MAX(ccm_sent_dt) AS latest_data FROM client_chat_message AS st 
+                       where ccm_client_id IS NOT NULL and ccm_user_id IS NOT NULL GROUP BY ccm_cch_id) AS each_item', 'each_item.latest_data = client_chat_message.ccm_sent_dt AND each_item.ccm_cch_id = client_chat_message.ccm_cch_id');
+
+        $unionLastMsg = $queryLastClientMsg->union($queryLastAgentMsg);
+
+        $lastMsgCmd = $unionLastMsg->createCommand();
+        $latestMsgs = $lastMsgCmd->queryAll();
+
 
         foreach ($clientChats as $key => $chat){
             $clientChats[$key]['outMsg'] = 0;
             $clientChats[$key]['inMsg'] = 0;
+
+            $clientChats[$key]['client_msg_date'] = '';
+            $clientChats[$key]['latest_client_msg'] = '';
+            $clientChats[$key]['agent_msg_date'] = '';
+            $clientChats[$key]['latest_agent_msg'] = '';
+
             foreach ($chatMessages as $message){
                 if ($chat['cch_id'] == $message['chatId'])
                 {
                     $clientChats[$key]['outMsg'] = $message['outMsg'];
                     $clientChats[$key]['inMsg'] = $message['inMsg'];
+                }
+            }
+
+            foreach ($latestMsgs as $msg){
+                if ($chat['cch_id'] == $msg['ccm_cch_id'])
+                {
+                    if (!is_null($msg['ccm_client_id']) && is_null($msg['ccm_user_id'])){
+                        $clientChats[$key]['client_msg_date'] = \Yii::$app->formatter->asDatetime(strtotime($msg['latest_data']), 'php: Y-m-d H:i:s');
+                        $clientChats[$key]['latest_client_msg'] = $msg['msg'];
+                    }
+
+                    if (!is_null($msg['ccm_client_id']) && !is_null($msg['ccm_user_id'])) {
+                        $clientChats[$key]['agent_msg_date'] = \Yii::$app->formatter->asDatetime(strtotime($msg['latest_data']), 'php: Y-m-d H:i:s');
+                        $clientChats[$key]['latest_agent_msg'] = $msg['msg'];
+                    }
                 }
             }
         }

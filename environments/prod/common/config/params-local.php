@@ -55,4 +55,5 @@ return [
     'processing_fee' => '{{ common.config.params.processing_fee:int }}',
     'global_phone' => '{{ common.config.params.global_phone:str }}',
 
+    'appEnv' => 'prod',
 ];

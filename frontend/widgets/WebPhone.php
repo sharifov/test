@@ -12,6 +12,7 @@ use common\models\Employee;
 use common\models\User;
 use common\models\UserCallStatus;
 use common\models\UserProfile;
+use sales\helpers\UserCallIdentity;
 use yii\helpers\VarDumper;
 
 /**
@@ -46,7 +47,7 @@ class WebPhone extends \yii\bootstrap\Widget
 
         //VarDumper::dump($userProfile, 10, true);        exit;
 
-        $clientId = 'seller'.$user_id;
+        $clientId = UserCallIdentity::getId($user_id);
         $tokenData = \Yii::$app->communication->getJwtTokenCache($clientId, true);
 
 

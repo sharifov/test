@@ -2,9 +2,11 @@
 
 namespace common\models;
 
+use common\components\jobs\CallPriceJob;
 use common\components\jobs\CheckClientCallJoinToConferenceJob;
 use common\components\purifier\Purifier;
 use common\models\query\CallQuery;
+use sales\helpers\UserCallIdentity;
 use sales\model\call\helper\CallHelper;
 use frontend\widgets\newWebPhone\call\socket\MissedCallMessage;
 use frontend\widgets\newWebPhone\call\socket\RemoveIncomingRequestMessage;
@@ -1319,10 +1321,10 @@ class Call extends \yii\db\ActiveRecord
 
         Notifications::pingUserMap();
 
-        $logEnable = Yii::$app->params['settings']['call_log_enable'] ?? false;
+        $isChangedTwStatus = array_key_exists('c_call_status', $changedAttributes);
 
+        $logEnable = Yii::$app->params['settings']['call_log_enable'] ?? false;
         if ($logEnable) {
-            $isChangedTwStatus = array_key_exists('c_call_status', $changedAttributes);
             $isChangedDuration = array_key_exists('c_call_duration', $changedAttributes);
             if (
                 Yii::$app->id === 'app-webapi'
@@ -1342,6 +1344,14 @@ class Call extends \yii\db\ActiveRecord
 //            }
         }
 
+        if ($isChangedTwStatus && $this->isCompletedTw()) {
+            $createJob = (bool)(Yii::$app->params['settings']['call_price_job'] ?? false);
+            if ($createJob) {
+                $job = new CallPriceJob();
+                $job->callSid = $this->c_call_sid;
+                Yii::$app->queue_job->delay(60)->priority(10)->push($job);
+            }
+        }
     }
 
     public static function getQueueName(Call $call): string
@@ -1470,7 +1480,7 @@ class Call extends \yii\db\ActiveRecord
                     $res = \Yii::$app->communication->acceptConferenceCall(
                         $call->c_id,
                         $call->c_call_sid,
-                        'client:seller' . $user_id,
+                        UserCallIdentity::getClientId($user_id),
                         $call->c_from,
                         $user_id
                     );
@@ -1488,7 +1498,7 @@ class Call extends \yii\db\ActiveRecord
                     }
 
                 } else {
-                    $agent = 'seller' . $user_id;
+                    $agent = UserCallIdentity::getId($user_id);
                     $res = \Yii::$app->communication->callRedirect($call->c_call_sid, 'client', $call->c_from, $agent);
 
                     Notifications::publish(RemoveIncomingRequestMessage::COMMAND, ['user_id' => $user_id], RemoveIncomingRequestMessage::create($call->c_call_sid));

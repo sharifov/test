@@ -2,7 +2,7 @@
     function OldWidget() {
         this.hold = function () {
             let btn = $('.btn-hold-call');
-            btn.html('<i class="fa fa-play"> </i> <span>Unhold</span>');
+            btn.html('<i class="fa fa-play"> </i> <span>Resume</span>');
             btn.attr('data-mode', 'hold');
             btn.prop('disabled', false);
         };

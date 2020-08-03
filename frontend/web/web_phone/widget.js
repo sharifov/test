@@ -435,7 +435,7 @@ window.phoneWidget.events = {
     this.hold = function (call) {
       //todo remove after removed old widget
       let btn = $('.btn-hold-call');
-      btn.html('<i class="fa fa-spinner fa-spin"> </i> <span>Hold</span>');
+      btn.html('<i class="fa fa-spinner fa-spin"> </i> <span>On Hold</span>');
       btn.prop('disabled', true);
       $.ajax({
         type: 'post',
@@ -461,7 +461,7 @@ window.phoneWidget.events = {
     this.unHold = function (call) {
       //todo remove after removed old widget
       let btn = $('.btn-hold-call');
-      btn.html('<i class="fa fa-spinner fa-spin"> </i> <span>Unhold</span>');
+      btn.html('<i class="fa fa-spinner fa-spin"> </i> <span>Resume</span>');
       btn.prop('disabled', true);
       $.ajax({
         type: 'post',
@@ -471,14 +471,14 @@ window.phoneWidget.events = {
         url: this.settings.unHoldUrl
       }).done(function (data) {
         if (data.error) {
-          createNotify('UnHold', data.message, 'error');
-          btn.html('<i class="fa fa-play"> </i> <span>Unhold</span>');
+          createNotify('Resume', data.message, 'error');
+          btn.html('<i class="fa fa-play"> </i> <span>Resume</span>');
           btn.prop('disabled', false);
           call.unSetHoldUnHoldRequestState();
         }
       }).fail(function () {
-        createNotify('UnHold', 'Server error', 'error');
-        btn.html('<i class="fa fa-play"> </i> <span>Unhold</span>');
+        createNotify('Resume', 'Server error', 'error');
+        btn.html('<i class="fa fa-play"> </i> <span>Resume</span>');
         btn.prop('disabled', false);
         call.unSetHoldUnHoldRequestState();
       });
@@ -629,7 +629,7 @@ window.phoneWidget.events = {
   function OldWidget() {
     this.hold = function () {
       let btn = $('.btn-hold-call');
-      btn.html('<i class="fa fa-play"> </i> <span>Unhold</span>');
+      btn.html('<i class="fa fa-play"> </i> <span>Resume</span>');
       btn.attr('data-mode', 'hold');
       btn.prop('disabled', false);
     };
@@ -833,8 +833,16 @@ function ActiveContactInfo(props) {
 
 function CallBtns(props) {
   let call = props.call;
+  let paneBtnClass = 'call-pane__call-btns';
+
+  if (call.data.isHold) {
+    paneBtnClass = paneBtnClass + ' is-on-hold';
+  } else {
+    paneBtnClass = paneBtnClass + ' is-on-call';
+  }
+
   return React.createElement("div", {
-    className: "call-pane__call-btns is-on-call"
+    className: paneBtnClass
   }, React.createElement("button", {
     className: "call-pane__mute",
     id: "call-pane__mute",
@@ -848,7 +856,25 @@ function CallBtns(props) {
     className: "fas fa-microphone-alt-slash"
   }, " ") : React.createElement("i", {
     className: "fas fa-microphone"
-  }, " ")), React.createElement("button", {
+  }, " ")), call.data.isHold ? React.createElement(CallingStateBlockHold, {
+    call: call
+  }) : React.createElement(CallingStateBlock, {
+    call: call
+  }), React.createElement("button", {
+    className: "call-pane__end-call",
+    id: "cancel-active-call",
+    "data-call-sid": call.data.callSid,
+    disabled: call.isSentHangupRequestState()
+  }, call.isSentHangupRequestState() ? React.createElement("i", {
+    className: "fa fa-spinner fa-spin"
+  }, " ") : React.createElement("i", {
+    className: "fa fa-phone-slash"
+  }, " ")));
+}
+
+function CallingStateBlock(props) {
+  let call = props.call;
+  return React.createElement("button", {
     className: call.data.isListen || call.data.isCoach ? 'call-pane__start-call calling-state-block join' : 'call-pane__start-call calling-state-block'
   }, React.createElement("div", {
     className: "call-in-action"
@@ -862,16 +888,24 @@ function CallBtns(props) {
     duration: call.getDuration(),
     timeStart: Date.now(),
     styleClass: "more"
-  })))), React.createElement("button", {
-    className: "call-pane__end-call",
-    id: "cancel-active-call",
-    "data-call-sid": call.data.callSid,
-    disabled: call.isSentHangupRequestState()
-  }, call.isSentHangupRequestState() ? React.createElement("i", {
-    className: "fa fa-spinner fa-spin"
-  }, " ") : React.createElement("i", {
-    className: "fa fa-phone-slash"
-  }, " ")));
+  }))));
+}
+
+function CallingStateBlockHold(props) {
+  let call = props.call;
+  return React.createElement("button", {
+    className: "call-pane__start-call calling-state-block"
+  }, React.createElement("div", {
+    className: "call-in-action"
+  }, React.createElement("span", {
+    className: "call-in-action__text"
+  }, "on hold"), React.createElement("span", {
+    className: "call-in-action__time"
+  }, React.createElement(PhoneWidgetTimer, {
+    duration: call.getHoldDuration(),
+    timeStart: Date.now(),
+    styleClass: "more"
+  }))));
 }
 
 function SoundIndication() {
@@ -1026,12 +1060,12 @@ function ButtonHold(props) {
     href: "#",
     className: "in-call-controls__action"
   }, props.call.isSentHoldUnHoldRequestState() ? React.createElement("i", {
-    className: "fa fa-spinner fa-spin"
+    className: "fa fa-spinner fa-spin hold-loader"
   }, " ") : props.call.data.isHold ? React.createElement("i", {
     className: "fa fa-play"
   }, " ") : React.createElement("i", {
     className: "fa fa-pause"
-  }, " "), React.createElement("span", null, props.call.data.isHold ? 'UnHold' : 'Hold')));
+  }, " "), React.createElement("span", null, props.call.data.isHold ? 'Resume' : 'On Hold')));
 }
 
 function ButtonTransfer(props) {
@@ -1044,7 +1078,7 @@ function ButtonTransfer(props) {
     className: "in-call-controls__action"
   }, React.createElement("i", {
     className: "fa fa-random"
-  }, " "), React.createElement("span", null, "Transfer Call")));
+  }, " "), React.createElement("span", null, "Transfer")));
 }
 
 function ButtonAddPerson(props) {
@@ -1849,10 +1883,10 @@ class PhoneWidgetPaneActiveBtnHold extends PhoneWidgetPaneActiveBtn {
 
   sendRequest() {
     this.disable();
-    let text = 'Unhold';
+    let text = 'Resume';
 
     if (this.btn.attr('data-mode') === 'unhold') {
-      text = 'Hold';
+      text = 'On Hold';
     }
 
     this.btn.children().html('<i class="fa fa-spinner fa-spin"> </i><span>' + text + '</span>');
@@ -1861,13 +1895,13 @@ class PhoneWidgetPaneActiveBtnHold extends PhoneWidgetPaneActiveBtn {
 
   unhold() {
     this.btn.attr('data-mode', 'unhold');
-    this.btn.children().html('<i class="fa fa-pause"> </i><span>Hold</span>');
+    this.btn.children().html('<i class="fa fa-pause"> </i><span>On Hold</span>');
     return this;
   }
 
   hold() {
     this.btn.attr('data-mode', 'hold');
-    this.btn.children().html('<i class="fa fa-play"> </i><span>Unhold</span>');
+    this.btn.children().html('<i class="fa fa-play"> </i><span>Resume</span>');
     return this;
   }
 

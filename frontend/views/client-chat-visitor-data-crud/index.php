@@ -7,7 +7,7 @@ use yii\widgets\Pjax;
 /* @var $searchModel sales\model\clientChatVisitorData\entity\search\ClientChatVisitorSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Client Chat Visitor Datas';
+$this->title = 'Client Chat Visitor Data';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="client-chat-visitor-data-index">

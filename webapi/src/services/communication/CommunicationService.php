@@ -19,6 +19,7 @@ use common\models\Sources;
 use common\models\UserProjectParams;
 use frontend\widgets\notification\NotificationMessage;
 use sales\entities\cases\Cases;
+use sales\helpers\UserCallIdentity;
 use sales\model\phoneList\entity\PhoneList;
 use sales\repositories\lead\LeadRepository;
 use sales\services\call\CallDeclinedException;
@@ -662,9 +663,9 @@ class CommunicationService
 		$agentId = null;
 
 		if (!empty($requestDataDTO->Called)) {
-			if (strpos($requestDataDTO->Called, 'client:seller') !== false) {
-				$agentId = (int)str_replace('client:seller', '', $requestDataDTO->Called);
-			}
+		    if (UserCallIdentity::canParse($requestDataDTO->Called)) {
+                $agentId = UserCallIdentity::parseUserId($requestDataDTO->Called);
+            }
 		}
 
 		if (!$agentId) {
@@ -1017,7 +1018,11 @@ class CommunicationService
 				$call->c_from = $callOriginalData['From'] ?? null;
 				$call->c_to = $callOriginalData['To'] ?? null;
 				$call->c_caller_name = $callOriginalData['Caller'] ?? null;
-				$agentId = (int) str_replace('client:seller', '', $call->c_from);
+				if (UserCallIdentity::canParse($call->c_from)) {
+                    $agentId = UserCallIdentity::parseUserId($call->c_from);
+                } else {
+				    $agentId = null;
+                }
 
 				if(isset($callData['c_project_id']) && $callData['c_project_id']) {
 					$call->c_project_id = (int) $callData['c_project_id'];

@@ -11,7 +11,6 @@ use yii\widgets\Pjax;
 /** @var ClientChatTransferForm $transferForm */
 ?>
 
-<script>pjaxOffFormSubmit('#pjax-cc-submit-transfer')</script>
 <div class="row">
 	<div class="col-md-12">
         <?php Pjax::begin(['id' => 'pjax-cc-submit-transfer', 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false, 'clientOptions' => ['async' => false]]) ?>
@@ -42,9 +41,12 @@ $js = <<<JS
         $('._cc_submit_transfer').html(btnHtml);
         if (xhr.status === 500) {
             createNotify('Error', 'Internal Server Error', 'error');
+        } else if (xhr.status === 403) {
+            createNotify('Error', xhr.responseText, 'error');
         }
     });
-    $('#pjax-cc-submit-transfer').on('pjax:beforeSend', function () {
+    $('#pjax-cc-submit-transfer').on('pjax:beforeSend', function (obj, xhr, data) {
+        data.data.append('cchId', $('#clientchattransferform-cchid').val());
         btnHtml = $('._cc_submit_transfer').html();
         $('._cc_submit_transfer').html('<i class="fa fa-spin fa-spinner"></i>');
     });

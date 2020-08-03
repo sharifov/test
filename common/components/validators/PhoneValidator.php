@@ -3,6 +3,7 @@
 namespace common\components\validators;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
+use sales\helpers\UserCallIdentity;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\base\Model;
@@ -86,7 +87,8 @@ class PhoneValidator extends Validator
         $filter->validateAttribute($model, $attribute);
 
         if ($this->allowClientSellerNumbers) {
-            preg_match('/^client:seller\d{1,5}$/', $model->{$attribute}, $matches);
+            $clientPrefix = UserCallIdentity::getClientPrefix();
+            preg_match('/^' . $clientPrefix . '/', $model->{$attribute}, $matches);
             if ($matches) {
                 return;
             }

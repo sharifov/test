@@ -2,6 +2,7 @@
 namespace sales\services\clientChatService;
 
 use common\models\Department;
+use sales\auth\Auth;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
@@ -17,6 +18,7 @@ use sales\repositories\visitorLog\VisitorLogRepository;
 use sales\services\TransactionManager;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
+use yii\web\ForbiddenHttpException;
 
 /**
  * Class ClientChatService
@@ -109,7 +111,7 @@ class ClientChatService
 		$response = \Yii::$app->chatBot->assignAgent($rid, $userId);
 		if ($response['error']) {
 			$error = Json::decode($response['error']);
-			throw new \RuntimeException($error['data']['error'], ClientChatCodeException::RC_ASSIGN_AGENT_FAILED);
+			throw new \RuntimeException('[Chat Bot] ' . $error['data']['error'] ?? 'Unknown error...', ClientChatCodeException::RC_ASSIGN_AGENT_FAILED);
 		}
 	}
 
@@ -186,13 +188,17 @@ class ClientChatService
 	{
 		$clientChat = $this->clientChatRepository->findById($chhId);
 
+		if (!Auth::can('client-chat/manage/all', ['chat' => $clientChat])) {
+			throw new ForbiddenHttpException('You do not have access to perform this action', 403);
+		}
+
 		if (!$clientChat->ccv || !$clientChat->ccv->ccvCvd || !$clientChat->ccv->ccvCvd->cvd_visitor_rc_id) {
 			throw new \RuntimeException('Visitor RC id is not found');
 		}
 
 		$botCloseChatResult = \Yii::$app->chatBot->endConversation($clientChat->cch_rid, $clientChat->ccv->ccvCvd->cvd_visitor_rc_id);
 		if ($botCloseChatResult['error']) {
-			throw new \RuntimeException('[Chat Bot] ' . $botCloseChatResult['error']);
+			throw new \RuntimeException('[Chat Bot] ' . $botCloseChatResult['error']['message'] ?? 'Unknown error message');
 		}
 
 		$success = $botCloseChatResult['data']['data']['data']['success'] ?? false;

@@ -24,5 +24,6 @@ return [
         'jsClientUrl' => '{{ common.config.params.centrifugo.jsClientUrl:str }}',
         'serviceUrl' => '{{ common.config.params.centrifugo.serviceUrl:str }}',
         'tokenHmacSecretKey' => '{{ common.config.params.centrifugo.tokenHmacSecretKey:str }}'
-    ]
+    ],
+    'appEnv' => 'dev',
 ];
