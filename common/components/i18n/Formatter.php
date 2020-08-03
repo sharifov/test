@@ -3,6 +3,7 @@
 namespace common\components\i18n;
 
 use common\components\purifier\Purifier;
+use common\models\Call;
 use common\models\CaseSale;
 use common\models\ConferenceParticipant;
 use common\models\Department;
@@ -116,7 +117,7 @@ class Formatter extends \yii\i18n\Formatter
             return $this->nullDisplay;
         }
 
-        return CallLogCategory::asFormat($value);
+        return  Call::SOURCE_LIST[$value] ?? '-';
     }
 
     public function asCallLogType($value): string

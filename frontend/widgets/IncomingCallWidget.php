@@ -13,7 +13,8 @@ use common\models\Employee;
 use common\models\Notifications;
 use common\models\UserCallStatus;
 use sales\auth\Auth;
-use sales\model\conference\useCase\DisconnectFromAllConferenceCalls;
+use sales\model\conference\useCase\DisconnectFromAllActiveClientsCreatedConferences;
+use sales\model\conference\useCase\PrepareCurrentCallsForNewCall;
 use sales\model\conference\useCase\ReturnToHoldCall;
 use Yii;
 use yii\helpers\VarDumper;
@@ -83,8 +84,8 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
 
                         switch ($action) {
                             case 'return':
-                                $disconnect = new DisconnectFromAllConferenceCalls();
-                                if ($disconnect->disconnect($userModel->id)) {
+                                $prepare = new PrepareCurrentCallsForNewCall();
+                                if ($prepare->prepare($userModel->id)) {
                                     $return = new ReturnToHoldCall();
                                     if ($return->return($call, $userModel->id)) {
                                         $return->acceptHoldCall($callUserAccess);
@@ -96,8 +97,8 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
                                 Yii::$app->redis->setnx($key, $userModel->id);
                                 $value = Yii::$app->redis->get($key);
                                 if ((int)$value === (int)$userModel->id) {
-                                    $disconnect = new DisconnectFromAllConferenceCalls();
-                                    if ($disconnect->disconnect($userModel->id)) {
+                                    $prepare = new PrepareCurrentCallsForNewCall();
+                                    if ($prepare->prepare($userModel->id)) {
                                         $this->acceptCall($callUserAccess, $userModel);
                                     }
                                     Yii::$app->redis->expire($key, 5);

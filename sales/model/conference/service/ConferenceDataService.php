@@ -96,6 +96,7 @@ class ConferenceDataService
             'conference' => [
                 'sid' => $conference->cf_sid,
                 'duration' => time() - strtotime($conference->cf_created_dt),
+                'creator' => $conference->cf_created_user_id,
             ],
         ];
     }

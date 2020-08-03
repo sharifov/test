@@ -200,6 +200,7 @@ $unHoldUrl = Url::to(['/phone/ajax-unhold-conference-call']);
 $returnHoldCallUrl = Url::to(['/call/return-hold-call']);
 $ajaxHangupUrl = Url::to(['/phone/ajax-hangup']);
 $sendDigitUrl = Url::to(['/phone/send-digit']);
+$prepareCurrentCallsUrl = Url::to(['/phone/prepare-current-calls']);
 
 $ucStatus = $userCallStatus->us_type_id ?? UserCallStatus::STATUS_TYPE_OCCUPIED;
 
@@ -230,6 +231,7 @@ PhoneWidgetCall.init({
     'btnHoldShow': $btnHoldShow,
     'btnTransferShow': $btnTransferShow,
     'sendDigitUrl': '$sendDigitUrl',    
+    'prepareCurrentCallsUrl': '$prepareCurrentCallsUrl'    
 });
 JS;
 $this->registerJs($js);

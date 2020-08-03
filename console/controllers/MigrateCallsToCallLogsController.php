@@ -476,7 +476,7 @@ class MigrateCallsToCallLogsController extends Controller
         }
         $callData['cl_call_finished_dt'] = date('Y-m-d H:i:s',(strtotime($call['c_created_dt']) + $call['c_call_duration']));
         $callData['cl_duration'] = strtotime($callData['cl_call_finished_dt']) - strtotime($callData['cl_call_created_dt']);
-        $callData['cl_category_id'] = CallLogCategory::GENERAL_LINE;
+        $callData['cl_category_id'] = Call::SOURCE_GENERAL_LINE;
 
         $queueData['clq_queue_time'] = $callData['cl_duration'];
         $queueData['clq_access_count'] = CallUserAccess::find()->andWhere(['cua_call_id' => $call['c_id']])->andWhere(['>=', 'cua_created_dt', $callData['cl_call_created_dt']])->count();
@@ -501,7 +501,7 @@ class MigrateCallsToCallLogsController extends Controller
 
         $callData['cl_duration'] = $call['c_call_duration'] + (strtotime($call['c_created_dt']) - (strtotime($call['prev_child_c_created_dt']) + $call['prev_child_c_call_duration']));
 
-        $callData['cl_category_id'] = CallLogCategory::GENERAL_LINE;
+        $callData['cl_category_id'] = Call::SOURCE_GENERAL_LINE;
         $callData['cl_is_transfer'] = (
             $call['parent_c_created_user_id'] != $call['c_created_user_id']
             || $call['parent_c_created_user_id'] == null
@@ -528,7 +528,7 @@ class MigrateCallsToCallLogsController extends Controller
 
         $callData['cl_duration'] = $call['c_call_duration'] + (strtotime($call['c_created_dt']) - (strtotime($call['top_parent_c_created_dt']) + $call['top_parent_c_call_duration']));
 
-        $callData['cl_category_id'] = CallLogCategory::GENERAL_LINE;
+        $callData['cl_category_id'] = Call::SOURCE_GENERAL_LINE;
         $callData['cl_is_transfer'] = (
             $call['parent_c_created_user_id'] != $call['c_created_user_id']
             || $call['parent_c_created_user_id'] == null
@@ -739,8 +739,17 @@ class MigrateCallsToCallLogsController extends Controller
             $callLog->cl_project_id = $callData['cl_project_id'] ?? $call['c_project_id'];
             $callLog->cl_price = $callData['cl_price'] ?? $call['c_price'];
             $callLog->cl_category_id = $callData['cl_category_id'] ?? (in_array($call['c_source_type_id'], [
-                Call::SOURCE_GENERAL_LINE, Call::SOURCE_DIRECT_CALL, Call::SOURCE_REDIRECT_CALL, Call::SOURCE_TRANSFER_CALL, Call::SOURCE_CONFERENCE_CALL, Call::SOURCE_REDIAL_CALL, Call::SOURCE_COACH_CALL
-            ], false) ? $call['c_source_type_id'] : null);
+                    Call::SOURCE_GENERAL_LINE,
+                    Call::SOURCE_DIRECT_CALL,
+                    Call::SOURCE_REDIRECT_CALL,
+                    Call::SOURCE_TRANSFER_CALL,
+                    Call::SOURCE_CONFERENCE_CALL,
+                    Call::SOURCE_REDIAL_CALL,
+                    Call::SOURCE_LISTEN,
+                    Call::SOURCE_COACH,
+                    Call::SOURCE_BARGE,
+                    Call::SOURCE_INTERNAL,
+                ], false) ? $call['c_source_type_id'] : null);
             $callLog->cl_is_transfer = $callData['cl_is_transfer'] ?? false;
             $callLog->cl_department_id = $callData['cl_department_id'] ?? $call['c_dep_id'];
             $callLog->cl_client_id = $callData['cl_client_id'] ?? $call['c_client_id'];

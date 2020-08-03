@@ -1,6 +1,7 @@
 <?php
 
 use borales\extensions\phoneInput\PhoneInput;
+use common\models\Call;
 use common\models\Department;
 use sales\access\ListsAccess;
 use sales\auth\Auth;
@@ -30,7 +31,7 @@ use yii\widgets\ActiveForm;
 
             <?= $form->field($model, 'cl_type_id')->dropDownList(CallLogType::getList(), ['prompt' => 'Select type']) ?>
 
-            <?= $form->field($model, 'cl_category_id')->dropDownList(CallLogCategory::getList(), ['prompt' => 'Select type']) ?>
+            <?= $form->field($model, 'cl_category_id')->dropDownList(Call::SOURCE_LIST, ['prompt' => 'Select type']) ?>
 
             <?= $form->field($model, 'cl_is_transfer')->dropDownList([0 => 'No', 1 => 'Yes'], ['prompt' => 'Select is transfer']) ?>
 

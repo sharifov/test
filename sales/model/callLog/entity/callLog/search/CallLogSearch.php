@@ -58,7 +58,7 @@ class CallLogSearch extends CallLog
             ['cl_type_id', 'in', 'range' => array_keys(CallLogType::getList())],
 
             ['cl_category_id', 'integer'],
-            ['cl_category_id', 'in', 'range' => array_keys(CallLogCategory::getList())],
+            ['cl_category_id', 'in', 'range' => array_keys(Call::SOURCE_LIST)],
 
             ['cl_status_id', 'integer'],
             ['cl_status_id', 'in', 'range' => array_keys(CallLogStatus::getList())],

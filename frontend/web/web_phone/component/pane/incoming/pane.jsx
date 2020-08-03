@@ -51,23 +51,58 @@ class IncomingPane extends React.Component {
                         </div>
                     </div>
                 </div>
-                <div className="actions-container">
-                    <div className="call-pane__call-btns">
-                        <button className="call-pane__start-call calling-state-block" id="btn-accept-call"
-                                data-from-internal={call.data.fromInternal} data-call-sid={call.data.callSid}
-                                disabled={call.isSentAcceptCallRequestState()}>
-                            {call.isSentAcceptCallRequestState()
-                                ? <i className="fa fa-spinner fa-spin"> </i>
-                                : <i className="fas fa-phone"> </i>
-                            }
-                        </button>
-                        <button className="call-pane__end-call" id="hide-incoming-call"
-                                data-call-sid={call.data.callSid}>
-                            <i className="fa fa-angle-double-right"> </i>
-                        </button>
-                    </div>
-                </div>
+                <IncomingActions call={call}/>
             </React.Fragment>
         );
     }
+}
+
+function IncomingActions(props) {
+    let call = props.call;
+
+    if (call.data.isInternal) {
+        return (
+            <div className="actions-container">
+                <div className="call-pane__call-btns">
+                    <button className="call-pane__end-call end-internal" id="hide-incoming-call"
+                            data-call-sid={call.data.callSid}>
+                        <i className="fa fa-angle-double-right"> </i>
+                    </button>
+                    <button className="call-pane__start-call calling-state-block"
+                            data-call-sid={call.data.callSid} onClick={() => acceptInternalCall(call)}>
+                        {call.isSentAcceptCallRequestState()
+                            ? <i className="fa fa-spinner fa-spin"> </i>
+                            : <i className="fas fa-phone"> </i>
+                        }
+                    </button>
+                    <button className="call-pane__end-call"
+                            data-call-sid={call.data.callSid} onClick={() => rejectInternalCall(call)}>
+                        {call.isSentRejectInternalRequest()
+                            ? <i className="fa fa-spinner fa-spin"> </i>
+                            : <i className="fa fa-phone-slash"> </i>
+                        }
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="actions-container">
+            <div className="call-pane__call-btns">
+                <button className="call-pane__start-call calling-state-block" id="btn-accept-call"
+                        data-from-internal={call.data.fromInternal} data-call-sid={call.data.callSid}
+                        disabled={call.isSentAcceptCallRequestState()}>
+                    {call.isSentAcceptCallRequestState()
+                        ? <i className="fa fa-spinner fa-spin"> </i>
+                        : <i className="fas fa-phone"> </i>
+                    }
+                </button>
+                <button className="call-pane__end-call" id="hide-incoming-call"
+                        data-call-sid={call.data.callSid}>
+                    <i className="fa fa-angle-double-right"> </i>
+                </button>
+            </div>
+        </div>
+    );
 }

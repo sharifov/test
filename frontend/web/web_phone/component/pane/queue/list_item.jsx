@@ -60,7 +60,7 @@ class ListItem extends React.Component {
                     </div>
                     <div className="call-list-item__main-action">
                         <a href="#" className="call-list-item__main-action-trigger"
-                           data-type-action={call.data.queue === 'inProgress' ? 'hangup' : (call.data.queue === 'hold' ? 'return' : 'accept')}
+                           data-type-action={call.data.queue === 'inProgress' ? 'hangup' : (call.data.queue === 'hold' ? 'return' : (call.data.isInternal ? 'acceptInternal' :'accept'))}
                            data-call-sid={call.data.callSid} data-from-internal={call.data.fromInternal}>
                             {call.isSentAcceptCallRequestState() || call.isSentHangupRequestState() || call.isSentReturnHoldCallRequestState()
                                 ? <i className="fa fa-spinner fa-spin"/>
@@ -81,7 +81,7 @@ function ListItemMenu(props) {
         return null;
     }
 
-    if (call.data.typeId === 3) {
+    if (call.data.typeId === 3 || call.data.isInternal) {
         return <ListItemMenuJoinCall call={call}/>
     }
 

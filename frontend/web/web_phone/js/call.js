@@ -532,12 +532,12 @@ var PhoneWidgetCall = function () {
         if (obj.status === 'In progress') {
             requestActiveCall(obj);
         } else if (obj.status === 'Ringing' || obj.status === 'Queued') {
-            if (obj.typeId === 2) {
+            if (parseInt(obj.typeId) === 2) {
                 requestIncomingCall(obj);
-            } else if (obj.typeId === 1) {
+            } else if (parseInt(obj.typeId) === 1) {
                 requestOutgoingCall(obj);
             }
-        } else if (obj.status === 'Completed' || obj.isEnded || obj.cua_status_id === 5) {
+        } else if (obj.status === 'Completed' || obj.isEnded || parseInt(obj.cua_status_id) === 5) {
             completeCall(obj.callSid);
         }
     }
@@ -578,6 +578,16 @@ var PhoneWidgetCall = function () {
 
             if (action === 'accept') {
                 acceptCall(btn.attr('data-call-sid'), btn.attr('data-from-internal'));
+                return false;
+            }
+
+            if (action === 'acceptInternal') {
+                let call = queues.direct.one(btn.attr('data-call-sid'));
+                if (call === null) {
+                    createNotify('Accept Internal Call', 'Not found Call on Direct Incoming Queue', 'error');
+                    return false;
+                }
+                acceptInternalCall(call);
                 return false;
             }
 
@@ -773,6 +783,10 @@ var PhoneWidgetCall = function () {
                 return false;
             }
 
+            if (!call.canHoldUnHold()) {
+                return false;
+            }
+
             if (call.data.isHold) {
                 sendUnHoldRequest(call.data.callSid);
             } else {
@@ -793,6 +807,10 @@ var PhoneWidgetCall = function () {
             let call = queues.active.one(callSid);
             if (call === null) {
                 createNotify('Error', 'Not found Call on Active Queue', 'error');
+                return false;
+            }
+
+            if (!call.canHoldUnHold()) {
                 return false;
             }
 

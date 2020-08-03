@@ -10,6 +10,7 @@
             'ajaxHangupUrl': '',
             'callAddNoteUrl': '',
             'sendDigitUrl': '',
+            'prepareCurrentCallsUrl': '',
         };
 
         this.init = function (settings) {
@@ -169,13 +170,13 @@
                 },
                 url: this.settings.ajaxHangupUrl
             })
-                .done(function(data) {
+                .done(function (data) {
                     if (data.error) {
                         createNotify('Hangup', data.message, 'error');
                         call.unSetHangupRequestState();
                     }
                 })
-                .fail(function() {
+                .fail(function () {
                     createNotify('Hangup', 'Server error', 'error');
                     call.unSetHangupRequestState();
                 })
@@ -223,6 +224,27 @@
                 })
                 .fail(function () {
                     createNotify('Send digit', 'Server error', 'error');
+                });
+        };
+
+        this.acceptInternalCall = function (call, connection) {
+            $.ajax({
+                type: 'post',
+                data: {},
+                url: this.settings.prepareCurrentCallsUrl,
+                dataType: 'json'
+            })
+                .done(function (data) {
+                    if (data.error) {
+                        createNotify('Prepare current call', data.message, 'error');
+                        call.unSetAcceptCallRequestState();
+                    } else {
+                        connection.accept();
+                    }
+                })
+                .fail(function () {
+                    createNotify('Prepare current call', 'Server error', 'error');
+                    call.unSetAcceptCallRequestState();
                 });
         };
     }
