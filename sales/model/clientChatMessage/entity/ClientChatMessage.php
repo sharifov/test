@@ -26,6 +26,11 @@ use yii\helpers\ArrayHelper;
 class ClientChatMessage extends \yii\db\ActiveRecord
 {
 
+    public const BY_BOT = 'bot';
+    public const BY_AGENT = 'agent';
+    public const BY_CLIENT = 'client';
+    public const BOT_EMAIL = 'bot@techork.com';
+
     /**
      * {@inheritdoc}
      */
@@ -144,6 +149,25 @@ class ClientChatMessage extends \yii\db\ActiveRecord
 	public function isMessageFromClient(): bool
 	{
 		return $this->ccm_client_id && !$this->ccm_user_id;
+	}
+
+	public function isMessageFromBot(): bool
+	{
+		return (isset($this->ccm_body['agent']['email']) && $this->ccm_body['agent']['email'] === self::BOT_EMAIL);
+	}
+
+    public function getByType(): string
+    {
+        if ($this->isMessageFromClient()) {
+            return self::BY_CLIENT;
+        }
+        if ($this->isMessageFromBot()) {
+            return self::BY_BOT;
+        }
+        if (!empty($this->ccm_user_id)) {
+            return self::BY_AGENT;
+        }
+        return 'undefined';
 	}
 
 	public function getMessage(): string

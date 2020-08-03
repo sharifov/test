@@ -1,6 +1,7 @@
 <?php
 
 use common\models\VisitorLog;
+use frontend\helpers\ChatHelper;
 use frontend\helpers\JsonHelper;
 use frontend\helpers\OutHelper;
 use sales\model\clientChat\entity\ClientChat;
@@ -179,6 +180,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'dataProvider' => $dataProvider,
                 'filterModel' => $searchModel,
                 'columns' => [
+                    [
+                        'attribute' => 'By',
+                        'value' => static function(ClientChatMessage $model) {
+                            return ChatHelper::formattedByChatMessage($model);
+                        },
+                        'format' => 'raw',
+                        'contentOptions' => ['style' => 'width:70px; white-space: normal;'],
+                    ],
                     [
                         'attribute' => 'message',
                         'value' => static function(ClientChatMessage $model) {
