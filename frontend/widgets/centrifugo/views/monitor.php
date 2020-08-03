@@ -23,10 +23,14 @@ function channelConnector(chName)
 {      
     centrifuge.subscribe(chName, function(message) {           
         let messageObj = JSON.parse(message.data.message);        
-        if(messageObj.chatsData){
-            //console.log(messageObj.chatsData)           
+        if(messageObj.chatsData && messageObj.chatsData.length > 0){
+            let ids = getRenderedChatIds()
+            //console.log(messageObj.chatsData)            
+                      
             messageObj.chatsData.forEach(function (chat, index) {
-                $("#card-live-chat").prepend(renderChat(chat));                              
+                if(!ids.includes(chat.cch_id)){
+                    $("#card-live-chat").prepend(renderChat(chat));
+                }                                              
             });
             getLastChatsUpdate(enableLiveUpdate)
             if (messageObj.chatsData.length > 0){               
@@ -81,7 +85,7 @@ function getLastChatsUpdate() {
     if(enableLiveUpdate){
         setTimeout(function(){
          contentUpdate(getLastCreatedChatDate())  
-    }, 10000);
+    }, 15000);
     }    
 }
 
@@ -180,7 +184,7 @@ function renderGeneralInfo(id, projectName,  chatCreateDate) {
                    '<i class="fa fa-comment green"></i>' +
                '</a>' + */
                '<div>' +
-                    '<i class="fa fa-comment green"></i> <u><a href="/client-chat-crud/view?id='+ id +'" target="_blank">'+ id +'</a></u><br>' +
+                    '<i class="fa fa-comment green"></i> <u><a class="chat-id-link" href="/client-chat-crud/view?id='+ id +'" target="_blank">'+ id +'</a></u><br>' +
                     /*'<span class="label label-danger" title="In messages">'+ inMsgCount +'</span> <br>' +
                     '<span class="label label-info" title="Out messages">'+ outMsgCount +'</span>' +*/
                '</div>' +
@@ -294,6 +298,14 @@ function renderNewAgentMessage(chatID, agentID, msgBody, createdDt, period) {
        
     removeCellBlinking(msgLocator)
     pushChatOnTop(chatID)
+}
+
+function getRenderedChatIds() {
+    let ids = []
+    $('.chat-id-link').each(function(i, obj) {       
+            ids.push($(this).text())               
+    });
+    return ids
 }
 
 /*function updateMessagesRelativeTime() {
