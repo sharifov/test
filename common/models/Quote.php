@@ -7,6 +7,7 @@ use common\components\SearchService;
 use common\models\local\FlightSegment;
 use common\models\local\LeadLogMessage;
 use common\models\query\QuoteQuery;
+use frontend\helpers\JsonHelper;
 use sales\entities\EventTrait;
 use sales\events\quote\QuoteSendEvent;
 use sales\services\parsingDump\lib\ParsingDump;
@@ -2467,5 +2468,16 @@ class Quote extends \yii\db\ActiveRecord
         if ($this->lead->isReadyForGa()) {
             $this->recordEvent(new QuoteSendEvent($this), QuoteSendEvent::class);
         }
+    }
+
+    public function getPenaltiesInfo(): array
+    {
+        if (!empty($this->origin_search_data)) {
+            $originSearchData = JsonHelper::decode($this->origin_search_data);
+            if (!empty($originSearchData['penalties'])) {
+                return $originSearchData['penalties'];
+            }
+        }
+        return [];
     }
 }

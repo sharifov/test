@@ -10,6 +10,7 @@
 use common\models\Quote;
 use common\models\Airline;
 use common\components\SearchService;
+use frontend\helpers\QuoteHelper;
 use yii\bootstrap\Html;
 use yii\helpers\Url;
 
@@ -276,6 +277,15 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
 			  data-original-title="<?= ($model->hasAirportChange)?'Airports Change':'No Airports Change'?>">
 				<i class="fa fa-exchange"></i>
 			</span>
+
+            <?php $penaltyInfo = $model->getPenaltiesInfo() ? QuoteHelper::formattedPenalties($model) : 'No penalty information' ?>
+            <span class="quote__badge <?php echo $model->getPenaltiesInfo() ? 'quote__badge--warning' : 'quote__badge--disabled' ?>"
+                data-toggle="tooltip"
+                data-html="true"
+			    title="<?php echo $penaltyInfo ?>">
+				    <i class="fa fa-expand"></i>
+			</span>
+
 		</div>
 		<div class="quote__actions">
 			<?php \yii\widgets\Pjax::begin(['id' => 'pjax-quote_prices-'.$model->id, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
@@ -286,3 +296,17 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
 		</div>
 	</div>
 </div>
+
+<?php
+$css = <<<CSS
+    .tooltip_penalties_box {
+        text-align: left;
+    }     
+    .tooltip_penalties_box ul {
+        padding-left: 16px;
+    } 
+    .tooltip_penalties_box p {
+        margin-bottom: 0;
+    }     
+CSS;
+$this->registerCss($css);
