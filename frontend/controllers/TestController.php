@@ -127,7 +127,7 @@ use sales\model\lead\useCase\lead\api\create\Handler;
 use sales\model\lead\useCase\lead\api\create\LeadForm;
 use sales\model\lead\useCases\lead\api\create\LeadCreateMessage;
 use sales\model\lead\useCases\lead\api\create\LeadCreateValue;
-use sales\model\lead\useCases\lead\api\create\SegmentForm;
+use sales\model\lead\useCases\lead\api\create\FlightForm;
 use sales\model\lead\useCases\lead\import\LeadImportForm;
 use sales\model\lead\useCases\lead\import\LeadImportService;
 use sales\model\notification\events\NotificationEvents;
