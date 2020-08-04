@@ -21,10 +21,10 @@ class QuoteHelper
         'best' => 'Best itinerary',
     ];
 
-    public static function formattedPenalties(Quote $model): string
+    public static function formattedPenalties(array $penalties): string
     {
         $out = '';
-        if ($penalties = $model->getPenaltiesInfo()) {
+        if ($penalties) {
             $out .= "<div class='tooltip_quote_info_box'>";
             $out .= '<p>Penalties: </p>';
             if (!empty($penalties['list'])) {
@@ -43,10 +43,10 @@ class QuoteHelper
         return $out;
     }
 
-    public static function formattedRank(Quote $model): string
+    public static function formattedRank(array $meta): string
     {
         $out = '';
-        if (($meta = $model->getMetaInfo()) && self::checkRankInfo($meta)) {
+        if ($meta && self::checkRankInfo($meta)) {
             $out .= "<div class='tooltip_quote_info_box'>";
             $out .= '<p>Ranking: </p>';
             $out .= '<ul>';
@@ -54,18 +54,27 @@ class QuoteHelper
             if (!empty($meta['rank'])) {
                 $out .= '<li>Rank : <strong>' . number_format($meta['rank'], 2, '.', '') . '</strong></li>';
             }
+
+            $rankParams = 0;
+            $rankParamsOut = '';
+
             if (isset($meta['cheapest'])) {
-                $icoClass = $meta['cheapest'] ? 'fa-check' : 'fa-times' ;
-                $out .= '<li>' . self::RANK_INFO_LIST['cheapest'] . " : <i class='fa " . $icoClass . "'></i></li>";
+                $icoClass = $meta['cheapest'] ? 'fa-check' : 'fa-times';
+                $rankParams += (int) $meta['cheapest'];
+                $rankParamsOut .= '<li>' . self::RANK_INFO_LIST['cheapest'] . " : <i class='fa " . $icoClass . "'></i></li>";
             }
             if (isset($meta['fastest'])) {
-                $icoClass = $meta['fastest'] ? 'fa-check' : 'fa-times' ;
-                $out .= '<li>' . self::RANK_INFO_LIST['fastest'] . " : <i class='fa " . $icoClass . "'></i></li>";
+                $icoClass = $meta['fastest'] ? 'fa-check' : 'fa-times';
+                $rankParams += (int) $meta['fastest'];
+                $rankParamsOut .= '<li>' . self::RANK_INFO_LIST['fastest'] . " : <i class='fa " . $icoClass . "'></i></li>";
             }
             if (isset($meta['best'])) {
-                $icoClass = $meta['best'] ? 'fa-check' : 'fa-times' ;
-                $out .= '<li>' . self::RANK_INFO_LIST['best'] . " : <i class='fa " . $icoClass . "'></i></li>";
+                $icoClass = $meta['best'] ? 'fa-check' : 'fa-times';
+                $rankParams += (int) $meta['best'];
+                $rankParamsOut .= '<li>' . self::RANK_INFO_LIST['best'] . " : <i class='fa " . $icoClass . "'></i></li>";
             }
+
+            $out .= $rankParams ? $rankParamsOut : '';
 
             $out .= '</ul>';
             $out .= '</div>';

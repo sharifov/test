@@ -98,7 +98,7 @@ $js = <<<JS
             e.stopPropagation();
         }
     });
-    $('.quote__heading [data-toggle="tooltip"]').tooltip();
+    $('.quote__heading [data-toggle="tooltip"]').tooltip({html:true});
     
     $("#pjax-quote-filter").on("pjax:beforeSend", function() {
         $('#pjax-quote-filter #flight-quote-search-submit i').removeClass('fa-filter').addClass('fa-spin fa-spinner disabled').prop('disabled', true);

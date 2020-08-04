@@ -438,7 +438,7 @@ $js = <<<JS
 
     var leadId = '$lead->id';
 
-    $('[data-toggle="tooltip"]').tooltip();
+    $('[data-toggle="tooltip"]').tooltip({html:true});
     
     $(document).on('keyup', '.alt-quote-price', function(event){
         var key = event.keyCode ? event.keyCode : event.which;

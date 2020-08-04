@@ -279,7 +279,7 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
 				<i class="fa fa-exchange"></i>
 			</span>
 
-            <?php $penaltyInfo = $model->getPenaltiesInfo() ? QuoteHelper::formattedPenalties($model) : 'No penalty information' ?>
+            <?php $penaltyInfo = $model->getPenaltiesInfo() ? QuoteHelper::formattedPenalties($model->getPenaltiesInfo()) : 'No penalty information' ?>
             <span class="quote__badge <?php echo $model->getPenaltiesInfo() ? 'quote__badge--warning' : 'quote__badge--disabled' ?>"
                 data-toggle="tooltip"
                 data-html="true"
@@ -287,7 +287,7 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
 				    <i class="fa fa-expand"></i>
 			</span>
 
-            <?php $rankInfo = $model->getMetaInfo() ? QuoteHelper::formattedRank($model) : 'No rank information' ?>
+            <?php $rankInfo = $model->getMetaInfo() ? QuoteHelper::formattedRank($model->getMetaInfo()) : 'No rank information' ?>
             <span class="quote__badge <?php echo $model->getPenaltiesInfo() ? 'bg-info' : 'quote__badge--disabled' ?>"
                 data-toggle="tooltip"
                 data-html="true"
@@ -310,6 +310,7 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
 $css = <<<CSS
     .tooltip_quote_info_box {
         text-align: left;
+        padding-top: 12px;
     }     
     .tooltip_quote_info_box ul {
         padding-left: 16px;

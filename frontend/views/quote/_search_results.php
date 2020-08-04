@@ -354,9 +354,21 @@ JS;
         </div>
     </div>
     <div class="search-results__wrapper">
-        <?php $n = 0; ?>
+        <?php
+            $n = 0;
+            $groupKeys = [];
+        ?>
         <?php foreach ($result['results'] as $key => $resultItem):?>
-            <?= $this->render('_search_result_item', ['resultKey' => $key,'result' => $resultItem,'locations' => $locations,'airlines' => $airlines]);?>
+            <?php
+                if (isset($resultItem['meta']['group1'])) {
+                    if (array_key_exists($resultItem['meta']['group1'], $groupKeys)) {
+                        continue;
+                    }
+                    $groupKeys[$resultItem['meta']['group1']] = $resultItem['meta']['group1'];
+                }
+            ?>
+
+            <?= $this->render('_search_result_item', ['resultKey' => $n,'result' => $resultItem,'locations' => $locations,'airlines' => $airlines]);?>
             <?php
             $n++;
             if($n > 50) {
@@ -364,12 +376,22 @@ JS;
             }
             ?>
         <?php endforeach;?>
-		<?php
-		$js = <<<JS
-    $('.quote__heading [data-toggle="tooltip"]').tooltip();
+<?php
+$js = <<<JS
+    
+    var countResult = '$n';    
+    $('#search-results__cnt').text(countResult);
+    $('[data-toggle="tooltip"]').tooltip({html:true});
 JS;
-		$this->registerJs($js);
-		?>
+$this->registerJs($js);
+
+$css = <<<CSS
+    .quote__trip { 
+        width: 624px;
+    }
+CSS;
+$this->registerCss($css);
+?>
     </div>
 <?php else:?>
     <div class="search-results__wrapper">

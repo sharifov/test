@@ -1,5 +1,6 @@
 <?php
 use common\components\SearchService;
+use frontend\helpers\QuoteHelper;
 use yii\bootstrap\Html;
 
 /**
@@ -246,6 +247,25 @@ if (!empty($baggagePerSegment)) {
                   data-toggle="tooltip" title="<?= ($hasAirportChange)?'Airports Change':'No Airports Change'?>" data-original-title="<?= ($hasAirportChange)?'Airports Change':'No Airports Change'?>">
 				<i class="fa fa-exchange"></i>
 			</span>
+
+            <?php $penaltyInfo = !empty($result['penalties']) ? QuoteHelper::formattedPenalties($result['penalties']) : 'No penalty information' ?>
+            <span class="quote__badge <?php echo !empty($result['penalties']) ? 'quote__badge--warning' : 'quote__badge--disabled' ?>"
+                data-toggle="tooltip"
+                data-html="true"
+                title="<?php echo $penaltyInfo ?>"
+			    data-original-title="<?php echo $penaltyInfo ?>">
+				    <i class="fa fa-expand"></i>
+			</span>
+
+			<?php $rankInfo = !empty($result['meta']) ? QuoteHelper::formattedRank($result['meta']) : 'No rank information' ?>
+            <span class="quote__badge <?php echo !empty($result['meta']) ? 'bg-info' : 'quote__badge--disabled' ?>"
+                data-toggle="tooltip"
+                data-html="true"
+                title="<?php echo $rankInfo ?>"
+			    data-original-title="<?php echo $rankInfo ?>">
+				    <i class="fa fa-star"></i>
+			</span>
+
         </div>
         <div class="quote__actions">
             <table class="table table-striped table-prices">
