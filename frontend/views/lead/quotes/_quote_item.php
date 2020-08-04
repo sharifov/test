@@ -55,7 +55,7 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
 
                 <?php $airline = $model->mainAirline;
                     if($airline) { echo \yii\helpers\Html::encode($airline->name); }
-                ?> &nbsp;[<strong><?= $model->main_airline_code?></strong>]
+                ?> &nbsp;<strong>[<?= $model->main_airline_code?>]</strong>
             </span>
 
 			<div class="quote__gds" title="GDS / <?php if ($showGdsOfferId && !empty($model->gds_offer_id)): echo 'GDS Offer ID: ' . \yii\helpers\Html::encode($model->gds_offer_id) . ' /'; endif; ?> PCC">
