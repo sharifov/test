@@ -139,7 +139,7 @@ class SaleTicket extends \yii\db\ActiveRecord
 
             ['st_recall_commission', 'number'],
 
-            ['st_record_locator', 'string', 'max' => 8],
+            ['st_record_locator', 'string', 'max' => 20],
 
             ['st_refundable_amount', 'number'],
 
