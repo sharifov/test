@@ -24,19 +24,24 @@ class QuoteHelper
     public static function formattedPenalties(array $penalties): string
     {
         $out = '';
-        if ($penalties) {
+        if ($penalties && self::checkPenaltiesInfo($penalties)) {
             $out .= "<div class='tooltip_quote_info_box'>";
             $out .= '<p>Penalties: </p>';
-            if (!empty($penalties['list'])) {
-                foreach ($penalties['list'] as $item) {
-                    $out .= '<ul>';
-                    if (isset($item['permitted']) && $item['permitted']) {
+
+            foreach ($penalties['list'] as $item) {
+                $out .= '<ul>';
+                if (isset($item['permitted']) && $item['permitted']) {
+                    if (!empty($item['type'])) {
                         $out .= '<li>Type : <strong>' . self::getPenaltyTypeName($item['type']) . '</strong></li>';
+                    }
+                    if (!empty($item['applicability'])) {
                         $out .= '<li>Applicability : <strong>' . $item['applicability'] . '</strong></li>';
+                    }
+                    if (isset($item['oAmount']['amount'], $item['oAmount']['currency'])) {
                         $out .= '<li>Amount : <strong>' . $item['oAmount']['amount'] . ' ' . $item['oAmount']['currency'] . '</strong></li>';
                     }
-                    $out .= '</ul>';
                 }
+                $out .= '</ul>';
             }
             $out .= '</div>';
         }
@@ -82,7 +87,12 @@ class QuoteHelper
         return $out;
     }
 
-    private static function checkRankInfo(array $meta): bool
+    public static function checkPenaltiesInfo(array $penalties): bool
+    {
+        return (!empty($penalties['exchange']) || !empty($penalties['refund']));
+    }
+
+    public static function checkRankInfo(array $meta): bool
     {
         return !empty(array_intersect_key(self::RANK_INFO_LIST, $meta));
     }
@@ -95,4 +105,24 @@ class QuoteHelper
         return 'unknown type';
     }
 
+
+    /* TODO::
+
+        * каждый ранкинг сделать отдельной иконкой
+
+        "ранк" - цифра
+        "cheapest": денга
+        "fastest": ракета
+        "best": палец вверх
+
+        * фильтр
+        - ранг диапазон
+        - остальное выпадающий списко только fastest например
+
+        * группировка
+        - маркировать или скрывать(аккордеон) - но выводить полные результаты
+
+        * багажи
+        - выводить две цифры - старый алгоритм/новый алгоритм
+     */
 }
