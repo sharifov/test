@@ -6,7 +6,7 @@ use common\models\Airports;
 use yii\base\Model;
 
 /**
- * Class SegmentForm
+ * Class FlightForm
  *
  * @property string $origin
  * @property string $originLabel
@@ -14,7 +14,7 @@ use yii\base\Model;
  * @property string $destinationLabel
  * @property string $departure
  */
-class SegmentForm extends Model
+class FlightForm extends Model
 {
     public $origin;
     public $originLabel;

@@ -63,14 +63,15 @@ class LeadController extends BaseController
      * @apiParam {int{0..9}}            lead.infants                                Infants count
      * @apiParam {string{50}}           [lead.request_ip]                           Request IP
      * @apiParam {string{32}}           [lead.discount_id]                          Discount ID
-     * @apiParam {string{40}}           lead.uid                                    UID value
+     * @apiParam {string{15}}           lead.uid                                    UID value
      * @apiParam {text}                 [lead.user_agent]                           User agent info
-     * @apiParam {object[]}             lead.segments                               Segments
-     * @apiParam {string{3}}            lead.segments.origin                        Segment Origin location Airport IATA-code
-     * @apiParam {string{3}}            lead.segments.destination                   Segment Destination location Airport IATA-code
-     * @apiParam {datetime{YYYY-MM-DD}} lead.segments.departure                     Segment Departure DateTime (format YYYY-MM-DD)
+     * @apiParam {object[]}             lead.flights                                Flights
+     * @apiParam {string{3}}            lead.flights.origin                         Flight Origin location Airport IATA-code
+     * @apiParam {string{3}}            lead.flights.destination                    Flight Destination location Airport IATA-code
+     * @apiParam {datetime{YYYY-MM-DD}} lead.flights.departure                      Flight Departure DateTime (format YYYY-MM-DD)
      * @apiParam {object}               lead.client                                 Client
-     * @apiParam {string{20}}           lead.client.phone                           Client phone
+     * @apiParam {string{20}}           lead.client.phone                           Client phone or Client email is required
+     * @apiParam {string{160}}          lead.client.email                           Client email or Client phone is required
      * @apiParam {int{2}=14-BOOK_FAILED, 15-ALTERNATIVE}   lead.status              Status
      * @apiParam {string{1}=E-ECONOMY, B-BUSINESS, F-FIRST, P-PREMIUM} lead.cabin   Cabin
      * @apiParam {int}                  lead.flight_id                              BO Flight ID
@@ -81,7 +82,8 @@ class LeadController extends BaseController
      * {
      *      "lead": {
      *           "client": {
-     *               "phone": "+37369333333"
+     *               "phone": "+37369333333",
+     *               "email": "email@email.com",
      *           },
      *           "uid": "WD6q53PO3b",
      *           "status": 14,
@@ -95,7 +97,7 @@ class LeadController extends BaseController
      *           "user_agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36",
      *           "flight_id": 12457,
      *           "user_language": "en-GB",
-     *           "segments": [
+     *           "flights": [
      *               {
      *                   "origin": "NYC",
      *                   "destination": "LON",
@@ -146,7 +148,8 @@ class LeadController extends BaseController
      *       "request": {
      *           "lead": {
      *              "client": {
-     *                   "phone": "+37369636963"
+     *                   "phone": "+37369636963",
+     *                   "email": "example@test.com",
      *               },
      *               "uid": "WD6q53PO3b",
      *               "status": 14,
@@ -160,7 +163,7 @@ class LeadController extends BaseController
      *               "user_agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36",
      *               "flight_id": 12457,
      *               "user_language": "en-GB",
-     *               "segments": [
+     *               "flights": [
      *                   {
      *                       "origin": "NYC",
      *                       "destination": "LON",
@@ -199,10 +202,10 @@ class LeadController extends BaseController
      *           "children": [
      *               "Children must be no greater than 9."
      *           ],
-     *           "segments[0][origin]": [
+     *           "flights[0][origin]": [
      *               "IATA (NY) not found."
      *           ],
-     *           "segments[2][departure]": [
+     *           "flights[2][departure]": [
      *               "The format of Departure is invalid."
      *           ],
      *           "client[phone]": [
