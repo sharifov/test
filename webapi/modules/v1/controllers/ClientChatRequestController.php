@@ -483,6 +483,13 @@ class ClientChatRequestController extends ApiBaseController
 	 */
 	public function actionProjectConfig(): Response
 	{
+		if (!$this->request->isGet) {
+			return new ErrorResponse(
+				new StatusCodeMessage(405),
+				new MessageMessage('Method not allowed.'),
+			);
+		}
+
 		$projectId = \Yii::$app->request->get('project_id');
 
 		$projectConfig = ClientChatProjectConfig::findOne(['ccpc_project_id' => $projectId]);
