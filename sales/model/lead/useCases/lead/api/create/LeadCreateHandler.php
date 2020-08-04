@@ -4,6 +4,7 @@ namespace sales\model\lead\useCases\lead\api\create;
 
 use common\models\Lead;
 use common\models\LeadFlightSegment;
+use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\lead\LeadSegmentRepository;
@@ -49,7 +50,10 @@ class LeadCreateHandler
     {
         $lead = $this->transactionManager->wrap(function () use ($form) {
 
-            $client = $this->clientManageService->getOrCreateByPhones([new PhoneCreateForm(['phone' => $form->clientForm->phone])]);
+            $client = $this->clientManageService->getOrCreate(
+                [new PhoneCreateForm(['phone' => $form->clientForm->phone])],
+                [new EmailCreateForm(['email' => $form->clientForm->email])]
+            );
 
             $lead = Lead::createByApiBO($form, $client);
 
@@ -61,7 +65,7 @@ class LeadCreateHandler
                 $form->infants,
                 $form->cabin,
                 [$form->clientForm->phone],
-                $this->getSegments($form->segmentsForm)
+                $this->getSegments($form->flightsForm)
             );
 
             $lead->setRequestHash($hash);
@@ -73,13 +77,13 @@ class LeadCreateHandler
                 $lead->eventLeadCreatedByApiBOEvent();
             }
 
-            $lead->setTripType($this->calculateTripType($form->segmentsForm));
+            $lead->setTripType($this->calculateTripType($form->flightsForm));
 
             $lead->l_is_test = $this->clientManageService->checkIfPhoneIsTest([$form->clientForm->phone]);
 
             $leadId = $this->leadRepository->save($lead);
 
-            $this->createFlightSegments($leadId, $form->segmentsForm);
+            $this->createFlightSegments($leadId, $form->flightsForm);
 
             return $lead;
 
@@ -90,11 +94,11 @@ class LeadCreateHandler
 
     /**
      * @param int $leadId
-     * @param SegmentForm[] $segments
+     * @param FlightForm[] $flights
      */
-    private function createFlightSegments(int $leadId, array $segments): void
+    private function createFlightSegments(int $leadId, array $flights): void
     {
-        foreach ($segments as $item) {
+        foreach ($flights as $item) {
             $segment = LeadFlightSegment::create(
                 $leadId,
                 $item->origin,
@@ -108,13 +112,13 @@ class LeadCreateHandler
     }
 
     /**
-     * @param SegmentForm[] $segmentsForm
+     * @param FlightForm[] $flightsForm
      * @return array
      */
-    private function getSegments(array $segmentsForm): array
+    private function getSegments(array $flightsForm): array
     {
         $segments = [];
-        foreach ($segmentsForm as $segmentForm) {
+        foreach ($flightsForm as $segmentForm) {
             $segments[] = [
                 'origin' => $segmentForm->origin,
                 'destination' => $segmentForm->destination,
@@ -125,13 +129,13 @@ class LeadCreateHandler
     }
 
     /**
-     * @param SegmentForm[] $segments
+     * @param FlightForm[] $flights
      * @return string
      */
-    private function calculateTripType(array $segments): string
+    private function calculateTripType(array $flights): string
     {
         $segmentsDTO = [];
-        foreach ($segments as $segment) {
+        foreach ($flights as $segment) {
             $segmentsDTO[] = new SegmentDTO($segment->origin, $segment->destination);
         }
 

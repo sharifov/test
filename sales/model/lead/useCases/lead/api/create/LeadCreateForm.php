@@ -25,12 +25,12 @@ use yii\base\Model;
  * @property string $request_ip
  * @property string $discount_id
  * @property string $user_agent
- * @property array $segments
+ * @property array $flights
  * @property array $client
  * @property int $flight_id
  * @property string|null $user_language
  *
- * @property SegmentForm[] $segmentsForm
+ * @property FlightForm[] $flightsForm
  * @property ClientForm $clientForm
  */
 class LeadCreateForm extends Model
@@ -48,12 +48,12 @@ class LeadCreateForm extends Model
     public $request_ip;
     public $discount_id;
     public $user_agent;
-    public $segments;
+    public $flights;
     public $client;
     public $flight_id;
     public ?string $user_language = null;
 
-    public $segmentsForm;
+    public $flightsForm;
     public $clientForm;
 
     public function rules(): array
@@ -103,9 +103,9 @@ class LeadCreateForm extends Model
             ['status', 'required'],
             ['status', 'in', 'range' => [Lead::STATUS_BOOK_FAILED, Lead::STATUS_ALTERNATIVE]],
 
-            ['segments', 'required'],
-            ['segments', IsArrayValidator::class],
-            ['segments', function () { $this->loadAndValidateSegments(); }, 'skipOnError' => true, 'skipOnEmpty' => true],
+            ['flights', 'required'],
+            ['flights', IsArrayValidator::class],
+            ['flights', function () { $this->loadAndValidateFlights(); }, 'skipOnError' => true, 'skipOnEmpty' => true],
 
             ['client', 'required'],
             ['client', IsArrayValidator::class],
@@ -126,48 +126,48 @@ class LeadCreateForm extends Model
         return 'lead';
     }
 
-    private function loadAndValidateSegments(): void
+    private function loadAndValidateFlights(): void
     {
         $isValid = true;
-        foreach ($this->segments as $key => $flight) {
+        foreach ($this->flights as $key => $flight) {
             /** @var array $flight */
-            if (!$this->loadAndValidateSegment($key, $flight)) {
+            if (!$this->loadAndValidateFlight($key, $flight)) {
                 $isValid = false;
             }
         }
         if (!$isValid) {
             return;
         }
-        $this->validateDateOfPreviousSegment();
+        $this->validateDateOfPreviousFlight();
     }
 
-    private function loadAndValidateSegment(int $key, array $flight): bool
+    private function loadAndValidateFlight(int $key, array $flight): bool
     {
-        $segment = new SegmentForm();
-        if (!$segment->load($flight, '')) {
-            $this->addError('segments[' . $key . ']', 'Cant load segment');
+        $flightForm = new FlightForm();
+        if (!$flightForm->load($flight, '')) {
+            $this->addError('flights[' . $key . ']', 'Cant load flight');
             return false;
         }
-        if ($segment->validate()) {
-            $this->segmentsForm[] = $segment;
+        if ($flightForm->validate()) {
+            $this->flightsForm[] = $flightForm;
             return true;
         }
-        foreach ($segment->errors as $attr => $error) {
+        foreach ($flightForm->errors as $attr => $error) {
             foreach ($error as $err) {
-                $this->addError('segments[' . $key . '][' . $attr . ']', $err);
+                $this->addError('flights[' . $key . '][' . $attr . ']', $err);
             }
         }
         return false;
     }
 
-    private function validateDateOfPreviousSegment(): void
+    private function validateDateOfPreviousFlight(): void
     {
-        foreach ($this->segmentsForm as $key => $segment) {
-            if (isset($this->segmentsForm[$key - 1])) {
-                $dateFrom = strtotime($this->segmentsForm[$key - 1]->departure);
-                $dateTo = strtotime($this->segmentsForm[$key]->departure);
+        foreach ($this->flightsForm as $key => $flight) {
+            if (isset($this->flightsForm[$key - 1])) {
+                $dateFrom = strtotime($this->flightsForm[$key - 1]->departure);
+                $dateTo = strtotime($this->flightsForm[$key]->departure);
                 if ($dateTo < $dateFrom) {
-                    $this->addError('segments[' . $key . '][departure]', 'Date can not be less than the date of the previous segment');
+                    $this->addError('flights[' . $key . '][departure]', 'Date can not be less than the date of the previous flight');
                 }
             }
         }
