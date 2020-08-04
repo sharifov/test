@@ -1240,6 +1240,15 @@ class Quote extends \yii\db\ActiveRecord
 
     public function getBaggageInfo()
     {
+        if ($freeBaggage = $this->getFreeBaggageInfoFromMeta()) {
+            $this->freeBaggageInfo = $freeBaggage . ' pcs';
+            $this->hasFreeBaggage = true;
+            return [
+                'hasFreeBaggage' => $this->hasFreeBaggage,
+                'freeBaggageInfo' => $this->freeBaggageInfo,
+            ];
+        } /* TODO:: спросить */
+
         //if one segment has baggage -> quote has baggage
         if(!empty($this->quoteTrips)){
             foreach ($this->quoteTrips as $trip){
@@ -1264,6 +1273,17 @@ class Quote extends \yii\db\ActiveRecord
             }
         }
         return ['hasFreeBaggage' => $this->hasFreeBaggage, 'freeBaggageInfo' => $this->freeBaggageInfo];
+    }
+
+    public function getFreeBaggageInfoFromMeta(): ?int
+    {
+        if (!empty($this->origin_search_data)) {
+            $originSearchData = JsonHelper::decode($this->origin_search_data);
+            if (!empty($originSearchData['meta']['bags'])) {
+                return (int) $originSearchData['meta']['bags'];
+            }
+        }
+        return null;
     }
 
 
