@@ -287,6 +287,14 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
 				    <i class="fa fa-expand"></i>
 			</span>
 
+            <?php $rankInfo = $model->getMetaInfo() ? QuoteHelper::formattedRank($model) : 'No rank information' ?>
+            <span class="quote__badge <?php echo $model->getPenaltiesInfo() ? 'bg-info' : 'quote__badge--disabled' ?>"
+                data-toggle="tooltip"
+                data-html="true"
+			    title="<?php echo $rankInfo ?>">
+				    <i class="fa fa-star"></i>
+			</span>
+
 		</div>
 		<div class="quote__actions">
 			<?php \yii\widgets\Pjax::begin(['id' => 'pjax-quote_prices-'.$model->id, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
@@ -300,13 +308,13 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
 
 <?php
 $css = <<<CSS
-    .tooltip_penalties_box {
+    .tooltip_quote_info_box {
         text-align: left;
     }     
-    .tooltip_penalties_box ul {
+    .tooltip_quote_info_box ul {
         padding-left: 16px;
     } 
-    .tooltip_penalties_box p {
+    .tooltip_quote_info_box p {
         margin-bottom: 0;
     }     
 CSS;

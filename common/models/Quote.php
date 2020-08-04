@@ -10,6 +10,7 @@ use common\models\query\QuoteQuery;
 use frontend\helpers\JsonHelper;
 use sales\entities\EventTrait;
 use sales\events\quote\QuoteSendEvent;
+use sales\helpers\app\AppHelper;
 use sales\services\parsingDump\lib\ParsingDump;
 use sales\services\parsingDump\ReservationService;
 use Yii;
@@ -1247,7 +1248,7 @@ class Quote extends \yii\db\ActiveRecord
                 'hasFreeBaggage' => $this->hasFreeBaggage,
                 'freeBaggageInfo' => $this->freeBaggageInfo,
             ];
-        } /* TODO:: спросить */
+        }
 
         //if one segment has baggage -> quote has baggage
         if(!empty($this->quoteTrips)){
@@ -1277,8 +1278,7 @@ class Quote extends \yii\db\ActiveRecord
 
     public function getFreeBaggageInfoFromMeta(): ?int
     {
-        if (!empty($this->origin_search_data)) {
-            $originSearchData = JsonHelper::decode($this->origin_search_data);
+        if ($originSearchData = $this->getJsonOriginSearchData()) {
             if (!empty($originSearchData['meta']['bags'])) {
                 return (int) $originSearchData['meta']['bags'];
             }
@@ -2490,14 +2490,34 @@ class Quote extends \yii\db\ActiveRecord
         }
     }
 
-    public function getPenaltiesInfo(): array
+    public function getPenaltiesInfo(): ?array
     {
-        if (!empty($this->origin_search_data)) {
-            $originSearchData = JsonHelper::decode($this->origin_search_data);
+        if ($originSearchData = $this->getJsonOriginSearchData()) {
             if (!empty($originSearchData['penalties'])) {
                 return $originSearchData['penalties'];
             }
         }
-        return [];
+        return null;
+    }
+
+    public function getMetaInfo(): ?array
+    {
+        if (($originSearchData = $this->getJsonOriginSearchData()) && !empty($originSearchData['meta'])) {
+            return $originSearchData['meta'];
+        }
+        return null;
+    }
+
+    public function getJsonOriginSearchData(): ?array
+    {
+        if (!empty($this->origin_search_data)) {
+            try {
+                return JsonHelper::decode($this->origin_search_data);
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableFormatter($throwable),
+                'Quote:getJsonOriginSearchData:failed');
+            }
+        }
+        return null;
     }
 }
