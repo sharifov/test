@@ -95,7 +95,7 @@ class LeadCreateForm extends Model
             ['discount_id', 'string', 'max' => 32],
 
             ['uid', 'required'],
-            ['uid', 'string', 'max' => 40],
+            ['uid', 'string', 'max' => 15],
             ['uid', 'unique', 'targetClass' => Lead::class, 'targetAttribute' => ['uid' => 'uid']],
 
             ['user_agent', 'string'],

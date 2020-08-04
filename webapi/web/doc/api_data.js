@@ -1456,7 +1456,7 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "string",
-            "size": "40",
+            "size": "15",
             "optional": false,
             "field": "lead.uid",
             "description": "<p>UID value</p>"

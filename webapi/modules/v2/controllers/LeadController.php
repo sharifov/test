@@ -63,7 +63,7 @@ class LeadController extends BaseController
      * @apiParam {int{0..9}}            lead.infants                                Infants count
      * @apiParam {string{50}}           [lead.request_ip]                           Request IP
      * @apiParam {string{32}}           [lead.discount_id]                          Discount ID
-     * @apiParam {string{40}}           lead.uid                                    UID value
+     * @apiParam {string{15}}           lead.uid                                    UID value
      * @apiParam {text}                 [lead.user_agent]                           User agent info
      * @apiParam {object[]}             lead.flights                                Flights
      * @apiParam {string{3}}            lead.flights.origin                         Flight Origin location Airport IATA-code
