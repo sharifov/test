@@ -659,9 +659,9 @@ class CasesController extends FController
         $leadSearchModel = new LeadSearch();
         $leadDataProvider = $leadSearchModel->searchByCase($params);
 
-
+        $casesUpdatePermission = Auth::can('cases/update', ['case' => $model]);
         $modelNote = new CaseNote();
-        if ($modelNote->load(Yii::$app->request->post())) {
+        if ($casesUpdatePermission && $modelNote->load(Yii::$app->request->post())) {
             $modelNote->cn_user_id = Yii::$app->user->id;
             $modelNote->cn_cs_id = $model->cs_id;
             $modelNote->cn_created_dt = date('Y-m-d H:i:s');

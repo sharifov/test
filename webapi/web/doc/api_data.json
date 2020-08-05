@@ -1456,7 +1456,7 @@
           {
             "group": "Parameter",
             "type": "string",
-            "size": "40",
+            "size": "15",
             "optional": false,
             "field": "lead.uid",
             "description": "<p>UID value</p>"
@@ -1472,32 +1472,32 @@
             "group": "Parameter",
             "type": "object[]",
             "optional": false,
-            "field": "lead.segments",
-            "description": "<p>Segments</p>"
+            "field": "lead.flights",
+            "description": "<p>Flights</p>"
           },
           {
             "group": "Parameter",
             "type": "string",
             "size": "3",
             "optional": false,
-            "field": "lead.segments.origin",
-            "description": "<p>Segment Origin location Airport IATA-code</p>"
+            "field": "lead.flights.origin",
+            "description": "<p>Flight Origin location Airport IATA-code</p>"
           },
           {
             "group": "Parameter",
             "type": "string",
             "size": "3",
             "optional": false,
-            "field": "lead.segments.destination",
-            "description": "<p>Segment Destination location Airport IATA-code</p>"
+            "field": "lead.flights.destination",
+            "description": "<p>Flight Destination location Airport IATA-code</p>"
           },
           {
             "group": "Parameter",
             "type": "datetime",
             "size": "YYYY-MM-DD",
             "optional": false,
-            "field": "lead.segments.departure",
-            "description": "<p>Segment Departure DateTime (format YYYY-MM-DD)</p>"
+            "field": "lead.flights.departure",
+            "description": "<p>Flight Departure DateTime (format YYYY-MM-DD)</p>"
           },
           {
             "group": "Parameter",
@@ -1512,7 +1512,15 @@
             "size": "20",
             "optional": false,
             "field": "lead.client.phone",
-            "description": "<p>Client phone</p>"
+            "description": "<p>Client phone or Client email is required</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "160",
+            "optional": false,
+            "field": "lead.client.email",
+            "description": "<p>Client email or Client phone is required</p>"
           },
           {
             "group": "Parameter",
@@ -1560,7 +1568,7 @@
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "\n{\n     \"lead\": {\n          \"client\": {\n              \"phone\": \"+37369333333\"\n          },\n          \"uid\": \"WD6q53PO3b\",\n          \"status\": 14,\n          \"source_code\": \"JIVOCH\",\n          \"cabin\": \"E\",\n          \"adults\": 2,\n          \"children\": 2,\n          \"infants\": 2,\n          \"request_ip\": \"12.12.12.12\",\n          \"discount_id\": \"123123\",\n          \"user_agent\": \"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36\",\n          \"flight_id\": 12457,\n          \"user_language\": \"en-GB\",\n          \"segments\": [\n              {\n                  \"origin\": \"NYC\",\n                  \"destination\": \"LON\",\n                  \"departure\": \"2019-12-16\"\n              },\n              {\n                  \"origin\": \"LON\",\n                  \"destination\": \"NYC\",\n                  \"departure\": \"2019-12-17\"\n              },\n              {\n                  \"origin\": \"LON\",\n                  \"destination\": \"NYC\",\n                  \"departure\": \"2019-12-18\"\n              }\n          ]\n      }\n}",
+          "content": "\n{\n     \"lead\": {\n          \"client\": {\n              \"phone\": \"+37369333333\",\n              \"email\": \"email@email.com\",\n          },\n          \"uid\": \"WD6q53PO3b\",\n          \"status\": 14,\n          \"source_code\": \"JIVOCH\",\n          \"cabin\": \"E\",\n          \"adults\": 2,\n          \"children\": 2,\n          \"infants\": 2,\n          \"request_ip\": \"12.12.12.12\",\n          \"discount_id\": \"123123\",\n          \"user_agent\": \"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36\",\n          \"flight_id\": 12457,\n          \"user_language\": \"en-GB\",\n          \"flights\": [\n              {\n                  \"origin\": \"NYC\",\n                  \"destination\": \"LON\",\n                  \"departure\": \"2019-12-16\"\n              },\n              {\n                  \"origin\": \"LON\",\n                  \"destination\": \"NYC\",\n                  \"departure\": \"2019-12-17\"\n              },\n              {\n                  \"origin\": \"LON\",\n                  \"destination\": \"NYC\",\n                  \"departure\": \"2019-12-18\"\n              }\n          ]\n      }\n}",
           "type": "json"
         }
       ]
@@ -1569,7 +1577,7 @@
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "\nHTTP/1.1 200 OK\n{\n      \"status\": 200,\n      \"message\": \"OK\",\n      \"data\": {\n         \"lead\": {\n              \"id\": 370949,\n              \"uid\": \"WD6q53PO3b\",\n              \"gid\": \"63e1505f4a8a87e6651048e3e3eae4e1\",\n              \"client_id\": 1034,\n              \"client\": {\n                 \"uuid\": \"35009a79-1a05-49d7-b876-2b884d0f825b\"\n                 \"client_id\": 331968,\n                 \"first_name\": \"Johann\",\n                 \"middle_name\": \"Sebastian\",\n                 \"last_name\": \"Bach\",\n                 \"phones\": [\n                     \"+13152572166\"\n                 ],\n                 \"emails\": [\n                     \"example@test.com\",\n                     \"bah@gmail.com\"\n                 ]\n             }\n          }\n      }\n      \"request\": {\n          \"lead\": {\n             \"client\": {\n                  \"phone\": \"+37369636963\"\n              },\n              \"uid\": \"WD6q53PO3b\",\n              \"status\": 14,\n              \"source_code\": \"JIVOCH\",\n              \"cabin\": \"E\",\n              \"adults\": 2,\n              \"children\": 2,\n              \"infants\": 2,\n              \"request_ip\": \"12.12.12.12\",\n              \"discount_id\": \"123123\",\n              \"user_agent\": \"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36\",\n              \"flight_id\": 12457,\n              \"user_language\": \"en-GB\",\n              \"segments\": [\n                  {\n                      \"origin\": \"NYC\",\n                      \"destination\": \"LON\",\n                      \"departure\": \"2019-12-16\"\n                  },\n                  {\n                      \"origin\": \"LON\",\n                      \"destination\": \"NYC\",\n                      \"departure\": \"2019-12-17\"\n                  },\n                  {\n                      \"origin\": \"LON\",\n                      \"destination\": \"NYC\",\n                      \"departure\": \"2019-12-18\"\n                  }\n              ]\n          }\n      },\n      \"technical\": {\n          \"action\": \"v2/lead/create\",\n          \"response_id\": 11930215,\n          \"request_dt\": \"2019-12-30 12:22:20\",\n          \"response_dt\": \"2019-12-30 12:22:21\",\n          \"execution_time\": 0.055,\n          \"memory_usage\": 1394416\n      }\n}",
+          "content": "\nHTTP/1.1 200 OK\n{\n      \"status\": 200,\n      \"message\": \"OK\",\n      \"data\": {\n         \"lead\": {\n              \"id\": 370949,\n              \"uid\": \"WD6q53PO3b\",\n              \"gid\": \"63e1505f4a8a87e6651048e3e3eae4e1\",\n              \"client_id\": 1034,\n              \"client\": {\n                 \"uuid\": \"35009a79-1a05-49d7-b876-2b884d0f825b\"\n                 \"client_id\": 331968,\n                 \"first_name\": \"Johann\",\n                 \"middle_name\": \"Sebastian\",\n                 \"last_name\": \"Bach\",\n                 \"phones\": [\n                     \"+13152572166\"\n                 ],\n                 \"emails\": [\n                     \"example@test.com\",\n                     \"bah@gmail.com\"\n                 ]\n             }\n          }\n      }\n      \"request\": {\n          \"lead\": {\n             \"client\": {\n                  \"phone\": \"+37369636963\",\n                  \"email\": \"example@test.com\",\n              },\n              \"uid\": \"WD6q53PO3b\",\n              \"status\": 14,\n              \"source_code\": \"JIVOCH\",\n              \"cabin\": \"E\",\n              \"adults\": 2,\n              \"children\": 2,\n              \"infants\": 2,\n              \"request_ip\": \"12.12.12.12\",\n              \"discount_id\": \"123123\",\n              \"user_agent\": \"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36\",\n              \"flight_id\": 12457,\n              \"user_language\": \"en-GB\",\n              \"flights\": [\n                  {\n                      \"origin\": \"NYC\",\n                      \"destination\": \"LON\",\n                      \"departure\": \"2019-12-16\"\n                  },\n                  {\n                      \"origin\": \"LON\",\n                      \"destination\": \"NYC\",\n                      \"departure\": \"2019-12-17\"\n                  },\n                  {\n                      \"origin\": \"LON\",\n                      \"destination\": \"NYC\",\n                      \"departure\": \"2019-12-18\"\n                  }\n              ]\n          }\n      },\n      \"technical\": {\n          \"action\": \"v2/lead/create\",\n          \"response_id\": 11930215,\n          \"request_dt\": \"2019-12-30 12:22:20\",\n          \"response_dt\": \"2019-12-30 12:22:21\",\n          \"execution_time\": 0.055,\n          \"memory_usage\": 1394416\n      }\n}",
           "type": "json"
         }
       ]
@@ -1578,7 +1586,7 @@
       "examples": [
         {
           "title": "Error-Response (422):",
-          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n      \"status\": 422,\n      \"message\": \"Validation error\",\n      \"errors\": {\n          \"children\": [\n              \"Children must be no greater than 9.\"\n          ],\n          \"segments[0][origin]\": [\n              \"IATA (NY) not found.\"\n          ],\n          \"segments[2][departure]\": [\n              \"The format of Departure is invalid.\"\n          ],\n          \"client[phone]\": [\n             \"The format of Phone is invalid.\"\n          ]\n      },\n      \"code\": 10301,\n      \"request\": {\n          ...\n      },\n      \"technical\": {\n          ...\n     }\n}",
+          "content": "\nHTTP/1.1 422 Unprocessable entity\n{\n      \"status\": 422,\n      \"message\": \"Validation error\",\n      \"errors\": {\n          \"children\": [\n              \"Children must be no greater than 9.\"\n          ],\n          \"flights[0][origin]\": [\n              \"IATA (NY) not found.\"\n          ],\n          \"flights[2][departure]\": [\n              \"The format of Departure is invalid.\"\n          ],\n          \"client[phone]\": [\n             \"The format of Phone is invalid.\"\n          ]\n      },\n      \"code\": 10301,\n      \"request\": {\n          ...\n      },\n      \"technical\": {\n          ...\n     }\n}",
           "type": "json"
         },
         {
