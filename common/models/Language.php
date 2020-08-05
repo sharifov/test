@@ -133,6 +133,16 @@ class Language extends ActiveRecord
             self::find()->orderBy(['name' => SORT_ASC])->asArray()->all(), 'language_id', 'name');
 	}
 
+	/**
+	 * @param array $languages
+	 * @return array
+	 */
+	public static function getListByPk(array $languages): array
+	{
+		return ArrayHelper::map(
+			self::find()->where(['IN', 'language_id', $languages])->orderBy(['name' => SORT_ASC])->asArray()->all(), 'language_id', 'name');
+	}
+
     /**
      * @param bool $active
      * @param null $group

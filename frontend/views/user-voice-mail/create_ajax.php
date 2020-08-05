@@ -1,13 +1,16 @@
 <?php
-use sales\model\userVoiceMail\entity\UserVoiceMail;
+
+use common\models\Language;
+use sales\model\userVoiceMail\useCase\manage\UserVoiceMailForm;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
 
 /**
- * @var UserVoiceMail $model
+ * @var $this \yii\web\View
+ * @var UserVoiceMailForm $model
  */
-
+\frontend\assets\WebAudioRecorder::register($this);
 ?>
 
 <script>
@@ -16,9 +19,10 @@ use yii\widgets\Pjax;
 
 <?php Pjax::begin(['id' => 'create-user-voice-mail-pjax', 'timeout' => 2000, 'enablePushState' => false]); ?>
 <?php $form = ActiveForm::begin([
-	'options' => ['data-pjax' => true],
+	'options' => ['data-pjax' => true, 'enctype' => 'multipart/form-data'],
 	'action' => ['user-voice-mail/ajax-create', 'uid' => $model->uvm_user_id],
 	'method' => 'post',
+    'enableClientValidation' => true,
 ]) ?>
 
 <div class="col-md-12">
@@ -31,13 +35,19 @@ use yii\widgets\Pjax;
 
 	<?= $form->field($model, 'uvm_name')->textInput() ?>
 	<?= $form->field($model, 'uvm_say_text_message')->textarea() ?>
-	<?= $form->field($model, 'uvm_say_language')->dropDownList(\common\models\Language::getList(), ['prompt' => '--'])?>
-	<?= $form->field($model, 'uvm_say_voice')->textarea(['max' => 30]) ?>
-	<?= $form->field($model, 'uvm_voice_file_message')->textarea(['max' => 255]) ?>
+	<?= $form->field($model, 'uvm_say_language')->dropDownList(Language::getListByPk($model->getAllowedList()), ['prompt' => '--'])?>
+	<?= $form->field($model, 'uvm_say_voice')->dropDownList($model->getSaveVoiceList(), ['prompt' => '--']) ?>
 	<?= $form->field($model, 'uvm_record_enable')->checkbox() ?>
 	<?= $form->field($model, 'uvm_max_recording_time')->input('number') ?>
 	<?= $form->field($model, 'uvm_transcribe_enable')->checkbox() ?>
 	<?= $form->field($model, 'uvm_enabled')->checkbox() ?>
+
+    <div id="webAudioRecorder">
+        <div>
+            <?= Html::button('<i class="fa fa-microphone"></i> Record', ['id' => 'recordButton', 'class' => 'btn btn-success']) ?>
+            <?= Html::button('<i class="fa fa-stop"></i> Stop', ['id' => 'stopButton', 'class' => 'btn btn-danger', 'disabled' => true]) ?>
+        </div>
+    </div>
 
 	<div class="form-group text-center">
 		<?= Html::submitButton('Save', ['class' => 'btn btn-success'])?>
@@ -45,4 +55,21 @@ use yii\widgets\Pjax;
 </div>
 
 <?php ActiveForm::end(); ?>
+<?php $js = <<<JS
+var webAudioRecord = $('#webAudioRecorder').webAudioRecorder({
+    recordBtnSelector: '#recordButton',
+    stopBtnSelector: '#stopButton',
+    showFormatsInfo: false,
+    showLog: true,
+    blobUrl: '{$model->blobUrl}'
+});
+$('#create-user-voice-mail-pjax').off().on('pjax:beforeSend', function (xhr, data, settings) {
+
+settings.data.append('{$model->formName()}[recordFile]', webAudioRecord.getRecord());
+settings.data.append('{$model->formName()}[blobUrl]', webAudioRecord.getBlobUrl());
+    
+});
+JS;
+$this->registerJs($js);
+?>
 <?php Pjax::end(); ?>

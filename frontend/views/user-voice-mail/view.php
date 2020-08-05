@@ -1,12 +1,13 @@
 <?php
 
+use sales\model\userVoiceMail\entity\UserVoiceMail;
 use yii\bootstrap4\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $model sales\model\userVoiceMail\entity\UserVoiceMail */
 
-$this->title = $model->uvmUser->username;
+$this->title = $model->uvmUser ? $model->uvmUser->username : '';
 $this->params['breadcrumbs'][] = ['label' => 'User Voice Mails', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
@@ -37,7 +38,18 @@ $this->params['breadcrumbs'][] = $this->title;
                 'uvm_say_text_message:ntext',
                 'uvm_say_language',
                 'uvm_say_voice',
-                'uvm_voice_file_message',
+                [
+                    'attribute' => 'uvm_voice_file_message',
+                    'value' => static function (UserVoiceMail $model) {
+                        if ($model->uvm_voice_file_message) {
+                            $sourceTag = Html::tag('source', null, ['src' => $model->uvm_voice_file_message, 'type' => 'audio/mpeg']);
+                            return Html::tag('audio', $sourceTag, ['controls' => true]);
+                        } else {
+                            return null;
+                        }
+                    },
+                    'format' => 'raw'
+                ],
                 'uvm_record_enable:BooleanByLabel',
                 'uvm_max_recording_time:datetime',
                 'uvm_transcribe_enable:BooleanByLabel',
