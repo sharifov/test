@@ -81,8 +81,32 @@ function ListItemMenu(props) {
         return null;
     }
 
-    if (call.data.typeId === 3 || call.data.isInternal) {
+    if (call.data.typeId === 3) {
         return <ListItemMenuJoinCall call={call}/>
+    }
+
+    if (call.data.isInternal) {
+        if (call.data.isConferenceCreator) {
+            return (
+                <ul className="call-list-item__menu call-item-menu">
+                    <li className="call-item-menu__list-item">
+                        <a href="#" className="call-item-menu__close"><i className="fa fa-chevron-right"> </i></a>
+                    </li>
+                    <React.Fragment>
+                        <ListItemBtnHold call={call}/>
+                        <ListItemBtnMute call={call}/>
+                    </React.Fragment>
+                </ul>
+            );
+        }
+        return (
+            <ul className="call-list-item__menu call-item-menu">
+                <li className="call-item-menu__list-item">
+                    <a href="#" className="call-item-menu__close"><i className="fa fa-chevron-right"> </i></a>
+                </li>
+                <ListItemBtnMute call={call}/>
+            </ul>
+        );
     }
 
     return (

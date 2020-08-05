@@ -1314,4 +1314,75 @@ class PhoneController extends FController
         }
         return $this->asJson($result);
     }
+
+    public function actionCreateInternalCall()
+    {
+        $result = ['error' => false, 'message' => ''];
+
+        try {
+            $createdUser = Auth::user();
+            $this->guardUserIsFree($createdUser->id);
+
+            $user_id = (int)Yii::$app->request->post('user_id');
+            $this->guardValidUser($user_id);
+
+            $this->guardPermissionUserToUserCall($createdUser->id, $user_id);
+
+            $result = Yii::$app->communication->callToUser(
+                UserCallIdentity::getClientId($createdUser->id),
+                UserCallIdentity::getClientId($user_id),
+                $createdUser->id,
+                [
+                    'status' => 'Ringing',
+                    'duration' => 0,
+                    'typeId' => Call::CALL_TYPE_IN,
+                    'type' => 'Incoming',
+                    'source_type_id' => Call::SOURCE_INTERNAL,
+                    'fromInternal' => 'false',
+                    'isInternal' => 'true',
+                    'isHold' => 'false',
+                    'holdDuration' => 0,
+                    'isListen' => 'false',
+                    'isCoach' => 'false',
+                    'isMute' => 'false',
+                    'isBarge' => 'false',
+                    'project' => '',
+                    'source' => Call::SOURCE_LIST[Call::SOURCE_INTERNAL],
+                    'isEnded' => 'false',
+                    'contact' => [
+                        'name' => $createdUser->nickname ?: $createdUser->username,
+                        'phone' => '',
+                        'company' => '',
+                    ],
+                    'department' => '',
+                    'queue' => Call::QUEUE_DIRECT,
+                    'conference' => [],
+                    'isConferenceCreator' => 'false',
+                ]
+            );
+
+        } catch (\Throwable $e) {
+            $result = [
+                'error' => true,
+                'message' => $e->getMessage(),
+            ];
+        }
+
+        return $this->asJson($result);
+    }
+
+    private function guardPermissionUserToUserCall($fromUserId, $toUserId): void
+    {
+        //todo
+    }
+
+    private function guardValidUser($userId): void
+    {
+        //todo
+    }
+
+    private function guardUserIsFree($userId): void
+    {
+        //todo
+    }
 }

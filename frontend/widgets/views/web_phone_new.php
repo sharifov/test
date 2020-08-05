@@ -28,6 +28,7 @@ NewWebPhoneAsset::register($this);
 $ajaxCheckUserForCallUrl = Url::to(['/phone/ajax-check-user-for-call']);
 $ajaxBlackList = Url::to(['/phone/check-black-phone']);
 $ajaxCreateCallUrl = Url::to(['/phone/ajax-create-call']);
+$createInternalCallUrl = Url::to(['/phone/create-internal-call']);
 
 $conferenceBase = 0;
 if (isset(Yii::$app->params['settings']['voip_conference_base'])) {
@@ -48,6 +49,9 @@ $js = <<<JS
 
     $(document).on('click', '#btn-new-make-call', function(e) {
         e.preventDefault();
+        
+        createInternalCall();
+        return false;
         
 		let phone_to = $('#call-pane__dial-number').val();
 		let case_id = $(this).attr('data-case-id') || null;
@@ -143,8 +147,23 @@ $js = <<<JS
         }, 'json');
         
     });
+    
+    function createInternalCall() {
+      $.ajax({
+                type: 'post',
+                data: {
+                    'user_id': 295
+                },
+                url: '{$createInternalCallUrl}'
+            })
+                .done(function (data) {
+                    if (data.error) {
+                        createNotify('Create Internal Call', data.message, 'error');
+                    }
+                })
+                .fail(function () {
+                    createNotify('Create Internal Call', 'Server error', 'error');
+                })
+    }
 JS;
 $this->registerJs($js);
-
-
-
