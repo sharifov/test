@@ -257,14 +257,8 @@ if (!empty($baggagePerSegment)) {
 				    <i class="fa fa-expand"></i>
 			</span>
 
-			<?php $rankInfo = !empty($result['meta']) ? QuoteHelper::formattedRank($result['meta']) : 'No rank information' ?>
-            <span class="quote__badge <?php echo !empty($result['meta']) ? 'bg-info' : 'quote__badge--disabled' ?>"
-                data-toggle="tooltip"
-                data-html="true"
-                title="<?php echo $rankInfo ?>"
-			    data-original-title="<?php echo $rankInfo ?>">
-				    <i class="fa fa-star"></i>
-			</span>
+			<?php $meta = !empty($result['meta']) ? $result['meta'] : null ?>
+			<?php echo QuoteHelper::formattedMetaRank($meta) ?>
 
         </div>
         <div class="quote__actions">

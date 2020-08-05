@@ -287,13 +287,7 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
 				    <i class="fa fa-expand"></i>
 			</span>
 
-            <?php $rankInfo = $model->getMetaInfo() ? QuoteHelper::formattedRank($model->getMetaInfo()) : 'No rank information' ?>
-            <span class="quote__badge <?php echo $model->getPenaltiesInfo() ? 'bg-info' : 'quote__badge--disabled' ?>"
-                data-toggle="tooltip"
-                data-html="true"
-			    title="<?php echo $rankInfo ?>">
-				    <i class="fa fa-star"></i>
-			</span>
+            <?php echo QuoteHelper::formattedMetaRank($model->getMetaInfo())?>
 
 		</div>
 		<div class="quote__actions">

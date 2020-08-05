@@ -48,42 +48,65 @@ class QuoteHelper
         return $out;
     }
 
-    public static function formattedRank(array $meta): string
+    public static function formattedRanking(?array $meta, int $decimals = 1): string
+    {
+        if (!empty($meta['rank'])) {
+            return '<span class="quote__badge bg-info"
+                data-toggle="tooltip"
+                data-html="true"
+                title="Rank: ' . $meta['rank'] . '">
+                    ' . number_format($meta['rank'], $decimals, '.', '') . '
+            </span>';
+        }
+        return '';
+    }
+
+    public static function formattedCheapest(?array $meta): string
+    {
+        if (!empty($meta['cheapest'])) {
+            return '<span class="quote__badge bg-green"
+                data-toggle="tooltip"
+                data-html="true"
+                title="' . self::RANK_INFO_LIST['cheapest'] . '">
+                    <i class="fa fa-money"></i>
+            </span>';
+        }
+        return '';
+    }
+
+    public static function formattedFastest(?array $meta): string
+    {
+        if (!empty($meta['fastest'])) {
+            return '<span class="quote__badge bg-orange"
+                data-toggle="tooltip"
+                data-html="true"
+                title="' . self::RANK_INFO_LIST['fastest'] . '">
+                    <i class="fa fa-rocket"></i>
+            </span>';
+        }
+        return '';
+    }
+
+    public static function formattedBest(?array $meta): string
+    {
+        if (!empty($meta['fastest'])) {
+            return '<span class="quote__badge bg-primary"
+                data-toggle="tooltip"
+                data-html="true"
+                title="' . self::RANK_INFO_LIST['best'] . '">
+                    <i class="fa fa-thumbs-o-up"></i>
+            </span>';
+        }
+        return '';
+    }
+
+    public static function formattedMetaRank(?array $meta): string
     {
         $out = '';
-        if ($meta && self::checkRankInfo($meta)) {
-            $out .= "<div class='tooltip_quote_info_box'>";
-            $out .= '<p>Ranking: </p>';
-            $out .= '<ul>';
-
-            if (!empty($meta['rank'])) {
-                $out .= '<li>Rank : <strong>' . number_format($meta['rank'], 2, '.', '') . '</strong></li>';
-            }
-
-            $rankParams = 0;
-            $rankParamsOut = '';
-
-            if (isset($meta['cheapest'])) {
-                $icoClass = $meta['cheapest'] ? 'fa-check' : 'fa-times';
-                $rankParams += (int) $meta['cheapest'];
-                $rankParamsOut .= '<li>' . self::RANK_INFO_LIST['cheapest'] . " : <i class='fa " . $icoClass . "'></i></li>";
-            }
-            if (isset($meta['fastest'])) {
-                $icoClass = $meta['fastest'] ? 'fa-check' : 'fa-times';
-                $rankParams += (int) $meta['fastest'];
-                $rankParamsOut .= '<li>' . self::RANK_INFO_LIST['fastest'] . " : <i class='fa " . $icoClass . "'></i></li>";
-            }
-            if (isset($meta['best'])) {
-                $icoClass = $meta['best'] ? 'fa-check' : 'fa-times';
-                $rankParams += (int) $meta['best'];
-                $rankParamsOut .= '<li>' . self::RANK_INFO_LIST['best'] . " : <i class='fa " . $icoClass . "'></i></li>";
-            }
-
-            $out .= $rankParams ? $rankParamsOut : '';
-
-            $out .= '</ul>';
-            $out .= '</div>';
-        }
+        $out .= self::formattedRanking($meta);
+        $out .= self::formattedCheapest($meta);
+        $out .= self::formattedFastest($meta);
+        $out .= self::formattedBest($meta);
         return $out;
     }
 
