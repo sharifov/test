@@ -2681,4 +2681,14 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
         return $userStatus;
     }
+
+    /**
+     * @param string $permission
+     * @param array $params
+     * @return bool
+     */
+    public function can(string $permission, array $params = []): bool
+    {
+        return Yii::$app->authManager->checkAccess($this->id, $permission, $params);
+    }
 }

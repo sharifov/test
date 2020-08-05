@@ -124,6 +124,10 @@ class CasesChangeStatusForm extends Model
                 unset($list[CasesStatus::STATUS_PENDING]);
             }
         }
+        $canTakeTrash = $this->user->can('cases/take_Trash', ['case' => $this->case]);
+        if (isset($list[CasesStatus::STATUS_TRASH]) && !$canTakeTrash) {
+            unset($list[CasesStatus::STATUS_TRASH]);
+        }
 
         return $list;
     }
