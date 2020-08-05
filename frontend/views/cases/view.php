@@ -72,7 +72,14 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
     <div class="x_panel">
         <div class="x_content" style="display: block;">
             <p>
-                <?= CasesViewRenderHelper::renderChangeStatusButton($model->cs_status, $user)?>
+                <?php if ($model->isTrash()) :?>
+                    <?php if (Auth::can('cases/take_Trash', ['case' => $model])) :?>
+                        <?= CasesViewRenderHelper::renderChangeStatusButton($model->cs_status, $user)?>
+                    <?php endif ?>
+                <?php else :?>
+                    <?= CasesViewRenderHelper::renderChangeStatusButton($model->cs_status, $user)?>
+                <?php endif ?>
+
                 <?= Html::button('<i class="fa fa-list"></i> Status History ' . ($model->caseStatusLogs ? '(' . count($model->caseStatusLogs) . ')' : ''), ['class' => 'btn btn-info', 'id' => 'btn-status-history', 'title' => 'Status history']) ?>
                 <?= CasesViewRenderHelper::renderTakeButton($model, $user) ?>
                 <?php if (Auth::can('cases/view_Checked', ['case' => $model])): ?>

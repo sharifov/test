@@ -1155,6 +1155,10 @@ class CasesController extends FController
                     throw new \DomainException('Status of a case without a category cannot be changed!');
                 }
 
+                if ($case->isTrash() && !Auth::can('cases/take_Trash', ['case' => $case])) {
+                    throw new \DomainException('Access denied, permission "cases/take_Trash" failed.');
+                }
+
                 switch ((int)$statusForm->statusId) {
                     case CasesStatus::STATUS_FOLLOW_UP :
                         $this->casesManageService->followUp($case->cs_id, $user->id, $statusForm->message, $statusForm->getConvertedDeadline());
