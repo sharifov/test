@@ -73,7 +73,21 @@ if (!empty($baggagePerSegment)) {
     }
 }
 
+    $rankCriteria = '';
+    if (!empty($result['meta']['fastest'])) {
+        $rankCriteria .= QuoteHelper::RANK_META_FASTEST;
+    }
+    if (!empty($result['meta']['best'])) {
+        $rankCriteria .= QuoteHelper::RANK_META_BEST;
+    }
+    if (!empty($result['meta']['cheapest'])) {
+        $rankCriteria .= QuoteHelper::RANK_META_CHEAPEST;
+    }
 
+    $group = '';
+    if (!empty($result['meta']['group1'])) {
+        $group = $result['meta']['group1'];
+    }
 ?>
 <div id="search-result__quote-<?= $resultKey?>"
     class="quote search-result__quote"
@@ -87,6 +101,8 @@ if (!empty($baggagePerSegment)) {
     data-airline="<?= $result['validatingCarrier']?>"
     data-changeairport="<?= $airportChange ?>"
     data-baggage="<?= isset($bagFilter)?$bagFilter:'' ?>"
+    data-rank-criteria="<?= $rankCriteria ?>"
+    data-group="<?= $group ?>"
     >
 
     <div class="quote__heading">
@@ -430,6 +446,11 @@ if (!empty($baggagePerSegment)) {
 
 
         <div class="quote__footer-left">
+
+        <?php echo $group ?> <?php /* TODO:: FOR DEBUG:: must by remove  */ ?>
+
+        <p><?= $result['key']?></p>  <?php /* TODO:: FOR DEBUG:: must by remove  */ ?>
+
 <!--            --><?php //if(isset($result['tickets']) && $result['tickets']):?>
 <!--                <span class="fa fa-warning warning"></span> Separate Ticket (--><?php //=count($result['tickets'])?><!--)-->
 <!--            --><?php //endif;?>

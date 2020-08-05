@@ -293,6 +293,21 @@ SearchResult = function(props) {
 
                         });
                         break;
+                    case 'rankCriteria':
+                        $(selector).each(function(idx){
+                            var criteriaData = $(this).data('rankCriteria');
+                            var obj = $(this);
+
+                            if (criteriaData.indexOf(filterList[filter]) === -1) {
+                                $(obj).removeClass('filtered');
+                            } else {
+                                $(obj).removeClass('d-none');
+                                $(obj).addClass('filtered');
+                                filterApplied = true;
+                            }
+                        });
+                        break;
+
                 }
             }
         }else{
@@ -678,6 +693,33 @@ SearchResult = function(props) {
         }
     }
 
+    this.filterRankCriteria = function() {
+        $(".filter--rankCriteria .custom-radio").on("click", function() {
+            var radio = $(this).find('input[type="radio"]');
+            radio.prop('checked', true);
+            if (radio.attr("id") !== "any") {
+                $('.filter--rankCriteria').addClass("selected")
+                    .find('[data-toggle="dropdown"] span').html(radio.parent().find('label:last').html());
+                scope.addFilterParams({
+                    name: 'rankCriteria',
+                    value: radio.attr("id")
+                });
+            } else {
+                $('.filter--rankCriteria').removeClass("selected")
+                    .find('[data-toggle="dropdown"] span').html();
+                scope.unsetFilterParams('rankCriteria');
+            }
+        });
+
+        $(".filter--rankCriteria .js-clear-filter").on("click", function(e) {
+            e.stopImmediatePropagation();
+            $('.filter--rankCriteria').removeClass("selected")
+                .find('[data-toggle="dropdown"] span').html();
+            $(".filter--rankCriteria .custom-radio").find('input[type="radio"]:first').prop('checked', true);
+            scope.unsetFilterParams('rankCriteria');
+        });
+    };
+
     this.filterInit = function() {
         //= fare filter
         scope.filterFareType();
@@ -696,7 +738,6 @@ SearchResult = function(props) {
         scope.filterAirlineChange();
         //= baggage filter
         scope.filterBaggage();
-
         //= time filter
         if ($('.filter--travel-time .nav-tabs').length) {
             $('.filter--travel-time .nav-tabs').tab();
@@ -708,6 +749,8 @@ SearchResult = function(props) {
         }
         scope.filterTravelTime();
         //=# time filter
+        //= RankCriteria filter
+        scope.filterRankCriteria();
     };
 
     this.helper = {

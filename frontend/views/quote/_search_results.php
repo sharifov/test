@@ -351,6 +351,43 @@ JS;
                     </div>
                 </div>
             </div>
+
+            <div class="filter filter--rankCriteria dropdown js-filter">
+                <a data-toggle="dropdown" href="#">Top Criteria
+                    <i class="icn-clear-filter js-clear-filter"></i></a>
+                <!--Dropdown-->
+                <div class="dropdown-menu dropdown-menu-right">
+                    <div class="search-filters__stops">
+                        <h3 class="search-filters__header">
+                            Top Criteria
+                            <i class="search-filters__close-btn js-dropdown-close"></i>
+                        </h3>
+                        <div class="search-filters__body">
+                            <div class="form-group custom-radio">
+                                <input type="radio" id="any" name="rankCriteria" checked>
+                                <label for="any"></label>
+                                <label for="any">Any</label>
+                            </div>
+                            <div class="form-group custom-radio">
+                                <input type="radio" id="cheapest" name="rankCriteria">
+                                <label for="cheapest"></label>
+                                <label for="cheapest">Cheapest</label>
+                            </div>
+                            <div class="form-group custom-radio">
+                                <input type="radio" id="fastest" name="rankCriteria">
+                                <label for="fastest"></label>
+                                <label for="fastest">Fastest</label>
+                            </div>
+                            <div class="form-group custom-radio">
+                                <input type="radio" id="best" name="rankCriteria">
+                                <label for="best"></label>
+                                <label for="best">Best itinerary</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
     <div class="search-results__wrapper">

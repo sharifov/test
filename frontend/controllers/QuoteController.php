@@ -61,14 +61,18 @@ class QuoteController extends FController
 
                 //Yii::$app->cache->delete($keyCache);
 
-                $result = Yii::$app->cacheFile->get($keyCache);
+                /*$result = Yii::$app->cacheFile->get($keyCache);
 
                 if($result === false){
                     $result = SearchService::getOnlineQuotes($lead);
                     if($result) {
                         Yii::$app->cacheFile->set($keyCache, $result, 600);
                     }
-                }
+                }*/ /* TODO:: FOR DEBUG:: must by remove  */
+
+                $result = SearchService::getOnlineQuotes($lead, 20);
+
+
 
                 $viewData = SearchService::getAirlineLocationInfo($result);
                 $viewData['result'] = $result;

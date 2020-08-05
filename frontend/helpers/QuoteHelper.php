@@ -14,12 +14,17 @@ class QuoteHelper
         're' => 'Refund',
     ];
 
-    public const RANK_INFO_LIST = [
-        'rank' => 'Rank',
-        'cheapest' => 'Cheapest',
-        'fastest' => 'Fastest',
-        'best' => 'Best itinerary',
+    public const RANK_META_LIST = [
+        self::RANK_META_RANK => 'Rank',
+        self::RANK_META_CHEAPEST => 'Cheapest',
+        self::RANK_META_FASTEST => 'Fastest',
+        self::RANK_META_BEST => 'Best itinerary',
     ];
+
+    public const RANK_META_CHEAPEST = 'cheapest';
+    public const RANK_META_BEST = 'best';
+    public const RANK_META_FASTEST = 'fastest';
+    public const RANK_META_RANK = 'rank';
 
     public static function formattedPenalties(array $penalties): string
     {
@@ -67,7 +72,7 @@ class QuoteHelper
             return '<span class="quote__badge bg-green"
                 data-toggle="tooltip"
                 data-html="true"
-                title="' . self::RANK_INFO_LIST['cheapest'] . '">
+                title="' . self::RANK_META_LIST['cheapest'] . '">
                     <i class="fa fa-money"></i>
             </span>';
         }
@@ -80,7 +85,7 @@ class QuoteHelper
             return '<span class="quote__badge bg-orange"
                 data-toggle="tooltip"
                 data-html="true"
-                title="' . self::RANK_INFO_LIST['fastest'] . '">
+                title="' . self::RANK_META_LIST['fastest'] . '">
                     <i class="fa fa-rocket"></i>
             </span>';
         }
@@ -89,11 +94,11 @@ class QuoteHelper
 
     public static function formattedBest(?array $meta): string
     {
-        if (!empty($meta['fastest'])) {
+        if (!empty($meta['best'])) {
             return '<span class="quote__badge bg-primary"
                 data-toggle="tooltip"
                 data-html="true"
-                title="' . self::RANK_INFO_LIST['best'] . '">
+                title="' . self::RANK_META_LIST['best'] . '">
                     <i class="fa fa-thumbs-o-up"></i>
             </span>';
         }
@@ -117,7 +122,7 @@ class QuoteHelper
 
     public static function checkRankInfo(array $meta): bool
     {
-        return !empty(array_intersect_key(self::RANK_INFO_LIST, $meta));
+        return !empty(array_intersect_key(self::RANK_META_LIST, $meta));
     }
 
     private static function getPenaltyTypeName(string $keyType): string
