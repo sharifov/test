@@ -75,10 +75,20 @@ if (!empty($baggagePerSegment)) {
 
 
 ?>
-<div class="quote search-result__quote" data-price="<?= $price?>"
-     data-durationmax="<?= max($totalDuration)?>" data-duration="<?= json_encode($totalDuration)?>" data-totalduration="<?= $totalDurationSum?>"
-     data-stop="<?= json_encode($stops)?>" data-time='<?= json_encode($time)?>' data-fareType="<?= (isset($result['fareType']))?$result['fareType']:''?>"
-     data-airline="<?= $result['validatingCarrier']?>" id="search-result__quote-<?= $resultKey?>" data-changeairport="<?= $airportChange ?>" data-baggage="<?= isset($bagFilter)?$bagFilter:'' ?>">
+<div id="search-result__quote-<?= $resultKey?>"
+    class="quote search-result__quote"
+    data-price="<?= $price?>"
+    data-durationmax="<?= max($totalDuration)?>"
+    data-duration="<?= json_encode($totalDuration)?>"
+    data-totalduration="<?= $totalDurationSum?>"
+    data-stop="<?= json_encode($stops)?>"
+    data-time='<?= json_encode($time)?>'
+    data-fareType="<?= (isset($result['fareType']))?$result['fareType']:''?>"
+    data-airline="<?= $result['validatingCarrier']?>"
+    data-changeairport="<?= $airportChange ?>"
+    data-baggage="<?= isset($bagFilter)?$bagFilter:'' ?>"
+    >
+
     <div class="quote__heading">
         <div class="quote__heading-left">
             <span class="quote__id"><strong># <?= $resultKey+1 ?></strong></span>
