@@ -62,21 +62,10 @@ class SearchService
      */
     public static function getGDSName($gds = null)
     {
-        $mapping = [
-            self::GDS_SABRE         => 'Sabre',
-            self::GDS_AMADEUS       => 'Amadeus',
-            self::GDS_TRAVELPORT    => 'TravelPort',
-            self::GDS_AIRWANDER     => 'Combined',
-            self::GDS_TRAVELFUSION  => 'TravelFusion',
-            self::GDS_COCKPIT       => 'Cockpit',
-            self::GDS_ONEPOINT      => 'OnePoint',
-        ];
-
         if ($gds === null) {
-            return $mapping;
+            return self::GDS_LIST;
         }
-
-        return $mapping[$gds] ?? $gds;
+        return self::GDS_LIST[$gds] ?? $gds;
     }
 
     /**

@@ -9,24 +9,12 @@ use Yii;
 
 class GTTGlobal
 {
-    const
-        GDS_SABRE = 'S',
-        GDS_AMADEUS = 'A',
-        GDS_WORLDSPAN = 'W';
-
     public static function getGDSName($gds = null)
     {
-        $mapping = [
-            self::GDS_SABRE => 'Sabre',
-            self::GDS_AMADEUS => 'Amadeus',
-            self::GDS_WORLDSPAN => 'Worldspan'
-        ];
-
         if ($gds === null) {
-            return $mapping;
+            return SearchService::GDS_LIST;
         }
-
-        return isset($mapping[$gds]) ? $mapping[$gds] : $gds;
+        return SearchService::GDS_LIST[$gds] ?? $gds;
     }
 
     public static function getOnlineQuotes(Lead $lead, $gdsCode)
