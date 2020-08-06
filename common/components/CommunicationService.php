@@ -1026,7 +1026,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
        return $this->processResponse($response);
     }
 
-    public function callToUser(string $from, string $to, int $created_userId, array $requestCall): array
+    public function callToUser(string $from, string $to, int $created_userId, array $requestCall, string $friendly_name): array
     {
         $data = [
             'from' => $from,
@@ -1034,6 +1034,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'created_user_id' => $created_userId,
             'requestCall' => $requestCall,
             'voipApiUsername' => $this->voipApiUsername,
+            'friendly_name' => $friendly_name,
         ];
 
        $response = $this->sendRequest('twilio-conference/call-to-user', $data);

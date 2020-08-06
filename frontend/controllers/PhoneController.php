@@ -22,6 +22,7 @@ use sales\helpers\UserCallIdentity;
 use sales\model\call\useCase\conference\create\CreateCallForm;
 use sales\model\conference\useCase\PrepareCurrentCallsForNewCall;
 use sales\model\user\entity\userStatus\UserStatus;
+use thamtech\uuid\helpers\UuidHelper;
 use yii\base\Exception;
 use yii\helpers\Html;
 use yii\web\BadRequestHttpException;
@@ -1360,7 +1361,8 @@ class PhoneController extends FController
                     'queue' => Call::QUEUE_DIRECT,
                     'conference' => [],
                     'isConferenceCreator' => 'false',
-                ]
+                ],
+                str_replace('-', '', UuidHelper::uuid())
             );
 
         } catch (\Throwable $e) {
