@@ -110,8 +110,7 @@ class ClientChatService
 	{
 		$response = \Yii::$app->chatBot->assignAgent($rid, $userId);
 		if ($response['error']) {
-			$error = Json::decode($response['error']);
-			throw new \RuntimeException('[Chat Bot] ' . $error['data']['error'] ?? 'Unknown error...', ClientChatCodeException::RC_ASSIGN_AGENT_FAILED);
+			throw new \RuntimeException('[Chat Bot] ' . $response['error']['message'] ?? 'Unknown error...', ClientChatCodeException::RC_ASSIGN_AGENT_FAILED);
 		}
 	}
 
@@ -151,7 +150,7 @@ class ClientChatService
 
 			$success = $botTransferChatResult['data']['success'] ?? false;
 			if (!$success) {
-				throw new \RuntimeException('[Chat Bot] ' . ($botTransferChatResult['data']['data']['data']['message'] ?? 'Cant read error message from Chat Bot response'));
+				throw new \RuntimeException('[Chat Bot] ' . ($botTransferChatResult['data']['message'] ?? 'Cant read error message from Chat Bot response'));
 			}
 
 			$clientChat->close();
@@ -179,9 +178,8 @@ class ClientChatService
 			$this->clientChatRepository->save($clientChat);
 			$this->sendNotificationToUsers($clientChat);
 		} catch (\RuntimeException | NotFoundException $e) {
-			\Yii::info('Send notification to users failed... ' . $e->getMessage() . '; File: ' . $e->getFile() . '; Line: ' . $e->getLine(), 'ClientChatService::assignToChannel::RuntimeException|NotFoundException');
+			\Yii::error('Send notification to users failed... ' . $e->getMessage() . '; File: ' . $e->getFile() . '; Line: ' . $e->getLine(), 'ClientChatService::assignToChannel::RuntimeException|NotFoundException');
 		}
-		\Yii::info('Send notification to users successfully finished...', 'ClientChatService::assignToChannel');
 	}
 
 	public function closeConversation(int $chhId): void
@@ -201,9 +199,9 @@ class ClientChatService
 			throw new \RuntimeException('[Chat Bot] ' . $botCloseChatResult['error']['message'] ?? 'Unknown error message');
 		}
 
-		$success = $botCloseChatResult['data']['data']['data']['success'] ?? false;
+		$success = $botCloseChatResult['data']['success'] ?? false;
 		if (!$success) {
-			throw new \RuntimeException('[Chat Bot] ' . ($botCloseChatResult['data']['data']['data']['message'] ?? 'Unknown error message'));
+			throw new \RuntimeException('[Chat Bot] ' . ($botCloseChatResult['data']['message'] ?? 'Unknown error message'));
 		}
 
 		$clientChat->close();
