@@ -12,6 +12,7 @@ use common\models\Employee;
 use common\models\User;
 use common\models\UserCallStatus;
 use common\models\UserProfile;
+use sales\helpers\setting\SettingHelper;
 use sales\helpers\UserCallIdentity;
 use yii\helpers\VarDumper;
 
@@ -36,6 +37,10 @@ class WebPhone extends \yii\bootstrap\Widget
         $userProfile = UserProfile::find()->where(['up_user_id' => $user_id])->limit(1)->one();
 
         //$sipExist = \common\models\UserProjectParams::find()->where(['upp_user_id' => $user_id])->andWhere(['AND', ['IS NOT', 'upp_tw_sip_id', null], ['!=', 'upp_tw_sip_id', '']])->one();
+
+		if (!SettingHelper::isOriginalPhoneWidgetEnabled()) {
+			return '';
+		}
 
         if(!$userProfile || (int) $userProfile->up_call_type_id !== UserProfile::CALL_TYPE_WEB) {
             return '';
