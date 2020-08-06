@@ -582,6 +582,29 @@ class Email extends \yii\db\ActiveRecord
         return $users;
     }
 
+    public function getUserIdByEmail(string $email): int
+    {
+        $user = [];
+        $params = UserProjectParams::find()->byEmail($email, false)->all();
+
+        if ($params) {
+            foreach ($params as $param) {
+                $user[$param->upp_user_id] = $param->upp_user_id;
+            }
+        }
+
+        $employees = Employee::find()->where(['email' => $email])->all();
+
+        if ($employees) {
+            foreach ($employees as $employee) {
+                $users[$employee->id] = $employee->id;
+            }
+        }
+
+        return reset($user);
+    }
+
+
     /*
     public static function reSubject($str = '') : string
     {
