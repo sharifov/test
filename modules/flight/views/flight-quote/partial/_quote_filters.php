@@ -1,5 +1,6 @@
 <?php
 
+use frontend\helpers\QuoteHelper;
 use kartik\select2\Select2;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightQuote;
@@ -142,6 +143,18 @@ use yii\bootstrap4\Html;
 						'class' => 'control-label'
 					]
 				])->dropDownList(FlightQuote::getSortList()) ?>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-2">
+				<?= $form->field($searchFrom, 'topCriteria', [
+					'labelOptions' => [
+						'class' => 'control-label'
+					]
+				])->dropDownList(QuoteHelper::TOP_META_LIST, [
+                    'prompt' => '--'
+                ]) ?>
             </div>
         </div>
 

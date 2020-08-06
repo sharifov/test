@@ -4,6 +4,7 @@ namespace modules\flight\src\useCases\api\searchQuote;
 
 use common\models\Airline;
 use common\models\Airports;
+use frontend\helpers\QuoteHelper;
 
 /**
  * Class FlightQuoteSearchHelper
@@ -120,9 +121,34 @@ class FlightQuoteSearchHelper
 			$quotes['results'][$key]['technicalStopCnt'] = $technicalStopCnt;
 			$quotes['results'][$key]['duration'] = $totalDuration;
 			$quotes['results'][$key]['totalDuration'] = array_sum($totalDuration);
+			$quotes['results'][$key]['topCriteria'] = self::getQuoteTopCriteria($quote);
+			$quotes['results'][$key]['rank'] = self::getQuoteRank($quote);
 		}
 
 		return $quotes;
+	}
+
+	private static function getQuoteRank(array $quote): float
+    {
+        if (!empty($quote['meta']['rank'])) {
+            return $quote['meta']['rank'];
+        }
+        return 0.0;
+	}
+
+	private static function getQuoteTopCriteria(array $quote): string
+    {
+		$topCriteria = '';
+        if (!empty($quote['meta']['fastest'])) {
+            $topCriteria .= QuoteHelper::TOP_META_FASTEST;
+        }
+        if (!empty($quote['meta']['best'])) {
+            $topCriteria .= QuoteHelper::TOP_META_BEST;
+        }
+        if (!empty($quote['meta']['cheapest'])) {
+            $topCriteria .= QuoteHelper::TOP_META_CHEAPEST;
+        }
+        return $topCriteria;
 	}
 
 	/**

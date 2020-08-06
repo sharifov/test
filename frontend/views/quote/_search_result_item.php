@@ -75,13 +75,13 @@ if (!empty($baggagePerSegment)) {
 
     $rankCriteria = '';
     if (!empty($result['meta']['fastest'])) {
-        $rankCriteria .= QuoteHelper::RANK_META_FASTEST;
+        $rankCriteria .= QuoteHelper::TOP_META_FASTEST;
     }
     if (!empty($result['meta']['best'])) {
-        $rankCriteria .= QuoteHelper::RANK_META_BEST;
+        $rankCriteria .= QuoteHelper::TOP_META_BEST;
     }
     if (!empty($result['meta']['cheapest'])) {
-        $rankCriteria .= QuoteHelper::RANK_META_CHEAPEST;
+        $rankCriteria .= QuoteHelper::TOP_META_CHEAPEST;
     }
 
     $group = '';
