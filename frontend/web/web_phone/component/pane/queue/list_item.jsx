@@ -36,12 +36,13 @@ class ListItem extends React.Component {
                                 className="call-info-list__name">{call.data.contact.name}</span>
                             </li>
                             {call.data.contact.company
-                                ? <li className="call-info-list__item"><span
-                                    className="call-info-list__company">{call.data.contact.company}</span></li>
+                                ? <li className="call-info-list__item"><span className="call-info-list__company">{call.data.contact.company}</span></li>
                                 : ''
                             }
-                            <li className="call-info-list__item"><span
-                                className="call-info-list__number">{call.data.contact.phone}</span></li>
+                            {call.data.typeId === 2 || call.data.typeId === 1
+                                ? <li className="call-info-list__item"><span className="call-info-list__number">{call.data.contact.phone}</span> </li>
+                                : ''
+                            }
                         </ul>
                         <div className="call-list-item__info-action call-info-action">
                             <span className="call-info-action__timer">

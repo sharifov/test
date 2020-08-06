@@ -448,7 +448,8 @@ window.phoneWidget.events = {
       'ajaxHangupUrl': '',
       'callAddNoteUrl': '',
       'sendDigitUrl': '',
-      'prepareCurrentCallsUrl': ''
+      'prepareCurrentCallsUrl': '',
+      'callInfoUrl': ''
     };
 
     this.init = function (settings) {
@@ -658,6 +659,23 @@ window.phoneWidget.events = {
       }).fail(function () {
         createNotify('Prepare current call', 'Server error', 'error');
         call.unSetAcceptCallRequestState();
+      });
+    };
+
+    this.callInfo = function (sid) {
+      $('#call-box-modal .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"> </i> Loading ...</div>');
+      $('#call-box-modal-label').html('Call Info');
+      $('#call-box-modal').modal();
+      $.ajax({
+        type: 'post',
+        data: {
+          sid: sid
+        },
+        url: this.settings.callInfoUrl
+      }).done(function (data) {
+        $('#call-box-modal .modal-body').html(data);
+      }).fail(function (xhr, textStatus, errorThrown) {
+        createNotify('Call info', xhr.responseText, 'error');
       });
     };
   }
@@ -1263,11 +1281,11 @@ class ListItem extends React.Component {
       className: "call-info-list__item"
     }, React.createElement("span", {
       className: "call-info-list__company"
-    }, call.data.contact.company)) : '', React.createElement("li", {
+    }, call.data.contact.company)) : '', call.data.typeId === 2 || call.data.typeId === 1 ? React.createElement("li", {
       className: "call-info-list__item"
     }, React.createElement("span", {
       className: "call-info-list__number"
-    }, call.data.contact.phone))), React.createElement("div", {
+    }, call.data.contact.phone), " ") : ''), React.createElement("div", {
       className: "call-list-item__info-action call-info-action"
     }, React.createElement("span", {
       className: "call-info-action__timer"
@@ -4368,6 +4386,7 @@ var PhoneWidgetCall = function () {
     contactInfoClickEvent();
     holdClickEvent();
     hangupClickEvent();
+    callInfoEvent();
     insertPhoneNumberEvent();
     loadCurrentQueueCalls();
   }
@@ -5132,6 +5151,20 @@ var PhoneWidgetCall = function () {
       }
 
       callRequester.hangupOutgoingCall(call);
+    });
+  }
+
+  function callInfoEvent() {
+    $(document).on('click', '.btn-history-call-info', function (e) {
+      e.preventDefault();
+      let callSid = $(this).attr('data-call-sid');
+
+      if (typeof callSid === 'undefined') {
+        createNotify('Call Info', 'Not found Call Sid', 'error');
+        return false;
+      }
+
+      callRequester.callInfo(callSid);
     });
   }
 
