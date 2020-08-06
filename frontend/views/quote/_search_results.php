@@ -353,13 +353,13 @@ JS;
             </div>
 
             <div class="filter filter--rankCriteria dropdown js-filter">
-                <a data-toggle="dropdown" href="#">Top Criteria
+                <a data-toggle="dropdown" href="#">Top
                     <i class="icn-clear-filter js-clear-filter"></i></a>
                 <!--Dropdown-->
                 <div class="dropdown-menu dropdown-menu-right">
                     <div class="search-filters__stops">
                         <h3 class="search-filters__header">
-                            Top Criteria
+                            Top
                             <i class="search-filters__close-btn js-dropdown-close"></i>
                         </h3>
                         <div class="search-filters__body">
@@ -386,6 +386,25 @@ JS;
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div class="filter filter--rank dropdown js-filter">
+                <a data-toggle="dropdown" href="#">Rank <i class="icn-clear-filter js-clear-filter"></i></a>
+
+                <div class="dropdown-menu dropdown-menu-right">
+                    <div class="search-filters__stops">
+                        <h3 class="search-filters__header">
+                            Rank
+                            <i class="search-filters__close-btn js-dropdown-close"></i>
+                        </h3>
+                        <div class="search-filters__body">
+                            <span class="search-filters__slider-label" id="rank-slider-label">10</span>
+                            <a href="#" class="search-filters__clear-link js-filter-reset">Clear</a>
+                            <div class="search-filters__slider" id="rank-slider" data-min="0" data-max="10"></div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
         </div>

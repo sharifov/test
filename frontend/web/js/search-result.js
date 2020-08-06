@@ -55,7 +55,11 @@ SearchResult = function(props) {
             currency: {
                 name: "USD",
                 symbol: "$"
-            }
+            },
+            filterRank: {
+                rank: "Rank",
+                to: "To"
+            },
         }, props.locale || {}),
         currentTripType = props.currentTripType || 'rt';
 
@@ -304,6 +308,35 @@ SearchResult = function(props) {
                                 $(obj).removeClass('d-none');
                                 $(obj).addClass('filtered');
                                 filterApplied = true;
+                            }
+                        });
+                        break;
+                    case 'rank':
+                        $(selector).each(function(idx){
+                            var obj = $(this);
+                            var filterValues = filterList[filter];
+                            var rankData = $(obj).data('rank');
+
+                            var rankElement = parseFloat(rankData).toFixed(1);
+                            var rankFrom = parseFloat(filterValues[0]).toFixed(1);
+                            var rankTo = parseFloat(filterValues[1]).toFixed(1);
+
+                            console.log({
+                                rankElement: rankElement,
+                                rankFrom: rankFrom,
+                                rankTo: rankTo,
+                                ef: (rankElement >= rankFrom),
+                                et: (rankElement <= rankTo)
+                            }); // TODO:: for debug
+
+                            if ((rankElement >= rankFrom) && (rankElement <= rankTo)) {
+                                $(obj).removeClass('d-none');
+                                $(obj).addClass('filtered');
+                                filterApplied = true;
+                                console.log({elSuccess: rankElement}); // TODO:: for debug
+                            } else {
+                                $(obj).removeClass('filtered');
+                                console.log({elFail: rankElement}); // TODO:: for debug
                             }
                         });
                         break;
@@ -720,6 +753,58 @@ SearchResult = function(props) {
         });
     };
 
+    this.filterRank = function() {
+        let sliderRank = document.getElementById('rank-slider');
+
+        let max = parseInt(sliderRank.getAttribute('data-max'), 10),
+            min = parseInt(sliderRank.getAttribute('data-min'), 10),
+            step = 1;
+
+        let filterRank = '.filter--rank',
+            jsFilterReset = '.filter--rank .js-filter-reset',
+            jsClearFilter = '.filter--rank i.js-clear-filter',
+            jsLabel = '#rank-slider-label';
+
+        noUiSlider.create(sliderRank, {
+            start: [min, max],
+            connect: [false, true, false],
+            tooltips: [
+                {to: function(value) {return parseInt(value, 10)}},
+                {to: function(value) {return parseInt(value, 10)}}
+            ],
+            step: step,
+            range: {
+                'min': min,
+                'max': max
+            }
+        });
+
+        sliderRank.noUiSlider.on('update', function (values, handle) {
+            $(jsLabel).html(parseInt(values[0], 10) + ' - ' + parseInt(values[1], 10));
+        });
+
+        sliderRank.noUiSlider.on('change', function(values, handle, unencoded, tap) {
+            if (tap) {
+                $(jsFilterReset).removeClass('hidden');
+                $(filterRank).addClass('selected').find('a[data-toggle="dropdown"] span');
+            }
+        });
+
+        sliderRank.noUiSlider.on('end', function(values) {
+            $(jsFilterReset).removeClass('hidden');
+            $(filterRank).addClass('selected').find('a[data-toggle="dropdown"] span');
+            scope.addFilterParams({name: 'rank', value: values});
+        });
+
+        $(jsClearFilter + ", " + jsFilterReset).on("click", function(e) {
+            e.stopImmediatePropagation();
+            $(jsFilterReset).addClass('hidden');
+            $(filterRank).removeClass('selected').find('a[data-toggle="dropdown"] span').html(locale.filterRank.rank);
+            sliderRank.noUiSlider.reset();
+            scope.unsetFilterParams('rank');
+        });
+    };
+
     this.filterInit = function() {
         //= fare filter
         scope.filterFareType();
@@ -749,8 +834,10 @@ SearchResult = function(props) {
         }
         scope.filterTravelTime();
         //=# time filter
-        //= RankCriteria filter
+        //= TopCriteria filter
         scope.filterRankCriteria();
+        //= Rank filter
+        scope.filterRank();
     };
 
     this.helper = {

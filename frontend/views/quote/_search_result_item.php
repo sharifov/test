@@ -88,6 +88,11 @@ if (!empty($baggagePerSegment)) {
     if (!empty($result['meta']['group1'])) {
         $group = $result['meta']['group1'];
     }
+
+    $rank = 0.0;
+    if (!empty($result['meta']['rank'])) {
+        $rank = number_format($result['meta']['rank'], 1, '.', '');
+    }
 ?>
 <div id="search-result__quote-<?= $resultKey?>"
     class="quote search-result__quote"
@@ -102,6 +107,7 @@ if (!empty($baggagePerSegment)) {
     data-changeairport="<?= $airportChange ?>"
     data-baggage="<?= isset($bagFilter)?$bagFilter:'' ?>"
     data-rank-criteria="<?= $rankCriteria ?>"
+    data-rank="<?= $rank ?>"
     data-group="<?= $group ?>"
     >
 
@@ -443,13 +449,7 @@ if (!empty($baggagePerSegment)) {
     </div>
 
     <div class="quote__footer">
-
-
         <div class="quote__footer-left">
-
-        <?php echo $group ?> <?php /* TODO:: FOR DEBUG:: must by remove  */ ?>
-
-        <p><?= $result['key']?></p>  <?php /* TODO:: FOR DEBUG:: must by remove  */ ?>
 
 <!--            --><?php //if(isset($result['tickets']) && $result['tickets']):?>
 <!--                <span class="fa fa-warning warning"></span> Separate Ticket (--><?php //=count($result['tickets'])?><!--)-->
