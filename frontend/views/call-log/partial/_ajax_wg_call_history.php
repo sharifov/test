@@ -18,6 +18,16 @@ use yii\helpers\Html;
             <?php
                 $callType = (int)$call['cl_type_id'];
                 $date = $call['cl_call_created_dt'];
+                $title = '';
+                if ($call['user_id']) {
+                    $phone = $call['formatted'];
+                } elseif ((int)$call['cl_type_id'] === 1) {
+                    $phone = $call['cl_phone_to'];
+                    $title = $call['formatted'] !== $call['cl_phone_to'] ? $call['formatted'] : '';
+                } else {
+                    $phone = $call['cl_phone_from'];
+                    $title = $call['formatted'] !== $call['cl_phone_from'] ? $call['formatted'] : '';
+                }
             ?>
             <li class="calls-history__item contact-info-card">
                 <div class="contact-info-card__status">
@@ -35,7 +45,9 @@ use yii\helpers\Html;
                 </div>
                 <div class="contact-info-card__details">
                     <div class="contact-info-card__line history-details">
-                        <strong class="contact-info-card__name phone-dial-history"<?php if (Auth::can('PhoneWidget_Dialpad')) {echo ' style="cursor:pointer;"';} ?> data-phone="<?= Html::encode(($callType === CallLogType::IN ? $call['cl_phone_from'] : $call['cl_phone_to'])) ?>"><?= Html::encode($call['client_name'] ?? ($callType === Call::CALL_TYPE_IN ? $call['cl_phone_from'] : $call['cl_phone_to'])) ?></strong>
+                        <strong class="contact-info-card__name phone-dial-history"<?php if (Auth::can('PhoneWidget_Dialpad')) {echo ' style="cursor:pointer;"';} ?> data-title="<?= $title ?>" data-user-id="<?= $call['user_id'] ?>" data-phone="<?= Html::encode($phone) ?>">
+                            <?= Html::encode($call['formatted']) ?>
+                        </strong>
                         <small class="contact-info-card__timestamp"><?= Yii::$app->formatter->asDate(strtotime($call['cl_call_created_dt']), 'php:h:i A') ?></small>
                     </div>
                     <div class="contact-info-card__line history-details">

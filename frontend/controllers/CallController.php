@@ -23,8 +23,9 @@ use sales\auth\Auth;
 
 use sales\helpers\call\CallHelper;
 use sales\model\call\services\currentQueueCalls\CurrentQueueCallsService;
-use sales\model\conference\useCase\DisconnectFromAllConferenceCalls;
+use sales\model\conference\useCase\DisconnectFromAllActiveClientsCreatedConferences;
 use sales\model\callNote\useCase\addNote\CallNoteRepository;
+use sales\model\conference\useCase\PrepareCurrentCallsForNewCall;
 use sales\model\conference\useCase\ReturnToHoldCall;
 use sales\repositories\call\CallRepository;
 use sales\repositories\call\CallUserAccessRepository;
@@ -1022,8 +1023,8 @@ class CallController extends FController
                             Yii::$app->redis->setnx($key, Auth::id());
                             $value = Yii::$app->redis->get($key);
                             if ((int)$value === (int)Auth::id()) {
-                                $disconnect = new DisconnectFromAllConferenceCalls();
-                                if ($disconnect->disconnect(Auth::id())) {
+                                $prepare = new PrepareCurrentCallsForNewCall();
+                                if ($prepare->prepare(Auth::id())) {
                                     $this->callService->acceptCall($callUserAccess, Auth::user());
                                 }
                                 Yii::$app->redis->expire($key, 5);
@@ -1074,9 +1075,9 @@ class CallController extends FController
                 if (!$callUserAccess) {
                     throw new \DomainException('Not found call user access');
                 }
-                $disconnect = new DisconnectFromAllConferenceCalls();
-                if (!$disconnect->disconnect(Auth::id())) {
-                    throw new \DomainException('Disconnect from current calls error');
+                $prepare = new PrepareCurrentCallsForNewCall();
+                if (!$prepare->prepare(Auth::id())) {
+                    throw new \DomainException('Prepare current calls error');
                 }
 
                 $return = new ReturnToHoldCall();

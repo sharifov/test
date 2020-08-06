@@ -23,9 +23,11 @@ class ContactsHelper
             $contactData['is_company'] = $contact['is_company'] ? true : false;
             $contactData['type'] = (int)$contact['type'];
             if ($contactData['type'] === Client::TYPE_INTERNAL) {
+                $contactData['isInternal'] = true;
                 $contactData['phones'] = array_keys(Employee::getPhoneList($contactData['id']));
                 $contactData['emails'] = array_keys(Employee::getEmailList($contactData['id']));
             } else {
+                $contactData['isInternal'] = false;
                 if ($client = Client::findOne($contactData['id'])) {
                     $phones = [];
                     foreach ($client->clientPhones as $phone) {

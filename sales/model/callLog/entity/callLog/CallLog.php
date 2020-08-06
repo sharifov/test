@@ -3,6 +3,7 @@
 namespace sales\model\callLog\entity\callLog;
 
 use common\components\validators\PhoneValidator;
+use common\models\Call;
 use common\models\Client;
 use common\models\Conference;
 use common\models\Department;
@@ -71,7 +72,7 @@ class CallLog extends \yii\db\ActiveRecord
             ['cl_type_id', 'in', 'range' => array_keys(CallLogType::getList())],
 
             ['cl_category_id', 'integer'],
-            ['cl_category_id', 'in', 'range' => array_keys(CallLogCategory::getList())],
+            ['cl_category_id', 'in', 'range' => array_keys(Call::SOURCE_LIST)],
 
             ['cl_is_transfer', 'boolean'],
 

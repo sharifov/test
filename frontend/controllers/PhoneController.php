@@ -20,7 +20,9 @@ use sales\auth\Auth;
 use sales\entities\cases\Cases;
 use sales\helpers\UserCallIdentity;
 use sales\model\call\useCase\conference\create\CreateCallForm;
+use sales\model\conference\useCase\PrepareCurrentCallsForNewCall;
 use sales\model\user\entity\userStatus\UserStatus;
+use thamtech\uuid\helpers\UuidHelper;
 use yii\base\Exception;
 use yii\helpers\Html;
 use yii\web\BadRequestHttpException;
@@ -922,7 +924,7 @@ class PhoneController extends FController
     {
         try {
             $sid = (string)Yii::$app->request->post('sid');
-            $data = $this->getDataForHoldConferenceCall($sid);
+            $data = $this->getDataForHoldConferenceCall($sid, Auth::id());
             /** @var Call $call */
             $call = $data['call'];
             if (!$call->currentParticipant->isJoin()) {
@@ -942,7 +944,7 @@ class PhoneController extends FController
     {
         try {
             $sid = (string)Yii::$app->request->post('sid');
-            $data = $this->getDataForHoldConferenceCall($sid);
+            $data = $this->getDataForHoldConferenceCall($sid, Auth::id());
             /** @var Call $call */
             $call = $data['call'];
             if (!$call->currentParticipant->isHold()) {
@@ -1035,7 +1037,7 @@ class PhoneController extends FController
     {
         try {
             $sid = (string)Yii::$app->request->post('sid');
-            $call = $this->getCallForMuteUnmuteParticipant($sid);
+            $call = $this->getCallForMuteUnmuteParticipant($sid, Auth::id());
             if ($call->currentParticipant->isMute()) {
                 throw new \Exception('Participant already is mute');
             }
@@ -1053,7 +1055,7 @@ class PhoneController extends FController
     {
         try {
             $sid = (string)Yii::$app->request->post('sid');
-            $call = $this->getCallForMuteUnmuteParticipant($sid);
+            $call = $this->getCallForMuteUnmuteParticipant($sid, Auth::id());
             if ($call->currentParticipant->isUnMute()) {
                 throw new \Exception('Participant already is unMute');
             }
@@ -1112,7 +1114,7 @@ class PhoneController extends FController
         return $call;
     }
 
-    private function getDataForHoldConferenceCall(string $sid): array
+    private function getDataForHoldConferenceCall(string $sid, int $userId): array
     {
         if (!$sid) {
             throw new BadRequestHttpException('Not found Call SID in request');
@@ -1122,7 +1124,7 @@ class PhoneController extends FController
             throw new BadRequestHttpException('Not found Call. Sid: ' . $sid);
         }
 
-        if (!$call->isOwner(Auth::id())) {
+        if (!$call->isOwner($userId)) {
             throw new BadRequestHttpException('Is not your Call');
         }
 
@@ -1130,7 +1132,7 @@ class PhoneController extends FController
             throw new BadRequestHttpException('Not found Participant');
         }
 
-        if (!$participant->isAgent()) {
+        if (!($participant->isAgent() || $participant->isUser())) {
             throw new BadRequestHttpException('Invalid type of Participant');
         }
 
@@ -1152,6 +1154,10 @@ class PhoneController extends FController
 
         if (!$conference = Conference::findOne(['cf_id' => $call->c_conference_id])) {
             throw new BadRequestHttpException('Not found conference. SID: ' . $call->c_conference_sid);
+        }
+
+        if (!$conference->isCreator($userId)) {
+            throw new BadRequestHttpException('You are not conference creator. Sid: ' . $sid);
         }
 
         if (!$participants = $conference->conferenceParticipants) {
@@ -1184,7 +1190,7 @@ class PhoneController extends FController
         ];
     }
 
-    private function getCallForMuteUnmuteParticipant(string $sid): Call
+    private function getCallForMuteUnmuteParticipant(string $sid, int $userId): Call
     {
         if (!$sid) {
             throw new BadRequestHttpException('Not found Call SID in request');
@@ -1194,7 +1200,7 @@ class PhoneController extends FController
             throw new BadRequestHttpException('Not found Call. Sid: ' . $sid);
         }
 
-        if (!$call->isOwner(Auth::id())) {
+        if (!$call->isOwner($userId)) {
             throw new BadRequestHttpException('Is not your Call');
         }
 
@@ -1206,7 +1212,7 @@ class PhoneController extends FController
             throw new BadRequestHttpException('Not found Participant');
         }
 
-        if (!$participant->isAgent()) {
+        if (!($participant->isAgent() || $participant->isUser())) {
             throw new BadRequestHttpException('Invalid type of Participant');
         }
 
@@ -1287,6 +1293,139 @@ class PhoneController extends FController
                 'message' => $e->getMessage(),
             ];
         }
+        return $this->asJson($result);
+    }
+
+    public function actionPrepareCurrentCalls()
+    {
+        $result = ['error' => false, 'message' => ''];
+        try {
+            $prepare = new PrepareCurrentCallsForNewCall();
+            if (!$prepare->prepare(Auth::id())) {
+                $result = [
+                    'error' => true,
+                    'message' => 'Error. Please try again later.',
+                ];
+            }
+        } catch (\Throwable $e) {
+            $result = [
+                'error' => true,
+                'message' => $e->getMessage(),
+            ];
+        }
+        return $this->asJson($result);
+    }
+
+    public function actionCreateInternalCall()
+    {
+        try {
+
+            $createdUser = Auth::user();
+            $key = 'call_user_to_user_' . $createdUser->id;
+            $this->guardFromUserIsFree($createdUser->id, $key);
+
+            $user_id = (int)Yii::$app->request->post('user_id');
+            $this->guardValidToUser($user_id);
+
+            $this->guardPermissionUserToUserCall($createdUser->id, $user_id);
+
+            Yii::$app->cache->set($key, (time() + 10), 10);
+
+            $result = Yii::$app->communication->callToUser(
+                UserCallIdentity::getClientId($createdUser->id),
+                UserCallIdentity::getClientId($user_id),
+                $createdUser->id,
+                [
+                    'status' => 'Ringing',
+                    'duration' => 0,
+                    'typeId' => Call::CALL_TYPE_IN,
+                    'type' => 'Incoming',
+                    'source_type_id' => Call::SOURCE_INTERNAL,
+                    'fromInternal' => 'false',
+                    'isInternal' => 'true',
+                    'isHold' => 'false',
+                    'holdDuration' => 0,
+                    'isListen' => 'false',
+                    'isCoach' => 'false',
+                    'isMute' => 'false',
+                    'isBarge' => 'false',
+                    'project' => '',
+                    'source' => Call::SOURCE_LIST[Call::SOURCE_INTERNAL],
+                    'isEnded' => 'false',
+                    'contact' => [
+                        'name' => $createdUser->nickname ?: $createdUser->username,
+                        'phone' => '',
+                        'company' => '',
+                    ],
+                    'department' => '',
+                    'queue' => Call::QUEUE_DIRECT,
+                    'conference' => [],
+                    'isConferenceCreator' => 'false',
+                ],
+                str_replace('-', '', UuidHelper::uuid())
+            );
+
+        } catch (\Throwable $e) {
+            $result = [
+                'error' => true,
+                'message' => $e->getMessage(),
+            ];
+        }
+
+        return $this->asJson($result);
+    }
+
+    private function guardPermissionUserToUserCall(int $fromUserId, int $toUserId): void
+    {
+        if ($fromUserId === $toUserId) {
+            throw new \DomainException('Invalid To userId');
+        }
+        //todo
+    }
+
+    private function guardValidToUser(int $userId): void
+    {
+        if (!$user = Employee::findOne(['id' => $userId])) {
+            throw new \DomainException('Not found user. Id: ' . $userId);
+        }
+        if (!$user->isOnline()) {
+            throw new \DomainException('User ' . ($user->nickname ?: $user->full_name) . ' is offline');
+        }
+        if (!$user->isCallFree()) {
+            throw new \DomainException('User ' . ($user->nickname ?: $user->full_name) . ' is occupied');
+        }
+    }
+
+    private function guardFromUserIsFree($userId, $key): void
+    {
+        if ($result = Yii::$app->cache->get($key)) {
+            throw new \DomainException('Please wait ' . abs($result - time()) . ' seconds.');
+        }
+    }
+
+    public function actionGetUserByPhone(): Response
+    {
+        try {
+            $phone = (string)Yii::$app->request->post('phone');
+            if ($uPp = UserProjectParams::find()->byPhone($phone, false)->limit(1)->one()) {
+                $result = [
+                    'error' => false,
+                    'userId' => $uPp->upp_user_id,
+                    'nickname' => $uPp->uppUser->nickname ?: $uPp->uppUser->full_name,
+                ];
+            } else {
+                $result = [
+                    'error' => false,
+                    'userId' => null
+                ];
+            }
+        } catch (\Throwable $e) {
+            $result = [
+                'error' => true,
+                'message' => $e->getMessage(),
+            ];
+        }
+
         return $this->asJson($result);
     }
 }

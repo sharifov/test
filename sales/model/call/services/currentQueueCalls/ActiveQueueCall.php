@@ -2,6 +2,7 @@
 
 namespace sales\model\call\services\currentQueueCalls;
 
+use common\models\Call;
 use yii\base\Model;
 
 class ActiveQueueCall extends Model
@@ -15,6 +16,7 @@ class ActiveQueueCall extends Model
     public $type;
     public $source_type_id;
     public $fromInternal;
+    public $isInternal;
     public $isHold;
     public $holdDuration;
     public $isListen;
@@ -28,7 +30,8 @@ class ActiveQueueCall extends Model
     public $name;
     public $company;
     public $department;
-    public $queue = 'inProgress';
+    public $queue = Call::QUEUE_IN_PROGRESS;
+    public $isConferenceCreator;
 
     public function getData(): array
     {

@@ -7,7 +7,7 @@
             if (!conferenceBase) {
                 return this.data.status === 'In progress';
             }
-            return this.data.typeId !== 3 && this.data.status === 'In progress';
+            return this.data.typeId !== 3 && this.data.status === 'In progress' && !this.data.isInternal;
         };
 
         this.block = function () {
@@ -23,7 +23,7 @@
         };
 
         this.canHoldUnHold = function () {
-            return this.data.typeId !== 3 && this.data.status === 'In progress';
+            return this.data.typeId !== 3 && this.data.status === 'In progress' && (!this.data.isInternal || (this.data.isInternal && this.data.isConferenceCreator));
         };
 
         this.setHoldRequestState = function () {
@@ -230,6 +230,27 @@
 
         this.isSentAddNoteRequestState = function () {
             return this.data.sentAddNoteRequest === true;
+        };
+
+        this.setRejectInternalRequest = function () {
+            if (this.isBlocked()) {
+                createNotify('Error', 'Call is blocked. Please wait some seconds.', 'error');
+                return false;
+            }
+            this.data.sentRejectInternalRequest = true;
+            this.block();
+            this.save();
+            return true;
+        };
+
+        this.unSetRejectInternalRequest = function () {
+            this.data.sentRejectInternalRequest = false;
+            this.unBlock();
+            this.save();
+        };
+
+        this.isSentRejectInternalRequest = function () {
+            return this.data.sentRejectInternalRequest === true;
         };
 
         this.getDuration = function () {
