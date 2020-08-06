@@ -27,7 +27,7 @@ class ClientChatController extends Controller
 		printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
 
-		$query = Employee::find()->select(['id', 'username', 'full_name', 'email'])->leftJoin('user_profile', 'id=up_user_id');
+		$query = Employee::find()->select(['id', 'username', 'nickname', 'email'])->leftJoin('user_profile', 'id=up_user_id');
         $query->where(['up_rc_user_id' => null]);
         $query->orWhere(['up_rc_user_id' => '']);
 
@@ -57,7 +57,7 @@ class ClientChatController extends Controller
 			$result = $rocketChat->createUser(
 				$user['username'],
 				$pass,
-				$user['full_name'] ?: $user['username'],
+				$user['nickname'] ?: $user['username'],
 				$user['email']
 			);
 
@@ -136,7 +136,7 @@ class ClientChatController extends Controller
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
 
-        $query = Employee::find()->select(['id', 'username', 'full_name', 'email'])->leftJoin('user_profile', 'id=up_user_id');
+        $query = Employee::find()->select(['id', 'username', 'nickname', 'email'])->leftJoin('user_profile', 'id=up_user_id');
         $query->where(['IS NOT', 'up_rc_user_id', null]);
 
         //echo $query->createCommand()->getRawSql(); exit;
@@ -160,7 +160,7 @@ class ClientChatController extends Controller
 
         foreach ($users as $user) {
 
-            $result = $rocketChat->deleteUser($user['username']);
+            $result = $rocketChat->deleteUser($user['nickname'] ?: $user['username']);
 
             echo "\n-- " . $user['username'] . ' ('.$user['id'].') --' . PHP_EOL;
 
