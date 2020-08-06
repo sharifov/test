@@ -15,6 +15,7 @@ class OutgoingQueueCall extends Model
     public $type;
     public $source_type_id;
     public $fromInternal;
+    public $isInternal;
     public $isHold;
     public $holdDuration;
     public $isListen;

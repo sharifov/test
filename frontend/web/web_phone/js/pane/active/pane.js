@@ -71,6 +71,13 @@ var PhoneWidgetPaneActive = function () {
             controls.addPerson.active = false;
             controls.dialpad.active = false;
         }
+        if (call.data.isInternal) {
+            controls.hold.active = !!call.data.isConferenceCreator;
+            controls.transfer.active = false;
+            controls.addPerson.active = false;
+            controls.dialpad.active = false;
+        }
+
         if (!conferenceBase) {
             controls.hold.active = false;
             controls.transfer.active = true;

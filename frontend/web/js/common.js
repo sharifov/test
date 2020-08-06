@@ -78,11 +78,12 @@
 
         let phone = $(this).data('phone-number');
         let title = $(this).data('title');
+        let userId = $(this).data('user-id');
         let widgetBtn = $('.js-toggle-phone-widget');
         if (widgetBtn.length) {
             $('.phone-widget').addClass('is_active')
             $('.js-toggle-phone-widget').addClass('is-mirror');
-            insertPhoneNumber(phone, title);
+            insertPhoneNumber(phone, title, userId, phone);
         }
     });
 
@@ -96,13 +97,31 @@
 
 })(window, $);
 
-function insertPhoneNumber(phone, title) {
-    $('#call-pane__dial-number').val(phone).attr('readonly', 'readonly');
+function insertPhoneNumber(formatted, title, userId, phone) {
+    $('#call-pane__dial-number').val(formatted).attr('readonly', 'readonly');
     if (title && title.length > 0) {
         $("#call-to-label").text(title);
+    } else {
+        $("#call-to-label").text('');
     }
+    $('#call-pane__dial-number-value').attr('data-user-id', (userId ? userId : '')).attr('data-phone', (phone ? phone : ''));
     soundNotification("button_tiny");
     $('.dialpad_btn_init').attr('disabled', 'disabled').addClass('disabled');
+    $('.call-pane__correction').attr('disabled', 'disabled');
+}
+
+$(document).on('input', '#call-pane__dial-number', function (e) {
+    $('#call-pane__dial-number-value').attr('data-user-id', '').attr('data-phone', '');
+});
+
+function reserveDialButton()
+{
+    $('#btn-new-make-call').html('<i class="fa fa-spinner fa-spin"> </i>').attr('disabled', true);
+}
+
+function freeDialButton()
+{
+    $('#btn-new-make-call').html('<i class="fas fa-phone"> </i>').attr('disabled', false);
 }
 
 function soundNotification(fileName = 'button_tiny', volume = 0.3) {

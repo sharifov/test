@@ -183,11 +183,11 @@ class CallLogTransferService
 
     private function transferInAcceptedChildCall(): void
     {
-        if ($this->call['c_status_id'] == Call::STATUS_NO_ANSWER && $this->call['c_source_type_id'] != Call::SOURCE_TRANSFER_CALL) {
-            $this->callLog['cl_status_id'] = CallLogStatus::FAILED;
-        } else {
+//        if ($this->call['c_status_id'] == Call::STATUS_NO_ANSWER && $this->call['c_source_type_id'] != Call::SOURCE_TRANSFER_CALL) {
+//            $this->callLog['cl_status_id'] = CallLogStatus::FAILED;
+//        } else {
             $this->callLog['cl_status_id'] = $this->call['c_status_id'];
-        }
+//        }
 
         if ($this->call['c_queue_start_dt'] !== null) {
             $this->callLog['cl_duration'] = $this->call['c_call_duration'] + (strtotime($this->call['c_created_dt']) - strtotime($this->call['c_queue_start_dt']));
@@ -215,11 +215,11 @@ class CallLogTransferService
 
     private function simpleInAcceptedChildCall(): void
     {
-        if ($this->call['c_status_id'] == Call::STATUS_NO_ANSWER && $this->call['c_source_type_id'] != Call::SOURCE_TRANSFER_CALL) {
-            $this->callLog['cl_status_id'] = CallLogStatus::FAILED;
-        } else {
+//        if ($this->call['c_status_id'] == Call::STATUS_NO_ANSWER && $this->call['c_source_type_id'] != Call::SOURCE_TRANSFER_CALL) {
+//            $this->callLog['cl_status_id'] = CallLogStatus::FAILED;
+//        } else {
             $this->callLog['cl_status_id'] = $this->call['c_status_id'];
-        }
+//        }
 
         if ($this->call['c_queue_start_dt'] !== null) {
             $this->callLog['cl_duration'] = $this->call['c_call_duration'] + (strtotime($this->call['c_created_dt']) - strtotime($this->call['c_queue_start_dt']));
@@ -313,18 +313,7 @@ class CallLogTransferService
             if ((array_key_exists('cl_category_id', $this->callLog))) {
                 $log->cl_category_id = $this->callLog['cl_category_id'];
             } else {
-                if (
-                in_array(
-                    $this->call['c_source_type_id'],
-                    [
-                        Call::SOURCE_GENERAL_LINE, Call::SOURCE_DIRECT_CALL, Call::SOURCE_REDIRECT_CALL, Call::SOURCE_TRANSFER_CALL, Call::SOURCE_CONFERENCE_CALL, Call::SOURCE_REDIAL_CALL,
-                    ], false
-                )
-                ) {
-                    $log->cl_category_id = $this->call['c_source_type_id'];
-                } else {
-                    $log->cl_category_id = null;
-                }
+                $log->cl_category_id = $this->call['c_source_type_id'];
             }
             if (array_key_exists('cl_is_transfer', $this->callLog)) {
                 $log->cl_is_transfer = $this->callLog['cl_is_transfer'];

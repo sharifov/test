@@ -1,4 +1,6 @@
 <?php
+
+use common\models\Call;
 use yii\helpers\Html;
 use \kartik\form\ActiveForm;
 use kartik\select2\Select2;
@@ -118,7 +120,7 @@ use common\models\Project;
                     <?= $form->field($model, 'categoryIds', [
                         'options' => ['class' => 'form-group']
                     ])->widget(Select2::class, [
-                        'data' => sales\model\callLog\entity\callLog\CallLogCategory::getList(),
+                        'data' => Call::SOURCE_LIST,
                         'size' => Select2::SMALL,
                         'options' => ['placeholder' => 'Select Category', 'multiple' => true],
                         'pluginOptions' => ['allowClear' => true],

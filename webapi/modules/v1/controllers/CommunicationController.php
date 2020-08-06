@@ -1158,6 +1158,18 @@ class CommunicationController extends ApiBaseController
                 $call->c_created_user_id = $custom_parameters->user_id;
             }
 
+            if ($custom_parameters->user_id) {
+                $call->c_created_user_id = $custom_parameters->user_id;
+            }
+
+            if ($custom_parameters->from) {
+                $call->c_from = $custom_parameters->from;
+            }
+
+            if ($custom_parameters->to) {
+                $call->c_to = $custom_parameters->to;
+            }
+
             if (!$call->save()) {
                 \Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:findOrCreateCallByData:Call:save');
             } else {

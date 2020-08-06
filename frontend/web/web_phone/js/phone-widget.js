@@ -375,11 +375,13 @@ $(document).ready(function() {
     });
     $('.call_pane_dialpad_clear_number').on('click', function(e) {
         e.preventDefault();
-        $('.call-pane__dial-number').val('').attr('readonly', false).prop('readonly', false);
+        $('#call-pane__dial-number').val('').attr('readonly', false).prop('readonly', false);
         $('#call-to-label').text('');
+        $('#call-pane__dial-number-value').attr('data-user-id', '').attr('data-phone', '');
         $('.suggested-contacts').removeClass('is_active');
 
         $('.dialpad_btn_init').attr('disabled', false).removeClass('disabled');
+        $('.call-pane__correction').attr('disabled', false);
 
         // $(this).removeClass('is-shown')
     });
@@ -387,6 +389,7 @@ $(document).ready(function() {
         e.preventDefault();
         $('.call-pane__dial-number').val('').attr('readonly', true).prop('readonly', true);
         $('#call-to-label').text('');
+        $('#call-pane__dial-number-value').attr('data-user-id', '').attr('data-phone', '');
         $('.suggested-contacts').removeClass('is_active');
     });
 

@@ -29,6 +29,7 @@ use yii\httpclient\Response;
  * @property string $username
  * @property string $password
  * @property Request $request
+ * @property string $voipApiUsername
  */
 
 class CommunicationService extends Component implements CommunicationServiceInterface
@@ -39,6 +40,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
     public $password;
     public $request;
     public $recording_url = '';
+    public $voipApiUsername = '';
 
 
     public function init() : void
@@ -1020,6 +1022,21 @@ class CommunicationService extends Component implements CommunicationServiceInte
         ];
 
        $response = $this->sendRequest('twilio/get-sms-price', $data);
+
+       return $this->processResponse($response);
+    }
+
+    public function callToUser(string $from, string $to, int $created_userId, array $requestCall): array
+    {
+        $data = [
+            'from' => $from,
+            'to' => $to,
+            'created_user_id' => $created_userId,
+            'requestCall' => $requestCall,
+            'voipApiUsername' => $this->voipApiUsername,
+        ];
+
+       $response = $this->sendRequest('twilio-conference/call-to-user', $data);
 
        return $this->processResponse($response);
     }

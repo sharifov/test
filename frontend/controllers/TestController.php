@@ -120,10 +120,11 @@ use sales\helpers\lead\LeadUrlHelper;
 use sales\helpers\payment\CreditCardHelper;
 use sales\helpers\query\QueryHelper;
 use sales\helpers\user\UserFinder;
+use sales\helpers\UserCallIdentity;
 use sales\model\call\useCase\UpdateCallPrice;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\conference\service\ManageCurrentCallsByUserService;
-use sales\model\conference\useCase\DisconnectFromAllConferenceCalls;
+use sales\model\conference\useCase\DisconnectFromAllActiveClientsCreatedConferences;
 use sales\model\coupon\useCase\request\CouponForm;
 use sales\model\emailList\entity\EmailList;
 use sales\model\lead\useCase\lead\api\create\Handler;
@@ -247,6 +248,60 @@ class TestController extends FController
 
     public function actionTest()
     {
+
+//        $userId = 294;
+//        $calls = Call::find()->andWhere([
+//            'c_created_user_id' => $userId,
+//            'c_call_type_id' => [Call::CALL_TYPE_IN, Call::CALL_TYPE_OUT],
+//            'c_status_id' => [Call::STATUS_RINGING, Call::STATUS_IN_PROGRESS]
+//        ])
+//            ->innerJoinWith(['conferenceParticipants' => static function(ConferenceParticipantQuery $query) {
+//                $query->andOnCondition([
+//                    'cp_type_id' => ConferenceParticipant::TYPE_USER,
+//                ]);
+//                $query->andOnCondition(['IS NOT', 'cp_status_id', null]);
+//                $query->andOnCondition(['<>', 'cp_status_id', ConferenceParticipant::STATUS_LEAVE]);
+//            }], false)
+//            ->innerJoin(Conference::tableName(), 'cf_id = c_conference_id')
+//            ->all();
+//
+//        VarDumper::dump($calls);
+//        die;
+
+        $r = Yii::$app->communication->callToUser(UserCallIdentity::getClientId(167), UserCallIdentity::getClientId(295), 167, [
+
+            'status' => 'Ringing',
+            'duration' => 0,
+            'typeId' => Call::CALL_TYPE_IN,
+            'type' => 'Incoming',
+            'source_type_id' => Call::SOURCE_INTERNAL,
+            'fromInternal' => 'false',
+            'isInternal' => 'true',
+            'isHold' => 'false',
+            'holdDuration' => 0,
+            'isListen' => 'false',
+            'isCoach' => 'false',
+            'isMute' => 'false',
+            'isBarge' => 'false',
+            'project' => '',
+            'source' => Call::SOURCE_LIST[Call::SOURCE_INTERNAL],
+            'isEnded' => 'false',
+            'contact' => [
+                'name' => 'Serj 2',
+                'phone' => '',
+                'company' => '',
+            ],
+            'department' => '',
+            'queue' => Call::QUEUE_DIRECT,
+            'conference' => [],
+            'isConferenceCreator' => 'true',
+        ]);
+        VarDumper::dump($r);
+//        $r2 = Yii::$app->communication->callToUser(UserCallIdentity::getClientId(294), UserCallIdentity::getClientId(295), 294);
+//        VarDumper::dump($r2);
+//
+        die;
+
 //        $job = new SmsPriceJob();
 //        $job->smsSid = 'SMbf59aed897c2b059a9fcb995746f5b9c';
 //        Yii::$app->queue_job->push($job);
@@ -627,7 +682,7 @@ class TestController extends FController
     public function actionTestNew()
     {
         $userId = 295;
-        $s = new DisconnectFromAllConferenceCalls();
+        $s = new DisconnectFromAllActiveClientsCreatedConferences();
         $s->disconnect($userId);
          die;
     }

@@ -13,12 +13,12 @@ use frontend\widgets\notification\NotificationMessage;
 use yii\helpers\VarDumper;
 
 /**
- * Class ManageCurrentCallsService
+ * Class DisconnectFromAllActiveCreatedConferences
  *
  * @property CommunicationService $communication
  * @property array $messages
  */
-class DisconnectFromAllConferenceCalls
+class DisconnectFromAllActiveClientsCreatedConferences
 {
     private CommunicationService $communication;
     private array $messages = [];
@@ -30,7 +30,7 @@ class DisconnectFromAllConferenceCalls
 
     public function disconnect(int $userId): bool
     {
-        foreach ($this->getActiveCalls($userId) as $call) {
+        foreach ($this->getActiveCreatedConferenceCalls($userId) as $call) {
             if ($call->c_conference_sid) {
                 try {
                     $result = $this->communication->disconnectFromConferenceCall($call->c_conference_sid, $call->c_call_sid);
@@ -104,7 +104,7 @@ class DisconnectFromAllConferenceCalls
      * @param int $userId
      * @return Call[]
      */
-    private function getActiveCalls(int $userId): array
+    private function getActiveCreatedConferenceCalls(int $userId): array
     {
         return Call::find()->andWhere([
             'c_created_user_id' => $userId,

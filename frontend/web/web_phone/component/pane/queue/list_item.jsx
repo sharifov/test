@@ -60,7 +60,7 @@ class ListItem extends React.Component {
                     </div>
                     <div className="call-list-item__main-action">
                         <a href="#" className="call-list-item__main-action-trigger"
-                           data-type-action={call.data.queue === 'inProgress' ? 'hangup' : (call.data.queue === 'hold' ? 'return' : 'accept')}
+                           data-type-action={call.data.queue === 'inProgress' ? 'hangup' : (call.data.queue === 'hold' ? 'return' : (call.data.isInternal ? 'acceptInternal' :'accept'))}
                            data-call-sid={call.data.callSid} data-from-internal={call.data.fromInternal}>
                             {call.isSentAcceptCallRequestState() || call.isSentHangupRequestState() || call.isSentReturnHoldCallRequestState()
                                 ? <i className="fa fa-spinner fa-spin"/>
@@ -83,6 +83,30 @@ function ListItemMenu(props) {
 
     if (call.data.typeId === 3) {
         return <ListItemMenuJoinCall call={call}/>
+    }
+
+    if (call.data.isInternal) {
+        if (call.data.isConferenceCreator) {
+            return (
+                <ul className="call-list-item__menu call-item-menu">
+                    <li className="call-item-menu__list-item">
+                        <a href="#" className="call-item-menu__close"><i className="fa fa-chevron-right"> </i></a>
+                    </li>
+                    <React.Fragment>
+                        <ListItemBtnHold call={call}/>
+                        <ListItemBtnMute call={call}/>
+                    </React.Fragment>
+                </ul>
+            );
+        }
+        return (
+            <ul className="call-list-item__menu call-item-menu">
+                <li className="call-item-menu__list-item">
+                    <a href="#" className="call-item-menu__close"><i className="fa fa-chevron-right"> </i></a>
+                </li>
+                <ListItemBtnMute call={call}/>
+            </ul>
+        );
     }
 
     return (

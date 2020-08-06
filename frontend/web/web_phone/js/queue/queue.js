@@ -12,6 +12,7 @@
             data.sentReturnHoldCallRequest = false;
             data.sentAcceptCallRequest = false;
             data.sentAddNoteRequest = false;
+            data.sentRejectInternalRequest = false;
         }
 
         this.add = function (data) {
@@ -130,7 +131,15 @@
             let groups = [];
             let key = '';
             calls.forEach(function (call) {
-                if (!call.data.project) {
+                if (call.data.isInternal) {
+                    if (!groups['internal']) {
+                        groups['internal'] = {
+                            'calls': []
+                        };
+                    }
+                    groups['internal'].calls.push(call);
+                    return;
+                } else if (!call.data.project) {
                     if (!groups['external']) {
                         groups['external'] = {
                             'calls': []

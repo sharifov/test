@@ -156,3 +156,12 @@
 .phone-widget .call-pane__call-btns.is-on-call .calling-state-block {
     animation: callAnimation 3s infinite linear;
 }
+.phone-widget .call-pane__end-call.end-internal {
+    left: 20px;
+}
+.phone-widget .contact-options-list .dial-to-user {
+    margin-left: 10px;
+}
+.phone-widget .contact-options-list {
+    justify-content: normal;
+}

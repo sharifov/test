@@ -155,7 +155,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                                 $out = '<span data-toggle="tooltip" title="" data-original-title="">';
 
-                                $out .= CallHelper::callNumber($phone, $access, '', ['data-title' => $model->username, 'disable-icon' => $access ? false : true], 'span');
+                                $out .= CallHelper::callNumber($phone, $access, '', ['data-title' => $model->full_name, 'disable-icon' => $access ? false : true, 'data-user-id' => $model->id], 'span');
                                 $out .= '</span>';
 
                                 $data[] = $out;
@@ -177,7 +177,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                             title="' . Html::encode($phone->cp_title) . '"
                                             data-original-title="' . Html::encode($phone->cp_title) . '">';
 
-                                $out .= CallHelper::callNumber($phone->phone, $access, '', ['data-title' => $model->full_name, 'disable-icon' => $access ? false : true], 'span');
+                                $out .= CallHelper::callNumber($phone->phone, $access, '', ['data-title' => $model->getNameByType(), 'disable-icon' => $access ? false : true], 'span');
                                 $out .= '</span>';
 
                                 $data[] = $out;
