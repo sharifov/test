@@ -2,6 +2,7 @@
 
 namespace sales\services\parsingDump\lib;
 
+use common\components\SearchService;
 use common\models\Quote;
 
 /**
@@ -33,9 +34,9 @@ class ParsingDump
     ];
 
     public CONST QUOTE_GDS_TYPE_MAP = [
-        Quote::GDS_AMADEUS => self::GDS_TYPE_AMADEUS,
-        Quote::GDS_SABRE => self::GDS_TYPE_SABRE,
-        Quote::GDS_WORLDSPAN => self::GDS_TYPE_WORLDSPAN,
+        SearchService::GDS_AMADEUS => self::GDS_TYPE_AMADEUS,
+        SearchService::GDS_SABRE => self::GDS_TYPE_SABRE,
+        SearchService::GDS_WORLDSPAN => self::GDS_TYPE_WORLDSPAN,
     ];
 
     /**

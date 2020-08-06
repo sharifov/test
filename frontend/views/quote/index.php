@@ -1,5 +1,6 @@
 <?php
 
+use common\components\SearchService;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -52,7 +53,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return '<i class="fa fa-plane"></i> '.$model->getGdsName2();
                 },
                 'format' => 'raw',
-                'filter' => \common\models\Quote::GDS_LIST
+                'filter' => SearchService::GDS_LIST
             ],
             'pcc',
             [

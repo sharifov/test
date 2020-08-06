@@ -61,21 +61,9 @@ use yii\helpers\VarDumper;
  */
 class Quote extends \yii\db\ActiveRecord
 {
-
     use EventTrait;
 
     public const CHECKOUT_URL_PAGE = 'checkout/quote';
-
-    public const
-        GDS_SABRE = 'S',
-        GDS_AMADEUS = 'A',
-        GDS_WORLDSPAN = 'W';
-
-    public CONST GDS_LIST = [
-        self::GDS_SABRE => 'Sabre',
-        self::GDS_AMADEUS => 'Amadeus',
-        self::GDS_WORLDSPAN => 'WorldSpan',
-    ];
 
     public const
         FARE_TYPE_PUB = 'PUB',
@@ -352,7 +340,7 @@ class Quote extends \yii\db\ActiveRecord
 
     public static function getGDSName($gds = null)
     {
-        $mapping = self::GDS_LIST;
+        $mapping = SearchService::GDS_LIST;
 
         if ($gds === null) {
             return $mapping;
@@ -1934,8 +1922,7 @@ class Quote extends \yii\db\ActiveRecord
      */
     public function getGdsName2(): string
     {
-        $name = self::GDS_LIST[$this->gds] ?? '-';
-        return $name;
+        return SearchService::GDS_LIST[$this->gds] ?? '-';
     }
 
     public function beforeDelete()

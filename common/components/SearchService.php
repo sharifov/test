@@ -14,7 +14,6 @@ use yii\helpers\VarDumper;
 
 class SearchService
 {
-
     public const GDS_SABRE         = 'S';
     public const GDS_AMADEUS       = 'A';
     public const GDS_TRAVELPORT    = 'T';
@@ -22,10 +21,26 @@ class SearchService
     public const GDS_TRAVELFUSION  = 'F';
     public const GDS_COCKPIT       = 'C';
     public const GDS_ONEPOINT      = 'M';
+    public const GDS_WORLDSPAN     = 'W';
 
+    public CONST GDS_LIST = [
+        self::GDS_SABRE => 'Sabre',
+        self::GDS_AMADEUS => 'Amadeus',
+        self::GDS_WORLDSPAN => 'WorldSpan',
+        self::GDS_TRAVELPORT => 'TravelPort',
+        self::GDS_AIRWANDER => 'AirWander',
+        self::GDS_TRAVELFUSION => 'TravelFusion',
+        self::GDS_COCKPIT => 'Cockpit',
+        self::GDS_ONEPOINT => 'OnePoint',
+    ];
 
-    public const CABIN_ECONOMY = 'Y', CABIN_PREMIUM_ECONOMY = 'S', CABIN_BUSINESS = 'C',
-    CABIN_PREMIUM_BUSINESS = 'J', CABIN_FIRST = 'F', CABIN_PREMIUM_FIRST = 'P';
+    public const
+        CABIN_ECONOMY = 'Y',
+        CABIN_PREMIUM_ECONOMY = 'S',
+        CABIN_BUSINESS = 'C',
+        CABIN_PREMIUM_BUSINESS = 'J',
+        CABIN_FIRST = 'F',
+        CABIN_PREMIUM_FIRST = 'P';
 
     /**
      * @param $minutes
