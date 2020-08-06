@@ -65,7 +65,7 @@ class FlightQuoteSearchForm extends Model
 	public $sortBy;
 
     public $topCriteria;
-    public $rank;
+    public $rank = '0-10';
 
 	/**
 	 * @return array
@@ -166,6 +166,11 @@ class FlightQuoteSearchForm extends Model
 
 		if ($this->topCriteria) {
             $quotes['results'] = AppHelper::filterBySearchInValue($quotes['results'], 'topCriteria', $this->topCriteria);
+		}
+
+		if ($this->rank) {
+		    $ranks = explode('-', $this->rank);
+            $quotes['results'] = AppHelper::filterByRange($quotes['results'], 'rank', $ranks[0], $ranks[1]);
 		}
 
 		return $quotes;
