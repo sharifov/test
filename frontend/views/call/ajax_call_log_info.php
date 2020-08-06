@@ -18,14 +18,14 @@ $this->title = 'Call Id: ' . $model->cl_id;
         <?= CallLogStatus::asFormat($model->cl_status_id) ?>
     </h2>
 
+    <?php if ($model->record): ?>
+        <audio controls="controls" controlsList="nodownload" style="width: 100%;">
+            <source src="<?= $model->record->getRecordingUrl() ?>" type="audio/mpeg">
+        </audio>
+    <?php endif; ?>
+
     <div class="col-md-6">
-
-        <?php if ($model->record): ?>
-            <audio controls="controls" controlsList="nodownload" style="width: 100%;">
-                <source src="<?= $model->record->getRecordingUrl() ?>" type="audio/mpeg">
-            </audio>
-        <?php endif; ?>
-
+        
         <?= DetailView::widget([
             'model' => $model,
             'attributes' => [
