@@ -5312,6 +5312,15 @@ input[disabled] + .radio-tab__text {
   border: none;
 }
 
+.inside_icon {
+    font-size: 9px;
+    color: #78c286;
+    position: absolute;
+    margin-left: -9px;
+    font-weight: 900;
+    cursor: default;
+}
+
 @-webkit-keyframes scaleIn {
   from {
     -webkit-transform: scale(1, 1);

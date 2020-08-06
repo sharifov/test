@@ -107,6 +107,19 @@ class QuoteHelper
         return '';
     }
 
+    public static function formattedFreeBaggage(?array $meta): string
+    {
+        if (!empty($meta['bags'])) {
+            return '<span class="quote__badge quote__badge--amenities"
+                data-toggle="tooltip"
+                title="Free baggage - ' . (int) $meta['bags'] .  ' pcs">
+                <i class="fa fa-suitcase"></i>
+                <span class="inside_icon">' . (int) $meta['bags'] . '</span>
+            </span>';
+        }
+        return '';
+    }
+
     public static function formattedMetaRank(?array $meta): string
     {
         $out = '';
@@ -129,18 +142,4 @@ class QuoteHelper
         }
         return 'unknown type';
     }
-
-
-    /* TODO::
-
-        * фильтр
-        - ранг диапазон
-        - остальное выпадающий списко только fastest например
-
-        * группировка
-        - маркировать или скрывать(аккордеон) - но выводить полные результаты
-
-        * багажи
-        - выводить две цифры - старый алгоритм/новый алгоритм
-     */
 }

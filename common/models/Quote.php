@@ -1241,15 +1241,6 @@ class Quote extends \yii\db\ActiveRecord
 
     public function getBaggageInfo()
     {
-        if ($freeBaggage = $this->getFreeBaggageInfoFromMeta()) {
-            $this->freeBaggageInfo = $freeBaggage . ' pcs';
-            $this->hasFreeBaggage = true;
-            return [
-                'hasFreeBaggage' => $this->hasFreeBaggage,
-                'freeBaggageInfo' => $this->freeBaggageInfo,
-            ];
-        }
-
         //if one segment has baggage -> quote has baggage
         if(!empty($this->quoteTrips)){
             foreach ($this->quoteTrips as $trip){
@@ -1285,7 +1276,6 @@ class Quote extends \yii\db\ActiveRecord
         }
         return null;
     }
-
 
     /**
      * @return array

@@ -253,20 +253,21 @@ if (!empty($baggagePerSegment)) {
             <?php endforeach;?>
         </div>
         <div class="quote__badges">
+
+            <?php $meta = !empty($result['meta']) ? $result['meta'] : null ?>
+            <?php echo QuoteHelper::formattedFreeBaggage($meta) ?>
+
 			<span class="quote__badge quote__badge--amenities <?php if(!$hasFreeBaggage):?>quote__badge--disabled<?php endif;?>" data-toggle="tooltip"
                   title="<?= ($freeBaggageInfo)?$freeBaggageInfo:'No free baggage'?>" data-original-title="<?= ($freeBaggageInfo)?$freeBaggageInfo:'No free baggage'?>">
 				<i class="fa fa-suitcase"></i><span class="quote__badge-num"></span>
 			</span>
 
             <?php
-
                 if ($needRecheck) {
                     $bagText = 'Bag re-check may be required'; //SearchService::getRecheckBaggageText();
                 } else {
                     $bagText = 'Bag re-check not required';
                 }
-
-
             ?>
 
             <span class="quote__badge quote__badge--warning <?=$needRecheck ? '' : 'quote__badge--disabled'?>" data-toggle="tooltip"
@@ -289,7 +290,6 @@ if (!empty($baggagePerSegment)) {
 				    <i class="fa fa-expand"></i>
 			</span>
 
-			<?php $meta = !empty($result['meta']) ? $result['meta'] : null ?>
 			<?php echo QuoteHelper::formattedMetaRank($meta) ?>
 
         </div>
