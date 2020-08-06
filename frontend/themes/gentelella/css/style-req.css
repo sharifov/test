@@ -5287,13 +5287,19 @@ input[disabled] + .radio-tab__text {
   border: none;
 }
 
-.inside_icon {
+.inside_icon,
+.flight_inside_icon {
     font-size: 9px;
     color: #78c286;
     position: absolute;
     margin-left: -9px;
     font-weight: 900;
     cursor: default;
+}
+
+.flight_inside_icon {
+   color: #e8e8e8;
+   margin-left: -17px;
 }
 
 @-webkit-keyframes scaleIn {

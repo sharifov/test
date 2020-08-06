@@ -51,14 +51,14 @@ class QuoteHelper
         return $out;
     }
 
-    public static function formattedRanking(?array $meta): string
+    public static function formattedRanking(?array $meta, string $class = 'quote__badge bg-info'): string
     {
         if (!empty($meta['rank'])) {
 
             $rank = number_format($meta['rank'], 1, '.', '');
             $rank = ($rank === '10.0') ? 10 : $rank;
 
-            return '<span class="quote__badge bg-info"
+            return '<span class="' . $class . '"
                 data-toggle="tooltip"
                 data-html="true"
                 title="Rank: ' . $meta['rank'] . '">
@@ -68,10 +68,10 @@ class QuoteHelper
         return '';
     }
 
-    public static function formattedCheapest(?array $meta): string
+    public static function formattedCheapest(?array $meta, string $class = 'quote__badge bg-green'): string
     {
         if (!empty($meta['cheapest'])) {
-            return '<span class="quote__badge bg-green"
+            return '<span class="' . $class . '"
                 data-toggle="tooltip"
                 data-html="true"
                 title="' . self::TOP_META_LIST['cheapest'] . '">
@@ -81,10 +81,10 @@ class QuoteHelper
         return '';
     }
 
-    public static function formattedFastest(?array $meta): string
+    public static function formattedFastest(?array $meta, string $class = 'quote__badge bg-orange'): string
     {
         if (!empty($meta['fastest'])) {
-            return '<span class="quote__badge bg-orange"
+            return '<span class="' . $class . '"
                 data-toggle="tooltip"
                 data-html="true"
                 title="' . self::TOP_META_LIST['fastest'] . '">
@@ -94,10 +94,10 @@ class QuoteHelper
         return '';
     }
 
-    public static function formattedBest(?array $meta): string
+    public static function formattedBest(?array $meta, string $class = 'quote__badge bg-primary'): string
     {
         if (!empty($meta['best'])) {
-            return '<span class="quote__badge bg-primary"
+            return '<span class="' . $class . '"
                 data-toggle="tooltip"
                 data-html="true"
                 title="' . self::TOP_META_LIST['best'] . '">
@@ -107,10 +107,10 @@ class QuoteHelper
         return '';
     }
 
-    public static function formattedFreeBaggage(?array $meta): string
+    public static function formattedFreeBaggage(?array $meta, string $class = 'quote__badge quote__badge--amenities'): string
     {
         if (!empty($meta['bags'])) {
-            return '<span class="quote__badge quote__badge--amenities"
+            return '<span class="' . $class . '"
                 data-toggle="tooltip"
                 title="Free baggage - ' . (int) $meta['bags'] .  ' pcs">
                 <i class="fa fa-suitcase"></i>
