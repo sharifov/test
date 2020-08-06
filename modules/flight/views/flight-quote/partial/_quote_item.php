@@ -352,12 +352,12 @@ $totalAmountQuote = 0.0;
                                 </span>
                             <?php endif; ?>
 
-                            <?php echo FlightQuoteHelper::formattedPenalties($penalties)?>
-
                             <?php echo FlightQuoteHelper::formattedRanking($meta)?>
                             <?php echo FlightQuoteHelper::formattedCheapest($meta)?>
                             <?php echo FlightQuoteHelper::formattedFastest($meta)?>
                             <?php echo FlightQuoteHelper::formattedBest($meta)?>
+
+                            <?php echo FlightQuoteHelper::formattedPenalties($penalties)?>
 
                         </td>
 
