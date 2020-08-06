@@ -11,6 +11,7 @@
             'callAddNoteUrl': '',
             'sendDigitUrl': '',
             'prepareCurrentCallsUrl': '',
+            'callInfoUrl': ''
         };
 
         this.init = function (settings) {
@@ -245,6 +246,23 @@
                 .fail(function () {
                     createNotify('Prepare current call', 'Server error', 'error');
                     call.unSetAcceptCallRequestState();
+                });
+        };
+
+        this.callInfo = function (sid) {
+            $('#call-box-modal .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"> </i> Loading ...</div>');
+            $('#call-box-modal-label').html('Call Info');
+            $('#call-box-modal').modal();
+            $.ajax({
+                type: 'post',
+                data: {sid: sid},
+                url: this.settings.callInfoUrl,
+            })
+                .done(function (data) {
+                    $('#call-box-modal .modal-body').html(data);
+                })
+                .fail(function (xhr, textStatus, errorThrown) {
+                    createNotify('Call info', xhr.responseText, 'error');
                 });
         };
     }

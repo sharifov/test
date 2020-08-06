@@ -61,6 +61,7 @@ var PhoneWidgetCall = function () {
         contactInfoClickEvent();
         holdClickEvent();
         hangupClickEvent();
+        callInfoEvent();
         insertPhoneNumberEvent();
 
         loadCurrentQueueCalls();
@@ -762,6 +763,18 @@ var PhoneWidgetCall = function () {
             }
 
             callRequester.hangupOutgoingCall(call);
+        });
+    }
+
+    function callInfoEvent() {
+        $(document).on('click', '.btn-history-call-info', function(e) {
+            e.preventDefault();
+            let callSid = $(this).attr('data-call-sid');
+            if (typeof callSid === 'undefined') {
+                createNotify('Call Info', 'Not found Call Sid', 'error');
+                return false;
+            }
+            callRequester.callInfo(callSid);
         });
     }
 

@@ -100,8 +100,7 @@ class CallLogController extends FController
 			$callSearch = new CallLogSearch();
 			$page = Yii::$app->request->post('page', 0);
 
-			$params['CallLogSearch']['cl_user_id'] = Auth::id();
-			$callHistory = $callSearch->getCallHistory($params);
+			$callHistory = $callSearch->getCallHistory(Auth::id());
 			$callHistory->pagination->setPage($page);
 
 			$rows = $callHistory->getModels();

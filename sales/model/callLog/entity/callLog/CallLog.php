@@ -11,6 +11,7 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\Project;
 use sales\entities\cases\Cases;
+use sales\helpers\UserCallIdentity;
 use sales\model\callLog\entity\callLogCase\CallLogCase;
 use sales\model\callLog\entity\callLogLead\CallLogLead;
 use sales\model\callLog\entity\callLogQueue\CallLogQueue;
@@ -130,12 +131,14 @@ class CallLog extends \yii\db\ActiveRecord
             'user.username' => 'User',
             'cl_department_id' => 'Department',
             'cl_project_id' => 'Project',
-            'cl_call_created_dt' => 'Call Created Dt',
-            'cl_call_finished_dt' => 'Call Finished Dt',
+            'cl_call_created_dt' => 'Created Dt',
+            'cl_call_finished_dt' => 'Finished Dt',
             'cl_status_id' => 'Status',
             'cl_client_id' => 'Client',
             'cl_price' => 'Price',
             'cl_conference_id' => 'Conference Id',
+            'formattedFrom' => 'From',
+            'formattedTo' => 'To',
         ];
     }
 
@@ -252,6 +255,11 @@ class CallLog extends \yii\db\ActiveRecord
 		return $this->cl_type_id === CallLogType::IN;
 	}
 
+    public function isOwner(int $userId): bool
+    {
+        return $this->cl_user_id === $userId;
+	}
+
 	/**
 	 * @return string
 	 */
@@ -267,4 +275,22 @@ class CallLog extends \yii\db\ActiveRecord
 
 		return '<i class="' . $icon . '"></i>';
 	}
+
+    public function getFormattedFrom(): string
+    {
+        return $this->formatPhone($this->cl_phone_from);
+	}
+
+    public function getFormattedTo(): string
+    {
+        return $this->formatPhone($this->cl_phone_to);
+	}
+
+	private function formatPhone(?string $phone): ?string
+    {
+        if (UserCallIdentity::canParse($phone) && ($userId = UserCallIdentity::parseUserId($phone)) && ($user = Employee::find()->select(['nickname'])->andWhere(['id' => $userId])->asArray()->one())) {
+            return $user['nickname'];
+        }
+        return $phone;
+    }
 }
