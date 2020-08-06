@@ -1,5 +1,6 @@
 <?php
 
+use frontend\helpers\QuoteHelper;
 use kartik\select2\Select2;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightQuote;
@@ -146,6 +147,62 @@ use yii\bootstrap4\Html;
         </div>
 
         <div class="row">
+            <div class="col-md-2">
+				<?= $form->field($searchFrom, 'topCriteria', [
+					'labelOptions' => [
+						'class' => 'control-label'
+					]
+				])->dropDownList(QuoteHelper::TOP_META_LIST, [
+                    'prompt' => '--'
+                ]) ?>
+            </div>
+
+            <div class="col-md-2" id="rank-slider-filter">
+				<div class="form-group">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <label for="" class="control-label">Rank</label>
+                        <span id="current-rank-value"></span>
+                        <?= $form->field($searchFrom, 'rank')->hiddenInput()->label(false) ?>
+                    </div>
+                    <div class="d-flex justify-content-center align-items-center" style="width: 100%; height: 100%;">
+                        <div class="search-filters__slider" id="rank-slider" data-min="0" data-max="10"></div>
+                    </div>
+                </div>
+                <?php $ranks = explode('-', $searchFrom->rank) ?>
+
+                <script>
+                    var sliderRank = document.getElementById('rank-slider');
+
+                    var maxRank = parseInt(sliderRank.getAttribute('data-max'), 10),
+                        minRank = parseInt(sliderRank.getAttribute('data-min'), 10),
+                        stepRank = 1;
+
+                    noUiSlider.create(sliderRank, {
+                        start: ['<?= $ranks[0] ?>', '<?= $ranks[1] ?>'],
+                        connect: [false, true, false],
+                        tooltips: [
+                            {to: function(value) {return parseInt(value, 10)}},
+                            {to: function(value) {return parseInt(value, 10)}}
+                        ],
+                        step: stepRank,
+                        range: {
+                            'min': minRank,
+                            'max': maxRank
+                        }
+                    });
+
+                    sliderRank.noUiSlider.on('update', function (values, handle) {
+                        $('#current-rank-value').html(parseInt(values[0], 10) + ' - ' + parseInt(values[1], 10));
+                    });
+
+                    sliderRank.noUiSlider.on('end', function(values) {
+                        $('#flightquotesearchform-rank').val(parseInt(values[0], 10) + '-' + parseInt(values[1], 10));
+                    });
+                </script>
+            </div>
+        </div>
+
+        <div class="row">
             <div class="col-md-12 d-flex align-items-center justify-content-center">
 				<?= Html::submitButton('<i class="fa fa-filter"></i> Apply filter', [
 					'class' => 'btn btn-success',
@@ -157,3 +214,4 @@ use yii\bootstrap4\Html;
         <?php ActiveForm::end(); ?>
     </div>
 </div>
+

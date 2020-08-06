@@ -7,8 +7,10 @@ use common\components\SearchService;
 use common\models\local\FlightSegment;
 use common\models\local\LeadLogMessage;
 use common\models\query\QuoteQuery;
+use frontend\helpers\JsonHelper;
 use sales\entities\EventTrait;
 use sales\events\quote\QuoteSendEvent;
+use sales\helpers\app\AppHelper;
 use sales\services\parsingDump\lib\ParsingDump;
 use sales\services\parsingDump\ReservationService;
 use Yii;
@@ -1265,6 +1267,15 @@ class Quote extends \yii\db\ActiveRecord
         return ['hasFreeBaggage' => $this->hasFreeBaggage, 'freeBaggageInfo' => $this->freeBaggageInfo];
     }
 
+    public function getFreeBaggageInfoFromMeta(): ?int
+    {
+        if ($originSearchData = $this->getJsonOriginSearchData()) {
+            if (!empty($originSearchData['meta']['bags'])) {
+                return (int) $originSearchData['meta']['bags'];
+            }
+        }
+        return null;
+    }
 
     /**
      * @return array
@@ -2467,5 +2478,36 @@ class Quote extends \yii\db\ActiveRecord
         if ($this->lead->isReadyForGa()) {
             $this->recordEvent(new QuoteSendEvent($this), QuoteSendEvent::class);
         }
+    }
+
+    public function getPenaltiesInfo(): ?array
+    {
+        if ($originSearchData = $this->getJsonOriginSearchData()) {
+            if (!empty($originSearchData['penalties'])) {
+                return $originSearchData['penalties'];
+            }
+        }
+        return null;
+    }
+
+    public function getMetaInfo(): ?array
+    {
+        if (($originSearchData = $this->getJsonOriginSearchData()) && !empty($originSearchData['meta'])) {
+            return $originSearchData['meta'];
+        }
+        return null;
+    }
+
+    public function getJsonOriginSearchData(): ?array
+    {
+        if (!empty($this->origin_search_data)) {
+            try {
+                return JsonHelper::decode($this->origin_search_data);
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableFormatter($throwable),
+                'Quote:getJsonOriginSearchData:failed');
+            }
+        }
+        return null;
     }
 }

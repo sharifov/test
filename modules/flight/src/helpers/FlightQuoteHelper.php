@@ -7,6 +7,7 @@ use common\models\Airline;
 use common\models\Airports;
 use common\models\QuoteSegment;
 use DateTime;
+use frontend\helpers\JsonHelper;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuote;
@@ -15,7 +16,9 @@ use modules\flight\src\useCases\flightQuote\create\FlightQuotePaxPriceDTO;
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuoteCreateForm;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuote;
+use sales\helpers\app\AppHelper;
 use sales\helpers\product\ProductQuoteHelper;
+use Yii;
 use yii\base\ErrorException;
 use yii\data\ActiveDataProvider;
 use yii\helpers\ArrayHelper;
@@ -1026,6 +1029,93 @@ class FlightQuoteHelper
 
 		return $trips;
 	}
+
+	public function getMetaInfo(FlightQuote $flightQuote): ?array
+    {
+        if (($originSearchData = self::getJsonOriginSearchData($flightQuote))) {
+            return $originSearchData['meta'] ?? null;
+        }
+        return null;
+    }
+
+	public static function getJsonOriginSearchData(FlightQuote $flightQuote): ?array
+    {
+        if (!empty($flightQuote->fq_origin_search_data)) {
+            try {
+                return JsonHelper::decode($flightQuote->fq_origin_search_data);
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableFormatter($throwable),
+                'FlightQuoteHelper:getJsonOriginSearchData:failed');
+            }
+        }
+        return null;
+    }
+
+    public static function formattedRanking(?array $meta, string $class = 'text-info'): string
+    {
+        if (!empty($meta['rank'])) {
+
+            $rank = number_format($meta['rank'], 1, '.', '');
+            $rank = ($rank === '10.0') ? 10 : $rank;
+
+            return '<span class="' . $class . '"
+                data-toggle="tooltip"
+                title="Rank: ' . $meta['rank'] . '">
+                    <i class="fa fa-border">' . $rank . '</i>
+            </span>';
+        }
+        return '';
+    }
+
+    public static function formattedCheapest(?array $meta, string $class = 'text-success'): string
+    {
+        if (!empty($meta['cheapest'])) {
+            return '<span class="' . $class . '"
+                data-toggle="tooltip"                
+                title="Cheapest">
+                    <i class="fa fa-money fa-border"></i>
+            </span>';
+        }
+        return '';
+    }
+
+    public static function formattedFastest(?array $meta, string $class = 'text-warning'): string
+    {
+        if (!empty($meta['fastest'])) {
+            return '<span class="' . $class . '"
+                data-toggle="tooltip"
+                title="Fastest">
+                    <i class="fa fa-rocket fa-border"></i>
+            </span>';
+        }
+        return '';
+    }
+
+    public static function formattedBest(?array $meta, string $class = 'text-primary'): string
+    {
+        if (!empty($meta['best'])) {
+            return '<span class="' . $class . '"
+                data-toggle="tooltip"
+                data-html="true"
+                title="Best">
+                    <i class="fa fa-thumbs-o-up fa-border"></i>
+            </span>';
+        }
+        return '';
+    }
+
+    public static function formattedFreeBaggage(?array $meta, string $class = 'success'): string
+    {
+        if (!empty($meta['bags'])) {
+            return '<span class="' . $class . '"
+                data-toggle="tooltip"
+                title="Free baggage - ' . (int) $meta['bags'] .  ' pcs">
+                <i class="fa fa-suitcase fa-border"></i>
+                <span class="flight_inside_icon">' . (int) $meta['bags'] . '</span>
+            </span>';
+        }
+        return '';
+    }
 
 	/**
 	 * @param DateTime $departureDateTime

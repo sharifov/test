@@ -4,9 +4,8 @@ namespace frontend\helpers;
 
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 
-
 /**
- * Class OutHelper
+ * Class ChatHelper
  */
 class ChatHelper
 {

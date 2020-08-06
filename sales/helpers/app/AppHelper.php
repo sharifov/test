@@ -122,4 +122,23 @@ class AppHelper
 		}
 		return $newArray;
 	}
+
+    /**
+     * @param array $array
+     * @param string $index
+     * @param string $value
+     * @return array
+     */
+    public static function filterBySearchInValue(array $array, string $index, string $value): array
+	{
+		$newArray = [];
+		if (is_array($array) && $array) {
+			foreach (array_keys($array) as $key) {
+			    if (strpos($array[$key][$index], $value) !== false) {
+			        $newArray[$key] = $array[$key];
+			    }
+			}
+		}
+		return $newArray;
+	}
 }

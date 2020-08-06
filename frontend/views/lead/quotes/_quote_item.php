@@ -10,6 +10,7 @@
 use common\models\Quote;
 use common\models\Airline;
 use common\components\SearchService;
+use frontend\helpers\QuoteHelper;
 use yii\bootstrap\Html;
 use yii\helpers\Url;
 
@@ -55,7 +56,7 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
 
                 <?php $airline = $model->mainAirline;
                     if($airline) { echo \yii\helpers\Html::encode($airline->name); }
-                ?> &nbsp;[<strong><?= $model->main_airline_code?></strong>]
+                ?> &nbsp;<strong>[<?= $model->main_airline_code?>]</strong>
             </span>
 
 			<div class="quote__gds" title="GDS / <?php if ($showGdsOfferId && !empty($model->gds_offer_id)): echo 'GDS Offer ID: ' . \yii\helpers\Html::encode($model->gds_offer_id) . ' /'; endif; ?> PCC">
@@ -259,6 +260,9 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
 
 		</div>
 		<div class="quote__badges">
+
+			<?php echo QuoteHelper::formattedFreeBaggage($model->getMetaInfo()) ?>
+
 			<span class="quote__badge quote__badge--amenities <?php if(!$model->hasFreeBaggage):?>quote__badge--disabled<?php endif;?>" data-toggle="tooltip"
 			 title="<?= ($model->freeBaggageInfo)?'Free baggage - '.$model->freeBaggageInfo:'No free baggage'?>"
 			data-original-title="<?= ($model->freeBaggageInfo)?'Free baggage - '.$model->freeBaggageInfo:'No free baggage'?>">
@@ -276,6 +280,17 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
 			  data-original-title="<?= ($model->hasAirportChange)?'Airports Change':'No Airports Change'?>">
 				<i class="fa fa-exchange"></i>
 			</span>
+
+            <?php $penaltyInfo = $model->getPenaltiesInfo() ? QuoteHelper::formattedPenalties($model->getPenaltiesInfo()) : 'No penalty information' ?>
+            <span class="quote__badge <?php echo $model->getPenaltiesInfo() ? 'quote__badge--warning' : 'quote__badge--disabled' ?>"
+                data-toggle="tooltip"
+                data-html="true"
+			    title="<?php echo $penaltyInfo ?>">
+				    <i class="fa fa-expand"></i>
+			</span>
+
+            <?php echo QuoteHelper::formattedMetaRank($model->getMetaInfo())?>
+
 		</div>
 		<div class="quote__actions">
 			<?php \yii\widgets\Pjax::begin(['id' => 'pjax-quote_prices-'.$model->id, 'enablePushState' => false, 'enableReplaceState' => false]); ?>
@@ -286,3 +301,18 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
 		</div>
 	</div>
 </div>
+
+<?php
+$css = <<<CSS
+    .tooltip_quote_info_box {
+        text-align: left;
+        padding-top: 12px;
+    }     
+    .tooltip_quote_info_box ul {
+        padding-left: 16px;
+    } 
+    .tooltip_quote_info_box p {
+        margin-bottom: 0;
+    }     
+CSS;
+$this->registerCss($css);

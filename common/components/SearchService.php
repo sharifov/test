@@ -121,11 +121,11 @@ class SearchService
      * @param Lead $lead
      * @param int $limit
      * @param null $gdsCode
+     * @param bool $group
      * @return mixed
-     * @throws \yii\base\InvalidConfigException
      * @throws \yii\httpclient\Exception
      */
-    public static function getOnlineQuotes(Lead $lead, int $limit = 600, $gdsCode = null)
+    public static function getOnlineQuotes(Lead $lead, int $limit = 600, $gdsCode = null, bool $group = true)
     {
         $result = null;
         $fl = [];
@@ -136,6 +136,7 @@ class SearchService
             'adt' => $lead->adults,
             'chd' => $lead->children,
             'inf' => $lead->infants,
+            'group' => $group,
         ];
 
         if ($limit) {

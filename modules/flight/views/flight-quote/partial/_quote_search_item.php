@@ -1,5 +1,6 @@
 <?php
 use common\components\SearchService;
+use frontend\helpers\QuoteHelper;
 use modules\flight\src\helpers\FlightQuoteHelper;
 use yii\bootstrap\Html;
 
@@ -171,6 +172,10 @@ $isQuoteAssignedToFlight = FlightQuoteHelper::isQuoteAssignedToFlight($flightQuo
 			<?php endforeach;?>
         </div>
         <div class="quote__badges">
+
+            <?php $meta = !empty($result['meta']) ? $result['meta'] : null ?>
+            <?php echo QuoteHelper::formattedFreeBaggage($meta) ?>
+
 			<span class="quote__badge quote__badge--amenities <?php if(!$hasFreeBaggage):?>quote__badge--disabled<?php endif;?>" data-toggle="tooltip"
                   title="<?= ($freeBaggageInfo)?$freeBaggageInfo:'No free baggage'?>" data-original-title="<?= ($freeBaggageInfo)?$freeBaggageInfo:'No free baggage'?>">
 				<i class="fa fa-suitcase"></i><span class="quote__badge-num"></span>
@@ -197,6 +202,21 @@ $isQuoteAssignedToFlight = FlightQuoteHelper::isQuoteAssignedToFlight($flightQuo
                   data-toggle="tooltip" title="<?= ($hasAirportChange)?'Airports Change':'No Airports Change'?>" data-original-title="<?= ($hasAirportChange)?'Airports Change':'No Airports Change'?>">
 				<i class="fa fa-exchange"></i>
 			</span>
+
+			<?php $penaltyInfo = (!empty($result['penalties']) && QuoteHelper::checkPenaltiesInfo($result['penalties'])) ?
+			    QuoteHelper::formattedPenalties($result['penalties']) : 'No penalty information' ?>
+            <span class="quote__badge
+                <?php echo $penaltyInfo !== 'No penalty information' ? 'quote__badge--warning' : 'quote__badge--disabled' ?>"
+                data-toggle="tooltip"
+                data-html="true"
+                title="<?php echo $penaltyInfo ?>"
+			    data-original-title="<?php echo $penaltyInfo ?>">
+				    <i class="fa fa-expand"></i>
+			</span>
+
+
+            <?php echo QuoteHelper::formattedMetaRank($meta) ?>
+
         </div>
         <div class="quote__actions">
             <table class="table table-striped table-prices">

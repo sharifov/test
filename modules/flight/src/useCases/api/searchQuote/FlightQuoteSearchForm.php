@@ -19,6 +19,8 @@ use yii\base\Model;
  * @property bool $baggage
  * @property bool $airportChange
  * @property string $sortBy
+ * @property string $topCriteria
+ * @property mixed $rank
  */
 class FlightQuoteSearchForm extends Model
 {
@@ -62,6 +64,8 @@ class FlightQuoteSearchForm extends Model
 	 */
 	public $sortBy;
 
+    public $topCriteria;
+    public $rank = '0-10';
 
 	/**
 	 * @return array
@@ -69,7 +73,11 @@ class FlightQuoteSearchForm extends Model
 	public function rules(): array
 	{
 		return [
-			[['fareType', 'airlines', 'tripDuration', 'stops', 'baggage', 'airportChange', 'sortBy'], 'safe'],
+			[
+			    [
+			        'fareType', 'airlines', 'tripDuration', 'stops', 'baggage', 'airportChange', 'sortBy',
+			        'topCriteria', 'rank',
+			    ], 'safe'],
 			['price', 'filter', 'filter' => 'intval'],
 		];
 	}
@@ -154,6 +162,15 @@ class FlightQuoteSearchForm extends Model
 
 				return count($item['duration']) === $cnt;
 			}, ARRAY_FILTER_USE_BOTH);
+		}
+
+		if ($this->topCriteria) {
+            $quotes['results'] = AppHelper::filterBySearchInValue($quotes['results'], 'topCriteria', $this->topCriteria);
+		}
+
+		if ($this->rank) {
+		    $ranks = explode('-', $this->rank);
+            $quotes['results'] = AppHelper::filterByRange($quotes['results'], 'rank', $ranks[0], $ranks[1]);
 		}
 
 		return $quotes;
