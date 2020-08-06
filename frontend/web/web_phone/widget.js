@@ -68,7 +68,7 @@ window.phoneWidget.events = {
         return this.data.status === 'In progress';
       }
 
-      return this.data.typeId !== 3 && this.data.status === 'In progress';
+      return this.data.typeId !== 3 && this.data.status === 'In progress' && !this.data.isInternal;
     };
 
     this.block = function () {
@@ -84,7 +84,7 @@ window.phoneWidget.events = {
     };
 
     this.canHoldUnHold = function () {
-      return this.data.typeId !== 3 && this.data.status === 'In progress';
+      return this.data.typeId !== 3 && this.data.status === 'In progress' && (!this.data.isInternal || this.data.isInternal && this.data.isConferenceCreator);
     };
 
     this.setHoldRequestState = function () {
@@ -308,6 +308,28 @@ window.phoneWidget.events = {
       return this.data.sentAddNoteRequest === true;
     };
 
+    this.setRejectInternalRequest = function () {
+      if (this.isBlocked()) {
+        createNotify('Error', 'Call is blocked. Please wait some seconds.', 'error');
+        return false;
+      }
+
+      this.data.sentRejectInternalRequest = true;
+      this.block();
+      this.save();
+      return true;
+    };
+
+    this.unSetRejectInternalRequest = function () {
+      this.data.sentRejectInternalRequest = false;
+      this.unBlock();
+      this.save();
+    };
+
+    this.isSentRejectInternalRequest = function () {
+      return this.data.sentRejectInternalRequest === true;
+    };
+
     this.getDuration = function () {
       let duration = this.data.duration || 0;
 
@@ -425,7 +447,8 @@ window.phoneWidget.events = {
       'returnHoldCallUrl': '',
       'ajaxHangupUrl': '',
       'callAddNoteUrl': '',
-      'sendDigitUrl': ''
+      'sendDigitUrl': '',
+      'prepareCurrentCallsUrl': ''
     };
 
     this.init = function (settings) {
@@ -616,6 +639,25 @@ window.phoneWidget.events = {
         }
       }).fail(function () {
         createNotify('Send digit', 'Server error', 'error');
+      });
+    };
+
+    this.acceptInternalCall = function (call, connection) {
+      $.ajax({
+        type: 'post',
+        data: {},
+        url: this.settings.prepareCurrentCallsUrl,
+        dataType: 'json'
+      }).done(function (data) {
+        if (data.error) {
+          createNotify('Prepare current call', data.message, 'error');
+          call.unSetAcceptCallRequestState();
+        } else {
+          connection.accept();
+        }
+      }).fail(function () {
+        createNotify('Prepare current call', 'Server error', 'error');
+        call.unSetAcceptCallRequestState();
       });
     };
   }
@@ -1003,29 +1045,67 @@ class IncomingPane extends React.Component {
       className: "contact-info-card__line history-details"
     }, React.createElement("span", {
       className: "contact-info-card__call-type"
-    }, call.data.contact.phone)))), React.createElement("div", {
+    }, call.data.contact.phone)))), React.createElement(IncomingActions, {
+      call: call
+    }));
+  }
+
+}
+
+function IncomingActions(props) {
+  let call = props.call;
+
+  if (call.data.isInternal) {
+    return React.createElement("div", {
       className: "actions-container"
     }, React.createElement("div", {
       className: "call-pane__call-btns"
     }, React.createElement("button", {
+      className: "call-pane__end-call end-internal",
+      id: "hide-incoming-call",
+      "data-call-sid": call.data.callSid
+    }, React.createElement("i", {
+      className: "fa fa-angle-double-right"
+    }, " ")), React.createElement("button", {
       className: "call-pane__start-call calling-state-block",
-      id: "btn-accept-call",
-      "data-from-internal": call.data.fromInternal,
       "data-call-sid": call.data.callSid,
-      disabled: call.isSentAcceptCallRequestState()
+      onClick: () => acceptInternalCall(call)
     }, call.isSentAcceptCallRequestState() ? React.createElement("i", {
       className: "fa fa-spinner fa-spin"
     }, " ") : React.createElement("i", {
       className: "fas fa-phone"
     }, " ")), React.createElement("button", {
       className: "call-pane__end-call",
-      id: "hide-incoming-call",
-      "data-call-sid": call.data.callSid
-    }, React.createElement("i", {
-      className: "fa fa-angle-double-right"
-    }, " ")))));
+      "data-call-sid": call.data.callSid,
+      onClick: () => rejectInternalCall(call)
+    }, call.isSentRejectInternalRequest() ? React.createElement("i", {
+      className: "fa fa-spinner fa-spin"
+    }, " ") : React.createElement("i", {
+      className: "fa fa-phone-slash"
+    }, " "))));
   }
 
+  return React.createElement("div", {
+    className: "actions-container"
+  }, React.createElement("div", {
+    className: "call-pane__call-btns"
+  }, React.createElement("button", {
+    className: "call-pane__start-call calling-state-block",
+    id: "btn-accept-call",
+    "data-from-internal": call.data.fromInternal,
+    "data-call-sid": call.data.callSid,
+    disabled: call.isSentAcceptCallRequestState()
+  }, call.isSentAcceptCallRequestState() ? React.createElement("i", {
+    className: "fa fa-spinner fa-spin"
+  }, " ") : React.createElement("i", {
+    className: "fas fa-phone"
+  }, " ")), React.createElement("button", {
+    className: "call-pane__end-call",
+    id: "hide-incoming-call",
+    "data-call-sid": call.data.callSid
+  }, React.createElement("i", {
+    className: "fa fa-angle-double-right"
+  }, " "))));
 }
 
 function ActivePaneControls(props) {
@@ -1206,7 +1286,7 @@ class ListItem extends React.Component {
     }, React.createElement("a", {
       href: "#",
       className: "call-list-item__main-action-trigger",
-      "data-type-action": call.data.queue === 'inProgress' ? 'hangup' : call.data.queue === 'hold' ? 'return' : 'accept',
+      "data-type-action": call.data.queue === 'inProgress' ? 'hangup' : call.data.queue === 'hold' ? 'return' : call.data.isInternal ? 'acceptInternal' : 'accept',
       "data-call-sid": call.data.callSid,
       "data-from-internal": call.data.fromInternal
     }, call.isSentAcceptCallRequestState() || call.isSentHangupRequestState() || call.isSentReturnHoldCallRequestState() ? React.createElement("i", {
@@ -1231,6 +1311,38 @@ function ListItemMenu(props) {
     return React.createElement(ListItemMenuJoinCall, {
       call: call
     });
+  }
+
+  if (call.data.isInternal) {
+    if (call.data.isConferenceCreator) {
+      return React.createElement("ul", {
+        className: "call-list-item__menu call-item-menu"
+      }, React.createElement("li", {
+        className: "call-item-menu__list-item"
+      }, React.createElement("a", {
+        href: "#",
+        className: "call-item-menu__close"
+      }, React.createElement("i", {
+        className: "fa fa-chevron-right"
+      }, " "))), React.createElement(React.Fragment, null, React.createElement(ListItemBtnHold, {
+        call: call
+      }), React.createElement(ListItemBtnMute, {
+        call: call
+      })));
+    }
+
+    return React.createElement("ul", {
+      className: "call-list-item__menu call-item-menu"
+    }, React.createElement("li", {
+      className: "call-item-menu__list-item"
+    }, React.createElement("a", {
+      href: "#",
+      className: "call-item-menu__close"
+    }, React.createElement("i", {
+      className: "fa fa-chevron-right"
+    }, " "))), React.createElement(ListItemBtnMute, {
+      call: call
+    }));
   }
 
   return React.createElement("ul", {
@@ -1340,6 +1452,20 @@ function Groups(props) {
       }
     }));
     delete data.groups[externalKey];
+  }
+
+  const internalKey = 'internal';
+
+  if (typeof data.groups[internalKey] !== 'undefined') {
+    items.push(React.createElement(GroupItem, {
+      key: internalKey,
+      group: {
+        'calls': data.groups[internalKey].calls,
+        'project': '',
+        'department': 'Internal Contacts'
+      }
+    }));
+    delete data.groups[internalKey];
   }
 
   for (let key in data.groups) {
@@ -2030,6 +2156,13 @@ var PhoneWidgetPaneActive = function () {
       controls.dialpad.active = false;
     }
 
+    if (call.data.isInternal) {
+      controls.hold.active = !!call.data.isConferenceCreator;
+      controls.transfer.active = false;
+      controls.addPerson.active = false;
+      controls.dialpad.active = false;
+    }
+
     if (!conferenceBase) {
       controls.hold.active = false;
       controls.transfer.active = true;
@@ -2455,6 +2588,7 @@ function PhoneWidgetPaneQueue(initQueues) {
       data.sentReturnHoldCallRequest = false;
       data.sentAcceptCallRequest = false;
       data.sentAddNoteRequest = false;
+      data.sentRejectInternalRequest = false;
     }
 
     this.add = function (data) {
@@ -2588,7 +2722,16 @@ function PhoneWidgetPaneQueue(initQueues) {
       let groups = [];
       let key = '';
       calls.forEach(function (call) {
-        if (!call.data.project) {
+        if (call.data.isInternal) {
+          if (!groups['internal']) {
+            groups['internal'] = {
+              'calls': []
+            };
+          }
+
+          groups['internal'].calls.push(call);
+          return;
+        } else if (!call.data.project) {
           if (!groups['external']) {
             groups['external'] = {
               'calls': []
@@ -3130,15 +3273,18 @@ $(document).ready(function () {
   });
   $('.call_pane_dialpad_clear_number').on('click', function (e) {
     e.preventDefault();
-    $('.call-pane__dial-number').val('').attr('readonly', false).prop('readonly', false);
+    $('#call-pane__dial-number').val('').attr('readonly', false).prop('readonly', false);
     $('#call-to-label').text('');
+    $('#call-pane__dial-number-value').attr('data-user-id', '').attr('data-phone', '');
     $('.suggested-contacts').removeClass('is_active');
-    $('.dialpad_btn_init').attr('disabled', false).removeClass('disabled'); // $(this).removeClass('is-shown')
+    $('.dialpad_btn_init').attr('disabled', false).removeClass('disabled');
+    $('.call-pane__correction').attr('disabled', false); // $(this).removeClass('is-shown')
   });
   $('.call_pane_dialpad_clear_number_disabled').on('click', function (e) {
     e.preventDefault();
     $('.call-pane__dial-number').val('').attr('readonly', true).prop('readonly', true);
     $('#call-to-label').text('');
+    $('#call-pane__dial-number-value').attr('data-user-id', '').attr('data-phone', '');
     $('.suggested-contacts').removeClass('is_active');
   });
   $('.call-pane__correction').on('click', function (e) {
@@ -4732,12 +4878,12 @@ var PhoneWidgetCall = function () {
     if (obj.status === 'In progress') {
       requestActiveCall(obj);
     } else if (obj.status === 'Ringing' || obj.status === 'Queued') {
-      if (obj.typeId === 2) {
+      if (parseInt(obj.typeId) === 2) {
         requestIncomingCall(obj);
-      } else if (obj.typeId === 1) {
+      } else if (parseInt(obj.typeId) === 1) {
         requestOutgoingCall(obj);
       }
-    } else if (obj.status === 'Completed' || obj.isEnded || obj.cua_status_id === 5) {
+    } else if (obj.status === 'Completed' || obj.isEnded || parseInt(obj.cua_status_id) === 5) {
       completeCall(obj.callSid);
     }
   }
@@ -4774,6 +4920,18 @@ var PhoneWidgetCall = function () {
 
       if (action === 'accept') {
         acceptCall(btn.attr('data-call-sid'), btn.attr('data-from-internal'));
+        return false;
+      }
+
+      if (action === 'acceptInternal') {
+        let call = queues.direct.one(btn.attr('data-call-sid'));
+
+        if (call === null) {
+          createNotify('Accept Internal Call', 'Not found Call on Direct Incoming Queue', 'error');
+          return false;
+        }
+
+        acceptInternalCall(call);
         return false;
       }
 
@@ -4997,6 +5155,10 @@ var PhoneWidgetCall = function () {
         return false;
       }
 
+      if (!call.canHoldUnHold()) {
+        return false;
+      }
+
       if (call.data.isHold) {
         sendUnHoldRequest(call.data.callSid);
       } else {
@@ -5019,6 +5181,10 @@ var PhoneWidgetCall = function () {
 
       if (call === null) {
         createNotify('Error', 'Not found Call on Active Queue', 'error');
+        return false;
+      }
+
+      if (!call.canHoldUnHold()) {
         return false;
       }
 
@@ -5046,12 +5212,13 @@ var PhoneWidgetCall = function () {
     function phoneDialInsertNumber(self) {
       let phone = $(self).data('phone');
       let title = $(self).data('title');
+      let userId = $(self).data('user-id');
       $(".widget-phone__contact-info-modal").hide();
       $('.phone-widget__header-actions a[data-toggle-tab]').removeClass('is_active');
       $('.phone-widget__tab').removeClass('is_active');
       $('.phone-widget__header-actions a[data-toggle-tab="tab-phone"]').addClass('is_active');
       $('#tab-phone').addClass('is_active');
-      insertPhoneNumber(phone, title);
+      insertPhoneNumber(phone, title, userId, phone);
     }
   }
 
@@ -5280,7 +5447,8 @@ var PhoneWidgetCall = function () {
       contactIcon = '<div class="contact-info-card__status">' + '<i class="far fa-user ' + contact['user_status_class'] + ' "></i>' + '</div>';
     }
 
-    let content = '<li class="calls-history__item contact-info-card call-contact-card" data-phone="' + contact['phone'] + '" data-title="' + contact['title'] + '">' + '<div class="collapsible-toggler">' + contactIcon + '<div class="contact-info-card__details">' + '<div class="contact-info-card__line history-details">' + '<strong class="contact-info-card__name">' + contact['name'] + '</strong>' + '</div>' + '</div>' + '</div>' + '</li>';
+    let dataUserId = contact.type === 3 ? contact.id : '';
+    let content = '<li class="calls-history__item contact-info-card call-contact-card" data-user-id="' + dataUserId + '" data-phone="' + contact['phone'] + '" data-title="' + contact['title'] + '">' + '<div class="collapsible-toggler">' + contactIcon + '<div class="contact-info-card__details">' + '<div class="contact-info-card__line history-details">' + '<strong class="contact-info-card__name">' + contact['name'] + '</strong>' + '</div>' + '</div>' + '</div>' + '</li>';
     return content;
   } // function loadNotFound() {
   //     let content = '<li class="calls-history__item contact-info-card">' +
@@ -5299,7 +5467,8 @@ var PhoneWidgetCall = function () {
   $(document).on('click', "li.call-contact-card", function () {
     let phone = $(this).data('phone');
     let title = $(this).data('title');
-    insertPhoneNumber(phone, title);
+    let userId = $(this).data('user-id');
+    insertPhoneNumber(phone, title, userId, phone);
     $('.suggested-contacts').removeClass('is_active');
   });
 })();
@@ -5769,7 +5938,13 @@ let PhoneWidgetContacts = function () {
   }
 
   function getContactItem(contact) {
-    let content = '<li class="calls-history__item contact-info-card is-collapsible">' + '<div class="collapsible-toggler collapsed" data-toggle="' + getSelectableState(contact) + '" data-target="#collapse' + contact['id'] + '" aria-expanded="false" aria-controls="collapse' + contact['id'] + '">' + '<div class="contact-info-card__status">' + '<div class="agent-text-avatar">' + '<span>' + contact['avatar'] + '</span>' + '</div>' + '</div>' + '<div class="contact-info-card__details">' + '<div class="contact-info-card__line history-details">' + '<strong class="contact-info-card__name">' + contact['name'] + '</strong>' + '</div>' + '<div class="contact-info-card__line history-details">' + '<span class="contact-info-card__call-type">' + contact['description'] + '</span>' + '</div>' + showCheckbox(contact) + '</div>' + '</div>' + '<div id="collapse' + contact['id'] + '" class="collapse collapsible-container" aria-labelledby="headingOne" data-parent="#contacts-tab">' + '<ul class="contact-options-list">' + '<li class="contact-options-list__option js-toggle-contact-info" data-contact="' + encode(contact) + '">' + '<i class="fa fa-user"></i>' + '<span>View</span>' + '</li>' + '</ul>' + '<ul class="contact-full-info">';
+    let content = '<li class="calls-history__item contact-info-card is-collapsible">' + '<div class="collapsible-toggler collapsed" data-toggle="' + getSelectableState(contact) + '" data-target="#collapse' + contact['id'] + '" aria-expanded="false" aria-controls="collapse' + contact['id'] + '">' + '<div class="contact-info-card__status">' + '<div class="agent-text-avatar">' + '<span>' + contact['avatar'] + '</span>' + '</div>' + '</div>' + '<div class="contact-info-card__details">' + '<div class="contact-info-card__line history-details">' + '<strong class="contact-info-card__name">' + contact['name'] + '</strong>' + '</div>' + '<div class="contact-info-card__line history-details">' + '<span class="contact-info-card__call-type">' + contact['description'] + '</span>' + '</div>' + showCheckbox(contact) + '</div>' + '</div>' + '<div id="collapse' + contact['id'] + '" class="collapse collapsible-container" aria-labelledby="headingOne" data-parent="#contacts-tab">' + '<ul class="contact-options-list">' + '<li class="contact-options-list__option js-toggle-contact-info" data-contact="' + encode(contact) + '">' + '<i class="fa fa-user"></i>';
+
+    if (contact.isInternal) {
+      content += '<li class="contact-options-list__option dial-to-user contact-dial-to-user" data-contact="' + encode(contact) + '"> <i class="fa fa-phone"> </i></li>';
+    }
+
+    content += '</ul>' + '<ul class="contact-full-info">';
 
     if (contact['phones']) {
       contact['phones'].forEach(function (phone, index) {
@@ -5911,7 +6086,10 @@ let PhoneWidgetContacts = function () {
   }
 
   function getPhoneItem(phone, index, contact) {
-    let content = '<li class="contact-full-info__phone">' + '<div class="form-group">' + '<label for="">Phone ' + (index + 1) + '</label>' + '<input readonly type="text" class="form-control" value="' + phone + '" autocomplete="off">' + '</div>' + '<ul class="actions-list">' + '<li class="actions-list__option actions-list__option--phone js-call-tab-trigger">' + '<i class="fa fa-phone phone-dial-contacts" data-phone="' + phone + '" data-title="' + contact['name'] + '"></i>' + '</li>' + '<li title="' + titleAccessGetMessages + '" class="actions-list__option js-trigger-messages-modal' + disabledClass + '" ' + 'data-contact-id="' + contact['id'] + '" data-contact-phone="' + phone + '" data-contact-type="' + contact['type'] + '">' + '<i class="fa fa-comment-alt"></i>' + '</li>' + showCheckboxMultiple(contact, index) + '</ul>' + '</li>';
+    let content = '<li class="contact-full-info__phone">' + '<div class="form-group">' + '<label for="">Phone ' + (index + 1) + '</label>' + '<input readonly type="text" class="form-control" value="' + phone + '" autocomplete="off">' + '</div>' + '<ul class="actions-list">' + '<li class="actions-list__option actions-list__option--phone js-call-tab-trigger">';
+    let dataUserId = contact.isInternal ? contact.id : '';
+    content += '<i class="fa fa-phone phone-dial-contacts" data-user-id="' + dataUserId + '" data-phone="' + phone + '" data-title="' + contact['name'] + '"></i>';
+    content += '</li>' + '<li title="' + titleAccessGetMessages + '" class="actions-list__option js-trigger-messages-modal' + disabledClass + '" ' + 'data-contact-id="' + contact['id'] + '" data-contact-phone="' + phone + '" data-contact-type="' + contact['type'] + '">' + '<i class="fa fa-comment-alt"></i>' + '</li>' + showCheckboxMultiple(contact, index) + '</ul>' + '</li>';
     return content;
   }
 
@@ -6126,6 +6304,14 @@ $(document).on('click', ".js-toggle-contact-info", function () {
   let data = PhoneWidgetContacts.viewContact(contact);
   $(".widget-phone__contact-info-modal").html(data);
   $(".widget-phone__contact-info-modal").show();
+});
+$(document).on('click', ".contact-dial-to-user", function () {
+  let contact = PhoneWidgetContacts.decodeContact($(this).data('contact'));
+  insertPhoneNumber(contact.name, '', contact.id, '');
+  $('.phone-widget__header-actions a[data-toggle-tab]').removeClass('is_active');
+  $('.phone-widget__tab').removeClass('is_active');
+  $('.phone-widget__header-actions a[data-toggle-tab="tab-phone"]').addClass('is_active');
+  $('#tab-phone').addClass('is_active');
 }); // $('.js-add-to-conference').on('click', function() {
 //     console.log(window.localStorage)
 //     $(this).trigger('selection-contacts');

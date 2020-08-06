@@ -255,6 +255,7 @@ class CallLogSearch extends CallLog
 		$query->leftJoin($clientTableName, $clientTableName . '.id = cl_client_id');
 		$query->leftJoin(CallNote::tableName(), new Expression('cn_id = (select cn_id from call_note where cn_call_id = cl_id order by cn_created_dt desc limit 1)'));
 		$query->where(['cl_user_id' => $this->cl_user_id]);
+		$query->where(['call_log.cl_type_id' => [Call::CALL_TYPE_OUT, Call::CALL_TYPE_OUT]]);
 		$query->groupBy(['cl_id', 'call_log.cl_type_id', 'cl_phone_from', 'cl_phone_to', 'cl_client_id', 'cl_call_created_dt', 'cl_status_id', 'cl_duration', 'callNote', 'client_name', 'user_id']);
 		$query->orderBy(['cl_call_created_dt' => SORT_DESC]);
 
