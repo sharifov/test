@@ -49,6 +49,7 @@ use borales\extensions\phoneInput\PhoneInput;
         'data' => $model->upp_email_list_id ? [
             $model->upp_email_list_id => $model->emailList->el_email
         ] : [],
+        'withProject' => true,
     ]) ?>
 
     <?php //= $form->field($model, 'upp_tw_phone_number')->textInput(['maxlength' => true]) ?>
