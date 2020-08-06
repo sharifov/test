@@ -25,7 +25,7 @@ $this->title = 'Call Id: ' . $model->cl_id;
     <?php endif; ?>
 
     <div class="col-md-6">
-        
+
         <?= DetailView::widget([
             'model' => $model,
             'attributes' => [
