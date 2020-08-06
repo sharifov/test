@@ -317,26 +317,16 @@ SearchResult = function(props) {
                             var filterValues = filterList[filter];
                             var rankData = $(obj).data('rank');
 
-                            var rankElement = parseFloat(rankData).toFixed(1);
-                            var rankFrom = parseFloat(filterValues[0]).toFixed(1);
-                            var rankTo = parseFloat(filterValues[1]).toFixed(1);
-
-                            console.log({
-                                rankElement: rankElement,
-                                rankFrom: rankFrom,
-                                rankTo: rankTo,
-                                ef: (rankElement >= rankFrom),
-                                et: (rankElement <= rankTo)
-                            }); // TODO:: for debug
+                            var rankElement = parseFloat(rankData);
+                            var rankFrom = parseFloat(filterValues[0]);
+                            var rankTo = parseFloat(filterValues[1]);
 
                             if ((rankElement >= rankFrom) && (rankElement <= rankTo)) {
                                 $(obj).removeClass('d-none');
                                 $(obj).addClass('filtered');
                                 filterApplied = true;
-                                console.log({elSuccess: rankElement}); // TODO:: for debug
                             } else {
                                 $(obj).removeClass('filtered');
-                                console.log({elFail: rankElement}); // TODO:: for debug
                             }
                         });
                         break;

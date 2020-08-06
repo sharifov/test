@@ -91,7 +91,7 @@ if (!empty($baggagePerSegment)) {
 
     $rank = 0.0;
     if (!empty($result['meta']['rank'])) {
-        $rank = number_format($result['meta']['rank'], 1, '.', '');
+        $rank = $result['meta']['rank'];
     }
 ?>
 <div id="search-result__quote-<?= $resultKey?>"
