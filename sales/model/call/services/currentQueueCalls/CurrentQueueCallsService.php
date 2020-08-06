@@ -16,10 +16,16 @@ use sales\model\phoneList\entity\PhoneList;
 class CurrentQueueCallsService
 {
     private int $userId;
+    private bool $canContactDetails;
+    private bool $canCallInfo;
 
     public function getQueuesCalls(int $userId): QueueCalls
     {
         $this->userId = $userId;
+
+        $auth = \Yii::$app->authManager;
+        $this->canContactDetails = $auth->checkAccess($this->userId, '/client/ajax-get-info');
+        $this->canCallInfo = $auth->checkAccess($this->userId, '/call/ajax-call-info');
 
         $holdQueue = $this->getHoldCalls();
         $incomingQueue = $this->getIncomingCalls();
@@ -223,6 +229,10 @@ class CurrentQueueCallsService
                 'company' => '',
                 'department' => $call->c_dep_id ? Department::getName($call->c_dep_id) : '',
                 'isConferenceCreator' => Conference::find()->andWhere(['cf_id' => $call->c_conference_id, 'cf_status_id' => Conference::STATUS_START, 'cf_created_user_id' => $this->userId])->exists(),
+                'canContactDetails' => $this->canContactDetails,
+                'canCallInfo' => $this->canCallInfo,
+                'isClient' => $call->c_client_id ? $call->cClient->isClient() : false,
+                'clientId' => $call->c_client_id,
             ]);
 
             $last_time = strtotime($call->c_updated_dt);
@@ -300,6 +310,10 @@ class CurrentQueueCallsService
                 'company' => '',
                 'department' => $call->c_dep_id ? Department::getName($call->c_dep_id) : '',
                 'queue' => '',
+                'canContactDetails' => $this->canContactDetails,
+                'canCallInfo' => $this->canCallInfo,
+                'isClient' => $call->c_client_id ? $call->cClient->isClient() : false,
+                'clientId' => $call->c_client_id,
             ]);
             $last_time = strtotime($call->c_updated_dt);
         }
@@ -352,6 +366,10 @@ class CurrentQueueCallsService
                 'company' => '',
                 'department' => $call->c_dep_id ? Department::getName($call->c_dep_id) : '',
                 'queue' => Call::getQueueName($call),
+                'canContactDetails' => $this->canContactDetails,
+                'canCallInfo' => $this->canCallInfo,
+                'isClient' => $call->c_client_id ? $call->cClient->isClient() : false,
+                'clientId' => $call->c_client_id,
             ]);
             $last_time = strtotime($item->cua_updated_dt);
         }
@@ -409,6 +427,10 @@ class CurrentQueueCallsService
                 'company' => '',
                 'department' => $call->c_dep_id ? Department::getName($call->c_dep_id) : '',
                 'queue' => Call::getQueueName($call),
+                'canContactDetails' => $this->canContactDetails,
+                'canCallInfo' => $this->canCallInfo,
+                'isClient' => $call->c_client_id ? $call->cClient->isClient() : false,
+                'clientId' => $call->c_client_id,
             ]);
         }
 

@@ -1198,34 +1198,34 @@ class Call extends \yii\db\ActiveRecord
                 ||!$this->currentParticipant
                 || ($this->currentParticipant && ($this->currentParticipant->isAgent() || $this->currentParticipant->isUser()))
             ) {
-                $message = (new CallUpdateMessage)->create($this, $isChangedStatus);
+                $message = (new CallUpdateMessage)->create($this, $isChangedStatus, $this->c_created_user_id);
                 Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id], $message);
             }
         }
 
-        if ($this->isInternal()) {
+        if ($this->c_created_user_id && $this->isInternal()) {
 
             $isChangedStatus = array_key_exists('c_status_id', $changedAttributes);
 
             if ($this->isOut() && ($insert || $isChangedStatus) && $this->isStatusRinging()) {
-                $message = (new CallUpdateMessage)->create($this, $isChangedStatus);
+                $message = (new CallUpdateMessage)->create($this, $isChangedStatus, $this->c_created_user_id);
                 Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id], $message);
             }
 
             if ($this->isIn() && ($insert || $isChangedStatus) && $this->c_parent_id && $this->isStatusRinging()) {
                 $internalParent = $this->cParent;
                 $internalParent->c_status_id = self::STATUS_RINGING;
-                $message = (new CallUpdateMessage)->create($internalParent, $isChangedStatus);
+                $message = (new CallUpdateMessage)->create($internalParent, $isChangedStatus, $this->c_created_user_id);
                 Notifications::publish('callUpdate', ['user_id' => $internalParent->c_created_user_id], $message);
             }
 
             if ($this->isIn() && ($insert || $isChangedStatus) && $this->c_parent_id && $this->isStatusInProgress()) {
 
                 $internalParent = $this->cParent;
-                $parentMessage = (new CallUpdateMessage)->create($internalParent, $isChangedStatus);
+                $parentMessage = (new CallUpdateMessage)->create($internalParent, $isChangedStatus, $this->c_created_user_id);
                 Notifications::publish('callUpdate', ['user_id' => $internalParent->c_created_user_id], $parentMessage);
 
-                $message = (new CallUpdateMessage)->create($this, $isChangedStatus);
+                $message = (new CallUpdateMessage)->create($this, $isChangedStatus, $this->c_created_user_id);
                 Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id], $message);
             }
 
