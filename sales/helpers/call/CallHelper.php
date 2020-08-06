@@ -35,6 +35,11 @@ class CallHelper
             $options['data-phone-from-id'] = $dataParams['phone-from-id'];
         }
 
+		if (!empty($dataParams['data-user-id'])) {
+            $options['data-user-id'] = $dataParams['data-user-id'];
+        } else {
+            $options['data-user-id'] = null;
+        }
 
         $disableIcon = $dataParams['disable-icon'] ?? false;
         if ($disableIcon) {

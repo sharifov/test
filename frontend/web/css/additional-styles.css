@@ -159,3 +159,9 @@
 .phone-widget .call-pane__end-call.end-internal {
     left: 20px;
 }
+.phone-widget .contact-options-list .dial-to-user {
+    margin-left: 10px;
+}
+.phone-widget .contact-options-list {
+    justify-content: normal;
+}

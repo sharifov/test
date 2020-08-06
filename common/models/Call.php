@@ -1077,9 +1077,20 @@ class Call extends \yii\db\ActiveRecord
             }
 
             if ($userListNotifications) {
+
+                $from = $this->c_from;
+                $to = $this->c_to;
+
+                if (UserCallIdentity::canParse($from) && ($fromUserId = UserCallIdentity::parseUserId($from)) && ($fromUser = Employee::find()->andWhere(['id' => $fromUserId])->asArray()->one())) {
+                    $from = $fromUser['nickname'];
+                }
+                if (UserCallIdentity::canParse($to) && ($toUserId = UserCallIdentity::parseUserId($to)) && ($toUser = Employee::find()->andWhere(['id' => $toUserId])->asArray()->one())) {
+                    $to = $toUser['nickname'];
+                }
+
                 $holdMessage = $changedAttributes['c_status_id'] === self::STATUS_HOLD ? ' Hold' : '';
                 $title = 'Missed' . $holdMessage . ' Call (' . $this->getSourceName() . ')';
-                $message = 'Missed' . $holdMessage . ' Call (' . $this->getSourceName() . ')  from ' . $this->c_from . ' to ' . $this->c_to;
+                $message = 'Missed' . $holdMessage . ' Call (' . $this->getSourceName() . ')  from ' . $from . ' to ' . $to;
                 if ($this->c_lead_id && $this->cLead) {
                     $message .= ', Lead (Id: ' . Purifier::createLeadShortLink($this->cLead) . ')';
                 }

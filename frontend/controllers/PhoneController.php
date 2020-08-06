@@ -1317,16 +1317,18 @@ class PhoneController extends FController
 
     public function actionCreateInternalCall()
     {
-        $result = ['error' => false, 'message' => ''];
-
         try {
+
             $createdUser = Auth::user();
-            $this->guardUserIsFree($createdUser->id);
+            $key = 'call_user_to_user_' . $createdUser->id;
+            $this->guardFromUserIsFree($createdUser->id, $key);
 
             $user_id = (int)Yii::$app->request->post('user_id');
-            $this->guardValidUser($user_id);
+            $this->guardValidToUser($user_id);
 
             $this->guardPermissionUserToUserCall($createdUser->id, $user_id);
+
+            Yii::$app->cache->set($key, (time() + 10), 10);
 
             $result = Yii::$app->communication->callToUser(
                 UserCallIdentity::getClientId($createdUser->id),
@@ -1371,18 +1373,57 @@ class PhoneController extends FController
         return $this->asJson($result);
     }
 
-    private function guardPermissionUserToUserCall($fromUserId, $toUserId): void
+    private function guardPermissionUserToUserCall(int $fromUserId, int $toUserId): void
     {
+        if ($fromUserId === $toUserId) {
+            throw new \DomainException('Invalid To userId');
+        }
         //todo
     }
 
-    private function guardValidUser($userId): void
+    private function guardValidToUser(int $userId): void
     {
-        //todo
+        if (!$user = Employee::findOne(['id' => $userId])) {
+            throw new \DomainException('Not found user. Id: ' . $userId);
+        }
+        if (!$user->isOnline()) {
+            throw new \DomainException('User ' . ($user->nickname ?: $user->full_name) . ' is offline');
+        }
+        if (!$user->isCallFree()) {
+            throw new \DomainException('User ' . ($user->nickname ?: $user->full_name) . ' is occupied');
+        }
     }
 
-    private function guardUserIsFree($userId): void
+    private function guardFromUserIsFree($userId, $key): void
     {
-        //todo
+        if ($result = Yii::$app->cache->get($key)) {
+            throw new \DomainException('Please wait ' . abs($result - time()) . ' seconds.');
+        }
+    }
+
+    public function actionGetUserByPhone(): Response
+    {
+        try {
+            $phone = (string)Yii::$app->request->post('phone');
+            if ($uPp = UserProjectParams::find()->byPhone($phone, false)->limit(1)->one()) {
+                $result = [
+                    'error' => false,
+                    'userId' => $uPp->upp_user_id,
+                    'nickname' => $uPp->uppUser->nickname ?: $uPp->uppUser->full_name,
+                ];
+            } else {
+                $result = [
+                    'error' => false,
+                    'userId' => null
+                ];
+            }
+        } catch (\Throwable $e) {
+            $result = [
+                'error' => true,
+                'message' => $e->getMessage(),
+            ];
+        }
+
+        return $this->asJson($result);
     }
 }

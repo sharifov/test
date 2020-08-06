@@ -54,6 +54,12 @@ if (!Auth::can('PhoneWidget_Dialpad')) {
                     'readonly' => !$canDialpad,
                 ]);
 
+                echo Html::hiddenInput('q_value', null, [
+                    'id' => 'call-pane__dial-number-value',
+                    'data-user-id' => null,
+                    'data-phone' => null,
+                ]);
+
                 if ($canDialpadSearch) {
                     ActiveForm::end();
                 }

@@ -167,11 +167,14 @@ let PhoneWidgetContacts = function () {
             '<div id="collapse' + contact['id'] + '" class="collapse collapsible-container" aria-labelledby="headingOne" data-parent="#contacts-tab">' +
             '<ul class="contact-options-list">' +
             '<li class="contact-options-list__option js-toggle-contact-info" data-contact="' + encode(contact) + '">' +
-            '<i class="fa fa-user"></i>' +
-            '<span>View</span>' +
-            '</li>' +
-            '</ul>' +
+            '<i class="fa fa-user"></i>';
+
+        if (contact.isInternal) {
+            content += '<li class="contact-options-list__option dial-to-user contact-dial-to-user" data-contact="' + encode(contact) + '"> <i class="fa fa-phone"> </i></li>';
+        }
+        content +=  '</ul>' +
             '<ul class="contact-full-info">';
+
         if (contact['phones']) {
             contact['phones'].forEach(function(phone, index) {
                 content += getPhoneItem(phone, index, contact);
@@ -350,9 +353,13 @@ let PhoneWidgetContacts = function () {
             '<input readonly type="text" class="form-control" value="' + phone + '" autocomplete="off">' +
             '</div>' +
             '<ul class="actions-list">' +
-            '<li class="actions-list__option actions-list__option--phone js-call-tab-trigger">' +
-            '<i class="fa fa-phone phone-dial-contacts" data-phone="' + phone + '" data-title="' + contact['name'] + '"></i>' +
-            '</li>' +
+            '<li class="actions-list__option actions-list__option--phone js-call-tab-trigger">';
+
+        let dataUserId = contact.isInternal ? contact.id : '';
+
+        content += '<i class="fa fa-phone phone-dial-contacts" data-user-id="' + dataUserId + '" data-phone="' + phone + '" data-title="' + contact['name'] + '"></i>';
+
+        content += '</li>' +
             '<li title="' + titleAccessGetMessages + '" class="actions-list__option js-trigger-messages-modal' + disabledClass + '" ' +
                     'data-contact-id="' + contact['id'] + '" data-contact-phone="' + phone + '" data-contact-type="' + contact['type'] + '">' +
             '<i class="fa fa-comment-alt"></i>' +
@@ -567,6 +574,15 @@ $(document).on('click', ".js-toggle-contact-info", function () {
     let data = PhoneWidgetContacts.viewContact(contact);
     $(".widget-phone__contact-info-modal").html(data);
     $(".widget-phone__contact-info-modal").show();
+});
+
+$(document).on('click', ".contact-dial-to-user", function () {
+    let contact = PhoneWidgetContacts.decodeContact($(this).data('contact'));
+    insertPhoneNumber(contact.name, '', contact.id,'');
+    $('.phone-widget__header-actions a[data-toggle-tab]').removeClass('is_active');
+    $('.phone-widget__tab').removeClass('is_active');
+    $('.phone-widget__header-actions a[data-toggle-tab="tab-phone"]').addClass('is_active');
+    $('#tab-phone').addClass('is_active');
 });
 
 // $('.js-add-to-conference').on('click', function() {

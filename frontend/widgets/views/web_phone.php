@@ -551,6 +551,10 @@ use yii\helpers\Html;
 
     function acceptInternalCall(call)
     {
+        if (call.isSentAcceptCallRequestState()) {
+            return;
+        }
+
         let callSid = call.data.callSid;
         let connection = incomingConnections.get(callSid);
 
@@ -774,12 +778,14 @@ use yii\helpers\Html;
                 });
 
                 device.on('error', function (error) {
+                    freeDialButton();
                     updateAgentStatus(connection, false, 1);
                     log('Twilio.Device Error: ' + error.message);
                     incomingSoundOff();
                 });
 
                 device.on('connect', function (conn) {
+                    freeDialButton();
                     incomingConnections.remove(conn.parameters.CallSid);
 
                     // currentConnection = conn;
@@ -876,6 +882,7 @@ use yii\helpers\Html;
                 });
 
                 device.on('disconnect', function (conn) {
+                    freeDialButton();
                     incomingConnections.remove(conn.parameters.CallSid);
 
                     //updateAgentStatus(connection, true);
@@ -983,6 +990,7 @@ use yii\helpers\Html;
 
 
                 device.on('cancel', function (conn) {
+                    freeDialButton();
                     incomingConnections.remove(conn.parameters.CallSid);
 
                     //var  access = updateAgentStatus(conn, true, true);

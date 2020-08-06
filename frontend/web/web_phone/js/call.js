@@ -838,12 +838,13 @@ var PhoneWidgetCall = function () {
         function phoneDialInsertNumber(self) {
             let phone = $(self).data('phone');
             let title = $(self).data('title');
+            let userId = $(self).data('user-id');
             $(".widget-phone__contact-info-modal").hide();
             $('.phone-widget__header-actions a[data-toggle-tab]').removeClass('is_active');
             $('.phone-widget__tab').removeClass('is_active');
             $('.phone-widget__header-actions a[data-toggle-tab="tab-phone"]').addClass('is_active');
             $('#tab-phone').addClass('is_active');
-            insertPhoneNumber(phone, title);
+            insertPhoneNumber(phone, title, userId, phone);
         }
     }
 
@@ -1067,7 +1068,8 @@ var PhoneWidgetCall = function () {
                 '<i class="far fa-user ' + contact['user_status_class'] + ' "></i>' +
                 '</div>';
         }
-        let content = '<li class="calls-history__item contact-info-card call-contact-card" data-phone="' + contact['phone'] + '" data-title="' + contact['title'] + '">' +
+        let dataUserId = contact.type === 3 ? contact.id : '';
+        let content = '<li class="calls-history__item contact-info-card call-contact-card" data-user-id="' + dataUserId + '" data-phone="' + contact['phone'] + '" data-title="' + contact['title'] + '">' +
             '<div class="collapsible-toggler">' +
             contactIcon
             + '<div class="contact-info-card__details">' +
@@ -1096,7 +1098,8 @@ var PhoneWidgetCall = function () {
     $(document).on('click', "li.call-contact-card", function () {
         let phone = $(this).data('phone');
         let title = $(this).data('title');
-        insertPhoneNumber(phone, title);
+        let userId = $(this).data('user-id');
+        insertPhoneNumber(phone, title, userId, phone);
         $('.suggested-contacts').removeClass('is_active');
     });
 })();

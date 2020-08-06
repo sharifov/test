@@ -29,6 +29,7 @@ $ajaxCheckUserForCallUrl = Url::to(['/phone/ajax-check-user-for-call']);
 $ajaxBlackList = Url::to(['/phone/check-black-phone']);
 $ajaxCreateCallUrl = Url::to(['/phone/ajax-create-call']);
 $createInternalCallUrl = Url::to(['/phone/create-internal-call']);
+$getUserByPhoneUrl = Url::to(['/phone/get-user-by-phone']);
 
 $conferenceBase = 0;
 if (isset(Yii::$app->params['settings']['voip_conference_base'])) {
@@ -50,23 +51,63 @@ $js = <<<JS
     $(document).on('click', '#btn-new-make-call', function(e) {
         e.preventDefault();
         
-        createInternalCall();
-        return false;
+        let toUserId = parseInt($('#call-pane__dial-number-value').attr('data-user-id'));  
         
-		let phone_to = $('#call-pane__dial-number').val();
-		let case_id = $(this).attr('data-case-id') || null;
-		let lead_id = $(this).attr('data-lead-id') || null;
-		
-		if (!phone_to) {
+        if (toUserId) {
+            let nickname = $('#call-to-label').html();
+            if (!nickname) {
+             	nickname = $('#call-pane__dial-number').val();
+            }
+            reserveDialButton();
+            createInternalCall(toUserId, nickname);
+            return false;
+        }
+        
+        let phone_to = $('#call-pane__dial-number').val();
+        
+        if (!phone_to) {
 			new PNotify({title: "Phone Widget", type: "error", text: 'Phone number not entered', hide: true});
 			return false;
 		}
-		
-		var reg = new RegExp('^[+]?[0-9]{9,15}$');
+        
+        var reg = new RegExp('^[+]{1}[0-9]{9,15}$');
 		if (!reg.test(phone_to)) {
 		    new PNotify({title: "Phone Widget", type: "error", text: 'Entered phone number is not correct. Phone number should contain only numbers and +', hide: true});
 			return false;	
 		}
+		
+		reserveDialButton();
+		let self = this;
+	    $.ajax({
+			type: 'post',
+			data: {
+				'phone': phone_to
+			},
+			url: '{$getUserByPhoneUrl}'
+		 })
+			.done(function (data) {
+				if (data.error) {
+					createNotify('Create Call', data.message, 'error');
+					freeDialButton();
+					return false;
+				}
+				if (data.userId) {
+					 createInternalCall(data.userId, data.nickname);
+					 return false;
+				}
+				createExternalCall(phone_to, self);
+			})
+			.fail(function () {
+				createNotify('Create Call', 'Server error', 'error');
+				freeDialButton();
+			})
+		
+    });
+    
+    function createExternalCall(phone_to, self) {
+        
+        let case_id = $(self).attr('data-case-id') || null;
+	    let lead_id = $(self).attr('data-lead-id') || null;
 		
         $.post('{$ajaxCheckUserForCallUrl}', {user_id: userId}, function(data) {
             
@@ -87,6 +128,7 @@ $js = <<<JS
 								};
 								$.post('{$ajaxCreateCallUrl}', createCallParams, function(data) {
 									if (data.error) {
+									    freeDialButton();
 										var text = 'Error. Try again later';
 										if (data.message) {
 											text = data.message;
@@ -99,25 +141,15 @@ $js = <<<JS
 							} else { 
 								let params = {'To': phone_to, 'FromAgentPhone': phone_from, 'project_id': project_id, 'lead_id': lead_id, 'case_id': case_id, 'c_type': 'call-web', 'c_user_id': userId, 'is_conference_call': {$conferenceBase}};						
 								webPhoneParams = params;
-								let PhoneNumbersData = phoneNumbers.getPrimaryData.value ? phoneNumbers.getPrimaryData : phoneNumbers.getData;
 								createNotify('Calling', 'Calling ' + params.To + '...', 'success');
 								updateAgentStatus(connection, false, 0);
 								connection = device.connect(params);
-								// 	 PhoneWidgetCall.requestOutgoingCall({  
-								// 		'callSid': '',
-								// 		'type': 'Outgoing',
-								// 		'status': 'Dialing',  
-								// 		'duration': 0,
-								// 		'project': PhoneNumbersData.project,
-								// 		'source': '',
-								// 		'contact': {
-								// 			'phone': data.phone,
-								// 			'name': data.callToName
-								// 		}
-								// 	});   
 							}
-						}      
+						} else {
+						    freeDialButton();
+						}
                     } else {
+                        freeDialButton();
                         var text = 'Error. Try again later';
                         if (data.message) {
                             text = data.message;
@@ -129,40 +161,43 @@ $js = <<<JS
                 }, 'json');
 					
             } else {
-								widgetIcon.update({
-									type: 'incoming',
-									timer: true,
-									text: null,
-									currentCalls: null,
-									status: 'online',
-									timerStamp: 0
-								});
-								alert('You have active call');
-								$('.call-pane').removeClass('is_active');
-								$('.call-pane-calling').addClass('is_active');
-								$(".call-pane__call-btns").addClass("is-on-call");
+				widgetIcon.update({
+					type: 'incoming',
+					timer: true,
+					text: null,
+					currentCalls: null,
+					status: 'online',
+					timerStamp: 0
+				});
+				alert('You have active call');
+				$('.call-pane').removeClass('is_active');
+				$('.call-pane-calling').addClass('is_active');
+				$(".call-pane__call-btns").addClass("is-on-call");
+				freeDialButton();
 
                 return false;
             }
         }, 'json');
-        
-    });
+    }
     
-    function createInternalCall() {
-      $.ajax({
+    function createInternalCall(toUserId, nickname) {
+        createNotify('Calling', 'Calling ' + nickname + ' ...', 'success');
+        $.ajax({
                 type: 'post',
                 data: {
-                    'user_id': 295
+                    'user_id': toUserId
                 },
                 url: '{$createInternalCallUrl}'
             })
                 .done(function (data) {
                     if (data.error) {
                         createNotify('Create Internal Call', data.message, 'error');
+                        freeDialButton();
                     }
                 })
                 .fail(function () {
                     createNotify('Create Internal Call', 'Server error', 'error');
+                    freeDialButton();
                 })
     }
 JS;
