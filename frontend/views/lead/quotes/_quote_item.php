@@ -281,13 +281,7 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
 				<i class="fa fa-exchange"></i>
 			</span>
 
-            <?php $penaltyInfo = $model->getPenaltiesInfo() ? QuoteHelper::formattedPenalties($model->getPenaltiesInfo()) : 'No penalty information' ?>
-            <span class="quote__badge <?php echo $model->getPenaltiesInfo() ? 'quote__badge--warning' : 'quote__badge--disabled' ?>"
-                data-toggle="tooltip"
-                data-html="true"
-			    title="<?php echo $penaltyInfo ?>">
-				    <i class="fa fa-expand"></i>
-			</span>
+			<?php echo QuoteHelper::formattedPenalties($model->getPenaltiesInfo()) ?>
 
             <?php echo QuoteHelper::formattedMetaRank($model->getMetaInfo())?>
 

@@ -318,7 +318,8 @@ $totalAmountQuote = 0.0;
                             <?php $baggageInfo = FlightQuoteHelper::getBaggageInfo($flightQuote); ?>
                             <?php $hasAirportChange = FlightQuoteHelper::hasAirportChange($flightQuote); ?>
                             <?php $ticketSegments = FlightQuoteHelper::getTicketSegments($flightQuote); ?>
-                            <?php $meta = (new FlightQuoteHelper())->getMetaInfo($flightQuote); ?>
+                            <?php $meta = FlightQuoteHelper::getMetaInfo($flightQuote); ?>
+                            <?php $penalties = FlightQuoteHelper::getPenaltiesInfo($flightQuote); ?>
 
                             <?php if($ticketSegments):?>
                                 <span title="Separate Ticket (<?=count($ticketSegments)?>)" data-toggle="tooltip">
@@ -350,6 +351,8 @@ $totalAmountQuote = 0.0;
                                         <i class="fa fa-exchange fa-border"></i>
                                 </span>
                             <?php endif; ?>
+
+                            <?php echo FlightQuoteHelper::formattedPenalties($penalties)?>
 
                             <?php echo FlightQuoteHelper::formattedRanking($meta)?>
                             <?php echo FlightQuoteHelper::formattedCheapest($meta)?>
