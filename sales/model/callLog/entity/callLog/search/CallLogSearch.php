@@ -231,12 +231,25 @@ class CallLogSearch extends CallLog
 
         $clientTableName = Client::tableName();
         $query->addSelect(["if (" . $clientTableName . ".first_name is not null, if (" . $clientTableName . ".last_name is not null, concat(" . $clientTableName . ".first_name, ' ', " . $clientTableName . ".last_name), " . $clientTableName . ".first_name), null) as client_name", 'cn_note as callNote']);
-		$clientPrefix  = UserCallIdentity::getClientPrefix();
+
+		$clientPrefix  = UserCallIdentity::getFullPrefix();
+		$length = strlen($clientPrefix) + 1;
+		//todo remove after regexp_substr will be available
+        $oldClientPrefix = 'client:seller';
+		$lengthOld = strlen($oldClientPrefix) + 1;
+
+//		$query->addSelect([
+//		    "IF(
+//				call_log.cl_type_id = 1,
+//				if (cl_phone_to regexp '" . $clientPrefix . "' = 1, REGEXP_SUBSTR(cl_phone_to, '[[:digit:]]+'), null),
+//				if (cl_phone_from regexp '" . $clientPrefix . "' = 1, REGEXP_SUBSTR(cl_phone_from, '[[:digit:]]+'), null)
+//            ) AS user_id"
+//        ]);
 		$query->addSelect([
 		    "IF(
 				call_log.cl_type_id = 1, 
-				if (cl_phone_to regexp '" . $clientPrefix . "' = 1, REGEXP_SUBSTR(cl_phone_to, '[[:digit:]]+'), null), 
-				if (cl_phone_from regexp '" . $clientPrefix . "' = 1, REGEXP_SUBSTR(cl_phone_from, '[[:digit:]]+'), null)
+				if (cl_phone_to regexp '" . $clientPrefix . "' = 1, substring(cl_phone_to from " . $length . "), if (cl_phone_to regexp '" . $oldClientPrefix . "' = 1, substring(cl_phone_to from " . $lengthOld . "),null)), 
+				if (cl_phone_from regexp '" . $clientPrefix . "' = 1, substring(cl_phone_from from " . $length . "), if (cl_phone_from regexp '" . $oldClientPrefix . "' = 1, substring(cl_phone_from from " . $lengthOld . "),null))
             ) AS user_id"
         ]);
 		$query->leftJoin($clientTableName, $clientTableName . '.id = cl_client_id');
