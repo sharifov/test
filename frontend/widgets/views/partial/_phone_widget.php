@@ -412,8 +412,8 @@ use yii\web\View;
     </div>
     <div class="additional-bar__body tabs">
         <ul class="tabs__nav tab-nav">
-            <li><a href="#tab-device" class="tab-trigger active-tab">Devices</a></li>
-            <li><a href="#tab-logs" class="tab-trigger">Logs</a></li>
+            <li class="wp-tab-device"><a href="#tab-device" class="tab-trigger active-tab">Devices</a></li>
+            <li><a href="#tab-logs" class="tab-trigger wp-devices-tab-log">Logs</a></li>
         </ul>
         <ul class="tabs__container tab-container">
             <li class="tabs__item" id="tab-device">
