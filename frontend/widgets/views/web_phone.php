@@ -768,8 +768,8 @@ use yii\helpers\Html;
                 //console.log('Token: ' + data.token);
                 device = new Twilio.Device(data.token, {codecPreferences: ['opus', 'pcmu'], closeProtection: true, enableIceRestart: true, enableRingingState: false, debug: false, allowIncomingWhileBusy: false});
 
-                // device.audio.incoming(false);
-                // device.audio.disconnect(false);
+                device.audio.incoming(false);
+                device.audio.disconnect(false);
 
                 //console.log([data, device]);
                 device.on('ready', function (device) {
@@ -1042,7 +1042,6 @@ use yii\helpers\Html;
     var incomingSoundInterval = null;
 
     function startTimerSoundIncomingCall() {
-        return;
         incomingSoundInterval = setInterval(function () {
             incomingAudio.play();
             clearInterval(incomingSoundInterval);
@@ -1050,7 +1049,6 @@ use yii\helpers\Html;
     }
 
     function incomingSoundOff() {
-        return;
         clearInterval(incomingSoundInterval);
         incomingAudio.pause();
     }

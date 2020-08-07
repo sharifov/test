@@ -131,15 +131,13 @@ function soundNotification(fileName = 'button_tiny', volume = 0.3) {
 }
 
 function soundDisconnect() {
-    return;
     soundNotification('disconnect_sound', 0.3);
 }
 
 function soundConnect() {
-    return;
-    soundNotification('connect_sound', 0.3);
+    soundNotification('connect_sound', 0.99);
 }
 
-let incomingAudio = new Audio('/js/sounds/incoming_sound.mp3');
+let incomingAudio = new Audio('/js/sounds/incoming_call.mp3');
 incomingAudio.volume = 0.3;
 incomingAudio.loop = true;
