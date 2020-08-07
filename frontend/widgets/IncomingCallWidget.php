@@ -13,6 +13,7 @@ use common\models\Employee;
 use common\models\Notifications;
 use common\models\UserCallStatus;
 use sales\auth\Auth;
+use sales\helpers\setting\SettingHelper;
 use sales\model\conference\useCase\DisconnectFromAllActiveClientsCreatedConferences;
 use sales\model\conference\useCase\PrepareCurrentCallsForNewCall;
 use sales\model\conference\useCase\ReturnToHoldCall;
@@ -55,6 +56,10 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
     {
         /** @var Employee $userModel */
         $userModel = \Yii::$app->user->identity;
+
+		if (!SettingHelper::isOriginalPhoneWidgetEnabled()) {
+			return '';
+		}
 
         if(!$userModel) {
             return '';

@@ -40,4 +40,9 @@ class SettingHelper
     {
         return \Yii::$app->params['settings']['client_chat_real_time_monitoring'] ?? false;
     }
+
+    public static function isOriginalPhoneWidgetEnabled(): bool
+	{
+		return \Yii::$app->params['settings']['enable_original_phone_widget'] ?? true;
+	}
 }

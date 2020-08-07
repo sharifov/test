@@ -52,7 +52,7 @@ use yii\helpers\Html;
                     </div>
                     <div class="contact-info-card__line history-details">
                         <span class="contact-info-card__call-type"><?= CallLogType::getName($callType) ?></span>
-<!--                        <small class="contact-info-card__call-length">--><?php // Yii::$app->formatter->asDuration($call['c_call_duration'] ?? 0) ?><!--</small>-->
+                        <small><i class="contact-info-card__call-info fa fa-info btn-history-call-info" data-call-sid="<?= $call['cl_call_sid'] ?>"> </i></small>
                     </div>
                     <?php if ($call['callNote']): ?>
                     <div class="contact-info-card__line history-details">

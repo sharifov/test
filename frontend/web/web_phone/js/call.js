@@ -61,6 +61,9 @@ var PhoneWidgetCall = function () {
         contactInfoClickEvent();
         holdClickEvent();
         hangupClickEvent();
+        callLogInfoEvent();
+        callInfoEvent();
+        clientInfoEvent();
         insertPhoneNumberEvent();
 
         loadCurrentQueueCalls();
@@ -762,6 +765,43 @@ var PhoneWidgetCall = function () {
             }
 
             callRequester.hangupOutgoingCall(call);
+        });
+    }
+
+    function callLogInfoEvent() {
+        $(document).on('click', '.btn-history-call-info', function(e) {
+            e.preventDefault();
+            let callSid = $(this).attr('data-call-sid');
+            if (typeof callSid === 'undefined') {
+                createNotify('Call Info', 'Not found Call Sid', 'error');
+                return false;
+            }
+            callRequester.callLogInfo(callSid);
+        });
+    }
+
+    function callInfoEvent() {
+        $(document).on('click', '.cw-btn-call-info', function(e) {
+            e.preventDefault();
+            let callSid = $(this).attr('data-call-sid');
+            if (typeof callSid === 'undefined') {
+                createNotify('Call Info', 'Not found Call Sid', 'error');
+                return false;
+            }
+            callRequester.callInfo(callSid);
+        });
+    }
+
+    function clientInfoEvent() {
+        $(document).on('click', '.cw-btn-client-info', function(e) {
+            e.preventDefault();
+            let clientId = $(this).attr('data-client-id');
+            let isClient = $(this).attr('data-is-client');
+            if (typeof clientId === 'undefined') {
+                createNotify('Client Info', 'Not found Client ID', 'error');
+                return false;
+            }
+            callRequester.clientInfo(clientId, isClient === 'true');
         });
     }
 

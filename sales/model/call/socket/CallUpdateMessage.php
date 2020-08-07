@@ -13,7 +13,7 @@ use sales\model\phoneList\entity\PhoneList;
 
 class CallUpdateMessage
 {
-    public function create(Call $call, bool $isChangedStatus): array
+    public function create(Call $call, bool $isChangedStatus, int $userId): array
     {
         $conferenceBase = (bool)(\Yii::$app->params['settings']['voip_conference_base'] ?? false);
         $fromInternal = PhoneList::find()->byPhone($call->c_from)->enabled()->exists();
@@ -46,7 +46,7 @@ class CallUpdateMessage
                 }
             }
         } else {
-            $name = $fromInternal ? $call->getCallerName($call->isIn() ? $call->c_from : $call->c_to) : 'ClientName';
+            $name = $fromInternal ? $call->getCallerName($call->isIn() ? $call->c_from : $call->c_to) : ($call->c_client_id ? $call->cClient->getFullName() : 'ClientName');
         }
 
         if ($call->isInternal() || ($call->currentParticipant && $call->currentParticipant->isUser())) {
@@ -134,6 +134,8 @@ class CallUpdateMessage
             }
         }
 
+        $auth = \Yii::$app->authManager;
+
         return [
             'id' => $callId,
             'callSid' => $callSid,
@@ -157,9 +159,14 @@ class CallUpdateMessage
             'source' => $source,
             'isEnded' => $call->isEnded(),
             'contact' => [
+                'id' => $call->c_client_id,
                 'name' => $name,
                 'phone' => $phone,
                 'company' => '',
+                'isClient' => $call->c_client_id ? $call->cClient->isClient() : false,
+                'canContactDetails' => $auth->checkAccess($userId, '/client/ajax-get-info'),
+                'canCallInfo' => $auth->checkAccess($userId, '/call/ajax-call-info'),
+                'callSid' => $callSid,
             ],
             'department' => $call->c_dep_id ? Department::getName($call->c_dep_id) : '',
             'queue' => Call::getQueueName($call),
