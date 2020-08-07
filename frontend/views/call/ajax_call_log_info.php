@@ -74,7 +74,7 @@ $this->title = 'Call Id: ' . $model->cl_id;
                         if (!$model->cl_client_id) {
                             return '';
                         }
-                        return $model->client->getFullName() . ' (' . $model->cl_client_id . ')';
+                        return $model->client->getShortName() . ' (' . $model->cl_client_id . ')';
                     },
                     'format' => 'raw'
                 ],

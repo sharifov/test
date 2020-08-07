@@ -118,7 +118,7 @@ $this->registerJs($js);
                         if (!$model->c_client_id) {
                             return '';
                         }
-                        return $model->cClient->getFullName() . ' (' . $model->c_client_id . ')';
+                        return $model->cClient->getShortName() . ' (' . $model->c_client_id . ')';
                     },
                     'format' => 'raw'
                 ],

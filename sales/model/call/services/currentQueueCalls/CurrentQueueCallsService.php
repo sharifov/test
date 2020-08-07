@@ -125,7 +125,7 @@ class CurrentQueueCallsService
         foreach ($queue as $call) {
 
             if ($call->isIn() || $call->isOut()) {
-                $name = $call->cClient ? $call->cClient->getFullName() : '------';
+                $name = $call->cClient ? $call->cClient->getShortName() : '------';
             } elseif ($call->isJoin() && ($parentJoin = $call->cParent) && $parentJoin->cCreatedUser) {
                 $name = $parentJoin->cCreatedUser->nickname;
             } else {
@@ -306,7 +306,7 @@ class CurrentQueueCallsService
                 'project' => $call->c_project_id ? $call->cProject->name : '',
                 'source' => $call->c_source_type_id ? $call->getSourceName() : '',
                 'phone' => $call->c_to,
-                'name' => $call->cClient ? $call->cClient->getFullName() : '------',
+                'name' => $call->cClient ? $call->cClient->getShortName() : '------',
                 'company' => '',
                 'department' => $call->c_dep_id ? Department::getName($call->c_dep_id) : '',
                 'queue' => '',
@@ -362,7 +362,7 @@ class CurrentQueueCallsService
                 'project' => $call->c_project_id ? $call->cProject->name : '',
                 'source' => $call->c_source_type_id ? $call->getSourceName() : '',
                 'phone' => $call->c_from,
-                'name' => $call->cClient ? $call->cClient->getFullName() : '------',
+                'name' => $call->cClient ? $call->cClient->getShortName() : '------',
                 'company' => '',
                 'department' => $call->c_dep_id ? Department::getName($call->c_dep_id) : '',
                 'queue' => Call::getQueueName($call),
@@ -423,7 +423,7 @@ class CurrentQueueCallsService
                 'project' => $call->c_project_id ? $call->cProject->name : '',
                 'source' => $call->c_source_type_id ? $call->getSourceName() : '',
                 'phone' => $phone,
-                'name' => $call->cClient ? $call->cClient->getFullName() : '------',
+                'name' => $call->cClient ? $call->cClient->getShortName() : '------',
                 'company' => '',
                 'department' => $call->c_dep_id ? Department::getName($call->c_dep_id) : '',
                 'queue' => Call::getQueueName($call),

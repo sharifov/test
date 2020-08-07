@@ -53,7 +53,7 @@ class ConferenceDataService
             $call = $participant->cpCall;
             $users[] = $call->c_created_user_id;
             if ($participant->isClient()) {
-                $name = $call->c_client_id ? $call->cClient->getFullName() : 'Name';
+                $name = $call->c_client_id ? $call->cClient->getShortName() : 'Name';
                 $avatar = strtoupper($name[0]);
                 $phone = '';
                 if ($call->isOut()) {

@@ -46,7 +46,7 @@ class CallUpdateMessage
                 }
             }
         } else {
-            $name = $fromInternal ? $call->getCallerName($call->isIn() ? $call->c_from : $call->c_to) : ($call->c_client_id ? $call->cClient->getFullName() : 'ClientName');
+            $name = $fromInternal ? $call->getCallerName($call->isIn() ? $call->c_from : $call->c_to) : ($call->c_client_id ? $call->cClient->getShortName() : 'ClientName');
         }
 
         if ($call->isInternal() || ($call->currentParticipant && $call->currentParticipant->isUser())) {

@@ -361,6 +361,11 @@ class Client extends ActiveRecord
 		return trim($this->last_name . ' ' . $this->first_name . ' ' . $this->middle_name);
 	}
 
+    public function getShortName(): string
+    {
+        return trim($this->first_name . ' ' . $this->last_name);
+	}
+
     public function isClient(): bool
     {
         return $this->cl_type_id === self::TYPE_CLIENT;
