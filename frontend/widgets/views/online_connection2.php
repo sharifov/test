@@ -59,7 +59,7 @@ $dtNow = date('Y-m-d H:i:s');
     <?php endif; ?>
 
 
-<?php if (UserMonitor::isAutologoutEnabled() && UserMonitor::isAutologoutShowMessage()): ?>
+<?php if (UserMonitor::isAutologoutEnabled()): ?>
     <?php Modal::begin([
         'id' => 'modal-autologout',
         'closeButton' => false,
@@ -69,7 +69,9 @@ $dtNow = date('Y-m-d H:i:s');
     ])?>
         <div class="text-center">
             <p>You are not active for a long time (<?=UserMonitor::autologoutIdlePeriodMin()?> min.). After a few seconds, the system will automatically log out.</p>
-            <h1 id="autologout-timer" class="text-danger">00:00</h1>
+            <?php if(UserMonitor::isAutologoutTimerSec()): ?>
+                <h1 id="autologout-timer" class="text-danger">00:00</h1>
+            <?php endif; ?>
             <p><b>Do you want to continue working?</b></p>
             <button class="btn btn-danger" id="btn-logout"><i class="fa fa-power-off"></i> LogOut</button>
             <button class="btn btn-success" id="btn-cancel-autologout"><i class="fa fa-check"></i> Continue working</button>
@@ -430,7 +432,7 @@ $this->registerJs($js, \yii\web\View::POS_READY, 'connection-js');
 
 if (UserMonitor::isAutologoutEnabled()) {
 
-    $isAutologoutShowMessage = UserMonitor::isAutologoutShowMessage();
+    $isAutologoutShowMessage = UserMonitor::isAutologoutShowMessage() ? 'true' : 'false';
     $isAutologoutTimerSec = UserMonitor::isAutologoutTimerSec();
 
     $js = <<<JS
@@ -480,9 +482,11 @@ function autoLogout() {
     // objDiv.attr('class', 'text-danger');
     // objDiv.find('i').attr('class', 'fa fa-power-off');
     
-    $('#autologout-timer').timer('remove').timer({countdown: true, format: '%M:%S', seconds: 0, duration: isAutologoutTimerSec + 's', callback: function() {
-		logout();
-	}}).timer('start');
+    if (isAutologoutTimerSec > 0) {
+        $('#autologout-timer').timer('remove').timer({countdown: true, format: '%M:%S', seconds: 0, duration: isAutologoutTimerSec + 's', callback: function() {
+            logout();
+        }}).timer('start');
+    }
     
     // console.log('autoLogout');
     if (isAutologoutShowMessage) {
