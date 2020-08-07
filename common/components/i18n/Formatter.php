@@ -43,6 +43,7 @@ use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use modules\qaTask\src\helpers\formatters\QaTaskFormatter;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesSourceType;
+use sales\helpers\PhoneFormatter;
 use sales\model\callLog\entity\callLog\CallLogCategory;
 use sales\model\callLog\entity\callLog\CallLogStatus;
 use sales\model\callLog\entity\callLog\CallLogType;
@@ -761,5 +762,14 @@ class Formatter extends \yii\i18n\Formatter
         }
 
         return Html::tag('i', '', ['class' => 'fa fa-user']) . ' ' . Html::encode($name);
+    }
+
+    public function asPhoneOrNickname($value): string
+    {
+        if (!$value) {
+            return $this->nullDisplay;
+        }
+
+        return PhoneFormatter::getPhoneOrNickname($value);
     }
 }

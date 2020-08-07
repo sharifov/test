@@ -6,6 +6,7 @@ use common\components\jobs\CallPriceJob;
 use common\components\jobs\CheckClientCallJoinToConferenceJob;
 use common\components\purifier\Purifier;
 use common\models\query\CallQuery;
+use sales\helpers\PhoneFormatter;
 use sales\helpers\UserCallIdentity;
 use sales\model\call\helper\CallHelper;
 use frontend\widgets\newWebPhone\call\socket\MissedCallMessage;
@@ -1078,15 +1079,8 @@ class Call extends \yii\db\ActiveRecord
 
             if ($userListNotifications) {
 
-                $from = $this->c_from;
-                $to = $this->c_to;
-
-                if (UserCallIdentity::canParse($from) && ($fromUserId = UserCallIdentity::parseUserId($from)) && ($fromUser = Employee::find()->andWhere(['id' => $fromUserId])->asArray()->one())) {
-                    $from = $fromUser['nickname'];
-                }
-                if (UserCallIdentity::canParse($to) && ($toUserId = UserCallIdentity::parseUserId($to)) && ($toUser = Employee::find()->andWhere(['id' => $toUserId])->asArray()->one())) {
-                    $to = $toUser['nickname'];
-                }
+                $from = PhoneFormatter::getPhoneOrNickname($this->c_from);
+                $to = PhoneFormatter::getPhoneOrNickname($this->c_to);
 
                 $holdMessage = $changedAttributes['c_status_id'] === self::STATUS_HOLD ? ' Hold' : '';
                 $title = 'Missed' . $holdMessage . ' Call (' . $this->getSourceName() . ')';

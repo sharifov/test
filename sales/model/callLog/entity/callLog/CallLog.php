@@ -137,8 +137,6 @@ class CallLog extends \yii\db\ActiveRecord
             'cl_client_id' => 'Client',
             'cl_price' => 'Price',
             'cl_conference_id' => 'Conference Id',
-            'formattedFrom' => 'From',
-            'formattedTo' => 'To',
         ];
     }
 
@@ -275,22 +273,4 @@ class CallLog extends \yii\db\ActiveRecord
 
 		return '<i class="' . $icon . '"></i>';
 	}
-
-    public function getFormattedFrom(): string
-    {
-        return $this->formatPhone($this->cl_phone_from);
-	}
-
-    public function getFormattedTo(): string
-    {
-        return $this->formatPhone($this->cl_phone_to);
-	}
-
-	private function formatPhone(?string $phone): ?string
-    {
-        if (UserCallIdentity::canParse($phone) && ($userId = UserCallIdentity::parseUserId($phone)) && ($user = Employee::find()->select(['nickname'])->andWhere(['id' => $userId])->asArray()->one())) {
-            return $user['nickname'];
-        }
-        return $phone;
-    }
 }

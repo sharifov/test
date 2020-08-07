@@ -63,93 +63,87 @@ $this->registerJs($js);
     </h2>
 
 
+    <?php if($model->recordingUrl):?>
+        <audio controls="controls" controlsList="nodownload" style="width: 100%;"><source src="<?=$model->recordingUrl?>" type="audio/mpeg"></audio>
+    <?php endif;?>
+
     <div class="col-md-6">
-        <?php if($model->recordingUrl):?>
-            <audio controls="controls" controlsList="nodownload" style="width: 100%;"><source src="<?=$model->recordingUrl?>" type="audio/mpeg"></>
-        <?php endif;?>
 
         <?= DetailView::widget([
             'model' => $model,
             'attributes' => [
-                [
-                    'attribute' => 'c_id',
-                    'value' => static function (\common\models\Call $model) {
-                        return Html::a($model->c_id, ['call/view2', 'id' => $model->c_id], ['target' => '_blank', 'data-pjax' => 0]);
-                    },
-                    'format' => 'raw'
-                ],
-                [
-                    'attribute' => 'c_project_id',
-                    'value' => static function (\common\models\Call $model) {
-                        return $model->cProject ? $model->cProject->name : '-';
-                    },
-                ],
-                'c_call_sid',
-                'c_parent_call_sid',
-                //'c_call_type_id',
-                [
-                    'attribute' => 'c_call_type_id',
-                    'value' => static function (\common\models\Call $model) {
-                        return $model->getCallTypeName();
-                    },
-                ],
-                [
-                    'attribute' => 'c_client_id',
-                    'value' => static function (\common\models\Call $model) {
-                        return  $model->c_client_id ?: '-';
-                    },
-                ],
-                'c_from',
-                'c_to',
-                'c_call_status',
-                //'c_forwarded_from',
-
-                //'c_parent_call_sid',
-
+                'c_id',
+                'cCreatedUser:userNickname:User',
+                'statusName:ntext:Status',
+                'callTypeName:ntext:Type',
+                'sourceName:ntext:Category',
+                'c_call_duration:ntext:Duration',
+                'c_from:phoneOrNickname',
+                'c_to:phoneOrNickname',
+                'c_created_dt:byUserDateTime',
+                'c_updated_dt:byUserDateTime',
             ],
         ]) ?>
     </div>
 
     <div class="col-md-6">
-    <?= DetailView::widget([
-        'model' => $model,
-        'attributes' => [
-            'c_caller_name',
-            'c_call_duration',
-            //'c_recording_url:url',
-            'c_recording_duration',
-            //'c_sequence_number',
-            'c_lead_id',
-            //'c_created_user_id',
-            [
-                'attribute' => 'c_created_user_id',
-                'value' => static function (\common\models\Call $model) {
-                    return  $model->cCreatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->cCreatedUser->username) : $model->c_created_user_id;
-                },
-                'format' => 'raw'
+        <?= DetailView::widget([
+            'model' => $model,
+            'attributes' => [
+                [
+                    'label' => 'Project',
+                    'attribute' => 'c_project_id',
+                    'value' => static function (Call $model) {
+                        if (!$model->c_project_id) {
+                            return '';
+                        }
+                        return Yii::$app->formatter->format($model->cProject, 'projectName');
+                    },
+                    'format' => 'raw'
+                ],
+                [
+                    'label' => 'Department',
+                    'attribute' => 'c_dep_id',
+                    'value' => static function (Call $model) {
+                        if (!$model->c_dep_id) {
+                            return '';
+                        }
+                        return Yii::$app->formatter->format($model->cDep, 'departmentName');
+                    },
+                    'format' => 'raw'
+                ],
+                [
+                    'attribute' => 'c_client_id',
+                    'value' => static function (Call $model) {
+                        if (!$model->c_client_id) {
+                            return '';
+                        }
+                        return $model->cClient->getFullName() . ' (' . $model->c_client_id . ')';
+                    },
+                    'format' => 'raw'
+                ],
+                [
+                    'label' => 'Lead',
+                    'value' => static function (Call $model) {
+                        if (!$model->cLead) {
+                            return '';
+                        }
+                        return Yii::$app->formatter->format($model->cLead, 'lead');
+                    },
+                    'format' => 'raw'
+                ],
+                [
+                    'label' => 'Case',
+                    'value' => static function (Call $model) {
+                        if (!$model->cCase) {
+                            return '';
+                        }
+                        return Yii::$app->formatter->format($model->cCase, 'case');
+                    },
+                    'format' => 'raw'
+                ],
             ],
-            //'c_created_dt',
-            [
-                'attribute' => 'c_created_dt',
-                'value' => static function (\common\models\Call $model) {
-                    return $model->c_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_created_dt)) : '-';
-                },
-                'format' => 'raw'
-            ],
-            [
-                'attribute' => 'c_updated_dt',
-                'value' => static function (\common\models\Call $model) {
-                    return $model->c_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->c_updated_dt)) : '-';
-                },
-                'format' => 'raw'
-            ],
-            //'c_com_call_id',
-            //'c_updated_dt',
-            //'c_project_id',
-            //'c_error_message',
-            'c_is_new:boolean',
-        ],
-    ]) ?>
+        ]) ?>
     </div>
 
 </div>
