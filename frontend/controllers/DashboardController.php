@@ -40,7 +40,7 @@ class DashboardController extends FController
      */
     public function actionIndex(): string
     {
-
+        return $this->dashboardAgent();
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
 

@@ -217,6 +217,15 @@ class UserConnection extends \yii\db\ActiveRecord
     }
 
     /**
+     * @param int $userId
+     * @return string
+     */
+    public static function getUserChannel(int $userId): string
+    {
+        return 'user-' . $userId;
+    }
+
+    /**
      * @return bool
      */
     public static function isIdleMonitorEnabled(): bool

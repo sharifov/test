@@ -27,7 +27,7 @@ $this->params['breadcrumbs'][] = $this->title;
         //'tableOptions' => ['class' => 'table table-bordered table-condensed table-hover'],
 
         'rowOptions' => static function (\common\models\UserConnection $model) {
-            if (!$model->uc_idle_state) {
+            if ($model->uc_idle_state) {
                 return ['class' => 'danger'];
             }
         },
@@ -69,7 +69,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
             ],
             'uc_ip',
-            'uc_window_state:boolean',
+            //'uc_window_state:boolean',
+            [
+                'class' => \common\components\grid\BooleanColumn::class,
+                'attribute' => 'uc_window_state',
+            ],
             [
                 'attribute' => 'uc_window_state_dt',
                 'value' => static function (\common\models\UserConnection $model) {
@@ -77,6 +81,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw',
             ],
+
+
             'uc_idle_state:boolean',
             [
                 'attribute' => 'uc_idle_state_dt',

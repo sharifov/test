@@ -12,7 +12,7 @@ class m200729_115607_add_columns_tbl_user_connection extends Migration
      */
     public function safeUp()
     {
-        $this->addColumn('{{%user_connection}}', 'uc_window_state', $this->boolean()->defaultValue(true));
+        $this->addColumn('{{%user_connection}}', 'uc_window_state', $this->boolean()->defaultValue(false));
         $this->addColumn('{{%user_connection}}', 'uc_window_state_dt', $this->dateTime());
         $this->addColumn('{{%user_connection}}', 'uc_idle_state', $this->boolean()->defaultValue(true));
         $this->addColumn('{{%user_connection}}', 'uc_idle_state_dt', $this->dateTime());

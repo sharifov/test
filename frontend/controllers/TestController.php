@@ -1795,6 +1795,11 @@ class TestController extends FController
         $airline = Yii::$app->travelServices->airportExport(0, 20000);
         VarDumper::dump($airline, 10, true);
     }
+
+    public function actionUserMonitor()
+    {
+        return $this->render('user-monitor');
+    }
 }
 
 
