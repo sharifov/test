@@ -220,7 +220,18 @@ class CallLogSearch extends CallLog
 			]
 		]);
 
-		$query->select(['cl_id', 'cl_call_sid', 'call_log.cl_type_id', 'cl_phone_from', 'cl_phone_to', 'cl_client_id', 'cl_call_created_dt', 'cl_status_id', 'cl_duration']);
+		$query->select([
+		    'cl_id',
+            'cl_call_sid',
+            'call_log.cl_type_id',
+            'cl_phone_from',
+            'cl_phone_to',
+            'cl_client_id',
+            'cl_call_created_dt',
+            'cl_status_id',
+            'cl_duration',
+            'cl_category_id',
+        ]);
 
         $clientTableName = Client::tableName();
         $query->addSelect(["if (" . $clientTableName . ".first_name is not null, if (" . $clientTableName . ".last_name is not null, concat(" . $clientTableName . ".first_name, ' ', " . $clientTableName . ".last_name), " . $clientTableName . ".first_name), null) as client_name", 'cn_note as callNote']);
@@ -249,14 +260,41 @@ class CallLogSearch extends CallLog
 		$query->leftJoin(CallNote::tableName(), new Expression('cn_id = (select cn_id from call_note where cn_call_id = cl_id order by cn_created_dt desc limit 1)'));
 		$query->andWhere(['cl_user_id' => $userId]);
 		$query->andWhere(['call_log.cl_type_id' => [Call::CALL_TYPE_IN, Call::CALL_TYPE_OUT]]);
-		$query->groupBy(['cl_id', 'cl_call_sid', 'call_log.cl_type_id', 'cl_phone_from', 'cl_phone_to', 'cl_client_id', 'cl_call_created_dt', 'cl_status_id', 'cl_duration', 'callNote', 'client_name', 'user_id']);
+		$query->groupBy([
+		    'cl_id',
+            'cl_call_sid',
+            'call_log.cl_type_id',
+            'cl_phone_from',
+            'cl_phone_to',
+            'cl_client_id',
+            'cl_call_created_dt',
+            'cl_status_id',
+            'cl_duration',
+            'callNote',
+            'client_name',
+            'user_id',
+            'cl_category_id',
+        ]);
 		$query->orderBy(['cl_call_created_dt' => SORT_DESC]);
 
 		$userTableName = Employee::tableName();
 		$q->select([
-                'cl_id', 'cl_call_sid', 'cl_type_id', 'cl_phone_from', 'cl_phone_to', 'cl_client_id', 'cl_call_created_dt', 'cl_status_id', 'cl_duration', 'callNote', 'client_name', 'user_id',  Employee::tableName() . '.nickname as nickname',
-                new Expression('if (client_name is not null, client_name, if (cl_type_id = 1, if(' . $userTableName . '.nickname is not null, ' . $userTableName . '.nickname, cl_phone_to), if(' . $userTableName . '.nickname is not null, ' . $userTableName . '.nickname, cl_phone_from))) as formatted'),
-            ])
+		    'cl_id',
+            'cl_call_sid',
+            'cl_type_id',
+            'cl_phone_from',
+            'cl_phone_to',
+            'cl_client_id',
+            'cl_call_created_dt',
+            'cl_status_id',
+            'cl_duration',
+            'callNote',
+            'client_name',
+            'user_id',
+            'cl_category_id',
+            Employee::tableName() . '.nickname as nickname',
+            new Expression('if (client_name is not null, client_name, if (cl_type_id = 1, if(' . $userTableName . '.nickname is not null, ' . $userTableName . '.nickname, cl_phone_to), if(' . $userTableName . '.nickname is not null, ' . $userTableName . '.nickname, cl_phone_from))) as formatted'),
+        ])
             ->from($query)
             ->leftJoin(Employee::tableName(), Employee::tableName() . '.id = user_id');
 

@@ -4,6 +4,7 @@
 
 use common\models\Call;
 use sales\auth\Auth;
+use sales\model\callLog\entity\callLog\CallLogCategory;
 use sales\model\callLog\entity\callLog\CallLogStatus;
 use sales\model\callLog\entity\callLog\CallLogType;
 use yii\helpers\Html;
@@ -51,7 +52,12 @@ use yii\helpers\Html;
                         <small class="contact-info-card__timestamp"><?= Yii::$app->formatter->asDate(strtotime($call['cl_call_created_dt']), 'php:h:i A') ?></small>
                     </div>
                     <div class="contact-info-card__line history-details">
-                        <span class="contact-info-card__call-type"><?= CallLogType::getName($callType) ?></span>
+                        <span class="contact-info-card__call-type">
+                            <?= CallLogType::getName($callType) ?>
+                            <?php if ($call['cl_category_id']): ?>
+                                 - <?= \common\models\Call::SOURCE_LIST[$call['cl_category_id']] ?? 'undefined' ?>
+                            <?php endif;?>
+                        </span>
                         <small><i class="contact-info-card__call-info fa fa-info btn-history-call-info" data-call-sid="<?= $call['cl_call_sid'] ?>"> </i></small>
                     </div>
                     <?php if ($call['callNote']): ?>
