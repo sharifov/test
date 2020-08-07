@@ -281,29 +281,11 @@ JS;
 ?>
 
 <?php
-/*$this->registerJs(
-    '
+$js = <<<JS
+    $(document).on('pjax:end', function() {
+        $('[data-toggle="tooltip"]').tooltip({html:true});
+    });
+    $('[data-toggle="tooltip"]').tooltip({html:true});
+JS;
+$this->registerJs($js);
 
-        $(document).on("click","#btn-call-expert-form", function() {
-            $("#div-call-expert-form").toggle();
-            return false;
-        });
-                
-
-        $("#pjax-lead-call-expert").on("pjax:start", function () {
-            //$("#pjax-container").fadeOut("fast");
-            $("#btn-submit-call-expert").attr("disabled", true).prop("disabled", true).addClass("disabled");
-            $("#btn-submit-call-expert i").attr("class", "fa fa-spinner fa-pulse fa-fw")
-            
-        });
-
-        $("#pjax-lead-call-expert").on("pjax:end", function () {
-            //$("#pjax-container").fadeIn("fast");
-            //alert("end");
-            
-            $("#btn-submit-call-expert").attr("disabled", false).prop("disabled", false).removeClass("disabled");
-            $("#btn-submit-call-expert i").attr("class", "fa fa-plus");
-            
-        });
-    '
-);*/

@@ -2469,10 +2469,8 @@ class Quote extends \yii\db\ActiveRecord
 
     public function getPenaltiesInfo(): ?array
     {
-        if ($originSearchData = $this->getJsonOriginSearchData()) {
-            if (!empty($originSearchData['penalties'])) {
-                return $originSearchData['penalties'];
-            }
+        if (($originSearchData = $this->getJsonOriginSearchData()) && !empty($originSearchData['penalties'])) {
+            return $originSearchData['penalties'];
         }
         return null;
     }

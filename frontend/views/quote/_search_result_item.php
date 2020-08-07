@@ -281,14 +281,7 @@ if (!empty($baggagePerSegment)) {
 				<i class="fa fa-exchange"></i>
 			</span>
 
-            <?php $penaltyInfo = !empty($result['penalties']) ? QuoteHelper::formattedPenalties($result['penalties']) : 'No penalty information' ?>
-            <span class="quote__badge <?php echo !empty($result['penalties']) ? 'quote__badge--warning' : 'quote__badge--disabled' ?>"
-                data-toggle="tooltip"
-                data-html="true"
-                title="<?php echo $penaltyInfo ?>"
-			    data-original-title="<?php echo $penaltyInfo ?>">
-				    <i class="fa fa-expand"></i>
-			</span>
+			<?php echo QuoteHelper::formattedPenalties($result['penalties'] ?? null) ?>
 
 			<?php echo QuoteHelper::formattedMetaRank($meta) ?>
 
