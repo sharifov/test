@@ -10,6 +10,7 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\clientChatLead\entity\ClientChatLeadRepository;
 use sales\model\clientChatRequest\ClientShortInfo;
+use sales\model\visitorLog\useCase\CreateVisitorLog;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadPreferencesRepository;
 use sales\repositories\lead\LeadRepository;
@@ -172,6 +173,11 @@ class LeadManageService
 		$leadId = $this->leadRepository->save($lead);
 
 		$this->createLeadPreferences($leadId, $form->preferences);
+
+        if ($logId = (new CreateVisitorLog())->create($client, $lead)) {
+            $lead->setVisitorLog($logId);
+            $this->leadRepository->save($lead);
+        }
 
 		return $lead;
 
