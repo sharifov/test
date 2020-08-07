@@ -213,8 +213,6 @@ $clientInfoUrl = Url::to(['/client/ajax-get-info']);
 
 $ucStatus = $userCallStatus->us_type_id ?? UserCallStatus::STATUS_TYPE_OCCUPIED;
 
-$canDialpad = $canDialpad ? 'true' : 'false';
-
 $btnHoldShow = Auth::can('PhoneWidget_OnHold') ? 'true' : 'false';
 $btnTransferShow = Auth::can('PhoneWidget_Transfer') ? 'true' : 'false';
 
@@ -236,7 +234,6 @@ PhoneWidgetCall.init({
     'unHoldUrl': '$unHoldUrl',
     'returnHoldCallUrl': '$returnHoldCallUrl',
     'ajaxHangupUrl': '$ajaxHangupUrl',
-    'dialpadEnabled': $canDialpad,
     'btnHoldShow': $btnHoldShow,
     'btnTransferShow': $btnTransferShow,
     'sendDigitUrl': '$sendDigitUrl',    

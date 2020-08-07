@@ -45,7 +45,7 @@ use yii\helpers\Html;
                 </div>
                 <div class="contact-info-card__details">
                     <div class="contact-info-card__line history-details">
-                        <strong class="contact-info-card__name phone-dial-history"<?php if (Auth::can('PhoneWidget_Dialpad')) {echo ' style="cursor:pointer;"';} ?> data-title="<?= $title ?>" data-user-id="<?= $call['user_id'] ?>" data-phone="<?= Html::encode($phone) ?>">
+                        <strong class="contact-info-card__name phone-dial-history" style="cursor:pointer;" data-title="<?= $title ?>" data-user-id="<?= $call['user_id'] ?>" data-phone="<?= Html::encode($phone) ?>">
                             <?= Html::encode($call['formatted']) ?>
                         </strong>
                         <small class="contact-info-card__timestamp"><?= Yii::$app->formatter->asDate(strtotime($call['cl_call_created_dt']), 'php:h:i A') ?></small>

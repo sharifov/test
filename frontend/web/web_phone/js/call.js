@@ -9,8 +9,7 @@ var PhoneWidgetCall = function () {
         'callStatusUrl': '',
         'ajaxSaveCallUrl': '',
         'clearMissedCallsUrl': '',
-        'currentQueueCallsUrl': '',
-        'dialpadEnabled': true
+        'currentQueueCallsUrl': ''
     };
 
     let callRequester = new window.phoneWidget.requesters.CallRequester();
@@ -865,9 +864,7 @@ var PhoneWidgetCall = function () {
     function insertPhoneNumberEvent() {
         $(document).on('click', '.phone-dial-history', function(e) {
             e.preventDefault();
-            if (settings.dialpadEnabled) {
-                phoneDialInsertNumber(this);
-            }
+            phoneDialInsertNumber(this);
         });
 
         $(document).on('click', '.phone-dial-contacts', function(e) {
