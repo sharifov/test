@@ -23,6 +23,7 @@ use sales\events\lead\LeadQuoteCloneEvent;
 use sales\events\lead\LeadRejectEvent;
 use sales\events\lead\LeadSnoozeEvent;
 use sales\events\lead\LeadSoldEvent;
+use sales\events\lead\LeadStatusChangedEvent;
 use sales\events\lead\LeadTaskEvent;
 use sales\events\lead\LeadTrashEvent;
 use sales\listeners\lead\LeadBookedEventLogListener;
@@ -46,6 +47,7 @@ use sales\listeners\lead\LeadPendingEventLogListener;
 use sales\listeners\lead\LeadPreferencesUpdateCurrencyEventListener;
 use sales\listeners\lead\LeadProcessingEventLogListener;
 use sales\listeners\lead\LeadQcallAddListener;
+use sales\listeners\lead\LeadQcallProcessingListener;
 use sales\listeners\lead\LeadQuoteCloneEventListener;
 use sales\listeners\lead\LeadRejectEventLogListener;
 use sales\listeners\lead\LeadSendToGaListener;
@@ -95,6 +97,9 @@ return [
         LeadSendToGaListener::class,
     ],
 
+    LeadStatusChangedEvent::class => [
+        LeadQcallProcessingListener::class,
+    ],
     LeadPendingEvent::class => [LeadPendingEventLogListener::class],
     LeadProcessingEvent::class => [
         LeadProcessingEventLogListener::class,
