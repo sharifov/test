@@ -13,6 +13,7 @@
  *
  */
 
+use common\models\Call;
 use common\models\Lead;
 use frontend\models\CommunicationForm;
 use frontend\models\LeadForm;
@@ -498,6 +499,7 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                                             <?= Html::a('<i class="fa fa-phone"></i>', '#', ['class' => 'btn call-box__btn call-box__btn--call', 'id' => 'btn-start-web-call',
                                                 'data-project-id' => $leadForm->getLead()->project_id,
                                                 'data-lead-id' => $leadForm->getLead()->id,
+                                                'data-source-type-id' => Call::SOURCE_LEAD,
                                                 'disabled' => ($comForm->c_voice_status == 1 ? true : false)
                                             ]) ?>
 
@@ -750,6 +752,7 @@ $js = <<<JS
         var phone_number = $('#c_phone_number').val();
         var project_id = $(this).data('project-id');
         var lead_id = $(this).data('lead-id');
+        var source_type_id = $(this).data('source-type-id');
         
         //alert(phoneNumber);
         
@@ -760,7 +763,7 @@ $js = <<<JS
             $('#web-phone-dial-modal .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
             $('#web-phone-dial-modal').modal();
             
-            $.post(ajaxPhoneDialUrl, {'phone_number': phone_number, 'project_id': project_id, 'lead_id': lead_id},
+            $.post(ajaxPhoneDialUrl, {'phone_number': phone_number, 'project_id': project_id, 'lead_id': lead_id, 'source_type_id': source_type_id},
                 function (data) {
                     $('#web-phone-dial-modal .modal-body').html(data);
                 }

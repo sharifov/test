@@ -205,6 +205,8 @@ class Call extends \yii\db\ActiveRecord
     public const SOURCE_COACH           = 8;
     public const SOURCE_BARGE           = 9;
     public const SOURCE_INTERNAL        = 10;
+    public const SOURCE_LEAD        = 11;
+    public const SOURCE_CASE        = 12;
 
     public const SOURCE_LIST = [
         self::SOURCE_GENERAL_LINE => 'General Line',
@@ -217,6 +219,8 @@ class Call extends \yii\db\ActiveRecord
         self::SOURCE_COACH  => 'Coach',
         self::SOURCE_BARGE  => 'Barge',
         self::SOURCE_INTERNAL  => 'Internal',
+        self::SOURCE_LEAD  => 'Lead',
+        self::SOURCE_CASE  => 'Case',
     ];
 
     public const SHORT_SOURCE_LIST = [
@@ -226,6 +230,8 @@ class Call extends \yii\db\ActiveRecord
         self::SOURCE_TRANSFER_CALL  => 'Transfer',
         self::SOURCE_CONFERENCE_CALL  => 'Conference',
         self::SOURCE_REDIAL_CALL  => 'Redial',
+        self::SOURCE_LEAD  => 'Lead',
+        self::SOURCE_CASE  => 'Case',
     ];
 
     public const TW_RECORDING_STATUS_PAUSED = 'paused';

@@ -348,7 +348,7 @@ $duration = 10;
 
                             <?php if($callData): ?>
 
-                                <?=$this->registerJs("webCall('". $callData['phone_from']."', '". $callData['phone_to']."', ". $callData['project_id'].", ". $callData['lead_id'].", 'auto-redial');");?>
+                                <?=$this->registerJs("webCall('". $callData['phone_from']."', '". $callData['phone_to']."', ". $callData['project_id'].", ". $callData['lead_id'].", '', 'auto-redial', '');");?>
                                 <?php //=$this->registerJs('autoredialInit(); startAutoTake();');?>
                                 <?php //=$this->registerJs('startTimer(20);');?>
                             <?php endif; ?>

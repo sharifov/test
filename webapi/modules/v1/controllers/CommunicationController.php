@@ -656,6 +656,10 @@ class CommunicationController extends ApiBaseController
                     $call->c_project_id = (int) $callData['c_project_id'];
                 }
 
+                if(isset($callOriginalData['c_source_type_id']) && $callOriginalData['c_source_type_id']) {
+                    $call->c_source_type_id = (int) $callOriginalData['c_source_type_id'];
+                }
+
                 $upp = null;
 
                 if ($call->isOut()) {

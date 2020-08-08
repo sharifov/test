@@ -11,6 +11,7 @@
  * @var $fromPhoneNumbers array
  */
 
+use common\models\Call;
 use common\models\DepartmentEmailProject;
 use common\models\DepartmentPhoneProject;
 use frontend\models\CaseCommunicationForm;
@@ -535,6 +536,7 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
                                     <?= Html::a('<i class="fa fa-phone"></i>', '#', ['class' => 'btn call-box__btn call-box__btn--call', 'id' => 'btn-start-web-call',
                                         'data-project-id' => $model->cs_project_id,
                                         'data-case-id' => $model->cs_id,
+                                        'data-source-type-id' => Call::SOURCE_CASE,
                                         'disabled' => $comForm->c_voice_status == 1 ? true : false
                                     ]) ?>
 
@@ -777,6 +779,7 @@ $js = <<<JS
         var phone_number = $('#c_phone_number').val();
         var project_id = $(this).data('project-id');
         var case_id = $(this).data('case-id');
+        var source_type_id = $(this).data('source-type-id');
         
         //alert(phoneNumber);
         
@@ -787,7 +790,7 @@ $js = <<<JS
             $('#web-phone-dial-modal .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
             $('#web-phone-dial-modal').modal();
             
-            $.post(ajaxPhoneDialUrl, {'phone_number': phone_number, 'project_id': project_id, 'case_id': case_id},
+            $.post(ajaxPhoneDialUrl, {'phone_number': phone_number, 'project_id': project_id, 'case_id': case_id, 'source_type_id': source_type_id},
                 function (data) {
                     $('#web-phone-dial-modal .modal-body').html(data);
                 }
