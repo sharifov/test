@@ -1117,7 +1117,7 @@ var PhoneWidgetCall = function () {
                 '</div>';
         }
         let dataUserId = contact.type === 3 ? contact.id : '';
-        let content = '<li class="calls-history__item contact-info-card call-contact-card" data-user-id="' + dataUserId + '" data-phone="' + contact['phone'] + '" data-title="' + contact['title'] + '">' +
+        let content = '<li class="calls-history__item contact-info-card call-contact-card" data-user-id="' + dataUserId + '" data-phone="' + (dataUserId ? contact['title'] : contact['phone']) + '" data-title="' + (dataUserId ? '' : contact['title']) + '">' +
             '<div class="collapsible-toggler">' +
             contactIcon
             + '<div class="contact-info-card__details">' +
