@@ -5331,6 +5331,7 @@ var PhoneWidgetCall = function () {
 
     function phoneDialInsertNumber(self) {
       let data = $(self);
+      let isInternal = !!data.data('user-id');
       $(".widget-phone__contact-info-modal").hide();
       $('.phone-widget__header-actions a[data-toggle-tab]').removeClass('is_active');
       $('.phone-widget__tab').removeClass('is_active');
@@ -5338,7 +5339,7 @@ var PhoneWidgetCall = function () {
       $('#tab-phone').addClass('is_active');
       insertPhoneNumber({
         'formatted': data.data('phone'),
-        'title': data.data('title'),
+        'title': isInternal ? '' : data.data('title'),
         'user_id': data.data('user-id'),
         'phone_to': data.data('phone'),
         'phone_from': '',
@@ -5578,7 +5579,7 @@ var PhoneWidgetCall = function () {
     }
 
     let dataUserId = contact.type === 3 ? contact.id : '';
-    let content = '<li class="calls-history__item contact-info-card call-contact-card" data-user-id="' + dataUserId + '" data-phone="' + contact['phone'] + '" data-title="' + contact['title'] + '">' + '<div class="collapsible-toggler">' + contactIcon + '<div class="contact-info-card__details">' + '<div class="contact-info-card__line history-details">' + '<strong class="contact-info-card__name">' + contact['name'] + '</strong>' + '</div>' + '</div>' + '</div>' + '</li>';
+    let content = '<li class="calls-history__item contact-info-card call-contact-card" data-user-id="' + dataUserId + '" data-phone="' + (dataUserId ? contact['title'] : contact['phone']) + '" data-title="' + (dataUserId ? '' : contact['title']) + '">' + '<div class="collapsible-toggler">' + contactIcon + '<div class="contact-info-card__details">' + '<div class="contact-info-card__line history-details">' + '<strong class="contact-info-card__name">' + contact['name'] + '</strong>' + '</div>' + '</div>' + '</div>' + '</li>';
     return content;
   } // function loadNotFound() {
   //     let content = '<li class="calls-history__item contact-info-card">' +
@@ -6224,7 +6225,7 @@ let PhoneWidgetContacts = function () {
   function getPhoneItem(phone, index, contact) {
     let content = '<li class="contact-full-info__phone">' + '<div class="form-group">' + '<label for="">Phone ' + (index + 1) + '</label>' + '<input readonly type="text" class="form-control" value="' + phone + '" autocomplete="off">' + '</div>' + '<ul class="actions-list">' + '<li class="actions-list__option actions-list__option--phone js-call-tab-trigger">';
     let dataUserId = contact.isInternal ? contact.id : '';
-    content += '<i class="fa fa-phone phone-dial-contacts" data-user-id="' + dataUserId + '" data-phone="' + phone + '" data-title="' + contact['name'] + '"></i>';
+    content += '<i class="fa fa-phone phone-dial-contacts" data-user-id="' + dataUserId + '" data-phone="' + (dataUserId ? contact['name'] : phone) + '" data-title="' + contact['name'] + '"></i>';
     content += '</li>' + '<li title="' + titleAccessGetMessages + '" class="actions-list__option js-trigger-messages-modal' + disabledClass + '" ' + 'data-contact-id="' + contact['id'] + '" data-contact-phone="' + phone + '" data-contact-type="' + contact['type'] + '">' + '<i class="fa fa-comment-alt"></i>' + '</li>' + showCheckboxMultiple(contact, index) + '</ul>' + '</li>';
     return content;
   }
