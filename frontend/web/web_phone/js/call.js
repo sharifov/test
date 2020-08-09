@@ -874,6 +874,7 @@ var PhoneWidgetCall = function () {
 
         function phoneDialInsertNumber(self) {
             let data = $(self);
+            let isInternal = !!data.data('user-id');
             $(".widget-phone__contact-info-modal").hide();
             $('.phone-widget__header-actions a[data-toggle-tab]').removeClass('is_active');
             $('.phone-widget__tab').removeClass('is_active');
@@ -881,7 +882,7 @@ var PhoneWidgetCall = function () {
             $('#tab-phone').addClass('is_active');
             insertPhoneNumber({
                 'formatted': data.data('phone'),
-                'title': data.data('title'),
+                'title': isInternal ? '' : data.data('title'),
                 'user_id': data.data('user-id'),
                 'phone_to': data.data('phone'),
                 'phone_from': '',

@@ -357,7 +357,7 @@ let PhoneWidgetContacts = function () {
 
         let dataUserId = contact.isInternal ? contact.id : '';
 
-        content += '<i class="fa fa-phone phone-dial-contacts" data-user-id="' + dataUserId + '" data-phone="' + phone + '" data-title="' + contact['name'] + '"></i>';
+        content += '<i class="fa fa-phone phone-dial-contacts" data-user-id="' + dataUserId + '" data-phone="' + (dataUserId ? contact['name'] : phone) + '" data-title="' + contact['name'] + '"></i>';
 
         content += '</li>' +
             '<li title="' + titleAccessGetMessages + '" class="actions-list__option js-trigger-messages-modal' + disabledClass + '" ' +
