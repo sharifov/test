@@ -873,15 +873,25 @@ var PhoneWidgetCall = function () {
         });
 
         function phoneDialInsertNumber(self) {
-            let phone = $(self).data('phone');
-            let title = $(self).data('title');
-            let userId = $(self).data('user-id');
+            let data = $(self);
             $(".widget-phone__contact-info-modal").hide();
             $('.phone-widget__header-actions a[data-toggle-tab]').removeClass('is_active');
             $('.phone-widget__tab').removeClass('is_active');
             $('.phone-widget__header-actions a[data-toggle-tab="tab-phone"]').addClass('is_active');
             $('#tab-phone').addClass('is_active');
-            insertPhoneNumber(phone, title, userId, phone);
+            insertPhoneNumber({
+                'formatted': data.data('phone'),
+                'title': data.data('title'),
+                'user_id': data.data('user-id'),
+                'phone_to': data.data('phone'),
+                'phone_from': '',
+                'project_id': data.data('project-id'),
+                'department_id': data.data('department-id'),
+                'client_id': data.data('client-id'),
+                'source_type_id': data.data('source-type-id'),
+                'lead_id': data.data('lead-id'),
+                'case_id': data.data('case-id'),
+            });
         }
     }
 
@@ -1136,7 +1146,13 @@ var PhoneWidgetCall = function () {
         let phone = $(this).data('phone');
         let title = $(this).data('title');
         let userId = $(this).data('user-id');
-        insertPhoneNumber(phone, title, userId, phone);
+        insertPhoneNumber({
+            'formatted': phone,
+            'title': title,
+            'user_id': userId,
+            'phone_to': phone,
+            'phone_from': '',
+        });
         $('.suggested-contacts').removeClass('is_active');
     });
 })();

@@ -1121,7 +1121,7 @@ use yii\helpers\Html;
         let params = {
             'To': phone_to,
             'FromAgentPhone': phone_from,
-            'project_id': project_id,
+            'c_project_id': project_id,
             'lead_id': lead_id,
             'case_id': case_id,
             'c_type': type,
@@ -1218,7 +1218,7 @@ use yii\helpers\Html;
         let params = {
             'To': phone_to,
             'FromAgentPhone': phone_from,
-            'project_id': project_id,
+            'c_project_id': project_id,
             'lead_id': lead_id,
             'c_type': type,
             'c_user_id': userId,

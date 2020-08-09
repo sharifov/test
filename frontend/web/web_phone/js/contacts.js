@@ -578,7 +578,13 @@ $(document).on('click', ".js-toggle-contact-info", function () {
 
 $(document).on('click', ".contact-dial-to-user", function () {
     let contact = PhoneWidgetContacts.decodeContact($(this).data('contact'));
-    insertPhoneNumber(contact.name, '', contact.id,'');
+    insertPhoneNumber({
+        'formatted': contact.name,
+        'title': '',
+        'user_id': contact.id,
+        'phone_to': '',
+        'phone_from': ''
+    });
     $('.phone-widget__header-actions a[data-toggle-tab]').removeClass('is_active');
     $('.phone-widget__tab').removeClass('is_active');
     $('.phone-widget__header-actions a[data-toggle-tab="tab-phone"]').addClass('is_active');

@@ -652,42 +652,55 @@ class CommunicationController extends ApiBaseController
                     $agentId = null;
                 }
 
-                if(isset($callData['c_project_id']) && $callData['c_project_id']) {
-                    $call->c_project_id = (int) $callData['c_project_id'];
+                if (!empty($callOriginalData['c_project_id'])) {
+                    $call->c_project_id = (int)$callOriginalData['c_project_id'];
+                } elseif (!empty($callData['c_project_id'])) {
+                    $call->c_project_id = (int)$callData['c_project_id'];
                 }
 
-                if(isset($callOriginalData['c_source_type_id']) && $callOriginalData['c_source_type_id']) {
-                    $call->c_source_type_id = (int) $callOriginalData['c_source_type_id'];
+                if (!empty($callOriginalData['c_dep_id'])) {
+                    $call->c_dep_id = (int)$callOriginalData['c_dep_id'];
+                }
+
+                if (!empty($callOriginalData['c_source_type_id'])) {
+                    $call->c_source_type_id = (int)$callOriginalData['c_source_type_id'];
+                }
+
+                if (!empty($callOriginalData['lead_id']) && $callOriginalData['lead_id'] !== 'null') {
+                    $call->c_lead_id = (int) $callOriginalData['lead_id'];
+                }
+
+                if (!empty($callOriginalData['case_id']) && $callOriginalData['case_id'] !== 'null') {
+                    $call->c_case_id = (int) $callOriginalData['case_id'];
+//                if ($call->c_case_id && ($case = Cases::findOne($call->c_case_id))) {
+//                    (Yii::createObject(CasesCommunicationService::class))->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_CALL);
+//                }
                 }
 
                 $upp = null;
 
-                if ($call->isOut()) {
-
-                    if (
-                        isset($callOriginalData['c_source_type_id'])
-                        && $callOriginalData['c_source_type_id']
-                        && (int)$callOriginalData['c_source_type_id'] === Call::SOURCE_REDIAL_CALL
-                    ) {
-                            $call->c_source_type_id = Call::SOURCE_REDIAL_CALL;
+                if (!$call->c_dep_id) {
+                    if ($call->c_lead_id && ($lead = $call->cLead)) {
+                        $call->c_dep_id = $lead->l_dep_id;
+                    } elseif ($call->c_case_id && ($case = $call->cCase)) {
+                        $call->c_dep_id = $case->cs_dep_id;
+                    } elseif ($call->c_project_id && !empty($callOriginalData['FromAgentPhone'])) {
+                        $upp = UserProjectParams::find()->byPhone($callOriginalData['FromAgentPhone'], false)->andWhere(['upp_project_id' => $call->c_project_id])->limit(1)->one();
+                        if ($upp && $upp->upp_dep_id) {
+                            $call->c_dep_id = $upp->upp_dep_id;
+                        }
                     }
+                }
 
+                if (!empty($callOriginalData['c_client_id'])) {
+                    $call->c_client_id = (int)$callOriginalData['c_client_id'];
+                }
+
+                if ($call->isOut()) {
                     if (!$call->c_client_id && $call->c_to) {
                         $clientPhone = ClientPhone::find()->where(['phone' => $call->c_to])->orderBy(['id' => SORT_DESC])->limit(1)->one();
                         if ($clientPhone && $clientPhone->client_id) {
                             $call->c_client_id = $clientPhone->client_id;
-                        }
-                    }
-
-                    if (isset($callOriginalData['lead_id']) && $callOriginalData['lead_id'] && ($lead = Lead::findOne((int)$callOriginalData['lead_id']))) {
-                        $call->c_dep_id = $lead->l_dep_id;
-                    } elseif (isset($callOriginalData['case_id']) && $callOriginalData['case_id'] && ($case = Cases::findOne((int)$callOriginalData['case_id']))) {
-                        $call->c_dep_id = $case->cs_dep_id;
-                    } elseif (!$call->c_dep_id && $call->c_project_id && isset($callOriginalData['FromAgentPhone']) && $callOriginalData['FromAgentPhone']) {
-//                        $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $callOriginalData['FromAgentPhone'], 'upp_project_id' => $call->c_project_id])->limit(1)->one();
-                        $upp = UserProjectParams::find()->byPhone($callOriginalData['FromAgentPhone'], false)->andWhere(['upp_project_id' => $call->c_project_id])->limit(1)->one();
-                        if ($upp && $upp->upp_dep_id) {
-                            $call->c_dep_id = $upp->upp_dep_id;
                         }
                     }
                 }
@@ -697,7 +710,6 @@ class CommunicationController extends ApiBaseController
                 }
 
                 if (!$upp) {
-//                    $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $call->c_from])->one();
                     $upp = UserProjectParams::find()->byPhone($call->c_from, false)->one();
                 }
 
@@ -712,19 +724,7 @@ class CommunicationController extends ApiBaseController
                 // Yii::warning('Not found Call: ' . $callSid, 'API:Communication:voiceClient:Call::find');
             }
 
-            if (isset($callOriginalData['lead_id']) && $callOriginalData['lead_id'] && $callOriginalData['lead_id'] !== 'null') {
-                $call->c_lead_id = (int) $callOriginalData['lead_id'];
-            }
-
-            if (isset($callOriginalData['case_id']) && $callOriginalData['case_id'] && $callOriginalData['case_id'] !== 'null') {
-                $call->c_case_id = (int) $callOriginalData['case_id'];
-//                if ($call->c_case_id && ($case = Cases::findOne($call->c_case_id))) {
-//                    (Yii::createObject(CasesCommunicationService::class))->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_CALL);
-//                }
-            }
-
-
-            if(isset($callOriginalData['CallStatus']) && $callOriginalData['CallStatus']) {
+            if(!empty($callOriginalData['CallStatus'])) {
                 $call->c_call_status = $callOriginalData['CallStatus'];
                 $call->setStatusByTwilioStatus($call->c_call_status);
             }

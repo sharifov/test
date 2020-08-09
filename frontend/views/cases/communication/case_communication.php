@@ -421,11 +421,15 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
                                     <?= Html::dropDownList('call-from-number', null, $fromPhoneNumbers, ['prompt' => '---', 'id' => 'call-from-number', 'class' => 'form-control', 'label'])?>
                                 </div>
                                 <div class="col-sm-3 form-group message-field-phone" style="display: block;">
-									<?= Html::button('<i class="fa fa-phone-square"></i> Make Call', ['class' => 'btn btn-sm btn-success', 'id' => 'btn-new-make-call', 'data-case-id' => $model->cs_id, 'style' => 'margin-top: 28px'])?>
+									<?= Html::button('<i class="fa fa-phone-square"></i> Make Call', ['class' => 'btn btn-sm btn-success', 'id' => 'btn-make-call-communication-block', 'style' => 'margin-top: 28px'])?>
                                 </div>
 								<?=Html::hiddenInput('call-lead-id', null, ['id' => 'call-lead-id'])?>
 								<?=Html::hiddenInput('call-case-id', $model->cs_id, ['id' => 'call-case-id'])?>
 								<?=Html::hiddenInput('call-project-id', $model->cs_project_id, ['id' => 'call-project-id'])?>
+                                <?=Html::hiddenInput('call-source-type-id', Call::SOURCE_CASE, ['id' => 'call-source-type-id'])?>
+                                <?=Html::hiddenInput('call-department-id', $model->cs_dep_id, ['id' => 'call-department-id'])?>
+                                <?=Html::hiddenInput('call-client-id', $model->cs_client_id, ['id' => 'call-client-id'])?>
+                                <?=Html::hiddenInput('call-client-name', ($model->cs_client_id ? $model->client->getShortName() : ''), ['id' => 'call-client-name'])?>
                             <?php endif; ?>
 
                             <?php if ($model->isDepartmentSupport()): ?>
@@ -753,18 +757,14 @@ $js = <<<JS
         $('#div-call-phone-number').text($(this).val());
     });
     
-    $(document).on("change", '#call-to-number', function () {
-        insertPhoneNumber($(this).val());
-    });
-    
-    $(document).on("change", '#call-from-number', function () {
-        let value = $(this).val();
-        window.phoneNumbers.setPrimaryData({
-            value: value,
-            projectId: projectId,
-            project: project
-        })
-    });
+    // $(document).on("change", '#call-from-number', function () {
+    //     let value = $(this).val();
+    //     window.phoneNumbers.setPrimaryData({
+    //         value: value,
+    //         projectId: projectId,
+    //         project: project
+    //     })
+    // });
     
      $('body').on("change", '#c_sms_tpl_key', function () {
         if($(this).val() == tpl_sms_blank_key) {

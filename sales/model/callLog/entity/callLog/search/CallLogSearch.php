@@ -11,6 +11,8 @@ use sales\helpers\UserCallIdentity;
 use sales\model\callLog\entity\callLog\CallLogCategory;
 use sales\model\callLog\entity\callLog\CallLogStatus;
 use sales\model\callLog\entity\callLog\CallLogType;
+use sales\model\callLog\entity\callLogCase\CallLogCase;
+use sales\model\callLog\entity\callLogLead\CallLogLead;
 use sales\model\callLog\entity\callLogQueue\CallLogQueue;
 use sales\model\callNote\entity\CallNote;
 use yii\data\ActiveDataProvider;
@@ -231,6 +233,12 @@ class CallLogSearch extends CallLog
             'cl_status_id',
             'cl_duration',
             'cl_category_id',
+            'cll_lead_id as lead_id',
+            'clc_case_id as case_id',
+            'cl_project_id',
+            'cl_department_id',
+            'cl_category_id',
+            'cl_client_id',
         ]);
 
         $clientTableName = Client::tableName();
@@ -257,6 +265,8 @@ class CallLogSearch extends CallLog
             ) AS user_id"
         ]);
 		$query->leftJoin($clientTableName, $clientTableName . '.id = cl_client_id');
+		$query->leftJoin( CallLogLead::tableName(),  'cll_cl_id = cl_id');
+		$query->leftJoin( CallLogCase::tableName(),  'clc_cl_id = cl_id');
 		$query->leftJoin(CallNote::tableName(), new Expression('cn_id = (select cn_id from call_note where cn_call_id = cl_id order by cn_created_dt desc limit 1)'));
 		$query->andWhere(['cl_user_id' => $userId]);
 		$query->andWhere(['call_log.cl_type_id' => [Call::CALL_TYPE_IN, Call::CALL_TYPE_OUT]]);
@@ -274,6 +284,11 @@ class CallLogSearch extends CallLog
             'client_name',
             'user_id',
             'cl_category_id',
+            'cll_lead_id',
+            'clc_case_id',
+            'cl_project_id',
+            'cl_department_id',
+            'cl_client_id',
         ]);
 		$query->orderBy(['cl_call_created_dt' => SORT_DESC]);
 
@@ -292,6 +307,11 @@ class CallLogSearch extends CallLog
             'client_name',
             'user_id',
             'cl_category_id',
+            'lead_id',
+            'case_id',
+            'cl_project_id',
+            'cl_department_id',
+            'cl_client_id',
             Employee::tableName() . '.nickname as nickname',
             new Expression('if (client_name is not null, client_name, if (cl_type_id = 1, if(' . $userTableName . '.nickname is not null, ' . $userTableName . '.nickname, cl_phone_to), if(' . $userTableName . '.nickname is not null, ' . $userTableName . '.nickname, cl_phone_from))) as formatted'),
         ])
