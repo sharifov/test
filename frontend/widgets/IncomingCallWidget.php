@@ -57,9 +57,9 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
         /** @var Employee $userModel */
         $userModel = \Yii::$app->user->identity;
 
-		if (!SettingHelper::isOriginalPhoneWidgetEnabled()) {
-			return '';
-		}
+//		if (!SettingHelper::isOriginalPhoneWidgetEnabled()) {
+//			return '';
+//		}
 
         if(!$userModel) {
             return '';
