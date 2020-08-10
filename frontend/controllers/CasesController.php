@@ -8,6 +8,7 @@ use common\models\CaseNote;
 use common\models\CaseSale;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
+use common\models\Department;
 use common\models\DepartmentEmailProject;
 use common\models\DepartmentPhoneProject;
 use common\models\Email;
@@ -47,6 +48,7 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\services\ClientChatAssignService;
 use sales\model\coupon\entity\couponCase\CouponCase;
 use sales\model\coupon\useCase\send\SendCouponsForm;
+use sales\model\phone\AvailablePhoneList;
 use sales\model\saleTicket\useCase\create\SaleTicketService;
 use sales\repositories\cases\CaseCategoryRepository;
 use sales\repositories\cases\CasesRepository;
@@ -686,24 +688,14 @@ class CasesController extends FController
         //VarDumper::dump($dataProvider->allModels); exit;
 
 		$fromPhoneNumbers = [];
-		if (SettingHelper::isCaseCommunicationNewCallWidgetEnabled()) {
-			if ($model && $model->isDepartmentSupport()) {
-				$departmentPhones = DepartmentPhoneProject::find()->where(['dpp_project_id' => $model->cs_project_id, 'dpp_dep_id' => $model->cs_dep_id, 'dpp_default' => DepartmentPhoneProject::DPP_DEFAULT_TRUE])->withPhoneList()->all();
-				foreach ($departmentPhones as $departmentPhone) {
-					$phone = $departmentPhone->getPhone();
-					if ($phone) {
-						$fromPhoneNumbers[$phone] = $departmentPhone->dppProject->name . ' (' . $phone . ')';
-					}
-				}
-			} else if ($userParams = UserProjectParams::find()->where(['upp_user_id' => Auth::id()])->withPhoneList()->all()) {
-				foreach ($userParams as $param) {
-					$phone = $param->getPhone();
-					if ($phone) {
-						$fromPhoneNumbers[$phone] = $param->uppProject->name . ' (' . $phone . ')';
-					}
-				}
-			}
-		}
+        if (SettingHelper::isLeadCommunicationNewCallWidgetEnabled()) {
+            if (($department = $model->department) && $params = $department->getParams()) {
+                $phoneList = new AvailablePhoneList(Auth::id(), $model->cs_project_id, $department->dep_id, $params->defaultPhoneType);
+                foreach ($phoneList->getList() as $phoneItem) {
+                    $fromPhoneNumbers[$phoneItem['phone']] = $phoneItem['project'] . ' ' . Department::DEPARTMENT_LIST[(int)$phoneItem['department_id']] . ' (' . $phoneItem['phone'] . ')';
+                }
+            }
+        }
 
         $enableCommunication = true;
         $isAdmin = true;
