@@ -216,7 +216,7 @@ $paxCntTypes = [
                                     'tag' => false,
                                 ],
                                 'template' => '{input}'
-                            ])->dropDownList(ParsingDump::GDS_TYPE_MAP, [
+                            ])->dropDownList(ParsingDump::QUOTE_GDS_TYPE_MAP, [
                                 'prompt' => 'Select',
                                 'required' => 'required'
                             ]) ?>
