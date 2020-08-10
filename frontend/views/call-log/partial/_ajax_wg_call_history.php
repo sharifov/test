@@ -48,6 +48,7 @@ use yii\helpers\Html;
                 <div class="contact-info-card__details">
                     <div class="contact-info-card__line history-details">
                         <strong class="contact-info-card__name phone-dial-history" style="cursor:pointer;"
+                                data-call-sid="<?= $call['cl_call_sid'] ?>"
                                 data-title="<?= $title ?>"
                                 data-user-id="<?= $call['user_id'] ?>"
                                 data-phone="<?= Html::encode($phone) ?>"

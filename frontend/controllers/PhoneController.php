@@ -20,7 +20,9 @@ use sales\auth\Auth;
 use sales\entities\cases\Cases;
 use sales\helpers\UserCallIdentity;
 use sales\model\call\useCase\conference\create\CreateCallForm;
+use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\conference\useCase\PrepareCurrentCallsForNewCall;
+use sales\model\phone\AvailablePhoneList;
 use sales\model\user\entity\userStatus\UserStatus;
 use thamtech\uuid\helpers\UuidHelper;
 use yii\base\Exception;
@@ -1419,6 +1421,61 @@ class PhoneController extends FController
                 $result = [
                     'error' => false,
                     'userId' => null
+                ];
+            }
+        } catch (\Throwable $e) {
+            $result = [
+                'error' => true,
+                'message' => $e->getMessage(),
+            ];
+        }
+
+        return $this->asJson($result);
+    }
+
+    public function actionGetCallHistoryFromNumber()
+    {
+        try {
+            $sid = (string)Yii::$app->request->post('sid');
+            if (!$call = CallLog::findOne(['cl_call_sid' => $sid])) {
+                throw new \DomainException('Not found Call. SID: ' . $sid);
+            }
+
+            if (!$call->cl_project_id) {
+                throw new \DomainException('Not found Project. Call SID: ' . $sid);
+            }
+
+            if (!$call->cl_department_id) {
+                throw new \DomainException('Not found Department. Call SID: ' . $sid);
+            }
+
+            if (!$params = $call->department->getParams()) {
+                throw new \DomainException('Not found Params. Department: ' . $call->department->dep_name);
+            }
+
+            $phone = null;
+
+            if ($call->isOut()) {
+                if (UserCallIdentity::canParse($call->cl_phone_from)) {
+                    $list = new AvailablePhoneList(Auth::id(), $call->cl_project_id, $call->cl_department_id, $params->defaultPhoneType);
+                    $phone = $list->getFirst();
+                } else {
+                    $phone = $call->cl_phone_from;
+                }
+            } elseif ($call->isIn()) {
+                $list = new AvailablePhoneList(Auth::id(), $call->cl_project_id, $call->cl_department_id, $params->defaultPhoneType);
+                $phone = $list->getFirst();
+            }
+
+            if ($phone) {
+                $result = [
+                    'error' => false,
+                    'phone' => $phone,
+                ];
+            } else {
+                $result = [
+                    'error' => true,
+                    'message' => 'Phone From not found',
                 ];
             }
         } catch (\Throwable $e) {

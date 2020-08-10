@@ -862,11 +862,6 @@ var PhoneWidgetCall = function () {
     }
 
     function insertPhoneNumberEvent() {
-        $(document).on('click', '.phone-dial-history', function(e) {
-            e.preventDefault();
-            phoneDialInsertNumber(this);
-        });
-
         $(document).on('click', '.phone-dial-contacts', function(e) {
             e.preventDefault();
             phoneDialInsertNumber(this);

@@ -253,6 +253,11 @@ class CallLog extends \yii\db\ActiveRecord
 		return $this->cl_type_id === CallLogType::IN;
 	}
 
+	public function isOut(): bool
+	{
+		return $this->cl_type_id === CallLogType::OUT;
+	}
+
     public function isOwner(int $userId): bool
     {
         return $this->cl_user_id === $userId;

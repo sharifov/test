@@ -1565,11 +1565,11 @@ function AllQueues(props) {
     type: "active"
   }) : '', countProperties(props.direct) > 0 ? React.createElement(QueueItem, {
     groups: props.direct,
-    name: "Direct Calls",
+    name: "Direct Line",
     type: "direct"
   }) : '', countProperties(props.general) > 0 ? React.createElement(QueueItem, {
     groups: props.general,
-    name: "General Lines",
+    name: "General Line",
     type: "general"
   }) : '');
 }
@@ -2632,12 +2632,12 @@ function PhoneWidgetPaneQueue(initQueues) {
         break;
 
       case 'direct':
-        $('[data-queue-marker]').html('Direct Calls');
+        $('[data-queue-marker]').html('Direct Line');
         markElement.addClass('tab-direct');
         break;
 
       case 'general':
-        $('[data-queue-marker]').html('General Lines');
+        $('[data-queue-marker]').html('General Line');
         markElement.addClass('tab-general');
         break;
 
@@ -3351,12 +3351,7 @@ $(document).ready(function () {
   });
   $('.call_pane_dialpad_clear_number').on('click', function (e) {
     e.preventDefault();
-    $('#call-pane__dial-number').val('').attr('readonly', false).prop('readonly', false);
-    resetDialNumberData();
-    $('#call-to-label').text('');
-    $('.suggested-contacts').removeClass('is_active');
-    $('.dialpad_btn_init').attr('disabled', false).removeClass('disabled');
-    $('.call-pane__correction').attr('disabled', false); // $(this).removeClass('is-shown')
+    clearDialData(); // $(this).removeClass('is-shown')
   });
   $('.call_pane_dialpad_clear_number_disabled').on('click', function (e) {
     e.preventDefault();
@@ -3752,7 +3747,7 @@ function formatPhoneNumber(phoneNumberString) {
     return [intlCode, '(', match[2], ') ', match[3], '-', match[4]].join('');
   }
 
-  return null;
+  return phoneNumberString;
 }
 
 function toSelect(elem, obj, cb) {
@@ -4284,6 +4279,15 @@ $(document).on('click', '.call-details__nav-btn--back', function (e) {
   e.preventDefault();
   $('.conference-call-details').removeClass('is_active');
 });
+
+function clearDialData() {
+  $('#call-pane__dial-number').val('').attr('readonly', false).prop('readonly', false);
+  resetDialNumberData();
+  $('#call-to-label').text('');
+  $('.suggested-contacts').removeClass('is_active');
+  $('.dialpad_btn_init').attr('disabled', false).removeClass('disabled');
+  $('.call-pane__correction').attr('disabled', false);
+}
 
 function widgetStatus(selector, updateStatusUrl) {
   let url = updateStatusUrl;
@@ -5320,10 +5324,6 @@ var PhoneWidgetCall = function () {
   }
 
   function insertPhoneNumberEvent() {
-    $(document).on('click', '.phone-dial-history', function (e) {
-      e.preventDefault();
-      phoneDialInsertNumber(this);
-    });
     $(document).on('click', '.phone-dial-contacts', function (e) {
       e.preventDefault();
       phoneDialInsertNumber(this);

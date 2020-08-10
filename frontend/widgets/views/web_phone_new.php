@@ -28,6 +28,7 @@ $ajaxBlackList = Url::to(['/phone/check-black-phone']);
 $ajaxCreateCallUrl = Url::to(['/phone/ajax-create-call']);
 $createInternalCallUrl = Url::to(['/phone/create-internal-call']);
 $getUserByPhoneUrl = Url::to(['/phone/get-user-by-phone']);
+$getCallHistoryFromNumberUrl = Url::to(['/phone/get-call-history-from-number']);
 
 $conferenceBase = 0;
 if (isset(Yii::$app->params['settings']['voip_conference_base'])) {
@@ -64,6 +65,62 @@ $js = <<<JS
 	 $(document).on('click', '#btn-new-make-call', function(e) {
         e.preventDefault();
         makeCallFromPhoneWidget(); 
+	 });
+
+	 $(document).on('click', '.phone-dial-history', function(e) {
+        e.preventDefault();
+       
+        let data = $(this);
+		let isInternal = !!data.data('user-id');
+		$(".widget-phone__contact-info-modal").hide();
+		$('.phone-widget__header-actions a[data-toggle-tab]').removeClass('is_active');
+		$('.phone-widget__tab').removeClass('is_active');
+		$('.phone-widget__header-actions a[data-toggle-tab="tab-phone"]').addClass('is_active');
+		$('#tab-phone').addClass('is_active');
+				
+		reserveDialButton();
+		
+		insertPhoneNumber({
+			'formatted': data.data('phone'),
+			'title': isInternal ? '' : data.data('title'),
+			'user_id': data.data('user-id'),
+			'phone_to': data.data('phone'),
+			'phone_from': '',
+			'project_id': data.data('project-id'),
+			'department_id': data.data('department-id'),
+			'client_id': data.data('client-id'),
+			'source_type_id': data.data('source-type-id'),
+			'lead_id': data.data('lead-id'),
+			'case_id': data.data('case-id'),
+		});
+		
+		if (isInternal) {
+		    makeCallFromPhoneWidget();			
+		    return false;
+		}
+		
+	    $.ajax({
+			type: 'post',
+			data: {
+				'sid': data.data('call-sid')
+			},
+			url: '{$getCallHistoryFromNumberUrl}'
+		})
+		.done(function (data) {
+			if (data.error) {
+				createNotify('Create Call', data.message, 'error');
+				freeDialButton();
+				clearDialData();
+				return false;
+			}
+			insertPhoneNumberFrom(data.phone);
+			makeCallFromPhoneWidget();			
+		})
+		.fail(function () {
+			createNotify('Create Call', 'Server error', 'error');
+			freeDialButton();
+			clearDialData();
+		});
 	 });
 
 	 $(document).on('click', '#btn-make-call-communication-block', function(e) {
@@ -139,11 +196,13 @@ $js = <<<JS
         }
 
         if (!data.to) {
+            freeDialButton();
 			new PNotify({title: "Create call", type: "error", text: 'Phone number not entered', hide: true});
 			return false;
 		}
 
 		if (!(new RegExp('^[+]{1}[0-9]{9,15}$')).test(data.to)) {
+		    freeDialButton();
 		    new PNotify({title: "Create call", type: "error", text: 'Entered phone number is not correct. Phone number should contain only numbers and +', hide: true});
 			return false;	
 		}	
