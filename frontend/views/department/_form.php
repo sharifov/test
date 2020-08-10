@@ -19,6 +19,26 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'dep_name')->textInput(['maxlength' => true]) ?>
 
+        <?php
+        try {
+            echo $form->field($model, 'dep_params')->widget(
+                \kdn\yii2\JsonEditor::class,
+                [
+                    'clientOptions' => [
+                        'modes' => ['code', 'form', 'tree', 'view'], //'text',
+                        'mode' => 'tree'
+                    ],
+                    //'collapseAll' => ['view'],
+                    'expandAll' => ['tree', 'form'],
+                ]
+            );
+        } catch (Exception $exception) {
+            echo $form->field($model, 'dep_params')->textarea(['rows' => 5]);
+        }
+
+        ?>
+
+
     <?php //= $form->field($model, 'dep_updated_user_id')->textInput() ?>
 
     <?php //= $form->field($model, 'dep_updated_dt')->textInput() ?>
