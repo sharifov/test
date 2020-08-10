@@ -7,6 +7,7 @@
  */
 
 use common\models\Lead;
+use sales\services\parsingDump\lib\ParsingDump;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\bootstrap\ActiveForm;
@@ -215,7 +216,7 @@ $paxCntTypes = [
                                     'tag' => false,
                                 ],
                                 'template' => '{input}'
-                            ])->dropDownList($quote::getGDSName(), [
+                            ])->dropDownList(ParsingDump::GDS_TYPE_MAP, [
                                 'prompt' => 'Select',
                                 'required' => 'required'
                             ]) ?>
