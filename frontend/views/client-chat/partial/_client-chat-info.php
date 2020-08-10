@@ -66,8 +66,6 @@ use yii\web\View;
         \yii\widgets\DetailView::widget([
             'model' => $clientChat,
             'attributes' => [
-                'cch_title',
-                'cch_description',
                 [
                     'label' => 'Case',
                     'value' => static function(ClientChat $model) {
