@@ -183,3 +183,11 @@ function soundConnect() {
 let incomingAudio = new Audio('/js/sounds/incoming_call.mp3');
 incomingAudio.volume = 0.3;
 incomingAudio.loop = true;
+
+$(document).ready( function () {
+    document.addEventListener("visibilitychange", function () {
+        if (document.visibilityState === 'hidden') {
+            localStorage.setItem('previousPage', $(document)[0].baseURI);
+        }
+    })
+});

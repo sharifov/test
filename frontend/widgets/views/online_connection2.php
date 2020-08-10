@@ -341,7 +341,10 @@ $js = <<<JS
                                 return false;
                             }
                         
-                            if (document.visibilityState == "visible" && obj.data.soundNotification) {
+                            let previousPage = localStorage.getItem('previousPage');
+                            if ((document.visibilityState == "visible") && obj.data.soundNotification) {
+                                soundNotification('incoming_message');
+                            } else if (previousPage === $(document)[0].baseURI && obj.data.soundNotification) {
                                 soundNotification('incoming_message');
                             }
                             
