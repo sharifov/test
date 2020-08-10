@@ -769,6 +769,7 @@ use yii\helpers\Html;
                 device = new Twilio.Device(data.token, {codecPreferences: ['opus', 'pcmu'], closeProtection: true, enableIceRestart: true, enableRingingState: false, debug: false, allowIncomingWhileBusy: false});
 
                 device.audio.incoming(false);
+                device.audio.outgoing(false);
                 device.audio.disconnect(false);
 
                 //console.log([data, device]);

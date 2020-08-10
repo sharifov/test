@@ -4,7 +4,6 @@ use frontend\widgets\newWebPhone\NewWebPhoneAsset;
 use yii\helpers\Url;
 use yii\web\View;
 
-/* @var $userPhoneProject string */
 /* @var $formattedPhoneProject string */
 /* @var $userCallStatus \common\models\UserCallStatus */
 /* @var $this View */
@@ -16,7 +15,6 @@ NewWebPhoneAsset::register($this);
 ?>
 
 <?= $this->render('partial/_phone_widget', [
-	'showWidgetContent' => !empty($userPhoneProject),
 	'userPhones' => $userPhones,
 	'userEmails' => $userEmails,
 	'userCallStatus' => $userCallStatus,
@@ -179,6 +177,12 @@ $js = <<<JS
 	    
     function createExternalCall(dialData) {
 	    		
+	    if (!dialData.from) {
+	        createNotify('Make call', 'Not found From phone', 'error');
+	        freeDialButton();
+	        return false;
+        }
+	     
         $.post('{$ajaxCheckUserForCallUrl}', {user_id: userId}, function(data) {
             
             if(data && data.is_ready) {

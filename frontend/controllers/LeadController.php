@@ -1228,6 +1228,20 @@ class LeadController extends FController
 				}
 			}
 		}
+//        if (SettingHelper::isCaseCommunicationNewCallWidgetEnabled()) {
+//            $departmentPhones = DepartmentPhoneProject::find()->where([
+//                'dpp_project_id' => $leadForm->getLead()->project_id,
+//                'dpp_dep_id' => $leadForm->getLead()->l_dep_id,
+//                'dpp_default' => DepartmentPhoneProject::DPP_DEFAULT_TRUE
+//            ])
+//            ->withPhoneList()->all();
+//            foreach ($departmentPhones as $departmentPhone) {
+//                $phone = $departmentPhone->getPhone();
+//                if ($phone) {
+//                    $fromPhoneNumbers[$phone] = $departmentPhone->dppProject->name . ' (' . $phone . ')';
+//                }
+//            }
+//        }
 
         return $this->render($tmpl, [
             'leadForm' => $leadForm,

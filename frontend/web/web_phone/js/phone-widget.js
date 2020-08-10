@@ -851,7 +851,7 @@ function formatPhoneNumber(phoneNumberString) {
         var intlCode = (match[1] ? '+1 ' : '')
         return [intlCode, '(', match[2], ') ', match[3], '-', match[4]].join('')
     }
-    return null
+    return phoneNumberString;
 }
 
 function toSelect(elem, obj, cb) {

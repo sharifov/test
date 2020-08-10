@@ -206,7 +206,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
 				$phone = '';
                 if ($call->isJoin()) {
                     if (($parent = $call->cParent) && $parent->cCreatedUser) {
-                        $name = $parent->cCreatedUser->username;
+                        $name = $parent->cCreatedUser->nickname;
                         $phone = $parent->c_to;
                     }
                 } else {
