@@ -218,6 +218,8 @@ class CallUserAccess extends \yii\db\ActiveRecord
                     }
                 }
 
+                $auth = Yii::$app->authManager;
+
 				$callInfo = [
                     'id' => $call->c_id,
                     'callSid' => $call->c_call_sid,
@@ -239,9 +241,14 @@ class CallUserAccess extends \yii\db\ActiveRecord
                     'source' => $call->c_source_type_id ? $call->getSourceName() : '',
                     'isEnded' => false,
                     'contact' => [
+                        'id' => $call->c_client_id,
                         'name' => $name,
                         'phone' => $phone,
                         'company' => '',
+                        'isClient' => $call->c_client_id ? $call->cClient->isClient() : false,
+                        'canContactDetails' => $auth->checkAccess($this->cua_user_id, '/client/ajax-get-info'),
+                        'canCallInfo' => $auth->checkAccess($this->cua_user_id, '/call/ajax-call-info'),
+                        'callSid' => $call->c_call_sid,
                     ],
                     'department' => $call->c_dep_id ? Department::getName($call->c_dep_id) : '',
                     'queue' => Call::getQueueName($call),

@@ -9,8 +9,7 @@ var PhoneWidgetCall = function () {
         'callStatusUrl': '',
         'ajaxSaveCallUrl': '',
         'clearMissedCallsUrl': '',
-        'currentQueueCallsUrl': '',
-        'dialpadEnabled': true
+        'currentQueueCallsUrl': ''
     };
 
     let callRequester = new window.phoneWidget.requesters.CallRequester();
@@ -61,7 +60,9 @@ var PhoneWidgetCall = function () {
         contactInfoClickEvent();
         holdClickEvent();
         hangupClickEvent();
+        callLogInfoEvent();
         callInfoEvent();
+        clientInfoEvent();
         insertPhoneNumberEvent();
 
         loadCurrentQueueCalls();
@@ -766,7 +767,7 @@ var PhoneWidgetCall = function () {
         });
     }
 
-    function callInfoEvent() {
+    function callLogInfoEvent() {
         $(document).on('click', '.btn-history-call-info', function(e) {
             e.preventDefault();
             let callSid = $(this).attr('data-call-sid');
@@ -774,7 +775,32 @@ var PhoneWidgetCall = function () {
                 createNotify('Call Info', 'Not found Call Sid', 'error');
                 return false;
             }
+            callRequester.callLogInfo(callSid);
+        });
+    }
+
+    function callInfoEvent() {
+        $(document).on('click', '.cw-btn-call-info', function(e) {
+            e.preventDefault();
+            let callSid = $(this).attr('data-call-sid');
+            if (typeof callSid === 'undefined') {
+                createNotify('Call Info', 'Not found Call Sid', 'error');
+                return false;
+            }
             callRequester.callInfo(callSid);
+        });
+    }
+
+    function clientInfoEvent() {
+        $(document).on('click', '.cw-btn-client-info', function(e) {
+            e.preventDefault();
+            let clientId = $(this).attr('data-client-id');
+            let isClient = $(this).attr('data-is-client');
+            if (typeof clientId === 'undefined') {
+                createNotify('Client Info', 'Not found Client ID', 'error');
+                return false;
+            }
+            callRequester.clientInfo(clientId, isClient === 'true');
         });
     }
 
@@ -838,9 +864,7 @@ var PhoneWidgetCall = function () {
     function insertPhoneNumberEvent() {
         $(document).on('click', '.phone-dial-history', function(e) {
             e.preventDefault();
-            if (settings.dialpadEnabled) {
-                phoneDialInsertNumber(this);
-            }
+            phoneDialInsertNumber(this);
         });
 
         $(document).on('click', '.phone-dial-contacts', function(e) {
@@ -849,15 +873,26 @@ var PhoneWidgetCall = function () {
         });
 
         function phoneDialInsertNumber(self) {
-            let phone = $(self).data('phone');
-            let title = $(self).data('title');
-            let userId = $(self).data('user-id');
+            let data = $(self);
+            let isInternal = !!data.data('user-id');
             $(".widget-phone__contact-info-modal").hide();
             $('.phone-widget__header-actions a[data-toggle-tab]').removeClass('is_active');
             $('.phone-widget__tab').removeClass('is_active');
             $('.phone-widget__header-actions a[data-toggle-tab="tab-phone"]').addClass('is_active');
             $('#tab-phone').addClass('is_active');
-            insertPhoneNumber(phone, title, userId, phone);
+            insertPhoneNumber({
+                'formatted': data.data('phone'),
+                'title': isInternal ? '' : data.data('title'),
+                'user_id': data.data('user-id'),
+                'phone_to': data.data('phone'),
+                'phone_from': '',
+                'project_id': data.data('project-id'),
+                'department_id': data.data('department-id'),
+                'client_id': data.data('client-id'),
+                'source_type_id': data.data('source-type-id'),
+                'lead_id': data.data('lead-id'),
+                'case_id': data.data('case-id'),
+            });
         }
     }
 
@@ -1082,7 +1117,7 @@ var PhoneWidgetCall = function () {
                 '</div>';
         }
         let dataUserId = contact.type === 3 ? contact.id : '';
-        let content = '<li class="calls-history__item contact-info-card call-contact-card" data-user-id="' + dataUserId + '" data-phone="' + contact['phone'] + '" data-title="' + contact['title'] + '">' +
+        let content = '<li class="calls-history__item contact-info-card call-contact-card" data-user-id="' + dataUserId + '" data-phone="' + (dataUserId ? contact['title'] : contact['phone']) + '" data-title="' + (dataUserId ? '' : contact['title']) + '">' +
             '<div class="collapsible-toggler">' +
             contactIcon
             + '<div class="contact-info-card__details">' +
@@ -1112,7 +1147,13 @@ var PhoneWidgetCall = function () {
         let phone = $(this).data('phone');
         let title = $(this).data('title');
         let userId = $(this).data('user-id');
-        insertPhoneNumber(phone, title, userId, phone);
+        insertPhoneNumber({
+            'formatted': phone,
+            'title': title,
+            'user_id': userId,
+            'phone_to': phone,
+            'phone_from': '',
+        });
         $('.suggested-contacts').removeClass('is_active');
     });
 })();

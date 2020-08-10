@@ -357,7 +357,7 @@ let PhoneWidgetContacts = function () {
 
         let dataUserId = contact.isInternal ? contact.id : '';
 
-        content += '<i class="fa fa-phone phone-dial-contacts" data-user-id="' + dataUserId + '" data-phone="' + phone + '" data-title="' + contact['name'] + '"></i>';
+        content += '<i class="fa fa-phone phone-dial-contacts" data-user-id="' + dataUserId + '" data-phone="' + (dataUserId ? contact['name'] : phone) + '" data-title="' + contact['name'] + '"></i>';
 
         content += '</li>' +
             '<li title="' + titleAccessGetMessages + '" class="actions-list__option js-trigger-messages-modal' + disabledClass + '" ' +
@@ -578,7 +578,13 @@ $(document).on('click', ".js-toggle-contact-info", function () {
 
 $(document).on('click', ".contact-dial-to-user", function () {
     let contact = PhoneWidgetContacts.decodeContact($(this).data('contact'));
-    insertPhoneNumber(contact.name, '', contact.id,'');
+    insertPhoneNumber({
+        'formatted': contact.name,
+        'title': '',
+        'user_id': contact.id,
+        'phone_to': '',
+        'phone_from': ''
+    });
     $('.phone-widget__header-actions a[data-toggle-tab]').removeClass('is_active');
     $('.phone-widget__tab').removeClass('is_active');
     $('.phone-widget__header-actions a[data-toggle-tab="tab-phone"]').addClass('is_active');

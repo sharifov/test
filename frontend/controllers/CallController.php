@@ -245,6 +245,15 @@ class CallController extends FController
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
+    protected function findModelBySid($sid)
+    {
+        if (($model = Call::findOne(['c_call_sid' => $sid])) !== null) {
+            return $model;
+        }
+
+        throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
 
     /**
      * @param Call $model
@@ -924,8 +933,14 @@ class CallController extends FController
     public function actionAjaxCallInfo()
     {
         $id = (int) Yii::$app->request->post('id');
+        $sid = (string) Yii::$app->request->post('sid');
 
-        $model = $this->findModel($id);
+        if ($id) {
+            $model = $this->findModel($id);
+        } else {
+            $model = $this->findModelBySid($sid);
+        }
+
         $this->checkAccess($model);
 
         if($model->c_is_new) {

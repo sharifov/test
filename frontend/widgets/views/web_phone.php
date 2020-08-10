@@ -795,8 +795,8 @@ use yii\helpers\Html;
                 //console.log('Token: ' + data.token);
                 device = new Twilio.Device(data.token, {codecPreferences: ['opus', 'pcmu'], closeProtection: true, enableIceRestart: true, enableRingingState: false, debug: false, allowIncomingWhileBusy: false});
 
-                // device.audio.incoming(false);
-                // device.audio.disconnect(false);
+                device.audio.incoming(false);
+                device.audio.disconnect(false);
 
                 //console.log([data, device]);
                 device.on('ready', function (device) {
@@ -1047,6 +1047,11 @@ use yii\helpers\Html;
 
                 if (device.audio.isOutputSelectionSupported) {
                     $('#output-selection').show();
+                } else {
+                    $(document).find('.phone-widget__additional-bar .tabs__nav.tab-nav .wp-tab-device').hide();
+                    $(document).find('.phone-widget__additional-bar .wp-devices-tab-log').addClass('active-tab');
+                    $(document).find('.phone-widget__additional-bar #tab-device').hide();
+                    $(document).find('.phone-widget__additional-bar #tab-logs').show();
                 }
 
                 window.localStorage.setItem('twilioDevice', JSON.stringify(device, function (key, value) {
@@ -1068,7 +1073,6 @@ use yii\helpers\Html;
     var incomingSoundInterval = null;
 
     function startTimerSoundIncomingCall() {
-        return;
         incomingSoundInterval = setInterval(function () {
             incomingAudio.play();
             clearInterval(incomingSoundInterval);
@@ -1076,7 +1080,6 @@ use yii\helpers\Html;
     }
 
     function incomingSoundOff() {
-        return;
         clearInterval(incomingSoundInterval);
         incomingAudio.pause();
     }
@@ -1111,7 +1114,7 @@ use yii\helpers\Html;
         return callSid;
     }
 
-    function webCall(phone_from, phone_to, project_id, lead_id, case_id, type) {
+    function webCall(phone_from, phone_to, project_id, lead_id, case_id, type, source_type_id) {
 
         /*var access =  updateAgentStatus(connection);
         if(!access) {
@@ -1128,6 +1131,7 @@ use yii\helpers\Html;
                 'project_id': project_id,
                 'lead_id': lead_id,
                 'case_id': case_id,
+                'source_type_id': source_type_id
             };
 
             $.post(ajaxCreateCallUrl, createCallParams, function(data) {
@@ -1148,12 +1152,13 @@ use yii\helpers\Html;
         let params = {
             'To': phone_to,
             'FromAgentPhone': phone_from,
-            'project_id': project_id,
+            'c_project_id': project_id,
             'lead_id': lead_id,
             'case_id': case_id,
             'c_type': type,
             'c_user_id': userId,
-            'is_conference_call': conferenceBase
+            'is_conference_call': conferenceBase,
+            'c_source_type_id': source_type_id
         };
 
 
@@ -1244,7 +1249,7 @@ use yii\helpers\Html;
         let params = {
             'To': phone_to,
             'FromAgentPhone': phone_from,
-            'project_id': project_id,
+            'c_project_id': project_id,
             'lead_id': lead_id,
             'c_type': type,
             'c_user_id': userId,
@@ -1516,13 +1521,14 @@ $js = <<<JS
         let project_id = $(this).data('project-id');
         let lead_id = $(this).data('lead-id');
         let case_id = $(this).data('case-id');
+        let source_type_id = $(this).data('source_type_id');
         //alert(phoneNumber);
         e.preventDefault();
         
         $('#web-phone-dial-modal .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
         $('#web-phone-dial-modal').modal();
         
-        $.post(ajaxPhoneDialUrl, {'phone_number': phone_number, 'project_id': project_id, 'lead_id': lead_id, 'case_id': case_id},
+        $.post(ajaxPhoneDialUrl, {'phone_number': phone_number, 'project_id': project_id, 'lead_id': lead_id, 'case_id': case_id, 'source_type_id': source_type_id},
             function (data) {
                 $('#web-phone-dial-modal .modal-body').html(data);
             }
@@ -1541,6 +1547,7 @@ $js = <<<JS
                 let project_id = $('#call-project-id').val();
                 let lead_id = $('#call-lead-id').val();
                 let case_id = $('#call-case-id').val();
+                let source_type_id = $('#call-source-type-id').val();
                 
                 $('#web-phone-dial-modal').modal('hide');
                 //alert(phone_from + ' - ' + phone_to);
@@ -1549,7 +1556,7 @@ $js = <<<JS
                 
                 $.post(ajaxBlackList, {phone: phone_to}, function(data) {
                     if (data.success) {
-                        webCall(phone_from, phone_to, project_id, lead_id, case_id, 'web-call');        
+                        webCall(phone_from, phone_to, project_id, lead_id, case_id, 'web-call', source_type_id);        
                     } else {
                         var text = 'Error. Try again later';
                         if (data.message) {

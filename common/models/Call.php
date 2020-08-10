@@ -6,6 +6,7 @@ use common\components\jobs\CallPriceJob;
 use common\components\jobs\CheckClientCallJoinToConferenceJob;
 use common\components\purifier\Purifier;
 use common\models\query\CallQuery;
+use sales\helpers\PhoneFormatter;
 use sales\helpers\UserCallIdentity;
 use sales\model\call\helper\CallHelper;
 use frontend\widgets\newWebPhone\call\socket\MissedCallMessage;
@@ -204,6 +205,8 @@ class Call extends \yii\db\ActiveRecord
     public const SOURCE_COACH           = 8;
     public const SOURCE_BARGE           = 9;
     public const SOURCE_INTERNAL        = 10;
+    public const SOURCE_LEAD        = 11;
+    public const SOURCE_CASE        = 12;
 
     public const SOURCE_LIST = [
         self::SOURCE_GENERAL_LINE => 'General Line',
@@ -216,6 +219,8 @@ class Call extends \yii\db\ActiveRecord
         self::SOURCE_COACH  => 'Coach',
         self::SOURCE_BARGE  => 'Barge',
         self::SOURCE_INTERNAL  => 'Internal',
+        self::SOURCE_LEAD  => 'Lead',
+        self::SOURCE_CASE  => 'Case',
     ];
 
     public const SHORT_SOURCE_LIST = [
@@ -225,6 +230,8 @@ class Call extends \yii\db\ActiveRecord
         self::SOURCE_TRANSFER_CALL  => 'Transfer',
         self::SOURCE_CONFERENCE_CALL  => 'Conference',
         self::SOURCE_REDIAL_CALL  => 'Redial',
+        self::SOURCE_LEAD  => 'Lead',
+        self::SOURCE_CASE  => 'Case',
     ];
 
     public const TW_RECORDING_STATUS_PAUSED = 'paused';
@@ -1078,15 +1085,8 @@ class Call extends \yii\db\ActiveRecord
 
             if ($userListNotifications) {
 
-                $from = $this->c_from;
-                $to = $this->c_to;
-
-                if (UserCallIdentity::canParse($from) && ($fromUserId = UserCallIdentity::parseUserId($from)) && ($fromUser = Employee::find()->andWhere(['id' => $fromUserId])->asArray()->one())) {
-                    $from = $fromUser['nickname'];
-                }
-                if (UserCallIdentity::canParse($to) && ($toUserId = UserCallIdentity::parseUserId($to)) && ($toUser = Employee::find()->andWhere(['id' => $toUserId])->asArray()->one())) {
-                    $to = $toUser['nickname'];
-                }
+                $from = PhoneFormatter::getPhoneOrNickname($this->c_from);
+                $to = PhoneFormatter::getPhoneOrNickname($this->c_to);
 
                 $holdMessage = $changedAttributes['c_status_id'] === self::STATUS_HOLD ? ' Hold' : '';
                 $title = 'Missed' . $holdMessage . ' Call (' . $this->getSourceName() . ')';
@@ -1198,34 +1198,34 @@ class Call extends \yii\db\ActiveRecord
                 ||!$this->currentParticipant
                 || ($this->currentParticipant && ($this->currentParticipant->isAgent() || $this->currentParticipant->isUser()))
             ) {
-                $message = (new CallUpdateMessage)->create($this, $isChangedStatus);
+                $message = (new CallUpdateMessage)->create($this, $isChangedStatus, $this->c_created_user_id);
                 Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id], $message);
             }
         }
 
-        if ($this->isInternal()) {
+        if ($this->c_created_user_id && $this->isInternal()) {
 
             $isChangedStatus = array_key_exists('c_status_id', $changedAttributes);
 
             if ($this->isOut() && ($insert || $isChangedStatus) && $this->isStatusRinging()) {
-                $message = (new CallUpdateMessage)->create($this, $isChangedStatus);
+                $message = (new CallUpdateMessage)->create($this, $isChangedStatus, $this->c_created_user_id);
                 Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id], $message);
             }
 
             if ($this->isIn() && ($insert || $isChangedStatus) && $this->c_parent_id && $this->isStatusRinging()) {
                 $internalParent = $this->cParent;
                 $internalParent->c_status_id = self::STATUS_RINGING;
-                $message = (new CallUpdateMessage)->create($internalParent, $isChangedStatus);
+                $message = (new CallUpdateMessage)->create($internalParent, $isChangedStatus, $this->c_created_user_id);
                 Notifications::publish('callUpdate', ['user_id' => $internalParent->c_created_user_id], $message);
             }
 
             if ($this->isIn() && ($insert || $isChangedStatus) && $this->c_parent_id && $this->isStatusInProgress()) {
 
                 $internalParent = $this->cParent;
-                $parentMessage = (new CallUpdateMessage)->create($internalParent, $isChangedStatus);
+                $parentMessage = (new CallUpdateMessage)->create($internalParent, $isChangedStatus, $this->c_created_user_id);
                 Notifications::publish('callUpdate', ['user_id' => $internalParent->c_created_user_id], $parentMessage);
 
-                $message = (new CallUpdateMessage)->create($this, $isChangedStatus);
+                $message = (new CallUpdateMessage)->create($this, $isChangedStatus, $this->c_created_user_id);
                 Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id], $message);
             }
 

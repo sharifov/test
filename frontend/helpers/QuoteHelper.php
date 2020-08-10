@@ -24,7 +24,7 @@ class QuoteHelper
     public const TOP_META_BEST = 'best';
     public const TOP_META_FASTEST = 'fastest';
 
-    public static function formattedPenalties(array $penalties): string
+    public static function innerPenalties(array $penalties): string
     {
         $out = '';
         if ($penalties && self::checkPenaltiesInfo($penalties)) {
@@ -49,6 +49,19 @@ class QuoteHelper
             $out .= '</div>';
         }
         return $out;
+    }
+
+    public static function formattedPenalties(?array $penalties, string $class = 'quote__badge quote__badge--warning'): string
+    {
+        if ($penalties && self::checkPenaltiesInfo($penalties)) {
+            return '<span class="' . $class . '"
+                data-toggle="tooltip"
+                data-html="true"
+                title="' . self::innerPenalties($penalties) . '">
+				    <i class="fa fa-expand"></i>
+			</span>';
+        }
+        return '';
     }
 
     public static function formattedRanking(?array $meta, string $class = 'quote__badge bg-info'): string
@@ -135,7 +148,7 @@ class QuoteHelper
         return (!empty($penalties['exchange']) || !empty($penalties['refund']));
     }
 
-    private static function getPenaltyTypeName(string $keyType): string
+    public static function getPenaltyTypeName(string $keyType): string
     {
         if (array_key_exists($keyType, self::PENALTY_TYPE_LIST)) {
             return self::PENALTY_TYPE_LIST[$keyType];

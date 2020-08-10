@@ -391,6 +391,7 @@ $isSuperAdmin = $user->isSuperAdmin();
             'icon' => 'user',
             'items' => [
                 ['label' => 'Users', 'url' => ['/employee/list'], 'icon' => 'user'],
+
                 ['label' => 'User Groups', 'url' => ['/user-group/index'], 'icon' => 'users'],
                 ['label' => 'User Groups Set', 'url' => ['/user-group-set/index'], 'icon' => 'users'],
                 ['label' => 'User Params', 'url' => ['/user-params/index'], 'icon' => 'bars'],
@@ -408,6 +409,8 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'User Commission Rules', 'url' => ['/user-commission-rules-crud/index'], 'icon' => 'list'],
                 ['label' => 'User Bonus Rules', 'url' => ['/user-bonus-rules-crud/index'], 'icon' => 'list'],
                 ['label' => 'User Failed Login', 'url' => ['/user-failed-login/index'], 'icon' => 'list'],
+                ['label' => 'User Monitor', 'url' => ['/user-monitor/index'], 'icon' => 'list'],
+                ['label' => 'User Monitor Stats', 'url' => ['/user-monitor/stats'], 'icon' => 'list'],
             ]
         ];
 

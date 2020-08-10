@@ -11,7 +11,9 @@
             'callAddNoteUrl': '',
             'sendDigitUrl': '',
             'prepareCurrentCallsUrl': '',
-            'callInfoUrl': ''
+            'callLogInfoUrl': '',
+            'callInfoUrl': '',
+            'clientInfoUrl': '',
         };
 
         this.init = function (settings) {
@@ -249,6 +251,23 @@
                 });
         };
 
+        this.callLogInfo = function (sid) {
+            $('#call-box-modal .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"> </i> Loading ...</div>');
+            $('#call-box-modal-label').html('Call Info');
+            $('#call-box-modal').modal();
+            $.ajax({
+                type: 'post',
+                data: {sid: sid},
+                url: this.settings.callLogInfoUrl,
+            })
+                .done(function (data) {
+                    $('#call-box-modal .modal-body').html(data);
+                })
+                .fail(function (xhr, textStatus, errorThrown) {
+                    createNotify('Call info', xhr.responseText, 'error');
+                });
+        };
+
         this.callInfo = function (sid) {
             $('#call-box-modal .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"> </i> Loading ...</div>');
             $('#call-box-modal-label').html('Call Info');
@@ -263,6 +282,24 @@
                 })
                 .fail(function (xhr, textStatus, errorThrown) {
                     createNotify('Call info', xhr.responseText, 'error');
+                });
+        };
+
+        this.clientInfo = function (id, isClient) {
+            $('#call-box-modal .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"> </i> Loading ...</div>');
+            let text = isClient ? 'Client details' : 'Contact info';
+            $('#call-box-modal-label').html(text + ' (' + id + ')');
+            $('#call-box-modal').modal();
+            $.ajax({
+                type: 'post',
+                data: {client_id: id},
+                url: this.settings.clientInfoUrl
+            })
+                .done(function (data) {
+                    $('#call-box-modal .modal-body').html(data);
+                })
+                .fail(function (xhr, textStatus, errorThrown) {
+                    createNotify(text, xhr.responseText, 'error');
                 });
         };
     }

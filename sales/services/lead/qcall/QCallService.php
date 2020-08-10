@@ -372,7 +372,7 @@ class QCallService
      * @param int $leadId
      * @return LeadQcall|null
      */
-    private function findQcall(int $leadId): ?LeadQcall
+    public function findQcall(int $leadId): ?LeadQcall
     {
         return LeadQcall::find()->andWhere(['lqc_lead_id' => $leadId])->one();
     }
@@ -381,7 +381,7 @@ class QCallService
      * @param Config $config
      * @return QcallConfig|null
      */
-    private function findConfig(Config $config): ?QcallConfig
+    public function findConfig(Config $config): ?QcallConfig
     {
         return QcallConfig::find()->config($config->status, $config->callCount);
     }

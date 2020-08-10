@@ -78,6 +78,7 @@ class PhoneController extends FController
         $project_id = Yii::$app->request->post('project_id');
         $lead_id = Yii::$app->request->post('lead_id');
         $case_id = Yii::$app->request->post('case_id');
+        $source_type_id = Yii::$app->request->post('source_type_id');
 
 
         $selectProjectPhone = null;
@@ -149,7 +150,8 @@ class PhoneController extends FController
             //'dataProvider' => $dataProvider,
             'fromPhoneNumbers' => $fromPhoneNumbers,
             'selectProjectPhone' => $selectProjectPhone,
-            'currentCall' => $currentCall
+            'currentCall' => $currentCall,
+            'source_type_id' => $source_type_id,
         ]);
     }
 

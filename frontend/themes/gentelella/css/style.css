@@ -5348,6 +5348,17 @@ input[disabled] + .radio-tab__text {
    margin-left: -17px;
 }
 
+.tooltip_quote_info_box {
+    text-align: left;
+    padding-top: 12px;
+}
+.tooltip_quote_info_box ul {
+    padding-left: 16px;
+}
+.tooltip_quote_info_box p {
+    margin-bottom: 0;
+}
+
 @-webkit-keyframes scaleIn {
   from {
     -webkit-transform: scale(1, 1);

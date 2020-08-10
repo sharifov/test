@@ -8,6 +8,7 @@ use common\models\Airports;
 use common\models\QuoteSegment;
 use DateTime;
 use frontend\helpers\JsonHelper;
+use frontend\helpers\QuoteHelper;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuote;
@@ -1030,10 +1031,18 @@ class FlightQuoteHelper
 		return $trips;
 	}
 
-	public function getMetaInfo(FlightQuote $flightQuote): ?array
+	public static function getMetaInfo(FlightQuote $flightQuote): ?array
     {
         if (($originSearchData = self::getJsonOriginSearchData($flightQuote))) {
             return $originSearchData['meta'] ?? null;
+        }
+        return null;
+    }
+
+    public static function getPenaltiesInfo(FlightQuote $flightQuote): ?array
+    {
+        if ($originSearchData = self::getJsonOriginSearchData($flightQuote)) {
+            return $originSearchData['penalties'] ?? null;
         }
         return null;
     }
@@ -1100,6 +1109,19 @@ class FlightQuoteHelper
                 title="Best">
                     <i class="fa fa-thumbs-o-up fa-border"></i>
             </span>';
+        }
+        return '';
+    }
+
+    public static function formattedPenalties(?array $penalties, string $class = 'text-warning'): string
+    {
+        if ($penalties && QuoteHelper::checkPenaltiesInfo($penalties)) {
+            return '<span class="' . $class . '"
+                data-toggle="tooltip"
+                data-html="true"
+                title="' . QuoteHelper::innerPenalties($penalties) . '">
+				    <i class="fa fa-expand fa-border"></i>
+			</span>';
         }
         return '';
     }

@@ -13,6 +13,8 @@ use yii\helpers\VarDumper;
  *
  * @property int $uo_user_id
  * @property string|null $uo_updated_dt
+ * @property int|null $uo_idle_state
+ * @property string|null $uo_idle_state_dt
  *
  * @property Employee $uoUser
  */
@@ -32,7 +34,8 @@ class UserOnline extends ActiveRecord
     public function rules()
     {
         return [
-            [['uo_updated_dt'], 'safe'],
+            [['uo_updated_dt', 'uo_idle_state_dt'], 'safe'],
+            [['uo_idle_state'], 'boolean'],
             [['uo_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['uo_user_id' => 'id']],
         ];
     }
@@ -62,6 +65,8 @@ class UserOnline extends ActiveRecord
         return [
             'uo_user_id' => 'User ID',
             'uo_updated_dt' => 'Updated Dt',
+            'uo_idle_state' => 'Idle State',
+            'uo_idle_state_dt' => 'Idle State Dt',
         ];
     }
 
