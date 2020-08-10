@@ -226,7 +226,7 @@ $js = <<<JS
 								};				
 								console.log('create call with params:');
 								console.log(params);
-								createNotify('Calling', 'Calling ' + params.To + '...', 'success');
+								// createNotify('Calling', 'Calling ' + params.To + '...', 'success');
 								updateAgentStatus(connection, false, 0);
 								connection = device.connect(params);
 							}
@@ -266,7 +266,7 @@ $js = <<<JS
     }
     
     function createInternalCall(toUserId, nickname) {
-        createNotify('Calling', 'Calling ' + nickname + ' ...', 'success');
+        // createNotify('Calling', 'Calling ' + nickname + ' ...', 'success');
         $.ajax({
                 type: 'post',
                 data: {

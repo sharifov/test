@@ -890,7 +890,7 @@ use yii\helpers\Html;
                     let access = updateAgentStatus(connection, false, 1);
                     console.log({"action":"disconnect", "cid":conn.parameters.CallSid, "access": access});
                     connection = conn;
-                    createNotify('Call ended', 'Call ended', 'warning');
+                    // createNotify('Call ended', 'Call ended', 'warning');
                     //console.warn(conn);
                     saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To, 'completed');
 
@@ -999,7 +999,7 @@ use yii\helpers\Html;
                     console.log({"action":"cancel", "cid":conn.parameters.CallSid, "access": access});
                     connection = conn;
                     log('Cancel call');
-                    createNotify('Cancel call', 'Cancel call', 'warning');
+                    // createNotify('Cancel call', 'Cancel call', 'warning');
                     saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To, 'canceled');
                     callControls2Hide();
                     $('#btn-group-id-redirect').hide();
@@ -1140,7 +1140,7 @@ use yii\helpers\Html;
             $('#web-call-to-number').text(params.To);
 
             console.log('Calling ' + params.To + '...');
-            createNotify('Calling', 'Calling ' + params.To + '...', 'success');
+            // createNotify('Calling', 'Calling ' + params.To + '...', 'success');
             connection = device.connect(params);
             updateAgentStatus(connection, false, 0);
             $('#btn-group-id-redirect').hide();
@@ -1160,7 +1160,7 @@ use yii\helpers\Html;
     }
 
     function joinConference(source_type, source_type_id, call_sid) {
-        new PNotify({title: source_type, type: "success", text: 'Request', hide: true});
+        // new PNotify({title: source_type, type: "success", text: 'Request', hide: true});
         $.ajax({
             type: 'post',
             data: {
@@ -1174,14 +1174,12 @@ use yii\helpers\Html;
             if (data.error) {
                 new PNotify({title: source_type, type: "error", text: data.message, hide: true});
             } else {
-                new PNotify({title: source_type, type: "success", text: 'Success', hide: true});
+                // new PNotify({title: source_type, type: "success", text: 'Success', hide: true});
             }
         })
         .fail(function (error) {
-            if (error) {
-                new PNotify({title: source_type, type: "error", text: error, hide: true});
-                console.error(error);
-            }
+            new PNotify({title: source_type, type: "error", text: "Server error", hide: true});
+            console.error(error);
         })
         .always(function () {
 
@@ -1233,7 +1231,7 @@ use yii\helpers\Html;
             $('#web-call-to-number').text(params.To);
 
             console.log('Calling ' + params.To + '...');
-            createNotify('Calling', 'Calling ' + params.To + '...', 'success');
+            // createNotify('Calling', 'Calling ' + params.To + '...', 'success');
             connection = device.connect(params);
             updateAgentStatus(connection, false, 0);
            // $('#btn-group-id-redirect').hide();
