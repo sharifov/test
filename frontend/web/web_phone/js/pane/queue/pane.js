@@ -148,11 +148,11 @@ function PhoneWidgetPaneQueue(initQueues) {
                 markElement.addClass('tab-active');
                 break;
             case 'direct':
-                $('[data-queue-marker]').html('Direct Calls');
+                $('[data-queue-marker]').html('Direct Line');
                 markElement.addClass('tab-direct');
                 break;
             case 'general':
-                $('[data-queue-marker]').html('General Lines');
+                $('[data-queue-marker]').html('General Line');
                 markElement.addClass('tab-general');
                 break;
             case 'all':
