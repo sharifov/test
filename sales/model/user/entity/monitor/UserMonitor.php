@@ -40,7 +40,7 @@ class UserMonitor extends \yii\db\ActiveRecord
         self::TYPE_ONLINE   => '#F5F1BD',
         self::TYPE_ACTIVE   => '#89c997',
         self::TYPE_LOGIN    => '#ff0000',
-        self::TYPE_LOGOUT   => '#919496',
+        self::TYPE_LOGOUT   => '#000000',
     ];
 
 
