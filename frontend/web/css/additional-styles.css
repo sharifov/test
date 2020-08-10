@@ -185,8 +185,8 @@ a.cw-call-contact-info {
 }
 .widget-line-overlay__queue-marker.tab-active,
 .call-filter__toggle--line-active.is-checked {
-    background-color: #1ABB9C !important;
+    background-color: #72b97f;
 }
 .call-filter__toggle--line-active {
-    border-color: #1ABB9C !important;
+    border-color: #72b97f;
 }
