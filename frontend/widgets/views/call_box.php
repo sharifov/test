@@ -59,6 +59,8 @@ if ($lastCall && ($lastCall->isStatusRinging() || $lastCall->isStatusInProgress(
 
 use yii\widgets\Pjax; ?>
 
+<?php if (\sales\helpers\setting\SettingHelper::isOriginalPhoneWidgetEnabled()): ?>
+
 <?php yii\widgets\Pjax::begin(['id' => 'call-box-pjax', 'timeout' => 10000, 'enablePushState' => false, 'options' => []])?>
 <div class="fabs">
     <div class="call_box <?=$isVisible ? 'is-visible' : ''?>">
@@ -258,6 +260,8 @@ use yii\widgets\Pjax; ?>
 </div>
 <?php yii\widgets\Pjax::end() ?>
 
+<?php endif; ?>
+
 <?= frontend\widgets\IncomingCallWidget::widget() ?>
 
 <?php Modal::begin([
@@ -342,7 +346,9 @@ use yii\widgets\Pjax; ?>
 
     function refreshCallBox(obj) {
         // console.log(obj);
-        $.pjax.reload({url: callBoxUrl, container: '#call-box-pjax', push: false, replace: false, 'scrollTo': false, timeout: 7000, async: false, data: {id: obj.id, status: obj.status}});
+        if ($('#call-box-pjax').length) {
+            $.pjax.reload({url: callBoxUrl, container: '#call-box-pjax', push: false, replace: false, 'scrollTo': false, timeout: 7000, async: false, data: {id: obj.id, status: obj.status}});
+        }
         if (typeof PhoneWidgetCall === 'object') {
             PhoneWidgetCall.refreshCallStatus(obj);
         }

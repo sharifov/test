@@ -38,9 +38,9 @@ class WebPhone extends \yii\bootstrap\Widget
 
         //$sipExist = \common\models\UserProjectParams::find()->where(['upp_user_id' => $user_id])->andWhere(['AND', ['IS NOT', 'upp_tw_sip_id', null], ['!=', 'upp_tw_sip_id', '']])->one();
 
-		if (!SettingHelper::isOriginalPhoneWidgetEnabled()) {
-			return '';
-		}
+//		if (!SettingHelper::isOriginalPhoneWidgetEnabled()) {
+//			return '';
+//		}
 
         if(!$userProfile || (int) $userProfile->up_call_type_id !== UserProfile::CALL_TYPE_WEB) {
             return '';
