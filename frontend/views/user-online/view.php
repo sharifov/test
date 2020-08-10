@@ -31,6 +31,8 @@ $this->params['breadcrumbs'][] = $this->title;
         'attributes' => [
             'uo_user_id:UserName',
             'uo_user_id',
+            'uo_idle_state:boolean',
+            'uo_idle_state_dt:byUserDateTime',
             'uo_updated_dt:byUserDateTime',
         ],
     ]) ?>

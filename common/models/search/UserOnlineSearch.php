@@ -17,8 +17,8 @@ class UserOnlineSearch extends UserOnline
     public function rules()
     {
         return [
-            [['uo_user_id'], 'integer'],
-            [['uo_updated_dt'], 'safe'],
+            [['uo_user_id', 'uo_idle_state'], 'integer'],
+            [['uo_updated_dt', 'uo_idle_state_dt'], 'safe'],
         ];
     }
 
@@ -46,6 +46,10 @@ class UserOnlineSearch extends UserOnline
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> ['defaultOrder' => ['uo_updated_dt' => SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
         ]);
 
         $this->load($params);
@@ -60,6 +64,8 @@ class UserOnlineSearch extends UserOnline
         $query->andFilterWhere([
             'uo_user_id' => $this->uo_user_id,
             'uo_updated_dt' => $this->uo_updated_dt,
+            'uo_idle_state' => $this->uo_idle_state,
+            'uo_idle_state_dt' => $this->uo_idle_state_dt,
         ]);
 
         return $dataProvider;

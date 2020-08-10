@@ -3,6 +3,7 @@ namespace console\controllers;
 
 use common\models\UserConnection;
 use common\models\UserOnline;
+use sales\model\user\entity\monitor\UserMonitor;
 use Swoole\Redis;
 use Swoole\Table;
 use Swoole\WebSocket\Server;
@@ -184,18 +185,32 @@ class WebsocketServerController extends Controller
 
                 if ($userConnection->save()) {
 
-                    $exist = UserOnline::find()->where(['uo_user_id' => $userConnection->uc_user_id])->exists();
+                    $um = UserMonitor::find()->where(['um_user_id' => $userId, 'um_type_id' => UserMonitor::TYPE_ONLINE])->limit(1)->orderBy(['um_id' => SORT_DESC])->one();
+                    if (!$um) {
+                        UserMonitor::addEvent($userId, UserMonitor::TYPE_ONLINE);
+                    }
 
-                    if (!$exist) {
+                    $userOnline = UserOnline::find()->where(['uo_user_id' => $userConnection->uc_user_id])->one();
+                    if (!$userOnline) {
                         $uo = new UserOnline();
                         $uo->uo_user_id = $userConnection->uc_user_id;
-                        if (!$uo->save()) {
+                        $uo->uo_idle_state = false;
+                        $uo->uo_idle_state_dt = date('Y-m-d H:i:s');
+
+                        if ($uo->save()) {
+                            UserMonitor::addEvent($uo->uo_user_id, UserMonitor::TYPE_ONLINE);
+                            UserMonitor::addEvent($uo->uo_user_id, UserMonitor::TYPE_ACTIVE);
+                        } else {
                             echo 'UserOnline:save' . PHP_EOL;
                             VarDumper::dump($uo->errors);
                         }
                         unset($uo);
+                    } else {
+                        $userOnline->uo_idle_state = false;
+                        $userOnline->uo_idle_state_dt = date('Y-m-d H:i:s');
+                        $userOnline->update();
                     }
-                    unset($exist);
+                    unset($userOnline);
 
                 } else {
                     echo 'UserConnection:save' . PHP_EOL;
@@ -330,14 +345,14 @@ class WebsocketServerController extends Controller
         });
 
 
-        $server->on('message', static function(Server $server, \Swoole\WebSocket\Frame $frame) {
-            echo "- received message: {$frame->data}\n";
-            $data['connection_info'] = $server->connection_info($frame->fd);
-            //$data['client_info'] = $server->getClientInfo($frame->fd);
-            $data['connection_list'] = $server->connection_list();
-            $data['data'] = $frame->data;
-            $data['dt'] = date('Y-m-d H:i:s');
-            $server->push($frame->fd, json_encode($data));
+        $server->on('message', static function(Server $server, \Swoole\WebSocket\Frame $frame) use ($thisClass) {
+            echo ' * ' . date('m-d H:i:s'). " received message: {$frame->data}\n";
+
+            $data = json_decode($frame->data, true);
+            $dataRequest = $thisClass->dataProcessing($server, $frame, $data);
+            if ($dataRequest) {
+                $server->push($frame->fd, json_encode($dataRequest));
+            }
         });
 
         $server->on('close', static function(Server $server, int $fd) {
@@ -373,7 +388,12 @@ class WebsocketServerController extends Controller
 
                     $uc->delete();
                     unset($uc);
+
+                    UserMonitor::closeConnectionEvent($row['user_id']);
                 }
+
+
+
                 \Yii::$app->db->createCommand('DELETE FROM user_online WHERE uo_user_id NOT IN (SELECT DISTINCT(uc_user_id) FROM user_connection)')->execute();
             }
 
@@ -405,6 +425,92 @@ class WebsocketServerController extends Controller
         });
 
         $server->start();
+    }
+
+    /**
+     * @param Server $server
+     * @param \Swoole\WebSocket\Frame $frame
+     * @param array $data
+     * @return array|null
+     */
+    public function dataProcessing(Server $server, \Swoole\WebSocket\Frame $frame, array $data): ?array
+    {
+        $out = null;
+
+        if (empty($data['c'])) {
+            $out['errors'][] = 'Error: Not isset "c" param';
+        }
+
+        if (empty($data['a'])) {
+            $out['errors'][] = 'Error: Not isset "a" param';
+        }
+
+        if (empty($data['p'])) {
+            $out['errors'][] = 'Error: Not isset "p" param';
+        }
+
+        if (!empty($out['errors'])) {
+            return $out;
+        }
+
+        $controller = $data['c'];
+        $action = $data['a'];
+        $params = $data['p'];
+
+
+        //$out['data'] = print_r($params, true);
+
+        if ($controller === 'idle' && $action === 'set') {
+            if (isset($params['val'])) {
+                $val = (bool) $params['val'];
+
+
+
+                UserConnection::updateAll(['uc_idle_state' => $val, 'uc_idle_state_dt' => date('Y-m-d H:i:s')], ['uc_connection_id' => $frame->fd, 'uc_app_instance' => \Yii::$app->params['appInstance']]);
+
+
+                //echo "\r\n";
+                $uc = UserConnection::find()->where(['uc_connection_id' => $frame->fd, 'uc_app_instance' => \Yii::$app->params['appInstance']])->one();
+                if ($uc && $uc->uc_user_id) {
+
+                    if ($val) {
+                        UserMonitor::setUserIdle($uc->uc_user_id);
+                    } else {
+                        UserMonitor::setUserActive($uc->uc_user_id);
+                    }
+
+                    UserMonitor::updateGlobalIdle($uc->uc_user_id);
+
+//                    print_r($uc->attributes);
+//                    $uc->uc_idle_state = $val;
+//                    $uc->uc_idle_state_dt = date('Y-m-d H:i:s');
+//                    $uc->save();
+                }
+
+                unset($uc, $val);
+
+            }
+        }
+
+        if ($controller === 'window' && $action === 'set') {
+            if (isset($params['val'])) {
+                $val = (bool) $params['val'];
+                UserConnection::updateAll(['uc_window_state' => $val, 'uc_window_state_dt' => date('Y-m-d H:i:s')], ['uc_connection_id' => $frame->fd, 'uc_app_instance' => \Yii::$app->params['appInstance']]);
+                unset($val);
+            }
+        }
+
+        if ($controller === 'info' && $action === 'get') {
+            $out['data'] = $data;
+            $out['connection_info'] = $server->connection_info($frame->fd);
+            //$data['client_info'] = $server->getClientInfo($frame->fd);
+            $out['connection_list'] = $server->connection_list();
+            $out['dt'] = date('Y-m-d H:i:s');
+
+            unset($data);
+        }
+
+        return $out;
     }
 
     /**

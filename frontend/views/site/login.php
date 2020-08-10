@@ -23,11 +23,11 @@ use yii\helpers\Url;
                     <?=$form->errorSummary($model); ?>
                 </div>*/ ?>
                 <div>
-                    <?= $form->field($model, 'username', ['template' => '{input}{error}'])->textInput(['autofocus' => true, 'maxlength' => true, 'placeholder' => 'Username']) ?>
+                    <?= $form->field($model, 'username')->textInput(['autofocus' => true, 'maxlength' => true, 'placeholder' => 'Username'])->label(false) ?>
                     <?php /*<input type="text" class="form-control" placeholder="Username" required="" />*/ ?>
                 </div>
                 <div>
-                    <?= $form->field($model, 'password', ['template' => '{input}{error}'])->passwordInput(['maxlength' => true, 'placeholder' => 'Password']) ?>
+                    <?= $form->field($model, 'password')->passwordInput(['maxlength' => true, 'placeholder' => 'Password'])->label(false) ?>
                     <?php /*<input type="password" class="form-control" placeholder="Password" required="" />*/ ?>
                 </div>
 
@@ -64,7 +64,7 @@ use yii\helpers\Url;
                     <br />
 
                     <div>
-                        <h1><i class="fa fa-dollar"></i>ales!</h1>
+                        <h1>CRM - Sales!</h1>
                         <p>©2017-<?=date('Y')?> All Rights Reserved.</p>
                     </div>
                 </div>
