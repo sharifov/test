@@ -32,8 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'dep_id',
             'dep_key',
             'dep_name',
-            //'dep_updated_user_id',
-            //'dep_updated_dt',
+            'dep_params',
             [
                 'attribute' => 'dep_updated_user_id',
                 'value' => static function (\common\models\Department $model) {

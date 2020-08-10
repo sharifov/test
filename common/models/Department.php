@@ -3,11 +3,13 @@
 namespace common\models;
 
 use common\models\query\DepartmentQuery;
+use sales\model\department\department\Params;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\bootstrap4\Html;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Json;
 
 /**
  * This is the model class for table "department".
@@ -17,6 +19,7 @@ use yii\helpers\ArrayHelper;
  * @property string $dep_name
  * @property int $dep_updated_user_id
  * @property string $dep_updated_dt
+ * @property string $dep_params
  *
  * @property Call[] $calls
  * @property Employee $depUpdatedUser
@@ -110,6 +113,8 @@ class Department extends \yii\db\ActiveRecord
             [['dep_id'], 'unique'],
             [['dep_key'], 'unique'],
             [['dep_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['dep_updated_user_id' => 'id']],
+
+            ['dep_params', 'string'],
         ];
     }
 
@@ -124,6 +129,7 @@ class Department extends \yii\db\ActiveRecord
             'dep_name' => 'Name',
             'dep_updated_user_id' => 'Updated User',
             'dep_updated_dt' => 'Updated Date',
+            'dep_params' => 'Parameters',
         ];
     }
 
@@ -205,5 +211,16 @@ class Department extends \yii\db\ActiveRecord
     {
         $data = self::find()->orderBy(['dep_id' => SORT_ASC])->asArray()->all();
         return ArrayHelper::map($data, 'dep_id', 'dep_name');
+    }
+
+    public function getParams(): ?Params
+    {
+        try {
+            $data = Json::decode($this->dep_params);
+            return new Params($data);
+        } catch (\Throwable $e) {
+            \Yii::error($e->getMessage(), 'Department:getParams');
+            return null;
+        }
     }
 }

@@ -139,6 +139,10 @@ function insertPhoneNumber(data) {
     $('.call-pane__correction').attr('disabled', 'disabled');
 }
 
+function insertPhoneNumberFrom(phone) {
+    $('#call-pane__dial-number-value').attr('data-phone-from', phone);
+}
+
 $(document).on('input', '#call-pane__dial-number', function (e) {
     resetDialNumberData();
 });

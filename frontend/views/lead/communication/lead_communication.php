@@ -334,24 +334,38 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                                                 }
 
 
-                                                if($call_type_id) {
-
-                                                    $callTypeName = \common\models\UserProfile::CALL_TYPE_LIST[$call_type_id] ?? '-';
-
-                                                    if($call_type_id == \common\models\UserProfile::CALL_TYPE_SIP && $userModel->userProfile && !$userModel->userProfile->up_sip) {
-                                                        $callTypeName .= ' [empty account]';
-                                                    }
-
-                                                    if ($tk == CommunicationForm::TYPE_VOICE) {
-                                                        //if ($userModel->userProfile->up_sip) {
-                                                        $typeList[$tk] = $itemName . ' ('.$callTypeName.')';
-                                                        //}
-                                                    }
-                                                }
+//                                                if($call_type_id) {
+//
+//                                                    $callTypeName = \common\models\UserProfile::CALL_TYPE_LIST[$call_type_id] ?? '-';
+//
+//                                                    if($call_type_id == \common\models\UserProfile::CALL_TYPE_SIP && $userModel->userProfile && !$userModel->userProfile->up_sip) {
+//                                                        $callTypeName .= ' [empty account]';
+//                                                    }
+//
+//                                                    if ($tk == CommunicationForm::TYPE_VOICE) {
+//                                                        //if ($userModel->userProfile->up_sip) {
+//                                                        $typeList[$tk] = $itemName . ' ('.$callTypeName.')';
+//                                                        //}
+//                                                    }
+//                                                }
                                             }
 
                                         }
                                     }
+
+                                    if ($call_type_id) {
+
+                                        $callTypeName = \common\models\UserProfile::CALL_TYPE_LIST[$call_type_id] ?? '-';
+
+                                        if ($call_type_id == \common\models\UserProfile::CALL_TYPE_SIP && $userModel->userProfile && !$userModel->userProfile->up_sip) {
+                                            $callTypeName .= ' [empty account]';
+                                        }
+
+                                        //if ($userModel->userProfile->up_sip) {
+                                        $typeList[\frontend\models\CommunicationForm::TYPE_VOICE] = \frontend\models\CommunicationForm::TYPE_LIST[\frontend\models\CommunicationForm::TYPE_VOICE] . ' (' . $callTypeName . ')';
+                                        //}
+                                    }
+
 
                                     ?>
 

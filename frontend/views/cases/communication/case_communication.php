@@ -341,23 +341,37 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
                                                 }
 
 
-                                                if($call_type_id) {
-
-                                                    $callTypeName = \common\models\UserProfile::CALL_TYPE_LIST[$call_type_id] ?? '-';
-
-                                                    if($call_type_id == \common\models\UserProfile::CALL_TYPE_SIP && $userModel->userProfile && !$userModel->userProfile->up_sip) {
-                                                        $callTypeName .= ' [empty account]';
-                                                    }
-
-                                                    if ($tk == \frontend\models\CommunicationForm::TYPE_VOICE) {
-                                                        //if ($userModel->userProfile->up_sip) {
-                                                        $typeList[$tk] = $itemName . ' ('.$callTypeName.')';
-                                                        //}
-                                                    }
-                                                }
+//                                                if($call_type_id) {
+//
+//                                                    $callTypeName = \common\models\UserProfile::CALL_TYPE_LIST[$call_type_id] ?? '-';
+//
+//                                                    if($call_type_id == \common\models\UserProfile::CALL_TYPE_SIP && $userModel->userProfile && !$userModel->userProfile->up_sip) {
+//                                                        $callTypeName .= ' [empty account]';
+//                                                    }
+//
+//                                                    if ($tk == \frontend\models\CommunicationForm::TYPE_VOICE) {
+//                                                        //if ($userModel->userProfile->up_sip) {
+//                                                        $typeList[$tk] = $itemName . ' ('.$callTypeName.')';
+//                                                        //}
+//                                                    }
+//                                                }
                                             //}
                                         }
                                     }
+
+                                    if ($call_type_id) {
+
+                                        $callTypeName = \common\models\UserProfile::CALL_TYPE_LIST[$call_type_id] ?? '-';
+
+                                        if ($call_type_id == \common\models\UserProfile::CALL_TYPE_SIP && $userModel->userProfile && !$userModel->userProfile->up_sip) {
+                                            $callTypeName .= ' [empty account]';
+                                        }
+
+                                        //if ($userModel->userProfile->up_sip) {
+                                        $typeList[\frontend\models\CommunicationForm::TYPE_VOICE] = \frontend\models\CommunicationForm::TYPE_LIST[\frontend\models\CommunicationForm::TYPE_VOICE] . ' (' . $callTypeName . ')';
+                                        //}
+                                    }
+
 
                                 ?>
 

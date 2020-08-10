@@ -2120,7 +2120,7 @@ class Call extends \yii\db\ActiveRecord
     public function getCallerName(string $fromNumber)
 	{
 		if ($this->cClient) {
-			return $this->cClient->getFullName();
+			return $this->cClient->getShortName();
 		}
 
 		$phone = PhoneList::find()->byPhone($fromNumber)->enabled()->one();
@@ -2133,7 +2133,7 @@ class Call extends \yii\db\ActiveRecord
 
 		$userProjectParams = UserProjectParams::find()->byPhone($fromNumber)->one();
 		if ($userProjectParams && $userProjectParams->uppUser) {
-			return $userProjectParams->uppUser->username;
+			return $userProjectParams->uppUser->nickname;
 		}
 
 		return 'ClientName';

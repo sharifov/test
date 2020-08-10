@@ -721,6 +721,10 @@ class CommunicationController extends ApiBaseController
                         $call->c_dep_id = $upp->upp_dep_id;
                     }
                 }
+
+                if (!$call->c_created_user_id) {
+                    $call->c_created_user_id = $agentId;
+                }
                 // Yii::warning('Not found Call: ' . $callSid, 'API:Communication:voiceClient:Call::find');
             }
 

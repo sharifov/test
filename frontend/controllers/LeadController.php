@@ -53,12 +53,14 @@ use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use sales\model\callLog\entity\callLog\CallLogType;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\department\department\DefaultPhoneType;
 use sales\model\lead\useCases\lead\create\LeadCreateByChatForm;
 use sales\model\lead\useCases\lead\create\LeadManageForm;
 use sales\model\lead\useCases\lead\import\LeadImportForm;
 use sales\model\lead\useCases\lead\import\LeadImportParseService;
 use sales\model\lead\useCases\lead\import\LeadImportService;
 use sales\model\lead\useCases\lead\import\LeadImportUploadForm;
+use sales\model\phone\AvailablePhoneList;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\NotFoundException;
@@ -1219,14 +1221,12 @@ class LeadController extends FController
 
 		$fromPhoneNumbers = [];
 		if (SettingHelper::isLeadCommunicationNewCallWidgetEnabled()) {
-			if ($userParams = UserProjectParams::find()->where(['upp_user_id' => Auth::id()])->withPhoneList()->all()) {
-				foreach ($userParams as $param) {
-					$phone = $param->getPhone();
-					if ($phone) {
-						$fromPhoneNumbers[$phone] = $param->uppProject->name . ' (' . $phone . ')';
-					}
-				}
-			}
+		    if (($department = $leadForm->getLead()->lDep) && $params = $department->getParams()) {
+                $phoneList = new AvailablePhoneList(Auth::id(), $leadForm->getLead()->project_id, $department->dep_id, $params->defaultPhoneType);
+                foreach ($phoneList->getList() as $phoneItem) {
+                    $fromPhoneNumbers[$phoneItem['phone']] = $phoneItem['project'] . ' ' . Department::DEPARTMENT_LIST[(int)$phoneItem['department_id']] . ' (' . $phoneItem['phone'] . ')';
+                }
+            }
 		}
 
         return $this->render($tmpl, [

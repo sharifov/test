@@ -183,3 +183,10 @@ a.cw-call-contact-info {
     text-decoration: underline;
     color: #363c45;
 }
+.widget-line-overlay__queue-marker.tab-active,
+.call-filter__toggle--line-active.is-checked {
+    background-color: #72b97f;
+}
+.call-filter__toggle--line-active {
+    border-color: #72b97f;
+}
