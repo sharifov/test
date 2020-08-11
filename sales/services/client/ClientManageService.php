@@ -15,6 +15,7 @@ use sales\model\clientChatVisitor\repository\ClientChatVisitorRepository;
 use sales\repositories\client\ClientEmailRepository;
 use sales\repositories\client\ClientPhoneRepository;
 use sales\repositories\client\ClientRepository;
+use sales\repositories\NotFoundException;
 use sales\services\ServiceFinder;
 
 /**
@@ -301,27 +302,7 @@ class ClientManageService
 			$form->middleName,
 			$form->lastName
 		);
-
-		$this->clientRepository->save($client);
-
-		return $client;
-	}
-
-	public function getOrCreateByUuId(ClientCreateForm $form): Client
-	{
-		if ($client = Client::find()->where(['uuid' => $form->uuid])->one()) {
-			return $client;
-		}
-		$client = Client::create(
-			$form->firstName,
-			$form->middleName,
-			$form->lastName
-		);
 		$client->uuid = $form->uuid;
-
-		if (!$client->validate()) {
-			throw new \RuntimeException('Client verification error: ' . $client->getErrorSummary(false)[0], ClientCodeException::CLIENT_VALIDATION);
-		}
 
 		$this->clientRepository->save($client);
 
@@ -338,9 +319,6 @@ class ClientManageService
 
 		$rcId = $clientChatRequest->getClientRcId();
 		$uuId = $clientChatRequest->getClientUuId();
-		if (empty($uuId)) {
-			throw new \RuntimeException('Client UuId is not provided');
-		}
 
 		if (empty($rcId)) {
 			throw new \RuntimeException('Client Rocket Chat id is not provided');
@@ -352,7 +330,12 @@ class ClientManageService
 			'uuid' => $uuId
 		]);
 
-		$client = $this->getOrCreateByUuId($clientForm);
+		try {
+			$client = $this->clientRepository->findByUuid($uuId);
+		} catch (NotFoundException $e) {
+			$client = $this->getOrCreateByRcId($clientForm);
+		}
+
 
 		$this->addEmail($client, $clientEmailForm);
 		$this->addPhone($client, $clientPhoneForm);
