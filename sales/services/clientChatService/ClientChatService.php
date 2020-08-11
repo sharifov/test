@@ -8,6 +8,10 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChat\useCase\transfer\ClientChatTransferForm;
+use sales\model\clientChatCase\entity\ClientChatCase;
+use sales\model\clientChatCase\entity\ClientChatCaseRepository;
+use sales\model\clientChatLead\entity\ClientChatLead;
+use sales\model\clientChatLead\entity\ClientChatLeadRepository;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\clientChatVisitor\repository\ClientChatVisitorRepository;
@@ -30,6 +34,8 @@ use yii\web\ForbiddenHttpException;
  * @property VisitorLogRepository $visitorLogRepository
  * @property ClientChatUserAccessRepository $clientChatUserAccessRepository
  * @property ClientChatVisitorRepository $clientChatVisitorRepository
+ * @property ClientChatLeadRepository $clientChatLeadRepository
+ * @property ClientChatCaseRepository $clientChatCaseRepository
  */
 class ClientChatService
 {
@@ -57,6 +63,14 @@ class ClientChatService
 	 * @var ClientChatVisitorRepository
 	 */
 	private ClientChatVisitorRepository $clientChatVisitorRepository;
+	/**
+	 * @var ClientChatLeadRepository
+	 */
+	private ClientChatLeadRepository $clientChatLeadRepository;
+	/**
+	 * @var ClientChatCaseRepository
+	 */
+	private ClientChatCaseRepository $clientChatCaseRepository;
 
 	public function __construct(
 		ClientChatChannelRepository $clientChatChannelRepository,
@@ -64,7 +78,9 @@ class ClientChatService
 		TransactionManager $transactionManager,
 		VisitorLogRepository $visitorLogRepository,
 		ClientChatUserAccessRepository $clientChatUserAccessRepository,
-		ClientChatVisitorRepository $clientChatVisitorRepository
+		ClientChatVisitorRepository $clientChatVisitorRepository,
+		ClientChatLeadRepository $clientChatLeadRepository,
+		ClientChatCaseRepository $clientChatCaseRepository
 	){
 		$this->clientChatChannelRepository = $clientChatChannelRepository;
 		$this->clientChatRepository = $clientChatRepository;
@@ -72,6 +88,8 @@ class ClientChatService
 		$this->visitorLogRepository = $visitorLogRepository;
 		$this->clientChatUserAccessRepository = $clientChatUserAccessRepository;
 		$this->clientChatVisitorRepository = $clientChatVisitorRepository;
+		$this->clientChatLeadRepository = $clientChatLeadRepository;
+		$this->clientChatCaseRepository = $clientChatCaseRepository;
 	}
 
 	public function assignClientChatChannel(ClientChat $clientChat, int $priority): void
@@ -159,7 +177,7 @@ class ClientChatService
 			$dto = ClientChatCloneDto::feelInOnTransfer($clientChat, $form);
 			$newClientChat = $this->clientChatRepository->clone($dto);
 			$this->clientChatRepository->save($newClientChat);
-			$this->assignToChannel($newClientChat);
+			$this->cloneLead($clientChat, $newClientChat)->cloneCase($clientChat, $newClientChat)->assignToChannel($newClientChat);
 
 			$oldVisitor = $clientChat->ccv->ccvCvd ?? null;
 
@@ -208,4 +226,35 @@ class ClientChatService
 
 		$this->clientChatRepository->save($clientChat);
 	}
+
+	/**
+	 * @param ClientChat $oldClientChat
+	 * @param ClientChat $newClientChat
+	 * @return ClientChatService
+	 */
+	public function cloneLead(ClientChat $oldClientChat, ClientChat $newClientChat): self
+	{
+		$leads = $oldClientChat->leads;
+		foreach ($leads as $lead) {
+			$clientChatLead = ClientChatLead::create($newClientChat->cch_id, $lead->id, new \DateTimeImmutable('now'));
+			$this->clientChatLeadRepository->save($clientChatLead);
+		}
+		return $this;
+	}
+
+	/**
+	 * @param ClientChat $oldClientChat
+	 * @param ClientChat $newClientChat
+	 * @return ClientChatService
+	 */
+	public function cloneCase(ClientChat $oldClientChat, ClientChat $newClientChat): self
+	{
+		$cases = $oldClientChat->cases;
+		foreach ($cases as $case) {
+			$clientChatCase = ClientChatCase::create($newClientChat->cch_id, $case->cs_id, new \DateTimeImmutable('now'));
+			$this->clientChatCaseRepository->save($clientChatCase);
+		}
+		return $this;
+	}
+
 }

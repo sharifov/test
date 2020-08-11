@@ -229,13 +229,13 @@ class ClientChatRequestService
 		try {
 			$clientChat = $this->clientChatRepository->findNotClosed($form->data['rid'] ?? '');
 		} catch (NotFoundException $e) {
-			$clientChat = $this->clientChatRepository->findByRid($form->data['rid'] ?? '');
+			$oldClientChat = $this->clientChatRepository->findByRid($form->data['rid'] ?? '');
 
-			$dto = ClientChatCloneDto::feelInOnCreateMessage($clientChat, $clientChatRequest->ccr_id);
+			$dto = ClientChatCloneDto::feelInOnCreateMessage($oldClientChat, $clientChatRequest->ccr_id);
 			$clientChat = $this->clientChatRepository->clone($dto);
 			$clientChat->cch_client_online = 1;
 			$this->clientChatRepository->save($clientChat);
-			$this->clientChatService->assignToChannel($clientChat);
+			$this->clientChatService->cloneLead($oldClientChat, $clientChat)->cloneCase($oldClientChat, $clientChat)->assignToChannel($clientChat);
 		}
 
 		$message = ClientChatMessage::createByApi($form, $clientChat, $clientChatRequest);
