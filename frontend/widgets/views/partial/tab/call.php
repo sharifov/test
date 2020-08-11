@@ -15,12 +15,13 @@ if (!Auth::can('PhoneWidget_Dialpad')) {
 <div class="phone-widget__tab is_active" id="tab-phone">
 
   <div class="call-pane call-pane-initial is_active">
-
-    <div class="calling-from-info">
-      <div class="current-number">
-        <div class="custom-phone-select"></div>
-      </div>
-    </div>
+    <?php if ($canDialpad): ?>
+        <div class="calling-from-info">
+          <div class="current-number">
+            <div class="custom-phone-select"></div>
+          </div>
+        </div>
+    <?php endif;?>
     <div class="call-pane__number">
 
             <ul class="phone-widget__list-item calls-history suggested-contacts"> </ul>

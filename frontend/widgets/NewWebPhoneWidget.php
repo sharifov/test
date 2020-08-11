@@ -6,6 +6,7 @@ use common\models\Employee;
 use common\models\UserCallStatus;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
+use sales\auth\Auth;
 use Yii;
 use yii\bootstrap\Widget;
 
@@ -68,6 +69,10 @@ class NewWebPhoneWidget extends Widget
 			'selected' => [],
 			'options' => []
 		];
+
+		if (!Auth::can('PhoneWidget_Dialpad')) {
+		    return $result;
+        }
 
 		foreach ($userProjectPhones as $phone) {
 			$result['options'][] = [

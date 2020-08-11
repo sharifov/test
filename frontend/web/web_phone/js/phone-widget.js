@@ -375,16 +375,21 @@ $(document).ready(function() {
     });
     $('.call_pane_dialpad_clear_number').on('click', function(e) {
         e.preventDefault();
-        clearDialData();
-        // $(this).removeClass('is-shown')
+        $('#call-pane__dial-number').val('').attr('readonly', false).prop('readonly', false);
+        resetDialNumberData();
+        $('#call-to-label').text('');
+        $('.suggested-contacts').removeClass('is_active');
+
+        $('.dialpad_btn_init').attr('disabled', false).removeClass('disabled');
+        $('.call-pane__correction').attr('disabled', false);
     });
 
     $('.call_pane_dialpad_clear_number_disabled').on('click', function(e) {
         e.preventDefault();
         $('.call-pane__dial-number').val('').attr('readonly', true).prop('readonly', true);
         $('#call-to-label').text('');
-        $('#call-pane__dial-number-value').attr('data-user-id', '').attr('data-phone', '');
         $('.suggested-contacts').removeClass('is_active');
+        resetDialNumberData();
     });
 
     $('.call-pane__correction').on('click', function(e) {
@@ -1431,13 +1436,3 @@ $(document).on('click', '.call-details__nav-btn--back', function(e) {
     e.preventDefault();
     $('.conference-call-details').removeClass('is_active')
 });
-
-function clearDialData() {
-    $('#call-pane__dial-number').val('').attr('readonly', false).prop('readonly', false);
-    resetDialNumberData();
-    $('#call-to-label').text('');
-    $('.suggested-contacts').removeClass('is_active');
-
-    $('.dialpad_btn_init').attr('disabled', false).removeClass('disabled');
-    $('.call-pane__correction').attr('disabled', false);
-}

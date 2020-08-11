@@ -78,48 +78,19 @@ $js = <<<JS
 		$('.phone-widget__header-actions a[data-toggle-tab="tab-phone"]').addClass('is_active');
 		$('#tab-phone').addClass('is_active');
 				
-		reserveDialButton();
-		
 		insertPhoneNumber({
 			'formatted': data.data('phone'),
 			'title': isInternal ? '' : data.data('title'),
 			'user_id': data.data('user-id'),
 			'phone_to': data.data('phone'),
-			'phone_from': '',
+			'is_request_from': !isInternal ? true : '',
+			'request_call_sid': !isInternal ? data.data('call-sid') : '',
 			'project_id': data.data('project-id'),
 			'department_id': data.data('department-id'),
 			'client_id': data.data('client-id'),
 			'source_type_id': data.data('source-type-id'),
 			'lead_id': data.data('lead-id'),
 			'case_id': data.data('case-id'),
-		});
-		
-		if (isInternal) {
-		    makeCallFromPhoneWidget();			
-		    return false;
-		}
-		
-	    $.ajax({
-			type: 'post',
-			data: {
-				'sid': data.data('call-sid')
-			},
-			url: '{$getCallHistoryFromNumberUrl}'
-		})
-		.done(function (data) {
-			if (data.error) {
-				createNotify('Create Call', data.message, 'error');
-				freeDialButton();
-				clearDialData();
-				return false;
-			}
-			insertPhoneNumberFrom(data.phone);
-			makeCallFromPhoneWidget();			
-		})
-		.fail(function () {
-			createNotify('Create Call', 'Server error', 'error');
-			freeDialButton();
-			clearDialData();
 		});
 	 });
 
@@ -159,6 +130,7 @@ $js = <<<JS
         $('#tab-phone').addClass('is_active');
         $('.phone-widget').addClass('is_active');
 	 	
+        reserveDialButton();
 	 	makeCallFromPhoneWidget();
 	 });
 	 
@@ -168,6 +140,8 @@ $js = <<<JS
         let data = {
             'user_id': value.attr('data-user-id'),
             'from': value.attr('data-phone-from') || (phoneNumbers.getPrimaryData.value || phoneNumbers.getData.value),
+            'is_request_from': value.attr('data-is-request-from'),
+            'request_call_sid': value.attr('data-request-call-sid'),
 			'to': to,
 			'project_id': value.attr('data-project-id') || (phoneNumbers.getPrimaryData.projectId || phoneNumbers.getData.projectId),
 			'department_id': value.attr('data-department-id'),
@@ -184,7 +158,7 @@ $js = <<<JS
             }
             data.nickname = nickname;
         }
-        	
+        
 		createCall(data);
 	 }
 
@@ -226,14 +200,42 @@ $js = <<<JS
 					 createInternalCall(result.userId, result.nickname);
 					 return false;
 				}
-				createExternalCall(data);
+				prepareExternalCall(data);
 			})
 			.fail(function () {
 				createNotify('Create Call', 'Server error', 'error');
 				freeDialButton();
 			});
 	}
-	    
+	
+	function prepareExternalCall(data) {
+	     if (data.is_request_from && data.is_request_from === 'true') {
+			$.ajax({
+				type: 'post',
+				data: {
+					'sid': data.request_call_sid
+				},
+				url: '{$getCallHistoryFromNumberUrl}'
+			})
+			.done(function (result) {
+				if (result.error) {
+					createNotify('Create Call', result.message, 'error');
+					freeDialButton();
+					return false;
+				}
+				data.from = result.phone;
+				createExternalCall(data);			
+			})
+			.fail(function () {
+				createNotify('Create Call', 'Server error', 'error');
+				freeDialButton();
+			});
+			return false;
+	     }
+	   
+	  	createExternalCall(data);
+	}
+
     function createExternalCall(dialData) {
 	    		
 	    if (!dialData.from) {

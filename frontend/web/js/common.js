@@ -87,8 +87,7 @@
                 'formatted': phone,
                 'title': title,
                 'user_id': userId,
-                'phone_to': phone,
-                'phone_from': ''
+                'phone_to': phone
             });
         }
     });
@@ -127,6 +126,8 @@ function insertPhoneNumber(data) {
         .attr('data-user-id', data.user_id ? data.user_id : '')
         .attr('data-phone-to', data.phone_to ? data.phone_to : '')
         .attr('data-phone-from', data.phone_from ? data.phone_from : '')
+        .attr('data-is-request-from', data.is_request_from ? data.is_request_from : '')
+        .attr('data-request-call-sid', data.request_call_sid ? data.request_call_sid : '')
         .attr('data-project-id', data.project_id ? data.project_id : '')
         .attr('data-department-id', data.department_id ? data.department_id : '')
         .attr('data-client-id', data.client_id ? data.client_id : '')
@@ -152,6 +153,8 @@ function resetDialNumberData() {
         .attr('data-user-id', '')
         .attr('data-phone-to', '')
         .attr('data-phone-from', '')
+        .attr('data-is-request-from', '')
+        .attr('data-request-call-sid', '')
         .attr('data-project-id', '')
         .attr('data-department-id', '')
         .attr('data-client-id', '')

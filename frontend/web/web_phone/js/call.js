@@ -880,7 +880,6 @@ var PhoneWidgetCall = function () {
                 'title': isInternal ? '' : data.data('title'),
                 'user_id': data.data('user-id'),
                 'phone_to': data.data('phone'),
-                'phone_from': '',
                 'project_id': data.data('project-id'),
                 'department_id': data.data('department-id'),
                 'client_id': data.data('client-id'),
@@ -1146,8 +1145,7 @@ var PhoneWidgetCall = function () {
             'formatted': phone,
             'title': title,
             'user_id': userId,
-            'phone_to': phone,
-            'phone_from': '',
+            'phone_to': phone
         });
         $('.suggested-contacts').removeClass('is_active');
     });
