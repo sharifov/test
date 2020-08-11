@@ -1224,7 +1224,9 @@ class LeadController extends FController
 		    if (($department = $leadForm->getLead()->lDep) && $params = $department->getParams()) {
                 $phoneList = new AvailablePhoneList(Auth::id(), $leadForm->getLead()->project_id, $department->dep_id, $params->defaultPhoneType);
                 foreach ($phoneList->getList() as $phoneItem) {
-                    $fromPhoneNumbers[$phoneItem['phone']] = $phoneItem['project'] . ' ' . Department::DEPARTMENT_LIST[(int)$phoneItem['department_id']] . ' (' . $phoneItem['phone'] . ')';
+                    $fromPhoneNumbers[$phoneItem['phone']] = $phoneItem['project']
+                        . ' ' . ((int)$phoneItem['type_id'] === AvailablePhoneList::GENERAL_ID ? Department::DEPARTMENT_LIST[(int)$phoneItem['department_id']] : AvailablePhoneList::PERSONAL)
+                        . ' (' . $phoneItem['phone'] . ')';
                 }
             }
 		}

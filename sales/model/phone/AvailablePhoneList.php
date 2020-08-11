@@ -30,7 +30,7 @@ class AvailablePhoneList
     public function __construct(int $userId, int $projectId, int $departmentId, DefaultPhoneType $defaultPhoneType)
     {
         if ($defaultPhoneType->isOnlyPersonal()) {
-            $this->list = $this->getUserPhones($userId, $projectId, $departmentId)
+            $this->list = $this->getUserPhones($userId, $projectId)
                 ->addSelect([Project::tableName() . '.name as project'])
                 ->innerJoin(Project::tableName(), 'id = upp_project_id')
                 ->asArray()->all();
@@ -47,7 +47,7 @@ class AvailablePhoneList
 
         $this->list = (new Query())
             ->select(['project_id', 'phone', 'type_id', 'type', Project::tableName() . '.name as project', 'department_id'])
-            ->from($this->getUserPhones($userId, $projectId, $departmentId)->union($this->getDepartmentPhones($projectId, $departmentId)))
+            ->from($this->getUserPhones($userId, $projectId)->union($this->getDepartmentPhones($projectId, $departmentId)))
             ->innerJoin(Project::tableName(), 'id = project_id')
             ->orderBy(['type_id' => $defaultPhoneType->isGeneralFirst() ? SORT_DESC : SORT_ASC])
             ->all();
@@ -72,12 +72,12 @@ class AvailablePhoneList
             ->andWhere(['dpp_project_id' => $projectId, 'dpp_dep_id' => $departmentId, 'dpp_default' => DepartmentPhoneProject::DPP_DEFAULT_TRUE]);
     }
 
-    private function getUserPhones(int $userId, int $projectId, int $departmentId): UserProjectParamsQuery
+    private function getUserPhones(int $userId, int $projectId): UserProjectParamsQuery
     {
         return UserProjectParams::find()
             ->select(['upp_project_id as project_id', 'upp_phone_list_id', 'pl_phone_number as phone', 'upp_dep_id as department_id'])
             ->addSelect(new Expression(self::PERSONAL_ID . ' as type_id, "' . self::PERSONAL . '" as type'))
             ->innerJoin(PhoneList::tableName(), 'pl_id = upp_phone_list_id')
-            ->andWhere(['upp_user_id' => $userId, 'upp_project_id' => $projectId, 'upp_dep_id' => $departmentId]);
+            ->andWhere(['upp_user_id' => $userId, 'upp_project_id' => $projectId]);
     }
 }
