@@ -2,6 +2,7 @@
 
 namespace sales\model\user\entity\monitor\search;
 
+use common\models\Employee;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use sales\model\user\entity\monitor\UserMonitor;
@@ -11,14 +12,21 @@ use sales\model\user\entity\monitor\UserMonitor;
  */
 class UserMonitorSearch extends UserMonitor
 {
+    public string $timeRange = '';
+    public string $startTime = '';
+    public string $endTime = '';
+
+    public $userId;
+    public $typeId;
+
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
-            [['um_id', 'um_user_id', 'um_type_id', 'um_period_sec'], 'integer'],
-            [['um_start_dt', 'um_end_dt', 'um_description'], 'safe'],
+            [['um_id', 'um_user_id', 'um_type_id', 'um_period_sec', 'userId', 'typeId'], 'integer'],
+            [['um_start_dt', 'um_end_dt', 'um_description', 'timeRange', 'startTime', 'endTime'], 'safe'],
         ];
     }
 
@@ -29,6 +37,15 @@ class UserMonitorSearch extends UserMonitor
     {
         // bypass scenarios() implementation in the parent class
         return Model::scenarios();
+    }
+
+    public function attributeLabels()
+    {
+        return [
+            'um_id' => 'ID',
+            'userId' => 'User ID',
+            'typeId' => 'Type ID'
+        ];
     }
 
     /**
@@ -54,6 +71,19 @@ class UserMonitorSearch extends UserMonitor
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
+        }
+
+        if ($this->userId){
+            $query->andWhere(['um_user_id' => $this->userId]);
+        }
+
+        if ($this->typeId){
+            $query->andWhere(['um_type_id' => $this->typeId]);
+        }
+
+        if (!empty($this->startTime) && !empty($this->endTime)){
+            $query->andWhere(['>=', 'um_start_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->startTime))]);
+            $query->andWhere(['<=', 'um_end_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->endTime))]);
         }
 
         // grid filtering conditions
@@ -106,7 +136,7 @@ class UserMonitorSearch extends UserMonitor
         ]);
 
         if ($startDateTime) {
-            $query->andWhere(['>=', 'um_start_dt', $startDateTime]);
+            $query->andWhere(['>=', 'um_start_dt', Employee::convertTimeFromUserDtToUTC(strtotime($startDateTime))]);
         }
 
         //$query->andFilterWhere(['like', 'um_description', $this->um_description]);

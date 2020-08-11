@@ -5,6 +5,7 @@ use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $data yii\data\ActiveDataProvider */
+/* @var $searchModel \sales\model\user\entity\monitor\search\UserMonitorSearch */
 /* @var $startDateTime string */
 /* @var $endDateTime string */
 
@@ -24,6 +25,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 $user = Yii::$app->user->identity;
 ?>
+<?= $this->render('_stats_search', ['model' => $searchModel]); ?>
 
     <div id="myTimeline">
         <ul class="timeline-events">
@@ -46,7 +48,7 @@ $user = Yii::$app->user->identity;
 
                     $tlData['start'] = \common\models\Employee::convertTimeFromUtcToUserTime($user, strtotime($item->um_start_dt));
                     if ($item->um_end_dt) {
-                        $tlData['end'] =  \common\models\Employee::convertTimeFromUtcToUserTime($user, strtotime($item->um_end_dt)); //$item->um_end_dt;
+                        $tlData['end'] = \common\models\Employee::convertTimeFromUtcToUserTime($user, strtotime($item->um_end_dt)); //$item->um_end_dt;
                     } else {
                         $tlData['size'] = 'small';
                     }
@@ -56,7 +58,7 @@ $user = Yii::$app->user->identity;
                     if ($item->um_type_id === UserMonitor::TYPE_LOGIN) {
                         $tlData['height'] = 40;
                         if (!$item->um_end_dt) {
-                            $tlData['end'] =  \common\models\Employee::convertTimeFromUtcToUserTime($user, strtotime($item->um_start_dt) + 90);
+                            $tlData['end'] = \common\models\Employee::convertTimeFromUtcToUserTime($user, strtotime($item->um_start_dt) + 90);
                         }
 
                         $tlData['content'] = $item->getTypeName() . ' ' . Yii::$app->formatter->asDatetime(strtotime($tlData['start']));
@@ -69,7 +71,7 @@ $user = Yii::$app->user->identity;
                     if ($item->um_type_id === UserMonitor::TYPE_ACTIVE) {
                         $tlData['height'] = 32;
                         if (!$item->um_end_dt) {
-                            $tlData['end'] =  \common\models\Employee::convertTimeFromUtcToUserTime($user, time());
+                            $tlData['end'] = \common\models\Employee::convertTimeFromUtcToUserTime($user, time());
                         }
 
                         $totalDuration = strtotime($tlData['end']) - strtotime($tlData['start']);
@@ -83,11 +85,9 @@ $user = Yii::$app->user->identity;
 
                     if ($item->um_type_id === UserMonitor::TYPE_ONLINE) {
                         if (!$item->um_end_dt) {
-                            $tlData['end'] =  \common\models\Employee::convertTimeFromUtcToUserTime($user, time());
+                            $tlData['end'] = \common\models\Employee::convertTimeFromUtcToUserTime($user, time());
                         }
                     }
-
-
 
 
                     $title = $item->um_id; //getTypeName()
@@ -96,7 +96,7 @@ $user = Yii::$app->user->identity;
 
                     <li data-timeline-node='<?= json_encode($tlData, JSON_THROW_ON_ERROR) ?>'></li>
                 <?php endforeach; ?>
-            <?php
+                <?php
 
                 /*
                  *
@@ -116,7 +116,6 @@ $user = Yii::$app->user->identity;
     <div class="timeline-event-view" style="color: #f8e7ab"></div>
 
 
-
 <?php
 
 $userList = [];
@@ -124,7 +123,7 @@ $userList = [];
 if (!empty($data['users'])) {
 
     foreach ($data['users'] as $userId => $username) {
-        $userList[] = '\'<div style="margin: 0 10px 0 10px"><i class="fa fa-user"></i> '. Html::encode($username).' (' . $userId . ') </div>\'';
+        $userList[] = '\'<div style="margin: 0 10px 0 10px"><i class="fa fa-user"></i> ' . Html::encode($username) . ' (' . $userId . ') </div>\'';
     }
 }
 
