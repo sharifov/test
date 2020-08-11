@@ -21,7 +21,7 @@ use yii\widgets\Pjax;
 
                 <?= $form->field($transferForm, 'isOnline')->hiddenInput()->label(false) ?>
 
-                <?= $form->field($transferForm, 'depId')->dropDownList(Department::getList(), ['prompt' => ' -- Select department --']) ?>
+                <?= $form->field($transferForm, 'depId')->dropDownList(Department::getListExcludingExchange(), ['prompt' => ' -- Select department --']) ?>
 
                 <div class="text-center" style="width: 100%">
                     <?= Html::submitButton('Submit', ['class' => 'btn btn-success _cc_submit_transfer']) ?>
