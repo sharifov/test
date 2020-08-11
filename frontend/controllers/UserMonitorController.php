@@ -20,7 +20,7 @@ class UserMonitorController extends FController
      */
     public function behaviors()
     {
-        $behaviors =  [
+        $behaviors = [
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
@@ -57,10 +57,17 @@ class UserMonitorController extends FController
         $endDateTime = date('Y-m-d H:i', strtotime('+10 hours'));
 
         $params = Yii::$app->request->queryParams;
+
+        if (!empty($params) && $params['UserMonitorSearch']['startTime'] && $params['UserMonitorSearch']['endTime']) {
+            $startDateTime = $params['UserMonitorSearch']['startTime'];
+            $endDateTime = $params['UserMonitorSearch']['endTime'];
+        }
+
         $data = $searchModel->searchStats($params, $startDateTime);
 
         return $this->render('stats', [
             'data' => $data,
+            'searchModel' => $searchModel,
             'startDateTime' => $startDateTime,
             'endDateTime' => $endDateTime,
         ]);

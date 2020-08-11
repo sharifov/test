@@ -43,6 +43,7 @@ class UserConnectionController extends FController
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'refreshDataCountdown' => 60
         ]);
     }
 

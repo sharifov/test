@@ -7,14 +7,41 @@ use yii\widgets\Pjax;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\UserConnectionSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $refreshDataCountdown */
 
 $this->title = 'User Connections';
 $this->params['breadcrumbs'][] = $this->title;
+
+$bundle = \frontend\assets\TimerAsset::register($this);
+
+$js = <<<JS
+let countdownDuration = '$refreshDataCountdown'
+function refresh(time){
+    $('#count-down').timer('remove').timer({countdown: true, format: '%M:%S', seconds: 0, duration: time, callback: function() {
+            $.pjax.reload({container: '#auto-refresh', async: false});
+            refresh(countdownDuration)
+    }}).timer('start');
+}
+
+refresh(countdownDuration)
+
+    $("#auto-refresh-btn").click(function() {
+        $.pjax.reload({container: '#auto-refresh', async: false});
+        refresh(countdownDuration)
+    });
+JS;
+$this->registerJs($js, \yii\web\View::POS_READY);
+
 ?>
 <div class="user-connection-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-    <?php Pjax::begin(); ?>
+
+    <p>
+        <?= Html::button('Refresh <i class="fa fa-clock-o"></i><span id="count-down">00:00</span>', ['id' => 'auto-refresh-btn','class' => 'btn btn-success']) ?>
+    </p>
+
+    <?php Pjax::begin(['id' => 'auto-refresh']); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <p>
