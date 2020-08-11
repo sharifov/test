@@ -44,6 +44,11 @@ class BaggageService
         return $this;
     }
 
+    public function getBaggageFromDump(): array
+    {
+        return $this->baggageFromDump;
+    }
+
     /**
      * @param array $segments
      * @return array
