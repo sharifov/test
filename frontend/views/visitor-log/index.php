@@ -43,6 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'vl_source_cid',
             'vl_ga_client_id',
             'vl_ga_user_id',
+            'vl_client_id:client',
             //'vl_user_id',
             //'vl_client_id',
             //'vl_lead_id',
