@@ -3351,14 +3351,19 @@ $(document).ready(function () {
   });
   $('.call_pane_dialpad_clear_number').on('click', function (e) {
     e.preventDefault();
-    clearDialData(); // $(this).removeClass('is-shown')
+    $('#call-pane__dial-number').val('').attr('readonly', false).prop('readonly', false);
+    resetDialNumberData();
+    $('#call-to-label').text('');
+    $('.suggested-contacts').removeClass('is_active');
+    $('.dialpad_btn_init').attr('disabled', false).removeClass('disabled');
+    $('.call-pane__correction').attr('disabled', false);
   });
   $('.call_pane_dialpad_clear_number_disabled').on('click', function (e) {
     e.preventDefault();
     $('.call-pane__dial-number').val('').attr('readonly', true).prop('readonly', true);
     $('#call-to-label').text('');
-    $('#call-pane__dial-number-value').attr('data-user-id', '').attr('data-phone', '');
     $('.suggested-contacts').removeClass('is_active');
+    resetDialNumberData();
   });
   $('.call-pane__correction').on('click', function (e) {
     e.preventDefault();
@@ -4279,15 +4284,6 @@ $(document).on('click', '.call-details__nav-btn--back', function (e) {
   e.preventDefault();
   $('.conference-call-details').removeClass('is_active');
 });
-
-function clearDialData() {
-  $('#call-pane__dial-number').val('').attr('readonly', false).prop('readonly', false);
-  resetDialNumberData();
-  $('#call-to-label').text('');
-  $('.suggested-contacts').removeClass('is_active');
-  $('.dialpad_btn_init').attr('disabled', false).removeClass('disabled');
-  $('.call-pane__correction').attr('disabled', false);
-}
 
 function widgetStatus(selector, updateStatusUrl) {
   let url = updateStatusUrl;
@@ -5342,7 +5338,6 @@ var PhoneWidgetCall = function () {
         'title': isInternal ? '' : data.data('title'),
         'user_id': data.data('user-id'),
         'phone_to': data.data('phone'),
-        'phone_from': '',
         'project_id': data.data('project-id'),
         'department_id': data.data('department-id'),
         'client_id': data.data('client-id'),
@@ -5603,8 +5598,7 @@ var PhoneWidgetCall = function () {
       'formatted': phone,
       'title': title,
       'user_id': userId,
-      'phone_to': phone,
-      'phone_from': ''
+      'phone_to': phone
     });
     $('.suggested-contacts').removeClass('is_active');
   });
@@ -6447,9 +6441,7 @@ $(document).on('click', ".contact-dial-to-user", function () {
   insertPhoneNumber({
     'formatted': contact.name,
     'title': '',
-    'user_id': contact.id,
-    'phone_to': '',
-    'phone_from': ''
+    'user_id': contact.id
   });
   $('.phone-widget__header-actions a[data-toggle-tab]').removeClass('is_active');
   $('.phone-widget__tab').removeClass('is_active');
