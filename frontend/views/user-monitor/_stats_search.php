@@ -56,7 +56,7 @@ use yii\widgets\ActiveForm;
                     <br>
                     <div class="form-group text-center">
                         <?= Html::submitButton('<i class="fa fa-search"></i> Search', ['name' => 'search', 'class' => 'btn btn-primary']) ?>
-                        <?= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset form', ['client-chat/report'], ['class' => 'btn btn-warning']) ?>
+                        <?= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset', ['user-monitor/stats'], ['class' => 'btn btn-warning']) ?>
                     </div>
                 </div>
             </div>
