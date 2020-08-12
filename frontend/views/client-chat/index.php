@@ -534,12 +534,9 @@ $(document).on('click', '.client-chat-send-offer', function(e) {
         $("#btn-submit-note i").attr("class", "fa fa-cog fa-spin fa-fw");
     });
     
-    $("#pjax-notes").on("pjax:end", function (obj, xhr) {           
+    $("#pjax-notes").on("pjax:end", function () {           
         $("#btn-submit-note").prop("disabled", false).removeClass("disabled");
         $("#btn-submit-note i").attr("class", "fa fa-plus");
-        if (xhr.status != 200) {
-            createNotify('Error', xhr.responseText, 'error');
-        }
     }); 
 
 $(document).on('click', '.create_lead', function (e) {
