@@ -368,9 +368,9 @@ class ContactsSearch extends Client
         ]);
 
         $queryUser->andWhere(['status' => Employee::STATUS_ACTIVE]);
-        $queryUser->innerJoin(UserProjectParams::tableName(), 'upp_user_id = u.id');
+        $queryUser->leftJoin(UserProjectParams::tableName(), 'upp_user_id = u.id');
         $queryUser->innerJoin(UserProfile::tableName(), 'up_user_id = u.id and up_show_in_contact_list = 1');
-        $queryUser->innerJoin(PhoneList::tableName(), 'pl_id = upp_phone_list_id');
+        $queryUser->leftJoin(PhoneList::tableName(), 'pl_id = upp_phone_list_id');
         $queryUser->leftJoin(EmailList::tableName(), 'el_id = upp_email_list_id');
         $queryUser->leftJoin(UserStatus::tableName(), 'us_user_id = u.id');
         $queryUser->leftJoin(UserOnline::tableName(), 'uo_user_id = u.id');

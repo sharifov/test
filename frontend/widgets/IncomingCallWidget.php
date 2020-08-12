@@ -89,8 +89,8 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
 
                         switch ($action) {
                             case 'return':
-                                $prepare = new PrepareCurrentCallsForNewCall();
-                                if ($prepare->prepare($userModel->id)) {
+                                $prepare = new PrepareCurrentCallsForNewCall($userModel->id);
+                                if ($prepare->prepare()) {
                                     $return = new ReturnToHoldCall();
                                     if ($return->return($call, $userModel->id)) {
                                         $return->acceptHoldCall($callUserAccess);
@@ -102,8 +102,8 @@ class IncomingCallWidget extends \yii\bootstrap\Widget
                                 Yii::$app->redis->setnx($key, $userModel->id);
                                 $value = Yii::$app->redis->get($key);
                                 if ((int)$value === (int)$userModel->id) {
-                                    $prepare = new PrepareCurrentCallsForNewCall();
-                                    if ($prepare->prepare($userModel->id)) {
+                                    $prepare = new PrepareCurrentCallsForNewCall($userModel->id);
+                                    if ($prepare->prepare()) {
                                         $this->acceptCall($callUserAccess, $userModel);
                                     }
                                     Yii::$app->redis->expire($key, 5);

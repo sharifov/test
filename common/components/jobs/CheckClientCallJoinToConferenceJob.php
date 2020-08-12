@@ -15,6 +15,8 @@ use yii\queue\JobInterface;
  */
 class CheckClientCallJoinToConferenceJob implements JobInterface
 {
+    private const STATUS_COMPLETED = 'completed';
+
     public int $callId;
     public string $dateTime;
 
@@ -23,6 +25,16 @@ class CheckClientCallJoinToConferenceJob implements JobInterface
         $call = Call::find()->andWhere(['c_id' => $this->callId, 'c_status_id' => Call::STATUS_DELAY])->one();
 
         if (!$call) {
+            return;
+        }
+
+        if (!$this->callIsActive($call->c_call_sid)) {
+            $call->setStatusCompleted();
+            if (!$call->save()) {
+                \Yii::error(VarDumper::dumpAsString([
+                    'error' => $call->getErrors()
+                ]), 'CheckClientCallJoinToConferenceJob:Call:Complete:Save');
+            }
             return;
         }
 
@@ -82,5 +94,28 @@ class CheckClientCallJoinToConferenceJob implements JobInterface
                 ]), 'CheckClientCallJoinToConferenceJob:hangUpRingingCalls:HangUp');
             }
         }
+    }
+
+    private function callIsActive(string $callSid): bool
+    {
+        try {
+            $result = \Yii::$app->communication->getCallInfo($callSid);
+            if ($result['error']) {
+                \Yii::error(VarDumper::dumpAsString([
+                    'result' => $result,
+                    'callSid' => $callSid,
+                ]), 'CheckClientCallJoinToConferenceJob:getCallInfo:Result');
+            } else {
+                if (!empty($result['result']) && $result['result']['status'] !== self::STATUS_COMPLETED) {
+                    return true;
+                }
+            }
+        } catch (\Throwable $e) {
+            \Yii::error(VarDumper::dumpAsString([
+                'error' => AppHelper::throwableFormatter($e),
+                'callSid' => $callSid,
+            ]), 'CheckClientCallJoinToConferenceJob:getCallInfo:Throwable');
+        }
+        return false;
     }
 }

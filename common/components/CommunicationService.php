@@ -1041,4 +1041,15 @@ class CommunicationService extends Component implements CommunicationServiceInte
 
        return $this->processResponse($response);
     }
+
+    public function getCallInfo(string $callSid): array
+    {
+        $data = [
+            'callSid' => $callSid,
+        ];
+
+       $response = $this->sendRequest('twilio-conference/get-call-info', $data);
+
+       return $this->processResponse($response);
+    }
 }

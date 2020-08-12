@@ -1304,8 +1304,8 @@ class PhoneController extends FController
     {
         $result = ['error' => false, 'message' => ''];
         try {
-            $prepare = new PrepareCurrentCallsForNewCall();
-            if (!$prepare->prepare(Auth::id())) {
+            $prepare = new PrepareCurrentCallsForNewCall(Auth::id());
+            if (!$prepare->prepare()) {
                 $result = [
                     'error' => true,
                     'message' => 'Error. Please try again later.',
