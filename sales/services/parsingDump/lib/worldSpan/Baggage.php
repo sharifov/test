@@ -113,7 +113,7 @@ class Baggage implements ParseDumpInterface
     public function prepareCarryOnAllowance(string $string): ?array
     {
         $result = null;
-        $carryPattern = '/CARRY ON ALLOWANCE(.*?)\z/s';
+        $carryPattern = '/CARRY ON ALLOWANCE(.*?)EMBARGO/s';
         preg_match($carryPattern, $string, $carryMatches);
 
         if (isset($carryMatches[1])) {
