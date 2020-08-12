@@ -1039,8 +1039,8 @@ class CallController extends FController
                             Yii::$app->redis->setnx($key, Auth::id());
                             $value = Yii::$app->redis->get($key);
                             if ((int)$value === (int)Auth::id()) {
-                                $prepare = new PrepareCurrentCallsForNewCall();
-                                if ($prepare->prepare(Auth::id())) {
+                                $prepare = new PrepareCurrentCallsForNewCall(Auth::id());
+                                if ($prepare->prepare()) {
                                     $this->callService->acceptCall($callUserAccess, Auth::user());
                                 }
                                 Yii::$app->redis->expire($key, 5);
@@ -1091,8 +1091,8 @@ class CallController extends FController
                 if (!$callUserAccess) {
                     throw new \DomainException('Not found call user access');
                 }
-                $prepare = new PrepareCurrentCallsForNewCall();
-                if (!$prepare->prepare(Auth::id())) {
+                $prepare = new PrepareCurrentCallsForNewCall(Auth::id());
+                if (!$prepare->prepare()) {
                     throw new \DomainException('Prepare current calls error');
                 }
 

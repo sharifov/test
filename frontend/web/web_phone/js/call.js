@@ -1022,7 +1022,8 @@ var PhoneWidgetCall = function () {
         sendHoldRequest: sendHoldRequest,
         sendUnHoldRequest: sendUnHoldRequest,
         storage: storage,
-        callRequester: callRequester
+        callRequester: callRequester,
+        completeCall: completeCall
     };
 }();
 

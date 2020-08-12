@@ -923,9 +923,9 @@ function ActiveContactInfo(props) {
     className: "info-icon fa fa-info"
   }, " ")), React.createElement("strong", null, call.data.contact.name))), React.createElement("div", {
     className: "contact-info-card__line history-details"
-  }, React.createElement("span", {
+  }, call.data.typeId !== 3 ? React.createElement("span", {
     className: "contact-info-card__call-type"
-  }, call.data.contact.phone))));
+  }, call.data.contact.phone) : '')));
 }
 
 function CallBtns(props) {
@@ -5484,7 +5484,8 @@ var PhoneWidgetCall = function () {
     sendHoldRequest: sendHoldRequest,
     sendUnHoldRequest: sendUnHoldRequest,
     storage: storage,
-    callRequester: callRequester
+    callRequester: callRequester,
+    completeCall: completeCall
   };
 }();
 

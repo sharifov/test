@@ -59,7 +59,10 @@ function ActiveContactInfo(props) {
                     </div>
                 </div>
                 <div className="contact-info-card__line history-details">
-                    <span className="contact-info-card__call-type">{call.data.contact.phone}</span>
+                    {call.data.typeId !== 3
+                        ? <span className="contact-info-card__call-type">{call.data.contact.phone}</span>
+                        : ''
+                    }
                 </div>
             </div>
         </div>

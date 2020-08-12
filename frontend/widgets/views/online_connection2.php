@@ -317,6 +317,14 @@ $js = <<<JS
                              }
                         }
                         
+                        if (obj.cmd === 'completeCall') {
+                            if (typeof obj.data !== 'undefined') {
+                                if (typeof PhoneWidgetCall === 'object') {
+                                    PhoneWidgetCall.completeCall(obj.data.call.sid);
+                                }
+                             }
+                        }
+                        
                         if (obj.cmd === 'callAlreadyTaken') {
                             createNotify('Accept Call', 'The call has already been taken by another agent', 'warning');
                             if (typeof PhoneWidgetCall === 'object') {
