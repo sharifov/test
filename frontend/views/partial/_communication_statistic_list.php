@@ -62,9 +62,9 @@ $classMap = [
         $text = '<i class="fa fa-weixin warning" aria-hidden="true" title="' . $statistics::HINT_CHATS . '"></i>
             <sup>' . $statistics->clientChatCount . '</sup>';
         if (Auth::can('/client-chat-crud/index')) {
-            $paramName = $statistics->isTypeCase() ? 'case_id' : 'lead_id';
+            $paramName = $statistics->isTypeCase() ? 'caseId' : 'leadId';
             echo Html::a($text,
-                Url::to(['/client-chat-crud/index', 'ClientChatSearch[' . $paramName . ']'  => $statistics->getId()]),
+                Url::to(['/client-chat-crud/index', 'ClientChatQaSearch[' . $paramName . ']'  => $statistics->getId()]),
                 $linkAttributes);
         } else {
              echo $text;

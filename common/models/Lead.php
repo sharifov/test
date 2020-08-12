@@ -4624,7 +4624,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
                 $this->getCountClientChat() . '</span>';
             if (Auth::can('/client-chat-crud/index')) {
                 $str .= Html::a($chatText,
-                    Url::to(['/client-chat-crud/index', 'ClientChatSearch[lead_id]'  => $this->id]), $linkAttributes);
+                    Url::to(['/client-chat-crud/index', 'ClientChatQaSearch[leadId]'  => $this->id]), $linkAttributes);
             } else {
                 $str .= $chatText;
             }
