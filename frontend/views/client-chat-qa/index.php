@@ -7,6 +7,7 @@ use yii\grid\ActionColumn;
 use common\components\grid\DateTimeColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
+use yii\helpers\Url;
 use yii\widgets\Pjax;
 
 /* @var yii\web\View $this */
@@ -15,6 +16,7 @@ use yii\widgets\Pjax;
 
 $this->title = 'Client Chats';
 $this->params['breadcrumbs'][] = $this->title;
+
 ?>
 <div class="client-chat-index">
 
@@ -139,7 +141,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'buttons' => [
                     'view' => static function ($url, ClientChat $model) {
                         return Html::a('<span class="glyphicon glyphicon-eye-open"></span>',
-                            ['/client-chat-qa/view', 'id' => $model->cch_id],
+                            [$url],
                             [
                                 'target' => '_blank',
                                 'data-pjax' => 0,
@@ -147,6 +149,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             ]);
                     },
                     'room' => static function ($url, ClientChat $model) {
+                        $urlArr = explode('/', $url);
                         return Html::a('<span class="glyphicon glyphicon-list-alt"></span>',
                             ['/client-chat-qa/room', 'rid' => $model->cch_rid],
                             [
