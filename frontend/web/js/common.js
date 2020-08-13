@@ -96,7 +96,7 @@
         $('.enable-timer').each( function (i, e) {
             let seconds = $(e).attr('data-seconds');
 
-            $(e).timer({format: '%H:%M:%S', seconds: seconds}).timer('start');
+            $(e).timer({format: '%d %H:%M:%S', seconds: seconds}).timer('start');
         });
     }
 
