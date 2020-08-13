@@ -250,7 +250,7 @@ let timeZone = '$timeZone';
             locale:  "en-US",
             format:  {
                 timeZone: timeZone,
-                custom: "%Y-%b-%m %H:%I"
+                custom: "%Y-%m-%d %H:%M"
             }
        },
        effects: {

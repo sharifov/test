@@ -74,7 +74,8 @@ use yii\widgets\ActiveForm;
                 <div class="col-md-12">
                     <div class="form-group text-center">
                         <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
-                        <?= Html::resetButton('Reset', ['class' => 'btn btn-outline-secondary']) ?>
+                        <?= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset', ['user-monitor/index'], ['class' => 'btn btn-warning']) ?>
+                        <?php // Html::resetButton('Reset', ['class' => 'btn btn-outline-secondary']) ?>
                     </div>
                 </div>
             </div>
