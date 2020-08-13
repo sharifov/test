@@ -509,35 +509,17 @@ $(document).on('click', '.client-chat-send-offer', function(e) {
         modal.modal('hide');
         createNotify('Error', 'Server error', 'error');
     }); 
-});
-
-    $(document).on('click', '.btn_toggle_form', function (e) {
+});    
         
-        e.preventDefault();
-        e.stopPropagation(); 
-           
-        $(this).find('i').toggleClass('fa-minus').toggleClass('fa-plus');
-        $(this).toggleClass('btn-secondary').toggleClass('btn-success');
-        
-        $('.box_note_form').toggle();
-        
-        var onContent = $('.box_note_form').is(':visible');
-        if (onContent) {
-             $('.x_content').show();
-        } else {
-            $('.x_content').hide();
-        } 
-    });
-    
-    $("#pjax-notes").on("pjax:start", function () {            
+    $("#pjax-notes").on("pjax:start", function () {         
         $("#btn-submit-note").prop("disabled", true).addClass("disabled");
         $("#btn-submit-note i").attr("class", "fa fa-cog fa-spin fa-fw");
     });
     
     $("#pjax-notes").on("pjax:end", function () {           
         $("#btn-submit-note").prop("disabled", false).removeClass("disabled");
-        $("#btn-submit-note i").attr("class", "fa fa-plus");
-    }); 
+        $("#btn-submit-note i").attr("class", "fa fa-plus");        
+    });
 
 $(document).on('click', '.create_lead', function (e) {
     e.preventDefault();
@@ -605,6 +587,20 @@ $(document).on('click', '.create_case', function (e) {
     })
 
 });
+
+$(document).on('click', '.btn_toggle_form', function (e) {
+    $("#clientchatnote-ccn_note").val('');
+    let modal = $('#add-note-model');
+    modal.modal('show');
+});
+
+$(document).on('click', '#btn-submit-note', function (e) {    
+    if ($("#clientchatnote-ccn_note").val() !== ''){
+       let modal = $('#add-note-model');
+        modal.modal('hide');
+    }    
+});
+
 JS;
 $this->registerJs($js);
 

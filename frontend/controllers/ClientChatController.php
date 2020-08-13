@@ -232,7 +232,7 @@ class ClientChatController extends FController
 				'clientChat' => $clientChat,
 				'client' => $clientChat->cchClient,
 			]);
-			$result['noteHtml'] = $this->renderPartial('partial/_client-chat-note', [
+			$result['noteHtml'] = $this->renderAjax('partial/_client-chat-note', [
 				'clientChat' => $clientChat,
 				'model' => new ClientChatNote(),
 			]);
@@ -288,7 +288,7 @@ class ClientChatController extends FController
         return $this->renderAjax('partial/_client-chat-note', [
             'clientChat' => $clientChat,
             'model' => $model,
-            'showContent' => true,
+            'showContent' => false,
         ]);
 	}
 
