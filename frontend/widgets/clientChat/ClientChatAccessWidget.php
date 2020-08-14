@@ -50,7 +50,7 @@ class ClientChatAccessWidget extends Widget
 	{
 		$_self = $this;
 
-		if (!SettingHelper::isClientChatEnabled()) {
+		if (!SettingHelper::isClientChatEnabled() || !Auth::can('/client-chat/index')) {
 			return false;
 		}
 //		$result = ClientChatCache::getCache()->getOrSet(ClientChatCache::getKey($this->userId), static function () use ($_self) {
