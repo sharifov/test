@@ -510,6 +510,33 @@ class RocketChat extends Component
     }
 
     /**
+     * @param string $userId
+     * @param array $data
+     * @return array
+     * @throws Exception
+     * * RocketChat docs https://docs.rocket.chat/api/rest-api/methods/users/update
+     */
+    public function updateUser(string $userId, array $data): array
+    {
+        $out = ['error' => '', 'data' => []];
+        $headers = $this->getSystemAuthDataHeader();
+
+        $response = $this->sendRequest('users.update', $data, 'post', $headers);
+
+        if ($response->isOk) {
+            if (!empty($response->data['user'])) {
+                $out['data'] = $response->data['user'];
+            } else {
+                $out['error'] = 'Not found in response array data key [user]';
+            }
+        } else {
+            $out['error'] = $response->content;
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'RocketChat:updateUser');
+        }
+        return $out;
+    }
+
+    /**
      * @param int $length
      * @return string
      * @throws \yii\base\Exception
