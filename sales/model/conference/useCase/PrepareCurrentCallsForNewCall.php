@@ -126,27 +126,30 @@ class PrepareCurrentCallsForNewCall
         }
 
         if ($clientCall->isOut()) {
-            if (!$clientCall->c_group_id) {
-                if ($clientCall->c_parent_id) {
-                    $clientCall->c_group_id = $clientCall->c_parent_id;
-                    $clientCall->cParent->c_group_id = $clientCall->cParent->c_id;
-                    if (!$clientCall->cParent->save()) {
-                        $this->addMessage([
-                            'title' => 'Transfer client call to hold',
-                            'user_id' => $this->userId,
-                            'calls_sid' => $callSid,
-                            'error' => 'Cant change group Id for Parent Call: ' . VarDumper::dumpAsString($clientCall->cParent->getErrors()),
-                        ]);
-                        return;
-                    }
-                } else {
-                    \Yii::error(VarDumper::dumpAsString([
-                        'message' => 'Not found Parent Call for Outgoing Call',
-                        'clientCall' => $clientCall->getAttributes(),
-                    ]), 'PrepareCurrentCallsForNewCall:transferClientCallToHold');
+
+            if ($parent = $clientCall->cParent) {
+                $parent->c_queue_start_dt = date('Y-m-d H:i:s');
+
+                if (!$clientCall->c_group_id) {
+                    $parent->c_group_id = $parent->c_id;
                 }
-                $clientCall->c_is_transfer = true;
+
+                if (!$parent->save()) {
+                    $this->addMessage([
+                        'title' => 'Transfer client call to hold',
+                        'user_id' => $this->userId,
+                        'calls_sid' => $callSid,
+                        'error' => 'Cant change Parent Call: ' . VarDumper::dumpAsString($parent->getErrors()),
+                    ]);
+                    return;
+                }
+            } else {
+                \Yii::error(VarDumper::dumpAsString([
+                    'message' => 'Not found parent call',
+                    'clientCall' => $clientCall->getAttributes(),
+                ]), 'PrepareCurrentCallsForNewCall:transferClientCallToHold');
             }
+
         } elseif ($clientCall->isIn()) {
             if (!$clientCall->c_group_id) {
                 if ($currentCall = Call::findOne(['c_call_sid' => $callSid])) {
@@ -167,9 +170,9 @@ class PrepareCurrentCallsForNewCall
                     ]), 'PrepareCurrentCallsForNewCall:transferClientCallToHold');
                 }
             }
+            $clientCall->c_queue_start_dt = date('Y-m-d H:i:s');
         }
 
-        $clientCall->c_queue_start_dt = date('Y-m-d H:i:s');
         $clientCall->hold();
         if (!$clientCall->save()) {
             $this->addMessage([
