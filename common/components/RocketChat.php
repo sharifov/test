@@ -521,7 +521,12 @@ class RocketChat extends Component
         $out = ['error' => '', 'data' => []];
         $headers = $this->getSystemAuthDataHeader();
 
-        $response = $this->sendRequest('users.update', $data, 'post', $headers);
+        $dataRequest = [
+            'userId' => $userId,
+            'data' => $data,
+        ];
+
+        $response = $this->sendRequest('users.update', $dataRequest, 'post', $headers);
 
         if ($response->isOk) {
             if (!empty($response->data['user'])) {
@@ -531,8 +536,13 @@ class RocketChat extends Component
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'RocketChat:updateUser');
         }
+
+        if (!empty($out['error'])) {
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10),
+                'RocketChat:updateUser:fail');
+        }
+
         return $out;
     }
 
