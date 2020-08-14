@@ -1084,6 +1084,9 @@ class CommunicationController extends ApiBaseController
 
                 $call->c_call_type_id = $parentCall->c_call_type_id;
 
+                $call->c_conference_id = $parentCall->c_conference_id;
+                $call->c_conference_sid = $parentCall->c_conference_sid;
+
                 /*if ($parentCall->c_lead_id) {
 
                 }*/
