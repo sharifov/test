@@ -1,6 +1,5 @@
 <?php
 
-use common\models\Email;
 use sales\helpers\clientChat\ClientChatHelper;
 use sales\helpers\clientChat\ClientChatMessageHelper;
 use sales\model\clientChat\entity\ClientChat;
