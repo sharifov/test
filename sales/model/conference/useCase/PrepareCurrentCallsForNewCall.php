@@ -147,6 +147,26 @@ class PrepareCurrentCallsForNewCall
                 }
                 $clientCall->c_is_transfer = true;
             }
+        } elseif ($clientCall->isIn()) {
+            if (!$clientCall->c_group_id) {
+                if ($currentCall = Call::findOne(['c_call_sid' => $callSid])) {
+                    $currentCall->c_group_id = $currentCall->c_id;
+                    if (!$currentCall->save()) {
+                        \Yii::error(VarDumper::dumpAsString([
+                            'message' => 'Cant save current call',
+                            'currentCall' => $currentCall->getAttributes(),
+                            'errors' => $currentCall->getErrors(),
+                        ]), 'PrepareCurrentCallsForNewCall:transferClientCallToHold');
+                    }
+                    $clientCall->c_group_id = $currentCall->c_id;
+                } else {
+                    \Yii::error(VarDumper::dumpAsString([
+                        'message' => 'Not found agent call',
+                        'agentCallSId' => $callSid,
+                        'clientCall' => $clientCall->getAttributes(),
+                    ]), 'PrepareCurrentCallsForNewCall:transferClientCallToHold');
+                }
+            }
         }
 
         $clientCall->c_queue_start_dt = date('Y-m-d H:i:s');

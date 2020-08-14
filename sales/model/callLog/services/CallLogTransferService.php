@@ -208,7 +208,7 @@ class CallLogTransferService
                 ->andWhere(['<=', 'cua_created_dt', $this->call['c_created_dt']])
                 ->count();
 
-        $this->queue['clq_is_transfer'] = ($this->call['c_group_id'] != $this->call['c_id']) ? true : false;
+//        $this->queue['clq_is_transfer'] = ($this->call['c_group_id'] != $this->call['c_id']) ? true : false;
 
         $this->createCallLogs();
     }
