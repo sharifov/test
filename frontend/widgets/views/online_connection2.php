@@ -387,6 +387,7 @@ $js = <<<JS
                         if (obj.cmd === 'clientChatUpdateTimeLastMessage') {                            
                             if (obj.data.cchId) {                                
                                 $("._cc-item-last-message-time[data-cch-id='"+obj.data.cchId+"']").attr('data-moment', obj.data.moment).html(obj.data.dateTime);
+                                pjaxReload({container: '#chat-last-message-refresh', async: false});
                             }
                         }
                         
