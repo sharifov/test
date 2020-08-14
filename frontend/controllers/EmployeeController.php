@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\components\jobs\RocketChatUserUpdateJob;
 use common\models\Employee;
 use common\models\EmployeeAcl;
 use common\models\EmployeeContactInfo;
@@ -593,6 +594,7 @@ class EmployeeController extends FController
      * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
      * @throws \yii\base\InvalidConfigException
+     * @throws \yii\httpclient\Exception
      */
     public function actionUpdate()
     {
@@ -674,10 +676,10 @@ class EmployeeController extends FController
                 $attr = Yii::$app->request->post($model->formName());
 
                 $model->prepareSave($attr);
+
+                $nicknameIsChanged = $model->isAttributeChanged('nickname');
+
                 if ($model->save()) {
-
-
-                    //$model->roles;
 
                     if ($model->form_roles) {
                         $availableRoles = Employee::getAllRoles();
@@ -775,10 +777,15 @@ class EmployeeController extends FController
                         }
                     }*/
 
+                    if ($nicknameIsChanged && !empty($modelProfile->up_rc_user_id)) {
+                        $job = new RocketChatUserUpdateJob();
+                        $job->userId = $modelProfile->up_rc_user_id;
+                        $job->data = ['username' => $model->nickname];
+
+                        Yii::$app->queue_job->priority(10)->push($job);
+                    }
 
                     Yii::$app->getSession()->setFlash('success', 'User updated');
-
-
                 }
 
             } else {

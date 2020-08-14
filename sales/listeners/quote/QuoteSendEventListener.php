@@ -26,7 +26,7 @@ class QuoteSendEventListener
                 Yii::$app->queue_job->priority(20)->push($job);
             }
         } catch (\Throwable $throwable) {
-            AppHelper::throwableLogger($throwable, 'QuoteSendEventListener:Throwable');
+            AppHelper::throwableLogger($throwable, 'QuoteSendEventListener:Throwable', true);
         }
     }
 
