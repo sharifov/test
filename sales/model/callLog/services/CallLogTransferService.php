@@ -85,12 +85,25 @@ class CallLogTransferService
             return;
         }
 
-        if ($call->isOut() && !$call->isGeneralParent() && ($call->c_group_id == null || $call->isTransfer())) {
+        if (
+            $call->isOut()
+            && !$call->isGeneralParent()
+            && (
+                $call->c_group_id == null || ($call->isTransfer() && $call->isSourceTransfer())
+            )
+        ) {
             $this->outChildCall();
             return;
         }
 
-        if ($call->isOut() && !$call->isGeneralParent() && $call->c_group_id != null && !$call->isTransfer()) {
+        if (
+            $call->isOut() &&
+            !$call->isGeneralParent()
+            && $call->c_group_id != null
+            && (
+                !$call->isTransfer() || ($call->isTransfer() && !$call->isSourceTransfer())
+            )
+        ) {
             $this->outChildTransferCall();
             return;
         }
