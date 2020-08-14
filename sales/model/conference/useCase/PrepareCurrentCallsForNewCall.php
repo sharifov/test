@@ -125,6 +125,7 @@ class PrepareCurrentCallsForNewCall
             return;
         }
 
+        $clientCall->c_queue_start_dt = date('Y-m-d H:i:s');
         $clientCall->hold();
         if (!$clientCall->save()) {
             $this->addMessage([
