@@ -125,6 +125,30 @@ class PrepareCurrentCallsForNewCall
             return;
         }
 
+        if ($clientCall->isOut()) {
+            if (!$clientCall->c_group_id) {
+                if ($clientCall->c_parent_id) {
+                    $clientCall->c_group_id = $clientCall->c_parent_id;
+                    $clientCall->cParent->c_group_id = $clientCall->cParent->c_id;
+                    if (!$clientCall->cParent->save()) {
+                        $this->addMessage([
+                            'title' => 'Transfer client call to hold',
+                            'user_id' => $this->userId,
+                            'calls_sid' => $callSid,
+                            'error' => 'Cant change group Id for Parent Call: ' . VarDumper::dumpAsString($clientCall->cParent->getErrors()),
+                        ]);
+                        return;
+                    }
+                } else {
+                    \Yii::error(VarDumper::dumpAsString([
+                        'message' => 'Not found Parent Call for Outgoing Call',
+                        'clientCall' => $clientCall->getAttributes(),
+                    ]), 'PrepareCurrentCallsForNewCall:transferClientCallToHold');
+                }
+                $clientCall->c_is_transfer = true;
+            }
+        }
+
         $clientCall->c_queue_start_dt = date('Y-m-d H:i:s');
         $clientCall->hold();
         if (!$clientCall->save()) {
