@@ -273,6 +273,11 @@ class ClientChat extends \yii\db\ActiveRecord
         return ClientChatMessage::find()->andWhere(['ccm_cch_id' => $this->cch_id])->andWhere(['is', 'ccm_user_id', null])->orderBy(['ccm_id' => SORT_DESC])->limit(1)->one();
     }
 
+    public function getLastMessageByAgent(): ?ClientChatMessage
+    {
+        return ClientChatMessage::find()->andWhere(['ccm_cch_id' => $this->cch_id])->andWhere(['is not', 'ccm_user_id', null])->orderBy(['ccm_id' => SORT_DESC])->limit(1)->one();
+    }
+
     public function attributeLabels(): array
     {
         return [
