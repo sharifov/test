@@ -12,22 +12,27 @@ use yii\helpers\StringHelper;
 
 <?php foreach($clientChats as $clientChat): ?>
     <?php
+        $inMessage = true;
         $lastChatMessage = $lastChatMessageDate = '';
         $lastClientMessage = $clientChat->getLastMessageByClient();
         $lastAgentMessage = $clientChat->getLastMessageByAgent();
 
         if($lastClientMessage && !$lastAgentMessage){
+            $inMessage = true;
             $lastChatMessage = $lastClientMessage->message;
             $lastChatMessageDate = $lastClientMessage->ccm_sent_dt;
         } elseif ($lastAgentMessage && !$lastClientMessage){
+            $inMessage = false;
             $lastChatMessage = $lastAgentMessage->message;
             $lastChatMessageDate = $lastAgentMessage->ccm_sent_dt;
         } elseif ($lastClientMessage && $lastAgentMessage) {
             if(strtotime($lastClientMessage->ccm_sent_dt) > strtotime($lastAgentMessage->ccm_sent_dt)){
+                $inMessage = true;
                 $lastChatMessage = $lastClientMessage->message;
                 $lastChatMessageDate = $lastClientMessage->ccm_sent_dt;
             }
             else{
+                $inMessage = false;
                 $lastChatMessage = $lastAgentMessage->message;
                 $lastChatMessageDate = $lastAgentMessage->ccm_sent_dt;
             }
@@ -51,7 +56,7 @@ use yii\helpers\StringHelper;
                 <p title="Сhat creation date"><small><?= Yii::$app->formatter->asDate($clientChat->cch_created_dt,'php:Y-M-d') ?></small></p>
                 <?php \yii\widgets\Pjax::begin(['id' => 'chat-last-message-refresh']) ?>
                     <?php if ($lastChatMessage) : ?>
-                        <p><small><?= StringHelper::truncate($lastChatMessage, 40, '...')?></small></p>
+                        <p title="Last <?= $inMessage ? 'client' : 'agent' ?>  message"><small><?= StringHelper::truncate($lastChatMessage, 40, '...')?></small></p>
                     <?php endif; ?>
                 <?php \yii\widgets\Pjax::end() ?>
             </span>
@@ -68,7 +73,7 @@ use yii\helpers\StringHelper;
             <span class="label label-default"><?= Html::encode($clientChat->cchChannel->ccc_name) ?></span>
 
 			<?php if ($lastChatMessageDate): ?>
-                <span title="Last chat message">
+                <span title="Last update">
                     <?php $period = round((time() - strtotime($lastChatMessageDate))); ?>
 					<small class="_cc-item-last-message-time" data-moment="<?= $period ?>" data-cch-id="<?= $clientChat->cch_id ?>"></small><br>
                 </span>
