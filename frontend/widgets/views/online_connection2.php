@@ -123,7 +123,28 @@ $js = <<<JS
         socket.send(msg);
     }
     
-
+    function pushDialogOnTop(chatID) {           
+        let parentElement = document.getElementById('cc-dialogs-wrapper')
+        let childElement = document.getElementById('dialog-' + chatID)
+        let topChatId = parentElement.firstElementChild.id
+            
+        if (chatID != topChatId.split("-")[1]){       
+            $("#dialog-" + chatID).hide('25000', function() {
+                parentElement.insertBefore(childElement, parentElement.firstChild)
+            }); 
+                      
+            $("#dialog-" + chatID).show('25000');       
+        }                
+    }
+    
+    function sortDialogOnLoad() {        
+        $('._cc_item_unread_messages').each(function(i, obj) { 
+            if ($(this).text()){
+                pushDialogOnTop($(this).data('cch-id'))                
+            }                           
+        });   
+    }
+    sortDialogOnLoad() 
     
 
     const userId = '$userId';
@@ -371,7 +392,9 @@ $js = <<<JS
                             }
                             
                             if (obj.data.cchId) {
-                                $("._cc-chat-unread-message").find("[data-cch-id='"+obj.data.cchId+"']").html(obj.data.cchUnreadMessages);
+                                $("._cc-chat-unread-message").find("[data-cch-id='"+obj.data.cchId+"']").html(obj.data.cchUnreadMessages); 
+                                pjaxReload({container: '#chat-last-message-refresh-' + obj.data.cchId, async: false});
+                                pushDialogOnTop(obj.data.cchId)
                             }
                             
                             pjaxReload({container: '#notify-pjax-cc', url: '{$ccNotificationUpdateUrl}'});
@@ -386,8 +409,7 @@ $js = <<<JS
 
                         if (obj.cmd === 'clientChatUpdateTimeLastMessage') {                            
                             if (obj.data.cchId) {                                
-                                $("._cc-item-last-message-time[data-cch-id='"+obj.data.cchId+"']").attr('data-moment', obj.data.moment).html(obj.data.dateTime);
-                                pjaxReload({container: '#chat-last-message-refresh', async: false});
+                                $("._cc-item-last-message-time[data-cch-id='"+obj.data.cchId+"']").attr('data-moment', obj.data.moment).html(obj.data.dateTime);                                
                             }
                         }
                         

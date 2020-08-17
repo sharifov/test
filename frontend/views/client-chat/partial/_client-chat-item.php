@@ -39,7 +39,7 @@ use yii\helpers\StringHelper;
         }
     ?>
 
-    <div class="_cc-list-item <?= $clientChatId && $clientChatId === $clientChat->cch_id ? '_cc_active' : '' ?> <?= $clientChat->getStatusClass() ?> " data-goto-param="/live/<?= $clientChat->cch_rid ?>?layout=embedded" data-rid="<?= $clientChat->cch_rid ?>" data-cch-id="<?= $clientChat->cch_id ?>" data-is-closed="<?= $clientChat->isClosed() ?>">
+    <div id="dialog-<?= $clientChat->cch_id ?>" class="_cc-list-item <?= $clientChatId && $clientChatId === $clientChat->cch_id ? '_cc_active' : '' ?> <?= $clientChat->getStatusClass() ?> " data-goto-param="/live/<?= $clientChat->cch_rid ?>?layout=embedded" data-rid="<?= $clientChat->cch_rid ?>" data-cch-id="<?= $clientChat->cch_id ?>" data-is-closed="<?= $clientChat->isClosed() ?>">
         <div class="_cc-item-icon-wrapper">
             <span class="_cc-item-icon-round">
                 <i class="fa fa-comment"></i>
@@ -54,7 +54,7 @@ use yii\helpers\StringHelper;
             <span class="_cc-title">
                 <p><b><?= Html::encode(ClientChatHelper::getClientName($clientChat)) ?></b></p>
                 <p title="Сhat creation date"><small><?= Yii::$app->formatter->asDate($clientChat->cch_created_dt,'php:Y-M-d') ?></small></p>
-                <?php \yii\widgets\Pjax::begin(['id' => 'chat-last-message-refresh']) ?>
+                <?php \yii\widgets\Pjax::begin(['id' => 'chat-last-message-refresh-' . $clientChat->cch_id]) ?>
                     <?php if ($lastChatMessage) : ?>
                         <p title="Last <?= $inMessage ? 'client' : 'agent' ?>  message"><small><?= StringHelper::truncate($lastChatMessage, 40, '...')?></small></p>
                     <?php endif; ?>
