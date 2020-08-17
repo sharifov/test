@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\models\query\ClientQuery;
+use sales\entities\cases\Cases;
 use sales\entities\EventTrait;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
@@ -38,6 +39,7 @@ use yii\db\ActiveQuery;
  * @property ClientPhone[] $clientPhonesByType
  * @property ClientProject[] $clientProjects
  * @property Lead[] $leads
+ * @property Cases[] $cases
  * @property string $nameByType
  * @property array $phoneNumbersSms
  * @property array $emailList
@@ -185,6 +187,11 @@ class Client extends ActiveRecord
     public function getLeads(): ActiveQuery
     {
         return $this->hasMany(Lead::class, ['client_id' => 'id']);
+    }
+
+    public function getCases(): ActiveQuery
+    {
+        return $this->hasMany(Cases::class, ['cs_client_id' => 'id']);
     }
 
     /**

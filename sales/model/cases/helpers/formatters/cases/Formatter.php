@@ -7,9 +7,11 @@ use yii\bootstrap4\Html;
 
 class Formatter
 {
-    public static function asCase(Cases $cases): string
+    public static function asCase(Cases $cases, string $class): string
     {
-        return Html::tag('i', '', ['class' => 'fa fa-arrow-right'])
+        $faClass = $class ?? 'fa-arrow-right';
+
+        return Html::tag('i', '', ['class' => 'fa ' . $faClass])
             . ' '
             . Html::a(
                 'case: ' . $cases->cs_id,

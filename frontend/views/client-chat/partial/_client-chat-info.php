@@ -46,6 +46,27 @@ use yii\web\View;
                         <?php endforeach; ?>
                     </span>
                 <?php endif; ?>
+
+                <?php if ($leads = $client->leads): ?>
+                    <span class="_rc-client-leads">
+                        <br />
+                        <h6>Leads from client:</h6>
+                        <?php foreach ($leads as $lead): ?>
+                            <?php echo Yii::$app->formatter->asLead($lead, 'fa-cubes') ?><br />
+                        <?php endforeach; ?>
+                    </span>
+                <?php endif; ?>
+
+                <?php if ($cases = $client->cases): ?>
+                    <span class="_rc-client-cases">
+                        <br />
+                        <h6>Cases from client:</h6>
+                        <?php foreach ($cases as $case): ?>
+                            <?php echo Yii::$app->formatter->asCase($case, 'fa-cubes') ?><br />
+                        <?php endforeach; ?>
+                    </span>
+                <?php endif; ?>
+
             </div>
         </div>
     </div>
