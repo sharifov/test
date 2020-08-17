@@ -30,7 +30,11 @@ class UpdateSmsPrice
                 throw new \DomainException($result['message']);
             }
             if (!isset($result['result']['price'])) {
-                throw new \DomainException('Not found price');
+                \Yii::info(VarDumper::dumpAsString([
+                    'smsSid' => $smsSid,
+                    'message' => 'Not found price',
+                ]), 'info\UpdateSmsPrice');
+                return;
             }
             $price = $result['result']['price'];
             $validator = new NumberValidator();
