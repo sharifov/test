@@ -125,6 +125,7 @@ use sales\model\call\useCase\UpdateCallPrice;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\conference\service\ManageCurrentCallsByUserService;
 use sales\model\conference\useCase\DisconnectFromAllActiveClientsCreatedConferences;
+use sales\model\conference\useCase\PrepareCurrentCallsForNewCall;
 use sales\model\coupon\useCase\request\CouponForm;
 use sales\model\emailList\entity\EmailList;
 use sales\model\lead\useCase\lead\api\create\Handler;
@@ -681,9 +682,10 @@ class TestController extends FController
 
     public function actionTestNew()
     {
+
         $userId = 295;
-        $s = new DisconnectFromAllActiveClientsCreatedConferences();
-        $s->disconnect($userId);
+        $prepare = new PrepareCurrentCallsForNewCall($userId);
+        $prepare->prepare();
          die;
     }
 

@@ -4,6 +4,7 @@ use common\components\grid\BooleanColumn;
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
 use common\models\Call;
+use common\models\ConferenceParticipant;
 use common\models\Employee;
 use dosamigos\datepicker\DatePicker;
 use common\components\grid\call\CallDurationColumn;
@@ -78,7 +79,7 @@ $user = Yii::$app->user->identity;
                         return
                             ((bool)(Yii::$app->params['settings']['voip_conference_base'] ?? false)
                             && Auth::can('/phone/ajax-join-to-conference'))
-                            && (int)$model['cp_type_id'] === 1
+                            && (int)$model['cp_type_id'] === ConferenceParticipant::TYPE_AGENT
                             && ($model->isIn() || $model->isOut())
                             && $model->isStatusInProgress();
                     },
@@ -99,7 +100,7 @@ $user = Yii::$app->user->identity;
                     'join' => static function ($url, Call $model) {
                         return'<div class="dropdown">
                               <button class="btn btn-success dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fa fa-rss"></i>
+                                <i class="fa fa-phone"></i>
                               </button>
                               <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                 <a class="dropdown-item conference-coach" href="#" onclick="joinListen(\'' . $model->c_call_sid . '\');">Listen</a>

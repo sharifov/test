@@ -1,9 +1,14 @@
 <?php
 
+use common\models\Call;
+use common\models\ConferenceParticipant;
 use common\models\Department;
+use common\models\search\CallSearch;
+use sales\auth\Auth;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
 use \common\models\CallUserAccess;
@@ -29,6 +34,7 @@ JS;
 $bundle = \frontend\assets\TimerAsset::register($this);
 $userId = Yii::$app->user->id;
 $dtNow = date('Y-m-d H:i:s');
+
 ?>
 
 <style>
@@ -137,14 +143,20 @@ function renderChildCallsRecursive($calls): void {
                                 </div>
                             <?php endif; ?>
                         </td>
+                        <td>
+                            <?php getJoinTemplate($callItem); ?>
+                        </td>
                     </tr>
 
-                    <?php if ($callItem->calls):?>
+                    <?php
+
+                        if ($children = getChildrenForRecursiveRender($callItem->c_id)):?>
                             <tr>
                                 <td colspan="8">
-                                <?php renderChildCallsRecursive($callItem->calls)?>
+                                    <?php renderChildCallsRecursive($children)?>
                                 </td>
                             </tr>
+
                     <?php endif;?>
 
                 <?php endforeach;?>
@@ -153,6 +165,46 @@ function renderChildCallsRecursive($calls): void {
 
     <?php
 }?>
+
+<?php
+
+function getChildrenForRecursiveRender($parentId)
+{
+    return CallSearch::find()
+        ->select('*')
+        ->andWhere(['<>', 'c_call_type_id', Call::CALL_TYPE_JOIN])
+        ->andWhere(['c_parent_id' => $parentId])
+        ->leftJoin(ConferenceParticipant::tableName(), 'cp_call_id = c_id AND cp_type_id = ' . ConferenceParticipant::TYPE_AGENT . ' AND cp_status_id <> ' . ConferenceParticipant::STATUS_LEAVE . ' AND cp_status_id IS NOT NULL')
+        ->all();
+}
+
+function getJoinTemplate($model)
+{
+    /** @var CallSearch $model */
+    $callIsTypeAgent = (isset($model->cp_type_id) && ((int)$model->cp_type_id === ConferenceParticipant::TYPE_AGENT));
+    if (
+        ((bool)(Yii::$app->params['settings']['voip_conference_base'] ?? false) && Auth::can('/phone/ajax-join-to-conference'))
+        && $callIsTypeAgent
+        && ($model->isIn() || $model->isOut())
+        && $model->isStatusInProgress()
+    ) {
+        ?>
+        <div class="dropdown">
+            <button class="btn btn-success dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                    aria-haspopup="true" aria-expanded="false">
+                <i class="fa fa-phone"></i>
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <a class="dropdown-item conference-coach" href="#" onclick="joinListen('<?= $model->c_call_sid ?>');">Listen</a>
+                <a class="dropdown-item conference-coach" href="#" onclick="joinCoach('<?= $model->c_call_sid ?>');">Coach</a>
+                <a class="dropdown-item conference-coach" href="#" onclick="joinBarge('<?= $model->c_call_sid ?>');">Barge</a>
+            </div>
+        </div>
+        <?php
+    }
+}
+
+?>
 
 <div id="call-map-page" class="col-md-12">
 

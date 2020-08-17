@@ -153,7 +153,7 @@ class CallSearch extends Call
             ],
         ]);
 
-        $query->leftJoin(ConferenceParticipant::tableName(), 'cp_call_id = c_id AND cp_type_id = ' . ConferenceParticipant::TYPE_AGENT);
+        $query->leftJoin(ConferenceParticipant::tableName(), 'cp_call_id = c_id AND cp_type_id = ' . ConferenceParticipant::TYPE_AGENT . ' AND cp_status_id <> ' . ConferenceParticipant::STATUS_LEAVE . ' AND cp_status_id IS NOT NULL');
 
         $this->load($params);
 
@@ -333,7 +333,9 @@ class CallSearch extends Call
      */
     public function searchUserCallMap($params): ActiveDataProvider
     {
-        $query = Call::find();
+        $query = static::find()->select('*')->andWhere(['<>', 'c_call_type_id', Call::CALL_TYPE_JOIN]);
+
+        $query->leftJoin(ConferenceParticipant::tableName(), 'cp_call_id = c_id AND cp_type_id = ' . ConferenceParticipant::TYPE_AGENT  . ' AND cp_status_id <> ' . ConferenceParticipant::STATUS_LEAVE  . ' AND cp_status_id IS NOT NULL');
 
         $this->load($params);
 
@@ -382,6 +384,8 @@ class CallSearch extends Call
         }
 
         $query->with(['cProject', 'cLead', /*'cLead.leadFlightSegments',*/ 'cCreatedUser', 'cDep', 'callUserAccesses', 'cuaUsers', 'cugUgs', 'calls']);
+
+//        VarDumper::dump($query->createCommand()->getRawSql());die;
 
         return $dataProvider;
     }
