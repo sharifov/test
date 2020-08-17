@@ -298,8 +298,8 @@ $lists =  new ListsAccess(Yii::$app->user->id);
                     //$airport = \common\models\AirportList::find()->where(['ai_iata_code' => $originCode])->one();
                     $airport = \common\models\Airports::find()->where(['iata' => $originCode])->one();
 
-                    if($airport && $airport->countryId) {
-                        $country = $airport->countryId;
+                    if($airport && $airport->a_country_code) {
+                        $country = $airport->a_country_code;
                     }
                 }
 
@@ -334,8 +334,8 @@ $lists =  new ListsAccess(Yii::$app->user->id);
 
                     $airport = \common\models\Airports::find()->where(['iata' => $destinationCode])->one();
 
-                    if($airport && $airport->countryId) {
-                        $country = $airport->countryId;
+                    if($airport && $airport->a_country_code) {
+                        $country = $airport->a_country_code;
                     }
 
                     /*if($airport && $airport->aiCountryIsoCode) {
