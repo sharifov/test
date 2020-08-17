@@ -12,6 +12,7 @@ class ClientChatAccessMessage
 	private const COMMAND_ACCEPT = 'accept';
 	private const COMMAND_PENDING = 'pending';
 	private const COMMAND_SKIP = 'skip';
+	private const COMMAND_DELETED = 'deleted';
 
 	public static function accept(ClientChatUserAccess $access): array
 	{
@@ -47,6 +48,18 @@ class ClientChatAccessMessage
 			'cch_id' => $access->ccua_cch_id,
 			'pjaxUrl' => Url::to('/client-chat/pjax-update-chat-widget'),
 			'html' => self::refresh($access->ccua_user_id)
+		];
+	}
+
+	public static function deleted(int $userId): array
+	{
+		return [
+			'command' => self::COMMAND_DELETED,
+			'status_id' => null,
+			'user_id' => $userId,
+			'cch_id' => null,
+			'pjaxUrl' => Url::to('/client-chat/pjax-update-chat-widget'),
+			'html' => self::refresh($userId)
 		];
 	}
 

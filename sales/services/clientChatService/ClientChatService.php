@@ -105,7 +105,7 @@ class ClientChatService
 	/**
 	 * @param ClientChat $clientChat
 	 */
-	public function sendNotificationToUsers(ClientChat $clientChat): void
+	public function sendRequestToUsers(ClientChat $clientChat): void
 	{
 		if ($channel = $clientChat->cchChannel) {
 			$userChannel = ClientChatUserChannel::find()->byChannelId($channel->ccc_id)->all();
@@ -113,7 +113,7 @@ class ClientChatService
 			if ($userChannel) {
 				/** @var ClientChatUserChannel $item */
 				foreach ($userChannel as $item) {
-					$this->sendNotificationToUser($clientChat, $item);
+					$this->sendRequestToUser($clientChat, $item);
 				}
 			}
 		}
@@ -123,7 +123,7 @@ class ClientChatService
 	 * @param ClientChat $clientChat
 	 * @param ClientChatUserChannel $clientChatUserChannel
 	 */
-	public function sendNotificationToUser(ClientChat $clientChat, ClientChatUserChannel $clientChatUserChannel): void
+	public function sendRequestToUser(ClientChat $clientChat, ClientChatUserChannel $clientChatUserChannel): void
 	{
 		if ($clientChat->cch_owner_user_id !== $clientChatUserChannel->ccuc_user_id && $clientChatUserChannel->ccucUser->userProfile && $clientChatUserChannel->ccucUser->userProfile->isRegisteredInRc()) {
 			$clientChatUserAccess = ClientChatUserAccess::create($clientChat->cch_id, $clientChatUserChannel->ccuc_user_id);
@@ -214,7 +214,7 @@ class ClientChatService
 					$userChannel = ClientChatUserChannel::find()->byChannelId($clientChatChannel->ccc_id)->byUserId($agentId)->one();
 					if ($userChannel) {
 						try {
-							$this->sendNotificationToUser($clientChat, $userChannel);
+							$this->sendRequestToUser($clientChat, $userChannel);
 						} catch (\RuntimeException $e) {
 							\Yii::error('Send notification to user ' . $userChannel->ccuc_user_id . ' failed... ' . $e->getMessage() . '; File: ' . $e->getFile() . '; Line: ' . $e->getLine(), 'ClientChatService::transfer::RuntimeException');
 							throw $e;
@@ -222,7 +222,7 @@ class ClientChatService
 					}
 				}
 			} else {
-				$this->sendNotificationToUsers($clientChat);
+				$this->sendRequestToUsers($clientChat);
 			}
 
 			return $newDepartment;
@@ -297,7 +297,7 @@ class ClientChatService
 		try {
 			$this->assignClientChatChannel($clientChat, 1);
 			$this->clientChatRepository->save($clientChat);
-			$this->sendNotificationToUsers($clientChat);
+			$this->sendRequestToUsers($clientChat);
 		} catch (\RuntimeException | NotFoundException $e) {
 			\Yii::error('Send notification to users failed... ' . $e->getMessage() . '; File: ' . $e->getFile() . '; Line: ' . $e->getLine(), 'ClientChatService::assignToChannel::RuntimeException|NotFoundException');
 		}

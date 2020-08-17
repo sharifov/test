@@ -89,9 +89,7 @@ function refreshClientChatWidget(obj) {
             window.enableTimer();
             break;
         case 'skip':
-            $('#_client_chat_access_widget').html(data.html);
-            window.enableTimer();
-            break;
+        case 'deleted':
         case 'pending':
             $('#_client_chat_access_widget').html(data.html);
             window.enableTimer();

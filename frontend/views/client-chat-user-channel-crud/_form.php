@@ -20,6 +20,8 @@ use yii\widgets\ActiveForm;
             ] : [],
         ]) ?>
 
+        <?= $form->errorSummary($model) ?>
+
         <?= $form->field($model, 'ccuc_channel_id')->textInput() ?>
 
         <?php // $form->field($model, 'ccuc_created_dt')->textInput() ?>

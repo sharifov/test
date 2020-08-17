@@ -42,9 +42,12 @@ class Scopes extends \yii\db\ActiveQuery
 		return $this->andWhere(['IN', 'cch_id', $ids]);
 	}
 
-	public function byOwner(int $userId): self
+	public function byOwner(?int $userId): self
 	{
-		return $this->andWhere(['cch_owner_user_id' => $userId]);
+		if ($userId) {
+			return $this->andWhere(['cch_owner_user_id' => $userId]);
+		}
+		return $this->andWhere(['cch_owner_user_id' => null]);
 	}
 
 	public function byRid(string $rid): self
