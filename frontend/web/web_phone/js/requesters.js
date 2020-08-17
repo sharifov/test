@@ -9,6 +9,11 @@
             'returnHoldCallUrl': '',
             'ajaxHangupUrl': '',
             'callAddNoteUrl': '',
+            'sendDigitUrl': '',
+            'prepareCurrentCallsUrl': '',
+            'callLogInfoUrl': '',
+            'callInfoUrl': '',
+            'clientInfoUrl': '',
         };
 
         this.init = function (settings) {
@@ -18,7 +23,7 @@
         this.hold = function (call) {
             //todo remove after removed old widget
             let btn = $('.btn-hold-call');
-            btn.html('<i class="fa fa-spinner fa-spin"> </i> <span>Hold</span>');
+            btn.html('<i class="fa fa-spinner fa-spin"> </i> <span>On Hold</span>');
             btn.prop('disabled', true);
 
             $.ajax({
@@ -49,7 +54,7 @@
         this.unHold = function (call) {
             //todo remove after removed old widget
             let btn = $('.btn-hold-call');
-            btn.html('<i class="fa fa-spinner fa-spin"> </i> <span>Unhold</span>');
+            btn.html('<i class="fa fa-spinner fa-spin"> </i> <span>Resume</span>');
             btn.prop('disabled', true);
 
             $.ajax({
@@ -61,16 +66,16 @@
             })
                 .done(function (data) {
                     if (data.error) {
-                        createNotify('UnHold', data.message, 'error');
-                        btn.html('<i class="fa fa-play"> </i> <span>Unhold</span>');
+                        createNotify('Resume', data.message, 'error');
+                        btn.html('<i class="fa fa-play"> </i> <span>Resume</span>');
                         btn.prop('disabled', false);
 
                         call.unSetHoldUnHoldRequestState();
                     }
                 })
                 .fail(function () {
-                    createNotify('UnHold', 'Server error', 'error');
-                    btn.html('<i class="fa fa-play"> </i> <span>Unhold</span>');
+                    createNotify('Resume', 'Server error', 'error');
+                    btn.html('<i class="fa fa-play"> </i> <span>Resume</span>');
                     btn.prop('disabled', false);
 
                     call.unSetHoldUnHoldRequestState();
@@ -168,13 +173,13 @@
                 },
                 url: this.settings.ajaxHangupUrl
             })
-                .done(function(data) {
+                .done(function (data) {
                     if (data.error) {
                         createNotify('Hangup', data.message, 'error');
                         call.unSetHangupRequestState();
                     }
                 })
-                .fail(function() {
+                .fail(function () {
                     createNotify('Hangup', 'Server error', 'error');
                     call.unSetHangupRequestState();
                 })
@@ -202,6 +207,99 @@
                 .fail(function () {
                     createNotify('Add Note', 'Server error', 'error');
                     call.unSetAddNoteRequestState();
+                });
+        };
+
+        this.sendDigit = function (conferenceSid, digit) {
+            $.ajax({
+                type: 'post',
+                data: {
+                    conference_sid: conferenceSid,
+                    digit: digit
+                },
+                url: this.settings.sendDigitUrl,
+                dataType: 'json'
+            })
+                .done(function (data) {
+                    if (data.error) {
+                        createNotify('Send digit', data.message, 'error');
+                    }
+                })
+                .fail(function () {
+                    createNotify('Send digit', 'Server error', 'error');
+                });
+        };
+
+        this.acceptInternalCall = function (call, connection) {
+            $.ajax({
+                type: 'post',
+                data: {},
+                url: this.settings.prepareCurrentCallsUrl,
+                dataType: 'json'
+            })
+                .done(function (data) {
+                    if (data.error) {
+                        createNotify('Prepare current call', data.message, 'error');
+                        call.unSetAcceptCallRequestState();
+                    } else {
+                        connection.accept();
+                    }
+                })
+                .fail(function () {
+                    createNotify('Prepare current call', 'Server error', 'error');
+                    call.unSetAcceptCallRequestState();
+                });
+        };
+
+        this.callLogInfo = function (sid) {
+            $('#call-box-modal .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"> </i> Loading ...</div>');
+            $('#call-box-modal-label').html('Call Info');
+            $('#call-box-modal').modal();
+            $.ajax({
+                type: 'post',
+                data: {sid: sid},
+                url: this.settings.callLogInfoUrl,
+            })
+                .done(function (data) {
+                    $('#call-box-modal .modal-body').html(data);
+                })
+                .fail(function (xhr, textStatus, errorThrown) {
+                    createNotify('Call info', xhr.responseText, 'error');
+                });
+        };
+
+        this.callInfo = function (sid) {
+            $('#call-box-modal .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"> </i> Loading ...</div>');
+            $('#call-box-modal-label').html('Call Info');
+            $('#call-box-modal').modal();
+            $.ajax({
+                type: 'post',
+                data: {sid: sid},
+                url: this.settings.callInfoUrl,
+            })
+                .done(function (data) {
+                    $('#call-box-modal .modal-body').html(data);
+                })
+                .fail(function (xhr, textStatus, errorThrown) {
+                    createNotify('Call info', xhr.responseText, 'error');
+                });
+        };
+
+        this.clientInfo = function (id, isClient) {
+            $('#call-box-modal .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"> </i> Loading ...</div>');
+            let text = isClient ? 'Client details' : 'Contact info';
+            $('#call-box-modal-label').html(text + ' (' + id + ')');
+            $('#call-box-modal').modal();
+            $.ajax({
+                type: 'post',
+                data: {client_id: id},
+                url: this.settings.clientInfoUrl
+            })
+                .done(function (data) {
+                    $('#call-box-modal .modal-body').html(data);
+                })
+                .fail(function (xhr, textStatus, errorThrown) {
+                    createNotify(text, xhr.responseText, 'error');
                 });
         };
     }

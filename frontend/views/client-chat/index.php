@@ -19,9 +19,12 @@ use yii\widgets\Pjax;
 /* @var $clientChat \sales\model\clientChat\entity\ClientChat|null */
 /* @var $history ClientChatMessage|null */
 /* @var $tab int */
+/* @var $dep int */
+/** @var $project int */
+/** @var $totalUnreadMessages int */
 
 $this->title = 'My Client Chat';
-$this->params['breadcrumbs'][] = $this->title;
+//$this->params['breadcrumbs'][] = $this->title;
 
 $loadChannelsUrl = Url::to('/client-chat/index');
 ClientChatAsset::register($this);
@@ -67,34 +70,39 @@ $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
                 'page' => $page,
                 'channelId' => $channelId,
                 'clientChatId' => $clientChat ? $clientChat->cch_id : null,
-                'tab' => $tab
+                'tab' => $tab,
+                'dep' => $dep,
+                'project' => $project,
+                'totalUnreadMessages' => $totalUnreadMessages,
             ]) ?>
         </div>
 		<?php Pjax::end() ?>
     </div>
     <div class="col-md-6">
-        <div id="_rc-iframe-wrapper" style="height: 100%; width: 100%; position: relative;">
+        <div id="_rc-iframe-wrapper">
             <?php if ($clientChat && !$clientChat->isClosed()): ?>
                 <iframe class="_rc-iframe" src="<?= $rcUrl ?>?layout=embedded&resumeToken=<?= $userRcAuthToken ?>&goto=<?= urlencode('/live/'. $clientChat->cch_rid . '?layout=embedded') ?>" id="_rc-<?= $clientChat->cch_id ?>" style="border: none; width: 100%; height: 100%;" ></iframe>
             <?php elseif ($clientChat && $clientChat->isClosed()): ?>
-                <?= $this->render('partial/_chat_history', ['history' => $history, 'clientChat' => $clientChat]) ?>
+				<?= $this->render('partial/_chat_history', ['clientChat' => $clientChat]) ?>
             <?php endif; ?>
         </div>
     </div>
     <div class="col-md-3">
-        <div id="_client-chat-info">
-            <?php if ($clientChat): ?>
-                <?= $this->render('partial/_client-chat-info', ['clientChat' => $clientChat, 'client' => $client]) ?>
-            <?php endif; ?>
-        </div>
+        <div id="_cc_additional_info_wrapper" style="position: relative;">
+            <div id="_client-chat-info">
+                <?php if ($clientChat): ?>
+                    <?= $this->render('partial/_client-chat-info', ['clientChat' => $clientChat, 'client' => $client]) ?>
+                <?php endif; ?>
+            </div>
 
-        <div id="_client-chat-note">
-            <?php if ($clientChat): ?>
-                <?php echo $this->render('partial/_client-chat-note', [
-                    'clientChat' => $clientChat,
-                    'model' => new ClientChatNote(),
-                ]) ?>
-            <?php endif; ?>
+            <div id="_client-chat-note">
+                <?php if ($clientChat): ?>
+                    <?php echo $this->render('partial/_client-chat-note', [
+                        'clientChat' => $clientChat,
+                        'model' => new ClientChatNote(),
+                    ]) ?>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 </div>
@@ -107,18 +115,31 @@ $this->registerJsFile('/js/moment.min.js', [
     ]
 ]);
 $clientChatId = $clientChat ? $clientChat->cch_id : 0;
+$discardUnreadMessageUrl = Url::to(['/client-chat/discard-unread-messages']);
 $js = <<<JS
 
+window.name = 'chat';
 $(document).ready( function () {
     let clientChatId = {$clientChatId};
 
-    window.name = 'chat';
     if (clientChatId) {
         localStorage.setItem('activeChatId', clientChatId);
     }
     
     $(window).on("beforeunload", function() { 
         localStorage.removeItem('activeChatId');
+        window.name = '';
+    })
+    
+    document.addEventListener("visibilitychange", function () {
+        if (window.name === 'chat') {
+            let activeChatId = $('._cc-list-wrapper').find('._cc-list-item._cc_active').attr('data-cch-id');
+            let params = new URLSearchParams(window.location.search);
+            let chatId = params.get('chid');
+            if (activeChatId == chatId) {
+                $.post('{$discardUnreadMessageUrl}', {cchId: activeChatId});
+            }
+        }
     })
 });
 
@@ -176,13 +197,13 @@ $(document).on('click', '#btn-load-channels', function (e) {
     });
 });
 
-if ($('#_rc-iframe-wrapper').find('._rc-iframe').length) {
-    let iframe = $($('#_rc-iframe-wrapper').find('._rc-iframe')[0]);
-    let windowHeight = $(window)[0].innerHeight;
-    let offsetTop = $("#_rc-iframe-wrapper").offset().top;
-    let iframeHeight = windowHeight - offsetTop - 20;
-    $(iframe).css('height', iframeHeight+'px');
-}
+// if ($('#_rc-iframe-wrapper').find('._rc-iframe').length) {
+//     let iframe = $($('#_rc-iframe-wrapper').find('._rc-iframe')[0]);
+//     let windowHeight = $(window)[0].innerHeight;
+//     let offsetTop = $("#_rc-iframe-wrapper").offset().top;
+//     let iframeHeight = windowHeight - offsetTop - 20;
+//     $(iframe).css('height', iframeHeight+'px');
+// }
 
 $(document).on('click', '._cc_tab', function () {
     let tab = $(this);
@@ -195,7 +216,6 @@ $(document).on('click', '._cc_tab', function () {
     }
     
     params.delete('chid');
-    params.delete('channelId');
     params.delete('page');
     params.set('tab', selectedTab);
     window.history.replaceState({}, '', '{$loadChannelsUrl}?'+params.toString());
@@ -217,9 +237,9 @@ $(document).on('click', '._cc-list-item', function () {
     let userRcAuthToken = '{$userRcAuthToken}';
     let gotoParam = encodeURIComponent($(this).attr('data-goto-param'));
     let iframeHref = rcUrl + '?layout=embedded&resumeToken=' + userRcAuthToken + '&goto=' + gotoParam;
-    let windowHeight = $(window)[0].innerHeight;
-    let offsetTop = $("#_rc-iframe-wrapper").offset().top;
-    let iframeHeight = windowHeight - offsetTop - 20;
+    // let windowHeight = $(window)[0].innerHeight;
+    // let offsetTop = $("#_rc-iframe-wrapper").offset().top;
+    // let iframeHeight = windowHeight - offsetTop - 20;
     let cch_id = $(this).attr('data-cch-id');
     let isClosed = $(this).attr('data-is-closed');
     $("#_rc-iframe-wrapper").find('._rc-iframe').hide();
@@ -236,7 +256,7 @@ $(document).on('click', '._cc-list-item', function () {
             
             let iframe = document.createElement('iframe');
             iframe.setAttribute('src', iframeHref);
-            iframe.setAttribute('style', 'width: 100%; height: '+iframeHeight+'px; border: none;');
+            // iframe.setAttribute('style', 'width: 100%; height: '+iframeHeight+'px; border: none;');
             iframe.onload = function () {
                 $('#_rc-iframe-wrapper').find('#_cc-load').remove();
             }
@@ -260,30 +280,18 @@ $(document).on('click', '._cc-list-item', function () {
         cache: false,
         data: {cch_id: cch_id},
         beforeSend: function () {
-            $('#_client-chat-info').append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
+            $('#_cc_additional_info_wrapper').append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
         },
         success: function (data) {
             $('#_client-chat-info').html(data.html);
+            $('#_client-chat-note').html(data.noteHtml);
         },
         error: function (xhr) {
             createNotify('Error', xhr.responseText, 'error');
         },
-    });
-    $.ajax({
-        type: 'post',
-        url: '{$clientChatNoteUrl}',
-        dataType: 'json',
-        cache: false,
-        data: {cch_id: cch_id},
-        beforeSend: function () {
-            $('#_client-chat-note').append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
-        },
-        success: function (data) {
-            $('#_client-chat-note').html(data.html);
-        },
-        error: function (xhr) {
-            createNotify('Error', xhr.responseText, 'error');
-        },
+        complete: function () {
+            $('#_cc_additional_info_wrapper #_cc-load').remove();
+        }
     });
 });
 
@@ -332,6 +340,7 @@ $(document).on('click', '.cc_transfer', function (e) {
             modal.find('.modal-body').html(data);
         },
         error: function (xhr) {
+            modal.modal('hide');
             createNotify('Error', xhr.responseText, 'error');
         },
     });
@@ -357,10 +366,7 @@ $(document).on('click', '.cc_close', function (e) {
                 if (data.error) {
                     createNotify('Error', data.message, 'error');
                 } else {
-                    let params = new URLSearchParams(window.location.search);
-                    params.set('tab', data.tab);
-                    window.history.replaceState({}, '', '{$loadChannelsUrl}?'+params.toString());
-                    refreshChatPage(cchId);
+                    refreshChatPage(cchId, data.tab);
                     createNotify('Success', data.message, 'success');
                 }
             },
@@ -374,17 +380,25 @@ $(document).on('click', '.cc_close', function (e) {
     }
 });
 
+window.removeCcLoadFromIframe = function () {
+    $('#_rc-iframe-wrapper').find('#_cc-load').remove();
+}
+
 window.getChatHistory = function (cchId) {
     $("#_rc-iframe-wrapper").find('._rc-iframe').hide();
     $("#_rc-iframe-wrapper").find('#_cc-load').remove();
     $("#_rc-iframe-wrapper").append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
     $.post('{$chatHistoryUrl}', {cchId: cchId}, function(data) {
         $("#_rc-iframe-wrapper").append(data);
-        $("#_rc-iframe-wrapper").find('#_cc-load').remove();
     });
 }
 
-window.refreshChatPage = function (cchId) {
+window.refreshChatPage = function (cchId, tab) {
+    if (tab) {
+        let params = new URLSearchParams(window.location.search);
+        params.set('tab', tab);
+        window.history.replaceState({}, '', '{$loadChannelsUrl}?'+params.toString());
+    }
     pjaxReload({container: '#pjax-client-chat-channel-list'});
     $('#_rc-'+cchId).remove();
     $('.cc_transfer').remove();
@@ -495,35 +509,17 @@ $(document).on('click', '.client-chat-send-offer', function(e) {
         modal.modal('hide');
         createNotify('Error', 'Server error', 'error');
     }); 
-});
-
-    $(document).on('click', '.btn_toggle_form', function (e) {
+});    
         
-        e.preventDefault();
-        e.stopPropagation(); 
-           
-        $(this).find('i').toggleClass('fa-minus').toggleClass('fa-plus');
-        $(this).toggleClass('btn-secondary').toggleClass('btn-success');
-        
-        $('.box_note_form').toggle();
-        
-        var onContent = $('.box_note_form').is(':visible');
-        if (onContent) {
-             $('.x_content').show();
-        } else {
-            $('.x_content').hide();
-        } 
-    });
-    
-    $("#pjax-notes").on("pjax:start", function () {            
+    $("#pjax-notes").on("pjax:start", function () {         
         $("#btn-submit-note").prop("disabled", true).addClass("disabled");
         $("#btn-submit-note i").attr("class", "fa fa-cog fa-spin fa-fw");
     });
     
     $("#pjax-notes").on("pjax:end", function () {           
         $("#btn-submit-note").prop("disabled", false).removeClass("disabled");
-        $("#btn-submit-note i").attr("class", "fa fa-plus");
-    }); 
+        $("#btn-submit-note i").attr("class", "fa fa-plus");        
+    });
 
 $(document).on('click', '.create_lead', function (e) {
     e.preventDefault();
@@ -545,13 +541,12 @@ $(document).on('click', '.create_lead', function (e) {
             modal.find('.modal-title').html(modalTitle);
             $('#preloader').addClass('d-none');
         },
-        error: function () {
-            new PNotify({
-                title: 'Error',
-                type: 'error',
-                text: 'Internal Server Error. Try again letter.',
-                hide: true
-            });
+        error: function (xhr) {
+            if (xhr.status === 403) {
+                createNotify('Error', xhr.responseText, 'error');
+            } else {
+                createNotify('Error', 'Internal Server Error. Try again letter.', 'error');
+            }
             setTimeout(function () {
                 $('#modal-md').modal('hide');
             }, 300)
@@ -579,13 +574,12 @@ $(document).on('click', '.create_case', function (e) {
             modal.find('.modal-title').html(modalTitle);
             $('#preloader').addClass('d-none');
         },
-        error: function () {
-            new PNotify({
-                title: 'Error',
-                type: 'error',
-                text: 'Internal Server Error. Try again letter.',
-                hide: true
-            });
+        error: function (xhr) {
+            if (xhr.status === 403) {
+                createNotify('Error', xhr.responseText, 'error');
+            } else {
+                createNotify('Error', 'Internal Server Error. Try again letter.', 'error');
+            }
             setTimeout(function () {
                 $('#modal-md').modal('hide');
             }, 300)
@@ -593,6 +587,20 @@ $(document).on('click', '.create_case', function (e) {
     })
 
 });
+
+$(document).on('click', '.btn_toggle_form', function (e) {
+    $("#clientchatnote-ccn_note").val('');
+    let modal = $('#add-note-model');
+    modal.modal('show');
+});
+
+$(document).on('click', '#btn-submit-note', function (e) {    
+    if ($("#clientchatnote-ccn_note").val() !== ''){
+       let modal = $('#add-note-model');
+        modal.modal('hide');
+    }    
+});
+
 JS;
 $this->registerJs($js);
 

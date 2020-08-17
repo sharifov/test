@@ -22,12 +22,12 @@ function ButtonHold(props) {
              data-call-sid={props.call.data.callSid} data-active={props.controls.hold.active}>
             <a href="#" className="in-call-controls__action">
                 {props.call.isSentHoldUnHoldRequestState()
-                    ?  <i className="fa fa-spinner fa-spin"> </i>
+                    ?  <i className="fa fa-spinner fa-spin hold-loader"> </i>
                     : props.call.data.isHold
                         ? <i className="fa fa-play"> </i>
                         : <i className="fa fa-pause"> </i>
                 }
-                <span>{props.call.data.isHold ? 'UnHold' : 'Hold'}</span>
+                <span>{props.call.data.isHold ? 'Resume' : 'On Hold'}</span>
             </a>
         </li>
     );
@@ -38,7 +38,7 @@ function ButtonTransfer(props) {
         <li className="in-call-controls__item wg-transfer-call" data-call-sid={props.call.data.callSid} data-active={props.controls.transfer.active}>
             <a href="#" className="in-call-controls__action">
                 <i className="fa fa-random"> </i>
-                <span>Transfer Call</span>
+                <span>Transfer</span>
             </a>
         </li>
     );

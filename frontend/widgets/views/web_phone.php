@@ -6,6 +6,7 @@
 /* @var $use_browser_call_access bool */
 
 use common\models\Call;
+use sales\helpers\setting\SettingHelper;
 use yii\helpers\Url;
 use yii\bootstrap4\Modal;
 use yii\helpers\Html;
@@ -13,7 +14,7 @@ use yii\helpers\Html;
 \frontend\assets\WebPhoneAsset::register($this);
 
 ?>
-
+<?php if (SettingHelper::isOriginalPhoneWidgetEnabled()): ?>
 <div class="fabs2" style="<?=((isset($_COOKIE['web-phone-widget-close']) && $_COOKIE['web-phone-widget-close']) ? '' : 'display: none')?>">
     <a id="prime2" class="fab2"><i class="fa fa-phone"></i></a>
 </div>
@@ -171,6 +172,8 @@ use yii\helpers\Html;
     </div>
 <?php Modal::end(); ?>
 
+<?php endif; ?>
+
 <?php Modal::begin([
     'id' => 'web-phone-redirect-agents-modal',
     'title' => 'Transfer Call',
@@ -324,15 +327,18 @@ use yii\helpers\Html;
     }
 
     // Bind button to hangup call
-    document.getElementById('button-hangup').onclick = function () {
-        log('Hanging up...');
-        if (device) {
-            let callSid = getActiveConnectionCallSid();
-            hangup(callSid);
-        } else {
-            log('Device is null');
-        }
-    };
+    let btnHangup = document.getElementById('button-hangup');
+    if (btnHangup) {
+        btnHangup.onclick = function () {
+            log('Hanging up...');
+            if (device) {
+                let callSid = getActiveConnectionCallSid();
+                hangup(callSid);
+            } else {
+                log('Device is null');
+            }
+        };
+    }
 
     function hangup(callSid) {
 
@@ -417,18 +423,20 @@ use yii\helpers\Html;
         });
     }
 
-    for (var i = 0; i < ringtoneDevices.length; i++) {
-        ringtoneDevices[i].addEventListener('change', function () {
-            let selectedDevices = [].slice.call(ringtoneDevices[i].children)
-                .filter(function (node) {
-                    return node.selected;
-                })
-                .map(function (node) {
-                    return node.getAttribute('data-id');
-                });
+    if (ringtoneDevices) {
+        for (var i = 0; i < ringtoneDevices.length; i++) {
+            ringtoneDevices[i].addEventListener('change', function () {
+                let selectedDevices = [].slice.call(ringtoneDevices[i].children)
+                    .filter(function (node) {
+                        return node.selected;
+                    })
+                    .map(function (node) {
+                        return node.getAttribute('data-id');
+                    });
 
-            device.audio.ringtoneDevices.set(selectedDevices);
-        });
+                device.audio.ringtoneDevices.set(selectedDevices);
+            });
+        }
     }
 
     function volumeIndicatorsChange(inputVolume, outputVolume) {
@@ -439,8 +447,10 @@ use yii\helpers\Html;
             inputColor = 'yellow';
         }
 
-        inputVolumeBar.style.width = Math.floor(inputVolume * 300) + 'px';
-        inputVolumeBar.style.background = inputColor;
+        if (inputVolumeBar) {
+            inputVolumeBar.style.width = Math.floor(inputVolume * 300) + 'px';
+            inputVolumeBar.style.background = inputColor;
+        }
 
         let outputColor = 'red';
         if (outputVolume < .50) {
@@ -449,8 +459,10 @@ use yii\helpers\Html;
             outputColor = 'yellow';
         }
 
-        outputVolumeBar.style.width = Math.floor(outputVolume * 300) + 'px';
-        outputVolumeBar.style.background = outputColor;
+        if (outputVolumeBar) {
+            outputVolumeBar.style.width = Math.floor(outputVolume * 300) + 'px';
+            outputVolumeBar.style.background = outputColor;
+        }
     }
 
 
@@ -488,7 +500,7 @@ use yii\helpers\Html;
             });
 
             let option = document.createElement('option');
-            option.label = device.label;
+            option.label = device.label;0
             option.setAttribute('data-id', id);
             if (isActive) {
                 option.setAttribute('selected', 'selected');
@@ -501,23 +513,32 @@ use yii\helpers\Html;
     function log(message) {
         let msg = '<p>&gt;&nbsp;' + message + '</p>';
         let logDiv = document.getElementById('call-log');
-        logDiv.innerHTML += msg;
-        logDiv.scrollTop = logDiv.scrollHeight;
+        if (logDiv) {
+            logDiv.innerHTML += msg;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
 
         let logDivWidget = $('.logs-block');
-        logDivWidget.append(msg);
-        logDivWidget.animate({ scrollTop: logDivWidget.prop("scrollHeight")}, 1000);
+        if (logDivWidget) {
+            logDivWidget.append(msg);
+            logDivWidget.animate({ scrollTop: logDivWidget.prop("scrollHeight")}, 1000);
+        }
     }
 
 
     function clearLog() {
         let logDiv = document.getElementById('call-log');
-        logDiv.innerHTML = '';
-        logDiv.scrollTop = logDiv.scrollHeight;
+        if (logDiv) {
+            logDiv.innerHTML = '';
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
 
         let logDivWidget = $('.logs-block');
-        logDivWidget.html('');
-        logDivWidget.animate({ scrollTop: logDivWidget.prop("scrollHeight")}, 1000);
+        if (logDivWidget) {
+            logDivWidget.html('');
+            logDivWidget.animate({ scrollTop: logDivWidget.prop("scrollHeight")}, 1000);
+        }
     }
 
     // Set the client name in the UI
@@ -549,28 +570,95 @@ use yii\helpers\Html;
         return false;
     }
 
-    document.getElementById('button-answer').onclick = function () {
-        console.log("button-answer: " + connection);
-
-        if (connection) {
-            connection.accept();
-            //document.getElementById('call-controls2').style.display = 'none';
-            $('#call-controls2').hide();
+    function acceptInternalCall(call)
+    {
+        if (call.isSentAcceptCallRequestState()) {
+            return;
         }
-    };
 
-    document.getElementById('button-reject').onclick = function () {
-        if (connection) {
+        let callSid = call.data.callSid;
+        let connection = incomingConnections.get(callSid);
+
+        if (connection === null) {
+            createNotify('Accept internal Call', 'Not found CallSid on Collections of IncomingConnections', 'error');
+            return;
+        }
+
+        callControls2Hide();
+
+        call.setAcceptCallRequestState();
+        PhoneWidgetCall.callRequester.acceptInternalCall(call, connection);
+    }
+
+    function rejectInternalCall(call)
+    {
+        let callSid = call.data.callSid;
+        let connection = incomingConnections.get(callSid);
+
+        if (connection === null) {
+            createNotify('Reject Internal Call', 'Not found CallSid on Collections of IncomingConnections', 'error');
+            return;
+        }
+
+        call.setRejectInternalRequest();
+        callControls2Hide();
+        incomingConnections.remove(connection.parameters.CallSid);
+        connection.reject();
+        incomingSoundOff();
+        $.get(ajaxSaveCallUrl + '?sid=' + connection.parameters.CallSid, function (r) {
+            console.log(r);
+        });
+    }
+
+    let btnAnswer = document.getElementById('button-answer');
+    if (btnAnswer) {
+        btnAnswer.onclick = function () {
+            let callSid = $('#button-answer').attr('data-call-sid');
+            if (!callSid) {
+                createNotify('Answer Call', 'CallSid is empty', 'error');
+                return;
+            }
+
+            let connection = incomingConnections.get(callSid);
+
+            if (connection === null) {
+                createNotify('Answer Call', 'Not found CallSid on Collections of IncomingConnections', 'error');
+                return;
+            }
+
+            console.log("button-answer: " + connection);
+
+            connection.accept();
+            callControls2Hide();
+        };
+    }
+
+    let btnReject = document.getElementById('button-reject');
+    if (btnReject) {
+        btnReject.onclick = function () {
+            let callSid = $('#button-reject').attr('data-call-sid');
+            if (!callSid) {
+                createNotify('Reject Call', 'CallSid is empty', 'error');
+                return;
+            }
+
+            let connection = incomingConnections.get(callSid);
+
+            if (connection === null) {
+                createNotify('Reject Call', 'Not found CallSid on Collections of IncomingConnections', 'error');
+                return;
+            }
+
+            incomingConnections.remove(connection.parameters.CallSid);
             console.log("button-reject: " + JSON.stringify(connection.parameters));
             connection.reject();
             incomingSoundOff();
-                $.get(ajaxSaveCallUrl + '?sid=' + connection.parameters.CallSid, function (r) {
+            $.get(ajaxSaveCallUrl + '?sid=' + connection.parameters.CallSid, function (r) {
                 console.log(r);
             });
-            //document.getElementById('call-controls2').style.display = 'none';
-            $('#call-controls2').hide();
-        }
-    };
+            callControls2Hide();
+        };
+    }
 
 
     function initRedirectToAgent(callSid) {
@@ -632,6 +720,69 @@ use yii\helpers\Html;
 
     var connectCallSid = null;
 
+    function IncomingConnections() {
+        this.connections = [];
+
+        this.add = function (connection) {
+            if (typeof connection.parameters === 'undefined') {
+                console.error('Not found Parameters. Connection: ' + JSON.stringify(connection));
+                return;
+            }
+            if (typeof connection.parameters.CallSid === 'undefined') {
+                console.error('Not found CallSid. Connection: ' + JSON.stringify(connection));
+                return;
+            }
+            this.connections.push(connection);
+        };
+
+        this.get = function (callSid) {
+            let index = this.getIndex(callSid);
+            if (index !== null) {
+                return this.connections[index];
+            }
+            console.error('Not found Connection. CallSid: ' + callSid);
+            return null;
+        };
+
+        this.getIndex = function (callSid) {
+            let index = null;
+            this.connections.forEach(function (connection, i) {
+                if (connection.parameters.CallSid === callSid) {
+                    index = i;
+                    return false;
+                }
+            });
+            return index;
+        };
+
+        this.remove = function (callSid) {
+            let index = this.getIndex(callSid);
+            if (index !== null) {
+                this.connections.splice(index, 1);
+            }
+        };
+
+        this.all = function () {
+            console.log(JSON.stringify(this.connections));
+        };
+    }
+
+    function callControls2Show(callSid)
+    {
+        $('#call-controls2 #button-answer').attr('data-call-sid', callSid);
+        $('#call-controls2 #button-reject').attr('data-call-sid', callSid);
+        $('#call-controls2').show();
+    }
+
+    function callControls2Hide()
+    {
+        $('#call-controls2 #button-answer').attr('data-call-sid', '');
+        $('#call-controls2 #button-reject').attr('data-call-sid', '');
+        $('#call-controls2').hide();
+    }
+
+    let incomingConnections = new IncomingConnections();
+
     function initDevice() {
         clearLog();
         log('Requesting Capability Token...');
@@ -642,10 +793,11 @@ use yii\helpers\Html;
                 // console.log('app_sid: ' + data.app_sid + 'account_sid: ' + data.account_sid);
                 call_acc_sid = data.account_sid;
                 //console.log('Token: ' + data.token);
-                device = new Twilio.Device(data.token, {codecPreferences: ['opus', 'pcmu'], closeProtection: true, enableIceRestart: true, enableRingingState: false, debug: false});
+                device = new Twilio.Device(data.token, {codecPreferences: ['opus', 'pcmu'], closeProtection: true, enableIceRestart: true, enableRingingState: false, debug: false, allowIncomingWhileBusy: false});
 
-                // device.audio.incoming(false);
-                // device.audio.disconnect(false);
+                device.audio.incoming(false);
+                device.audio.outgoing(false);
+                device.audio.disconnect(false);
 
                 //console.log([data, device]);
                 device.on('ready', function (device) {
@@ -654,12 +806,16 @@ use yii\helpers\Html;
                 });
 
                 device.on('error', function (error) {
+                    freeDialButton();
                     updateAgentStatus(connection, false, 1);
                     log('Twilio.Device Error: ' + error.message);
                     incomingSoundOff();
                 });
 
                 device.on('connect', function (conn) {
+                    freeDialButton();
+                    incomingConnections.remove(conn.parameters.CallSid);
+
                     // currentConnection = conn;
                     //console.log("connect call: status: " + connection.status() + "\n" + 'connection: ' + JSON.stringify(connection) + "\n conn:" + JSON.stringify(conn));
                     //updateAgentStatus(connection, true);
@@ -678,12 +834,20 @@ use yii\helpers\Html;
 
                     let isJoin = false;
                     let sourceTypeId = null;
+                    let isInternal = false;
+                    let isConferenceCreator = false;
                     conn.customParameters.forEach(function(value, key) {
                         if (key === 'type_id' && value == '<?= Call::CALL_TYPE_JOIN ?>') {
                             isJoin = true;
                         }
                         if (key === 'source_type_id') {
                             sourceTypeId = value;
+                        }
+                        if (key === 'isInternal') {
+                            isInternal = (value === 'true');
+                        }
+                        if (key === 'isConferenceCreator') {
+                            isConferenceCreator = (value === 'true');
                         }
                     });
 
@@ -705,12 +869,14 @@ use yii\helpers\Html;
 
                         if (typeof  PhoneWidgetCall === 'object') {
                             if (conferenceBase) {
-                                let btnHold = $('.btn-hold-call');
-                                btnHold.prop('disabled', false);
-                                btnHold.html('<i class="fa fa-pause"></i> <span>Hold</span>');
-                                btnHold.data('mode', 'unhold');
-                                btnHold.attr('data-call-sid', connection.parameters.CallSid);
-                                $('#btn-group-id-hold-call').show();
+                                if (!isInternal || (isInternal && isConferenceCreator)) {
+                                    let btnHold = $('.btn-hold-call');
+                                    btnHold.prop('disabled', false);
+                                    btnHold.html('<i class="fa fa-pause"></i> <span>On Hold</span>');
+                                    btnHold.data('mode', 'unhold');
+                                    btnHold.attr('data-call-sid', connection.parameters.CallSid);
+                                    $('#btn-group-id-hold-call').show();
+                                }
                             }
                         }
 
@@ -725,9 +891,15 @@ use yii\helpers\Html;
                         } else {
                             $('#btn-group-id-redirect').show();
                         }
+
+                        if (isInternal) {
+                            $('#btn-group-id-redirect').hide();
+                        }
                     }
 
-                    volumeIndicators.style.display = 'block';
+                    if (volumeIndicators) {
+                        volumeIndicators.style.display = 'block';
+                    }
                     bindVolumeIndicators(conn);
                     if (typeof PhoneWidgetCall === 'object') {
                         PhoneWidgetCall.updateConnection(conn);
@@ -740,11 +912,14 @@ use yii\helpers\Html;
                 });
 
                 device.on('disconnect', function (conn) {
+                    freeDialButton();
+                    incomingConnections.remove(conn.parameters.CallSid);
+
                     //updateAgentStatus(connection, true);
                     let access = updateAgentStatus(connection, false, 1);
                     console.log({"action":"disconnect", "cid":conn.parameters.CallSid, "access": access});
                     connection = conn;
-                    createNotify('Call ended', 'Call ended', 'warning');
+                    // createNotify('Call ended', 'Call ended', 'warning');
                     //console.warn(conn);
                     saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To, 'completed');
 
@@ -756,7 +931,9 @@ use yii\helpers\Html;
                     $('#join-source-type').hide();
                     $('#btn-group-id-hold-call').hide();
 
-                    volumeIndicators.style.display = 'none';
+                    if (volumeIndicators) {
+                        volumeIndicators.style.display = 'none';
+                    }
                     cleanPhones();
 
                     if (connectCallSid === conn.parameters.CallSid) {
@@ -772,18 +949,33 @@ use yii\helpers\Html;
                 // });
 
                 device.on('incoming', function (conn) {
+                    incomingConnections.add(conn);
                     // console.log({"action":"incoming", "cid":conn.parameters.CallSid});
                     connection = conn;
-                    $('#call-controls2').hide();
+                    callControls2Hide();
                     incomingSoundOff();
                     if ("autoAccept" in connection.message && connection.message.autoAccept === 'false') {
-                        $('#call-controls2').show();
+                        if ("isInternal" in connection.message && connection.message.isInternal === 'true') {
+                            let call = JSON.parse(atob(connection.message.requestCall), function (k, v) {
+                                if (v === 'false') {
+                                    return false;
+                                } else if (v === 'true') {
+                                    return true;
+                                }
+                                return v;
+                            });
+                            call.callSid = connection.parameters.CallSid;
+                            PhoneWidgetCall.refreshCallStatus(call);
+                        } else {
+                            callControls2Show(connection.parameters.CallSid);
+                        }
+
                         startTimerSoundIncomingCall();
                     } else {
                         if (document.visibilityState === 'visible') {
                             conn.accept();
                         } else {
-                            $('#call-controls2').show();
+                            callControls2Show(connection.parameters.CallSid);
                             startTimerSoundIncomingCall();
                         }
                     }
@@ -830,14 +1022,17 @@ use yii\helpers\Html;
 
 
                 device.on('cancel', function (conn) {
+                    freeDialButton();
+                    incomingConnections.remove(conn.parameters.CallSid);
+
                     //var  access = updateAgentStatus(conn, true, true);
                     let access = updateAgentStatus(connection, false, 1);
                     console.log({"action":"cancel", "cid":conn.parameters.CallSid, "access": access});
                     connection = conn;
                     log('Cancel call');
-                    createNotify('Cancel call', 'Cancel call', 'warning');
+                    // createNotify('Cancel call', 'Cancel call', 'warning');
                     saveDbCall(conn.parameters.CallSid, conn.message.FromAgentPhone, conn.message.To, 'canceled');
-                    $('#call-controls2').hide();
+                    callControls2Hide();
                     $('#btn-group-id-redirect').hide();
                     incomingSoundOff();
                 });
@@ -853,6 +1048,11 @@ use yii\helpers\Html;
 
                 if (device.audio.isOutputSelectionSupported) {
                     $('#output-selection').show();
+                } else {
+                    $(document).find('.phone-widget__additional-bar .tabs__nav.tab-nav .wp-tab-device').hide();
+                    $(document).find('.phone-widget__additional-bar .wp-devices-tab-log').addClass('active-tab');
+                    $(document).find('.phone-widget__additional-bar #tab-device').hide();
+                    $(document).find('.phone-widget__additional-bar #tab-logs').show();
                 }
 
                 window.localStorage.setItem('twilioDevice', JSON.stringify(device, function (key, value) {
@@ -874,7 +1074,6 @@ use yii\helpers\Html;
     var incomingSoundInterval = null;
 
     function startTimerSoundIncomingCall() {
-        return;
         incomingSoundInterval = setInterval(function () {
             incomingAudio.play();
             clearInterval(incomingSoundInterval);
@@ -882,7 +1081,6 @@ use yii\helpers\Html;
     }
 
     function incomingSoundOff() {
-        return;
         clearInterval(incomingSoundInterval);
         incomingAudio.pause();
     }
@@ -917,7 +1115,7 @@ use yii\helpers\Html;
         return callSid;
     }
 
-    function webCall(phone_from, phone_to, project_id, lead_id, case_id, type) {
+    function webCall(phone_from, phone_to, project_id, lead_id, case_id, type, source_type_id) {
 
         /*var access =  updateAgentStatus(connection);
         if(!access) {
@@ -934,6 +1132,7 @@ use yii\helpers\Html;
                 'project_id': project_id,
                 'lead_id': lead_id,
                 'case_id': case_id,
+                'source_type_id': source_type_id
             };
 
             $.post(ajaxCreateCallUrl, createCallParams, function(data) {
@@ -954,12 +1153,13 @@ use yii\helpers\Html;
         let params = {
             'To': phone_to,
             'FromAgentPhone': phone_from,
-            'project_id': project_id,
+            'c_project_id': project_id,
             'lead_id': lead_id,
             'case_id': case_id,
             'c_type': type,
             'c_user_id': userId,
-            'is_conference_call': conferenceBase
+            'is_conference_call': conferenceBase,
+            'c_source_type_id': source_type_id
         };
 
 
@@ -971,7 +1171,7 @@ use yii\helpers\Html;
             $('#web-call-to-number').text(params.To);
 
             console.log('Calling ' + params.To + '...');
-            createNotify('Calling', 'Calling ' + params.To + '...', 'success');
+            // createNotify('Calling', 'Calling ' + params.To + '...', 'success');
             connection = device.connect(params);
             updateAgentStatus(connection, false, 0);
             $('#btn-group-id-redirect').hide();
@@ -991,7 +1191,7 @@ use yii\helpers\Html;
     }
 
     function joinConference(source_type, source_type_id, call_sid) {
-        new PNotify({title: source_type, type: "success", text: 'Request', hide: true});
+        // new PNotify({title: source_type, type: "success", text: 'Request', hide: true});
         $.ajax({
             type: 'post',
             data: {
@@ -1005,14 +1205,12 @@ use yii\helpers\Html;
             if (data.error) {
                 new PNotify({title: source_type, type: "error", text: data.message, hide: true});
             } else {
-                new PNotify({title: source_type, type: "success", text: 'Success', hide: true});
+                // new PNotify({title: source_type, type: "success", text: 'Success', hide: true});
             }
         })
         .fail(function (error) {
-            if (error) {
-                new PNotify({title: source_type, type: "error", text: error, hide: true});
-                console.error(error);
-            }
+            new PNotify({title: source_type, type: "error", text: "Server error", hide: true});
+            console.error(error);
         })
         .always(function () {
 
@@ -1050,7 +1248,7 @@ use yii\helpers\Html;
         let params = {
             'To': phone_to,
             'FromAgentPhone': phone_from,
-            'project_id': project_id,
+            'c_project_id': project_id,
             'lead_id': lead_id,
             'c_type': type,
             'c_user_id': userId,
@@ -1064,7 +1262,7 @@ use yii\helpers\Html;
             $('#web-call-to-number').text(params.To);
 
             console.log('Calling ' + params.To + '...');
-            createNotify('Calling', 'Calling ' + params.To + '...', 'success');
+            // createNotify('Calling', 'Calling ' + params.To + '...', 'success');
             connection = device.connect(params);
             updateAgentStatus(connection, false, 0);
            // $('#btn-group-id-redirect').hide();
@@ -1082,6 +1280,7 @@ use yii\helpers\Html;
 
 
 $js = <<<JS
+
     const webPhoneWidget = $('#web-phone-widget');
     //setInterval('clearAgentStatus(connection)', 1000);
 
@@ -1321,13 +1520,14 @@ $js = <<<JS
         let project_id = $(this).data('project-id');
         let lead_id = $(this).data('lead-id');
         let case_id = $(this).data('case-id');
+        let source_type_id = $(this).data('source_type_id');
         //alert(phoneNumber);
         e.preventDefault();
         
         $('#web-phone-dial-modal .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
         $('#web-phone-dial-modal').modal();
         
-        $.post(ajaxPhoneDialUrl, {'phone_number': phone_number, 'project_id': project_id, 'lead_id': lead_id, 'case_id': case_id},
+        $.post(ajaxPhoneDialUrl, {'phone_number': phone_number, 'project_id': project_id, 'lead_id': lead_id, 'case_id': case_id, 'source_type_id': source_type_id},
             function (data) {
                 $('#web-phone-dial-modal .modal-body').html(data);
             }
@@ -1346,6 +1546,7 @@ $js = <<<JS
                 let project_id = $('#call-project-id').val();
                 let lead_id = $('#call-lead-id').val();
                 let case_id = $('#call-case-id').val();
+                let source_type_id = $('#call-source-type-id').val();
                 
                 $('#web-phone-dial-modal').modal('hide');
                 //alert(phone_from + ' - ' + phone_to);
@@ -1354,7 +1555,7 @@ $js = <<<JS
                 
                 $.post(ajaxBlackList, {phone: phone_to}, function(data) {
                     if (data.success) {
-                        webCall(phone_from, phone_to, project_id, lead_id, case_id, 'web-call');        
+                        webCall(phone_from, phone_to, project_id, lead_id, case_id, 'web-call', source_type_id);        
                     } else {
                         var text = 'Error. Try again later';
                         if (data.message) {

@@ -7,14 +7,41 @@ use yii\widgets\Pjax;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\UserConnectionSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $refreshDataCountdown */
 
 $this->title = 'User Connections';
 $this->params['breadcrumbs'][] = $this->title;
+
+$bundle = \frontend\assets\TimerAsset::register($this);
+
+$js = <<<JS
+let countdownDuration = '$refreshDataCountdown'
+function refresh(time){
+    $('#count-down').timer('remove').timer({countdown: true, format: '%M:%S', seconds: 0, duration: time, callback: function() {
+            $.pjax.reload({container: '#auto-refresh', async: false});
+            refresh(countdownDuration)
+    }}).timer('start');
+}
+
+refresh(countdownDuration)
+
+    $("#auto-refresh-btn").click(function() {
+        $.pjax.reload({container: '#auto-refresh', async: false});
+        refresh(countdownDuration)
+    });
+JS;
+$this->registerJs($js, \yii\web\View::POS_READY);
+
 ?>
 <div class="user-connection-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-    <?php Pjax::begin(); ?>
+
+    <p>
+        <?= Html::button('Refresh <i class="fa fa-clock-o"></i><span id="count-down">00:00</span>', ['id' => 'auto-refresh-btn','class' => 'btn btn-success']) ?>
+    </p>
+
+    <?php Pjax::begin(['id' => 'auto-refresh']); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <p>
@@ -24,6 +51,13 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        //'tableOptions' => ['class' => 'table table-bordered table-condensed table-hover'],
+
+        'rowOptions' => static function (\common\models\UserConnection $model) {
+            if ($model->uc_idle_state) {
+                return ['class' => 'danger'];
+            }
+        },
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
             'uc_id',
@@ -62,6 +96,28 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
             ],
             'uc_ip',
+            //'uc_window_state:boolean',
+            [
+                'class' => \common\components\grid\BooleanColumn::class,
+                'attribute' => 'uc_window_state',
+            ],
+            [
+                'attribute' => 'uc_window_state_dt',
+                'value' => static function (\common\models\UserConnection $model) {
+                    return $model->uc_window_state_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->uc_window_state_dt), 'php: Y-m-d H:i:s') : $model->uc_window_state_dt;
+                },
+                'format' => 'raw',
+            ],
+
+
+            'uc_idle_state:boolean',
+            [
+                'attribute' => 'uc_idle_state_dt',
+                'value' => static function (\common\models\UserConnection $model) {
+                    return $model->uc_idle_state_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->uc_idle_state_dt), 'php: Y-m-d H:i:s') : $model->uc_idle_state_dt;
+                },
+                'format' => 'raw',
+            ],
             [
                 'attribute' => 'uc_created_dt',
                 'value' => static function (\common\models\UserConnection $model) {

@@ -42,7 +42,7 @@ class CentrifugoNotificationWidget extends Widget
     {
         $this->registerAssets();
         $client = new Client($this->centrifugoUrl);
-        $token = $client->setSecret($this->tokenHmacSecretKey)->generateConnectionToken($this->userId,  '');
+        $token = $client->setSecret($this->tokenHmacSecretKey)->generateConnectionToken('',  '');
 
         return $this->render('index',[
             'channels' => $this->userAllowedChannels,

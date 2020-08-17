@@ -5333,6 +5333,32 @@ input[disabled] + .radio-tab__text {
   border: none;
 }
 
+.inside_icon,
+.flight_inside_icon {
+    font-size: 9px;
+    color: #78c286;
+    position: absolute;
+    margin-left: -9px;
+    font-weight: 900;
+    cursor: default;
+}
+
+.flight_inside_icon {
+   color: #e8e8e8;
+   margin-left: -17px;
+}
+
+.tooltip_quote_info_box {
+    text-align: left;
+    padding-top: 12px;
+}
+.tooltip_quote_info_box ul {
+    padding-left: 16px;
+}
+.tooltip_quote_info_box p {
+    margin-bottom: 0;
+}
+
 @-webkit-keyframes scaleIn {
   from {
     -webkit-transform: scale(1, 1);

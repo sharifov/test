@@ -95,7 +95,7 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>*/ ?>
 
         <div class="col-md-1" title="Сompleted Tasks Percent">
-            <input type="text" value="<?=$taskSummary['completedTasksPercent']?>" data-width="120" data-height="120" data-fgColor="<?=($taskSummary['completedTasksPercent']>=$user->userParams->up_min_percent_for_take_leads?'#66CC66':'#f3a72d')?>" class="dial" readonly="readonly" title="Сompleted Tasks Percent">
+            <input type="text" value="<?=$taskSummary['completedTasksPercent']?>" data-width="120" data-height="120" data-fgColor="<?=($taskSummary['completedTasksPercent']>=$user->userParams->up_min_percent_for_take_leads?'#66CC66':'#f3a72d')?>" class="knob_element" readonly="readonly" title="Сompleted Tasks Percent">
         </div>
 
         <div class="col-md-1" title="Taked leads">
@@ -106,7 +106,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     $maxVal = $user->userParams->up_default_take_limit_leads;
                 }
             ?>
-            <input type="text" value="<?=$newLeadsCount?>" data-max="<?=$maxVal?>" data-width="120" data-height="120" data-fgColor="#337ab7" class="dial" readonly="readonly" title="Taked leads">
+            <input type="text" value="<?=$newLeadsCount?>" data-max="<?=$maxVal?>" data-width="120" data-height="120" data-fgColor="#337ab7" class="knob_element" readonly="readonly" title="Taked leads">
         </div>
 
         <?= $this->render('@frontend/widgets/views/user_info_progress', [
@@ -479,7 +479,7 @@ echo '<div class="table-responsive">' . GridView::widget([
 </div>
 
 <?php //if($isAccessNewLead):?>
-    <?php $this->registerJs('$(".dial").knob();', \yii\web\View::POS_READY); ?>
+    <?php $this->registerJs('$(".knob_element").knob();', \yii\web\View::POS_READY); ?>
 <?php //endif; ?>
 
 

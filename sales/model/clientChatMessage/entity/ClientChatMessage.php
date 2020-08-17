@@ -7,6 +7,7 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestApiForm;
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "client_chat_message".
@@ -24,6 +25,11 @@ use Yii;
  */
 class ClientChatMessage extends \yii\db\ActiveRecord
 {
+
+    public const BY_BOT = 'bot';
+    public const BY_AGENT = 'agent';
+    public const BY_CLIENT = 'client';
+    public const BOT_EMAIL = 'bot@techork.com';
 
     /**
      * {@inheritdoc}
@@ -145,6 +151,25 @@ class ClientChatMessage extends \yii\db\ActiveRecord
 		return $this->ccm_client_id && !$this->ccm_user_id;
 	}
 
+	public function isMessageFromBot(): bool
+	{
+		return (isset($this->ccm_body['agent']['email']) && $this->ccm_body['agent']['email'] === self::BOT_EMAIL);
+	}
+
+    public function getByType(): string
+    {
+        if ($this->isMessageFromClient()) {
+            return self::BY_CLIENT;
+        }
+        if ($this->isMessageFromBot()) {
+            return self::BY_BOT;
+        }
+        if (!empty($this->ccm_user_id)) {
+            return self::BY_AGENT;
+        }
+        return 'undefined';
+	}
+
 	public function getMessage(): string
 	{
 		return $this->ccm_body['msg'] ?? '';
@@ -177,4 +202,13 @@ class ClientChatMessage extends \yii\db\ActiveRecord
             'files' => 'Files',
         ];
     }
+
+    /**
+     * @param int $chatId
+     * @return int|null
+     */
+    public static function countByChatId(int $chatId): ?int
+    {
+		return self::find()->where(['ccm_cch_id' => $chatId])->count();
+	}
 }

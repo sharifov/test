@@ -13,6 +13,7 @@ use yii\helpers\Html;
 /* @var $case_id int */
 /* @var $selectProjectPhone string */
 /* @var $currentCall \common\models\Call */
+/** @var int $source_type_id */
 
 /** @var Employee $user */
 $user = Yii::$app->user->identity;
@@ -198,6 +199,7 @@ $user = Yii::$app->user->identity;
                         <?=Html::hiddenInput('call-lead-id', $lead_id, ['id' => 'call-lead-id'])?>
                         <?=Html::hiddenInput('call-case-id', $case_id, ['id' => 'call-case-id'])?>
                         <?=Html::hiddenInput('call-project-id', $project ? $project->id : '', ['id' => 'call-project-id'])?>
+                        <?=Html::hiddenInput('call-source-type-id', $source_type_id ?: '', ['id' => 'call-source-type-id'])?>
                     </td>
                     <td>
                         <?= Html::button('<i class="fa fa-phone-square"></i> Make Call', ['class' => 'btn btn-sm btn-success btn-make-call']) ?>

@@ -483,10 +483,10 @@ $js = <<<JS
     });
 
     $(document).on('pjax:end', function() {
-         $('[data-toggle="tooltip"]').tooltip();
+         $('[data-toggle="tooltip"]').tooltip({html:true});
     });
 
-   $('[data-toggle="tooltip"]').tooltip();
+   $('[data-toggle="tooltip"]').tooltip({html:true});
 
 JS;
     $this->registerJs($js, View::POS_READY);

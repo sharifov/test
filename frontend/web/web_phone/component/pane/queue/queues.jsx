@@ -6,11 +6,11 @@ function AllQueues(props) {
                 : ''
             }
             {countProperties(props.direct) > 0
-                ? <QueueItem groups={props.direct} name="Direct Calls" type="direct"/>
+                ? <QueueItem groups={props.direct} name="Direct Line" type="direct"/>
                 : ''
             }
             {countProperties(props.general) > 0
-                ? <QueueItem groups={props.general} name="General Lines" type="general"/>
+                ? <QueueItem groups={props.general} name="General Line" type="general"/>
                 : ''
             }
         </React.Fragment>

@@ -1,6 +1,9 @@
 <?php
 /* @var $leadId integer */
 
+use common\models\UserConnection;
+use sales\model\user\entity\monitor\UserMonitor;
+use yii\bootstrap4\Modal;
 use yii\helpers\Url;
 
 /* @var $caseId integer */
@@ -14,6 +17,16 @@ use yii\helpers\Url;
 /* @var $this \yii\web\View */
 
 \frontend\assets\WebSocketAsset::register($this);
+if (UserConnection::isIdleMonitorEnabled()) {
+    \frontend\assets\IdleAsset::register($this);
+}
+
+if (UserMonitor::isAutologoutEnabled()) {
+    $bundle = \frontend\assets\TimerAsset::register($this);
+    \frontend\assets\BroadcastChannelAsset::register($this);
+}
+
+$dtNow = date('Y-m-d H:i:s');
 
 ?>
     <li>
@@ -23,7 +36,50 @@ use yii\helpers\Url;
                 <span class="badge" title="Open tabs"></span>
             <?php //php endif;*/?>
         </a>
+        <script>
+            function socketSend(controller, action, params) {
+                let data = {};
+                data.c = controller;
+                data.a = action;
+                data.p = params;
+                //console.log(data);
+                socket.send(JSON.stringify(data));
+            }
+        </script>
     </li>
+    <?php if (UserConnection::isIdleMonitorEnabled()): ?>
+    <li>
+        <a href="javascript:;" class="info-number" title="User Monitor" id="user-monitor-indicator">
+            <div class="text-success"><i class="fa fa-clock-o"></i> <span id="user-monitor-timer"></span></div>
+        </a>
+    </li>
+    <?php
+        //$this->registerJs("$('#user-monitor-timer').timer({format: '%M:%S', seconds: 0}).timer('start');", \yii\web\View::POS_READY, 'user-monitor-timer');
+    ?>
+    <?php endif; ?>
+
+
+<?php if (UserMonitor::isAutologoutEnabled()): ?>
+    <?php Modal::begin([
+        'id' => 'modal-autologout',
+        'closeButton' => false,
+        'title' => '<i class="fa fa-power-off"></i> Auto LogOut',
+        'size' => Modal::SIZE_SMALL,
+        'clientOptions' => ['backdrop' => 'static', 'keyboard' => false],
+    ])?>
+        <div class="text-center">
+            <p>You are not active for a long time (<?=UserMonitor::autologoutIdlePeriodMin()?> min.). After a few seconds, the system will automatically log out.</p>
+            <?php if(UserMonitor::isAutologoutTimerSec()): ?>
+                <h1 id="autologout-timer" class="text-danger">00:00</h1>
+            <?php endif; ?>
+            <p><b>Do you want to continue working?</b></p>
+            <button class="btn btn-danger" id="btn-logout"><i class="fa fa-power-off"></i> LogOut</button>
+            <button class="btn btn-success" id="btn-cancel-autologout"><i class="fa fa-check"></i> Continue working</button>
+        </div>
+    <?php Modal::end()?>
+<?php endif; ?>
+
+
 <?php
 // $userAgent = urlencode(Yii::$app->request->userAgent);
 // const socket = new WebSocket('wss:\\sales.dev.travelinsides.com:8888/?user_id=1&controller_id=test&action_id=test&page_url=test&lead_id=15636');
@@ -66,6 +122,9 @@ $js = <<<JS
         var msg = document.getElementById("message").value;
         socket.send(msg);
     }
+    
+
+    
 
     const userId = '$userId';
     const wsUrl = '$wsUrl';
@@ -258,6 +317,14 @@ $js = <<<JS
                              }
                         }
                         
+                        if (obj.cmd === 'completeCall') {
+                            if (typeof obj.data !== 'undefined') {
+                                if (typeof PhoneWidgetCall === 'object') {
+                                    PhoneWidgetCall.completeCall(obj.data.call.sid);
+                                }
+                             }
+                        }
+                        
                         if (obj.cmd === 'callAlreadyTaken') {
                             createNotify('Accept Call', 'The call has already been taken by another agent', 'warning');
                             if (typeof PhoneWidgetCall === 'object') {
@@ -277,19 +344,26 @@ $js = <<<JS
                         
                             let activeChatId = localStorage.getItem('activeChatId');
                             
-                            if (activeChatId == obj.data.cchId && obj.data.cchUnreadMessages) {
+                            if (document.visibilityState == "visible" && window.name === 'chat' && activeChatId == obj.data.cchId && obj.data.cchUnreadMessages) {
                                 $.post('{$discardUnreadMessageUrl}', {cchId: activeChatId});
                                 return false;
                             }
                         
-                            if (obj.data.soundNotification) {
+                            let previousPage = localStorage.getItem('previousPage');
+                            if ((document.visibilityState == "visible") && obj.data.soundNotification) {
+                                soundNotification('incoming_message');
+                            } else if (previousPage === $(document)[0].baseURI && obj.data.soundNotification) {
                                 soundNotification('incoming_message');
                             }
                             
                             if(obj.data.totalUnreadMessages) {
                                 $('._cc_unread_messages').html(obj.data.totalUnreadMessages);
+                                if (window.name === 'chat') {
+                                    faviconChat.badge(obj.data.totalUnreadMessages);
+                                }
                             } else {
                                 $('._cc_unread_messages').html('');
+                                faviconChat.reset();
                                 if (obj.data.refreshPage) {
                                     window.location.reload();
                                     return false;
@@ -315,6 +389,13 @@ $js = <<<JS
                                 $("._cc-item-last-message-time[data-cch-id='"+obj.data.cchId+"']").attr('data-moment', obj.data.moment).html(obj.data.dateTime);
                             }
                         }
+                        
+                        if (obj.cmd === 'logout') {
+                            if (typeof autoLogout === "function") {
+                                autoLogout(obj);
+                            }
+                        }
+                        
                     }
                     // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
                 } catch (error) {
@@ -346,12 +427,6 @@ $js = <<<JS
                 //}
                 onlineObj.attr('title', 'Online Connection: false').find('i').removeClass('success').addClass('danger');
             };
-            
-            /*socket.setTimeout(function () {
-            console.log('2 seconds passed, closing the socket');
-          socket.close();
-        }, 2000);*/
-    
     
         } catch (error) {
             console.error(error);
@@ -363,14 +438,122 @@ $js = <<<JS
 
 JS;
 
-//if(Yii::$app->controller->uniqueId)
-/*if(in_array(Yii::$app->controller->action->uniqueId, ['orders/create'])) {
+$this->registerJs($js, \yii\web\View::POS_READY, 'connection-js');
 
-} else {*/
 
-    //if (Yii::$app->controller->module->id != 'user-management') {
-$this->registerJs($js, \yii\web\View::POS_READY);
-    //}
+if (UserMonitor::isAutologoutEnabled()) {
+
+    $isAutologoutShowMessage = UserMonitor::isAutologoutShowMessage() ? 'true' : 'false';
+    $isAutologoutTimerSec = UserMonitor::isAutologoutTimerSec();
+
+    $js = <<<JS
+const isAutologoutShowMessage = $isAutologoutShowMessage;
+const isAutologoutTimerSec = $isAutologoutTimerSec;
+
+$('#btn-cancel-autologout').on('click', function () {
+     cancelAutoLogout();
+});
+
+$('#btn-logout').on('click', function () {
+     if (isAutologoutShowMessage) {
+        $('#modal-autologout').modal('hide');
+     }
+     logout();
+});
+
+const channel = new BroadcastChannel('tabCommands');
+
+channel.onmessage = function(e) {
+    if (e.data.event === 'stopAutoLogout') {
+        stopAutoLogout();      
+    }
+};
+
+function logout() {
+    window.location.href = '/site/logout?type=autologout';
+}
+
+function cancelAutoLogout() {
+    stopAutoLogout();
+    channel.postMessage({event: 'stopAutoLogout'});
+    return false;
+}
+
+function stopAutoLogout() {
+    $('#autologout-timer').timer('remove');
+    
+    if (isAutologoutShowMessage) {
+        $('#modal-autologout').modal('hide');
+    }
+    return false;
+}
+
+function autoLogout() {
+    // let objDiv = $('#user-monitor-indicator div');
+    // objDiv.attr('class', 'text-danger');
+    // objDiv.find('i').attr('class', 'fa fa-power-off');
+    
+    if (isAutologoutTimerSec > 0) {
+        $('#autologout-timer').timer('remove').timer({countdown: true, format: '%M:%S', seconds: 0, duration: isAutologoutTimerSec + 's', callback: function() {
+            logout();
+        }}).timer('start');
+    }
+    
+    // console.log('autoLogout');
+    if (isAutologoutShowMessage) {
+        $('#modal-autologout').modal({show: true});
+    }
+}
+JS;
+
+    $this->registerJs($js, \yii\web\View::POS_READY, 'autologout-js');
+}
+
+
+if (UserConnection::isIdleMonitorEnabled()) {
+
+    $idleMs = UserConnection::idleSeconds() * 1000;
+$js = <<<JS
+
+function setIdle() {
+    let objDiv = $('#user-monitor-indicator div');
+    objDiv.attr('class', 'text-warning');
+    objDiv.find('i').attr('class', 'fa fa-coffee');
+    $('#user-monitor-timer').timer('remove').timer({format: '%M:%S', seconds: 0}).timer('start');
+    //console.log('I\'m idle');
+}
+
+function setActive() {
+    let objDiv = $('#user-monitor-indicator div');
+    objDiv.attr('class', 'text-success');
+    objDiv.find('i').attr('class', 'fa fa-clock-o');
+    $('#user-monitor-timer').timer('remove').text('');//.timer({format: '%M:%S', seconds: 0}).timer('start');
+    //console.log('Hey, I\'m active!');
+}
+
+$(document).idle({
+    onIdle: function(){
+        socketSend('idle', 'set', { val: true });
+        setIdle();
+    },
+    onActive: function(){
+        socketSend('idle', 'set', { val: false });
+        setActive();
+    },
+    onHide: function(){
+        socketSend('window', 'set', { val: false });
+        //console.log('I\'m hidden');
+    },
+    onShow: function(){
+        socketSend('window', 'set', { val: true });
+        //console.log('Hey, I\'m visible!');
+    },
+    idle: $idleMs
+});
+JS;
+
+    $this->registerJs($js, \yii\web\View::POS_READY, 'idle-js');
+}
 //}
 
 

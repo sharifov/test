@@ -1,5 +1,6 @@
 <?php
 
+use common\components\SearchService;
 use common\models\Department;
 use common\models\Lead;
 use frontend\widgets\lead\editTool\ButtonWidget;
@@ -443,7 +444,7 @@ $isAgent = Auth::user()->isAgent();
                         return '<i class="fa fa-plane"></i> '.$model->getGdsName2();
                     },
                     'format' => 'raw',
-                    'filter' => \common\models\Quote::GDS_LIST
+                    'filter' => SearchService::GDS_LIST
                 ],
 
                 'pcc',

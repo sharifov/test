@@ -5,9 +5,13 @@ use yii\web\AssetBundle;
 
 class ClientChatAsset extends AssetBundle
 {
-	public $sourcePath = '@frontend/themes/gentelella_v2/css/client-chat/';
+	public $sourcePath = '@frontend/themes/gentelella_v2/';
 	public $css = [
-		'client-chat.css',
+		'css/client-chat/client-chat.css',
+	];
+
+	public $js = [
+		'js/client-chat/client-chat.js'
 	];
 
 	public $depends = [

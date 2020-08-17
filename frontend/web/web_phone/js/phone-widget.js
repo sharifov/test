@@ -126,7 +126,7 @@ $(document).ready(function() {
             historySimpleBar = simpleBar;
         }
 
-        if ($(el).attr('id') === 'tab-contacts') {
+        if ($(el).attr('id') === 'tab-contacts' && typeof PhoneWidgetContacts !== 'undefined') {
            PhoneWidgetContacts.initLazyLoadFullList(simpleBar);
         }
     });
@@ -300,7 +300,7 @@ $(document).ready(function() {
     var dialpadCurrentValue = null;
     var dialpadButtonTimer = null;
 
-    $('.dial__btn').on("mousedown touchstart", function(e){
+    $('.dialpad_btn_init').on("mousedown touchstart", function(e){
         e.preventDefault();
 
         var keyPressed = $(this).val();
@@ -335,6 +335,31 @@ $(document).ready(function() {
         $('.call-pane__dial-number').focus();
     });
 
+    $('.dialpad_btn_active').on("mousedown touchstart", function(e){
+        e.preventDefault();
+
+        var keyPressedFormatted = $(this).val();
+        var keyPressed = keyPressedFormatted === '✱' ? '*' : keyPressedFormatted;
+        let conferenceSid = $(this).attr('data-conference-sid');
+
+        // var frequencyPair = dtmfFrequencies[keyPressed];
+        // this sets the freq1 and freq2 properties
+        // dtmf.freq1 = frequencyPair.f1;
+        // dtmf.freq2 = frequencyPair.f2;
+
+        // if (dtmf.status == 0){
+        //     dtmf.start();
+        // }
+
+        let currentVal = $('#call-pane__dial-number_active_dialpad').val();
+
+        $('#call-pane__dial-number_active_dialpad').val(currentVal + keyPressedFormatted);
+        $('.call-pane__dial-clear-all').addClass('is-shown');
+        $('#call-pane__dial-number_active_dialpad').focus();
+
+        PhoneWidgetCall.callRequester.sendDigit(conferenceSid, keyPressed);
+    });
+
     $(window).on("mouseup touchend", function(){
         if (typeof dtmf !== "undefined" && dtmf.status){
             dtmf.stop();
@@ -344,21 +369,27 @@ $(document).ready(function() {
 
     //---------------------------------------------------
 
+    $('.call_pane_dialpad_clear_number_active_dialpad').on('click', function(e) {
+        e.preventDefault();
+        $('#call-pane__dial-number_active_dialpad').val('');
+    });
     $('.call_pane_dialpad_clear_number').on('click', function(e) {
         e.preventDefault();
-        $('.call-pane__dial-number').val('').attr('readonly', false).prop('readonly', false);
+        $('#call-pane__dial-number').val('').attr('readonly', false).prop('readonly', false);
+        resetDialNumberData();
         $('#call-to-label').text('');
         $('.suggested-contacts').removeClass('is_active');
 
-        $('.dial__btn').attr('disabled', false).removeClass('disabled');
-
-        // $(this).removeClass('is-shown')
+        $('.dialpad_btn_init').attr('disabled', false).removeClass('disabled');
+        $('.call-pane__correction').attr('disabled', false);
     });
+
     $('.call_pane_dialpad_clear_number_disabled').on('click', function(e) {
         e.preventDefault();
         $('.call-pane__dial-number').val('').attr('readonly', true).prop('readonly', true);
         $('#call-to-label').text('');
         $('.suggested-contacts').removeClass('is_active');
+        resetDialNumberData();
     });
 
     $('.call-pane__correction').on('click', function(e) {
@@ -819,7 +850,7 @@ function formatPhoneNumber(phoneNumberString) {
         var intlCode = (match[1] ? '+1 ' : '')
         return [intlCode, '(', match[2], ') ', match[3], '-', match[4]].join('')
     }
-    return null
+    return phoneNumberString;
 }
 
 function toSelect(elem, obj, cb) {
@@ -845,11 +876,16 @@ function toSelect(elem, obj, cb) {
     };
 
     // nodes
-    function selectedNode(value, project, id, projectId) {
+    function selectedNode(value, project, id, projectId, length) {
+        let chevronDown = '';
+        if (length > 1) {
+            chevronDown = '<i class="fa fa-chevron-down"></i>';
+        }
         return (
             '<button value="' + value + '" data-info-project="' + project + '" data-info-project-id="'+ projectId +'" class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+
             '<small class="current-number__phone current-number__selected-nr">' + formatPhoneNumber(value) + '</small>'+
             '<span class="current-number__identifier current-number__selected-project">' + project + '</span>'+
+            chevronDown +
             '</button>'
         );
     }
@@ -875,17 +911,18 @@ function toSelect(elem, obj, cb) {
             '<div class="dropdown-menu" >' +
             arr +
             '</div>';
-        if (optionList.length > 1) {
-            str = str + '<i class="fa fa-chevron-down"></i>';
-        }
+        // if (optionList.length > 1) {
+        //     str = str + '<i class="fa fa-chevron-down"></i>';
+        // }
         str = str + '</div>';
 
         return str;
     }
 
     function generateSelect(obj) {
+        let length = obj.options.length;
         $element.append(
-            containerNode(selectedNode(obj.selected.value, obj.selected.project, obj.selected.id, obj.selected.projectId), obj.options)
+            containerNode(selectedNode(obj.selected.value, obj.selected.project, obj.selected.id, obj.selected.projectId, length), obj.options)
         )
     }
 

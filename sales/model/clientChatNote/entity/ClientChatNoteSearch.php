@@ -35,6 +35,10 @@ class ClientChatNoteSearch extends ClientChatNote
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> ['defaultOrder' => ['ccn_id' => SORT_ASC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
         ]);
 
         $this->load($params);

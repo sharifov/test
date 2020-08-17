@@ -6,18 +6,20 @@ use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 
 /** @var $this \yii\web\View */
 /** @var $access ClientChatUserAccess[] */
-/** @var $isPjax bool */
+/** @var $open bool */
+/** @var $formatter Formatter */
 
 ClientChatAsset::register($this);
 
 $accessUrl = \yii\helpers\Url::to('/client-chat/access-manage');
+$totalRequest = count($access);
 ?>
 
 
-<?php yii\widgets\Pjax::begin(['id' => 'client-chat-box-pjax', 'timeout' => 10000, 'enablePushState' => false, 'options' => []])?>
+<?php // yii\widgets\Pjax::begin(['id' => 'client-chat-box-pjax', 'timeout' => 10000, 'enablePushState' => false, 'options' => []])?>
 <div class="_cc-fabs">
-    <div class="_cc-box <?= $isPjax && $access ? 'is-visible' : '' ?>">
-        <div class="_сс-box-header <?= $access ? 'active' : '' ?>">
+    <div class="_cc-box <?= $open && $access ? 'is-visible' : '' ?>">
+        <div class="_cc-box-header <?= $access ? 'active' : '' ?>">
             <div class="_cc-box-option">
                 <div class="header_img">
 					<?=\yii\helpers\Html::img('/img/user.png')?>
@@ -55,16 +57,16 @@ $accessUrl = \yii\helpers\Url::to('/client-chat/access-manage');
                                 <?php endif; ?>
 
                                 <span class="_cc-request-created">
-                                    <?php if (Yii::$app->formatter instanceof Formatter): ?>
-                                        <?= Yii::$app->formatter->asByUserDateTime($item->ccua_created_dt) ?>
+                                    <?php if ($formatter instanceof Formatter): ?>
+                                        <?= $formatter->asByUserDateTime($item->ccua_created_dt) ?>
                                     <?php else: ?>
-										<?= Yii::$app->formatter->asDatetime($item->ccua_created_dt) ?>
+										<?= $formatter->asDatetime($item->ccua_created_dt) ?>
 									<?php endif; ?>
                                 </span>
 
-                                    <?php if (Yii::$app->formatter instanceof Formatter): ?>
+                                    <?php if ($formatter instanceof Formatter): ?>
                                     <span>
-                                        <?= Yii::$app->formatter->asTimer($item->ccua_created_dt) ?>
+                                        <?= $formatter->asTimer($item->ccua_created_dt) ?>
                                     </span>
                                     <?php endif; ?>
                                 <div class="_cc-data">
@@ -76,7 +78,7 @@ $accessUrl = \yii\helpers\Url::to('/client-chat/access-manage');
                                         <span class="label label-default"><?= $item->ccuaCch->cchProject->name ?></span>
                                     <?php endif; ?>
 
-                                    <span class="label label-default"><?= $item->ccuaCch->cchChannel->ccc_name ?></span>
+                                    <span class="label label-default"><?= $item->ccuaCch->cchChannel ? $item->ccuaCch->cchChannel->ccc_name : '' ?></span>
                                 </div>
                             </div>
 
@@ -99,20 +101,39 @@ $accessUrl = \yii\helpers\Url::to('/client-chat/access-manage');
 <!--        <div class="fab_field">-->
 <!--        </div>-->
     </div>
-    <a id="_cc-access-wg" class="_cc-fab " style="<?= $access ? '' : 'background: #d5b24c' ?>">
+    <a id="_cc-access-wg" class="_cc-fab <?= $open && $access ? 'is-visible' : '' ?>" style="<?= $access ? '' : 'background: #d5b24c' ?>">
         <i class="fa fa-comments-o"></i>
+        <?php if ($totalRequest): ?>
+            <span class="_cc_total_request_wrapper">
+                <?= $totalRequest ?>
+            </span>
+            <span class="circle" style="animation-delay: 0s"></span>
+            <span class="circle" style="animation-delay: 1s"></span>
+            <span class="circle" style="animation-delay: 2s"></span>
+            <span class="circle" style="animation-delay: 3s"></span>
+        <?php endif; ?>
     </a>
 </div>
-<?php yii\widgets\Pjax::end() ?>
+<?php // yii\widgets\Pjax::end() ?>
 
 <?php
-$accessExist = count($access);
 $js = <<<JS
- if ({$accessExist}) {
+    
+let _ccWgStatus = localStorage.getItem('_cc_wg_status');
+let _access = {$totalRequest} > 0 ? true : false;
+if (_ccWgStatus === 'true' && _access) {
     toggleClientChatAccess();
- }
-$("#client-chat-box-pjax").on("pjax:end", function() {
-    window.enableTimer();
+}
+
+window.addEventListener('storage', function (event) {
+    if (event.key === '_cc_wg_status') {
+        let _ccWgStatus = localStorage.getItem('_cc_wg_status');
+        if (_ccWgStatus === 'true') {
+            toggleClientChatAccess(true);
+        } else {
+            toggleClientChatAccess(false);
+        }
+    }
 });
 // $(document).on('click', '._cc_chevron', function () {
 //     $(this).closest('._cc-box-item').toggleClass('active');

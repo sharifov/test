@@ -90,6 +90,16 @@ $js = <<<JS
     });
 JS;
 $this->registerJs($js);
+?>
+
+<?php
+$js = <<<JS
+    $(document).on('pjax:end', function() {
+        $('[data-toggle="tooltip"]').tooltip({html:true});
+    });
+    $('[data-toggle="tooltip"]').tooltip({html:true});
+JS;
+$this->registerJs($js);
 
 //$js = <<<JS
 // $('.flight_quote_drop_down_menu').on('click', '.flight-quote-view-status-log', function(e){

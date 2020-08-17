@@ -8,6 +8,12 @@ function Groups(props) {
         delete data.groups[externalKey];
     }
 
+    const internalKey = 'internal';
+    if (typeof data.groups[internalKey] !== 'undefined') {
+        items.push(<GroupItem key={internalKey} group={{'calls': data.groups[internalKey].calls, 'project': '', 'department': 'Internal Contacts'}}/>);
+        delete data.groups[internalKey];
+    }
+
     for (let key in data.groups) {
         if (key === 'inArray') {
             continue;

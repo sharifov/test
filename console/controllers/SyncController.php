@@ -4,7 +4,7 @@ namespace console\controllers;
 
 use common\components\BackOffice;
 use common\models\Airline;
-use common\models\Airport;
+use common\models\Airports;
 use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
@@ -23,6 +23,7 @@ use common\models\QuotePrice;
 use common\models\Sources;
 use yii\console\Controller;
 use Yii;
+use yii\helpers\Console;
 
 class SyncController extends Controller
 {
@@ -61,9 +62,9 @@ class SyncController extends Controller
         $result = BackOffice::sendRequest('default/airports');
         if (isset($result['data'])) {
             foreach ($result['data'] as $airportId => $airportAttr) {
-                $airport = Airport::findOne($airportAttr['iata']);
+                $airport = Airports::findOne($airportAttr['iata']);
                 if ($airport === null) {
-                    $airport = new Airport();
+                    $airport = new Airports();
                 }
                 $airport->attributes = $airportAttr;
                 if (!$airport->save()) {
@@ -73,6 +74,39 @@ class SyncController extends Controller
                 echo 'Sync success airport id: ' . $airportId . PHP_EOL;
             }
         }
+    }
+
+    /**
+     * @param int $limit
+     * @throws \yii\httpclient\Exception
+     */
+    public function actionAirports2($limit = 12000)
+    {
+        printf("\n --- [" . date('Y-m-d H:i:s') . "] Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+
+        $result = Airports::synchronization($limit);
+
+        if($result) {
+            if($result['error']) {
+                printf(" - Error: %s\n", $this->ansiFormat($result['error'], Console::FG_RED));
+            } else {
+
+                if($result['created']) {
+                    $message = 'Created Airports (' . count($result['created']) . '): "'.implode(', ', $result['created']);
+                    printf(" - Created: %s\n", $this->ansiFormat($message, Console::FG_GREEN));
+                }
+                if($result['updated']) {
+                    $message = 'Updated Airports (' . count($result['updated']) . '): "'.implode(', ', $result['updated']);
+                    printf(" - Updated: %s\n", $this->ansiFormat($message, Console::FG_YELLOW));
+                }
+                if($result['errored']) {
+                    $message = 'Errored Airports (' . count($result['errored']) . '): "'.implode(', ', $result['errored']);
+                    printf(" - Error: %s\n", $this->ansiFormat($message, Console::FG_RED));
+                }
+            }
+        }
+
+        printf("\n --- [" . date('Y-m-d H:i:s') . "] End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
 
     public function actionAirlines()

@@ -6,9 +6,35 @@
 ._cc-wrapper ._cc_tabs_wrapper {
     display: flex;
     align-items: center;
-    height: 50px;
+    height: 30px;
     width: 100%;
 }
+._cc-wrapper ._cc_filter_wrapper {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+._cc-wrapper ._cc_filter_wrapper ._cc_filter {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    align-items: start;
+    justify-content: start;
+    border-top: 1px solid lightgray;
+    padding: 5px;
+}
+#_rc-iframe-wrapper {
+    height: 100%;
+    width: 100%;
+    position: relative;
+}
+#_rc-iframe-wrapper ._rc-iframe {
+    border: none;
+    width: 100%;
+    height: calc(100vh - 85px);
+}
+
 ._cc-wrapper ._cc_tabs_wrapper ._cc_tab {
     width: 50%;
     display: flex;
@@ -164,7 +190,7 @@
 #_channel_list_wrapper {
     border: 1px solid lightgrey;
     border-radius: 3px;
-    height: calc(100vh - 138px);
+    height: calc(100vh - 85px);
 }
 
 #_cc-load {
@@ -182,7 +208,17 @@
     z-index: 10;
     font-size: 1rem;
 }
-
+._cc_tab ._cc_unread_messages {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background-color: red;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+}
 
 #_client-chat-info {
     /*height: 100%;*/

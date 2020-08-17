@@ -11,8 +11,11 @@ class ConferenceDataService
     private const TYPE_LISTEN = 'listen';
     private const TYPE_COACHING = 'coaching';
 
-    public static function getDataBySid(string $conferenceSid): array
+    public static function getDataBySid(?string $conferenceSid): array
     {
+        if (!$conferenceSid) {
+            return [];
+        }
         $conference = Conference::findOne(['cf_sid' => $conferenceSid, 'cf_status_id' => [Conference::STATUS_START]]);
         if (!$conference) {
             return [];
@@ -50,7 +53,7 @@ class ConferenceDataService
             $call = $participant->cpCall;
             $users[] = $call->c_created_user_id;
             if ($participant->isClient()) {
-                $name = $call->cClient->getFullName();
+                $name = $call->c_client_id ? $call->cClient->getShortName() : 'Name';
                 $avatar = strtoupper($name[0]);
                 $phone = '';
                 if ($call->isOut()) {
@@ -93,6 +96,7 @@ class ConferenceDataService
             'conference' => [
                 'sid' => $conference->cf_sid,
                 'duration' => time() - strtotime($conference->cf_created_dt),
+                'creator' => $conference->cf_created_user_id,
             ],
         ];
     }

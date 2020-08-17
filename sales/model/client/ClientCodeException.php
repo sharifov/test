@@ -13,6 +13,7 @@ class ClientCodeException
     public const CLIENT_NOT_FOUND = Module::CLIENT . 100;
     public const CLIENT_SAVE = Module::CLIENT . 101;
     public const CLIENT_REMOVE = Module::CLIENT . 102;
+    public const CLIENT_VALIDATION = Module::CLIENT . 103;
 
     public const CLIENT_PHONE_NOT_FOUND = Module::CLIENT . 200;
     public const CLIENT_PHONE_SAVE = Module::CLIENT . 201;

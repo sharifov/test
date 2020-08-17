@@ -13,16 +13,18 @@ use yii\widgets\Pjax;
 
     <?= $this->render('_client_info', ['model' => $model]) ?>
 
-    <?php //if (Yii::$app->user->can('leadSection')): ?>
-        <?php Pjax::begin(['id' => 'client_leads_info', 'timeout' => 2000, 'enablePushState' => false]); ?>
-            <?= $this->render('_leads_info', ['dataProvider' => $leadsDataProvider]) ?>
-        <?php Pjax::end() ?>
-    <?php //endif; ?>
+    <?php if ($model->isClient()): ?>
+        <?php //if (Yii::$app->user->can('leadSection')): ?>
+            <?php Pjax::begin(['id' => 'client_leads_info', 'timeout' => 2000, 'enablePushState' => false]); ?>
+                <?= $this->render('_leads_info', ['dataProvider' => $leadsDataProvider]) ?>
+            <?php Pjax::end() ?>
+        <?php //endif; ?>
 
-    <?php //if (Yii::$app->user->can('caseSection')): ?>
-        <?php Pjax::begin(['id' => 'client_cases_info', 'timeout' => 2000, 'enablePushState' => false]); ?>
-            <?= $this->render('_cases_info', ['dataProvider' => $casesDataProvider]) ?>
-        <?php Pjax::end() ?>
-    <?php //endif; ?>
+        <?php //if (Yii::$app->user->can('caseSection')): ?>
+            <?php Pjax::begin(['id' => 'client_cases_info', 'timeout' => 2000, 'enablePushState' => false]); ?>
+                <?= $this->render('_cases_info', ['dataProvider' => $casesDataProvider]) ?>
+            <?php Pjax::end() ?>
+        <?php //endif; ?>
+    <?php endif;?>
 
 </div>

@@ -13,6 +13,7 @@
  *
  */
 
+use common\models\Call;
 use common\models\Lead;
 use frontend\models\CommunicationForm;
 use frontend\models\LeadForm;
@@ -333,24 +334,38 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                                                 }
 
 
-                                                if($call_type_id) {
-
-                                                    $callTypeName = \common\models\UserProfile::CALL_TYPE_LIST[$call_type_id] ?? '-';
-
-                                                    if($call_type_id == \common\models\UserProfile::CALL_TYPE_SIP && $userModel->userProfile && !$userModel->userProfile->up_sip) {
-                                                        $callTypeName .= ' [empty account]';
-                                                    }
-
-                                                    if ($tk == CommunicationForm::TYPE_VOICE) {
-                                                        //if ($userModel->userProfile->up_sip) {
-                                                        $typeList[$tk] = $itemName . ' ('.$callTypeName.')';
-                                                        //}
-                                                    }
-                                                }
+//                                                if($call_type_id) {
+//
+//                                                    $callTypeName = \common\models\UserProfile::CALL_TYPE_LIST[$call_type_id] ?? '-';
+//
+//                                                    if($call_type_id == \common\models\UserProfile::CALL_TYPE_SIP && $userModel->userProfile && !$userModel->userProfile->up_sip) {
+//                                                        $callTypeName .= ' [empty account]';
+//                                                    }
+//
+//                                                    if ($tk == CommunicationForm::TYPE_VOICE) {
+//                                                        //if ($userModel->userProfile->up_sip) {
+//                                                        $typeList[$tk] = $itemName . ' ('.$callTypeName.')';
+//                                                        //}
+//                                                    }
+//                                                }
                                             }
 
                                         }
                                     }
+
+                                    if ($call_type_id) {
+
+                                        $callTypeName = \common\models\UserProfile::CALL_TYPE_LIST[$call_type_id] ?? '-';
+
+                                        if ($call_type_id == \common\models\UserProfile::CALL_TYPE_SIP && $userModel->userProfile && !$userModel->userProfile->up_sip) {
+                                            $callTypeName .= ' [empty account]';
+                                        }
+
+                                        //if ($userModel->userProfile->up_sip) {
+                                        $typeList[\frontend\models\CommunicationForm::TYPE_VOICE] = \frontend\models\CommunicationForm::TYPE_LIST[\frontend\models\CommunicationForm::TYPE_VOICE] . ' (' . $callTypeName . ')';
+                                        //}
+                                    }
+
 
                                     ?>
 
@@ -395,11 +410,15 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                                         <?= Html::dropDownList('call-from-number', null, $fromPhoneNumbers, ['prompt' => '---', 'id' => 'call-from-number', 'class' => 'form-control', 'label'])?>
                                     </div>
                                     <div class="col-sm-3 form-group message-field-phone" style="display: block;">
-                                        <?= Html::button('<i class="fa fa-phone-square"></i> Make Call', ['class' => 'btn btn-sm btn-success', 'id' => 'btn-new-make-call', 'data-lead-id' => $lead->id, 'style' => 'margin-top: 28px'])?>
+                                        <?= Html::button('<i class="fa fa-phone-square"></i> Make Call', ['class' => 'btn btn-sm btn-success', 'id' => 'btn-make-call-communication-block', 'style' => 'margin-top: 28px'])?>
                                     </div>
                                     <?=Html::hiddenInput('call-lead-id', $lead->id, ['id' => 'call-lead-id'])?>
                                     <?=Html::hiddenInput('call-case-id', null, ['id' => 'call-case-id'])?>
                                     <?=Html::hiddenInput('call-project-id', $lead->project_id, ['id' => 'call-project-id'])?>
+                                    <?=Html::hiddenInput('call-source-type-id', Call::SOURCE_LEAD, ['id' => 'call-source-type-id'])?>
+                                    <?=Html::hiddenInput('call-department-id', $lead->l_dep_id, ['id' => 'call-department-id'])?>
+                                    <?=Html::hiddenInput('call-client-id', $lead->client_id, ['id' => 'call-client-id'])?>
+                                    <?=Html::hiddenInput('call-client-name', ($lead->client_id ? $lead->client->getShortName() : ''), ['id' => 'call-client-name'])?>
                                 <?php endif; ?>
                             </div>
                             <div id="sms-input-box" class="message-field-sms" >
@@ -498,6 +517,7 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                                             <?= Html::a('<i class="fa fa-phone"></i>', '#', ['class' => 'btn call-box__btn call-box__btn--call', 'id' => 'btn-start-web-call',
                                                 'data-project-id' => $leadForm->getLead()->project_id,
                                                 'data-lead-id' => $leadForm->getLead()->id,
+                                                'data-source-type-id' => Call::SOURCE_LEAD,
                                                 'disabled' => ($comForm->c_voice_status == 1 ? true : false)
                                             ]) ?>
 
@@ -724,18 +744,14 @@ $js = <<<JS
         $('#div-call-phone-number').text($(this).val());
     });
     
-    $(document).on("change", '#call-to-number', function () {
-        insertPhoneNumber($(this).val());
-    });
-    
-    $(document).on("change", '#call-from-number', function () {
-        let value = $(this).val();
-        window.phoneNumbers.setPrimaryData({
-            value: value,
-            projectId: projectId,
-            project: project
-        })
-    });
+    // $(document).on("change", '#call-from-number', function () {
+    //     let value = $(this).val();
+    //     window.phoneNumbers.setPrimaryData({
+    //         value: value,
+    //         projectId: projectId,
+    //         project: project
+    //     })
+    // });
     
     $('body').on("change", '#c_sms_tpl_key', function () {
         if($(this).val() == tpl_sms_blank_key) {
@@ -750,6 +766,7 @@ $js = <<<JS
         var phone_number = $('#c_phone_number').val();
         var project_id = $(this).data('project-id');
         var lead_id = $(this).data('lead-id');
+        var source_type_id = $(this).data('source-type-id');
         
         //alert(phoneNumber);
         
@@ -760,7 +777,7 @@ $js = <<<JS
             $('#web-phone-dial-modal .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
             $('#web-phone-dial-modal').modal();
             
-            $.post(ajaxPhoneDialUrl, {'phone_number': phone_number, 'project_id': project_id, 'lead_id': lead_id},
+            $.post(ajaxPhoneDialUrl, {'phone_number': phone_number, 'project_id': project_id, 'lead_id': lead_id, 'source_type_id': source_type_id},
                 function (data) {
                     $('#web-phone-dial-modal .modal-body').html(data);
                 }

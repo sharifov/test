@@ -2,6 +2,7 @@
 
 namespace sales\entities\call;
 
+use common\models\Call;
 use common\models\Employee;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\callLog\entity\callLog\search\CallLogSearch;
@@ -287,7 +288,7 @@ class CallGraphsSearch extends CallLogSearch
         $parentQuery->andWhere(['cl_status_id' => [CallLogStatus::COMPLETE, CallLogStatus::BUSY, CallLogStatus::NOT_ANSWERED]]);
         $parentQuery->andWhere(['OR',
             ['cl_category_id' => null],
-            ['<>', 'cl_category_id', CallLogCategory::TRANSFER_CALL]
+            ['<>', 'cl_category_id', Call::SOURCE_TRANSFER_CALL]
         ]);
 
         if ($this->projectIds) {
@@ -346,7 +347,7 @@ class CallGraphsSearch extends CallLogSearch
         $childQuery->andWhere(['cl_status_id' => [CallLogStatus::COMPLETE, CallLogStatus::BUSY, CallLogStatus::NOT_ANSWERED]]);
         $childQuery->andWhere(['OR',
             ['cl_category_id' => null],
-            ['<>', 'cl_category_id', CallLogCategory::TRANSFER_CALL]
+            ['<>', 'cl_category_id', Call::SOURCE_TRANSFER_CALL]
         ]);
 
         if ($this->projectIds) {

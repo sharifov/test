@@ -15,12 +15,13 @@ if (!Auth::can('PhoneWidget_Dialpad')) {
 <div class="phone-widget__tab is_active" id="tab-phone">
 
   <div class="call-pane call-pane-initial is_active">
-
-    <div class="calling-from-info">
-      <div class="current-number">
-        <div class="custom-phone-select"></div>
-      </div>
-    </div>
+    <?php if ($canDialpad): ?>
+        <div class="calling-from-info">
+          <div class="current-number">
+            <div class="custom-phone-select"></div>
+          </div>
+        </div>
+    <?php endif;?>
     <div class="call-pane__number">
 
             <ul class="phone-widget__list-item calls-history suggested-contacts"> </ul>
@@ -52,6 +53,12 @@ if (!Auth::can('PhoneWidget_Dialpad')) {
                     'maxlength' => 16,
                     'disabled' => !$canDialpad,
                     'readonly' => !$canDialpad,
+                ]);
+
+                echo Html::hiddenInput('q_value', null, [
+                    'id' => 'call-pane__dial-number-value',
+                    'data-user-id' => null,
+                    'data-phone' => null,
                 ]);
 
                 if ($canDialpadSearch) {
@@ -89,18 +96,18 @@ if (!Auth::can('PhoneWidget_Dialpad')) {
       ?>
     <div class="call-pane__dial-block">
       <ul class="call-pane__dial dial">
-        <li class="dial__item"><button class="dial__btn" value="1"<?= $dialPadButtonDisabledClass?>>1</button></li>
-        <li class="dial__item"><button class="dial__btn" value="2"<?= $dialPadButtonDisabledClass?>>2</button></li>
-        <li class="dial__item"><button class="dial__btn" value="3"<?= $dialPadButtonDisabledClass?>>3</button></li>
-        <li class="dial__item"><button class="dial__btn" value="4"<?= $dialPadButtonDisabledClass?>>4</button></li>
-        <li class="dial__item"><button class="dial__btn" value="5"<?= $dialPadButtonDisabledClass?>>5</button></li>
-        <li class="dial__item"><button class="dial__btn" value="6"<?= $dialPadButtonDisabledClass?>>6</button></li>
-        <li class="dial__item"><button class="dial__btn" value="7"<?= $dialPadButtonDisabledClass?>>7</button></li>
-        <li class="dial__item"><button class="dial__btn" value="8"<?= $dialPadButtonDisabledClass?>>8</button></li>
-        <li class="dial__item"><button class="dial__btn" value="9"<?= $dialPadButtonDisabledClass?>>9</button></li>
-        <li class="dial__item"><button class="dial__btn" value="✱"<?= $dialPadButtonDisabledClass?>>✱</button></li>
-        <li class="dial__item"><button class="dial__btn" value="0"<?= $dialPadButtonDisabledClass?>>0 +</button></li>
-        <li class="dial__item"><button class="dial__btn" value="#"<?= $dialPadButtonDisabledClass?>>#</button></li>
+        <li class="dial__item"><button class="dial__btn dialpad_btn_init" value="1"<?= $dialPadButtonDisabledClass?>>1</button></li>
+        <li class="dial__item"><button class="dial__btn dialpad_btn_init" value="2"<?= $dialPadButtonDisabledClass?>>2</button></li>
+        <li class="dial__item"><button class="dial__btn dialpad_btn_init" value="3"<?= $dialPadButtonDisabledClass?>>3</button></li>
+        <li class="dial__item"><button class="dial__btn dialpad_btn_init" value="4"<?= $dialPadButtonDisabledClass?>>4</button></li>
+        <li class="dial__item"><button class="dial__btn dialpad_btn_init" value="5"<?= $dialPadButtonDisabledClass?>>5</button></li>
+        <li class="dial__item"><button class="dial__btn dialpad_btn_init" value="6"<?= $dialPadButtonDisabledClass?>>6</button></li>
+        <li class="dial__item"><button class="dial__btn dialpad_btn_init" value="7"<?= $dialPadButtonDisabledClass?>>7</button></li>
+        <li class="dial__item"><button class="dial__btn dialpad_btn_init" value="8"<?= $dialPadButtonDisabledClass?>>8</button></li>
+        <li class="dial__item"><button class="dial__btn dialpad_btn_init" value="9"<?= $dialPadButtonDisabledClass?>>9</button></li>
+        <li class="dial__item"><button class="dial__btn dialpad_btn_init" value="✱"<?= $dialPadButtonDisabledClass?>>✱</button></li>
+        <li class="dial__item"><button class="dial__btn dialpad_btn_init" value="0"<?= $dialPadButtonDisabledClass?>>0 +</button></li>
+        <li class="dial__item"><button class="dial__btn dialpad_btn_init" value="#"<?= $dialPadButtonDisabledClass?>>#</button></li>
       </ul>
       <div class="call-pane__call-btns">
         <button class="call-pane__start-call calling-state-block" id="btn-new-make-call">
@@ -153,28 +160,27 @@ if (!Auth::can('PhoneWidget_Dialpad')) {
         </a>
     </div>
     <div class="additional-info__body">
-
       <form id="contact-list-calls-ajax" action="/contacts/list-calls-ajax" method="get">
-        <input type="text" id="call-pane__dial-number" class="call-pane__dial-number" name="q" maxlength="16" placeholder="Name, company, phone..." autocomplete="off" readonly="readonly">
-        <a href="#" class="call-pane__dial-clear-all is-shown call_pane_dialpad_clear_number">
+        <input type="text" id="call-pane__dial-number_active_dialpad" class="call-pane__dial-number" name="q" maxlength="16" placeholder="" autocomplete="off" readonly="readonly">
+        <a href="#" class="call-pane__dial-clear-all is-shown call_pane_dialpad_clear_number_active_dialpad">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M7 8.20625L12.7937 14L13.9999 12.7938L8.2062 7.00004L14 1.20621L12.7938 0L7 5.79383L1.2062 0L0 1.20621L5.7938 7.00004L7.97135e-05 12.7938L1.20628 14L7 8.20625Z" fill="white"></path>
           </svg>
         </a>
       </form>
       <ul class="call-pane__dial dial">
-        <li class="dial__item"><button class="dial__btn" value="1">1</button></li>
-        <li class="dial__item"><button class="dial__btn" value="2">2</button></li>
-        <li class="dial__item"><button class="dial__btn" value="3">3</button></li>
-        <li class="dial__item"><button class="dial__btn" value="4">4</button></li>
-        <li class="dial__item"><button class="dial__btn" value="5">5</button></li>
-        <li class="dial__item"><button class="dial__btn" value="6">6</button></li>
-        <li class="dial__item"><button class="dial__btn" value="7">7</button></li>
-        <li class="dial__item"><button class="dial__btn" value="8">8</button></li>
-        <li class="dial__item"><button class="dial__btn" value="9">9</button></li>
-        <li class="dial__item"><button class="dial__btn" value="✱">✱</button></li>
-        <li class="dial__item"><button class="dial__btn" value="0">0 +</button></li>
-        <li class="dial__item"><button class="dial__btn" value="#">#</button></li>
+        <li class="dial__item"><button class="dial__btn dialpad_btn_active" value="1">1</button></li>
+        <li class="dial__item"><button class="dial__btn dialpad_btn_active" value="2">2</button></li>
+        <li class="dial__item"><button class="dial__btn dialpad_btn_active" value="3">3</button></li>
+        <li class="dial__item"><button class="dial__btn dialpad_btn_active" value="4">4</button></li>
+        <li class="dial__item"><button class="dial__btn dialpad_btn_active" value="5">5</button></li>
+        <li class="dial__item"><button class="dial__btn dialpad_btn_active" value="6">6</button></li>
+        <li class="dial__item"><button class="dial__btn dialpad_btn_active" value="7">7</button></li>
+        <li class="dial__item"><button class="dial__btn dialpad_btn_active" value="8">8</button></li>
+        <li class="dial__item"><button class="dial__btn dialpad_btn_active" value="9">9</button></li>
+        <li class="dial__item"><button class="dial__btn dialpad_btn_active" value="✱">✱</button></li>
+        <li class="dial__item"><button class="dial__btn dialpad_btn_active" value="0">0</button></li>
+        <li class="dial__item"><button class="dial__btn dialpad_btn_active" value="#">#</button></li>
       </ul>
     </div>
   </div>
@@ -200,10 +206,13 @@ $holdUrl = Url::to(['/phone/ajax-hold-conference-call']);
 $unHoldUrl = Url::to(['/phone/ajax-unhold-conference-call']);
 $returnHoldCallUrl = Url::to(['/call/return-hold-call']);
 $ajaxHangupUrl = Url::to(['/phone/ajax-hangup']);
+$sendDigitUrl = Url::to(['/phone/send-digit']);
+$prepareCurrentCallsUrl = Url::to(['/phone/prepare-current-calls']);
+$callLogInfoUrl = Url::to(['/call/ajax-call-log-info']);
+$callInfoUrl = Url::to(['/call/ajax-call-info']);
+$clientInfoUrl = Url::to(['/client/ajax-get-info']);
 
 $ucStatus = $userCallStatus->us_type_id ?? UserCallStatus::STATUS_TYPE_OCCUPIED;
-
-$canDialpad = $canDialpad ? 'true' : 'false';
 
 $btnHoldShow = Auth::can('PhoneWidget_OnHold') ? 'true' : 'false';
 $btnTransferShow = Auth::can('PhoneWidget_Transfer') ? 'true' : 'false';
@@ -226,9 +235,13 @@ PhoneWidgetCall.init({
     'unHoldUrl': '$unHoldUrl',
     'returnHoldCallUrl': '$returnHoldCallUrl',
     'ajaxHangupUrl': '$ajaxHangupUrl',
-    'dialpadEnabled': $canDialpad,
     'btnHoldShow': $btnHoldShow,
-    'btnTransferShow': $btnTransferShow    
+    'btnTransferShow': $btnTransferShow,
+    'sendDigitUrl': '$sendDigitUrl',    
+    'prepareCurrentCallsUrl': '$prepareCurrentCallsUrl',
+    'callLogInfoUrl': '$callLogInfoUrl',
+    'callInfoUrl': '$callInfoUrl',
+    'clientInfoUrl': '$clientInfoUrl',
 });
 JS;
 $this->registerJs($js);

@@ -29,6 +29,7 @@ use yii\httpclient\Response;
  * @property string $username
  * @property string $password
  * @property Request $request
+ * @property string $voipApiUsername
  */
 
 class CommunicationService extends Component implements CommunicationServiceInterface
@@ -39,6 +40,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
     public $password;
     public $request;
     public $recording_url = '';
+    public $voipApiUsername = '';
 
 
     public function init() : void
@@ -805,6 +807,17 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $this->processConferenceResponse($response);
     }
 
+    public function cancelCall(string $sid): array
+    {
+        $data = [
+            'sid' => $sid,
+        ];
+
+        $response = $this->sendRequest('twilio-conference/cancel-call', $data);
+
+        return $this->processConferenceResponse($response);
+    }
+
     public function holdConferenceCall(string $conferenceSid, string $keeperSid): array
     {
         $data = [
@@ -913,6 +926,11 @@ class CommunicationService extends Component implements CommunicationServiceInte
 
     private function processConferenceResponse(\yii\httpclient\Response $response): array
     {
+        return $this->processResponse($response);
+    }
+
+    private function processResponse(\yii\httpclient\Response $response): array
+    {
         $out = ['error' => false, 'message' => '', 'result' => []];
 
         if ($response->isOk) {
@@ -921,8 +939,8 @@ class CommunicationService extends Component implements CommunicationServiceInte
                 $isError = (bool)($data['is_error'] ?? false);
                 if ($isError) {
                     $out['error'] = true;
-                    $out['message'] = $data['message'] ?? 'Undefined error message';
-                    \Yii::error(VarDumper::dumpAsString($response->data), 'Component:CommunicationService::processConferenceResponse:response');
+                    $out['message'] = (string)($data['message'] ?? 'Undefined error message');
+                    \Yii::error(VarDumper::dumpAsString($response->data), 'Component:CommunicationService::processResponse:response');
                 }
                 $out['result'] = $data['result'] ?? [];
             } else {
@@ -932,7 +950,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
         } else {
             $out['error'] = true;
             $out['message'] = 'Server error. Try again later.';
-            \Yii::error(VarDumper::dumpAsString($response->content), 'Component:CommunicationService::processConferenceResponse');
+            \Yii::error(VarDumper::dumpAsString($response->content), 'Component:CommunicationService::processResponse');
 		}
 
 	    return $out;
@@ -972,5 +990,66 @@ class CommunicationService extends Component implements CommunicationServiceInte
         }
 
         return $out;
+    }
+
+    public function sendDigitToConference(string $conferenceSid, string $digit): array
+    {
+        $data = [
+            'conferenceSid' => $conferenceSid,
+            'digit' => $digit,
+        ];
+
+        $response = $this->sendRequest('twilio-conference/send-digit', $data);
+
+        return $this->processConferenceResponse($response);
+    }
+
+    public function getCallPrice(string $callSid): array
+    {
+        $data = [
+            'callSid' => $callSid,
+        ];
+
+       $response = $this->sendRequest('twilio/get-call-price', $data);
+
+       return $this->processResponse($response);
+    }
+
+    public function getSmsPrice(string $smsSid): array
+    {
+        $data = [
+            'smsSid' => $smsSid,
+        ];
+
+       $response = $this->sendRequest('twilio/get-sms-price', $data);
+
+       return $this->processResponse($response);
+    }
+
+    public function callToUser(string $from, string $to, int $created_userId, array $requestCall, string $friendly_name): array
+    {
+        $data = [
+            'from' => $from,
+            'to' => $to,
+            'created_user_id' => $created_userId,
+            'requestCall' => $requestCall,
+            'voipApiUsername' => $this->voipApiUsername,
+            'friendly_name' => $friendly_name,
+        ];
+
+       $response = $this->sendRequest('twilio-conference/call-to-user', $data);
+
+       return $this->processResponse($response);
+    }
+
+    public function getCallInfo(string $callSid): array
+    {
+        $data = [
+            'callSid' => $callSid,
+        ];
+
+       $response = $this->sendRequest('twilio-conference/get-call-info', $data);
+
+       return $this->processResponse($response);
     }
 }

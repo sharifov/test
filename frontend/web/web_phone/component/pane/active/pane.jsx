@@ -59,7 +59,10 @@ function ActiveContactInfo(props) {
                     </div>
                 </div>
                 <div className="contact-info-card__line history-details">
-                    <span className="contact-info-card__call-type">{call.data.contact.phone}</span>
+                    {call.data.typeId !== 3
+                        ? <span className="contact-info-card__call-type">{call.data.contact.phone}</span>
+                        : ''
+                    }
                 </div>
             </div>
         </div>
@@ -68,8 +71,14 @@ function ActiveContactInfo(props) {
 
 function CallBtns(props) {
     let call = props.call;
+    let paneBtnClass = 'call-pane__call-btns';
+    if (call.data.isHold) {
+        paneBtnClass = paneBtnClass + ' is-on-hold';
+    } else {
+        paneBtnClass = paneBtnClass + ' is-on-call';
+    }
     return (
-        <div className="call-pane__call-btns is-on-call">
+        <div className={paneBtnClass}>
             <button className="call-pane__mute" id="call-pane__mute"
                     disabled={call.data.isListen || call.data.isHold || call.isSentMuteUnMuteRequestState()}
                     data-call-sid={call.data.callSid} data-is-muted={call.data.isMute}
@@ -81,10 +90,25 @@ function CallBtns(props) {
                         : <i className="fas fa-microphone"> </i>
                 }
             </button>
-            <button className={call.data.isListen || call.data.isCoach ? 'call-pane__start-call calling-state-block join' : 'call-pane__start-call calling-state-block'}>
-                <div className="call-in-action">
-                    {call.data.isListen || call.data.isCoach ? <i className="fa fa-headphones-alt"> </i> : ''}
-                    <span className="call-in-action__text">
+            {call.data.isHold ? <CallingStateBlockHold call={call} /> : <CallingStateBlock call={call} />}
+            <button className="call-pane__end-call" id="cancel-active-call" data-call-sid={call.data.callSid}
+                    disabled={call.isSentHangupRequestState()}>
+                {call.isSentHangupRequestState()
+                    ? <i className="fa fa-spinner fa-spin"> </i>
+                    : <i className="fa fa-phone-slash"> </i>
+                }
+            </button>
+        </div>
+    );
+}
+
+function CallingStateBlock(props) {
+    let call = props.call;
+    return (
+        <button className={call.data.isListen || call.data.isCoach ? 'call-pane__start-call calling-state-block join' : 'call-pane__start-call calling-state-block'}>
+            <div className="call-in-action">
+                {call.data.isListen || call.data.isCoach ? <i className="fa fa-headphones-alt"> </i> : ''}
+                <span className="call-in-action__text">
                         {call.data.isCoach
                             ? 'Coaching'
                             : call.data.isListen
@@ -94,17 +118,21 @@ function CallBtns(props) {
                                     : 'on call'
                         }
                     </span>
-                    <span className="call-in-action__time"><PhoneWidgetTimer duration={call.getDuration()} timeStart={Date.now()} styleClass="more"/></span>
-                </div>
-            </button>
-            <button className="call-pane__end-call" id="cancel-active-call" data-call-sid={call.data.callSid}
-                    disabled={call.isSentHangupRequestState()}>
-                {call.isSentHangupRequestState()
-                    ? <i className="fa fa-spinner fa-spin"> </i>
-                    : <i className="fa fa-phone-slash"> </i>
-                }
-            </button>
-        </div>
+                <span className="call-in-action__time"><PhoneWidgetTimer duration={call.getDuration()} timeStart={Date.now()} styleClass="more"/></span>
+            </div>
+        </button>
+    );
+}
+
+function CallingStateBlockHold(props) {
+    let call = props.call;
+    return (
+        <button className="call-pane__start-call calling-state-block">
+            <div className="call-in-action">
+                <span className="call-in-action__text">on hold</span>
+                <span className="call-in-action__time"><PhoneWidgetTimer duration={call.getHoldDuration()} timeStart={Date.now()} styleClass="more"/></span>
+            </div>
+        </button>
     );
 }
 

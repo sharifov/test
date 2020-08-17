@@ -13,21 +13,14 @@ use common\models\Lead;
  * @property int|null $ownerId
  * @property string $created
  */
-class LeadStatusChangedEvent
+class LeadStatusChangedEvent implements LeadableEventInterface
 {
-
     public $lead;
     public $oldStatus;
     public $newStatus;
     public $ownerId;
     public $created;
 
-    /**
-     * @param Lead $lead
-     * @param int|null $oldStatus
-     * @param int $newStatus
-     * @param int|null $ownerId
-     */
     public function __construct(Lead $lead, ?int $oldStatus, int $newStatus, ?int $ownerId)
     {
         $this->lead = $lead;
@@ -37,4 +30,8 @@ class LeadStatusChangedEvent
         $this->created = date('Y-m-d H:i:s');
     }
 
+    public function getLead(): Lead
+    {
+        return $this->lead;
+    }
 }

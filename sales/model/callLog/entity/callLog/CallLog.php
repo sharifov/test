@@ -3,6 +3,7 @@
 namespace sales\model\callLog\entity\callLog;
 
 use common\components\validators\PhoneValidator;
+use common\models\Call;
 use common\models\Client;
 use common\models\Conference;
 use common\models\Department;
@@ -10,6 +11,7 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\Project;
 use sales\entities\cases\Cases;
+use sales\helpers\UserCallIdentity;
 use sales\model\callLog\entity\callLogCase\CallLogCase;
 use sales\model\callLog\entity\callLogLead\CallLogLead;
 use sales\model\callLog\entity\callLogQueue\CallLogQueue;
@@ -71,7 +73,7 @@ class CallLog extends \yii\db\ActiveRecord
             ['cl_type_id', 'in', 'range' => array_keys(CallLogType::getList())],
 
             ['cl_category_id', 'integer'],
-            ['cl_category_id', 'in', 'range' => array_keys(CallLogCategory::getList())],
+            ['cl_category_id', 'in', 'range' => array_keys(Call::SOURCE_LIST)],
 
             ['cl_is_transfer', 'boolean'],
 
@@ -129,8 +131,8 @@ class CallLog extends \yii\db\ActiveRecord
             'user.username' => 'User',
             'cl_department_id' => 'Department',
             'cl_project_id' => 'Project',
-            'cl_call_created_dt' => 'Call Created Dt',
-            'cl_call_finished_dt' => 'Call Finished Dt',
+            'cl_call_created_dt' => 'Created Dt',
+            'cl_call_finished_dt' => 'Finished Dt',
             'cl_status_id' => 'Status',
             'cl_client_id' => 'Client',
             'cl_price' => 'Price',
@@ -249,6 +251,16 @@ class CallLog extends \yii\db\ActiveRecord
 	public function isIn(): bool
 	{
 		return $this->cl_type_id === CallLogType::IN;
+	}
+
+	public function isOut(): bool
+	{
+		return $this->cl_type_id === CallLogType::OUT;
+	}
+
+    public function isOwner(int $userId): bool
+    {
+        return $this->cl_user_id === $userId;
 	}
 
 	/**

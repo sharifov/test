@@ -124,7 +124,6 @@ class CasesChangeStatusForm extends Model
                 unset($list[CasesStatus::STATUS_PENDING]);
             }
         }
-
         return $list;
     }
 

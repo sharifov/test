@@ -10,9 +10,11 @@ use common\models\search\EmployeeSearch;
 use common\models\search\LeadTaskSearch;
 use common\models\UserBonusRules;
 use common\models\UserCommissionRules;
+use common\models\UserConnection;
 use common\models\UserParams;
 use frontend\models\form\UserProfileForm;
 use sales\helpers\app\AppHelper;
+use sales\model\user\entity\monitor\UserMonitor;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
@@ -96,9 +98,20 @@ class SiteController extends FController
 
     public function actionLogout()
     {
+        $userId = Yii::$app->user->id;
         if (Yii::$app->user->logout()) {
             LoginForm::removeWsIdentityCookie();
+
+            if (Yii::$app->request->get('type') === 'autologout') {
+                Yii::$app->session->setFlash('warning', 'The system has automatically logged out of your account!');
+            }
+
+            if (UserConnection::isIdleMonitorEnabled()) {
+                UserMonitor::addEvent($userId, UserMonitor::TYPE_LOGOUT);
+            }
         }
+
+
 
         return $this->goHome();
     }
@@ -138,6 +151,11 @@ class SiteController extends FController
             }
 
             if ($model->login()) {
+
+                if (UserConnection::isIdleMonitorEnabled()) {
+                    UserMonitor::addEvent(Yii::$app->user->id, UserMonitor::TYPE_LOGIN);
+                }
+
                 return $this->goBack();
             }
         }

@@ -24,12 +24,17 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'rowOptions' => static function (\common\models\UserOnline $model) {
+            if ($model->uo_idle_state) {
+                return ['class' => 'danger'];
+            }
+        },
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
 
             [
                 'label' => 'User ID',
-                'value' => static function($model) {
+                'value' => static function(\common\models\UserOnline $model) {
                     return $model->uo_user_id;
                 },
             ],
@@ -40,6 +45,16 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'uo_user_id',
                 'relation' => 'uoUser',
                 'placeholder' => 'Select User',
+            ],
+
+            'uo_idle_state:boolean',
+            [
+                //'class' => \common\components\grid\DateTimeColumn::class,
+                'attribute' => 'uo_idle_state_dt',
+                'value' => static function (\common\models\UserOnline $model) {
+                    return $model->uo_idle_state_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->uo_idle_state_dt), 'php: Y-m-d [H:i:s]')  : '-';
+                },
+                'format' => 'raw'
             ],
 
             /*[

@@ -17,6 +17,7 @@ use common\models\VisitorLog;
 use frontend\widgets\notification\NotificationMessage;
 use modules\lead\src\entities\lead\LeadQuery;
 use sales\auth\Auth;
+use sales\helpers\app\AppHelper;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use sales\repositories\lead\LeadRepository;
@@ -844,9 +845,8 @@ class QuoteController extends ApiBaseController
             }
         } catch (\Throwable $e) {
 
-            Yii::error($e->getTraceAsString(), 'API:Quote:create:try');
-            if (Yii::$app->request->get('debug')) $message = ($e->getTraceAsString());
-            else $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
+            $message = AppHelper::throwableFormatter($e);
+            Yii::error($message, 'API:Quote:create:try');
 
             $response['error'] = $message;
             $response['errors'] = $message;

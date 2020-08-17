@@ -78,11 +78,17 @@
 
         let phone = $(this).data('phone-number');
         let title = $(this).data('title');
+        let userId = $(this).data('user-id');
         let widgetBtn = $('.js-toggle-phone-widget');
         if (widgetBtn.length) {
             $('.phone-widget').addClass('is_active')
             $('.js-toggle-phone-widget').addClass('is-mirror');
-            insertPhoneNumber(phone, title);
+            insertPhoneNumber({
+                'formatted': phone,
+                'title': title,
+                'user_id': userId,
+                'phone_to': phone
+            });
         }
     });
 
@@ -96,13 +102,75 @@
 
 })(window, $);
 
-function insertPhoneNumber(phone, title) {
-    $('#call-pane__dial-number').val(phone).attr('readonly', 'readonly');
-    if (title && title.length > 0) {
-        $("#call-to-label").text(title);
+/* data = {
+    formatted,
+    title,
+    user_id,
+    phone_to,
+    phone_from,
+    project_id,
+    department_id,
+    client_id,
+    source_type_id,
+    lead_id,
+    case_id
+} */
+function insertPhoneNumber(data) {
+    $('#call-pane__dial-number').val((data.formatted ? data.formatted : '')).attr('readonly', 'readonly');
+    if (data.title && data.title.length > 0) {
+        $("#call-to-label").text(data.title);
+    } else {
+        $("#call-to-label").text('');
     }
+    $('#call-pane__dial-number-value')
+        .attr('data-user-id', data.user_id ? data.user_id : '')
+        .attr('data-phone-to', data.phone_to ? data.phone_to : '')
+        .attr('data-phone-from', data.phone_from ? data.phone_from : '')
+        .attr('data-is-request-from', data.is_request_from ? data.is_request_from : '')
+        .attr('data-request-call-sid', data.request_call_sid ? data.request_call_sid : '')
+        .attr('data-project-id', data.project_id ? data.project_id : '')
+        .attr('data-department-id', data.department_id ? data.department_id : '')
+        .attr('data-client-id', data.client_id ? data.client_id : '')
+        .attr('data-source-type-id', data.source_type_id ? data.source_type_id : '')
+        .attr('data-lead-id', data.lead_id ? data.lead_id : '')
+        .attr('data-case-id', data.case_id ? data.case_id : '');
+
     soundNotification("button_tiny");
-    $('.dial__btn').attr('disabled', 'disabled').addClass('disabled');
+    $('.dialpad_btn_init').attr('disabled', 'disabled').addClass('disabled');
+    $('.call-pane__correction').attr('disabled', 'disabled');
+}
+
+function insertPhoneNumberFrom(phone) {
+    $('#call-pane__dial-number-value').attr('data-phone-from', phone);
+}
+
+$(document).on('input', '#call-pane__dial-number', function (e) {
+    resetDialNumberData();
+});
+
+function resetDialNumberData() {
+    $('#call-pane__dial-number-value')
+        .attr('data-user-id', '')
+        .attr('data-phone-to', '')
+        .attr('data-phone-from', '')
+        .attr('data-is-request-from', '')
+        .attr('data-request-call-sid', '')
+        .attr('data-project-id', '')
+        .attr('data-department-id', '')
+        .attr('data-client-id', '')
+        .attr('data-source-type-id', '')
+        .attr('data-lead-id', '')
+        .attr('data-case-id', '');
+}
+
+function reserveDialButton()
+{
+    $('#btn-new-make-call').html('<i class="fa fa-spinner fa-spin"> </i>').attr('disabled', true);
+}
+
+function freeDialButton()
+{
+    $('#btn-new-make-call').html('<i class="fas fa-phone"> </i>').attr('disabled', false);
 }
 
 function soundNotification(fileName = 'button_tiny', volume = 0.3) {
@@ -112,15 +180,21 @@ function soundNotification(fileName = 'button_tiny', volume = 0.3) {
 }
 
 function soundDisconnect() {
-    return;
     soundNotification('disconnect_sound', 0.3);
 }
 
 function soundConnect() {
-    return;
-    soundNotification('connect_sound', 0.3);
+    soundNotification('connect_sound', 0.99);
 }
 
-let incomingAudio = new Audio('/js/sounds/incoming_sound.mp3');
+let incomingAudio = new Audio('/js/sounds/incoming_call.mp3');
 incomingAudio.volume = 0.3;
 incomingAudio.loop = true;
+
+$(document).ready( function () {
+    document.addEventListener("visibilitychange", function () {
+        if (document.visibilityState === 'hidden') {
+            localStorage.setItem('previousPage', $(document)[0].baseURI);
+        }
+    })
+});

@@ -16,6 +16,10 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'uo_updated_dt')->textInput() ?>
 
+    <?= $form->field($model, 'uo_idle_state')->checkbox() ?>
+
+    <?= $form->field($model, 'uo_idle_state_dt')->textInput() ?>
+
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>

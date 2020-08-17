@@ -17,6 +17,7 @@ use sales\services\client\ClientManageService;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatService\ClientChatService;
 use sales\services\TransactionManager;
+use common\components\CentrifugoService;
 use yii\helpers\Html;
 
 /**
@@ -157,12 +158,11 @@ class ClientChatRequestService
 
 	private function guestDisconnected(ClientChatRequest $clientChatRequest): void
 	{
-		$visitor = $this->clientChatVisitorRepository->findByVisitorId($clientChatRequest->getClientRcId());
+		$visitorData = $this->clientChatVisitorDataRepository->findByVisitorRcId($clientChatRequest->getClientRcId());
 
-		if ($visitor->ccvClient) {
-			$clientChats = $this->clientChatRepository->findByClientId($visitor->ccv_client_id);
-
-			foreach ($clientChats as $clientChat) {
+		if ($visitorData->clientChatVisitors) {
+			foreach ($visitorData->clientChatVisitors as $chatVisitor) {
+				$clientChat = $this->clientChatRepository->findById($chatVisitor->ccv_cch_id);
 				if ($clientChat->cch_client_online) {
 					$clientChat->cch_client_online = 0;
 					$this->clientChatRepository->save($clientChat);
@@ -175,6 +175,7 @@ class ClientChatRequestService
 					}
 				}
 			}
+
 		}
 	}
 
@@ -199,8 +200,16 @@ class ClientChatRequestService
 
 		$visitorRcId = $clientChatRequest->getClientRcId();
 
-		$visitorData = $this->clientChatVisitorDataRepository->findOrCreateByVisitorId($visitorRcId);
-		$this->clientChatVisitorRepository->create($clientChat->cch_id, $visitorData->cvd_id, $clientChat->cch_client_id);
+		try {
+			$visitorData = $this->clientChatVisitorDataRepository->findByVisitorRcId($visitorRcId);
+			if (!$this->clientChatVisitorRepository->exists($clientChat->cch_id, $visitorData->cvd_id)) {
+				$this->clientChatVisitorRepository->create($clientChat->cch_id, $visitorData->cvd_id, $clientChat->cch_client_id);
+			}
+		} catch (NotFoundException $e) {
+			$visitorData = $this->clientChatVisitorDataRepository->createByVisitorId($visitorRcId);
+			$this->clientChatVisitorRepository->create($clientChat->cch_id, $visitorData->cvd_id, $clientChat->cch_client_id);
+		}
+
 
 		if ($clientChat->cch_owner_user_id) {
 			Notifications::publish('clientChatUpdateClientStatus', ['user_id' => $clientChat->cch_owner_user_id], [
@@ -220,16 +229,18 @@ class ClientChatRequestService
 		try {
 			$clientChat = $this->clientChatRepository->findNotClosed($form->data['rid'] ?? '');
 		} catch (NotFoundException $e) {
-			$clientChat = $this->clientChatRepository->findByRid($form->data['rid'] ?? '');
+			$oldClientChat = $this->clientChatRepository->findByRid($form->data['rid'] ?? '');
 
-			$dto = ClientChatCloneDto::feelInOnCreateMessage($clientChat, $clientChatRequest->ccr_id);
+			$dto = ClientChatCloneDto::feelInOnCreateMessage($oldClientChat, $clientChatRequest->ccr_id);
 			$clientChat = $this->clientChatRepository->clone($dto);
+			$clientChat->cch_client_online = 1;
 			$this->clientChatRepository->save($clientChat);
-			$this->clientChatService->assignToChannel($clientChat);
+			$this->clientChatService->cloneLead($oldClientChat, $clientChat)->cloneCase($oldClientChat, $clientChat)->assignToChannel($clientChat);
 		}
 
 		$message = ClientChatMessage::createByApi($form, $clientChat, $clientChatRequest);
 		$this->clientChatMessageRepository->save($message, 0);
+        $this->sendLastChatMessageToMonitor($clientChat, $message);
 		if ($clientChat->cch_owner_user_id && $clientChatRequest->isGuestUttered() && $clientChat->cchOwnerUser->userProfile && $clientChat->cchOwnerUser->userProfile->isRegisteredInRc()) {
 			$this->clientChatMessageService->increaseUnreadMessages($clientChat->cch_id, $clientChat->cch_owner_user_id);
 			$this->updateDateTimeLastMessageNotification($clientChat, $message);
@@ -264,5 +275,19 @@ class ClientChatRequestService
 				'cchId' => $clientChat->cch_id,
             ]
         ]);
+    }
+
+    public function sendLastChatMessageToMonitor(ClientChat $clientChat, ClientChatMessage $message): void
+    {
+        $data = [];
+        $data['chat_id'] = $message->ccm_cch_id;
+        $data['client_id'] = $message->ccm_client_id;
+        $data['user_id'] = $message->ccm_user_id;
+        $data['sent_dt'] = \Yii::$app->formatter->asDatetime(strtotime($message->ccm_sent_dt), 'php: Y-m-d H:i:s');
+        $data['period'] = \Yii::$app->formatter->asRelativeTime(strtotime($message->ccm_sent_dt));
+        $data['msg'] = $message->message;
+        CentrifugoService::sendMsg(json_encode([
+            'chatMessageData' => $data,
+        ]), 'realtimeClientChatChannel');
     }
 }

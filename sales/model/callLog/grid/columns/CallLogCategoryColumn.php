@@ -2,7 +2,7 @@
 
 namespace sales\model\callLog\grid\columns;
 
-use sales\model\callLog\entity\callLog\CallLogCategory;
+use common\models\Call;
 use yii\grid\DataColumn;
 
 /**
@@ -23,7 +23,7 @@ class CallLogCategoryColumn extends DataColumn
         parent::init();
 
         if ($this->filter === null) {
-            $this->filter = CallLogCategory::getList();
+            $this->filter = Call::SOURCE_LIST;
         }
 
         if (!$this->attribute) {

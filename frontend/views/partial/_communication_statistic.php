@@ -7,6 +7,7 @@
 
 use sales\auth\Auth;
 use sales\helpers\communication\StatisticsHelper;
+use sales\model\clientChat\entity\search\ClientChatQaSearch;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
@@ -64,9 +65,14 @@ $linkAttributes = ['target' => '_blank', 'data-pjax'=> '0'];
             $text = $statistics->clientChatCount .
                 '&nbsp;&nbsp;<i class="fa fa-weixin warning" aria-hidden="true" title="' . $statistics::HINT_CHATS . '"></i>';
             if (Auth::can('/client-chat-crud/index')) {
-                $paramName = $statistics->isTypeCase() ? 'case_id' : 'lead_id';
-                echo Html::a($text,
-                    Url::to(['/client-chat-crud/index', 'ClientChatSearch[' . $paramName . ']'  => $statistics->getId()]),
+                $paramName = $statistics->isTypeCase() ? 'caseId' : 'leadId';
+
+                echo Html::a(
+                    $text,
+                    Url::to([
+                        '/client-chat-crud/index',
+                        'ClientChatQaSearch[' . $paramName . ']'  => $statistics->getId(),
+                    ]),
                     $linkAttributes);
             } else {
                  echo $text;
@@ -75,9 +81,3 @@ $linkAttributes = ['target' => '_blank', 'data-pjax'=> '0'];
     </div>
 </div>
 
-<?php
-$css = <<<CSS
-    .box-statistics {    
-    }
-CSS;
-$this->registerCss($css);

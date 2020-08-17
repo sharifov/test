@@ -23,8 +23,10 @@ use sales\auth\Auth;
 
 use sales\helpers\call\CallHelper;
 use sales\model\call\services\currentQueueCalls\CurrentQueueCallsService;
-use sales\model\conference\useCase\DisconnectFromAllConferenceCalls;
+use sales\model\callLog\entity\callLog\CallLog;
+use sales\model\conference\useCase\DisconnectFromAllActiveClientsCreatedConferences;
 use sales\model\callNote\useCase\addNote\CallNoteRepository;
+use sales\model\conference\useCase\PrepareCurrentCallsForNewCall;
 use sales\model\conference\useCase\ReturnToHoldCall;
 use sales\repositories\call\CallRepository;
 use sales\repositories\call\CallUserAccessRepository;
@@ -237,6 +239,15 @@ class CallController extends FController
     protected function findModel($id)
     {
         if (($model = Call::findOne($id)) !== null) {
+            return $model;
+        }
+
+        throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    protected function findModelBySid($sid)
+    {
+        if (($model = Call::findOne(['c_call_sid' => $sid])) !== null) {
             return $model;
         }
 
@@ -922,8 +933,14 @@ class CallController extends FController
     public function actionAjaxCallInfo()
     {
         $id = (int) Yii::$app->request->post('id');
+        $sid = (string) Yii::$app->request->post('sid');
 
-        $model = $this->findModel($id);
+        if ($id) {
+            $model = $this->findModel($id);
+        } else {
+            $model = $this->findModelBySid($sid);
+        }
+
         $this->checkAccess($model);
 
         if($model->c_is_new) {
@@ -1022,8 +1039,8 @@ class CallController extends FController
                             Yii::$app->redis->setnx($key, Auth::id());
                             $value = Yii::$app->redis->get($key);
                             if ((int)$value === (int)Auth::id()) {
-                                $disconnect = new DisconnectFromAllConferenceCalls();
-                                if ($disconnect->disconnect(Auth::id())) {
+                                $prepare = new PrepareCurrentCallsForNewCall(Auth::id());
+                                if ($prepare->prepare()) {
                                     $this->callService->acceptCall($callUserAccess, Auth::user());
                                 }
                                 Yii::$app->redis->expire($key, 5);
@@ -1074,9 +1091,9 @@ class CallController extends FController
                 if (!$callUserAccess) {
                     throw new \DomainException('Not found call user access');
                 }
-                $disconnect = new DisconnectFromAllConferenceCalls();
-                if (!$disconnect->disconnect(Auth::id())) {
-                    throw new \DomainException('Disconnect from current calls error');
+                $prepare = new PrepareCurrentCallsForNewCall(Auth::id());
+                if (!$prepare->prepare()) {
+                    throw new \DomainException('Prepare current calls error');
                 }
 
                 $return = new ReturnToHoldCall();
@@ -1217,5 +1234,29 @@ class CallController extends FController
         Yii::$app->response->format = Response::FORMAT_JSON;
         $calls = Call::find()->where(['c_created_user_id' => Yii::$app->user->id])->orderBy(['c_id' => SORT_DESC])->limit(3)->all();
         return ['calls' => $calls];
+    }
+
+    public function actionAjaxCallLogInfo()
+    {
+        $sid = (string) Yii::$app->request->post('sid');
+
+        $model = $this->findCallLogModel($sid);
+
+        if (!$model->isOwner(Auth::id())) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
+        return $this->renderAjax('ajax_call_log_info', [
+            'model' => $model,
+        ]);
+    }
+
+    protected function findCallLogModel(string $sid): CallLog
+    {
+        if (($model = CallLog::findOne(['cl_call_sid' => $sid])) !== null) {
+            return $model;
+        }
+
+        throw new NotFoundHttpException('The requested page does not exist.');
     }
 }

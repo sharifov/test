@@ -178,6 +178,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                     'url' => 'javascript:',
                     'icon' => 'comments warning',
                     'items' => [
+                        ['label' => 'Project config', 'url' => ['/client-chat-project-config/index']],
                         ['label' => 'Client Chat', 'url' => ['/client-chat-crud/index']],
                         ['label' => 'Request', 'url' => ['/client-chat-request-crud/index']],
                         ['label' => 'Channel', 'url' => ['/client-chat-channel-crud/index']],
@@ -190,7 +191,9 @@ $isSuperAdmin = $user->isSuperAdmin();
                         ['label' => 'Chat Cases', 'url' => ['/client-chat-case/index']],
                         ['label' => 'Visitor', 'url' => ['/client-chat-visitor-crud/index']],
                         ['label' => 'Visitor Data', 'url' => ['/client-chat-visitor-data-crud/index']],
-                    ]
+                        ['label' => 'Client Chat QA', 'url' => ['/client-chat-qa/index']],
+
+                    ],
                 ],
                 ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'list'],
                 ['label' => 'SMS Distrib List', 'url' => ['/sms-distribution-list/index'], 'icon' => 'list'],
@@ -345,7 +348,8 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'Email List', 'url' => ['/email-list/index'], 'icon' => 'envelope-o'],
 
                 ['label' => 'Airlines', 'url' => ['/settings/airlines'], 'icon' => 'plane'],
-                ['label' => 'Airports', 'url' => ['/settings/airports'], 'icon' => 'plane'],
+                //['label' => 'Airports', 'url' => ['/settings/airports'], 'icon' => 'plane'],
+                ['label' => 'Airports', 'url' => ['/airports/index'], 'icon' => 'plane'],
                 ['label' => 'ACL (IP)', 'url' => ['/settings/acl'], 'icon' => 'user-secret'],
                 ['label' => 'API Users', 'url' => ['/api-user/index'], 'icon' => 'users'],
                 ['label' => 'Tasks', 'url' => ['/task/index'], 'icon' => 'list'],
@@ -387,6 +391,7 @@ $isSuperAdmin = $user->isSuperAdmin();
             'icon' => 'user',
             'items' => [
                 ['label' => 'Users', 'url' => ['/employee/list'], 'icon' => 'user'],
+
                 ['label' => 'User Groups', 'url' => ['/user-group/index'], 'icon' => 'users'],
                 ['label' => 'User Groups Set', 'url' => ['/user-group-set/index'], 'icon' => 'users'],
                 ['label' => 'User Params', 'url' => ['/user-params/index'], 'icon' => 'bars'],
@@ -404,6 +409,8 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'User Commission Rules', 'url' => ['/user-commission-rules-crud/index'], 'icon' => 'list'],
                 ['label' => 'User Bonus Rules', 'url' => ['/user-bonus-rules-crud/index'], 'icon' => 'list'],
                 ['label' => 'User Failed Login', 'url' => ['/user-failed-login/index'], 'icon' => 'list'],
+                ['label' => 'User Monitor', 'url' => ['/user-monitor/index'], 'icon' => 'list'],
+                ['label' => 'User Monitor Stats', 'url' => ['/user-monitor/stats'], 'icon' => 'list'],
             ]
         ];
 
@@ -477,6 +484,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'User Stats', 'url' => ['/user-connection/stats'], 'icon' => 'area-chart'],
                 ['label' => 'Call User Map', 'url' => ['/call/user-map'], 'icon' => 'map'],
                 ['label' => 'Real-time User Map', 'url' => ['/call/realtime-user-map'], 'icon' => 'map'],
+                ['label' => 'Real-time Client Chat', 'url' => ['/client-chat/monitor'], 'icon' => 'map'],
                 ['label' => 'Agents Ratings', 'url' => ['/stats/agent-ratings'], 'icon' => 'star-half-empty'],
                 ['label' => 'Stats Agents & Leads', 'url' => ['/report/agents'], 'icon' => 'users'],
             ]
@@ -532,6 +540,7 @@ $isSuperAdmin = $user->isSuperAdmin();
 
                 ['label' => 'Site Settings Category', 'url' => ['/setting-category/index'], 'icon' => 'list'],
                 ['label' => 'Site Settings', 'url' => ['/setting/index'], 'icon' => 'cogs'],
+                ['label' => 'Site ENV', 'url' => ['/setting/env'], 'icon' => 'info-circle'],
             ]
         ];
 

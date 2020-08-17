@@ -226,7 +226,7 @@ $lists =  new ListsAccess(Yii::$app->user->id);
 
                 $city = '-';
 
-                $airport = \common\models\Airport::find()->where(['iata' => $originCode])->one();
+                $airport = \common\models\Airports::find()->where(['iata' => $originCode])->one();
 
                 if($airport && $airport->city) {
                     $city = $airport->city;
@@ -265,7 +265,7 @@ $lists =  new ListsAccess(Yii::$app->user->id);
 
                 $city = '-';
 
-                $airport = \common\models\Airport::find()->where(['iata' => $destinationCode])->one();
+                $airport = \common\models\Airports::find()->where(['iata' => $destinationCode])->one();
 
                 if($airport && $airport->city) {
                     $city = $airport->city;
@@ -296,10 +296,10 @@ $lists =  new ListsAccess(Yii::$app->user->id);
                 $country = '-';
                 if($originCode) {
                     //$airport = \common\models\AirportList::find()->where(['ai_iata_code' => $originCode])->one();
-                    $airport = \common\models\Airport::find()->where(['iata' => $originCode])->one();
+                    $airport = \common\models\Airports::find()->where(['iata' => $originCode])->one();
 
-                    if($airport && $airport->countryId) {
-                        $country = $airport->countryId;
+                    if($airport && $airport->a_country_code) {
+                        $country = $airport->a_country_code;
                     }
                 }
 
@@ -332,10 +332,10 @@ $lists =  new ListsAccess(Yii::$app->user->id);
                 if($destinationCode) {
                     //$airport = \common\models\AirportList::find()->where(['ai_iata_code' => $destinationCode])->one();
 
-                    $airport = \common\models\Airport::find()->where(['iata' => $destinationCode])->one();
+                    $airport = \common\models\Airports::find()->where(['iata' => $destinationCode])->one();
 
-                    if($airport && $airport->countryId) {
-                        $country = $airport->countryId;
+                    if($airport && $airport->a_country_code) {
+                        $country = $airport->a_country_code;
                     }
 
                     /*if($airport && $airport->aiCountryIsoCode) {

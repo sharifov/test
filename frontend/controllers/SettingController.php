@@ -48,6 +48,18 @@ class SettingController extends FController
     }
 
     /**
+     * @return string
+     */
+    public function actionEnv()
+    {
+        return $this->render('env', [
+
+        ]);
+    }
+
+
+
+    /**
      * Displays a single Setting model.
      * @param integer $id
      * @return mixed

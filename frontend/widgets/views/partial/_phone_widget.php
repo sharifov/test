@@ -13,7 +13,7 @@ use yii\web\View;
 ?>
 
 <div class="phone-widget" style="margin-bottom: 30px">
-  <?php if($showWidgetContent): ?>
+
   <div class="phone-widget__header">
     <div class="phone-widget__heading">
       <div class="number-toggle">
@@ -22,9 +22,9 @@ use yii\web\View;
         <div class="status-confirmation"></div>
       </div>
         <ul class="call-filter">
-            <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-active" data-call-filter="active">0</a></li>
-            <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-direct" data-call-filter="direct">0</a></li>
-            <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-general" data-call-filter="general">0</a></li>
+            <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-active" title="Active Calls" data-call-filter="active">0</a></li>
+            <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-direct" title="Direct Line" data-call-filter="direct">0</a></li>
+            <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-general" title="General Line" data-call-filter="general">0</a></li>
         </ul>
 
         <!-- <a href="#" class="phone-widget__dev header-action-small toggle-bar-logs"><i class="fas fa-tools"></i></a> -->
@@ -48,7 +48,7 @@ use yii\web\View;
       </li>
         <?php if (Auth::can('PhoneWidget_HistoryTab')): ?>
             <li>
-                <a href="#" data-toggle-tab="tab-history" data-missed-calls="0">
+                <a href="#" data-toggle-tab="tab-history" data-missed-calls="0" style="margin-right: 15px">
                     <i class="fas fa-file-invoice"></i>
                     <span>history</span>
                 </a>
@@ -412,8 +412,8 @@ use yii\web\View;
     </div>
     <div class="additional-bar__body tabs">
         <ul class="tabs__nav tab-nav">
-            <li><a href="#tab-device" class="tab-trigger active-tab">Devices</a></li>
-            <li><a href="#tab-logs" class="tab-trigger">Logs</a></li>
+            <li class="wp-tab-device"><a href="#tab-device" class="tab-trigger active-tab">Devices</a></li>
+            <li><a href="#tab-logs" class="tab-trigger wp-devices-tab-log">Logs</a></li>
         </ul>
         <ul class="tabs__container tab-container">
             <li class="tabs__item" id="tab-device">
@@ -438,11 +438,5 @@ use yii\web\View;
 
   </div>
 
-  <?php else: ?>
-  <div class="alert alert-danger alert-dismissible" role="alert">
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
-        aria-hidden="true">&times;</span></button>
-    <strong>Warning!</strong> WebCall token is empty.
-  </div>
-  <?php endif; ?>
+
 </div>

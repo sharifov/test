@@ -206,7 +206,7 @@ class CallUserAccess extends \yii\db\ActiveRecord
 				$phone = '';
                 if ($call->isJoin()) {
                     if (($parent = $call->cParent) && $parent->cCreatedUser) {
-                        $name = $parent->cCreatedUser->username;
+                        $name = $parent->cCreatedUser->nickname;
                         $phone = $parent->c_to;
                     }
                 } else {
@@ -217,6 +217,8 @@ class CallUserAccess extends \yii\db\ActiveRecord
                         $phone = $call->c_to;
                     }
                 }
+
+                $auth = Yii::$app->authManager;
 
 				$callInfo = [
                     'id' => $call->c_id,
@@ -239,9 +241,14 @@ class CallUserAccess extends \yii\db\ActiveRecord
                     'source' => $call->c_source_type_id ? $call->getSourceName() : '',
                     'isEnded' => false,
                     'contact' => [
+                        'id' => $call->c_client_id,
                         'name' => $name,
                         'phone' => $phone,
                         'company' => '',
+                        'isClient' => $call->c_client_id ? $call->cClient->isClient() : false,
+                        'canContactDetails' => $auth->checkAccess($this->cua_user_id, '/client/ajax-get-info'),
+                        'canCallInfo' => $auth->checkAccess($this->cua_user_id, '/call/ajax-call-info'),
+                        'callSid' => $call->c_call_sid,
                     ],
                     'department' => $call->c_dep_id ? Department::getName($call->c_dep_id) : '',
                     'queue' => Call::getQueueName($call),

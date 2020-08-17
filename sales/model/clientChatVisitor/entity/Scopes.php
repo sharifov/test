@@ -9,8 +9,8 @@ use yii\db\ActiveQuery;
  */
 class Scopes extends ActiveQuery
 {
-	public function byVisitorRcId(string $id): ActiveQuery
+	public function byUniqueFields(int $cchId, int $cvdId): self
 	{
-		return $this->andWhere(['ccv_visitor_rc_id' => $id]);
+		return $this->andWhere(['ccv_cch_id' => $cchId, 'ccv_cvd_id' => $cvdId]);
 	}
 }

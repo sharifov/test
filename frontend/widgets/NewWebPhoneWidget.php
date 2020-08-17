@@ -6,6 +6,7 @@ use common\models\Employee;
 use common\models\UserCallStatus;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
+use sales\auth\Auth;
 use Yii;
 use yii\bootstrap\Widget;
 
@@ -29,12 +30,11 @@ class NewWebPhoneWidget extends Widget
 
 		$userPhoneProject = $this->getUserProjectParams($this->userId);
 
-		if (!$useNewWebPhoneWidget || empty($userPhoneProject)) {
+		if (!$useNewWebPhoneWidget) {
 			return '';
 		}
 
 		return $this->render('web_phone_new', [
-			'userPhoneProject' => $userPhoneProject,
             'formattedPhoneProject' => json_encode($this->formatDataForSelectList($userPhoneProject)),
             'userPhones' => array_keys($this->getUserPhones()),
             'userEmails' => array_keys($this->getUserEmails()),
@@ -69,6 +69,11 @@ class NewWebPhoneWidget extends Widget
 			'selected' => [],
 			'options' => []
 		];
+
+		if (!Auth::can('PhoneWidget_Dialpad')) {
+		    return $result;
+        }
+
 		foreach ($userProjectPhones as $phone) {
 			$result['options'][] = [
 				'value' => $phone['pl_phone_number'],
@@ -76,9 +81,16 @@ class NewWebPhoneWidget extends Widget
 				'projectId' => $phone['upp_project_id']
 			];
 		}
-		$result['selected']['value'] = $userProjectPhones[0]['pl_phone_number'] ?? 'undefined';
-		$result['selected']['project'] = $userProjectPhones[0]['project_name'] ?? 'undefined';
-		$result['selected']['projectId'] = $userProjectPhones[0]['upp_project_id'] ?? 'undefined';
+
+		if (!isset($userProjectPhones[0])) {
+            $result['selected']['value'] = '';
+            $result['selected']['project'] = 'no number';
+            $result['selected']['projectId'] = '';
+        } else {
+            $result['selected']['value'] = $userProjectPhones[0]['pl_phone_number'];
+            $result['selected']['project'] = $userProjectPhones[0]['project_name'];
+            $result['selected']['projectId'] = $userProjectPhones[0]['upp_project_id'];
+        }
 
 		return $result;
 	}

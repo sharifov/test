@@ -351,10 +351,69 @@ JS;
                     </div>
                 </div>
             </div>
+
+            <div class="filter filter--rankCriteria dropdown js-filter">
+                <a data-toggle="dropdown" href="#">Top
+                    <i class="icn-clear-filter js-clear-filter"></i></a>
+                <!--Dropdown-->
+                <div class="dropdown-menu dropdown-menu-right">
+                    <div class="search-filters__stops">
+                        <h3 class="search-filters__header">
+                            Top
+                            <i class="search-filters__close-btn js-dropdown-close"></i>
+                        </h3>
+                        <div class="search-filters__body">
+                            <div class="form-group custom-radio">
+                                <input type="radio" id="any" name="rankCriteria" checked>
+                                <label for="any"></label>
+                                <label for="any">Any</label>
+                            </div>
+                            <div class="form-group custom-radio">
+                                <input type="radio" id="cheapest" name="rankCriteria">
+                                <label for="cheapest"></label>
+                                <label for="cheapest">Cheapest</label>
+                            </div>
+                            <div class="form-group custom-radio">
+                                <input type="radio" id="fastest" name="rankCriteria">
+                                <label for="fastest"></label>
+                                <label for="fastest">Fastest</label>
+                            </div>
+                            <div class="form-group custom-radio">
+                                <input type="radio" id="best" name="rankCriteria">
+                                <label for="best"></label>
+                                <label for="best">Best itinerary</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter filter--rank dropdown js-filter">
+                <a data-toggle="dropdown" href="#">Rank <i class="icn-clear-filter js-clear-filter"></i></a>
+
+                <div class="dropdown-menu dropdown-menu-right">
+                    <div class="search-filters__stops">
+                        <h3 class="search-filters__header">
+                            Rank
+                            <i class="search-filters__close-btn js-dropdown-close"></i>
+                        </h3>
+                        <div class="search-filters__body">
+                            <span class="search-filters__slider-label" id="rank-slider-label">10</span>
+                            <a href="#" class="search-filters__clear-link js-filter-reset">Clear</a>
+                            <div class="search-filters__slider" id="rank-slider" data-min="0" data-max="10"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
         </div>
     </div>
     <div class="search-results__wrapper">
-        <?php $n = 0; ?>
+        <?php
+            $n = 0;
+            $groupKeys = [];
+        ?>
         <?php foreach ($result['results'] as $key => $resultItem):?>
             <?= $this->render('_search_result_item', ['resultKey' => $key,'result' => $resultItem,'locations' => $locations,'airlines' => $airlines]);?>
             <?php
@@ -364,12 +423,20 @@ JS;
             }
             ?>
         <?php endforeach;?>
-		<?php
-		$js = <<<JS
-    $('.quote__heading [data-toggle="tooltip"]').tooltip();
+<?php
+$js = <<<JS
+    
+    $('[data-toggle="tooltip"]').tooltip({html:true});
 JS;
-		$this->registerJs($js);
-		?>
+$this->registerJs($js);
+
+$css = <<<CSS
+    .quote__trip { 
+        width: 624px;
+    }
+CSS;
+$this->registerCss($css);
+?>
     </div>
 <?php else:?>
     <div class="search-results__wrapper">

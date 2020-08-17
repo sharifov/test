@@ -211,6 +211,11 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 		return $this->decodedData['visitor']['id'] ?? '';
 	}
 
+	public function getClientUuId(): string
+	{
+		return $this->decodedData['visitor']['uuid'] ?? '';
+	}
+
 	public function getVisitorId(): string
 	{
 		return $this->decodedData['visitorId'] ?? '';

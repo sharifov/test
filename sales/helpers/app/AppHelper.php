@@ -28,13 +28,18 @@ class AppHelper
     /**
      * @param Throwable $throwable
      * @param string $category
+     * @param bool $formatted
      */
-    public static function throwableLogger(\Throwable $throwable, string $category): void
+    public static function throwableLogger(\Throwable $throwable, string $category, bool $formatted = false): void
     {
+        $errorMessage = $formatted ?
+            self::throwableFormatter($throwable) :
+            VarDumper::dumpAsString($throwable, 20);
+
         if ($throwable->getCode() < 0) {
-            Yii::info(self::throwableFormatter($throwable),"info\{$category}");
+            Yii::info($errorMessage,'info\\"' . $category . '"');
         } else {
-            Yii::error(self::throwableFormatter($throwable), $category);
+            Yii::error($errorMessage, $category);
         }
     }
 
@@ -113,6 +118,25 @@ class AppHelper
 				} else {
 					$newArray[$key] = $array[$key];
 				}
+			}
+		}
+		return $newArray;
+	}
+
+    /**
+     * @param array $array
+     * @param string $index
+     * @param string $value
+     * @return array
+     */
+    public static function filterBySearchInValue(array $array, string $index, string $value): array
+	{
+		$newArray = [];
+		if (is_array($array) && $array) {
+			foreach (array_keys($array) as $key) {
+			    if (strpos($array[$key][$index], $value) !== false) {
+			        $newArray[$key] = $array[$key];
+			    }
 			}
 		}
 		return $newArray;

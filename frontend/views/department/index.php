@@ -1,7 +1,9 @@
 <?php
 
+use common\models\Department;
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\Json;
 use yii\widgets\Pjax;
 use common\components\grid\UserSelect2Column;
 use dosamigos\datepicker\DatePicker;
@@ -32,6 +34,21 @@ $this->params['breadcrumbs'][] = $this->title;
             'dep_id',
             'dep_key',
             'dep_name',
+
+            [
+                'attribute' => 'dep_params',
+                'value' => static function (Department $model) {
+
+                    try {
+                        $val = Json::decode($model->dep_params);
+                        return '<pre>'.print_r($val, true).'</pre>';
+                    } catch (Throwable $e) {
+                        return 'Json decode error';
+                    }
+                },
+                'format' => 'raw',
+                //'filter' => false
+            ],
 
             [
                 'class' => UserSelect2Column::class,

@@ -79,4 +79,4 @@ NotificationSocketAsset::register($this);
 
 <?php
 
-$this->registerJs("notificationCount('" . $count . "', '".$totalUnreadMessages."')", View::POS_END);
+$this->registerJs("notificationCount('" . $count . "', '".$totalUnreadMessages."')", View::POS_READY);

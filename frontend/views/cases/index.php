@@ -17,6 +17,7 @@ use \sales\entities\cases\CasesStatus;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
 use yii\helpers\ArrayHelper;
+use sales\auth\Auth;
 
 /* @var $this yii\web\View */
 /* @var $searchModel sales\entities\cases\CasesSearch */
@@ -93,6 +94,21 @@ $gridId = 'cases-grid-id';
             ],
             [
                 'attribute' => 'cs_id',
+                'value' => static function(Cases $case){
+                    if(Auth::can('cases/view', ['case' => $case])){
+                        return Html::a($case->cs_id, [
+                            'cases/view',
+                            'gid' => $case->cs_gid
+                        ], [
+                            'target' => '_blank',
+                            'title' => 'View',
+                            'data-pjax' => 0,
+                        ]);
+                    } else {
+                        return $case->cs_id;
+                    }
+                },
+                'format' => 'raw',
                 'options' => [
                     'style' => 'width:80px'
                 ],
@@ -245,6 +261,28 @@ $gridId = 'cases-grid-id';
             ],
             [
                 'class' => 'yii\grid\ActionColumn',
+                'template' => '{take}',
+                'visibleButtons' => [
+                    'take' => static function (Cases $model, $key, $index) {
+                        return Auth::can('cases/take', ['case' => $model]);
+                    },
+                ],
+                'buttons' => [
+                    'take' => static function ($url, Cases $model) {
+                        return Html::a('<i class="fa fa-download"></i> Take', ['cases/take', 'gid' => $model->cs_gid], [
+                            'class' => 'btn btn-primary btn-xs take-processing-btn',
+                            'data-pjax' => 0,
+                            /*'data' => [
+                                'confirm' => 'Are you sure you want to take this Case?',
+                                //'method' => 'post',
+                            ],*/
+                        ]);
+                    }
+                ],
+            ]
+
+            /*[
+                'class' => 'yii\grid\ActionColumn',
                 'template' => '{view}',
                 'buttons' => [
                     'view' => function ($url, Cases $model, $key) {
@@ -254,8 +292,7 @@ $gridId = 'cases-grid-id';
                         ]));
                     }
                 ]
-            ]
-
+            ]*/
         ],
     ]); ?>
 

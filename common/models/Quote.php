@@ -7,8 +7,10 @@ use common\components\SearchService;
 use common\models\local\FlightSegment;
 use common\models\local\LeadLogMessage;
 use common\models\query\QuoteQuery;
+use frontend\helpers\JsonHelper;
 use sales\entities\EventTrait;
 use sales\events\quote\QuoteSendEvent;
+use sales\helpers\app\AppHelper;
 use sales\services\parsingDump\lib\ParsingDump;
 use sales\services\parsingDump\ReservationService;
 use Yii;
@@ -59,21 +61,9 @@ use yii\helpers\VarDumper;
  */
 class Quote extends \yii\db\ActiveRecord
 {
-
     use EventTrait;
 
     public const CHECKOUT_URL_PAGE = 'checkout/quote';
-
-    public const
-        GDS_SABRE = 'S',
-        GDS_AMADEUS = 'A',
-        GDS_WORLDSPAN = 'W';
-
-    public CONST GDS_LIST = [
-        self::GDS_SABRE => 'Sabre',
-        self::GDS_AMADEUS => 'Amadeus',
-        self::GDS_WORLDSPAN => 'WorldSpan',
-    ];
 
     public const
         FARE_TYPE_PUB = 'PUB',
@@ -350,7 +340,7 @@ class Quote extends \yii\db\ActiveRecord
 
     public static function getGDSName($gds = null)
     {
-        $mapping = self::GDS_LIST;
+        $mapping = SearchService::GDS_LIST;
 
         if ($gds === null) {
             return $mapping;
@@ -829,11 +819,11 @@ class Quote extends \yii\db\ActiveRecord
 					/*if ($depDateTime > $arrDateTime) {
 						$arrDateTime->add(\DateInterval::createFromDateString('+1 year'));
 					}*/
-					$depCity = Airport::findIdentity($depAirport);
+					$depCity = Airports::findByIata($depAirport);
 					/*$timezone = ($depCity !== null && !empty($depCity->timezone))
 					? new \DateTimeZone($depCity->timezone)
 					: new \DateTimeZone("UTC");*/
-					$arrCity = Airport::findIdentity($arrAirport);
+					$arrCity = Airports::findByIata($arrAirport);
 					/*$timezone = ($arrCity !== null && !empty($arrCity->timezone))
 						? new \DateTimeZone($arrCity->timezone)
 						: new \DateTimeZone("UTC");*/
@@ -1013,11 +1003,16 @@ class Quote extends \yii\db\ActiveRecord
             $rowTime = $rowExpl[1];
             preg_match_all('/([0-9]{3,4})(N|A|P)?(\+([0-9])?)?/', $rowTime, $matches);
 			if (!empty($matches)) {
+
+			    if (!isset($matches[1][0], $matches[1][1])) {
+                    throw new \Exception('Quote:getTripsSegmentsData:Date:notParsed');
+			    }
+
 				$now = new \DateTime();
 				$matches[1][0] = substr_replace($matches[1][0], ':', -2, 0);
 				$matches[1][1] = substr_replace($matches[1][1], ':', -2, 0);
 				$date = $depDate . ' ' . $matches[1][0];
-				if ($matches[2][0] != '') {
+				if (isset($matches[2][0]) && $matches[2][0] != '') {
 					$date = $date . strtolower(str_replace('N', 'P', $matches[2][0])) . 'm';
 					$dateFormat = 'jM g:ia';
 				}
@@ -1035,8 +1030,9 @@ class Quote extends \yii\db\ActiveRecord
 					$dateFormat = 'Y' . $dateFormat;
 					$depDateTime = \DateTime::createFromFormat($dateFormat, $date);
 				}
+
 				$date = $arrDate . ' ' . $matches[1][1];
-				if ($matches[2][1] != '') {
+				if (isset($matches[2][1]) && $matches[2][1] != '') {
 					$date = $date . strtolower(str_replace('N', 'P', $matches[2][1])) . 'm';
 					$dateFormat = 'jM g:ia';
 				}
@@ -1052,7 +1048,7 @@ class Quote extends \yii\db\ActiveRecord
 					$arrDateTime = \DateTime::createFromFormat($dateFormat, $date);
 				}
 				$arrDepDiff = $depDateTime->diff($arrDateTime);
-				if ($arrDepDiff->d == 0 && !$arrDateInRow && !empty($matches[3][1])) {
+				if ($arrDepDiff->d == 0 && !$arrDateInRow && isset($matches[3][1]) && !empty($matches[3][1])) {
 					if ($matches[3][1] == "+") {
 						$matches[3][1] .= 1;
 					}
@@ -1061,11 +1057,11 @@ class Quote extends \yii\db\ActiveRecord
 				/*if ($depDateTime > $arrDateTime) {
 					$arrDateTime->add(\DateInterval::createFromDateString('+1 year'));
 				}*/
-				$depCity = Airport::findIdentity($depAirport);
+				$depCity = Airports::findByIata($depAirport);
 				/*$timezone = ($depCity !== null && !empty($depCity->timezone))
 				? new \DateTimeZone($depCity->timezone)
 				: new \DateTimeZone("UTC");*/
-				$arrCity = Airport::findIdentity($arrAirport);
+				$arrCity = Airports::findByIata($arrAirport);
 				/*$timezone = ($arrCity !== null && !empty($arrCity->timezone))
 					? new \DateTimeZone($arrCity->timezone)
 					: new \DateTimeZone("UTC");*/
@@ -1125,8 +1121,8 @@ class Quote extends \yii\db\ActiveRecord
             $firstSegment = $trip['segments'][0];
             $lastSegment = $trip['segments'][count($trip['segments']) - 1];
 
-            $depCity = Airport::findIdentity($firstSegment['qs_departure_airport_code']);
-            $arrCity = Airport::findIdentity($lastSegment['qs_arrival_airport_code']);
+            $depCity = Airports::findByIata($firstSegment['qs_departure_airport_code']);
+            $arrCity = Airports::findByIata($lastSegment['qs_arrival_airport_code']);
             $arrivalTime = new \DateTime($lastSegment['qs_arrival_time']);
             $departureTime = new \DateTime($firstSegment['qs_departure_time']);
 
@@ -1259,6 +1255,15 @@ class Quote extends \yii\db\ActiveRecord
         return ['hasFreeBaggage' => $this->hasFreeBaggage, 'freeBaggageInfo' => $this->freeBaggageInfo];
     }
 
+    public function getFreeBaggageInfoFromMeta(): ?int
+    {
+        if ($originSearchData = $this->getJsonOriginSearchData()) {
+            if (!empty($originSearchData['meta']['bags'])) {
+                return (int) $originSearchData['meta']['bags'];
+            }
+        }
+        return null;
+    }
 
     /**
      * @return array
@@ -1796,8 +1801,8 @@ class Quote extends \yii\db\ActiveRecord
             $firstSegment = $trip['segments'][0];
             $lastSegment = $trip['segments'][count($trip['segments']) - 1];
 
-            $depCity = Airport::findIdentity($firstSegment['departureAirportCode']);
-            $arrCity = Airport::findIdentity($lastSegment['arrivalAirportCode']);
+            $depCity = Airports::findByIata($firstSegment['departureAirportCode']);
+            $arrCity = Airports::findByIata($lastSegment['arrivalAirportCode']);
 
             $arrDt = new \DateTime($lastSegment['arrivalTime']);
             $depDt = new \DateTime($firstSegment['departureTime']);
@@ -1850,8 +1855,8 @@ class Quote extends \yii\db\ActiveRecord
             $firstSegment = $trip['segments'][0];
             $lastSegment = $trip['segments'][count($trip['segments']) - 1];
 
-            $depCity = Airport::findIdentity($firstSegment['departureAirport']);
-            $arrCity = Airport::findIdentity($lastSegment['arrivalAirport']);
+            $depCity = Airports::findByIata($firstSegment['departureAirport']);
+            $arrCity = Airports::findByIata($lastSegment['arrivalAirport']);
 
             if ($depCity !== null && $arrCity !== null && $depCity->dst != $arrCity->dst) {
                 $flightDuration = ($lastSegment['arrivalDateTime']->getTimestamp() - $firstSegment['departureDateTime']->getTimestamp()) / 60;
@@ -1863,8 +1868,8 @@ class Quote extends \yii\db\ActiveRecord
             foreach ($trip['segments'] as $segment) {
                 $routing[] = $segment['arrivalAirport'];
             }
-            $src = Airport::findIdentity($routing[min(array_keys($routing))]);
-            $dst = Airport::findIdentity($routing[max(array_keys($routing))]);
+            $src = Airports::findByIata($routing[min(array_keys($routing))]);
+            $dst = Airports::findByIata($routing[max(array_keys($routing))]);
             $trips[$key]['routing'] = implode('-', $routing);
             $trips[$key]['title'] = sprintf('%s - %s',
                 ($src !== null) ? $src->city : $src,
@@ -1917,8 +1922,7 @@ class Quote extends \yii\db\ActiveRecord
      */
     public function getGdsName2(): string
     {
-        $name = self::GDS_LIST[$this->gds] ?? '-';
-        return $name;
+        return SearchService::GDS_LIST[$this->gds] ?? '-';
     }
 
     public function beforeDelete()
@@ -2461,5 +2465,34 @@ class Quote extends \yii\db\ActiveRecord
         if ($this->lead->isReadyForGa()) {
             $this->recordEvent(new QuoteSendEvent($this), QuoteSendEvent::class);
         }
+    }
+
+    public function getPenaltiesInfo(): ?array
+    {
+        if (($originSearchData = $this->getJsonOriginSearchData()) && !empty($originSearchData['penalties'])) {
+            return $originSearchData['penalties'];
+        }
+        return null;
+    }
+
+    public function getMetaInfo(): ?array
+    {
+        if (($originSearchData = $this->getJsonOriginSearchData()) && !empty($originSearchData['meta'])) {
+            return $originSearchData['meta'];
+        }
+        return null;
+    }
+
+    public function getJsonOriginSearchData(): ?array
+    {
+        if (!empty($this->origin_search_data)) {
+            try {
+                return JsonHelper::decode($this->origin_search_data);
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableFormatter($throwable),
+                'Quote:getJsonOriginSearchData:failed');
+            }
+        }
+        return null;
     }
 }

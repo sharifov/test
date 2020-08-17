@@ -7,6 +7,7 @@
  */
 
 use common\models\Lead;
+use sales\services\parsingDump\lib\ParsingDump;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\bootstrap\ActiveForm;
@@ -215,7 +216,7 @@ $paxCntTypes = [
                                     'tag' => false,
                                 ],
                                 'template' => '{input}'
-                            ])->dropDownList($quote::getGDSName(), [
+                            ])->dropDownList(ParsingDump::QUOTE_GDS_TYPE_MAP, [
                                 'prompt' => 'Select',
                                 'required' => 'required'
                             ]) ?>
@@ -438,7 +439,7 @@ $js = <<<JS
 
     var leadId = '$lead->id';
 
-    $('[data-toggle="tooltip"]').tooltip();
+    $('[data-toggle="tooltip"]').tooltip({html:true});
     
     $(document).on('keyup', '.alt-quote-price', function(event){
         var key = event.keyCode ? event.keyCode : event.which;

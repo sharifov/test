@@ -4,6 +4,8 @@ namespace frontend\controllers;
 
 use common\models\Employee;
 use common\models\Language;
+use sales\helpers\app\AppHelper;
+use sales\model\userVoiceMail\useCase\manage\UserVoiceMailForm;
 use Yii;
 use sales\model\userVoiceMail\entity\UserVoiceMail;
 use sales\model\userVoiceMail\entity\search\UserVoiceMailSearch;
@@ -14,6 +16,7 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\db\StaleObjectException;
+use yii\web\UploadedFile;
 
 class UserVoiceMailController extends FController
 {
@@ -64,12 +67,21 @@ class UserVoiceMailController extends FController
      */
     public function actionCreate()
     {
-        $model = new UserVoiceMail();
+        $model = new UserVoiceMailForm();
         $model->uvm_max_recording_time = 60;
         $model->uvm_say_voice = 'alice';
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->uvm_id]);
+        if ($model->load(Yii::$app->request->post())) {
+			$model->recordFile = UploadedFile::getInstance($model, 'recordFile');
+			try {
+				if($model->validate() && $model->save(false)) {
+					return $this->redirect(['view', 'id' => $model->uvm_id]);
+				}
+			} catch (\Throwable $e) {
+				AppHelper::throwableLogger($e, 'UserVoiceMail::save');
+				$model->addError('general', 'Internal Server Error');
+				$model->deleteRecord();
+			}
         }
 
         $languages = Language::getList();
@@ -88,13 +100,25 @@ class UserVoiceMailController extends FController
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
+        $model = UserVoiceMailForm::findOne($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->uvm_id]);
-        }
+        if ($model) {
+			if ($model->load(Yii::$app->request->post())) {
+				$model->recordFile = UploadedFile::getInstance($model, 'recordFile');
+				try {
+					if($model->validate() && $model->updateRow()) {
+						return $this->redirect(['view', 'id' => $model->uvm_id]);
+					}
+				} catch (\Throwable $e) {
+					AppHelper::throwableLogger($e, 'UserVoiceMail::save');
+					$model->addError('general', 'Internal Server Error');
+				}
+			}
+		} else {
+			throw new NotFoundHttpException('The requested page does not exist.');
+		}
+
 		$languages = Language::getList();
-
 		return $this->render('update', [
             'model' => $model,
 			'languageList' => $languages
@@ -126,12 +150,19 @@ class UserVoiceMailController extends FController
 			throw new BadRequestHttpException('Invalid User Id: ' . $userId, 1);
 		}
 
-		$userVoiceMail = new UserVoiceMail();
+		$userVoiceMail = new UserVoiceMailForm();
 		$userVoiceMail->uvm_user_id = $userId;
 
 		if ($userVoiceMail->load(Yii::$app->request->post())) {
-			if($userVoiceMail->validate() && $userVoiceMail->save()) {
-				return 'Success <script>$("#modal-df").modal("hide")</script>';
+			$userVoiceMail->recordFile = UploadedFile::getInstance($userVoiceMail, 'recordFile');
+			try {
+				if($userVoiceMail->validate() && $userVoiceMail->save(false)) {
+					return 'Success <script>$("#modal-df").modal("hide"); createNotify("Success", "Voice Mail created successfully", "success");</script>';
+				}
+			} catch (\Throwable $e) {
+				AppHelper::throwableLogger($e, 'UserVoiceMail::save');
+				$userVoiceMail->addError('general', 'Internal Server Error');
+				$userVoiceMail->deleteRecord();
 			}
 		}
 
@@ -144,12 +175,24 @@ class UserVoiceMailController extends FController
 	{
 		$id = Yii::$app->request->get('id');
 
-		$model = $this->findModel($id);
+		$model = UserVoiceMailForm::findOne($id);
 
-		if ($model->load(Yii::$app->request->post())) {
-			if($model->validate() && $model->save()) {
-				return 'Success <script>$("#modal-df").modal("hide")</script>';
+		if ($model) {
+
+			if ($model->load(Yii::$app->request->post())) {
+				$model->recordFile = UploadedFile::getInstance($model, 'recordFile');
+				try {
+					if($model->validate() && $model->updateRow()) {
+						return 'Success <script>$("#modal-df").modal("hide"); createNotify("Success", "Voice Mail updated successfully", "success");</script>';
+					}
+				} catch (\Throwable $e) {
+					AppHelper::throwableLogger($e, 'UserVoiceMail::save');
+					$model->addError('general', 'Internal Server Error');
+				}
 			}
+
+		} else {
+			$model->addError('general', 'User Voice Mail entity not found');
 		}
 		return $this->renderAjax('update_ajax', [
 			'model' => $model,

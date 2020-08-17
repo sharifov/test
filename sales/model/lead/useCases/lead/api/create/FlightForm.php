@@ -2,7 +2,7 @@
 
 namespace sales\model\lead\useCases\lead\api\create;
 
-use common\models\Airport;
+use common\models\Airports;
 use yii\base\Model;
 
 /**
@@ -46,7 +46,7 @@ class FlightForm extends Model
 
     public function iataValidation($attribute): void
     {
-        if (!$iata = Airport::findOne(['iata' => $this->$attribute])) {
+        if (!$iata = Airports::findOne(['iata' => $this->$attribute])) {
             $this->addError($attribute, 'IATA (' . $this->$attribute . ') not found.');
             return;
         }

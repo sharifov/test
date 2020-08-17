@@ -3,6 +3,7 @@
 namespace common\components\i18n;
 
 use common\components\purifier\Purifier;
+use common\models\Call;
 use common\models\CaseSale;
 use common\models\ConferenceParticipant;
 use common\models\Department;
@@ -42,6 +43,7 @@ use modules\qaTask\src\useCases\qaTask\QaTaskActions;
 use modules\qaTask\src\helpers\formatters\QaTaskFormatter;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesSourceType;
+use sales\helpers\PhoneFormatter;
 use sales\model\callLog\entity\callLog\CallLogCategory;
 use sales\model\callLog\entity\callLog\CallLogStatus;
 use sales\model\callLog\entity\callLog\CallLogType;
@@ -116,7 +118,7 @@ class Formatter extends \yii\i18n\Formatter
             return $this->nullDisplay;
         }
 
-        return CallLogCategory::asFormat($value);
+        return  Call::SOURCE_LIST[$value] ?? '-';
     }
 
     public function asCallLogType($value): string
@@ -733,5 +735,41 @@ class Formatter extends \yii\i18n\Formatter
         }
 
         return \sales\model\clientChat\Formatter::asClientChat($chat);
+    }
+
+    /**
+     * @param Employee|int|string|null $value
+     * @return string
+     */
+    public function asUserNickname($value): string
+    {
+        if (!$value) {
+            return $this->nullDisplay;
+        }
+
+        if (is_string($value)) {
+            $name = $value;
+        } elseif ($value instanceof Employee) {
+            $name = $value->nickname ?: $value->username;
+        } elseif (is_int($value)) {
+            if ($entity = Employee::find()->select(['nickname', 'username'])->where(['id' => $value])->cache(3600)->one()) {
+                $name = $entity->nickname ?: $entity->username;
+            } else {
+                return 'not found';
+            }
+        } else {
+            throw new \InvalidArgumentException('user must be Employee|int|string|null');
+        }
+
+        return Html::tag('i', '', ['class' => 'fa fa-user']) . ' ' . Html::encode($name);
+    }
+
+    public function asPhoneOrNickname($value): string
+    {
+        if (!$value) {
+            return $this->nullDisplay;
+        }
+
+        return PhoneFormatter::getPhoneOrNickname($value);
     }
 }

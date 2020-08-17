@@ -4,6 +4,7 @@
  */
 
 use common\components\SearchService;
+use frontend\helpers\QuoteHelper;
 use modules\flight\models\FlightQuote;
 use modules\flight\src\helpers\FlightQuoteHelper;
 use modules\product\src\entities\productQuote\ProductQuote;
@@ -317,12 +318,16 @@ $totalAmountQuote = 0.0;
                             <?php $baggageInfo = FlightQuoteHelper::getBaggageInfo($flightQuote); ?>
                             <?php $hasAirportChange = FlightQuoteHelper::hasAirportChange($flightQuote); ?>
                             <?php $ticketSegments = FlightQuoteHelper::getTicketSegments($flightQuote); ?>
+                            <?php $meta = FlightQuoteHelper::getMetaInfo($flightQuote); ?>
+                            <?php $penalties = FlightQuoteHelper::getPenaltiesInfo($flightQuote); ?>
 
                             <?php if($ticketSegments):?>
                                 <span title="Separate Ticket (<?=count($ticketSegments)?>)" data-toggle="tooltip">
                                     <i class="fa fa-ticket fa-border text-info"> <?=count($ticketSegments)?></i>
                                 </span>
                             <?php endif; ?>
+
+                            <?php echo FlightQuoteHelper::formattedFreeBaggage($meta, 'success') ?>
 
                             <span class="<?=$baggageInfo['hasFreeBaggage'] ? ($baggageInfo['freeBaggageInfo'] ? 'success' : 'warning') : ''?>" data-toggle="tooltip"
                                   title="<?= ($baggageInfo['freeBaggageInfo'])?'Free baggage - '.$baggageInfo['freeBaggageInfo']:'No free baggage'?>"
@@ -346,6 +351,14 @@ $totalAmountQuote = 0.0;
                                         <i class="fa fa-exchange fa-border"></i>
                                 </span>
                             <?php endif; ?>
+
+                            <?php echo FlightQuoteHelper::formattedRanking($meta)?>
+                            <?php echo FlightQuoteHelper::formattedCheapest($meta)?>
+                            <?php echo FlightQuoteHelper::formattedFastest($meta)?>
+                            <?php echo FlightQuoteHelper::formattedBest($meta)?>
+
+                            <?php echo FlightQuoteHelper::formattedPenalties($penalties)?>
+
                         </td>
 
                     </tr>

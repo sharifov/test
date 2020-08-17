@@ -118,10 +118,10 @@ class ChatBot extends Component
             if (!empty($response->data)) {
                 $out['data'] = $response->data;
             } else {
-                $out['error'] = 'Not found in response array';
+                $out['error']['message'] = 'Not found in response array';
             }
         } else {
-            $out['error'] = $response->content;
+            $out['error'] = Json::decode($response->content);
             \Yii::error(VarDumper::dumpAsString(['rid' => $rid, 'error' => $out['error']], 10), 'ChatBot:endConversation');
         }
 
@@ -153,7 +153,7 @@ class ChatBot extends Component
 			if (!empty($response->data)) {
 				$out['data'] = $response->data;
 			} else {
-				$out['error'] = 'Not found in response array';
+				$out['error']['message'] = 'Not found in response array';
 			}
 		} else {
 			$out['error'] = Json::decode($response->content);
@@ -183,10 +183,10 @@ class ChatBot extends Component
             if (!empty($response->data)) {
                 $out['data'] = $response->data;
             } else {
-                $out['error'] = 'Not found in response array data key [data]';
+                $out['error']['message'] = 'Not found in response array data key [data]';
             }
         } else {
-            $out['error'] = $response->content;
+            $out['error'] = Json::decode($response->content);
             \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'ChatBot:assignAgent');
         }
 
@@ -203,11 +203,11 @@ class ChatBot extends Component
             if (!empty($response->data)) {
                 $out['data'] = $response->data;
             } else {
-                $out['error'] = 'Not found in response array data key [data]';
+                $out['error']['message'] = 'Not found in response array data key [data]';
             }
         } else {
-            $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'ChatBot:sendMessage');
+            $out['error'] = Json::decode($response->content);
+			\Yii::error(VarDumper::dumpAsString($out['error'], 10), 'ChatBot:sendMessage');
         }
 
         return $out;

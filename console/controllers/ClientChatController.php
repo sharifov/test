@@ -27,7 +27,7 @@ class ClientChatController extends Controller
 		printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
 
-		$query = Employee::find()->select(['id', 'username', 'full_name', 'email'])->leftJoin('user_profile', 'id=up_user_id');
+		$query = Employee::find()->select(['id', 'username', 'nickname', 'email'])->leftJoin('user_profile', 'id=up_user_id');
         $query->where(['up_rc_user_id' => null]);
         $query->orWhere(['up_rc_user_id' => '']);
 
@@ -57,7 +57,7 @@ class ClientChatController extends Controller
 			$result = $rocketChat->createUser(
 				$user['username'],
 				$pass,
-				$user['full_name'] ?: $user['username'],
+				$user['nickname'] ?: $user['username'],
 				$user['email']
 			);
 
@@ -136,7 +136,7 @@ class ClientChatController extends Controller
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
 
-        $query = Employee::find()->select(['id', 'username', 'full_name', 'email'])->leftJoin('user_profile', 'id=up_user_id');
+        $query = Employee::find()->select(['id', 'username', 'nickname', 'email'])->leftJoin('user_profile', 'id=up_user_id');
         $query->where(['IS NOT', 'up_rc_user_id', null]);
 
         //echo $query->createCommand()->getRawSql(); exit;
@@ -160,7 +160,7 @@ class ClientChatController extends Controller
 
         foreach ($users as $user) {
 
-            $result = $rocketChat->deleteUser($user['username']);
+            $result = $rocketChat->deleteUser($user['nickname'] ?: $user['username']);
 
             echo "\n-- " . $user['username'] . ' ('.$user['id'].') --' . PHP_EOL;
 
@@ -196,4 +196,50 @@ class ClientChatController extends Controller
 
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
+
+    public function actionDeleteRcCredentialsFromCrm(?int $userId = null, int $limit = 5, int $offset = 0): void
+	{
+		printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+
+		$query = UserProfile::find()->where(['not', ['up_rc_user_id' => null]])->orWhere(['<>', 'up_rc_user_id', '']);
+
+		if ($limit) {
+			$query->limit($limit);
+		}
+
+		if ($offset) {
+			$query->offset($offset);
+		}
+
+		if ($userId) {
+			$query->andWhere(['up_user_id' => $userId]);
+		}
+
+		$users = $query->all();
+
+		$rocketChat = \Yii::$app->rchat;
+		$rocketChat->updateSystemAuth(false);
+
+		foreach ($users as $user) {
+
+			echo "\n-- UserId " . ' ('.$user->up_user_id.') --' . PHP_EOL;
+
+
+			$user->up_rc_user_password = null;
+			$user->up_rc_user_id = null;
+			$user->up_rc_auth_token = null;
+			$user->up_rc_token_expired = null;
+
+
+			if(!$user->save()) {
+				$errorMessage = VarDumper::dumpAsString(['profile' => $user->attributes, 'errors' => $user->errors]);
+				\Yii::error($errorMessage, 'Console:ClientChat:actionDeleteRcCredentialsFromCrm:UserProfile:save');
+				continue;
+			}
+
+			printf(" - Deleted: %s\n", $this->ansiFormat('Success', Console::FG_BLUE));
+		}
+
+		printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+	}
 }

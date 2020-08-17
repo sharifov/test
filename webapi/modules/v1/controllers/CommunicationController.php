@@ -25,6 +25,7 @@ use frontend\widgets\newWebPhone\sms\socket\Message;
 use frontend\widgets\notification\NotificationMessage;
 use sales\entities\cases\Cases;
 use sales\helpers\app\AppHelper;
+use sales\helpers\UserCallIdentity;
 use sales\model\call\form\CallCustomParameters;
 use sales\model\callLog\services\CallLogConferenceTransferService;
 use sales\model\callLog\services\CallLogTransferService;
@@ -645,40 +646,61 @@ class CommunicationController extends ApiBaseController
                 $call->c_from = $callOriginalData['From'] ?? null;
                 $call->c_to = $callOriginalData['To'] ?? null;
                 $call->c_caller_name = $callOriginalData['Caller'] ?? null;
-                $agentId = (int) str_replace('client:seller', '', $call->c_from);
+                if (UserCallIdentity::canParse($call->c_from)) {
+                    $agentId = UserCallIdentity::parseUserId($call->c_from);
+                } else {
+                    $agentId = null;
+                }
 
-                if(isset($callData['c_project_id']) && $callData['c_project_id']) {
-                    $call->c_project_id = (int) $callData['c_project_id'];
+                if (!empty($callOriginalData['c_project_id'])) {
+                    $call->c_project_id = (int)$callOriginalData['c_project_id'];
+                } elseif (!empty($callData['c_project_id'])) {
+                    $call->c_project_id = (int)$callData['c_project_id'];
+                }
+
+                if (!empty($callOriginalData['c_dep_id'])) {
+                    $call->c_dep_id = (int)$callOriginalData['c_dep_id'];
+                }
+
+                if (!empty($callOriginalData['c_source_type_id'])) {
+                    $call->c_source_type_id = (int)$callOriginalData['c_source_type_id'];
+                }
+
+                if (!empty($callOriginalData['lead_id']) && $callOriginalData['lead_id'] !== 'null') {
+                    $call->c_lead_id = (int) $callOriginalData['lead_id'];
+                }
+
+                if (!empty($callOriginalData['case_id']) && $callOriginalData['case_id'] !== 'null') {
+                    $call->c_case_id = (int) $callOriginalData['case_id'];
+//                if ($call->c_case_id && ($case = Cases::findOne($call->c_case_id))) {
+//                    (Yii::createObject(CasesCommunicationService::class))->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_CALL);
+//                }
                 }
 
                 $upp = null;
 
-                if ($call->isOut()) {
-
-                    if (
-                        isset($callOriginalData['c_source_type_id'])
-                        && $callOriginalData['c_source_type_id']
-                        && (int)$callOriginalData['c_source_type_id'] === Call::SOURCE_REDIAL_CALL
-                    ) {
-                            $call->c_source_type_id = Call::SOURCE_REDIAL_CALL;
+                if (!$call->c_dep_id) {
+                    if ($call->c_lead_id && ($lead = $call->cLead)) {
+                        $call->c_dep_id = $lead->l_dep_id;
+                    } elseif ($call->c_case_id && ($case = $call->cCase)) {
+                        $call->c_dep_id = $case->cs_dep_id;
+                    } elseif ($call->c_project_id && !empty($callOriginalData['FromAgentPhone'])) {
+                        $upp = UserProjectParams::find()->byPhone($callOriginalData['FromAgentPhone'], false)->andWhere(['upp_project_id' => $call->c_project_id])->limit(1)->one();
+                        if ($upp && $upp->upp_dep_id) {
+                            $call->c_dep_id = $upp->upp_dep_id;
+                        }
                     }
+                }
 
+                if (!empty($callOriginalData['c_client_id'])) {
+                    $call->c_client_id = (int)$callOriginalData['c_client_id'];
+                }
+
+                if ($call->isOut()) {
                     if (!$call->c_client_id && $call->c_to) {
                         $clientPhone = ClientPhone::find()->where(['phone' => $call->c_to])->orderBy(['id' => SORT_DESC])->limit(1)->one();
                         if ($clientPhone && $clientPhone->client_id) {
                             $call->c_client_id = $clientPhone->client_id;
-                        }
-                    }
-
-                    if (isset($callOriginalData['lead_id']) && $callOriginalData['lead_id'] && ($lead = Lead::findOne((int)$callOriginalData['lead_id']))) {
-                        $call->c_dep_id = $lead->l_dep_id;
-                    } elseif (isset($callOriginalData['case_id']) && $callOriginalData['case_id'] && ($case = Cases::findOne((int)$callOriginalData['case_id']))) {
-                        $call->c_dep_id = $case->cs_dep_id;
-                    } elseif (!$call->c_dep_id && $call->c_project_id && isset($callOriginalData['FromAgentPhone']) && $callOriginalData['FromAgentPhone']) {
-//                        $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $callOriginalData['FromAgentPhone'], 'upp_project_id' => $call->c_project_id])->limit(1)->one();
-                        $upp = UserProjectParams::find()->byPhone($callOriginalData['FromAgentPhone'], false)->andWhere(['upp_project_id' => $call->c_project_id])->limit(1)->one();
-                        if ($upp && $upp->upp_dep_id) {
-                            $call->c_dep_id = $upp->upp_dep_id;
                         }
                     }
                 }
@@ -688,7 +710,6 @@ class CommunicationController extends ApiBaseController
                 }
 
                 if (!$upp) {
-//                    $upp = UserProjectParams::find()->where(['upp_tw_phone_number' => $call->c_from])->one();
                     $upp = UserProjectParams::find()->byPhone($call->c_from, false)->one();
                 }
 
@@ -700,22 +721,14 @@ class CommunicationController extends ApiBaseController
                         $call->c_dep_id = $upp->upp_dep_id;
                     }
                 }
+
+                if (!$call->c_created_user_id) {
+                    $call->c_created_user_id = $agentId;
+                }
                 // Yii::warning('Not found Call: ' . $callSid, 'API:Communication:voiceClient:Call::find');
             }
 
-            if (isset($callOriginalData['lead_id']) && $callOriginalData['lead_id'] && $callOriginalData['lead_id'] !== 'null') {
-                $call->c_lead_id = (int) $callOriginalData['lead_id'];
-            }
-
-            if (isset($callOriginalData['case_id']) && $callOriginalData['case_id'] && $callOriginalData['case_id'] !== 'null') {
-                $call->c_case_id = (int) $callOriginalData['case_id'];
-//                if ($call->c_case_id && ($case = Cases::findOne($call->c_case_id))) {
-//                    (Yii::createObject(CasesCommunicationService::class))->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_CALL);
-//                }
-            }
-
-
-            if(isset($callOriginalData['CallStatus']) && $callOriginalData['CallStatus']) {
+            if(!empty($callOriginalData['CallStatus'])) {
                 $call->c_call_status = $callOriginalData['CallStatus'];
                 $call->setStatusByTwilioStatus($call->c_call_status);
             }
@@ -853,7 +866,7 @@ class CommunicationController extends ApiBaseController
             }*/
 
             if (!$call->save()) {
-                Yii::error(VarDumper::dumpAsString($call->errors), 'API:Communication:voiceDefault:Call:save');
+                Yii::error(VarDumper::dumpAsString(['errors' => $call->errors, 'call' => $call->getAttributes()]), 'API:Communication:voiceDefault:Call:save');
                 $response['error'] = 'Error in method voiceDefault. ' . $call->getErrorSummary(false)[0];
             }
 
@@ -1071,6 +1084,9 @@ class CommunicationController extends ApiBaseController
 
                 $call->c_call_type_id = $parentCall->c_call_type_id;
 
+                $call->c_conference_id = $parentCall->c_conference_id;
+                $call->c_conference_sid = $parentCall->c_conference_sid;
+
                 /*if ($parentCall->c_lead_id) {
 
                 }*/
@@ -1153,6 +1169,18 @@ class CommunicationController extends ApiBaseController
                 $call->c_created_user_id = $custom_parameters->user_id;
             }
 
+            if ($custom_parameters->user_id) {
+                $call->c_created_user_id = $custom_parameters->user_id;
+            }
+
+            if ($custom_parameters->from) {
+                $call->c_from = $custom_parameters->from;
+            }
+
+            if ($custom_parameters->to) {
+                $call->c_to = $custom_parameters->to;
+            }
+
             if (!$call->save()) {
                 \Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:findOrCreateCallByData:Call:save');
             } else {
@@ -1193,8 +1221,8 @@ class CommunicationController extends ApiBaseController
         $agentId = null;
 
         if (isset($callData['Called']) && $callData['Called']) {
-            if(strpos($callData['Called'], 'client:seller') !== false) {
-                $agentId = (int) str_replace('client:seller', '', $callData['Called']);
+            if (UserCallIdentity::canParse($callData['Called'])) {
+                $agentId = UserCallIdentity::parseUserId($callData['Called']);
             }
         }
 
@@ -1305,8 +1333,8 @@ class CommunicationController extends ApiBaseController
 //				'record' => 'record-from-answer-dual',
 //				'recordingStatusCallback' =>  Yii::$app->params['host'] . '/v1/twilio-jwt/recording-callback',
 //			]);
-//			$dial->client('seller'.$user->id);
-			$response['agent_username'][] = 'seller'.$user->id;
+//			$dial->client(UserCallIdentity::getId($user->id));
+			$response['agent_username'][] = UserCallIdentity::getId($user->id);
 			$responseTwml = null;
 		}
 
@@ -2404,6 +2432,7 @@ class CommunicationController extends ApiBaseController
                         'post' => $post,
                         'form' => $form->getAttributes(),
                     ]), 'API:Communication:voiceConferenceCallCallback');
+                    $conference = Conference::findOne(['cf_sid' => $form->ConferenceSid]);
                 }
             } catch (\Throwable $e) {
                 $conference = Conference::findOne(['cf_sid' => $form->ConferenceSid]);
@@ -2430,6 +2459,10 @@ class CommunicationController extends ApiBaseController
         }
 
         if (!$conference) {
+            Yii::error(VarDumper::dumpAsString([
+                'post' => $post,
+                'form' => $form->getAttributes(),
+            ]), 'API:Communication:voiceConferenceCallCallback:Not:SavedFound');
             $response['error'] = 'Not found and not saved Conference';
             return $response;
         }

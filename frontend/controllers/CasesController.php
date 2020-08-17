@@ -8,6 +8,7 @@ use common\models\CaseNote;
 use common\models\CaseSale;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
+use common\models\Department;
 use common\models\DepartmentEmailProject;
 use common\models\DepartmentPhoneProject;
 use common\models\Email;
@@ -47,6 +48,7 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\services\ClientChatAssignService;
 use sales\model\coupon\entity\couponCase\CouponCase;
 use sales\model\coupon\useCase\send\SendCouponsForm;
+use sales\model\phone\AvailablePhoneList;
 use sales\model\saleTicket\useCase\create\SaleTicketService;
 use sales\repositories\cases\CaseCategoryRepository;
 use sales\repositories\cases\CasesRepository;
@@ -659,9 +661,9 @@ class CasesController extends FController
         $leadSearchModel = new LeadSearch();
         $leadDataProvider = $leadSearchModel->searchByCase($params);
 
-
+        $casesUpdatePermission = Auth::can('cases/update', ['case' => $model]);
         $modelNote = new CaseNote();
-        if ($modelNote->load(Yii::$app->request->post())) {
+        if ($casesUpdatePermission && $modelNote->load(Yii::$app->request->post())) {
             $modelNote->cn_user_id = Yii::$app->user->id;
             $modelNote->cn_cs_id = $model->cs_id;
             $modelNote->cn_created_dt = date('Y-m-d H:i:s');
@@ -686,24 +688,16 @@ class CasesController extends FController
         //VarDumper::dump($dataProvider->allModels); exit;
 
 		$fromPhoneNumbers = [];
-		if (SettingHelper::isCaseCommunicationNewCallWidgetEnabled()) {
-			if ($model && $model->isDepartmentSupport()) {
-				$departmentPhones = DepartmentPhoneProject::find()->where(['dpp_project_id' => $model->cs_project_id, 'dpp_dep_id' => $model->cs_dep_id, 'dpp_default' => DepartmentPhoneProject::DPP_DEFAULT_TRUE])->withPhoneList()->all();
-				foreach ($departmentPhones as $departmentPhone) {
-					$phone = $departmentPhone->getPhone();
-					if ($phone) {
-						$fromPhoneNumbers[$phone] = $departmentPhone->dppProject->name . ' (' . $phone . ')';
-					}
-				}
-			} else if ($userParams = UserProjectParams::find()->where(['upp_user_id' => Auth::id()])->withPhoneList()->all()) {
-				foreach ($userParams as $param) {
-					$phone = $param->getPhone();
-					if ($phone) {
-						$fromPhoneNumbers[$phone] = $param->uppProject->name . ' (' . $phone . ')';
-					}
-				}
-			}
-		}
+        if (SettingHelper::isLeadCommunicationNewCallWidgetEnabled()) {
+            if (($department = $model->department) && $params = $department->getParams()) {
+                $phoneList = new AvailablePhoneList(Auth::id(), $model->cs_project_id, $department->dep_id, $params->defaultPhoneType);
+                foreach ($phoneList->getList() as $phoneItem) {
+                    $fromPhoneNumbers[$phoneItem['phone']] = $phoneItem['project']
+                        . ' ' . ((int)$phoneItem['type_id'] === AvailablePhoneList::GENERAL_ID ? Department::DEPARTMENT_LIST[(int)$phoneItem['department_id']] : AvailablePhoneList::PERSONAL)
+                        . ' (' . $phoneItem['phone'] . ')';
+                }
+            }
+        }
 
         $enableCommunication = true;
         $isAdmin = true;
@@ -964,6 +958,10 @@ class CasesController extends FController
             throw new NotFoundHttpException('Client chat not found');
         }
 
+		if (!Auth::can('client-chat/manage/all', ['chat' => ClientChat::findOne(['cch_id' => $chat])])) {
+			throw new ForbiddenHttpException('You do not have access to perform this action', 403);
+		}
+
         $user = Auth::user();
         $form = new CasesCreateByChatForm($user, $chat);
 
@@ -1149,6 +1147,10 @@ class CasesController extends FController
 
                 if ($user->isSimpleAgent() && empty($case->cs_category_id)) {
                     throw new \DomainException('Status of a case without a category cannot be changed!');
+                }
+
+                if ($case->isTrash() && !Auth::can('cases/take_Trash', ['case' => $case])) {
+                    throw new \DomainException('Access denied, permission "cases/take_Trash" failed.');
                 }
 
                 switch ((int)$statusForm->statusId) {

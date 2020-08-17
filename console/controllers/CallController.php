@@ -9,6 +9,7 @@ use common\models\Sources;
 use common\models\UserProfile;
 use console\helpers\OutputHelper;
 use sales\helpers\app\AppHelper;
+use sales\helpers\UserCallIdentity;
 use yii\console\Controller;
 use Yii;
 use yii\helpers\Console;
@@ -47,6 +48,41 @@ class CallController extends Controller
 		$this->outputHelper = $outputHelper;
 		$this->setSettings();
 	}
+
+    /**
+     * @param int $days
+     */
+    public function actionCleaner(int $days = 10): void
+    {
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
+
+        $processed = 0;
+        $timeStart = microtime(true);
+        $dtOlder = (new \DateTime('now'))->modify('-' . $days . ' days')->format('Y-m-d H:i:s');
+
+        try {
+            $processed = Call::deleteAll(['<=', 'c_created_dt', $dtOlder]);
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableFormatter($throwable),
+            'CallController:actionCleaner');
+            echo Console::renderColoredString('%r --- Error : ' . $throwable->getMessage() . ' %n'), PHP_EOL;
+        }
+
+        $timeEnd = microtime(true);
+        $time = number_format(round($timeEnd - $timeStart, 2), 2);
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .
+            ' s] %g Processed: %w[' . $processed . '] %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+
+        Yii::info(VarDumper::dumpAsString([
+            'Processed' => $processed,
+            'Days' => $days,
+            'Execute Time' => $time . ' sec',
+            'End Time' => date('Y-m-d H:i:s'),
+        ]), 'info\CallController:actionCleaner:result');
+    }
 
     /**
      * @param int|null $ringingMinutes
@@ -230,7 +266,7 @@ class CallController extends Controller
                                 if($projectUser && $projectUser->userProfile && $projectUser->userProfile->up_call_type_id === UserProfile::CALL_TYPE_WEB) {
                                         $user = $projectUser;
                                         if ($user->isOnline() && $user->isCallStatusReady() && $user->isCallFree()) {
-                                            $agent = 'seller' . $user->id;
+                                            $agent = UserCallIdentity::getId($user->id);
                                             echo 'Find agent:'. $agent . PHP_EOL;
                                             $res = $communicationService->callRedirect($call->c_call_sid, 'client', $call->c_from, $agent);
                                             if($res && isset($res['error']) && $res['error'] === false) {

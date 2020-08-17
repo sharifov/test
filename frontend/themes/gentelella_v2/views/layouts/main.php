@@ -238,7 +238,10 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
 <?php if (Auth::can('PhoneWidget')): ?>
     <?= frontend\widgets\NewWebPhoneWidget::widget(['userId' => Auth::id()]) ?>
 <?php endif; ?>
-<?= ClientChatAccessWidget::widget(['userId' => Auth::id()]) ?>
+
+<div id="_client_chat_access_widget">
+    <?= ClientChatAccessWidget::widget(['userId' => Auth::id()]) ?>
+</div>
 
 <?php $this->endBody(); ?>
 </body>

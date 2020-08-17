@@ -4,9 +4,11 @@ namespace modules\flight\src\helpers;
 
 use common\components\SearchService;
 use common\models\Airline;
-use common\models\Airport;
+use common\models\Airports;
 use common\models\QuoteSegment;
 use DateTime;
+use frontend\helpers\JsonHelper;
+use frontend\helpers\QuoteHelper;
 use modules\flight\models\Flight;
 use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuote;
@@ -15,7 +17,9 @@ use modules\flight\src\useCases\flightQuote\create\FlightQuotePaxPriceDTO;
 use modules\flight\src\useCases\flightQuote\createManually\FlightQuoteCreateForm;
 use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuote;
+use sales\helpers\app\AppHelper;
 use sales\helpers\product\ProductQuoteHelper;
+use Yii;
 use yii\base\ErrorException;
 use yii\data\ActiveDataProvider;
 use yii\helpers\ArrayHelper;
@@ -490,11 +494,11 @@ class FlightQuoteHelper
 					/*if ($depDateTime > $arrDateTime) {
 						$arrDateTime->add(\DateInterval::createFromDateString('+1 year'));
 					}*/
-					$depCity = Airport::findIdentity($depAirport);
+					$depCity = Airports::findByIata($depAirport);
 					/*$timezone = ($depCity !== null && !empty($depCity->timezone))
 					? new \DateTimeZone($depCity->timezone)
 					: new \DateTimeZone("UTC");*/
-					$arrCity = Airport::findIdentity($arrAirport);
+					$arrCity = Airports::findByIata($arrAirport);
 					/*$timezone = ($arrCity !== null && !empty($arrCity->timezone))
 						? new \DateTimeZone($arrCity->timezone)
 						: new \DateTimeZone("UTC");*/
@@ -937,11 +941,11 @@ class FlightQuoteHelper
 				/*if ($depDateTime > $arrDateTime) {
 					$arrDateTime->add(\DateInterval::createFromDateString('+1 year'));
 				}*/
-				$depCity = Airport::findIdentity($depAirport);
+				$depCity = Airports::findByIata($depAirport);
 				/*$timezone = ($depCity !== null && !empty($depCity->timezone))
 				? new \DateTimeZone($depCity->timezone)
 				: new \DateTimeZone("UTC");*/
-				$arrCity = Airport::findIdentity($arrAirport);
+				$arrCity = Airports::findByIata($arrAirport);
 				/*$timezone = ($arrCity !== null && !empty($arrCity->timezone))
 					? new \DateTimeZone($arrCity->timezone)
 					: new \DateTimeZone("UTC");*/
@@ -1005,8 +1009,8 @@ class FlightQuoteHelper
 			$firstSegment = $trip['segments'][0];
 			$lastSegment = $trip['segments'][count($trip['segments']) - 1];
 
-			$depCity = Airport::findIdentity($firstSegment['departureAirport']);
-			$arrCity = Airport::findIdentity($lastSegment['arrivalAirport']);
+			$depCity = Airports::findByIata($firstSegment['departureAirport']);
+			$arrCity = Airports::findByIata($lastSegment['arrivalAirport']);
 			$arrivalTime = $lastSegment['arrivalDateTime'];
 			$departureTime = $firstSegment['departureDateTime'];
 
@@ -1026,6 +1030,114 @@ class FlightQuoteHelper
 
 		return $trips;
 	}
+
+	public static function getMetaInfo(FlightQuote $flightQuote): ?array
+    {
+        if (($originSearchData = self::getJsonOriginSearchData($flightQuote))) {
+            return $originSearchData['meta'] ?? null;
+        }
+        return null;
+    }
+
+    public static function getPenaltiesInfo(FlightQuote $flightQuote): ?array
+    {
+        if ($originSearchData = self::getJsonOriginSearchData($flightQuote)) {
+            return $originSearchData['penalties'] ?? null;
+        }
+        return null;
+    }
+
+	public static function getJsonOriginSearchData(FlightQuote $flightQuote): ?array
+    {
+        if (!empty($flightQuote->fq_origin_search_data)) {
+            try {
+                return JsonHelper::decode($flightQuote->fq_origin_search_data);
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableFormatter($throwable),
+                'FlightQuoteHelper:getJsonOriginSearchData:failed');
+            }
+        }
+        return null;
+    }
+
+    public static function formattedRanking(?array $meta, string $class = 'text-info'): string
+    {
+        if (!empty($meta['rank'])) {
+
+            $rank = number_format($meta['rank'], 1, '.', '');
+            $rank = ($rank === '10.0') ? 10 : $rank;
+
+            return '<span class="' . $class . '"
+                data-toggle="tooltip"
+                title="Rank: ' . $meta['rank'] . '">
+                    <i class="fa fa-border">' . $rank . '</i>
+            </span>';
+        }
+        return '';
+    }
+
+    public static function formattedCheapest(?array $meta, string $class = 'text-success'): string
+    {
+        if (!empty($meta['cheapest'])) {
+            return '<span class="' . $class . '"
+                data-toggle="tooltip"                
+                title="Cheapest">
+                    <i class="fa fa-money fa-border"></i>
+            </span>';
+        }
+        return '';
+    }
+
+    public static function formattedFastest(?array $meta, string $class = 'text-warning'): string
+    {
+        if (!empty($meta['fastest'])) {
+            return '<span class="' . $class . '"
+                data-toggle="tooltip"
+                title="Fastest">
+                    <i class="fa fa-rocket fa-border"></i>
+            </span>';
+        }
+        return '';
+    }
+
+    public static function formattedBest(?array $meta, string $class = 'text-primary'): string
+    {
+        if (!empty($meta['best'])) {
+            return '<span class="' . $class . '"
+                data-toggle="tooltip"
+                data-html="true"
+                title="Best">
+                    <i class="fa fa-thumbs-o-up fa-border"></i>
+            </span>';
+        }
+        return '';
+    }
+
+    public static function formattedPenalties(?array $penalties, string $class = 'text-warning'): string
+    {
+        if ($penalties && QuoteHelper::checkPenaltiesInfo($penalties)) {
+            return '<span class="' . $class . '"
+                data-toggle="tooltip"
+                data-html="true"
+                title="' . QuoteHelper::innerPenalties($penalties) . '">
+				    <i class="fa fa-expand fa-border"></i>
+			</span>';
+        }
+        return '';
+    }
+
+    public static function formattedFreeBaggage(?array $meta, string $class = 'success'): string
+    {
+        if (!empty($meta['bags'])) {
+            return '<span class="' . $class . '"
+                data-toggle="tooltip"
+                title="Free baggage - ' . (int) $meta['bags'] .  ' pcs">
+                <i class="fa fa-suitcase fa-border"></i>
+                <span class="flight_inside_icon">' . (int) $meta['bags'] . '</span>
+            </span>';
+        }
+        return '';
+    }
 
 	/**
 	 * @param DateTime $departureDateTime

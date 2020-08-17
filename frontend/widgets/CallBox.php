@@ -10,6 +10,7 @@ namespace frontend\widgets;
 use common\models\Call;
 use common\models\Employee;
 use common\models\UserCallStatus;
+use sales\helpers\setting\SettingHelper;
 
 /**
  * Alert widget renders a message from
@@ -54,6 +55,10 @@ class CallBox extends \yii\bootstrap\Widget
         $user_id = \Yii::$app->user->id;
         /** @var Employee $userModel */
         $userModel = \Yii::$app->user->identity;
+
+//        if (!SettingHelper::isOriginalPhoneWidgetEnabled()) {
+//        	return '';
+//		}
 
         if(!$userModel) {
             return '';

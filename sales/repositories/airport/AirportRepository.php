@@ -2,26 +2,26 @@
 
 namespace sales\repositories\airport;
 
-use common\models\Airport;
+use common\models\Airports;
 use sales\repositories\NotFoundException;
 use sales\repositories\Repository;
 use yii\db\ActiveRecord;
 
 /**
  * Class AirportRepository
- * @method null|Airport get(int $id)
- * @method null|Airport getByIata($iata)
+ * @method null|Airports get(int $id)
+ * @method null|Airports getByIata($iata)
  */
 class AirportRepository extends Repository
 {
 
     /**
      * @param int $id
-     * @return Airport
+     * @return Airports
      */
-    public function find(int $id): Airport
+    public function find(int $id): Airports
     {
-        if ($airport = Airport::findOne($id)) {
+        if ($airport = Airports::findOne($id)) {
             return $airport;
         }
         throw new NotFoundException('Airport is not found.');
@@ -29,11 +29,11 @@ class AirportRepository extends Repository
 
     /**
      * @param $iata
-     * @return Airport
+     * @return Airports
      */
-    public function findByIata($iata): Airport
+    public function findByIata($iata): Airports
     {
-        if ($airport = Airport::findOne(['iata' => $iata])) {
+        if ($airport = Airports::findOne(['iata' => $iata])) {
             return $airport;
         }
         throw new NotFoundException('Airport (' . $iata . ') is not found.');
@@ -45,7 +45,7 @@ class AirportRepository extends Repository
      */
     public function iataExists($iata): bool
     {
-        return Airport::find()->where(['iata' => $iata])->exists();
+        return Airports::find()->where(['iata' => $iata])->exists();
     }
 
     /**
@@ -55,7 +55,7 @@ class AirportRepository extends Repository
     public function getListByIata($iata = []): array
     {
         $data = [];
-        foreach (Airport::find()->where(['iata' => $iata])->all() as $airport){
+        foreach (Airports::find()->where(['iata' => $iata])->all() as $airport){
             $data[$airport['iata']] = ['name' => $airport['name'], 'city' => $airport['city'], 'country' => $airport['country']];
         }
         return $data;
@@ -69,7 +69,7 @@ class AirportRepository extends Repository
     {
         $countTerm = mb_strlen($term);
 
-        $query = Airport::find();
+        $query = Airports::find();
 
         if($countTerm < 4) {
             $query->orfilterWhere(['like', 'LOWER(iata)', $term]);

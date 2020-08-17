@@ -55,7 +55,11 @@ SearchResult = function(props) {
             currency: {
                 name: "USD",
                 symbol: "$"
-            }
+            },
+            filterRank: {
+                rank: "Rank",
+                to: "To"
+            },
         }, props.locale || {}),
         currentTripType = props.currentTripType || 'rt';
 
@@ -293,6 +297,40 @@ SearchResult = function(props) {
 
                         });
                         break;
+                    case 'rankCriteria':
+                        $(selector).each(function(idx){
+                            var criteriaData = $(this).data('rankCriteria');
+                            var obj = $(this);
+
+                            if (criteriaData.indexOf(filterList[filter]) === -1) {
+                                $(obj).removeClass('filtered');
+                            } else {
+                                $(obj).removeClass('d-none');
+                                $(obj).addClass('filtered');
+                                filterApplied = true;
+                            }
+                        });
+                        break;
+                    case 'rank':
+                        $(selector).each(function(idx){
+                            var obj = $(this);
+                            var filterValues = filterList[filter];
+                            var rankData = $(obj).data('rank');
+
+                            var rankElement = parseFloat(rankData);
+                            var rankFrom = parseFloat(filterValues[0]);
+                            var rankTo = parseFloat(filterValues[1]);
+
+                            if ((rankElement >= rankFrom) && (rankElement <= rankTo)) {
+                                $(obj).removeClass('d-none');
+                                $(obj).addClass('filtered');
+                                filterApplied = true;
+                            } else {
+                                $(obj).removeClass('filtered');
+                            }
+                        });
+                        break;
+
                 }
             }
         }else{
@@ -678,6 +716,85 @@ SearchResult = function(props) {
         }
     }
 
+    this.filterRankCriteria = function() {
+        $(".filter--rankCriteria .custom-radio").on("click", function() {
+            var radio = $(this).find('input[type="radio"]');
+            radio.prop('checked', true);
+            if (radio.attr("id") !== "any") {
+                $('.filter--rankCriteria').addClass("selected")
+                    .find('[data-toggle="dropdown"] span').html(radio.parent().find('label:last').html());
+                scope.addFilterParams({
+                    name: 'rankCriteria',
+                    value: radio.attr("id")
+                });
+            } else {
+                $('.filter--rankCriteria').removeClass("selected")
+                    .find('[data-toggle="dropdown"] span').html();
+                scope.unsetFilterParams('rankCriteria');
+            }
+        });
+
+        $(".filter--rankCriteria .js-clear-filter").on("click", function(e) {
+            e.stopImmediatePropagation();
+            $('.filter--rankCriteria').removeClass("selected")
+                .find('[data-toggle="dropdown"] span').html();
+            $(".filter--rankCriteria .custom-radio").find('input[type="radio"]:first').prop('checked', true);
+            scope.unsetFilterParams('rankCriteria');
+        });
+    };
+
+    this.filterRank = function() {
+        let sliderRank = document.getElementById('rank-slider');
+
+        let max = parseInt(sliderRank.getAttribute('data-max'), 10),
+            min = parseInt(sliderRank.getAttribute('data-min'), 10),
+            step = 1;
+
+        let filterRank = '.filter--rank',
+            jsFilterReset = '.filter--rank .js-filter-reset',
+            jsClearFilter = '.filter--rank i.js-clear-filter',
+            jsLabel = '#rank-slider-label';
+
+        noUiSlider.create(sliderRank, {
+            start: [min, max],
+            connect: [false, true, false],
+            tooltips: [
+                {to: function(value) {return parseInt(value, 10)}},
+                {to: function(value) {return parseInt(value, 10)}}
+            ],
+            step: step,
+            range: {
+                'min': min,
+                'max': max
+            }
+        });
+
+        sliderRank.noUiSlider.on('update', function (values, handle) {
+            $(jsLabel).html(parseInt(values[0], 10) + ' - ' + parseInt(values[1], 10));
+        });
+
+        sliderRank.noUiSlider.on('change', function(values, handle, unencoded, tap) {
+            if (tap) {
+                $(jsFilterReset).removeClass('hidden');
+                $(filterRank).addClass('selected').find('a[data-toggle="dropdown"] span');
+            }
+        });
+
+        sliderRank.noUiSlider.on('end', function(values) {
+            $(jsFilterReset).removeClass('hidden');
+            $(filterRank).addClass('selected').find('a[data-toggle="dropdown"] span');
+            scope.addFilterParams({name: 'rank', value: values});
+        });
+
+        $(jsClearFilter + ", " + jsFilterReset).on("click", function(e) {
+            e.stopImmediatePropagation();
+            $(jsFilterReset).addClass('hidden');
+            $(filterRank).removeClass('selected').find('a[data-toggle="dropdown"] span').html(locale.filterRank.rank);
+            sliderRank.noUiSlider.reset();
+            scope.unsetFilterParams('rank');
+        });
+    };
+
     this.filterInit = function() {
         //= fare filter
         scope.filterFareType();
@@ -696,7 +813,6 @@ SearchResult = function(props) {
         scope.filterAirlineChange();
         //= baggage filter
         scope.filterBaggage();
-
         //= time filter
         if ($('.filter--travel-time .nav-tabs').length) {
             $('.filter--travel-time .nav-tabs').tab();
@@ -708,6 +824,10 @@ SearchResult = function(props) {
         }
         scope.filterTravelTime();
         //=# time filter
+        //= TopCriteria filter
+        scope.filterRankCriteria();
+        //= Rank filter
+        scope.filterRank();
     };
 
     this.helper = {

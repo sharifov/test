@@ -4,6 +4,9 @@
 namespace frontend\widgets\clientChat;
 
 
+use common\components\i18n\Formatter;
+use common\models\Employee;
+use sales\auth\Auth;
 use sales\helpers\setting\SettingHelper;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use yii\base\Widget;
@@ -13,11 +16,12 @@ use yii\base\Widget;
  * @package frontend\widgets\clientChat
  *
  * @property int $userId
+ * @property bool $open
  */
 class ClientChatAccessWidget extends Widget
 {
 	/**
-	 * @var self
+	 * @var self $instance
 	 */
 	private static $instance;
 
@@ -25,6 +29,11 @@ class ClientChatAccessWidget extends Widget
 	 * @var int $userId
 	 */
 	public int $userId;
+
+	/**
+	 * @var bool $open
+	 */
+	public bool $open = false;
 
 	public static function getInstance(): ClientChatAccessWidget
 	{
@@ -41,7 +50,7 @@ class ClientChatAccessWidget extends Widget
 	{
 		$_self = $this;
 
-		if (!SettingHelper::isClientChatEnabled()) {
+		if (!SettingHelper::isClientChatEnabled() || !Auth::can('/client-chat/index')) {
 			return false;
 		}
 //		$result = ClientChatCache::getCache()->getOrSet(ClientChatCache::getKey($this->userId), static function () use ($_self) {
@@ -50,10 +59,17 @@ class ClientChatAccessWidget extends Widget
 //			];
 //		}, null, new TagDependency(['tags' => ClientChatCache::getTags($this->userId)]));
 
-		$isPjax = \Yii::$app->request->isPjax;
-
 		$result['access'] = ClientChatUserAccess::pendingRequests($_self->userId);
 
-		return $this->render('cc_request', ['access' => $result['access'], 'isPjax' => $isPjax]);
+		$user = Employee::findOne(['id' => $this->userId]);
+
+		if ($user) {
+			$formatter = new Formatter();
+			$formatter->timeZone = $user->timezone;
+		} else {
+			$formatter = \Yii::$app->formatter;
+		}
+
+		return $this->render('cc_request', ['access' => $result['access'], 'open' => $this->open, 'formatter' => $formatter]);
 	}
 }

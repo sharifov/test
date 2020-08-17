@@ -29,15 +29,17 @@ class ConferenceStatusCallbackHandler
     public function end(Conference $conference, ConferenceStatusCallbackForm $form): void
     {
         $conference->end($form->getFormattedTimestamp());
+
         if (!$conference->save()) {
             \Yii::error(VarDumper::dumpAsString([
                 'errors' => $conference->getErrors(),
                 'model' => $conference->getAttributes(),
             ]), 'ConferenceStatusCallbackHandler:end');
         }
-        if (!$call = $conference->call) {
-            return;
-        }
+
+//        if (!$call = $conference->call) {
+//            return;
+//        }
 //        $service = \Yii::createObject(CallLogConferenceTransferService::class);
 //        $service->transfer($call, $conference);
     }
@@ -109,7 +111,7 @@ class ConferenceStatusCallbackHandler
             return;
         }
 
-        if ($participant->isAgent() && ($call = $participant->cpCall) && $call->c_created_user_id) {
+        if (($participant->isAgent() || $participant->isUser()) && ($call = $participant->cpCall) && $call->c_created_user_id) {
             Notifications::publish(HoldMessage::COMMAND, ['user_id' => $call->c_created_user_id], HoldMessage::hold($call));
         }
     }
@@ -134,7 +136,7 @@ class ConferenceStatusCallbackHandler
             return;
         }
 
-        if ($participant->isAgent() && ($call = $participant->cpCall) && $call->c_created_user_id) {
+        if (($participant->isAgent() || $participant->isUser()) && ($call = $participant->cpCall) && $call->c_created_user_id) {
             Notifications::publish(HoldMessage::COMMAND, ['user_id' => $call->c_created_user_id], HoldMessage::unhold($call));
         }
     }
@@ -159,7 +161,7 @@ class ConferenceStatusCallbackHandler
             return;
         }
 
-        if ($participant->isAgent() && ($call = $participant->cpCall) && $call->c_created_user_id) {
+        if (($participant->isAgent() || $participant->isUser()) && ($call = $participant->cpCall) && $call->c_created_user_id) {
             Notifications::publish(MuteMessage::COMMAND, ['user_id' => $call->c_created_user_id], MuteMessage::mute($call));
         }
     }
@@ -184,7 +186,7 @@ class ConferenceStatusCallbackHandler
             return;
         }
 
-        if ($participant->isAgent() && ($call = $participant->cpCall) && $call->c_created_user_id) {
+        if (($participant->isAgent() || $participant->isUser()) && ($call = $participant->cpCall) && $call->c_created_user_id) {
             Notifications::publish(MuteMessage::COMMAND, ['user_id' => $call->c_created_user_id], MuteMessage::unmute($call));
         }
     }

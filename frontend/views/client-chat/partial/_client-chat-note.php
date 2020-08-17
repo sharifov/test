@@ -1,11 +1,13 @@
 <?php
 
+use frontend\helpers\OutHelper;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatNote\entity\ClientChatNote;
 use yii\helpers\Html;
 use yii\web\View;
 use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
+use yii\bootstrap4\Modal;
 
 /***
  * @var ClientChat $clientChat
@@ -64,9 +66,7 @@ $showContent = $showContent ?? false;
                         </tr>
                         <tr>
                             <td>
-                                <?php if($note->ccn_deleted) :?><s><?php endif?>
-                                    <?php echo $note->ccn_note ? nl2br(Html::encode($note->ccn_note)) : '-' ?>
-                                <?php if($note->ccn_deleted) :?></s><?php endif?>
+                                <?php echo OutHelper::formattedChatNote($note) ?>
                             </td>
                         </tr>
                     </table>
@@ -75,36 +75,46 @@ $showContent = $showContent ?? false;
             <?php endif ?>
         </div>
 
-        <div class="box_note_form" style="padding: 10px; display: none;">
-            <?php $form = ActiveForm::begin([
-                    'id' => 'note-form',
-                    'action' => ['client-chat/create-note', 'cch_id' => $clientChat->cch_id],
-                    'method' => 'post',
-                    'options' => [
-                        'data-pjax' => 1,
-                    ],
-                ]);
-                $model->ccn_chat_id = $clientChat->cch_id;
-            ?>
-                <div class="row" >
-                    <?= $form->field($model, 'ccn_chat_id')->hiddenInput()->label(false) ?>
+        <?php Modal::begin(['id' => 'add-note-model',
+            'title' => 'Add note',
+            'size' => Modal::SIZE_DEFAULT
+        ])?>
 
-                    <div class="col-md-12">
-                        <?= $form->field($model, 'ccn_note')->textarea(['rows' => 3]) ?>
-                    </div>
+        <?php $form = ActiveForm::begin([
+            'id' => 'note-form',
+            'action' => ['client-chat/create-note', 'cch_id' => $clientChat->cch_id],
+            'method' => 'post',
+            'options' => [
+                'data-pjax' => 1,
+            ],
+        ]);
+        $model->ccn_chat_id = $clientChat->cch_id;
+        ?>
+        <div class="row" >
+            <?= $form->field($model, 'ccn_chat_id')->hiddenInput()->label(false) ?>
 
-                    <div class="col-md-12">
-                        <div class="form-group text-center">
-                            <?php echo Html::submitButton('<i class="fa fa-plus"></i> Add Note', [
-                                'class' => 'btn btn-success', 'id' => 'btn-submit-note'
-                            ]) ?>
-                        </div>
-                    </div>
+            <div class="col-md-12">
+                <?= $form->field($model, 'ccn_note')->textarea(['rows' => 3]) ?>
+            </div>
+
+            <div class="col-md-12">
+                <div class="form-group text-center">
+                    <?php echo Html::submitButton('<i class="fa fa-plus"></i> Add Note', [
+                        'class' => 'btn btn-success', 'id' => 'btn-submit-note'
+                    ]) ?>
                 </div>
-            <?php ActiveForm::end(); ?>
-
+            </div>
         </div>
+        <?php ActiveForm::end(); ?>
+
+        <?php Modal::end()?>
+
     </div>
+
 <?php Pjax::end() ?>
+
+
+
+
 
 

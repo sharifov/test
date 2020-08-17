@@ -169,7 +169,7 @@ class ClientChat extends \yii\db\ActiveRecord
         return $this->hasOne(Department::class, ['dep_id' => 'cch_dep_id']);
     }
 
-	public function getCchLanguage(): \yii\db\ActiveQuery
+	public function getLanguage(): \yii\db\ActiveQuery
 	{
 		return $this->hasOne(Language::class, ['language_id' => 'cch_language_id']);
 	}
@@ -203,7 +203,7 @@ class ClientChat extends \yii\db\ActiveRecord
 	{
 		return $this->hasOne(ClientChatVisitor::class, ['ccv_client_id' => 'cch_client_id', 'ccv_cch_id' => 'cch_id']);
 	}
-	
+
 	public function getLeads(): ActiveQuery
 	{
 		return $this->hasMany(Lead::class, ['id' => 'ccl_lead_id'])->viaTable(ClientChatLead::tableName(), ['ccl_chat_id' => 'cch_id']);
@@ -327,5 +327,10 @@ class ClientChat extends \yii\db\ActiveRecord
             }
         }
         return false;
+	}
+
+	public function isOwner(int $userId): bool
+	{
+		return $this->cch_owner_user_id === $userId;
 	}
 }

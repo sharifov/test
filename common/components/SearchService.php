@@ -7,14 +7,13 @@ use common\models\local\FlightSegment;
 use common\models\Quote;
 use Yii;
 use common\models\Airline;
-use common\models\Airport;
+use common\models\Airports;
 use yii\httpclient\Client;
 use yii\httpclient\CurlTransport;
 use yii\helpers\VarDumper;
 
 class SearchService
 {
-
     public const GDS_SABRE         = 'S';
     public const GDS_AMADEUS       = 'A';
     public const GDS_TRAVELPORT    = 'T';
@@ -22,10 +21,26 @@ class SearchService
     public const GDS_TRAVELFUSION  = 'F';
     public const GDS_COCKPIT       = 'C';
     public const GDS_ONEPOINT      = 'M';
+    public const GDS_WORLDSPAN     = 'W';
 
+    public CONST GDS_LIST = [
+        self::GDS_SABRE => 'Sabre',
+        self::GDS_AMADEUS => 'Amadeus',
+        self::GDS_WORLDSPAN => 'WorldSpan',
+        self::GDS_TRAVELPORT => 'TravelPort',
+        self::GDS_AIRWANDER => 'AirWander',
+        self::GDS_TRAVELFUSION => 'TravelFusion',
+        self::GDS_COCKPIT => 'Cockpit',
+        self::GDS_ONEPOINT => 'OnePoint',
+    ];
 
-    public const CABIN_ECONOMY = 'Y', CABIN_PREMIUM_ECONOMY = 'S', CABIN_BUSINESS = 'C',
-    CABIN_PREMIUM_BUSINESS = 'J', CABIN_FIRST = 'F', CABIN_PREMIUM_FIRST = 'P';
+    public const
+        CABIN_ECONOMY = 'Y',
+        CABIN_PREMIUM_ECONOMY = 'S',
+        CABIN_BUSINESS = 'C',
+        CABIN_PREMIUM_BUSINESS = 'J',
+        CABIN_FIRST = 'F',
+        CABIN_PREMIUM_FIRST = 'P';
 
     /**
      * @param $minutes
@@ -47,21 +62,10 @@ class SearchService
      */
     public static function getGDSName($gds = null)
     {
-        $mapping = [
-            self::GDS_SABRE         => 'Sabre',
-            self::GDS_AMADEUS       => 'Amadeus',
-            self::GDS_TRAVELPORT    => 'TravelPort',
-            self::GDS_AIRWANDER     => 'Combined',
-            self::GDS_TRAVELFUSION  => 'TravelFusion',
-            self::GDS_COCKPIT       => 'Cockpit',
-            self::GDS_ONEPOINT      => 'OnePoint',
-        ];
-
         if ($gds === null) {
-            return $mapping;
+            return self::GDS_LIST;
         }
-
-        return $mapping[$gds] ?? $gds;
+        return self::GDS_LIST[$gds] ?? $gds;
     }
 
     /**
@@ -121,11 +125,11 @@ class SearchService
      * @param Lead $lead
      * @param int $limit
      * @param null $gdsCode
+     * @param bool $group
      * @return mixed
-     * @throws \yii\base\InvalidConfigException
      * @throws \yii\httpclient\Exception
      */
-    public static function getOnlineQuotes(Lead $lead, int $limit = 600, $gdsCode = null)
+    public static function getOnlineQuotes(Lead $lead, int $limit = 600, $gdsCode = null, bool $group = true)
     {
         $result = null;
         $fl = [];
@@ -136,6 +140,7 @@ class SearchService
             'adt' => $lead->adults,
             'chd' => $lead->children,
             'inf' => $lead->infants,
+            'group' => $group,
         ];
 
         if ($limit) {
@@ -215,7 +220,7 @@ class SearchService
         }
 
         $airlines = Airline::getAirlinesListByIata($airlinesIata);
-        $locations = Airport::getAirportListByIata($locationsIata);
+        $locations = Airports::getAirportListByIata($locationsIata);
 
         return ['airlines' => $airlines, 'locations' => $locations];
     }
@@ -247,7 +252,7 @@ class SearchService
         }
 
         $airlines = Airline::getAirlinesListByIata($airlinesIata);
-        $locations = Airport::getAirportListByIata($locationsIata);
+        $locations = Airports::getAirportListByIata($locationsIata);
 
         return ['airlines' => $airlines, 'locations' => $locations];
     }

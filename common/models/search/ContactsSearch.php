@@ -283,7 +283,7 @@ class ContactsSearch extends Client
 
         $queryUser = Employee::find()->alias('u')->select([
             'u.id as id',
-            'u.full_name as full_name',
+            'u.nickname as full_name',
             'type' => new Expression(Client::TYPE_INTERNAL),
             'is_company' => new Expression('null'),
             'description' => new Expression('null'),
@@ -303,7 +303,7 @@ class ContactsSearch extends Client
                 ['IN', 'u.id', UserProjectParams::find()->select(['DISTINCT(upp_user_id)'])->andWhere('upp_user_id = u.id')->andWhere([
                     'upp_email_list_id' => EmailList::find()->select('el_id')->andWhere(['like', 'el_email', $q])
                 ])],
-                ['like', 'u.full_name', $q],
+                ['like', 'u.nickname', $q],
             ]);
         }
 
@@ -356,7 +356,7 @@ class ContactsSearch extends Client
 
         $queryUser = Employee::find()->alias('u')->select([
             'u.id as id',
-            'u.full_name as full_name',
+            'u.nickname as full_name',
             'company_name' => new Expression('null'),
             'type' => new Expression(Client::TYPE_INTERNAL),
             'pl_phone_number as phone',
@@ -368,9 +368,9 @@ class ContactsSearch extends Client
         ]);
 
         $queryUser->andWhere(['status' => Employee::STATUS_ACTIVE]);
-        $queryUser->innerJoin(UserProjectParams::tableName(), 'upp_user_id = u.id');
+        $queryUser->leftJoin(UserProjectParams::tableName(), 'upp_user_id = u.id');
         $queryUser->innerJoin(UserProfile::tableName(), 'up_user_id = u.id and up_show_in_contact_list = 1');
-        $queryUser->innerJoin(PhoneList::tableName(), 'pl_id = upp_phone_list_id');
+        $queryUser->leftJoin(PhoneList::tableName(), 'pl_id = upp_phone_list_id');
         $queryUser->leftJoin(EmailList::tableName(), 'el_id = upp_email_list_id');
         $queryUser->leftJoin(UserStatus::tableName(), 'us_user_id = u.id');
         $queryUser->leftJoin(UserOnline::tableName(), 'uo_user_id = u.id');

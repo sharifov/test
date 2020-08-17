@@ -1,6 +1,7 @@
 <?php
 
 use yii\helpers\Html;
+use yii\helpers\StringHelper;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
@@ -40,7 +41,12 @@ $this->params['breadcrumbs'][] = $this->title;
                     $view = "";
                     if (array_key_exists('attachments', $model->ccm_body)) {
                         foreach ($model->ccm_body['attachments'] as $attachment) {
-                            $view = $view.HTML::a($attachment['title'], "/client-chat-message-crud/download?url=".base64_encode ( $attachment['title_link'] ), ['target'=>'_blank']).", ";
+                            if (array_key_exists('title_link', $attachment) && array_key_exists('title', $attachment)) {
+                                $view = $view.HTML::a($attachment['title'], "/client-chat-message-crud/download?url=".base64_encode ( $attachment['title_link'] ), ['target'=>'_blank']).", ";
+                            }
+                            if (array_key_exists('image_url', $attachment)) {
+                                $view .= Html::a($attachment['image_url'], $attachment['image_url'], ['target'=>'_blank']) . ', ';
+                            }
                         }
                     }
 

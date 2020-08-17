@@ -58,7 +58,8 @@ return [
             'url2' => 'https://communication.api.travelinsides.com/v2/',
             'username' => 'sales',
             'password' => '',
-            'recording_url' => 'https://api.twilio.com/2010-04-01/Accounts/AC10f3c74efba7b492cbd7dca86077736c/Recordings/'
+            'recording_url' => 'https://api.twilio.com/2010-04-01/Accounts/AC10f3c74efba7b492cbd7dca86077736c/Recordings/',
+            'voipApiUsername' => 'sales'
         ],
         'airsearch' => [
             'class' => \common\components\AirSearchService::class,
@@ -83,6 +84,13 @@ return [
         'chatBot' => [
             'class' => \common\components\ChatBot::class,
             'url' => 'https://chatbot.travel-dev.com/private/api/v1/',
+            'username' => '',
+            'password' => '',
+        ],
+
+        'travelServices' => [
+            'class' => \common\components\TravelServices::class,
+            'url' => 'https://geonames.travelinsides.com/api/v1/',
             'username' => '',
             'password' => '',
         ],

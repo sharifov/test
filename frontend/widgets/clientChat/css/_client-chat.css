@@ -21,11 +21,11 @@
 ._cc-access-request-item:last-child {
     border-bottom: none;
 }
-._сс-box-header.active {
+._cc-box-header.active {
     background-color: #78c286;
 }
 
-#client-chat-box-pjax {
+#_client_chat_access_widget {
     position: relative;
     z-index: 1040;
 }
@@ -50,10 +50,52 @@
     transition: all .1s ease-out;
     position: relative;
     z-index: 998;
-    overflow: hidden;
     background: #42a5f5;
     webkit-transition-delay: 25ms;
     transition-delay: 25ms;
+}
+._cc_total_request_wrapper {
+    position: absolute;
+    top: -2px;
+    right: -5px;
+    background-color: red;
+    width: 20px;
+    height: 20px;
+    border-radius: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 985;
+    font-size: 11px;
+    font-weight: bold;
+}
+._cc-fab.is-visible .circle {
+    display: none;
+}
+._cc-fab .circle {
+    display: block;
+    border-radius: 50%;
+    background-color: deepskyblue;
+    width: 56px;
+    height: 56px;
+    position: absolute;
+    opacity: 0;
+    animation: scaleIn 4s infinite cubic-bezier(.36, .11, .89, .32);
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    z-index: -1;
+}
+@keyframes scaleIn {
+    from {
+        transform: scale(.5, .5);
+        opacity: .5;
+    }
+    to {
+        transform: scale(2.5, 2.5);
+        opacity: 0;
+    }
 }
 ._cc-fab > i {
     font-size: 2em;
@@ -84,7 +126,7 @@
     display: block;
 }
 
-._сс-box-header {
+._cc-box-header {
     font-size: 13px;
     font-weight: 500;
     color: #f3f3f3;

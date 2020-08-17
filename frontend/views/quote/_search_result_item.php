@@ -1,5 +1,6 @@
 <?php
 use common\components\SearchService;
+use frontend\helpers\QuoteHelper;
 use yii\bootstrap\Html;
 
 /**
@@ -72,12 +73,44 @@ if (!empty($baggagePerSegment)) {
     }
 }
 
+    $rankCriteria = '';
+    if (!empty($result['meta']['fastest'])) {
+        $rankCriteria .= QuoteHelper::TOP_META_FASTEST;
+    }
+    if (!empty($result['meta']['best'])) {
+        $rankCriteria .= QuoteHelper::TOP_META_BEST;
+    }
+    if (!empty($result['meta']['cheapest'])) {
+        $rankCriteria .= QuoteHelper::TOP_META_CHEAPEST;
+    }
 
+    $group = '';
+    if (!empty($result['meta']['group1'])) {
+        $group = $result['meta']['group1'];
+    }
+
+    $rank = 0.0;
+    if (!empty($result['meta']['rank'])) {
+        $rank = $result['meta']['rank'];
+    }
 ?>
-<div class="quote search-result__quote" data-price="<?= $price?>"
-     data-durationmax="<?= max($totalDuration)?>" data-duration="<?= json_encode($totalDuration)?>" data-totalduration="<?= $totalDurationSum?>"
-     data-stop="<?= json_encode($stops)?>" data-time='<?= json_encode($time)?>' data-fareType="<?= (isset($result['fareType']))?$result['fareType']:''?>"
-     data-airline="<?= $result['validatingCarrier']?>" id="search-result__quote-<?= $resultKey?>" data-changeairport="<?= $airportChange ?>" data-baggage="<?= isset($bagFilter)?$bagFilter:'' ?>">
+<div id="search-result__quote-<?= $resultKey?>"
+    class="quote search-result__quote"
+    data-price="<?= $price?>"
+    data-durationmax="<?= max($totalDuration)?>"
+    data-duration="<?= json_encode($totalDuration)?>"
+    data-totalduration="<?= $totalDurationSum?>"
+    data-stop="<?= json_encode($stops)?>"
+    data-time='<?= json_encode($time)?>'
+    data-fareType="<?= (isset($result['fareType']))?$result['fareType']:''?>"
+    data-airline="<?= $result['validatingCarrier']?>"
+    data-changeairport="<?= $airportChange ?>"
+    data-baggage="<?= isset($bagFilter)?$bagFilter:'' ?>"
+    data-rank-criteria="<?= $rankCriteria ?>"
+    data-rank="<?= $rank ?>"
+    data-group="<?= $group ?>"
+    >
+
     <div class="quote__heading">
         <div class="quote__heading-left">
             <span class="quote__id"><strong># <?= $resultKey+1 ?></strong></span>
@@ -220,20 +253,21 @@ if (!empty($baggagePerSegment)) {
             <?php endforeach;?>
         </div>
         <div class="quote__badges">
+
+            <?php $meta = !empty($result['meta']) ? $result['meta'] : null ?>
+            <?php echo QuoteHelper::formattedFreeBaggage($meta) ?>
+
 			<span class="quote__badge quote__badge--amenities <?php if(!$hasFreeBaggage):?>quote__badge--disabled<?php endif;?>" data-toggle="tooltip"
                   title="<?= ($freeBaggageInfo)?$freeBaggageInfo:'No free baggage'?>" data-original-title="<?= ($freeBaggageInfo)?$freeBaggageInfo:'No free baggage'?>">
 				<i class="fa fa-suitcase"></i><span class="quote__badge-num"></span>
 			</span>
 
             <?php
-
                 if ($needRecheck) {
                     $bagText = 'Bag re-check may be required'; //SearchService::getRecheckBaggageText();
                 } else {
                     $bagText = 'Bag re-check not required';
                 }
-
-
             ?>
 
             <span class="quote__badge quote__badge--warning <?=$needRecheck ? '' : 'quote__badge--disabled'?>" data-toggle="tooltip"
@@ -246,6 +280,11 @@ if (!empty($baggagePerSegment)) {
                   data-toggle="tooltip" title="<?= ($hasAirportChange)?'Airports Change':'No Airports Change'?>" data-original-title="<?= ($hasAirportChange)?'Airports Change':'No Airports Change'?>">
 				<i class="fa fa-exchange"></i>
 			</span>
+
+			<?php echo QuoteHelper::formattedPenalties($result['penalties'] ?? null) ?>
+
+			<?php echo QuoteHelper::formattedMetaRank($meta) ?>
+
         </div>
         <div class="quote__actions">
             <table class="table table-striped table-prices">
@@ -403,9 +442,8 @@ if (!empty($baggagePerSegment)) {
     </div>
 
     <div class="quote__footer">
-
-
         <div class="quote__footer-left">
+
 <!--            --><?php //if(isset($result['tickets']) && $result['tickets']):?>
 <!--                <span class="fa fa-warning warning"></span> Separate Ticket (--><?php //=count($result['tickets'])?><!--)-->
 <!--            --><?php //endif;?>

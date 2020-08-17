@@ -1,7 +1,7 @@
 <?php
 namespace frontend\controllers;
 
-use common\components\CommunicationService;
+use common\components\CentrifugoService;
 use common\models\Lead;
 use common\models\Quote;
 use common\models\VisitorLog;
@@ -33,8 +33,7 @@ use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use Yii;
 use yii\helpers\VarDumper;
-use yii\web\BadRequestHttpException;
-use yii\web\NotFoundHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\web\Response;
 
 /**
@@ -117,7 +116,7 @@ class ClientChatController extends FController
 		return ArrayHelper::merge(parent::behaviors(), $behaviors);
 	}
 
-	public function actionIndex(int $channelId = null, int $page = 1, int $chid = 0, int $tab = ClientChat::TAB_ACTIVE)
+	public function actionIndex(int $channelId = null, int $page = 1, int $chid = 0, int $tab = ClientChat::TAB_ACTIVE, int $dep = 0, int $project = 0)
 	{
 		$channelsQuery = ClientChatChannel::find()
 			->joinWithCcuc(Auth::id());
@@ -136,6 +135,14 @@ class ClientChatController extends FController
 				$query->byChannelIds(ArrayHelper::getColumn($channels, 'ccc_id'));
 			}
 
+			if ($dep) {
+				$query->byDepartment($dep);
+			}
+
+			if ($project) {
+				$query->byProject($project);
+			}
+
 			if (ClientChat::isTabActive($tab)) {
 				$query->active();
 			} else {
@@ -151,6 +158,11 @@ class ClientChatController extends FController
 
 		try {
 			$clientChat = $this->clientChatRepository->findById($chid);
+
+			if (!Auth::can('client-chat/manage/all', ['chat' => $clientChat])) {
+				throw new ForbiddenHttpException('You do not have access to this chat', 403);
+			}
+
 			if ($clientChat->cch_owner_user_id) {
 				$this->clientChatMessageService->discardUnreadMessages($clientChat->cch_id, $clientChat->cch_owner_user_id);
 			}
@@ -198,6 +210,9 @@ class ClientChatController extends FController
 			'client' => $clientChat->cchClient ?? '',
 			'history' => $history ?? null,
 			'tab' => $tab,
+			'dep' => $dep,
+			'project' => $project,
+			'totalUnreadMessages' => $this->clientChatMessageService->getCountOfTotalUnreadMessages(Auth::id())
 		]);
 	}
 
@@ -216,6 +231,10 @@ class ClientChatController extends FController
 			$result['html'] = $this->renderPartial('partial/_client-chat-info', [
 				'clientChat' => $clientChat,
 				'client' => $clientChat->cchClient,
+			]);
+			$result['noteHtml'] = $this->renderAjax('partial/_client-chat-note', [
+				'clientChat' => $clientChat,
+				'model' => new ClientChatNote(),
 			]);
 
 		} catch (NotFoundException $e) {
@@ -251,6 +270,12 @@ class ClientChatController extends FController
         $cchId = Yii::$app->request->get('cch_id');
         $model = new ClientChatNote();
 
+        $clientChat = $this->clientChatRepository->findById($cchId);
+
+		if (!Auth::can('client-chat/manage/all', ['chat' => $clientChat])) {
+			throw new ForbiddenHttpException('You do not have access to perform this action', 403);
+		}
+
         if (Yii::$app->request->isAjax && $model->load(Yii::$app->request->post())) {
             try {
                 $this->clientChatNoteRepository->save($model);
@@ -260,12 +285,10 @@ class ClientChatController extends FController
             }
         }
 
-        $clientChat = $this->clientChatRepository->findById($cchId);
-
         return $this->renderAjax('partial/_client-chat-note', [
             'clientChat' => $clientChat,
             'model' => $model,
-            'showContent' => true,
+            'showContent' => false,
         ]);
 	}
 
@@ -277,9 +300,15 @@ class ClientChatController extends FController
 
             $clientChat = $this->clientChatRepository->findById($cchId);
 
+			if (!Auth::can('client-chat/manage/all', ['chat' => $clientChat])) {
+				throw new ForbiddenHttpException('You do not have access to perform this action', 403);
+			}
+
             if ($clientChatNote = $this->clientChatNoteRepository->findById($ccnId)) {
                 $this->clientChatNoteRepository->toggleDeleted($clientChatNote);
             }
+		} catch (ForbiddenHttpException $e) {
+			throw $e;
 		} catch (\Throwable $throwable) {
 		    Yii::error(AppHelper::throwableFormatter($throwable),
 		    'ClientChatController:actionDeleteNote:delete');
@@ -404,7 +433,7 @@ class ClientChatController extends FController
 
 			$result['tab'] = ClientChat::TAB_ARCHIVE;
 
-		} catch (NotFoundException | \RuntimeException $e) {
+		} catch (NotFoundException | \RuntimeException | ForbiddenHttpException $e) {
 			$result['error'] = true;
 			$result['message'] = $e->getMessage();
 		} catch (\Throwable $e) {
@@ -422,15 +451,15 @@ class ClientChatController extends FController
 
 		try {
 			$clientChat = $this->clientChatRepository->findById($chatId);
-			if ($clientChat->isClosed()) {
-				$history = ClientChatMessage::find()->byChhId($clientChat->cch_id)->all();
-			}
+//			if ($clientChat->isClosed()) {
+//				$history = ClientChatMessage::find()->byChhId($clientChat->cch_id)->all();
+//			}
 		} catch (NotFoundException $e) {
 			$clientChat = null;
 		}
 
 		return $this->renderAjax('partial/_chat_history', [
-			'history' => $history ?? null,
+//			'history' => $history ?? null,
 			'clientChat' => $clientChat
 		]);
 	}
@@ -449,10 +478,14 @@ class ClientChatController extends FController
 			$form->isOnline = $clientChat->cch_client_online;
 		}
 
+		if (!Auth::can('client-chat/manage/all', ['chat' => $clientChat])) {
+			throw new ForbiddenHttpException('You do not have access to perform this action', 403);
+		}
+
 		try {
 			if ($form->load(Yii::$app->request->post()) && $form->validate()) {
-				$this->clientChatService->transfer($form);
-				return '<script>$("#modal-sm").modal("hide"); refreshChatPage('.$form->cchId.');</script>';
+				$newDepartment = $this->clientChatService->transfer($form);
+				return '<script>$("#modal-sm").modal("hide"); refreshChatPage('.$form->cchId.', '.ClientChat::TAB_ARCHIVE.'); createNotify("Success", "Chat successfully transferred to '.$newDepartment->dep_name.' department. ", "success")</script>';
 			}
 		} catch (\DomainException $e) {
 			$form->addError('depId', $e->getMessage());
@@ -489,7 +522,7 @@ class ClientChatController extends FController
 	{
 		$cchId = Yii::$app->request->post('cchId');
 		$userId = Auth::id();
-		$this->clientChatMessageService->discardUnreadMessages($cchId, $userId);
+		$this->clientChatMessageService->discardUnreadMessages((int)$cchId, $userId);
 	}
 
 	public function actionSendOfferList(): string
@@ -501,6 +534,9 @@ class ClientChatController extends FController
 
         try {
             $clientChat = $this->clientChatRepository->findById($chatId);
+			if (!Auth::can('client-chat/manage/all', ['chat' => $clientChat])) {
+				throw new ForbiddenHttpException('You do not have access to perform this action', 403);
+			}
             $lead = $this->leadRepository->find($leadId);
 
             if (!$this->sendOfferCheckAccess($clientChat, Auth::user())) {
@@ -611,6 +647,24 @@ class ClientChatController extends FController
         }
 
         return $this->asJson($out);
+    }
+
+    public function actionMonitor()
+    {
+        if(Yii::$app->request->isPost){
+            $params = Yii::$app->request->post();
+            $searchModel = new ClientChatSearch();
+            $chatsData = $searchModel->searchRealtimeClientChatActivity($params);
+
+            CentrifugoService::sendMsg(json_encode([
+                'chatsData' => $chatsData,
+            ]), 'realtimeClientChatChannel');
+
+        } else {
+            $this->layout = '@frontend/themes/gentelella_v2/views/layouts/main_tv';
+
+            return $this->render('monitor');
+        }
     }
 
     private function createOfferMessage(ClientChat $chat, array $captures): array
