@@ -7,7 +7,7 @@ use yii\bootstrap4\Html;
 
 class Formatter
 {
-    public static function asCase(Cases $cases, string $class): string
+    public static function asCase(Cases $cases, ?string $class): string
     {
         $faClass = $class ?? 'fa-arrow-right';
 
