@@ -1,0 +1,8 @@
+[program:QueueSystemServices]
+command=/usr/bin/php /var/www/sales/www/yii queue-system-services/listen
+stdout_logfile=/var/www/sales/www/console/runtime/queue-system-services.log
+autostart=true
+autorestart=true
+user=root
+stopsignal=KILL
+numprocs=1
