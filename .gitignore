@@ -44,3 +44,5 @@ phpunit.phar
 
 # visual studio code
 .vscode
+
+/lsp
