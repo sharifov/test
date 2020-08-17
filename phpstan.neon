@@ -1,0 +1,6 @@
+parameters:
+  level: 5
+  paths:
+    - webapi
+  excludes_analyse:
+    - webapi/tests/*
