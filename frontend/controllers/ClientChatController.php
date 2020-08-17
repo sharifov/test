@@ -27,6 +27,7 @@ use sales\repositories\NotFoundException;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatService\ClientChatService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
+use sales\services\TransactionManager;
 use sales\viewModel\chat\ViewModelChatGraph;
 use yii\data\ActiveDataProvider;
 use yii\filters\VerbFilter;
@@ -47,6 +48,7 @@ use yii\web\Response;
  * @property ClientChatUserAccessService $clientChatUserAccessService
  * @property ClientChatNoteRepository $clientChatNoteRepository
  * @property LeadRepository $leadRepository
+ * @property TransactionManager $transactionManager
  */
 class ClientChatController extends FController
 {
@@ -77,8 +79,12 @@ class ClientChatController extends FController
      * @var LeadRepository
      */
     private $leadRepository;
+	/**
+	 * @var TransactionManager
+	 */
+	private TransactionManager $transactionManager;
 
-    public function __construct(
+	public function __construct(
 		$id,
 		$module,
 		ClientChatRepository $clientChatRepository,
@@ -88,6 +94,7 @@ class ClientChatController extends FController
 		ClientChatUserAccessService $clientChatUserAccessService,
 		ClientChatNoteRepository $clientChatNoteRepository,
 		LeadRepository $leadRepository,
+		TransactionManager $transactionManager,
 		$config = [])
 	{
 		parent::__construct($id, $module, $config);
@@ -98,7 +105,8 @@ class ClientChatController extends FController
 		$this->clientChatUserAccessService = $clientChatUserAccessService;
 		$this->clientChatNoteRepository = $clientChatNoteRepository;
         $this->leadRepository = $leadRepository;
-    }
+		$this->transactionManager = $transactionManager;
+	}
 
 	/**
 	 * @return array
@@ -323,7 +331,7 @@ class ClientChatController extends FController
 
     public function actionAccessManage(): \yii\web\Response
 	{
-		$cchId = \Yii::$app->request->post('cchId');
+		$ccuaId = \Yii::$app->request->post('ccuaId');
 		$accessAction = \Yii::$app->request->post('accessAction');
 
 		try {
@@ -334,7 +342,7 @@ class ClientChatController extends FController
 				'notifyType' => ''
 			];
 
-			$ccua = $this->clientChatUserAccessRepository->findByPrimaryKeys($cchId, Auth::id());
+			$ccua = $this->clientChatUserAccessRepository->findByPrimaryKey($ccuaId);
 			$this->clientChatUserAccessService->updateStatus($ccua, (int)$accessAction);
 
 			$result['success'] = true;
@@ -485,10 +493,10 @@ class ClientChatController extends FController
 		try {
 			if ($form->load(Yii::$app->request->post()) && $form->validate()) {
 				$newDepartment = $this->clientChatService->transfer($form);
-				return '<script>$("#modal-sm").modal("hide"); refreshChatPage('.$form->cchId.', '.ClientChat::TAB_ARCHIVE.'); createNotify("Success", "Chat successfully transferred to '.$newDepartment->dep_name.' department. ", "success")</script>';
+				return '<script>$("#modal-sm").modal("hide"); refreshChatPage('.$form->cchId.', '.ClientChat::TAB_ACTIVE.'); createNotify("Success", "Chat successfully transferred to '.$newDepartment->dep_name.' department. ", "success")</script>';
 			}
 		} catch (\DomainException $e) {
-			$form->addError('depId', $e->getMessage());
+			$form->addError('general', $e->getMessage());
 		} catch (\RuntimeException $e) {
 			$form->addError('general', $e->getMessage());
 		} catch (\Throwable $e) {
@@ -666,6 +674,35 @@ class ClientChatController extends FController
             return $this->render('monitor');
         }
     }
+
+    public function actionAjaxCancelTransfer()
+	{
+		$cchId = Yii::$app->request->post('cchId');
+
+		$result = [
+			'error' => false,
+			'message' => 'Transfer canceled successfully'
+		];
+
+		try {
+			$chat = $this->clientChatRepository->findById($cchId);
+
+			$this->transactionManager->wrap( function () use ($chat){
+				$this->clientChatUserAccessService->disableAccessForOtherUsers($chat->cch_id, $chat->cch_owner_user_id);
+//				$this->clientChatService->cancelTransfer($chat);
+			});
+
+		} catch (\DomainException | \RuntimeException $e) {
+			$result['error'] = true;
+			$result['message'] = $e->getMessage();
+		} catch (\Throwable $e) {
+			Yii::error(AppHelper::throwableFormatter($e), 'ClientChatController::actionAjaxCancelTransfer::Throwable');
+			$result['error'] = true;
+			$result['message'] = 'Internal Server Error';
+		}
+
+		return $this->asJson($result);
+	}
 
     private function createOfferMessage(ClientChat $chat, array $captures): array
     {

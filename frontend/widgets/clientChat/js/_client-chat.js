@@ -31,6 +31,7 @@ $(document).on('click', '._cc-access-action', function (e) {
 
     let url = $(this).attr('data-ajax-url');
     let cchId = $(this).attr('data-cch-id');
+    let ccuaId = $(this).attr('data-ccua-id');
     let accessAction = $(this).attr('data-access-action');
 
     let $btn = $(this);
@@ -40,7 +41,7 @@ $(document).on('click', '._cc-access-action', function (e) {
     $.ajax({
         url: url,
         type: 'post',
-        data: {cchId: cchId, accessAction: accessAction},
+        data: {ccuaId: ccuaId, accessAction: accessAction},
         cache: false,
         dataType: 'json',
         beforeSend: function () {

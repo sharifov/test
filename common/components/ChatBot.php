@@ -11,6 +11,7 @@ namespace common\components;
 use sales\auth\Auth;
 use yii\base\Component;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\httpclient\Client;
@@ -121,7 +122,7 @@ class ChatBot extends Component
                 $out['error']['message'] = 'Not found in response array';
             }
         } else {
-            $out['error'] = Json::decode($response->content);
+            $out['error'] = $this->parseErrorContent($response);
             \Yii::error(VarDumper::dumpAsString(['rid' => $rid, 'error' => $out['error']], 10), 'ChatBot:endConversation');
         }
 
@@ -156,7 +157,7 @@ class ChatBot extends Component
 				$out['error']['message'] = 'Not found in response array';
 			}
 		} else {
-			$out['error'] = Json::decode($response->content);
+			$out['error'] = $this->parseErrorContent($response);
 			\Yii::error(VarDumper::dumpAsString(['rid' => $rid, 'error' => $out['error']], 10), 'ChatBot:endConversation');
 		}
 
@@ -186,7 +187,7 @@ class ChatBot extends Component
                 $out['error']['message'] = 'Not found in response array data key [data]';
             }
         } else {
-            $out['error'] = Json::decode($response->content);
+            $out['error'] = $this->parseErrorContent($response);
             \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'ChatBot:assignAgent');
         }
 
@@ -206,10 +207,19 @@ class ChatBot extends Component
                 $out['error']['message'] = 'Not found in response array data key [data]';
             }
         } else {
-            $out['error'] = Json::decode($response->content);
+            $out['error'] = $this->parseErrorContent($response);
 			\Yii::error(VarDumper::dumpAsString($out['error'], 10), 'ChatBot:sendMessage');
         }
 
         return $out;
     }
+
+    private function parseErrorContent(Response $response): array
+	{
+		$result = json_decode($response->content, true);
+		if (json_last_error() === JSON_ERROR_NONE) {
+			return $result;
+		}
+		return ['message' => strip_tags($response->content)];
+	}
 }

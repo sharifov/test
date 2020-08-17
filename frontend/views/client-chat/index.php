@@ -37,6 +37,7 @@ $clintChatDataIUrl = Url::toRoute('/client-chat/ajax-data-info');
 $clientChatCloseUrl = Url::toRoute('/client-chat/ajax-close');
 $chatHistoryUrl = Url::toRoute('/client-chat/ajax-history');
 $chatTransferUrl = Url::toRoute('/client-chat/ajax-transfer-view');
+$chatCancelTransferUrl = Url::toRoute('/client-chat/ajax-cancel-transfer');
 $chatSendOfferListUrl = Url::toRoute('/client-chat/send-offer-list');
 $chatSendOfferPreviewUrl = Url::toRoute('/client-chat/send-offer-preview');
 $chatSendOfferGenerateUrl = Url::toRoute('/client-chat/send-offer-generate');
@@ -273,26 +274,41 @@ $(document).on('click', '._cc-list-item', function () {
     localStorage.setItem('activeChatId', cch_id);
     
     $('#_rc-'+cch_id).show();
-    $.ajax({
-        type: 'post',
-        url: '{$clientChatInfoUrl}',
-        dataType: 'json',
-        cache: false,
-        data: {cch_id: cch_id},
-        beforeSend: function () {
-            $('#_cc_additional_info_wrapper').append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
-        },
-        success: function (data) {
-            $('#_client-chat-info').html(data.html);
-            $('#_client-chat-note').html(data.noteHtml);
-        },
-        error: function (xhr) {
-            createNotify('Error', xhr.responseText, 'error');
-        },
-        complete: function () {
-            $('#_cc_additional_info_wrapper #_cc-load').remove();
-        }
-    });
+    window.refreshChatInfo(cch_id);
+});
+
+$(document).on('click', '.cc_cancel_transfer', function (e) {
+    e.preventDefault();
+    let btn = $(this);
+    let cchId = btn.attr('data-cch-id');
+    let btnHtml = btn.html();
+    
+    if (confirm('Confirm transfer chat')) {
+        $.ajax({
+            type: 'post',
+            url: '{$chatCancelTransferUrl}',
+            dataType: 'json',
+            cache: false,
+            data: {cchId: cchId},
+            beforeSend: function () {
+                btn.html('<i class="fa fa-spin fa-spinner"></i>');
+            },
+            success: function (data) {
+                if (data.error) {
+                    createNotify('Error', data.message, 'error');
+                } else {
+                    refreshChatPage(cchId, data.tab);
+                    createNotify('Success', data.message, 'success');
+                }
+            },
+            complete: function () {
+                btn.html(btnHtml);
+            },
+            error: function (xhr) {
+                createNotify('Error', xhr.responseText, 'error');
+            }
+        });
+    }
 });
 
 $(document).on('click', '.cc_full_info', function (e) {
@@ -393,6 +409,28 @@ window.getChatHistory = function (cchId) {
     });
 }
 
+window.refreshChatInfo = function (cch_id) {
+    $.ajax({
+        type: 'post',
+        url: '{$clientChatInfoUrl}',
+        dataType: 'json',
+        cache: false,
+        data: {cch_id: cch_id},
+        beforeSend: function () {
+            $('#_cc_additional_info_wrapper').append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
+        },
+        success: function (data) {
+            $('#_client-chat-info').html(data.html);
+            $('#_client-chat-note').html(data.noteHtml);
+        },
+        error: function (xhr) {
+            createNotify('Error', xhr.responseText, 'error');
+        },
+        complete: function () {
+            $('#_cc_additional_info_wrapper #_cc-load').remove();
+        }
+    });
+}
 window.refreshChatPage = function (cchId, tab) {
     if (tab) {
         let params = new URLSearchParams(window.location.search);
@@ -404,6 +442,7 @@ window.refreshChatPage = function (cchId, tab) {
     $('.cc_transfer').remove();
     $('.cc_close').remove();
     getChatHistory(cchId);
+    refreshChatInfo(cchId);
 }
 
 $(document).on('click', '.chat-offer', function(e) {

@@ -1,6 +1,8 @@
 <?php
 
 use common\models\Department;
+use kartik\select2\Select2;
+use sales\helpers\clientChat\ClientChatHelper;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\transfer\ClientChatTransferForm;
 use yii\helpers\Html;
@@ -21,7 +23,22 @@ use yii\widgets\Pjax;
 
                 <?= $form->field($transferForm, 'isOnline')->hiddenInput()->label(false) ?>
 
-                <?= $form->field($transferForm, 'depId')->dropDownList(Department::getListExcludingExchange(), ['prompt' => ' -- Select department --']) ?>
+                <?= $form->field($transferForm, 'depId')->dropDownList(Department::getListExcludingExchange(), ['prompt' => ' -- Select department --', 'id' => 'depId']) ?>
+
+                <?= $form->field($transferForm, 'agentId')->widget(Select2::class, [
+                    'data' => ClientChatHelper::getAvailableAgentForTransfer($clientChat, $clientChat->cch_dep_id),
+                    'options' => [
+                        'prompt' => '---',
+                        'placeholder' => 'Select agent',
+                        'multiple' => true
+                    ],
+                    'pluginOptions' => [
+                        'allowClear' => true,
+						'placeholder' => 'Select agent',
+                        'allowMultiple' => true
+					],
+                    'size' => Select2::SIZE_SMALL,
+				]) ?>
 
                 <div class="text-center" style="width: 100%">
                     <?= Html::submitButton('Submit', ['class' => 'btn btn-success _cc_submit_transfer']) ?>

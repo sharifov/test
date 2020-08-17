@@ -413,6 +413,14 @@ $js = <<<JS
                             }
                         }
                         
+                        if (obj.cmd === 'clientChatTransfer') {
+                            let activeChatId = localStorage.getItem('activeChatId');
+                            if (typeof window.refreshChatPage === 'function' && window.name === 'chat' && activeChatId == obj.data.cchId) {
+                                window.refreshChatPage(obj.data.cchId, obj.data.tab);
+                            }
+                            createNotify('Warning', obj.data.message, 'warning');
+                        }
+                        
                         if (obj.cmd === 'logout') {
                             if (typeof autoLogout === "function") {
                                 autoLogout(obj);

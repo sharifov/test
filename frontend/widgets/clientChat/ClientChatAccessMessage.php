@@ -1,7 +1,9 @@
 <?php
 namespace frontend\widgets\clientChat;
 
+use common\models\Employee;
 use sales\auth\Auth;
+use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use yii\helpers\Url;
 
@@ -45,6 +47,24 @@ class ClientChatAccessMessage
 			'cch_id' => $access->ccua_cch_id,
 			'pjaxUrl' => Url::to('/client-chat/pjax-update-chat-widget'),
 			'html' => self::refresh($access->ccua_user_id)
+		];
+	}
+
+	public static function allAgentsCanceledTransfer(ClientChat $chat): array
+	{
+		return [
+			'message' => 'All users rejected the chat with id: ' . $chat->cch_id,
+			'cchId' => $chat->cch_id,
+			'tab' => ClientChat::TAB_ACTIVE
+		];
+	}
+
+	public static function agentTransferAccepted(ClientChat $chat, Employee $employee): array
+	{
+		return [
+			'message' => 'User: ' . $employee->nickname . ' accepted chat with id: ' . $chat->cch_id,
+			'cchId' => $chat->cch_id,
+			'tab' => ClientChat::TAB_ARCHIVE
 		];
 	}
 

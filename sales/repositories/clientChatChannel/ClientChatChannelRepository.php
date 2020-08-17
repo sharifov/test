@@ -8,12 +8,18 @@ use sales\repositories\Repository;
 
 class ClientChatChannelRepository extends Repository
 {
-	public function findByClientChatData(ClientChat $clientChat, ?int $priority): ClientChatChannel
+	/**
+	 * @param int|null $depId
+	 * @param int|null $projectId
+	 * @param int|null $priority
+	 * @return ClientChatChannel
+	 */
+	public function findByClientChatData(?int $depId, ?int $projectId, ?int $priority): ClientChatChannel
 	{
 		$channel = ClientChatChannel::find();
 
-		$channel->byDepartment($clientChat->cch_dep_id);
-		$channel->byProject($clientChat->cch_project_id);
+		$channel->byDepartment($depId);
+		$channel->byProject($projectId);
 
 		if ($priority) {
 			$channel->priority($priority);

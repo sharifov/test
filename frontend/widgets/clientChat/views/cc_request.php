@@ -80,12 +80,18 @@ $totalRequest = count($access);
 
                                     <span class="label label-default"><?= $item->ccuaCch->cchChannel ? $item->ccuaCch->cchChannel->ccc_name : '' ?></span>
                                 </div>
+
+                                <?php if ($item->ccuaCch->cchOwnerUser && $item->ccuaCch->isTransfer()): ?>
+                                    <div>
+                                        <span class="label label-warning">Transfer</span> from <b><?= $item->ccuaCch->cchOwnerUser->nickname ?></b>
+                                    </div>
+                                <?php endif; ?>
                             </div>
 
 
                             <div class="_cc-action">
-                                <button class="btn btn-sm btn-success _cc-access-action" data-cch-id="<?= $item->ccua_cch_id ?>" data-ajax-url="<?= $accessUrl ?>" data-access-action="<?= ClientChatUserAccess::STATUS_ACCEPT ?>"><i class="fa fa-check"></i> Accept</button>
-                                <button class="btn btn-sm btn-warning _cc-access-action" data-cch-id="<?= $item->ccua_cch_id ?>" data-ajax-url="<?= $accessUrl ?>" data-access-action="<?= ClientChatUserAccess::STATUS_SKIP ?>"><i class="fa fa-close"></i> Skip</button>
+                                <button class="btn btn-sm btn-success _cc-access-action" data-ccua-id="<?= $item->ccua_id ?>" data-cch-id="<?= $item->ccua_cch_id ?>" data-ajax-url="<?= $accessUrl ?>" data-access-action="<?= ClientChatUserAccess::STATUS_ACCEPT ?>"><i class="fa fa-check"></i> Accept</button>
+                                <button class="btn btn-sm btn-warning _cc-access-action" data-ccua-id="<?= $item->ccua_id ?>" data-cch-id="<?= $item->ccua_cch_id ?>" data-ajax-url="<?= $accessUrl ?>" data-access-action="<?= ClientChatUserAccess::STATUS_SKIP ?>"><i class="fa fa-close"></i> Skip</button>
                             </div>
 
 <!--                            <span class="_cc_chevron"><i class="fa fa-chevron-down"></i></span>-->

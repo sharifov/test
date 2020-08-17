@@ -3,9 +3,11 @@ namespace sales\repositories\clientChatUserAccessRepository;
 
 use common\models\Notifications;
 use frontend\widgets\clientChat\ClientChatAccessMessage;
+use sales\dispatchers\EventDispatcher;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
+use sales\model\clientChatUserAccess\event\SendNotificationEvent;
 use sales\repositories\NotFoundException;
 use sales\repositories\Repository;
 use sales\services\clientChatService\ClientChatService;
@@ -15,6 +17,7 @@ use sales\services\clientChatService\ClientChatService;
  * @package sales\repositories\clientChatUserAccessRepository
  *
  * @property ClientChatRepository $clientChatRepository
+ * @property EventDispatcher $eventDispatcher
  */
 class ClientChatUserAccessRepository extends Repository
 {
@@ -22,10 +25,15 @@ class ClientChatUserAccessRepository extends Repository
 	 * @var ClientChatRepository
 	 */
 	private ClientChatRepository $clientChatRepository;
+	/**
+	 * @var EventDispatcher
+	 */
+	private EventDispatcher $eventDispatcher;
 
-	public function __construct(ClientChatRepository $clientChatRepository)
+	public function __construct(ClientChatRepository $clientChatRepository, EventDispatcher $eventDispatcher)
 	{
 		$this->clientChatRepository = $clientChatRepository;
+		$this->eventDispatcher = $eventDispatcher;
 	}
 
 	public function save(ClientChatUserAccess $clientChatUserAccess): ClientChatUserAccess
@@ -33,19 +41,31 @@ class ClientChatUserAccessRepository extends Repository
 		if (!$clientChatUserAccess->save()) {
 			throw new \RuntimeException($clientChatUserAccess->getErrorSummary(false)[0], ClientChatCodeException::CC_USER_ACCESS_SAVE_FAILED);
 		}
-		$this->sendNotifications($clientChatUserAccess);
+		$this->eventDispatcher->dispatchAll([new SendNotificationEvent($clientChatUserAccess)]);
 		return $clientChatUserAccess;
 	}
 
-	public function findByPrimaryKeys(int $cchId, int $userId): ClientChatUserAccess
+	public function findByPrimaryKey(int $id): ClientChatUserAccess
 	{
-		if ($access = ClientChatUserAccess::findOne(['ccua_cch_id' => $cchId, 'ccua_user_id' => $userId])) {
+		if ($access = ClientChatUserAccess::findOne(['ccua_id' => $id])) {
 			return $access;
 		}
 		throw new NotFoundException('Client Chat User Access is not found');
 	}
 
-	private function sendNotifications(ClientChatUserAccess $access): void
+	/**
+	 * @param int $chatId
+	 * @return ClientChatUserAccess[]
+	 */
+	public function findByChatIdAndUserId(int $chatId, int $userId): array
+	{
+		if ($access = ClientChatUserAccess::find()->byChatId($chatId)->byUserId()->all()) {
+			return $access;
+		}
+		throw new NotFoundException('Client Chat User Access not found rows');
+	}
+
+	public function sendNotifications(ClientChatUserAccess $access): void
 	{
 		$data = [];
 		if ($access->isAccept()) {

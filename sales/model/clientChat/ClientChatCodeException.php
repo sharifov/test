@@ -24,4 +24,8 @@ class ClientChatCodeException
 	{
 		return in_array($e->getCode(), self::WARNING_ERROR_LIST, false);
 	}
+
+	public static function isAlreadyAssigned(\Throwable $e) {
+		return (int)$e->getCode() === (int)self::CC_OWNER_ALREADY_ASSIGNED;
+	}
 }

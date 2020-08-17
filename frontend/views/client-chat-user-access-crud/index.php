@@ -29,6 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
 
+            'ccua_id',
             'ccua_cch_id',
 			[
 				'class' => UserSelect2Column::class,

@@ -75,7 +75,9 @@ use yii\web\View;
         <h3 style="margin: 0;">Chat info</h3>
         <div class="d-flex align-items-center justify-content-center">
             <?= Html::button('<i class="fa fa-info"></i>', ['class' => 'btn btn-info cc_full_info', 'title' => 'Additional Information', 'data-cch-id' => $clientChat->cch_id]) ?>
-            <?php if (!$clientChat->isClosed()): ?>
+            <?php if ($clientChat->isTransfer()): ?>
+				<?= Html::button('<i class="fa fa-exchange"></i>', ['class' => 'btn btn-danger cc_cancel_transfer', 'title' => 'Cancel Transfer', 'data-cch-id' => $clientChat->cch_id]) ?>
+            <?php elseif (!$clientChat->isClosed()): ?>
                 <?= Html::button('<i class="fa fa-close"></i>', ['class' => 'btn btn-danger cc_close', 'title' => 'Close', 'data-cch-id' => $clientChat->cch_id]) ?>
                 <?= Html::button('<i class="fa fa-exchange"></i>', ['class' => 'btn btn-warning cc_transfer', 'title' => 'Transfer', 'data-cch-id' => $clientChat->cch_id]) ?>
             <?php endif; ?>

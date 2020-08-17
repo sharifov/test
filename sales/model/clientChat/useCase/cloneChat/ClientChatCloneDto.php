@@ -15,6 +15,7 @@ use sales\model\clientChat\useCase\transfer\ClientChatTransferForm;
  * @property int|null $cchClientId
  * @property int|null $ownerId
  * @property int|null $isOnline
+ * @property int|null $status
  */
 class ClientChatCloneDto
 {
@@ -25,6 +26,7 @@ class ClientChatCloneDto
 	public $cchClientId;
 	public $ownerId;
 	public $isOnline;
+	public $status;
 
 	public static function feelInOnCreateMessage(ClientChat $clientChat, int $clientChatRequestId): self
 	{
@@ -39,16 +41,16 @@ class ClientChatCloneDto
 		return $_self;
 	}
 
-	public static function feelInOnTransfer(ClientChat $clientChat, ClientChatTransferForm $form): self
+	public static function feelInOnTransfer(ClientChat $clientChat): self
 	{
 		$_self = new self();
 		$_self->cchRid = $clientChat->cch_rid;
 		$_self->cchCcrId = $clientChat->cch_ccr_id;
 		$_self->cchProjectId = $clientChat->cch_project_id;
-		$_self->cchDepId = $form->depId;
+		$_self->cchDepId = $clientChat->cch_dep_id;
 		$_self->cchClientId = $clientChat->cch_client_id;
 		$_self->ownerId = null;
-		$_self->isOnline = (int)$form->isOnline;
+		$_self->isOnline = (int)$clientChat->cch_client_online;
 		return $_self;
 	}
 }

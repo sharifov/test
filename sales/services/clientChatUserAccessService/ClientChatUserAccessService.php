@@ -2,9 +2,13 @@
 
 namespace sales\services\clientChatUserAccessService;
 
+use common\models\Notifications;
+use frontend\widgets\clientChat\ClientChatAccessMessage;
 use sales\model\clientChat\ClientChatCodeException;
+use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
+use sales\model\clientChatVisitor\repository\ClientChatVisitorRepository;
 use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessRepository;
 use sales\services\clientChatService\ClientChatService;
 
@@ -15,6 +19,7 @@ use sales\services\clientChatService\ClientChatService;
  * @property ClientChatUserAccessRepository $clientChatUserAccessRepository
  * @property ClientChatRepository $clientChatRepository
  * @property ClientChatService $clientChatService
+ * @property ClientChatVisitorRepository $clientChatVisitorRepository
  */
 class ClientChatUserAccessService
 {
@@ -30,43 +35,64 @@ class ClientChatUserAccessService
 	 * @var ClientChatService
 	 */
 	private ClientChatService $clientChatService;
+	/**
+	 * @var ClientChatVisitorRepository
+	 */
+	private ClientChatVisitorRepository $clientChatVisitorRepository;
 
-	public function __construct(ClientChatUserAccessRepository $clientChatUserAccessRepository, ClientChatRepository $clientChatRepository, ClientChatService $clientChatService)
+	public function __construct(ClientChatUserAccessRepository $clientChatUserAccessRepository, ClientChatRepository $clientChatRepository, ClientChatService $clientChatService, ClientChatVisitorRepository $clientChatVisitorRepository)
 	{
 		$this->clientChatUserAccessRepository = $clientChatUserAccessRepository;
 		$this->clientChatRepository = $clientChatRepository;
 		$this->clientChatService = $clientChatService;
+		$this->clientChatVisitorRepository = $clientChatVisitorRepository;
 	}
 
-	public function updateStatus(ClientChatUserAccess $ccua, int $status): void
+	public function updateStatus(ClientChatUserAccess $ccua, int $status, ?int $chatOwnerId = null): void
 	{
 		if (!ClientChatUserAccess::statusExist($status)) {
 			throw new \RuntimeException('User access status is unknown');
 		}
 		$ccua->setStatus($status);
 
+		$clientChat = $this->clientChatRepository->findById($ccua->ccua_cch_id);
+		$previousOwner = $clientChat->cch_owner_user_id;
 		if ($ccua->isAccept()) {
 			try {
-				$ccua->ccuaCch->assignOwner($ccua->ccua_user_id);
-				$this->clientChatRepository->save($ccua->ccuaCch);
-				$this->clientChatService->assignAgentToRcChannel($ccua->ccuaCch->cch_rid, $ccua->ccuaUser->userProfile->up_rc_user_id ?? '');
+				if ($clientChat->isTransfer()) {
+					$this->clientChatService->finishTransfer($clientChat, $ccua);
+				} else {
+					$clientChat->assignOwner($ccua->ccua_user_id);
+					$this->clientChatRepository->save($clientChat);
+					$this->clientChatService->assignAgentToRcChannel($clientChat->cch_rid, $ccua->ccuaUser->userProfile->up_rc_user_id ?? '');
+				}
 			} catch (\DomainException | \RuntimeException $e) {
 				if (ClientChatCodeException::isRcAssignAgentFailed($e)) {
-					$ccua->ccuaCch->removeOwner();
+					$ccua->ccuaCch->assignOwner($previousOwner);
 					$this->clientChatRepository->save($ccua->ccuaCch);
 				}
 				throw $e;
 			}
-			$this->disableAccessForOtherUsers($ccua);
+			$this->disableAccessForOtherUsers($ccua->ccua_cch_id, $ccua->ccua_user_id);
+		} else if ($ccua->isSkip() && $clientChat->isTransfer()) {
+			$userAccesses = ClientChatUserAccess::find()->byChatId($clientChat->cch_id)->exceptById($ccua->ccua_id)->pending()->exists();
+			if (!$userAccesses) {
+				$this->clientChatService->cancelTransfer($clientChat);
+
+				if ($chatOwnerId !== $clientChat->cch_owner_user_id) {
+					$data = ClientChatAccessMessage::allAgentsCanceledTransfer($clientChat);
+					Notifications::publish('clientChatTransfer', ['user_id' => $clientChat->cch_owner_user_id], ['data' => $data]);
+				}
+			}
 		}
 		$this->clientChatUserAccessRepository->save($ccua);
 	}
 
-	public function disableAccessForOtherUsers(ClientChatUserAccess $ccua): void
+	public function disableAccessForOtherUsers(int $chatId, int $userId): void
 	{
-		$usersAccess = ClientChatUserAccess::find()->exceptUser($ccua->ccua_user_id)->byChatId( $ccua->ccua_cch_id)->all();
+		$usersAccess = ClientChatUserAccess::find()->notAccepted()->exceptUser($userId)->byChatId($chatId)->all();
 		foreach ($usersAccess as $access) {
-			$this->updateStatus($access, ClientChatUserAccess::STATUS_SKIP);
+			$this->updateStatus($access, ClientChatUserAccess::STATUS_SKIP, $userId);
 		}
 	}
 
