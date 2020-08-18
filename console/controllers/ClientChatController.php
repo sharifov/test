@@ -160,7 +160,9 @@ class ClientChatController extends Controller
 
         foreach ($users as $user) {
 
-            $result = $rocketChat->deleteUser($user['nickname'] ?: $user['username']);
+			$userProfile = UserProfile::findOne(['up_user_id' => $user['id']]);
+
+            $result = $rocketChat->deleteUser($userProfile->up_rc_user_id ?? null, $user['nickname'] ?: $user['username']);
 
             echo "\n-- " . $user['username'] . ' ('.$user['id'].') --' . PHP_EOL;
 
@@ -169,7 +171,6 @@ class ClientChatController extends Controller
 
                 printf(" - Deleted: %s\n", $this->ansiFormat('Success', Console::FG_BLUE));
 
-                $userProfile = UserProfile::findOne(['up_user_id' => $user['id']]);
 
                 if (!$userProfile) {
                     continue;
