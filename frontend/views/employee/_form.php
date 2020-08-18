@@ -288,7 +288,6 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                         <div class="row">
                             <div class="col-md-3">
                                 <?= $form->field($modelUserParams, 'up_inbox_show_limit_leads')->input('number', ['step' => 1, 'min' => 0, 'max' => 500]) ?>
-                                <?= $form->field($modelUserParams, 'up_call_expert_limit')->input('number', ['step' => 1, 'min' => -1, 'max' => 1000]) ?>
                             </div>
                             <div class="col-md-3">
                                 <?= $form->field($modelUserParams, 'up_default_take_limit_leads')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
@@ -302,6 +301,16 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                         </div>
                     <?php endif; ?>
 
+                <?php endif; ?>
+
+                <?php if ($user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision() || $user->isUserManager()): ?>
+                    <?php if (!Yii::$app->user->identity->canRole('supervision')): ?>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <?= $form->field($modelUserParams, 'up_call_expert_limit')->input('number', ['step' => 1, 'min' => -1, 'max' => 1000]) ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 <?php endif; ?>
 
             </div>
