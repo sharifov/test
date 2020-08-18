@@ -36,7 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'cl_id',
             'cl_group_id',
             ['class' => DateTimeColumn::class, 'attribute' => 'cl_call_created_dt', 'format' => 'byUserDateTimeWithSeconds'],
-            ['class' => DateTimeColumn::class, 'attribute' => 'cl_call_finished_dt'],
+            ['class' => DateTimeColumn::class, 'attribute' => 'cl_call_finished_dt', 'format' => 'byUserDateTimeWithSeconds'],
             'cl_duration',
             ['class' => \sales\model\callLog\grid\columns\RecordingUrlColumn::class],
             ['class' => \sales\model\callLog\grid\columns\CallLogStatusColumn::class],
