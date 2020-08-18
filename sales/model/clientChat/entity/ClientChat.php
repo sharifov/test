@@ -268,9 +268,9 @@ class ClientChat extends \yii\db\ActiveRecord
 		return ClientChatHelper::getClientName($this) . ClientChatHelper::getClientStatusMessage($this);
 	}
 
-	public function assignOwner(int $userId): void
+	public function assignOwner(?int $userId): void
 	{
-		if (!$this->isTransfer() && $this->cchOwnerUser && $this->cch_owner_user_id !== $userId) {
+		if (!$this->isTransfer() && !is_null($userId) && $this->cchOwnerUser && $this->cch_owner_user_id !== $userId) {
 			throw new \DomainException('Client Chat already assigned to: ' . $this->cchOwnerUser->username, ClientChatCodeException::CC_OWNER_ALREADY_ASSIGNED);
 		}
 		$this->cch_owner_user_id = $userId;
