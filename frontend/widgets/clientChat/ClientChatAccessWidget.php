@@ -10,6 +10,7 @@ use sales\auth\Auth;
 use sales\helpers\setting\SettingHelper;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use yii\base\Widget;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class ClientChatAccessWidget
@@ -50,7 +51,8 @@ class ClientChatAccessWidget extends Widget
 	{
 		$_self = $this;
 
-		if (!SettingHelper::isClientChatEnabled() || !Auth::can('/client-chat/index')) {
+		$user = \Yii::$app->user->identity;
+		if (!SettingHelper::isClientChatEnabled() || ($user instanceof Employee && !Auth::can('/client-chat/index'))) {
 			return false;
 		}
 //		$result = ClientChatCache::getCache()->getOrSet(ClientChatCache::getKey($this->userId), static function () use ($_self) {

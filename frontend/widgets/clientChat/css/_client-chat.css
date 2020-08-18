@@ -216,7 +216,7 @@
     margin-top: 10px;
 }
 ._cc-data {
-    display: flex;flex-direction: row; align-items: start; justify-content: start;
+    display: flex;flex-direction: row; align-items: start; justify-content: start; flex-wrap: wrap;
 }
 ._cc-data .label {
     margin-top: 5px;
