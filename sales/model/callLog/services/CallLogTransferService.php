@@ -38,7 +38,7 @@ class CallLogTransferService
         if (
             !$call->isGeneralParent()
             && (
-                (($call->isTransfer() || $call->c_group_id == null) && $call->isOut())
+                (($call->c_group_id == null || ($call->isTransfer() && $call->isSourceTransfer())) && $call->isOut())
                 || ($call->isIn() && (strtotime($call->c_queue_start_dt) > strtotime($call->c_created_dt)))
             )
         ) {
