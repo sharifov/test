@@ -96,7 +96,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     'filter' => false,
                     //'filter' => [1 => 'Online', $searchModel::STATUS_DELETED => 'Deleted'],
                     'value' => static function (\common\models\Employee $model) {
-                        return $model->isCallStatusReady() ? '<span class="label label-success">Ready</span>' : '<span class="label label-warning">Occupied</span>';
+                        return $model->isCallStatusReady() ? '<span class="label label-success">ON</span>' : '<span class="label label-warning">OFF</span>';
                     },
                     'format' => 'raw'
                 ],
