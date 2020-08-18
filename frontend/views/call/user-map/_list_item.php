@@ -1,8 +1,12 @@
 <?php
 
 use common\models\CallUserAccess;
+use common\models\ConferenceParticipant;
+use common\models\search\CallSearch;
+use sales\auth\Auth;
 use yii\helpers\Html;
 use \common\models\Call;
+use yii\helpers\VarDumper;
 
 /* @var $this yii\web\View */
 /* @var $model Call */
@@ -198,8 +202,9 @@ use \common\models\Call;
 
                 <?php endif; ?>
             </td>
-
-
+            <td>
+                <?php getJoinTemplate($model); ?>
+            </td>
         </tr>
 
         <?php if($model->cuaUsers):?>
@@ -228,13 +233,14 @@ use \common\models\Call;
             </tr>
         <?php endif; ?>
 
-        <?php if ($model->calls):?>
-            <tr class="<?=$trClass?>">
-                <td colspan="7">
-                <?php renderChildCallsRecursive($model->calls)?>
-                </td>
-            </tr>
-        <?php endif;?>
+        <?php
+            if ($children = getChildrenForRecursiveRender($model->c_id)): ?>
+                <tr class="<?=$trClass?>">
+                    <td colspan="7">
+                        <?php renderChildCallsRecursive($children) ?>
+                    </td>
+                </tr>
+            <?php endif;?>
     </table>
 </div>
 

@@ -11,12 +11,20 @@ function widgetStatus(selector, updateStatusUrl) {
 
     function node(status) {
         return ('<div class="status-confirmation-tooltip">'+
-            '<span>Switch to <i class="' + (status ? 'occupied' : 'online') +'">' + (status ? 'occupied' : 'online') + '</i> ?</span>'+
+            '<span>Switch to <i class="' + (status ? 'occupied' : 'online') +'">' + (status ? 'OFF' : 'ON') + '</i> ?</span>'+
             '<div class="status-action-group">'+
             '<a href="#" data-status-action="false">NO</a>'+
             '<a href="#" data-status-action="true"><i class="fa fa-check"></i></a>'+
             '</div>'+
             '</div>');
+    }
+
+    function setPhoneStatusOn() {
+        $('#pw_status_name').text('ON');
+    }
+
+    function setPhoneStatusOff() {
+        $('#pw_status_name').text('OFF');
     }
 
     function handleChange(btn) {
@@ -40,6 +48,9 @@ function widgetStatus(selector, updateStatusUrl) {
                 let status = true;
                 if (type_id === 2) {
                     status = false;
+                    setPhoneStatusOff()
+                } else {
+                    setPhoneStatusOn()
                 }
                 $(selector).prop('checked', status);
                 state.status = status;
@@ -97,8 +108,10 @@ function widgetStatus(selector, updateStatusUrl) {
         setStatus: function(status) {
             if (status === 1) {
                 state.status = true;
+                setPhoneStatusOn();
             } else {
                 state.status = false;
+                setPhoneStatusOff();
             }
             $(parent).html('');
             $('.status-confirmation-tooltip').detach();

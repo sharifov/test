@@ -18,7 +18,7 @@ use yii\web\View;
     <div class="phone-widget__heading">
       <div class="number-toggle">
         <input type="checkbox" id="number-status3" class="call-status-switcher" <?= ($userCallStatus && $userCallStatus->isReady() ? 'checked' : '') ?>>
-        <label for="number-status3">ready</label>
+        <label for="number-status3" id="pw_status_name"><?= ($userCallStatus && $userCallStatus->isReady() ? 'ON' : 'OFF') ?></label>
         <div class="status-confirmation"></div>
       </div>
         <ul class="call-filter">

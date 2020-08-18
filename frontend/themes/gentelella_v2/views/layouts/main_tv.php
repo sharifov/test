@@ -4,6 +4,7 @@
 /* @var $content string */
 
 use frontend\widgets\OnlineConnection;
+use sales\auth\Auth;
 use yii\helpers\Html;
 
 \frontend\themes\gentelella_v2\assets\Asset::register($this);
@@ -117,7 +118,11 @@ use yii\helpers\Html;
         </div>
     </div>
 </div>
-
+<?= frontend\widgets\CallBox::widget() ?>
+<?= frontend\widgets\WebPhone::widget() ?>
+<?php if (Auth::can('PhoneWidget')): ?>
+    <?= frontend\widgets\NewWebPhoneWidget::widget(['userId' => Auth::id()]) ?>
+<?php endif; ?>
 <?php $this->endBody(); ?>
 </body>
 </html>
