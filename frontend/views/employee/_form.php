@@ -232,7 +232,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 
                 </div>
 
-                <?php if($user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision()): ?>
+                <?php if($user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision() || $user->isUserManager()): ?>
 
                     <div class="row">
                         <div class="col-md-12">
@@ -242,29 +242,11 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 
                     <div class="row">
                         <div class="col-md-3">
-                            <?= $form->field($modelUserParams, 'up_base_amount')->input('number', ['step' => 0.01, 'min' => 0, 'max' => 1000]) ?>
-                        </div>
-                        <div class="col-md-3">
-                            <?= $form->field($modelUserParams, 'up_commission_percent')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
-                        </div>
-                        <div class="col-md-3">
-                            <?= $form->field($modelUserParams, 'up_bonus_active')->checkbox() ?>
-                        </div>
-                        <div class="col-md-3">
-                            <?= $form->field($modelUserParams, 'up_leaderboard_enabled')->checkbox() ?>
-                        </div>
-                    </div>
-
-
-
-
-                    <div class="row">
-                        <div class="col-md-3">
                             <?= $form->field($modelUserParams, 'up_work_start_tm')->widget(
                                 \kartik\time\TimePicker::class, [
-                                    'pluginOptions' => [
-                                        'showSeconds' => false,
-                                        'showMeridian' => false,
+                                'pluginOptions' => [
+                                    'showSeconds' => false,
+                                    'showMeridian' => false,
                                 ]])?>
                         </div>
                         <div class="col-md-3">
@@ -280,6 +262,24 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                                 'pluginOptions' => ['allowClear' => true],
                             ]);
                             ?>
+                        </div>
+                    </div>
+
+                <?php endif;?>
+
+                <?php if($user->isAdmin() || $user->isSuperAdmin() || $user->isSupervision()): ?>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <?= $form->field($modelUserParams, 'up_base_amount')->input('number', ['step' => 0.01, 'min' => 0, 'max' => 1000]) ?>
+                        </div>
+                        <div class="col-md-3">
+                            <?= $form->field($modelUserParams, 'up_commission_percent')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
+                        </div>
+                        <div class="col-md-3">
+                            <?= $form->field($modelUserParams, 'up_bonus_active')->checkbox() ?>
+                        </div>
+                        <div class="col-md-3">
+                            <?= $form->field($modelUserParams, 'up_leaderboard_enabled')->checkbox() ?>
                         </div>
                     </div>
 
