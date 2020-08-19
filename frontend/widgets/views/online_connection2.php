@@ -163,7 +163,10 @@ $js = <<<JS
                 //socket.send('{"user2_id":' + user_id + '}');
                 console.info('Socket Status: ' + socket.readyState + ' (Open)');
                 onlineObj.attr('title', 'Online Connection: opened').find('i').removeClass('danger').addClass('warning');
-                //console.log(e);
+                console.log(e);
+                
+                PhoneWidgetCall.loadCurrentQueueCalls();
+               
             };
             
             socket.onmessage = function (e) {

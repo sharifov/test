@@ -65,7 +65,7 @@ var PhoneWidgetCall = function () {
         clientInfoEvent();
         insertPhoneNumberEvent();
 
-        loadCurrentQueueCalls();
+        loadCurrentQueueCallsEvent();
     }
 
     function removeIncomingRequest(callSid) {
@@ -945,65 +945,73 @@ var PhoneWidgetCall = function () {
         }
     }
 
+    function loadCurrentQueueCallsEvent() {
+        // $(document).ready(function() {
+        //     loadCurrentQueueCalls();
+        // });
+    }
+
+    function resetCallState() {
+
+    }
+
     function loadCurrentQueueCalls() {
-        $(document).ready(function() {
-            $.ajax({type: 'post', data: {}, url: settings.currentQueueCallsUrl})
-                .done(function (data) {
-                    if (data.isEmpty) {
+        $.ajax({type: 'post', data: {}, url: settings.currentQueueCallsUrl})
+            .done(function (data) {
+                if (data.isEmpty) {
+                    return;
+                }
+
+                let holdExist = false;
+                data.hold.forEach(function (call) {
+                    waitQueue.add(call);
+                    holdExist = true;
+                });
+
+                let lastIncomingCall = null;
+                let incomingExist = false;
+                data.incoming.forEach(function (call) {
+                    lastIncomingCall = waitQueue.add(call);
+                    incomingExist = true;
+                });
+
+                let outgoingExist = false;
+                data.outgoing.forEach(function (call) {
+                    queues.outgoing.add(call);
+                    outgoingExist = true;
+                });
+
+                let activeExist = false;
+                data.active.forEach(function (call) {
+                    queues.active.add(call);
+                    activeExist = true;
+                });
+                data.conferences.forEach(function (conference) {
+                    storage.conference.add(conference);
+                });
+
+                openWidget();
+                panes.queue.refresh();
+
+                if (data.lastActive === 'incoming') {
+                    if (lastIncomingCall !== null) {
+                        panes.incoming.init(lastIncomingCall, (queues.direct.count() + queues.general.count()), (queues.active.count() + queues.hold.count()));
+                        openCallTab();
                         return;
                     }
+                }
 
-                    let holdExist = false;
-                    data.hold.forEach(function (call) {
-                        waitQueue.add(call);
-                        holdExist = true;
-                    });
-
-                    let lastIncomingCall = null;
-                    let incomingExist = false;
-                    data.incoming.forEach(function (call) {
-                        lastIncomingCall = waitQueue.add(call);
-                        incomingExist = true;
-                    });
-
-                    let outgoingExist = false;
-                    data.outgoing.forEach(function (call) {
-                        queues.outgoing.add(call);
-                        outgoingExist = true;
-                    });
-
-                    let activeExist = false;
-                    data.active.forEach(function (call) {
-                        queues.active.add(call);
-                        activeExist = true;
-                    });
-                    data.conferences.forEach(function (conference) {
-                        storage.conference.add(conference);
-                    });
-
+                if (holdExist && !activeExist && !outgoingExist && !incomingExist) {
                     openWidget();
-                    panes.queue.refresh();
+                    panes.queue.openAllCalls();
+                    return;
+                }
 
-                    if (data.lastActive === 'incoming') {
-                        if (lastIncomingCall !== null) {
-                            panes.incoming.init(lastIncomingCall, (queues.direct.count() + queues.general.count()), (queues.active.count() + queues.hold.count()));
-                            openCallTab();
-                            return;
-                        }
-                    }
-
-                    if (holdExist && !activeExist && !outgoingExist && !incomingExist) {
-                        openWidget();
-                        panes.queue.openAllCalls();
-                        return;
-                    }
-
-                    refreshPanes();
-                })
-                .fail(function () {
-                    createNotify('Load current calls', 'Server error', 'error');
-                })
-        })
+                refreshPanes();
+            })
+            .fail(function () {
+                createNotify('Load current calls', 'Server error', 'error');
+            });
     }
 
     return {
@@ -1023,7 +1031,8 @@ var PhoneWidgetCall = function () {
         sendUnHoldRequest: sendUnHoldRequest,
         storage: storage,
         callRequester: callRequester,
-        completeCall: completeCall
+        completeCall: completeCall,
+        loadCurrentQueueCalls: loadCurrentQueueCalls
     };
 }();
 
