@@ -18,6 +18,7 @@ use Yii;
  * @property string|null $qsb_allow_unit
  * @property string|null $qsb_allow_max_weight
  * @property string|null $qsb_allow_max_size
+ * @property bool $qsb_carry_one
  *
  * @property FlightQuoteSegment $qsbFlightQuoteSegment
  */
@@ -43,6 +44,8 @@ class FlightQuoteSegmentPaxBaggage extends \yii\db\ActiveRecord
             [['qsb_allow_unit'], 'string', 'max' => 4],
             [['qsb_allow_max_weight', 'qsb_allow_max_size'], 'string', 'max' => 100],
             [['qsb_flight_quote_segment_id'], 'exist', 'skipOnError' => true, 'targetClass' => FlightQuoteSegment::class, 'targetAttribute' => ['qsb_flight_quote_segment_id' => 'fqs_id']],
+            [['qsb_carry_one'], 'boolean'],
+            [['qsb_carry_one'], 'default', 'value' => true],
         ];
     }
 
@@ -61,6 +64,7 @@ class FlightQuoteSegmentPaxBaggage extends \yii\db\ActiveRecord
             'qsb_allow_unit' => 'Qsb Allow Unit',
             'qsb_allow_max_weight' => 'Qsb Allow Max Weight',
             'qsb_allow_max_size' => 'Qsb Allow Max Size',
+            'qsb_carry_one' => 'Carry one',
         ];
     }
 
