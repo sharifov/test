@@ -2621,6 +2621,7 @@
 		margin-left: -#{$sp2};
 		// transform: translateY(-#{$sp});
 		position: relative;
+		z-index: 111;
 
 		label {
 			background: $color-theme-dark3;
@@ -2685,6 +2686,8 @@
 				display: flex;
 				justify-content: space-between;
 				align-items: center;
+
+				box-shadow: 0 1px 4px rgba(#7d7d7d,.6);
 
 				&:after,
 				&:before {
@@ -4057,11 +4060,20 @@
 		&:active:hover,
 		&:active:focus {
 			color: #2a3f54;
+			background-color: rgba(243, 243, 243, 0.6);
 		}
 
 		&--phone {
 			background-color: #5e9b10;
 			color: $white;
+
+			&:hover,
+			&:active,
+			&:focus,
+			&:active:hover,
+			&:active:focus {
+				background-color: rgba(#5e9b10,.8);
+			}
 		}
 
 		&--min,
@@ -4099,6 +4111,8 @@
 
 .phone-widget {
 	.phone-notifications {
+
+
 		top: 42px;
 		&__list {
 			max-height: none;
@@ -4125,7 +4139,26 @@
 			border-width: 7px;
 			margin-left: -7px;
 		}
+
+		&--active-calls {
+			&:before {
+				right: 138px;
+			}
+		}
+
+		&--direct-calls {
+			&:before {
+				right: 105px;
+			}
+		}
+
+		&--general-calls {
+			&:before {
+				right: 70px;
+			}
+		}
 	}
+	
 	.incoming-notification {
 		&__inner {
 			flex-direction: column;

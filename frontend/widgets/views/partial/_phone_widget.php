@@ -29,7 +29,7 @@ use yii\web\View;
 
         <!-- phone notifications -->
 
-        <div class="phone-notifications">
+        <div class="phone-notifications phone-notifications--general-calls">
                 <ul class="phone-notifications__list">
                     <li class="phone-notifications__item phone-notifications__item--shown">
                         <div class="incoming-notification">
