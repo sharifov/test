@@ -86,6 +86,16 @@ use yii\helpers\Html;
                                                     <?= $baggage->qsb_allow_weight . $baggage->qsb_allow_unit?>
                                                 <?php endif;?>
                                             </span>
+
+                                                <?php if(isset($baggage->qsb_carry_one)):?>
+                                                    <?php if((bool) $baggage->qsb_carry_one === false):?>
+                                                        <span class="fa-stack" title="CarryOn Disable">
+                                                            <i class="fa fa-shopping-bag fa-stack-1x"></i>
+                                                            <i class="fa fa-ban fa-stack-2x text-danger"></i>
+                                                        </span>
+                                                    <?php endif ?>
+                                                <?php endif ?>
+
                                             <?php endforeach;?>
                                         <?php endif;?>
 

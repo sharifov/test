@@ -15,6 +15,7 @@ class FlightQuoteSegmentPaxBaggageDTO
 	public $allowUnit;
 	public $allowMaxWeight;
 	public $allowMaxSize;
+	public $carryOn;
 
 	/**
 	 * FlightQuoteSegmentPaxBaggageDTO constructor.
@@ -32,5 +33,6 @@ class FlightQuoteSegmentPaxBaggageDTO
 		$this->allowUnit = $baggage['allowUnit'] ?? null;
 		$this->allowMaxWeight = $baggage['allowMaxWeight'] ?? null;
 		$this->allowMaxSize = $baggage['allowMaxSize'] ?? null;
+		$this->carryOn = $baggage['carryOn'] ?? null;
 	}
 }
