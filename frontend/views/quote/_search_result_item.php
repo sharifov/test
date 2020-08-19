@@ -398,6 +398,16 @@ if (!empty($baggagePerSegment)) {
 											<i class="fa fa-suitcase"></i>&nbsp;<?= (isset($charge['price']))?$charge['price']:''?>$</span>
                                                         <?php endforeach;?>
                                                     <?php endif;?>
+
+                                                        <?php if(isset($baggage['carryOn'])):?>
+                                                            <?php if((bool) $baggage['carryOn'] === false):?>
+                                                                <span class="fa-stack fa-lg" title="CarryOn Disable">
+                                                                    <i class="fa fa-shopping-bag fa-stack-1x"></i>
+                                                                    <i class="fa fa-ban fa-stack-2x text-danger"></i>
+                                                                </span>
+                                                            <?php endif ?>
+                                                        <?php endif ?>
+
                                                     <?php break; endforeach;?>
                                             <?php endif;?>
                                             <?php if(isset($segment['meal'])):?><span class="badge badge-light" title="<?= $segment['meal']?>"><i class="fa fa-cutlery"></i></span><?php endif;?>
