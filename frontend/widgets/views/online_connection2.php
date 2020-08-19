@@ -163,7 +163,10 @@ $js = <<<JS
                 //socket.send('{"user2_id":' + user_id + '}');
                 console.info('Socket Status: ' + socket.readyState + ' (Open)');
                 onlineObj.attr('title', 'Online Connection: opened').find('i').removeClass('danger').addClass('warning');
-                //console.log(e);
+                // console.log(e);
+                
+                socketSend('Call', 'GetCurrentQueueCalls', {'userId': userId});
+               
             };
             
             socket.onmessage = function (e) {
@@ -430,6 +433,12 @@ $js = <<<JS
                             }
                         }
                         
+                        if (obj.cmd === 'updateCurrentCalls') {
+                            if (typeof PhoneWidgetCall === "object") {
+                                PhoneWidgetCall.updateCurrentCalls(obj.data, obj.userStatus);
+                            }
+                        }
+                        
                     }
                     // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
                 } catch (error) {
@@ -460,6 +469,7 @@ $js = <<<JS
                     console.log('Socket error: ' + event.message);
                 //}
                 onlineObj.attr('title', 'Online Connection: false').find('i').removeClass('success').addClass('danger');
+                
             };
     
         } catch (error) {
