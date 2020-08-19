@@ -325,7 +325,7 @@ $isQuoteAssignedToFlight = FlightQuoteHelper::isQuoteAssignedToFlight($flightQuo
 
 													    <?php if(isset($baggage['carryOn'])):?>
                                                             <?php if((bool) $baggage['carryOn'] === false):?>
-                                                                <span class="fa-stack fa-lg" title="CarryOn Disable">
+                                                                <span class="fa-stack" title="CarryOn Disable">
                                                                     <i class="fa fa-shopping-bag fa-stack-1x"></i>
                                                                     <i class="fa fa-ban fa-stack-2x text-danger"></i>
                                                                 </span>

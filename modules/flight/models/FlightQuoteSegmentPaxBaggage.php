@@ -101,6 +101,7 @@ class FlightQuoteSegmentPaxBaggage extends \yii\db\ActiveRecord
 		$baggage->qsb_allow_unit = $dto->allowUnit;
 		$baggage->qsb_allow_max_weight = $dto->allowMaxWeight;
 		$baggage->qsb_allow_max_size = $dto->allowMaxSize;
+		$baggage->qsb_carry_one = $dto->carryOn;
 
 		return $baggage;
 	}
