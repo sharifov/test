@@ -54,4 +54,48 @@ class QueueCalls
     {
         return $this->lastActiveQueue === self::LAST_ACTIVE_ACTIVE;
     }
+
+    public function toArray(): array
+    {
+        if ($this->isEmpty()) {
+            return [
+                'isEmpty' => true
+            ];
+        }
+
+        $hold = [];
+        foreach ($this->hold as $item) {
+            $hold[] = $item->getData();
+        }
+
+        $incoming = [];
+        foreach ($this->incoming as $item) {
+            $incoming[] = $item->getData();
+        }
+
+        $outgoing = [];
+        foreach ($this->outgoing as $item) {
+            $outgoing[] = $item->getData();
+        }
+
+        $active = [];
+        foreach ($this->active as $item) {
+            $active[] = $item->getData();
+        }
+
+        $conferences = [];
+        foreach ($this->conference as $item) {
+            $conferences[] = $item->getData();
+        }
+
+        return [
+            'isEmpty' => false,
+            'hold' => $hold,
+            'incoming' => $incoming,
+            'outgoing' => $outgoing,
+            'active' => $active,
+            'conferences' => $conferences,
+            'lastActive' => $this->lastActiveQueue
+        ];
+    }
 }

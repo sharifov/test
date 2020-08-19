@@ -1,8 +1,11 @@
 <?php
 namespace console\controllers;
 
+use common\models\UserCallStatus;
 use common\models\UserConnection;
 use common\models\UserOnline;
+use sales\auth\Auth;
+use sales\model\call\services\currentQueueCalls\CurrentQueueCallsService;
 use sales\model\user\entity\monitor\UserMonitor;
 use Swoole\Redis;
 use Swoole\Table;
@@ -453,8 +456,8 @@ class WebsocketServerController extends Controller
             return $out;
         }
 
-        $controller = $data['c'];
-        $action = $data['a'];
+        $controller = (string)$data['c'];
+        $action = (string)$data['a'];
         $params = $data['p'];
 
 
@@ -510,7 +513,27 @@ class WebsocketServerController extends Controller
             unset($data);
         }
 
+        if ($controller = $this->resolveController($controller, $action)) {
+            try {
+                $out = $controller($params);
+            } catch (\Throwable $e) {
+                $out ['errors'][] = $e->getMessage();
+            }
+        }
+
         return $out;
+    }
+
+    private function resolveController(string $controllerName, string $actionName): ?callable
+    {
+        $controllerClass = '\console\socket\controllers' . '\\' . $controllerName . 'Controller';
+        if (class_exists($controllerClass)) {
+            $controller = \Yii::$container->get($controllerClass);
+            if (method_exists($controller, 'action' . $actionName)) {
+                return [$controller, 'action' . $actionName];
+            }
+        }
+        return null;
     }
 
     /**

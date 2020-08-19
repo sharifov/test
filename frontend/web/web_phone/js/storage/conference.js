@@ -76,6 +76,10 @@
                 console.log(conference);
             });
         };
+
+        this.reset = function () {
+            this.conferences = [];
+        };
     }
 
     window.phoneWidget.storage.conference = new ConferenceStorage();
