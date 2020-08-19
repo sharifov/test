@@ -97,7 +97,9 @@ use yii\web\View;
                             $out .= Yii::$app->formatter->format($case, 'case') . ' ';
                         }
                         $out .= '</span>';
-                        $out .= Html::button(' [ Create ] ', ['class' => 'btn btn-link default create_case', 'data-link' => Url::to(['/cases/create-by-chat', 'chat_id' => $model->cch_id])]);
+                        if (!$model->isClosed()) {
+                            $out .= Html::button(' [ Create ] ', ['class' => 'btn btn-link default create_case', 'data-link' => Url::to(['/cases/create-by-chat', 'chat_id' => $model->cch_id])]);
+                        }
                         return $out;
                     },
                     'format' => 'raw',
@@ -108,12 +110,14 @@ use yii\web\View;
                         $out = '<span id="chat-info-lead-info">';
                         foreach ($model->leads as $lead) {
                             $out .= Yii::$app->formatter->format($lead, 'lead') . ' ';
-                            if ($lead->isExistQuotesForSend()) {
+                            if (!$model->isClosed() && $lead->isExistQuotesForSend()) {
                                 $out .= ' ' . Html::button('Offer', ['class' => 'btn btn-info chat-offer default', 'data-chat-id' => $model->cch_id, 'data-lead-id' => $lead->id]) . ' ';
                             }
                         }
                         $out .= '</span>';
-                        $out .= Html::button(' [ Create ] ', ['class' => 'btn btn-link default create_lead', 'data-link' => Url::to(['/lead/create-by-chat', 'chat_id' => $model->cch_id])]);
+                        if (!$model->isClosed()) {
+							$out .= Html::button(' [ Create ] ', ['class' => 'btn btn-link default create_lead', 'data-link' => Url::to(['/lead/create-by-chat', 'chat_id' => $model->cch_id])]);
+						}
                         return $out;
                     },
                     'format' => 'raw',
