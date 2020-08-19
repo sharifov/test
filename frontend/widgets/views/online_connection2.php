@@ -371,7 +371,7 @@ $js = <<<JS
                             }
                         
                             let previousPage = localStorage.getItem('previousPage');
-                            if ((document.visibilityState == "visible") && obj.data.soundNotification) {
+                            if ((document.visibilityState == "visible") && obj.data.soundNotification && window.name === 'chat') {
                                 soundNotification('incoming_message');
                             } else if (previousPage === $(document)[0].baseURI && obj.data.soundNotification) {
                                 soundNotification('incoming_message');
@@ -393,11 +393,14 @@ $js = <<<JS
                             
                             if (obj.data.cchId) {
                                 $("._cc-chat-unread-message").find("[data-cch-id='"+obj.data.cchId+"']").html(obj.data.cchUnreadMessages); 
-                                pjaxReload({container: '#chat-last-message-refresh-' + obj.data.cchId, async: false});
-                                pushDialogOnTop(obj.data.cchId)
+                                if($('#chat-last-message-refresh-' + obj.data.cchId).length > 0){
+                                    pjaxReload({container: '#chat-last-message-refresh-' + obj.data.cchId, async: false});
+                                    pushDialogOnTop(obj.data.cchId)
+                                } 
                             }
-                            
-                            pjaxReload({container: '#notify-pjax-cc', url: '{$ccNotificationUpdateUrl}'});
+                            if($('#notify-pjax-cc').length > 0){
+                                pjaxReload({container: '#notify-pjax-cc', url: '{$ccNotificationUpdateUrl}'});
+                            }
                         }
                         
                         if (obj.cmd === 'clientChatUpdateClientStatus') {

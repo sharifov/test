@@ -25,14 +25,13 @@ function channelConnector(chName)
         let messageObj = JSON.parse(message.data.message);        
         if(messageObj.chatsData && messageObj.chatsData.length > 0){
             let ids = getRenderedChatIds()
-            //console.log(messageObj.chatsData)            
-                      
+            //console.log(messageObj.chatsData)
             messageObj.chatsData.forEach(function (chat, index) {
                 if(!ids.includes(chat.cch_id)){
                     $("#card-live-chat").prepend(renderChat(chat));
                 }                                              
             });
-            getLastChatsUpdate(enableLiveUpdate)
+            getLastChatsUpdate()
             if (messageObj.chatsData.length > 0){               
                 updateLocalTime()
                 //updateMessagesRelativeTime()
@@ -40,20 +39,13 @@ function channelConnector(chName)
         }
         
         if(messageObj.chatMessageData){
-            let newMsg = messageObj.chatMessageData 
-            if(newMsg.client_id && !newMsg.user_id){              
-                //console.log(newMsg)
-                renderNewClientMessage(newMsg.chat_id, newMsg.client_id, newMsg.msg, newMsg.sent_dt)  
-            }              
+            let newMsg = messageObj.chatMessageData                           
 
-            if(newMsg.client_id && !newMsg.user_id){               
-                //console.log(newMsg)
-                renderNewClientMessage(newMsg.chat_id, newMsg.client_id, newMsg.msg, newMsg.sent_dt, newMsg.period)                
-
+            if(newMsg.client_id && !newMsg.user_id){ 
+                renderNewClientMessage(newMsg.chat_id, newMsg.client_id, newMsg.msg, newMsg.sent_dt, newMsg.period)    
             }
             
-            if (newMsg.client_id && newMsg.user_id){               
-                //console.log(newMsg)
+            if (newMsg.client_id && newMsg.user_id){
                 renderNewAgentMessage(newMsg.chat_id, newMsg.user_id, newMsg.msg, newMsg.sent_dt, newMsg.period)
             }             
             //updateMessagesRelativeTime()
@@ -84,7 +76,8 @@ function contentUpdate(chatsFromDateTime) {
 function getLastChatsUpdate() {    
     if(enableLiveUpdate){
         setTimeout(function(){
-         contentUpdate(getLastCreatedChatDate())  
+         contentUpdate(getLastCreatedChatDate()) 
+         getLastChatsUpdate(enableLiveUpdate) 
     }, 15000);
     }    
 }
@@ -154,7 +147,7 @@ function renderChat(chat) {
                             '<td class="text-center" style="width:150px">' + 
                                 renderGeneralInfo(chat.cch_id, chat.project, chat.cch_created_dt) +
                             '</td>' +
-                            '<td class="text-center" style="width:150px">' +
+                            '<td class="text-center" style="width:190px">' +
                                 renderAdditionalInfo(chat.department, chat.channel) +
                             '</td>' +
                             '<td class="text-left" style="width:250px">' +
@@ -266,8 +259,7 @@ function renderClientMessage(chatID, clientID, clientName, msgDate, latestMsg, p
 }
 
 function renderNewClientMessage(chatID, clientID, msgBody, createdDt, period) {
-    let msgLocator = chatID + '-' + clientID;
-    console.log(period)
+    let msgLocator = chatID + '-' + clientID;    
     $('#' + msgLocator).text(msgBody);
     //$('#time-' + msgLocator).prop('title', createdDt);
     $('#time-' + msgLocator).text(period);
@@ -378,11 +370,11 @@ function renderAgentInfo(chatID, agentID,  agentName, outMsgCount, md5Email) {
    return html
 }
 
-function removeBlinking(id) {
+/*function removeBlinking(id) {
   setTimeout(function(){
       $('#icn-' + id).removeClass('blinking');                        
   }, 7000);
-}
+}*/
 
 function removeCellBlinking(id) {
   setTimeout(function(){
@@ -405,7 +397,7 @@ function pushChatOnTop(chatID) {
 }
     
 JS;
-$this->registerJs($js, \yii\web\View::POS_LOAD);
+$this->registerJs($js, \yii\web\View::POS_READY);
 
 ?>
 
@@ -416,7 +408,7 @@ $this->registerJs($js, \yii\web\View::POS_LOAD);
                 <thead>
                 <tr>
                     <th class="column-title text-center chat-monitor-th" style="display: table-cell; width:160px;">Chat ID / Project </th>
-                    <th class="column-title text-center chat-monitor-th" style="display: table-cell; width:150px;">Department / Channel </th>
+                    <th class="column-title text-center chat-monitor-th" style="display: table-cell; width:190px;">Department / Channel </th>
                     <th class="column-title chat-monitor-th" style="display: table-cell; width:250px;">Agent Info </th>
                     <th class="column-title chat-monitor-th" style="display: table-cell; width:450px;">Agent Last Message </th>
                     <th class="column-title chat-monitor-th" style="display: table-cell; width:250px;">Client info </th>
