@@ -56,7 +56,6 @@ use yii\db\ActiveRecord;
  * @property ClientChatVisitor $ccv
  * @property Lead[] $leads
  * @property Cases[] $cases
- * @property ClientChatRequest[] $requestsByRid
  */
 class ClientChat extends \yii\db\ActiveRecord
 {
@@ -156,13 +155,6 @@ class ClientChat extends \yii\db\ActiveRecord
     public function getCchCcr(): \yii\db\ActiveQuery
     {
         return $this->hasOne(ClientChatRequest::class, ['ccr_id' => 'cch_ccr_id']);
-    }
-
-    public function getRequestsByRid(): ActiveQuery
-    {
-        return $this->hasMany(ClientChatRequest::class, ['ccr_rid' => 'cch_rid'])
-            ->orderBy(['ccr_id' => SORT_DESC])
-            ->distinct();
     }
 
 	public function getCchChannel(): \yii\db\ActiveQuery

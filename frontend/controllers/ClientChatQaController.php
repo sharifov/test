@@ -8,6 +8,8 @@ use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatMessage\entity\search\ClientChatMessageSearch;
 use sales\model\clientChatNote\entity\ClientChatNoteSearch;
+use sales\model\clientChatRequest\entity\ClientChatRequest;
+use sales\model\clientChatRequest\entity\search\ClientChatRequestSearch;
 use sales\repositories\NotFoundException;
 use Yii;
 use sales\model\clientChat\entity\ClientChat;
@@ -106,10 +108,11 @@ class ClientChatQaController extends FController
             $visitorLog = VisitorLog::find()->byCvdId($clientChat->ccv->ccv_cvd_id)->orderBy(['vl_created_dt' => SORT_DESC])->one();
         }
 
-        /* TODO::  */
-
-        \yii\helpers\VarDumper::dump($clientChat->requestsByRid, 10, true); exit();
-        /* FOR DEBUG:: must by remove */
+        $requestSearch = new ClientChatRequestSearch();
+        $data[$requestSearch->formName()]['ccr_rid'] = (string) $clientChat->cch_rid;
+        $data[$requestSearch->formName()]['ccr_event'] = ClientChatRequest::EVENT_TRACK;
+        $dataProviderRequest = $requestSearch->search($data);
+        $dataProviderRequest->setPagination(['pageSize' => 10]);
 
         return $this->render('view', [
             'model' => $this->findModel($id),
@@ -118,6 +121,7 @@ class ClientChatQaController extends FController
             'dataProviderNotes' => $dataProviderNotes,
             'visitorLog' => $visitorLog ?? null,
             'clientChatVisitorData' => $clientChat->ccv->ccvCvd ?? null,
+            'dataProviderRequest' => $dataProviderRequest,
         ]);
     }
 
