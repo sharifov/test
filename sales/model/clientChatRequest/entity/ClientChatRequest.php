@@ -225,4 +225,16 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 	{
 		return $this->decodedData['page']['url'] ?? '';
 	}
+
+    /**
+     * @param string $rid
+     * @return array|ActiveRecord|null
+     */
+    public static function getLastRequestByRid(string $rid)
+    {
+        return self::find()
+            ->where(['ccr_rid' => $rid])
+            ->orderBy(['ccr_id' => SORT_DESC])
+            ->one();
+    }
 }

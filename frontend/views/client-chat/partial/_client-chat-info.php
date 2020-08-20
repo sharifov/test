@@ -2,6 +2,8 @@
 use common\models\Client;
 use common\models\Quote;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChatRequest\entity\ClientChatRequest;
+use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use yii\bootstrap4\Button;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -149,6 +151,21 @@ use yii\web\View;
                     'cvd_region',
                     'cvd_city',
                     'cvd_timezone',
+                    [
+                        'label' => 'Last Url',
+                        'value' => static function(ClientChatVisitorData $model) use ($clientChat) {
+                            if (
+                                $clientChat->cch_rid &&
+                                $chatRequest = ClientChatRequest::getLastRequestByRid((string) $clientChat->cch_rid)
+                            ) {
+                                if ($pageUrl = $chatRequest->getPageUrl()) {
+                                    return Yii::$app->formatter->asUrl($pageUrl, ['target' => '_blank']);
+                                }
+                            }
+                            return Yii::$app->formatter->nullDisplay;
+                        },
+                        'format' => 'raw',
+                    ],
                 ]
             ])
             ?>
