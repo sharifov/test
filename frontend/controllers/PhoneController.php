@@ -382,6 +382,8 @@ class PhoneController extends FController
 
             $originalCall->c_is_transfer = true;
 
+            $groupId = $originalCall->c_group_id ?: $originalCall->c_id;
+
             $lastChild = null;
 
             $createdUserId = null;
@@ -416,23 +418,17 @@ class PhoneController extends FController
                 $parent->c_conference_sid = null;
                 $parent->c_is_transfer = true;
                 $parent->c_source_type_id = Call::SOURCE_TRANSFER_CALL;
-                if (!$parent->c_group_id) {
-                    $parent->c_group_id = $originalCall->c_id;
-                }
+                $parent->c_group_id = $groupId;
                 if (!$parent->save()) {
                     Yii::error('Can save parent call', 'PhoneController:actionAjaxCallRedirect');
                 }
             }
 
-            $groupId = null;
             if (!$originalCall->c_group_id) {
                 if ($lastChild) {
-                    $groupId = $originalCall->c_id;
                     $lastChild->c_group_id = $groupId;
                     $originalCall->c_group_id = $groupId;
-
                 } else {
-                    $groupId = $originalCall->c_id;
                     $originalCall->c_group_id = $groupId;
                 }
             }
@@ -728,7 +724,8 @@ class PhoneController extends FController
             $data['type'] = $type;
             $data['isTransfer'] = true;
 
-            $groupId = $originCall->c_group_id;
+            $groupId = $originCall->c_group_id ?: $originCall->c_id;
+
             $createdUserId = $originCall->c_created_user_id;
 
             if ($originCall->cParent) {
@@ -744,8 +741,11 @@ class PhoneController extends FController
                     $parent->c_is_transfer = true;
 
                     if (!$originCall->c_group_id) {
-                        $groupId = $originCall->c_id;
                         $originCall->c_group_id = $groupId;
+                        $parent->c_group_id = $groupId;
+                    }
+
+                    if (!$parent->c_group_id) {
                         $parent->c_group_id = $groupId;
                     }
 
@@ -783,8 +783,11 @@ class PhoneController extends FController
                     $childCall->c_is_transfer = true;
 
                     if (!$originCall->c_group_id) {
-                        $groupId = $originCall->c_id;
                         $originCall->c_group_id = $groupId;
+                        $childCall->c_group_id = $groupId;
+                    }
+
+                    if (!$childCall->c_group_id) {
                         $childCall->c_group_id = $groupId;
                     }
 

@@ -1180,52 +1180,6 @@ class CallController extends FController
 		return $this->asJson($result);
 	}
 
-	public function actionCurrentQueueCalls(): Response
-    {
-        $queue = $this->currentQueueCalls->getQueuesCalls(Auth::id());
-
-        if ($queue->isEmpty()) {
-            return $this->asJson([
-                'isEmpty' => true
-            ]);
-        }
-
-        $hold = [];
-        foreach ($queue->hold as $item) {
-            $hold[] = $item->getData();
-        }
-
-        $incoming = [];
-        foreach ($queue->incoming as $item) {
-            $incoming[] = $item->getData();
-        }
-
-        $outgoing = [];
-        foreach ($queue->outgoing as $item) {
-            $outgoing[] = $item->getData();
-        }
-
-        $active = [];
-        foreach ($queue->active as $item) {
-            $active[] = $item->getData();
-        }
-
-        $conferences = [];
-        foreach ($queue->conference as $item) {
-            $conferences[] = $item->getData();
-        }
-
-        return $this->asJson([
-            'isEmpty' => false,
-            'hold' => $hold,
-            'incoming' => $incoming,
-            'outgoing' => $outgoing,
-            'active' => $active,
-            'conferences' => $conferences,
-            'lastActive' => $queue->lastActiveQueue
-        ]);
-    }
-
     /**
      * @return array|\yii\db\ActiveRecord|null
      */

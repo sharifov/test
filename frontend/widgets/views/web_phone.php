@@ -810,6 +810,11 @@ use yii\helpers\Html;
                     updateAgentStatus(connection, false, 1);
                     log('Twilio.Device Error: ' + error.message);
                     incomingSoundOff();
+                    if (typeof  error.twilioError !== 'undefined') {
+                        createNotify(error.twilioError.description, error.twilioError.explanation, 'error');
+                    } else {
+                        createNotify('Twilio error', error.message, 'error');
+                    }
                 });
 
                 device.on('connect', function (conn) {
