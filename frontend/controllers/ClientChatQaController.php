@@ -17,6 +17,8 @@ use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
+use function Amp\Promise\timeoutWithDefault;
+
 /**
  * ClientChatQaController implements the CRUD actions for ClientChat model.
  *
@@ -103,6 +105,11 @@ class ClientChatQaController extends FController
         if ($clientChat->ccv && $clientChat->ccv->ccv_cvd_id) {
             $visitorLog = VisitorLog::find()->byCvdId($clientChat->ccv->ccv_cvd_id)->orderBy(['vl_created_dt' => SORT_DESC])->one();
         }
+
+        /* TODO::  */
+
+        \yii\helpers\VarDumper::dump($clientChat->requestsByRid, 10, true); exit();
+        /* FOR DEBUG:: must by remove */
 
         return $this->render('view', [
             'model' => $this->findModel($id),

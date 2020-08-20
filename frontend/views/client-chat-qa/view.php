@@ -142,6 +142,20 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ],
             ]) ?>
+
+            <h5>Browsing history</h5>
+            <?php //  /* TODO::  */ $model->ccv ?>
+
+            <?php if($model->ccv && !empty($model->ccv->visitorData)): ?>
+                <?php foreach ($model->ccv->visitorData as $visitorData): ?>
+                    <?php if(!empty($visitorData->cvd_url)): ?>
+                        <?php echo Yii::$app->formatter->asDatetime($visitorData->cvd_created_dt) ?>
+                        <?php echo Yii::$app->formatter->asUrl($visitorData->cvd_url) ?>
+                        <br />
+                    <?php endif ?>
+                <?php endforeach ?>
+            <?php endif ?>
+
         </div>
 
         <div class="col-md-4">
