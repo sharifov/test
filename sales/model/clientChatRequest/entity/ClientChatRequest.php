@@ -81,7 +81,7 @@ class ClientChatRequest extends \yii\db\ActiveRecord
             'ccr_event' => 'Event',
             'ccr_rid' => 'Request ID',
             'ccr_json_data' => 'Json Data',
-            'ccr_created_dt' => 'Created Dt',
+            'ccr_created_dt' => 'Created',
         ];
     }
 
