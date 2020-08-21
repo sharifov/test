@@ -166,7 +166,7 @@ use yii\widgets\Pjax;
                                     $visitorId = $clientChat->ccv->ccvCvd->cvd_visitor_rc_id ?? '';
                                 }
 
-                                if ($chatRequest = ClientChatRequest::getLastRequestByVisitorId($visitorId)) {
+                                if ($chatRequest = ClientChatRequest::getLastRequestByVisitorId($visitorId, ClientChatRequest::EVENT_TRACK)) {
                                     if ($pageUrl = $chatRequest->getPageUrl()) {
                                         return Yii::$app->formatter->asUrl($pageUrl, ['target' => '_blank']);
                                     }
