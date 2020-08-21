@@ -369,7 +369,7 @@ $js = <<<JS
                             let activeChatId = localStorage.getItem('activeChatId');
                             
                             if (document.visibilityState == "visible" && window.name === 'chat' && activeChatId == obj.data.cchId && obj.data.cchUnreadMessages) {
-                                $.post('{$discardUnreadMessageUrl}', {cchId: activeChatId});
+                                $.post('{$discardUnreadMessageUrl}', {cchId: activeChatId}); 
                                 return false;
                             }
                         
@@ -400,6 +400,9 @@ $js = <<<JS
                                     pjaxReload({container: '#chat-last-message-refresh-' + obj.data.cchId, async: false});
                                     pushDialogOnTop(obj.data.cchId)
                                 } 
+                                if($('#pjax-chat-additional-data-' + obj.data.cchId).length > 0){
+                                    pjaxReload({container: '#pjax-chat-additional-data-' + obj.data.cchId, async: false});
+                                } 
                             }
                             if($('#notify-pjax-cc').length > 0){
                                 pjaxReload({container: '#notify-pjax-cc', url: '{$ccNotificationUpdateUrl}'});
@@ -410,7 +413,7 @@ $js = <<<JS
                             if (obj.cchId) {
                                 $('._cc-list-wrapper').find('[data-cch-id="'+obj.cchId+'"]').find('._cc-status').attr('data-is-online', obj.isOnline);
                             }
-                            createNotify('Client Chat Notification', obj.statusMessage, obj.isOnline ? 'success' : 'warning');
+                            //createNotify('Client Chat Notification', obj.statusMessage, obj.isOnline ? 'success' : 'warning');
                         }
 
                         if (obj.cmd === 'clientChatUpdateTimeLastMessage') {                            
