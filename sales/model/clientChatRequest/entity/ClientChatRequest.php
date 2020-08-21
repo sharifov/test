@@ -241,4 +241,16 @@ class ClientChatRequest extends \yii\db\ActiveRecord
             ->orderBy(['ccr_id' => SORT_DESC])
             ->one();
     }
+
+    /**
+     * @param string $visitorId
+     * @return array|ActiveRecord|null
+     */
+    public static function getLastRequestByVisitorId(string $visitorId)
+    {
+        return self::find()
+            ->where(['ccr_visitor_id' => $visitorId])
+            ->orderBy(['ccr_id' => SORT_DESC])
+            ->one();
+    }
 }
