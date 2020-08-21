@@ -8,6 +8,8 @@ use sales\model\clientChat\entity\search\ClientChatQaSearch;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatMessage\entity\search\ClientChatMessageSearch;
 use sales\model\clientChatNote\entity\ClientChatNoteSearch;
+use sales\model\clientChatRequest\entity\ClientChatRequest;
+use sales\model\clientChatRequest\entity\search\ClientChatRequestSearch;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use Yii;
 use sales\model\clientChat\entity\ClientChat;
@@ -89,6 +91,16 @@ class ClientChatCrudController extends FController
             $visitorLog = VisitorLog::find()->byCvdId($clientChat->ccv->ccv_cvd_id)->orderBy(['vl_created_dt' => SORT_DESC])->one();
         }
 
+        $requestSearch = new ClientChatRequestSearch();
+        $visitorId = '';
+		if ($clientChat->ccv && $clientChat->ccv->ccvCvd) {
+		    $visitorId = $clientChat->ccv->ccvCvd->cvd_visitor_rc_id ?? '';
+		}
+        $data[$requestSearch->formName()]['ccr_visitor_id'] = $visitorId;
+        $data[$requestSearch->formName()]['ccr_event'] = ClientChatRequest::EVENT_TRACK;
+        $dataProviderRequest = $requestSearch->search($data);
+        $dataProviderRequest->setPagination(['pageSize' => 10]);
+
         return $this->render('../client-chat-qa/view', [
             'model' => $this->findModel($id),
             'searchModel' => $searchModel,
@@ -96,6 +108,7 @@ class ClientChatCrudController extends FController
             'dataProviderNotes' => $dataProviderNotes,
             'visitorLog' => $visitorLog ?? null,
             'clientChatVisitorData' => $clientChat->ccv->ccvCvd ?? null,
+            'dataProviderRequest' => $dataProviderRequest,
         ]);
     }
 
