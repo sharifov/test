@@ -369,7 +369,7 @@ $js = <<<JS
                             let activeChatId = localStorage.getItem('activeChatId');
                             
                             if (document.visibilityState == "visible" && window.name === 'chat' && activeChatId == obj.data.cchId && obj.data.cchUnreadMessages) {
-                                $.post('{$discardUnreadMessageUrl}', {cchId: activeChatId});
+                                $.post('{$discardUnreadMessageUrl}', {cchId: activeChatId}); 
                                 return false;
                             }
                         
@@ -399,6 +399,9 @@ $js = <<<JS
                                 if($('#chat-last-message-refresh-' + obj.data.cchId).length > 0){
                                     pjaxReload({container: '#chat-last-message-refresh-' + obj.data.cchId, async: false});
                                     pushDialogOnTop(obj.data.cchId)
+                                } 
+                                if($('#pjax-chat-additional-data-' + obj.data.cchId).length > 0){
+                                    pjaxReload({container: '#pjax-chat-additional-data-' + obj.data.cchId, async: false});
                                 } 
                             }
                             if($('#notify-pjax-cc').length > 0){

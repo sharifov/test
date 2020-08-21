@@ -9,6 +9,7 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
 use yii\web\View;
+use yii\widgets\Pjax;
 
 /***
  * @var ClientChat $clientChat
@@ -137,40 +138,47 @@ use yii\web\View;
         ?>
     </div>
 
-    <?php if ($clientChat->ccv && $clientChat->ccv->ccvCvd): ?>
-        <div class="_rc-block-wrapper">
-            <h3 style="margin: 0;">Additional Data</h3>
-        </div>
+    <?php Pjax::begin([
+        'id' => 'pjax-chat-additional-data-' . $clientChat->cch_id,
+        'timeout' => 5000,
+        'enablePushState' => false
+    ]) ?>
+        <?php if ($clientChat->ccv && $clientChat->ccv->ccvCvd): ?>
+            <div class="_rc-block-wrapper">
+                <h3 style="margin: 0;">Additional Data</h3>
+            </div>
 
-        <div class="_rc-block-wrapper">
-            <?=
-            \yii\widgets\DetailView::widget([
-                'model' => $clientChat->ccv->ccvCvd,
-                'attributes' => [
-                    'cvd_country',
-                    'cvd_region',
-                    'cvd_city',
-                    'cvd_timezone',
-                    [
-                        'label' => 'Last Url',
-                        'value' => static function(ClientChatVisitorData $model) use ($clientChat) {
-                            if (
-                                $clientChat->cch_rid &&
-                                $chatRequest = ClientChatRequest::getLastRequestByRid((string) $clientChat->cch_rid)
-                            ) {
-                                if ($pageUrl = $chatRequest->getPageUrl()) {
-                                    return Yii::$app->formatter->asUrl($pageUrl, ['target' => '_blank']);
+            <div class="_rc-block-wrapper">
+                <?php echo
+                \yii\widgets\DetailView::widget([
+                    'model' => $clientChat->ccv->ccvCvd,
+                    'attributes' => [
+                        'cvd_country',
+                        'cvd_region',
+                        'cvd_city',
+                        'cvd_timezone',
+                        [
+                            'label' => 'Last Url',
+                            'value' => static function(ClientChatVisitorData $model) use ($clientChat) {
+                                if (
+                                    $clientChat->cch_rid &&
+                                    $chatRequest = ClientChatRequest::getLastRequestByRid((string) $clientChat->cch_rid)
+                                ) {
+                                    if ($pageUrl = $chatRequest->getPageUrl()) {
+                                        return Yii::$app->formatter->asUrl($pageUrl, ['target' => '_blank']);
+                                    }
                                 }
-                            }
-                            return Yii::$app->formatter->nullDisplay;
-                        },
-                        'format' => 'raw',
-                    ],
-                ]
-            ])
-            ?>
-        </div>
-    <?php endif; ?>
+                                return Yii::$app->formatter->nullDisplay;
+                            },
+                            'format' => 'raw',
+                        ],
+                    ]
+                ])
+                ?>
+
+            </div>
+        <?php endif; ?>
+    <?php Pjax::end() ?>
 </div>
 
 
