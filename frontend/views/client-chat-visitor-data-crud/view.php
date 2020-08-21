@@ -1,6 +1,8 @@
 <?php
 
 use yii\bootstrap4\Html;
+use yii\helpers\Json;
+use yii\helpers\VarDumper;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
@@ -42,7 +44,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'cvd_referrer',
                 'cvd_timezone',
                 'cvd_local_time',
-                'cvd_data',
+                [
+                    'attribute' => 'cvd_data',
+                    'value' => static function (\sales\model\clientChatVisitorData\entity\ClientChatVisitorData $model) {
+						return Html::tag('pre', VarDumper::dumpAsString(Json::decode($model->cvd_data)));
+					},
+                    'format' => 'raw'
+                ],
                 'cvd_created_dt',
                 'cvd_updated_dt',
                 'cvd_visitor_rc_id',
