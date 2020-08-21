@@ -2,7 +2,11 @@
 namespace sales\helpers\call;
 
 
+use common\models\Call;
+use common\models\Department;
 use DateTime;
+use sales\model\callLog\entity\callLog\CallLogStatus;
+use sales\model\callLog\entity\callLog\CallLogType;
 use yii\bootstrap4\Dropdown;
 use yii\helpers\Html;
 
@@ -127,5 +131,90 @@ class CallHelper
         }
 
         return $result;
+    }
+
+    public static function formCallToHistoryTab($call): string
+    {
+        $callType = (int)$call['cl_type_id'];
+        $title = '';
+        if ($call['user_id']) {
+            $phone = $call['formatted'];
+        } elseif ($callType === Call::CALL_TYPE_OUT) {
+            $phone = $call['cl_phone_to'];
+            $title = $call['formatted'] !== $call['cl_phone_to'] ? $call['formatted'] : '';
+        } else {
+            $phone = $call['cl_phone_from'];
+            $title = $call['formatted'] !== $call['cl_phone_from'] ? $call['formatted'] : '';
+        }
+
+        $tpl = ' 
+            <li class="calls-history__item contact-info-card">
+                <div class="contact-info-card__status">
+                    <div class="contact-info-card__call-icon">';
+        if ($callType === CallLogType::IN && (int)$call['cl_status_id'] === CallLogStatus::NOT_ANSWERED) {
+            $tpl .= '<img src="/img/pw-missed.svg">';
+        } elseif ($callType === CallLogType::IN) {
+            $tpl .= '<img src="/img/pw-incoming.svg">';
+        } else {
+            $tpl .= '
+                <div class="contact-info-card__call-icon">
+                    <img src="/img/pw-outgoing.svg">
+                </div>';
+        }
+        $tpl .= '</div>
+                </div>
+                <div class="contact-info-card__details">
+                    <div class="contact-info-card__line history-details">
+                        <strong class="contact-info-card__name phone-dial-history" style="cursor:pointer;"
+                                data-call-sid="' . $call['cl_call_sid'] . '"
+                                data-title="' .  $title  .'"
+                                data-user-id="' . $call['user_id'] . '"
+                                data-phone="' . Html::encode($phone) . '"
+                                data-project-id="' . Html::encode($call['cl_project_id']) . '"
+                                data-department-id="' . Html::encode($call['cl_department_id']) . '"
+                                data-client-id="' . Html::encode($call['cl_client_id']) . '"';
+        if ((int)$call['cl_type_id'] === Call::CALL_TYPE_OUT) {
+            $tpl .= ' data-source-type-id="' . $call['cl_category_id'] . '"';
+            $tpl .= ' data-lead-id="' . $call['lead_id'] . '"';
+            $tpl .= ' data-case-id="' . $call['case_id'] . '"';
+        } elseif ((int)$call['cl_type_id'] === Call::CALL_TYPE_IN) {
+            $department = (int)$call['cl_department_id'];
+            if ($department === Department::DEPARTMENT_SALES) {
+                if ($call['lead_id']) {
+                    $tpl .= ' data-source-type-id="' . Call::SOURCE_LEAD . '"';
+                    $tpl .= ' data-lead-id="' . $call['lead_id'] . '"';
+                }
+            } elseif ($department) {
+                if ($call['case_id']) {
+                    $tpl .= ' data-source-type-id="' . Call::SOURCE_CASE . '"';
+                    $tpl .= ' data-case-id="' . $call['case_id'] . '"';
+                }
+            }
+        }
+
+        $tpl .= '>';
+        $tpl .= Html::encode($call['formatted']);
+        $tpl .= ' </strong>
+                        <small class="contact-info-card__timestamp">' . $call['cl_call_created_dt'] . '</small>
+                    </div>
+                    <div class="contact-info-card__line history-details">
+                        <span class="contact-info-card__call-type">';
+        $tpl .= CallLogType::getName($callType);
+        if ($call['cl_category_id']) {
+            $tpl .= '-' . (\common\models\Call::SOURCE_LIST[$call['cl_category_id']] ?? 'undefined');
+        }
+        $tpl .= ' </span>
+                        <small><i class="contact-info-card__call-info fa fa-info btn-history-call-info" data-call-sid="' . $call['cl_call_sid'] . '"> </i></small>
+                    </div>';
+        if ($call['callNote']) {
+            $tpl .= '<div class="contact-info-card__line history-details">
+                        <div class="contact-info-card__note">
+                            <span class="contact-info-card__note-message">' . Html::encode($call['callNote']) . '</span>
+                        </div>
+                    </div>';
+        }
+        $tpl .= '</div>
+            </li>';
+        return $tpl;
     }
 }
