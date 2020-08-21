@@ -11,6 +11,13 @@ var PhoneWidgetPaneIncoming = function () {
 
     // call => window.phoneWidget.call.Call
     function load(call) {
+        ReactDOM.unmountComponentAtNode(document.getElementById('desktop-phone-notifications'));
+        ReactDOM.render(React.createElement(DesktopNotification, {call: call}), document.getElementById('desktop-phone-notifications'));
+
+
+
+
+
         contactInfo.load(call.data.contact);
 
         ReactDOM.unmountComponentAtNode($reactContainer);
