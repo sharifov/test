@@ -163,7 +163,10 @@ $js = <<<JS
                 //socket.send('{"user2_id":' + user_id + '}');
                 console.info('Socket Status: ' + socket.readyState + ' (Open)');
                 onlineObj.attr('title', 'Online Connection: opened').find('i').removeClass('danger').addClass('warning');
-                //console.log(e);
+                // console.log(e);
+                
+                socketSend('Call', 'GetCurrentQueueCalls', {'userId': userId});
+               
             };
             
             socket.onmessage = function (e) {
@@ -366,12 +369,12 @@ $js = <<<JS
                             let activeChatId = localStorage.getItem('activeChatId');
                             
                             if (document.visibilityState == "visible" && window.name === 'chat' && activeChatId == obj.data.cchId && obj.data.cchUnreadMessages) {
-                                $.post('{$discardUnreadMessageUrl}', {cchId: activeChatId});
+                                $.post('{$discardUnreadMessageUrl}', {cchId: activeChatId}); 
                                 return false;
                             }
                         
                             let previousPage = localStorage.getItem('previousPage');
-                            if ((document.visibilityState == "visible") && obj.data.soundNotification) {
+                            if ((document.visibilityState == "visible") && obj.data.soundNotification && window.name === 'chat') {
                                 soundNotification('incoming_message');
                             } else if (previousPage === $(document)[0].baseURI && obj.data.soundNotification) {
                                 soundNotification('incoming_message');
@@ -393,18 +396,24 @@ $js = <<<JS
                             
                             if (obj.data.cchId) {
                                 $("._cc-chat-unread-message").find("[data-cch-id='"+obj.data.cchId+"']").html(obj.data.cchUnreadMessages); 
-                                pjaxReload({container: '#chat-last-message-refresh-' + obj.data.cchId, async: false});
-                                pushDialogOnTop(obj.data.cchId)
+                                if($('#chat-last-message-refresh-' + obj.data.cchId).length > 0){
+                                    pjaxReload({container: '#chat-last-message-refresh-' + obj.data.cchId, async: false});
+                                    pushDialogOnTop(obj.data.cchId)
+                                } 
+                                if($('#pjax-chat-additional-data-' + obj.data.cchId).length > 0){
+                                    pjaxReload({container: '#pjax-chat-additional-data-' + obj.data.cchId, async: false});
+                                } 
                             }
-                            
-                            pjaxReload({container: '#notify-pjax-cc', url: '{$ccNotificationUpdateUrl}'});
+                            if($('#notify-pjax-cc').length > 0){
+                                pjaxReload({container: '#notify-pjax-cc', url: '{$ccNotificationUpdateUrl}'});
+                            }
                         }
                         
                         if (obj.cmd === 'clientChatUpdateClientStatus') {
                             if (obj.cchId) {
                                 $('._cc-list-wrapper').find('[data-cch-id="'+obj.cchId+'"]').find('._cc-status').attr('data-is-online', obj.isOnline);
                             }
-                            createNotify('Client Chat Notification', obj.statusMessage, obj.isOnline ? 'success' : 'warning');
+                            //createNotify('Client Chat Notification', obj.statusMessage, obj.isOnline ? 'success' : 'warning');
                         }
 
                         if (obj.cmd === 'clientChatUpdateTimeLastMessage') {                            
@@ -424,6 +433,18 @@ $js = <<<JS
                         if (obj.cmd === 'logout') {
                             if (typeof autoLogout === "function") {
                                 autoLogout(obj);
+                            }
+                        }
+                        
+                        if (obj.cmd === 'updateCurrentCalls') {
+                            if (typeof PhoneWidgetCall === "object") {
+                                PhoneWidgetCall.updateCurrentCalls(obj.data, obj.userStatus);
+                            }
+                        }
+                        
+                        if (obj.cmd === 'addCallToHistory') {
+                            if (typeof PhoneWidgetCall === "object") {
+                                PhoneWidgetCall.socket(obj.data);
                             }
                         }
                         
@@ -457,6 +478,7 @@ $js = <<<JS
                     console.log('Socket error: ' + event.message);
                 //}
                 onlineObj.attr('title', 'Online Connection: false').find('i').removeClass('success').addClass('danger');
+                
             };
     
         } catch (error) {

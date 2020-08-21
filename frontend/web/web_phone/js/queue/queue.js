@@ -100,6 +100,10 @@
                 console.log(call);
             });
         };
+
+        this.reset = function () {
+            this.calls = [];
+        }
     }
 
     class QueueItem {
@@ -179,6 +183,10 @@
 
         remove (callSid) {
             this.queue.remove(callSid);
+        }
+
+        reset () {
+            this.queue.reset();
         }
     }
 

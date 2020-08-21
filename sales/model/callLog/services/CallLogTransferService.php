@@ -4,16 +4,24 @@ namespace sales\model\callLog\services;
 
 use common\models\Call;
 use common\models\CallUserAccess;
+use common\models\Client;
+use common\models\Employee;
 use common\models\Lead;
+use common\models\Notifications;
+use common\models\UserParams;
 use sales\entities\cases\Cases;
+use sales\helpers\call\CallHelper;
+use sales\helpers\UserCallIdentity;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\callLog\entity\callLog\CallLogStatus;
 use sales\model\callLog\entity\callLogCase\CallLogCase;
 use sales\model\callLog\entity\callLogLead\CallLogLead;
 use sales\model\callLog\entity\callLogQueue\CallLogQueue;
 use sales\model\callLog\entity\callLogRecord\CallLogRecord;
+use sales\model\callNote\entity\CallNote;
 use sales\model\phoneList\entity\PhoneList;
 use Yii;
+use yii\db\Expression;
 use yii\helpers\VarDumper;
 
 /**
@@ -38,7 +46,7 @@ class CallLogTransferService
         if (
             !$call->isGeneralParent()
             && (
-                (($call->isTransfer() || $call->c_group_id == null) && $call->isOut())
+                (($call->c_group_id == null || ($call->isTransfer() && $call->isSourceTransfer())) && $call->isOut())
                 || ($call->isIn() && (strtotime($call->c_queue_start_dt) > strtotime($call->c_created_dt)))
             )
         ) {
@@ -309,7 +317,9 @@ class CallLogTransferService
             $log = new CallLog();
             $log->cl_id = $this->call['c_id'];
             $log->cl_call_sid = $this->map('cl_call_sid', 'c_call_sid');
-            $log->cl_type_id = $this->map('cl_type_id', 'c_call_type_id');
+            if ($log->cl_type_id = $this->map('cl_type_id', 'c_call_type_id')) {
+                $log->cl_type_id = (int)$log->cl_type_id;
+            }
             $log->cl_phone_from = $this->map('cl_phone_from', 'c_from');
             $log->cl_phone_to = $this->map('cl_phone_to', 'c_to');
             $log->cl_duration = $this->map('cl_duration', 'c_call_duration');
@@ -410,10 +420,100 @@ class CallLogTransferService
 
             $transaction->commit();
 
+            if ($log->cl_user_id && ($log->isIn() || $log->isOut())) {
+                $this->sendHistorySocketMessage($log->getAttributes(), $this->call['c_case_id'], $this->call['c_lead_id']);
+            }
+
         } catch (\Throwable $e) {
             $transaction->rollBack();
             \Yii::error(VarDumper::dumpAsString(['category' => 'createCallLogs', 'Call' => $this->call, 'error' => $e->getMessage()]), 'CallLogTransferService');
         }
+    }
+
+    private function sendHistorySocketMessage(array $call, ?int $caseId, ?int $leadId): void
+    {
+        $toUserId = (int)$call['cl_user_id'];
+        if (!$toUserId) {
+            return;
+        }
+        $toUser = Employee::find()->select(['id', 'up_timezone'])->andWhere(['id' => $toUserId])->leftJoin(UserParams::tableName(), 'up_user_id = id')->asArray()->one();
+        if (!$toUser) {
+            return;
+        }
+
+        $call['case_id'] = $caseId;
+        $call['lead_id'] = $leadId;
+
+        $callNote  = CallNote::find()->select(['cn_note'])->andWhere(['cn_call_id' => $call['cl_id']])->orderBy(['cn_created_dt' => SORT_DESC])->asArray()->limit(1)->one();
+        $call['callNote'] = $callNote['cn_note'] ?? '';
+
+        $clientPrefix  = UserCallIdentity::getFullPrefix();
+        $length = strlen($clientPrefix);
+        $oldClientPrefix = 'client:seller';
+        $lengthOld = strlen($oldClientPrefix);
+
+        $call['user_id'] = null;
+        if ((int)$call['cl_type_id'] === Call::CALL_TYPE_OUT) {
+            if (strpos($call['cl_phone_to'], $clientPrefix, 0) === 0) {
+                $call['user_id'] = (int)substr($call['cl_phone_to'], $length);
+            } elseif (strpos($call['cl_phone_to'], $oldClientPrefix, 0) === 0) {
+                $call['user_id'] = (int)substr($call['cl_phone_to'], $lengthOld);
+            }
+        } else {
+            if (strpos($call['cl_phone_from'], $clientPrefix, 0) === 0) {
+                $call['user_id'] = (int)substr($call['cl_phone_from'], $length);
+            } elseif (strpos($call['cl_phone_from'], $oldClientPrefix, 0) === 0) {
+                $call['user_id'] = (int)substr($call['cl_phone_from'], $lengthOld);
+            }
+        }
+        $call['nickname'] = null;
+        if ($call['user_id']) {
+            if ($user = Employee::find()->select(['nickname'])->andWhere(['id' => $call['user_id']])->asArray()->one()) {
+                $call['nickname'] = $user['nickname'];
+            }
+        }
+
+        $call['client_name'] = null;
+        if ($call['cl_client_id']) {
+            $client = Client::find()
+                ->addSelect(new Expression("if (first_name is not null, if (last_name is not null, concat(first_name, ' ', last_name), first_name), null) as client_name"))
+                ->andWhere(['id' => $call['cl_client_id']])
+                ->asArray()
+                ->one();
+            if ($client) {
+                $call['client_name'] = $client['client_name'];
+            }
+        }
+
+        $call['formatted'] = null;
+        if ($call['client_name']) {
+            $call['formatted'] = $call['client_name'];
+        } else {
+            if ((int)$call['cl_type_id'] === Call::CALL_TYPE_OUT) {
+                if ($call['nickname']) {
+                    $call['formatted'] = $call['nickname'];
+                } else {
+                    $call['formatted'] = $call['cl_phone_to'];
+                }
+            } else {
+                if ($call['nickname']) {
+                    $call['formatted'] = $call['nickname'];
+                } else {
+                    $call['formatted'] = $call['cl_phone_from'];
+                }
+            }
+        }
+
+        $call['cl_call_created_dt'] = Employee::convertTimeFromUtcToUserTime($toUser['up_timezone'], strtotime($call['cl_call_created_dt']), 'h:i A');
+
+        Notifications::publish(
+            'addCallToHistory',
+            ['user_id' => (int)$call['cl_user_id']],
+            ['data' => [
+                'command' => 'addCallToHistory',
+                'call' => CallHelper::formCallToHistoryTab($call)]
+            ]
+        );
     }
 
     private function map(string $callLogAttr, string $callAttr): ?string

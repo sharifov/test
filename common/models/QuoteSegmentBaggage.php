@@ -24,6 +24,7 @@ use yii\helpers\ArrayHelper;
  * @property string $qsb_created_dt
  * @property string $qsb_updated_dt
  * @property int $qsb_updated_user_id
+ * @property bool $qsb_carry_one
  *
  * @property QuoteSegment $qsbSegment
  * @property Employee $qsbUpdatedUser
@@ -48,6 +49,8 @@ class QuoteSegmentBaggage extends \yii\db\ActiveRecord
             [['qsb_created_dt', 'qsb_updated_dt'], 'safe'],
             [['qsb_pax_code', 'qsb_airline_code'], 'string', 'max' => 3],
             [['qsb_allow_unit'], 'string', 'max' => 4],
+            [['qsb_carry_one'], 'boolean'],
+            [['qsb_carry_one'], 'default', 'value' => true],
             [['qsb_allow_max_weight', 'qsb_allow_max_size'], 'string', 'max' => 100],
             [['qsb_segment_id'], 'exist', 'skipOnError' => true, 'targetClass' => QuoteSegment::class, 'targetAttribute' => ['qsb_segment_id' => 'qs_id']],
             [['qsb_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['qsb_updated_user_id' => 'id']],
@@ -72,6 +75,7 @@ class QuoteSegmentBaggage extends \yii\db\ActiveRecord
             'qsb_created_dt' => 'Qsb Created Dt',
             'qsb_updated_dt' => 'Qsb Updated Dt',
             'qsb_updated_user_id' => 'Qsb Updated User ID',
+            'qsb_carry_one' => 'Carry one',
         ];
     }
 

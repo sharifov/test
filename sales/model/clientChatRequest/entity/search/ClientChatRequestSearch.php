@@ -17,12 +17,15 @@ class ClientChatRequestSearch extends ClientChatRequest
             ['ccr_id', 'integer'],
 
             ['ccr_json_data', 'safe'],
+
+            [['ccr_rid'], 'string', 'max' => 150],
+            [['ccr_visitor_id'], 'string', 'max' => 100],
         ];
     }
 
     public function search($params): ActiveDataProvider
     {
-        $query = static::find();
+        $query = static::find()->distinct();
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -35,12 +38,14 @@ class ClientChatRequestSearch extends ClientChatRequest
         $this->load($params);
 
         if (!$this->validate()) {
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 
         $query->andFilterWhere([
             'ccr_id' => $this->ccr_id,
+            'ccr_rid' => $this->ccr_rid,
+            'ccr_visitor_id' => $this->ccr_visitor_id,
             'date_format(ccr_created_dt, "%y-%m-%d")' => $this->ccr_created_dt,
         ]);
 

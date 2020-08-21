@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Employee;
 use sales\model\user\entity\monitor\UserMonitor;
 use yii\helpers\Html;
 
@@ -22,7 +23,7 @@ $this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2
 
 $this->title = 'User Monitors';
 $this->params['breadcrumbs'][] = $this->title;
-
+/** @var Employee $user */
 $user = Yii::$app->user->identity;
 ?>
 <?= $this->render('_stats_search', ['model' => $searchModel]); ?>
@@ -46,9 +47,9 @@ $user = Yii::$app->user->identity;
                         //'html' => false
                     ];
 
-                    $tlData['start'] = \common\models\Employee::convertTimeFromUtcToUserTime($user, strtotime($item->um_start_dt));
+                    $tlData['start'] = \common\models\Employee::convertTimeFromUtcToUserTime($user->getTimezone(), strtotime($item->um_start_dt));
                     if ($item->um_end_dt) {
-                        $tlData['end'] = \common\models\Employee::convertTimeFromUtcToUserTime($user, strtotime($item->um_end_dt)); //$item->um_end_dt;
+                        $tlData['end'] = \common\models\Employee::convertTimeFromUtcToUserTime($user->getTimezone(), strtotime($item->um_end_dt)); //$item->um_end_dt;
                     } else {
                         $tlData['size'] = 'small';
                     }
@@ -58,7 +59,7 @@ $user = Yii::$app->user->identity;
                     if ($item->um_type_id === UserMonitor::TYPE_LOGIN) {
                         $tlData['height'] = 40;
                         if (!$item->um_end_dt) {
-                            $tlData['end'] = \common\models\Employee::convertTimeFromUtcToUserTime($user, strtotime($item->um_start_dt) + 90);
+                            $tlData['end'] = \common\models\Employee::convertTimeFromUtcToUserTime($user->getTimezone(), strtotime($item->um_start_dt) + 90);
                         }
 
                         $tlData['content'] = $item->getTypeName() . ' ' . Yii::$app->formatter->asDatetime(strtotime($tlData['start']));
@@ -71,7 +72,7 @@ $user = Yii::$app->user->identity;
                     if ($item->um_type_id === UserMonitor::TYPE_ACTIVE) {
                         $tlData['height'] = 32;
                         if (!$item->um_end_dt) {
-                            $tlData['end'] = \common\models\Employee::convertTimeFromUtcToUserTime($user, time());
+                            $tlData['end'] = \common\models\Employee::convertTimeFromUtcToUserTime($user->getTimezone(), time());
                         }
 
                         $totalDuration = strtotime($tlData['end']) - strtotime($tlData['start']);
@@ -85,7 +86,7 @@ $user = Yii::$app->user->identity;
 
                     if ($item->um_type_id === UserMonitor::TYPE_ONLINE) {
                         if (!$item->um_end_dt) {
-                            $tlData['end'] = \common\models\Employee::convertTimeFromUtcToUserTime($user, time());
+                            $tlData['end'] = \common\models\Employee::convertTimeFromUtcToUserTime($user->getTimezone(), time());
                         }
                     }
 

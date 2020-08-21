@@ -242,7 +242,10 @@ class CallLogSearch extends CallLog
         ]);
 
         $clientTableName = Client::tableName();
-        $query->addSelect(["if (" . $clientTableName . ".first_name is not null, if (" . $clientTableName . ".last_name is not null, concat(" . $clientTableName . ".first_name, ' ', " . $clientTableName . ".last_name), " . $clientTableName . ".first_name), null) as client_name", 'cn_note as callNote']);
+        $query->addSelect([
+            "if (" . $clientTableName . ".first_name is not null, if (" . $clientTableName . ".last_name is not null, concat(" . $clientTableName . ".first_name, ' ', " . $clientTableName . ".last_name), " . $clientTableName . ".first_name), null) as client_name",
+            'cn_note as callNote'
+        ]);
 
 		$clientPrefix  = UserCallIdentity::getFullPrefix();
 		$length = strlen($clientPrefix) + 1;

@@ -112,49 +112,54 @@ $this->params['breadcrumbs'][] = $this->title;
             </thead>
             <tbody>
             <tr>
-                <td>0</td>
+                <td>1</td>
                 <td>appName</td>
                 <td><?=Yii::$app->params['appName'] ?? ''?></td>
             </tr>
             <tr>
-                <td>1</td>
+                <td>2</td>
+                <td>appEnv</td>
+                <td><?=Yii::$app->params['appEnv'] ?? ''?></td>
+            </tr>
+            <tr>
+                <td>3</td>
                 <td>appInstance</td>
                 <td><?=Yii::$app->params['appInstance'] ?? ''?></td>
             </tr>
             <tr>
-                <td>2</td>
+                <td>4</td>
                 <td>url_address</td>
                 <td><?=Yii::$app->params['url_address'] ?? ''?></td>
             </tr>
             <tr>
-                <td>3</td>
+                <td>5</td>
                 <td>url_api_address</td>
                 <td><?=Yii::$app->params['url_api_address'] ?? ''?></td>
             </tr>
             <tr>
-                <td>4</td>
+                <td>6</td>
                 <td>backOffice serverUrl</td>
                 <td><?=Yii::$app->params['backOffice']['serverUrl'] ?? ''?></td>
             </tr>
             <tr>
-                <td>5</td>
+                <td>7</td>
                 <td>backOffice serverUrlV3</td>
                 <td><?=Yii::$app->params['backOffice']['serverUrlV3'] ?? ''?></td>
             </tr>
             <tr>
-                <td>6</td>
+                <td>8</td>
                 <td>getAirportUrl</td>
                 <td><?=Yii::$app->params['getAirportUrl'] ?? ''?></td>
             </tr>
 
             <tr>
-                <td>7</td>
+                <td>9</td>
                 <td>searchApiUrl</td>
                 <td><?=Yii::$app->params['searchApiUrl'] ?? ''?></td>
             </tr>
 
             <tr>
-                <td>8</td>
+                <td>10</td>
                 <td>global_phone</td>
                 <td><?=Yii::$app->params['global_phone'] ?? ''?></td>
             </tr>

@@ -21,6 +21,8 @@ use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatNote\ClientChatNoteRepository;
 use sales\model\clientChatNote\entity\ClientChatNote;
+use sales\model\clientChatRequest\entity\ClientChatRequest;
+use sales\model\clientChatRequest\entity\search\ClientChatRequestSearch;
 use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\NotFoundException;
@@ -380,10 +382,21 @@ class ClientChatController extends FController
 		} catch (NotFoundException $e) {
 		}
 
+		$requestSearch = new ClientChatRequestSearch();
+		$visitorId = '';
+		if ($clientChat->ccv && $clientChat->ccv->ccvCvd) {
+		    $visitorId = $clientChat->ccv->ccvCvd->cvd_visitor_rc_id ?? '';
+		}
+        $data[$requestSearch->formName()]['ccr_visitor_id'] = $visitorId;
+        $data[$requestSearch->formName()]['ccr_event'] = ClientChatRequest::EVENT_TRACK;
+        $dataProviderRequest = $requestSearch->search($data);
+        $dataProviderRequest->setPagination(['pageSize' => 40]);
+
 		return $this->renderAjax('partial/_data_info', [
 			'clientChat' => $clientChat,
 			'clientChatVisitorData' => $clientChat->ccv->ccvCvd ?? null,
-			'visitorLog' => $visitorLog
+			'visitorLog' => $visitorLog,
+			'dataProviderRequest' => $dataProviderRequest,
 		]);
 	}
 

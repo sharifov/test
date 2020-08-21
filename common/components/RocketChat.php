@@ -363,20 +363,23 @@ class RocketChat extends Component
     }
 
 
-
-
-    /**
-     * @param string $username
-     * @return array
-     * @throws Exception
-     */
-    public function deleteUser(string $username): array
+	/**
+	 * @param string|null $username
+	 * @param string|null $userRcId
+	 * @return array
+	 * @throws Exception
+	 */
+    public function deleteUser(?string $userRcId, ?string $username = null): array
     {
 
         $out = ['error' => false, 'data' => []];
         $headers = $this->getSystemAuthDataHeader();
 
-        $data['username'] = $username;
+		if ($userRcId) {
+			$data['userId'] = $userRcId;
+		} else if ($username) {
+        	$data['username'] = $username;
+		}
 
         $response = $this->sendRequest('users.delete', $data, 'post', $headers);
 

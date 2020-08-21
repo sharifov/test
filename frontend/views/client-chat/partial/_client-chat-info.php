@@ -2,11 +2,14 @@
 use common\models\Client;
 use common\models\Quote;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChatRequest\entity\ClientChatRequest;
+use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use yii\bootstrap4\Button;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
 use yii\web\View;
+use yii\widgets\Pjax;
 
 /***
  * @var ClientChat $clientChat
@@ -97,7 +100,9 @@ use yii\web\View;
                             $out .= Yii::$app->formatter->format($case, 'case') . ' ';
                         }
                         $out .= '</span>';
-                        $out .= Html::button(' [ Create ] ', ['class' => 'btn btn-link default create_case', 'data-link' => Url::to(['/cases/create-by-chat', 'chat_id' => $model->cch_id])]);
+                        if (!$model->isClosed()) {
+                            $out .= Html::button(' [ Create ] ', ['class' => 'btn btn-link default create_case', 'data-link' => Url::to(['/cases/create-by-chat', 'chat_id' => $model->cch_id])]);
+                        }
                         return $out;
                     },
                     'format' => 'raw',
@@ -108,12 +113,14 @@ use yii\web\View;
                         $out = '<span id="chat-info-lead-info">';
                         foreach ($model->leads as $lead) {
                             $out .= Yii::$app->formatter->format($lead, 'lead') . ' ';
-                            if ($lead->isExistQuotesForSend()) {
+                            if (!$model->isClosed() && $lead->isExistQuotesForSend()) {
                                 $out .= ' ' . Html::button('Offer', ['class' => 'btn btn-info chat-offer default', 'data-chat-id' => $model->cch_id, 'data-lead-id' => $lead->id]) . ' ';
                             }
                         }
                         $out .= '</span>';
-                        $out .= Html::button(' [ Create ] ', ['class' => 'btn btn-link default create_lead', 'data-link' => Url::to(['/lead/create-by-chat', 'chat_id' => $model->cch_id])]);
+                        if (!$model->isClosed()) {
+							$out .= Html::button(' [ Create ] ', ['class' => 'btn btn-link default create_lead', 'data-link' => Url::to(['/lead/create-by-chat', 'chat_id' => $model->cch_id])]);
+						}
                         return $out;
                     },
                     'format' => 'raw',
@@ -131,25 +138,50 @@ use yii\web\View;
         ?>
     </div>
 
-    <?php if ($clientChat->ccv && $clientChat->ccv->ccvCvd): ?>
-        <div class="_rc-block-wrapper">
-            <h3 style="margin: 0;">Additional Data</h3>
-        </div>
+    <?php Pjax::begin([
+        'id' => 'pjax-chat-additional-data-' . $clientChat->cch_id,
+        'timeout' => 5000,
+        'enablePushState' => false
+    ]) ?>
+        <?php if ($clientChat->ccv && $clientChat->ccv->ccvCvd): ?>
+            <div class="_rc-block-wrapper">
+                <h3 style="margin: 0;">Additional Data</h3>
+            </div>
 
-        <div class="_rc-block-wrapper">
-            <?=
-            \yii\widgets\DetailView::widget([
-                'model' => $clientChat->ccv->ccvCvd,
-                'attributes' => [
-                    'cvd_country',
-                    'cvd_region',
-                    'cvd_city',
-                    'cvd_timezone',
-                ]
-            ])
-            ?>
-        </div>
-    <?php endif; ?>
+            <div class="_rc-block-wrapper">
+                <?php echo
+                \yii\widgets\DetailView::widget([
+                    'model' => $clientChat->ccv->ccvCvd,
+                    'attributes' => [
+                        'cvd_country',
+                        'cvd_region',
+                        'cvd_city',
+                        'cvd_timezone',
+                        [
+                            'label' => 'Last Url',
+                            'value' => static function(ClientChatVisitorData $model) use ($clientChat) {
+
+                                $visitorId = '';
+                                if ($clientChat->ccv && $clientChat->ccv->ccvCvd) {
+                                    $visitorId = $clientChat->ccv->ccvCvd->cvd_visitor_rc_id ?? '';
+                                }
+
+                                if ($chatRequest = ClientChatRequest::getLastRequestByVisitorId($visitorId, ClientChatRequest::EVENT_TRACK)) {
+                                    if ($pageUrl = $chatRequest->getPageUrl()) {
+                                        return Yii::$app->formatter->asUrl($pageUrl, ['target' => '_blank']);
+                                    }
+                                }
+                                return Yii::$app->formatter->nullDisplay;
+                            },
+                            'format' => 'raw',
+                        ],
+                    ]
+                ])
+                ?>
+
+            </div>
+        <?php endif; ?>
+    <?php Pjax::end() ?>
 </div>
 
 

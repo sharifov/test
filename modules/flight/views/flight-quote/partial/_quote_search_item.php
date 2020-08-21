@@ -305,7 +305,7 @@ $isQuoteAssignedToFlight = FlightQuoteHelper::isQuoteAssignedToFlight($flightQuo
                                                 <div class="segment__cabin"><?= SearchService::getCabin($segment['cabin'])?></div>
                                             </div>
                                         </div>
-                                        <div class="segment__note">
+                                        <div class="segment__note search_fq">
 											<?php if($segment['operatingAirline'] != $segment['marketingAirline']):?>Operated by <?= (!isset($airlines[$segment['operatingAirline']]))?:$airlines[$segment['operatingAirline']];?>.<?php endif;?>
 											<?php if(isset($segment['baggage'])):?>
 												<?php foreach ($segment['baggage'] as $baggage):?>
@@ -322,6 +322,16 @@ $isQuoteAssignedToFlight = FlightQuoteHelper::isQuoteAssignedToFlight($flightQuo
 											<i class="fa fa-suitcase"></i>&nbsp;<?= (isset($charge['price']))?$charge['price']:''?>$</span>
 														<?php endforeach;?>
 													<?php endif;?>
+
+													    <?php if(isset($baggage['carryOn'])):?>
+                                                            <?php if((bool) $baggage['carryOn'] === false):?>
+                                                                <span class="fa-stack" title="CarryOn Disable">
+                                                                    <i class="fa fa-shopping-bag fa-stack-1x"></i>
+                                                                    <i class="fa fa-ban fa-stack-2x text-danger"></i>
+                                                                </span>
+                                                            <?php endif ?>
+                                                        <?php endif ?>
+
 													<?php break; endforeach;?>
 											<?php endif;?>
 											<?php if(isset($segment['meal'])):?><span class="badge badge-light" title="<?= $segment['meal']?>"><i class="fa fa-cutlery"></i></span><?php endif;?>

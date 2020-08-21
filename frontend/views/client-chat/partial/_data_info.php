@@ -4,11 +4,15 @@
  * @var $clientChat \sales\model\clientChat\entity\ClientChat|null
  * @var $visitorLog \common\models\VisitorLog|null
  * @var $clientChatVisitorData ClientChatVisitorData|null
+ * @var yii\data\ActiveDataProvider $dataProviderRequest
  */
 
+use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use yii\bootstrap4\Alert;
+use yii\grid\GridView;
 use yii\widgets\DetailView;
+use yii\widgets\Pjax;
 
 ?>
 
@@ -38,6 +42,38 @@ use yii\widgets\DetailView;
                 ]
             ]) ?>
         <?php endif; ?>
+
+        <?php if ($dataProviderRequest) :?>
+            <h4>Browsing history</h4>
+            <?php Pjax::begin(['id' => 'pjax-browsing-history', 'timeout' => 5000, 'enablePushState' => false]); ?>
+            <?php echo GridView::widget([
+                'dataProvider' => $dataProviderRequest,
+                'columns' => [
+                    [
+                        'attribute' => 'ccr_created_dt',
+                        'value' => static function(ClientChatRequest $model) {
+                            return $model->ccr_created_dt ?
+                                Yii::$app->formatter->asDatetime(strtotime($model->ccr_created_dt)) : '-';
+                        },
+                        'format' => 'raw',
+                        'header' => 'Created',
+                    ],
+                    [
+                        'label' => 'Url',
+                        'value' => static function(ClientChatRequest $model) {
+                            if ($pageUrl = $model->getPageUrl()) {
+                                return Yii::$app->formatter->asUrl($pageUrl);
+                            }
+                            return Yii::$app->formatter->nullDisplay;
+                        },
+                        'format' => 'raw',
+                        'header' => 'Url',
+                    ],
+                ],
+            ]) ?>
+        <?php endif ?>
+        <?php Pjax::end() ?>
+
 	</div>
     <div class="col-md-6">
         <?php if ($visitorLog): ?>

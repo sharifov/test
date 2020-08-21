@@ -107,7 +107,7 @@ class ClientChatService
 	 */
 	public function sendRequestToUsers(ClientChat $clientChat): void
 	{
-		if ($channel = $clientChat->cchChannel) {
+		if ($channel = $this->clientChatChannelRepository->findByClientChatData($clientChat->cch_dep_id, $clientChat->cch_project_id, null)) {
 			$userChannel = ClientChatUserChannel::find()->byChannelId($channel->ccc_id)->all();
 
 			if ($userChannel) {
@@ -208,9 +208,9 @@ class ClientChatService
 			$clientChat->cch_dep_id = $form->depId;
 			$this->clientChatRepository->save($clientChat);
 
+			$clientChatChannel = $this->clientChatChannelRepository->findByClientChatData($form->depId, $clientChat->cch_project_id, null);
 			if ($form->agentId) {
 				foreach ($form->agentId as $agentId) {
-					$clientChatChannel = $this->clientChatChannelRepository->findByClientChatData($form->depId, $clientChat->cch_project_id, null);
 					$userChannel = ClientChatUserChannel::find()->byChannelId($clientChatChannel->ccc_id)->byUserId($agentId)->one();
 					if ($userChannel) {
 						try {
@@ -222,6 +222,7 @@ class ClientChatService
 					}
 				}
 			} else {
+				$clientChat->cch_dep_id = $form->depId;
 				$this->sendRequestToUsers($clientChat);
 			}
 

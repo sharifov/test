@@ -2461,12 +2461,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $users;
     }
 
-    public static function convertTimeFromUtcToUserTime(Employee $user, int $time): string
+    public static function convertTimeFromUtcToUserTime($timezone, int $time, ?string $format = 'Y-m-d H:i:s'): string
     {
-        $timezone = $user->timezone;
-        $format = 'Y-m-d H:i:s';
+        if (!$timezone) {
+            $timezone = 'UTC';
+        }
         try {
-            return (new \DateTimeImmutable(date($format, $time), new \DateTimeZone('UTC')))
+            return (new \DateTimeImmutable(date('Y-m-d H:i:s', $time), new \DateTimeZone('UTC')))
                 ->setTimezone(new \DateTimeZone($timezone))
                 ->format($format);
         } catch (\Throwable $e) {

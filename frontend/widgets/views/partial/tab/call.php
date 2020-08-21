@@ -201,7 +201,6 @@ $ajaxUnMuteUrl = Url::to(['/phone/ajax-unmute-participant']);
 $ajaxCallAddNoteUrl = Url::to(['/call/ajax-add-note']);
 $updateStatusUrl = Url::to(['/user-call-status/update-status']);
 $clearMissedCallsUrl = Url::to(['/call/clear-missed-calls']);
-$currentQueueCallsUrl = Url::to(['/call/current-queue-calls']);
 $holdUrl = Url::to(['/phone/ajax-hold-conference-call']);
 $unHoldUrl = Url::to(['/phone/ajax-unhold-conference-call']);
 $returnHoldCallUrl = Url::to(['/call/return-hold-call']);
@@ -229,7 +228,6 @@ PhoneWidgetCall.init({
     'updateStatusUrl': '$updateStatusUrl',
     'countMissedCalls': $countMissedCalls,
     'clearMissedCallsUrl': '$clearMissedCallsUrl',
-    'currentQueueCallsUrl': '$currentQueueCallsUrl',
     'status': $ucStatus,
     'holdUrl': '$holdUrl',
     'unHoldUrl': '$unHoldUrl',

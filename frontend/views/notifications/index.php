@@ -14,7 +14,7 @@ $this->title = Yii::t('notifications', 'Notifications');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="notifications-index">
-    <h1><i class="fa fa-comment-o"></i> <?= Html::encode($this->title) ?></h1>
+    <h1><i class="fa fa-bell-o"></i> <?= Html::encode($this->title) ?></h1>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
     <p>
         <?= Html::a(Yii::t('notifications', 'Create Notifications'), ['create'], ['class' => 'btn btn-success']) ?>

@@ -798,6 +798,8 @@ $(document).ready(function() {
     //     console.log('here is a event for back button');
     // })
 
+    window.historySimpleBar = historySimpleBar;
+
 });
 
 function stateTimer () {

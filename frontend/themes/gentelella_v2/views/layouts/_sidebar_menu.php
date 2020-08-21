@@ -111,7 +111,7 @@ $isSuperAdmin = $user->isSuperAdmin();
 //                    '<span id="div-cnt-notification">' . ($cntNotifications ? '<span class="label-success label pull-right">' . $cntNotifications . '</span>' : '') . '</span>',
                     '<span id="div-cnt-notification"><span class="label-success label pull-right notification-counter"></span></span>',
                 'url' => ['/notifications/list'],
-                'icon' => 'comment',
+                'icon' => 'bell-o',
             ];
         }
 
@@ -198,7 +198,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'list'],
                 ['label' => 'SMS Distrib List', 'url' => ['/sms-distribution-list/index'], 'icon' => 'list'],
                 ['label' => 'Emails', 'url' => ['/email/index'], 'icon' => 'envelope'],
-                ['label' => 'Notification List', 'url' => ['/notifications/index'], 'icon' => 'comment-o'],
+                ['label' => 'Notification List', 'url' => ['/notifications/index'], 'icon' => 'bell-o'],
 
                 [
                     'label' => 'Conferences',

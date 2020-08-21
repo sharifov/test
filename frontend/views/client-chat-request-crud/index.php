@@ -1,8 +1,11 @@
 <?php
 
+use frontend\helpers\JsonHelper;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
+use yii\helpers\StringHelper;
+use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\clientChatRequest\entity\search\ClientChatRequestSearch */
@@ -27,9 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
-
             'ccr_id',
-            //'ccr_event',
             [
                 'attribute' => 'ccr_event',
                 'value' => static function(ClientChatRequest $model) {
@@ -37,7 +38,27 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'filter' => ClientChatRequest::getEventList()
             ],
-            'ccr_json_data:ntext',
+            'ccr_rid',
+            'ccr_visitor_id',
+            [
+                'attribute' => 'ccr_json_data',
+                'value' => static function(ClientChatRequest $model) {
+                    $content = '<p>' . StringHelper::truncate($model->ccr_json_data, 200, '...', null, true) . '</p>';
+                    $content .= Html::a('<i class="fas fa-eye"></i> details</a>',null,
+                        [
+                            'class' => 'btn btn-sm btn-success',
+                            'data-pjax' => 0,
+                            'onclick' => '(function ( $event ) { $("#data_'. $model->ccr_id . '").toggle(); })();',
+                        ]
+                    );
+                    $content .= $model->ccr_json_data ?
+                        '<pre id="data_'. $model->ccr_id . '" style="display: none;">' .
+                            VarDumper::dumpAsString(JsonHelper::decode($model->ccr_json_data), 10, true) . '</pre>' : '-';
+
+                    return $content;
+                },
+                'format' => 'raw',
+            ],
 			[
 				'class' => \common\components\grid\DateTimeColumn::class,
 				'attribute' => 'ccr_created_dt',
@@ -51,3 +72,19 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php Pjax::end(); ?>
 
 </div>
+
+<?php
+$css = <<<CSS
+    .tooltip-inner {
+         max-width: 800px;
+         width: 800px; 
+    }
+CSS;
+$this->registerCss($css);
+?>
+
+<?php $this->registerJs("
+    $(function () {
+        $('[data-toggle=\"tooltip\"]').tooltip({html:true});
+    });
+", $this::POS_END, 'tooltips'); ?>
