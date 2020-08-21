@@ -16,6 +16,7 @@ use yii\db\ActiveRecord;
  * @property string|null $ccr_rid
  * @property string|null $ccr_json_data
  * @property string|null $ccr_created_dt
+ * @property string|null $ccr_visitor_id
  * @property array|null $decodedData
  */
 class ClientChatRequest extends \yii\db\ActiveRecord
@@ -58,6 +59,7 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 
             ['ccr_json_data', 'string'],
             ['ccr_rid', 'string'],
+            [['ccr_visitor_id'], 'string', 'max' => 100],
         ];
     }
 
@@ -82,6 +84,7 @@ class ClientChatRequest extends \yii\db\ActiveRecord
             'ccr_rid' => 'Room ID',
             'ccr_json_data' => 'Json Data',
             'ccr_created_dt' => 'Created',
+            'ccr_visitor_id' => 'Visitor ID',
         ];
     }
 
@@ -109,6 +112,7 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 		$_self->ccr_event = $form->eventId;
 		$_self->ccr_json_data = json_encode($form->data, JSON_THROW_ON_ERROR);
 		$_self->ccr_rid = $form->rid;
+        $_self->ccr_visitor_id = $form->data['visitor']['id'] ?? null;
 
 		return $_self;
 	}
