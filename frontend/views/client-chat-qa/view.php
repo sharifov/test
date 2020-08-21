@@ -8,6 +8,7 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatMessage\entity\search\ClientChatMessageSearch;
 use sales\model\clientChatNote\entity\ClientChatNote;
+use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
@@ -22,6 +23,7 @@ use yii\widgets\DetailView;
 /* @var ClientChatMessageSearch $searchModel */
 /* @var yii\data\ActiveDataProvider $dataProvider */
 /* @var yii\data\ActiveDataProvider $dataProviderNotes */
+/* @var yii\data\ActiveDataProvider $dataProviderRequest */
 /* @var ClientChatVisitorData|null $clientChatVisitorData */
 
 $this->title = $model->cch_id;
@@ -142,6 +144,32 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ],
             ]) ?>
+
+            <h5>Browsing history</h5>
+            <?php echo GridView::widget([
+                'dataProvider' => $dataProviderRequest,
+                'columns' => [
+                    [
+                        'attribute' => 'ccr_created_dt',
+                        'value' => static function(ClientChatRequest $model) {
+                            return $model->ccr_created_dt ?
+                                Yii::$app->formatter->asDatetime(strtotime($model->ccr_created_dt)) : '-';
+                        },
+                        'format' => 'raw',
+                    ],
+                    [
+                        'label' => 'Url',
+                        'value' => static function(ClientChatRequest $model) {
+                            if ($pageUrl = $model->getPageUrl()) {
+                                return Yii::$app->formatter->asUrl($pageUrl);
+                            }
+                            return Yii::$app->formatter->nullDisplay;
+                        },
+                        'format' => 'raw',
+                    ],
+                ],
+            ]) ?>
+
         </div>
 
         <div class="col-md-4">
@@ -249,7 +277,6 @@ $this->params['breadcrumbs'][] = $this->title;
             <h5>Chat notes</h5>
             <?php echo GridView::widget([
                 'dataProvider' => $dataProviderNotes,
-                'filterModel' => false,
                 'columns' => [
                     [
                         'attribute' => 'ccn_note',
