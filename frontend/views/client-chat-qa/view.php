@@ -15,6 +15,7 @@ use yii\grid\GridView;
 use yii\helpers\StringHelper;
 use yii\helpers\Url;
 use yii\widgets\DetailView;
+use yii\widgets\Pjax;
 
 /* @var ClientChat $model */
 /* @var yii\web\View $this */
@@ -146,6 +147,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ]) ?>
 
             <h5>Browsing history</h5>
+            <?php Pjax::begin(['id' => 'pjax-browsing-history-qa', 'timeout' => 5000, 'enablePushState' => false]); ?>
             <?php echo GridView::widget([
                 'dataProvider' => $dataProviderRequest,
                 'columns' => [
@@ -171,6 +173,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ],
             ]) ?>
+            <?php Pjax::end() ?>
 
         </div>
 

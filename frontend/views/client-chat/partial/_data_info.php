@@ -12,6 +12,7 @@ use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use yii\bootstrap4\Alert;
 use yii\grid\GridView;
 use yii\widgets\DetailView;
+use yii\widgets\Pjax;
 
 ?>
 
@@ -44,6 +45,7 @@ use yii\widgets\DetailView;
 
         <?php if ($dataProviderRequest) :?>
             <h4>Browsing history</h4>
+            <?php Pjax::begin(['id' => 'pjax-browsing-history', 'timeout' => 5000, 'enablePushState' => false]); ?>
             <?php echo GridView::widget([
                 'dataProvider' => $dataProviderRequest,
                 'columns' => [
@@ -70,6 +72,7 @@ use yii\widgets\DetailView;
                 ],
             ]) ?>
         <?php endif ?>
+        <?php Pjax::end() ?>
 
 	</div>
     <div class="col-md-6">
