@@ -931,7 +931,7 @@ class Call extends \yii\db\ActiveRecord
                                 $cuaExists = CallUserAccess::find()->andWhere([
                                     'cua_call_id' => $this->c_id, 'cua_status_id' => CallUserAccess::STATUS_TYPE_ACCEPT
                                 ])->andWhere(['>=', 'cua_updated_dt', $this->c_queue_start_dt])->exists();
-                                if (!$cuaExists) {
+                                if (!$cuaExists && !$this->c_conference_id) {
                                     $this->c_status_id = self::STATUS_NO_ANSWER;
                                     self::updateAll(['c_status_id' => self::STATUS_NO_ANSWER], ['c_id' => $this->c_id]);
                                 }
