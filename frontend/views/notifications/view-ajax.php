@@ -12,7 +12,7 @@ $this->title = 'Notification - '. $model->n_title;
 
 <div class="notifications-view">
 
-    <h1><i class="fa fa-comment-o"></i> <?= Html::encode($model->n_title) ?></h1>
+    <h1><i class="fa fa-bell-o"></i> <?= Html::encode($model->n_title) ?></h1>
 
     <div class="row">
         <div class="col-md-5">
