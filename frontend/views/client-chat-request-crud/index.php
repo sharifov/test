@@ -39,23 +39,18 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => ClientChatRequest::getEventList()
             ],
             'ccr_rid',
-            //'ccr_json_data:ntext',
+            'ccr_visitor_id',
             [
                 'attribute' => 'ccr_json_data',
-
                 'value' => static function(ClientChatRequest $model) {
-
                     $content = '<p>' . StringHelper::truncate($model->ccr_json_data, 200, '...', null, true) . '</p>';
-                    $content .= Html::a(
-                                '<i class="fas fa-eye"></i> details</a>',
-                                null,
-                                [
-                                    'class' => 'btn btn-sm btn-success',
-                                    'title' => 'detail',
-                                    'data-pjax' => 0,
-                                    'onclick' => '(function ( $event ) { $("#data_'. $model->ccr_id . '").toggle(); })();',
-                                ]
-                            );
+                    $content .= Html::a('<i class="fas fa-eye"></i> details</a>',null,
+                        [
+                            'class' => 'btn btn-sm btn-success',
+                            'data-pjax' => 0,
+                            'onclick' => '(function ( $event ) { $("#data_'. $model->ccr_id . '").toggle(); })();',
+                        ]
+                    );
                     $content .= $model->ccr_json_data ?
                         '<pre id="data_'. $model->ccr_id . '" style="display: none;">' .
                             VarDumper::dumpAsString(JsonHelper::decode($model->ccr_json_data), 10, true) . '</pre>' : '-';
@@ -64,7 +59,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw',
             ],
-
 			[
 				'class' => \common\components\grid\DateTimeColumn::class,
 				'attribute' => 'ccr_created_dt',

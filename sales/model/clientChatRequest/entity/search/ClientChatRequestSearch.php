@@ -19,6 +19,7 @@ class ClientChatRequestSearch extends ClientChatRequest
             ['ccr_json_data', 'safe'],
 
             [['ccr_rid'], 'string', 'max' => 150],
+            [['ccr_visitor_id'], 'string', 'max' => 100],
         ];
     }
 
@@ -44,6 +45,7 @@ class ClientChatRequestSearch extends ClientChatRequest
         $query->andFilterWhere([
             'ccr_id' => $this->ccr_id,
             'ccr_rid' => $this->ccr_rid,
+            'ccr_visitor_id' => $this->ccr_visitor_id,
             'date_format(ccr_created_dt, "%y-%m-%d")' => $this->ccr_created_dt,
         ]);
 

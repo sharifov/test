@@ -109,7 +109,11 @@ class ClientChatQaController extends FController
         }
 
         $requestSearch = new ClientChatRequestSearch();
-        $data[$requestSearch->formName()]['ccr_rid'] = (string) $clientChat->cch_rid;
+        $visitorId = '';
+		if ($clientChat->ccv && $clientChat->ccv->ccvCvd) {
+		    $visitorId = $clientChat->ccv->ccvCvd->cvd_visitor_rc_id ?? '';
+		}
+        $data[$requestSearch->formName()]['ccr_visitor_id'] = $visitorId;
         $data[$requestSearch->formName()]['ccr_event'] = ClientChatRequest::EVENT_TRACK;
         $dataProviderRequest = $requestSearch->search($data);
         $dataProviderRequest->setPagination(['pageSize' => 10]);

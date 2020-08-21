@@ -54,6 +54,7 @@ use yii\widgets\DetailView;
                                 Yii::$app->formatter->asDatetime(strtotime($model->ccr_created_dt)) : '-';
                         },
                         'format' => 'raw',
+                        'header' => 'Created',
                     ],
                     [
                         'label' => 'Url',
@@ -64,6 +65,7 @@ use yii\widgets\DetailView;
                             return Yii::$app->formatter->nullDisplay;
                         },
                         'format' => 'raw',
+                        'header' => 'Url',
                     ],
                 ],
             ]) ?>

@@ -156,6 +156,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 Yii::$app->formatter->asDatetime(strtotime($model->ccr_created_dt)) : '-';
                         },
                         'format' => 'raw',
+                        'header' => 'Created',
                     ],
                     [
                         'label' => 'Url',
@@ -166,6 +167,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             return Yii::$app->formatter->nullDisplay;
                         },
                         'format' => 'raw',
+                        'header' => 'Url',
                     ],
                 ],
             ]) ?>
