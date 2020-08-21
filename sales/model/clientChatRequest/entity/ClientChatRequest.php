@@ -79,7 +79,7 @@ class ClientChatRequest extends \yii\db\ActiveRecord
         return [
             'ccr_id' => 'ID',
             'ccr_event' => 'Event',
-            'ccr_rid' => 'Request ID',
+            'ccr_rid' => 'Room ID',
             'ccr_json_data' => 'Json Data',
             'ccr_created_dt' => 'Created',
         ];
