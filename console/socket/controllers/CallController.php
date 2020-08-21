@@ -40,4 +40,9 @@ class CallController
             'userStatus' => (int)($userStatusType['us_type_id'] ?? UserCallStatus::STATUS_TYPE_OCCUPIED),
         ];
     }
+
+    public function __destruct()
+    {
+        unset($this->currentQueueCallsService);
+    }
 }

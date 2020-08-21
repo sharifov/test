@@ -519,6 +519,7 @@ class WebsocketServerController extends Controller
             } catch (\Throwable $e) {
                 $out ['errors'][] = $e->getMessage();
             }
+            unset($controller);
         }
 
         return $out;
