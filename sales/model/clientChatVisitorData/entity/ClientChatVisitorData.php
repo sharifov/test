@@ -71,7 +71,7 @@ class ClientChatVisitorData extends \yii\db\ActiveRecord
 
             ['cvd_timezone', 'string', 'max' => 50],
 
-            ['cvd_title', 'string', 'max' => 50],
+            ['cvd_title', 'string', 'max' => 150],
 
             ['cvd_updated_dt', 'safe'],
 

@@ -12,7 +12,7 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="notifications-view">
 
-    <h1><i class="fa fa-comment-o"></i> <?= Html::encode($this->title) ?></h1>
+    <h1><i class="fa fa-bell-o"></i> <?= Html::encode($this->title) ?></h1>
 
     <p>
         <?= Html::a('<i class="fa fa-list"></i> My Notifications', ['list'], ['class' => 'btn btn-success']) ?>
