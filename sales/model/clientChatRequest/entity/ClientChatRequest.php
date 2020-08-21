@@ -244,12 +244,14 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 
     /**
      * @param string $visitorId
+     * @param int $eventId
      * @return array|ActiveRecord|null
      */
-    public static function getLastRequestByVisitorId(string $visitorId)
+    public static function getLastRequestByVisitorId(string $visitorId, int $eventId)
     {
         return self::find()
             ->where(['ccr_visitor_id' => $visitorId])
+            ->andWhere(['ccr_event' => $eventId])
             ->orderBy(['ccr_id' => SORT_DESC])
             ->one();
     }
