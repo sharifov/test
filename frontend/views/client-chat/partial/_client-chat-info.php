@@ -160,10 +160,13 @@ use yii\widgets\Pjax;
                         [
                             'label' => 'Last Url',
                             'value' => static function(ClientChatVisitorData $model) use ($clientChat) {
-                                if (
-                                    $clientChat->cch_rid &&
-                                    $chatRequest = ClientChatRequest::getLastRequestByRid((string) $clientChat->cch_rid)
-                                ) {
+
+                                $visitorId = '';
+                                if ($clientChat->ccv && $clientChat->ccv->ccvCvd) {
+                                    $visitorId = $clientChat->ccv->ccvCvd->cvd_visitor_rc_id ?? '';
+                                }
+
+                                if ($chatRequest = ClientChatRequest::getLastRequestByVisitorId($visitorId)) {
                                     if ($pageUrl = $chatRequest->getPageUrl()) {
                                         return Yii::$app->formatter->asUrl($pageUrl, ['target' => '_blank']);
                                     }
