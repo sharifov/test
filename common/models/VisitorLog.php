@@ -41,6 +41,7 @@ use yii\db\ActiveRecord;
 class VisitorLog extends \yii\db\ActiveRecord
 {
     public const SCENARIO_API_CREATE = 'api_create';
+    public const SCENARIO_CLIENT_CHAT_CREATE = 'create_by_client_chat';
 
     public static function tableName(): string
     {
@@ -50,7 +51,7 @@ class VisitorLog extends \yii\db\ActiveRecord
     public function rules(): array
     {
         return [
-            ['vl_project_id', 'required'],
+            ['vl_project_id', 'required', 'on' => [self::SCENARIO_DEFAULT]],
             ['vl_project_id', 'integer'],
             ['vl_project_id', 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['vl_project_id' => 'id']],
 
@@ -59,18 +60,18 @@ class VisitorLog extends \yii\db\ActiveRecord
             ['vl_client_id', 'integer'],
             ['vl_client_id', 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['vl_client_id' => 'id']],
 
-            ['vl_lead_id', 'required'],
+            ['vl_lead_id', 'required', 'on' => [self::SCENARIO_DEFAULT]],
             ['vl_lead_id', 'integer'],
             ['vl_lead_id', 'exist', 'skipOnError' => true, 'targetClass' => Lead::class, 'targetAttribute' => ['vl_lead_id' => 'id']],
 
-            ['vl_visit_dt', 'required'],
+            ['vl_visit_dt', 'required', 'on' => [self::SCENARIO_DEFAULT, self::SCENARIO_API_CREATE]],
             ['vl_visit_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
 
             ['vl_created_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
 
             ['vl_source_cid', 'string', 'max' => 10],
 
-            ['vl_ga_client_id', 'required'],
+            ['vl_ga_client_id', 'required', 'on' => [self::SCENARIO_DEFAULT, self::SCENARIO_API_CREATE]],
             ['vl_ga_client_id', 'string', 'max' => 36],
 
             ['vl_ga_user_id', 'string', 'max' => 36],
@@ -123,6 +124,7 @@ class VisitorLog extends \yii\db\ActiveRecord
             'vl_utm_source', 'vl_utm_medium', 'vl_utm_campaign', 'vl_utm_term', 'vl_utm_content', 'vl_referral_url',
             'vl_location_url', 'vl_user_agent', 'vl_ip_address', 'vl_visit_dt',
         ];
+        $scenarios[self::SCENARIO_CLIENT_CHAT_CREATE] = $scenarios[self::SCENARIO_DEFAULT];
         return $scenarios;
     }
 
@@ -188,6 +190,7 @@ class VisitorLog extends \yii\db\ActiveRecord
     public static function createByClientChatRequest(int $cvdId, array $data): self
 	{
 		$log = new self();
+		$log->scenario = self::SCENARIO_CLIENT_CHAT_CREATE;
 		$log->vl_cvd_id = $cvdId;
 		self::fillInData($log, $data);
 		return $log;
@@ -195,6 +198,7 @@ class VisitorLog extends \yii\db\ActiveRecord
 
 	public function updateByClientChatRequest(array $data): void
 	{
+		$this->scenario = self::SCENARIO_CLIENT_CHAT_CREATE;
 		self::fillInData($this, $data);
 	}
 
