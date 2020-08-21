@@ -98,7 +98,7 @@ class CallLogController extends FController
 		if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
 
 			$callSearch = new CallLogSearch();
-			$page = Yii::$app->request->post('page', 0);
+			$page = (int)Yii::$app->request->post('page', 0);
 
 			$callHistory = $callSearch->getCallHistory(Auth::id());
 			$callHistory->pagination->setPage($page);
@@ -110,8 +110,9 @@ class CallLogController extends FController
 			$result = [
 				'html'  => $this->renderAjax('partial/_ajax_wg_call_history', [
 					'callHistory' => CallHelper::formatCallHistoryByDate($rows, $userTimezone),
+                    'page' => ($page + 1)
 				]),
-				'page' => $page+1,
+				'page' => $page + 1,
 				'rows' => empty($rows)
 			];
 

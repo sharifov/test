@@ -442,6 +442,12 @@ $js = <<<JS
                             }
                         }
                         
+                        if (obj.cmd === 'addCallToHistory') {
+                            if (typeof PhoneWidgetCall === "object") {
+                                PhoneWidgetCall.socket(obj.data);
+                            }
+                        }
+                        
                     }
                     // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
                 } catch (error) {
