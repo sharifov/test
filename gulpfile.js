@@ -44,6 +44,7 @@ function build_phone_widget(cb) {
        'frontend/web/web_phone/component/pane/contact_info.jsx',
        'frontend/web/web_phone/component/pane/conference/pane.jsx',
        'frontend/web/web_phone/component/pane/add_note.jsx',
+       'frontend/web/web_phone/component/notification/notifications.jsx',
 
        'frontend/web/web_phone/js/contact_info.js',
        'frontend/web/web_phone/js/dialpad.js',
@@ -60,13 +61,15 @@ function build_phone_widget(cb) {
        'frontend/web/web_phone/js/queue/queue.js',
        'frontend/web/web_phone/js/storage/conference.js',
 
-        'frontend/web/web_phone/js/phone-widget.js',
+       'frontend/web/web_phone/js/notifier/notifier.js',
+
+       'frontend/web/web_phone/js/phone-widget.js',
 		
-		'frontend/web/web_phone/js/status.js',
-		'frontend/web/web_phone/js/call.js',
-		'frontend/web/web_phone/js/sms.js',
-		'frontend/web/web_phone/js/contacts.js',
-		'frontend/web/web_phone/js/email.js',
+	   'frontend/web/web_phone/js/status.js',
+	   'frontend/web/web_phone/js/call.js',
+	   'frontend/web/web_phone/js/sms.js',
+	   'frontend/web/web_phone/js/contacts.js',
+	   'frontend/web/web_phone/js/email.js',
     ])
         // The gulp-uglify plugin won't update the filename
         .pipe(concat('widget.js'))

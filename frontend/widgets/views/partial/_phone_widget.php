@@ -27,53 +27,7 @@ use yii\web\View;
             <li class="call-filter__alert is-visible"><a href="#" class="call-filter__toggle call-filter__toggle--line-general" title="General Line" data-call-filter="general">0</a></li>
         </ul>
 
-        <!-- phone notifications -->
-
-        <div class="phone-notifications phone-notifications--general-calls">
-                <ul class="phone-notifications__list">
-                    <li class="phone-notifications__item phone-notifications__item--shown">
-                        <div class="incoming-notification">
-                            <i class="user-icn">G</i>
-                            <div class="incoming-notification__inner">
-                                <div class="incoming-notification__info">
-                                    <div class="incoming-notification__general-info">
-                                        <b class="incoming-notification__name">Geffy Morgan Jefferson</b>
-                                        <span class="incoming-notification__phone">+1 (888) 88 888 88</span>
-                                        <div class="incoming-notification__project">
-                                            <b class="incoming-notification__project-name">WOWFARE</b>
-                                            <i>•</i>
-                                            <span class="incoming-notification__position">Sales General</span>
-                                        </div>
-                                    </div>
-                                    <div class="incoming-notification__timer">
-                                        <span>24:32</span>
-                                    </div>
-                                </div>
-                                <div class="incoming-notification__action-list">
-                                    <div class="incoming-notification__dynamic">
-                                        <a href="#" class="incoming-notification__action incoming-notification__action--line">
-                                            <i class="fa fa-random"></i>
-                                        </a>
-                                        
-                                        <a href="#" class="incoming-notification__action incoming-notification__action--info">
-                                            <i class="fa fa-info"></i>
-                                        </a>
-                                       
-                                        <a href="#" class="incoming-notification__action incoming-notification__action--phone">
-                                            <i class="fa fa-phone"></i>
-                                        </a>
-                                    </div>
-                                    <a href="#" class="incoming-notification__action incoming-notification__action--min">
-                                        <i class="fa fa-long-arrow-alt-down"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-
-        <!-- end phone notifications -->
+        <div id="widget-phone-notifications"></div>
 
         <!-- <a href="#" class="phone-widget__dev header-action-small toggle-bar-logs"><i class="fas fa-tools"></i></a> -->
       <!-- <span class="phone-widget__title">Calls</span> -->

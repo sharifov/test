@@ -60,7 +60,7 @@ class NewWebPhoneAsset extends AssetBundle
                 ['/web_phone/component/pane/contact_info.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
                 ['/web_phone/component/pane/conference/pane.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
                 ['/web_phone/component/pane/add_note.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
-                ['/web_phone/component/notification/desktop.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
+                ['/web_phone/component/notification/notifications.jsx', 'position' => \yii\web\View::POS_HEAD, 'type' => 'text/babel'],
 
                 '/web_phone/js/contact_info.js',
                 '/web_phone/js/dialpad.js',
@@ -76,6 +76,8 @@ class NewWebPhoneAsset extends AssetBundle
 
                 '/web_phone/js/queue/queue.js',
                 '/web_phone/js/storage/conference.js',
+
+                '/web_phone/js/notifier/notifier.js',
 
                 '/web_phone/js/phone-widget.js',
 
