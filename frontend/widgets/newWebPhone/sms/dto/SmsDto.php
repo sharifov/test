@@ -48,7 +48,7 @@ class SmsDto
      */
     public function __construct($sms, Employee $user, Contact $contact)
     {
-        $createdDt = Employee::convertTimeFromUtcToUserTime($user, strtotime($sms['s_created_dt']));
+        $createdDt = Employee::convertTimeFromUtcToUserTime($user->getTimezone(), strtotime($sms['s_created_dt']));
         $this->id = $sms['s_id'];
         $this->type = (int)$sms['s_type_id'];
         $this->from = $sms['s_phone_from'];

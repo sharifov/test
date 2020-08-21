@@ -3715,6 +3715,8 @@ $(document).ready(function () {
   // $(widget.control).on('pw-back-action', function () {
   //     console.log('here is a event for back button');
   // })
+
+  window.historySimpleBar = historySimpleBar;
 });
 
 function stateTimer() {
@@ -5429,6 +5431,21 @@ var PhoneWidgetCall = function () {
     if (data.command === 'conferenceUpdate') {
       conferenceUpdate(data);
       return;
+    }
+
+    if (data.command === 'addCallToHistory') {
+      addCallToHistory(data);
+      return;
+    }
+  }
+
+  function addCallToHistory(data) {
+    if ($('#tab-history .simplebar-content .history-tab-today-first-block').length > 0) {
+      $('#tab-history .simplebar-content .history-tab-today-first-block').prepend(data.call);
+    } else {
+      let call = '<span class="section-separator">Today</span>' + '<ul class="phone-widget__list-item calls-history history-tab-today-first-block">' + data.call + '</ul>';
+      $('#tab-history .simplebar-content').prepend(call);
+      window.historySimpleBar.recalculate();
     }
   }
 
