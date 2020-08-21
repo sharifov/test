@@ -390,7 +390,7 @@ class ClientChatController extends FController
         $data[$requestSearch->formName()]['ccr_visitor_id'] = $visitorId;
         $data[$requestSearch->formName()]['ccr_event'] = ClientChatRequest::EVENT_TRACK;
         $dataProviderRequest = $requestSearch->search($data);
-        $dataProviderRequest->setPagination(['pageSize' => 10]);
+        $dataProviderRequest->setPagination(['pageSize' => 40]);
 
 		return $this->renderAjax('partial/_data_info', [
 			'clientChat' => $clientChat,
