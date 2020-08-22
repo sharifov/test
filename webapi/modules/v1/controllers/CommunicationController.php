@@ -1142,6 +1142,8 @@ class CommunicationController extends ApiBaseController
                     $call->setTypeOut();
                 } elseif ($custom_parameters->type_id === Call::CALL_TYPE_IN) {
                     $call->setTypeIn();
+                } elseif ($custom_parameters->type_id === Call::CALL_TYPE_RETURN) {
+                    $call->setTypeReturn();
                 }
             }
 

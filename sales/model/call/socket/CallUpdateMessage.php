@@ -30,6 +30,12 @@ class CallUpdateMessage
             } else {
                 $phone = $call->c_to;
             }
+        } elseif ($call->isReturn() && ($parentReturn = $call->cParent)) {
+            if ($parentReturn->isIn()) {
+                $phone = $parentReturn->c_from;
+            } elseif ($parentReturn->isOut()) {
+                $phone = $parentReturn->c_to;
+            }
         }
 
         if ($call->isJoin()) {

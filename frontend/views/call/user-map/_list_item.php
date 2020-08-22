@@ -36,8 +36,10 @@ use yii\helpers\VarDumper;
 
                 <?php if ($model->isIn()):?>
                     <span class="badge badge-danger">In</span>
-                <?php else:?>
+                <?php elseif ($model->isOut()):?>
                     <span class="badge badge-blue">Out</span>
+                <?php elseif ($model->isReturn()):?>
+                    <span class="badge badge-blue">Return</span>
                 <?php endif;?>
 
             </td>
