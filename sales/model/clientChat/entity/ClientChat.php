@@ -235,7 +235,6 @@ class ClientChat extends \yii\db\ActiveRecord
 	public function close(): void
 	{
 		$this->cch_status_id = self::STATUS_CLOSED;
-		$this->cch_client_online = 0;
 	}
 
 	public function transfer(): void
