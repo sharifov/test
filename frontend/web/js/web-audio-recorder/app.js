@@ -11,6 +11,7 @@
 
         var AudioContext = window.AudioContext || window.webkitAudioContext;
         var audioContext;
+        var updateDateTime;
 
         var recordBtn, stopBtn, blobRecord, blobUrl, form, submitBtn;
 
@@ -28,6 +29,9 @@
         var recordView = document.createElement('div');
         recordView.id = 'record';
         recordView.className = 'd-flex justify-content-center align-items-center';
+        var canvas = document.getElementById('visualizer');
+        var canvasCtx = canvas.getContext("2d");
+        var timerWrapper = $('#timer-wrapper');
 
 
         var defaults = {
@@ -61,6 +65,78 @@
             return true;
         }
 
+        var minSecStr = function(n) {
+            return (n < 10 ? "0" : "") + n;
+        };
+
+        updateDateTime = function() {
+            var sec;
+
+            if (recorder) {
+                sec = recorder.recordingTime() | 0;
+                $('#time-display').html("" + (minSecStr(sec / 60 | 0)) + ":" + (minSecStr(sec % 60)));
+            }
+        };
+
+        window.setInterval(updateDateTime, 200);
+
+        var visualize = function (stream) {
+            if(!audioContext) {
+                audioContext = new AudioContext();
+            }
+
+            let source = audioContext.createMediaStreamSource(stream);
+
+            let analyser = audioContext.createAnalyser();
+            analyser.fftSize = 2048;
+            let bufferLength = analyser.frequencyBinCount;
+            let dataArray = new Uint8Array(bufferLength);
+
+            source.connect(analyser);
+
+            draw();
+
+            timerWrapper.show();
+
+            function draw() {
+                let WIDTH = canvas.width
+                let HEIGHT = canvas.height;
+
+                requestAnimationFrame(draw);
+
+                analyser.getByteTimeDomainData(dataArray);
+
+                canvasCtx.fillStyle = 'rgb(255,255,255)';
+                canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
+
+                canvasCtx.lineWidth = 2;
+                canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
+
+                canvasCtx.beginPath();
+
+                let sliceWidth = WIDTH * 1.0 / bufferLength;
+                let x = 0;
+
+
+                for(let i = 0; i < bufferLength; i++) {
+
+                    let v = dataArray[i] / 128.0;
+                    let y = v * HEIGHT/2;
+
+                    if(i === 0) {
+                        canvasCtx.moveTo(x, y);
+                    } else {
+                        canvasCtx.lineTo(x, y);
+                    }
+
+                    x += sliceWidth;
+                }
+
+                canvasCtx.lineTo(canvas.width, canvas.height/2);
+                canvasCtx.stroke();
+            }
+        }
+
         var startRecording = function () {
             console.log("startRecording() called");
 
@@ -78,6 +154,8 @@
                 gumStream = stream;
 
                 input = audioContext.createMediaStreamSource(stream);
+
+                visualize(gumStream);
 
                 recorder = new WebAudioRecorder(input, {
                     workerDir: "/js/web-audio-recorder/", // must end with slash
@@ -135,6 +213,8 @@
             submitBtn.attr('disabled', false);
 
             recorder.finishRecording();
+
+            timerWrapper.hide();
 
             __log('Recording stopped');
         }

@@ -152,6 +152,7 @@ class UserVoiceMailController extends FController
 
 		$userVoiceMail = new UserVoiceMailForm();
 		$userVoiceMail->uvm_user_id = $userId;
+		$userVoiceMail->uvm_max_recording_time = 10;
 
 		if ($userVoiceMail->load(Yii::$app->request->post())) {
 			$userVoiceMail->recordFile = UploadedFile::getInstance($userVoiceMail, 'recordFile');

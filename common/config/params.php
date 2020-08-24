@@ -53,5 +53,5 @@ return [
         'password'  => '',
         'iv'        => '',
     ],
-
+	'user_voice_mail_alias' => '@frontend/web/'
 ];
