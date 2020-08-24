@@ -593,7 +593,11 @@ class CasesQSearch extends Cases
      */
     public function searchNeedAction($params, Employee $user): ActiveDataProvider
     {
-        $query = $this->casesQRepository->getNeedActionQuery($user);
+        $query = $this->casesQRepository->getNeedActionQuery($user)->addSelect(['*']);
+
+        $query->addSelect([
+            'time_left' => new Expression('if ((cs_deadline_dt IS NOT NULL), cs_deadline_dt, \'2100-01-01 00:00:00\')')
+        ]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
