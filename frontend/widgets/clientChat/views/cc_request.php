@@ -3,6 +3,7 @@
 use common\components\i18n\Formatter;
 use frontend\widgets\clientChat\ClientChatAsset;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
+use yii\helpers\Html;
 
 /** @var $this \yii\web\View */
 /** @var $access ClientChatUserAccess[] */
@@ -22,7 +23,7 @@ $totalRequest = count($access);
         <div class="_cc-box-header <?= $access ? 'active' : '' ?>">
             <div class="_cc-box-option">
                 <div class="header_img">
-					<?=\yii\helpers\Html::img('/img/user.png')?>
+					<?= Html::img('/img/user.png')?>
                 </div>
                 <span id="_cc-box-title">Client Chat Request</span> <br>
             </div>
@@ -35,14 +36,14 @@ $totalRequest = count($access);
                             <div class="_cc-client-info">
                                 <span class="_cc-client-name">
                                     <i class="fa fa-user"></i>
-                                    <?= $item->ccuaCch->cchClient && $item->ccuaCch->cchClient->full_name ? $item->ccuaCch->cchClient->full_name : 'Guest-' . $item->ccuaCch->cch_id ?>
+                                    <?= Html::encode($item->ccuaCch->cchClient && $item->ccuaCch->cchClient->full_name ? $item->ccuaCch->cchClient->full_name : 'Guest-' . $item->ccuaCch->cch_id) ?>
                                 </span>
 
                                 <?php if ($item->ccuaCch->cchClient && $item->ccuaCch->cchClient->clientEmails): ?>
                                     <?php foreach($item->ccuaCch->cchClient->clientEmails as $email): ?>
                                         <span class="_cc-client-email">
                                             <i class="fa fa-envelope"></i>
-                                            <code><?= $email->email ?></code>
+                                            <code><?= Html::encode($email->email) ?></code>
                                         </span>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
@@ -51,39 +52,39 @@ $totalRequest = count($access);
                                     <?php foreach($item->ccuaCch->cchClient->clientPhones as $phone): ?>
                                         <span class="_cc-client-phone">
                                             <i class="fa fa-phone"></i>
-                                            <code><?= $phone->phone ?></code>
+                                            <code><?= Html::encode($phone->phone) ?></code>
                                         </span>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
 
                                 <span class="_cc-request-created">
                                     <?php if ($formatter instanceof Formatter): ?>
-                                        <?= $formatter->asByUserDateTime($item->ccua_created_dt) ?>
+                                        <?= Html::encode($formatter->asByUserDateTime($item->ccua_created_dt)) ?>
                                     <?php else: ?>
-										<?= $formatter->asDatetime($item->ccua_created_dt) ?>
+										<?= Html::encode($formatter->asDatetime($item->ccua_created_dt)) ?>
 									<?php endif; ?>
                                 </span>
 
                                     <?php if ($formatter instanceof Formatter): ?>
                                     <span>
-                                        <?= $formatter->asTimer($item->ccua_created_dt) ?>
+                                        <?= Html::encode($formatter->asTimer($item->ccua_created_dt)) ?>
                                     </span>
                                     <?php endif; ?>
                                 <div class="_cc-data">
                                     <?php if ($item->ccuaCch->cchDep): ?>
-                                        <span class="label label-default"><?= $item->ccuaCch->cchDep->dep_name ?></span>
+                                        <span class="label label-default"><?= Html::encode($item->ccuaCch->cchDep->dep_name) ?></span>
                                     <?php endif; ?>
 
                                     <?php if ($item->ccuaCch->cchProject): ?>
-                                        <span class="label label-default"><?= $item->ccuaCch->cchProject->name ?></span>
+                                        <span class="label label-default"><?= Html::encode($item->ccuaCch->cchProject->name) ?></span>
                                     <?php endif; ?>
 
-                                    <span class="label label-default"><?= $item->ccuaCch->cchChannel ? $item->ccuaCch->cchChannel->ccc_name : '' ?></span>
+                                    <span class="label label-default"><?= Html::encode($item->ccuaCch->cchChannel ? $item->ccuaCch->cchChannel->ccc_name : '') ?></span>
                                 </div>
 
                                 <?php if ($item->ccuaCch->cchOwnerUser && $item->ccuaCch->isTransfer()): ?>
                                     <div>
-                                        <span class="label label-warning">Transfer</span> from <b><?= $item->ccuaCch->cchOwnerUser->nickname ?></b>
+                                        <span class="label label-warning">Transfer</span> from <b><?= Html::encode($item->ccuaCch->cchOwnerUser->nickname) ?></b>
                                     </div>
                                 <?php endif; ?>
                             </div>
