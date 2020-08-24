@@ -28,6 +28,7 @@ use sales\model\userVoiceMail\entity\search\UserVoiceMailSearch;
 use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessRepository;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
+use sales\services\TransactionManager;
 use Yii;
 use yii\bootstrap4\Html;
 use yii\data\ActiveDataProvider;
@@ -973,6 +974,8 @@ class EmployeeController extends FController
                         throw new \RuntimeException($userProfile->getErrorSummary(false)[0]);
                     }
 
+					$this->clientChatUserAccessService->setUserAccessToAllChats($user->id);
+
                 } else {
                     $errorMessage = $rocketChat::getErrorMessageFromResult($result);
                     throw new \RuntimeException('Error from RocketChat. ' . $errorMessage);
@@ -1026,7 +1029,7 @@ class EmployeeController extends FController
                         throw new \RuntimeException($userProfile->getErrorSummary(false)[0]);
                     }
 
-                    $this->clientChatUserAccessService->removeUserAccess($userProfile->up_user_id);
+                    $this->clientChatUserAccessService->disableUserAccessToAllChats($userProfile->up_user_id);
                     $this->clientChatMessageService->discardAllUnreadMessagesForUser($userProfile->up_user_id);
                 } else {
                     $errorMessage = $rocketChat::getErrorMessageFromResult($result);

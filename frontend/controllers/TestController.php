@@ -152,6 +152,7 @@ use sales\services\cases\CasesSaleService;
 use sales\services\client\ClientManageService;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatService\ClientChatService;
+use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
 use sales\services\email\EmailService;
 use sales\services\email\incoming\EmailIncomingService;
 use sales\services\lead\LeadCloneService;
@@ -1872,6 +1873,13 @@ class TestController extends FController
     {
         return $this->render('user-monitor');
     }
+
+    public function actionTestSetByUserId()
+	{
+		$repository = Yii::createObject(ClientChatUserAccessService::class);
+
+		$repository->setUserAccessToAllChats(464);
+	}
 }
 
 

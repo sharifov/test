@@ -41,7 +41,7 @@ class ClientChatUserAccessRepository extends Repository
 		if (!$clientChatUserAccess->save()) {
 			throw new \RuntimeException($clientChatUserAccess->getErrorSummary(false)[0], ClientChatCodeException::CC_USER_ACCESS_SAVE_FAILED);
 		}
-		$this->eventDispatcher->dispatchAll([new SendNotificationEvent($clientChatUserAccess)]);
+		$this->eventDispatcher->dispatch(new SendNotificationEvent($clientChatUserAccess), 'clientChatUserAccess_' . $clientChatUserAccess->ccua_user_id);
 		return $clientChatUserAccess;
 	}
 
@@ -59,7 +59,7 @@ class ClientChatUserAccessRepository extends Repository
 	 */
 	public function findByChatIdAndUserId(int $chatId, int $userId): array
 	{
-		if ($access = ClientChatUserAccess::find()->byChatId($chatId)->byUserId()->all()) {
+		if ($access = ClientChatUserAccess::find()->byChatId($chatId)->byUserId($userId)->all()) {
 			return $access;
 		}
 		throw new NotFoundException('Client Chat User Access not found rows');

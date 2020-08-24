@@ -5,12 +5,14 @@ namespace sales\services\clientChatUserAccessService;
 use common\models\Notifications;
 use frontend\widgets\clientChat\ClientChatAccessMessage;
 use sales\model\clientChat\ClientChatCodeException;
-use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
+use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatVisitor\repository\ClientChatVisitorRepository;
 use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessRepository;
+use sales\repositories\clientChatUserChannel\ClientChatUserChannelRepository;
 use sales\services\clientChatService\ClientChatService;
+use sales\services\TransactionManager;
 
 /**
  * Class ClientChatUserAccessService
@@ -20,6 +22,8 @@ use sales\services\clientChatService\ClientChatService;
  * @property ClientChatRepository $clientChatRepository
  * @property ClientChatService $clientChatService
  * @property ClientChatVisitorRepository $clientChatVisitorRepository
+ * @property ClientChatUserChannelRepository $clientChatUserChannelRepository
+ * @property TransactionManager $transactionManager
  */
 class ClientChatUserAccessService
 {
@@ -39,13 +43,29 @@ class ClientChatUserAccessService
 	 * @var ClientChatVisitorRepository
 	 */
 	private ClientChatVisitorRepository $clientChatVisitorRepository;
+	/**
+	 * @var ClientChatUserChannelRepository
+	 */
+	private ClientChatUserChannelRepository $clientChatUserChannelRepository;
+	/**
+	 * @var TransactionManager
+	 */
+	private TransactionManager $transactionManager;
 
-	public function __construct(ClientChatUserAccessRepository $clientChatUserAccessRepository, ClientChatRepository $clientChatRepository, ClientChatService $clientChatService, ClientChatVisitorRepository $clientChatVisitorRepository)
-	{
+	public function __construct(
+		ClientChatUserAccessRepository $clientChatUserAccessRepository,
+		ClientChatRepository $clientChatRepository,
+		ClientChatService $clientChatService,
+		ClientChatVisitorRepository $clientChatVisitorRepository,
+		ClientChatUserChannelRepository $clientChatUserChannelRepository,
+		TransactionManager $transactionManager
+	) {
 		$this->clientChatUserAccessRepository = $clientChatUserAccessRepository;
 		$this->clientChatRepository = $clientChatRepository;
 		$this->clientChatService = $clientChatService;
 		$this->clientChatVisitorRepository = $clientChatVisitorRepository;
+		$this->clientChatUserChannelRepository = $clientChatUserChannelRepository;
+		$this->transactionManager = $transactionManager;
 	}
 
 	public function updateStatus(ClientChatUserAccess $ccua, int $status, ?int $chatOwnerId = null): void
@@ -98,13 +118,37 @@ class ClientChatUserAccessService
 
 	/**
 	 * @param int $userId
+	 * @throws \Throwable
 	 */
-	public function removeUserAccess(int $userId): void
+	public function disableUserAccessToAllChats(int $userId): void
 	{
-		/** @var ClientChatUserAccess[] $userAccess  */
-		$userAccess = ClientChatUserAccess::find()->byUserId($userId)->pending()->all();
-		foreach ($userAccess as $access) {
-			$this->updateStatus($access, ClientChatUserAccess::STATUS_SKIP);
-		}
+		$_self = $this;
+		$this->transactionManager->wrap( static function () use ($userId, $_self) {
+			/** @var ClientChatUserAccess[] $userAccess  */
+			$userAccess = ClientChatUserAccess::find()->byUserId($userId)->pending()->all();
+			foreach ($userAccess as $access) {
+				$_self->updateStatus($access, ClientChatUserAccess::STATUS_SKIP);
+			}
+		});
+	}
+
+	/**
+	 * @param int $id
+	 * @throws \Throwable
+	 */
+	public function setUserAccessToAllChats(int $id): void
+	{
+		$_self = $this;
+		$this->transactionManager->wrap( static function () use ($id, $_self) {
+			if ($userChannels = $_self->clientChatUserChannelRepository->findByUserId($id)) {
+				foreach ($userChannels as $userChannel) {
+					if ($chats = ClientChat::find()->byOwner(null)->byChannel($userChannel->ccuc_channel_id)->all()) {
+						foreach ($chats as $chat) {
+							$_self->clientChatService->sendRequestToUser($chat, $userChannel);
+						}
+					}
+				}
+			}
+		});
 	}
 }
