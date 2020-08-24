@@ -104,19 +104,23 @@ class ClientChatService
 
 	/**
 	 * @param ClientChat $clientChat
+	 * @throws \Throwable
 	 */
 	public function sendRequestToUsers(ClientChat $clientChat): void
 	{
-		if ($channel = $this->clientChatChannelRepository->findByClientChatData($clientChat->cch_dep_id, $clientChat->cch_project_id, null)) {
-			$userChannel = ClientChatUserChannel::find()->byChannelId($channel->ccc_id)->all();
+		$_self = $this;
+		$this->transactionManager->wrap(static function () use ($clientChat, $_self) {
+			if ($channel = $_self->clientChatChannelRepository->findByClientChatData($clientChat->cch_dep_id, $clientChat->cch_project_id, null)) {
+				$userChannel = ClientChatUserChannel::find()->byChannelId($channel->ccc_id)->all();
 
-			if ($userChannel) {
-				/** @var ClientChatUserChannel $item */
-				foreach ($userChannel as $item) {
-					$this->sendRequestToUser($clientChat, $item);
+				if ($userChannel) {
+					/** @var ClientChatUserChannel $item */
+					foreach ($userChannel as $item) {
+						$_self->sendRequestToUser($clientChat, $item);
+					}
 				}
 			}
-		}
+		});
 	}
 
 	/**
