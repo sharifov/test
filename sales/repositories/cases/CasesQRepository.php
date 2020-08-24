@@ -83,11 +83,36 @@ class CasesQRepository
         return $this->getNeedActionQuery($user)->count();
     }
 
+    public function getNeedActionQuery(Employee $user): ActiveQuery
+    {
+        $query = CasesQSearch::find()->andWhere(['cs_need_action' => true])->andWhere(['<>', 'cs_status', CasesStatus::STATUS_PENDING]);
+
+        if ($user->isAdmin()) {
+            return $query;
+        }
+
+        $condition = [
+            'OR',
+            [
+                'AND',
+                ['cs_status' => CasesStatus::STATUS_PROCESSING],
+                ['cs_user_id' => $user->id],
+            ],
+            ['cs_status' => CasesStatus::STATUS_FOLLOW_UP],
+            ['cs_status' => CasesStatus::STATUS_TRASH],
+            ['cs_status' => CasesStatus::STATUS_SOLVED],
+        ];
+
+        $query->andWhere($this->createSubQuery($user->id, $condition, $checkDepPermission = false));
+
+        return $query;
+    }
+
     /**
      * @param Employee $user
      * @return ActiveQuery
      */
-    public function getNeedActionQuery(Employee $user): ActiveQuery
+    public function getNeedActionQueryNew(Employee $user): ActiveQuery /* TODO::  */
     {
         $query = CasesQSearch::find()
             ->andWhere(['cs_need_action' => true])
