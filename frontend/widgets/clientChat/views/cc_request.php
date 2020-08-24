@@ -59,15 +59,15 @@ $totalRequest = count($access);
 
                                 <span class="_cc-request-created">
                                     <?php if ($formatter instanceof Formatter): ?>
-                                        <?= Html::encode($formatter->asByUserDateTime($item->ccua_created_dt)) ?>
+                                        <?= $formatter->asByUserDateTime($item->ccua_created_dt) ?>
                                     <?php else: ?>
-										<?= Html::encode($formatter->asDatetime($item->ccua_created_dt)) ?>
+										<?= $formatter->asDatetime($item->ccua_created_dt) ?>
 									<?php endif; ?>
                                 </span>
 
                                     <?php if ($formatter instanceof Formatter): ?>
                                     <span>
-                                        <?= Html::encode($formatter->asTimer($item->ccua_created_dt)) ?>
+                                        <?= $formatter->asTimer($item->ccua_created_dt) ?>
                                     </span>
                                     <?php endif; ?>
                                 <div class="_cc-data">
