@@ -89,27 +89,60 @@ class CasesQRepository
      */
     public function getNeedActionQuery(Employee $user): ActiveQuery
     {
-        $query = CasesQSearch::find()->andWhere(['cs_need_action' => true])->andWhere(['<>', 'cs_status', CasesStatus::STATUS_PENDING]);
+        $query = CasesQSearch::find()
+            ->andWhere(['cs_need_action' => true])
+            ->andWhere(['<>', 'cs_status', CasesStatus::STATUS_PENDING]);
+        $timeLeftSelect = [
+            'time_left' => new Expression('if ((cs_deadline_dt IS NOT NULL), cs_deadline_dt, \'2100-01-01 00:00:00\')')
+        ];
 
-        if ($user->isAdmin()) {
+        $subQueries = [];
+        if ($user->can('caseListOwner')) {
+            $caseListOwnerQuery = clone ($query);
+            $caseListOwnerQuery->select(['cases.*'])
+                ->andWhere($this->createSubQuery($user->id, [], $checkDepPermission = false, true));
+            $caseListOwnerQuery->addSelect($timeLeftSelect);
+            $subQueries[] = $caseListOwnerQuery;
+        }
+        if ($user->can('caseListEmpty')) {
+            $caseListEmptyQuery = clone ($query);
+            $condition['cs_user_id'] = null;
+            $caseListEmptyQuery->select(['cases.*'])
+                ->andWhere($this->createSubQuery($user->id, $condition, $checkDepPermission = false, false));
+            $caseListEmptyQuery->addSelect($timeLeftSelect);
+            $subQueries[] = $caseListEmptyQuery;
+        }
+        if ($user->can('caseListAny')) {
+            $caseListAnyQuery = clone ($query);
+            $caseListAnyQuery->select(['cases.*'])
+                ->andWhere($this->createSubQuery($user->id, [], $checkDepPermission = false, false));
+            $caseListAnyQuery->addSelect($timeLeftSelect);
+            $subQueries[] = $caseListAnyQuery;
+        }
+        if ($user->can('caseListGroup')) {
+            $caseListGroupQuery = clone ($query);
+            $conditions = ['cs_user_id' => $this->usersIdsInCommonGroups($user->id, 60)];
+            $caseListGroupQuery->select(['cases.*'])
+                ->andWhere($this->createSubQuery($user->id, $conditions, $checkDepPermission = false, false));
+            $caseListGroupQuery->addSelect($timeLeftSelect);
+            $subQueries[] = $caseListGroupQuery;
+        }
+
+        if (empty($subQueries)) {
+            $query->where('0=1');
             return $query;
         }
 
-        $condition = [
-            'OR',
-            [
-                'AND',
-                ['cs_status' => CasesStatus::STATUS_PROCESSING],
-                ['cs_user_id' => $user->id],
-            ],
-            ['cs_status' => CasesStatus::STATUS_FOLLOW_UP],
-            ['cs_status' => CasesStatus::STATUS_TRASH],
-            ['cs_status' => CasesStatus::STATUS_SOLVED],
-        ];
+        foreach ($subQueries as $key => $subQuery) {
+            if ($key === 0) {
+                $parentQuery = $subQuery;
+                continue;
+            }
+            $parentQuery->union($subQuery);
+        }
+        $parentQuery->distinct();
 
-        $query->andWhere($this->createSubQuery($user->id, $condition, $checkDepPermission = false));
-
-        return $query;
+        return $parentQuery;
     }
 
     /**
@@ -294,11 +327,12 @@ class CasesQRepository
 
     /**
      * @param $userId
+     * @param int $cacheDuration
      * @return ActiveQuery
      */
-    private function usersIdsInCommonGroups($userId): ActiveQuery
+    private function usersIdsInCommonGroups($userId, int $cacheDuration = -1): ActiveQuery
     {
-        return EmployeeGroupAccess::usersIdsInCommonGroupsSubQuery($userId);
+        return EmployeeGroupAccess::usersIdsInCommonGroupsSubQuery($userId, $cacheDuration);
     }
 
     /**
@@ -338,16 +372,15 @@ class CasesQRepository
         ];
     }
 
-    private function createSubQuery($userId, $conditions, $checkDepPermission = true): array
+    private function createSubQuery($userId, $conditions, $checkDepPermission = true, bool $isOwner = true): array
     {
         $depConditions = [];
         if ($checkDepPermission) {
             $depConditions = $this->inDepartment($userId);
         }
 
-        return [
+        $result = [
             'or',
-            $this->isOwner($userId),
             [
                 'and',
                 $this->inProject($userId),
@@ -355,5 +388,11 @@ class CasesQRepository
                 $conditions
             ]
         ];
+
+        if ($isOwner) {
+            $result['cs_user_id'] = $userId;
+        }
+
+        return $result;
     }
 }
