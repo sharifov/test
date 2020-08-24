@@ -49,7 +49,7 @@ use yii\widgets\Pjax;
             ]) ?>
         <?php endif; ?>
 
-        <?php if ($dataProviderRequest) :?>
+        <?php if ($dataProviderRequest->getTotalCount()) :?>
             <h4>Browsing history</h4>
             <?php Pjax::begin(['id' => 'pjax-browsing-history', 'timeout' => 5000, 'enablePushState' => false]); ?>
             <?php echo GridView::widget([
@@ -81,7 +81,7 @@ use yii\widgets\Pjax;
         <?php endif ?>
 
         <?php if ($client) :?>
-            <?php if ($leadDataProvider) :?>
+            <?php if ($leadDataProvider->getTotalCount()) :?>
                 <h4>Leads from client</h4>
                 <?php Pjax::begin(['id' => 'pjax-client-leads', 'timeout' => 5000, 'enablePushState' => false]); ?>
                 <?php echo GridView::widget([
@@ -108,7 +108,7 @@ use yii\widgets\Pjax;
                 <?php Pjax::end() ?>
             <?php endif ?>
 
-            <?php if ($casesDataProvider) :?>
+            <?php if ($casesDataProvider->getTotalCount()) :?>
                 <h4>Cases from client</h4>
                 <?php Pjax::begin(['id' => 'pjax-client-cases', 'timeout' => 5000, 'enablePushState' => false]); ?>
                 <?php echo GridView::widget([
