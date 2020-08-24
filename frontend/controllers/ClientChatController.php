@@ -4,11 +4,14 @@ namespace frontend\controllers;
 use common\components\CentrifugoService;
 use common\models\Lead;
 use common\models\Quote;
+use common\models\search\LeadSearch;
 use common\models\VisitorLog;
 use frontend\widgets\clientChat\ClientChatAccessWidget;
 use frontend\widgets\notification\NotificationSocketWidget;
 use frontend\widgets\notification\NotificationWidget;
 use sales\auth\Auth;
+use sales\entities\cases\Cases;
+use sales\entities\cases\CasesSearch;
 use sales\entities\chat\ChatGraphsSearch;
 use sales\helpers\app\AppHelper;
 use sales\model\clientChat\ClientChatCodeException;
@@ -392,11 +395,26 @@ class ClientChatController extends FController
         $dataProviderRequest = $requestSearch->search($data);
         $dataProviderRequest->setPagination(['pageSize' => 40]);
 
+        if ($clientChat->cchClient) {
+            $leadSearch = new LeadSearch();
+            $data[$leadSearch->formName()]['client_id'] = $clientChat->cchClient->id;
+            $data[$leadSearch->formName()]['project_id'] = $clientChat->cch_project_id;
+            $leadDataProvider = $leadSearch->search($data);
+
+            $casesSearch = new CasesSearch();
+            $data[$casesSearch->formName()]['cs_client_id'] = $clientChat->cchClient->id;
+            $data[$casesSearch->formName()]['cs_project_id'] = $clientChat->cch_project_id;
+            $casesDataProvider = $casesSearch->search($data, Auth::user());
+        }
+
 		return $this->renderAjax('partial/_data_info', [
 			'clientChat' => $clientChat,
 			'clientChatVisitorData' => $clientChat->ccv->ccvCvd ?? null,
 			'visitorLog' => $visitorLog,
 			'dataProviderRequest' => $dataProviderRequest,
+			'client' => $clientChat->cchClient ?? null,
+			'leadDataProvider' => $leadDataProvider ?? null,
+			'casesDataProvider' => $casesDataProvider ?? null,
 		]);
 	}
 

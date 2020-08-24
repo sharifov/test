@@ -5,8 +5,14 @@
  * @var $visitorLog \common\models\VisitorLog|null
  * @var $clientChatVisitorData ClientChatVisitorData|null
  * @var yii\data\ActiveDataProvider $dataProviderRequest
+ * @var Client $client
+ * @var yii\data\ActiveDataProvider|null $leadDataProvider
+ * @var yii\data\ActiveDataProvider|null $casesDataProvider
  */
 
+use common\models\Client;
+use common\models\Lead;
+use sales\entities\cases\Cases;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use yii\bootstrap4\Alert;
@@ -71,8 +77,65 @@ use yii\widgets\Pjax;
                     ],
                 ],
             ]) ?>
+            <?php Pjax::end() ?>
         <?php endif ?>
-        <?php Pjax::end() ?>
+
+        <?php if ($client) :?>
+            <?php if ($leadDataProvider) :?>
+                <h4>Leads from client</h4>
+                <?php Pjax::begin(['id' => 'pjax-client-leads', 'timeout' => 5000, 'enablePushState' => false]); ?>
+                <?php echo GridView::widget([
+                    'dataProvider' => $leadDataProvider,
+                    'columns' => [
+                        [
+                            'attribute' => 'id',
+                            'value' => static function(Lead $model) {
+                                return Yii::$app->formatter->asLead($model, 'fa-cubes');
+                            },
+                            'format' => 'raw',
+                            'header' => 'Lead',
+                        ],
+                        [
+                            'attribute' => 'created',
+                            'value' => static function(Lead $model) {
+                                return Yii::$app->formatter->asByUserDateTime($model->created);
+                            },
+                            'format' => 'raw',
+                            'header' => 'Created',
+                        ],
+                    ],
+                ]) ?>
+                <?php Pjax::end() ?>
+            <?php endif ?>
+
+            <?php if ($casesDataProvider) :?>
+                <h4>Cases from client</h4>
+                <?php Pjax::begin(['id' => 'pjax-client-cases', 'timeout' => 5000, 'enablePushState' => false]); ?>
+                <?php echo GridView::widget([
+                    'dataProvider' => $casesDataProvider,
+                    'columns' => [
+                        [
+                            'attribute' => 'cs_id',
+                            'value' => static function(Cases $model) {
+                                return Yii::$app->formatter->asCase($model, 'fa-cube');
+                            },
+                            'format' => 'raw',
+                            'header' => 'Case',
+                        ],
+                        [
+                            'attribute' => 'cs_created_dt',
+                            'value' => static function(Cases $model) {
+                                return Yii::$app->formatter->asByUserDateTime($model->cs_created_dt);
+                            },
+                            'format' => 'raw',
+                            'header' => 'Created',
+                        ],
+                    ],
+                ]) ?>
+                <?php Pjax::end() ?>
+            <?php endif ?>
+
+        <?php endif  ?>
 
 	</div>
     <div class="col-md-6">
