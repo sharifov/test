@@ -83,7 +83,7 @@ class CasesQRepository
         return $this->getNeedActionQuery($user)->count();
     }
 
-    public function getNeedActionQuery(Employee $user): ActiveQuery
+    public function getNeedActionQueryOld(Employee $user): ActiveQuery
     {
         $query = CasesQSearch::find()->andWhere(['cs_need_action' => true])->andWhere(['<>', 'cs_status', CasesStatus::STATUS_PENDING]);
 
@@ -112,7 +112,7 @@ class CasesQRepository
      * @param Employee $user
      * @return ActiveQuery
      */
-    public function getNeedActionQueryNew(Employee $user): ActiveQuery /* TODO::  */
+    public function getNeedActionQuery(Employee $user): ActiveQuery 
     {
         $query = CasesQSearch::find()
             ->andWhere(['cs_need_action' => true])
