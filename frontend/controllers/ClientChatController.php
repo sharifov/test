@@ -523,7 +523,6 @@ class ClientChatController extends FController
 
 		try {
 			if ($form->load(Yii::$app->request->post()) && !$form->pjaxReload && $form->validate()) {
-				ini_set('memory_limit', '512M');
 				$newDepartment = $this->clientChatService->transfer($form);
 				return '<script>$("#modal-sm").modal("hide"); refreshChatPage('.$form->cchId.', '.ClientChat::TAB_ACTIVE.'); createNotify("Success", "Chat successfully transferred to '.$newDepartment->dep_name.' department. ", "success")</script>';
 			}
@@ -722,7 +721,6 @@ class ClientChatController extends FController
 		];
 
 		try {
-			ini_set('memory_limit', '512M');
 
 			$chat = $this->clientChatRepository->findById($cchId);
 
