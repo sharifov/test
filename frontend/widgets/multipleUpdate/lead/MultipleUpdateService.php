@@ -47,7 +47,7 @@ class MultipleUpdateService
             }
 
             //if (!$lead->isAvailableForMultiUpdate() && !$form->authUserIsAdmin()) {
-            if (Auth::can('leadSearchMultipleUpdate', ['lead' => $lead])) {
+            if (!Auth::can('leadSearchMultipleUpdate', ['lead' => $lead])) {
                 $this->addMessage('Lead: ' . $leadId . ' with status: ' . $lead->getStatusName() . ' is not available for MultiUpdate. Available only status: Processing, FollowUp, Hold, Trash, Snooze');
                 continue;
             }
