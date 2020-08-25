@@ -356,9 +356,11 @@ class CasesQRepository
             ]
         ];
 
-        if ($isOwner) {
-            $result['cs_user_id'] = $userId;
-        }
+		if ($isOwner) {
+			$result['cs_user_id'] = [
+				'cs_user_id' => $userId
+			];
+		}
 
         return $result;
     }
