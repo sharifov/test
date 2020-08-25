@@ -108,19 +108,16 @@ class ClientChatService
 	 */
 	public function sendRequestToUsers(ClientChat $clientChat): void
 	{
-		$_self = $this;
-		$this->transactionManager->wrap(static function () use ($clientChat, $_self) {
-			if ($channel = $_self->clientChatChannelRepository->findByClientChatData($clientChat->cch_dep_id, $clientChat->cch_project_id, null)) {
-				$userChannel = ClientChatUserChannel::find()->byChannelId($channel->ccc_id)->all();
+		if ($channel = $this->clientChatChannelRepository->findByClientChatData($clientChat->cch_dep_id, $clientChat->cch_project_id, null)) {
+			$userChannel = ClientChatUserChannel::find()->byChannelId($channel->ccc_id)->all();
 
-				if ($userChannel) {
-					/** @var ClientChatUserChannel $item */
-					foreach ($userChannel as $item) {
-						$_self->sendRequestToUser($clientChat, $item);
-					}
+			if ($userChannel) {
+				/** @var ClientChatUserChannel $item */
+				foreach ($userChannel as $item) {
+					$this->sendRequestToUser($clientChat, $item);
 				}
 			}
-		});
+		}
 	}
 
 	/**
@@ -154,7 +151,7 @@ class ClientChatService
 	 * @return Department
 	 * @throws \Throwable
 	 */
-	public function transfer(ClientChatTransferForm $form): Department
+	public function transfer(ClientChat $clientChat, ClientChatTransferForm $form): Department
 	{
 		return $this->transactionManager->wrap( function () use ($form) {
 			$clientChat = $this->clientChatRepository->findById($form->cchId);
