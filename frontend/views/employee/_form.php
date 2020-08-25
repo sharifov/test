@@ -90,7 +90,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 </div>
                 <div class="row">
                     <div class="col-sm-6">
-                        <?= $form->field($model, 'nickname')->textInput() ?>
+                        <?= $form->field($model, 'full_name')->textInput() ?>
                     </div>
                     <div class="col-sm-6">
                         <?= $form->field($model, 'password')->passwordInput(['autocomplete' => "off"]) ?>
@@ -99,7 +99,10 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 
                 <div class="row">
                     <div class="col-sm-6">
-                        <?= $form->field($model, 'full_name')->textInput() ?>
+                        <?= $form->field($model, 'nickname')->textInput() ?>
+                    </div>
+                     <div class="col-sm-6">
+                        <?= $form->field($model, 'nickname_client_chat')->textInput() ?>
                     </div>
                 </div>
 

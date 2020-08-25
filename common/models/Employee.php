@@ -16,6 +16,7 @@ use sales\model\user\entity\ShiftTime;
 use sales\model\user\entity\StartTime;
 use sales\model\user\entity\UserCache;
 use sales\model\user\entity\userStatus\UserStatus;
+use sales\validators\SlugValidator;
 use Yii;
 use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
@@ -35,6 +36,7 @@ use yii\web\NotFoundHttpException;
  * @property string $username
  * @property string $full_name
  * @property string $nickname
+ * @property string $nickname_client_chat
  * @property string $auth_key
  * @property string $password_hash
  * @property string $password_reset_token
@@ -382,17 +384,18 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function rules()
     {
         return [
-            [['username', 'auth_key', 'password_hash', 'email', 'form_roles', 'full_name', 'nickname'], 'required'],
+            [['username', 'auth_key', 'password_hash', 'email', 'form_roles', 'full_name', 'nickname', 'nickname_client_chat'], 'required'],
             [['password'], 'required', 'on' => self::SCENARIO_REGISTER],
-            [['email', 'password', 'username', 'full_name', 'nickname'], 'trim'],
+            [['email', 'password', 'username', 'full_name', 'nickname', 'nickname_client_chat'], 'trim'],
             [['password'], 'string', 'min' => 8],
             [['status'], 'integer'],
-            [['password_hash', 'password_reset_token', 'email'], 'string', 'max' => 255],
+            [['password_hash', 'password_reset_token', 'email', 'nickname_client_chat'], 'string', 'max' => 255],
             [['username', 'full_name', 'nickname'], 'string', 'min' => 3, 'max' => 50],
             [['auth_key'], 'string', 'max' => 32],
-            [['username'], 'unique'],
+            [['username', 'nickname_client_chat'], 'unique'],
             [['email'], 'unique'],
             [['email'], 'email'],
+            [['nickname_client_chat'], SlugValidator::class],
             ['email', 'filter', 'filter' => 'strtolower', 'skipOnEmpty' => true],
             [['username'], 'match' ,'pattern'=>'/^[a-z0-9_\-\.]+$/i', 'message'=>'Username can contain only characters ("a-z", "0-9", "_", "-", ".")'],
             [['make_user_project_params'], 'boolean'],
@@ -422,7 +425,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             'user_departments' => 'Departments',
             'make_user_project_params' => 'Make user project params (automatic)',
             'full_name' => 'Full Name',
-            'client_chat_user_channel' => 'Client chat user channel'
+            'client_chat_user_channel' => 'Client chat user channel',
+            'nickname_client_chat' => 'Nickname Client Chat',
         ];
     }
 

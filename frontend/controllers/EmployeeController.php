@@ -678,7 +678,7 @@ class EmployeeController extends FController
 
                 $model->prepareSave($attr);
 
-                $nicknameIsChanged = $model->isAttributeChanged('nickname');
+                $nicknameCCIsChanged = $model->isAttributeChanged('nickname_client_chat');
 
                 if ($model->save()) {
 
@@ -778,10 +778,10 @@ class EmployeeController extends FController
                         }
                     }*/
 
-                    if ($nicknameIsChanged && !empty($modelProfile->up_rc_user_id)) {
+                    if ($nicknameCCIsChanged && !empty($modelProfile->up_rc_user_id)) {
                         $job = new RocketChatUserUpdateJob();
                         $job->userId = $modelProfile->up_rc_user_id;
-                        $job->data = ['username' => $model->nickname];
+                        $job->data = ['username' => $model->nickname_client_chat];
 
                         Yii::$app->queue_job->priority(10)->push($job);
                     }
