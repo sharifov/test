@@ -14,6 +14,7 @@ use sales\entities\cases\CasesQSearch;
 use sales\entities\cases\CasesStatus;
 use yii\db\ActiveQuery;
 use yii\db\Expression;
+use yii\helpers\ArrayHelper;
 
 class CasesQRepository
 {
@@ -83,31 +84,30 @@ class CasesQRepository
         return $this->getNeedActionQuery($user)->count();
     }
 
-    /**
-     * @param Employee $user
-     * @return ActiveQuery
-     */
     public function getNeedActionQuery(Employee $user): ActiveQuery
     {
-        $query = CasesQSearch::find()->andWhere(['cs_need_action' => true])->andWhere(['<>', 'cs_status', CasesStatus::STATUS_PENDING]);
+        $query = CasesQSearch::find()
+            ->andWhere(['cs_need_action' => true])
+            ->andWhere(['<>', 'cs_status', CasesStatus::STATUS_PENDING]);
 
-        if ($user->isAdmin()) {
+        $query->andWhere($this->createSubQuery($user->id, [], $checkDepPermission = false, false));
+
+        if ($user->can('caseListAny')) {
             return $query;
         }
 
-        $condition = [
-            'OR',
-            [
-                'AND',
-                ['cs_status' => CasesStatus::STATUS_PROCESSING],
-                ['cs_user_id' => $user->id],
-            ],
-            ['cs_status' => CasesStatus::STATUS_FOLLOW_UP],
-            ['cs_status' => CasesStatus::STATUS_TRASH],
-            ['cs_status' => CasesStatus::STATUS_SOLVED],
-        ];
+        $userIds = [];
+        if ($user->can('caseListOwner')) {
+            $userIds[] = $user->id;
+        }
+        if ($user->can('caseListEmpty')) {
+            $userIds[] = null;
+        }
+        if ($user->can('caseListGroup')) {
+            $userIds = ArrayHelper::merge($userIds, EmployeeGroupAccess::getUsersIdsInCommonGroups($user->id));
+        }
 
-        $query->andWhere($this->createSubQuery($user->id, $condition, $checkDepPermission = false));
+        $query->andWhere(['IN', 'cs_user_id', $userIds]);
 
         return $query;
     }
@@ -294,11 +294,12 @@ class CasesQRepository
 
     /**
      * @param $userId
+     * @param int $cacheDuration
      * @return ActiveQuery
      */
-    private function usersIdsInCommonGroups($userId): ActiveQuery
+    private function usersIdsInCommonGroups($userId, int $cacheDuration = -1): ActiveQuery
     {
-        return EmployeeGroupAccess::usersIdsInCommonGroupsSubQuery($userId);
+        return EmployeeGroupAccess::usersIdsInCommonGroupsSubQuery($userId, $cacheDuration);
     }
 
     /**
@@ -338,16 +339,15 @@ class CasesQRepository
         ];
     }
 
-    private function createSubQuery($userId, $conditions, $checkDepPermission = true): array
+    private function createSubQuery($userId, $conditions, $checkDepPermission = true, bool $isOwner = true): array
     {
         $depConditions = [];
         if ($checkDepPermission) {
             $depConditions = $this->inDepartment($userId);
         }
 
-        return [
+        $result = [
             'or',
-            $this->isOwner($userId),
             [
                 'and',
                 $this->inProject($userId),
@@ -355,5 +355,11 @@ class CasesQRepository
                 $conditions
             ]
         ];
+
+        if ($isOwner) {
+            $result['cs_user_id'] = $userId;
+        }
+
+        return $result;
     }
 }
