@@ -4,6 +4,7 @@ namespace frontend\widgets\multipleUpdate\lead;
 
 use common\models\Employee;
 use common\models\Lead;
+use sales\auth\Auth;
 use sales\services\lead\LeadStateService;
 use sales\services\lead\qcall\Config;
 use sales\services\lead\qcall\FindPhoneParams;
@@ -45,7 +46,8 @@ class MultipleUpdateService
                 continue;
             }
 
-            if (!$lead->isAvailableForMultiUpdate() && !$form->authUserIsAdmin()) {
+            //if (!$lead->isAvailableForMultiUpdate() && !$form->authUserIsAdmin()) {
+            if (Auth::can('leadSearchMultipleUpdate', ['lead' => $lead])) {
                 $this->addMessage('Lead: ' . $leadId . ' with status: ' . $lead->getStatusName() . ' is not available for MultiUpdate. Available only status: Processing, FollowUp, Hold, Trash, Snooze');
                 continue;
             }
