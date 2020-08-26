@@ -339,25 +339,6 @@ class CasesQRepository
         ];
     }
 
-    private function createSubQueryOrig($userId, $conditions, $checkDepPermission = true): array
-    {
-        $depConditions = [];
-        if ($checkDepPermission) {
-            $depConditions = $this->inDepartment($userId);
-        }
-
-        return [
-            'or',
-            $this->isOwner($userId),
-            [
-                'and',
-                $this->inProject($userId),
-                $depConditions,
-                $conditions
-            ]
-        ];
-    }
-
     /**
      * @param $userId
      * @param $conditions
