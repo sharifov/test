@@ -179,9 +179,10 @@ $list = new ListsAccess(Yii::$app->user->id);
         ],
         [
             'label' =>'No Answer',
-            'attribute' => 'outCallsNoAnswer',
+            //'attribute' => 'outCallsNoAnswer',
             'value' => function($data) {
-                return $data['outCallsNoAnswer'] ?: '-';
+                $noAnswer = $data['totalOutCalls'] - $data['outCallsCompleted'];
+                return $noAnswer ?: '-';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3'],
             'contentOptions' => [

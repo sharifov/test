@@ -476,7 +476,7 @@ class CallLogSearch extends CallLog
         } elseif (!empty($this->maxTalkTime) && empty($this->minTalkTime)) {
             $queryByLogRecordDuration = ' AND NOT clr_duration <=' . $this->maxTalkTime;
         } elseif (!empty($this->minTalkTime) && !empty($this->maxTalkTime)) {
-            $queryByLogRecordDuration = ' AND clr_duration NOT BETWEEN ' . $this->minTalkTime . ' AND ' . $this->maxTalkTime . ' OR clr_duration IS NULL ';
+            $queryByLogRecordDuration = ' AND clr_duration NOT BETWEEN ' . $this->minTalkTime . ' AND ' . $this->maxTalkTime;
         } else {
             $queryByLogRecordDuration = '';
         }
@@ -491,7 +491,7 @@ class CallLogSearch extends CallLog
             SUM(IF(cl_type_id = ' . CallLogType::OUT . ' AND (cl_category_id <> ' . CallLogCategory::REDIAL_CALL . ' OR cl_category_id IS NULL), 1, 0)) as totalOutCalls,
             COALESCE(SUM(IF(cl_type_id = ' . CallLogType::OUT . ' AND (cl_category_id <> ' . CallLogCategory::REDIAL_CALL . ' OR cl_category_id IS NULL) AND cl_status_id = ' . CallLogStatus::COMPLETE . $queryByLogRecordDuration . ', clr_duration, 0)), 0) as outCallsCompletedDuration,
             SUM(IF(cl_type_id = ' . CallLogType::OUT . ' AND (cl_category_id <> ' . CallLogCategory::REDIAL_CALL . ' OR cl_category_id IS NULL) AND cl_status_id = ' . CallLogStatus::COMPLETE . $queryByLogRecordDuration . ', 1, 0)) as outCallsCompleted,
-            SUM(IF(cl_type_id = ' . CallLogType::OUT . ' AND (cl_category_id <> ' . CallLogCategory::REDIAL_CALL . ' OR cl_category_id IS NULL) AND cl_status_id <> ' . CallLogStatus::COMPLETE . $queryByLogRecordDuration . ', 1, 0)) as outCallsNoAnswer,
+            
             COALESCE(SUM(IF(cl_type_id = ' . CallLogType::IN . ', clr_duration, 0)), 0) as inCallsDuration,
             SUM(IF(cl_type_id = ' . CallLogType::IN . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . ', 1, 0)) as inCallsCompleted,
             SUM(IF(cl_type_id = ' . CallLogType::IN . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . ' AND cl_category_id = ' . CallLogCategory::DIRECT_CALL . ', 1, 0)) as inCallsDirectLine,
@@ -540,7 +540,7 @@ class CallLogSearch extends CallLog
                 $model['totalOutCalls'] == 0 &&
                 $model['outCallsCompletedDuration'] == 0 &&
                 $model['outCallsCompleted'] == 0 &&
-                $model['outCallsNoAnswer'] == 0 &&
+                //$model['outCallsNoAnswer'] == 0 &&
                 $model['inCallsDuration'] == 0 &&
                 $model['inCallsCompleted'] == 0 &&
                 $model['inCallsDirectLine'] == 0 &&
@@ -569,7 +569,7 @@ class CallLogSearch extends CallLog
                     'totalOutCalls',
                     'outCallsCompletedDuration',
                     'outCallsCompleted',
-                    'outCallsNoAnswer',
+                    //'outCallsNoAnswer',
                     'inCallsDuration',
                     'inCallsCompleted',
                     'inCallsDirectLine',
