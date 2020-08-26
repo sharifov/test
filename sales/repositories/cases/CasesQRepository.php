@@ -339,7 +339,6 @@ class CasesQRepository
         ];
     }
 
-
     /**
      * @param $userId
      * @param $conditions
