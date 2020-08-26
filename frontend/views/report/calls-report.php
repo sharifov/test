@@ -108,8 +108,9 @@ $list = new ListsAccess(Yii::$app->user->id);
         [
             'label' =>'Completed Duration',
             'attribute' => 'outCallsCompletedDuration',
+            'format' => 'raw',
             'value' => function($data) {
-                return $data['outCallsCompletedDuration'] ?: '-';
+                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['outCallsCompletedDuration']).'">' . gmdate('H:i:s', $data['outCallsCompletedDuration']) . '</span>';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3'],
             'contentOptions' => [
