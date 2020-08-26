@@ -10,7 +10,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 /**
  * @var $this yii\web\View
- * @var $searchModel common\models\search\CallSearch;
+ * @var $searchModel \sales\model\callLog\entity\callLog\search\CallLogSearch;
  * @var $dataProvider yii\data\ArrayDataProvider
  */
 $list = new ListsAccess(Yii::$app->user->id);
@@ -40,9 +40,9 @@ $list = new ListsAccess(Yii::$app->user->id);
     $gridColumns = [
         [
             'label' => 'Username',
-            'attribute' => 'c_created_user_id',
+            'attribute' => 'cl_user_id',
             'value' => static function ($data) {
-                $employee = \common\models\Employee::findone($data['c_created_user_id']);
+                $employee = \common\models\Employee::findone($data['cl_user_id']);
                 return $employee->username;
             },
             'format' => 'raw',
@@ -53,11 +53,11 @@ $list = new ListsAccess(Yii::$app->user->id);
         ],
 
         [
-            'label' => 'Duration',
+            'label' => 'Talk Time',
+            'attribute' => 'totalTalkTime',
             'format' => 'raw',
             'value' => function($data) {
-                $totalDuration =  $data['outgoingCallsDuration'] + $data['incomingCallsDuration'] + $data['redialCallsDuration'];
-                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($totalDuration).'">' . gmdate('H:i:s', $totalDuration) . '</span>';
+                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['totalTalkTime']).'">' . gmdate('H:i:s', $data['totalTalkTime']) . '</span>';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
             'contentOptions' => [
@@ -69,8 +69,9 @@ $list = new ListsAccess(Yii::$app->user->id);
 
         [
             'label' => 'Completed',
+            'attribute' => 'totalCompleted',
             'value' => function($data) {
-                return $data['outgoingCallsCompleted'] + $data['incomingCompletedCalls'] + $data['redialCompleted'] ?: '-';
+                return $data['totalCompleted'] ?: '-';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3'],
             'contentOptions' => [
@@ -82,20 +83,33 @@ $list = new ListsAccess(Yii::$app->user->id);
 
         [
             'label' =>'Duration',
-            'attribute' => 'outgoingCallsDuration',
+            'attribute' => 'outCallsDuration',
             'headerOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
             'contentOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
             'filterOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
             'format' => 'raw',
             'value' => function($data) {
-                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['outgoingCallsDuration']).'">' . gmdate('H:i:s', $data['outgoingCallsDuration']) . '</span>';
+                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['outCallsDuration']).'">' . gmdate('H:i:s', $data['outCallsDuration']) . '</span>';
             }
         ],
         [
             'label' =>'Total',
-            'attribute' => 'outgoingCalls',
+            'attribute' => 'totalOutCalls',
             'value' => function($data) {
-                return $data['outgoingCalls'] ?: '-';
+                return $data['totalOutCalls'] ?: '-';
+            },
+            'headerOptions' => ['style' => 'background-color:#fcf8e3'],
+            'contentOptions' => [
+                'style' => 'background-color:#fcf8e3',
+                'class' => 'text-center'
+            ],
+            'filterOptions' => ['style' => 'background-color:#fcf8e3']
+        ],
+        [
+            'label' =>'Completed Duration',
+            'attribute' => 'outCallsCompletedDuration',
+            'value' => function($data) {
+                return $data['outCallsCompletedDuration'] ?: '-';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3'],
             'contentOptions' => [
@@ -106,9 +120,9 @@ $list = new ListsAccess(Yii::$app->user->id);
         ],
         [
             'label' =>'Completed',
-            'attribute' => 'outgoingCallsCompleted',
+            'attribute' => 'outCallsCompleted',
             'value' => function($data) {
-                return $data['outgoingCallsCompleted'] ?: '-';
+                return $data['outCallsCompleted'] ?: '-';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3'],
             'contentOptions' => [
@@ -118,23 +132,10 @@ $list = new ListsAccess(Yii::$app->user->id);
             'filterOptions' => ['style' => 'background-color:#fcf8e3']
         ],
         [
-            'label' =>'NoAnswer',
-            'attribute' => 'outgoingCallsNoAnswer',
+            'label' =>'No Answer',
+            'attribute' => 'outCallsNoAnswer',
             'value' => function($data) {
-                return $data['outgoingCallsNoAnswer'] ?: '-';
-            },
-            'headerOptions' => ['style' => 'background-color:#fcf8e3'],
-            'contentOptions' => [
-                'style' => 'background-color:#fcf8e3',
-                'class' => 'text-center'
-            ],
-            'filterOptions' => ['style' => 'background-color:#fcf8e3']
-        ],
-        [
-            'label' =>'Busy',
-            'attribute' => 'outgoingCallsBusy',
-            'value' => function($data) {
-                return $data['outgoingCallsBusy'] ?: '-';
+                return $data['outCallsNoAnswer'] ?: '-';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3'],
             'contentOptions' => [
@@ -145,20 +146,20 @@ $list = new ListsAccess(Yii::$app->user->id);
         ],
         [
             'label' =>'Duration',
-            'attribute' => 'incomingCallsDuration',
+            'attribute' => 'inCallsDuration',
             'headerOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
             'contentOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
             'filterOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
             'format' => 'raw',
             'value' => function($data) {
-                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['incomingCallsDuration']).'">' . gmdate('H:i:s', $data['incomingCallsDuration']) . '</span>';
+                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['inCallsDuration']).'">' . gmdate('H:i:s', $data['inCallsDuration']) . '</span>';
             }
         ],
         [
             'label' =>'Completed',
-            'attribute' => 'incomingCompletedCalls',
+            'attribute' => 'inCallsCompleted',
             'value' => function($data) {
-                return $data['incomingCompletedCalls'] ?: '-';
+                return $data['inCallsCompleted'] ?: '-';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3'],
             'contentOptions' => [
@@ -169,9 +170,9 @@ $list = new ListsAccess(Yii::$app->user->id);
         ],
         [
             'label' =>'Direct Line',
-            'attribute' => 'incomingDirectLine',
+            'attribute' => 'inCallsDirectLine',
             'value' => function($data) {
-                return $data['incomingDirectLine'] ?: '-';
+                return $data['inCallsDirectLine'] ?: '-';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3'],
             'contentOptions' => [
@@ -182,9 +183,9 @@ $list = new ListsAccess(Yii::$app->user->id);
         ],
         [
             'label' =>'General Line',
-            'attribute' => 'incomingGeneralLine',
+            'attribute' => 'inCallsGeneralLine',
             'value' => function($data) {
-                return $data['incomingGeneralLine'] ?: '-';
+                return $data['inCallsGeneralLine'] ?: '-';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3'],
             'contentOptions' => [
@@ -195,22 +196,22 @@ $list = new ListsAccess(Yii::$app->user->id);
         ],
 
         [
-            'label' =>'Duration',
-            'attribute' => 'redialCallsDuration',
+            'label' =>'Talk time',
+            'attribute' => 'redialCallsTalkTime',
             'headerOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
             'contentOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
             'filterOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
             'format' => 'raw',
             'value' => function($data) {
-                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['redialCallsDuration']).'">' . gmdate('H:i:s', $data['redialCallsDuration']) . '</span>';
+                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['redialCallsTalkTime']).'">' . gmdate('H:i:s', $data['redialCallsTalkTime']) . '</span>';
             }
         ],
 
         [
             'label' =>'Total Attempts',
-            'attribute' => 'totalAttempts',
+            'attribute' => 'redialCallsTotalAttempts',
             'value' => function($data) {
-                return $data['totalAttempts'] ?: '-';
+                return $data['redialCallsTotalAttempts'] ?: '-';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3;'],
             'contentOptions' => [
@@ -222,9 +223,9 @@ $list = new ListsAccess(Yii::$app->user->id);
 
         [
             'label' =>'Completed',
-            'attribute' => 'redialCompleted',
+            'attribute' => 'redialCallsCompleted',
             'value' => function($data) {
-                return $data['redialCompleted'] ?: '-';
+                return $data['redialCallsCompleted'] ?: '-';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3'],
             'contentOptions' => [
