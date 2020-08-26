@@ -479,7 +479,7 @@ class CallLogSearch extends CallLog
         } elseif (!empty($this->maxTalkTime) && empty($this->minTalkTime)) {
             $queryByLogRecordDuration = ' AND clr_duration <=' . $this->maxTalkTime;
         } elseif (!empty($this->minTalkTime) && !empty($this->maxTalkTime)) {
-            $queryByLogRecordDuration = ' AND clr_duration BETWEEN ' . $this->minTalkTime . ' AND ' . $this->maxTalkTime;
+            $queryByLogRecordDuration = ' AND clr_duration NOT BETWEEN ' . $this->minTalkTime . ' AND ' . $this->maxTalkTime . ' OR clr_duration IS NULL ';
         } else {
             $queryByLogRecordDuration = '';
         }
@@ -488,14 +488,13 @@ class CallLogSearch extends CallLog
         $query = new Query();
         $query->leftJoin(CallLogRecord::tableName(), static::tableName() . '.cl_id =' . CallLogRecord::tableName() . '.clr_cl_id');
         $query->select(['cl_user_id, DATE(CONVERT_TZ(DATE_SUB(cl_call_created_dt, INTERVAL ' . $timeSub . ' HOUR), "+00:00", "' . $utcOffsetDST . '")) AS createdDate,
-            COALESCE(SUM(IF(cl_type_id = ' . CallLogType::OUT . ' OR cl_type_id = ' . CallLogType::IN . ' OR cl_category_id = ' . CallLogCategory::REDIAL_CALL . ', clr_duration, 0)), 0) as totalTalkTime,
-            SUM(IF((cl_type_id = ' . CallLogType::OUT . ' OR cl_type_id = ' . CallLogType::IN . ' OR cl_category_id = ' . CallLogCategory::REDIAL_CALL . ') AND cl_status_id = ' . CallLogStatus::COMPLETE . ', 1, 0)) as totalCompleted,
-            SUM(IF(cl_type_id = ' . CallLogType::OUT . ' AND cl_category_id <> ' . CallLogCategory::REDIAL_CALL . ', cl_duration, 0)) as outCallsDuration,
-            SUM(IF(cl_type_id = ' . CallLogType::OUT . ' AND cl_category_id <> ' . CallLogCategory::REDIAL_CALL . ', clr_duration, 0)) as outCallsTalkTime,
-            SUM(IF(cl_type_id = ' . CallLogType::OUT . ' AND cl_category_id <> ' . CallLogCategory::REDIAL_CALL . ', 1, 0)) as totalOutCalls,
-            SUM(IF(cl_type_id = ' . CallLogType::OUT . ' AND cl_category_id <> ' . CallLogCategory::REDIAL_CALL . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . $queryByLogRecordDuration . ', clr_duration, 0)) as outCallsCompletedDuration,
-            SUM(IF(cl_type_id = ' . CallLogType::OUT . ' AND cl_category_id <> ' . CallLogCategory::REDIAL_CALL . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . $queryByLogRecordDuration . ', 1, 0)) as outCallsCompleted,
-            SUM(IF(cl_type_id = ' . CallLogType::OUT . ' AND cl_category_id <> ' . CallLogCategory::REDIAL_CALL . ' AND cl_status_id <> ' . CallLogStatus::COMPLETE . $queryByLogRecordDuration . ', 1, 0)) as outCallsNoAnswer,
+            COALESCE(SUM(IF(cl_type_id = ' . CallLogType::OUT . ' OR cl_type_id = ' . CallLogType::IN . ' OR cl_category_id = ' . CallLogCategory::REDIAL_CALL . ', clr_duration, 0)), 0) as totalTalkTime,            
+            SUM(IF(cl_type_id = ' . CallLogType::OUT . ' AND cl_category_id <> ' . CallLogCategory::REDIAL_CALL . ' OR cl_category_id IS NULL, cl_duration, 0)) as outCallsDuration,
+            COALESCE(SUM(IF(cl_type_id = ' . CallLogType::OUT . ' AND cl_category_id <> ' . CallLogCategory::REDIAL_CALL . ' OR cl_category_id IS NULL, clr_duration, 0)), 0) as outCallsTalkTime,
+            SUM(IF(cl_type_id = ' . CallLogType::OUT . ' AND cl_category_id <> ' . CallLogCategory::REDIAL_CALL . ' OR cl_category_id IS NULL, 1, 0)) as totalOutCalls,
+            COALESCE(SUM(IF(cl_type_id = ' . CallLogType::OUT . ' AND cl_category_id <> ' . CallLogCategory::REDIAL_CALL . ' OR cl_category_id IS NULL AND cl_status_id = ' . CallLogStatus::COMPLETE . $queryByLogRecordDuration . ', clr_duration, 0)), 0) as outCallsCompletedDuration,
+            SUM(IF(cl_type_id = ' . CallLogType::OUT . ' AND cl_category_id <> ' . CallLogCategory::REDIAL_CALL . ' OR cl_category_id IS NULL AND cl_status_id = ' . CallLogStatus::COMPLETE . $queryByLogRecordDuration . ', 1, 0)) as outCallsCompleted,
+            SUM(IF(cl_type_id = ' . CallLogType::OUT . ' AND cl_category_id <> ' . CallLogCategory::REDIAL_CALL . ' OR cl_category_id IS NULL AND cl_status_id <> ' . CallLogStatus::COMPLETE . $queryByLogRecordDuration . ', 1, 0)) as outCallsNoAnswer,
             COALESCE(SUM(IF(cl_type_id = ' . CallLogType::IN . ', clr_duration, 0)), 0) as inCallsDuration,
             SUM(IF(cl_type_id = ' . CallLogType::IN . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . ', 1, 0)) as inCallsCompleted,
             SUM(IF(cl_type_id = ' . CallLogType::IN . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . ' AND cl_category_id = ' . CallLogCategory::DIRECT_CALL . ', 1, 0)) as inCallsDirectLine,
@@ -503,7 +502,7 @@ class CallLogSearch extends CallLog
             SUM(IF(cl_category_id = ' . CallLogCategory::REDIAL_CALL . ', cl_duration, 0)) as redialCallsDuration,
             SUM(IF(cl_category_id = ' . CallLogCategory::REDIAL_CALL . ', clr_duration, 0)) as redialCallsTalkTime,
             SUM(IF(cl_category_id = ' . CallLogCategory::REDIAL_CALL . ', 1, 0)) as redialCallsTotalAttempts,
-            SUM(IF(cl_category_id = ' . CallLogCategory::REDIAL_CALL . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . ', 1, 0)) as redialCallsCompleted,
+            SUM(IF(cl_category_id = ' . CallLogCategory::REDIAL_CALL . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . $queryByLogRecordDuration. ', 1, 0)) as redialCallsCompleted,
             SUM(IF(cl_category_id = ' . CallLogCategory::REDIAL_CALL . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . $queryByLogRecordDuration . ', clr_duration, 0)) as redialCallsCompleteTalkTime           
         ']);
 
@@ -534,10 +533,11 @@ class CallLogSearch extends CallLog
         $command = $query->createCommand();
         $data = $command->queryAll();
 
+        //var_dump($data); die();
+
         foreach ($data as $key => $model) {
             if (
                 $model['totalTalkTime'] == 0 &&
-                $model['totalCompleted'] == 0 &&
                 $model['outCallsDuration'] == 0 &&
                 $model['outCallsTalkTime'] == 0 &&
                 $model['totalOutCalls'] == 0 &&
@@ -567,7 +567,6 @@ class CallLogSearch extends CallLog
                     'cl_user_id',
                     'createdDate',
                     'totalTalkTime',
-                    'totalCompleted',
                     'outCallsDuration',
                     'outCallsTalkTime',
                     'totalOutCalls',
