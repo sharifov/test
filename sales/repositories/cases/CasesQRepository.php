@@ -90,7 +90,7 @@ class CasesQRepository
             ->andWhere(['cs_need_action' => true])
             ->andWhere(['<>', 'cs_status', CasesStatus::STATUS_PENDING]);
 
-        $query->andWhere($this->createSubQuery($user->id, [], $checkDepPermission = false, false));
+        $query->andWhere($this->createSubQueryForNeedAction($user->id, [], $checkDepPermission = false));
 
         if ($user->can('caseListAny')) {
             return $query;
@@ -339,14 +339,39 @@ class CasesQRepository
         ];
     }
 
-    private function createSubQuery($userId, $conditions, $checkDepPermission = true, bool $isOwner = true): array
+    private function createSubQueryOrig($userId, $conditions, $checkDepPermission = true): array
     {
         $depConditions = [];
         if ($checkDepPermission) {
             $depConditions = $this->inDepartment($userId);
         }
 
-        $result = [
+        return [
+            'or',
+            $this->isOwner($userId),
+            [
+                'and',
+                $this->inProject($userId),
+                $depConditions,
+                $conditions
+            ]
+        ];
+    }
+
+    /**
+     * @param $userId
+     * @param $conditions
+     * @param bool $checkDepPermission
+     * @return array
+     */
+    private function createSubQueryForNeedAction($userId, $conditions, $checkDepPermission = true): array
+    {
+        $depConditions = [];
+        if ($checkDepPermission) {
+            $depConditions = $this->inDepartment($userId);
+        }
+
+        return [
             'or',
             [
                 'and',
@@ -355,11 +380,24 @@ class CasesQRepository
                 $conditions
             ]
         ];
+    }
 
-        if ($isOwner) {
-            $result['cs_user_id'] = $userId;
+    private function createSubQuery($userId, $conditions, $checkDepPermission = true): array
+    {
+        $depConditions = [];
+        if ($checkDepPermission) {
+            $depConditions = $this->inDepartment($userId);
         }
 
-        return $result;
+        return [
+            'or',
+            $this->isOwner($userId),
+            [
+                'and',
+                $this->inProject($userId),
+                $depConditions,
+                $conditions
+            ]
+        ];
     }
 }
