@@ -85,9 +85,9 @@ $list = new ListsAccess(Yii::$app->user->id);
 
         [
             'label' => 'Completed',
-            'attribute' => 'totalCompleted',
             'value' => function($data) {
-                return $data['totalCompleted'] ?: '-';
+                $totalCompleted=  $data['outCallsCompleted'] + $data['inCallsCompleted'] + $data['redialCallsCompleted'];
+                return $totalCompleted;
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3'],
             'contentOptions' => [
