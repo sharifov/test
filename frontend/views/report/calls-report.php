@@ -101,7 +101,7 @@ $list = new ListsAccess(Yii::$app->user->id);
             'label' => 'Complete Talk Time',
             'format' => 'raw',
             'value' => function($data) {
-                $totalTalkTime=  $data['outCallsCompletedDuration'] + $data['inCallsDuration'] + $data['redialCallsTalkTime'];
+                $totalTalkTime=  $data['outCallsCompletedDuration'] + $data['inCallsDuration'] + $data['redialCallsCompleteTalkTime'];
                 return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($totalTalkTime).'">' . gmdate('H:i:s', $totalTalkTime) . '</span>';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3;'],
