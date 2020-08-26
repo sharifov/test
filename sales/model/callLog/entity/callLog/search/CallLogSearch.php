@@ -472,9 +472,9 @@ class CallLogSearch extends CallLog
         }
 
         if (!empty($this->minTalkTime) && empty($this->maxTalkTime)) {
-            $queryByLogRecordDuration = ' AND NOT clr_duration >=' . $this->minTalkTime;
+            $queryByLogRecordDuration = ' AND clr_duration >=' . $this->minTalkTime;
         } elseif (!empty($this->maxTalkTime) && empty($this->minTalkTime)) {
-            $queryByLogRecordDuration = ' AND NOT clr_duration <=' . $this->maxTalkTime;
+            $queryByLogRecordDuration = ' AND clr_duration <=' . $this->maxTalkTime;
         } elseif (!empty($this->minTalkTime) && !empty($this->maxTalkTime)) {
             $queryByLogRecordDuration = ' AND clr_duration BETWEEN ' . $this->minTalkTime . ' AND ' . $this->maxTalkTime;
         } else {
