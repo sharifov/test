@@ -128,7 +128,7 @@ $list = new ListsAccess(Yii::$app->user->id);
             'attribute' => 'outCallsTalkTime',
             'format' => 'raw',
             'value' => function($data) {
-                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['outCallsDuration']).'">' . gmdate('H:i:s', $data['outCallsDuration']) . '</span>';
+                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['outCallsTalkTime']).'">' . gmdate('H:i:s', $data['outCallsTalkTime']) . '</span>';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3'],
             'contentOptions' => [
