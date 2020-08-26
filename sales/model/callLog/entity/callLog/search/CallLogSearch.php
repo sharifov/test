@@ -488,6 +488,7 @@ class CallLogSearch extends CallLog
             COALESCE(SUM(IF(cl_type_id = ' . CallLogType::OUT . ' OR cl_type_id = ' . CallLogType::IN . ' OR cl_category_id = ' . CallLogCategory::REDIAL_CALL . ', clr_duration, 0)), 0) as totalTalkTime,
             SUM(IF((cl_type_id = ' . CallLogType::OUT . ' OR cl_type_id = ' . CallLogType::IN . ' OR cl_category_id = ' . CallLogCategory::REDIAL_CALL . ') AND cl_status_id = ' . CallLogStatus::COMPLETE . ', 1, 0)) as totalCompleted,
             SUM(IF(cl_type_id = ' . CallLogType::OUT . ' AND cl_category_id <> ' . CallLogCategory::REDIAL_CALL . ', cl_duration, 0)) as outCallsDuration,
+            SUM(IF(cl_type_id = ' . CallLogType::OUT . ' AND cl_category_id <> ' . CallLogCategory::REDIAL_CALL . ', clr_duration, 0)) as outCallsTalkTime,
             SUM(IF(cl_type_id = ' . CallLogType::OUT . ' AND cl_category_id <> ' . CallLogCategory::REDIAL_CALL . ', 1, 0)) as totalOutCalls,
             SUM(IF(cl_type_id = ' . CallLogType::OUT . ' AND cl_category_id <> ' . CallLogCategory::REDIAL_CALL . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . $queryByLogRecordDuration . ', clr_duration, 0)) as outCallsCompletedDuration,
             SUM(IF(cl_type_id = ' . CallLogType::OUT . ' AND cl_category_id <> ' . CallLogCategory::REDIAL_CALL . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . $queryByLogRecordDuration . ', 1, 0)) as outCallsCompleted,
@@ -496,9 +497,11 @@ class CallLogSearch extends CallLog
             SUM(IF(cl_type_id = ' . CallLogType::IN . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . ', 1, 0)) as inCallsCompleted,
             SUM(IF(cl_type_id = ' . CallLogType::IN . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . ' AND cl_category_id = ' . CallLogCategory::DIRECT_CALL . ', 1, 0)) as inCallsDirectLine,
             SUM(IF(cl_type_id = ' . CallLogType::IN . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . ' AND cl_category_id = ' . CallLogCategory::GENERAL_LINE . ', 1, 0)) as inCallsGeneralLine,
+            SUM(IF(cl_category_id = ' . CallLogCategory::REDIAL_CALL . ', cl_duration, 0)) as redialCallsDuration,
             SUM(IF(cl_category_id = ' . CallLogCategory::REDIAL_CALL . ', clr_duration, 0)) as redialCallsTalkTime,
             SUM(IF(cl_category_id = ' . CallLogCategory::REDIAL_CALL . ', 1, 0)) as redialCallsTotalAttempts,
-            SUM(IF(cl_category_id = ' . CallLogCategory::REDIAL_CALL . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . ', 1, 0)) as redialCallsCompleted            
+            SUM(IF(cl_category_id = ' . CallLogCategory::REDIAL_CALL . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . ', 1, 0)) as redialCallsCompleted,
+            SUM(IF(cl_category_id = ' . CallLogCategory::REDIAL_CALL . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . $queryByLogRecordDuration . ', clr_duration, 0)) as redialCallsCompleteTalkTime           
         ']);
 
         $query->from([new \yii\db\Expression(static::tableName() . ' PARTITION(' . $this->getPartitionsByYears($date_from, $date_to) . ') ')]);
@@ -533,6 +536,7 @@ class CallLogSearch extends CallLog
                 $model['totalTalkTime'] == 0 &&
                 $model['totalCompleted'] == 0 &&
                 $model['outCallsDuration'] == 0 &&
+                $model['outCallsTalkTime'] == 0 &&
                 $model['totalOutCalls'] == 0 &&
                 $model['outCallsCompletedDuration'] == 0 &&
                 $model['outCallsCompleted'] == 0 &&
@@ -541,9 +545,11 @@ class CallLogSearch extends CallLog
                 $model['inCallsCompleted'] == 0 &&
                 $model['inCallsDirectLine'] == 0 &&
                 $model['inCallsGeneralLine'] == 0 &&
+                $model['redialCallsDuration'] == 0 &&
                 $model['redialCallsTalkTime'] == 0 &&
                 $model['redialCallsTotalAttempts'] == 0 &&
-                $model['redialCallsCompleted'] == 0
+                $model['redialCallsCompleted'] == 0 &&
+                $model['redialCallsCompleteTalkTime'] == 0
 
             ) {
                 unset($data[$key]);
@@ -560,6 +566,7 @@ class CallLogSearch extends CallLog
                     'totalTalkTime',
                     'totalCompleted',
                     'outCallsDuration',
+                    'outCallsTalkTime',
                     'totalOutCalls',
                     'outCallsCompletedDuration',
                     'outCallsCompleted',
@@ -568,9 +575,11 @@ class CallLogSearch extends CallLog
                     'inCallsCompleted',
                     'inCallsDirectLine',
                     'inCallsGeneralLine',
+                    'redialCallsDuration',
                     'redialCallsTalkTime',
                     'redialCallsTotalAttempts',
                     'redialCallsCompleted',
+                    'redialCallsCompleteTalkTime',
                 ],
             ],
             'pagination' => [
