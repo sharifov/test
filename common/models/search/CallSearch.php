@@ -541,27 +541,6 @@ class CallSearch extends Call
         }
         $query->groupBy(['c_created_user_id']);
 
-        /*$subQuerycommand = $subQuery->createCommand();
-        $subQuerySQL = $subQuerycommand->getRawSql();
-
-        $query = new Query();
-        $query->select(['c_created_user_id, 
-                        SUM(outgoingCallsDuration) as outgoingCallsDuration, 
-                        SUM(outgoingCalls) as outgoingCalls, 
-                        SUM(outgoingCallsCompleted) as outgoingCallsCompleted, 
-                        SUM(outgoingCallsNoAnswer) as outgoingCallsNoAnswer, 
-                        SUM(outgoingCallsBusy) as outgoingCallsBusy, 
-                        SUM(incomingCallsDuration) as incomingCallsDuration, 
-                        SUM(incomingCompletedCalls) as incomingCompletedCalls, 
-                        SUM(incomingDirectLine) as incomingDirectLine, 
-                        SUM(incomingGeneralLine) as incomingGeneralLine, 
-                        SUM(redialCallsDuration) as redialCallsDuration, 
-                        SUM(totalAttempts) as totalAttempts, 
-                        SUM(redialCompleted) as redialCompleted 
-                FROM ('. $subQuerySQL .') AS tbl        
-        ']);
-        $query->groupBy(['tbl.c_created_user_id']);*/
-
         $command = $query->createCommand();
         $data = $command->queryAll();
 
@@ -613,13 +592,13 @@ class CallSearch extends Call
         return $dataProvider = new ArrayDataProvider($paramsData);
     }
 
-    /**
+    /*
      * @param $params
      * @param $user Employee
      * @return ArrayDataProvider
      * @throws \Exception
      */
-    public function searchCallsReport($params, $user):ArrayDataProvider
+    /*public function searchCallsReport($params, $user):ArrayDataProvider
     {
         $this->load($params);
         $timezone = $user->timezone;
@@ -762,7 +741,7 @@ class CallSearch extends Call
         ];
 
         return $dataProvider = new ArrayDataProvider($paramsData);
-    }
+    }*/
 
     /**
      * @param $params

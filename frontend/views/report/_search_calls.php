@@ -3,6 +3,12 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use sales\access\EmployeeDepartmentAccess;
 use common\models\Employee;
+
+/**
+ * @var $this yii\web\View
+ * @var $model \sales\model\callLog\entity\callLog\search\CallLogSearch;
+ * @var $list
+ */
 ?>
 
 <div class="calls-search">
@@ -15,15 +21,15 @@ use common\models\Employee;
         <div class="col-md-3">
             <div class="row">
                 <div class="col-md-12">
-                    <?= $form->field($model, 'createTimeRange', [
+                    <?= $form->field($model, 'reportCreateTimeRange', [
                         'options' => ['class' => 'form-group']
                     ])->widget(\kartik\daterange\DateRangePicker::class, [
                         'presetDropdown' => false,
                         'hideInput' => true,
                         'convertFormat' => true,
                         'pluginOptions' => [
-                            'minDate' => date("Y-m-d 00:00", strtotime("- 61 days")),
-                            'maxDate' => date("Y-m-d 23:59"),
+                            //'minDate' => date("Y-m-d 00:00", strtotime("- 61 days")),
+                            //'maxDate' => date("Y-m-d 23:59"),
                             'timePicker' => true,
                             'timePickerIncrement' => 1,
                             'timePicker24Hour' => true,
@@ -32,7 +38,7 @@ use common\models\Employee;
                                 'separator' => ' - '
                             ]
                         ]
-                    ])->label('Created Date');
+                    ])->label('Call Log Created Date');
                     ?>
                 </div>
             </div>
@@ -72,7 +78,7 @@ use common\models\Employee;
         <div class="col-md-3">
             <div class="row">
                 <div class="col-md-6">
-                    <?= $form->field($model, 'c_created_user_id')->dropDownList($list->getEmployees(), ['prompt' => '-'])->label('Username') ?>
+                    <?= $form->field($model, 'cl_user_id')->dropDownList($list->getEmployees(), ['prompt' => '-'])->label('Username') ?>
                 </div>
                 <div class="col-md-6">
                     <?= $form->field($model, 'callDepId')->dropDownList(EmployeeDepartmentAccess::getDepartments(), ['prompt' => '-'])->label('Department') ?>
@@ -82,7 +88,7 @@ use common\models\Employee;
         <div class="col-md-3">
             <div class="row">
                 <div class="col-md-6">
-                    <?= $form->field($model, 'c_project_id')->dropDownList(\common\models\Project::getList(), ['prompt' => '-'])->label('Project') ?>
+                    <?= $form->field($model, 'cl_project_id')->dropDownList(\common\models\Project::getList(), ['prompt' => '-'])->label('Project') ?>
                 </div>
                 <div class="col-md-6">
                     <?= $form->field($model, 'userGroupId')->dropDownList(\common\models\UserGroup::getList(), ['prompt' => '-'])->label('User Group') ?>
@@ -92,10 +98,10 @@ use common\models\Employee;
         <div class="col-md-3">
             <div class="row">
                 <div class="col-md-6">
-                    <?= $form->field($model, 'call_duration_from')->input('number', ['min' => 0]) ?>
+                    <?= $form->field($model, 'minTalkTime')->input('number', ['min' => 0])->label(' Complete call Min talk time') ?>
                 </div>
                 <div class="col-md-6">
-                    <?= $form->field($model, 'call_duration_to')->input('number', ['min' => 0]) ?>
+                    <?= $form->field($model, 'maxTalkTime')->input('number', ['min' => 0])->label('Complete call Max talk time') ?>
                 </div>
             </div>
         </div>

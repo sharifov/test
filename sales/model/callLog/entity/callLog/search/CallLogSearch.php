@@ -5,6 +5,7 @@ namespace sales\model\callLog\entity\callLog\search;
 use common\models\Call;
 use common\models\Client;
 use common\models\Employee;
+use common\models\UserGroupAssign;
 use kartik\daterange\DateRangeBehavior;
 use sales\auth\Auth;
 use sales\helpers\UserCallIdentity;
@@ -14,9 +15,11 @@ use sales\model\callLog\entity\callLog\CallLogType;
 use sales\model\callLog\entity\callLogCase\CallLogCase;
 use sales\model\callLog\entity\callLogLead\CallLogLead;
 use sales\model\callLog\entity\callLogQueue\CallLogQueue;
+use sales\model\callLog\entity\callLogRecord\CallLogRecord;
 use sales\model\callNote\entity\CallNote;
 use yii\data\ActiveDataProvider;
 use sales\model\callLog\entity\callLog\CallLog;
+use yii\data\ArrayDataProvider;
 use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\VarDumper;
@@ -52,6 +55,16 @@ class CallLogSearch extends CallLog
     public $callDurationFrom;
     public $callDurationTo;
     public $callNote;
+
+    public $reportTimezone;
+    public $defaultUserTz;
+    public $timeFrom;
+    public $timeTo;
+    public $callDepId;
+    public $userGroupId;
+    public $minTalkTime;
+    public $maxTalkTime;
+    public $reportCreateTimeRange;
 
     public const CREATE_TIME_START_DEFAULT_RANGE = '-6 days';
 
@@ -91,6 +104,9 @@ class CallLogSearch extends CallLog
             [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['callDurationFrom', 'callDurationTo'], 'integer'],
             [['projectIds', 'statusIds', 'typesIds', 'categoryIds', 'departmentIds'], 'each', 'rule' => ['integer']],
+            [['reportTimezone', 'timeFrom', 'timeTo'], 'string'],
+            [['callDepId', 'userGroupId', 'minTalkTime', 'maxTalkTime'], 'integer'],
+            ['reportCreateTimeRange', 'safe']
         ];
     }
 
@@ -114,6 +130,23 @@ class CallLogSearch extends CallLog
         ];
     }
 
+    private function getPartitionsByYears($from, $to)
+    {
+        $yFrom = date('y', strtotime($from));
+        $yTo = date('y', strtotime($to));
+        $partitions = 'y';
+        if ($yFrom == $yTo) {
+            $nextYear = (int)$yFrom + 1;
+            $partitions = 'y' . $nextYear;
+        } else {
+            $nextYearFrom = (int)$yFrom + 1;
+            $nextYearTo = (int)$yTo + 1;
+            $partitions = 'y' . $nextYearFrom . ',' . 'y' . $nextYearTo;
+        }
+
+        return $partitions;
+    }
+
     public function search($params, Employee $user): ActiveDataProvider
     {
         $query = static::find()
@@ -122,7 +155,7 @@ class CallLogSearch extends CallLog
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['cl_call_created_dt' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['cl_call_created_dt' => SORT_DESC]],
         ]);
 
         /*if(!array_filter(isset($params['CallLogSearch']) ? $params['CallLogSearch'] : [])) {
@@ -179,7 +212,7 @@ class CallLogSearch extends CallLog
             ]);
         }
 
-        if ($this->createTimeRange){
+        if ($this->createTimeRange) {
             $dateTimeStart = Employee::convertTimeFromUserDtToUTC($this->createTimeStart);
             $dateTimeEnd = Employee::convertTimeFromUserDtToUTC($this->createTimeEnd);
             $query->andWhere(['between', 'cl_call_created_dt', $dateTimeStart, $dateTimeEnd]);
@@ -210,20 +243,20 @@ class CallLogSearch extends CallLog
         return $dataProvider;
     }
 
-	public function getCallHistory(int $userId): ActiveDataProvider
-	{
-		$query = static::find();
+    public function getCallHistory(int $userId): ActiveDataProvider
+    {
+        $query = static::find();
 
         $q = new Query();
-		$dataProvider = new ActiveDataProvider([
-			'query' => $q,
-			'pagination' => [
-				'pageSize' => 10,
-			]
-		]);
+        $dataProvider = new ActiveDataProvider([
+            'query' => $q,
+            'pagination' => [
+                'pageSize' => 10,
+            ]
+        ]);
 
-		$query->select([
-		    'cl_id',
+        $query->select([
+            'cl_id',
             'cl_call_sid',
             'call_log.cl_type_id',
             'cl_phone_from',
@@ -247,11 +280,11 @@ class CallLogSearch extends CallLog
             'cn_note as callNote'
         ]);
 
-		$clientPrefix  = UserCallIdentity::getFullPrefix();
-		$length = strlen($clientPrefix) + 1;
-		//todo remove after regexp_substr will be available
+        $clientPrefix = UserCallIdentity::getFullPrefix();
+        $length = strlen($clientPrefix) + 1;
+        //todo remove after regexp_substr will be available
         $oldClientPrefix = 'client:seller';
-		$lengthOld = strlen($oldClientPrefix) + 1;
+        $lengthOld = strlen($oldClientPrefix) + 1;
 
 //		$query->addSelect([
 //		    "IF(
@@ -260,21 +293,21 @@ class CallLogSearch extends CallLog
 //				if (cl_phone_from regexp '" . $clientPrefix . "' = 1, REGEXP_SUBSTR(cl_phone_from, '[[:digit:]]+'), null)
 //            ) AS user_id"
 //        ]);
-		$query->addSelect([
-		    "IF(
+        $query->addSelect([
+            "IF(
 				call_log.cl_type_id = 1, 
 				if (cl_phone_to regexp '" . $clientPrefix . "' = 1, substring(cl_phone_to from " . $length . "), if (cl_phone_to regexp '" . $oldClientPrefix . "' = 1, substring(cl_phone_to from " . $lengthOld . "),null)), 
 				if (cl_phone_from regexp '" . $clientPrefix . "' = 1, substring(cl_phone_from from " . $length . "), if (cl_phone_from regexp '" . $oldClientPrefix . "' = 1, substring(cl_phone_from from " . $lengthOld . "),null))
             ) AS user_id"
         ]);
-		$query->leftJoin($clientTableName, $clientTableName . '.id = cl_client_id');
-		$query->leftJoin( CallLogLead::tableName(),  'cll_cl_id = cl_id');
-		$query->leftJoin( CallLogCase::tableName(),  'clc_cl_id = cl_id');
-		$query->leftJoin(CallNote::tableName(), new Expression('cn_id = (select cn_id from call_note where cn_call_id = cl_id order by cn_created_dt desc limit 1)'));
-		$query->andWhere(['cl_user_id' => $userId]);
-		$query->andWhere(['call_log.cl_type_id' => [Call::CALL_TYPE_IN, Call::CALL_TYPE_OUT]]);
-		$query->groupBy([
-		    'cl_id',
+        $query->leftJoin($clientTableName, $clientTableName . '.id = cl_client_id');
+        $query->leftJoin(CallLogLead::tableName(), 'cll_cl_id = cl_id');
+        $query->leftJoin(CallLogCase::tableName(), 'clc_cl_id = cl_id');
+        $query->leftJoin(CallNote::tableName(), new Expression('cn_id = (select cn_id from call_note where cn_call_id = cl_id order by cn_created_dt desc limit 1)'));
+        $query->andWhere(['cl_user_id' => $userId]);
+        $query->andWhere(['call_log.cl_type_id' => [Call::CALL_TYPE_IN, Call::CALL_TYPE_OUT]]);
+        $query->groupBy([
+            'cl_id',
             'cl_call_sid',
             'call_log.cl_type_id',
             'cl_phone_from',
@@ -293,11 +326,11 @@ class CallLogSearch extends CallLog
             'cl_department_id',
             'cl_client_id',
         ]);
-		$query->orderBy(['cl_call_created_dt' => SORT_DESC]);
+        $query->orderBy(['cl_call_created_dt' => SORT_DESC]);
 
-		$userTableName = Employee::tableName();
-		$q->select([
-		    'cl_id',
+        $userTableName = Employee::tableName();
+        $q->select([
+            'cl_id',
             'cl_call_sid',
             'cl_type_id',
             'cl_phone_from',
@@ -323,8 +356,8 @@ class CallLogSearch extends CallLog
 
 //		VarDumper::dump($q->createCommand()->getRawSql());die;
 
-		return $dataProvider;
-	}
+        return $dataProvider;
+    }
 
     public function searchMyCalls($params, Employee $user): ActiveDataProvider
     {
@@ -335,7 +368,7 @@ class CallLogSearch extends CallLog
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['cl_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['cl_id' => SORT_DESC]],
         ]);
 
         if (!$this->validate()) {
@@ -346,36 +379,36 @@ class CallLogSearch extends CallLog
             \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cl_call_created_dt', $this->cl_call_created_dt, $user->timezone);
         }
 
-        if ($this->createTimeRange){
+        if ($this->createTimeRange) {
             $dateTimeStart = Employee::convertTimeFromUserDtToUTC($this->createTimeStart);
             $dateTimeEnd = Employee::convertTimeFromUserDtToUTC($this->createTimeEnd);
             $query->andWhere(['between', 'cl_call_created_dt', $dateTimeStart, $dateTimeEnd]);
         }
 
-        if ($this->projectIds){
+        if ($this->projectIds) {
             $query->andWhere(['cl_project_id' => $this->projectIds]);
         }
 
-        if ($this->statusIds){
+        if ($this->statusIds) {
             $query->andWhere(['cl_status_id' => $this->statusIds]);
         }
 
-        if ($this->typesIds){
+        if ($this->typesIds) {
             $query->andWhere(['cl_type_id' => $this->typesIds]);
         }
-        if ($this->categoryIds){
+        if ($this->categoryIds) {
             $query->andWhere(['cl_category_id' => $this->categoryIds]);
         }
 
-        if ($this->departmentIds){
+        if ($this->departmentIds) {
             $query->andWhere(['cl_department_id' => $this->departmentIds]);
         }
 
-        if($this->callDurationFrom){
+        if ($this->callDurationFrom) {
             $query->andWhere(['>=', 'cl_duration', $this->callDurationFrom]);
         }
 
-        if ($this->callDurationTo){
+        if ($this->callDurationTo) {
             $query->andWhere(['<=', 'cl_duration', $this->callDurationTo]);
         }
 
@@ -393,5 +426,161 @@ class CallLogSearch extends CallLog
             ->andFilterWhere(['like', 'cl_phone_to', $this->cl_phone_to]);
 
         return $dataProvider;
+    }
+
+    /**
+     * @param $params
+     * @param $user Employee
+     * @return ArrayDataProvider
+     * @throws \yii\db\Exception
+     */
+    public function searchCallsReport($params, $user): ArrayDataProvider
+    {
+        $this->load($params);
+        $timezone = $user->timezone;
+
+        if ($this->reportTimezone == null) {
+            $this->defaultUserTz = $timezone;
+        } else {
+            $timezone = $this->reportTimezone;
+            $this->defaultUserTz = $this->reportTimezone;
+        }
+
+        if ($this->timeTo == "") {
+            $differenceTimeToFrom = "24:00";
+        } else {
+            if ((strtotime($this->timeTo) - strtotime($this->timeFrom)) <= 0) {
+                $differenceTimeToFrom = sprintf("%02d:00", (strtotime("24:00") - strtotime(sprintf("%02d:00", abs((strtotime($this->timeTo) - strtotime($this->timeFrom))) / 3600))) / 3600);
+            } else {
+                $differenceTimeToFrom = sprintf("%02d:00", (strtotime($this->timeTo) - strtotime($this->timeFrom)) / 3600);
+            }
+        }
+
+        if ($this->reportCreateTimeRange != null) {
+            $dates = explode(' - ', $this->reportCreateTimeRange);
+            $hourSub = date('G', strtotime($dates[0]));
+            $timeSub = date('G', strtotime($this->timeFrom));
+
+            $date_from = Employee::convertToUTC(strtotime($dates[0]) - ($hourSub * 3600), $this->defaultUserTz);
+            $date_to = Employee::convertToUTC(strtotime($dates[1]), $this->defaultUserTz);
+            $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
+            $utcOffsetDST = Employee::getUtcOffsetDst($timezone, $date_from) ?? date('P');
+        } else {
+            $timeSub = date('G', strtotime(date('00:00')));
+
+            $date_from = Employee::convertToUTC(strtotime(date('Y-m-d 00:00')), $this->defaultUserTz);
+            $date_to = Employee::convertToUTC(strtotime(date('Y-m-d 23:59')), $this->defaultUserTz);
+            $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
+            $utcOffsetDST = Employee::getUtcOffsetDst($timezone, $date_from) ?? date('P');
+        }
+
+        if (!empty($this->minTalkTime) && empty($this->maxTalkTime)) {
+            $queryByLogRecordDuration = ' AND clr_duration >=' . $this->minTalkTime;
+        } elseif (!empty($this->maxTalkTime) && empty($this->minTalkTime)) {
+            $queryByLogRecordDuration = ' AND clr_duration <=' . $this->maxTalkTime;
+        } elseif (!empty($this->minTalkTime) && !empty($this->maxTalkTime)) {
+            $queryByLogRecordDuration = ' AND clr_duration BETWEEN ' . $this->minTalkTime . ' AND ' . $this->maxTalkTime;
+        } else {
+            $queryByLogRecordDuration = '';
+        }
+
+        //$query = static::find()->joinWith(['record']);
+        $query = new Query();
+        $query->leftJoin(CallLogRecord::tableName(), static::tableName() . '.cl_id =' . CallLogRecord::tableName() . '.clr_cl_id');
+        $query->select(['cl_user_id, DATE(CONVERT_TZ(DATE_SUB(cl_call_created_dt, INTERVAL ' . $timeSub . ' HOUR), "+00:00", "' . $utcOffsetDST . '")) AS createdDate,
+            COALESCE(SUM(IF(cl_type_id = ' . CallLogType::OUT . ' OR cl_type_id = ' . CallLogType::IN . ' OR cl_category_id = ' . CallLogCategory::REDIAL_CALL . ', clr_duration, 0)), 0) as totalTalkTime,
+            SUM(IF((cl_type_id = ' . CallLogType::OUT . ' OR cl_type_id = ' . CallLogType::IN . ' OR cl_category_id = ' . CallLogCategory::REDIAL_CALL . ') AND cl_status_id = ' . CallLogStatus::COMPLETE . ', 1, 0)) as totalCompleted,
+            SUM(IF(cl_type_id = ' . CallLogType::OUT . ' AND cl_category_id <> ' . CallLogCategory::REDIAL_CALL . ', cl_duration, 0)) as outCallsDuration,
+            SUM(IF(cl_type_id = ' . CallLogType::OUT . ' AND cl_category_id <> ' . CallLogCategory::REDIAL_CALL . ', 1, 0)) as totalOutCalls,
+            SUM(IF(cl_type_id = ' . CallLogType::OUT . ' AND cl_category_id <> ' . CallLogCategory::REDIAL_CALL . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . $queryByLogRecordDuration . ', clr_duration, 0)) as outCallsCompletedDuration,
+            SUM(IF(cl_type_id = ' . CallLogType::OUT . ' AND cl_category_id <> ' . CallLogCategory::REDIAL_CALL . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . $queryByLogRecordDuration . ', 1, 0)) as outCallsCompleted,
+            SUM(IF(cl_type_id = ' . CallLogType::OUT . ' AND cl_category_id <> ' . CallLogCategory::REDIAL_CALL . ' AND cl_status_id <> ' . CallLogStatus::COMPLETE . $queryByLogRecordDuration . ', 1, 0)) as outCallsNoAnswer,
+            COALESCE(SUM(IF(cl_type_id = ' . CallLogType::IN . ', clr_duration, 0)), 0) as inCallsDuration,
+            SUM(IF(cl_type_id = ' . CallLogType::IN . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . ', 1, 0)) as inCallsCompleted,
+            SUM(IF(cl_type_id = ' . CallLogType::IN . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . ' AND cl_category_id = ' . CallLogCategory::DIRECT_CALL . ', 1, 0)) as inCallsDirectLine,
+            SUM(IF(cl_type_id = ' . CallLogType::IN . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . ' AND cl_category_id = ' . CallLogCategory::GENERAL_LINE . ', 1, 0)) as inCallsGeneralLine,
+            SUM(IF(cl_category_id = ' . CallLogCategory::REDIAL_CALL . ', clr_duration, 0)) as redialCallsTalkTime,
+            SUM(IF(cl_category_id = ' . CallLogCategory::REDIAL_CALL . ', 1, 0)) as redialCallsTotalAttempts,
+            SUM(IF(cl_category_id = ' . CallLogCategory::REDIAL_CALL . ' AND cl_status_id = ' . CallLogStatus::COMPLETE . ', 1, 0)) as redialCallsCompleted            
+        ']);
+
+        $query->from([new \yii\db\Expression(static::tableName() . ' PARTITION(' . $this->getPartitionsByYears($date_from, $date_to) . ') ')]);
+        $query->where('cl_call_created_dt ' . $between_condition);
+        $query->andWhere('cl_user_id IS NOT NULL');
+        $query->andWhere('TIME(CONVERT_TZ(DATE_SUB(cl_call_created_dt, INTERVAL ' . $timeSub . ' HOUR), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '")');
+
+        if (!empty($this->cl_user_id)) {
+            $query->andWhere('cl_user_id=' . $this->cl_user_id);
+        }
+
+        if (isset($params['CallLogSearch']['callDepId']) && $params['CallLogSearch']['callDepId'] != "") {
+            $query->andWhere('cl_department_id= ' . $params['CallLogSearch']['callDepId']);
+        }
+
+        if (!empty($this->cl_project_id)) {
+            $query->andWhere('cl_project_id=' . $this->cl_project_id);
+        }
+
+        if (!empty($this->userGroupId)) {
+            $userIdsByGroup = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where('ugs_group_id = ' . $this->userGroupId);
+            $query->andWhere(['cl_user_id' => $userIdsByGroup]);
+        }
+
+        $query->groupBy(['cl_user_id', 'createdDate']);
+
+        $command = $query->createCommand();
+        $data = $command->queryAll();
+
+        foreach ($data as $key => $model) {
+            if (
+                $model['totalTalkTime'] == 0 &&
+                $model['totalCompleted'] == 0 &&
+                $model['outCallsDuration'] == 0 &&
+                $model['totalOutCalls'] == 0 &&
+                $model['outCallsCompletedDuration'] == 0 &&
+                $model['outCallsCompleted'] == 0 &&
+                $model['outCallsNoAnswer'] == 0 &&
+                $model['inCallsDuration'] == 0 &&
+                $model['inCallsCompleted'] == 0 &&
+                $model['inCallsDirectLine'] == 0 &&
+                $model['inCallsGeneralLine'] == 0 &&
+                $model['redialCallsTalkTime'] == 0 &&
+                $model['redialCallsTotalAttempts'] == 0 &&
+                $model['redialCallsCompleted'] == 0
+
+            ) {
+                unset($data[$key]);
+            }
+        }
+
+        $paramsData = [
+            'allModels' => $data,
+            'sort' => [
+                //'defaultOrder' => ['username' => SORT_ASC],
+                'attributes' => [
+                    'cl_user_id',
+                    'createdDate',
+                    'totalTalkTime',
+                    'totalCompleted',
+                    'outCallsDuration',
+                    'totalOutCalls',
+                    'outCallsCompletedDuration',
+                    'outCallsCompleted',
+                    'outCallsNoAnswer',
+                    'inCallsDuration',
+                    'inCallsCompleted',
+                    'inCallsDirectLine',
+                    'inCallsGeneralLine',
+                    'redialCallsTalkTime',
+                    'redialCallsTotalAttempts',
+                    'redialCallsCompleted',
+                ],
+            ],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
+        ];
+
+        return $dataProvider = new ArrayDataProvider($paramsData);
     }
 }
