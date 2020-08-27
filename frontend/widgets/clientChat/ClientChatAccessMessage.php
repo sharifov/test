@@ -35,7 +35,7 @@ class ClientChatAccessMessage
 			'user_id' => $access->ccua_user_id,
 			'cch_id' => $access->ccua_cch_id,
 			'pjaxUrl' => Url::to('/client-chat/pjax-update-chat-widget'),
-			'html' => self::refresh($access->ccua_user_id)
+			'html' => self::refresh($access->ccua_user_id, $access->ccua_id)
 		];
 	}
 
@@ -81,11 +81,12 @@ class ClientChatAccessMessage
 		];
 	}
 
-	private static function refresh(int $userId)
+	private static function refresh(int $userId, ?int $accessId = null)
 	{
 		$widget = ClientChatAccessWidget::getInstance();
 		$widget->userId = $userId;
 		$widget->open = true;
+		$widget->userAccessId = $accessId;
 		return $widget->run();
 	}
 }

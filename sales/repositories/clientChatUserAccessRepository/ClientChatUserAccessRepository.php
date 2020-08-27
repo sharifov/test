@@ -41,7 +41,7 @@ class ClientChatUserAccessRepository extends Repository
 		if (!$clientChatUserAccess->save()) {
 			throw new \RuntimeException($clientChatUserAccess->getErrorSummary(false)[0], ClientChatCodeException::CC_USER_ACCESS_SAVE_FAILED);
 		}
-//		$this->eventDispatcher->dispatch(new SendNotificationEvent($clientChatUserAccess), 'clientChatUserAccess_' . $clientChatUserAccess->ccua_user_id);
+		$this->eventDispatcher->dispatch(new SendNotificationEvent($clientChatUserAccess), 'clientChatUserAccess_' . $clientChatUserAccess->ccua_user_id);
 		return $clientChatUserAccess;
 	}
 

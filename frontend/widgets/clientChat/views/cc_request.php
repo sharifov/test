@@ -12,7 +12,6 @@ use yii\helpers\Html;
 
 ClientChatAsset::register($this);
 
-$accessUrl = \yii\helpers\Url::to('/client-chat/access-manage');
 $totalRequest = count($access);
 ?>
 
@@ -31,74 +30,10 @@ $totalRequest = count($access);
         <div class="_cc-box-body">
             <?php if($access): ?>
                 <?php foreach($access as $item): ?>
-                    <div class="_cc-box-item-wrapper" id="ccr_<?= $item->ccua_cch_id ?>_<?= $item->ccua_user_id ?>">
-                        <div class="_cc-box-item">
-                            <div class="_cc-client-info">
-                                <span class="_cc-client-name">
-                                    <i class="fa fa-user"></i>
-                                    <?= Html::encode($item->ccuaCch->cchClient && $item->ccuaCch->cchClient->full_name ? $item->ccuaCch->cchClient->full_name : 'Guest-' . $item->ccuaCch->cch_id) ?>
-                                </span>
-
-                                <?php if ($item->ccuaCch->cchClient && $item->ccuaCch->cchClient->clientEmails): ?>
-                                    <?php foreach($item->ccuaCch->cchClient->clientEmails as $email): ?>
-                                        <span class="_cc-client-email">
-                                            <i class="fa fa-envelope"></i>
-                                            <code><?= Html::encode($email->email) ?></code>
-                                        </span>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-
-                                <?php if ($item->ccuaCch->cchClient && $item->ccuaCch->cchClient->clientPhones): ?>
-                                    <?php foreach($item->ccuaCch->cchClient->clientPhones as $phone): ?>
-                                        <span class="_cc-client-phone">
-                                            <i class="fa fa-phone"></i>
-                                            <code><?= Html::encode($phone->phone) ?></code>
-                                        </span>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-
-                                <span class="_cc-request-created">
-                                    <?php if ($formatter instanceof Formatter): ?>
-                                        <?= $formatter->asByUserDateTime($item->ccua_created_dt) ?>
-                                    <?php else: ?>
-										<?= $formatter->asDatetime($item->ccua_created_dt) ?>
-									<?php endif; ?>
-                                </span>
-
-                                    <?php if ($formatter instanceof Formatter): ?>
-                                    <span>
-                                        <?= $formatter->asTimer($item->ccua_created_dt) ?>
-                                    </span>
-                                    <?php endif; ?>
-                                <div class="_cc-data">
-                                    <?php if ($item->ccuaCch->cchDep): ?>
-                                        <span class="label label-default"><?= Html::encode($item->ccuaCch->cchDep->dep_name) ?></span>
-                                    <?php endif; ?>
-
-                                    <?php if ($item->ccuaCch->cchProject): ?>
-                                        <span class="label label-default"><?= Html::encode($item->ccuaCch->cchProject->name) ?></span>
-                                    <?php endif; ?>
-
-                                    <span class="label label-default"><?= Html::encode($item->ccuaCch->cchChannel ? $item->ccuaCch->cchChannel->ccc_name : '') ?></span>
-                                </div>
-
-                                <?php if ($item->ccuaCch->cchOwnerUser && $item->ccuaCch->isTransfer()): ?>
-                                    <div>
-                                        <span class="label label-warning">Transfer</span> from <b><?= Html::encode($item->ccuaCch->cchOwnerUser->nickname) ?></b>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-
-
-                            <div class="_cc-action">
-                                <button class="btn btn-sm btn-success _cc-access-action" data-ccua-id="<?= $item->ccua_id ?>" data-cch-id="<?= $item->ccua_cch_id ?>" data-ajax-url="<?= $accessUrl ?>" data-access-action="<?= ClientChatUserAccess::STATUS_ACCEPT ?>"><i class="fa fa-check"></i> Accept</button>
-                                <button class="btn btn-sm btn-warning _cc-access-action" data-ccua-id="<?= $item->ccua_id ?>" data-cch-id="<?= $item->ccua_cch_id ?>" data-ajax-url="<?= $accessUrl ?>" data-access-action="<?= ClientChatUserAccess::STATUS_SKIP ?>"><i class="fa fa-close"></i> Skip</button>
-                            </div>
-
-<!--                            <span class="_cc_chevron"><i class="fa fa-chevron-down"></i></span>-->
-                        </div>
-                        <hr>
-                    </div>
+                    <?= $this->render('cc_request_item', [
+                        'access' => $item,
+                        'formatter' => $formatter
+                    ]) ?>
                 <?php endforeach; ?>
             <?php else: ?>
                 <p>You have no active client conversations requests.</p>
@@ -108,17 +43,18 @@ $totalRequest = count($access);
 <!--        <div class="fab_field">-->
 <!--        </div>-->
     </div>
-    <a id="_cc-access-wg" class="_cc-fab <?= $open && $access ? 'is-visible' : '' ?>" style="<?= $access ? '' : 'background: #d5b24c' ?>">
+    <a id="_cc-access-wg" total-items="<?= $totalRequest ?>" class="_cc-fab <?= $open && $access ? 'is-visible' : '' ?> <?= $access ? '' : 'inactive' ?>">
         <i class="fa fa-comments-o"></i>
-        <?php if ($totalRequest): ?>
+
+        <div id="_circle_wrapper" class="<?= $totalRequest ? 'active' : '' ?>">
             <span class="_cc_total_request_wrapper">
-                <?= $totalRequest ?>
+                <?= $totalRequest ?: 0 ?>
             </span>
             <span class="circle" style="animation-delay: 0s"></span>
             <span class="circle" style="animation-delay: 1s"></span>
             <span class="circle" style="animation-delay: 2s"></span>
             <span class="circle" style="animation-delay: 3s"></span>
-        <?php endif; ?>
+        </div>
     </a>
 </div>
 <?php // yii\widgets\Pjax::end() ?>
