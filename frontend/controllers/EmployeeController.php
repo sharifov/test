@@ -17,7 +17,6 @@ use common\models\UserParams;
 use common\models\UserProductType;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
-use frontend\models\search\UserFailedLoginSearch;
 use frontend\models\UserFailedLogin;
 use frontend\models\UserMultipleForm;
 use sales\auth\Auth;
@@ -25,16 +24,13 @@ use sales\helpers\app\AppHelper;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\emailList\entity\EmailList;
 use sales\model\userVoiceMail\entity\search\UserVoiceMailSearch;
-use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessRepository;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
-use sales\services\TransactionManager;
 use Yii;
 use yii\bootstrap4\Html;
 use yii\data\ActiveDataProvider;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
-use yii\helpers\Console;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
@@ -303,6 +299,8 @@ class EmployeeController extends FController
                             try {
                                 $user->removeAllClientChatChanels();
                                 $user->addClientChatChanels($multipleForm->userClientChatChanels, Auth::id());
+                                $this->clientChatUserAccessService->disableUserAccessToAllChats($user->id);
+                                $this->clientChatUserAccessService->setUserAccessToAllChatsByChannelIds($multipleForm->userClientChatChanels, $user->id);
                                 $transaction->commit();
                             } catch (\Throwable $e) {
                                 $transaction->rollBack();
@@ -757,8 +755,10 @@ class EmployeeController extends FController
                                 $clientChatChanel->ccuc_created_dt = date('Y-m-d H:i:s');
                                 $clientChatChanel->ccuc_created_user_id = Auth::id();
                                 $clientChatChanel->save();
-                            }
-                        }
+							}
+							$this->clientChatUserAccessService->disableUserAccessToAllChats($model->id);
+							$this->clientChatUserAccessService->setUserAccessToAllChatsByChannelIds($attr['client_chat_user_channel'], $model->id);
+						}
                     }
 
                     //VarDumper::dump($attr['user_groups'], 10, true); exit;

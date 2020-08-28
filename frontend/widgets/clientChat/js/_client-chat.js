@@ -102,6 +102,10 @@ function refreshClientChatWidget(obj) {
             window.enableTimer();
             openWidget();
             break;
+        case 'reset':
+            $('#_client_chat_access_widget').html(data.html);
+            window.enableTimer();
+            break;
         default:
             console.error('refreshClientChatWidget:: unknown command');
             break;

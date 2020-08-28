@@ -5,12 +5,12 @@ namespace sales\model\clientChatUserAccess\event;
 use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessRepository;
 
 /**
- * Class SendNotificationListener
+ * Class UpdateChatUserAccessWidgetListener
  * @package sales\model\clientChatUserAccess\event
  *
  * @property ClientChatUserAccessRepository $accessRepository
  */
-class SendNotificationListener
+class UpdateChatUserAccessWidgetListener
 {
 	public $accessRepository;
 
@@ -19,8 +19,8 @@ class SendNotificationListener
 		$this->accessRepository = $accessRepository;
 	}
 
-	public function handle(SendNotificationEvent $event): void
+	public function handle(UpdateChatUserAccessWidgetEvent $event): void
 	{
-		$this->accessRepository->sendNotifications($event->userAccess);
+		$this->accessRepository->updateChatUserAccessWidget($event->cchId, $event->userId, $event->statusId, $event->ccuaId);
 	}
 }

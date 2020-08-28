@@ -4,15 +4,18 @@ namespace sales\services\clientChatUserAccessService;
 
 use common\models\Notifications;
 use frontend\widgets\clientChat\ClientChatAccessMessage;
+use sales\dispatchers\EventDispatcher;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
+use sales\model\clientChatUserAccess\event\ResetChatUserAccessWidgetEvent;
 use sales\model\clientChatVisitor\repository\ClientChatVisitorRepository;
 use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessRepository;
 use sales\repositories\clientChatUserChannel\ClientChatUserChannelRepository;
 use sales\services\clientChatService\ClientChatService;
 use sales\services\TransactionManager;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class ClientChatUserAccessService
@@ -122,13 +125,13 @@ class ClientChatUserAccessService
 	 */
 	public function disableUserAccessToAllChats(int $userId): void
 	{
-		$_self = $this;
-		$this->transactionManager->wrap( static function () use ($userId, $_self) {
+		$this->transactionManager->wrap( static function () use ($userId) {
 			/** @var ClientChatUserAccess[] $userAccess  */
-			$userAccess = ClientChatUserAccess::find()->byUserId($userId)->pending()->all();
-			foreach ($userAccess as $access) {
-				$_self->updateStatus($access, ClientChatUserAccess::STATUS_SKIP);
-			}
+			$eventDispatcher = \Yii::createObject(EventDispatcher::class);
+			$userAccess = ClientChatUserAccess::find()->select(['ccua_cch_id'])->byUserId($userId)->pending()->asArray()->all();
+			$chats = ArrayHelper::getColumn($userAccess, 'ccua_cch_id');
+			ClientChatUserAccess::updateAll(['ccua_status_id' => ClientChatUserAccess::STATUS_SKIP], ['ccua_cch_id' => $chats, 'ccua_user_id' => $userId, 'ccua_status_id' => ClientChatUserAccess::STATUS_PENDING]);
+			$eventDispatcher->dispatch(new ResetChatUserAccessWidgetEvent($userId), 'ResetChatUserAccessWidgetEvent_' . $userId);
 		});
 	}
 
@@ -150,5 +153,34 @@ class ClientChatUserAccessService
 				}
 			}
 		});
+	}
+
+	public function setUserAccessToAllChatsByChannelIds(array $channelIds, int $userId)
+	{
+		$eventDispatcher = \Yii::createObject(EventDispatcher::class);
+		if ($chats = ClientChat::find()->select(['cch_id'])->byOwner(null)->byChannelIds($channelIds)->asArray()->all()) {
+			$data = [];
+			foreach ($chats as $chat) {
+				$data[] = [
+					'ccua_cch_id' => $chat['cch_id'],
+					'ccua_user_id' => $userId,
+					'ccua_status_id' => ClientChatUserAccess::STATUS_PENDING,
+					'ccua_created_dt' => date('Y-m-d H:i:s'),
+					'ccua_updated_dt' => date('Y-m-d H:i:s'),
+				];
+			}
+			\Yii::$app->db->createCommand()->batchInsert(ClientChatUserAccess::tableName(), ['ccua_cch_id', 'ccua_user_id', 'ccua_status_id', 'ccua_created_dt', 'ccua_updated_dt'], $data)->execute();
+		}
+		$eventDispatcher->dispatch(new ResetChatUserAccessWidgetEvent($userId), 'ResetChatUserAccessWidgetEvent_' . $userId);
+	}
+
+	public function disableUserAccessToAllChatsByChannelIds(array $channelIds, int $userId): void
+	{
+		$eventDispatcher = \Yii::createObject(EventDispatcher::class);
+		if ($chats = ClientChat::find()->select(['cch_id'])->byOwner(null)->byChannelIds($channelIds)->asArray()->all()) {
+			$chats = ArrayHelper::getColumn($chats, 'cch_id');
+			ClientChatUserAccess::updateAll(['ccua_status_id' => ClientChatUserAccess::STATUS_SKIP], ['ccua_cch_id' => $chats, 'ccua_status_id' => ClientChatUserAccess::STATUS_PENDING, 'ccua_user_id' => $userId]);
+		}
+		$eventDispatcher->dispatch(new ResetChatUserAccessWidgetEvent($userId), 'ResetChatUserAccessWidgetEvent_' . $userId);
 	}
 }

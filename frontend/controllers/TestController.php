@@ -1880,6 +1880,18 @@ class TestController extends FController
 
 		$repository->setUserAccessToAllChats(464);
 	}
+
+	public function actionSetAccessToAllChatsByChannelIds()
+	{
+		try {
+			$userAccessService = Yii::createObject(ClientChatUserAccessService::class);
+
+			$userAccessService->disableUserAccessToAllChats(464);
+			$userAccessService->setUserAccessToAllChatsByChannelIds([5], 464);
+		} catch (\Throwable $e) {
+			echo AppHelper::throwableFormatter($e);
+		}
+	}
 }
 
 

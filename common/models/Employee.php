@@ -9,6 +9,8 @@ use common\models\search\EmployeeSearch;
 use modules\product\src\entities\productType\ProductType;
 use sales\access\EmployeeGroupAccess;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
+use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
+use sales\model\clientChatUserAccess\event\UpdateChatUserAccessWidgetEvent;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\user\entity\Access;
 use sales\model\user\entity\AccessCache;
