@@ -13,6 +13,11 @@ class ClientChatHelper
 		return $clientChat->cchClient && $clientChat->cchClient->full_name ? $clientChat->cchClient->full_name : 'Guest-' . $clientChat->cch_id;
 	}
 
+	public static function getFirstLetterFromName(ClientChat $clientChat): string
+	{
+		return strtoupper(self::getClientName($clientChat)[0]);
+	}
+
 	public static function getClientStatusMessage(ClientChat $clientChat): string
 	{
 		return (int)$clientChat->cch_client_online ? ' is online...' : ' left from chat...';
