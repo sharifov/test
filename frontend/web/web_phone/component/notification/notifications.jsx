@@ -22,6 +22,9 @@ class PhoneWidgetNotification extends React.Component {
 
     render() {
         let className = 'phone-notifications';
+        if (!(this.props.notification.isDeleted || this.props.notification.isNew)) {
+            className = className + ' phone-notifications--shown';
+        }
         if (this.props.notification.queue === 'general') {
             className = className + ' phone-notifications--general-calls';
         } else if (this.props.notification.queue === 'direct') {
