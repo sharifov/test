@@ -29,7 +29,7 @@ class PhoneWidgetNotification extends React.Component {
             className = className + ' phone-notifications--general-calls';
         } else if (this.props.notification.queue === 'direct') {
             className = className + ' phone-notifications--direct-calls';
-        } else if (this.props.notification.queue === 'active') {
+        } else if (this.props.notification.queue === 'active' || this.props.notification.queue === 'hold') {
             className = className + ' phone-notifications--active-calls';
         }
 
@@ -88,15 +88,17 @@ function NotificationItem(props) {
                     </div>
                     <div className="incoming-notification__action-list">
                         <div className="incoming-notification__dynamic">
-                            <a href="#"
+                            {/* <a href="#"
                                className="incoming-notification__action incoming-notification__action--line">
                                 <i className="fa fa-random"> </i>
-                            </a>
+                            </a> */}
 
-                            <a href="#"
-                               className="incoming-notification__action incoming-notification__action--info">
-                                <i className="fa fa-info"> </i>
-                            </a>
+                            {item.canCallInfo
+                                ? <a href="#" data-call-sid={item.callSid} className="incoming-notification__action incoming-notification__action--info pw-btn-call-info">
+                                     <i className="fa fa-info"> </i>
+                                  </a>
+                                : ''
+                            }
 
                             <a href="#"
                                className="incoming-notification__action incoming-notification__action--phone">
@@ -104,10 +106,10 @@ function NotificationItem(props) {
                             </a>
                         </div>
                         {props.source === 'phone'
-                            ?   <a href="#" className="incoming-notification__action incoming-notification__action--min">
+                            ?   <a href="#" data-call-sid={item.key} className="incoming-notification__action incoming-notification__action--min pw-notification-hide">
                                     <i className="fa fa-long-arrow-alt-down"> </i>
                                 </a>
-                            :   <a href="#" className="incoming-notification__action incoming-notification__action--max">
+                            :   <a href="#" data-call-sid={item.key} className="incoming-notification__action incoming-notification__action--max pw-notification-hide">
                                     <i className="fa fa-long-arrow-down"> </i>
                                 </a>
                         }

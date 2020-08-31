@@ -16,11 +16,11 @@
 
         this.remove = function (key) {
             let index = this.getIndex(key);
-            if (index !== null) {
-                this.notifications.splice(index, 1);
-                return true;
+            if (index === null) {
+                return false;
             }
-            return false;
+            this.notifications.splice(index, 1);
+            return true;
         };
 
         this.getIndex = function (key) {
@@ -98,7 +98,7 @@
 
         this.add = function (key, notification) {
             if (this.notifications.add(key, notification) === false) {
-                return;
+                return false;
             }
 
             notification.isNew = true;
@@ -111,12 +111,13 @@
                 self.notifiers.desktop.notify(self.notifications.all());
                 self.notifiers.phone.notify(notification);
             }, 50);
+            return true;
         };
 
         this.remove = function (key) {
             let notification = this.notifications.one(key);
             if (notification === null) {
-                return;
+                return false;
             }
             notification.isDeleted = true;
             this.notifiers.desktop.notify(this.notifications.all());
@@ -135,6 +136,12 @@
                     self.notifiers.desktop.reset();
                 }
             }, 400);
+            return true;
+        };
+
+        this.reset = function () {
+            this.notifiers.desktop.reset();
+            this.notifiers.phone.reset();
         };
     }
 

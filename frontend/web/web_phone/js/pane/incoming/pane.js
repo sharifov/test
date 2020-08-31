@@ -11,18 +11,6 @@ var PhoneWidgetPaneIncoming = function () {
 
     // call => window.phoneWidget.call.Call
     function load(call) {
-
-        window.phoneWidget.notifier.add(
-            call.data.callSid,
-            {
-                'queue': call.data.queue,
-                'name': call.data.contact.name,
-                'phone': call.data.contact.phone,
-                'project': call.data.project,
-                'department': call.data.department,
-                'duration': call.data.duration
-            });
-
         contactInfo.load(call.data.contact);
 
         ReactDOM.unmountComponentAtNode($reactContainer);

@@ -128,11 +128,12 @@ var PhoneWidgetPaneActive = function () {
     function init(call, conference) {
         load(call, conference);
         show();
-        if (call.getHoldDuration()) {
-            widgetIcon.update({type: 'hold', timer: true, 'timerStamp': call.getHoldDuration(), text: 'on hold', currentCalls: null, status: 'online'});
-            return;
-        }
-        widgetIcon.update({type: 'inProgress', timer: true, 'timerStamp': call.getDuration(), text: 'on call', currentCalls: '', status: 'online'});
+        PhoneWidgetCall.iconUpdate();
+        // if (call.getHoldDuration()) {
+        //     widgetIcon.update({type: 'hold', timer: true, 'timerStamp': call.getHoldDuration(), text: 'on hold', currentCalls: null, status: 'online'});
+        //     return;
+        // }
+        // widgetIcon.update({type: 'inProgress', timer: true, 'timerStamp': call.getDuration(), text: 'on call', currentCalls: '', status: 'online'});
     }
 
     return {

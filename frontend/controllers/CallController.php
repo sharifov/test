@@ -855,8 +855,8 @@ class CallController extends FController
 
         //if($result === false) {
 
-            $box = IncomingCallWidget::getInstance();
-            $result = $box->run();
+//            $box = IncomingCallWidget::getInstance();
+//            $result = $box->run();
 
             /*if($result) {
                 Yii::$app->cache->set($keyCache, $result, 30);
@@ -865,7 +865,8 @@ class CallController extends FController
 
         //VarDumper::dump($data); exit;
 
-        return $result;
+//        return $result;
+        return '';
     }
 
 
