@@ -184,7 +184,7 @@ var PhoneWidgetCall = function () {
         if (call.data.queue === 'hold') {
             console.log('hold call');
             panes.queue.refresh();
-            addNotification(call.data.callSid, call);
+            addIncomingCallNotification(call);
             return false;
         }
         panes.queue.refresh();
@@ -192,7 +192,7 @@ var PhoneWidgetCall = function () {
         //todo remove
        //panes.incoming.init(call, (queues.direct.count() + queues.general.count()), (queues.active.count() + queues.hold.count()));
 
-        addNotification(call.data.callSid, call);
+        addIncomingCallNotification(call);
         audio.incoming.refresh();
         iconUpdate();
         openWidget();
@@ -221,6 +221,7 @@ var PhoneWidgetCall = function () {
 
         waitQueue.remove(data.callSid);
         queues.outgoing.remove(data.callSid);
+        removeNotification(data.callSid);
 
         let call = queues.active.add(data);
         if (call === null) {
@@ -637,7 +638,7 @@ var PhoneWidgetCall = function () {
             let btn = $(this);
             acceptCall(btn.attr('data-call-sid'), btn.attr('data-from-internal'));
         });
-        $(document).on('click', '.call-list-item__main-action-trigger', function () {
+        $(document).on('click', '.btn-item-call-queue', function () {
             let btn = $(this);
             let action = $(this).attr('data-type-action');
 
@@ -1046,9 +1047,10 @@ var PhoneWidgetCall = function () {
         }
     }
 
-    function addNotification(key, call) {
+    function addIncomingCallNotification(call) {
         return window.phoneWidget.notifier.add(
-            key,
+            call.data.callSid,
+            window.phoneWidget.notifier.types.incomingCall,
             {
                 'callSid': call.data.callSid,
                 'queue': call.data.queue,
@@ -1057,8 +1059,12 @@ var PhoneWidgetCall = function () {
                 'project': call.data.project,
                 'department': call.data.department,
                 'duration': call.data.duration,
-                'canCallInfo': call.data.contact.canCallInfo
-            });
+                'canCallInfo': call.data.contact.canCallInfo,
+                'isInternal': call.data.isInternal,
+                'fromInternal': call.data.fromInternal,
+                'eventName': call.getEventUpdateName()
+            }
+        );
     }
 
     function removeNotification(key) {
@@ -1075,7 +1081,7 @@ var PhoneWidgetCall = function () {
             let call = waitQueue.add(item);
             if (call !== null) {
                 holdExist = true;
-                addNotification(call.data.callSid, call);
+                addIncomingCallNotification(call);
             }
         });
 
@@ -1084,7 +1090,7 @@ var PhoneWidgetCall = function () {
         data.incoming.forEach(function (item) {
             let call = waitQueue.add(item);
             if (call !== null) {
-                addNotification(call.data.callSid, call);
+                addIncomingCallNotification(call);
                 incomingExist = true;
                 lastIncomingCall = call;
             }

@@ -1,17 +1,22 @@
 (function () {
 
+    let types = {
+        incomingCall: 'incomingCall'
+    };
+
     function Collection() {
 
         this.notifications = [];
 
-        this.add = function (key, data) {
+        this.add = function (key, type, notification) {
             if (this.getIndex(key) !== null) {
                 return false;
             }
-            data.key = key;
-            data.timePushed = Date.now();
-            this.notifications.unshift(data);
-            return data;
+            notification.key = key;
+            notification.type = type;
+            notification.timePushed = Date.now();
+            this.notifications.unshift(notification);
+            return notification;
         };
 
         this.remove = function (key) {
@@ -96,8 +101,8 @@
             'phone': new PhoneWidgetNotifier(),
         };
 
-        this.add = function (key, notification) {
-            if (this.notifications.add(key, notification) === false) {
+        this.add = function (key, type, notification) {
+            if (this.notifications.add(key, type, notification) === false) {
                 return false;
             }
 
@@ -178,4 +183,5 @@
     }
 
     window.phoneWidget.notifier = new Notifier();
+    window.phoneWidget.notifier.types = types;
 })();
