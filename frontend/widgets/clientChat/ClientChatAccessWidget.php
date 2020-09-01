@@ -10,13 +10,13 @@ use sales\auth\Auth;
 use sales\helpers\setting\SettingHelper;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use yii\base\Widget;
-use yii\helpers\ArrayHelper;
 
 /**
  * Class ClientChatAccessWidget
  * @package frontend\widgets\clientChat
  *
  * @property int $userId
+ * @property int|null $userAccessId
  * @property bool $open
  */
 class ClientChatAccessWidget extends Widget
@@ -30,6 +30,11 @@ class ClientChatAccessWidget extends Widget
 	 * @var int $userId
 	 */
 	public int $userId;
+
+	/**
+	 * @var int|null $userAccessId
+	 */
+	public ?int $userAccessId = null;
 
 	/**
 	 * @var bool $open
@@ -61,8 +66,6 @@ class ClientChatAccessWidget extends Widget
 //			];
 //		}, null, new TagDependency(['tags' => ClientChatCache::getTags($this->userId)]));
 
-		$result['access'] = ClientChatUserAccess::pendingRequests($_self->userId);
-
 		$user = Employee::findOne(['id' => $this->userId]);
 
 		if ($user) {
@@ -72,6 +75,12 @@ class ClientChatAccessWidget extends Widget
 			$formatter = \Yii::$app->formatter;
 		}
 
-		return $this->render('cc_request', ['access' => $result['access'], 'open' => $this->open, 'formatter' => $formatter]);
+		if ($this->userAccessId) {
+			$result = ClientChatUserAccess::findOne(['ccua_id' => $this->userAccessId]);
+			return $this->render('cc_request_item', ['access' => $result, 'formatter' => $formatter]);
+		}
+
+		$result = ClientChatUserAccess::pendingRequests($_self->userId);
+		return $this->render('cc_request', ['access' => $result, 'open' => $this->open, 'formatter' => $formatter]);
 	}
 }

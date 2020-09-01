@@ -4,6 +4,7 @@ namespace frontend\widgets\multipleUpdate\lead;
 
 use common\models\Employee;
 use common\models\Lead;
+use sales\auth\Auth;
 use sales\services\lead\LeadStateService;
 use sales\services\lead\qcall\Config;
 use sales\services\lead\qcall\FindPhoneParams;
@@ -34,6 +35,10 @@ class MultipleUpdateService
         $this->report = [];
     }
 
+    /**
+     * @param MultipleUpdateForm $form
+     * @return array
+     */
     public function update(MultipleUpdateForm $form): array
     {
         $creatorId = $form->authUserId();
@@ -45,8 +50,9 @@ class MultipleUpdateService
                 continue;
             }
 
-            if (!$lead->isAvailableForMultiUpdate() && !$form->authUserIsAdmin()) {
-                $this->addMessage('Lead: ' . $leadId . ' with status: ' . $lead->getStatusName() . ' is not available for MultiUpdate. Available only status: Processing, FollowUp, Hold, Trash, Snooze');
+            //if (!$lead->isAvailableForMultiUpdate() && !$form->authUserIsAdmin()) {
+            if (!Auth::can('leadSearchMultipleUpdate', ['lead' => $lead]) && !$form->authUserIsAdmin()) {
+                $this->addMessage('Lead ID: ' . $leadId . ' with status "' . $lead->getStatusName() . '" is not available for Multiple Update (permission: leadSearchMultipleUpdate)'); //  Available only status: Processing, FollowUp, Hold, Trash, Snooze
                 continue;
             }
 
@@ -74,6 +80,12 @@ class MultipleUpdateService
         return $this->report;
     }
 
+    /**
+     * @param Lead $lead
+     * @param MultipleUpdateForm $form
+     * @param NewOwner $newOwner
+     * @param $creatorId
+     */
     private function changeOwner(Lead $lead, MultipleUpdateForm $form, NewOwner $newOwner, $creatorId): void
     {
         if ($lead->isPending()) {
@@ -142,6 +154,13 @@ class MultipleUpdateService
         }
     }
 
+    /**
+     * @param Lead $lead
+     * @param MultipleUpdateForm $form
+     * @param NewOwner $newOwner
+     * @param $oldOwnerId
+     * @param $creatorId
+     */
     private function changeStatus(lead $lead, MultipleUpdateForm $form, NewOwner $newOwner, $oldOwnerId, $creatorId): void
     {
         if ($form->isPending()) {
@@ -213,6 +232,10 @@ class MultipleUpdateService
         }
     }
 
+    /**
+     * @param array $reports
+     * @return string
+     */
     public function formatReport(array $reports): string
     {
         if (!$reports) {
@@ -226,7 +249,9 @@ class MultipleUpdateService
         return $out . '</ul>';
     }
 
-
+    /**
+     * @param string $message
+     */
     private function addMessage(string $message): void
     {
         $this->report[] = $message;
@@ -295,6 +320,10 @@ class MultipleUpdateService
         return 'Undefined username';
     }
 
+    /**
+     * @param MultipleUpdateForm $form
+     * @param Lead $lead
+     */
     private function redialProcess(MultipleUpdateForm $form, Lead $lead): void
     {
         $message = '';

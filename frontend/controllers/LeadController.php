@@ -2122,8 +2122,7 @@ class LeadController extends FController
             try {
                 $leadManageService = Yii::createObject(\sales\model\lead\useCases\lead\create\LeadManageService::class);
                 $lead = $leadManageService->createByClientChat($form, $chat, $userId);
-                $out = Yii::$app->formatter->format($lead, 'lead');
-                return "<script> $('#modal-md').modal('hide');$('#chat-info-lead-info').append(' " . $out . "')</script>";
+                return "<script> $('#modal-md').modal('hide');refreshChatInfo('".$chat->cch_id."')</script>";
             } catch (\Throwable $e) {
                 Yii::error(AppHelper::throwableFormatter($e), 'LeadController:actionCreateByChat');
                 return "<script> $('#modal-md').modal('hide');createNotify('Create Lead', '" . $e->getMessage() . "', 'error');</script>";

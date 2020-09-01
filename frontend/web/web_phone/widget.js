@@ -1318,7 +1318,7 @@ class ListItem extends React.Component {
       className: "call-info-list__item"
     }, React.createElement("span", {
       className: "call-info-list__company"
-    }, call.data.contact.company)) : '', call.data.typeId === 2 || call.data.typeId === 1 ? React.createElement("li", {
+    }, call.data.contact.company)) : '', call.data.typeId === 2 || call.data.typeId === 1 || call.data.typeId === 4 ? React.createElement("li", {
       className: "call-info-list__item"
     }, React.createElement("span", {
       className: "call-info-list__number"

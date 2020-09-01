@@ -8,6 +8,7 @@ use sales\helpers\app\AppHelper;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\services\clientChatService\ClientChatService;
+use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
 use Yii;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\clientChatUserChannel\entity\search\ClientChatUserChannelSearch;
@@ -23,6 +24,7 @@ use yii\db\StaleObjectException;
  * @package frontend\controllers
  *
  * @property ClientChatService $clientChatService
+ * @property ClientChatUserAccessService $accessService
  */
 class ClientChatUserChannelCrudController extends FController
 {
@@ -31,11 +33,16 @@ class ClientChatUserChannelCrudController extends FController
 	 * @var ClientChatService
 	 */
 	private ClientChatService $clientChatService;
+	/**
+	 * @var ClientChatUserAccessService
+	 */
+	private ClientChatUserAccessService $accessService;
 
-	public function __construct($id, $module, ClientChatService $clientChatService, $config = [])
+	public function __construct($id, $module, ClientChatService $clientChatService, ClientChatUserAccessService $accessService, $config = [])
 	{
 		parent::__construct($id, $module, $config);
 		$this->clientChatService = $clientChatService;
+		$this->accessService = $accessService;
 	}
 
 	/**
@@ -91,11 +98,7 @@ class ClientChatUserChannelCrudController extends FController
         try {
 			if ($model->load(Yii::$app->request->post()) && $model->save()) {
 
-				$chats = ClientChat::find()->byChannel($model->ccuc_channel_id)->byOwner(null)->all();
-
-				foreach ($chats as $chat) {
-					$this->clientChatService->sendRequestToUser($chat, $model);
-				}
+				$this->accessService->setUserAccessToAllChatsByChannelIds([$model->ccuc_channel_id], $model->ccuc_user_id);
 
 				return $this->redirect(['view', 'ccuc_user_id' => $model->ccuc_user_id, 'ccuc_channel_id' => $model->ccuc_channel_id]);
 			}
@@ -124,21 +127,10 @@ class ClientChatUserChannelCrudController extends FController
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
 
-        	if ($previousChannelId !== $model->ccuc_channel_id) {
-				$userAccess = ClientChatUserAccess::find()->byUserId($model->ccuc_user_id)->pending()->all();
-				foreach ($userAccess as $access) {
-					$access->delete();
-				}
-				if ($userAccess) {
-					$data = ClientChatAccessMessage::deleted($model->ccuc_user_id);
-					Notifications::publish('clientChatRequest', ['user_id' => $model->ccuc_user_id], ['data' => $data]);
-				}
-				$chats = ClientChat::find()->byChannel($model->ccuc_channel_id)->byOwner(null)->all();
-				foreach ($chats as $chat) {
-					$this->clientChatService->sendRequestToUser($chat, $model);
-				}
+        	if ($previousChannelId !== (int)$model->ccuc_channel_id) {
+        		$this->accessService->disableUserAccessToAllChatsByChannelIds([$previousChannelId], $model->ccuc_user_id);
+        		$this->accessService->setUserAccessToAllChatsByChannelIds([$model->ccuc_channel_id], $model->ccuc_user_id);
 			}
-
 
             return $this->redirect(['view', 'ccuc_user_id' => $model->ccuc_user_id, 'ccuc_channel_id' => $model->ccuc_channel_id]);
         }
@@ -160,16 +152,8 @@ class ClientChatUserChannelCrudController extends FController
     {
         $model = $this->findModel($ccuc_user_id, $ccuc_channel_id);
 
-        $userAccess = ClientChatUserAccess::find()->byUserId($model->ccuc_user_id)->pending()->all();
-
-        foreach ($userAccess as $access) {
-        	$access->delete();
-		}
         $model->delete();
-        if ($userAccess) {
-			$data = ClientChatAccessMessage::deleted($model->ccuc_user_id);
-			Notifications::publish('clientChatRequest', ['user_id' => $model->ccuc_user_id], ['data' => $data]);
-		}
+		$this->accessService->disableUserAccessToAllChatsByChannelIds([$ccuc_channel_id], $ccuc_user_id);
 		return $this->redirect(['index']);
     }
 

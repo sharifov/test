@@ -5,5 +5,5 @@ namespace sales\dispatchers;
 interface EventDispatcher
 {
     public function dispatchAll(array $events): void;
-    public function dispatch($event): void;
+    public function dispatch($event, $key = null): void;
 }

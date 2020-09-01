@@ -10,6 +10,7 @@ use frontend\models\SoldReportForm;
 use common\models\Employee;
 use common\models\Lead;
 use sales\auth\Auth;
+use sales\model\callLog\entity\callLog\search\CallLogSearch;
 use Yii;
 use yii\data\ArrayDataProvider;
 use yii\filters\AccessControl;
@@ -108,7 +109,7 @@ class ReportController extends FController
 
     public function actionCallsReport()
     {
-        $searchModel = new CallSearch();
+        $searchModel = new CallLogSearch();
         $params = Yii::$app->request->queryParams;
 
         /** @var Employee $user */

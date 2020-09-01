@@ -104,6 +104,7 @@ class ClientChatService
 
 	/**
 	 * @param ClientChat $clientChat
+	 * @throws \Throwable
 	 */
 	public function sendRequestToUsers(ClientChat $clientChat): void
 	{
@@ -150,7 +151,7 @@ class ClientChatService
 	 * @return Department
 	 * @throws \Throwable
 	 */
-	public function transfer(ClientChatTransferForm $form): Department
+	public function transfer(ClientChat $clientChat, ClientChatTransferForm $form): Department
 	{
 		return $this->transactionManager->wrap( function () use ($form) {
 			$clientChat = $this->clientChatRepository->findById($form->cchId);

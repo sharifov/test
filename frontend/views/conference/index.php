@@ -33,6 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'cf_sid',
             'cf_friendly_name',
+            'cf_call_sid',
             [
                 'label' => 'Participants',
                 'value' => static function(\common\models\Conference $model) {

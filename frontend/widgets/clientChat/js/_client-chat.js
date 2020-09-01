@@ -85,17 +85,70 @@ function refreshClientChatWidget(obj) {
                     window.open(data.url);
                 }
             }
-            $('#_client_chat_access_widget').html(data.html);
-            window.enableTimer();
+            $('#ccr_'+data.cch_id+'_'+data.user_id).remove();
+            decreaseTotalCount();
             break;
         case 'skip':
+            $('#ccr_'+data.cch_id+'_'+data.user_id).remove();
+            decreaseTotalCount();
+            break;
         case 'deleted':
+            $('#ccr_'+data.cch_id+'_'+data.user_id).remove();
+            decreaseTotalCount();
+            break;
         case 'pending':
+            increaseTotalCount();
+            $('#_client_chat_access_widget ._cc-box-body').prepend(data.html);
+            window.enableTimer();
+            openWidget();
+            break;
+        case 'reset':
             $('#_client_chat_access_widget').html(data.html);
             window.enableTimer();
             break;
         default:
             console.error('refreshClientChatWidget:: unknown command');
             break;
+    }
+}
+
+function openWidget() {
+    $('#_client_chat_access_widget ._cc-box').addClass('is-visible');
+    $('#_cc-access-wg').addClass('is-visible');
+}
+
+function closeWidget() {
+    $('#_client_chat_access_widget ._cc-box').removeClass('is-visible');
+    $('#_cc-access-wg').removeClass('is-visible');
+}
+
+function increaseTotalCount() {
+    let accessWg = $('#_cc-access-wg');
+    let boxHeader = $('._cc-box-header');
+    let totalCount = parseInt(accessWg.attr('total-items'));
+    let circleWrapper = $('#_circle_wrapper');
+    if (totalCount <= 0) {
+        $('#_client_chat_access_widget ._cc-box-body').html('');
+    }
+    accessWg.attr('total-items', totalCount+1).removeClass('inactive');
+    $('._cc_total_request_wrapper', accessWg).html(totalCount+1);
+    boxHeader.addClass('active');
+    circleWrapper.addClass('active');
+}
+
+function decreaseTotalCount() {
+    let accessWg = $('#_cc-access-wg');
+    let boxHeader = $('._cc-box-header');
+    let circleWrapper = $('#_circle_wrapper');
+    let totalCount = parseInt(accessWg.attr('total-items'))-1;
+    accessWg.attr('total-items', totalCount);
+    $('._cc_total_request_wrapper', accessWg).html(totalCount);
+
+    if (totalCount <= 0) {
+        accessWg.addClass('inactive');
+        boxHeader.removeClass('active');
+        circleWrapper.removeClass('active');
+        $('#_client_chat_access_widget ._cc-box-body').html('<p>You have no active client conversations requests.</p>');
+        closeWidget();
     }
 }

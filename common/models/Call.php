@@ -187,11 +187,13 @@ class Call extends \yii\db\ActiveRecord
     public const CALL_TYPE_OUT  = 1;
     public const CALL_TYPE_IN   = 2;
     public const CALL_TYPE_JOIN   = 3;
+    public const CALL_TYPE_RETURN   = 4;
 
     public const TYPE_LIST = [
         self::CALL_TYPE_OUT => 'Outgoing',
         self::CALL_TYPE_IN  => 'Incoming',
         self::CALL_TYPE_JOIN  => 'Join',
+        self::CALL_TYPE_RETURN  => 'Return',
     ];
 
 
@@ -1809,6 +1811,16 @@ class Call extends \yii\db\ActiveRecord
     public function isJoin(): bool
     {
         return (int) $this->c_call_type_id === self::CALL_TYPE_JOIN;
+    }
+
+    public function setTypeReturn(): void
+    {
+        $this->c_call_type_id = self::CALL_TYPE_RETURN;
+    }
+
+    public function isReturn(): bool
+    {
+        return (int) $this->c_call_type_id === self::CALL_TYPE_RETURN;
     }
 
 

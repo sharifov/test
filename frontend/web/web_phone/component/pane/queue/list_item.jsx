@@ -39,7 +39,7 @@ class ListItem extends React.Component {
                                 ? <li className="call-info-list__item"><span className="call-info-list__company">{call.data.contact.company}</span></li>
                                 : ''
                             }
-                            {call.data.typeId === 2 || call.data.typeId === 1
+                            {call.data.typeId === 2 || call.data.typeId === 1 || call.data.typeId === 4
                                 ? <li className="call-info-list__item"><span className="call-info-list__number">{call.data.contact.phone}</span> </li>
                                 : ''
                             }

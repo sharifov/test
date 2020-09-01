@@ -5,6 +5,7 @@ namespace webapi\modules\v1\controllers;
 use common\models\ApiLog;
 use sales\entities\cases\CaseCategory;
 use sales\helpers\app\AppHelper;
+use sales\model\clientChat\ClientChatTranslate;
 use sales\model\clientChat\entity\projectConfig\ClientChatProjectConfig;
 use sales\model\clientChat\entity\projectConfig\ProjectConfigApiResponseDto;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestApiForm;
@@ -213,7 +214,7 @@ class ClientChatRequestController extends ApiBaseController
 	 * @throws \JsonException
 	 *
 	 *
-	 * @api {post} /v1/client-chat-request/create-message Client Chat Request Create Message
+	 * @api {post} /v1/client-chat-request/create-message Create Message
 	 * @apiVersion 0.1.0
 	 * @apiName ClientChatRequestCreateMessage
 	 * @apiGroup ClientChat
@@ -381,17 +382,19 @@ class ClientChatRequestController extends ApiBaseController
 	}
 
 	/**
-	 * @api {get} /v1/client-chat-request/project-config Client Chat Request Project Config
+	 * @api {get} /v1/client-chat-request/project-config Project Config
 	 * @apiVersion 0.1.0
 	 * @apiName ClientChatProjectConfig
 	 * @apiGroup ClientChat
 	 * @apiPermission Authorized User
 	 *
 	 * @apiParam {int} project_id Project ID
+	 * @apiParam {string{5}} [language_id] Language ID (ru-RU)
 	 *
 	 * @apiParamExample {get} Request-Example:
 	 * {
 	 *     "project_id": 1,
+     *     "language_id": "ru-RU"
 	 * }
 	 *
 	 * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
@@ -459,7 +462,34 @@ class ClientChatRequestController extends ApiBaseController
 	 * "settings": {
 	 * "fileUpload": true,
 	 * "maxMessageLength": 500
-	 * }
+	 * },
+     * "language_id": "ru-RU",
+     * "translates": {
+     *  "i18n": {
+                "dialogs_history": "История",
+                "new_message": "New message",
+                "enter_message": "Type your message and press Enter",
+                "dialogs_zerodata": "There are no conversations yet. We've never talked before",
+                "enter_email": "Enter your email",
+                "enter_phone": "Enter phone number",
+                "leave_email": "You can leave your email and we'll continue this conversation through email:",
+                "page_title_new_message": "New message",
+                "privacy_policy": "Privacy Policy",
+                "close": "Close",
+                "bumperText": "We use cookies to offer you a better browsing experience, analyze   site traffic and personalize content. By using this site or clicking I agree, you consent to our use of cookies. You can read our policy \n    here.",
+                "bumperButton": "I agree",
+                "confirmSubscription": "I agree with terms of service",
+                "appeal": "You",
+                "vote_comment": "What happened?",
+                "vote_text": "Please rate the operator",
+                "vote_thanks": "Thank you for rating!"
+            },
+            "settings": {
+                "messenger_collapsed_text": "Ask me...",
+                "messenger_offline_message": "Тhere are no operators ready to answer now, but you  can leave your question, and we will help you during business hours.",
+                "messenger_welcome_message": "Ask your question and we will respond. Write to us!"
+            }
+        }
 	 * }
 	 * }
 	 *
@@ -492,12 +522,23 @@ class ClientChatRequestController extends ApiBaseController
 
 		$projectId = \Yii::$app->request->get('project_id');
 
+        $languageId = \Yii::$app->request->get('language_id');
+		if ($languageId) {
+            $languageId = substr($languageId, 0, 5);
+        }
+
+        //echo VarDumper::dump(ClientChatTranslate::getTranslates($languageId)); exit;
+
 		$projectConfig = ClientChatProjectConfig::findOne(['ccpc_project_id' => $projectId]);
 
 		if ($projectConfig) {
+            $data = ArrayHelper::toArray(new ProjectConfigApiResponseDto($projectConfig));
+            $data['language_id'] = $languageId;
+            $data['translates'] = ClientChatTranslate::getTranslates($languageId);
+
 			return new SuccessResponse(
 				new StatusCodeMessage(200),
-				new DataMessage(ArrayHelper::toArray(new ProjectConfigApiResponseDto($projectConfig)))
+				new DataMessage($data)
 			);
 		}
 
@@ -508,6 +549,11 @@ class ClientChatRequestController extends ApiBaseController
 		);
 	}
 
+    /**
+     * @param ApiLog $apiLog
+     * @param Response $response
+     * @return Response
+     */
 	private function endApiLog(ApiLog $apiLog, Response $response): Response
 	{
 		$apiLog->endApiLog(ArrayHelper::toArray($response));

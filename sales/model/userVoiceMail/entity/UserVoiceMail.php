@@ -138,8 +138,8 @@ class UserVoiceMail extends \yii\db\ActiveRecord
             ['uvm_record_enable', 'integer'],
 
             ['uvm_say_language', 'string', 'max' => 10],
-            ['uvm_say_language', 'required'],
-			['uvm_say_language', 'exist', 'skipOnError' => true, 'targetClass' => Language::class, 'targetAttribute' => ['uvm_say_language' => 'language_id']],
+            ['uvm_say_language', 'default', 'value' => null],
+			['uvm_say_language', 'exist', 'skipOnError' => true, 'skipOnEmpty' => true, 'targetClass' => Language::class, 'targetAttribute' => ['uvm_say_language' => 'language_id']],
 
             ['uvm_say_text_message', 'string'],
 

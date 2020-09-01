@@ -253,7 +253,7 @@ define({ "api": [
   {
     "type": "get",
     "url": "/v1/client-chat-request/project-config",
-    "title": "Client Chat Request Project Config",
+    "title": "Project Config",
     "version": "0.1.0",
     "name": "ClientChatProjectConfig",
     "group": "ClientChat",
@@ -271,13 +271,21 @@ define({ "api": [
             "optional": false,
             "field": "project_id",
             "description": "<p>Project ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "5",
+            "optional": true,
+            "field": "language_id",
+            "description": "<p>Language ID (ru-RU)</p>"
           }
         ]
       },
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n    \"project_id\": 1,\n}",
+          "content": "{\n    \"project_id\": 1,\n    \"language_id\": \"ru-RU\"\n}",
           "type": "get"
         }
       ]
@@ -325,7 +333,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "\nHTTP/1.1 200 OK\n\n{\n\"status\": 200,\n\"message\": \"OK\",\n\"data\": {\n\"endpoint\": \"chatbot.travel-dev.com\",\n\"enabled\": true,\n\"project\": \"HOP2\",\n\"notificationSound\": \"https://cdn.travelinsides.com/npmstatic/assets/chime.mp3\",\n\"theme\": {\n\"theme\": \"linear-gradient(270deg, #0AAB99 0%, #1E71D1 100%)\",\n\"primary\": \"#0C89DF\",\n\"primaryDark\": \"#0066BA\",\n\"accent\": \"#0C89DF\",\n\"accentDark\": \"#0066BA\"\n},\n\"registration\": {\n\"enabled\": true,\n\"departments\": [\n\"Sales\",\n\"Support\"\n],\n\"registrationTitle\": \"Registration title if registration is enabled\",\n\"registrationSubtitle\": \"Registration subtitle if it is enabled\",\n\"formFields\": {\n\"name\": {\n\"enabled\": true,\n\"required\": true,\n\"maxLength\": 40,\n\"minLength\": 3\n},\n\"email\": {\n\"enabled\": true,\n\"required\": true,\n\"maxLength\": 40,\n\"minLength\": 3\n},\n\"department\": {\n\"enabled\": true,\n\"required\": true\n}\n}\n},\n\"settings\": {\n\"fileUpload\": true,\n\"maxMessageLength\": 500\n}\n}\n}",
+          "content": "\nHTTP/1.1 200 OK\n\n{\n\"status\": 200,\n\"message\": \"OK\",\n\"data\": {\n\"endpoint\": \"chatbot.travel-dev.com\",\n\"enabled\": true,\n\"project\": \"HOP2\",\n\"notificationSound\": \"https://cdn.travelinsides.com/npmstatic/assets/chime.mp3\",\n\"theme\": {\n\"theme\": \"linear-gradient(270deg, #0AAB99 0%, #1E71D1 100%)\",\n\"primary\": \"#0C89DF\",\n\"primaryDark\": \"#0066BA\",\n\"accent\": \"#0C89DF\",\n\"accentDark\": \"#0066BA\"\n},\n\"registration\": {\n\"enabled\": true,\n\"departments\": [\n\"Sales\",\n\"Support\"\n],\n\"registrationTitle\": \"Registration title if registration is enabled\",\n\"registrationSubtitle\": \"Registration subtitle if it is enabled\",\n\"formFields\": {\n\"name\": {\n\"enabled\": true,\n\"required\": true,\n\"maxLength\": 40,\n\"minLength\": 3\n},\n\"email\": {\n\"enabled\": true,\n\"required\": true,\n\"maxLength\": 40,\n\"minLength\": 3\n},\n\"department\": {\n\"enabled\": true,\n\"required\": true\n}\n}\n},\n\"settings\": {\n\"fileUpload\": true,\n\"maxMessageLength\": 500\n},\n\"language_id\": \"ru-RU\",\n\"translates\": {\n \"i18n\": {\n                \"dialogs_history\": \"История\",\n                \"new_message\": \"New message\",\n                \"enter_message\": \"Type your message and press Enter\",\n                \"dialogs_zerodata\": \"There are no conversations yet. We've never talked before\",\n                \"enter_email\": \"Enter your email\",\n                \"enter_phone\": \"Enter phone number\",\n                \"leave_email\": \"You can leave your email and we'll continue this conversation through email:\",\n                \"page_title_new_message\": \"New message\",\n                \"privacy_policy\": \"Privacy Policy\",\n                \"close\": \"Close\",\n                \"bumperText\": \"We use cookies to offer you a better browsing experience, analyze   site traffic and personalize content. By using this site or clicking I agree, you consent to our use of cookies. You can read our policy \\n    here.\",\n                \"bumperButton\": \"I agree\",\n                \"confirmSubscription\": \"I agree with terms of service\",\n                \"appeal\": \"You\",\n                \"vote_comment\": \"What happened?\",\n                \"vote_text\": \"Please rate the operator\",\n                \"vote_thanks\": \"Thank you for rating!\"\n            },\n            \"settings\": {\n                \"messenger_collapsed_text\": \"Ask me...\",\n                \"messenger_offline_message\": \"Тhere are no operators ready to answer now, but you  can leave your question, and we will help you during business hours.\",\n                \"messenger_welcome_message\": \"Ask your question and we will respond. Write to us!\"\n            }\n        }\n}\n}",
           "type": "json"
         },
         {
@@ -417,7 +425,7 @@ define({ "api": [
   {
     "type": "post",
     "url": "/v1/client-chat-request/create-message",
-    "title": "Client Chat Request Create Message",
+    "title": "Create Message",
     "version": "0.1.0",
     "name": "ClientChatRequestCreateMessage",
     "group": "ClientChat",

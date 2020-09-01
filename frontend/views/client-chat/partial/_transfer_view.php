@@ -16,10 +16,12 @@ use yii\widgets\Pjax;
 <div class="row">
 	<div class="col-md-12">
         <?php Pjax::begin(['id' => 'pjax-cc-submit-transfer', 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false, 'clientOptions' => ['async' => false]]) ?>
-            <?php $form = ActiveForm::begin(['options' => ['data-pjax' => 1]]); ?>
+            <?php $form = ActiveForm::begin(['options' => ['data-pjax' => 1, 'id' => 'cc-submit-transfer-form']]); ?>
                 <?= $form->errorSummary($transferForm) ?>
 
                 <?= $form->field($transferForm, 'cchId')->hiddenInput()->label(false) ?>
+
+                <?= $form->field($transferForm, 'pjaxReload')->hiddenInput(['id' => 'pjaxReload'])->label(false) ?>
 
                 <?= $form->field($transferForm, 'isOnline')->hiddenInput()->label(false) ?>
 
@@ -66,6 +68,12 @@ $js = <<<JS
         data.data.append('cchId', $('#clientchattransferform-cchid').val());
         btnHtml = $('._cc_submit_transfer').html();
         $('._cc_submit_transfer').html('<i class="fa fa-spin fa-spinner"></i>');
+    });
+    
+    $(document).on('change', '#depId', function () {
+        $('#pjaxReload').val(1);
+         $('#cc-submit-transfer-form').submit();
+        
     });
 })();
 JS;

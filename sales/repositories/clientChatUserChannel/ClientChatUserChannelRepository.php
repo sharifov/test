@@ -1,0 +1,22 @@
+<?php
+
+namespace sales\repositories\clientChatUserChannel;
+
+use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
+use sales\repositories\NotFoundException;
+use sales\repositories\Repository;
+
+class ClientChatUserChannelRepository extends Repository
+{
+	/**
+	 * @param int $id
+	 * @return ClientChatUserChannel[]
+	 */
+	public function findByUserId(int $id): array
+	{
+		if ($channels = ClientChatUserChannel::find()->byUserId($id)->all()) {
+			return $channels;
+		}
+		throw new NotFoundException('Not Found data in Client Chat User Channel by user id: ' . $id);
+	}
+}

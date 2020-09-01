@@ -4,6 +4,7 @@
 namespace sales\model\userVoiceMail\useCase\manage;
 
 
+use sales\helpers\app\AppParamsHelper;
 use sales\model\userVoiceMail\entity\UserVoiceMail;
 use yii\helpers\ArrayHelper;
 use yii\web\UploadedFile;
@@ -17,6 +18,8 @@ use yii\web\UploadedFile;
  */
 class UserVoiceMailForm extends UserVoiceMail
 {
+	private const VOICE_RECORDS_DIR_NAME = 'voice-records';
+
 	/**
 	 * @var UploadedFile
 	 */
@@ -46,10 +49,15 @@ class UserVoiceMailForm extends UserVoiceMail
 	private function saveFile(): void
 	{
 		if ($this->recordFile) {
-			$filePath = \Yii::getAlias('@frontend/web/');
-			$fileName = '/voice-records/' . md5(uniqid()) . '.' . $this->recordFile->extension;
+			$filePath = \Yii::getAlias(AppParamsHelper::getVoiceMailAlias());
+			$fileName = self::VOICE_RECORDS_DIR_NAME . '/' . md5(uniqid()) . '.' . $this->recordFile->extension;
+			if (!file_exists($filePath . self::VOICE_RECORDS_DIR_NAME)) {
+				if (!mkdir($dir = $filePath . self::VOICE_RECORDS_DIR_NAME) && !is_dir($dir)) {
+					throw new \RuntimeException('Directory "' . $dir . '" was not created');
+				}
+			}
 			$this->recordFile->saveAs($filePath . $fileName);
-			$this->uvm_voice_file_message = $fileName;
+			$this->uvm_voice_file_message = '/' . $fileName;
 		}
 	}
 

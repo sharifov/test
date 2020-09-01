@@ -43,9 +43,13 @@ use yii\widgets\Pjax;
 	<?= $form->field($model, 'uvm_enabled')->checkbox() ?>
 
     <div id="webAudioRecorder">
-        <div>
+        <div style="display: flex; align-items: center;">
             <?= Html::button('<i class="fa fa-microphone"></i> Record', ['id' => 'recordButton', 'class' => 'btn btn-success']) ?>
             <?= Html::button('<i class="fa fa-stop"></i> Stop', ['id' => 'stopButton', 'class' => 'btn btn-danger', 'disabled' => true]) ?>
+        </div>
+        <div id="timer-wrapper" class="d-flex align-items-center">
+            <span id="time-display" class="label label-default" style="margin-right: 10px;">00:00</span>
+            <canvas id="visualizer" height="20px" style="width: 100%;"></canvas>
         </div>
     </div>
 

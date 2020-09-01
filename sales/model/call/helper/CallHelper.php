@@ -22,6 +22,8 @@ class CallHelper
             } elseif ($call->c_source_type_id === Call::SOURCE_BARGE) {
                 $description .= ': Barge';
             }
+        } elseif ($call->isReturn()) {
+            $description = 'Return';
         }
         return $description;
     }
