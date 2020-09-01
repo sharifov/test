@@ -17,32 +17,57 @@ class ClientChatTranslate
      */
     public static function getTranslates($language = null): array
     {
-        $data['i18n'] = [
-            'dialogs_history'           => Yii::t('clientChat', 'Conversation history', [], $language),
-            'new_message'               => Yii::t('clientChat', 'New message', [], $language),
-            'enter_message'             => Yii::t('clientChat', 'Type your message and press Enter', [], $language),
-            'dialogs_zerodata'          => Yii::t('clientChat', 'There are no conversations yet. We\'ve never talked before', [], $language),
-            'enter_email'               => Yii::t('clientChat', 'Enter your email', [], $language),
-            'enter_phone'               => Yii::t('clientChat', 'Enter phone number', [], $language),
-            'leave_email'               => Yii::t('clientChat', 'You can leave your email and we\'ll continue this conversation through email:', [], $language),
-            'page_title_new_message'    => Yii::t('clientChat', 'New message', [], $language),
-            'privacy_policy'            => Yii::t('clientChat', 'Privacy Policy', [], $language),
-            'close'                     => Yii::t('clientChat', 'Close', [], $language),
-            'bumperText'                => Yii::t('clientChat','We use cookies to offer you a better browsing experience, analyze   site traffic and personalize content. By using this site or clicking I agree, you consent to our use of cookies. You can read our policy 
-    here.', [], $language),
-            'bumperButton'              => Yii::t('clientChat', 'I agree', [], $language),
-            'confirmSubscription'       => Yii::t('clientChat', 'I agree with terms of service', [], $language),
-            'appeal'                    => Yii::t('clientChat', 'You', [], $language),
-            'vote_comment'              => Yii::t('clientChat', 'What happened?', [], $language),
-            'vote_text'                 => Yii::t('clientChat', 'Please rate the operator', [], $language),
-            'vote_thanks'               => Yii::t('clientChat', 'Thank you for rating!', [], $language),
+
+        $data['connection_lost'] = [
+            'title'     => Yii::t('clientChat', 'Connection Lost', [], $language),
+            'subtitle'  => Yii::t('clientChat', 'Trying to reconnect', [], $language),
         ];
 
-        $data['settings'] = [
-            'messenger_collapsed_text'      => Yii::t('clientChat-settings', 'Ask me...', [], $language),
-            'messenger_offline_message'     => Yii::t('clientChat-settings', 'Тhere are no operators ready to answer now, but you  can leave your question, and we will help you during business hours.', [], $language),
-            'messenger_welcome_message'     => Yii::t('clientChat-settings', 'Ask your question and we will respond. Write to us!', [], $language),
+        $data['waiting_for_response']   = Yii::t('clientChat', 'Waiting for response', [], $language);
+        $data['waiting_for_agent']      = Yii::t('clientChat', 'Waiting for an agent', [], $language);
+        $data['video_reply']            = Yii::t('clientChat', 'Video message', [], $language);
+        $data['audio_reply']            = Yii::t('clientChat', 'Audio message', [], $language);
+        $data['image_reply']            = Yii::t('clientChat', 'Image message', [], $language);
+        $data['new_message']            = Yii::t('clientChat', 'New message', [], $language);
+        $data['agent']                  = Yii::t('clientChat', 'Agent', [], $language);
+        $data['textarea_placeholder']   = Yii::t('clientChat', 'Type a message...', [], $language);
+
+        $data['registration'] = [
+            'title'                     => Yii::t('clientChat_registration', 'Welcome', [], $language),
+            'subtitle'                  => Yii::t('clientChat_registration', 'Be sure to leave a message', [], $language),
+            'name'                      => Yii::t('clientChat_registration', 'Name', [], $language),
+            'name_placeholder'          => Yii::t('clientChat_registration', 'Your name', [], $language),
+            'email'                     => Yii::t('clientChat_registration', 'Email', [], $language),
+            'email_placeholder'         => Yii::t('clientChat_registration', 'Your email', [], $language),
+            'department'                => Yii::t('clientChat_registration', 'Department', [], $language),
+            'department_placeholder'    => Yii::t('clientChat_registration', 'Choose a department', [], $language),
+            'start_chat'                => Yii::t('clientChat_registration', 'Start chat', [], $language),
         ];
+
+        $data['conversations'] = [
+            'no_conversations'              => Yii::t('clientChat_conversations', 'No conversations yet', [], $language),
+            'no_archived_conversations'     => Yii::t('clientChat_conversations', 'No archived conversations yet', [], $language),
+            'history'                       => Yii::t('clientChat_conversations', 'Conversation history', [], $language),
+            'active'                        => Yii::t('clientChat_conversations', 'Active', [], $language),
+            'archived'                      => Yii::t('clientChat_conversations', 'Archived Chats', [], $language),
+            'start_new'                     => Yii::t('clientChat_conversations', 'New Chat', [], $language),
+        ];
+
+        $data['file_upload'] = [
+            'file_too_big'          => Yii::t('clientChat_file', 'This file is too big. Max file size is {{size}}', [], $language),
+            'file_too_big_alt'      => Yii::t('clientChat_file', 'No archived conversations yetThis file is too large', [], $language),
+            'generic_error'         => Yii::t('clientChat_file', 'Failed to upload, please try again', [], $language),
+            'not_allowed'           => Yii::t('clientChat_file', 'This file type is not supported', [], $language),
+            'drop_file'             => Yii::t('clientChat_file', 'Drop file here to upload it', [], $language),
+            'upload_progress'       => Yii::t('clientChat_file', 'Uploading file...', [], $language),
+        ];
+
+        $data['department'] = [
+            'sales'         => Yii::t('clientChat', 'Sales', [], $language),
+            'support'       => Yii::t('clientChat', 'Support', [], $language),
+            'exchange'      => Yii::t('clientChat', 'Exchange', [], $language),
+        ];
+
         return $data;
     }
 
