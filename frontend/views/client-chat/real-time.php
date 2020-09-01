@@ -8,7 +8,7 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="client-chat-real-time">
     <h1><?= Html::encode($this->title) ?></h1>
-    <div style="width: 100%" id="client-chat-realtime-div"></div>
+    <div style="width: 100%; min-height: 600px" id="client-chat-realtime-div"></div>
 </div>
 
 <?php
@@ -23,7 +23,7 @@ b():window.addEventListener("load",b)})();
   }
 
   var t = setInterval(function() {
-    if (window.k) {
+   if (window.k && window.k.realtimeVisitors) {
       clearInterval(t);
       run();
     }

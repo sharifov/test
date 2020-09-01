@@ -161,7 +161,7 @@ $isSuperAdmin = $user->isSuperAdmin();
             'icon' => 'comments',
             'items' => [
                 ['label' => 'My Client Chat', 'url' => ['/client-chat/index']],
-                ['label' => 'Real Time', 'url' => ['/client-chat/real-time']],
+                ['label' => 'Real Time Visitors', 'url' => ['/client-chat/real-time']],
             ]
         ];
 
