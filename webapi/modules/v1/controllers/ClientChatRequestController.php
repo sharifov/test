@@ -464,32 +464,52 @@ class ClientChatRequestController extends ApiBaseController
 	 * "maxMessageLength": 500
 	 * },
      * "language_id": "ru-RU",
-     * "translates": {
-     *  "i18n": {
-                "dialogs_history": "История",
-                "new_message": "New message",
-                "enter_message": "Type your message and press Enter",
-                "dialogs_zerodata": "There are no conversations yet. We've never talked before",
-                "enter_email": "Enter your email",
-                "enter_phone": "Enter phone number",
-                "leave_email": "You can leave your email and we'll continue this conversation through email:",
-                "page_title_new_message": "New message",
-                "privacy_policy": "Privacy Policy",
-                "close": "Close",
-                "bumperText": "We use cookies to offer you a better browsing experience, analyze   site traffic and personalize content. By using this site or clicking I agree, you consent to our use of cookies. You can read our policy \n    here.",
-                "bumperButton": "I agree",
-                "confirmSubscription": "I agree with terms of service",
-                "appeal": "You",
-                "vote_comment": "What happened?",
-                "vote_text": "Please rate the operator",
-                "vote_thanks": "Thank you for rating!"
-            },
-            "settings": {
-                "messenger_collapsed_text": "Ask me...",
-                "messenger_offline_message": "Тhere are no operators ready to answer now, but you  can leave your question, and we will help you during business hours.",
-                "messenger_welcome_message": "Ask your question and we will respond. Write to us!"
-            }
+    "translations": {
+        "connection_lost": {
+            "title": "Connection Lost",
+            "subtitle": "Trying to reconnect"
+        },
+        "waiting_for_response": "Waiting for response",
+        "waiting_for_agent": "Waiting for an agent",
+        "video_reply": "Video message",
+        "audio_reply": "Audio message",
+        "image_reply": "Image message",
+        "new_message": "New message",
+        "agent": "Agent",
+        "textarea_placeholder": "Type a message...",
+        "registration": {
+            "title": "Welcome",
+            "subtitle": "Be sure to leave a message",
+            "name": "Name",
+            "name_placeholder": "Your name",
+            "email": "Email",
+            "email_placeholder": "Your email",
+            "department": "Department",
+            "department_placeholder": "Choose a department",
+            "start_chat": "Start chat"
+        },
+        "conversations": {
+            "no_conversations": "No conversations yet",
+            "no_archived_conversations": "No archived conversations yet",
+            "history": "Conversation history",
+            "active": "Active",
+            "archived": "Archived Chats",
+            "start_new": "New Chat"
+        },
+        "file_upload": {
+            "file_too_big": "This file is too big. Max file size is {{size}}",
+            "file_too_big_alt": "No archived conversations yetThis file is too large",
+            "generic_error": "Failed to upload, please try again",
+            "not_allowed": "This file type is not supported",
+            "drop_file": "Drop file here to upload it",
+            "upload_progress": "Uploading file..."
+        },
+        "department": {
+            "sales": "Sales",
+            "support": "Support",
+            "exchange": "Exchange"
         }
+    }
 	 * }
 	 * }
 	 *
@@ -534,7 +554,7 @@ class ClientChatRequestController extends ApiBaseController
 		if ($projectConfig) {
             $data = ArrayHelper::toArray(new ProjectConfigApiResponseDto($projectConfig));
             $data['language_id'] = $languageId;
-            $data['translates'] = ClientChatTranslate::getTranslates($languageId);
+            $data['translations'] = ClientChatTranslate::getTranslates($languageId);
 
 			return new SuccessResponse(
 				new StatusCodeMessage(200),

@@ -57,6 +57,7 @@ use sales\model\phoneList\helpers\formatters\PhoneListFormatter;
 use sales\model\user\entity\paymentCategory\UserPaymentCategory;
 use sales\model\user\entity\payroll\UserPayroll;
 use yii\bootstrap4\Html;
+use yii\helpers\VarDumper;
 
 class Formatter extends \yii\i18n\Formatter
 {
@@ -772,4 +773,12 @@ class Formatter extends \yii\i18n\Formatter
 
         return PhoneFormatter::getPhoneOrNickname($value);
     }
+
+    public function asDumpJson(?string $data): string
+	{
+		if ($data) {
+			return VarDumper::dumpAsString($data);
+		}
+		return $this->nullDisplay;
+	}
 }

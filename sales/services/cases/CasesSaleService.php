@@ -559,8 +559,8 @@ class CasesSaleService
             }
             throw new \RuntimeException('Error. Param saleId is empty or Case not found');
         } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableFormatter($throwable),
-            'CasesSaleService:createSale:Throwable' );
+            Yii::error(VarDumper::dumpAsString(['throwable' => AppHelper::throwableFormatter($throwable), 'saleData' => $saleData]),
+            'CasesSaleService:createSale:Throwable');
         }
         return null;
     }
