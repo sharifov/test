@@ -711,6 +711,11 @@ class ClientChatController extends FController
         }
     }
 
+    public function actionRealTime()
+    {
+        return $this->render('real-time');
+    }
+
     public function actionAjaxCancelTransfer()
 	{
 		$cchId = Yii::$app->request->post('cchId');

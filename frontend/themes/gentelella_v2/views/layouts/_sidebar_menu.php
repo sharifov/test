@@ -148,11 +148,23 @@ $isSuperAdmin = $user->isSuperAdmin();
             'icon' => 'user'
         ];
 
-		$menuItems[] = [
-			'label' => 'My Client Chat ' . '<span id="div-cnt-client-chat"><span class="label-success label pull-right _cc_unread_messages"></span></span>',
-			'url' => ['/client-chat/index'],
-			'icon' => 'comments'
-		];
+//		$menuItems[] = [
+//			'label' => 'My Client Chat ' . '<span id="div-cnt-client-chat"><span class="label-success label pull-right _cc_unread_messages"></span></span>',
+//			'url' => ['/client-chat/index'],
+//			'icon' => 'comments'
+//		];
+
+
+        $menuItems[] = [
+            'label' => 'Client Chat' . '<span id="div-cnt-client-chat"><span class="label-success label pull-right _cc_unread_messages"></span></span>',
+            'url' => 'javascript:',
+            'icon' => 'comments',
+            'items' => [
+                ['label' => 'My Client Chat', 'url' => ['/client-chat/index']],
+                ['label' => 'Real Time', 'url' => ['/client-chat/real-time']],
+            ]
+        ];
+
 
         $menuItems[] = [
             'label' => 'Data Lists',
@@ -496,7 +508,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'User Stats', 'url' => ['/user-connection/stats'], 'icon' => 'area-chart'],
                 ['label' => 'Call User Map', 'url' => ['/call/user-map'], 'icon' => 'map'],
                 ['label' => 'Real-time User Map', 'url' => ['/call/realtime-user-map'], 'icon' => 'map'],
-                ['label' => 'Real-time Client Chat', 'url' => ['/client-chat/monitor'], 'icon' => 'map'],
+                ['label' => 'Client Chat Monitor', 'url' => ['/client-chat/monitor'], 'icon' => 'map'],
                 ['label' => 'Agents Ratings', 'url' => ['/stats/agent-ratings'], 'icon' => 'star-half-empty'],
                 ['label' => 'Stats Agents & Leads', 'url' => ['/report/agents'], 'icon' => 'users'],
             ]
