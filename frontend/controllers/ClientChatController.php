@@ -713,7 +713,8 @@ class ClientChatController extends FController
 
     public function actionRealTime()
     {
-        return $this->render('real-time');
+        $host = 'https://dev-livechat.travel-dev.com/visitors';
+        return $this->render('real-time', ['host' => $host]);
     }
 
     public function actionAjaxCancelTransfer()

@@ -1,14 +1,15 @@
 <?php
 /* @var $this yii\web\View */
+/* @var $host string */
 
 use yii\bootstrap4\Html;
 
-$this->title = 'Client Chat - Real Time';
+$this->title = 'Client Chat - Real Time Visitors';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="client-chat-real-time">
-    <h1><?= Html::encode($this->title) ?></h1>
-    <div style="width: 100%; min-height: 600px" id="client-chat-realtime-div"></div>
+    <h3><i class="fa fa-comments"></i> <?= Html::encode($this->title) ?></h3>
+    <div style="width: 100%; height: 800px" id="client-chat-realtime-div"></div>
 </div>
 
 <?php
@@ -18,7 +19,7 @@ b():window.addEventListener("load",b)})();
 
   var run = function () {
     window.k.realtimeVisitors(document.getElementById('client-chat-realtime-div'), {
-      host: 'https://dev-livechat.travel-dev.com/visitors'
+      host: '$host'
     });
   }
 
