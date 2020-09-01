@@ -1340,7 +1340,7 @@ class ListItem extends React.Component {
       className: "call-list-item__main-action"
     }, React.createElement("a", {
       href: "#",
-      className: "call-list-item__main-action-trigger",
+      className: "call-list-item__main-action-trigger btn-item-call-queue",
       "data-type-action": call.data.queue === 'inProgress' ? 'hangup' : call.data.queue === 'hold' ? 'return' : call.data.isInternal ? 'acceptInternal' : 'accept',
       "data-call-sid": call.data.callSid,
       "data-from-internal": call.data.fromInternal
@@ -2000,9 +2000,9 @@ class DesktopNotification extends React.Component {
   }
 
   render() {
-    let items = this.props.notifications.map(item => React.createElement(NotificationItem, {
-      key: item.key,
-      item: item,
+    let items = this.props.notifications.map(notification => React.createElement(NotificationItem, {
+      key: notification.key,
+      notification: notification,
       source: 'desktop'
     }));
     return React.createElement("div", {
@@ -2040,7 +2040,7 @@ class PhoneWidgetNotification extends React.Component {
       className: "phone-notifications__list"
     }, React.createElement(NotificationItem, {
       key: this.props.notification.key,
-      item: this.props.notification,
+      notification: this.props.notification,
       source: 'phone'
     })));
   }
@@ -2048,86 +2048,162 @@ class PhoneWidgetNotification extends React.Component {
 }
 
 function NotificationItem(props) {
-  let item = props.item;
-  let duration = item.duration || 0;
-
-  if (item.timePushed) {
-    duration = Math.floor((Date.now() - parseInt(item.timePushed)) / 1000) + parseInt(duration);
+  if (props.notification.type === window.phoneWidget.notifier.types.incomingCall) {
+    return React.createElement(IncomingCallNotificationItem, {
+      notification: props.notification,
+      source: props.source
+    });
   }
 
-  let info = '';
+  return null;
+}
 
-  if (item.project && item.department) {
-    info = React.createElement("div", {
-      className: "incoming-notification__project"
-    }, React.createElement("b", {
-      className: "incoming-notification__project-name"
-    }, item.project), React.createElement("i", null, "\u2022"), React.createElement("span", {
-      className: "incoming-notification__position"
-    }, item.department));
-  } else if (item.project) {
-    info = React.createElement("div", {
-      className: "incoming-notification__project"
-    }, React.createElement("b", {
-      className: "incoming-notification__project-name"
-    }, item.project));
-  } else if (item.department) {
-    info = React.createElement("div", {
-      className: "incoming-notification__project"
-    }, React.createElement("span", {
-      className: "incoming-notification__position"
-    }, item.department));
+class IncomingCallNotificationItem extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      notification: props.notification
+    };
   }
 
-  return React.createElement("li", {
-    className: item.isDeleted || item.isNew ? 'phone-notifications__item' : 'phone-notifications__item phone-notifications__item--shown'
-  }, React.createElement("div", {
-    className: "incoming-notification"
-  }, React.createElement("i", {
-    className: "user-icn"
-  }, item.name[0]), React.createElement("div", {
-    className: "incoming-notification__inner"
-  }, React.createElement("div", {
-    className: "incoming-notification__info"
-  }, React.createElement("div", {
-    className: "incoming-notification__general-info"
-  }, React.createElement("b", {
-    className: "incoming-notification__name"
-  }, item.name), React.createElement("span", {
-    className: "incoming-notification__phone"
-  }, item.phone), info), React.createElement("div", {
-    className: "incoming-notification__timer"
-  }, React.createElement("span", null, React.createElement(PhoneWidgetTimer, {
-    duration: duration,
-    timeStart: Date.now()
-  })))), React.createElement("div", {
-    className: "incoming-notification__action-list"
-  }, React.createElement("div", {
-    className: "incoming-notification__dynamic"
-  }, item.canCallInfo ? React.createElement("a", {
-    href: "#",
-    "data-call-sid": item.callSid,
-    className: "incoming-notification__action incoming-notification__action--info pw-btn-call-info"
-  }, React.createElement("i", {
-    className: "fa fa-info"
-  }, " ")) : '', React.createElement("a", {
-    href: "#",
-    className: "incoming-notification__action incoming-notification__action--phone"
-  }, React.createElement("i", {
-    className: "fa fa-phone"
-  }, " "))), props.source === 'phone' ? React.createElement("a", {
-    href: "#",
-    "data-call-sid": item.key,
-    className: "incoming-notification__action incoming-notification__action--min pw-notification-hide"
-  }, React.createElement("i", {
-    className: "fa fa-long-arrow-alt-down"
-  }, " ")) : React.createElement("a", {
-    href: "#",
-    "data-call-sid": item.key,
-    className: "incoming-notification__action incoming-notification__action--max pw-notification-hide"
-  }, React.createElement("i", {
-    className: "fa fa-long-arrow-down"
-  }, " "))))));
+  componentDidMount() {
+    if (this.props.source === 'phone') {
+      window.phoneWidget.eventDispatcher.addListener(this.state.notification.eventName, this.phoneUpdateHandler());
+    } else {
+      window.phoneWidget.eventDispatcher.addListener(this.state.notification.eventName, this.desktopUpdateHandler());
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.props.source === 'phone') {
+      window.phoneWidget.eventDispatcher.removeListener(this.state.notification.eventName, this.phoneUpdateHandler());
+    } else {
+      window.phoneWidget.eventDispatcher.removeListener(this.state.notification.eventName, this.desktopUpdateHandler());
+    }
+  }
+
+  phoneUpdateHandler() {
+    let self = this;
+    return function (event) {
+      //phone
+      let call = event.call;
+      let notification = self.state.notification;
+      notification.isSentAcceptCallRequestState = call.isSentAcceptCallRequestState();
+      notification.isSentReturnHoldCallRequestState = call.isSentReturnHoldCallRequestState();
+      self.setState({
+        notification: notification
+      });
+    };
+  }
+
+  desktopUpdateHandler() {
+    let self = this;
+    return function (event) {
+      //desktop
+      let call = event.call;
+      let notification = self.state.notification;
+      notification.isSentAcceptCallRequestState = call.isSentAcceptCallRequestState();
+      notification.isSentReturnHoldCallRequestState = call.isSentReturnHoldCallRequestState();
+      self.setState({
+        notification: notification
+      });
+    };
+  }
+
+  render() {
+    let notification = this.state.notification;
+    let duration = notification.duration || 0;
+
+    if (notification.timePushed) {
+      duration = Math.floor((Date.now() - parseInt(notification.timePushed)) / 1000) + parseInt(duration);
+    }
+
+    let info = '';
+
+    if (notification.project && notification.department) {
+      info = React.createElement("div", {
+        className: "incoming-notification__project"
+      }, React.createElement("b", {
+        className: "incoming-notification__project-name"
+      }, notification.project), React.createElement("i", null, "\u2022"), React.createElement("span", {
+        className: "incoming-notification__position"
+      }, notification.department));
+    } else if (notification.project) {
+      info = React.createElement("div", {
+        className: "incoming-notification__project"
+      }, React.createElement("b", {
+        className: "incoming-notification__project-name"
+      }, notification.project));
+    } else if (notification.department) {
+      info = React.createElement("div", {
+        className: "incoming-notification__project"
+      }, React.createElement("span", {
+        className: "incoming-notification__position"
+      }, notification.department));
+    } else if (notification.isInternal) {
+      info = React.createElement("div", {
+        className: "incoming-notification__project"
+      }, React.createElement("span", {
+        className: "incoming-notification__position"
+      }, "Internal"));
+    }
+
+    return React.createElement("li", {
+      className: notification.isDeleted || notification.isNew ? 'phone-notifications__item' : 'phone-notifications__item phone-notifications__item--shown'
+    }, React.createElement("div", {
+      className: "incoming-notification"
+    }, React.createElement("i", {
+      className: "user-icn"
+    }, notification.name[0]), React.createElement("div", {
+      className: "incoming-notification__inner"
+    }, React.createElement("div", {
+      className: "incoming-notification__info"
+    }, React.createElement("div", {
+      className: "incoming-notification__general-info"
+    }, React.createElement("b", {
+      className: "incoming-notification__name"
+    }, notification.name), React.createElement("span", {
+      className: "incoming-notification__phone"
+    }, notification.phone), info), React.createElement("div", {
+      className: "incoming-notification__timer"
+    }, React.createElement("span", null, React.createElement(PhoneWidgetTimer, {
+      duration: duration,
+      timeStart: Date.now()
+    })))), React.createElement("div", {
+      className: "incoming-notification__action-list"
+    }, React.createElement("div", {
+      className: "incoming-notification__dynamic"
+    }, notification.canCallInfo ? React.createElement("a", {
+      href: "#",
+      "data-call-sid": notification.callSid,
+      className: "incoming-notification__action incoming-notification__action--info pw-btn-call-info"
+    }, React.createElement("i", {
+      className: "fa fa-info"
+    }, " ")) : '', React.createElement("a", {
+      href: "#",
+      className: "incoming-notification__action incoming-notification__action--phone btn-item-call-queue",
+      "data-type-action": notification.queue === 'hold' ? 'return' : notification.isInternal ? 'acceptInternal' : 'accept',
+      "data-call-sid": notification.callSid,
+      "data-from-internal": notification.fromInternal
+    }, notification.isSentAcceptCallRequestState || notification.isSentReturnHoldCallRequestState ? React.createElement("i", {
+      className: "fa fa-spinner fa-spin"
+    }, " ") : React.createElement("i", {
+      className: "fa fa-phone"
+    }, " "))), this.props.source === 'phone' ? React.createElement("a", {
+      href: "#",
+      "data-call-sid": notification.key,
+      className: "incoming-notification__action incoming-notification__action--min pw-notification-hide"
+    }, React.createElement("i", {
+      className: "fa fa-long-arrow-alt-down"
+    }, " ")) : React.createElement("a", {
+      href: "#",
+      "data-call-sid": notification.key,
+      className: "incoming-notification__action incoming-notification__action--max pw-notification-hide"
+    }, React.createElement("i", {
+      className: "fa fa-long-arrow-down"
+    }, " "))))));
+  }
+
 }
 
 var PhoneWidgetContactInfo = function () {
@@ -3116,18 +3192,23 @@ function PhoneWidgetPaneQueue(initQueues) {
 })();
 
 (function () {
+  let types = {
+    incomingCall: 'incomingCall'
+  };
+
   function Collection() {
     this.notifications = [];
 
-    this.add = function (key, data) {
+    this.add = function (key, type, notification) {
       if (this.getIndex(key) !== null) {
         return false;
       }
 
-      data.key = key;
-      data.timePushed = Date.now();
-      this.notifications.unshift(data);
-      return data;
+      notification.key = key;
+      notification.type = type;
+      notification.timePushed = Date.now();
+      this.notifications.unshift(notification);
+      return notification;
     };
 
     this.remove = function (key) {
@@ -3224,8 +3305,8 @@ function PhoneWidgetPaneQueue(initQueues) {
       'phone': new PhoneWidgetNotifier()
     };
 
-    this.add = function (key, notification) {
-      if (this.notifications.add(key, notification) === false) {
+    this.add = function (key, type, notification) {
+      if (this.notifications.add(key, type, notification) === false) {
         return false;
       }
 
@@ -3314,6 +3395,7 @@ function PhoneWidgetPaneQueue(initQueues) {
   }
 
   window.phoneWidget.notifier = new Notifier();
+  window.phoneWidget.notifier.types = types;
 })();
 
 $(document).ready(function () {
@@ -5011,7 +5093,7 @@ var PhoneWidgetCall = function () {
     if (call.data.queue === 'hold') {
       console.log('hold call');
       panes.queue.refresh();
-      addNotification(call.data.callSid, call);
+      addIncomingCallNotification(call);
       return false;
     }
 
@@ -5019,7 +5101,7 @@ var PhoneWidgetCall = function () {
     panes.queue.hide(); //todo remove
     //panes.incoming.init(call, (queues.direct.count() + queues.general.count()), (queues.active.count() + queues.hold.count()));
 
-    addNotification(call.data.callSid, call);
+    addIncomingCallNotification(call);
     audio.incoming.refresh();
     iconUpdate();
     openWidget(); // openCallTab();
@@ -5049,6 +5131,7 @@ var PhoneWidgetCall = function () {
     console.log('active call');
     waitQueue.remove(data.callSid);
     queues.outgoing.remove(data.callSid);
+    removeNotification(data.callSid);
     let call = queues.active.add(data);
 
     if (call === null) {
@@ -5479,7 +5562,7 @@ var PhoneWidgetCall = function () {
       let btn = $(this);
       acceptCall(btn.attr('data-call-sid'), btn.attr('data-from-internal'));
     });
-    $(document).on('click', '.call-list-item__main-action-trigger', function () {
+    $(document).on('click', '.btn-item-call-queue', function () {
       let btn = $(this);
       let action = $(this).attr('data-type-action');
 
@@ -5915,8 +5998,8 @@ var PhoneWidgetCall = function () {
     }
   }
 
-  function addNotification(key, call) {
-    return window.phoneWidget.notifier.add(key, {
+  function addIncomingCallNotification(call) {
+    return window.phoneWidget.notifier.add(call.data.callSid, window.phoneWidget.notifier.types.incomingCall, {
       'callSid': call.data.callSid,
       'queue': call.data.queue,
       'name': call.data.contact.name,
@@ -5924,7 +6007,10 @@ var PhoneWidgetCall = function () {
       'project': call.data.project,
       'department': call.data.department,
       'duration': call.data.duration,
-      'canCallInfo': call.data.contact.canCallInfo
+      'canCallInfo': call.data.contact.canCallInfo,
+      'isInternal': call.data.isInternal,
+      'fromInternal': call.data.fromInternal,
+      'eventName': call.getEventUpdateName()
     });
   }
 
@@ -5943,7 +6029,7 @@ var PhoneWidgetCall = function () {
 
       if (call !== null) {
         holdExist = true;
-        addNotification(call.data.callSid, call);
+        addIncomingCallNotification(call);
       }
     });
     let lastIncomingCall = null;
@@ -5952,7 +6038,7 @@ var PhoneWidgetCall = function () {
       let call = waitQueue.add(item);
 
       if (call !== null) {
-        addNotification(call.data.callSid, call);
+        addIncomingCallNotification(call);
         incomingExist = true;
         lastIncomingCall = call;
       }
