@@ -279,9 +279,9 @@ $js = <<<JS
                                 if (typeof obj.status !== 'undefined') {
                                      PhoneWidgetCall.requestIncomingCall(obj);
                                 }
-                                if (obj.cua_status_id === 2) {
-                                     PhoneWidgetCall.removeIncomingRequest(obj.callSid);
-                                }
+                                // if (obj.cua_status_id === 2) {
+                                    // PhoneWidgetCall.removeIncomingRequest(obj.callSid);
+                                // }
                             }
                         }
                         

@@ -22,6 +22,7 @@ class ConferenceSearch extends Conference
             [['cf_sid', 'cf_options', 'cf_created_dt', 'cf_updated_dt'], 'safe'],
             [['cf_friendly_name', 'cf_call_sid'], 'string'],
             [['cf_start_dt', 'cf_end_dt'], 'date', 'format' => 'php:Y-m-d'],
+            ['cf_duration', 'integer'],
         ];
     }
 
@@ -74,6 +75,7 @@ class ConferenceSearch extends Conference
             'cf_friendly_name' => $this->cf_friendly_name,
             'cf_created_user_id' => $this->cf_created_user_id,
             'cf_call_sid' => $this->cf_call_sid,
+            'cf_duration' => $this->cf_duration,
         ]);
 
         $query->andFilterWhere(['like', 'cf_sid', $this->cf_sid])
