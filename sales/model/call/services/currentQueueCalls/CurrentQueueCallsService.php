@@ -124,7 +124,7 @@ class CurrentQueueCallsService
 
         foreach ($queue as $call) {
 
-            if ($call->isIn() || $call->isOut()) {
+            if ($call->isIn() || $call->isOut() || $call->isReturn()) {
                 $name = $call->cClient ? $call->cClient->getShortName() : '------';
             } elseif ($call->isJoin() && ($parentJoin = $call->cParent) && $parentJoin->cCreatedUser) {
                 $name = $parentJoin->cCreatedUser->nickname;
@@ -150,6 +150,12 @@ class CurrentQueueCallsService
                     } else {
                         $phone = $parentJoin->c_from;
                     }
+                }
+            } elseif ($call->isReturn() && ($parentReturn = $call->cParent)) {
+                if ($parentReturn->isIn()) {
+                    $phone = $parentReturn->c_from;
+                } elseif ($parentReturn->isOut()) {
+                    $phone = $parentReturn->c_to;
                 }
             }
 

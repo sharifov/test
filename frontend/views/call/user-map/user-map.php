@@ -57,8 +57,10 @@ function renderChildCallsRecursive($calls): void {
                             <u><?=Html::a($callItem->c_id, ['call/view', 'id' => $callItem->c_id], ['target' => '_blank', 'data-pjax' => 0])?></u><br>
                             <?php if ($callItem->isIn()): ?>
                                 <span class="badge badge-danger">In</span>
-                            <?php else: ?>
+                            <?php elseif($callItem->isOut()): ?>
                                 <span class="badge badge-danger">Out</span>
+                            <?php elseif($callItem->isReturn()): ?>
+                                <span class="badge badge-danger">Return</span>
                             <?php endif; ?>
                         </td>
                         <td style="width: 50px">
@@ -185,7 +187,7 @@ function getJoinTemplate($model)
     if (
         ((bool)(Yii::$app->params['settings']['voip_conference_base'] ?? false) && Auth::can('/phone/ajax-join-to-conference'))
         && $callIsTypeAgent
-        && ($model->isIn() || $model->isOut())
+        && ($model->isIn() || $model->isOut() || $model->isReturn())
         && $model->isStatusInProgress()
     ) {
         ?>

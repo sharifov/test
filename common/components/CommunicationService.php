@@ -869,7 +869,8 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'friendlyName' => $friendlyName,
             'conferenceSid' => $conferenceSid,
             'to' => $to,
-            'user_id' => $userId
+            'user_id' => $userId,
+            'voipApiUsername' => $this->voipApiUsername,
         ];
 
         $response = $this->sendRequest('twilio-conference/return-to-conference-call', $data);
