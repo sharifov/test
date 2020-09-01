@@ -340,6 +340,18 @@ $isSuperAdmin = $user->isSuperAdmin();
                         ['label' => 'Department Phones', 'url' => ['/department-phone-project/index']],
                     ]
                 ],
+                [
+                    'label' => 'Phone Line',
+                    'url' => 'javascript:',
+                    'icon' => 'phone-volume',
+                    'items' => [
+                        ['label' => 'Phone Line', 'url' => ['/phone-line-crud/index']],
+                        ['label' => 'Phone Number', 'url' => ['/phone-line-phone-number-crud/index']],
+                        ['label' => 'User Assign', 'url' => ['/phone-line-user-assign-crud/index']],
+                        ['label' => 'User Group', 'url' => ['/phone-line-user-group-crud/index']],
+                        ['label' => 'User Personal Phone Number', 'url' => ['/user-personal-phone-number-crud/index']],
+                    ]
+                ],
 
 
 
