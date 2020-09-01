@@ -175,7 +175,7 @@ class Conference extends \yii\db\ActiveRecord
         return self::STATUS_LIST;
     }
 
-    public function start(string $dateTime = ''): void
+    public function start(?string $dateTime = null): void
     {
         $this->cf_start_dt = $dateTime;
         $this->cf_status_id = self::STATUS_START;
@@ -196,7 +196,7 @@ class Conference extends \yii\db\ActiveRecord
         return $this->cf_status_id === self::STATUS_DELAY;
     }
 
-    public function end(string $dateTime = ''): void
+    public function end(?string $dateTime = null): void
     {
         $this->cf_end_dt = $dateTime;
         $this->cf_status_id = self::STATUS_END;

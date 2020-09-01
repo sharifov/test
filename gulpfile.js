@@ -64,7 +64,9 @@ function build_phone_widget(cb) {
        'frontend/web/web_phone/js/notifier/notifier.js',
 
        'frontend/web/web_phone/js/phone-widget.js',
-		
+
+       'frontend/web/web_phone/js/audio.js',
+
 	   'frontend/web/web_phone/js/status.js',
 	   'frontend/web/web_phone/js/call.js',
 	   'frontend/web/web_phone/js/sms.js',

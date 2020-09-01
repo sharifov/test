@@ -35,6 +35,10 @@ var PhoneWidgetCall = function () {
         'queue': new PhoneWidgetPaneQueue(queues)
     };
 
+    let audio = {
+        'incoming': new window.phoneWidget.audio.Incoming(queues)
+    };
+
     function init(options)
     {
         callRequester.init(options);
@@ -64,12 +68,14 @@ var PhoneWidgetCall = function () {
         clientInfoEvent();
         insertPhoneNumberEvent();
         hideNotificationEvent();
+        muteIncomingAudioEvent();
     }
 
     function removeIncomingRequest(callSid) {
         let isRemoved = waitQueue.remove(callSid);
         panes.queue.refresh();
         removeNotification(callSid);
+        audio.incoming.refresh();
         if (isRemoved) {
             iconUpdate();
         }
@@ -187,6 +193,7 @@ var PhoneWidgetCall = function () {
        //panes.incoming.init(call, (queues.direct.count() + queues.general.count()), (queues.active.count() + queues.hold.count()));
 
         addNotification(call.data.callSid, call);
+        audio.incoming.refresh();
         iconUpdate();
         openWidget();
         // openCallTab();
@@ -217,9 +224,11 @@ var PhoneWidgetCall = function () {
 
         let call = queues.active.add(data);
         if (call === null) {
+            audio.incoming.refresh();
             console.log('Call is already exist in Active Queue');
             return false;
         }
+        audio.incoming.refresh();
 
         if (panes.outgoing.getCallSid() === call.data.callSid) {
             panes.outgoing.removeCallSid();
@@ -311,6 +320,7 @@ var PhoneWidgetCall = function () {
         queues.outgoing.remove(callSid);
         waitQueue.remove(callSid);
         storage.conference.removeByParticipantCallSid(callSid);
+        audio.incoming.refresh();
 
         panes.queue.refresh();
 
@@ -953,6 +963,16 @@ var PhoneWidgetCall = function () {
         });
     }
 
+    function muteIncomingAudioEvent() {
+        $(document).on('click', '#incoming-sound-indicator', function() {
+            if($(this).attr('data-status') === '1') {
+                audio.incoming.muted();
+            } else {
+                audio.incoming.unMuted();
+            }
+        });
+    }
+
     function sendHoldRequest(callSid) {
         let call = queues.active.one(callSid);
         if (call === null) {
@@ -1096,6 +1116,8 @@ var PhoneWidgetCall = function () {
         //         return;
         //     }
         // }
+
+        audio.incoming.refresh();
 
         if (holdExist && !activeExist && !outgoingExist && !incomingExist) {
             openWidget();

@@ -146,7 +146,7 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
                         ]) */ ?>
 
                         <li class="nav-item">
-                            <a href="javascript:;" class="info-number" title="Incoming Call - Volume ON" id="incoming-sound-indicator"></a>
+                            <a href="javascript:;" class="info-number" data-status="1" title="Incoming Call - Volume ON" id="incoming-sound-indicator"><i class="fa fa-volume-up text-success"> </i></a>
                         </li>
 
                         <?php /*php endif;*/?>

@@ -81,6 +81,8 @@ class NewWebPhoneAsset extends AssetBundle
 
                 '/web_phone/js/phone-widget.js',
 
+                '/web_phone/js/audio.js',
+
                 '/web_phone/js/status.js',
                 '/web_phone/js/call.js',
                 '/web_phone/js/sms.js',

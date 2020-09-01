@@ -30,7 +30,7 @@ class CallLogRecord extends \yii\db\ActiveRecord
             ['clr_cl_id', 'unique'],
             ['clr_cl_id', 'exist', 'skipOnError' => true, 'targetClass' => CallLog::class, 'targetAttribute' => ['clr_cl_id' => 'cl_id']],
 
-            ['clr_duration', 'integer'],
+            ['clr_duration', 'integer', 'max' => 32500],
 
             ['clr_record_sid', 'required'],
             ['clr_record_sid', 'string', 'max' => 34],

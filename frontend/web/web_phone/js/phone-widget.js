@@ -197,7 +197,7 @@ $(document).ready(function() {
     })
 
     $('.additional-bar__close').on('click', function() {
-        console.log($(this).parents('.additional-bar'))
+        // console.log($(this).parents('.additional-bar'))
         $(this).parents('.additional-bar').slideUp(150);
     })
 
@@ -207,7 +207,7 @@ $(document).ready(function() {
     })
 
     $('.additional-bar__close').on('click', function() {
-        console.log($(this).parents('.additional-bar'))
+        // console.log($(this).parents('.additional-bar'))
         $(this).parents('.additional-bar').slideUp(150);
     })
 
