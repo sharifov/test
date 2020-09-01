@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use kartik\grid\GridView;
 use sales\access\ListsAccess;
 use kartik\export\ExportMenu;
+use sales\helpers\call\CallHelper;
 
 $this->title = 'Calls Report';
 $this->params['breadcrumbs'][] = $this->title;
@@ -58,7 +59,7 @@ $list = new ListsAccess(Yii::$app->user->id);
             'format' => 'raw',
             'value' => function($data) {
                 $totalDuration =  $data['inCallsDuration'] + $data['outCallsDuration'] + $data['redialCallsDuration'];
-                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($totalDuration).'">' . gmdate('H:i:s', $totalDuration) . '</span>';
+                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($totalDuration).'">' . CallHelper::customizedDuration($totalDuration) . '</span>';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
             'contentOptions' => [
@@ -72,8 +73,8 @@ $list = new ListsAccess(Yii::$app->user->id);
             'label' => 'Talk Time',
             'format' => 'raw',
             'value' => function($data) {
-                $totalTalkTime=  $data['outCallsTalkTime'] + $data['inCallsDuration'] + $data['redialCallsTalkTime'];
-                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($totalTalkTime).'">' . gmdate('H:i:s', $totalTalkTime) . '</span>';
+                $totalTalkTime =  $data['outCallsTalkTime'] + $data['inCallsDuration'] + $data['redialCallsTalkTime'];
+                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($totalTalkTime).'">' . CallHelper::customizedDuration($totalTalkTime) . '</span>';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3;'],
             'contentOptions' => [
@@ -102,7 +103,7 @@ $list = new ListsAccess(Yii::$app->user->id);
             'format' => 'raw',
             'value' => function($data) {
                 $totalTalkTime=  $data['outCallsCompletedDuration'] + $data['inCallsDuration'] + $data['redialCallsCompleteTalkTime'];
-                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($totalTalkTime).'">' . gmdate('H:i:s', $totalTalkTime) . '</span>';
+                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($totalTalkTime).'">' . CallHelper::customizedDuration($totalTalkTime) . '</span>';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3;'],
             'contentOptions' => [
@@ -120,7 +121,7 @@ $list = new ListsAccess(Yii::$app->user->id);
             'filterOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
             'format' => 'raw',
             'value' => function($data) {
-                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['outCallsDuration']).'">' . gmdate('H:i:s', $data['outCallsDuration']) . '</span>';
+                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['outCallsDuration']).'">' . CallHelper::customizedDuration($data['outCallsDuration']) . '</span>';
             }
         ],
         [
@@ -128,7 +129,7 @@ $list = new ListsAccess(Yii::$app->user->id);
             'attribute' => 'outCallsTalkTime',
             'format' => 'raw',
             'value' => function($data) {
-                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['outCallsTalkTime']).'">' . gmdate('H:i:s', $data['outCallsTalkTime']) . '</span>';
+                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['outCallsTalkTime']).'">' . CallHelper::customizedDuration($data['outCallsTalkTime']) . '</span>';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3'],
             'contentOptions' => [
@@ -155,7 +156,7 @@ $list = new ListsAccess(Yii::$app->user->id);
             'attribute' => 'outCallsCompletedDuration',
             'format' => 'raw',
             'value' => function($data) {
-                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['outCallsCompletedDuration']).'">' . gmdate('H:i:s', $data['outCallsCompletedDuration']) . '</span>';
+                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['outCallsCompletedDuration']).'">' . CallHelper::customizedDuration($data['outCallsCompletedDuration']) . '</span>';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3'],
             'contentOptions' => [
@@ -199,7 +200,7 @@ $list = new ListsAccess(Yii::$app->user->id);
             'filterOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
             'format' => 'raw',
             'value' => function($data) {
-                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['inCallsDuration']).'">' . gmdate('H:i:s', $data['inCallsDuration']) . '</span>';
+                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['inCallsDuration']).'">' . CallHelper::customizedDuration($data['inCallsDuration']) . '</span>';
             }
         ],
         [
@@ -250,7 +251,7 @@ $list = new ListsAccess(Yii::$app->user->id);
             'filterOptions' => ['style' => 'background-color:#fcf8e3; border-left: 2px solid #f0ad4e;'],
             'format' => 'raw',
             'value' => function($data) {
-                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['redialCallsDuration']).'">' . gmdate('H:i:s', $data['redialCallsDuration']) . '</span>';
+                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['redialCallsDuration']).'">' . CallHelper::customizedDuration($data['redialCallsDuration'])  . '</span>';
             }
         ],
 
@@ -259,7 +260,7 @@ $list = new ListsAccess(Yii::$app->user->id);
             'attribute' => 'redialCallsTalkTime',
             'format' => 'raw',
             'value' => function($data) {
-                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['redialCallsTalkTime']).'">' . gmdate('H:i:s', $data['redialCallsTalkTime']) . '</span>';
+                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['redialCallsTalkTime']).'">' . CallHelper::customizedDuration($data['redialCallsTalkTime']) . '</span>';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3;'],
             'contentOptions' => [
@@ -302,7 +303,7 @@ $list = new ListsAccess(Yii::$app->user->id);
             'attribute' => 'redialCallsCompleteTalkTime',
             'format' => 'raw',
             'value' => function($data) {
-                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['redialCallsCompleteTalkTime']).'">' . gmdate('H:i:s', $data['redialCallsCompleteTalkTime']) . '</span>';
+                return '<i class="fa fa-clock-o"></i> <span title="'.Yii::$app->formatter->asDuration($data['redialCallsCompleteTalkTime']).'">' . CallHelper::customizedDuration($data['redialCallsCompleteTalkTime']) . '</span>';
             },
             'headerOptions' => ['style' => 'background-color:#fcf8e3'],
             'contentOptions' => [

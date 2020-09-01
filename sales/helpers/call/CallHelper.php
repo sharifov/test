@@ -217,4 +217,22 @@ class CallHelper
             </li>';
         return $tpl;
     }
+
+    /**
+     * @param string $sec
+     * @param string $delimiter
+     * @return string
+     */
+    public static function customizedDuration(string $sec, string $delimiter = ':'):string
+    {
+        $seconds = $sec % 60;
+        $minutes = floor($sec / 60 % 60);
+        $hours   = floor($sec / 3600);
+
+        $seconds = ($seconds > 0) ? str_pad($seconds, 2, "0", STR_PAD_LEFT) : '00';
+        $minutes = ($minutes > 0) ? str_pad($minutes, 2, "0", STR_PAD_LEFT).$delimiter : '00'.$delimiter;
+        $hours   = ($hours > 0) ? str_pad($hours, 2, "0", STR_PAD_LEFT).$delimiter : '00'.$delimiter;
+
+        return "$hours$minutes$seconds";
+    }
 }
