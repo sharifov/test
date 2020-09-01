@@ -974,8 +974,7 @@ use yii\helpers\Html;
                         } else {
                             callControls2Show(connection.parameters.CallSid);
                         }
-
-                        startTimerSoundIncomingCall();
+                        // startTimerSoundIncomingCall();
                     } else {
                         if (document.visibilityState === 'visible') {
                             conn.accept();

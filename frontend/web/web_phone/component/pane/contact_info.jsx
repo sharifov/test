@@ -32,7 +32,7 @@ function ContactInfoHeader(props) {
                 : <span className="additional-info__header-title">{props.isClient ? 'Client details': 'Contact info'}</span>
             }
             {props.canCallInfo
-                ? <React.Fragment> &nbsp;/&nbsp; <a href="#" data-call-sid={props.callSid} className="cw-call-contact-info cw-btn-call-info"><span className="additional-info__header-title">Call info</span></a> </React.Fragment>
+                ? <React.Fragment> &nbsp;/&nbsp; <a href="#" data-call-sid={props.callSid} className="cw-call-contact-info pw-btn-call-info"><span className="additional-info__header-title">Call info</span></a> </React.Fragment>
                 : ''
             }
         </React.Fragment>
