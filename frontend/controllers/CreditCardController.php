@@ -4,9 +4,14 @@ namespace frontend\controllers;
 
 use common\models\CaseSale;
 use common\models\SaleCreditCard;
+use frontend\helpers\JsonHelper;
 use frontend\models\form\CreditCardForm;
 use http\Exception\RuntimeException;
+use sales\forms\caseSale\CaseSaleSendCcInfoForm;
+use sales\helpers\cases\CaseSaleHelper;
+use sales\repositories\cases\CasesRepository;
 use sales\repositories\cases\CasesSaleRepository;
+use sales\repositories\client\ClientRepository;
 use sales\repositories\NotFoundException;
 use sales\services\cases\CasesSaleService;
 use Yii;
@@ -25,6 +30,8 @@ use yii\filters\VerbFilter;
  *
  * @property CasesSaleService $casesSaleService
  * @property CasesSaleRepository $casesSaleRepository
+ * @property CasesRepository $casesRepository
+ * @property ClientRepository $clientRepository
  */
 class CreditCardController extends FController
 {
@@ -37,12 +44,22 @@ class CreditCardController extends FController
 	 * @var CasesSaleRepository
 	 */
 	private $casesSaleRepository;
+	/**
+	 * @var CasesRepository
+	 */
+	private CasesRepository $casesRepository;
+	/**
+	 * @var ClientRepository
+	 */
+	private ClientRepository $clientRepository;
 
-	public function __construct($id, $module, CasesSaleService $casesSaleService, CasesSaleRepository $casesSaleRepository, $config = [])
+	public function __construct($id, $module, CasesSaleService $casesSaleService, CasesSaleRepository $casesSaleRepository, CasesRepository $casesRepository, ClientRepository $clientRepository, $config = [])
 	{
 		parent::__construct($id, $module, $config);
 		$this->casesSaleService = $casesSaleService;
 		$this->casesSaleRepository = $casesSaleRepository;
+		$this->casesRepository = $casesRepository;
+		$this->clientRepository = $clientRepository;
 	}
 
 	/**
@@ -252,6 +269,43 @@ class CreditCardController extends FController
 			'saleId' => $saleId,
 			'model' => $form,
 			'isAjax' => true
+		]);
+	}
+
+	public function actionAjaxSendCcInfo()
+	{
+		$caseId = Yii::$app->request->get('caseId', null);
+		$saleId = Yii::$app->request->get('saleId', null);
+
+		$form = new CaseSaleSendCcInfoForm();
+		$caseSale = null;
+		try {
+			$caseSale = $this->casesSaleRepository->getSaleByPrimaryKeys((int)$caseId, (int)$saleId);
+			$case = $this->casesRepository->find((int)$caseId);
+			$client = $this->clientRepository->find($case->cs_client_id);
+			$customerEmail = CaseSaleHelper::getCustomerEmail(JsonHelper::decode($caseSale->css_sale_data));
+			if ($customerEmail) {
+				$form->emailList[$customerEmail] = $customerEmail;
+			}
+			$clientEmailList = ArrayHelper::merge($form->emailList, $client->emailList);
+			$form->emailList = $clientEmailList;
+
+			if (Yii::$app->request->isPjax && $form->load(Yii::$app->request->post()) && $form->validate()) {
+				$apiKey = $this->casesSaleRepository->getProjectApiKey($caseSale);
+				$result = $this->casesSaleService->sendCcInfo($apiKey, $caseSale->css_sale_id, $caseSale->css_sale_book_id, $form->email);
+				if ($result['error']) {
+					throw new \RuntimeException('B/O error has occurred: ' . $result['message']);
+				}
+				return '<script>$("#modal-sm").modal("hide"); createNotify("Success", "Email sent to customer successfully", "success")</script>';
+			}
+		} catch (NotFoundException | \RuntimeException $e) {
+			$form->addError('general', $e->getMessage());
+		} catch (\Throwable $e) {
+			$form->addError('general', 'Internal Server Error');
+		}
+
+		return $this->renderAjax('partial/_send_cc_info_form', [
+			'formCaseSale' => $form,
 		]);
 	}
 

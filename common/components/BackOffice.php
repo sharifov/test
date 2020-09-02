@@ -48,7 +48,7 @@ class BackOffice
 	 * @throws \yii\base\InvalidConfigException
 	 * @throws \yii\httpclient\Exception
 	 */
-    public static function sendRequest2(string $endpoint = '', array $fields = [], string $type = 'POST', int $curlTimeOut = 30, string $host = ''): \yii\httpclient\Response
+    public static function sendRequest2(string $endpoint = '', array $fields = [], string $type = 'POST', int $curlTimeOut = 30, string $host = '', bool $addBasicAuth = false): \yii\httpclient\Response
     {
 
     	$host = $host ?: Yii::$app->params['backOffice']['serverUrl'];
@@ -72,13 +72,17 @@ class BackOffice
             //"Content-length"    => mb_strlen($xmlRequest),
         ];*/
 
-
         $headers = [
             'version'   => Yii::$app->params['backOffice']['ver'],
             'signature' => $signature
         ];
 
-        //VarDumper::dump([$uri, $headers, $fields]);exit;
+        if ($addBasicAuth) {
+			$username = Yii::$app->params['backOffice']['username'] ?? '';
+			$password = Yii::$app->params['backOffice']['password'] ?? '';
+			$authStr = base64_encode($username . ':' . $password);
+			$headers['Authorization'] = 'Basic ' . $authStr;
+		}
 
         $response = $client->createRequest()
             ->setMethod($type)
