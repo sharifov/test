@@ -133,6 +133,7 @@ class UserVoiceMail extends \yii\db\ActiveRecord
 
             ['uvm_max_recording_time', 'integer'],
 
+            ['uvm_name', 'required'],
             ['uvm_name', 'string', 'max' => 50],
 
             ['uvm_record_enable', 'integer'],

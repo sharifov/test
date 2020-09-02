@@ -2,6 +2,7 @@
 
 use common\components\grid\DateTimeColumn;
 use common\models\UserProductType;
+use common\models\UserProjectParams;
 use frontend\models\UserFailedLogin;
 use modules\product\src\entities\productType\ProductType;
 use sales\auth\Auth;
@@ -582,6 +583,28 @@ JS;
                             }
                             return '-';
                         }
+                    ],
+                    [
+                        'attribute' => 'upp_vm_enabled',
+                        'format' => 'raw',
+                        'value' => function(\common\models\UserProjectParams $model) {
+                            if ($model->upp_vm_enabled) {
+                                return '<i class="fa fa-check-square-o"></i>';
+                            }
+                            return '-';
+                        }
+                    ],
+                    [
+                        'attribute' => 'upp_vm_user_status_id',
+                        'value' => static function(UserProjectParams $model) {
+                            return UserProjectParams::VM_USER_STATUS_LIST[$model->upp_vm_user_status_id] ?? null;
+                        },
+                    ],
+                    [
+                        'attribute' => 'upp_vm_id',
+                        'value' => static function(UserProjectParams $model) {
+                            return $model->upp_vm_id ? $model->voiceMail->uvm_name : null;
+                        },
                     ],
                     //'upp_tw_sip_id',
 
