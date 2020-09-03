@@ -33,8 +33,8 @@ class ClientChatTranslate
         $data['textarea_placeholder']   = Yii::t('clientChat', 'Type a message...', [], $language);
 
         $data['registration'] = [
-            'title'                     => Yii::t('clientChat_registration', 'Welcome', [], $language),
-            'subtitle'                  => Yii::t('clientChat_registration', 'Be sure to leave a message', [], $language),
+            'title'                     => Yii::t('clientChat_registration', 'We are ready to help you', [], $language),
+            'subtitle'                  => Yii::t('clientChat_registration', 'Please leave your contact details below to start a conversation.', [], $language),
             'name'                      => Yii::t('clientChat_registration', 'Name', [], $language),
             'name_placeholder'          => Yii::t('clientChat_registration', 'Your name', [], $language),
             'email'                     => Yii::t('clientChat_registration', 'Email', [], $language),
@@ -55,7 +55,7 @@ class ClientChatTranslate
 
         $data['file_upload'] = [
             'file_too_big'          => Yii::t('clientChat_file', 'This file is too big. Max file size is {{size}}', [], $language),
-            'file_too_big_alt'      => Yii::t('clientChat_file', 'No archived conversations yetThis file is too large', [], $language),
+            'file_too_big_alt'      => Yii::t('clientChat_file', 'This file is too big.', [], $language),
             'generic_error'         => Yii::t('clientChat_file', 'Failed to upload, please try again', [], $language),
             'not_allowed'           => Yii::t('clientChat_file', 'This file type is not supported', [], $language),
             'drop_file'             => Yii::t('clientChat_file', 'Drop file here to upload it', [], $language),

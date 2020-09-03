@@ -5,6 +5,10 @@ return [
         'route' => 'lead/queue',
     ],*/
     [
+        'pattern' => 'user/info/<id>',
+        'route' => 'user/info',
+    ],
+    [
         'pattern' => 'leads/view/<id>',
         'route' => 'leads/view',
     ],
