@@ -134,12 +134,18 @@ $isSuperAdmin = $user->isSuperAdmin();
             $menuItems[] = ['label' => 'My SMS <span id="sms-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/sms/list'], 'icon' => 'comments'];
         }
 
-        if ($user->canCall()) {
-            $menuItems[] = ['label' => 'My Calls <span id="call-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/call/list'], 'icon' => 'phone'];
-        }
 
         if ($user->canCall()) {
-            $menuItems[] = ['label' => 'My Calls Log <span id="call-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/call-log/list'], 'icon' => 'phone'];
+            $menuItems[] = [
+                'label' => 'My Calls <span class="label-info label pull-right"></span> ',
+                'url' => 'javascript:',
+                'icon' => 'phone',
+                'items' => [
+                    ['label' => 'My Calls <span class="label-info label pull-right"></span> ', 'url' => ['/call/list'], 'icon' => 'phone'],
+                    ['label' => 'My Calls Log <span class="label-info label pull-right"></span> ', 'url' => ['/call-log/list'], 'icon' => 'phone'],
+                    ['label' => 'My Voice Mail Record <span id="voice-mail-record-count" data-type="count" class="label-success label pull-right voice-mail-record"></span> ', 'url' => ['/voice-mail-record/list'], 'icon' => 'envelope'],
+                ]
+            ];
         }
 
         $menuItems[] = [
@@ -224,6 +230,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ],
                 ['label' => 'Call Note', 'url' => ['/call-note-crud/index'], 'icon' => 'list'],
                 ['label' => 'User Voice Mail', 'url' => ['/user-voice-mail/index'], 'icon' => 'microphone'],
+                ['label' => 'Voice Mail Records', 'url' => ['/voice-mail-record/index'], 'icon' => 'envelope'],
                 [
                     'label' => 'QCall',
                     'url' => 'javascript:',
@@ -662,6 +669,8 @@ function updateCounters(url, className, idName) {
                 $.each( data, function( key, val ) {
                     if (val != 0) {
                         $("#" + idName + "-" + key).html(val);
+                    } else if (val == 0) {
+                        $("#" + idName + "-" + key).html('');
                     }
                 });
             }
@@ -686,6 +695,16 @@ if (Yii::$app->user->can('caseSection')) {
 if (Yii::$app->user->can('/qa-task/qa-task-queue/count')) {
     $urlQaTaskCount = Url::to(['/qa-task/qa-task-queue/count']);
     $this->registerJs("updateCounters('$urlQaTaskCount', 'qa-task-info', 'qa-task-q');", $this::POS_LOAD);
+}
+if ($user->canCall()) {
+    $urlVoiceMailRecordCount = Url::to(['/voice-mail-record/count']);
+    $this->registerJs("
+    function updateVoiceRecordCounters() {
+        updateCounters('$urlVoiceMailRecordCount', 'voice-mail-record', 'voice-mail-record');
+    }
+    window.updateVoiceRecordCounters = updateVoiceRecordCounters;
+    window.updateVoiceRecordCounters();
+    ", $this::POS_LOAD);
 }
 
 $js = <<<JS

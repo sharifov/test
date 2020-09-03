@@ -112,6 +112,21 @@ class UserProjectParams extends \yii\db\ActiveRecord
         ];
     }
 
+    public function vmIsOnline(): bool
+    {
+        return $this->upp_vm_user_status_id === self::VM_USER_STATUS_ONLINE;
+    }
+
+    public function vmIsOffline(): bool
+    {
+        return $this->upp_vm_user_status_id === self::VM_USER_STATUS_OFFLINE;
+    }
+
+    public function vmIsAll(): bool
+    {
+        return $this->upp_vm_user_status_id === self::VM_USER_STATUS_ALL || $this->upp_vm_user_status_id === null;
+    }
+
     public function getAvailableVoiceMail(): array
     {
         if (!$this->upp_user_id) {
