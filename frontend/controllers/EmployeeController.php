@@ -758,6 +758,8 @@ class EmployeeController extends FController
 							}
 							$this->clientChatUserAccessService->disableUserAccessToAllChats($model->id);
 							$this->clientChatUserAccessService->setUserAccessToAllChatsByChannelIds($attr['client_chat_user_channel'], $model->id);
+						} else {
+							$this->clientChatUserAccessService->disableUserAccessToAllChats($model->id);
 						}
                     }
 
