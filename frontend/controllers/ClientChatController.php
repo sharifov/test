@@ -273,7 +273,7 @@ class ClientChatController extends FController
 		];
 		try {
 			$clientChat = $this->clientChatRepository->findById($cchId);
-			$this->clientChatMessageService->discardUnreadMessages($clientChat->cch_id, $clientChat->cch_owner_user_id);
+			$this->clientChatMessageService->discardUnreadMessages($clientChat->cch_id, (int)$clientChat->cch_owner_user_id);
 
 			$result['html'] = $this->renderPartial('partial/_client-chat-info', [
 				'clientChat' => $clientChat,
@@ -600,7 +600,7 @@ class ClientChatController extends FController
 	{
 		$cchId = Yii::$app->request->post('cchId');
 		$userId = Auth::id();
-		$this->clientChatMessageService->discardUnreadMessages((int)$cchId, $userId);
+		$this->clientChatMessageService->discardUnreadMessages((int)$cchId, (int)$userId);
 	}
 
 	public function actionSendOfferList(): string
