@@ -379,7 +379,7 @@ class ClientChatService
 			$this->clientChatRepository->save($clientChat);
 			$this->sendRequestToUsers($clientChat);
 		} catch (\RuntimeException | NotFoundException $e) {
-			\Yii::error('Send notification to users failed... ' . $e->getMessage() . '; File: ' . $e->getFile() . '; Line: ' . $e->getLine(), 'ClientChatService::assignToChannel::RuntimeException|NotFoundException');
+//			\Yii::error('Send notification to users failed... ' . $e->getMessage() . '; File: ' . $e->getFile() . '; Line: ' . $e->getLine(), 'ClientChatService::assignToChannel::RuntimeException|NotFoundException');
 		}
 	}
 
