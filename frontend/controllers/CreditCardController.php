@@ -293,7 +293,7 @@ class CreditCardController extends FController
 
 			if (Yii::$app->request->isPjax && $form->load(Yii::$app->request->post()) && $form->validate()) {
 				$apiKey = $this->casesSaleRepository->getProjectApiKey($caseSale);
-				$result = $this->casesSaleService->sendCcInfo($apiKey, $caseSale->css_sale_id, $caseSale->css_sale_book_id, $form->email);
+				$result = $this->casesSaleService->sendCcInfo($apiKey, $caseSale->css_sale_id, (string)$caseSale->css_sale_book_id, $form->email);
 				if ($result['error']) {
 					throw new \RuntimeException('B/O error has occurred: ' . $result['message']);
 				}
