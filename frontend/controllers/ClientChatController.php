@@ -386,7 +386,6 @@ class ClientChatController extends FController
 
 			$result['success'] = true;
 		} catch (\RuntimeException | \DomainException | NotFoundException $e) {
-			\Yii::error(AppHelper::throwableFormatter($e), 'ClientChatController::actionAccessManage::RuntimeException|DomainException|NotFoundException');
 			$result['notifyMessage'] = $e->getMessage();
 			if (ClientChatCodeException::isWarningMessage($e)) {
 				$result['notifyTitle'] = 'Warning';

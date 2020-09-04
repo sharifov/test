@@ -129,7 +129,7 @@ class ClientChatRequestService
 
 		$this->transactionManager->wrap( function () use ($clientChatRequest, $form) {
 			if ($clientChatRequest->isRoomConnected()) {
-				$this->roomConnected($clientChatRequest, $form);
+				$this->roomConnected($clientChatRequest);
 			} else if ($clientChatRequest->isGuestDisconnected()) {
 				$this->guestDisconnected($clientChatRequest);
 			} else if ($clientChatRequest->isTrackEvent()) {
