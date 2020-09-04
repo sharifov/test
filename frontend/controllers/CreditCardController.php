@@ -8,6 +8,7 @@ use frontend\helpers\JsonHelper;
 use frontend\models\form\CreditCardForm;
 use http\Exception\RuntimeException;
 use sales\forms\caseSale\CaseSaleSendCcInfoForm;
+use sales\helpers\app\AppHelper;
 use sales\helpers\cases\CaseSaleHelper;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\cases\CasesSaleRepository;
@@ -301,6 +302,7 @@ class CreditCardController extends FController
 		} catch (NotFoundException | \RuntimeException $e) {
 			$form->addError('general', $e->getMessage());
 		} catch (\Throwable $e) {
+			Yii::error(AppHelper::throwableFormatter($e), 'CreditCardController::actionAjaxSendCcInfo::Throwable');
 			$form->addError('general', 'Internal Server Error');
 		}
 
