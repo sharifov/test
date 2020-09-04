@@ -794,7 +794,7 @@ class ClientChatController extends FController
 				$this->clientChatService->createByAgent($form, Auth::id());
 				return '<script>$("#modal-sm").modal("hide"); createNotify("Success", "Message was successfully sent to client", "success");</script>';
 			}
-		} catch (NotFoundException | \RuntimeException $e) {
+		} catch (\RuntimeException | \DomainException $e) {
 			$form->addError('general', $e->getMessage());
 		} catch (\Throwable $e) {
 			Yii::error($e->getMessage() . '; File: ' . $e->getFile() . '; Line: ' . $e->getLine(), 'ClientChatController::actionRealTimeStartChat::Throwable');

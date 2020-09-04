@@ -3,6 +3,7 @@ namespace sales\services\clientChatService;
 
 use common\models\Department;
 use common\models\Notifications;
+use common\models\UserProfile;
 use frontend\widgets\clientChat\ClientChatAccessMessage;
 use sales\auth\Auth;
 use sales\forms\clientChat\RealTimeStartChatForm;
@@ -181,6 +182,15 @@ class ClientChatService
 	{
 		$_self = $this;
 		$this->transactionManager->wrap(static function () use ($form, $ownerId, $_self) {
+			if (!$userProfile = UserProfile::findOne(['up_user_id' => $ownerId])) {
+				throw new NotFoundException('User Profile is not found');
+			}
+
+			if (empty($userProfile->up_rc_user_id) || empty($userProfile->up_rc_auth_token)) {
+				throw new \DomainException('You dont have rocketchat credentials');
+			}
+
+
 			$clientChatRequest = ClientChatRequest::createByAgent($form);
 			$_self->clientChatRequestRepository->save($clientChatRequest);
 
@@ -209,7 +219,7 @@ class ClientChatService
 
 			$userChannel = $_self->clientChatUserChannelRepository->findByPrimaryKeys($ownerId, $form->channelId);
 
-			$_self->assignAgentToRcChannel($form->rid, $clientChat->cchOwnerUser->userProfile->up_rc_user_id ?? '');
+			$_self->assignAgentToRcChannel($form->rid, $userProfile->up_rc_user_id);
 
 			$message = [
 				'message' => [
@@ -219,14 +229,10 @@ class ClientChatService
 				]
 			];
 
-			if (($rocketUserId = Auth::user()->userProfile->up_rc_user_id) && ($rocketToken = Auth::user()->userProfile->up_rc_auth_token)) {
-				$headers =  [
-					'X-User-Id' => $rocketUserId,
-					'X-Auth-Token' => $rocketToken,
-				];
-			} else {
-				$headers = \Yii::$app->rchat->getSystemAuthDataHeader();
-			}
+			$headers =  [
+				'X-User-Id' => $userProfile->up_rc_user_id,
+				'X-Auth-Token' => $userProfile->up_rc_auth_token,
+			];
 
 			$sendMessageResult = \Yii::$app->chatBot->sendMessage($message, $headers);
 			if ($sendMessageResult['error']) {
