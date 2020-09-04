@@ -15,7 +15,7 @@ class ClientChatHelper
 
 	public static function getFirstLetterFromName(ClientChat $clientChat): string
 	{
-		return strtoupper(self::getClientName($clientChat)[0]);
+		return mb_strtoupper(mb_substr(self::getClientName($clientChat), 0, 1));
 	}
 
 	public static function getClientStatusMessage(ClientChat $clientChat): string
