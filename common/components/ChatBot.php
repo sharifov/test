@@ -158,7 +158,7 @@ class ChatBot extends Component
 			}
 		} else {
 			$out['error'] = $this->parseErrorContent($response);
-			\Yii::error(VarDumper::dumpAsString(['rid' => $rid, 'error' => $out['error']], 10), 'ChatBot:endConversation');
+			\Yii::error(VarDumper::dumpAsString(['rid' => $rid, 'error' => $out['error']], 10), 'ChatBot:transfer');
 		}
 
 		return $out;
