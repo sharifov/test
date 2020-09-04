@@ -100,21 +100,57 @@
             'desktop': new DesktopNotifier(),
             'phone': new PhoneWidgetNotifier(),
         };
+        this.isOn = true;
+        this.offKey = null;
+
+        this.getVisibleNotifications = function () {
+            let notifications = [];
+            this.notifications.all().forEach(function (notification) {
+                if (notification.isShow) {
+                    notifications.push(notification);
+                }
+            });
+            return notifications;
+        };
 
         this.add = function (key, type, notification) {
             if (this.notifications.add(key, type, notification) === false) {
                 return false;
             }
 
+            if (!notification.isShow) {
+                return true;
+            }
+
             notification.isNew = true;
-            this.notifiers.desktop.notify(this.notifications.all());
+            this.notifiers.desktop.notify(this.getVisibleNotifications());
             this.notifiers.phone.notify(notification);
 
             notification.isNew = false;
             let self = this;
             setTimeout(function () {
-                self.notifiers.desktop.notify(self.notifications.all());
+                self.notifiers.desktop.notify(self.getVisibleNotifications());
                 self.notifiers.phone.notify(notification);
+            }, 50);
+            return true;
+        };
+
+        this.addAndShowOnlyDesktop = function (key, type, notification) {
+            if (this.notifications.add(key, type, notification) === false) {
+                return false;
+            }
+
+            if (!notification.isShow) {
+                return true;
+            }
+
+            notification.isNew = true;
+            this.notifiers.desktop.notify(this.getVisibleNotifications());
+
+            notification.isNew = false;
+            let self = this;
+            setTimeout(function () {
+                self.notifiers.desktop.notify(self.getVisibleNotifications());
             }, 50);
             return true;
         };
@@ -124,8 +160,14 @@
             if (notification === null) {
                 return false;
             }
+
+            if (!notification.isShow) {
+                this.notifications.remove(key);
+                return true;
+            }
+
             notification.isDeleted = true;
-            this.notifiers.desktop.notify(this.notifications.all());
+            this.notifiers.desktop.notify(this.getVisibleNotifications());
             if (this.notifiers.phone.isEqual(notification.key)) {
                 this.notifiers.phone.notify(notification);
             }
@@ -133,15 +175,87 @@
             this.notifications.remove(key);
             let self = this;
             setTimeout(function () {
-                self.notifiers.desktop.notify(self.notifications.all());
+                let notifications = self.getVisibleNotifications();
+                self.notifiers.desktop.notify(notifications);
                 if (self.notifiers.phone.isEqual(notification.key)) {
                     self.notifiers.phone.reset();
                 }
-                if (self.notifications.count() === 0) {
+                if (notifications.length === 0) {
                     self.notifiers.desktop.reset();
                 }
             }, 400);
             return true;
+        };
+
+        this.hide = function (key) {
+            let notification = this.notifications.one(key);
+            if (notification === null) {
+                return false;
+            }
+            if (!notification.isShow) {
+                return true;
+            }
+
+            notification.willHide = true;
+            this.notifiers.desktop.notify(this.getVisibleNotifications());
+            if (this.notifiers.phone.isEqual(notification.key)) {
+                this.notifiers.phone.notify(notification);
+            }
+            notification.willHide = false;
+
+            notification.isShow = false;
+            let self = this;
+            setTimeout(function () {
+                let notifications = self.getVisibleNotifications();
+                self.notifiers.desktop.notify(notifications);
+                if (self.notifiers.phone.isEqual(notification.key)) {
+                    self.notifiers.phone.reset();
+                }
+                if (notifications.length === 0) {
+                    self.notifiers.desktop.reset();
+                }
+            }, 400);
+            return true;
+        };
+
+        this.refresh = function () {
+            if (!this.isOn) {
+                return false;
+            }
+
+            this.notifications.all().forEach(function (notification) {
+                notification.isShow = true;
+                notification.isNew = true;
+            });
+            this.notifiers.desktop.notify(this.getVisibleNotifications());
+
+            this.notifications.all().forEach(function (notification) {
+                notification.isNew = false;
+            });
+
+            let self = this;
+            setTimeout(function () {
+                self.notifiers.desktop.notify(self.getVisibleNotifications());
+            }, 50);
+
+            this.notifiers.phone.reset();
+            return true;
+        };
+
+        this.on = function (key) {
+            if (this.isOff() && this.offKey !== key) {
+                return;
+            }
+            this.isOn = true;
+        };
+
+        this.off = function (key) {
+            this.isOn = false;
+            this.offKey = key;
+        };
+
+        this.isOff = function () {
+            return this.isOn === false;
         };
 
         this.reset = function () {
@@ -175,6 +289,7 @@
         this.reset = function () {
             ReactDOM.unmountComponentAtNode(this.$container);
             this.$container.innerHTML = '';
+            this.notificationKey = null;
         };
 
         this.isEqual = function (key) {

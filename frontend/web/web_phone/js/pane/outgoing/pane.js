@@ -36,8 +36,8 @@ var PhoneWidgetPaneOutgoing = function () {
         callSid = sid;
     }
 
-    function getCallSid() {
-        return callSid;
+    function isEqual(sid) {
+        return callSid === sid;
     }
 
     function removeCallSid() {
@@ -59,7 +59,7 @@ var PhoneWidgetPaneOutgoing = function () {
         load: load,
         show: show,
         hide: hide,
-        getCallSid: getCallSid,
+        isEqual: isEqual,
         removeCallSid: removeCallSid,
         isActive: isActive
     }

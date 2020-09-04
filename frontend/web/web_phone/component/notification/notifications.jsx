@@ -22,7 +22,7 @@ class PhoneWidgetNotification extends React.Component {
 
     render() {
         let className = 'phone-notifications';
-        if (!(this.props.notification.isDeleted || this.props.notification.isNew)) {
+        if (!(this.props.notification.isDeleted || this.props.notification.isNew || this.props.notification.willHide)) {
             className = className + ' phone-notifications--shown';
         }
         if (this.props.notification.queue === 'general') {
@@ -140,7 +140,7 @@ class IncomingCallNotificationItem extends React.Component {
         }
 
         return (
-            <li className={(notification.isDeleted || notification.isNew) ? 'phone-notifications__item' : 'phone-notifications__item phone-notifications__item--shown'}>
+            <li className={(notification.isDeleted || notification.isNew || notification.willHide) ? 'phone-notifications__item' : 'phone-notifications__item phone-notifications__item--shown'}>
                 <div className="incoming-notification">
                     <i className="user-icn">{notification.name[0]}</i>
                     <div className="incoming-notification__inner">
@@ -161,13 +161,13 @@ class IncomingCallNotificationItem extends React.Component {
                                 <i className="fa fa-random"> </i>
                                  </a> */}
 
-                                {notification.canCallInfo
+                                {/*notification.canCallInfo
                                     ? <a href="#" data-call-sid={notification.callSid}
                                          className="incoming-notification__action incoming-notification__action--info pw-btn-call-info">
                                         <i className="fa fa-info"> </i>
                                     </a>
                                     : ''
-                                }
+                                */}
                                  <a href="#"
                                     className="incoming-notification__action incoming-notification__action--phone btn-item-call-queue"
                                     data-type-action={notification.queue === 'hold' ? 'return' : (notification.isInternal ? 'acceptInternal' :'accept')}
