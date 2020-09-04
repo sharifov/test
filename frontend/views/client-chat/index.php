@@ -283,7 +283,7 @@ $(document).on('click', '.cc_cancel_transfer', function (e) {
     let cchId = btn.attr('data-cch-id');
     let btnHtml = btn.html();
     
-    if (confirm('Confirm transfer chat')) {
+    if (confirm('Confirm transfer cancellation')) {
         $.ajax({
             type: 'post',
             url: '{$chatCancelTransferUrl}',

@@ -757,7 +757,7 @@ class ClientChatController extends FController
 
 		$result = [
 			'error' => false,
-			'message' => 'Transfer canceled successfully'
+			'message' => 'Transfer cancelled successfully'
 		];
 
 		try {
