@@ -3,10 +3,13 @@
 namespace sales\model\clientChatRequest\entity;
 
 use sales\dispatchers\NativeEventDispatcher;
+use sales\forms\clientChat\RealTimeStartChatForm;
 use sales\model\clientChatRequest\event\ClientChatRequestEvents;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestApiForm;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
+use yii\helpers\Json;
 
 /**
  * This is the model class for table "client_chat_request".
@@ -32,6 +35,7 @@ class ClientChatRequest extends \yii\db\ActiveRecord
     public const EVENT_AGENT_JOINED_ROOM = 8;
     public const EVENT_USER_DEPARTMENT_TRANSFER = 9;
     public const EVENT_TRACK = 10;
+    public const EVENT_CREATE_BY_AGENT = 12;
 
 	private const EVENT_LIST = [
 		self::EVENT_GUEST_CONNECTED => 'GUEST_CONNECTED',
@@ -45,6 +49,7 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 		self::EVENT_AGENT_JOINED_ROOM => 'AGENT_JOINED_ROOM',
 		self::EVENT_USER_DEPARTMENT_TRANSFER => 'USER_DEPARTMENT_TRANSFER',
 		self::EVENT_TRACK => 'TRACK_EVENT',
+		self::EVENT_CREATE_BY_AGENT => 'CREATE_BY_AGENT'
 	];
 
 	private array $decodedJsonData = [];
@@ -114,6 +119,16 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 		$_self->ccr_rid = $form->rid;
         $_self->ccr_visitor_id = $form->data['visitor']['id'] ?? null;
 
+		return $_self;
+	}
+
+	public static function createByAgent(RealTimeStartChatForm $form): self
+	{
+		$_self = new self();
+		$_self->ccr_event = self::EVENT_CREATE_BY_AGENT;
+		$_self->ccr_json_data = $form->dataToJson();
+		$_self->ccr_rid = $form->rid;
+		$_self->ccr_visitor_id = $form->visitorId;
 		return $_self;
 	}
 

@@ -181,9 +181,8 @@ class ClientChatRequestService
 
 	/**
 	 * @param ClientChatRequest $clientChatRequest
-	 * @param ClientChatRequestApiForm $form
 	 */
-	private function roomConnected(ClientChatRequest $clientChatRequest, ClientChatRequestApiForm $form): void
+	private function roomConnected(ClientChatRequest $clientChatRequest): void
 	{
 		$clientChat = $this->clientChatRepository->getOrCreateByRequest($clientChatRequest);
 		if (!$clientChat->cch_client_id) {
@@ -209,7 +208,6 @@ class ClientChatRequestService
 			$visitorData = $this->clientChatVisitorDataRepository->createByVisitorId($visitorRcId);
 			$this->clientChatVisitorRepository->create($clientChat->cch_id, $visitorData->cvd_id, $clientChat->cch_client_id);
 		}
-
 
 		if ($clientChat->cch_owner_user_id) {
 			Notifications::publish('clientChatUpdateClientStatus', ['user_id' => $clientChat->cch_owner_user_id], [

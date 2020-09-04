@@ -13,6 +13,7 @@ $this->params['breadcrumbs'][] = $this->title;
 </div>
 
 <?php
+$url = \yii\helpers\Url::toRoute('/client-chat/real-time-start-chat');
 $js = <<<JS
 (function(){function b(){var a=document.createElement("script");a.type="text/javascript";a.async=!0;a.src="https://cdn.travelinsides.com/npmstatic/chatapi-dev.min.js";document.getElementsByTagName("head")[0].appendChild(a)}window.k=window.k||{};window.k.livechat=window.k.livechat||{};var c=[];["create","setCustomProps","track","onReady"].forEach(function(a){window.k.livechat[a]=function(){c.push([a,arguments])}});window.k.livechat.queue=c;"complete"===document.readyState?
 b():window.addEventListener("load",b)})();
@@ -20,6 +21,24 @@ b():window.addEventListener("load",b)})();
   var run = function () {
     window.k.realtimeVisitors(document.getElementById('client-chat-realtime-div'), {
       host: '$host'
+    }).then( function (instance) {
+        instance.events.on('chat-created', function (e) {
+            let rid = e.rid;
+            let visitorId = e.visitorId;
+            let projectName = e.projectName;
+            
+            var modal = $('#modal-sm');
+            modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> </div>');
+            modal.modal('show').find('.modal-header').html('<h3>Send Message ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
+            
+            $.get('$url', {rid: rid, visitorId: visitorId, projectName: projectName}, function(data) {
+                modal.find('.modal-body').html(data);
+            });
+                
+           return false;
+        });
+    }).catch(function () {
+        console.error('Chat created event error has occurred');
     });
   }
 

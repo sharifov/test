@@ -5,6 +5,7 @@ use common\models\Department;
 use common\models\Notifications;
 use frontend\widgets\clientChat\ClientChatAccessMessage;
 use sales\auth\Auth;
+use sales\forms\clientChat\RealTimeStartChatForm;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
@@ -12,19 +13,21 @@ use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChat\useCase\transfer\ClientChatTransferForm;
 use sales\model\clientChatCase\entity\ClientChatCase;
 use sales\model\clientChatCase\entity\ClientChatCaseRepository;
-use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\clientChatLead\entity\ClientChatLeadRepository;
+use sales\model\clientChatRequest\entity\ClientChatRequest;
+use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestRepository;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\clientChatVisitor\repository\ClientChatVisitorRepository;
+use sales\model\clientChatVisitorData\repository\ClientChatVisitorDataRepository;
 use sales\repositories\clientChatChannel\ClientChatChannelRepository;
 use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessRepository;
+use sales\repositories\clientChatUserChannel\ClientChatUserChannelRepository;
 use sales\repositories\NotFoundException;
 use sales\repositories\visitorLog\VisitorLogRepository;
+use sales\services\client\ClientManageService;
 use sales\services\TransactionManager;
-use yii\helpers\ArrayHelper;
-use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\ForbiddenHttpException;
 
@@ -40,6 +43,10 @@ use yii\web\ForbiddenHttpException;
  * @property ClientChatVisitorRepository $clientChatVisitorRepository
  * @property ClientChatLeadRepository $clientChatLeadRepository
  * @property ClientChatCaseRepository $clientChatCaseRepository
+ * @property ClientManageService $clientManageService
+ * @property ClientChatVisitorDataRepository $clientChatVisitorDataRepository
+ * @property ClientChatRequestRepository $clientChatRequestRepository
+ * @property ClientChatUserChannelRepository $clientChatUserChannelRepository
  */
 class ClientChatService
 {
@@ -75,6 +82,22 @@ class ClientChatService
 	 * @var ClientChatCaseRepository
 	 */
 	private ClientChatCaseRepository $clientChatCaseRepository;
+	/**
+	 * @var ClientManageService
+	 */
+	private ClientManageService $clientManageService;
+	/**
+	 * @var ClientChatVisitorDataRepository
+	 */
+	private ClientChatVisitorDataRepository $clientChatVisitorDataRepository;
+	/**
+	 * @var ClientChatRequestRepository
+	 */
+	private ClientChatRequestRepository $clientChatRequestRepository;
+	/**
+	 * @var ClientChatUserChannelRepository
+	 */
+	private ClientChatUserChannelRepository $clientChatUserChannelRepository;
 
 	public function __construct(
 		ClientChatChannelRepository $clientChatChannelRepository,
@@ -84,7 +107,11 @@ class ClientChatService
 		ClientChatUserAccessRepository $clientChatUserAccessRepository,
 		ClientChatVisitorRepository $clientChatVisitorRepository,
 		ClientChatLeadRepository $clientChatLeadRepository,
-		ClientChatCaseRepository $clientChatCaseRepository
+		ClientChatCaseRepository $clientChatCaseRepository,
+		ClientManageService $clientManageService,
+		ClientChatVisitorDataRepository $clientChatVisitorDataRepository,
+		ClientChatRequestRepository $clientChatRequestRepository,
+		ClientChatUserChannelRepository $clientChatUserChannelRepository
 	){
 		$this->clientChatChannelRepository = $clientChatChannelRepository;
 		$this->clientChatRepository = $clientChatRepository;
@@ -94,6 +121,10 @@ class ClientChatService
 		$this->clientChatVisitorRepository = $clientChatVisitorRepository;
 		$this->clientChatLeadRepository = $clientChatLeadRepository;
 		$this->clientChatCaseRepository = $clientChatCaseRepository;
+		$this->clientManageService = $clientManageService;
+		$this->clientChatVisitorDataRepository = $clientChatVisitorDataRepository;
+		$this->clientChatRequestRepository = $clientChatRequestRepository;
+		$this->clientChatUserChannelRepository = $clientChatUserChannelRepository;
 	}
 
 	public function assignClientChatChannel(ClientChat $clientChat, int $priority): void
@@ -146,12 +177,77 @@ class ClientChatService
 		}
 	}
 
+	public function createByAgent(RealTimeStartChatForm $form, int $ownerId): void
+	{
+		$_self = $this;
+		$this->transactionManager->wrap(static function () use ($form, $ownerId, $_self) {
+			$clientChatRequest = ClientChatRequest::createByAgent($form);
+			$_self->clientChatRequestRepository->save($clientChatRequest);
+
+			$clientChat = $_self->clientChatRepository->getOrCreateByRequest($clientChatRequest);
+			if (!$clientChat->cch_client_id) {
+				$client = $_self->clientManageService->getOrCreateByClientChatRequest($clientChatRequest);
+				$clientChat->cch_client_id = $client->id;
+			}
+			$channel = $_self->clientChatChannelRepository->find($form->channelId);
+			$clientChat->cch_channel_id = $channel->ccc_id;
+			$clientChat->cch_dep_id = $channel->ccc_dep_id;
+			$clientChat->cch_project_id = $channel->ccc_project_id;
+			$clientChat->cch_client_online = 1;
+			$_self->clientChatRepository->save($clientChat);
+
+			$visitorRcId = $clientChatRequest->getClientRcId();
+			try {
+				$visitorData = $_self->clientChatVisitorDataRepository->findByVisitorRcId($visitorRcId);
+				if (!$_self->clientChatVisitorRepository->exists($clientChat->cch_id, $visitorData->cvd_id)) {
+					$_self->clientChatVisitorRepository->create($clientChat->cch_id, $visitorData->cvd_id, $clientChat->cch_client_id);
+				}
+			} catch (NotFoundException $e) {
+				$visitorData = $_self->clientChatVisitorDataRepository->createByVisitorId($visitorRcId);
+				$_self->clientChatVisitorRepository->create($clientChat->cch_id, $visitorData->cvd_id, $clientChat->cch_client_id);
+			}
+
+			$userChannel = $_self->clientChatUserChannelRepository->findByPrimaryKeys($ownerId, $form->channelId);
+
+			$_self->assignAgentToRcChannel($form->rid, $clientChat->cchOwnerUser->userProfile->up_rc_user_id ?? '');
+
+			$message = [
+				'message' => [
+					'msg' => $form->message,
+					'rid' => $form->rid,
+					'alias' => Auth::user()->nickname_client_chat
+				]
+			];
+
+			if (($rocketUserId = Auth::user()->userProfile->up_rc_user_id) && ($rocketToken = Auth::user()->userProfile->up_rc_auth_token)) {
+				$headers =  [
+					'X-User-Id' => $rocketUserId,
+					'X-Auth-Token' => $rocketToken,
+				];
+			} else {
+				$headers = \Yii::$app->rchat->getSystemAuthDataHeader();
+			}
+
+			$sendMessageResult = \Yii::$app->chatBot->sendMessage($message, $headers);
+			if ($sendMessageResult['error']) {
+				throw new \RuntimeException('[ChatBot SendMessage] ' . $sendMessageResult['error']['message']);
+			}
+			if (!$sendMessageResult['data']['success']) {
+				throw new \RuntimeException('[ChatBot SendMessage] ' . $sendMessageResult['data']['']);
+			}
+
+			$clientChatUserAccess = ClientChatUserAccess::create($clientChat->cch_id, $userChannel->ccuc_user_id);
+			$clientChatUserAccess->accept();
+			$_self->clientChatUserAccessRepository->save($clientChatUserAccess);
+		});
+	}
+
 	/**
 	 * @param ClientChatTransferForm $form
 	 * @return Department
 	 * @throws \Throwable
 	 */
-	public function transfer(ClientChat $clientChat, ClientChatTransferForm $form): Department
+	public function transfer(ClientChatTransferForm $form): Department
 	{
 		return $this->transactionManager->wrap( function () use ($form) {
 			$clientChat = $this->clientChatRepository->findById($form->cchId);
@@ -180,30 +276,6 @@ class ClientChatService
 			if (!$oldDepartment || !$newDepartment) {
 				throw new \RuntimeException('Old or New department name is undefined');
 			}
-
-//			$botTransferChatResult = \Yii::$app->chatBot->transferDepartment($clientChat->cch_rid, $clientChat->ccv->ccvCvd->cvd_visitor_rc_id, $oldDepartment, $newDepartment->dep_name);
-//			if ($botTransferChatResult['error']) {
-//				throw new \RuntimeException('[Chat Bot] ' . $botTransferChatResult['error']['message'] ?? 'Cant read error message from Chat Bot response');
-//			}
-//
-//			$success = $botTransferChatResult['data']['success'] ?? false;
-//			if (!$success) {
-//				throw new \RuntimeException('[Chat Bot] ' . ($botTransferChatResult['data']['message'] ?? 'Cant read error message from Chat Bot response'));
-//			}
-
-//			$clientChat->transfer();
-//			$this->clientChatRepository->save($clientChat);
-
-//			$dto = ClientChatCloneDto::feelInOnTransfer($clientChat, $form);
-//			$newClientChat = $this->clientChatRepository->clone($dto);
-//			$this->clientChatRepository->save($newClientChat);
-//			$this->cloneLead($clientChat, $newClientChat)->cloneCase($clientChat, $newClientChat)->assignToChannel($newClientChat);
-//
-//			$oldVisitor = $clientChat->ccv->ccvCvd ?? null;
-//
-//			if ($oldVisitor) {
-//				$this->clientChatVisitorRepository->create($newClientChat->cch_id, $oldVisitor->cvd_id, $newClientChat->cch_client_id);
-//			}
 
 			$clientChat->transfer();
 			$clientChat->cch_dep_id = $form->depId;

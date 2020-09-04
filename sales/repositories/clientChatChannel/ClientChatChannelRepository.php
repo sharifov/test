@@ -34,4 +34,31 @@ class ClientChatChannelRepository extends Repository
 
 		throw new NotFoundException('Channel Not Found');
 	}
+
+	/**
+	 * @param int $userId
+	 * @param int|null $projectId
+	 * @return ClientChatChannel[]
+	 */
+	public function getByUserAndProject(int $userId, ?int $projectId): array
+	{
+		$channelQuery = ClientChatChannel::find();
+		$channelQuery->joinWithCcuc($userId);
+		if ($projectId) {
+			$channelQuery->byProject($projectId);
+		}
+		$channels = $channelQuery->asArray()->all();
+		if ($channels) {
+			return $channels;
+		}
+		throw new NotFoundException('Channels not found');
+	}
+
+	public function find(int $id): ClientChatChannel
+	{
+		if ($channel = ClientChatChannel::findOne(['ccc_id' => $id])) {
+			return $channel;
+		}
+		throw new NotFoundException('Client Chat Channel not found');
+	}
 }
