@@ -448,6 +448,11 @@ $js = <<<JS
                             }
                         }
                         
+                        if (obj.cmd === 'showNotification') {
+                            let data = obj.data;
+                            createNotify(data.title, data.message, data.type);
+                        }
+                        
                     }
                     // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
                 } catch (error) {

@@ -1428,6 +1428,17 @@ class Call extends \yii\db\ActiveRecord
                             $call->setStatusByTwilioStatus($call->c_call_status);
                             $call->c_created_user_id = null;
                             $call->update();
+
+                            if (!empty($res['message']) && $res['message'] === 'Call status is Completed') {
+                                Notifications::publish('showNotification', ['user_id' => $user_id], [
+                                    'data' => [
+                                        'title' => 'Accept call',
+                                        'message' => 'The other side hung up',
+                                        'type' => 'warning',
+                                    ]
+                                ]);
+                            }
+
                             return false;
                         }
                         return true;

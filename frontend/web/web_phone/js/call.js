@@ -226,6 +226,7 @@ var PhoneWidgetCall = function () {
         if (countIncoming > 0 || countActive > 0) {
             panes.incoming.initWidgetIcon(countIncoming, countActive);
         }
+        audio.incoming.refresh();
     }
 
     function requestActiveCall(data) {
@@ -334,7 +335,7 @@ var PhoneWidgetCall = function () {
         waitQueue.remove(callSid);
         storage.conference.removeByParticipantCallSid(callSid);
         let incomingDeleted = removeNotification(callSid);
-        //audio.incoming.refresh();
+        audio.incoming.refresh();
         window.phoneWidget.notifier.on(callSid);
         audio.incoming.on(callSid);
 
@@ -378,6 +379,9 @@ var PhoneWidgetCall = function () {
              if (panes.incoming.isActive()) {
                  panes.incoming.initWidgetIcon((queues.direct.count() + queues.general.count()), (queues.active.count() + queues.hold.count()));
              }
+        }
+        if (queues.active.count() === 0 && queues.hold.count() === 0 && (queues.direct.count() > 0 || queues.general.count() > 0)) {
+            audio.incoming.refresh();
         }
     }
 

@@ -479,6 +479,18 @@ class PhoneController extends FController
                         'message' => 'ok',
                         'sid' => $resultApi['result']['sid']
                     ];
+                } elseif (!empty($resultApi['error']) && $resultApi['message'] === 'Call status is Completed') {
+                    $result = [
+                        'error' => false,
+                        'message' => 'ok',
+                    ];
+                    Notifications::publish('showNotification', ['user_id' => Auth::id()], [
+                        'data' => [
+                            'title' => 'Transfer call',
+                            'message' => 'The other side hung up',
+                            'type' => 'warning',
+                        ]
+                    ]);
                 } else {
                     throw new Exception('API Error: PhoneController/actionAjaxCallRedirect: Not found resultApi[result][sid] - ' . VarDumper::dumpAsString($resultApi), 10);
                 }

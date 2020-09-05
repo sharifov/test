@@ -941,7 +941,15 @@ class CommunicationService extends Component implements CommunicationServiceInte
                 if ($isError) {
                     $out['error'] = true;
                     $out['message'] = (string)($data['message'] ?? 'Undefined error message');
-                    \Yii::error(VarDumper::dumpAsString($response->data), 'Component:CommunicationService::processResponse:response');
+                    if (
+                        !
+                        (
+                            (!empty($data['code']) && $data['code'] === 21220 && $out['message'] === 'Call status is Completed')
+                            || (!empty($data['code']) && $data['code'] === 20404 && $out['message'] === 'Send digit error. Conference not found')
+                        )
+                    ) {
+                        \Yii::error(VarDumper::dumpAsString($response->data), 'Component:CommunicationService::processResponse:response');
+                    }
                 }
                 $out['result'] = $data['result'] ?? [];
             } else {
