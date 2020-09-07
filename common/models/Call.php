@@ -2115,7 +2115,7 @@ class Call extends \yii\db\ActiveRecord
         if ($timeLimit && ($this->isStatusIvr() || $this->isStatusQueue())) {
             if ($callMaxTime < time()) {
                 $result = $this->cancelCall();
-                Yii::info('CallId: ' . $this->c_id . ', '. VarDumper::dumpAsString($result) ,'info\checkCancelCall:cancelCall');
+//                Yii::info('CallId: ' . $this->c_id . ', '. VarDumper::dumpAsString($result) ,'info\checkCancelCall:cancelCall');
                 return true;
             }
         }

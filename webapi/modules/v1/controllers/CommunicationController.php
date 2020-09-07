@@ -470,8 +470,8 @@ class CommunicationController extends ApiBaseController
 							return $this->createExceptionCall($incoming_phone_number, 'User is offline');
 						}
 
-						Yii::info('Offline - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $incoming_phone_number,
-                            'info\API:Communication:Incoming:Offline');
+//						Yii::info('Offline - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $incoming_phone_number,
+//                            'info\API:Communication:Incoming:Offline');
                         $message = 'Missing Call from ' . $client_phone_number . ' to ' . $incoming_phone_number . "\r\n Reason: Agent offline";
                         if ($callModel->c_lead_id && $callModel->cLead) {
                             $message .= "\r\n Lead (Id: " . Purifier::createLeadShortLink($callModel->cLead) . ")";
@@ -1503,7 +1503,7 @@ class CommunicationController extends ApiBaseController
 	 */
     protected function createExceptionCall(string $phoneNumber, string $message = 'Sorry, this number is temporarily not working.'): array
     {
-        Yii::error('Number is temporarily not working ('.$phoneNumber.')', 'API:Communication:createExceptionCall');
+//        Yii::error('Number is temporarily not working ('.$phoneNumber.')', 'API:Communication:createExceptionCall');
 
         $responseTwml = new VoiceResponse();
         $responseTwml->say($message, [

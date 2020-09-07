@@ -138,7 +138,7 @@ class EmailIncomingService
         if ($lead = Lead::find()->findLastSalesLeadByClient($clientId, $projectId)->one()) {
             return $lead->id;
         }
-        Yii::info('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . '. | No new lead creation allowed on email.', 'info\EmailIncomingService');
+//        Yii::info('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . '. | No new lead creation allowed on email.', 'info\EmailIncomingService');
         return null;
     }
 
@@ -161,7 +161,7 @@ class EmailIncomingService
         if ($case = Cases::find()->findLastExchangeCaseByClient($clientId, $projectId)->one()) {
             return $case->cs_id;
         }
-        Yii::info('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . '. | No new exchange case creation allowed on Email.', 'info\EmailIncomingService');
+//        Yii::info('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . '. | No new exchange case creation allowed on Email.', 'info\EmailIncomingService');
         return null;
     }
 
@@ -184,7 +184,7 @@ class EmailIncomingService
         if ($case = Cases::find()->findLastSupportCaseByClient($clientId, $projectId)->one()) {
             return $case->cs_id;
         }
-        Yii::info('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . '. | No new support case creation allowed on Email.', 'info\EmailIncomingService');
+//        Yii::info('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . '. | No new support case creation allowed on Email.', 'info\EmailIncomingService');
         return null;
     }
 
@@ -213,7 +213,7 @@ class EmailIncomingService
             if ($case = Cases::find()->findLastSupportCaseByClient($clientId, $projectId)->one()) {
                 return $case->cs_id;
             }
-            Yii::info('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . '. | No new support case creation allowed on Email.', 'info\EmailIncomingService');
+//            Yii::info('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . '. | No new support case creation allowed on Email.', 'info\EmailIncomingService');
         }
 
         return new Process($leadId, $caseId);
