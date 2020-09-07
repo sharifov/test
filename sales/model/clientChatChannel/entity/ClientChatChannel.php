@@ -28,6 +28,7 @@ use yii\helpers\ArrayHelper;
  * @property string|null $ccc_updated_dt
  * @property int|null $ccc_created_user_id
  * @property int|null $ccc_updated_user_id
+ * @property int|null $ccc_default
  *
  * @property Employee $cccCreatedUser
  * @property Department $cccDep
@@ -68,6 +69,8 @@ class ClientChatChannel extends \yii\db\ActiveRecord
 
             ['ccc_created_user_id', 'integer'],
             ['ccc_created_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ccc_created_user_id' => 'id']],
+
+			['ccc_default', 'integer'],
 
             ['ccc_dep_id', 'integer'],
             ['ccc_dep_id', 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['ccc_dep_id' => 'dep_id']],
@@ -138,6 +141,7 @@ class ClientChatChannel extends \yii\db\ActiveRecord
             'ccc_updated_dt' => 'Updated Dt',
             'ccc_created_user_id' => 'Created User ID',
             'ccc_updated_user_id' => 'Updated User ID',
+			'ccc_default' => 'Default',
         ];
     }
 

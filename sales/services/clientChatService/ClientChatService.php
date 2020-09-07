@@ -7,6 +7,7 @@ use common\models\UserProfile;
 use frontend\widgets\clientChat\ClientChatAccessMessage;
 use sales\auth\Auth;
 use sales\forms\clientChat\RealTimeStartChatForm;
+use sales\helpers\app\AppHelper;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
@@ -14,6 +15,7 @@ use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChat\useCase\transfer\ClientChatTransferForm;
 use sales\model\clientChatCase\entity\ClientChatCase;
 use sales\model\clientChatCase\entity\ClientChatCaseRepository;
+use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\clientChatLead\entity\ClientChatLeadRepository;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
@@ -128,26 +130,37 @@ class ClientChatService
 		$this->clientChatUserChannelRepository = $clientChatUserChannelRepository;
 	}
 
-	public function assignClientChatChannel(ClientChat $clientChat, int $priority): void
+	/**
+	 * @param ClientChat $clientChat
+	 * @param int $priority
+	 * @return ClientChatChannel|null
+	 */
+	public function assignClientChatChannel(ClientChat $clientChat, int $priority): ?ClientChatChannel
 	{
-		$clientChatChannel = $this->clientChatChannelRepository->findByClientChatData($clientChat->cch_dep_id, $clientChat->cch_project_id, $priority);
-		$clientChat->cch_channel_id = $clientChatChannel->ccc_id;
+		try {
+			$clientChatChannel = $this->clientChatChannelRepository->findByClientChatData($clientChat->cch_dep_id, $clientChat->cch_project_id, $priority);
+		} catch (NotFoundException $e) {
+			$clientChatChannel = ClientChatChannel::findOne(['ccc_default' => 1]);
+			if (!$clientChatChannel) {
+				\Yii::error('Default Channel is not found', 'ClientChatService::assignClientChatChannel::defaultChannel');
+			}
+		}
+		$clientChat->cch_channel_id = $clientChatChannel->ccc_id ?? null;
+		return $clientChatChannel;
 	}
 
 	/**
 	 * @param ClientChat $clientChat
-	 * @throws \Throwable
+	 * @param ClientChatChannel $channel
 	 */
-	public function sendRequestToUsers(ClientChat $clientChat): void
+	public function sendRequestToUsers(ClientChat $clientChat, ClientChatChannel $channel): void
 	{
-		if ($channel = $this->clientChatChannelRepository->findByClientChatData($clientChat->cch_dep_id, $clientChat->cch_project_id, null)) {
-			$userChannel = ClientChatUserChannel::find()->byChannelId($channel->ccc_id)->all();
+		$userChannel = ClientChatUserChannel::find()->byChannelId($channel->ccc_id)->all();
 
-			if ($userChannel) {
-				/** @var ClientChatUserChannel $item */
-				foreach ($userChannel as $item) {
-					$this->sendRequestToUser($clientChat, $item);
-				}
+		if ($userChannel) {
+			/** @var ClientChatUserChannel $item */
+			foreach ($userChannel as $item) {
+				$this->sendRequestToUser($clientChat, $item);
 			}
 		}
 	}
@@ -276,11 +289,11 @@ class ClientChatService
 				throw new \RuntimeException('Visitor RC id is not found');
 			}
 
-			$oldDepartment = $clientChat->cchDep->dep_name ?? null;
+//			$oldDepartment = $clientChat->cchDep->dep_name ?? null;
 			$newDepartment = Department::findOne(['dep_id' => $form->depId]);
 
-			if (!$oldDepartment || !$newDepartment) {
-				throw new \RuntimeException('Old or New department name is undefined');
+			if (!$newDepartment) {
+				throw new \RuntimeException('New department is not found');
 			}
 
 			$clientChat->transfer();
@@ -302,7 +315,7 @@ class ClientChatService
 				}
 			} else {
 				$clientChat->cch_dep_id = $form->depId;
-				$this->sendRequestToUsers($clientChat);
+				$this->sendRequestToUsers($clientChat, $clientChatChannel);
 			}
 
 			return $newDepartment;
@@ -374,12 +387,14 @@ class ClientChatService
 
 	public function assignToChannel(ClientChat $clientChat): void
 	{
-		try {
-			$this->assignClientChatChannel($clientChat, 1);
-			$this->clientChatRepository->save($clientChat);
-			$this->sendRequestToUsers($clientChat);
-		} catch (\RuntimeException | NotFoundException $e) {
-//			\Yii::error('Send notification to users failed... ' . $e->getMessage() . '; File: ' . $e->getFile() . '; Line: ' . $e->getLine(), 'ClientChatService::assignToChannel::RuntimeException|NotFoundException');
+		$channel = $this->assignClientChatChannel($clientChat,1);
+		if ($channel) {
+			try {
+				$this->clientChatRepository->save($clientChat);
+				$this->sendRequestToUsers($clientChat, $channel);
+			} catch (\RuntimeException $e) {
+				\Yii::error(AppHelper::throwableFormatter($e), 'ClientChatService::assignToChannel::RuntimeException');
+			}
 		}
 	}
 

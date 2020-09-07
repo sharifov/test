@@ -39,6 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
 				}
             ],
             'ccc_disabled:booleanByLabel',
+            'ccc_default:booleanByLabel',
             'ccc_priority',
 			[
 				'class' => DateTimeColumn::class,

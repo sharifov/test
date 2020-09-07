@@ -1,7 +1,6 @@
 <?php
 namespace sales\repositories\clientChatChannel;
 
-use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\repositories\NotFoundException;
 use sales\repositories\Repository;
