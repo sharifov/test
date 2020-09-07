@@ -216,6 +216,7 @@ class ClientChatService
 			$clientChat->cch_channel_id = $channel->ccc_id;
 			$clientChat->cch_dep_id = $channel->ccc_dep_id;
 			$clientChat->cch_project_id = $channel->ccc_project_id;
+			$clientChat->cch_owner_user_id = $ownerId;
 			$clientChat->cch_client_online = 1;
 			$_self->clientChatRepository->save($clientChat);
 
