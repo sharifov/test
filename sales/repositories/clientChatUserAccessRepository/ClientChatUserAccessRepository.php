@@ -78,9 +78,8 @@ class ClientChatUserAccessRepository extends Repository
 		Notifications::publish('clientChatRequest', ['user_id' => $userId], ['data' => $data]);
 	}
 
-	public function resetChatUserAccessWidget(int $userId)
+	public function resetChatUserAccessWidget(int $userId): void
 	{
-		\Yii::info('resetChatUserAccessWidget', 'info\resetChatUserAccessWidget');
 		$data = ClientChatAccessMessage::reset($userId);
 		Notifications::publish('clientChatRequest', ['user_id' => $userId], ['data' => $data]);
 	}
