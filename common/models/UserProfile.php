@@ -176,9 +176,6 @@ class UserProfile extends \yii\db\ActiveRecord
 
 	public function isRegisteredInRc(): bool
 	{
-		if ($this->up_rc_auth_token && $this->up_rc_user_id) {
-			return true;
-		}
-		return false;
+		return $this->up_rc_auth_token && $this->up_rc_user_id;
 	}
 }
