@@ -182,4 +182,12 @@ class ClientChatUserAccess extends \yii\db\ActiveRecord
 			$this->addError('ccua_user_id', 'User: ' . $user->username . ' has already received a request with this chat');
 		}
 	}
+
+	public function getTimeByChatStatus(): string
+	{
+		if ($this->ccuaCch && $this->ccuaCch->isTransfer()) {
+			return (string)$this->ccua_created_dt;
+		}
+		return (string)$this->ccuaCch->cch_created_dt;
+	}
 }
