@@ -186,7 +186,7 @@ class ChatBot extends Component
             }
         } else {
             $out['error'] = $this->parseErrorContent($response);
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'ChatBot:assignAgent');
+//            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'ChatBot:assignAgent');
         }
 
         return $out;
@@ -206,7 +206,7 @@ class ChatBot extends Component
             }
         } else {
             $out['error'] = $this->parseErrorContent($response);
-			\Yii::error(VarDumper::dumpAsString($out['error'], 10), 'ChatBot:sendMessage');
+//			\Yii::error(VarDumper::dumpAsString($out['error'], 10), 'ChatBot:sendMessage');
         }
 
         return $out;
