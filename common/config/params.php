@@ -53,5 +53,6 @@ return [
         'password'  => '',
         'iv'        => '',
     ],
-	'user_voice_mail_alias' => '@frontend/web/'
+	'user_voice_mail_alias' => '@frontend/web/',
+	'liveChatRealTimeVisitors' => 'https://livechat.travelinsides.com/visitors'
 ];
