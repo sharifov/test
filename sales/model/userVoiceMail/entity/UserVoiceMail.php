@@ -9,6 +9,7 @@ use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "user_voice_mail".
@@ -235,6 +236,13 @@ class UserVoiceMail extends \yii\db\ActiveRecord
 		}
 	}
 
+    public function isExistVoiceRecordFile(): bool
+    {
+        $filePath = \Yii::getAlias('@frontend/web/');
+        $fileName = $this->uvm_voice_file_message;
+        return $fileName && file_exists($filePath . $fileName);
+    }
+
 	public function deleteRecord(?string $oldRecord = null): void
 	{
 		$filePath = \Yii::getAlias('@frontend/web/');
@@ -284,8 +292,18 @@ class UserVoiceMail extends \yii\db\ActiveRecord
             }
         }
 
-        if ($url = $this->getVoiceUrl()) {
-            $response['play']['url'] = $url;
+        if ($this->uvm_voice_file_message) {
+            if ($this->isExistVoiceRecordFile()) {
+                if ($url = $this->getVoiceUrl()) {
+                    $response['play']['url'] = $url;
+                }
+            } else {
+                Yii::error(VarDumper::dumpAsString([
+                    'error' => 'File not exist',
+                    'userVoiceMailId' => $this->uvm_id,
+                    'voiceFile' => $this->uvm_voice_file_message,
+                ]), 'UserVoiceMail');
+            }
         }
 
         if ($this->uvm_record_enable) {
