@@ -3,6 +3,7 @@
 namespace common\models;
 
 use common\models\query\ConferenceParticipantQuery;
+use yii\db\ActiveQuery;
 
 /**
  * This is the model class for table "conference_participant".
@@ -17,6 +18,8 @@ use common\models\query\ConferenceParticipantQuery;
  * @property int|null $cp_type_id
  * @property string $cp_hold_dt
  * @property boolean $cp_mute
+ * @property string $cp_cf_sid
+ * @property int|null $cp_user_id
  *
  * @property Call $cpCall
  * @property Conference $cpCf
@@ -62,6 +65,10 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
 
             [['cp_cf_id'], 'required'],
             [['cp_cf_id', 'cp_call_id'], 'integer'],
+
+            ['cp_cf_sid', 'required'],
+            ['cp_cf_sid', 'string', 'max' => 34],
+
             [['cp_call_sid'], 'string', 'max' => 34],
 //            [['cp_call_sid'], 'unique'],
             [['cp_call_id'], 'exist', 'skipOnError' => true, 'targetClass' => Call::class, 'targetAttribute' => ['cp_call_id' => 'c_id']],
@@ -71,6 +78,9 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
             ['cp_type_id', 'in', 'range' => array_keys(self::TYPE_LIST)],
 
             [['cp_join_dt', 'cp_leave_dt', 'cp_hold_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+
+            ['cp_user_id', 'integer'],
+            ['cp_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Conference::class, 'targetAttribute' => ['cp_user_id' => 'cf_id']],
         ];
     }
 
@@ -82,6 +92,7 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
         return [
             'cp_id' => 'ID',
             'cp_cf_id' => 'Conference ID',
+            'cp_cf_sid' => 'Conference SID',
             'cp_call_sid' => 'Call Sid',
             'cp_call_id' => 'Call ID',
             'cp_status_id' => 'Status',
@@ -89,7 +100,13 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
             'cp_leave_dt' => 'Leave Dt',
             'cp_type_id' => 'Type',
             'cp_hold_dt' => 'Hold Dt',
+            'cp_user_id' => 'User',
         ];
+    }
+
+    public function getUser(): ActiveQuery
+    {
+        return $this->hasOne(Employee::class, ['id' => 'cp_user_id']);
     }
 
     /**

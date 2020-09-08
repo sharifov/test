@@ -8,15 +8,49 @@ use common\models\ConferenceParticipant;
 use common\models\Notifications;
 use frontend\widgets\newWebPhone\call\socket\HoldMessage;
 use frontend\widgets\newWebPhone\call\socket\MuteMessage;
+use sales\dispatchers\EventDispatcher;
 use sales\model\callLog\services\CallLogConferenceTransferService;
+use sales\model\conference\entity\conferenceEventLog\ConferenceEventLog;
+use sales\model\conference\entity\conferenceEventLog\ConferenceEventLogRepository;
+use sales\model\conference\entity\conferenceEventLog\events\ConferenceEnd;
+use sales\model\conference\entity\conferenceEventLog\events\ConferenceStart;
+use sales\model\conference\entity\conferenceEventLog\events\ParticipantHold;
+use sales\model\conference\entity\conferenceEventLog\events\ParticipantJoin;
+use sales\model\conference\entity\conferenceEventLog\events\ParticipantLeave;
+use sales\model\conference\entity\conferenceEventLog\events\ParticipantMute;
+use sales\model\conference\entity\conferenceEventLog\events\ParticipantUnHold;
+use sales\model\conference\entity\conferenceEventLog\events\ParticipantUnMute;
 use sales\model\conference\service\ConferenceDataService;
 use sales\model\conference\socket\SocketCommands;
 use yii\helpers\VarDumper;
 
+/**
+ * Class ConferenceStatusCallbackHandler
+ *
+ * @property EventDispatcher $eventDispatcher
+ * @property ConferenceEventLogRepository $eventLogRepository
+ */
 class ConferenceStatusCallbackHandler
 {
+    private EventDispatcher $eventDispatcher;
+    private ConferenceEventLogRepository $eventLogRepository;
+
+    public function __construct(EventDispatcher $eventDispatcher, ConferenceEventLogRepository $eventLogRepository)
+    {
+        $this->eventDispatcher = $eventDispatcher;
+        $this->eventLogRepository = $eventLogRepository;
+    }
+
     public function start(Conference $conference, ConferenceStatusCallbackForm $form): void
     {
+        try {
+            $event = ConferenceStart::fromArray($form->toArray());
+            $log = ConferenceEventLog::create($form->ConferenceSid, new \DateTimeImmutable(), $event->toJson(), $form->StatusCallbackEvent, $form->SequenceNumber);
+            $this->eventLogRepository->save($log);
+        } catch (\Throwable $e) {
+            \Yii::error($e, static::class . ':start:eventLog');
+        }
+
         $conference->start($form->getFormattedTimestamp());
         if (!$conference->save()) {
             \Yii::error(VarDumper::dumpAsString([
@@ -28,6 +62,14 @@ class ConferenceStatusCallbackHandler
 
     public function end(Conference $conference, ConferenceStatusCallbackForm $form): void
     {
+        try {
+            $event = ConferenceEnd::fromArray($form->toArray());
+            $log = ConferenceEventLog::create($form->ConferenceSid, new \DateTimeImmutable(), $event->toJson(), $form->StatusCallbackEvent, $form->SequenceNumber);
+            $this->eventLogRepository->save($log);
+        } catch (\Throwable $e) {
+            \Yii::error($e, static::class . ':end:eventLog');
+        }
+
         $conference->end($form->getFormattedTimestamp());
 
         if (!$conference->save()) {
@@ -46,6 +88,14 @@ class ConferenceStatusCallbackHandler
 
     public function join(Conference $conference, ConferenceStatusCallbackForm $form): void
     {
+        try {
+            $event = ParticipantJoin::fromArray($form->toArray());
+            $log = ConferenceEventLog::create($form->ConferenceSid, new \DateTimeImmutable(), $event->toJson(), $form->StatusCallbackEvent, $form->SequenceNumber);
+            $this->eventLogRepository->save($log);
+        } catch (\Throwable $e) {
+            \Yii::error($e, static::class . ':join:eventLog');
+        }
+
         $participant = $this->createParticipant($conference, $form);
         $participant->join();
         $participant->cp_join_dt = date('Y-m-d H:i:s');
@@ -66,6 +116,14 @@ class ConferenceStatusCallbackHandler
 
     public function leave(Conference $conference, ConferenceStatusCallbackForm $form): void
     {
+        try {
+            $event = ParticipantLeave::fromArray($form->toArray());
+            $log = ConferenceEventLog::create($form->ConferenceSid, new \DateTimeImmutable(), $event->toJson(), $form->StatusCallbackEvent, $form->SequenceNumber);
+            $this->eventLogRepository->save($log);
+        } catch (\Throwable $e) {
+            \Yii::error($e, static::class . ':leave:eventLog');
+        }
+
         $participant = ConferenceParticipant::find()->where([
             'cp_cf_id' => $conference->cf_id,
             'cp_call_sid' => $form->CallSid,
@@ -93,6 +151,14 @@ class ConferenceStatusCallbackHandler
 
     public function hold(Conference $conference, ConferenceStatusCallbackForm $form): void
     {
+        try {
+            $event = ParticipantHold::fromArray($form->toArray());
+            $log = ConferenceEventLog::create($form->ConferenceSid, new \DateTimeImmutable(), $event->toJson(), $form->StatusCallbackEvent, $form->SequenceNumber);
+            $this->eventLogRepository->save($log);
+        } catch (\Throwable $e) {
+            \Yii::error($e, static::class . ':hold:eventLog');
+        }
+
         $participant = ConferenceParticipant::find()->where([
             'cp_cf_id' => $conference->cf_id,
             'cp_call_sid' => $form->CallSid,
@@ -118,6 +184,14 @@ class ConferenceStatusCallbackHandler
 
     public function unHold(Conference $conference, ConferenceStatusCallbackForm $form): void
     {
+        try {
+            $event = ParticipantUnHold::fromArray($form->toArray());
+            $log = ConferenceEventLog::create($form->ConferenceSid, new \DateTimeImmutable(), $event->toJson(), $form->StatusCallbackEvent, $form->SequenceNumber);
+            $this->eventLogRepository->save($log);
+        } catch (\Throwable $e) {
+            \Yii::error($e, static::class . ':unHold:eventLog');
+        }
+
         $participant = ConferenceParticipant::find()->where([
             'cp_cf_id' => $conference->cf_id,
             'cp_call_sid' => $form->CallSid,
@@ -143,6 +217,14 @@ class ConferenceStatusCallbackHandler
 
     public function mute(Conference $conference, ConferenceStatusCallbackForm $form): void
     {
+        try {
+            $event = ParticipantMute::fromArray($form->toArray());
+            $log = ConferenceEventLog::create($form->ConferenceSid, new \DateTimeImmutable(), $event->toJson(), $form->StatusCallbackEvent, $form->SequenceNumber);
+            $this->eventLogRepository->save($log);
+        } catch (\Throwable $e) {
+            \Yii::error($e, static::class . ':mute:eventLog');
+        }
+
         $participant = ConferenceParticipant::find()->where([
             'cp_cf_id' => $conference->cf_id,
             'cp_call_sid' => $form->CallSid,
@@ -168,6 +250,14 @@ class ConferenceStatusCallbackHandler
 
     public function unMute(Conference $conference, ConferenceStatusCallbackForm $form): void
     {
+        try {
+            $event = ParticipantUnMute::fromArray($form->toArray());
+            $log = ConferenceEventLog::create($form->ConferenceSid, new \DateTimeImmutable(), $event->toJson(), $form->StatusCallbackEvent, $form->SequenceNumber);
+            $this->eventLogRepository->save($log);
+        } catch (\Throwable $e) {
+            \Yii::error($e, static::class . ':unMute:eventLog');
+        }
+
         $participant = ConferenceParticipant::find()->where([
             'cp_cf_id' => $conference->cf_id,
             'cp_call_sid' => $form->CallSid,
@@ -196,7 +286,9 @@ class ConferenceStatusCallbackHandler
         $participant = new ConferenceParticipant();
         $participant->cp_type_id = $form->participant_type_id;
         $participant->cp_cf_id = $conference->cf_id;
+        $participant->cp_cf_sid = $conference->cf_sid;
         $participant->cp_call_sid = $form->CallSid;
+        $participant->cp_user_id = $form->participant_user_id;
         if ($call = $this->findAndUpdateCall($form->CallSid, $conference)) {
             $participant->cp_call_id = $call->c_id;
         }

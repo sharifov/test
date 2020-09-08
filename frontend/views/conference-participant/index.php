@@ -2,6 +2,7 @@
 
 use common\components\grid\conferenceParticipant\ConferenceParticipantTypeColumn;
 use common\components\grid\DateTimeColumn;
+use common\components\grid\UserSelect2Column;
 use common\models\ConferenceParticipant;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -32,6 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'cp_id',
             ['class' => ConferenceParticipantTypeColumn::class],
+            ['class' => UserSelect2Column::class, 'attribute' => 'cp_user_id', 'relation' => 'user'],
             //'cp_cf_id',
             [
                 'attribute' => 'cp_cf_id',

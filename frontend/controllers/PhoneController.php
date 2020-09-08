@@ -1008,7 +1008,8 @@ class PhoneController extends FController
                 $call->c_project_id,
                 $from,
                 UserCallIdentity::getClientId(Auth::id()),
-                $source_type_id
+                $source_type_id,
+                Auth::id()
             );
             Yii::$app->session->set($key, time());
         } catch (\Throwable $e) {
@@ -1353,6 +1354,7 @@ class PhoneController extends FController
             $result = Yii::$app->communication->callToUser(
                 UserCallIdentity::getClientId($createdUser->id),
                 UserCallIdentity::getClientId($user_id),
+                $user_id,
                 $createdUser->id,
                 [
                     'status' => 'Ringing',
