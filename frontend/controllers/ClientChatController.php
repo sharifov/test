@@ -3,6 +3,7 @@ namespace frontend\controllers;
 
 use common\components\CentrifugoService;
 use common\models\Lead;
+use common\models\Project;
 use common\models\Quote;
 use common\models\search\LeadSearch;
 use common\models\VisitorLog;
@@ -15,6 +16,7 @@ use sales\entities\cases\CasesSearch;
 use sales\entities\chat\ChatGraphsSearch;
 use sales\forms\clientChat\RealTimeStartChatForm;
 use sales\helpers\app\AppHelper;
+use sales\helpers\app\AppParamsHelper;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\entity\search\ClientChatSearch;
@@ -746,8 +748,9 @@ class ClientChatController extends FController
 
     public function actionRealTime()
     {
-        $host = 'https://dev-livechat.travel-dev.com/visitors';
-        return $this->render('real-time', ['host' => $host]);
+        $host = AppParamsHelper::liveChatRealTimeVisitorsUrl();
+        $projects = Project::getListByUser(Auth::id());
+        return $this->render('real-time', ['host' => $host, 'projects' => implode(',', $projects)]);
     }
 
     public function actionAjaxCancelTransfer()

@@ -26,4 +26,5 @@ return [
         'tokenHmacSecretKey' => '{{ common.config.params.centrifugo.tokenHmacSecretKey:str }}'
     ],
     'appEnv' => 'dev',
+	'liveChatRealTimeVisitors' => '{{ common.config.params.liveChatRealTimeVisitors:str }}'
 ];
