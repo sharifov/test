@@ -199,10 +199,9 @@ class ClientChatService
 				throw new NotFoundException('User Profile is not found');
 			}
 
-			if (empty($userProfile->up_rc_user_id) || empty($userProfile->up_rc_auth_token)) {
+			if (!$userProfile->isRegisteredInRc()) {
 				throw new \DomainException('You dont have rocketchat credentials');
 			}
-
 
 			$clientChatRequest = ClientChatRequest::createByAgent($form);
 			$_self->clientChatRequestRepository->save($clientChatRequest);
@@ -212,7 +211,15 @@ class ClientChatService
 				$client = $_self->clientManageService->getOrCreateByClientChatRequest($clientChatRequest);
 				$clientChat->cch_client_id = $client->id;
 			}
+
 			$channel = $_self->clientChatChannelRepository->find($form->channelId);
+
+			$activeChatExist = ClientChat::find()->byDepartment($channel->ccc_dep_id)->byClientId($clientChat->cch_client_id)->notClosed()->exists();
+			if ($activeChatExist) {
+				$department = Department::find()->select(['dep_name'])->where(['dep_id' => $channel->ccc_dep_id])->asArray()->one();
+				throw new \DomainException('This visitor is already chatting with agent in ' . $department['dep_name'] . ' department');
+			}
+
 			$clientChat->cch_channel_id = $channel->ccc_id;
 			$clientChat->cch_dep_id = $channel->ccc_dep_id;
 			$clientChat->cch_project_id = $channel->ccc_project_id;
