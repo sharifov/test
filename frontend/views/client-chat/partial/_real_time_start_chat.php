@@ -22,9 +22,9 @@ use yii\widgets\Pjax;
                     <?= $form->field($startChatForm, 'projectId')->hiddenInput()->label(false) ?>
 
                     <?= $form->field($startChatForm, 'channelId')->widget(\kartik\select2\Select2::class, [
-                        "options" => [
-                            'prompt' => '---'
-                        ],
+//                        "options" => [
+//                            'prompt' => '---'
+//                        ],
                         'data' => $channels
                     ]) ?>
 
