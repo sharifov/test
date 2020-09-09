@@ -4,11 +4,13 @@ namespace sales\model\conference\entity\aggregate;
 
 class Duration
 {
-    private ?\DateTimeImmutable $start = null;
+    private \DateTimeImmutable $start;
+
+    private bool $started = false;
+
+    private \DateTimeImmutable $finish;
 
     private bool $finished = false;
-
-    private int $value = 0;
 
     private function __construct()
     {
@@ -17,28 +19,26 @@ class Duration
     public static function byStart(\DateTimeImmutable $date): self
     {
         $duration = new self();
-        $duration->start = $date;
+        $duration->start($date);
         return $duration;
     }
 
-    public static function byEnd(\DateTimeImmutable $date): self
+    public static function byFinish(\DateTimeImmutable $date): self
     {
         $duration = new self();
-        $duration->end($date);
+        $duration->finish($date);
         return $duration;
     }
 
-    public function isStarted(): bool
+    public function finish(\DateTimeImmutable $date): void
     {
-        return $this->start !== null;
-    }
-
-    public function end(\DateTimeImmutable $date): void
-    {
-        if (!$this->isStarted()) {
-            $this->start = $date;
+        if ($this->isFinished()) {
+            throw new \DomainException('Duration is already finished.');
         }
-        $this->value = abs(($date->diff($this->start))->format('%s'));
+        if ($this->isStarted() && $date < $this->start) {
+            throw new \DomainException('Finish date (' . $date->format('Y-m-d H:i:s') . ') must be longer or equal of start date ' . $this->start->format('Y-m-d H:i:s'));
+        }
+        $this->finish = $date;
         $this->finished = true;
     }
 
@@ -47,8 +47,65 @@ class Duration
         return $this->finished === true;
     }
 
+    private function start(\DateTimeImmutable $date): void
+    {
+        if ($this->isStarted()) {
+            throw new \DomainException('Duration is already started.');
+        }
+        $this->start = $date;
+        $this->started = true;
+    }
+
+    public function isStarted(): bool
+    {
+        return $this->started === true;
+    }
+
     public function getValue(): int
     {
-        return $this->value;
+        if (!$this->isFinished()) {
+            throw new \DomainException('Duration not finished. Cant calculate value.');
+        }
+        if ($this->isStarted()) {
+            return $this->finish->getTimestamp() - $this->start->getTimestamp();
+        }
+        return 0;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->isStarted() && !$this->isFinished();
+    }
+
+    public function getState(): array
+    {
+        $state = [];
+        if ($this->isStarted()) {
+            $state['start'] = $this->start->format('Y-m-d H:i:s');
+        } else {
+            $state['start'] = '';
+        }
+        if ($this->isFinished()) {
+            $state['finish'] = $this->finish->format('Y-m-d H:i:s');
+        } else {
+            $state['finish'] = '';
+        }
+        return $state;
+    }
+
+    public function getResult(): array
+    {
+        $result['value'] = $this->getValue();
+        if ($this->isStarted()) {
+            $result['start'] = $this->start->format('Y-m-d H:i:s');
+        } else {
+            $result['start'] = '';
+        }
+        if ($this->isFinished()) {
+            $result['finish'] = $this->finish->format('Y-m-d H:i:s');
+        } else {
+            $result['finish'] = '';
+        }
+        return $result;
     }
 }

@@ -103,7 +103,7 @@ class ParticipantUnMute implements Event
         ];
     }
 
-    public function isJoin(): bool
+    public function isParticipantJoin(): bool
     {
         return false;
     }
@@ -111,6 +111,36 @@ class ParticipantUnMute implements Event
     public function isConferenceEnd(): bool
     {
         return false;
+    }
+
+    public function isParticipantLeave(): bool
+    {
+        return false;
+    }
+
+    public function isConferenceStart(): bool
+    {
+        return false;
+    }
+
+    public function isParticipantHold(): bool
+    {
+        return false;
+    }
+
+    public function isParticipantUnHold(): bool
+    {
+        return false;
+    }
+
+    public function isParticipantMute(): bool
+    {
+        return false;
+    }
+
+    public function isParticipantUnMute(): bool
+    {
+        return true;
     }
 
     public function getTimestamp(): \DateTimeImmutable

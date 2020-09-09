@@ -18,8 +18,11 @@ class Durations
             return;
         }
 
-        if (($duration = $this->getCurrent()) && !$duration->isFinished()) {
-            throw new \DomainException('Last duration is not finished');
+        $current = $this->getCurrent();
+
+        if (!$current->isFinished()) {
+//            $current->finish($date);
+            throw new \DomainException('Current duration is not finished');
         }
 
         $this->add(Duration::byStart($date));
@@ -28,20 +31,18 @@ class Durations
     public function addEnd(\DateTimeImmutable $date): void
     {
         if ($this->isEmpty()) {
-            $this->add(Duration::byEnd($date));
+            $this->add(Duration::byFinish($date));
             return;
         }
 
-        if (($duration = $this->getCurrent()) && $duration->isFinished()) {
-            throw new \DomainException('Last duration is already finished');
+        $current = $this->getCurrent();
+
+        if ($current->isFinished()) {
+            $this->add(Duration::byFinish($date));
+            return;
         }
 
-        $duration->end($date);
-    }
-
-    public function isEmpty(): bool
-    {
-        return empty($this->durations);
+        $current->finish($date);
     }
 
     public function getValue(): int
@@ -53,21 +54,45 @@ class Durations
         return $value;
     }
 
-    public function isStarted(): bool
+    public function currentIsActive(): bool
     {
-        if (!$current = $this->getCurrent()) {
-            return false;
-        }
-        return $current->isStarted();
+        return $this->getCurrent()->isActive();
     }
 
-    private function getCurrent(): ?Duration
+    public function isEmpty(): bool
     {
-        return end($this->durations);
+        return empty($this->durations);
+    }
+
+    private function getCurrent(): Duration
+    {
+        $current = end($this->durations);
+        if (!$current) {
+            throw new \DomainException('Not found current duration.');
+        }
+        return $current;
     }
 
     private function add(Duration $duration): void
     {
         $this->durations[] = $duration;
+    }
+
+    public function getState(): array
+    {
+        $state = [];
+        foreach ($this->durations as $duration) {
+            $state[] = $duration->getState();
+        }
+        return $state;
+    }
+
+    public function getResult(): array
+    {
+        $result['value'] = $this->getValue();
+        foreach ($this->durations as $duration) {
+            $result['details'][] = $duration->getResult();
+        }
+        return $result;
     }
 }

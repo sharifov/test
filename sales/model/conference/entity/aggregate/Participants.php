@@ -38,18 +38,22 @@ class Participants
         return $this->participants[$id->getValue()];
     }
 
-    public function processTalkTimer(\DateTimeImmutable $date): void
+    public function recalculateTalkDuration(\DateTimeImmutable $date): void
     {
         $countActiveParticipants = $this->getCountActiveParticipants();
         foreach ($this->participants as $participant) {
             if ($countActiveParticipants < 2) {
-                if ($participant->isStartedTalk()) {
-                    $participant->endTalk($date);
+                if ($participant->isWaitFinishTalk()) {
+                    $participant->finishTalk($date);
                 }
-            } else {
-                if (!$participant->isStartedTalk() && $participant->isActive()) {
-                    $participant->startTalk($date);
-                }
+                continue;
+            }
+            if ($participant->isWaitStartTalk() && $participant->isActive()) {
+                $participant->startTalk($date);
+                continue;
+            }
+            if ($participant->isWaitFinishTalk() && !$participant->isActive()) {
+                $participant->finishTalk($date);
             }
         }
     }
@@ -74,17 +78,21 @@ class Participants
         }
     }
 
-    public function report(): array
+    public function getState(): array
     {
-        $report = [];
+        $participants = [];
         foreach ($this->participants as $participant) {
-            $report[] = [
-                'id' => $participant->getId()->getValue(),
-                'duration' => $participant->getDuration(),
-                'talkDuration' => $participant->getTalkDuration(),
-                'holdDuration' => $participant->getHoldDuration(),
-            ];
+            $participants[] = $participant->getState();
         }
-        return $report;
+        return $participants;
+    }
+
+    public function getResult(): array
+    {
+        $result = [];
+        foreach ($this->participants as $participant) {
+            $result[] = $participant->getResult();
+        }
+        return $result;
     }
 }

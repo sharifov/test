@@ -67,12 +67,42 @@ class ConferenceStart implements Event
         ];
     }
 
-    public function isJoin(): bool
+    public function isParticipantJoin(): bool
     {
         return false;
     }
 
     public function isConferenceEnd(): bool
+    {
+        return false;
+    }
+
+    public function isParticipantLeave(): bool
+    {
+        return false;
+    }
+
+    public function isConferenceStart(): bool
+    {
+        return true;
+    }
+
+    public function isParticipantHold(): bool
+    {
+        return false;
+    }
+
+    public function isParticipantUnHold(): bool
+    {
+        return false;
+    }
+
+    public function isParticipantMute(): bool
+    {
+        return false;
+    }
+
+    public function isParticipantUnMute(): bool
     {
         return false;
     }
