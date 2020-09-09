@@ -126,6 +126,7 @@ use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\conference\entity\aggregate\ConferenceLogAggregate;
 use sales\model\conference\entity\aggregate\log\HtmlFormatter;
 use sales\model\conference\entity\conferenceEventLog\ConferenceEventLog;
+use sales\model\conference\entity\conferenceEventLog\ConferenceEventLogQuery;
 use sales\model\conference\entity\conferenceEventLog\EventFactory;
 use sales\model\conference\service\ManageCurrentCallsByUserService;
 use sales\model\conference\useCase\DisconnectFromAllActiveClientsCreatedConferences;
@@ -254,16 +255,12 @@ class TestController extends FController
 
     public function actionTest()
     {
+        $conferenceSid  = 'CF598673a88ea9deb25aeb04b2821fe24d';
+        $eventsLog = ConferenceEventLogQuery::getRawData($conferenceSid);
 
-        $conferenceSid  = 'CF2e8a4d3fbbd53c399f5819b55f369fed';
-        $eventsLog = ConferenceEventLog::find()
-            ->select(['cel_event_type', 'cel_data'])
-            ->andWhere(['cel_conference_sid' => $conferenceSid])->orderBy(['cel_sequence_number' => SORT_ASC])->asArray()
-            //->limit(10)
-            ->all();
         $events = [];
         foreach ($eventsLog as $item) {
-            $events[] = EventFactory::create($item['cel_event_type'], $item['cel_data']);
+            $events[] = EventFactory::create($item['type'], $item['data']);
         }
         $aggregate = new ConferenceLogAggregate($events);
         $aggregate->run();
