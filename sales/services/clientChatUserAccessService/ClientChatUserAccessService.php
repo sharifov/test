@@ -10,6 +10,7 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatUserAccess\event\ResetChatUserAccessWidgetEvent;
+use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\clientChatVisitor\repository\ClientChatVisitorRepository;
 use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessRepository;
 use sales\repositories\clientChatUserChannel\ClientChatUserChannelRepository;
@@ -136,19 +137,17 @@ class ClientChatUserAccessService
 	}
 
 	/**
-	 * @param int $id
+	 * @param ClientChatUserChannel[] $userChannels
 	 * @throws \Throwable
 	 */
-	public function setUserAccessToAllChats(int $id): void
+	public function setUserAccessToAllChats(array $userChannels): void
 	{
 		$_self = $this;
-		$this->transactionManager->wrap( static function () use ($id, $_self) {
-			if ($userChannels = $_self->clientChatUserChannelRepository->findByUserId($id)) {
-				foreach ($userChannels as $userChannel) {
-					if ($chats = ClientChat::find()->byOwner(null)->byChannel($userChannel->ccuc_channel_id)->all()) {
-						foreach ($chats as $chat) {
-							$_self->clientChatService->sendRequestToUser($chat, $userChannel);
-						}
+		$this->transactionManager->wrap( static function () use ($userChannels, $_self) {
+			foreach ($userChannels as $userChannel) {
+				if ($chats = ClientChat::find()->byOwner(null)->byChannel($userChannel->ccuc_channel_id)->all()) {
+					foreach ($chats as $chat) {
+						$_self->clientChatService->sendRequestToUser($chat, $userChannel);
 					}
 				}
 			}
