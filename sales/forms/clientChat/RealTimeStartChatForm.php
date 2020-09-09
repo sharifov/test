@@ -29,9 +29,8 @@ class RealTimeStartChatForm extends \yii\base\Model
 
 	public int $channelId = 0;
 
-	public function __construct(string $rid, string $visitorId, string $projectName, ProjectRepository $projectRepository, $config = [])
+	public function __construct(string $visitorId, string $projectName, ProjectRepository $projectRepository, $config = [])
 	{
-		$this->rid = $rid;
 		$this->visitorId = $visitorId;
 		$this->projectName = $projectName;
 		$this->projectId = $projectRepository->getIdByName($projectName);
@@ -43,7 +42,7 @@ class RealTimeStartChatForm extends \yii\base\Model
 		return [
 			[['rid', 'visitorId', 'message'], 'string'],
 			[['channelId', 'projectId'], 'integer'],
-			[['rid', 'visitorId', 'message', 'channelId'], 'required'],
+			[['visitorId', 'message', 'channelId'], 'required'],
 			[['channelId'], 'filter', 'filter' => 'intval'],
 			[['projectId'], 'default', 'value' => null],
 			[['projectId'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],

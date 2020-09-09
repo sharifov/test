@@ -29,7 +29,6 @@ b():window.addEventListener("load",b)})();
       }
     }).then( function (instance) {
         instance.events.on('chat-created', function (e) {
-            let rid = e.rid;
             let visitorId = e.visitorId;
             let projectName = e.projectName;
             
@@ -37,7 +36,7 @@ b():window.addEventListener("load",b)})();
             modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> </div>');
             modal.modal('show').find('.modal-header').html('<h3>Send Message ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
             
-            $.get('$url', {rid: rid, visitorId: visitorId, projectName: projectName}, function(data) {
+            $.get('$url', {visitorId: visitorId, projectName: projectName}, function(data) {
                 modal.find('.modal-body').html(data);
             });
                 

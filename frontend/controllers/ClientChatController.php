@@ -786,11 +786,10 @@ class ClientChatController extends FController
 
 	public function actionRealTimeStartChat(): string
 	{
-		$rid = Yii::$app->request->get('rid', '');
 		$visitorId = Yii::$app->request->get('visitorId', '');
 		$projectName = Yii::$app->request->get('projectName', '');
 
-		$form = new RealTimeStartChatForm($rid, $visitorId, $projectName, $this->projectRepository);
+		$form = new RealTimeStartChatForm($visitorId, $projectName, $this->projectRepository);
 
 		try {
 			if (Yii::$app->request->isPjax && $form->load(Yii::$app->request->post()) && $form->validate()) {

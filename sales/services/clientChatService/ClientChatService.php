@@ -203,6 +203,14 @@ class ClientChatService
 				throw new \DomainException('You dont have rocketchat credentials');
 			}
 
+			$channel = $_self->clientChatChannelRepository->find($form->channelId);
+			$department = Department::find()->select(['dep_name'])->where(['dep_id' => $channel->ccc_dep_id])->asArray()->one();
+			if (!$department) {
+				throw new \RuntimeException('Cannot create room: department data is not found');
+			}
+
+			$form->rid = $_self->createRcRoom($form->visitorId, $department['dep_name']);
+
 			$clientChatRequest = ClientChatRequest::createByAgent($form);
 			$_self->clientChatRequestRepository->save($clientChatRequest);
 
@@ -212,11 +220,8 @@ class ClientChatService
 				$clientChat->cch_client_id = $client->id;
 			}
 
-			$channel = $_self->clientChatChannelRepository->find($form->channelId);
-
 			$activeChatExist = ClientChat::find()->byDepartment($channel->ccc_dep_id)->byClientId($clientChat->cch_client_id)->notClosed()->exists();
 			if ($activeChatExist) {
-				$department = Department::find()->select(['dep_name'])->where(['dep_id' => $channel->ccc_dep_id])->asArray()->one();
 				throw new \DomainException('This visitor is already chatting with agent in ' . $department['dep_name'] . ' department');
 			}
 
@@ -463,4 +468,21 @@ class ClientChatService
 		return $this;
 	}
 
+	/**
+	 * @param string $visitorId
+	 * @param string $department
+	 * @return string
+	 */
+	public function createRcRoom(string $visitorId, string $department): string
+	{
+		$result = \Yii::$app->chatBot->createRoom($visitorId, $department);
+		if ($result['error']) {
+			throw new \RuntimeException('[ChatBot Create Room] ' . $result['error']['message'] ?? 'Unknown ChatBot error message');
+		}
+
+		if (!$rid = (string)($result['data']['rid'] ?? null)) {
+			throw new \RuntimeException('[ChatBot Create Room] RoomId is not created');
+		}
+		return $rid;
+	}
 }
