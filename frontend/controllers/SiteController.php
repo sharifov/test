@@ -13,6 +13,7 @@ use common\models\UserCommissionRules;
 use common\models\UserConnection;
 use common\models\UserParams;
 use frontend\models\form\UserProfileForm;
+use frontend\themes\gentelella_v2\widgets\SideBarMenu;
 use sales\helpers\app\AppHelper;
 use sales\model\user\entity\monitor\UserMonitor;
 use Yii;
@@ -49,7 +50,7 @@ class SiteController extends FController
                         'allow' => true,
                     ],
                     [
-                        'actions' => ['index', 'logout', 'profile', 'get-airport', 'blank', ],
+                        'actions' => ['index', 'logout', 'profile', 'get-airport', 'blank', 'side-bar-menu'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -345,6 +346,35 @@ class SiteController extends FController
         }
 
         return json_encode([]);
+    }
+
+    /**
+     * @return string
+     */
+    public function actionSideBarMenu(): string
+    {
+        //$id = Yii::$app->request->get('id');
+        // $status = Yii::$app->request->get('status');
+
+        // $keyCache = 'cal-box-request-' . $id . '-' . $status;
+
+        //Yii::$app->cache->delete($keyCache);
+
+        //$result = Yii::$app->cache->get($keyCache);
+
+        //if($result === false) {
+
+        $box = SideBarMenu::getInstance();
+
+        /*if($result) {
+            Yii::$app->cache->set($keyCache, $result, 30);
+        }*/
+        //}
+
+        //VarDumper::dump($data); exit;
+
+        return $box->run();
+
     }
 
 }

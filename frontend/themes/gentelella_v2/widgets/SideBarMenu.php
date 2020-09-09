@@ -1,26 +1,57 @@
 <?php
+/**
+ * @author Alexandr <alex.connor@techork.com>
+ */
 
+namespace frontend\themes\gentelella_v2\widgets;
+
+use common\models\Employee;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
-use \yii\helpers\Url;
-use yii\widgets\Pjax;
+use Yii;
 
-/* @var $this \yii\web\View */
-/** @var \common\models\Employee $user */
 
-$user = Yii::$app->user->identity;
+/**
+ * Class SideBarMenu
+ * @package frontend\themes\gentelella_v2\widgets
+ */
+class SideBarMenu extends \yii\bootstrap\Widget
+{
+    private static $instance;
 
-$isAdmin = $user->isAdmin() || $user->isSuperAdmin();
-$isSupervision = $user->isSupervision();
-$isAgent = $user->isAgent();
-$isQA = $user->isQa();
-$isUM = $user->isUserManager();
-$isSuperAdmin = $user->isSuperAdmin();
+    public ?Employee $user = null;
 
-?>
-<div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
-    <?php Pjax::begin(['id' => 'pjax-sidebar-menu', 'timeout' => 5000, 'enablePushState' => true]); ?>
-    <div class="menu_section">
-        <?php
+    /**
+     * @return SideBarMenu
+     */
+    public static function getInstance(): SideBarMenu
+    {
+        if (null === static::$instance) {
+            static::$instance = new static();
+        }
+
+        return static::$instance;
+    }
+
+    public function init()
+    {
+        parent::init();
+    }
+
+    /**
+     * @return string
+     */
+    public function run()
+    {
+        if ($this->user) {
+            $user = $this->user;
+        } else {
+            $user = Yii::$app->user->identity;
+        }
+
+        $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
+
+        $isUM = $user->isUserManager();
+        //$isSuperAdmin = $user->isSuperAdmin();
 
         $menuItems = [];
 //        if ($user->canCall()) {
@@ -106,7 +137,7 @@ $isSuperAdmin = $user->isSuperAdmin();
         }
 
         if (!$isUM) {
-           // $cntNotifications = \common\models\Notifications::findNewCount(Yii::$app->user->id);
+            // $cntNotifications = \common\models\Notifications::findNewCount(Yii::$app->user->id);
             $cntNotifications = null;
             $menuItems[] = [
                 'label' => 'My Notifications' .
@@ -338,7 +369,7 @@ $isSuperAdmin = $user->isSuperAdmin();
             'url' => 'javascript:',
             'icon' => 'list',
             'items' => [
-                    $menuNewData,
+                $menuNewData,
 
                 [
                     'label' => 'Projects',
@@ -560,7 +591,7 @@ $isSuperAdmin = $user->isSuperAdmin();
 
                 ['label' => 'User Site Activity', 'url' => ['/user-site-activity/index'], 'icon' => 'bars'],
                 ['label' => 'User Activity Report', 'url' => ['/user-site-activity/report'], 'icon' => 'bar-chart'],
-				['label' => 'Global Model Logs', 'url' => ['/global-log/index'], 'icon' => 'list'],
+                ['label' => 'Global Model Logs', 'url' => ['/global-log/index'], 'icon' => 'list'],
                 ['label' => 'Clean cache & assets', 'url' => ['/clean/index'], 'icon' => 'remove'],
                 [
                     'label' => Yii::t('language', 'Tools'), 'url' => 'javascript:', 'icon' => 'cog',
@@ -590,30 +621,22 @@ $isSuperAdmin = $user->isSuperAdmin();
             ],
         ];
 
-
         if ($search_text = Yii::$app->request->get('search_text')) {
-            filterMenuItems($menuItems, $search_text);
+            self::filterMenuItems($menuItems, $search_text);
         }
-        ensureVisibility($menuItems);
-
-        echo \frontend\themes\gentelella_v2\widgets\Menu::widget([
-            'items' => $menuItems,
-            'encodeLabels' => false,
-            'activateParents' => true,
-            'linkTemplate' => '<a href="{url}" {attributes} data-pjax="0">{icon}<span>{label}</span>{badge}</a>'
-        ]);
+        self::ensureVisibility($menuItems);
 
 
 
-        ?>
+        return $this->render('side_bar_menu', ['menuItems' => $menuItems, 'user' => $user, 'search_text' => $search_text]);
+    }
 
-    </div>
-    <?php Pjax::end(); ?>
-</div>
-
-<?php
-
-    function filterMenuItems(&$items, string $text = '')
+    /**
+     * @param $items
+     * @param string $text
+     * @return bool
+     */
+    public static function filterMenuItems(&$items, string $text = ''): bool
     {
         $allVisible = false;
         foreach ($items as $k => &$item) {
@@ -628,16 +651,8 @@ $isSuperAdmin = $user->isSuperAdmin();
             }
 
             if (isset($item['items'])) {
-                $item['visible'] = filterMenuItems($item['items'], $text);
+                $item['visible'] = self::filterMenuItems($item['items'], $text);
             }
-
-
-
-            //$allVisible = true;
-
-/*            if (isset($item['items']) && (!filterMenuItems($item['items']) && !isset($item['visible']))) {
-                $item['visible'] = false;
-            }*/
 
             if (!isset($item['visible']) || $item['visible'] === true) {
                 $allVisible = true;
@@ -646,7 +661,11 @@ $isSuperAdmin = $user->isSuperAdmin();
         return $allVisible;
     }
 
-    function ensureVisibility(&$items)
+    /**
+     * @param $items
+     * @return bool
+     */
+    public static function ensureVisibility(&$items): bool
     {
         $allVisible = false;
         foreach ($items as &$item) {
@@ -684,7 +703,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 }
             }
             // If not children are visible - make invisible this node
-            if (isset($item['items']) && (!ensureVisibility($item['items']) && !isset($item['visible']))) {
+            if (isset($item['items']) && (!self::ensureVisibility($item['items']) && !isset($item['visible']))) {
                 $item['visible'] = false;
             }
             if (isset($item['label']) && (!isset($item['visible']) || $item['visible'] === true)) {
@@ -693,104 +712,5 @@ $isSuperAdmin = $user->isSuperAdmin();
         }
         return $allVisible;
     }
-?>
 
-
-<?php
-
-$js =<<<JS
-function updateCounters(url, className, idName) {
-    var types = [];
-    $("." + className).each(function(i) {
-        types.push($(this).data('type'));
-    });
-    
-    $.ajax({
-        type: "POST",
-        url: url,
-        data: {types: types}, 
-        dataType: 'json',
-        success: function(data){
-            if (typeof (data) != "undefined" && data != null) {
-                $.each( data, function( key, val ) {
-                    if (val != 0) {
-                        $("#" + idName + "-" + key).html(val);
-                    } else if (val == 0) {
-                        $("#" + idName + "-" + key).html('');
-                    }
-                });
-            }
-        },
-        error: function(data){
-            console.log(data);
-        }, 
-    });    
-    
 }
-JS;
-$this->registerJs($js, $this::POS_LOAD);
-
-if (Yii::$app->user->can('leadSection')) {
-    $urlBadgesCount = Url::to(['/badges/get-badges-count']);
-    $this->registerJs("updateCounters('$urlBadgesCount', 'bginfo', 'badges');", $this::POS_LOAD);
-}
-if (Yii::$app->user->can('caseSection')) {
-    $urlCasesQCount = Url::to(['/cases-q-counters/get-q-count']);
-    $this->registerJs("updateCounters('$urlCasesQCount', 'cases-q-info', 'cases-q');", $this::POS_LOAD);
-}
-if (Yii::$app->user->can('/qa-task/qa-task-queue/count')) {
-    $urlQaTaskCount = Url::to(['/qa-task/qa-task-queue/count']);
-    $this->registerJs("updateCounters('$urlQaTaskCount', 'qa-task-info', 'qa-task-q');", $this::POS_LOAD);
-}
-if ($user->canCall()) {
-    $urlVoiceMailRecordCount = Url::to(['/voice-mail-record/count']);
-    $this->registerJs("
-    function updateVoiceRecordCounters() {
-        updateCounters('$urlVoiceMailRecordCount', 'voice-mail-record', 'voice-mail-record');
-    }
-    window.updateVoiceRecordCounters = updateVoiceRecordCounters;
-    window.updateVoiceRecordCounters();
-    ", $this::POS_LOAD);
-}
-
-$js = <<<JS
-$('.nav.side-menu [data-ajax-link]').on('click', function (e) {
-    e.preventDefault();
-    let ajaxLink = $(this).data('ajax-link');
-    let modalTitle = $(this).data('modal-title');
-    
-    if (ajaxLink) {
-        let url = $(this).attr('href');
-        
-        var modal = $('#modal-md');
-        $.ajax({
-            type: 'post',
-            url: url,
-            data: {},
-            dataType: 'html',
-            beforeSend: function () {
-                modal.find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
-                modal.find('.modal-title').html(modalTitle);
-                modal.modal('show');
-            },
-            success: function (data) {
-                modal.find('.modal-body').html(data);
-                modal.find('.modal-title').html(modalTitle);
-                $('#preloader').addClass('d-none');
-            },
-            error: function () {
-                new PNotify({
-                    title: 'Error',
-                    type: 'error',
-                    text: 'Internal Server Error. Try again letter.',
-                    hide: true
-                });
-                setTimeout(function () {
-                    $('#modal-md').modal('hide');
-                }, 300)
-            },
-        })
-    }
-});
-JS;
-$this->registerJs($js);
