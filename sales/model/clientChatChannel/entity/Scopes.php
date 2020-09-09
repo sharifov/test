@@ -27,6 +27,11 @@ class Scopes extends \yii\db\ActiveQuery
 		return $this->andWhere(new Expression('ccc_project_id is NULL'));
 	}
 
+	public function exceptDepartment(int $departmentId): Scopes
+	{
+		return $this->andWhere(['<>', 'ccc_dep_id', $departmentId]);
+	}
+
 	public function priority(int $priority)
 	{
 		return $this->andWhere(['ccc_priority' => $priority]);

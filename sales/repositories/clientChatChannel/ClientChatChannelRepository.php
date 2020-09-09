@@ -37,14 +37,18 @@ class ClientChatChannelRepository extends Repository
 	/**
 	 * @param int $userId
 	 * @param int|null $projectId
+	 * @param int|null $exceptDepartment
 	 * @return ClientChatChannel[]
 	 */
-	public function getByUserAndProject(int $userId, ?int $projectId): array
+	public function getByUserAndProject(int $userId, ?int $projectId, ?int $exceptDepartment = null): array
 	{
 		$channelQuery = ClientChatChannel::find();
 		$channelQuery->joinWithCcuc($userId);
 		if ($projectId) {
 			$channelQuery->byProject($projectId);
+		}
+		if ($exceptDepartment) {
+			$channelQuery->exceptDepartment($exceptDepartment);
 		}
 		$channels = $channelQuery->asArray()->all();
 		if ($channels) {

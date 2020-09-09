@@ -2,6 +2,7 @@
 namespace frontend\controllers;
 
 use common\components\CentrifugoService;
+use common\models\Department;
 use common\models\Lead;
 use common\models\Project;
 use common\models\Quote;
@@ -803,7 +804,7 @@ class ClientChatController extends FController
 			$form->addError('general', 'Internal Server Error');
 		}
 
-		$channels = $this->clientChatChannelRepository->getByUserAndProject(Auth::id(), $form->projectId);
+		$channels = $this->clientChatChannelRepository->getByUserAndProject(Auth::id(), $form->projectId, Department::DEPARTMENT_EXCHANGE);
 		$channels = ArrayHelper::map($channels, 'ccc_id', 'ccc_name');
 
 		return $this->renderAjax('partial/_real_time_start_chat', [
