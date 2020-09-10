@@ -9,7 +9,6 @@ class m200910_074925_add_field_key_tbl_projects extends Migration
 {
     public function safeUp()
     {
-        $this->dropColumn('{{%projects}}', 'project_key');
         $this->addColumn('{{%projects}}', 'project_key', $this->string(50)->unique());
         $this->createIndex('IND-projects-project_key','{{%projects}}', 'project_key');
 
