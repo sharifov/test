@@ -259,6 +259,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Conference Room', 'url' => ['/conference-room/index']],
                         ['label' => 'Conferences', 'url' => ['/conference/index']],
                         ['label' => 'Conference Participant', 'url' => ['/conference-participant/index']],
+                        ['label' => 'Conference Event Log', 'url' => ['/conference-event-log/index']],
                     ]
                 ],
                 ['label' => 'Call Note', 'url' => ['/call-note-crud/index'], 'icon' => 'list'],
