@@ -18,11 +18,12 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <p>
-        <?= Html::a('Create Project', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('<i class="fa fa-plus"></i> Create Project', ['create'], ['class' => 'btn btn-success']) ?>
 
-        <?= Html::a('Synchronization Projects from BO', ['synchronization'], ['class' => 'btn btn-warning', 'data' => [
+        <?= Html::a('<i class="fa fa-refresh"></i> Synchronization Projects from BO', ['synchronization'], ['class' => 'btn btn-warning', 'data' => [
             'confirm' => 'Are you sure you want synchronization all projects from BackOffice Server?',
             'method' => 'post',
+            'tooltip'
         ],]) ?>
 
     </p>
@@ -30,10 +31,43 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'tableOptions' => ['class' => 'table table-bordered table-hover'],
+        'rowOptions' => static function (\common\models\Project $model) {
+
+            if ($model->closed) {
+                return [
+                    'class' => 'danger'
+                ];
+            }
+
+        },
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
 
-            'id',
+            ['attribute' => 'id',
+                'headerOptions' => ['style' => 'width:70px'],
+            ],
+            [
+                'class' => 'yii\grid\ActionColumn',
+
+                'headerOptions' => ['style' => 'width:70px'],
+                'template' => '{view} {update} {sources}',
+                'buttons' => [
+                    'sources' => function ($url, \common\models\Project $model, $key) {
+                        return Html::a('<span class="fa fa-list text-info"></span>', ['sources/index', 'SourcesSearch[project_id]' => $model->id], ['title' => 'Sources', 'target' => '_blank', 'data-pjax' => 0]);
+                    },
+//                    'settings' => function ($url, \common\models\Project $model, $key) {
+//                        return Html::a('<span class="fa fa-cog"></span>', ['settings/projects', 'id' => $model->id], ['title' => 'Settings', 'target' => '_blank', 'data-pjax' => 0]);
+//                    },
+                    /*'switch' => function ($url, \common\models\Employee $model, $key) {
+                        return Html::a('<span class="fa fa-sign-in"></span>', ['employee/switch', 'id' => $model->id], ['title' => 'switch User', 'data' => [
+                            'confirm' => 'Are you sure you want to switch user?',
+                            //'method' => 'get',
+                        ],]);
+                    },*/
+                ]
+            ],
+            'project_key',
             'name:projectName',
             //'link',
 
@@ -45,53 +79,45 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw'
             ],
 
+
+            //'api_key',
+            'email_postfix',
+            'closed:boolean',
+            'sort_order',
+            //'api_key',
+            //'contact_info:ntext',
+            [
+                'attribute' => 'contact_info',
+                'value' => static function (\common\models\Project $model) {
+                    return \yii\helpers\VarDumper::dumpAsString($model->contactInfo->attributes, 5);
+                },
+                //'format' => 'raw'
+            ],
+
             [
                 'attribute' => 'last_update',
                 'value' => static function (\common\models\Project $model) {
                     return $model->last_update ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->last_update)) : '-';
                 },
                 'format' => 'raw',
-                'filter' => DatePicker::widget([
-                    'model' => $searchModel,
-                    'attribute' => 'last_update',
-                    'clientOptions' => [
-                        'autoclose' => true,
-                        'format' => 'yyyy-mm-dd',
-                    ],
-                    'options' => [
-                        'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
-                    ],
-                ]),
+//                'filter' => DatePicker::widget([
+//                    'model' => $searchModel,
+//                    'attribute' => 'last_update',
+//                    'clientOptions' => [
+//                        'autoclose' => true,
+//                        'format' => 'yyyy-mm-dd',
+//                    ],
+//                    'options' => [
+//                        'autocomplete' => 'off',
+//                        'placeholder' =>'Choose Date'
+//                    ],
+//                ]),
             ],
-            //'api_key',
-            'email_postfix',
-            'closed:boolean',
-            'sort_order',
-            //'api_key',
-            'contact_info:ntext',
 
             //'last_update',
-            'custom_data:ntext',
+            //'custom_data:ntext',
 
-            [
-                'class' => 'yii\grid\ActionColumn',
-                'template' => '{view} {update} {sources} {settings}',
-                'buttons' => [
-                    'sources' => function ($url, \common\models\Project $model, $key) {
-                        return Html::a('<span class="fa fa-list"></span>', ['sources/index', 'SourcesSearch[project_id]' => $model->id], ['title' => 'Sources'/*, 'target' => '_blank'*/]);
-                    },
-                    'settings' => function ($url, \common\models\Project $model, $key) {
-                        return Html::a('<span class="fa fa-cog"></span>', ['settings/projects', 'id' => $model->id], ['title' => 'Settings'/*, 'target' => '_blank'*/]);
-                    },
-                    /*'switch' => function ($url, \common\models\Employee $model, $key) {
-                        return Html::a('<span class="fa fa-sign-in"></span>', ['employee/switch', 'id' => $model->id], ['title' => 'switch User', 'data' => [
-                            'confirm' => 'Are you sure you want to switch user?',
-                            //'method' => 'get',
-                        ],]);
-                    },*/
-                ]
-            ],
+
         ],
     ]); ?>
     <?php Pjax::end(); ?>
