@@ -196,7 +196,7 @@ class ClientManageService
 	public function updateClient(Client $client, ClientCreateForm $form): void
 	{
 		$client = $this->finder->clientFind($client);
-		$client->edit($form->firstName, $form->lastName, $form->middleName);
+		$client->edit((string)$form->firstName, (string)$form->lastName, (string)$form->middleName);
 		$this->clientRepository->save($client);
 	}
 
