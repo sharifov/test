@@ -85,6 +85,11 @@ class ConferenceLogAggregate
         $this->logResult();
     }
 
+    public function getParticipantsResult(): array
+    {
+        return $this->participants->getResult();
+    }
+
     private function processJoinEvent(ParticipantJoin $event, ParticipantId $participantId, ParticipantType $participantType): void
     {
         if ($this->participants->isExist($participantId)) {
