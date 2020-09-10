@@ -67,8 +67,22 @@ $this->params['breadcrumbs'][] = $this->title;
                     },*/
                 ]
             ],
-            'project_key',
+            [
+                'attribute' => 'project_key',
+                'value' => static function (\common\models\Project $model) {
+                    return '<span class="badge badge-primary">' . $model->project_key . '</span>';
+                },
+                'format' => 'raw'
+            ],
+            //'project_key',
             'name:projectName',
+            [
+                'label' => 'Sources',
+                'value' => static function (\common\models\Project $model) {
+                    return $model->sources ? Html::a(count($model->sources), ['sources/index', 'SourcesSearch[project_id]' => $model->id], ['title' => 'Sources', 'target' => '_blank', 'data-pjax' => 0]) : '-';
+                },
+                'format' => 'raw'
+            ],
             //'link',
 
             [
@@ -100,18 +114,18 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $model->last_update ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->last_update)) : '-';
                 },
                 'format' => 'raw',
-//                'filter' => DatePicker::widget([
-//                    'model' => $searchModel,
-//                    'attribute' => 'last_update',
-//                    'clientOptions' => [
-//                        'autoclose' => true,
-//                        'format' => 'yyyy-mm-dd',
-//                    ],
-//                    'options' => [
-//                        'autocomplete' => 'off',
-//                        'placeholder' =>'Choose Date'
-//                    ],
-//                ]),
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'last_update',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' =>'Choose Date'
+                    ],
+                ]),
             ],
 
             //'last_update',
