@@ -2,7 +2,6 @@
 
 namespace sales\model\conference\useCase\saveParticipantStats;
 
-use common\models\Conference;
 use sales\model\conference\entity\aggregate\ConferenceLogAggregate;
 use sales\model\conference\entity\conferenceEventLog\ConferenceEventLogQuery;
 use sales\model\conference\entity\conferenceEventLog\EventFactory;
@@ -13,24 +12,33 @@ class Handler
 {
     public function handle(Command $command): void
     {
-        $conference = Conference::find()->select(['cf_id', 'cf_sid'])->andWhere(['cf_sid' => $command->conferenceSid])->asArray()->one();
-        if (!$conference) {
-            \Yii::error('Not found conference. Sid: ' . $command->conferenceSid, 'saveParticipantStats');
+        $eventsLog = ConferenceEventLogQuery::getRawData($command->conferenceSid);
+        if (!$eventsLog) {
+            \Yii::error('Not found conference events. Sid: ' . $command->conferenceSid, 'saveParticipantStats');
             return;
         }
 
-        $eventsLog = ConferenceEventLogQuery::getRawData($conference['cf_sid']);
         $events = [];
         foreach ($eventsLog as $item) {
             $events[] = EventFactory::create($item['type'], $item['data']);
         }
 
-        $aggregate = new ConferenceLogAggregate($events);
-        $aggregate->run();
+        try {
+            $aggregate = new ConferenceLogAggregate($events);
+            $aggregate->run();
+            $participants = $aggregate->getParticipantsResult();
+        } catch (\Throwable $e) {
+            \Yii::error(
+                VarDumper::dumpAsString([
+                    'error' => $e->getMessage(),
+                    'message' => 'Aggregation error',
+                ]),
+                'saveParticipantStats');
+            return;
+        }
 
-        $participants = $aggregate->getParticipantsResult();
         if (!$participants) {
-            \Yii::error('Not found participant result. Sid: ' . $command->conferenceSid, 'saveParticipantStats');
+            \Yii::error('Not found conference participant result. Sid: ' . $command->conferenceSid, 'saveParticipantStats');
             return;
         }
 
@@ -58,7 +66,6 @@ class Handler
                     'exception' => $e->getMessage(),
                 ]), 'saveParticipantStats:ConferenceParticipantStats:exception');
             }
-
         }
     }
 }

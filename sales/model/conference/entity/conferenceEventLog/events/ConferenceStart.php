@@ -14,6 +14,7 @@ class ConferenceStart implements Event
     public \DateTimeImmutable $Timestamp;
     public string $StatusCallbackEvent;
 
+    public ?int $conferenceId = null;
     public array $raw;
 
     private function __construct(
@@ -22,6 +23,7 @@ class ConferenceStart implements Event
         string $SequenceNumber,
         string $Timestamp,
         string $StatusCallbackEvent,
+        ?int $conferenceId,
         array $raw
     ) {
         $this->ConferenceSid = $ConferenceSid;
@@ -29,6 +31,7 @@ class ConferenceStart implements Event
         $this->SequenceNumber = $SequenceNumber;
         $this->Timestamp = new \DateTimeImmutable($Timestamp);
         $this->StatusCallbackEvent = $StatusCallbackEvent;
+        $this->conferenceId = $conferenceId;
         $this->raw = $raw;
     }
 
@@ -40,6 +43,7 @@ class ConferenceStart implements Event
             $raw['SequenceNumber'],
             $raw['Timestamp'],
             $raw['StatusCallbackEvent'],
+            $raw['conferenceId'] ?? null,
             $raw
         );
     }
@@ -63,7 +67,8 @@ class ConferenceStart implements Event
             'SequenceNumber' => $this->SequenceNumber,
             'Timestamp' => $this->Timestamp->format('Y-m-d H:i:s'),
             'StatusCallbackEvent' => $this->StatusCallbackEvent,
-            'raw' => $this->raw
+            'conferenceId' => $this->conferenceId,
+            'raw' => $this->raw,
         ];
     }
 

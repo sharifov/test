@@ -2547,6 +2547,8 @@ class CommunicationController extends ApiBaseController
             return $response;
         }
 
+        $form->conferenceId = $conference->cf_id;
+
         if ($form->StatusCallbackEvent === Conference::EVENT_CONFERENCE_START) {
 
             $this->conferenceStatusCallbackHandler->start($conference, $form);

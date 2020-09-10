@@ -23,6 +23,7 @@ class ParticipantUnHold implements Event
     public ?int $participant_user_id = null;
     public ?string $participant_identity = null;
 
+    public ?int $conferenceId = null;
     public array $raw;
 
     private function __construct(
@@ -39,6 +40,7 @@ class ParticipantUnHold implements Event
         string $Muted,
         ?string $participant_user_id,
         ?string $participant_identity,
+        ?int $conferenceId,
         array $raw
     ) {
         $this->Coaching = $Coaching;
@@ -54,6 +56,7 @@ class ParticipantUnHold implements Event
         $this->Muted = $Muted;
         $this->participant_user_id = $participant_user_id;
         $this->participant_identity = $participant_identity;
+        $this->conferenceId = $conferenceId;
         $this->raw = $raw;
     }
 
@@ -73,6 +76,7 @@ class ParticipantUnHold implements Event
             $raw['Muted'],
             $raw['participant_user_id'] ?? null,
             $raw['participant_identity'] ?? null,
+            $raw['conferenceId'] ?? null,
             $raw
         );
     }
@@ -104,6 +108,7 @@ class ParticipantUnHold implements Event
             'Muted' => $this->Muted,
             'participant_user_id' => $this->participant_user_id,
             'participant_identity' => $this->participant_identity,
+            'conferenceId' => $this->conferenceId,
             'raw' => $this->raw
         ];
     }

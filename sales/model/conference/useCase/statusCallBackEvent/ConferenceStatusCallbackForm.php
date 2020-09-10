@@ -30,6 +30,8 @@ use yii\base\Model;
  * @property $conference_created_user_id
  * @property $participant_user_id
  * @property $participant_identity
+ *
+ * @property $conferenceId
  */
 class ConferenceStatusCallbackForm extends Model
 {
@@ -74,6 +76,8 @@ class ConferenceStatusCallbackForm extends Model
     public $conference_created_user_id;
     public $participant_user_id;
     public $participant_identity;
+
+    public $conferenceId;
 
     public function rules(): array
     {
@@ -137,6 +141,8 @@ class ConferenceStatusCallbackForm extends Model
             ['participant_user_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
 
             ['participant_identity', 'string', 'max' => 50],
+
+            ['conferenceId', 'integer'],
         ];
     }
 

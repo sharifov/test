@@ -22,6 +22,8 @@ use sales\model\conference\entity\conferenceEventLog\events\ParticipantUnHold;
 use sales\model\conference\entity\conferenceEventLog\events\ParticipantUnMute;
 use sales\model\conference\service\ConferenceDataService;
 use sales\model\conference\socket\SocketCommands;
+use sales\model\conference\useCase\saveParticipantStats\Command;
+use sales\model\conference\useCase\saveParticipantStats\Handler;
 use yii\helpers\VarDumper;
 
 /**
@@ -29,16 +31,19 @@ use yii\helpers\VarDumper;
  *
  * @property EventDispatcher $eventDispatcher
  * @property ConferenceEventLogRepository $eventLogRepository
+ * @property Handler $saveParticipantHandler
  */
 class ConferenceStatusCallbackHandler
 {
     private EventDispatcher $eventDispatcher;
     private ConferenceEventLogRepository $eventLogRepository;
+    private Handler $saveParticipantHandler;
 
-    public function __construct(EventDispatcher $eventDispatcher, ConferenceEventLogRepository $eventLogRepository)
+    public function __construct(EventDispatcher $eventDispatcher, ConferenceEventLogRepository $eventLogRepository, Handler $saveParticipantHandler)
     {
         $this->eventDispatcher = $eventDispatcher;
         $this->eventLogRepository = $eventLogRepository;
+        $this->saveParticipantHandler = $saveParticipantHandler;
     }
 
     public function start(Conference $conference, ConferenceStatusCallbackForm $form): void
@@ -78,6 +83,8 @@ class ConferenceStatusCallbackHandler
                 'model' => $conference->getAttributes(),
             ]), 'ConferenceStatusCallbackHandler:end');
         }
+
+        $this->saveParticipantHandler->handle(new Command($conference->cf_sid, $conference->cf_id));
 
 //        if (!$call = $conference->call) {
 //            return;

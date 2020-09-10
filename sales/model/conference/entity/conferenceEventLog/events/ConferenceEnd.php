@@ -17,6 +17,7 @@ class ConferenceEnd implements Event
     public string $ReasonConferenceEnded;
     public string $Reason;
 
+    public ?int $conferenceId = null;
     public array $raw;
 
     private function __construct(
@@ -28,6 +29,7 @@ class ConferenceEnd implements Event
         string $CallSidEndingConference,
         string $ReasonConferenceEnded,
         string $Reason,
+        ?int $conferenceId,
         array $raw
     ) {
         $this->ConferenceSid = $ConferenceSid;
@@ -39,6 +41,7 @@ class ConferenceEnd implements Event
         $this->CallSidEndingConference = $CallSidEndingConference;
         $this->ReasonConferenceEnded = $ReasonConferenceEnded;
         $this->Reason = $Reason;
+        $this->conferenceId = $conferenceId;
     }
 
     public static function fromArray(array $raw): self
@@ -52,6 +55,7 @@ class ConferenceEnd implements Event
             $raw['CallSidEndingConference'],
             $raw['ReasonConferenceEnded'],
             $raw['Reason'],
+            $raw['conferenceId'] ?? null,
             $raw
         );
     }
@@ -78,7 +82,8 @@ class ConferenceEnd implements Event
             'CallSidEndingConference' => $this->CallSidEndingConference,
             'ReasonConferenceEnded' => $this->ReasonConferenceEnded,
             'Reason' => $this->Reason,
-            'raw' => $this->raw
+            'conferenceId' => $this->conferenceId,
+            'raw' => $this->raw,
         ];
     }
 
