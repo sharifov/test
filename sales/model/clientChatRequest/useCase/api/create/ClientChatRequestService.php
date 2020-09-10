@@ -298,6 +298,9 @@ class ClientChatRequestService
 			$visitorData = $this->clientChatVisitorDataRepository->findByVisitorRcId($visitorRcId);
 			$visitorData->updateByClientChatRequest($form->data);
 			$this->clientChatVisitorDataRepository->save($visitorData);
+			if (!$this->clientChatVisitorRepository->exists($chatId, $visitorData->cvd_id)) {
+				$this->clientChatVisitorRepository->create($chatId, $visitorData->cvd_id, $clientId);
+			}
 		} catch (NotFoundException $e) {
 			$visitorData = $this->clientChatVisitorDataRepository->createByClientChatRequest($visitorRcId, $form->data);
 			$this->clientChatVisitorRepository->create($chatId, $visitorData->cvd_id, $clientId);
