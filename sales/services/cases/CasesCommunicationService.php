@@ -77,7 +77,7 @@ class CasesCommunicationService
 
         $content_data['agent'] = [
             'name'      => $user->full_name,
-            'username'  => $user->username,
+            'nickname'  => $user->nickname,
 //            'phone'     => $upp && $upp->upp_tw_phone_number ? $upp->upp_tw_phone_number : '',
             'phone'     => $upp && $upp->getPhone() ? $upp->getPhone() : '',
 //            'email'     => $upp && $upp->upp_email ? $upp->upp_email : '',
