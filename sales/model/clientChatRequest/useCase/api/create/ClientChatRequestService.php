@@ -299,7 +299,7 @@ class ClientChatRequestService
 			$visitorData->updateByClientChatRequest($form->data);
 			$this->clientChatVisitorDataRepository->save($visitorData);
 		} catch (NotFoundException $e) {
-			$visitorData = $this->clientChatVisitorDataRepository->createByVisitorId($visitorRcId);
+			$visitorData = $this->clientChatVisitorDataRepository->createByClientChatRequest($visitorRcId, $form->data);
 			$this->clientChatVisitorRepository->create($chatId, $visitorData->cvd_id, $clientId);
 		}
 
