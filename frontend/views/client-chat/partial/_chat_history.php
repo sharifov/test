@@ -10,7 +10,7 @@ $date = $history[0]->ccm_sent_dt ?? null;
 $iDate = null;
 $rcUrl = Yii::$app->rchat->host  . '/home';
 $userRcAuthToken = Auth::user()->userProfile ? Auth::user()->userProfile->up_rc_auth_token : '';
-
+$readOnly = ($clientChat->isClosed() ? '&readonly=true' : '');
 ?>
 
 <?php /* if ($history && $clientChat): ?>
@@ -71,7 +71,7 @@ $userRcAuthToken = Auth::user()->userProfile ? Auth::user()->userProfile->up_rc_
     ]) ?>
 <?php endif; */ ?>
 <?php if ($clientChat): ?>
-    <iframe class="_rc-iframe" onload="removeCcLoadFromIframe()" src="<?= $rcUrl ?>?readonly=true&layout=embedded&resumeToken=<?= $userRcAuthToken ?>&goto=<?= urlencode('/live/'. $clientChat->cch_rid . '?layout=embedded&readonly=true') ?>" id="_rc-<?= $clientChat->cch_id ?>" style="border: none; width: 100%; height: 100%;" ></iframe>
+    <iframe class="_rc-iframe" onload="removeCcLoadFromIframe()" src="<?= $rcUrl ?>?&layout=embedded<?= $readOnly ?>&resumeToken=<?= $userRcAuthToken ?>&goto=<?= urlencode('/live/'. $clientChat->cch_rid . '?layout=embedded' . $readOnly) ?>" id="_rc-<?= $clientChat->cch_id ?>" style="border: none; width: 100%; height: 100%;" ></iframe>
 <?php else: ?>
 	<?= \yii\bootstrap4\Alert::widget([
 		'options' => [
