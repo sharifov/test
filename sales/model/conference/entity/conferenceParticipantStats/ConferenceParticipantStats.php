@@ -29,7 +29,9 @@ class ConferenceParticipantStats extends \yii\db\ActiveRecord
             ['cps_cf_id', 'integer'],
             ['cps_cf_id', 'exist', 'skipOnError' => true, 'targetClass' => Conference::class, 'targetAttribute' => ['cps_cf_id' => 'cf_id']],
 
+            ['cps_cf_sid', 'required'],
             ['cps_cf_sid', 'string', 'max' => 34],
+            ['cps_cf_sid', 'trim'],
 
             ['cps_created_dt', 'required'],
             ['cps_created_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
@@ -41,6 +43,7 @@ class ConferenceParticipantStats extends \yii\db\ActiveRecord
             ['cps_talk_time', 'integer', 'max' => 32500],
 
             ['cps_participant_identity', 'string', 'max' => 50],
+            ['cps_participant_identity', 'trim'],
 
             ['cps_user_id', 'integer'],
             ['cps_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['cps_user_id' => 'id']],
