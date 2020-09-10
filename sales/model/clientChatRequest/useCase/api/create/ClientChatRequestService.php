@@ -190,10 +190,6 @@ class ClientChatRequestService
 		if (!$clientChat->cch_client_id) {
 			$client = $this->clientManageService->getOrCreateByClientChatRequest($clientChatRequest);
 			$clientChat->cch_client_id = $client->id;
-		} else {
-			$clientForm = new ClientCreateForm();
-			$clientForm->firstName = $clientChatRequest->getNameFromData();
-			$this->clientManageService->updateClient($clientChat->cchClient, $clientForm);
 		}
 
 		if (!$clientChat->cch_channel_id) {
