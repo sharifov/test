@@ -14,40 +14,43 @@ class Participant
     private Durations $talkDuration;
     private Durations $holdDuration;
 
-    private function __construct(ParticipantId $id, ParticipantType $type)
+    private ?string $userId = null;
+
+    private function __construct(ParticipantId $id, ParticipantType $type, ?string $userId)
     {
         $this->id = $id;
         $this->type = $type;
+        $this->userId = $userId;
         $this->status = ParticipantStatus::init();
         $this->duration = new Durations();
         $this->talkDuration = new Durations();
         $this->holdDuration = new Durations();
     }
 
-    public static function byJoin(ParticipantId $id, ParticipantType $type, \DateTimeImmutable $date): self
+    public static function byJoin(ParticipantId $id, ParticipantType $type, \DateTimeImmutable $date, ?string $userId): self
     {
-        $participant = new self($id, $type);
+        $participant = new self($id, $type, $userId);
         $participant->join($date);
         return $participant;
     }
 
-    public static function byLeave(ParticipantId $id, ParticipantType $type, \DateTimeImmutable $date): self
+    public static function byLeave(ParticipantId $id, ParticipantType $type, \DateTimeImmutable $date, ?string $userId): self
     {
-        $participant = new self($id, $type);
+        $participant = new self($id, $type, $userId);
         $participant->leave($date);
         return $participant;
     }
 
-    public static function byHold(ParticipantId $id, ParticipantType $type, \DateTimeImmutable $date): self
+    public static function byHold(ParticipantId $id, ParticipantType $type, \DateTimeImmutable $date, ?string $userId): self
     {
-        $participant = new self($id, $type);
+        $participant = new self($id, $type, $userId);
         $participant->hold($date);
         return $participant;
     }
 
-    public static function byUnHold(ParticipantId $id, ParticipantType $type, \DateTimeImmutable $date): self
+    public static function byUnHold(ParticipantId $id, ParticipantType $type, \DateTimeImmutable $date, ?string $userId): self
     {
-        $participant = new self($id, $type);
+        $participant = new self($id, $type, $userId);
         $participant->unHold($date);
         return $participant;
     }
@@ -156,6 +159,7 @@ class Participant
     {
         return [
             'id' => $this->id->getValue(),
+            'userId' => $this->userId,
             'status' => $this->status->getHistory(),
             'type' => $this->type->getValue(),
             'duration' => $this->duration->getState(),
@@ -168,6 +172,7 @@ class Participant
     {
         return [
             'id' => $this->id->getValue(),
+            'userId' => $this->userId,
             'status' => $this->status->getHistory(),
             'type' => $this->type->getValue(),
             'duration' => $this->getDuration()->getResult(),

@@ -93,7 +93,7 @@ class ConferenceLogAggregate
             return;
         }
 
-        $participant = Participant::byJoin($participantId, $participantType, $event->getTimestamp());
+        $participant = Participant::byJoin($participantId, $participantType, $event->getTimestamp(), $event->participant_user_id);
         $this->participants->add($participant);
     }
 
@@ -105,7 +105,7 @@ class ConferenceLogAggregate
             return;
         }
 
-        $participant = Participant::byLeave($participantId, $participantType, $event->getTimestamp());
+        $participant = Participant::byLeave($participantId, $participantType, $event->getTimestamp(), $event->participant_user_id);
         $this->participants->add($participant);
     }
 
@@ -117,7 +117,7 @@ class ConferenceLogAggregate
             return;
         }
 
-        $participant = Participant::byHold($participantId, $participantType, $event->getTimestamp());
+        $participant = Participant::byHold($participantId, $participantType, $event->getTimestamp(), $event->participant_user_id);
         $this->participants->add($participant);
     }
 
@@ -129,7 +129,7 @@ class ConferenceLogAggregate
             return;
         }
 
-        $participant = Participant::byUnHold($participantId, $participantType, $event->getTimestamp());
+        $participant = Participant::byUnHold($participantId, $participantType, $event->getTimestamp(), $event->participant_user_id);
         $this->participants->add($participant);
     }
 
@@ -148,11 +148,10 @@ class ConferenceLogAggregate
         $participantId = null;
         $participantType = null;
         if (!$event->isConferenceEnd() && !$event->isConferenceStart()) {
+            $participantId = new ParticipantId($event->participant_identity);
             if ($event->participant_user_id) {
-                $participantId = new ParticipantId($event->participant_user_id);
                 $participantType = ParticipantType::byUser();
             } else {
-                $participantId = new ParticipantId($event->CallSid);
                 $participantType = ParticipantType::byDefault();
             }
         }

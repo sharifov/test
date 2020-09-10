@@ -289,6 +289,7 @@ class ConferenceStatusCallbackHandler
         $participant->cp_cf_sid = $conference->cf_sid;
         $participant->cp_call_sid = $form->CallSid;
         $participant->cp_user_id = $form->participant_user_id;
+        $participant->cp_identity = $form->participant_identity;
         if ($call = $this->findAndUpdateCall($form->CallSid, $conference)) {
             $participant->cp_call_id = $call->c_id;
         }

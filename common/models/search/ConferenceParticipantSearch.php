@@ -25,6 +25,7 @@ class ConferenceParticipantSearch extends ConferenceParticipant
             [['cp_leave_dt', 'cp_join_dt', 'cp_hold_dt'], 'date', 'format' => 'php:Y-m-d'],
 
             ['cp_user_id', 'integer'],
+            ['cp_identity', 'string'],
         ];
     }
 
@@ -68,6 +69,7 @@ class ConferenceParticipantSearch extends ConferenceParticipant
             'cp_status_id' => $this->cp_status_id,
             'cp_type_id' => $this->cp_type_id,
             'cp_user_id' => $this->cp_user_id,
+            'cp_identity' => $this->cp_identity,
         ]);
 
         $query->andFilterWhere(['like', 'cp_call_sid', $this->cp_call_sid]);

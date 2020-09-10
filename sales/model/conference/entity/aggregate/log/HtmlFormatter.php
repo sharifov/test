@@ -17,26 +17,27 @@ class HtmlFormatter
         foreach ($this->logs->logs as $log) {
             if ($log->isEvent()) {
                 if ($log->participantId) {
-                    $out .= '<tr bgcolor="goldenrod"><th colspan="2">Event</th><th colspan="2">ParticipantId</th><th colspan="2">Raw</t></tr>';
+                    $out .= '<tr bgcolor="goldenrod"><th colspan="2">Event</th><th colspan="2">ParticipantId</th><th colspan="3">Raw</t></tr>';
                     $out .= '<tr>';
                     $out .= '<td colspan="2">' . $log->type . '</td>';
                     $out .= '<td colspan="2">' . $log->participantId . '</td>';
-                    $out .= '<td colspan="2"><pre>' . print_r($log->raw, true) . '</pre></td>';
+                    $out .= '<td colspan="3"><pre>' . print_r($log->raw, true) . '</pre></td>';
                     $out .= '</tr>';
                 } else {
-                    $out .= '<tr bgcolor="goldenrod"><th colspan="3">Event</th><th colspan="3">Raw</th></tr>';
+                    $out .= '<tr bgcolor="goldenrod"><th colspan="3">Event</th><th colspan="4">Raw</th></tr>';
                     $out .= '<tr>';
                     $out .= '<td colspan="3">' . $log->type . '</td>';
-                    $out .= '<td colspan="3"><pre>' . print_r($log->raw, true) . '</pre></td>';
+                    $out .= '<td colspan="4"><pre>' . print_r($log->raw, true) . '</pre></td>';
                     $out .= '</tr>';
                 }
             } elseif ($log->isParticipants()) {
-                $out .= '<tr bgcolor="lightsteelblue"><th colspan="6">Participants</th></trbg>';
-                $out .= '<tr><th>Id</th><th>Type</th><th>Status</th><th>Duration</th><th>TalkDuration</th><th>HoldDuration</th></tr>';
+                $out .= '<tr bgcolor="lightsteelblue"><th colspan="7">Participants</th></trbg>';
+                $out .= '<tr><th>Id</th><th>Type</th><th>UserId</th><th>Status</th><th>Duration</th><th>TalkDuration</th><th>HoldDuration</th></tr>';
                 foreach ($log->participants as $participant) {
                     $out .= '<tr>';
                     $out .= '<td>' . $participant['id'] . '</td>';
                     $out .= '<td>' . $participant['type'] . '</td>';
+                    $out .= '<td>' . $participant['userId'] . '</td>';
                     $out .= '<td>' . $this->formatStateStatuses($participant['status']) . '</td>';
                     $out .= '<td>' . $this->formatStateDuration($participant['duration']) . '</td>';
                     $out .= '<td>' . $this->formatStateDuration($participant['talkDuration']) . '</td>';
@@ -44,13 +45,14 @@ class HtmlFormatter
                     $out .= '</tr>';
                 }
             } elseif ($log->isResult()) {
-                $out .= '<tr bgcolor="indianred"><th colspan="6" style="color:#fff;">Result</th></trbg>';
-                $out .= '<tr bgcolor="lightsteelblue"><th colspan="6">Participants</th></trbg>';
-                $out .= '<tr><th>Id</th><th>Type</th><th>Status</th><th>Duration</th><th>TalkDuration</th><th>HoldDuration</th></tr>';
+                $out .= '<tr bgcolor="indianred"><th colspan="7" style="color:#fff;">Result</th></trbg>';
+                $out .= '<tr bgcolor="lightsteelblue"><th colspan="7">Participants</th></trbg>';
+                $out .= '<tr><th>Id</th><th>Type</th><th>UserId</th><th>Status</th><th>Duration</th><th>TalkDuration</th><th>HoldDuration</th></tr>';
                 foreach ($log->participants as $participant) {
                     $out .= '<tr>';
                     $out .= '<td>' . $participant['id'] . '</td>';
                     $out .= '<td>' . $participant['type'] . '</td>';
+                    $out .= '<td>' . $participant['userId'] . '</td>';
                     $out .= '<td>' . $this->formatStateStatuses($participant['status']) . '</td>';
                     $out .= '<td>' . $this->formatResultDuration($participant['duration']) . '</td>';
                     $out .= '<td>' . $this->formatResultDuration($participant['talkDuration']) . '</td>';
@@ -59,7 +61,7 @@ class HtmlFormatter
                 }
             } else {
                 $out .= '<tr>';
-                $out .= '<td colspan="6">Undefined log type</td>';
+                $out .= '<td colspan="7">Undefined log type</td>';
                 $out .= '</tr>';
             }
         }

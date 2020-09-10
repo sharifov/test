@@ -21,6 +21,7 @@ class ParticipantLeave implements Event
     public string $Muted;
 
     public ?int $participant_user_id = null;
+    public ?string $participant_identity = null;
 
     public array $raw;
 
@@ -37,6 +38,7 @@ class ParticipantLeave implements Event
         string $Hold,
         string $Muted,
         ?string $participant_user_id,
+        ?string $participant_identity,
         array $raw
     ) {
         $this->Coaching = $Coaching;
@@ -51,6 +53,7 @@ class ParticipantLeave implements Event
         $this->Hold = $Hold;
         $this->Muted = $Muted;
         $this->participant_user_id = $participant_user_id;
+        $this->participant_identity = $participant_identity;
         $this->raw = $raw;
     }
 
@@ -69,6 +72,7 @@ class ParticipantLeave implements Event
             $raw['Hold'],
             $raw['Muted'],
             $raw['participant_user_id'] ?? null,
+            $raw['participant_identity'] ?? null,
             $raw
         );
     }
@@ -99,6 +103,7 @@ class ParticipantLeave implements Event
             'Hold' => $this->Hold,
             'Muted' => $this->Muted,
             'participant_user_id' => $this->participant_user_id,
+            'participant_identity' => $this->participant_identity,
             'raw' => $this->raw
         ];
     }

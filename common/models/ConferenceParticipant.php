@@ -20,6 +20,7 @@ use yii\db\ActiveQuery;
  * @property boolean $cp_mute
  * @property string $cp_cf_sid
  * @property int|null $cp_user_id
+ * @property int|string $cp_identity
  *
  * @property Call $cpCall
  * @property Conference $cpCf
@@ -81,6 +82,8 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
 
             ['cp_user_id', 'integer'],
             ['cp_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Conference::class, 'targetAttribute' => ['cp_user_id' => 'cf_id']],
+
+            ['cp_identity', 'string', 'max' => 50],
         ];
     }
 
@@ -101,6 +104,7 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
             'cp_type_id' => 'Type',
             'cp_hold_dt' => 'Hold Dt',
             'cp_user_id' => 'User',
+            'cp_identity' => 'Identity',
         ];
     }
 

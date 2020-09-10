@@ -22,6 +22,8 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'cp_cf_sid')->textInput() ?>
 
+    <?= $form->field($model, 'cp_identity')->textInput() ?>
+
     <?= $form->field($model, 'cp_call_sid')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'cp_call_id')->textInput() ?>

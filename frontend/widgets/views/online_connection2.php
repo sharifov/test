@@ -8,6 +8,7 @@ use yii\helpers\Url;
 
 /* @var $caseId integer */
 /* @var $userId integer */
+/* @var $userIdentity integer */
 /* @var $controllerId string */
 /* @var $actionId string */
 /* @var $pageUrl string */
@@ -148,6 +149,7 @@ $js = <<<JS
     
 
     const userId = '$userId';
+    const userIdentity = '$userIdentity';
     const wsUrl = '$wsUrl';
     const onlineObj = $('#online-connection-indicator');
     
