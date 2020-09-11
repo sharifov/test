@@ -94,7 +94,7 @@ class InternalContactService
                 return new InternalContact($department, $upp->upp_project_id, $upp->upp_user_id, $log);
             }
 //            $log->add('Not found department for userProjectParams tw_phone_number: ' . $upp->upp_tw_phone_number);
-            $log->add('Not found department for userProjectParams tw_phone_number: ' . $upp->getPhone());
+//            $log->add('Not found department for userProjectParams tw_phone_number: ' . $upp->getPhone());
             if ($upp->uppUser) {
                 if ($upp->uppUser->userDepartments && isset($upp->uppUser->userDepartments[0]) && $upp->uppUser->userDepartments[0]->udDep) {
                     if ($incomingProject && $upp->upp_project_id && $incomingProject !== $upp->upp_project_id) {
@@ -141,7 +141,7 @@ class InternalContactService
                 return new InternalContact($department, $upp->upp_project_id, $upp->upp_user_id, $log);
             }
 //            $log->add('Not found department for userProjectParams email: ' . $upp->upp_email);
-            $log->add('Not found department for userProjectParams email: ' . $upp->getEmail());
+//            $log->add('Not found department for userProjectParams email: ' . $upp->getEmail());
             if ($upp->uppUser) {
                 if ($upp->uppUser->userDepartments && isset($upp->uppUser->userDepartments[0]) && $upp->uppUser->userDepartments[0]->udDep) {
                     if ($incomingProject && $upp->upp_project_id && $incomingProject !== $upp->upp_project_id) {
