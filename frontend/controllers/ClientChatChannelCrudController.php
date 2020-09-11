@@ -7,6 +7,7 @@ use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatChannel\entity\search\ClientChatChannelSearch;
 use frontend\controllers\FController;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -65,6 +66,8 @@ class ClientChatChannelCrudController extends FController
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->ccc_id]);
+        } else {
+            $model->ccc_settings = json_encode(ClientChatChannel::getDefaultSettingList());
         }
 
         return $this->render('create', [
@@ -83,6 +86,10 @@ class ClientChatChannelCrudController extends FController
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->ccc_id]);
+        } else {
+            if (!$model->ccc_settings) {
+                $model->ccc_settings = json_encode(ClientChatChannel::getDefaultSettingList());
+            }
         }
 
         return $this->render('update', [
