@@ -30,6 +30,7 @@ class Handler
         } catch (\Throwable $e) {
             \Yii::error(
                 VarDumper::dumpAsString([
+                    'command' => $command,
                     'error' => $e->getMessage(),
                     'message' => 'Aggregation error',
                 ]),
@@ -43,24 +44,26 @@ class Handler
         }
 
         foreach ($participants as $participant) {
-            $stats = new ConferenceParticipantStats();
-            $stats->cps_cf_id = $command->conferenceId;
-            $stats->cps_cf_sid = $command->conferenceSid;
-            $stats->cps_participant_identity = $participant['id'];
-            $stats->cps_user_id = $participant['userId'];
-            $stats->cps_duration = (int)$participant['duration']['value'];
-            $stats->cps_talk_time = (int)$participant['talkDuration']['value'];
-            $stats->cps_hold_time = (int)$participant['holdDuration']['value'];
-            $stats->cps_created_dt = date('Y-m-d H:i:s');
             try {
+                $stats = new ConferenceParticipantStats();
+                $stats->cps_cf_id = $command->conferenceId;
+                $stats->cps_cf_sid = $command->conferenceSid;
+                $stats->cps_participant_identity = $participant['id'];
+                $stats->cps_user_id = $participant['userId'];
+                $stats->cps_duration = (int)$participant['duration']['value'];
+                $stats->cps_talk_time = (int)$participant['talkDuration']['value'];
+                $stats->cps_hold_time = (int)$participant['holdDuration']['value'];
+                $stats->cps_created_dt = date('Y-m-d H:i:s');
                 if (!$stats->save()) {
                     \Yii::error(VarDumper::dumpAsString([
+                        'command' => $command,
                         'errors' => $stats->getErrors(),
                         'model' => $stats->getAttributes(),
                     ]), 'saveParticipantStats:ConferenceParticipantStats:save');
                 }
             } catch (\Throwable $e) {
                 \Yii::error(VarDumper::dumpAsString([
+                    'command' => $command,
                     'errors' => $stats->getErrors(),
                     'model' => $stats->getAttributes(),
                     'exception' => $e->getMessage(),
