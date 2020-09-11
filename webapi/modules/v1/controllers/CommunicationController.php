@@ -615,6 +615,7 @@ class CommunicationController extends ApiBaseController
                         );
                         if ($ntf) {
                             Notifications::publish('getNewNotification', ['user_id' => $voiceMailRecord->vmr_user_id], NotificationMessage::add($ntf));
+                            Notifications::publish('updateVoiceMailRecord', ['user_id' => $voiceMailRecord->vmr_user_id], []);
                         }
                     } else {
                         Yii::error(VarDumper::dumpAsString([

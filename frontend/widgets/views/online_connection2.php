@@ -455,6 +455,13 @@ $js = <<<JS
                             createNotify(data.title, data.message, data.type);
                         }
                         
+                        if (obj.cmd === 'updateVoiceMailRecord') {
+                            if ($("#voice-mail-pjax").length > 0) {
+                                pjaxReload({container: "#voice-mail-pjax"});    
+                            }
+                            window.updateVoiceRecordCounters();
+                        }
+                        
                     }
                     // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
                 } catch (error) {
