@@ -44,7 +44,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'uvm_transcribe_enable')->checkbox() ?>
 
-        <?= $form->field($model, 'uvm_enabled')->checkbox() ?>
+        <?php //= $form->field($model, 'uvm_enabled')->checkbox() ?>
 
         <div id="webAudioRecorder">
             <div>

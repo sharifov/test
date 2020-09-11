@@ -36,7 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'uvm_record_enable:BooleanByLabel',
             //'uvm_max_recording_time:datetime',
             'uvm_transcribe_enable:BooleanByLabel',
-            'uvm_enabled:BooleanByLabel',
+            //'uvm_enabled:BooleanByLabel',
             'uvm_created_dt:byUserDateTime',
             'uvm_updated_dt:byUserDateTime',
             'uvm_created_user_id:username',

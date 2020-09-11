@@ -130,6 +130,7 @@ class UserVoiceMail extends \yii\db\ActiveRecord
             ['uvm_created_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['uvm_created_user_id' => 'id']],
 
             ['uvm_enabled', 'boolean'],
+            ['uvm_enabled', 'default', 'value' => true],
 
             ['uvm_max_recording_time', 'integer', 'max' => 3600],
 
