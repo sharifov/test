@@ -29,6 +29,9 @@ use yii\helpers\ArrayHelper;
  * @property int|null $ccc_created_user_id
  * @property int|null $ccc_updated_user_id
  * @property int|null $ccc_default
+ * @property string $ccc_frontend_name
+ * @property int|null $ccc_frontend_enabled
+ * @property string|null $ccc_settings
  *
  * @property Employee $cccCreatedUser
  * @property Department $cccDep
@@ -47,7 +50,7 @@ class ClientChatChannel extends \yii\db\ActiveRecord
 			'timestamp' => [
 				'class' => TimestampBehavior::class,
 				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['ccc_created_dt', 'ccc_updated_dt'],
+					ActiveRecord::EVENT_BEFORE_INSERT => ['ccc_created_dt'],
 					ActiveRecord::EVENT_BEFORE_UPDATE => ['ccc_updated_dt'],
 				],
 				'value' => date('Y-m-d H:i:s'),
@@ -55,7 +58,7 @@ class ClientChatChannel extends \yii\db\ActiveRecord
 			'user' => [
 				'class' => BlameableBehavior::class,
 				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['ccc_created_user_id', 'ccc_updated_user_id'],
+					ActiveRecord::EVENT_BEFORE_INSERT => ['ccc_created_user_id'],
 					ActiveRecord::EVENT_BEFORE_UPDATE => ['ccc_updated_user_id'],
 				]
 			],
@@ -71,6 +74,7 @@ class ClientChatChannel extends \yii\db\ActiveRecord
             ['ccc_created_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ccc_created_user_id' => 'id']],
 
 			['ccc_default', 'integer'],
+			['ccc_frontend_enabled', 'boolean'],
 
             ['ccc_dep_id', 'integer'],
             ['ccc_dep_id', 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['ccc_dep_id' => 'dep_id']],
@@ -79,10 +83,12 @@ class ClientChatChannel extends \yii\db\ActiveRecord
             ['ccc_priority', 'integer', 'max' => self::MAX_PRIORITY_VALUE, 'min' => 1],
             ['ccc_priority', 'default', 'value' => 1],
 
-            ['ccc_name', 'required'],
+            [['ccc_name', 'ccc_frontend_name'], 'required'],
             ['ccc_name', 'filter', 'filter' => 'trim'],
             ['ccc_name', 'string', 'max' => 255],
             ['ccc_name', 'unique'],
+            [['ccc_frontend_name'], 'string', 'max' => 100],
+            ['ccc_frontend_name', 'filter', 'filter' => 'trim'],
 
             ['ccc_project_id', 'integer'],
             ['ccc_project_id', 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['ccc_project_id' => 'id']],
@@ -90,7 +96,10 @@ class ClientChatChannel extends \yii\db\ActiveRecord
             ['ccc_ug_id', 'integer'],
             ['ccc_ug_id', 'exist', 'skipOnError' => true, 'targetClass' => UserGroup::class, 'targetAttribute' => ['ccc_ug_id' => 'ug_id']],
 
-            ['ccc_updated_dt', 'safe'],
+            [['ccc_updated_dt'], 'safe'],
+
+            [['ccc_settings'], 'string'],
+
 
             ['ccc_updated_user_id', 'integer'],
             ['ccc_updated_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ccc_updated_user_id' => 'id']],
@@ -142,6 +151,9 @@ class ClientChatChannel extends \yii\db\ActiveRecord
             'ccc_created_user_id' => 'Created User ID',
             'ccc_updated_user_id' => 'Updated User ID',
 			'ccc_default' => 'Default',
+            'ccc_frontend_name' => 'Frontend Name',
+            'ccc_frontend_enabled' => 'Frontend Enabled',
+            'ccc_settings' => 'Settings',
         ];
     }
 
@@ -168,5 +180,47 @@ class ClientChatChannel extends \yii\db\ActiveRecord
     {
         $data = self::find()->orderBy(['ccc_name' => SORT_ASC])->asArray()->all();
         return ArrayHelper::map($data,'ccc_id', 'ccc_name');
+    }
+
+    /**
+     * @return array
+     */
+    public static function getDefaultSettingList() : array
+    {
+        $settings = [];
+        $settings['max_dialog_count'] = 1;
+        $settings['feedback_rating_enabled'] = true;
+        $settings['feedback_message_enabled'] = true;
+        $settings['history_email_enabled'] = true;
+        $settings['history_download_enabled'] = true;
+        return $settings;
+    }
+
+    /**
+     * @param int $projectId
+     * @return array
+     */
+    public static function getSettingsList(int $projectId): array
+    {
+        $dataList = [];
+        $channelList = self::find()->where(['ccc_disabled' => false, 'ccc_frontend_enabled' => true, 'ccc_project_id' => $projectId])->orderBy(['ccc_priority' => SORT_ASC])->all();
+        if ($channelList) {
+            foreach ($channelList as $channelItem) {
+                if ($channelItem->ccc_settings) {
+                    $settings = @json_decode($channelItem->ccc_settings, true);
+                    $settings = $settings ?: [];
+                } else {
+                    $settings = [];
+                }
+
+                $dataList[] = [
+                    'id' => $channelItem->ccc_id,
+                    'name' => $channelItem->ccc_frontend_name,
+                    'priority' => $channelItem->ccc_priority,
+                    'settings' => $settings
+                ];
+            }
+        }
+        return $dataList;
     }
 }

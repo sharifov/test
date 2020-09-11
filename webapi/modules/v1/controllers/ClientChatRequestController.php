@@ -463,6 +463,35 @@ class ClientChatRequestController extends ApiBaseController
 	 * "fileUpload": true,
 	 * "maxMessageLength": 500
 	 * },
+     *
+     * "channels": [
+        {
+            "id": 2,
+            "name": "Channel 2",
+            "priority": 1,
+            "settings": {
+                "max_dialog_count": 4,
+                "feedback_rating_enabled": false,
+                "feedback_message_enabled": true,
+                "history_email_enabled": false,
+                "history_download_enabled": true
+            }
+        },
+        {
+            "id": 3,
+            "name": "Channel 11",
+            "priority": 2,
+            "settings": {
+                "max_dialog_count": 1,
+                "feedback_rating_enabled": true,
+                "feedback_message_enabled": true,
+                "history_email_enabled": true,
+                "history_download_enabled": true
+            }
+        }
+    ],
+     *
+     *
      * "language_id": "ru-RU",
     "translations": {
         "connection_lost": {
