@@ -26,21 +26,35 @@ $this->params['breadcrumbs'][] = $this->title;
         ]) ?>
     </p>
 
+    <div class="col-md-4">
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
             'id',
+            'project_key',
             'name:projectName',
             'link',
             'api_key',
             'email_postfix',
             'ga_tracking_id',
-            'contact_info:ntext',
+            //'contact_info:ntext',
             'closed:boolean',
             'last_update',
-            'custom_data:ntext',
+            //'custom_data:ntext',
             'sort_order'
         ],
     ]) ?>
+
+
+
+    </div>
+    <div class="col-md-3 bg-white">
+        <h2>Contact info:</h2>
+        <?=\yii\helpers\VarDumper::dumpAsString($model->contactInfo->attributes, 10, true) ?>
+    </div>
+    <div class="col-md-5 bg-white">
+        <h2>Custom data:</h2>
+        <?=\yii\helpers\VarDumper::dumpAsString(@json_decode($model->custom_data, true), 10, true) ?>
+    </div>
 
 </div>

@@ -201,7 +201,7 @@ class CallHelper
                         <span class="contact-info-card__call-type">';
         $tpl .= CallLogType::getName($callType);
         if ($call['cl_category_id']) {
-            $tpl .= '-' . (\common\models\Call::SOURCE_LIST[$call['cl_category_id']] ?? 'undefined');
+            $tpl .= ' - ' . (\common\models\Call::SOURCE_LIST[$call['cl_category_id']] ?? 'undefined');
         }
         $tpl .= ' </span>
                         <small><i class="contact-info-card__call-info fa fa-info btn-history-call-info" data-call-sid="' . $call['cl_call_sid'] . '"> </i></small>

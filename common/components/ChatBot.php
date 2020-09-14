@@ -24,6 +24,7 @@ use yii\httpclient\Response;
  * @package common\components
  *
  * @property string $url
+ * @property string $visitorsUrl
  * @property string $username
  * @property string $password
  *
@@ -33,6 +34,7 @@ use yii\httpclient\Response;
 class ChatBot extends Component
 {
     public string $url;
+    public string $visitorsUrl;
     public string $username;
     public string $password;
 
@@ -76,26 +78,53 @@ class ChatBot extends Component
     protected function sendRequest(string $action = '', array $data = [], string $method = 'post', array $headers = [], array $options = []) : Response
     {
         $url = $this->url . $action;
-
         //$options = ['RETURNTRANSFER' => 1];
-
-        $this->request->setMethod($method)
-            ->setFormat(\yii\httpclient\Client::FORMAT_JSON)
-            ->setUrl($url)
-            ->setData($data);
-
-        if ($headers) {
-            $this->request->addHeaders($headers);
-        }
-
-        $this->request->setOptions([CURLOPT_ENCODING => 'gzip']);
-
-        if ($options) {
-            $this->request->setOptions($options);
-        }
-
-        return $this->request->send();
+		return $this->send($url, $data, $method, $headers, $options);
     }
+
+	/**
+	 * @param string $action
+	 * @param array $data
+	 * @param string $method
+	 * @param array $headers
+	 * @param array $options
+	 * @return Response
+	 * @throws \yii\httpclient\Exception
+	 */
+    protected function visitorsSendRequest(string $action = '', array $data = [], string $method = 'post', array $headers = [], array $options = []): Response
+	{
+		$url = $this->visitorsUrl . $action;
+		return $this->send($url, $data, $method, $headers, $options);
+	}
+
+	/**
+	 * @param string $url
+	 * @param array $data
+	 * @param string $method
+	 * @param array $headers
+	 * @param array $options
+	 * @return Response
+	 * @throws \yii\httpclient\Exception
+	 */
+	private function send(string $url, array $data = [], string $method = 'post', array $headers = [], array $options = []): Response
+	{
+		$this->request->setMethod($method)
+			->setFormat(\yii\httpclient\Client::FORMAT_JSON)
+			->setUrl($url)
+			->setData($data);
+
+		if ($headers) {
+			$this->request->addHeaders($headers);
+		}
+
+		$this->request->setOptions([CURLOPT_ENCODING => 'gzip']);
+
+		if ($options) {
+			$this->request->setOptions($options);
+		}
+
+		return $this->request->send();
+	}
 
 
 	/**
@@ -123,7 +152,6 @@ class ChatBot extends Component
             }
         } else {
             $out['error'] = $this->parseErrorContent($response);
-            \Yii::error(VarDumper::dumpAsString(['rid' => $rid, 'error' => $out['error']], 10), 'ChatBot:endConversation');
         }
 
         return $out;
@@ -158,7 +186,6 @@ class ChatBot extends Component
 			}
 		} else {
 			$out['error'] = $this->parseErrorContent($response);
-			\Yii::error(VarDumper::dumpAsString(['rid' => $rid, 'error' => $out['error']], 10), 'ChatBot:endConversation');
 		}
 
 		return $out;
@@ -188,11 +215,34 @@ class ChatBot extends Component
             }
         } else {
             $out['error'] = $this->parseErrorContent($response);
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'ChatBot:assignAgent');
+//            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'ChatBot:assignAgent');
         }
 
         return $out;
     }
+
+	public function createRoom(string $visitorId, string $department) : array
+	{
+		$out = ['error' => false, 'data' => []];
+		$data = [
+			'id' => $visitorId,
+			'department' => $department
+		];
+
+		$response = $this->visitorsSendRequest('create-room', $data, 'post');
+
+		if ($response->isOk) {
+			if (!empty($response->data)) {
+				$out['data'] = $response->data;
+			} else {
+				$out['error']['message'] = 'Not found in response array data key [data]';
+			}
+		} else {
+			$out['error'] = $this->parseErrorContent($response);
+		}
+
+		return $out;
+	}
 
     public function sendMessage(array $data, array $headers = []) : array
     {
@@ -208,7 +258,7 @@ class ChatBot extends Component
             }
         } else {
             $out['error'] = $this->parseErrorContent($response);
-			\Yii::error(VarDumper::dumpAsString($out['error'], 10), 'ChatBot:sendMessage');
+//			\Yii::error(VarDumper::dumpAsString($out['error'], 10), 'ChatBot:sendMessage');
         }
 
         return $out;

@@ -7,6 +7,8 @@ use common\models\query\UserProjectParamsQuery;
 use sales\access\CallAccess;
 use sales\model\emailList\entity\EmailList;
 use sales\model\phoneList\entity\PhoneList;
+use sales\model\userVoiceMail\entity\UserVoiceMail;
+use sales\model\userVoiceMail\entity\UserVoiceMailQuery;
 use Yii;
 use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -29,6 +31,9 @@ use yii\db\ActiveRecord;
  * @property int $upp_dep_id
  * @property int|null $upp_phone_list_id
  * @property int|null $upp_email_list_id
+ * @property bool|null $upp_vm_enabled
+ * @property int|null $upp_vm_user_status_id
+ * @property int|null $upp_vm_id
  *
  * @property Project $uppProject
  * @property Employee $uppUpdatedUser
@@ -36,9 +41,20 @@ use yii\db\ActiveRecord;
  * @property Department $uppDep
  * @property PhoneList $phoneList
  * @property EmailList $emailList
+ * @property UserVoiceMail $voiceMail
  */
 class UserProjectParams extends \yii\db\ActiveRecord
 {
+    public const VM_USER_STATUS_ONLINE = 1;
+    public const VM_USER_STATUS_OFFLINE = 2;
+    public const VM_USER_STATUS_ALL = 3;
+
+    public const VM_USER_STATUS_LIST = [
+        self::VM_USER_STATUS_ONLINE => 'online',
+        self::VM_USER_STATUS_OFFLINE => 'offline',
+        self::VM_USER_STATUS_ALL => 'all',
+    ];
+
     /**
      * {@inheritdoc}
      */
@@ -89,7 +105,39 @@ class UserProjectParams extends \yii\db\ActiveRecord
             ['upp_email_list_id', 'integer'],
             ['upp_email_list_id', 'unique'],
             ['upp_email_list_id', 'exist', 'skipOnError' => true, 'targetClass' => EmailList::class, 'targetAttribute' => ['upp_email_list_id' => 'el_id']],
+            
+            ['upp_vm_enabled', 'boolean'],
+            ['upp_vm_user_status_id', 'in', 'range' => array_keys(self::VM_USER_STATUS_LIST)],
+            ['upp_vm_id', 'in', 'range' => array_keys($this->getAvailableVoiceMail())],
         ];
+    }
+
+    public function vmIsOnline(): bool
+    {
+        return $this->upp_vm_user_status_id === self::VM_USER_STATUS_ONLINE;
+    }
+
+    public function vmIsOffline(): bool
+    {
+        return $this->upp_vm_user_status_id === self::VM_USER_STATUS_OFFLINE;
+    }
+
+    public function vmIsAll(): bool
+    {
+        return $this->upp_vm_user_status_id === self::VM_USER_STATUS_ALL || $this->upp_vm_user_status_id === null;
+    }
+
+    public function getAvailableVoiceMail(): array
+    {
+        if (!$this->upp_user_id) {
+            return [];
+        }
+        return UserVoiceMailQuery::getListByUser($this->upp_user_id);
+    }
+
+    public function getVoiceMail(): ActiveQuery
+    {
+        return $this->hasOne(UserVoiceMail::class, ['uvm_id' => 'upp_vm_id']);
     }
 
     /**
@@ -112,6 +160,9 @@ class UserProjectParams extends \yii\db\ActiveRecord
             'phoneList.pl_phone_number' => 'Phone List',
             'upp_email_list_id' => 'Email List',
             'emailList.el_email' => 'Email List',
+            'upp_vm_enabled' => 'Voice mail enabled',
+            'upp_vm_user_status_id' => 'Voice mail user status',
+            'upp_vm_id' => 'Voice mail',
         ];
     }
 

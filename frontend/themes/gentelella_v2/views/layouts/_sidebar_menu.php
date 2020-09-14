@@ -2,6 +2,7 @@
 
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use \yii\helpers\Url;
+use yii\widgets\Pjax;
 
 /* @var $this \yii\web\View */
 /** @var \common\models\Employee $user */
@@ -17,6 +18,7 @@ $isSuperAdmin = $user->isSuperAdmin();
 
 ?>
 <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
+    <?php Pjax::begin(['id' => 'pjax-sidebar-menu', 'timeout' => 5000, 'enablePushState' => true]); ?>
     <div class="menu_section">
         <?php
 
@@ -134,12 +136,18 @@ $isSuperAdmin = $user->isSuperAdmin();
             $menuItems[] = ['label' => 'My SMS <span id="sms-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/sms/list'], 'icon' => 'comments'];
         }
 
-        if ($user->canCall()) {
-            $menuItems[] = ['label' => 'My Calls <span id="call-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/call/list'], 'icon' => 'phone'];
-        }
 
         if ($user->canCall()) {
-            $menuItems[] = ['label' => 'My Calls Log <span id="call-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/call-log/list'], 'icon' => 'phone'];
+            $menuItems[] = [
+                'label' => 'My Calls <span class="label-info label pull-right"></span> ',
+                'url' => 'javascript:',
+                'icon' => 'phone',
+                'items' => [
+                    ['label' => 'My Calls <span class="label-info label pull-right"></span> ', 'url' => ['/call/list'], 'icon' => 'phone'],
+                    ['label' => 'My Calls Log <span class="label-info label pull-right"></span> ', 'url' => ['/call-log/list'], 'icon' => 'phone'],
+                    ['label' => 'My Voice Mail Record <span id="voice-mail-record-count" data-type="count" class="label-success label pull-right voice-mail-record"></span> ', 'url' => ['/voice-mail-record/list'], 'icon' => 'envelope'],
+                ]
+            ];
         }
 
         $menuItems[] = [
@@ -224,6 +232,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ],
                 ['label' => 'Call Note', 'url' => ['/call-note-crud/index'], 'icon' => 'list'],
                 ['label' => 'User Voice Mail', 'url' => ['/user-voice-mail/index'], 'icon' => 'microphone'],
+                ['label' => 'Voice Mail Records', 'url' => ['/voice-mail-record/index'], 'icon' => 'envelope'],
                 [
                     'label' => 'QCall',
                     'url' => 'javascript:',
@@ -581,66 +590,110 @@ $isSuperAdmin = $user->isSuperAdmin();
             ],
         ];
 
+
+        if ($search_text = Yii::$app->request->get('search_text')) {
+            filterMenuItems($menuItems, $search_text);
+        }
         ensureVisibility($menuItems);
 
         echo \frontend\themes\gentelella_v2\widgets\Menu::widget([
             'items' => $menuItems,
             'encodeLabels' => false,
             'activateParents' => true,
-            'linkTemplate' => '<a href="{url}" {attributes}>{icon}<span>{label}</span>{badge}</a>'
+            'linkTemplate' => '<a href="{url}" {attributes} data-pjax="0">{icon}<span>{label}</span>{badge}</a>'
         ]);
 
-        function ensureVisibility(&$items)
-        {
-            $allVisible = false;
-            foreach ($items as &$item) {
-                if (isset($item['url']) && is_array($item['url']) && !isset($item['visible'])) {
-                    $url = $item['url'][0];
-                    if ($url === '/' || Yii::$app->user->can('/*')) {
-                        //for superAdmin or Dashboard
-                        $item['visible'] = true;
-                    } else {
-                        // for ex.: /rbac/route  =>   rbac/route  for search in app->urlManager->rules
-                        $patternForRulesFromMainConfig =  substr($url, 1, strlen($url));
-                        $rulesFromMainConfig =\yii\helpers\ArrayHelper::map(Yii::$app->urlManager->rules, 'name', 'route');
-                        foreach ($rulesFromMainConfig as $pattern => $route) {
-                            if ($patternForRulesFromMainConfig === $pattern || strpos($pattern, $patternForRulesFromMainConfig . '/<') === 0) {
-                                $item['visible'] = Yii::$app->user->can('/' . $route);
-                                break;
-                            }
-                        }
-                        if (!isset($item['visible'])) {
-                            $item['visible'] = false;
-                            $chunks = explode('/', $url);
-                            $tmpRoute = '';
-                            foreach ($chunks as $chunk) {
-                                if (!empty($chunk)) {
-                                    $tmpRoute .=  '/' . $chunk;
-                                    if ($item['visible'] = Yii::$app->user->can($tmpRoute . '/*')) {
-                                        break;
-                                    }
-                                }
-                            }
-                            if (!$item['visible']) {
-                                $item['visible'] = Yii::$app->user->can($url);
-                            }
-                        }
-                    }
-                }
-                // If not children are visible - make invisible this node
-                if (isset($item['items']) && (!ensureVisibility($item['items']) && !isset($item['visible']))) {
-                    $item['visible'] = false;
-                }
-                if (isset($item['label']) && (!isset($item['visible']) || $item['visible'] === true)) {
-                    $allVisible = true;
-                }
-            }
-            return $allVisible;
-        }
+
+
         ?>
 
     </div>
+    <?php Pjax::end(); ?>
 </div>
+
+<?php
+
+    function filterMenuItems(&$items, string $text = '')
+    {
+        $allVisible = false;
+        foreach ($items as $k => &$item) {
+
+            if (!isset($item['label'])) {
+                $item['visible'] = false;
+                continue;
+            }
+
+            if (stripos(strip_tags($item['label']), $text) === false) {
+                $item['visible'] = false;
+            }
+
+            if (isset($item['items'])) {
+                $item['visible'] = filterMenuItems($item['items'], $text);
+            }
+
+
+
+            //$allVisible = true;
+
+/*            if (isset($item['items']) && (!filterMenuItems($item['items']) && !isset($item['visible']))) {
+                $item['visible'] = false;
+            }*/
+
+            if (!isset($item['visible']) || $item['visible'] === true) {
+                $allVisible = true;
+            }
+        }
+        return $allVisible;
+    }
+
+    function ensureVisibility(&$items)
+    {
+        $allVisible = false;
+        foreach ($items as &$item) {
+            if (isset($item['url']) && is_array($item['url']) && !isset($item['visible'])) {
+                $url = $item['url'][0];
+                if ($url === '/' || Yii::$app->user->can('/*')) {
+                    //for superAdmin or Dashboard
+                    $item['visible'] = true;
+                } else {
+                    // for ex.: /rbac/route  =>   rbac/route  for search in app->urlManager->rules
+                    $patternForRulesFromMainConfig =  substr($url, 1, strlen($url));
+                    $rulesFromMainConfig =\yii\helpers\ArrayHelper::map(Yii::$app->urlManager->rules, 'name', 'route');
+                    foreach ($rulesFromMainConfig as $pattern => $route) {
+                        if ($patternForRulesFromMainConfig === $pattern || strpos($pattern, $patternForRulesFromMainConfig . '/<') === 0) {
+                            $item['visible'] = Yii::$app->user->can('/' . $route);
+                            break;
+                        }
+                    }
+                    if (!isset($item['visible'])) {
+                        $item['visible'] = false;
+                        $chunks = explode('/', $url);
+                        $tmpRoute = '';
+                        foreach ($chunks as $chunk) {
+                            if (!empty($chunk)) {
+                                $tmpRoute .=  '/' . $chunk;
+                                if ($item['visible'] = Yii::$app->user->can($tmpRoute . '/*')) {
+                                    break;
+                                }
+                            }
+                        }
+                        if (!$item['visible']) {
+                            $item['visible'] = Yii::$app->user->can($url);
+                        }
+                    }
+                }
+            }
+            // If not children are visible - make invisible this node
+            if (isset($item['items']) && (!ensureVisibility($item['items']) && !isset($item['visible']))) {
+                $item['visible'] = false;
+            }
+            if (isset($item['label']) && (!isset($item['visible']) || $item['visible'] === true)) {
+                $allVisible = true;
+            }
+        }
+        return $allVisible;
+    }
+?>
 
 
 <?php
@@ -662,6 +715,8 @@ function updateCounters(url, className, idName) {
                 $.each( data, function( key, val ) {
                     if (val != 0) {
                         $("#" + idName + "-" + key).html(val);
+                    } else if (val == 0) {
+                        $("#" + idName + "-" + key).html('');
                     }
                 });
             }
@@ -686,6 +741,16 @@ if (Yii::$app->user->can('caseSection')) {
 if (Yii::$app->user->can('/qa-task/qa-task-queue/count')) {
     $urlQaTaskCount = Url::to(['/qa-task/qa-task-queue/count']);
     $this->registerJs("updateCounters('$urlQaTaskCount', 'qa-task-info', 'qa-task-q');", $this::POS_LOAD);
+}
+if ($user->canCall()) {
+    $urlVoiceMailRecordCount = Url::to(['/voice-mail-record/count']);
+    $this->registerJs("
+    function updateVoiceRecordCounters() {
+        updateCounters('$urlVoiceMailRecordCount', 'voice-mail-record', 'voice-mail-record');
+    }
+    window.updateVoiceRecordCounters = updateVoiceRecordCounters;
+    window.updateVoiceRecordCounters();
+    ", $this::POS_LOAD);
 }
 
 $js = <<<JS

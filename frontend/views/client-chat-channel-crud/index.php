@@ -27,10 +27,23 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'tableOptions' => ['class' => 'table table-bordered table-hover'],
+        'rowOptions' => static function (ClientChatChannel $model) {
+
+            if ($model->ccc_disabled) {
+                return [
+                    'class' => 'danger'
+                ];
+            }
+
+        },
         'columns' => [
-            'ccc_id',
-            'ccc_name',
+            ['attribute' => 'ccc_id',
+                'headerOptions' => ['style' => 'width:70px'],
+            ],
             'ccc_project_id:projectName',
+            'ccc_name',
+            'ccc_frontend_name',
             'ccc_dep_id:departmentName',
             [
                 'attribute' => 'ccc_ug_id',
@@ -38,7 +51,9 @@ $this->params['breadcrumbs'][] = $this->title;
 					return $model->cccUg ? $model->cccUg->ug_name : null;
 				}
             ],
-            'ccc_disabled:booleanByLabel',
+            'ccc_disabled:boolean',
+            'ccc_frontend_enabled:booleanByLabel',
+            'ccc_default:boolean',
             'ccc_priority',
 			[
 				'class' => DateTimeColumn::class,

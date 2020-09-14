@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Employee;
+use common\models\UserProjectParams;
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
@@ -37,7 +38,7 @@ $this->title = 'Home Page'; // . $user->username;
     </div>
 
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="x_panel">
                 <div class="x_title" >
                     <h2><i class="fa fa-user"></i> User Info</h2>
@@ -130,7 +131,7 @@ $this->title = 'Home Page'; // . $user->username;
 
 
 
-        <div class="col-md-5">
+        <div class="col-md-6">
             <?php if ($user->userProjectParams): ?>
             <div class="x_panel">
                 <div class="x_title" >
@@ -150,6 +151,9 @@ $this->title = 'Home Page'; // . $user->username;
                             <th>Phone</th>
                             <th>Department</th>
                             <th>Allow General Line</th>
+                            <th>Voice mail enabled</th>
+                            <th>Voice mail user status</th>
+                            <th>Voice mail</th>
                         </tr>
                         <?php foreach ($user->userProjectParams as $projectParam) :?>
                             <tr>
@@ -159,7 +163,10 @@ $this->title = 'Home Page'; // . $user->username;
 <!--                                <td>--><?php //=Html::encode($projectParam->upp_tw_phone_number)?><!--</td>-->
                                 <td><?= Yii::$app->formatter->asPhoneList($projectParam->phoneList) ?></td>
                                 <td><?=($projectParam->uppDep ? $projectParam->uppDep->dep_name : '-')?></td>
-                                <td><span class="label label-<?=$projectParam->upp_allow_general_line ? 'success' : 'danger'?>"><?=$projectParam->upp_allow_general_line ? 'Yes' : 'No'?></span></td>
+                                <td><?=$projectParam->upp_allow_general_line ? '<i class="fa fa-check-square-o"> </i>' : '-'; ?></span></td>
+                                <td><?= $projectParam->upp_vm_enabled ? '<i class="fa fa-check-square-o"> </i>' : '-'; ?></td>
+                                <td><?= UserProjectParams::VM_USER_STATUS_LIST[$projectParam->upp_vm_user_status_id] ?? '<span class="not-set">(not set)</span>'; ?></td>
+                                <td><?= $projectParam->upp_vm_id ? $projectParam->voiceMail->uvm_name : '<span class="not-set">(not set)</span>'; ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </table>

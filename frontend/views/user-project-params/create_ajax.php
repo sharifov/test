@@ -1,5 +1,6 @@
 <?php
 
+use common\models\UserProjectParams;
 use sales\access\EmployeeProjectAccess;
 use sales\widgets\EmailSelect2Widget;
 use sales\widgets\PhoneSelect2Widget;
@@ -23,7 +24,7 @@ use borales\extensions\phoneInput\PhoneInput;
 </script>
 
 <?php \yii\widgets\Pjax::begin(['id' => 'create-app-pjax', 'timeout' => 2000, 'enablePushState' => false]); ?>
-<?php $form = ActiveForm::begin(['options' => ['data-pjax' => true], 'action' => ['user-project-params/create-ajax'], 'method' => 'post']); ?>
+<?php $form = ActiveForm::begin(['options' => ['data-pjax' => true], 'action' => ['user-project-params/create-ajax', 'user_id' => $model->upp_user_id], 'method' => 'post', 'enableClientValidation' => false]); ?>
 
 <div class="col-md-12">
     <?php //= $form->field($model, 'upp_user_id')->dropDownList($userList, ['prompt' => '-']) ?>
@@ -72,6 +73,10 @@ use borales\extensions\phoneInput\PhoneInput;
     ]) ?>
 
     <?= $form->field($model, 'upp_allow_general_line')->checkbox() ?>
+
+    <?= $form->field($model, 'upp_vm_enabled')->checkbox() ?>
+    <?= $form->field($model, 'upp_vm_user_status_id')->dropDownList(UserProjectParams::VM_USER_STATUS_LIST, ['prompt' => 'Select user status']) ?>
+    <?= $form->field($model, 'upp_vm_id')->dropDownList($model->getAvailableVoiceMail(), ['prompt' => 'Select voice mail']) ?>
 
     <?php //= $form->field($model, 'upp_tw_sip_id')->textInput(['maxlength' => true]) ?>
 

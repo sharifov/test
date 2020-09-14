@@ -12,6 +12,8 @@ use common\models\query\ConferenceQuery;
 use frontend\widgets\notification\NotificationMessage;
 use yii\helpers\VarDumper;
 
+//todo remove
+
 /**
  * Class DisconnectFromAllActiveCreatedConferences
  *

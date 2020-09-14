@@ -1,22 +1,29 @@
 (function () {
 
-    function Incoming(queues) {
+    function Incoming(queues, notifier, incomingPane, outgoingPane) {
         this.queues = queues;
+        this.notifier = notifier;
+        this.incomingPane = incomingPane;
+        this.outgoingPane = outgoingPane;
 
         this.audio = new Audio('/js/sounds/incoming_call.mp3');
         this.audio.volume = 0.3;
         this.audio.loop = true;
+
+        this.isOn = true;
+        this.offKey = null;
 
         this.play = function () {
             if (document.visibilityState === 'visible') {
                 this.audio.play();
                 return;
             }
-            this.pause();
+            this.stop();
         };
 
-        this.pause = function () {
+        this.stop = function () {
             this.audio.pause();
+            this.audio.currentTime = 0;
         };
 
         this.muted = function () {
@@ -34,15 +41,27 @@
         };
 
         this.refresh = function () {
-            if (this.queues.active.count() > 0) {
-                this.pause();
+            if (!this.isOn) {
+                this.stop();
                 return;
             }
-            if (this.queues.direct.count() > 0 || this.queues.general.count() > 0) {
+            if (this.queues.active.count() > 0) {
+                this.stop();
+                return;
+            }
+            if (this.outgoingPane.isActive()) {
+                this.stop();
+                return;
+            }
+            if (this.incomingPane.isActive()) {
                 this.play();
                 return;
             }
-            this.pause();
+            if (this.notifier.getVisibleNotifications().length > 0) {
+                this.play();
+                return;
+            }
+            this.stop();
         };
 
         this.indicatorMuted = function () {
@@ -51,6 +70,22 @@
 
         this.indicatorUnMuted = function () {
             $('#incoming-sound-indicator').attr('data-status', 1).html('<i class="fa fa-volume-up text-success"> </i>').attr('title', 'Incoming Call - Volume ON');
+        };
+
+        this.on = function (key) {
+            if (this.isOff() && this.offKey !== key) {
+                return;
+            }
+            this.isOn = true;
+        };
+
+        this.off = function (key) {
+            this.isOn = false;
+            this.offKey = key;
+        };
+
+        this.isOff = function () {
+            return this.isOn === false;
         };
     }
 

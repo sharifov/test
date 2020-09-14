@@ -10,6 +10,7 @@ namespace frontend\widgets;
 
 use common\models\Lead;
 use sales\entities\cases\Cases;
+use sales\helpers\UserCallIdentity;
 use Yii;
 
 /**
@@ -71,6 +72,7 @@ class OnlineConnection extends \yii\bootstrap\Widget
 
         return $this->render('online_connection2', [
             'userId' =>  $userId,
+            'userIdentity' =>  UserCallIdentity::getClientId($userId),
             'controllerId' => $controllerId,
             'actionId' => $actionId,
             'pageUrl' => $pageUrl,

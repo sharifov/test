@@ -37,10 +37,10 @@ class UpdateCallPrice
             }
 
             if (!isset($result['result']['price'])) {
-                \Yii::info(VarDumper::dumpAsString([
-                    'callSid' => $callSid,
-                    'message' => 'Not found price',
-                ]), 'info\UpdateCallPrice');
+//                \Yii::info(VarDumper::dumpAsString([
+//                    'callSid' => $callSid,
+//                    'message' => 'Not found price',
+//                ]), 'info\UpdateCallPrice');
                 return;
             }
 

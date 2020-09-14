@@ -6,6 +6,7 @@ use common\components\purifier\Purifier;
 use common\models\ApiLog;
 use common\models\Call;
 use common\models\CallUserGroup;
+use common\models\Client;
 use common\models\ClientPhone;
 use common\models\Conference;
 use common\models\ConferenceParticipant;
@@ -24,6 +25,7 @@ use frontend\widgets\newWebPhone\call\socket\RemoveIncomingRequestMessage;
 use frontend\widgets\newWebPhone\sms\socket\Message;
 use frontend\widgets\notification\NotificationMessage;
 use sales\entities\cases\Cases;
+use sales\forms\lead\PhoneCreateForm;
 use sales\helpers\app\AppHelper;
 use sales\helpers\UserCallIdentity;
 use sales\model\call\form\CallCustomParameters;
@@ -35,11 +37,14 @@ use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackH
 use sales\model\emailList\entity\EmailList;
 use sales\model\phoneList\entity\PhoneList;
 use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
+use sales\model\userVoiceMail\entity\UserVoiceMail;
+use sales\model\voiceMailRecord\entity\VoiceMailRecord;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\user\UserProjectParamsRepository;
 use sales\services\call\CallDeclinedException;
 use sales\services\call\CallService;
 use sales\services\cases\CasesCommunicationService;
+use sales\services\client\ClientManageService;
 use sales\services\sms\incoming\SmsIncomingForm;
 use sales\services\sms\incoming\SmsIncomingService;
 use Twilio\TwiML\VoiceResponse;
@@ -428,6 +433,30 @@ class CommunicationController extends ApiBaseController
                     $user = $upp->uppUser;
 
                     if ($user) {
+
+                        if ($upp->upp_vm_enabled && $upp->upp_vm_id) {
+                            if (
+                                $upp->vmIsAll()
+                                || ($upp->vmIsOffline() && !$user->isOnline())
+                                || ($upp->vmIsOnline() && $user->isOnline())
+                            ) {
+                                if (!$callModel->c_client_id) {
+                                    try {
+                                        $client = (Yii::createObject(ClientManageService::class))->getOrCreateByPhones([new PhoneCreateForm(['phone' => $callModel->c_from])]);
+                                        $callModel->c_client_id = $client->id;
+                                    } catch (\Throwable $e) {
+                                        Yii::error($e->getMessage(), 'API:Communication:createVoiceMailResponse:Client:create');
+                                    }
+                                }
+                                $callModel->c_created_user_id = $upp->upp_user_id;
+                                if (!$callModel->save()) {
+                                    Yii::error(VarDumper::dumpAsString($callModel->getErrors()), 'API:Communication:createVoiceMailResponse:Call:save');
+                                }
+
+                                return $this->createVoiceMailResponse($upp->voiceMail, $callModel->c_created_user_id, $callModel->c_client_id);
+                            }
+                        }
+
                         if ($user->isOnline()) {
                             // Yii::info('DIRECT CALL - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $incoming_phone_number, 'info\API:Communication:Incoming:DirectCall');
 							if ($callFromInternalPhone && $user->userStatus->us_is_on_call) {
@@ -441,8 +470,8 @@ class CommunicationController extends ApiBaseController
 							return $this->createExceptionCall($incoming_phone_number, 'User is offline');
 						}
 
-						Yii::info('Offline - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $incoming_phone_number,
-                            'info\API:Communication:Incoming:Offline');
+//						Yii::info('Offline - User (' . $user->username . ') Id: ' . $user->id . ', phone: ' . $incoming_phone_number,
+//                            'info\API:Communication:Incoming:Offline');
                         $message = 'Missing Call from ' . $client_phone_number . ' to ' . $incoming_phone_number . "\r\n Reason: Agent offline";
                         if ($callModel->c_lead_id && $callModel->cLead) {
                             $message .= "\r\n Lead (Id: " . Purifier::createLeadShortLink($callModel->cLead) . ")";
@@ -563,7 +592,41 @@ class CommunicationController extends ApiBaseController
 //
 //                    Notifications::sendSocket('recordingUpdate', ['lead_id' => $call->c_lead_id], ['url' => $call->recordingUrl]);
 //                }
+
+                if (!empty($callData['voiceMail'])) {
+                    $voiceMailRecord = new VoiceMailRecord();
+                    $voiceMailRecord->vmr_call_id = $call->c_id;
+                    $voiceMailRecord->vmr_record_sid = $callData['RecordingSid'];
+                    $voiceMailRecord->vmr_user_id = $callData['userId'] ?? null;
+                    $voiceMailRecord->vmr_client_id = $callData['clientId'] ?? null;
+                    $voiceMailRecord->vmr_created_dt = !empty($callData['RecordingStartTime']) ? date('Y-m-d H:i:s', strtotime($callData['RecordingStartTime'])) : null;
+                    $voiceMailRecord->vmr_duration = (int)$callData['RecordingDuration'];
+                    $voiceMailRecord->vmr_new = true;
+                    $voiceMailRecord->vmr_deleted = false;
+                    if ($voiceMailRecord->save()) {
+                        $clientData = '';
+                        if ($client = Client::findOne($voiceMailRecord->vmr_client_id)) {
+                            $clientData = 'Client(Id: ' . $client->id . ' Name: ' . ($client->is_company ? $client->company_name : $client->getShortName()) . '). ';
+                        }
+                        $ntf = Notifications::create(
+                            $voiceMailRecord->vmr_user_id,
+                            'Voice Mail',
+                            'New Voice Mail. ' . $clientData . 'Record: ' . $voiceMailRecord->getRecordingUrl(), Notifications::TYPE_INFO, true
+                        );
+                        if ($ntf) {
+                            Notifications::publish('getNewNotification', ['user_id' => $voiceMailRecord->vmr_user_id], NotificationMessage::add($ntf));
+                            Notifications::publish('updateVoiceMailRecord', ['user_id' => $voiceMailRecord->vmr_user_id], []);
+                        }
+                    } else {
+                        Yii::error(VarDumper::dumpAsString([
+                            'errors' => $voiceMailRecord->getErrors(),
+                            'model' => $voiceMailRecord->getAttributes(),
+                            'callData' => $callData,
+                        ]), 'API:Communication:voiceRecord:VoiceMailRecord:save');
+                    }
+                }
             }
+
         } else {
             $response['error'] = 'Not found callData[CallSid] or callData[RecordingSid] in voiceRecord';
         }
@@ -1441,7 +1504,7 @@ class CommunicationController extends ApiBaseController
 	 */
     protected function createExceptionCall(string $phoneNumber, string $message = 'Sorry, this number is temporarily not working.'): array
     {
-        Yii::error('Number is temporarily not working ('.$phoneNumber.')', 'API:Communication:createExceptionCall');
+//        Yii::error('Number is temporarily not working ('.$phoneNumber.')', 'API:Communication:createExceptionCall');
 
         $responseTwml = new VoiceResponse();
         $responseTwml->say($message, [
@@ -1462,6 +1525,22 @@ class CommunicationController extends ApiBaseController
         return $responseData;
     }
 
+    protected function createVoiceMailResponse(UserVoiceMail $voiceMail, int $userId, ?int $clientId): array
+    {
+        return [
+            'status' => 200,
+            'name' => 'Success',
+            'code' => 0,
+            'message' => '',
+            'data' => [
+                'response' => [
+                    'voiceMail' => $voiceMail->getResponse(),
+                    'userId' => $userId,
+                    'clientId' => $clientId,
+                ]
+            ]
+        ];
+    }
 
     protected function startCallService(Call $callModel, DepartmentPhoneProject $department, int $ivrSelectedDigit, array $stepParams): array
     {
@@ -2468,6 +2547,8 @@ class CommunicationController extends ApiBaseController
             $response['error'] = 'Not found and not saved Conference';
             return $response;
         }
+
+        $form->conferenceId = $conference->cf_id;
 
         if ($form->StatusCallbackEvent === Conference::EVENT_CONFERENCE_START) {
 

@@ -79,7 +79,7 @@ class InternalContactService
         if ($dpp = DepartmentPhoneProject::find()->byPhone($phone)->one()) {
             if ($dpp->dpp_dep_id && $department = $dpp->dppDep) {
                 if ($incomingProject && $dpp->dpp_project_id && $incomingProject !== $dpp->dpp_project_id) {
-                    $log->add('Incoming Project not equal for ' . $phone . ' departmentPhoneProject Id: ' . $dpp->dpp_id . '. Incoming ProjectId: ' . $incomingProject . '. Found ProjectId: ' . $dpp->dpp_project_id);
+//                    $log->add('Incoming Project not equal for ' . $phone . ' departmentPhoneProject Id: ' . $dpp->dpp_id . '. Incoming ProjectId: ' . $incomingProject . '. Found ProjectId: ' . $dpp->dpp_project_id);
                 }
                 return new InternalContact($department, $dpp->dpp_project_id, null, $log);
             }
@@ -89,16 +89,16 @@ class InternalContactService
         if ($upp = UserProjectParams::find()->byPhone($phone)->one()) {
             if ($upp->upp_dep_id && $department = $upp->uppDep) {
                 if ($incomingProject && $upp->upp_project_id && $incomingProject !== $upp->upp_project_id) {
-                    $log->add('Incoming Project not equal for ' . $phone . ' userProjectParams. Incoming ProjectId: ' . $incomingProject . '. Found ProjectId: ' . $upp->upp_project_id);
+//                    $log->add('Incoming Project not equal for ' . $phone . ' userProjectParams. Incoming ProjectId: ' . $incomingProject . '. Found ProjectId: ' . $upp->upp_project_id);
                 }
                 return new InternalContact($department, $upp->upp_project_id, $upp->upp_user_id, $log);
             }
 //            $log->add('Not found department for userProjectParams tw_phone_number: ' . $upp->upp_tw_phone_number);
-            $log->add('Not found department for userProjectParams tw_phone_number: ' . $upp->getPhone());
+//            $log->add('Not found department for userProjectParams tw_phone_number: ' . $upp->getPhone());
             if ($upp->uppUser) {
                 if ($upp->uppUser->userDepartments && isset($upp->uppUser->userDepartments[0]) && $upp->uppUser->userDepartments[0]->udDep) {
                     if ($incomingProject && $upp->upp_project_id && $incomingProject !== $upp->upp_project_id) {
-                        $log->add('Incoming Project not equal for ' . $phone . ' userProjectParams. Incoming ProjectId: ' . $incomingProject . '. Found ProjectId: ' . $upp->upp_project_id);
+//                        $log->add('Incoming Project not equal for ' . $phone . ' userProjectParams. Incoming ProjectId: ' . $incomingProject . '. Found ProjectId: ' . $upp->upp_project_id);
                     }
                     return new InternalContact($upp->uppUser->userDepartments[0]->udDep, $upp->upp_project_id, $upp->upp_user_id, $log);
                 }
@@ -126,7 +126,7 @@ class InternalContactService
         if ($dep = DepartmentEmailProject::find()->byEmail($email)->one()) {
             if ($dep->dep_dep_id && $department = $dep->depDep) {
                 if ($incomingProject && $incomingProject !== $dep->dep_project_id) {
-                    $log->add('Incoming Project not equal for ' . $email . ' DepartmentEmailProject Id: ' . $dep->dep_id . '. Incoming ProjectId: ' . $incomingProject . '. Found ProjectId: ' . $dep->dep_project_id);
+//                    $log->add('Incoming Project not equal for ' . $email . ' DepartmentEmailProject Id: ' . $dep->dep_id . '. Incoming ProjectId: ' . $incomingProject . '. Found ProjectId: ' . $dep->dep_project_id);
                 }
                 return new InternalContact($department, $dep->dep_project_id, null, $log);
             }
@@ -136,16 +136,16 @@ class InternalContactService
         if ($upp = UserProjectParams::find()->byEmail($email)->one()) {
             if ($upp->upp_dep_id && $department = $upp->uppDep) {
                 if ($incomingProject && $upp->upp_project_id && $incomingProject !== $upp->upp_project_id) {
-                    $log->add('Incoming Project not equal for ' . $email . ' userProjectParams. Incoming ProjectId: ' . $incomingProject . '. Found ProjectId: ' . $upp->upp_project_id);
+//                    $log->add('Incoming Project not equal for ' . $email . ' userProjectParams. Incoming ProjectId: ' . $incomingProject . '. Found ProjectId: ' . $upp->upp_project_id);
                 }
                 return new InternalContact($department, $upp->upp_project_id, $upp->upp_user_id, $log);
             }
 //            $log->add('Not found department for userProjectParams email: ' . $upp->upp_email);
-            $log->add('Not found department for userProjectParams email: ' . $upp->getEmail());
+//            $log->add('Not found department for userProjectParams email: ' . $upp->getEmail());
             if ($upp->uppUser) {
                 if ($upp->uppUser->userDepartments && isset($upp->uppUser->userDepartments[0]) && $upp->uppUser->userDepartments[0]->udDep) {
                     if ($incomingProject && $upp->upp_project_id && $incomingProject !== $upp->upp_project_id) {
-                        $log->add('Incoming Project not equal for ' . $email . ' userProjectParams. Incoming ProjectId: ' . $incomingProject . '. Found ProjectId: ' . $upp->upp_project_id);
+//                        $log->add('Incoming Project not equal for ' . $email . ' userProjectParams. Incoming ProjectId: ' . $incomingProject . '. Found ProjectId: ' . $upp->upp_project_id);
                     }
                     return new InternalContact($upp->uppUser->userDepartments[0]->udDep, $upp->upp_project_id, $upp->upp_user_id, $log);
                 }

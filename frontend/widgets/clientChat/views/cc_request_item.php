@@ -37,15 +37,15 @@ $accessUrl = \yii\helpers\Url::to('/client-chat/access-manage');
 
 			<span class="_cc-request-created">
                                     <?php if ($formatter instanceof Formatter): ?>
-										<?= $formatter->asByUserDateTime($access->ccua_created_dt) ?>
+										<?= $formatter->asByUserDateTime($access->getTimeByChatStatus()) ?>
 									<?php else: ?>
-										<?= $formatter->asDatetime($access->ccua_created_dt) ?>
+										<?= $formatter->asDatetime($access->getTimeByChatStatus()) ?>
 									<?php endif; ?>
                                 </span>
 
 			<?php if ($formatter instanceof Formatter): ?>
 				<span>
-                                        <?= $formatter->asTimer($access->ccua_created_dt) ?>
+                                        <?= $formatter->asTimer($access->getTimeByChatStatus()) ?>
                                     </span>
 			<?php endif; ?>
 			<div class="_cc-data">

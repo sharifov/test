@@ -13,6 +13,8 @@ use yii\widgets\ActiveForm;
     <?php $form = ActiveForm::begin(); ?>
 
     <div class="col-md-6">
+        <?= $form->field($model, 'project_key')->textInput(['maxlength' => true]) ?>
+
         <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 
         <?= $form->field($model, 'link')->textInput(['maxlength' => true]) ?>

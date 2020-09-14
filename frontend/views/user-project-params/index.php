@@ -4,6 +4,7 @@ use common\components\grid\BooleanColumn;
 use common\components\grid\department\DepartmentColumn;
 use common\models\Employee;
 use common\components\grid\UserSelect2Column;
+use common\models\UserProjectParams;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -75,6 +76,20 @@ if ($user->isAdmin()) {
                 'relation' => 'phoneList',
             ],
             ['class' => BooleanColumn::class, 'attribute' => 'upp_allow_general_line'],
+            ['class' => BooleanColumn::class, 'attribute' => 'upp_vm_enabled'],
+            [
+                'attribute' => 'upp_vm_user_status_id',
+                'value' => static function(UserProjectParams $model) {
+                    return UserProjectParams::VM_USER_STATUS_LIST[$model->upp_vm_user_status_id] ?? null;
+                },
+                'filter' => UserProjectParams::VM_USER_STATUS_LIST,
+            ],
+            [
+                'attribute' => 'upp_vm_id',
+                'value' => static function(UserProjectParams $model) {
+                    return $model->upp_vm_id ? $model->voiceMail->uvm_name : null;
+                },
+            ],
             //'upp_tw_sip_id',
             //'upp_created_dt',
             //'upp_updated_dt',

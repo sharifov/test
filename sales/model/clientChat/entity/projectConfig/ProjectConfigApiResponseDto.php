@@ -1,6 +1,7 @@
 <?php
 namespace sales\model\clientChat\entity\projectConfig;
 
+use sales\model\clientChatChannel\entity\ClientChatChannel;
 use yii\helpers\Json;
 
 /**
@@ -14,6 +15,7 @@ use yii\helpers\Json;
  * @property array $theme
  * @property array $registration
  * @property array $settings
+ * @property array $channels
  */
 class ProjectConfigApiResponseDto
 {
@@ -52,6 +54,11 @@ class ProjectConfigApiResponseDto
 	 */
 	public array $settings;
 
+    /**
+     * @var array $channels
+     */
+    public array $channels;
+
 	public function __construct(ClientChatProjectConfig $projectConfig)
 	{
 		$params = Json::decode($projectConfig->ccpc_params_json);
@@ -63,5 +70,6 @@ class ProjectConfigApiResponseDto
 		$this->theme = Json::decode($projectConfig->ccpc_theme_json) ?? '{}';
 		$this->registration = Json::decode($projectConfig->ccpc_registration_json) ?? '{}';
 		$this->settings = Json::decode($projectConfig->ccpc_settings_json) ?? '{}';
+        $this->channels = ClientChatChannel::getSettingsList($projectConfig->ccpc_project_id);
 	}
 }

@@ -390,6 +390,10 @@ use yii\helpers\Html;
                     if (call !== null) {
                         call.unSetHangupRequestState();
                     }
+                    return;
+                }
+                if (typeof data.result !== 'undefined' && typeof data.result.status !== 'undefined' && data.result.status === 'completed') {
+                    PhoneWidgetCall.completeCall(callSid);
                 }
             })
             .fail(function(jqXHR, textStatus, errorThrown) {

@@ -902,7 +902,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $this->processConferenceResponse($response);
     }
 
-    public function joinToConference(string $callSid, string $conferenceSid, int $projectId, string $from, string $to, string $source_type_id): array
+    public function joinToConference(string $callSid, string $conferenceSid, int $projectId, string $from, string $to, string $source_type_id, int $user_id): array
     {
         $data = [
             'callSid' => $callSid,
@@ -911,6 +911,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'from' => $from,
             'to' => $to,
             'source_type_id' => $source_type_id,
+            'user_id' => $user_id
         ];
 
         $response = $this->sendRequest('twilio-conference/join-to-conference', $data);
@@ -941,7 +942,15 @@ class CommunicationService extends Component implements CommunicationServiceInte
                 if ($isError) {
                     $out['error'] = true;
                     $out['message'] = (string)($data['message'] ?? 'Undefined error message');
-                    \Yii::error(VarDumper::dumpAsString($response->data), 'Component:CommunicationService::processResponse:response');
+                    if (
+                        !
+                        (
+                            (!empty($data['code']) && $data['code'] === 21220 && $out['message'] === 'Call status is Completed')
+                            || (!empty($data['code']) && $data['code'] === 20404 && $out['message'] === 'Send digit error. Conference not found')
+                        )
+                    ) {
+                        \Yii::error(VarDumper::dumpAsString($response->data), 'Component:CommunicationService::processResponse:response');
+                    }
                 }
                 $out['result'] = $data['result'] ?? [];
             } else {
@@ -1060,11 +1069,12 @@ class CommunicationService extends Component implements CommunicationServiceInte
        return $this->processResponseGetPrice($response);
     }
 
-    public function callToUser(string $from, string $to, int $created_userId, array $requestCall, string $friendly_name): array
+    public function callToUser(string $from, string $to, int $to_user_id, int $created_userId, array $requestCall, string $friendly_name): array
     {
         $data = [
             'from' => $from,
             'to' => $to,
+            'to_user_id' => $to_user_id,
             'created_user_id' => $created_userId,
             'requestCall' => $requestCall,
             'voipApiUsername' => $this->voipApiUsername,

@@ -461,7 +461,7 @@ class RocketChat extends Component
 
 
     /**
-     * @param array $$message
+     * @param array $message
      * @return array
      * @throws Exception
      */
@@ -481,7 +481,7 @@ class RocketChat extends Component
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'RocketChat:getAllDepartments');
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'RocketChat:sendMessage');
         }
 
         return $out;

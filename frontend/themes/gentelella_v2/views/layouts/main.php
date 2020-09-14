@@ -85,7 +85,8 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
                 </div>
 
                 <!-- sidebar menu -->
-                <?= $this->render('_sidebar_menu') ?>
+                <?php //= $this->render('_sidebar_menu') ?>
+                <?= \frontend\themes\gentelella_v2\widgets\SideBarMenu::widget(['user' => $user]); ?>
                 <!-- /sidebar menu -->
 
                 <!-- /menu footer buttons -->

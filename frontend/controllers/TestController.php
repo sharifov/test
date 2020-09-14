@@ -123,9 +123,15 @@ use sales\helpers\user\UserFinder;
 use sales\helpers\UserCallIdentity;
 use sales\model\call\useCase\UpdateCallPrice;
 use sales\model\callLog\entity\callLog\CallLog;
+use sales\model\conference\entity\aggregate\ConferenceLogAggregate;
+use sales\model\conference\entity\aggregate\log\HtmlFormatter;
+use sales\model\conference\entity\conferenceEventLog\ConferenceEventLog;
+use sales\model\conference\entity\conferenceEventLog\ConferenceEventLogQuery;
+use sales\model\conference\entity\conferenceEventLog\EventFactory;
 use sales\model\conference\service\ManageCurrentCallsByUserService;
 use sales\model\conference\useCase\DisconnectFromAllActiveClientsCreatedConferences;
 use sales\model\conference\useCase\PrepareCurrentCallsForNewCall;
+use sales\model\conference\useCase\saveParticipantStats\Command;
 use sales\model\coupon\useCase\request\CouponForm;
 use sales\model\emailList\entity\EmailList;
 use sales\model\lead\useCase\lead\api\create\Handler;
@@ -250,6 +256,26 @@ class TestController extends FController
 
     public function actionTest()
     {
+        $command = new Command('CF17c1116022347e5202ef035e2e88286f', 4973);
+        $handler = Yii::createObject(\sales\model\conference\useCase\saveParticipantStats\Handler::class);
+        $handler->handle($command);
+
+        die;
+        $conferenceSid  = 'CF598673a88ea9deb25aeb04b2821fe24d';
+        $eventsLog = ConferenceEventLogQuery::getRawData($conferenceSid);
+
+        $events = [];
+        foreach ($eventsLog as $item) {
+            $events[] = EventFactory::create($item['type'], $item['data']);
+        }
+        $aggregate = new ConferenceLogAggregate($events);
+        $aggregate->run();
+        $printer = new HtmlFormatter($aggregate->logs);
+        return $this->renderContent($printer->format());
+
+        return '';
+
+
 
 //        $userId = 294;
 //        $calls = Call::find()->andWhere([

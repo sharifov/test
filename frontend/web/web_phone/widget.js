@@ -511,6 +511,8 @@ window.phoneWidget.events = {
     };
 
     this.accept = function (call) {
+      window.phoneWidget.notifier.off(call.data.callSid);
+      PhoneWidgetCall.audio.incoming.off(call.data.callSid);
       $.ajax({
         type: 'post',
         url: this.settings.acceptCallUrl,
@@ -523,10 +525,14 @@ window.phoneWidget.events = {
         if (data.error) {
           createNotify('Accept Call', data.message, 'error');
           call.unSetAcceptCallRequestState();
+          window.phoneWidget.notifier.on(call.data.callSid);
+          PhoneWidgetCall.audio.incoming.on(call.data.callSid);
         }
       }).fail(function () {
         createNotify('Accept Call', 'Server error', 'error');
         call.unSetAcceptCallRequestState();
+        window.phoneWidget.notifier.on(call.data.callSid);
+        PhoneWidgetCall.audio.incoming.on(call.data.callSid);
       });
     };
 
@@ -567,6 +573,8 @@ window.phoneWidget.events = {
     };
 
     this.returnHoldCall = function (call) {
+      window.phoneWidget.notifier.off(call.data.callSid);
+      PhoneWidgetCall.audio.incoming.off(call.data.callSid);
       $.ajax({
         type: 'post',
         url: this.settings.returnHoldCallUrl,
@@ -578,10 +586,14 @@ window.phoneWidget.events = {
         if (data.error) {
           createNotify('Return Hold Call', data.message, 'error');
           call.unSetReturnHoldCallRequestState();
+          window.phoneWidget.notifier.on(call.data.callSid);
+          PhoneWidgetCall.audio.incoming.on(call.data.callSid);
         }
       }).fail(function () {
         createNotify('Return Hold Call', 'Server error', 'error');
         call.unSetReturnHoldCallRequestState();
+        window.phoneWidget.notifier.on(call.data.callSid);
+        PhoneWidgetCall.audio.incoming.on(call.data.callSid);
       });
     };
 
@@ -2022,7 +2034,7 @@ class PhoneWidgetNotification extends React.Component {
   render() {
     let className = 'phone-notifications';
 
-    if (!(this.props.notification.isDeleted || this.props.notification.isNew)) {
+    if (!(this.props.notification.isDeleted || this.props.notification.isNew || this.props.notification.willHide)) {
       className = className + ' phone-notifications--shown';
     }
 
@@ -2149,7 +2161,7 @@ class IncomingCallNotificationItem extends React.Component {
     }
 
     return React.createElement("li", {
-      className: notification.isDeleted || notification.isNew ? 'phone-notifications__item' : 'phone-notifications__item phone-notifications__item--shown'
+      className: notification.isDeleted || notification.isNew || notification.willHide ? 'phone-notifications__item' : 'phone-notifications__item phone-notifications__item--shown'
     }, React.createElement("div", {
       className: "incoming-notification"
     }, React.createElement("i", {
@@ -2173,13 +2185,7 @@ class IncomingCallNotificationItem extends React.Component {
       className: "incoming-notification__action-list"
     }, React.createElement("div", {
       className: "incoming-notification__dynamic"
-    }, notification.canCallInfo ? React.createElement("a", {
-      href: "#",
-      "data-call-sid": notification.callSid,
-      className: "incoming-notification__action incoming-notification__action--info pw-btn-call-info"
-    }, React.createElement("i", {
-      className: "fa fa-info"
-    }, " ")) : '', React.createElement("a", {
+    }, React.createElement("a", {
       href: "#",
       className: "incoming-notification__action incoming-notification__action--phone btn-item-call-queue",
       "data-type-action": notification.queue === 'hold' ? 'return' : notification.isInternal ? 'acceptInternal' : 'accept',
@@ -2467,8 +2473,8 @@ var PhoneWidgetPaneActive = function () {
     callSid = sid;
   }
 
-  function getCallSid() {
-    return callSid;
+  function isEqual(sid) {
+    return callSid === sid;
   }
 
   function removeCallSid() {
@@ -2517,7 +2523,7 @@ var PhoneWidgetPaneActive = function () {
     load: load,
     show: show,
     hide: hide,
-    getCallSid: getCallSid,
+    isEqual: isEqual,
     removeCallSid: removeCallSid,
     isActive: isActive,
     removeCallInProgressIndicator: removeCallInProgressIndicator
@@ -2557,8 +2563,8 @@ var PhoneWidgetPaneIncoming = function () {
     callSid = sid;
   }
 
-  function getCallSid() {
-    return callSid;
+  function isEqual(sid) {
+    return callSid === sid;
   }
 
   function removeCallSid() {
@@ -2600,7 +2606,7 @@ var PhoneWidgetPaneIncoming = function () {
     load: load,
     show: show,
     hide: hide,
-    getCallSid: getCallSid,
+    isEqual: isEqual,
     removeCallSid: removeCallSid,
     isActive: isActive,
     initWidgetIcon: initWidgetIcon
@@ -2640,8 +2646,8 @@ var PhoneWidgetPaneOutgoing = function () {
     callSid = sid;
   }
 
-  function getCallSid() {
-    return callSid;
+  function isEqual(sid) {
+    return callSid === sid;
   }
 
   function removeCallSid() {
@@ -2670,7 +2676,7 @@ var PhoneWidgetPaneOutgoing = function () {
     load: load,
     show: show,
     hide: hide,
-    getCallSid: getCallSid,
+    isEqual: isEqual,
     removeCallSid: removeCallSid,
     isActive: isActive
   };
@@ -3304,20 +3310,55 @@ function PhoneWidgetPaneQueue(initQueues) {
       'desktop': new DesktopNotifier(),
       'phone': new PhoneWidgetNotifier()
     };
+    this.isOn = true;
+    this.offKey = null;
+
+    this.getVisibleNotifications = function () {
+      let notifications = [];
+      this.notifications.all().forEach(function (notification) {
+        if (notification.isShow) {
+          notifications.push(notification);
+        }
+      });
+      return notifications;
+    };
 
     this.add = function (key, type, notification) {
       if (this.notifications.add(key, type, notification) === false) {
         return false;
       }
 
+      if (!notification.isShow) {
+        return true;
+      }
+
       notification.isNew = true;
-      this.notifiers.desktop.notify(this.notifications.all());
+      this.notifiers.desktop.notify(this.getVisibleNotifications());
       this.notifiers.phone.notify(notification);
       notification.isNew = false;
       let self = this;
       setTimeout(function () {
-        self.notifiers.desktop.notify(self.notifications.all());
+        self.notifiers.desktop.notify(self.getVisibleNotifications());
         self.notifiers.phone.notify(notification);
+      }, 50);
+      return true;
+    };
+
+    this.addAndShowOnlyDesktop = function (key, type, notification) {
+      if (this.notifications.add(key, type, notification) === false) {
+        return false;
+      }
+
+      if (!notification.isShow) {
+        return true;
+      }
+
+      notification.isNew = true;
+      this.notifiers.desktop.notify(this.getVisibleNotifications());
+      notification.isNew = false;
+      let self = this;
+      setTimeout(function () {
+        self.notifiers.desktop.notify(self.getVisibleNotifications());
       }, 50);
       return true;
     };
@@ -3329,8 +3370,13 @@ function PhoneWidgetPaneQueue(initQueues) {
         return false;
       }
 
+      if (!notification.isShow) {
+        this.notifications.remove(key);
+        return true;
+      }
+
       notification.isDeleted = true;
-      this.notifiers.desktop.notify(this.notifications.all());
+      this.notifiers.desktop.notify(this.getVisibleNotifications());
 
       if (this.notifiers.phone.isEqual(notification.key)) {
         this.notifiers.phone.notify(notification);
@@ -3339,17 +3385,92 @@ function PhoneWidgetPaneQueue(initQueues) {
       this.notifications.remove(key);
       let self = this;
       setTimeout(function () {
-        self.notifiers.desktop.notify(self.notifications.all());
+        let notifications = self.getVisibleNotifications();
+        self.notifiers.desktop.notify(notifications);
 
         if (self.notifiers.phone.isEqual(notification.key)) {
           self.notifiers.phone.reset();
         }
 
-        if (self.notifications.count() === 0) {
+        if (notifications.length === 0) {
           self.notifiers.desktop.reset();
         }
       }, 400);
       return true;
+    };
+
+    this.hide = function (key) {
+      let notification = this.notifications.one(key);
+
+      if (notification === null) {
+        return false;
+      }
+
+      if (!notification.isShow) {
+        return true;
+      }
+
+      notification.willHide = true;
+      this.notifiers.desktop.notify(this.getVisibleNotifications());
+
+      if (this.notifiers.phone.isEqual(notification.key)) {
+        this.notifiers.phone.notify(notification);
+      }
+
+      notification.willHide = false;
+      notification.isShow = false;
+      let self = this;
+      setTimeout(function () {
+        let notifications = self.getVisibleNotifications();
+        self.notifiers.desktop.notify(notifications);
+
+        if (self.notifiers.phone.isEqual(notification.key)) {
+          self.notifiers.phone.reset();
+        }
+
+        if (notifications.length === 0) {
+          self.notifiers.desktop.reset();
+        }
+      }, 400);
+      return true;
+    };
+
+    this.refresh = function () {
+      if (!this.isOn) {
+        return false;
+      }
+
+      this.notifications.all().forEach(function (notification) {
+        notification.isShow = true;
+        notification.isNew = true;
+      });
+      this.notifiers.desktop.notify(this.getVisibleNotifications());
+      this.notifications.all().forEach(function (notification) {
+        notification.isNew = false;
+      });
+      let self = this;
+      setTimeout(function () {
+        self.notifiers.desktop.notify(self.getVisibleNotifications());
+      }, 50);
+      this.notifiers.phone.reset();
+      return true;
+    };
+
+    this.on = function (key) {
+      if (this.isOff() && this.offKey !== key) {
+        return;
+      }
+
+      this.isOn = true;
+    };
+
+    this.off = function (key) {
+      this.isOn = false;
+      this.offKey = key;
+    };
+
+    this.isOff = function () {
+      return this.isOn === false;
     };
 
     this.reset = function () {
@@ -3387,6 +3508,7 @@ function PhoneWidgetPaneQueue(initQueues) {
     this.reset = function () {
       ReactDOM.unmountComponentAtNode(this.$container);
       this.$container.innerHTML = '';
+      this.notificationKey = null;
     };
 
     this.isEqual = function (key) {
@@ -4706,11 +4828,16 @@ $(document).on('click', '.call-details__nav-btn--back', function (e) {
 });
 
 (function () {
-  function Incoming(queues) {
+  function Incoming(queues, notifier, incomingPane, outgoingPane) {
     this.queues = queues;
+    this.notifier = notifier;
+    this.incomingPane = incomingPane;
+    this.outgoingPane = outgoingPane;
     this.audio = new Audio('/js/sounds/incoming_call.mp3');
     this.audio.volume = 0.3;
     this.audio.loop = true;
+    this.isOn = true;
+    this.offKey = null;
 
     this.play = function () {
       if (document.visibilityState === 'visible') {
@@ -4718,11 +4845,12 @@ $(document).on('click', '.call-details__nav-btn--back', function (e) {
         return;
       }
 
-      this.pause();
+      this.stop();
     };
 
-    this.pause = function () {
+    this.stop = function () {
       this.audio.pause();
+      this.audio.currentTime = 0;
     };
 
     this.muted = function () {
@@ -4740,17 +4868,32 @@ $(document).on('click', '.call-details__nav-btn--back', function (e) {
     };
 
     this.refresh = function () {
-      if (this.queues.active.count() > 0) {
-        this.pause();
+      if (!this.isOn) {
+        this.stop();
         return;
       }
 
-      if (this.queues.direct.count() > 0 || this.queues.general.count() > 0) {
+      if (this.queues.active.count() > 0) {
+        this.stop();
+        return;
+      }
+
+      if (this.outgoingPane.isActive()) {
+        this.stop();
+        return;
+      }
+
+      if (this.incomingPane.isActive()) {
         this.play();
         return;
       }
 
-      this.pause();
+      if (this.notifier.getVisibleNotifications().length > 0) {
+        this.play();
+        return;
+      }
+
+      this.stop();
     };
 
     this.indicatorMuted = function () {
@@ -4759,6 +4902,23 @@ $(document).on('click', '.call-details__nav-btn--back', function (e) {
 
     this.indicatorUnMuted = function () {
       $('#incoming-sound-indicator').attr('data-status', 1).html('<i class="fa fa-volume-up text-success"> </i>').attr('title', 'Incoming Call - Volume ON');
+    };
+
+    this.on = function (key) {
+      if (this.isOff() && this.offKey !== key) {
+        return;
+      }
+
+      this.isOn = true;
+    };
+
+    this.off = function (key) {
+      this.isOn = false;
+      this.offKey = key;
+    };
+
+    this.isOff = function () {
+      return this.isOn === false;
     };
   }
 
@@ -4915,7 +5075,7 @@ var PhoneWidgetCall = function () {
     'queue': new PhoneWidgetPaneQueue(queues)
   };
   let audio = {
-    'incoming': new window.phoneWidget.audio.Incoming(queues)
+    'incoming': new window.phoneWidget.audio.Incoming(queues, window.phoneWidget.notifier, panes.incoming, panes.outgoing)
   };
 
   function init(options) {
@@ -4929,8 +5089,8 @@ var PhoneWidgetCall = function () {
     muteBtnClickEvent();
     transferCallBtnClickEvent();
     acceptCallBtnClickEvent();
-    rejectIncomingCallClickEvent(); // hideIncomingCallClickEvent();
-
+    rejectIncomingCallClickEvent();
+    hideIncomingCallClickEvent();
     callAddNoteCLickEvent();
     dialpadCLickEvent();
     contactInfoClickEvent();
@@ -4949,18 +5109,21 @@ var PhoneWidgetCall = function () {
     panes.queue.refresh();
     removeNotification(callSid);
     audio.incoming.refresh();
+    window.phoneWidget.notifier.on(callSid);
+    audio.incoming.on(callSid);
 
     if (isRemoved) {
       iconUpdate();
-    } //todo remove
-    // if (panes.incoming.getCallSid() === callSid) {
-    //     panes.incoming.removeCallSid();
-    //     if (panes.incoming.isActive()) {
-    //         panes.incoming.hide();
-    //         refreshPanes();
-    //     }
-    // }
+    }
 
+    if (panes.incoming.isEqual(callSid)) {
+      panes.incoming.removeCallSid();
+
+      if (panes.incoming.isActive()) {
+        panes.incoming.hide();
+        refreshPanes();
+      }
+    }
   }
 
   function refreshPanes() {
@@ -5093,15 +5256,20 @@ var PhoneWidgetCall = function () {
     if (call.data.queue === 'hold') {
       console.log('hold call');
       panes.queue.refresh();
-      addIncomingCallNotification(call);
+      addIncomingCallNotification(call, false);
       return false;
     }
 
     panes.queue.refresh();
-    panes.queue.hide(); //todo remove
-    //panes.incoming.init(call, (queues.direct.count() + queues.general.count()), (queues.active.count() + queues.hold.count()));
+    panes.queue.hide();
 
-    addIncomingCallNotification(call);
+    if (queues.active.count() > 0 || queues.outgoing.count() > 0 || panes.incoming.isActive()) {
+      addIncomingCallNotification(call, true);
+    } else {
+      addFirstIncomingCallNotification(call, true);
+      panes.incoming.init(call, queues.direct.count() + queues.general.count(), queues.active.count() + queues.hold.count());
+    }
+
     audio.incoming.refresh();
     iconUpdate();
     openWidget(); // openCallTab();
@@ -5125,6 +5293,14 @@ var PhoneWidgetCall = function () {
     panes.outgoing.init(call);
     openWidget();
     openCallTab();
+    let countIncoming = queues.direct.count() + queues.general.count();
+    let countActive = queues.active.count() + queues.hold.count();
+
+    if (countIncoming > 0 || countActive > 0) {
+      panes.incoming.initWidgetIcon(countIncoming, countActive);
+    }
+
+    audio.incoming.refresh();
   }
 
   function requestActiveCall(data) {
@@ -5142,7 +5318,7 @@ var PhoneWidgetCall = function () {
 
     audio.incoming.refresh();
 
-    if (panes.outgoing.getCallSid() === call.data.callSid) {
+    if (panes.outgoing.isEqual(call.data.callSid)) {
       panes.outgoing.removeCallSid();
       panes.outgoing.hide();
     }
@@ -5237,11 +5413,14 @@ var PhoneWidgetCall = function () {
     queues.outgoing.remove(callSid);
     waitQueue.remove(callSid);
     storage.conference.removeByParticipantCallSid(callSid);
+    let incomingDeleted = removeNotification(callSid);
     audio.incoming.refresh();
+    window.phoneWidget.notifier.on(callSid);
+    audio.incoming.on(callSid);
     panes.queue.refresh();
     let needRefresh = false;
 
-    if (panes.active.getCallSid() === callSid) {
+    if (panes.active.isEqual(callSid)) {
       panes.active.removeCallSid();
       panes.active.removeCallInProgressIndicator();
       window.connection = '';
@@ -5249,9 +5428,17 @@ var PhoneWidgetCall = function () {
       if (panes.active.isActive()) {
         needRefresh = true;
       }
+
+      if (queues.wait.count() > 0) {
+        if (window.phoneWidget.notifier.refresh()) {
+          openWidget();
+          panes.queue.openAllCalls();
+          audio.incoming.refresh();
+        }
+      }
     }
 
-    if (panes.outgoing.getCallSid() === callSid) {
+    if (panes.outgoing.isEqual(callSid)) {
       panes.outgoing.removeCallSid();
 
       if (panes.outgoing.isActive()) {
@@ -5259,20 +5446,24 @@ var PhoneWidgetCall = function () {
       }
     }
 
-    let incomingDeleted = removeNotification(callSid); //todo remove
-    // if (panes.incoming.getCallSid() === callSid) {
-    //     panes.incoming.removeCallSid();
-    //     if (panes.incoming.isActive()) {
-    //         needRefresh = true;
-    //     }
-    // }
+    if (panes.incoming.isEqual(callSid)) {
+      panes.incoming.removeCallSid();
+
+      if (panes.incoming.isActive()) {
+        needRefresh = true;
+      }
+    }
 
     if (needRefresh || incomingDeleted) {
       refreshPanes();
-    } else {//todo remove
-      // if (panes.incoming.isActive()) {
-      //     panes.incoming.initWidgetIcon((queues.direct.count() + queues.general.count()), (queues.active.count() + queues.hold.count()));
-      // }
+    } else {
+      if (panes.incoming.isActive()) {
+        panes.incoming.initWidgetIcon(queues.direct.count() + queues.general.count(), queues.active.count() + queues.hold.count());
+      }
+    }
+
+    if (queues.active.count() === 0 && queues.hold.count() === 0 && (queues.direct.count() > 0 || queues.general.count() > 0)) {
+      audio.incoming.refresh();
     }
   }
 
@@ -5286,26 +5477,34 @@ var PhoneWidgetCall = function () {
         $('#call-controls2').hide();
       }
     });
-  } //todo remove
-  // function hideIncomingCallClickEvent()
-  // {
-  //     $(document).on('click', '#hide-incoming-call', function(e) {
-  //         e.preventDefault();
-  //         let callSid = $(this).attr('data-call-sid');
-  //         if (!callSid) {
-  //             createNotify('Error', 'Not found Call SID', 'error');
-  //             return false;
-  //         }
-  //         if (panes.incoming.getCallSid() === callSid) {
-  //             panes.incoming.removeCallSid();
-  //             if (panes.incoming.isActive()) {
-  //                 panes.incoming.hide();
-  //                 refreshPanes();
-  //             }
-  //         }
-  //     })
-  // }
+  }
 
+  function hideIncomingCallClickEvent() {
+    $(document).on('click', '#hide-incoming-call', function (e) {
+      e.preventDefault();
+      let callSid = $(this).attr('data-call-sid');
+
+      if (!callSid) {
+        createNotify('Error', 'Not found Call SID', 'error');
+        return false;
+      }
+
+      if (panes.incoming.isEqual(callSid)) {
+        panes.incoming.removeCallSid();
+
+        if (panes.incoming.isActive()) {
+          panes.incoming.hide();
+          hideNotification(callSid);
+          refreshPanes();
+
+          if (queues.wait.count() > 0 && queues.active.count() === 0 && queues.outgoing.count() === 0) {
+            panes.queue.openAllCalls();
+            audio.incoming.refresh();
+          }
+        }
+      }
+    });
+  }
 
   function callAddNoteCLickEvent() {
     $(document).on('click', '#active_call_add_note_submit', function (e) {
@@ -5695,7 +5894,7 @@ var PhoneWidgetCall = function () {
 
     call.hold(); //todo remove after removed old widget
 
-    if (!(panes.active.getCallSid() === call.data.callSid && panes.active.isActive())) {
+    if (!(panes.active.isEqual(call.data.callSid) && panes.active.isActive())) {
       return;
     }
 
@@ -5713,7 +5912,7 @@ var PhoneWidgetCall = function () {
 
     call.unHold(); //todo remove after removed old widget
 
-    if (!(panes.active.getCallSid() === call.data.callSid && panes.active.isActive())) {
+    if (!(panes.active.isEqual(call.data.callSid) && panes.active.isActive())) {
       return;
     }
 
@@ -5908,7 +6107,22 @@ var PhoneWidgetCall = function () {
     $(document).on('click', '.pw-notification-hide', function (e) {
       e.preventDefault();
       let key = $(this).attr('data-call-sid');
-      removeNotification(key);
+      hideNotification(key);
+
+      if (panes.incoming.isEqual(key)) {
+        panes.incoming.removeCallSid();
+
+        if (panes.incoming.isActive()) {
+          panes.incoming.hide();
+          refreshPanes();
+        }
+      }
+
+      audio.incoming.refresh();
+
+      if (queues.active.count() === 0 && queues.outgoing.count() === 0 && !panes.incoming.isActive()) {
+        panes.queue.openAllCalls();
+      }
     });
   }
 
@@ -5998,8 +6212,16 @@ var PhoneWidgetCall = function () {
     }
   }
 
-  function addIncomingCallNotification(call) {
-    return window.phoneWidget.notifier.add(call.data.callSid, window.phoneWidget.notifier.types.incomingCall, {
+  function addFirstIncomingCallNotification(call, isShow) {
+    return window.phoneWidget.notifier.addAndShowOnlyDesktop(call.data.callSid, window.phoneWidget.notifier.types.incomingCall, createIncomingCallNotification(call, isShow));
+  }
+
+  function addIncomingCallNotification(call, isShow) {
+    return window.phoneWidget.notifier.add(call.data.callSid, window.phoneWidget.notifier.types.incomingCall, createIncomingCallNotification(call, isShow));
+  }
+
+  function createIncomingCallNotification(call, isShow) {
+    return {
       'callSid': call.data.callSid,
       'queue': call.data.queue,
       'name': call.data.contact.name,
@@ -6010,12 +6232,19 @@ var PhoneWidgetCall = function () {
       'canCallInfo': call.data.contact.canCallInfo,
       'isInternal': call.data.isInternal,
       'fromInternal': call.data.fromInternal,
-      'eventName': call.getEventUpdateName()
-    });
+      'eventName': call.getEventUpdateName(),
+      'isShow': isShow
+    };
   }
 
   function removeNotification(key) {
     return window.phoneWidget.notifier.remove(key);
+  }
+
+  function hideNotification(key) {
+    let isHide = window.phoneWidget.notifier.hide(key);
+    audio.incoming.refresh();
+    return isHide;
   }
 
   function loadCalls(data) {
@@ -6029,7 +6258,7 @@ var PhoneWidgetCall = function () {
 
       if (call !== null) {
         holdExist = true;
-        addIncomingCallNotification(call);
+        addFirstIncomingCallNotification(call, true);
       }
     });
     let lastIncomingCall = null;
@@ -6038,7 +6267,7 @@ var PhoneWidgetCall = function () {
       let call = waitQueue.add(item);
 
       if (call !== null) {
-        addIncomingCallNotification(call);
+        addFirstIncomingCallNotification(call, true);
         incomingExist = true;
         lastIncomingCall = call;
       }
@@ -6057,20 +6286,24 @@ var PhoneWidgetCall = function () {
       storage.conference.add(conference);
     });
     openWidget();
-    panes.queue.refresh(); // todo remove
-    // if (data.lastActive === 'incoming') {
-    //     if (lastIncomingCall !== null) {
-    //         panes.incoming.init(lastIncomingCall, (queues.direct.count() + queues.general.count()), (queues.active.count() + queues.hold.count()));
-    //         openCallTab();
-    //         return;
-    //     }
-    // }
+    panes.queue.refresh();
+
+    if (data.lastActive === 'incoming' && queues.active.count() === 0 && queues.outgoing.count() === 0) {
+      if (lastIncomingCall !== null) {
+        panes.incoming.init(lastIncomingCall, queues.direct.count() + queues.general.count(), queues.active.count() + queues.hold.count());
+        openCallTab();
+        audio.incoming.refresh();
+        return;
+      }
+    }
 
     audio.incoming.refresh();
 
     if (holdExist && !activeExist && !outgoingExist && !incomingExist) {
       openWidget();
       panes.queue.openAllCalls();
+      window.phoneWidget.notifier.refresh();
+      audio.incoming.refresh();
       iconUpdate();
       return;
     }
@@ -6114,7 +6347,8 @@ var PhoneWidgetCall = function () {
     callRequester: callRequester,
     completeCall: completeCall,
     updateCurrentCalls: updateCurrentCalls,
-    iconUpdate: iconUpdate
+    iconUpdate: iconUpdate,
+    audio: audio
   };
 }();
 

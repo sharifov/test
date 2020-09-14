@@ -40,7 +40,7 @@ class ClientChatUserAccessRepository extends Repository
 		if (!$access->save()) {
 			throw new \RuntimeException($access->getErrorSummary(false)[0], ClientChatCodeException::CC_USER_ACCESS_SAVE_FAILED);
 		}
-		$this->eventDispatcher->dispatch(new UpdateChatUserAccessWidgetEvent($access->ccua_cch_id, $access->ccua_user_id, $access->ccua_status_id, $access->getPrimaryKey()[0] ?? null), 'UpdateChatUserAccessWidgetEvent_' . $access->ccua_user_id);
+		$this->eventDispatcher->dispatch(new UpdateChatUserAccessWidgetEvent($access->ccua_cch_id, $access->ccua_user_id, $access->ccua_status_id, $access->getPrimaryKey()), 'UpdateChatUserAccessWidgetEvent_' . $access->ccua_user_id);
 		return $access;
 	}
 
@@ -78,9 +78,8 @@ class ClientChatUserAccessRepository extends Repository
 		Notifications::publish('clientChatRequest', ['user_id' => $userId], ['data' => $data]);
 	}
 
-	public function resetChatUserAccessWidget(int $userId)
+	public function resetChatUserAccessWidget(int $userId): void
 	{
-		\Yii::info('resetChatUserAccessWidget', 'info\resetChatUserAccessWidget');
 		$data = ClientChatAccessMessage::reset($userId);
 		Notifications::publish('clientChatRequest', ['user_id' => $userId], ['data' => $data]);
 	}

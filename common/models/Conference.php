@@ -35,6 +35,7 @@ use yii\db\ActiveRecord;
  */
 class Conference extends \yii\db\ActiveRecord
 {
+
     public const EVENT_CONFERENCE_END = 'conference-end';
     public const EVENT_CONFERENCE_START = 'conference-start';
     public const EVENT_PARTICIPANT_LEAVE = 'participant-leave';
@@ -45,6 +46,19 @@ class Conference extends \yii\db\ActiveRecord
     public const EVENT_PARTICIPANT_UNHOLD = 'participant-unhold';
     public const EVENT_PARTICIPANT_SPEECH_START = 'participant-speech-start';
     public const EVENT_PARTICIPANT_SPEECH_STOP = 'participant-speech-stop';
+
+    public const EVENT_LIST = [
+        self::EVENT_CONFERENCE_END => self::EVENT_CONFERENCE_END,
+        self::EVENT_CONFERENCE_START => self::EVENT_CONFERENCE_START,
+        self::EVENT_PARTICIPANT_LEAVE => self::EVENT_PARTICIPANT_LEAVE,
+        self::EVENT_PARTICIPANT_JOIN => self::EVENT_PARTICIPANT_JOIN,
+        self::EVENT_PARTICIPANT_MUTE => self::EVENT_PARTICIPANT_MUTE,
+        self::EVENT_PARTICIPANT_UNMUTE => self::EVENT_PARTICIPANT_UNMUTE,
+        self::EVENT_PARTICIPANT_HOLD => self::EVENT_PARTICIPANT_HOLD,
+        self::EVENT_PARTICIPANT_UNHOLD => self::EVENT_PARTICIPANT_UNHOLD,
+        self::EVENT_PARTICIPANT_SPEECH_START => self::EVENT_PARTICIPANT_SPEECH_START,
+        self::EVENT_PARTICIPANT_SPEECH_STOP => self::EVENT_PARTICIPANT_SPEECH_STOP,
+    ];
 
     public const STATUS_START   = 1;
     public const STATUS_DELAY   = 2;

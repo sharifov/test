@@ -24,6 +24,7 @@ use sales\helpers\app\AppHelper;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\emailList\entity\EmailList;
 use sales\model\userVoiceMail\entity\search\UserVoiceMailSearch;
+use sales\repositories\clientChatUserChannel\ClientChatUserChannelRepository;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
 use Yii;
@@ -43,6 +44,7 @@ use yii\widgets\ActiveForm;
  *
  * @property ClientChatUserAccessService $clientChatUserAccessService
  * @property ClientChatMessageService $clientChatMessageService
+ * @property ClientChatUserChannelRepository $clientChatUserChannelRepository
  */
 class EmployeeController extends FController
 {
@@ -54,6 +56,10 @@ class EmployeeController extends FController
 	 * @var ClientChatMessageService
 	 */
 	private ClientChatMessageService $clientChatMessageService;
+	/**
+	 * @var ClientChatUserChannelRepository
+	 */
+	private ClientChatUserChannelRepository $clientChatUserChannelRepository;
 
 	/**
      * @return array
@@ -71,11 +77,12 @@ class EmployeeController extends FController
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
-    public function __construct($id, $module, ClientChatUserAccessService $clientChatUserAccessService, ClientChatMessageService $clientChatMessageService, $config = [])
+    public function __construct($id, $module, ClientChatUserAccessService $clientChatUserAccessService, ClientChatMessageService $clientChatMessageService, ClientChatUserChannelRepository $clientChatUserChannelRepository, $config = [])
 	{
 		parent::__construct($id, $module, $config);
 		$this->clientChatUserAccessService = $clientChatUserAccessService;
 		$this->clientChatMessageService = $clientChatMessageService;
+		$this->clientChatUserChannelRepository = $clientChatUserChannelRepository;
 	}
 
     public function actionSellerContactInfo($employeeId)
@@ -546,6 +553,20 @@ class EmployeeController extends FController
                             }
                         }
 
+						if (isset($attr['client_chat_user_channel'])) {
+							if ($attr['client_chat_user_channel']) {
+								foreach ($attr['client_chat_user_channel'] as $chId) {
+									$clientChatChanel = new ClientChatUserChannel();
+									$clientChatChanel->ccuc_user_id = $model->id;
+									$clientChatChanel->ccuc_channel_id = (int)$chId;
+									$clientChatChanel->ccuc_created_dt = date('Y-m-d H:i:s');
+									$clientChatChanel->ccuc_created_user_id = Auth::id();
+									$clientChatChanel->save();
+								}
+								$this->clientChatUserAccessService->setUserAccessToAllChatsByChannelIds($attr['client_chat_user_channel'], $model->id);
+							}
+						}
+
                         $transaction->commit();
                         Yii::$app->getSession()->setFlash('success', 'User created');
                         return $this->redirect(['update', 'id' => $model->id]);
@@ -758,6 +779,8 @@ class EmployeeController extends FController
 							}
 							$this->clientChatUserAccessService->disableUserAccessToAllChats($model->id);
 							$this->clientChatUserAccessService->setUserAccessToAllChatsByChannelIds($attr['client_chat_user_channel'], $model->id);
+						} else {
+							$this->clientChatUserAccessService->disableUserAccessToAllChats($model->id);
 						}
                     }
 
@@ -935,14 +958,17 @@ class EmployeeController extends FController
             $out = ['status' => 0, 'message' => ''];
 
             try {
-                $rocketChat = \Yii::$app->rchat;
+				$userChannels = $this->clientChatUserChannelRepository->findByUserId($user->id);
+
+				$rocketChat = \Yii::$app->rchat;
                 $rocketChat->updateSystemAuth(false);
                 $password = $rocketChat::generatePassword();
 
+                $rocketChatUsername = $user->nickname_client_chat ?: $user->username;
                 $result = $rocketChat->createUser(
                     $user->username,
                     $password,
-                    $user->nickname ?: $user->username,
+					$rocketChatUsername,
                     $user->email
                 );
 
@@ -974,7 +1000,7 @@ class EmployeeController extends FController
                         throw new \RuntimeException($userProfile->getErrorSummary(false)[0]);
                     }
 
-					$this->clientChatUserAccessService->setUserAccessToAllChats($user->id);
+					$this->clientChatUserAccessService->setUserAccessToAllChats($userChannels);
 
                 } else {
                     $errorMessage = $rocketChat::getErrorMessageFromResult($result);

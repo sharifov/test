@@ -196,7 +196,7 @@ class ClientManageService
 	public function updateClient(Client $client, ClientCreateForm $form): void
 	{
 		$client = $this->finder->clientFind($client);
-		$client->edit($form->firstName, $form->lastName, $form->middleName);
+		$client->edit((string)$form->firstName, (string)$form->lastName, (string)$form->middleName);
 		$this->clientRepository->save($client);
 	}
 
@@ -292,11 +292,8 @@ class ClientManageService
 		return $this->create($form);
 	}
 
-	public function getOrCreateByRcId(ClientCreateForm $form): Client
+	public function createByRcId(ClientCreateForm $form): Client
 	{
-		if ($client = Client::find()->joinWithCcVisitor($form->rcId)->one()) {
-			return $client;
-		}
 		$client = Client::create(
 			$form->firstName,
 			$form->middleName,
@@ -333,7 +330,11 @@ class ClientManageService
 		try {
 			$client = $this->clientRepository->findByUuid($uuId);
 		} catch (NotFoundException $e) {
-			$client = $this->getOrCreateByRcId($clientForm);
+			if ($client = Client::find()->joinWithCcVisitor($clientForm->rcId)->one()) {
+				$this->updateClient($client, $clientForm);
+			} else {
+				$client = $this->createByRcId($clientForm);
+			}
 		}
 
 

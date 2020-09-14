@@ -2,6 +2,7 @@
 
 use common\components\grid\conferenceParticipant\ConferenceParticipantTypeColumn;
 use common\components\grid\DateTimeColumn;
+use common\components\grid\UserSelect2Column;
 use common\models\ConferenceParticipant;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -31,7 +32,9 @@ $this->params['breadcrumbs'][] = $this->title;
             //['class' => 'yii\grid\SerialColumn'],
 
             'cp_id',
+            'cp_identity',
             ['class' => ConferenceParticipantTypeColumn::class],
+            ['class' => UserSelect2Column::class, 'attribute' => 'cp_user_id', 'relation' => 'user'],
             //'cp_cf_id',
             [
                 'attribute' => 'cp_cf_id',
@@ -47,14 +50,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'cp_call_id',
                 'value' => static function(\common\models\ConferenceParticipant $model) {
                     return Html::a($model->cp_call_id, ['call/view', 'id' => $model->cp_call_id], ['target' => '_blank', 'data-pjax' => 0]);
-                },
-                'format' => 'raw'
-            ],
-
-            [
-                'label' => 'Phone number',
-                'value' => static function(\common\models\ConferenceParticipant $model) {
-                    return $model->cpCall ? Html::a($model->cpCall->c_from, ['call/view', 'id' => $model->cp_call_id], ['target' => '_blank', 'data-pjax' => 0]) : '-';
                 },
                 'format' => 'raw'
             ],

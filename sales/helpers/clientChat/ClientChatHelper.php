@@ -1,10 +1,13 @@
 <?php
 namespace sales\helpers\clientChat;
 
+use common\models\UserProfile;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
+use sales\model\clientChatUserChannel\entity\search\ClientChatUserChannelSearch;
+use yii\helpers\ArrayHelper;
 
 class ClientChatHelper
 {
@@ -15,7 +18,7 @@ class ClientChatHelper
 
 	public static function getFirstLetterFromName(ClientChat $clientChat): string
 	{
-		return strtoupper(self::getClientName($clientChat)[0]);
+		return mb_strtoupper(mb_substr(self::getClientName($clientChat), 0, 1));
 	}
 
 	public static function getClientStatusMessage(ClientChat $clientChat): string
@@ -23,19 +26,13 @@ class ClientChatHelper
 		return (int)$clientChat->cch_client_online ? ' is online...' : ' left from chat...';
 	}
 
-	public static function getAvailableAgentForTransfer(ClientChat $chat, $depId): array
+	public static function getAvailableAgentForTransfer(ClientChat $chat, ?int $depId): array
 	{
 		$result = [];
-		if ($channel = ClientChatChannel::find()->byDepartment($depId)->byProject($chat->cch_project_id)->one()) {
-			if ($userChannel = ClientChatUserChannel::find()->byChannelId($channel->ccc_id)->all()) {
-				/** @var ClientChatUserChannel $item */
-				foreach ($userChannel as $item) {
-					if ($item->ccucUser->userProfile && $item->ccucUser->userProfile->isRegisteredInRc()) {
-						$result[$item->ccuc_user_id] = $item->ccucUser->nickname ?: $item->ccucUser->username;
-					}
-				}
-			}
-
+		if ($channel = ClientChatChannel::find()->select(['ccc_id'])->byDepartment($depId)->byProject($chat->cch_project_id)->asArray()->one()) {
+			$search = new ClientChatUserChannelSearch();
+			$availableAgents = $search->getAvailableAgentForTransfer((int)$channel['ccc_id']);
+			$result = ArrayHelper::map($availableAgents, 'user_id', 'nickname');
 		}
 		return $result;
 	}

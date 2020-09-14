@@ -2,7 +2,9 @@
 namespace frontend\controllers;
 
 use common\components\CentrifugoService;
+use common\models\Department;
 use common\models\Lead;
+use common\models\Project;
 use common\models\Quote;
 use common\models\search\LeadSearch;
 use common\models\VisitorLog;
@@ -13,7 +15,9 @@ use sales\auth\Auth;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesSearch;
 use sales\entities\chat\ChatGraphsSearch;
+use sales\forms\clientChat\RealTimeStartChatForm;
 use sales\helpers\app\AppHelper;
+use sales\helpers\app\AppParamsHelper;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\entity\search\ClientChatSearch;
@@ -26,9 +30,14 @@ use sales\model\clientChatNote\ClientChatNoteRepository;
 use sales\model\clientChatNote\entity\ClientChatNote;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatRequest\entity\search\ClientChatRequestSearch;
+use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestRepository;
+use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestService;
+use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
+use sales\repositories\clientChatChannel\ClientChatChannelRepository;
 use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\NotFoundException;
+use sales\repositories\project\ProjectRepository;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatService\ClientChatService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
@@ -54,6 +63,10 @@ use yii\web\Response;
  * @property ClientChatNoteRepository $clientChatNoteRepository
  * @property LeadRepository $leadRepository
  * @property TransactionManager $transactionManager
+ * @property ClientChatChannelRepository $clientChatChannelRepository
+ * @property ProjectRepository $projectRepository
+ * @property ClientChatRequestService $clientChatRequestService
+ * @property ClientChatRequestRepository $clientChatRequestRepository
  */
 class ClientChatController extends FController
 {
@@ -88,6 +101,22 @@ class ClientChatController extends FController
 	 * @var TransactionManager
 	 */
 	private TransactionManager $transactionManager;
+	/**
+	 * @var ClientChatChannelRepository
+	 */
+	private ClientChatChannelRepository $clientChatChannelRepository;
+	/**
+	 * @var ProjectRepository
+	 */
+	private ProjectRepository $projectRepository;
+	/**
+	 * @var ClientChatRequestService
+	 */
+	private ClientChatRequestService $clientChatRequestService;
+	/**
+	 * @var ClientChatRequestRepository
+	 */
+	private ClientChatRequestRepository $clientChatRequestRepository;
 
 	public function __construct(
 		$id,
@@ -100,6 +129,10 @@ class ClientChatController extends FController
 		ClientChatNoteRepository $clientChatNoteRepository,
 		LeadRepository $leadRepository,
 		TransactionManager $transactionManager,
+		ClientChatChannelRepository $clientChatChannelRepository,
+		ProjectRepository $projectRepository,
+		ClientChatRequestService $clientChatRequestService,
+		ClientChatRequestRepository $clientChatRequestRepository,
 		$config = [])
 	{
 		parent::__construct($id, $module, $config);
@@ -111,6 +144,10 @@ class ClientChatController extends FController
 		$this->clientChatNoteRepository = $clientChatNoteRepository;
         $this->leadRepository = $leadRepository;
 		$this->transactionManager = $transactionManager;
+		$this->clientChatChannelRepository = $clientChatChannelRepository;
+		$this->projectRepository = $projectRepository;
+		$this->clientChatRequestService = $clientChatRequestService;
+		$this->clientChatRequestRepository = $clientChatRequestRepository;
 	}
 
 	/**
@@ -239,7 +276,7 @@ class ClientChatController extends FController
 		];
 		try {
 			$clientChat = $this->clientChatRepository->findById($cchId);
-			$this->clientChatMessageService->discardUnreadMessages($clientChat->cch_id, $clientChat->cch_owner_user_id);
+			$this->clientChatMessageService->discardUnreadMessages($clientChat->cch_id, (int)$clientChat->cch_owner_user_id);
 
 			$result['html'] = $this->renderPartial('partial/_client-chat-info', [
 				'clientChat' => $clientChat,
@@ -352,7 +389,6 @@ class ClientChatController extends FController
 
 			$result['success'] = true;
 		} catch (\RuntimeException | \DomainException | NotFoundException $e) {
-			\Yii::error(AppHelper::throwableFormatter($e), 'ClientChatController::actionAccessManage::RuntimeException|DomainException|NotFoundException');
 			$result['notifyMessage'] = $e->getMessage();
 			if (ClientChatCodeException::isWarningMessage($e)) {
 				$result['notifyTitle'] = 'Warning';
@@ -523,7 +559,7 @@ class ClientChatController extends FController
 
 		try {
 			if ($form->load(Yii::$app->request->post()) && !$form->pjaxReload && $form->validate()) {
-				$newDepartment = $this->clientChatService->transfer($clientChat, $form);
+				$newDepartment = $this->clientChatService->transfer($form);
 				return '<script>$("#modal-sm").modal("hide"); refreshChatPage('.$form->cchId.', '.ClientChat::TAB_ACTIVE.'); createNotify("Success", "Chat successfully transferred to '.$newDepartment->dep_name.' department. ", "success")</script>';
 			}
 
@@ -566,7 +602,7 @@ class ClientChatController extends FController
 	{
 		$cchId = Yii::$app->request->post('cchId');
 		$userId = Auth::id();
-		$this->clientChatMessageService->discardUnreadMessages((int)$cchId, $userId);
+		$this->clientChatMessageService->discardUnreadMessages((int)$cchId, (int)$userId);
 	}
 
 	public function actionSendOfferList(): string
@@ -713,8 +749,9 @@ class ClientChatController extends FController
 
     public function actionRealTime()
     {
-        $host = 'https://dev-livechat.travel-dev.com/visitors';
-        return $this->render('real-time', ['host' => $host]);
+        $host = AppParamsHelper::liveChatRealTimeVisitorsUrl();
+        $projects = Project::getListByUser(Auth::id());
+        return $this->render('real-time', ['host' => $host, 'projects' => implode(',', $projects)]);
     }
 
     public function actionAjaxCancelTransfer()
@@ -723,7 +760,7 @@ class ClientChatController extends FController
 
 		$result = [
 			'error' => false,
-			'message' => 'Transfer canceled successfully'
+			'message' => 'Transfer cancelled successfully'
 		];
 
 		try {
@@ -745,6 +782,34 @@ class ClientChatController extends FController
 		}
 
 		return $this->asJson($result);
+	}
+
+	public function actionRealTimeStartChat(): string
+	{
+		$visitorId = Yii::$app->request->get('visitorId', '');
+		$projectName = Yii::$app->request->get('projectName', '');
+
+		$form = new RealTimeStartChatForm($visitorId, $projectName, $this->projectRepository);
+
+		try {
+			if (Yii::$app->request->isPjax && $form->load(Yii::$app->request->post()) && $form->validate()) {
+				$this->clientChatService->createByAgent($form, Auth::id());
+				return '<script>$("#modal-sm").modal("hide"); createNotify("Success", "Message was successfully sent to client", "success");</script>';
+			}
+		} catch (\RuntimeException | \DomainException $e) {
+			$form->addError('general', $e->getMessage());
+		} catch (\Throwable $e) {
+			Yii::error($e->getMessage() . '; File: ' . $e->getFile() . '; Line: ' . $e->getLine(), 'ClientChatController::actionRealTimeStartChat::Throwable');
+			$form->addError('general', 'Internal Server Error');
+		}
+
+		$channels = $this->clientChatChannelRepository->getByUserAndProject(Auth::id(), $form->projectId, Department::DEPARTMENT_EXCHANGE);
+		$channels = ArrayHelper::map($channels, 'ccc_id', 'ccc_name');
+
+		return $this->renderAjax('partial/_real_time_start_chat', [
+			'startChatForm' => $form,
+			'channels' => $channels
+		]);
 	}
 
     private function createOfferMessage(ClientChat $chat, array $captures): array

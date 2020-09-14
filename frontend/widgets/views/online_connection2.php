@@ -8,6 +8,7 @@ use yii\helpers\Url;
 
 /* @var $caseId integer */
 /* @var $userId integer */
+/* @var $userIdentity integer */
 /* @var $controllerId string */
 /* @var $actionId string */
 /* @var $pageUrl string */
@@ -148,6 +149,7 @@ $js = <<<JS
     
 
     const userId = '$userId';
+    const userIdentity = '$userIdentity';
     const wsUrl = '$wsUrl';
     const onlineObj = $('#online-connection-indicator');
     
@@ -446,6 +448,18 @@ $js = <<<JS
                             if (typeof PhoneWidgetCall === "object") {
                                 PhoneWidgetCall.socket(obj.data);
                             }
+                        }
+                        
+                        if (obj.cmd === 'showNotification') {
+                            let data = obj.data;
+                            createNotify(data.title, data.message, data.type);
+                        }
+                        
+                        if (obj.cmd === 'updateVoiceMailRecord') {
+                            if ($("#voice-mail-pjax").length > 0) {
+                                pjaxReload({container: "#voice-mail-pjax"});    
+                            }
+                            window.updateVoiceRecordCounters();
                         }
                         
                     }

@@ -8,6 +8,7 @@ use frontend\helpers\JsonHelper;
 use frontend\models\form\CreditCardForm;
 use http\Exception\RuntimeException;
 use sales\forms\caseSale\CaseSaleSendCcInfoForm;
+use sales\helpers\app\AppHelper;
 use sales\helpers\cases\CaseSaleHelper;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\cases\CasesSaleRepository;
@@ -292,7 +293,8 @@ class CreditCardController extends FController
 
 			if (Yii::$app->request->isPjax && $form->load(Yii::$app->request->post()) && $form->validate()) {
 				$apiKey = $this->casesSaleRepository->getProjectApiKey($caseSale);
-				$result = $this->casesSaleService->sendCcInfo($apiKey, $caseSale->css_sale_id, $caseSale->css_sale_book_id, $form->email);
+				$dataSale = JsonHelper::decode($caseSale->css_sale_data_updated);
+				$result = $this->casesSaleService->sendCcInfo($apiKey, $caseSale->css_sale_id, (string)($dataSale['bookingId'] ?? ''), $form->email);
 				if ($result['error']) {
 					throw new \RuntimeException('B/O error has occurred: ' . $result['message']);
 				}
@@ -301,6 +303,7 @@ class CreditCardController extends FController
 		} catch (NotFoundException | \RuntimeException $e) {
 			$form->addError('general', $e->getMessage());
 		} catch (\Throwable $e) {
+			Yii::error(AppHelper::throwableFormatter($e), 'CreditCardController::actionAjaxSendCcInfo::Throwable');
 			$form->addError('general', 'Internal Server Error');
 		}
 

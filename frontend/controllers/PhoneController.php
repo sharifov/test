@@ -479,6 +479,18 @@ class PhoneController extends FController
                         'message' => 'ok',
                         'sid' => $resultApi['result']['sid']
                     ];
+                } elseif (!empty($resultApi['error']) && $resultApi['message'] === 'Call status is Completed') {
+                    $result = [
+                        'error' => false,
+                        'message' => 'ok',
+                    ];
+                    Notifications::publish('showNotification', ['user_id' => Auth::id()], [
+                        'data' => [
+                            'title' => 'Transfer call',
+                            'message' => 'The other side hung up',
+                            'type' => 'warning',
+                        ]
+                    ]);
                 } else {
                     throw new Exception('API Error: PhoneController/actionAjaxCallRedirect: Not found resultApi[result][sid] - ' . VarDumper::dumpAsString($resultApi), 10);
                 }
@@ -996,7 +1008,8 @@ class PhoneController extends FController
                 $call->c_project_id,
                 $from,
                 UserCallIdentity::getClientId(Auth::id()),
-                $source_type_id
+                $source_type_id,
+                Auth::id()
             );
             Yii::$app->session->set($key, time());
         } catch (\Throwable $e) {
@@ -1341,6 +1354,7 @@ class PhoneController extends FController
             $result = Yii::$app->communication->callToUser(
                 UserCallIdentity::getClientId($createdUser->id),
                 UserCallIdentity::getClientId($user_id),
+                $user_id,
                 $createdUser->id,
                 [
                     'status' => 'Ringing',

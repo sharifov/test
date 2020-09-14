@@ -1428,6 +1428,17 @@ class Call extends \yii\db\ActiveRecord
                             $call->setStatusByTwilioStatus($call->c_call_status);
                             $call->c_created_user_id = null;
                             $call->update();
+
+                            if (!empty($res['message']) && $res['message'] === 'Call status is Completed') {
+                                Notifications::publish('showNotification', ['user_id' => $user_id], [
+                                    'data' => [
+                                        'title' => 'Accept call',
+                                        'message' => 'The other side hung up',
+                                        'type' => 'warning',
+                                    ]
+                                ]);
+                            }
+
                             return false;
                         }
                         return true;
@@ -2104,7 +2115,7 @@ class Call extends \yii\db\ActiveRecord
         if ($timeLimit && ($this->isStatusIvr() || $this->isStatusQueue())) {
             if ($callMaxTime < time()) {
                 $result = $this->cancelCall();
-                Yii::info('CallId: ' . $this->c_id . ', '. VarDumper::dumpAsString($result) ,'info\checkCancelCall:cancelCall');
+//                Yii::info('CallId: ' . $this->c_id . ', '. VarDumper::dumpAsString($result) ,'info\checkCancelCall:cancelCall');
                 return true;
             }
         }

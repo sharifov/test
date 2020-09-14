@@ -31,4 +31,5 @@ return [
     ],
 
     'appEnv' => 'stage',
+	'liveChatRealTimeVisitors' => '{{ common.config.params.liveChatRealTimeVisitors:str }}'
 ];

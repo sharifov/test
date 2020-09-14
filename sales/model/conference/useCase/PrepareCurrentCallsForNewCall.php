@@ -125,6 +125,16 @@ class PrepareCurrentCallsForNewCall
             return;
         }
 
+        if ($clientCall->isTwFinishStatus()) {
+            \Yii::info(VarDumper::dumpAsString([
+                'message' => 'Transfer client call to hold',
+                'userId' => $this->userId,
+                'info' => 'Call is finished',
+                'clientCall' => $clientCall->getAttributes(),
+            ]), 'info\PrepareCurrentCallsForNewCall:transferClientCallToHold');
+            return;
+        }
+
         if ($clientCall->isOut()) {
 
             if ($parent = $clientCall->cParent) {
