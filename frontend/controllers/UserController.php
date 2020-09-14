@@ -9,6 +9,7 @@ use common\models\search\SmsSearch;
 use frontend\models\search\UserSiteActivitySearch;
 use sales\auth\Auth;
 use sales\model\callLog\entity\callLog\search\CallLogSearch;
+use sales\model\clientChat\entity\search\ClientChatSearch;
 use sales\model\user\entity\monitor\search\UserMonitorSearch;
 use Yii;
 use common\models\UserCallStatus;
@@ -209,6 +210,18 @@ class UserController extends FController
         $smsDataProvider = $smsSearchModel->search($params);
         $smsDataProvider->pagination->pageSize = 10;
 
+        $chatSearchModel = new ClientChatSearch();
+        $userTimezone = Auth::user()->userParams->up_timezone ?? 'UTC';
+        $currentDate = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->setTimezone(new \DateTimeZone($userTimezone));
+        $chatSearchModel->timeStart = ($currentDate->modify($chatSearchModel::DEFAULT_INTERVAL_BETWEEN_DAYS))->format('Y-m-d') . ' 00:00:00';
+        $chatSearchModel->timeEnd = $currentDate->format('Y-m-d') . ' 23:59:59';
+        $chatSearchModel->timeRange = $chatSearchModel->timeStart . ' - ' . $chatSearchModel->timeEnd;
+        $params['ClientChatSearch']['cch_owner_user_id'] = $id;
+        $chatDataProvider = $chatSearchModel->search($params);
+        $chatDataProvider->pagination->pageSize = 10;
+
+
+
         return $this->render('info', [
             'model' => $this->findUserModel($id),
             'data' => $data,
@@ -221,6 +234,8 @@ class UserController extends FController
             'emailSearchModel' => $emailSearchModel,
             'smsDataProvider' => $smsDataProvider,
             'smsSearchModel' => $smsSearchModel,
+            'chatDataProvider' => $chatDataProvider,
+            'chatSearchModel' => $chatSearchModel,
         ]);
     }
 }

@@ -4,11 +4,11 @@ use yii\helpers\Html;
 use \kartik\form\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model common\models\search\CallSearch */
+/* @var $model sales\model\clientChat\entity\search\ClientChatSearch */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="call-search">
+<div class="info-chat-search">
     <div class="x_panel">
         <div class="x_title">
             <h2><i class="fa fa-search"></i> Search</h2>
@@ -42,7 +42,7 @@ use \kartik\form\ActiveForm;
 
             <div class="row">
                 <div class="col-md-4">
-                    <?php echo $form->field($model, 'date_range', [
+                    <?php echo $form->field($model, 'timeRange', [
                         //'addon'=>['prepend'=>['content'=>'<i class="fa fa-calendar"></i>']],
                         'options' => ['class' => 'form-group']
                     ])->widget(\kartik\daterange\DateRangePicker::class, [
@@ -50,8 +50,8 @@ use \kartik\form\ActiveForm;
                         'presetDropdown' => true,
                         'hideInput' => true,
                         'convertFormat' => true,
-                        'startAttribute' => 'datetime_start',
-                        'endAttribute' => 'datetime_end',
+                        'startAttribute' => 'timeStart',
+                        'endAttribute' => 'timeEnd',
                         'pluginOptions' => [
                             'timePicker' => true,
                             'timePickerIncrement' => 1,

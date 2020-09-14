@@ -159,6 +159,8 @@ $this->params['breadcrumbs'][] = $this->title;
                             </li>
                             <li role="presentation" class=""><a href="#tab_content7" id="home-tab" role="tab" data-toggle="tab" aria-expanded="true" class="" aria-selected="true">Sms Stats</a>
                             </li>
+                            <li role="presentation" class=""><a href="#tab_content8" id="home-tab" role="tab" data-toggle="tab" aria-expanded="true" class="" aria-selected="true">Chats Stats</a>
+                            </li>
                         </ul>
                         <div id="myTabContent" class="tab-content">
                             <div role="tabpanel" class="tab-pane fade" id="tab_content1" aria-labelledby="home-tab">
@@ -197,7 +199,13 @@ $this->params['breadcrumbs'][] = $this->title;
                             <div role="tabpanel" class="tab-pane fade" id="tab_content7" aria-labelledby="profile-tab">
                                 <?= $this->render('partial/_info_sms', [
                                     'smsDataProvider' => $smsDataProvider,
-                                    'smsSearchModel' => $smsSearchModel,
+                                    'smsSearchModel' => $smsSearchModel
+                                ]) ?>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="tab_content8" aria-labelledby="profile-tab">
+                                <?= $this->render('partial/_info_chats', [
+                                    'chatDataProvider' => $chatDataProvider,
+                                    'chatSearchModel' => $chatSearchModel
                                 ]) ?>
                             </div>
                         </div>

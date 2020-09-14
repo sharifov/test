@@ -25,6 +25,7 @@ class ClientChatSearch extends ClientChat
     public string $timeRange;
     public string $timeStart;
     public string $timeEnd;
+    public const DEFAULT_INTERVAL_BETWEEN_DAYS = '-6 days';
 
     public function __construct($config = [])
     {
@@ -105,6 +106,15 @@ class ClientChatSearch extends ClientChat
             return $dataProvider;
         }
 
+        if(!empty($this->timeRange)){
+            $query->andFilterWhere(['>=', 'cch_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->timeStart))])
+                ->andFilterWhere(['<=', 'cch_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->timeEnd))]);
+        }
+
+        if (!empty($this->cch_created_dt)) {
+            $query->andFilterWhere(['DATE(cch_created_dt)' => date('Y-m-d', strtotime($this->cch_created_dt))]);
+        }
+
         $query->andFilterWhere([
             'cch_id' => $this->cch_id,
             'cch_ccr_id' => $this->cch_ccr_id,
@@ -115,7 +125,7 @@ class ClientChatSearch extends ClientChat
             'cch_owner_user_id' => $this->cch_owner_user_id,
             'cch_status_id' => $this->cch_status_id,
             'cch_ua' => $this->cch_ua,
-            'date_format(cch_created_dt, "%Y-%m-%d")' => $this->cch_created_dt,
+            //'date_format(cch_created_dt, "%Y-%m-%d")' => $this->cch_created_dt,
             'date_format(cch_updated_dt, "%Y-%m-%d")' => $this->cch_updated_dt,
             'cch_created_user_id' => $this->cch_created_user_id,
             'cch_updated_user_id' => $this->cch_updated_user_id,
