@@ -40,7 +40,7 @@ class ConferenceEventLog extends \yii\db\ActiveRecord
             ['cel_event_type', 'required'],
             ['cel_event_type', 'string', 'max' => 50],
 
-            ['cel_sequence_number', 'integer'],
+            ['cel_sequence_number', 'integer', 'max' => 32000],
         ];
     }
 
