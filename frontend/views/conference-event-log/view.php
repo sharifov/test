@@ -35,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'cel_event_type',
                 'cel_conference_sid',
                 'cel_sequence_number',
-                'cel_created_dt',
+                'cel_created_dt:byUserDatetime',
                 'cel_data:ntext',
             ],
         ]) ?>

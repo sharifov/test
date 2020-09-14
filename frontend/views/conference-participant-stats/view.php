@@ -36,7 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'cps_cf_sid',
                 'cps_participant_identity',
                 'user:UserName',
-                'cps_created_dt',
+                'cps_created_dt:byUserDatetime',
                 'cps_duration:duration',
                 'cps_talk_time:duration',
                 'cps_hold_time:duration',
