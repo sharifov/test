@@ -39,8 +39,8 @@ use yii\widgets\Pjax;
 	<?= $form->field($model, 'uvm_say_voice')->dropDownList($model->getSaveVoiceList(), ['prompt' => '--']) ?>
 	<?= $form->field($model, 'uvm_record_enable')->checkbox() ?>
 	<?= $form->field($model, 'uvm_max_recording_time')->input('number') ?>
-	<?= $form->field($model, 'uvm_transcribe_enable')->checkbox() ?>
-	<?php //= $form->field($model, 'uvm_enabled')->checkbox() ?>
+	<?php //= $form->field($model, 'uvm_transcribe_enable')->checkbox() ?>
+	<?= $form->field($model, 'uvm_enabled')->checkbox() ?>
 
     <div id="webAudioRecorder">
         <div style="display: flex; align-items: center;">

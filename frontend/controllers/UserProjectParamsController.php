@@ -102,12 +102,11 @@ class UserProjectParamsController extends FController
         $model = new UserProjectParams([
             'upp_allow_general_line' => true
         ]);
-
+        $model->upp_user_id = Yii::$app->request->get('user_id');
 
         //VarDumper::dump(Yii::$app->request->post(), 10, true); exit;
 
         if ($model->load(Yii::$app->request->post())) {
-
 
             //$url = \yii\helpers\Url::to(Yii::$app->request->post('redirect'));
 
@@ -119,8 +118,6 @@ class UserProjectParamsController extends FController
                 //Yii::$app->session->setFlash('success', 'Created new project params!');
                 //return $this->redirect(Yii::$app->request->referrer); //'/'.Yii::$app->request->post('redirect'));
             }
-        } else {
-            $model->upp_user_id = Yii::$app->request->get('user_id');
         }
 
         return $this->renderAjax('create_ajax', [

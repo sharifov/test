@@ -24,7 +24,7 @@ use borales\extensions\phoneInput\PhoneInput;
 </script>
 
 <?php \yii\widgets\Pjax::begin(['id' => 'create-app-pjax', 'timeout' => 2000, 'enablePushState' => false]); ?>
-<?php $form = ActiveForm::begin(['options' => ['data-pjax' => true], 'action' => ['user-project-params/create-ajax'], 'method' => 'post']); ?>
+<?php $form = ActiveForm::begin(['options' => ['data-pjax' => true], 'action' => ['user-project-params/create-ajax', 'user_id' => $model->upp_user_id], 'method' => 'post', 'enableClientValidation' => false]); ?>
 
 <div class="col-md-12">
     <?php //= $form->field($model, 'upp_user_id')->dropDownList($userList, ['prompt' => '-']) ?>

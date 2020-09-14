@@ -3,6 +3,7 @@
 namespace sales\model\clientChatRequest\useCase\api\create;
 
 use common\models\Notifications;
+use sales\forms\lead\ClientCreateForm;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
@@ -129,7 +130,7 @@ class ClientChatRequestService
 
 		$this->transactionManager->wrap( function () use ($clientChatRequest, $form) {
 			if ($clientChatRequest->isRoomConnected()) {
-				$this->roomConnected($clientChatRequest);
+				$this->roomConnected($form, $clientChatRequest);
 			} else if ($clientChatRequest->isGuestDisconnected()) {
 				$this->guestDisconnected($clientChatRequest);
 			} else if ($clientChatRequest->isTrackEvent()) {
@@ -180,9 +181,10 @@ class ClientChatRequestService
 	}
 
 	/**
+	 * @param ClientChatRequestApiForm $form
 	 * @param ClientChatRequest $clientChatRequest
 	 */
-	private function roomConnected(ClientChatRequest $clientChatRequest): void
+	private function roomConnected(ClientChatRequestApiForm $form, ClientChatRequest $clientChatRequest): void
 	{
 		$clientChat = $this->clientChatRepository->getOrCreateByRequest($clientChatRequest);
 		if (!$clientChat->cch_client_id) {
@@ -198,16 +200,7 @@ class ClientChatRequestService
 		$this->clientChatRepository->save($clientChat);
 
 		$visitorRcId = $clientChatRequest->getClientRcId();
-
-		try {
-			$visitorData = $this->clientChatVisitorDataRepository->findByVisitorRcId($visitorRcId);
-			if (!$this->clientChatVisitorRepository->exists($clientChat->cch_id, $visitorData->cvd_id)) {
-				$this->clientChatVisitorRepository->create($clientChat->cch_id, $visitorData->cvd_id, $clientChat->cch_client_id);
-			}
-		} catch (NotFoundException $e) {
-			$visitorData = $this->clientChatVisitorDataRepository->createByVisitorId($visitorRcId);
-			$this->clientChatVisitorRepository->create($clientChat->cch_id, $visitorData->cvd_id, $clientChat->cch_client_id);
-		}
+		$this->manageChatVisitorData($clientChat->cch_id, $clientChat->cch_client_id, $visitorRcId, $form);
 
 		if ($clientChat->cch_owner_user_id) {
 			Notifications::publish('clientChatUpdateClientStatus', ['user_id' => $clientChat->cch_owner_user_id], [
@@ -288,4 +281,33 @@ class ClientChatRequestService
             'chatMessageData' => $data,
         ]), 'realtimeClientChatChannel');
     }
+
+	/**
+	 * @param int $chatId
+	 * @param int $clientId
+	 * @param string $visitorRcId
+	 * @param ClientChatRequestApiForm $form
+	 */
+    private function manageChatVisitorData(int $chatId, int $clientId, string $visitorRcId, ClientChatRequestApiForm $form): void
+	{
+		try {
+			$visitorData = $this->clientChatVisitorDataRepository->findByVisitorRcId($visitorRcId);
+			$visitorData->updateByClientChatRequest($form->data);
+			$this->clientChatVisitorDataRepository->save($visitorData);
+			if (!$this->clientChatVisitorRepository->exists($chatId, $visitorData->cvd_id)) {
+				$this->clientChatVisitorRepository->create($chatId, $visitorData->cvd_id, $clientId);
+			}
+		} catch (NotFoundException $e) {
+			$visitorData = $this->clientChatVisitorDataRepository->createByClientChatRequest($visitorRcId, $form->data);
+			$this->clientChatVisitorRepository->create($chatId, $visitorData->cvd_id, $clientId);
+		}
+
+		try {
+			$visitorLog = $this->visitorLogRepository->findByVisitorDataId($visitorData->cvd_id);
+			$visitorLog->updateByClientChatRequest($form->data);
+			$this->visitorLogRepository->save($visitorLog);
+		} catch (NotFoundException $e) {
+			$this->visitorLogRepository->createByClientChatRequest($visitorData->cvd_id, $form->data);
+		}
+	}
 }

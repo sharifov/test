@@ -30,7 +30,7 @@ b():window.addEventListener("load",b)})();
     }).then( function (instance) {
         instance.events.on('chat-created', function (e) {
             let visitorId = e.visitorId;
-            let projectName = e.projectName;
+            let projectName = e.project;
             
             var modal = $('#modal-sm');
             modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> </div>');

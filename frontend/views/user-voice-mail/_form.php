@@ -42,7 +42,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'uvm_max_recording_time')->input('number') ?>
 
-        <?= $form->field($model, 'uvm_transcribe_enable')->checkbox() ?>
+        <?php //= $form->field($model, 'uvm_transcribe_enable')->checkbox() ?>
 
         <?php //= $form->field($model, 'uvm_enabled')->checkbox() ?>
 

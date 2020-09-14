@@ -202,8 +202,6 @@ $user = Yii::$app->user->identity;
             <?php endforeach; ?>
         <?php endif; ?>
 
-
-
         <?php  if (!empty($leadModel->bo_flight_id) && $leadModel->isOwner($user->id) && $leadModel->isBooked()) {
             $title = empty($leadModel->getAdditionalInformationFormFirstElement()->pnr)
                 ? 'Create PNR' : 'PNR Created';
@@ -216,47 +214,6 @@ $user = Yii::$app->user->identity;
             ];
             echo Html::button('<i class="fa fa-plus"></i> ' . $title . '', $options);
         }  ?>
-
-
-
-
-
-
-        <?php if($user->isAdmin() || $user->isSupervision() || $user->isQaSuper()): ?>
-
-
-
-            &nbsp; <div class="dropdown">
-                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <i class="fa fa-bars"></i> Actions
-                </button>
-                <div class="dropdown-menu">
-                    <?= Html::a('<i class="fa fa-bars"></i> Status Logs', null, [
-                        'id' => 'view-flow-transition',
-                        'class' => 'dropdown-item',
-                        'title' => 'Status Logs LeadID #' . $leadForm->lead->id
-                    ]) ?>
-
-                    <?= Html::a('<i class="fa fa-list"></i> Data Logs', null, [
-                        'id' => 'btn-general-lead-log',
-                        'class' => 'dropdown-item showModalButton',
-                        'data-modal_id' => 'client-large',
-                        'title' => 'General Lead Log #' . $leadForm->lead->id,
-                        'data-content-url' => Url::to(['global-log/ajax-view-general-lead-log', 'lid' => $leadForm->lead->id])
-                    ]) ?>
-
-                    <?php if (Auth::can('/visitor-log/index')): ?>
-                        <?= Html::a('<i class="fa fa-list"></i> Visitor Logs', ['/visitor-log/index', 'VisitorLogSearch[vl_lead_id]' => $leadForm->lead->id], [
-                            'class' => 'dropdown-item',
-                            'title' => 'Visitor log #' . $leadForm->lead->id,
-                        ]) ?>
-                    <?php endif; ?>
-
-                </div>
-            </div>
-
-        <?php endif; ?>
-
 
         <?php if($leadModel->isSold() && ($user->isAdmin() || $user->isSupervision())):?>
         	<?= Html::button('<i class="fa fa-money"></i> Split profit', [
@@ -286,6 +243,50 @@ $user = Yii::$app->user->identity;
             <?php endif;?>
         <?php endif;?>
     </div>
+
+    <?php endif; ?>
+
+    <?php
+    $canStatusLog = Auth::can('/lead/flow-transition');
+    $canDataLogs = Auth::can('/global-log/ajax-view-general-lead-log');
+    $canVisitorLogs = Auth::can('/visitor-log/index');
+    ?>
+
+    <?php if ($canStatusLog || $canDataLogs || $canVisitorLogs): ?>
+
+        &nbsp; <div class="dropdown">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fa fa-bars"> </i> Logs
+            </button>
+            <div class="dropdown-menu">
+
+                <?php if ($canStatusLog): ?>
+                    <?= Html::a('<i class="fa fa-bars"> </i> Status Logs', null, [
+                        'id' => 'view-flow-transition',
+                        'class' => 'dropdown-item',
+                        'title' => 'Status Logs LeadID #' . $leadForm->lead->id
+                    ]) ?>
+                <?php endif;?>
+
+                <?php if ($canDataLogs): ?>
+                    <?= Html::a('<i class="fa fa-list"> </i> Data Logs', null, [
+                        'id' => 'btn-general-lead-log',
+                        'class' => 'dropdown-item showModalButton',
+                        'data-modal_id' => 'client-large',
+                        'title' => 'General Lead Log #' . $leadForm->lead->id,
+                        'data-content-url' => Url::to(['global-log/ajax-view-general-lead-log', 'lid' => $leadForm->lead->id])
+                    ]) ?>
+                <?php endif; ?>
+
+                <?php if ($canVisitorLogs): ?>
+                    <?= Html::a('<i class="fa fa-list"> </i> Visitor Logs', ['/visitor-log/index', 'VisitorLogSearch[vl_lead_id]' => $leadForm->lead->id], [
+                        'class' => 'dropdown-item',
+                        'title' => 'Visitor log #' . $leadForm->lead->id,
+                    ]) ?>
+                <?php endif; ?>
+
+            </div>
+        </div>
 
     <?php endif; ?>
 
