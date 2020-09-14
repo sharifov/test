@@ -65,7 +65,7 @@ class UserVoiceMailForm extends UserVoiceMail
 	{
 		$oldRecord = $this->oldAttributes['uvm_voice_file_message'];
 		$this->save(false);
-		if ($oldRecord) {
+		if (($oldRecord && $this->uvm_voice_file_message && $oldRecord !== $this->uvm_voice_file_message) || ($oldRecord && !$this->uvm_voice_file_message)) {
 			$this->deleteRecord($oldRecord);
 		}
 		return true;
