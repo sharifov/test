@@ -6,6 +6,7 @@ use borales\extensions\phoneInput\PhoneInputValidator;
 use common\components\BackOffice;
 use common\models\query\EmployeeQuery;
 use common\models\search\EmployeeSearch;
+use frontend\models\UserFailedLogin;
 use modules\product\src\entities\productType\ProductType;
 use sales\access\EmployeeGroupAccess;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
@@ -72,6 +73,8 @@ use yii\web\NotFoundHttpException;
  * @property UserGroupAssign[] $userGroupAssigns
  * @property UserGroup[] $ugsGroups
  * @property UserParams $userParams
+ * @property UserProductType $userProductType
+ * @property UserFailedLogin $userFailedLogin
  *
  * @property UserProjectParams[] $userProjectParams
  * @property Project[] $uppProjects
@@ -800,6 +803,22 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             /* @var ActiveQuery $query */
             $query->andWhere(['upt_product_enabled' => true]);
         });
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getUserProductType()
+    {
+        return $this->hasMany(UserProductType::class, ['upt_user_id' => 'id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getUserFailedLogin()
+    {
+        return $this->hasMany(UserFailedLogin::class, ['ufl_user_id' => 'id']);
     }
 
     /**

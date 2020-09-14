@@ -4,6 +4,12 @@ namespace frontend\controllers;
 
 use common\models\Employee;
 use common\models\Notifications;
+use common\models\search\EmailSearch;
+use common\models\search\SmsSearch;
+use frontend\models\search\UserSiteActivitySearch;
+use sales\auth\Auth;
+use sales\model\callLog\entity\callLog\search\CallLogSearch;
+use sales\model\user\entity\monitor\search\UserMonitorSearch;
 use Yii;
 use common\models\UserCallStatus;
 use common\models\search\UserCallStatusSearch;
@@ -180,8 +186,41 @@ class UserController extends FController
      */
     public function actionInfo($id)
     {
+        $params = Yii::$app->request->queryParams;
+
+        $searchModel = new UserMonitorSearch();
+        $startDateTime = date('Y-m-d H:i', strtotime('-1 day'));
+        $endDateTime = date('Y-m-d H:i', strtotime('+10 hours'));
+        $data = $searchModel->searchStats(['UserMonitorSearch' => ['um_user_id' => $id]], $startDateTime);
+
+        $userSiteActivityModel = new UserSiteActivitySearch();
+        $userActivity = $userSiteActivityModel->searchReport(['UserSiteActivitySearch' => ['usa_user_id' => $id]]);
+
+        $callLogSearchModel = new CallLogSearch();
+        $callLogDataProvider = $callLogSearchModel->searchMyCalls($params, Employee::findIdentity($id));
+
+        $emailSearchModel = new EmailSearch();
+        $params['EmailSearch']['e_created_user_id'] = $id;
+        $emailDataProvider = $emailSearchModel->search($params);
+        $emailDataProvider->pagination->pageSize = 10;
+
+        $smsSearchModel = new SmsSearch();
+        $params['SmsSearch']['s_created_user_id'] = $id;
+        $smsDataProvider = $smsSearchModel->search($params);
+        $smsDataProvider->pagination->pageSize = 10;
+
         return $this->render('info', [
             'model' => $this->findUserModel($id),
+            'data' => $data,
+            'startDateTime' => $startDateTime,
+            'endDateTime' => $endDateTime,
+            'userActivity' => $userActivity,
+            'callLogDataProvider' => $callLogDataProvider,
+            'callLogSearchModel' => $callLogSearchModel,
+            'emailDataProvider' => $emailDataProvider,
+            'emailSearchModel' => $emailSearchModel,
+            'smsDataProvider' => $smsDataProvider,
+            'smsSearchModel' => $smsSearchModel,
         ]);
     }
 }

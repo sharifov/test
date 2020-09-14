@@ -6,6 +6,7 @@ use common\models\EmailTemplateType;
 use common\models\Employee;
 use common\models\UserGroupAssign;
 use common\models\UserProjectParams;
+use sales\auth\Auth;
 use sales\helpers\query\QueryHelper;
 use Yii;
 use yii\base\Model;
@@ -27,6 +28,7 @@ class EmailSearch extends Email
     public $datetime_start;
     public $datetime_end;
     public $date_range;
+    public const CREATE_TIME_START_DEFAULT_RANGE = '-6 days';
 
     /**
      * {@inheritdoc}
@@ -40,6 +42,14 @@ class EmailSearch extends Email
 			[['e_template_type_name'], 'string'],
             [['e_email_from', 'e_email_to', 'e_email_cc', 'e_email_bc', 'e_email_subject', 'e_email_body_text', 'e_attach', 'e_email_data', 'e_language_id', 'e_status_done_dt', 'e_read_dt', 'e_error_message', 'e_created_dt', 'e_updated_dt', 'e_message_id', 'e_ref_message_id', 'e_inbox_created_dt'], 'safe'],
         ];
+    }
+
+    public function __construct($config = [])
+    {
+        parent::__construct($config);
+        $userTimezone = Auth::user()->userParams->up_timezone ?? 'UTC';
+        $currentDate = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->setTimezone(new \DateTimeZone($userTimezone));
+        $this->date_range = ($currentDate->modify(self::CREATE_TIME_START_DEFAULT_RANGE))->format('Y-m-d') . ' 00:00:00 - ' . $currentDate->format('Y-m-d') . ' 23:59:59';
     }
 
     /**
@@ -97,13 +107,13 @@ class EmailSearch extends Email
             return $dataProvider;
         }
 
-        if(empty($this->e_created_dt) && isset($params['EmailSearch']['date_range'])){
+        if(!empty($this->date_range)){
             $query->andFilterWhere(['>=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
                 ->andFilterWhere(['<=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
-        } elseif (!empty($params['EmailSearch']['e_created_dt'])) {
+        }
+
+        if (!empty($this->e_created_dt)) {
             $query->andFilterWhere(['DATE(e_created_dt)' => date('Y-m-d', strtotime($this->e_created_dt))]);
-            /*$query->andFilterWhere(['>=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->e_created_dt))])
-                ->andFilterWhere(['<=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->e_created_dt) + 3600 * 24)]);*/
         }
 
         if($this->supervision_id > 0) {
