@@ -2,6 +2,7 @@
 namespace frontend\controllers;
 
 use common\components\CentrifugoService;
+use common\models\Client;
 use common\models\Department;
 use common\models\Lead;
 use common\models\Project;
@@ -44,6 +45,8 @@ use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
 use sales\services\TransactionManager;
 use sales\viewModel\chat\ViewModelChatGraph;
 use yii\data\ActiveDataProvider;
+use yii\data\ArrayDataProvider;
+use yii\db\Expression;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use Yii;
@@ -177,33 +180,10 @@ class ClientChatController extends FController
 
 		/** @var $channels ClientChatChannel[] */
 		if ($channels) {
-			$query = ClientChat::find()->orderBy(['cch_created_dt' => SORT_DESC])->byOwner(Auth::id());
 
-			if ($channelId) {
-				$query->byChannel($channelId);
-			} else {
-				$query->byChannelIds(ArrayHelper::getColumn($channels, 'ccc_id'));
-			}
+			$search = new ClientChatSearch();
+			$dataProvider = $search->getListOfChats($channelId, $channels, $dep, $project, $tab, $page);
 
-			if ($dep) {
-				$query->byDepartment($dep);
-			}
-
-			if ($project) {
-				$query->byProject($project);
-			}
-
-			if (ClientChat::isTabActive($tab)) {
-				$query->active();
-			} else {
-				$query->archive();
-			}
-
-			$dataProvider = new ActiveDataProvider(['query' => $query, 'pagination' => ['pageSize' => self::CLIENT_CHAT_PAGE_SIZE]]);
-			if (\Yii::$app->request->isGet) {
-				$dataProvider->pagination->pageSize = $page * self::CLIENT_CHAT_PAGE_SIZE;
-				$dataProvider->pagination->page = 0;
-			}
 		}
 
 		try {

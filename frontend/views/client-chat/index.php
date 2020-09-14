@@ -12,7 +12,7 @@ use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $channels ClientChatChannel[] */
-/* @var $dataProvider ActiveDataProvider|null */
+/* @var $dataProvider \yii\data\ArrayDataProvider|null */
 /* @var $page int */
 /* @var $channelId int|null */
 /* @var $client \common\models\Client|null */

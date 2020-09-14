@@ -2,14 +2,21 @@
 
 namespace sales\model\clientChat\entity\search;
 
+use common\models\Client;
+use common\models\Department;
 use common\models\Employee;
+use common\models\Project;
+use sales\auth\Auth;
+use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
+use sales\services\clientChatMessage\ClientChatMessageService;
 use yii\data\ActiveDataProvider;
 use sales\model\clientChat\entity\ClientChat;
 use yii\data\ArrayDataProvider;
 use yii\data\SqlDataProvider;
 use yii\db\Expression;
 use yii\db\Query;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class ClientChatSearch
@@ -25,6 +32,8 @@ class ClientChatSearch extends ClientChat
     public string $timeRange;
     public string $timeStart;
     public string $timeEnd;
+
+    private const CLIENT_CHAT_PAGE_SIZE = 10;
 
     public function __construct($config = [])
     {
@@ -311,4 +320,89 @@ class ClientChatSearch extends ClientChat
 
         return $clientChats;
     }
+
+	/**
+	 * @param int|null $channelId
+	 * @param ClientChatChannel[] $channels
+	 * @param int|null $dep
+	 * @param int|null $project
+	 * @param int|null $tab
+	 * @param int $page
+	 * @return ArrayDataProvider
+	 * @throws \yii\base\InvalidConfigException
+	 */
+    public function getListOfChats(?int $channelId, array $channels, ?int $dep, ?int $project, ?int $tab, int $page): ArrayDataProvider
+	{
+		$query = ClientChat::find()->select([
+			ClientChat::tableName().'.*',
+			new Expression('ifnull(trim(concat(client.first_name, \' \', ifnull(client.last_name, \'\'))), concat(\'Guest-\', cch_id)) as client_full_name'),
+			'dep_name',
+			'project.name as project_name',
+			'ccc_name'
+		])->orderBy(['cch_created_dt' => SORT_DESC])->byOwner(Auth::id());
+
+		if ($channelId) {
+			$query->byChannel($channelId);
+		} else {
+			$query->byChannelIds(ArrayHelper::getColumn($channels, 'ccc_id'));
+		}
+
+		if ($dep) {
+			$query->byDepartment($dep);
+		}
+
+		if ($project) {
+			$query->byProject($project);
+		}
+
+		if (ClientChat::isTabActive($tab)) {
+			$query->active();
+		} else {
+			$query->archive();
+		}
+		$query->join('JOIN', ['client' => Client::tableName()], 'cch_client_id = client.id');
+		$query->join('JOIN', [ClientChatChannel::tableName()], 'cch_channel_id = ccc_id');
+		$query->leftJoin(Department::tableName(), 'cch_dep_id = dep_id');
+		$query->leftJoin(['project' => Project::tableName()], 'cch_project_id = project.id');
+
+		$data = $query->asArray()->all();
+		$data = ArrayHelper::index($data, 'cch_id');
+		$chatIds = ArrayHelper::map($data, 'cch_id', 'cch_id');
+		$lastMessages = ClientChatMessage::find()->select(['ccm_sent_dt' => 'MAX(ccm_sent_dt)', 'ccm_cch_id'])->byChatIds($chatIds)->groupBy(['ccm_cch_id'])->asArray()->all();
+		$lastMessages = ArrayHelper::index($lastMessages, 'ccm_cch_id');
+
+		$messageService = \Yii::createObject(ClientChatMessageService::class);
+		foreach ($data as $key => $item) {
+			if (isset($lastMessages[$key])) {
+				$data[$key]['ccm_sent_dt'] = $lastMessages[$key]['ccm_sent_dt'] ? strtotime($lastMessages[$key]['ccm_sent_dt']) : 0;
+			} else {
+				$data[$key]['ccm_sent_dt'] = 0;
+			}
+			$data[$key]['count_unread_messages'] = $messageService->getCountOfChatUnreadMessages((int)$item['cch_id'], (int)$item['cch_owner_user_id']);
+		}
+
+		$dataProvider = new ArrayDataProvider([
+			'allModels' => $data,
+			'pagination' => ['pageSize' => self::CLIENT_CHAT_PAGE_SIZE],
+			'sort' => [
+				'defaultOrder' => [
+					'count_unread_messages' => SORT_DESC,
+					'ccm_sent_dt' => SORT_DESC,
+					'cch_created_dt' => SORT_DESC
+				],
+				'attributes' => [
+					'count_unread_messages',
+					'ccm_sent_dt',
+					'cch_created_dt'
+				]
+			]
+		]);
+
+		if (\Yii::$app->request->isGet) {
+			$dataProvider->pagination->pageSize = $page * self::CLIENT_CHAT_PAGE_SIZE;
+			$dataProvider->pagination->page = 0;
+		}
+
+		return $dataProvider;
+	}
 }

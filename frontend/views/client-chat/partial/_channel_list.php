@@ -10,7 +10,7 @@ use yii\helpers\Html;
 
 /** @var $channels ClientChatChannel[] */
 /** @var $this \yii\web\View */
-/** @var $dataProvider \yii\data\ActiveDataProvider|null */
+/** @var $dataProvider \yii\data\ArrayDataProvider|null */
 /** @var $loadChannelsUrl string */
 /** @var $page int */
 /** @var $channelId int|null */

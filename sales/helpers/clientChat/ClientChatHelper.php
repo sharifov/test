@@ -16,9 +16,9 @@ class ClientChatHelper
 		return $clientChat->cchClient && $clientChat->cchClient->full_name ? $clientChat->cchClient->full_name : 'Guest-' . $clientChat->cch_id;
 	}
 
-	public static function getFirstLetterFromName(ClientChat $clientChat): string
+	public static function getFirstLetterFromName(string $name): string
 	{
-		return mb_strtoupper(mb_substr(self::getClientName($clientChat), 0, 1));
+		return mb_strtoupper(mb_substr($name, 0, 1));
 	}
 
 	public static function getClientStatusMessage(ClientChat $clientChat): string

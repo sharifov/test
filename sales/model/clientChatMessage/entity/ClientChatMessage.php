@@ -211,4 +211,14 @@ class ClientChatMessage extends \yii\db\ActiveRecord
     {
 		return self::find()->where(['ccm_cch_id' => $chatId])->count();
 	}
+
+	public static function getLastMessageByClient(int $cchId): ?self
+	{
+		return ClientChatMessage::find()->andWhere(['ccm_cch_id' => $cchId])->andWhere(['is', 'ccm_user_id', null])->orderBy(['ccm_id' => SORT_DESC])->limit(1)->one();
+	}
+
+	public static function getLastMessageByAgent(int $cchId): ?self
+	{
+		return ClientChatMessage::find()->andWhere(['ccm_cch_id' => $cchId])->andWhere(['is not', 'ccm_user_id', null])->orderBy(['ccm_id' => SORT_DESC])->limit(1)->one();
+	}
 }

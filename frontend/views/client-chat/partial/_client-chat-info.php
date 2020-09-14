@@ -27,7 +27,7 @@ $_self = $this;
     <div class="_rc-block-wrapper">
         <div style="display: flex; margin-bottom: 15px;">
             <span class="_rc-client-icon _cc-item-icon-round">
-                <span class="_cc_client_name"><?= ClientChatHelper::getFirstLetterFromName($clientChat) ?></span>
+                <span class="_cc_client_name"><?= ClientChatHelper::getFirstLetterFromName(ClientChatHelper::getClientName($clientChat)) ?></span>
                 <span class="_cc-status-wrapper">
                     <span class="_cc-status" data-is-online="<?= (int)$clientChat->cch_client_online ?>"></span>
                 </span>

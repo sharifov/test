@@ -3,8 +3,10 @@
 use sales\helpers\clientChat\ClientChatHelper;
 use sales\helpers\clientChat\ClientChatMessageHelper;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChatMessage\entity\ClientChatMessage;
 use yii\helpers\Html;
 use yii\helpers\StringHelper;
+use yii\widgets\Pjax;
 
 /** @var $clientChats ClientChat[] */
 /** @var $clientChatId int|null */
@@ -14,8 +16,8 @@ use yii\helpers\StringHelper;
     <?php
         $inMessage = true;
         $lastChatMessage = $lastChatMessageDate = '';
-        $lastClientMessage = $clientChat->getLastMessageByClient();
-        $lastAgentMessage = $clientChat->getLastMessageByAgent();
+        $lastClientMessage = ClientChatMessage::getLastMessageByClient((int)$clientChat['cch_id']);
+        $lastAgentMessage = ClientChatMessage::getLastMessageByAgent((int)$clientChat['cch_id']);
 
         if($lastClientMessage && !$lastAgentMessage){
             $inMessage = true;
@@ -39,38 +41,38 @@ use yii\helpers\StringHelper;
         }
     ?>
 
-    <div id="dialog-<?= $clientChat->cch_id ?>" class="_cc-list-item <?= $clientChatId && $clientChatId === $clientChat->cch_id ? '_cc_active' : '' ?>" data-goto-param="/live/<?= $clientChat->cch_rid ?>?layout=embedded" data-rid="<?= $clientChat->cch_rid ?>" data-cch-id="<?= $clientChat->cch_id ?>" data-is-closed="<?= $clientChat->isClosed() ?>">
+        <div id="dialog-<?= $clientChat['cch_id'] ?>" class="_cc-list-item <?= $clientChatId && $clientChatId === (int)$clientChat['cch_id'] ? '_cc_active' : '' ?>" data-goto-param="/live/<?= $clientChat['cch_rid'] ?>?layout=embedded" data-rid="<?= $clientChat['cch_rid'] ?>" data-cch-id="<?= $clientChat['cch_id'] ?>" data-is-closed="<?= (int)$clientChat['cch_status_id'] === ClientChat::STATUS_CLOSED ?>">
         <div class="_cc-item-icon-wrapper">
             <span class="_cc-item-icon-round">
-                <span class="_cc_client_name"><?= ClientChatHelper::getFirstLetterFromName($clientChat) ?></span>
+                <span class="_cc_client_name"><?= ClientChatHelper::getFirstLetterFromName($clientChat['client_full_name']) ?></span>
                 <span class="_cc-status-wrapper">
-                    <span class="_cc-status" data-is-online="<?= (int)$clientChat->cch_client_online ?>"></span>
+                    <span class="_cc-status" data-is-online="<?= (int)$clientChat['cch_client_online'] ?>"></span>
                 </span>
-                <?php $unreadMessages = ClientChatMessageHelper::getCountOfChatUnreadMessage($clientChat->cch_id, $clientChat->cch_owner_user_id) ?>
+                <?php $unreadMessages = ClientChatMessageHelper::getCountOfChatUnreadMessage($clientChat['cch_id'], $clientChat['cch_owner_user_id']) ?>
             </span>
             <span class="_cc-title">
-                <p><b><?= Html::encode(ClientChatHelper::getClientName($clientChat)) ?></b></p>
-                <p title="Сhat creation date"><small><?= Yii::$app->formatter->asDate($clientChat->cch_created_dt,'php:F d Y') ?></small></p>
+                <p><b><?= Html::encode($clientChat['client_full_name']) ?></b></p>
+                <p title="Сhat creation date"><small><?= Yii::$app->formatter->asDate($clientChat['cch_created_dt'],'php:F d Y') ?></small></p>
                 <div>
-                    <?php if ($clientChat->cchDep): ?>
-                        <span class="label label-info"><?= Html::encode($clientChat->cchDep->dep_name) ?></span>
+                    <?php if ($clientChat['dep_name']): ?>
+                        <span class="label label-info"><?= Html::encode($clientChat['dep_name']) ?></span>
                     <?php endif; ?>
 
-                    <?php if ($clientChat->cchProject): ?>
-                        <span class="label label-success"><?= Html::encode($clientChat->cchProject->name) ?></span>
+                    <?php if ($clientChat['project_name']): ?>
+                        <span class="label label-success"><?= Html::encode($clientChat['project_name']) ?></span>
                     <?php endif; ?>
 
-                    <span class="label label-default"><?= Html::encode($clientChat->cchChannel->ccc_name) ?></span>
+                    <span class="label label-default"><?= Html::encode($clientChat['ccc_name']) ?></span>
 
-                    <?php if ($clientChat->isTransfer()):?>
+                    <?php if ((int)$clientChat['cch_status_id'] === ClientChat::STATUS_TRANSFER):?>
                         <span class="label label-warning">In Transfer</span>
                     <?php endif; ?>
                 </div>
-                <?php \yii\widgets\Pjax::begin(['id' => 'chat-last-message-refresh-' . $clientChat->cch_id]) ?>
+                <?php Pjax::begin(['id' => 'chat-last-message-refresh-' . $clientChat['cch_id']]) ?>
                     <?php if ($lastChatMessage) : ?>
                         <p title="Last <?= $inMessage ? 'client' : 'agent' ?>  message"><small><?= StringHelper::truncate($lastChatMessage, 40, '...')?></small></p>
                     <?php endif; ?>
-                <?php \yii\widgets\Pjax::end() ?>
+                <?php Pjax::end() ?>
             </span>
         </div>
         <div class="_cc_item_data">
@@ -78,12 +80,12 @@ use yii\helpers\StringHelper;
 			<?php if ($lastChatMessageDate): ?>
                 <span title="Last update">
                     <?php $period = round((time() - strtotime($lastChatMessageDate))); ?>
-					<small class="_cc-item-last-message-time" data-moment="<?= $period ?>" data-cch-id="<?= $clientChat->cch_id ?>"></small><br>
+					<small class="_cc-item-last-message-time" data-moment="<?= $period ?>" data-cch-id="<?= $clientChat['cch_id'] ?>"></small><br>
                 </span>
 			<?php endif; ?>
 
             <span class="_cc-chat-unread-message">
-                <span class="badge badge-info _cc_item_unread_messages" data-cch-id="<?= $clientChat->cch_id ?>"><?php if ($unreadMessages): ?><?= $unreadMessages ?><?php endif; ?></span>
+                <span class="badge badge-info _cc_item_unread_messages" data-cch-id="<?= $clientChat['cch_id'] ?>"><?php if ($unreadMessages): ?><?= $unreadMessages ?><?php endif; ?></span>
             </span>
         </div>
     </div>
