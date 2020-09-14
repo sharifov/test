@@ -469,6 +469,8 @@ class ClientChatRequestController extends ApiBaseController
             "id": 2,
             "name": "Channel 2",
             "priority": 1,
+            "default": false,
+            "enabled": true,
             "settings": {
                 "max_dialog_count": 4,
                 "feedback_rating_enabled": false,
@@ -481,6 +483,8 @@ class ClientChatRequestController extends ApiBaseController
             "id": 3,
             "name": "Channel 11",
             "priority": 2,
+            "default": true,
+            "enabled": true,
             "settings": {
                 "max_dialog_count": 1,
                 "feedback_rating_enabled": true,

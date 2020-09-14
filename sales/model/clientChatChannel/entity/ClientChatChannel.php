@@ -203,7 +203,10 @@ class ClientChatChannel extends \yii\db\ActiveRecord
     public static function getSettingsList(int $projectId): array
     {
         $dataList = [];
-        $channelList = self::find()->where(['ccc_disabled' => false, 'ccc_frontend_enabled' => true, 'ccc_project_id' => $projectId])->orderBy(['ccc_priority' => SORT_ASC])->all();
+        $channelList = self::find()
+            ->where(['ccc_disabled' => false, 'ccc_frontend_enabled' => true, 'ccc_project_id' => $projectId])
+            ->orWhere(['ccc_default' => true, 'ccc_project_id' => $projectId])
+            ->orderBy(['ccc_priority' => SORT_ASC])->all();
         if ($channelList) {
             foreach ($channelList as $channelItem) {
                 if ($channelItem->ccc_settings) {
@@ -217,6 +220,8 @@ class ClientChatChannel extends \yii\db\ActiveRecord
                     'id' => $channelItem->ccc_id,
                     'name' => $channelItem->ccc_frontend_name,
                     'priority' => $channelItem->ccc_priority,
+                    'default' => (boolean) $channelItem->ccc_default,
+                    'enabled' => (boolean) $channelItem->ccc_frontend_enabled,
                     'settings' => $settings
                 ];
             }
