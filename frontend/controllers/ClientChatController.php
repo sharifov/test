@@ -731,7 +731,8 @@ class ClientChatController extends FController
     {
         $host = AppParamsHelper::liveChatRealTimeVisitorsUrl();
         $projects = Project::getListByUser(Auth::id());
-        return $this->render('real-time', ['host' => $host, 'projects' => implode(',', $projects)]);
+        $projectsWithKeys = Project::getListByUserWithProjectKeys(Auth::id());
+        return $this->render('real-time', ['host' => $host, 'projects' => implode(',', $projects), 'projectsWithKeys' => json_encode($projectsWithKeys, true)]);
     }
 
     public function actionAjaxCancelTransfer()

@@ -2,6 +2,7 @@
 /* @var $this yii\web\View */
 /* @var $host string */
 /* @var $projects string */
+/* @var $projectsWithKeys string */
 
 use yii\bootstrap4\Html;
 
@@ -20,12 +21,14 @@ $js = <<<JS
 b():window.addEventListener("load",b)})();
     
   var projects = '$projects' ? '$projects'.split(',') : [];
+  console.log(JSON.parse('$projectsWithKeys'));
   var run = function () {
     window.k.realtimeVisitors(document.getElementById('client-chat-realtime-div'), {
       host: '$host',
       settings: {
         project: projects,
-        writeMessageEnabled: true
+        writeMessageEnabled: true,
+        projectsWithKeys: JSON.parse('$projectsWithKeys')
       }
     }).then( function (instance) {
         instance.events.on('chat-created', function (e) {

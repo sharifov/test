@@ -165,7 +165,10 @@ class Project extends \yii\db\ActiveRecord
         return ArrayHelper::map($data,'project_id', 'project.name');
     }
 
-
+	public static function getListByUserWithProjectKeys(int $user_id = 0) : array
+	{
+		return self::find()->select(['project' => 'name', 'projectKey' => 'project_key'])->innerJoin(ProjectEmployeeAccess::tableName(), 'project_id = id and employee_id = :userId', ['userId' => $user_id])->asArray()->all();
+	}
 
 
     /**
