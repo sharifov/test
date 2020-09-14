@@ -460,17 +460,13 @@ class WebsocketServerController extends Controller
         $action = (string)$data['a'];
         $params = $data['p'];
 
-
         //$out['data'] = print_r($params, true);
 
         if ($controller === 'idle' && $action === 'set') {
             if (isset($params['val'])) {
                 $val = (bool) $params['val'];
 
-
-
                 UserConnection::updateAll(['uc_idle_state' => $val, 'uc_idle_state_dt' => date('Y-m-d H:i:s')], ['uc_connection_id' => $frame->fd, 'uc_app_instance' => \Yii::$app->params['appInstance']]);
-
 
                 //echo "\r\n";
                 $uc = UserConnection::find()->where(['uc_connection_id' => $frame->fd, 'uc_app_instance' => \Yii::$app->params['appInstance']])->one();
@@ -511,6 +507,14 @@ class WebsocketServerController extends Controller
             $out['dt'] = date('Y-m-d H:i:s');
 
             unset($data);
+        }
+
+        if ($controller === 'server' && $action === 'info') {
+            $out['Requested'] = round(memory_get_usage() / 1024, 2) . ' KB';
+            $out['Allocated'] = round(memory_get_usage(true) / 1024, 2) . ' KB';
+            $out['Peak requested'] = round(memory_get_peak_usage() / 1024, 2) . ' KB';
+            $out['Peak allocated'] = round(memory_get_peak_usage(true) / 1024, 2) . ' KB';
+            $out['dt'] = date('Y-m-d H:i:s');
         }
 
         if ($controller = $this->resolveController($controller, $action)) {

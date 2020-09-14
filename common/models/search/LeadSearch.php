@@ -389,6 +389,7 @@ class LeadSearch extends Lead
                 || $this->client_email
                 || $this->client_phone
                 || $this->status == Lead::STATUS_FOLLOW_UP
+                || $this->status == Lead::STATUS_PENDING
                 || $this->request_ip
                 || $this->discount_id
                 || $this->gid

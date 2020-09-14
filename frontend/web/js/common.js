@@ -96,7 +96,7 @@
         $('.enable-timer').each( function (i, e) {
             let seconds = $(e).attr('data-seconds');
 
-            $(e).timer({format: '%H:%M:%S', seconds: seconds}).timer('start');
+            $(e).timer({format: '%d %H:%M:%S', seconds: seconds}).timer('start');
         });
     }
 
@@ -176,7 +176,16 @@ function freeDialButton()
 function soundNotification(fileName = 'button_tiny', volume = 0.3) {
     let audio = new Audio('/js/sounds/' + fileName + '.mp3');
     audio.volume = volume;
-    audio.play();
+    let promise = audio.play();
+    //Structure if in this case is used as a trick to hide DOM Exception in terminal
+    if (promise !== undefined) {
+        promise.then(_ => {
+            // Autoplay started!
+        }).catch(error => {
+            // Autoplay was prevented.
+            // Show a "Play" button so that user can start playback.
+        });
+    }
 }
 
 function soundDisconnect() {

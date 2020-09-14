@@ -209,7 +209,9 @@ function notificationPNotify(id, type, title, message, desktopMessage) {
         mouse_reset: false,
         hide: true,
     });
-    soundNotification();
+    if (document.visibilityState === 'visible') {
+        soundNotification();
+    }
 }
 
 function notificationCount(count, totalUnreadMessages) {

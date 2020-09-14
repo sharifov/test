@@ -28,6 +28,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'cf_end_dt')->widget(DateTimePicker::class) ?>
 
+        <?= $form->field($model, 'cf_duration')->textInput() ?>
+
         <?= $form->field($model, 'cf_created_dt')->widget(DateTimePicker::class) ?>
 
         <?= $form->field($model, 'cf_updated_dt')->widget(DateTimePicker::class) ?>

@@ -2,6 +2,8 @@
 namespace sales\helpers\cases;
 
 
+use common\models\CaseSale;
+
 class CaseSaleHelper
 {
 	/**
@@ -44,5 +46,10 @@ class CaseSaleHelper
 			}
 		}
 		return $cnt;
+	}
+
+	public static function getCustomerEmail(array $data): string
+	{
+		return $data['email'] ?? '';
 	}
 }

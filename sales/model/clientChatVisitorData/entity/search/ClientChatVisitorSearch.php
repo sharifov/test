@@ -58,7 +58,7 @@ class ClientChatVisitorSearch extends ClientChatVisitorData
         $this->load($params);
 
         if (!$this->validate()) {
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 

@@ -29,9 +29,11 @@
 
         this.remove = function (callSid) {
             let index = this.getIndex(callSid);
-            if (index !== null) {
-                this.calls.splice(index, 1);
+            if (index === null) {
+                return false;
             }
+            this.calls.splice(index, 1);
+            return true;
         };
 
         this.getIndex = function (callSid) {

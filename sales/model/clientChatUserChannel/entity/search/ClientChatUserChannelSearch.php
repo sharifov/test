@@ -4,6 +4,7 @@ namespace sales\model\clientChatUserChannel\entity\search;
 
 use yii\data\ActiveDataProvider;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
+use yii\db\Expression;
 
 class ClientChatUserChannelSearch extends ClientChatUserChannel
 {
@@ -67,5 +68,24 @@ class ClientChatUserChannelSearch extends ClientChatUserChannel
 		]);
 
 		return $dataProvider;
+	}
+
+	/**
+	 * @param int $channelId
+	 * @return array|\yii\db\ActiveRecord[]
+	 */
+	public function getAvailableAgentForTransfer(int $channelId): array
+	{
+		$query = self::find()->select([
+			'user_id' => 'ccuc_user_id',
+			new Expression('if (nickname_client_chat is null or nickname_client_chat = \'\', username, nickname_client_chat) as `nickname`')
+		]);
+
+		$query->byChannelId($channelId);
+		$query->joinUser();
+		$query->hasRcProfile();
+		$query->onlineUsers();
+
+		return $query->asArray()->all();
 	}
 }

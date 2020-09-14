@@ -39,5 +39,10 @@ phpunit.phar
 # vagrant runtime
 /.vagrant
 
+/phpstan.loc.neon
+/psalm.loc.xml
+
 # visual studio code
 .vscode
+
+/lsp

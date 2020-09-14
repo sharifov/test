@@ -57,7 +57,7 @@ class PriceController extends Controller
                 printf('%s',$this->ansiFormat('.', Console::FG_GREEN));
             } catch (\Throwable $e) {
                 printf('%s',$this->ansiFormat('.', Console::FG_RED));
-                \Yii::error($e->getMessage(), 'PriceController:actionUpdateCallsPrice:update');
+//                \Yii::error($e->getMessage(), 'PriceController:actionUpdateCallsPrice:update');
             }
         }
 
@@ -91,7 +91,7 @@ class PriceController extends Controller
                 printf('%s',$this->ansiFormat('.', Console::FG_GREEN));
             } catch (\Throwable $e) {
                 printf('%s',$this->ansiFormat('.', Console::FG_RED));
-                \Yii::error($e->getMessage(), 'PriceController:actionUpdateSmsPrice:update');
+//                \Yii::error($e->getMessage(), 'PriceController:actionUpdateSmsPrice:update');
             }
         }
 

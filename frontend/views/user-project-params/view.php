@@ -1,5 +1,6 @@
 <?php
 
+use common\models\UserProjectParams;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
@@ -51,6 +52,19 @@ $this->params['breadcrumbs'][] = $this->title;
             'upp_tw_phone_number',
             'phoneList.pl_phone_number',
             'upp_allow_general_line:booleanByLabel',
+            'upp_vm_enabled:booleanByLabel',
+            [
+                'attribute' => 'upp_vm_user_status_id',
+                'value' => static function(UserProjectParams $model) {
+                    return UserProjectParams::VM_USER_STATUS_LIST[$model->upp_vm_user_status_id] ?? null;
+                },
+            ],
+            [
+                'attribute' => 'upp_vm_id',
+                'value' => static function(UserProjectParams $model) {
+                    return $model->upp_vm_id ? $model->voiceMail->uvm_name : null;
+                },
+            ],
             //'upp_tw_sip_id',
             [
                 'attribute' => 'upp_updated_dt',

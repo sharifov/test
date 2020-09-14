@@ -146,7 +146,7 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
                         ]) */ ?>
 
                         <li class="nav-item">
-                            <a href="javascript:;" class="info-number" title="Incoming Call - Volume ON" id="incoming-sound-indicator"></a>
+                            <a href="javascript:;" class="info-number" data-status="1" title="Incoming Call - Volume ON" id="incoming-sound-indicator"><i class="fa fa-volume-up text-success"> </i></a>
                         </li>
 
                         <?php /*php endif;*/?>
@@ -163,6 +163,54 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
 
         <!-- page content -->
         <div class="right_col" role="main">
+
+            <div id="desktop-phone-notifications">
+<!--                <div class="phone-notifications">-->
+<!--                    <ul class="phone-notifications__list">-->
+<!--                        <li class="phone-notifications__item phone-notifications__item--shown">-->
+<!--                            <div class="incoming-notification">-->
+<!--                                <i class="user-icn">G</i>-->
+<!--                                <div class="incoming-notification__inner">-->
+<!--                                    <div class="incoming-notification__info">-->
+<!--                                        <div class="incoming-notification__general-info">-->
+<!--                                            <b class="incoming-notification__name">Geffy Morgan Jefferson</b>-->
+<!--                                            <span class="incoming-notification__phone">+1 (888) 88 888 88</span>-->
+<!--                                            <div class="incoming-notification__project">-->
+<!--                                                <b class="incoming-notification__project-name">WOWFARE</b>-->
+<!--                                                <i>•</i>-->
+<!--                                                <span class="incoming-notification__position">Sales General</span>-->
+<!--                                            </div>-->
+<!--                                        </div>-->
+<!--                                        <div class="incoming-notification__timer">-->
+<!--                                            <span>24:32</span>-->
+<!--                                        </div>-->
+<!---->
+<!--                                    </div>-->
+<!--                                    <div class="incoming-notification__action-list">-->
+<!--                                        <div class="incoming-notification__dynamic">-->
+<!--                                            <a href="#" class="incoming-notification__action incoming-notification__action--line">-->
+<!--                                                <i class="fa fa-random"></i>-->
+<!--                                            </a>-->
+<!---->
+<!--                                            <a href="#" class="incoming-notification__action incoming-notification__action--info">-->
+<!--                                                <i class="fa fa-info"></i>-->
+<!--                                            </a>-->
+<!---->
+<!--                                            <a href="#" class="incoming-notification__action incoming-notification__action--phone">-->
+<!--                                                <i class="fa fa-phone"></i>-->
+<!--                                            </a>-->
+<!--                                        </div>-->
+<!--                                        <a href="#" class="incoming-notification__action incoming-notification__action--max">-->
+<!--                                            <i class="fa fa-long-arrow-down"></i>-->
+<!--                                        </a>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </li>-->
+<!--                    </ul>-->
+<!--                </div>-->
+            </div>
+
             <?php if (isset($this->params['h1'])): ?>
                 <div class="page-title">
                     <div class="title_left">

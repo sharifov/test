@@ -869,7 +869,8 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'friendlyName' => $friendlyName,
             'conferenceSid' => $conferenceSid,
             'to' => $to,
-            'user_id' => $userId
+            'user_id' => $userId,
+            'voipApiUsername' => $this->voipApiUsername,
         ];
 
         $response = $this->sendRequest('twilio-conference/return-to-conference-call', $data);
@@ -940,7 +941,48 @@ class CommunicationService extends Component implements CommunicationServiceInte
                 if ($isError) {
                     $out['error'] = true;
                     $out['message'] = (string)($data['message'] ?? 'Undefined error message');
+                    if (
+                        !
+                        (
+                            (!empty($data['code']) && $data['code'] === 21220 && $out['message'] === 'Call status is Completed')
+                            || (!empty($data['code']) && $data['code'] === 20404 && $out['message'] === 'Send digit error. Conference not found')
+                        )
+                    ) {
+                        \Yii::error(VarDumper::dumpAsString($response->data), 'Component:CommunicationService::processResponse:response');
+                    }
+                }
+                $out['result'] = $data['result'] ?? [];
+            } else {
+                $out['error'] = true;
+                $out['message'] = 'Not found in response array data';
+            }
+        } else {
+            $out['error'] = true;
+            $out['message'] = 'Server error. Try again later.';
+            \Yii::error(VarDumper::dumpAsString($response->content), 'Component:CommunicationService::processResponse');
+		}
+
+	    return $out;
+	}
+
+    private function processResponseGetPrice(\yii\httpclient\Response $response): array
+    {
+        $notFoundCode = 20404;//twilio not found code
+
+        $out = ['error' => false, 'message' => '', 'result' => []];
+
+        if ($response->isOk) {
+            if (isset($response->data['data'])) {
+                $code = $response->data['code'] ?? null;
+                $data = $response->data['data'];
+                $isError = (bool)($data['is_error'] ?? false);
+                if ($isError && $code !== $notFoundCode) {
+                    $out['error'] = true;
+                    $out['message'] = (string)($data['message'] ?? 'Undefined error message');
                     \Yii::error(VarDumper::dumpAsString($response->data), 'Component:CommunicationService::processResponse:response');
+                }
+                if ($code === $notFoundCode) {
+                    $out['message'] = (string)($data['message'] ?? 'Undefined message');
                 }
                 $out['result'] = $data['result'] ?? [];
             } else {
@@ -1012,7 +1054,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
 
        $response = $this->sendRequest('twilio/get-call-price', $data);
 
-       return $this->processResponse($response);
+       return $this->processResponseGetPrice($response);
     }
 
     public function getSmsPrice(string $smsSid): array
@@ -1023,7 +1065,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
 
        $response = $this->sendRequest('twilio/get-sms-price', $data);
 
-       return $this->processResponse($response);
+       return $this->processResponseGetPrice($response);
     }
 
     public function callToUser(string $from, string $to, int $created_userId, array $requestCall, string $friendly_name): array

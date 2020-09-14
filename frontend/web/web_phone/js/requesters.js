@@ -83,6 +83,8 @@
         };
 
         this.accept = function (call) {
+            window.phoneWidget.notifier.off(call.data.callSid);
+            PhoneWidgetCall.audio.incoming.off(call.data.callSid);
             $.ajax({
                 type: 'post',
                 url: this.settings.acceptCallUrl,
@@ -96,11 +98,15 @@
                     if (data.error) {
                         createNotify('Accept Call', data.message, 'error');
                         call.unSetAcceptCallRequestState();
+                        window.phoneWidget.notifier.on(call.data.callSid);
+                        PhoneWidgetCall.audio.incoming.on(call.data.callSid);
                     }
                 })
                 .fail(function () {
                     createNotify('Accept Call', 'Server error', 'error');
                     call.unSetAcceptCallRequestState();
+                    window.phoneWidget.notifier.on(call.data.callSid);
+                    PhoneWidgetCall.audio.incoming.on(call.data.callSid);
                 })
         };
 
@@ -145,6 +151,8 @@
         };
 
         this.returnHoldCall = function (call) {
+            window.phoneWidget.notifier.off(call.data.callSid);
+            PhoneWidgetCall.audio.incoming.off(call.data.callSid);
             $.ajax({
                 type: 'post',
                 url: this.settings.returnHoldCallUrl,
@@ -157,11 +165,15 @@
                     if (data.error) {
                         createNotify('Return Hold Call', data.message, 'error');
                         call.unSetReturnHoldCallRequestState();
+                        window.phoneWidget.notifier.on(call.data.callSid);
+                        PhoneWidgetCall.audio.incoming.on(call.data.callSid);
                     }
                 })
                 .fail(function () {
                     createNotify('Return Hold Call', 'Server error', 'error');
                     call.unSetReturnHoldCallRequestState();
+                    window.phoneWidget.notifier.on(call.data.callSid);
+                    PhoneWidgetCall.audio.incoming.on(call.data.callSid);
                 })
         };
 

@@ -37,7 +37,11 @@ class UpdateCallPrice
             }
 
             if (!isset($result['result']['price'])) {
-                throw new \DomainException('Not found price');
+//                \Yii::info(VarDumper::dumpAsString([
+//                    'callSid' => $callSid,
+//                    'message' => 'Not found price',
+//                ]), 'info\UpdateCallPrice');
+                return;
             }
 
             $price = $result['result']['price'];

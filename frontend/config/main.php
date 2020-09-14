@@ -211,17 +211,18 @@ return [
 
         'translatemanager' => [
             'class'                     => \lajax\translatemanager\Module::class,
-            'root'                      => '@common/templates',               // The root directory of the project scan.
+            'root'                      => [/*'@frontend/views/',*/ '@frontend/../sales/model/clientChat/'],               // The root directory of the project scan.
             'scanRootParentDirectory'   => true,
             'layout'                    => '@frontend/themes/gentelella_v2/views/layouts/main',         // Name of the used layout. If using own layout use 'null'.
             'allowedIPs'                => ['*'],               // 127.0.0.1 IP addresses from which the translation interface is accessible.
             'roles'                     => [Employee::ROLE_SUPER_ADMIN, Employee::ROLE_ADMIN],               // For setting access levels to the translating interface.
             'tmpDir'                    => '@runtime',         // Writable directory for the client-side temporary language files.
             // IMPORTANT: must be identical for all applications (the AssetsManager serves the JavaScript files containing language elements from this directory).
-            'phpTranslators'            => ['Yii::t', 't'],             // list of the php function for translating messages.
+            'phpTranslators'            => ['::t'],             // list of the php function for translating messages.
             //'jsTranslators'             => ['lajax.t', 't'],         // list of the js function for translating messages.
-            'patterns'                  => [/*'*.js',*/'*.twig'],   // list of file extensions that contain language elements.
-            'ignoredCategories'         => ['yii', 'language', 'app', 'database'],             // these categories won't be included in the language database.
+            'patterns'                  => ['*.php'],   // list of file extensions that contain language elements.
+            'ignoredCategories'         => ['yii', 'language', 'app', 'database', 'yii2mod.rbac'],             // these categories won't be included in the language database.
+            //'onlyCategories'            => ['client-chat'],
             'ignoredItems'              => ['config', 'vendor', 'console', 'environments', 'node_modules', 'runtime'],          // these files will not be processed.
             'scanTimeLimit'             => null,                // increase to prevent "Maximum execution time" errors, if null the default max_execution_time will be used
             'searchEmptyCommand'        => '!',                 // the search string to enter in the 'Translation' search field to find not yet translated items, set to null to disable this feature
@@ -232,15 +233,17 @@ return [
                     'connection'    => 'db',                    // connection identifier
                     'table'         => '{{%language}}',         // table name
                     'columns'       => ['name', 'name_ascii'],   //names of multilingual fields
-                    //'category' => 'database-table-name',// the category is the database table name
-                ]
+                    //'category'      => 'db',// the category is the database table name
+                ],
+
             ],
+
             'scanners' => [ // define this if you need to override default scanners (below)
-                //'\lajax\translatemanager\services\scanners\ScannerPhpFunction',
-                //'\lajax\translatemanager\services\scanners\ScannerPhpArray',
+                '\lajax\translatemanager\services\scanners\ScannerPhpFunction',
+                '\lajax\translatemanager\services\scanners\ScannerPhpArray',
                 //'\lajax\translatemanager\services\scanners\ScannerJavaScriptFunction',
                 //'\lajax\translatemanager\services\scanners\ScannerDatabase',
-                \common\components\ScannerTwigFunction::class
+                //\common\components\ScannerTwigFunction::class
             ],
 
             //'googleApiKey'              => 'AIzaSyCBz5uH4JyegEa_vqN_OGJCORq-UpkmTiQ',
@@ -314,7 +317,7 @@ return [
     ],
     'as access' => [
         'class' => 'yii\filters\AccessControl',
-        'except' => ['site/login', 'site/step-two', 'site/captcha'],
+        'except' => ['site/login', 'site/step-two', 'site/captcha', 'site/error'],
         'rules' => [
             [
                 'allow' => true,

@@ -1,6 +1,8 @@
 <?php
 
 use common\models\Department;
+use kartik\select2\Select2;
+use sales\helpers\clientChat\ClientChatHelper;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\transfer\ClientChatTransferForm;
 use yii\helpers\Html;
@@ -14,14 +16,31 @@ use yii\widgets\Pjax;
 <div class="row">
 	<div class="col-md-12">
         <?php Pjax::begin(['id' => 'pjax-cc-submit-transfer', 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false, 'clientOptions' => ['async' => false]]) ?>
-            <?php $form = ActiveForm::begin(['options' => ['data-pjax' => 1]]); ?>
+            <?php $form = ActiveForm::begin(['options' => ['data-pjax' => 1, 'id' => 'cc-submit-transfer-form']]); ?>
                 <?= $form->errorSummary($transferForm) ?>
 
                 <?= $form->field($transferForm, 'cchId')->hiddenInput()->label(false) ?>
 
+                <?= $form->field($transferForm, 'pjaxReload')->hiddenInput(['id' => 'pjaxReload'])->label(false) ?>
+
                 <?= $form->field($transferForm, 'isOnline')->hiddenInput()->label(false) ?>
 
-                <?= $form->field($transferForm, 'depId')->dropDownList(Department::getListExcludingExchange(), ['prompt' => ' -- Select department --']) ?>
+                <?= $form->field($transferForm, 'depId')->dropDownList(Department::getList(), ['prompt' => ' -- Select department --', 'id' => 'depId']) ?>
+
+                <?= $form->field($transferForm, 'agentId')->widget(Select2::class, [
+                    'data' => ClientChatHelper::getAvailableAgentForTransfer($clientChat, $clientChat->cch_dep_id),
+                    'options' => [
+                        'prompt' => '---',
+                        'placeholder' => 'Select agent',
+                        'multiple' => true
+                    ],
+                    'pluginOptions' => [
+                        'allowClear' => true,
+						'placeholder' => 'Select agent',
+                        'allowMultiple' => true
+					],
+                    'size' => Select2::SIZE_SMALL,
+				]) ?>
 
                 <div class="text-center" style="width: 100%">
                     <?= Html::submitButton('Submit', ['class' => 'btn btn-success _cc_submit_transfer']) ?>
@@ -49,6 +68,12 @@ $js = <<<JS
         data.data.append('cchId', $('#clientchattransferform-cchid').val());
         btnHtml = $('._cc_submit_transfer').html();
         $('._cc_submit_transfer').html('<i class="fa fa-spin fa-spinner"></i>');
+    });
+    
+    $(document).on('change', '#depId', function () {
+        $('#pjaxReload').val(1);
+         $('#cc-submit-transfer-form').submit();
+        
     });
 })();
 JS;

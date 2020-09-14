@@ -27,6 +27,7 @@ use yii\db\ActiveRecord;
  * @property int|null $cf_created_user_id
  * @property string|null $cf_start_dt
  * @property string|null $cf_end_dt
+ * @property int|null $cf_duration
  *
  * @property ConferenceRoom $cfCr
  * @property ConferenceParticipant[] $conferenceParticipants
@@ -83,6 +84,8 @@ class Conference extends \yii\db\ActiveRecord
             [['cf_start_dt', 'cf_end_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
 
 //            [['cf_call_sid'], 'exist', 'skipOnError' => true, 'targetClass' => Call::class, 'targetAttribute' => ['cf_call_sid' => 'c_call_sid']],
+
+            ['cf_duration', 'integer', 'max' => 32500],
         ];
     }
 
@@ -104,6 +107,7 @@ class Conference extends \yii\db\ActiveRecord
             'cf_start_dt' => 'Start',
             'cf_end_dt' => 'End',
             'cf_call_sid' => 'Call Sid',
+            'cf_duration' => 'Duration',
         ];
     }
 
@@ -175,7 +179,7 @@ class Conference extends \yii\db\ActiveRecord
         return self::STATUS_LIST;
     }
 
-    public function start(string $dateTime = ''): void
+    public function start(?string $dateTime = null): void
     {
         $this->cf_start_dt = $dateTime;
         $this->cf_status_id = self::STATUS_START;
@@ -196,10 +200,20 @@ class Conference extends \yii\db\ActiveRecord
         return $this->cf_status_id === self::STATUS_DELAY;
     }
 
-    public function end(string $dateTime = ''): void
+    public function end(?string $dateTime = null): void
     {
         $this->cf_end_dt = $dateTime;
         $this->cf_status_id = self::STATUS_END;
+        $this->calculateDuration();
+    }
+
+    public function calculateDuration(): void
+    {
+        if (!$this->cf_end_dt || !$this->cf_start_dt) {
+            $this->cf_duration = 0;
+            return;
+        }
+        $this->cf_duration = strtotime($this->cf_end_dt) - strtotime($this->cf_start_dt);
     }
 
     public function isEnd(): bool

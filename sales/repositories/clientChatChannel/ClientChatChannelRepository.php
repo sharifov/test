@@ -1,19 +1,24 @@
 <?php
 namespace sales\repositories\clientChatChannel;
 
-use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\repositories\NotFoundException;
 use sales\repositories\Repository;
 
 class ClientChatChannelRepository extends Repository
 {
-	public function findByClientChatData(ClientChat $clientChat, ?int $priority): ClientChatChannel
+	/**
+	 * @param int|null $depId
+	 * @param int|null $projectId
+	 * @param int|null $priority
+	 * @return ClientChatChannel
+	 */
+	public function findByClientChatData(?int $depId, ?int $projectId, ?int $priority): ClientChatChannel
 	{
 		$channel = ClientChatChannel::find();
 
-		$channel->byDepartment($clientChat->cch_dep_id);
-		$channel->byProject($clientChat->cch_project_id);
+		$channel->byDepartment($depId);
+		$channel->byProject($projectId);
 
 		if ($priority) {
 			$channel->priority($priority);
@@ -27,5 +32,36 @@ class ClientChatChannelRepository extends Repository
 		}
 
 		throw new NotFoundException('Channel Not Found');
+	}
+
+	/**
+	 * @param int $userId
+	 * @param int|null $projectId
+	 * @param int|null $exceptDepartment
+	 * @return ClientChatChannel[]
+	 */
+	public function getByUserAndProject(int $userId, ?int $projectId, ?int $exceptDepartment = null): array
+	{
+		$channelQuery = ClientChatChannel::find();
+		$channelQuery->joinWithCcuc($userId);
+		if ($projectId) {
+			$channelQuery->byProject($projectId);
+		}
+		if ($exceptDepartment) {
+			$channelQuery->exceptDepartment($exceptDepartment);
+		}
+		$channels = $channelQuery->asArray()->all();
+		if ($channels) {
+			return $channels;
+		}
+		throw new NotFoundException('Channels not found');
+	}
+
+	public function find(int $id): ClientChatChannel
+	{
+		if ($channel = ClientChatChannel::findOne(['ccc_id' => $id])) {
+			return $channel;
+		}
+		throw new NotFoundException('Client Chat Channel not found');
 	}
 }

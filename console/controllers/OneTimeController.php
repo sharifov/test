@@ -6,6 +6,7 @@ use common\components\jobs\CreateSaleFromBOJob;
 use common\models\CaseSale;
 use common\components\jobs\UpdateSaleFromBOJob;
 use common\models\Client;
+use common\models\Conference;
 use common\models\DepartmentEmailProject;
 use common\models\DepartmentPhoneProject;
 use common\models\UserProjectParams;
@@ -492,6 +493,48 @@ class OneTimeController extends Controller
             ' s] %g Processed: %w[' . $processed . '] %g How many records left %w[' . $left . '] %g %n'), PHP_EOL;
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+    }
+
+    public function actionCalculateConferenceDuration()
+    {
+        $report = [];
+
+        printf(PHP_EOL . '--- Start [' . date('Y-m-d H:i:s') . '] %s ---' . PHP_EOL, $this->ansiFormat(self::class . '\\' . $this->action->id, Console::FG_YELLOW));
+        printf(PHP_EOL);
+        $time_start = microtime(true);
+
+        $query = Conference::find()
+            ->andWhere(['IS', 'cf_duration', null])
+            ->orderBy(['cf_id' => SORT_ASC]);
+        $count = (clone $query)->count();
+
+        Console::startProgress(0, $count);
+        $processed = 0;
+
+        foreach ($query->batch() as $conferences) {
+            /** @var Conference $conference */
+            foreach ($conferences as $conference) {
+                $conference->calculateDuration();
+                if (!$conference->save()) {
+                    $report[] = VarDumper::dumpAsString([
+                        'id' => $conference->cf_id,
+                        'errors' => $conference->getErrors(),
+                        'model' => $conference->getAttributes(),
+                    ]);
+                }
+                $processed ++;
+                Console::updateProgress($processed, $count);
+            }
+        }
+        Console::endProgress(false);
+
+        $time_end = microtime(true);
+        $time = number_format(round($time_end - $time_start, 2), 2);
+        if ($report) {
+            print_r($report);
+        }
+        printf(PHP_EOL . 'Execute Time: %s' . PHP_EOL, $this->ansiFormat($time . ' s', Console::FG_RED));
+        printf(PHP_EOL . ' --- End [' . date('Y-m-d H:i:s') . '] %s ---' . PHP_EOL . PHP_EOL, $this->ansiFormat(self::class . '\\' . $this->action->id, Console::FG_YELLOW));
     }
 
     /**

@@ -2,6 +2,7 @@
 
 use common\components\grid\DateTimeColumn;
 use common\models\UserProductType;
+use common\models\UserProjectParams;
 use frontend\models\UserFailedLogin;
 use modules\product\src\entities\productType\ProductType;
 use sales\auth\Auth;
@@ -90,7 +91,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 </div>
                 <div class="row">
                     <div class="col-sm-6">
-                        <?= $form->field($model, 'nickname')->textInput() ?>
+                        <?= $form->field($model, 'full_name')->textInput() ?>
                     </div>
                     <div class="col-sm-6">
                         <?= $form->field($model, 'password')->passwordInput(['autocomplete' => "off"]) ?>
@@ -99,7 +100,10 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 
                 <div class="row">
                     <div class="col-sm-6">
-                        <?= $form->field($model, 'full_name')->textInput() ?>
+                        <?= $form->field($model, 'nickname')->textInput() ?>
+                    </div>
+                     <div class="col-sm-6">
+                        <?= $form->field($model, 'nickname_client_chat')->textInput() ?>
                     </div>
                 </div>
 
@@ -580,6 +584,28 @@ JS;
                             return '-';
                         }
                     ],
+                    [
+                        'attribute' => 'upp_vm_enabled',
+                        'format' => 'raw',
+                        'value' => function(\common\models\UserProjectParams $model) {
+                            if ($model->upp_vm_enabled) {
+                                return '<i class="fa fa-check-square-o"></i>';
+                            }
+                            return '-';
+                        }
+                    ],
+                    [
+                        'attribute' => 'upp_vm_user_status_id',
+                        'value' => static function(UserProjectParams $model) {
+                            return UserProjectParams::VM_USER_STATUS_LIST[$model->upp_vm_user_status_id] ?? null;
+                        },
+                    ],
+                    [
+                        'attribute' => 'upp_vm_id',
+                        'value' => static function(UserProjectParams $model) {
+                            return $model->upp_vm_id ? $model->voiceMail->uvm_name : null;
+                        },
+                    ],
                     //'upp_tw_sip_id',
 
                     /*[
@@ -657,7 +683,7 @@ JS;
 					'uvm_say_language',
 					'uvm_record_enable:booleanByLabel',
 					'uvm_max_recording_time',
-					'uvm_transcribe_enable:booleanByLabel',
+//					'uvm_transcribe_enable:booleanByLabel',
 					'uvm_enabled:booleanByLabel',
 					'uvm_created_dt:byUserDateTime',
 					'uvm_updated_dt:byUserDateTime',

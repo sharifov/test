@@ -107,6 +107,7 @@ class QuoteController extends FController
                 if($resultSearch !== false){
                     foreach ($resultSearch['results'] as $entry){
                         if($entry['key'] == $key){
+
                             $transaction = Quote::getDb()->beginTransaction();
 
                             $quote = new Quote();
@@ -265,6 +266,9 @@ class QuoteController extends FController
                                                         }
                                                         if(isset($baggageEntry['allowMaxSize'])){
                                                             $baggage->qsb_allow_max_size = $baggageEntry['allowMaxSize'];
+                                                        }
+                                                        if(isset($baggageEntry['carryOn'])){
+                                                            $baggage->qsb_carry_one = $baggageEntry['carryOn'];
                                                         }
                                                         if(!$baggage->validate()){
                                                             $result['error'] = VarDumper::dumpAsString($baggage->errors);

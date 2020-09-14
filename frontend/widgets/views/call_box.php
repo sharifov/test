@@ -262,7 +262,7 @@ use yii\widgets\Pjax; ?>
 
 <?php endif; ?>
 
-<?= frontend\widgets\IncomingCallWidget::widget() ?>
+<?php //= frontend\widgets\IncomingCallWidget::widget() ?>
 
 <?php Modal::begin([
     'id' => 'call-box-modal',

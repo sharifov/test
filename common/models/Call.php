@@ -187,11 +187,13 @@ class Call extends \yii\db\ActiveRecord
     public const CALL_TYPE_OUT  = 1;
     public const CALL_TYPE_IN   = 2;
     public const CALL_TYPE_JOIN   = 3;
+    public const CALL_TYPE_RETURN   = 4;
 
     public const TYPE_LIST = [
         self::CALL_TYPE_OUT => 'Outgoing',
         self::CALL_TYPE_IN  => 'Incoming',
         self::CALL_TYPE_JOIN  => 'Join',
+        self::CALL_TYPE_RETURN  => 'Return',
     ];
 
 
@@ -1426,6 +1428,17 @@ class Call extends \yii\db\ActiveRecord
                             $call->setStatusByTwilioStatus($call->c_call_status);
                             $call->c_created_user_id = null;
                             $call->update();
+
+                            if (!empty($res['message']) && $res['message'] === 'Call status is Completed') {
+                                Notifications::publish('showNotification', ['user_id' => $user_id], [
+                                    'data' => [
+                                        'title' => 'Accept call',
+                                        'message' => 'The other side hung up',
+                                        'type' => 'warning',
+                                    ]
+                                ]);
+                            }
+
                             return false;
                         }
                         return true;
@@ -1811,6 +1824,16 @@ class Call extends \yii\db\ActiveRecord
         return (int) $this->c_call_type_id === self::CALL_TYPE_JOIN;
     }
 
+    public function setTypeReturn(): void
+    {
+        $this->c_call_type_id = self::CALL_TYPE_RETURN;
+    }
+
+    public function isReturn(): bool
+    {
+        return (int) $this->c_call_type_id === self::CALL_TYPE_RETURN;
+    }
+
 
     /**
      * @param string $statusName
@@ -2092,7 +2115,7 @@ class Call extends \yii\db\ActiveRecord
         if ($timeLimit && ($this->isStatusIvr() || $this->isStatusQueue())) {
             if ($callMaxTime < time()) {
                 $result = $this->cancelCall();
-                Yii::info('CallId: ' . $this->c_id . ', '. VarDumper::dumpAsString($result) ,'info\checkCancelCall:cancelCall');
+//                Yii::info('CallId: ' . $this->c_id . ', '. VarDumper::dumpAsString($result) ,'info\checkCancelCall:cancelCall');
                 return true;
             }
         }

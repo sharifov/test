@@ -75,7 +75,7 @@ class FlightQuoteSegment extends \yii\db\ActiveRecord
             [['fqs_departure_airport_iata', 'fqs_departure_airport_terminal', 'fqs_arrival_airport_iata', 'fqs_arrival_airport_terminal'], 'string', 'max' => 3],
             [['fqs_operating_airline', 'fqs_marketing_airline', 'fqs_marriage_group', 'fqs_cabin_class', 'fqs_meal'], 'string', 'max' => 2],
             [['fqs_air_equip_type'], 'string', 'max' => 4],
-            [['fqs_fare_code'], 'string', 'max' => 20],
+            [['fqs_fare_code'], 'string', 'max' => 50],
             [['fqs_key'], 'string', 'max' => 40],
             [['fqs_flight_quote_id'], 'exist', 'skipOnError' => true, 'targetClass' => FlightQuote::class, 'targetAttribute' => ['fqs_flight_quote_id' => 'fq_id']],
             [['fqs_flight_quote_trip_id'], 'exist', 'skipOnError' => true, 'targetClass' => FlightQuoteTrip::class, 'targetAttribute' => ['fqs_flight_quote_trip_id' => 'fqt_id']],

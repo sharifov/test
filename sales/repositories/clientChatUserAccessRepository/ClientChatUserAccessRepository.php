@@ -3,18 +3,20 @@ namespace sales\repositories\clientChatUserAccessRepository;
 
 use common\models\Notifications;
 use frontend\widgets\clientChat\ClientChatAccessMessage;
+use sales\dispatchers\EventDispatcher;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
+use sales\model\clientChatUserAccess\event\UpdateChatUserAccessWidgetEvent;
 use sales\repositories\NotFoundException;
 use sales\repositories\Repository;
-use sales\services\clientChatService\ClientChatService;
 
 /**
  * Class ClientChatUserAccessRepository
  * @package sales\repositories\clientChatUserAccessRepository
  *
  * @property ClientChatRepository $clientChatRepository
+ * @property EventDispatcher $eventDispatcher
  */
 class ClientChatUserAccessRepository extends Repository
 {
@@ -22,40 +24,63 @@ class ClientChatUserAccessRepository extends Repository
 	 * @var ClientChatRepository
 	 */
 	private ClientChatRepository $clientChatRepository;
+	/**
+	 * @var EventDispatcher
+	 */
+	private EventDispatcher $eventDispatcher;
 
-	public function __construct(ClientChatRepository $clientChatRepository)
+	public function __construct(ClientChatRepository $clientChatRepository, EventDispatcher $eventDispatcher)
 	{
 		$this->clientChatRepository = $clientChatRepository;
+		$this->eventDispatcher = $eventDispatcher;
 	}
 
-	public function save(ClientChatUserAccess $clientChatUserAccess): ClientChatUserAccess
+	public function save(ClientChatUserAccess $access): ClientChatUserAccess
 	{
-		if (!$clientChatUserAccess->save()) {
-			throw new \RuntimeException($clientChatUserAccess->getErrorSummary(false)[0], ClientChatCodeException::CC_USER_ACCESS_SAVE_FAILED);
+		if (!$access->save()) {
+			throw new \RuntimeException($access->getErrorSummary(false)[0], ClientChatCodeException::CC_USER_ACCESS_SAVE_FAILED);
 		}
-		$this->sendNotifications($clientChatUserAccess);
-		return $clientChatUserAccess;
+		$this->eventDispatcher->dispatch(new UpdateChatUserAccessWidgetEvent($access->ccua_cch_id, $access->ccua_user_id, $access->ccua_status_id, $access->getPrimaryKey()), 'UpdateChatUserAccessWidgetEvent_' . $access->ccua_user_id);
+		return $access;
 	}
 
-	public function findByPrimaryKeys(int $cchId, int $userId): ClientChatUserAccess
+	public function findByPrimaryKey(int $id): ClientChatUserAccess
 	{
-		if ($access = ClientChatUserAccess::findOne(['ccua_cch_id' => $cchId, 'ccua_user_id' => $userId])) {
+		if ($access = ClientChatUserAccess::findOne(['ccua_id' => $id])) {
 			return $access;
 		}
 		throw new NotFoundException('Client Chat User Access is not found');
 	}
 
-	private function sendNotifications(ClientChatUserAccess $access): void
+	/**
+	 * @param int $chatId
+	 * @return ClientChatUserAccess[]
+	 */
+	public function findByChatIdAndUserId(int $chatId, int $userId): array
+	{
+		if ($access = ClientChatUserAccess::find()->byChatId($chatId)->byUserId($userId)->all()) {
+			return $access;
+		}
+		throw new NotFoundException('Client Chat User Access not found rows');
+	}
+
+	public function updateChatUserAccessWidget(int $cchId, int $userId, int $statusId, ?int $ccuaId = null): void
 	{
 		$data = [];
-		if ($access->isAccept()) {
-			$data = ClientChatAccessMessage::accept($access);
-		} else if ($access->isPending()) {
-			$data = ClientChatAccessMessage::pending($access);
-		} else if ($access->isSkip()) {
-			$data = ClientChatAccessMessage::skip($access);
+		if ($statusId === ClientChatUserAccess::STATUS_ACCEPT) {
+			$data = ClientChatAccessMessage::accept($cchId, $userId, $statusId);
+		} else if ($statusId === ClientChatUserAccess::STATUS_PENDING) {
+			$data = ClientChatAccessMessage::pending($cchId, $userId, $statusId, (int)$ccuaId);
+		} else if ($statusId === ClientChatUserAccess::STATUS_SKIP) {
+			$data = ClientChatAccessMessage::skip($cchId, $userId, $statusId);
 		}
 
-		Notifications::publish('clientChatRequest', ['user_id' => $access->ccua_user_id], ['data' => $data]);
+		Notifications::publish('clientChatRequest', ['user_id' => $userId], ['data' => $data]);
+	}
+
+	public function resetChatUserAccessWidget(int $userId): void
+	{
+		$data = ClientChatAccessMessage::reset($userId);
+		Notifications::publish('clientChatRequest', ['user_id' => $userId], ['data' => $data]);
 	}
 }

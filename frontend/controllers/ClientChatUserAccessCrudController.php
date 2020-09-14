@@ -50,10 +50,10 @@ class ClientChatUserAccessCrudController extends FController
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($ccua_cch_id, $ccua_user_id): string
+    public function actionView($id): string
     {
         return $this->render('view', [
-            'model' => $this->findModel($ccua_cch_id, $ccua_user_id),
+            'model' => $this->findModel($id),
         ]);
     }
 
@@ -65,7 +65,7 @@ class ClientChatUserAccessCrudController extends FController
         $model = new ClientChatUserAccess();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'ccua_cch_id' => $model->ccua_cch_id, 'ccua_user_id' => $model->ccua_user_id]);
+            return $this->redirect(['view', 'id' => $model->ccua_id]);
         }
 
         return $this->render('create', [
@@ -79,12 +79,12 @@ class ClientChatUserAccessCrudController extends FController
      * @return string|Response
      * @throws NotFoundHttpException
      */
-    public function actionUpdate($ccua_cch_id, $ccua_user_id)
+    public function actionUpdate($id)
     {
-        $model = $this->findModel($ccua_cch_id, $ccua_user_id);
+        $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'ccua_cch_id' => $model->ccua_cch_id, 'ccua_user_id' => $model->ccua_user_id]);
+			return $this->redirect(['view', 'id' => $model->ccua_id]);
         }
 
         return $this->render('update', [
@@ -100,9 +100,9 @@ class ClientChatUserAccessCrudController extends FController
      * @throws \Throwable
      * @throws StaleObjectException
      */
-    public function actionDelete($ccua_cch_id, $ccua_user_id): Response
+    public function actionDelete($id): Response
     {
-        $this->findModel($ccua_cch_id, $ccua_user_id)->delete();
+        $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
     }
@@ -113,9 +113,9 @@ class ClientChatUserAccessCrudController extends FController
      * @return ClientChatUserAccess
      * @throws NotFoundHttpException
      */
-    protected function findModel($ccua_cch_id, $ccua_user_id): ClientChatUserAccess
+    protected function findModel($id): ClientChatUserAccess
     {
-        if (($model = ClientChatUserAccess::findOne(['ccua_cch_id' => $ccua_cch_id, 'ccua_user_id' => $ccua_user_id])) !== null) {
+        if (($model = ClientChatUserAccess::findOne(['ccua_id' => $id])) !== null) {
             return $model;
         }
 

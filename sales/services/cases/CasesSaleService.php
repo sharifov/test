@@ -13,6 +13,7 @@ use sales\helpers\app\AppHelper;
 use sales\model\saleTicket\useCase\create\SaleTicketService;
 use sales\repositories\cases\CasesSaleRepository;
 use Yii;
+use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
@@ -559,8 +560,8 @@ class CasesSaleService
             }
             throw new \RuntimeException('Error. Param saleId is empty or Case not found');
         } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableFormatter($throwable),
-            'CasesSaleService:createSale:Throwable' );
+            Yii::error(VarDumper::dumpAsString(['throwable' => AppHelper::throwableFormatter($throwable), 'saleData' => $saleData]),
+            'CasesSaleService:createSale:Throwable');
         }
         return null;
     }
@@ -574,4 +575,36 @@ class CasesSaleService
     {
         return CaseSale::find()->where(['css_cs_id' => $csId, 'css_sale_id' => $saleId])->exists();
     }
+
+    public function sendCcInfo(string $apiKey, int $saleId, string $bookId, string $email): array
+	{
+		$result = [
+			'error' => false,
+			'message' => ''
+		];
+
+		$data = [
+			'apiKey' => $apiKey,
+			'flightRequest' => [
+				'uid' => $bookId,
+				'saleId' => $saleId
+			],
+			'email' => $email
+		];
+		$response = BackOffice::sendRequest2('payment/invoke-new-cc-info', $data, 'POST', 30, Yii::$app->params['backOffice']['serverUrlV3'], true);
+		if ($response->isOk) {
+			$responseData = $response->data;
+			Yii::info(VarDumper::dumpAsString($responseData), 'info\CasesSaleService::sendCcInfo::BOResponse');
+			if (!$responseData['success']) {
+				$result['error'] = true;
+				$result['message'] = reset($responseData['errors'])[0] ?? 'Unknown error message from B/O';
+			}
+			return $result;
+		}
+
+		$result['error'] = true;
+		$result['message'] = Json::decode($response->content)['message'] ?? 'Unknown error message from B/O';
+
+		return $result;
+	}
 }

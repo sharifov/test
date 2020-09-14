@@ -3,10 +3,13 @@
 namespace sales\model\clientChatRequest\entity;
 
 use sales\dispatchers\NativeEventDispatcher;
+use sales\forms\clientChat\RealTimeStartChatForm;
 use sales\model\clientChatRequest\event\ClientChatRequestEvents;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestApiForm;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
+use yii\helpers\Json;
 
 /**
  * This is the model class for table "client_chat_request".
@@ -16,21 +19,23 @@ use yii\db\ActiveRecord;
  * @property string|null $ccr_rid
  * @property string|null $ccr_json_data
  * @property string|null $ccr_created_dt
+ * @property string|null $ccr_visitor_id
  * @property array|null $decodedData
  */
 class ClientChatRequest extends \yii\db\ActiveRecord
 {
-	private const EVENT_GUEST_CONNECTED = 1;
-	private const EVENT_GUEST_DISCONNECTED = 11;
-    private const EVENT_ROOM_CONNECTED = 2;
-    private const EVENT_ROOM_DISCONNECTED = 3;
-    private const EVENT_GUEST_UTTERED = 4;
-    private const EVENT_AGENT_UTTERED = 5;
-    private const EVENT_DEPARTMENT_TRANSFER = 6;
-    private const EVENT_AGENT_LEFT_ROOM = 7;
-    private const EVENT_AGENT_JOINED_ROOM = 8;
-    private const EVENT_USER_DEPARTMENT_TRANSFER = 9;
-    private const EVENT_TRACK = 10;
+	public const EVENT_GUEST_CONNECTED = 1;
+	public const EVENT_GUEST_DISCONNECTED = 11;
+    public const EVENT_ROOM_CONNECTED = 2;
+    public const EVENT_ROOM_DISCONNECTED = 3;
+    public const EVENT_GUEST_UTTERED = 4;
+    public const EVENT_AGENT_UTTERED = 5;
+    public const EVENT_DEPARTMENT_TRANSFER = 6;
+    public const EVENT_AGENT_LEFT_ROOM = 7;
+    public const EVENT_AGENT_JOINED_ROOM = 8;
+    public const EVENT_USER_DEPARTMENT_TRANSFER = 9;
+    public const EVENT_TRACK = 10;
+    public const EVENT_CREATE_BY_AGENT = 12;
 
 	private const EVENT_LIST = [
 		self::EVENT_GUEST_CONNECTED => 'GUEST_CONNECTED',
@@ -44,6 +49,7 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 		self::EVENT_AGENT_JOINED_ROOM => 'AGENT_JOINED_ROOM',
 		self::EVENT_USER_DEPARTMENT_TRANSFER => 'USER_DEPARTMENT_TRANSFER',
 		self::EVENT_TRACK => 'TRACK_EVENT',
+		self::EVENT_CREATE_BY_AGENT => 'CREATE_BY_AGENT'
 	];
 
 	private array $decodedJsonData = [];
@@ -58,6 +64,7 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 
             ['ccr_json_data', 'string'],
             ['ccr_rid', 'string'],
+            [['ccr_visitor_id'], 'string', 'max' => 100],
         ];
     }
 
@@ -79,9 +86,10 @@ class ClientChatRequest extends \yii\db\ActiveRecord
         return [
             'ccr_id' => 'ID',
             'ccr_event' => 'Event',
-            'ccr_rid' => 'Request ID',
+            'ccr_rid' => 'Room ID',
             'ccr_json_data' => 'Json Data',
-            'ccr_created_dt' => 'Created Dt',
+            'ccr_created_dt' => 'Created',
+            'ccr_visitor_id' => 'Visitor ID',
         ];
     }
 
@@ -109,7 +117,18 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 		$_self->ccr_event = $form->eventId;
 		$_self->ccr_json_data = json_encode($form->data, JSON_THROW_ON_ERROR);
 		$_self->ccr_rid = $form->rid;
+        $_self->ccr_visitor_id = $form->data['visitor']['id'] ?? null;
 
+		return $_self;
+	}
+
+	public static function createByAgent(RealTimeStartChatForm $form): self
+	{
+		$_self = new self();
+		$_self->ccr_event = self::EVENT_CREATE_BY_AGENT;
+		$_self->ccr_json_data = $form->dataToJson();
+		$_self->ccr_rid = $form->rid;
+		$_self->ccr_visitor_id = $form->visitorId;
 		return $_self;
 	}
 
@@ -220,4 +239,35 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 	{
 		return $this->decodedData['visitorId'] ?? '';
 	}
+
+	public function getPageUrl(): string
+	{
+		return $this->decodedData['page']['url'] ?? '';
+	}
+
+    /**
+     * @param string $rid
+     * @return array|ActiveRecord|null
+     */
+    public static function getLastRequestByRid(string $rid)
+    {
+        return self::find()
+            ->where(['ccr_rid' => $rid])
+            ->orderBy(['ccr_id' => SORT_DESC])
+            ->one();
+    }
+
+    /**
+     * @param string $visitorId
+     * @param int $eventId
+     * @return array|ActiveRecord|null
+     */
+    public static function getLastRequestByVisitorId(string $visitorId, int $eventId)
+    {
+        return self::find()
+            ->where(['ccr_visitor_id' => $visitorId])
+            ->andWhere(['ccr_event' => $eventId])
+            ->orderBy(['ccr_id' => SORT_DESC])
+            ->one();
+    }
 }

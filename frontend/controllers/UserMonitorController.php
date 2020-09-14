@@ -6,6 +6,7 @@ use Yii;
 use sales\model\user\entity\monitor\UserMonitor;
 use sales\model\user\entity\monitor\search\UserMonitorSearch;
 use frontend\controllers\FController;
+use yii\data\Pagination;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -58,19 +59,59 @@ class UserMonitorController extends FController
 
         $params = Yii::$app->request->queryParams;
 
-        if (!empty($params) && $params['UserMonitorSearch']['startTime'] && $params['UserMonitorSearch']['endTime']) {
+        if (!empty($params['UserMonitorSearch']['startTime']) && !empty($params['UserMonitorSearch']['endTime'])) {
             $startDateTime = $params['UserMonitorSearch']['startTime'];
             $endDateTime = $params['UserMonitorSearch']['endTime'];
         }
 
         $data = $searchModel->searchStats($params, $startDateTime);
 
-        return $this->render('stats', [
-            'data' => $data,
-            'searchModel' => $searchModel,
-            'startDateTime' => $startDateTime,
-            'endDateTime' => $endDateTime,
+        $pagination = new Pagination([
+            'totalCount' => count($data['users']),
+            'pageSize' => 10
         ]);
+
+        if (Yii::$app->request->isPjax) {
+            if ($params['page'] == 1) {
+                $pageOffset = 0;
+            } else {
+                $pageOffset = $params['page'] * $pagination->getPageSize() - $pagination->getPageSize();
+            }
+
+            $dataPager = array_slice($data['users'], $pageOffset, $pagination->getPageSize(), true);
+            unset($data['users']);
+            $data['users'] = $dataPager;
+            return $this->renderAjax('stats', [
+                'data' => $data,
+                'searchModel' => $searchModel,
+                'startDateTime' => $startDateTime,
+                'endDateTime' => $endDateTime,
+                'pagination' => $pagination,
+                'pageOffset' => $pageOffset
+            ]);
+        } else {
+            if (isset($params['page'])) {
+                if ($params['page'] == 1) {
+                    $pageOffset = 0;
+                } else {
+                    $pageOffset = $params['page'] * $pagination->getPageSize() - $pagination->getPageSize();
+                }
+            } else {
+                $pageOffset = 0;
+            }
+            $dataPager = array_slice($data['users'], $pageOffset, $pagination->getPageSize(), true);
+            unset($data['users']);
+            $data['users'] = $dataPager;
+
+            return $this->render('stats', [
+                'data' => $data,
+                'searchModel' => $searchModel,
+                'startDateTime' => $startDateTime,
+                'endDateTime' => $endDateTime,
+                'pagination' => $pagination,
+                'pageOffset' => $pageOffset
+            ]);
+        }
     }
 
     /**

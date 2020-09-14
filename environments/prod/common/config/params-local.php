@@ -56,4 +56,5 @@ return [
     'global_phone' => '{{ common.config.params.global_phone:str }}',
 
     'appEnv' => 'prod',
+	'liveChatRealTimeVisitors' => '{{ common.config.params.liveChatRealTimeVisitors:str }}'
 ];

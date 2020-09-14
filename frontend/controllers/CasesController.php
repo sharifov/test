@@ -973,8 +973,7 @@ class CasesController extends FController
                     $this->casesManageService->processing($case->cs_id, $user->id, $user->id);
                     return $case;
                 });
-                $out = Yii::$app->formatter->format($case, 'case');
-                return "<script> $('#modal-md').modal('hide');$('#chat-info-case-info').append(' " . $out . "')</script>";
+                return "<script> $('#modal-md').modal('hide');refreshChatInfo('".$chat->cch_id."')</script>";
             } catch (\Throwable $e){
                 Yii::error(AppHelper::throwableFormatter($e), 'CasesController:actionCreateByChat');
                 return "<script> $('#modal-md').modal('hide');createNotify('Create Case', '" . $e->getMessage() . "', 'error');</script>";

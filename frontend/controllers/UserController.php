@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\Employee;
 use common\models\Notifications;
 use Yii;
 use common\models\UserCallStatus;
@@ -134,6 +135,20 @@ class UserController extends FController
     }
 
     /**
+     * @param $id
+     * @return Employee|null
+     * @throws NotFoundHttpException
+     */
+    protected function findUserModel(int $id): ?Employee
+    {
+        if (($model = Employee::findOne($id)) !== null) {
+            return $model;
+        }
+
+        throw new NotFoundHttpException('The requested user does not exist.');
+    }
+
+    /**
      * @return array
      */
     public function actionUpdateStatus(): array
@@ -155,5 +170,18 @@ class UserController extends FController
 
         Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         return ['type_id' => $type_id];
+    }
+
+    /**
+     * Displays a single UserCallStatus model.
+     * @param integer $id
+     * @return mixed
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    public function actionInfo($id)
+    {
+        return $this->render('info', [
+            'model' => $this->findUserModel($id),
+        ]);
     }
 }

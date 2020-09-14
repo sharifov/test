@@ -143,8 +143,8 @@ class ConferenceStatusCallbackForm extends Model
         return '';
     }
 
-    public function getFormattedTimestamp(): string
+    public function getFormattedTimestamp(): ?string
     {
-        return $this->Timestamp ? date('Y-m-d H:i:s', strtotime($this->Timestamp)) : '';
+        return $this->Timestamp ? date('Y-m-d H:i:s', strtotime($this->Timestamp)) : null;
     }
 }

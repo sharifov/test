@@ -445,6 +445,18 @@ sudo apt-get install centrifugo=2.4.0-0
 * Centrifugo docs:  ```https://centrifugal.github.io/centrifugo/```
 * Installation docs:  ```https://packagecloud.io/FZambia/centrifugo```
 
+Run PHPStan (LOC Environments) 
+[https://phpstan.org/config-reference#config-file](https://psalm.dev/docs/running_psalm/configuration/)
+```
+./vendor/bin/phpstan analyse -c phpstan.loc.neon
+```
+
+Run Psalm (LOC Environments) 
+[https://psalm.dev/docs/running_psalm/configuration/](https://psalm.dev/docs/running_psalm/configuration/)
+```
+./vendor/bin/psalm -c psalm.loc.xml
+```
+
 *Default local config:*
 ```
 cd /etc/centrifugo

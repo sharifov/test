@@ -30,7 +30,7 @@ class AppHelper
      * @param string $category
      * @param bool $formatted
      */
-    public static function throwableLogger(\Throwable $throwable, string $category, bool $formatted = false): void
+    public static function throwableLogger(\Throwable $throwable, string $category, bool $formatted = true): void
     {
         $errorMessage = $formatted ?
             self::throwableFormatter($throwable) :

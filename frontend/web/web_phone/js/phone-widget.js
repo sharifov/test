@@ -197,7 +197,7 @@ $(document).ready(function() {
     })
 
     $('.additional-bar__close').on('click', function() {
-        console.log($(this).parents('.additional-bar'))
+        // console.log($(this).parents('.additional-bar'))
         $(this).parents('.additional-bar').slideUp(150);
     })
 
@@ -207,7 +207,7 @@ $(document).ready(function() {
     })
 
     $('.additional-bar__close').on('click', function() {
-        console.log($(this).parents('.additional-bar'))
+        // console.log($(this).parents('.additional-bar'))
         $(this).parents('.additional-bar').slideUp(150);
     })
 
@@ -797,6 +797,8 @@ $(document).ready(function() {
     // $(widget.control).on('pw-back-action', function () {
     //     console.log('here is a event for back button');
     // })
+
+    window.historySimpleBar = historySimpleBar;
 
 });
 

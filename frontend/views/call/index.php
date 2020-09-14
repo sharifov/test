@@ -80,7 +80,7 @@ $user = Yii::$app->user->identity;
                             ((bool)(Yii::$app->params['settings']['voip_conference_base'] ?? false)
                             && Auth::can('/phone/ajax-join-to-conference'))
                             && (int)$model['cp_type_id'] === ConferenceParticipant::TYPE_AGENT
-                            && ($model->isIn() || $model->isOut())
+                            && ($model->isIn() || $model->isOut() || $model->isReturn())
                             && $model->isStatusInProgress();
                     },
                 ],

@@ -10,9 +10,16 @@ use yii\base\Model;
  * @property int $cchId
  * @property int|null $depId
  * @property int|null $isOnline
+ * @property int|null $pjaxReload
+ * @property array|null $agentId
  */
 class ClientChatTransferForm extends Model
 {
+	/**
+	 * @var int
+	 */
+	public $pjaxReload;
+
 	/**
 	 * @var int
 	 */
@@ -28,13 +35,26 @@ class ClientChatTransferForm extends Model
 	 */
 	public $isOnline;
 
+	/**
+	 * @var array|null
+	 */
+	public $agentId;
+
 	public function rules(): array
 	{
 		return [
-			[['cchId', 'depId', 'isOnline'], 'integer'],
-			[['cchId', 'depId', 'isOnline'], 'default', 'value' => null],
+			[['cchId', 'depId', 'isOnline', 'pjaxReload'], 'integer'],
+			[['cchId', 'depId', 'isOnline', 'pjaxReload'], 'default', 'value' => null],
 			[['cchId', 'depId'], 'required'],
 			[['cchId', 'depId', 'isOnline'], 'filter', 'filter' => 'intval'],
+			[['agentId'], 'filter', 'filter' => static function ($value) {
+				if (empty($value)) {
+					return [];
+				}
+				return $value;
+			}],
+			['agentId', 'each', 'rule' => ['integer']],
+			['agentId', 'each', 'rule' => ['filter', 'filter' => 'intval']],
 		];
 	}
 
@@ -43,7 +63,8 @@ class ClientChatTransferForm extends Model
 		return [
 			'cchId' => 'Client Chat Id',
 			'depId' => 'Department',
-			'isOnline' => 'Client Network Status'
+			'isOnline' => 'Client Network Status',
+			'agentId' => 'Agents'
 		];
 	}
 }

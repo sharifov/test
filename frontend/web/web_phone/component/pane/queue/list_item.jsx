@@ -39,7 +39,7 @@ class ListItem extends React.Component {
                                 ? <li className="call-info-list__item"><span className="call-info-list__company">{call.data.contact.company}</span></li>
                                 : ''
                             }
-                            {call.data.typeId === 2 || call.data.typeId === 1
+                            {call.data.typeId === 2 || call.data.typeId === 1 || call.data.typeId === 4
                                 ? <li className="call-info-list__item"><span className="call-info-list__number">{call.data.contact.phone}</span> </li>
                                 : ''
                             }
@@ -60,7 +60,7 @@ class ListItem extends React.Component {
                         <ListItemMenu call={call}/>
                     </div>
                     <div className="call-list-item__main-action">
-                        <a href="#" className="call-list-item__main-action-trigger"
+                        <a href="#" className="call-list-item__main-action-trigger btn-item-call-queue"
                            data-type-action={call.data.queue === 'inProgress' ? 'hangup' : (call.data.queue === 'hold' ? 'return' : (call.data.isInternal ? 'acceptInternal' :'accept'))}
                            data-call-sid={call.data.callSid} data-from-internal={call.data.fromInternal}>
                             {call.isSentAcceptCallRequestState() || call.isSentHangupRequestState() || call.isSentReturnHoldCallRequestState()

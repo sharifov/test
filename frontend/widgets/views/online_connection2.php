@@ -123,7 +123,28 @@ $js = <<<JS
         socket.send(msg);
     }
     
-
+    function pushDialogOnTop(chatID) {           
+        let parentElement = document.getElementById('cc-dialogs-wrapper')
+        let childElement = document.getElementById('dialog-' + chatID)
+        let topChatId = parentElement.firstElementChild.id
+            
+        if (chatID != topChatId.split("-")[1]){       
+            $("#dialog-" + chatID).hide('25000', function() {
+                parentElement.insertBefore(childElement, parentElement.firstChild)
+            }); 
+                      
+            $("#dialog-" + chatID).show('25000');       
+        }                
+    }
+    
+    function sortDialogOnLoad() {        
+        $('._cc_item_unread_messages').each(function(i, obj) { 
+            if ($(this).text()){
+                pushDialogOnTop($(this).data('cch-id'))                
+            }                           
+        });   
+    }
+    sortDialogOnLoad() 
     
 
     const userId = '$userId';
@@ -258,9 +279,9 @@ $js = <<<JS
                                 if (typeof obj.status !== 'undefined') {
                                      PhoneWidgetCall.requestIncomingCall(obj);
                                 }
-                                if (obj.cua_status_id === 2) {
-                                     PhoneWidgetCall.removeIncomingRequest(obj.callSid);
-                                }
+                                // if (obj.cua_status_id === 2) {
+                                    // PhoneWidgetCall.removeIncomingRequest(obj.callSid);
+                                // }
                             }
                         }
                         
@@ -348,12 +369,12 @@ $js = <<<JS
                             let activeChatId = localStorage.getItem('activeChatId');
                             
                             if (document.visibilityState == "visible" && window.name === 'chat' && activeChatId == obj.data.cchId && obj.data.cchUnreadMessages) {
-                                $.post('{$discardUnreadMessageUrl}', {cchId: activeChatId});
+                                $.post('{$discardUnreadMessageUrl}', {cchId: activeChatId}); 
                                 return false;
                             }
                         
                             let previousPage = localStorage.getItem('previousPage');
-                            if ((document.visibilityState == "visible") && obj.data.soundNotification) {
+                            if ((document.visibilityState == "visible") && obj.data.soundNotification && window.name === 'chat') {
                                 soundNotification('incoming_message');
                             } else if (previousPage === $(document)[0].baseURI && obj.data.soundNotification) {
                                 soundNotification('incoming_message');
@@ -374,23 +395,39 @@ $js = <<<JS
                             }
                             
                             if (obj.data.cchId) {
-                                $("._cc-chat-unread-message").find("[data-cch-id='"+obj.data.cchId+"']").html(obj.data.cchUnreadMessages);
+                                $("._cc-chat-unread-message").find("[data-cch-id='"+obj.data.cchId+"']").html(obj.data.cchUnreadMessages); 
+                                if($('#chat-last-message-refresh-' + obj.data.cchId).length > 0){
+                                    pjaxReload({container: '#chat-last-message-refresh-' + obj.data.cchId, async: false});
+                                    pushDialogOnTop(obj.data.cchId)
+                                } 
+                                if($('#pjax-chat-additional-data-' + obj.data.cchId).length > 0){
+                                    pjaxReload({container: '#pjax-chat-additional-data-' + obj.data.cchId, async: false});
+                                } 
                             }
-                            
-                            pjaxReload({container: '#notify-pjax-cc', url: '{$ccNotificationUpdateUrl}'});
+                            if($('#notify-pjax-cc').length > 0){
+                                pjaxReload({container: '#notify-pjax-cc', url: '{$ccNotificationUpdateUrl}'});
+                            }
                         }
                         
                         if (obj.cmd === 'clientChatUpdateClientStatus') {
                             if (obj.cchId) {
                                 $('._cc-list-wrapper').find('[data-cch-id="'+obj.cchId+'"]').find('._cc-status').attr('data-is-online', obj.isOnline);
                             }
-                            createNotify('Client Chat Notification', obj.statusMessage, obj.isOnline ? 'success' : 'warning');
+                            //createNotify('Client Chat Notification', obj.statusMessage, obj.isOnline ? 'success' : 'warning');
                         }
 
                         if (obj.cmd === 'clientChatUpdateTimeLastMessage') {                            
                             if (obj.data.cchId) {                                
-                                $("._cc-item-last-message-time[data-cch-id='"+obj.data.cchId+"']").attr('data-moment', obj.data.moment).html(obj.data.dateTime);
+                                $("._cc-item-last-message-time[data-cch-id='"+obj.data.cchId+"']").attr('data-moment', obj.data.moment).html(obj.data.dateTime);                                
                             }
+                        }
+                        
+                        if (obj.cmd === 'clientChatTransfer') {
+                            let activeChatId = localStorage.getItem('activeChatId');
+                            if (typeof window.refreshChatPage === 'function' && window.name === 'chat' && activeChatId == obj.data.cchId) {
+                                window.refreshChatPage(obj.data.cchId, obj.data.tab);
+                            }
+                            createNotify('Warning', obj.data.message, 'warning');
                         }
                         
                         if (obj.cmd === 'logout') {
@@ -403,6 +440,17 @@ $js = <<<JS
                             if (typeof PhoneWidgetCall === "object") {
                                 PhoneWidgetCall.updateCurrentCalls(obj.data, obj.userStatus);
                             }
+                        }
+                        
+                        if (obj.cmd === 'addCallToHistory') {
+                            if (typeof PhoneWidgetCall === "object") {
+                                PhoneWidgetCall.socket(obj.data);
+                            }
+                        }
+                        
+                        if (obj.cmd === 'showNotification') {
+                            let data = obj.data;
+                            createNotify(data.title, data.message, data.type);
                         }
                         
                     }

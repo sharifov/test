@@ -96,7 +96,7 @@ class QCallService
     ): ?int
     {
         if (!$qConfig = $this->findConfig($config)) {
-            Yii::warning('QCallService:create. Config not found for status: ' . $config->status . ', callCount: ' . $config->callCount);
+            //Yii::warning('QCallService:create. Config not found for status: ' . $config->status . ', callCount: ' . $config->callCount);
             return null;
         }
 
@@ -140,7 +140,7 @@ class QCallService
     ): void
     {
         if (!$qConfig = $this->findConfig($config)) {
-            Yii::warning('QCallService:updateInterval. Config not found for status: ' . $config->status . ', callCount: ' . $config->callCount);
+//            Yii::warning('QCallService:updateInterval. Config not found for status: ' . $config->status . ', callCount: ' . $config->callCount);
             return;
         }
 

@@ -75,7 +75,8 @@
 		"yiisoft/yii2-redis": "~2.0.0",
 		"centrifugal/phpcent": "~3.0",
 		"kivork/yii2-bootstrap4-glyphicons": "*",
-		"2amigos/yii2-multi-select-widget": "*"
+		"2amigos/yii2-multi-select-widget": "*",
+		"kivork/yii2-mattermost-log-target": "@dev"
 
 	},
 	"require-dev" : {
@@ -90,7 +91,9 @@
 		"codeception/verify": "~0.5.0 || ~1.1.0",
 		"symfony/browser-kit": ">=2.7 <=4.2.4",
 		"codeception/phpunit-wrapper": "^7.8",
-		"phpunit/phpunit": "^7.0"
+		"phpunit/phpunit": "^7.0",
+		"vimeo/psalm": "^3.13",
+		"phpstan/phpstan": "^0.12.37"
 	},
 	"config" : {
 		"process-timeout" : 1800,
@@ -110,6 +113,10 @@
 		{
 			"type": "git",
 			"url": "https://stash.travelinsides.com/scm/lib/yii2-bootstrap4-glyphicons.git"
+		},
+		{
+			"type": "vcs",
+			"url": "https://stash.travelinsides.com/scm/lib/yii2-mattermost-log-target.git"
 		}
 	]
 }

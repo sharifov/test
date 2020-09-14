@@ -111,7 +111,7 @@ $isSuperAdmin = $user->isSuperAdmin();
 //                    '<span id="div-cnt-notification">' . ($cntNotifications ? '<span class="label-success label pull-right">' . $cntNotifications . '</span>' : '') . '</span>',
                     '<span id="div-cnt-notification"><span class="label-success label pull-right notification-counter"></span></span>',
                 'url' => ['/notifications/list'],
-                'icon' => 'comment',
+                'icon' => 'bell-o',
             ];
         }
 
@@ -134,12 +134,18 @@ $isSuperAdmin = $user->isSuperAdmin();
             $menuItems[] = ['label' => 'My SMS <span id="sms-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/sms/list'], 'icon' => 'comments'];
         }
 
-        if ($user->canCall()) {
-            $menuItems[] = ['label' => 'My Calls <span id="call-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/call/list'], 'icon' => 'phone'];
-        }
 
         if ($user->canCall()) {
-            $menuItems[] = ['label' => 'My Calls Log <span id="call-inbox-queue" class="label-info label pull-right"></span> ', 'url' => ['/call-log/list'], 'icon' => 'phone'];
+            $menuItems[] = [
+                'label' => 'My Calls <span class="label-info label pull-right"></span> ',
+                'url' => 'javascript:',
+                'icon' => 'phone',
+                'items' => [
+                    ['label' => 'My Calls <span class="label-info label pull-right"></span> ', 'url' => ['/call/list'], 'icon' => 'phone'],
+                    ['label' => 'My Calls Log <span class="label-info label pull-right"></span> ', 'url' => ['/call-log/list'], 'icon' => 'phone'],
+                    ['label' => 'My Voice Mail Record <span id="voice-mail-record-count" data-type="count" class="label-success label pull-right voice-mail-record"></span> ', 'url' => ['/voice-mail-record/list'], 'icon' => 'envelope'],
+                ]
+            ];
         }
 
         $menuItems[] = [
@@ -148,11 +154,23 @@ $isSuperAdmin = $user->isSuperAdmin();
             'icon' => 'user'
         ];
 
-		$menuItems[] = [
-			'label' => 'My Client Chat ' . '<span id="div-cnt-client-chat"><span class="label-success label pull-right _cc_unread_messages"></span></span>',
-			'url' => ['/client-chat/index'],
-			'icon' => 'comments'
-		];
+//		$menuItems[] = [
+//			'label' => 'My Client Chat ' . '<span id="div-cnt-client-chat"><span class="label-success label pull-right _cc_unread_messages"></span></span>',
+//			'url' => ['/client-chat/index'],
+//			'icon' => 'comments'
+//		];
+
+
+        $menuItems[] = [
+            'label' => 'Client Chat' . '<span id="div-cnt-client-chat"><span class="label-success label pull-right _cc_unread_messages"></span></span>',
+            'url' => 'javascript:',
+            'icon' => 'comments',
+            'items' => [
+                ['label' => 'My Client Chat', 'url' => ['/client-chat/index']],
+                ['label' => 'Real Time Visitors', 'url' => ['/client-chat/real-time']],
+            ]
+        ];
+
 
         $menuItems[] = [
             'label' => 'Data Lists',
@@ -198,7 +216,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'list'],
                 ['label' => 'SMS Distrib List', 'url' => ['/sms-distribution-list/index'], 'icon' => 'list'],
                 ['label' => 'Emails', 'url' => ['/email/index'], 'icon' => 'envelope'],
-                ['label' => 'Notification List', 'url' => ['/notifications/index'], 'icon' => 'comment-o'],
+                ['label' => 'Notification List', 'url' => ['/notifications/index'], 'icon' => 'bell-o'],
 
                 [
                     'label' => 'Conferences',
@@ -212,6 +230,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ],
                 ['label' => 'Call Note', 'url' => ['/call-note-crud/index'], 'icon' => 'list'],
                 ['label' => 'User Voice Mail', 'url' => ['/user-voice-mail/index'], 'icon' => 'microphone'],
+                ['label' => 'Voice Mail Records', 'url' => ['/voice-mail-record/index'], 'icon' => 'envelope'],
                 [
                     'label' => 'QCall',
                     'url' => 'javascript:',
@@ -338,6 +357,18 @@ $isSuperAdmin = $user->isSuperAdmin();
                         ['label' => 'Departments', 'url' => ['/department/index']],
                         ['label' => 'Department Emails', 'url' => ['/department-email-project/index']],
                         ['label' => 'Department Phones', 'url' => ['/department-phone-project/index']],
+                    ]
+                ],
+                [
+                    'label' => 'Phone Line',
+                    'url' => 'javascript:',
+                    'icon' => 'phone-volume',
+                    'items' => [
+                        ['label' => 'Phone Line', 'url' => ['/phone-line-crud/index']],
+                        ['label' => 'Phone Number', 'url' => ['/phone-line-phone-number-crud/index']],
+                        ['label' => 'User Assign', 'url' => ['/phone-line-user-assign-crud/index']],
+                        ['label' => 'User Group', 'url' => ['/phone-line-user-group-crud/index']],
+                        ['label' => 'User Personal Phone Number', 'url' => ['/user-personal-phone-number-crud/index']],
                     ]
                 ],
 
@@ -484,7 +515,7 @@ $isSuperAdmin = $user->isSuperAdmin();
                 ['label' => 'User Stats', 'url' => ['/user-connection/stats'], 'icon' => 'area-chart'],
                 ['label' => 'Call User Map', 'url' => ['/call/user-map'], 'icon' => 'map'],
                 ['label' => 'Real-time User Map', 'url' => ['/call/realtime-user-map'], 'icon' => 'map'],
-                ['label' => 'Real-time Client Chat', 'url' => ['/client-chat/monitor'], 'icon' => 'map'],
+                ['label' => 'Client Chat Monitor', 'url' => ['/client-chat/monitor'], 'icon' => 'map'],
                 ['label' => 'Agents Ratings', 'url' => ['/stats/agent-ratings'], 'icon' => 'star-half-empty'],
                 ['label' => 'Stats Agents & Leads', 'url' => ['/report/agents'], 'icon' => 'users'],
             ]
@@ -638,6 +669,8 @@ function updateCounters(url, className, idName) {
                 $.each( data, function( key, val ) {
                     if (val != 0) {
                         $("#" + idName + "-" + key).html(val);
+                    } else if (val == 0) {
+                        $("#" + idName + "-" + key).html('');
                     }
                 });
             }
@@ -662,6 +695,16 @@ if (Yii::$app->user->can('caseSection')) {
 if (Yii::$app->user->can('/qa-task/qa-task-queue/count')) {
     $urlQaTaskCount = Url::to(['/qa-task/qa-task-queue/count']);
     $this->registerJs("updateCounters('$urlQaTaskCount', 'qa-task-info', 'qa-task-q');", $this::POS_LOAD);
+}
+if ($user->canCall()) {
+    $urlVoiceMailRecordCount = Url::to(['/voice-mail-record/count']);
+    $this->registerJs("
+    function updateVoiceRecordCounters() {
+        updateCounters('$urlVoiceMailRecordCount', 'voice-mail-record', 'voice-mail-record');
+    }
+    window.updateVoiceRecordCounters = updateVoiceRecordCounters;
+    window.updateVoiceRecordCounters();
+    ", $this::POS_LOAD);
 }
 
 $js = <<<JS

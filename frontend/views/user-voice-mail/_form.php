@@ -42,7 +42,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'uvm_max_recording_time')->input('number') ?>
 
-        <?= $form->field($model, 'uvm_transcribe_enable')->checkbox() ?>
+        <?php //= $form->field($model, 'uvm_transcribe_enable')->checkbox() ?>
 
         <?= $form->field($model, 'uvm_enabled')->checkbox() ?>
 
@@ -50,6 +50,10 @@ use yii\widgets\ActiveForm;
             <div>
 				<?= Html::button('<i class="fa fa-microphone"></i> Record', ['id' => 'recordButton', 'class' => 'btn btn-success']) ?>
 				<?= Html::button('<i class="fa fa-stop"></i> Stop', ['id' => 'stopButton', 'class' => 'btn btn-danger', 'disabled' => true]) ?>
+            </div>
+            <div id="timer-wrapper" class="d-flex align-items-center">
+                <span id="time-display" class="label label-default" style="margin-right: 10px;">00:00</span>
+                <canvas id="visualizer" height="20px" style="width: 100%;"></canvas>
             </div>
         </div>
 

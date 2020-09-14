@@ -62,17 +62,20 @@ class ClientChat extends \yii\db\ActiveRecord
 	public const STATUS_GENERATED = 1;
 	public const STATUS_CLOSED = 9;
 	public const STATUS_PENDING = 2;
+	public const STATUS_TRANSFER = 3;
 
 	private const STATUS_LIST = [
 		self::STATUS_GENERATED => 'Generated',
 		self::STATUS_PENDING => 'Pending',
-		self::STATUS_CLOSED => 'Closed'
+		self::STATUS_CLOSED => 'Closed',
+		self::STATUS_TRANSFER => 'Transfer',
 	];
 
 	private const STATUS_CLASS_LIST = [
 		self::STATUS_GENERATED => 'info',
 		self::STATUS_PENDING => 'warning',
-		self::STATUS_CLOSED => 'danger'
+		self::STATUS_CLOSED => 'danger',
+		self::STATUS_TRANSFER => 'warning',
 	];
 
 	public const TAB_ACTIVE = 1;
@@ -232,7 +235,16 @@ class ClientChat extends \yii\db\ActiveRecord
 	public function close(): void
 	{
 		$this->cch_status_id = self::STATUS_CLOSED;
-		$this->cch_client_online = 0;
+	}
+
+	public function transfer(): void
+	{
+		$this->cch_status_id = self::STATUS_TRANSFER;
+	}
+
+	public function isTransfer(): bool
+	{
+		return $this->cch_status_id === self::STATUS_TRANSFER;
 	}
 
 	public function isClosed(): bool
@@ -255,9 +267,9 @@ class ClientChat extends \yii\db\ActiveRecord
 		return ClientChatHelper::getClientName($this) . ClientChatHelper::getClientStatusMessage($this);
 	}
 
-	public function assignOwner(int $userId): void
+	public function assignOwner(?int $userId): void
 	{
-		if ($this->cchOwnerUser && $this->cch_owner_user_id !== $userId) {
+		if (!$this->isTransfer() && !is_null($userId) && $this->cchOwnerUser && $this->cch_owner_user_id !== $userId) {
 			throw new \DomainException('Client Chat already assigned to: ' . $this->cchOwnerUser->username, ClientChatCodeException::CC_OWNER_ALREADY_ASSIGNED);
 		}
 		$this->cch_owner_user_id = $userId;
@@ -271,6 +283,11 @@ class ClientChat extends \yii\db\ActiveRecord
     public function getLastMessageByClient(): ?ClientChatMessage
     {
         return ClientChatMessage::find()->andWhere(['ccm_cch_id' => $this->cch_id])->andWhere(['is', 'ccm_user_id', null])->orderBy(['ccm_id' => SORT_DESC])->limit(1)->one();
+    }
+
+    public function getLastMessageByAgent(): ?ClientChatMessage
+    {
+        return ClientChatMessage::find()->andWhere(['ccm_cch_id' => $this->cch_id])->andWhere(['is not', 'ccm_user_id', null])->orderBy(['ccm_id' => SORT_DESC])->limit(1)->one();
     }
 
     public function attributeLabels(): array

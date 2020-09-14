@@ -5,6 +5,7 @@ namespace webapi\modules\v1\controllers;
 use common\models\ApiLog;
 use sales\entities\cases\CaseCategory;
 use sales\helpers\app\AppHelper;
+use sales\model\clientChat\ClientChatTranslate;
 use sales\model\clientChat\entity\projectConfig\ClientChatProjectConfig;
 use sales\model\clientChat\entity\projectConfig\ProjectConfigApiResponseDto;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestApiForm;
@@ -213,7 +214,7 @@ class ClientChatRequestController extends ApiBaseController
 	 * @throws \JsonException
 	 *
 	 *
-	 * @api {post} /v1/client-chat-request/create-message Client Chat Request Create Message
+	 * @api {post} /v1/client-chat-request/create-message Create Message
 	 * @apiVersion 0.1.0
 	 * @apiName ClientChatRequestCreateMessage
 	 * @apiGroup ClientChat
@@ -381,17 +382,19 @@ class ClientChatRequestController extends ApiBaseController
 	}
 
 	/**
-	 * @api {get} /v1/client-chat-request/project-config Client Chat Request Project Config
+	 * @api {get} /v1/client-chat-request/project-config Project Config
 	 * @apiVersion 0.1.0
 	 * @apiName ClientChatProjectConfig
 	 * @apiGroup ClientChat
 	 * @apiPermission Authorized User
 	 *
 	 * @apiParam {int} project_id Project ID
+	 * @apiParam {string{5}} [language_id] Language ID (ru-RU)
 	 *
 	 * @apiParamExample {get} Request-Example:
 	 * {
 	 *     "project_id": 1,
+     *     "language_id": "ru-RU"
 	 * }
 	 *
 	 * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
@@ -459,7 +462,54 @@ class ClientChatRequestController extends ApiBaseController
 	 * "settings": {
 	 * "fileUpload": true,
 	 * "maxMessageLength": 500
-	 * }
+	 * },
+     * "language_id": "ru-RU",
+    "translations": {
+        "connection_lost": {
+            "title": "Connection Lost",
+            "subtitle": "Trying to reconnect"
+        },
+        "waiting_for_response": "Waiting for response",
+        "waiting_for_agent": "Waiting for an agent",
+        "video_reply": "Video message",
+        "audio_reply": "Audio message",
+        "image_reply": "Image message",
+        "new_message": "New message",
+        "agent": "Agent",
+        "textarea_placeholder": "Type a message...",
+        "registration": {
+            "title": "Welcome",
+            "subtitle": "Be sure to leave a message",
+            "name": "Name",
+            "name_placeholder": "Your name",
+            "email": "Email",
+            "email_placeholder": "Your email",
+            "department": "Department",
+            "department_placeholder": "Choose a department",
+            "start_chat": "Start chat"
+        },
+        "conversations": {
+            "no_conversations": "No conversations yet",
+            "no_archived_conversations": "No archived conversations yet",
+            "history": "Conversation history",
+            "active": "Active",
+            "archived": "Archived Chats",
+            "start_new": "New Chat"
+        },
+        "file_upload": {
+            "file_too_big": "This file is too big. Max file size is {{size}}",
+            "file_too_big_alt": "No archived conversations yetThis file is too large",
+            "generic_error": "Failed to upload, please try again",
+            "not_allowed": "This file type is not supported",
+            "drop_file": "Drop file here to upload it",
+            "upload_progress": "Uploading file..."
+        },
+        "department": {
+            "sales": "Sales",
+            "support": "Support",
+            "exchange": "Exchange"
+        }
+    }
 	 * }
 	 * }
 	 *
@@ -492,12 +542,23 @@ class ClientChatRequestController extends ApiBaseController
 
 		$projectId = \Yii::$app->request->get('project_id');
 
+        $languageId = \Yii::$app->request->get('language_id');
+		if ($languageId) {
+            $languageId = substr($languageId, 0, 5);
+        }
+
+        //echo VarDumper::dump(ClientChatTranslate::getTranslates($languageId)); exit;
+
 		$projectConfig = ClientChatProjectConfig::findOne(['ccpc_project_id' => $projectId]);
 
 		if ($projectConfig) {
+            $data = ArrayHelper::toArray(new ProjectConfigApiResponseDto($projectConfig));
+            $data['language_id'] = $languageId;
+            $data['translations'] = ClientChatTranslate::getTranslates($languageId);
+
 			return new SuccessResponse(
 				new StatusCodeMessage(200),
-				new DataMessage(ArrayHelper::toArray(new ProjectConfigApiResponseDto($projectConfig)))
+				new DataMessage($data)
 			);
 		}
 
@@ -508,6 +569,11 @@ class ClientChatRequestController extends ApiBaseController
 		);
 	}
 
+    /**
+     * @param ApiLog $apiLog
+     * @param Response $response
+     * @return Response
+     */
 	private function endApiLog(ApiLog $apiLog, Response $response): Response
 	{
 		$apiLog->endApiLog(ArrayHelper::toArray($response));

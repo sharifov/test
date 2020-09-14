@@ -28,6 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\SerialColumn'],
 
             'cvd_id',
+            'cvd_visitor_rc_id',
             'cvd_country',
             'cvd_region',
             'cvd_city',
@@ -41,7 +42,6 @@ $this->params['breadcrumbs'][] = $this->title;
             //'cvd_data',
             //'cvd_created_dt',
             //'cvd_updated_dt',
-            //'cvd_visitor_rc_id',
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\components\jobs\RocketChatUserUpdateJob;
 use common\models\Employee;
 use common\models\EmployeeAcl;
 use common\models\EmployeeContactInfo;
@@ -16,7 +17,6 @@ use common\models\UserParams;
 use common\models\UserProductType;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
-use frontend\models\search\UserFailedLoginSearch;
 use frontend\models\UserFailedLogin;
 use frontend\models\UserMultipleForm;
 use sales\auth\Auth;
@@ -24,7 +24,7 @@ use sales\helpers\app\AppHelper;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\emailList\entity\EmailList;
 use sales\model\userVoiceMail\entity\search\UserVoiceMailSearch;
-use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessRepository;
+use sales\repositories\clientChatUserChannel\ClientChatUserChannelRepository;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
 use Yii;
@@ -32,7 +32,6 @@ use yii\bootstrap4\Html;
 use yii\data\ActiveDataProvider;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
-use yii\helpers\Console;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
@@ -45,6 +44,7 @@ use yii\widgets\ActiveForm;
  *
  * @property ClientChatUserAccessService $clientChatUserAccessService
  * @property ClientChatMessageService $clientChatMessageService
+ * @property ClientChatUserChannelRepository $clientChatUserChannelRepository
  */
 class EmployeeController extends FController
 {
@@ -56,6 +56,10 @@ class EmployeeController extends FController
 	 * @var ClientChatMessageService
 	 */
 	private ClientChatMessageService $clientChatMessageService;
+	/**
+	 * @var ClientChatUserChannelRepository
+	 */
+	private ClientChatUserChannelRepository $clientChatUserChannelRepository;
 
 	/**
      * @return array
@@ -73,11 +77,12 @@ class EmployeeController extends FController
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
-    public function __construct($id, $module, ClientChatUserAccessService $clientChatUserAccessService, ClientChatMessageService $clientChatMessageService, $config = [])
+    public function __construct($id, $module, ClientChatUserAccessService $clientChatUserAccessService, ClientChatMessageService $clientChatMessageService, ClientChatUserChannelRepository $clientChatUserChannelRepository, $config = [])
 	{
 		parent::__construct($id, $module, $config);
 		$this->clientChatUserAccessService = $clientChatUserAccessService;
 		$this->clientChatMessageService = $clientChatMessageService;
+		$this->clientChatUserChannelRepository = $clientChatUserChannelRepository;
 	}
 
     public function actionSellerContactInfo($employeeId)
@@ -301,6 +306,8 @@ class EmployeeController extends FController
                             try {
                                 $user->removeAllClientChatChanels();
                                 $user->addClientChatChanels($multipleForm->userClientChatChanels, Auth::id());
+                                $this->clientChatUserAccessService->disableUserAccessToAllChats($user->id);
+                                $this->clientChatUserAccessService->setUserAccessToAllChatsByChannelIds($multipleForm->userClientChatChanels, $user->id);
                                 $transaction->commit();
                             } catch (\Throwable $e) {
                                 $transaction->rollBack();
@@ -546,6 +553,20 @@ class EmployeeController extends FController
                             }
                         }
 
+						if (isset($attr['client_chat_user_channel'])) {
+							if ($attr['client_chat_user_channel']) {
+								foreach ($attr['client_chat_user_channel'] as $chId) {
+									$clientChatChanel = new ClientChatUserChannel();
+									$clientChatChanel->ccuc_user_id = $model->id;
+									$clientChatChanel->ccuc_channel_id = (int)$chId;
+									$clientChatChanel->ccuc_created_dt = date('Y-m-d H:i:s');
+									$clientChatChanel->ccuc_created_user_id = Auth::id();
+									$clientChatChanel->save();
+								}
+								$this->clientChatUserAccessService->setUserAccessToAllChatsByChannelIds($attr['client_chat_user_channel'], $model->id);
+							}
+						}
+
                         $transaction->commit();
                         Yii::$app->getSession()->setFlash('success', 'User created');
                         return $this->redirect(['update', 'id' => $model->id]);
@@ -593,6 +614,7 @@ class EmployeeController extends FController
      * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
      * @throws \yii\base\InvalidConfigException
+     * @throws \yii\httpclient\Exception
      */
     public function actionUpdate()
     {
@@ -674,10 +696,10 @@ class EmployeeController extends FController
                 $attr = Yii::$app->request->post($model->formName());
 
                 $model->prepareSave($attr);
+
+                $nicknameCCIsChanged = $model->isAttributeChanged('nickname_client_chat');
+
                 if ($model->save()) {
-
-
-                    //$model->roles;
 
                     if ($model->form_roles) {
                         $availableRoles = Employee::getAllRoles();
@@ -754,8 +776,12 @@ class EmployeeController extends FController
                                 $clientChatChanel->ccuc_created_dt = date('Y-m-d H:i:s');
                                 $clientChatChanel->ccuc_created_user_id = Auth::id();
                                 $clientChatChanel->save();
-                            }
-                        }
+							}
+							$this->clientChatUserAccessService->disableUserAccessToAllChats($model->id);
+							$this->clientChatUserAccessService->setUserAccessToAllChatsByChannelIds($attr['client_chat_user_channel'], $model->id);
+						} else {
+							$this->clientChatUserAccessService->disableUserAccessToAllChats($model->id);
+						}
                     }
 
                     //VarDumper::dump($attr['user_groups'], 10, true); exit;
@@ -775,10 +801,15 @@ class EmployeeController extends FController
                         }
                     }*/
 
+                    if ($nicknameCCIsChanged && !empty($modelProfile->up_rc_user_id)) {
+                        $job = new RocketChatUserUpdateJob();
+                        $job->userId = $modelProfile->up_rc_user_id;
+                        $job->data = ['username' => $model->nickname_client_chat];
+
+                        Yii::$app->queue_job->priority(10)->push($job);
+                    }
 
                     Yii::$app->getSession()->setFlash('success', 'User updated');
-
-
                 }
 
             } else {
@@ -927,14 +958,17 @@ class EmployeeController extends FController
             $out = ['status' => 0, 'message' => ''];
 
             try {
-                $rocketChat = \Yii::$app->rchat;
+				$userChannels = $this->clientChatUserChannelRepository->findByUserId($user->id);
+
+				$rocketChat = \Yii::$app->rchat;
                 $rocketChat->updateSystemAuth(false);
                 $password = $rocketChat::generatePassword();
 
+                $rocketChatUsername = $user->nickname_client_chat ?: $user->username;
                 $result = $rocketChat->createUser(
                     $user->username,
                     $password,
-                    $user->nickname ?: $user->username,
+					$rocketChatUsername,
                     $user->email
                 );
 
@@ -965,6 +999,8 @@ class EmployeeController extends FController
                     if(!$userProfile->save()) {
                         throw new \RuntimeException($userProfile->getErrorSummary(false)[0]);
                     }
+
+					$this->clientChatUserAccessService->setUserAccessToAllChats($userChannels);
 
                 } else {
                     $errorMessage = $rocketChat::getErrorMessageFromResult($result);
@@ -1019,7 +1055,7 @@ class EmployeeController extends FController
                         throw new \RuntimeException($userProfile->getErrorSummary(false)[0]);
                     }
 
-                    $this->clientChatUserAccessService->removeUserAccess($userProfile->up_user_id);
+                    $this->clientChatUserAccessService->disableUserAccessToAllChats($userProfile->up_user_id);
                     $this->clientChatMessageService->discardAllUnreadMessagesForUser($userProfile->up_user_id);
                 } else {
                     $errorMessage = $rocketChat::getErrorMessageFromResult($result);

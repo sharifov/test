@@ -8,7 +8,9 @@ use yii\helpers\Html;
 
 class CallDurationColumn extends DataColumn
 {
-    public $attribute = 'c_recording_duration';
+    public $attributeDuration = 'c_recording_duration';
+    public $attributeSid = 'c_recording_sid';
+    public $attributeUrl = 'recordingUrl';
     public $label = 'Recording';
     public $format = 'raw';
     public $options = ['style' => 'width: 80px'];
@@ -17,16 +19,16 @@ class CallDurationColumn extends DataColumn
     protected function renderDataCellContent($model, $key, $index): string
     {
         /** @var Call $model */
-        if (!$model->c_recording_sid) {
+        if (!$model->{$this->attributeSid}) {
             return '-';
         }
 
-        if ($model->c_recording_duration && $model->c_recording_duration >= 3600) {
+        if ($model->{$this->attributeDuration} && $model->{$this->attributeDuration} >= 3600) {
             $format = 'H:i:s';
         } else {
             $format = 'i:s';
         }
 
-        return  Html::button(gmdate($format, $model->c_recording_duration) . ' <i class="fa fa-volume-up"></i>', ['title' => $model->c_recording_duration . ' (sec)', 'class' => 'btn btn-' . ($model->c_recording_duration < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $model->recordingUrl /*yii\helpers\Url::to(['call/record', 'sid' =>  $model->c_call_sid ])*/ ]);
+        return  Html::button(gmdate($format, $model->{$this->attributeDuration}) . ' <i class="fa fa-volume-up"></i>', ['title' => $model->{$this->attributeDuration} . ' (sec)', 'class' => 'btn btn-' . ($model->{$this->attributeDuration} < 30 ? 'warning' : 'success') . ' btn-xs btn-recording_url', 'data-source_src' => $model->{$this->attributeUrl} /*yii\helpers\Url::to(['call/record', 'sid' =>  $model->c_call_sid ])*/ ]);
     }
 }

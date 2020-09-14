@@ -57,6 +57,7 @@ use sales\model\phoneList\helpers\formatters\PhoneListFormatter;
 use sales\model\user\entity\paymentCategory\UserPaymentCategory;
 use sales\model\user\entity\payroll\UserPayroll;
 use yii\bootstrap4\Html;
+use yii\helpers\VarDumper;
 
 class Formatter extends \yii\i18n\Formatter
 {
@@ -358,22 +359,22 @@ class Formatter extends \yii\i18n\Formatter
         return ProductFormatter::asProduct($product);
     }
 
-    public function asLead(?Lead $lead): string
+    public function asLead(?Lead $lead, ?string $class = null): string
     {
         if ($lead === null) {
             return $this->nullDisplay;
         }
 
-        return \modules\lead\src\helpers\formatters\lead\Formatter::asLead($lead);
+        return \modules\lead\src\helpers\formatters\lead\Formatter::asLead($lead, $class);
     }
 
-    public function asCase(?Cases $case): string
+    public function asCase(?Cases $case, ?string $class = null): string
     {
         if ($case === null) {
             return $this->nullDisplay;
         }
 
-        return \sales\model\cases\helpers\formatters\cases\Formatter::asCase($case);
+        return \sales\model\cases\helpers\formatters\cases\Formatter::asCase($case, $class);
     }
 
     public function asCaseSale(?CaseSale $caseSale): string
@@ -772,4 +773,12 @@ class Formatter extends \yii\i18n\Formatter
 
         return PhoneFormatter::getPhoneOrNickname($value);
     }
+
+    public function asDumpJson(?string $data): string
+	{
+		if ($data) {
+			return VarDumper::dumpAsString($data);
+		}
+		return $this->nullDisplay;
+	}
 }

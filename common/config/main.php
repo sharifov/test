@@ -84,6 +84,7 @@ return [
         'chatBot' => [
             'class' => \common\components\ChatBot::class,
             'url' => 'https://chatbot.travel-dev.com/private/api/v1/',
+			'visitorsUrl' => 'https://chatbot.travel-dev.com/visitors/api/v1/',
             'username' => '',
             'password' => '',
         ],
@@ -119,6 +120,12 @@ return [
             'port' => 11300,
             'tube' => 'queue_job',
         ],
+        'queue_system_services' => [
+            'class' => \yii\queue\beanstalk\Queue::class,
+            'host' => 'localhost',
+            'port' => 11300,
+            'tube' => 'queue_system_services',
+        ],
         'telegram' => [
             'class' => \aki\telegram\Telegram::class,
             'botUsername' => 'CrmKivorkBot',
@@ -134,6 +141,7 @@ return [
         'queue_email_job',
         'queue_phone_check',
         'queue_job',
+        'queue_system_services',
         \common\components\SettingsBootstrap::class,
         common\bootstrap\SetUp::class,
         common\bootstrap\SetUpListeners::class,

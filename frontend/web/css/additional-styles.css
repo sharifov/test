@@ -190,3 +190,14 @@ a.cw-call-contact-info {
 .call-filter__toggle--line-active {
     border-color: #72b97f;
 }
+
+.phone-widget .phone-notifications:before {
+    opacity: 0;
+    transition: .2s;
+    z-index: -1;
+}
+.phone-widget .phone-notifications--shown:before {
+    opacity: 1;
+    transition: .2s;
+    z-index: 9999;
+}

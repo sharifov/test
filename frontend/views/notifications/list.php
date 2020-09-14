@@ -14,7 +14,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="notifications-list">
 
 
-    <h1><i class="fa fa-comment-o"></i> <?= Html::encode($this->title) ?></h1>
+    <h1><i class="fa fa-bell-o"></i> <?= Html::encode($this->title) ?></h1>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <p>

@@ -33,6 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'cf_sid',
             'cf_friendly_name',
+            'cf_call_sid',
             [
                 'label' => 'Participants',
                 'value' => static function(\common\models\Conference $model) {
@@ -71,7 +72,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => \common\components\grid\DateTimeColumn::class,
                 'attribute' => 'cf_end_dt',
             ],
-
+            'cf_duration:duration',
             [
                 'attribute' => 'cf_created_dt',
                 'value' => function(\common\models\Conference $model) {

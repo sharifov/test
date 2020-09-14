@@ -44,6 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'cf_options:ntext',
             'cf_start_dt:byUserDateTime',
             'cf_end_dt:byUserDateTime',
+            'cf_duration:duration',
             'cf_created_dt:byUserDateTime',
             'cf_updated_dt:byUserDateTime',
             'createdUser:userName'

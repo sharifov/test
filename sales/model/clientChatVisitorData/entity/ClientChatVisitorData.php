@@ -71,14 +71,14 @@ class ClientChatVisitorData extends \yii\db\ActiveRecord
 
             ['cvd_timezone', 'string', 'max' => 50],
 
-            ['cvd_title', 'string', 'max' => 50],
+            ['cvd_title', 'string', 'max' => 150],
 
             ['cvd_updated_dt', 'safe'],
 
             ['cvd_url', 'string', 'max' => 255],
 
 			['cvd_visitor_rc_id', 'string', 'max' => 50],
-			['cvd_visitor_rc_id', 'unique'],
+			['cvd_visitor_rc_id', 'unique'], // ccr_visitor_id in ClientChatRequest
 		];
     }
 
@@ -145,14 +145,14 @@ class ClientChatVisitorData extends \yii\db\ActiveRecord
 	private static function fillInData(self $_self, array $data): void
 	{
 		$_self->cvd_country = $data['geo']['country'] ?? '';
-		$_self->cvd_region = $data['geo']['region'] ?? '';
+		$_self->cvd_region = $data['geo']['region_code'] ?? '';
 		$_self->cvd_city = $data['geo']['city'] ?? '';
 		$_self->cvd_latitude = (float)($data['geo']['latitude'] ?? 0);
 		$_self->cvd_longitude = (float)($data['geo']['longitude'] ?? 0);
 		$_self->cvd_url = $data['page']['url'] ?? '';
 		$_self->cvd_title = $data['page']['title'] ?? '';
-		$_self->cvd_referrer = $data['page']['referer'] ?? '';
-		$_self->cvd_timezone = $data['page']['timezone'] ?? '';
+		$_self->cvd_referrer = $data['page']['referrer'] ?? '';
+		$_self->cvd_timezone = $data['geo']['timezone'] ?? '';
 		$_self->cvd_local_time = $data['page']['local_time'] ?? '';
 		$_self->cvd_data = Json::encode($data);
 	}

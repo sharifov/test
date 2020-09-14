@@ -20,10 +20,14 @@ class DeferredEventDispatcher implements EventDispatcher
         }
     }
 
-    public function dispatch($event): void
+    public function dispatch($event, $key = null): void
     {
         if ($this->defer) {
-            $this->queue[] = $event;
+        	if ($key) {
+            	$this->queue[$key] = $event;
+			} else {
+            	$this->queue[] = $event;
+			}
         } else {
             $this->next->dispatch($event);
         }

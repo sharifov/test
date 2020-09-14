@@ -20,16 +20,13 @@ $showContent = $showContent ?? false;
 ?>
 
 <?php Pjax::begin(['id' => 'pjax-notes', 'enablePushState' => false, 'timeout' => 10000]) ?>
+<div class="_rc-block-wrapper">
     <div class="x_panel">
         <div class="x_title">
-            <h2><i class="fa fa-sticky-note-o"></i>  Chat notes (<?php echo count($clientChat->notes) ?>) </h2>
+            <h2>Chat notes (<?php echo count($clientChat->notes) ?>) </h2>
             <ul class="nav navbar-right panel_toolbox">
                 <li>
-                    <?php echo Html::button('<i class="fa fa-plus"></i>', [
-                        'class' => 'btn btn-success btn_toggle_form',
-                        'title' => 'Show form for add note',
-                        'style' => 'margin-right: 5px;'
-                    ]) ?>
+                    <a class="btn_toggle_form"><i class="fa fa-plus"></i> New Note</a>
                 </li>
                 <li>
                     <a class="collapse-link"><i class="fa fa-chevron-down"></i></a>
@@ -41,36 +38,31 @@ $showContent = $showContent ?? false;
         <div class="x_content" style="<?php echo $showContent ? '' : 'display: none;' ?>">
             <?php if ($clientChat->notes) :?>
                 <?php foreach ($clientChat->notes as $note) :?>
-                    <table class="table table-striped table-bordered">
-                        <tr>
-                            <td>
-                                <div class="float-right" >
-                                    <?php $class = $note->ccn_deleted ? 'fa-reply' : 'fa-remove' ?>
-                                    <?php $textAlert = $note->ccn_deleted ? 'recover' : 'delete' ?>
-                                    <?= Html::a('<i class="fa ' . $class . '"></i>',
-                                        ['client-chat/delete-note', 'ccn_id' => $note->ccn_id, 'cch_id' => $clientChat->cch_id],
-                                        [
-                                            'class' => 'text-secondary',
-                                            'data' => [
-                                                'confirm' => 'Are you sure you want to ' . $textAlert . ' this note?',
-                                                'method' => 'post',
-                                            ],
-                                            'data-pjax'=> 1,
-                                        ]) ?>
-                                </div>
-                                <i class="fa fa-user"></i>
-                                    <?php echo $note->user ? Html::encode($note->user->username): '-' ?>,
-                                <i class="fa fa-calendar"></i>
-                                    <?php echo $note->ccn_created_dt ? Yii::$app->formatter->asDatetime(strtotime($note->ccn_created_dt)) : '' ?>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <?php echo OutHelper::formattedChatNote($note) ?>
-                            </td>
-                        </tr>
-                    </table>
-
+                <div class="_cc-chat-notes-item">
+                    <div class="d-flex justify-content-between align-items-center" style="width: 100%;">
+                        <span class="_cc_agent_name"><?php echo $note->user ? Html::encode($note->user->username): '-' ?></span>
+                        <span>
+                            <?php $class = $note->ccn_deleted ? 'fa-reply' : 'fa-remove' ?>
+							<?php $textAlert = $note->ccn_deleted ? 'recover' : 'delete' ?>
+							<?= Html::a('<i class="fa ' . $class . '"></i>',
+                                ['client-chat/delete-note', 'ccn_id' => $note->ccn_id, 'cch_id' => $clientChat->cch_id],
+                                [
+                                    'class' => 'text-secondary',
+                                    'data' => [
+                                        'confirm' => 'Are you sure you want to ' . $textAlert . ' this note?',
+                                        'method' => 'post',
+                                    ],
+                                    'data-pjax'=> 1,
+                            ]) ?>
+                        </span>
+                    </div>
+                    <div class="_cc_chat_note_date_item">
+						<?= $note->ccn_created_dt ? Yii::$app->formatter->asDatetime(strtotime($note->ccn_created_dt)) : '' ?>
+                    </div>
+                    <div class="_cc_chat_note_item_content">
+						<?= OutHelper::formattedChatNote($note) ?>
+                    </div>
+                </div>
                 <?php endforeach ?>
             <?php endif ?>
         </div>
@@ -110,7 +102,7 @@ $showContent = $showContent ?? false;
         <?php Modal::end()?>
 
     </div>
-
+</div>
 <?php Pjax::end() ?>
 
 

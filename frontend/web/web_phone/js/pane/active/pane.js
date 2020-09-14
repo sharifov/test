@@ -91,8 +91,8 @@ var PhoneWidgetPaneActive = function () {
         callSid = sid;
     }
 
-    function getCallSid() {
-        return callSid;
+    function isEqual(sid) {
+        return callSid === sid;
     }
 
     function removeCallSid() {
@@ -128,11 +128,12 @@ var PhoneWidgetPaneActive = function () {
     function init(call, conference) {
         load(call, conference);
         show();
-        if (call.getHoldDuration()) {
-            widgetIcon.update({type: 'hold', timer: true, 'timerStamp': call.getHoldDuration(), text: 'on hold', currentCalls: null, status: 'online'});
-            return;
-        }
-        widgetIcon.update({type: 'inProgress', timer: true, 'timerStamp': call.getDuration(), text: 'on call', currentCalls: '', status: 'online'});
+        PhoneWidgetCall.iconUpdate();
+        // if (call.getHoldDuration()) {
+        //     widgetIcon.update({type: 'hold', timer: true, 'timerStamp': call.getHoldDuration(), text: 'on hold', currentCalls: null, status: 'online'});
+        //     return;
+        // }
+        // widgetIcon.update({type: 'inProgress', timer: true, 'timerStamp': call.getDuration(), text: 'on call', currentCalls: '', status: 'online'});
     }
 
     return {
@@ -142,7 +143,7 @@ var PhoneWidgetPaneActive = function () {
         load: load,
         show: show,
         hide: hide,
-        getCallSid: getCallSid,
+        isEqual: isEqual,
         removeCallSid: removeCallSid,
         isActive: isActive,
         removeCallInProgressIndicator: removeCallInProgressIndicator

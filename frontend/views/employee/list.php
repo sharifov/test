@@ -171,11 +171,14 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
             ],
             [
                 'class' => ActionColumn::class,
-                'template' => '{update} {projects} {groups} {switch}',
+                'template' => '{info} {update} {projects} {groups} {switch}',
                 'visibleButtons' => [
                     /*'view' => function ($model, $key, $index) {
                         return User::hasPermission('viewOrder');
                     },*/
+                    'info' => static function (\common\models\Employee $model, $key, $index) {
+                        return Auth::can('/user/info');
+                    },
                     'update' => static function (\common\models\Employee $model, $key, $index) use ($isAdmin, $isUM) {
                         return (
                             $isAdmin
@@ -202,6 +205,9 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     },
                 ],
                 'buttons' => [
+                    'info' => static function ($url, \common\models\Employee $model, $key) {
+                        return Html::a('<span class="fa fa-info-circle"></span>', ['user/info', 'id' => $model->id], ['title' => 'User info', 'target' => '_blank', 'class' => 'text-info']);
+                    },
                     'projects' => static function ($url, \common\models\Employee $model, $key) {
                         return Html::a('<span class="fa fa-list"></span>', ['user-project-params/index', 'UserProjectParamsSearch[upp_user_id]' => $model->id], ['title' => 'Projects', 'target' => '_blank']);
                     },

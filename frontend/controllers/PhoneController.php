@@ -479,6 +479,18 @@ class PhoneController extends FController
                         'message' => 'ok',
                         'sid' => $resultApi['result']['sid']
                     ];
+                } elseif (!empty($resultApi['error']) && $resultApi['message'] === 'Call status is Completed') {
+                    $result = [
+                        'error' => false,
+                        'message' => 'ok',
+                    ];
+                    Notifications::publish('showNotification', ['user_id' => Auth::id()], [
+                        'data' => [
+                            'title' => 'Transfer call',
+                            'message' => 'The other side hung up',
+                            'type' => 'warning',
+                        ]
+                    ]);
                 } else {
                     throw new Exception('API Error: PhoneController/actionAjaxCallRedirect: Not found resultApi[result][sid] - ' . VarDumper::dumpAsString($resultApi), 10);
                 }
@@ -730,7 +742,7 @@ class PhoneController extends FController
 
             if ($originCall->cParent) {
 
-                if ($originCall->isOut()) {
+                if ($originCall->isOut() || ($originCall->isReturn() && $originCall->cParent->isOut())) {
                     $parent = Call::find()->firstChild($originCall->c_parent_id)->one();
                 } else {
                     $parent = $originCall->cParent;
@@ -1090,7 +1102,7 @@ class PhoneController extends FController
             throw new BadRequestHttpException('Invalid Call status. Sid: ' . $sid);
         }
 
-        if (!($call->isIn() || $call->isOut())) {
+        if (!($call->isIn() || $call->isOut() || $call->isReturn())) {
             throw new BadRequestHttpException('Invalid Call Type. Sid: ' . $sid);
         }
 
@@ -1143,7 +1155,7 @@ class PhoneController extends FController
             throw new BadRequestHttpException('Invalid type of Participant');
         }
 
-        if (!($call->isIn() || $call->isOut())) {
+        if (!($call->isIn() || $call->isOut() || $call->isReturn())) {
             throw new BadRequestHttpException('Invalid Call type');
         }
 

@@ -10,6 +10,8 @@ class ClientChatUserAccessSearch extends ClientChatUserAccess
     public function rules(): array
     {
         return [
+            ['ccua_id', 'integer'],
+
             ['ccua_cch_id', 'integer'],
 
             ['ccua_created_dt', 'safe'],
@@ -28,7 +30,7 @@ class ClientChatUserAccessSearch extends ClientChatUserAccess
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['ccua_cch_id' => SORT_DESC]],
+            'sort'=> ['defaultOrder' => ['ccua_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -42,6 +44,7 @@ class ClientChatUserAccessSearch extends ClientChatUserAccess
         }
 
         $query->andFilterWhere([
+            'ccua_id' => $this->ccua_id,
             'ccua_cch_id' => $this->ccua_cch_id,
             'ccua_user_id' => $this->ccua_user_id,
             'ccua_status_id' => $this->ccua_status_id,

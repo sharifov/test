@@ -32,6 +32,9 @@ use yii\widgets\ActiveForm;
         <div class="col-md-12">
             <div class="row">
                 <div class="col-md-1">
+                    <?= $form->field($model, 'cs_id') ?>
+                </div>
+                <div class="col-md-1">
                     <?= $form->field($model, 'cssSaleId') ?>
                 </div>
                 <div class="col-md-1">

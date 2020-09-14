@@ -461,7 +461,7 @@ class RocketChat extends Component
 
 
     /**
-     * @param array $$message
+     * @param array $message
      * @return array
      * @throws Exception
      */
@@ -481,7 +481,7 @@ class RocketChat extends Component
             }
         } else {
             $out['error'] = $response->content;
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'RocketChat:getAllDepartments');
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'RocketChat:sendMessage');
         }
 
         return $out;
@@ -509,6 +509,43 @@ class RocketChat extends Component
             $out['error'] = true;
             \Yii::error(VarDumper::dumpAsString($response, 10), 'RocketChat');
         }
+        return $out;
+    }
+
+    /**
+     * @param string $userId
+     * @param array $data
+     * @return array
+     * @throws Exception
+     * * RocketChat docs https://docs.rocket.chat/api/rest-api/methods/users/update
+     */
+    public function updateUser(string $userId, array $data): array
+    {
+        $out = ['error' => '', 'data' => []];
+        $headers = $this->getSystemAuthDataHeader();
+
+        $dataRequest = [
+            'userId' => $userId,
+            'data' => $data,
+        ];
+
+        $response = $this->sendRequest('users.update', $dataRequest, 'post', $headers);
+
+        if ($response->isOk) {
+            if (!empty($response->data['user'])) {
+                $out['data'] = $response->data['user'];
+            } else {
+                $out['error'] = 'Not found in response array data key [user]';
+            }
+        } else {
+            $out['error'] = $response->content;
+        }
+
+        if (!empty($out['error'])) {
+            \Yii::error(VarDumper::dumpAsString($out['error'], 10),
+                'RocketChat:updateUser:fail');
+        }
+
         return $out;
     }
 

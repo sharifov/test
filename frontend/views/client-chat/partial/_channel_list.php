@@ -30,6 +30,7 @@ use yii\helpers\Html;
                 <?php if (ClientChat::isTabActive($key)): ?>
                     <sup class="_cc_unread_messages label label-danger" ><?= $totalUnreadMessages ?: '' ?></sup>
                 <?php endif; ?>
+                <span class="_cc_tab_active"></span>
             </div>
         <?php endforeach; ?>
     </div>
@@ -105,7 +106,7 @@ use yii\helpers\Html;
 		]) ?>
 	</div>
 
-	<div class="_cc-list-wrapper">
+	<div id="cc-dialogs-wrapper" class="_cc-list-wrapper">
         <?php if ($dataProvider): ?>
 		    <?= $this->render('_client-chat-item', ['clientChats' => $dataProvider->getModels(), 'clientChatId' => $clientChatId]) ?>
         <?php endif; ?>

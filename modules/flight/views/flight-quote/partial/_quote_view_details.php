@@ -73,15 +73,27 @@ use modules\product\src\entities\productQuote\ProductQuote;
 									<div class="segment__note">
 										<?php if($segment->fqs_operating_airline != $segment->fqs_marketing_airline):?>Operated by <?php $airline = Airline::findIdentity($segment->fqs_operating_airline);if($airline) echo $airline->name; else echo $segment->fqs_operating_airline?>.<?php endif;?>
 										<?php if(!empty($segment->flightQuoteSegmentPaxBaggages)):?>
-											<span class="badge badge-primary"><i class="fa fa-suitcase"></i>&nbsp;
-                                    <?php foreach ($segment->flightQuoteSegmentPaxBaggages as $baggage):?>
-										<?php if(isset($baggage->qsb_allow_pieces)):?>
-											<?= \Yii::t('search', '{n, plural, =0{no baggage} one{# piece} other{# pieces}}', ['n' => $baggage->qsb_allow_pieces]);?>
-										<?php elseif(isset($baggage->qsb_allow_weight)):?>
-											<?= $baggage->qsb_allow_weight.$baggage->qsb_allow_unit?>
-										<?php endif;?>
+
+                                        <?php foreach ($segment->flightQuoteSegmentPaxBaggages as $baggage):?>
+                                            <span class="badge badge-primary"><i class="fa fa-suitcase"></i>&nbsp;
+                                                <?php if(isset($baggage->qsb_allow_pieces)):?>
+                                                    <?= \Yii::t('search', '{n, plural, =0{no baggage} one{# piece} other{# pieces}}', ['n' => $baggage->qsb_allow_pieces]);?>
+                                                <?php elseif(isset($baggage->qsb_allow_weight)):?>
+                                                    <?= $baggage->qsb_allow_weight.$baggage->qsb_allow_unit?>
+                                                <?php endif;?>
+                                            </span>
+
+										    <?php if(isset($baggage->qsb_carry_one)):?>
+                                                <?php if((bool) $baggage->qsb_carry_one === false):?>
+                                                    <span class="fa-stack " title="CarryOn Disable">
+                                                        <i class="fa fa-shopping-bag fa-stack-1x"></i>
+                                                        <i class="fa fa-ban fa-stack-2x text-danger"></i>
+                                                    </span>
+                                                <?php endif ?>
+                                            <?php endif ?>
+
 										<?php break; endforeach;?>
-                                    </span>
+
 										<?php endif;?>
 										<?php if(!empty($segment->flightQuoteSegmentPaxBaggageCharges)):?>
 											<?php $paxCode = null;?>

@@ -12,6 +12,7 @@ use yii\db\ActiveRecord;
 /**
  * This is the model class for table "client_chat_user_access".
  *
+ * @property int $ccua_id
  * @property int $ccua_cch_id
  * @property int $ccua_user_id
  * @property int|null $ccua_status_id
@@ -27,20 +28,23 @@ class ClientChatUserAccess extends \yii\db\ActiveRecord
 	public const STATUS_ACCEPT = 2;
 	public const STATUS_BUSY = 3;
 	public const STATUS_SKIP = 4;
+	public const STATUS_TRANSFER_ACCEPTED = 5;
 
 	public const STATUS_LIST = [
 		self::STATUS_PENDING => 'Pending',
 		self::STATUS_ACCEPT => 'Accept',
 		self::STATUS_BUSY => 'Busy',
-		self::STATUS_SKIP => 'Skip'
+		self::STATUS_SKIP => 'Skip',
+		self::STATUS_TRANSFER_ACCEPTED => 'Transfer Accepted',
 	];
 
     public const STATUS_CLASS_LIST = [
         self::STATUS_PENDING => 'info',
         self::STATUS_ACCEPT => 'success',
         self::STATUS_BUSY => 'warning',
-        self::STATUS_SKIP => 'danger'
-    ];
+        self::STATUS_SKIP => 'danger',
+		self::STATUS_TRANSFER_ACCEPTED => 'warning',
+	];
 
 	public function behaviors(): array
 	{
@@ -59,8 +63,6 @@ class ClientChatUserAccess extends \yii\db\ActiveRecord
     public function rules(): array
     {
         return [
-            [['ccua_cch_id', 'ccua_user_id'], 'unique', 'targetAttribute' => ['ccua_cch_id', 'ccua_user_id']],
-
             ['ccua_cch_id', 'required'],
             ['ccua_cch_id', 'integer'],
             ['ccua_cch_id', 'exist', 'skipOnError' => true, 'targetClass' => ClientChat::class, 'targetAttribute' => ['ccua_cch_id' => 'cch_id']],
@@ -91,6 +93,7 @@ class ClientChatUserAccess extends \yii\db\ActiveRecord
     public function attributeLabels(): array
     {
         return [
+			'ccua_id' => 'Ccua ID',
             'ccua_cch_id' => 'Chat ID',
             'ccua_user_id' => 'User',
             'ccua_status_id' => 'Status',
@@ -109,10 +112,10 @@ class ClientChatUserAccess extends \yii\db\ActiveRecord
         return 'client_chat_user_access';
     }
 
-    public static function create(int $channelId, int $userId): self
+    public static function create(int $chatId, int $userId): self
 	{
 		$access = new self();
-		$access->ccua_cch_id = $channelId;
+		$access->ccua_cch_id = $chatId;
 		$access->ccua_user_id = $userId;
 
 		return $access;
@@ -121,6 +124,16 @@ class ClientChatUserAccess extends \yii\db\ActiveRecord
 	public function pending(): void
 	{
 		$this->ccua_status_id = self::STATUS_PENDING;
+	}
+
+	public function accept(): void
+	{
+		$this->ccua_status_id = self::STATUS_ACCEPT;
+	}
+
+	public function transferAccepted(): void
+	{
+		$this->ccua_status_id = self::STATUS_TRANSFER_ACCEPTED;
 	}
 
 	/**
@@ -159,8 +172,22 @@ class ClientChatUserAccess extends \yii\db\ActiveRecord
 
 	public function checkIfAlreadyAccepted($attributes): void
 	{
-		if ($this->isAccept() && self::find()->byClientChat($this->ccua_cch_id)->accepted()->exists()) {
+		$clientChat = $this->ccuaCch;
+		if ($clientChat && !$clientChat->isTransfer() && $this->isAccept() && self::find()->byClientChat($this->ccua_cch_id)->accepted()->exists()) {
 			$this->addError('ccua_status_id', 'Chat request already accepted');
 		}
+
+		if ($clientChat->isTransfer() && $this->isPending() && self::find()->byClientChat($this->ccua_cch_id)->byUserId($this->ccua_user_id)->pending()->exists()) {
+			$user = $this->ccuaUser;
+			$this->addError('ccua_user_id', 'User: ' . $user->username . ' has already received a request with this chat');
+		}
+	}
+
+	public function getTimeByChatStatus(): string
+	{
+		if ($this->ccuaCch && $this->ccuaCch->isTransfer()) {
+			return (string)$this->ccua_created_dt;
+		}
+		return (string)$this->ccuaCch->cch_created_dt;
 	}
 }
