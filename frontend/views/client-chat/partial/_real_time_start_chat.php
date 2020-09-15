@@ -20,6 +20,8 @@ use yii\widgets\Pjax;
                     <?= $form->field($startChatForm, 'rid')->hiddenInput()->label(false) ?>
                     <?= $form->field($startChatForm, 'visitorId')->hiddenInput()->label(false) ?>
                     <?= $form->field($startChatForm, 'projectId')->hiddenInput()->label(false) ?>
+                    <?= $form->field($startChatForm, 'projectName')->hiddenInput()->label(false) ?>
+                    <?= $form->field($startChatForm, 'visitorName')->hiddenInput()->label(false) ?>
 
                     <?= $form->field($startChatForm, 'channelId')->widget(\kartik\select2\Select2::class, [
 //                        "options" => [

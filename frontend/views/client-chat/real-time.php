@@ -34,12 +34,13 @@ b():window.addEventListener("load",b)})();
         instance.events.on('chat-created', function (e) {
             let visitorId = e.visitorId;
             let projectName = e.project;
+            let visitorName = e.visitor.name;
             
             var modal = $('#modal-sm');
             modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> </div>');
             modal.modal('show').find('.modal-header').html('<h3>Send Message ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
             
-            $.get('$url', {visitorId: visitorId, projectName: projectName}, function(data) {
+            $.post('$url', {visitorId: visitorId, projectName: projectName, visitorName: visitorName}, function(data) {
                 modal.find('.modal-body').html(data);
             });
                 

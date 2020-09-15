@@ -13,6 +13,7 @@ use yii\helpers\Json;
  * @property $message string
  * @property $projectId int|null
  * @property $projectName string
+ * @property $visitorName string
  * @property $channelId int
  */
 class RealTimeStartChatForm extends \yii\base\Model
@@ -29,18 +30,21 @@ class RealTimeStartChatForm extends \yii\base\Model
 
 	public int $channelId = 0;
 
-	public function __construct(string $visitorId, string $projectName, ProjectRepository $projectRepository, $config = [])
+	public string $visitorName = '';
+
+	public function __construct(string $visitorId, string $projectName, ProjectRepository $projectRepository, string $visitorName, $config = [])
 	{
 		$this->visitorId = $visitorId;
 		$this->projectName = $projectName;
 		$this->projectId = $projectRepository->getIdByName($projectName);
+		$this->visitorName = $visitorName;
 		parent::__construct($config);
 	}
 
 	public function rules(): array
 	{
 		return [
-			[['rid', 'visitorId', 'message'], 'string'],
+			[['rid', 'visitorId', 'message', 'visitorName'], 'string'],
 			[['channelId', 'projectId'], 'integer'],
 			[['visitorId', 'message', 'channelId'], 'required'],
 			[['channelId'], 'filter', 'filter' => 'intval'],
@@ -56,6 +60,7 @@ class RealTimeStartChatForm extends \yii\base\Model
 			'visitor' => [
 				'id' => $this->visitorId,
 				'project' => $this->projectName,
+				'name' => $this->visitorName
 			]
 		]);
 	}

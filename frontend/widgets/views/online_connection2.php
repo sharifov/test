@@ -22,8 +22,8 @@ if (UserConnection::isIdleMonitorEnabled()) {
     \frontend\assets\IdleAsset::register($this);
 }
 
+$bundle = \frontend\assets\TimerAsset::register($this);
 if (UserMonitor::isAutologoutEnabled()) {
-    $bundle = \frontend\assets\TimerAsset::register($this);
     \frontend\assets\BroadcastChannelAsset::register($this);
 }
 
