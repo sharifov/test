@@ -9,9 +9,8 @@ use yii\widgets\Pjax;
 /* @var $this yii\web\View */
 /* @var $model Employee */
 /* @var $userActivity */
-//var_dump($model); die();
+
 ?>
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
 <?php if (isset($userActivity['byHour']) && $userActivity['byHour']): ?>
 

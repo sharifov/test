@@ -3851,4 +3851,44 @@ class LeadSearch extends Lead
 
         return $dataProvider = new ArrayDataProvider($paramsData);
     }
+
+    public function searchUserLeadsInfo($params, $userID)
+    {
+        $this->load($params);
+
+        $query = new Query();
+        $query->addSelect(['DATE(created) as createdDate,
+            COUNT(id) AS allUserLeads,
+            SUM(IF(status = '. Lead::STATUS_BOOKED .', 1, 0)) AS bookedLeads
+        ']);
+        $query->from(static::tableName());
+        $query->where(['employee_id' => $userID]);
+        if(!empty($this->date_range)){
+            $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
+                ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
+        }
+        $query->groupBy('createdDate');
+
+        $command = $query->createCommand();
+        $sql = $command->rawSql;
+
+        $paramsData = [
+            'sql' => $sql,
+            'sort' => [
+                'defaultOrder' => [
+                    'createdDate' => SORT_DESC,
+                ],
+                'attributes' => [
+                    'createdDate',
+                    'allUserLeads',
+                    'bookedLeads',
+                ],
+            ],
+            'pagination' => [
+                'pageSize' => 10,
+            ],
+        ];
+
+        return new SqlDataProvider($paramsData);
+    }
 }

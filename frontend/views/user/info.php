@@ -15,6 +15,7 @@ $this->title = 'User Info';
 $this->params['breadcrumbs'][] = ['label' => 'Employee List', 'url' => ['employee/list']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <div class="user-info">
 
     <h1><i class="fa fa-user"></i> <?= Html::encode($this->title) ?></h1>
@@ -161,6 +162,18 @@ $this->params['breadcrumbs'][] = $this->title;
                             </li>
                             <li role="presentation" class=""><a href="#tab_content8" id="home-tab" role="tab" data-toggle="tab" aria-expanded="true" class="" aria-selected="true">Chats Stats</a>
                             </li>
+                            <li role="presentation" class=""><a href="#tab_content9" id="home-tab" role="tab" data-toggle="tab" aria-expanded="true" class="" aria-selected="true">Calls Chart</a>
+                            </li>
+                            <li role="presentation" class=""><a href="#tab_content10" id="home-tab" role="tab" data-toggle="tab" aria-expanded="true" class="" aria-selected="true">Emails Chart</a>
+                            </li>
+                            <li role="presentation" class=""><a href="#tab_content11" id="home-tab" role="tab" data-toggle="tab" aria-expanded="true" class="" aria-selected="true">SMS Chart</a>
+                            </li>
+                            <li role="presentation" class=""><a href="#tab_content12" id="home-tab" role="tab" data-toggle="tab" aria-expanded="true" class="" aria-selected="true">Chat Chart</a>
+                            </li>
+                            <li role="presentation" class=""><a href="#tab_content13" id="home-tab" role="tab" data-toggle="tab" aria-expanded="true" class="" aria-selected="true">Leads</a>
+                            </li>
+                            <li role="presentation" class=""><a href="#tab_content14" id="home-tab" role="tab" data-toggle="tab" aria-expanded="true" class="" aria-selected="true">Cases</a>
+                            </li>
                         </ul>
                         <div id="myTabContent" class="tab-content">
                             <div role="tabpanel" class="tab-pane fade" id="tab_content1" aria-labelledby="home-tab">
@@ -206,6 +219,38 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <?= $this->render('partial/_info_chats', [
                                     'chatDataProvider' => $chatDataProvider,
                                     'chatSearchModel' => $chatSearchModel
+                                ]) ?>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="tab_content9" aria-labelledby="profile-tab">
+                                <?= $this->render('partial/_info_calls_chart', [
+                                    'callsInfoGraph' => $callsInfoGraph
+                                ]) ?>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="tab_content10" aria-labelledby="profile-tab">
+                                <?= $this->render('partial/_info_emails_chart', [
+                                    'emailsInfoGraph' => $emailsInfoGraph
+                                ]) ?>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="tab_content11" aria-labelledby="profile-tab">
+                                <?= $this->render('partial/_info_sms_chart', [
+                                    'smsInfoGraph' => $smsInfoGraph
+                                ]) ?>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="tab_content12" aria-labelledby="profile-tab">
+                                <?= $this->render('partial/_info_chat_chart', [
+                                    'chatInfoGraph' => $chatInfoGraph
+                                ]) ?>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="tab_content13" aria-labelledby="profile-tab">
+                                <?= $this->render('partial/_info_leads', [
+                                    'leadsInfoDataProvider' => $leadsInfoDataProvider,
+                                    'leadsSearchModel' => $leadsSearchModel
+                                ]) ?>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="tab_content14" aria-labelledby="profile-tab">
+                                <?= $this->render('partial/_info_cases', [
+                                    'casesInfoDataProvider' => $casesInfoDataProvider,
+                                    'casesSearchModel' => $casesSearchModel
                                 ]) ?>
                             </div>
                         </div>

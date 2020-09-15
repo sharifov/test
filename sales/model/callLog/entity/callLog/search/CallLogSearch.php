@@ -591,4 +591,30 @@ class CallLogSearch extends CallLog
 
         return $dataProvider = new ArrayDataProvider($paramsData);
     }
+
+    public function searchCallsGraph($params, $user_id): array
+    {
+        $query = new Query();
+        $query->addSelect(['DATE(cl_call_created_dt) as createdDate,
+               SUM(IF(cl_status_id= ' . CallLogStatus::COMPLETE . ', 1, 0)) AS callsComplete,
+               SUM(IF(cl_status_id= ' . CallLogStatus::BUSY . ', 1, 0)) AS callsBusy,
+               SUM(IF(cl_status_id= ' . CallLogStatus::NOT_ANSWERED . ', 1, 0)) AS callsNotAnswered,
+               SUM(IF(cl_status_id= ' . CallLogStatus::FAILED . ', 1, 0)) AS callsFailed,
+               SUM(IF(cl_status_id= ' . CallLogStatus::CANCELED . ', 1, 0)) AS callsCanceled,
+               SUM(IF(cl_status_id= ' . CallLogStatus::DECLINED . ', 1, 0)) AS callsDeclined
+        ']);
+        //$query->from([new \yii\db\Expression(static::tableName() . ' PARTITION(' . $this->getPartitionsByYears($date_from, $date_to) . ') ')]);
+        $query->from(static::tableName());
+        $query->where('cl_status_id IS NOT NULL');
+        $query->andWhere(['cl_user_id' => $user_id]);
+        if($this->createTimeRange){
+            $range = explode(' - ', $this->createTimeRange);
+            $query->andWhere(['>=', 'cl_call_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($range[0]))]);
+            $query->andWhere(['<=', 'cl_call_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($range[1]))]);
+        }
+
+        $query->groupBy('createdDate');
+
+        return $query->createCommand()->queryAll();
+    }
 }

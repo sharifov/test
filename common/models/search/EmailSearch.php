@@ -12,6 +12,7 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Email;
+use yii\db\Query;
 
 /**
  * EmailSearch represents the model behind the search form of `common\models\Email`.
@@ -300,5 +301,27 @@ class EmailSearch extends Email
         $dataProvider->setTotalCount(QueryHelper::getQueryCountValidModel($this, static::class . 'searchEmails' . $params['EmailSearch']['user_id'], $query, 60));
 
         return $dataProvider;
+    }
+
+    public function searchEmailGraph($params, $user_id): array
+    {
+        $query = new Query();
+        $query->addSelect(['DATE(e_created_dt) as createdDate,
+               SUM(IF(e_status_id= ' . Email::STATUS_DONE . ', 1, 0)) AS emailsDone,
+               SUM(IF(e_status_id= ' . Email::STATUS_ERROR . ', 1, 0)) AS emailsError               
+        ']);
+
+        $query->from(static::tableName());
+        $query->where('e_status_id IS NOT NULL');
+        $query->andWhere(['e_created_user_id' => $user_id]);
+        if($this->date_range){
+            $range = explode(' - ', $this->date_range);
+            $query->andWhere(['>=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($range[0]))]);
+            $query->andWhere(['<=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($range[1]))]);
+        }
+
+        $query->groupBy('createdDate');
+
+        return $query->createCommand()->queryAll();
     }
 }

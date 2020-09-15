@@ -10,6 +10,7 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Sms;
+use yii\db\Query;
 use yii\helpers\VarDumper;
 
 /**
@@ -258,5 +259,27 @@ class SmsSearch extends Sms
             ->andFilterWhere(['like', 's_tw_from_zip', $this->s_tw_from_zip]);
 
         return $dataProvider;
+    }
+
+    public function searchSmsGraph($params, $user_id): array
+    {
+        $query = new Query();
+        $query->addSelect(['DATE(s_created_dt) as createdDate,
+               SUM(IF(s_status_id= ' . SMS::STATUS_DONE . ', 1, 0)) AS smsDone,
+               SUM(IF(s_status_id= ' . SMS::STATUS_ERROR . ', 1, 0)) AS smsError               
+        ']);
+
+        $query->from(static::tableName());
+        $query->where('s_status_id IS NOT NULL');
+        $query->andWhere(['s_created_user_id' => $user_id]);
+        if($this->date_range){
+            $range = explode(' - ', $this->date_range);
+            $query->andWhere(['>=', 's_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($range[0]))]);
+            $query->andWhere(['<=', 's_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($range[1]))]);
+        }
+
+        $query->groupBy('createdDate');
+
+        return $query->createCommand()->queryAll();
     }
 }
