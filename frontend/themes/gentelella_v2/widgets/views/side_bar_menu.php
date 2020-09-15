@@ -102,44 +102,44 @@ if ($user->canCall()) {
     ", $this::POS_LOAD);
 }
 
-//$js = <<<JS
-//$('.nav.side-menu [data-ajax-link]').on('click', function (e) {
-//    e.preventDefault();
-//    let ajaxLink = $(this).data('ajax-link');
-//    let modalTitle = $(this).data('modal-title');
-//
-//    if (ajaxLink) {
-//        let url = $(this).attr('href');
-//
-//        var modal = $('#modal-md');
-//        $.ajax({
-//            type: 'post',
-//            url: url,
-//            data: {},
-//            dataType: 'html',
-//            beforeSend: function () {
-//                modal.find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
-//                modal.find('.modal-title').html(modalTitle);
-//                modal.modal('show');
-//            },
-//            success: function (data) {
-//                modal.find('.modal-body').html(data);
-//                modal.find('.modal-title').html(modalTitle);
-//                $('#preloader').addClass('d-none');
-//            },
-//            error: function () {
-//                new PNotify({
-//                    title: 'Error',
-//                    type: 'error',
-//                    text: 'Internal Server Error. Try again letter.',
-//                    hide: true
-//                });
-//                setTimeout(function () {
-//                    $('#modal-md').modal('hide');
-//                }, 300)
-//            },
-//        })
-//    }
-//});
-//JS;
-//$this->registerJs($js);
+$js = <<<JS
+$('.nav.side-menu [data-ajax-link]').on('click', function (e) {
+    e.preventDefault();
+    let ajaxLink = $(this).data('ajax-link');
+    let modalTitle = $(this).data('modal-title');
+
+    if (ajaxLink) {
+        let url = $(this).attr('href');
+
+        var modal = $('#modal-md');
+        $.ajax({
+            type: 'post',
+            url: url,
+            data: {},
+            dataType: 'html',
+            beforeSend: function () {
+                modal.find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+                modal.find('.modal-title').html(modalTitle);
+                modal.modal('show');
+            },
+            success: function (data) {
+                modal.find('.modal-body').html(data);
+                modal.find('.modal-title').html(modalTitle);
+                $('#preloader').addClass('d-none');
+            },
+            error: function () {
+                new PNotify({
+                    title: 'Error',
+                    type: 'error',
+                    text: 'Internal Server Error. Try again letter.',
+                    hide: true
+                });
+                setTimeout(function () {
+                    $('#modal-md').modal('hide');
+                }, 300)
+            },
+        })
+    }
+});
+JS;
+$this->registerJs($js);
