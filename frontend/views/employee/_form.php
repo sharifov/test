@@ -684,7 +684,7 @@ JS;
 					'uvm_record_enable:booleanByLabel',
 					'uvm_max_recording_time',
 //					'uvm_transcribe_enable:booleanByLabel',
-					'uvm_enabled:booleanByLabel',
+//					'uvm_enabled:booleanByLabel',
 					'uvm_created_dt:byUserDateTime',
 					'uvm_updated_dt:byUserDateTime',
 					[
