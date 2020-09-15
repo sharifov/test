@@ -272,7 +272,7 @@ $user = Yii::$app->user->identity;
                     <?= Html::a('<i class="fa fa-list"> </i> Data Logs', null, [
                         'id' => 'btn-general-lead-log',
                         'class' => 'dropdown-item showModalButton',
-                        'data-modal_id' => 'client-large',
+                        'data-modal_id' => 'lg',
                         'title' => 'General Lead Log #' . $leadForm->lead->id,
                         'data-content-url' => Url::to(['global-log/ajax-view-general-lead-log', 'lid' => $leadForm->lead->id])
                     ]) ?>
