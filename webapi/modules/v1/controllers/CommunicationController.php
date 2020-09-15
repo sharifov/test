@@ -44,6 +44,7 @@ use sales\repositories\user\UserProjectParamsRepository;
 use sales\services\call\CallDeclinedException;
 use sales\services\call\CallService;
 use sales\services\cases\CasesCommunicationService;
+use sales\services\client\ClientCreateForm;
 use sales\services\client\ClientManageService;
 use sales\services\sms\incoming\SmsIncomingForm;
 use sales\services\sms\incoming\SmsIncomingService;
@@ -442,7 +443,10 @@ class CommunicationController extends ApiBaseController
                             ) {
                                 if (!$callModel->c_client_id) {
                                     try {
-                                        $client = (Yii::createObject(ClientManageService::class))->getOrCreateByPhones([new PhoneCreateForm(['phone' => $callModel->c_from])]);
+                                        $clientForm = ClientCreateForm::createWidthDefaultName();
+                                        $clientForm->projectId = $upp->upp_project_id;
+                                        $clientForm->typeCreate = Client::TYPE_CREATE_CALL;
+                                        $client = (Yii::createObject(ClientManageService::class))->getOrCreateByPhones([new PhoneCreateForm(['phone' => $callModel->c_from])], $clientForm);
                                         $callModel->c_client_id = $client->id;
                                     } catch (\Throwable $e) {
                                         Yii::error($e->getMessage(), 'API:Communication:createVoiceMailResponse:Client:create');

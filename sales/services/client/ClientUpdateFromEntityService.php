@@ -8,7 +8,7 @@ use sales\entities\cases\Cases;
 use sales\forms\cases\CasesAddEmailForm;
 use sales\forms\cases\CasesAddPhoneForm;
 use sales\forms\cases\CasesClientUpdateForm;
-use sales\forms\lead\ClientCreateForm;
+use sales\services\client\ClientCreateForm;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
 use sales\repositories\client\ClientEmailRepository;

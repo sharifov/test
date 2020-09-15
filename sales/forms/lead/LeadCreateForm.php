@@ -11,6 +11,7 @@ use sales\helpers\lead\LeadHelper;
 use sales\access\ListsAccess;
 use sales\repositories\cases\CasesRepository;
 use sales\repositories\NotFoundException;
+use sales\services\client\ClientCreateForm;
 
 /**
  * @property string $cabin

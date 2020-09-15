@@ -33,6 +33,8 @@ use yii\db\ActiveQuery;
  * @property bool $disabled
  * @property int $rating
  * @property int $cl_type_id // 1 - Client, 2 - Contact
+ * @property int|null $cl_type_create // 1 - Manually, 2 - Lead etc.
+ * @property int|null $cl_project_id
  *
  * @property ClientEmail[] $clientEmails
  * @property ClientPhone[] $clientPhones
@@ -63,6 +65,24 @@ class Client extends ActiveRecord
         self::TYPE_INTERNAL => 'Internal',
     ];
 
+    public const TYPE_CREATE_MANUALLY = 1;
+    public const TYPE_CREATE_LEAD = 2;
+    public const TYPE_CREATE_CASE = 3;
+    public const TYPE_CREATE_CALL = 4;
+    public const TYPE_CREATE_SMS = 5;
+    public const TYPE_CREATE_EMAIL = 6;
+    public const TYPE_CREATE_CLIENT_CHAT = 7;
+
+    public const TYPE_CREATE_LIST = [
+        self::TYPE_CREATE_MANUALLY => 'Manually',
+        self::TYPE_CREATE_LEAD => 'Lead',
+        self::TYPE_CREATE_CASE => 'Case',
+        self::TYPE_CREATE_CALL => 'Call',
+        self::TYPE_CREATE_SMS => 'Sms',
+        self::TYPE_CREATE_EMAIL => 'Email',
+        self::TYPE_CREATE_CLIENT_CHAT => 'Client chat'
+    ];
+
     /**
      * @return string
      */
@@ -75,14 +95,18 @@ class Client extends ActiveRecord
      * @param $firstName
      * @param $middleName
      * @param $lastName
+     * @param $projectId
+     * @param $typeCreate
      * @return Client
      */
-    public static function create($firstName, $middleName, $lastName): self
+    public static function create($firstName, $middleName, $lastName, $projectId, $typeCreate): self
     {
         $client = new static();
         $client->first_name = $firstName;
         $client->middle_name = $middleName;
         $client->last_name = $lastName;
+        $client->cl_project_id = $projectId;
+        $client->cl_type_create = $typeCreate;
         $client->uuid = UuidHelper::uuid();
         return $client;
     }
@@ -113,6 +137,14 @@ class Client extends ActiveRecord
             [['parent_id', 'rating', 'cl_type_id'], 'integer'],
             ['uuid', 'unique'],
             ['uuid', UuidValidator::class],
+
+            ['cl_type_create', 'integer'],
+            ['cl_type_create', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['cl_type_create', 'in', 'range' => array_keys(self::TYPE_CREATE_LIST)],
+
+            ['cl_project_id', 'integer'],
+            ['cl_project_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['cl_project_id', 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['cl_project_id' => 'id']],
         ];
     }
 
@@ -137,7 +169,8 @@ class Client extends ActiveRecord
             'disabled' => 'Disabled',
             'rating' => 'Rating',
             'cl_type_id' => 'Type',
-            'ucl_favorite' => 'Favorite'
+            'cl_type_create' => 'Type create',
+            'cl_project_id' => 'Project',
         ];
     }
 

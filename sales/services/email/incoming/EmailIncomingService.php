@@ -2,8 +2,10 @@
 
 namespace sales\services\email\incoming;
 
+use common\models\Client;
 use common\models\Sources;
 use sales\services\cases\CasesSaleService;
+use sales\services\client\ClientCreateForm;
 use sales\services\lead\LeadManageService;
 use sales\services\TransactionManager;
 use Yii;
@@ -69,13 +71,17 @@ class EmailIncomingService
         /** @var Process $process */
         $process = $this->transactionManager->wrap(function () use ($clientEmail, $internalEmail, $incomingProject, $emailId) {
 
-            $client = $this->clientManageService->getOrCreateByEmails([new EmailCreateForm(['email' => $clientEmail])]);
-
             $contact = $this->internalContactService->findByEmail($internalEmail, $incomingProject);
 
             if (!$contact->projectId) {
                 throw new \DomainException('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . ' | Project Id not found');
             }
+
+            $clientForm = ClientCreateForm::createWidthDefaultName();
+            $clientForm->projectId = $contact->projectId;
+            $clientForm->typeCreate = Client::TYPE_CREATE_EMAIL;
+
+            $client = $this->clientManageService->getOrCreateByEmails([new EmailCreateForm(['email' => $clientEmail])], $clientForm);
 
             if ($department = $contact->department) {
                 if ($department->isSales()) {

@@ -4,6 +4,7 @@ namespace sales\services\lead;
 
 use common\models\Client;
 use sales\model\visitorLog\useCase\CreateVisitorLog;
+use sales\services\client\ClientCreateForm;
 use thamtech\uuid\helpers\UuidHelper;
 use Yii;
 use common\models\Lead;
@@ -147,7 +148,10 @@ class LeadManageService
     {
         $lead = $this->transaction->wrap(function () use ($phoneNumber, $projectId, $sourceId, $gmt) {
 
-            $client = $this->clientManageService->getOrCreateByPhones([new PhoneCreateForm(['phone' => $phoneNumber, 'comments' => 'incoming'])]);
+            $clientForm = ClientCreateForm::createWidthDefaultName();
+            $clientForm->projectId = $projectId;
+            $clientForm->typeCreate = Client::TYPE_CREATE_LEAD;
+            $client = $this->clientManageService->getOrCreateByPhones([new PhoneCreateForm(['phone' => $phoneNumber, 'comments' => 'incoming'])], $clientForm);
 
             $sourceId = $this->getSourceId($sourceId, $projectId);
 

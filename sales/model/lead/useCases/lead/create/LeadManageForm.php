@@ -7,7 +7,7 @@ use common\models\Sources;
 use sales\access\EmployeeProjectAccess;
 use sales\access\ListsAccess;
 use sales\forms\CompositeForm;
-use sales\forms\lead\ClientCreateForm;
+use sales\services\client\ClientCreateForm;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
 use sales\forms\lead\PreferencesCreateForm;

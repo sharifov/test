@@ -9,6 +9,7 @@ namespace common\components\jobs;
 
 use common\models\Call;
 use common\models\CallUserAccess;
+use common\models\Client;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Lead;
@@ -19,6 +20,7 @@ use sales\repositories\cases\CasesRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\services\cases\CasesCreateService;
 use sales\services\cases\CasesSaleService;
+use sales\services\client\ClientCreateForm;
 use sales\services\client\ClientManageService;
 use sales\services\lead\LeadManageService;
 use yii\base\BaseObject;
@@ -142,7 +144,10 @@ class CallQueueJob extends BaseObject implements JobInterface
                             $call->c_lead_id = $lead->id ?? null;
 
                             if (!$createLeadOnIncoming) {
-								$client = $this->clientManageService->getOrCreateByPhones([new PhoneCreateForm(['phone' => $call->c_from, 'comments' => 'incoming'])]);
+                                $clientForm = ClientCreateForm::createWidthDefaultName();
+                                $clientForm->projectId = $call->c_project_id;
+                                $clientForm->typeCreate = Client::TYPE_CREATE_CALL;
+								$client = $this->clientManageService->getOrCreateByPhones([new PhoneCreateForm(['phone' => $call->c_from, 'comments' => 'incoming'])], $clientForm);
 								$call->c_client_id = $client->id;
 							}
 
@@ -176,7 +181,10 @@ class CallQueueJob extends BaseObject implements JobInterface
                         $call->c_case_id = $case->cs_id ?? null;
 
 						if (!$createCaseOnIncoming) {
-							$client = $this->clientManageService->getOrCreateByPhones([new PhoneCreateForm(['phone' => $call->c_from])]);
+                            $clientForm = ClientCreateForm::createWidthDefaultName();
+                            $clientForm->projectId = $call->c_project_id;
+                            $clientForm->typeCreate = Client::TYPE_CREATE_CALL;
+							$client = $this->clientManageService->getOrCreateByPhones([new PhoneCreateForm(['phone' => $call->c_from])], $clientForm);
 							$call->c_client_id = $client->id;
 						}
 

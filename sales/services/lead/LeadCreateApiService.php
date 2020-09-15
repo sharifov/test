@@ -14,7 +14,7 @@ use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Lead;
 use common\models\LeadFlightSegment;
-use sales\forms\lead\ClientCreateForm;
+use sales\services\client\ClientCreateForm;
 use sales\repositories\lead\LeadRepository;
 use sales\services\client\ClientManageService;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
@@ -312,7 +312,9 @@ class LeadCreateApiService
             $newClient = new ClientCreateForm([
                 'firstName' => $firstName,
                 'middleName' => $middleName,
-                'lastName' => $lastName
+                'lastName' => $lastName,
+                'projectId' => $modelLead->project_id,
+                'typeCreate' => Client::TYPE_CREATE_LEAD,
             ]);
 
             if (!$newClient->validate()) {

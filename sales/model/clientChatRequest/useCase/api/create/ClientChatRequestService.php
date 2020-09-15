@@ -3,7 +3,7 @@
 namespace sales\model\clientChatRequest\useCase\api\create;
 
 use common\models\Notifications;
-use sales\forms\lead\ClientCreateForm;
+use sales\services\client\ClientCreateForm;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
 use sales\model\clientChat\useCase\create\ClientChatRepository;

@@ -6,7 +6,7 @@ use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\UserContactList;
-use sales\forms\lead\ClientCreateForm;
+use sales\services\client\ClientCreateForm;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
 use sales\model\client\ClientCodeException;
@@ -75,7 +75,9 @@ class ClientManageService
         $client = Client::create(
             $clientForm->firstName,
             $clientForm->middleName,
-            $clientForm->lastName
+            $clientForm->lastName,
+            $clientForm->projectId,
+            $clientForm->typeCreate
         );
         $this->clientRepository->save($client);
         return $client;
@@ -204,10 +206,10 @@ class ClientManageService
      * Find or create Client
      *
      * @param PhoneCreateForm[] $phones
-     * @param ClientCreateForm|null $clientForm
+     * @param ClientCreateForm $clientForm
      * @return Client
      */
-    public function getOrCreateByPhones(array $phones, ?ClientCreateForm $clientForm = null): Client
+    public function getOrCreateByPhones(array $phones, ClientCreateForm $clientForm): Client
     {
         $phones = $this->guardNotEmptyPhones($phones);
 
@@ -217,9 +219,6 @@ class ClientManageService
             }
         }
 
-        if (!$clientForm) {
-            $clientForm = new ClientCreateForm(['firstName' => 'ClientName']);
-        }
         $client = $this->create($clientForm);
         $this->addPhones($client, $phones);
 
@@ -232,10 +231,10 @@ class ClientManageService
 
 	/**
 	 * @param array $phones
-	 * @param bool $setClientIdNull
+	 * @param ClientCreateForm $form
 	 * @return Client
 	 */
-    public function getExistingOrCreateEmptyObj(array $phones): Client
+    public function getExistingOrCreateEmptyObj(array $phones, ClientCreateForm $form): Client
 	{
 		$client = null;
 		/** @var PhoneCreateForm[] $phones */
@@ -246,7 +245,7 @@ class ClientManageService
 		}
 
 		if (!$client) {
-			$client = Client::create('', '', '');
+			$client = Client::create('', '', '', $form->projectId, $form->typeCreate);
 			$client->id = 0;
 		}
 
@@ -257,10 +256,10 @@ class ClientManageService
      * Find or create Client
      *
      * @param EmailCreateForm[] $emails
-     * @param ClientCreateForm|null $clientForm
+     * @param ClientCreateForm $clientForm
      * @return Client
      */
-    public function getOrCreateByEmails(array $emails, ?ClientCreateForm $clientForm = null): Client
+    public function getOrCreateByEmails(array $emails, ClientCreateForm $clientForm): Client
     {
         $emails = $this->guardNotEmptyEmails($emails);
 
@@ -268,10 +267,6 @@ class ClientManageService
             if (($clientEmail = $this->clientEmailRepository->getByEmail($email->email)) && ($client = $clientEmail->client)) {
                 return $client;
             }
-        }
-
-        if (!$clientForm) {
-            $clientForm = new ClientCreateForm(['firstName' => 'ClientName']);
         }
 
         $client = $this->create($clientForm);
@@ -297,7 +292,9 @@ class ClientManageService
 		$client = Client::create(
 			$form->firstName,
 			$form->middleName,
-			$form->lastName
+			$form->lastName,
+            $form->projectId,
+            $form->typeCreate
 		);
 		$client->uuid = $form->uuid;
 
@@ -324,7 +321,9 @@ class ClientManageService
 		$clientForm = new ClientCreateForm([
 			'firstName' => $clientChatRequest->getNameFromData(),
 			'rcId' => $rcId,
-			'uuid' => $uuId
+			'uuid' => $uuId,
+            'typeCreate' => Client::TYPE_CREATE_CLIENT_CHAT,
+//            'projectId' => todo
 		]);
 
 		try {
@@ -348,10 +347,10 @@ class ClientManageService
      *
      * @param PhoneCreateForm[] $phones
      * @param EmailCreateForm[] $emails
-     * @param ClientCreateForm|null $clientForm
+     * @param ClientCreateForm $clientForm
      * @return Client
      */
-    public function getOrCreate(array $phones, array $emails, ?ClientCreateForm $clientForm = null): Client
+    public function getOrCreate(array $phones, array $emails, ClientCreateForm $clientForm): Client
     {
         try {
             $client = $this->getOrCreateByPhones($phones, $clientForm);

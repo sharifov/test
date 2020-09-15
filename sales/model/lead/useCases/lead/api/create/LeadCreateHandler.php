@@ -2,12 +2,14 @@
 
 namespace sales\model\lead\useCases\lead\api\create;
 
+use common\models\Client;
 use common\models\Lead;
 use common\models\LeadFlightSegment;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\lead\LeadSegmentRepository;
+use sales\services\client\ClientCreateForm;
 use sales\services\client\ClientManageService;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
 use sales\services\lead\calculator\SegmentDTO;
@@ -50,9 +52,14 @@ class LeadCreateHandler
     {
         $lead = $this->transactionManager->wrap(function () use ($form) {
 
+            $clientForm = ClientCreateForm::createWidthDefaultName();
+            $clientForm->projectId = $form->project_id;
+            $clientForm->typeCreate = Client::TYPE_CREATE_LEAD;
+
             $client = $this->clientManageService->getOrCreate(
                 [new PhoneCreateForm(['phone' => $form->clientForm->phone])],
-                [new EmailCreateForm(['email' => $form->clientForm->email])]
+                [new EmailCreateForm(['email' => $form->clientForm->email])],
+                $clientForm
             );
 
             $lead = Lead::createByApiBO($form, $client);

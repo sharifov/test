@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use common\components\BackOffice;
 use common\components\CommunicationService;
 use common\models\Call;
+use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Department;
@@ -2049,6 +2050,8 @@ class LeadController extends FController
         $form->assignDep(Department::DEPARTMENT_SALES);
         if ($form->load($data['post']) && $form->validate()) {
             try {
+                $form->client->projectId = $form->projectId;
+                $form->client->typeCreate = Client::TYPE_CREATE_LEAD;
                 $lead = $this->leadManageService->createManuallyByDefault($form, Yii::$app->user->id, Yii::$app->user->id, LeadFlow::DESCRIPTION_MANUAL_CREATE);
                 Yii::$app->session->setFlash('success', 'Lead save');
                 return $this->redirect(['/lead/view', 'gid' => $lead->gid]);
@@ -2077,6 +2080,8 @@ class LeadController extends FController
 			if (Yii::$app->request->isPjax && $form->load($data['post']) && $form->validate()) {
 				try {
 					$leadManageService = Yii::createObject(\sales\model\lead\useCases\lead\create\LeadManageService::class);
+					$form->client->projectId = $form->projectId;
+					$form->client->typeCreate = Client::TYPE_CREATE_LEAD;
 					$lead = $leadManageService->createManuallyByDefault($form, Yii::$app->user->id, Yii::$app->user->id, LeadFlow::DESCRIPTION_MANUAL_CREATE);
 					Yii::$app->session->setFlash('success', 'Lead save');
 					return $this->redirect(['/lead/view', 'gid' => $lead->gid]);
@@ -2150,6 +2155,8 @@ class LeadController extends FController
         $form->assignDep(Department::DEPARTMENT_EXCHANGE);
         if ($form->load($data['post']) && $form->validate()) {
             try {
+                $form->client->projectId = $form->projectId;
+                $form->client->typeCreate = Client::TYPE_CREATE_LEAD;
                 $lead = $this->leadManageService->createManuallyFromCase($form, Yii::$app->user->id, Yii::$app->user->id, 'Manual create form Case');
                 Yii::$app->session->setFlash('success', 'Lead save');
                 return $this->redirect(['/lead/view', 'gid' => $lead->gid]);
