@@ -98,9 +98,10 @@ class Client extends ActiveRecord
      * @param $lastName
      * @param $projectId
      * @param $typeCreate
+     * @param $parentId
      * @return Client
      */
-    public static function create($firstName, $middleName, $lastName, $projectId, $typeCreate): self
+    public static function create($firstName, $middleName, $lastName, $projectId, $typeCreate, $parentId): self
     {
         $client = new static();
         $client->first_name = $firstName;
@@ -108,6 +109,7 @@ class Client extends ActiveRecord
         $client->last_name = $lastName;
         $client->cl_project_id = $projectId;
         $client->cl_type_create = $typeCreate;
+        $client->parent_id = $parentId;
         $client->uuid = UuidHelper::uuid();
         return $client;
     }
@@ -425,5 +427,15 @@ class Client extends ActiveRecord
     public function isInternal(): bool
     {
         return $this->cl_type_id === self::TYPE_INTERNAL;
+	}
+
+    public function isProjectEqual(int $projectId): bool
+    {
+        return $this->cl_project_id === $projectId;
+	}
+
+    public function isWithoutProject(): bool
+    {
+        return $this->cl_project_id === null;
 	}
 }

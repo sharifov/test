@@ -6,6 +6,8 @@ use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\UserContactList;
+use sales\repositories\client\ClientsCollection;
+use sales\repositories\client\ClientsQuery;
 use sales\services\client\ClientCreateForm;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
@@ -68,16 +70,18 @@ class ClientManageService
 
     /**
      * @param ClientCreateForm $clientForm
+     * @param int|null $parentId
      * @return Client
      */
-    public function create(ClientCreateForm $clientForm): Client
+    public function create(ClientCreateForm $clientForm, ?int $parentId): Client
     {
         $client = Client::create(
             $clientForm->firstName,
             $clientForm->middleName,
             $clientForm->lastName,
             $clientForm->projectId,
-            $clientForm->typeCreate
+            $clientForm->typeCreate,
+            $parentId
         );
         $this->clientRepository->save($client);
         return $client;
@@ -213,13 +217,28 @@ class ClientManageService
     {
         $phones = $this->guardNotEmptyPhones($phones);
 
+        $parentId = null;
+        $projectId = (int)$clientForm->projectId;
+
         foreach ($phones as $phone) {
-            if (($clientPhone = $this->clientPhoneRepository->getByPhone($phone->phone)) && ($client = $clientPhone->client)) {
-                return $client;
+            $collections = new ClientsCollection(ClientsQuery::allByPhone($phone->phone));
+            if ($collections->isEmpty()) {
+                continue;
             }
+            if ($projectId) {
+                if ($client = $collections->getWithProject($projectId)) {
+                    return $client;
+                }
+            } else {
+                if ($client = $collections->getWithoutProject()) {
+                    return $client;
+                }
+            }
+            $parentId = $collections->getFirstId();
+            break;
         }
 
-        $client = $this->create($clientForm);
+        $client = $this->create($clientForm, $parentId);
         $this->addPhones($client, $phones);
 
         if (!$client->clientPhones) {
@@ -230,24 +249,35 @@ class ClientManageService
     }
 
 	/**
-	 * @param array $phones
+	 * @param PhoneCreateForm[] $phones
 	 * @param ClientCreateForm $form
 	 * @return Client
 	 */
     public function getExistingOrCreateEmptyObj(array $phones, ClientCreateForm $form): Client
 	{
-		$client = null;
-		/** @var PhoneCreateForm[] $phones */
-		foreach ($phones as $phone) {
-			if (($clientPhone = $this->clientPhoneRepository->getByPhone($phone->phone))) {
-				$client = $clientPhone->client;
-			}
-		}
+        $parentId = null;
+        $projectId = (int)$form->projectId;
 
-		if (!$client) {
-			$client = Client::create('', '', '', $form->projectId, $form->typeCreate);
-			$client->id = 0;
-		}
+        foreach ($phones as $phone) {
+            $collections = new ClientsCollection(ClientsQuery::allByPhone($phone->phone));
+            if ($collections->isEmpty()) {
+                continue;
+            }
+            if ($projectId) {
+                if ($client = $collections->getWithProject($projectId)) {
+                    return $client;
+                }
+            } else {
+                if ($client = $collections->getWithoutProject()) {
+                    return $client;
+                }
+            }
+            $parentId = $collections->getFirstId();
+            break;
+        }
+
+        $client = Client::create('', '', '', $form->projectId, $form->typeCreate, $parentId);
+        $client->id = 0;
 
 		return $client;
 	}
@@ -263,13 +293,28 @@ class ClientManageService
     {
         $emails = $this->guardNotEmptyEmails($emails);
 
+        $parentId = null;
+        $projectId = (int)$clientForm->projectId;
+
         foreach ($emails as $email) {
-            if (($clientEmail = $this->clientEmailRepository->getByEmail($email->email)) && ($client = $clientEmail->client)) {
-                return $client;
+            $collections = new ClientsCollection(ClientsQuery::allByEmail($email->email));
+            if ($collections->isEmpty()) {
+                continue;
             }
+            if ($projectId) {
+                if ($client = $collections->getWithProject($projectId)) {
+                    return $client;
+                }
+            } else {
+                if ($client = $collections->getWithoutProject()) {
+                    return $client;
+                }
+            }
+            $parentId = $collections->getFirstId();
+            break;
         }
 
-        $client = $this->create($clientForm);
+        $client = $this->create($clientForm, $parentId);
         $this->addEmails($client, $emails);
 
         if (!$client->clientEmails) {
@@ -279,22 +324,23 @@ class ClientManageService
         return $client;
     }
 
-    public function getOrCreateByClientId(ClientCreateForm $form): Client
+    public function getOrCreateByClientId(ClientCreateForm $form, $parentId): Client
 	{
 		if ($client = Client::findOne($form->id)) {
 			return $client;
 		}
-		return $this->create($form);
+		return $this->create($form, $parentId);
 	}
 
-	public function createByRcId(ClientCreateForm $form): Client
+	public function createByRcId(ClientCreateForm $form, $parentId): Client
 	{
 		$client = Client::create(
 			$form->firstName,
 			$form->middleName,
 			$form->lastName,
             $form->projectId,
-            $form->typeCreate
+            $form->typeCreate,
+            $parentId
 		);
 		$client->uuid = $form->uuid;
 
@@ -325,6 +371,7 @@ class ClientManageService
             'typeCreate' => Client::TYPE_CREATE_CLIENT_CHAT,
 //            'projectId' => todo
 		]);
+		$parentId = null;
 
 		try {
 			$client = $this->clientRepository->findByUuid($uuId);
@@ -332,7 +379,7 @@ class ClientManageService
 			if ($client = Client::find()->joinWithCcVisitor($clientForm->rcId)->one()) {
 				$this->updateClient($client, $clientForm);
 			} else {
-				$client = $this->createByRcId($clientForm);
+				$client = $this->createByRcId($clientForm, $parentId);
 			}
 		}
 

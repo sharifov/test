@@ -34,6 +34,7 @@ class ClientSearch extends Client
             [['is_company', 'is_public', 'disabled'], 'boolean'],
 
             ['cl_project_id', 'integer'],
+            ['parent_id', 'integer'],
         ];
     }
 
@@ -108,6 +109,7 @@ class ClientSearch extends Client
             'is_public' => $this->is_public,
             'disabled' => $this->disabled,
             'cl_project_id' => $this->cl_project_id,
+            'parent_id' => $this->parent_id,
         ]);
 
         return $dataProvider;

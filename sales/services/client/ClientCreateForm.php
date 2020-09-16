@@ -43,6 +43,7 @@ class ClientCreateForm extends Model
 			['uuid', 'string', 'max' => 36],
 			['rcId', 'string', 'max' => 50],
 
+            ['projectId', 'default', 'value' => null],
             ['projectId', 'integer'],
             ['projectId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
             ['projectId', 'exist', 'skipOnError'  => true, 'targetClass' => Project::class, 'targetAttribute' => ['projectId' => 'id']],

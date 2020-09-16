@@ -56,7 +56,7 @@ class CaseController extends Controller
 			if (!$caseSale) {
 				$transaction = Yii::$app->db->beginTransaction();
 				try {
-					$client = Client::create('ClientName', null, null, $refund['projectid'], Client::TYPE_CREATE_CASE);
+					$client = Client::create('ClientName', null, null, $refund['projectid'], Client::TYPE_CREATE_CASE, null);
 					if (!$client->save(false)) {
 						throw new Exception($client->getErrorSummary(true)[0]);
 					}
