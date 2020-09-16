@@ -423,7 +423,8 @@ class ClientChatRequestController extends ApiBaseController
 	 * "data": {
 	 * "endpoint": "chatbot.travel-dev.com",
 	 * "enabled": true,
-	 * "project": "HOP2",
+	 * "project": "WOWFARE",
+     * "projectKey": "wowfare",
 	 * "notificationSound": "https://cdn.travelinsides.com/npmstatic/assets/chime.mp3",
 	 * "theme": {
 	 * "theme": "linear-gradient(270deg, #0AAB99 0%, #1E71D1 100%)",

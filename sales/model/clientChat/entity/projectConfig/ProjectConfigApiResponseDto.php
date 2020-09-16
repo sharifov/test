@@ -11,6 +11,7 @@ use yii\helpers\Json;
  * @property string $endpoint
  * @property bool $enabled
  * @property string $project
+ * @property string $projectKey
  * @property string $notificationSound
  * @property array $theme
  * @property array $registration
@@ -33,6 +34,11 @@ class ProjectConfigApiResponseDto
 	 * @var string $project
 	 */
 	public string $project;
+
+    /**
+     * @var string $projectKey
+     */
+    public string $projectKey;
 
 	/**
 	 * @var string $notificationSound
@@ -66,7 +72,8 @@ class ProjectConfigApiResponseDto
 		$this->endpoint = $params['endpoint'] ?? '';
 		$this->notificationSound = $params['notificationSound'] ?? '';
 		$this->enabled = (bool)$projectConfig->ccpc_enabled;
-		$this->project = $projectConfig->ccpcProject->name ?? '';
+		$this->project = $projectConfig->ccpcProject ? $projectConfig->ccpcProject->name : '';
+        $this->projectKey = $projectConfig->ccpcProject ? $projectConfig->ccpcProject->project_key : '';
 		$this->theme = Json::decode($projectConfig->ccpc_theme_json) ?? '{}';
 		$this->registration = Json::decode($projectConfig->ccpc_registration_json) ?? '{}';
 		$this->settings = Json::decode($projectConfig->ccpc_settings_json) ?? '{}';
