@@ -600,6 +600,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     'label' => Yii::t('language', 'Tools'), 'url' => 'javascript:', 'icon' => 'cog',
                     'items' => [
                         ['label' => Yii::t('language', 'Check Flight Dump'), 'url' => ['/tools/check-flight-dump']],
+                        ['label' => Yii::t('language', 'Stash Log Files'), 'url' => ['/tools/stash-log-file']],
+
                     ]
                 ],
 
