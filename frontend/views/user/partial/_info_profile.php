@@ -115,14 +115,14 @@ use yii\widgets\Pjax;
                         [
                             'label' => 'Project',
                             'value' => function (\common\models\UserProjectParams $model) {
-                                return $model->uppProject->name ? $model->uppProject->name : '-';
+                                return $model->uppProject && $model->uppProject->name ? $model->uppProject->name : '-';
                             },
                         ],
 
                         [
                             'label' => 'Department',
                             'value' => function (\common\models\UserProjectParams $model) {
-                                return $model->uppDep->dep_name ? $model->uppDep->dep_name : '-';
+                                return $model->uppDep && $model->uppDep->dep_name ? $model->uppDep->dep_name : '-';
                             },
                         ],
 
