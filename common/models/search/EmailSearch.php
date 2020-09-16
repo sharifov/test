@@ -6,11 +6,13 @@ use common\models\EmailTemplateType;
 use common\models\Employee;
 use common\models\UserGroupAssign;
 use common\models\UserProjectParams;
+use sales\auth\Auth;
 use sales\helpers\query\QueryHelper;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Email;
+use yii\db\Query;
 
 /**
  * EmailSearch represents the model behind the search form of `common\models\Email`.
@@ -27,6 +29,7 @@ class EmailSearch extends Email
     public $datetime_start;
     public $datetime_end;
     public $date_range;
+    public const CREATE_TIME_START_DEFAULT_RANGE = '-6 days';
 
     /**
      * {@inheritdoc}
@@ -40,6 +43,14 @@ class EmailSearch extends Email
 			[['e_template_type_name'], 'string'],
             [['e_email_from', 'e_email_to', 'e_email_cc', 'e_email_bc', 'e_email_subject', 'e_email_body_text', 'e_attach', 'e_email_data', 'e_language_id', 'e_status_done_dt', 'e_read_dt', 'e_error_message', 'e_created_dt', 'e_updated_dt', 'e_message_id', 'e_ref_message_id', 'e_inbox_created_dt'], 'safe'],
         ];
+    }
+
+    public function __construct($config = [])
+    {
+        parent::__construct($config);
+        $userTimezone = Auth::user()->userParams->up_timezone ?? 'UTC';
+        $currentDate = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->setTimezone(new \DateTimeZone($userTimezone));
+        $this->date_range = ($currentDate->modify(self::CREATE_TIME_START_DEFAULT_RANGE))->format('Y-m-d') . ' 00:00:00 - ' . $currentDate->format('Y-m-d') . ' 23:59:59';
     }
 
     /**
@@ -97,13 +108,13 @@ class EmailSearch extends Email
             return $dataProvider;
         }
 
-        if(empty($this->e_created_dt) && isset($params['EmailSearch']['date_range'])){
+        if(!empty($this->date_range)){
             $query->andFilterWhere(['>=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
                 ->andFilterWhere(['<=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
-        } elseif (!empty($params['EmailSearch']['e_created_dt'])) {
+        }
+
+        if (!empty($this->e_created_dt)) {
             $query->andFilterWhere(['DATE(e_created_dt)' => date('Y-m-d', strtotime($this->e_created_dt))]);
-            /*$query->andFilterWhere(['>=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->e_created_dt))])
-                ->andFilterWhere(['<=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->e_created_dt) + 3600 * 24)]);*/
         }
 
         if($this->supervision_id > 0) {
@@ -290,5 +301,27 @@ class EmailSearch extends Email
         $dataProvider->setTotalCount(QueryHelper::getQueryCountValidModel($this, static::class . 'searchEmails' . $params['EmailSearch']['user_id'], $query, 60));
 
         return $dataProvider;
+    }
+
+    public function searchEmailGraph($params, $user_id): array
+    {
+        $query = new Query();
+        $query->addSelect(['DATE(e_created_dt) as createdDate,
+               SUM(IF(e_status_id= ' . Email::STATUS_DONE . ', 1, 0)) AS emailsDone,
+               SUM(IF(e_status_id= ' . Email::STATUS_ERROR . ', 1, 0)) AS emailsError               
+        ']);
+
+        $query->from(static::tableName());
+        $query->where('e_status_id IS NOT NULL');
+        $query->andWhere(['e_created_user_id' => $user_id]);
+        if($this->date_range){
+            $range = explode(' - ', $this->date_range);
+            $query->andWhere(['>=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($range[0]))]);
+            $query->andWhere(['<=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($range[1]))]);
+        }
+
+        $query->groupBy('createdDate');
+
+        return $query->createCommand()->queryAll();
     }
 }

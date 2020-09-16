@@ -7,11 +7,15 @@ use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $model Employee */
+/* @var $data yii\data\ActiveDataProvider */
+/* @var $startDateTime string */
+/* @var $endDateTime string */
 
 $this->title = 'User Info';
 $this->params['breadcrumbs'][] = ['label' => 'Employee List', 'url' => ['employee/list']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <div class="user-info">
 
     <h1><i class="fa fa-user"></i> <?= Html::encode($this->title) ?></h1>
@@ -24,9 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php endif; ?>
     </p>
 
-
     <?php //Pjax::end(); ?>
-
 
 
         <div class="x_panel">
@@ -120,6 +122,11 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 </div>
                 <div class="col-md-9 col-sm-9 ">
+                    <?= $this->render('partial/_info_user_monitor', [
+                        'data' => $data,
+                        'startDateTime' => $startDateTime,
+                        'endDateTime' => $endDateTime,
+                    ]) ?>
 <!--                    <div class="profile_title">-->
 <!--                        <div class="col-md-6">-->
 <!--                            <h2>User Activity Report</h2>-->
@@ -139,19 +146,42 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     <div class="" role="tabpanel" data-example-id="togglable-tabs">
                         <ul id="myTab" class="nav nav-tabs bar_tabs" role="tablist">
-<!--                            <li role="presentation" class="active"><a href="#tab_content1" id="home-tab" role="tab" data-toggle="tab" aria-expanded="true" class="" aria-selected="true">Recent Activity</a>-->
-<!--                            </li>-->
-<!--                            <li role="presentation" class=""><a href="#tab_content2" role="tab" id="profile-tab" data-toggle="tab" aria-expanded="false" class="" aria-selected="false">Projects Worked on</a>-->
-<!--                            </li>-->
-                            <li role="presentation" class=""><a href="#tab_content3" role="tab" id="profile-tab2" data-toggle="tab" aria-expanded="false" class="active" aria-selected="false">Profile</a>
+                            <li role="presentation" class="active"><a href="#tab_content3" role="tab" id="profile-tab2" data-toggle="tab" aria-expanded="false" class="active" aria-selected="false">Profile</a>
+                            </li>
+                            <!-- <li role="presentation" class=""><a href="#tab_content2" role="tab" id="profile-tab" data-toggle="tab" aria-expanded="false" class="" aria-selected="false">Projects Worked on</a>-->
+                            <!-- </li>-->
+                            <li role="presentation" class=""><a href="#tab_content1" id="home-tab" role="tab" data-toggle="tab" aria-expanded="true" class="" aria-selected="true">Recent Activity</a>
+                            </li>
+                            <li role="presentation" class=""><a href="#tab_content4" id="home-tab" role="tab" data-toggle="tab" aria-expanded="true" class="" aria-selected="true">User Failed Login</a>
+                            </li>
+                            <li role="presentation" class=""><a href="#tab_content5" id="home-tab" role="tab" data-toggle="tab" aria-expanded="true" class="" aria-selected="true">Calls Stats</a>
+                            </li>
+                            <li role="presentation" class=""><a href="#tab_content6" id="home-tab" role="tab" data-toggle="tab" aria-expanded="true" class="" aria-selected="true">Emails Stats</a>
+                            </li>
+                            <li role="presentation" class=""><a href="#tab_content7" id="home-tab" role="tab" data-toggle="tab" aria-expanded="true" class="" aria-selected="true">Sms Stats</a>
+                            </li>
+                            <li role="presentation" class=""><a href="#tab_content8" id="home-tab" role="tab" data-toggle="tab" aria-expanded="true" class="" aria-selected="true">Chats Stats</a>
+                            </li>
+                            <li role="presentation" class=""><a href="#tab_content9" id="home-tab" role="tab" data-toggle="tab" aria-expanded="true" class="" aria-selected="true">Calls Chart</a>
+                            </li>
+                            <li role="presentation" class=""><a href="#tab_content10" id="home-tab" role="tab" data-toggle="tab" aria-expanded="true" class="" aria-selected="true">Emails Chart</a>
+                            </li>
+                            <li role="presentation" class=""><a href="#tab_content11" id="home-tab" role="tab" data-toggle="tab" aria-expanded="true" class="" aria-selected="true">SMS Chart</a>
+                            </li>
+                            <li role="presentation" class=""><a href="#tab_content12" id="home-tab" role="tab" data-toggle="tab" aria-expanded="true" class="" aria-selected="true">Chat Chart</a>
+                            </li>
+                            <li role="presentation" class=""><a href="#tab_content13" id="home-tab" role="tab" data-toggle="tab" aria-expanded="true" class="" aria-selected="true">Leads</a>
+                            </li>
+                            <li role="presentation" class=""><a href="#tab_content14" id="home-tab" role="tab" data-toggle="tab" aria-expanded="true" class="" aria-selected="true">Cases</a>
                             </li>
                         </ul>
                         <div id="myTabContent" class="tab-content">
-<!--                            <div role="tabpanel" class="tab-pane fade" id="tab_content1" aria-labelledby="home-tab">-->
-<!--                                --><?php //= $this->render('partial/_info_activity', [
-//                                    'model' => $model,
-//                                ]) ?>
-<!--                            </div>-->
+                            <div role="tabpanel" class="tab-pane fade" id="tab_content1" aria-labelledby="home-tab">
+                                <?= $this->render('partial/_info_activity', [
+                                    'model' => $model,
+                                    'userActivity' => $userActivity,
+                               ]) ?>
+                            </div>
 <!--                            <div role="tabpanel" class="tab-pane fade" id="tab_content2" aria-labelledby="profile-tab">-->
 <!--                                --><?php //= $this->render('partial/_info_project', [
 //                                    'model' => $model,
@@ -160,6 +190,67 @@ $this->params['breadcrumbs'][] = $this->title;
                             <div role="tabpanel" class="tab-pane active" id="tab_content3" aria-labelledby="profile-tab">
                                 <?= $this->render('partial/_info_profile', [
                                     'model' => $model,
+                                ]) ?>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="tab_content4" aria-labelledby="profile-tab">
+                                <?= $this->render('partial/_info_user_failed_login', [
+                                    'model' => $model,
+                                ]) ?>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="tab_content5" aria-labelledby="profile-tab">
+                                <?= $this->render('partial/_info_calls', [
+                                    'callLogDataProvider' => $callLogDataProvider,
+                                    'callLogSearchModel' => $callLogSearchModel
+                                ]) ?>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="tab_content6" aria-labelledby="profile-tab">
+                                <?= $this->render('partial/_info_emails', [
+                                    'emailDataProvider' => $emailDataProvider,
+                                    'emailSearchModel' => $emailSearchModel
+                                ]) ?>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="tab_content7" aria-labelledby="profile-tab">
+                                <?= $this->render('partial/_info_sms', [
+                                    'smsDataProvider' => $smsDataProvider,
+                                    'smsSearchModel' => $smsSearchModel
+                                ]) ?>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="tab_content8" aria-labelledby="profile-tab">
+                                <?= $this->render('partial/_info_chats', [
+                                    'chatDataProvider' => $chatDataProvider,
+                                    'chatSearchModel' => $chatSearchModel
+                                ]) ?>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="tab_content9" aria-labelledby="profile-tab">
+                                <?= $this->render('partial/_info_calls_chart', [
+                                    'callsInfoGraph' => $callsInfoGraph
+                                ]) ?>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="tab_content10" aria-labelledby="profile-tab">
+                                <?= $this->render('partial/_info_emails_chart', [
+                                    'emailsInfoGraph' => $emailsInfoGraph
+                                ]) ?>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="tab_content11" aria-labelledby="profile-tab">
+                                <?= $this->render('partial/_info_sms_chart', [
+                                    'smsInfoGraph' => $smsInfoGraph
+                                ]) ?>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="tab_content12" aria-labelledby="profile-tab">
+                                <?= $this->render('partial/_info_chat_chart', [
+                                    'chatInfoGraph' => $chatInfoGraph
+                                ]) ?>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="tab_content13" aria-labelledby="profile-tab">
+                                <?= $this->render('partial/_info_leads', [
+                                    'leadsInfoDataProvider' => $leadsInfoDataProvider,
+                                    'leadsSearchModel' => $leadsSearchModel
+                                ]) ?>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="tab_content14" aria-labelledby="profile-tab">
+                                <?= $this->render('partial/_info_cases', [
+                                    'casesInfoDataProvider' => $casesInfoDataProvider,
+                                    'casesSearchModel' => $casesSearchModel
                                 ]) ?>
                             </div>
                         </div>

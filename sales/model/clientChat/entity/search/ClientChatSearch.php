@@ -32,6 +32,7 @@ class ClientChatSearch extends ClientChat
     public string $timeRange;
     public string $timeStart;
     public string $timeEnd;
+    public const DEFAULT_INTERVAL_BETWEEN_DAYS = '-6 days';
 
     private const CLIENT_CHAT_PAGE_SIZE = 10;
 
@@ -114,6 +115,15 @@ class ClientChatSearch extends ClientChat
             return $dataProvider;
         }
 
+        if(!empty($this->timeRange)){
+            $query->andFilterWhere(['>=', 'cch_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->timeStart))])
+                ->andFilterWhere(['<=', 'cch_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->timeEnd))]);
+        }
+
+        if (!empty($this->cch_created_dt)) {
+            $query->andFilterWhere(['DATE(cch_created_dt)' => date('Y-m-d', strtotime($this->cch_created_dt))]);
+        }
+
         $query->andFilterWhere([
             'cch_id' => $this->cch_id,
             'cch_ccr_id' => $this->cch_ccr_id,
@@ -124,7 +134,7 @@ class ClientChatSearch extends ClientChat
             'cch_owner_user_id' => $this->cch_owner_user_id,
             'cch_status_id' => $this->cch_status_id,
             'cch_ua' => $this->cch_ua,
-            'date_format(cch_created_dt, "%Y-%m-%d")' => $this->cch_created_dt,
+            //'date_format(cch_created_dt, "%Y-%m-%d")' => $this->cch_created_dt,
             'date_format(cch_updated_dt, "%Y-%m-%d")' => $this->cch_updated_dt,
             'cch_created_user_id' => $this->cch_created_user_id,
             'cch_updated_user_id' => $this->cch_updated_user_id,
@@ -405,4 +415,26 @@ class ClientChatSearch extends ClientChat
 
 		return $dataProvider;
 	}
+
+    public function searchChatGraph($params, $user_id): array
+    {
+        $query = new Query();
+        $query->addSelect(['DATE(cch_created_dt) as createdDate,
+               SUM(IF(cch_status_id = ' . ClientChat::STATUS_GENERATED . ', 1, 0)) AS chatGenerated,
+               SUM(IF(cch_status_id = ' . ClientChat::STATUS_PENDING . ', 1, 0)) AS chatPending,
+               SUM(IF(cch_status_id = ' . ClientChat::STATUS_TRANSFER . ', 1, 0)) AS chatTransfer,
+               SUM(IF(cch_status_id = ' . ClientChat::STATUS_CLOSED . ', 1, 0)) AS chatClosed             
+        ']);
+
+        $query->from(static::tableName());
+        $query->where('cch_owner_user_id IS NOT NULL');
+        $query->andWhere(['cch_owner_user_id' => $user_id]);
+
+        $query->andWhere(['>=', 'cch_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->timeStart))]);
+        $query->andWhere(['<=', 'cch_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->timeEnd))]);
+
+        $query->groupBy('createdDate');
+
+        return $query->createCommand()->queryAll();
+    }
 }

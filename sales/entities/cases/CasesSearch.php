@@ -25,7 +25,9 @@ use sales\model\clientChatCase\entity\ClientChatCase;
 use sales\model\saleTicket\entity\SaleTicket;
 use Yii;
 use yii\data\ActiveDataProvider;
+use yii\data\SqlDataProvider;
 use yii\db\Expression;
+use yii\db\Query;
 
 /**
  * Class CasesSearch
@@ -114,6 +116,10 @@ class CasesSearch extends Cases
     public $chatsQtyTo;
     public $caseUserGroup;
 
+    public $datetime_start;
+    public $datetime_end;
+    public $date_range;
+
     private $cacheSaleData = [];
 
     public int $cacheDuration = 60 * 1;
@@ -166,6 +172,8 @@ class CasesSearch extends Cases
                 ],
                 'integer', 'min' => 0, 'max' => 1000
             ],
+            [['datetime_start', 'datetime_end'], 'safe'],
+            [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
         ];
     }
 
@@ -952,5 +960,45 @@ class CasesSearch extends Cases
             }
         }
         return null;
+    }
+
+    public function searchUserCasesInfo($params, $userID)
+    {
+        $this->load($params);
+
+        $query = new Query();
+        $query->addSelect(['DATE(cs_created_dt) as createdDate,
+            COUNT(cs_id) AS allUserCases,
+            SUM(IF(cs_status = '. CasesStatus::STATUS_SOLVED .', 1, 0)) AS solvedCases
+        ']);
+        $query->from(static::tableName());
+        $query->where(['cs_user_id' => $userID]);
+        if(!empty($this->date_range)){
+            $query->andFilterWhere(['>=', 'cs_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
+                ->andFilterWhere(['<=', 'cs_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
+        }
+        $query->groupBy('createdDate');
+
+        $command = $query->createCommand();
+        $sql = $command->rawSql;
+
+        $paramsData = [
+            'sql' => $sql,
+            'sort' => [
+                'defaultOrder' => [
+                    'createdDate' => SORT_DESC,
+                ],
+                'attributes' => [
+                    'createdDate',
+                    'allUserCases',
+                    'solvedCases',
+                ],
+            ],
+            'pagination' => [
+                'pageSize' => 10,
+            ],
+        ];
+
+        return new SqlDataProvider($paramsData);
     }
 }

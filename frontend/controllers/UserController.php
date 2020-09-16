@@ -4,6 +4,15 @@ namespace frontend\controllers;
 
 use common\models\Employee;
 use common\models\Notifications;
+use common\models\search\EmailSearch;
+use common\models\search\LeadSearch;
+use common\models\search\SmsSearch;
+use frontend\models\search\UserSiteActivitySearch;
+use sales\auth\Auth;
+use sales\entities\cases\CasesSearch;
+use sales\model\callLog\entity\callLog\search\CallLogSearch;
+use sales\model\clientChat\entity\search\ClientChatSearch;
+use sales\model\user\entity\monitor\search\UserMonitorSearch;
 use Yii;
 use common\models\UserCallStatus;
 use common\models\search\UserCallStatusSearch;
@@ -180,8 +189,83 @@ class UserController extends FController
      */
     public function actionInfo($id)
     {
+        $params = Yii::$app->request->queryParams;
+
+        $userTimezone = Auth::user()->userParams->up_timezone ?? 'UTC';
+        $currentDate = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->setTimezone(new \DateTimeZone($userTimezone));
+
+        $searchModel = new UserMonitorSearch();
+        $startDateTime = date('Y-m-d H:i', strtotime('-1 day'));
+        $endDateTime = date('Y-m-d H:i', strtotime('+10 hours'));
+        $data = $searchModel->searchStats(['UserMonitorSearch' => ['um_user_id' => $id]], $startDateTime);
+
+        $userSiteActivityModel = new UserSiteActivitySearch();
+        $userActivity = $userSiteActivityModel->searchReport(['UserSiteActivitySearch' => ['usa_user_id' => $id]]);
+
+        $callLogSearchModel = new CallLogSearch();
+        $callLogDataProvider = $callLogSearchModel->searchMyCalls($params, Employee::findIdentity($id));
+
+        $callsInfoGraph = $callLogSearchModel->searchCallsGraph($params, $id);
+
+        $emailSearchModel = new EmailSearch();
+        $params['EmailSearch']['e_created_user_id'] = $id;
+        $emailDataProvider = $emailSearchModel->search($params);
+        $emailDataProvider->pagination->pageSize = 10;
+
+        $emailsInfoGraph = $emailSearchModel->searchEmailGraph($params, $id);
+
+        $smsSearchModel = new SmsSearch();
+        $params['SmsSearch']['s_created_user_id'] = $id;
+        $smsDataProvider = $smsSearchModel->search($params);
+        $smsDataProvider->pagination->pageSize = 10;
+
+        $smsInfoGraph = $smsSearchModel->searchSmsGraph($params, $id);
+
+        $chatSearchModel = new ClientChatSearch();
+        $chatSearchModel->timeStart = ($currentDate->modify($chatSearchModel::DEFAULT_INTERVAL_BETWEEN_DAYS))->format('Y-m-d') . ' 00:00:00';
+        $chatSearchModel->timeEnd = $currentDate->format('Y-m-d') . ' 23:59:59';
+        $chatSearchModel->timeRange = $chatSearchModel->timeStart . ' - ' . $chatSearchModel->timeEnd;
+        $params['ClientChatSearch']['cch_owner_user_id'] = $id;
+        $chatDataProvider = $chatSearchModel->search($params);
+        $chatDataProvider->pagination->pageSize = 10;
+
+        $chatInfoGraph = $chatSearchModel->searchChatGraph($params, $id);
+
+        $leadsSearchModel = new LeadSearch();
+        $leadsSearchModel->datetime_start = ($currentDate->modify('-6 days'))->format('Y-m-d') . ' 00:00:00';
+        $leadsSearchModel->datetime_end= $currentDate->format('Y-m-d') . ' 23:59:59';
+        $leadsSearchModel->date_range = $leadsSearchModel->datetime_start . ' - ' . $leadsSearchModel->datetime_end;
+        $leadsInfoDataProvider = $leadsSearchModel->searchUserLeadsInfo($params, $id);
+
+        $casesSearchModel = new CasesSearch();
+        $casesSearchModel->datetime_start = ($currentDate->modify('-6 days'))->format('Y-m-d') . ' 00:00:00';
+        $casesSearchModel->datetime_end= $currentDate->format('Y-m-d') . ' 23:59:59';
+        $casesSearchModel->date_range = $casesSearchModel->datetime_start . ' - ' . $casesSearchModel->datetime_end;
+        $casesInfoDataProvider = $casesSearchModel->searchUserCasesInfo($params, $id);
+
+
         return $this->render('info', [
             'model' => $this->findUserModel($id),
+            'data' => $data,
+            'startDateTime' => $startDateTime,
+            'endDateTime' => $endDateTime,
+            'userActivity' => $userActivity,
+            'callLogDataProvider' => $callLogDataProvider,
+            'callLogSearchModel' => $callLogSearchModel,
+            'emailDataProvider' => $emailDataProvider,
+            'emailSearchModel' => $emailSearchModel,
+            'smsDataProvider' => $smsDataProvider,
+            'smsSearchModel' => $smsSearchModel,
+            'chatDataProvider' => $chatDataProvider,
+            'chatSearchModel' => $chatSearchModel,
+            'callsInfoGraph' => $callsInfoGraph,
+            'emailsInfoGraph' => $emailsInfoGraph,
+            'smsInfoGraph' => $smsInfoGraph,
+            'chatInfoGraph' => $chatInfoGraph,
+            'leadsInfoDataProvider' => $leadsInfoDataProvider,
+            'leadsSearchModel' => $leadsSearchModel,
+            'casesInfoDataProvider' => $casesInfoDataProvider,
+            'casesSearchModel' => $casesSearchModel
         ]);
     }
 }
