@@ -166,6 +166,9 @@ class ToolsController extends FController
             'frontendData' => $frontendData,
             'consoleData' => $consoleData,
             'webapiData' => $webapiData,
+            'fnFrontend' => $fnFrontend,
+            'fnConsole' => $fnConsole,
+            'fnWebapi' => $fnWebApi,
             'lines' => $lines,
         ]);
     }
