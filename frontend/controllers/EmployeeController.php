@@ -777,8 +777,13 @@ class EmployeeController extends FController
                                 $clientChatChanel->ccuc_created_user_id = Auth::id();
                                 $clientChatChanel->save();
 							}
-							$this->clientChatUserAccessService->disableUserAccessToAllChats($model->id);
-							$this->clientChatUserAccessService->setUserAccessToAllChatsByChannelIds($attr['client_chat_user_channel'], $model->id);
+
+                            if (!empty($modelProfile->up_rc_user_id)) {
+								$this->clientChatUserAccessService->disableUserAccessToAllChats($model->id);
+								$this->clientChatUserAccessService->setUserAccessToAllChatsByChannelIds($attr['client_chat_user_channel'], $model->id);
+							} else {
+								$this->clientChatUserAccessService->disableUserAccessToAllChats($model->id);
+							}
 						} else {
 							$this->clientChatUserAccessService->disableUserAccessToAllChats($model->id);
 						}
@@ -1000,9 +1005,12 @@ class EmployeeController extends FController
                         throw new \RuntimeException($userProfile->getErrorSummary(false)[0]);
                     }
 
-					$this->clientChatUserAccessService->setUserAccessToAllChats($userChannels);
+                    $userChannels = ArrayHelper::getColumn(ArrayHelper::toArray($userChannels), 'ccuc_channel_id');
+                    if ($userChannels) {
+						$this->clientChatUserAccessService->setUserAccessToAllChatsByChannelIds($userChannels, $user->id);
+					}
 
-                } else {
+				} else {
                     $errorMessage = $rocketChat::getErrorMessageFromResult($result);
                     throw new \RuntimeException('Error from RocketChat. ' . $errorMessage);
                 }
