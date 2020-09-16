@@ -1918,6 +1918,17 @@ class TestController extends FController
 			echo AppHelper::throwableFormatter($e);
 		}
 	}
+
+	public function actionErrors()
+    {
+        $message = 'Test message ' . date('Y-m-d H:i:s');
+
+        Yii::error('Error: ' . $message, 'error\TestController:actionErrors');
+        Yii::warning('Warning: ' . $message, 'warning\TestController:actionErrors');
+        Yii::info('Info: ' . $message, 'info\TestController:actionErrors');
+
+        echo 'Test Error, Warning, Info - ' . date('Y-m-d H:i:s');
+    }
 }
 
 
