@@ -33,6 +33,8 @@ use yii\helpers\Json;
  */
 class ClientChatVisitorData extends \yii\db\ActiveRecord
 {
+	private CONST REFERRER_MAX_LENGTH = 1000;
+
 	public function behaviors(): array
 	{
 		return [
@@ -65,7 +67,10 @@ class ClientChatVisitorData extends \yii\db\ActiveRecord
 
             ['cvd_longitude', 'number'],
 
-            ['cvd_referrer', 'string', 'max' => 255],
+			['cvd_referrer', 'filter', 'filter' => function ($value) {
+				return substr($value, 0, self::REFERRER_MAX_LENGTH);
+			}],
+			['cvd_referrer', 'string', 'max' => self::REFERRER_MAX_LENGTH],
 
             ['cvd_region', 'string', 'max' => 5],
 

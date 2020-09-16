@@ -2,8 +2,10 @@
 
 namespace console\controllers;
 
+use Faker\Factory;
 use modules\twilio\src\entities\conferenceLog\ConferenceLog;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
+use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use sales\model\conference\entity\aggregate\ConferenceLogAggregate;
 use sales\model\conference\entity\aggregate\Duration;
 use sales\model\conference\entity\aggregate\log\HtmlFormatter;
@@ -42,5 +44,18 @@ class TestController extends Controller
 	{
 		$chatRepository = \Yii::createObject(ClientChatRepository::class);
 		var_dump($chatRepository->isChatInTransfer($cchId));
+	}
+
+	public function actionTestChatVisitorDataRules()
+	{
+		$faker = Factory::create();
+		$data = new ClientChatVisitorData();
+		$data->cvd_referrer = $faker->realText(1005, 1);
+
+		var_dump(strlen($data->cvd_referrer));
+		var_dump($data->validate());
+		var_dump($data->errors);
+
+
 	}
 }
