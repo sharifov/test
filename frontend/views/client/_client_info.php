@@ -27,6 +27,7 @@ $user = Yii::$app->user->identity;
         <?= DetailView::widget([
             'model' => $model,
             'attributes' => [
+                'project:projectName',
                 [
                     'label' => 'Phones',
                     'value' => static function (Client $model) {

@@ -29,6 +29,10 @@ use yii\widgets\Pjax;
 			<td><?= \yii\helpers\Html::encode($client->middle_name) ?></td>
 		</tr>
 	<?php endif; ?>
+    <tr>
+        <td colspan="2" style="background-color: #eef3f9">Project</td>
+        <td><?= $client->cl_project_id ? $client->project->name : '' ?></td>
+    </tr>
 </table>
 
 <?php Pjax::end() ?>

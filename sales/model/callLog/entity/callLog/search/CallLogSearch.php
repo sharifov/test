@@ -268,7 +268,7 @@ class CallLogSearch extends CallLog
             'cl_category_id',
             'cll_lead_id as lead_id',
             'clc_case_id as case_id',
-            'cl_project_id',
+            'call_log.cl_project_id',
             'cl_department_id',
             'cl_category_id',
             'cl_client_id',
@@ -322,7 +322,7 @@ class CallLogSearch extends CallLog
             'cl_category_id',
             'cll_lead_id',
             'clc_case_id',
-            'cl_project_id',
+            'call_log.cl_project_id',
             'cl_department_id',
             'cl_client_id',
         ]);

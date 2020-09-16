@@ -5,6 +5,7 @@ namespace common\models\search;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Employee;
+use common\models\Project;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Client;
@@ -31,6 +32,8 @@ class ClientSearch extends Client
             ['uuid', 'string', 'max' => 36],
             [['company_name'], 'string', 'max' => 150],
             [['is_company', 'is_public', 'disabled'], 'boolean'],
+
+            ['cl_project_id', 'integer'],
         ];
     }
 
@@ -40,7 +43,7 @@ class ClientSearch extends Client
      */
     public function search($params): ActiveDataProvider
     {
-        $query = Client::find()->with('leads.employee.ugsGroups');
+        $query = Client::find()->with(['leads.employee.ugsGroups'])->joinWith(['project']);
 
         // add conditions that should always apply here
 
@@ -51,6 +54,11 @@ class ClientSearch extends Client
                 'pageSize' => 30,
             ],
         ]);
+
+        $dataProvider->sort->attributes['cl_project_id'] = [
+            'asc' => [Project::tableName() . '.name' => SORT_ASC],
+            'desc' => [Project::tableName() . '.name' => SORT_DESC],
+        ];
 
         $this->load($params);
 
@@ -99,6 +107,7 @@ class ClientSearch extends Client
             'is_company' => $this->is_company,
             'is_public' => $this->is_public,
             'disabled' => $this->disabled,
+            'cl_project_id' => $this->cl_project_id,
         ]);
 
         return $dataProvider;

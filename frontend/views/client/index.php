@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Client;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -36,6 +37,11 @@ $this->params['breadcrumbs'][] = $this->title;
             'company_name',
             'is_company:boolean',
             'is_public:boolean',
+            [
+                'class' => \common\components\grid\project\ProjectColumn::class,
+                'attribute' => 'cl_project_id',
+                'relation' => 'project',
+            ],
             'disabled:boolean',
             [
                 'header' => 'Phones',

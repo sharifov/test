@@ -40,6 +40,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'description',
             'is_company:boolean',
             'is_public:boolean',
+            'project:projectName',
             'disabled:boolean',
             'rating',
             [

@@ -99,6 +99,7 @@ use sales\auth\Auth;
                         <?= \yii\widgets\DetailView::widget([
                             'model' => $caseModel->client,
                             'attributes' => [
+                                'project:projectName',
                                 [
                                     'label' => 'Phones',
                                     'value' => function(\common\models\Client $model) {
