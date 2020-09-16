@@ -3,6 +3,7 @@
 namespace console\controllers;
 
 use modules\twilio\src\entities\conferenceLog\ConferenceLog;
+use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\conference\entity\aggregate\ConferenceLogAggregate;
 use sales\model\conference\entity\aggregate\Duration;
 use sales\model\conference\entity\aggregate\log\HtmlFormatter;
@@ -36,4 +37,10 @@ class TestController extends Controller
 
 
     }
+
+    public function actionTestIsChatTransfer(int $cchId)
+	{
+		$chatRepository = \Yii::createObject(ClientChatRepository::class);
+		var_dump($chatRepository->isChatInTransfer($cchId));
+	}
 }

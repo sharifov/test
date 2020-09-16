@@ -142,7 +142,7 @@ class ClientChatUserAccess extends \yii\db\ActiveRecord
 	 */
 	public static function pendingRequests(int $userId): array
 	{
-		return self::find()->byUserId($userId)->pending()->orderBy(['ccua_created_dt' => SORT_DESC])->all();
+		return self::find()->byUserId($userId)->pending()->innerJoin(ClientChat::tableName(), 'ccua_cch_id = cch_id')->orderBy(['cch_status_id' => SORT_DESC, 'ccua_created_dt' => SORT_ASC])->all();
 	}
 
 	public static function statusExist(int $status): bool

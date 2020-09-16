@@ -182,8 +182,7 @@
     overflow-y: auto;
     padding: 10px 10px 0 10px;
     max-height: 350px;
-    display: flex;
-    flex-direction: column-reverse;
+    display: inline-block;
 }
 ._cc-box-item {
     width: 100%;

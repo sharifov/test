@@ -28,7 +28,7 @@ class ClientChatAccessMessage
 		];
 	}
 
-	public static function pending(int $cchId, int $userId, int $statusId, int $ccuaId): array
+	public static function pending(int $cchId, int $userId, int $statusId, int $ccuaId, bool $isChatInTransfer): array
 	{
 		return [
 			'command' => self::COMMAND_PENDING,
@@ -36,6 +36,7 @@ class ClientChatAccessMessage
 			'user_id' => $userId,
 			'cch_id' => $cchId,
 			'pjaxUrl' => Url::to('/client-chat/pjax-update-chat-widget'),
+			'isChatInTransfer' => $isChatInTransfer,
 			'html' => self::refresh($userId, $ccuaId)
 		];
 	}
@@ -52,7 +53,7 @@ class ClientChatAccessMessage
 		];
 	}
 
-	public static function reset(int $userId)
+	public static function reset(int $userId): array
 	{
 		return [
 			'command' => self::COMMAND_RESET,

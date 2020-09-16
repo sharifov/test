@@ -98,7 +98,11 @@ function refreshClientChatWidget(obj) {
             break;
         case 'pending':
             increaseTotalCount();
-            $('#_client_chat_access_widget ._cc-box-body').prepend(data.html);
+            if ('isChatInTransfer' in data && data.isChatInTransfer) {
+                $('#_client_chat_access_widget ._cc-box-body').prepend(data.html);
+            } else {
+                $('#_client_chat_access_widget ._cc-box-body').append(data.html);
+            }
             window.enableTimer();
             openWidget();
             break;

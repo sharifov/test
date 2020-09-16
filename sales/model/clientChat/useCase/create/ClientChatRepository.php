@@ -108,6 +108,12 @@ class ClientChatRepository
 		$clientChat->cch_owner_user_id = $userId;
 	}
 
+	public function isChatInTransfer(int $cchId): bool
+	{
+		$chat = ClientChat::find()->select(['cch_status_id'])->byId($cchId)->one();
+		return ($chat ? $chat->isTransfer() : false);
+	}
+
 	/**
 	 * @param int $id
 	 * @return ClientChat[]

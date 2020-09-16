@@ -70,7 +70,8 @@ class ClientChatUserAccessRepository extends Repository
 		if ($statusId === ClientChatUserAccess::STATUS_ACCEPT) {
 			$data = ClientChatAccessMessage::accept($cchId, $userId, $statusId);
 		} else if ($statusId === ClientChatUserAccess::STATUS_PENDING) {
-			$data = ClientChatAccessMessage::pending($cchId, $userId, $statusId, (int)$ccuaId);
+			$isChatInTransfer = $this->clientChatRepository->isChatInTransfer($cchId);
+			$data = ClientChatAccessMessage::pending($cchId, $userId, $statusId, (int)$ccuaId, $isChatInTransfer);
 		} else if ($statusId === ClientChatUserAccess::STATUS_SKIP) {
 			$data = ClientChatAccessMessage::skip($cchId, $userId, $statusId);
 		}
