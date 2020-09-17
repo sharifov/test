@@ -151,7 +151,7 @@ class Language extends ActiveRecord
     public static function getLanguages($active = true, $group = null): array
     {
         if ($active) {
-            $query = self::find()->where(['status' => static::STATUS_ACTIVE]);
+            $query = self::find()->where(['status' => static::STATUS_ACTIVE])->orderBy(['language_id' => SORT_ASC]);
         } else {
             $query =  self::find();
         }

@@ -121,6 +121,7 @@ use sales\helpers\payment\CreditCardHelper;
 use sales\helpers\query\QueryHelper;
 use sales\helpers\user\UserFinder;
 use sales\helpers\UserCallIdentity;
+use sales\model\call\entity\callCommand\CallCommand;
 use sales\model\call\useCase\UpdateCallPrice;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\conference\entity\aggregate\ConferenceLogAggregate;

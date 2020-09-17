@@ -201,3 +201,9 @@ a.cw-call-contact-info {
     transition: .2s;
     z-index: 9999;
 }
+.hidden {
+    display: none;
+}
+.has-error {
+    border-color: #dc3545 !important;
+}

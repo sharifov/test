@@ -284,7 +284,7 @@ $isSuperAdmin = $user->isSuperAdmin();
         ];
 
         $menuNewData = [
-            'label' => 'New Data',
+            'label' => 'Product Data',
             'url' => 'javascript:',
             'icon' => 'list',
             'items' => [
@@ -338,7 +338,20 @@ $isSuperAdmin = $user->isSuperAdmin();
             'url' => 'javascript:',
             'icon' => 'list',
             'items' => [
+
                     $menuNewData,
+                [
+                    'label' => 'Calls & Phone',
+                    'url' => 'javascript:',
+                    'icon' => 'phone',
+                    'items' => [
+                        ['label' => 'Phone List', 'url' => ['/phone-list/index'], 'icon' => 'phone'],
+                        ['label' => 'Phone Blacklist', 'url' => ['/phone-blacklist/index']],
+                        ['label' => 'Call Commands', 'url' => ['/call-command/index']],
+                        ['label' => 'Phone Line Command', 'url' => ['/phone-line-command-crud/index']],
+                        ['label' => 'Call Gather Switch', 'url' => ['/call-gather-switch-crud/index']],
+                    ]
+                ],
 
                 [
                     'label' => 'Projects',
@@ -376,8 +389,7 @@ $isSuperAdmin = $user->isSuperAdmin();
 
 
 
-                ['label' => 'Phone List', 'url' => ['/phone-list/index'], 'icon' => 'phone'],
-                ['label' => 'Phone Blacklist', 'url' => ['/phone-blacklist/index'], 'icon' => 'phone'],
+
                 ['label' => 'Email List', 'url' => ['/email-list/index'], 'icon' => 'envelope-o'],
 
                 ['label' => 'Airlines', 'url' => ['/settings/airlines'], 'icon' => 'plane'],
