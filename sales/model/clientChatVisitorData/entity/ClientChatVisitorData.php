@@ -83,6 +83,7 @@ class ClientChatVisitorData extends \yii\db\ActiveRecord
             ['cvd_url', 'string', 'max' => 255],
 
 			['cvd_visitor_rc_id', 'string', 'max' => 50],
+			['cvd_visitor_rc_id', 'required'],
 			['cvd_visitor_rc_id', 'unique'], // ccr_visitor_id in ClientChatRequest
 		];
     }
