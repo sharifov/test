@@ -138,4 +138,9 @@ class Scopes extends \yii\db\ActiveQuery
 		return $this->andWhere(['cch_id' => $id]);
 	}
 
+	public function withoutOwnerOrInTransfer(): Scopes
+	{
+		return $this->byOwner(null)->orWhere(['cch_status_id' => ClientChat::STATUS_TRANSFER]);
+	}
+
 }

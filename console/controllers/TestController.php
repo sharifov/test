@@ -13,6 +13,7 @@ use sales\model\conference\entity\conferenceEventLog\ConferenceEventLog;
 use sales\model\conference\entity\conferenceEventLog\EventFactory;
 use sales\model\conference\entity\conferenceEventLog\events\ParticipantJoin;
 use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackForm;
+use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
 use yii\console\Controller;
 use yii\helpers\VarDumper;
 
@@ -55,7 +56,12 @@ class TestController extends Controller
 		var_dump(strlen($data->cvd_referrer));
 		var_dump($data->validate());
 		var_dump($data->errors);
+	}
 
-
+	public function actionTestUserAccessToAllChats(int $userId)
+	{
+		$channelIds = [1,2,3,4,5,6,7,8];
+		$service = \Yii::createObject(ClientChatUserAccessService::class);
+		$service->setUserAccessToAllChatsByChannelIds($channelIds, $userId);
 	}
 }
