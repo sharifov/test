@@ -23,6 +23,10 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Create Client', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
+    <?php
+    $filterProjects = \common\models\Project::getList();
+    $filterProjects['-1'] ='Without project';
+    ?>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
@@ -42,6 +46,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => \common\components\grid\project\ProjectColumn::class,
                 'attribute' => 'cl_project_id',
                 'relation' => 'project',
+                'filter' => $filterProjects,
             ],
             'disabled:boolean',
             [

@@ -33,7 +33,9 @@ class ClientSearch extends Client
             [['company_name'], 'string', 'max' => 150],
             [['is_company', 'is_public', 'disabled'], 'boolean'],
 
+            ['cl_project_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
             ['cl_project_id', 'integer'],
+
             ['parent_id', 'integer'],
         ];
     }
@@ -108,9 +110,16 @@ class ClientSearch extends Client
             'is_company' => $this->is_company,
             'is_public' => $this->is_public,
             'disabled' => $this->disabled,
-            'cl_project_id' => $this->cl_project_id,
             'parent_id' => $this->parent_id,
         ]);
+
+        if ($this->cl_project_id === -1) {
+            $query->andWhere(['IS', 'cl_project_id', null]);
+        } else {
+            $query->andFilterWhere([
+                'cl_project_id' => $this->cl_project_id,
+            ]);
+        }
 
         return $dataProvider;
     }

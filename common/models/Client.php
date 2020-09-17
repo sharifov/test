@@ -52,6 +52,8 @@ use yii\db\ActiveQuery;
  */
 class Client extends ActiveRecord
 {
+    public const SCENARIO_MANUALLY = 'manually';
+
     use EventTrait;
 
     public $full_name;
@@ -145,6 +147,7 @@ class Client extends ActiveRecord
             ['cl_type_create', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
             ['cl_type_create', 'in', 'range' => array_keys(self::TYPE_CREATE_LIST)],
 
+            ['cl_project_id', 'required', 'on' => [self::SCENARIO_MANUALLY]],
             ['cl_project_id', 'integer'],
             ['cl_project_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
             ['cl_project_id', 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['cl_project_id' => 'id']],

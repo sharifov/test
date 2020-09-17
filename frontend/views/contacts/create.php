@@ -3,6 +3,7 @@
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use frontend\models\form\ContactForm;
+use sales\access\EmployeeProjectAccess;
 use unclead\multipleinput\MultipleInput;
 use unclead\multipleinput\MultipleInputColumn;
 use yii\helpers\Html;
@@ -28,6 +29,8 @@ $this->registerCss('
     }   
 '
 );
+
+$projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
 
 ?>
 
@@ -61,6 +64,7 @@ $this->registerCss('
                 <?= $form->field($contactForm, 'description')->textarea(['rows' => 4, 'style' => 'width: 320px', 'class' => 'form-control']) ?>
                 <?= $form->field($contactForm, 'is_public')->checkbox() ?>
                 <?= $form->field($contactForm, 'disabled')->checkbox() ?>
+                <?= $form->field($contactForm, 'cl_project_id')->dropDownList($projectList, ['prompt' => '-'])->label('Project') ?>
 
                 <?php echo Html::checkbox('ucl_favorite', 0,
                     ['id' => 'ucl_favorite', ]) ?> Favorite

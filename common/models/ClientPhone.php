@@ -75,6 +75,8 @@ class ClientPhone extends \yii\db\ActiveRecord
     // old phone value. need for afterSave() method
     private $old_phone = '';
 
+    public $enablelAferSave = true; //todo remove
+
     /**
      * {@inheritdoc}
      */
@@ -214,28 +216,33 @@ class ClientPhone extends \yii\db\ActiveRecord
 
     public function afterSave($insert, $changedAttributes)
     {
-        if($this->id > 0 && $this->client_id > 0 ) {
-            $isRenewPhoneNumber = ( $this->old_phone != '' && $this->old_phone !== $this->phone );
-            /*\Yii::info(VarDumper::dumpAsString([
-                'client_id' => $this->client_id,
-                'id' => $this->id,
-                'validate_dt' => $this->validate_dt,
-                'is_sms' => $this->is_sms,
-                'old_phone' => $this->old_phone,
-                'phone' => $this->phone,
-                'isRenewPhoneNumber' => $isRenewPhoneNumber,
-            ]), 'info\model:ClientPhone:afterSave');*/
+        if ($this->enablelAferSave) {
 
-            // check if phone rewrite
-            if(NULL === $this->validate_dt || $isRenewPhoneNumber) {
-                /** @var Queue $queue */
-                $queue = \Yii::$app->queue_phone_check;
-                $job = new CheckPhoneNumberJob();
-                $job->client_id = $this->client_id;
-                $job->client_phone_id = $this->id;
-                $queue->push($job);
+            if ($this->id > 0 && $this->client_id > 0) {
+                $isRenewPhoneNumber = ($this->old_phone != '' && $this->old_phone !== $this->phone);
+                /*\Yii::info(VarDumper::dumpAsString([
+                    'client_id' => $this->client_id,
+                    'id' => $this->id,
+                    'validate_dt' => $this->validate_dt,
+                    'is_sms' => $this->is_sms,
+                    'old_phone' => $this->old_phone,
+                    'phone' => $this->phone,
+                    'isRenewPhoneNumber' => $isRenewPhoneNumber,
+                ]), 'info\model:ClientPhone:afterSave');*/
+
+                // check if phone rewrite
+                if (NULL === $this->validate_dt || $isRenewPhoneNumber) {
+                    /** @var Queue $queue */
+                    $queue = \Yii::$app->queue_phone_check;
+                    $job = new CheckPhoneNumberJob();
+                    $job->client_id = $this->client_id;
+                    $job->client_phone_id = $this->id;
+                    $queue->push($job);
+                }
             }
+
         }
+
         parent::afterSave($insert, $changedAttributes);
     }
 

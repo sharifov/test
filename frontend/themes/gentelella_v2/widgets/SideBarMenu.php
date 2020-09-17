@@ -315,6 +315,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'User Contact Lists', 'url' => ['/user-contact-list/index'], 'icon' => 'list'],
                 ['label' => 'Client Project', 'url' => ['/client-project/index'], 'icon' => 'list'],
                 ['label' => 'Unsubscribed Clients', 'url' => ['/email-unsubscribe/index'], 'icon' => 'bell-slash'],
+                ['label' => 'Stats', 'url' => ['/client/stats'], 'icon' => 'users'],
             ]
         ];
 

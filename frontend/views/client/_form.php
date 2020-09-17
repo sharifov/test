@@ -2,6 +2,7 @@
 
 use common\models\Client;
 use common\models\UserContactList;
+use sales\access\EmployeeProjectAccess;
 use sales\auth\Auth;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
@@ -9,6 +10,9 @@ use yii\widgets\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $model common\models\Client */
 /* @var $form yii\widgets\ActiveForm */
+
+$projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
+
 ?>
 
 <div class="client-form">
@@ -30,8 +34,8 @@ use yii\widgets\ActiveForm;
     <?= $form->field($model, 'disabled')->checkbox() ?>
     <?= $form->field($model, 'rating')->textInput(['type' => 'number', 'step' => 1]) ?>
     <?= $form->field($model, 'parent_id')->textInput() ?>
-
-    <?php echo $form->field($model, 'cl_type_id')->dropDownList($model::TYPE_LIST) ?>
+    <?= $form->field($model, 'cl_project_id')->dropDownList($projectList, ['prompt' => '-']) ?>
+    <?= $form->field($model, 'cl_type_id')->dropDownList($model::TYPE_LIST) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
