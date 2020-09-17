@@ -1928,6 +1928,16 @@ class TestController extends FController
         Yii::warning('Warning: ' . $message, 'warning\TestController:actionErrors');
         Yii::info('Info: ' . $message, 'info\TestController:actionErrors');
 
+
+        try {
+            $a = 3 / 0;
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableLog($throwable, true), 'error\TestController:actionErrors:Throwable');
+        }
+
+
+
+
         echo 'Test Error, Warning, Info - ' . date('Y-m-d H:i:s');
     }
 }

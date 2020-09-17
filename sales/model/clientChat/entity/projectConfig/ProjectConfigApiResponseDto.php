@@ -1,6 +1,7 @@
 <?php
 namespace sales\model\clientChat\entity\projectConfig;
 
+use sales\model\clientChat\entity\channelTranslate\ClientChatChannelTranslate;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use yii\helpers\Json;
 
@@ -65,7 +66,12 @@ class ProjectConfigApiResponseDto
      */
     public array $channels;
 
-	public function __construct(ClientChatProjectConfig $projectConfig)
+    /**
+     * ProjectConfigApiResponseDto constructor.
+     * @param ClientChatProjectConfig $projectConfig
+     * @param string|null $languageId
+     */
+	public function __construct(ClientChatProjectConfig $projectConfig, ?string $languageId = null)
 	{
 		$params = Json::decode($projectConfig->ccpc_params_json);
 
@@ -77,6 +83,6 @@ class ProjectConfigApiResponseDto
 		$this->theme = Json::decode($projectConfig->ccpc_theme_json) ?? '{}';
 		$this->registration = Json::decode($projectConfig->ccpc_registration_json) ?? '{}';
 		$this->settings = Json::decode($projectConfig->ccpc_settings_json) ?? '{}';
-        $this->channels = ClientChatChannel::getSettingsList($projectConfig->ccpc_project_id);
+        $this->channels = ClientChatChannel::getSettingsList($projectConfig->ccpc_project_id, $languageId);
 	}
 }

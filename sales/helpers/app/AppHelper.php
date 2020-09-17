@@ -27,6 +27,25 @@ class AppHelper
 
     /**
      * @param Throwable $throwable
+     * @param bool $trace
+     * @return array
+     */
+    public static function throwableLog(\Throwable $throwable, bool $trace = false): array
+    {
+        $data['message'] = $throwable->getMessage();
+        $data['code'] = $throwable->getCode();
+        $data['file'] = $throwable->getFile();
+        $data['line'] = $throwable->getLine();
+
+        if ($trace) {
+            $data['trace'] = $throwable->getTrace();
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param Throwable $throwable
      * @param string $category
      * @param bool $formatted
      */

@@ -581,12 +581,10 @@ class ClientChatRequestController extends ApiBaseController
             $languageId = substr($languageId, 0, 5);
         }
 
-        //echo VarDumper::dump(ClientChatTranslate::getTranslates($languageId)); exit;
-
 		$projectConfig = ClientChatProjectConfig::findOne(['ccpc_project_id' => $projectId]);
 
 		if ($projectConfig) {
-            $data = ArrayHelper::toArray(new ProjectConfigApiResponseDto($projectConfig));
+            $data = ArrayHelper::toArray(new ProjectConfigApiResponseDto($projectConfig, $languageId));
             $data['language_id'] = $languageId;
             $data['translations'] = ClientChatTranslate::getTranslates($languageId);
 

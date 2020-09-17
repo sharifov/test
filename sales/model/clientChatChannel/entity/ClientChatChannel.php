@@ -6,6 +6,7 @@ use common\models\Department;
 use common\models\Employee;
 use common\models\Project;
 use common\models\UserGroup;
+use sales\model\clientChat\entity\channelTranslate\ClientChatChannelTranslate;
 use sales\model\clientChat\entity\ClientChat;
 use Yii;
 use yii\behaviors\BlameableBehavior;
@@ -198,9 +199,10 @@ class ClientChatChannel extends \yii\db\ActiveRecord
 
     /**
      * @param int $projectId
+     * @param string|null $languageId
      * @return array
      */
-    public static function getSettingsList(int $projectId): array
+    public static function getSettingsList(int $projectId, ?string $languageId = null): array
     {
         $dataList = [];
         $channelList = self::find()
@@ -216,9 +218,14 @@ class ClientChatChannel extends \yii\db\ActiveRecord
                     $settings = [];
                 }
 
+                $translateName = null;
+                if ($languageId) {
+                    $translateName = ClientChatChannelTranslate::find()->select(['ct_name'])->where(['ct_channel_id' => $channelItem->ccc_id, 'ct_language_id' => $languageId])->limit(1)->scalar();
+                }
+
                 $dataList[] = [
                     'id' => $channelItem->ccc_id,
-                    'name' => $channelItem->ccc_frontend_name,
+                    'name' => $translateName ?: $channelItem->ccc_frontend_name,
                     'priority' => $channelItem->ccc_priority,
                     'default' => (boolean) $channelItem->ccc_default,
                     'enabled' => (boolean) $channelItem->ccc_frontend_enabled,
