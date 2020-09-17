@@ -90,6 +90,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'options' => ['style' => 'width:200px']
                 //'placeholder' => 'Select User'
             ],
+			[
+				'attribute' => 'cch_source_type_id',
+				'options' => ['style' => 'width:100px'],
+				'filter' => ClientChat::getSourceTypeList(),
+				'value' => static function (ClientChat $model) {
+					return $model->getSourceTypeName();
+				}
+			],
             [
                 'attribute' => 'case_id',
                 'label' => 'Case',

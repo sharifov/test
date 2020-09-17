@@ -79,6 +79,7 @@ class ClientChatSearch extends ClientChat
             ['cch_rid', 'safe'],
 
             ['cch_status_id', 'integer'],
+            ['cch_source_type_id', 'integer'],
 
             ['cch_title', 'safe'],
 
@@ -133,6 +134,7 @@ class ClientChatSearch extends ClientChat
             'cch_client_id' => $this->cch_client_id,
             'cch_owner_user_id' => $this->cch_owner_user_id,
             'cch_status_id' => $this->cch_status_id,
+            'cch_source_type_id' => $this->cch_source_type_id,
             'cch_ua' => $this->cch_ua,
             //'date_format(cch_created_dt, "%Y-%m-%d")' => $this->cch_created_dt,
             'date_format(cch_updated_dt, "%Y-%m-%d")' => $this->cch_updated_dt,

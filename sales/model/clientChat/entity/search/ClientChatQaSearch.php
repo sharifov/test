@@ -56,7 +56,7 @@ class ClientChatQaSearch extends ClientChat
                     'cch_dep_id', 'cch_channel_id', 'cch_client_id',
                     'cch_status_id', 'cch_ua', 'cch_created_user_id',
                     'cch_updated_user_id', 'cch_client_online', 'messageBy',
-                    'cch_owner_user_id', 'caseId', 'leadId',
+                    'cch_owner_user_id', 'caseId', 'leadId', 'cch_source_type_id'
                 ],
                 'integer',
             ],
@@ -118,6 +118,7 @@ class ClientChatQaSearch extends ClientChat
             'cch_created_user_id' => $this->cch_created_user_id,
             'cch_updated_user_id' => $this->cch_updated_user_id,
             'cch_client_online' => $this->cch_client_online,
+            'cch_source_type_id' => $this->cch_source_type_id,
         ]);
 
         $query->andFilterWhere(['like', 'cch_rid', $this->cch_rid])

@@ -103,6 +103,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => \common\components\grid\UserColumn::class,
                 'relation' => 'cchOwnerUser',
             ],
+			[
+				'attribute' => 'cch_source_type_id',
+				'options' => ['style' => 'width:100px'],
+                'filter' => ClientChat::getSourceTypeList(),
+                'value' => static function (ClientChat $model) {
+                    return $model->getSourceTypeName();
+                }
+			],
             [
                 'attribute' => 'caseId',
                 'label' => 'Case',
