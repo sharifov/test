@@ -63,7 +63,7 @@ class ClientChatVisitorDataCrudController extends FController
     {
         $model = new ClientChatVisitorData();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post()) && $model->validate() && $model->save()) {
             return $this->redirect(['view', 'id' => $model->cvd_id]);
         }
 
