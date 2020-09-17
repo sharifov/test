@@ -44,6 +44,22 @@ $this->params['breadcrumbs'][] = $this->title;
             'ccc_project_id:projectName',
             'ccc_name',
             'ccc_frontend_name',
+            [
+                'label' => 'Translations',
+                'value' => static function (ClientChatChannel $model) {
+                    $translates = $model->clientChatChannelTranslates;
+                    $val = null;
+                    if ($translates) {
+                        $data = \yii\helpers\ArrayHelper::map($translates, 'ct_language_id', 'ct_language_id');
+                        if ($data) {
+                            $val = '<label class="label label-default">' . implode('</label> <span class="label label-default">', $data) . '</label>';
+                        }
+                    }
+
+                    return $val ?: '-';
+                },
+                'format' => 'raw'
+            ],
             'ccc_dep_id:departmentName',
             [
                 'attribute' => 'ccc_ug_id',
@@ -80,7 +96,37 @@ $this->params['breadcrumbs'][] = $this->title;
 				'placeholder' => 'Select User'
 			],
 
-            ['class' => 'yii\grid\ActionColumn'],
+            ['class' => 'yii\grid\ActionColumn',
+                'template' => '{translate} {view} {update} {delete} ',
+                'contentOptions'=>['style'=>'width: 90px;'],
+                'visibleButtons' => [
+                    /*'view' => function ($model, $key, $index) {
+                        return User::hasPermission('viewOrder');
+                    },*/
+//                    'update' => static function ($model, $key, $index) use ($user) {
+//                        return $user->isAdmin();
+//                    },
+//
+//                    'delete' => static function ($model, $key, $index) use ($user) {
+//                        return $user->isAdmin();
+//                    },
+
+//                    'translate' => static function (ClientChatChannel $model, $key, $index) use ($user) {
+//                        return $user->isAdmin() && $model->isIn() && ($model->isStatusIvr() || $model->isStatusQueue() || $model->isStatusRinging() || $model->isStatusInProgress());
+//                    },
+
+
+                ],
+                'buttons' => [
+                    'translate' => static function ($url, ClientChatChannel $model) {
+                        return Html::a('<i class="fa fa-language text-info"></i>', ['client-chat-channel-translate/index', 'ClientChatChannelTranslateSearch[ct_channel_id]' => $model->ccc_id], [
+                            'title' => 'Translate',
+                            'data-pjax' => 0,
+                            'target' => '_blank',
+                        ]);
+                    },
+                ],
+            ],
         ],
     ]); ?>
 

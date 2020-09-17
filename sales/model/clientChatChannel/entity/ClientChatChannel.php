@@ -39,6 +39,7 @@ use yii\helpers\ArrayHelper;
  * @property Project $cccProject
  * @property UserGroup $cccUg
  * @property Employee $cccUpdatedUser
+ * @property ClientChatChannelTranslate[] $clientChatChannelTranslates
  * @property ClientChat[] $cch
  */
 class ClientChatChannel extends \yii\db\ActiveRecord
@@ -130,6 +131,16 @@ class ClientChatChannel extends \yii\db\ActiveRecord
     public function getCccUpdatedUser(): ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'ccc_updated_user_id']);
+    }
+
+    /**
+     * Gets query for [[ClientChatChannelTranslates]].
+     *
+     * @return ActiveQuery
+     */
+    public function getClientChatChannelTranslates(): ActiveQuery
+    {
+        return $this->hasMany(ClientChatChannelTranslate::class, ['ct_channel_id' => 'ccc_id']);
     }
 
     public function getCch(): ActiveQuery
