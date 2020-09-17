@@ -1,5 +1,6 @@
 <?php
 
+use sales\model\clientChat\entity\ClientChat;
 use yii\bootstrap4\Html;
 use yii\widgets\ActiveForm;
 
@@ -38,13 +39,17 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'cch_note')->textInput(['maxlength' => true]) ?>
 
-        <?= $form->field($model, 'cch_status_id')->dropDownList(\sales\model\clientChat\entity\ClientChat::getStatusList(), ['prompt' => '---']) ?>
+        <?= $form->field($model, 'cch_status_id')->dropDownList(ClientChat::getStatusList(), ['prompt' => '---']) ?>
 
         <?= $form->field($model, 'cch_ip')->textInput(['maxlength' => true]) ?>
 
         <?= $form->field($model, 'cch_ua')->textInput() ?>
 
         <?= $form->field($model, 'cch_language_id')->textInput(['maxlength' => true]) ?>
+
+        <?= $form->field($model, 'cch_source_type_id')->dropDownList(ClientChat::getSourceTypeList(), ['prompt' => '---']) ?>
+
+        <?= $form->field($model, 'cch_missed')->checkbox() ?>
 
         <?php // $form->field($model, 'cch_created_dt')->textInput() ?>
 

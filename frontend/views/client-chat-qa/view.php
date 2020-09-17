@@ -83,10 +83,18 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'attribute' => 'cch_language_id',
                         'value' => static function (ClientChat $model) {
-                            return $model->language ? $model->language->name : '<span class="not-set">(not set)</span>';
+                            return $model->language ? $model->language->name : null;
                         },
                         'format' => 'raw',
                     ],
+					[
+						'attribute' => 'cch_source_type_id',
+						'value' => static function (ClientChat $model) {
+							return $model->getSourceTypeName();
+						},
+						'format' => 'raw',
+					],
+					'cch_missed:booleanByLabel',
                     'cch_created_dt:byUserDateTime',
                     'cch_updated_dt:byUserDateTime',
                     'cch_created_user_id:username',

@@ -45,6 +45,8 @@ use yii\db\ActiveRecord;
  * @property int|null $cch_created_user_id
  * @property int|null $cch_updated_user_id
  * @property int|null $cch_client_online
+ * @property int|null $cch_source_type_id
+ * @property int|null $cch_missed
  *
  * @property ClientChatRequest $cchCcr
  * @property Client $cchClient
@@ -84,6 +86,14 @@ class ClientChat extends \yii\db\ActiveRecord
 	public const TAB_LIST_NAME = [
 		self::TAB_ACTIVE => 'Active',
 		self::TAB_ARCHIVE => 'Closed'
+	];
+
+	public const SOURCE_TYPE_CLIENT = 1;
+	public const SOURCE_TYPE_AGENT = 2;
+
+	private const SOURCE_TYPE_LIST = [
+		self::SOURCE_TYPE_CLIENT => 'Client',
+		self::SOURCE_TYPE_AGENT => 'Agent'
 	];
 
 	public function behaviors(): array
@@ -139,6 +149,8 @@ class ClientChat extends \yii\db\ActiveRecord
             ['cch_rid', 'string', 'max' => 150],
 
             ['cch_status_id', 'integer'],
+            ['cch_source_type_id', 'integer'],
+            ['cch_missed', 'integer'],
 
             ['cch_title', 'string', 'max' => 50],
 
@@ -222,9 +234,19 @@ class ClientChat extends \yii\db\ActiveRecord
 		return self::STATUS_LIST;
 	}
 
+	public static function getSourceTypeList(): array
+	{
+		return self::SOURCE_TYPE_LIST;
+	}
+
 	public function getStatusName(): ?string
 	{
 		return $this->cch_status_id ? self::getStatusList()[$this->cch_status_id] : null;
+	}
+
+	public function getSourceTypeName(): ?string
+	{
+		return $this->cch_source_type_id ? self::getSourceTypeList()[$this->cch_source_type_id] : null;
 	}
 
 	public function generated(): void
@@ -303,6 +325,8 @@ class ClientChat extends \yii\db\ActiveRecord
             'cch_created_user_id' => 'Created User',
             'cch_updated_user_id' => 'Updated User',
             'cch_client_online' => 'Client Online',
+            'cch_source_type_id' => 'Source Type',
+            'cch_missed' => 'Missed',
         ];
     }
 

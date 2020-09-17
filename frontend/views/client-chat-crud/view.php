@@ -42,7 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 //'cch_channel_id',
                 [
                     'attribute' => 'cch_channel_id',
-                    'value' => static function (\sales\model\clientChat\entity\ClientChat $model) {
+                    'value' => static function (ClientChat $model) {
                         return $model->cch_channel_id ? Html::a(Html::encode($model->cchChannel->ccc_name), ['client-chat-channel-crud/view', 'id' => $model->cch_channel_id], ['target' => '_blank', 'data-pjax' => 0]) : '-';
                     },
                     'format' => 'raw',
@@ -80,7 +80,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 [
                     'attribute' => 'cch_status_id',
-                    'value' => static function (\sales\model\clientChat\entity\ClientChat $model) {
+                    'value' => static function (ClientChat $model) {
                         return Html::tag('span', $model->getStatusName(), ['class' => 'badge badge-'.$model->getStatusClass()]);
                     },
                     'format' => 'raw',
@@ -88,6 +88,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'cch_ip',
                 'cch_ua',
                 'cch_language_id',
+				[
+					'attribute' => 'cch_source_type_id',
+					'value' => static function (ClientChat $model) {
+						return $model->getSourceTypeName();
+					},
+					'format' => 'raw',
+				],
+                'cch_missed:booleanByLabel',
                 'cch_created_dt:byUserDateTime',
                 'cch_updated_dt:byUserDateTime',
                 'cch_created_user_id:username',

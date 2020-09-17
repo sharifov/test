@@ -37,7 +37,7 @@ class ClientChatRepository
 		$this->departmentRepository = $departmentRepository;
 	}
 
-	public function getOrCreateByRequest(ClientChatRequest $clientChatRequest): ClientChat
+	public function getOrCreateByRequest(ClientChatRequest $clientChatRequest, int $sourceType): ClientChat
 	{
 		try {
 			$clientChat = $this->findNotClosed($clientChatRequest->ccr_rid);
@@ -48,6 +48,7 @@ class ClientChatRepository
 			$clientChat->cch_project_id = $this->projectRepository->getIdByName($clientChatRequest->getProjectNameFromData());
 			$department = $this->departmentRepository->findByName($clientChatRequest->getDepartmentFromData());
 			$clientChat->cch_dep_id = $department ? $department->dep_id : null;
+			$clientChat->cch_source_type_id = $sourceType;
 			$clientChat->generated();
 		}
 

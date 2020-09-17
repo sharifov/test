@@ -187,7 +187,7 @@ class ClientChatService
 	{
 		$response = \Yii::$app->chatBot->assignAgent($rid, $userId);
 		if ($response['error']) {
-			throw new \RuntimeException('[Chat Bot] ' . $response['error']['message'] ?? 'Unknown error...', ClientChatCodeException::RC_ASSIGN_AGENT_FAILED);
+			throw new \RuntimeException('[Chat Bot Assign Agent] ' . $response['error']['message'] ?? 'Unknown error...', ClientChatCodeException::RC_ASSIGN_AGENT_FAILED);
 		}
 	}
 
@@ -214,7 +214,7 @@ class ClientChatService
 			$clientChatRequest = ClientChatRequest::createByAgent($form);
 			$_self->clientChatRequestRepository->save($clientChatRequest);
 
-			$clientChat = $_self->clientChatRepository->getOrCreateByRequest($clientChatRequest);
+			$clientChat = $_self->clientChatRepository->getOrCreateByRequest($clientChatRequest, ClientChat::SOURCE_TYPE_AGENT);
 			if (!$clientChat->cch_client_id) {
 				$client = $_self->clientManageService->getOrCreateByClientChatRequest($clientChatRequest);
 				$clientChat->cch_client_id = $client->id;
