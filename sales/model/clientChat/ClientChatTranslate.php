@@ -68,6 +68,21 @@ class ClientChatTranslate
             'exchange'      => Yii::t('clientChat', 'Exchange', [], $language),
         ];
 
+        $data['feedback'] = [
+            'thanks_for_feedback'       => Yii::t('clientChat_feedback', 'Thanks for your feedback!', [], $language),
+            'rate_conversation'         => Yii::t('clientChat_feedback', 'Rate Your Conversation', [], $language),
+            'submit'                    => Yii::t('clientChat_feedback', 'Submit feedback', [], $language),
+            'submit_error'              => Yii::t('clientChat_feedback', 'Failed to submit', [], $language),
+            'comment'                   => Yii::t('clientChat_feedback', 'Your opinion is important for us', [], $language),
+            'rate'                      => Yii::t('clientChat_feedback', 'You rated this dialogue as {{rate}}', [], $language),
+            'no_rating'                 => Yii::t('clientChat_feedback', 'No score', [], $language),
+            'rating_1'                  => Yii::t('clientChat_feedback', 'Terrible', [], $language),
+            'rating_2'                  => Yii::t('clientChat_feedback', 'Bad', [], $language),
+            'rating_3'                  => Yii::t('clientChat_feedback', 'Acceptable', [], $language),
+            'rating_4'                  => Yii::t('clientChat_feedback', 'Good', [], $language),
+            'rating_5'                  => Yii::t('clientChat_feedback', 'Awesome', [], $language),
+        ];
+
         return $data;
     }
 
