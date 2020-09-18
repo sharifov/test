@@ -70,6 +70,7 @@ class ClientChatTranslate
 
         $data['feedback'] = [
             'thanks_for_feedback'       => Yii::t('clientChat_feedback', 'Thanks for your feedback!', [], $language),
+            'leave_feedback'            => Yii::t('clientChat_feedback', 'Leave feedback', [], $language),
             'rate_conversation'         => Yii::t('clientChat_feedback', 'Rate Your Conversation', [], $language),
             'submit'                    => Yii::t('clientChat_feedback', 'Submit feedback', [], $language),
             'submit_error'              => Yii::t('clientChat_feedback', 'Failed to submit', [], $language),
