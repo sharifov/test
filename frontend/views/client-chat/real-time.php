@@ -1,7 +1,6 @@
 <?php
 /* @var $this yii\web\View */
 /* @var $host string */
-/* @var $projects string */
 /* @var $projectsWithKeys string */
 
 use yii\bootstrap4\Html;
@@ -19,16 +18,14 @@ $url = \yii\helpers\Url::toRoute('/client-chat/real-time-start-chat');
 $js = <<<JS
 (function(){function b(){var a=document.createElement("script");a.type="text/javascript";a.async=!0;a.src="https://cdn.travelinsides.com/npmstatic/chatapi-dev.min.js";document.getElementsByTagName("head")[0].appendChild(a)}window.k=window.k||{};window.k.livechat=window.k.livechat||{};var c=[];["create","setCustomProps","track","onReady"].forEach(function(a){window.k.livechat[a]=function(){c.push([a,arguments])}});window.k.livechat.queue=c;"complete"===document.readyState?
 b():window.addEventListener("load",b)})();
+
     
-  var projects = '$projects' ? '$projects'.split(',') : [];
-  console.log(JSON.parse('$projectsWithKeys'));
   var run = function () {
     window.k.realtimeVisitors(document.getElementById('client-chat-realtime-div'), {
       host: '$host',
       settings: {
-        project: projects,
         writeMessageEnabled: true,
-        projectsWithKeys: JSON.parse('$projectsWithKeys')
+        project: JSON.parse('$projectsWithKeys')
       }
     }).then( function (instance) {
         instance.events.on('chat-created', function (e) {
