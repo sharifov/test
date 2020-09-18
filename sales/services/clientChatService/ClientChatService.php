@@ -31,7 +31,6 @@ use sales\repositories\NotFoundException;
 use sales\repositories\visitorLog\VisitorLogRepository;
 use sales\services\client\ClientManageService;
 use sales\services\TransactionManager;
-use yii\helpers\VarDumper;
 use yii\web\ForbiddenHttpException;
 
 /**
@@ -194,35 +193,32 @@ class ClientChatService
 	public function createByAgent(RealTimeStartChatForm $form, int $ownerId): void
 	{
 		$_self = $this;
-		$this->transactionManager->wrap(static function () use ($form, $ownerId, $_self) {
+		try {
 			if (!$userProfile = UserProfile::findOne(['up_user_id' => $ownerId])) {
 				throw new NotFoundException('User Profile is not found');
 			}
-
 			if (!$userProfile->isRegisteredInRc()) {
 				throw new \DomainException('You dont have rocketchat credentials');
 			}
-
 			$channel = $_self->clientChatChannelRepository->find($form->channelId);
+
 			$department = Department::find()->select(['dep_name'])->where(['dep_id' => $channel->ccc_dep_id])->asArray()->one();
 			if (!$department) {
 				throw new \RuntimeException('Cannot create room: department data is not found');
 			}
 
-			$form->rid = $_self->createRcRoom($form->visitorId, $department['dep_name']);
-
 			$clientChatRequest = ClientChatRequest::createByAgent($form);
 			$_self->clientChatRequestRepository->save($clientChatRequest);
+			$client = $_self->clientManageService->getOrCreateByClientChatRequest($clientChatRequest);
+
+			$activeChatExist = ClientChat::find()->byDepartment($channel->ccc_dep_id)->byClientId($client->id)->notClosed()->exists();
+			if ($activeChatExist) {
+				throw new \DomainException('This visitor is already chatting with agent in ' . $department['dep_name'] . ' department');
+			}
 
 			$clientChat = $_self->clientChatRepository->getOrCreateByRequest($clientChatRequest, ClientChat::SOURCE_TYPE_AGENT);
 			if (!$clientChat->cch_client_id) {
-				$client = $_self->clientManageService->getOrCreateByClientChatRequest($clientChatRequest);
 				$clientChat->cch_client_id = $client->id;
-			}
-
-			$activeChatExist = ClientChat::find()->byDepartment($channel->ccc_dep_id)->byClientId($clientChat->cch_client_id)->notClosed()->exists();
-			if ($activeChatExist) {
-				throw new \DomainException('This visitor is already chatting with agent in ' . $department['dep_name'] . ' department');
 			}
 
 			$clientChat->cch_channel_id = $channel->ccc_id;
@@ -230,48 +226,37 @@ class ClientChatService
 			$clientChat->cch_project_id = $channel->ccc_project_id;
 			$clientChat->cch_owner_user_id = $ownerId;
 			$clientChat->cch_client_online = 1;
-			$_self->clientChatRepository->save($clientChat);
+			$this->clientChatRepository->save($clientChat);
 
-			$visitorRcId = $clientChatRequest->getClientRcId();
-			try {
-				$visitorData = $_self->clientChatVisitorDataRepository->findByVisitorRcId($visitorRcId);
-				if (!$_self->clientChatVisitorRepository->exists($clientChat->cch_id, $visitorData->cvd_id)) {
+			$this->transactionManager->wrap(static function () use ($form, $ownerId, $_self, $department, $userProfile, $clientChatRequest, $clientChat) {
+				$visitorRcId = $clientChatRequest->getClientRcId();
+				try {
+					$visitorData = $_self->clientChatVisitorDataRepository->findByVisitorRcId($visitorRcId);
+					if (!$_self->clientChatVisitorRepository->exists($clientChat->cch_id, $visitorData->cvd_id)) {
+						$_self->clientChatVisitorRepository->create($clientChat->cch_id, $visitorData->cvd_id, $clientChat->cch_client_id);
+					}
+				} catch (NotFoundException $e) {
+					$visitorData = $_self->clientChatVisitorDataRepository->createByVisitorId($visitorRcId);
 					$_self->clientChatVisitorRepository->create($clientChat->cch_id, $visitorData->cvd_id, $clientChat->cch_client_id);
 				}
-			} catch (NotFoundException $e) {
-				$visitorData = $_self->clientChatVisitorDataRepository->createByVisitorId($visitorRcId);
-				$_self->clientChatVisitorRepository->create($clientChat->cch_id, $visitorData->cvd_id, $clientChat->cch_client_id);
+
+				$userChannel = $_self->clientChatUserChannelRepository->findByPrimaryKeys($ownerId, $form->channelId);
+
+				$clientChatUserAccess = ClientChatUserAccess::create($clientChat->cch_id, $userChannel->ccuc_user_id);
+				$clientChatUserAccess->accept();
+				$_self->clientChatUserAccessRepository->save($clientChatUserAccess);
+
+				$rid = $_self->createRcRoom($form->visitorId, $department['dep_name'], $form->message, $userProfile->up_rc_user_id, $userProfile->up_rc_auth_token);
+
+				$clientChat->cch_rid = $rid;
+				$_self->clientChatRepository->save($clientChat);
+			});
+		} catch (\DomainException | \RuntimeException $e) {
+			if (isset($clientChat)) {
+				$this->clientChatRepository->delete($clientChat);
 			}
-
-			$userChannel = $_self->clientChatUserChannelRepository->findByPrimaryKeys($ownerId, $form->channelId);
-
-			$_self->assignAgentToRcChannel($form->rid, $userProfile->up_rc_user_id);
-
-			$message = [
-				'message' => [
-					'msg' => $form->message,
-					'rid' => $form->rid,
-					'alias' => Auth::user()->nickname_client_chat
-				]
-			];
-
-			$headers =  [
-				'X-User-Id' => $userProfile->up_rc_user_id,
-				'X-Auth-Token' => $userProfile->up_rc_auth_token,
-			];
-
-			$sendMessageResult = \Yii::$app->chatBot->sendMessage($message, $headers);
-			if ($sendMessageResult['error']) {
-				throw new \RuntimeException('[ChatBot SendMessage] ' . $sendMessageResult['error']['message']);
-			}
-			if (!$sendMessageResult['data']['success']) {
-				throw new \RuntimeException('[ChatBot SendMessage] ' . $sendMessageResult['data']['']);
-			}
-
-			$clientChatUserAccess = ClientChatUserAccess::create($clientChat->cch_id, $userChannel->ccuc_user_id);
-			$clientChatUserAccess->accept();
-			$_self->clientChatUserAccessRepository->save($clientChatUserAccess);
-		});
+			throw $e;
+		}
 	}
 
 	/**
@@ -471,11 +456,14 @@ class ClientChatService
 	/**
 	 * @param string $visitorId
 	 * @param string $department
+	 * @param string|null $message
+	 * @param string $userRcId
+	 * @param string $userRcToken
 	 * @return string
 	 */
-	public function createRcRoom(string $visitorId, string $department): string
+	public function createRcRoom(string $visitorId, string $department, ?string $message, string $userRcId, string $userRcToken): string
 	{
-		$result = \Yii::$app->chatBot->createRoom($visitorId, $department);
+		$result = \Yii::$app->chatBot->createRoom($visitorId, $department, $message, $userRcId, $userRcToken);
 		if ($result['error']) {
 			throw new \RuntimeException('[ChatBot Create Room] ' . $result['error']['message'] ?? 'Unknown ChatBot error message');
 		}

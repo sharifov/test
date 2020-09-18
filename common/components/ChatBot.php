@@ -221,12 +221,15 @@ class ChatBot extends Component
         return $out;
     }
 
-	public function createRoom(string $visitorId, string $department) : array
+	public function createRoom(string $visitorId, string $department, ?string $message, string $userRcId, string $userRcToken) : array
 	{
 		$out = ['error' => false, 'data' => []];
 		$data = [
-			'id' => $visitorId,
-			'department' => $department
+			'visitorId' => $visitorId,
+			'department' => $department,
+			'userId' => $userRcId,
+			'userToken' => $userRcToken,
+			'message' => $message
 		];
 
 		$response = $this->visitorsSendRequest('create-room', $data, 'post');

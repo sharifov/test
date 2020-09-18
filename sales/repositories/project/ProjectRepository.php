@@ -12,12 +12,20 @@ class ProjectRepository extends Repository
 		return Project::find()->select(['id'])->byName($name)->active()->one();
 	}
 
+	public function findByKey(string $key)
+	{
+		return Project::find()->select(['id'])->byKey($key)->active()->one();
+	}
+
 	public function getIdByName(string $name): ?int
 	{
 		$project = $this->findByName($name);
-		if ($project) {
-			return $project->id;
-		}
-		return null;
+		return $project->id ?? null;
+	}
+
+	public function getIdByProjectKey(string $key): ?int
+	{
+		$project = $this->findByKey($key);
+		return $project->id ?? null;
 	}
 }

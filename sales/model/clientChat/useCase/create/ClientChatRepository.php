@@ -126,4 +126,12 @@ class ClientChatRepository
 		}
 		throw new NotFoundException('Client Chats are not found by client id: ' . $id);
 	}
+
+	public function delete(ClientChat $clientChat): bool
+	{
+		if (!$clientChat->delete()) {
+			throw new \RuntimeException($clientChat->getErrorSummary(false)[0]);
+		}
+		return true;
+	}
 }
