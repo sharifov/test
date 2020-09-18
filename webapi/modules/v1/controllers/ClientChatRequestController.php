@@ -3,6 +3,7 @@
 namespace webapi\modules\v1\controllers;
 
 use common\models\ApiLog;
+use common\models\Project;
 use sales\entities\cases\CaseCategory;
 use sales\helpers\app\AppHelper;
 use sales\model\clientChat\ClientChatTranslate;
@@ -388,12 +389,14 @@ class ClientChatRequestController extends ApiBaseController
 	 * @apiGroup ClientChat
 	 * @apiPermission Authorized User
 	 *
-	 * @apiParam {int} project_id Project ID
+	 * @apiParam {int} [project_id] Project ID
+	 * @apiParam {string{100}} [project_key] Project Key (Priority)
 	 * @apiParam {string{5}} [language_id] Language ID (ru-RU)
 	 *
 	 * @apiParamExample {get} Request-Example:
 	 * {
 	 *     "project_id": 1,
+     *     "project_key": "ovago",
      *     "language_id": "ru-RU"
 	 * }
 	 *
@@ -575,6 +578,20 @@ class ClientChatRequestController extends ApiBaseController
 		}
 
 		$projectId = \Yii::$app->request->get('project_id');
+        $projectKey = \Yii::$app->request->get('project_key');
+
+        if ($projectKey) {
+            /** @var Project $project */
+            $project = Project::find()->select(['id'])->where(['project_key' => $projectKey])->limit(1)->one();
+            if (!$project) {
+                return new ErrorResponse(
+                    new StatusCodeMessage(404),
+                    new MessageMessage('Not found Project by project key'),
+                );
+            }
+
+            $projectId = $project->id;
+        }
 
         $languageId = \Yii::$app->request->get('language_id');
 		if ($languageId) {
@@ -595,7 +612,7 @@ class ClientChatRequestController extends ApiBaseController
 		}
 
 		return new ErrorResponse(
-			new StatusCodeMessage(400),
+			new StatusCodeMessage(404),
 			new MessageMessage('Project Config not found'),
 			new CodeMessage(ApiCodeException::NOT_FOUND_PROJECT_CONFIG)
 		);

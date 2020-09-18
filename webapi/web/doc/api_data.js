@@ -268,9 +268,17 @@ define({ "api": [
           {
             "group": "Parameter",
             "type": "int",
-            "optional": false,
+            "optional": true,
             "field": "project_id",
             "description": "<p>Project ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "100",
+            "optional": true,
+            "field": "project_key",
+            "description": "<p>Project Key (Priority)</p>"
           },
           {
             "group": "Parameter",
@@ -285,7 +293,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n    \"project_id\": 1,\n    \"language_id\": \"ru-RU\"\n}",
+          "content": "{\n    \"project_id\": 1,\n    \"project_key\": \"ovago\",\n    \"language_id\": \"ru-RU\"\n}",
           "type": "get"
         }
       ]
