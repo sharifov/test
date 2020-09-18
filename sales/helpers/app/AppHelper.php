@@ -48,15 +48,20 @@ class AppHelper
      * @param Throwable $throwable
      * @param string $category
      * @param bool $formatted
+     * @param int $typeCodeDelimiter
      */
-    public static function throwableLogger(\Throwable $throwable, string $category, bool $formatted = true): void
-    {
+    public static function throwableLogger(
+        \Throwable $throwable,
+        string $category,
+        bool $formatted = true,
+        int $typeCodeDelimiter = 0
+    ): void {
         $errorMessage = $formatted ?
             self::throwableFormatter($throwable) :
             VarDumper::dumpAsString($throwable, 20);
 
-        if ($throwable->getCode() < 0) {
-            Yii::info($errorMessage,'info\\"' . $category . '"');
+        if ($throwable->getCode() < $typeCodeDelimiter) {
+            Yii::info($errorMessage, 'info\\"' . $category . '"');
         } else {
             Yii::error($errorMessage, $category);
         }

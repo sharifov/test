@@ -360,7 +360,6 @@ class QuoteController extends ApiBaseController
             else $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
 
             $response['error'] = $message;
-            $response['errors'] = $message;
             $response['error_code'] = 30;
         }
 
@@ -588,7 +587,6 @@ class QuoteController extends ApiBaseController
                 else $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
 
                 $response['error'] = $message;
-                $response['errors'] = $message;
                 $response['error_code'] = 30;
 
                 $transaction->rollBack();
@@ -845,11 +843,19 @@ class QuoteController extends ApiBaseController
             }
         } catch (\Throwable $e) {
 
-            $message = AppHelper::throwableFormatter($e);
-            Yii::error($message, 'API:Quote:create:try');
+            if ($e->getCode() < 0) {
+                Yii::warning(AppHelper::throwableFormatter($e),'API:Quote:create:try');
+            } else {
+                Yii::error(AppHelper::throwableFormatter($e),'API:Quote:create:try');
+            }
+
+            if (Yii::$app->request->get('debug')) {
+                $message = ($e->getTraceAsString());
+            } else {
+                $message = $e->getMessage();
+            }
 
             $response['error'] = $message;
-            $response['errors'] = $message;
             $response['error_code'] = 30;
 
             $transaction->rollBack();

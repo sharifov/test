@@ -1005,7 +1005,7 @@ class Quote extends \yii\db\ActiveRecord
 			if (!empty($matches)) {
 
 			    if (!isset($matches[1][0], $matches[1][1])) {
-                    throw new \Exception('Quote:getTripsSegmentsData:Date:notParsed');
+                    throw new \Exception('TripsSegmentsData is wrong, please check dump', -5);
 			    }
 
 				$now = new \DateTime();
