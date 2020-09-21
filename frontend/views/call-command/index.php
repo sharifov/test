@@ -1,5 +1,7 @@
 <?php
 
+use dosamigos\datepicker\DatePicker;
+use yii\grid\ActionColumn;
 use sales\model\call\entity\callCommand\CallCommand;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -37,6 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'filter' => CallCommand::getTypeList(),
                 'format' => 'raw',
+                'enableSorting' => false,
             ],
             'ccom_parent_id',
             [
@@ -64,12 +67,30 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => \common\models\Employee::getList(),
                 'format' => 'raw',
             ],
-            'ccom_created_user_id:userName',
+            //'ccom_created_user_id:userName',
             //'ccom_updated_user_id',
-            'ccom_created_dt:byUserDateTime',
+            [
+                'attribute' => 'ccom_created_dt',
+                'value' => static function (CallCommand $model) {
+                    return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->ccom_created_dt));
+                },
+                'format' => 'raw',
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'ccom_created_dt',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' =>'Choose Date'
+                    ],
+                ]),
+            ],
             //'ccom_updated_dt',
 
-            ['class' => 'yii\grid\ActionColumn'],
+            ['class' => ActionColumn::class],
         ],
     ]); ?>
 

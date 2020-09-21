@@ -254,34 +254,38 @@ class CallCommandController extends FController
 
     public function actionValidateCommandListForm(): array
     {
-        if ($typeId = Yii::$app->request->get('type_id')) {
+        try {
+            if ($typeId = Yii::$app->request->get('type_id')) {
 
-            Yii::$app->response->format = Response::FORMAT_JSON;
-
-            try {
                 $callCommandService = new CallCommandTypeService($typeId);
                 /** @var CommandList $mainModel */
                 $mainModel = $callCommandService->initTypeCommandClass();
                 $formName = $mainModel->formName();
                 $post = Yii::$app->request->post();
 
-                $models = [];
-                foreach ($post[$formName]['multipleFormData'] as $key => $value) {
-                    $model = $callCommandService->initTypeCommandClass();
-                    $model->setAttributes($value);
-                    $models[$key] = $model;
+                if (!empty($post[$formName]['multipleFormData'])) {
+                    $models = [];
+                    foreach ($post[$formName]['multipleFormData'] as $key => $value) {
+                        $model = $callCommandService->initTypeCommandClass();
+                        $model->setAttributes($value);
+                        $models[$key] = $model;
+                    }
+
+                    Yii::$app->response->format = Response::FORMAT_JSON;
+
+                    Model::loadMultiple($models, Yii::$app->request->post());
+                    Yii::$app->response->format = Response::FORMAT_JSON;
+                    return ActiveForm::validateMultiple($models);
                 }
-
-                Model::loadMultiple($models, Yii::$app->request->post());
-                Yii::$app->response->format = Response::FORMAT_JSON;
-                return ActiveForm::validateMultiple($models);
-
-            } catch (\Throwable $throwable) {
-                AppHelper::throwableLogger($throwable,
-                'CallCommandController:actionValidateCommandListForm', true);
+                throw new \DomainException('MultipleFormData Undefined.', -1);
             }
+            throw new \InvalidArgumentException('TypeId is required.', -2);
+
+        } catch (\Throwable $throwable) {
+            AppHelper::throwableLogger($throwable,
+            'CallCommandController:actionValidateCommandListForm', true);
         }
-        throw new BadRequestHttpException('TypeId is required');
+        return [];
     }
 
     /**

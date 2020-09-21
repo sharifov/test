@@ -409,7 +409,16 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'User Personal Phone Number', 'url' => ['/user-personal-phone-number-crud/index']],
                     ]
                 ],
-
+                [
+                    'label' => 'Call command',
+                    'url' => 'javascript:',
+                    'icon' => 'list',
+                    'items' => [
+                        ['label' => 'Call Command', 'url' => ['/call-command/index']],
+                        ['label' => 'Phone Line Commands', 'url' => ['/phone-line-command-crud/index']],
+                        ['label' => 'Call Gather Switches', 'url' => ['/call-gather-switch-crud/index']],
+                    ]
+                ],
 
 
                 ['label' => 'Phone List', 'url' => ['/phone-list/index'], 'icon' => 'phone'],

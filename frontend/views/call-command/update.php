@@ -7,14 +7,19 @@ use yii\helpers\Html;
 /* @var $model sales\model\call\entity\callCommand\CallCommand */
 /* @var string $typeForm */
 
-$this->title = 'Update Call Command: ' . $model->ccom_id;
+
+$typeName = CallCommand::getTypeName($model->ccom_type_id);
+
+$name = $model->ccom_name ? ', Name: ' . $model->ccom_name : '';
+
+$this->title = 'Update Call Command. Type: ' . $typeName . ', Id: ' . $model->ccom_id;
 $this->params['breadcrumbs'][] = ['label' => 'Call Commands', 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->ccom_id, 'url' => ['view', 'id' => $model->ccom_id]];
 $this->params['breadcrumbs'][] = 'Update';
 ?>
 <div class="call-command-update">
 
-    <h1><?= Html::encode($this->title) ?></h1>
+    <h3><?= Html::encode($this->title) ?></h3>
 
     <?= $this->render('_form', [
         'model' => $model,

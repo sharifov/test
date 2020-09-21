@@ -2,6 +2,7 @@
 
 namespace sales\model\call\entity\callCommand\search;
 
+use common\models\Employee;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use sales\model\call\entity\callCommand\CallCommand;
@@ -33,11 +34,19 @@ class CallCommandSearch extends CallCommand
     {
         $query = CallCommand::find();
 
-        // add conditions that should always apply here
+        $query->joinWith('ccomProject');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => [
+                'defaultOrder' => ['ccom_id' => SORT_DESC],
+            ],
         ]);
+
+        $dataProvider->sort->attributes['ccom_project_id'] = [
+            'asc' => ['projects.name' => SORT_ASC],
+            'desc' => ['projects.name' => SORT_DESC],
+        ];
 
         $this->load($params);
 
@@ -56,9 +65,13 @@ class CallCommandSearch extends CallCommand
             'ccom_user_id' => $this->ccom_user_id,
             'ccom_created_user_id' => $this->ccom_created_user_id,
             'ccom_updated_user_id' => $this->ccom_updated_user_id,
-            'ccom_created_dt' => $this->ccom_created_dt,
             'ccom_updated_dt' => $this->ccom_updated_dt,
         ]);
+
+         if ($this->ccom_created_dt){
+            $query->andFilterWhere(['>=', 'ccom_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ccom_created_dt))])
+                ->andFilterWhere(['<=', 'ccom_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ccom_created_dt) + 3600 * 24)]);
+        }
 
         $query->andFilterWhere(['like', 'ccom_lang_id', $this->ccom_lang_id])
             ->andFilterWhere(['like', 'ccom_name', $this->ccom_name])
