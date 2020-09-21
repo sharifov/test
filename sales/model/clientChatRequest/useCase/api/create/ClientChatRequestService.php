@@ -188,7 +188,7 @@ class ClientChatRequestService
 	{
 		$clientChat = $this->clientChatRepository->getOrCreateByRequest($clientChatRequest, ClientChat::SOURCE_TYPE_CLIENT);
 		if (!$clientChat->cch_client_id) {
-			$client = $this->clientManageService->getOrCreateByClientChatRequest($clientChatRequest);
+			$client = $this->clientManageService->getOrCreateByClientChatRequest($clientChatRequest, (int)$clientChat->cch_project_id);
 			$clientChat->cch_client_id = $client->id;
 		}
 

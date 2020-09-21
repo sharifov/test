@@ -6,6 +6,7 @@ use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\UserContactList;
+use http\Exception\RuntimeException;
 use sales\repositories\client\ClientsCollection;
 use sales\repositories\client\ClientsQuery;
 use sales\services\client\ClientCreateForm;
@@ -349,7 +350,7 @@ class ClientManageService
 		return $client;
 	}
 
-	public function getOrCreateByClientChatRequest(ClientChatRequest $clientChatRequest): Client
+	public function getOrCreateByClientChatRequest(ClientChatRequest $clientChatRequest, int $projectId): Client
 	{
 		$clientEmailForm = (new EmailCreateForm());
 		$clientEmailForm->email = $clientChatRequest->getEmailFromData();
@@ -369,16 +370,20 @@ class ClientManageService
 			'rcId' => $rcId,
 			'uuid' => $uuId,
             'typeCreate' => Client::TYPE_CREATE_CLIENT_CHAT,
-//            'projectId' => todo
+            'projectId' => $projectId
 		]);
 		$parentId = null;
 
 		try {
-			$client = $this->clientRepository->findByUuid($uuId);
+			$client = $this->clientRepository->findByUuidAndProjectId($uuId, $projectId);
+			$this->updateClient($client, $clientForm);
 		} catch (NotFoundException $e) {
-			if ($client = Client::find()->joinWithCcVisitor($clientForm->rcId)->one()) {
+			if ($client = Client::find()->byProject($projectId)->joinWithCcVisitor($clientForm->rcId)->one()) {
 				$this->updateClient($client, $clientForm);
 			} else {
+				if (empty($clientForm->projectId)) {
+					throw new \RuntimeException('Cannot create client without Project');
+				}
 				$client = $this->createByRcId($clientForm, $parentId);
 			}
 		}

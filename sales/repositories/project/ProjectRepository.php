@@ -3,6 +3,7 @@
 namespace sales\repositories\project;
 
 use common\models\Project;
+use sales\repositories\NotFoundException;
 use sales\repositories\Repository;
 
 class ProjectRepository extends Repository
@@ -14,7 +15,10 @@ class ProjectRepository extends Repository
 
 	public function findByKey(string $key)
 	{
-		return Project::find()->select(['id'])->byKey($key)->active()->one();
+		if ($project = Project::find()->select(['id'])->byKey($key)->active()->one()) {
+			return $project;
+		}
+		throw new NotFoundException('Project not found by key: ' . $key);
 	}
 
 	public function getIdByName(string $name): ?int

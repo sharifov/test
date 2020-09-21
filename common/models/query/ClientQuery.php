@@ -32,4 +32,9 @@ class ClientQuery extends ActiveQuery
 		return $this->join('INNER JOIN', ClientChatVisitor::tableName(), 'ccv_client_id = id')
 			->join('INNER JOIN', ClientChatVisitorData::tableName(), 'cvd_visitor_rc_id = :visitorId and ccv_cvd_id = cvd_id', ['visitorId' => $visitorId]);
 	}
+
+	public function byProject(int $projectId): ClientQuery
+	{
+		return $this->andWhere(['cl_project_id' => $projectId]);
+	}
 }

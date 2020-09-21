@@ -209,7 +209,7 @@ class ClientChatService
 
 			$clientChatRequest = ClientChatRequest::createByAgent($form);
 			$_self->clientChatRequestRepository->save($clientChatRequest);
-			$client = $_self->clientManageService->getOrCreateByClientChatRequest($clientChatRequest);
+			$client = $_self->clientManageService->getOrCreateByClientChatRequest($clientChatRequest, (int)$form->projectId);
 
 			$activeChatExist = ClientChat::find()->byDepartment($channel->ccc_dep_id)->byClientId($client->id)->notClosed()->exists();
 			if ($activeChatExist) {

@@ -195,7 +195,7 @@ class ClientChatRequest extends \yii\db\ActiveRecord
         return self::EVENT_LIST[$this->ccr_event] ?? '-';
     }
 
-	public function getProjectNameFromData(): string
+	public function getProjectKeyFromData(): string
 	{
 		return $this->decodedData['visitor']['project'] ?? '';
 	}
