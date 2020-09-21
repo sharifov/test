@@ -19,7 +19,7 @@ class ClientsQuery
     public static function allByEmail(string $email): array
     {
         return Client::find()->alias('cl_tbl')
-            ->innerJoin(ClientEmail::tableName() . ' as cle', 'cle.client_id = cl_tbl.id AND clp.email = :email', [':email' => $email])
+            ->innerJoin(ClientEmail::tableName() . ' as cle', 'cle.client_id = cl_tbl.id AND cle.email = :email', [':email' => $email])
             ->orderBy(['cl_tbl.id' => SORT_ASC])
             ->all();
     }
