@@ -125,7 +125,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'attribute' => 'updated',
                         'value' => function(\common\models\Client $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
+                            return $model->updated ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated)) : null;
                         },
                         'format' => 'html',
                     ],
