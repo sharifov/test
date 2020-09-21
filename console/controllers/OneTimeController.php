@@ -865,7 +865,7 @@ class OneTimeController extends Controller
             $phone->created = $oldPhone['created'];
             $phone->is_sms = $oldPhone['is_sms'];
             $phone->validate_dt = $oldPhone['validate_dt'];
-            $phone->type = $oldPhone['type'];
+            $phone->type = $oldPhone['type'] ?: ClientPhone::PHONE_NOT_SET;
             $phone->cp_title = $oldPhone['cp_title'];
             $phone->detachBehavior('timestamp');
             if (!$phone->save()) {
@@ -887,7 +887,7 @@ class OneTimeController extends Controller
             $email->client_id = $toId;
             $email->email = $oldEmail['email'];
             $email->created = $oldEmail['created'];
-            $email->type = $oldEmail['type'];
+            $email->type = $oldEmail['type'] ?: ClientEmail::EMAIL_NOT_SET;
             $email->ce_title = $oldEmail['ce_title'];
             $email->detachBehavior('timestamp');
             if (!$email->save()) {
