@@ -83,21 +83,21 @@ class ClientSearch extends Client
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'id' => $this->id,
+            Client::tableName() . '.id' => $this->id,
         ]);
 
         if($this->not_in_client_id) {
-            $query->andWhere(['NOT IN', 'id', $this->not_in_client_id]);
+            $query->andWhere(['NOT IN', Client::tableName() . '.id', $this->not_in_client_id]);
         }
 
         if ($this->client_email) {
             $subQuery = ClientEmail::find()->select(['DISTINCT(client_id)'])->where(['like', 'email', $this->client_email]);
-            $query->andWhere(['IN', 'id', $subQuery]);
+            $query->andWhere(['IN', Client::tableName() . '.id', $subQuery]);
         }
 
         if ($this->client_phone) {
             $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['like', 'phone', $this->client_phone]);
-            $query->andWhere(['IN', 'id', $subQuery]);
+            $query->andWhere(['IN', Client::tableName() . '.id', $subQuery]);
         }
 
         $query->andFilterWhere(['like', 'first_name', $this->first_name])
