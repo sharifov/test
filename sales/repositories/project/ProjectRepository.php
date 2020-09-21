@@ -3,6 +3,7 @@
 namespace sales\repositories\project;
 
 use common\models\Project;
+use sales\helpers\app\AppHelper;
 use sales\repositories\NotFoundException;
 use sales\repositories\Repository;
 
@@ -18,6 +19,7 @@ class ProjectRepository extends Repository
 		if ($project = Project::find()->select(['id'])->byKey($key)->active()->one()) {
 			return $project;
 		}
+		\Yii::error('Project not found by key: ' . $key, 'ProjectRepository::findByKey::notFound');
 		throw new NotFoundException('Project not found by key: ' . $key);
 	}
 

@@ -178,7 +178,6 @@ class ClientChatRequestController extends ApiBaseController
                     $this->clientChatRequestService->create($form);
 
                 } catch (\RuntimeException | \DomainException | NotFoundException $e) {
-					\Yii::error(AppHelper::throwableFormatter($e), 'Api::ClientChatRequestController::actionCreate::RuntimeException|DomainException|NotFoundException');
 					return $this->endApiLog($apiLog, new ErrorResponse(
                         new StatusCodeMessage(400),
                         new MessageMessage($e->getMessage()),
