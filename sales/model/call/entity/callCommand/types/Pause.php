@@ -25,7 +25,8 @@ class Pause extends Model implements CommandTypeInterface
         return [
             [['length'], 'required'],
 
-            ['length', 'integer', 'min' => 0],
+            ['length', 'integer', 'min' => 1],
+            ['length', 'filter', 'filter' => 'intval'],
 
             [['typeId', 'sort'], 'integer'],
         ];
