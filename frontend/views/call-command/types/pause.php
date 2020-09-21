@@ -26,7 +26,7 @@ $formId = $callCommandTypeService::viewNameFormatting($callCommandTypeService->g
 
         <div class="row">
             <div class="col-md-4">
-                <?php echo $formType->field($model, 'length')->input('number', ['min' => 0, 'step' => 1]) ?>
+                <?php echo $formType->field($model, 'length')->input('number', ['min' => 1, 'step' => 1]) ?>
             </div>
         </div>
 
