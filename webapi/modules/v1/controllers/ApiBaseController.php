@@ -108,11 +108,12 @@ class ApiBaseController extends Controller
                 ]);
 
                 if (!$apiUser) {
-                    Yii::warning('API not found username: '.$username, 'API:HttpBasicAuth:ApiUser');
+                    Yii::warning(['message' => 'API not found username', 'username' => $username, 'endpoint' => $this->action->uniqueId], 'API:HttpBasicAuth:ApiUser');
                     return NULL;
                 }
+
                 if (!$apiUser->validatePassword($password)) {
-                    Yii::warning('API invalid password: '.$password.', username: '.$username.' ', 'API:HttpBasicAuth:ApiUser');
+                    Yii::warning(['message' => 'API invalid password', 'username' => $username, 'endpoint' => $this->action->uniqueId], 'API:HttpBasicAuth:ApiUser');
                     return NULL;
                 }
                 if (!$apiUser->au_enabled) {
