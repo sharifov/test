@@ -45,4 +45,9 @@ class SettingHelper
 	{
 		return \Yii::$app->params['settings']['enable_original_phone_widget'] ?? true;
 	}
+
+	public static function getRcNameForRegisterChannelInRc(): string
+	{
+		return \Yii::$app->params['settings']['rc_username_for_register_channel'] ?? '';
+	}
 }

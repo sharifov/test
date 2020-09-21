@@ -2,20 +2,37 @@
 
 namespace frontend\controllers;
 
+use sales\helpers\setting\SettingHelper;
+use sales\services\clientChatChannel\ClientChatChannelService;
 use Yii;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatChannel\entity\search\ClientChatChannelSearch;
-use frontend\controllers\FController;
 use yii\helpers\ArrayHelper;
-use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\db\StaleObjectException;
 
+/**
+ * Class ClientChatChannelCrudController
+ * @package frontend\controllers
+ *
+ * @property ClientChatChannelService $channelService
+ */
 class ClientChatChannelCrudController extends FController
 {
-    /**
+	/**
+	 * @var ClientChatChannelService
+	 */
+	private ClientChatChannelService $channelService;
+
+	public function __construct($id, $module, ClientChatChannelService $channelService, $config = [])
+	{
+		parent::__construct($id, $module, $config);
+		$this->channelService = $channelService;
+	}
+
+	/**
     * @return array
     */
     public function behaviors(): array
@@ -64,13 +81,23 @@ class ClientChatChannelCrudController extends FController
     {
         $model = new ClientChatChannel();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->ccc_id]);
-        } else {
-            $model->ccc_settings = json_encode(ClientChatChannel::getDefaultSettingList());
+        if ($model->load(Yii::$app->request->post())) {
+        	$transaction = Yii::$app->db->beginTransaction();
+        	try {
+				if ($model->save()) {
+					$this->channelService->registerChannelInRocketChat($model->ccc_id, SettingHelper::getRcNameForRegisterChannelInRc());
+					$transaction->commit();
+            		return $this->redirect(['view', 'id' => $model->ccc_id]);
+				}
+			} catch (\Throwable $e) {
+				Yii::$app->session->setFlash('error', $e->getMessage());
+			}
+			$transaction->rollBack();
         }
 
-        return $this->render('create', [
+		$model->ccc_settings = json_encode(ClientChatChannel::getDefaultSettingList());
+
+		return $this->render('create', [
             'model' => $model,
         ]);
     }

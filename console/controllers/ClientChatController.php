@@ -4,7 +4,13 @@ namespace console\controllers;
 
 use common\models\Employee;
 use common\models\UserProfile;
+use sales\helpers\app\AppHelper;
+use sales\helpers\setting\SettingHelper;
+use sales\model\clientChatChannel\entity\ClientChatChannel;
+use sales\services\clientChatChannel\ClientChatChannelCodeException;
+use sales\services\clientChatChannel\ClientChatChannelService;
 use yii\console\Controller;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
 
@@ -241,6 +247,38 @@ class ClientChatController extends Controller
 			printf(" - Deleted: %s\n", $this->ansiFormat('Success', Console::FG_BLUE));
 		}
 
+		printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+	}
+
+	public function actionRegisterChannelsInRc(int $channelId = null, string $username = '')
+	{
+		printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+		if (empty($username)) {
+			$username = SettingHelper::getRcNameForRegisterChannelInRc();
+		}
+
+		$query = ClientChatChannel::find();
+		if ($channelId) {
+			$query->byChannel($channelId);
+		}
+		$channels = $query->all();
+
+		$service = \Yii::createObject(ClientChatChannelService::class);
+		foreach ($channels as $channel) {
+			try {
+				$service->registerChannelInRocketChat($channel->ccc_id, $username);
+
+				printf("\n --- Channel successfully created in rocket chat:  %s ---\n", $this->ansiFormat('ChannelId: ' . $channel->ccc_id, Console::FG_GREEN));
+			} catch (\RuntimeException $e) {
+				if (ClientChatChannelCodeException::isWarningMessage($e)) {
+					printf("\n --- %s ---\n", $this->ansiFormat($e->getMessage(), Console::FG_YELLOW));
+				} else {
+					printf("\n --- Error has occurred:  %s ---\n", $this->ansiFormat($e->getMessage(), Console::FG_RED));
+				}
+			} catch (\Throwable $e) {
+				printf("\n --- Critical Error has occurred:  %s ---\n", $this->ansiFormat(AppHelper::throwableFormatter($e), Console::FG_RED));
+			}
+		}
 		printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 	}
 }

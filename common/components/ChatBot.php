@@ -267,6 +267,31 @@ class ChatBot extends Component
         return $out;
     }
 
+    public function getUserInfo(string $username)
+	{
+		$out = ['error' => false, 'data' => []];
+
+		$data = [
+			'username' => $username
+		];
+
+		$headers = \Yii::$app->rchat->getSystemAuthDataHeader();
+		$response = $this->sendRequest('users.info?' . http_build_query($data), $data, 'GET', $headers);
+
+		if ($response->isOk) {
+			if (!empty($response->data)) {
+				$out['data'] = $response->data;
+			} else {
+				$out['error']['message'] = 'Not found in response array data key [data]';
+			}
+		} else {
+			$out['error'] = $this->parseErrorContent($response);
+//			\Yii::error(VarDumper::dumpAsString($out['error'], 10), 'ChatBot:sendMessage');
+		}
+
+		return $out;
+	}
+
     private function parseErrorContent(Response $response): array
 	{
 		$result = json_decode($response->content, true);
