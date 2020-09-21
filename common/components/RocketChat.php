@@ -576,7 +576,7 @@ class RocketChat extends Component
 		return $out;
 	}
 
-	public function createDepartment(array $data)
+	public function createDepartment(array $data, string $rcAgentId, string $rcUsername): array
 	{
 		$out = ['error' => '', 'data' => []];
 		$headers = $this->getSystemAuthDataHeader();
@@ -592,8 +592,8 @@ class RocketChat extends Component
 			],
 			'agents' => [
 				[
-					'agentId' => '',
-					'username' => ''
+					'agentId' => $rcAgentId,
+					'username' => $rcUsername
 				]
 			]
 		];

@@ -59,15 +59,9 @@ class ClientChatChannelService
 				'department' => [
 					'name' => (string)$channelId
 				],
-				'agents' => [
-					[
-						'agentId' => $this->rocketChatUserInfo['_id'] ?? '',
-						'username' => $this->rocketChatUserInfo['username'] ?? ''
-					]
-				]
 			];
 
-			$newDepartment = \Yii::$app->rchat->createDepartment($newDepartmentData);
+			$newDepartment = \Yii::$app->rchat->createDepartment($newDepartmentData, $this->rocketChatUserInfo['_id'] ?? '', $this->rocketChatUserInfo['username'] ?? '');
 			if ($newDepartment['error']) {
 				throw new \RuntimeException('[Chat Bot Create Department] '.$newDepartment['error'].'; ChannelId: ' . $channelId, ClientChatChannelCodeException::RC_CREATE_DEPARTMENT);
 			}
