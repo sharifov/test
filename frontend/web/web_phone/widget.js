@@ -6533,7 +6533,7 @@ let PhoneWidgetSms = function () {
   function showModalSelectNumber(contact) {
     let content = '';
     $.each(getUserPhones(), function (i, phone) {
-      content += '<span class="phone-widget-userPhones btn btn-success" data-contact="' + encode(contact) + '" data-user-phone="' + phone + '">' + phone + '</span>';
+      content += '<span class="phone-widget-userPhones btn btn-success" style="margin-left: 0;margin-right: 7px" data-contact="' + encode(contact) + '" data-user-phone="' + phone + '">' + phone + '</span>';
     });
     let modal = $('#modal-df');
     modal.find('.modal-body').html(content);
@@ -7340,7 +7340,7 @@ let PhoneWidgetEmail = function () {
   function showModalSelectNumber(contact, contactEmail) {
     let content = '';
     $.each(getUserEmails(), function (i, email) {
-      content += '<span class="phone-widget-userEmails btn btn-success" data-contact-email="' + contactEmail + '" data-contact="' + contact + '" data-user-email="' + email + '">' + email + '</span>';
+      content += '<span class="phone-widget-userEmails btn btn-success" style="margin-left: 0;margin-right: 7px" data-contact-email="' + contactEmail + '" data-contact="' + contact + '" data-user-email="' + email + '">' + email + '</span>';
     });
     let modal = $('#modal-df');
     modal.find('.modal-body').html(content);
