@@ -21,7 +21,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('<i class="fa fa-plus"></i> Create Client Chat Channel', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php Pjax::begin(); ?>
+    <?php Pjax::begin(['id' => 'client-chat-channel-pjax']); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
@@ -97,7 +97,7 @@ $this->params['breadcrumbs'][] = $this->title;
 			],
 
             ['class' => 'yii\grid\ActionColumn',
-                'template' => '{translate} {view} {update} {delete} ',
+                'template' => '{default} {translate} {view} {update} {delete} ',
                 'contentOptions'=>['style'=>'width: 90px;'],
                 'visibleButtons' => [
                     /*'view' => function ($model, $key, $index) {
@@ -125,6 +125,11 @@ $this->params['breadcrumbs'][] = $this->title;
                             'target' => '_blank',
                         ]);
                     },
+                    'default' => static function ($url, ClientChatChannel $model) {
+                        if (!$model->ccc_default) {
+                            return Html::a('<i class="fas fa-cog"></i>', ['client-chat-channel-crud/set-default', 'channel_id' => $model->ccc_id], ['class' => 'set_default', 'data-pjax' => 0,]);
+                        }
+                    }
                 ],
             ],
         ],
@@ -132,4 +137,42 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php Pjax::end(); ?>
 
+<?php
+
+$js = <<<JS
+$(document).on('click', '.set_default', function (e) {
+    e.preventDefault();
+    let btn = $(this);
+    
+    $.ajax({
+        url: btn.attr('href'),
+        type: 'get',
+        dataType: 'json',
+        beforeSend: function () {
+            btn.find('i').addClass('fa-spin');
+        },
+        complete: function () {
+            btn.find('i').removeClass('fa-spin');
+        },
+        success: function (data) {
+            let type = 'success';  
+            let title = 'Success';  
+            if (data.error) {
+              type = 'error';  
+              title = 'Error';  
+            } else {
+                pjaxReload({container: '#client-chat-channel-pjax'});
+            }
+            createNotify(title, data.message, type);
+        },
+        error: function (xhr, txt) {
+            
+        }
+        
+    })
+})
+JS;
+
+$this->registerJs($js);
+?>
 </div>

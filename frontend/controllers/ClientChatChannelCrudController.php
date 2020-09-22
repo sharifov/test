@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use sales\helpers\setting\SettingHelper;
+use sales\repositories\NotFoundException;
 use sales\services\clientChatChannel\ClientChatChannelService;
 use Yii;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
@@ -87,7 +88,7 @@ class ClientChatChannelCrudController extends FController
     {
         $model = new ClientChatChannel();
 
-        if ($model->load(Yii::$app->request->post())) {
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
         	$transaction = Yii::$app->db->beginTransaction();
         	try {
 				if ($model->save()) {
@@ -143,6 +144,37 @@ class ClientChatChannelCrudController extends FController
 
         return $this->redirect(['index']);
     }
+
+    public function actionSetDefault(): Response
+	{
+		$channelId = Yii::$app->request->get('channel_id');
+
+		$result = [
+			'error' => false,
+			'message' => ''
+		];
+
+		try {
+			$channel = $this->findModel((int)$channelId);
+
+			$otherChannels = ClientChatChannel::find()->select(['ccc_id'])->where(['ccc_project_id' => $channel->ccc_project_id, 'ccc_default' => 1])->andWhere(['<>', 'ccc_id', $channel->ccc_id])->column();
+			if ($otherChannels) {
+				Yii::$app->db->createCommand()->update(ClientChatChannel::tableName(),
+					['ccc_default' => 0],
+					['ccc_id' => $otherChannels]
+				)->execute();
+			}
+			$channel->ccc_default = 1;
+			$channel->save();
+
+			$result['message'] = 'Channel is set by default';
+		} catch (NotFoundException $e) {
+			$result['error'] = true;
+			$result['message'] = $e->getMessage();
+		}
+
+		return $this->asJson($result);
+	}
 
     /**
      * @param integer $id

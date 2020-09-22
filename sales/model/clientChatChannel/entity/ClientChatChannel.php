@@ -92,8 +92,10 @@ class ClientChatChannel extends \yii\db\ActiveRecord
             [['ccc_frontend_name'], 'string', 'max' => 100],
             ['ccc_frontend_name', 'filter', 'filter' => 'trim'],
 
+            ['ccc_project_id', 'required'],
             ['ccc_project_id', 'integer'],
             ['ccc_project_id', 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['ccc_project_id' => 'id']],
+            [['ccc_project_id', 'ccc_dep_id'], 'unique', 'targetAttribute' => ['ccc_project_id', 'ccc_dep_id']],
 
             ['ccc_ug_id', 'integer'],
             ['ccc_ug_id', 'exist', 'skipOnError' => true, 'targetClass' => UserGroup::class, 'targetAttribute' => ['ccc_ug_id' => 'ug_id']],
@@ -107,6 +109,24 @@ class ClientChatChannel extends \yii\db\ActiveRecord
             ['ccc_updated_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ccc_updated_user_id' => 'id']],
         ];
     }
+
+    public function beforeSave($insert): bool
+	{
+		$defaultChannel = self::findOne(['ccc_default' => 1, 'ccc_project_id' => $this->ccc_project_id]);
+		if (!$defaultChannel && $insert) {
+			$this->ccc_default = 1;
+		}
+		return parent::beforeSave($insert);
+	}
+
+	public function afterDelete(): void
+	{
+		$defaultChannel = self::findOne(['ccc_default' => 1, 'ccc_project_id' => $this->ccc_project_id, ['<>', 'ccc_id', $this->ccc_id]]);
+		if (!$defaultChannel && $firstChannel = self::findOne(['ccc_project_id' => $this->ccc_project_id])) {
+			$firstChannel->ccc_default = 1;
+			$firstChannel->save();
+		}
+	}
 
     public function getCccCreatedUser(): ActiveQuery
     {
