@@ -2456,6 +2456,321 @@
   },
   {
     "type": "post",
+    "url": "/v1/quote/create",
+    "title": "Create Quote",
+    "version": "0.1.0",
+    "name": "CreateQuote",
+    "group": "Quotes",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "apiKey",
+            "description": "<p>API Key for Project</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "Lead",
+            "description": "<p>Lead data array</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "Lead.uid",
+            "description": "<p>uid</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "Lead.market_info_id",
+            "description": "<p>market_info_id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "Lead.bo_flight_id",
+            "description": "<p>bo_flight_id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "float",
+            "optional": true,
+            "field": "Lead.final_profit",
+            "description": "<p>final_profit</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "Quote",
+            "description": "<p>Quote data array</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "Quote.uid",
+            "description": "<p>uid</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "Quote.record_locator",
+            "description": "<p>record_locator</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "Quote.pcc",
+            "description": "<p>pcc</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "Quote.cabin",
+            "description": "<p>cabin</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "Quote.gds",
+            "description": "<p>gds</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "Quote.trip_type",
+            "description": "<p>trip_type</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "Quote.main_airline_code",
+            "description": "<p>main_airline_code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "Quote.reservation_dump",
+            "description": "<p>reservation_dump</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "Quote.status",
+            "description": "<p>status</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "Quote.check_payment",
+            "description": "<p>check_payment</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "Quote.fare_type",
+            "description": "<p>fare_type</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "Quote.employee_name",
+            "description": "<p>employee_name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "bool",
+            "optional": true,
+            "field": "Quote.created_by_seller",
+            "description": "<p>created_by_seller</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "QuotePrice[]",
+            "description": "<p>QuotePrice data array</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "QuotePrice.uid",
+            "description": "<p>uid</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "QuotePrice.passenger_type",
+            "description": "<p>passenger_type</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "float",
+            "optional": true,
+            "field": "QuotePrice.selling",
+            "description": "<p>selling</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "float",
+            "optional": true,
+            "field": "QuotePrice.net",
+            "description": "<p>net</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "float",
+            "optional": true,
+            "field": "QuotePrice.fare",
+            "description": "<p>fare</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "float",
+            "optional": true,
+            "field": "QuotePrice.taxes",
+            "description": "<p>taxes</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "float",
+            "optional": true,
+            "field": "QuotePrice.mark_up",
+            "description": "<p>mark_up</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "float",
+            "optional": true,
+            "field": "QuotePrice.extra_mark_up",
+            "description": "<p>extra_mark_up</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "float",
+            "optional": true,
+            "field": "QuotePrice.service_fee",
+            "description": "<p>service_fee</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n     \"apiKey\": \"d190c378e131ccfd8a889c8ee8994cb55f22fbeeb93f9b99007e8e7ecc24d0dd\",\n     \"Lead\": {\n         \"uid\": \"5de486f15f095\",\n         \"market_info_id\": 52,\n         \"bo_flight_id\": 0,\n         \"final_profit\": 0\n     },\n     \"Quote\": {\n         \"uid\": \"5f207ec201b99\",\n         \"record_locator\": null,\n         \"pcc\": \"0RY9\",\n         \"cabin\": \"E\",\n         \"gds\": \"S\",\n         \"trip_type\": \"RT\",\n         \"main_airline_code\": \"UA\",\n         \"reservation_dump\": \"1 KL6123V 15OCT Q MCOAMS SS1   801P 1100A  16OCT F /DCKL /E \\n 2 KL1009L 18OCT S AMSLHR SS1  1015A 1045A /DCKL /E\",\n         \"status\": 1,\n         \"check_payment\": \"1\",\n         \"fare_type\": \"TOUR\",\n         \"employee_name\": \"Barry\",\n         \"created_by_seller\": false\n     },\n     \"QuotePrice\": [\n         {\n             \"uid\": \"expert.5f207ec222c86\",\n             \"passenger_type\": \"ADT\",\n             \"selling\": 696.19,\n             \"net\": 622.65,\n             \"fare\": 127,\n             \"taxes\": 495.65,\n             \"mark_up\": 50,\n             \"extra_mark_up\": 0,\n             \"service_fee\": 23.54\n         }\n     ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "string",
+            "optional": false,
+            "field": "status",
+            "description": "<p>Status</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "string",
+            "optional": false,
+            "field": "action",
+            "description": "<p>Action</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "integer",
+            "optional": false,
+            "field": "response_id",
+            "description": "<p>Response Id</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "DateTime",
+            "optional": false,
+            "field": "request_dt",
+            "description": "<p>Request Date &amp; Time</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "DateTime",
+            "optional": false,
+            "field": "response_dt",
+            "description": "<p>Response Date &amp; Time</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n {\n     \"status\": \"Success\",\n     \"action\": \"v1/quote/create\",\n     \"response_id\": 11926893,\n     \"request_dt\": \"2020-09-22 05:05:54\",\n     \"response_dt\": \"2020-09-22 05:05:54\",\n     \"execution_time\": 0.193,\n     \"memory_usage\": 1647440\n }",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 404 Not Found\n{\n    \"name\": \"Not Found\",\n    \"message\": \"Already Exist Quote UID: 5f207ec201b19\",\n    \"code\": 2,\n    \"status\": 404,\n    \"type\": \"yii\\\\web\\\\NotFoundHttpException\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v1/controllers/QuoteController.php",
+    "groupTitle": "Quotes"
+  },
+  {
+    "type": "post",
     "url": "/v2/quote/get-info",
     "title": "Get Quote",
     "version": "0.2.0",
