@@ -301,7 +301,7 @@ class CallCommandController extends FController
 
             Yii::$app->response->format = Response::FORMAT_JSON;
 
-            $model = new CallCommand(); /* TODO:: add ID if update */
+            $model = new CallCommand();
 
             if ($model->load(Yii::$app->request->post()) && $model->validate()) {
                 return ['success' => true];

@@ -63,8 +63,6 @@ class CommandListService
         return $result;
     }
 
-
-
     public static function refreshParentJson(CallCommand $model): void
     {
         if ($model->ccom_parent_id && $parentModel = CallCommand::findOne($model->ccom_parent_id)) {

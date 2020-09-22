@@ -6,6 +6,7 @@ use common\models\Employee;
 use common\models\Project;
 use sales\behaviors\StringToJsonBehavior;
 use sales\model\call\entity\callCommand\behaviors\RefreshCommandLineJsonBehavior;
+use sales\model\call\entity\callCommand\behaviors\SyncSortToJsonBehavior;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -158,6 +159,9 @@ class CallCommand extends \yii\db\ActiveRecord
             ],
             'refreshJson' => [
                 'class' => RefreshCommandLineJsonBehavior::class,
+            ],
+            'syncSort' => [
+                'class' => SyncSortToJsonBehavior::class,
             ],
         ];
     }
