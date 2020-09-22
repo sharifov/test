@@ -321,12 +321,14 @@ class ClientChatService
 	public function finishTransfer(ClientChat $clientChat, ClientChatUserAccess $chatUserAccess): ClientChat
 	{
 		return $this->transactionManager->wrap( function () use ($clientChat, $chatUserAccess) {
-			$oldDepartment = $clientChat->cchChannel->cccDep ?? null;
-			$newDepartment = Department::findOne(['dep_id' => $clientChat->cch_dep_id]);
+//			$oldDepartment = $clientChat->cchChannel->cccDep ?? null;
+//			$newDepartment = Department::findOne(['dep_id' => $clientChat->cch_dep_id]);
+//
+//			if (!$oldDepartment || !$newDepartment) {
+//				throw new \RuntimeException('Old or New department name is undefined');
+//			}
 
-			if (!$oldDepartment || !$newDepartment) {
-				throw new \RuntimeException('Old or New department name is undefined');
-			}
+			$oldChannelId = $clientChat->cch_channel_id;
 
 			$clientChat->close();
 			$this->clientChatRepository->save($clientChat);
@@ -355,8 +357,8 @@ class ClientChatService
 			}
 			$chatUserAccess->transferAccepted();
 
-			if ($oldDepartment->dep_id !== $newDepartment->dep_id) {
-				$botTransferChatResult = \Yii::$app->chatBot->transferDepartment($clientChat->cch_rid, $clientChat->ccv->ccvCvd->cvd_visitor_rc_id, $oldDepartment->dep_name, $newDepartment->dep_name);
+			if ($oldChannelId !== $newClientChat->cch_channel_id) {
+				$botTransferChatResult = \Yii::$app->chatBot->transferDepartment($clientChat->cch_rid, $clientChat->ccv->ccvCvd->cvd_visitor_rc_id, (string)$oldChannelId, (string)$channel->ccc_id);
 				if ($botTransferChatResult['error']) {
 					throw new \RuntimeException('[Chat Bot] ' . $botTransferChatResult['error']['message'] ?? 'Cant read error message from Chat Bot response');
 				}
