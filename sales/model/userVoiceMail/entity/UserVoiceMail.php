@@ -323,4 +323,10 @@ class UserVoiceMail extends \yii\db\ActiveRecord
         }
         return Yii::$app->params['url_address'] . $this->uvm_voice_file_message;
     }
+
+    public static function getList() : array
+    {
+        $data = self::find()->orderBy(['uvm_name' => SORT_ASC])->asArray()->all();
+        return ArrayHelper::map($data,'uvm_id', 'uvm_name');
+    }
 }

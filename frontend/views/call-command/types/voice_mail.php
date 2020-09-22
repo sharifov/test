@@ -2,6 +2,7 @@
 
 use sales\model\call\entity\callCommand\types\VoiceMail;
 use sales\model\call\services\CallCommandTypeService;
+use sales\model\userVoiceMail\entity\UserVoiceMail;
 use yii\widgets\ActiveForm;
 use yii\helpers\Url;
 
@@ -25,8 +26,7 @@ $formId = $callCommandTypeService::viewNameFormatting($callCommandTypeService->g
 
         <div class="row">
             <div class="col-md-4">
-                <?php echo $formType->field($model, 'vm_id')->input('number', ['min' => 0, 'step' => 1]) ?>
-                <?php /* TODO: dropDownList from VoiceMail AR model ? */ ?>
+                <?php echo $formType->field($model, 'vm_id')->dropDownList(UserVoiceMail::getList(), ['prompt' => '-']) ?>
             </div>
         </div>
 

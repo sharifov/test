@@ -18,7 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="call-command-view">
 
-    <h1><?= Html::encode($this->title) ?></h1>
+    <h3><?= Html::encode($this->title) ?></h3>
 
     <p>
         <?= Html::a('Update', ['update', 'id' => $model->ccom_id], ['class' => 'btn btn-primary']) ?>
