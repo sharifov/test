@@ -40,7 +40,7 @@ class Gather extends Model implements CommandTypeInterface
     public $partialResultCallback;
     public $partialResultCallbackMethod = self::METHOD_POST;
     public $profanityFilter = true;
-    public $speechTimeout;
+    public $speechTimeout = 5;
     public $timeout = 5;
     public $speechModel = self::SPEECH_MODEL_DEFAULT;
     public $enhanced = false;
