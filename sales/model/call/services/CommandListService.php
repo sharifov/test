@@ -74,6 +74,7 @@ class CommandListService
                     foreach ($childes as $key => $childrenModel) {
                         $resultJson[$key] = (array) $childrenModel->ccom_params_json;
                         $resultJson[$key]['additional']['model_id'] = $childrenModel->ccom_id;
+                        $resultJson[$key]['sort'] = $childrenModel->ccom_sort_order;
                     }
                 }
                 $parentModel->ccom_params_json = $resultJson;

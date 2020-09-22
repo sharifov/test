@@ -21,6 +21,7 @@ class RefreshCommandLineJsonBehavior extends Behavior
         return [
             ActiveRecord::EVENT_AFTER_DELETE => 'refreshJson',
             ActiveRecord::EVENT_AFTER_UPDATE => 'refreshJson',
+            ActiveRecord::EVENT_AFTER_INSERT => 'refreshJson',
         ];
     }
 

@@ -10,6 +10,9 @@ use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
+
+use function Amp\Promise\timeoutWithDefault;
 
 /**
  * This is the model class for table "call_command".
@@ -94,6 +97,18 @@ class CallCommand extends \yii\db\ActiveRecord
             [['ccom_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['ccom_project_id' => 'id']],
             [['ccom_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ccom_user_id' => 'id']],
             [['ccom_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ccom_updated_user_id' => 'id']],
+
+            ['ccom_sort_order', 'required', 'when' => function ($model) {
+                return !empty($model->ccom_parent_id);
+            }, 'whenClient' => "function (attribute, value) {
+                return $('#callCommandParent').val().length;
+            }"],
+
+            [['ccom_sort_order'], 'unique', 'targetAttribute' => ['ccom_parent_id', 'ccom_sort_order'],
+                'message' => 'This parent already has a child with this sorting',
+                    'when' => function($model) {
+                        return (!empty($model->ccom_parent_id) && !empty($model->ccom_sort_order));
+                    }, 'enableClientValidation' => false],
         ];
     }
 
@@ -218,5 +233,32 @@ class CallCommand extends \yii\db\ActiveRecord
     public static function getTypeName(int $typeId): ?string
     {
         return self::TYPE_LIST[$typeId] ?? null;
+    }
+
+    public static function getList(?array $includeType = [self::TYPE_COMMAND_LIST])
+    {
+        $query = self::find()
+            ->select(['ccom_id', 'ccom_type_id', 'ccom_name'])
+            ->orderBy(['ccom_id' => SORT_DESC]);
+
+        if ($includeType) {
+            $query->andWhere(['IN', 'ccom_type_id', $includeType]);
+        }
+
+        $data = $query->asArray()->all();
+
+        foreach ($data as $key => $value) {
+            $data[$key]['name'] = $value['ccom_id'] . ' ' . $value['ccom_name'];
+        }
+
+        return ArrayHelper::map($data, 'ccom_id', 'name');
+    }
+
+    public static function checkParentSort(int $parentId, int $sort): bool
+    {
+        return self::find()->where([
+            'ccom_parent_id' => $parentId,
+            'ccom_sort_order' => $sort,
+        ])->exists();
     }
 }

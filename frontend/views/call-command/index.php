@@ -1,5 +1,6 @@
 <?php
 
+use common\components\grid\UserSelect2Column;
 use dosamigos\datepicker\DatePicker;
 use yii\grid\ActionColumn;
 use sales\model\call\entity\callCommand\CallCommand;
@@ -27,7 +28,6 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             'ccom_id',
-            'ccom_name',
             [
                 'attribute' => 'ccom_type_id',
                 'value' => static function(CallCommand $model) {
@@ -41,6 +41,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'enableSorting' => false,
             ],
+            'ccom_name',
             'ccom_parent_id',
             [
                 'attribute' => 'ccom_project_id',
@@ -60,15 +61,11 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'ccom_sort_order',
             [
+                'class' => UserSelect2Column::class,
                 'attribute' => 'ccom_user_id',
-                'value' => static function(CallCommand $model) {
-                    return $model->ccomUser ? Yii::$app->formatter->asUserName($model->ccomUser) : Yii::$app->formatter->nullDisplay;
-                },
-                'filter' => \common\models\Employee::getList(),
-                'format' => 'raw',
+                'relation' => 'ccomUser',
+                 'options' => ['style' => 'width:140px']
             ],
-            //'ccom_created_user_id:userName',
-            //'ccom_updated_user_id',
             [
                 'attribute' => 'ccom_created_dt',
                 'value' => static function (CallCommand $model) {

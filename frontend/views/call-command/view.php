@@ -8,7 +8,10 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model sales\model\call\entity\callCommand\CallCommand */
 
-$this->title = $model->ccom_id;
+$name = $model->ccom_name ? ', Name: ' . $model->ccom_name : '';
+$typeName = CallCommand::getTypeName($model->ccom_type_id);
+
+$this->title = 'Update Call Command. Type: ' . $typeName . ', Id: ' . $model->ccom_id;
 $this->params['breadcrumbs'][] = ['label' => 'Call Commands', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);

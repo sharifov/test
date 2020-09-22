@@ -4,7 +4,9 @@ use common\models\Employee;
 use sales\model\call\entity\callCommand\CallCommand;
 use sales\model\call\entity\callCommand\types\CommandList;
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\widgets\ActiveForm;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $model sales\model\call\entity\callCommand\CallCommand */
@@ -19,47 +21,49 @@ $typeForm = $typeForm ?? '';
     <?php $form = ActiveForm::begin(['id' => 'command_form']); ?>
 
     <div class="row">
+
         <div class="col-md-4">
 
-            <div class="row">
-                <div class="col-md-4">
-                    <?= $form->field($model, 'ccom_parent_id')->input('number', ['min' => 0, 'step' => 1]) ?>
+                <div class="row">
+                    <div class="col-md-6">
+                        <?= $form->field($model, 'ccom_type_id')->dropDownList(CallCommand::getTypeList(),
+                            ['prompt' => '---', 'id' => 'callCommandTypeId']) ?>
+                    </div>
+                    <div class="col-md-6">
+                        <?= $form->field($model, 'ccom_name')->textInput(['maxlength' => true]) ?>
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <?= $form->field($model, 'ccom_project_id')->dropDownList(\common\models\Project::getList(), ['prompt' => '-']) ?>
+                <div class="row">
+                    <div class="col-md-8">
+                        <?= $form->field($model, 'ccom_user_id')->dropDownList(Employee::getList(), ['prompt' => '---'])?>
+                    </div>
+                    <div class="col-md-4">
+                        <?= $form->field($model, 'ccom_sort_order')
+                            ->input('number', ['min' => 0, 'step' => 1, 'id' => 'callCommandSortOrder']) ?>
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <?= $form->field($model, 'ccom_lang_id')->dropDownList(\common\models\Language::getLanguages(), ['prompt' => '-']) ?>
+                <div class="row">
+                    <div class="col-md-4">
+                        <?php echo $form->field($model, 'ccom_parent_id')
+                            ->dropDownList(CallCommand::getList(), ['prompt' => '-', 'id' => 'callCommandParent']) ?>
+                    </div>
+                    <div class="col-md-4">
+                        <?= $form->field($model, 'ccom_project_id')->dropDownList(\common\models\Project::getList(), ['prompt' => '-']) ?>
+                    </div>
+                    <div class="col-md-4">
+                        <?= $form->field($model, 'ccom_lang_id')->dropDownList(\common\models\Language::getLanguages(), ['prompt' => '-']) ?>
+                    </div>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <?= $form->field($model, 'ccom_type_id')->dropDownList(CallCommand::getTypeList(),
-                        ['prompt' => '---', 'id' => 'callCommandTypeId']) ?>
-                </div>
-                <div class="col-md-6">
-                    <?= $form->field($model, 'ccom_user_id')->dropDownList(Employee::getList(), ['prompt' => '---'])?>
-                </div>
-            </div>
 
-            <div class="row">
-                <div class="col-md-8">
-                    <?= $form->field($model, 'ccom_name')->textInput(['maxlength' => true]) ?>
-                </div>
-                <div class="col-md-4">
-                    <?= $form->field($model, 'ccom_sort_order')->input('number', ['min' => 0, 'step' => 1]) ?>
-                </div>
-            </div>
+                    <?= $form->field($model, 'ccom_params_json')->textarea([
+                        'style' => 'display:none;', 'id' => 'params_json'
+                    ])->label(false) ?>
 
-                <?= $form->field($model, 'ccom_params_json')->textarea([
-                    'style' => 'display:none;', 'id' => 'params_json'
-                ])->label(false) ?>
-
-            <div class="row">
-                <div class="col-md-12">
-                    <div id="command_list_form_box"></div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div id="command_list_form_box"></div>
+                    </div>
                 </div>
-            </div>
 
         </div>
 
@@ -93,115 +97,149 @@ $js = <<<JS
     let saveBtnContent = '<i class="fa fa-save"></i> Save Command';
     
     $(document).on('click', '#save_command', function (e) {
+    
         e.preventDefault();
         e.stopPropagation();
         
-        let btn = $(this);
+        let btn = $('#save_command');
         btn.html(saveBtnLoaderContent).prop("disabled", true);  
                 
         let typeObj = $('#callCommandTypeId');
         let typeId = parseInt(typeObj.val(), 10);
         
-        if (!Number.isInteger(typeId)) {
-            $('#command_form').yiiActiveForm('validateAttribute', 'callcommand-ccom_type_id');
-            btn.html(saveBtnContent).prop("disabled", false);
-            return false;
-        }
+        let commandForm = $('#command_form');
         
-        if (typeId === typeCommandListId) {
-            let formCommandListObj = $('#$commandListFormName');
-            
-            $.ajax({
-                url: '/call-command/validate-command-list-form/?type_id=' + typeCommandListId,
-                type: 'POST',
-                data: formCommandListObj.serializeArray(),
-                dataType: 'json'    
-            })
-            .done(function(dataResponse) {                
-                $.each(dataResponse, function(keyEl, msgs) {
-
-                    let splitKeyEl = keyEl.split('-');
-                    splitKeyEl[0] = splitKeyEl[0] + '-multipleformdata';
-                    let elementId = splitKeyEl.join('-');
-        
-                    if (msgs.length) {
-                        var message = msgs.join(',');
-                        $('#' + elementId).addClass('has-error').prop('title', message);
-                    }
-                });
-            })
-            .fail(function(error) {
-                console.log(error);        
-            });                         
-            
-            if (formCommandListObj.find('.has-error').length) {
-                btn.html(saveBtnContent).prop("disabled", false);
-                return false;
-            } else {
-                let subFormBoxObj = $('#type_form_box');
+        $.ajax({
+            type: 'POST',
+            url: '/call-command/validate-command-form/',
+            data: commandForm.serializeArray(),
+            dataType: 'json'  
+        })
+        .done(function(data) {
+            if(data.success) {
                 
-                subFormBoxObj.find('form').each(function() {                     
-                    let subForm = $(this);                    
-                    let dataForm = subForm.data("yiiActiveForm");
-                        
-                    $.each(dataForm.attributes, function() {
-                        this.status = 3;
-                    });
-                    subForm.yiiActiveForm('data').submitting = false;
-                    subForm.yiiActiveForm("validate");
-                })
-                .promise()
-                .done( function() { 
-                    if (subFormBoxObj.find('.has-error').length) {
-                        btn.html(saveBtnContent).prop("disabled", false);                    
-                        return false;
-                    } else {
-                    
-                        let dataSubForms = [];
-                        subFormBoxObj.find('form').each(function() {
-                            dataSubForms.push(mappingFormData($(this)));    
-                        });
-                        
-                        $('#params_json').val(JSON.stringify(dataSubForms));                         
-                        $('#command_form').submit();                   
-                    }  
-                });  
-                btn.html(saveBtnContent).prop("disabled", false);              
-                return false; 
-            }  
-                        
-        } else {
-        
-            let simpleForm = $("#type_form_box").find('form:first');
-            $('#params_json').val(JSON.stringify(mappingFormData(simpleForm)));
-            let dataSimpleForm = simpleForm.data("yiiActiveForm");
+                console.log('success validate-command-form');
                 
-            $.each(dataSimpleForm.attributes, function() {
-                this.status = 3;
-            });
-            
-            simpleForm.yiiActiveForm('data').submitting = false;
-            simpleForm.yiiActiveForm("validate");
-                        
-            simpleForm.on('ajaxComplete', function(event, jqXHR, textStatus) {
-                if (simpleFormAjaxSend === 1) {
+                if (!Number.isInteger(typeId)) {
+                    $('#command_form').yiiActiveForm('validateAttribute', 'callcommand-ccom_type_id');
                     btn.html(saveBtnContent).prop("disabled", false);
                     return false;
                 }
-                simpleFormAjaxSend = 1;                
-                if (textStatus === 'success') {
-                   $('#command_form').submit(); 
-                }
-            });
-            
-            if (simpleForm.find('.has-error').length === 0) {
-                $('#command_form').submit(); 
-            } 
-            btn.html(saveBtnContent).prop("disabled", false);           
-            return false;             
-        } 
+                
+                if (typeId === typeCommandListId) {
+                    let formCommandListObj = $('#$commandListFormName');
+                    
+                    $.ajax({
+                        url: '/call-command/validate-command-list-form/?type_id=' + typeCommandListId,
+                        type: 'POST',
+                        data: formCommandListObj.serializeArray(),
+                        dataType: 'json'    
+                    })
+                    .done(function(dataResponse) {                
+                        $.each(dataResponse, function(keyEl, msgs) {
         
-        $('#command_form').submit();
+                            let splitKeyEl = keyEl.split('-');
+                            splitKeyEl[0] = splitKeyEl[0] + '-multipleformdata';
+                            let elementId = splitKeyEl.join('-');
+                
+                            if (msgs.length) {
+                                var message = msgs.join(',');
+                                $('#' + elementId).addClass('has-error').prop('title', message);
+                            }
+                        });
+                    })
+                    .fail(function(error) {
+                        console.log(error); 
+                        btn.html(saveBtnContent).prop("disabled", false);           
+                        return false;       
+                    });                         
+                    
+                    if (formCommandListObj.find('.has-error').length) {
+                        btn.html(saveBtnContent).prop("disabled", false);
+                        return false;
+                    } else {
+                        let subFormBoxObj = $('#type_form_box');
+                        
+                        subFormBoxObj.find('form').each(function() {                     
+                            let subForm = $(this);                    
+                            let dataForm = subForm.data("yiiActiveForm");
+                                
+                            $.each(dataForm.attributes, function() {
+                                this.status = 3;
+                            });
+                            subForm.yiiActiveForm('data').submitting = false;
+                            subForm.yiiActiveForm("validate");
+                        })
+                        .promise()
+                        .done( function() { 
+                            if (subFormBoxObj.find('.has-error').length) {
+                                btn.html(saveBtnContent).prop("disabled", false);                    
+                                return false;
+                            } else {
+                            
+                                let dataSubForms = [];
+                                subFormBoxObj.find('form').each(function() {
+                                    dataSubForms.push(mappingFormData($(this)));    
+                                });
+                                
+                                $('#params_json').val(JSON.stringify(dataSubForms));                         
+                                $('#command_form').submit();                   
+                            }  
+                        });  
+                        btn.html(saveBtnContent).prop("disabled", false);              
+                        return false; 
+                    }  
+                                
+                } else {
+                
+                    let simpleForm = $("#type_form_box").find('form:first');
+                    $('#params_json').val(JSON.stringify(mappingFormData(simpleForm)));
+                    let dataSimpleForm = simpleForm.data("yiiActiveForm");
+                        
+                    $.each(dataSimpleForm.attributes, function() {
+                        this.status = 3;
+                    });
+                    
+                    simpleForm.yiiActiveForm('data').submitting = false;
+                    simpleForm.yiiActiveForm("validate");
+                                
+                    simpleForm.on('ajaxComplete', function(event, jqXHR, textStatus) {
+                        if (simpleFormAjaxSend === 1) {
+                            btn.html(saveBtnContent).prop("disabled", false);
+                            return false;
+                        }
+                        simpleFormAjaxSend = 1;                
+                        if (textStatus === 'success') {
+                           $('#command_form').submit(); 
+                        }
+                    });
+                    
+                    if (simpleForm.find('.has-error').length === 0) {
+                        $('#command_form').submit(); 
+                    } 
+                    btn.html(saveBtnContent).prop("disabled", false);           
+                    return false;             
+                } 
+                
+                return false;
+            } else if (data.validation) {                
+                console.log('validation command form failed');
+                commandForm.yiiActiveForm('updateMessages', data.validation, true); 
+                btn.html(saveBtnContent).prop("disabled", false);           
+                return false; 
+            } else {
+                console.log('incorrect server response');
+                btn.html(saveBtnContent).prop("disabled", false);           
+                return false; 
+            }
+        })
+        .fail(function(error) {
+            console.log(error);    
+            btn.html(saveBtnContent).prop("disabled", false);           
+            return false;     
+        });
+        
+        return false;   
     });
         
     $(document).on('change', '#callCommandTypeId', function() {

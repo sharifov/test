@@ -14,6 +14,7 @@ use sales\model\call\entity\callCommand\search\CallCommandSearch;
 use yii\base\Model;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
@@ -286,6 +287,27 @@ class CallCommandController extends FController
             'CallCommandController:actionValidateCommandListForm', true);
         }
         return [];
+    }
+
+    public function actionValidateCommandForm()
+    {
+        if (Yii::$app->request->isAjax) {
+
+            Yii::$app->response->format = Response::FORMAT_JSON;
+
+            $model = new CallCommand(); /* TODO:: add ID if update */
+
+            if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+                return ['success' => true];
+            }
+
+            $result = [];
+            foreach ($model->getErrors() as $attribute => $errors) {
+                $result[Html::getInputId($model, $attribute)] = $errors;
+            }
+            return ['validation' => $result];
+        }
+        throw new BadRequestHttpException();
     }
 
     /**
