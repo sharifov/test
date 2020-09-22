@@ -200,9 +200,9 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 		return $this->decodedData['visitor']['project'] ?? '';
 	}
 
-	public function getDepartmentFromData(): ?string
+	public function getChannelIdFromData(): int
 	{
-		return $this->decodedData['visitor']['department'] ?? '';
+		return (int)($this->decodedData['visitor']['channel'] ?? null);
 	}
 
 	public function getEmailFromData(): ?string

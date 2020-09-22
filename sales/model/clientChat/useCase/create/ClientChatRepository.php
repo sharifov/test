@@ -46,8 +46,6 @@ class ClientChatRepository
 			$clientChat->cch_rid = $clientChatRequest->ccr_rid;
 			$clientChat->cch_ccr_id = $clientChatRequest->ccr_id;
 			$clientChat->cch_project_id = $this->projectRepository->getIdByProjectKey($clientChatRequest->getProjectKeyFromData());
-			$department = $this->departmentRepository->findByName($clientChatRequest->getDepartmentFromData());
-			$clientChat->cch_dep_id = $department ? $department->dep_id : null;
 			$clientChat->cch_source_type_id = $sourceType;
 			$clientChat->generated();
 		}

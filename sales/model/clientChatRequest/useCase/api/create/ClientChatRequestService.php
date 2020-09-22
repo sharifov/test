@@ -3,9 +3,9 @@
 namespace sales\model\clientChatRequest\useCase\api\create;
 
 use common\models\Notifications;
-use sales\services\client\ClientCreateForm;
+use sales\helpers\app\AppHelper;
+use sales\repositories\clientChatChannel\ClientChatChannelRepository;
 use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatMessage\ClientChatMessageRepository;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
@@ -35,6 +35,7 @@ use yii\helpers\Html;
  * @property TransactionManager $transactionManager
  * @property ClientChatVisitorRepository $clientChatVisitorRepository
  * @property ClientChatVisitorDataRepository $clientChatVisitorDataRepository
+ * @property ClientChatChannelRepository $clientChatChannelRepository
  */
 class ClientChatRequestService
 {
@@ -79,6 +80,10 @@ class ClientChatRequestService
 	 * @var ClientChatVisitorDataRepository
 	 */
 	private ClientChatVisitorDataRepository $clientChatVisitorDataRepository;
+	/**
+	 * @var ClientChatChannelRepository
+	 */
+	private ClientChatChannelRepository $clientChatChannelRepository;
 
 	/**
 	 * ClientChatRequestService constructor.
@@ -103,7 +108,8 @@ class ClientChatRequestService
 		VisitorLogRepository $visitorLogRepository,
 		TransactionManager $transactionManager,
 		ClientChatVisitorRepository $clientChatVisitorRepository,
-		ClientChatVisitorDataRepository $clientChatVisitorDataRepository
+		ClientChatVisitorDataRepository $clientChatVisitorDataRepository,
+		ClientChatChannelRepository $clientChatChannelRepository
 	)
 	{
 		$this->clientChatRequestRepository = $clientChatRequestRepository;
@@ -116,6 +122,7 @@ class ClientChatRequestService
 		$this->transactionManager = $transactionManager;
 		$this->clientChatVisitorRepository = $clientChatVisitorRepository;
 		$this->clientChatVisitorDataRepository = $clientChatVisitorDataRepository;
+		$this->clientChatChannelRepository = $clientChatChannelRepository;
 	}
 
 	/**
@@ -191,13 +198,18 @@ class ClientChatRequestService
 			$client = $this->clientManageService->getOrCreateByClientChatRequest($clientChatRequest, (int)$clientChat->cch_project_id);
 			$clientChat->cch_client_id = $client->id;
 		}
+		$clientChat->cch_client_online = 1;
 
 		if (!$clientChat->cch_channel_id) {
-			$this->clientChatService->assignToChannel($clientChat);
+			$channel = $this->clientChatService->assignClientChatChannel($clientChat, $clientChatRequest->getChannelIdFromData());
+			if ($channel->ccc_project_id !== $clientChat->cch_project_id) {
+				throw new \DomainException('Channel project does not match project from api request');
+			}
+			$this->clientChatRepository->save($clientChat);
+			$this->clientChatService->sendRequestToUsers($clientChat, $channel);
+		} else {
+			$this->clientChatRepository->save($clientChat);
 		}
-
-		$clientChat->cch_client_online = 1;
-		$this->clientChatRepository->save($clientChat);
 
 		$visitorRcId = $clientChatRequest->getClientRcId();
 		$this->manageChatVisitorData($clientChat->cch_id, $clientChat->cch_client_id, $visitorRcId, $form);
@@ -217,18 +229,7 @@ class ClientChatRequestService
 	 */
 	private function saveMessage(ClientChatRequestApiForm $form, ClientChatRequest $clientChatRequest): void
 	{
-		try {
-			$clientChat = $this->clientChatRepository->findNotClosed($form->data['rid'] ?? '');
-		} catch (NotFoundException $e) {
-			$oldClientChat = $this->clientChatRepository->findByRid($form->data['rid'] ?? '');
-
-			$dto = ClientChatCloneDto::feelInOnCreateMessage($oldClientChat, $clientChatRequest->ccr_id);
-			$clientChat = $this->clientChatRepository->clone($dto);
-			$clientChat->cch_client_online = 1;
-			$this->clientChatRepository->save($clientChat);
-			$this->clientChatService->cloneLead($oldClientChat, $clientChat)->cloneCase($oldClientChat, $clientChat)->assignToChannel($clientChat);
-		}
-
+		$clientChat = $this->clientChatRepository->findByRid($form->data['rid'] ?? '');
 		$message = ClientChatMessage::createByApi($form, $clientChat, $clientChatRequest);
 		$this->clientChatMessageRepository->save($message, 0);
         $this->sendLastChatMessageToMonitor($clientChat, $message);

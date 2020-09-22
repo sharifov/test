@@ -131,20 +131,18 @@ class ClientChatService
 
 	/**
 	 * @param ClientChat $clientChat
-	 * @param int $priority
-	 * @return ClientChatChannel|null
+	 * @param int $channelId
+	 * @return ClientChatChannel
 	 */
-	public function assignClientChatChannel(ClientChat $clientChat, int $priority): ?ClientChatChannel
+	public function assignClientChatChannel(ClientChat $clientChat, int $channelId): ClientChatChannel
 	{
 		try {
-			$clientChatChannel = $this->clientChatChannelRepository->findByClientChatData($clientChat->cch_dep_id, $clientChat->cch_project_id, $priority);
+			$clientChatChannel = $this->clientChatChannelRepository->find($channelId);
 		} catch (NotFoundException $e) {
-			$clientChatChannel = ClientChatChannel::findOne(['ccc_default' => 1]);
-			if (!$clientChatChannel) {
-				\Yii::error('Default Channel is not found', 'ClientChatService::assignClientChatChannel::defaultChannel');
-			}
+			$clientChatChannel = $this->clientChatChannelRepository->findDefaultByProject((int)$clientChat->cch_project_id);
 		}
-		$clientChat->cch_channel_id = $clientChatChannel->ccc_id ?? null;
+		$clientChat->cch_channel_id = $clientChatChannel->ccc_id;
+		$clientChat->cch_dep_id = $clientChatChannel->ccc_dep_id;
 		return $clientChatChannel;
 	}
 
@@ -337,7 +335,13 @@ class ClientChatService
 			$newClientChat = $this->clientChatRepository->clone($dto);
 			$newClientChat->assignOwner($chatUserAccess->ccua_user_id);
 			$this->clientChatRepository->save($newClientChat);
-			$this->cloneLead($clientChat, $newClientChat)->cloneCase($clientChat, $newClientChat)->assignClientChatChannel($newClientChat, 1);
+			$this->cloneLead($clientChat, $newClientChat)->cloneCase($clientChat, $newClientChat);
+			try {
+				$channel = $this->clientChatChannelRepository->findByClientChatData($newClientChat->cch_dep_id, $newClientChat->cch_project_id, null);
+			} catch (NotFoundException $e) {
+				$channel = $this->clientChatChannelRepository->findDefaultByProject((int)$newClientChat->cch_project_id);
+			}
+			$newClientChat->cch_channel_id = $channel->ccc_id;
 			$this->clientChatRepository->save($newClientChat);
 
 			$userAccess = ClientChatUserAccess::create($newClientChat->cch_id, $newClientChat->cch_owner_user_id);
@@ -351,20 +355,20 @@ class ClientChatService
 			}
 			$chatUserAccess->transferAccepted();
 
-			if ($oldDepartment->dep_id !== $newDepartment->dep_id) {
-				$botTransferChatResult = \Yii::$app->chatBot->transferDepartment($clientChat->cch_rid, $clientChat->ccv->ccvCvd->cvd_visitor_rc_id, $oldDepartment->dep_name, $newDepartment->dep_name);
-				if ($botTransferChatResult['error']) {
-					throw new \RuntimeException('[Chat Bot] ' . $botTransferChatResult['error']['message'] ?? 'Cant read error message from Chat Bot response');
-				}
-
-				$success = $botTransferChatResult['data']['success'] ?? false;
-				if (!$success) {
-					throw new \RuntimeException('[Chat Bot] ' . ($botTransferChatResult['data']['message'] ?? 'Cant read error message from Chat Bot response'));
-				}
-
-			}
-
-			$this->assignAgentToRcChannel($newClientChat->cch_rid, $newClientChat->cchOwnerUser->userProfile->up_rc_user_id ?? '');
+//			if ($oldDepartment->dep_id !== $newDepartment->dep_id) {
+//				$botTransferChatResult = \Yii::$app->chatBot->transferDepartment($clientChat->cch_rid, $clientChat->ccv->ccvCvd->cvd_visitor_rc_id, $oldDepartment->dep_name, $newDepartment->dep_name);
+//				if ($botTransferChatResult['error']) {
+//					throw new \RuntimeException('[Chat Bot] ' . $botTransferChatResult['error']['message'] ?? 'Cant read error message from Chat Bot response');
+//				}
+//
+//				$success = $botTransferChatResult['data']['success'] ?? false;
+//				if (!$success) {
+//					throw new \RuntimeException('[Chat Bot] ' . ($botTransferChatResult['data']['message'] ?? 'Cant read error message from Chat Bot response'));
+//				}
+//
+//			}
+//
+//			$this->assignAgentToRcChannel($newClientChat->cch_rid, $newClientChat->cchOwnerUser->userProfile->up_rc_user_id ?? '');
 
 			$data = ClientChatAccessMessage::agentTransferAccepted($clientChat, $userAccess->ccuaUser);
 			Notifications::publish('clientChatTransfer', ['user_id' => $clientChat->cch_owner_user_id], ['data' => $data]);
@@ -380,19 +384,6 @@ class ClientChatService
 			$clientChat->cch_dep_id = $channel->ccc_dep_id;
 			$clientChat->generated();
 			$this->clientChatRepository->save($clientChat);
-		}
-	}
-
-	public function assignToChannel(ClientChat $clientChat): void
-	{
-		$channel = $this->assignClientChatChannel($clientChat,1);
-		if ($channel) {
-			try {
-				$this->clientChatRepository->save($clientChat);
-				$this->sendRequestToUsers($clientChat, $channel);
-			} catch (\RuntimeException $e) {
-				\Yii::error(AppHelper::throwableFormatter($e), 'ClientChatService::assignToChannel::RuntimeException');
-			}
 		}
 	}
 
