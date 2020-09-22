@@ -5,6 +5,8 @@ namespace sales\model\call\entity\callCommand;
 use common\models\Employee;
 use sales\model\phoneLine\phoneLine\entity\PhoneLine;
 use Yii;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
@@ -50,6 +52,26 @@ class PhoneLineCommand extends ActiveRecord
             'plc_sort_order' => 'Sort Order',
             'plc_created_user_id' => 'Created User ID',
             'plc_created_dt' => 'Created Dt',
+        ];
+    }
+
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['plc_created_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s'),
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['plc_created_user_id'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['plc_created_user_id'],
+                ]
+            ],
         ];
     }
 

@@ -26,16 +26,20 @@ $this->params['breadcrumbs'][] = $this->title;
         ]) ?>
     </p>
 
-    <?= DetailView::widget([
-        'model' => $model,
-        'attributes' => [
-            'plc_id',
-            'plc_line_id',
-            'plc_ccom_id',
-            'plc_sort_order',
-            'plc_created_user_id',
-            'plc_created_dt',
-        ],
-    ]) ?>
+    <div class="row">
+        <div class="col-md-4">
+            <?= DetailView::widget([
+                'model' => $model,
+                'attributes' => [
+                    'plc_id',
+                    'plc_line_id',
+                    'plc_ccom_id',
+                    'plc_sort_order',
+                    'plc_created_user_id:userName',
+                    'plc_created_dt:byUserDateTime',
+                ],
+            ]) ?>
+        </div>
+    </div>
 
 </div>
