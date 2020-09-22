@@ -14,6 +14,7 @@ use Yii;
 use common\models\ApiLog;
 use common\models\search\ApiLogSearch;
 use yii\filters\AccessControl;
+use yii\helpers\ArrayHelper;
 use yii\helpers\FileHelper;
 use yii\helpers\VarDumper;
 use yii\web\Controller;
@@ -25,6 +26,28 @@ use yii\filters\VerbFilter;
  */
 class ToolsController extends FController
 {
+
+    /**
+     * @return array
+     */
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'verbs' => [
+                'class' => VerbFilter::class,
+                'actions' => [
+                    'delete' => ['POST'],
+                ],
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
+    public function init(): void
+    {
+        parent::init();
+        $this->layoutCrud();
+    }
 
     /**
      * @return \yii\web\Response

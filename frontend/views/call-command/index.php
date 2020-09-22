@@ -60,31 +60,39 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
             ],
             'ccom_sort_order',
+
+//            [
+//                'attribute' => 'ccom_user_id',
+//                'value' => static function(CallCommand $model) {
+//                    return $model->ccomUser ? Yii::$app->formatter->asUserName($model->ccomUser) : Yii::$app->formatter->nullDisplay;
+//                },
+//                'filter' => \common\models\Employee::getList(),
+//                'format' => 'raw',
+//            ],
+
             [
                 'class' => UserSelect2Column::class,
                 'attribute' => 'ccom_user_id',
                 'relation' => 'ccomUser',
                  'options' => ['style' => 'width:140px']
             ],
+
             [
-                'attribute' => 'ccom_created_dt',
-                'value' => static function (CallCommand $model) {
-                    return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->ccom_created_dt));
-                },
-                'format' => 'raw',
-                'filter' => DatePicker::widget([
+                'attribute' => 'ccom_created_user_id',
+                'filter' => \sales\widgets\UserSelect2Widget::widget([
                     'model' => $searchModel,
-                    'attribute' => 'ccom_created_dt',
-                    'clientOptions' => [
-                        'autoclose' => true,
-                        'format' => 'yyyy-mm-dd',
-                    ],
-                    'options' => [
-                        'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
-                    ],
+                    'attribute' => 'ccom_created_user_id'
                 ]),
+                'format' => 'username',
+                'options' => [
+                    'width' => '150px'
+                ]
             ],
+            'ccom_created_dt:byUserDateTime',
+
+            //'ccom_created_user_id:userName',
+            //'ccom_updated_user_id',
+
             //'ccom_updated_dt',
 
             ['class' => ActionColumn::class],

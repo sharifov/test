@@ -69,11 +69,11 @@ $this->params['breadcrumbs'][] = $this->title;
                     $data = \yii\helpers\VarDumper::dumpAsString(@json_decode($model->al_request_data, true));
                     //if($data) $data = end($data);
                     $str = \yii\helpers\StringHelper::truncate(Html::encode($data), 1600, '...', null, false);
-                    $str = preg_replace("~CA(\w+)~", '<b style="color: darkred">${0}</b>', $str);
-
-                    $str = str_replace('CallSid', '<b style="color: green">CallSid</b>', $str);
-
-                    $str = str_replace('CallStatus', '<b style="color: #2b3f63">CallStatus</b>', $str);
+//                    $str = preg_replace("~CA(\w+)~", '<b style="color: darkred">${0}</b>', $str);
+//
+//                    $str = str_replace('CallSid', '<b style="color: green">CallSid</b>', $str);
+//
+//                    $str = str_replace('CallStatus', '<b style="color: #2b3f63">CallStatus</b>', $str);
 
 
 

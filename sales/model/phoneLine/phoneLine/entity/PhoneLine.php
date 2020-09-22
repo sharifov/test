@@ -183,4 +183,19 @@ class PhoneLine extends \yii\db\ActiveRecord
     {
         return 'phone_line';
     }
+
+    /**
+     * @param bool|null $enabled
+     * @return array
+     */
+    public static function getList(?bool $enabled = null): array
+    {
+        $query = self::find()->select(['line_name', 'line_id'])->orderBy(['line_name' => SORT_ASC]);
+
+        if ($enabled !== null) {
+            $query->where(['line_enabled' => $enabled]);
+        }
+
+        return $query->indexBy('line_id')->asArray()->column();
+    }
 }

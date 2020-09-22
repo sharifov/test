@@ -28,6 +28,12 @@ class PhoneLineCommandCrudController extends FController
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
+    public function init(): void
+    {
+        parent::init();
+        $this->layoutCrud();
+    }
+
     /**
      * Lists all PhoneLineCommand models.
      * @return mixed

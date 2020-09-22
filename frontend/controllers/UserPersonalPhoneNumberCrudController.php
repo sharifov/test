@@ -29,6 +29,12 @@ class UserPersonalPhoneNumberCrudController extends FController
         ];
     }
 
+    public function init(): void
+    {
+        parent::init();
+        $this->layoutCrud();
+    }
+
     /**
      * @return string
      */

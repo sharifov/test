@@ -213,7 +213,7 @@ return [
             'class'                     => \lajax\translatemanager\Module::class,
             'root'                      => [/*'@frontend/views/',*/ '@frontend/../sales/model/clientChat/'],               // The root directory of the project scan.
             'scanRootParentDirectory'   => true,
-            'layout'                    => '@frontend/themes/gentelella_v2/views/layouts/main',         // Name of the used layout. If using own layout use 'null'.
+            'layout'                    => '@frontend/themes/gentelella_v2/views/layouts/main_crud',         // Name of the used layout. If using own layout use 'null'.
             'allowedIPs'                => ['*'],               // 127.0.0.1 IP addresses from which the translation interface is accessible.
             'roles'                     => [Employee::ROLE_SUPER_ADMIN, Employee::ROLE_ADMIN],               // For setting access levels to the translating interface.
             'tmpDir'                    => '@runtime',         // Writable directory for the client-side temporary language files.

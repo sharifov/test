@@ -15,7 +15,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('Create Phone Line Command', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('<i class="fa fa-plus"></i>  Create Phone Line Command', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
     <?php Pjax::begin(); ?>
@@ -25,14 +25,25 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
+            //['class' => 'yii\grid\SerialColumn'],
 
             'plc_id',
             'plc_line_id',
             'plc_ccom_id',
             'plc_sort_order',
-            'plc_created_user_id',
-            //'plc_created_dt',
+            //'plc_created_user_id',
+            [
+                'attribute' => 'plc_created_user_id',
+                'filter' => \sales\widgets\UserSelect2Widget::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'plc_created_user_id'
+                ]),
+                'format' => 'username',
+                'options' => [
+                    'width' => '150px'
+                ]
+            ],
+            'plc_created_dt:byUserDateTime',
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

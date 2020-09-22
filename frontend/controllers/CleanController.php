@@ -15,6 +15,7 @@ use yii\web\Response;
 class CleanController extends FController
 {
 
+
     public $assetPaths = [
         '@frontend/web/assets',
         '@webapi/web/assets'
@@ -26,6 +27,26 @@ class CleanController extends FController
         '@webapi/runtime'
     ];
     public $caches = ['cache'];
+
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'verbs' => [
+                'class' => VerbFilter::class,
+                'actions' => [
+                    'delete' => ['POST'],
+                ],
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
+
+    public function init(): void
+    {
+        parent::init();
+        $this->layoutCrud();
+    }
 
     /**
      * @return Response

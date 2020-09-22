@@ -30,6 +30,12 @@ class ApiLogController extends FController
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
+    public function init(): void
+    {
+        parent::init();
+        $this->layoutCrud();
+    }
+
     /**
      * Lists all ApiLog models.
      * @return mixed

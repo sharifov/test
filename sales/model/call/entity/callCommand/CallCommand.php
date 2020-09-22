@@ -235,30 +235,32 @@ class CallCommand extends \yii\db\ActiveRecord
         return self::TYPE_LIST[$typeId] ?? null;
     }
 
-    public static function getList(?array $includeType = [self::TYPE_COMMAND_LIST])
-    {
-        $query = self::find()
-            ->select(['ccom_id', 'ccom_type_id', 'ccom_name'])
-            ->orderBy(['ccom_id' => SORT_DESC]);
 
-        if ($includeType) {
-            $query->andWhere(['IN', 'ccom_type_id', $includeType]);
+    /**
+     * @param bool $extended
+     * @param int|null $typeId
+     * @return array
+     */
+    public static function getList(bool $extended = false, ?int $typeId = null): array
+    {
+        $query = self::find()->select(['ccom_name', 'ccom_id', 'ccom_type_id'])->orderBy(['ccom_name' => SORT_ASC]);
+
+        if ($typeId) {
+            $query->where(['ccom_type_id' => $typeId]);
         }
 
-        $data = $query->asArray()->all();
-
-        foreach ($data as $key => $value) {
-            $data[$key]['name'] = $value['ccom_id'] . ' ' . $value['ccom_name'];
+        if ($extended) {
+            $data = [];
+            $list = $query->all();
+            if ($list) {
+                foreach ($list as $item) {
+                    $data[$item->ccom_id] = self::getTypeName($item->ccom_type_id) . ($item->ccom_name ? ' [' . $item->ccom_name . ']' : '') . ' (id: ' . $item->ccom_id  . ' )';
+                }
+            }
+        } else {
+            $data = $query->indexBy('ccom_id')->asArray()->column();
         }
 
-        return ArrayHelper::map($data, 'ccom_id', 'name');
-    }
-
-    public static function checkParentSort(int $parentId, int $sort): bool
-    {
-        return self::find()->where([
-            'ccom_parent_id' => $parentId,
-            'ccom_sort_order' => $sort,
-        ])->exists();
+        return $data;
     }
 }

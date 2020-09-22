@@ -44,6 +44,12 @@ class CallCommandController extends FController
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
+    public function init(): void
+    {
+        parent::init();
+        $this->layoutCrud();
+    }
+
     /**
      * Lists all CallCommand models.
      * @return mixed
