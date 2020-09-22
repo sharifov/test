@@ -150,7 +150,7 @@ class LeadManageService
 
             $clientForm = ClientCreateForm::createWidthDefaultName();
             $clientForm->projectId = $projectId;
-            $clientForm->typeCreate = Client::TYPE_CREATE_LEAD;
+            $clientForm->typeCreate = Client::TYPE_CREATE_CALL;
             $client = $this->clientManageService->getOrCreateByPhones([new PhoneCreateForm(['phone' => $phoneNumber, 'comments' => 'incoming'])], $clientForm);
 
             $sourceId = $this->getSourceId($sourceId, $projectId);

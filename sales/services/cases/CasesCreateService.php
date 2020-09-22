@@ -174,7 +174,7 @@ class CasesCreateService
 
             $clientForm = ClientCreateForm::createWidthDefaultName();
             $clientForm->projectId = $projectId;
-            $clientForm->typeCreate = Client::TYPE_CREATE_CASE;
+            $clientForm->typeCreate = Client::TYPE_CREATE_CALL;
 
         	if ($createCaseOnIncoming) {
 				$client = $this->clientManageService->getOrCreateByPhones($clientPhones, $clientForm);
