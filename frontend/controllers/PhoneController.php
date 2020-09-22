@@ -930,6 +930,17 @@ class PhoneController extends FController
 
             $result = Yii::$app->communication->hangUp($call->c_call_sid);
 
+            if (isset($result['result']['status']) && ($result['result']['status'] !== $call->c_call_status)) {
+                $call->c_call_status = (string)$result['result']['status'];
+                $call->setStatusByTwilioStatus($call->c_call_status);
+                if (!$call->save()) {
+                    Yii::error(VarDumper::dumpAsString([
+                        'errors' => $call->getErrors(),
+                        'model' => $call->getAttributes(),
+                    ]), 'PhoneController:AjaxHangup:Call:save');
+                }
+            }
+
         } catch (\Throwable $e) {
             $result = [
                 'error' => true,
