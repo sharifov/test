@@ -749,7 +749,7 @@ class ClientChatController extends FController
 
 			$this->transactionManager->wrap( function () use ($chat){
 				$this->clientChatUserAccessService->disableAccessForOtherUsers($chat->cch_id, $chat->cch_owner_user_id);
-//				$this->clientChatService->cancelTransfer($chat);
+				$this->clientChatService->cancelTransfer($chat);
 			});
 
 		} catch (\DomainException | \RuntimeException $e) {
