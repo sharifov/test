@@ -355,20 +355,20 @@ class ClientChatService
 			}
 			$chatUserAccess->transferAccepted();
 
-//			if ($oldDepartment->dep_id !== $newDepartment->dep_id) {
-//				$botTransferChatResult = \Yii::$app->chatBot->transferDepartment($clientChat->cch_rid, $clientChat->ccv->ccvCvd->cvd_visitor_rc_id, $oldDepartment->dep_name, $newDepartment->dep_name);
-//				if ($botTransferChatResult['error']) {
-//					throw new \RuntimeException('[Chat Bot] ' . $botTransferChatResult['error']['message'] ?? 'Cant read error message from Chat Bot response');
-//				}
-//
-//				$success = $botTransferChatResult['data']['success'] ?? false;
-//				if (!$success) {
-//					throw new \RuntimeException('[Chat Bot] ' . ($botTransferChatResult['data']['message'] ?? 'Cant read error message from Chat Bot response'));
-//				}
-//
-//			}
-//
-//			$this->assignAgentToRcChannel($newClientChat->cch_rid, $newClientChat->cchOwnerUser->userProfile->up_rc_user_id ?? '');
+			if ($oldDepartment->dep_id !== $newDepartment->dep_id) {
+				$botTransferChatResult = \Yii::$app->chatBot->transferDepartment($clientChat->cch_rid, $clientChat->ccv->ccvCvd->cvd_visitor_rc_id, $oldDepartment->dep_name, $newDepartment->dep_name);
+				if ($botTransferChatResult['error']) {
+					throw new \RuntimeException('[Chat Bot] ' . $botTransferChatResult['error']['message'] ?? 'Cant read error message from Chat Bot response');
+				}
+
+				$success = $botTransferChatResult['data']['success'] ?? false;
+				if (!$success) {
+					throw new \RuntimeException('[Chat Bot] ' . ($botTransferChatResult['data']['message'] ?? 'Cant read error message from Chat Bot response'));
+				}
+
+			}
+
+			$this->assignAgentToRcChannel($newClientChat->cch_rid, $newClientChat->cchOwnerUser->userProfile->up_rc_user_id ?? '');
 
 			$data = ClientChatAccessMessage::agentTransferAccepted($clientChat, $userAccess->ccuaUser);
 			Notifications::publish('clientChatTransfer', ['user_id' => $clientChat->cch_owner_user_id], ['data' => $data]);
