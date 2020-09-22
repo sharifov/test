@@ -229,7 +229,11 @@ class ClientChatRequestService
 	 */
 	private function saveMessage(ClientChatRequestApiForm $form, ClientChatRequest $clientChatRequest): void
 	{
-		$clientChat = $this->clientChatRepository->findByRid($form->data['rid'] ?? '');
+		try {
+			$clientChat = $this->clientChatRepository->findNotClosed($form->data['rid'] ?? '');
+		} catch (NotFoundException $e) {
+			$clientChat = $this->clientChatRepository->findByRid($form->data['rid'] ?? '');
+		}
 		$message = ClientChatMessage::createByApi($form, $clientChat, $clientChatRequest);
 		$this->clientChatMessageRepository->save($message, 0);
         $this->sendLastChatMessageToMonitor($clientChat, $message);
