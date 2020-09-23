@@ -2,6 +2,7 @@
 
 namespace sales\model\call\entity\callCommand\search;
 
+use common\models\Employee;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use sales\model\call\entity\callCommand\PhoneLineCommand;
@@ -42,15 +43,18 @@ class PhoneLineCommandSearch extends PhoneLineCommand
             return $dataProvider;
         }
 
-        // grid filtering conditions
         $query->andFilterWhere([
             'plc_id' => $this->plc_id,
             'plc_line_id' => $this->plc_line_id,
             'plc_ccom_id' => $this->plc_ccom_id,
             'plc_sort_order' => $this->plc_sort_order,
             'plc_created_user_id' => $this->plc_created_user_id,
-            'plc_created_dt' => $this->plc_created_dt,
         ]);
+
+        if ($this->plc_created_dt){
+            $query->andFilterWhere(['>=', 'plc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->plc_created_dt))])
+                ->andFilterWhere(['<=', 'plc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->plc_created_dt) + 3600 * 24)]);
+        }
 
         return $dataProvider;
     }

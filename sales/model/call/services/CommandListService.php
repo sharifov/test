@@ -28,6 +28,10 @@ class CommandListService
         if (is_array($model->ccom_params_json) && !empty($model->ccom_params_json)) {
             foreach ($model->ccom_params_json as $key => $item) {
 
+                if (is_string($key)) {
+                    continue;
+                }
+
                 try {
                     $childrenModel = new CallCommand();
                     $childrenModel->ccom_parent_id = $model->ccom_id;

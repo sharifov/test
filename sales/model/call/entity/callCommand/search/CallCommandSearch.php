@@ -68,7 +68,7 @@ class CallCommandSearch extends CallCommand
             'ccom_updated_dt' => $this->ccom_updated_dt,
         ]);
 
-         if ($this->ccom_created_dt){
+        if ($this->ccom_created_dt){
             $query->andFilterWhere(['>=', 'ccom_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ccom_created_dt))])
                 ->andFilterWhere(['<=', 'ccom_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ccom_created_dt) + 3600 * 24)]);
         }

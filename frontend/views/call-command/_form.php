@@ -45,7 +45,8 @@ $typeForm = $typeForm ?? '';
                 <div class="row">
                     <div class="col-md-4">
                         <?php echo $form->field($model, 'ccom_parent_id')
-                            ->dropDownList(CallCommand::getList(), ['prompt' => '-', 'id' => 'callCommandParent']) ?>
+                            ->dropDownList(CallCommand::getListByTypes([CallCommand::TYPE_COMMAND_LIST], false),
+                                ['prompt' => '-', 'id' => 'callCommandParent']) ?>
                     </div>
                     <div class="col-md-4">
                         <?= $form->field($model, 'ccom_project_id')->dropDownList(\common\models\Project::getList(), ['prompt' => '-']) ?>
@@ -258,6 +259,12 @@ $js = <<<JS
                 typeObj.val(typeCommandListId);
                 return false;
             }   
+        }
+        
+        if (typeId === typeCommandListId) {
+            $('#callCommandParent').val('').prop('disabled', true);            
+        } else {
+            $('#callCommandParent').prop('disabled', false);
         }
         
         typeObj.data('prev_type', typeId);

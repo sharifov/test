@@ -108,6 +108,9 @@ class CallCommandTypeService
     {
         if (is_array($data) && !empty($data)) {
             foreach ($data as $key => $value) {
+                if (is_string($key)) {
+                    continue;
+                }
                 $data[$key]['sub_type'] = $value['typeId'];
                 $data[$key]['sub_sort'] = $value['sort'];
                 $data[$key]['model_id'] = $value['additional']['model_id'] ?? 0;

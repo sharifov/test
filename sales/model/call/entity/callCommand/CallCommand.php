@@ -267,4 +267,26 @@ class CallCommand extends \yii\db\ActiveRecord
 
         return $data;
     }
+
+    public static function getListByTypes(?array $includeType = null, bool $showTypeName = true): array
+    {
+        $query = self::find()
+            ->select(['ccom_id', 'ccom_type_id', 'ccom_name'])
+            ->orderBy(['ccom_id' => SORT_DESC]);
+
+        if ($includeType) {
+            $query->andWhere(['IN', 'ccom_type_id', $includeType]);
+        }
+
+        $data = $query->asArray()->all();
+
+        foreach ($data as $key => $value) {
+            $name = $showTypeName ? self::getTypeName($value['ccom_type_id']) . ' ' : '';
+            $name .= ($value['ccom_name'] ? ' [' . $value['ccom_name'] . ']' : '') . ' (id: ' . $value['ccom_id']  . ')';
+            $data[$key]['name'] = $name;
+        }
+
+        return ArrayHelper::map($data, 'ccom_id', 'name');
+    }
+
 }

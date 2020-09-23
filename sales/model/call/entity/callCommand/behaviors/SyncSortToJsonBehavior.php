@@ -27,8 +27,10 @@ class SyncSortToJsonBehavior extends Behavior
     public function syncSortToJson(): void
     {
         /** @var CallCommand $this->owner */
-        $paramsJson = $this->owner->ccom_params_json;
-        $paramsJson['sort'] = $this->owner->ccom_sort_order;
-        $this->owner->ccom_params_json = $paramsJson;
+        if ((int) $this->owner->ccom_type_id !== CallCommand::TYPE_COMMAND_LIST) {
+            $paramsJson = $this->owner->ccom_params_json;
+            $paramsJson['sort'] = $this->owner->ccom_sort_order;
+            $this->owner->ccom_params_json = $paramsJson;
+        }
     }
 }

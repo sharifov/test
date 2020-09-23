@@ -7,6 +7,7 @@ use sales\model\call\entity\callCommand\CallCommand;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\call\entity\callCommand\search\CallCommandSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -60,23 +61,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
             ],
             'ccom_sort_order',
-
-//            [
-//                'attribute' => 'ccom_user_id',
-//                'value' => static function(CallCommand $model) {
-//                    return $model->ccomUser ? Yii::$app->formatter->asUserName($model->ccomUser) : Yii::$app->formatter->nullDisplay;
-//                },
-//                'filter' => \common\models\Employee::getList(),
-//                'format' => 'raw',
-//            ],
-
             [
                 'class' => UserSelect2Column::class,
                 'attribute' => 'ccom_user_id',
                 'relation' => 'ccomUser',
                  'options' => ['style' => 'width:140px']
             ],
-
             [
                 'attribute' => 'ccom_created_user_id',
                 'filter' => \sales\widgets\UserSelect2Widget::widget([
@@ -111,12 +101,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ]),
             ],
-
-            //'ccom_created_user_id:userName',
-            //'ccom_updated_user_id',
-
-            //'ccom_updated_dt',
-
             ['class' => ActionColumn::class],
         ],
     ]); ?>
