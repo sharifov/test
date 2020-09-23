@@ -31,7 +31,7 @@ class ProjectRepository extends Repository
 
 	public function getIdByProjectKey(string $key): ?int
 	{
-		$project = $this->findByKey($key);
+		$project = $key ? $this->findByKey($key) : null;
 		return $project->id ?? null;
 	}
 }
