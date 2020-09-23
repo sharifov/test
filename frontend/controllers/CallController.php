@@ -1049,7 +1049,8 @@ class CallController extends FController
                                 Notifications::publish('callAlreadyTaken', ['user_id' => Auth::id()], ['callSid' => $call->c_call_sid]);
                                 Yii::info(VarDumper::dumpAsString([
                                     'callId' => $callUserAccess->cua_call_id,
-                                    'userId' => Auth::id()
+                                    'userId' => Auth::id(),
+                                    'acceptedUserId' => (int)$value,
                                 ]), 'info\NewPhoneWidgetAcceptRedisReservation');
                             }
                             $response['error'] = false;

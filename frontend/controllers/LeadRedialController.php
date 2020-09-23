@@ -516,7 +516,8 @@ class LeadRedialController extends FController
         if ((int)$value !== $userId) {
             Yii::info(VarDumper::dumpAsString([
                 'leadId' => $leadId,
-                'userId' => $userId
+                'userId' => $userId,
+                'reservedUserId' => (int)$value,
             ]), 'info\LeadRedialRedisReservation');
             throw new \DomainException('Lead reserved. Try again later.');
         }
