@@ -15,6 +15,7 @@ use frontend\widgets\notification\NotificationWidget;
 use sales\auth\Auth;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesSearch;
+use sales\entities\chat\ChatExtendedGraphsSearch;
 use sales\entities\chat\ChatGraphsSearch;
 use sales\forms\clientChat\RealTimeStartChatForm;
 use sales\helpers\app\AppHelper;
@@ -43,6 +44,7 @@ use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatService\ClientChatService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
 use sales\services\TransactionManager;
+use sales\viewModel\chat\ViewModelChatExtendedGraph;
 use sales\viewModel\chat\ViewModelChatGraph;
 use yii\data\ActiveDataProvider;
 use yii\data\ArrayDataProvider;
@@ -450,6 +452,34 @@ class ClientChatController extends FController
 
             $html = $this->renderAjax('partial/_stats_chart', [
                 'viewModel' => new ViewModelChatGraph($statsSearch->stats(), $statsSearch),
+            ]);
+        }
+
+        $response = [
+            'html' => $html ?? '',
+            'error' => $statsSearch->hasErrors(),
+            'message' => $statsSearch->getErrorSummary(true)
+        ];
+
+        return $this->asJson($response);
+    }
+
+    public function actionExtendedStats()
+    {
+        $model = new ChatExtendedGraphsSearch();
+        $model->load(\Yii::$app->request->queryParams);
+
+        return $this->render('extended-stats', ['model' => $model]);
+    }
+
+    public function actionAjaxGetExtendedStatsChart(): \yii\web\Response
+    {
+        $statsSearch = new ChatExtendedGraphsSearch();
+        $statsSearch->load(Yii::$app->request->post());
+        if ($statsSearch->validate()) {
+
+            $html = $this->renderAjax('partial/_extended_stats_chart', [
+                'viewModel' => new ViewModelChatExtendedGraph($statsSearch->stats(), $statsSearch),
             ]);
         }
 

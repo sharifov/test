@@ -56,6 +56,22 @@ $this->params['breadcrumbs'][] = $this->title;
                             ])->dropDownList($model::getDateFormatTextList())->label('Group By')?>
                         </div>
 
+                        <div class="col-md-2">
+                            <?= $form->field($model, 'cch_owner_user_id', [
+                                'options' => ['class' => 'form-group']
+                            ])->dropDownList(\common\models\Employee::getList(), [
+                                'prompt' => 'All'
+                            ])->label('Username') ?>
+                        </div>
+
+                        <div class="col-md-2">
+                            <?= $form->field($model, 'cch_channel_id', [
+                                'options' => ['class' => 'form-group']
+                            ])->dropDownList(\sales\model\clientChatChannel\entity\ClientChatChannel::getList(), [
+                                'prompt' => 'All'
+                            ])->label('Channel') ?>
+                        </div>
+
                     </div>
 
                     <div class="row">
@@ -89,7 +105,7 @@ $this->params['breadcrumbs'][] = $this->title;
 </div>
 
 <?php
-$url = \yii\helpers\Url::to(['/client-chat/ajax-get-chart-stats']);
+$url = \yii\helpers\Url::to(['/client-chat/ajax-get-extended-stats-chart']);
 $js = <<<JS
 $(document).ready( function () {
     let formLoaded = $('#chat-chart-search-form').serializeArray();

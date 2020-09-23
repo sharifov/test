@@ -66,6 +66,8 @@ class ClientChat extends \yii\db\ActiveRecord
 	public const STATUS_PENDING = 2;
 	public const STATUS_TRANSFER = 3;
 
+	public const MISSED = 1;
+
 	private const STATUS_LIST = [
 		self::STATUS_GENERATED => 'Generated',
 		self::STATUS_PENDING => 'Pending',
