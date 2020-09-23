@@ -295,6 +295,10 @@ class LeadCreateApiService
         $projectId = $modelLead->project_id;
         $parentId = null;
 
+        if (empty($modelLead->phones)) {
+            throw new UnprocessableEntityHttpException('Phones from ModelLead cannot be empty.');
+        }
+
         foreach ($modelLead->phones as $phone) {
             $phone = trim($phone);
             if (!$phone) {
