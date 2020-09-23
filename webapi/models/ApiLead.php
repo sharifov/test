@@ -119,10 +119,15 @@ class ApiLead extends Model
             [['client_first_name', 'client_last_name', 'client_middle_name'], 'string', 'max' => 100],
             [['emails'], 'each', 'rule' => ['email']],
             [['phones'], 'each', 'rule' => ['string', 'max' => 20]],
-			[['phones'], 'filter', 'filter' => function ($phones) {
-        		return array_map(function ($phone) {
-					return preg_replace("/[^0-9\+]/", '', $phone);
-				}, $phones);
+			[['phones'], 'filter', 'filter' => static function ($phones) {
+			    if ($phones) {
+                    return array_map(
+                        static function ($phone) {
+                            return preg_replace("/[^0-9\+]/", '', $phone);
+                        },
+                        $phones
+                    );
+                }
 			}],
             [['phones'], 'checkForExistence'],
             [['source_id'], 'checkEmailAndPhone', 'except' => [self::SCENARIO_UPDATE, self::SCENARIO_GET]],
