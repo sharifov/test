@@ -1389,6 +1389,19 @@ class LeadSearch extends Lead
             ],
         ]);
 
+        $sort = $dataProvider->getSort();
+        $sort->attributes = array_merge($sort->attributes, [
+            'leads.id' => [
+                'asc' => [Lead::tableName() . '.id' => SORT_ASC],
+                'desc' => [Lead::tableName() .'.id' => SORT_DESC]
+            ],
+            'id' => [
+                'asc' => [Lead::tableName() . '.id' => SORT_ASC],
+                'desc' => [Lead::tableName() .'.id' => SORT_DESC]
+            ]
+        ]);
+        $dataProvider->setSort($sort);
+
         $this->load($params);
 
         if (!$this->validate()) {
