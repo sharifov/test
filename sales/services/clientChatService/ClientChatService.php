@@ -244,7 +244,7 @@ class ClientChatService
 				$clientChatUserAccess->accept();
 				$_self->clientChatUserAccessRepository->save($clientChatUserAccess);
 
-				$rid = $_self->createRcRoom($form->visitorId, $department['dep_name'], $form->message, $userProfile->up_rc_user_id, $userProfile->up_rc_auth_token);
+				$rid = $_self->createRcRoom($form->visitorId, (string)$clientChat->cch_channel_id, $form->message, $userProfile->up_rc_user_id, $userProfile->up_rc_auth_token);
 
 				$clientChat->cch_rid = $rid;
 				$_self->clientChatRepository->save($clientChat);
@@ -448,15 +448,15 @@ class ClientChatService
 
 	/**
 	 * @param string $visitorId
-	 * @param string $department
+	 * @param string $channelId
 	 * @param string|null $message
 	 * @param string $userRcId
 	 * @param string $userRcToken
 	 * @return string
 	 */
-	public function createRcRoom(string $visitorId, string $department, ?string $message, string $userRcId, string $userRcToken): string
+	public function createRcRoom(string $visitorId, string $channelId, ?string $message, string $userRcId, string $userRcToken): string
 	{
-		$result = \Yii::$app->chatBot->createRoom($visitorId, $department, $message, $userRcId, $userRcToken);
+		$result = \Yii::$app->chatBot->createRoom($visitorId, $channelId, $message, $userRcId, $userRcToken);
 		if ($result['error']) {
 			throw new \RuntimeException('[ChatBot Create Room] ' . $result['error']['message'] ?? 'Unknown ChatBot error message');
 		}
