@@ -83,21 +83,6 @@ class ChatBot extends Component
     }
 
 	/**
-	 * @param string $action
-	 * @param array $data
-	 * @param string $method
-	 * @param array $headers
-	 * @param array $options
-	 * @return Response
-	 * @throws \yii\httpclient\Exception
-	 */
-    protected function visitorsSendRequest(string $action = '', array $data = [], string $method = 'post', array $headers = [], array $options = []): Response
-	{
-		$url = $this->visitorsUrl . $action;
-		return $this->send($url, $data, $method, $headers, $options);
-	}
-
-	/**
 	 * @param string $url
 	 * @param array $data
 	 * @param string $method
@@ -232,7 +217,7 @@ class ChatBot extends Component
 			'message' => $message
 		];
 
-		$response = $this->visitorsSendRequest('create-room', $data, 'post');
+		$response = $this->sendRequest('livechat/create-room', $data, 'post');
 
 		if ($response->isOk) {
 			if (!empty($response->data)) {

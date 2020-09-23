@@ -84,7 +84,6 @@ return [
         'chatBot' => [
             'class' => \common\components\ChatBot::class,
             'url' => 'https://chatbot.travel-dev.com/private/api/v1/',
-			'visitorsUrl' => 'https://chatbot.travel-dev.com/visitors/api/v1/',
             'username' => '',
             'password' => '',
         ],
