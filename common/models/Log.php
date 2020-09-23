@@ -18,6 +18,8 @@ use yii\helpers\ArrayHelper;
  */
 class Log extends \yii\db\ActiveRecord
 {
+    public const ADDITIONAL_DATA_DELIMITER = 'Additional data:';
+
     /**
      * @inheritdoc
      */
@@ -52,5 +54,13 @@ class Log extends \yii\db\ActiveRecord
             'prefix' => 'Prefix',
             'message' => 'Message',
         ];
+    }
+
+    public static function cutErrorMessage(string $message): string
+    {
+        if ($cutMessage = strstr($message, self::ADDITIONAL_DATA_DELIMITER, true)) {
+            return $cutMessage;
+        }
+        return $message;
     }
 }

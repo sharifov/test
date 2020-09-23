@@ -9,6 +9,7 @@ use common\models\GlobalLog;
 use common\models\Lead;
 //use common\models\LeadLog;
 use common\models\local\LeadLogMessage;
+use common\models\Log;
 use common\models\Notifications;
 use common\models\Quote;
 use common\models\QuotePrice;
@@ -22,6 +23,7 @@ use sales\helpers\app\AppHelper;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use sales\repositories\lead\LeadRepository;
+use sales\services\quote\addQuote\Trip;
 use Yii;
 use yii\helpers\Html;
 use yii\helpers\Json;
@@ -820,15 +822,14 @@ class QuoteController extends ApiBaseController
             throw new NotFoundHttpException('Not found Lead UID: ' . $leadAttributes['uid'], 2);
         }
 
-        $model = Quote::findOne(['uid' => $quoteAttributes['uid']]);
-        if ($model) {
+        $quote = Quote::findOne(['uid' => $quoteAttributes['uid']]);
+        if ($quote) {
             throw new NotFoundHttpException('Already Exist Quote UID: ' . $quoteAttributes['uid'], 2);
         }
 
-        $model = new Quote();
-
+        $quote = new Quote();
         $selling = 0;
-        $changedAttributes = $model->attributes;
+        $changedAttributes = $quote->attributes;
         $changedAttributes['selling'] = $selling;
 
         $response = [
@@ -837,15 +838,24 @@ class QuoteController extends ApiBaseController
 
         $transaction = Yii::$app->db->beginTransaction();
         try {
-            $model->attributes = $quoteAttributes;
-            $model->lead_id = $lead->id;
-            $model->employee_id = null;
+            $quote->attributes = $quoteAttributes;
+            $quote->lead_id = $lead->id;
+            $quote->employee_id = null;
 
             $type = $quoteAttributes['type_id'] ?? null;
-            $this->setTypeQuoteInsert($type, $model, $lead);
+            $this->setTypeQuoteInsert($type, $quote, $lead);
 
-            $model->save();
-            $model->createQuoteTrips();
+            $quote->save();
+            if ($quote->hasErrors()) {
+                throw new \RuntimeException($quote->getErrorSummary(false)[0]);
+            }
+
+            $tripsSegmentsData = $quote->getTripsSegmentsData();
+            $trip = new Trip($quote);
+            $trip->createTrips($tripsSegmentsData);
+            $quote = $trip->getQuote();
+
+            //  $quote->createQuoteTrips();
 
             if(isset($quoteAttributes['baggage']) && !empty($quoteAttributes['baggage'])){
                 foreach ($quoteAttributes['baggage'] as $baggageAttr){
@@ -853,7 +863,7 @@ class QuoteController extends ApiBaseController
                     $origin = substr($segmentKey, 0, 3);
                     $destination = substr($segmentKey, 2, 3);
                     $segment = QuoteSegment::find()->innerJoin(QuoteTrip::tableName(),'qs_trip_id = qt_id')
-                                ->andWhere(['qt_quote_id' =>  $model->id])
+                                ->andWhere(['qt_quote_id' =>  $quote->id])
                                 ->andWhere(['or',
                                     ['qs_departure_airport_code'=>$origin],
                                     ['qs_arrival_airport_code'=>$destination]
@@ -910,7 +920,7 @@ class QuoteController extends ApiBaseController
                     $quotePrice = new QuotePrice();
                     if ($quotePrice) {
                         $quotePrice->attributes = $quotePriceAttributes;
-                        $quotePrice->quote_id = $model->id;
+                        $quotePrice->quote_id = $quote->id;
                         if (!$quotePrice->save()) {
                             $warnings[] = $quotePrice->getErrorSummary(false)[0];
                         }
@@ -918,40 +928,38 @@ class QuoteController extends ApiBaseController
                 }
             }
 
-            if (!$model->hasErrors()) {
+            if (!$quote->hasErrors()) {
                 $response['status'] = 'Success';
                 $transaction->commit();
 
                 (\Yii::createObject(GlobalLogInterface::class))->log(
                     new LogDTO(
-                        get_class($model),
-                        $model->id,
+                        get_class($quote),
+                        $quote->id,
                         \Yii::$app->id,
                         null,
                         Json::encode(['selling' => $changedAttributes['selling'] ?? 0]),
-                        Json::encode(['selling' => round($model->getPricesData()['total']['selling'], 2)]),
+                        Json::encode(['selling' => round($quote->getPricesData()['total']['selling'], 2)]),
                         null,
                         GlobalLog::ACTION_TYPE_UPDATE
                     )
                 );
 
-            } else {
-                throw new \RuntimeException($model->getErrorSummary(false)[0]);
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
 
             $transaction->rollBack();
 
-            if ($e->getCode() < 0) {
-                Yii::warning(AppHelper::throwableFormatter($e),'API:Quote:create:warning:try');
+            if ($throwable->getCode() < 0) {
+                Yii::warning(AppHelper::throwableFormatter($throwable),'API:Quote:create:warning:try');
             } else {
-                Yii::error(AppHelper::throwableFormatter($e),'API:Quote:create:try');
+                Yii::error(VarDumper::dumpAsString($throwable),'API:Quote:create:try');
             }
 
             if (Yii::$app->request->get('debug')) {
-                $message = $e->getTraceAsString();
+                $message = $throwable->getTraceAsString();
             } else {
-                $message = $e->getMessage();
+                $message = Log::cutErrorMessage($throwable->getMessage());
             }
 
             $response['error'] = $message;
