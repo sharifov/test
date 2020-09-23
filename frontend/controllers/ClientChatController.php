@@ -796,13 +796,17 @@ class ClientChatController extends FController
 
 	public function actionRealTimeStartChat(): string
 	{
-		$visitorId = Yii::$app->request->post('visitorId', '');
-		$projectName = Yii::$app->request->post('projectName', '');
-		$visitorName = Yii::$app->request->post('visitorName', '');
+		$visitorId = Yii::$app->request->get('visitorId', '');
+		$projectName = Yii::$app->request->get('projectName', '');
+		$visitorName = Yii::$app->request->get('visitorName', '');
 
-		$form = new RealTimeStartChatForm($visitorId, $projectName, $this->projectRepository, $visitorName);
+		$form = new RealTimeStartChatForm($visitorId, $projectName, $visitorName);
 
 		try {
+			if ($form->projectName) {
+				$form->projectId = $this->projectRepository->getIdByProjectKey($form->projectName);
+			}
+
 			if (Yii::$app->request->isPjax && $form->load(Yii::$app->request->post()) && $form->validate()) {
 				$this->clientChatService->createByAgent($form, Auth::id());
 				return '<script>$("#modal-sm").modal("hide"); createNotify("Success", "Message was successfully sent to client", "success");</script>';

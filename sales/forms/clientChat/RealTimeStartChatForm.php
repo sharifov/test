@@ -32,11 +32,10 @@ class RealTimeStartChatForm extends \yii\base\Model
 
 	public string $visitorName = '';
 
-	public function __construct(string $visitorId, string $projectName, ProjectRepository $projectRepository, string $visitorName, $config = [])
+	public function __construct(string $visitorId, string $projectName, string $visitorName, $config = [])
 	{
 		$this->visitorId = $visitorId;
 		$this->projectName = $projectName;
-		$this->projectId = $projectName ? $projectRepository->getIdByProjectKey($projectName) : null;
 		$this->visitorName = $visitorName;
 		parent::__construct($config);
 	}

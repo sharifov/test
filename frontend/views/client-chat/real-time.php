@@ -37,7 +37,7 @@ b():window.addEventListener("load",b)})();
             modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> </div>');
             modal.modal('show').find('.modal-header').html('<h3>Send Message ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
             
-            $.post('$url', {visitorId: visitorId, projectName: projectName, visitorName: visitorName}, function(data) {
+            $.get('$url', {visitorId: visitorId, projectName: projectName, visitorName: visitorName}, function(data) {
                 modal.find('.modal-body').html(data);
             });
                 
