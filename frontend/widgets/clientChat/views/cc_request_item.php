@@ -9,7 +9,7 @@ use yii\helpers\Html;
 
 $accessUrl = \yii\helpers\Url::to('/client-chat/access-manage');
 ?>
-<div class="_cc-box-item-wrapper" id="ccr_<?= $access->ccua_cch_id ?>_<?= $access->ccua_user_id ?>">
+<div class="_cc-box-item-wrapper" id="ccr_<?= $access->ccua_cch_id ?>_<?= $access->ccua_user_id ?>" data-is-transfer="<?= (int)$access->ccuaCch->isTransfer() ?>">
 	<div class="_cc-box-item">
 		<div class="_cc-client-info">
                                 <span class="_cc-client-name">

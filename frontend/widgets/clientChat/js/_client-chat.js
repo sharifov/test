@@ -99,7 +99,12 @@ function refreshClientChatWidget(obj) {
         case 'pending':
             increaseTotalCount();
             if ('isChatInTransfer' in data && data.isChatInTransfer) {
-                $('#_client_chat_access_widget ._cc-box-body').prepend(data.html);
+                let oneTransferElem = $('#_client_chat_access_widget ._cc-box-item-wrapper[data-is-transfer="1"]').last();
+                if (oneTransferElem.length) {
+                    oneTransferElem.after(data.html);
+                } else {
+                    $('#_client_chat_access_widget ._cc-box-body').prepend(data.html);
+                }
             } else {
                 $('#_client_chat_access_widget ._cc-box-body').append(data.html);
             }
