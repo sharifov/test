@@ -209,7 +209,7 @@ class ClientChatService
 			$_self->clientChatRequestRepository->save($clientChatRequest);
 			$client = $_self->clientManageService->getOrCreateByClientChatRequest($clientChatRequest, (int)$form->projectId);
 
-			$activeChatExist = ClientChat::find()->byDepartment($channel->ccc_dep_id)->byClientId($client->id)->notClosed()->exists();
+			$activeChatExist = ClientChat::find()->byDepartment($channel->ccc_dep_id)->withOwner()->byClientId($client->id)->notClosed()->exists();
 			if ($activeChatExist) {
 				throw new \DomainException('This visitor is already chatting with agent in ' . $department['dep_name'] . ' department');
 			}
@@ -292,11 +292,18 @@ class ClientChatService
 				throw new \RuntimeException('New department is not found');
 			}
 
+			$clientChatChannel = $this->clientChatChannelRepository->findByClientChatData($form->depId, $clientChat->cch_project_id, null);
+
+			$activeChatExists = ClientChat::find()->byChannel($clientChatChannel->ccc_id)->byClientId($clientChat->cch_client_id)->active()->exists();
+
+			if ($activeChatExists && !$clientChatChannel->isAllowedTransferToChannel()) {
+				throw new \DomainException('Client already has active chat in this department');
+			}
+
 			$clientChat->transfer();
 			$clientChat->cch_dep_id = $form->depId;
 			$this->clientChatRepository->save($clientChat);
 
-			$clientChatChannel = $this->clientChatChannelRepository->findByClientChatData($form->depId, $clientChat->cch_project_id, null);
 			if ($form->agentId) {
 				foreach ($form->agentId as $agentId) {
 					$userChannel = ClientChatUserChannel::find()->byChannelId($clientChatChannel->ccc_id)->byUserId($agentId)->one();
@@ -304,7 +311,7 @@ class ClientChatService
 						try {
 							$this->sendRequestToUser($clientChat, $userChannel);
 						} catch (\RuntimeException $e) {
-							\Yii::error('Send notification to user ' . $userChannel->ccuc_user_id . ' failed... ' . $e->getMessage() . '; File: ' . $e->getFile() . '; Line: ' . $e->getLine(), 'ClientChatService::transfer::RuntimeException');
+							\Yii::error('Send request to user ' . $userChannel->ccuc_user_id . ' failed... ' . $e->getMessage() . '; File: ' . $e->getFile() . '; Line: ' . $e->getLine(), 'ClientChatService::transfer::RuntimeException');
 							throw $e;
 						}
 					}

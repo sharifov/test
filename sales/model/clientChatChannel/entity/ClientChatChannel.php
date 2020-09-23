@@ -14,6 +14,7 @@ use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Json;
 
 /**
  * This is the model class for table "client_chat_channel".
@@ -33,6 +34,7 @@ use yii\helpers\ArrayHelper;
  * @property string $ccc_frontend_name
  * @property int|null $ccc_frontend_enabled
  * @property string|null $ccc_settings
+ * @property array $settings
  *
  * @property Employee $cccCreatedUser
  * @property Department $cccDep
@@ -45,6 +47,8 @@ use yii\helpers\ArrayHelper;
 class ClientChatChannel extends \yii\db\ActiveRecord
 {
 	public const MAX_PRIORITY_VALUE = 100;
+
+	private array $decodedSettings = [];
 
 	public function behaviors(): array
 	{
@@ -189,6 +193,14 @@ class ClientChatChannel extends \yii\db\ActiveRecord
         ];
     }
 
+	public function getSettings(): array
+	{
+		if (!empty($this->decodedSettings)) {
+			return $this->decodedSettings;
+		}
+		return $this->decodedSettings = ArrayHelper::merge(self::getDefaultSettingList(), Json::decode($this->ccc_settings) ?? []);
+	}
+
     /**
      * @return Scopes
      */
@@ -226,8 +238,14 @@ class ClientChatChannel extends \yii\db\ActiveRecord
         $settings['history_email_enabled'] = true;
         $settings['history_download_enabled'] = true;
         $settings['count_of_active_chats'] = 1;
+        $settings['allow_transfer_to_channel_with_active_chat'] = false;
         return $settings;
     }
+
+	public function isAllowedTransferToChannel(): bool
+	{
+		return (bool)($this->settings['allow_transfer_to_channel_with_active_chat'] ?? self::getDefaultSettingList()['allow_transfer_to_channel_with_active_chat']);
+	}
 
     /**
      * @param int $projectId

@@ -80,6 +80,11 @@ class Scopes extends \yii\db\ActiveQuery
 		return $this->andWhere(['cch_dep_id' => $dep]);
 	}
 
+	public function withOwner(): self
+	{
+		return $this->andWhere(['not', ['cch_owner_user_id' => null]]);
+	}
+
 	public function byProject(int $id): self
 	{
 		return $this->andWhere(['cch_project_id' => $id]);
