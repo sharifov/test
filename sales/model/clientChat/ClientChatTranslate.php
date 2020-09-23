@@ -31,6 +31,10 @@ class ClientChatTranslate
         $data['new_message']            = Yii::t('clientChat', 'New message', [], $language);
         $data['agent']                  = Yii::t('clientChat', 'Agent', [], $language);
         $data['textarea_placeholder']   = Yii::t('clientChat', 'Type a message...', [], $language);
+        $data['transfer_department']   = Yii::t('clientChat', 'The chat was transferred to the department {{name}}', [], $language);
+        $data['videocall_started']   = Yii::t('clientChat', 'Video call started', [], $language);
+        $data['videocall_ended']   = Yii::t('clientChat', 'Video call ended', [], $language);
+
 
         $data['registration'] = [
             'title'                     => Yii::t('clientChat_registration', 'We are ready to help you', [], $language),
@@ -51,6 +55,7 @@ class ClientChatTranslate
             'active'                        => Yii::t('clientChat_conversations', 'Active', [], $language),
             'archived'                      => Yii::t('clientChat_conversations', 'Archived Chats', [], $language),
             'start_new'                     => Yii::t('clientChat_conversations', 'New Chat', [], $language),
+            'conversation_ended'            => Yii::t('clientChat_conversations', 'Conversation has ended', [], $language),
         ];
 
         $data['file_upload'] = [
@@ -83,6 +88,8 @@ class ClientChatTranslate
             'rating_4'                  => Yii::t('clientChat_feedback', 'Good', [], $language),
             'rating_5'                  => Yii::t('clientChat_feedback', 'Awesome', [], $language),
         ];
+
+
 
         return $data;
     }
