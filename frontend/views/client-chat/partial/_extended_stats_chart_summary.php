@@ -17,11 +17,11 @@ $amountOfChats = $viewModel->amountOfChats;
             </tr>
             <tr>
                 <td></td>
-                <td>Amount of Chats</td>
+                <td>Amount of Chats <i class="fa fa-exclamation-triangle" aria-hidden="true" title="Calculated by Chats in Status Generated"></i></td>
                 <td>Amount of Accepted Chats</td>
                 <td>Amount of Missed Chats</td>
                 <td>First Response Time (FRT)</td>
-                <td>Average Chat Duration (ACD)</td>
+                <td>Average Chat Duration (ACD) <i class="fa fa-exclamation-triangle" aria-hidden="true" title="Calculated by Chats in Status Closed"></i></td>
             </tr>
             <tr>
                 <td>Incoming</td>
@@ -29,7 +29,7 @@ $amountOfChats = $viewModel->amountOfChats;
                 <td> <?= $amountOfChats['acceptedByAgent'] ?> </td>
                 <td> - </td>
                 <td> <?= $amountOfChats['totalFrtAvg'] ?> </td>
-                <td> - </td>
+                <td> <?= $amountOfChats['totalClientChatDurationAvg'] ?> </td>
             </tr>
             <tr>
                 <td>Outgoing</td>
@@ -37,7 +37,7 @@ $amountOfChats = $viewModel->amountOfChats;
                 <td> - </td>
                 <td> - </td>
                 <td> - </td>
-                <td> - </td>
+                <td> <?= $amountOfChats['totalAgentChatDurationAvg'] ?> </td>
             </tr>
             <tr>
                 <td>Total</td>

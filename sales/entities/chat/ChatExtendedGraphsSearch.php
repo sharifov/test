@@ -77,8 +77,10 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
         $query = static::find();
         $query->select([
             '' . $this->setGroupingParam() . ' AS date',
-            'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_CLIENT . ', 1, 0)) AS initiatedByClient',
-            'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_AGENT . ', 1, 0)) AS initiatedByAgent',
+            'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_CLIENT . ' AND cch_status_id = '. ClientChat::STATUS_GENERATED . ', 1, 0)) AS initiatedByClient',
+            'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_AGENT . ' AND cch_status_id = '. ClientChat::STATUS_GENERATED . ', 1, 0)) AS initiatedByAgent',
+            'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_CLIENT . ' AND cch_status_id = '. ClientChat::STATUS_CLOSED. ', 1, 0)) AS initiatedByClientClosed',
+            'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_AGENT . ' AND cch_status_id = '. ClientChat::STATUS_CLOSED . ', 1, 0)) AS initiatedByAgentClosed',
             'SUM(IF(cch_missed = ' . ClientChat::MISSED . ', 1, 0)) AS missedChats',
             'GROUP_CONCAT(DISTINCT cch_owner_user_id) AS agentsInGroup'
         ]);
@@ -206,15 +208,19 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
 
         foreach ($allData as $key => $finalData){
             $allData[$key]['sumFrtOfChatsInGroup'] = 0;
-            $allData[$key]['sumChatDurationInGroup'] = 0;
+            $allData[$key]['sumClientChatDurationInGroup'] = 0;
+            $allData[$key]['sumAgentChatDurationInGroup'] = 0;
             $agentsInGroup = explode(',', $finalData['agentsInGroup']);
             for ($i = 0; $i < count($agentsInGroup); $i++){
                 foreach ($chatsData as $chat){
                     if (!strcmp($finalData['date'], $chat['date'])  && $agentsInGroup[$i] == $chat['cch_owner_user_id'] && $chat['cch_source_type_id'] == ClientChat::SOURCE_TYPE_CLIENT ){
                         $allData[$key]['sumFrtOfChatsInGroup'] += $chat['agent_frt'];
                     }
-                    if (!strcmp($finalData['date'], $chat['date'])  && $agentsInGroup[$i] == $chat['cch_owner_user_id'] ){
-                        $allData[$key]['sumChatDurationInGroup'] += $chat['chat_duration'];
+                    if (!strcmp($finalData['date'], $chat['date'])  && $agentsInGroup[$i] == $chat['cch_owner_user_id'] && $chat['cch_source_type_id'] == ClientChat::SOURCE_TYPE_CLIENT ){
+                        $allData[$key]['sumClientChatDurationInGroup'] += $chat['chat_duration'];
+                    }
+                    if (!strcmp($finalData['date'], $chat['date'])  && $agentsInGroup[$i] == $chat['cch_owner_user_id'] && $chat['cch_source_type_id'] == ClientChat::SOURCE_TYPE_AGENT ){
+                        $allData[$key]['sumAgentChatDurationInGroup'] += $chat['chat_duration'];
                     }
                 }
             }

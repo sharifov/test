@@ -91,10 +91,17 @@ class ViewModelChatExtendedGraph
     {
         $totalInitiatedByClient = array_sum(array_column($this->clientChatData, 'initiatedByClient'));
         $totalInitiatedByAgent = array_sum(array_column($this->clientChatData, 'initiatedByAgent'));
+        $totalInitiatedByClientClosed = array_sum(array_column($this->clientChatData, 'initiatedByClientClosed'));
+        $totalInitiatedByAgentClosed = array_sum(array_column($this->clientChatData, 'initiatedByAgentClosed'));
         $totalAcceptedByAgent = array_sum(array_column($this->clientChatData, 'acceptedByAgent'));
         $totalMissedChats = array_sum(array_column($this->clientChatData, 'missedChats'));
         $totalFrtAvg = floor(array_sum(array_column($this->clientChatData, 'sumFrtOfChatsInGroup')) / ($totalInitiatedByClient ?: 1));
-        $totalChatDurationAvg = floor(array_sum(array_column($this->clientChatData, 'sumChatDurationInGroup')) / ($totalInitiatedByClient + $totalInitiatedByAgent ?: 1));
+
+        $totalClientChatDurationAvg = floor(array_sum(array_column($this->clientChatData, 'sumClientChatDurationInGroup')) / ($totalInitiatedByClientClosed ?: 1));
+        $totalAgentChatDurationAvg = floor(array_sum(array_column($this->clientChatData, 'sumAgentChatDurationInGroup')) / ($totalInitiatedByAgentClosed ?: 1));
+
+        $totalChatDurationAvg = floor((array_sum(array_column($this->clientChatData, 'sumClientChatDurationInGroup')) + array_sum(array_column($this->clientChatData, 'sumAgentChatDurationInGroup')))  / (($totalInitiatedByClientClosed + $totalInitiatedByAgentClosed) ?: 1));
+
         $this->amountOfChats = [
             'clients' => $totalInitiatedByClient,
             'agents' => $totalInitiatedByAgent,
@@ -102,6 +109,8 @@ class ViewModelChatExtendedGraph
             'acceptedByAgent' => $totalAcceptedByAgent,
             'missedChats' => $totalMissedChats,
             'totalFrtAvg' => \Yii::$app->formatter->asDuration($totalFrtAvg),
+            'totalClientChatDurationAvg' => \Yii::$app->formatter->asDuration($totalClientChatDurationAvg),
+            'totalAgentChatDurationAvg' => \Yii::$app->formatter->asDuration($totalAgentChatDurationAvg),
             'totalChatDurationAvg' =>  \Yii::$app->formatter->asDuration($totalChatDurationAvg),
         ];
     }
