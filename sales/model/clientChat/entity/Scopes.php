@@ -75,6 +75,11 @@ class Scopes extends \yii\db\ActiveQuery
 		return $this->andWhere(['cch_client_id' => $id]);
 	}
 
+	public function expectOwner(int $id): self
+	{
+		return $this->andWhere(['<>', 'cch_owner_user_id', $id]);
+	}
+
 	public function byDepartment(int $dep): self
 	{
 		return $this->andWhere(['cch_dep_id' => $dep]);

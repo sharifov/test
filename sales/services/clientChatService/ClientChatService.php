@@ -294,7 +294,7 @@ class ClientChatService
 
 			$clientChatChannel = $this->clientChatChannelRepository->findByClientChatData($form->depId, $clientChat->cch_project_id, null);
 
-			$activeChatExists = ClientChat::find()->byChannel($clientChatChannel->ccc_id)->byClientId($clientChat->cch_client_id)->active()->exists();
+			$activeChatExists = ClientChat::find()->byChannel($clientChatChannel->ccc_id)->byClientId($clientChat->cch_client_id)->expectOwner($clientChat->cch_owner_user_id)->active()->exists();
 
 			if ($activeChatExists && !$clientChatChannel->isAllowedTransferToChannel()) {
 				throw new \DomainException('Client already has active chat in this department');
