@@ -225,6 +225,7 @@ class ClientChatChannel extends \yii\db\ActiveRecord
         $settings['feedback_message_enabled'] = true;
         $settings['history_email_enabled'] = true;
         $settings['history_download_enabled'] = true;
+        $settings['count_of_active_chats'] = 1;
         return $settings;
     }
 
