@@ -23,7 +23,7 @@ use sales\helpers\app\AppHelper;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use sales\repositories\lead\LeadRepository;
-use sales\services\quote\addQuote\Trip;
+use sales\services\quote\addQuote\TripService;
 use Yii;
 use yii\helpers\Html;
 use yii\helpers\Json;
@@ -851,11 +851,10 @@ class QuoteController extends ApiBaseController
             }
 
             $tripsSegmentsData = $quote->getTripsSegmentsData();
-            $trip = new Trip($quote);
+
+            $trip = new TripService($quote);
             $trip->createTrips($tripsSegmentsData);
             $quote = $trip->getQuote();
-
-            //  $quote->createQuoteTrips();
 
             if(isset($quoteAttributes['baggage']) && !empty($quoteAttributes['baggage'])){
                 foreach ($quoteAttributes['baggage'] as $baggageAttr){

@@ -10,9 +10,9 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 
 /**
- * Class Trip
+ * Class TripService
  */
-class Trip
+class TripService
 {
     private Quote $quote;
     private array $errors = [];
@@ -32,6 +32,15 @@ class Trip
     public function createTrips(array $parsedData): array
     {
         $result = [];
+
+        if (empty($parsedData)) {
+            $message = 'Parsed "reservation_dump" cannot be empty.';
+                $message .= ' ' . Log::ADDITIONAL_DATA_DELIMITER .
+                    '. Dump: ' . $this->quote->reservation_dump .
+                    '. QuoteUid: ' . $this->quote->uid;
+            throw new \DomainException($message, -1);
+        }
+
         foreach ($parsedData as $tripEntry) {
             $this->guardTripEntry($tripEntry);
 
@@ -42,8 +51,8 @@ class Trip
             if (!$trip->validate()) {
                 $message = 'QuoteTrip not created. Error: ' . $trip->getErrorSummary(false)[0];
                 $message .= ' ' . Log::ADDITIONAL_DATA_DELIMITER .
-                    ' Dump: ' . $this->quote->reservation_dump .
-                    ' QuoteUid: ' . $this->quote->uid;
+                    '. Dump: ' . $this->quote->reservation_dump .
+                    '. QuoteUid: ' . $this->quote->uid;
 
                 throw new \DomainException($message, -1);
             }
@@ -56,10 +65,10 @@ class Trip
                 $segment->attributes = $segmentEntry;
                 if (!$segment->validate()) {
                     $message = 'QuoteSegment not created.' .
-                        ' Error: ' . $segment->getErrorSummary(false)[0];
+                        '. Error: ' . $segment->getErrorSummary(false)[0];
                     $message .= ' ' . Log::ADDITIONAL_DATA_DELIMITER .
-                        ' SegmentDump: ' . VarDumper::dumpAsString($segmentEntry) .
-                        ' QuoteDump: ' . $this->quote->reservation_dump;
+                        '. SegmentDump: ' . VarDumper::dumpAsString($segmentEntry) .
+                        '. QuoteDump: ' . $this->quote->reservation_dump;
 
                     throw new \DomainException($message, -1);
                 }
@@ -78,9 +87,9 @@ class Trip
 
         $message = 'Keys "qt_duration", "qt_key" and "segments" must be in an "TripEntry".';
         $message .= ' ' . Log::ADDITIONAL_DATA_DELIMITER .
-            ' TripEntry: . ' . VarDumper::dumpAsString($tripEntry) .
-            ' Dump: ' . $this->quote->reservation_dump .
-            ' QuoteUid' . $this->quote->uid;
+            '. TripEntry: . ' . VarDumper::dumpAsString($tripEntry) .
+            '. Dump: ' . $this->quote->reservation_dump .
+            '. QuoteUid' . $this->quote->uid;
 
         throw new \DomainException($message, -1);
     }
