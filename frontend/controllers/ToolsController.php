@@ -196,6 +196,39 @@ class ToolsController extends FController
         ]);
     }
 
+
+    /**
+     * @return string
+     * @throws \Exception
+     */
+    public function actionDbInfo(): string
+    {
+
+        $db = Yii::$app->getDb();
+        // get the db name
+        $schema = $db->createCommand('select database()')->queryScalar();
+        // get all tables
+        $tables = $db->createCommand('SELECT * FROM information_schema.tables WHERE table_schema=:schema AND table_type = "BASE TABLE"', [
+            ':schema' => $schema,
+        ])->queryAll();
+
+        //VarDumper::dump($tables); exit;
+
+        // Alter the encoding of each table
+//        foreach ($tables as $id => $table) {
+//            $tableName = $table['TABLE_NAME'];
+//            if($tableName) {
+//                $db->createCommand("ALTER TABLE `$tableName` CONVERT TO CHARACTER SET " . $collate . " COLLATE " . $collation)->execute();
+//                echo $id." - tbl: " . $tableName . " - " . $table['TABLE_COLLATION'] . " \r\n";
+//            }
+//        }
+
+        return $this->render('db-info', [
+            'tables' => $tables,
+            'schema' => $schema,
+        ]);
+    }
+
     /**
      * @param $filepath
      * @param int $lines
