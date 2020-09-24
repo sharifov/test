@@ -11,7 +11,7 @@ use sales\auth\Auth;
 use yii\helpers\Html;
 use frontend\widgets\centrifugo\CentrifugoNotificationWidget;
 
-$bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
+$bundle = \frontend\themes\gentelella_v2\assets\AssetCrud::register($this);
 \frontend\assets\PageLoaderAsset::register($this);
 
 

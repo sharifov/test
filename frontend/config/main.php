@@ -28,7 +28,7 @@ $appVersion = $params['release']['version'] ?? '';
 
 return [
     'id' => 'app-frontend',
-    'name'  => 'Sales',
+    'name'  => 'Sales CRM',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'controllerNamespace' => 'frontend\controllers',
