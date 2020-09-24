@@ -137,7 +137,7 @@ class ClientChatController extends Controller
      * @throws \yii\base\Exception
      * @throws \yii\httpclient\Exception
      */
-    public function actionRcDeleteUserProfile(?int $userId = null, int $limit = 5, int $offset = 0)
+    public function actionRcDeleteUserProfile(?int $userId = null, int $limit = 5, int $offset = 0, int $deleteByUsername = 0)
     {
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
@@ -168,7 +168,7 @@ class ClientChatController extends Controller
 
 			$userProfile = UserProfile::findOne(['up_user_id' => $user['id']]);
 
-            $result = $rocketChat->deleteUser($userProfile->up_rc_user_id ?? null, $user['nickname'] ?: $user['username']);
+            $result = $rocketChat->deleteUser($userProfile->up_rc_user_id ?? null, $user['nickname'] ?: $user['username'], $deleteByUsername);
 
             echo "\n-- " . $user['username'] . ' ('.$user['id'].') --' . PHP_EOL;
 
