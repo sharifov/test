@@ -118,7 +118,11 @@ class LeadController extends ApiBaseController
      * @apiParam {string{500}}          lead.visitor_log.vl_user_agent
      * @apiParam {string{39}}           lead.visitor_log.vl_ip_address
      * @apiParam {datetime{YYYY-MM-DD HH:mm:ss}}  lead.visitor_log.vl_visit_dt
-     *
+     * @apiParam {object}               Client
+     * @apiParam {string}               [Client.name]                            Client name
+     * @apiParam {string}               [Client.phone]                           Client phone
+     * @apiParam {string}               [Client.email]                           Client email
+     * @apiParam {string}               [Client.client_ip]                       Client client_ip
      *
      * @apiParamExample {json} Request-Example:
      * {
@@ -188,6 +192,12 @@ class LeadController extends ApiBaseController
      *                   "vl_visit_dt": "2020-02-14 12:00:00"
      *               }
      *        ]
+     *    },
+     *    "Client": {
+     *        "name": "Alexandr",
+     *        "phone": "+373-69-487523",
+     *        "email": "email1@gmail.com",
+     *        "client_ip": "127.0.0.1"
      *    }
      * }
      *
