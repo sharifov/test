@@ -294,16 +294,18 @@ class CallCommand extends \yii\db\ActiveRecord
 
     public function checkParentSort($attribute, $params)
     {
-        $findResult = self::findByParentAndSort($this->ccom_parent_id, $this->ccom_sort_order);
+        if ($this->ccom_parent_id) {
+            $findResult = self::findByParentAndSort($this->ccom_parent_id, $this->ccom_sort_order);
 
-        if (
-            !empty($findResult)
-            &&
-            ($findResult->ccom_parent_id === (int) $this->ccom_parent_id && $findResult->ccom_sort_order === (int) $this->ccom_sort_order)
-            &&
-            ($findResult->ccom_id !== $this->ccom_id)
-        ) {
-            $this->addError($attribute, 'This parent already has a child with this sorting');
+            if (
+                !empty($findResult)
+                &&
+                ($findResult->ccom_parent_id === (int) $this->ccom_parent_id && $findResult->ccom_sort_order === (int) $this->ccom_sort_order)
+                &&
+                ($findResult->ccom_id !== $this->ccom_id)
+            ) {
+                $this->addError($attribute, 'This parent already has a child with this sorting');
+            }
         }
     }
 
