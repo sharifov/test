@@ -142,7 +142,7 @@ class ClientChatController extends Controller
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
 
-        $query = Employee::find()->select(['id', 'username', 'nickname', 'email'])->leftJoin('user_profile', 'id=up_user_id');
+        $query = Employee::find()->select(['id', 'username', 'nickname', 'email', 'nickname_client_chat'])->leftJoin('user_profile', 'id=up_user_id');
         $query->where(['IS NOT', 'up_rc_user_id', null]);
 
         //echo $query->createCommand()->getRawSql(); exit;
