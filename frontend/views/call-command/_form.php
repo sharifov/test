@@ -44,9 +44,11 @@ $typeForm = $typeForm ?? '';
                 </div>
                 <div class="row">
                     <div class="col-md-4">
+                        <?php $disabled = ($model->ccom_type_id === CallCommand::TYPE_COMMAND_LIST) ?>
+
                         <?php echo $form->field($model, 'ccom_parent_id')
                             ->dropDownList(CallCommand::getListByTypes([CallCommand::TYPE_COMMAND_LIST], false),
-                                ['prompt' => '-', 'id' => 'callCommandParent']) ?>
+                                ['prompt' => '-', 'id' => 'callCommandParent', 'disabled' => $disabled]) ?>
                     </div>
                     <div class="col-md-4">
                         <?= $form->field($model, 'ccom_project_id')->dropDownList(\common\models\Project::getList(), ['prompt' => '-']) ?>
@@ -56,9 +58,11 @@ $typeForm = $typeForm ?? '';
                     </div>
                 </div>
 
-                    <?= $form->field($model, 'ccom_params_json')->textarea([
+                    <?php echo $form->field($model, 'ccom_params_json')->textarea([
                         'style' => 'display:none;', 'id' => 'params_json'
                     ])->label(false) ?>
+
+                    <?php echo $form->field($model, 'ccom_id')->hiddenInput()->label(false) ?>
 
                 <div class="row">
                     <div class="col-md-12">

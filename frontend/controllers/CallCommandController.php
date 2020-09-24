@@ -300,8 +300,15 @@ class CallCommandController extends FController
         if (Yii::$app->request->isAjax) {
 
             Yii::$app->response->format = Response::FORMAT_JSON;
+            $post = Yii::$app->request->post();
+            $callCommandFormName = (new CallCommand())->formName();
+            $ccom_id = isset($post[$callCommandFormName]['ccom_id']) ? (int) $post[$callCommandFormName]['ccom_id'] : null;
 
-            $model = new CallCommand();
+            if ($ccom_id && CallCommand::findOne($ccom_id)) {
+                $model = CallCommand::findOne($ccom_id);
+            } else {
+                $model = new CallCommand();
+            }
 
             if ($model->load(Yii::$app->request->post()) && $model->validate()) {
                 return ['success' => true];

@@ -105,11 +105,14 @@ class CallCommand extends \yii\db\ActiveRecord
                 return $('#callCommandParent').val().length;
             }"],
 
-            [['ccom_sort_order'], 'unique', 'targetAttribute' => ['ccom_parent_id', 'ccom_sort_order'],
+            ['ccom_sort_order', 'checkParentSort']
+
+            /*[['ccom_sort_order'], 'unique', 'targetAttribute' => ['ccom_parent_id', 'ccom_sort_order'],
                 'message' => 'This parent already has a child with this sorting',
                     'when' => function($model) {
                         return (!empty($model->ccom_parent_id) && !empty($model->ccom_sort_order));
-                    }, 'enableClientValidation' => false],
+                    }, 'enableClientValidation' => false],*/
+
         ];
     }
 
@@ -289,4 +292,33 @@ class CallCommand extends \yii\db\ActiveRecord
         return ArrayHelper::map($data, 'ccom_id', 'name');
     }
 
+    public function checkParentSort($attribute, $params)
+    {
+        $findResult = self::findByParentAndSort($this->ccom_parent_id, $this->ccom_sort_order);
+
+        if (
+            !empty($findResult)
+            &&
+            ($findResult->ccom_parent_id === (int) $this->ccom_parent_id && $findResult->ccom_sort_order === (int) $this->ccom_sort_order)
+            &&
+            ($findResult->ccom_id !== $this->ccom_id)
+        ) {
+            $this->addError($attribute, 'This parent already has a child with this sorting');
+        }
+    }
+
+    /**
+     * @param int $parentId
+     * @param int $sort
+     * @return array|ActiveRecord|null
+     */
+    public static function findByParentAndSort(int $parentId, int $sort)
+    {
+        return self::find()
+            ->select(['ccom_id', 'ccom_parent_id', 'ccom_sort_order'])
+            ->where([
+                'ccom_parent_id' => $parentId,
+                'ccom_sort_order' => $sort,
+            ])->one();
+    }
 }

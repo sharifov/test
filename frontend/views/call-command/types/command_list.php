@@ -50,10 +50,10 @@ use yii\helpers\Url;
                     'options' => [
                         'class' => 'form-control input_command_line sort_command_line',
                         'readonly' => true,
-                        'style' => 'width: 30px;',
+                        'style' => 'width: 35px;',
                     ],
                     'headerOptions' => [
-                        'style' => 'width: 20px;',
+                        'style' => 'width: 25px;',
                     ],
                 ],
                 [

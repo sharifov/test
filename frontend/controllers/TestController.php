@@ -1884,6 +1884,12 @@ class TestController extends FController
 
 	public function actionZ()
     {
+        $x = CallCommand::findByParentAndSort(189, 2);
+
+        \yii\helpers\VarDumper::dump($x, 10, true); exit();
+        /* FOR DEBUG:: must by remove */
+
+
         return $this->render('z');
     }
 
