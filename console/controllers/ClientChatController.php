@@ -63,7 +63,7 @@ class ClientChatController extends Controller
 			$result = $rocketChat->createUser(
 				$user['username'],
 				$pass,
-				$user['nickname'] ?: $user['username'],
+				$user['nickname_client_chat'] ?: $user['username'],
 				$user['email']
 			);
 
@@ -168,7 +168,7 @@ class ClientChatController extends Controller
 
 			$userProfile = UserProfile::findOne(['up_user_id' => $user['id']]);
 
-            $result = $rocketChat->deleteUser($userProfile->up_rc_user_id ?? null, $user['nickname'] ?: $user['username'], $deleteByUsername);
+            $result = $rocketChat->deleteUser($userProfile->up_rc_user_id ?? null, $user['nickname_client_chat'] ?: $user['username'], $deleteByUsername);
 
             echo "\n-- " . $user['username'] . ' ('.$user['id'].') --' . PHP_EOL;
 
