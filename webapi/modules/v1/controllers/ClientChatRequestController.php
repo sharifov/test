@@ -599,7 +599,11 @@ class ClientChatRequestController extends ApiBaseController
         }
 
 		$projectConfig = ClientChatProjectConfig::findOne(['ccpc_project_id' => $projectId]);
-		$projectChannels = ClientChatChannel::find()->select(['ccc_name', 'ccc_id'])->where(['ccc_project_id' => $projectId])->orderBy(['ccc_name' => SORT_ASC])->indexBy('ccc_id')->asArray()->column();
+		$projectChannels = ClientChatChannel::find()
+            ->select(['ccc_frontend_name', 'ccc_id'])
+            ->where(['ccc_project_id' => $projectId, 'ccc_disabled' => false])
+            ->orderBy(['ccc_frontend_name' => SORT_ASC])
+            ->indexBy('ccc_id')->asArray()->column();
 
 		if ($projectConfig) {
             $data = ArrayHelper::toArray(new ProjectConfigApiResponseDto($projectConfig, $languageId));
