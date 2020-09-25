@@ -86,15 +86,8 @@ class SmsSearch extends Sms
             return $dataProvider;
         }
 
-        /*if(empty($this->s_created_dt) && isset($params['SmsSearch']['date_range'])){
-            $query->andFilterWhere(['>=', 's_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
-                ->andFilterWhere(['<=', 's_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
-        } elseif (isset($params['SmsSearch']['s_created_dt']) && !empty($params['SmsSearch']['s_created_dt'])) {
-            $query->andFilterWhere(['>=', 's_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->s_created_dt))])
-                ->andFilterWhere(['<=', 's_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->s_created_dt) + 3600 * 24)]);
-        }*/
 
-        if(!empty($this->date_range)){
+        if($this->datetime_start && $this->datetime_end){
             $query->andFilterWhere(['>=', 's_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
                 ->andFilterWhere(['<=', 's_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         }
@@ -272,10 +265,9 @@ class SmsSearch extends Sms
         $query->from(static::tableName());
         $query->where('s_status_id IS NOT NULL');
         $query->andWhere(['s_created_user_id' => $user_id]);
-        if($this->date_range){
-            $range = explode(' - ', $this->date_range);
-            $query->andWhere(['>=', 's_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($range[0]))]);
-            $query->andWhere(['<=', 's_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($range[1]))]);
+        if($this->datetime_start && $this->datetime_end){
+            $query->andWhere(['>=', 's_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))]);
+            $query->andWhere(['<=', 's_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         }
 
         $query->groupBy('createdDate');

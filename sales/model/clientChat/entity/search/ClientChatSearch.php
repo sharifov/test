@@ -116,7 +116,7 @@ class ClientChatSearch extends ClientChat
             return $dataProvider;
         }
 
-        if(!empty($this->timeRange)){
+        if($this->timeStart && $this->timeEnd){
             $query->andFilterWhere(['>=', 'cch_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->timeStart))])
                 ->andFilterWhere(['<=', 'cch_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->timeEnd))]);
         }

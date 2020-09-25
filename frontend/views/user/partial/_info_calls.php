@@ -10,7 +10,7 @@ use \common\models\Project;
 ?>
 
 <?php Pjax::begin(['timeout' => 10000]); ?>
-<?= $this->render('_info_calls_search', ['model' => $callLogSearchModel]); ?>
+<?php /* echo $this->render('_info_calls_search', ['model' => $callLogSearchModel]); */ ?>
 <?= GridView::widget([
     'dataProvider' => $callLogDataProvider,
     'filterModel' => $callLogSearchModel,

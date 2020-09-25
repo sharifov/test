@@ -106,7 +106,7 @@ class CallLogSearch extends CallLog
             [['projectIds', 'statusIds', 'typesIds', 'categoryIds', 'departmentIds'], 'each', 'rule' => ['integer']],
             [['reportTimezone', 'timeFrom', 'timeTo'], 'string'],
             [['callDepId', 'userGroupId', 'minTalkTime', 'maxTalkTime'], 'integer'],
-            ['reportCreateTimeRange', 'safe']
+            [['reportCreateTimeRange', 'createTimeStart', 'createTimeEnd'], 'safe']
         ];
     }
 
@@ -118,7 +118,7 @@ class CallLogSearch extends CallLog
         $this->createTimeRange = ($currentDate->modify(self::CREATE_TIME_START_DEFAULT_RANGE))->format('Y-m-d') . ' 00:00:00 - ' . $currentDate->format('Y-m-d') . ' 23:59:59';
     }
 
-    public function behaviors()
+    /*public function behaviors()
     {
         return [
             [
@@ -128,7 +128,7 @@ class CallLogSearch extends CallLog
                 'dateEndAttribute' => 'createTimeEnd',
             ]
         ];
-    }
+    }*/
 
     private function getPartitionsByYears($from, $to)
     {
@@ -379,9 +379,9 @@ class CallLogSearch extends CallLog
             \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cl_call_created_dt', $this->cl_call_created_dt, $user->timezone);
         }
 
-        if ($this->createTimeRange) {
-            $dateTimeStart = Employee::convertTimeFromUserDtToUTC($this->createTimeStart);
-            $dateTimeEnd = Employee::convertTimeFromUserDtToUTC($this->createTimeEnd);
+        if ($this->createTimeStart && $this->createTimeEnd) {
+            $dateTimeStart = Employee::convertTimeFromUserDtToUTC(strtotime($this->createTimeStart));
+            $dateTimeEnd = Employee::convertTimeFromUserDtToUTC(strtotime($this->createTimeEnd));
             $query->andWhere(['between', 'cl_call_created_dt', $dateTimeStart, $dateTimeEnd]);
         }
 
@@ -607,10 +607,9 @@ class CallLogSearch extends CallLog
         $query->from(static::tableName());
         $query->where('cl_status_id IS NOT NULL');
         $query->andWhere(['cl_user_id' => $user_id]);
-        if($this->createTimeRange){
-            $range = explode(' - ', $this->createTimeRange);
-            $query->andWhere(['>=', 'cl_call_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($range[0]))]);
-            $query->andWhere(['<=', 'cl_call_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($range[1]))]);
+        if($this->createTimeStart && $this->createTimeEnd){
+            $query->andWhere(['>=', 'cl_call_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->createTimeStart))]);
+            $query->andWhere(['<=', 'cl_call_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->createTimeEnd))]);
         }
 
         $query->groupBy('createdDate');

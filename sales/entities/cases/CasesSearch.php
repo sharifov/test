@@ -973,7 +973,7 @@ class CasesSearch extends Cases
         ']);
         $query->from(static::tableName());
         $query->where(['cs_user_id' => $userID]);
-        if(!empty($this->date_range)){
+        if($this->datetime_start && $this->datetime_end){
             $query->andFilterWhere(['>=', 'cs_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
                 ->andFilterWhere(['<=', 'cs_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         }

@@ -108,7 +108,7 @@ class EmailSearch extends Email
             return $dataProvider;
         }
 
-        if(!empty($this->date_range)){
+        if($this->datetime_start && $this->datetime_end){
             $query->andFilterWhere(['>=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
                 ->andFilterWhere(['<=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         }
@@ -314,10 +314,9 @@ class EmailSearch extends Email
         $query->from(static::tableName());
         $query->where('e_status_id IS NOT NULL');
         $query->andWhere(['e_created_user_id' => $user_id]);
-        if($this->date_range){
-            $range = explode(' - ', $this->date_range);
-            $query->andWhere(['>=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($range[0]))]);
-            $query->andWhere(['<=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($range[1]))]);
+        if($this->datetime_start && $this->datetime_end){
+            $query->andWhere(['>=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))]);
+            $query->andWhere(['<=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         }
 
         $query->groupBy('createdDate');

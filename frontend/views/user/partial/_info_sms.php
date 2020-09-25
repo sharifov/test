@@ -8,7 +8,7 @@ use yii\helpers\Html;
 
 <?php Pjax::begin(['timeout' => 10000]); ?>
 
-<?= $this->render('_info_sms_search', ['model' => $smsSearchModel]); ?>
+<?php /*echo $this->render('_info_sms_search', ['model' => $smsSearchModel]); */?>
 
 <?= GridView::widget([
     'dataProvider' => $smsDataProvider,
