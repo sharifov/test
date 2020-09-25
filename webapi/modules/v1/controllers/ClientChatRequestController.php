@@ -611,7 +611,7 @@ class ClientChatRequestController extends ApiBaseController
             $data['translations'] = ClientChatTranslate::getTranslates($languageId);
 
             if ($projectChannels){
-                $data['department'] = $projectChannels;
+                $data['translations']['department'] = $projectChannels;
             }
 
 			return new SuccessResponse(
