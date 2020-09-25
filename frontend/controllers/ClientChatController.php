@@ -688,8 +688,18 @@ class ClientChatController extends FController
                 if ($capture = $this->generateQuoteCapture($quote)) {
                     /** @var Quote $quote */
                     $data = $quote->getPricesData();
-                    $price = (int)(str_replace('.', '', ($data['total']['selling'] ?? 0))) * 100;
-
+                    $selling = $data['total']['selling'] ?? 0;
+                    if (($pos = strpos($selling, '.')) > 0) {
+                        $str = substr($selling, $pos + 1, 2);
+                        if ($str == '') {
+                            $selling .= '00';
+                        } elseif (strlen($str) === 1) {
+                            $selling .= '0';
+                        }
+                    } else {
+                        $selling .= '.00';
+                    }
+                    $price = (int)(str_replace('.', '', $selling)) * 100;
                     $captures[] = [
                         'price' => $price,
                         'data' => $capture,
@@ -700,16 +710,12 @@ class ClientChatController extends FController
                 throw new \DomainException('Not generated captures. Try again.');
             }
 
-            Yii::info($captures, 'info\debug_before_sort');
-
             usort($captures, static function ($a, $b) {
                 if ($a['price'] === $b['price']) {
                     return 0;
                 }
                 return ($a['price'] < $b['price']) ? -1 : 1;
             });
-
-            Yii::info($captures, 'info\debug_after_sort');
 
             if (!$this->saveQuoteCaptures($captures, Auth::id(), $form->chatId, $form->leadId)) {
                 throw new \DomainException('Cant tmp save quotes. Please try again later.');
