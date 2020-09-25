@@ -700,12 +700,16 @@ class ClientChatController extends FController
                 throw new \DomainException('Not generated captures. Try again.');
             }
 
+            Yii::info($captures, 'info\debug_before_sort');
+
             usort($captures, static function ($a, $b) {
                 if ($a['price'] === $b['price']) {
                     return 0;
                 }
-                return ($a["price"] < $b["price"]) ? -1 : 1;
+                return ($a['price'] < $b['price']) ? -1 : 1;
             });
+
+            Yii::info($captures, 'info\debug_after_sort');
 
             if (!$this->saveQuoteCaptures($captures, Auth::id(), $form->chatId, $form->leadId)) {
                 throw new \DomainException('Cant tmp save quotes. Please try again later.');
