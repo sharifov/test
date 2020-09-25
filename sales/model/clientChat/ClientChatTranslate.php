@@ -67,11 +67,11 @@ class ClientChatTranslate
             'upload_progress'       => Yii::t('clientChat_file', 'Uploading file...', [], $language),
         ];
 
-        $data['department'] = [
+        /*$data['department'] = [
             'sales'         => Yii::t('clientChat', 'Sales', [], $language),
             'support'       => Yii::t('clientChat', 'Support', [], $language),
             'exchange'      => Yii::t('clientChat', 'Exchange', [], $language),
-        ];
+        ];*/
 
         $data['feedback'] = [
             'thanks_for_feedback'       => Yii::t('clientChat_feedback', 'Thanks for your feedback!', [], $language),
