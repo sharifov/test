@@ -1098,5 +1098,46 @@ class EmployeeController extends FController
         return preg_replace('~'.$term.'~i', '<b style="color: #e15554"><u>$0</u></b>', $str);
     }
 
+    public function actionValidateRocketChatCredential()
+    {
+        if (!Yii::$app->request->isPost) {
+            throw new BadRequestHttpException();
+        }
 
+        try {
+            $userId = (int)Yii::$app->request->post('id');
+            if (!$userId) {
+                throw new \Exception('Not found user Id');
+            }
+            $user = Employee::findOne($userId);
+            if (!$user) {
+                throw new \Exception('Not found User with Id ' . $userId);
+            }
+            if (!$rocketUserId = $user->userProfile->up_rc_user_id) {
+                throw new \Exception('Not found Rocket Chat User Id for this user(' . $userId . ')');
+            }
+            if (!$rocketToken = $user->userProfile->up_rc_auth_token) {
+                throw new \Exception('Not found Rocket Chat Auth Token for this user(' . $userId . ')');
+            }
+
+            $result = \Yii::$app->rchat->me($rocketUserId, $rocketToken);
+
+            if ($result['error'] !== false) {
+                if ($result['error'] === 'You must be logged in to do this.') {
+                    throw new \Exception('Invalid credential');
+                }
+                throw new \Exception((string)$result['error']);
+            }
+
+        } catch (\Throwable $e) {
+            return $this->asJson([
+                'error' => true,
+                'message' => $e->getMessage(),
+            ]);
+        }
+        return $this->asJson([
+            'error' => false,
+            'message' => 'OK',
+        ]);
+    }
 }

@@ -490,6 +490,24 @@ class RocketChat extends Component
         return $out;
     }
 
+    public function me(string $userId, string $token): array
+    {
+        $out = ['error' => false, 'data' => []];
+
+        $response = $this->sendRequest('me', [], 'get', [
+            'X-User-Id' => $userId,
+            'X-Auth-Token' => $token,
+        ]);
+
+        if ($response->isOk) {
+            $out['data'] = $response->data;
+        } else {
+            $out['error'] = self::getErrorMessageFromResult($response->content);
+        }
+
+        return $out;
+    }
+
     /**
      * @param string $url
      * @throws \Exception
