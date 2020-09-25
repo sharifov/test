@@ -400,7 +400,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             [['username', 'nickname_client_chat'], 'unique'],
             [['email'], 'unique'],
             [['email'], 'email'],
-            [['nickname_client_chat'], SlugValidator::class],
+            /*[['nickname_client_chat'], SlugValidator::class],*/
             ['email', 'filter', 'filter' => 'strtolower', 'skipOnEmpty' => true],
             [['username'], 'match' ,'pattern'=>'/^[a-z0-9_\-\.]+$/i', 'message'=>'Username can contain only characters ("a-z", "0-9", "_", "-", ".")'],
             [['make_user_project_params'], 'boolean'],
