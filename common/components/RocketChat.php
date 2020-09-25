@@ -545,8 +545,10 @@ class RocketChat extends Component
         }
 
         if (!empty($out['error'])) {
-            \Yii::error(VarDumper::dumpAsString($out['error'], 10),
-                'RocketChat:updateUser:fail');
+            \Yii::error(VarDumper::dumpAsString([
+                'RequestData' => $dataRequest,
+                'ResponseError' => $out['error'],
+            ], 10),'RocketChat:updateUser:fail');
         }
 
         return $out;
