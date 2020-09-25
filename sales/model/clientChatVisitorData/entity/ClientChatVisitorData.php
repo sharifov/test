@@ -80,7 +80,7 @@ class ClientChatVisitorData extends \yii\db\ActiveRecord
 
             ['cvd_updated_dt', 'safe'],
 
-            ['cvd_url', 'string', 'max' => 255],
+            ['cvd_url', 'string', 'max' => 1000],
 
 			['cvd_visitor_rc_id', 'string', 'max' => 50],
 			['cvd_visitor_rc_id', 'required'],
@@ -155,7 +155,7 @@ class ClientChatVisitorData extends \yii\db\ActiveRecord
 		$_self->cvd_city = $data['geo']['city'] ?? '';
 		$_self->cvd_latitude = (float)($data['geo']['latitude'] ?? 0);
 		$_self->cvd_longitude = (float)($data['geo']['longitude'] ?? 0);
-		$_self->cvd_url = $data['page']['url'] ?? '';
+		$_self->cvd_url = (string)substr(($data['page']['url'] ?? ''), 0, 1000);
 		$_self->cvd_title = $data['page']['title'] ?? '';
 		$_self->cvd_referrer = $data['page']['referrer'] ?? '';
 		$_self->cvd_timezone = $data['geo']['timezone'] ?? '';
