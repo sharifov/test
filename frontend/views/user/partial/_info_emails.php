@@ -6,7 +6,7 @@ use dosamigos\datepicker\DatePicker;
 ?>
 
 <?php Pjax::begin(); ?>
-<?= $this->render('_info_emails_search', ['model' => $emailSearchModel]); ?>
+<?php /*echo $this->render('_info_emails_search', ['model' => $emailSearchModel]); */?>
 <?= GridView::widget([
     'dataProvider' => $emailDataProvider,
     'filterModel' => $emailSearchModel,

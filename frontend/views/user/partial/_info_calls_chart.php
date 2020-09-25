@@ -59,7 +59,11 @@
             var options = {
                 title : 'Dynamic of User Calls by Statuses',
                 vAxis: {title: 'Calls'},
-                hAxis: {title: 'Days'},
+                hAxis: {
+                    title: 'Days',
+                    slantedText: true,
+                    slantedTextAngle: 30,
+                },
                 seriesType: 'bars',
                 //series: {6: {type: 'bars'}},
                 /*series: {

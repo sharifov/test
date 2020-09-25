@@ -13,7 +13,11 @@
             var options = {
                 title : 'Dynamic of User Emails by Statuses',
                 vAxis: {title: 'Emails'},
-                hAxis: {title: 'Days'},
+                hAxis: {
+                    title: 'Days',
+                    slantedText: true,
+                    slantedTextAngle: 30,
+                },
                 seriesType: 'bars',
                 //series: {5: {type: 'bars'}},
                 /*series: {

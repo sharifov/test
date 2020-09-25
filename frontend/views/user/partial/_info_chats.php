@@ -9,7 +9,7 @@ use common\components\grid\DateTimeColumn;
 ?>
 
 <?php Pjax::begin() ?>
-<?= $this->render('_info_chats_search', ['model' => $chatSearchModel]); ?>
+<?php /*echo $this->render('_info_chats_search', ['model' => $chatSearchModel]); */?>
 <?= GridView::widget([
     'dataProvider' => $chatDataProvider,
     'filterModel' => $chatSearchModel,

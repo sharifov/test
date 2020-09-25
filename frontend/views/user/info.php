@@ -121,12 +121,88 @@ $this->params['breadcrumbs'][] = $this->title;
 <!--                    </ul>-->
 
                 </div>
+                <?php Pjax::begin() ?>
                 <div class="col-md-9 col-sm-9 ">
-                    <?= $this->render('partial/_info_user_monitor', [
+                    <?= $this->render('partial/_info_search', [
+                        'datePickerModel' => $datePickerModel
+                    ]) ?>
+
+                    <!--<?/*= $this->render('partial/_info_user_monitor', [
                         'data' => $data,
                         'startDateTime' => $startDateTime,
                         'endDateTime' => $endDateTime,
-                    ]) ?>
+                    ]) */?> -->
+
+                    <?php if (isset($userActivity['byHour']) && $userActivity['byHour']): ?>
+
+                        <div id="chart_div"></div>
+
+                        <script type="text/javascript">
+                            google.charts.load('current', {'packages': ['corechart', 'bar']});
+                            google.charts.setOnLoadCallback(function () {
+                                var totalCallsChart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+
+                                //var colors = ['#8ec5ff', '#dd4b4e', '#587ca6'];
+
+                                var options = {
+                                    title: 'User Activity Dynamics',
+                                    chartArea: {width: '95%', right: 10},
+                                    textStyle: {
+                                        color: '#596b7d'
+                                    },
+                                    titleColor: '#596b7d',
+                                    fontSize: 14,
+                                    //color: '#596b7d',
+                                    //colors: colors,
+                                    //enableInteractivity: true,
+                                    height: 300,
+                                    width: 1145,
+                                    animation: {
+                                        duration: 200,
+                                        easing: 'linear',
+                                        startup: true
+                                    },
+                                    // legend: {
+                                    //     position: 'top',
+                                    //     alignment: 'end'
+                                    // },
+                                    hAxis: {
+                                        title: '',
+                                        slantedText: true,
+                                        slantedTextAngle: 30,
+                                        textStyle: {
+                                            fontSize: 12,
+                                            color: '#596b7d',
+                                        },
+                                        titleColor: '#596b7d',
+
+                                    },
+                                    vAxis: {
+                                        format: 'short',
+                                        title: 'Requests',
+                                        titleColor: '#596b7d',
+                                    },
+                                    theme: 'material',
+                                    //isStacked: false,
+                                    bar: {groupWidth: "50%"}
+                                };
+
+                                var data = google.visualization.arrayToDataTable([
+                                    ['Days', 'Requests', {role: 'annotation'}],
+                                    <?php foreach($userActivity['byHour'] as $k => $item): ?>
+                                    ['<?=($item['created_hour']) ?>:00, <?=date('d-M', strtotime($item['created_date'])) ?> ', <?= $item['cnt'] ?>, '<?= ' ' ?>'],
+                                    <?php endforeach; ?>
+                                ]);
+                                totalCallsChart.draw(data, options);
+
+                                $(window).on('resize', function () {
+                                    options.width = document.getElementById('tab_content1').clientWidth
+                                    totalCallsChart.draw(data, options)
+                                })
+                            })
+                        </script>
+                    <?php endif; ?>
+
 <!--                    <div class="profile_title">-->
 <!--                        <div class="col-md-6">-->
 <!--                            <h2>User Activity Report</h2>-->
@@ -256,8 +332,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         </div>
                     </div>
                 </div>
+                <?php Pjax::end() ?>
             </div>
         </div>
-
-
 </div>

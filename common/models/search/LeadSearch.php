@@ -3876,7 +3876,7 @@ class LeadSearch extends Lead
         ']);
         $query->from(static::tableName());
         $query->where(['employee_id' => $userID]);
-        if(!empty($this->date_range)){
+        if($this->datetime_start && $this->datetime_end){
             $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
                 ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
         }

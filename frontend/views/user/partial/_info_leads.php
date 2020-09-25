@@ -5,7 +5,7 @@ use yii\widgets\Pjax;
 
 ?>
 <?php Pjax::begin() ?>
-<?= $this->render('_info_leads_search', ['model' => $leadsSearchModel]); ?>
+<?php /*echo $this->render('_info_leads_search', ['model' => $leadsSearchModel]); */?>
 <?= GridView::widget([
     'dataProvider' => $leadsInfoDataProvider,
     'filterModel' => $leadsSearchModel,
