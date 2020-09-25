@@ -115,6 +115,7 @@ $this->registerJsFile('/js/moment.min.js', [
         \yii\web\JqueryAsset::class
     ]
 ]);
+$moveOfferUrl = Url::to(['/client-chat/move-offer']);
 $clientChatId = $clientChat ? $clientChat->cch_id : 0;
 $discardUnreadMessageUrl = Url::to(['/client-chat/discard-unread-messages']);
 $js = <<<JS
@@ -638,6 +639,47 @@ $(document).on('click', '#btn-submit-note', function (e) {
        let modal = $('#add-note-model');
         modal.modal('hide');
     }    
+});
+
+$(document).on('click', '.btn_move_offer', function(e) {
+  e.preventDefault();
+  let btn = $(this);
+  let leadId = $(this).attr('data-lead-id');
+  let chatId = $(this).attr('data-chat-id');
+  let captureKey = $(this).attr('data-capture-key');
+  let type = $(this).attr('data-type');
+  btn.attr('disabled', true);
+  btn.removeClass('fa-arrow-up');
+  btn.addClass('fa-spinner');
+  btn.removeClass('btn-success');
+  btn.addClass('btn-default');
+  $.ajax({
+    type: 'post',
+    dataType: 'json',
+    url: '{$moveOfferUrl}',
+    data: {
+        leadId: leadId,
+        chatId: chatId,
+        captureKey: captureKey,
+        type: type
+    }
+  })
+  .done(function(data) {
+    $(document).find('.send-offer-container').html(data.view);
+    if (data.error) {
+        createNotify('Move offer', data.error, 'error');
+    }
+  })
+  .fail(function (xhr, textStatus, errorThrown) {
+      createNotify('Move offer', xhr.responseText, 'error');
+  })
+  .always(function() {
+    btn.attr('disabled', false);
+    btn.removeClass('fa-spinner');
+    btn.addClass('fa-arrow-up');
+    btn.removeClass('btn-default');
+    btn.addClass('btn-success');
+  });
 });
 
 JS;

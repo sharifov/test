@@ -53,7 +53,9 @@ use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use Yii;
 use yii\helpers\VarDumper;
+use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
+use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
 /**
@@ -684,12 +686,27 @@ class ClientChatController extends FController
             }
             foreach ($form->quotes as $quote) {
                 if ($capture = $this->generateQuoteCapture($quote)) {
-                    $captures[] = $capture;
+                    /** @var Quote $quote */
+                    $data = $quote->getPricesData();
+                    $price = (int)(str_replace('.', '', ($data['total']['selling'] ?? 0))) * 100;
+
+                    $captures[] = [
+                        'price' => $price,
+                        'data' => $capture,
+                    ];
                 }
             }
             if (!$captures) {
                 throw new \DomainException('Not generated captures. Try again.');
             }
+
+            usort($captures, static function ($a, $b) {
+                if ($a['price'] === $b['price']) {
+                    return 0;
+                }
+                return ($a["price"] < $b["price"]) ? -1 : 1;
+            });
+
             if (!$this->saveQuoteCaptures($captures, Auth::id(), $form->chatId, $form->leadId)) {
                 throw new \DomainException('Cant tmp save quotes. Please try again later.');
             }
@@ -700,7 +717,7 @@ class ClientChatController extends FController
         return $this->renderAjax('partial/_send_offer_generate', [
             'errorMessage' => $errorMessage,
             'form' => $form,
-            'captures' => $captures,
+            'captures' => ArrayHelper::getColumn($captures, 'data'),
         ]);
     }
 
@@ -718,7 +735,7 @@ class ClientChatController extends FController
                 throw new \DomainException('Not found saved quote captures. Please try again.');
             }
 
-            $message = $this->createOfferMessage($clientChat, $captures);
+            $message = $this->createOfferMessage($clientChat, ArrayHelper::getColumn($captures, 'data'));
 
             if (($rocketUserId = Auth::user()->userProfile->up_rc_user_id) && ($rocketToken = Auth::user()->userProfile->up_rc_auth_token)) {
                 $headers =  [
@@ -738,6 +755,74 @@ class ClientChatController extends FController
         }
 
         return $this->asJson($out);
+    }
+
+    public function actionMoveOffer()
+    {
+        if (!Yii::$app->request->isPost) {
+            throw new BadRequestHttpException();
+        }
+
+        $chatId = (int)Yii::$app->request->post('chatId');
+        $leadId = (int)Yii::$app->request->post('leadId');
+        $captureKey = (int)Yii::$app->request->post('captureKey');
+        $type = (string)Yii::$app->request->post('type');
+
+        if (!$chatId || !$leadId || !$type) {
+            throw new BadRequestHttpException('Not found chatId or leadId or type');
+        }
+
+        if ($type !== 'up' && $type !== 'down') {
+            throw new BadRequestHttpException('Type value is invalid');
+        }
+
+        if (!$captures = $this->getQuoteCaptures(Auth::id(), $chatId, $leadId)) {
+            throw new BadRequestHttpException('Not found saved quote captures. Please try again.');
+        }
+
+        $originalCaptures = $captures;
+
+        if (!isset($captures[$captureKey])) {
+            throw new BadRequestHttpException('Not found capture with this key ' . $captureKey);
+        }
+
+        if ($type === 'up') {
+            $newCaptureKey = $captureKey - 1;
+        } else {
+            $newCaptureKey = $captureKey + 1;
+        }
+
+        if (!isset($captures[$newCaptureKey])) {
+            throw new BadRequestHttpException('Move error. Not found capture with new Key ' . $newCaptureKey);
+        }
+
+        $tmpCapture = $captures[$captureKey];
+        $captures[$captureKey] = $captures[$newCaptureKey];
+        $captures[$newCaptureKey] = $tmpCapture;
+
+        $form = new GenerateImagesForm();
+        $form->leadId = $leadId;
+        $form->chatId = $chatId;
+
+        if (!$this->saveQuoteCaptures($captures, Auth::id(), $chatId, $leadId)) {
+            return $this->asJson([
+                'view' => $this->renderAjax('partial/_send_offer_generate', [
+                    'errorMessage' => '',
+                    'form' => $form,
+                    'captures' => ArrayHelper::getColumn($originalCaptures, 'data'),
+                ]),
+                'error' => 'Cant tmp save quotes. Please try again later.',
+            ]);
+        }
+
+        return $this->asJson([
+            'view' => $this->renderAjax('partial/_send_offer_generate', [
+                'errorMessage' => '',
+                'form' => $form,
+                'captures' => ArrayHelper::getColumn($captures, 'data'),
+            ]),
+            'error' => false,
+        ]);
     }
 
     public function actionMonitor()
