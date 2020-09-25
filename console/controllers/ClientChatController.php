@@ -60,10 +60,11 @@ class ClientChatController extends Controller
 
 			$pass = $rocketChat::generatePassword();
 
+            $rocketChatUsername = $user['nickname_client_chat'] ?: $user['username'];
 			$result = $rocketChat->createUser(
-				$user['username'],
+				$rocketChatUsername,
 				$pass,
-				$user['nickname_client_chat'] ?: $user['username'],
+				$rocketChatUsername,
 				$user['email']
 			);
 

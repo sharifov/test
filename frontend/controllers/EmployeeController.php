@@ -815,7 +815,7 @@ class EmployeeController extends FController
                     if ($nicknameCCIsChanged && !empty($modelProfile->up_rc_user_id)) {
                         $job = new RocketChatUserUpdateJob();
                         $job->userId = $modelProfile->up_rc_user_id;
-                        $job->data = ['username' => $model->nickname_client_chat];
+                        $job->data = ['name' => $model->nickname_client_chat]; /* TODO:: name or username? */
 
                         Yii::$app->queue_job->priority(10)->push($job);
                     }
@@ -977,7 +977,7 @@ class EmployeeController extends FController
 
                 $rocketChatUsername = $user->nickname_client_chat ?: $user->username;
                 $result = $rocketChat->createUser(
-                    $user->username,
+                    $rocketChatUsername,
                     $password,
 					$rocketChatUsername,
                     $user->email

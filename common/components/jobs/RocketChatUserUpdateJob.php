@@ -31,7 +31,10 @@ class RocketChatUserUpdateJob extends BaseObject implements JobInterface
 
             if (!empty($result['data'])) {
                 Yii::info('RocketChat User Updated. ' .
-                    VarDumper::dumpAsString($this->data, 10),
+                    VarDumper::dumpAsString([
+                        'RequestData' => $this->data,
+                        'ResponseData' => $result['data'],
+                    ], 10),
                     'info\RocketChatUserUpdateJob:execute:success');
             }
         } catch (\Throwable $throwable) {
