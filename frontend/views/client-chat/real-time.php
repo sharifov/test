@@ -39,6 +39,11 @@ b():window.addEventListener("load",b)})();
             
             $.get('$url', {visitorId: visitorId, projectName: projectName, visitorName: visitorName}, function(data) {
                 modal.find('.modal-body').html(data);
+            }).fail( function (xhr) {
+                createNotify('Error', xhr.responseText, 'error');
+                setTimeout(function () {
+                    $("#modal-sm").modal("hide");
+                }, 500);
             });
                 
            return false;
