@@ -448,7 +448,7 @@ JS;
             </div>
         </div>
     </div>
-    <?php if (!$model->isNewRecord && (Auth::user()->isAdmin() || Auth::user()->isSuperAdmin())) : ?>
+    <?php if (!$model->isNewRecord && (Auth::can('/employee/register-to-rocket-chat') && Auth::can('/employee/un-register-from-rocket-chat'))): ?>
         <h5>Rocket Chat Credentials</h5>
         <div class="well">
             <div class="form-group">

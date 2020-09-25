@@ -16,9 +16,6 @@ class m200925_055406_add_permission_validate_rc_credential extends Migration
     public $roles = [
         Employee::ROLE_SUPER_ADMIN,
         Employee::ROLE_ADMIN,
-        Employee::ROLE_SUPERVISION,
-        Employee::ROLE_EX_SUPER,
-        Employee::ROLE_SUP_SUPER,
     ];
     /**
      * {@inheritdoc}
