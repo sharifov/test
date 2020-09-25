@@ -7,7 +7,6 @@ use common\models\UserProfile;
 use frontend\widgets\clientChat\ClientChatAccessMessage;
 use sales\auth\Auth;
 use sales\forms\clientChat\RealTimeStartChatForm;
-use sales\helpers\app\AppHelper;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
@@ -18,6 +17,8 @@ use sales\model\clientChatCase\entity\ClientChatCaseRepository;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\clientChatLead\entity\ClientChatLeadRepository;
+use sales\model\clientChatNote\ClientChatNoteRepository;
+use sales\model\clientChatNote\entity\ClientChatNote;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestRepository;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
@@ -49,6 +50,7 @@ use yii\web\ForbiddenHttpException;
  * @property ClientChatVisitorDataRepository $clientChatVisitorDataRepository
  * @property ClientChatRequestRepository $clientChatRequestRepository
  * @property ClientChatUserChannelRepository $clientChatUserChannelRepository
+ * @property ClientChatNoteRepository $clientChatNoteRepository
  */
 class ClientChatService
 {
@@ -100,6 +102,10 @@ class ClientChatService
 	 * @var ClientChatUserChannelRepository
 	 */
 	private ClientChatUserChannelRepository $clientChatUserChannelRepository;
+	/**
+	 * @var ClientChatNoteRepository
+	 */
+	private ClientChatNoteRepository $clientChatNoteRepository;
 
 	public function __construct(
 		ClientChatChannelRepository $clientChatChannelRepository,
@@ -113,7 +119,8 @@ class ClientChatService
 		ClientManageService $clientManageService,
 		ClientChatVisitorDataRepository $clientChatVisitorDataRepository,
 		ClientChatRequestRepository $clientChatRequestRepository,
-		ClientChatUserChannelRepository $clientChatUserChannelRepository
+		ClientChatUserChannelRepository $clientChatUserChannelRepository,
+		ClientChatNoteRepository $clientChatNoteRepository
 	){
 		$this->clientChatChannelRepository = $clientChatChannelRepository;
 		$this->clientChatRepository = $clientChatRepository;
@@ -127,6 +134,7 @@ class ClientChatService
 		$this->clientChatVisitorDataRepository = $clientChatVisitorDataRepository;
 		$this->clientChatRequestRepository = $clientChatRequestRepository;
 		$this->clientChatUserChannelRepository = $clientChatUserChannelRepository;
+		$this->clientChatNoteRepository = $clientChatNoteRepository;
 	}
 
 	/**
@@ -343,14 +351,16 @@ class ClientChatService
 			$dto = ClientChatCloneDto::feelInOnTransfer($clientChat);
 			$newClientChat = $this->clientChatRepository->clone($dto);
 			$newClientChat->assignOwner($chatUserAccess->ccua_user_id);
+			$newClientChat->cch_source_type_id = ClientChat::SOURCE_TYPE_TRANSFER;
 			$this->clientChatRepository->save($newClientChat);
-			$this->cloneLead($clientChat, $newClientChat)->cloneCase($clientChat, $newClientChat);
+			$this->cloneLead($clientChat, $newClientChat)->cloneCase($clientChat, $newClientChat)->cloneNotes($clientChat, $newClientChat);
 			try {
 				$channel = $this->clientChatChannelRepository->findByClientChatData($newClientChat->cch_dep_id, $newClientChat->cch_project_id, null);
 			} catch (NotFoundException $e) {
 				$channel = $this->clientChatChannelRepository->findDefaultByProject((int)$newClientChat->cch_project_id);
 			}
 			$newClientChat->cch_channel_id = $channel->ccc_id;
+			$newClientChat->cch_parent_id = $clientChat->cch_id;
 			$this->clientChatRepository->save($newClientChat);
 
 			$userAccess = ClientChatUserAccess::create($newClientChat->cch_id, $newClientChat->cch_owner_user_id);
@@ -449,6 +459,19 @@ class ClientChatService
 		foreach ($cases as $case) {
 			$clientChatCase = ClientChatCase::create($newClientChat->cch_id, $case->cs_id, new \DateTimeImmutable('now'));
 			$this->clientChatCaseRepository->save($clientChatCase);
+		}
+		return $this;
+	}
+
+	public function cloneNotes(ClientChat $oldClientChat, ClientChat $newClientChat): self
+	{
+		$notes = $oldClientChat->notes;
+		foreach ($notes as $note) {
+			$clientChatNote = ClientChatNote::create($newClientChat->cch_id, $note->ccn_user_id, $note->ccn_note);
+			$clientChatNote->ccn_created_dt = $note->ccn_created_dt;
+			$clientChatNote->ccn_updated_dt = $note->ccn_updated_dt;
+			$clientChatNote->ccn_deleted = $note->ccn_deleted;
+			$this->clientChatNoteRepository->save($clientChatNote);
 		}
 		return $this;
 	}

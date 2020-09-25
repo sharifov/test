@@ -301,6 +301,7 @@ class ClientChatController extends FController
     {
         $cchId = Yii::$app->request->get('cch_id');
         $model = new ClientChatNote();
+        $model->ccn_user_id = Auth::id();
 
         $clientChat = $this->clientChatRepository->findById($cchId);
 

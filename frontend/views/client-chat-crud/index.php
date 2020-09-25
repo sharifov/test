@@ -32,6 +32,9 @@ $this->params['breadcrumbs'][] = $this->title;
                     'attribute' => 'cch_id',
                 'options' => ['style' => 'width:100px']
             ],
+            [
+                'attribute' => 'cch_parent_id'
+            ],
             'cch_rid',
             //'cch_ccr_id',
             [

@@ -67,12 +67,7 @@ class ClientChatNote extends ActiveRecord
                     ActiveRecord::EVENT_BEFORE_UPDATE => ['ccn_updated_dt'],
                 ],
                 'value' => date('Y-m-d H:i:s')
-            ],
-            'user' => [
-                'class' => BlameableBehavior::class,
-                'createdByAttribute' => 'ccn_user_id',
-                'updatedByAttribute' => 'ccn_user_id',
-            ],
+            ]
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
@@ -91,4 +86,13 @@ class ClientChatNote extends ActiveRecord
     {
         return new clientChatNoteScopes(static::class);
     }
+
+    public static function create(int $chatId, int $userId, string $note): ClientChatNote
+	{
+		$model = new self();
+		$model->ccn_chat_id = $chatId;
+		$model->ccn_user_id = $userId;
+		$model->ccn_note = $note;
+		return $model;
+	}
 }

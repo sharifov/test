@@ -35,6 +35,17 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'cch_id',
                 'options' => ['style' => 'width:100px']
             ],
+			[
+				'attribute' => 'cch_parent_id',
+				'value' => static function (ClientChat $model) {
+					return $model->cch_parent_id ?
+						Html::a('<i class="fa fa-link"></i> ' . $model->cch_parent_id,
+							['client-chat-crud/view', 'id' => $model->cch_parent_id],
+							['target' => '_blank', 'data-pjax' => 0]) : '-';
+				},
+				'format' => 'raw',
+				'options' => ['style' => 'width:100px'],
+			],
             'cch_rid',
             [
                 'label' => 'Messages',

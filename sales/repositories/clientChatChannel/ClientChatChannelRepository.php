@@ -60,7 +60,7 @@ class ClientChatChannelRepository extends Repository
 	public function findDefaultByProject(int $projectId): ClientChatChannel
 	{
 		if (!$clientChatChannel = ClientChatChannel::findOne(['ccc_default' => 1, 'ccc_project_id' => $projectId])) {
-			\Yii::error('Default Channel is not found by project('.$projectId.')', 'ClientChatRepository::findDefaultByProject::defaultChannel');
+			throw new NotFoundException('Default Channel is not found by project('.$projectId.')');
 		}
 		return $clientChatChannel;
 	}
