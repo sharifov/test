@@ -9,6 +9,7 @@ use sales\helpers\app\AppHelper;
 use sales\model\clientChat\ClientChatTranslate;
 use sales\model\clientChat\entity\projectConfig\ClientChatProjectConfig;
 use sales\model\clientChat\entity\projectConfig\ProjectConfigApiResponseDto;
+use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestApiForm;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestService;
 use sales\repositories\NotFoundException;
@@ -598,11 +599,20 @@ class ClientChatRequestController extends ApiBaseController
         }
 
 		$projectConfig = ClientChatProjectConfig::findOne(['ccpc_project_id' => $projectId]);
+		$projectChannels = ClientChatChannel::find()
+            ->select(['ccc_frontend_name', 'ccc_id'])
+            ->where(['ccc_project_id' => $projectId, 'ccc_disabled' => false])
+            ->orderBy(['ccc_frontend_name' => SORT_ASC])
+            ->indexBy('ccc_id')->asArray()->column();
 
 		if ($projectConfig) {
             $data = ArrayHelper::toArray(new ProjectConfigApiResponseDto($projectConfig, $languageId));
             $data['language_id'] = $languageId;
             $data['translations'] = ClientChatTranslate::getTranslates($languageId);
+
+            if ($projectChannels){
+                $data['translations']['department'] = $projectChannels;
+            }
 
 			return new SuccessResponse(
 				new StatusCodeMessage(200),
