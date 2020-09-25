@@ -977,7 +977,7 @@ class EmployeeController extends FController
 
                 $rocketChatUsername = $user->nickname_client_chat ?: $user->username;
                 $result = $rocketChat->createUser(
-                    $rocketChatUsername,
+                    $user->username,
                     $password,
 					$rocketChatUsername,
                     $user->email
