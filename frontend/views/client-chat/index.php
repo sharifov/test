@@ -22,6 +22,8 @@ use yii\widgets\Pjax;
 /* @var $dep int */
 /** @var $project int */
 /** @var $totalUnreadMessages int */
+/** @var int $group */
+
 $this->title = 'My Client Chat';
 //$this->params['breadcrumbs'][] = $this->title;
 
@@ -74,6 +76,7 @@ $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
                 'dep' => $dep,
                 'project' => $project,
                 'totalUnreadMessages' => $totalUnreadMessages,
+                'group' => $group,
             ]); ?>
         </div>
 		<?php Pjax::end(); ?>
@@ -222,6 +225,28 @@ $(document).on('click', '._cc_tab', function () {
     window.history.replaceState({}, '', '{$loadChannelsUrl}?'+params.toString());
     $('._cc_tab').removeClass('active');
     tab.addClass('active');
+    $('._rc-iframe').hide();
+    $('#_client-chat-info').html('');
+    $('#_client-chat-note').html('');
+    pjaxReload({container: '#pjax-client-chat-channel-list'});
+});
+
+$(document).on('click', '._cc_group', function () {
+    let group = $(this);
+    let params = new URLSearchParams(window.location.search);
+    let selectedGroup = group.attr('data-group-id');
+    let currentGroup = params.get('group');
+    
+    if (selectedGroup == currentGroup) {
+        return false;
+    }
+    
+    params.delete('chid');
+    params.delete('page');
+    params.set('group', selectedGroup);
+    window.history.replaceState({}, '', '{$loadChannelsUrl}?'+params.toString());
+    $('._cc_group').removeClass('active');
+    group.addClass('active');
     $('._rc-iframe').hide();
     $('#_client-chat-info').html('');
     $('#_client-chat-note').html('');

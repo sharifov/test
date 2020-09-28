@@ -48,7 +48,7 @@ use yii\widgets\Pjax;
                 <span class="_cc-status-wrapper">
                     <span class="_cc-status" data-is-online="<?= (int)$clientChat['cch_client_online'] ?>"></span>
                 </span>
-                <?php $unreadMessages = ClientChatMessageHelper::getCountOfChatUnreadMessage($clientChat['cch_id'], $clientChat['cch_owner_user_id']) ?>
+                <?php $unreadMessages = $clientChat['cch_owner_user_id'] ? ClientChatMessageHelper::getCountOfChatUnreadMessage($clientChat['cch_id'], $clientChat['cch_owner_user_id']) : null ?>
             </span>
             <span class="_cc-title">
                 <p><b><?= Html::encode($clientChat['client_full_name']) ?></b></p>

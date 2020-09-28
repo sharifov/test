@@ -48,7 +48,7 @@ class ClientChatSearch extends ClientChat
     public function rules(): array
     {
         return [
-            [['timeRange', 'timeStart', 'timeEnd'], 'string' ],
+            [['timeRange', 'timeStart', 'timeEnd'], 'string'],
 
             ['cch_ccr_id', 'integer'],
 
@@ -103,7 +103,7 @@ class ClientChatSearch extends ClientChat
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['cch_id' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['cch_id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],
@@ -116,7 +116,7 @@ class ClientChatSearch extends ClientChat
             return $dataProvider;
         }
 
-        if($this->timeStart && $this->timeEnd){
+        if ($this->timeStart && $this->timeEnd) {
             $query->andFilterWhere(['>=', 'cch_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->timeStart))])
                 ->andFilterWhere(['<=', 'cch_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->timeEnd))]);
         }
@@ -167,8 +167,8 @@ class ClientChatSearch extends ClientChat
         $query->select([
             'username',
             'cch_owner_user_id AS owner',
-            'SUM(IF(cch_status_id = '. ClientChat::STATUS_GENERATED .', 1, 0)) AS generated',
-            'SUM(IF(cch_status_id = '. ClientChat::STATUS_CLOSED .', 1, 0)) AS closed',
+            'SUM(IF(cch_status_id = ' . ClientChat::STATUS_GENERATED . ', 1, 0)) AS generated',
+            'SUM(IF(cch_status_id = ' . ClientChat::STATUS_CLOSED . ', 1, 0)) AS closed',
         ]);
 
         $query->where('cch_owner_user_id IS NOT NULL');
@@ -176,7 +176,7 @@ class ClientChatSearch extends ClientChat
             'between',
             'cch_created_dt',
             Employee::convertTimeFromUserDtToUTC(strtotime($this->timeStart)),
-            Employee::convertTimeFromUserDtToUTC(strtotime($this->timeEnd))
+            Employee::convertTimeFromUserDtToUTC(strtotime($this->timeEnd)),
         ]);
 
         $query->groupBy(['owner']);
@@ -191,7 +191,7 @@ class ClientChatSearch extends ClientChat
             'between',
             'ccm_sent_dt',
             Employee::convertTimeFromUserDtToUTC(strtotime($this->timeStart)),
-            Employee::convertTimeFromUserDtToUTC(strtotime($this->timeEnd))
+            Employee::convertTimeFromUserDtToUTC(strtotime($this->timeEnd)),
         ]);
 
         $queryMessages->groupBy(['user']);
@@ -199,13 +199,11 @@ class ClientChatSearch extends ClientChat
         $clientChat = $query->createCommand()->queryAll();
         $clientChatMsg = $queryMessages->createCommand()->queryAll();
 
-        foreach ($clientChat as $key => $item)
-        {
+        foreach ($clientChat as $key => $item) {
             $clientChat[$key]['msg'] = '';
-            foreach ($clientChatMsg as $msg)
-            {
-                if ($item['owner'] == $msg['user']){
-                    $clientChat[$key]['msg'] = (string)$msg['messages'];
+            foreach ($clientChatMsg as $msg) {
+                if ($item['owner'] == $msg['user']) {
+                    $clientChat[$key]['msg'] = (string) $msg['messages'];
                 }
             }
         }
@@ -242,11 +240,11 @@ class ClientChatSearch extends ClientChat
             'CONCAT(COALESCE(c.first_name, " "), " ", COALESCE(c.last_name, " ") ) as clientName',
             'p.name as project',
             'd.dep_name as department',
-            'ch.ccc_name as channel'
-            ]);
+            'ch.ccc_name as channel',
+        ]);
         $queryChats->where(['cch_status_id' => ClientChat::STATUS_GENERATED]);
-        if($params['formDate']){
-            $queryChats->where(['between','cch_created_dt', $params['formDate'], date('Y-m-d H:i:s')]);
+        if ($params['formDate']) {
+            $queryChats->where(['between', 'cch_created_dt', $params['formDate'], date('Y-m-d H:i:s')]);
         } else {
             $queryChats->limit(10);
         }
@@ -271,7 +269,7 @@ class ClientChatSearch extends ClientChat
             'latest_data',
             'ccm_client_id',
             'ccm_user_id',
-            new Expression("ccm_body->>'msg' as msg")
+            new Expression("ccm_body->>'msg' as msg"),
         ]);
         $queryLastClientMsg->innerJoin('(SELECT ccm_cch_id, MAX(ccm_sent_dt) AS latest_data FROM client_chat_message AS st 
                        where ccm_client_id IS NOT NULL and ccm_user_id IS NULL GROUP BY ccm_cch_id) AS each_item', 'each_item.latest_data = client_chat_message.ccm_sent_dt AND each_item.ccm_cch_id = client_chat_message.ccm_cch_id');
@@ -282,7 +280,7 @@ class ClientChatSearch extends ClientChat
             'latest_data',
             'ccm_client_id',
             'ccm_user_id',
-            new Expression("ccm_body->>'msg' as msg")
+            new Expression("ccm_body->>'msg' as msg"),
         ]);
         $queryLastAgentMsg->innerJoin('(SELECT ccm_cch_id, MAX(ccm_sent_dt) AS latest_data FROM client_chat_message AS st 
                        where ccm_client_id IS NOT NULL and ccm_user_id IS NOT NULL GROUP BY ccm_cch_id) AS each_item', 'each_item.latest_data = client_chat_message.ccm_sent_dt AND each_item.ccm_cch_id = client_chat_message.ccm_cch_id');
@@ -293,7 +291,7 @@ class ClientChatSearch extends ClientChat
         $latestMsgs = $lastMsgCmd->queryAll();
 
 
-        foreach ($clientChats as $key => $chat){
+        foreach ($clientChats as $key => $chat) {
             $clientChats[$key]['outMsg'] = 0;
             $clientChats[$key]['inMsg'] = 0;
 
@@ -304,18 +302,16 @@ class ClientChatSearch extends ClientChat
             $clientChats[$key]['agent_msg_date'] = '';
             $clientChats[$key]['latest_agent_msg'] = '';
 
-            foreach ($chatMessages as $message){
-                if ($chat['cch_id'] == $message['chatId'])
-                {
+            foreach ($chatMessages as $message) {
+                if ($chat['cch_id'] == $message['chatId']) {
                     $clientChats[$key]['outMsg'] = $message['outMsg'];
                     $clientChats[$key]['inMsg'] = $message['inMsg'];
                 }
             }
 
-            foreach ($latestMsgs as $msg){
-                if ($chat['cch_id'] == $msg['ccm_cch_id'])
-                {
-                    if (!is_null($msg['ccm_client_id']) && is_null($msg['ccm_user_id'])){
+            foreach ($latestMsgs as $msg) {
+                if ($chat['cch_id'] == $msg['ccm_cch_id']) {
+                    if (!is_null($msg['ccm_client_id']) && is_null($msg['ccm_user_id'])) {
                         $clientChats[$key]['client_msg_period'] = \Yii::$app->formatter->asRelativeTime(strtotime($msg['latest_data']));
                         $clientChats[$key]['client_msg_date'] = \Yii::$app->formatter->asDatetime(strtotime($msg['latest_data']), 'php: Y-m-d H:i:s');
                         $clientChats[$key]['latest_client_msg'] = $msg['msg'];
@@ -333,90 +329,106 @@ class ClientChatSearch extends ClientChat
         return $clientChats;
     }
 
-	/**
-	 * @param int|null $channelId
-	 * @param ClientChatChannel[] $channels
-	 * @param int|null $dep
-	 * @param int|null $project
-	 * @param int|null $tab
-	 * @param int $page
-	 * @return ArrayDataProvider
-	 * @throws \yii\base\InvalidConfigException
-	 */
-    public function getListOfChats(?int $channelId, array $channels, ?int $dep, ?int $project, ?int $tab, int $page): ArrayDataProvider
-	{
-		$query = ClientChat::find()->select([
-			ClientChat::tableName().'.*',
-			new Expression('ifnull(trim(concat(client.first_name, \' \', ifnull(client.last_name, \'\'))), concat(\'Guest-\', cch_id)) as client_full_name'),
-			'dep_name',
-			'project.name as project_name',
-			'ccc_name'
-		])->orderBy(['cch_created_dt' => SORT_DESC])->byOwner(Auth::id());
+    /**
+     * @param int|null            $channelId
+     * @param ClientChatChannel[] $channels
+     * @param int|null            $dep
+     * @param int|null            $project
+     * @param int|null            $tab
+     * @param int                 $page
+     * @param int                 $group
+     *
+     * @return ArrayDataProvider
+     *
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function getListOfChats(?int $channelId, array $channels, ?int $dep, ?int $project, ?int $tab, int $page, int $group): ArrayDataProvider
+    {
+        $query = ClientChat::find()->select([
+            ClientChat::tableName() . '.*',
+            new Expression('ifnull(trim(concat(client.first_name, \' \', ifnull(client.last_name, \'\'))), concat(\'Guest-\', cch_id)) as client_full_name'),
+            'dep_name',
+            'project.name as project_name',
+            'ccc_name',
+        ])->orderBy(['cch_created_dt' => SORT_DESC]);
 
-		if ($channelId) {
-			$query->byChannel($channelId);
-		} else {
-			$query->byChannelIds(ArrayHelper::getColumn($channels, 'ccc_id'));
-		}
+        if ($group === ClientChat::TAB_GROUPS_MY) {
+            $query->byOwner(Auth::id());
+        } elseif ($group === ClientChat::TAB_GROUPS_OTHER) {
+            $query
+                ->andWhere(['<>', 'cch_owner_user_id', Auth::id()])
+                ->andWhere(['IS NOT', 'cch_owner_user_id', null]);
+        }
 
-		if ($dep) {
-			$query->byDepartment($dep);
-		}
+        $channelsIds = ArrayHelper::getColumn($channels, 'ccc_id');
+        if ($channelId) {
+            if ($channelsIds && !in_array($channelId, $channelsIds)) {
+                $query->where('0=1');
+            } else {
+                $query->byChannel($channelId);
+            }
+        } else {
+            $query->byChannelIds($channelsIds);
+        }
 
-		if ($project) {
-			$query->byProject($project);
-		}
+        if ($dep) {
+            $query->byDepartment($dep);
+        }
 
-		if (ClientChat::isTabActive($tab)) {
-			$query->active();
-		} else {
-			$query->archive();
-		}
-		$query->join('JOIN', ['client' => Client::tableName()], 'cch_client_id = client.id');
-		$query->join('JOIN', [ClientChatChannel::tableName()], 'cch_channel_id = ccc_id');
-		$query->leftJoin(Department::tableName(), 'cch_dep_id = dep_id');
-		$query->leftJoin(['project' => Project::tableName()], 'cch_project_id = project.id');
+        if ($project) {
+            $query->byProject($project);
+        }
 
-		$data = $query->asArray()->all();
-		$data = ArrayHelper::index($data, 'cch_id');
-		$chatIds = ArrayHelper::map($data, 'cch_id', 'cch_id');
-		$lastMessages = ClientChatMessage::find()->select(['ccm_sent_dt' => 'MAX(ccm_sent_dt)', 'ccm_cch_id'])->byChatIds($chatIds)->groupBy(['ccm_cch_id'])->asArray()->all();
-		$lastMessages = ArrayHelper::index($lastMessages, 'ccm_cch_id');
+        if (ClientChat::isTabActive($tab)) {
+            $query->active();
+        } else {
+            $query->archive();
+        }
+        $query->join('JOIN', ['client' => Client::tableName()], 'cch_client_id = client.id');
+        $query->join('JOIN', [ClientChatChannel::tableName()], 'cch_channel_id = ccc_id');
+        $query->leftJoin(Department::tableName(), 'cch_dep_id = dep_id');
+        $query->leftJoin(['project' => Project::tableName()], 'cch_project_id = project.id');
 
-		$messageService = \Yii::createObject(ClientChatMessageService::class);
-		foreach ($data as $key => $item) {
-			if (isset($lastMessages[$key])) {
-				$data[$key]['ccm_sent_dt'] = $lastMessages[$key]['ccm_sent_dt'] ? strtotime($lastMessages[$key]['ccm_sent_dt']) : 0;
-			} else {
-				$data[$key]['ccm_sent_dt'] = 0;
-			}
-			$data[$key]['count_unread_messages'] = $messageService->getCountOfChatUnreadMessages((int)$item['cch_id'], (int)$item['cch_owner_user_id']);
-		}
+        $data = $query->asArray()->all();
+        $data = ArrayHelper::index($data, 'cch_id');
+        $chatIds = ArrayHelper::map($data, 'cch_id', 'cch_id');
+        $lastMessages = ClientChatMessage::find()->select(['ccm_sent_dt' => 'MAX(ccm_sent_dt)', 'ccm_cch_id'])->byChatIds($chatIds)->groupBy(['ccm_cch_id'])->asArray()->all();
+        $lastMessages = ArrayHelper::index($lastMessages, 'ccm_cch_id');
 
-		$dataProvider = new ArrayDataProvider([
-			'allModels' => $data,
-			'pagination' => ['pageSize' => self::CLIENT_CHAT_PAGE_SIZE],
-			'sort' => [
-				'defaultOrder' => [
-					'count_unread_messages' => SORT_DESC,
-					'ccm_sent_dt' => SORT_DESC,
-					'cch_created_dt' => SORT_DESC
-				],
-				'attributes' => [
-					'count_unread_messages',
-					'ccm_sent_dt',
-					'cch_created_dt'
-				]
-			]
-		]);
+        $messageService = \Yii::createObject(ClientChatMessageService::class);
+        foreach ($data as $key => $item) {
+            if (isset($lastMessages[$key])) {
+                $data[$key]['ccm_sent_dt'] = $lastMessages[$key]['ccm_sent_dt'] ? strtotime($lastMessages[$key]['ccm_sent_dt']) : 0;
+            } else {
+                $data[$key]['ccm_sent_dt'] = 0;
+            }
+            $data[$key]['count_unread_messages'] = $messageService->getCountOfChatUnreadMessages((int) $item['cch_id'], (int) $item['cch_owner_user_id']);
+        }
 
-		if (\Yii::$app->request->isGet) {
-			$dataProvider->pagination->pageSize = $page * self::CLIENT_CHAT_PAGE_SIZE;
-			$dataProvider->pagination->page = 0;
-		}
+        $dataProvider = new ArrayDataProvider([
+            'allModels' => $data,
+            'pagination' => ['pageSize' => self::CLIENT_CHAT_PAGE_SIZE],
+            'sort' => [
+                'defaultOrder' => [
+                    'count_unread_messages' => SORT_DESC,
+                    'ccm_sent_dt' => SORT_DESC,
+                    'cch_created_dt' => SORT_DESC,
+                ],
+                'attributes' => [
+                    'count_unread_messages',
+                    'ccm_sent_dt',
+                    'cch_created_dt',
+                ],
+            ],
+        ]);
 
-		return $dataProvider;
-	}
+        if (\Yii::$app->request->isGet) {
+            $dataProvider->pagination->pageSize = $page * self::CLIENT_CHAT_PAGE_SIZE;
+            $dataProvider->pagination->page = 0;
+        }
+
+        return $dataProvider;
+    }
 
     public function searchChatGraph($params, $user_id): array
     {

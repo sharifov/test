@@ -143,8 +143,7 @@ class ClientChatController extends FController
         ClientChatRequestService $clientChatRequestService,
         ClientChatRequestRepository $clientChatRequestRepository,
         $config = []
-    )
-    {
+    ) {
         parent::__construct($id, $module, $config);
         $this->clientChatRepository = $clientChatRepository;
         $this->clientChatUserAccessRepository = $clientChatUserAccessRepository;
@@ -177,8 +176,15 @@ class ClientChatController extends FController
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
-    public function actionIndex(int $channelId = null, int $page = 1, int $chid = 0, int $tab = ClientChat::TAB_ACTIVE, int $dep = 0, int $project = 0)
-    {
+    public function actionIndex(
+        int $channelId = null,
+        int $page = 1,
+        int $chid = 0,
+        int $tab = ClientChat::TAB_ACTIVE,
+        int $dep = 0,
+        int $project = 0,
+        int $group = ClientChat::TAB_GROUPS_MY
+    ) {
         $channelsQuery = ClientChatChannel::find()
             ->joinWithCcuc(Auth::id());
         $dataProvider = null;
@@ -186,10 +192,14 @@ class ClientChatController extends FController
         $channelId = $channelId ?: null;
         $channels = $channelsQuery->all();
 
+        if ($group !== ClientChat::TAB_GROUPS_MY && $group !== ClientChat::TAB_GROUPS_OTHER) {
+            $group = ClientChat::TAB_GROUPS_MY;
+        }
+
         /** @var $channels ClientChatChannel[] */
         if ($channels) {
             $search = new ClientChatSearch();
-            $dataProvider = $search->getListOfChats($channelId, $channels, $dep, $project, $tab, $page);
+            $dataProvider = $search->getListOfChats($channelId, $channels, $dep, $project, $tab, $page, $group);
         }
 
         try {
@@ -247,6 +257,7 @@ class ClientChatController extends FController
             'dep' => $dep,
             'project' => $project,
             'totalUnreadMessages' => $this->clientChatMessageService->getCountOfTotalUnreadMessages(Auth::id()),
+            'group' => $group,
         ]);
     }
 
