@@ -13,6 +13,7 @@ use sales\helpers\clientChat\ClientChatHelper;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChatCase\entity\ClientChatCase;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
+use sales\model\clientChatFeedback\entity\ClientChatFeedback;
 use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatNote\entity\ClientChatNote;
@@ -59,6 +60,7 @@ use yii\db\ActiveRecord;
  * @property ClientChatVisitor $ccv
  * @property Lead[] $leads
  * @property Cases[] $cases
+ * @property ClientChatFeedback $feedback
  */
 class ClientChat extends \yii\db\ActiveRecord
 {
@@ -233,6 +235,11 @@ class ClientChat extends \yii\db\ActiveRecord
 	public function getCases(): ActiveQuery
 	{
 		return $this->hasMany(Cases::class, ['cs_id' => 'cccs_case_id'])->viaTable(ClientChatCase::tableName(), ['cccs_chat_id' => 'cch_id']);
+	}
+
+	public function getFeedback(): ActiveQuery
+	{
+		return $this->hasOne(ClientChatFeedback::class, ['ccf_client_chat_id' => 'cch_id']);
 	}
 
 	public static function getStatusList(): array

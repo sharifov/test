@@ -6,6 +6,7 @@ use common\models\VisitorLog;
 use sales\auth\Auth;
 use sales\model\clientChat\entity\search\ClientChatQaSearch;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
+use sales\model\clientChatFeedback\entity\ClientChatFeedbackSearch;
 use sales\model\clientChatMessage\entity\search\ClientChatMessageSearch;
 use sales\model\clientChatNote\entity\ClientChatNoteSearch;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
@@ -107,6 +108,11 @@ class ClientChatCrudController extends FController
         $dataProviderRequest = $requestSearch->search($data);
         $dataProviderRequest->setPagination(['pageSize' => 10]);
 
+        $searchModelFeedback = new ClientChatFeedbackSearch();
+        $data[$searchModelFeedback->formName()]['ccf_client_chat_id'] = $id;
+        $dataProviderFeedback = $searchModelFeedback->search($data);
+        $dataProviderFeedback->setPagination(['pageSize' => 20]);
+
         return $this->render('../client-chat-qa/view', [
             'model' => $this->findModel($id),
             'searchModel' => $searchModel,
@@ -115,6 +121,7 @@ class ClientChatCrudController extends FController
             'visitorLog' => $visitorLog ?? null,
             'clientChatVisitorData' => $clientChat->ccv->ccvCvd ?? null,
             'dataProviderRequest' => $dataProviderRequest,
+            'dataProviderFeedback' => $dataProviderFeedback,
         ]);
     }
 

@@ -68,6 +68,48 @@ $_self = $this;
         </div>
     </div>
 
+    <?php if ($clientChat->feedback): ?>
+        <?php $feedback = $clientChat->feedback ?>
+        <div class="_rc-block-wrapper">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Feedback </h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li>
+                            <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+
+                <div class="x_content">
+                    <div >
+                        <strong>Client</strong>: <?php echo $feedback->client ? Html::encode($feedback->client->full_name) : '-' ?>
+                    </div>
+                    <div>
+                        <strong>Rating</strong>:
+                        <?php if($feedback->ccf_rating): ?>
+                            <?php for($i = 1; $i <= $feedback->ccf_rating; $i++): ?>
+                                <i class="fa fa-star text-warning"></i>
+                            <?php endfor ?>
+                        <?php else: ?>
+                            -
+                        <?php endif ?>
+                    </div>
+                    <div >
+                        <strong>Message</strong>: <?php echo Html::encode($feedback->ccf_message) ?>
+                    </div>
+                    <div>
+                        <strong>Agent</strong>: <?php echo $feedback->employee ? Html::encode($feedback->employee->username) : '-' ?>
+                    </div>
+                    <div class="_cc_chat_note_date_item">
+						<?php echo $feedback->ccf_created_dt ? Yii::$app->formatter->asDatetime(strtotime($feedback->ccf_created_dt)) : '' ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <?php endif ?>
+
     <div class="_rc-block-wrapper">
         <div class="x_panel">
             <div class="x_title">
