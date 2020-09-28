@@ -198,6 +198,29 @@ class DbController extends Controller
     }
 
     /**
+     * @param string $tableName
+     * @throws Exception
+     */
+    public function actionConvertCollateTbl(string $tableName)
+    {
+
+        $collate = 'utf8mb4';
+        $collation = 'utf8mb4_unicode_ci';
+
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+
+        echo ' - Table: "' . $tableName . '"';
+        //echo PHP_EOL;
+
+        $db = Yii::$app->getDb();
+        $db->createCommand('SET FOREIGN_KEY_CHECKS=0;')->execute();
+        $db->createCommand("ALTER TABLE `$tableName` CONVERT TO CHARACTER SET " . $collate . " COLLATE " . $collation)->execute();
+        $db->createCommand('SET FOREIGN_KEY_CHECKS=1;')->execute();
+
+        printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+    }
+
+    /**
      * Remove Client Emails and Phones Duplicates
      */
     public function actionRemoveClientDuplicates()
