@@ -83,9 +83,6 @@ $_self = $this;
                 </div>
 
                 <div class="x_content">
-                    <div >
-                        <strong>Client</strong>: <?php echo $feedback->client ? Html::encode($feedback->client->full_name) : '-' ?>
-                    </div>
                     <div>
                         <strong>Rating</strong>:
                         <?php if($feedback->ccf_rating): ?>
@@ -98,9 +95,6 @@ $_self = $this;
                     </div>
                     <div >
                         <strong>Message</strong>: <?php echo Html::encode($feedback->ccf_message) ?>
-                    </div>
-                    <div>
-                        <strong>Agent</strong>: <?php echo $feedback->employee ? Html::encode($feedback->employee->username) : '-' ?>
                     </div>
                     <div class="_cc_chat_note_date_item">
 						<?php echo $feedback->ccf_created_dt ? Yii::$app->formatter->asDatetime(strtotime($feedback->ccf_created_dt)) : '' ?>
