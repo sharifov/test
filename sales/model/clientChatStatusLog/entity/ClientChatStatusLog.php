@@ -4,6 +4,7 @@ namespace sales\model\clientChatStatusLog\entity;
 
 use common\models\Employee;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChatChannel\entity\ClientChatChannel;
 
 /**
  * This is the model class for table "client_chat_status_log".
@@ -16,9 +17,13 @@ use sales\model\clientChat\entity\ClientChat;
  * @property string|null $csl_end_dt
  * @property int|null $csl_owner_id
  * @property string|null $csl_description
+ * @property int|null $csl_user_id
+ * @property int|null $csl_prev_channel_id
  *
  * @property ClientChat $cslCch
  * @property Employee $cslOwner
+ * @property ClientChatChannel $cslPrevChannel
+ * @property Employee $cslUser
  */
 class ClientChatStatusLog extends \yii\db\ActiveRecord
 {
@@ -38,10 +43,16 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
             ['csl_owner_id', 'integer'],
             ['csl_owner_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['csl_owner_id' => 'id']],
 
+			['csl_prev_channel_id', 'integer'],
+			['csl_prev_channel_id', 'exist', 'skipOnError' => true, 'targetClass' => ClientChatChannel::class, 'targetAttribute' => ['csl_prev_channel_id' => 'ccc_id']],
+
             ['csl_start_dt', 'safe'],
 
             ['csl_to_status', 'integer'],
-        ];
+
+			['csl_user_id', 'integer'],
+			['csl_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['csl_user_id' => 'id']],
+		];
     }
 
     public function getCslCch(): \yii\db\ActiveQuery
@@ -54,6 +65,16 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
         return $this->hasOne(Employee::class, ['id' => 'csl_owner_id']);
     }
 
+	public function getCslPrevChannel(): \yii\db\ActiveQuery
+	{
+		return $this->hasOne(ClientChatChannel::class, ['ccc_id' => 'csl_prev_channel_id']);
+	}
+	
+	public function getCslUser(): \yii\db\ActiveQuery
+	{
+		return $this->hasOne(Employee::class, ['id' => 'csl_user_id']);
+	}
+
     public function attributeLabels(): array
     {
         return [
@@ -65,6 +86,8 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
             'csl_end_dt' => 'End Dt',
             'csl_owner_id' => 'Owner ID',
             'csl_description' => 'Description',
+			'csl_user_id' => 'User ID',
+			'csl_prev_channel_id' => 'Prev Channel ID',
         ];
     }
 

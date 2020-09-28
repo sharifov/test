@@ -55,6 +55,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'csl_end_dt:byUserDateTime',
                 'csl_owner_id:username',
                 'csl_description:ntext',
+                [
+                    'attribute' => 'csl_prev_channel_id',
+                    'value' => static function (ClientChatStatusLog $model) {
+                        return $model->cslPrevChannel ? Html::a('<i class="fa fa-link"></i> ' . $model->cslPrevChannel->ccc_name, 'client-chat-channel-crud/view', ['ccc_id' => $model->csl_prev_channel_id]) : null;
+                    },
+					'format' => 'raw',
+				],
+                'csl_user_id:username',
             ],
         ]) ?>
 
