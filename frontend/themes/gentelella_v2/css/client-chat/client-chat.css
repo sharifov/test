@@ -548,3 +548,6 @@
 ._cc_item_data span:last-child {
     margin-bottom: 0;
 }
+._cc-list-wrapper ._cc-list-item.cc_closed {
+    background: #ffefed;
+}

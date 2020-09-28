@@ -85,6 +85,7 @@ class ClientChat extends \yii\db\ActiveRecord
 		self::STATUS_TRANSFER => 'warning',
 	];
 
+	public const TAB_ALL = 0;
 	public const TAB_ACTIVE = 1;
 	public const TAB_ARCHIVE = 2;
 
@@ -372,6 +373,11 @@ class ClientChat extends \yii\db\ActiveRecord
 	public static function isTabActive(int $tab): bool
 	{
 		return $tab === self::TAB_ACTIVE;
+	}
+
+	public static function isTabClosed(int $tab): bool
+	{
+		return $tab === self::TAB_ARCHIVE;
 	}
 
     public function isAssignedLead(int $leadId): bool

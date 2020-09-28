@@ -2,6 +2,7 @@
 
 use frontend\themes\gentelella_v2\assets\ClientChatAsset;
 use sales\auth\Auth;
+use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatNote\entity\ClientChatNote;
@@ -120,6 +121,8 @@ $this->registerJsFile('/js/moment.min.js', [
 $moveOfferUrl = Url::to(['/client-chat/move-offer']);
 $clientChatId = $clientChat ? $clientChat->cch_id : 0;
 $discardUnreadMessageUrl = Url::to(['/client-chat/discard-unread-messages']);
+$tabAll = ClientChat::TAB_ALL;
+$tabActive = ClientChat::TAB_ACTIVE;
 $js = <<<JS
 
 window.name = 'chat';
@@ -215,8 +218,12 @@ $(document).on('click', '._cc_tab', function () {
     let selectedTab = tab.attr('data-tab-id');
     
     let currentTab = params.get('tab');
+    
+    if (currentTab === null) {
+        currentTab = {$tabActive};
+    }
     if (currentTab == selectedTab) {
-        return false;
+        selectedTab = {$tabAll};
     }
     
     params.delete('chid');

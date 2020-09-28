@@ -23,6 +23,7 @@ use yii\helpers\ArrayHelper;
  *
  * @property int|null $lead_id
  * @property int|null $case_id
+ * @property int      $pageSize
  */
 class ClientChatSearch extends ClientChat
 {
@@ -34,7 +35,8 @@ class ClientChatSearch extends ClientChat
     public string $timeEnd;
     public const DEFAULT_INTERVAL_BETWEEN_DAYS = '-6 days';
 
-    private const CLIENT_CHAT_PAGE_SIZE = 10;
+    private int $pageSize;
+    private const DEFAULT_PAGE_SIZE = 10;
 
     public function __construct($config = [])
     {
@@ -43,6 +45,7 @@ class ClientChatSearch extends ClientChat
         $range = explode(' - ', $this->timeRange);
         $this->timeStart = $range[0];
         $this->timeEnd = $range[1];
+        $this->pageSize = \Yii::$app->params['settings']['client_chat_page_size'] ?? self::DEFAULT_PAGE_SIZE;
     }
 
     public function rules(): array
@@ -350,14 +353,16 @@ class ClientChatSearch extends ClientChat
             'dep_name',
             'project.name as project_name',
             'ccc_name',
-        ])->orderBy(['cch_created_dt' => SORT_DESC]);
+        ]);
 
         if ($group === ClientChat::TAB_GROUPS_MY) {
             $query->byOwner(Auth::id());
+            $query->orderBy(['cch_updated_dt' => SORT_DESC]);
         } elseif ($group === ClientChat::TAB_GROUPS_OTHER) {
             $query
                 ->andWhere(['<>', 'cch_owner_user_id', Auth::id()])
                 ->andWhere(['IS NOT', 'cch_owner_user_id', null]);
+            $query->orderBy(['cch_created_dt' => SORT_DESC]);
         }
 
         $channelsIds = ArrayHelper::getColumn($channels, 'ccc_id');
@@ -381,9 +386,10 @@ class ClientChatSearch extends ClientChat
 
         if (ClientChat::isTabActive($tab)) {
             $query->active();
-        } else {
+        } elseif (ClientChat::isTabClosed($tab)) {
             $query->archive();
         }
+
         $query->join('JOIN', ['client' => Client::tableName()], 'cch_client_id = client.id');
         $query->join('JOIN', [ClientChatChannel::tableName()], 'cch_channel_id = ccc_id');
         $query->leftJoin(Department::tableName(), 'cch_dep_id = dep_id');
@@ -407,23 +413,23 @@ class ClientChatSearch extends ClientChat
 
         $dataProvider = new ArrayDataProvider([
             'allModels' => $data,
-            'pagination' => ['pageSize' => self::CLIENT_CHAT_PAGE_SIZE],
-            'sort' => [
-                'defaultOrder' => [
-                    'count_unread_messages' => SORT_DESC,
-                    'ccm_sent_dt' => SORT_DESC,
-                    'cch_created_dt' => SORT_DESC,
-                ],
-                'attributes' => [
-                    'count_unread_messages',
-                    'ccm_sent_dt',
-                    'cch_created_dt',
-                ],
-            ],
+            'pagination' => ['pageSize' => $this->pageSize],
+//            'sort' => [
+//                'defaultOrder' => [
+//                    'count_unread_messages' => SORT_DESC,
+//                    'ccm_sent_dt' => SORT_DESC,
+//                    'cch_created_dt' => SORT_DESC,
+//                ],
+//                'attributes' => [
+//                    'count_unread_messages',
+//                    'ccm_sent_dt',
+//                    'cch_created_dt',
+//                ],
+//            ],
         ]);
 
         if (\Yii::$app->request->isGet) {
-            $dataProvider->pagination->pageSize = $page * self::CLIENT_CHAT_PAGE_SIZE;
+            $dataProvider->pagination->pageSize = $page * $this->pageSize;
             $dataProvider->pagination->page = 0;
         }
 
