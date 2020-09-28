@@ -1,4 +1,5 @@
 <?php
+
 namespace frontend\controllers;
 
 use common\components\CentrifugoService;
@@ -60,244 +61,242 @@ use yii\web\Response;
 
 /**
  * Class ClientChatController
+ *
  * @package frontend\controllers
  *
- * @property ClientChatRepository $clientChatRepository
+ * @property ClientChatRepository           $clientChatRepository
  * @property ClientChatUserAccessRepository $clientChatUserAccessRepository
- * @property ClientChatMessageService $clientChatMessageService
- * @property ClientChatService $clientChatService
- * @property ClientChatUserAccessService $clientChatUserAccessService
- * @property ClientChatNoteRepository $clientChatNoteRepository
- * @property LeadRepository $leadRepository
- * @property TransactionManager $transactionManager
- * @property ClientChatChannelRepository $clientChatChannelRepository
- * @property ProjectRepository $projectRepository
- * @property ClientChatRequestService $clientChatRequestService
- * @property ClientChatRequestRepository $clientChatRequestRepository
+ * @property ClientChatMessageService       $clientChatMessageService
+ * @property ClientChatService              $clientChatService
+ * @property ClientChatUserAccessService    $clientChatUserAccessService
+ * @property ClientChatNoteRepository       $clientChatNoteRepository
+ * @property LeadRepository                 $leadRepository
+ * @property TransactionManager             $transactionManager
+ * @property ClientChatChannelRepository    $clientChatChannelRepository
+ * @property ProjectRepository              $projectRepository
+ * @property ClientChatRequestService       $clientChatRequestService
+ * @property ClientChatRequestRepository    $clientChatRequestRepository
  */
 class ClientChatController extends FController
 {
-	private const CLIENT_CHAT_PAGE_SIZE = 10;
-	/**
-	 * @var ClientChatRepository
-	 */
-	private ClientChatRepository $clientChatRepository;
-	/**
-	 * @var ClientChatUserAccessRepository
-	 */
-	private ClientChatUserAccessRepository $clientChatUserAccessRepository;
-	/**
-	 * @var ClientChatMessageService
-	 */
-	private ClientChatMessageService $clientChatMessageService;
-	/**
-	 * @var ClientChatService
-	 */
-	private ClientChatService $clientChatService;
-	/**
-	 * @var ClientChatUserAccessService
-	 */
-	private ClientChatUserAccessService $clientChatUserAccessService;
+    private const CLIENT_CHAT_PAGE_SIZE = 10;
+    /**
+     * @var ClientChatRepository
+     */
+    private ClientChatRepository $clientChatRepository;
+    /**
+     * @var ClientChatUserAccessRepository
+     */
+    private ClientChatUserAccessRepository $clientChatUserAccessRepository;
+    /**
+     * @var ClientChatMessageService
+     */
+    private ClientChatMessageService $clientChatMessageService;
+    /**
+     * @var ClientChatService
+     */
+    private ClientChatService $clientChatService;
+    /**
+     * @var ClientChatUserAccessService
+     */
+    private ClientChatUserAccessService $clientChatUserAccessService;
 
     private ClientChatNoteRepository $clientChatNoteRepository;
     /**
      * @var LeadRepository
      */
     private $leadRepository;
-	/**
-	 * @var TransactionManager
-	 */
-	private TransactionManager $transactionManager;
-	/**
-	 * @var ClientChatChannelRepository
-	 */
-	private ClientChatChannelRepository $clientChatChannelRepository;
-	/**
-	 * @var ProjectRepository
-	 */
-	private ProjectRepository $projectRepository;
-	/**
-	 * @var ClientChatRequestService
-	 */
-	private ClientChatRequestService $clientChatRequestService;
-	/**
-	 * @var ClientChatRequestRepository
-	 */
-	private ClientChatRequestRepository $clientChatRequestRepository;
+    /**
+     * @var TransactionManager
+     */
+    private TransactionManager $transactionManager;
+    /**
+     * @var ClientChatChannelRepository
+     */
+    private ClientChatChannelRepository $clientChatChannelRepository;
+    /**
+     * @var ProjectRepository
+     */
+    private ProjectRepository $projectRepository;
+    /**
+     * @var ClientChatRequestService
+     */
+    private ClientChatRequestService $clientChatRequestService;
+    /**
+     * @var ClientChatRequestRepository
+     */
+    private ClientChatRequestRepository $clientChatRequestRepository;
 
-	public function __construct(
-		$id,
-		$module,
-		ClientChatRepository $clientChatRepository,
-		ClientChatUserAccessRepository $clientChatUserAccessRepository,
-		ClientChatMessageService $clientChatMessageService,
-		ClientChatService $clientChatService,
-		ClientChatUserAccessService $clientChatUserAccessService,
-		ClientChatNoteRepository $clientChatNoteRepository,
-		LeadRepository $leadRepository,
-		TransactionManager $transactionManager,
-		ClientChatChannelRepository $clientChatChannelRepository,
-		ProjectRepository $projectRepository,
-		ClientChatRequestService $clientChatRequestService,
-		ClientChatRequestRepository $clientChatRequestRepository,
-		$config = [])
-	{
-		parent::__construct($id, $module, $config);
-		$this->clientChatRepository = $clientChatRepository;
-		$this->clientChatUserAccessRepository = $clientChatUserAccessRepository;
-		$this->clientChatMessageService = $clientChatMessageService;
-		$this->clientChatService = $clientChatService;
-		$this->clientChatUserAccessService = $clientChatUserAccessService;
-		$this->clientChatNoteRepository = $clientChatNoteRepository;
+    public function __construct(
+        $id,
+        $module,
+        ClientChatRepository $clientChatRepository,
+        ClientChatUserAccessRepository $clientChatUserAccessRepository,
+        ClientChatMessageService $clientChatMessageService,
+        ClientChatService $clientChatService,
+        ClientChatUserAccessService $clientChatUserAccessService,
+        ClientChatNoteRepository $clientChatNoteRepository,
+        LeadRepository $leadRepository,
+        TransactionManager $transactionManager,
+        ClientChatChannelRepository $clientChatChannelRepository,
+        ProjectRepository $projectRepository,
+        ClientChatRequestService $clientChatRequestService,
+        ClientChatRequestRepository $clientChatRequestRepository,
+        $config = []
+    )
+    {
+        parent::__construct($id, $module, $config);
+        $this->clientChatRepository = $clientChatRepository;
+        $this->clientChatUserAccessRepository = $clientChatUserAccessRepository;
+        $this->clientChatMessageService = $clientChatMessageService;
+        $this->clientChatService = $clientChatService;
+        $this->clientChatUserAccessService = $clientChatUserAccessService;
+        $this->clientChatNoteRepository = $clientChatNoteRepository;
         $this->leadRepository = $leadRepository;
-		$this->transactionManager = $transactionManager;
-		$this->clientChatChannelRepository = $clientChatChannelRepository;
-		$this->projectRepository = $projectRepository;
-		$this->clientChatRequestService = $clientChatRequestService;
-		$this->clientChatRequestRepository = $clientChatRequestRepository;
-	}
+        $this->transactionManager = $transactionManager;
+        $this->clientChatChannelRepository = $clientChatChannelRepository;
+        $this->projectRepository = $projectRepository;
+        $this->clientChatRequestService = $clientChatRequestService;
+        $this->clientChatRequestRepository = $clientChatRequestRepository;
+    }
 
-	/**
-	 * @return array
-	 */
-	public function behaviors(): array
-	{
-		$behaviors = [
-			'verbs' => [
-				'class' => VerbFilter::class,
-				'actions' => [
-					'delete' => ['POST'],
-				],
-			],
-		];
-		return ArrayHelper::merge(parent::behaviors(), $behaviors);
-	}
+    /**
+     * @return array
+     */
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'verbs' => [
+                'class' => VerbFilter::class,
+                'actions' => [
+                    'delete' => ['POST'],
+                ],
+            ],
+        ];
 
-	public function actionIndex(int $channelId = null, int $page = 1, int $chid = 0, int $tab = ClientChat::TAB_ACTIVE, int $dep = 0, int $project = 0)
-	{
-		$channelsQuery = ClientChatChannel::find()
-			->joinWithCcuc(Auth::id());
-		$dataProvider = null;
-		$page = $page ?: 1;
-		$channelId = $channelId ?: null;
-		$channels = $channelsQuery->all();
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
 
-		/** @var $channels ClientChatChannel[] */
-		if ($channels) {
+    public function actionIndex(int $channelId = null, int $page = 1, int $chid = 0, int $tab = ClientChat::TAB_ACTIVE, int $dep = 0, int $project = 0)
+    {
+        $channelsQuery = ClientChatChannel::find()
+            ->joinWithCcuc(Auth::id());
+        $dataProvider = null;
+        $page = $page ?: 1;
+        $channelId = $channelId ?: null;
+        $channels = $channelsQuery->all();
 
-			$search = new ClientChatSearch();
-			$dataProvider = $search->getListOfChats($channelId, $channels, $dep, $project, $tab, $page);
+        /** @var $channels ClientChatChannel[] */
+        if ($channels) {
+            $search = new ClientChatSearch();
+            $dataProvider = $search->getListOfChats($channelId, $channels, $dep, $project, $tab, $page);
+        }
 
-		}
+        try {
+            $clientChat = $this->clientChatRepository->findById($chid);
 
-		try {
-			$clientChat = $this->clientChatRepository->findById($chid);
+            if (!Auth::can('client-chat/manage/all', ['chat' => $clientChat])) {
+                throw new ForbiddenHttpException('You do not have access to this chat', 403);
+            }
 
-			if (!Auth::can('client-chat/manage/all', ['chat' => $clientChat])) {
-				throw new ForbiddenHttpException('You do not have access to this chat', 403);
-			}
+            if ($clientChat->cch_owner_user_id) {
+                $this->clientChatMessageService->discardUnreadMessages($clientChat->cch_id, $clientChat->cch_owner_user_id);
+            }
 
-			if ($clientChat->cch_owner_user_id) {
-				$this->clientChatMessageService->discardUnreadMessages($clientChat->cch_id, $clientChat->cch_owner_user_id);
-			}
+            if ($clientChat->isClosed()) {
+                $history = ClientChatMessage::find()->byChhId($clientChat->cch_id)->all();
+            }
+        } catch (NotFoundException $e) {
+            $clientChat = null;
+        } catch (\DomainException $e) {
+            $clientChat = null;
+        }
 
-			if ($clientChat->isClosed()) {
-				$history = ClientChatMessage::find()->byChhId($clientChat->cch_id)->all();
-			}
+        if ($dataProvider && \Yii::$app->request->isPost) {
+            if (\Yii::$app->request->post('loadingChannels')) {
+                $dataProvider->pagination->page = $page;
+            } else {
+                $dataProvider->pagination->page = $page = 0;
+            }
 
-		} catch (NotFoundException $e) {
-			$clientChat = null;
-		} catch (\DomainException $e) {
-			$clientChat = null;
-		}
+            $response = [
+                'html' => '',
+                'page' => $page,
+            ];
 
-		if ($dataProvider && \Yii::$app->request->isPost) {
+            if ($dataProvider->getCount()) {
+                $response['html'] = $this->renderPartial('partial/_client-chat-item', [
+                    'clientChats' => $dataProvider->getModels(),
+                    'clientChatId' => $clientChat ? $clientChat->cch_id : '',
+                ]);
+                $response['page'] = $page + 1;
+            }
 
-			if (\Yii::$app->request->post('loadingChannels')) {
-				$dataProvider->pagination->page = $page;
-			} else {
-				$dataProvider->pagination->page = $page = 0;
-			}
+            return $this->asJson($response);
+        }
 
-			$response = [
-				'html' => '',
-				'page' => $page
-			];
+        return $this->render('index', [
+            'channels' => $channels,
+            'dataProvider' => $dataProvider,
+            'channelId' => $channelId,
+            'page' => $page,
+            'clientChat' => $clientChat,
+            'client' => $clientChat->cchClient ?? '',
+            'history' => $history ?? null,
+            'tab' => $tab,
+            'dep' => $dep,
+            'project' => $project,
+            'totalUnreadMessages' => $this->clientChatMessageService->getCountOfTotalUnreadMessages(Auth::id()),
+        ]);
+    }
 
-			if ($dataProvider->getCount()) {
-				$response['html'] = $this->renderPartial('partial/_client-chat-item', [
-					'clientChats' => $dataProvider->getModels(),
-					'clientChatId' => $clientChat ? $clientChat->cch_id : ''
-				]);
-				$response['page'] = $page + 1;
-			}
-
-			return $this->asJson($response);
-		}
-
-		return $this->render('index', [
-			'channels' => $channels,
-			'dataProvider' => $dataProvider,
-			'channelId' => $channelId,
-			'page' => $page,
-			'clientChat' => $clientChat,
-			'client' => $clientChat->cchClient ?? '',
-			'history' => $history ?? null,
-			'tab' => $tab,
-			'dep' => $dep,
-			'project' => $project,
-			'totalUnreadMessages' => $this->clientChatMessageService->getCountOfTotalUnreadMessages(Auth::id())
-		]);
-	}
-
-	public function actionInfo()
-	{
-		$cchId = \Yii::$app->request->post('cch_id');
-
-		$result = [
-			'html' => '',
-			'message' => ''
-		];
-		try {
-			$clientChat = $this->clientChatRepository->findById($cchId);
-			$this->clientChatMessageService->discardUnreadMessages($clientChat->cch_id, (int)$clientChat->cch_owner_user_id);
-
-			$result['html'] = $this->renderPartial('partial/_client-chat-info', [
-				'clientChat' => $clientChat,
-				'client' => $clientChat->cchClient,
-			]);
-			$result['noteHtml'] = $this->renderAjax('partial/_client-chat-note', [
-				'clientChat' => $clientChat,
-				'model' => new ClientChatNote(),
-			]);
-
-		} catch (NotFoundException $e) {
-			$result['message'] = $e->getMessage();
-		}
-
-		return $this->asJson($result);
-	}
-
-	public function actionNote(): Response
+    public function actionInfo()
     {
         $cchId = \Yii::$app->request->post('cch_id');
 
-		$result = [
-			'html' => '',
-			'message' => ''
-		];
-		try {
-			$clientChat = $this->clientChatRepository->findById($cchId);
+        $result = [
+            'html' => '',
+            'message' => '',
+        ];
+        try {
+            $clientChat = $this->clientChatRepository->findById($cchId);
+            $this->clientChatMessageService->discardUnreadMessages($clientChat->cch_id, (int) $clientChat->cch_owner_user_id);
 
-			$result['html'] = $this->renderPartial('partial/_client-chat-note', [
+            $result['html'] = $this->renderPartial('partial/_client-chat-info', [
+                'clientChat' => $clientChat,
+                'client' => $clientChat->cchClient,
+            ]);
+            $result['noteHtml'] = $this->renderAjax('partial/_client-chat-note', [
                 'clientChat' => $clientChat,
                 'model' => new ClientChatNote(),
             ]);
+        } catch (NotFoundException $e) {
+            $result['message'] = $e->getMessage();
+        }
 
-		} catch (NotFoundException $e) {}
+        return $this->asJson($result);
+    }
 
-		return $this->asJson($result);
-	}
+    public function actionNote(): Response
+    {
+        $cchId = \Yii::$app->request->post('cch_id');
+
+        $result = [
+            'html' => '',
+            'message' => '',
+        ];
+        try {
+            $clientChat = $this->clientChatRepository->findById($cchId);
+
+            $result['html'] = $this->renderPartial('partial/_client-chat-note', [
+                'clientChat' => $clientChat,
+                'model' => new ClientChatNote(),
+            ]);
+        } catch (NotFoundException $e) {
+        }
+
+        return $this->asJson($result);
+    }
 
     public function actionCreateNote(): string
     {
@@ -307,16 +306,18 @@ class ClientChatController extends FController
 
         $clientChat = $this->clientChatRepository->findById($cchId);
 
-		if (!Auth::can('client-chat/manage/all', ['chat' => $clientChat])) {
-			throw new ForbiddenHttpException('You do not have access to perform this action', 403);
-		}
+        if (!Auth::can('client-chat/manage/all', ['chat' => $clientChat])) {
+            throw new ForbiddenHttpException('You do not have access to perform this action', 403);
+        }
 
         if (Yii::$app->request->isAjax && $model->load(Yii::$app->request->post())) {
             try {
                 $this->clientChatNoteRepository->save($model);
             } catch (\Throwable $throwable) {
-                Yii::error(AppHelper::throwableFormatter($throwable),
-                'ClientChatController:actionCreateNote:save');
+                Yii::error(
+                    AppHelper::throwableFormatter($throwable),
+                    'ClientChatController:actionCreateNote:save'
+                );
             }
         }
 
@@ -325,92 +326,94 @@ class ClientChatController extends FController
             'model' => $model,
             'showContent' => false,
         ]);
-	}
+    }
 
-	public function actionDeleteNote(): string
+    public function actionDeleteNote(): string
     {
-		try {
-	        $cchId = Yii::$app->request->get('cch_id');
-		    $ccnId = Yii::$app->request->get('ccn_id');
+        try {
+            $cchId = Yii::$app->request->get('cch_id');
+            $ccnId = Yii::$app->request->get('ccn_id');
 
             $clientChat = $this->clientChatRepository->findById($cchId);
 
-			if (!Auth::can('client-chat/manage/all', ['chat' => $clientChat])) {
-				throw new ForbiddenHttpException('You do not have access to perform this action', 403);
-			}
+            if (!Auth::can('client-chat/manage/all', ['chat' => $clientChat])) {
+                throw new ForbiddenHttpException('You do not have access to perform this action', 403);
+            }
 
             if ($clientChatNote = $this->clientChatNoteRepository->findById($ccnId)) {
                 $this->clientChatNoteRepository->toggleDeleted($clientChatNote);
             }
-		} catch (ForbiddenHttpException $e) {
-			throw $e;
-		} catch (\Throwable $throwable) {
-		    Yii::error(AppHelper::throwableFormatter($throwable),
-		    'ClientChatController:actionDeleteNote:delete');
-		}
+        } catch (ForbiddenHttpException $e) {
+            throw $e;
+        } catch (\Throwable $throwable) {
+            Yii::error(
+                AppHelper::throwableFormatter($throwable),
+                'ClientChatController:actionDeleteNote:delete'
+            );
+        }
 
         return $this->renderAjax('partial/_client-chat-note', [
             'clientChat' => $clientChat ?? null,
             'model' => new ClientChatNote(),
             'showContent' => true,
         ]);
-	}
+    }
 
     public function actionAccessManage(): \yii\web\Response
-	{
-		$ccuaId = \Yii::$app->request->post('ccuaId');
-		$accessAction = \Yii::$app->request->post('accessAction');
+    {
+        $ccuaId = \Yii::$app->request->post('ccuaId');
+        $accessAction = \Yii::$app->request->post('accessAction');
 
-		try {
-			$result = [
-				'success' => false,
-				'notifyMessage' => '',
-				'notifyTitle' => '',
-				'notifyType' => ''
-			];
+        try {
+            $result = [
+                'success' => false,
+                'notifyMessage' => '',
+                'notifyTitle' => '',
+                'notifyType' => '',
+            ];
 
-			$ccua = $this->clientChatUserAccessRepository->findByPrimaryKey($ccuaId);
-			$this->clientChatUserAccessService->updateStatus($ccua, (int)$accessAction);
+            $ccua = $this->clientChatUserAccessRepository->findByPrimaryKey($ccuaId);
+            $this->clientChatUserAccessService->updateStatus($ccua, (int) $accessAction);
 
-			$result['success'] = true;
-		} catch (\RuntimeException | \DomainException | NotFoundException $e) {
-			$result['notifyMessage'] = $e->getMessage();
-			if (ClientChatCodeException::isWarningMessage($e)) {
-				$result['notifyTitle'] = 'Warning';
-				$result['notifyType'] = 'warning';
-			} else {
-				$result['notifyTitle'] = 'Error';
-				$result['notifyType'] = 'error';
-			}
-		} catch (\Throwable $e) {
-			\Yii::error(AppHelper::throwableFormatter($e), 'ClientChatController::actionAccessManage::Throwable');
-			$result['notifyMessage'] = 'Internal Server Error';
-			$result['notifyTitle'] = 'Error';
-			$result['notifyType'] = 'error';
-		}
+            $result['success'] = true;
+        } catch (\RuntimeException | \DomainException | NotFoundException $e) {
+            $result['notifyMessage'] = $e->getMessage();
+            if (ClientChatCodeException::isWarningMessage($e)) {
+                $result['notifyTitle'] = 'Warning';
+                $result['notifyType'] = 'warning';
+            } else {
+                $result['notifyTitle'] = 'Error';
+                $result['notifyType'] = 'error';
+            }
+        } catch (\Throwable $e) {
+            \Yii::error(AppHelper::throwableFormatter($e), 'ClientChatController::actionAccessManage::Throwable');
+            $result['notifyMessage'] = 'Internal Server Error';
+            $result['notifyTitle'] = 'Error';
+            $result['notifyType'] = 'error';
+        }
 
-		return $this->asJson($result);
-	}
+        return $this->asJson($result);
+    }
 
-	public function actionAjaxDataInfo()
-	{
-		$cchId = \Yii::$app->request->post('cchId');
+    public function actionAjaxDataInfo()
+    {
+        $cchId = \Yii::$app->request->post('cchId');
 
-		$clientChat = null;
-		$visitorLog = null;
-		try {
-			$clientChat = $this->clientChatRepository->findById($cchId);
-			if ($clientChat->ccv && $clientChat->ccv->ccv_cvd_id) {
-				$visitorLog = VisitorLog::find()->byCvdId($clientChat->ccv->ccv_cvd_id)->orderBy(['vl_created_dt' => SORT_DESC])->one();
-			}
-		} catch (NotFoundException $e) {
-		}
+        $clientChat = null;
+        $visitorLog = null;
+        try {
+            $clientChat = $this->clientChatRepository->findById($cchId);
+            if ($clientChat->ccv && $clientChat->ccv->ccv_cvd_id) {
+                $visitorLog = VisitorLog::find()->byCvdId($clientChat->ccv->ccv_cvd_id)->orderBy(['vl_created_dt' => SORT_DESC])->one();
+            }
+        } catch (NotFoundException $e) {
+        }
 
-		$requestSearch = new ClientChatRequestSearch();
-		$visitorId = '';
-		if ($clientChat->ccv && $clientChat->ccv->ccvCvd) {
-		    $visitorId = $clientChat->ccv->ccvCvd->cvd_visitor_rc_id ?? '';
-		}
+        $requestSearch = new ClientChatRequestSearch();
+        $visitorId = '';
+        if ($clientChat->ccv && $clientChat->ccv->ccvCvd) {
+            $visitorId = $clientChat->ccv->ccvCvd->cvd_visitor_rc_id ?? '';
+        }
         $data[$requestSearch->formName()]['ccr_visitor_id'] = $visitorId;
         $data[$requestSearch->formName()]['ccr_event'] = ClientChatRequest::EVENT_TRACK;
         $dataProviderRequest = $requestSearch->search($data);
@@ -428,18 +431,18 @@ class ClientChatController extends FController
             $casesDataProvider = $casesSearch->search($data, Auth::user());
         }
 
-		return $this->renderAjax('partial/_data_info', [
-			'clientChat' => $clientChat,
-			'clientChatVisitorData' => $clientChat->ccv->ccvCvd ?? null,
-			'visitorLog' => $visitorLog,
-			'dataProviderRequest' => $dataProviderRequest,
-			'client' => $clientChat->cchClient ?? null,
-			'leadDataProvider' => $leadDataProvider ?? null,
-			'casesDataProvider' => $casesDataProvider ?? null,
-		]);
-	}
+        return $this->renderAjax('partial/_data_info', [
+            'clientChat' => $clientChat,
+            'clientChatVisitorData' => $clientChat->ccv->ccvCvd ?? null,
+            'visitorLog' => $visitorLog,
+            'dataProviderRequest' => $dataProviderRequest,
+            'client' => $clientChat->cchClient ?? null,
+            'leadDataProvider' => $leadDataProvider ?? null,
+            'casesDataProvider' => $casesDataProvider ?? null,
+        ]);
+    }
 
-	public function actionStats()
+    public function actionStats()
     {
         $model = new ChatGraphsSearch();
         $model->load(\Yii::$app->request->queryParams);
@@ -452,7 +455,6 @@ class ClientChatController extends FController
         $statsSearch = new ChatGraphsSearch();
         $statsSearch->load(Yii::$app->request->post());
         if ($statsSearch->validate()) {
-
             $html = $this->renderAjax('partial/_stats_chart', [
                 'viewModel' => new ViewModelChatGraph($statsSearch->stats(), $statsSearch),
             ]);
@@ -461,7 +463,7 @@ class ClientChatController extends FController
         $response = [
             'html' => $html ?? '',
             'error' => $statsSearch->hasErrors(),
-            'message' => $statsSearch->getErrorSummary(true)
+            'message' => $statsSearch->getErrorSummary(true),
         ];
 
         return $this->asJson($response);
@@ -480,7 +482,6 @@ class ClientChatController extends FController
         $statsSearch = new ChatExtendedGraphsSearch();
         $statsSearch->load(Yii::$app->request->post());
         if ($statsSearch->validate()) {
-
             $html = $this->renderAjax('partial/_extended_stats_chart', [
                 'viewModel' => new ViewModelChatExtendedGraph($statsSearch->stats(), $statsSearch),
             ]);
@@ -489,7 +490,7 @@ class ClientChatController extends FController
         $response = [
             'html' => $html ?? '',
             'error' => $statsSearch->hasErrors(),
-            'message' => $statsSearch->getErrorSummary(true)
+            'message' => $statsSearch->getErrorSummary(true),
         ];
 
         return $this->asJson($response);
@@ -502,134 +503,134 @@ class ClientChatController extends FController
 
         return $this->render('report', [
             'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider
+            'dataProvider' => $dataProvider,
         ]);
     }
 
-	public function actionAjaxClose()
-	{
-		$cchId = \Yii::$app->request->post('cchId');
+    public function actionAjaxClose()
+    {
+        $cchId = \Yii::$app->request->post('cchId');
 
-		$result = [
-			'error' => false,
-			'message' => 'Room successfully closed'
-		];
+        $result = [
+            'error' => false,
+            'message' => 'Room successfully closed',
+        ];
 
-		try {
+        try {
+            $this->clientChatService->closeConversation($cchId);
 
-			$this->clientChatService->closeConversation($cchId);
+            $result['tab'] = ClientChat::TAB_ARCHIVE;
+        } catch (NotFoundException | \RuntimeException | ForbiddenHttpException $e) {
+            $result['error'] = true;
+            $result['message'] = $e->getMessage();
+        } catch (\Throwable $e) {
+            Yii::error(AppHelper::throwableFormatter($e), 'ClientChatController::actionAjaxClose::Throwable');
+            $result['error'] = true;
+            $result['message'] = 'Internal Server Error';
+        }
 
-			$result['tab'] = ClientChat::TAB_ARCHIVE;
+        return $this->asJson($result);
+    }
 
-		} catch (NotFoundException | \RuntimeException | ForbiddenHttpException $e) {
-			$result['error'] = true;
-			$result['message'] = $e->getMessage();
-		} catch (\Throwable $e) {
-			Yii::error(AppHelper::throwableFormatter($e), 'ClientChatController::actionAjaxClose::Throwable');
-			$result['error'] = true;
-			$result['message'] = 'Internal Server Error';
-		}
+    public function actionAjaxHistory()
+    {
+        $chatId = \Yii::$app->request->post('cchId');
 
-		return $this->asJson($result);
-	}
-
-	public function actionAjaxHistory()
-	{
-		$chatId = \Yii::$app->request->post('cchId');
-
-		try {
-			$clientChat = $this->clientChatRepository->findById($chatId);
-//			if ($clientChat->isClosed()) {
+        try {
+            $clientChat = $this->clientChatRepository->findById($chatId);
+            //			if ($clientChat->isClosed()) {
 //				$history = ClientChatMessage::find()->byChhId($clientChat->cch_id)->all();
 //			}
-		} catch (NotFoundException $e) {
-			$clientChat = null;
-		}
+        } catch (NotFoundException $e) {
+            $clientChat = null;
+        }
 
-		return $this->renderAjax('partial/_chat_history', [
-//			'history' => $history ?? null,
-			'clientChat' => $clientChat
-		]);
-	}
+        return $this->renderAjax('partial/_chat_history', [
+            //			'history' => $history ?? null,
+            'clientChat' => $clientChat,
+        ]);
+    }
 
-	public function actionAjaxTransferView(): string
-	{
-		$cchId = Yii::$app->request->post('cchId');
-
-		$clientChat = ClientChat::findOne($cchId);
-
-		$form = new ClientChatTransferForm();
-
-		if ($clientChat) {
-			$form->cchId = $clientChat->cch_id;
-			$form->depId = $clientChat->cch_dep_id;
-			$form->isOnline = $clientChat->cch_client_online;
-		}
-
-		if (!Auth::can('client-chat/manage/all', ['chat' => $clientChat])) {
-			throw new ForbiddenHttpException('You do not have access to perform this action', 403);
-		}
-
-		try {
-			if ($form->load(Yii::$app->request->post()) && !$form->pjaxReload && $form->validate()) {
-				$newDepartment = $this->clientChatService->transfer($form);
-				return '<script>$("#modal-sm").modal("hide"); refreshChatPage('.$form->cchId.', '.ClientChat::TAB_ACTIVE.'); createNotify("Success", "Chat successfully transferred to '.$newDepartment->dep_name.' department. ", "success")</script>';
-			}
-
-			if ($form->pjaxReload) {
-				$clientChat->cch_dep_id = $form->depId;
-				$form->pjaxReload = 0;
-			}
-		} catch (\DomainException $e) {
-			$form->addError('general', $e->getMessage());
-		} catch (\RuntimeException $e) {
-			$form->addError('general', $e->getMessage());
-		} catch (\Throwable $e) {
-			$form->addError('general', 'Internal Server Error');
-			Yii::error(AppHelper::throwableFormatter($e), 'ClientChatController::actionAjaxTransferView::Throwable');
-		}
-
-		return $this->renderAjax('partial/_transfer_view', ['clientChat' => $clientChat, 'transferForm' => $form]);
-	}
-
-	public function actionPjaxUpdateChatWidget()
-	{
-		$widget = ClientChatAccessWidget::getInstance();
-		$widget->userId = Auth::id();
-		return $widget->run();
-	}
-
-	public function actionRefreshNotification(): string
-	{
-		if (Yii::$app->params['settings']['notification_web_socket']) {
-			$widget = new NotificationSocketWidget();
-		} else {
-			$widget = new NotificationWidget();
-		}
-		$widget->userId = Auth::id();
-		return $widget->run();
-	}
-
-
-	public function actionDiscardUnreadMessages(): void
-	{
-		$cchId = Yii::$app->request->post('cchId');
-		$userId = Auth::id();
-		$this->clientChatMessageService->discardUnreadMessages((int)$cchId, (int)$userId);
-	}
-
-	public function actionSendOfferList(): string
+    public function actionAjaxTransferView(): string
     {
-        $chatId = (int)\Yii::$app->request->post('chat_id');
-        $leadId = (int)\Yii::$app->request->post('lead_id');
+        $cchId = Yii::$app->request->post('cchId');
+
+        $clientChat = ClientChat::findOne($cchId);
+
+        $form = new ClientChatTransferForm();
+
+        if ($clientChat) {
+            $form->cchId = $clientChat->cch_id;
+            $form->depId = $clientChat->cch_dep_id;
+            $form->isOnline = $clientChat->cch_client_online;
+        }
+
+        if (!Auth::can('client-chat/manage/all', ['chat' => $clientChat])) {
+            throw new ForbiddenHttpException('You do not have access to perform this action', 403);
+        }
+
+        try {
+            if ($form->load(Yii::$app->request->post()) && !$form->pjaxReload && $form->validate()) {
+                $newDepartment = $this->clientChatService->transfer($form);
+
+                return '<script>$("#modal-sm").modal("hide"); refreshChatPage(' . $form->cchId . ', ' . ClientChat::TAB_ACTIVE . '); createNotify("Success", "Chat successfully transferred to ' . $newDepartment->dep_name . ' department. ", "success")</script>';
+            }
+
+            if ($form->pjaxReload) {
+                $clientChat->cch_dep_id = $form->depId;
+                $form->pjaxReload = 0;
+            }
+        } catch (\DomainException $e) {
+            $form->addError('general', $e->getMessage());
+        } catch (\RuntimeException $e) {
+            $form->addError('general', $e->getMessage());
+        } catch (\Throwable $e) {
+            $form->addError('general', 'Internal Server Error');
+            Yii::error(AppHelper::throwableFormatter($e), 'ClientChatController::actionAjaxTransferView::Throwable');
+        }
+
+        return $this->renderAjax('partial/_transfer_view', ['clientChat' => $clientChat, 'transferForm' => $form]);
+    }
+
+    public function actionPjaxUpdateChatWidget()
+    {
+        $widget = ClientChatAccessWidget::getInstance();
+        $widget->userId = Auth::id();
+
+        return $widget->run();
+    }
+
+    public function actionRefreshNotification(): string
+    {
+        if (Yii::$app->params['settings']['notification_web_socket']) {
+            $widget = new NotificationSocketWidget();
+        } else {
+            $widget = new NotificationWidget();
+        }
+        $widget->userId = Auth::id();
+
+        return $widget->run();
+    }
+
+    public function actionDiscardUnreadMessages(): void
+    {
+        $cchId = Yii::$app->request->post('cchId');
+        $userId = Auth::id();
+        $this->clientChatMessageService->discardUnreadMessages((int) $cchId, (int) $userId);
+    }
+
+    public function actionSendOfferList(): string
+    {
+        $chatId = (int) \Yii::$app->request->post('chat_id');
+        $leadId = (int) \Yii::$app->request->post('lead_id');
         $errorMessage = '';
         $dataProvider = null;
 
         try {
             $clientChat = $this->clientChatRepository->findById($chatId);
-			if (!Auth::can('client-chat/manage/all', ['chat' => $clientChat])) {
-				throw new ForbiddenHttpException('You do not have access to perform this action', 403);
-			}
+            if (!Auth::can('client-chat/manage/all', ['chat' => $clientChat])) {
+                throw new ForbiddenHttpException('You do not have access to perform this action', 403);
+            }
             $lead = $this->leadRepository->find($leadId);
 
             if (!$this->sendOfferCheckAccess($clientChat, Auth::user())) {
@@ -699,7 +700,7 @@ class ClientChatController extends FController
                     } else {
                         $selling .= '.00';
                     }
-                    $price = (int)(str_replace('.', '', $selling)) * 100;
+                    $price = (int) (str_replace('.', '', $selling)) * 100;
                     $captures[] = [
                         'price' => $price,
                         'data' => $capture,
@@ -714,6 +715,7 @@ class ClientChatController extends FController
                 if ($a['price'] === $b['price']) {
                     return 0;
                 }
+
                 return ($a['price'] < $b['price']) ? -1 : 1;
             });
 
@@ -734,8 +736,8 @@ class ClientChatController extends FController
     public function actionSendOffer(): Response
     {
         $out = ['error' => false, 'message' => ''];
-        $chatId = (int)\Yii::$app->request->post('chatId');
-        $leadId = (int)\Yii::$app->request->post('leadId');
+        $chatId = (int) \Yii::$app->request->post('chatId');
+        $leadId = (int) \Yii::$app->request->post('leadId');
 
         try {
             $clientChat = $this->clientChatRepository->findById($chatId);
@@ -748,7 +750,7 @@ class ClientChatController extends FController
             $message = $this->createOfferMessage($clientChat, ArrayHelper::getColumn($captures, 'data'));
 
             if (($rocketUserId = Auth::user()->userProfile->up_rc_user_id) && ($rocketToken = Auth::user()->userProfile->up_rc_auth_token)) {
-                $headers =  [
+                $headers = [
                     'X-User-Id' => $rocketUserId,
                     'X-Auth-Token' => $rocketToken,
                 ];
@@ -758,7 +760,6 @@ class ClientChatController extends FController
 
             Yii::$app->chatBot->sendMessage($message, $headers);
             $this->removeQuoteCaptures(Auth::id(), $clientChat->cch_id, $lead->id);
-
         } catch (\DomainException $e) {
             $out['error'] = true;
             $out['message'] = $e->getMessage();
@@ -773,10 +774,10 @@ class ClientChatController extends FController
             throw new BadRequestHttpException();
         }
 
-        $chatId = (int)Yii::$app->request->post('chatId');
-        $leadId = (int)Yii::$app->request->post('leadId');
-        $captureKey = (int)Yii::$app->request->post('captureKey');
-        $type = (string)Yii::$app->request->post('type');
+        $chatId = (int) Yii::$app->request->post('chatId');
+        $leadId = (int) Yii::$app->request->post('leadId');
+        $captureKey = (int) Yii::$app->request->post('captureKey');
+        $type = (string) Yii::$app->request->post('type');
 
         if (!$chatId || !$leadId || !$type) {
             throw new BadRequestHttpException('Not found chatId or leadId or type');
@@ -837,7 +838,7 @@ class ClientChatController extends FController
 
     public function actionMonitor()
     {
-        if(Yii::$app->request->isPost){
+        if (Yii::$app->request->isPost) {
             $params = Yii::$app->request->post();
             $searchModel = new ClientChatSearch();
             $chatsData = $searchModel->searchRealtimeClientChatActivity($params);
@@ -845,7 +846,6 @@ class ClientChatController extends FController
             CentrifugoService::sendMsg(json_encode([
                 'chatsData' => $chatsData,
             ]), 'realtimeClientChatChannel');
-
         } else {
             $this->layout = '@frontend/themes/gentelella_v2/views/layouts/main_tv';
 
@@ -857,82 +857,82 @@ class ClientChatController extends FController
     {
         $host = AppParamsHelper::liveChatRealTimeVisitorsUrl();
         $projectsWithKeys = Project::getListByUserWithProjectKeys(Auth::id());
+
         return $this->render('real-time', ['host' => $host, 'projectsWithKeys' => json_encode($projectsWithKeys, true)]);
     }
 
     public function actionAjaxCancelTransfer()
-	{
-		$cchId = Yii::$app->request->post('cchId');
+    {
+        $cchId = Yii::$app->request->post('cchId');
 
-		$result = [
-			'error' => false,
-			'message' => 'Transfer cancelled successfully'
-		];
+        $result = [
+            'error' => false,
+            'message' => 'Transfer cancelled successfully',
+        ];
 
-		try {
+        try {
+            $chat = $this->clientChatRepository->findById($cchId);
 
-			$chat = $this->clientChatRepository->findById($cchId);
+            $this->transactionManager->wrap(function () use ($chat) {
+                $this->clientChatUserAccessService->disableAccessForOtherUsers($chat->cch_id, $chat->cch_owner_user_id);
+                $this->clientChatService->cancelTransfer($chat);
+            });
+        } catch (\DomainException | \RuntimeException $e) {
+            $result['error'] = true;
+            $result['message'] = $e->getMessage();
+        } catch (\Throwable $e) {
+            Yii::error(AppHelper::throwableFormatter($e), 'ClientChatController::actionAjaxCancelTransfer::Throwable');
+            $result['error'] = true;
+            $result['message'] = 'Internal Server Error';
+        }
 
-			$this->transactionManager->wrap( function () use ($chat){
-				$this->clientChatUserAccessService->disableAccessForOtherUsers($chat->cch_id, $chat->cch_owner_user_id);
-				$this->clientChatService->cancelTransfer($chat);
-			});
+        return $this->asJson($result);
+    }
 
-		} catch (\DomainException | \RuntimeException $e) {
-			$result['error'] = true;
-			$result['message'] = $e->getMessage();
-		} catch (\Throwable $e) {
-			Yii::error(AppHelper::throwableFormatter($e), 'ClientChatController::actionAjaxCancelTransfer::Throwable');
-			$result['error'] = true;
-			$result['message'] = 'Internal Server Error';
-		}
+    public function actionRealTimeStartChat(): string
+    {
+        $visitorId = Yii::$app->request->get('visitorId', '');
+        $projectName = Yii::$app->request->get('projectName', '');
+        $visitorName = Yii::$app->request->get('visitorName', '');
 
-		return $this->asJson($result);
-	}
+        $form = new RealTimeStartChatForm($visitorId, $projectName, $visitorName);
 
-	public function actionRealTimeStartChat(): string
-	{
-		$visitorId = Yii::$app->request->get('visitorId', '');
-		$projectName = Yii::$app->request->get('projectName', '');
-		$visitorName = Yii::$app->request->get('visitorName', '');
+        try {
+            if ($form->projectName) {
+                $form->projectId = $this->projectRepository->getIdByProjectKey($form->projectName);
+            }
 
-		$form = new RealTimeStartChatForm($visitorId, $projectName, $visitorName);
+            if (Yii::$app->request->isPjax && $form->load(Yii::$app->request->post()) && $form->validate()) {
+                $this->clientChatService->createByAgent($form, Auth::id());
 
-		try {
-			if ($form->projectName) {
-				$form->projectId = $this->projectRepository->getIdByProjectKey($form->projectName);
-			}
+                return '<script>$("#modal-sm").modal("hide"); createNotify("Success", "Message was successfully sent to client", "success");</script>';
+            }
+        } catch (\RuntimeException | \DomainException $e) {
+            $form->addError('general', $e->getMessage());
+        } catch (\Throwable $e) {
+            Yii::error($e->getMessage() . '; File: ' . $e->getFile() . '; Line: ' . $e->getLine(), 'ClientChatController::actionRealTimeStartChat::Throwable');
+            $form->addError('general', 'Internal Server Error');
+        }
 
-			if (Yii::$app->request->isPjax && $form->load(Yii::$app->request->post()) && $form->validate()) {
-				$this->clientChatService->createByAgent($form, Auth::id());
-				return '<script>$("#modal-sm").modal("hide"); createNotify("Success", "Message was successfully sent to client", "success");</script>';
-			}
-		} catch (\RuntimeException | \DomainException $e) {
-			$form->addError('general', $e->getMessage());
-		} catch (\Throwable $e) {
-			Yii::error($e->getMessage() . '; File: ' . $e->getFile() . '; Line: ' . $e->getLine(), 'ClientChatController::actionRealTimeStartChat::Throwable');
-			$form->addError('general', 'Internal Server Error');
-		}
+        $domainError = '';
+        $channels = [];
+        try {
+            $channels = $this->clientChatChannelRepository->getByUserAndProject(Auth::id(), $form->projectId, Department::DEPARTMENT_EXCHANGE);
+            $channels = ArrayHelper::map($channels, 'ccc_id', 'ccc_name');
 
-		$domainError = '';
-		$channels = [];
-		try {
-			$channels = $this->clientChatChannelRepository->getByUserAndProject(Auth::id(), $form->projectId, Department::DEPARTMENT_EXCHANGE);
-			$channels = ArrayHelper::map($channels, 'ccc_id', 'ccc_name');
+            if (!$channels) {
+                $domainError = 'You dont have access to channels';
+            }
+        } catch (NotFoundException $e) {
+            $domainError = $e->getMessage();
+        }
 
-			if (!$channels) {
-				$domainError = 'You dont have access to channels';
-			}
-		} catch (NotFoundException $e) {
-			$domainError = $e->getMessage();
-		}
-
-		return $this->renderAjax('partial/_real_time_start_chat', [
-			'startChatForm' => $form,
-			'channels' => $channels,
-			'domainError' => $domainError
-		]);
-	}
+        return $this->renderAjax('partial/_real_time_start_chat', [
+            'startChatForm' => $form,
+            'channels' => $channels,
+            'domainError' => $domainError,
+        ]);
+    }
 
     private function createOfferMessage(ClientChat $chat, array $captures): array
     {
@@ -946,14 +946,14 @@ class ClientChatController extends FController
                         'type' => 'web_url',
                         'msg_in_chat_window' => true,
                         'text' => 'Offer',
-                        'msg' => $capture['checkoutUrl']
-                    ]
+                        'msg' => $capture['checkoutUrl'],
+                    ],
                 ],
                 'fields' => [
                     [
                         'short' => true,
-                        'title' =>  'Offer',
-                        'value' => '[' . $capture['checkoutUrl'] . '](' . $capture['checkoutUrl'] . ')'
+                        'title' => 'Offer',
+                        'value' => '[' . $capture['checkoutUrl'] . '](' . $capture['checkoutUrl'] . ')',
                     ],
                 ],
             ];
@@ -965,9 +965,10 @@ class ClientChatController extends FController
                 'attachments' => $attachments,
                 'file' => [
                     'customTemplate' => 'carousel',
-                ]
-            ]
+                ],
+            ],
         ];
+
         return $data;
     }
 
@@ -1019,20 +1020,22 @@ class ClientChatController extends FController
                     'img_width' => 265,
                     'img_height' => 60,
                     'img_format' => 'png',
-                    'img_update' => 1
+                    'img_update' => 1,
                 ]
             );
             $url = $mailCapture['data'];
+
             return [
                 'img' => $url['host'] . $url['dir'] . $url['img'],
-                'checkoutUrl' => $quote->getCheckoutUrlPage()
+                'checkoutUrl' => $quote->getCheckoutUrlPage(),
             ];
         } catch (\Throwable $e) {
             Yii::error(VarDumper::dumpAsString([
                 'error' => AppHelper::throwableFormatter($e),
                 'quote' => $quote->getAttributes(),
-            ]),'ClientChatController:generateQuoteCapture');
+            ]), 'ClientChatController:generateQuoteCapture');
         }
+
         return [];
     }
 
@@ -1049,7 +1052,8 @@ class ClientChatController extends FController
     private function removeQuoteCaptures(int $userId, int $chatId, int $leadId): void
     {
         if (!Yii::$app->cache->delete($this->getQuoteCaptureCacheKey($userId, $chatId, $leadId))) {
-            Yii::error(VarDumper::dumpAsString([
+            Yii::error(
+                VarDumper::dumpAsString([
                     'message' => 'Cant remove tmp quotes captures',
                     'userId' => $userId,
                     'chatId' => $chatId,
