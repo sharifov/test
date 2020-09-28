@@ -22,14 +22,13 @@ use yii\widgets\Pjax;
 /* @var $dep int */
 /** @var $project int */
 /** @var $totalUnreadMessages int */
-
 $this->title = 'My Client Chat';
 //$this->params['breadcrumbs'][] = $this->title;
 
 $loadChannelsUrl = Url::to('/client-chat/index');
 ClientChatAsset::register($this);
 
-$rcUrl = Yii::$app->rchat->host  . '/home';
+$rcUrl = Yii::$app->rchat->host . '/home';
 $userRcAuthToken = Auth::user()->userProfile ? Auth::user()->userProfile->up_rc_auth_token : '';
 $clientChatInfoUrl = Url::toRoute('/client-chat/info');
 $clientChatNoteUrl = Url::toRoute('/client-chat/note');
@@ -46,23 +45,23 @@ $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
 
 <?php if (empty($channels)): ?>
     <?php echo Alert::widget([
-		'options' => [
-			'class' => 'alert-warning',
-		],
-		'body' => 'You have no assigned channels.'
+        'options' => [
+            'class' => 'alert-warning',
+        ],
+        'body' => 'You have no assigned channels.',
     ]); ?>
 <?php elseif (empty($userRcAuthToken)): ?>
 	<?php echo Alert::widget([
-		'options' => [
-			'class' => 'alert-warning',
-		],
-		'body' => 'You have no assigned token or the token is not valid.'
+	    'options' => [
+	        'class' => 'alert-warning',
+	    ],
+	    'body' => 'You have no assigned token or the token is not valid.',
 	]); ?>
 <?php else: ?>
 
 <div class="row">
     <div class="col-md-3">
-        <?php Pjax::begin(['id' => 'pjax-client-chat-channel-list'])?>
+        <?php Pjax::begin(['id' => 'pjax-client-chat-channel-list']); ?>
         <div id="_channel_list_wrapper">
             <?= $this->render('partial/_channel_list', [
                 'channels' => $channels,
@@ -75,16 +74,16 @@ $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
                 'dep' => $dep,
                 'project' => $project,
                 'totalUnreadMessages' => $totalUnreadMessages,
-            ]) ?>
+            ]); ?>
         </div>
-		<?php Pjax::end() ?>
+		<?php Pjax::end(); ?>
     </div>
     <div class="col-md-6">
         <div id="_rc-iframe-wrapper">
             <?php if ($clientChat && !$clientChat->isClosed()): ?>
-                <iframe class="_rc-iframe" src="<?= $rcUrl ?>?layout=embedded&resumeToken=<?= $userRcAuthToken ?>&goto=<?= urlencode('/live/'. $clientChat->cch_rid . '?layout=embedded') ?>" id="_rc-<?= $clientChat->cch_id ?>" style="border: none; width: 100%; height: 100%;" ></iframe>
+                <iframe class="_rc-iframe" src="<?= $rcUrl; ?>?layout=embedded&resumeToken=<?= $userRcAuthToken; ?>&goto=<?= urlencode('/live/' . $clientChat->cch_rid . '?layout=embedded'); ?>" id="_rc-<?= $clientChat->cch_id; ?>" style="border: none; width: 100%; height: 100%;" ></iframe>
             <?php elseif ($clientChat && $clientChat->isClosed()): ?>
-				<?= $this->render('partial/_chat_history', ['clientChat' => $clientChat]) ?>
+				<?= $this->render('partial/_chat_history', ['clientChat' => $clientChat]); ?>
             <?php endif; ?>
         </div>
     </div>
@@ -92,7 +91,7 @@ $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
         <div id="_cc_additional_info_wrapper" style="position: relative;">
             <div id="_client-chat-info">
                 <?php if ($clientChat): ?>
-                    <?= $this->render('partial/_client-chat-info', ['clientChat' => $clientChat, 'client' => $client]) ?>
+                    <?= $this->render('partial/_client-chat-info', ['clientChat' => $clientChat, 'client' => $client]); ?>
                 <?php endif; ?>
             </div>
 
@@ -101,7 +100,7 @@ $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
                     <?php echo $this->render('partial/_client-chat-note', [
                         'clientChat' => $clientChat,
                         'model' => new ClientChatNote(),
-                    ]) ?>
+                    ]); ?>
                 <?php endif; ?>
             </div>
         </div>
@@ -112,8 +111,8 @@ $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
 $this->registerJsFile('/js/moment.min.js', [
     'position' => \yii\web\View::POS_HEAD,
     'depends' => [
-        \yii\web\JqueryAsset::class
-    ]
+        \yii\web\JqueryAsset::class,
+    ],
 ]);
 $moveOfferUrl = Url::to(['/client-chat/move-offer']);
 $clientChatId = $clientChat ? $clientChat->cch_id : 0;
