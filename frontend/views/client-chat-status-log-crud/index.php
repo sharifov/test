@@ -58,11 +58,18 @@ $this->params['breadcrumbs'][] = $this->title;
 			[
 				'attribute' => 'csl_prev_channel_id',
 				'value' => static function (ClientChatStatusLog $model) {
-					return $model->cslPrevChannel ? Html::a('<i class="fa fa-link"></i> ' . $model->cslPrevChannel->ccc_name, 'client-chat-channel-crud/view', ['ccc_id' => $model->csl_prev_channel_id]) : null;
+					return $model->cslPrevChannel ? Html::a('<i class="fa fa-link"></i> ' . $model->cslPrevChannel->ccc_name, ['/client-chat-channel-crud/view', 'id' => $model->csl_prev_channel_id], ['target' => '_blank', 'data-pjax' => 0]) : null;
 				},
 				'format' => 'raw',
+				'filter' => \sales\model\clientChatChannel\entity\ClientChatChannel::getList()
 			],
-			'csl_user_id:username',
+			[
+				'class' => UserSelect2Column::class,
+				'attribute' => 'csl_user_id',
+				'relation' => 'cslUser',
+				'format' => 'username',
+				'placeholder' => 'Select User'
+			],
             //'csl_to_status',
 			[
 				'class' => DateTimeColumn::class,

@@ -58,7 +58,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 [
                     'attribute' => 'csl_prev_channel_id',
                     'value' => static function (ClientChatStatusLog $model) {
-                        return $model->cslPrevChannel ? Html::a('<i class="fa fa-link"></i> ' . $model->cslPrevChannel->ccc_name, 'client-chat-channel-crud/view', ['ccc_id' => $model->csl_prev_channel_id]) : null;
+                        return $model->cslPrevChannel ? Html::a('<i class="fa fa-link"></i> ' . $model->cslPrevChannel->ccc_name, ['/client-chat-channel-crud/view', 'id' => $model->csl_prev_channel_id], ['target' => '_blank', 'data-pjax' => 0]) : null;
                     },
 					'format' => 'raw',
 				],
