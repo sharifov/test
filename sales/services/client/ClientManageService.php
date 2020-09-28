@@ -20,6 +20,7 @@ use sales\repositories\client\ClientPhoneRepository;
 use sales\repositories\client\ClientRepository;
 use sales\repositories\NotFoundException;
 use sales\services\ServiceFinder;
+use yii\db\ActiveRecord;
 
 /**
  * Class ClientManageService
@@ -374,25 +375,40 @@ class ClientManageService
 		]);
 		$parentId = null;
 
-		try {
-			$client = $this->clientRepository->findByUuidAndProjectId($uuId, $projectId);
-			$this->updateClient($client, $clientForm);
-		} catch (NotFoundException $e) {
-			if ($client = Client::find()->byProject($projectId)->joinWithCcVisitor($clientForm->rcId)->one()) {
-				$this->updateClient($client, $clientForm);
-			} else {
-				if (empty($clientForm->projectId)) {
-					throw new \RuntimeException('Cannot create client without Project');
-				}
-				$client = $this->createByRcId($clientForm, $parentId);
-			}
+		if ($client = self::detectClientChatRequest($projectId, $uuId, $clientEmailForm->email, $rcId)) {
+		    $this->updateClient($client, $clientForm);
+		} else {
+		    if (empty($clientForm->projectId)) {
+                throw new \RuntimeException('Cannot create client without Project');
+            }
+            $client = $this->createByRcId($clientForm, $parentId);
 		}
-
 
 		$this->addEmail($client, $clientEmailForm);
 		$this->addPhone($client, $clientPhoneForm);
 		return $client;
 	}
+
+    /**
+     * @param int $projectId
+     * @param string|null $uuId
+     * @param string|null $email
+     * @param string|null $rcId
+     * @return Client|ActiveRecord|null
+     */
+    private static function detectClientChatRequest(int $projectId, ?string $uuId, ?string $email, ?string $rcId)
+    {
+        if (!empty($uuId) && $client = Client::findOne(['uuid' => $uuId, 'cl_project_id' => $projectId])) {
+			return $client;
+		}
+        if (!empty($email) && $client = ClientsQuery::oneByEmailAndProject($email, $projectId)) {
+			return $client;
+		}
+        if (!empty($rcId) && $client = Client::find()->byProject($projectId)->joinWithCcVisitor($rcId)->one()) {
+			return $client;
+		}
+		return null;
+    }
 
     /**
      * Find or create Client

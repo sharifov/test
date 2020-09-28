@@ -194,6 +194,7 @@ class ClientChatRequestService
 	private function roomConnected(ClientChatRequestApiForm $form, ClientChatRequest $clientChatRequest): void
 	{
 		$clientChat = $this->clientChatRepository->getOrCreateByRequest($clientChatRequest, ClientChat::SOURCE_TYPE_CLIENT);
+
 		if (!$clientChat->cch_client_id) {
 			$client = $this->clientManageService->getOrCreateByClientChatRequest($clientChatRequest, (int)$clientChat->cch_project_id);
 			$clientChat->cch_client_id = $client->id;

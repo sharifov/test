@@ -23,4 +23,16 @@ class ClientsQuery
             ->orderBy(['cl_tbl.id' => SORT_ASC])
             ->all();
     }
+
+
+    public static function oneByEmailAndProject(string $email, int $projectId)
+    {
+        return Client::find()->alias('clients')->select(['clients.*'])
+            ->innerJoin(ClientEmail::tableName() . ' AS emails',
+                'emails.client_id = clients.id AND emails.email = :email', [':email' => $email])
+            ->where(['clients.cl_project_id' => $projectId])
+            ->orderBy(['clients.id' => SORT_DESC])
+            ->limit(1)
+            ->one();
+    }
 }
