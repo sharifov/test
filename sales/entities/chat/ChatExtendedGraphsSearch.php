@@ -87,15 +87,16 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
 
         $query->where(['cch_status_id' => [ClientChat::STATUS_GENERATED, ClientChat::STATUS_CLOSED]]);
 
-        if($this->cch_owner_user_id){
-            $query->andWhere(['cch_owner_user_id' => $this->cch_owner_user_id]);
-        }
-
         $ccTblSubQuery = new Query();
         $ccTblSubQuery->select('*')->from(ClientChat::tableName())->where('date_format(cch_created_dt, "%Y-%m-%d") = date');
 
         $ccuaTblSubQuery = new Query();
         $ccuaTblSubQuery->select('*')->from(ClientChatUserAccess::tableName())->where(['ccua_status_id' => ClientChatUserAccess::STATUS_ACCEPT]);
+
+        if($this->cch_owner_user_id){
+            $query->andWhere(['cch_owner_user_id' => $this->cch_owner_user_id]);
+            $ccuaTblSubQuery->andWhere(['ccua_user_id' => $this->cch_owner_user_id]);
+        }
 
         if($this->cch_channel_id){
             $query->andWhere(['cch_channel_id' => $this->cch_channel_id]);
