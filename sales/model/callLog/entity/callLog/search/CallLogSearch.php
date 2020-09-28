@@ -213,8 +213,9 @@ class CallLogSearch extends CallLog
         }
 
         if ($this->createTimeRange) {
-            $dateTimeStart = Employee::convertTimeFromUserDtToUTC($this->createTimeStart);
-            $dateTimeEnd = Employee::convertTimeFromUserDtToUTC($this->createTimeEnd);
+            $date = explode(' - ', $this->createTimeRange);
+            $dateTimeStart = Employee::convertTimeFromUserDtToUTC(strtotime($date[0]));
+            $dateTimeEnd = Employee::convertTimeFromUserDtToUTC(strtotime($date[1]));
             $query->andWhere(['between', 'cl_call_created_dt', $dateTimeStart, $dateTimeEnd]);
         }
 

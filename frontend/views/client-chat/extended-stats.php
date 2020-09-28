@@ -3,7 +3,7 @@
 use sales\entities\chat\ChatGraphsSearch;
 use yii\bootstrap4\ActiveForm;
 use yii\helpers\Html;
-
+use sales\widgets\UserSelect2Widget;
 /**
  * @var ChatGraphsSearch $model
  */
@@ -57,11 +57,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         </div>
 
                         <div class="col-md-2">
-                            <?= $form->field($model, 'cch_owner_user_id', [
-                                'options' => ['class' => 'form-group']
-                            ])->dropDownList(\common\models\Employee::getList(), [
-                                'prompt' => 'All'
-                            ])->label('Username') ?>
+                            <?= $form->field($model, 'cch_owner_user_id')->widget(UserSelect2Widget::class) ?>
                         </div>
 
                         <div class="col-md-2">
