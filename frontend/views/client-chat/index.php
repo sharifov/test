@@ -123,6 +123,7 @@ $clientChatId = $clientChat ? $clientChat->cch_id : 0;
 $discardUnreadMessageUrl = Url::to(['/client-chat/discard-unread-messages']);
 $tabAll = ClientChat::TAB_ALL;
 $tabActive = ClientChat::TAB_ACTIVE;
+$groupMyChat = ClientChat::TAB_GROUPS_MY;
 $js = <<<JS
 
 window.name = 'chat';
@@ -171,12 +172,30 @@ $(document).on('click', '#btn-load-channels', function (e) {
     let btn = $(this);
     let btnCurrentText = btn.html();
     let selectedChannel = $('#channel-list').val();
+    let selectedProject = $('#project-list').val();
+    let selectedDep = $('#dep-list').val();
     let params = new URLSearchParams(window.location.search);
-    let url = '{$loadChannelsUrl}?&page='+page;
+    let tab = {$tabActive};
+    if (params.get("tab") === '0' || params.get("tab") !== null) {
+        tab = params.get("tab");
+    }
+    let group = {$groupMyChat};
+    if (params.get("group") !== null) {
+        group = params.get("group");
+    }
+    let url = '{$loadChannelsUrl}?&page=' + page + "&tab=" + tab + "&group=" + group;
     
     if (selectedChannel > 0) {
         url = url+'&channelId='+selectedChannel;
         params.set('channelId', selectedChannel);
+    }
+    if (selectedProject > 0) {
+        url = url+'&project='+selectedProject;
+        params.set('project', selectedProject);
+    }
+    if (selectedDep > 0) {
+        url = url+'&dep='+selectedDep;
+        params.set('dep', selectedDep);
     }
 
     $.ajax({
