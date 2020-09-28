@@ -499,6 +499,103 @@ define({ "api": [
   },
   {
     "type": "get",
+    "url": "/v1/client/info",
+    "title": "Client Info",
+    "version": "0.1.0",
+    "name": "Client",
+    "group": "Client",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          },
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Accept-Encoding",
+            "description": ""
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "client_uuid",
+            "description": "<p>Client UUID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "project_key",
+            "description": "<p>Project key</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "\n{\n     \"client_uuid\": \"af5241f1-094f-4fde-ada3-bd72986216f0\",\n     \"project_key\": \"ovago\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n     \"status\": 200,\n     \"message\": \"OK\",\n     \"data\": {\n         \"first_name\": \"Client first name\",\n         \"last_name\": \"Client last name\",\n         \"created\": \"2020-09-24 11:29:15\"\n     }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response (422):",
+          "content": "\nHTTP/1.1 200 OK\n\n{\n    \"status\": 422,\n    \"message\": \"Validation error\",\n    \"errors\": {\n        \"client_uuid\": [\n            \"Client Uuid cannot be blank.\"\n       ],\n       \"project_key\": [\n            \"Project Key is invalid.\"\n        ]\n    },\n    \"code\": \"11602\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (400):",
+          "content": "\nHTTP/1.1 200 OK\n\n{\n    \"status\": 400,\n    \"message\": \"Load data error\",\n    \"errors\": {\n         \"Not found Client data on request\"\n    },\n    \"code\": \"11601\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (404):",
+          "content": "\nHTTP/1.1 200 OK\n\n{\n    \"status\": 404,\n    \"message\": \"Client not found\",\n    \"code\": \"11100\",\n    \"errors\": []\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v1/controllers/ClientController.php",
+    "groupTitle": "Client"
+  },
+  {
+    "type": "get",
     "url": "/v2/client-email/subscribe",
     "title": "Client Email Subscribe",
     "version": "0.2.0",
