@@ -336,7 +336,7 @@ class ClientChatSearch extends ClientChat
         return $clientChats;
     }
 
-    public function getListOfChats(int $userId, array $channels, FilterForm $filter): ArrayDataProvider
+    public function getListOfChats(int $userId, array $channelsIds, FilterForm $filter): ArrayDataProvider
     {
         $query = ClientChat::find()->select([
             ClientChat::tableName() . '.*',
@@ -354,15 +354,12 @@ class ClientChatSearch extends ClientChat
                 ->andWhere(['<>', 'cch_owner_user_id', $userId])
                 ->andWhere(['IS NOT', 'cch_owner_user_id', null]);
             $query->orderBy(['cch_created_dt' => SORT_DESC]);
+        } elseif (GroupFilter::isAll($filter->group)) {
+            $query->orderBy(['cch_created_dt' => SORT_DESC]);
         }
 
-        $channelsIds = ArrayHelper::getColumn($channels, 'ccc_id');
         if ($filter->channelId) {
-            if ($channelsIds && !in_array($filter->channelId, $channelsIds)) {
-                $query->where('0=1');
-            } else {
-                $query->byChannel($filter->channelId);
-            }
+            $query->byChannel($filter->channelId);
         } else {
             $query->byChannelIds($channelsIds);
         }

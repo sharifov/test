@@ -15,7 +15,6 @@ use yii\helpers\Url;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
-/* @var $channels ClientChatChannel[] */
 /* @var $dataProvider \yii\data\ArrayDataProvider|null */
 /* @var $client \common\models\Client|null */
 /* @var $clientChat \sales\model\clientChat\entity\ClientChat|null */
@@ -44,7 +43,7 @@ $chatSendOfferGenerateUrl = Url::toRoute('/client-chat/send-offer-generate');
 $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
 ?>
 
-<?php if (empty($channels)): ?>
+<?php if ($filter->isEmptyChannels()): ?>
     <?php echo Alert::widget([
         'options' => [
             'class' => 'alert-warning',
@@ -65,7 +64,6 @@ $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
         <?php Pjax::begin(['id' => 'pjax-client-chat-channel-list']); ?>
         <div id="_channel_list_wrapper">
             <?= $this->render('partial/_channel_list', [
-                'channels' => $channels,
                 'dataProvider' => $dataProvider,
                 'loadChannelsUrl' => $loadChannelsUrl,
                 'clientChatId' => $clientChat ? $clientChat->cch_id : null,
@@ -87,7 +85,7 @@ $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
     <div class="col-md-3">
         <div id="_cc_additional_info_wrapper" style="position: relative;">
             <div id="_client-chat-info">
-                <?php if ($clientChat): ?>
+                <?php if ($clientChat && $client): ?>
                     <?= $this->render('partial/_client-chat-info', ['clientChat' => $clientChat, 'client' => $client]); ?>
                 <?php endif; ?>
             </div>
@@ -117,6 +115,7 @@ $discardUnreadMessageUrl = Url::to(['/client-chat/discard-unread-messages']);
 $tabAll = ClientChat::TAB_ALL;
 $tabActive = ClientChat::TAB_ACTIVE;
 $groupMyChat = GroupFilter::MY;
+$groupAll = GroupFilter::ALL;
 $readAll = ReadFilter::ALL;
 $js = <<<JS
 
@@ -168,20 +167,23 @@ $(document).on('click', '#btn-load-channels', function (e) {
     let selectedChannel = $('#channel-list').val();
     let selectedProject = $('#project-list').val();
     let selectedDep = $('#dep-list').val();
+    let selectedStatus = $('#status-list').val();
+    
     let params = new URLSearchParams(window.location.search);
-    let tab = {$tabActive};
-    if (params.get("tab") === '0' || params.get("tab") !== null) {
-        tab = params.get("tab");
-    }
-    let readFilter = {$readAll};
-    if (params.get("readFilter") === '0' || params.get("readFilter") !== null) {
-        readFilter = params.get("readFilter");
+//    let tab = {$tabActive};
+//    if (params.get("tab") === '0' || params.get("tab") !== null) {
+//        tab = params.get("tab");
+//    }
+
+    let read = {$readAll};
+    if (params.get("read") === '0' || params.get("read") !== null) {
+        read = params.get("read");
     }
     let group = {$groupMyChat};
     if (params.get("group") !== null) {
         group = params.get("group");
     }
-    let url = '{$loadChannelsUrl}?&page=' + page + "&tab=" + tab + "&group=" + group + "&readFilter=" + readFilter;
+    let url = '{$loadChannelsUrl}?&page=' + page + "&status=" + selectedStatus + "&group=" + group + "&read=" + read;
     
     if (selectedChannel > 0) {
         url = url+'&channelId='+selectedChannel;
@@ -233,7 +235,6 @@ $(document).on('click', '._cc_tab', function () {
     let tab = $(this);
     let params = new URLSearchParams(window.location.search);
     let selectedTab = tab.attr('data-tab-id');
-    
     let currentTab = params.get('tab');
     
     if (currentTab === null) {
@@ -258,16 +259,20 @@ $(document).on('click', '._cc_tab', function () {
 $(document).on('click', '.cc_btn_group_filter', function () {
     let group = $(this);
     let params = new URLSearchParams(window.location.search);
-    let selectedGroup = group.attr('data-group-id');
-    let currentGroup = params.get('group');
+    let selectedFilter = group.attr('data-group-id');
+    let currentFilter = params.get('group');
     
-    if (selectedGroup == currentGroup) {
-        return false;
+    if (currentFilter === null) {
+        currentFilter = {$groupMyChat};
     }
     
+    if (selectedFilter == currentFilter) {
+        selectedFilter = {$groupAll};
+    }
+      
     params.delete('chid');
     params.delete('page');
-    params.set('group', selectedGroup);
+    params.set('group', selectedFilter);
     window.history.replaceState({}, '', '{$loadChannelsUrl}?'+params.toString());
     $('.cc_btn_group_filter').removeClass('active');
     group.addClass('active');
@@ -277,13 +282,11 @@ $(document).on('click', '.cc_btn_group_filter', function () {
     pjaxReload({container: '#pjax-client-chat-channel-list'});
 });
 
-
 $(document).on('click', '.cc_btn_read_filter', function () {
     let tab = $(this);
     let params = new URLSearchParams(window.location.search);
     let selectedFilter = tab.attr('data-read-id');
-    
-    let currentFilter = params.get('readFilter');
+    let currentFilter = params.get('read');
     
     if (currentFilter === null) {
         currentFilter = {$readAll};
@@ -294,7 +297,7 @@ $(document).on('click', '.cc_btn_read_filter', function () {
     
     params.delete('chid');
     params.delete('page');
-    params.set('readFilter', selectedFilter);
+    params.set('read', selectedFilter);
     window.history.replaceState({}, '', '{$loadChannelsUrl}?'+params.toString());
     $('.cc_btn_read_filter').removeClass('active');
     tab.addClass('active');

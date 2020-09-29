@@ -1,21 +1,18 @@
 ;( function (window) {
     'use strict';
-    window._cc_apply_filter = function (selectedChannel, primaryUrl, selectedTab, selectedDep, selectedProject, selectedGroup, readFilter) {
+    window._cc_apply_filter = function (channelId, primaryUrl, status, dep, project, group, read) {
         let btn = $("#btn-load-channels");
         let params = new URLSearchParams(window.location.search);
-        let tab = selectedTab;
-        let dep = selectedDep;
-        let project = selectedProject;
 
-        let url = primaryUrl + "?tab=" + tab + "&group=" + selectedGroup + "&readFilter=" + readFilter;
+        let url = primaryUrl + "?status=" + status + "&group=" + group + "&read=" + read;
         if (dep > 0) {
             url = url + "&dep=" + dep;
         }
         if (project > 0) {
             url = url + "&project=" + project;
         }
-        if (selectedChannel > 0) {
-            url = url + "&channelId="+selectedChannel;
+        if (channelId > 0) {
+            url = url + "&channelId="+channelId;
         }
 
         $.ajax({
@@ -23,7 +20,7 @@
             url: url,
             dataType: "json",
             cache: false,
-            data: {page: 1, channelId: params.get("channelId") | selectedChannel},
+            data: {page: 1, channelId: params.get("channelId") | channelId},
             beforeSend: function () {
                 $("#_channel_list_wrapper").append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
             },
@@ -35,9 +32,12 @@
                     btn.html("All conversations are loaded").prop('disabled', true).addClass('disabled');
                 }
                 params.set('page', 1);
-                params.set('channelId', selectedChannel);
+                params.set('channelId', channelId);
+                params.set('status', status);
                 params.set('dep', dep);
                 params.set('project', project);
+                params.set('group', group);
+                params.set('read', read);
                 window.history.replaceState({}, '', primaryUrl+"?"+params.toString());
             },
             complete: function () {

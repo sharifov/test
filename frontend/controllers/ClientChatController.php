@@ -181,7 +181,11 @@ class ClientChatController extends FController
 
     public function actionIndex()
     {
-        $filter = new FilterForm();
+        $userId = Auth::id();
+
+        $channels = ClientChatChannel::find()->select(['ccc_name', 'ccc_id'])->joinWithCcuc($userId)->indexBy('ccc_id')->column();
+
+        $filter = new FilterForm($channels);
 
         if (!$filter->load(Yii::$app->request->get(), '') || !$filter->validate()) {
             $filter->loadDefaultValues();
@@ -192,19 +196,16 @@ class ClientChatController extends FController
             $filter->group = GroupFilter::MY;
         }
 
-        $userId = Auth::id();
-
-        $channels = ClientChatChannel::find()->joinWithCcuc($userId)->all();
-
         $dataProvider = null;
         /** @var $channels ClientChatChannel[] */
         if ($channels) {
-            $dataProvider = (new ClientChatSearch())->getListOfChats($userId, $channels, $filter);
+            $dataProvider = (new ClientChatSearch())->getListOfChats($userId, array_keys($channels), $filter);
         }
 
-        if ($filter->chatId) {
+        $clientChat = null;
+        if ($filter->chid) {
             try {
-                $clientChat = $this->clientChatRepository->findById($filter->chatId);
+                $clientChat = $this->clientChatRepository->findById($filter->chid);
 
                 if (!Auth::can('client-chat/manage/all', ['chat' => $clientChat])) {
                     throw new ForbiddenHttpException('You do not have access to this chat', 403);
@@ -222,8 +223,6 @@ class ClientChatController extends FController
             } catch (\DomainException $e) {
                 $clientChat = null;
             }
-        } else {
-            $clientChat = null;
         }
 
         if ($dataProvider && \Yii::$app->request->isPost) {
@@ -250,10 +249,9 @@ class ClientChatController extends FController
         }
 
         return $this->render('index', [
-            'channels' => $channels,
             'dataProvider' => $dataProvider,
             'clientChat' => $clientChat,
-            'client' => $clientChat->cchClient ?? '',
+            'client' => $clientChat->cchClient ?? null,
             'history' => $history ?? null,
             'totalUnreadMessages' => $this->clientChatMessageService->getCountOfTotalUnreadMessages($userId),
             'filter' => $filter,
