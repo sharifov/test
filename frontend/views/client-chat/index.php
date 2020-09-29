@@ -3,6 +3,8 @@
 use frontend\themes\gentelella_v2\assets\ClientChatAsset;
 use sales\auth\Auth;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChat\entity\ClientChatReadFilter;
+use sales\model\clientChat\entity\ClientChatTabGroups;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatNote\entity\ClientChatNote;
@@ -24,6 +26,7 @@ use yii\widgets\Pjax;
 /** @var $project int */
 /** @var $totalUnreadMessages int */
 /** @var int $group */
+/** @var int $readFilter */
 
 $this->title = 'My Client Chat';
 //$this->params['breadcrumbs'][] = $this->title;
@@ -78,6 +81,7 @@ $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
                 'project' => $project,
                 'totalUnreadMessages' => $totalUnreadMessages,
                 'group' => $group,
+                'readFilter' => $readFilter,
             ]); ?>
         </div>
 		<?php Pjax::end(); ?>
@@ -123,7 +127,8 @@ $clientChatId = $clientChat ? $clientChat->cch_id : 0;
 $discardUnreadMessageUrl = Url::to(['/client-chat/discard-unread-messages']);
 $tabAll = ClientChat::TAB_ALL;
 $tabActive = ClientChat::TAB_ACTIVE;
-$groupMyChat = ClientChat::TAB_GROUPS_MY;
+$groupMyChat = ClientChatTabGroups::MY;
+$readAll = ClientChatReadFilter::ALL;
 $js = <<<JS
 
 window.name = 'chat';
@@ -179,11 +184,15 @@ $(document).on('click', '#btn-load-channels', function (e) {
     if (params.get("tab") === '0' || params.get("tab") !== null) {
         tab = params.get("tab");
     }
+    let readFilter = {$readAll};
+    if (params.get("readFilter") === '0' || params.get("readFilter") !== null) {
+        readFilter = params.get("readFilter");
+    }
     let group = {$groupMyChat};
     if (params.get("group") !== null) {
         group = params.get("group");
     }
-    let url = '{$loadChannelsUrl}?&page=' + page + "&tab=" + tab + "&group=" + group;
+    let url = '{$loadChannelsUrl}?&page=' + page + "&tab=" + tab + "&group=" + group + "&readFilter=" + readFilter;
     
     if (selectedChannel > 0) {
         url = url+'&channelId='+selectedChannel;
@@ -257,7 +266,7 @@ $(document).on('click', '._cc_tab', function () {
     pjaxReload({container: '#pjax-client-chat-channel-list'});
 });
 
-$(document).on('click', '._cc_group', function () {
+$(document).on('click', '.cc_btn_group_filter', function () {
     let group = $(this);
     let params = new URLSearchParams(window.location.search);
     let selectedGroup = group.attr('data-group-id');
@@ -271,8 +280,35 @@ $(document).on('click', '._cc_group', function () {
     params.delete('page');
     params.set('group', selectedGroup);
     window.history.replaceState({}, '', '{$loadChannelsUrl}?'+params.toString());
-    $('._cc_group').removeClass('active');
+    $('.cc_btn_group_filter').removeClass('active');
     group.addClass('active');
+    $('._rc-iframe').hide();
+    $('#_client-chat-info').html('');
+    $('#_client-chat-note').html('');
+    pjaxReload({container: '#pjax-client-chat-channel-list'});
+});
+
+
+$(document).on('click', '.cc_btn_read_filter', function () {
+    let tab = $(this);
+    let params = new URLSearchParams(window.location.search);
+    let selectedFilter = tab.attr('data-read-id');
+    
+    let currentFilter = params.get('readFilter');
+    
+    if (currentFilter === null) {
+        currentFilter = {$readAll};
+    }
+    if (currentFilter == selectedFilter) {
+        selectedFilter = {$readAll};
+    }
+    
+    params.delete('chid');
+    params.delete('page');
+    params.set('readFilter', selectedFilter);
+    window.history.replaceState({}, '', '{$loadChannelsUrl}?'+params.toString());
+    $('.cc_btn_read_filter').removeClass('active');
+    tab.addClass('active');
     $('._rc-iframe').hide();
     $('#_client-chat-info').html('');
     $('#_client-chat-note').html('');

@@ -104,17 +104,7 @@ class ClientChat extends \yii\db\ActiveRecord
 		self::SOURCE_TYPE_TRANSFER => 'Transfer',
 	];
 
-    public const TAB_GROUPS_MY = 1;
-    public const TAB_GROUPS_OTHER = 2;
-    public const TAB_GROUPS_FREE_TO_TAKE = 3;
-
-    public const TAB_GROUPS_LIST = [
-        self::TAB_GROUPS_MY => 'My Chats',
-        self::TAB_GROUPS_OTHER => 'Other Chats',
-        self::TAB_GROUPS_FREE_TO_TAKE => 'Free to take',
-    ];
-
-	public function behaviors(): array
+    public function behaviors(): array
 	{
 		return [
 			'timestamp' => [

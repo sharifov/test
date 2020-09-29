@@ -4,6 +4,8 @@ use common\models\Department;
 use common\models\Project;
 use kartik\select2\Select2;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChat\entity\ClientChatReadFilter;
+use sales\model\clientChat\entity\ClientChatTabGroups;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
@@ -20,6 +22,7 @@ use yii\helpers\Html;
 /** @var $project int */
 /** @var $totalUnreadMessages int */
 /** @var $group int */
+/** @var $readFilter int */
 
 ?>
 
@@ -55,7 +58,7 @@ use yii\helpers\Html;
                     let selectedChannel = $("#channel-list").val();
                     let selectedDep = $(this).val();
                     let selectedProject = $("#project-list").val();
-                    window._cc_apply_filter(selectedChannel, "' . $loadChannelsUrl . '", ' . $tab . ', selectedDep, selectedProject, ' . $group . ');
+                    window._cc_apply_filter(selectedChannel, "' . $loadChannelsUrl . '", ' . $tab . ', selectedDep, selectedProject, ' . $group . ', ' . $readFilter . ');
                 }'),
                 ],
             ]); ?>
@@ -79,7 +82,7 @@ use yii\helpers\Html;
                     let selectedChannel = $("#channel-list").val();
                     let selectedDep = $("#dep-list").val();
                     let selectedProject = $(this).val();
-                    window._cc_apply_filter(selectedChannel, "' . $loadChannelsUrl . '", ' . $tab . ', selectedDep, selectedProject, ' . $group . ');
+                    window._cc_apply_filter(selectedChannel, "' . $loadChannelsUrl . '", ' . $tab . ', selectedDep, selectedProject, ' . $group . ', ' . $readFilter . ');
                 }'),
 			    ],
 			]); ?>
@@ -96,7 +99,7 @@ use yii\helpers\Html;
                     let selectedChannel = $(this).val();
                     let selectedDep = $("#dep-list").val();
                     let selectedProject = $("#project-list").val();
-                    window._cc_apply_filter(selectedChannel, "' . $loadChannelsUrl . '", ' . $tab . ', selectedDep, selectedProject, ' . $group . ');
+                    window._cc_apply_filter(selectedChannel, "' . $loadChannelsUrl . '", ' . $tab . ', selectedDep, selectedProject, ' . $group . ', ' . $readFilter . ');
                 }'),
 		    ],
 		    'options' => [
@@ -107,12 +110,30 @@ use yii\helpers\Html;
 		]); ?>
 	</div>
     <div class="_cc_groups_wrapper">
-        <?php foreach (ClientChat::TAB_GROUPS_LIST as $key => $item): ?>
-            <div class="_cc_group <?= $key === $group ? 'active' : ''; ?>" data-group-id="<?= $key; ?>"> <?= $item; ?>
+        <?php foreach (ClientChatTabGroups::LIST as $key => $item): ?>
+            <div class="_cc_group cc_btn_group_filter <?= $key === $group ? 'active' : ''; ?>" data-group-id="<?= $key; ?>"> <?= $item; ?>
                 <span class="_cc_group_active"></span>
             </div>
         <?php endforeach; ?>
     </div>
+
+    <?php if (ClientChatTabGroups::isMy($group)): ?>
+        <div class="row">
+            <div class="_cc_groups_wrapper">
+                <div class="col-md-6">
+                    <?php foreach (ClientChatReadFilter::LIST as $key => $item): ?>
+                        <div class="col-md-6">
+                            <div class="_cc_group cc_btn_read_filter <?= $key === $readFilter ? 'active' : ''; ?>"
+                                 data-read-id="<?= $key; ?>"> <?= $item; ?>
+                                <span class="_cc_group_active"> </span>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
 	<div id="cc-dialogs-wrapper" class="_cc-list-wrapper">
         <?php if ($dataProvider): ?>
 		    <?= $this->render('_client-chat-item', ['clientChats' => $dataProvider->getModels(), 'clientChatId' => $clientChatId]); ?>

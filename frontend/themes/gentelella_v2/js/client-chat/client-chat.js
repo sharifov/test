@@ -1,13 +1,13 @@
 ;( function (window) {
     'use strict';
-    window._cc_apply_filter = function (selectedChannel, primaryUrl, selectedTab, selectedDep, selectedProject, selectedGroup) {
+    window._cc_apply_filter = function (selectedChannel, primaryUrl, selectedTab, selectedDep, selectedProject, selectedGroup, readFilter) {
         let btn = $("#btn-load-channels");
         let params = new URLSearchParams(window.location.search);
         let tab = selectedTab;
         let dep = selectedDep;
         let project = selectedProject;
 
-        let url = primaryUrl + "?tab=" + tab + "&group=" + selectedGroup;
+        let url = primaryUrl + "?tab=" + tab + "&group=" + selectedGroup + "&readFilter=" + readFilter;
         if (dep > 0) {
             url = url + "&dep=" + dep;
         }

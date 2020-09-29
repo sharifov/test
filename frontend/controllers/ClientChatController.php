@@ -23,6 +23,8 @@ use sales\helpers\app\AppHelper;
 use sales\helpers\app\AppParamsHelper;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChat\entity\ClientChatReadFilter;
+use sales\model\clientChat\entity\ClientChatTabGroups;
 use sales\model\clientChat\entity\search\ClientChatSearch;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChat\useCase\sendOffer\GenerateImagesForm;
@@ -183,7 +185,8 @@ class ClientChatController extends FController
         int $tab = ClientChat::TAB_ACTIVE,
         int $dep = 0,
         int $project = 0,
-        int $group = ClientChat::TAB_GROUPS_MY
+        int $group = ClientChatTabGroups::MY,
+        int $readFilter = ClientChatReadFilter::ALL
     ) {
         $channelsQuery = ClientChatChannel::find()
             ->joinWithCcuc(Auth::id());
@@ -192,14 +195,18 @@ class ClientChatController extends FController
         $channelId = $channelId ?: null;
         $channels = $channelsQuery->all();
 
-        if ($group !== ClientChat::TAB_GROUPS_MY && $group !== ClientChat::TAB_GROUPS_OTHER) {
-            $group = ClientChat::TAB_GROUPS_MY;
+        if (!ClientChatTabGroups::isValid($group)) {
+            $group = ClientChatTabGroups::MY;
+        }
+
+        if (!ClientChatReadFilter::isValid($readFilter)) {
+            $readFilter = ClientChatReadFilter::ALL;
         }
 
         /** @var $channels ClientChatChannel[] */
         if ($channels) {
             $search = new ClientChatSearch();
-            $dataProvider = $search->getListOfChats($channelId, $channels, $dep, $project, $tab, $page, $group);
+            $dataProvider = $search->getListOfChats($channelId, $channels, $dep, $project, $tab, $page, $group, $readFilter);
         }
 
         try {
@@ -258,6 +265,7 @@ class ClientChatController extends FController
             'project' => $project,
             'totalUnreadMessages' => $this->clientChatMessageService->getCountOfTotalUnreadMessages(Auth::id()),
             'group' => $group,
+            'readFilter' => $readFilter,
         ]);
     }
 
