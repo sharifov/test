@@ -1,4 +1,5 @@
 <?php
+
 return [
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
@@ -130,6 +131,7 @@ return [
             'host' => 'localhost',
             'port' => 11300,
             'tube' => 'queue_client_chat_job',
+            'as idAccess' => sales\behaviors\JobIdAccessBehavior::class
         ],
         'telegram' => [
             'class' => \aki\telegram\Telegram::class,

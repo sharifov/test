@@ -2,6 +2,8 @@
 
 namespace webapi\modules\v1\controllers;
 
+use common\components\jobs\clientChat\ClientChatFeedbackJob;
+use common\components\jobs\clientChat\ClientChatRequestJob;
 use common\models\ApiLog;
 use common\models\Project;
 use sales\entities\cases\CaseCategory;
@@ -24,6 +26,7 @@ use webapi\src\response\messages\MessageMessage;
 use webapi\src\response\messages\StatusCodeMessage;
 use webapi\src\response\Response;
 use webapi\src\response\SuccessResponse;
+use Yii;
 use yii\filters\HttpCache;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
@@ -706,7 +709,6 @@ class ClientChatRequestController extends ApiBaseController
 		}
 
 		$form = (new ClientChatRequestApiForm())->fillIn($event, $data);
-
         if (!$form->validate()) {
             return $this->endApiLog($apiLog, new ErrorResponse(
                 new StatusCodeMessage(400),
@@ -716,19 +718,7 @@ class ClientChatRequestController extends ApiBaseController
             ));
         }
 
-        try {
-            $this->clientChatRequestService->createRequest($form);
-        } catch (\Throwable $e) {
-            return $this->endApiLog($apiLog, new ErrorResponse(
-                new StatusCodeMessage(400),
-                new MessageMessage('Client Chat Request not saved.'),
-                new ErrorsMessage($e->getMessage()),
-                new CodeMessage(ApiCodeException::CLIENT_CHAT_REQUEST_CREATE_FAILED)
-            ));
-        }
-
         $feedbackForm = (new ClientChatRequestFeedbackSubForm())->fillIn($data);
-
         if (!$feedbackForm->validate()) {
             return $this->endApiLog($apiLog, new ErrorResponse(
                 new StatusCodeMessage(400),
@@ -739,7 +729,32 @@ class ClientChatRequestController extends ApiBaseController
         }
 
         try {
-            $this->clientChatRequestService->createOrUpdateFeedback($feedbackForm);
+            if (Yii::$app->params['settings']['enable_client_chat_job']) {
+                $requestJob = new ClientChatRequestJob();
+                $requestJob->requestApiForm = $form;
+                $requestJobId = Yii::$app->queue_client_chat_job->priority(10)->push($requestJob);
+            } else {
+                $this->clientChatRequestService->createRequest($form);
+            }
+        } catch (\Throwable $e) {
+            return $this->endApiLog($apiLog, new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage('Client Chat Request not saved.'),
+                new ErrorsMessage($e->getMessage()),
+                new CodeMessage(ApiCodeException::CLIENT_CHAT_REQUEST_CREATE_FAILED)
+            ));
+        }
+
+        try {
+            if (Yii::$app->params['settings']['enable_client_chat_job']) {
+                $feedbackJob = new ClientChatFeedbackJob();
+                $feedbackJob->feedbackForm = $feedbackForm;
+                $feedbackJobId = Yii::$app->queue_client_chat_job->priority(10)->push($feedbackJob);
+                $resultMessage = 'Feedback added to queue (jobId: ' . $feedbackJobId . ')';
+            } else {
+                $clientChatFeedback = $this->clientChatRequestService->createOrUpdateFeedback($feedbackForm);
+                $resultMessage = 'Feedback saved (id: ' . $clientChatFeedback->ccf_id . ')';
+            }
         } catch (\Throwable $e) {
             return $this->endApiLog($apiLog, new ErrorResponse(
                 new StatusCodeMessage(400),
@@ -750,8 +765,8 @@ class ClientChatRequestController extends ApiBaseController
         }
 
         return $this->endApiLog($apiLog, new SuccessResponse(
-                new StatusCodeMessage(200),
-                new MessageMessage('Ok'),
+            new StatusCodeMessage(200),
+            new MessageMessage($resultMessage),
         ));
 	}
 

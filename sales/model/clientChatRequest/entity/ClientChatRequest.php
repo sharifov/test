@@ -21,6 +21,7 @@ use yii\helpers\Json;
  * @property string|null $ccr_created_dt
  * @property string|null $ccr_visitor_id
  * @property array|null $decodedData
+ * @property int|null $ccr_job_id
  */
 class ClientChatRequest extends \yii\db\ActiveRecord
 {
@@ -66,6 +67,8 @@ class ClientChatRequest extends \yii\db\ActiveRecord
             ['ccr_json_data', 'string'],
             ['ccr_rid', 'string'],
             [['ccr_visitor_id'], 'string', 'max' => 100],
+
+            [['ccr_job_id'], 'integer'],
         ];
     }
 
@@ -91,6 +94,7 @@ class ClientChatRequest extends \yii\db\ActiveRecord
             'ccr_json_data' => 'Json Data',
             'ccr_created_dt' => 'Created',
             'ccr_visitor_id' => 'Visitor ID',
+            'ccr_job_id' => 'Job ID',
         ];
     }
 

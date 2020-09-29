@@ -18,6 +18,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'ccr_json_data')->textarea(['rows' => 6]) ?>
 
+        <?= $form->field($model, 'ccr_job_id')->textInput() ?>
+
         <?php // $form->field($model, 'ccr_created_dt')->textInput() ?>
 
         <div class="form-group">

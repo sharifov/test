@@ -42,6 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
                 'ccr_json_data:ntext',
                 'ccr_created_dt:username',
+                'ccr_job_id',
             ],
         ]) ?>
 
