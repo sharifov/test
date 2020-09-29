@@ -108,6 +108,7 @@ use sales\entities\cases\CaseCategory;
 use sales\events\lead\LeadCreatedByApiEvent;
 use sales\forms\api\communication\voice\finish\FinishForm;
 use sales\forms\api\communication\voice\record\RecordForm;
+use sales\model\clientChat\entity\ClientChat;
 use sales\repositories\client\ClientsQuery;
 use sales\services\client\ClientCreateForm;
 use sales\forms\lead\EmailCreateForm;

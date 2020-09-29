@@ -16,4 +16,5 @@ class ApiCodeException
     public const POST_DATA_IS_EMPTY = Module::API . 105;
     public const POST_DATA_NOT_LOADED = Module::API . 106;
     public const FAILED_FORM_VALIDATE = Module::API . 107;
+    public const CLIENT_CHAT_FEEDBACK_CREATE_FAILED = Module::API . 108;
 }

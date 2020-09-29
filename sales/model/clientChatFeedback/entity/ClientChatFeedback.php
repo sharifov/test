@@ -48,12 +48,16 @@ class ClientChatFeedback extends ActiveRecord
             [['ccf_client_chat_id', 'ccf_user_id', 'ccf_client_id'], 'integer'],
             [['ccf_message'], 'string'],
             [['ccf_created_dt', 'ccf_updated_dt'], 'safe'],
+
             [['ccf_client_chat_id'], 'exist', 'skipOnError' => true, 'targetClass' => ClientChat::class, 'targetAttribute' => ['ccf_client_chat_id' => 'cch_id']],
             [['ccf_client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['ccf_client_id' => 'id']],
             [['ccf_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ccf_user_id' => 'id']],
 
             [['ccf_rating'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            [['ccf_rating'], 'integer', 'min' => 1, 'max' => 5],
+            [['ccf_rating'], 'integer'],
+            [['ccf_rating'], 'in', 'range' => self::RATING_LIST],
+
+            [['ccf_message', 'ccf_rating'], 'validateCommentRating'],
         ];
     }
 
@@ -101,8 +105,27 @@ class ClientChatFeedback extends ActiveRecord
         return $this->hasOne(Employee::class, ['id' => 'ccf_user_id']);
     }
 
-    public static function find(): clientChatFeedbackScopes
+    public static function find(): ClientChatFeedbackScopes
     {
-        return new clientChatFeedbackScopes(static::class);
+        return new ClientChatFeedbackScopes(static::class);
+    }
+
+    public function validateCommentRating(): void
+	{
+	    if (empty($this->ccf_message) && empty($this->ccf_rating)) {
+	        $this->addError('ccf_message', 'Comment or rating must be filled.');
+	        $this->addError('ccf_rating', 'Rating or comment must be filled.');
+	    }
+	}
+
+    public static function create(int $chatId, int $userId, int $clientId, ?int $rating, ?string $message): self
+    {
+        $model = new static();
+        $model->ccf_client_chat_id = $chatId;
+        $model->ccf_user_id = $userId;
+        $model->ccf_client_id = $clientId;
+        $model->ccf_rating = $rating;
+        $model->ccf_message = $message;
+        return $model;
     }
 }

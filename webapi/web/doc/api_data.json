@@ -251,6 +251,68 @@
     "groupTitle": "Cases"
   },
   {
+    "type": "post",
+    "url": "/v1/client-chat-request/feedback",
+    "title": "Client Chat Feedback",
+    "version": "0.1.0",
+    "name": "ClientChatFeedback",
+    "group": "ClientChat",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "examples": [
+        {
+          "title": "Request-Example LEAVE_FEEDBACK:",
+          "content": "{\n\t\t\"event\": \"LEAVE_FEEDBACK\",\n\t\t\"data\": {\n\t\t\t\"rid\": \"20a20989-4d26-42f4-9a1c-2948ce4c4d56\",\n         \"comment\": \"Hello, this is my feedback\",\n         \"rating\": 4,\n         \"visitor\": {\n             \"id\": \"1c1d90ff-5489-45f5-b19b-2181a65ce898\",\n             \"project\": \"ovago\"\n         }\n     }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n   \"status\": 200\n   \"message\": \"Ok\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response (400):",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n\t\"status\":400,\n\t\"message\":\"Some errors occurred while creating client chat request\",\n\t\"code\":\"13104\",\n\t\"errors\":[\"Event is invalid.\"]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v1/controllers/ClientChatRequestController.php",
+    "groupTitle": "ClientChat"
+  },
+  {
     "type": "get",
     "url": "/v1/client-chat-request/project-config",
     "title": "Project Config",

@@ -12,6 +12,7 @@ use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\repositories\department\DepartmentRepository;
 use sales\repositories\NotFoundException;
 use sales\repositories\project\ProjectRepository;
+use yii\db\ActiveRecord;
 
 /**
  * Class ClientChatRepository
@@ -73,6 +74,14 @@ class ClientChatRepository
 			return $clientChat;
 		}
 		throw new NotFoundException('unable to find client chat by rid: ' . $rid);
+	}
+
+    public function findLastByRid(string $rid): ?ActiveRecord
+	{
+		if ($clientChat = ClientChat::find()->byRid($rid)->orderBy(['cch_id' => SORT_DESC])->one()) {
+			return $clientChat;
+		}
+		throw new NotFoundException('Not find client chat by rid: ' . $rid);
 	}
 
 	public function findNotClosed(string $rid): ClientChat

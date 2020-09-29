@@ -9,9 +9,8 @@ use yii\db\ActiveQuery;
  *
  * @see ClientChatNote
  */
-class clientChatFeedbackScopes extends ActiveQuery
+class ClientChatFeedbackScopes extends ActiveQuery
 {
-
     /**
      * {@inheritdoc}
      * @return ClientChatFeedback[]|array

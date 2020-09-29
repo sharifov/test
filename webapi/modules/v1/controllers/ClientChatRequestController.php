@@ -11,6 +11,7 @@ use sales\model\clientChat\entity\projectConfig\ClientChatProjectConfig;
 use sales\model\clientChat\entity\projectConfig\ProjectConfigApiResponseDto;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestApiForm;
+use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestFeedbackSubForm;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestService;
 use sales\repositories\NotFoundException;
 use webapi\src\ApiCodeException;
@@ -625,6 +626,133 @@ class ClientChatRequestController extends ApiBaseController
 			new MessageMessage('Project Config not found'),
 			new CodeMessage(ApiCodeException::NOT_FOUND_PROJECT_CONFIG)
 		);
+	}
+
+	/**
+	 * @api {post} /v1/client-chat-request/feedback Client Chat Feedback
+	 * @apiVersion 0.1.0
+	 * @apiName ClientChatFeedback
+	 * @apiGroup ClientChat
+	 * @apiPermission Authorized User
+	 *
+	 * @apiHeader {string} Authorization    Credentials <code>base64_encode(Username:Password)</code>
+	 * @apiHeaderExample {json} Header-Example:
+	 *  {
+	 *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+	 *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+	 *  }
+	 *
+	 * @apiParamExample {json} Request-Example LEAVE_FEEDBACK:
+	 * {
+	 *		"event": "LEAVE_FEEDBACK",
+	 *		"data": {
+	 *			"rid": "20a20989-4d26-42f4-9a1c-2948ce4c4d56",
+     *          "comment": "Hello, this is my feedback",
+     *          "rating": 4,
+     *          "visitor": {
+     *              "id": "1c1d90ff-5489-45f5-b19b-2181a65ce898",
+     *              "project": "ovago"
+     *          }
+	 *      }
+	 * }
+	 *
+	 * @apiSuccessExample Success-Response:
+	 *  HTTP/1.1 200 OK
+	 *  {
+	 *     "status": 200
+	 *     "message": "Ok"
+	 *  }
+	 *
+	 * @apiErrorExample {json} Error-Response (400):
+	 *
+	 * HTTP/1.1 400 Bad Request
+	 * {
+	 * 	"status":400,
+	 * 	"message":"Some errors occurred while creating client chat request",
+	 * 	"code":"13104",
+	 * 	"errors":["Event is invalid."]
+	 * }
+	 *
+	 */
+	public function actionFeedback()
+	{
+		$apiLog = $this->startApiLog($this->action->uniqueId);
+
+		if (!\Yii::$app->request->isPost) {
+			return new ErrorResponse(
+				new StatusCodeMessage(400),
+				new MessageMessage('Not found POST request'),
+				new CodeMessage(ApiCodeException::REQUEST_IS_NOT_POST)
+			);
+		}
+
+		if (!\Yii::$app->request->post()) {
+			return new ErrorResponse(
+				new StatusCodeMessage(400),
+				new MessageMessage('POST data request is empty'),
+				new CodeMessage(ApiCodeException::POST_DATA_IS_EMPTY)
+			);
+		}
+
+		$event = \Yii::$app->request->post('event');
+		$data = \Yii::$app->request->post('data');
+
+		if (!$event || !$data) {
+			return new ErrorResponse(
+				new StatusCodeMessage(400),
+				new MessageMessage('Event or data is not provided'),
+				new CodeMessage(ApiCodeException::EVENT_OR_DATA_IS_NOT_PROVIDED)
+			);
+		}
+
+		$form = (new ClientChatRequestApiForm())->fillIn($event, $data);
+
+        if (!$form->validate()) {
+            return $this->endApiLog($apiLog, new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage('Client Chat Request not saved. Validate failed.'),
+                new ErrorsMessage($form->getErrorSummary(true)),
+                new CodeMessage(ApiCodeException::FAILED_FORM_VALIDATE)
+            ));
+        }
+
+        try {
+            $this->clientChatRequestService->createRequest($form);
+        } catch (\Throwable $e) {
+            return $this->endApiLog($apiLog, new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage('Client Chat Request not saved.'),
+                new ErrorsMessage($e->getMessage()),
+                new CodeMessage(ApiCodeException::CLIENT_CHAT_REQUEST_CREATE_FAILED)
+            ));
+        }
+
+        $feedbackForm = (new ClientChatRequestFeedbackSubForm())->fillIn($data);
+
+        if (!$feedbackForm->validate()) {
+            return $this->endApiLog($apiLog, new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage('Feedback validate failed.'),
+                new ErrorsMessage($feedbackForm->getErrorSummary(true)),
+                new CodeMessage(ApiCodeException::FAILED_FORM_VALIDATE)
+            ));
+        }
+
+        try {
+            $this->clientChatRequestService->createOrUpdateFeedback($feedbackForm);
+        } catch (\Throwable $e) {
+            return $this->endApiLog($apiLog, new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage('Client Chat Feedback not saved.'),
+                new ErrorsMessage($e->getMessage()),
+                new CodeMessage(ApiCodeException::CLIENT_CHAT_FEEDBACK_CREATE_FAILED)
+            ));
+        }
+
+        return $this->endApiLog($apiLog, new SuccessResponse(
+                new StatusCodeMessage(200),
+                new MessageMessage('Ok'),
+        ));
 	}
 
     /**

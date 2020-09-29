@@ -82,9 +82,9 @@ class ClientChatNote extends ActiveRecord
         return $this->hasOne(Employee::class, ['id' => 'ccn_user_id']);
     }
 
-    public static function find(): clientChatNoteScopes
+    public static function find(): ClientChatNoteScopes
     {
-        return new clientChatNoteScopes(static::class);
+        return new ClientChatNoteScopes(static::class);
     }
 
     public static function create(int $chatId, int $userId, string $note): ClientChatNote

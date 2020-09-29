@@ -36,6 +36,7 @@ class ClientChatRequest extends \yii\db\ActiveRecord
     public const EVENT_USER_DEPARTMENT_TRANSFER = 9;
     public const EVENT_TRACK = 10;
     public const EVENT_CREATE_BY_AGENT = 12;
+    public const EVENT_LEAVE_FEEDBACK = 13;
 
 	private const EVENT_LIST = [
 		self::EVENT_GUEST_CONNECTED => 'GUEST_CONNECTED',
@@ -49,7 +50,7 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 		self::EVENT_AGENT_JOINED_ROOM => 'AGENT_JOINED_ROOM',
 		self::EVENT_USER_DEPARTMENT_TRANSFER => 'USER_DEPARTMENT_TRANSFER',
 		self::EVENT_TRACK => 'TRACK_EVENT',
-		self::EVENT_CREATE_BY_AGENT => 'CREATE_BY_AGENT'
+		self::EVENT_LEAVE_FEEDBACK => 'LEAVE_FEEDBACK',
 	];
 
 	private array $decodedJsonData = [];

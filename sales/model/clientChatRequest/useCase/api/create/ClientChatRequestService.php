@@ -2,23 +2,25 @@
 
 namespace sales\model\clientChatRequest\useCase\api\create;
 
+use common\components\CentrifugoService;
 use common\models\Notifications;
-use sales\helpers\app\AppHelper;
-use sales\repositories\clientChatChannel\ClientChatChannelRepository;
+use frontend\widgets\notification\NotificationMessage;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
+use sales\model\clientChatFeedback\ClientChatFeedbackRepository;
+use sales\model\clientChatFeedback\entity\ClientChatFeedback;
 use sales\model\clientChatMessage\ClientChatMessageRepository;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatVisitor\repository\ClientChatVisitorRepository;
 use sales\model\clientChatVisitorData\repository\ClientChatVisitorDataRepository;
+use sales\repositories\clientChatChannel\ClientChatChannelRepository;
 use sales\repositories\NotFoundException;
 use sales\repositories\visitorLog\VisitorLogRepository;
 use sales\services\client\ClientManageService;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatService\ClientChatService;
 use sales\services\TransactionManager;
-use common\components\CentrifugoService;
 use yii\helpers\Html;
 
 /**
@@ -36,6 +38,7 @@ use yii\helpers\Html;
  * @property ClientChatVisitorRepository $clientChatVisitorRepository
  * @property ClientChatVisitorDataRepository $clientChatVisitorDataRepository
  * @property ClientChatChannelRepository $clientChatChannelRepository
+ * @property ClientChatFeedbackRepository $clientChatFeedbackRepository
  */
 class ClientChatRequestService
 {
@@ -85,19 +88,23 @@ class ClientChatRequestService
 	 */
 	private ClientChatChannelRepository $clientChatChannelRepository;
 
-	/**
-	 * ClientChatRequestService constructor.
-	 * @param ClientChatRequestRepository $clientChatRequestRepository
-	 * @param ClientChatRepository $clientChatRepository
-	 * @param ClientManageService $clientManageService
-	 * @param ClientChatMessageRepository $clientChatMessageRepository
-	 * @param ClientChatMessageService $clientChatMessageService
-	 * @param ClientChatService $clientChatService
-	 * @param VisitorLogRepository $visitorLogRepository
-	 * @param TransactionManager $transactionManager
-	 * @param ClientChatVisitorRepository $clientChatVisitorRepository
-	 * @param ClientChatVisitorDataRepository $clientChatVisitorDataRepository
-	 */
+	private ClientChatFeedbackRepository $clientChatFeedbackRepository;
+
+    /**
+     * ClientChatRequestService constructor.
+     * @param ClientChatRequestRepository $clientChatRequestRepository
+     * @param ClientChatRepository $clientChatRepository
+     * @param ClientManageService $clientManageService
+     * @param ClientChatMessageRepository $clientChatMessageRepository
+     * @param ClientChatMessageService $clientChatMessageService
+     * @param ClientChatService $clientChatService
+     * @param VisitorLogRepository $visitorLogRepository
+     * @param TransactionManager $transactionManager
+     * @param ClientChatVisitorRepository $clientChatVisitorRepository
+     * @param ClientChatVisitorDataRepository $clientChatVisitorDataRepository
+     * @param ClientChatChannelRepository $clientChatChannelRepository
+     * @param ClientChatFeedbackRepository $clientChatFeedbackRepository
+     */
 	public function __construct(
 		ClientChatRequestRepository $clientChatRequestRepository,
 		ClientChatRepository $clientChatRepository,
@@ -109,7 +116,8 @@ class ClientChatRequestService
 		TransactionManager $transactionManager,
 		ClientChatVisitorRepository $clientChatVisitorRepository,
 		ClientChatVisitorDataRepository $clientChatVisitorDataRepository,
-		ClientChatChannelRepository $clientChatChannelRepository
+		ClientChatChannelRepository $clientChatChannelRepository,
+		ClientChatFeedbackRepository $clientChatFeedbackRepository
 	)
 	{
 		$this->clientChatRequestRepository = $clientChatRequestRepository;
@@ -123,6 +131,7 @@ class ClientChatRequestService
 		$this->clientChatVisitorRepository = $clientChatVisitorRepository;
 		$this->clientChatVisitorDataRepository = $clientChatVisitorDataRepository;
 		$this->clientChatChannelRepository = $clientChatChannelRepository;
+		$this->clientChatFeedbackRepository = $clientChatFeedbackRepository;
 	}
 
 	/**
@@ -163,6 +172,59 @@ class ClientChatRequestService
 			throw new \RuntimeException('Unknown event provided');
 		}
 	}
+
+    /**
+     * @param ClientChatRequestApiForm $form
+     * @return ClientChatRequest
+     * @throws \JsonException
+     */
+    public function createRequest(ClientChatRequestApiForm $form): ClientChatRequest
+    {
+		$clientChatRequest = ClientChatRequest::createByApi($form);
+		return $this->clientChatRequestRepository->save($clientChatRequest);
+	}
+
+	public function createOrUpdateFeedback(ClientChatRequestFeedbackSubForm $form): ClientChatFeedback
+    {
+        /** @var ClientChat $clientChat */
+        $clientChat = $this->clientChatRepository->findLastByRid($form->rid ?? '');
+
+        if ($clientChatFeedback = $clientChat->feedback) {
+            $clientChatFeedback->ccf_user_id = $clientChat->cch_owner_user_id;
+            $clientChatFeedback->ccf_message = $form->comment;
+            $clientChatFeedback->ccf_rating = $form->rating;
+        } else {
+            $clientChatFeedback = ClientChatFeedback::create(
+                $clientChat->cch_id,
+                $clientChat->cch_owner_user_id,
+                $clientChat->cch_client_id,
+                $form->rating,
+                $form->comment
+            );
+        }
+
+        if ($this->clientChatFeedbackRepository->save($clientChatFeedback)) {
+            Notifications::publish('clientChatUpdateClientStatus', ['user_id' => $clientChat->cch_owner_user_id], [
+                'cchId' => $clientChat->cch_id,
+                'isOnline' => (int)$clientChat->cch_client_online,
+                'statusMessage' => Html::encode($clientChat->getClientStatusMessage()),
+            ]);
+
+            if ($notification = Notifications::create(
+                $clientChat->cch_owner_user_id,
+                'Feedback received',
+                'Feedback received. Client Chat ID: ' . $clientChat->cch_id,
+                Notifications::TYPE_INFO,
+                true
+            )) {
+                $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ?
+                    NotificationMessage::add($notification) : [];
+                Notifications::publish('getNewNotification', ['user_id' => $clientChat->cch_owner_user_id], $dataNotification);
+            }
+        }
+
+        return $clientChatFeedback;
+    }
 
 	private function guestDisconnected(ClientChatRequest $clientChatRequest): void
 	{

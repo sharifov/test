@@ -7,7 +7,7 @@ namespace sales\model\clientChatNote\entity;
  *
  * @see ClientChatNote
  */
-class clientChatNoteScopes extends \yii\db\ActiveQuery
+class ClientChatNoteScopes extends \yii\db\ActiveQuery
 {
     /*public function active()
     {
