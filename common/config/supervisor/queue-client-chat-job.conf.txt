@@ -1,0 +1,10 @@
+[program:QueueClientChatJob]
+process_name=%(program_name)s_%(process_num)02d
+command=/usr/bin/php /var/www/sales/yii queue-client-chat-job/listen --verbose=1 --color=0
+stdout_logfile=/var/www/sales/console/runtime/queue-client-chat-job.log
+autostart=true
+autorestart=true
+user=root
+stopsignal=KILL
+numprocs=3
+redirect_stderr=true
