@@ -199,6 +199,11 @@ class ClientChatController extends FController
             $group = ClientChatTabGroups::MY;
         }
 
+        //todo remove after added logic free to take
+        if (ClientChatTabGroups::isFreeToTake($group)) {
+            $group = ClientChatTabGroups::MY;
+        }
+
         if (!ClientChatReadFilter::isValid($readFilter)) {
             $readFilter = ClientChatReadFilter::ALL;
         }
