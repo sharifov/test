@@ -1,10 +1,10 @@
 ;( function (window) {
     'use strict';
-    window._cc_apply_filter = function (channelId, primaryUrl, status, dep, project, group, read) {
+    window._cc_apply_filter = function (channelId, primaryUrl, status, dep, project, group, read, agentId, createdDate) {
         let btn = $("#btn-load-channels");
         let params = new URLSearchParams(window.location.search);
 
-        let url = primaryUrl + "?status=" + status + "&group=" + group + "&read=" + read;
+        let url = primaryUrl + "?status=" + status + "&group=" + group + "&read=" + read + "&agentId=" + agentId + "&createdDate=" + createdDate;
         if (dep > 0) {
             url = url + "&dep=" + dep;
         }
@@ -22,7 +22,7 @@
             cache: false,
             data: {page: 1, channelId: params.get("channelId") | channelId},
             beforeSend: function () {
-                $("#_channel_list_wrapper").append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
+                $("#_channel_list_wrapper").append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"> </i></div></div>');
             },
             success: function (data) {
                 $("._cc-list-wrapper").html(data.html);
@@ -38,6 +38,8 @@
                 params.set('project', project);
                 params.set('group', group);
                 params.set('read', read);
+                params.set('agentId', agentId);
+                params.set('createdDate', createdDate);
                 window.history.replaceState({}, '', primaryUrl+"?"+params.toString());
             },
             complete: function () {

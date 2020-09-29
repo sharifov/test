@@ -1,10 +1,12 @@
 <?php
 
+use dosamigos\datepicker\DatePicker;
 use kartik\select2\Select2;
 use sales\model\clientChat\dashboard\FilterForm;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\dashboard\ReadFilter;
 use sales\model\clientChat\dashboard\GroupFilter;
+use sales\widgets\UserSelect2Widget;
 use yii\helpers\Html;
 
 /** @var $this \yii\web\View */
@@ -13,7 +15,6 @@ use yii\helpers\Html;
 /** @var $clientChatId int|null */
 /** @var $totalUnreadMessages int */
 /** @var FilterForm $filter */
-
 ?>
 
 <div class="_cc-wrapper">
@@ -46,11 +47,13 @@ use yii\helpers\Html;
                 ],
                 'pluginEvents' => [
                     'change' => new \yii\web\JsExpression('function (e) {
+                    let selectedAgent = $("#agents-list").val();
                     let selectedStatus = $("#status-list").val();
                     let selectedChannel = $("#channel-list").val();
                     let selectedDep = $(this).val();
                     let selectedProject = $("#project-list").val();
-                    window._cc_apply_filter(selectedChannel, "' . $loadChannelsUrl . '", selectedStatus, selectedDep, selectedProject, ' . $filter->group . ', ' . $filter->read . ');
+                    let selectedCreatedDate = $("#created-date").val();
+                    window._cc_apply_filter(selectedChannel, "' . $loadChannelsUrl . '", selectedStatus, selectedDep, selectedProject, ' . $filter->group . ', ' . $filter->read . ', selectedAgent, selectedCreatedDate);
                 }'),
                 ],
             ]); ?>
@@ -71,11 +74,13 @@ use yii\helpers\Html;
 			    ],
 			    'pluginEvents' => [
 			        'change' => new \yii\web\JsExpression('function (e) {
+			         let selectedAgent = $("#agents-list").val();
 			        let selectedStatus = $("#status-list").val();
                     let selectedChannel = $("#channel-list").val();
                     let selectedDep = $("#dep-list").val();
                     let selectedProject = $(this).val();
-                    window._cc_apply_filter(selectedChannel, "' . $loadChannelsUrl . '", selectedStatus, selectedDep, selectedProject, ' . $filter->group . ', ' . $filter->read . ');
+                    let selectedCreatedDate = $("#created-date").val();
+                    window._cc_apply_filter(selectedChannel, "' . $loadChannelsUrl . '", selectedStatus, selectedDep, selectedProject, ' . $filter->group . ', ' . $filter->read . ', selectedAgent, selectedCreatedDate);
                 }'),
 			    ],
 			]); ?>
@@ -83,18 +88,20 @@ use yii\helpers\Html;
     </div>
     <div class="_cc_filter_wrapper">
         <div class="_cc_filter">
-            <?= Html::label('Channel list:', null, ['class' => 'control-label']); ?>
+            <?= Html::label('Channel:', null, ['class' => 'control-label']); ?>
             <?= Select2::widget([
                 'data' => $filter->getChannels(),
                 'name' => 'channel-list',
                 'size' => Select2::SIZE_SMALL,
                 'pluginEvents' => [
                     'change' => new \yii\web\JsExpression('function (e) {
+                    let selectedAgent = $("#agents-list").val();
                     let selectedStatus = $("#status-list").val();
                     let selectedChannel = $(this).val();
                     let selectedDep = $("#dep-list").val();
                     let selectedProject = $("#project-list").val();
-                    window._cc_apply_filter(selectedChannel, "' . $loadChannelsUrl . '", selectedStatus, selectedDep, selectedProject, ' . $filter->group . ', ' . $filter->read . ');
+                    let selectedCreatedDate = $("#created-date").val();
+                    window._cc_apply_filter(selectedChannel, "' . $loadChannelsUrl . '", selectedStatus, selectedDep, selectedProject, ' . $filter->group . ', ' . $filter->read . ', selectedAgent, selectedCreatedDate);
                 }'),
                 ],
                 'pluginOptions' => [
@@ -115,11 +122,13 @@ use yii\helpers\Html;
                 'size' => Select2::SIZE_SMALL,
                 'pluginEvents' => [
                     'change' => new \yii\web\JsExpression('function (e) {
+                    let selectedAgent = $("#agents-list").val();
                     let selectedStatus = $(this).val();
                     let selectedChannel = $("#channel-list").val();
                     let selectedDep = $("#dep-list").val();
                     let selectedProject = $("#project-list").val();
-                    window._cc_apply_filter(selectedChannel, "' . $loadChannelsUrl . '", selectedStatus, selectedDep, selectedProject, ' . $filter->group . ', ' . $filter->read . ');
+                    let selectedCreatedDate = $("#created-date").val();
+                    window._cc_apply_filter(selectedChannel, "' . $loadChannelsUrl . '", selectedStatus, selectedDep, selectedProject, ' . $filter->group . ', ' . $filter->read . ', selectedAgent, selectedCreatedDate);
                 }'),
                 ],
                 'pluginOptions' => [
@@ -132,6 +141,60 @@ use yii\helpers\Html;
                 'value' => $filter->status,
             ]); ?>
         </div>
+    </div>
+    <div class="_cc_filter_wrapper">
+        <div class="_cc_filter">
+            <?= Html::label('Agent:', null, ['class' => 'control-label']); ?>
+            <?= UserSelect2Widget::widget([
+                'name' => 'agents-list',
+                'size' => Select2::SIZE_SMALL,
+                'pluginEvents' => [
+                    'change' => new \yii\web\JsExpression('function (e) {
+                        let selectedAgent = $(this).val();
+                        let selectedStatus = $("#status-list").val();
+                        let selectedChannel = $("#channel-list").val();
+                        let selectedDep = $("#dep-list").val();
+                        let selectedProject = $("#project-list").val();
+                        let selectedCreatedDate = $("#created-date").val(); 
+                        window._cc_apply_filter(selectedChannel, "' . $loadChannelsUrl . '", selectedStatus, selectedDep, selectedProject, ' . $filter->group . ', ' . $filter->read . ', selectedAgent, selectedCreatedDate);
+                    }'),
+                ],
+                'pluginOptions' => [
+                    'width' => '100%',
+                ],
+                'options' => [
+                    'placeholder' => 'Choose the agent...',
+                    'id' => 'agents-list',
+                ],
+                'value' => $filter->agentId,
+                'initValueText' => $filter->agentName,
+            ]); ?>
+        </div>
+        <div class="_cc_filter">
+            <?= Html::label('Created:', null, ['class' => 'control-label']); ?>
+            <?= DatePicker::widget([
+                'name' => 'created-date',
+                'id' => 'created-date',
+                'value' => $filter->createdDate,
+                'template' => '{addon}{input}',
+                'clientOptions' => [
+                    'autoclose' => true,
+                    'format' => 'dd-mm-yyyy',
+                ],
+                'clientEvents' => [
+                    'changeDate' => new \yii\web\JsExpression('function(e){
+                        let selectedAgent = $("#agents-list").val();
+                        let selectedStatus = $("#status-list").val();
+                        let selectedChannel = $("#channel-list").val();
+                        let selectedDep = $("#dep-list").val();
+                        let selectedProject = $("#project-list").val();
+                        let selectedCreatedDate = $("#created-date").val(); 
+                        window._cc_apply_filter(selectedChannel, "' . $loadChannelsUrl . '", selectedStatus, selectedDep, selectedProject, ' . $filter->group . ', ' . $filter->read . ', selectedAgent, selectedCreatedDate);
+                     }'),
+                ],
+            ]); ?>
+        </div>
+
     </div>
     <div class="_cc_groups_wrapper">
         <?php foreach ($filter->getGroupFilter() as $key => $item): ?>

@@ -168,6 +168,8 @@ $(document).on('click', '#btn-load-channels', function (e) {
     let selectedProject = $('#project-list').val();
     let selectedDep = $('#dep-list').val();
     let selectedStatus = $('#status-list').val();
+    let selectedAgentId = $('#agents-list').val();
+    let selectedCreatedDate = $('#created-date').val();
     
     let params = new URLSearchParams(window.location.search);
 //    let tab = {$tabActive};
@@ -183,7 +185,7 @@ $(document).on('click', '#btn-load-channels', function (e) {
     if (params.get("group") !== null) {
         group = params.get("group");
     }
-    let url = '{$loadChannelsUrl}?&page=' + page + "&status=" + selectedStatus + "&group=" + group + "&read=" + read;
+    let url = '{$loadChannelsUrl}?&page=' + page + "&status=" + selectedStatus + "&group=" + group + "&read=" + read + "&agentId=" + selectedAgentId + "&createdDate=" + selectedCreatedDate;
     
     if (selectedChannel > 0) {
         url = url+'&channelId='+selectedChannel;

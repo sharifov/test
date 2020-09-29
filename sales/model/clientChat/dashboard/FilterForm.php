@@ -3,6 +3,7 @@
 namespace sales\model\clientChat\dashboard;
 
 use common\models\Department;
+use common\models\Employee;
 use common\models\Project;
 use sales\model\clientChat\entity\ClientChat;
 use yii\base\Model;
@@ -20,6 +21,9 @@ use yii\helpers\ArrayHelper;
  * @property $group
  * @property $read
  * @property array $channels
+ * @property $agentId
+ * @property $agentName
+ * @property $createdDate
  */
 class FilterForm extends Model
 {
@@ -31,6 +35,9 @@ class FilterForm extends Model
     public $project;
     public $group;
     public $read;
+    public $agentId;
+    public $agentName;
+    public $createdDate;
 
     private array $channels;
 
@@ -80,7 +87,24 @@ class FilterForm extends Model
             ['read', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
             ['read', 'default', 'value' => ReadFilter::ALL],
             ['read', 'in', 'range' => array_merge([ReadFilter::ALL], array_keys($this->getReadFilter()))],
+
+            ['agentId', 'integer'],
+            ['agentId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['agentId', 'validateAgent', 'skipOnEmpty' => true, 'skipOnError' => true],
+
+            ['createdDate', 'string'],
+            ['createdDate', 'date', 'format' => 'php:d-m-Y'],
+            ['createdDate', 'default', 'value' => null],
         ];
+    }
+
+    public function validateAgent(): void
+    {
+        $agent = Employee::find()->select(['id', 'username'])->andWhere(['id' => $this->agentId])->asArray()->one();
+        if (!$agent) {
+            return;
+        }
+        $this->agentName = $agent['username'];
     }
 
     public function getGroupFilter(): array
@@ -128,5 +152,8 @@ class FilterForm extends Model
         $this->project = 0;
         $this->group = GroupFilter::MY;
         $this->read = ReadFilter::ALL;
+        $this->agentId = null;
+        $this->agentName = null;
+        $this->createdDate = null;
     }
 }

@@ -199,7 +199,7 @@ class ClientChatController extends FController
         $dataProvider = null;
         /** @var $channels ClientChatChannel[] */
         if ($channels) {
-            $dataProvider = (new ClientChatSearch())->getListOfChats($userId, array_keys($channels), $filter);
+            $dataProvider = (new ClientChatSearch())->getListOfChats(Auth::user(), array_keys($channels), $filter);
         }
 
         $clientChat = null;

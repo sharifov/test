@@ -7,6 +7,7 @@ use common\models\Department;
 use common\models\Employee;
 use common\models\Project;
 use sales\auth\Auth;
+use sales\helpers\query\QueryHelper;
 use sales\model\clientChat\dashboard\FilterForm;
 use sales\model\clientChat\dashboard\ReadFilter;
 use sales\model\clientChat\dashboard\GroupFilter;
@@ -336,7 +337,7 @@ class ClientChatSearch extends ClientChat
         return $clientChats;
     }
 
-    public function getListOfChats(int $userId, array $channelsIds, FilterForm $filter): ArrayDataProvider
+    public function getListOfChats(Employee $user, array $channelsIds, FilterForm $filter): ArrayDataProvider
     {
         $query = ClientChat::find()->select([
             ClientChat::tableName() . '.*',
@@ -347,11 +348,11 @@ class ClientChatSearch extends ClientChat
         ]);
 
         if (GroupFilter::isMy($filter->group)) {
-            $query->byOwner($userId);
+            $query->byOwner($user->id);
             $query->orderBy(['cch_updated_dt' => SORT_DESC]);
         } elseif (GroupFilter::isOther($filter->group)) {
             $query
-                ->andWhere(['<>', 'cch_owner_user_id', $userId])
+                ->andWhere(['<>', 'cch_owner_user_id', $user->id])
                 ->andWhere(['IS NOT', 'cch_owner_user_id', null]);
             $query->orderBy(['cch_created_dt' => SORT_DESC]);
         } elseif (GroupFilter::isAll($filter->group)) {
@@ -376,6 +377,14 @@ class ClientChatSearch extends ClientChat
             $query->active();
         } elseif (ClientChat::isTabClosed($filter->status)) {
             $query->archive();
+        }
+
+        if ($filter->agentId) {
+            $query->andWhere(['cch_owner_user_id' => $filter->agentId]);
+        }
+
+        if ($filter->createdDate) {
+            \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cch_created_dt', $filter->createdDate, $user->timezone);
         }
 
         $query->join('JOIN', ['client' => Client::tableName()], 'cch_client_id = client.id');
