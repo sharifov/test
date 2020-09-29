@@ -1,9 +1,10 @@
 <?php
 
-namespace sales\model\clientChat\entity;
+namespace sales\model\clientChat\dashboard;
 
-class ClientChatTabGroups
+class GroupFilter
 {
+    public const ALL = 0;
     public const MY = 1;
     public const OTHER = 2;
     public const FREE_TO_TAKE = 3;
@@ -27,6 +28,11 @@ class ClientChatTabGroups
     public static function isFreeToTake(int $value): bool
     {
         return $value === self::FREE_TO_TAKE;
+    }
+
+    public static function isAll(int $value): bool
+    {
+        return $value === self::ALL;
     }
 
     public static function isValid(int $value): bool

@@ -1,8 +1,8 @@
 <?php
 
-namespace sales\model\clientChat\entity;
+namespace sales\model\clientChat\dashboard;
 
-class ClientChatReadFilter
+class ReadFilter
 {
     public const ALL = 0;
     public const READ = 1;
@@ -21,6 +21,11 @@ class ClientChatReadFilter
     public static function isUnread(int $value): bool
     {
         return $value === self::UNREAD;
+    }
+
+    public static function isAll(int $value): bool
+    {
+        return $value === self::ALL;
     }
 
     public static function isValid(int $value): bool

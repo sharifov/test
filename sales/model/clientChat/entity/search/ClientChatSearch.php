@@ -7,8 +7,9 @@ use common\models\Department;
 use common\models\Employee;
 use common\models\Project;
 use sales\auth\Auth;
-use sales\model\clientChat\entity\ClientChatReadFilter;
-use sales\model\clientChat\entity\ClientChatTabGroups;
+use sales\model\clientChat\dashboard\FilterForm;
+use sales\model\clientChat\dashboard\ReadFilter;
+use sales\model\clientChat\dashboard\GroupFilter;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\services\clientChatMessage\ClientChatMessageService;
@@ -335,21 +336,7 @@ class ClientChatSearch extends ClientChat
         return $clientChats;
     }
 
-    /**
-     * @param int|null            $channelId
-     * @param ClientChatChannel[] $channels
-     * @param int|null            $dep
-     * @param int|null            $project
-     * @param int|null            $tab
-     * @param int                 $page
-     * @param int                 $group
-     * @param int                 $readFilter
-     *
-     * @return ArrayDataProvider
-     *
-     * @throws \yii\base\InvalidConfigException
-     */
-    public function getListOfChats(?int $channelId, array $channels, ?int $dep, ?int $project, ?int $tab, int $page, int $group, int $readFilter): ArrayDataProvider
+    public function getListOfChats(int $userId, array $channels, FilterForm $filter): ArrayDataProvider
     {
         $query = ClientChat::find()->select([
             ClientChat::tableName() . '.*',
@@ -359,38 +346,38 @@ class ClientChatSearch extends ClientChat
             'ccc_name',
         ]);
 
-        if (ClientChatTabGroups::isMy($group)) {
-            $query->byOwner(Auth::id());
+        if (GroupFilter::isMy($filter->group)) {
+            $query->byOwner($userId);
             $query->orderBy(['cch_updated_dt' => SORT_DESC]);
-        } elseif (ClientChatTabGroups::isOther($group)) {
+        } elseif (GroupFilter::isOther($filter->group)) {
             $query
-                ->andWhere(['<>', 'cch_owner_user_id', Auth::id()])
+                ->andWhere(['<>', 'cch_owner_user_id', $userId])
                 ->andWhere(['IS NOT', 'cch_owner_user_id', null]);
             $query->orderBy(['cch_created_dt' => SORT_DESC]);
         }
 
         $channelsIds = ArrayHelper::getColumn($channels, 'ccc_id');
-        if ($channelId) {
-            if ($channelsIds && !in_array($channelId, $channelsIds)) {
+        if ($filter->channelId) {
+            if ($channelsIds && !in_array($filter->channelId, $channelsIds)) {
                 $query->where('0=1');
             } else {
-                $query->byChannel($channelId);
+                $query->byChannel($filter->channelId);
             }
         } else {
             $query->byChannelIds($channelsIds);
         }
 
-        if ($dep) {
-            $query->byDepartment($dep);
+        if ($filter->dep) {
+            $query->byDepartment($filter->dep);
         }
 
-        if ($project) {
-            $query->byProject($project);
+        if ($filter->project) {
+            $query->byProject($filter->project);
         }
 
-        if (ClientChat::isTabActive($tab)) {
+        if (ClientChat::isTabActive($filter->status)) {
             $query->active();
-        } elseif (ClientChat::isTabClosed($tab)) {
+        } elseif (ClientChat::isTabClosed($filter->status)) {
             $query->archive();
         }
 
@@ -415,12 +402,12 @@ class ClientChatSearch extends ClientChat
             $data[$key]['count_unread_messages'] = $messageService->getCountOfChatUnreadMessages((int) $item['cch_id'], (int) $item['cch_owner_user_id']);
         }
 
-        if (ClientChatTabGroups::isMy($group)) {
-            if (ClientChatReadFilter::isRead($readFilter)) {
+        if (GroupFilter::isMy($filter->group)) {
+            if (ReadFilter::isRead($filter->read)) {
                 $data = array_filter($data, static function ($item) {
                     return $item['count_unread_messages'] === 0;
                 });
-            } elseif (ClientChatReadFilter::isUnread($readFilter)) {
+            } elseif (ReadFilter::isUnread($filter->read)) {
                 $data = array_filter($data, static function ($item) {
                     return $item['count_unread_messages'] > 0;
                 });
@@ -430,22 +417,22 @@ class ClientChatSearch extends ClientChat
         $dataProvider = new ArrayDataProvider([
             'allModels' => $data,
             'pagination' => ['pageSize' => $this->pageSize],
-//            'sort' => [
-//                'defaultOrder' => [
-//                    'count_unread_messages' => SORT_DESC,
-//                    'ccm_sent_dt' => SORT_DESC,
-//                    'cch_created_dt' => SORT_DESC,
-//                ],
-//                'attributes' => [
-//                    'count_unread_messages',
-//                    'ccm_sent_dt',
-//                    'cch_created_dt',
-//                ],
-//            ],
+            //            'sort' => [
+            //                'defaultOrder' => [
+            //                    'count_unread_messages' => SORT_DESC,
+            //                    'ccm_sent_dt' => SORT_DESC,
+            //                    'cch_created_dt' => SORT_DESC,
+            //                ],
+            //                'attributes' => [
+            //                    'count_unread_messages',
+            //                    'ccm_sent_dt',
+            //                    'cch_created_dt',
+            //                ],
+            //            ],
         ]);
 
         if (\Yii::$app->request->isGet) {
-            $dataProvider->pagination->pageSize = $page * $this->pageSize;
+            $dataProvider->pagination->pageSize = $filter->page * $this->pageSize;
             $dataProvider->pagination->page = 0;
         }
 

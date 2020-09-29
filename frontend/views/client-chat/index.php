@@ -2,9 +2,10 @@
 
 use frontend\themes\gentelella_v2\assets\ClientChatAsset;
 use sales\auth\Auth;
+use sales\model\clientChat\dashboard\FilterForm;
 use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChat\entity\ClientChatReadFilter;
-use sales\model\clientChat\entity\ClientChatTabGroups;
+use sales\model\clientChat\dashboard\ReadFilter;
+use sales\model\clientChat\dashboard\GroupFilter;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatNote\entity\ClientChatNote;
@@ -16,17 +17,11 @@ use yii\widgets\Pjax;
 /* @var $this yii\web\View */
 /* @var $channels ClientChatChannel[] */
 /* @var $dataProvider \yii\data\ArrayDataProvider|null */
-/* @var $page int */
-/* @var $channelId int|null */
 /* @var $client \common\models\Client|null */
 /* @var $clientChat \sales\model\clientChat\entity\ClientChat|null */
 /* @var $history ClientChatMessage|null */
-/* @var $tab int */
-/* @var $dep int */
-/** @var $project int */
 /** @var $totalUnreadMessages int */
-/** @var int $group */
-/** @var int $readFilter */
+/** @var FilterForm $filter */
 
 $this->title = 'My Client Chat';
 //$this->params['breadcrumbs'][] = $this->title;
@@ -73,15 +68,9 @@ $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
                 'channels' => $channels,
                 'dataProvider' => $dataProvider,
                 'loadChannelsUrl' => $loadChannelsUrl,
-                'page' => $page,
-                'channelId' => $channelId,
                 'clientChatId' => $clientChat ? $clientChat->cch_id : null,
-                'tab' => $tab,
-                'dep' => $dep,
-                'project' => $project,
                 'totalUnreadMessages' => $totalUnreadMessages,
-                'group' => $group,
-                'readFilter' => $readFilter,
+                'filter' => $filter,
             ]); ?>
         </div>
 		<?php Pjax::end(); ?>
@@ -127,8 +116,8 @@ $clientChatId = $clientChat ? $clientChat->cch_id : 0;
 $discardUnreadMessageUrl = Url::to(['/client-chat/discard-unread-messages']);
 $tabAll = ClientChat::TAB_ALL;
 $tabActive = ClientChat::TAB_ACTIVE;
-$groupMyChat = ClientChatTabGroups::MY;
-$readAll = ClientChatReadFilter::ALL;
+$groupMyChat = GroupFilter::MY;
+$readAll = ReadFilter::ALL;
 $js = <<<JS
 
 window.name = 'chat';

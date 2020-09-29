@@ -22,9 +22,10 @@ use sales\forms\clientChat\RealTimeStartChatForm;
 use sales\helpers\app\AppHelper;
 use sales\helpers\app\AppParamsHelper;
 use sales\model\clientChat\ClientChatCodeException;
+use sales\model\clientChat\dashboard\FilterForm;
 use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChat\entity\ClientChatReadFilter;
-use sales\model\clientChat\entity\ClientChatTabGroups;
+use sales\model\clientChat\dashboard\ReadFilter;
+use sales\model\clientChat\dashboard\GroupFilter;
 use sales\model\clientChat\entity\search\ClientChatSearch;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChat\useCase\sendOffer\GenerateImagesForm;
@@ -178,72 +179,63 @@ class ClientChatController extends FController
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
-    public function actionIndex(
-        int $channelId = null,
-        int $page = 1,
-        int $chid = 0,
-        int $tab = ClientChat::TAB_ACTIVE,
-        int $dep = 0,
-        int $project = 0,
-        int $group = ClientChatTabGroups::MY,
-        int $readFilter = ClientChatReadFilter::ALL
-    ) {
-        $channelsQuery = ClientChatChannel::find()
-            ->joinWithCcuc(Auth::id());
-        $dataProvider = null;
-        $page = $page ?: 1;
-        $channelId = $channelId ?: null;
-        $channels = $channelsQuery->all();
+    public function actionIndex()
+    {
+        $filter = new FilterForm();
 
-        if (!ClientChatTabGroups::isValid($group)) {
-            $group = ClientChatTabGroups::MY;
+        if (!$filter->load(Yii::$app->request->get(), '') || !$filter->validate()) {
+            $filter->loadDefaultValues();
         }
 
         //todo remove after added logic free to take
-        if (ClientChatTabGroups::isFreeToTake($group)) {
-            $group = ClientChatTabGroups::MY;
+        if (GroupFilter::isFreeToTake($filter->group)) {
+            $filter->group = GroupFilter::MY;
         }
 
-        if (!ClientChatReadFilter::isValid($readFilter)) {
-            $readFilter = ClientChatReadFilter::ALL;
-        }
+        $userId = Auth::id();
 
+        $channels = ClientChatChannel::find()->joinWithCcuc($userId)->all();
+
+        $dataProvider = null;
         /** @var $channels ClientChatChannel[] */
         if ($channels) {
-            $search = new ClientChatSearch();
-            $dataProvider = $search->getListOfChats($channelId, $channels, $dep, $project, $tab, $page, $group, $readFilter);
+            $dataProvider = (new ClientChatSearch())->getListOfChats($userId, $channels, $filter);
         }
 
-        try {
-            $clientChat = $this->clientChatRepository->findById($chid);
+        if ($filter->chatId) {
+            try {
+                $clientChat = $this->clientChatRepository->findById($filter->chatId);
 
-            if (!Auth::can('client-chat/manage/all', ['chat' => $clientChat])) {
-                throw new ForbiddenHttpException('You do not have access to this chat', 403);
-            }
+                if (!Auth::can('client-chat/manage/all', ['chat' => $clientChat])) {
+                    throw new ForbiddenHttpException('You do not have access to this chat', 403);
+                }
 
-            if ($clientChat->cch_owner_user_id) {
-                $this->clientChatMessageService->discardUnreadMessages($clientChat->cch_id, $clientChat->cch_owner_user_id);
-            }
+                if ($clientChat->cch_owner_user_id) {
+                    $this->clientChatMessageService->discardUnreadMessages($clientChat->cch_id, $clientChat->cch_owner_user_id);
+                }
 
-            if ($clientChat->isClosed()) {
-                $history = ClientChatMessage::find()->byChhId($clientChat->cch_id)->all();
+                if ($clientChat->isClosed()) {
+                    $history = ClientChatMessage::find()->byChhId($clientChat->cch_id)->all();
+                }
+            } catch (NotFoundException $e) {
+                $clientChat = null;
+            } catch (\DomainException $e) {
+                $clientChat = null;
             }
-        } catch (NotFoundException $e) {
-            $clientChat = null;
-        } catch (\DomainException $e) {
+        } else {
             $clientChat = null;
         }
 
         if ($dataProvider && \Yii::$app->request->isPost) {
             if (\Yii::$app->request->post('loadingChannels')) {
-                $dataProvider->pagination->page = $page;
+                $dataProvider->pagination->page = $filter->page;
             } else {
-                $dataProvider->pagination->page = $page = 0;
+                $dataProvider->pagination->page = $filter->page = 0;
             }
 
             $response = [
                 'html' => '',
-                'page' => $page,
+                'page' => $filter->page,
             ];
 
             if ($dataProvider->getCount()) {
@@ -251,7 +243,7 @@ class ClientChatController extends FController
                     'clientChats' => $dataProvider->getModels(),
                     'clientChatId' => $clientChat ? $clientChat->cch_id : '',
                 ]);
-                $response['page'] = $page + 1;
+                $response['page'] = $filter->page + 1;
             }
 
             return $this->asJson($response);
@@ -260,17 +252,11 @@ class ClientChatController extends FController
         return $this->render('index', [
             'channels' => $channels,
             'dataProvider' => $dataProvider,
-            'channelId' => $channelId,
-            'page' => $page,
             'clientChat' => $clientChat,
             'client' => $clientChat->cchClient ?? '',
             'history' => $history ?? null,
-            'tab' => $tab,
-            'dep' => $dep,
-            'project' => $project,
-            'totalUnreadMessages' => $this->clientChatMessageService->getCountOfTotalUnreadMessages(Auth::id()),
-            'group' => $group,
-            'readFilter' => $readFilter,
+            'totalUnreadMessages' => $this->clientChatMessageService->getCountOfTotalUnreadMessages($userId),
+            'filter' => $filter,
         ]);
     }
 

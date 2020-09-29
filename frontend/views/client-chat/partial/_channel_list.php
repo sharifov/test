@@ -3,9 +3,10 @@
 use common\models\Department;
 use common\models\Project;
 use kartik\select2\Select2;
+use sales\model\clientChat\dashboard\FilterForm;
 use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChat\entity\ClientChatReadFilter;
-use sales\model\clientChat\entity\ClientChatTabGroups;
+use sales\model\clientChat\dashboard\ReadFilter;
+use sales\model\clientChat\dashboard\GroupFilter;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
@@ -14,15 +15,9 @@ use yii\helpers\Html;
 /** @var $this \yii\web\View */
 /** @var $dataProvider \yii\data\ArrayDataProvider|null */
 /** @var $loadChannelsUrl string */
-/** @var $page int */
-/** @var $channelId int|null */
 /** @var $clientChatId int|null */
-/** @var $tab int */
-/** @var $dep int */
-/** @var $project int */
 /** @var $totalUnreadMessages int */
-/** @var $group int */
-/** @var $readFilter int */
+/** @var FilterForm $filter */
 
 ?>
 
@@ -30,7 +25,7 @@ use yii\helpers\Html;
 <div class="_cc-wrapper">
     <div class="_cc_tabs_wrapper">
         <?php foreach (ClientChat::getTabList() as $key => $item): ?>
-            <div class="_cc_tab <?= $key === $tab ? 'active' : ''; ?>" data-tab-id="<?= $key; ?>"> <?= $item; ?>
+            <div class="_cc_tab <?= $key === $filter->status ? 'active' : ''; ?>" data-tab-id="<?= $key; ?>"> <?= $item; ?>
                 <?php if (ClientChat::isTabActive($key)): ?>
                     <sup class="_cc_unread_messages label label-danger" ><?= $totalUnreadMessages ?: ''; ?></sup>
                 <?php endif; ?>
@@ -49,7 +44,7 @@ use yii\helpers\Html;
                     'placeholder' => 'Choose the channel...',
                     'id' => 'dep-list',
                 ],
-                'value' => $dep ?: 0,
+                'value' => $filter->dep ?: 0,
                 'pluginOptions' => [
                     'width' => '100%',
                 ],
@@ -58,7 +53,7 @@ use yii\helpers\Html;
                     let selectedChannel = $("#channel-list").val();
                     let selectedDep = $(this).val();
                     let selectedProject = $("#project-list").val();
-                    window._cc_apply_filter(selectedChannel, "' . $loadChannelsUrl . '", ' . $tab . ', selectedDep, selectedProject, ' . $group . ', ' . $readFilter . ');
+                    window._cc_apply_filter(selectedChannel, "' . $loadChannelsUrl . '", ' . $filter->status . ', selectedDep, selectedProject, ' . $filter->group . ', ' . $filter->read . ');
                 }'),
                 ],
             ]); ?>
@@ -73,7 +68,7 @@ use yii\helpers\Html;
 			        'placeholder' => 'Choose the channel...',
 			        'id' => 'project-list',
 			    ],
-			    'value' => $project ?: 0,
+			    'value' => $filter->project ?: 0,
 			    'pluginOptions' => [
 			        'width' => '100%',
 			    ],
@@ -82,7 +77,7 @@ use yii\helpers\Html;
                     let selectedChannel = $("#channel-list").val();
                     let selectedDep = $("#dep-list").val();
                     let selectedProject = $(this).val();
-                    window._cc_apply_filter(selectedChannel, "' . $loadChannelsUrl . '", ' . $tab . ', selectedDep, selectedProject, ' . $group . ', ' . $readFilter . ');
+                    window._cc_apply_filter(selectedChannel, "' . $loadChannelsUrl . '", ' . $filter->status . ', selectedDep, selectedProject, ' . $filter->group . ', ' . $filter->read . ');
                 }'),
 			    ],
 			]); ?>
@@ -99,31 +94,31 @@ use yii\helpers\Html;
                     let selectedChannel = $(this).val();
                     let selectedDep = $("#dep-list").val();
                     let selectedProject = $("#project-list").val();
-                    window._cc_apply_filter(selectedChannel, "' . $loadChannelsUrl . '", ' . $tab . ', selectedDep, selectedProject, ' . $group . ', ' . $readFilter . ');
+                    window._cc_apply_filter(selectedChannel, "' . $loadChannelsUrl . '", ' . $filter->status . ', selectedDep, selectedProject, ' . $filter->group . ', ' . $filter->read . ');
                 }'),
 		    ],
 		    'options' => [
 		        'placeholder' => 'Choose the channel...',
 		        'id' => 'channel-list',
 		    ],
-		    'value' => $channelId ?: 0,
+		    'value' => $filter->channelId ?: 0,
 		]); ?>
 	</div>
     <div class="_cc_groups_wrapper">
-        <?php foreach (ClientChatTabGroups::LIST as $key => $item): ?>
-            <div class="_cc_group cc_btn_group_filter <?= $key === $group ? 'active' : ''; ?>" data-group-id="<?= $key; ?>"> <?= $item; ?>
+        <?php foreach (GroupFilter::LIST as $key => $item): ?>
+            <div class="_cc_group cc_btn_group_filter <?= $key === $filter->group ? 'active' : ''; ?>" data-group-id="<?= $key; ?>"> <?= $item; ?>
                 <span class="_cc_group_active"></span>
             </div>
         <?php endforeach; ?>
     </div>
 
-    <?php if (ClientChatTabGroups::isMy($group)): ?>
+    <?php if (GroupFilter::isMy($filter->group)): ?>
         <div class="row">
             <div class="_cc_groups_wrapper">
                 <div class="col-md-6">
-                    <?php foreach (ClientChatReadFilter::LIST as $key => $item): ?>
+                    <?php foreach (ReadFilter::LIST as $key => $item): ?>
                         <div class="col-md-6">
-                            <div class="_cc_group cc_btn_read_filter <?= $key === $readFilter ? 'active' : ''; ?>"
+                            <div class="_cc_group cc_btn_read_filter <?= $key === $filter->read ? 'active' : ''; ?>"
                                  data-read-id="<?= $key; ?>"> <?= $item; ?>
                                 <span class="_cc_group_active"> </span>
                             </div>
@@ -141,6 +136,6 @@ use yii\helpers\Html;
 	</div>
 
 	<div class="_cc-channel-pagination" style="display: flex;justify-content: center; padding: 15px 0 10px;">
-		<button class="btn btn-default" id="btn-load-channels" data-page="<?= $page; ?>">Load more</button>
+		<button class="btn btn-default" id="btn-load-channels" data-page="<?= $filter->page; ?>">Load more</button>
 	</div>
 </div>
