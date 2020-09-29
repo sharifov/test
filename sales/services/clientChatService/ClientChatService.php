@@ -6,10 +6,12 @@ use common\models\Notifications;
 use common\models\UserProfile;
 use frontend\widgets\clientChat\ClientChatAccessMessage;
 use sales\auth\Auth;
+use sales\dispatchers\DeferredEventDispatcher;
 use sales\forms\clientChat\RealTimeStartChatForm;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
+use sales\model\clientChat\useCase\close\ClientChatCloseForm;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChat\useCase\transfer\ClientChatTransferForm;
 use sales\model\clientChatCase\entity\ClientChatCase;
@@ -223,6 +225,10 @@ class ClientChatService
 			}
 
 			$clientChat = $_self->clientChatRepository->getOrCreateByRequest($clientChatRequest, ClientChat::SOURCE_TYPE_AGENT);
+
+			$dispatcher = \Yii::createObject(DeferredEventDispatcher::class);
+			$dispatcher->defer();
+
 			if (!$clientChat->cch_client_id) {
 				$clientChat->cch_client_id = $client->id;
 			}
@@ -232,6 +238,7 @@ class ClientChatService
 			$clientChat->cch_project_id = $channel->ccc_project_id;
 			$clientChat->cch_owner_user_id = $ownerId;
 			$clientChat->cch_client_online = 1;
+			$clientChat->pending($ownerId);
 			$this->clientChatRepository->save($clientChat);
 
 			$this->transactionManager->wrap(static function () use ($form, $ownerId, $_self, $department, $userProfile, $clientChatRequest, $clientChat) {
@@ -267,12 +274,13 @@ class ClientChatService
 
 	/**
 	 * @param ClientChatTransferForm $form
+	 * @param int $userId
 	 * @return Department
 	 * @throws \Throwable
 	 */
-	public function transfer(ClientChatTransferForm $form): Department
+	public function transfer(ClientChatTransferForm $form, int $userId): Department
 	{
-		return $this->transactionManager->wrap( function () use ($form) {
+		return $this->transactionManager->wrap( function () use ($form, $userId) {
 			$clientChat = $this->clientChatRepository->findById($form->cchId);
 
 			if ($clientChat->isClosed()) {
@@ -308,7 +316,7 @@ class ClientChatService
 				throw new \DomainException('Client already has active chat in this department');
 			}
 
-			$clientChat->transfer();
+			$clientChat->transfer($userId, $form->comment);
 			$clientChat->cch_dep_id = $form->depId;
 			$this->clientChatRepository->save($clientChat);
 
@@ -333,6 +341,21 @@ class ClientChatService
 		});
 	}
 
+	/**
+	 * @param ClientChat $clientChat
+	 * @param int $ownerId
+	 * @throws \yii\httpclient\Exception
+	 */
+	public function acceptChat(ClientChat $clientChat, int $ownerId): void
+	{
+		$_self = $this;
+		$this->transactionManager->wrap( static function () use ($_self, $clientChat, $ownerId) {
+			$clientChat->assignOwner($ownerId)->inProgress($ownerId);
+			$_self->clientChatRepository->save($clientChat);
+			$_self->assignAgentToRcChannel($clientChat->cch_rid, $ccua->ccuaUser->userProfile->up_rc_user_id ?? '');
+		});
+	}
+
 	public function finishTransfer(ClientChat $clientChat, ClientChatUserAccess $chatUserAccess): ClientChat
 	{
 		return $this->transactionManager->wrap( function () use ($clientChat, $chatUserAccess) {
@@ -345,22 +368,23 @@ class ClientChatService
 
 			$oldChannelId = $clientChat->cch_channel_id;
 
-			$clientChat->close();
+			$clientChat->close($chatUserAccess->ccua_user_id);
 			$this->clientChatRepository->save($clientChat);
 
 			$dto = ClientChatCloneDto::feelInOnTransfer($clientChat);
-			$newClientChat = $this->clientChatRepository->clone($dto);
+			$newClientChat = ClientChat::clone($dto);
 			$newClientChat->assignOwner($chatUserAccess->ccua_user_id);
 			$newClientChat->cch_source_type_id = ClientChat::SOURCE_TYPE_TRANSFER;
+			try {
+				$channel = $this->clientChatChannelRepository->findByClientChatData($clientChat->cch_dep_id, (int)$clientChat->cch_project_id, null);
+			} catch (NotFoundException $e) {
+				$channel = $this->clientChatChannelRepository->findDefaultByProject((int)$clientChat->cch_project_id);
+			}
 			$this->clientChatRepository->save($newClientChat);
 			$this->cloneLead($clientChat, $newClientChat)->cloneCase($clientChat, $newClientChat)->cloneNotes($clientChat, $newClientChat);
-			try {
-				$channel = $this->clientChatChannelRepository->findByClientChatData($newClientChat->cch_dep_id, $newClientChat->cch_project_id, null);
-			} catch (NotFoundException $e) {
-				$channel = $this->clientChatChannelRepository->findDefaultByProject((int)$newClientChat->cch_project_id);
-			}
 			$newClientChat->cch_channel_id = $channel->ccc_id;
 			$newClientChat->cch_parent_id = $clientChat->cch_id;
+			$newClientChat->pending($chatUserAccess->ccua_user_id);
 			$this->clientChatRepository->save($newClientChat);
 
 			$userAccess = ClientChatUserAccess::create($newClientChat->cch_id, $newClientChat->cch_owner_user_id);
@@ -396,19 +420,19 @@ class ClientChatService
 		});
 	}
 
-	public function cancelTransfer(ClientChat $clientChat): void
+	public function cancelTransfer(ClientChat $clientChat, ?int $callerId): void
 	{
 		$channel = $clientChat->cchChannel;
 		if ($channel) {
 			$clientChat->cch_dep_id = $channel->ccc_dep_id;
-			$clientChat->generated();
+			$clientChat->inProgress($callerId);
 			$this->clientChatRepository->save($clientChat);
 		}
 	}
 
-	public function closeConversation(int $chhId): void
+	public function closeConversation(ClientChatCloseForm $form, int $userId): void
 	{
-		$clientChat = $this->clientChatRepository->findById($chhId);
+		$clientChat = $this->clientChatRepository->findById($form->cchId);
 
 		if (!Auth::can('client-chat/manage/all', ['chat' => $clientChat])) {
 			throw new ForbiddenHttpException('You do not have access to perform this action', 403);
@@ -428,7 +452,7 @@ class ClientChatService
 			throw new \RuntimeException('[Chat Bot] ' . ($botCloseChatResult['data']['message'] ?? 'Unknown error message'));
 		}
 
-		$clientChat->close();
+		$clientChat->close($userId, $form->comment);
 
 		$this->clientChatRepository->save($clientChat);
 	}

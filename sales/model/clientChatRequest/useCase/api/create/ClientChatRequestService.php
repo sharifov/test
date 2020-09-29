@@ -260,9 +260,17 @@ class ClientChatRequestService
 			if ($channel->ccc_project_id !== $clientChat->cch_project_id) {
 				throw new \DomainException('Channel project does not match project from api request');
 			}
+
+			if (!$clientChat->cch_id) {
+				$clientChat->pending(null);
+			}
+
 			$this->clientChatRepository->save($clientChat);
 			$this->clientChatService->sendRequestToUsers($clientChat, $channel);
 		} else {
+			if (!$clientChat->cch_id) {
+				$clientChat->pending(null);
+			}
 			$this->clientChatRepository->save($clientChat);
 		}
 

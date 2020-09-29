@@ -17,7 +17,7 @@ class ClientChatCodeException
 
 	public static function isRcAssignAgentFailed(\Throwable $e): bool
 	{
-		return (int)$e->getCode() === (int)self::RC_ASSIGN_AGENT_FAILED;
+		return (int)$e->getCode() === self::RC_ASSIGN_AGENT_FAILED;
 	}
 
 	public static function isWarningMessage(\Throwable $e): bool
@@ -26,6 +26,6 @@ class ClientChatCodeException
 	}
 
 	public static function isAlreadyAssigned(\Throwable $e) {
-		return (int)$e->getCode() === (int)self::CC_OWNER_ALREADY_ASSIGNED;
+		return (int)$e->getCode() === self::CC_OWNER_ALREADY_ASSIGNED;
 	}
 }

@@ -77,15 +77,15 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
         $query = static::find();
         $query->select([
             '' . $this->setGroupingParam() . ' AS date',
-            'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_CLIENT . ' AND cch_status_id = '. ClientChat::STATUS_GENERATED . ', 1, 0)) AS initiatedByClient',
-            'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_AGENT . ' AND cch_status_id = '. ClientChat::STATUS_GENERATED . ', 1, 0)) AS initiatedByAgent',
+            'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_CLIENT . ' AND cch_status_id = '. ClientChat::STATUS_PENDING . ', 1, 0)) AS initiatedByClient',
+            'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_AGENT . ' AND cch_status_id = '. ClientChat::STATUS_PENDING . ', 1, 0)) AS initiatedByAgent',
             'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_CLIENT . ' AND cch_status_id = '. ClientChat::STATUS_CLOSED. ', 1, 0)) AS initiatedByClientClosed',
             'SUM(IF(cch_source_type_id = ' . ClientChat::SOURCE_TYPE_AGENT . ' AND cch_status_id = '. ClientChat::STATUS_CLOSED . ', 1, 0)) AS initiatedByAgentClosed',
             'SUM(IF(cch_missed = ' . ClientChat::MISSED . ', 1, 0)) AS missedChats',
             'GROUP_CONCAT(DISTINCT cch_owner_user_id) AS agentsInGroup'
         ]);
 
-        $query->where(['cch_status_id' => [ClientChat::STATUS_GENERATED, ClientChat::STATUS_CLOSED]]);
+        $query->where(['cch_status_id' => [ClientChat::STATUS_PENDING, ClientChat::STATUS_CLOSED]]);
 
         $ccTblSubQuery = new Query();
         $ccTblSubQuery->select('*')->from(ClientChat::tableName())->where('date_format(cch_created_dt, "%Y-%m-%d") = date');
@@ -138,7 +138,7 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
             'cch_created_dt',
             'cch_updated_dt'
         ]);
-        $queryChats->where(['cch_status_id' => [ClientChat::STATUS_GENERATED, ClientChat::STATUS_CLOSED]]);
+        $queryChats->where(['cch_status_id' => [ClientChat::STATUS_PENDING, ClientChat::STATUS_CLOSED]]);
 
         if($this->cch_owner_user_id){
             $queryChats->andWhere(['cch_owner_user_id' => $this->cch_owner_user_id]);

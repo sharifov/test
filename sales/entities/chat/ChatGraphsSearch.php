@@ -72,7 +72,7 @@ class ChatGraphsSearch extends ClientChatSearch
         $query = static::find();
         $query->select([
             ''. $this->setGroupingParam() .' AS date',
-            'SUM(IF(cch_status_id = '. ClientChat::STATUS_GENERATED .', 1, 0)) AS generated',
+            'SUM(IF(cch_status_id = '. ClientChat::STATUS_PENDING .', 1, 0)) AS generated',
             'SUM(IF(cch_status_id = '. ClientChat::STATUS_CLOSED .', 1, 0)) AS closed',
         ]);
 

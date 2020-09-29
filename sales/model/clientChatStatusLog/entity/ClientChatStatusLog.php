@@ -91,10 +91,37 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
         ];
     }
 
+	public function end(): void
+	{
+		$this->csl_end_dt = date('Y-m-d H:i:s');
+	}
+
     public static function find(): Scopes
     {
         return new Scopes(static::class);
     }
+
+    public static function create(
+		int $chatId,
+		?int $fromStatus,
+		int $toStatus,
+		?int $ownerId,
+		?int $creatorId,
+		?int $channelId,
+		?string $description = ''
+	): self
+	{
+		$status = new self();
+		$status->csl_cch_id = $chatId;
+		$status->csl_from_status = $fromStatus;
+		$status->csl_to_status = $toStatus;
+		$status->csl_owner_id = $ownerId;
+		$status->csl_user_id = $creatorId;
+		$status->csl_prev_channel_id = $channelId;
+		$status->csl_description = $description;
+		$status->csl_start_dt = date('Y-m-d H:i:s');
+		return $status;
+	}
 
     public static function tableName(): string
     {

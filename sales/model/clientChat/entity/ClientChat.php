@@ -9,8 +9,11 @@ use common\models\Language;
 use common\models\Lead;
 use common\models\Project;
 use sales\entities\cases\Cases;
+use sales\entities\EventTrait;
 use sales\helpers\clientChat\ClientChatHelper;
 use sales\model\clientChat\ClientChatCodeException;
+use sales\model\clientChat\event\ClientChatManageStatusLogEvent;
+use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
 use sales\model\clientChatCase\entity\ClientChatCase;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatFeedback\entity\ClientChatFeedback;
@@ -64,25 +67,30 @@ use yii\db\ActiveRecord;
  */
 class ClientChat extends \yii\db\ActiveRecord
 {
-	public const STATUS_GENERATED = 1;
+	use EventTrait;
+
+	public const STATUS_NEW = 1;
 	public const STATUS_CLOSED = 9;
 	public const STATUS_PENDING = 2;
+	public const STATUS_IN_PROGRESS = 4;
 	public const STATUS_TRANSFER = 3;
 
 	public const MISSED = 1;
 
 	private const STATUS_LIST = [
-		self::STATUS_GENERATED => 'Generated',
+		self::STATUS_NEW => 'New',
 		self::STATUS_PENDING => 'Pending',
 		self::STATUS_CLOSED => 'Closed',
 		self::STATUS_TRANSFER => 'Transfer',
+		self::STATUS_IN_PROGRESS => 'In Progress',
 	];
 
 	private const STATUS_CLASS_LIST = [
-		self::STATUS_GENERATED => 'info',
+		self::STATUS_NEW => 'info',
 		self::STATUS_PENDING => 'warning',
 		self::STATUS_CLOSED => 'danger',
 		self::STATUS_TRANSFER => 'warning',
+		self::STATUS_IN_PROGRESS => 'info',
 	];
 
 	public const TAB_ALL = 0;
@@ -263,19 +271,28 @@ class ClientChat extends \yii\db\ActiveRecord
 		return $this->cch_source_type_id ? self::getSourceTypeList()[$this->cch_source_type_id] : null;
 	}
 
-	public function generated(): void
+	public function pending(?int $userId, ?string $description = null): void
 	{
-		$this->cch_status_id = self::STATUS_GENERATED;
+		$this->recordEvent(new ClientChatManageStatusLogEvent($this, $this->cch_status_id, self::STATUS_PENDING, $this->cch_owner_user_id, $userId, $description, $this->cch_channel_id));
+		$this->cch_status_id = self::STATUS_PENDING;
 	}
 
-	public function close(): void
+	public function close(int $userId, ?string $description = null): void
 	{
+		$this->recordEvent(new ClientChatManageStatusLogEvent($this, $this->cch_status_id, self::STATUS_CLOSED, $this->cch_owner_user_id, $userId, $description, $this->cch_channel_id));
 		$this->cch_status_id = self::STATUS_CLOSED;
 	}
 
-	public function transfer(): void
+	public function transfer(int $userId, ?string $description = null): void
 	{
+		$this->recordEvent(new ClientChatManageStatusLogEvent($this, $this->cch_status_id, self::STATUS_TRANSFER, $this->cch_owner_user_id, $userId, $description, $this->cch_channel_id));
 		$this->cch_status_id = self::STATUS_TRANSFER;
+	}
+
+	public function inProgress(?int $userId): void
+	{
+		$this->recordEvent(new ClientChatManageStatusLogEvent($this, $this->cch_status_id, self::STATUS_IN_PROGRESS, $this->cch_owner_user_id, $userId, null, $this->cch_channel_id));
+		$this->cch_status_id = self::STATUS_IN_PROGRESS;
 	}
 
 	public function isTransfer(): bool
@@ -303,12 +320,13 @@ class ClientChat extends \yii\db\ActiveRecord
 		return ClientChatHelper::getClientName($this) . ClientChatHelper::getClientStatusMessage($this);
 	}
 
-	public function assignOwner(?int $userId): void
+	public function assignOwner(?int $userId): self
 	{
 		if (!$this->isTransfer() && !is_null($userId) && $this->cchOwnerUser && $this->cch_owner_user_id !== $userId) {
 			throw new \DomainException('Client Chat already assigned to: ' . $this->cchOwnerUser->username, ClientChatCodeException::CC_OWNER_ALREADY_ASSIGNED);
 		}
 		$this->cch_owner_user_id = $userId;
+		return $this;
 	}
 
 	public function removeOwner(): void
@@ -383,5 +401,18 @@ class ClientChat extends \yii\db\ActiveRecord
 	public function isOwner(int $userId): bool
 	{
 		return $this->cch_owner_user_id === $userId;
+	}
+
+	public static function clone(ClientChatCloneDto $dto): ClientChat
+	{
+		$chat = new ClientChat();
+		$chat->cch_rid = $dto->cchRid;
+		$chat->cch_ccr_id = $dto->cchCcrId;
+		$chat->cch_project_id = $dto->cchProjectId;
+		$chat->cch_dep_id = $dto->cchDepId;
+		$chat->cch_client_id = $dto->cchClientId;
+		$chat->cch_owner_user_id = $dto->ownerId;
+		$chat->cch_client_online = $dto->isOnline;
+		return $chat;
 	}
 }

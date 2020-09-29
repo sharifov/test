@@ -27,6 +27,7 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\dashboard\ReadFilter;
 use sales\model\clientChat\dashboard\GroupFilter;
 use sales\model\clientChat\entity\search\ClientChatSearch;
+use sales\model\clientChat\useCase\close\ClientChatCloseForm;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChat\useCase\sendOffer\GenerateImagesForm;
 use sales\model\clientChat\useCase\transfer\ClientChatTransferForm;
@@ -380,8 +381,9 @@ class ClientChatController extends FController
                 'notifyType' => '',
             ];
 
-            $ccua = $this->clientChatUserAccessRepository->findByPrimaryKey($ccuaId);
-            $this->clientChatUserAccessService->updateStatus($ccua, (int) $accessAction);
+			$ccua = $this->clientChatUserAccessRepository->findByPrimaryKey($ccuaId);
+			$clientChat = $this->clientChatRepository->findById($ccua->ccua_cch_id);
+			$this->clientChatUserAccessService->updateStatus($clientChat, $ccua, (int)$accessAction);
 
             $result['success'] = true;
         } catch (\RuntimeException | \DomainException | NotFoundException $e) {
@@ -519,26 +521,25 @@ class ClientChatController extends FController
     {
         $cchId = \Yii::$app->request->post('cchId');
 
-        $result = [
-            'error' => false,
-            'message' => 'Room successfully closed',
-        ];
+		$form = new ClientChatCloseForm();
+		$form->cchId = $cchId;
 
-        try {
-            $this->clientChatService->closeConversation($cchId);
-
-            $result['tab'] = ClientChat::TAB_ARCHIVE;
-        } catch (NotFoundException | \RuntimeException | ForbiddenHttpException $e) {
-            $result['error'] = true;
-            $result['message'] = $e->getMessage();
-        } catch (\Throwable $e) {
-            Yii::error(AppHelper::throwableFormatter($e), 'ClientChatController::actionAjaxClose::Throwable');
-            $result['error'] = true;
-            $result['message'] = 'Internal Server Error';
-        }
-
-        return $this->asJson($result);
-    }
+		if (Yii::$app->request->isPjax && $form->load(Yii::$app->request->post()) && $form->validate()) {
+			try {
+				$this->clientChatService->closeConversation($form, Auth::id());
+				return '<script>$("#modal-sm").modal("hide"); refreshChatPage('.$form->cchId.', '.ClientChat::TAB_ARCHIVE.'); createNotify("Success", "Room successfully closed", "success")</script>';
+			} catch (NotFoundException | \RuntimeException | ForbiddenHttpException $e) {
+				$form->addError('general', $e->getMessage());
+			} catch (\Throwable $e) {
+				Yii::error(AppHelper::throwableFormatter($e), 'ClientChatController::actionAjaxClose::Throwable');
+				$form->addError('general', $e->getMessage());
+			}
+		}
+		return $this->renderAjax('partial/_close_chat_view', [
+			'cchId' => $cchId,
+			'closeForm' => $form
+		]);
+	}
 
     public function actionAjaxHistory()
     {
@@ -577,12 +578,11 @@ class ClientChatController extends FController
             throw new ForbiddenHttpException('You do not have access to perform this action', 403);
         }
 
-        try {
-            if ($form->load(Yii::$app->request->post()) && !$form->pjaxReload && $form->validate()) {
-                $newDepartment = $this->clientChatService->transfer($form);
-
-                return '<script>$("#modal-sm").modal("hide"); refreshChatPage(' . $form->cchId . ', ' . ClientChat::TAB_ACTIVE . '); createNotify("Success", "Chat successfully transferred to ' . $newDepartment->dep_name . ' department. ", "success")</script>';
-            }
+		try {
+			if ($form->load(Yii::$app->request->post()) && !$form->pjaxReload && $form->validate()) {
+				$newDepartment = $this->clientChatService->transfer($form, Auth::id());
+				return '<script>$("#modal-sm").modal("hide"); refreshChatPage('.$form->cchId.', '.ClientChat::TAB_ACTIVE.'); createNotify("Success", "Chat successfully transferred to '.$newDepartment->dep_name.' department. ", "success")</script>';
+			}
 
             if ($form->pjaxReload) {
                 $clientChat->cch_dep_id = $form->depId;
@@ -881,18 +881,19 @@ class ClientChatController extends FController
         try {
             $chat = $this->clientChatRepository->findById($cchId);
 
-            $this->transactionManager->wrap(function () use ($chat) {
-                $this->clientChatUserAccessService->disableAccessForOtherUsers($chat->cch_id, $chat->cch_owner_user_id);
-                $this->clientChatService->cancelTransfer($chat);
-            });
-        } catch (\DomainException | \RuntimeException $e) {
-            $result['error'] = true;
-            $result['message'] = $e->getMessage();
-        } catch (\Throwable $e) {
-            Yii::error(AppHelper::throwableFormatter($e), 'ClientChatController::actionAjaxCancelTransfer::Throwable');
-            $result['error'] = true;
-            $result['message'] = 'Internal Server Error';
-        }
+			$this->transactionManager->wrap( function () use ($chat){
+				$this->clientChatUserAccessService->disableAccessForOtherUsersBatch($chat, $chat->cch_owner_user_id);
+				$this->clientChatService->cancelTransfer($chat, Auth::id());
+			});
+
+		} catch (\DomainException | \RuntimeException $e) {
+			$result['error'] = true;
+			$result['message'] = $e->getMessage();
+		} catch (\Throwable $e) {
+			Yii::error(AppHelper::throwableFormatter($e), 'ClientChatController::actionAjaxCancelTransfer::Throwable');
+			$result['error'] = true;
+			$result['message'] = 'Internal Server Error';
+		}
 
         return $this->asJson($result);
     }

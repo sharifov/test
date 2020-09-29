@@ -35,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' =>'Client Chat ID',
                 'attribute' => 'csl_cch_id',
                 'value' => static function (ClientChatStatusLog $model) {
-                    return $model->cslCch ? $model->cslCch->cch_id : null;
+                    return $model->cslCch->cch_id ?? null;
                 }
             ],
             //'csl_from_status',
@@ -50,7 +50,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'csl_to_status',
                 'value' => static function (ClientChatStatusLog $model) {
-                    return $model->csl_from_status ?  Html::tag('span', ClientChat::getStatusList()[$model->csl_to_status], ['class' => 'badge badge-'.ClientChat::getStatusClassList()[$model->csl_to_status]]) : null;
+                    return $model->csl_to_status ?  Html::tag('span', ClientChat::getStatusList()[$model->csl_to_status], ['class' => 'badge badge-'.ClientChat::getStatusClassList()[$model->csl_to_status]]) : null;
                 },
                 'format' => 'raw',
                 'filter' => \sales\model\clientChat\entity\ClientChat::getStatusList()

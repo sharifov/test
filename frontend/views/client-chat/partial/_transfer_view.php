@@ -42,6 +42,8 @@ use yii\widgets\Pjax;
                     'size' => Select2::SIZE_SMALL,
 				]) ?>
 
+        		<?= $form->field($transferForm, 'comment')->textarea(['max' => 255]) ?>
+
                 <div class="text-center" style="width: 100%">
                     <?= Html::submitButton('Submit', ['class' => 'btn btn-success _cc_submit_transfer']) ?>
                 </div>

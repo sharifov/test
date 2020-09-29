@@ -447,34 +447,39 @@ $(document).on('click', '.cc_close', function (e) {
     e.preventDefault();
     let btn = $(this);
     let cchId = btn.attr('data-cch-id');
-    let btnHtml = btn.html();
+    // let btnHtml = btn.html();
+    let modal = $('#modal-sm');
     
-    if (confirm('Confirm close chat')) {
-        $.ajax({
-            type: 'post',
-            url: '{$clientChatCloseUrl}',
-            dataType: 'json',
-            cache: false,
-            data: {cchId: cchId},
-            beforeSend: function () {
-                btn.html('<i class="fa fa-spin fa-spinner"></i>');
-            },
-            success: function (data) {
-                if (data.error) {
-                    createNotify('Error', data.message, 'error');
-                } else {
-                    refreshChatPage(cchId, data.tab);
-                    createNotify('Success', data.message, 'success');
-                }
-            },
-            complete: function () {
-                btn.html(btnHtml);
-            },
-            error: function (xhr) {
-                createNotify('Error', xhr.responseText, 'error');
-            }
-        })
-    }
+    $.ajax({
+        type: 'post',
+        url: '{$clientChatCloseUrl}',
+        dataType: 'html',
+        cache: false,
+        data: {cchId: cchId},
+        beforeSend: function () {
+            // btn.html('<i class="fa fa-spin fa-spinner"></i>');
+            modal.find('.modal-body').html('<div><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
+            modal.find('.modal-title').html('Client Chat Close Chat');
+            modal.modal('show');
+        },
+        success: function (data) {
+        console.log(data);
+            modal.find('.modal-body').html(data);
+            // if (data.error) {
+            //     createNotify('Error', data.message, 'error');
+            // } else {
+            //     refreshChatPage(cchId, data.tab);
+            //     createNotify('Success', data.message, 'success');
+            // }
+        },
+        // complete: function () {
+        //     btn.html(btnHtml);
+        // },
+        error: function (xhr) {
+            modal.modal('hide');
+            createNotify('Error', xhr.responseText, 'error');
+        }
+    });
 });
 
 window.removeCcLoadFromIframe = function () {

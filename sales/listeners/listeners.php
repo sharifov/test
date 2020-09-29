@@ -2,6 +2,8 @@
 
 use sales\events\quote\QuoteSendEvent;
 use sales\listeners\quote\QuoteSendEventListener;
+use sales\model\clientChat\event\ClientChatManageStatusLogEvent;
+use sales\model\clientChat\event\ClientChatManageStatusLogListener;
 use sales\model\clientChatUserAccess\event\ResetChatUserAccessWidgetEvent;
 use sales\model\clientChatUserAccess\event\ResetChatUserAccessWidgetListener;
 use sales\model\clientChatUserAccess\event\UpdateChatUserAccessWidgetEvent;
@@ -14,4 +16,5 @@ return [
 	QuoteSendEvent::class => [QuoteSendEventListener::class],
 	UpdateChatUserAccessWidgetEvent::class => [UpdateChatUserAccessWidgetListener::class],
 	ResetChatUserAccessWidgetEvent::class => [ResetChatUserAccessWidgetListener::class],
+	ClientChatManageStatusLogEvent::class => [ClientChatManageStatusLogListener::class]
 ];

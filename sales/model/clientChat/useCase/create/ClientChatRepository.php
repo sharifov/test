@@ -4,10 +4,9 @@
 namespace sales\model\clientChat\useCase\create;
 
 
-use sales\behaviors\BlameableBehaviorExceptApi;
+use sales\dispatchers\EventDispatcher;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\repositories\department\DepartmentRepository;
 use sales\repositories\NotFoundException;
@@ -20,6 +19,7 @@ use yii\db\ActiveRecord;
  *
  * @property ProjectRepository $projectRepository
  * @property DepartmentRepository $departmentRepository
+ * @property EventDispatcher $eventDispatcher
  */
 class ClientChatRepository
 {
@@ -31,11 +31,16 @@ class ClientChatRepository
 	 * @var DepartmentRepository
 	 */
 	private DepartmentRepository $departmentRepository;
+	/**
+	 * @var EventDispatcher
+	 */
+	private EventDispatcher $eventDispatcher;
 
-	public function __construct(ProjectRepository $projectRepository, DepartmentRepository $departmentRepository)
+	public function __construct(ProjectRepository $projectRepository, DepartmentRepository $departmentRepository, EventDispatcher $eventDispatcher)
 	{
 		$this->projectRepository = $projectRepository;
 		$this->departmentRepository = $departmentRepository;
+		$this->eventDispatcher = $eventDispatcher;
 	}
 
 	public function getOrCreateByRequest(ClientChatRequest $clientChatRequest, int $sourceType): ClientChat
@@ -48,24 +53,9 @@ class ClientChatRepository
 			$clientChat->cch_ccr_id = $clientChatRequest->ccr_id;
 			$clientChat->cch_project_id = $this->projectRepository->getIdByProjectKey($clientChatRequest->getProjectKeyFromData());
 			$clientChat->cch_source_type_id = $sourceType;
-			$clientChat->generated();
 		}
 
 		return $clientChat;
-	}
-
-	public function clone(ClientChatCloneDto $dto): ClientChat
-	{
-		$chat = new ClientChat();
-		$chat->cch_rid = $dto->cchRid;
-		$chat->cch_ccr_id = $dto->cchCcrId;
-		$chat->cch_project_id = $dto->cchProjectId;
-		$chat->cch_dep_id = $dto->cchDepId;
-		$chat->cch_client_id = $dto->cchClientId;
-		$chat->cch_owner_user_id = $dto->ownerId;
-		$chat->cch_client_online = $dto->isOnline;
-		$chat->generated();
-		return $chat;
 	}
 
 	public function findByRid(string $rid): ClientChat
@@ -97,6 +87,7 @@ class ClientChatRepository
 		if (!$clientChat->save()) {
 			throw new \RuntimeException($clientChat->getErrorSummary(false)[0]);
 		}
+		$this->eventDispatcher->dispatchAll($clientChat->releaseEvents());
 		return $clientChat;
 	}
 

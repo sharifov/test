@@ -175,7 +175,7 @@ class ClientChatSearch extends ClientChat
         $query->select([
             'username',
             'cch_owner_user_id AS owner',
-            'SUM(IF(cch_status_id = ' . ClientChat::STATUS_GENERATED . ', 1, 0)) AS generated',
+            'SUM(IF(cch_status_id = ' . ClientChat::STATUS_PENDING . ', 1, 0)) AS generated',
             'SUM(IF(cch_status_id = ' . ClientChat::STATUS_CLOSED . ', 1, 0)) AS closed',
         ]);
 
@@ -250,7 +250,7 @@ class ClientChatSearch extends ClientChat
             'd.dep_name as department',
             'ch.ccc_name as channel',
         ]);
-        $queryChats->where(['cch_status_id' => ClientChat::STATUS_GENERATED]);
+        $queryChats->where(['cch_status_id' => ClientChat::STATUS_PENDING]);
         if ($params['formDate']) {
             $queryChats->where(['between', 'cch_created_dt', $params['formDate'], date('Y-m-d H:i:s')]);
         } else {
@@ -449,7 +449,7 @@ class ClientChatSearch extends ClientChat
     {
         $query = new Query();
         $query->addSelect(['DATE(cch_created_dt) as createdDate,
-               SUM(IF(cch_status_id = ' . ClientChat::STATUS_GENERATED . ', 1, 0)) AS chatGenerated,
+               SUM(IF(cch_status_id = ' . ClientChat::STATUS_PENDING . ', 1, 0)) AS chatGenerated,
                SUM(IF(cch_status_id = ' . ClientChat::STATUS_PENDING . ', 1, 0)) AS chatPending,
                SUM(IF(cch_status_id = ' . ClientChat::STATUS_TRANSFER . ', 1, 0)) AS chatTransfer,
                SUM(IF(cch_status_id = ' . ClientChat::STATUS_CLOSED . ', 1, 0)) AS chatClosed             

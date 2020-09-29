@@ -40,6 +40,11 @@ class ClientChatTransferForm extends Model
 	 */
 	public $agentId;
 
+	/**
+	 * @var string|null
+	 */
+	public $comment;
+
 	public function rules(): array
 	{
 		return [
@@ -55,6 +60,7 @@ class ClientChatTransferForm extends Model
 			}],
 			['agentId', 'each', 'rule' => ['integer']],
 			['agentId', 'each', 'rule' => ['filter', 'filter' => 'intval']],
+			['comment', 'string', 'max' => 255],
 		];
 	}
 
@@ -64,7 +70,8 @@ class ClientChatTransferForm extends Model
 			'cchId' => 'Client Chat Id',
 			'depId' => 'Department',
 			'isOnline' => 'Client Network Status',
-			'agentId' => 'Agents'
+			'agentId' => 'Agents',
+			'comment' => 'Comment'
 		];
 	}
 }

@@ -4,6 +4,7 @@ namespace sales\services\clientChatUserAccessService;
 
 use common\models\Notifications;
 use frontend\widgets\clientChat\ClientChatAccessMessage;
+use sales\auth\Auth;
 use sales\dispatchers\EventDispatcher;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\entity\ClientChat;
@@ -16,6 +17,7 @@ use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessReposi
 use sales\repositories\clientChatUserChannel\ClientChatUserChannelRepository;
 use sales\services\clientChatService\ClientChatService;
 use sales\services\TransactionManager;
+use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -72,36 +74,25 @@ class ClientChatUserAccessService
 		$this->transactionManager = $transactionManager;
 	}
 
-	public function updateStatus(ClientChatUserAccess $ccua, int $status, ?int $chatOwnerId = null): void
+	public function updateStatus(ClientChat $clientChat, ClientChatUserAccess $ccua, int $status, ?int $chatOwnerId = null): void
 	{
 		if (!ClientChatUserAccess::statusExist($status)) {
 			throw new \RuntimeException('User access status is unknown');
 		}
 		$ccua->setStatus($status);
 
-		$clientChat = $this->clientChatRepository->findById($ccua->ccua_cch_id);
-		$previousOwner = $clientChat->cch_owner_user_id;
 		if ($ccua->isAccept()) {
-			try {
-				if ($clientChat->isTransfer()) {
-					$this->clientChatService->finishTransfer($clientChat, $ccua);
-				} else {
-					$clientChat->assignOwner($ccua->ccua_user_id);
-					$this->clientChatRepository->save($clientChat);
-					$this->clientChatService->assignAgentToRcChannel($clientChat->cch_rid, $ccua->ccuaUser->userProfile->up_rc_user_id ?? '');
-				}
-			} catch (\DomainException | \RuntimeException $e) {
-				if (ClientChatCodeException::isRcAssignAgentFailed($e)) {
-					$ccua->ccuaCch->assignOwner($previousOwner);
-					$this->clientChatRepository->save($ccua->ccuaCch);
-				}
-				throw $e;
+
+			if ($clientChat->isTransfer()) {
+				$this->clientChatService->finishTransfer($clientChat, $ccua);
+			} else {
+				$this->clientChatService->acceptChat($clientChat, $ccua->ccua_user_id);
 			}
-			$this->disableAccessForOtherUsers($ccua->ccua_cch_id, $ccua->ccua_user_id);
+			$this->disableAccessForOtherUsersBatch($clientChat, $ccua->ccua_user_id);
 		} else if ($ccua->isSkip() && $clientChat->isTransfer()) {
 			$userAccesses = ClientChatUserAccess::find()->byChatId($clientChat->cch_id)->exceptById($ccua->ccua_id)->pending()->exists();
 			if (!$userAccesses) {
-				$this->clientChatService->cancelTransfer($clientChat);
+				$this->clientChatService->cancelTransfer($clientChat, null);
 
 				if ($chatOwnerId !== $clientChat->cch_owner_user_id) {
 					$data = ClientChatAccessMessage::allAgentsCanceledTransfer($clientChat);
@@ -112,12 +103,9 @@ class ClientChatUserAccessService
 		$this->clientChatUserAccessRepository->save($ccua);
 	}
 
-	public function disableAccessForOtherUsers(int $chatId, int $userId): void
+	public function disableAccessForOtherUsersBatch(ClientChat $clientChat, int $ownerId): bool
 	{
-		$usersAccess = ClientChatUserAccess::find()->notAccepted()->exceptUser($userId)->byChatId($chatId)->all();
-		foreach ($usersAccess as $access) {
-			$this->updateStatus($access, ClientChatUserAccess::STATUS_SKIP, $userId);
-		}
+		return (bool)ClientChatUserAccess::updateAll(['ccua_status_id' => ClientChatUserAccess::STATUS_SKIP], new Expression('ccua_cch_id = :chatId and ccua_user_id <> :userId and ccua_status_id = :status', ['chatId' => $clientChat->cch_id, 'userId' => $ownerId, 'status' => ClientChatUserAccess::STATUS_PENDING]));
 	}
 
 	/**
