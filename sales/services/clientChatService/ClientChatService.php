@@ -368,7 +368,7 @@ class ClientChatService
 		$this->transactionManager->wrap( static function () use ($_self, $clientChat, $ownerId) {
 			$clientChat->assignOwner($ownerId)->inProgress($ownerId);
 			$_self->clientChatRepository->save($clientChat);
-			$_self->assignAgentToRcChannel($clientChat->cch_rid, $ccua->ccuaUser->userProfile->up_rc_user_id ?? '');
+			$_self->assignAgentToRcChannel($clientChat->cch_rid, $clientChat->cchOwnerUser->userProfile->up_rc_user_id ?? '');
 		});
 	}
 
