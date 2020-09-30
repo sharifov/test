@@ -424,7 +424,7 @@ $js = <<<JS
                             }
                         }
                         
-                        if (obj.cmd === 'clientChatTransfer') {
+                        if (obj.cmd === 'refreshChatPage') {
                             let activeChatId = localStorage.getItem('activeChatId');
                             if (typeof window.refreshChatPage === 'function' && window.name === 'chat' && activeChatId == obj.data.cchId) {
                                 window.refreshChatPage(obj.data.cchId, obj.data.tab);

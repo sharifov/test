@@ -11,6 +11,7 @@ namespace frontend\widgets;
 use common\models\Lead;
 use sales\entities\cases\Cases;
 use sales\helpers\UserCallIdentity;
+use sales\model\clientChat\entity\ClientChat;
 use Yii;
 
 /**
@@ -60,6 +61,17 @@ class OnlineConnection extends \yii\bootstrap\Widget
                 }
             }
         }
+
+        if (Yii::$app->controller->action->uniqueId === 'client-chat/index') {
+        	$cchId = Yii::$app->request->get('chid');
+        	if ($cchId) {
+        		$chat = ClientChat::find()->select(['cch_id'])->byId($cchId)->asArray()->one();
+        		if ($chat && $chat['cch_id']) {
+        			$subList[] = 'chat-' . $chat['cch_id'];
+        			unset($chat);
+				}
+			}
+		}
 
         $userId = Yii::$app->user->id;
         $controllerId = Yii::$app->controller->id;

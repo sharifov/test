@@ -42,7 +42,7 @@ class CasesCreateByChatForm extends Model
     public function __construct(Employee $tipsUser, ClientChat $chat, $config = [])
     {
         parent::__construct($config);
-        $this->depId = $chat->cch_dep_id;
+        $this->depId = $chat->cchChannel->ccc_dep_id;
         $this->projectId = $chat->cch_project_id;
         $this->sourceTypeId = CasesSourceType::CHAT;
         $this->user = $tipsUser;

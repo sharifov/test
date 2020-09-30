@@ -6,8 +6,6 @@ namespace sales\services\clientChatService;
 
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\repositories\clientChatStatusLogRepository\ClientChatStatusLogRepository;
-use yii\helpers\ArrayHelper;
-use yii\helpers\VarDumper;
 
 /**
  * Class ClientChatStatusLogService

@@ -28,7 +28,7 @@ use yii\widgets\Pjax;
                 <?= $form->field($transferForm, 'depId')->dropDownList(Department::getList(), ['prompt' => ' -- Select department --', 'id' => 'depId']) ?>
 
                 <?= $form->field($transferForm, 'agentId')->widget(Select2::class, [
-                    'data' => ClientChatHelper::getAvailableAgentForTransfer($clientChat, $clientChat->cch_dep_id),
+                    'data' => ClientChatHelper::getAvailableAgentForTransfer($clientChat, $transferForm->depId),
                     'options' => [
                         'prompt' => '---',
                         'placeholder' => 'Select agent',

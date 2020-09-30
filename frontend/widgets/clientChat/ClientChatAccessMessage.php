@@ -91,6 +91,37 @@ class ClientChatAccessMessage
 		];
 	}
 
+	public static function agentStartTransfer(ClientChat $chat, Employee $employee): array
+	{
+		return [
+			'message' => 'User: ' . $employee->nickname . ' initialized transfer of this chat',
+			'cchId' => $chat->cch_id,
+			'tab' => ClientChat::TAB_ACTIVE
+		];
+	}
+
+	public static function chatCanceled(ClientChat $chat, ?Employee $user): array
+	{
+		$message = 'The chat was canceled by the system because all agents skipped the request';
+		if ($user) {
+			$message = 'User: ' . $user->nickname . ' canceled transfer of this chat';
+		}
+		return [
+			'message' => $message,
+			'cchId' => $chat->cch_id,
+			'tab' => ClientChat::TAB_ACTIVE
+		];
+	}
+
+	public static function chatClosed(ClientChat $chat, Employee $user): array
+	{
+		return [
+			'message' => 'User: ' . $user->nickname . ' closed this chat',
+			'cchId' => $chat->cch_id,
+			'tab' => ClientChat::TAB_ACTIVE
+		];
+	}
+
 	private static function refresh(int $userId, ?int $accessId = null)
 	{
 		$widget = ClientChatAccessWidget::getInstance();

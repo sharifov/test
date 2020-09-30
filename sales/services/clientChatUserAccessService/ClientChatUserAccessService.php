@@ -93,11 +93,6 @@ class ClientChatUserAccessService
 			$userAccesses = ClientChatUserAccess::find()->byChatId($clientChat->cch_id)->exceptById($ccua->ccua_id)->pending()->exists();
 			if (!$userAccesses) {
 				$this->clientChatService->cancelTransfer($clientChat, null);
-
-				if ($chatOwnerId !== $clientChat->cch_owner_user_id) {
-					$data = ClientChatAccessMessage::allAgentsCanceledTransfer($clientChat);
-					Notifications::publish('clientChatTransfer', ['user_id' => $clientChat->cch_owner_user_id], ['data' => $data]);
-				}
 			}
 		}
 		$this->clientChatUserAccessRepository->save($ccua, $clientChat);

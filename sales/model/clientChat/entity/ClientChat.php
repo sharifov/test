@@ -409,7 +409,6 @@ class ClientChat extends \yii\db\ActiveRecord
 		$chat->cch_rid = $dto->cchRid;
 		$chat->cch_ccr_id = $dto->cchCcrId;
 		$chat->cch_project_id = $dto->cchProjectId;
-		$chat->cch_dep_id = $dto->cchDepId;
 		$chat->cch_client_id = $dto->cchClientId;
 		$chat->cch_owner_user_id = $dto->ownerId;
 		$chat->cch_client_online = $dto->isOnline;

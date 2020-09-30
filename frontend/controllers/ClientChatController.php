@@ -585,7 +585,7 @@ class ClientChatController extends FController
 
         if ($clientChat) {
             $form->cchId = $clientChat->cch_id;
-            $form->depId = $clientChat->cch_dep_id;
+            $form->depId = $clientChat->cchChannel->ccc_dep_id;
             $form->isOnline = $clientChat->cch_client_online;
         }
 
@@ -600,8 +600,8 @@ class ClientChatController extends FController
 			}
 
             if ($form->pjaxReload) {
-                $clientChat->cch_dep_id = $form->depId;
                 $form->pjaxReload = 0;
+                $form->agentId = null;
             }
         } catch (\DomainException $e) {
             $form->addError('general', $e->getMessage());
@@ -898,7 +898,7 @@ class ClientChatController extends FController
 
 			$this->transactionManager->wrap( function () use ($chat){
 				$this->clientChatUserAccessService->disableAccessForOtherUsersBatch($chat, $chat->cch_owner_user_id);
-				$this->clientChatService->cancelTransfer($chat, Auth::id());
+				$this->clientChatService->cancelTransfer($chat, Auth::user());
 			});
 
 		} catch (\DomainException | \RuntimeException $e) {

@@ -7,9 +7,7 @@ use common\models\Employee;
 use common\models\Notifications;
 use common\models\UserProfile;
 use frontend\widgets\clientChat\ClientChatAccessMessage;
-use frontend\widgets\lead\editTool\Url;
 use frontend\widgets\notification\NotificationMessage;
-use sales\auth\Auth;
 use sales\dispatchers\DeferredEventDispatcher;
 use sales\forms\clientChat\RealTimeStartChatForm;
 use sales\model\clientChat\ClientChatCodeException;
@@ -32,14 +30,13 @@ use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\clientChatVisitor\repository\ClientChatVisitorRepository;
 use sales\model\clientChatVisitorData\repository\ClientChatVisitorDataRepository;
 use sales\repositories\clientChatChannel\ClientChatChannelRepository;
+use sales\repositories\clientChatStatusLogRepository\ClientChatStatusLogRepository;
 use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessRepository;
 use sales\repositories\clientChatUserChannel\ClientChatUserChannelRepository;
 use sales\repositories\NotFoundException;
 use sales\repositories\visitorLog\VisitorLogRepository;
 use sales\services\client\ClientManageService;
 use sales\services\TransactionManager;
-use yii\helpers\Html;
-use yii\web\ForbiddenHttpException;
 
 /**
  * Class ClientChatService
@@ -58,6 +55,7 @@ use yii\web\ForbiddenHttpException;
  * @property ClientChatRequestRepository $clientChatRequestRepository
  * @property ClientChatUserChannelRepository $clientChatUserChannelRepository
  * @property ClientChatNoteRepository $clientChatNoteRepository
+ * @property ClientChatStatusLogRepository $clientChatStatusLogRepository
  */
 class ClientChatService
 {
@@ -113,6 +111,10 @@ class ClientChatService
 	 * @var ClientChatNoteRepository
 	 */
 	private ClientChatNoteRepository $clientChatNoteRepository;
+	/**
+	 * @var ClientChatStatusLogRepository
+	 */
+	private ClientChatStatusLogRepository $clientChatStatusLogRepository;
 
 	public function __construct(
 		ClientChatChannelRepository $clientChatChannelRepository,
@@ -127,7 +129,8 @@ class ClientChatService
 		ClientChatVisitorDataRepository $clientChatVisitorDataRepository,
 		ClientChatRequestRepository $clientChatRequestRepository,
 		ClientChatUserChannelRepository $clientChatUserChannelRepository,
-		ClientChatNoteRepository $clientChatNoteRepository
+		ClientChatNoteRepository $clientChatNoteRepository,
+		ClientChatStatusLogRepository $clientChatStatusLogRepository
 	){
 		$this->clientChatChannelRepository = $clientChatChannelRepository;
 		$this->clientChatRepository = $clientChatRepository;
@@ -142,6 +145,7 @@ class ClientChatService
 		$this->clientChatRequestRepository = $clientChatRequestRepository;
 		$this->clientChatUserChannelRepository = $clientChatUserChannelRepository;
 		$this->clientChatNoteRepository = $clientChatNoteRepository;
+		$this->clientChatStatusLogRepository = $clientChatStatusLogRepository;
 	}
 
 	/**
@@ -157,7 +161,6 @@ class ClientChatService
 			$clientChatChannel = $this->clientChatChannelRepository->findDefaultByProject((int)$clientChat->cch_project_id);
 		}
 		$clientChat->cch_channel_id = $clientChatChannel->ccc_id;
-		$clientChat->cch_dep_id = $clientChatChannel->ccc_dep_id;
 		return $clientChatChannel;
 	}
 
@@ -167,7 +170,7 @@ class ClientChatService
 	 */
 	public function sendRequestToUsers(ClientChat $clientChat, ClientChatChannel $channel): void
 	{
-		$userChannel = ClientChatUserChannel::find()->byChannelId($channel->ccc_id)->all();
+		$userChannel = ClientChatUserChannel::find()->byChannelId($channel->ccc_id)->onlineUsers()->all();
 
 		if ($userChannel) {
 			/** @var ClientChatUserChannel $item */
@@ -239,7 +242,6 @@ class ClientChatService
 			}
 
 			$clientChat->cch_channel_id = $channel->ccc_id;
-			$clientChat->cch_dep_id = $channel->ccc_dep_id;
 			$clientChat->cch_project_id = $channel->ccc_project_id;
 			$clientChat->cch_owner_user_id = $ownerId;
 			$clientChat->cch_client_online = 1;
@@ -321,7 +323,7 @@ class ClientChatService
 			}
 
 			$clientChat->transfer($user->id, $form->comment);
-			$clientChat->cch_dep_id = $form->depId;
+			$clientChat->cch_channel_id = $clientChatChannel->ccc_id;
 			$this->clientChatRepository->save($clientChat);
 
 			if ($form->agentId) {
@@ -339,7 +341,6 @@ class ClientChatService
 				$agentNames = Employee::find()->select(['nickname'])->where(['id' => $form->agentId])->asArray()->column();
 				$transferTo = implode(', ', $agentNames) . ' agent';
 			} else {
-				$clientChat->cch_dep_id = $form->depId;
 				$this->sendRequestToUsers($clientChat, $clientChatChannel);
 				$transferTo = $clientChatChannel->ccc_name . ' channel';
 			}
@@ -352,6 +353,9 @@ class ClientChatService
 					Notifications::publish('getNewNotification', ['user_id' => $user->id], $dataNotification);
 				}
 			}
+
+			$data = ClientChatAccessMessage::agentStartTransfer($clientChat, $user);
+			Notifications::pub(['chat-' . $clientChat->cch_id], 'refreshChatPage', ['data' => $data]);
 
 			return $newDepartment;
 		});
@@ -391,9 +395,7 @@ class ClientChatService
 			$newClientChat = ClientChat::clone($dto);
 			$newClientChat->assignOwner($chatUserAccess->ccua_user_id);
 			$newClientChat->cch_source_type_id = ClientChat::SOURCE_TYPE_TRANSFER;
-			try {
-				$channel = $this->clientChatChannelRepository->findByClientChatData($clientChat->cch_dep_id, (int)$clientChat->cch_project_id, null);
-			} catch (NotFoundException $e) {
+			if (!$channel = $clientChat->cchChannel) {
 				$channel = $this->clientChatChannelRepository->findDefaultByProject((int)$clientChat->cch_project_id);
 			}
 			$this->clientChatRepository->save($newClientChat);
@@ -430,19 +432,26 @@ class ClientChatService
 			$this->assignAgentToRcChannel($newClientChat->cch_rid, $newClientChat->cchOwnerUser->userProfile->up_rc_user_id ?? '');
 
 			$data = ClientChatAccessMessage::agentTransferAccepted($clientChat, $userAccess->ccuaUser);
-			Notifications::publish('clientChatTransfer', ['user_id' => $clientChat->cch_owner_user_id], ['data' => $data]);
+			Notifications::publish('refreshChatPage', ['user_id' => $clientChat->cch_owner_user_id], ['data' => $data]);
 
 			return $newClientChat;
 		});
 	}
 
-	public function cancelTransfer(ClientChat $clientChat, ?int $callerId): void
+	public function cancelTransfer(ClientChat $clientChat, ?Employee $user): void
 	{
 		$channel = $clientChat->cchChannel;
 		if ($channel) {
-			$clientChat->cch_dep_id = $channel->ccc_dep_id;
-			$clientChat->inProgress($callerId);
+			$previousLog = $this->clientChatStatusLogRepository->getPrevious($clientChat->cch_id);
+			if (!$previousLog) {
+				throw new \RuntimeException('Cannot find previous chat status log');
+			}
+			$clientChat->cch_channel_id = $previousLog->csl_prev_channel_id;
+			$clientChat->inProgress($user->id ?? null);
 			$this->clientChatRepository->save($clientChat);
+
+			$data = ClientChatAccessMessage::chatCanceled($clientChat, $user);
+			Notifications::pub(['chat-' . $clientChat->cch_id], 'refreshChatPage', ['data' => $data]);
 		}
 	}
 
@@ -476,6 +485,9 @@ class ClientChatService
 				Notifications::publish('getNewNotification', ['user_id' => $user->id], $dataNotification);
 			}
 		}
+
+		$data = ClientChatAccessMessage::chatClosed($clientChat, $user);
+		Notifications::pub(['chat-' . $clientChat->cch_id], 'refreshChatPage', ['data' => $data]);
 	}
 
 	/**

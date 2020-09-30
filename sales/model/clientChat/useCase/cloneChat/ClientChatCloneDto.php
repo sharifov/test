@@ -34,7 +34,6 @@ class ClientChatCloneDto
 		$_self->cchRid = $clientChat->cch_rid;
 		$_self->cchCcrId = $clientChatRequestId;
 		$_self->cchProjectId = $clientChat->cch_project_id;
-		$_self->cchDepId = $clientChat->cch_dep_id;
 		$_self->cchClientId = $clientChat->cch_client_id;
 		$_self->ownerId = null;
 		$_self->isOnline = $clientChat->cch_client_online;
@@ -47,7 +46,6 @@ class ClientChatCloneDto
 		$_self->cchRid = $clientChat->cch_rid;
 		$_self->cchCcrId = $clientChat->cch_ccr_id;
 		$_self->cchProjectId = $clientChat->cch_project_id;
-		$_self->cchDepId = $clientChat->cch_dep_id;
 		$_self->cchClientId = $clientChat->cch_client_id;
 		$_self->ownerId = null;
 		$_self->isOnline = (int)$clientChat->cch_client_online;
