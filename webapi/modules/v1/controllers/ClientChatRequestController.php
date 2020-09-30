@@ -3,7 +3,6 @@
 namespace webapi\modules\v1\controllers;
 
 use common\components\jobs\clientChat\ClientChatFeedbackJob;
-use common\components\jobs\clientChat\ClientChatRequestJob;
 use common\models\ApiLog;
 use common\models\Project;
 use sales\entities\cases\CaseCategory;
@@ -12,6 +11,7 @@ use sales\model\clientChat\ClientChatTranslate;
 use sales\model\clientChat\entity\projectConfig\ClientChatProjectConfig;
 use sales\model\clientChat\entity\projectConfig\ProjectConfigApiResponseDto;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
+use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestApiForm;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestFeedbackSubForm;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestService;
@@ -712,7 +712,7 @@ class ClientChatRequestController extends ApiBaseController
         if (!$form->validate()) {
             return $this->endApiLog($apiLog, new ErrorResponse(
                 new StatusCodeMessage(400),
-                new MessageMessage('Client Chat Request not saved. Validate failed.'),
+                new MessageMessage('Client Chat validate failed.'),
                 new ErrorsMessage($form->getErrorSummary(true)),
                 new CodeMessage(ApiCodeException::FAILED_FORM_VALIDATE)
             ));
@@ -729,13 +729,7 @@ class ClientChatRequestController extends ApiBaseController
         }
 
         try {
-            if (Yii::$app->params['settings']['enable_client_chat_job']) {
-                $requestJob = new ClientChatRequestJob();
-                $requestJob->requestApiForm = $form;
-                $requestJobId = Yii::$app->queue_client_chat_job->priority(10)->push($requestJob);
-            } else {
-                $this->clientChatRequestService->createRequest($form);
-            }
+            $clientChatRequest = $this->clientChatRequestService->createRequest($form);
         } catch (\Throwable $e) {
             return $this->endApiLog($apiLog, new ErrorResponse(
                 new StatusCodeMessage(400),
@@ -748,11 +742,24 @@ class ClientChatRequestController extends ApiBaseController
         try {
             if (Yii::$app->params['settings']['enable_client_chat_job']) {
                 $feedbackJob = new ClientChatFeedbackJob();
-                $feedbackJob->feedbackForm = $feedbackForm;
-                $feedbackJobId = Yii::$app->queue_client_chat_job->priority(10)->push($feedbackJob);
-                $resultMessage = 'Feedback added to queue (jobId: ' . $feedbackJobId . ')';
+                $feedbackJob->rid = $feedbackForm->rid;
+                $feedbackJob->comment = $feedbackForm->comment;
+                $feedbackJob->rating = $feedbackForm->rating;
+
+                if ($feedbackJobId = Yii::$app->queue_client_chat_job->priority(10)->push($feedbackJob)) {
+                    $clientChatRequest->ccr_job_id = $feedbackJobId;
+                    $clientChatRequest->save();
+                    $resultMessage = 'Feedback added to queue (jobId: ' . $feedbackJobId . ')';
+                } else {
+                    throw new \Exception('Feedback not added to queue. ClientChatRequest ID : ' .
+                        $clientChatRequest->ccr_rid);
+                }
             } else {
-                $clientChatFeedback = $this->clientChatRequestService->createOrUpdateFeedback($feedbackForm);
+                $clientChatFeedback = $this->clientChatRequestService->createOrUpdateFeedback(
+                    $feedbackForm->rid,
+                    $feedbackForm->comment,
+                    $feedbackForm->rating
+                );
                 $resultMessage = 'Feedback saved (id: ' . $clientChatFeedback->ccf_id . ')';
             }
         } catch (\Throwable $e) {
@@ -766,7 +773,7 @@ class ClientChatRequestController extends ApiBaseController
 
         return $this->endApiLog($apiLog, new SuccessResponse(
             new StatusCodeMessage(200),
-            new MessageMessage($resultMessage),
+            new MessageMessage($resultMessage ?? 'Ok'),
         ));
 	}
 

@@ -21,6 +21,7 @@ use sales\services\client\ClientManageService;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatService\ClientChatService;
 use sales\services\TransactionManager;
+use Yii;
 use yii\helpers\Html;
 
 /**
@@ -184,38 +185,49 @@ class ClientChatRequestService
 		return $this->clientChatRequestRepository->save($clientChatRequest);
 	}
 
-	public function createOrUpdateFeedback(ClientChatRequestFeedbackSubForm $form): ClientChatFeedback
+	public function createOrUpdateFeedback(string $rid, ?string $comment, ?int $rating): ClientChatFeedback
     {
         /** @var ClientChat $clientChat */
-        $clientChat = $this->clientChatRepository->findLastByRid($form->rid ?? '');
+        $clientChat = $this->clientChatRepository->findLastByRid($rid ?? '');
 
         if ($clientChatFeedback = $clientChat->feedback) {
             $clientChatFeedback->ccf_user_id = $clientChat->cch_owner_user_id;
-            $clientChatFeedback->ccf_message = $form->comment;
-            $clientChatFeedback->ccf_rating = $form->rating;
+            $clientChatFeedback->ccf_message = $comment;
+            $clientChatFeedback->ccf_rating = $rating;
         } else {
             $clientChatFeedback = ClientChatFeedback::create(
                 $clientChat->cch_id,
                 $clientChat->cch_owner_user_id,
                 $clientChat->cch_client_id,
-                $form->rating,
-                $form->comment
+                $rating,
+                $comment
             );
         }
 
-        if ($this->clientChatFeedbackRepository->save($clientChatFeedback) && $notification = Notifications::create(
+        if ($this->clientChatFeedbackRepository->save($clientChatFeedback)) {
+            self::sendFeedbackNotifications($clientChat);
+        }
+        return $clientChatFeedback;
+    }
+
+    private static function sendFeedbackNotifications(ClientChat $clientChat): void
+    {
+        if ($notification = Notifications::create(
             $clientChat->cch_owner_user_id,
             'Feedback received',
-            'Feedback received. Client Chat ID: ' . $clientChat->cch_id,
+            'Feedback received. ' . 'Client Chat ID: ' . $clientChat->cch_id,
             Notifications::TYPE_INFO,
             true
         )) {
             $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ?
                 NotificationMessage::add($notification) : [];
-            Notifications::publish('getNewNotification', ['user_id' => $clientChat->cch_owner_user_id], $dataNotification);
-        }
 
-        return $clientChatFeedback;
+            Notifications::publish(
+                'getNewNotification',
+                ['user_id' => $clientChat->cch_owner_user_id],
+                $dataNotification
+            );
+        }
     }
 
 	private function guestDisconnected(ClientChatRequest $clientChatRequest): void
