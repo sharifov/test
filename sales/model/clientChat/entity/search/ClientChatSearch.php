@@ -409,11 +409,7 @@ class ClientChatSearch extends ClientChat
         }
 
         if (GroupFilter::isMy($filter->group)) {
-            if (ReadFilter::isRead($filter->read)) {
-                $data = array_filter($data, static function ($item) {
-                    return $item['count_unread_messages'] === 0;
-                });
-            } elseif (ReadFilter::isUnread($filter->read)) {
+            if (ReadFilter::isUnread($filter->read)) {
                 $data = array_filter($data, static function ($item) {
                     return $item['count_unread_messages'] > 0;
                 });
@@ -436,11 +432,6 @@ class ClientChatSearch extends ClientChat
             //                ],
             //            ],
         ]);
-
-        if (\Yii::$app->request->isGet) {
-            $dataProvider->pagination->pageSize = $filter->page * $this->pageSize;
-            $dataProvider->pagination->page = 0;
-        }
 
         return $dataProvider;
     }

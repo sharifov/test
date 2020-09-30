@@ -8,13 +8,13 @@ use common\models\Project;
 use sales\model\clientChat\entity\ClientChat;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 
 /**
  * Class FilterForm
  *
  * @property $channelId
  * @property $page
- * @property $chid
  * @property $status
  * @property $dep
  * @property $project
@@ -28,8 +28,6 @@ use yii\helpers\ArrayHelper;
 class FilterForm extends Model
 {
     public $channelId;
-    public $page;
-    public $chid;
     public $status;
     public $dep;
     public $project;
@@ -55,14 +53,6 @@ class FilterForm extends Model
             ['channelId', 'default', 'value' => 0],
             ['channelId', 'in', 'range' => array_keys($this->getChannels())],
 
-            ['page', 'integer'],
-            ['page', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['page', 'default', 'value' => 1],
-
-            ['chid', 'integer'],
-            ['chid', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['chid', 'default', 'value' => null],
-
             ['status', 'integer'],
             ['status', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
             ['status', 'default', 'value' => ClientChat::TAB_ACTIVE],
@@ -86,7 +76,7 @@ class FilterForm extends Model
             ['read', 'integer'],
             ['read', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
             ['read', 'default', 'value' => ReadFilter::ALL],
-            ['read', 'in', 'range' => array_merge([ReadFilter::ALL], array_keys($this->getReadFilter()))],
+            ['read', 'in', 'range' => array_keys($this->getReadFilter())],
 
             ['agentId', 'integer'],
             ['agentId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
@@ -145,8 +135,6 @@ class FilterForm extends Model
     public function loadDefaultValues(): void
     {
         $this->channelId = 0;
-        $this->page = 1;
-        $this->chid = null;
         $this->status = ClientChat::TAB_ACTIVE;
         $this->dep = 0;
         $this->project = 0;
@@ -155,5 +143,30 @@ class FilterForm extends Model
         $this->agentId = null;
         $this->agentName = null;
         $this->createdDate = null;
+    }
+
+    public function getId(): string
+    {
+        return $this->formName() . '-Id';
+    }
+
+    public function getGroupInput(): string
+    {
+        return Html::hiddenInput(Html::getInputName($this, 'group'), $this->group, ['id' => $this->getGroupInputId()]);
+    }
+
+    public function getGroupInputId(): string
+    {
+        return  Html::getInputId($this, 'group');
+    }
+
+    public function getReadInput(): string
+    {
+        return Html::activeCheckbox($this, 'read', ['label' => 'Unread', 'id' => $this->getReadInputId()]);
+    }
+
+    public function getReadInputId(): string
+    {
+        return  Html::getInputId($this, 'read');
     }
 }

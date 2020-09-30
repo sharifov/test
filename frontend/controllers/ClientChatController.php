@@ -191,13 +191,18 @@ class ClientChatController extends FController
 
         $filter = new FilterForm($channels);
 
-        if (!$filter->load(Yii::$app->request->get(), '') || !$filter->validate()) {
+        if (!$filter->load(Yii::$app->request->get()) || !$filter->validate()) {
             $filter->loadDefaultValues();
         }
 
         //todo remove after added logic free to take
         if (GroupFilter::isFreeToTake($filter->group)) {
             $filter->group = GroupFilter::MY;
+        }
+
+        $page = (int) \Yii::$app->request->get('page');
+        if ($page < 1) {
+            $page = 1;
         }
 
         $dataProvider = null;
@@ -207,9 +212,11 @@ class ClientChatController extends FController
         }
 
         $clientChat = null;
-        if ($filter->chid) {
+        $chid = (int) Yii::$app->request->get('chid');
+
+        if ($chid) {
             try {
-                $clientChat = $this->clientChatRepository->findById($filter->chid);
+                $clientChat = $this->clientChatRepository->findById($chid);
 
                 if (!Auth::can('client-chat/manage/all', ['chat' => $clientChat])) {
                     throw new ForbiddenHttpException('You do not have access to this chat', 403);
@@ -229,16 +236,19 @@ class ClientChatController extends FController
             }
         }
 
-        if ($dataProvider && \Yii::$app->request->isPost) {
-            if (\Yii::$app->request->post('loadingChannels')) {
-                $dataProvider->pagination->page = $filter->page;
-            } else {
-                $dataProvider->pagination->page = $filter->page = 0;
-            }
+
+        $loadingChannels = \Yii::$app->request->get('loadingChannels');
+        if ($dataProvider && $loadingChannels) {
+            $dataProvider->pagination->setPage($page - 1);
+//            if (\Yii::$app->request->post('loadingChannels')) {
+//                $dataProvider->pagination->page = $filter->page;
+//            } else {
+//                $dataProvider->pagination->page = $filter->page = 0;
+//            }
 
             $response = [
                 'html' => '',
-                'page' => $filter->page,
+                'page' => $page,
             ];
 
             if ($dataProvider->getCount()) {
@@ -246,10 +256,17 @@ class ClientChatController extends FController
                     'clientChats' => $dataProvider->getModels(),
                     'clientChatId' => $clientChat ? $clientChat->cch_id : '',
                 ]);
-                $response['page'] = $filter->page + 1;
+                $response['page'] = $page + 1;
             }
 
             return $this->asJson($response);
+        } else {
+            if ($page > 1) {
+                $dataProvider->pagination->setPage(0);
+                $dataProvider->pagination->pageSize = $page * $dataProvider->pagination->pageSize;
+            } else {
+                $dataProvider->pagination->setPage($page - 1);
+            }
         }
 
         return $this->render('index', [
@@ -259,6 +276,7 @@ class ClientChatController extends FController
             'history' => $history ?? null,
             'totalUnreadMessages' => $this->clientChatMessageService->getCountOfTotalUnreadMessages($userId),
             'filter' => $filter,
+            'page' => $page + 1,
         ]);
     }
 
@@ -384,9 +402,9 @@ class ClientChatController extends FController
                 'notifyType' => '',
             ];
 
-			$ccua = $this->clientChatUserAccessRepository->findByPrimaryKey($ccuaId);
-			$clientChat = $this->clientChatRepository->findById($ccua->ccua_cch_id);
-			$this->clientChatUserAccessService->updateStatus($clientChat, $ccua, (int)$accessAction);
+            $ccua = $this->clientChatUserAccessRepository->findByPrimaryKey($ccuaId);
+            $clientChat = $this->clientChatRepository->findById($ccua->ccua_cch_id);
+            $this->clientChatUserAccessService->updateStatus($clientChat, $ccua, (int) $accessAction);
 
             $result['success'] = true;
         } catch (\RuntimeException | \DomainException | NotFoundException $e) {
@@ -524,37 +542,37 @@ class ClientChatController extends FController
     {
         $cchId = \Yii::$app->request->post('cchId');
 
-		$form = new ClientChatCloseForm();
-		$form->cchId = $cchId;
+        $form = new ClientChatCloseForm();
+        $form->cchId = $cchId;
 
-		try {
+        try {
+            $form->load(Yii::$app->request->post());
 
-			$form->load(Yii::$app->request->post());
+            $chat = $this->clientChatRepository->findById((int) $form->cchId);
 
-			$chat = $this->clientChatRepository->findById((int)$form->cchId);
+            if (!Auth::can('client-chat/manage/all', ['chat' => $chat])) {
+                throw new ForbiddenHttpException('You do not have access to manage this chat', 403);
+            }
 
-			if (!Auth::can('client-chat/manage/all', ['chat' => $chat])) {
-				throw new ForbiddenHttpException('You do not have access to manage this chat', 403);
-			}
+            if (Yii::$app->request->isPjax && $form->validate()) {
+                $this->clientChatService->closeConversation($form, Auth::user());
 
-			if (Yii::$app->request->isPjax && $form->validate()) {
-				$this->clientChatService->closeConversation($form, Auth::user());
-				return '<script>$("#modal-sm").modal("hide"); refreshChatPage('.$form->cchId.', '.ClientChat::TAB_ARCHIVE.'); createNotify("Success", "Room successfully closed", "success")</script>';
-			}
-		} catch (NotFoundException | ForbiddenHttpException $e) {
-			return '<script>setTimeout(function () {$("#modal-sm").modal("hide");}, 500); createNotify("Error", "'.$e->getMessage().'", "error")</script>';
-		} catch (\RuntimeException $e) {
-			$form->addError('general', $e->getMessage());
-		} catch (\Throwable $e) {
-			Yii::error(AppHelper::throwableFormatter($e), 'ClientChatController::actionAjaxClose::Throwable');
-			$form->addError('general', 'Internal Server Error');
-		}
+                return '<script>$("#modal-sm").modal("hide"); refreshChatPage(' . $form->cchId . ', ' . ClientChat::TAB_ARCHIVE . '); createNotify("Success", "Room successfully closed", "success")</script>';
+            }
+        } catch (NotFoundException | ForbiddenHttpException $e) {
+            return '<script>setTimeout(function () {$("#modal-sm").modal("hide");}, 500); createNotify("Error", "' . $e->getMessage() . '", "error")</script>';
+        } catch (\RuntimeException $e) {
+            $form->addError('general', $e->getMessage());
+        } catch (\Throwable $e) {
+            Yii::error(AppHelper::throwableFormatter($e), 'ClientChatController::actionAjaxClose::Throwable');
+            $form->addError('general', 'Internal Server Error');
+        }
 
-		return $this->renderAjax('partial/_close_chat_view', [
-			'cchId' => $cchId,
-			'closeForm' => $form
-		]);
-	}
+        return $this->renderAjax('partial/_close_chat_view', [
+            'cchId' => $cchId,
+            'closeForm' => $form,
+        ]);
+    }
 
     public function actionAjaxHistory()
     {
@@ -593,11 +611,12 @@ class ClientChatController extends FController
             throw new ForbiddenHttpException('You do not have access to perform this action', 403);
         }
 
-		try {
-			if ($form->load(Yii::$app->request->post()) && !$form->pjaxReload && $form->validate()) {
-				$newDepartment = $this->clientChatService->transfer($form, Auth::user());
-				return '<script>$("#modal-sm").modal("hide"); refreshChatPage('.$form->cchId.', '.ClientChat::TAB_ACTIVE.'); createNotify("Success", "Chat successfully transferred to '.$newDepartment->dep_name.' department. ", "success")</script>';
-			}
+        try {
+            if ($form->load(Yii::$app->request->post()) && !$form->pjaxReload && $form->validate()) {
+                $newDepartment = $this->clientChatService->transfer($form, Auth::user());
+
+                return '<script>$("#modal-sm").modal("hide"); refreshChatPage(' . $form->cchId . ', ' . ClientChat::TAB_ACTIVE . '); createNotify("Success", "Chat successfully transferred to ' . $newDepartment->dep_name . ' department. ", "success")</script>';
+            }
 
             if ($form->pjaxReload) {
                 $clientChat->cch_dep_id = $form->depId;
@@ -896,19 +915,18 @@ class ClientChatController extends FController
         try {
             $chat = $this->clientChatRepository->findById($cchId);
 
-			$this->transactionManager->wrap( function () use ($chat){
-				$this->clientChatUserAccessService->disableAccessForOtherUsersBatch($chat, $chat->cch_owner_user_id);
-				$this->clientChatService->cancelTransfer($chat, Auth::id());
-			});
-
-		} catch (\DomainException | \RuntimeException $e) {
-			$result['error'] = true;
-			$result['message'] = $e->getMessage();
-		} catch (\Throwable $e) {
-			Yii::error(AppHelper::throwableFormatter($e), 'ClientChatController::actionAjaxCancelTransfer::Throwable');
-			$result['error'] = true;
-			$result['message'] = 'Internal Server Error';
-		}
+            $this->transactionManager->wrap(function () use ($chat) {
+                $this->clientChatUserAccessService->disableAccessForOtherUsersBatch($chat, $chat->cch_owner_user_id);
+                $this->clientChatService->cancelTransfer($chat, Auth::id());
+            });
+        } catch (\DomainException | \RuntimeException $e) {
+            $result['error'] = true;
+            $result['message'] = $e->getMessage();
+        } catch (\Throwable $e) {
+            Yii::error(AppHelper::throwableFormatter($e), 'ClientChatController::actionAjaxCancelTransfer::Throwable');
+            $result['error'] = true;
+            $result['message'] = 'Internal Server Error';
+        }
 
         return $this->asJson($result);
     }
