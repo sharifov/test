@@ -81,7 +81,7 @@ class ConferenceParticipant extends \yii\db\ActiveRecord
             [['cp_join_dt', 'cp_leave_dt', 'cp_hold_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
 
             ['cp_user_id', 'integer'],
-            ['cp_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Conference::class, 'targetAttribute' => ['cp_user_id' => 'cf_id']],
+            ['cp_user_id', 'exist', 'skipOnError' => true, 'skipOnEmpty' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['cp_user_id' => 'id']],
 
             ['cp_identity', 'string', 'max' => 50],
         ];
