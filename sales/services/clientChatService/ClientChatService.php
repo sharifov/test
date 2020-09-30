@@ -417,12 +417,12 @@ class ClientChatService
 			if ($oldChannelId !== $newClientChat->cch_channel_id) {
 				$botTransferChatResult = \Yii::$app->chatBot->transferDepartment($clientChat->cch_rid, $clientChat->ccv->ccvCvd->cvd_visitor_rc_id, (string)$oldChannelId, (string)$channel->ccc_id);
 				if ($botTransferChatResult['error']) {
-					throw new \RuntimeException('[Chat Bot] ' . $botTransferChatResult['error']['message'] ?? 'Cant read error message from Chat Bot response');
+					throw new \RuntimeException('[Chat Bot Transfer] ' . $botTransferChatResult['error']['message'] ?? 'Cant read error message from Chat Bot response');
 				}
 
 				$success = $botTransferChatResult['data']['success'] ?? false;
 				if (!$success) {
-					throw new \RuntimeException('[Chat Bot] ' . ($botTransferChatResult['data']['message'] ?? 'Cant read error message from Chat Bot response'));
+					throw new \RuntimeException('[Chat Bot Transfer] ' . ($botTransferChatResult['data']['message'] ?? 'Cant read error message from Chat Bot response'));
 				}
 
 			}
