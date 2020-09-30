@@ -203,24 +203,16 @@ class ClientChatRequestService
             );
         }
 
-        if ($this->clientChatFeedbackRepository->save($clientChatFeedback)) {
-            Notifications::publish('clientChatUpdateClientStatus', ['user_id' => $clientChat->cch_owner_user_id], [
-                'cchId' => $clientChat->cch_id,
-                'isOnline' => (int)$clientChat->cch_client_online,
-                'statusMessage' => Html::encode($clientChat->getClientStatusMessage()),
-            ]);
-
-            if ($notification = Notifications::create(
-                $clientChat->cch_owner_user_id,
-                'Feedback received',
-                'Feedback received. Client Chat ID: ' . $clientChat->cch_id,
-                Notifications::TYPE_INFO,
-                true
-            )) {
-                $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ?
-                    NotificationMessage::add($notification) : [];
-                Notifications::publish('getNewNotification', ['user_id' => $clientChat->cch_owner_user_id], $dataNotification);
-            }
+        if ($this->clientChatFeedbackRepository->save($clientChatFeedback) && $notification = Notifications::create(
+            $clientChat->cch_owner_user_id,
+            'Feedback received',
+            'Feedback received. Client Chat ID: ' . $clientChat->cch_id,
+            Notifications::TYPE_INFO,
+            true
+        )) {
+            $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ?
+                NotificationMessage::add($notification) : [];
+            Notifications::publish('getNewNotification', ['user_id' => $clientChat->cch_owner_user_id], $dataNotification);
         }
 
         return $clientChatFeedback;
