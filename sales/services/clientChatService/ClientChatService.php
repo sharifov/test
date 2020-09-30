@@ -454,15 +454,15 @@ class ClientChatService
 			throw new \RuntimeException('Visitor RC id is not found');
 		}
 
-//		$botCloseChatResult = \Yii::$app->chatBot->endConversation($clientChat->cch_rid, $clientChat->ccv->ccvCvd->cvd_visitor_rc_id);
-//		if ($botCloseChatResult['error']) {
-//			throw new \RuntimeException('[Chat Bot] ' . $botCloseChatResult['error']['message'] ?? 'Unknown error message');
-//		}
-//
-//		$success = $botCloseChatResult['data']['success'] ?? false;
-//		if (!$success) {
-//			throw new \RuntimeException('[Chat Bot] ' . ($botCloseChatResult['data']['message'] ?? 'Unknown error message'));
-//		}
+		$botCloseChatResult = \Yii::$app->chatBot->endConversation($clientChat->cch_rid, $clientChat->ccv->ccvCvd->cvd_visitor_rc_id);
+		if ($botCloseChatResult['error']) {
+			throw new \RuntimeException('[Chat Bot] ' . $botCloseChatResult['error']['message'] ?? 'Unknown error message');
+		}
+
+		$success = $botCloseChatResult['data']['success'] ?? false;
+		if (!$success) {
+			throw new \RuntimeException('[Chat Bot] ' . ($botCloseChatResult['data']['message'] ?? 'Unknown error message'));
+		}
 
 		$clientChat->close($user->id, $form->comment);
 
