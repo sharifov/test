@@ -26,6 +26,7 @@ class FilterShortCodeToId implements Filter
         $this->processLead();
         $this->processCase();
         $this->processQaTask();
+        $this->processChat();
         return $this->content;
     }
 
@@ -49,4 +50,11 @@ class FilterShortCodeToId implements Filter
             return $matches[1];
         }, $this->content);
     }
+
+    public function processChat(): void
+	{
+		$this->content = preg_replace_callback('|{chat-([\d]+)}|iU', static function ($matches) {
+			return $matches[1];
+		}, $this->content);
+	}
 }

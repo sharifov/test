@@ -2,20 +2,20 @@
 
 namespace sales\model\clientChatUserAccess\event;
 
-use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
+use sales\model\clientChat\entity\ClientChat;
 
 /**
  * Class UpdateChatUserAccessWidgetEvent
  * @package sales\model\clientChatUserAccess\event
  *
- * @property int $cchId
+ * @property ClientChat $chat
  * @property int $userId
  * @property int $statusId
  * @property int|null $ccuaId
  */
 class UpdateChatUserAccessWidgetEvent
 {
-	public $cchId;
+	public $chat;
 
 	public $userId;
 
@@ -23,9 +23,9 @@ class UpdateChatUserAccessWidgetEvent
 
 	public $ccuaId;
 
-	public function __construct(int $cchId, int $userId, int $statusId, ?int $ccuaId = null)
+	public function __construct(ClientChat $chat, int $userId, int $statusId, ?int $ccuaId = null)
 	{
-		$this->cchId = $cchId;
+		$this->chat = $chat;
 		$this->userId = $userId;
 		$this->statusId = $statusId;
 		$this->ccuaId = $ccuaId;

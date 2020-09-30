@@ -6,11 +6,14 @@ use common\components\CentrifugoService;
 use common\models\Client;
 use common\models\Department;
 use common\models\Lead;
+use common\models\Notifications;
 use common\models\Project;
 use common\models\Quote;
 use common\models\search\LeadSearch;
 use common\models\VisitorLog;
+use frontend\widgets\clientChat\ClientChatAccessMessage;
 use frontend\widgets\clientChat\ClientChatAccessWidget;
+use frontend\widgets\notification\NotificationMessage;
 use frontend\widgets\notification\NotificationSocketWidget;
 use frontend\widgets\notification\NotificationWidget;
 use sales\auth\Auth;
@@ -524,17 +527,29 @@ class ClientChatController extends FController
 		$form = new ClientChatCloseForm();
 		$form->cchId = $cchId;
 
-		if (Yii::$app->request->isPjax && $form->load(Yii::$app->request->post()) && $form->validate()) {
-			try {
-				$this->clientChatService->closeConversation($form, Auth::id());
-				return '<script>$("#modal-sm").modal("hide"); refreshChatPage('.$form->cchId.', '.ClientChat::TAB_ARCHIVE.'); createNotify("Success", "Room successfully closed", "success")</script>';
-			} catch (NotFoundException | \RuntimeException | ForbiddenHttpException $e) {
-				$form->addError('general', $e->getMessage());
-			} catch (\Throwable $e) {
-				Yii::error(AppHelper::throwableFormatter($e), 'ClientChatController::actionAjaxClose::Throwable');
-				$form->addError('general', $e->getMessage());
+		try {
+
+			$form->load(Yii::$app->request->post());
+
+			$chat = $this->clientChatRepository->findById((int)$form->cchId);
+
+			if (!Auth::can('client-chat/manage/all', ['chat' => $chat])) {
+				throw new ForbiddenHttpException('You do not have access to manage this chat', 403);
 			}
+
+			if (Yii::$app->request->isPjax && $form->validate()) {
+				$this->clientChatService->closeConversation($form, Auth::user());
+				return '<script>$("#modal-sm").modal("hide"); refreshChatPage('.$form->cchId.', '.ClientChat::TAB_ARCHIVE.'); createNotify("Success", "Room successfully closed", "success")</script>';
+			}
+		} catch (NotFoundException | ForbiddenHttpException $e) {
+			return '<script>setTimeout(function () {$("#modal-sm").modal("hide");}, 500); createNotify("Error", "'.$e->getMessage().'", "error")</script>';
+		} catch (\RuntimeException $e) {
+			$form->addError('general', $e->getMessage());
+		} catch (\Throwable $e) {
+			Yii::error(AppHelper::throwableFormatter($e), 'ClientChatController::actionAjaxClose::Throwable');
+			$form->addError('general', 'Internal Server Error');
 		}
+
 		return $this->renderAjax('partial/_close_chat_view', [
 			'cchId' => $cchId,
 			'closeForm' => $form
@@ -580,7 +595,7 @@ class ClientChatController extends FController
 
 		try {
 			if ($form->load(Yii::$app->request->post()) && !$form->pjaxReload && $form->validate()) {
-				$newDepartment = $this->clientChatService->transfer($form, Auth::id());
+				$newDepartment = $this->clientChatService->transfer($form, Auth::user());
 				return '<script>$("#modal-sm").modal("hide"); refreshChatPage('.$form->cchId.', '.ClientChat::TAB_ACTIVE.'); createNotify("Success", "Chat successfully transferred to '.$newDepartment->dep_name.' department. ", "success")</script>';
 			}
 

@@ -100,12 +100,19 @@ class ClientChatUserAccessService
 				}
 			}
 		}
-		$this->clientChatUserAccessRepository->save($ccua);
+		$this->clientChatUserAccessRepository->save($ccua, $clientChat);
 	}
 
 	public function disableAccessForOtherUsersBatch(ClientChat $clientChat, int $ownerId): bool
 	{
-		return (bool)ClientChatUserAccess::updateAll(['ccua_status_id' => ClientChatUserAccess::STATUS_SKIP], new Expression('ccua_cch_id = :chatId and ccua_user_id <> :userId and ccua_status_id = :status', ['chatId' => $clientChat->cch_id, 'userId' => $ownerId, 'status' => ClientChatUserAccess::STATUS_PENDING]));
+		$users = ClientChatUserAccess::find()->select(['ccua_user_id', 'ccua_id'])->where(new Expression('ccua_cch_id = :chatId and ccua_user_id <> :userId and ccua_status_id = :status', ['chatId' => $clientChat->cch_id, 'userId' => $ownerId, 'status' => ClientChatUserAccess::STATUS_PENDING]))->asArray()->all();
+		if ($query = (bool)ClientChatUserAccess::updateAll(['ccua_status_id' => ClientChatUserAccess::STATUS_SKIP], new Expression('ccua_cch_id = :chatId and ccua_user_id <> :userId and ccua_status_id = :status', ['chatId' => $clientChat->cch_id, 'userId' => $ownerId, 'status' => ClientChatUserAccess::STATUS_PENDING]))) {
+			foreach ($users as $user) {
+				$this->clientChatUserAccessRepository->updateChatUserAccessWidget($clientChat, (int)$user['ccua_user_id'], ClientChatUserAccess::STATUS_SKIP, (int)$user['ccua_id']);
+			}
+			return true;
+		}
+		return false;
 	}
 
 	/**

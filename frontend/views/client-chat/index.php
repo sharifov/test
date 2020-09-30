@@ -463,7 +463,6 @@ $(document).on('click', '.cc_close', function (e) {
             modal.modal('show');
         },
         success: function (data) {
-        console.log(data);
             modal.find('.modal-body').html(data);
             // if (data.error) {
             //     createNotify('Error', data.message, 'error');

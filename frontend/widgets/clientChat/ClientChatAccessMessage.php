@@ -2,9 +2,7 @@
 namespace frontend\widgets\clientChat;
 
 use common\models\Employee;
-use sales\auth\Auth;
 use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use yii\helpers\Url;
 
 class ClientChatAccessMessage
@@ -28,7 +26,7 @@ class ClientChatAccessMessage
 		];
 	}
 
-	public static function pending(int $cchId, int $userId, int $statusId, int $ccuaId, bool $isChatInTransfer): array
+	public static function pending(int $cchId, int $userId, int $statusId, ?int $ccuaId, bool $isChatInTransfer): array
 	{
 		return [
 			'command' => self::COMMAND_PENDING,

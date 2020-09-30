@@ -35,7 +35,6 @@ class ClientChatStatusLogService
 			$this->clientChatStatusLogRepository->save($previous);
 		}
 		$log = ClientChatStatusLog::create($chatId, $fromStatus, $toStatus, $ownerId, $userId, $prevChannel, $description);
-		\Yii::info(VarDumper::dumpAsString(ArrayHelper::toArray($log)), 'info\abra');
 		$this->clientChatStatusLogRepository->save($log);
 	}
 }

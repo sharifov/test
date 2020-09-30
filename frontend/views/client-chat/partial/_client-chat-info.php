@@ -1,11 +1,14 @@
 <?php
 use common\models\Client;
 use common\models\Quote;
+use sales\auth\Auth;
 use sales\entities\cases\CasesStatus;
+use sales\guards\clientChat\ClientChatManageGuard;
 use sales\helpers\clientChat\ClientChatHelper;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
+use sales\repositories\clientChatStatusLogRepository\ClientChatStatusLogRepository;
 use yii\bootstrap4\Button;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -21,6 +24,9 @@ use yii\widgets\Pjax;
  */
 
 $_self = $this;
+
+$statusLogRepository = Yii::createObject(ClientChatStatusLogRepository::class);
+$guard = new ClientChatManageGuard($statusLogRepository);
 ?>
 
 <div class="_rc-client-chat-info-wrapper">
@@ -60,7 +66,7 @@ $_self = $this;
         <div class="d-flex align-items-center justify-content-center" style="width: 100%;">
             <?= Html::button('<i class="fa fa-info-circle"></i> Information', ['class' => 'btn btn-info cc_full_info', 'title' => 'Additional Information', 'data-cch-id' => $clientChat->cch_id]) ?>
             <?php if ($clientChat->isTransfer()): ?>
-				<?= Html::button('<i class="fa fa-exchange"></i> Cancel Transfer', ['class' => 'btn btn-danger cc_cancel_transfer', 'title' => 'Cancel Transfer', 'data-cch-id' => $clientChat->cch_id]) ?>
+				<?= $guard->isCanCancelTransfer($clientChat, Auth::user()) ? Html::button('<i class="fa fa-exchange"></i> Cancel Transfer', ['class' => 'btn btn-danger cc_cancel_transfer', 'title' => 'Cancel Transfer', 'data-cch-id' => $clientChat->cch_id]) : '' ?>
             <?php elseif (!$clientChat->isClosed()): ?>
                 <?= Html::button('<i class="fa fa-times-circle"></i> Close Chat', ['class' => 'btn btn-danger cc_close', 'title' => 'Close', 'data-cch-id' => $clientChat->cch_id]) ?>
                 <?= Html::button('<i class="fa fa-exchange"></i> Transfer', ['class' => 'btn btn-warning cc_transfer', 'title' => 'Transfer', 'data-cch-id' => $clientChat->cch_id]) ?>

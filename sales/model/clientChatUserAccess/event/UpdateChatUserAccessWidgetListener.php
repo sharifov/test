@@ -21,6 +21,6 @@ class UpdateChatUserAccessWidgetListener
 
 	public function handle(UpdateChatUserAccessWidgetEvent $event): void
 	{
-		$this->accessRepository->updateChatUserAccessWidget($event->cchId, $event->userId, $event->statusId, $event->ccuaId);
+		$this->accessRepository->updateChatUserAccessWidget($event->chat, $event->userId, $event->statusId, $event->ccuaId);
 	}
 }

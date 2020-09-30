@@ -6,6 +6,7 @@ use common\components\purifier\filter\Filter;
 use common\models\Lead;
 use modules\qaTask\src\entities\qaTask\QaTask;
 use sales\entities\cases\Cases;
+use sales\model\clientChat\entity\ClientChat;
 
 /**
  * Class Purifier
@@ -44,4 +45,9 @@ class Purifier
     {
         return '{qa-task-' . $task->t_id . '-' . $task->t_gid . '}';
     }
+
+    public static function createChatShortLink(ClientChat $chat): string
+	{
+		return '{chat-' . $chat->cch_id . '}';
+	}
 }

@@ -4,8 +4,10 @@ namespace sales\model\clientChatUserAccess\entity;
 
 use common\models\Employee;
 use sales\dispatchers\NativeEventDispatcher;
+use sales\entities\EventTrait;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatUserAccess\event\ClientChatUserAccessEvent;
+use sales\model\clientChatUserAccess\event\UpdateChatUserAccessWidgetEvent;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 
@@ -24,6 +26,8 @@ use yii\db\ActiveRecord;
  */
 class ClientChatUserAccess extends \yii\db\ActiveRecord
 {
+	use EventTrait;
+
 	public const STATUS_PENDING = 1;
 	public const STATUS_ACCEPT = 2;
 	public const STATUS_BUSY = 3;

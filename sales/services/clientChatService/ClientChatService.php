@@ -1,10 +1,14 @@
 <?php
 namespace sales\services\clientChatService;
 
+use common\components\purifier\Purifier;
 use common\models\Department;
+use common\models\Employee;
 use common\models\Notifications;
 use common\models\UserProfile;
 use frontend\widgets\clientChat\ClientChatAccessMessage;
+use frontend\widgets\lead\editTool\Url;
+use frontend\widgets\notification\NotificationMessage;
 use sales\auth\Auth;
 use sales\dispatchers\DeferredEventDispatcher;
 use sales\forms\clientChat\RealTimeStartChatForm;
@@ -34,6 +38,7 @@ use sales\repositories\NotFoundException;
 use sales\repositories\visitorLog\VisitorLogRepository;
 use sales\services\client\ClientManageService;
 use sales\services\TransactionManager;
+use yii\helpers\Html;
 use yii\web\ForbiddenHttpException;
 
 /**
@@ -181,7 +186,7 @@ class ClientChatService
 		if ($clientChat->cch_owner_user_id !== $clientChatUserChannel->ccuc_user_id && $clientChatUserChannel->ccucUser->userProfile && $clientChatUserChannel->ccucUser->userProfile->isRegisteredInRc()) {
 			$clientChatUserAccess = ClientChatUserAccess::create($clientChat->cch_id, $clientChatUserChannel->ccuc_user_id);
 			$clientChatUserAccess->pending();
-			$this->clientChatUserAccessRepository->save($clientChatUserAccess);
+			$this->clientChatUserAccessRepository->save($clientChatUserAccess, $clientChat);
 		}
 	}
 
@@ -257,7 +262,7 @@ class ClientChatService
 
 				$clientChatUserAccess = ClientChatUserAccess::create($clientChat->cch_id, $userChannel->ccuc_user_id);
 				$clientChatUserAccess->accept();
-				$_self->clientChatUserAccessRepository->save($clientChatUserAccess);
+				$_self->clientChatUserAccessRepository->save($clientChatUserAccess, $clientChat);
 
 				$rid = $_self->createRcRoom($form->visitorId, (string)$clientChat->cch_channel_id, $form->message, $userProfile->up_rc_user_id, $userProfile->up_rc_auth_token);
 
@@ -274,13 +279,13 @@ class ClientChatService
 
 	/**
 	 * @param ClientChatTransferForm $form
-	 * @param int $userId
+	 * @param Employee $user
 	 * @return Department
 	 * @throws \Throwable
 	 */
-	public function transfer(ClientChatTransferForm $form, int $userId): Department
+	public function transfer(ClientChatTransferForm $form, Employee $user): Department
 	{
-		return $this->transactionManager->wrap( function () use ($form, $userId) {
+		return $this->transactionManager->wrap( function () use ($form, $user) {
 			$clientChat = $this->clientChatRepository->findById($form->cchId);
 
 			if ($clientChat->isClosed()) {
@@ -301,7 +306,6 @@ class ClientChatService
 				throw new \RuntimeException('Visitor RC id is not found');
 			}
 
-//			$oldDepartment = $clientChat->cchDep->dep_name ?? null;
 			$newDepartment = Department::findOne(['dep_id' => $form->depId]);
 
 			if (!$newDepartment) {
@@ -316,7 +320,7 @@ class ClientChatService
 				throw new \DomainException('Client already has active chat in this department');
 			}
 
-			$clientChat->transfer($userId, $form->comment);
+			$clientChat->transfer($user->id, $form->comment);
 			$clientChat->cch_dep_id = $form->depId;
 			$this->clientChatRepository->save($clientChat);
 
@@ -332,9 +336,21 @@ class ClientChatService
 						}
 					}
 				}
+				$agentNames = Employee::find()->select(['nickname'])->where(['id' => $form->agentId])->asArray()->column();
+				$transferTo = implode(', ', $agentNames) . ' agent';
 			} else {
 				$clientChat->cch_dep_id = $form->depId;
 				$this->sendRequestToUsers($clientChat, $clientChatChannel);
+				$transferTo = $clientChatChannel->ccc_name . ' channel';
+			}
+
+			if ($clientChat->cch_owner_user_id !== $user->id) {
+				$comment = $form->comment ? '; Comment: ' . $form->comment : '';
+				$chatLink = Purifier::createChatShortLink($clientChat);
+				if ($ntf = Notifications::create($clientChat->cch_owner_user_id, 'Your Chat was transferred', $user->nickname . ' starts chat transfer to ' . $transferTo . $comment . '; ' . $chatLink, Notifications::TYPE_INFO, true)) {
+					$dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+					Notifications::publish('getNewNotification', ['user_id' => $user->id], $dataNotification);
+				}
 			}
 
 			return $newDepartment;
@@ -389,7 +405,7 @@ class ClientChatService
 
 			$userAccess = ClientChatUserAccess::create($newClientChat->cch_id, $newClientChat->cch_owner_user_id);
 			$userAccess->accept();
-			$this->clientChatUserAccessRepository->save($userAccess);
+			$this->clientChatUserAccessRepository->save($userAccess, $newClientChat);
 
 			$oldVisitor = $clientChat->ccv->ccvCvd ?? null;
 
@@ -430,31 +446,36 @@ class ClientChatService
 		}
 	}
 
-	public function closeConversation(ClientChatCloseForm $form, int $userId): void
+	public function closeConversation(ClientChatCloseForm $form, Employee $user): void
 	{
 		$clientChat = $this->clientChatRepository->findById($form->cchId);
-
-		if (!Auth::can('client-chat/manage/all', ['chat' => $clientChat])) {
-			throw new ForbiddenHttpException('You do not have access to perform this action', 403);
-		}
 
 		if (!$clientChat->ccv || !$clientChat->ccv->ccvCvd || !$clientChat->ccv->ccvCvd->cvd_visitor_rc_id) {
 			throw new \RuntimeException('Visitor RC id is not found');
 		}
 
-		$botCloseChatResult = \Yii::$app->chatBot->endConversation($clientChat->cch_rid, $clientChat->ccv->ccvCvd->cvd_visitor_rc_id);
-		if ($botCloseChatResult['error']) {
-			throw new \RuntimeException('[Chat Bot] ' . $botCloseChatResult['error']['message'] ?? 'Unknown error message');
-		}
+//		$botCloseChatResult = \Yii::$app->chatBot->endConversation($clientChat->cch_rid, $clientChat->ccv->ccvCvd->cvd_visitor_rc_id);
+//		if ($botCloseChatResult['error']) {
+//			throw new \RuntimeException('[Chat Bot] ' . $botCloseChatResult['error']['message'] ?? 'Unknown error message');
+//		}
+//
+//		$success = $botCloseChatResult['data']['success'] ?? false;
+//		if (!$success) {
+//			throw new \RuntimeException('[Chat Bot] ' . ($botCloseChatResult['data']['message'] ?? 'Unknown error message'));
+//		}
 
-		$success = $botCloseChatResult['data']['success'] ?? false;
-		if (!$success) {
-			throw new \RuntimeException('[Chat Bot] ' . ($botCloseChatResult['data']['message'] ?? 'Unknown error message'));
-		}
-
-		$clientChat->close($userId, $form->comment);
+		$clientChat->close($user->id, $form->comment);
 
 		$this->clientChatRepository->save($clientChat);
+
+		if ($clientChat->cch_owner_user_id !== $user->id) {
+			$comment = $form->comment ? '; Comment: ' . $form->comment : '';
+			$chatLink = Purifier::createChatShortLink($clientChat);
+			if ($ntf = Notifications::create($clientChat->cch_owner_user_id, 'Your Chat was closed', 'Your Chat was closed by ' . $user->nickname . $comment . '; ' . $chatLink, Notifications::TYPE_INFO, true)) {
+				$dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+				Notifications::publish('getNewNotification', ['user_id' => $user->id], $dataNotification);
+			}
+		}
 	}
 
 	/**
