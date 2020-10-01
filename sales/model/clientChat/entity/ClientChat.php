@@ -397,6 +397,11 @@ class ClientChat extends \yii\db\ActiveRecord
 		return $tab === self::TAB_ARCHIVE;
 	}
 
+	public static function isTabAll(int $tab): bool
+	{
+		return $tab === self::TAB_ALL;
+	}
+
     public function isAssignedLead(int $leadId): bool
     {
         foreach ($this->leads as $lead) {

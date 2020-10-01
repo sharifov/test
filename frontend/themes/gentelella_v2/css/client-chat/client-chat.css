@@ -21,9 +21,10 @@
     height: 100%;
     align-items: start;
     justify-content: start;
+    margin-bottom: 10px;
 }
 ._cc-wrapper ._cc_filter_wrapper ._cc_filter:first-child {
-    margin-right: 7px;
+    //margin-right: 7px;
 }
 ._cc-case-item,
 ._cc-lead-item,

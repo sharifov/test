@@ -46,5 +46,50 @@
                 $("#_channel_list_wrapper").find('#_cc-load').remove();
             }
         });
+    };
+
+    window.updateClientChatFilter = function(formId, formName, loadChannelsUrl) {
+        let filterParams = getClientChatFilterParams(formId);
+        let urlParams = new URLSearchParams(window.location.search);
+
+        urlParams.delete('chid');
+        urlParams.delete('page');
+
+        let otherUrlParams = new URLSearchParams();
+
+        urlParams.forEach(function(value, key) {
+            if (key.indexOf(formName) !== 0) {
+                otherUrlParams.set(key, value);
+            }
+        });
+
+        window.history.replaceState({}, '', loadChannelsUrl + '?' + filterParams + '&' + otherUrlParams.toString());
+
+        $('.cc_btn_read_filter').removeClass('active');
+        $('._rc-iframe').hide();
+        $('#_client-chat-info').html('');
+        $('#_client-chat-note').html('');
+        pjaxReload({container: '#pjax-client-chat-channel-list'});
+    };
+
+    function getClientChatFilterParams(formId) {
+        return $("#" + formId).serialize();
     }
+
+    window.getClientChatLoadMoreUrl = function(formId, formName, loadChannelsUrl) {
+        let filterParams = getClientChatFilterParams(formId);
+        let urlParams = new URLSearchParams(window.location.search);
+
+        urlParams.delete('page');
+
+        let otherUrlParams = new URLSearchParams();
+        urlParams.forEach(function(value, key) {
+            if (key.indexOf(formName) !== 0) {
+                otherUrlParams.set(key, value);
+            }
+        });
+
+        return loadChannelsUrl + '?' + filterParams + '&' + otherUrlParams.toString();
+    };
+
 })(window);

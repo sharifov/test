@@ -9,7 +9,7 @@ use common\models\Project;
 use sales\auth\Auth;
 use sales\helpers\query\QueryHelper;
 use sales\model\clientChat\dashboard\FilterForm;
-use sales\model\clientChat\dashboard\ReadFilter;
+use sales\model\clientChat\dashboard\ReadUnreadFilter;
 use sales\model\clientChat\dashboard\GroupFilter;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
@@ -339,6 +339,12 @@ class ClientChatSearch extends ClientChat
 
     public function getListOfChats(Employee $user, array $channelsIds, FilterForm $filter): ArrayDataProvider
     {
+        if (GroupFilter::isNothing($filter->group)) {
+            return new ArrayDataProvider([
+                'allModels' => [],
+            ]);
+        }
+
         $query = ClientChat::find()->select([
             ClientChat::tableName() . '.*',
             new Expression('ifnull(trim(concat(client.first_name, \' \', ifnull(client.last_name, \'\'))), concat(\'Guest-\', cch_id)) as client_full_name'),
@@ -347,16 +353,26 @@ class ClientChatSearch extends ClientChat
             'ccc_name',
         ]);
 
+        if (ClientChat::isTabAll($filter->status)) {
+            $query->addOrderBy(['cch_status_id' => SORT_ASC]);
+        }elseif (ClientChat::isTabActive($filter->status)) {
+            $query->active();
+        } elseif (ClientChat::isTabClosed($filter->status)) {
+            $query->archive();
+        }
+
         if (GroupFilter::isMy($filter->group)) {
             $query->byOwner($user->id);
-            $query->orderBy(['cch_updated_dt' => SORT_DESC]);
+            $query->addOrderBy(['cch_updated_dt' => SORT_DESC]);
         } elseif (GroupFilter::isOther($filter->group)) {
             $query
                 ->andWhere(['<>', 'cch_owner_user_id', $user->id])
                 ->andWhere(['IS NOT', 'cch_owner_user_id', null]);
-            $query->orderBy(['cch_created_dt' => SORT_DESC]);
+            $query->addOrderBy(['cch_created_dt' => SORT_DESC]);
+        } elseif (GroupFilter::isFreeToTake($filter->group)) {
+            //todo
         } elseif (GroupFilter::isAll($filter->group)) {
-            $query->orderBy(['cch_created_dt' => SORT_DESC]);
+            $query->addOrderBy(['cch_created_dt' => SORT_DESC]);
         }
 
         if ($filter->channelId) {
@@ -373,14 +389,8 @@ class ClientChatSearch extends ClientChat
             $query->byProject($filter->project);
         }
 
-        if (ClientChat::isTabActive($filter->status)) {
-            $query->active();
-        } elseif (ClientChat::isTabClosed($filter->status)) {
-            $query->archive();
-        }
-
-        if ($filter->agentId) {
-            $query->andWhere(['cch_owner_user_id' => $filter->agentId]);
+        if ($filter->userId) {
+            $query->andWhere(['cch_owner_user_id' => $filter->userId]);
         }
 
         if ($filter->createdDate) {
@@ -409,11 +419,7 @@ class ClientChatSearch extends ClientChat
         }
 
         if (GroupFilter::isMy($filter->group)) {
-            if (ReadFilter::isRead($filter->read)) {
-                $data = array_filter($data, static function ($item) {
-                    return $item['count_unread_messages'] === 0;
-                });
-            } elseif (ReadFilter::isUnread($filter->read)) {
+            if (ReadUnreadFilter::isUnread($filter->readUnread)) {
                 $data = array_filter($data, static function ($item) {
                     return $item['count_unread_messages'] > 0;
                 });
@@ -436,11 +442,6 @@ class ClientChatSearch extends ClientChat
             //                ],
             //            ],
         ]);
-
-        if (\Yii::$app->request->isGet) {
-            $dataProvider->pagination->pageSize = $filter->page * $this->pageSize;
-            $dataProvider->pagination->page = 0;
-        }
 
         return $dataProvider;
     }

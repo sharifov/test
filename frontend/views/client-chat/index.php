@@ -4,7 +4,7 @@ use frontend\themes\gentelella_v2\assets\ClientChatAsset;
 use sales\auth\Auth;
 use sales\model\clientChat\dashboard\FilterForm;
 use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChat\dashboard\ReadFilter;
+use sales\model\clientChat\dashboard\ReadUnreadFilter;
 use sales\model\clientChat\dashboard\GroupFilter;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
@@ -21,6 +21,7 @@ use yii\widgets\Pjax;
 /* @var $history ClientChatMessage|null */
 /** @var $totalUnreadMessages int */
 /** @var FilterForm $filter */
+/** @var int $page */
 
 $this->title = 'My Client Chat';
 //$this->params['breadcrumbs'][] = $this->title;
@@ -69,6 +70,7 @@ $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
                 'clientChatId' => $clientChat ? $clientChat->cch_id : null,
                 'totalUnreadMessages' => $totalUnreadMessages,
                 'filter' => $filter,
+                'page' => $page,
             ]); ?>
         </div>
 		<?php Pjax::end(); ?>
@@ -112,11 +114,9 @@ $this->registerJsFile('/js/moment.min.js', [
 $moveOfferUrl = Url::to(['/client-chat/move-offer']);
 $clientChatId = $clientChat ? $clientChat->cch_id : 0;
 $discardUnreadMessageUrl = Url::to(['/client-chat/discard-unread-messages']);
-$tabAll = ClientChat::TAB_ALL;
-$tabActive = ClientChat::TAB_ACTIVE;
-$groupMyChat = GroupFilter::MY;
 $groupAll = GroupFilter::ALL;
-$readAll = ReadFilter::ALL;
+$canGroupAll = $filter->permissions->canAllOfGroup() ? 'true' : 'false';
+$readAll = ReadUnreadFilter::ALL;
 $js = <<<JS
 
 window.name = 'chat';
@@ -163,49 +163,19 @@ $(document).on('click', '#btn-load-channels', function (e) {
     
     let page = $(this).attr('data-page');
     let btn = $(this);
+    
     let btnCurrentText = btn.html();
-    let selectedChannel = $('#channel-list').val();
-    let selectedProject = $('#project-list').val();
-    let selectedDep = $('#dep-list').val();
-    let selectedStatus = $('#status-list').val();
-    let selectedAgentId = $('#agents-list').val();
-    let selectedCreatedDate = $('#created-date').val();
     
     let params = new URLSearchParams(window.location.search);
-//    let tab = {$tabActive};
-//    if (params.get("tab") === '0' || params.get("tab") !== null) {
-//        tab = params.get("tab");
-//    }
 
-    let read = {$readAll};
-    if (params.get("read") === '0' || params.get("read") !== null) {
-        read = params.get("read");
-    }
-    let group = {$groupMyChat};
-    if (params.get("group") !== null) {
-        group = params.get("group");
-    }
-    let url = '{$loadChannelsUrl}?&page=' + page + "&status=" + selectedStatus + "&group=" + group + "&read=" + read + "&agentId=" + selectedAgentId + "&createdDate=" + selectedCreatedDate;
-    
-    if (selectedChannel > 0) {
-        url = url+'&channelId='+selectedChannel;
-        params.set('channelId', selectedChannel);
-    }
-    if (selectedProject > 0) {
-        url = url+'&project='+selectedProject;
-        params.set('project', selectedProject);
-    }
-    if (selectedDep > 0) {
-        url = url+'&dep='+selectedDep;
-        params.set('dep', selectedDep);
-    }
-
+    let urlParams = window.getClientChatLoadMoreUrl('{$filter->getId()}', '{$filter->formName()}', '{$loadChannelsUrl}');
+    let url = urlParams + '&loadingChannels=1' + '&page=' + page;
     $.ajax({
-        type: 'post',
+        type: 'get',
         url: url,
         dataType: 'json',
         cache: false,
-        data: {loadingChannels: 1, channelId: params.get('channelId') | selectedChannel},
+        // data: {loadingChannels: 1, channelId: params.get('channelId') | selectedChannel},
         beforeSend: function () {
             btn.html('<i class="fa fa-spin fa-spinner"></i> Loading...').prop('disabled', true).addClass('disabled');
         },
@@ -216,8 +186,7 @@ $(document).on('click', '#btn-load-channels', function (e) {
             } else {
                 btn.html('All conversations are loaded');
             }
-            params.set('page', data.page);
-            window.history.replaceState({}, '', '{$loadChannelsUrl}?'+params.toString());
+            window.history.replaceState({}, '', '{$loadChannelsUrl}?' + urlParams + '&page=' + (data.page - 1));
         },
         error: function (xhr) {
             btn.html(btnCurrentText);
@@ -233,80 +202,25 @@ $(document).on('click', '#btn-load-channels', function (e) {
 //     $(iframe).css('height', iframeHeight+'px');
 // }
 
-$(document).on('click', '._cc_tab', function () {
-    let tab = $(this);
-    let params = new URLSearchParams(window.location.search);
-    let selectedTab = tab.attr('data-tab-id');
-    let currentTab = params.get('tab');
-    
-    if (currentTab === null) {
-        currentTab = {$tabActive};
-    }
-    if (currentTab == selectedTab) {
-        selectedTab = {$tabAll};
-    }
-    
-    params.delete('chid');
-    params.delete('page');
-    params.set('tab', selectedTab);
-    window.history.replaceState({}, '', '{$loadChannelsUrl}?'+params.toString());
-    $('._cc_tab').removeClass('active');
-    tab.addClass('active');
-    $('._rc-iframe').hide();
-    $('#_client-chat-info').html('');
-    $('#_client-chat-note').html('');
-    pjaxReload({container: '#pjax-client-chat-channel-list'});
-});
-
 $(document).on('click', '.cc_btn_group_filter', function () {
-    let group = $(this);
-    let params = new URLSearchParams(window.location.search);
-    let selectedFilter = group.attr('data-group-id');
-    let currentFilter = params.get('group');
-    
-    if (currentFilter === null) {
-        currentFilter = {$groupMyChat};
+    let newValue = $(this).attr('data-group-id');
+    let groupInput = $(document).find('#{$filter->getGroupInputId()}');
+    let oldValue = groupInput.val();
+    let canGroupAll = {$canGroupAll};
+    if (newValue == oldValue) {
+        if (canGroupAll) {
+            groupInput.val({$groupAll});
+        } else {
+            return false;
+        }
+    } else {
+        groupInput.val(newValue);
     }
-    
-    if (selectedFilter == currentFilter) {
-        selectedFilter = {$groupAll};
-    }
-      
-    params.delete('chid');
-    params.delete('page');
-    params.set('group', selectedFilter);
-    window.history.replaceState({}, '', '{$loadChannelsUrl}?'+params.toString());
-    $('.cc_btn_group_filter').removeClass('active');
-    group.addClass('active');
-    $('._rc-iframe').hide();
-    $('#_client-chat-info').html('');
-    $('#_client-chat-note').html('');
-    pjaxReload({container: '#pjax-client-chat-channel-list'});
+    window.updateClientChatFilter('{$filter->getId()}', '{$filter->formName()}', '{$loadChannelsUrl}');
 });
 
-$(document).on('click', '.cc_btn_read_filter', function () {
-    let tab = $(this);
-    let params = new URLSearchParams(window.location.search);
-    let selectedFilter = tab.attr('data-read-id');
-    let currentFilter = params.get('read');
-    
-    if (currentFilter === null) {
-        currentFilter = {$readAll};
-    }
-    if (currentFilter == selectedFilter) {
-        selectedFilter = {$readAll};
-    }
-    
-    params.delete('chid');
-    params.delete('page');
-    params.set('read', selectedFilter);
-    window.history.replaceState({}, '', '{$loadChannelsUrl}?'+params.toString());
-    $('.cc_btn_read_filter').removeClass('active');
-    tab.addClass('active');
-    $('._rc-iframe').hide();
-    $('#_client-chat-info').html('');
-    $('#_client-chat-note').html('');
-    pjaxReload({container: '#pjax-client-chat-channel-list'});
+$(document).on('click', '#{$filter->getReadUnreadInputId()}', function () {
+    window.updateClientChatFilter('{$filter->getId()}', '{$filter->formName()}', '{$loadChannelsUrl}');
 });
 
 $(document).on('click', '._cc-list-item', function () {
