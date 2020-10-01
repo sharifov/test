@@ -62,6 +62,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     },
 					'format' => 'raw',
 				],
+				[
+					'attribute' => 'csl_action_type',
+					'value' => static function (ClientChatStatusLog $model) {
+						return $model->getActionLabel();
+					},
+					'format' => 'raw',
+				],
                 'csl_user_id:username',
             ],
         ]) ?>

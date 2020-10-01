@@ -25,6 +25,7 @@ use sales\model\clientChatNote\ClientChatNoteRepository;
 use sales\model\clientChatNote\entity\ClientChatNote;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestRepository;
+use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\clientChatVisitor\repository\ClientChatVisitorRepository;
@@ -245,7 +246,7 @@ class ClientChatService
 			$clientChat->cch_project_id = $channel->ccc_project_id;
 			$clientChat->cch_owner_user_id = $ownerId;
 			$clientChat->cch_client_online = 1;
-			$clientChat->pending($ownerId);
+			$clientChat->pending($ownerId, ClientChatStatusLog::ACTION_OPEN_BY_AGENT);
 			$this->clientChatRepository->save($clientChat);
 
 			$this->transactionManager->wrap(static function () use ($form, $ownerId, $_self, $department, $userProfile, $clientChatRequest, $clientChat) {
@@ -322,7 +323,7 @@ class ClientChatService
 				throw new \DomainException('Client already has active chat in this department');
 			}
 
-			$clientChat->transfer($user->id, $form->comment);
+			$clientChat->transfer($user->id, ClientChatStatusLog::ACTION_TRANSFER, $form->comment);
 			$clientChat->cch_channel_id = $clientChatChannel->ccc_id;
 			$this->clientChatRepository->save($clientChat);
 
@@ -370,7 +371,7 @@ class ClientChatService
 	{
 		$_self = $this;
 		$this->transactionManager->wrap( static function () use ($_self, $clientChat, $ownerId) {
-			$clientChat->assignOwner($ownerId)->inProgress($ownerId);
+			$clientChat->assignOwner($ownerId)->inProgress($ownerId, ClientChatStatusLog::ACTION_OPEN);
 			$_self->clientChatRepository->save($clientChat);
 			$_self->assignAgentToRcChannel($clientChat->cch_rid, $clientChat->cchOwnerUser->userProfile->up_rc_user_id ?? '');
 		});
@@ -388,7 +389,7 @@ class ClientChatService
 
 			$oldChannelId = $clientChat->cch_channel_id;
 
-			$clientChat->close($chatUserAccess->ccua_user_id);
+			$clientChat->close($chatUserAccess->ccua_user_id, ClientChatStatusLog::ACTION_ACCEPT_TRANSFER);
 			$this->clientChatRepository->save($clientChat);
 
 			$dto = ClientChatCloneDto::feelInOnTransfer($clientChat);
@@ -402,7 +403,7 @@ class ClientChatService
 			$this->cloneLead($clientChat, $newClientChat)->cloneCase($clientChat, $newClientChat)->cloneNotes($clientChat, $newClientChat);
 			$newClientChat->cch_channel_id = $channel->ccc_id;
 			$newClientChat->cch_parent_id = $clientChat->cch_id;
-			$newClientChat->pending($chatUserAccess->ccua_user_id);
+			$newClientChat->pending($chatUserAccess->ccua_user_id, ClientChatStatusLog::ACTION_ACCEPT_TRANSFER);
 			$this->clientChatRepository->save($newClientChat);
 
 			$userAccess = ClientChatUserAccess::create($newClientChat->cch_id, $newClientChat->cch_owner_user_id);
@@ -438,7 +439,7 @@ class ClientChatService
 		});
 	}
 
-	public function cancelTransfer(ClientChat $clientChat, ?Employee $user): void
+	public function cancelTransfer(ClientChat $clientChat, ?Employee $user, int $action): void
 	{
 		$channel = $clientChat->cchChannel;
 		if ($channel) {
@@ -447,7 +448,7 @@ class ClientChatService
 				throw new \RuntimeException('Cannot find previous chat status log');
 			}
 			$clientChat->cch_channel_id = $previousLog->csl_prev_channel_id;
-			$clientChat->inProgress($user->id ?? null);
+			$clientChat->inProgress($user->id ?? null, $action);
 			$this->clientChatRepository->save($clientChat);
 
 			$data = ClientChatAccessMessage::chatCanceled($clientChat, $user);
@@ -473,7 +474,7 @@ class ClientChatService
 			throw new \RuntimeException('[Chat Bot] ' . ($botCloseChatResult['data']['message'] ?? 'Unknown error message'));
 		}
 
-		$clientChat->close($user->id, $form->comment);
+		$clientChat->close($user->id, ClientChatStatusLog::ACTION_CLOSE, $form->comment);
 
 		$this->clientChatRepository->save($clientChat);
 

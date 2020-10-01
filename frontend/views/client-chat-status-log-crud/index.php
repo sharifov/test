@@ -2,6 +2,7 @@
 
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
+use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\model\clientChat\entity\ClientChat;
 use yii\bootstrap4\Html;
@@ -61,7 +62,7 @@ $this->params['breadcrumbs'][] = $this->title;
 					return $model->cslPrevChannel ? Html::a('<i class="fa fa-link"></i> ' . $model->cslPrevChannel->ccc_name, ['/client-chat-channel-crud/view', 'id' => $model->csl_prev_channel_id], ['target' => '_blank', 'data-pjax' => 0]) : null;
 				},
 				'format' => 'raw',
-				'filter' => \sales\model\clientChatChannel\entity\ClientChatChannel::getList()
+				'filter' => ClientChatChannel::getList()
 			],
 			[
 				'class' => UserSelect2Column::class,
@@ -87,6 +88,15 @@ $this->params['breadcrumbs'][] = $this->title;
 				'relation' => 'cslOwner',
 				'format' => 'username',
 				'placeholder' => 'Select User'
+			],
+
+			[
+				'attribute' => 'csl_action_type',
+				'value' => static function (ClientChatStatusLog $model) {
+					return $model->getActionLabel();
+				},
+				'format' => 'raw',
+				'filter' => ClientChatStatusLog::getActionList()
 			],
 
             ['class' => 'yii\grid\ActionColumn'],

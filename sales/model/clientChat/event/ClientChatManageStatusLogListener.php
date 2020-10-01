@@ -34,7 +34,8 @@ class ClientChatManageStatusLogListener
 				$event->ownerId,
 				$event->description,
 				$event->creatorUserId,
-				$event->prevChannelId
+				$event->prevChannelId,
+				$event->actionType
 			);
 		} catch (\Throwable $e) {
 			\Yii::error($e, 'ClientChatListener:ClientChatManageStatusLogListener');

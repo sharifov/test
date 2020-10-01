@@ -9,6 +9,7 @@ use sales\dispatchers\EventDispatcher;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
+use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatUserAccess\event\ResetChatUserAccessWidgetEvent;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
@@ -92,7 +93,7 @@ class ClientChatUserAccessService
 		} else if ($ccua->isSkip() && $clientChat->isTransfer()) {
 			$userAccesses = ClientChatUserAccess::find()->byChatId($clientChat->cch_id)->exceptById($ccua->ccua_id)->pending()->exists();
 			if (!$userAccesses) {
-				$this->clientChatService->cancelTransfer($clientChat, null);
+				$this->clientChatService->cancelTransfer($clientChat, null, ClientChatStatusLog::ACTION_CANCEL_TRANSFER_BY_SYSTEM);
 			}
 		}
 		$this->clientChatUserAccessRepository->save($ccua, $clientChat);

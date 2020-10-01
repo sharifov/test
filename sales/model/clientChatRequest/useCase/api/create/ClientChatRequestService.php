@@ -12,6 +12,7 @@ use sales\model\clientChatFeedback\entity\ClientChatFeedback;
 use sales\model\clientChatMessage\ClientChatMessageRepository;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
+use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\model\clientChatVisitor\repository\ClientChatVisitorRepository;
 use sales\model\clientChatVisitorData\repository\ClientChatVisitorDataRepository;
 use sales\repositories\clientChatChannel\ClientChatChannelRepository;
@@ -275,14 +276,14 @@ class ClientChatRequestService
 			}
 
 			if (!$clientChat->cch_id) {
-				$clientChat->pending(null);
+				$clientChat->pending(null, ClientChatStatusLog::ACTION_OPEN);
 			}
 
 			$this->clientChatRepository->save($clientChat);
 			$this->clientChatService->sendRequestToUsers($clientChat, $channel);
 		} else {
 			if (!$clientChat->cch_id) {
-				$clientChat->pending(null);
+				$clientChat->pending(null, ClientChatStatusLog::ACTION_OPEN);
 			}
 			$this->clientChatRepository->save($clientChat);
 		}

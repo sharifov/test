@@ -5,6 +5,7 @@ namespace sales\model\clientChatStatusLog\entity;
 use common\models\Employee;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
+use yii\helpers\Html;
 
 /**
  * This is the model class for table "client_chat_status_log".
@@ -19,6 +20,7 @@ use sales\model\clientChatChannel\entity\ClientChatChannel;
  * @property string|null $csl_description
  * @property int|null $csl_user_id
  * @property int|null $csl_prev_channel_id
+ * @property int $csl_action_type
  *
  * @property ClientChat $cslCch
  * @property Employee $cslOwner
@@ -27,6 +29,40 @@ use sales\model\clientChatChannel\entity\ClientChatChannel;
  */
 class ClientChatStatusLog extends \yii\db\ActiveRecord
 {
+	public const ACTION_OPEN = 1;
+	public const ACTION_OPEN_BY_AGENT = 2;
+	public const ACTION_TRANSFER = 3;
+	public const ACTION_ACCEPT_TRANSFER = 4;
+	public const ACTION_CANCEL_TRANSFER_BY_AGENT = 5;
+	public const ACTION_CANCEL_TRANSFER_BY_SYSTEM = 6;
+	public const ACTION_CLOSE = 7;
+	public const ACTION_AUTO_CLOSE = 8;
+	public const ACTION_MULTIPLE_UPDATE = 9;
+
+	private const ACTION_LIST = [
+		self::ACTION_OPEN => 'Open By Client',
+		self::ACTION_OPEN_BY_AGENT => 'Open By Agent',
+		self::ACTION_TRANSFER => 'Transfer',
+		self::ACTION_ACCEPT_TRANSFER => 'Accept Transfer',
+		self::ACTION_CANCEL_TRANSFER_BY_AGENT => 'Cancel Transfer By Agent',
+		self::ACTION_CANCEL_TRANSFER_BY_SYSTEM => 'Cancel Transfer By System',
+		self::ACTION_CLOSE => 'Close',
+		self::ACTION_AUTO_CLOSE => 'Auto Close',
+		self::ACTION_MULTIPLE_UPDATE => 'Multiple Update',
+	];
+
+	private const ACTION_LABEL_LIST = [
+		self::ACTION_OPEN => 'badge badge-info',
+		self::ACTION_OPEN_BY_AGENT => 'badge badge-info',
+		self::ACTION_TRANSFER => 'badge badge-yellow',
+		self::ACTION_ACCEPT_TRANSFER => 'badge badge-yellow',
+		self::ACTION_CANCEL_TRANSFER_BY_AGENT => 'badge badge-yellow',
+		self::ACTION_CANCEL_TRANSFER_BY_SYSTEM => 'badge badge-yellow',
+		self::ACTION_CLOSE => 'badge badge-red',
+		self::ACTION_AUTO_CLOSE => 'badge badge-red',
+		self::ACTION_MULTIPLE_UPDATE => 'badge badge-awake',
+	];
+
     public function rules(): array
     {
         return [
@@ -49,6 +85,9 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
             ['csl_start_dt', 'safe'],
 
             ['csl_to_status', 'integer'],
+
+			['csl_action_type', 'integer'],
+			['csl_action_type', 'in', 'range' => self::getActionList()],
 
 			['csl_user_id', 'integer'],
 			['csl_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['csl_user_id' => 'id']],
@@ -88,6 +127,7 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
             'csl_description' => 'Description',
 			'csl_user_id' => 'User ID',
 			'csl_prev_channel_id' => 'Prev Channel ID',
+			'csl_action_type' => 'Action Type',
         ];
     }
 
@@ -108,6 +148,7 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
 		?int $ownerId,
 		?int $creatorId,
 		?int $channelId,
+		int $actionType,
 		?string $description = ''
 	): self
 	{
@@ -119,6 +160,7 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
 		$status->csl_user_id = $creatorId;
 		$status->csl_prev_channel_id = $channelId;
 		$status->csl_description = $description;
+		$status->csl_action_type = $actionType;
 		$status->csl_start_dt = date('Y-m-d H:i:s');
 		return $status;
 	}
@@ -127,4 +169,24 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
     {
         return 'client_chat_status_log';
     }
+
+    public static function getActionList(): array
+	{
+		return self::ACTION_LIST;
+	}
+
+	public function getActionName(): ?string
+	{
+		return self::getActionList()[$this->csl_action_type] ?? null;
+	}
+
+    public function getActionLabelClass(): string
+	{
+		return self::ACTION_LABEL_LIST[$this->csl_action_type] ?? 'badge badge-white';
+	}
+
+	public function getActionLabel(): ?string
+	{
+		return $this->csl_action_type ? Html::tag('span', $this->getActionName(), ['class' => $this->getActionLabelClass()]) : null;
+	}
 }

@@ -42,6 +42,7 @@ use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatRequest\entity\search\ClientChatRequestSearch;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestRepository;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestService;
+use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\repositories\clientChatChannel\ClientChatChannelRepository;
 use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessRepository;
@@ -898,7 +899,7 @@ class ClientChatController extends FController
 
 			$this->transactionManager->wrap( function () use ($chat){
 				$this->clientChatUserAccessService->disableAccessForOtherUsersBatch($chat, $chat->cch_owner_user_id);
-				$this->clientChatService->cancelTransfer($chat, Auth::user());
+				$this->clientChatService->cancelTransfer($chat, Auth::user(), ClientChatStatusLog::ACTION_ACCEPT_TRANSFER);
 			});
 
 		} catch (\DomainException | \RuntimeException $e) {
