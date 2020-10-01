@@ -228,7 +228,7 @@ class ClientChatService
 			$_self->clientChatRequestRepository->save($clientChatRequest);
 			$client = $_self->clientManageService->getOrCreateByClientChatRequest($clientChatRequest, (int)$form->projectId);
 
-			$activeChatExist = ClientChat::find()->byDepartment($channel->ccc_dep_id)->withOwner()->byClientId($client->id)->notClosed()->exists();
+			$activeChatExist = ClientChat::find()->byChannel($channel->ccc_id)->withOwner()->byClientId($client->id)->notClosed()->exists();
 			if ($activeChatExist) {
 				throw new \DomainException('This visitor is already chatting with agent in ' . $department['dep_name'] . ' department');
 			}
