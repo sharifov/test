@@ -6,6 +6,7 @@ use Yii;
 use sales\model\clientChatHold\entity\ClientChatHold;
 use sales\model\clientChatHold\entity\ClientChatHoldSearch;
 use frontend\controllers\FController;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -14,19 +15,17 @@ use yii\filters\VerbFilter;
  */
 class ClientChatHoldCrudController extends FController
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function behaviors()
+    public function behaviors(): array
     {
-        return [
+        $behaviors = [
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class' => VerbFilter::class,
                 'actions' => [
                     'delete' => ['POST'],
                 ],
             ],
         ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**

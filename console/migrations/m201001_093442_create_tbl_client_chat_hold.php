@@ -9,7 +9,11 @@ use yii\db\Migration;
 class m201001_093442_create_tbl_client_chat_hold extends Migration
 {
     public $route = [
-        '/client-chat-hold-crud/*',
+        '/client-chat-hold-crud/index',
+        '/client-chat-hold-crud/view',
+        '/client-chat-hold-crud/create',
+        '/client-chat-hold-crud/update',
+        '/client-chat-hold-crud/delete'
     ];
 
     public $roles = [
