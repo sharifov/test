@@ -19,30 +19,43 @@ use yii\helpers\Html;
  * @property $dep
  * @property $project
  * @property $group
- * @property $read
- * @property array $channels
- * @property $agentId
- * @property $agentName
+ * @property $readUnread
+ * @property $userId
+ * @property $userName
  * @property $createdDate
+ * @property array       $channels
+ * @property Permissions $permissions
  */
 class FilterForm extends Model
 {
+    public const DEFAULT_VALUE_CHANNEL_ID = 0;
+    public const DEFAULT_VALUE_STATUS = ClientChat::TAB_ACTIVE;
+    public const DEFAULT_VALUE_DEP = 0;
+    public const DEFAULT_VALUE_PROJECT = 0;
+    public const DEFAULT_VALUE_READ_UNREAD = ReadUnreadFilter::ALL;
+    public const DEFAULT_VALUE_USER_ID = null;
+    public const DEFAULT_VALUE_USER_NAME = null;
+    public const DEFAULT_VALUE_CREATED_DATE = null;
+
     public $channelId;
     public $status;
     public $dep;
     public $project;
     public $group;
-    public $read;
-    public $agentId;
-    public $agentName;
+    public $readUnread;
+    public $userId;
+    public $userName;
     public $createdDate;
 
     private array $channels;
+
+    public Permissions $permissions;
 
     public function __construct(array $channels, $config = [])
     {
         parent::__construct($config);
         $this->channels = $channels;
+        $this->permissions = new Permissions();
     }
 
     public function rules(): array
@@ -50,61 +63,57 @@ class FilterForm extends Model
         return [
             ['channelId', 'integer'],
             ['channelId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['channelId', 'default', 'value' => 0],
+            ['channelId', 'default', 'value' => self::DEFAULT_VALUE_CHANNEL_ID],
             ['channelId', 'in', 'range' => array_keys($this->getChannels())],
 
             ['status', 'integer'],
             ['status', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['status', 'default', 'value' => ClientChat::TAB_ACTIVE],
+            ['status', 'default', 'value' => self::DEFAULT_VALUE_STATUS],
             ['status', 'in', 'range' => array_keys($this->getStatuses())],
 
             ['dep', 'integer'],
             ['dep', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['dep', 'default', 'value' => 0],
+            ['dep', 'default', 'value' => self::DEFAULT_VALUE_DEP],
             ['dep', 'in', 'range' => array_keys($this->getDepartments())],
 
             ['project', 'integer'],
             ['project', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['project', 'default', 'value' => 0],
+            ['project', 'default', 'value' => self::DEFAULT_VALUE_PROJECT],
             ['project', 'in', 'range' => array_keys($this->getProjects())],
 
             ['group', 'integer'],
             ['group', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['group', 'default', 'value' => GroupFilter::MY],
-            ['group', 'in', 'range' => array_merge([GroupFilter::ALL], array_keys($this->getGroupFilter()))],
+            ['group', 'default', 'value' => $this->getDefaultGroupValue()],
+            ['group', 'in', 'range' => array_keys($this->getAvailableGroup())],
 
-            ['read', 'integer'],
-            ['read', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['read', 'default', 'value' => ReadFilter::ALL],
-            ['read', 'in', 'range' => array_keys($this->getReadFilter())],
+            ['readUnread', 'integer'],
+            ['readUnread', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['readUnread', 'default', 'value' => self::DEFAULT_VALUE_READ_UNREAD],
+            ['readUnread', 'in', 'range' => array_keys($this->getReadFilter())],
 
-            ['agentId', 'integer'],
-            ['agentId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['agentId', 'validateAgent', 'skipOnEmpty' => true, 'skipOnError' => true],
+            ['userId', 'integer'],
+            ['userId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['userId', 'default', 'value' => self::DEFAULT_VALUE_USER_ID],
+            ['userId', 'validateUser', 'skipOnEmpty' => true, 'skipOnError' => true],
 
             ['createdDate', 'string'],
             ['createdDate', 'date', 'format' => 'php:d-m-Y'],
-            ['createdDate', 'default', 'value' => null],
+            ['createdDate', 'default', 'value' => self::DEFAULT_VALUE_CREATED_DATE],
         ];
     }
 
-    public function validateAgent(): void
+    public function validateUser(): void
     {
-        $agent = Employee::find()->select(['id', 'username'])->andWhere(['id' => $this->agentId])->asArray()->one();
-        if (!$agent) {
+        $user = Employee::find()->select(['id', 'username'])->andWhere(['id' => $this->userId])->asArray()->one();
+        if (!$user) {
             return;
         }
-        $this->agentName = $agent['username'];
-    }
-
-    public function getGroupFilter(): array
-    {
-        return GroupFilter::LIST;
+        $this->userName = $user['username'];
     }
 
     public function getReadFilter(): array
     {
-        return ReadFilter::LIST;
+        return ReadUnreadFilter::LIST;
     }
 
     public function getStatuses(): array
@@ -134,15 +143,119 @@ class FilterForm extends Model
 
     public function loadDefaultValues(): void
     {
-        $this->channelId = 0;
-        $this->status = ClientChat::TAB_ACTIVE;
-        $this->dep = 0;
-        $this->project = 0;
-        $this->group = GroupFilter::MY;
-        $this->read = ReadFilter::ALL;
-        $this->agentId = null;
-        $this->agentName = null;
-        $this->createdDate = null;
+        if ($this->channelId === null || $this->hasErrors('channelId')) {
+            $this->channelId = self::DEFAULT_VALUE_CHANNEL_ID;
+        }
+        if ($this->status === null || $this->hasErrors('status')) {
+            $this->status = self::DEFAULT_VALUE_STATUS;
+        }
+        if ($this->dep === null || $this->hasErrors('dep')) {
+            $this->dep = self::DEFAULT_VALUE_DEP;
+        }
+        if ($this->project === null || $this->hasErrors('project')) {
+            $this->project = self::DEFAULT_VALUE_PROJECT;
+        }
+        if ($this->group === null || $this->hasErrors('group')) {
+            $this->group = $this->getDefaultGroupValue();
+        }
+        if ($this->readUnread === null || $this->hasErrors('readUnread')) {
+            $this->readUnread = self::DEFAULT_VALUE_READ_UNREAD;
+        }
+        if ($this->userId === null || $this->hasErrors('userId')) {
+            $this->userId = self::DEFAULT_VALUE_USER_ID;
+            $this->userName = self::DEFAULT_VALUE_USER_NAME;
+        }
+        if ($this->createdDate === null || $this->hasErrors('createdDate')) {
+            $this->createdDate = self::DEFAULT_VALUE_CREATED_DATE;
+        }
+    }
+
+    public function loadDefaultValuesByPermissions(): void
+    {
+        if (!$this->permissions->canChannel()) {
+            $this->channelId = self::DEFAULT_VALUE_CHANNEL_ID;
+        }
+        if (!$this->permissions->canStatus()) {
+            $this->status = ClientChat::TAB_ALL;
+        }
+        if (!$this->permissions->canDepartment()) {
+            $this->dep = self::DEFAULT_VALUE_DEP;
+        }
+        if (!$this->permissions->canProject()) {
+            $this->project = self::DEFAULT_VALUE_PROJECT;
+        }
+        if (!$this->permissions->canOneOfGroup()) {
+            $this->group = $this->getDefaultGroupValue();
+        }
+        if (!$this->permissions->canReadUnread()) {
+            $this->readUnread = self::DEFAULT_VALUE_READ_UNREAD;
+        }
+        if (!$this->permissions->canUser()) {
+            $this->userId = self::DEFAULT_VALUE_USER_ID;
+            $this->userName = self::DEFAULT_VALUE_USER_NAME;
+        }
+        if (!$this->permissions->canCreatedDate()) {
+            $this->createdDate = self::DEFAULT_VALUE_CREATED_DATE;
+        }
+    }
+
+    public function getAvailableGroup(): array
+    {
+        $filter = GroupFilter::FULL_LIST;
+
+        $filter = $this->processFilterGroupByPermissions($filter);
+
+        if (isset($filter[GroupFilter::ALL]) && !$this->permissions->canAllOfGroup()) {
+            unset($filter[GroupFilter::ALL]);
+        }
+
+        return $filter;
+    }
+
+    public function getDefaultGroupValue(): int
+    {
+        if ($this->permissions->canGroupMyChats()) {
+            return GroupFilter::MY;
+        }
+        if ($this->permissions->canGroupOtherChats()) {
+            return GroupFilter::OTHER;
+        }
+        if ($this->permissions->canGroupFreeToTake()) {
+            return GroupFilter::FREE_TO_TAKE;
+        }
+
+        return GroupFilter::NOTHING;
+    }
+
+    public function getGroupFilterUI(): array
+    {
+        $filter = $this->getAvailableGroup();
+
+        if (isset($filter[GroupFilter::NOTHING])) {
+            unset($filter[GroupFilter::NOTHING]);
+        }
+        if (isset($filter[GroupFilter::ALL])) {
+            unset($filter[GroupFilter::ALL]);
+        }
+
+        $filter = $this->processFilterGroupByPermissions($filter);
+
+        return $filter;
+    }
+
+    private function processFilterGroupByPermissions(array $filter): array
+    {
+        if (isset($filter[GroupFilter::MY]) && !$this->permissions->canGroupMyChats()) {
+            unset($filter[GroupFilter::MY]);
+        }
+        if (isset($filter[GroupFilter::OTHER]) && !$this->permissions->canGroupOtherChats()) {
+            unset($filter[GroupFilter::OTHER]);
+        }
+        if (isset($filter[GroupFilter::FREE_TO_TAKE]) && !$this->permissions->canGroupFreeToTake()) {
+            unset($filter[GroupFilter::FREE_TO_TAKE]);
+        }
+
+        return $filter;
     }
 
     public function getId(): string
@@ -160,13 +273,13 @@ class FilterForm extends Model
         return  Html::getInputId($this, 'group');
     }
 
-    public function getReadInput(): string
+    public function getReadUnreadInput(): string
     {
-        return Html::activeCheckbox($this, 'read', ['label' => 'Unread', 'id' => $this->getReadInputId()]);
+        return Html::activeCheckbox($this, 'readUnread', ['label' => 'Unread', 'id' => $this->getReadUnreadInputId()]);
     }
 
-    public function getReadInputId(): string
+    public function getReadUnreadInputId(): string
     {
-        return  Html::getInputId($this, 'read');
+        return  Html::getInputId($this, 'readUnread');
     }
 }

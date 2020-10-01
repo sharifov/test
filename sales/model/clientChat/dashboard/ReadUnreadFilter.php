@@ -2,7 +2,7 @@
 
 namespace sales\model\clientChat\dashboard;
 
-class ReadFilter
+class ReadUnreadFilter
 {
     public const ALL = 0;
     public const UNREAD = 1;

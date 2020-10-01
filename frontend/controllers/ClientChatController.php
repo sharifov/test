@@ -27,7 +27,7 @@ use sales\helpers\app\AppParamsHelper;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\dashboard\FilterForm;
 use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChat\dashboard\ReadFilter;
+use sales\model\clientChat\dashboard\ReadUnreadFilter;
 use sales\model\clientChat\dashboard\GroupFilter;
 use sales\model\clientChat\entity\search\ClientChatSearch;
 use sales\model\clientChat\useCase\close\ClientChatCloseForm;
@@ -194,6 +194,8 @@ class ClientChatController extends FController
         if (!$filter->load(Yii::$app->request->get()) || !$filter->validate()) {
             $filter->loadDefaultValues();
         }
+
+        $filter->loadDefaultValuesByPermissions();
 
         //todo remove after added logic free to take
         if (GroupFilter::isFreeToTake($filter->group)) {
