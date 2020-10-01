@@ -13,10 +13,12 @@ use sales\entities\EventTrait;
 use sales\helpers\clientChat\ClientChatHelper;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\event\ClientChatManageStatusLogEvent;
+use sales\model\clientChat\event\ClientChatSetStatusCloseEvent;
 use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
 use sales\model\clientChatCase\entity\ClientChatCase;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatFeedback\entity\ClientChatFeedback;
+use sales\model\clientChatLastMessage\entity\ClientChatLastMessage;
 use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatNote\entity\ClientChatNote;
@@ -64,6 +66,7 @@ use yii\db\ActiveRecord;
  * @property Lead[] $leads
  * @property Cases[] $cases
  * @property ClientChatFeedback $feedback
+ * @property ClientChatLastMessage $lastMessage
  */
 class ClientChat extends \yii\db\ActiveRecord
 {
@@ -251,6 +254,11 @@ class ClientChat extends \yii\db\ActiveRecord
 		return $this->hasOne(ClientChatFeedback::class, ['ccf_client_chat_id' => 'cch_id']);
 	}
 
+	public function getLastMessage(): ActiveQuery
+	{
+		return $this->hasOne(ClientChatLastMessage::class, ['cclm_cch_id' => 'cch_id']);
+	}
+
 	public static function getStatusList(): array
 	{
 		return self::STATUS_LIST;
@@ -280,6 +288,7 @@ class ClientChat extends \yii\db\ActiveRecord
 	public function close(int $userId, ?string $description = null): void
 	{
 		$this->recordEvent(new ClientChatManageStatusLogEvent($this, $this->cch_status_id, self::STATUS_CLOSED, $this->cch_owner_user_id, $userId, $description, $this->cch_channel_id));
+		$this->recordEvent(new ClientChatSetStatusCloseEvent($this->cch_id));
 		$this->cch_status_id = self::STATUS_CLOSED;
 	}
 

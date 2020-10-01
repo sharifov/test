@@ -23,6 +23,7 @@ use sales\services\clientChatService\ClientChatService;
 use sales\services\TransactionManager;
 use Yii;
 use yii\helpers\Html;
+use yii\helpers\VarDumper;
 
 /**
  * Class ClientChatRequestService
@@ -357,9 +358,15 @@ class ClientChatRequestService
         $data['sent_dt'] = \Yii::$app->formatter->asDatetime(strtotime($message->ccm_sent_dt), 'php: Y-m-d H:i:s');
         $data['period'] = \Yii::$app->formatter->asRelativeTime(strtotime($message->ccm_sent_dt));
         $data['msg'] = $message->message;
-        CentrifugoService::sendMsg(json_encode([
-            'chatMessageData' => $data,
-        ]), 'realtimeClientChatChannel');
+
+        try {
+            CentrifugoService::sendMsg(json_encode([
+                'chatMessageData' => $data,
+            ]), 'realtimeClientChatChannel');
+        } catch (\Throwable $throwable) {
+            Yii::error(VarDumper::dumpAsString($throwable),
+            'ClientChatRequestService:sendLastChatMessageToMonitor');
+        }
     }
 
 	/**

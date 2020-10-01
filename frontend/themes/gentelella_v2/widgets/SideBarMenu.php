@@ -245,6 +245,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Visitor Data', 'url' => ['/client-chat-visitor-data-crud/index']],
                         ['label' => 'Client Chat QA', 'url' => ['/client-chat-qa/index']],
                         ['label' => 'Client Chat Feedback', 'url' => ['/client-chat-feedback-crud/index']],
+                        ['label' => 'Client Chat Last Message', 'url' => ['/client-chat-last-message-crud/index']],
                     ],
                 ],
                 ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'list'],

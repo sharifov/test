@@ -363,7 +363,7 @@ class ClientChatRequestController extends ApiBaseController
 					new CodeMessage(ApiCodeException::CLIENT_CHAT_REQUEST_CREATE_FAILED)
 				));
 			} catch (\Throwable $e) {
-				\Yii::error(AppHelper::throwableFormatter($e), 'Api::ClientChatRequestController::actionCreateMessage::Throwable');
+				\Yii::error(VarDumper::dumpAsString($e), 'Api::ClientChatRequestController::actionCreateMessage::Throwable');
 				\Yii::error(VarDumper::dumpAsString($form->data), 'Api::ClientChatRequestController::actionCreateMessage::RequestData');
 				return $this->endApiLog($apiLog, new ErrorResponse(
 					new StatusCodeMessage(500),

@@ -3,6 +3,8 @@
 namespace sales\model\clientChatMessage\entity;
 
 use DateTime;
+use sales\behaviors\ClientChatSetLastMessageBehavior;
+use sales\entities\EventTrait;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestApiForm;
@@ -25,6 +27,7 @@ use yii\helpers\ArrayHelper;
  */
 class ClientChatMessage extends \yii\db\ActiveRecord
 {
+    use EventTrait;
 
     public const BY_BOT = 'bot';
     public const BY_AGENT = 'agent';
@@ -61,6 +64,15 @@ class ClientChatMessage extends \yii\db\ActiveRecord
     public function getId()
     {
         return $this->getPrimaryKey();
+    }
+
+    public function behaviors(): array
+    {
+        return [
+            'setLastMessage' => [
+                'class' => ClientChatSetLastMessageBehavior::class,
+            ],
+        ];
     }
 
     /**
