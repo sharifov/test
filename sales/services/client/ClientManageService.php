@@ -373,19 +373,25 @@ class ClientManageService
             'typeCreate' => Client::TYPE_CREATE_CLIENT_CHAT,
             'projectId' => $projectId
 		]);
-		$parentId = null;
 
-		if ($client = self::detectClientChatRequest($projectId, $uuId, $clientEmailForm->email, $rcId)) {
+		if ($client = self::detectClientFromChatRequest($projectId, $uuId, $clientEmailForm->email, $rcId)) {
 		    $this->updateClient($client, $clientForm);
 		} else {
 		    if (empty($clientForm->projectId)) {
                 throw new \RuntimeException('Cannot create client without Project');
+            }
+
+            $parentId = null;
+            if ($parent = ClientsQuery::findParentByEmail($clientEmailForm->email, $clientForm->projectId)) {
+                /** @var Client $parent */
+                $parentId = $parent->id;
             }
             $client = $this->createByRcId($clientForm, $parentId);
 		}
 
 		$this->addEmail($client, $clientEmailForm);
 		$this->addPhone($client, $clientPhoneForm);
+
 		return $client;
 	}
 
@@ -396,9 +402,9 @@ class ClientManageService
      * @param string|null $rcId
      * @return Client|ActiveRecord|null
      */
-    private static function detectClientChatRequest(int $projectId, ?string $uuId, ?string $email, ?string $rcId)
+    private static function detectClientFromChatRequest(int $projectId, ?string $uuId, ?string $email, ?string $rcId)
     {
-        if (!empty($uuId) && $client = Client::findOne(['uuid' => $uuId, 'cl_project_id' => $projectId])) {
+        if (!empty($uuId) && $client = Client::find()->byProject($projectId)->byUuid($uuId)->one()) {
 			return $client;
 		}
         if (!empty($email) && $client = ClientsQuery::oneByEmailAndProject($email, $projectId)) {
