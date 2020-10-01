@@ -211,6 +211,16 @@ class ClientChatService
 	{
 		$_self = $this;
 		try {
+
+			$redis = \Yii::$app->redis;
+			$key = $form->visitorId;
+
+			if (!$redis->get($key)) {
+				$redis->setnx($key, true);
+			} else {
+				throw new \RuntimeException('This action is currently being taken by another agent.', ClientChatCodeException::CC_REAL_TIME_ACTION_TAKEN);
+			}
+
 			if (!$userProfile = UserProfile::findOne(['up_user_id' => $ownerId])) {
 				throw new NotFoundException('User Profile is not found');
 			}
@@ -272,10 +282,19 @@ class ClientChatService
 				$clientChat->cch_rid = $rid;
 				$_self->clientChatRepository->save($clientChat);
 			});
+
+			$redis->del($key);
 		} catch (\DomainException | \RuntimeException $e) {
+			if (!ClientChatCodeException::isActionTaken($e)) {
+				$redis->del($key);
+			}
+
 			if (isset($clientChat)) {
 				$this->clientChatRepository->delete($clientChat);
 			}
+			throw $e;
+		} catch (\Throwable $e) {
+			$redis->del($key);
 			throw $e;
 		}
 	}

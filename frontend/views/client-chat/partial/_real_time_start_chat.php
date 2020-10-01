@@ -34,7 +34,7 @@ use yii\widgets\Pjax;
                     <?= $form->field($startChatForm, 'message')->textarea() ?>
 
                     <div class="d-flex justify-content-center">
-                        <?= \yii\helpers\Html::submitButton('Start Chat', ['class' => 'btn btn-success btn-sm']) ?>
+                        <?= \yii\helpers\Html::submitButton('Start Chat', ['class' => 'btn btn-success btn-sm', 'id' => '_cc_submit_send_message']) ?>
                     </div>
 
                 <?php ActiveForm::end() ?>
@@ -49,3 +49,19 @@ use yii\widgets\Pjax;
         <?php endif; ?>
 	</div>
 </div>
+
+<?php
+$js = <<<JS
+(function() {
+    let btnHtml = '';
+    $('#_cc_real_time_start_chat_pjax').on('pjax:end', function (data, xhr) {
+        $('#_cc_submit_send_message').prop('disabled', false).removeClass('disabled').html(btnHtml);
+    });
+    $('#_cc_real_time_start_chat_pjax').on('pjax:beforeSend', function (obj, xhr, data) {
+        btnHtml = $('#_cc_submit_send_message').html();
+        $('#_cc_submit_send_message').addClass('disabled').prop('disabled', true).html('<i class="fa fa-spin fa-spinner"></i>');
+    });
+})();
+JS;
+$this->registerJs($js);
+?>
