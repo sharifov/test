@@ -9,7 +9,7 @@ use yii\helpers\Html;
 ?>
 
 <div class="profile_title">
-    <div class="col-md-6">
+    <div class="col-md-7">
         <?php $form = ActiveForm::begin([
             'method' => 'get',
             'options' => [
@@ -38,7 +38,8 @@ use yii\helpers\Html;
                         'locale' => [
                             'format' => 'Y-m-d H:i:s',
                             'separator' => ' - '
-                        ]
+                        ],
+                        'opens' => 'right'
                     ]
                 ])->label(false);
                 ?>

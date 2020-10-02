@@ -5997,3 +5997,15 @@ td.selected-cell {
   from, to { box-shadow: 0 0 0 0 red;}
   0% { box-shadow: 0 0 0 2px red; }
 }
+
+ul.bar_tabs {
+  height: 26px !important;
+}
+
+ul.bar_tabs>li a {
+  padding: 10px 7px !important;
+}
+
+ul.bar_tabs>li> a.active {
+  background:#fff;
+}

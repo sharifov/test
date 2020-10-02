@@ -121,7 +121,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <!--                    </ul>-->
 
                 </div>
-                <?php Pjax::begin() ?>
+                <?php Pjax::begin(['enablePushState' => false]) ?>
                 <div class="col-md-9 col-sm-9 ">
                     <?= $this->render('partial/_info_search', [
                         'datePickerModel' => $datePickerModel
@@ -140,11 +140,11 @@ $this->params['breadcrumbs'][] = $this->title;
                         <script type="text/javascript">
                             google.charts.load('current', {'packages': ['corechart', 'bar']});
                             google.charts.setOnLoadCallback(function () {
-                                var totalCallsChart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+                                let totalRequestsChart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
 
                                 //var colors = ['#8ec5ff', '#dd4b4e', '#587ca6'];
 
-                                var options = {
+                                let options = {
                                     title: 'User Activity Dynamics',
                                     chartArea: {width: '95%', right: 10},
                                     textStyle: {
@@ -162,10 +162,10 @@ $this->params['breadcrumbs'][] = $this->title;
                                         easing: 'linear',
                                         startup: true
                                     },
-                                    // legend: {
-                                    //     position: 'top',
-                                    //     alignment: 'end'
-                                    // },
+                                    legend: {
+                                        position: 'top',
+                                        alignment: 'end'
+                                    },
                                     hAxis: {
                                         title: '',
                                         slantedText: true,
@@ -187,17 +187,17 @@ $this->params['breadcrumbs'][] = $this->title;
                                     bar: {groupWidth: "50%"}
                                 };
 
-                                var data = google.visualization.arrayToDataTable([
+                                let data = google.visualization.arrayToDataTable([
                                     ['Days', 'Requests', {role: 'annotation'}],
                                     <?php foreach($userActivity['byHour'] as $k => $item): ?>
                                     ['<?=($item['created_hour']) ?>:00, <?=date('d-M', strtotime($item['created_date'])) ?> ', <?= $item['cnt'] ?>, '<?= ' ' ?>'],
                                     <?php endforeach; ?>
                                 ]);
-                                totalCallsChart.draw(data, options);
+                                totalRequestsChart.draw(data, options);
 
                                 $(window).on('resize', function () {
                                     options.width = document.getElementById('tab_content1').clientWidth
-                                    totalCallsChart.draw(data, options)
+                                    totalRequestsChart.draw(data, options)
                                 })
                             })
                         </script>
@@ -222,7 +222,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     <div class="" role="tabpanel" data-example-id="togglable-tabs">
                         <ul id="myTab" class="nav nav-tabs bar_tabs" role="tablist">
-                            <li role="presentation" class="active"><a href="#tab_content3" role="tab" id="profile-tab2" data-toggle="tab" aria-expanded="false" class="active" aria-selected="false">Profile</a>
+                            <li role="presentation" class="active"><a href="#tab_content3" role="tab" id="profile-tab3" data-toggle="tab" aria-expanded="false" class="" aria-selected="false">Profile</a>
                             </li>
                             <!-- <li role="presentation" class=""><a href="#tab_content2" role="tab" id="profile-tab" data-toggle="tab" aria-expanded="false" class="" aria-selected="false">Projects Worked on</a>-->
                             <!-- </li>-->
@@ -263,7 +263,7 @@ $this->params['breadcrumbs'][] = $this->title;
 //                                    'model' => $model,
 //                                ]) ?>
 <!--                            </div>-->
-                            <div role="tabpanel" class="tab-pane active" id="tab_content3" aria-labelledby="profile-tab">
+                            <div role="tabpanel" class="tab-pane fade" id="tab_content3" aria-labelledby="profile-tab">
                                 <?= $this->render('partial/_info_profile', [
                                     'model' => $model,
                                 ]) ?>
@@ -332,7 +332,36 @@ $this->params['breadcrumbs'][] = $this->title;
                         </div>
                     </div>
                 </div>
+
+                <?php
+                $jsTabs = <<<JS
+                    $('a[data-toggle="tab"]').on('show.bs.tab', function(e) {
+                        //console.log(localStorage)
+                        //localStorage.removeItem('activeTab');
+                        localStorage.setItem('activeTab', $(e.target).attr('href'));
+                    });                    
+                    
+                    var activeTab = localStorage.getItem('activeTab');                    
+                    if (activeTab) {
+                       $('a[href="' + activeTab + '"]').tab('show');
+                    }
+                    JS;
+                $this->registerJs($jsTabs, \yii\web\View::POS_LOAD)
+                ?>
+
                 <?php Pjax::end() ?>
             </div>
         </div>
 </div>
+
+<?php
+$js = <<<JS
+    var activeTab = localStorage.getItem('activeTab');                    
+    if (!activeTab) {
+         $('#profile-tab3').addClass('active')
+         $('#tab_content3').removeClass('fade').addClass('active')
+    }
+JS;
+
+$this->registerJs($js, \yii\web\View::POS_LOAD)
+?>
