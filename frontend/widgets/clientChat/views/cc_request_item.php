@@ -21,7 +21,7 @@ $accessUrl = \yii\helpers\Url::to('/client-chat/access-manage');
 				<?php foreach($access->ccuaCch->cchClient->clientEmails as $email): ?>
 					<span class="_cc-client-email">
                                             <i class="fa fa-envelope"></i>
-                                            <code><?= Html::encode($email->email) ?></code>
+                                            <i><?= Html::encode($email->email) ?></i>
                                         </span>
 				<?php endforeach; ?>
 			<?php endif; ?>
@@ -30,35 +30,50 @@ $accessUrl = \yii\helpers\Url::to('/client-chat/access-manage');
 				<?php foreach($access->ccuaCch->cchClient->clientPhones as $phone): ?>
 					<span class="_cc-client-phone">
                                             <i class="fa fa-phone"></i>
-                                            <code><?= Html::encode($phone->phone) ?></code>
+                                            <i><?= Html::encode($phone->phone) ?></i>
                                         </span>
 				<?php endforeach; ?>
 			<?php endif; ?>
 
-			<span class="_cc-request-created">
-                                    <?php if ($formatter instanceof Formatter): ?>
-										<?= $formatter->asByUserDateTime($access->getTimeByChatStatus()) ?>
-									<?php else: ?>
-										<?= $formatter->asDatetime($access->getTimeByChatStatus()) ?>
-									<?php endif; ?>
-                                </span>
-
-			<?php if ($formatter instanceof Formatter): ?>
-				<span>
-                                        <?= $formatter->asTimer($access->getTimeByChatStatus()) ?>
-                                    </span>
-			<?php endif; ?>
-			<div class="_cc-data">
-				<?php if ($access->ccuaCch->cchDep): ?>
+            <div class="_cc-data">
+                <?php /*if ($access->ccuaCch->cchDep): ?>
 					<span class="label label-default"><?= Html::encode($access->ccuaCch->cchDep->dep_name) ?></span>
-				<?php endif; ?>
+				<?php endif;*/ ?>
 
-				<?php if ($access->ccuaCch->cchProject): ?>
-					<span class="label label-default"><?= Html::encode($access->ccuaCch->cchProject->name) ?></span>
-				<?php endif; ?>
+                <?php if ($access->ccuaCch->cchProject): ?>
+                    <span class="label label-success" style="font-size: 12px"><?= Html::encode($access->ccuaCch->cchProject->name) ?></span>
+                <?php endif; ?>
 
-				<span class="label label-default"><?= Html::encode($access->ccuaCch->cchChannel ? $access->ccuaCch->cchChannel->ccc_name : '') ?></span>
-			</div>
+                <span class="label label-default" style="font-size: 12px"><?= Html::encode($access->ccuaCch->cchChannel ? $access->ccuaCch->cchChannel->ccc_name : '') ?></span>
+            </div>
+
+            <div class="col-md-12">
+
+                    <span class="_cc-request-created">
+                        <small>
+                                        <?php if ($formatter instanceof Formatter): ?>
+                                            <?= $formatter->asByUserDateTime($access->getTimeByChatStatus()) ?>
+                                        <?php else: ?>
+                                            <?= $formatter->asDatetime($access->getTimeByChatStatus()) ?>
+                                        <?php endif; ?>
+                        </small>
+                    </span>
+                    <span title="Relative Time">
+                    <?php
+                        $timeSec = strtotime($access->getTimeByChatStatus());
+                        if ($timeSec < (60 * 60 * 24) ) {
+                            echo '<i class="fa fa-clock-o"></i> ' . Yii::$app->formatter->asRelativeTime($timeSec);
+                        } else {
+                            if ($formatter instanceof Formatter) {
+                                echo $formatter->asTimer($access->getTimeByChatStatus());
+                            }
+                        }
+                    ?>
+                    </span>
+
+
+            </div>
+
 
 			<?php if ($access->ccuaCch->cchOwnerUser && $access->ccuaCch->isTransfer()): ?>
 				<div>

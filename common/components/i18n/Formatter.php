@@ -464,9 +464,9 @@ class Formatter extends \yii\i18n\Formatter
 
 		$diff = abs($currentTime-$dateTime);
 
-		$icon = Html::tag('i', '', ['class' => 'fas fa-hourglass-end']);
+		$icon = Html::tag('i', '', ['class' => 'fa fa-clock-o']);
 		$timerSpan = Html::tag('span', '', ['class' => 'enable-timer ' . $timerSpanClass, 'data-seconds' => $diff]);
-		return Html::tag('span', $icon . ' ' . $timerSpan);
+		return Html::tag('div', $icon . ' ' . $timerSpan);
 	}
 
 	/**
