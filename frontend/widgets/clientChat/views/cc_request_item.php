@@ -61,7 +61,7 @@ $accessUrl = \yii\helpers\Url::to('/client-chat/access-manage');
                     <span title="Relative Time">
                     <?php
                         $timeSec = strtotime($access->getTimeByChatStatus());
-                        if ($timeSec < (60 * 60 * 24) ) {
+                        if ($timeSec >= (60 * 60 * 24) ) {
                             echo '<i class="fa fa-clock-o"></i> ' . Yii::$app->formatter->asRelativeTime($timeSec);
                         } else {
                             if ($formatter instanceof Formatter) {
