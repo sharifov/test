@@ -1,66 +1,139 @@
 <?php
 
-use yii\bootstrap4\Html;
-use common\components\bootstrap4\activeForm\ActiveForm;
+use common\components\grid\UserSelect2Column;
+use common\models\Department;
+use common\models\Employee;
+use common\models\Language;
+use common\models\Project;
+use kartik\select2\Select2;
+use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChat\entity\search\ClientChatQaSearch;
+use sales\model\clientChatChannel\entity\ClientChatChannel;
+use sales\model\clientChatData\entity\ClientChatData;
+use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
+use yii\helpers\Html;
+use yii\web\View;
+use yii\widgets\ActiveForm;
+use yii\widgets\Pjax;
 
-/* @var $this yii\web\View */
-/* @var $model sales\model\clientChat\entity\search\ClientChatSearch */
-/* @var $form common\components\bootstrap4\activeForm\ActiveForm */
+/* @var yii\web\View $this */
+/* @var ClientChatQaSearch $model */
+/* @var yii\widgets\ActiveForm $form */
 ?>
 
 <div class="client-chat-search">
 
-    <?php $form = ActiveForm::begin([
-        'action' => ['index'],
-        'method' => 'get',
-        'options' => [
-            'data-pjax' => 1
-        ],
-    ]); ?>
+    <div class="x_panel">
+        <div class="x_title">
+            <h2><i class="fa fa-search"></i> Search</h2>
+            <ul class="nav navbar-right panel_toolbox">
+                <li>
+                    <a class="collapse-link"><i class="fa fa-chevron-down"></i></a>
+                </li>
+            </ul>
+            <div class="clearfix"></div>
+        </div>
 
-    <?= $form->field($model, 'cch_id') ?>
+        <?php $display = (Yii::$app->request->isPjax || Yii::$app->request->get('ClientChatQaSearch'))
+            ? 'block' : 'none'; ?>
+        <div class="x_content" style="display: <?php echo $display ?>">
+            <?php $form = ActiveForm::begin([
+                'action' => ['index'],
+                'id' => 'qa_search_form',
+                'method' => 'get',
+                'options' => [
+                    'data-pjax' => 1
+                ],
+            ]); ?>
 
-    <?= $form->field($model, 'cch_rid') ?>
+            <div class="row">
+                <div class="col-md-2">
+                    <?php echo $form->field($model, 'cch_id') ?>
+                    <?php echo $form->field($model, 'cch_channel_id')->dropDownList(ClientChatChannel::getList(), ['prompt' => '-']) ?>
 
-    <?= $form->field($model, 'cch_ccr_id') ?>
+                    <?= $form->field($model, 'createdRangeDate', [
+                        'options' => ['class' => 'form-group']
+                    ])->widget(\kartik\daterange\DateRangePicker::class, [
+                        'presetDropdown' => false,
+                        'hideInput' => true,
+                        'convertFormat' => true,
+                        'pluginOptions' => [
+                            'timePicker' => false,
+                            'locale' => [
+                                'format' => 'd-M-Y',
+                                'separator' => ' - '
+                            ]
+                        ]
+                    ])->label('Created From / To') ?>
 
-    <?= $form->field($model, 'cch_title') ?>
+                </div>
+                <div class="col-md-2">
+                    <?php echo $form->field($model, 'cch_rid') ?>
+                    <?php echo $form->field($model, 'cch_client_id') ?>
+                </div>
+                <div class="col-md-2">
+                    <?php echo $form->field($model, 'cch_ccr_id') ?>
 
-    <?= $form->field($model, 'cch_description') ?>
+                    <?php echo $form->field($model, 'cch_owner_user_id')->widget(Select2::class, [
+                            'data' => Employee::getList(),
+                            'size' => Select2::SMALL,
+                            'options' => ['multiple' => false],
+                            'pluginOptions' => ['allowClear' => true, 'placeholder' => '', 'id' => 'user_id'],
+                    ]) ?>
+                </div>
+                <div class="col-md-2">
+                    <?php echo $form->field($model, 'cch_status_id')->dropDownList(ClientChat::getStatusList(), ['prompt' => '-']) ?>
+                    <?php echo $form->field($model, 'caseId') ?>
+                </div>
+                <div class="col-md-2">
+                    <?php echo $form->field($model, 'cch_project_id')->dropDownList(Project::getList(), ['prompt' => '-']) ?>
+                    <?php echo $form->field($model, 'leadId') ?>
 
-    <?php // echo $form->field($model, 'cch_project_id') ?>
+                </div>
+                <div class="col-md-2">
+                    <?php echo $form->field($model, 'cch_dep_id')->dropDownList(Department::getList(), ['prompt' => '-']) ?>
+                    <?php echo $form->field($model, 'cch_language_id')->dropDownList(Language::getLanguages(), ['prompt' => '-']) ?>
+                </div>
+            </div>
 
-    <?php // echo $form->field($model, 'cch_dep_id') ?>
+            <div class="row">
+                <div class="col-md-2">
+                    <?php echo $form->field($model, 'dataCountry')->dropDownList(ClientChatVisitorData::getCountryList(), ['prompt' => '-']) ?>
+                </div>
+                <div class="col-md-2">
+                    <?php echo $form->field($model, 'dataCity')->dropDownList(ClientChatVisitorData::getCityList(), ['prompt' => '-']) ?>
+                </div>
+                <!--<div class="col-md-1">
+                    <?php /* echo $form->field($model, 'messageBy')->dropDownList(ClientChatQaSearch::MESSAGE_BY_LIST, ['prompt' => '-']) */ ?>
+                </div>-->
+                <div class="col-md-2">
+                    <?php echo $form->field($model, 'messageText') ?>
+                </div>
+            </div>
 
-    <?php // echo $form->field($model, 'cch_channel_id') ?>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group text-center">
+                        <?= Html::submitButton('<i class="fa fa-search"></i> Search', ['class' => 'btn btn-primary search_qa_btn']) ?>
+                        <?= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset',
+                            ['index'], ['class' => 'btn btn-outline-secondary']) ?>
+                    </div>
+                </div>
+            </div>
 
-    <?php // echo $form->field($model, 'cch_client_id') ?>
-
-    <?php // echo $form->field($model, 'cch_owner_user_id') ?>
-
-    <?php // echo $form->field($model, 'cch_note') ?>
-
-    <?php // echo $form->field($model, 'cch_status_id') ?>
-
-    <?php // echo $form->field($model, 'cch_ip') ?>
-
-    <?php // echo $form->field($model, 'cch_ua') ?>
-
-    <?php // echo $form->field($model, 'cch_language_id') ?>
-
-    <?php // echo $form->field($model, 'cch_created_dt') ?>
-
-    <?php // echo $form->field($model, 'cch_updated_dt') ?>
-
-    <?php // echo $form->field($model, 'cch_created_user_id') ?>
-
-    <?php // echo $form->field($model, 'cch_updated_user_id') ?>
-
-    <div class="form-group">
-        <?= Html::submitButton('Search', ['class' => 'btn btn-primary']) ?>
-        <?= Html::resetButton('Reset', ['class' => 'btn btn-outline-secondary']) ?>
+            <?php ActiveForm::end(); ?>
+        </div>
     </div>
-
-    <?php ActiveForm::end(); ?>
-
 </div>
+
+<?php
+$js = <<<JS
+    $(document).on('beforeSubmit', '#qa_search_form', function(event) {
+        let btn = $(this).find('.search_qa_btn');
+        
+        btn.html('<i class="fa fa-cog fa-spin"></i>  Loading')            
+            .prop("disabled", true);
+    });
+JS;
+$this->registerJs($js, View::POS_READY);
+?>

@@ -69,7 +69,7 @@ class ClientChatCrudController extends FController
         $searchModel = new ClientChatQaSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-        return $this->render('../client-chat-qa/index', [
+        return $this->render('../client-chat-crud/index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
@@ -113,7 +113,7 @@ class ClientChatCrudController extends FController
         $dataProviderFeedback = $searchModelFeedback->search($data);
         $dataProviderFeedback->setPagination(['pageSize' => 20]);
 
-        return $this->render('../client-chat-qa/view', [
+        return $this->render('../client-chat-crud/view', [
             'model' => $this->findModel($id),
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
