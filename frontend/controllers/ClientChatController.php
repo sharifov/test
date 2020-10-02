@@ -20,6 +20,7 @@ use sales\auth\Auth;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesSearch;
 use sales\entities\chat\ChatExtendedGraphsSearch;
+use sales\entities\chat\ChatFeedbackGraphSearch;
 use sales\entities\chat\ChatGraphsSearch;
 use sales\forms\clientChat\RealTimeStartChatForm;
 use sales\helpers\app\AppHelper;
@@ -54,6 +55,7 @@ use sales\services\clientChatService\ClientChatService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
 use sales\services\TransactionManager;
 use sales\viewModel\chat\ViewModelChatExtendedGraph;
+use sales\viewModel\chat\ViewModelChatFeedbackGraph;
 use sales\viewModel\chat\ViewModelChatGraph;
 use yii\data\ActiveDataProvider;
 use yii\data\ArrayDataProvider;
@@ -518,6 +520,33 @@ class ClientChatController extends FController
         if ($statsSearch->validate()) {
             $html = $this->renderAjax('partial/_extended_stats_chart', [
                 'viewModel' => new ViewModelChatExtendedGraph($statsSearch->stats(), $statsSearch),
+            ]);
+        }
+
+        $response = [
+            'html' => $html ?? '',
+            'error' => $statsSearch->hasErrors(),
+            'message' => $statsSearch->getErrorSummary(true),
+        ];
+
+        return $this->asJson($response);
+    }
+
+    public function actionFeedbackStats()
+    {
+        $model = new ChatFeedbackGraphSearch();
+        $model->load(\Yii::$app->request->queryParams);
+
+        return $this->render('feedback-stats', ['model' => $model]);
+    }
+
+    public function actionAjaxGetFeedbackStatsChart(): \yii\web\Response
+    {
+        $statsSearch = new ChatFeedbackGraphSearch();
+        $statsSearch->load(Yii::$app->request->post());
+        if ($statsSearch->validate()) {
+            $html = $this->renderAjax('partial/_feedback_stats_chart', [
+                'viewModel' => new ViewModelChatFeedbackGraph($statsSearch->stats(), $statsSearch),
             ]);
         }
 
