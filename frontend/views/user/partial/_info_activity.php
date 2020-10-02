@@ -12,7 +12,7 @@ use yii\widgets\Pjax;
 
 ?>
 
-<?php /*if (isset($userActivity['byHour']) && $userActivity['byHour']): */?><!--
+<?php /*if (isset($userActivity['byHour']) && $userActivity['byHour']): */ ?><!--
 
     <div id="chart_div"></div>
 
@@ -68,9 +68,9 @@ use yii\widgets\Pjax;
 
             var data = google.visualization.arrayToDataTable([
                 ['Days', 'Requests', {role: 'annotation'}],
-                <?php /*foreach($userActivity['byHour'] as $k => $item): */?>
-                ['<?/*=($item['created_hour']) */?>:00, <?/*=date('d-M', strtotime($item['created_date'])) */?> ', <?/*= $item['cnt'] */?>, '<?/*= ' ' */?>'],
-                <?php /*endforeach; */?>
+                <?php /*foreach($userActivity['byHour'] as $k => $item): */ ?>
+                ['<? /*=($item['created_hour']) */ ?>:00, <? /*=date('d-M', strtotime($item['created_date'])) */ ?> ', <? /*= $item['cnt'] */ ?>, '<? /*= ' ' */ ?>'],
+                <?php /*endforeach; */ ?>
             ]);
             totalCallsChart.draw(data, options);
 
@@ -80,10 +80,11 @@ use yii\widgets\Pjax;
             })
         })
     </script>
---><?php /*endif; */?>
+--><?php /*endif; */ ?>
 
-<?php if (isset($userActivity['byPage']) && $userActivity['byPage']): ?>
-    <?php Pjax::begin() ?>
+<?php Pjax::begin() ?>
+<h5>Recent Activity</h5>
+<div class="well">
     <?= GridView::widget([
         'dataProvider' => new \yii\data\ArrayDataProvider([
             'allModels' => $userActivity['byPage'],
@@ -91,7 +92,7 @@ use yii\widgets\Pjax;
                 'pageSize' => 10,
             ],
         ]),
-        //'filterModel' => $searchModel,
+        'emptyTextOptions' => ['class' => 'text-center'],
         'columns' => [
             [
                 'label' => 'Page Url',
@@ -104,8 +105,9 @@ use yii\widgets\Pjax;
         ]
     ]);
     ?>
-    <?php Pjax::end() ?>
-<?php endif; ?>
+</div>
+<?php Pjax::end() ?>
+
 <!--
 <ul class="messages">
     <li>
