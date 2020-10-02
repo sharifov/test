@@ -27,6 +27,7 @@ use sales\model\clientChatVisitor\entity\ClientChatVisitor;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\helpers\Html;
 
 /**
  * This is the model class for table "client_chat".
@@ -269,10 +270,21 @@ class ClientChat extends \yii\db\ActiveRecord
 		return self::SOURCE_TYPE_LIST;
 	}
 
+    /**
+     * @return string|null
+     */
 	public function getStatusName(): ?string
 	{
 		return $this->cch_status_id ? self::getStatusList()[$this->cch_status_id] : null;
 	}
+
+    /**
+     * @return string
+     */
+    public function getStatusLabel(): string
+    {
+        return '<span style="font-size: 12px" class="label label-' . Html::encode($this->getStatusClass()) . '">' . Html::encode($this->getStatusName()) . '</span>';
+    }
 
 	public function getSourceTypeName(): ?string
 	{

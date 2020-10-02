@@ -1942,6 +1942,23 @@ class TestController extends FController
 
         echo 'Test Error, Warning, Info - ' . date('Y-m-d H:i:s');
     }
+
+    public function actionLock(): string
+    {
+        $redis = Yii::$app->redis;
+        $key = 'test-lock';
+
+        //VarDumper::dump($redis->get($key));
+
+        if ($redis->get($key)) {
+            return 'lock';
+        } else {
+            $redis->setnx($key, 1);
+            $redis->expire($key, 10);
+            //sleep(3);
+        }
+        return 'ok';
+    }
 }
 
 

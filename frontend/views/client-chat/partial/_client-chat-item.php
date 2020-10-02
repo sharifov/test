@@ -55,9 +55,9 @@ use yii\widgets\Pjax;
                 <p><b><?= Html::encode($clientChat['client_full_name']) ?></b></p>
                 <p title="Сhat creation date"><small><?= Yii::$app->formatter->asDate($clientChat['cch_created_dt'],'php:F d Y') ?></small></p>
                 <div>
-                    <?php if ($clientChat['dep_name']): ?>
+                    <?php /*if ($clientChat['dep_name']): ?>
                         <span class="label label-info"><?= Html::encode($clientChat['dep_name']) ?></span>
-                    <?php endif; ?>
+                    <?php endif;*/ ?>
 
                     <?php if ($clientChat['project_name']): ?>
                         <span class="label label-success"><?= Html::encode($clientChat['project_name']) ?></span>
