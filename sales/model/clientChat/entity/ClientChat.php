@@ -293,26 +293,26 @@ class ClientChat extends \yii\db\ActiveRecord
 
 	public function pending(?int $userId, int $action, ?string $description = null): void
 	{
-		$this->recordEvent(new ClientChatManageStatusLogEvent($this, $this->cch_status_id, self::STATUS_PENDING, $this->cch_owner_user_id, $userId, $description, $this->cch_channel_id, $action));
+		$this->recordEvent(new ClientChatManageStatusLogEvent($this, $this->cch_status_id, self::STATUS_PENDING, $this->cch_owner_user_id, $userId, $description, $this->cch_channel_id, $action, null));
 		$this->cch_status_id = self::STATUS_PENDING;
 	}
 
-	public function close(int $userId, int $action, ?string $description = null): void
+	public function close(int $userId, int $action, ?int $reasonId = null, ?string $description = null): void
 	{
-		$this->recordEvent(new ClientChatManageStatusLogEvent($this, $this->cch_status_id, self::STATUS_CLOSED, $this->cch_owner_user_id, $userId, $description, $this->cch_channel_id, $action));
+		$this->recordEvent(new ClientChatManageStatusLogEvent($this, $this->cch_status_id, self::STATUS_CLOSED, $this->cch_owner_user_id, $userId, $description, $this->cch_channel_id, $action, $reasonId));
 		$this->recordEvent(new ClientChatSetStatusCloseEvent($this->cch_id));
 		$this->cch_status_id = self::STATUS_CLOSED;
 	}
 
-	public function transfer(int $userId, int $action, ?string $description = null): void
+	public function transfer(int $userId, int $action, ?int $reasonId, ?string $description = null): void
 	{
-		$this->recordEvent(new ClientChatManageStatusLogEvent($this, $this->cch_status_id, self::STATUS_TRANSFER, $this->cch_owner_user_id, $userId, $description, $this->cch_channel_id, $action));
+		$this->recordEvent(new ClientChatManageStatusLogEvent($this, $this->cch_status_id, self::STATUS_TRANSFER, $this->cch_owner_user_id, $userId, $description, $this->cch_channel_id, $action, $reasonId));
 		$this->cch_status_id = self::STATUS_TRANSFER;
 	}
 
 	public function inProgress(?int $userId, $action): void
 	{
-		$this->recordEvent(new ClientChatManageStatusLogEvent($this, $this->cch_status_id, self::STATUS_IN_PROGRESS, $this->cch_owner_user_id, $userId, null, $this->cch_channel_id, $action));
+		$this->recordEvent(new ClientChatManageStatusLogEvent($this, $this->cch_status_id, self::STATUS_IN_PROGRESS, $this->cch_owner_user_id, $userId, null, $this->cch_channel_id, $action, null));
 		$this->cch_status_id = self::STATUS_IN_PROGRESS;
 	}
 

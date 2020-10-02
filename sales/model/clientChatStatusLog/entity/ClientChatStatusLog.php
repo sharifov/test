@@ -148,8 +148,7 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
 		?int $ownerId,
 		?int $creatorId,
 		?int $channelId,
-		int $actionType,
-		?string $description = ''
+		int $actionType
 	): self
 	{
 		$status = new self();
@@ -159,7 +158,6 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
 		$status->csl_owner_id = $ownerId;
 		$status->csl_user_id = $creatorId;
 		$status->csl_prev_channel_id = $channelId;
-		$status->csl_description = $description;
 		$status->csl_action_type = $actionType;
 		$status->csl_start_dt = date('Y-m-d H:i:s');
 		return $status;

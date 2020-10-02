@@ -4,6 +4,7 @@
 namespace sales\services\clientChatService;
 
 
+use sales\model\clientChat\entity\statusLogReason\ClientChatStatusLogReason;
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\repositories\clientChatStatusLogRepository\ClientChatStatusLogRepository;
 
@@ -26,13 +27,17 @@ class ClientChatStatusLogService
 		$this->clientChatStatusLogRepository = $clientChatStatusLogRepository;
 	}
 
-	public function log(int $chatId, ?int $fromStatus, int $toStatus, ?int $ownerId, ?string $description, ?int $userId, ?int $prevChannel, int $actionType): void
+	public function log(int $chatId, ?int $fromStatus, int $toStatus, ?int $ownerId, ?string $description, ?int $userId, ?int $prevChannel, int $actionType, ?int $reasonId): void
 	{
 		if ($previous = $this->clientChatStatusLogRepository->getPrevious($chatId)) {
 			$previous->end();
 			$this->clientChatStatusLogRepository->save($previous);
 		}
-		$log = ClientChatStatusLog::create($chatId, $fromStatus, $toStatus, $ownerId, $userId, $prevChannel, $actionType, $description);
+		$log = ClientChatStatusLog::create($chatId, $fromStatus, $toStatus, $ownerId, $userId, $prevChannel, $actionType);
 		$this->clientChatStatusLogRepository->save($log);
+		if ($reasonId) {
+			$statusLogReason = ClientChatStatusLogReason::create($log->csl_id, $reasonId, $description);
+			$statusLogReason->save();
+		}
 	}
 }

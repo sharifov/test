@@ -342,7 +342,7 @@ class ClientChatService
 				throw new \DomainException('Client already has active chat in this department');
 			}
 
-			$clientChat->transfer($user->id, ClientChatStatusLog::ACTION_TRANSFER, $form->comment);
+			$clientChat->transfer($user->id, ClientChatStatusLog::ACTION_TRANSFER, $form->reasonId, $form->comment);
 			$clientChat->cch_channel_id = $clientChatChannel->ccc_id;
 			$this->clientChatRepository->save($clientChat);
 
@@ -493,7 +493,7 @@ class ClientChatService
 			throw new \RuntimeException('[Chat Bot] ' . ($botCloseChatResult['data']['message'] ?? 'Unknown error message'));
 		}
 
-		$clientChat->close($user->id, ClientChatStatusLog::ACTION_CLOSE, $form->comment);
+		$clientChat->close($user->id, ClientChatStatusLog::ACTION_CLOSE, $form->reasonId, $form->comment);
 
 		$this->clientChatRepository->save($clientChat);
 

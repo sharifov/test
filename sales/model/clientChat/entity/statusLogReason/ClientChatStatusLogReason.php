@@ -61,4 +61,13 @@ class ClientChatStatusLogReason extends \yii\db\ActiveRecord
     {
         return 'client_chat_status_log_reason';
     }
+
+    public static function create(int $statusLog, int $reasonId, ?string $comment): self
+	{
+		$model = new self();
+		$model->cslr_status_log_id = $statusLog;
+		$model->cslr_action_reason_id = $reasonId;
+		$model->cslr_comment = $comment;
+		return $model;
+	}
 }

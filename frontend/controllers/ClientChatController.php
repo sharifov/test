@@ -596,7 +596,7 @@ class ClientChatController extends FController
         } catch (\RuntimeException $e) {
             $form->addError('general', $e->getMessage());
         } catch (\Throwable $e) {
-            Yii::error(AppHelper::throwableFormatter($e), 'ClientChatController::actionAjaxClose::Throwable');
+			Yii::error(VarDumper::dumpAsString(AppHelper::throwableLog($e, true)), 'ClientChatController::actionAjaxClose::Throwable');
             $form->addError('general', 'Internal Server Error');
         }
 

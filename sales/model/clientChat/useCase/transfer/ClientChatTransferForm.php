@@ -1,6 +1,8 @@
 <?php
 namespace sales\model\clientChat\useCase\transfer;
 
+use sales\model\clientChat\entity\actionReason\ClientChatActionReasonQuery;
+use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use yii\base\Model;
 
 /**
@@ -41,9 +43,25 @@ class ClientChatTransferForm extends Model
 	public $agentId;
 
 	/**
+	 * @var int
+	 */
+	public $reasonId;
+
+	/**
+	 * @var ReasonDto[]
+	 */
+	public $reasons;
+
+	/**
 	 * @var string|null
 	 */
 	public $comment;
+
+	public function __construct($config = [])
+	{
+		parent::__construct($config);
+		$this->reasons = ClientChatActionReasonQuery::getReasons(ClientChatStatusLog::ACTION_TRANSFER);
+	}
 
 	public function rules(): array
 	{
@@ -60,8 +78,21 @@ class ClientChatTransferForm extends Model
 			}],
 			['agentId', 'each', 'rule' => ['integer']],
 			['agentId', 'each', 'rule' => ['filter', 'filter' => 'intval']],
-			['comment', 'string', 'max' => 255],
+			['reasonId', 'in', 'range' => array_keys($this->getReasonList())],
+			['comment', 'string', 'max' => 100],
+			['comment', 'required', 'when' => function () {
+				return (isset($this->reasons[$this->reasonId]) && $this->reasons[$this->reasonId]->isCommentRequired());
+			}, 'skipOnError' => true],
 		];
+	}
+
+	public function getReasonList(): array
+	{
+		$list = [];
+		foreach ($this->reasons as $reason) {
+			$list[$reason->id] = $reason->name;
+		}
+		return $list;
 	}
 
 	public function attributeLabels(): array
@@ -71,6 +102,7 @@ class ClientChatTransferForm extends Model
 			'depId' => 'Department',
 			'isOnline' => 'Client Network Status',
 			'agentId' => 'Agents',
+			'reasonId' => 'Reason',
 			'comment' => 'Comment'
 		];
 	}

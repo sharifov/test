@@ -17,6 +17,7 @@ use sales\model\clientChat\entity\ClientChat;
  * @property int|string $description
  * @property int|null $prevChannelId
  * @property int| $actionType
+ * @property int|null $reasonId
  */
 class ClientChatManageStatusLogEvent
 {
@@ -28,8 +29,9 @@ class ClientChatManageStatusLogEvent
 	public $description;
 	public $prevChannelId;
 	public $actionType;
+	public $reasonId;
 
-	public function __construct(ClientChat $chat, ?int $oldStatus, int $newStatus, ?int $ownerId, ?int $creatorUserId, ?string $description, ?int $prevChannelId, int $actionType)
+	public function __construct(ClientChat $chat, ?int $oldStatus, int $newStatus, ?int $ownerId, ?int $creatorUserId, ?string $description, ?int $prevChannelId, int $actionType, ?int $reasonId)
 	{
 		$this->chat = $chat;
 		$this->oldStatus = $oldStatus;
@@ -39,5 +41,6 @@ class ClientChatManageStatusLogEvent
 		$this->description = $description;
 		$this->prevChannelId = $prevChannelId;
 		$this->actionType = $actionType;
+		$this->reasonId = $reasonId;
 	}
 }
