@@ -52,6 +52,7 @@ class ClientChatRequest extends \yii\db\ActiveRecord
 		self::EVENT_USER_DEPARTMENT_TRANSFER => 'USER_DEPARTMENT_TRANSFER',
 		self::EVENT_TRACK => 'TRACK_EVENT',
 		self::EVENT_LEAVE_FEEDBACK => 'LEAVE_FEEDBACK',
+		self::EVENT_CREATE_BY_AGENT => 'CREATE_BY_AGENT'
 	];
 
 	private array $decodedJsonData = [];

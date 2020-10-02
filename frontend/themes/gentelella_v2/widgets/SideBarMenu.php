@@ -235,6 +235,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Channel', 'url' => ['/client-chat-channel-crud/index']],
                         ['label' => 'Channel Translate', 'url' => ['/client-chat-channel-translate/index']],
                         ['label' => 'Status Log', 'url' => ['/client-chat-status-log-crud/index']],
+                        ['label' => 'Action Reason', 'url' => ['/client-chat-action-reason-crud/index']],
+                        ['label' => 'Status Log Reason', 'url' => ['/client-chat-status-log-reason-crud/index']],
                         ['label' => 'User Channel', 'url' => ['/client-chat-user-channel-crud/index']],
                         ['label' => 'User Access', 'url' => ['/client-chat-user-access-crud/index']],
                         ['label' => 'Chat Messages', 'url' => ['/client-chat-message-crud/index']],

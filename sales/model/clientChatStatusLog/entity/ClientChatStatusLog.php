@@ -87,7 +87,7 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
             ['csl_to_status', 'integer'],
 
 			['csl_action_type', 'integer'],
-			['csl_action_type', 'in', 'range' => self::getActionList()],
+			['csl_action_type', 'in', 'range' => array_keys(self::getActionList())],
 
 			['csl_user_id', 'integer'],
 			['csl_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['csl_user_id' => 'id']],
@@ -175,18 +175,18 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
 		return self::ACTION_LIST;
 	}
 
-	public function getActionName(): ?string
+	public static function getActionName(int $id): ?string
 	{
-		return self::getActionList()[$this->csl_action_type] ?? null;
+		return self::getActionList()[$id] ?? null;
 	}
 
-    public function getActionLabelClass(): string
+    public static function getActionLabelClass(int $id): string
 	{
-		return self::ACTION_LABEL_LIST[$this->csl_action_type] ?? 'badge badge-white';
+		return self::ACTION_LABEL_LIST[$id] ?? 'badge badge-white';
 	}
 
-	public function getActionLabel(): ?string
+	public static function getActionLabel(?int $id): ?string
 	{
-		return $this->csl_action_type ? Html::tag('span', $this->getActionName(), ['class' => $this->getActionLabelClass()]) : null;
+		return $id ? Html::tag('span', self::getActionName($id), ['class' => self::getActionLabelClass($id)]) : null;
 	}
 }
