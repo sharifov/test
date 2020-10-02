@@ -559,6 +559,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Emails Stats', 'url' => ['/stats/emails-graph'], 'icon' => 'line-chart'],
                 ['label' => 'Clients Chat Stats', 'url' => ['/client-chat/stats'], 'icon' => 'line-chart'],
                 ['label' => 'Chat Extended Stats', 'url' => ['/client-chat/extended-stats'], 'icon' => 'line-chart'],
+                ['label' => 'Chat Feedback Stats', 'url' => ['/client-chat/feedback-stats'], 'icon' => 'star'],
                 ['label' => 'Stats Employees', 'url' => ['/stats/index'], 'icon' => 'users'],
                 ['label' => 'User Stats', 'url' => ['/user-connection/stats'], 'icon' => 'area-chart'],
                 ['label' => 'Call User Map', 'url' => ['/call/user-map'], 'icon' => 'map'],
