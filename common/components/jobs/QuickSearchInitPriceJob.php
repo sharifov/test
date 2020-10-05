@@ -38,8 +38,8 @@ class QuickSearchInitPriceJob extends BaseObject implements JobInterface
                 $lead = Lead::findOne($this->lead_id);
                 if ($lead) {
                     $result = SearchService::getOnlineQuotes($lead);
-                    if($result && isset($result['results'][0]['prices']['totalPrice'])) {
-                        $minPrice = (double) $result['results'][0]['prices']['totalPrice'];
+                    if($result && isset($result['data']['results'][0]['prices']['totalPrice'])) {
+                        $minPrice = (double) $result['data']['results'][0]['prices']['totalPrice'];
                         $lead->l_init_price = $minPrice;
                         $lead->update();
                     }

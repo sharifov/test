@@ -23,7 +23,7 @@ class SearchService
     public const GDS_ONEPOINT      = 'M';
     public const GDS_WORLDSPAN     = 'W';
 
-    public CONST GDS_LIST = [
+    public const GDS_LIST = [
         self::GDS_SABRE => 'Sabre',
         self::GDS_AMADEUS => 'Amadeus',
         self::GDS_WORLDSPAN => 'WorldSpan',
@@ -128,10 +128,11 @@ class SearchService
      * @param bool $group
      * @return mixed
      * @throws \yii\httpclient\Exception
+     * @throws \JsonException
      */
     public static function getOnlineQuotes(Lead $lead, int $limit = 600, $gdsCode = null, bool $group = true)
     {
-        $result = null;
+        $result = [];
         $fl = [];
 
         $params = [
@@ -147,7 +148,7 @@ class SearchService
             $params['limit'] = $limit;
         }
 
-        if($gdsCode) {
+        if ($gdsCode) {
             $params['gds'] = $gdsCode;
         }
 
@@ -173,18 +174,20 @@ class SearchService
         $response = \Yii::$app->airsearch->sendRequest('v1/search', $params, 'GET');
 
         if ($response->isOk) {
-            return $response->data;
+            $result['data'] = $response->data;
         } else {
-
+            $result['error'] = $response->content;
             \Yii::error(
-                'LeadId: ' . $lead->id
-                . ' Params: ' . VarDumper::dumpAsString($params, 10)
-                . ' Error: ' . VarDumper::dumpAsString($response->content, 10)
-                , 'SearchService::getOnlineQuotes'
+                ['lead_id' => $lead->id,
+                'params' => $params,
+                'message' => $response->content],
+                'SearchService::getOnlineQuotes'
             );
         }
 
-        return json_decode($result, true);
+
+
+        return $result; //json_decode((string)$result, true, 512, JSON_THROW_ON_ERROR);
     }
 
     /**
@@ -195,23 +198,23 @@ class SearchService
     {
         $airlinesIata = [];
         $locationsIata = [];
-        if(isset($result['results'])){
-            foreach ($result['results'] as $resItem){
-                if(!in_array($resItem['validatingCarrier'], $airlinesIata)){
+        if (isset($result['results'])) {
+            foreach ($result['results'] as $resItem) {
+                if (!in_array($resItem['validatingCarrier'], $airlinesIata)) {
                     $airlinesIata[] = $resItem['validatingCarrier'];
                 }
-                foreach ($resItem['trips'] as $trip){
-                    foreach ($trip['segments'] as $segment){
-                        if(!in_array($segment['operatingAirline'], $airlinesIata)){
+                foreach ($resItem['trips'] as $trip) {
+                    foreach ($trip['segments'] as $segment) {
+                        if (!in_array($segment['operatingAirline'], $airlinesIata)) {
                             $airlinesIata[] = $segment['operatingAirline'];
                         }
-                        if(!in_array($segment['marketingAirline'], $airlinesIata)){
+                        if (!in_array($segment['marketingAirline'], $airlinesIata)) {
                             $airlinesIata[] = $segment['marketingAirline'];
                         }
-                        if(!in_array($segment['departureAirportCode'], $locationsIata)){
+                        if (!in_array($segment['departureAirportCode'], $locationsIata)) {
                             $locationsIata[] = $segment['departureAirportCode'];
                         }
-                        if(!in_array($segment['arrivalAirportCode'], $locationsIata)){
+                        if (!in_array($segment['arrivalAirportCode'], $locationsIata)) {
                             $locationsIata[] = $segment['arrivalAirportCode'];
                         }
                     }
@@ -231,21 +234,21 @@ class SearchService
         $locationsIata = [];
 
 
-        if(!in_array($resItem['validatingCarrier'], $airlinesIata)){
+        if (!in_array($resItem['validatingCarrier'], $airlinesIata)) {
             $airlinesIata[] = $resItem['validatingCarrier'];
         }
-        foreach ($resItem['trips'] as $trip){
-            foreach ($trip['segments'] as $segment){
-                if(!in_array($segment['operatingAirline'], $airlinesIata)){
+        foreach ($resItem['trips'] as $trip) {
+            foreach ($trip['segments'] as $segment) {
+                if (!in_array($segment['operatingAirline'], $airlinesIata)) {
                     $airlinesIata[] = $segment['operatingAirline'];
                 }
-                if(!in_array($segment['marketingAirline'], $airlinesIata)){
+                if (!in_array($segment['marketingAirline'], $airlinesIata)) {
                     $airlinesIata[] = $segment['marketingAirline'];
                 }
-                if(!in_array($segment['departureAirportCode'], $locationsIata)){
+                if (!in_array($segment['departureAirportCode'], $locationsIata)) {
                     $locationsIata[] = $segment['departureAirportCode'];
                 }
-                if(!in_array($segment['arrivalAirportCode'], $locationsIata)){
+                if (!in_array($segment['arrivalAirportCode'], $locationsIata)) {
                     $locationsIata[] = $segment['arrivalAirportCode'];
                 }
             }
@@ -261,7 +264,7 @@ class SearchService
     {
         $segments = [];
 
-        foreach ($result['trips'] as $trip){
+        foreach ($result['trips'] as $trip) {
             foreach ($trip['segments'] as $segment) {
                 $fSegment = new FlightSegment();
                 $fSegment->departureTime = $segment['departureTime'];
@@ -271,7 +274,7 @@ class SearchService
                 $fSegment->bookingClass = $segment['bookingClass'];
                 $fSegment->departureAirportCode = $segment['departureAirportCode'];
                 $fSegment->destinationAirportCode = $segment['arrivalAirportCode'];
-                if($segment['operatingAirline'] != $segment['marketingAirline']){
+                if ($segment['operatingAirline'] != $segment['marketingAirline']) {
                     $fSegment->operationAirlineCode = $segment['operatingAirline'];
                 }
                 $segments[] = $fSegment;
