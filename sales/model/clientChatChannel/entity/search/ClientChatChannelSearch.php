@@ -53,6 +53,7 @@ class ClientChatChannelSearch extends ClientChatChannel
             'ccc_dep_id' => $this->ccc_dep_id,
             'ccc_ug_id' => $this->ccc_ug_id,
             'ccc_disabled' => $this->ccc_disabled,
+            'ccc_frontend_enabled' => $this->ccc_frontend_enabled,
             'ccc_default' => $this->ccc_default,
             'ccc_priority' => $this->ccc_priority,
             'date_format(ccc_created_dt, "%Y-%m-%d")' => $this->ccc_created_dt,

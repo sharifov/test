@@ -54,8 +54,8 @@ class ClientChatNoteSearch extends ClientChatNote
             'ccn_chat_id' => $this->ccn_chat_id,
             'ccn_user_id' => $this->ccn_user_id,
             'ccn_deleted' => $this->ccn_deleted,
-            'ccn_created_dt' => $this->ccn_created_dt,
-            'ccn_updated_dt' => $this->ccn_updated_dt,
+            'DATE(ccn_created_dt)' => $this->ccn_created_dt,
+            'DATE(ccn_updated_dt)' => $this->ccn_updated_dt,
         ]);
 
         $query->andFilterWhere(['like', 'ccn_note', $this->ccn_note]);

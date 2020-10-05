@@ -61,8 +61,8 @@ class ClientChatChannelTranslateSearch extends ClientChatChannelTranslate
             'ct_channel_id' => $this->ct_channel_id,
             'ct_created_user_id' => $this->ct_created_user_id,
             'ct_updated_user_id' => $this->ct_updated_user_id,
-            'ct_created_dt' => $this->ct_created_dt,
-            'ct_updated_dt' => $this->ct_updated_dt,
+            'DATE(ct_created_dt)' => $this->ct_created_dt,
+            'DATE(ct_updated_dt)' => $this->ct_updated_dt,
         ]);
 
         $query->andFilterWhere(['like', 'ct_language_id', $this->ct_language_id])

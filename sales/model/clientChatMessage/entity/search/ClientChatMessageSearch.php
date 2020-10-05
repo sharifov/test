@@ -65,7 +65,7 @@ class ClientChatMessageSearch extends ClientChatMessage
             'ccm_id' => $this->ccm_id,
             'ccm_client_id' => $this->ccm_client_id,
             'ccm_user_id' => $this->ccm_user_id,
-            'ccm_sent_dt' => $this->ccm_sent_dt,
+            'DATE(ccm_sent_dt)' => $this->ccm_sent_dt,
             'ccm_cch_id' => $this->ccm_cch_id,
         ]);
 

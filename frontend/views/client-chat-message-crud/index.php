@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use common\components\grid\UserSelect2Column;
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\clientChatMessage\entity\search\ClientChatMessageSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -30,8 +31,17 @@ $this->params['breadcrumbs'][] = $this->title;
             'ccm_id',
             'ccm_rid',
             'ccm_client_id',
-            'ccm_user_id:userName',
-            'ccm_sent_dt:byUserDateTime',
+            //'ccm_user_id:userName',
+            [
+                'attribute' => 'ccm_user_id',
+                'format' => 'userName',
+                'filter' => \common\models\Employee::getList()
+            ],
+            [
+                'class' => common\components\grid\DateTimeColumn::class,
+                'attribute' => 'ccm_sent_dt',
+                'format' => 'byUserDateTime',
+            ],
             'ccm_has_attachment',
             //'ccm_body',
             [

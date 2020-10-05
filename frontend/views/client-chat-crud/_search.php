@@ -74,7 +74,7 @@ use yii\widgets\Pjax;
                 <div class="col-md-2">
                     <?php echo $form->field($model, 'cch_ccr_id') ?>
 
-                    <?php echo $form->field($model, 'cch_owner_user_id')->widget(Select2::class, [
+                    <?php echo $form->field($model, 'ownerUserID')->widget(Select2::class, [
                             'data' => Employee::getList(),
                             'size' => Select2::SMALL,
                             'options' => ['multiple' => false],

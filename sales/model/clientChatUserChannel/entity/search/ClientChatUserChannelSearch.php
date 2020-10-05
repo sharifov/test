@@ -43,7 +43,7 @@ class ClientChatUserChannelSearch extends ClientChatUserChannel
         $query->andFilterWhere([
             'ccuc_user_id' => $this->ccuc_user_id,
             'ccuc_channel_id' => $this->ccuc_channel_id,
-            'ccuc_created_dt' => $this->ccuc_created_dt,
+            'DATE(ccuc_created_dt)' => $this->ccuc_created_dt,
             'ccuc_created_user_id' => $this->ccuc_created_user_id,
         ]);
 

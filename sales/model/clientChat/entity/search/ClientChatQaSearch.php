@@ -38,6 +38,7 @@ class ClientChatQaSearch extends ClientChat
     public $messageText;
     public $leadId;
     public $caseId;
+    public string $ownerUserID = '';
 
     public const MESSAGE_BY_CLIENT = 1;
     public const MESSAGE_BY_USER = 2;
@@ -69,6 +70,7 @@ class ClientChatQaSearch extends ClientChat
                 'safe',
             ],
             [['dataCountry', 'dataCity', 'messageText'], 'string', 'max' => 100],
+            ['ownerUserID', 'string']
         ];
     }
 
@@ -76,6 +78,7 @@ class ClientChatQaSearch extends ClientChat
     {
         $labels = [
             'cch_client_id' => 'Client ID',
+            'ownerUserID' => 'Owner User'
         ];
         return ArrayHelper::merge(parent::attributeLabels(), $labels);
     }
