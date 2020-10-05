@@ -44,7 +44,7 @@ class ClientChatFeedback extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['ccf_client_chat_id', 'ccf_user_id', 'ccf_client_id'], 'required'],
+            [['ccf_client_chat_id', 'ccf_client_id'], 'required'],
             [['ccf_client_chat_id', 'ccf_user_id', 'ccf_client_id'], 'integer'],
             [['ccf_message'], 'string'],
             [['ccf_created_dt', 'ccf_updated_dt'], 'safe'],
@@ -118,7 +118,7 @@ class ClientChatFeedback extends ActiveRecord
 	    }
 	}
 
-    public static function create(int $chatId, int $userId, int $clientId, ?int $rating, ?string $message): self
+    public static function create(int $chatId, ?int $userId, int $clientId, ?int $rating, ?string $message): self
     {
         $model = new static();
         $model->ccf_client_chat_id = $chatId;

@@ -15,7 +15,7 @@ use yii\queue\Queue;
  */
 class ClientChatFeedbackJob implements JobInterface
 {
-    public string $rid;
+    public $rid;
     public $comment;
     public $rating;
 
