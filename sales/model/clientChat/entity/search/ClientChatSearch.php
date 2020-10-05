@@ -13,6 +13,7 @@ use sales\model\clientChat\dashboard\ReadUnreadFilter;
 use sales\model\clientChat\dashboard\GroupFilter;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
+use sales\model\clientChatUnread\entity\ClientChatUnread;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use yii\data\ActiveDataProvider;
 use sales\model\clientChat\entity\ClientChat;
@@ -351,11 +352,12 @@ class ClientChatSearch extends ClientChat
             'dep_name',
             'project.name as project_name',
             'ccc_name',
+            'ccu_count',
         ]);
 
         if (ClientChat::isTabAll($filter->status)) {
             $query->addOrderBy(['cch_status_id' => SORT_ASC]);
-        }elseif (ClientChat::isTabActive($filter->status)) {
+        } elseif (ClientChat::isTabActive($filter->status)) {
             $query->active();
         } elseif (ClientChat::isTabClosed($filter->status)) {
             $query->archive();
@@ -401,6 +403,7 @@ class ClientChatSearch extends ClientChat
         $query->join('JOIN', [ClientChatChannel::tableName()], 'cch_channel_id = ccc_id');
         $query->leftJoin(Department::tableName(), 'cch_dep_id = dep_id');
         $query->leftJoin(['project' => Project::tableName()], 'cch_project_id = project.id');
+        $query->leftJoin(ClientChatUnread::tableName(), 'ccu_cc_id = cch_id');
 
         $data = $query->asArray()->all();
         $data = ArrayHelper::index($data, 'cch_id');
@@ -415,7 +418,7 @@ class ClientChatSearch extends ClientChat
             } else {
                 $data[$key]['ccm_sent_dt'] = 0;
             }
-            $data[$key]['count_unread_messages'] = $messageService->getCountOfChatUnreadMessages((int) $item['cch_id'], (int) $item['cch_owner_user_id']);
+            $data[$key]['count_unread_messages'] = (int) $item['ccu_count'];
         }
 
         if (GroupFilter::isMy($filter->group)) {
@@ -425,6 +428,7 @@ class ClientChatSearch extends ClientChat
                 });
             }
         }
+
 
         $dataProvider = new ArrayDataProvider([
             'allModels' => $data,

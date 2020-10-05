@@ -13,6 +13,8 @@ use sales\entities\EventTrait;
 use sales\helpers\clientChat\ClientChatHelper;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\event\ClientChatManageStatusLogEvent;
+use sales\model\clientChat\event\ClientChatOwnerAssignedEvent;
+use sales\model\clientChat\event\ClientChatOwnerRemovedEvent;
 use sales\model\clientChat\event\ClientChatSetStatusCloseEvent;
 use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
 use sales\model\clientChatCase\entity\ClientChatCase;
@@ -23,6 +25,7 @@ use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatNote\entity\ClientChatNote;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
+use sales\model\clientChatUnread\entity\ClientChatUnread;
 use sales\model\clientChatVisitor\entity\ClientChatVisitor;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -55,6 +58,7 @@ use yii\helpers\Html;
  * @property int|null $cch_source_type_id
  * @property int|null $cch_missed
  * @property int|null $cch_parent_id
+ * @property int|null $countUnreadMessage
  *
  * @property ClientChatRequest $cchCcr
  * @property Client $cchClient
@@ -68,6 +72,7 @@ use yii\helpers\Html;
  * @property Cases[] $cases
  * @property ClientChatFeedback $feedback
  * @property ClientChatLastMessage $lastMessage
+ * @property ClientChatUnread $unreadMessage
  */
 class ClientChat extends \yii\db\ActiveRecord
 {
@@ -115,6 +120,9 @@ class ClientChat extends \yii\db\ActiveRecord
 		self::SOURCE_TYPE_AGENT => 'Agent',
 		self::SOURCE_TYPE_TRANSFER => 'Transfer',
 	];
+
+	// for query only
+	public $countUnreadMessage;
 
     public function behaviors(): array
 	{
@@ -260,6 +268,11 @@ class ClientChat extends \yii\db\ActiveRecord
 		return $this->hasOne(ClientChatLastMessage::class, ['cclm_cch_id' => 'cch_id']);
 	}
 
+	public function getUnreadMessage(): ActiveQuery
+	{
+		return $this->hasOne(ClientChatUnread::class, ['ccu_cc_id' => 'cch_id']);
+	}
+
 	public static function getStatusList(): array
 	{
 		return self::STATUS_LIST;
@@ -346,6 +359,7 @@ class ClientChat extends \yii\db\ActiveRecord
 		if (!$this->isTransfer() && !is_null($userId) && $this->cchOwnerUser && $this->cch_owner_user_id !== $userId) {
 			throw new \DomainException('Client Chat already assigned to: ' . $this->cchOwnerUser->username, ClientChatCodeException::CC_OWNER_ALREADY_ASSIGNED);
 		}
+        $this->recordEvent(new ClientChatOwnerAssignedEvent($this->cch_id, $this->cch_owner_user_id, $userId));
 		$this->cch_owner_user_id = $userId;
 		return $this;
 	}

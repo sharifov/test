@@ -44,6 +44,7 @@ use sales\model\clientChatRequest\entity\search\ClientChatRequestSearch;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestRepository;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestService;
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
+use sales\model\clientChatUnread\entity\ClientChatUnread;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\repositories\clientChatChannel\ClientChatChannelRepository;
 use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessRepository;
@@ -215,7 +216,7 @@ class ClientChatController extends FController
         if ($channels) {
             $dataProvider = (new ClientChatSearch())->getListOfChats(Auth::user(), array_keys($channels), $filter);
         }
-
+        
         $clientChat = null;
         $chid = (int) Yii::$app->request->get('chid');
 
@@ -227,8 +228,14 @@ class ClientChatController extends FController
                     throw new ForbiddenHttpException('You do not have access to this chat', 403);
                 }
 
-                if ($clientChat->cch_owner_user_id) {
+                if ($clientChat->cch_owner_user_id && $clientChat->isOwner(Auth::id())) {
                     $this->clientChatMessageService->discardUnreadMessages($clientChat->cch_id, $clientChat->cch_owner_user_id);
+                    if ($dataProvider && ($models = $dataProvider->getModels())) {
+                        if (isset($models[$clientChat->cch_id])) {
+                            $models[$clientChat->cch_id]['count_unread_messages'] = $this->clientChatMessageService->getCountOfChatUnreadMessagesByUser($clientChat->cch_id, Auth::id());
+                        }
+                        $dataProvider->setModels($models);
+                    }
                 }
 
                 if ($clientChat->isClosed()) {
@@ -243,34 +250,36 @@ class ClientChatController extends FController
 
 
         $loadingChannels = \Yii::$app->request->get('loadingChannels');
-        if ($dataProvider && $loadingChannels) {
-            $dataProvider->pagination->setPage($page - 1);
+        if ($dataProvider) {
+            if ($loadingChannels) {
+                $dataProvider->pagination->setPage($page - 1);
 //            if (\Yii::$app->request->post('loadingChannels')) {
 //                $dataProvider->pagination->page = $filter->page;
 //            } else {
 //                $dataProvider->pagination->page = $filter->page = 0;
 //            }
 
-            $response = [
-                'html' => '',
-                'page' => $page,
-            ];
+                $response = [
+                    'html' => '',
+                    'page' => $page,
+                ];
 
-            if ($dataProvider->getCount()) {
-                $response['html'] = $this->renderPartial('partial/_client-chat-item', [
-                    'clientChats' => $dataProvider->getModels(),
-                    'clientChatId' => $clientChat ? $clientChat->cch_id : '',
-                ]);
-                $response['page'] = $page + 1;
-            }
+                if ($dataProvider->getCount()) {
+                    $response['html'] = $this->renderPartial('partial/_client-chat-item', [
+                        'clientChats' => $dataProvider->getModels(),
+                        'clientChatId' => $clientChat ? $clientChat->cch_id : '',
+                    ]);
+                    $response['page'] = $page + 1;
+                }
 
-            return $this->asJson($response);
-        } else {
-            if ($page > 1) {
-                $dataProvider->pagination->setPage(0);
-                $dataProvider->pagination->pageSize = $page * $dataProvider->pagination->pageSize;
+                return $this->asJson($response);
             } else {
-                $dataProvider->pagination->setPage($page - 1);
+                if ($page > 1) {
+                    $dataProvider->pagination->setPage(0);
+                    $dataProvider->pagination->pageSize = $page * $dataProvider->pagination->pageSize;
+                } else {
+                    $dataProvider->pagination->setPage($page - 1);
+                }
             }
         }
 
@@ -279,7 +288,6 @@ class ClientChatController extends FController
             'clientChat' => $clientChat,
             'client' => $clientChat->cchClient ?? null,
             'history' => $history ?? null,
-            'totalUnreadMessages' => $this->clientChatMessageService->getCountOfTotalUnreadMessages($userId),
             'filter' => $filter,
             'page' => $page + 1,
         ]);
@@ -295,7 +303,9 @@ class ClientChatController extends FController
         ];
         try {
             $clientChat = $this->clientChatRepository->findById($cchId);
-            $this->clientChatMessageService->discardUnreadMessages($clientChat->cch_id, (int) $clientChat->cch_owner_user_id);
+            if ($clientChat->cch_owner_user_id && $clientChat->isOwner(Auth::id())) {
+                $this->clientChatMessageService->discardUnreadMessages($clientChat->cch_id, (int)$clientChat->cch_owner_user_id);
+            }
 
             $result['html'] = $this->renderPartial('partial/_client-chat-info', [
                 'clientChat' => $clientChat,
@@ -688,9 +698,15 @@ class ClientChatController extends FController
 
     public function actionDiscardUnreadMessages(): void
     {
-        $cchId = Yii::$app->request->post('cchId');
+        $chatId = (int)Yii::$app->request->post('cchId');
+        $chat = ClientChat::findOne($chatId);
+        if (!$chat) {
+            return;
+        }
         $userId = Auth::id();
-        $this->clientChatMessageService->discardUnreadMessages((int) $cchId, (int) $userId);
+        if ($chat->cch_owner_user_id && $chat->isOwner($userId)) {
+            $this->clientChatMessageService->discardUnreadMessages($chatId, $userId);
+        }
     }
 
     public function actionSendOfferList(): string
@@ -947,19 +963,18 @@ class ClientChatController extends FController
         try {
             $chat = $this->clientChatRepository->findById($cchId);
 
-			$this->transactionManager->wrap( function () use ($chat){
-				$this->clientChatUserAccessService->disableAccessForOtherUsersBatch($chat, $chat->cch_owner_user_id);
-				$this->clientChatService->cancelTransfer($chat, Auth::user(), ClientChatStatusLog::ACTION_ACCEPT_TRANSFER);
-			});
-
-		} catch (\DomainException | \RuntimeException $e) {
-			$result['error'] = true;
-			$result['message'] = $e->getMessage();
-		} catch (\Throwable $e) {
-			Yii::error(AppHelper::throwableFormatter($e), 'ClientChatController::actionAjaxCancelTransfer::Throwable');
-			$result['error'] = true;
-			$result['message'] = 'Internal Server Error';
-		}
+            $this->transactionManager->wrap(function () use ($chat) {
+                $this->clientChatUserAccessService->disableAccessForOtherUsersBatch($chat, $chat->cch_owner_user_id);
+                $this->clientChatService->cancelTransfer($chat, Auth::user(), ClientChatStatusLog::ACTION_ACCEPT_TRANSFER);
+            });
+        } catch (\DomainException | \RuntimeException $e) {
+            $result['error'] = true;
+            $result['message'] = $e->getMessage();
+        } catch (\Throwable $e) {
+            Yii::error(AppHelper::throwableFormatter($e), 'ClientChatController::actionAjaxCancelTransfer::Throwable');
+            $result['error'] = true;
+            $result['message'] = 'Internal Server Error';
+        }
 
         return $this->asJson($result);
     }
@@ -1142,5 +1157,37 @@ class ClientChatController extends FController
     private function getQuoteCaptureCacheKey(int $userId, int $chatId, int $leadId): string
     {
         return 'chatQuoteCapture' . $userId . '.' . $chatId . '.' . $leadId;
+    }
+
+    public function actionResetUnreadMessage()
+    {
+        $chatId = (int) Yii::$app->request->post('chatId');
+        $unread = ClientChatUnread::find()->select(['*', 'cch_owner_user_id as ownerId'])->andWhere(['ccu_cc_id' => $chatId])->innerJoinWith('chat', false)->one();
+
+        if (!$unread) {
+            return $this->asJson(['error' => false, 'message' => '']);
+        }
+
+        if (!$unread->isOwner(Auth::id())) {
+            return $this->asJson(['error' => true, 'message' => 'Owner incorrect']);
+        }
+
+        if (!$unread->ccu_count) {
+            return $this->asJson(['error' => false, 'message' => '']);
+        }
+
+        try {
+            if ($unread->delete()) {
+                return $this->asJson(['error' => false, 'message' => '']);
+            }
+        } catch (\Throwable $e) {
+            Yii::error([
+                'message' => 'Client chat unread message reset',
+                'model' => $unread->getAttributes(),
+                'errors' => $unread->getErrors(),
+            ], 'ClientChatController:actionResetUnreadMessage');
+
+            return $this->asJson(['error' => true, 'message' => 'Reset unread messages error.']);
+        }
     }
 }

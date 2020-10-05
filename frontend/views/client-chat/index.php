@@ -42,6 +42,7 @@ $chatSendOfferListUrl = Url::toRoute('/client-chat/send-offer-list');
 $chatSendOfferPreviewUrl = Url::toRoute('/client-chat/send-offer-preview');
 $chatSendOfferGenerateUrl = Url::toRoute('/client-chat/send-offer-generate');
 $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
+$clientChatResetUnreadMessageUrl = Url::toRoute(['/client-chat/reset-unread-message']);
 ?>
 
 <?php if ($filter->isEmptyChannels()): ?>
@@ -68,7 +69,6 @@ $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
                 'dataProvider' => $dataProvider,
                 'loadChannelsUrl' => $loadChannelsUrl,
                 'clientChatId' => $clientChat ? $clientChat->cch_id : null,
-                'totalUnreadMessages' => $totalUnreadMessages,
                 'filter' => $filter,
                 'page' => $page,
             ]); ?>
@@ -223,8 +223,38 @@ $(document).on('click', '#{$filter->getReadUnreadInputId()}', function () {
     window.updateClientChatFilter('{$filter->getId()}', '{$filter->formName()}', '{$loadChannelsUrl}');
 });
 
+function clientChatResetUnreadMessageCounter(chatId) {
+    $.ajax({
+        type: 'post',
+        dataType: 'json',
+        url: '{$clientChatResetUnreadMessageUrl}',
+        data: {
+            'chatId': chatId
+        }
+    })
+    .done(function(data) {
+        if (data.error) {
+            createNotify('Reset unread message', data.message, 'error');
+            return;
+        }
+        $(document).find("._cc-chat-unread-message").find("[data-cch-id='" + chatId + "']").html(''); 
+    })
+    .fail(function(xhr) {
+      createNotify('Reset unread message', xhr.responseText, 'error');
+    })
+    ;
+}
+
 $(document).on('click', '._cc-list-item', function () {
 
+    let cch_id = $(this).attr('data-cch-id');
+    let ownerId = $(this).attr('data-owner-id');
+    let countUnreadMessage = $("._cc-chat-unread-message").find("[data-cch-id='"+cch_id+"']").html();
+        
+    // if (countUnreadMessage && ownerId === userId) {
+    //     clientChatResetUnreadMessageCounter(cch_id);    
+    // }
+        
     if ($(this).hasClass('_cc_active')) {
         return false;
     }
@@ -236,7 +266,7 @@ $(document).on('click', '._cc-list-item', function () {
     // let windowHeight = $(window)[0].innerHeight;
     // let offsetTop = $("#_rc-iframe-wrapper").offset().top;
     // let iframeHeight = windowHeight - offsetTop - 20;
-    let cch_id = $(this).attr('data-cch-id');
+    
     let isClosed = $(this).attr('data-is-closed');
     $("#_rc-iframe-wrapper").find('._rc-iframe').hide();
     $('._cc-list-item').removeClass('_cc_active');
@@ -431,11 +461,12 @@ window.refreshChatInfo = function (cch_id) {
     });
 }
 window.refreshChatPage = function (cchId, tab) {
-    if (tab) {
-        let params = new URLSearchParams(window.location.search);
-        params.set('tab', tab);
-        window.history.replaceState({}, '', '{$loadChannelsUrl}?'+params.toString());
-    }
+    //todo will remove all TAB logic
+//    if (tab) {
+//        let params = new URLSearchParams(window.location.search);
+//        params.set('tab', tab);
+//        window.history.replaceState({}, '', '{$loadChannelsUrl}?'+params.toString());
+//    }
     pjaxReload({container: '#pjax-client-chat-channel-list'});
     $('#_rc-'+cchId).remove();
     $('.cc_transfer').remove();

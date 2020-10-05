@@ -42,14 +42,14 @@ use yii\widgets\Pjax;
         $isClosed = (int)$clientChat['cch_status_id'] === ClientChat::STATUS_CLOSED;
     ?>
 
-        <div id="dialog-<?= $clientChat['cch_id'] ?>" class="_cc-list-item <?= $isClosed ? 'cc_closed' : '' ?> <?= $clientChatId && $clientChatId === (int)$clientChat['cch_id'] ? '_cc_active' : '' ?>" data-goto-param="/live/<?= $clientChat['cch_rid'] ?>?layout=embedded" data-rid="<?= $clientChat['cch_rid'] ?>" data-cch-id="<?= $clientChat['cch_id'] ?>" data-is-closed="<?= (int)$clientChat['cch_status_id'] === ClientChat::STATUS_CLOSED ?>">
+        <div id="dialog-<?= $clientChat['cch_id'] ?>" data-owner-id="<?= $clientChat['cch_owner_user_id'] ?>" class="_cc-list-item <?= $isClosed ? 'cc_closed' : '' ?> <?= $clientChatId && $clientChatId === (int)$clientChat['cch_id'] ? '_cc_active' : '' ?>" data-goto-param="/live/<?= $clientChat['cch_rid'] ?>?layout=embedded" data-rid="<?= $clientChat['cch_rid'] ?>" data-cch-id="<?= $clientChat['cch_id'] ?>" data-is-closed="<?= (int)$clientChat['cch_status_id'] === ClientChat::STATUS_CLOSED ?>">
         <div class="_cc-item-icon-wrapper">
             <span class="_cc-item-icon-round">
                 <span class="_cc_client_name"><?= ClientChatHelper::getFirstLetterFromName($clientChat['client_full_name']) ?></span>
                 <span class="_cc-status-wrapper">
                     <span class="_cc-status" data-is-online="<?= (int)$clientChat['cch_client_online'] ?>"></span>
                 </span>
-                <?php $unreadMessages = $clientChat['cch_owner_user_id'] ? ClientChatMessageHelper::getCountOfChatUnreadMessage($clientChat['cch_id'], $clientChat['cch_owner_user_id']) : null ?>
+                <?php $unreadMessages = $clientChat['count_unread_messages'] ?: null; ?>
             </span>
             <span class="_cc-title">
                 <p><b><?= Html::encode($clientChat['client_full_name']) ?></b></p>

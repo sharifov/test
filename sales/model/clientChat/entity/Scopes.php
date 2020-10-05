@@ -153,4 +153,9 @@ class Scopes extends \yii\db\ActiveQuery
 		return $this->byOwner(null)->orWhere(['cch_status_id' => ClientChat::STATUS_TRANSFER]);
 	}
 
+    public function withUnreadMessage(bool $edgerLoading = false): self
+    {
+        return $this->innerJoinWith('unreadMessage', $edgerLoading);
+	}
+
 }
