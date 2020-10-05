@@ -6,6 +6,8 @@ use sales\model\clientChatChannel\entity\ClientChatChannel;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use common\components\grid\BooleanColumn;
+
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\clientChatChannel\entity\search\ClientChatChannelSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -41,9 +43,31 @@ $this->params['breadcrumbs'][] = $this->title;
             ['attribute' => 'ccc_id',
                 'headerOptions' => ['style' => 'width:70px'],
             ],
-            'ccc_project_id:projectName',
-            'ccc_name',
-            'ccc_frontend_name',
+            [
+                'attribute' => 'ccc_project_id',
+                'format' => 'projectName',
+                'filter' => \common\models\Project::getList()
+            ],
+            //'ccc_name',
+            [
+                'label' => 'Name',
+                'attribute' => 'ccc_id',
+                'value' => static function (ClientChatChannel $model) {
+                    return $model->ccc_name;
+                },
+                'filter' => ClientChatChannel::getList()
+
+            ],
+            //'ccc_frontend_name',
+            [
+                'label' => 'Frontend Name',
+                'attribute' => 'ccc_id',
+                'value' => static function (ClientChatChannel $model) {
+                    return $model->ccc_frontend_name;
+                },
+                'filter' => ClientChatChannel::getListWithFrontedNames()
+
+            ],
             [
                 'label' => 'Translations',
                 'value' => static function (ClientChatChannel $model) {
@@ -60,45 +84,53 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw'
             ],
-            'ccc_dep_id:departmentName',
+            //'ccc_dep_id:departmentName',
+            [
+                'attribute' => 'ccc_dep_id',
+                'format' => 'departmentName',
+                'filter' => \common\models\Department::getList()
+            ],
             [
                 'attribute' => 'ccc_ug_id',
-				'value' => static function (ClientChatChannel $model) {
-					return $model->cccUg ? $model->cccUg->ug_name : null;
-				}
+                'value' => static function (ClientChatChannel $model) {
+                    return $model->cccUg ? $model->cccUg->ug_name : null;
+                }
             ],
-            'ccc_disabled:boolean',
-            'ccc_frontend_enabled:booleanByLabel',
-            'ccc_default:boolean',
+            //'ccc_disabled:boolean',
+            ['class' => BooleanColumn::class, 'attribute' => 'ccc_disabled'],
+            //'ccc_frontend_enabled:booleanByLabel',
+            ['class' => BooleanColumn::class, 'attribute' => 'ccc_frontend_enabled'],
+            //'ccc_default:boolean',
+            ['class' => BooleanColumn::class, 'attribute' => 'ccc_default'],
             'ccc_priority',
-			[
-				'class' => DateTimeColumn::class,
-				'attribute' => 'ccc_created_dt',
-				'format' => 'byUserDateTime'
-			],
-			[
-				'class' => DateTimeColumn::class,
-				'attribute' => 'ccc_updated_dt',
-				'format' => 'byUserDateTime'
-			],
-			[
-				'class' => UserSelect2Column::class,
-				'attribute' => 'ccc_created_user_id',
-				'relation' => 'cccCreatedUser',
-				'format' => 'username',
-				'placeholder' => 'Select User'
-			],
-			[
-				'class' => UserSelect2Column::class,
-				'attribute' => 'ccc_updated_user_id',
-				'relation' => 'cccCreatedUser',
-				'format' => 'username',
-				'placeholder' => 'Select User'
-			],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'ccc_created_dt',
+                'format' => 'byUserDateTime'
+            ],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'ccc_updated_dt',
+                'format' => 'byUserDateTime'
+            ],
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'ccc_created_user_id',
+                'relation' => 'cccCreatedUser',
+                'format' => 'username',
+                'placeholder' => 'Select User'
+            ],
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'ccc_updated_user_id',
+                'relation' => 'cccCreatedUser',
+                'format' => 'username',
+                'placeholder' => 'Select User'
+            ],
 
             ['class' => 'yii\grid\ActionColumn',
                 'template' => '{default} {translate} {view} {update} {delete} ',
-                'contentOptions'=>['style'=>'width: 90px;'],
+                'contentOptions' => ['style' => 'width: 90px;'],
                 'visibleButtons' => [
                     /*'view' => function ($model, $key, $index) {
                         return User::hasPermission('viewOrder');
@@ -137,9 +169,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php Pjax::end(); ?>
 
-<?php
+    <?php
 
-$js = <<<JS
+    $js = <<<JS
 $(document).on('click', '.set_default', function (e) {
     e.preventDefault();
     let btn = $(this);
@@ -173,6 +205,6 @@ $(document).on('click', '.set_default', function (e) {
 })
 JS;
 
-$this->registerJs($js);
-?>
+    $this->registerJs($js);
+    ?>
 </div>

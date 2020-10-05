@@ -111,10 +111,16 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw',
             ],
-            [
+            /*[
                 'attribute' => 'cch_owner_user_id',
                 'class' => \common\components\grid\UserColumn::class,
                 'relation' => 'cchOwnerUser',
+            ],*/
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'cch_owner_user_id',
+                'relation' => 'cchOwnerUser',
+                'placeholder' => 'Select User'
             ],
 			[
 				'attribute' => 'cch_source_type_id',
