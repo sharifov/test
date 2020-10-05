@@ -1,8 +1,8 @@
 <?php
 
 $rules = [
-
-  'align_multiline_comment' => ['comment_type' => 'all_multiline'],
+    '@PSR2' => true,
+  /*'align_multiline_comment' => ['comment_type' => 'all_multiline'],
 
   'array_indentation' => true,
 
@@ -180,7 +180,7 @@ $rules = [
 
 	'visibility_required' => true,
 
-	'whitespace_after_comma_in_array' => true,
+	'whitespace_after_comma_in_array' => true,*/
 ];
 
 $finder = PhpCsFixer\Finder::create()
