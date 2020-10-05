@@ -226,10 +226,16 @@ class ClientChatChannel extends \yii\db\ActiveRecord
         return ArrayHelper::map($data,'ccc_id', 'ccc_name');
     }
 
+    public static function getListWithNames() : array
+    {
+        $data = self::find()->where('LENGTH(ccc_name) > 0')->distinct()->orderBy(['ccc_name' => SORT_ASC])->asArray()->all();
+        return ArrayHelper::map($data,'ccc_name', 'ccc_name');
+    }
+
     public static function getListWithFrontedNames() : array
     {
-        $data = self::find()->where('LENGTH(ccc_frontend_name) > 0')->orderBy(['ccc_name' => SORT_ASC])->asArray()->all();
-        return ArrayHelper::map($data,'ccc_id', 'ccc_frontend_name');
+        $data = self::find()->where('LENGTH(ccc_frontend_name) > 0')->distinct()->orderBy(['ccc_frontend_name' => SORT_ASC])->asArray()->all();
+        return ArrayHelper::map($data,'ccc_frontend_name', 'ccc_frontend_name');
     }
 
     /**

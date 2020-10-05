@@ -51,17 +51,17 @@ $this->params['breadcrumbs'][] = $this->title;
             //'ccc_name',
             [
                 'label' => 'Name',
-                'attribute' => 'ccc_id',
+                'attribute' => 'ccc_name',
                 'value' => static function (ClientChatChannel $model) {
                     return $model->ccc_name;
                 },
-                'filter' => ClientChatChannel::getList()
+                'filter' => ClientChatChannel::getListWithNames()
 
             ],
             //'ccc_frontend_name',
             [
                 'label' => 'Frontend Name',
-                'attribute' => 'ccc_id',
+                'attribute' => 'ccc_frontend_name',
                 'value' => static function (ClientChatChannel $model) {
                     return $model->ccc_frontend_name;
                 },
