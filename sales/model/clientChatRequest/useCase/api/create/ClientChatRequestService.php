@@ -15,6 +15,7 @@ use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\model\clientChatVisitor\repository\ClientChatVisitorRepository;
 use sales\model\clientChatVisitorData\repository\ClientChatVisitorDataRepository;
+use sales\model\user\entity\userConnectionActiveChat\UserConnectionActiveChat;
 use sales\repositories\clientChatChannel\ClientChatChannelRepository;
 use sales\repositories\NotFoundException;
 use sales\repositories\visitorLog\VisitorLogRepository;
@@ -315,8 +316,10 @@ class ClientChatRequestService
 		$this->clientChatMessageRepository->save($message, 0);
         $this->sendLastChatMessageToMonitor($clientChat, $message);
 		if ($clientChat->cch_owner_user_id && $clientChatRequest->isGuestUttered() && $clientChat->cchOwnerUser->userProfile && $clientChat->cchOwnerUser->userProfile->isRegisteredInRc()) {
-			$this->clientChatMessageService->increaseUnreadMessages($clientChat->cch_id, $clientChat->cch_owner_user_id);
-			$this->updateDateTimeLastMessageNotification($clientChat, $message);
+            if (!UserConnectionActiveChat::find()->andWhere(['ucac_chat_id' => $clientChat->cch_id])->exists()) {
+                $this->clientChatMessageService->increaseUnreadMessages($clientChat->cch_id, $clientChat->cch_owner_user_id);
+                $this->updateDateTimeLastMessageNotification($clientChat, $message);
+            }
 		}
 	}
 

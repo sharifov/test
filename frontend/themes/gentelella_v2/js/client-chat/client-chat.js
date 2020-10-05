@@ -70,13 +70,14 @@
         $('#_client-chat-info').html('');
         $('#_client-chat-note').html('');
         pjaxReload({container: '#pjax-client-chat-channel-list'});
+        window.removeChatFromActiveConnection();
     };
 
     function getClientChatFilterParams(formId) {
         return $("#" + formId).serialize();
     }
 
-    window.getClientChatLoadMoreUrl = function(formId, formName, loadChannelsUrl) {
+    window.getClientChatLoadMoreUrl = function(formId, formName) {
         let filterParams = getClientChatFilterParams(formId);
         let urlParams = new URLSearchParams(window.location.search);
 
@@ -88,8 +89,8 @@
                 otherUrlParams.set(key, value);
             }
         });
-
-        return loadChannelsUrl + '?' + filterParams + '&' + otherUrlParams.toString();
+        let newOtherParams = otherUrlParams.toString() ? ('&' + otherUrlParams.toString()) : '';
+        return filterParams + newOtherParams;
     };
 
 })(window);

@@ -111,6 +111,7 @@ $discardUnreadMessageUrl = Url::to(['/client-chat/discard-unread-messages']);
 $js = <<<JS
    
     window.socket = null;
+    window.socketConnectionId = null;
 
     /**
      * Send a message to the WebSocket server
@@ -188,6 +189,10 @@ $js = <<<JS
                         if(obj.cmd === 'initConnection') {
                             if (typeof obj.uc_id !== 'undefined') {
                                 if(obj.uc_id > 0) {
+                                    window.socketConnectionId = obj.uc_id;
+                                    if (typeof addChatToActiveConnection ===  "function") {
+                                        addChatToActiveConnection();
+                                    }
                                     onlineObj.attr('title', 'Online Connection (' + obj.uc_id +'): true').find('i').removeClass('warning').removeClass('danger').addClass('success');
                                 } else {
                                     onlineObj.attr('title', 'Timeout DB connection: restart service').find('i').removeClass('danger').removeClass('success').addClass('warning');
@@ -481,6 +486,7 @@ $js = <<<JS
                 //console.log('Code: ' + event.code);
                 
                 onlineObj.attr('title', 'Disconnect').find('i').removeClass('success').addClass('danger');
+                window.socketConnectionId = null;
                 // setTimeout(function() {
                 //   wsInitConnect();
                 // }, 5000);
@@ -492,12 +498,14 @@ $js = <<<JS
                     console.log('Socket error: ' + event.message);
                 //}
                 onlineObj.attr('title', 'Online Connection: false').find('i').removeClass('success').addClass('danger');
+                window.socketConnectionId = null;
                 
             };
     
         } catch (error) {
             console.error(error);
             onlineObj.attr('title', 'Online Connection: error').find('i').removeClass('success').addClass('danger');
+            window.socketConnectionId = null;
         }
     }
     

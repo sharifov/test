@@ -43,6 +43,8 @@ $chatSendOfferPreviewUrl = Url::toRoute('/client-chat/send-offer-preview');
 $chatSendOfferGenerateUrl = Url::toRoute('/client-chat/send-offer-generate');
 $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
 $clientChatResetUnreadMessageUrl = Url::toRoute(['/client-chat/reset-unread-message']);
+$clientChatAddActiveConnectionUrl = Url::toRoute(['/client-chat/add-active-connection']);
+$clientChatRemoveFromActiveConnectionUrl = Url::toRoute(['/client-chat/remove-active-connection']);
 ?>
 
 <?php if ($filter->isEmptyChannels()): ?>
@@ -113,11 +115,15 @@ $this->registerJsFile('/js/moment.min.js', [
 ]);
 $moveOfferUrl = Url::to(['/client-chat/move-offer']);
 $clientChatId = $clientChat ? $clientChat->cch_id : 0;
+$clientChatOwnerId = $clientChat ? $clientChat->cch_owner_user_id : 0;
 $discardUnreadMessageUrl = Url::to(['/client-chat/discard-unread-messages']);
 $groupAll = GroupFilter::ALL;
 $canGroupAll = $filter->permissions->canAllOfGroup() ? 'true' : 'false';
 $readAll = ReadUnreadFilter::ALL;
 $js = <<<JS
+
+let currentChatId = {$clientChatId};
+let currentChatOwnerId = {$clientChatOwnerId};
 
 window.name = 'chat';
 $(document).ready( function () {
@@ -168,8 +174,8 @@ $(document).on('click', '#btn-load-channels', function (e) {
     
     let params = new URLSearchParams(window.location.search);
 
-    let urlParams = window.getClientChatLoadMoreUrl('{$filter->getId()}', '{$filter->formName()}', '{$loadChannelsUrl}');
-    let url = urlParams + '&loadingChannels=1' + '&page=' + page;
+    let urlParams = window.getClientChatLoadMoreUrl('{$filter->getId()}', '{$filter->formName()}');
+    let url = '{$loadChannelsUrl}?' + urlParams + '&loadingChannels=1' + '&page=' + page;
     $.ajax({
         type: 'get',
         url: url,
@@ -245,15 +251,66 @@ function clientChatResetUnreadMessageCounter(chatId) {
     ;
 }
 
+function addChatToActiveConnection() {
+    if (!currentChatId || currentChatOwnerId != userId || !window.socketConnectionId) {
+        return;
+    }
+    $.ajax({
+        type: 'post',
+        dataType: 'json',
+        url: '{$clientChatAddActiveConnectionUrl}',
+        data: {
+            'chatId': currentChatId,
+            'connectionId': window.socketConnectionId
+        }
+    })
+    .done(function(data) {
+        // if (data.error) {
+        //     createNotify('Add chat to active connection ', data.message, 'error');
+        // }
+    })
+    .fail(function(xhr) {
+        // createNotify('Add chat to active connection ', xhr.responseText, 'error');
+    })
+    ;
+}
+window.removeChatFromActiveConnection = function () {
+    if (!currentChatId || currentChatOwnerId != userId || !window.socketConnectionId) {
+        return;
+    }
+    $.ajax({
+        type: 'post',
+        dataType: 'json',
+        url: '{$clientChatRemoveFromActiveConnectionUrl}',
+        data: {
+            'chatId': currentChatId,
+            'connectionId': window.socketConnectionId
+        }
+    })
+    .done(function(data) {
+        // if (data.error) {
+        //     createNotify('Add chat to active connection ', data.message, 'error');
+        // }
+    })
+    .fail(function(xhr) {
+        // createNotify('Add chat to active connection ', xhr.responseText, 'error');
+    })
+    ;
+    currentChatId = 0;
+    currentChatOwnerId = 0;
+};
+
 $(document).on('click', '._cc-list-item', function () {
 
     let cch_id = $(this).attr('data-cch-id');
+    currentChatId = cch_id;
     let ownerId = $(this).attr('data-owner-id');
+    currentChatOwnerId = ownerId;
     let countUnreadMessage = $("._cc-chat-unread-message").find("[data-cch-id='"+cch_id+"']").html();
         
-    // if (countUnreadMessage && ownerId === userId) {
-    //     clientChatResetUnreadMessageCounter(cch_id);    
-    // }
+   if (ownerId === userId) {
+        addChatToActiveConnection();    
+   }
         
     if ($(this).hasClass('_cc_active')) {
         return false;

@@ -10,6 +10,7 @@ use common\models\Notifications;
 use common\models\Project;
 use common\models\Quote;
 use common\models\search\LeadSearch;
+use common\models\UserConnection;
 use common\models\VisitorLog;
 use frontend\widgets\clientChat\ClientChatAccessMessage;
 use frontend\widgets\clientChat\ClientChatAccessWidget;
@@ -46,6 +47,7 @@ use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestService;
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\model\clientChatUnread\entity\ClientChatUnread;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
+use sales\model\user\entity\userConnectionActiveChat\UserConnectionActiveChat;
 use sales\repositories\clientChatChannel\ClientChatChannelRepository;
 use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessRepository;
 use sales\repositories\lead\LeadRepository;
@@ -235,6 +237,7 @@ class ClientChatController extends FController
                             $models[$clientChat->cch_id]['count_unread_messages'] = $this->clientChatMessageService->getCountOfChatUnreadMessagesByUser($clientChat->cch_id, Auth::id());
                         }
                         $dataProvider->setModels($models);
+                        $dataProvider->refresh();
                     }
                 }
 
@@ -1188,6 +1191,97 @@ class ClientChatController extends FController
             ], 'ClientChatController:actionResetUnreadMessage');
 
             return $this->asJson(['error' => true, 'message' => 'Reset unread messages error.']);
+        }
+    }
+
+    public function actionAddActiveConnection()
+    {
+        $chatId = (int) Yii::$app->request->post('chatId');
+        $connectionId = (int) Yii::$app->request->post('connectionId');
+
+        if (!$chat = ClientChat::find()->andWhere(['cch_id' => $chatId])->one()) {
+            return $this->asJson(['error' => true, 'message' => 'Client chat not found']);
+        }
+
+        if (!UserConnection::find()->andWhere(['uc_id' => $connectionId])->exists()) {
+            return $this->asJson(['error' => true, 'message' => 'User connection not found']);
+        }
+
+        if (!$chat->isOwner(Auth::id())) {
+            return $this->asJson(['error' => true, 'message' => 'Owner incorrect']);
+        }
+
+        if ($activeConnection = UserConnectionActiveChat::find()->andWhere(['ucac_conn_id' => $connectionId])->one()) {
+            if ($activeConnection->ucac_chat_id === $chatId) {
+                return $this->asJson(['error' => false, 'message' => '']);
+            }
+            $activeConnection->ucac_chat_id = $chatId;
+        } else {
+            $activeConnection = new UserConnectionActiveChat();
+            $activeConnection->ucac_chat_id = $chatId;
+            $activeConnection->ucac_conn_id = $connectionId;
+        }
+
+        try {
+            if ($activeConnection->save()) {
+                return $this->asJson(['error' => false, 'message' => '']);
+            }
+
+            Yii::error([
+                'message' => 'Add user connection active chat',
+                'model' => $activeConnection->getAttributes(),
+                'errors' => $activeConnection->getErrors(),
+            ], 'ClientChatController:actionAddActiveConnection');
+
+            return $this->asJson(['error' => true, 'message' => 'Active connection save error.']);
+        } catch (\Throwable $e) {
+            Yii::error([
+                'message' => 'Add user connection active chat',
+                'model' => $activeConnection->getAttributes(),
+                'errors' => $e->getMessage(),
+            ], 'ClientChatController:actionAddActiveConnection');
+
+            return $this->asJson(['error' => true, 'message' => 'Active connection save error.']);
+        }
+    }
+
+    public function actionRemoveActiveConnection()
+    {
+        $chatId = (int) Yii::$app->request->post('chatId');
+        $connectionId = (int) Yii::$app->request->post('connectionId');
+
+        if (!$chat = ClientChat::find()->andWhere(['cch_id' => $chatId])->one()) {
+            return $this->asJson(['error' => true, 'message' => 'Client chat not found']);
+        }
+
+        if (!$chat->isOwner(Auth::id())) {
+            return $this->asJson(['error' => true, 'message' => 'Owner incorrect']);
+        }
+
+        if (!$activeConnection = UserConnectionActiveChat::find()->andWhere(['ucac_conn_id' => $connectionId, 'ucac_chat_id' => $chatId])->one()) {
+            return $this->asJson(['error' => false, 'message' => '']);
+        }
+
+        try {
+            if ($activeConnection->delete()) {
+                return $this->asJson(['error' => false, 'message' => '']);
+            }
+
+            Yii::error([
+                'message' => 'Remove user connection active chat',
+                'model' => $activeConnection->getAttributes(),
+                'errors' => $activeConnection->getErrors(),
+            ], 'ClientChatController:actionRemoveActiveConnection');
+
+            return $this->asJson(['error' => true, 'message' => 'Active connection remove error.']);
+        } catch (\Throwable $e) {
+            Yii::error([
+                'message' => 'Remove user connection active chat',
+                'model' => $activeConnection->getAttributes(),
+                'errors' => $e->getMessage(),
+            ], 'ClientChatController:actionRemoveActiveConnection');
+
+            return $this->asJson(['error' => true, 'message' => 'Active connection remove error.']);
         }
     }
 }
