@@ -24,14 +24,14 @@ $accessUrl = \yii\helpers\Url::to('/client-chat/access-manage');
 				<?php endforeach; ?>
 			<?php endif; ?>
 
-			<?php if ($access->ccuaCch->cchClient && $access->ccuaCch->cchClient->clientPhones): ?>
-				<?php foreach ($access->ccuaCch->cchClient->clientPhones as $phone): ?>
-					<span class="_cc-client-phone">
+			<?php /*if ($access->ccuaCch->cchClient && $access->ccuaCch->cchClient->clientPhones): ?>
+                <?php foreach ($access->ccuaCch->cchClient->clientPhones as $phone): ?>
+                    <span class="_cc-client-phone">
                                             <i class="fa fa-phone"></i>
                                             <i><?= Html::encode($phone->phone); ?></i>
                                         </span>
-				<?php endforeach; ?>
-			<?php endif; ?>
+                <?php endforeach; ?>
+            <?php endif;*/ ?>
 
             <div class="_cc-data">
                 <?php /*if ($access->ccuaCch->cchDep): ?>

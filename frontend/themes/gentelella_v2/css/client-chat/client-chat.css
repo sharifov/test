@@ -92,7 +92,7 @@
     justify-content: center;
     font-weight: 600;
     cursor: pointer;
-    padding: 20px 0;
+    padding: 12px 0;
     border-bottom: 1px solid #ebebeb;
     position: relative;
 }
@@ -118,6 +118,7 @@
 ._cc-wrapper ._cc_tabs_wrapper ._cc_tab.active,
 ._cc-wrapper ._cc_groups_wrapper ._cc_group.active {
     color: #0073ce;
+    background-color: #e2effb;
 }
 ._cc-wrapper ._cc_tabs_wrapper ._cc_tab.active ._cc_tab_active,
 ._cc-wrapper ._cc_groups_wrapper ._cc_group.active ._cc_group_active {

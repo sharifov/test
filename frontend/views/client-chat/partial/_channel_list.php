@@ -24,6 +24,6 @@ use sales\model\clientChat\dashboard\FilterForm;
 	</div>
 
 	<div class="_cc-channel-pagination" style="display: flex;justify-content: center; padding: 15px 0 10px;">
-		<button class="btn btn-default" id="btn-load-channels" data-page="<?= $page; ?>">Load more</button>
+        <button class="btn btn-default btn-sm" id="btn-load-channels" data-page="<?= $page; ?>"><i class="fa fa-angle-double-down"></i> Load more ...</button>
 	</div>
 </div>
