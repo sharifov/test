@@ -14,7 +14,6 @@ use sales\helpers\clientChat\ClientChatHelper;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\event\ClientChatManageStatusLogEvent;
 use sales\model\clientChat\event\ClientChatOwnerAssignedEvent;
-
 use sales\model\clientChat\event\ClientChatSetStatusCloseEvent;
 use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
 use sales\model\clientChatCase\entity\ClientChatCase;
@@ -342,6 +341,21 @@ class ClientChat extends \yii\db\ActiveRecord
 		return $this->cch_status_id === self::STATUS_CLOSED;
 	}
 
+    public function isNew(): bool
+    {
+        return $this->cch_status_id === self::STATUS_NEW;
+	}
+
+    public function isPending(): bool
+    {
+        return $this->cch_status_id === self::STATUS_PENDING;
+	}
+
+    public function isInProgress(): bool
+    {
+        return $this->cch_status_id === self::STATUS_IN_PROGRESS;
+	}
+
 	public static function getStatusClassList(): array
 	{
 		return self::STATUS_CLASS_LIST;
@@ -444,6 +458,11 @@ class ClientChat extends \yii\db\ActiveRecord
 	public function isOwner(int $userId): bool
 	{
 		return $this->cch_owner_user_id === $userId;
+	}
+
+    public function hasOwner(): bool
+    {
+        return $this->cch_owner_user_id ? true : false;
 	}
 
 	public static function clone(ClientChatCloneDto $dto): ClientChat

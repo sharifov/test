@@ -32,6 +32,7 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\dashboard\ReadUnreadFilter;
 use sales\model\clientChat\dashboard\GroupFilter;
 use sales\model\clientChat\entity\search\ClientChatSearch;
+use sales\model\clientChat\permissions\ClientChatActionPermission;
 use sales\model\clientChat\useCase\close\ClientChatCloseForm;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChat\useCase\sendOffer\GenerateImagesForm;
@@ -184,6 +185,14 @@ class ClientChatController extends FController
                     'delete' => ['POST'],
                 ],
             ],
+            'access' => [
+                'allowActions' => [
+                    'ajax-close',
+                    'ajax-transfer-view',
+                    'delete-note',
+                    'create-note',
+                ],
+            ],
         ];
 
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
@@ -293,6 +302,7 @@ class ClientChatController extends FController
             'history' => $history ?? null,
             'filter' => $filter,
             'page' => $page + 1,
+            'actionPermissions' => new ClientChatActionPermission(),
         ]);
     }
 
@@ -313,11 +323,19 @@ class ClientChatController extends FController
             $result['html'] = $this->renderPartial('partial/_client-chat-info', [
                 'clientChat' => $clientChat,
                 'client' => $clientChat->cchClient,
+                'actionPermissions' => new ClientChatActionPermission(),
             ]);
-            $result['noteHtml'] = $this->renderAjax('partial/_client-chat-note', [
-                'clientChat' => $clientChat,
-                'model' => new ClientChatNote(),
-            ]);
+            $permissions = new ClientChatActionPermission();
+            if ($permissions->canNoteView($clientChat)) {
+                $result['noteHtml'] = $this->renderAjax('partial/_client-chat-note', [
+                    'clientChat' => $clientChat,
+                    'model' => new ClientChatNote(),
+                    'actionPermissions' => $permissions,
+                ]);
+            } else {
+                $result['noteHtml'] = '';
+            }
+
         } catch (NotFoundException $e) {
             $result['message'] = $e->getMessage();
         }
@@ -335,11 +353,16 @@ class ClientChatController extends FController
         ];
         try {
             $clientChat = $this->clientChatRepository->findById($cchId);
-
-            $result['html'] = $this->renderPartial('partial/_client-chat-note', [
-                'clientChat' => $clientChat,
-                'model' => new ClientChatNote(),
-            ]);
+            $permissions = new ClientChatActionPermission();
+            if ($permissions->canNoteView($clientChat)) {
+                $result['html'] = $this->renderPartial('partial/_client-chat-note', [
+                    'clientChat' => $clientChat,
+                    'model' => new ClientChatNote(),
+                    'actionPermissions' => $permissions,
+                ]);
+            } else {
+                $result['html'] = '';
+            }
         } catch (NotFoundException $e) {
         }
 
@@ -348,15 +371,19 @@ class ClientChatController extends FController
 
     public function actionCreateNote(): string
     {
-        $cchId = Yii::$app->request->get('cch_id');
-        $model = new ClientChatNote();
-        $model->ccn_user_id = Auth::id();
+        $cchId = (int) Yii::$app->request->get('cch_id');
 
-        $clientChat = $this->clientChatRepository->findById($cchId);
+        if (!$clientChat = ClientChat::findOne($cchId)) {
+            throw new NotFoundHttpException();
+        }
 
-        if (!Auth::can('client-chat/manage/all', ['chat' => $clientChat])) {
+        $permissions = new ClientChatActionPermission();
+        if (!$permissions->canNoteAdd($clientChat)) {
             throw new ForbiddenHttpException('You do not have access to perform this action', 403);
         }
+
+        $model = new ClientChatNote();
+        $model->ccn_user_id = Auth::id();
 
         if (Yii::$app->request->isAjax && $model->load(Yii::$app->request->post())) {
             try {
@@ -373,21 +400,25 @@ class ClientChatController extends FController
             'clientChat' => $clientChat,
             'model' => $model,
             'showContent' => false,
+            'actionPermissions' => $permissions,
         ]);
     }
 
     public function actionDeleteNote(): string
     {
+        $cchId = (int) Yii::$app->request->get('cch_id');
+        $ccnId = (int) Yii::$app->request->get('ccn_id');
+
+        if (!$clientChat = ClientChat::findOne($cchId)) {
+            throw new NotFoundHttpException();
+        }
+
+        $permissions = new ClientChatActionPermission();
+        if (!$permissions->canNoteDelete($clientChat)) {
+            throw new ForbiddenHttpException('You do not have access to perform this action', 403);
+        }
+
         try {
-            $cchId = Yii::$app->request->get('cch_id');
-            $ccnId = Yii::$app->request->get('ccn_id');
-
-            $clientChat = $this->clientChatRepository->findById($cchId);
-
-            if (!Auth::can('client-chat/manage/all', ['chat' => $clientChat])) {
-                throw new ForbiddenHttpException('You do not have access to perform this action', 403);
-            }
-
             if ($clientChatNote = $this->clientChatNoteRepository->findById($ccnId)) {
                 $this->clientChatNoteRepository->toggleDeleted($clientChatNote);
             }
@@ -404,6 +435,7 @@ class ClientChatController extends FController
             'clientChat' => $clientChat ?? null,
             'model' => new ClientChatNote(),
             'showContent' => true,
+            'actionPermissions' => $permissions
         ]);
     }
 
@@ -595,8 +627,10 @@ class ClientChatController extends FController
 
             $chat = $this->clientChatRepository->findById((int) $form->cchId);
 
-            if (!Auth::can('client-chat/manage/all', ['chat' => $chat])) {
-                throw new ForbiddenHttpException('You do not have access to manage this chat', 403);
+            $permissions = new ClientChatActionPermission();
+
+            if (!$permissions->canClose($chat)) {
+                throw new ForbiddenHttpException('You do not have access to close this chat', 403);
             }
 
             if (Yii::$app->request->isPjax && $form->validate()) {
@@ -640,9 +674,17 @@ class ClientChatController extends FController
 
     public function actionAjaxTransferView(): string
     {
-        $cchId = Yii::$app->request->post('cchId');
+        $cchId = (int)Yii::$app->request->post('cchId');
 
-        $clientChat = ClientChat::findOne($cchId);
+        if (!$clientChat = ClientChat::findOne($cchId)) {
+            throw new NotFoundHttpException('Client chat not found');
+        }
+
+        $permissions = new ClientChatActionPermission();
+
+        if (!$permissions->canTransfer($clientChat)) {
+            throw new ForbiddenHttpException('You do not have access to perform this action', 403);
+        }
 
         $form = new ClientChatTransferForm();
 
@@ -652,9 +694,6 @@ class ClientChatController extends FController
             $form->isOnline = $clientChat->cch_client_online;
         }
 
-        if (!Auth::can('client-chat/manage/all', ['chat' => $clientChat])) {
-            throw new ForbiddenHttpException('You do not have access to perform this action', 403);
-        }
 
         try {
             if ($form->load(Yii::$app->request->post()) && !$form->pjaxReload && $form->validate()) {
