@@ -359,7 +359,7 @@ class ClientChat extends \yii\db\ActiveRecord
 		if (!$this->isTransfer() && !is_null($userId) && $this->cchOwnerUser && $this->cch_owner_user_id !== $userId) {
 			throw new \DomainException('Client Chat already assigned to: ' . $this->cchOwnerUser->username, ClientChatCodeException::CC_OWNER_ALREADY_ASSIGNED);
 		}
-        $this->recordEvent(new ClientChatOwnerAssignedEvent($this->cch_id, $this->cch_owner_user_id, $userId));
+        $this->recordEvent(new ClientChatOwnerAssignedEvent($this, $this->cch_owner_user_id, $userId));
 		$this->cch_owner_user_id = $userId;
 		return $this;
 	}

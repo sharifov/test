@@ -20,6 +20,6 @@ class ClientChatRemoveOldOwnerUnreadMessagesListener
 
     public function handle(ClientChatOwnerAssignedEvent $event): void
     {
-        $this->service->discardUnreadMessages($event->chatId, $event->oldOwner);
+        $this->service->discardUnreadMessages($event->chat->cch_id, $event->oldOwner);
     }
 }
