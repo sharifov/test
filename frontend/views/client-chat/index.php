@@ -490,7 +490,11 @@ window.getChatHistory = function (cchId) {
     $("#_rc-iframe-wrapper").find('._rc-iframe').hide();
     $("#_rc-iframe-wrapper").find('#_cc-load').remove();
     $("#_rc-iframe-wrapper").append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
+              
     $.post('{$chatHistoryUrl}', {cchId: cchId}, function(data) {
+        if (data.indexOf('iframe') !== -1) {
+            $('#_rc-'+cchId).remove();
+        }
         $("#_rc-iframe-wrapper").append(data);
     });
 }
