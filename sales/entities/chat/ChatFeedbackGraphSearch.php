@@ -16,7 +16,7 @@ class ChatFeedbackGraphSearch extends ClientChatFeedbackSearch
     public string $startTimeRange = '';
     public string $endTimeRange = '';
     public string $projectID = '';
-    public string $departmentID = '';
+    public string $channelID = '';
     public string $ccfUserID = '';
     public int $groupBy;
     public string $timeZone;
@@ -46,8 +46,10 @@ class ChatFeedbackGraphSearch extends ClientChatFeedbackSearch
     public function rules(): array
     {
         return [
-            [['timeRange', 'startTimeRange', 'endTimeRange', 'projectID', 'departmentID', 'ccfUserID', 'ccf_created_dt', 'ccf_message'], 'string'],
-            [['ccf_id', 'ccf_rating', 'ccf_client_id', 'ccf_user_id', 'groupBy'], 'integer']
+            [['timeRange', 'startTimeRange', 'endTimeRange', 'projectID', 'channelID', 'ccfUserID', 'ccf_created_dt', 'ccf_message'], 'string'],
+            [['ccf_id', 'ccf_rating', 'ccf_client_id', 'ccf_user_id', 'groupBy'], 'integer'],
+            ['timeRange', 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+            ['timeRange', 'required'],
         ];
     }
 
@@ -77,14 +79,14 @@ class ChatFeedbackGraphSearch extends ClientChatFeedbackSearch
             Employee::convertTimeFromUserDtToUTC(strtotime($this->endTimeRange))
         ]);
 
-        if ($this->projectID){
+        if ($this->projectID) {
             $query->andWhere(['cch_project_id' => $this->projectID]);
         }
 
-        if ($this->departmentID){
-            $query->andWhere(['cch_dep_id' => $this->departmentID]);
+        if ($this->channelID) {
+            $query->andWhere(['cch_channel_id' => $this->channelID]);
         }
-        if ($this->ccfUserID){
+        if ($this->ccfUserID) {
             $query->andWhere(['cch_owner_user_id' => $this->ccfUserID]);
         }
 
@@ -92,6 +94,7 @@ class ChatFeedbackGraphSearch extends ClientChatFeedbackSearch
             $query->andWhere(['>', 'LENGTH(ccf_message)', 0]);
         } elseif ($this->ccf_message === '1') {
             $query->andWhere(['=', 'LENGTH(ccf_message)', 0]);
+            $query->orWhere(['ccf_message' => null]);
         }
 
         $query->andFilterWhere([
@@ -99,7 +102,7 @@ class ChatFeedbackGraphSearch extends ClientChatFeedbackSearch
             'ccf_client_id' => $this->ccf_client_id,
             'ccf_user_id' => $this->ccf_user_id,
             'ccf_rating' => $this->ccf_rating,
-            'DATE(ccf_created_dt)'=> $this->ccf_created_dt
+            'DATE(ccf_created_dt)' => $this->ccf_created_dt
         ]);
 
 

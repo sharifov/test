@@ -138,11 +138,11 @@ class ViewModelChatFeedbackGraph
 
         $headers = [
             'Date',
-            'One Start',
-            'Two Starts',
-            'Three Starts',
-            'Four Starts',
-            'Five Starts',
+            'Terrible',
+            'Bad',
+            'Acceptable',
+            'Good',
+            'Awesome',
         ];
 
         if ($chartData) {
