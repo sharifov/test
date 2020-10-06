@@ -134,7 +134,7 @@ $guard = new ClientChatManageGuard($statusLogRepository);
             <div class="x_title">
                 <h2>Cases </h2>
                 <ul class="nav navbar-right panel_toolbox">
-                    <?php if (!$clientChat->isClosed()): ?>
+                    <?php if (!$clientChat->isClosed() && Auth::can('/cases/create-by-chat')): ?>
                     <li>
                         <a class="create_case" data-link="<?= Url::to(['/cases/create-by-chat', 'chat_id' => $clientChat->cch_id]); ?>"><i class="fa fa-plus"></i> Create Case</a>
                     </li>
@@ -167,7 +167,7 @@ $guard = new ClientChatManageGuard($statusLogRepository);
             <div class="x_title">
                 <h2>Leads </h2>
                 <ul class="nav navbar-right panel_toolbox">
-					<?php if (!$clientChat->isClosed()): ?>
+					<?php if (!$clientChat->isClosed() && Auth::can('/lead/create-by-chat')): ?>
                         <li>
                             <a class="create_lead" data-link="<?= Url::to(['/lead/create-by-chat', 'chat_id' => $clientChat->cch_id]); ?>"><i class="fa fa-plus"></i> Create Lead</a>
                         </li>
