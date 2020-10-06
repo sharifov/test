@@ -660,7 +660,11 @@ class ClientChatController extends FController
             if ($form->load(Yii::$app->request->post()) && !$form->pjaxReload && $form->validate()) {
                 $newDepartment = $this->clientChatService->transfer($form, Auth::user());
 
-                return '<script>$("#modal-sm").modal("hide"); refreshChatPage(' . $form->cchId . ', ' . ClientChat::TAB_ACTIVE . '); createNotify("Success", "Chat successfully transferred to ' . $newDepartment->dep_name . ' department. ", "success")</script>';
+                return '<script>
+                        $("#modal-sm").modal("hide"); 
+                        refreshChatPage(' . $form->cchId . '); 
+                        createNotify("Success", "Chat successfully transferred to ' . $newDepartment->dep_name . ' department. ", "success");
+                    </script>';
             }
 
             if ($form->pjaxReload) {
