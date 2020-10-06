@@ -38,9 +38,6 @@ class DateTimeColumn extends DataColumn
                 'clientEvents' => [
                     'clearDate' => 'function (e) {$(e.target).find("input").change();}',
                 ],
-                'clientEvents' => [
-                    'clearDate' => 'function (e) {$(e.target).find("input").change();}',
-                ],
             ]);
         }
     }
