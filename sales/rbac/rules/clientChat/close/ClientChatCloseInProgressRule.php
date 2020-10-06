@@ -15,10 +15,6 @@ class ClientChatCloseInProgressRule extends Rule
             return false;
         }
 
-        if (!\Yii::$app->authManager->checkAccess($user, 'client-chat/manage')) {
-            return false;
-        }
-
         /** @var ClientChat $chat */
         $chat = $params['chat'];
 

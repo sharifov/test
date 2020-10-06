@@ -6,6 +6,7 @@ use sales\entities\cases\CasesStatus;
 use sales\guards\clientChat\ClientChatManageGuard;
 use sales\helpers\clientChat\ClientChatHelper;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChat\permissions\ClientChatActionPermission;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use sales\repositories\clientChatStatusLogRepository\ClientChatStatusLogRepository;
@@ -21,6 +22,7 @@ use yii\widgets\Pjax;
  * @var Client $client
  * @var View $this
  * @var bool $existAvailableLeadQuotes
+ * @var ClientChatActionPermission $actionPermissions
  */
 
 $_self = $this;
@@ -87,8 +89,12 @@ $guard = new ClientChatManageGuard($statusLogRepository);
             <?php if ($clientChat->isTransfer()): ?>
 				<?= $guard->isCanCancelTransfer($clientChat, Auth::user()) ? Html::button('<i class="fa fa-exchange"></i> Cancel Transfer', ['class' => 'btn btn-danger cc_cancel_transfer', 'title' => 'Cancel Transfer', 'data-cch-id' => $clientChat->cch_id]) : ''; ?>
             <?php elseif (!$clientChat->isClosed()): ?>
+                <?php if ($actionPermissions->canClose($clientChat)): ?>
                 <?= Html::button('<i class="fa fa-times-circle"></i> Close Chat', ['class' => 'btn btn-danger cc_close', 'title' => 'Close', 'data-cch-id' => $clientChat->cch_id]); ?>
-                <?= Html::button('<i class="fa fa-exchange"></i> Transfer', ['class' => 'btn btn-warning cc_transfer', 'title' => 'Transfer', 'data-cch-id' => $clientChat->cch_id]); ?>
+                <?php endif;?>
+                <?php if ($actionPermissions->canTransfer($clientChat)): ?>
+                    <?= Html::button('<i class="fa fa-exchange"></i> Transfer', ['class' => 'btn btn-warning cc_transfer', 'title' => 'Transfer', 'data-cch-id' => $clientChat->cch_id]); ?>
+                <?php endif;?>
             <?php endif; ?>
         </div>
     </div>

@@ -6,6 +6,7 @@ use sales\model\clientChat\dashboard\FilterForm;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\dashboard\ReadUnreadFilter;
 use sales\model\clientChat\dashboard\GroupFilter;
+use sales\model\clientChat\permissions\ClientChatActionPermission;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatNote\entity\ClientChatNote;
@@ -22,6 +23,7 @@ use yii\widgets\Pjax;
 /** @var $totalUnreadMessages int */
 /** @var FilterForm $filter */
 /** @var int $page */
+/** @var ClientChatActionPermission $actionPermissions */
 
 $this->title = 'My Client Chat';
 //$this->params['breadcrumbs'][] = $this->title;
@@ -90,18 +92,20 @@ $clientChatRemoveFromActiveConnectionUrl = Url::toRoute(['/client-chat/remove-ac
         <div id="_cc_additional_info_wrapper" style="position: relative;">
             <div id="_client-chat-info">
                 <?php if ($clientChat && $client): ?>
-                    <?= $this->render('partial/_client-chat-info', ['clientChat' => $clientChat, 'client' => $client]); ?>
+                    <?= $this->render('partial/_client-chat-info', ['clientChat' => $clientChat, 'client' => $client, 'actionPermissions' => $actionPermissions]); ?>
                 <?php endif; ?>
             </div>
 
             <div id="_client-chat-note">
-                <?php if ($clientChat): ?>
+                <?php if ($clientChat && $actionPermissions->canNoteView($clientChat)): ?>
                     <?php echo $this->render('partial/_client-chat-note', [
                         'clientChat' => $clientChat,
                         'model' => new ClientChatNote(),
+                        'actionPermissions' => $actionPermissions,
                     ]); ?>
-                <?php endif; ?>
+                <?php endif;?>
             </div>
+
         </div>
     </div>
 </div>
