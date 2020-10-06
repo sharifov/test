@@ -12,7 +12,7 @@ use yii\helpers\Html;
  */
 
 ?>
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
 <?php if ($viewModel->prepareStatsData): ?>
 
@@ -82,7 +82,7 @@ use yii\helpers\Html;
         });
     </script>
 
-    <?php Pjax::begin(['enablePushState' => false, 'clientOptions' => ['method' => 'POST']]) ?>
+    <?php Pjax::begin(['id' => 'feedback-grid', 'enablePushState' => false, 'clientOptions' => ['method' => 'POST']]) ?>
     <?= GridView::widget([
         'dataProvider' => $viewModel->dataProvider,
         'filterModel' => $viewModel->chatFeedbackGraphsSearch,
@@ -94,18 +94,24 @@ use yii\helpers\Html;
                     'style' => 'width:100px'
                 ],
             ],*/
+
             [
                 'label' => 'Client',
                 'attribute' => 'ccf_client_id',
                 'value' => static function ($model) {
-                    return $model['first_name'] . ' ' . $model['last_name'];
+                    if ($model['first_name'] || $model['last_name']) {
+                        return '<span class="label label-info"> <i class="fa fa-link"></i> ' . Html::encode($model['first_name'] . ' ' . $model['last_name']) . ' (' . $model['ccf_client_id'] . ')</span>';
+                    } else {
+                        return 'not set';
+                    }
                 },
+                'format' => 'raw',
                 'options' => [
                     'style' => 'width:200px'
                 ],
                 'filterInputOptions' => [
-                        'class' => 'form-control',
-                        'placeholder' => 'Client ID'
+                    'class' => 'form-control',
+                    'placeholder' => 'Client ID'
                 ]
             ],
 
@@ -118,6 +124,7 @@ use yii\helpers\Html;
                 'options' => [
                     'style' => 'width:200px'
                 ],
+                'filter' => \common\models\Employee::getList(),
                 'filterInputOptions' => [
                     'class' => 'form-control',
                     'placeholder' => 'User ID'
@@ -146,7 +153,7 @@ use yii\helpers\Html;
             [
                 'label' => 'Remark',
                 'attribute' => 'ccf_message',
-                'filter' => [0 => 'With Remark', 1 => 'Without Remark' ]
+                'filter' => [0 => 'With Remark', 1 => 'Without Remark']
             ],
             [
                 'label' => 'Created',
@@ -212,3 +219,23 @@ use yii\helpers\Html;
         </div>
     </div>
 <?php endif; ?>
+
+
+<?php
+$gridFilterJs = <<<JS
+
+$('#feedback-grid').on('pjax:beforeSend', function (obj, xhr, dataObj) {    
+    const queryString = window.location.search;  
+    if (queryString) {
+        const urlParams = new URLSearchParams(queryString);
+        const timeRange = urlParams.get('ChatFeedbackGraphSearch[timeRange]')
+        const rangeParam = {'ChatFeedbackGraphSearch' : {'timeRange': timeRange}}    
+        const recursiveEncoded = $.param( rangeParam );
+        const finalUri = dataObj.data + '&'+ recursiveEncoded
+        dataObj.data = finalUri
+    }        
+});
+
+JS;
+$this->registerJs($gridFilterJs, \yii\web\View::POS_READY);
+?>

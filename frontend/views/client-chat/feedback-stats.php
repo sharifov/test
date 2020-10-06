@@ -29,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <?php $form = ActiveForm::begin([
                             'id' => 'feedback-chart-search-form',
                             //'options' => ['data-pjax' => '#client-chat-chart'],
-                            'enableClientValidation' => false,
+                            //'enableClientValidation' => false,
                         ]) ?>
 
                         <div class="row">
@@ -40,6 +40,12 @@ $this->params['breadcrumbs'][] = $this->title;
                                     'presetDropdown' => true,
                                     'hideInput' => true,
                                     'convertFormat' => true,
+                                    'containerTemplate' => '<div class="kv-drp-dropdown">
+                                                                <span class="left-ind">{pickerIcon}</span>
+                                                                <input type="text" readonly class="form-control range-value" value="{value}">                                                                
+                                                                <span class="right-ind"><b class="caret"></b></span>
+                                                            </div>
+                                                            {input}',
                                     'pluginOptions' => [
                                         'timePicker' => true,
                                         'timePickerIncrement' => 1,
@@ -81,7 +87,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             </div>
 
                             <div class="col-md-2">
-                                <?= $form->field($model, 'departmentID')->dropDownList(EmployeeDepartmentAccess::getDepartments(), ['prompt' => '-'])->label('Department') ?>
+                                <?= $form->field($model, 'channelID')->dropDownList(\sales\model\clientChatChannel\entity\ClientChatChannel::getList(), ['prompt' => '-'])->label('Channel') ?>
                             </div>
 
                             <div class="col-md-2">
@@ -126,7 +132,7 @@ $(document).ready( function () {
     let formLoaded = $('#feedback-chart-search-form').serializeArray();
     let submitBtnHtml = $('#chat-chart-from-btn').html();
     let spinner = '<i class="fa fa-spinner fa-spin"></i> Loading...';
-    console.log(formLoaded)
+    
     $.ajax({
         url: '$url',
         type: 'post',
@@ -170,9 +176,9 @@ $(document).ready( function () {
         
         var formData = new FormData(document.getElementById('feedback-chart-search-form'));
                
-       formData.delete('_csrf-frontend');
+        formData.delete('_csrf-frontend');
         var params = new URLSearchParams(formData).toString();
-        
+        console.log(form)
         $.ajax({
             url: '$url',
             type: 'post',
@@ -216,14 +222,6 @@ $this->registerJs($js);
 ?>
 <?php
 $dropDownJs = <<<JS
-/* $('#chatfeedbackgraphsearch-groupby option').each(function(){  
-    if($(this).val() != 2){                    
-       this.disabled = true
-    }
-    if($(this).val() == 4){                    
-       this.disabled = false
-    }
-}); */  
 
 let range = $("#chatfeedbackgraphsearch-timerange").val().split(" - ")
     let start = moment(range[0], "YYYY-MM-DD");
