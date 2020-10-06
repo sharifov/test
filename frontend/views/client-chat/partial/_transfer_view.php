@@ -15,8 +15,17 @@ use yii\widgets\Pjax;
 
 <div class="row">
 	<div class="col-md-12">
-        <?php Pjax::begin(['id' => 'pjax-cc-submit-transfer', 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false, 'clientOptions' => ['async' => false]]) ?>
-            <?php $form = ActiveForm::begin(['options' => ['data-pjax' => 1, 'id' => 'cc-submit-transfer-form']]); ?>
+        <?php Pjax::begin([
+            'id' => 'pjax-cc-submit-transfer',
+            'timeout' => 5000,
+            'enablePushState' => false,
+            'enableReplaceState' => false,
+            'clientOptions' => ['async' => false]
+        ]) ?>
+        <?php $form = ActiveForm::begin([
+            'id' => 'cc-submit-transfer-form',
+            'options' => ['data-pjax' => 1]
+        ]); ?>
                 <?= $form->errorSummary($transferForm) ?>
 
                 <?= $form->field($transferForm, 'cchId')->hiddenInput()->label(false) ?>

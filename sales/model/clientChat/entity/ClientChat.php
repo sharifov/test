@@ -14,7 +14,7 @@ use sales\helpers\clientChat\ClientChatHelper;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\event\ClientChatManageStatusLogEvent;
 use sales\model\clientChat\event\ClientChatOwnerAssignedEvent;
-use sales\model\clientChat\event\ClientChatOwnerRemovedEvent;
+
 use sales\model\clientChat\event\ClientChatSetStatusCloseEvent;
 use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
 use sales\model\clientChatCase\entity\ClientChatCase;
@@ -83,6 +83,7 @@ class ClientChat extends \yii\db\ActiveRecord
 	public const STATUS_PENDING = 2;
 	public const STATUS_IN_PROGRESS = 4;
 	public const STATUS_TRANSFER = 3;
+	public const STATUS_HOLD = 10;
 
 	public const MISSED = 1;
 
@@ -92,6 +93,7 @@ class ClientChat extends \yii\db\ActiveRecord
 		self::STATUS_CLOSED => 'Closed',
 		self::STATUS_TRANSFER => 'Transfer',
 		self::STATUS_IN_PROGRESS => 'In Progress',
+		self::STATUS_HOLD => 'Hold',
 	];
 
 	private const STATUS_CLASS_LIST = [
@@ -100,6 +102,7 @@ class ClientChat extends \yii\db\ActiveRecord
 		self::STATUS_CLOSED => 'danger',
 		self::STATUS_TRANSFER => 'warning',
 		self::STATUS_IN_PROGRESS => 'info',
+		self::STATUS_HOLD => 'info',
 	];
 
 	public const TAB_ALL = 0;
