@@ -51,7 +51,7 @@ use yii\widgets\Pjax;
                 <?php $unreadMessages = $clientChat['count_unread_messages'] ?: null; ?>
             </span>
             <span>
-                <p><b><?= Html::encode($clientChat['client_full_name']) ?></b></p>
+                <div><b><?= Html::encode($clientChat['client_full_name']) ?></b></div>
                 <span title="Chat creation date"><small><i class="fa fa-calendar"></i> <?= Yii::$app->formatter->asDate($clientChat['cch_created_dt'], 'php:F d Y, H:i') ?></small></span>
                 <?php if (!empty($clientChat['cch_owner_user_id'])): ?>
                     , <span title="Owner"><small><i class="fa fa-user"></i> <?= Html::encode($clientChat['owner_username']) ?></small></span>
