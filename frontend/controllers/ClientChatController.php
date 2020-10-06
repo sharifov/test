@@ -185,6 +185,14 @@ class ClientChatController extends FController
                     'delete' => ['POST'],
                 ],
             ],
+            'access' => [
+                'allowActions' => [
+                    'ajax-close',
+                    'ajax-transfer-view',
+                    'delete-note',
+                    'create-note',
+                ],
+            ],
         ];
 
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
