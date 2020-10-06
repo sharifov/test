@@ -353,6 +353,7 @@ class ClientChatSearch extends ClientChat
             'project.name as project_name',
             'ccc_name',
             'ccu_count',
+            'owner_username' => 'owner.username',
         ]);
 
         if (ClientChat::isTabAll($filter->status)) {
@@ -404,6 +405,7 @@ class ClientChatSearch extends ClientChat
         $query->leftJoin(Department::tableName(), 'cch_dep_id = dep_id');
         $query->leftJoin(['project' => Project::tableName()], 'cch_project_id = project.id');
         $query->leftJoin(ClientChatUnread::tableName(), 'ccu_cc_id = cch_id');
+        $query->leftJoin(['owner' => Employee::tableName()], 'cch_owner_user_id = owner.id');
 
         $data = $query->asArray()->all();
         $data = ArrayHelper::index($data, 'cch_id');

@@ -14,10 +14,10 @@ use sales\helpers\user\UserFinder;
  */
 class Scopes extends \yii\db\ActiveQuery
 {
-	public const ROLES_FULL_ACCESS = [
+    public const ROLES_FULL_ACCESS = [
         Employee::ROLE_ADMIN,
-		Employee::ROLE_SUPER_ADMIN,
-		Employee::ROLE_QA,
+        Employee::ROLE_SUPER_ADMIN,
+        Employee::ROLE_QA,
         Employee::ROLE_QA_SUPER,
     ];
 
@@ -27,75 +27,75 @@ class Scopes extends \yii\db\ActiveQuery
         Employee::ROLE_SUP_SUPER,
     ];
 
-	public function byChannel(int $id): self
-	{
-		return $this->andWhere(['cch_channel_id' => $id]);
-	}
+    public function byChannel(int $id): self
+    {
+        return $this->andWhere(['cch_channel_id' => $id]);
+    }
 
-	public function byChannelIds(array $ids): self
-	{
-		return $this->andWhere(['IN', 'cch_channel_id', $ids]);
-	}
+    public function byChannelIds(array $ids): self
+    {
+        return $this->andWhere(['IN', 'cch_channel_id', $ids]);
+    }
 
-	public function byIds(array $ids): self
-	{
-		return $this->andWhere(['IN', 'cch_id', $ids]);
-	}
+    public function byIds(array $ids): self
+    {
+        return $this->andWhere(['IN', 'cch_id', $ids]);
+    }
 
-	public function byOwner(?int $userId): self
-	{
-		if ($userId) {
-			return $this->andWhere(['cch_owner_user_id' => $userId]);
-		}
-		return $this->andWhere(['cch_owner_user_id' => null]);
-	}
+    public function byOwner(?int $userId): self
+    {
+        if ($userId) {
+            return $this->andWhere(['cch_owner_user_id' => $userId]);
+        }
+        return $this->andWhere(['cch_owner_user_id' => null]);
+    }
 
-	public function byRid(string $rid): self
-	{
-		return $this->andWhere(['cch_rid' => $rid]);
-	}
+    public function byRid(string $rid): self
+    {
+        return $this->andWhere(['cch_rid' => $rid]);
+    }
 
-	public function notClosed(): self
-	{
-		return $this->andWhere(['<>', 'cch_status_id', ClientChat::STATUS_CLOSED]);
-	}
+    public function notClosed(): self
+    {
+        return $this->andWhere(['<>', 'cch_status_id', ClientChat::STATUS_CLOSED]);
+    }
 
-	public function active(): self
-	{
-		return $this->notClosed();
-	}
+    public function active(): self
+    {
+        return $this->notClosed();
+    }
 
-	public function archive(): self
-	{
-		return $this->andWhere(['cch_status_id' => ClientChat::STATUS_CLOSED]);
-	}
+    public function archive(): self
+    {
+        return $this->andWhere(['cch_status_id' => ClientChat::STATUS_CLOSED]);
+    }
 
-	public function byClientId(int $id): self
-	{
-		return $this->andWhere(['cch_client_id' => $id]);
-	}
+    public function byClientId(int $id): self
+    {
+        return $this->andWhere(['cch_client_id' => $id]);
+    }
 
-	public function expectOwner(int $id): self
-	{
-		return $this->andWhere(['<>', 'cch_owner_user_id', $id]);
-	}
+    public function expectOwner(int $id): self
+    {
+        return $this->andWhere(['<>', 'cch_owner_user_id', $id]);
+    }
 
-	public function byDepartment(int $dep): self
-	{
-		return $this->andWhere(['cch_dep_id' => $dep]);
-	}
+    public function byDepartment(int $dep): self
+    {
+        return $this->andWhere(['cch_dep_id' => $dep]);
+    }
 
-	public function withOwner(): self
-	{
-		return $this->andWhere(['not', ['cch_owner_user_id' => null]]);
-	}
+    public function withOwner(): self
+    {
+        return $this->andWhere(['not', ['cch_owner_user_id' => null]]);
+    }
 
-	public function byProject(int $id): self
-	{
-		return $this->andWhere(['cch_project_id' => $id]);
-	}
+    public function byProject(int $id): self
+    {
+        return $this->andWhere(['cch_project_id' => $id]);
+    }
 
-	public function byUserGroupsRestriction(?Employee $user = null): self
+    public function byUserGroupsRestriction(?Employee $user = null): self
     {
         $user = UserFinder::getOrFind($user);
         $fullAccess = EmployeeAccessHelper::entryInRoles($user, self::ROLES_FULL_ACCESS);
@@ -144,18 +144,17 @@ class Scopes extends \yii\db\ActiveQuery
     }
 
     public function byId(int $id): self
-	{
-		return $this->andWhere(['cch_id' => $id]);
-	}
+    {
+        return $this->andWhere(['cch_id' => $id]);
+    }
 
-	public function withoutOwnerOrInTransfer(): Scopes
-	{
-		return $this->byOwner(null)->orWhere(['cch_status_id' => ClientChat::STATUS_TRANSFER]);
-	}
+    public function withoutOwnerOrInTransfer(): Scopes
+    {
+        return $this->byOwner(null)->orWhere(['cch_status_id' => ClientChat::STATUS_TRANSFER]);
+    }
 
     public function withUnreadMessage(bool $edgerLoading = false): self
     {
         return $this->innerJoinWith('unreadMessage', $edgerLoading);
-	}
-
+    }
 }

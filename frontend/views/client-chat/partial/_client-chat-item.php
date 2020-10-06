@@ -12,28 +12,27 @@ use yii\widgets\Pjax;
 /** @var $clientChatId int|null */
 ?>
 
-<?php foreach($clientChats as $clientChat): ?>
+<?php foreach ($clientChats as $clientChat): ?>
     <?php
         $inMessage = true;
         $lastChatMessage = $lastChatMessageDate = '';
         $lastClientMessage = ClientChatMessage::getLastMessageByClient((int)$clientChat['cch_id']);
         $lastAgentMessage = ClientChatMessage::getLastMessageByAgent((int)$clientChat['cch_id']);
 
-        if($lastClientMessage && !$lastAgentMessage){
+        if ($lastClientMessage && !$lastAgentMessage) {
             $inMessage = true;
             $lastChatMessage = $lastClientMessage->message;
             $lastChatMessageDate = $lastClientMessage->ccm_sent_dt;
-        } elseif ($lastAgentMessage && !$lastClientMessage){
+        } elseif ($lastAgentMessage && !$lastClientMessage) {
             $inMessage = false;
             $lastChatMessage = $lastAgentMessage->message;
             $lastChatMessageDate = $lastAgentMessage->ccm_sent_dt;
         } elseif ($lastClientMessage && $lastAgentMessage) {
-            if(strtotime($lastClientMessage->ccm_sent_dt) > strtotime($lastAgentMessage->ccm_sent_dt)){
+            if (strtotime($lastClientMessage->ccm_sent_dt) > strtotime($lastAgentMessage->ccm_sent_dt)) {
                 $inMessage = true;
                 $lastChatMessage = $lastClientMessage->message;
                 $lastChatMessageDate = $lastClientMessage->ccm_sent_dt;
-            }
-            else{
+            } else {
                 $inMessage = false;
                 $lastChatMessage = $lastAgentMessage->message;
                 $lastChatMessageDate = $lastAgentMessage->ccm_sent_dt;
@@ -51,9 +50,12 @@ use yii\widgets\Pjax;
                 </span>
                 <?php $unreadMessages = $clientChat['count_unread_messages'] ?: null; ?>
             </span>
-            <span class="_cc-title">
+            <span>
                 <p><b><?= Html::encode($clientChat['client_full_name']) ?></b></p>
-                <p title="Сhat creation date"><small><?= Yii::$app->formatter->asDate($clientChat['cch_created_dt'],'php:F d Y') ?></small></p>
+                <span title="Chat creation date"><small><i class="fa fa-calendar"></i> <?= Yii::$app->formatter->asDate($clientChat['cch_created_dt'], 'php:F d Y, H:i') ?></small></span>
+                <?php if (!empty($clientChat['cch_owner_user_id'])): ?>
+                    , <span title="Owner"><small><i class="fa fa-user"></i> <?= Html::encode($clientChat['owner_username']) ?></small></span>
+                <?php endif;?>
                 <div>
                     <?php /*if ($clientChat['dep_name']): ?>
                         <span class="label label-info"><?= Html::encode($clientChat['dep_name']) ?></span>

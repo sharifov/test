@@ -17,12 +17,12 @@ class HttpBasicAuth extends \yii\filters\auth\HttpBasicAuth
     public function verify($username, $password): ?ApiUser
     {
         if (!$user = ApiUser::findOne(['au_api_username' => $username])) {
-            Yii::warning('API not found username: ' . $username, 'API:HttpBasicAuth:ApiUser');
+            Yii::warning(['message' => 'API: not found username', 'endpoint' => Yii::$app->controller->action->uniqueId, 'username' => $username, 'RemoteIP' => Yii::$app->request->getRemoteIP(), 'UserIP' => Yii::$app->request->getUserIP()], 'API:HttpBasicAuth:ApiUser');
             return null;
         }
 
         if (!$user->validatePassword($password)) {
-            Yii::warning('API invalid password: ' . $password . ', username: ' . $username . ' ', 'API:HttpBasicAuth:ApiUser');
+            Yii::warning(['message' => 'API: invalid password', 'endpoint' => Yii::$app->controller->action->uniqueId, 'username' => $username, 'password' => $password, 'RemoteIP' => Yii::$app->request->getRemoteIP(), 'UserIP' => Yii::$app->request->getUserIP()], 'API:HttpBasicAuth:ApiUser');
             return null;
         }
 
