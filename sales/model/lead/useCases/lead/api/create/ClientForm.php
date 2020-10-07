@@ -5,6 +5,7 @@ namespace sales\model\lead\useCases\lead\api\create;
 use borales\extensions\phoneInput\PhoneInputValidator;
 use sales\services\client\InternalEmailValidator;
 use sales\services\client\InternalPhoneValidator;
+use thamtech\uuid\validators\UuidValidator;
 use yii\base\Model;
 
 /**
@@ -12,11 +13,13 @@ use yii\base\Model;
  *
  * @property string $phone
  * @property string $email
+ * @property string $uuid
  */
 class ClientForm extends Model
 {
     public $phone;
     public $email;
+    public $uuid;
 
     public function rules(): array
     {
@@ -34,6 +37,8 @@ class ClientForm extends Model
             ['email', InternalEmailValidator::class, 'allowInternalEmail' => \Yii::$app->params['settings']['allow_contact_internal_email']],
 
             [['email', 'phone'], 'requiredValidate', 'skipOnEmpty' => false],
+
+            ['uuid', UuidValidator::class, 'skipOnEmpty' => true],
         ];
     }
 

@@ -123,6 +123,7 @@ class LeadController extends ApiBaseController
      * @apiParam {string}               [Client.phone]                           Client phone
      * @apiParam {string}               [Client.email]                           Client email
      * @apiParam {string}               [Client.client_ip]                       Client client_ip
+     * @apiParam {string}               [Client.uuid]                            Client uuid
      *
      * @apiParamExample {json} Request-Example:
      * {
@@ -197,7 +198,8 @@ class LeadController extends ApiBaseController
      *        "name": "Alexandr",
      *        "phone": "+373-69-487523",
      *        "email": "email1@gmail.com",
-     *        "client_ip": "127.0.0.1"
+     *        "client_ip": "127.0.0.1",
+     *        "uuid": "35009a79-1a05-49d7-b876-2b884d0f825b"
      *    }
      * }
      *
@@ -394,8 +396,12 @@ class LeadController extends ApiBaseController
             $post = Yii::$app->request->post();
         }
 
+        if (!empty($post['Client']['uuid'])) {
+            $post['lead']['clientUuid'] = $post['Client']['uuid'];
+        }
 
         $modelLead = new ApiLead();
+
         //$modelLead->scenario = ApiLead::SCENARIO_CREATE;
 
         //print_r($this->apiProject); exit;
@@ -407,7 +413,6 @@ class LeadController extends ApiBaseController
         }
 
         if ($modelLead->load($post)) {
-
 
             if($modelLead->project_id) {
 

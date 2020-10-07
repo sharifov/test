@@ -59,7 +59,8 @@ class LeadCreateHandler
             $client = $this->clientManageService->getOrCreate(
                 [new PhoneCreateForm(['phone' => $form->clientForm->phone])],
                 [new EmailCreateForm(['email' => $form->clientForm->email])],
-                $clientForm
+                $clientForm,
+                $form->clientForm->uuid
             );
 
             $lead = Lead::createByApiBO($form, $client);

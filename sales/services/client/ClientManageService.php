@@ -422,16 +422,19 @@ class ClientManageService
      * @param PhoneCreateForm[] $phones
      * @param EmailCreateForm[] $emails
      * @param ClientCreateForm $clientForm
+     * @param string|null $uuid
      * @return Client
      */
-    public function getOrCreate(array $phones, array $emails, ClientCreateForm $clientForm): Client
+    public function getOrCreate(array $phones, array $emails, ClientCreateForm $clientForm, ?string $uuid = null): Client
     {
-        try {
-            $client = $this->getOrCreateByPhones($phones, $clientForm);
-        } catch (InternalPhoneException $e) {
-            throw $e;
-        } catch (\DomainException $e) {
-            $client = $this->getOrCreateByEmails($emails, $clientForm);
+        if (!(!empty($uuid) && $client = Client::findOne(['uuid' => $uuid]))) {
+            try {
+                $client = $this->getOrCreateByPhones($phones, $clientForm);
+            } catch (InternalPhoneException $e) {
+                throw $e;
+            } catch (\DomainException $e) {
+                $client = $this->getOrCreateByEmails($emails, $clientForm);
+            }
         }
 
         $this->addPhones($client, $phones);

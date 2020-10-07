@@ -295,6 +295,10 @@ class LeadCreateApiService
         $projectId = $modelLead->project_id;
         $parentId = null;
 
+        if (!empty($modelLead->clientUuid) && $client = Client::findOne(['uuid' => $modelLead->clientUuid])) {
+            return $client;
+        }
+
         if (!is_array($modelLead->phones)) {
             throw new UnprocessableEntityHttpException('Phones from ModelLead cannot be empty.');
         }

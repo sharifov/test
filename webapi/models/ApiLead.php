@@ -10,6 +10,7 @@ use common\models\Lead;
 use common\models\Sources;
 use common\models\UserProjectParams;
 use common\models\VisitorLog;
+use thamtech\uuid\validators\UuidValidator;
 use Yii;
 use yii\base\Model;
 
@@ -49,7 +50,7 @@ use yii\base\Model;
  * @property string $user_language
  * @property array $visitor_log
  * @property array $visitorLogErrors
- *
+ * @property string $clientUuid
  */
 class ApiLead extends Model
 {
@@ -93,7 +94,7 @@ class ApiLead extends Model
     public $visitor_log;
 
     public $visitorLogErrors = [];
-
+    public $clientUuid;
 
     public function formName()
     {
@@ -155,6 +156,8 @@ class ApiLead extends Model
             [['user_language'], 'string', 'max' => 5],
             ['user_language', 'exist', 'skipOnError' => true, 'skipOnEmpty' => true,
                 'targetClass' => Language::class, 'targetAttribute' => ['user_language' => 'language_id']],
+
+            ['clientUuid', UuidValidator::class],
         ];
     }
 
@@ -324,6 +327,7 @@ class ApiLead extends Model
 
             'user_language'    => 'Client Language',
             'user_agent'    => 'Client UserAgent',
+            'clientUuid'    => 'Client Uuid',
         ];
     }
 
