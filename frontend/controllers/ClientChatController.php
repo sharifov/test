@@ -306,9 +306,15 @@ class ClientChatController extends FController
         ]);
     }
 
-    public function actionInfo()
+    /**
+     * @return Response
+     * @throws BadRequestHttpException
+     */
+    public function actionInfo(): Response
     {
-        $cchId = \Yii::$app->request->post('cch_id');
+        if (!Yii::$app->request->isAjax || !$cchId = (int) Yii::$app->request->post('cch_id')) {
+            throw new BadRequestHttpException('Invalid parameters');
+        }
 
         $result = [
             'html' => '',
@@ -345,7 +351,7 @@ class ClientChatController extends FController
 
     public function actionNote(): Response
     {
-        $cchId = \Yii::$app->request->post('cch_id');
+        $cchId = (int) Yii::$app->request->post('cch_id', 0);
 
         $result = [
             'html' => '',
@@ -369,13 +375,18 @@ class ClientChatController extends FController
         return $this->asJson($result);
     }
 
+    /**
+     * @return string
+     * @throws BadRequestHttpException
+     * @throws ForbiddenHttpException
+     */
     public function actionCreateNote(): string
     {
-        $cchId = (int) Yii::$app->request->get('cch_id');
-
-        if (!$clientChat = ClientChat::findOne($cchId)) {
-            throw new NotFoundHttpException();
+        if (!Yii::$app->request->isAjax || !$cchId = (int) Yii::$app->request->get('cch_id')) {
+            throw new BadRequestHttpException('Invalid parameters');
         }
+
+        $clientChat = $this->clientChatRepository->findById($cchId);
 
         $permissions = new ClientChatActionPermission();
         if (!$permissions->canNoteAdd($clientChat)) {
@@ -385,7 +396,7 @@ class ClientChatController extends FController
         $model = new ClientChatNote();
         $model->ccn_user_id = Auth::id();
 
-        if (Yii::$app->request->isAjax && $model->load(Yii::$app->request->post())) {
+        if ($model->load(Yii::$app->request->post())) {
             try {
                 $this->clientChatNoteRepository->save($model);
             } catch (\Throwable $throwable) {
@@ -404,14 +415,24 @@ class ClientChatController extends FController
         ]);
     }
 
+    /**
+     * @return string
+     * @throws BadRequestHttpException
+     * @throws ForbiddenHttpException
+     */
     public function actionDeleteNote(): string
     {
-        $cchId = (int) Yii::$app->request->get('cch_id');
-        $ccnId = (int) Yii::$app->request->get('ccn_id');
-
-        if (!$clientChat = ClientChat::findOne($cchId)) {
-            throw new NotFoundHttpException();
+        if (!Yii::$app->request->isAjax ||
+            !Yii::$app->request->get('cch_id') ||
+            !Yii::$app->request->get('ccn_id')
+        ) {
+            throw new BadRequestHttpException('Invalid parameters');
         }
+
+        $cchId = (int) Yii::$app->request->get('cch_id', 0);
+        $ccnId = (int) Yii::$app->request->get('ccn_id', 0);
+
+        $clientChat = $this->clientChatRepository->findById($cchId);
 
         $permissions = new ClientChatActionPermission();
         if (!$permissions->canNoteDelete($clientChat)) {
@@ -422,8 +443,6 @@ class ClientChatController extends FController
             if ($clientChatNote = $this->clientChatNoteRepository->findById($ccnId)) {
                 $this->clientChatNoteRepository->toggleDeleted($clientChatNote);
             }
-        } catch (ForbiddenHttpException $e) {
-            throw $e;
         } catch (\Throwable $throwable) {
             Yii::error(
                 AppHelper::throwableFormatter($throwable),
@@ -439,10 +458,21 @@ class ClientChatController extends FController
         ]);
     }
 
+    /**
+     * @return Response
+     * @throws BadRequestHttpException
+     */
     public function actionAccessManage(): \yii\web\Response
     {
-        $ccuaId = \Yii::$app->request->post('ccuaId');
-        $accessAction = \Yii::$app->request->post('accessAction');
+        if (!Yii::$app->request->isAjax ||
+            !Yii::$app->request->post('ccuaId') ||
+            !Yii::$app->request->post('accessAction')
+        ) {
+            throw new BadRequestHttpException('Invalid parameters');
+        }
+
+        $ccuaId = (int) Yii::$app->request->post('ccuaId');
+        $accessAction = (int) Yii::$app->request->post('accessAction');
 
         try {
             $result = [
@@ -476,18 +506,22 @@ class ClientChatController extends FController
         return $this->asJson($result);
     }
 
-    public function actionAjaxDataInfo()
+    /**
+     * @return string
+     * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function actionAjaxDataInfo(): string
     {
-        $cchId = \Yii::$app->request->post('cchId');
+        if (!Yii::$app->request->isAjax || !$cchId = (int) Yii::$app->request->post('cchId')) {
+            throw new BadRequestHttpException('Invalid parameters');
+        }
 
-        $clientChat = null;
+        $clientChat = $this->clientChatRepository->findById($cchId);
+
         $visitorLog = null;
-        try {
-            $clientChat = $this->clientChatRepository->findById($cchId);
-            if ($clientChat->ccv && $clientChat->ccv->ccv_cvd_id) {
-                $visitorLog = VisitorLog::find()->byCvdId($clientChat->ccv->ccv_cvd_id)->orderBy(['vl_created_dt' => SORT_DESC])->one();
-            }
-        } catch (NotFoundException $e) {
+        if ($clientChat->ccv && $clientChat->ccv->ccv_cvd_id) {
+            $visitorLog = VisitorLog::find()->byCvdId($clientChat->ccv->ccv_cvd_id)->orderBy(['vl_created_dt' => SORT_DESC])->one();
         }
 
         $requestSearch = new ClientChatRequestSearch();
@@ -531,8 +565,16 @@ class ClientChatController extends FController
         return $this->render('stats', ['model' => $model]);
     }
 
+    /**
+     * @return Response
+     * @throws BadRequestHttpException
+     */
     public function actionAjaxGetChartStats(): \yii\web\Response
     {
+        if (!Yii::$app->request->isAjax) {
+            throw new BadRequestHttpException();
+        }
+
         $statsSearch = new ChatGraphsSearch();
         $statsSearch->load(Yii::$app->request->post());
         if ($statsSearch->validate()) {
@@ -558,8 +600,16 @@ class ClientChatController extends FController
         return $this->render('extended-stats', ['model' => $model]);
     }
 
+    /**
+     * @return Response
+     * @throws BadRequestHttpException
+     */
     public function actionAjaxGetExtendedStatsChart(): \yii\web\Response
     {
+        if (!Yii::$app->request->isAjax) {
+            throw new BadRequestHttpException();
+        }
+
         $statsSearch = new ChatExtendedGraphsSearch();
         $statsSearch->load(Yii::$app->request->post());
         if ($statsSearch->validate()) {
@@ -585,8 +635,16 @@ class ClientChatController extends FController
         return $this->render('feedback-stats', ['model' => $model]);
     }
 
+    /**
+     * @return Response
+     * @throws BadRequestHttpException
+     */
     public function actionAjaxGetFeedbackStatsChart(): \yii\web\Response
     {
+        if (!Yii::$app->request->isAjax) {
+            throw new BadRequestHttpException();
+        }
+
         $statsSearch = new ChatFeedbackGraphSearch();
         $statsSearch->load(Yii::$app->request->post());
         if ($statsSearch->validate()) {
@@ -615,9 +673,15 @@ class ClientChatController extends FController
         ]);
     }
 
-    public function actionAjaxClose()
+    /**
+     * @return string
+     * @throws BadRequestHttpException
+     */
+    public function actionAjaxClose(): string
     {
-        $cchId = \Yii::$app->request->post('cchId');
+        if (!Yii::$app->request->isAjax || !$cchId = (int) Yii::$app->request->post('cchId')) {
+            throw new BadRequestHttpException('Invalid parameters');
+        }
 
         $form = new ClientChatCloseForm();
         $form->cchId = $cchId;
@@ -653,9 +717,15 @@ class ClientChatController extends FController
         ]);
     }
 
-    public function actionAjaxHistory()
+    /**
+     * @return string
+     * @throws BadRequestHttpException
+     */
+    public function actionAjaxHistory(): string
     {
-        $chatId = \Yii::$app->request->post('cchId');
+        if (!Yii::$app->request->isAjax || !$chatId = (int) Yii::$app->request->post('cchId')) {
+            throw new BadRequestHttpException('Invalid parameters');
+        }
 
         try {
             $clientChat = $this->clientChatRepository->findById($chatId);
@@ -672,14 +742,18 @@ class ClientChatController extends FController
         ]);
     }
 
+    /**
+     * @return string
+     * @throws BadRequestHttpException
+     * @throws ForbiddenHttpException
+     */
     public function actionAjaxTransferView(): string
     {
-        $cchId = (int)Yii::$app->request->post('cchId');
-
-        if (!$clientChat = ClientChat::findOne($cchId)) {
-            throw new NotFoundHttpException('Client chat not found');
+        if (!Yii::$app->request->isAjax || !$cchId = (int) Yii::$app->request->post('cchId')) {
+            throw new BadRequestHttpException('Invalid parameters');
         }
 
+        $clientChat = $this->clientChatRepository->findById($cchId);
         $permissions = new ClientChatActionPermission();
 
         if (!$permissions->canTransfer($clientChat)) {
@@ -997,9 +1071,15 @@ class ClientChatController extends FController
         return $this->render('real-time', ['host' => $host, 'projectsWithKeys' => json_encode($projectsWithKeys, true)]);
     }
 
-    public function actionAjaxCancelTransfer()
+    /**
+     * @return Response
+     * @throws BadRequestHttpException
+     */
+    public function actionAjaxCancelTransfer(): Response
     {
-        $cchId = Yii::$app->request->post('cchId');
+        if (!Yii::$app->request->isAjax || !$cchId = (int) Yii::$app->request->post('cchId')) {
+            throw new BadRequestHttpException('Invalid parameters');
+        }
 
         $result = [
             'error' => false,
