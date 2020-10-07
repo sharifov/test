@@ -456,18 +456,21 @@ class ClientChatSearch extends ClientChat
     {
         $query = new Query();
         $query->addSelect(['DATE(cch_created_dt) as createdDate,
-               SUM(IF(cch_status_id = ' . ClientChat::STATUS_PENDING . ', 1, 0)) AS chatGenerated,
+               SUM(IF(cch_status_id = ' . ClientChat::STATUS_NEW . ', 1, 0)) AS chatNew,
                SUM(IF(cch_status_id = ' . ClientChat::STATUS_PENDING . ', 1, 0)) AS chatPending,
-               SUM(IF(cch_status_id = ' . ClientChat::STATUS_TRANSFER . ', 1, 0)) AS chatTransfer,
+               SUM(IF(cch_status_id = ' . ClientChat::STATUS_IN_PROGRESS . ', 1, 0)) AS chatProgress,
+               SUM(IF(cch_status_id = ' . ClientChat::STATUS_TRANSFER . ', 1, 0)) AS chatTransfer,             
+               SUM(IF(cch_status_id = ' . ClientChat::STATUS_HOLD . ', 1, 0)) AS chatHold,             
                SUM(IF(cch_status_id = ' . ClientChat::STATUS_CLOSED . ', 1, 0)) AS chatClosed             
         ']);
 
         $query->from(static::tableName());
         $query->where('cch_owner_user_id IS NOT NULL');
         $query->andWhere(['cch_owner_user_id' => $user_id]);
-
-        $query->andWhere(['>=', 'cch_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->timeStart))]);
-        $query->andWhere(['<=', 'cch_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->timeEnd))]);
+        if ($this->timeStart && $this->timeEnd) {
+            $query->andWhere(['>=', 'cch_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->timeStart))]);
+            $query->andWhere(['<=', 'cch_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->timeEnd))]);
+        }
 
         $query->groupBy('createdDate');
 

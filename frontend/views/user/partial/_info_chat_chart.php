@@ -39,20 +39,24 @@
                 let data = google.visualization.arrayToDataTable([
                     [
                         'Days',
-                        'Generate',
+                        'New',
                         'Pending',
+                        'Progress',
                         'Transfer',
+                        'Hold',
                         'Closed',
                         {role: 'annotation'}
                     ],
                     <?php foreach($chatInfoGraph as $k => $item): ?>
                     [
                         '<?=($item['createdDate']) ?>',
-                        <?= $item['chatGenerated'] ?>,
+                        <?= $item['chatNew'] ?>,
                         <?= $item['chatPending'] ?>,
+                        <?= $item['chatProgress'] ?>,
                         <?= $item['chatTransfer'] ?>,
+                        <?= $item['chatHold'] ?>,
                         <?= $item['chatClosed'] ?>,
-                        'Total: <?= $item['chatGenerated'] + $item['chatPending'] + $item['chatTransfer'] + $item['chatClosed'] ?>',
+                        'Total: <?= $item['chatNew'] + $item['chatPending'] + $item['chatProgress'] + $item['chatTransfer'] + $item['chatHold'] + $item['chatClosed'] ?>',
                     ],
                     <?php endforeach; ?>
                 ]);
