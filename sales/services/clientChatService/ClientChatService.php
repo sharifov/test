@@ -436,7 +436,7 @@ class ClientChatService
 			}
 			$chatUserAccess->transferAccepted();
 
-			if ($oldChannelId !== $newClientChat->cch_channel_id) {
+			if ((int)$oldChannelId !== (int)$newClientChat->cch_channel_id) {
 				$botTransferChatResult = \Yii::$app->chatBot->transferDepartment($clientChat->cch_rid, $clientChat->ccv->ccvCvd->cvd_visitor_rc_id, (string)$oldChannelId, (string)$channel->ccc_id);
 				if ($botTransferChatResult['error']) {
 					throw new \RuntimeException('[Chat Bot Transfer] ' . $botTransferChatResult['error']['message'] ?? 'Cant read error message from Chat Bot response');
