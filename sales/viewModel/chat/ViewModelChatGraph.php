@@ -43,7 +43,11 @@ class ViewModelChatGraph
         foreach ($this->clientChatData as $arr){
             array_push($mappedData, [
                 $arr['date'],
-                (int)$arr['generated'],
+                (int)$arr['new'],
+                (int)$arr['pending'],
+                (int)$arr['progress'],
+                (int)$arr['transfer'],
+                (int)$arr['hold'],
                 (int)$arr['closed']
             ]);
         }
@@ -54,7 +58,11 @@ class ViewModelChatGraph
 
         $headers = [
             'Date',
-            'Generated',
+            'New',
+            'Pending',
+            'Progress',
+            'Transfer',
+            'Hold',
             'Closed',
         ];
         if ($mappedData){
