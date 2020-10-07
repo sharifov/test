@@ -428,7 +428,8 @@ $(document).on('click', '.cc_full_info', function (e) {
             modal.find('.modal-body').html(data);
         },
         error: function (xhr) {
-            createNotify('Error', xhr.responseText, 'error');
+            modal.find('.modal-body').html('Error: ' + xhr.responseText);
+            //createNotify('Error', xhr.responseText, 'error');
         },
     });
 });

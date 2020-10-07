@@ -62,12 +62,14 @@ use sales\viewModel\chat\ViewModelChatExtendedGraph;
 use sales\viewModel\chat\ViewModelChatFeedbackGraph;
 use sales\viewModel\chat\ViewModelChatGraph;
 use Yii;
+use yii\base\InvalidConfigException;
 use yii\data\ActiveDataProvider;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
+use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
 /**
@@ -330,8 +332,10 @@ class ClientChatController extends FController
             'html' => '',
             'message' => '',
         ];
+
         try {
             $clientChat = $this->clientChatRepository->findById($cchId);
+
             if ($clientChat->cch_owner_user_id && $clientChat->isOwner(Auth::id())) {
                 $this->clientChatMessageService->discardUnreadMessages($clientChat->cch_id, (int)$clientChat->cch_owner_user_id);
             }
@@ -369,6 +373,7 @@ class ClientChatController extends FController
         ];
         try {
             $clientChat = $this->clientChatRepository->findById($cchId);
+
             $permissions = new ClientChatActionPermission();
             if ($permissions->canNoteView($clientChat)) {
                 $result['html'] = $this->renderPartial('partial/_client-chat-note', [
@@ -389,6 +394,7 @@ class ClientChatController extends FController
      * @return string
      * @throws BadRequestHttpException
      * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
      */
     public function actionCreateNote(): string
     {
@@ -396,7 +402,11 @@ class ClientChatController extends FController
             throw new BadRequestHttpException('Invalid parameters');
         }
 
-        $clientChat = $this->clientChatRepository->findById($cchId);
+        try {
+            $clientChat = $this->clientChatRepository->findById($cchId);
+        } catch (NotFoundException $throwable) {
+            throw new NotFoundHttpException('Client chat is not found');
+        }
 
         $permissions = new ClientChatActionPermission();
         if (!$permissions->canNoteAdd($clientChat)) {
@@ -429,6 +439,7 @@ class ClientChatController extends FController
      * @return string
      * @throws BadRequestHttpException
      * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
      */
     public function actionDeleteNote(): string
     {
@@ -442,7 +453,11 @@ class ClientChatController extends FController
         $cchId = (int) Yii::$app->request->get('cch_id', 0);
         $ccnId = (int) Yii::$app->request->get('ccn_id', 0);
 
-        $clientChat = $this->clientChatRepository->findById($cchId);
+        try {
+            $clientChat = $this->clientChatRepository->findById($cchId);
+        } catch (NotFoundException $throwable) {
+            throw new NotFoundHttpException('Client chat is not found');
+        }
 
         $permissions = new ClientChatActionPermission();
         if (!$permissions->canNoteDelete($clientChat)) {
@@ -519,15 +534,22 @@ class ClientChatController extends FController
     /**
      * @return string
      * @throws BadRequestHttpException
-     * @throws \yii\base\InvalidConfigException
+     * @throws NotFoundHttpException
+     * @throws InvalidConfigException
      */
     public function actionAjaxDataInfo(): string
     {
-        if (!Yii::$app->request->isAjax || !$cchId = (int) Yii::$app->request->post('cchId')) {
+        $cchId = (int) Yii::$app->request->post('cchId');
+
+        if (!Yii::$app->request->isAjax || !$cchId) {
             throw new BadRequestHttpException('Invalid parameters');
         }
 
-        $clientChat = $this->clientChatRepository->findById($cchId);
+        try {
+            $clientChat = $this->clientChatRepository->findById($cchId);
+        } catch (NotFoundException $throwable) {
+            throw new NotFoundHttpException('Client chat is not found');
+        }
 
         $visitorLog = null;
         if ($clientChat->ccv && $clientChat->ccv->ccv_cvd_id) {
@@ -755,7 +777,7 @@ class ClientChatController extends FController
     /**
      * @return string
      * @throws BadRequestHttpException
-     * @throws ForbiddenHttpException
+     * @throws ForbiddenHttpException|NotFoundHttpException
      */
     public function actionAjaxTransferView(): string
     {
@@ -763,7 +785,12 @@ class ClientChatController extends FController
             throw new BadRequestHttpException('Invalid parameters');
         }
 
-        $clientChat = $this->clientChatRepository->findById($cchId);
+        try {
+            $clientChat = $this->clientChatRepository->findById($cchId);
+        } catch (NotFoundException $throwable) {
+            throw new NotFoundHttpException('Client chat is not found');
+        }
+
         $permissions = new ClientChatActionPermission();
 
         if (!$permissions->canTransfer($clientChat)) {
@@ -806,10 +833,12 @@ class ClientChatController extends FController
         return $this->renderAjax('partial/_transfer_view', ['clientChat' => $clientChat, 'transferForm' => $form]);
     }
 
+
     /**
      * @return string
      * @throws BadRequestHttpException
      * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
      */
     public function actionAjaxHoldView(): string
     {
@@ -817,7 +846,11 @@ class ClientChatController extends FController
             throw new BadRequestHttpException('Invalid parameters');
         }
 
-        $clientChat = $this->clientChatRepository->findById($cchId);
+        try {
+            $clientChat = $this->clientChatRepository->findById($cchId);
+        } catch (NotFoundException $throwable) {
+            throw new NotFoundHttpException('Client chat is not found');
+        }
 
         if (!$clientChat->isInProgress()) { /* TODO:: must be replaced to permission in separate task */
             throw new ForbiddenHttpException('Chat must be in status InProgress');
@@ -877,7 +910,11 @@ class ClientChatController extends FController
                     throw new BadRequestHttpException('Invalid parameters');
                 }
 
-                $clientChat = $this->clientChatRepository->findById($cchId);
+                try {
+                    $clientChat = $this->clientChatRepository->findById($cchId);
+                } catch (NotFoundException $throwable) {
+                    throw new NotFoundHttpException('Client chat is not found');
+                }
 
                 if (!$clientChat->isHold()) { /* TODO:: must be replaced to permission in separate task */
                     throw new ForbiddenHttpException('Chat must be in status Hold');
