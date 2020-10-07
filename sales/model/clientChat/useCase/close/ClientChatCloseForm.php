@@ -73,4 +73,9 @@ class ClientChatCloseForm extends Model
 			'comment' => 'Comment'
 		];
 	}
+
+    public function formName(): string
+    {
+        return '';
+	}
 }
