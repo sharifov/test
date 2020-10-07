@@ -1,11 +1,9 @@
 <?php
 
-
 namespace sales\services\clientChatChannel;
 
-
-use http\Exception\RuntimeException;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 /**
  * Class ClientChatChannelService
@@ -47,26 +45,82 @@ class ClientChatChannelService
 			$this->username = $username;
 		}
 
-		if (!$this->rocketChatDepartments) {
-			$request = \Yii::$app->rchat->getDepartments();
-			if ($request['data'] && $request['data']['departments']) {
-				$this->rocketChatDepartments = ArrayHelper::getColumn($request['data']['departments'], 'name');
-			}
-		}
+		if ($this->isExistChanelInRocketChatDepartments($channelId)) {
+            throw new \RuntimeException('Channel with id: ' . $channelId . ' already exist in rocket chat', ClientChatChannelCodeException::RC_DEPARTMENT_EXIST);
+        }
 
-		if (!in_array($channelId, $this->rocketChatDepartments, false)) {
-			$newDepartmentData = [
-				'department' => [
-					'name' => (string)$channelId
-				],
-			];
+        $newDepartmentData = [
+            'department' => [
+                'name' => (string)$channelId
+            ],
+        ];
 
-			$newDepartment = \Yii::$app->rchat->createDepartment($newDepartmentData, $this->rocketChatUserInfo['_id'] ?? '', $this->rocketChatUserInfo['username'] ?? '');
-			if ($newDepartment['error']) {
-				throw new \RuntimeException('[Chat Bot Create Department] '.$newDepartment['error'].'; ChannelId: ' . $channelId, ClientChatChannelCodeException::RC_CREATE_DEPARTMENT);
-			}
-		} else {
-			throw new \RuntimeException('Channel with id: ' . $channelId . ' already exist in rocket chat', ClientChatChannelCodeException::RC_DEPARTMENT_EXIST);
-		}
+        $newDepartment = \Yii::$app->rchat->createDepartment($newDepartmentData, $this->rocketChatUserInfo['_id'] ?? '', $this->rocketChatUserInfo['username'] ?? '');
+        if ($newDepartment['error']) {
+            throw new \RuntimeException('[Chat Bot Create Department] '.$newDepartment['error'].'; ChannelId: ' . $channelId, ClientChatChannelCodeException::RC_CREATE_DEPARTMENT);
+        }
 	}
+
+	public function unRegisterChannelInRocketChat(int $channelId): void
+	{
+        if (!$this->isExistChanelInRocketChatDepartments($channelId)) {
+            throw new \RuntimeException('Channel with id: ' . $channelId . ' already unregistered', ClientChatChannelCodeException::RC_REMOVE_DEPARTMENT);
+        }
+
+		if (!$rocketChatDepartmentId = $this->getRocketChatDepartmentId($channelId)) {
+            throw new \RuntimeException('[Chat Bot UnRegistered Department] not found rocket chat department Id', ClientChatChannelCodeException::RC_REMOVE_DEPARTMENT);
+        }
+
+        $result = \Yii::$app->rchat->removeDepartment($rocketChatDepartmentId);
+
+        if ($result['error']) {
+            throw new \RuntimeException('[Chat Bot UnRegistered Department] '. $result['error'].'; ChannelId: ' . $channelId, ClientChatChannelCodeException::RC_REMOVE_DEPARTMENT);
+        }
+
+        if (!isset($result['data']['success'])) {
+            throw new \RuntimeException('[Chat Bot UnRegistered Department] not found success response; ChannelId: ' . $channelId, ClientChatChannelCodeException::RC_REMOVE_DEPARTMENT);
+        }
+
+        if (!$result['data']['success']) {
+            throw new \RuntimeException('[Chat Bot UnRegistered Department] success response error; ChannelId: ' . $channelId, ClientChatChannelCodeException::RC_REMOVE_DEPARTMENT);
+        }
+	}
+
+	public function validateChannelInRocketChat(int $channelId): bool
+	{
+		return $this->isExistChanelInRocketChatDepartments($channelId);
+	}
+
+	public function getRocketChatDepartments(): array
+    {
+        if ($this->rocketChatDepartments) {
+            return $this->rocketChatDepartments;
+        }
+        $request = \Yii::$app->rchat->getDepartments();
+        if ($request['data'] && !empty($request['data']['departments'])) {
+            $this->rocketChatDepartments = $request['data']['departments'];
+        }
+        return $this->rocketChatDepartments;
+    }
+
+    private function getRocketChatDepartmentsNames(): array
+    {
+        return ArrayHelper::getColumn($this->getRocketChatDepartments(), 'name');
+    }
+
+    private function isExistChanelInRocketChatDepartments(int $channelId): bool
+    {
+        return in_array($channelId, $this->getRocketChatDepartmentsNames(), false);
+    }
+
+    private function getRocketChatDepartmentId(int $channelId): ?string
+    {
+        $departmentId = null;
+        foreach ($this->getRocketChatDepartments() as $item) {
+            if ($item['name'] === (string)$channelId) {
+                $departmentId = $item['_id'];
+            }
+        }
+        return $departmentId;
+    }
 }

@@ -21,7 +21,29 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <p>
         <?= Html::a('<i class="fa fa-plus"></i> Create Client Chat Channel', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('Validate all', ['validate-all'], [
+            'class' => 'btn btn-info',
+            'data' => [
+                'confirm' => 'Are you sure you want to Validate all?',
+                'method' => 'post',
+            ],
+        ]) ?>
+       <?= Html::a('Register all', ['register-all'], [
+            'class' => 'btn btn-warning',
+            'data' => [
+                'confirm' => 'Are you sure you want to Register all?',
+                'method' => 'post',
+            ],
+        ]) ?>
+       <?= Html::a('UnRegister all', ['un-register-all'], [
+            'class' => 'btn btn-danger',
+            'data' => [
+                'confirm' => 'Are you sure you want to UnRegister all?',
+                'method' => 'post',
+            ],
+        ]) ?>
     </p>
+
 
     <?php Pjax::begin(['id' => 'client-chat-channel-pjax']); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>

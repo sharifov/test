@@ -639,6 +639,30 @@ class RocketChat extends Component
 		return $out;
 	}
 
+	public function removeDepartment(string $departmentId): array
+	{
+		$out = ['error' => '', 'data' => []];
+		$headers = $this->getSystemAuthDataHeader();
+		$response = $this->sendRequest('livechat/department/' . $departmentId, [],'delete', $headers);
+
+		if ($response->isOk) {
+			if (!empty($response->data['success'])) {
+				$out['data'] = $response->data;
+			} else {
+				$out['error'] = 'Not found in response array data key';
+			}
+		} else {
+			$out['error'] = self::getErrorMessageFromResult($response->content);
+		}
+
+		if (!empty($out['error'])) {
+			\Yii::error(VarDumper::dumpAsString($out['error'], 10),
+				'RocketChat:removeDepartment:fail');
+		}
+
+		return $out;
+	}
+
     /**
      * @param int $length
      * @return string

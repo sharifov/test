@@ -9,6 +9,7 @@ use Yii;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatChannel\entity\search\ClientChatChannelSearch;
 use yii\helpers\ArrayHelper;
+use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -43,6 +44,12 @@ class ClientChatChannelCrudController extends FController
                 'class' => VerbFilter::class,
                 'actions' => [
                     'delete' => ['POST'],
+                    'validate-all' => ['POST'],
+                    'register-all' => ['POST'],
+                    'un-register-all' => ['POST'],
+                    'validate' => ['POST'],
+                    'register' => ['POST'],
+                    'un-register' => ['POST'],
                 ],
             ],
         ];
@@ -188,5 +195,165 @@ class ClientChatChannelCrudController extends FController
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    public function actionValidateAll()
+    {
+        $report = [];
+        $channels = ClientChatChannel::find()->select(['ccc_id', 'ccc_name'])->asArray()->orderBy(['ccc_id' => SORT_ASC])->all();
+
+        foreach ($channels as $channel) {
+            $report[] = $this->validate($channel);
+        }
+
+        return $this->render('report', [
+            'title' => 'Validate all',
+            'report' => $report,
+            'backUrl' => ['index']
+        ]);
+    }
+
+    public function actionValidate($id)
+    {
+        if (!$id) {
+            throw new BadRequestHttpException('Not found channel ID');
+        }
+
+        $channel = ClientChatChannel::find()->select(['ccc_id', 'ccc_name'])->andWhere(['ccc_id' => $id])->asArray()->one();
+
+        if (!$channel) {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
+
+        $report[] = $this->validate($channel);
+
+        return $this->render('report', [
+            'title' => 'Validate',
+            'report' => $report,
+            'backUrl' => ['view', 'id' => $id]
+        ]);
+    }
+
+    public function actionRegisterAll()
+    {
+        $report = [];
+        $channels = ClientChatChannel::find()->select(['ccc_id', 'ccc_name'])->asArray()->orderBy(['ccc_id' => SORT_ASC])->all();
+
+        foreach ($channels as $channel) {
+           $report[] = $this->register($channel);
+        }
+
+        return $this->render('report', [
+            'title' => 'Register all',
+            'report' => $report,
+            'backUrl' => ['index']
+        ]);
+    }
+
+    public function actionRegister($id)
+    {
+        if (!$id) {
+            throw new BadRequestHttpException('Not found channel ID');
+        }
+
+        $channel = ClientChatChannel::find()->select(['ccc_id', 'ccc_name'])->andWhere(['ccc_id' => $id])->asArray()->one();
+
+        if (!$channel) {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
+
+        $report[] = $this->register($channel);
+
+        return $this->render('report', [
+            'title' => 'Register',
+            'report' => $report,
+            'backUrl' => ['view', 'id' => $id]
+        ]);
+    }
+
+    public function actionUnRegisterAll()
+    {
+        $report = [];
+        $channels = ClientChatChannel::find()->select(['ccc_id', 'ccc_name'])->asArray()->orderBy(['ccc_id' => SORT_ASC])->all();
+
+        foreach ($channels as $channel) {
+            $report[] = $this->unRegister($channel);
+        }
+
+        return $this->render('report', [
+            'title' => 'UnRegister all',
+            'report' => $report,
+            'backUrl' => ['index']
+        ]);
+    }
+
+    public function actionUnRegister($id)
+    {
+        if (!$id) {
+            throw new BadRequestHttpException('Not found channel ID');
+        }
+
+        $channel = ClientChatChannel::find()->select(['ccc_id', 'ccc_name'])->andWhere(['ccc_id' => $id])->asArray()->one();
+
+        if (!$channel) {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
+
+        $report[] = $this->unRegister($channel);
+
+        return $this->render('report', [
+            'title' => 'UnRegister',
+            'report' => $report,
+            'backUrl' => ['view', 'id' => $id]
+        ]);
+    }
+
+    private function register(array $channel): array
+    {
+        try {
+            $this->channelService->registerChannelInRocketChat($channel['ccc_id'], SettingHelper::getRcNameForRegisterChannelInRc());
+            $message = 'Registered';
+        } catch (\Throwable $e) {
+            $message = $e->getMessage();
+        }
+        return [
+            'id' => $channel['ccc_id'],
+            'name' => $channel['ccc_name'],
+            'message' => $message,
+        ];
+    }
+
+    private function validate(array $channel): array
+    {
+        try {
+            $result = $this->channelService->validateChannelInRocketChat($channel['ccc_id']);
+            if ($result) {
+                $message = 'Registered';
+            } else {
+                $message = 'Not registered';
+            }
+        } catch (\Throwable $e) {
+            $message = $e->getMessage();
+        }
+        return [
+            'id' => $channel['ccc_id'],
+            'name' => $channel['ccc_name'],
+            'message' => $message,
+        ];
+    }
+
+    private function unRegister(array $channel): array
+    {
+        try {
+            $this->channelService->unRegisterChannelInRocketChat($channel['ccc_id']);
+            $message = 'Not registered';
+        } catch (\Throwable $e) {
+            $message = $e->getMessage();
+        }
+        return [
+            'id' => $channel['ccc_id'],
+            'name' => $channel['ccc_name'],
+            'message' => $message,
+        ];
     }
 }
