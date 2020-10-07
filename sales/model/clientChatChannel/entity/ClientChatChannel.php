@@ -35,6 +35,7 @@ use yii\helpers\Json;
  * @property int|null $ccc_frontend_enabled
  * @property string|null $ccc_settings
  * @property array $settings
+ * @property bool $ccc_registered
  *
  * @property Employee $cccCreatedUser
  * @property Department $cccDep
@@ -111,6 +112,8 @@ class ClientChatChannel extends \yii\db\ActiveRecord
 
             ['ccc_updated_user_id', 'integer'],
             ['ccc_updated_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ccc_updated_user_id' => 'id']],
+
+            ['ccc_registered', 'boolean'],
         ];
     }
 
@@ -190,6 +193,7 @@ class ClientChatChannel extends \yii\db\ActiveRecord
             'ccc_frontend_name' => 'Frontend Name',
             'ccc_frontend_enabled' => 'Frontend Enabled',
             'ccc_settings' => 'Settings',
+            'ccc_registered' => 'Registered',
         ];
     }
 
@@ -296,5 +300,15 @@ class ClientChatChannel extends \yii\db\ActiveRecord
             }
         }
         return $dataList;
+    }
+
+    public function registered(): void
+    {
+        $this->ccc_registered = true;
+    }
+
+    public function unRegistered(): void
+    {
+        $this->ccc_registered = false;
     }
 }

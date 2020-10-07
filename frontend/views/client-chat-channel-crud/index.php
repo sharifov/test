@@ -80,6 +80,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => ClientChatChannel::getListWithNames()
 
             ],
+            ['class' => BooleanColumn::class, 'attribute' => 'ccc_registered'],
             //'ccc_frontend_name',
             [
                 'label' => 'Frontend Name',

@@ -25,6 +25,7 @@ class ClientChatChannelSearch extends ClientChatChannel
             ['ccc_ug_id', 'integer'],
             ['ccc_updated_dt', 'safe'],
             ['ccc_updated_user_id', 'integer'],
+            ['ccc_registered', 'boolean']
         ];
     }
 
@@ -60,6 +61,7 @@ class ClientChatChannelSearch extends ClientChatChannel
             'date_format(ccc_updated_dt, "%Y-%m-%d")' => $this->ccc_updated_dt,
             'ccc_created_user_id' => $this->ccc_created_user_id,
             'ccc_updated_user_id' => $this->ccc_updated_user_id,
+            'ccc_registered' => $this->ccc_registered,
         ]);
 
         $query->andFilterWhere(['like', 'ccc_name', $this->ccc_name]);

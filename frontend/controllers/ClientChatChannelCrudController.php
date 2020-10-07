@@ -98,6 +98,7 @@ class ClientChatChannelCrudController extends FController
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
         	$transaction = Yii::$app->db->beginTransaction();
         	try {
+        	    $model->registered();
 				if ($model->save()) {
 					$this->channelService->registerChannelInRocketChat($model->ccc_id, SettingHelper::getRcNameForRegisterChannelInRc());
 					$transaction->commit();
@@ -200,7 +201,7 @@ class ClientChatChannelCrudController extends FController
     public function actionValidateAll()
     {
         $report = [];
-        $channels = ClientChatChannel::find()->select(['ccc_id', 'ccc_name'])->asArray()->orderBy(['ccc_id' => SORT_ASC])->all();
+        $channels = ClientChatChannel::find()->orderBy(['ccc_id' => SORT_ASC])->all();
 
         foreach ($channels as $channel) {
             $report[] = $this->validate($channel);
@@ -219,7 +220,7 @@ class ClientChatChannelCrudController extends FController
             throw new BadRequestHttpException('Not found channel ID');
         }
 
-        $channel = ClientChatChannel::find()->select(['ccc_id', 'ccc_name'])->andWhere(['ccc_id' => $id])->asArray()->one();
+        $channel = ClientChatChannel::find()->andWhere(['ccc_id' => $id])->one();
 
         if (!$channel) {
             throw new NotFoundHttpException('The requested page does not exist.');
@@ -237,7 +238,7 @@ class ClientChatChannelCrudController extends FController
     public function actionRegisterAll()
     {
         $report = [];
-        $channels = ClientChatChannel::find()->select(['ccc_id', 'ccc_name'])->asArray()->orderBy(['ccc_id' => SORT_ASC])->all();
+        $channels = ClientChatChannel::find()->orderBy(['ccc_id' => SORT_ASC])->all();
 
         foreach ($channels as $channel) {
            $report[] = $this->register($channel);
@@ -256,7 +257,7 @@ class ClientChatChannelCrudController extends FController
             throw new BadRequestHttpException('Not found channel ID');
         }
 
-        $channel = ClientChatChannel::find()->select(['ccc_id', 'ccc_name'])->andWhere(['ccc_id' => $id])->asArray()->one();
+        $channel = ClientChatChannel::find()->andWhere(['ccc_id' => $id])->one();
 
         if (!$channel) {
             throw new NotFoundHttpException('The requested page does not exist.');
@@ -274,7 +275,7 @@ class ClientChatChannelCrudController extends FController
     public function actionUnRegisterAll()
     {
         $report = [];
-        $channels = ClientChatChannel::find()->select(['ccc_id', 'ccc_name'])->asArray()->orderBy(['ccc_id' => SORT_ASC])->all();
+        $channels = ClientChatChannel::find()->orderBy(['ccc_id' => SORT_ASC])->all();
 
         foreach ($channels as $channel) {
             $report[] = $this->unRegister($channel);
@@ -293,7 +294,7 @@ class ClientChatChannelCrudController extends FController
             throw new BadRequestHttpException('Not found channel ID');
         }
 
-        $channel = ClientChatChannel::find()->select(['ccc_id', 'ccc_name'])->andWhere(['ccc_id' => $id])->asArray()->one();
+        $channel = ClientChatChannel::find()->andWhere(['ccc_id' => $id])->one();
 
         if (!$channel) {
             throw new NotFoundHttpException('The requested page does not exist.');
@@ -308,51 +309,76 @@ class ClientChatChannelCrudController extends FController
         ]);
     }
 
-    private function register(array $channel): array
+    private function register(ClientChatChannel $channel): array
     {
         try {
-            $this->channelService->registerChannelInRocketChat($channel['ccc_id'], SettingHelper::getRcNameForRegisterChannelInRc());
+            $this->channelService->registerChannelInRocketChat($channel->ccc_id, SettingHelper::getRcNameForRegisterChannelInRc());
             $message = 'Registered';
-        } catch (\Throwable $e) {
-            $message = $e->getMessage();
-        }
-        return [
-            'id' => $channel['ccc_id'],
-            'name' => $channel['ccc_name'],
-            'message' => $message,
-        ];
-    }
-
-    private function validate(array $channel): array
-    {
-        try {
-            $result = $this->channelService->validateChannelInRocketChat($channel['ccc_id']);
-            if ($result) {
-                $message = 'Registered';
-            } else {
-                $message = 'Not registered';
+            $channel->registered();
+            if (!$channel->save()) {
+                Yii::error([
+                    'message' => 'Register client channel chat',
+                    'errors' => $channel->getErrors(),
+                    'model' => $channel->getAttributes(),
+                ], 'ClientChatChannelCrudController');
             }
         } catch (\Throwable $e) {
             $message = $e->getMessage();
         }
         return [
-            'id' => $channel['ccc_id'],
-            'name' => $channel['ccc_name'],
+            'id' => $channel->ccc_id,
+            'name' => $channel->ccc_name,
             'message' => $message,
         ];
     }
 
-    private function unRegister(array $channel): array
+    private function validate(ClientChatChannel $channel): array
     {
         try {
-            $this->channelService->unRegisterChannelInRocketChat($channel['ccc_id']);
-            $message = 'Not registered';
+            $result = $this->channelService->validateChannelInRocketChat($channel->ccc_id);
+            if ($result) {
+                $message = 'Registered';
+                $channel->registered();
+            } else {
+                $message = 'Not registered';
+                $channel->unRegistered();
+            }
+            if (!$channel->save()) {
+                Yii::error([
+                    'message' => 'Validate client channel chat',
+                    'errors' => $channel->getErrors(),
+                    'model' => $channel->getAttributes(),
+                ], 'ClientChatChannelCrudController');
+            }
         } catch (\Throwable $e) {
             $message = $e->getMessage();
         }
         return [
-            'id' => $channel['ccc_id'],
-            'name' => $channel['ccc_name'],
+            'id' => $channel->ccc_id,
+            'name' => $channel->ccc_name,
+            'message' => $message,
+        ];
+    }
+
+    private function unRegister(ClientChatChannel $channel): array
+    {
+        try {
+            $this->channelService->unRegisterChannelInRocketChat($channel->ccc_id);
+            $message = 'Not registered';
+            $channel->unRegistered();
+            if (!$channel->save()) {
+                Yii::error([
+                    'message' => 'UnRegistered client channel chat',
+                    'errors' => $channel->getErrors(),
+                    'model' => $channel->getAttributes(),
+                ], 'ClientChatChannelCrudController');
+            }
+        } catch (\Throwable $e) {
+            $message = $e->getMessage();
+        }
+        return [
+            'id' => $channel->ccc_id,
+            'name' => $channel->ccc_name,
             'message' => $message,
         ];
     }

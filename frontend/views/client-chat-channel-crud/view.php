@@ -54,6 +54,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'attributes' => [
                 'ccc_id',
                 'ccc_name',
+                'ccc_registered:booleanByLabel',
                 'ccc_frontend_name',
                 'ccc_project_id:projectName',
                 'ccc_dep_id:departmentName',
