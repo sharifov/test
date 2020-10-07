@@ -33,6 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'cchd_id',
                 'cchd_cch_id',
                 'cchd_cch_status_log_id',
+                'cchd_start_dt:ByUserDateTime',
                 'cchd_deadline_dt:ByUserDateTime',
             ],
         ]) ?>

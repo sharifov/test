@@ -1,19 +1,19 @@
 <?php
+
 use common\models\Client;
-use common\models\Quote;
 use sales\auth\Auth;
 use sales\entities\cases\CasesStatus;
 use sales\guards\clientChat\ClientChatManageGuard;
 use sales\helpers\clientChat\ClientChatHelper;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChatHold\service\ClientChatHoldService;
 use sales\model\clientChat\permissions\ClientChatActionPermission;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use sales\repositories\clientChatStatusLogRepository\ClientChatStatusLogRepository;
-use yii\bootstrap4\Button;
 use yii\helpers\Html;
 use yii\helpers\Url;
-use yii\helpers\VarDumper;
+use yii\web\JqueryAsset;
 use yii\web\View;
 use yii\widgets\Pjax;
 
@@ -47,57 +47,141 @@ $guard = new ClientChatManageGuard($statusLogRepository);
             </div>
 
             <div class="col-md-4 text-right" title="Current Status">
-                <?= $clientChat->getStatusLabel(); ?>
+                <?= $clientChat->getStatusLabel(); ?> <br />
+
+                <div class="dropdown " style="margin-top: 10px;">
+                    <button class="btn text-warning dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                            aria-haspopup="true" aria-expanded="false"
+                            style="box-shadow: 0 0 0 0.2rem rgba(240, 184, 81, 0.25); height: 25px; margin-top: 3px;" >
+                        <i class="fa fa-bars warning"></i> <span class="text-warning">Actions</span>
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+
+                        <?php echo Html::a('<i class="fa fa-info-circle"></i> Information', null, [
+                            'class' => 'dropdown-item text-success cc_full_info',
+                            'title' => 'Additional Information',
+                            'data-cch-id' => $clientChat->cch_id
+                        ]) ?>
+
+                        <?php if ($clientChat->isTransfer()): ?>
+                            <?php if($guard->isCanCancelTransfer($clientChat, Auth::user())): ?>
+                                <?php echo Html::a('<i class="fa fa-exchange"></i> Cancel Transfer', null, [
+                                    'class' => 'dropdown-item cc_cancel_transfer',
+                                    'title' => 'Cancel Transfer',
+                                    'data-cch-id' => $clientChat->cch_id
+                                ]) ?>
+                            <?php endif; ?>
+                        <?php elseif (!$clientChat->isClosed()): ?>
+                            <?php if ($actionPermissions->canClose($clientChat)): ?>
+                                <?php echo Html::a('<i class="fa fa-times-circle"></i> Close Chat', null, [
+                                    'class' => 'dropdown-item text-danger cc_close',
+                                    'title' => 'Close',
+                                    'data-cch-id' => $clientChat->cch_id
+                                ]) ?>
+                            <?php endif;?>
+
+                            <?php if ($actionPermissions->canTransfer($clientChat)): ?>
+                                <?php echo Html::a('<i class="fa fa-exchange"></i> Transfer', null, [
+                                    'class' => 'dropdown-item text-warning cc_transfer',
+                                    'title' => 'Transfer',
+                                    'data-cch-id' => $clientChat->cch_id
+                                ]) ?>
+                            <?php endif;?>
+                        <?php endif; ?>
+
+                        <?php if($clientChat->isInProgress()): ?> <?php /* TODO:: must be replaced to permission in separate task */ ?>
+                            <?php echo Html::a('<i class="fa fa-pause"></i> Hold', null, [
+                                'class' => 'dropdown-item text-secondary cc_hold',
+                                'title' => 'Hold',
+                                'data-cch-id' => $clientChat->cch_id
+                            ]) ?>
+                        <?php endif; ?>
+
+                        <?php if($clientChat->isHold()): ?> <?php /* TODO:: must be replaced to permission in separate task */ ?>
+                            <?php echo Html::a('<i class="fa fa-play"></i> In Progress', null, [
+                                'class' => 'dropdown-item text-nowrap text-info cc_in_progress ',
+                                'title' => 'In Progress',
+                                'data-cch-id' => $clientChat->cch_id
+                            ]) ?>
+                        <?php endif; ?>
+
+                    </div>
+                </div>
             </div>
         </div>
     </div>
     <div class="_rc-block-wrapper">
-        <div style="display: flex; margin-bottom: 15px;">
-            <span class="_rc-client-icon _cc-item-icon-round">
-                <span class="_cc_client_name"><?= ClientChatHelper::getFirstLetterFromName(ClientChatHelper::getClientName($clientChat)); ?></span>
-                <span class="_cc-status-wrapper">
-                    <span class="_cc-status" data-is-online="<?= (int) $clientChat->cch_client_online; ?>"></span>
-                </span>
-            </span>
-            <div class="_rc-client-info">
-
-                <span class="_rc-client-name">
-                    <span><?= Html::encode($client->full_name ?: 'Guest-' . $client->id); ?></span>
-                </span>
-
-                <?php if ($emails = $client->clientEmails): ?>
-                    <span class="_rc-client-email">
-                        <i class="fa fa-envelope"></i>
-                        <?php foreach ($emails as $email): ?>
-                            <code><?= Html::encode($email->email); ?></code>
-                        <?php endforeach; ?>
+        <div class="row">
+            <div class="col-md-12">
+                <div style="display: flex; margin-bottom: 15px;">
+                    <span class="_rc-client-icon _cc-item-icon-round">
+                        <span class="_cc_client_name"><?= ClientChatHelper::getFirstLetterFromName(ClientChatHelper::getClientName($clientChat)); ?></span>
+                        <span class="_cc-status-wrapper">
+                            <span class="_cc-status" data-is-online="<?= (int) $clientChat->cch_client_online; ?>"></span>
+                        </span>
                     </span>
-                <?php endif; ?>
+                    <div class="_rc-client-info">
 
-                <?php if ($phones = $client->clientPhones): ?>
-                    <span class="_rc-client-phone">
-                        <i class="fa fa-phone"></i>
-                        <?php foreach ($phones as $phone): ?>
-                            <code><?= Html::encode($phone->phone); ?></code>
-                        <?php endforeach; ?>
-                    </span>
-                <?php endif; ?>
+                        <span class="_rc-client-name">
+                            <span><?= Html::encode($client->full_name ?: 'Guest-' . $client->id); ?></span>
+                        </span>
+
+                        <?php if ($emails = $client->clientEmails): ?>
+                            <span class="_rc-client-email">
+                                <i class="fa fa-envelope"></i>
+                                <?php foreach ($emails as $email): ?>
+                                    <code><?= Html::encode($email->email); ?></code>
+                                <?php endforeach; ?>
+                            </span>
+                        <?php endif; ?>
+
+                        <?php if ($phones = $client->clientPhones): ?>
+                            <span class="_rc-client-phone">
+                                <i class="fa fa-phone"></i>
+                                <?php foreach ($phones as $phone): ?>
+                                    <code><?= Html::encode($phone->phone); ?></code>
+                                <?php endforeach; ?>
+                            </span>
+                        <?php endif; ?>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="d-flex align-items-center justify-content-center" style="width: 100%;">
-            <?= Html::button('<i class="fa fa-info-circle"></i> Information', ['class' => 'btn btn-info cc_full_info', 'title' => 'Additional Information', 'data-cch-id' => $clientChat->cch_id]); ?>
-            <?php if ($clientChat->isTransfer()): ?>
-				<?= $guard->isCanCancelTransfer($clientChat, Auth::user()) ? Html::button('<i class="fa fa-exchange"></i> Cancel Transfer', ['class' => 'btn btn-danger cc_cancel_transfer', 'title' => 'Cancel Transfer', 'data-cch-id' => $clientChat->cch_id]) : ''; ?>
-            <?php elseif (!$clientChat->isClosed()): ?>
-                <?php if ($actionPermissions->canClose($clientChat)): ?>
-                <?= Html::button('<i class="fa fa-times-circle"></i> Close Chat', ['class' => 'btn btn-danger cc_close', 'title' => 'Close', 'data-cch-id' => $clientChat->cch_id]); ?>
-                <?php endif;?>
-                <?php if ($actionPermissions->canTransfer($clientChat)): ?>
-                    <?= Html::button('<i class="fa fa-exchange"></i> Transfer', ['class' => 'btn btn-warning cc_transfer', 'title' => 'Transfer', 'data-cch-id' => $clientChat->cch_id]); ?>
-                <?php endif;?>
-            <?php endif; ?>
-        </div>
+
     </div>
+
+    <?php if($clientChat->isShowDeadlineProgress() && $clientChatHold = $clientChat->clientChatHold): ?>
+        <div class="_rc-block-wrapper" id="progress_bar_box">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>
+                        Status Hold (<?php echo ClientChatHoldService::formatTimeFromSeconds($clientChatHold->deadlineStartDiffInSeconds()) ?>)
+                    </h2>
+                    <div class="clearfix"></div>
+                </div>
+
+                <div class="x_content">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <div class="progress" id="progressBar" style="height: 13px;">
+                                <div
+                                    class="progress-bar progress-bar-striped bg-info progress-bar-animated"
+                                    role="progressbar"
+                                    style="width: 100%;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div id="countdown-clock text-center badge badge-warning" style="font-size: 12px">
+                                <i class="fa fa-clock-o"></i> <span id="clock">00:00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <?php endif; ?>
 
     <?php if ($clientChat->feedback): ?>
         <?php $feedback = $clientChat->feedback; ?>
@@ -124,8 +208,8 @@ $guard = new ClientChatManageGuard($statusLogRepository);
                             -
                         <?php endif; ?>
                     </div>
-                    <div >
-                        <strong>Message</strong>: <?php echo Html::encode($feedback->ccf_message); ?>
+                    <div>
+                        <strong>Message</strong>: <?php echo Html::encode($feedback->ccf_message) ?>
                     </div>
                     <div class="_cc_chat_note_date_item">
 						<?php echo $feedback->ccf_created_dt ? Yii::$app->formatter->asDatetime(strtotime($feedback->ccf_created_dt)) : ''; ?>
@@ -267,4 +351,57 @@ $guard = new ClientChatManageGuard($statusLogRepository);
     <?php Pjax::end(); ?>
 </div>
 
+<?php if(isset($clientChatHold)): ?>
 
+<?php
+
+   $formatTimer = ClientChatHoldService::isMoreThanHourLeft($clientChatHold) ? '%H:%M:%S' : '%M:%S';
+
+$js = <<<JS
+
+    var maxProgressBar = {$clientChatHold->deadlineStartDiffInSeconds()};
+    var leftProgressBar = {$clientChatHold->deadlineNowDiffInSeconds()};
+    var warningZone = {$clientChatHold->halfWarningSeconds()};
+    var progressBoxObj = $('#progressBar');
+    var progressLineObj = progressBoxObj.find('.progress-bar');
+    var progressBarWidth = 0;
+    var timerProgressBar;
+
+    startTimer(leftProgressBar);
+
+    function startTimer(sec) {
+        let seconds = new Date().getTime() + (1000 * sec);
+        $('#clock').countdown(seconds)
+            .on('update.countdown', function(event) {
+                let format = '{$formatTimer}';
+                $(this).html(event.strftime(format));
+                
+            })
+            .on('finish.countdown', function(event) {
+                 $('#clock').html('00:00');  
+                 $('#progress_bar_box').hide();               
+            });
+    }
+    
+    timerProgressBar = setInterval(function() {
+        
+        if (leftProgressBar <= 0) {
+            progressLineObj.removeClass('bg-warning progress-bar-animated progress-bar-striped');
+            progressLineObj.width(0);
+            clearInterval(timerProgressBar);
+            return false;
+        }
+        leftProgressBar--;
+        progressBarWidth = leftProgressBar * progressBoxObj.width() / maxProgressBar;
+        
+        if (leftProgressBar < warningZone) {
+            progressLineObj.removeClass('bg-info').addClass('bg-warning');
+        } 
+        progressLineObj.width(progressBarWidth);       
+
+    }, 1000);
+    
+JS;
+$this->registerJs($js);
+?>
+<?php endif; ?>

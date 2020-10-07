@@ -13,6 +13,7 @@ use sales\model\clientChatNote\entity\ClientChatNote;
 use yii\bootstrap4\Alert;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Url;
+use yii\web\JqueryAsset;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
@@ -44,9 +45,16 @@ $chatSendOfferListUrl = Url::toRoute('/client-chat/send-offer-list');
 $chatSendOfferPreviewUrl = Url::toRoute('/client-chat/send-offer-preview');
 $chatSendOfferGenerateUrl = Url::toRoute('/client-chat/send-offer-generate');
 $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
+$chatHoldUrl = Url::toRoute('/client-chat/ajax-hold-view');
+$chatProgressUrl = Url::toRoute('/client-chat/ajax-to-progress');
 $clientChatResetUnreadMessageUrl = Url::toRoute(['/client-chat/reset-unread-message']);
 $clientChatAddActiveConnectionUrl = Url::toRoute(['/client-chat/add-active-connection']);
 $clientChatRemoveFromActiveConnectionUrl = Url::toRoute(['/client-chat/remove-active-connection']);
+
+$this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2.2.0/jquery.countdown.min.js', [
+    'position' => $this::POS_HEAD,
+    'depends' => [JqueryAsset::class]
+]);
 ?>
 
 <?php if ($filter->isEmptyChannels()): ?>
@@ -130,6 +138,9 @@ let currentChatId = {$clientChatId};
 let currentChatOwnerId = {$clientChatOwnerId};
 
 window.name = 'chat';
+
+let spinnerForModal = '<div><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>'; 
+
 $(document).ready( function () {
     let clientChatId = {$clientChatId};
 
@@ -409,7 +420,7 @@ $(document).on('click', '.cc_full_info', function (e) {
         cache: false,
         data: {cchId: cchId},
         beforeSend: function () {
-            modal.find('.modal-body').html('<div><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
+            modal.find('.modal-body').html(spinnerForModal);
             modal.find('.modal-title').html('Client Chat Info');
             modal.modal('show');
         },
@@ -434,7 +445,7 @@ $(document).on('click', '.cc_transfer', function (e) {
         cache: false,
         data: {cchId: cchId},
         beforeSend: function () {
-            modal.find('.modal-body').html('<div><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
+            modal.find('.modal-body').html(spinnerForModal);
             modal.find('.modal-title').html('Client Chat Transfer');
             modal.modal('show');
         },
@@ -463,7 +474,7 @@ $(document).on('click', '.cc_close', function (e) {
         data: {cchId: cchId},
         beforeSend: function () {
             // btn.html('<i class="fa fa-spin fa-spinner"></i>');
-            modal.find('.modal-body').html('<div><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
+            modal.find('.modal-body').html(spinnerForModal);
             modal.find('.modal-title').html('Client Chat Close Chat');
             modal.modal('show');
         },
@@ -546,7 +557,7 @@ $(document).on('click', '.chat-offer', function(e) {
     let leadId = $(this).attr('data-lead-id');
     let modal = $('#modal-lg');
     
-    modal.find('.modal-body').html('<div><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
+    modal.find('.modal-body').html(spinnerForModal);
     modal.find('.modal-title').html('Send Offer');
     modal.modal('show');
 
@@ -589,7 +600,7 @@ $(document).on('click', '.quotes-uid-chat-generate', function(e) {
     }
     
     let modal = $('#modal-lg');
-    modal.find('.modal-body').html('<div><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');    
+    modal.find('.modal-body').html(spinnerForModal);    
     
      $.ajax({
         type: 'post',
@@ -620,7 +631,7 @@ $(document).on('click', '.client-chat-send-offer', function(e) {
      }
      
      let modal = $('#modal-lg');
-     modal.find('.modal-body').html('<div><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');    
+     modal.find('.modal-body').html(spinnerForModal);    
     
      $.ajax({
         type: 'post',
@@ -774,6 +785,92 @@ $(document).on('click', '.btn_move_offer', function(e) {
     btn.removeClass('btn-default');
     btn.addClass('btn-success');
   });
+});
+
+$(document).on('click', '.cc_hold', function (e) {
+    e.preventDefault();
+    
+    let btnHold = $(this);
+    let btnContent = btnHold.html();
+        
+    btnHold.html('<i class="fa fa-cog fa-spin"></i> Loading...')
+        .addClass('btn-default')
+        .prop('disabled', true);
+    
+    let cchId = btnHold.attr('data-cch-id');
+    let modal = $('#modal-sm');
+    modal.find('.modal-body').html(spinnerForModal);
+    modal.modal('show');
+                
+    $.ajax({
+        type: 'post',
+        url: '{$chatHoldUrl}',
+        dataType: 'html',
+        cache: false,
+        data: {cchId: cchId},  
+    })
+    .done(function(dataResponse) {
+        modal.find('.modal-title').html('Client Chat Hold');
+        modal.find('.modal-body').html(dataResponse);        
+    })
+    .fail(function(xhr, textStatus, errorThrown) {
+        if (xhr.status === 403) {
+            createNotify('Error', xhr.responseText, 'error');
+        } else {
+            createNotify('Error', 'Internal Server Error. Try again letter.', 'error');
+        }  
+        setTimeout(function () {
+            modal.modal('hide');
+        }, 900) 
+    })
+    .always(function(jqXHR, textStatus, errorThrown) {  
+        setTimeout(function () {
+            btnHold.html(btnContent).removeClass('btn-default').prop('disabled', false);  
+        }, 1000);       
+    });     
+});
+
+$(document).on('click', '.cc_in_progress', function (e) {
+    e.preventDefault();
+    
+    if(!confirm('Are you sure you want to change status "In Progress"')) {
+        return false;
+    } 
+    
+    let cchId = $(this).attr('data-cch-id');
+    let btnProgress = $(this);
+    let btnContent = btnProgress.html();
+        
+    btnProgress.html('<i class="fa fa-cog fa-spin"></i> Loading...')
+        .addClass('btn-default')
+        .prop('disabled', true);
+    
+    $.ajax({
+        url: '{$chatProgressUrl}',
+        type: 'POST',
+        data: {cchId: cchId},
+        dataType: 'json'    
+    })
+    .done(function(dataResponse) {
+        if (dataResponse.status === 1) { 
+            createNotify('Success', dataResponse.message, 'success'); 
+            refreshChatPage(cchId);                        
+        } else if (dataResponse.message.length) {
+            createNotify('Error', dataResponse.message, 'error');
+        } else {
+            createNotify('Error', 'Error, please check logs', 'error');
+        }
+        btnProgress.html(btnContent).removeClass('btn-default').prop('disabled', false);
+    })
+    .fail(function(jqXHR, textStatus, errorThrown) {
+        createNotify('Error', jqXHR.responseText, 'error');
+        btnProgress.html(btnContent).removeClass('btn-default').prop('disabled', false);      
+    })
+    .always(function(jqXHR, textStatus, errorThrown) {  
+        setTimeout(function () {
+            btnProgress.html(btnContent).removeClass('btn-default').prop('disabled', false);  
+        }, 3000);
+    });           
 });
 
 JS;

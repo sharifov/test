@@ -29,9 +29,31 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            'cchd_id',
             'cchd_cch_id',
             'cchd_cch_status_log_id',
+            [
+                'attribute' => 'cchd_start_dt',
+                'value' => static function (ClientChatHold $model) {
+                    return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->cchd_start_dt));
+                },
+                'format' => 'raw',
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'cchd_start_dt',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                        'clearBtn' => true,
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' =>'Choose Date'
+                    ],
+                    'clientEvents' => [
+                        'clearDate' => 'function (e) {$(e.target).find("input").change();}',
+                    ],
+                ]),
+            ],
             [
                 'attribute' => 'cchd_deadline_dt',
                 'value' => static function (ClientChatHold $model) {

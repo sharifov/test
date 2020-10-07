@@ -18,6 +18,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'cchd_cch_status_log_id')->textInput() ?>
 
+        <?php echo $form->field($model, 'cchd_start_dt')->widget(DateTimePicker::class) ?>
+
         <?php echo $form->field($model, 'cchd_deadline_dt')->widget(DateTimePicker::class) ?>
 
         <div class="form-group">

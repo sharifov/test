@@ -3,22 +3,18 @@
 namespace frontend\controllers;
 
 use common\components\CentrifugoService;
-use common\models\Client;
 use common\models\Department;
 use common\models\Lead;
-use common\models\Notifications;
 use common\models\Project;
 use common\models\Quote;
 use common\models\search\LeadSearch;
 use common\models\UserConnection;
 use common\models\VisitorLog;
-use frontend\widgets\clientChat\ClientChatAccessMessage;
+use frontend\helpers\JsonHelper;
 use frontend\widgets\clientChat\ClientChatAccessWidget;
-use frontend\widgets\notification\NotificationMessage;
 use frontend\widgets\notification\NotificationSocketWidget;
 use frontend\widgets\notification\NotificationWidget;
 use sales\auth\Auth;
-use sales\entities\cases\Cases;
 use sales\entities\cases\CasesSearch;
 use sales\entities\chat\ChatExtendedGraphsSearch;
 use sales\entities\chat\ChatFeedbackGraphSearch;
@@ -28,16 +24,18 @@ use sales\helpers\app\AppHelper;
 use sales\helpers\app\AppParamsHelper;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\dashboard\FilterForm;
-use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChat\dashboard\ReadUnreadFilter;
 use sales\model\clientChat\dashboard\GroupFilter;
+use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\entity\search\ClientChatSearch;
 use sales\model\clientChat\permissions\ClientChatActionPermission;
 use sales\model\clientChat\useCase\close\ClientChatCloseForm;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
+use sales\model\clientChat\useCase\hold\ClientChatHoldForm;
 use sales\model\clientChat\useCase\sendOffer\GenerateImagesForm;
 use sales\model\clientChat\useCase\transfer\ClientChatTransferForm;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
+use sales\model\clientChatHold\ClientChatHoldRepository;
+use sales\model\clientChatHold\entity\ClientChatHold;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatNote\ClientChatNoteRepository;
 use sales\model\clientChatNote\entity\ClientChatNote;
@@ -50,27 +48,26 @@ use sales\model\clientChatUnread\entity\ClientChatUnread;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\user\entity\userConnectionActiveChat\UserConnectionActiveChat;
 use sales\repositories\clientChatChannel\ClientChatChannelRepository;
+use sales\repositories\clientChatStatusLogRepository\ClientChatStatusLogRepository;
 use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessRepository;
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\NotFoundException;
 use sales\repositories\project\ProjectRepository;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatService\ClientChatService;
+use sales\services\clientChatService\ClientChatStatusLogService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
 use sales\services\TransactionManager;
 use sales\viewModel\chat\ViewModelChatExtendedGraph;
 use sales\viewModel\chat\ViewModelChatFeedbackGraph;
 use sales\viewModel\chat\ViewModelChatGraph;
+use Yii;
 use yii\data\ActiveDataProvider;
-use yii\data\ArrayDataProvider;
-use yii\db\Expression;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
-use Yii;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
-use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
 /**
@@ -90,6 +87,9 @@ use yii\web\Response;
  * @property ProjectRepository              $projectRepository
  * @property ClientChatRequestService       $clientChatRequestService
  * @property ClientChatRequestRepository    $clientChatRequestRepository
+ * @property ClientChatStatusLogService     $clientChatStatusLogService
+ * @property ClientChatStatusLogRepository  $clientChatStatusLogRepository
+ * @property ClientChatHoldRepository       $clientChatHoldRepository
  */
 class ClientChatController extends FController
 {
@@ -141,6 +141,10 @@ class ClientChatController extends FController
      */
     private ClientChatRequestRepository $clientChatRequestRepository;
 
+    private ClientChatStatusLogService $clientChatStatusLogService;
+    private ClientChatStatusLogRepository $clientChatStatusLogRepository;
+    private ClientChatHoldRepository $clientChatHoldRepository;
+
     public function __construct(
         $id,
         $module,
@@ -156,6 +160,9 @@ class ClientChatController extends FController
         ProjectRepository $projectRepository,
         ClientChatRequestService $clientChatRequestService,
         ClientChatRequestRepository $clientChatRequestRepository,
+        ClientChatStatusLogService $clientChatStatusLogService,
+        ClientChatStatusLogRepository $clientChatStatusLogRepository,
+        ClientChatHoldRepository $clientChatHoldRepository,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -171,6 +178,9 @@ class ClientChatController extends FController
         $this->projectRepository = $projectRepository;
         $this->clientChatRequestService = $clientChatRequestService;
         $this->clientChatRequestRepository = $clientChatRequestRepository;
+        $this->clientChatStatusLogService = $clientChatStatusLogService;
+        $this->clientChatStatusLogRepository = $clientChatStatusLogRepository;
+        $this->clientChatHoldRepository = $clientChatHoldRepository;
     }
 
     /**
@@ -227,7 +237,7 @@ class ClientChatController extends FController
         if ($channels) {
             $dataProvider = (new ClientChatSearch())->getListOfChats(Auth::user(), array_keys($channels), $filter);
         }
-        
+
         $clientChat = null;
         $chid = (int) Yii::$app->request->get('chid');
 
@@ -326,7 +336,7 @@ class ClientChatController extends FController
                 $this->clientChatMessageService->discardUnreadMessages($clientChat->cch_id, (int)$clientChat->cch_owner_user_id);
             }
 
-            $result['html'] = $this->renderPartial('partial/_client-chat-info', [
+            $result['html'] = $this->renderAjax('partial/_client-chat-info', [
                 'clientChat' => $clientChat,
                 'client' => $clientChat->cchClient,
                 'actionPermissions' => new ClientChatActionPermission(),
@@ -794,6 +804,97 @@ class ClientChatController extends FController
         }
 
         return $this->renderAjax('partial/_transfer_view', ['clientChat' => $clientChat, 'transferForm' => $form]);
+    }
+
+    /**
+     * @return string
+     * @throws BadRequestHttpException
+     * @throws ForbiddenHttpException
+     */
+    public function actionAjaxHoldView(): string
+    {
+        if (!Yii::$app->request->isAjax || !$cchId = (int) Yii::$app->request->post('cchId')) {
+            throw new BadRequestHttpException('Invalid parameters');
+        }
+
+        $clientChat = $this->clientChatRepository->findById($cchId);
+
+        if (!$clientChat->isInProgress()) { /* TODO:: must be replaced to permission in separate task */
+            throw new ForbiddenHttpException('Chat must be in status InProgress');
+        }
+
+        $form = new ClientChatHoldForm();
+        $form->cchId = $clientChat->cch_id;
+
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            try {
+
+                if ($clientChat->isHold()) {
+                    throw new \DomainException('Client Chat already in hold');
+                }
+
+                $clientChat->hold(Auth::id(), ClientChatStatusLog::ACTION_HOLD, $form->comment);
+                $this->clientChatRepository->save($clientChat);
+
+                if ($clientChatStatusLog = $this->clientChatStatusLogRepository->getPrevious($clientChat->cch_id)) {
+                    $startDt = ClientChatHold::getStartDT();
+                    $deadlineDt = ClientChatHold::convertDeadlineDTFromMinute($form->minuteToDeadline);
+                    $clientChatHold = ClientChatHold::create($clientChat->cch_id, $clientChatStatusLog->csl_id,
+                        $deadlineDt, $startDt);
+                    $this->clientChatHoldRepository->save($clientChatHold);
+                }
+
+                return '<script>$("#modal-sm").modal("hide"); 
+                    refreshChatPage(' . $form->cchId . '); 
+                    createNotify("Success", "Сhat status changed to Hold", "success");</script>';
+            } catch (\Throwable $throwable) {
+                $form->addError('general', 'Internal Server Error');
+                Yii::error(AppHelper::throwableFormatter($throwable),
+                    'ClientChatController::actionAjaxHoldView::Throwable');
+            }
+        }
+
+        return $this->renderAjax('partial/_hold_view', [
+            'clientChat' => $clientChat,
+            'holdForm' => $form,
+            'deadlineOptions' => JsonHelper::decode(Yii::$app->params['settings']['client_chat_hold_deadline_options']),
+        ]);
+    }
+
+    /**
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws ForbiddenHttpException
+     */
+    public function actionAjaxToProgress(): array
+    {
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+
+            $result = ['message' => '', 'status' => 0];
+            try {
+                if (!$cchId = (int) Yii::$app->request->post('cchId')) {
+                    throw new BadRequestHttpException('Invalid parameters');
+                }
+
+                $clientChat = $this->clientChatRepository->findById($cchId);
+
+                if (!$clientChat->isHold()) { /* TODO:: must be replaced to permission in separate task */
+                    throw new ForbiddenHttpException('Chat must be in status Hold');
+                }
+
+                $clientChat->inProgress(Auth::id(), ClientChatStatusLog::ACTION_REVERT_TO_PROGRESS);
+                $this->clientChatRepository->save($clientChat);
+
+                $result = ['message' => 'ClientChat status changed to InProgress', 'status' => 1];
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableFormatter($throwable),
+                    'ClientChatController:actionAjaxToProgress:throwable');
+                $result['message'] = VarDumper::dumpAsString($throwable->getMessage());
+            }
+            return $result;
+        }
+        throw new BadRequestHttpException();
     }
 
     public function actionPjaxUpdateChatWidget()

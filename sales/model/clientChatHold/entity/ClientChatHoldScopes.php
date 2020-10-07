@@ -5,7 +5,7 @@ namespace sales\model\clientChatHold\entity;
 /**
  * This is the ActiveQuery class for [[ClientChatHold]].
  *
- * @see ClientChatHold
+ * @see ClientChatHoldService
  */
 class ClientChatHoldScopes extends \yii\db\ActiveQuery
 {

@@ -19,11 +19,12 @@ use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
 use sales\model\clientChatCase\entity\ClientChatCase;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatFeedback\entity\ClientChatFeedback;
+use sales\model\clientChatHold\entity\ClientChatHold;
 use sales\model\clientChatLastMessage\entity\ClientChatLastMessage;
 use sales\model\clientChatLead\entity\ClientChatLead;
-use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatNote\entity\ClientChatNote;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
+use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\model\clientChatUnread\entity\ClientChatUnread;
 use sales\model\clientChatVisitor\entity\ClientChatVisitor;
 use yii\behaviors\TimestampBehavior;
@@ -71,6 +72,7 @@ use yii\helpers\Html;
  * @property Cases[] $cases
  * @property ClientChatFeedback $feedback
  * @property ClientChatLastMessage $lastMessage
+ * @property ClientChatHold $clientChatHold
  * @property ClientChatUnread $unreadMessage
  */
 class ClientChat extends \yii\db\ActiveRecord
@@ -270,6 +272,11 @@ class ClientChat extends \yii\db\ActiveRecord
 		return $this->hasOne(ClientChatLastMessage::class, ['cclm_cch_id' => 'cch_id']);
 	}
 
+    public function getClientChatHold(): ActiveQuery
+	{
+		return $this->hasOne(ClientChatHold::class, ['cchd_cch_id' => 'cch_id']);
+	}
+
 	public function getUnreadMessage(): ActiveQuery
 	{
 		return $this->hasOne(ClientChatUnread::class, ['ccu_cc_id' => 'cch_id']);
@@ -331,6 +338,28 @@ class ClientChat extends \yii\db\ActiveRecord
 		$this->cch_status_id = self::STATUS_IN_PROGRESS;
 	}
 
+    public function hold(
+        ?int $userId,
+        int $action = ClientChatStatusLog::ACTION_HOLD,
+        ?string $description = null,
+        ?int $reasonId = null
+    ): void {
+        $this->recordEvent(
+            new ClientChatManageStatusLogEvent(
+                $this,
+                $this->cch_status_id,
+                self::STATUS_HOLD,
+                $this->cch_owner_user_id,
+                $userId,
+                $description,
+                $this->cch_channel_id,
+                $action,
+                $reasonId
+            )
+        );
+        $this->cch_status_id = self::STATUS_HOLD;
+    }
+
 	public function isTransfer(): bool
 	{
 		return $this->cch_status_id === self::STATUS_TRANSFER;
@@ -341,7 +370,17 @@ class ClientChat extends \yii\db\ActiveRecord
 		return $this->cch_status_id === self::STATUS_CLOSED;
 	}
 
-    public function isNew(): bool
+	public function isInProgress(): bool
+	{
+		return $this->cch_status_id === self::STATUS_IN_PROGRESS;
+	}
+
+	public function isHold(): bool
+	{
+		return $this->cch_status_id === self::STATUS_HOLD;
+	}
+
+	public function isNew(): bool
     {
         return $this->cch_status_id === self::STATUS_NEW;
 	}
@@ -349,11 +388,6 @@ class ClientChat extends \yii\db\ActiveRecord
     public function isPending(): bool
     {
         return $this->cch_status_id === self::STATUS_PENDING;
-	}
-
-    public function isInProgress(): bool
-    {
-        return $this->cch_status_id === self::STATUS_IN_PROGRESS;
 	}
 
 	public static function getStatusClassList(): array
@@ -475,5 +509,10 @@ class ClientChat extends \yii\db\ActiveRecord
 		$chat->cch_owner_user_id = $dto->ownerId;
 		$chat->cch_client_online = $dto->isOnline;
 		return $chat;
+	}
+
+    public function isShowDeadlineProgress(): bool
+	{
+		return ($this->isHold() && $this->clientChatHold && !$this->clientChatHold->isDead());
 	}
 }
