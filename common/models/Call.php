@@ -789,6 +789,7 @@ class Call extends \yii\db\ActiveRecord
 
 //        $userListSocketNotification = [];
         $isChangedStatus = isset($changedAttributes['c_status_id']);
+        $isChangedStatusFromEmptyInclude = array_key_exists('c_status_id', $changedAttributes);
 
         if ($this->c_parent_id && $this->isOut() && ($lead = $this->cLead) && $lead->isCallPrepare()) {
             try {
@@ -812,7 +813,7 @@ class Call extends \yii\db\ActiveRecord
 
         }
 
-        if ($this->c_parent_id && ($insert || $isChangedStatus) && $this->c_lead_id && $this->isOut() && $this->isEnded()) {
+        if ($this->c_parent_id && ($insert || $isChangedStatusFromEmptyInclude) && $this->c_lead_id && $this->isOut() && $this->isEnded()) {
 
             $lead = $this->cLead;
 
