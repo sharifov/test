@@ -10,7 +10,7 @@ use yii\db\Migration;
 class m201008_043859_add_permission_cc_take extends Migration
 {
     private $route = [
-        '/client-chat/take',
+        '/client-chat/ajax-take',
     ];
 
     private $roles = [
