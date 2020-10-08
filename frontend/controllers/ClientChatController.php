@@ -5,12 +5,14 @@ namespace frontend\controllers;
 use common\components\CentrifugoService;
 use common\models\Department;
 use common\models\Lead;
+use common\models\Notifications;
 use common\models\Project;
 use common\models\Quote;
 use common\models\search\LeadSearch;
 use common\models\UserConnection;
 use common\models\VisitorLog;
 use frontend\helpers\JsonHelper;
+use frontend\widgets\clientChat\ClientChatAccessMessage;
 use frontend\widgets\clientChat\ClientChatAccessWidget;
 use frontend\widgets\notification\NotificationSocketWidget;
 use frontend\widgets\notification\NotificationWidget;
@@ -223,11 +225,6 @@ class ClientChatController extends FController
         }
 
         $filter->loadDefaultValuesByPermissions();
-
-        //todo remove after added logic free to take
-        if (GroupFilter::isFreeToTake($filter->group)) {
-            $filter->group = GroupFilter::MY;
-        }
 
         $page = (int) \Yii::$app->request->get('page');
         if ($page < 1) {
@@ -509,7 +506,7 @@ class ClientChatController extends FController
 
             $ccua = $this->clientChatUserAccessRepository->findByPrimaryKey($ccuaId);
             $clientChat = $this->clientChatRepository->findById($ccua->ccua_cch_id);
-            $this->clientChatUserAccessService->updateStatus($clientChat, $ccua, (int) $accessAction);
+            $this->clientChatUserAccessService->updateStatus($clientChat, $ccua, $accessAction);
 
             $result['success'] = true;
         } catch (\RuntimeException | \DomainException | NotFoundException $e) {
@@ -530,6 +527,7 @@ class ClientChatController extends FController
 
         return $this->asJson($result);
     }
+
 
     /**
      * @return string
@@ -894,10 +892,10 @@ class ClientChatController extends FController
         ]);
     }
 
+
     /**
      * @return array
      * @throws BadRequestHttpException
-     * @throws ForbiddenHttpException
      */
     public function actionAjaxToProgress(): array
     {
@@ -927,6 +925,44 @@ class ClientChatController extends FController
             } catch (\Throwable $throwable) {
                 Yii::error(AppHelper::throwableFormatter($throwable),
                     'ClientChatController:actionAjaxToProgress:throwable');
+                $result['message'] = VarDumper::dumpAsString($throwable->getMessage());
+            }
+            return $result;
+        }
+        throw new BadRequestHttpException();
+    }
+
+    /**
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function actionAjaxTake(): array
+    {
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+
+            $result = ['message' => '', 'status' => 0];
+            try {
+                if (!$cchId = (int) Yii::$app->request->post('cchId')) {
+                    throw new BadRequestHttpException('Invalid parameters', -1);
+                }
+                if (!$clientChat = ClientChat::findOne($cchId)) {
+                    throw new NotFoundHttpException('Client chat is not found', -2);
+                }
+                if (!$clientChat->isIdle()) { /* TODO:: must be replaced to permission in separate task */
+                    throw new ForbiddenHttpException('Chat must be in status "Idle"', -3);
+                }
+
+                if ($takeClientChat = $this->clientChatService->takeClientChat($clientChat, Auth::user())) {
+                    $data = ClientChatAccessMessage::chatTaken($clientChat, Auth::user());
+		            Notifications::pub(['chat-' . $clientChat->cch_id], 'refreshChatPage', ['data' => $data]);
+                }
+
+                $result = ['message' => 'ClientChat successfully taken', 'status' => 1];
+
+            } catch (\Throwable $throwable) {
+                AppHelper::throwableLogger($throwable,
+                'ClientChatController:actionTake:throwable');
                 $result['message'] = VarDumper::dumpAsString($throwable->getMessage());
             }
             return $result;

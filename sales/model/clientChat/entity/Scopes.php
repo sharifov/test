@@ -157,4 +157,9 @@ class Scopes extends \yii\db\ActiveQuery
     {
         return $this->innerJoinWith('unreadMessage', $edgerLoading);
     }
+
+    public function byStatus(int $statusId): self
+    {
+        return $this->andWhere(['cch_status_id' => $statusId]);
+    }
 }

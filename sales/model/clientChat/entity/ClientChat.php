@@ -85,6 +85,7 @@ class ClientChat extends \yii\db\ActiveRecord
 	public const STATUS_IN_PROGRESS = 4;
 	public const STATUS_TRANSFER = 3;
 	public const STATUS_HOLD = 10;
+	public const STATUS_IDLE = 11;
 
 	public const MISSED = 1;
 
@@ -95,6 +96,7 @@ class ClientChat extends \yii\db\ActiveRecord
 		self::STATUS_TRANSFER => 'Transfer',
 		self::STATUS_IN_PROGRESS => 'In Progress',
 		self::STATUS_HOLD => 'Hold',
+		self::STATUS_IDLE => 'Idle',
 	];
 
 	private const STATUS_CLASS_LIST = [
@@ -104,6 +106,7 @@ class ClientChat extends \yii\db\ActiveRecord
 		self::STATUS_TRANSFER => 'warning',
 		self::STATUS_IN_PROGRESS => 'info',
 		self::STATUS_HOLD => 'info',
+		self::STATUS_IDLE => 'info',
 	];
 
 	public const TAB_ALL = 0;
@@ -118,11 +121,13 @@ class ClientChat extends \yii\db\ActiveRecord
 	public const SOURCE_TYPE_CLIENT = 1;
 	public const SOURCE_TYPE_AGENT = 2;
 	public const SOURCE_TYPE_TRANSFER = 3;
+	public const SOURCE_TYPE_TAKE = 4;
 
 	private const SOURCE_TYPE_LIST = [
 		self::SOURCE_TYPE_CLIENT => 'Client',
 		self::SOURCE_TYPE_AGENT => 'Agent',
 		self::SOURCE_TYPE_TRANSFER => 'Transfer',
+		self::SOURCE_TYPE_TAKE => 'Take',
 	];
 
 	// for query only
@@ -388,6 +393,11 @@ class ClientChat extends \yii\db\ActiveRecord
     public function isPending(): bool
     {
         return $this->cch_status_id === self::STATUS_PENDING;
+	}
+
+    public function isIdle(): bool
+    {
+        return $this->cch_status_id === self::STATUS_IDLE;
 	}
 
 	public static function getStatusClassList(): array

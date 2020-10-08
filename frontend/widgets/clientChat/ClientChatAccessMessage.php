@@ -122,6 +122,15 @@ class ClientChatAccessMessage
 		];
 	}
 
+	public static function chatTaken(ClientChat $chat, Employee $user): array
+	{
+		return [
+			'message' => 'Your Chat was take by ' . $user->nickname ,
+			'cchId' => $chat->cch_id,
+			'tab' => ClientChat::TAB_ACTIVE
+		];
+	}
+
 	private static function refresh(int $userId, ?int $accessId = null)
 	{
 		$widget = ClientChatAccessWidget::getInstance();

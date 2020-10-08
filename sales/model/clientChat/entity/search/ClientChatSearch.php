@@ -375,7 +375,7 @@ class ClientChatSearch extends ClientChat
                 ->andWhere(['IS NOT', 'cch_owner_user_id', null]);
             $query->addOrderBy(['cch_created_dt' => SORT_DESC]);
         } elseif (GroupFilter::isFreeToTake($filter->group)) {
-            //todo
+            $query->byStatus(ClientChat::STATUS_IDLE);
         }
 
         if ($filter->channelId) {

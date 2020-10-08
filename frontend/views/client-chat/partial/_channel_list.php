@@ -14,7 +14,13 @@ use sales\model\clientChat\dashboard\FilterForm;
 <div class="_cc-wrapper">
 
     <div class="cc-filters-wrapper">
-        <?= $this->render('filter/_filter', ['filter' => $filter, 'loadChannelsUrl' => $loadChannelsUrl]); ?>
+        <?= $this->render('filter/_filter',
+            [
+                'filter' => $filter,
+                'loadChannelsUrl' => $loadChannelsUrl,
+                'dataProvider' => $dataProvider,
+            ]
+        ); ?>
     </div>
 
 	<div id="cc-dialogs-wrapper" class="_cc-list-wrapper">

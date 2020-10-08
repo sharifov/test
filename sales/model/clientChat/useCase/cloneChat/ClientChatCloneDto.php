@@ -2,7 +2,6 @@
 namespace sales\model\clientChat\useCase\cloneChat;
 
 use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChat\useCase\transfer\ClientChatTransferForm;
 
 /**
  * Class ClientChatCloneDto
@@ -16,6 +15,8 @@ use sales\model\clientChat\useCase\transfer\ClientChatTransferForm;
  * @property int|null $ownerId
  * @property int|null $isOnline
  * @property int|null $status
+ * @property int|null $sourceTypeId
+ * @property int|null $parentId
  */
 class ClientChatCloneDto
 {
@@ -27,6 +28,8 @@ class ClientChatCloneDto
 	public $ownerId;
 	public $isOnline;
 	public $status;
+	public $sourceTypeId;
+	public $parentId;
 
 	public static function feelInOnCreateMessage(ClientChat $clientChat, int $clientChatRequestId): self
 	{
@@ -51,4 +54,28 @@ class ClientChatCloneDto
 		$_self->isOnline = (int)$clientChat->cch_client_online;
 		return $_self;
 	}
+
+    /**
+     * @param ClientChat $clientChat
+     * @param int $ownerId
+     * @param int $parentId
+     * @param int $sourceTypeId
+     * @return static
+     */
+    public static function feelInOnTake(
+        ClientChat $clientChat,
+        int $ownerId,
+        int $sourceTypeId = ClientChat::SOURCE_TYPE_TAKE
+    ): self {
+        $self = new self();
+        $self->cchRid = $clientChat->cch_rid;
+        $self->cchCcrId = $clientChat->cch_ccr_id;
+        $self->cchProjectId = $clientChat->cch_project_id;
+        $self->cchClientId = $clientChat->cch_client_id;
+        $self->ownerId = $ownerId;
+        $self->parentId = $clientChat->cch_id;
+        $self->sourceTypeId = $sourceTypeId;
+        $self->isOnline = (int)$clientChat->cch_client_online;
+        return $self;
+    }
 }

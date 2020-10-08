@@ -49,7 +49,7 @@ $guard = new ClientChatManageGuard($statusLogRepository);
             <div class="col-md-4 text-right" title="Current Status">
                 <?= $clientChat->getStatusLabel(); ?> <br />
 
-                <div class="dropdown " style="margin-top: 10px;">
+                <div class="dropdown " style="margin-top: 10px; float: right;">
                     <button class="btn text-warning dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
                             aria-haspopup="true" aria-expanded="false"
                             style="box-shadow: 0 0 0 0.2rem rgba(240, 184, 81, 0.25); height: 25px; margin-top: 3px;" >
@@ -101,6 +101,14 @@ $guard = new ClientChatManageGuard($statusLogRepository);
                             <?php echo Html::a('<i class="fa fa-play"></i> In Progress', null, [
                                 'class' => 'dropdown-item text-nowrap text-info cc_in_progress ',
                                 'title' => 'In Progress',
+                                'data-cch-id' => $clientChat->cch_id
+                            ]) ?>
+                        <?php endif; ?>
+
+                        <?php if($clientChat->isIdle()): ?> <?php /* TODO:: must be replaced to permission in separate task */ ?>
+                            <?php echo Html::a('<i class="fa fa-arrows-h"></i> Take', null, [
+                                'class' => 'dropdown-item text-info cc_take ',
+                                'title' => 'Take',
                                 'data-cch-id' => $clientChat->cch_id
                             ]) ?>
                         <?php endif; ?>

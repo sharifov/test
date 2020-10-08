@@ -40,6 +40,7 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
 	public const ACTION_MULTIPLE_UPDATE = 9;
 	public const ACTION_HOLD = 10;
 	public const ACTION_REVERT_TO_PROGRESS = 11;
+	public const ACTION_TAKE = 12;
 
 	private const ACTION_LIST = [
 		self::ACTION_OPEN => 'Open By Client',
@@ -53,6 +54,7 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
 		self::ACTION_MULTIPLE_UPDATE => 'Multiple Update',
 		self::ACTION_HOLD => 'Hold',
 		self::ACTION_REVERT_TO_PROGRESS => 'Revert to progress',
+		self::ACTION_TAKE => 'Take',
 	];
 
 	private const ACTION_LABEL_LIST = [
@@ -67,6 +69,7 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
 		self::ACTION_MULTIPLE_UPDATE => 'badge badge-awake',
 		self::ACTION_HOLD => 'badge badge-info',
 		self::ACTION_REVERT_TO_PROGRESS => 'badge badge-info',
+		self::ACTION_TAKE => 'badge badge-info',
 	];
 
     public function rules(): array

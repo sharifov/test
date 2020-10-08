@@ -7,6 +7,7 @@ use common\components\purifier\Purifier;
 use common\components\purifier\PurifierFilter;
 use common\models\query\NotificationsQuery;
 use frontend\widgets\notification\NotificationCache;
+use frontend\widgets\notification\NotificationMessage;
 use sales\helpers\app\AppHelper;
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -478,4 +479,23 @@ class Notifications extends ActiveRecord
         $this->on($name, $handler, $data, $append);
         $this->_eventList[] = $name;
     }
+
+    /**
+     * @param int $user_id
+     * @param string $title
+     * @param string $message
+     * @param int $type
+     * @param bool $popup
+     * @param bool $unique
+     * @return bool
+     */
+    public static function createAndPublish($user_id = 0, $title = '', $message = '', $type = 1, $popup = true, $unique = false): bool
+    {
+        if ($ntf = self::create($user_id, $title, $message, $type, $popup, $unique)) {
+            $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+            return self::publish('getNewNotification', ['user_id' => $user_id], $dataNotification);
+        }
+        return false;
+    }
+
 }

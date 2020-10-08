@@ -50,11 +50,8 @@ $chatProgressUrl = Url::toRoute('/client-chat/ajax-to-progress');
 $clientChatResetUnreadMessageUrl = Url::toRoute(['/client-chat/reset-unread-message']);
 $clientChatAddActiveConnectionUrl = Url::toRoute(['/client-chat/add-active-connection']);
 $clientChatRemoveFromActiveConnectionUrl = Url::toRoute(['/client-chat/remove-active-connection']);
+$clientChatTakeUrl = Url::toRoute(['/client-chat/ajax-take']);
 
-$this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2.2.0/jquery.countdown.min.js', [
-    'position' => $this::POS_HEAD,
-    'depends' => [JqueryAsset::class]
-]);
 ?>
 
 <?php if ($filter->isEmptyChannels()): ?>
@@ -119,6 +116,11 @@ $this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2
 </div>
 
 <?php
+$this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2.2.0/jquery.countdown.min.js', [
+    'position' => $this::POS_HEAD,
+    'depends' => [JqueryAsset::class]
+]);
+
 $this->registerJsFile('/js/moment.min.js', [
     'position' => \yii\web\View::POS_HEAD,
     'depends' => [
@@ -415,7 +417,7 @@ $(document).on('click', '.cc_full_info', function (e) {
         success: function (data) {
             modal.find('.modal-body').html(data);
         },
-        error: function (xhr) {
+        error: function (xhr) {                  
             modal.find('.modal-body').html('Error: ' + xhr.responseText);
             //createNotify('Error', xhr.responseText, 'error');
         },
@@ -822,7 +824,7 @@ $(document).on('click', '.cc_hold', function (e) {
 $(document).on('click', '.cc_in_progress', function (e) {
     e.preventDefault();
     
-    if(!confirm('Are you sure you want to change status "In Progress"')) {
+    if(!confirm('Are you sure want to change status "In Progress"')) {
         return false;
     } 
     
@@ -858,6 +860,49 @@ $(document).on('click', '.cc_in_progress', function (e) {
     .always(function(jqXHR, textStatus, errorThrown) {  
         setTimeout(function () {
             btnProgress.html(btnContent).removeClass('btn-default').prop('disabled', false);  
+        }, 3000);
+    });           
+});
+
+$(document).on('click', '.cc_take', function (e) {
+    e.preventDefault();
+    
+    if(!confirm('Are you sure want to Take the chat?')) {
+        return false;
+    } 
+    
+    let cchId = $(this).attr('data-cch-id');
+    let btnSubmit = $(this);
+    let btnContent = btnSubmit.html();
+        
+    btnSubmit.html('<i class="fa fa-cog fa-spin"></i> Loading...')
+        .addClass('btn-default')
+        .prop('disabled', true);
+    
+    $.ajax({
+        url: '{$clientChatTakeUrl}',
+        type: 'POST',
+        data: {cchId: cchId},
+        dataType: 'json'    
+    })
+    .done(function(dataResponse) {
+        if (dataResponse.status === 1) { 
+            createNotify('Success', dataResponse.message, 'success'); 
+            refreshChatPage(cchId);                        
+        } else if (dataResponse.message.length) {
+            createNotify('Error', dataResponse.message, 'error');
+        } else {
+            createNotify('Error', 'Error, please check logs', 'error');
+        }
+        btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);
+    })
+    .fail(function(jqXHR, textStatus, errorThrown) {
+        createNotify('Error', jqXHR.responseText, 'error');
+        btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);      
+    })
+    .always(function(jqXHR, textStatus, errorThrown) {  
+        setTimeout(function () {
+            btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);  
         }, 3000);
     });           
 });

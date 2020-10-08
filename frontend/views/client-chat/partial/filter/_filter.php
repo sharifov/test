@@ -5,10 +5,12 @@ use kartik\select2\Select2;
 use sales\model\clientChat\dashboard\FilterForm;
 use sales\model\clientChat\dashboard\GroupFilter;
 use sales\widgets\UserSelect2Widget;
+use yii\data\ArrayDataProvider;
 use yii\helpers\Html;
 
 /** @var FilterForm $filter */
 /** @var string $loadChannelsUrl */
+/** @var ArrayDataProvider|null $dataProvider */
 
 /*
     <div class="_cc_tabs_wrapper">
@@ -197,9 +199,25 @@ JS;
     </div>
 
     <?php if ($filter->permissions->canOneOfGroup()): ?>
-        <div class="_cc_groups_wrapper">
+        <div class="_cc_groups_wrapper ">
             <?php foreach ($filter->getGroupFilterUI() as $key => $item): ?>
-                <div class="_cc_group cc_btn_group_filter <?= ($key === $filter->group ? 'active' : ''); ?>" data-group-id="<?= $key; ?>"><?= $item; ?><span class="_cc_group_active"> </span></div>
+                <?php if ($key === GroupFilter::FREE_TO_TAKE): ?>
+                    <?php
+                        $countItems = '';
+                        if ($key === $filter->group) {
+                            $count = $dataProvider ? (int) $dataProvider->getTotalCount() : 0;
+                            $countItems = ' <small style="margin-left: 4px;"><span class="label label-default">' . $count . '</span></small>';
+                        }
+                    ?>
+                    <div
+                        class="_cc_group cc_btn_group_filter <?= ($key === $filter->group ? 'active' : '') ?>"
+                        data-group-id="<?= $key; ?>">
+                            <?php echo $item . $countItems ?>
+                                <span class="_cc_group_active"> </span>
+                    </div>
+                <?php else: ?>
+                    <div class="_cc_group cc_btn_group_filter <?= ($key === $filter->group ? 'active' : ''); ?>" data-group-id="<?= $key; ?>"><?= $item; ?><span class="_cc_group_active"> </span></div>
+                <?php endif; ?>
             <?php endforeach; ?>
             <?= $filter->getGroupInput(); ?>
         </div>
