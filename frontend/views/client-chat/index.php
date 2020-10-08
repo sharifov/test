@@ -165,10 +165,11 @@ $(document).ready( function () {
     })
 });
 
-$(document).ready( function () {
-    $('._cc-item-last-message-time[data-moment]').each( function (i, elem) {
-        $(elem).html(moment.duration(-$(elem).data('moment'), 'seconds').humanize(true));
-    });
+$(document).ready( function () {      
+    updateLastMessageTime()
+    $('#pjax-client-chat-channel-list').on('pjax:success', function() {
+        updateLastMessageTime()
+    }) 
     let interval = 60;
     setInterval(function () {
          $('._cc-item-last-message-time[data-moment]').each( function (i, elem) {
@@ -178,6 +179,12 @@ $(document).ready( function () {
          });
     }, interval*1000); 
 });
+
+function updateLastMessageTime() {
+    $('._cc-item-last-message-time[data-moment]').each( function (i, elem) {
+        $(elem).html(moment.duration(-$(elem).data('moment'), 'seconds').humanize(true));
+    });
+}
 
 $(document).on('click', '#btn-load-channels', function (e) {
     e.preventDefault();
