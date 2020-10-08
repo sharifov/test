@@ -353,8 +353,11 @@ class ClientChatSearch extends ClientChat
             'project.name as project_name',
             'ccc_name',
             'ccu_count',
+            'ccu_updated_dt',
             'owner_username' => 'owner.username',
         ]);
+
+        $query->addOrderBy(['ccu_updated_dt' => SORT_DESC]);
 
         if (ClientChat::isTabAll($filter->status)) {
 

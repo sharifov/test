@@ -139,14 +139,14 @@ $js = <<<JS
         }                
     }
     
-    function sortDialogOnLoad() {        
-        $('._cc_item_unread_messages').each(function(i, obj) { 
-            if ($(this).text()){
-                pushDialogOnTop($(this).data('cch-id'))                
-            }                           
-        });   
-    }
-    sortDialogOnLoad() 
+    // function sortDialogOnLoad() {        
+    //     $('._cc_item_unread_messages').each(function(i, obj) { 
+    //         if ($(this).text()){
+    //             pushDialogOnTop($(this).data('cch-id'))                
+    //         }                           
+    //     });   
+    // }
+    // sortDialogOnLoad() 
     
 
     const userId = '$userId';

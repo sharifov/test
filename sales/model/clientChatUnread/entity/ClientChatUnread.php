@@ -50,7 +50,7 @@ class ClientChatUnread extends \yii\db\ActiveRecord
             'timestamp' => [
                 'class' => TimestampBehavior::class,
                 'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => ['ccu_created_dt'],
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['ccu_created_dt', 'ccu_updated_dt'],
                     ActiveRecord::EVENT_BEFORE_UPDATE => ['ccu_updated_dt'],
                 ],
                 'value' => date('Y-m-d H:i:s'),
