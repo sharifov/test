@@ -67,6 +67,10 @@ class CasesCommunicationService
             'gid' => $case->cs_gid
         ];
 
+        if ($case->caseSale){
+            $content_data['sales'] = array_column($case->caseSale, 'css_sale_book_id', 'css_sale_id');
+        }
+
         $content_data['project'] = [
             'name'      => $project ? $project->name : '',
             'url'       => $project ? $project->link : 'https://',
