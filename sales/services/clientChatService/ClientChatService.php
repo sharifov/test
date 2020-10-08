@@ -574,33 +574,33 @@ class ClientChatService
 		return $rid;
 	}
 
-	public function takeClientChat(ClientChat $clientChat, Employee $owner): ClientChat
-	{
-		return $this->transactionManager->wrap(function() use ($clientChat, $owner) {
+    public function takeClientChat(ClientChat $clientChat, Employee $owner): ClientChat
+    {
+        return $this->transactionManager->wrap(function () use ($clientChat, $owner) {
+            $clientChat->close($owner->id, ClientChatStatusLog::ACTION_ACCEPT_TRANSFER);
+            $this->clientChatRepository->save($clientChat);
 
-			$clientChat->close($owner->id, ClientChatStatusLog::ACTION_ACCEPT_TRANSFER);
-			$this->clientChatRepository->save($clientChat);
+            $dto = ClientChatCloneDto::feelInOnTake($clientChat, $owner->id);
+            $newClientChat = ClientChat::clone($dto);
+            $newClientChat->inProgress($owner->id, ClientChatStatusLog::ACTION_TAKE);
+            $this->clientChatRepository->save($newClientChat);
 
-			$dto = ClientChatCloneDto::feelInOnTake($clientChat, $owner->id);
-			$newClientChat = ClientChat::clone($dto);
-			$newClientChat->inProgress($owner->id, ClientChatStatusLog::ACTION_TAKE);
-			$this->clientChatRepository->save($newClientChat);
+            $this->cloneLead($clientChat, $newClientChat)
+                ->cloneCase($clientChat, $newClientChat)
+                ->cloneNotes($clientChat, $newClientChat);
 
-			$this->cloneLead($clientChat, $newClientChat)
-			    ->cloneCase($clientChat, $newClientChat)
-			    ->cloneNotes($clientChat, $newClientChat);
+            $userAccess = ClientChatUserAccess::create($newClientChat->cch_id, $newClientChat->cch_owner_user_id);
+            $userAccess->accept();
+            $this->clientChatUserAccessRepository->save($userAccess, $newClientChat);
 
-			$userAccess = ClientChatUserAccess::create($newClientChat->cch_id, $newClientChat->cch_owner_user_id);
-			$userAccess->accept();
-			$this->clientChatUserAccessRepository->save($userAccess, $newClientChat);
+            if ($oldVisitor = $clientChat->ccv->ccvCvd ?? null) {
+                $this->clientChatVisitorRepository->create($newClientChat->cch_id, $oldVisitor->cvd_id,
+                    $newClientChat->cch_client_id);
+            }
 
-			if ($oldVisitor = $clientChat->ccv->ccvCvd ?? null) {
-				$this->clientChatVisitorRepository->create($newClientChat->cch_id, $oldVisitor->cvd_id, $newClientChat->cch_client_id);
-			}
+            $this->assignAgentToRcChannel($newClientChat->cch_rid, $owner->userProfile->up_rc_user_id ?? '');
 
-			$this->assignAgentToRcChannel($newClientChat->cch_rid, $newClientChat->cchOwnerUser->userProfile->up_rc_user_id ?? '');
-
-			return $newClientChat;
-		});
-	}
+            return $newClientChat;
+        });
+    }
 }

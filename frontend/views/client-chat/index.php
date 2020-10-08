@@ -894,8 +894,8 @@ $(document).on('click', '.cc_take', function (e) {
     })
     .done(function(dataResponse) {
         if (dataResponse.status === 1) { 
-            createNotify('Success', dataResponse.message, 'success'); 
-            refreshChatPage(cchId);                        
+            createNotify('Success', dataResponse.message, 'success');
+            $(location).attr('href', '/client-chat/index?chid=' + dataResponse.takeClientChatId);                     
         } else if (dataResponse.message.length) {
             createNotify('Error', dataResponse.message, 'error');
         } else {

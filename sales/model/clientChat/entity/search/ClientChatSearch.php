@@ -353,8 +353,11 @@ class ClientChatSearch extends ClientChat
             'project.name as project_name',
             'ccc_name',
             'ccu_count',
+            'ccu_updated_dt',
             'owner_username' => 'owner.username',
         ]);
+
+        $query->addOrderBy(['ccu_updated_dt' => SORT_DESC]);
 
         if (ClientChat::isTabAll($filter->status)) {
 
@@ -369,6 +372,7 @@ class ClientChatSearch extends ClientChat
         if (GroupFilter::isMy($filter->group)) {
             $query->byOwner($user->id);
             $query->addOrderBy(['cch_updated_dt' => SORT_DESC]);
+            $query->notInStatus(ClientChat::STATUS_IDLE);
         } elseif (GroupFilter::isOther($filter->group)) {
             $query
                 ->andWhere(['<>', 'cch_owner_user_id', $user->id])

@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\components\CentrifugoService;
+use common\components\purifier\Purifier;
 use common\models\Department;
 use common\models\Lead;
 use common\models\Notifications;
@@ -16,6 +17,7 @@ use frontend\widgets\clientChat\ClientChatAccessMessage;
 use frontend\widgets\clientChat\ClientChatAccessWidget;
 use frontend\widgets\notification\NotificationSocketWidget;
 use frontend\widgets\notification\NotificationWidget;
+use http\Exception\RuntimeException;
 use sales\auth\Auth;
 use sales\entities\cases\CasesSearch;
 use sales\entities\chat\ChatExtendedGraphsSearch;
@@ -941,7 +943,7 @@ class ClientChatController extends FController
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
 
-            $result = ['message' => '', 'status' => 0];
+            $result = ['message' => '', 'status' => 0, 'takeClientChatId' => ''];
             try {
                 if (!$cchId = (int) Yii::$app->request->post('cchId')) {
                     throw new BadRequestHttpException('Invalid parameters', -1);
@@ -954,11 +956,23 @@ class ClientChatController extends FController
                 }
 
                 if ($takeClientChat = $this->clientChatService->takeClientChat($clientChat, Auth::user())) {
-                    $data = ClientChatAccessMessage::chatTaken($clientChat, Auth::user());
+                    $data = ClientChatAccessMessage::chatTaken($clientChat, $clientChat->cchOwnerUser);
 		            Notifications::pub(['chat-' . $clientChat->cch_id], 'refreshChatPage', ['data' => $data]);
-                }
 
-                $result = ['message' => 'ClientChat successfully taken', 'status' => 1];
+                    $clientChatLink = Purifier::createChatShortLink($clientChat);
+                    Notifications::createAndPublish(
+                        $clientChat->cch_owner_user_id,
+                        'Your Chat was take',
+                        'Your Chat was take by ' . Auth::user()->nickname . '; ' . $clientChatLink,
+                        Notifications::TYPE_INFO,
+                        true);
+
+                    $result['message'] = 'ClientChat successfully taken';
+                    $result['status'] = 1;
+                    $result['takeClientChatId'] = $takeClientChat->cch_id;
+                    return $result;
+                }
+                throw new \RuntimeException('Error: TakeClientChat not created');
 
             } catch (\Throwable $throwable) {
                 AppHelper::throwableLogger($throwable,

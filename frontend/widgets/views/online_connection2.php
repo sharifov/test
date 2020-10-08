@@ -139,20 +139,24 @@ $js = <<<JS
         }                
     }
     
-    function sortDialogOnLoad() {        
-        $('._cc_item_unread_messages').each(function(i, obj) { 
-            if ($(this).text()){
-                pushDialogOnTop($(this).data('cch-id'))                
-            }                           
-        });   
-    }
-    sortDialogOnLoad() 
+    // function sortDialogOnLoad() {        
+    //     $('._cc_item_unread_messages').each(function(i, obj) { 
+    //         if ($(this).text()){
+    //             pushDialogOnTop($(this).data('cch-id'))                
+    //         }                           
+    //     });   
+    // }
+    // sortDialogOnLoad() 
     
 
     const userId = '$userId';
     const userIdentity = '$userIdentity';
     const wsUrl = '$wsUrl';
     const onlineObj = $('#online-connection-indicator');
+    
+    window.sendCommandUpdatePhoneWidgetCurrentCalls = function () {
+        socketSend('Call', 'GetCurrentQueueCalls', {'userId': userId});
+    };
     
     function wsInitConnect(){
         
@@ -168,7 +172,7 @@ $js = <<<JS
                 onlineObj.attr('title', 'Online Connection: opened').find('i').removeClass('danger').addClass('warning');
                 // console.log(e);
                 
-                socketSend('Call', 'GetCurrentQueueCalls', {'userId': userId});
+                window.sendCommandUpdatePhoneWidgetCurrentCalls();
                
             };
             

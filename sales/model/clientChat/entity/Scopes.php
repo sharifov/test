@@ -162,4 +162,9 @@ class Scopes extends \yii\db\ActiveQuery
     {
         return $this->andWhere(['cch_status_id' => $statusId]);
     }
+
+    public function notInStatus(int $statusId): self
+    {
+        return $this->andWhere(['!=', 'cch_status_id', $statusId]);
+    }
 }
