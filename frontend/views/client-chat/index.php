@@ -129,8 +129,6 @@ $moveOfferUrl = Url::to(['/client-chat/move-offer']);
 $clientChatId = $clientChat ? $clientChat->cch_id : 0;
 $clientChatOwnerId = $clientChat ? $clientChat->cch_owner_user_id : 0;
 $discardUnreadMessageUrl = Url::to(['/client-chat/discard-unread-messages']);
-$groupAll = GroupFilter::ALL;
-$canGroupAll = $filter->permissions->canAllOfGroup() ? 'true' : 'false';
 $readAll = ReadUnreadFilter::ALL;
 $js = <<<JS
 
@@ -226,17 +224,7 @@ $(document).on('click', '#btn-load-channels', function (e) {
 $(document).on('click', '.cc_btn_group_filter', function () {
     let newValue = $(this).attr('data-group-id');
     let groupInput = $(document).find('#{$filter->getGroupInputId()}');
-    let oldValue = groupInput.val();
-    let canGroupAll = {$canGroupAll};
-    if (newValue == oldValue) {
-        if (canGroupAll) {
-            groupInput.val({$groupAll});
-        } else {
-            return false;
-        }
-    } else {
-        groupInput.val(newValue);
-    }
+    groupInput.val(newValue);
     window.updateClientChatFilter('{$filter->getId()}', '{$filter->formName()}', '{$loadChannelsUrl}');
 });
 

@@ -357,12 +357,14 @@ class ClientChatSearch extends ClientChat
         ]);
 
         if (ClientChat::isTabAll($filter->status)) {
-            $query->addOrderBy(['cch_status_id' => SORT_ASC]);
+
         } elseif (ClientChat::isTabActive($filter->status)) {
             $query->active();
         } elseif (ClientChat::isTabClosed($filter->status)) {
             $query->archive();
         }
+
+        $query->addOrderBy(['cch_status_id' => SORT_ASC]);
 
         if (GroupFilter::isMy($filter->group)) {
             $query->byOwner($user->id);
@@ -374,8 +376,6 @@ class ClientChatSearch extends ClientChat
             $query->addOrderBy(['cch_created_dt' => SORT_DESC]);
         } elseif (GroupFilter::isFreeToTake($filter->group)) {
             //todo
-        } elseif (GroupFilter::isAll($filter->group)) {
-            $query->addOrderBy(['cch_created_dt' => SORT_DESC]);
         }
 
         if ($filter->channelId) {
@@ -413,7 +413,6 @@ class ClientChatSearch extends ClientChat
         $lastMessages = ClientChatMessage::find()->select(['ccm_sent_dt' => 'MAX(ccm_sent_dt)', 'ccm_cch_id'])->byChatIds($chatIds)->groupBy(['ccm_cch_id'])->asArray()->all();
         $lastMessages = ArrayHelper::index($lastMessages, 'ccm_cch_id');
 
-        $messageService = \Yii::createObject(ClientChatMessageService::class);
         foreach ($data as $key => $item) {
             if (isset($lastMessages[$key])) {
                 $data[$key]['ccm_sent_dt'] = $lastMessages[$key]['ccm_sent_dt'] ? strtotime($lastMessages[$key]['ccm_sent_dt']) : 0;

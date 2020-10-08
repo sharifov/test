@@ -201,15 +201,7 @@ class FilterForm extends Model
 
     public function getAvailableGroup(): array
     {
-        $filter = GroupFilter::FULL_LIST;
-
-        $filter = $this->processFilterGroupByPermissions($filter);
-
-        if (isset($filter[GroupFilter::ALL]) && !$this->permissions->canAllOfGroup()) {
-            unset($filter[GroupFilter::ALL]);
-        }
-
-        return $filter;
+        return $this->processFilterGroupByPermissions(GroupFilter::LIST);
     }
 
     public function getDefaultGroupValue(): int
@@ -233,9 +225,6 @@ class FilterForm extends Model
 
         if (isset($filter[GroupFilter::NOTHING])) {
             unset($filter[GroupFilter::NOTHING]);
-        }
-        if (isset($filter[GroupFilter::ALL])) {
-            unset($filter[GroupFilter::ALL]);
         }
 
         $filter = $this->processFilterGroupByPermissions($filter);
