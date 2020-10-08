@@ -80,12 +80,12 @@ class ClientChat extends \yii\db\ActiveRecord
 	use EventTrait;
 
 	public const STATUS_NEW = 1;
-	public const STATUS_CLOSED = 9;
 	public const STATUS_PENDING = 2;
-	public const STATUS_IN_PROGRESS = 4;
 	public const STATUS_TRANSFER = 3;
+	public const STATUS_IN_PROGRESS = 4;
 	public const STATUS_HOLD = 5;
 	public const STATUS_IDLE = 6;
+	public const STATUS_CLOSED = 9;
 
 	public const MISSED = 1;
 
