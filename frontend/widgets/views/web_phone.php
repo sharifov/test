@@ -950,6 +950,8 @@ use yii\helpers\Html;
                     }
 
                     incomingSoundOff();
+
+                    window.sendCommandUpdatePhoneWidgetCurrentCalls();
                 });
 
                 // device.on('ringing', function (conn) {
