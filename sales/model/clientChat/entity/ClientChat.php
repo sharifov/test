@@ -511,13 +511,16 @@ class ClientChat extends \yii\db\ActiveRecord
 
 	public static function clone(ClientChatCloneDto $dto): ClientChat
 	{
-		$chat = new ClientChat();
+		$chat = new self();
 		$chat->cch_rid = $dto->cchRid;
 		$chat->cch_ccr_id = $dto->cchCcrId;
 		$chat->cch_project_id = $dto->cchProjectId;
 		$chat->cch_client_id = $dto->cchClientId;
 		$chat->cch_owner_user_id = $dto->ownerId;
 		$chat->cch_client_online = $dto->isOnline;
+		$chat->cch_parent_id = $dto->parentId;
+        $chat->cch_source_type_id = $dto->sourceTypeId;
+        $chat->cch_channel_id = $dto->channelId;
 		return $chat;
 	}
 

@@ -3,6 +3,7 @@
 namespace sales\model\clientChatRequest\useCase\api\create;
 
 use common\components\CentrifugoService;
+use common\components\purifier\Purifier;
 use common\models\Notifications;
 use frontend\widgets\notification\NotificationMessage;
 use sales\model\clientChat\entity\ClientChat;
@@ -215,10 +216,11 @@ class ClientChatRequestService
 
     private static function sendFeedbackNotifications(ClientChat $clientChat): void
     {
+        $clientChatLink = Purifier::createChatShortLink($clientChat);
         if ($notification = Notifications::create(
             $clientChat->cch_owner_user_id,
             'Feedback received',
-            'Feedback received. ' . 'Client Chat ID: ' . $clientChat->cch_id,
+            'Feedback received. ' . 'Client Chat; ' . $clientChatLink,
             Notifications::TYPE_INFO,
             true
         )) {
