@@ -47,4 +47,9 @@ class Scopes extends \yii\db\ActiveQuery
 	{
 		return $this->andWhere(['ccc_id' => $id]);
 	}
+
+    public function enabled(): self
+    {
+        return $this->andWhere(['ccc_disabled' => false]);
+	}
 }

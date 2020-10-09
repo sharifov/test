@@ -1,8 +1,6 @@
 <?php
 
-use common\models\Department;
 use kartik\select2\Select2;
-use sales\helpers\clientChat\ClientChatHelper;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\transfer\ClientChatTransferForm;
 use yii\helpers\Html;
@@ -13,61 +11,74 @@ use yii\widgets\Pjax;
 /** @var ClientChatTransferForm $transferForm */
 ?>
 
-<div class="row">
-	<div class="col-md-12">
-        <?php Pjax::begin([
-            'id' => 'pjax-cc-submit-transfer',
-            'timeout' => 5000,
-            'enablePushState' => false,
-            'enableReplaceState' => false,
-            'clientOptions' => ['async' => false]
-        ]) ?>
-        <?php $form = ActiveForm::begin([
-            'id' => 'cc-submit-transfer-form',
-            'options' => ['data-pjax' => 1],
-            'enableClientValidation' => false
-        ]); ?>
-                <?= $form->errorSummary($transferForm) ?>
+    <div class="row">
+        <div class="col-md-12">
+            <?php Pjax::begin([
+                'id' => 'pjax-cc-submit-transfer',
+                'timeout' => 5000,
+                'enablePushState' => false,
+                'enableReplaceState' => false,
+                'clientOptions' => ['async' => false]
+            ]) ?>
+            <?php $form = ActiveForm::begin([
+                'id' => 'cc-submit-transfer-form',
+                'options' => ['data-pjax' => 1],
+                'enableClientValidation' => false
+            ]); ?>
 
-                <?= $form->field($transferForm, 'cchId')->hiddenInput()->label(false) ?>
+            <?= $form->errorSummary($transferForm) ?>
 
-                <?= $form->field($transferForm, 'pjaxReload')->hiddenInput(['id' => 'pjaxReload'])->label(false) ?>
+            <?= $form->field($transferForm, 'pjaxReload')->hiddenInput(['id' => 'pjaxReload'])->label(false) ?>
 
-                <?= $form->field($transferForm, 'isOnline')->hiddenInput()->label(false) ?>
+            <?= $form->field($transferForm, 'type')->dropDownList($transferForm->getTypeList()) ?>
 
-                <?= $form->field($transferForm, 'depId')->dropDownList(Department::getList(), ['prompt' => ' -- Select department --', 'id' => 'depId']) ?>
+            <?= $form->field($transferForm, 'depId')->dropDownList($transferForm->getDepartments(), ['prompt' => '-- Select department --']) ?>
 
-                <?= $form->field($transferForm, 'agentId')->widget(Select2::class, [
-                    'data' => ClientChatHelper::getAvailableAgentForTransfer($clientChat, $transferForm->depId),
+            <?= $form->field($transferForm, 'channelId')->dropDownList($transferForm->getChannels(), ['prompt' => '-- Select channel --']) ?>
+
+            <?php if ($transferForm->isAgentTransfer()): ?>
+                <?= $form->field($transferForm, 'agentId', ['options' => ['class' => 'form-group required']])->widget(Select2::class, [
+                    'data' => $transferForm->getAgents(),
                     'options' => [
                         'prompt' => '---',
                         'placeholder' => 'Select agent',
-                        'multiple' => true
+                        'multiple' => true,
                     ],
                     'pluginOptions' => [
                         'allowClear' => true,
-						'placeholder' => 'Select agent',
+                        'placeholder' => 'Select agent',
                         'allowMultiple' => true
-					],
+                    ],
+                    'pluginEvents' => [
+                        "change" => "function() { 
+                            $('.field-clientchattransferform-agentid').removeClass('has-error'); 
+                            $('.field-clientchattransferform-agentid').find('.help-block').html(''); 
+                        }",
+                    ],
                     'size' => Select2::SIZE_SMALL,
-				]) ?>
+                ]) ?>
+            <?php endif;?>
 
-                <?php if ($transferForm->reasons): ?>
-                    <?= $form->field($transferForm, 'reasonId')->dropDownList($transferForm->getReasonList()) ?>
+            <?php if ($transferForm->reasons): ?>
+                <?= $form->field($transferForm, 'reasonId')->dropDownList($transferForm->getReasonList()) ?>
 
-                    <?= $form->field($transferForm, 'comment')->textarea(['max' => 100]) ?>
-                <?php endif ?>
+                <?= $form->field($transferForm, 'comment')->textarea(['max' => 100]) ?>
+            <?php endif ?>
 
-                <div class="text-center" style="width: 100%">
-                    <?= Html::submitButton('Submit', ['class' => 'btn btn-success _cc_submit_transfer']) ?>
-                </div>
+            <div class="text-center" style="width: 100%">
+                <?= Html::submitButton('Submit', ['class' => 'btn btn-success _cc_submit_transfer']) ?>
+            </div>
 
             <?php $form::end(); ?>
-        <?php Pjax::end() ?>
-	</div>
-</div>
+            <?php Pjax::end() ?>
+        </div>
+    </div>
 
 <?php
+
+$typeInputId = Html::getInputId($transferForm, 'type');
+$depInputId = Html::getInputId($transferForm, 'depId');
+$channelInputId = Html::getInputId($transferForm, 'channelId');
 
 $js = <<<JS
 (function() {
@@ -81,16 +92,24 @@ $js = <<<JS
         }
     });
     $('#pjax-cc-submit-transfer').on('pjax:beforeSend', function (obj, xhr, data) {
-        data.data.append('cchId', $('#clientchattransferform-cchid').val());
+        data.data.append('cchId', {$transferForm->chatId});
         btnHtml = $('._cc_submit_transfer').html();
         $('._cc_submit_transfer').html('<i class="fa fa-spin fa-spinner"></i>');
     });
     
-    $(document).on('change', '#depId', function () {
-        $('#pjaxReload').val(1);
-         $('#cc-submit-transfer-form').submit();
-        
+    $(document).on('input', '#{$depInputId}', function () {
+        reloadForm();
     });
+    $(document).on('input', '#{$typeInputId}', function(e) {
+        reloadForm();
+    });
+    $(document).on('input', '#{$channelInputId}', function(e) {
+        reloadForm();
+    });
+    function reloadForm() {
+        $('#pjaxReload').val(1);
+        $('#cc-submit-transfer-form').submit();
+    }
 })();
 JS;
 $this->registerJs($js);

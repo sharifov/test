@@ -318,10 +318,10 @@ class ClientChatService
 	 * @return Department
 	 * @throws \Throwable
 	 */
-	public function transfer(ClientChatTransferForm $form, Employee $user): Department
+	public function transfer(ClientChatTransferForm $form, Employee $user): ClientChatChannel
 	{
 		return $this->transactionManager->wrap( function () use ($form, $user) {
-			$clientChat = $this->clientChatRepository->findById($form->cchId);
+			$clientChat = $this->clientChatRepository->findById($form->chatId);
 
 			if ($clientChat->isClosed()) {
 				throw new \DomainException('It’s not possible to transfer the chat to another department because it is in the "Closed" status');
@@ -341,13 +341,7 @@ class ClientChatService
 				throw new \RuntimeException('Visitor RC id is not found');
 			}
 
-			$newDepartment = Department::findOne(['dep_id' => $form->depId]);
-
-			if (!$newDepartment) {
-				throw new \RuntimeException('New department is not found');
-			}
-
-			$clientChatChannel = $this->clientChatChannelRepository->findByClientChatData($form->depId, $clientChat->cch_project_id, null);
+			$clientChatChannel = $this->clientChatChannelRepository->find($form->channelId);
 
 			$activeChatExists = ClientChat::find()->byChannel($clientChatChannel->ccc_id)->byClientId($clientChat->cch_client_id)->expectOwner($clientChat->cch_owner_user_id)->active()->exists();
 
@@ -359,7 +353,7 @@ class ClientChatService
 			$clientChat->cch_channel_id = $clientChatChannel->ccc_id;
 			$this->clientChatRepository->save($clientChat);
 
-			if ($form->agentId) {
+			if ($form->isAgentTransfer()) {
 				foreach ($form->agentId as $agentId) {
 					$userChannel = ClientChatUserChannel::find()->byChannelId($clientChatChannel->ccc_id)->byUserId($agentId)->one();
 					if ($userChannel) {
@@ -390,7 +384,7 @@ class ClientChatService
 			$data = ClientChatAccessMessage::agentStartTransfer($clientChat, $user);
 			Notifications::pub(['chat-' . $clientChat->cch_id], 'refreshChatPage', ['data' => $data]);
 
-			return $newDepartment;
+			return $clientChatChannel;
 		});
 	}
 

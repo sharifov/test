@@ -798,23 +798,22 @@ class ClientChatController extends FController
             throw new ForbiddenHttpException('You do not have access to perform this action', 403);
         }
 
-        $form = new ClientChatTransferForm();
-
-        if ($clientChat) {
-            $form->cchId = $clientChat->cch_id;
-            $form->depId = $clientChat->cchChannel->ccc_dep_id;
-            $form->isOnline = $clientChat->cch_client_online;
-        }
-
+        $form = new ClientChatTransferForm(
+            $clientChat->cch_id,
+            $clientChat->cch_channel_id,
+            $clientChat->cch_project_id,
+            $clientChat->cch_owner_user_id
+        );
 
         try {
+
             if ($form->load(Yii::$app->request->post()) && !$form->pjaxReload && $form->validate()) {
-                $newDepartment = $this->clientChatService->transfer($form, Auth::user());
+                $newChannel = $this->clientChatService->transfer($form, Auth::user());
 
                 return '<script>
                         $("#modal-sm").modal("hide"); 
-                        refreshChatPage(' . $form->cchId . '); 
-                        createNotify("Success", "Chat successfully transferred to ' . $newDepartment->dep_name . ' department. ", "success");
+                        refreshChatPage(' . $form->chatId . '); 
+                        createNotify("Success", "Chat successfully transferred to ' . $newChannel->ccc_name . ' channel. ", "success");
                     </script>';
             }
 
