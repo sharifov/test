@@ -95,7 +95,7 @@ class ClientChatUserAccessSearch extends ClientChatUserAccess
 			'cch_status_id',
 			'is_transfer' => 'if (cch_status_id=:status, 1, 0)',
 			'cch_client_id',
-			'full_name' => 'concat(client.first_name, \' \', client.last_name)',
+			'full_name' => 'trim(concat(client.first_name, \' \', client.last_name))',
 			'client_email' => 'GROUP_CONCAT(DISTINCT `client_email`.email SEPARATOR \',\')',
 			'cch_project_id',
 			'project_name' => 'project.name',
