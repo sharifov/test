@@ -24,7 +24,8 @@ use yii\widgets\Pjax;
         ]) ?>
         <?php $form = ActiveForm::begin([
             'id' => 'cc-submit-transfer-form',
-            'options' => ['data-pjax' => 1]
+            'options' => ['data-pjax' => 1],
+            'enableClientValidation' => false
         ]); ?>
                 <?= $form->errorSummary($transferForm) ?>
 
