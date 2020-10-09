@@ -6,10 +6,12 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use yii\helpers\Html;
 use yii\helpers\StringHelper;
+use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
 
 /** @var $clientChats ClientChat[] */
 /** @var $clientChatId int|null */
+Yii::error(VarDumper::dumpAsString($clientChats));
 ?>
 
 <?php foreach ($clientChats as $clientChat): ?>

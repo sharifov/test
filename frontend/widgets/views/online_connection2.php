@@ -430,13 +430,13 @@ $js = <<<JS
                             }
                             
                             if (obj.data.cchId && obj.data.moment) {
-                                let seconds = + obj.data.moment + 60;
+                                let seconds = + obj.data.moment;
                                 $("._cc-item-last-message-time[data-cch-id='"+obj.data.cchId+"']").attr('data-moment', obj.data.moment).html(moment.duration(-seconds, 'seconds').humanize(true));
                             }
                         }
                         
                         if (obj.cmd === 'clientChatUpdateItemInfo') {
-                            let seconds = + obj.data.moment + 60;
+                            let seconds = + obj.data.moment;
                             $("._cc-item-last-message-time[data-cch-id='"+obj.data.cchId+"']").attr('data-moment', obj.data.moment).html(moment.duration(-seconds, 'seconds').humanize(true));
                             let lastMessageValue = $('#chat-last-message-' + obj.data.cchId);
                             if (lastMessageValue.length > 0) {
