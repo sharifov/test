@@ -255,7 +255,7 @@ class ClientChatController extends FController
 
                     if ($dataProvider && ($models = $dataProvider->getModels())) {
                         if (isset($models[$clientChat->cch_id])) {
-                            $models[$clientChat->cch_id]['count_unread_messages'] = $this->clientChatMessageService->getCountOfChatUnreadMessagesByUser($clientChat->cch_id, Auth::id());
+                            $models[$clientChat->cch_id]['count_unread_messages'] = 0;
                         }
                         $dataProvider->setModels($models);
                         $dataProvider->refresh();

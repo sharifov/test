@@ -325,6 +325,7 @@ class ClientChatRequestService
                     $countUnreadByChatMessages = $this->clientChatMessageService->increaseUnreadMessages($clientChat->cch_id);
                     $this->updateMessageInfoNotification($countUnreadByChatMessages, $clientChat, $message);
                 } else {
+                    $this->clientChatMessageService->touchUnreadMessage($clientChat->cch_id);
                     Notifications::publish('clientChatUpdateItemInfo', ['user_id' => $clientChat->cch_owner_user_id], [
                         'data' => [
                             'cchId' => $clientChat->cch_id,
@@ -338,6 +339,7 @@ class ClientChatRequestService
                 $this->clientChatMessageService->increaseUnreadMessages($clientChat->cch_id);
             }
         } elseif ($clientChatRequest->isAgentUttered()) {
+            $this->clientChatMessageService->touchUnreadMessage($clientChat->cch_id);
             if ($clientChat->hasOwner() && $clientChat->cchOwnerUser->userProfile && $clientChat->cchOwnerUser->userProfile->isRegisteredInRc()) {
                 Notifications::publish('clientChatUpdateItemInfo', ['user_id' => $clientChat->cch_owner_user_id], [
                     'data' => [
