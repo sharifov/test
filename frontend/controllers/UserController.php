@@ -194,7 +194,7 @@ class UserController extends FController
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionInfo($id)
+    public function actionInfo(int $id)
     {
         $params = Yii::$app->request->queryParams;
 
@@ -261,13 +261,12 @@ class UserController extends FController
         $leadsSearchModel = new LeadSearch();
         $leadsSearchModel->datetime_start = $datePickerModel->dateStart;
         $leadsSearchModel->datetime_end = $datePickerModel->dateEnd;
-        //$leadsSearchModel->date_range = $leadsSearchModel->datetime_start . ' - ' . $leadsSearchModel->datetime_end;
         $leadsInfoDataProvider = $leadsSearchModel->searchUserLeadsInfo($params, $id);
 
         $casesSearchModel = new CasesSearch();
         $casesSearchModel->datetime_start =  $datePickerModel->dateStart;
         $casesSearchModel->datetime_end= $datePickerModel->dateEnd;
-        //$casesSearchModel->date_range = $casesSearchModel->datetime_start . ' - ' . $casesSearchModel->datetime_end;
+
         $casesInfoDataProvider = $casesSearchModel->searchUserCasesInfo($params, $id);
 
 

@@ -11,14 +11,13 @@ use sales\viewmodel\chat\ViewModelChatGraph;
     <div id="myChart"></div>
     <script type="text/javascript">
         $(document).ready( function () {
-            $('a[class^="export-full"]').off();
             var graphData = <?= $viewModel->preparedData ?>;
 
             google.charts.load('current', {'packages':['corechart','bar']});
             google.charts.setOnLoadCallback(function () {
                 var totalCallsChart = new google.visualization.ColumnChart(document.getElementById('myChart'));
 
-                var colors = ['#8ec5ff', '#dd4b4e', '#587ca6'];
+                //var colors = ['#8ec5ff', '#dd4b4e', '#587ca6'];
 
                 var options = {
                     title: 'Client Chat Activity',
@@ -29,7 +28,7 @@ use sales\viewmodel\chat\ViewModelChatGraph;
                     titleColor: '#596b7d',
                     fontSize: 14,
                     color: '#596b7d',
-                    colors: colors,
+                    //colors: colors,
                     enableInteractivity: true,
                     height: 650,
                     animation:{

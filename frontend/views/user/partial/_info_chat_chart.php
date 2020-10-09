@@ -44,6 +44,7 @@
                         'Progress',
                         'Transfer',
                         'Hold',
+                        'Idle',
                         'Closed',
                         {role: 'annotation'}
                     ],
@@ -55,8 +56,9 @@
                         <?= $item['chatProgress'] ?>,
                         <?= $item['chatTransfer'] ?>,
                         <?= $item['chatHold'] ?>,
+                        <?= $item['chatIdle'] ?>,
                         <?= $item['chatClosed'] ?>,
-                        'Total: <?= $item['chatNew'] + $item['chatPending'] + $item['chatProgress'] + $item['chatTransfer'] + $item['chatHold'] + $item['chatClosed'] ?>',
+                        'Total: <?= $item['chatNew'] + $item['chatPending'] + $item['chatProgress'] + $item['chatTransfer'] + $item['chatHold'] + $item['chatClosed'] + $item['chatIdle'] ?>',
                     ],
                     <?php endforeach; ?>
                 ]);

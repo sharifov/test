@@ -48,6 +48,7 @@ class ViewModelChatGraph
                 (int)$arr['progress'],
                 (int)$arr['transfer'],
                 (int)$arr['hold'],
+                (int)$arr['idle'],
                 (int)$arr['closed']
             ]);
         }
@@ -63,6 +64,7 @@ class ViewModelChatGraph
             'Progress',
             'Transfer',
             'Hold',
+            'Idle',
             'Closed',
         ];
         if ($mappedData){

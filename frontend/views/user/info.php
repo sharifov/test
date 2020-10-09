@@ -2,16 +2,18 @@
 
 use common\models\Employee;
 use yii\helpers\Html;
-use yii\grid\GridView;
 use yii\widgets\Pjax;
 
-/* @var $this yii\web\View */
-/* @var $model Employee */
-/* @var $data yii\data\ActiveDataProvider */
-/* @var $startDateTime string */
-/* @var $endDateTime string */
 /**
- * @var $datePickerModel \yii\base\DynamicModel
+ * @var $this yii\web\View
+ * @var $startDateTime string
+ * @var $endDateTime string
+ * @var $model Employee
+ * @var $data yii\data\ActiveDataProvider
+ * @var $datePickerModel  \yii\base\DynamicModel
+ * @var $userActivity  \frontend\models\search\UserSiteActivitySearch
+ * @var $callLogDataProvider \yii\data\ActiveDataProvider
+ * @var $callLogSearchModel \sales\model\callLog\entity\callLog\search\CallLogSearch
  */
 
 $this->title = 'User Info';
@@ -20,7 +22,6 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <div class="user-info">
-
         <h1><i class="fa fa-user"></i> <?= Html::encode($this->title) ?></h1>
         <?php //Pjax::begin(); ?>
         <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
@@ -32,7 +33,6 @@ $this->params['breadcrumbs'][] = $this->title;
         </p>
 
         <?php //Pjax::end(); ?>
-
 
         <div class="x_panel">
             <div class="x_title">

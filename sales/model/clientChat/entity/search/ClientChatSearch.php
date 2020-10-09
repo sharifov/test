@@ -464,6 +464,7 @@ class ClientChatSearch extends ClientChat
                SUM(IF(cch_status_id = ' . ClientChat::STATUS_IN_PROGRESS . ', 1, 0)) AS chatProgress,
                SUM(IF(cch_status_id = ' . ClientChat::STATUS_TRANSFER . ', 1, 0)) AS chatTransfer,             
                SUM(IF(cch_status_id = ' . ClientChat::STATUS_HOLD . ', 1, 0)) AS chatHold,             
+               SUM(IF(cch_status_id = ' . ClientChat::STATUS_IDLE . ', 1, 0)) AS chatIdle,             
                SUM(IF(cch_status_id = ' . ClientChat::STATUS_CLOSED . ', 1, 0)) AS chatClosed             
         ']);
 
