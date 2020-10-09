@@ -1352,6 +1352,24 @@ class ClientChatController extends FController
         ]);
     }
 
+    public function actionChatRequests()
+	{
+		if (!Yii::$app->request->isPost) {
+			throw new BadRequestHttpException('Not POST data', 1);
+		}
+		$page = Yii::$app->request->post('page', 0);
+		$countDisplayedRequests = Yii::$app->request->post('countDisplayedRequests', 0);
+		$widget = ClientChatAccessWidget::getInstance();
+		$widget->userId = Auth::id();
+		$widget->page = (int)$page;
+		$widget->countDisplayedRequests = (int)$countDisplayedRequests;
+		return $this->asJson([
+			'data' => $widget->fetchItems(),
+			'page' => $page+1,
+			'totalItems' => $widget->getTotalItems()
+		]);
+	}
+
     private function createOfferMessage(ClientChat $chat, array $captures): array
     {
         $attachments = [];

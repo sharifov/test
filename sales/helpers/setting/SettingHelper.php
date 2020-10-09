@@ -50,4 +50,9 @@ class SettingHelper
 	{
 		return \Yii::$app->params['settings']['rc_username_for_register_channel'] ?? '';
 	}
+
+	public static function getChatWidgetLimitRequests(): int
+	{
+		return (int)(\Yii::$app->params['settings']['chat_widget_limit_requests'] ?? 20);
+	}
 }

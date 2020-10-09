@@ -1,6 +1,7 @@
 $(document).on('click', '#_cc-access-wg', function () {
+    var loading = $(this).data('loading');
     let promise = new Promise( (resolve, reject) => {
-        toggleClientChatAccess();
+        toggleClientChatAccess(!loading ? null : false);
         resolve();
     });
     promise.then( () => {
@@ -29,14 +30,19 @@ function toggleClientChatAccess(status) {
 $(document).on('click', '._cc-access-action', function (e) {
     e.preventDefault();
 
-    let url = $(this).attr('data-ajax-url');
-    let cchId = $(this).attr('data-cch-id');
-    let ccuaId = $(this).attr('data-ccua-id');
-    let accessAction = $(this).attr('data-access-action');
-
     let $btn = $(this);
 
-    let btnHtml = $btn.html();
+    let url = $btn.attr('data-ajax-url');
+    let ccuaId = $btn.attr('data-ccua-id');
+    let accessAction = $btn.attr('data-access-action');
+
+    let actionBtns = $btn.closest('._cc-action').find('._cc-access-action');
+
+    let btnsHtml = [];
+
+    actionBtns.each(function (i, elem) {
+        btnsHtml[$(elem).attr('data-access-action')] = $(elem).html();
+    });
 
     $.ajax({
         url: url,
@@ -45,21 +51,22 @@ $(document).on('click', '._cc-access-action', function (e) {
         cache: false,
         dataType: 'json',
         beforeSend: function () {
-            $btn.prop('disabled', 'true').addClass('disabled').html('<i class="fa fa-spin fa-spinner"></i>');
+            $(actionBtns).prop('disabled', 'true').addClass('disabled').html('<i class="fa fa-spin fa-spinner"></i>');
         },
         success: function (data) {
-            if (data.success) {
-                $btn.closest('._cc-box-item-wrapper').remove();
-                return false;
+            if (!data.success) {
+                createNotify(data.notifyTitle, data.notifyMessage, data.notifyType);
+                actionBtns.each(function (i, elem) {
+                    $(elem).html(btnsHtml[$(elem).attr('data-access-action')]).removeClass('disabled').removeAttr('disabled');
+                });
             }
-            createNotify(data.notifyTitle, data.notifyMessage, data.notifyType);
         },
         error: function (xhr) {
-            console.log(xhr);
+            createNotify('Error', xhr.responseText, 'error');
+            actionBtns.each(function (i, elem) {
+                $(elem).html(btnsHtml[$(elem).attr('data-access-action')]).removeClass('disabled').removeAttr('disabled');
+            });
         },
-        complete: function () {
-            $btn.html(btnHtml).removeClass('disabled').removeAttr('disabled');
-        }
     })
 })
 
@@ -85,35 +92,27 @@ function refreshClientChatWidget(obj) {
                     window.open(data.url);
                 }
             }
-            $('#ccr_'+data.cch_id+'_'+data.user_id).remove();
-            decreaseTotalCount();
+            window.chat.removeRequest(data.chatId, data.userId, data.chatUserAccessId);
             break;
         case 'skip':
-            $('#ccr_'+data.cch_id+'_'+data.user_id).remove();
-            decreaseTotalCount();
+            window.chat.removeRequest(data.chatId, data.userId, data.chatUserAccessId);
             break;
         case 'deleted':
-            $('#ccr_'+data.cch_id+'_'+data.user_id).remove();
-            decreaseTotalCount();
+            window.chat.removeRequest(data.chatId, data.userId, data.chatUserAccessId);
             break;
         case 'pending':
-            increaseTotalCount();
-            if ('isChatInTransfer' in data && data.isChatInTransfer) {
-                let oneTransferElem = $('#_client_chat_access_widget ._cc-box-item-wrapper[data-is-transfer="1"]').last();
-                if (oneTransferElem.length) {
-                    oneTransferElem.after(data.html);
-                } else {
-                    $('#_client_chat_access_widget ._cc-box-body').prepend(data.html);
-                }
-            } else {
-                $('#_client_chat_access_widget ._cc-box-body').append(data.html);
-            }
-            window.enableTimer();
-            openWidget();
+            window.chat.addRequest(data.item);
             break;
         case 'reset':
-            $('#_client_chat_access_widget').html(data.html);
-            window.enableTimer();
+            if (data.items.length) {
+                window.chat.db.addBatch(data.items)
+                    .then(() => {window.chat.db.sortData(); window.chat.totalItems = parseInt(data.totalItems)})
+                    .then(() => {window.chat.displayAllRequests(2)})
+                    .then(() => {window.enableTimer(); toggleClientChatAccess(true)});
+            } else {
+                window.chat.db.removeAll()
+                    .then(() => {window.chat.hasNoRequests()});
+            }
             break;
         default:
             console.error('refreshClientChatWidget:: unknown command');

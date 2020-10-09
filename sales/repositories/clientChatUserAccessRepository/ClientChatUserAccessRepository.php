@@ -65,16 +65,15 @@ class ClientChatUserAccessRepository extends Repository
 		throw new NotFoundException('Client Chat User Access not found rows');
 	}
 
-	public function updateChatUserAccessWidget(ClientChat $chat, int $userId, int $statusId, ?int $ccuaId = null): void
+	public function updateChatUserAccessWidget(ClientChat $chat, int $userId, int $statusId, ?int $chatUserAccessId = null): void
 	{
 		$data = [];
 		if ($statusId === ClientChatUserAccess::STATUS_ACCEPT) {
-			$data = ClientChatAccessMessage::accept($chat->cch_id, $userId, $statusId);
+			$data = ClientChatAccessMessage::accept($chat->cch_id, $userId, (int)$chatUserAccessId);
 		} else if ($statusId === ClientChatUserAccess::STATUS_PENDING) {
-			$isChatInTransfer = $chat->isTransfer();
-			$data = ClientChatAccessMessage::pending($chat->cch_id, $userId, $statusId, (int)$ccuaId, $isChatInTransfer);
+			$data = ClientChatAccessMessage::pending($userId, (int)$chatUserAccessId);
 		} else if ($statusId === ClientChatUserAccess::STATUS_SKIP) {
-			$data = ClientChatAccessMessage::skip($chat->cch_id, $userId, $statusId);
+			$data = ClientChatAccessMessage::skip($chat->cch_id, $userId, (int)$chatUserAccessId);
 		}
 
 		Notifications::publish('clientChatRequest', ['user_id' => $userId], ['data' => $data]);

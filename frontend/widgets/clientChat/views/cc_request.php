@@ -2,19 +2,18 @@
 
 use common\components\i18n\Formatter;
 use frontend\widgets\clientChat\ClientChatAsset;
-use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use yii\helpers\Html;
 
 /** @var $this \yii\web\View */
-/** @var $access ClientChatUserAccess[] */
+/** @var $access array */
 /** @var $open bool */
 /** @var $formatter Formatter */
+/** @var $page int */
 
 ClientChatAsset::register($this);
 
 $totalRequest = count($access);
 ?>
-
 
 <?php // yii\widgets\Pjax::begin(['id' => 'client-chat-box-pjax', 'timeout' => 10000, 'enablePushState' => false, 'options' => []])?>
 <div class="_cc-fabs">
@@ -27,26 +26,17 @@ $totalRequest = count($access);
                 <span id="_cc-box-title">Client Chat Request</span> <br>
             </div>
         </div>
-        <div class="_cc-box-body">
-            <?php if($access): ?>
-                <?php foreach($access as $item): ?>
-                    <?= $this->render('cc_request_item', [
-                        'access' => $item,
-                        'formatter' => $formatter
-                    ]) ?>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <p>You have no active client conversations requests.</p>
-            <?php endif; ?>
+        <div class="_cc-box-body" id="_cc-box-body">
         </div>
 
-<!--        <div class="fab_field">-->
-<!--        </div>-->
+        <span id="_wrap_cc_load_requests">
+            <button id="_cc_load_requests" class="btn btn-default" data-page="<?= $page ?>" >Load more</button>
+        </span>
     </div>
-    <a id="_cc-access-wg" total-items="<?= $totalRequest ?>" class="_cc-fab <?= $open && $access ? 'is-visible' : '' ?> <?= $access ? '' : 'inactive' ?>">
-        <i class="fa fa-comments-o"></i>
+    <a id="_cc-access-wg" data-loading="1" total-items="<?= $totalRequest ?>" class="_cc-fab <?= $open && $access ? 'is-visible' : '' ?> <?= $access ? '' : 'inactive' ?>">
+        <i class="fa fa-spinner fa-spin" id="_cc-access-icon"></i>
 
-        <div id="_circle_wrapper" class="<?= $totalRequest ? 'active' : '' ?>">
+        <div id="_circle_wrapper" class="">
             <span class="_cc_total_request_wrapper">
                 <?= $totalRequest ?: 0 ?>
             </span>
@@ -60,6 +50,7 @@ $totalRequest = count($access);
 <?php // yii\widgets\Pjax::end() ?>
 
 <?php
+$url = \yii\helpers\Url::to(['/client-chat/chat-requests']);
 $js = <<<JS
     
 let _ccWgStatus = localStorage.getItem('_cc_wg_status');
@@ -81,6 +72,31 @@ window.addEventListener('storage', function (event) {
 // $(document).on('click', '._cc_chevron', function () {
 //     $(this).closest('._cc-box-item').toggleClass('active');
 // });
+
+var spinnWrap = $('#_wrap_cc_load_requests');
+$(document).on('click', '#_cc_load_requests', function()
+{
+    let page = $(this).attr('data-page');
+    let btn = $(this);
+    if(spinnWrap.hasClass('active') && page)
+    {
+        btn.html('<i class="fa fa-spinner fa-spin"></i>').prop('disabled', true);
+        let ajax = window.chat.loadData(page);
+        
+        ajax
+        .then(() => {window.chat.displayAllRequests(parseInt(page)+1)})
+        .catch(() => {btn.html('All request loaded').prop('disabled', true).addClass('disabled');})
+    }
+});
+
+(function (window) {
+    var ChatApp = window.ChatApp;
+    var DataStore = ChatApp.DataStore;
+    var Chat = ChatApp.Chat;
+
+    var ds = new DataStore();
+    window.chat = new Chat('$url', ds, $page);
+})(window);
 JS;
 
 $this->registerJs($js);

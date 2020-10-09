@@ -236,4 +236,9 @@ class ClientEmail extends \yii\db\ActiveRecord
 		}
 		return '';
 	}
+
+	public static function getEmailListByClient(int $clientId): array
+	{
+		return self::find()->select(['email', 'id'])->where(['client_id' => $clientId])->indexBy('id')->asArray()->column();
+	}
 }
