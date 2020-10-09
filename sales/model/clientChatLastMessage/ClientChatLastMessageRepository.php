@@ -28,7 +28,6 @@ class ClientChatLastMessageRepository extends Repository
                 $clientChatLastMessage = new ClientChatLastMessage();
             }
             $clientChatLastMessage->cclm_message = $clientChatMessage->getMessage();
-            $clientChatLastMessage->cclm_dt = $clientChatMessage->ccm_sent_dt;
             $clientChatLastMessage->cclm_cch_id = $clientChatMessage->ccm_cch_id;
             $clientChatLastMessage->cclm_type_id = self::getTypeByMessage($clientChatMessage);
 

@@ -21,8 +21,6 @@ use sales\widgets\DateTimePicker;
 
         <?= $form->field($model, 'cclm_message')->textarea(['rows' => 6]) ?>
 
-        <?php echo $form->field($model, 'cclm_dt')->widget(DateTimePicker::class) ?>
-
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
         </div>

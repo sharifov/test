@@ -908,17 +908,13 @@ class ClientChatController extends FController
             $result = ['message' => '', 'status' => 0];
             try {
                 if (!$cchId = (int) Yii::$app->request->post('cchId')) {
-                    throw new BadRequestHttpException('Invalid parameters');
+                    throw new BadRequestHttpException('Invalid parameters', -1);
                 }
-
-                try {
-                    $clientChat = $this->clientChatRepository->findById($cchId);
-                } catch (NotFoundException $throwable) {
-                    throw new NotFoundHttpException('Client chat is not found');
+                if (!$clientChat = ClientChat::findOne($cchId)) {
+                    throw new NotFoundHttpException('Client chat is not found', -2);
                 }
-
                 if (!$clientChat->isHold()) { /* TODO:: must be replaced to permission in separate task */
-                    throw new ForbiddenHttpException('Chat must be in status Hold');
+                    throw new ForbiddenHttpException('Chat must be in status Hold', -3);
                 }
 
                 $clientChat->inProgress(Auth::id(), ClientChatStatusLog::ACTION_REVERT_TO_PROGRESS);
@@ -926,7 +922,7 @@ class ClientChatController extends FController
 
                 $result = ['message' => 'ClientChat status changed to InProgress', 'status' => 1];
             } catch (\Throwable $throwable) {
-                Yii::error(AppHelper::throwableFormatter($throwable),
+                AppHelper::throwableLogger($throwable,
                     'ClientChatController:actionAjaxToProgress:throwable');
                 $result['message'] = VarDumper::dumpAsString($throwable->getMessage());
             }
@@ -943,20 +939,36 @@ class ClientChatController extends FController
     {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
+            $redis = Yii::$app->redis;
 
-            $result = ['message' => '', 'status' => 0, 'takeClientChatId' => ''];
+            $result = ['message' => '', 'status' => 0, 'goToClientChatId' => ''];
+
             try {
                 if (!$cchId = (int) Yii::$app->request->post('cchId')) {
                     throw new BadRequestHttpException('Invalid parameters', -1);
                 }
-                if (!$clientChat = ClientChat::findOne($cchId)) {
-                    throw new NotFoundHttpException('Client chat is not found', -2);
+                if (!$redis->get($takeIdentity = 'cc_take_' . $cchId)) {
+                    $redis->setnx($takeIdentity, Auth::id());
+                    $redis->expire($takeIdentity, 20);
+                } else {
+                    throw new \RuntimeException('Chat is already being processed', -2);
                 }
-                if (!$clientChat->isIdle()) { /* TODO:: must be replaced to permission in separate task */
-                    throw new ForbiddenHttpException('Chat must be in status "Idle"', -3);
+                if (!$clientChat = ClientChat::findOne($cchId)) {
+                    throw new NotFoundHttpException('Chat is not found', -3);
+                }
+                if (!$clientChat->isIdle()) { // TODO:: must be replaced to permission in separate task
+                    throw new ForbiddenHttpException('Chat must be in status "Idle"', -4);
                 }
 
-                if ($takeClientChat = $this->clientChatService->takeClientChat($clientChat, Auth::user())) {
+                if ($clientChat->cch_owner_user_id === Auth::id()) {
+                    $clientChat->inProgress(Auth::id(), ClientChatStatusLog::ACTION_REVERT_TO_PROGRESS);
+                    $this->clientChatRepository->save($clientChat);
+
+                    $result['message'] = 'ClientChat status changed to InProgress';
+                    $result['status'] = 2;
+                    $result['goToClientChatId'] = $clientChat->cch_id;
+
+                } elseif ($takeClientChat = $this->clientChatService->takeClientChat($clientChat, Auth::user())) {
                     $data = ClientChatAccessMessage::chatTaken($clientChat, $clientChat->cchOwnerUser);
 		            Notifications::pub(['chat-' . $clientChat->cch_id], 'refreshChatPage', ['data' => $data]);
 
@@ -970,16 +982,17 @@ class ClientChatController extends FController
 
                     $result['message'] = 'ClientChat successfully taken';
                     $result['status'] = 1;
-                    $result['takeClientChatId'] = $takeClientChat->cch_id;
-                    return $result;
-                }
-                throw new \RuntimeException('Error: TakeClientChat not created');
+                    $result['goToClientChatId'] = $takeClientChat->cch_id;
 
+                } else {
+                    throw new \RuntimeException('Error: TakeClientChat is failed');
+                }
             } catch (\Throwable $throwable) {
                 AppHelper::throwableLogger($throwable,
                 'ClientChatController:actionTake:throwable');
                 $result['message'] = VarDumper::dumpAsString($throwable->getMessage());
             }
+            $redis->del($takeIdentity ?? 'cc_take');
             return $result;
         }
         throw new BadRequestHttpException();

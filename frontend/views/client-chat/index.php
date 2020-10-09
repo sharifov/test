@@ -886,6 +886,8 @@ $(document).on('click', '.cc_take', function (e) {
     btnSubmit.html('<i class="fa fa-cog fa-spin"></i> Loading...')
         .addClass('btn-default')
         .prop('disabled', true);
+        
+    $('#page-loader').show();    
     
     $.ajax({
         url: '{$clientChatTakeUrl}',
@@ -894,9 +896,10 @@ $(document).on('click', '.cc_take', function (e) {
         dataType: 'json'    
     })
     .done(function(dataResponse) {
-        if (dataResponse.status === 1) { 
+        $('#page-loader').hide();
+        if (dataResponse.status > 0) { 
             createNotify('Success', dataResponse.message, 'success');
-            $(location).attr('href', '/client-chat/index?chid=' + dataResponse.takeClientChatId);                     
+            $(location).attr('href', '/client-chat/index?chid=' + dataResponse.goToClientChatId);                     
         } else if (dataResponse.message.length) {
             createNotify('Error', dataResponse.message, 'error');
         } else {
@@ -905,12 +908,14 @@ $(document).on('click', '.cc_take', function (e) {
         btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
+        $('#page-loader').hide();
         createNotify('Error', jqXHR.responseText, 'error');
-        btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);      
+        btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);
     })
     .always(function(jqXHR, textStatus, errorThrown) {  
         setTimeout(function () {
-            btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);  
+            $('#page-loader').hide();
+            btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);
         }, 3000);
     });           
 });

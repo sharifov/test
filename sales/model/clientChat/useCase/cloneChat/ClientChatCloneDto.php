@@ -18,6 +18,7 @@ use sales\model\clientChat\entity\ClientChat;
  * @property int|null $sourceTypeId
  * @property int|null $parentId
  * @property int|null $channelId
+ * @property string|null $languageId
  */
 class ClientChatCloneDto
 {
@@ -32,6 +33,7 @@ class ClientChatCloneDto
 	public $sourceTypeId;
 	public $parentId;
 	public $channelId;
+	public $languageId;
 
 	public static function feelInOnCreateMessage(ClientChat $clientChat, int $clientChatRequestId): self
 	{
@@ -79,6 +81,7 @@ class ClientChatCloneDto
         $self->parentId = $clientChat->cch_id;
         $self->sourceTypeId = $sourceTypeId;
         $self->channelId = $clientChat->cch_channel_id;
+        $self->languageId = $clientChat->cch_language_id;
         return $self;
     }
 }

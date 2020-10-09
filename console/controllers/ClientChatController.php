@@ -6,20 +6,34 @@ use common\models\Employee;
 use common\models\UserProfile;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
+use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
+use sales\model\clientChatLastMessage\entity\ClientChatLastMessage;
+use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\services\clientChatChannel\ClientChatChannelCodeException;
 use sales\services\clientChatChannel\ClientChatChannelService;
+use Yii;
 use yii\console\Controller;
-use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
 
 /**
  * Class ClientChatController
  * @package console\controllers
+ *
+ * @property ClientChatRepository $clientChatRepository
  */
 class ClientChatController extends Controller
 {
+    private ClientChatRepository $clientChatRepository;
+
+    public function __construct($id, $module, ClientChatRepository $clientChatRepository, $config = [])
+	{
+		parent::__construct($id, $module, $config);
+		$this->clientChatRepository = $clientChatRepository;
+	}
+
     /**
      * @param int|null $userId
      * @param int $limit
@@ -282,4 +296,59 @@ class ClientChatController extends Controller
 		}
 		printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 	}
+
+	public function actionIdle(): void
+    {
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
+
+        $processed = $failed = 0;
+        $timeStart = microtime(true);
+        $minutes = \Yii::$app->params['settings']['client_chat_inactive_minutes'] ?? 0;
+
+        if ($minutes === 0) {
+            echo Console::renderColoredString('%w --- Script stopped. Setting "client_chat_inactive_minutes" = 0 %n'), PHP_EOL;
+            return;
+        }
+
+        $dtOlder = (new \DateTime('now'))->modify('-' . $minutes . ' minutes')->format('Y-m-d H:i:s');
+
+        $inactiveChats = ClientChat::find()
+            ->innerJoinWith('lastMessage', false)
+            ->byStatus(ClientChat::STATUS_IN_PROGRESS)
+            ->andWhere(['<=', 'cclm_dt', $dtOlder])
+            ->andWhere(['cclm_type_id' => ClientChatLastMessage::TYPE_AGENT])
+            ->orderBy(['cch_id' => SORT_ASC])
+            ->indexBy('cch_id')
+            ->all();
+
+        foreach ($inactiveChats as $clientChat) {
+            try {
+                /** @var ClientChat $clientChat */
+                $clientChat->idle(null, ClientChatStatusLog::ACTION_AUTO_IDLE);
+                $this->clientChatRepository->save($clientChat);
+                $processed++;
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableFormatter($throwable),
+                    'ClientChatController:actionIdle');
+                echo Console::renderColoredString('%r --- Error : ' . $throwable->getMessage() . ' %n'), PHP_EOL;
+                $failed++;
+            }
+        }
+
+        $timeEnd = microtime(true);
+        $time = number_format(round($timeEnd - $timeStart, 2), 2);
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .
+            ' s] %g Processed: %w[' . $processed . '] %g Failed: %w[' . $failed . '] %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+
+        Yii::info(VarDumper::dumpAsString([
+            'Processed' => $processed,
+            'Failed' => $failed,
+            'Minutes' => $minutes,
+            'Execute Time' => $time . ' sec',
+            'End Time' => date('Y-m-d H:i:s'),
+        ]), 'info\ClientChatController:actionIdle:result');
+    }
 }

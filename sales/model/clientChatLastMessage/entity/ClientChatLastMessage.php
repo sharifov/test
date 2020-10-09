@@ -4,6 +4,7 @@ namespace sales\model\clientChatLastMessage\entity;
 
 use sales\model\clientChat\entity\ClientChat;
 use Yii;
+use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
@@ -48,10 +49,7 @@ class ClientChatLastMessage extends ActiveRecord
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'cclm_id' => 'ID',
@@ -61,6 +59,20 @@ class ClientChatLastMessage extends ActiveRecord
             'cclm_dt' => 'Dt',
         ];
     }
+
+    public function behaviors(): array
+	{
+		return [
+			'timestamp' => [
+				'class' => TimestampBehavior::class,
+				'attributes' => [
+					ActiveRecord::EVENT_BEFORE_INSERT => ['cclm_dt'],
+					ActiveRecord::EVENT_BEFORE_UPDATE => ['cclm_dt'],
+				],
+				'value' => date('Y-m-d H:i:s'),
+			],
+		];
+	}
 
     public function getClientChat(): ActiveQuery
     {

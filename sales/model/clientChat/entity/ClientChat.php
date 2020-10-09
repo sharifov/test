@@ -49,7 +49,7 @@ use yii\helpers\Html;
  * @property int|null $cch_status_id
  * @property string|null $cch_ip
  * @property int|null $cch_ua
- * @property int|null $cch_language_id
+ * @property string|null $cch_language_id
  * @property string|null $cch_created_dt
  * @property string|null $cch_updated_dt
  * @property int|null $cch_created_user_id
@@ -104,7 +104,7 @@ class ClientChat extends \yii\db\ActiveRecord
 		self::STATUS_PENDING => 'warning',
 		self::STATUS_CLOSED => 'danger',
 		self::STATUS_TRANSFER => 'warning',
-		self::STATUS_IN_PROGRESS => 'info',
+		self::STATUS_IN_PROGRESS => 'success',
 		self::STATUS_HOLD => 'info',
 		self::STATUS_IDLE => 'info',
 	];
@@ -365,6 +365,28 @@ class ClientChat extends \yii\db\ActiveRecord
         $this->cch_status_id = self::STATUS_HOLD;
     }
 
+    public function idle(
+        ?int $userId,
+        int $action = ClientChatStatusLog::ACTION_AUTO_IDLE,
+        ?string $description = null,
+        ?int $reasonId = null
+    ): void {
+        $this->recordEvent(
+            new ClientChatManageStatusLogEvent(
+                $this,
+                $this->cch_status_id,
+                self::STATUS_IDLE,
+                $this->cch_owner_user_id,
+                $userId,
+                $description,
+                $this->cch_channel_id,
+                $action,
+                $reasonId
+            )
+        );
+        $this->cch_status_id = self::STATUS_IDLE;
+    }
+
 	public function isTransfer(): bool
 	{
 		return $this->cch_status_id === self::STATUS_TRANSFER;
@@ -521,11 +543,22 @@ class ClientChat extends \yii\db\ActiveRecord
 		$chat->cch_parent_id = $dto->parentId;
         $chat->cch_source_type_id = $dto->sourceTypeId;
         $chat->cch_channel_id = $dto->channelId;
+        $chat->cch_language_id = $dto->languageId;
 		return $chat;
 	}
 
     public function isShowDeadlineProgress(): bool
 	{
 		return ($this->isHold() && $this->clientChatHold && !$this->clientChatHold->isDead());
+	}
+
+    public static function getStatusClassById(?int $statusId): string
+    {
+		return self::getStatusClassList()[$statusId] ?? '';
+	}
+
+	public static function getStatusNameById(?int $statusId): string
+    {
+		return self::getStatusList()[$statusId] ?? 'unknown status';
 	}
 }
