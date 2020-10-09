@@ -13,7 +13,9 @@ class ClientChatAsset extends AssetBundle
 	];
 
 	public $js = [
-		'js/_client-chat.js'
+		'js/chat.js',
+		'js/datastore.js',
+		'js/_client-chat.js',
 	];
 
 	public $depends = [

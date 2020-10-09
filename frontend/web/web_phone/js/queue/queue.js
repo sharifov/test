@@ -48,7 +48,12 @@
         };
 
         this.getLast = function () {
+            if (this.count() === 0) {
+                return null;
+            }
+
             let call = null;
+
             for (let i in this.calls) {
                 if (i === 'inArray') {
                     continue;
@@ -62,6 +67,10 @@
         };
 
         this.getFirst = function () {
+            if (this.count() === 0) {
+                return null;
+            }
+
             let call = null;
 
             for (let i in this.calls) {

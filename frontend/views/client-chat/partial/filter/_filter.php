@@ -206,12 +206,13 @@ JS;
                         $countItems = '';
                         if ($key === $filter->group) {
                             $count = $dataProvider ? (int) $dataProvider->getTotalCount() : 0;
-                            $countItems = ' <small style="margin-left: 4px;"><span class="label label-default">' . $count . '</span></small>';
+                            $countItems = ' <small style="margin-left: 4px;">
+                                <span class="label label-default" style="font-size: 9px;">' . $count . '</span></small>';
                         }
                     ?>
                     <div
-                        class="_cc_group cc_btn_group_filter <?= ($key === $filter->group ? 'active' : '') ?>"
-                        data-group-id="<?= $key; ?>">
+                        class="_cc_group cc_btn_group_filter <?php echo ($key === $filter->group ? 'active' : '') ?>"
+                        data-group-id="<?php echo $key ?>">
                             <?php echo $item . $countItems ?>
                                 <span class="_cc_group_active"> </span>
                     </div>

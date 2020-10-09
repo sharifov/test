@@ -151,7 +151,9 @@
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     padding-top: 8px;
-    background-color: #d5b24c
+    background-color: #d5b24c;
+    position: relative;
+    z-index: 101;
 }
 ._cc-box-option {
     float: left;
@@ -258,5 +260,18 @@
         transform: scale(1.05, 1.05);
     }
 }
+
+#_wrap_cc_load_requests {
+    z-index: 100;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+#_wrap_cc_load_requests.active {
+    display: flex;
+}
+/*#_wrap_cc_load_requests .fa {*/
+/*    font-size: 42px;*/
+/*}*/
 
 

@@ -309,4 +309,9 @@ class ClientPhone extends \yii\db\ActiveRecord
 		}
 		return '';
 	}
+
+	public static function getPhoneListByClient(int $clientId): array
+	{
+		return self::find()->select(['phone', 'id'])->where(['client_id' => $clientId])->column();
+	}
 }

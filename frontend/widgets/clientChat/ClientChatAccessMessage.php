@@ -13,51 +13,42 @@ class ClientChatAccessMessage
 	private const COMMAND_DELETED = 'deleted';
 	private const COMMAND_RESET = 'reset';
 
-	public static function accept(int $cchId, int $userId, int $statusId): array
+	public static function accept(int $chatId, int $userId, int $chatUserAccessId): array
 	{
 		return [
 			'command' => self::COMMAND_ACCEPT,
-			'url' => Url::toRoute(['/client-chat/index', 'chid' => $cchId]),
-			'status_id' => $statusId,
-			'user_id' => $userId,
-			'cch_id' => $cchId,
-			'pjaxUrl' => Url::to('/client-chat/pjax-update-chat-widget'),
-			'html' => self::refresh($userId)
+			'url' => Url::toRoute(['/client-chat/index', 'chid' => $chatId]),
+			'userId' => $userId,
+			'chatId' => $chatId,
+			'chatUserAccessId' => $chatUserAccessId
 		];
 	}
 
-	public static function pending(int $cchId, int $userId, int $statusId, ?int $ccuaId, bool $isChatInTransfer): array
+	public static function pending(int $userId, int $chatUserAccess): array
 	{
 		return [
 			'command' => self::COMMAND_PENDING,
-			'status_id' => $statusId,
-			'user_id' => $userId,
-			'cch_id' => $cchId,
-			'pjaxUrl' => Url::to('/client-chat/pjax-update-chat-widget'),
-			'isChatInTransfer' => $isChatInTransfer,
-			'html' => self::refresh($userId, $ccuaId)
+			'item' => self::getOneRequest($userId, $chatUserAccess)
 		];
 	}
 
-	public static function skip(int $cchId, int $userId, int $statusId): array
+	public static function skip(int $cchId, int $userId, int $chatUserAccessId): array
 	{
 		return [
 			'command' => self::COMMAND_SKIP,
-			'status_id' => $statusId,
-			'user_id' => $userId,
-			'cch_id' => $cchId,
-			'pjaxUrl' => Url::to('/client-chat/pjax-update-chat-widget'),
-			'html' => self::refresh($userId)
+			'userId' => $userId,
+			'chatId' => $cchId,
+			'chatUserAccessId' => $chatUserAccessId
 		];
 	}
 
 	public static function reset(int $userId): array
 	{
+		$data = self::refresh($userId);
 		return [
 			'command' => self::COMMAND_RESET,
-			'user_id' => $userId,
-			'pjaxUrl' => Url::to('/client-chat/pjax-update-chat-widget'),
-			'html' => self::refresh($userId)
+			'items' => $data['items'],
+			'totalItems' => $data['totalItems']
 		];
 	}
 
@@ -131,12 +122,22 @@ class ClientChatAccessMessage
 		];
 	}
 
-	private static function refresh(int $userId, ?int $accessId = null)
+	private static function refresh(int $userId): array
+	{
+		$widget = ClientChatAccessWidget::getInstance();
+		$widget->userId = $userId;
+		return [
+			'items' => $widget->fetchItems(),
+			'totalItems' => $widget->getTotalItems()
+		];
+	}
+
+	private static function getOneRequest(int $userId, int $chatUserAccessId): array
 	{
 		$widget = ClientChatAccessWidget::getInstance();
 		$widget->userId = $userId;
 		$widget->open = true;
-		$widget->userAccessId = $accessId;
-		return $widget->run();
+		$widget->userAccessId = $chatUserAccessId;
+		return $widget->fetchOneItem();
 	}
 }

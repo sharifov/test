@@ -373,9 +373,9 @@ CRONs
 0 9 27 * * php /var/www/sale/yii postgres-db/create-chat-message-partition
 40 5 * * * php /var/www/sale/yii call/cleaner
 */3 * * * *         php /var/www/sale/yii user-monitor/logout
+*/1 * * * *   run-this-one php /var/www/sale/yii client-chat/idle
 ```
-Note: php /var/www/sale/yii db/compress-email - Временный скрипт. Удалить запись после дополнительного тикета по :
-ALTER TABLE "email" DROP "e_email_body_text";  
+  
 ```
 sudo chmod 777 /var/spool/cron/crontabs/root
 ```

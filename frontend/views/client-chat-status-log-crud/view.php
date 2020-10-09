@@ -1,9 +1,9 @@
 <?php
 
-use yii\bootstrap4\Html;
-use yii\widgets\DetailView;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
+use yii\bootstrap4\Html;
+use yii\widgets\DetailView;
 
 
 /* @var $this yii\web\View */
@@ -40,14 +40,18 @@ $this->params['breadcrumbs'][] = $this->title;
                 [
                     'attribute' => 'csl_from_status',
                     'value' => static function (ClientChatStatusLog $model) {
-                        return $model->csl_from_status ?  Html::tag('span', ClientChat::getStatusList()[$model->csl_from_status], ['class' => 'badge badge-'.ClientChat::getStatusClassList()[$model->csl_from_status]]) : null;
+                        return $model->csl_from_status ? Html::tag('span',
+                            ClientChat::getStatusNameById($model->csl_from_status),
+                            ['class' => 'badge badge-' . ClientChat::getStatusClassById($model->csl_from_status)]) : null;
                     },
                     'format' => 'raw',
                 ],
                 //'csl_to_status',
                 [   'attribute' => 'csl_to_status',
                     'value' => static function (ClientChatStatusLog $model) {
-                        return $model->csl_to_status ?  Html::tag('span', ClientChat::getStatusList()[$model->csl_to_status], ['class' => 'badge badge-'.ClientChat::getStatusClassList()[$model->csl_to_status]]) : null;
+                        return $model->csl_to_status ? Html::tag('span',
+                            ClientChat::getStatusNameById($model->csl_to_status),
+                            ['class' => 'badge badge-' . ClientChat::getStatusClassById($model->csl_to_status)]) : null;
                     },
                     'format' => 'raw',
                 ],

@@ -1,5 +1,8 @@
 <?php
 
+use common\components\grid\BooleanColumn;
+use common\components\grid\DateTimeColumn;
+use common\components\grid\UserSelect2Column;
 use sales\model\clientChat\entity\actionReason\ClientChatActionReason;
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use yii\bootstrap4\Html;
@@ -38,12 +41,32 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'ccar_key',
             'ccar_name',
-            'ccar_enabled:booleanByLabel',
-            'ccar_comment_required:booleanByLabel',
-            'ccar_created_user_id:username',
-            'ccar_updated_user_id:username',
-            'ccar_created_dt:byUserDateTime',
-            'ccar_updated_dt:byUserDateTime',
+			['class' => BooleanColumn::class, 'attribute' => 'ccar_enabled'],
+			['class' => BooleanColumn::class, 'attribute' => 'ccar_comment_required'],
+			[
+				'class' => UserSelect2Column::class,
+				'attribute' => 'ccar_created_user_id',
+				'relation' => 'ccarCreatedUser',
+				'format' => 'username',
+				'placeholder' => 'Select User'
+			],
+			[
+				'class' => UserSelect2Column::class,
+				'attribute' => 'ccar_updated_user_id',
+				'relation' => 'ccarUpdatedUser',
+				'format' => 'username',
+				'placeholder' => 'Select User'
+			],
+			[
+				'class' => DateTimeColumn::class,
+				'attribute' => 'ccar_created_dt',
+				'format' => 'byUserDateTime'
+			],
+			[
+				'class' => DateTimeColumn::class,
+				'attribute' => 'ccar_updated_dt',
+				'format' => 'byUserDateTime'
+			],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],
