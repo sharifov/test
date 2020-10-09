@@ -348,7 +348,10 @@ class CasesSaleService
     {
         $caseSale->css_sale_pnr = $saleData['pnr'] ?? null;
         $caseSale->css_sale_created_dt = $saleData['created'] ?? null;
-        $caseSale->css_sale_book_id = $saleData['confirmationNumber'] ?? null;
+        //$caseSale->css_sale_book_id = $saleData['confirmationNumber'] ?? null;
+        if (!empty( $saleData['confirmationNumber'])) {
+            $caseSale->css_sale_book_id = $saleData['confirmationNumber'];
+        }
         $caseSale->css_sale_pax = $saleData['requestDetail']['passengersCnt'] ?? null;
         if (isset($saleData['price']['priceQuotes'])) {
             $amountCharged = 0;
