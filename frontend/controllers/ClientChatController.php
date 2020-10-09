@@ -252,6 +252,7 @@ class ClientChatController extends FController
 
                 if ($clientChat->cch_owner_user_id && $clientChat->isOwner(Auth::id())) {
                     $this->clientChatMessageService->discardUnreadMessages($clientChat->cch_id, $clientChat->cch_owner_user_id);
+
                     if ($dataProvider && ($models = $dataProvider->getModels())) {
                         if (isset($models[$clientChat->cch_id])) {
                             $models[$clientChat->cch_id]['count_unread_messages'] = $this->clientChatMessageService->getCountOfChatUnreadMessagesByUser($clientChat->cch_id, Auth::id());
@@ -1012,7 +1013,7 @@ class ClientChatController extends FController
             return;
         }
         $userId = Auth::id();
-        if ($chat->cch_owner_user_id && $chat->isOwner($userId)) {
+        if ($chat->hasOwner() && $chat->isOwner($userId)) {
             $this->clientChatMessageService->discardUnreadMessages($chatId, $userId);
         }
     }

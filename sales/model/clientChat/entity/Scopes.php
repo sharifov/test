@@ -8,6 +8,7 @@ use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeGroupAccess;
 use sales\access\EmployeeProjectAccess;
 use sales\helpers\user\UserFinder;
+use yii\db\ActiveQuery;
 
 /**
  * @see ClientChat
@@ -155,7 +156,9 @@ class Scopes extends \yii\db\ActiveQuery
 
     public function withUnreadMessage(bool $edgerLoading = false): self
     {
-        return $this->innerJoinWith('unreadMessage', $edgerLoading);
+        return $this->innerJoinWith(['unreadMessage' => static function(ActiveQuery $query) {
+            $query->andOnCondition(['>', 'ccu_count', 0]);
+        }], $edgerLoading);
     }
 
     public function byStatus(int $statusId): self

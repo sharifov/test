@@ -1070,7 +1070,7 @@ class EmployeeController extends FController
                     }
 
                     $this->clientChatUserAccessService->disableUserAccessToAllChats($userProfile->up_user_id);
-                    $this->clientChatMessageService->discardAllUnreadMessagesForUser($userProfile->up_user_id);
+//                    $this->clientChatMessageService->discardAllUnreadMessagesForUser($userProfile->up_user_id);
                 } else {
                     $errorMessage = $rocketChat::getErrorMessageFromResult($result);
                     throw new \RuntimeException('Error from RocketChat. ' . $errorMessage);

@@ -5,6 +5,7 @@ use common\models\Notifications;
 use sales\helpers\setting\SettingHelper;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatUnread\entity\ClientChatUnread;
+use sales\model\clientChatUnread\entity\ClientChatUnreadRepository;
 use sales\repositories\call\CallRepository;
 use yii\db\ActiveQuery;
 
@@ -13,6 +14,7 @@ use yii\db\ActiveQuery;
  * @package sales\services\clientChatMessage
  *
  * @property CallRepository $callRepository
+ * @property ClientChatUnreadRepository $unreadRepository
  */
 class ClientChatMessageService
 {
@@ -20,43 +22,59 @@ class ClientChatMessageService
 	 * @var CallRepository
 	 */
 	private CallRepository $callRepository;
+    /**
+     * @var ClientChatUnreadRepository
+     */
+    private ClientChatUnreadRepository $unreadRepository;
 
-	/**
+    /**
 	 * ClientChatMessageService constructor.
 	 * @param CallRepository $callRepository
+	 * @param ClientChatUnreadRepository $unreadRepository
 	 */
-	public function __construct(CallRepository $callRepository)
+	public function __construct(CallRepository $callRepository, ClientChatUnreadRepository $unreadRepository)
 	{
 		$this->callRepository = $callRepository;
-	}
+        $this->unreadRepository = $unreadRepository;
+    }
 
-	public function increaseUnreadMessages(int $cchId, int $userId): self
+	public function increaseUnreadMessages(int $chatId): int
 	{
-		$unread = ClientChatUnread::find()->andWhere(['ccu_cc_id' => $cchId])->one();
+		$unread = $this->unreadRepository->get($chatId);
 		if (!$unread) {
-		    $unread = new ClientChatUnread();
-		    $unread->ccu_cc_id = $cchId;
+		    $unread = ClientChatUnread::create($chatId, 0, new \DateTimeImmutable());
         }
-		$unread->increase();
+		$unread->increase(new \DateTimeImmutable());
 		try {
-            if (!$unread->save()) {
-                \Yii::error([
-                    'message' => 'Client chat message increase error',
-                    'model' => $unread->getErrors(),
-                    'errors' => $unread->getErrors(),
-                ], 'ClientChatMessageService:increaseUnreadMessages');
-            }
+		    $this->unreadRepository->save($unread);
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => 'Client chat message increase error',
-                'model' => $unread->getErrors(),
+                'model' => $unread->getAttributes(),
                 'errors' => $e->getMessage(),
             ], 'ClientChatMessageService:increaseUnreadMessages');
         }
 
-		Notifications::publish('clientChatUnreadMessage', ['user_id' => $userId], ['data' => ['totalUnreadMessages' => $this->getCountOfTotalUnreadMessagesByUser($userId) ?: '', 'cchId' => $cchId, 'cchUnreadMessages' => $unread->ccu_count, 'soundNotification' => $this->soundNotification($userId)]]);
-		return $this;
+		return $unread->ccu_count;
 	}
+
+    public function touchUnreadMessage(int $chatId): void
+    {
+        $unread = $this->unreadRepository->get($chatId);
+        if (!$unread) {
+            $unread = ClientChatUnread::create($chatId, 0, new \DateTimeImmutable());
+        }
+        $unread->touch(new \DateTimeImmutable());
+        try {
+            $this->unreadRepository->save($unread);
+        } catch (\Throwable $e) {
+            \Yii::error([
+                'message' => 'Client chat message increase error',
+                'model' => $unread->getAttributes(),
+                'errors' => $e->getMessage(),
+            ], 'ClientChatMessageService:touchUnreadMessageDate');
+        }
+    }
 
     public function getUserChatsIdWithUnreadMessages(int $userId): array
     {
@@ -77,25 +95,19 @@ class ClientChatMessageService
 
 	public function discardUnreadMessages(int $chatId, ?int $userId): void
 	{
-        $unreadMessage = ClientChatUnread::find()->andWhere(['ccu_cc_id' => $chatId])->one();
-
-        if (!$unreadMessage) {
-            return;
+        $unread = $this->unreadRepository->get($chatId);
+        if (!$unread) {
+            $unread = ClientChatUnread::create($chatId, 0, new \DateTimeImmutable());
         }
 
+        $unread->resetCounter();
         try {
-            if (!$unreadMessage->delete()) {
-                \Yii::error([
-                    'message' => 'Client chat discard unread messages',
-                    'model' => $unreadMessage->getErrors(),
-                    'errors' => $unreadMessage->getErrors(),
-                ], 'ClientChatMessageService:discardUnreadMessages');
-            }
+            $this->unreadRepository->save($unread);
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => 'Client chat discard unread messages',
-                'model' => $unreadMessage->getErrors(),
-                'errors' => $e->getMessage(),
+                'model' => $unread->getAttributes(),
+                'errors' => $e->getErrors(),
             ], 'ClientChatMessageService:discardUnreadMessages');
         }
 
@@ -114,17 +126,11 @@ class ClientChatMessageService
 
         foreach ($unreadMessages as $unreadMessage) {
             try {
-                if (!$unreadMessage->delete()) {
-                    \Yii::error([
-                        'message' => 'Client chat discard all unread messages for user',
-                        'model' => $unreadMessage->getErrors(),
-                        'errors' => $unreadMessage->getErrors(),
-                    ], 'ClientChatMessageService:discardAllUnreadMessagesForUser');
-                }
+                $this->unreadRepository->remove($unreadMessage);
             } catch (\Throwable $e) {
                 \Yii::error([
                     'message' => 'Client chat discard all unread messages for user',
-                    'model' => $unreadMessage->getErrors(),
+                    'model' => $unreadMessage->getAttributes(),
                     'errors' => $e->getMessage(),
                 ], 'ClientChatMessageService:discardAllUnreadMessagesForUser');
             }
@@ -133,7 +139,7 @@ class ClientChatMessageService
 		Notifications::publish('clientChatUnreadMessage', ['user_id' => $userId], ['data' => ['totalUnreadMessages' => $this->getCountOfTotalUnreadMessagesByUser($userId) ?: '', 'refreshPage' => 1]]);
 	}
 
-	private function soundNotification(int $userId): bool
+	public function soundNotification(int $userId): bool
 	{
 		return SettingHelper::isCcSoundNotificationEnabled() && !$this->callRepository->isUserHasActiveCalls($userId);
 	}

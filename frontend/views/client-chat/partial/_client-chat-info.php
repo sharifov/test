@@ -298,11 +298,12 @@ $guard = new ClientChatManageGuard($statusLogRepository);
         </div>
     </div>
 
-    <?php Pjax::begin([
+    <?php /* Pjax::begin([
         'id' => 'pjax-chat-additional-data-' . $clientChat->cch_id,
         'timeout' => 5000,
         'enablePushState' => false,
-    ]); ?>
+    ]); */ ?>
+
         <?php if ($clientChat->ccv && $clientChat->ccv->ccvCvd): ?>
             <div class="_rc-block-wrapper">
                 <div class="x_panel">
@@ -356,7 +357,7 @@ $guard = new ClientChatManageGuard($statusLogRepository);
 
             </div>
         <?php endif; ?>
-    <?php Pjax::end(); ?>
+    <?php // Pjax::end(); ?>
 </div>
 
 <?php if(isset($clientChatHold)): ?>

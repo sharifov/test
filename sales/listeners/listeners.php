@@ -22,5 +22,5 @@ return [
 	ResetChatUserAccessWidgetEvent::class => [ResetChatUserAccessWidgetListener::class],
 	ClientChatManageStatusLogEvent::class => [ClientChatManageStatusLogListener::class],
 	ClientChatSetStatusCloseEvent::class => [ClientChatSetStatusCloseListener::class],
-    ClientChatOwnerAssignedEvent::class => [ClientChatRemoveOldOwnerUnreadMessagesListener::class],
+//    ClientChatOwnerAssignedEvent::class => [ClientChatRemoveOldOwnerUnreadMessagesListener::class],
 ];

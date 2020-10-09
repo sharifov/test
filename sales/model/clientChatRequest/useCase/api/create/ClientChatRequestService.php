@@ -26,6 +26,7 @@ use sales\services\clientChatService\ClientChatService;
 use sales\services\TransactionManager;
 use Yii;
 use yii\helpers\Html;
+use yii\helpers\StringHelper;
 use yii\helpers\VarDumper;
 
 /**
@@ -308,22 +309,62 @@ class ClientChatRequestService
 	 * @param ClientChatRequest $clientChatRequest
 	 */
 	private function saveMessage(ClientChatRequestApiForm $form, ClientChatRequest $clientChatRequest): void
-	{
-		try {
-			$clientChat = $this->clientChatRepository->findNotClosed($form->data['rid'] ?? '');
-		} catch (NotFoundException $e) {
-			$clientChat = $this->clientChatRepository->findByRid($form->data['rid'] ?? '');
-		}
-		$message = ClientChatMessage::createByApi($form, $clientChat, $clientChatRequest);
-		$this->clientChatMessageRepository->save($message, 0);
+    {
+        try {
+            $clientChat = $this->clientChatRepository->findNotClosed($form->data['rid'] ?? '');
+        } catch (NotFoundException $e) {
+            $clientChat = $this->clientChatRepository->findByRid($form->data['rid'] ?? '');
+        }
+        $message = ClientChatMessage::createByApi($form, $clientChat, $clientChatRequest);
+        $this->clientChatMessageRepository->save($message, 0);
         $this->sendLastChatMessageToMonitor($clientChat, $message);
-		if ($clientChat->cch_owner_user_id && $clientChatRequest->isGuestUttered() && $clientChat->cchOwnerUser->userProfile && $clientChat->cchOwnerUser->userProfile->isRegisteredInRc()) {
-            if (!UserConnectionActiveChat::find()->andWhere(['ucac_chat_id' => $clientChat->cch_id])->exists()) {
-                $this->clientChatMessageService->increaseUnreadMessages($clientChat->cch_id, $clientChat->cch_owner_user_id);
-                $this->updateDateTimeLastMessageNotification($clientChat, $message);
+
+        if ($clientChatRequest->isGuestUttered()) {
+            if ($clientChat->hasOwner() && $clientChat->cchOwnerUser->userProfile && $clientChat->cchOwnerUser->userProfile->isRegisteredInRc()) {
+                if (!UserConnectionActiveChat::find()->andWhere(['ucac_chat_id' => $clientChat->cch_id])->exists()) {
+                    $countUnreadByChatMessages = $this->clientChatMessageService->increaseUnreadMessages($clientChat->cch_id);
+                    $this->updateMessageInfoNotification($countUnreadByChatMessages, $clientChat, $message);
+                } else {
+                    Notifications::publish('clientChatUpdateItemInfo', ['user_id' => $clientChat->cch_owner_user_id], [
+                        'data' => [
+                            'cchId' => $clientChat->cch_id,
+                            'shortMessage' => StringHelper::truncate($message->getMessage(), 40, '...'),
+                            'messageOwner' => $message->isMessageFromClient() ? 'client' : 'agent',
+                            'moment' => round((time() - strtotime($message->ccm_sent_dt))),
+                        ]
+                    ]);
+                }
+            } else {
+                $this->clientChatMessageService->increaseUnreadMessages($clientChat->cch_id);
             }
-		}
-	}
+        } elseif ($clientChatRequest->isAgentUttered()) {
+            if ($clientChat->hasOwner() && $clientChat->cchOwnerUser->userProfile && $clientChat->cchOwnerUser->userProfile->isRegisteredInRc()) {
+                Notifications::publish('clientChatUpdateItemInfo', ['user_id' => $clientChat->cch_owner_user_id], [
+                    'data' => [
+                        'cchId' => $clientChat->cch_id,
+                        'shortMessage' => StringHelper::truncate($message->getMessage(), 40, '...'),
+                        'messageOwner' => $message->isMessageFromClient() ? 'client' : 'agent',
+                        'moment' => round((time() - strtotime($message->ccm_sent_dt))),
+                    ]
+                ]);
+            }
+        }
+    }
+
+    private function updateMessageInfoNotification($countUnreadByChatMessages, ClientChat $clientChat, ClientChatMessage $message): void
+    {
+        Notifications::publish('clientChatUnreadMessage', ['user_id' => $clientChat->cch_owner_user_id], [
+            'data' => [
+                'cchId' => $clientChat->cch_id,
+                'totalUnreadMessages' => $this->clientChatMessageService->getCountOfTotalUnreadMessagesByUser($clientChat->cch_owner_user_id) ?: '',
+                'cchUnreadMessages' => $countUnreadByChatMessages,
+                'soundNotification' => $this->clientChatMessageService->soundNotification($clientChat->cch_owner_user_id),
+                'shortMessage' => StringHelper::truncate($message->getMessage(), 40, '...'),
+                'messageOwner' => $message->isMessageFromClient() ? 'client' : 'agent',
+                'moment' =>  round((time() - strtotime($message->ccm_sent_dt))),
+            ]
+        ]);
+    }
 
 	public function createOrUpdateVisitorData(ClientChatRequestApiForm $form, ClientChatRequest $request): void
 	{

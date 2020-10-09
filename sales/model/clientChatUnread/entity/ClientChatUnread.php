@@ -18,11 +18,27 @@ use yii\db\ActiveRecord;
  */
 class ClientChatUnread extends \yii\db\ActiveRecord
 {
+    public static function create(int $chatId, int $count, \DateTimeImmutable $date): self
+    {
+        $model = new self();
+        $model->ccu_cc_id = $chatId;
+        $model->ccu_created_dt = $date->format('Y-m-d H:i:s');
+        $model->ccu_updated_dt = $date->format('Y-m-d H:i:s');
+        $model->ccu_count = $count;
+        return $model;
+    }
+
     public ?int $ownerId = null;
 
-    public function increase(): void
+    public function increase(\DateTimeImmutable $date): void
     {
-        $this->ccu_count = $this->ccu_count ? (int) $this->ccu_count + 1 : 1;
+        $this->ccu_count = (int) $this->ccu_count + 1;
+        $this->ccu_updated_dt = $date->format('Y-m-d H:i:s');
+    }
+
+    public function resetCounter(): void
+    {
+        $this->ccu_count = 0;
     }
 
     public function isOwner(int $userId): bool
@@ -34,6 +50,11 @@ class ClientChatUnread extends \yii\db\ActiveRecord
         return (int) $this->ownerId === $userId;
     }
 
+    public function touch(\DateTimeImmutable $date): void
+    {
+        $this->ccu_updated_dt = $date->format('Y-m-d H:i:s');
+    }
+
     public function rules(): array
     {
         return [
@@ -41,20 +62,10 @@ class ClientChatUnread extends \yii\db\ActiveRecord
             ['ccu_cc_id', 'exist', 'skipOnError' => true, 'targetClass' => ClientChat::class, 'targetAttribute' => ['ccu_cc_id' => 'cch_id']],
 
             ['ccu_count', 'integer', 'max' => 100000],
-        ];
-    }
 
-    public function behaviors(): array
-    {
-        return [
-            'timestamp' => [
-                'class' => TimestampBehavior::class,
-                'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => ['ccu_created_dt', 'ccu_updated_dt'],
-                    ActiveRecord::EVENT_BEFORE_UPDATE => ['ccu_updated_dt'],
-                ],
-                'value' => date('Y-m-d H:i:s'),
-            ],
+            ['ccu_created_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+
+            ['ccu_updated_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
         ];
     }
 

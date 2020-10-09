@@ -405,19 +405,44 @@ $js = <<<JS
                                 }
                             }
                             
-                            if (obj.data.cchId) {
-                                $("._cc-chat-unread-message").find("[data-cch-id='"+obj.data.cchId+"']").html(obj.data.cchUnreadMessages); 
-                                if($('#chat-last-message-refresh-' + obj.data.cchId).length > 0){
-                                    pjaxReload({container: '#chat-last-message-refresh-' + obj.data.cchId, async: false});
+                            if (obj.data.cchId && (obj.data.cchUnreadMessages === null || obj.data.cchUnreadMessages > 0)) {
+                                $("._cc-chat-unread-message").find("[data-cch-id='"+obj.data.cchId+"']").html(obj.data.cchUnreadMessages);
+                            }
+                            // if (obj.data.cchId) {
+                                // if($('#chat-last-message-refresh-' + obj.data.cchId).length > 0){
+                                   //pjaxReload({container: '#chat-last-message-refresh-' + obj.data.cchId, async: false});
+                                   //pushDialogOnTop(obj.data.cchId)
+                                // } 
+                                // if($('#pjax-chat-additional-data-' + obj.data.cchId).length > 0){
+                                 //  pjaxReload({container: '#pjax-chat-additional-data-' + obj.data.cchId, async: false});
+                                // } 
+                            // }
+                            
+                            if (obj.data.shortMessage) {
+                                let lastMessageValue = $('#chat-last-message-' + obj.data.cchId);
+                                if (lastMessageValue.length > 0) {
+                                    lastMessageValue.html('<p title="Last ' + obj.data.messageOwner + ' message"><small>' + obj.data.shortMessage + '</small></p>');
                                     pushDialogOnTop(obj.data.cchId)
-                                } 
-                                if($('#pjax-chat-additional-data-' + obj.data.cchId).length > 0){
-                                    pjaxReload({container: '#pjax-chat-additional-data-' + obj.data.cchId, async: false});
-                                } 
+                                 }
                             }
                             if($('#notify-pjax-cc').length > 0){
                                 pjaxReload({container: '#notify-pjax-cc', url: '{$ccNotificationUpdateUrl}'});
                             }
+                            
+                            if (obj.data.cchId && obj.data.moment) {
+                                let seconds = + obj.data.moment + 60;
+                                $("._cc-item-last-message-time[data-cch-id='"+obj.data.cchId+"']").attr('data-moment', obj.data.moment).html(moment.duration(-seconds, 'seconds').humanize(true));
+                            }
+                        }
+                        
+                        if (obj.cmd === 'clientChatUpdateItemInfo') {
+                            let seconds = + obj.data.moment + 60;
+                            $("._cc-item-last-message-time[data-cch-id='"+obj.data.cchId+"']").attr('data-moment', obj.data.moment).html(moment.duration(-seconds, 'seconds').humanize(true));
+                            let lastMessageValue = $('#chat-last-message-' + obj.data.cchId);
+                            if (lastMessageValue.length > 0) {
+                                lastMessageValue.html('<p title="Last ' + obj.data.messageOwner + ' message"><small>' + obj.data.shortMessage + '</small></p>');
+                                pushDialogOnTop(obj.data.cchId)
+                             }
                         }
                         
                         if (obj.cmd === 'clientChatUpdateClientStatus') {
@@ -427,11 +452,11 @@ $js = <<<JS
                             //createNotify('Client Chat Notification', obj.statusMessage, obj.isOnline ? 'success' : 'warning');
                         }
 
-                        if (obj.cmd === 'clientChatUpdateTimeLastMessage') {                            
-                            if (obj.data.cchId) {                                
-                                $("._cc-item-last-message-time[data-cch-id='"+obj.data.cchId+"']").attr('data-moment', obj.data.moment).html(obj.data.dateTime);                                
-                            }
-                        }
+                        // if (obj.cmd === 'clientChatUpdateTimeLastMessage') {                            
+                        //     if (obj.data.cchId) {                                
+                        //         $("._cc-item-last-message-time[data-cch-id='"+obj.data.cchId+"']").attr('data-moment', obj.data.moment).html(obj.data.dateTime);                                
+                        //     }
+                        // }
                         
                         if (obj.cmd === 'refreshChatPage') {
                             let activeChatId = localStorage.getItem('activeChatId');

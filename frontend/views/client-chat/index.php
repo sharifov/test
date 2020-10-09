@@ -187,6 +187,7 @@ function updateLastMessageTime() {
 }
 
 $(document).on('click', '#btn-load-channels', function (e) {
+    
     e.preventDefault();
     
     let page = $(this).attr('data-page');

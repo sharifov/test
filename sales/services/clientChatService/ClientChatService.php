@@ -26,6 +26,8 @@ use sales\model\clientChatNote\entity\ClientChatNote;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestRepository;
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
+use sales\model\clientChatUnread\entity\ClientChatUnread;
+use sales\model\clientChatUnread\entity\ClientChatUnreadRepository;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\clientChatVisitor\repository\ClientChatVisitorRepository;
@@ -37,6 +39,7 @@ use sales\repositories\clientChatUserChannel\ClientChatUserChannelRepository;
 use sales\repositories\NotFoundException;
 use sales\repositories\visitorLog\VisitorLogRepository;
 use sales\services\client\ClientManageService;
+use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\TransactionManager;
 
 /**
@@ -57,6 +60,8 @@ use sales\services\TransactionManager;
  * @property ClientChatUserChannelRepository $clientChatUserChannelRepository
  * @property ClientChatNoteRepository $clientChatNoteRepository
  * @property ClientChatStatusLogRepository $clientChatStatusLogRepository
+ * @property ClientChatMessageService $clientChatMessageService
+ * @property ClientChatUnreadRepository $clientChatUnreadRepository
  */
 class ClientChatService
 {
@@ -117,7 +122,11 @@ class ClientChatService
 	 */
 	private ClientChatStatusLogRepository $clientChatStatusLogRepository;
 
-	public function __construct(
+    private ClientChatMessageService $clientChatMessageService;
+
+    private ClientChatUnreadRepository $clientChatUnreadRepository;
+
+    public function __construct(
 		ClientChatChannelRepository $clientChatChannelRepository,
 		ClientChatRepository $clientChatRepository,
 		TransactionManager $transactionManager,
@@ -131,7 +140,9 @@ class ClientChatService
 		ClientChatRequestRepository $clientChatRequestRepository,
 		ClientChatUserChannelRepository $clientChatUserChannelRepository,
 		ClientChatNoteRepository $clientChatNoteRepository,
-		ClientChatStatusLogRepository $clientChatStatusLogRepository
+		ClientChatStatusLogRepository $clientChatStatusLogRepository,
+        ClientChatMessageService $clientChatMessageService,
+        ClientChatUnreadRepository $clientChatUnreadRepository
 	){
 		$this->clientChatChannelRepository = $clientChatChannelRepository;
 		$this->clientChatRepository = $clientChatRepository;
@@ -147,7 +158,9 @@ class ClientChatService
 		$this->clientChatUserChannelRepository = $clientChatUserChannelRepository;
 		$this->clientChatNoteRepository = $clientChatNoteRepository;
 		$this->clientChatStatusLogRepository = $clientChatStatusLogRepository;
-	}
+        $this->clientChatMessageService = $clientChatMessageService;
+        $this->clientChatUnreadRepository = $clientChatUnreadRepository;
+    }
 
 	/**
 	 * @param ClientChat $clientChat
@@ -392,6 +405,7 @@ class ClientChatService
 		$this->transactionManager->wrap( static function () use ($_self, $clientChat, $ownerId) {
 			$clientChat->assignOwner($ownerId)->inProgress($ownerId, ClientChatStatusLog::ACTION_OPEN);
 			$_self->clientChatRepository->save($clientChat);
+			$_self->clientChatMessageService->touchUnreadMessage($clientChat->cch_id);
 			$_self->assignAgentToRcChannel($clientChat->cch_rid, $clientChat->cchOwnerUser->userProfile->up_rc_user_id ?? '');
 		});
 	}
@@ -424,6 +438,10 @@ class ClientChatService
 			$newClientChat->cch_parent_id = $clientChat->cch_id;
 			$newClientChat->pending($chatUserAccess->ccua_user_id, ClientChatStatusLog::ACTION_ACCEPT_TRANSFER);
 			$this->clientChatRepository->save($newClientChat);
+
+			$prevCount = $clientChat->unreadMessage ? $clientChat->unreadMessage->ccu_count : 0;
+			$unreadMessages = ClientChatUnread::create($newClientChat->cch_id, $prevCount, new \DateTimeImmutable());
+			$this->clientChatUnreadRepository->save($unreadMessages);
 
 			$userAccess = ClientChatUserAccess::create($newClientChat->cch_id, $newClientChat->cch_owner_user_id);
 			$userAccess->accept();

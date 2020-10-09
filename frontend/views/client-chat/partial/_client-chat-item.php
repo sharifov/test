@@ -71,11 +71,13 @@ use yii\widgets\Pjax;
                         <span class="label label-warning">In Transfer</span>
                     <?php endif; ?>
                 </div>
-                <?php Pjax::begin(['id' => 'chat-last-message-refresh-' . $clientChat['cch_id']]) ?>
+                <?php // Pjax::begin(['id' => 'chat-last-message-refresh-' . $clientChat['cch_id']]) ?>
+                <div id="chat-last-message-<?= $clientChat['cch_id'] ?>">
                     <?php if ($lastChatMessage) : ?>
                         <p title="Last <?= $inMessage ? 'client' : 'agent' ?>  message"><small><?= StringHelper::truncate($lastChatMessage, 40, '...')?></small></p>
                     <?php endif; ?>
-                <?php Pjax::end() ?>
+                </div>
+                <?php // Pjax::end() ?>
             </span>
         </div>
         <div class="_cc_item_data">
