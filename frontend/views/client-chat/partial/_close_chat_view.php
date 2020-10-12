@@ -11,7 +11,7 @@ use yii\widgets\Pjax;
 	<div class="row">
 		<div class="col-md-12">
 			<?php Pjax::begin(['id' => 'pjax-cc-submit-close', 'timeout' => 5000, 'enablePushState' => false, 'enableReplaceState' => false]) ?>
-			<?php $form = ActiveForm::begin(['options' => ['data-pjax' => 1, 'id' => 'cc-submit-close-form']]); ?>
+			<?php $form = ActiveForm::begin(['options' => ['data-pjax' => 1, 'id' => 'cc-submit-close-form'], 'enableClientValidation' => false]); ?>
 			<?= $form->errorSummary($closeForm) ?>
 
 			<?= $form->field($closeForm, 'cchId')->hiddenInput()->label(false) ?>
