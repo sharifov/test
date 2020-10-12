@@ -427,7 +427,7 @@ class ClientChatService
 			$this->cloneLead($clientChat, $newClientChat)->cloneCase($clientChat, $newClientChat)->cloneNotes($clientChat, $newClientChat);
 			$newClientChat->cch_channel_id = $channel->ccc_id;
 			$newClientChat->cch_parent_id = $clientChat->cch_id;
-			$newClientChat->pending($chatUserAccess->ccua_user_id, ClientChatStatusLog::ACTION_ACCEPT_TRANSFER);
+			$newClientChat->inProgress($chatUserAccess->ccua_user_id, ClientChatStatusLog::ACTION_ACCEPT_TRANSFER);
 			$this->clientChatRepository->save($newClientChat);
 
 			$prevCount = $clientChat->unreadMessage ? $clientChat->unreadMessage->ccu_count : 0;
