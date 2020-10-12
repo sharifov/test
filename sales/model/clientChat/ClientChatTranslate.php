@@ -17,7 +17,6 @@ class ClientChatTranslate
      */
     public static function getTranslates($language = null): array
     {
-
         $data['connection_lost'] = [
             'title'     => Yii::t('clientChat', 'Connection Lost', [], $language),
             'subtitle'  => Yii::t('clientChat', 'Trying to reconnect', [], $language),
@@ -34,6 +33,8 @@ class ClientChatTranslate
         $data['transfer_department']   = Yii::t('clientChat', 'The chat was transferred to the department {{name}}', [], $language);
         $data['videocall_started']   = Yii::t('clientChat', 'Video call started', [], $language);
         $data['videocall_ended']   = Yii::t('clientChat', 'Video call ended', [], $language);
+
+
 
 
         $data['registration'] = [
@@ -90,8 +91,40 @@ class ClientChatTranslate
         ];
 
 
+        $dataEmojiPicker['search']   = Yii::t('clientChat_emojipicker', 'Search', [], $language);
+        $dataEmojiPicker['clear']   = Yii::t('clientChat_emojipicker', 'Clear', [], $language);
+        $dataEmojiPicker['notfound']   = Yii::t('clientChat_emojipicker', 'No Emoji Found', [], $language);
+
+        $dataEmojiPicker['skintext']   = Yii::t('clientChat_emojipicker', 'Choose your default skin tone', [], $language);
+
+        $dataEmojiPicker['categories'] = [
+            'search'       => Yii::t('clientChat_emojipicker', 'Search Results', [], $language),
+            'recent'       => Yii::t('clientChat_emojipicker', 'Frequently Used', [], $language),
+            'smileys'       => Yii::t('clientChat_emojipicker', 'Smileys & Emotion', [], $language),
+            'people'       => Yii::t('clientChat_emojipicker', 'People & Body', [], $language),
+            'nature'       => Yii::t('clientChat_emojipicker', 'Animals & Nature', [], $language),
+            'foods'       => Yii::t('clientChat_emojipicker', 'Food & Drink', [], $language),
+            'activity'       => Yii::t('clientChat_emojipicker', 'Activity', [], $language),
+            'places'       => Yii::t('clientChat_emojipicker', 'Travel & Places', [], $language),
+            'objects'       => Yii::t('clientChat_emojipicker', 'Objects', [], $language),
+            'symbols'       => Yii::t('clientChat_emojipicker', 'Symbols', [], $language),
+            'flags'       => Yii::t('clientChat_emojipicker', 'Flags', [], $language),
+            'custom'       => Yii::t('clientChat_emojipicker', 'Custom', [], $language),
+        ];
+
+        $dataEmojiPicker['categorieslabel']   = Yii::t('clientChat_emojipicker', 'Emoji categories', [], $language);
+        $dataEmojiPicker['skintones'] = [
+            1       => Yii::t('clientChat_emojipicker', 'Default Skin Tone', [], $language),
+            2       => Yii::t('clientChat_emojipicker', 'Light Skin Tone', [], $language),
+            3       => Yii::t('clientChat_emojipicker', 'Medium-Light Skin Tone', [], $language),
+            4       => Yii::t('clientChat_emojipicker', 'Medium Skin Tone', [], $language),
+            5       => Yii::t('clientChat_emojipicker', 'Medium-Dark Skin Tone', [], $language),
+            6       => Yii::t('clientChat_emojipicker', 'Dark Skin Tone', [], $language),
+        ];
+
+        $data['emojipicker'] = $dataEmojiPicker;
+
 
         return $data;
     }
-
 }
