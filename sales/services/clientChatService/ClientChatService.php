@@ -407,14 +407,11 @@ class ClientChatService
 	public function finishTransfer(ClientChat $clientChat, ClientChatUserAccess $chatUserAccess): ClientChat
 	{
 		return $this->transactionManager->wrap( function () use ($clientChat, $chatUserAccess) {
-//			$oldDepartment = $clientChat->cchChannel->cccDep ?? null;
-//			$newDepartment = Department::findOne(['dep_id' => $clientChat->cch_dep_id]);
-//
-//			if (!$oldDepartment || !$newDepartment) {
-//				throw new \RuntimeException('Old or New department name is undefined');
-//			}
-
-			$oldChannelId = $clientChat->cch_channel_id;
+			$previous = $this->clientChatStatusLogRepository->getPrevious($clientChat->cch_id);
+			$oldChannelId = $previous->csl_prev_channel_id ?? null;
+			if (!$oldChannelId) {
+				throw new \RuntimeException('Unable to determine the previous chat channel');
+			}
 
 			$clientChat->close($chatUserAccess->ccua_user_id, ClientChatStatusLog::ACTION_ACCEPT_TRANSFER);
 			$this->clientChatRepository->save($clientChat);
