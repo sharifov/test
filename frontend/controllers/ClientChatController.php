@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\components\CentrifugoService;
+use common\components\i18n\Formatter;
 use common\components\purifier\Purifier;
 use common\models\Department;
 use common\models\Lead;
@@ -289,9 +290,12 @@ class ClientChatController extends FController
                 ];
 
                 if ($dataProvider->getCount()) {
+                    $formatter = new Formatter();
+                    $formatter->timeZone = Auth::user()->timezone;
                     $response['html'] = $this->renderPartial('partial/_client-chat-item', [
                         'clientChats' => $dataProvider->getModels(),
                         'clientChatId' => $clientChat ? $clientChat->cch_id : '',
+                        'formatter' => $formatter
                     ]);
                     $response['page'] = $page + 1;
                 }

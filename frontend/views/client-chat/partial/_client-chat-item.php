@@ -1,17 +1,15 @@
 <?php
 
+use common\components\i18n\Formatter;
 use sales\helpers\clientChat\ClientChatHelper;
-use sales\helpers\clientChat\ClientChatMessageHelper;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use yii\helpers\Html;
 use yii\helpers\StringHelper;
-use yii\helpers\VarDumper;
-use yii\widgets\Pjax;
 
 /** @var $clientChats ClientChat[] */
 /** @var $clientChatId int|null */
-
+/** @var $formatter Formatter */
 ?>
 
 <?php foreach ($clientChats as $clientChat): ?>
@@ -54,7 +52,7 @@ use yii\widgets\Pjax;
             </span>
             <span>
                 <div><b><?= Html::encode($clientChat['client_full_name']) ?></b></div>
-                <span title="Chat creation date"><small><i class="fa fa-calendar"></i> <?= Yii::$app->formatter->asDate($clientChat['cch_created_dt'], 'php:F d Y, H:i') ?></small></span>
+                <span title="Chat creation date"><small><?= $formatter->asByUserDateTime($clientChat['cch_created_dt'], 'php:F d Y, H:i') ?></small></span>
                 <?php if (!empty($clientChat['cch_owner_user_id'])): ?>
                     , <span title="Owner"><small><i class="fa fa-user"></i> <?= Html::encode($clientChat['owner_username']) ?></small></span>
                 <?php endif;?>

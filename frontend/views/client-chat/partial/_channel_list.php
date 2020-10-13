@@ -9,6 +9,9 @@ use sales\model\clientChat\dashboard\FilterForm;
 /** @var $totalUnreadMessages int */
 /** @var FilterForm $filter */
 /** @var int $page */
+
+$formatter = new \common\components\i18n\Formatter();
+$formatter->timeZone = \sales\auth\Auth::user()->timezone;
 ?>
 
 <div class="_cc-wrapper">
@@ -25,7 +28,7 @@ use sales\model\clientChat\dashboard\FilterForm;
 
 	<div id="cc-dialogs-wrapper" class="_cc-list-wrapper">
         <?php if ($dataProvider): ?>
-		    <?= $this->render('_client-chat-item', ['clientChats' => $dataProvider->getModels(), 'clientChatId' => $clientChatId]); ?>
+		    <?= $this->render('_client-chat-item', ['clientChats' => $dataProvider->getModels(), 'clientChatId' => $clientChatId, 'formatter' => $formatter]); ?>
         <?php endif; ?>
 	</div>
 
