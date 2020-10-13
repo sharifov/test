@@ -39,10 +39,10 @@ $js = <<<JS
     let btnHtml = '';
     $('#pjax-cc-submit-close').on('pjax:beforeSend', function (obj, xhr, data) {
         btnHtml = $('._cc_submit_close').html();
-        $('._cc_submit_close').html('<i class="fa fa-spin fa-spinner"></i>');
+        $('._cc_submit_close').html('<i class="fa fa-spin fa-spinner"></i>').addClass('disabled').prop('disabled', true);
     });
     $('#pjax-cc-submit-close').on('pjax:end', function (data, xhr) {
-        $('._cc_submit_close').html(btnHtml);
+        $('._cc_submit_close').html(btnHtml).removeClass('disabled').prop('disabled', false);
         if (xhr.status === 500) {
             createNotify('Error', 'Internal Server Error', 'error');
         } else if (xhr.status === 403) {

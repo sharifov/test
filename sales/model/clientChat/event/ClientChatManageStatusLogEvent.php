@@ -21,26 +21,26 @@ use sales\model\clientChat\entity\ClientChat;
  */
 class ClientChatManageStatusLogEvent
 {
-	public $chat;
-	public $oldStatus;
-	public $newStatus;
-	public $ownerId;
-	public $creatorUserId;
-	public $description;
-	public $prevChannelId;
-	public $actionType;
-	public $reasonId;
+    public $chat;
+    public $oldStatus;
+    public $newStatus;
+    public $ownerId;
+    public $creatorUserId;
+    public $description;
+    public $prevChannelId;
+    public $actionType;
+    public $reasonId;
 
-	public function __construct(ClientChat $chat, ?int $oldStatus, int $newStatus, ?int $ownerId, ?int $creatorUserId, ?string $description, ?int $prevChannelId, int $actionType, ?int $reasonId)
-	{
-		$this->chat = $chat;
-		$this->oldStatus = $oldStatus;
-		$this->newStatus = $newStatus;
-		$this->ownerId = $ownerId;
-		$this->creatorUserId = $creatorUserId;
-		$this->description = $description;
-		$this->prevChannelId = $prevChannelId;
-		$this->actionType = $actionType;
-		$this->reasonId = $reasonId;
-	}
+    public function __construct(ClientChat $chat, ?int $oldStatus, int $newStatus, ?int $ownerId, ?int $creatorUserId, ?string $description, ?int $prevChannelId, int $actionType, ?int $reasonId)
+    {
+        $this->chat = $chat;
+        $this->oldStatus = $oldStatus;
+        $this->newStatus = $newStatus;
+        $this->ownerId = $ownerId;
+        $this->creatorUserId = $creatorUserId;
+        $this->description = $description;
+        $this->prevChannelId = $prevChannelId;
+        $this->actionType = $actionType;
+        $this->reasonId = $reasonId;
+    }
 }
