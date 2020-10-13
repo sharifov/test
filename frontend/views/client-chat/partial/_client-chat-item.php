@@ -51,7 +51,7 @@ use yii\helpers\StringHelper;
                 <?php $unreadMessages = $clientChat['count_unread_messages'] ?: null; ?>
             </span>
             <span>
-                <div><b><?= Html::encode($clientChat['client_full_name']) ?></b></div>
+                <div title="Client name"><b><?= Html::encode($clientChat['client_full_name']) ?></b></div>
                 <span title="Chat creation date"><small><?= $formatter->asByUserDateTime($clientChat['cch_created_dt'], 'php:F d Y, H:i') ?></small></span>
                 <?php if (!empty($clientChat['cch_owner_user_id'])): ?>
                     , <span title="Owner"><small><i class="fa fa-user"></i> <?= Html::encode($clientChat['owner_username']) ?></small></span>
@@ -62,10 +62,10 @@ use yii\helpers\StringHelper;
                     <?php endif;*/ ?>
 
                     <?php if ($clientChat['project_name']): ?>
-                        <span class="label label-success"><?= Html::encode($clientChat['project_name']) ?></span>
+                        <span class="label label-success" title="Project"><?= Html::encode($clientChat['project_name']) ?></span>
                     <?php endif; ?>
 
-                    <span class="label label-default"><?= Html::encode($clientChat['ccc_name']) ?></span>
+                    <span class="label label-default" title="Channel"><?= Html::encode($clientChat['ccc_name']) ?></span>
 
                     <?php if ((int)$clientChat['cch_status_id'] === ClientChat::STATUS_TRANSFER):?>
                         <span class="label label-warning">In Transfer</span>
@@ -74,23 +74,28 @@ use yii\helpers\StringHelper;
                 <?php // Pjax::begin(['id' => 'chat-last-message-refresh-' . $clientChat['cch_id']])?>
                 <div id="chat-last-message-<?= $clientChat['cch_id'] ?>">
                     <?php if ($lastChatMessage) : ?>
-                        <p title="Last <?= $inMessage ? 'client' : 'agent' ?>  message"><small><?= StringHelper::truncate($lastChatMessage, 40, '...')?></small></p>
+                        <p title="Last <?= $inMessage ? 'client' : 'agent' ?>  message"><small><i class="fa fa-comment"></i> <?= StringHelper::truncate($lastChatMessage, 40, '...')?></small></p>
                     <?php endif; ?>
                 </div>
                 <?php // Pjax::end()?>
             </span>
         </div>
         <div class="_cc_item_data">
+            <span class="label label-info">
+            <?php
+               echo Html::encode(ClientChat::getStatusNameById($clientChat['cch_status_id']));
+            ?>
+            </span>
 
-			<?php if ($lastChatMessageDate): ?>
-                <span title="Last update">
+			<?php if ($lastChatMessageDate = '2020-10-15 12:30:10'): ?>
+                <span title="Last message date & time">
                     <?php $period = round((time() - strtotime($lastChatMessageDate))); ?>
 					<small class="_cc-item-last-message-time" data-moment="<?= $period ?>" data-cch-id="<?= $clientChat['cch_id'] ?>"></small><br>
                 </span>
 			<?php endif; ?>
 
-            <span class="_cc-chat-unread-message">
-                <span class="badge badge-info _cc_item_unread_messages" data-cch-id="<?= $clientChat['cch_id'] ?>"><?php if ($unreadMessages): ?><?= $unreadMessages ?><?php endif; ?></span>
+            <span class="_cc-chat-unread-message" title="Unread messages">
+                <span class="badge badge-info" data-cch-id="<?= $clientChat['cch_id'] ?>"><?=$unreadMessages>0 ? ($unreadMessages > 99 ? '99+' : $unreadMessages) : '' ?></span>
             </span>
         </div>
     </div>
