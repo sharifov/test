@@ -17,10 +17,14 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\entity\search\ClientChatSearch;
 use frontend\controllers\FController;
 use yii\helpers\ArrayHelper;
+use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
+use yii\web\NotAcceptableHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\db\StaleObjectException;
+use Throwable;
+use yii\helpers\VarDumper;
 
 class ClientChatCrudController extends FController
 {
@@ -34,10 +38,10 @@ class ClientChatCrudController extends FController
      * @param array $config
      */
     public function __construct($id, $module, ClientChatRepository $clientChatRepository, $config = [])
-	{
-		parent::__construct($id, $module, $config);
-		$this->clientChatRepository = $clientChatRepository;
-	}
+    {
+        parent::__construct($id, $module, $config);
+        $this->clientChatRepository = $clientChatRepository;
+    }
 
     /**
     * @return array
@@ -100,9 +104,9 @@ class ClientChatCrudController extends FController
 
         $requestSearch = new ClientChatRequestSearch();
         $visitorId = '';
-		if ($clientChat->ccv && $clientChat->ccv->ccvCvd) {
-		    $visitorId = $clientChat->ccv->ccvCvd->cvd_visitor_rc_id ?? '';
-		}
+        if ($clientChat->ccv && $clientChat->ccv->ccvCvd) {
+            $visitorId = $clientChat->ccv->ccvCvd->cvd_visitor_rc_id ?? '';
+        }
         $data[$requestSearch->formName()]['ccr_visitor_id'] = $visitorId;
         $data[$requestSearch->formName()]['ccr_event'] = ClientChatRequest::EVENT_TRACK;
         $dataProviderRequest = $requestSearch->search($data);
@@ -132,8 +136,8 @@ class ClientChatCrudController extends FController
     {
         $model = new ClientChat();
 
-		$model->cch_created_user_id = Auth::id();
-		$model->cch_updated_user_id = Auth::id();
+        $model->cch_created_user_id = Auth::id();
+        $model->cch_updated_user_id = Auth::id();
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->cch_id]);
         }
@@ -153,8 +157,8 @@ class ClientChatCrudController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			$model->cch_updated_user_id = Auth::id();
-			return $this->redirect(['view', 'id' => $model->cch_id]);
+            $model->cch_updated_user_id = Auth::id();
+            return $this->redirect(['view', 'id' => $model->cch_id]);
         }
 
         return $this->render('update', [
@@ -177,11 +181,52 @@ class ClientChatCrudController extends FController
     }
 
     /**
+     * @return Response
+     * @throws BadRequestHttpException
+     */
+    public function actionSelectAll(): Response
+    {
+        if (Yii::$app->request->isAjax) {
+            $result = (new ClientChatQaSearch())->searchIds(Yii::$app->request->queryParams);
+            return $this->asJson($result);
+        }
+        throw new BadRequestHttpException();
+    }
+
+    public function actionDeleteSelected(): Response
+    {
+        if (!Auth::user()->isAdmin()) {
+            throw new NotAcceptableHttpException('Access denied');
+        }
+
+        $items = Yii::$app->request->post('selection');
+
+        if (Yii::$app->request->isAjax && !empty($items) && is_array($items)) {
+            $result = [];
+            foreach ($items as $value) {
+                if ($clientChat = self::findModel($value)) {
+                    try {
+                        $clientChat->delete();
+                        $result[] = $value;
+                    } catch (Throwable $throwable) {
+                        Yii::warning(
+                            VarDumper::dumpAsString($throwable),
+                            'ClientChatCrudController:actionDeleteSelected'
+                        );
+                    }
+                }
+            }
+            return $this->asJson($result);
+        }
+        throw new BadRequestHttpException();
+    }
+
+    /**
      * @param integer $id
      * @return ClientChat
      * @throws NotFoundHttpException
      */
-    protected function findModel($id): ClientChat
+    protected function findModel(int $id): ClientChat
     {
         if (($model = ClientChat::findOne($id)) !== null) {
             return $model;
