@@ -374,6 +374,7 @@ CRONs
 40 5 * * * php /var/www/sale/yii call/cleaner
 */3 * * * *         php /var/www/sale/yii user-monitor/logout
 */1 * * * *   run-this-one php /var/www/sale/yii client-chat/idle
+*/1 * * * *   run-this-one php /var/www/sale/yii client-chat/hold-to-progress
 ```
   
 ```

@@ -29,10 +29,10 @@ class ClientChatController extends Controller
     private ClientChatRepository $clientChatRepository;
 
     public function __construct($id, $module, ClientChatRepository $clientChatRepository, $config = [])
-	{
-		parent::__construct($id, $module, $config);
-		$this->clientChatRepository = $clientChatRepository;
-	}
+    {
+        parent::__construct($id, $module, $config);
+        $this->clientChatRepository = $clientChatRepository;
+    }
 
     /**
      * @param int|null $userId
@@ -42,107 +42,101 @@ class ClientChatController extends Controller
      * @throws \yii\base\Exception
      * @throws \yii\httpclient\Exception
      */
-	public function actionRcCreateUserProfile(?int $userId = null, int $limit = 5, int $offset = 0)
-	{
-		printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+    public function actionRcCreateUserProfile(?int $userId = null, int $limit = 5, int $offset = 0)
+    {
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
 
-		$query = Employee::find()->select(['id', 'username', 'nickname', 'email', 'nickname_client_chat'])->leftJoin('user_profile', 'id=up_user_id');
+        $query = Employee::find()->select(['id', 'username', 'nickname', 'email', 'nickname_client_chat'])->leftJoin('user_profile', 'id=up_user_id');
         $query->where(['up_rc_user_id' => null]);
         $query->orWhere(['up_rc_user_id' => '']);
 
         //echo $query->createCommand()->getRawSql(); exit;
 
-		if ($limit) {
-			$query->limit($limit);
-		}
+        if ($limit) {
+            $query->limit($limit);
+        }
 
         if ($offset) {
             $query->offset($offset);
         }
 
-		if ($userId) {
-			$query->andWhere(['id' => $userId]);
-		}
+        if ($userId) {
+            $query->andWhere(['id' => $userId]);
+        }
 
-		$users = $query->asArray()->all();
+        $users = $query->asArray()->all();
 
-		$rocketChat = \Yii::$app->rchat;
+        $rocketChat = \Yii::$app->rchat;
         $rocketChat->updateSystemAuth(false);
 
-		foreach ($users as $user) {
-
-			$pass = $rocketChat::generatePassword();
+        foreach ($users as $user) {
+            $pass = $rocketChat::generatePassword();
 
             $rocketChatUsername = $user['nickname_client_chat'] ?: $user['username'];
-			$result = $rocketChat->createUser(
-				$user['username'],
-				$pass,
-				$rocketChatUsername,
-				$user['email']
-			);
+            $result = $rocketChat->createUser(
+                $user['username'],
+                $pass,
+                $rocketChatUsername,
+                $user['email']
+            );
 
             echo "\n-- " . $user['username'] . ' ('.$user['id'].') --' . PHP_EOL;
 
-			if (isset($result['error']) && !$result['error']) {
-
-
+            if (isset($result['error']) && !$result['error']) {
                 printf(" - Registered: %s\n", $this->ansiFormat('Username: ' . $result['data']['username'] . ', ID: ' . $result['data']['_id'], Console::FG_BLUE));
 
-				$userProfile = UserProfile::findOne(['up_user_id' => $user['id']]);
-//				if ($userProfile && $userProfile->up_rc_user_id) {
-//					continue;
-//				}
+                $userProfile = UserProfile::findOne(['up_user_id' => $user['id']]);
+                //				if ($userProfile && $userProfile->up_rc_user_id) {
+                //					continue;
+                //				}
 
-				if (!$userProfile) {
-					$userProfile = new UserProfile();
-					$userProfile->up_user_id = $user['id'];
-				}
-
-				$userProfile->up_rc_user_password = $pass;
-
-				if (empty($result['data']['_id'])) {
-                    printf("\n --- Empty result[data][_id]: %s ---\n", $this->ansiFormat(VarDumper::dumpAsString(['user' => $user, 'data' => $result]), Console::FG_RED));
-				    continue;
+                if (!$userProfile) {
+                    $userProfile = new UserProfile();
+                    $userProfile->up_user_id = $user['id'];
                 }
 
-				$userProfile->up_rc_user_id = $result['data']['_id'];
+                $userProfile->up_rc_user_password = $pass;
 
-				if(!$userProfile->save()) {
+                if (empty($result['data']['_id'])) {
+                    printf("\n --- Empty result[data][_id]: %s ---\n", $this->ansiFormat(VarDumper::dumpAsString(['user' => $user, 'data' => $result]), Console::FG_RED));
+                    continue;
+                }
+
+                $userProfile->up_rc_user_id = $result['data']['_id'];
+
+                if (!$userProfile->save()) {
                     $errorMessage = VarDumper::dumpAsString(['profile' => $userProfile->attributes, 'errors' => $userProfile->errors]);
                     \Yii::error($errorMessage, 'Console:ClientChat:RcCreateUserProfile:UserProfile:save');
                     continue;
                 }
 
-				$login = $rocketChat->login($user['username'], $pass);
+                $login = $rocketChat->login($user['username'], $pass);
 
-				if (isset($login['error']) && $login['error']) {
+                if (isset($login['error']) && $login['error']) {
                     printf(" - Logined error: %s\n", $this->ansiFormat('Username: ' . $result['data']['username'], Console::FG_RED));
                     $errorMessage = VarDumper::dumpAsString($login['error']);
                     printf(" - Error: %s\n", $this->ansiFormat($errorMessage, Console::FG_RED));
-					continue;
-				}
+                    continue;
+                }
 
-				if (!empty($login['data']['authToken'])) {
-
+                if (!empty($login['data']['authToken'])) {
                     $userProfile->up_rc_auth_token = $login['data']['authToken'];
                     $userProfile->up_rc_token_expired = $rocketChat::generateTokenExpired();
-                    if(!$userProfile->save()) {
+                    if (!$userProfile->save()) {
                         $errorMessage = VarDumper::dumpAsString(['profile' => $userProfile->attributes, 'errors' => $userProfile->errors]);
                         \Yii::error($errorMessage, 'Console:ClientChat:RcCreateUserProfile:UserProfile:save:login');
-
                     }
                     printf("\n -- Logined: %s\n", $this->ansiFormat('Username: ' . $result['data']['username'], Console::FG_GREEN));
                 }
-
-			} else {
-			    $errorMessage = $rocketChat::getErrorMessageFromResult($result);
-				printf(" - Error2: %s\n", $this->ansiFormat($errorMessage, Console::FG_RED));
-			}
-		}
+            } else {
+                $errorMessage = $rocketChat::getErrorMessageFromResult($result);
+                printf(" - Error2: %s\n", $this->ansiFormat($errorMessage, Console::FG_RED));
+            }
+        }
 
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
-	}
+    }
 
     /**
      * @param int|null $userId
@@ -180,16 +174,13 @@ class ClientChatController extends Controller
         $rocketChat->updateSystemAuth(false);
 
         foreach ($users as $user) {
-
-			$userProfile = UserProfile::findOne(['up_user_id' => $user['id']]);
+            $userProfile = UserProfile::findOne(['up_user_id' => $user['id']]);
 
             $result = $rocketChat->deleteUser($userProfile->up_rc_user_id ?? null, $user['username'], $deleteByUsername);
 
             echo "\n-- " . $user['username'] . ' ('.$user['id'].') --' . PHP_EOL;
 
             if (isset($result['error']) && !$result['error']) {
-
-
                 printf(" - Deleted: %s\n", $this->ansiFormat('Success', Console::FG_BLUE));
 
 
@@ -203,13 +194,11 @@ class ClientChatController extends Controller
                 $userProfile->up_rc_token_expired = null;
 
 
-                if(!$userProfile->save()) {
+                if (!$userProfile->save()) {
                     $errorMessage = VarDumper::dumpAsString(['profile' => $userProfile->attributes, 'errors' => $userProfile->errors]);
                     \Yii::error($errorMessage, 'Console:ClientChat:RcDeleteUserProfile:UserProfile:save');
                     continue;
                 }
-
-
             } else {
                 $errorMessage = $rocketChat::getErrorMessageFromResult($result);
                 printf(" - Error2: %s\n", $this->ansiFormat($errorMessage, Console::FG_RED));
@@ -220,84 +209,83 @@ class ClientChatController extends Controller
     }
 
     public function actionDeleteRcCredentialsFromCrm(?int $userId = null, int $limit = 5, int $offset = 0): void
-	{
-		printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+    {
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
-		$query = UserProfile::find()->where(['not', ['up_rc_user_id' => null]])->orWhere(['<>', 'up_rc_user_id', '']);
+        $query = UserProfile::find()->where(['not', ['up_rc_user_id' => null]])->orWhere(['<>', 'up_rc_user_id', '']);
 
-		if ($limit) {
-			$query->limit($limit);
-		}
+        if ($limit) {
+            $query->limit($limit);
+        }
 
-		if ($offset) {
-			$query->offset($offset);
-		}
+        if ($offset) {
+            $query->offset($offset);
+        }
 
-		if ($userId) {
-			$query->andWhere(['up_user_id' => $userId]);
-		}
+        if ($userId) {
+            $query->andWhere(['up_user_id' => $userId]);
+        }
 
-		$users = $query->all();
+        $users = $query->all();
 
-		$rocketChat = \Yii::$app->rchat;
-		$rocketChat->updateSystemAuth(false);
+        $rocketChat = \Yii::$app->rchat;
+        $rocketChat->updateSystemAuth(false);
 
-		foreach ($users as $user) {
-
-			echo "\n-- UserId " . ' ('.$user->up_user_id.') --' . PHP_EOL;
-
-
-			$user->up_rc_user_password = null;
-			$user->up_rc_user_id = null;
-			$user->up_rc_auth_token = null;
-			$user->up_rc_token_expired = null;
+        foreach ($users as $user) {
+            echo "\n-- UserId " . ' ('.$user->up_user_id.') --' . PHP_EOL;
 
 
-			if(!$user->save()) {
-				$errorMessage = VarDumper::dumpAsString(['profile' => $user->attributes, 'errors' => $user->errors]);
-				\Yii::error($errorMessage, 'Console:ClientChat:actionDeleteRcCredentialsFromCrm:UserProfile:save');
-				continue;
-			}
+            $user->up_rc_user_password = null;
+            $user->up_rc_user_id = null;
+            $user->up_rc_auth_token = null;
+            $user->up_rc_token_expired = null;
 
-			printf(" - Deleted: %s\n", $this->ansiFormat('Success', Console::FG_BLUE));
-		}
 
-		printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
-	}
+            if (!$user->save()) {
+                $errorMessage = VarDumper::dumpAsString(['profile' => $user->attributes, 'errors' => $user->errors]);
+                \Yii::error($errorMessage, 'Console:ClientChat:actionDeleteRcCredentialsFromCrm:UserProfile:save');
+                continue;
+            }
 
-	public function actionRegisterChannelsInRc(int $channelId = null, string $username = '')
-	{
-		printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
-		if (empty($username)) {
-			$username = SettingHelper::getRcNameForRegisterChannelInRc();
-		}
+            printf(" - Deleted: %s\n", $this->ansiFormat('Success', Console::FG_BLUE));
+        }
 
-		$query = ClientChatChannel::find();
-		if ($channelId) {
-			$query->byChannel($channelId);
-		}
-		$channels = $query->all();
+        printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+    }
 
-		$service = \Yii::createObject(ClientChatChannelService::class);
-		foreach ($channels as $channel) {
-			try {
-				$service->registerChannelInRocketChat($channel->ccc_id, $username);
+    public function actionRegisterChannelsInRc(int $channelId = null, string $username = '')
+    {
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+        if (empty($username)) {
+            $username = SettingHelper::getRcNameForRegisterChannelInRc();
+        }
 
-				printf("\n --- Channel successfully created in rocket chat:  %s ---\n", $this->ansiFormat('ChannelId: ' . $channel->ccc_id, Console::FG_GREEN));
-			} catch (\RuntimeException $e) {
-				if (ClientChatChannelCodeException::isWarningMessage($e)) {
-					printf("\n --- %s ---\n", $this->ansiFormat($e->getMessage(), Console::FG_YELLOW));
-				} else {
-					printf("\n --- Error has occurred:  %s ---\n", $this->ansiFormat($e->getMessage(), Console::FG_RED));
-				}
-			} catch (\Throwable $e) {
-				printf("\n --- Critical Error has occurred:  %s ---\n", $this->ansiFormat(AppHelper::throwableFormatter($e), Console::FG_RED));
-			}
-		}
-		printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
-	}
+        $query = ClientChatChannel::find();
+        if ($channelId) {
+            $query->byChannel($channelId);
+        }
+        $channels = $query->all();
 
-	public function actionIdle(): void
+        $service = \Yii::createObject(ClientChatChannelService::class);
+        foreach ($channels as $channel) {
+            try {
+                $service->registerChannelInRocketChat($channel->ccc_id, $username);
+
+                printf("\n --- Channel successfully created in rocket chat:  %s ---\n", $this->ansiFormat('ChannelId: ' . $channel->ccc_id, Console::FG_GREEN));
+            } catch (\RuntimeException $e) {
+                if (ClientChatChannelCodeException::isWarningMessage($e)) {
+                    printf("\n --- %s ---\n", $this->ansiFormat($e->getMessage(), Console::FG_YELLOW));
+                } else {
+                    printf("\n --- Error has occurred:  %s ---\n", $this->ansiFormat($e->getMessage(), Console::FG_RED));
+                }
+            } catch (\Throwable $e) {
+                printf("\n --- Critical Error has occurred:  %s ---\n", $this->ansiFormat(AppHelper::throwableFormatter($e), Console::FG_RED));
+            }
+        }
+        printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+    }
+
+    public function actionIdle(): void
     {
         echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
@@ -307,7 +295,7 @@ class ClientChatController extends Controller
         $minutes = \Yii::$app->params['settings']['client_chat_inactive_minutes'] ?? 0;
 
         if ($minutes === 0) {
-            echo Console::renderColoredString('%w --- Script stopped. Setting "client_chat_inactive_minutes" = 0 %n'), PHP_EOL;
+            echo Console::renderColoredString('%w --- Script stopped. Setting "client_chat_inactive_minutes" eq "0" %n'), PHP_EOL;
             return;
         }
 
@@ -329,8 +317,10 @@ class ClientChatController extends Controller
                 $this->clientChatRepository->save($clientChat);
                 $processed++;
             } catch (\Throwable $throwable) {
-                Yii::error(AppHelper::throwableFormatter($throwable),
-                    'ClientChatController:actionIdle');
+                Yii::error(
+                    AppHelper::throwableFormatter($throwable),
+                    'ClientChatController:actionIdle:throwable'
+                );
                 echo Console::renderColoredString('%r --- Error : ' . $throwable->getMessage() . ' %n'), PHP_EOL;
                 $failed++;
             }
@@ -350,5 +340,58 @@ class ClientChatController extends Controller
             'Execute Time' => $time . ' sec',
             'End Time' => date('Y-m-d H:i:s'),
         ]), 'info\ClientChatController:actionIdle:result');
+    }
+
+    public function actionHoldToProgress(): void
+    {
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
+
+        $processed = $failed = 0;
+        $timeStart = microtime(true);
+        $enable = \Yii::$app->params['settings']['client_chat_job_hold_to_in_progress_enable'] ?? false;
+
+        if (!$enable) {
+            echo Console::renderColoredString('%w --- Script stopped. Setting "client_chat_job_hold_to_in_progress_enable" eq "FALSE" %n'), PHP_EOL;
+            return;
+        }
+
+        $holdDeadlineChats = ClientChat::find()
+            ->innerJoinWith('clientChatHold', false)
+            ->byStatus(ClientChat::STATUS_HOLD)
+            ->andWhere(['<=', 'cchd_deadline_dt', (new \DateTime('now'))->format('Y-m-d H:i:s')])
+            ->orderBy(['cch_id' => SORT_ASC])
+            ->indexBy('cch_id')
+            ->all();
+
+        foreach ($holdDeadlineChats as $clientChat) {
+            try {
+                /** @var ClientChat $clientChat */
+                $clientChat->inProgress(null, ClientChatStatusLog::ACTION_AUTO_REVERT_TO_PROGRESS);
+                $this->clientChatRepository->save($clientChat);
+                $processed++;
+            } catch (\Throwable $throwable) {
+                Yii::error(
+                    AppHelper::throwableFormatter($throwable),
+                    'ClientChatController:actionHoldToProgress:throwable'
+                );
+                echo Console::renderColoredString('%r --- Error : ' . $throwable->getMessage() . ' %n'), PHP_EOL;
+                $failed++;
+            }
+        }
+
+        $timeEnd = microtime(true);
+        $time = number_format(round($timeEnd - $timeStart, 2), 2);
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .
+            ' s] %g Processed: %w[' . $processed . '] %g Failed: %w[' . $failed . '] %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+
+        Yii::info(VarDumper::dumpAsString([
+            'Processed' => $processed,
+            'Failed' => $failed,
+            'Execute Time' => $time . ' sec',
+            'End Time' => date('Y-m-d H:i:s'),
+        ]), 'info\ClientChatController:actionHoldToProgress:result');
     }
 }
