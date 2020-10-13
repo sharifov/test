@@ -353,6 +353,7 @@ class CasesSaleService
         if (!empty( $saleData['confirmationNumber'])) {
             $caseSale->css_sale_book_id = $saleData['confirmationNumber'];
         }
+        $caseSale->css_sale_pax = $saleData['requestDetail']['passengersCnt'] ?? null;
         if (isset($saleData['price']['priceQuotes'])) {
             $amountCharged = 0;
             foreach ($saleData['price']['priceQuotes'] as $priceQuote) {
