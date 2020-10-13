@@ -87,7 +87,7 @@ use yii\helpers\StringHelper;
             ?>
             </span>
 
-			<?php if ($lastChatMessageDate = '2020-10-15 12:30:10'): ?>
+			<?php if ($lastChatMessageDate): ?>
                 <span title="Last message date & time">
                     <?php $period = round((time() - strtotime($lastChatMessageDate))); ?>
 					<small class="_cc-item-last-message-time" data-moment="<?= $period ?>" data-cch-id="<?= $clientChat['cch_id'] ?>"></small><br>
