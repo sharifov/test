@@ -49,52 +49,52 @@ use yii\helpers\VarDumper;
 class ClientChatRequestService
 {
 
-	/**
-	 * @var ClientChatRequestRepository
-	 */
-	private ClientChatRequestRepository $clientChatRequestRepository;
-	/**
-	 * @var ClientChatRepository
-	 */
-	private ClientChatRepository $clientChatRepository;
-	/**
-	 * @var ClientManageService
-	 */
-	private ClientManageService $clientManageService;
-	/**
-	 * @var ClientChatMessageRepository
-	 */
-	private ClientChatMessageRepository $clientChatMessageRepository;
-	/**
-	 * @var ClientChatMessageService
-	 */
-	private ClientChatMessageService $clientChatMessageService;
-	/**
-	 * @var ClientChatService
-	 */
-	private ClientChatService $clientChatService;
-	/**
-	 * @var VisitorLogRepository
-	 */
-	private VisitorLogRepository $visitorLogRepository;
-	/**
-	 * @var TransactionManager
-	 */
-	private TransactionManager $transactionManager;
-	/**
-	 * @var ClientChatVisitorRepository
-	 */
-	private ClientChatVisitorRepository $clientChatVisitorRepository;
-	/**
-	 * @var ClientChatVisitorDataRepository
-	 */
-	private ClientChatVisitorDataRepository $clientChatVisitorDataRepository;
-	/**
-	 * @var ClientChatChannelRepository
-	 */
-	private ClientChatChannelRepository $clientChatChannelRepository;
+    /**
+     * @var ClientChatRequestRepository
+     */
+    private ClientChatRequestRepository $clientChatRequestRepository;
+    /**
+     * @var ClientChatRepository
+     */
+    private ClientChatRepository $clientChatRepository;
+    /**
+     * @var ClientManageService
+     */
+    private ClientManageService $clientManageService;
+    /**
+     * @var ClientChatMessageRepository
+     */
+    private ClientChatMessageRepository $clientChatMessageRepository;
+    /**
+     * @var ClientChatMessageService
+     */
+    private ClientChatMessageService $clientChatMessageService;
+    /**
+     * @var ClientChatService
+     */
+    private ClientChatService $clientChatService;
+    /**
+     * @var VisitorLogRepository
+     */
+    private VisitorLogRepository $visitorLogRepository;
+    /**
+     * @var TransactionManager
+     */
+    private TransactionManager $transactionManager;
+    /**
+     * @var ClientChatVisitorRepository
+     */
+    private ClientChatVisitorRepository $clientChatVisitorRepository;
+    /**
+     * @var ClientChatVisitorDataRepository
+     */
+    private ClientChatVisitorDataRepository $clientChatVisitorDataRepository;
+    /**
+     * @var ClientChatChannelRepository
+     */
+    private ClientChatChannelRepository $clientChatChannelRepository;
 
-	private ClientChatFeedbackRepository $clientChatFeedbackRepository;
+    private ClientChatFeedbackRepository $clientChatFeedbackRepository;
 
     /**
      * ClientChatRequestService constructor.
@@ -111,73 +111,74 @@ class ClientChatRequestService
      * @param ClientChatChannelRepository $clientChatChannelRepository
      * @param ClientChatFeedbackRepository $clientChatFeedbackRepository
      */
-	public function __construct(
-		ClientChatRequestRepository $clientChatRequestRepository,
-		ClientChatRepository $clientChatRepository,
-		ClientManageService $clientManageService,
-		ClientChatMessageRepository $clientChatMessageRepository,
-		ClientChatMessageService $clientChatMessageService,
-		ClientChatService $clientChatService,
-		VisitorLogRepository $visitorLogRepository,
-		TransactionManager $transactionManager,
-		ClientChatVisitorRepository $clientChatVisitorRepository,
-		ClientChatVisitorDataRepository $clientChatVisitorDataRepository,
-		ClientChatChannelRepository $clientChatChannelRepository,
-		ClientChatFeedbackRepository $clientChatFeedbackRepository
-	)
-	{
-		$this->clientChatRequestRepository = $clientChatRequestRepository;
-		$this->clientChatRepository = $clientChatRepository;
-		$this->clientManageService = $clientManageService;
-		$this->clientChatMessageRepository = $clientChatMessageRepository;
-		$this->clientChatMessageService = $clientChatMessageService;
-		$this->clientChatService = $clientChatService;
-		$this->visitorLogRepository = $visitorLogRepository;
-		$this->transactionManager = $transactionManager;
-		$this->clientChatVisitorRepository = $clientChatVisitorRepository;
-		$this->clientChatVisitorDataRepository = $clientChatVisitorDataRepository;
-		$this->clientChatChannelRepository = $clientChatChannelRepository;
-		$this->clientChatFeedbackRepository = $clientChatFeedbackRepository;
-	}
+    public function __construct(
+        ClientChatRequestRepository $clientChatRequestRepository,
+        ClientChatRepository $clientChatRepository,
+        ClientManageService $clientManageService,
+        ClientChatMessageRepository $clientChatMessageRepository,
+        ClientChatMessageService $clientChatMessageService,
+        ClientChatService $clientChatService,
+        VisitorLogRepository $visitorLogRepository,
+        TransactionManager $transactionManager,
+        ClientChatVisitorRepository $clientChatVisitorRepository,
+        ClientChatVisitorDataRepository $clientChatVisitorDataRepository,
+        ClientChatChannelRepository $clientChatChannelRepository,
+        ClientChatFeedbackRepository $clientChatFeedbackRepository
+    ) {
+        $this->clientChatRequestRepository = $clientChatRequestRepository;
+        $this->clientChatRepository = $clientChatRepository;
+        $this->clientManageService = $clientManageService;
+        $this->clientChatMessageRepository = $clientChatMessageRepository;
+        $this->clientChatMessageService = $clientChatMessageService;
+        $this->clientChatService = $clientChatService;
+        $this->visitorLogRepository = $visitorLogRepository;
+        $this->transactionManager = $transactionManager;
+        $this->clientChatVisitorRepository = $clientChatVisitorRepository;
+        $this->clientChatVisitorDataRepository = $clientChatVisitorDataRepository;
+        $this->clientChatChannelRepository = $clientChatChannelRepository;
+        $this->clientChatFeedbackRepository = $clientChatFeedbackRepository;
+    }
 
-	/**
-	 * @param ClientChatRequestApiForm $form
-	 * @throws \JsonException
-	 * @throws \Throwable
-	 */
-	public function create(ClientChatRequestApiForm $form): void
-	{
-		$clientChatRequest = ClientChatRequest::createByApi($form);
-		$this->clientChatRequestRepository->save($clientChatRequest);
+    /**
+     * @param ClientChatRequestApiForm $form
+     * @throws \JsonException
+     * @throws \Throwable
+     */
+    public function create(ClientChatRequestApiForm $form): void
+    {
+        $clientChatRequest = $this->createRequest($form);
+        $this->processRequest($clientChatRequest);
+    }
 
-		$this->transactionManager->wrap( function () use ($clientChatRequest, $form) {
-			if ($clientChatRequest->isRoomConnected()) {
-				$this->roomConnected($form, $clientChatRequest);
-			} else if ($clientChatRequest->isGuestDisconnected()) {
-				$this->guestDisconnected($clientChatRequest);
-			} else if ($clientChatRequest->isTrackEvent()) {
-				$this->createOrUpdateVisitorData($form, $clientChatRequest);
-			} else {
-				throw new \RuntimeException('Unknown event provided');
-			}
-		});
-	}
+    public function processRequest(ClientChatRequest $clientChatRequest): void
+    {
+        $this->transactionManager->wrap(function () use ($clientChatRequest) {
+            if ($clientChatRequest->isRoomConnected()) {
+                $this->roomConnected($clientChatRequest);
+            } elseif ($clientChatRequest->isGuestDisconnected()) {
+                $this->guestDisconnected($clientChatRequest);
+            } elseif ($clientChatRequest->isTrackEvent()) {
+                $this->createOrUpdateVisitorData($clientChatRequest);
+            } else {
+                throw new \RuntimeException('Unknown event provided');
+            }
+        });
+    }
 
-	/**
-	 * @param ClientChatRequestApiForm $form
-	 * @throws \JsonException
-	 */
-	public function createMessage(ClientChatRequestApiForm $form): void
-	{
-		$clientChatRequest = ClientChatRequest::createByApi($form);
-		$this->clientChatRequestRepository->save($clientChatRequest);
+    /**
+     * @param ClientChatRequestApiForm $form
+     * @throws \JsonException
+     */
+    public function createMessage(ClientChatRequestApiForm $form): void
+    {
+        $clientChatRequest = $this->createRequest($form);
 
-		if ($clientChatRequest->isGuestUttered() || $clientChatRequest->isAgentUttered()) {
-			$this->saveMessage($form, $clientChatRequest);
-		} else {
-			throw new \RuntimeException('Unknown event provided');
-		}
-	}
+        if ($clientChatRequest->isGuestUttered() || $clientChatRequest->isAgentUttered()) {
+            $this->saveMessage($form, $clientChatRequest);
+        } else {
+            throw new \RuntimeException('Unknown event provided');
+        }
+    }
 
     /**
      * @param ClientChatRequestApiForm $form
@@ -186,11 +187,11 @@ class ClientChatRequestService
      */
     public function createRequest(ClientChatRequestApiForm $form): ClientChatRequest
     {
-		$clientChatRequest = ClientChatRequest::createByApi($form);
-		return $this->clientChatRequestRepository->save($clientChatRequest);
-	}
+        $clientChatRequest = ClientChatRequest::createByApi($form);
+        return $this->clientChatRequestRepository->save($clientChatRequest);
+    }
 
-	public function createOrUpdateFeedback(string $rid, ?string $comment, ?int $rating): ClientChatFeedback
+    public function createOrUpdateFeedback(string $rid, ?string $comment, ?int $rating): ClientChatFeedback
     {
         /** @var ClientChat $clientChat */
         $clientChat = $this->clientChatRepository->findLastByRid($rid ?? '');
@@ -236,79 +237,77 @@ class ClientChatRequestService
         }
     }
 
-	private function guestDisconnected(ClientChatRequest $clientChatRequest): void
-	{
-		$visitorData = $this->clientChatVisitorDataRepository->findByVisitorRcId($clientChatRequest->getClientRcId());
+    private function guestDisconnected(ClientChatRequest $clientChatRequest): void
+    {
+        $visitorData = $this->clientChatVisitorDataRepository->findByVisitorRcId($clientChatRequest->getClientRcId());
 
-		if ($visitorData->clientChatVisitors) {
-			foreach ($visitorData->clientChatVisitors as $chatVisitor) {
-				$clientChat = $this->clientChatRepository->findById($chatVisitor->ccv_cch_id);
-				if ($clientChat->cch_client_online) {
-					$clientChat->cch_client_online = 0;
-					$this->clientChatRepository->save($clientChat);
-					if ($clientChat->cch_owner_user_id) {
-						Notifications::publish('clientChatUpdateClientStatus', ['user_id' => $clientChat->cch_owner_user_id], [
-							'cchId' => $clientChat->cch_id,
-							'isOnline' => (int)$clientChat->cch_client_online,
-							'statusMessage' => Html::encode($clientChat->getClientStatusMessage()),
-						]);
-					}
-				}
-			}
+        if ($visitorData->clientChatVisitors) {
+            foreach ($visitorData->clientChatVisitors as $chatVisitor) {
+                $clientChat = $this->clientChatRepository->findById($chatVisitor->ccv_cch_id);
+                if ($clientChat->cch_client_online) {
+                    $clientChat->cch_client_online = 0;
+                    $this->clientChatRepository->save($clientChat);
+                    if ($clientChat->cch_owner_user_id) {
+                        Notifications::publish('clientChatUpdateClientStatus', ['user_id' => $clientChat->cch_owner_user_id], [
+                            'cchId' => $clientChat->cch_id,
+                            'isOnline' => (int)$clientChat->cch_client_online,
+                            'statusMessage' => Html::encode($clientChat->getClientStatusMessage()),
+                        ]);
+                    }
+                }
+            }
+        }
+    }
 
-		}
-	}
+    /**
+     * @param ClientChatRequest $clientChatRequest
+     */
+    private function roomConnected(ClientChatRequest $clientChatRequest): void
+    {
+        $clientChat = $this->clientChatRepository->getOrCreateByRequest($clientChatRequest, ClientChat::SOURCE_TYPE_CLIENT);
 
-	/**
-	 * @param ClientChatRequestApiForm $form
-	 * @param ClientChatRequest $clientChatRequest
-	 */
-	private function roomConnected(ClientChatRequestApiForm $form, ClientChatRequest $clientChatRequest): void
-	{
-		$clientChat = $this->clientChatRepository->getOrCreateByRequest($clientChatRequest, ClientChat::SOURCE_TYPE_CLIENT);
+        if (!$clientChat->cch_client_id) {
+            $client = $this->clientManageService->getOrCreateByClientChatRequest($clientChatRequest, (int)$clientChat->cch_project_id);
+            $clientChat->cch_client_id = $client->id;
+        }
+        $clientChat->cch_client_online = 1;
 
-		if (!$clientChat->cch_client_id) {
-			$client = $this->clientManageService->getOrCreateByClientChatRequest($clientChatRequest, (int)$clientChat->cch_project_id);
-			$clientChat->cch_client_id = $client->id;
-		}
-		$clientChat->cch_client_online = 1;
+        if (!$clientChat->cch_channel_id) {
+            $channel = $this->clientChatService->assignClientChatChannel($clientChat, $clientChatRequest->getChannelIdFromData());
+            if ($channel->ccc_project_id !== $clientChat->cch_project_id) {
+                throw new \DomainException('Channel project does not match project from api request');
+            }
 
-		if (!$clientChat->cch_channel_id) {
-			$channel = $this->clientChatService->assignClientChatChannel($clientChat, $clientChatRequest->getChannelIdFromData());
-			if ($channel->ccc_project_id !== $clientChat->cch_project_id) {
-				throw new \DomainException('Channel project does not match project from api request');
-			}
+            if (!$clientChat->cch_id) {
+                $clientChat->pending(null, ClientChatStatusLog::ACTION_OPEN);
+            }
 
-			if (!$clientChat->cch_id) {
-				$clientChat->pending(null, ClientChatStatusLog::ACTION_OPEN);
-			}
+            $this->clientChatRepository->save($clientChat);
+            $this->clientChatService->sendRequestToUsers($clientChat, $channel);
+        } else {
+            if (!$clientChat->cch_id) {
+                $clientChat->pending(null, ClientChatStatusLog::ACTION_OPEN);
+            }
+            $this->clientChatRepository->save($clientChat);
+        }
 
-			$this->clientChatRepository->save($clientChat);
-			$this->clientChatService->sendRequestToUsers($clientChat, $channel);
-		} else {
-			if (!$clientChat->cch_id) {
-				$clientChat->pending(null, ClientChatStatusLog::ACTION_OPEN);
-			}
-			$this->clientChatRepository->save($clientChat);
-		}
+        $visitorRcId = $clientChatRequest->getClientRcId();
+        $this->manageChatVisitorData($clientChat->cch_id, $clientChat->cch_client_id, $visitorRcId, $clientChatRequest->getDecodedData());
 
-		$visitorRcId = $clientChatRequest->getClientRcId();
-		$this->manageChatVisitorData($clientChat->cch_id, $clientChat->cch_client_id, $visitorRcId, $form);
+        if ($clientChat->cch_owner_user_id) {
+            Notifications::publish('clientChatUpdateClientStatus', ['user_id' => $clientChat->cch_owner_user_id], [
+                'cchId' => $clientChat->cch_id,
+                'isOnline' => (int)$clientChat->cch_client_online,
+                'statusMessage' => Html::encode($clientChat->getClientStatusMessage()),
+            ]);
+        }
+    }
 
-		if ($clientChat->cch_owner_user_id) {
-			Notifications::publish('clientChatUpdateClientStatus', ['user_id' => $clientChat->cch_owner_user_id], [
-				'cchId' => $clientChat->cch_id,
-				'isOnline' => (int)$clientChat->cch_client_online,
-				'statusMessage' => Html::encode($clientChat->getClientStatusMessage()),
-			]);
-		}
-	}
-
-	/**
-	 * @param ClientChatRequestApiForm $form
-	 * @param ClientChatRequest $clientChatRequest
-	 */
-	private function saveMessage(ClientChatRequestApiForm $form, ClientChatRequest $clientChatRequest): void
+    /**
+     * @param ClientChatRequestApiForm $form
+     * @param ClientChatRequest $clientChatRequest
+     */
+    private function saveMessage(ClientChatRequestApiForm $form, ClientChatRequest $clientChatRequest): void
     {
         try {
             $clientChat = $this->clientChatRepository->findNotClosed($form->data['rid'] ?? '');
@@ -368,32 +367,32 @@ class ClientChatRequestService
         ]);
     }
 
-	public function createOrUpdateVisitorData(ClientChatRequestApiForm $form, ClientChatRequest $request): void
-	{
-		$cchVisitorData = $this->clientChatVisitorDataRepository->findByVisitorRcId($request->getClientRcId());
-		$this->clientChatVisitorDataRepository->updateByClientChatRequest($cchVisitorData, $form->data);
+    public function createOrUpdateVisitorData(ClientChatRequest $request): void
+    {
+        $cchVisitorData = $this->clientChatVisitorDataRepository->findByVisitorRcId($request->getClientRcId());
+        $this->clientChatVisitorDataRepository->updateByClientChatRequest($cchVisitorData, $request->getDecodedData());
 
-		try {
-			$visitorLog = $this->visitorLogRepository->findByVisitorDataId($cchVisitorData->cvd_id);
-			$this->visitorLogRepository->updateByClientChatRequest($visitorLog, $form->data);
-		} catch (NotFoundException $e) {
-			$this->visitorLogRepository->createByClientChatRequest($cchVisitorData->cvd_id, $form->data);
-		}
-	}
+        try {
+            $visitorLog = $this->visitorLogRepository->findByVisitorDataId($cchVisitorData->cvd_id);
+            $this->visitorLogRepository->updateByClientChatRequest($visitorLog, $request->getDecodedData());
+        } catch (NotFoundException $e) {
+            $this->visitorLogRepository->createByClientChatRequest($cchVisitorData->cvd_id, $request->getDecodedData());
+        }
+    }
 
-	public function updateDateTimeLastMessageNotification(ClientChat $clientChat, ClientChatMessage $message): void
+    public function updateDateTimeLastMessageNotification(ClientChat $clientChat, ClientChatMessage $message): void
     {
         $user = $clientChat->cchOwnerUser;
         $dateTime = $message->ccm_sent_dt;
         $formatter = new \Yii::$app->formatter;
         if ($user->timezone) {
-        	$formatter->timeZone = $user->timezone;
+            $formatter->timeZone = $user->timezone;
         }
         Notifications::publish('clientChatUpdateTimeLastMessage', ['user_id' => $clientChat->cch_owner_user_id], [
             'data' => [
                 'dateTime' =>  $formatter->asRelativeTime(strtotime($dateTime)),
-				'moment' =>  round((time() - strtotime($dateTime))),
-				'cchId' => $clientChat->cch_id,
+                'moment' =>  round((time() - strtotime($dateTime))),
+                'cchId' => $clientChat->cch_id,
             ]
         ]);
     }
@@ -413,37 +412,39 @@ class ClientChatRequestService
                 'chatMessageData' => $data,
             ]), 'realtimeClientChatChannel');
         } catch (\Throwable $throwable) {
-            Yii::error(VarDumper::dumpAsString($throwable),
-            'ClientChatRequestService:sendLastChatMessageToMonitor');
+            Yii::error(
+                VarDumper::dumpAsString($throwable),
+                'ClientChatRequestService:sendLastChatMessageToMonitor'
+            );
         }
     }
 
-	/**
-	 * @param int $chatId
-	 * @param int $clientId
-	 * @param string $visitorRcId
-	 * @param ClientChatRequestApiForm $form
-	 */
-    private function manageChatVisitorData(int $chatId, int $clientId, string $visitorRcId, ClientChatRequestApiForm $form): void
-	{
-		try {
-			$visitorData = $this->clientChatVisitorDataRepository->findByVisitorRcId($visitorRcId);
-			$visitorData->updateByClientChatRequest($form->data);
-			$this->clientChatVisitorDataRepository->save($visitorData);
-			if (!$this->clientChatVisitorRepository->exists($chatId, $visitorData->cvd_id)) {
-				$this->clientChatVisitorRepository->create($chatId, $visitorData->cvd_id, $clientId);
-			}
-		} catch (NotFoundException $e) {
-			$visitorData = $this->clientChatVisitorDataRepository->createByClientChatRequest($visitorRcId, $form->data);
-			$this->clientChatVisitorRepository->create($chatId, $visitorData->cvd_id, $clientId);
-		}
+    /**
+     * @param int $chatId
+     * @param int $clientId
+     * @param string $visitorRcId
+     * @param array $data
+     */
+    private function manageChatVisitorData(int $chatId, int $clientId, string $visitorRcId, array $data): void
+    {
+        try {
+            $visitorData = $this->clientChatVisitorDataRepository->findByVisitorRcId($visitorRcId);
+            $visitorData->updateByClientChatRequest($data);
+            $this->clientChatVisitorDataRepository->save($visitorData);
+            if (!$this->clientChatVisitorRepository->exists($chatId, $visitorData->cvd_id)) {
+                $this->clientChatVisitorRepository->create($chatId, $visitorData->cvd_id, $clientId);
+            }
+        } catch (NotFoundException $e) {
+            $visitorData = $this->clientChatVisitorDataRepository->createByClientChatRequest($visitorRcId, $data);
+            $this->clientChatVisitorRepository->create($chatId, $visitorData->cvd_id, $clientId);
+        }
 
-		try {
-			$visitorLog = $this->visitorLogRepository->findByVisitorDataId($visitorData->cvd_id);
-			$visitorLog->updateByClientChatRequest($form->data);
-			$this->visitorLogRepository->save($visitorLog);
-		} catch (NotFoundException $e) {
-			$this->visitorLogRepository->createByClientChatRequest($visitorData->cvd_id, $form->data);
-		}
-	}
+        try {
+            $visitorLog = $this->visitorLogRepository->findByVisitorDataId($visitorData->cvd_id);
+            $visitorLog->updateByClientChatRequest($data);
+            $this->visitorLogRepository->save($visitorLog);
+        } catch (NotFoundException $e) {
+            $this->visitorLogRepository->createByClientChatRequest($visitorData->cvd_id, $data);
+        }
+    }
 }

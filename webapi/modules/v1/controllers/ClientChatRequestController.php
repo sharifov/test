@@ -3,6 +3,7 @@
 namespace webapi\modules\v1\controllers;
 
 use common\components\jobs\clientChat\ClientChatFeedbackJob;
+use common\components\jobs\clientChat\ClientChatRequestCreateJob;
 use common\models\ApiLog;
 use common\models\Project;
 use sales\entities\cases\CaseCategory;
@@ -179,7 +180,20 @@ class ClientChatRequestController extends ApiBaseController
 
         if ($form->validate()) {
             try {
-                $this->clientChatRequestService->create($form);
+                if (Yii::$app->params['settings']['enable_client_chat_job']) {
+                    $clientChatRequest = $this->clientChatRequestService->createRequest($form);
+                    $job = new ClientChatRequestCreateJob();
+                    $job->requestId = $clientChatRequest->ccr_id;
+                    if ($jobId = Yii::$app->queue_client_chat_job->priority(10)->push($job)) {
+                        $clientChatRequest->ccr_job_id = $jobId;
+                        $clientChatRequest->save();
+                    } else {
+                        throw new \Exception('ClientChatRequest not added to queue. ClientChatRequest RID : ' .
+                            $clientChatRequest->ccr_rid);
+                    }
+                } else {
+                    $this->clientChatRequestService->create($form);
+                }
             } catch (\RuntimeException | \DomainException | NotFoundException $e) {
                 return $this->endApiLog($apiLog, new ErrorResponse(
                     new StatusCodeMessage(400),
