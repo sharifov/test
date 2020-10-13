@@ -67,11 +67,9 @@ use yii\helpers\StringHelper;
 
                     <span class="label label-default"><?= Html::encode($clientChat['ccc_name']) ?></span>
 
-                    <?php echo '<span class="label label-' .
-                            Html::encode(ClientChat::getStatusClassById((int)$clientChat['cch_status_id'])) . '">' .
-                                Html::encode(ClientChat::getStatusNameById((int)$clientChat['cch_status_id'])) .
-                        '</span>';
-                    ?>
+                    <?php if ((int)$clientChat['cch_status_id'] === ClientChat::STATUS_TRANSFER):?>
+                        <span class="label label-warning">In Transfer</span>
+                    <?php endif; ?>
                 </div>
                 <?php // Pjax::begin(['id' => 'chat-last-message-refresh-' . $clientChat['cch_id']])?>
                 <div id="chat-last-message-<?= $clientChat['cch_id'] ?>">
