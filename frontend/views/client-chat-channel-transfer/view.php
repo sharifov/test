@@ -6,7 +6,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model sales\model\clientChatChannelTransfer\entity\ClientChatChannelTransfer */
 
-$this->title = $model->cctr_from_ccc_id;
+$this->title = 'Transfer Rule';
 $this->params['breadcrumbs'][] = ['label' => 'Client Chat Channel Transfers', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
