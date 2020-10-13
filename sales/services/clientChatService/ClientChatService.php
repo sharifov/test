@@ -41,6 +41,7 @@ use sales\repositories\visitorLog\VisitorLogRepository;
 use sales\services\client\ClientManageService;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\TransactionManager;
+use yii\helpers\VarDumper;
 
 /**
  * Class ClientChatService
@@ -448,6 +449,7 @@ class ClientChatService
 			\Yii::info((int)$oldChannelId . ' - ' . (int)$newClientChat->cch_channel_id, 'finishTransfer');
 			if ((int)$oldChannelId !== (int)$newClientChat->cch_channel_id) {
 				$botTransferChatResult = \Yii::$app->chatBot->transferDepartment($clientChat->cch_rid, $clientChat->ccv->ccvCvd->cvd_visitor_rc_id, (string)$oldChannelId, (string)$newClientChat->cch_channel_id);
+                \Yii::info(VarDumper::dumpAsString($botTransferChatResult), 'finishTransfer');
 				if ($botTransferChatResult['error']) {
 					throw new \RuntimeException('[Chat Bot Transfer] ' . $botTransferChatResult['error']['message'] ?? 'Cant read error message from Chat Bot response');
 				}
