@@ -127,9 +127,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         5000 => 150
     ];
 
-	private const CALL_EXPERT_SHIFT_MINUTES = 12*60;
+    private const CALL_EXPERT_SHIFT_MINUTES = 12*60;
 
-	private const LEVEL_PERMISSION_IS_AGENT = 'isAgent';
+    private const LEVEL_PERMISSION_IS_AGENT = 'isAgent';
 
     public $password;
     public $deleted;
@@ -155,7 +155,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     private $_timezone;
     private $_isAllowCallExpert;
     private $_callExpertCountByShiftTime;
-	private $_callExpertCount;
+    private $_callExpertCount;
 
     private $departmentAccess = [];
     private $projectAccess = [];
@@ -550,9 +550,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function getTimezone()
     {
-        if($this->_timezone === null) {
+        if ($this->_timezone === null) {
             $params = $this->userParams;
-            if($params && $params->up_timezone) {
+            if ($params && $params->up_timezone) {
                 $this->_timezone = $params->up_timezone;
             } else {
                 $this->_timezone = false;
@@ -566,11 +566,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function getIsAllowCallExpert(): bool
     {
-
-        if($this->_isAllowCallExpert === null) {
+        if ($this->_isAllowCallExpert === null) {
             $this->_isAllowCallExpert = false;
             $params = $this->userParams;
-            if($params && (int) $params->up_call_expert_limit >= 0) {
+            if ($params && (int) $params->up_call_expert_limit >= 0) {
                 $this->_isAllowCallExpert = true;
             }
         }
@@ -583,8 +582,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function getCallExpertCountByShiftTime(): int
     {
-
-        if($this->_callExpertCountByShiftTime === null) {
+        if ($this->_callExpertCountByShiftTime === null) {
             //$this->_callExpertCountByShiftTime = 0;
 
             $shiftTime = $this->getShiftTime();
@@ -601,20 +599,19 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $this->_callExpertCountByShiftTime;
     }
 
-	/**
-	 * @param int $minutes
-	 * @return int
-	 */
-	public function getCallExpertCount(int $minutes = self::CALL_EXPERT_SHIFT_MINUTES): int
-	{
-		if($this->_callExpertCount === null) {
+    /**
+     * @param int $minutes
+     * @return int
+     */
+    public function getCallExpertCount(int $minutes = self::CALL_EXPERT_SHIFT_MINUTES): int
+    {
+        if ($this->_callExpertCount === null) {
+            $startShiftDateTime = date('Y-m-d H:i:s', strtotime('-' . $minutes .' minutes'));
 
-			$startShiftDateTime = date('Y-m-d H:i:s', strtotime('-' . $minutes .' minutes'));
-
-			$this->_callExpertCount = LeadCallExpert::find()->where(['lce_agent_user_id' => $this->id])->andWhere(['>=', 'lce_request_dt', $startShiftDateTime])->count();
-		}
-		return $this->_callExpertCount;
-	}
+            $this->_callExpertCount = LeadCallExpert::find()->where(['lce_agent_user_id' => $this->id])->andWhere(['>=', 'lce_request_dt', $startShiftDateTime])->count();
+        }
+        return $this->_callExpertCount;
+    }
 
     /**
      * @return bool
@@ -623,8 +620,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     {
         $params = $this->userParams;
 
-        if($params) {
-
+        if ($params) {
             if ((int)$params->up_call_expert_limit === 0) {
                 return true;
             }
@@ -674,7 +670,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function canRole(string $role = '') : bool
     {
-        if($this->roles === null) {
+        if ($this->roles === null) {
             $roles = $this->getRoles();
             $this->roles = array_keys($roles);
         }
@@ -703,7 +699,6 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function canRoute(string $url = ''): bool
     {
-
         if ($url && $url[0] !== '/') {
             $url = '/' . $url;
         }
@@ -800,9 +795,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     {
         return $this->hasMany(ProductType::class, ['pt_id' => 'upt_product_type_id'])
             ->viaTable(UserProductType::tableName(), ['upt_user_id' => 'id'], static function ($query) {
-            /* @var ActiveQuery $query */
-            $query->andWhere(['upt_product_enabled' => true]);
-        });
+                /* @var ActiveQuery $query */
+                $query->andWhere(['upt_product_enabled' => true]);
+            });
     }
 
     /**
@@ -906,7 +901,6 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public static function getAllRoles(): array
     {
-
         $auth = \Yii::$app->authManager;
 
         /*$query = new Query();
@@ -929,33 +923,33 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             return $roles;
         }
 
-        if((!$user->isAdmin() && !$user->isSuperAdmin()) || $user->isAnySenior()) {
-            if(isset($roles[self::ROLE_ADMIN])) {
+        if ((!$user->isAdmin() && !$user->isSuperAdmin()) || $user->isAnySenior()) {
+            if (isset($roles[self::ROLE_ADMIN])) {
                 unset($roles[self::ROLE_ADMIN]);
             }
-            if(isset($roles[self::ROLE_SALES_SENIOR])) {
+            if (isset($roles[self::ROLE_SALES_SENIOR])) {
                 unset($roles[self::ROLE_SALES_SENIOR]);
             }
-            if(isset($roles[self::ROLE_EXCHANGE_SENIOR])) {
+            if (isset($roles[self::ROLE_EXCHANGE_SENIOR])) {
                 unset($roles[self::ROLE_EXCHANGE_SENIOR]);
             }
-            if(isset($roles[self::ROLE_SUPPORT_SENIOR])) {
+            if (isset($roles[self::ROLE_SUPPORT_SENIOR])) {
                 unset($roles[self::ROLE_SUPPORT_SENIOR]);
             }
 
-            if(isset($roles[self::ROLE_SUPERVISION])) {
+            if (isset($roles[self::ROLE_SUPERVISION])) {
                 unset($roles[self::ROLE_SUPERVISION]);
             }
         }
 
-        if(!$user->isAdmin() && !$user->isSuperAdmin() && !$user->isUserManager() ) {
-            if(isset($roles[self::ROLE_QA])) {
+        if (!$user->isAdmin() && !$user->isSuperAdmin() && !$user->isUserManager()) {
+            if (isset($roles[self::ROLE_QA])) {
                 unset($roles[self::ROLE_QA]);
             }
         }
 
-        if(!$user->isSuperAdmin()) {
-            if(isset($roles[self::ROLE_SUPER_ADMIN])) {
+        if (!$user->isSuperAdmin()) {
+            if (isset($roles[self::ROLE_SUPER_ADMIN])) {
                 unset($roles[self::ROLE_SUPER_ADMIN]);
             }
         }
@@ -1106,9 +1100,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     public function getFirstUserProjectParam(): ActiveQuery
-	{
-		return $this->hasOne(UserProjectParams::class, ['upp_user_id' => 'id']);
-	}
+    {
+        return $this->hasOne(UserProjectParams::class, ['upp_user_id' => 'id']);
+    }
 
     /**
      * @param bool $onlyNames
@@ -1132,8 +1126,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $this->rolesName;
     }
 
-    public function roleUpdate($uID, $role){
-        Yii::$app->db->createCommand()->update('auth_assignment', ['item_name' => $role], "user_id = $uID" )->execute();
+    public function roleUpdate($uID, $role)
+    {
+        Yii::$app->db->createCommand()->update('auth_assignment', ['item_name' => $role], "user_id = $uID")->execute();
     }
 
     public function removeAllRoles()
@@ -1192,15 +1187,17 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
     public function getRolesRaw()
     {
-        if(!$this->id) return [];
-        if(NULL !== $this->roles_raw) {
+        if (!$this->id) {
+            return [];
+        }
+        if (null !== $this->roles_raw) {
             return $this->roles_raw;
         }
         $items = [];
         $connection = \Yii::$app->getDb();
         $command = $connection->createCommand("SELECT item_name FROM auth_assignment WHERE user_id = " . $this->id);
         $items = $command->queryAll();
-        if(count($items)) {
+        if (count($items)) {
             return ArrayHelper::map($items, 'item_name', 'item_name');
         }
         return $items;
@@ -1219,19 +1216,19 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public static function getListByRole($role = self::ROLE_AGENT): array
     {
-        $data = self::find()->leftJoin('auth_assignment','auth_assignment.user_id = id')->andWhere(['auth_assignment.item_name' => $role])->orderBy(['username' => SORT_ASC])->asArray()->all();
+        $data = self::find()->leftJoin('auth_assignment', 'auth_assignment.user_id = id')->andWhere(['auth_assignment.item_name' => $role])->orderBy(['username' => SORT_ASC])->asArray()->all();
         return ArrayHelper::map($data, 'id', 'username');
     }
 
-	/**
-	 * @param array $role
-	 * @return array
-	 */
-	public static function getListSplitProfitByRole(array $role = [self::ROLE_AGENT]): array
-	{
-		$data = self::find()->leftJoin('auth_assignment','auth_assignment.user_id = id')->andWhere(['in', 'auth_assignment.item_name', $role])->orderBy(['username' => SORT_ASC])->asArray()->all();
-		return ArrayHelper::map($data, 'id', 'username');
-	}
+    /**
+     * @param array $role
+     * @return array
+     */
+    public static function getListSplitProfitByRole(array $role = [self::ROLE_AGENT]): array
+    {
+        $data = self::find()->leftJoin('auth_assignment', 'auth_assignment.user_id = id')->andWhere(['in', 'auth_assignment.item_name', $role])->orderBy(['username' => SORT_ASC])->asArray()->all();
+        return ArrayHelper::map($data, 'id', 'username');
+    }
 
     /**
      * @param int $userId
@@ -1341,7 +1338,6 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
                         //if(is_int($employeeId)){
                         $child_options[$employeeId] = $employee;
                         //}
-
                     }
                     $options[$type] = $child_options;
                 }
@@ -1402,7 +1398,6 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function getCurrentShiftTaskInfoSummary()
     {
-
         if ($this->currentShiftTaskInfoSummary) {
             return $this->currentShiftTaskInfoSummary;
         }
@@ -1537,9 +1532,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
                 $completedTasks = $completed[$task->lt_task_id] ?? 0;
 
-                $str = '<tr><td><small>' . Html::encode($task->ltTask->t_name) . '</small></td><td><small>' . $completedTasks . ' / ' . Html::a($task->field_cnt,
-                        ['lead-task/index', 'LeadTaskSearch[lt_task_id]' => $task->lt_task_id, 'LeadTaskSearch[lt_user_id]' => $this->id],
-                        ['data-pjax' => 0, 'target' => '_blank']) . '</small></td>';
+                $str = '<tr><td><small>' . Html::encode($task->ltTask->t_name) . '</small></td><td><small>' . $completedTasks . ' / ' . Html::a(
+                    $task->field_cnt,
+                    ['lead-task/index', 'LeadTaskSearch[lt_task_id]' => $task->lt_task_id, 'LeadTaskSearch[lt_user_id]' => $this->id],
+                    ['data-pjax' => 0, 'target' => '_blank']
+                ) . '</small></td>';
 
 
                 if ($task->field_cnt > 0) {
@@ -1635,9 +1632,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             foreach ($taskListAll as $task) {
                 $completedTasks = $completed[$task->lt_task_id] ?? 0;
 
-                $str = '<tr><td><small>' . Html::encode($task->ltTask->t_name) . '</small></td><td><small>' . $completedTasks . ' / ' . Html::a($task->field_cnt,
-                        ['lead-task/index', 'LeadTaskSearch[lt_task_id]' => $task->lt_task_id, 'LeadTaskSearch[lt_user_id]' => $userID],
-                        ['data-pjax' => 0, 'target' => '_blank']) . '</small></td>';
+                $str = '<tr><td><small>' . Html::encode($task->ltTask->t_name) . '</small></td><td><small>' . $completedTasks . ' / ' . Html::a(
+                    $task->field_cnt,
+                    ['lead-task/index', 'LeadTaskSearch[lt_task_id]' => $task->lt_task_id, 'LeadTaskSearch[lt_user_id]' => $userID],
+                    ['data-pjax' => 0, 'target' => '_blank']
+                ) . '</small></td>';
 
                 if ($task->field_cnt > 0) {
                     $percent = (int)($completedTasks * 100 / $task->field_cnt);
@@ -1677,7 +1676,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function paramsForSalary() : array
     {
         $data = [];
-        if($this->userParams) {
+        if ($this->userParams) {
             $data['base_amount'] = is_numeric($this->userParams->up_base_amount) ? (float) $this->userParams->up_base_amount : 0;
             $data['commission_percent'] = is_numeric($this->userParams->up_commission_percent) ? (float) $this->userParams->up_commission_percent : 0;
             $data['bonus_active'] = is_numeric($this->userParams->up_bonus_active) ? $this->userParams->up_bonus_active : 0;
@@ -1688,7 +1687,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
 
         $data['profit_bonuses'] = $this->getProfitBonuses();
-        if(empty($data['profit_bonuses'])){
+        if (empty($data['profit_bonuses'])) {
             $data['profit_bonuses'] = self::PROFIT_BONUSES;
         }
 
@@ -1751,11 +1750,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $entry['minus_percent_profit'] = intval($entry['minus_percent_profit']);
             $entry['minus_percent_tips'] = intval($entry['minus_percent_tips']);
             $quote = Quote::findOne(['id' => $entry['q_id']]);
-            if($entry['final_profit'] !== null){
+            if ($entry['final_profit'] !== null) {
                 $totalProfit = $entry['final_profit'];
                 $agentsProcessingFee = ($entry['agents_processing_fee'])?$entry['agents_processing_fee']:$entry['pax_cnt']*Lead::AGENT_PROCESSING_FEE_PER_PAX;
                 $totalProfit -= $agentsProcessingFee;
-            }else{
+            } else {
                 $totalProfit = $quote->getEstimationProfit();
             }
             $totalTips = $entry['tips']/2;
@@ -1878,7 +1877,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
                 'c_created_user_id' => $employeeId,
                 'c_call_type_id' => $callType,
             ]);
-        if ($status != null){
+        if ($status != null) {
             $query->andWhere([
                 'c_call_status' => $status
             ]);
@@ -1888,7 +1887,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $query->andWhere(['NOT',['c_parent_id' => null]]);
         }*/
 
-        if ($source != null){
+        if ($source != null) {
             $query->andWhere([
                 'c_source_type_id' => $source
             ]);
@@ -1918,7 +1917,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
         $query = LeadFlow::find()->select('COUNT(DISTINCT(lead_id))')->where(['lf_owner_id' => $this->id, 'status' => $statusList]);
 
-        if($from_status_id > 0) {
+        if ($from_status_id > 0) {
             $query->andWhere(['lf_from_status_id' => $from_status_id]);
         }
 
@@ -1988,7 +1987,6 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
 
         if ($this->userParams) {
-
             $this->userParams->up_work_minutes = $this->userParams->up_work_minutes ?: 480;
             $startTime = $this->userParams->up_work_start_tm;
             $workSeconds = (int)$this->userParams->up_work_minutes * 60;
@@ -2111,12 +2109,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
 
         if ($params = $this->userParams) {
-
-
             if (!$params->up_min_percent_for_take_leads) {
                 $access = true;
             } else {
-
                 $currentShiftTaskInfoSummary = $this->getCurrentShiftTaskInfoSummary();
                 if ($currentShiftTaskInfoSummary['completedTasksPercent'] >= $params->up_min_percent_for_take_leads) {
                     $access = true;
@@ -2129,9 +2124,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
                         $access = true;
                     }
                 }
-
             }
-
         }
 
         return $access;
@@ -2153,7 +2146,6 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             && ($frequencyMinutes = $params->up_frequency_minutes)
             && ($lastTakenDt = $this->getLastTakenLeadDt($flowDescriptions, $fromStatuses))
         ) {
-
             $nextTakeUTC = (new \DateTime($lastTakenDt, new \DateTimeZone('UTC')))
                 ->add(new \DateInterval('PT' . $frequencyMinutes . 'M'));
 
@@ -2163,7 +2155,6 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
                 $access = false;
                 $takeDt = $nextTakeUTC;
             }
-
         }
 
         $takeDt->setTimezone(new \DateTimeZone($this->userParams->up_timezone ?: 'UTC'));
@@ -2174,7 +2165,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
     public static function getAllEmployeesByRole($role = self::ROLE_AGENT)
     {
-        return self::find()->leftJoin('auth_assignment','auth_assignment.user_id = id')->andWhere(['auth_assignment.item_name' => $role])->all();
+        return self::find()->leftJoin('auth_assignment', 'auth_assignment.user_id = id')->andWhere(['auth_assignment.item_name' => $role])->all();
     }
 
     /**
@@ -2198,7 +2189,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $phoneList = UserProjectParams::find()
             ->select(['pl_phone_number', 'upp_phone_list_id'])
             ->byUserId($user_id)
-            ->innerJoinWith(['phoneList' => static function(\sales\model\phoneList\entity\Scopes $query) use ($onyEnabled) {
+            ->innerJoinWith(['phoneList' => static function (\sales\model\phoneList\entity\Scopes $query) use ($onyEnabled) {
                 if ($onyEnabled) {
                     $query->andOnCondition(['pl_enabled' => true]);
                 }
@@ -2219,7 +2210,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $emailList = UserProjectParams::find()
             ->select(['el_email', 'upp_email_list_id'])
             ->byUserId($user_id)
-            ->innerJoinWith(['emailList' => static function(\sales\model\emailList\entity\Scopes $query) use ($onyEnabled) {
+            ->innerJoinWith(['emailList' => static function (\sales\model\emailList\entity\Scopes $query) use ($onyEnabled) {
                 if ($onyEnabled) {
                     $query->andOnCondition(['el_enabled' => true]);
                 }
@@ -2291,7 +2282,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public static function isSupervisionAgent(int $user_id, int $supervision_id = null) : bool
     {
         //$exist = false;
-        if(!$supervision_id) {
+        if (!$supervision_id) {
             $supervision_id = Yii::$app->user->id;
         }
 
@@ -2308,7 +2299,6 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public static function getUsersForRedirectCall(Call $call): array
     {
-
         $query = UserConnection::find();
         $subQuery1 = UserProfile::find()->select(['up_call_type_id'])->where('up_user_id = user_connection.uc_user_id');
 
@@ -2349,7 +2339,6 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public static function getUsersForCallQueueOld(Call $call, int $limit = 0, int $hours = 1, ?array $exceptUserIds = null): array
     {
-
         $project_id = $call->c_project_id;
         $department_id = $call->c_dep_id;
 
@@ -2369,7 +2358,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             ->andWhere(['>=', 'c_created_dt', $date_time]);
 
 
-        $query->select([
+        $query->select(
+            [
                 'tbl_user_id' => 'user_connection.uc_user_id',
                 'tbl_call_status_id' => $subQuery2,
                 'tbl_calls_count_process' => $subQuery3,
@@ -2387,11 +2377,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $subQueryUpp = UserProjectParams::find()->select(['DISTINCT(upp_user_id)'])->where(['upp_project_id' => $project_id, 'upp_allow_general_line' => true]);
         $query->andWhere(['IN', 'user_connection.uc_user_id', $subQueryUpp]);
 
-        if($exceptUserIds) {
+        if ($exceptUserIds) {
             $query->andWhere(['NOT IN', 'user_connection.uc_user_id', $exceptUserIds]);
         }
 
-        if($department_id) {
+        if ($department_id) {
             $subQueryUd = UserDepartment::find()->usersByDep($department_id);
             $query->andWhere(['IN', 'user_connection.uc_user_id', $subQueryUd]);
         }
@@ -2416,7 +2406,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $generalQuery->andWhere(['AND', ['=', 'tbl_call_type_id', UserProfile::CALL_TYPE_WEB], ['IS NOT', 'tbl_call_type_id', null]]);
         $generalQuery->orderBy(['tbl_calls_count' => SORT_ASC]);
 
-        if($limit > 0) {
+        if ($limit > 0) {
             $generalQuery->limit($limit);
         }
 
@@ -2438,7 +2428,6 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public static function getUsersForCallQueue(Call $call, int $limit = 0, int $hours = 1, ?array $exceptUserIds = null): array
     {
-
         $project_id = $call->c_project_id;
         $department_id = $call->c_dep_id;
 
@@ -2454,7 +2443,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $query->andWhere(['up.up_call_type_id' => UserProfile::CALL_TYPE_WEB]);
         $query->andWhere(['upp.upp_allow_general_line' => true, 'upp.upp_project_id' => $project_id]);
 
-        if($exceptUserIds) {
+        if ($exceptUserIds) {
             $query->andWhere(['NOT IN', 'uo.uo_user_id', $exceptUserIds]);
         }
 
@@ -2474,7 +2463,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         //$query->groupBy(['uo.uo_user_id']);
         $query->orderBy(['us.us_gl_call_count' => SORT_ASC]);
 
-        if($limit > 0) {
+        if ($limit > 0) {
             $query->limit($limit);
         }
 
@@ -2508,7 +2497,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     {
         $dateTime = '';
 
-        if($time >= 0) {
+        if ($time >= 0) {
 
             /** @var Employee $user */
             $user = \Yii::$app->user->identity;
@@ -2534,8 +2523,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     {
         $dateTime = '';
 
-        if($time >= 0) {
-
+        if ($time >= 0) {
             $dateTime = date('Y-m-d H:i:s', $time);
 
             try {
@@ -2552,13 +2540,14 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $dateTime;
     }
 
-    public static function getUtcOffsetDst( $time_zone = 'Europe/Chisinau', $dateToCheck ) {
+    public static function getUtcOffsetDst($time_zone = 'Europe/Chisinau', $dateToCheck)
+    {
         // Set UTC as default time zone.
         //date_default_timezone_set( 'UTC' );
         $utc = new \DateTime($dateToCheck);
         // Calculate offset.
-        $current = timezone_open( $time_zone );
-        $offset_s  = timezone_offset_get( $current, $utc ); // seconds
+        $current = timezone_open($time_zone);
+        $offset_s  = timezone_offset_get($current, $utc); // seconds
         $offset_s  = (string) $offset_s;
         $sign = ($offset_s > 0) ? '+' : '-';
         $hours = floor(abs($offset_s) / 3600);
@@ -2566,20 +2555,20 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         return $sign . sprintf("%02d:%02d", $hours, $minutes);
     }
 
-	/**
-	 * @return string|null
-	 */
+    /**
+     * @return string|null
+     */
     public function findEmployeeIp(): ?string
-	{
-		return Yii::$app->request->remoteIP;
-	}
+    {
+        return Yii::$app->request->remoteIP;
+    }
 
-	public function checkIfUsersIpIsAllowed(): bool
-	{
-		$allowedIp = Yii::$app->params['settings']['test_allow_ip_address_list'] ?? Yii::$app->params['test_allow_ip_address_list'];
+    public function checkIfUsersIpIsAllowed(): bool
+    {
+        $allowedIp = Yii::$app->params['settings']['test_allow_ip_address_list'] ?? Yii::$app->params['test_allow_ip_address_list'];
 
-		return in_array($this->findEmployeeIp(), $allowedIp ?? [], false);
-	}
+        return in_array($this->findEmployeeIp(), $allowedIp ?? [], false);
+    }
 
     /**
      * @return EmployeeQuery
@@ -2612,7 +2601,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function getGravatarUrl(int $s = 128, string $default = 'identicon'): string
     {
-        if($this->email) {
+        if ($this->email) {
             $url = '//www.gravatar.com/avatar/' . md5(strtolower(trim($this->email))) . '?d=' . $default . '&s=' . $s;
         } else {
             $url = '//www.gravatar.com/avatar/?d=' . $default . '&s=60';
@@ -2669,7 +2658,6 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function initUserStatus(): ?UserStatus
     {
-
         $last_hours = (int)(Yii::$app->params['settings']['general_line_last_hours'] ?? 1);
         $date_time = date('Y-m-d H:i:s', strtotime('-' . $last_hours .' hours'));
 
@@ -2702,8 +2690,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         $userStatus->us_has_call_access = $callAccess;
 
         if (!$userStatus->save()) {
-            \Yii::error(VarDumper::dumpAsString($userStatus->errors),
-                'Employee:initUserStatus:UserStatus:save');
+            \Yii::error(
+                VarDumper::dumpAsString($userStatus->errors),
+                'Employee:initUserStatus:UserStatus:save'
+            );
         }
 
         return $userStatus;

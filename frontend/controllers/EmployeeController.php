@@ -1140,4 +1140,56 @@ class EmployeeController extends FController
             'message' => 'OK',
         ]);
     }
+
+    public function actionRefreshRocketChatUserToken()
+    {
+        if (!Yii::$app->request->isPost) {
+            throw new BadRequestHttpException();
+        }
+
+        try {
+            $userId = (int)Yii::$app->request->post('id');
+            if (!$userId) {
+                throw new \RuntimeException('Not found user Id');
+            }
+            $user = Employee::findOne($userId);
+            if (!$user) {
+                throw new \RuntimeException('Not found User with Id ' . $userId);
+            }
+            if (!$rocketUsername = $user['username']) {
+                throw new \RuntimeException('Not found Username for this user(' . $userId . ')');
+            }
+            if (!$rocketPassword = $user->userProfile->up_rc_user_password) {
+                throw new \RuntimeException('Not found Rocket Chat Auth Password for this user(' . $userId . ')');
+            }
+
+            $result = \Yii::$app->rchat->login($rocketUsername, $rocketPassword);
+
+            if ($result['error'] !== false) {
+                if ($result['error'] === 'You must be logged in to do this.') {
+                    throw new \RuntimeException('Invalid credential');
+                }
+                throw new \RuntimeException((string)$result['error']);
+            }
+
+            if (empty($result['data']['authToken'])) {
+                throw new \RuntimeException('index authToken not found in rocket chat api response');
+            }
+
+            $user->userProfile->up_rc_auth_token = $result['data']['authToken'];
+            $user->userProfile->up_rc_token_expired = \Yii::$app->rchat::generateTokenExpired();
+            if (!$user->userProfile->save()) {
+                throw new \RuntimeException($user->userProfile->getErrorSummary(false)[0]);
+            }
+        } catch (\Throwable $e) {
+            return $this->asJson([
+                'error' => true,
+                'message' => $e->getMessage(),
+            ]);
+        }
+        return $this->asJson([
+            'error' => false,
+            'message' => 'OK',
+        ]);
+    }
 }

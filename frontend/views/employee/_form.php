@@ -504,6 +504,7 @@ JS;
                     </div>
                     <?php if ($modelProfile->up_rc_user_id && $modelProfile->up_rc_auth_token && Auth::can('/employee/validate-rocket-chat-credential')): ?>
                         <div class="col-md-6" style="text-align: right">
+                            <button class="btn btn-success refresh_token" data-user-id="<?= $modelProfile->up_user_id ?>">Refresh Token</button>
                             <button class="btn btn-success validate_credential" data-user-id="<?= $modelProfile->up_user_id ?>">Validate credential</button>
                         </div>
                     <?php endif;?>
@@ -889,6 +890,7 @@ JS;
 
 <?php
 $validateCredentialRcUrl = Url::to(['/employee/validate-rocket-chat-credential']);
+$refreshTokenRcUrl = Url::to(['/employee/refresh-rocket-chat-user-token']);
 $js = <<<JS
 
     //  $(document).on('click', '.unblock-user', function(e) {
@@ -1185,6 +1187,37 @@ $js = <<<JS
          })
         .always(function () {
             btn.html('Validate credential');
+            btn.attr('disabled', false);
+        });
+    });
+    
+    $(document).on('click', '.refresh_token', function(e) {
+        e.preventDefault();
+        let btn = $(this); 
+        let userId = btn.attr('data-user-id');
+        btn.html('<i class="fa fa-spinner fa-spin"></i> Refresh Token');
+        btn.attr('disabled', true);
+        $.ajax({
+            type: 'post',
+            dataType: 'json',
+            url: '{$refreshTokenRcUrl}',
+            data: {
+                id: userId
+            }
+        })
+        .done(function(data) {
+            if (data.error) {
+                createNotify('Refresh Rocket Chat User Token', data.message, 'error');
+                return;
+            }
+            createNotify('Refresh Rocket Chat User Token', 'Success', 'success');
+            setTimeout(() => {window.location.reload();}, 500);
+        })  
+         .fail(function (xhr, textStatus, errorThrown) {
+             createNotify('Refresh Rocket Chat User Token', xhr.responseText, 'error');
+         })
+        .always(function () {
+            btn.html('Refresh Token');
             btn.attr('disabled', false);
         });
     });
