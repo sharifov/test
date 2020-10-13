@@ -104,26 +104,63 @@ class ClientChatRequestController extends ApiBaseController
      *
      *
      *
-     * @apiParamExample {json} Request-Example GUEST_CONNECTED:
-     * {
-            "event": "GUEST_CONNECTED",
-            "data": {
-                "rid": "292a9961-asdas-4d66-bhnjm-sdvsdv",
-                "channel": "livechat-channel",
-                "name": "Test 45",
-                "email": "test+45@mail.com",
-                "ip": "127.0.0.1",
-                "project": 'OVAGO',
-                 "department": "department id optional"
-            }
-     * }
-     *
      * @apiParamExample {json} Request-Example ROOM_CONNECTED:
      * {
-            "event": 'ROOM_CONNECTED',
+            "event": "ROOM_CONNECTED",
             "data": {
-                "rid": '9e563c67-fe10-42d5-a664-6e30d2974201',
-                "visitor": { "_id": 'pnjNRHsnnWXhW5LBn', "username": 'guest-81' }
+                "geo": {
+                    "ip": "92.115.180.30",
+                    "version": "IPv4",
+                    "city": "Chisinau",
+                    "region": "Chi\u0219in\u0103u Municipality",
+                    "region_code": "CU",
+                    "country": "MD",
+                    "country_name": "Republic of Moldova",
+                    "country_code": "MD",
+                    "country_code_iso3": "MDA",
+                    "country_capital": "Chisinau",
+                    "country_tld": ".md",
+                    "continent_code": "EU",
+                    "in_eu": false,
+                    "postal": "MD-2000",
+                    "latitude": 47.0056,
+                    "longitude": 28.8575,
+                    "timezone": "Europe\/Chisinau",
+                    "utc_offset": "+0300",
+                    "country_calling_code": "+373",
+                    "currency": "MDL",
+                    "currency_name": "Leu",
+                    "languages": "ro,ru,gag,tr",
+                    "country_area": 33843,
+                    "country_population": 3545883,
+                    "asn": "AS8926",
+                    "org": "Moldtelecom SA"
+                },
+                "visitor": {
+                    "conversations": 0,
+                    "lastAgentMessage": null,
+                    "lastVisitorMessage": null,
+                    "id": "fef46d63-8a30-4eec-89eb-62f1bfc0ffcd",
+                    "uuid": "54d87707-bb54-46e3-9eca-8f776c7bcacf",
+                    "project": "ovago"
+                },
+                "sources": [],
+                "page": {
+                    "url": "https:\/\/dev-ovago.travel-dev.com\/search\/WAS-FRA%2F2021-03-22%2F2021-03-28",
+                    "title": "Air Ticket Booking - Find Cheap Flights and Airfare Deals - Ovago.com",
+                    "referrer": "https:\/\/dev-ovago.travel-dev.com\/search\/WAS-FRA%2F2021-03-22%2F2021-03-28"
+                },
+                "system": {
+                    "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/85.0.4183.102 Safari\/537.36",
+                    "language": "en-US",
+                    "resolution": "1920x1080"
+                },
+                "custom": {
+                    "event": {
+                        "eventName": "UPDATE",
+                        "eventProps": []
+                    }
+                }
             }
      * }
      *
@@ -246,70 +283,65 @@ class ClientChatRequestController extends ApiBaseController
      *
      *
      *
-     * @apiParamExample {json} Request-Example GUEST_UTTERED:
+     * @apiParamExample {json} Request-Example AGENT_UTTERED:
      * {
-            "event": "GUEST_UTTERED",
+            "event": "AGENT_UTTERED",
             "data": {
-                "_id": "XipJ2fqumzr3n3Nhh",
-                "rid": "292a9961-asdas-4d66-bhnjm-sdgadg",
-                "msg": "hello",
-                "token": "292a9961-asdas-4d66-bhnjm-sdvsdu",
-                "alias": "jora",
-                "ts": {
-                    "$date": 1592924833106
+                "id": "G6CBYkRYBotjaPPSu",
+                "rid": "e19bf809-12c9-4981-89d0-da2f5d071890",
+                "token": "56976e05-1916-44fb-a074-5a8d0358019b",
+                "visitor": {
+                    "conversations": 0,
+                    "lastAgentMessage": null,
+                    "lastVisitorMessage": null,
+                    "id": "56976e05-1916-44fb-a074-5a8d0358019b",
+                    "username": "guest-1219",
+                    "phone": null,
+                    "token": "56976e05-1916-44fb-a074-5a8d0358019b"
                 },
+                "agent": {
+                    "name": "vadim_larsen_admin",
+                    "username": "vadim_larsen_admin",
+                    "email": "vadim.larsen@techork.com"
+                },
+                "msg": "test",
+                "timestamp": 1602587182948,
                 "u": {
-                    "_id": "pvS87aeQxfqgnzsFW",
-                    "username": "guest-124",
-                    "name": "jora"
+                    "_id": "MszwfgYRGB9Tpw5Et",
+                    "username": "vadim.larsen"
                 },
-                "groupable": false,
-                "mentions": [],
-                "channels": [],
-                "_updatedAt": {
-                    "$date": 1592924833113
+                    "agentId": "MszwfgYRGB9Tpw5Et"
                 }
-            }
      * }
      *
      * @apiParamExample {json} Request-Example GUEST_UTTERED with Attachment:
      * {
             "event": "GUEST_UTTERED",
             "data": {
-                "_id": "XipJ2fqumzr3n3Nhh",
-                "rid": "292a9961-asdas-4d66-bhnjm-sdgadg",
-                "msg": "hello",
-                "token": "292a9961-asdas-4d66-bhnjm-sdvsdu",
-                "alias": "jora",
-                "ts": {
-                    "$date": 1592924833106
+                "id": "93ea7e9d-04cc-4f96-8bbf-d8b646113fd7",
+                "rid": "88c395e3-fe19-4fe2-99dc-b0a1874efbdd",
+                "token": "9728d3b4-5754-4339-9b0f-1c75edc727e9",
+                "visitor": {
+                    "conversations": 0,
+                    "lastAgentMessage": null,
+                    "lastVisitorMessage": null,
+                    "id": "9728d3b4-5754-4339-9b0f-1c75edc727e9",
+                    "name": "Henry Fonda",
+                    "username": "guest-1220",
+                    "phone": null,
+                    "token": "9728d3b4-5754-4339-9b0f-1c75edc727e9"
                 },
-                "file": {
-                    "_id": "EKSp7qfb7LqQxjA3N",
-                    "name": "469_5263_9274dc35-1390-4b95-9767-fa4b71adc7a2-c26e70f8-0eff-4558-8005-73a699c7d7f8.mp4",
-                    "type": "video/mp4"
+                "agent": {
+                    "name": "bot",
+                    "username": "bot",
+                    "email": "bot@techork.com"
                 },
-                "attachments": [
-                    {
-                        "title": "469_5263_9274dc35-1390-4b95-9767-fa4b71adc7a2-c26e70f8-0eff-4558-8005-73a699c7d7f8.mp4",
-                        "type": "file",
-                        "title_link": "/file-upload/EKSp7qfb7LqQxjA3N/469_5263_9274dc35-1390-4b95-9767-fa4b71adc7a2-c26e70f8-0eff-4558-8005-73a699c7d7f8.mp4",
-                        "title_link_download": true,
-                        "video_url": "/file-upload/EKSp7qfb7LqQxjA3N/469_5263_9274dc35-1390-4b95-9767-fa4b71adc7a2-c26e70f8-0eff-4558-8005-73a699c7d7f8.mp4",
-                        "video_type": "video/mp4",
-                        "video_size": 5276
-                    }
-                ],
+                "msg": "Hi",
+                "timestamp": 1602588445024,
                 "u": {
-                    "_id": "pvS87aeQxfqgnzsFW",
-                    "username": "guest-124",
-                    "name": "jora"
-                },
-                "groupable": false,
-                "mentions": [],
-                "channels": [],
-                "_updatedAt": {
-                    "$date": 1592924833113
+                    "_id": "cYNGwXX6L8cN3eb2Q",
+                    "username": "guest-1220",
+                    "name": "Henry Fonda"
                 }
             }
      * }
