@@ -19,6 +19,7 @@ use sales\model\clientChat\useCase\transfer\ClientChatTransferForm;
 use sales\model\clientChatCase\entity\ClientChatCase;
 use sales\model\clientChatCase\entity\ClientChatCaseRepository;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
+use sales\model\clientChatChannelTransfer\ClientChatChannelTransferRule;
 use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\clientChatLead\entity\ClientChatLeadRepository;
 use sales\model\clientChatNote\ClientChatNoteRepository;
@@ -323,6 +324,11 @@ class ClientChatService
 	{
 		return $this->transactionManager->wrap( function () use ($form, $user) {
 			$clientChat = $this->clientChatRepository->findById($form->chatId);
+
+			$transferRule = new ClientChatChannelTransferRule();
+			if (!$transferRule->can($clientChat->cch_channel_id, $form->channelId)) {
+                throw new \DomainException('Cant transfer to channel with other project');
+            }
 
 			if ($clientChat->isClosed()) {
 				throw new \DomainException('It’s not possible to transfer the chat to another department because it is in the "Closed" status');

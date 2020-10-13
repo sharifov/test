@@ -7,6 +7,7 @@ use common\models\Department;
 use sales\helpers\clientChat\ClientChatHelper;
 use sales\model\clientChat\entity\actionReason\ClientChatActionReasonQuery;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
+use sales\model\clientChatChannelTransfer\entity\ClientChatChannelTransfer;
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\model\clientChatUserChannel\entity\search\ClientChatUserChannelSearch;
 use yii\base\Model;
@@ -122,11 +123,15 @@ class ClientChatTransferForm extends Model
 
     public function getChannels(): array
     {
-        $channels = ClientChatChannel::find()->select(['ccc_name', 'ccc_id'])->enabled()->byProject($this->projectId);
+        $channels = ClientChatChannel::find()
+            ->select(['ccc_name', 'ccc_id'])
+            ->enabled()
+            ->byProject($this->projectId)
+            ->andWhere(['ccc_id' => ClientChatChannelTransfer::find()->select(['cctr_to_ccc_id'])->fromChannel($this->originalChannelId)]);
         if ($this->depId) {
             $channels->byDepartment((int)$this->depId);
         }
-        return $channels->indexBy('ccc_id')->column();
+        return $channels->orderBy(['ccc_name' => SORT_ASC])->indexBy('ccc_id')->column();
     }
 
     public function getReasonList(): array
