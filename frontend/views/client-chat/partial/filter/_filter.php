@@ -90,7 +90,7 @@ use yii\helpers\Html;
             </div>
 
             <div class="row" style="display: none" id="additional_filters_div">
-                <?php if ($filter->permissions->canDepartment()): ?>
+                <?php /*if ($filter->permissions->canDepartment()): ?>
                     <div class="col-md-6" >
                         <?= Html::label('Department:', null, ['class' => 'control-label']); ?>
                         <?= Select2::widget([
@@ -112,7 +112,7 @@ use yii\helpers\Html;
                             ],
                         ]); ?>
                     </div>
-                <?php endif; ?>
+                <?php endif;*/ ?>
 
                 <?php if ($filter->permissions->canStatus()): ?>
                     <div class="col-md-6">
