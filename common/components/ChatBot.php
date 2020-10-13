@@ -165,8 +165,9 @@ class ChatBot extends Component
 		$headers = \Yii::$app->rchat->getSystemAuthDataHeader();
 		$response = $this->sendRequest('livechat/transfer-department', $data, 'post', $headers);
 
+        \Yii::info(VarDumper::dumpAsString($response), 'info\ChatBot::transferDepartment::params');
 
-		if ($response->isOk) {
+        if ($response->isOk) {
 			if (!empty($response->data)) {
 				$out['data'] = $response->data;
 			} else {
