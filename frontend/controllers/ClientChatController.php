@@ -234,6 +234,10 @@ class ClientChatController extends FController
             $page = 1;
         }
 
+        if ($filter->resetAdditionalFilter) {
+            $filter->resetAdditionalAttributes();
+        }
+
         $dataProvider = null;
         /** @var $channels ClientChatChannel[] */
         if ($channels) {

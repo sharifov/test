@@ -6,6 +6,7 @@ use common\models\Department;
 use common\models\Employee;
 use common\models\Project;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChatChannel\entity\ClientChatChannel;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
@@ -23,19 +24,25 @@ use yii\helpers\Html;
  * @property $userId
  * @property $userName
  * @property $createdDate
+ * @property $fromDate
+ * @property $toDate
+ * @property $rangeDate
+ * @property $resetAdditionalFilter
  * @property array       $channels
  * @property Permissions $permissions
  */
 class FilterForm extends Model
 {
     public const DEFAULT_VALUE_CHANNEL_ID = 0;
-    public const DEFAULT_VALUE_STATUS = ClientChat::TAB_ACTIVE;
+    public const DEFAULT_VALUE_STATUS = 0;
     public const DEFAULT_VALUE_DEP = 0;
     public const DEFAULT_VALUE_PROJECT = 0;
     public const DEFAULT_VALUE_READ_UNREAD = ReadUnreadFilter::ALL;
     public const DEFAULT_VALUE_USER_ID = null;
     public const DEFAULT_VALUE_USER_NAME = null;
     public const DEFAULT_VALUE_CREATED_DATE = null;
+    public const DEFAULT_VALUE_FROM_DATE = null;
+    public const DEFAULT_VALUE_TO_DATE = null;
 
     public $channelId;
     public $status;
@@ -46,10 +53,20 @@ class FilterForm extends Model
     public $userId;
     public $userName;
     public $createdDate;
+    public $fromDate;
+    public $toDate;
+    public $rangeDate;
+    public $resetAdditionalFilter = false;
 
     private array $channels;
 
     public Permissions $permissions;
+
+    private array $additionalFilterAttributes = [
+        'status',
+        'userId',
+        'rangeDate',
+    ];
 
     public function __construct(array $channels, $config = [])
     {
@@ -99,6 +116,13 @@ class FilterForm extends Model
             ['createdDate', 'string'],
             ['createdDate', 'date', 'format' => 'php:d-m-Y'],
             ['createdDate', 'default', 'value' => self::DEFAULT_VALUE_CREATED_DATE],
+
+            [['fromDate', 'toDate'], 'string'],
+            [['fromDate', 'toDate'], 'date', 'format' => 'php:d-m-Y'],
+            [['fromDate', 'toDate'], 'default', 'value' => self::DEFAULT_VALUE_CREATED_DATE],
+
+            ['rangeDate', 'safe'],
+            ['resetAdditionalFilter', 'boolean'],
         ];
     }
 
@@ -131,8 +155,18 @@ class FilterForm extends Model
         return ArrayHelper::merge(['All'], Project::getList());
     }
 
-    public function getChannels(): array
+    public function getChannels(int $cacheDuration = 300): array
     {
+        if ($this->project) {
+            $channels = ClientChatChannel::find()
+                ->select(['ccc_name', 'ccc_id'])
+                ->where(['ccc_project_id' => $this->project])
+                ->andWhere(['IN', 'ccc_id', array_keys($this->channels)])
+                ->cache($cacheDuration)
+                ->indexBy('ccc_id')
+                ->column();
+            return ArrayHelper::merge(['All'], $channels);
+        }
         return ArrayHelper::merge(['All'], $this->channels);
     }
 
@@ -270,5 +304,40 @@ class FilterForm extends Model
     public function getReadUnreadInputId(): string
     {
         return  Html::getInputId($this, 'readUnread');
+    }
+
+    public function attributeLabels(): array
+    {
+        return [
+            'channelId' => 'Channel ID',
+            'status' => 'Status',
+            'project' => 'Project',
+            'userId' => 'User ID',
+            'rangeDate' => 'Created range dates',
+        ];
+    }
+
+    public function getAdditionalFilterAttributes(): array
+    {
+        return $this->additionalFilterAttributes;
+    }
+
+    public function isAdditionalFilterActive(): bool
+    {
+        foreach ($this->getAdditionalFilterAttributes() as $key => $attrName) {
+            if (!empty($this->{$attrName}) && $this->{$attrName} !== 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function resetAdditionalAttributes(): FilterForm
+    {
+        $this->status = self::DEFAULT_VALUE_STATUS;
+        $this->userId = self::DEFAULT_VALUE_USER_ID;
+        $this->fromDate = self::DEFAULT_VALUE_FROM_DATE;
+        $this->toDate = self::DEFAULT_VALUE_TO_DATE;
+        return $this;
     }
 }

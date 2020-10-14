@@ -404,6 +404,10 @@ class ClientChatSearch extends ClientChat
             \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cch_created_dt', $filter->createdDate, $user->timezone);
         }
 
+        if ($filter->fromDate && $filter->toDate) {
+            QueryHelper::dateRangeByUserTZ($query, 'cch_created_dt', $filter->fromDate, $filter->toDate, $user->timezone);
+        }
+
         $query->join('JOIN', ['client' => Client::tableName()], 'cch_client_id = client.id');
         $query->join('JOIN', [ClientChatChannel::tableName()], 'cch_channel_id = ccc_id');
         $query->leftJoin(Department::tableName(), 'cch_dep_id = dep_id');

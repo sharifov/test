@@ -1,12 +1,12 @@
 <?php
 
-use dosamigos\datepicker\DatePicker;
 use kartik\select2\Select2;
 use sales\model\clientChat\dashboard\FilterForm;
 use sales\model\clientChat\dashboard\GroupFilter;
 use sales\widgets\UserSelect2Widget;
 use yii\data\ArrayDataProvider;
 use yii\helpers\Html;
+use yii\web\JsExpression;
 
 /** @var FilterForm $filter */
 /** @var string $loadChannelsUrl */
@@ -29,6 +29,8 @@ use yii\helpers\Html;
 
 <?= Html::beginForm(\yii\helpers\Url::to(['/client-chat/index']), 'GET', ['id' => $filter->getId()]); ?>
     <div class="col-md-12" style="margin-top: 10px">
+
+        <?php echo Html::hiddenInput(Html::getInputName($filter, 'resetAdditionalFilter'), 0, ['id' => 'resetAdditionalFilter']); ?>
 
             <div class="row">
                 <?php if ($filter->permissions->canProject()): ?>
@@ -83,13 +85,30 @@ use yii\helpers\Html;
         <?php
             if ($filter->permissions->canDepartment() || $filter->permissions->canStatus() || $filter->permissions->canUser() || $filter->permissions->canCreatedDate()):
         ?>
+
+            <?php $isAdditionalFilterActive = $filter->isAdditionalFilterActive(); ?>
+
             <div class="row" style="margin-top: 6px;">
                 <div class="col-md-12 text-right">
                     <i class="fa fa-filter"></i> <?= Html::a('Additional filters', null, ['id' => 'btn_additional_filters']) ?>
+                    <?php if ($isAdditionalFilterActive): ?>
+                        <?php echo Html::a(
+                            '(reset <i class="fa fa-times"></i>)',
+                            null,
+                            [
+                                'id' => 'reset_additional',
+                                'style' => 'font-weight: bold;',
+                            ]
+                        ); ?>
+                    <?php endif ?>
                 </div>
             </div>
 
-            <div class="row" style="display: none" id="additional_filters_div">
+            <div
+                class="row"
+                id="additional_filters_div"
+                style="margin-bottom: 20px; display: <?php echo $isAdditionalFilterActive ? '' : 'none' ?>;">
+
                 <?php /*if ($filter->permissions->canDepartment()): ?>
                     <div class="col-md-6" >
                         <?= Html::label('Department:', null, ['class' => 'control-label']); ?>
@@ -163,38 +182,66 @@ use yii\helpers\Html;
                 <?php endif; ?>
 
                 <?php if ($filter->permissions->canCreatedDate()): ?>
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <?= Html::label('Created:', null, ['class' => 'control-label']); ?>
-                        <?= DatePicker::widget([
-                            'name' => Html::getInputName($filter, 'createdDate'),
-                            'id' => Html::getInputId($filter, 'createdDate'),
-                            'value' => $filter->createdDate,
-                            'template' => '{addon}{input}',
-                            'clientOptions' => [
-                                'autoclose' => true,
-                                'format' => 'dd-mm-yyyy',
+                        <?= \kartik\daterange\DateRangePicker::widget([
+                            'model' => $filter,
+                            'attribute' => 'rangeDate',
+                            'useWithAddon' => false,
+                            'presetDropdown' => false,
+                            'hideInput' => true,
+                            'convertFormat' => true,
+                            'startAttribute' => 'fromDate',
+                            'endAttribute' => 'toDate',
+                            'pluginOptions' => [
+                                'timePicker' => false,
                                 'clearBtn' => true,
+                                'locale' => [
+                                    'format' => 'Y-m-d',
+                                    'separator' => ' / '
+                                ],
+                                'allowClear' => true,
                             ],
-                            'clientEvents' => [
-                                'clearDate' => 'function (e) {$(e.target).find("input").change();}',
-                                'changeDate' => new \yii\web\JsExpression('function(e){
-                                        window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
-                                     }'),
+                            'pluginEvents' => [
+                                'apply.daterangepicker' => new JsExpression('function() { 
+                                    window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
+                                }')
                             ],
                         ]); ?>
                     </div>
                 <?php endif; ?>
             </div>
 
-        <?php
+<?php
 $js = <<<JS
+ 
+    $(document).find('.kv-drp-dropdown').find('.kv-clear').on('click', function(e) {
+        e.stopPropagation();
+        $(document).find('.kv-drp-dropdown').find('.range-value').val('');
+        $(document).val('').trigger('change').trigger('cancel.daterangepicker');
+        $('.kv-drp-container input').each(function() {
+            $(this).val('');
+        }); 
+        window.updateClientChatFilter("{$filter->getId()}", "{$filter->formName()}", "{$loadChannelsUrl}");
+    }); 
+        
+    $(document).on('click', '#reset_additional', function (e) {
+        e.stopPropagation();        
+        $('#additional_filters_div').find('input,select').each(function() {
+            $(this).val('');          
+        }); 
+        $('#resetAdditionalFilter').val('1');
+        window.updateClientChatFilter("{$filter->getId()}", "{$filter->formName()}", "{$loadChannelsUrl}");
+    });  
+
 $('#btn_additional_filters').on('click', function() {
     $('#additional_filters_div').toggle();  
 });
 JS;
-                $this->registerJs($js);
-            endif;
-        ?>
+$this->registerJs($js);
+?>
+
+    <?php endif; ?>
 
     </div>
 
@@ -211,7 +258,7 @@ JS;
                         }
                     ?>
                     <div
-                        class="_cc_group cc_btn_group_filter <?php echo ($key === $filter->group ? 'active' : '') ?>"
+                        class="_cc_group cc_btn_group_filter <?php echo($key === $filter->group ? 'active' : '') ?>"
                         data-group-id="<?php echo $key ?>">
                             <?php echo $item . $countItems ?>
                                 <span class="_cc_group_active"> </span>
