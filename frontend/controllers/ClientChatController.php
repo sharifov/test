@@ -209,6 +209,8 @@ class ClientChatController extends FController
                     'ajax-transfer-view',
                     'delete-note',
                     'create-note',
+                    'ajax-hold-view',
+                    'ajax-un-hold',
                 ],
             ],
         ];
@@ -867,8 +869,9 @@ class ClientChatController extends FController
             throw new NotFoundHttpException('Client chat is not found');
         }
 
-        if (!$clientChat->isInProgress()) { /* TODO:: must be replaced to permission in separate task */
-            throw new ForbiddenHttpException('Chat must be in status InProgress');
+        $permissions = new ClientChatActionPermission();
+        if (!$permissions->canHold($clientChat)) {
+            throw new ForbiddenHttpException('Access denied.');
         }
 
         $form = new ClientChatHoldForm();
@@ -876,9 +879,6 @@ class ClientChatController extends FController
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
-                if ($clientChat->isHold()) {
-                    throw new \DomainException('Client Chat already in hold');
-                }
 
                 $clientChat->hold(Auth::id(), ClientChatStatusLog::ACTION_HOLD, $form->comment);
                 $this->clientChatRepository->save($clientChat);
@@ -919,7 +919,7 @@ class ClientChatController extends FController
      * @return array
      * @throws BadRequestHttpException
      */
-    public function actionAjaxToProgress(): array
+    public function actionAjaxUnHold(): array
     {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
@@ -932,8 +932,9 @@ class ClientChatController extends FController
                 if (!$clientChat = ClientChat::findOne($cchId)) {
                     throw new NotFoundHttpException('Client chat is not found', -2);
                 }
-                if (!$clientChat->isHold()) { /* TODO:: must be replaced to permission in separate task */
-                    throw new ForbiddenHttpException('Chat must be in status Hold', -3);
+                $permissions = new ClientChatActionPermission();
+                if (!$permissions->canUnHold($clientChat)) {
+                    throw new ForbiddenHttpException('Access denied.', -3);
                 }
 
                 $clientChat->inProgress(Auth::id(), ClientChatStatusLog::ACTION_REVERT_TO_PROGRESS);
@@ -943,7 +944,7 @@ class ClientChatController extends FController
             } catch (\Throwable $throwable) {
                 AppHelper::throwableLogger(
                     $throwable,
-                    'ClientChatController:actionAjaxToProgress:throwable'
+                    'ClientChatController:actionAjaxUnHold:throwable'
                 );
                 $result['message'] = VarDumper::dumpAsString($throwable->getMessage());
             }

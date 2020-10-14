@@ -48,7 +48,7 @@ $chatSendOfferPreviewUrl = Url::toRoute('/client-chat/send-offer-preview');
 $chatSendOfferGenerateUrl = Url::toRoute('/client-chat/send-offer-generate');
 $chatSendOfferUrl = Url::toRoute('/client-chat/send-offer');
 $chatHoldUrl = Url::toRoute('/client-chat/ajax-hold-view');
-$chatProgressUrl = Url::toRoute('/client-chat/ajax-to-progress');
+$chatUnHoldUrl = Url::toRoute('/client-chat/ajax-un-hold');
 $clientChatResetUnreadMessageUrl = Url::toRoute(['/client-chat/reset-unread-message']);
 $clientChatAddActiveConnectionUrl = Url::toRoute(['/client-chat/add-active-connection']);
 $clientChatRemoveFromActiveConnectionUrl = Url::toRoute(['/client-chat/remove-active-connection']);
@@ -866,10 +866,10 @@ $(document).on('click', '.cc_hold', function (e) {
     });     
 });
 
-$(document).on('click', '.cc_in_progress', function (e) {
+$(document).on('click', '.cc_un_hold', function (e) {
     e.preventDefault();
     
-    if(!confirm('Are you sure want to change status "In Progress"')) {
+    if(!confirm('Are you sure want to make UnHold?')) {
         return false;
     } 
     
@@ -882,7 +882,7 @@ $(document).on('click', '.cc_in_progress', function (e) {
         .prop('disabled', true);
     
     $.ajax({
-        url: '{$chatProgressUrl}',
+        url: '{$chatUnHoldUrl}',
         type: 'POST',
         data: {cchId: cchId},
         dataType: 'json'    

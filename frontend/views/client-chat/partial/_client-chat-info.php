@@ -95,18 +95,16 @@ $guard = new ClientChatManageGuard($statusLogRepository);
                             ]) ?>
                         <?php endif; ?>
 
-                        <?php if($clientChat->isInProgress()): ?> <?php /* TODO:: must be replaced to permission in separate task */ ?>
-                            <?php echo Html::a('<i class="fa fa-pause"></i> Hold', null, [
+                        <?php if ($actionPermissions->canHold($clientChat)): ?>
+                            <?php echo Html::a('<i class="fa fa-pause"> </i> Hold', null, [
                                 'class' => 'dropdown-item text-secondary cc_hold',
                                 'title' => 'Hold',
                                 'data-cch-id' => $clientChat->cch_id
                             ]) ?>
-                        <?php endif; ?>
-
-                        <?php if($clientChat->isHold()): ?> <?php /* TODO:: must be replaced to permission in separate task */ ?>
-                            <?php echo Html::a('<i class="fa fa-play"></i> In Progress', null, [
-                                'class' => 'dropdown-item text-nowrap text-info cc_in_progress ',
-                                'title' => 'In Progress',
+                        <?php elseif ($actionPermissions->canUnHold($clientChat)): ?>
+                            <?php echo Html::a('<i class="fa fa-play"> </i> UnHold', null, [
+                                'class' => 'dropdown-item text-nowrap text-info cc_un_hold',
+                                'title' => 'UnHold',
                                 'data-cch-id' => $clientChat->cch_id
                             ]) ?>
                         <?php endif; ?>

@@ -14,6 +14,8 @@ use sales\model\clientChat\entity\ClientChat;
  * @property bool|null $canNoteAdd
  * @property bool|null $canNoteDelete
  * @property bool|null $canReopenChat
+ * @property bool|null $canHold
+ * @property bool|null $canUnHold
  */
 class ClientChatActionPermission
 {
@@ -26,6 +28,9 @@ class ClientChatActionPermission
     private ?bool $canNoteDelete = null;
 
     private ?bool $canReopenChat = null;
+
+    private ?bool $canHold = null;
+    private ?bool $canUnHold = null;
 
     public function canClose(ClientChat $chat): bool
     {
@@ -79,5 +84,23 @@ class ClientChatActionPermission
         }
         $this->canNoteDelete = Auth::can('client-chat/manage', ['chat' => $chat]) && Auth::can('client-chat/notes/delete');
         return $this->canNoteDelete;
+    }
+
+    public function canHold(ClientChat $chat): bool
+    {
+        if ($this->canHold !== null) {
+            return $this->canHold;
+        }
+        $this->canHold = Auth::can('client-chat/manage', ['chat' => $chat]) && Auth::can('client-chat/hold', ['chat' => $chat]);
+        return $this->canHold;
+    }
+
+    public function canUnHold(ClientChat $chat): bool
+    {
+        if ($this->canUnHold !== null) {
+            return $this->canUnHold;
+        }
+        $this->canUnHold = Auth::can('client-chat/manage', ['chat' => $chat]) && Auth::can('client-chat/un_hold', ['chat' => $chat]);
+        return $this->canUnHold;
     }
 }
