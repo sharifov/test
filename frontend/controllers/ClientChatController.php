@@ -363,7 +363,6 @@ class ClientChatController extends FController
             } else {
                 $result['noteHtml'] = '';
             }
-
         } catch (NotFoundException $e) {
             $result['message'] = $e->getMessage();
         }
@@ -748,7 +747,7 @@ class ClientChatController extends FController
         } catch (\RuntimeException $e) {
             $form->addError('general', $e->getMessage());
         } catch (\Throwable $e) {
-			Yii::error(VarDumper::dumpAsString(AppHelper::throwableLog($e, true)), 'ClientChatController::actionAjaxClose::Throwable');
+            Yii::error(VarDumper::dumpAsString(AppHelper::throwableLog($e, true)), 'ClientChatController::actionAjaxClose::Throwable');
             $form->addError('general', 'Internal Server Error');
         }
 
@@ -814,7 +813,6 @@ class ClientChatController extends FController
         );
 
         try {
-
             if ($form->load(Yii::$app->request->post()) && !$form->pjaxReload && $form->validate()) {
                 $newChannel = $this->clientChatService->transfer($form, Auth::user());
 
@@ -869,7 +867,6 @@ class ClientChatController extends FController
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
-
                 if ($clientChat->isHold()) {
                     throw new \DomainException('Client Chat already in hold');
                 }
@@ -880,8 +877,12 @@ class ClientChatController extends FController
                 if ($clientChatStatusLog = $this->clientChatStatusLogRepository->getPrevious($clientChat->cch_id)) {
                     $startDt = ClientChatHold::getStartDT();
                     $deadlineDt = ClientChatHold::convertDeadlineDTFromMinute($form->minuteToDeadline);
-                    $clientChatHold = ClientChatHold::create($clientChat->cch_id, $clientChatStatusLog->csl_id,
-                        $deadlineDt, $startDt);
+                    $clientChatHold = ClientChatHold::create(
+                        $clientChat->cch_id,
+                        $clientChatStatusLog->csl_id,
+                        $deadlineDt,
+                        $startDt
+                    );
                     $this->clientChatHoldRepository->save($clientChatHold);
                 }
 
@@ -890,8 +891,10 @@ class ClientChatController extends FController
                     createNotify("Success", "Сhat status changed to Hold", "success");</script>';
             } catch (\Throwable $throwable) {
                 $form->addError('general', 'Internal Server Error');
-                Yii::error(AppHelper::throwableFormatter($throwable),
-                    'ClientChatController::actionAjaxHoldView::Throwable');
+                Yii::error(
+                    AppHelper::throwableFormatter($throwable),
+                    'ClientChatController::actionAjaxHoldView::Throwable'
+                );
             }
         }
 
@@ -929,8 +932,10 @@ class ClientChatController extends FController
 
                 $result = ['message' => 'ClientChat status changed to InProgress', 'status' => 1];
             } catch (\Throwable $throwable) {
-                AppHelper::throwableLogger($throwable,
-                    'ClientChatController:actionAjaxToProgress:throwable');
+                AppHelper::throwableLogger(
+                    $throwable,
+                    'ClientChatController:actionAjaxToProgress:throwable'
+                );
                 $result['message'] = VarDumper::dumpAsString($throwable->getMessage());
             }
             return $result;
@@ -974,10 +979,9 @@ class ClientChatController extends FController
                     $result['message'] = 'ClientChat status changed to InProgress';
                     $result['status'] = 2;
                     $result['goToClientChatId'] = $clientChat->cch_id;
-
                 } elseif ($takeClientChat = $this->clientChatService->takeClientChat($clientChat, Auth::user())) {
                     $data = ClientChatAccessMessage::chatTaken($clientChat, $clientChat->cchOwnerUser);
-		            Notifications::pub(['chat-' . $clientChat->cch_id], 'refreshChatPage', ['data' => $data]);
+                    Notifications::pub(['chat-' . $clientChat->cch_id], 'refreshChatPage', ['data' => $data]);
 
                     $clientChatLink = Purifier::createChatShortLink($clientChat);
                     Notifications::createAndPublish(
@@ -985,18 +989,20 @@ class ClientChatController extends FController
                         'Your Chat was taken',
                         'Your Chat was taken by ' . Auth::user()->nickname . '; ' . $clientChatLink,
                         Notifications::TYPE_INFO,
-                        true);
+                        true
+                    );
 
                     $result['message'] = 'ClientChat successfully taken';
                     $result['status'] = 1;
                     $result['goToClientChatId'] = $takeClientChat->cch_id;
-
                 } else {
                     throw new \RuntimeException('Error: TakeClientChat is failed');
                 }
             } catch (\Throwable $throwable) {
-                AppHelper::throwableLogger($throwable,
-                'ClientChatController:actionTake:throwable');
+                AppHelper::throwableLogger(
+                    $throwable,
+                    'ClientChatController:actionTake:throwable'
+                );
                 $result['message'] = VarDumper::dumpAsString($throwable->getMessage());
             }
             $redis->del($takeIdentity ?? 'cc_take');
@@ -1360,22 +1366,22 @@ class ClientChatController extends FController
     }
 
     public function actionChatRequests()
-	{
-		if (!Yii::$app->request->isPost) {
-			throw new BadRequestHttpException('Not POST data', 1);
-		}
-		$page = Yii::$app->request->post('page', 0);
-		$countDisplayedRequests = Yii::$app->request->post('countDisplayedRequests', 0);
-		$widget = ClientChatAccessWidget::getInstance();
-		$widget->userId = Auth::id();
-		$widget->page = (int)$page;
-		$widget->countDisplayedRequests = (int)$countDisplayedRequests;
-		return $this->asJson([
-			'data' => $widget->fetchItems(),
-			'page' => $page+1,
-			'totalItems' => $widget->getTotalItems()
-		]);
-	}
+    {
+        if (!Yii::$app->request->isPost) {
+            throw new BadRequestHttpException('Not POST data', 1);
+        }
+        $page = Yii::$app->request->post('page', 0);
+        $countDisplayedRequests = Yii::$app->request->post('countDisplayedRequests', 0);
+        $widget = ClientChatAccessWidget::getInstance();
+        $widget->userId = Auth::id();
+        $widget->page = (int)$page;
+        $widget->countDisplayedRequests = (int)$countDisplayedRequests;
+        return $this->asJson([
+            'data' => $widget->fetchItems(),
+            'page' => $page+1,
+            'totalItems' => $widget->getTotalItems()
+        ]);
+    }
 
     private function createOfferMessage(ClientChat $chat, array $captures): array
     {
