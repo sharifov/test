@@ -42,6 +42,7 @@ use DateTime;
  * @property mixed $completeIncomingCallsQuery
  * @property string $partitionsByYears
  * @property \yii\data\SqlDataProvider $totalCalls
+ * @property-read \yii\data\SqlDataProvider $callLogStats
  * @property string $timeZone
  */
 class CallGraphsSearch extends CallLogSearch
@@ -93,6 +94,9 @@ class CallGraphsSearch extends CallLogSearch
         self::DATE_FORMAT_HOURS_DAYS,
         self::DATE_FORMAT_WEEKDAYS
     ];
+
+    public const GROUP_FORMAT_HOURS = 'H:00:00';
+    public const GROUP_FORMAT_DAYS_HOURS = 'Y-m-d H:00';
 
     public const DATE_FORMAT_LIST = [
         self::DATE_FORMAT_HOURS_DAYS => '%H:00',
@@ -396,7 +400,7 @@ class CallGraphsSearch extends CallLogSearch
 
         $dateFormat = $this->getDateFormat($this->callGraphGroupBy) ?? $this->getDefaultDateFormat();
         if ((int)$this->callGraphGroupBy === self::DATE_FORMAT_WEEKS) {
-            return "concat(str_to_date(date_format(convert_tz(cl_call_created_dt, '+00:00', '".$timeZone."'), '%Y %v Monday'), '%x %v %W'), ' - ', str_to_date(date_format(convert_tz(cl_call_created_dt, '+00:00', '".$timeZone."'), '%Y %v Sunday'), '%x %v %W'))";
+            return "concat(str_to_date(date_format(convert_tz(cl_call_created_dt, '+00:00', '".$timeZone."'), '%Y %v Monday'), '%x %v %W'), '/', str_to_date(date_format(convert_tz(cl_call_created_dt, '+00:00', '".$timeZone."'), '%Y %v Sunday'), '%x %v %W'))";
         } if ((int)$this->callGraphGroupBy === self::DATE_FORMAT_WEEKDAYS){
             return "WEEKDAY(convert_tz(cl_call_created_dt, '+00:00', '".$timeZone."'))";
         } else {

@@ -130,6 +130,8 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
                     if (
                         selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION ?>
                         || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION_AVG ?>
+                        || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS_AVG ?>
+                        || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS ?>
                     ) {
                         indexes[+$(elem).val()].forEach( function (e) {
                             arr.push(e);
@@ -176,6 +178,8 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
                         if (
                             selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION ?>
                             || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION_AVG ?>
+                            || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS_AVG ?>
+                            || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS ?>
                         ) {
                             indexes[+$(elem).val()].forEach( function (e) {
                                 arr.push(e);
@@ -207,6 +211,8 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
                             if (
                                 selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION ?>
                                 || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION_AVG ?>
+                                || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS_AVG ?>
+                                || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS ?>
                             ) {
                                 indexes[+$(elem).val()].forEach( function (e) {
                                     arr.push(e);
@@ -247,6 +253,8 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
                             if (
                                 selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION ?>
                                 || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION_AVG ?>
+                                || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS_AVG ?>
+                                || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS ?>
                             ) {
                                 indexes[+$(elem).val()].forEach( function (e) {
                                     arr.push(e);
