@@ -8,57 +8,72 @@ use DatePeriod;
 
 class ChartTools
 {
-    public static function getHourRange( $start = 0, $end = 86400, $step = 3600, $format = 'H:i:s' ) {
+    /**
+     * @param int $start
+     * @param int $end
+     * @param int $step
+     * @param string $format
+     * @return array
+     */
+    public static function getHourRange($start = 0, $end = 86400, $step = 3600, $format = 'H:i')
+    {
         $times = array();
-        foreach ( range( $start, $end, $step ) as $timestamp ) {
-            $hour_mins = gmdate( 'H:i', $timestamp );
-            if ( ! empty( $format ) )
-                $times[$hour_mins] = gmdate( $format, $timestamp );
-            else $times[$hour_mins] = $hour_mins;
+        foreach (range($start, $end, $step) as $timestamp) {
+            $hour_mins = gmdate('H:i', $timestamp);
+            if (! empty($format)) {
+                $times[$hour_mins] = gmdate($format, $timestamp);
+            } else {
+                $times[$hour_mins] = $hour_mins;
+            }
         }
         return $times;
     }
 
-    public static function getHoursRange($first, $last, $step, $format) {
+    public static function getHoursRange($first, $last, $step, $format)
+    {
         $period = array();
-        $current = strtotime( $first );
-        $last = strtotime( $last );
-        while( $current <= $last ) {
-            $period[] = date( $format, $current );
-            $current = strtotime( $step, $current );
+        $current = strtotime($first);
+        $last = strtotime($last);
+        while ($current <= $last) {
+            $period[] = date($format, $current);
+            $current = strtotime($step, $current);
         }
         return $period;
     }
 
-    public static function getDaysRange( $first, $last, $step = '+1 day', $format = 'Y-m-d' ) {
+    public static function getDaysRange($first, $last, $step = '+1 day', $format = 'Y-m-d')
+    {
         $dates = array();
-        $current = strtotime( $first );
-        $last = strtotime( $last );
-        while( $current <= $last ) {
-            $dates[] = date( $format, $current );
-            $current = strtotime( $step, $current );
+        $current = strtotime($first);
+        $last = strtotime($last);
+        while ($current <= $last) {
+            $dates[] = date($format, $current);
+            $current = strtotime($step, $current);
         }
         return $dates;
     }
 
-    public static function getMonthsRange($start, $end) {
+    public static function getMonthsRange($start, $end, $format = 'Y-m')
+    {
         $startDate  = strtotime($start);
         $endDate    = strtotime($end);
-        $firstMonth = date('Y-m', $startDate);
-        $lastMonth  = date('Y-m', $endDate);
+        $firstMonth = date($format, $startDate);
+        $lastMonth  = date($format, $endDate);
         $months = array($firstMonth);
-        while($startDate < $endDate) {
+        while ($startDate < $endDate) {
             $startDate = strtotime(date('Y-m-d', $startDate).' +1 month');
-            if(date('Y-m', $startDate) != $lastMonth && ($startDate < $endDate))
-                $months[] = date('Y-m', $startDate);
+            if (date($format, $startDate) != $lastMonth && ($startDate < $endDate)) {
+                $months[] = date($format, $startDate);
+            }
         }
         if ($firstMonth != $lastMonth) {
-            $months[] = date('Y-m', $endDate);
+            $months[] = date($format, $endDate);
         }
         return $months;
     }
 
-    public static function getWeeksRange($start, $end){
+    public static function getWeeksRange($start, $end)
+    {
         $interval = new DateInterval('P1D');
         $dateRange = new DatePeriod($start, $interval, $end);
         $weekNumber = 1;
@@ -70,15 +85,26 @@ class ChartTools
             }
         }
         $weeksRanges = [];
-        foreach ($weeks as $week) {
-            $firstEle = reset($week);
-            $lastEle = end($week);
+        foreach ($weeks as $key => $week) {
+            if ($key == 1) {
+                $firstEle = $start->modify('last monday')->format('Y-m-d');
+            } else {
+                $firstEle = reset($week);
+            }
+
+            if ($key == count($weeks)) {
+                $lastEle = $end->modify('next sunday')->format('Y-m-d');
+            } else {
+                $lastEle = end($week);
+            }
+
             array_push($weeksRanges, $firstEle .'/'.$lastEle);
         }
         return $weeksRanges;
     }
 
-    public static function getWeek($periodName){
+    public static function getWeek($periodName)
+    {
         $week = [];
         $startWeek = strtotime("last monday -12", strtotime($periodName));
         $endWeek = strtotime("next sunday midnight -36", $startWeek);
@@ -88,11 +114,17 @@ class ChartTools
         return $week;
     }
 
-    public static function getCurrentMonth(){
+    public static function getCurrentMonth()
+    {
         $month = [];
         $month['start'] = strtotime('first day of this month noon');
         $month['end'] = strtotime('last day of this month noon -24');
         return $month;
+    }
+
+    public static function getWeekDaysRange()
+    {
+        return ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     }
 
     /* $start_week = strtotime("last monday noon", strtotime("today"));

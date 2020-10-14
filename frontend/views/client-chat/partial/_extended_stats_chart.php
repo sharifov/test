@@ -9,14 +9,13 @@
     <div id="myChart"></div>
     <script type="text/javascript">
         $(document).ready(function () {
-            //$('a[class^="export-full"]').off();
             var graphData = <?= $viewModel->preparedData ?>;
 
             google.charts.load('current', {'packages': ['corechart', 'bar']});
             google.charts.setOnLoadCallback(function () {
                 var totalCallsChart = new google.visualization.ColumnChart(document.getElementById('myChart'));
 
-                var colors = ['#8ec5ff', '#dd4b4e', '#587ca6'];
+                //var colors = ['#8ec5ff', '#dd4b4e', '#587ca6'];
 
                 var options = {
                     title: 'Dynamic of New Initiated Chats by Client / Agent',
@@ -62,8 +61,7 @@
                 };
 
                 var data = google.visualization.arrayToDataTable(graphData);
-                //data.addColumn({type: 'string', role: 'annotation'})
-                console.log(data)
+
                 totalCallsChart.draw(data, options);
 
                 $(window).on('resize', function () {

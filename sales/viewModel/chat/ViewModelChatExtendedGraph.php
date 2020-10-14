@@ -3,6 +3,7 @@
 
 namespace sales\viewModel\chat;
 
+use common\components\ChartTools;
 use sales\entities\chat\ChatExtendedGraphsSearch;
 use yii\data\ArrayDataProvider;
 use yii\helpers\ArrayHelper;
@@ -54,8 +55,33 @@ class ViewModelChatExtendedGraph
             ]);
         }
 
+        if ($this->chatExtendedGraphsSearch->graphGroupBy == ChatExtendedGraphsSearch::DATE_FORMAT_HOURS) {
+            $mappedData = $this->normalizeByHoursOnAxisX($mappedData);
+        }
+
+        if ($this->chatExtendedGraphsSearch->graphGroupBy == ChatExtendedGraphsSearch::DATE_FORMAT_DAYS) {
+            $mappedData = $this->normalizeByDaysOnAxisX($mappedData);
+        }
+
+        if ($this->chatExtendedGraphsSearch->graphGroupBy == ChatExtendedGraphsSearch::DATE_FORMAT_WEEKS) {
+            $mappedData = $this->normalizeByWeeksOnAxisX($mappedData);
+        }
+
         if ($this->chatExtendedGraphsSearch->graphGroupBy === ChatExtendedGraphsSearch::DATE_FORMAT_WEEKDAYS) {
             $mappedData = $this->setWeekDayName($mappedData);
+        }
+
+        if ($this->chatExtendedGraphsSearch->graphGroupBy === ChatExtendedGraphsSearch::DATE_FORMAT_MONTH) {
+            $mappedData = $this->setMonthName($mappedData);
+            $mappedData = $this->normalizeByMonthsOnAxisX($mappedData);
+        }
+
+        if ($this->chatExtendedGraphsSearch->graphGroupBy == ChatExtendedGraphsSearch::DATE_FORMAT_HOURS_DAYS) {
+            $mappedData = $this->normalizeByHoursOfDaysOnAxisX($mappedData);
+        }
+
+        if ($this->chatExtendedGraphsSearch->graphGroupBy == ChatExtendedGraphsSearch::DATE_FORMAT_WEEKDAYS) {
+            $mappedData = $this->normalizeByWeekDaysOnAxisX($mappedData);
         }
 
         $headers = [
@@ -75,6 +101,168 @@ class ViewModelChatExtendedGraph
      * @param array $data
      * @return array
      */
+    private function normalizeByHoursOnAxisX(array $data): array
+    {
+        $timeRange = explode(' - ', $this->chatExtendedGraphsSearch->createTimeRange);
+        $groupFormat = $this->chatExtendedGraphsSearch::GROUP_FORMAT_DAYS_HOURS;
+        $axisX = ChartTools::getHoursRange($timeRange[0], $timeRange[1], $step = '+1 hour', $groupFormat);
+        $defaultGroups = array_column($data, 0);
+        $normalizedData = $data;
+        foreach ($axisX as $point) {
+            if (in_array($point, $defaultGroups)) {
+                continue;
+            } else {
+                array_push($normalizedData, [$point, 0, 0, 0, 0]);
+            }
+        }
+
+        usort($normalizedData, function ($firstElement, $secondElement) {
+            $datetimeFirst = strtotime($firstElement[0]);
+            $datetimeSecond = strtotime($secondElement[0]);
+            return $datetimeFirst - $datetimeSecond;
+        });
+
+        return $normalizedData;
+    }
+    /**
+     * @param array $data
+     * @return array
+     */
+    private function normalizeByHoursOfDaysOnAxisX(array $data): array
+    {
+        $axisX = ChartTools::getHourRange();
+        $defaultGroups = array_column($data, 0);
+        $normalizedData = $data;
+        foreach ($axisX as $point) {
+            if (in_array($point, $defaultGroups)) {
+                continue;
+            } else {
+                array_push($normalizedData, [$point, 0, 0, 0, 0]);
+            }
+        }
+
+        usort($normalizedData, function ($firstElement, $secondElement) {
+            $datetimeFirst = strtotime($firstElement[0]);
+            $datetimeSecond = strtotime($secondElement[0]);
+            return $datetimeFirst - $datetimeSecond;
+        });
+
+        return $normalizedData;
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    private function normalizeByWeekDaysOnAxisX(array $data): array
+    {
+        $axisX = ChartTools::getWeekDaysRange();
+        $defaultGroups = array_column($data, 0);
+        $normalizedData = $data;
+        foreach ($axisX as $point) {
+            if (in_array($point, $defaultGroups)) {
+                continue;
+            } else {
+                array_push($normalizedData, [$point, 0, 0, 0, 0]);
+            }
+        }
+
+        usort($normalizedData, function ($a, $b) {
+            return date('N', strtotime($a[0])) - date('N', strtotime($b[0]));
+        });
+
+        return $normalizedData;
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    private function normalizeByDaysOnAxisX(array $data): array
+    {
+        $timeRange = explode(' - ', $this->chatExtendedGraphsSearch->createTimeRange);
+        $axisX = ChartTools::getDaysRange($timeRange[0], $timeRange[1]);
+        $defaultGroups = array_column($data, 0);
+        $normalizedData = $data;
+        foreach ($axisX as $point) {
+            if (in_array($point, $defaultGroups)) {
+                continue;
+            } else {
+                array_push($normalizedData, [$point, 0, 0, 0, 0]);
+            }
+        }
+
+        usort($normalizedData, function ($firstElement, $secondElement) {
+            $datetimeFirst = strtotime($firstElement[0]);
+            $datetimeSecond = strtotime($secondElement[0]);
+            return $datetimeFirst - $datetimeSecond;
+        });
+
+        return $normalizedData;
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     * @throws \Exception
+     */
+    private function normalizeByWeeksOnAxisX(array $data): array
+    {
+        $timeRange = explode(' - ', $this->chatExtendedGraphsSearch->createTimeRange);
+        $axisX = ChartTools::getWeeksRange(new \DateTime($timeRange[0]), new \DateTime($timeRange[1]));
+        $defaultGroups = array_column($data, 0);
+        $normalizedData = $data;
+        foreach ($axisX as $point) {
+            if (in_array($point, $defaultGroups)) {
+                continue;
+            } else {
+                array_push($normalizedData, [$point, 0, 0, 0, 0]);
+            }
+        }
+
+        usort($normalizedData, function ($firstElement, $secondElement) {
+            $firstCriteria = explode('/', $firstElement[0]);
+            $secondCriteria = explode('/', $secondElement[0]);
+            $datetimeFirst = strtotime($firstCriteria[0]);
+            $datetimeSecond = strtotime($secondCriteria[0]);
+            return $datetimeFirst - $datetimeSecond;
+        });
+
+        return $normalizedData;
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    private function normalizeByMonthsOnAxisX(array $data): array
+    {
+        $timeRange = explode(' - ', $this->chatExtendedGraphsSearch->createTimeRange);
+        $axisX = ChartTools::getMonthsRange($timeRange[0], $timeRange[1], 'Y-F');
+        $defaultGroups = array_column($data, 0);
+        $normalizedData = $data;
+
+        foreach ($axisX as $point) {
+            if (in_array($point, $defaultGroups)) {
+                continue;
+            } else {
+                array_push($normalizedData, [$point, 0, 0, 0, 0]);
+            }
+        }
+
+        usort($normalizedData, function ($firstElement, $secondElement) {
+            $datetimeFirst = strtotime($firstElement[0]);
+            $datetimeSecond = strtotime($secondElement[0]);
+            return $datetimeFirst - $datetimeSecond;
+        });
+
+        return $normalizedData;
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
     private function setWeekDayName(array $data): array
     {
         $week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -82,6 +270,20 @@ class ViewModelChatExtendedGraph
         foreach ($data as $key => $arr) {
             $firstKey = array_key_first($arr);
             $data[$key][$firstKey] = $week[$arr[$firstKey]];
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    private function setMonthName(array $data):array
+    {
+        foreach ($data as $key => $arr) {
+            $firstKey = array_key_first($arr);
+            $data[$key][$firstKey] = date('Y-F', strtotime($data[$key][$firstKey]));
         }
 
         return $data;
