@@ -24,8 +24,10 @@ class ClientChatRequestCreateJob implements JobInterface
             }
             $service = Yii::createObject(ClientChatRequestService::class);
             $service->processRequest($request);
-        } catch (\Throwable $throwable) {
-            AppHelper::throwableLogger($throwable, 'ClientChatRequestCreateJob:Execute:Throwable', false);
+        } catch (\RuntimeException | \DomainException | NotFoundException $e) {
+
+        } catch (\Throwable $e) {
+            AppHelper::throwableLogger($e, 'ClientChatRequestCreateJob:Execute:Throwable', false);
         }
     }
 }
