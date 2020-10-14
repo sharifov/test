@@ -559,6 +559,9 @@ class ClientChatController extends FController
     public function actionAjaxDataInfo(): string
     {
         $cchId = (int) Yii::$app->request->post('cchId');
+        if (!$cchId) {
+            $cchId = (int) Yii::$app->request->get('cchId');
+        }
 
         if (!Yii::$app->request->isAjax || !$cchId) {
             throw new BadRequestHttpException('Invalid parameters');
@@ -584,17 +587,20 @@ class ClientChatController extends FController
         $data[$requestSearch->formName()]['ccr_event'] = ClientChatRequest::EVENT_TRACK;
         $dataProviderRequest = $requestSearch->search($data);
         $dataProviderRequest->setPagination(['pageSize' => 40]);
+        $dataProviderRequest->pagination->params = array_merge(Yii::$app->request->get(), ['cchId' => $cchId]);
 
         if ($clientChat->cchClient) {
             $leadSearch = new LeadSearch();
             $data[$leadSearch->formName()]['client_id'] = $clientChat->cchClient->id;
             $data[$leadSearch->formName()]['project_id'] = $clientChat->cch_project_id;
             $leadDataProvider = $leadSearch->search($data);
+            $leadDataProvider->pagination->params = array_merge(Yii::$app->request->get(), ['cchId' => $cchId]);
 
             $casesSearch = new CasesSearch();
             $data[$casesSearch->formName()]['cs_client_id'] = $clientChat->cchClient->id;
             $data[$casesSearch->formName()]['cs_project_id'] = $clientChat->cch_project_id;
             $casesDataProvider = $casesSearch->search($data, Auth::user());
+            $casesDataProvider->pagination->params = array_merge(Yii::$app->request->get(), ['cchId' => $cchId]);
         }
 
         return $this->renderAjax('partial/_data_info', [
