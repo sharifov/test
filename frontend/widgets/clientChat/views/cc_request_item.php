@@ -16,6 +16,7 @@ $date = (int)$access['is_transfer'] ? $access['ccua_created_dt'] : $access['cch_
 	<div class="_cc-box-item">
 		<div class="_cc-client-info">
             <span class="_cc-client-name">
+                <span class="_cc_access_item_num"></span>
                 <i class="fa fa-user"></i>
                 <?= Html::encode($access['full_name'] ?: 'Guest-' . $access['cch_client_id']) ?>
             </span>

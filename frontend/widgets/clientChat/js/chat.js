@@ -32,7 +32,7 @@
         }
 
         this.refreshLoadMoreBtn = function () {
-            let itemsCounter = '(' + this.totalItems + ')';
+            let itemsCounter = '(' + (this.totalItems - this.db.data.length) + ')';
             btnLoadMoreRequests.html('Load More ' + itemsCounter).prop('disabled', false).removeClass('disabled');
         }
 
@@ -90,8 +90,9 @@
         if (this.db.data.length) {
             boxBody.html('');
             this.db.data.forEach((item) => {boxBody.append(item.html)});
+            this.numberItems();
             accessWg.attr('total-items', this.db.data.length).removeClass('inactive');
-            $('._cc_total_request_wrapper', accessWg).html(this.db.data.length);
+            $('._cc_total_request_wrapper', accessWg).html(this.totalItems);
             boxHeader.addClass('active');
             circleWrapper.addClass('active');
             wrapLoadMoreRequests.addClass('active');
@@ -102,14 +103,30 @@
         }
     }
 
+    Chat.prototype.numberItems = function () {
+        $('._cc-box-item-wrapper', boxBody).each( function (i, elem) {
+            $(elem).find('._cc_access_item_num').html('#' + (i+1));
+        });
+    }
+
     Chat.prototype.displayOneRequest = function (request) {
-        boxBody.append(request.html);
+        if (request.is_transfer) {
+            let oneTransferElem = $('#_client_chat_access_widget ._cc-box-item-wrapper[data-is-transfer="1"]').last();
+            if (oneTransferElem.length) {
+                oneTransferElem.after(request.html);
+            } else {
+                boxBody.prepend(request.html);
+            }
+        } else {
+            boxBody.append(request.html);
+        }
         accessWg.attr('total-items', this.db.data.length).removeClass('inactive');
-        $('._cc_total_request_wrapper', accessWg).html(this.db.data.length);
+        $('._cc_total_request_wrapper', accessWg).html(this.totalItems);
         boxHeader.addClass('active');
         circleWrapper.addClass('active');
         wrapLoadMoreRequests.addClass('active');
         this.refreshLoadMoreBtn();
+        this.numberItems();
         if (this.totalItems == this.db.data.length) {
             this.disableLoadMoreBtn();
         }
@@ -121,14 +138,14 @@
                 this.totalItems = parseInt(this.totalItems) - 1;
 
                 $('#ccr_'+chatId+'_'+userId).remove();
-                $('._cc_total_request_wrapper', accessWg).html(this.db.data.length);
+                $('._cc_total_request_wrapper', accessWg).html(this.totalItems);
+                this.numberItems();
 
                 if (this.totalItems != this.db.data.length) {
                     this.refreshLoadMoreBtn();
                 }
             })
             .then(() => {
-                console.log(this.totalItems);
                 if (!this.db.data.length && this.totalItems == 0) {
                     this.hasNoRequests();
                 } else if (!this.db.data.length && this.totalItems) {

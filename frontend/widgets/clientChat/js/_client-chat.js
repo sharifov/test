@@ -38,11 +38,7 @@ $(document).on('click', '._cc-access-action', function (e) {
 
     let actionBtns = $btn.closest('._cc-action').find('._cc-access-action');
 
-    let btnsHtml = [];
-
-    actionBtns.each(function (i, elem) {
-        btnsHtml[$(elem).attr('data-access-action')] = $(elem).html();
-    });
+    let btnHtml = $btn.html();
 
     $.ajax({
         url: url,
@@ -51,21 +47,24 @@ $(document).on('click', '._cc-access-action', function (e) {
         cache: false,
         dataType: 'json',
         beforeSend: function () {
-            $(actionBtns).prop('disabled', 'true').addClass('disabled').html('<i class="fa fa-spin fa-spinner"></i>');
+            $(actionBtns).prop('disabled', 'true').addClass('disabled');
+            $btn.html('<i class="fa fa-spin fa-spinner"></i>');
         },
         success: function (data) {
             if (!data.success) {
                 createNotify(data.notifyTitle, data.notifyMessage, data.notifyType);
                 actionBtns.each(function (i, elem) {
-                    $(elem).html(btnsHtml[$(elem).attr('data-access-action')]).removeClass('disabled').removeAttr('disabled');
+                    $(elem).removeClass('disabled').removeAttr('disabled');
                 });
+                $btn.html(btnHtml);
             }
         },
         error: function (xhr) {
             createNotify('Error', xhr.responseText, 'error');
             actionBtns.each(function (i, elem) {
-                $(elem).html(btnsHtml[$(elem).attr('data-access-action')]).removeClass('disabled').removeAttr('disabled');
+                $(elem).removeClass('disabled').removeAttr('disabled');
             });
+            $btn.html(btnHtml);
         },
     })
 })
