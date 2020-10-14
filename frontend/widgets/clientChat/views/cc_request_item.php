@@ -43,8 +43,12 @@ $date = (int)$access['is_transfer'] ? $access['ccua_created_dt'] : $access['cch_
                         <?php endif; ?>
                     </small>
                 </span>
+                <?php $period = round((time() - strtotime($date))); ?>
                 <span title="Relative Time">
-                <?php
+                    <i class="fa fa-clock-o"></i>
+                    <span data-moment="<?= $period ?>" class="_cc_request_relative_time">
+                    </span>
+                <?php /*
                     $timeSec = strtotime($date);
                     if ($timeSec >= (60 * 60 * 24)) {
                         echo '<i class="fa fa-clock-o"></i> ' . Yii::$app->formatter->asRelativeTime($timeSec);
@@ -52,7 +56,7 @@ $date = (int)$access['is_transfer'] ? $access['ccua_created_dt'] : $access['cch_
                         if ($formatter instanceof Formatter) {
                             echo $formatter->asTimer($date);
                         }
-                    }
+                    } */
                 ?>
                 </span>
             </div>

@@ -45,6 +45,14 @@
                     let _access = this.db.data.length > 0;
                     if (_ccWgStatus === 'true' && _access) {
                         toggleClientChatAccess();
+                        let interval = 60;
+                        setInterval(function () {
+                            $('._cc_request_relative_time').each( function (i, elem) {
+                                let seconds = +($(elem).attr('data-moment')) + interval;
+                                $(elem).attr('data-moment', seconds);
+                                $(elem).html(moment.duration(-seconds, 'seconds').humanize(true));
+                            });
+                        }, interval*1000);
                     }
                 }.bind(this))
                 .catch(() => {this.hasNoRequests()})
@@ -96,6 +104,7 @@
             boxHeader.addClass('active');
             circleWrapper.addClass('active');
             wrapLoadMoreRequests.addClass('active');
+            this.updateRequestsRelativeTime();
             this.refreshLoadMoreBtn();
         }
         if (this.totalItems == this.db.data.length) {
@@ -132,6 +141,12 @@
         }
     }
 
+    Chat.prototype.updateRequestsRelativeTime = function () {
+        $('._cc_request_relative_time').each( function (i, elem) {
+            $(elem).html(moment.duration(-$(elem).data('moment'), 'seconds').humanize(true));
+        });
+    }
+
     Chat.prototype.removeRequest = function (chatId, userId, chatUserAccessId) {
         this.db.deleteByRequestId(chatUserAccessId)
             .then(() => {
@@ -163,6 +178,7 @@
             .then(() => {this.displayOneRequest(request)})
             .then(() => {
                 window.enableTimer();
+                this.updateRequestsRelativeTime();
                 openWidget();
                 this.countAddedItems += 1;
             })

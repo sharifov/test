@@ -13,7 +13,7 @@ class ClientChatAsset extends AssetBundle
     ];
 
     public $js = [
-        'js/chat.js?v1.0',
+        'js/chat.js?v1.0.1',
         'js/datastore.js?v1.0',
         'js/_client-chat.js?v1.0',
     ];
