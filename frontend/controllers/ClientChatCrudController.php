@@ -7,6 +7,7 @@ use sales\auth\Auth;
 use sales\model\clientChat\entity\search\ClientChatQaSearch;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatFeedback\entity\ClientChatFeedbackSearch;
+use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatMessage\entity\search\ClientChatMessageSearch;
 use sales\model\clientChatNote\entity\ClientChatNoteSearch;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
@@ -207,6 +208,7 @@ class ClientChatCrudController extends FController
                 if ($clientChat = self::findModel($value)) {
                     try {
                         $clientChat->delete();
+                        ClientChatMessage::removeAllMessages($value);
                         $result[] = $value;
                     } catch (Throwable $throwable) {
                         Yii::warning(
