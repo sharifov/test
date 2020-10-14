@@ -162,20 +162,6 @@ class ClientChatCrudController extends FController
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
 
-            /* TODO:: FOR TEST:: must by remove  */
-            if ($model->isIdle() && $userIds = UserConnection::getUsersByControllerAction('client-chat', 'index')) {
-                $count = ClientChat::find()->byStatus(ClientChat::STATUS_IDLE)->count();
-
-                foreach ($userIds as $userId) {
-                    if ($pubChannel = UserConnection::getLastUserChannel($userId)) {
-                        Notifications::pub(
-                            [$pubChannel],
-                            'updateCountFreeToTake',
-                            ['count' => (int) $count]
-                        );
-                    }
-                }
-            }
             return $this->redirect(['view', 'id' => $model->cch_id]);
         }
 
