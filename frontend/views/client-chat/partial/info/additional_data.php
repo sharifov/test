@@ -7,7 +7,7 @@ use yii\widgets\DetailView;
 
 ?>
 
-<?php if (!$clientChatVisitorData): ?>
+<?php if ($clientChatVisitorData): ?>
     <?= DetailView::widget([
         'model' => $clientChatVisitorData,
         'attributes' => [
