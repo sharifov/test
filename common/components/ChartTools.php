@@ -92,7 +92,12 @@ class ChartTools
                 $firstEle = reset($week);
             }
 
-            $lastEle = end($week);
+            if ($key == count($weeks)) {
+                $lastEle = $end->modify('next sunday')->format('Y-m-d');
+            } else {
+                $lastEle = end($week);
+            }
+
             array_push($weeksRanges, $firstEle .'/'.$lastEle);
         }
         return $weeksRanges;

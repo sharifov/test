@@ -47,6 +47,9 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
         self::DATE_FORMAT_WEEKDAYS => '%W',
     ];
 
+    public const GROUP_FORMAT_HOURS = 'H:00:00';
+    public const GROUP_FORMAT_DAYS_HOURS = 'Y-m-d H:00';
+
     public function rules(): array
     {
         return [
@@ -262,7 +265,7 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
         } else if ($this->graphGroupBy === self::DATE_FORMAT_DAYS){
             return "date_format(cch_created_dt, '$format')";
         } else if ($this->graphGroupBy === self::DATE_FORMAT_WEEKS){
-            return "concat(str_to_date(date_format(cch_created_dt, '%Y %v Monday'), '%x %v %W'), ' - ', str_to_date(date_format(cch_created_dt, '%Y %v Sunday'), '%x %v %W'))";
+            return "concat(str_to_date(date_format(cch_created_dt, '%Y %v Monday'), '%x %v %W'), '/', str_to_date(date_format(cch_created_dt, '%Y %v Sunday'), '%x %v %W'))";
         } else if ($this->graphGroupBy === self::DATE_FORMAT_MONTH){
             return "date_format(cch_created_dt, '$format')";
         } else if ($this->graphGroupBy === self::DATE_FORMAT_HOURS_DAYS){
