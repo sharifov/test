@@ -130,6 +130,14 @@ class ClientChatAccessMessage
         ];
     }
 
+    public static function chatInProgress(int $chatId): array
+    {
+        return [
+            'message' => 'Chat changed status to "in progress".',
+            'cchId' => $chatId,
+        ];
+    }
+
     private static function refresh(int $userId): array
     {
         $widget = ClientChatAccessWidget::getInstance();

@@ -3,7 +3,9 @@
 namespace console\controllers;
 
 use common\models\Employee;
+use common\models\Notifications;
 use common\models\UserProfile;
+use frontend\widgets\clientChat\ClientChatAccessMessage;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\model\clientChat\entity\ClientChat;
@@ -369,6 +371,10 @@ class ClientChatController extends Controller
                 /** @var ClientChat $clientChat */
                 $clientChat->inProgress(null, ClientChatStatusLog::ACTION_AUTO_REVERT_TO_PROGRESS);
                 $this->clientChatRepository->save($clientChat);
+
+                $data = ClientChatAccessMessage::chatInProgress($clientChat->cch_id);
+                Notifications::pub(['chat-' . $clientChat->cch_id], 'refreshChatPage', ['data' => $data]);
+
                 $processed++;
             } catch (\Throwable $throwable) {
                 Yii::error(
