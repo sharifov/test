@@ -348,7 +348,8 @@ class ClientChatSearch extends ClientChat
 
         $query = ClientChat::find()->select([
             ClientChat::tableName() . '.*',
-            new Expression('ifnull(trim(concat_ws(\' \', client.first_name, client.last_name)), concat(\'Guest-\', cch_id)) as client_full_name'),
+            new Expression('trim(concat_ws(\' \', client.first_name, client.last_name)) as client_full_name'),
+            'client_id' => 'client.id',
             'dep_name',
             'project.name as project_name',
             'ccc_name',

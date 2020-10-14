@@ -67,528 +67,526 @@ use yii\helpers\VarDumper;
  */
 class ClientChatService
 {
-	/**
-	 * @var ClientChatChannelRepository
-	 */
-	private ClientChatChannelRepository $clientChatChannelRepository;
-	/**
-	 * @var ClientChatRepository
-	 */
-	private ClientChatRepository $clientChatRepository;
-	/**
-	 * @var TransactionManager
-	 */
-	private TransactionManager $transactionManager;
-	/**
-	 * @var VisitorLogRepository
-	 */
-	private VisitorLogRepository $visitorLogRepository;
-	/**
-	 * @var ClientChatUserAccessRepository
-	 */
-	private ClientChatUserAccessRepository $clientChatUserAccessRepository;
-	/**
-	 * @var ClientChatVisitorRepository
-	 */
-	private ClientChatVisitorRepository $clientChatVisitorRepository;
-	/**
-	 * @var ClientChatLeadRepository
-	 */
-	private ClientChatLeadRepository $clientChatLeadRepository;
-	/**
-	 * @var ClientChatCaseRepository
-	 */
-	private ClientChatCaseRepository $clientChatCaseRepository;
-	/**
-	 * @var ClientManageService
-	 */
-	private ClientManageService $clientManageService;
-	/**
-	 * @var ClientChatVisitorDataRepository
-	 */
-	private ClientChatVisitorDataRepository $clientChatVisitorDataRepository;
-	/**
-	 * @var ClientChatRequestRepository
-	 */
-	private ClientChatRequestRepository $clientChatRequestRepository;
-	/**
-	 * @var ClientChatUserChannelRepository
-	 */
-	private ClientChatUserChannelRepository $clientChatUserChannelRepository;
-	/**
-	 * @var ClientChatNoteRepository
-	 */
-	private ClientChatNoteRepository $clientChatNoteRepository;
-	/**
-	 * @var ClientChatStatusLogRepository
-	 */
-	private ClientChatStatusLogRepository $clientChatStatusLogRepository;
+    /**
+     * @var ClientChatChannelRepository
+     */
+    private ClientChatChannelRepository $clientChatChannelRepository;
+    /**
+     * @var ClientChatRepository
+     */
+    private ClientChatRepository $clientChatRepository;
+    /**
+     * @var TransactionManager
+     */
+    private TransactionManager $transactionManager;
+    /**
+     * @var VisitorLogRepository
+     */
+    private VisitorLogRepository $visitorLogRepository;
+    /**
+     * @var ClientChatUserAccessRepository
+     */
+    private ClientChatUserAccessRepository $clientChatUserAccessRepository;
+    /**
+     * @var ClientChatVisitorRepository
+     */
+    private ClientChatVisitorRepository $clientChatVisitorRepository;
+    /**
+     * @var ClientChatLeadRepository
+     */
+    private ClientChatLeadRepository $clientChatLeadRepository;
+    /**
+     * @var ClientChatCaseRepository
+     */
+    private ClientChatCaseRepository $clientChatCaseRepository;
+    /**
+     * @var ClientManageService
+     */
+    private ClientManageService $clientManageService;
+    /**
+     * @var ClientChatVisitorDataRepository
+     */
+    private ClientChatVisitorDataRepository $clientChatVisitorDataRepository;
+    /**
+     * @var ClientChatRequestRepository
+     */
+    private ClientChatRequestRepository $clientChatRequestRepository;
+    /**
+     * @var ClientChatUserChannelRepository
+     */
+    private ClientChatUserChannelRepository $clientChatUserChannelRepository;
+    /**
+     * @var ClientChatNoteRepository
+     */
+    private ClientChatNoteRepository $clientChatNoteRepository;
+    /**
+     * @var ClientChatStatusLogRepository
+     */
+    private ClientChatStatusLogRepository $clientChatStatusLogRepository;
 
     private ClientChatMessageService $clientChatMessageService;
 
     private ClientChatUnreadRepository $clientChatUnreadRepository;
 
     public function __construct(
-		ClientChatChannelRepository $clientChatChannelRepository,
-		ClientChatRepository $clientChatRepository,
-		TransactionManager $transactionManager,
-		VisitorLogRepository $visitorLogRepository,
-		ClientChatUserAccessRepository $clientChatUserAccessRepository,
-		ClientChatVisitorRepository $clientChatVisitorRepository,
-		ClientChatLeadRepository $clientChatLeadRepository,
-		ClientChatCaseRepository $clientChatCaseRepository,
-		ClientManageService $clientManageService,
-		ClientChatVisitorDataRepository $clientChatVisitorDataRepository,
-		ClientChatRequestRepository $clientChatRequestRepository,
-		ClientChatUserChannelRepository $clientChatUserChannelRepository,
-		ClientChatNoteRepository $clientChatNoteRepository,
-		ClientChatStatusLogRepository $clientChatStatusLogRepository,
+        ClientChatChannelRepository $clientChatChannelRepository,
+        ClientChatRepository $clientChatRepository,
+        TransactionManager $transactionManager,
+        VisitorLogRepository $visitorLogRepository,
+        ClientChatUserAccessRepository $clientChatUserAccessRepository,
+        ClientChatVisitorRepository $clientChatVisitorRepository,
+        ClientChatLeadRepository $clientChatLeadRepository,
+        ClientChatCaseRepository $clientChatCaseRepository,
+        ClientManageService $clientManageService,
+        ClientChatVisitorDataRepository $clientChatVisitorDataRepository,
+        ClientChatRequestRepository $clientChatRequestRepository,
+        ClientChatUserChannelRepository $clientChatUserChannelRepository,
+        ClientChatNoteRepository $clientChatNoteRepository,
+        ClientChatStatusLogRepository $clientChatStatusLogRepository,
         ClientChatMessageService $clientChatMessageService,
         ClientChatUnreadRepository $clientChatUnreadRepository
-	){
-		$this->clientChatChannelRepository = $clientChatChannelRepository;
-		$this->clientChatRepository = $clientChatRepository;
-		$this->transactionManager = $transactionManager;
-		$this->visitorLogRepository = $visitorLogRepository;
-		$this->clientChatUserAccessRepository = $clientChatUserAccessRepository;
-		$this->clientChatVisitorRepository = $clientChatVisitorRepository;
-		$this->clientChatLeadRepository = $clientChatLeadRepository;
-		$this->clientChatCaseRepository = $clientChatCaseRepository;
-		$this->clientManageService = $clientManageService;
-		$this->clientChatVisitorDataRepository = $clientChatVisitorDataRepository;
-		$this->clientChatRequestRepository = $clientChatRequestRepository;
-		$this->clientChatUserChannelRepository = $clientChatUserChannelRepository;
-		$this->clientChatNoteRepository = $clientChatNoteRepository;
-		$this->clientChatStatusLogRepository = $clientChatStatusLogRepository;
+    ) {
+        $this->clientChatChannelRepository = $clientChatChannelRepository;
+        $this->clientChatRepository = $clientChatRepository;
+        $this->transactionManager = $transactionManager;
+        $this->visitorLogRepository = $visitorLogRepository;
+        $this->clientChatUserAccessRepository = $clientChatUserAccessRepository;
+        $this->clientChatVisitorRepository = $clientChatVisitorRepository;
+        $this->clientChatLeadRepository = $clientChatLeadRepository;
+        $this->clientChatCaseRepository = $clientChatCaseRepository;
+        $this->clientManageService = $clientManageService;
+        $this->clientChatVisitorDataRepository = $clientChatVisitorDataRepository;
+        $this->clientChatRequestRepository = $clientChatRequestRepository;
+        $this->clientChatUserChannelRepository = $clientChatUserChannelRepository;
+        $this->clientChatNoteRepository = $clientChatNoteRepository;
+        $this->clientChatStatusLogRepository = $clientChatStatusLogRepository;
         $this->clientChatMessageService = $clientChatMessageService;
         $this->clientChatUnreadRepository = $clientChatUnreadRepository;
     }
 
-	/**
-	 * @param ClientChat $clientChat
-	 * @param int $channelId
-	 * @return ClientChatChannel
-	 */
-	public function assignClientChatChannel(ClientChat $clientChat, int $channelId): ClientChatChannel
-	{
-		try {
-			$clientChatChannel = $this->clientChatChannelRepository->find($channelId);
-		} catch (NotFoundException $e) {
-			$clientChatChannel = $this->clientChatChannelRepository->findDefaultByProject((int)$clientChat->cch_project_id);
-		}
-		$clientChat->cch_channel_id = $clientChatChannel->ccc_id;
-		return $clientChatChannel;
-	}
+    /**
+     * @param ClientChat $clientChat
+     * @param int $channelId
+     * @return ClientChatChannel
+     */
+    public function assignClientChatChannel(ClientChat $clientChat, int $channelId): ClientChatChannel
+    {
+        try {
+            $clientChatChannel = $this->clientChatChannelRepository->find($channelId);
+        } catch (NotFoundException $e) {
+            $clientChatChannel = $this->clientChatChannelRepository->findDefaultByProject((int)$clientChat->cch_project_id);
+        }
+        $clientChat->cch_channel_id = $clientChatChannel->ccc_id;
+        return $clientChatChannel;
+    }
 
-	/**
-	 * @param ClientChat $clientChat
-	 * @param ClientChatChannel $channel
-	 */
-	public function sendRequestToUsers(ClientChat $clientChat, ClientChatChannel $channel): void
-	{
-		$userChannel = ClientChatUserChannel::find()->byChannelId($channel->ccc_id)->onlineUsers()->all();
+    /**
+     * @param ClientChat $clientChat
+     * @param ClientChatChannel $channel
+     */
+    public function sendRequestToUsers(ClientChat $clientChat, ClientChatChannel $channel): void
+    {
+        $userChannel = ClientChatUserChannel::find()->byChannelId($channel->ccc_id)->onlineUsers()->all();
 
-		if ($userChannel) {
-			/** @var ClientChatUserChannel $item */
-			foreach ($userChannel as $item) {
-				$this->sendRequestToUser($clientChat, $item);
-			}
-		}
-	}
+        if ($userChannel) {
+            /** @var ClientChatUserChannel $item */
+            foreach ($userChannel as $item) {
+                $this->sendRequestToUser($clientChat, $item);
+            }
+        }
+    }
 
-	/**
-	 * @param ClientChat $clientChat
-	 * @param ClientChatUserChannel $clientChatUserChannel
-	 */
-	public function sendRequestToUser(ClientChat $clientChat, ClientChatUserChannel $clientChatUserChannel): void
-	{
-		if ($clientChat->cch_owner_user_id !== $clientChatUserChannel->ccuc_user_id && $clientChatUserChannel->ccucUser->userProfile && $clientChatUserChannel->ccucUser->userProfile->isRegisteredInRc()) {
-			$clientChatUserAccess = ClientChatUserAccess::create($clientChat->cch_id, $clientChatUserChannel->ccuc_user_id);
-			$clientChatUserAccess->pending();
-			$this->clientChatUserAccessRepository->save($clientChatUserAccess, $clientChat);
-		}
-	}
+    /**
+     * @param ClientChat $clientChat
+     * @param ClientChatUserChannel $clientChatUserChannel
+     */
+    public function sendRequestToUser(ClientChat $clientChat, ClientChatUserChannel $clientChatUserChannel): void
+    {
+        if ($clientChat->cch_owner_user_id !== $clientChatUserChannel->ccuc_user_id && $clientChatUserChannel->ccucUser->userProfile && $clientChatUserChannel->ccucUser->userProfile->isRegisteredInRc()) {
+            $clientChatUserAccess = ClientChatUserAccess::create($clientChat->cch_id, $clientChatUserChannel->ccuc_user_id);
+            $clientChatUserAccess->pending();
+            $this->clientChatUserAccessRepository->save($clientChatUserAccess, $clientChat);
+        }
+    }
 
-	/**
-	 * @param string $rid
-	 * @param string $userId
-	 * @throws \yii\httpclient\Exception
-	 */
-	public function assignAgentToRcChannel(string $rid, string $userId): void
-	{
-		$response = \Yii::$app->chatBot->assignAgent($rid, $userId);
-		if ($response['error']) {
-			throw new \RuntimeException('[Chat Bot Assign Agent] ' . $response['error']['message'] ?? 'Unknown error...', ClientChatCodeException::RC_ASSIGN_AGENT_FAILED);
-		}
-	}
+    /**
+     * @param string $rid
+     * @param string $userId
+     * @throws \yii\httpclient\Exception
+     */
+    public function assignAgentToRcChannel(string $rid, string $userId): void
+    {
+        $response = \Yii::$app->chatBot->assignAgent($rid, $userId);
+        if ($response['error']) {
+            throw new \RuntimeException('[Chat Bot Assign Agent] ' . $response['error']['message'] ?? 'Unknown error...', ClientChatCodeException::RC_ASSIGN_AGENT_FAILED);
+        }
+    }
 
-	public function createByAgent(RealTimeStartChatForm $form, int $ownerId): void
-	{
-		$_self = $this;
-		try {
+    public function createByAgent(RealTimeStartChatForm $form, int $ownerId): void
+    {
+        $_self = $this;
+        try {
+            $redis = \Yii::$app->redis;
+            $key = $form->visitorId;
 
-			$redis = \Yii::$app->redis;
-			$key = $form->visitorId;
+            if (!$redis->get($key)) {
+                $redis->setnx($key, true);
+            } else {
+                throw new \RuntimeException('This action is currently being taken by another agent.', ClientChatCodeException::CC_REAL_TIME_ACTION_TAKEN);
+            }
 
-			if (!$redis->get($key)) {
-				$redis->setnx($key, true);
-			} else {
-				throw new \RuntimeException('This action is currently being taken by another agent.', ClientChatCodeException::CC_REAL_TIME_ACTION_TAKEN);
-			}
+            if (!$userProfile = UserProfile::findOne(['up_user_id' => $ownerId])) {
+                throw new NotFoundException('User Profile is not found');
+            }
+            if (!$userProfile->isRegisteredInRc()) {
+                throw new \DomainException('You dont have rocketchat credentials');
+            }
+            $channel = $_self->clientChatChannelRepository->find($form->channelId);
 
-			if (!$userProfile = UserProfile::findOne(['up_user_id' => $ownerId])) {
-				throw new NotFoundException('User Profile is not found');
-			}
-			if (!$userProfile->isRegisteredInRc()) {
-				throw new \DomainException('You dont have rocketchat credentials');
-			}
-			$channel = $_self->clientChatChannelRepository->find($form->channelId);
+            $department = Department::find()->select(['dep_name'])->where(['dep_id' => $channel->ccc_dep_id])->asArray()->one();
+            if (!$department) {
+                throw new \RuntimeException('Cannot create room: department data is not found');
+            }
 
-			$department = Department::find()->select(['dep_name'])->where(['dep_id' => $channel->ccc_dep_id])->asArray()->one();
-			if (!$department) {
-				throw new \RuntimeException('Cannot create room: department data is not found');
-			}
+            $clientChatRequest = ClientChatRequest::createByAgent($form);
+            $_self->clientChatRequestRepository->save($clientChatRequest);
+            $client = $_self->clientManageService->getOrCreateByClientChatRequest($clientChatRequest, (int)$form->projectId);
 
-			$clientChatRequest = ClientChatRequest::createByAgent($form);
-			$_self->clientChatRequestRepository->save($clientChatRequest);
-			$client = $_self->clientManageService->getOrCreateByClientChatRequest($clientChatRequest, (int)$form->projectId);
+            $activeChatExist = ClientChat::find()->byChannel($channel->ccc_id)->withOwner()->byClientId($client->id)->notClosed()->exists();
+            if ($activeChatExist) {
+                throw new \DomainException('This visitor is already chatting with agent in ' . $department['dep_name'] . ' department');
+            }
 
-			$activeChatExist = ClientChat::find()->byChannel($channel->ccc_id)->withOwner()->byClientId($client->id)->notClosed()->exists();
-			if ($activeChatExist) {
-				throw new \DomainException('This visitor is already chatting with agent in ' . $department['dep_name'] . ' department');
-			}
+            $clientChat = $_self->clientChatRepository->getOrCreateByRequest($clientChatRequest, ClientChat::SOURCE_TYPE_AGENT);
 
-			$clientChat = $_self->clientChatRepository->getOrCreateByRequest($clientChatRequest, ClientChat::SOURCE_TYPE_AGENT);
+            $dispatcher = \Yii::createObject(DeferredEventDispatcher::class);
+            $dispatcher->defer();
 
-			$dispatcher = \Yii::createObject(DeferredEventDispatcher::class);
-			$dispatcher->defer();
+            if (!$clientChat->cch_client_id) {
+                $clientChat->cch_client_id = $client->id;
+            }
 
-			if (!$clientChat->cch_client_id) {
-				$clientChat->cch_client_id = $client->id;
-			}
+            $clientChat->cch_channel_id = $channel->ccc_id;
+            $clientChat->cch_project_id = $channel->ccc_project_id;
+            $clientChat->cch_owner_user_id = $ownerId;
+            $clientChat->cch_client_online = 1;
+            $clientChat->pending($ownerId, ClientChatStatusLog::ACTION_OPEN_BY_AGENT);
+            $this->clientChatRepository->save($clientChat);
 
-			$clientChat->cch_channel_id = $channel->ccc_id;
-			$clientChat->cch_project_id = $channel->ccc_project_id;
-			$clientChat->cch_owner_user_id = $ownerId;
-			$clientChat->cch_client_online = 1;
-			$clientChat->pending($ownerId, ClientChatStatusLog::ACTION_OPEN_BY_AGENT);
-			$this->clientChatRepository->save($clientChat);
+            $this->transactionManager->wrap(static function () use ($form, $ownerId, $_self, $department, $userProfile, $clientChatRequest, $clientChat) {
+                $visitorRcId = $clientChatRequest->getClientRcId();
+                try {
+                    $visitorData = $_self->clientChatVisitorDataRepository->findByVisitorRcId($visitorRcId);
+                    if (!$_self->clientChatVisitorRepository->exists($clientChat->cch_id, $visitorData->cvd_id)) {
+                        $_self->clientChatVisitorRepository->create($clientChat->cch_id, $visitorData->cvd_id, $clientChat->cch_client_id);
+                    }
+                } catch (NotFoundException $e) {
+                    $visitorData = $_self->clientChatVisitorDataRepository->createByVisitorId($visitorRcId);
+                    $_self->clientChatVisitorRepository->create($clientChat->cch_id, $visitorData->cvd_id, $clientChat->cch_client_id);
+                }
 
-			$this->transactionManager->wrap(static function () use ($form, $ownerId, $_self, $department, $userProfile, $clientChatRequest, $clientChat) {
-				$visitorRcId = $clientChatRequest->getClientRcId();
-				try {
-					$visitorData = $_self->clientChatVisitorDataRepository->findByVisitorRcId($visitorRcId);
-					if (!$_self->clientChatVisitorRepository->exists($clientChat->cch_id, $visitorData->cvd_id)) {
-						$_self->clientChatVisitorRepository->create($clientChat->cch_id, $visitorData->cvd_id, $clientChat->cch_client_id);
-					}
-				} catch (NotFoundException $e) {
-					$visitorData = $_self->clientChatVisitorDataRepository->createByVisitorId($visitorRcId);
-					$_self->clientChatVisitorRepository->create($clientChat->cch_id, $visitorData->cvd_id, $clientChat->cch_client_id);
-				}
+                $userChannel = $_self->clientChatUserChannelRepository->findByPrimaryKeys($ownerId, $form->channelId);
 
-				$userChannel = $_self->clientChatUserChannelRepository->findByPrimaryKeys($ownerId, $form->channelId);
+                $clientChatUserAccess = ClientChatUserAccess::create($clientChat->cch_id, $userChannel->ccuc_user_id);
+                $clientChatUserAccess->accept();
+                $_self->clientChatUserAccessRepository->save($clientChatUserAccess, $clientChat);
 
-				$clientChatUserAccess = ClientChatUserAccess::create($clientChat->cch_id, $userChannel->ccuc_user_id);
-				$clientChatUserAccess->accept();
-				$_self->clientChatUserAccessRepository->save($clientChatUserAccess, $clientChat);
+                $rid = $_self->createRcRoom($form->visitorId, (string)$clientChat->cch_channel_id, $form->message, $userProfile->up_rc_user_id, $userProfile->up_rc_auth_token);
 
-				$rid = $_self->createRcRoom($form->visitorId, (string)$clientChat->cch_channel_id, $form->message, $userProfile->up_rc_user_id, $userProfile->up_rc_auth_token);
+                $clientChat->cch_rid = $rid;
+                $_self->clientChatRepository->save($clientChat);
+            });
 
-				$clientChat->cch_rid = $rid;
-				$_self->clientChatRepository->save($clientChat);
-			});
+            $redis->del($key);
+        } catch (\DomainException | \RuntimeException $e) {
+            if (!ClientChatCodeException::isActionTaken($e)) {
+                $redis->del($key);
+            }
 
-			$redis->del($key);
-		} catch (\DomainException | \RuntimeException $e) {
-			if (!ClientChatCodeException::isActionTaken($e)) {
-				$redis->del($key);
-			}
+            if (isset($clientChat)) {
+                $this->clientChatRepository->delete($clientChat);
+            }
+            throw $e;
+        } catch (\Throwable $e) {
+            $redis->del($key);
+            throw $e;
+        }
+    }
 
-			if (isset($clientChat)) {
-				$this->clientChatRepository->delete($clientChat);
-			}
-			throw $e;
-		} catch (\Throwable $e) {
-			$redis->del($key);
-			throw $e;
-		}
-	}
+    /**
+     * @param ClientChatTransferForm $form
+     * @param Employee $user
+     * @return Department
+     * @throws \Throwable
+     */
+    public function transfer(ClientChatTransferForm $form, Employee $user): ClientChatChannel
+    {
+        return $this->transactionManager->wrap(function () use ($form, $user) {
+            $clientChat = $this->clientChatRepository->findById($form->chatId);
 
-	/**
-	 * @param ClientChatTransferForm $form
-	 * @param Employee $user
-	 * @return Department
-	 * @throws \Throwable
-	 */
-	public function transfer(ClientChatTransferForm $form, Employee $user): ClientChatChannel
-	{
-		return $this->transactionManager->wrap( function () use ($form, $user) {
-			$clientChat = $this->clientChatRepository->findById($form->chatId);
-
-			$transferRule = new ClientChatChannelTransferRule();
-			if (!$transferRule->can($clientChat->cch_channel_id, $form->channelId)) {
+            $transferRule = new ClientChatChannelTransferRule();
+            if (!$transferRule->can($clientChat->cch_channel_id, $form->channelId)) {
                 throw new \DomainException('Cant transfer to channel with other project');
             }
 
-			if ($clientChat->isClosed()) {
-				throw new \DomainException('It’s not possible to transfer the chat to another department because it is in the "Closed" status');
-			}
+            if ($clientChat->isClosed()) {
+                throw new \DomainException('It’s not possible to transfer the chat to another department because it is in the "Closed" status');
+            }
 
-//			if ($clientChat->cch_dep_id === $form->depId && !$form->agentId) {
-//				throw new \DomainException('Chat already assigned to this department; Choose another;');
-//			}
+            //			if ($clientChat->cch_dep_id === $form->depId && !$form->agentId) {
+            //				throw new \DomainException('Chat already assigned to this department; Choose another;');
+            //			}
 
-			foreach ($form->agentId as $agentId) {
-				if ($clientChat->cch_owner_user_id === $agentId) {
-					throw new \DomainException($clientChat->cchOwnerUser->nickname . ' is already the owner of this chat.');
-				}
-			}
+            foreach ($form->agentId as $agentId) {
+                if ($clientChat->cch_owner_user_id === $agentId) {
+                    throw new \DomainException($clientChat->cchOwnerUser->nickname . ' is already the owner of this chat.');
+                }
+            }
 
-			if (!$clientChat->ccv || !$clientChat->ccv->ccvCvd || !$clientChat->ccv->ccvCvd->cvd_visitor_rc_id) {
-				throw new \RuntimeException('Visitor RC id is not found');
-			}
+            if (!$clientChat->ccv || !$clientChat->ccv->ccvCvd || !$clientChat->ccv->ccvCvd->cvd_visitor_rc_id) {
+                throw new \RuntimeException('Visitor RC id is not found');
+            }
 
-			$clientChatChannel = $this->clientChatChannelRepository->find($form->channelId);
+            $clientChatChannel = $this->clientChatChannelRepository->find($form->channelId);
 
-			$activeChatExists = ClientChat::find()->byChannel($clientChatChannel->ccc_id)->byClientId($clientChat->cch_client_id)->expectOwner($clientChat->cch_owner_user_id)->active()->exists();
+            $activeChatExists = ClientChat::find()->byChannel($clientChatChannel->ccc_id)->byClientId($clientChat->cch_client_id)->expectOwner($clientChat->cch_owner_user_id)->active()->exists();
 
-			if ($activeChatExists && !$clientChatChannel->isAllowedTransferToChannel()) {
-				throw new \DomainException('Client already has active chat in this department');
-			}
+            if ($activeChatExists && !$clientChatChannel->isAllowedTransferToChannel()) {
+                throw new \DomainException('Client already has active chat in this department');
+            }
 
-			$clientChat->transfer($user->id, ClientChatStatusLog::ACTION_TRANSFER, $form->reasonId, $form->comment);
-			$clientChat->cch_channel_id = $clientChatChannel->ccc_id;
-			$this->clientChatRepository->save($clientChat);
+            $clientChat->transfer($user->id, ClientChatStatusLog::ACTION_TRANSFER, $form->reasonId, $form->comment);
+            $clientChat->cch_channel_id = $clientChatChannel->ccc_id;
+            $this->clientChatRepository->save($clientChat);
 
-			if ($form->isAgentTransfer()) {
-				foreach ($form->agentId as $agentId) {
-					$userChannel = ClientChatUserChannel::find()->byChannelId($clientChatChannel->ccc_id)->byUserId($agentId)->one();
-					if ($userChannel) {
-						try {
-							$this->sendRequestToUser($clientChat, $userChannel);
-						} catch (\RuntimeException $e) {
-							\Yii::error('Send request to user ' . $userChannel->ccuc_user_id . ' failed... ' . $e->getMessage() . '; File: ' . $e->getFile() . '; Line: ' . $e->getLine(), 'ClientChatService::transfer::RuntimeException');
-							throw $e;
-						}
-					}
-				}
-				$agentNames = Employee::find()->select(['nickname'])->where(['id' => $form->agentId])->asArray()->column();
-				$transferTo = implode(', ', $agentNames) . ' agent';
-			} else {
-				$this->sendRequestToUsers($clientChat, $clientChatChannel);
-				$transferTo = $clientChatChannel->ccc_name . ' channel';
-			}
+            if ($form->isAgentTransfer()) {
+                foreach ($form->agentId as $agentId) {
+                    $userChannel = ClientChatUserChannel::find()->byChannelId($clientChatChannel->ccc_id)->byUserId($agentId)->one();
+                    if ($userChannel) {
+                        try {
+                            $this->sendRequestToUser($clientChat, $userChannel);
+                        } catch (\RuntimeException $e) {
+                            \Yii::error('Send request to user ' . $userChannel->ccuc_user_id . ' failed... ' . $e->getMessage() . '; File: ' . $e->getFile() . '; Line: ' . $e->getLine(), 'ClientChatService::transfer::RuntimeException');
+                            throw $e;
+                        }
+                    }
+                }
+                $agentNames = Employee::find()->select(['nickname'])->where(['id' => $form->agentId])->asArray()->column();
+                $transferTo = implode(', ', $agentNames) . ' agent';
+            } else {
+                $this->sendRequestToUsers($clientChat, $clientChatChannel);
+                $transferTo = $clientChatChannel->ccc_name . ' channel';
+            }
 
-			if ($clientChat->cch_owner_user_id !== $user->id) {
-				$comment = $form->comment ? '; Comment: ' . $form->comment : '';
-				$chatLink = Purifier::createChatShortLink($clientChat);
-				if ($ntf = Notifications::create($clientChat->cch_owner_user_id, 'Your Chat was transferred', $user->nickname . ' starts chat transfer to ' . $transferTo . $comment . '; ' . $chatLink, Notifications::TYPE_INFO, true)) {
-					$dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-					Notifications::publish('getNewNotification', ['user_id' => $user->id], $dataNotification);
-				}
-			}
+            if ($clientChat->cch_owner_user_id !== $user->id) {
+                $comment = $form->comment ? '; Comment: ' . $form->comment : '';
+                $chatLink = Purifier::createChatShortLink($clientChat);
+                if ($ntf = Notifications::create($clientChat->cch_owner_user_id, 'Your Chat was transferred', $user->nickname . ' starts chat transfer to ' . $transferTo . $comment . '; ' . $chatLink, Notifications::TYPE_INFO, true)) {
+                    $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                    Notifications::publish('getNewNotification', ['user_id' => $user->id], $dataNotification);
+                }
+            }
 
-			$data = ClientChatAccessMessage::agentStartTransfer($clientChat, $user);
-			Notifications::pub(['chat-' . $clientChat->cch_id], 'refreshChatPage', ['data' => $data]);
+            $data = ClientChatAccessMessage::agentStartTransfer($clientChat, $user);
+            Notifications::pub(['chat-' . $clientChat->cch_id], 'refreshChatPage', ['data' => $data]);
 
-			return $clientChatChannel;
-		});
-	}
+            return $clientChatChannel;
+        });
+    }
 
-	/**
-	 * @param ClientChat $clientChat
-	 * @param int $ownerId
-	 * @throws \yii\httpclient\Exception
-	 */
-	public function acceptChat(ClientChat $clientChat, int $ownerId): void
-	{
-		$_self = $this;
-		$this->transactionManager->wrap( static function () use ($_self, $clientChat, $ownerId) {
-			$clientChat->assignOwner($ownerId)->inProgress($ownerId, ClientChatStatusLog::ACTION_OPEN);
-			$_self->clientChatRepository->save($clientChat);
-			$_self->clientChatMessageService->touchUnreadMessage($clientChat->cch_id);
-			$_self->assignAgentToRcChannel($clientChat->cch_rid, $clientChat->cchOwnerUser->userProfile->up_rc_user_id ?? '');
-		});
-	}
+    /**
+     * @param ClientChat $clientChat
+     * @param int $ownerId
+     * @throws \yii\httpclient\Exception
+     */
+    public function acceptChat(ClientChat $clientChat, int $ownerId): void
+    {
+        $_self = $this;
+        $this->transactionManager->wrap(static function () use ($_self, $clientChat, $ownerId) {
+            $clientChat->assignOwner($ownerId)->inProgress($ownerId, ClientChatStatusLog::ACTION_OPEN);
+            $_self->clientChatRepository->save($clientChat);
+            $_self->clientChatMessageService->touchUnreadMessage($clientChat->cch_id);
+            $_self->assignAgentToRcChannel($clientChat->cch_rid, $clientChat->cchOwnerUser->userProfile->up_rc_user_id ?? '');
+        });
+    }
 
-	public function finishTransfer(ClientChat $clientChat, ClientChatUserAccess $chatUserAccess): ClientChat
-	{
-		return $this->transactionManager->wrap( function () use ($clientChat, $chatUserAccess) {
-			$previous = $this->clientChatStatusLogRepository->getPrevious($clientChat->cch_id);
-			$oldChannelId = $previous->csl_prev_channel_id ?? null;
-			if (!$oldChannelId) {
-				throw new \RuntimeException('Unable to determine the previous chat channel');
-			}
+    public function finishTransfer(ClientChat $clientChat, ClientChatUserAccess $chatUserAccess): ClientChat
+    {
+        return $this->transactionManager->wrap(function () use ($clientChat, $chatUserAccess) {
+            $previous = $this->clientChatStatusLogRepository->getPrevious($clientChat->cch_id);
+            $oldChannelId = $previous->csl_prev_channel_id ?? null;
+            if (!$oldChannelId) {
+                throw new \RuntimeException('Unable to determine the previous chat channel');
+            }
 
-			$clientChat->close($chatUserAccess->ccua_user_id, ClientChatStatusLog::ACTION_ACCEPT_TRANSFER);
-			$this->clientChatRepository->save($clientChat);
+            $clientChat->close($chatUserAccess->ccua_user_id, ClientChatStatusLog::ACTION_ACCEPT_TRANSFER);
+            $this->clientChatRepository->save($clientChat);
 
-			$dto = ClientChatCloneDto::feelInOnTransfer($clientChat);
-			$newClientChat = ClientChat::clone($dto);
-			$newClientChat->assignOwner($chatUserAccess->ccua_user_id);
-			$newClientChat->cch_source_type_id = ClientChat::SOURCE_TYPE_TRANSFER;
-			if (!$channel = $clientChat->cchChannel) {
-				$channel = $this->clientChatChannelRepository->findDefaultByProject((int)$clientChat->cch_project_id);
-			}
-			$this->clientChatRepository->save($newClientChat);
-			$this->cloneLead($clientChat, $newClientChat)->cloneCase($clientChat, $newClientChat)->cloneNotes($clientChat, $newClientChat);
-			$newClientChat->cch_channel_id = $channel->ccc_id;
-			$newClientChat->cch_parent_id = $clientChat->cch_id;
-			$newClientChat->inProgress($chatUserAccess->ccua_user_id, ClientChatStatusLog::ACTION_ACCEPT_TRANSFER);
-			$this->clientChatRepository->save($newClientChat);
+            $dto = ClientChatCloneDto::feelInOnTransfer($clientChat);
+            $newClientChat = ClientChat::clone($dto);
+            $newClientChat->assignOwner($chatUserAccess->ccua_user_id);
+            $newClientChat->cch_source_type_id = ClientChat::SOURCE_TYPE_TRANSFER;
+            if (!$channel = $clientChat->cchChannel) {
+                $channel = $this->clientChatChannelRepository->findDefaultByProject((int)$clientChat->cch_project_id);
+            }
+            $this->clientChatRepository->save($newClientChat);
+            $this->cloneLead($clientChat, $newClientChat)->cloneCase($clientChat, $newClientChat)->cloneNotes($clientChat, $newClientChat);
+            $newClientChat->cch_channel_id = $channel->ccc_id;
+            $newClientChat->cch_parent_id = $clientChat->cch_id;
+            $newClientChat->inProgress($chatUserAccess->ccua_user_id, ClientChatStatusLog::ACTION_ACCEPT_TRANSFER);
+            $this->clientChatRepository->save($newClientChat);
 
-			$prevCount = $clientChat->unreadMessage ? $clientChat->unreadMessage->ccu_count : 0;
-			$unreadMessages = ClientChatUnread::create($newClientChat->cch_id, $prevCount, new \DateTimeImmutable());
-			$this->clientChatUnreadRepository->save($unreadMessages);
+            $prevCount = $clientChat->unreadMessage ? $clientChat->unreadMessage->ccu_count : 0;
+            $unreadMessages = ClientChatUnread::create($newClientChat->cch_id, $prevCount, new \DateTimeImmutable());
+            $this->clientChatUnreadRepository->save($unreadMessages);
 
-			$userAccess = ClientChatUserAccess::create($newClientChat->cch_id, $newClientChat->cch_owner_user_id);
-			$userAccess->accept();
-			$this->clientChatUserAccessRepository->save($userAccess, $newClientChat);
+            $userAccess = ClientChatUserAccess::create($newClientChat->cch_id, $newClientChat->cch_owner_user_id);
+            $userAccess->accept();
+            $this->clientChatUserAccessRepository->save($userAccess, $newClientChat);
 
-			$oldVisitor = $clientChat->ccv->ccvCvd ?? null;
+            $oldVisitor = $clientChat->ccv->ccvCvd ?? null;
 
-			if ($oldVisitor) {
-				$this->clientChatVisitorRepository->create($newClientChat->cch_id, $oldVisitor->cvd_id, $newClientChat->cch_client_id);
-			}
-			$chatUserAccess->transferAccepted();
+            if ($oldVisitor) {
+                $this->clientChatVisitorRepository->create($newClientChat->cch_id, $oldVisitor->cvd_id, $newClientChat->cch_client_id);
+            }
+            $chatUserAccess->transferAccepted();
 
-			if ((int)$oldChannelId !== (int)$newClientChat->cch_channel_id) {
-				$botTransferChatResult = \Yii::$app->chatBot->transferDepartment($clientChat->cch_rid, $clientChat->ccv->ccvCvd->cvd_visitor_rc_id, (string)$oldChannelId, (string)$newClientChat->cch_channel_id);
-				if ($botTransferChatResult['error']) {
-					throw new \RuntimeException('[Chat Bot Transfer] ' . $botTransferChatResult['error']['message'] ?? 'Cant read error message from Chat Bot response');
-				}
+            if ((int)$oldChannelId !== (int)$newClientChat->cch_channel_id) {
+                $botTransferChatResult = \Yii::$app->chatBot->transferDepartment($clientChat->cch_rid, $clientChat->ccv->ccvCvd->cvd_visitor_rc_id, (string)$oldChannelId, (string)$newClientChat->cch_channel_id);
+                if ($botTransferChatResult['error']) {
+                    throw new \RuntimeException('[Chat Bot Transfer] ' . $botTransferChatResult['error']['message'] ?? 'Cant read error message from Chat Bot response');
+                }
 
-				$success = $botTransferChatResult['data']['success'] ?? false;
-				if (!$success) {
-					throw new \RuntimeException('[Chat Bot Transfer] ' . ($botTransferChatResult['data']['message'] ?? 'Cant read error message from Chat Bot response'));
-				}
+                $success = $botTransferChatResult['data']['success'] ?? false;
+                if (!$success) {
+                    throw new \RuntimeException('[Chat Bot Transfer] ' . ($botTransferChatResult['data']['message'] ?? 'Cant read error message from Chat Bot response'));
+                }
+            }
 
-			}
+            $this->assignAgentToRcChannel($newClientChat->cch_rid, $newClientChat->cchOwnerUser->userProfile->up_rc_user_id ?? '');
 
-			$this->assignAgentToRcChannel($newClientChat->cch_rid, $newClientChat->cchOwnerUser->userProfile->up_rc_user_id ?? '');
+            $data = ClientChatAccessMessage::agentTransferAccepted($clientChat, $userAccess->ccuaUser);
+            Notifications::publish('refreshChatPage', ['user_id' => $clientChat->cch_owner_user_id], ['data' => $data]);
 
-			$data = ClientChatAccessMessage::agentTransferAccepted($clientChat, $userAccess->ccuaUser);
-			Notifications::publish('refreshChatPage', ['user_id' => $clientChat->cch_owner_user_id], ['data' => $data]);
+            return $newClientChat;
+        });
+    }
 
-			return $newClientChat;
-		});
-	}
+    public function cancelTransfer(ClientChat $clientChat, ?Employee $user, int $action): void
+    {
+        $channel = $clientChat->cchChannel;
+        if ($channel) {
+            $previousLog = $this->clientChatStatusLogRepository->getPrevious($clientChat->cch_id);
+            if (!$previousLog) {
+                throw new \RuntimeException('Cannot find previous chat status log');
+            }
+            $clientChat->cch_channel_id = $previousLog->csl_prev_channel_id;
+            $clientChat->inProgress($user->id ?? null, $action);
+            $this->clientChatRepository->save($clientChat);
 
-	public function cancelTransfer(ClientChat $clientChat, ?Employee $user, int $action): void
-	{
-		$channel = $clientChat->cchChannel;
-		if ($channel) {
-			$previousLog = $this->clientChatStatusLogRepository->getPrevious($clientChat->cch_id);
-			if (!$previousLog) {
-				throw new \RuntimeException('Cannot find previous chat status log');
-			}
-			$clientChat->cch_channel_id = $previousLog->csl_prev_channel_id;
-			$clientChat->inProgress($user->id ?? null, $action);
-			$this->clientChatRepository->save($clientChat);
+            $data = ClientChatAccessMessage::chatCanceled($clientChat, $user);
+            Notifications::pub(['chat-' . $clientChat->cch_id], 'refreshChatPage', ['data' => $data]);
+        }
+    }
 
-			$data = ClientChatAccessMessage::chatCanceled($clientChat, $user);
-			Notifications::pub(['chat-' . $clientChat->cch_id], 'refreshChatPage', ['data' => $data]);
-		}
-	}
+    public function closeConversation(ClientChatCloseForm $form, Employee $user): void
+    {
+        $clientChat = $this->clientChatRepository->findById($form->cchId);
 
-	public function closeConversation(ClientChatCloseForm $form, Employee $user): void
-	{
-		$clientChat = $this->clientChatRepository->findById($form->cchId);
+        if (!$clientChat->ccv || !$clientChat->ccv->ccvCvd || !$clientChat->ccv->ccvCvd->cvd_visitor_rc_id) {
+            throw new \RuntimeException('Visitor RC id is not found');
+        }
 
-		if (!$clientChat->ccv || !$clientChat->ccv->ccvCvd || !$clientChat->ccv->ccvCvd->cvd_visitor_rc_id) {
-			throw new \RuntimeException('Visitor RC id is not found');
-		}
+        $botCloseChatResult = \Yii::$app->chatBot->endConversation($clientChat->cch_rid, $clientChat->ccv->ccvCvd->cvd_visitor_rc_id);
+        if ($botCloseChatResult['error']) {
+            throw new \RuntimeException('[Chat Bot] ' . $botCloseChatResult['error']['message'] ?? 'Unknown error message');
+        }
 
-		$botCloseChatResult = \Yii::$app->chatBot->endConversation($clientChat->cch_rid, $clientChat->ccv->ccvCvd->cvd_visitor_rc_id);
-		if ($botCloseChatResult['error']) {
-			throw new \RuntimeException('[Chat Bot] ' . $botCloseChatResult['error']['message'] ?? 'Unknown error message');
-		}
+        $success = $botCloseChatResult['data']['success'] ?? false;
+        if (!$success) {
+            throw new \RuntimeException('[Chat Bot] ' . ($botCloseChatResult['data']['message'] ?? 'Unknown error message'));
+        }
 
-		$success = $botCloseChatResult['data']['success'] ?? false;
-		if (!$success) {
-			throw new \RuntimeException('[Chat Bot] ' . ($botCloseChatResult['data']['message'] ?? 'Unknown error message'));
-		}
+        $clientChat->close($user->id, ClientChatStatusLog::ACTION_CLOSE, $form->reasonId, $form->comment);
 
-		$clientChat->close($user->id, ClientChatStatusLog::ACTION_CLOSE, $form->reasonId, $form->comment);
+        $this->clientChatRepository->save($clientChat);
 
-		$this->clientChatRepository->save($clientChat);
+        if ($clientChat->cch_owner_user_id !== $user->id) {
+            $comment = $form->comment ? '; Comment: ' . $form->comment : '';
+            $chatLink = Purifier::createChatShortLink($clientChat);
+            if ($ntf = Notifications::create($clientChat->cch_owner_user_id, 'Your Chat was closed', 'Your Chat was closed by ' . $user->nickname . $comment . '; ' . $chatLink, Notifications::TYPE_INFO, true)) {
+                $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                Notifications::publish('getNewNotification', ['user_id' => $user->id], $dataNotification);
+            }
+        }
 
-		if ($clientChat->cch_owner_user_id !== $user->id) {
-			$comment = $form->comment ? '; Comment: ' . $form->comment : '';
-			$chatLink = Purifier::createChatShortLink($clientChat);
-			if ($ntf = Notifications::create($clientChat->cch_owner_user_id, 'Your Chat was closed', 'Your Chat was closed by ' . $user->nickname . $comment . '; ' . $chatLink, Notifications::TYPE_INFO, true)) {
-				$dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-				Notifications::publish('getNewNotification', ['user_id' => $user->id], $dataNotification);
-			}
-		}
+        $data = ClientChatAccessMessage::chatClosed($clientChat, $user);
+        Notifications::pub(['chat-' . $clientChat->cch_id], 'refreshChatPage', ['data' => $data]);
+    }
 
-		$data = ClientChatAccessMessage::chatClosed($clientChat, $user);
-		Notifications::pub(['chat-' . $clientChat->cch_id], 'refreshChatPage', ['data' => $data]);
-	}
+    /**
+     * @param ClientChat $oldClientChat
+     * @param ClientChat $newClientChat
+     * @return ClientChatService
+     */
+    public function cloneLead(ClientChat $oldClientChat, ClientChat $newClientChat): self
+    {
+        $leads = $oldClientChat->leads;
+        foreach ($leads as $lead) {
+            $clientChatLead = ClientChatLead::create($newClientChat->cch_id, $lead->id, new \DateTimeImmutable('now'));
+            $this->clientChatLeadRepository->save($clientChatLead);
+        }
+        return $this;
+    }
 
-	/**
-	 * @param ClientChat $oldClientChat
-	 * @param ClientChat $newClientChat
-	 * @return ClientChatService
-	 */
-	public function cloneLead(ClientChat $oldClientChat, ClientChat $newClientChat): self
-	{
-		$leads = $oldClientChat->leads;
-		foreach ($leads as $lead) {
-			$clientChatLead = ClientChatLead::create($newClientChat->cch_id, $lead->id, new \DateTimeImmutable('now'));
-			$this->clientChatLeadRepository->save($clientChatLead);
-		}
-		return $this;
-	}
+    /**
+     * @param ClientChat $oldClientChat
+     * @param ClientChat $newClientChat
+     * @return ClientChatService
+     */
+    public function cloneCase(ClientChat $oldClientChat, ClientChat $newClientChat): self
+    {
+        $cases = $oldClientChat->cases;
+        foreach ($cases as $case) {
+            $clientChatCase = ClientChatCase::create($newClientChat->cch_id, $case->cs_id, new \DateTimeImmutable('now'));
+            $this->clientChatCaseRepository->save($clientChatCase);
+        }
+        return $this;
+    }
 
-	/**
-	 * @param ClientChat $oldClientChat
-	 * @param ClientChat $newClientChat
-	 * @return ClientChatService
-	 */
-	public function cloneCase(ClientChat $oldClientChat, ClientChat $newClientChat): self
-	{
-		$cases = $oldClientChat->cases;
-		foreach ($cases as $case) {
-			$clientChatCase = ClientChatCase::create($newClientChat->cch_id, $case->cs_id, new \DateTimeImmutable('now'));
-			$this->clientChatCaseRepository->save($clientChatCase);
-		}
-		return $this;
-	}
+    public function cloneNotes(ClientChat $oldClientChat, ClientChat $newClientChat): self
+    {
+        $notes = $oldClientChat->notes;
+        foreach ($notes as $note) {
+            $clientChatNote = ClientChatNote::create($newClientChat->cch_id, $note->ccn_user_id, $note->ccn_note);
+            $clientChatNote->ccn_created_dt = $note->ccn_created_dt;
+            $clientChatNote->ccn_updated_dt = $note->ccn_updated_dt;
+            $clientChatNote->ccn_deleted = $note->ccn_deleted;
+            $this->clientChatNoteRepository->save($clientChatNote);
+        }
+        return $this;
+    }
 
-	public function cloneNotes(ClientChat $oldClientChat, ClientChat $newClientChat): self
-	{
-		$notes = $oldClientChat->notes;
-		foreach ($notes as $note) {
-			$clientChatNote = ClientChatNote::create($newClientChat->cch_id, $note->ccn_user_id, $note->ccn_note);
-			$clientChatNote->ccn_created_dt = $note->ccn_created_dt;
-			$clientChatNote->ccn_updated_dt = $note->ccn_updated_dt;
-			$clientChatNote->ccn_deleted = $note->ccn_deleted;
-			$this->clientChatNoteRepository->save($clientChatNote);
-		}
-		return $this;
-	}
+    /**
+     * @param string $visitorId
+     * @param string $channelId
+     * @param string|null $message
+     * @param string $userRcId
+     * @param string $userRcToken
+     * @return string
+     */
+    public function createRcRoom(string $visitorId, string $channelId, ?string $message, string $userRcId, string $userRcToken): string
+    {
+        $result = \Yii::$app->chatBot->createRoom($visitorId, $channelId, $message, $userRcId, $userRcToken);
+        if ($result['error']) {
+            throw new \RuntimeException('[ChatBot Create Room] ' . $result['error']['message'] ?? 'Unknown ChatBot error message');
+        }
 
-	/**
-	 * @param string $visitorId
-	 * @param string $channelId
-	 * @param string|null $message
-	 * @param string $userRcId
-	 * @param string $userRcToken
-	 * @return string
-	 */
-	public function createRcRoom(string $visitorId, string $channelId, ?string $message, string $userRcId, string $userRcToken): string
-	{
-		$result = \Yii::$app->chatBot->createRoom($visitorId, $channelId, $message, $userRcId, $userRcToken);
-		if ($result['error']) {
-			throw new \RuntimeException('[ChatBot Create Room] ' . $result['error']['message'] ?? 'Unknown ChatBot error message');
-		}
-
-		if (!$rid = (string)($result['data']['rid'] ?? null)) {
-			throw new \RuntimeException('[ChatBot Create Room] RoomId is not created');
-		}
-		return $rid;
-	}
+        if (!$rid = (string)($result['data']['rid'] ?? null)) {
+            throw new \RuntimeException('[ChatBot Create Room] RoomId is not created');
+        }
+        return $rid;
+    }
 
     public function takeClientChat(ClientChat $clientChat, Employee $owner): ClientChat
     {
@@ -610,8 +608,11 @@ class ClientChatService
             $this->clientChatUserAccessRepository->save($userAccess, $newClientChat);
 
             if ($oldVisitor = $clientChat->ccv->ccvCvd ?? null) {
-                $this->clientChatVisitorRepository->create($newClientChat->cch_id, $oldVisitor->cvd_id,
-                    $newClientChat->cch_client_id);
+                $this->clientChatVisitorRepository->create(
+                    $newClientChat->cch_id,
+                    $oldVisitor->cvd_id,
+                    $newClientChat->cch_client_id
+                );
             }
 
             $this->assignAgentToRcChannel($newClientChat->cch_rid, $owner->userProfile->up_rc_user_id ?? '');
