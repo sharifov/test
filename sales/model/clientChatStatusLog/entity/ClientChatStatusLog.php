@@ -43,6 +43,7 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
 	public const ACTION_TAKE = 12;
 	public const ACTION_AUTO_IDLE = 13;
 	public const ACTION_AUTO_REVERT_TO_PROGRESS = 14;
+	public const ACTION_REOPEN = 15;
 
 	private const ACTION_LIST = [
 		self::ACTION_OPEN => 'Open By Client',
@@ -59,6 +60,7 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
 		self::ACTION_TAKE => 'Take',
 		self::ACTION_AUTO_IDLE => 'Auto Idle',
 		self::ACTION_AUTO_REVERT_TO_PROGRESS => 'Auto Revert to progress',
+		self::ACTION_REOPEN => 'Reopen',
 	];
 
 	private const ACTION_LABEL_LIST = [
@@ -76,6 +78,7 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
 		self::ACTION_TAKE => 'badge badge-info',
 		self::ACTION_AUTO_IDLE => 'badge badge-info',
 		self::ACTION_AUTO_REVERT_TO_PROGRESS => 'badge badge-info',
+		self::ACTION_REOPEN => 'badge badge-info',
 	];
 
     public function rules(): array

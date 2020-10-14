@@ -87,6 +87,12 @@ $guard = new ClientChatManageGuard($statusLogRepository);
                                     'data-cch-id' => $clientChat->cch_id
                                 ]) ?>
                             <?php endif;?>
+                        <?php elseif ($actionPermissions->canReopenChat($clientChat)): ?>
+                            <?php echo Html::a('<i class="fab fa-openid"></i> Reopen', null, [
+                                'class' => 'dropdown-item text-warning cc_reopen',
+                                'title' => 'Reopen',
+                                'data-cch-id' => $clientChat->cch_id
+                            ]) ?>
                         <?php endif; ?>
 
                         <?php if($clientChat->isInProgress()): ?> <?php /* TODO:: must be replaced to permission in separate task */ ?>

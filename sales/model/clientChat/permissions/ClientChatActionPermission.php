@@ -13,6 +13,7 @@ use sales\model\clientChat\entity\ClientChat;
  * @property bool|null $canNoteView
  * @property bool|null $canNoteAdd
  * @property bool|null $canNoteDelete
+ * @property bool|null $canReopenChat
  */
 class ClientChatActionPermission
 {
@@ -23,6 +24,8 @@ class ClientChatActionPermission
     private ?bool $canNoteView = null;
     private ?bool $canNoteAdd = null;
     private ?bool $canNoteDelete = null;
+
+    private ?bool $canReopenChat = null;
 
     public function canClose(ClientChat $chat): bool
     {
@@ -40,6 +43,15 @@ class ClientChatActionPermission
         }
         $this->canTransfer = Auth::can('client-chat/manage', ['chat' => $chat]) && Auth::can('client-chat/transfer', ['chat' => $chat]);
         return $this->canTransfer;
+    }
+
+    public function canReopenChat(ClientChat $chat): bool
+    {
+        if ($this->canReopenChat !== null) {
+            return $this->canReopenChat;
+        }
+        $this->canReopenChat = Auth::can('client-chat/manage', ['chat' => $chat] && Auth::can('client-chat/close/reopen', ['chat' => $chat]));
+        return $this->canReopenChat;
     }
 
     public function canNoteView(ClientChat $chat): bool

@@ -40,6 +40,7 @@ $clintChatDataIUrl = Url::toRoute('/client-chat/ajax-data-info');
 $clientChatCloseUrl = Url::toRoute('/client-chat/ajax-close');
 $chatHistoryUrl = Url::toRoute('/client-chat/ajax-history');
 $chatTransferUrl = Url::toRoute('/client-chat/ajax-transfer-view');
+$chatReopenUrl = Url::toRoute('/client-chat/ajax-reopen-chat');
 $chatCancelTransferUrl = Url::toRoute('/client-chat/ajax-cancel-transfer');
 $chatSendOfferListUrl = Url::toRoute('/client-chat/send-offer-list');
 $chatSendOfferPreviewUrl = Url::toRoute('/client-chat/send-offer-preview');
@@ -456,6 +457,40 @@ $(document).on('click', '.cc_transfer', function (e) {
             createNotify('Error', xhr.responseText, 'error');
         },
     });
+});
+
+$(document).on('click', '.cc_reopen', function (e) {
+    e.preventDefault();
+    let btn = $(this);
+    let cchId = btn.attr('data-cch-id');
+    
+    let btnIcon = btn.find('i');
+    
+    if (confirm('Confirm reopen action...')) {
+        $.ajax({
+        type: 'post',
+        url: '{$chatReopenUrl}',
+        dataType: 'json',
+        cache: false,
+        data: {chatId: cchId},
+        beforeSend: function () {
+            btn.find('i').replaceWith('<i class="fa fa-spin fa-spinner"></i>');
+        },
+        success: function (data) {
+            if (data.error) {
+                createNotify('Error', data.message, 'error');
+            } else {
+                createNotify('Success', 'Chat reopened successfully', 'success');
+            }
+        },
+        complete: function () {
+            btn.find('i').replaceWith(btnIcon);
+        },
+        error: function (xhr) {
+            createNotify('Error', xhr.responseText, 'error');
+        },
+    });
+    }
 });
 
 $(document).on('click', '.cc_close', function (e) {

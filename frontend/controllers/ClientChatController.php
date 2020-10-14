@@ -1640,4 +1640,35 @@ class ClientChatController extends FController
             return $this->asJson(['error' => true, 'message' => 'Active connection remove error.']);
         }
     }
+
+    public function actionAjaxReopenChat(): Response
+    {
+        if (!Yii::$app->request->isPost) {
+            throw new BadRequestHttpException();
+        }
+
+        $chatId = (int)Yii::$app->request->post('chatId');
+
+        if (!$chat = ClientChat::findOne(['cch_id' => $chatId])) {
+            return $this->asJson(['error' => true, 'message' => 'Chat not found']);
+        }
+
+        $permissions = new ClientChatActionPermission();
+        if (!$permissions->canReopenChat($chat)) {
+            throw new ForbiddenHttpException('You do not have access to perform this action', 403);
+        }
+
+        $chat->inProgress(Auth::id(), ClientChatStatusLog::ACTION_REOPEN);
+
+        try {
+            $this->clientChatRepository->save($chat);
+        } catch (\RuntimeException $e) {
+            return $this->asJson(['error' => true, 'message' => $e->getMessage()]);
+        }
+
+        $data = ClientChatAccessMessage::chatReopen($chat->cch_id, Auth::user()->nickname);
+        Notifications::pub(['chat-' . $chat->cch_id], 'refreshChatPage', ['data' => $data]);
+
+        return $this->asJson(['error' => false, 'message' => '']);
+    }
 }
