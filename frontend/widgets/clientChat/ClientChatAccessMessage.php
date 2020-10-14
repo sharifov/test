@@ -116,7 +116,7 @@ class ClientChatAccessMessage
 	public static function chatTaken(ClientChat $chat, Employee $user): array
 	{
 		return [
-			'message' => 'Your Chat was take by ' . $user->nickname ,
+			'message' => 'Your Chat was taken by ' . $user->nickname ,
 			'cchId' => $chat->cch_id,
 			'tab' => ClientChat::TAB_ACTIVE
 		];
