@@ -47,30 +47,30 @@ use yii\helpers\Json;
  */
 class ClientChatChannel extends \yii\db\ActiveRecord
 {
-	public const MAX_PRIORITY_VALUE = 100;
+    public const MAX_PRIORITY_VALUE = 100;
 
-	private array $decodedSettings = [];
+    private array $decodedSettings = [];
 
-	public function behaviors(): array
-	{
-		return [
-			'timestamp' => [
-				'class' => TimestampBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['ccc_created_dt'],
-					ActiveRecord::EVENT_BEFORE_UPDATE => ['ccc_updated_dt'],
-				],
-				'value' => date('Y-m-d H:i:s'),
-			],
-			'user' => [
-				'class' => BlameableBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['ccc_created_user_id'],
-					ActiveRecord::EVENT_BEFORE_UPDATE => ['ccc_updated_user_id'],
-				]
-			],
-		];
-	}
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['ccc_created_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['ccc_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s'),
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['ccc_created_user_id'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['ccc_updated_user_id'],
+                ]
+            ],
+        ];
+    }
 
     public function rules(): array
     {
@@ -80,8 +80,8 @@ class ClientChatChannel extends \yii\db\ActiveRecord
             ['ccc_created_user_id', 'integer'],
             ['ccc_created_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ccc_created_user_id' => 'id']],
 
-			['ccc_default', 'integer'],
-			['ccc_frontend_enabled', 'boolean'],
+            ['ccc_default', 'integer'],
+            ['ccc_frontend_enabled', 'boolean'],
 
             ['ccc_dep_id', 'integer'],
             ['ccc_dep_id', 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['ccc_dep_id' => 'dep_id']],
@@ -100,7 +100,7 @@ class ClientChatChannel extends \yii\db\ActiveRecord
             ['ccc_project_id', 'required'],
             ['ccc_project_id', 'integer'],
             ['ccc_project_id', 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['ccc_project_id' => 'id']],
-            [['ccc_project_id', 'ccc_dep_id'], 'unique', 'targetAttribute' => ['ccc_project_id', 'ccc_dep_id']],
+//            [['ccc_project_id', 'ccc_dep_id'], 'unique', 'targetAttribute' => ['ccc_project_id', 'ccc_dep_id']],
 
             ['ccc_ug_id', 'integer'],
             ['ccc_ug_id', 'exist', 'skipOnError' => true, 'targetClass' => UserGroup::class, 'targetAttribute' => ['ccc_ug_id' => 'ug_id']],
@@ -118,22 +118,22 @@ class ClientChatChannel extends \yii\db\ActiveRecord
     }
 
     public function beforeSave($insert): bool
-	{
-		$defaultChannel = self::findOne(['ccc_default' => 1, 'ccc_project_id' => $this->ccc_project_id]);
-		if (!$defaultChannel && $insert) {
-			$this->ccc_default = 1;
-		}
-		return parent::beforeSave($insert);
-	}
+    {
+        $defaultChannel = self::findOne(['ccc_default' => 1, 'ccc_project_id' => $this->ccc_project_id]);
+        if (!$defaultChannel && $insert) {
+            $this->ccc_default = 1;
+        }
+        return parent::beforeSave($insert);
+    }
 
-	public function afterDelete(): void
-	{
-		$defaultChannel = self::findOne(['ccc_default' => 1, 'ccc_project_id' => $this->ccc_project_id, ['<>', 'ccc_id', $this->ccc_id]]);
-		if (!$defaultChannel && $firstChannel = self::findOne(['ccc_project_id' => $this->ccc_project_id])) {
-			$firstChannel->ccc_default = 1;
-			$firstChannel->save();
-		}
-	}
+    public function afterDelete(): void
+    {
+        $defaultChannel = self::findOne(['ccc_default' => 1, 'ccc_project_id' => $this->ccc_project_id, ['<>', 'ccc_id', $this->ccc_id]]);
+        if (!$defaultChannel && $firstChannel = self::findOne(['ccc_project_id' => $this->ccc_project_id])) {
+            $firstChannel->ccc_default = 1;
+            $firstChannel->save();
+        }
+    }
 
     public function getCccCreatedUser(): ActiveQuery
     {
@@ -171,9 +171,9 @@ class ClientChatChannel extends \yii\db\ActiveRecord
     }
 
     public function getCch(): ActiveQuery
-	{
-		return $this->hasMany(ClientChat::class, ['cch_channel_id' => 'ccc_id']);
-	}
+    {
+        return $this->hasMany(ClientChat::class, ['cch_channel_id' => 'ccc_id']);
+    }
 
     public function attributeLabels(): array
     {
@@ -189,7 +189,7 @@ class ClientChatChannel extends \yii\db\ActiveRecord
             'ccc_updated_dt' => 'Updated Dt',
             'ccc_created_user_id' => 'Created User ID',
             'ccc_updated_user_id' => 'Updated User ID',
-			'ccc_default' => 'Default',
+            'ccc_default' => 'Default',
             'ccc_frontend_name' => 'Frontend Name',
             'ccc_frontend_enabled' => 'Frontend Enabled',
             'ccc_settings' => 'Settings',
@@ -197,13 +197,13 @@ class ClientChatChannel extends \yii\db\ActiveRecord
         ];
     }
 
-	public function getSettings(): array
-	{
-		if (!empty($this->decodedSettings)) {
-			return $this->decodedSettings;
-		}
-		return $this->decodedSettings = ArrayHelper::merge(ClientChatChannelDefaultSettings::getAll(), Json::decode($this->ccc_settings) ?? []);
-	}
+    public function getSettings(): array
+    {
+        if (!empty($this->decodedSettings)) {
+            return $this->decodedSettings;
+        }
+        return $this->decodedSettings = ArrayHelper::merge(ClientChatChannelDefaultSettings::getAll(), Json::decode($this->ccc_settings) ?? []);
+    }
 
     /**
      * @return Scopes
@@ -227,46 +227,25 @@ class ClientChatChannel extends \yii\db\ActiveRecord
     public static function getList() : array
     {
         $data = self::find()->orderBy(['ccc_name' => SORT_ASC])->asArray()->all();
-        return ArrayHelper::map($data,'ccc_id', 'ccc_name');
+        return ArrayHelper::map($data, 'ccc_id', 'ccc_name');
     }
 
     public static function getListWithNames() : array
     {
         $data = self::find()->where('LENGTH(ccc_name) > 0')->distinct()->orderBy(['ccc_name' => SORT_ASC])->asArray()->all();
-        return ArrayHelper::map($data,'ccc_name', 'ccc_name');
+        return ArrayHelper::map($data, 'ccc_name', 'ccc_name');
     }
 
     public static function getListWithFrontedNames() : array
     {
         $data = self::find()->where('LENGTH(ccc_frontend_name) > 0')->distinct()->orderBy(['ccc_frontend_name' => SORT_ASC])->asArray()->all();
-        return ArrayHelper::map($data,'ccc_frontend_name', 'ccc_frontend_name');
+        return ArrayHelper::map($data, 'ccc_frontend_name', 'ccc_frontend_name');
     }
 
-    /**
-     * @return array
-     */
-    public static function getDefaultSettingList() : array
+    public function isAllowedTransferToChannel(): bool
     {
-        $settings = [];
-        $settings['max_dialog_count'] = 1;
-        $settings['feedback_rating_enabled'] = true;
-        $settings['feedback_message_enabled'] = true;
-        $settings['history_email_enabled'] = true;
-        $settings['history_download_enabled'] = true;
-        $settings['count_of_active_chats'] = 1;
-        $settings['allow_transfer_to_channel_with_active_chat'] = false;
-        $settings['canStartFromArchived'] = true;
-        $settings['audioRecording'] = [
-            'enabled' => true,
-            'maxLength' => 30
-        ];
-        return $settings;
+        return (bool)($this->settings['allow_transfer_to_channel_with_active_chat'] ?? ClientChatChannelDefaultSettings::getAll()['allow_transfer_to_channel_with_active_chat']);
     }
-
-	public function isAllowedTransferToChannel(): bool
-	{
-		return (bool)($this->settings['allow_transfer_to_channel_with_active_chat'] ?? ClientChatChannelDefaultSettings::getAll()['allow_transfer_to_channel_with_active_chat']);
-	}
 
     /**
      * @param int $projectId
