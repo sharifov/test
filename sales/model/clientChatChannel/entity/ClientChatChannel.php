@@ -202,7 +202,7 @@ class ClientChatChannel extends \yii\db\ActiveRecord
 		if (!empty($this->decodedSettings)) {
 			return $this->decodedSettings;
 		}
-		return $this->decodedSettings = ArrayHelper::merge(self::getDefaultSettingList(), Json::decode($this->ccc_settings) ?? []);
+		return $this->decodedSettings = ArrayHelper::merge(ClientChatChannelDefaultSettings::getAll(), Json::decode($this->ccc_settings) ?? []);
 	}
 
     /**
@@ -265,7 +265,7 @@ class ClientChatChannel extends \yii\db\ActiveRecord
 
 	public function isAllowedTransferToChannel(): bool
 	{
-		return (bool)($this->settings['allow_transfer_to_channel_with_active_chat'] ?? self::getDefaultSettingList()['allow_transfer_to_channel_with_active_chat']);
+		return (bool)($this->settings['allow_transfer_to_channel_with_active_chat'] ?? ClientChatChannelDefaultSettings::getAll()['allow_transfer_to_channel_with_active_chat']);
 	}
 
     /**

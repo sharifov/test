@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use sales\helpers\setting\SettingHelper;
+use sales\model\clientChatChannel\entity\ClientChatChannelDefaultSettings;
 use sales\repositories\NotFoundException;
 use sales\services\clientChatChannel\ClientChatChannelService;
 use Yii;
@@ -110,7 +111,7 @@ class ClientChatChannelCrudController extends FController
 			$transaction->rollBack();
         }
 
-		$model->ccc_settings = json_encode(ClientChatChannel::getDefaultSettingList());
+		$model->ccc_settings = json_encode(ClientChatChannelDefaultSettings::getAll());
 
 		return $this->render('create', [
             'model' => $model,
@@ -130,7 +131,7 @@ class ClientChatChannelCrudController extends FController
             return $this->redirect(['view', 'id' => $model->ccc_id]);
         } else {
             if (!$model->ccc_settings) {
-                $model->ccc_settings = json_encode(ClientChatChannel::getDefaultSettingList());
+                $model->ccc_settings = json_encode(ClientChatChannelDefaultSettings::getAll());
             }
         }
 
