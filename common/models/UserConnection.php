@@ -245,8 +245,8 @@ class UserConnection extends \yii\db\ActiveRecord
     {
         return self::find()
             ->select(['uc_user_id'])
-            ->where(['uc_idle_state' => false])
-            ->andWhere(['uc_controller_id' => $controller])
+            ->innerJoin(UserOnline::tableName() . ' AS user_online', 'user_online.uo_user_id = uc_user_id') /* TODO:: add Idle State */
+            ->where(['uc_controller_id' => $controller])
             ->andWhere(['uc_action_id' => $action])
             ->orderBy(['uc_id' => SORT_DESC])
             ->indexBy('uc_user_id')
