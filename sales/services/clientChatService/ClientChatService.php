@@ -270,7 +270,7 @@ class ClientChatService
             $clientChat->cch_project_id = $channel->ccc_project_id;
             $clientChat->cch_owner_user_id = $ownerId;
             $clientChat->cch_client_online = 1;
-            $clientChat->pending($ownerId, ClientChatStatusLog::ACTION_OPEN_BY_AGENT);
+            $clientChat->inProgress($ownerId, ClientChatStatusLog::ACTION_OPEN_BY_AGENT);
             $this->clientChatRepository->save($clientChat);
 
             $this->transactionManager->wrap(static function () use ($form, $ownerId, $_self, $department, $userProfile, $clientChatRequest, $clientChat) {
