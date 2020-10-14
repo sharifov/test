@@ -110,7 +110,7 @@
     }
 
     Chat.prototype.displayOneRequest = function (request) {
-        if (request.is_transfer) {
+        if (parseInt(request.is_transfer)) {
             let oneTransferElem = $('#_client_chat_access_widget ._cc-box-item-wrapper[data-is-transfer="1"]').last();
             if (oneTransferElem.length) {
                 oneTransferElem.after(request.html);
