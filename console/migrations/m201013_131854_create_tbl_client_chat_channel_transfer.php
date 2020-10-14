@@ -24,6 +24,8 @@ class m201013_131854_create_tbl_client_chat_channel_transfer extends Migration
             'cctr_created_dt' => $this->dateTime(),
         ], $tableOptions);
 
+        $this->addPrimaryKey('PK-chat_channel_transfer', '{{%client_chat_channel_transfer}}', ['cctr_from_ccc_id', 'cctr_to_ccc_id']);
+
         $this->addForeignKey(
             'FK-chat_channel_transfer-cctr_from_ccc_id',
             '{{%client_chat_channel_transfer}}',
@@ -54,7 +56,7 @@ class m201013_131854_create_tbl_client_chat_channel_transfer extends Migration
             'CASCADE'
         );
 
-        $this->addPrimaryKey('PK-chat_channel_transfer', '{{%client_chat_channel_transfer}}', ['cctr_from_ccc_id', 'cctr_to_ccc_id']);
+
     }
 
     /**
