@@ -255,6 +255,7 @@ class ClientChatChannel extends \yii\db\ActiveRecord
         $settings['history_download_enabled'] = true;
         $settings['count_of_active_chats'] = 1;
         $settings['allow_transfer_to_channel_with_active_chat'] = false;
+        $settings['canStartFromArchived'] = true;
         return $settings;
     }
 
