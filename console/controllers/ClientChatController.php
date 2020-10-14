@@ -11,6 +11,7 @@ use sales\helpers\setting\SettingHelper;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
+use sales\model\clientChatHold\entity\ClientChatHold;
 use sales\model\clientChatLastMessage\entity\ClientChatLastMessage;
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\services\clientChatChannel\ClientChatChannelCodeException;
@@ -372,8 +373,15 @@ class ClientChatController extends Controller
                 $clientChat->inProgress(null, ClientChatStatusLog::ACTION_AUTO_REVERT_TO_PROGRESS);
                 $this->clientChatRepository->save($clientChat);
 
-                $data = ClientChatAccessMessage::chatInProgress($clientChat->cch_id);
-                Notifications::pub(['chat-' . $clientChat->cch_id], 'refreshChatPage', ['data' => $data]);
+                if ($holdRow = ClientChatHold::findOne(['cchd_cch_id' => $clientChat->cch_id])) {
+                    $holdRow->delete();
+                }
+
+                Notifications::pub(
+                    ['chat-' . $clientChat->cch_id],
+                    'refreshChatPage',
+                    ['data' => ClientChatAccessMessage::chatInProgress($clientChat->cch_id)]
+                );
 
                 $processed++;
             } catch (\Throwable $throwable) {
