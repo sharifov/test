@@ -236,7 +236,7 @@ class LeadSearch extends Lead
                 'defaultOrder' => ['leads.id' => SORT_DESC]
             ],
             'pagination' => [
-                'pageSize' => 30,
+                'pageSize' => 5,
             ],
         ]);
 
