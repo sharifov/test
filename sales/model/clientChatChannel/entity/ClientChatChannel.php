@@ -256,6 +256,10 @@ class ClientChatChannel extends \yii\db\ActiveRecord
         $settings['count_of_active_chats'] = 1;
         $settings['allow_transfer_to_channel_with_active_chat'] = false;
         $settings['canStartFromArchived'] = true;
+        $settings['audioRecording'] = [
+            'enabled' => true,
+            'maxLength' => 30
+        ];
         return $settings;
     }
 
