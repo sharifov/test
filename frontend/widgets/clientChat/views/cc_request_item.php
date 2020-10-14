@@ -5,7 +5,6 @@ use common\models\ClientPhone;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use yii\helpers\Html;
 
-
 /** @var $access array */
 /** @var $formatter Formatter */
 
@@ -18,13 +17,13 @@ $date = (int)$access['is_transfer'] ? $access['ccua_created_dt'] : $access['cch_
 		<div class="_cc-client-info">
             <span class="_cc-client-name">
                 <i class="fa fa-user"></i>
-                <?= Html::encode($access['full_name'] ?: 'Guest-' . $access['ccua_cch_id']) ?>
+                <?= Html::encode($access['full_name'] ?: 'Guest-' . $access['cch_client_id']) ?>
             </span>
 
             <div class="_cc-data">
                 <?php /*if ($access->ccuaCch->cchDep): ?>
-					<span class="label label-default"><?= Html::encode($access->ccuaCch->cchDep->dep_name) ?></span>
-				<?php endif;*/ ?>
+                    <span class="label label-default"><?= Html::encode($access->ccuaCch->cchDep->dep_name) ?></span>
+                <?php endif;*/ ?>
 
                 <?php if ($access['project_name']): ?>
                     <span class="label label-success" style="font-size: 12px"><?= Html::encode($access['project_name']) ?></span>
@@ -46,7 +45,7 @@ $date = (int)$access['is_transfer'] ? $access['ccua_created_dt'] : $access['cch_
                 <span title="Relative Time">
                 <?php
                     $timeSec = strtotime($date);
-                    if ($timeSec >= (60 * 60 * 24) ) {
+                    if ($timeSec >= (60 * 60 * 24)) {
                         echo '<i class="fa fa-clock-o"></i> ' . Yii::$app->formatter->asRelativeTime($timeSec);
                     } else {
                         if ($formatter instanceof Formatter) {
