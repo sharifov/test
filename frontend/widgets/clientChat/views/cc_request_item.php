@@ -21,15 +21,6 @@ $date = (int)$access['is_transfer'] ? $access['ccua_created_dt'] : $access['cch_
                 <?= Html::encode($access['full_name'] ?: 'Guest-' . $access['ccua_cch_id']) ?>
             </span>
 
-			<?php if ($access['client_email'] && $emails = explode(',', $access['client_email'])): ?>
-				<?php foreach($emails as $email): ?>
-					<span class="_cc-client-email">
-                        <i class="fa fa-envelope"></i>
-                        <i><?= Html::encode($email) ?></i>
-                    </span>
-				<?php endforeach; ?>
-			<?php endif; ?>
-
             <div class="_cc-data">
                 <?php /*if ($access->ccuaCch->cchDep): ?>
 					<span class="label label-default"><?= Html::encode($access->ccuaCch->cchDep->dep_name) ?></span>
