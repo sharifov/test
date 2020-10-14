@@ -16,7 +16,7 @@ class ClientChatHoldSearch extends ClientChatHold
     {
         return [
             [['cchd_id', 'cchd_cch_id', 'cchd_cch_status_log_id'], 'integer'],
-            [['cchd_deadline_dt'], 'safe'],
+            [['cchd_start_dt', 'cchd_deadline_dt'], 'safe'],
         ];
     }
 
@@ -25,7 +25,7 @@ class ClientChatHoldSearch extends ClientChatHold
      * @param array $params
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search($params): ActiveDataProvider
     {
         $query = ClientChatHold::find();
 
@@ -50,9 +50,13 @@ class ClientChatHoldSearch extends ClientChatHold
             'cchd_cch_status_log_id' => $this->cchd_cch_status_log_id,
         ]);
 
-        if ($this->cchd_deadline_dt){
+        if ($this->cchd_deadline_dt) {
             $query->andFilterWhere(['>=', 'cchd_deadline_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->cchd_deadline_dt))])
                 ->andFilterWhere(['<=', 'cchd_deadline_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->cchd_deadline_dt) + 3600 * 24)]);
+        }
+        if ($this->cchd_start_dt) {
+            $query->andFilterWhere(['>=', 'cchd_start_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->cchd_start_dt))])
+                ->andFilterWhere(['<=', 'cchd_start_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->cchd_start_dt) + 3600 * 24)]);
         }
 
         return $dataProvider;
