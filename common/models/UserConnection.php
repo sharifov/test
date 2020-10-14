@@ -241,4 +241,15 @@ class UserConnection extends \yii\db\ActiveRecord
         return \Yii::$app->params['settings']['idle_seconds'] ?? 0;
     }
 
+    public static function getUsersByControllerAction(string $controller, string $action): array
+    {
+        return self::find()
+            ->select(['uc_user_id'])
+            ->where(['uc_idle_state' => false])
+            ->andWhere(['uc_controller_id' => $controller])
+            ->andWhere(['uc_action_id' => $action])
+            ->orderBy(['uc_id' => SORT_DESC])
+            ->indexBy('uc_user_id')
+            ->column();
+    }
 }

@@ -25,6 +25,8 @@ use yii\web\Response;
 use yii\db\StaleObjectException;
 use Throwable;
 use yii\helpers\VarDumper;
+use common\models\Notifications;
+use common\models\UserConnection;
 
 class ClientChatCrudController extends FController
 {
@@ -158,6 +160,21 @@ class ClientChatCrudController extends FController
         $model->cch_updated_user_id = Auth::id();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+
+            /* TODO:: FOR TEST:: must by remove  */
+            if ($model->isIdle() && $userIds = UserConnection::getUsersByControllerAction('client-chat', 'index')) {
+                $count = ClientChat::find()->byStatus(ClientChat::STATUS_IDLE)->count();
+
+                foreach ($userIds as $userId) {
+                    if ($pubChannel = UserConnection::getLastUserChannel($userId)) {
+                        Notifications::pub(
+                            [$pubChannel],
+                            'updateCountFreeToTake',
+                            ['count' => (int) $count]
+                        );
+                    }
+                }
+            }
             return $this->redirect(['view', 'id' => $model->cch_id]);
         }
 

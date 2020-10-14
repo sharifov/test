@@ -497,6 +497,14 @@ $js = <<<JS
                             window.updateVoiceRecordCounters();
                         }
                         
+                         if(obj.cmd === 'updateCountFreeToTake') {
+                            let freeToTakeEl = $('#count_free_to_take');
+                            
+                            if (freeToTakeEl.length) {
+                                freeToTakeEl.text(obj.count);
+                            }
+                        }
+                        
                     }
                     // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
                 } catch (error) {
