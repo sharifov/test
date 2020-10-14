@@ -212,35 +212,6 @@ use yii\web\JsExpression;
                 <?php endif; ?>
             </div>
 
-<?php
-$js = <<<JS
- 
-    $(document).find('.kv-drp-dropdown').find('.kv-clear').on('click', function(e) {
-        e.stopPropagation();
-        $(document).find('.kv-drp-dropdown').find('.range-value').val('');
-        $(document).val('').trigger('change').trigger('cancel.daterangepicker');
-        $('.kv-drp-container input').each(function() {
-            $(this).val('');
-        }); 
-        window.updateClientChatFilter("{$filter->getId()}", "{$filter->formName()}", "{$loadChannelsUrl}");
-    }); 
-        
-    $(document).on('click', '#reset_additional', function (e) {
-        e.stopPropagation();        
-        $('#additional_filters_div').find('input,select').each(function() {
-            $(this).val('');          
-        }); 
-        $('#resetAdditionalFilter').val('1');
-        window.updateClientChatFilter("{$filter->getId()}", "{$filter->formName()}", "{$loadChannelsUrl}");
-    });  
-
-$('#btn_additional_filters').on('click', function() {
-    $('#additional_filters_div').toggle();  
-});
-JS;
-$this->registerJs($js);
-?>
-
     <?php endif; ?>
 
     </div>
