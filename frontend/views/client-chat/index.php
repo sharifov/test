@@ -25,6 +25,7 @@ use yii\widgets\Pjax;
 /** @var FilterForm $filter */
 /** @var int $page */
 /** @var ClientChatActionPermission $actionPermissions */
+/** @var int $countFreeToTake */
 
 $this->title = 'My Client Chat';
 //$this->params['breadcrumbs'][] = $this->title;
@@ -81,6 +82,7 @@ $clientChatTakeUrl = Url::toRoute(['/client-chat/ajax-take']);
                 'clientChatId' => $clientChat ? $clientChat->cch_id : null,
                 'filter' => $filter,
                 'page' => $page,
+                'countFreeToTake' => $countFreeToTake,
             ]); ?>
         </div>
 		<?php Pjax::end(); ?>

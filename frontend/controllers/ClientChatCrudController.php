@@ -155,9 +155,9 @@ class ClientChatCrudController extends FController
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        $model->cch_updated_user_id = Auth::id();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            $model->cch_updated_user_id = Auth::id();
             return $this->redirect(['view', 'id' => $model->cch_id]);
         }
 

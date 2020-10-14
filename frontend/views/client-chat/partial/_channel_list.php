@@ -9,6 +9,7 @@ use sales\model\clientChat\dashboard\FilterForm;
 /** @var $totalUnreadMessages int */
 /** @var FilterForm $filter */
 /** @var int $page */
+/** @var int $countFreeToTake */
 
 $formatter = new \common\components\i18n\Formatter();
 $formatter->timeZone = \sales\auth\Auth::user()->timezone;
@@ -22,6 +23,7 @@ $formatter->timeZone = \sales\auth\Auth::user()->timezone;
                 'filter' => $filter,
                 'loadChannelsUrl' => $loadChannelsUrl,
                 'dataProvider' => $dataProvider,
+                'countFreeToTake' => $countFreeToTake,
             ]
         ); ?>
     </div>

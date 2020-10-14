@@ -59,6 +59,7 @@ use sales\repositories\lead\LeadRepository;
 use sales\repositories\NotFoundException;
 use sales\repositories\project\ProjectRepository;
 use sales\services\clientChatMessage\ClientChatMessageService;
+use sales\services\clientChatService\ClientChatQuery;
 use sales\services\clientChatService\ClientChatService;
 use sales\services\clientChatService\ClientChatStatusLogService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
@@ -238,10 +239,17 @@ class ClientChatController extends FController
             $filter->resetAdditionalAttributes();
         }
 
+        $countFreeToTake = 0;
         $dataProvider = null;
         /** @var $channels ClientChatChannel[] */
         if ($channels) {
             $dataProvider = (new ClientChatSearch())->getListOfChats(Auth::user(), array_keys($channels), $filter);
+
+            if ($filter->group === GroupFilter::FREE_TO_TAKE) {
+                $countFreeToTake = $dataProvider->getTotalCount();
+            } else {
+                $countFreeToTake = ClientChatQuery::countFreeToTake(Auth::user(), array_keys($channels), $filter);
+            }
         }
 
         $clientChat = null;
@@ -323,6 +331,7 @@ class ClientChatController extends FController
             'filter' => $filter,
             'page' => $page + 1,
             'actionPermissions' => new ClientChatActionPermission(),
+            'countFreeToTake' => $countFreeToTake,
         ]);
     }
 

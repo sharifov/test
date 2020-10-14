@@ -11,6 +11,7 @@ use yii\web\JsExpression;
 /** @var FilterForm $filter */
 /** @var string $loadChannelsUrl */
 /** @var ArrayDataProvider|null $dataProvider */
+/** @var int $countFreeToTake */
 
 /*
     <div class="_cc_tabs_wrapper">
@@ -93,13 +94,13 @@ use yii\web\JsExpression;
                     <i class="fa fa-filter"></i> <?= Html::a('Additional filters', null, ['id' => 'btn_additional_filters']) ?>
                     <?php if ($isAdditionalFilterActive): ?>
                         <?php echo Html::a(
-                            '(reset <i class="fa fa-times"></i>)',
-                            null,
-                            [
+            '(reset <i class="fa fa-times"></i>)',
+            null,
+            [
                                 'id' => 'reset_additional',
                                 'style' => 'font-weight: bold;',
                             ]
-                        ); ?>
+        ); ?>
                     <?php endif ?>
                 </div>
             </div>
@@ -221,12 +222,13 @@ use yii\web\JsExpression;
             <?php foreach ($filter->getGroupFilterUI() as $key => $item): ?>
                 <?php if ($key === GroupFilter::FREE_TO_TAKE): ?>
                     <?php
-                        $countItems = '';
-                        if ($key === $filter->group) {
-                            $count = $dataProvider ? (int) $dataProvider->getTotalCount() : 0;
-                            $countItems = ' <small style="margin-left: 4px;">
-                                <span class="label label-default" style="font-size: 9px;">' . $count . '</span></small>';
-                        }
+                        $countItems = ' 
+                            <small style="margin-left: 4px;">
+                                <span 
+                                    class="label label-default" 
+                                    style="font-size: 9px;" 
+                                    id="count_free_to_take">
+                                        ' . $countFreeToTake . '</span></small>';
                     ?>
                     <div
                         class="_cc_group cc_btn_group_filter <?php echo($key === $filter->group ? 'active' : '') ?>"
