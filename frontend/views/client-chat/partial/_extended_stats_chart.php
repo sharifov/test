@@ -6,6 +6,11 @@
 ?>
 
 <?php if ($viewModel->preparedData): ?>
+    <div class="btn-group" role="group">
+        <button id="lineType" class="btn btn-outline-secondary btn-group ml-2" value="LineChart"><i class="fa fa-line-chart blue"></i></button>
+        <button id="columnType" class="btn btn-outline-secondary btn-group" value="ColumnChart"><i class="fa fa-bar-chart blue"></i></button>
+    </div>
+
     <div id="myChart"></div>
     <script type="text/javascript">
         $(document).ready(function () {
@@ -13,10 +18,7 @@
 
             google.charts.load('current', {'packages': ['corechart', 'bar']});
             google.charts.setOnLoadCallback(function () {
-                var totalCallsChart = new google.visualization.ColumnChart(document.getElementById('myChart'));
-
                 //var colors = ['#8ec5ff', '#dd4b4e', '#587ca6'];
-
                 var options = {
                     title: 'Dynamic of New Initiated Chats by Client / Agent',
                     chartArea: {width: '95%', right: 10},
@@ -60,11 +62,26 @@
                     tooltip: {isHtml: true}
                 };
 
+                var chartType = document.getElementById("lineType").value;
+                var totalCallsChart = new google.visualization[chartType](document.getElementById('myChart'));
+
                 var data = google.visualization.arrayToDataTable(graphData);
 
                 totalCallsChart.draw(data, options);
 
                 $(window).on('resize', function () {
+                    totalCallsChart.draw(data, options);
+                });
+
+                $("#lineType").on('click', function () {
+                    chartType = document.getElementById("lineType").value;
+                    totalCallsChart = new google.visualization[chartType](document.getElementById('myChart'));
+                    totalCallsChart.draw(data, options);
+                });
+
+                $("#columnType").on('click', function () {
+                    chartType = document.getElementById("columnType").value;
+                    totalCallsChart = new google.visualization[chartType](document.getElementById('myChart'));
                     totalCallsChart.draw(data, options);
                 });
             });
