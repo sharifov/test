@@ -92,21 +92,4 @@
         let newOtherParams = otherUrlParams.toString() ? ('&' + otherUrlParams.toString()) : '';
         return filterParams + newOtherParams;
     };
-
-    window.refreshClientChatFreeToTake = function(cchId, statusName) {
-
-        let freeToTakeElement = $('#count_free_to_take');
-        if (freeToTakeElement.length) {
-            pjaxReload({container: '#pjax-client-chat-channel-list'});
-
-            let activeChatId = parseInt(localStorage.getItem('activeChatId'), 10);
-            cchId = parseInt(cchId, 10);
-
-            if (activeChatId === cchId) {
-                window.refreshChatInfo(cchId);
-                createNotify('Warning', 'Current Сhat has changed status to ' + statusName, 'warning');
-            }
-        }
-    };
-
 })(window);
