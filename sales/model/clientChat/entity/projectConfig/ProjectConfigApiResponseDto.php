@@ -74,7 +74,7 @@ class ProjectConfigApiResponseDto
         $this->notificationSound = $params['notificationSound'] ?? '';
         $this->enabled = (bool)$projectConfig->ccpc_enabled;
         $this->project = $projectConfig->ccpcProject ? $projectConfig->ccpcProject->name : '';
-        $this->projectKey = $projectConfig->ccpcProject ? $projectConfig->ccpcProject->project_key : '';
+        $this->projectKey = ($projectConfig->ccpcProject && $projectConfig->ccpcProject->project_key) ? $projectConfig->ccpcProject->project_key : '';
         $this->theme = Json::decode($projectConfig->ccpc_theme_json) ?? '{}';
         $this->settings = Json::decode($projectConfig->ccpc_settings_json) ?? '{}';
         $this->channels = ClientChatChannel::getSettingsList($projectConfig->ccpc_project_id, $languageId);
