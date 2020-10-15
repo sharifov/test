@@ -985,7 +985,7 @@ class ClientChatController extends FController
                     throw new NotFoundHttpException('Chat is not found', -3);
                 }
                 if (!$clientChat->isIdle()) { // TODO:: must be replaced to permission in separate task
-                    throw new ForbiddenHttpException('Chat must be in status "Idle"', -4);
+                    throw new ForbiddenHttpException('Chat must be in status Idle', -4);
                 }
 
                 if ($clientChat->cch_owner_user_id === Auth::id()) {
@@ -996,19 +996,19 @@ class ClientChatController extends FController
                     $result['status'] = 2;
                     $result['goToClientChatId'] = $clientChat->cch_id;
                 } elseif ($takeClientChat = $this->clientChatService->takeClientChat($clientChat, Auth::user())) {
-                    $data = ClientChatAccessMessage::chatTaken($clientChat, $clientChat->cchOwnerUser);
+                    $data = ClientChatAccessMessage::chatTaken($clientChat, $takeClientChat->cchOwnerUser->nickname);
                     Notifications::pub(['chat-' . $clientChat->cch_id], 'refreshChatPage', ['data' => $data]);
 
                     $clientChatLink = Purifier::createChatShortLink($clientChat);
                     Notifications::createAndPublish(
                         $clientChat->cch_owner_user_id,
-                        'Your Chat was taken',
-                        'Your Chat was taken by ' . Auth::user()->nickname . '; ' . $clientChatLink,
+                        'Chat was taken',
+                        'Client Chat was taken by ' . $takeClientChat->cchOwnerUser->nickname . ' (' . $clientChatLink . ')',
                         Notifications::TYPE_INFO,
                         true
                     );
 
-                    $result['message'] = 'ClientChat successfully taken';
+                    $result['message'] = 'Client Chat was successfully taken';
                     $result['status'] = 1;
                     $result['goToClientChatId'] = $takeClientChat->cch_id;
                 } else {
