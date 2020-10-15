@@ -105,7 +105,7 @@ $clientChatTakeUrl = Url::toRoute(['/client-chat/ajax-take']);
             </div>
 
             <div id="_client-chat-note">
-                <?php if ($clientChat && $actionPermissions->canNoteView($clientChat)): ?>
+                <?php if ($clientChat && ($actionPermissions->canNoteView($clientChat) || $actionPermissions->canNoteAdd($clientChat) || $actionPermissions->canNoteDelete($clientChat))): ?>
                     <?php echo $this->render('partial/_client-chat-note', [
                         'clientChat' => $clientChat,
                         'model' => new ClientChatNote(),
