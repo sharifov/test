@@ -433,6 +433,13 @@ class ViewModelTotalCallGraph
                 array_push($normalizedData, [$point, 0, '', 0, '']);
             }
         }
+
+        usort($normalizedData, function ($firstElement, $secondElement) {
+            $datetimeFirst = strtotime($firstElement[0]);
+            $datetimeSecond = strtotime($secondElement[0]);
+            return $datetimeFirst - $datetimeSecond;
+        });
+
         return $normalizedData;
     }
     /**
@@ -502,6 +509,13 @@ class ViewModelTotalCallGraph
                 array_push($normalizedData, [$point, 0, '', 0, '']);
             }
         }
+
+        usort($normalizedData, function ($firstElement, $secondElement) {
+            $datetimeFirst = strtotime($firstElement[0]);
+            $datetimeSecond = strtotime($secondElement[0]);
+            return $datetimeFirst - $datetimeSecond;
+        });
+
         return $normalizedData;
     }
 
@@ -523,6 +537,15 @@ class ViewModelTotalCallGraph
                 array_push($normalizedData, [$point, 0, '', 0, '']);
             }
         }
+
+        usort($normalizedData, function ($firstElement, $secondElement) {
+            $firstCriteria = explode('/', $firstElement[0]);
+            $secondCriteria = explode('/', $secondElement[0]);
+            $datetimeFirst = strtotime($firstCriteria[0]);
+            $datetimeSecond = strtotime($secondCriteria[0]);
+            return $datetimeFirst - $datetimeSecond;
+        });
+
         return $normalizedData;
     }
 
