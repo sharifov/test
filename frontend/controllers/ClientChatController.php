@@ -365,7 +365,7 @@ class ClientChatController extends FController
                 'actionPermissions' => new ClientChatActionPermission(),
             ]);
             $permissions = new ClientChatActionPermission();
-            if ($permissions->canNoteView($clientChat)) {
+            if ($permissions->canNoteView($clientChat) || $permissions->canNoteAdd($clientChat) || $permissions->canNoteDelete($clientChat)) {
                 $result['noteHtml'] = $this->renderAjax('partial/_client-chat-note', [
                     'clientChat' => $clientChat,
                     'model' => new ClientChatNote(),
