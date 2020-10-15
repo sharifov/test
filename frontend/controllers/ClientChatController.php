@@ -483,9 +483,8 @@ class ClientChatController extends FController
         }
 
         try {
-            if ($clientChatNote = $this->clientChatNoteRepository->findById($ccnId)) {
-                $this->clientChatNoteRepository->toggleDeleted($clientChatNote);
-            }
+            $clientChatNote = $this->clientChatNoteRepository->findById($ccnId);
+            $this->clientChatNoteRepository->toggleDeleted($clientChatNote);
         } catch (\Throwable $throwable) {
             Yii::error(
                 AppHelper::throwableFormatter($throwable),
