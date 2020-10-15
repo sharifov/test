@@ -2,6 +2,11 @@
 
 use yii\helpers\Html;
 use \kartik\form\ActiveForm;
+use sales\widgets\UserSelect2Widget;
+use kartik\select2\Select2;
+use common\models\Project;
+use common\models\UserGroup;
+use common\models\Department;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\search\CallSearch */
@@ -65,24 +70,54 @@ use \kartik\form\ActiveForm;
                     ])->label('Created DateTime Range');
                     ?>
                 </div>
-                <!--<div class="col-md-3">
-                    <div class="col-md-6">
-                        <?php /*echo $form->field($model, 'call_duration_from')->input('number', ['min' => 0]) */?>
-                    </div>
-                    <div class="col-md-6">
-                        <?php /*echo $form->field($model, 'call_duration_to')->input('number', ['min' => 0]) */?>
-                    </div>
+
+                <div class="col-md-2">
+                    <?= $form->field($model, 'userID')->widget(UserSelect2Widget::class, [
+                        'data' => $model->userID ? [
+                            $model->userID => \common\models\Employee::findOne($model->userID)->username
+                        ] : [],
+                    ])->label('User') ?>
                 </div>
 
                 <div class="col-md-2">
-                    <?php /*echo $form->field($model, 'projectId')->dropDownList(\common\models\Project::getList(), ['prompt' => '-'])->label('Project ID') */?>
+                    <?= $form->field($model, 'projectIds', [
+                        'options' => ['class' => 'form-group']
+                    ])->widget(Select2::class, [
+                        'data' => Project::getList(),
+                        'size' => Select2::SMALL,
+                        'options' => ['placeholder' => 'Select Project', 'multiple' => true],
+                        'pluginOptions' => ['allowClear' => true],
+                    ])->label('Project') ?>
+                </div>
+
+                <div class="col-md-2">
+                    <?= $form->field($model, 'departmentIds', [
+                        'options' => ['class' => 'form-group']
+                    ])->widget(Select2::class, [
+                        'data' => Department::getList(),
+                        'size' => Select2::SMALL,
+                        'options' => ['placeholder' => 'Select Department', 'multiple' => true],
+                        'pluginOptions' => ['allowClear' => true],
+                    ])->label('Department') ?>
+                </div>
+
+                <div class="col-md-2">
+                    <?= $form->field($model, 'userGroupIds', [
+                        'options' => ['class' => 'form-group']
+                    ])->widget(Select2::class, [
+                        'data' => UserGroup::getList(),
+                        'size' => Select2::SMALL,
+                        'options' => ['placeholder' => 'Select User Group', 'multiple' => true],
+                        'pluginOptions' => ['allowClear' => true],
+                    ])->label('User Groups') ?>
+                </div>
+
+                <div class="col-md-2">
+                    <?= $form->field($model, 'minTalkTime')->input('number', ['min' => 0])->label('Talk time from') ?>
                 </div>
                 <div class="col-md-2">
-                    <?php /*echo $form->field($model, 'statusId')->dropDownList(\common\models\Call::STATUS_LIST, ['prompt' => '-'])->label('Status ID') */?>
+                    <?= $form->field($model, 'maxTalkTime')->input('number', ['min' => 0])->label('Talk time to') ?>
                 </div>
-                <div class="col-md-2">
-                    <?php /*echo $form->field($model, 'callTypeId')->dropDownList(\common\models\Call::CALL_TYPE_LIST, ['prompt' => '-'])->label('Call Type ID') */?>
-                </div> -->
             </div>
 
             <div class="row">

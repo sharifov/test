@@ -52,9 +52,11 @@ class CallLogSearch extends CallLog
     public $typesIds = [];
     public $categoryIds = [];
     public $departmentIds = [];
+    public $userGroupIds = [];
     public $callDurationFrom;
     public $callDurationTo;
     public $callNote;
+    public $userID;
 
     public $reportTimezone;
     public $defaultUserTz;
@@ -103,9 +105,9 @@ class CallLogSearch extends CallLog
             [['clq_access_count', 'clq_queue_time'], 'integer'],
             [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['callDurationFrom', 'callDurationTo'], 'integer'],
-            [['projectIds', 'statusIds', 'typesIds', 'categoryIds', 'departmentIds'], 'each', 'rule' => ['integer']],
+            [['projectIds', 'statusIds', 'typesIds', 'categoryIds', 'departmentIds', 'userGroupIds'], 'each', 'rule' => ['integer']],
             [['reportTimezone', 'timeFrom', 'timeTo'], 'string'],
-            [['callDepId', 'userGroupId', 'minTalkTime', 'maxTalkTime'], 'integer'],
+            [['callDepId', 'userGroupId', 'minTalkTime', 'maxTalkTime', 'userID'], 'integer'],
             [['reportCreateTimeRange', 'createTimeStart', 'createTimeEnd'], 'safe']
         ];
     }
@@ -150,8 +152,8 @@ class CallLogSearch extends CallLog
     public function search($params, Employee $user): ActiveDataProvider
     {
         $query = static::find()
-            ->with(['project', 'department', 'phoneList', 'user', 'record'])
-            ->joinWith(['callLogLead.lead', 'callLogCase.case', 'queue']);
+            ->with(['project', 'department', 'phoneList', 'user'])
+            ->joinWith(['callLogLead.lead', 'callLogCase.case', 'queue', 'record']);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -217,6 +219,33 @@ class CallLogSearch extends CallLog
             $dateTimeStart = Employee::convertTimeFromUserDtToUTC(strtotime($date[0]));
             $dateTimeEnd = Employee::convertTimeFromUserDtToUTC(strtotime($date[1]));
             $query->andWhere(['between', 'cl_call_created_dt', $dateTimeStart, $dateTimeEnd]);
+        }
+
+        if ($this->userID) {
+            $query->andWhere(['cl_user_id' => $this->userID]);
+        }
+
+        if ($this->projectIds) {
+            $query->andWhere(['cl_project_id' => $this->projectIds]);
+        }
+
+        if ($this->departmentIds) {
+            $query->andWhere(['cl_department_id' => $this->departmentIds]);
+        }
+
+        if ($this->userGroupIds) {
+            $userIdsByGroup = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id) as cl_user_id'])->where(['ugs_group_id' => $this->userGroupIds])->asArray()->all();
+            if ($userIdsByGroup) {
+                $query->andWhere(['in', ['cl_user_id'], $userIdsByGroup]);
+            }
+        }
+
+        if (!empty($this->minTalkTime) && empty($this->maxTalkTime)) {
+            $query->andWhere(['>=', 'clr_duration', $this->minTalkTime]);
+        } elseif (!empty($this->maxTalkTime) && empty($this->minTalkTime)) {
+            $query->andWhere(['<=', 'clr_duration', $this->maxTalkTime]);
+        } elseif (!empty($this->minTalkTime) && !empty($this->maxTalkTime)) {
+            $query->andWhere(['between', 'clr_duration', $this->minTalkTime, $this->maxTalkTime]);
         }
 
         // grid filtering conditions
