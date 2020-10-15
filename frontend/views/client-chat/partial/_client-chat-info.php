@@ -109,8 +109,14 @@ $guard = new ClientChatManageGuard($statusLogRepository);
                             ]) ?>
                         <?php endif; ?>
 
-                        <?php if($clientChat->isIdle()): ?> <?php /* TODO:: must be replaced to permission in separate task */ ?>
-                            <?php echo Html::a('<i class="fa fa-arrows-h"></i> Take', null, [
+                        <?php if ($actionPermissions->canReturn($clientChat)): ?>
+                            <?php echo Html::a('<i class="fa fa-arrows-h"> </i> Return', null, [
+                                'class' => 'dropdown-item text-info cc_return',
+                                'title' => 'Return the chat to In Progress',
+                                'data-cch-id' => $clientChat->cch_id
+                            ]) ?>
+                        <?php elseif ($actionPermissions->canTake($clientChat)): ?>
+                            <?php echo Html::a('<i class="fa fa-arrows-h"> </i> Take', null, [
                                 'class' => 'dropdown-item text-info cc_take ',
                                 'title' => 'Take',
                                 'data-cch-id' => $clientChat->cch_id

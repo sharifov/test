@@ -16,6 +16,7 @@ use sales\model\clientChat\entity\ClientChat;
  * @property bool|null $canReopenChat
  * @property bool|null $canHold
  * @property bool|null $canUnHold
+ * @property bool|null $canReturn
  */
 class ClientChatActionPermission
 {
@@ -31,6 +32,10 @@ class ClientChatActionPermission
 
     private ?bool $canHold = null;
     private ?bool $canUnHold = null;
+
+    private ?bool $canReturn = null;
+
+    private ?bool $canTake = null;
 
     public function canClose(ClientChat $chat): bool
     {
@@ -102,5 +107,23 @@ class ClientChatActionPermission
         }
         $this->canUnHold = Auth::can('client-chat/manage', ['chat' => $chat]) && Auth::can('client-chat/un_hold', ['chat' => $chat]);
         return $this->canUnHold;
+    }
+
+    public function canReturn(ClientChat $chat): bool
+    {
+        if ($this->canReturn !== null) {
+            return $this->canReturn;
+        }
+        $this->canReturn = Auth::can('client-chat/manage', ['chat' => $chat]) && Auth::can('client-chat/return', ['chat' => $chat]);
+        return $this->canReturn;
+    }
+
+    public function canTake(ClientChat $chat): bool
+    {
+        if ($this->canTake !== null) {
+            return $this->canTake;
+        }
+        $this->canTake = Auth::can('client-chat/view', ['chat' => $chat]) && Auth::can('client-chat/take', ['chat' => $chat]);
+        return $this->canTake;
     }
 }

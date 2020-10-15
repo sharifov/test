@@ -56,6 +56,7 @@ $clientChatResetUnreadMessageUrl = Url::toRoute(['/client-chat/reset-unread-mess
 $clientChatAddActiveConnectionUrl = Url::toRoute(['/client-chat/add-active-connection']);
 $clientChatRemoveFromActiveConnectionUrl = Url::toRoute(['/client-chat/remove-active-connection']);
 $clientChatTakeUrl = Url::toRoute(['/client-chat/ajax-take']);
+$clientChatReturnUrl = Url::toRoute(['/client-chat/ajax-return']);
 
 ?>
 
@@ -952,6 +953,54 @@ $(document).on('click', '.cc_take', function (e) {
     
     $.ajax({
         url: '{$clientChatTakeUrl}',
+        type: 'POST',
+        data: {cchId: cchId},
+        dataType: 'json'    
+    })
+    .done(function(dataResponse) {
+        $('#page-loader').hide();
+        if (dataResponse.status > 0) { 
+            createNotify('Success', dataResponse.message, 'success');
+            $(location).attr('href', '/client-chat/index?chid=' + dataResponse.goToClientChatId);                     
+        } else if (dataResponse.message.length) {
+            createNotify('Error', dataResponse.message, 'error');
+        } else {
+            createNotify('Error', 'Error, please check logs', 'error');
+        }
+        btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);
+    })
+    .fail(function(jqXHR, textStatus, errorThrown) {
+        $('#page-loader').hide();
+        createNotify('Error', jqXHR.responseText, 'error');
+        btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);
+    })
+    .always(function(jqXHR, textStatus, errorThrown) {  
+        setTimeout(function () {
+            $('#page-loader').hide();
+            btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);
+        }, 3000);
+    });           
+});
+
+$(document).on('click', '.cc_return', function (e) {
+    e.preventDefault();
+    
+    if(!confirm('Are you sure want to Return the chat to In Progress?')) {
+        return false;
+    } 
+    
+    let cchId = $(this).attr('data-cch-id');
+    let btnSubmit = $(this);
+    let btnContent = btnSubmit.html();
+        
+    btnSubmit.html('<i class="fa fa-cog fa-spin"></i> Loading...')
+        .addClass('btn-default')
+        .prop('disabled', true);
+        
+    $('#page-loader').show();    
+    
+    $.ajax({
+        url: '{$clientChatReturnUrl}',
         type: 'POST',
         data: {cchId: cchId},
         dataType: 'json'    
