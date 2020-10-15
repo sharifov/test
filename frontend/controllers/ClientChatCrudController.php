@@ -2,8 +2,11 @@
 
 namespace frontend\controllers;
 
+use common\models\Notifications;
 use common\models\VisitorLog;
+use frontend\widgets\clientChat\ClientChatAccessMessage;
 use sales\auth\Auth;
+use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\entity\search\ClientChatQaSearch;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatFeedback\entity\ClientChatFeedbackSearch;
@@ -12,22 +15,16 @@ use sales\model\clientChatMessage\entity\search\ClientChatMessageSearch;
 use sales\model\clientChatNote\entity\ClientChatNoteSearch;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatRequest\entity\search\ClientChatRequestSearch;
-use sales\services\clientChatMessage\ClientChatMessageService;
-use Yii;
-use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChat\entity\search\ClientChatSearch;
-use frontend\controllers\FController;
-use yii\helpers\ArrayHelper;
-use yii\web\BadRequestHttpException;
-use yii\web\NotFoundHttpException;
-use yii\web\NotAcceptableHttpException;
-use yii\filters\VerbFilter;
-use yii\web\Response;
-use yii\db\StaleObjectException;
 use Throwable;
+use Yii;
+use yii\db\StaleObjectException;
+use yii\filters\VerbFilter;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
-use common\models\Notifications;
-use common\models\UserConnection;
+use yii\web\BadRequestHttpException;
+use yii\web\NotAcceptableHttpException;
+use yii\web\NotFoundHttpException;
+use yii\web\Response;
 
 class ClientChatCrudController extends FController
 {
@@ -159,8 +156,24 @@ class ClientChatCrudController extends FController
     {
         $model = $this->findModel($id);
         $model->cch_updated_user_id = Auth::id();
+        $oldStatus = $model->cch_status_id;
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+
+            if ((ClientChat::STATUS_IDLE !== $oldStatus) && $model->isIdle()) { /* TODO:: FOR TEST  */
+
+                Notifications::pub(
+                    ['chat-' . $model->cch_id],
+                    'clientChatUpdateStatus',
+                    ['data' => ClientChatAccessMessage::chatIdle($model->cch_id)]
+                );
+
+                Notifications::sendCommandByControllerAction(
+                    'updateFreeToTake',
+                    'client-chat',
+                    'index'
+                );
+            }
 
             return $this->redirect(['view', 'id' => $model->cch_id]);
         }

@@ -329,6 +329,14 @@ class ClientChatController extends Controller
             }
         }
 
+        if ($processed) {
+            Notifications::sendCommandByControllerAction(
+                'updateFreeToTake',
+                'client-chat',
+                'index'
+            );
+        }
+
         $timeEnd = microtime(true);
         $time = number_format(round($timeEnd - $timeStart, 2), 2);
         echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .

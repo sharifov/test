@@ -15,6 +15,7 @@ use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\event\ClientChatManageStatusLogEvent;
 use sales\model\clientChat\event\ClientChatOwnerAssignedEvent;
 use sales\model\clientChat\event\ClientChatSetStatusCloseEvent;
+use sales\model\clientChat\event\ClientChatSetStatusIdleEvent;
 use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
 use sales\model\clientChatCase\entity\ClientChatCase;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
@@ -384,42 +385,43 @@ class ClientChat extends \yii\db\ActiveRecord
                 $reasonId
             )
         );
+        $this->recordEvent(new ClientChatSetStatusIdleEvent($this->cch_id));
         $this->cch_status_id = self::STATUS_IDLE;
     }
 
     public function isTransfer(): bool
     {
-        return $this->cch_status_id === self::STATUS_TRANSFER;
+        return (int) $this->cch_status_id === self::STATUS_TRANSFER;
     }
 
     public function isClosed(): bool
     {
-        return $this->cch_status_id === self::STATUS_CLOSED;
+        return (int) $this->cch_status_id === self::STATUS_CLOSED;
     }
 
     public function isInProgress(): bool
     {
-        return $this->cch_status_id === self::STATUS_IN_PROGRESS;
+        return (int) $this->cch_status_id === self::STATUS_IN_PROGRESS;
     }
 
     public function isHold(): bool
     {
-        return $this->cch_status_id === self::STATUS_HOLD;
+        return (int) $this->cch_status_id === self::STATUS_HOLD;
     }
 
     public function isNew(): bool
     {
-        return $this->cch_status_id === self::STATUS_NEW;
+        return (int) $this->cch_status_id === self::STATUS_NEW;
     }
 
     public function isPending(): bool
     {
-        return $this->cch_status_id === self::STATUS_PENDING;
+        return (int) $this->cch_status_id === self::STATUS_PENDING;
     }
 
     public function isIdle(): bool
     {
-        return $this->cch_status_id === self::STATUS_IDLE;
+        return (int) $this->cch_status_id === self::STATUS_IDLE;
     }
 
     public static function getStatusClassList(): array

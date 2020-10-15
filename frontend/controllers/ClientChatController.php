@@ -18,7 +18,6 @@ use frontend\widgets\clientChat\ClientChatAccessMessage;
 use frontend\widgets\clientChat\ClientChatAccessWidget;
 use frontend\widgets\notification\NotificationSocketWidget;
 use frontend\widgets\notification\NotificationWidget;
-use http\Exception\RuntimeException;
 use sales\auth\Auth;
 use sales\entities\cases\CasesSearch;
 use sales\entities\chat\ChatExtendedGraphsSearch;
@@ -50,7 +49,6 @@ use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestRepository
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestService;
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\model\clientChatUnread\entity\ClientChatUnread;
-use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\user\entity\userConnectionActiveChat\UserConnectionActiveChat;
 use sales\repositories\clientChatChannel\ClientChatChannelRepository;
 use sales\repositories\clientChatStatusLogRepository\ClientChatStatusLogRepository;
@@ -83,21 +81,21 @@ use yii\web\Response;
  *
  * @package frontend\controllers
  *
- * @property ClientChatRepository           $clientChatRepository
+ * @property ClientChatRepository $clientChatRepository
  * @property ClientChatUserAccessRepository $clientChatUserAccessRepository
- * @property ClientChatMessageService       $clientChatMessageService
- * @property ClientChatService              $clientChatService
- * @property ClientChatUserAccessService    $clientChatUserAccessService
- * @property ClientChatNoteRepository       $clientChatNoteRepository
- * @property LeadRepository                 $leadRepository
- * @property TransactionManager             $transactionManager
- * @property ClientChatChannelRepository    $clientChatChannelRepository
- * @property ProjectRepository              $projectRepository
- * @property ClientChatRequestService       $clientChatRequestService
- * @property ClientChatRequestRepository    $clientChatRequestRepository
- * @property ClientChatStatusLogService     $clientChatStatusLogService
- * @property ClientChatStatusLogRepository  $clientChatStatusLogRepository
- * @property ClientChatHoldRepository       $clientChatHoldRepository
+ * @property ClientChatMessageService $clientChatMessageService
+ * @property ClientChatService $clientChatService
+ * @property ClientChatUserAccessService $clientChatUserAccessService
+ * @property ClientChatNoteRepository $clientChatNoteRepository
+ * @property LeadRepository $leadRepository
+ * @property TransactionManager $transactionManager
+ * @property ClientChatChannelRepository $clientChatChannelRepository
+ * @property ProjectRepository $projectRepository
+ * @property ClientChatRequestService $clientChatRequestService
+ * @property ClientChatRequestRepository $clientChatRequestRepository
+ * @property ClientChatStatusLogService $clientChatStatusLogService
+ * @property ClientChatStatusLogRepository $clientChatStatusLogRepository
+ * @property ClientChatHoldRepository $clientChatHoldRepository
  */
 class ClientChatController extends FController
 {
@@ -222,7 +220,10 @@ class ClientChatController extends FController
     {
         $userId = Auth::id();
 
-        $channels = ClientChatChannel::find()->select(['ccc_name', 'ccc_id'])->joinWithCcuc($userId)->indexBy('ccc_id')->column();
+        $channels = ClientChatChannel::find()->select([
+            'ccc_name',
+            'ccc_id'
+        ])->joinWithCcuc($userId)->indexBy('ccc_id')->column();
 
         $filter = new FilterForm($channels);
 
@@ -232,7 +233,7 @@ class ClientChatController extends FController
 
         $filter->loadDefaultValuesByPermissions();
 
-        $page = (int) \Yii::$app->request->get('page');
+        $page = (int)\Yii::$app->request->get('page');
         if ($page < 1) {
             $page = 1;
         }
@@ -255,7 +256,7 @@ class ClientChatController extends FController
         }
 
         $clientChat = null;
-        $chid = (int) Yii::$app->request->get('chid');
+        $chid = (int)Yii::$app->request->get('chid');
 
         if ($chid) {
             try {
@@ -266,7 +267,10 @@ class ClientChatController extends FController
                 }
 
                 if ($clientChat->cch_owner_user_id && $clientChat->isOwner(Auth::id())) {
-                    $this->clientChatMessageService->discardUnreadMessages($clientChat->cch_id, $clientChat->cch_owner_user_id);
+                    $this->clientChatMessageService->discardUnreadMessages(
+                        $clientChat->cch_id,
+                        $clientChat->cch_owner_user_id
+                    );
 
                     if ($dataProvider && ($models = $dataProvider->getModels())) {
                         if (isset($models[$clientChat->cch_id])) {
@@ -343,7 +347,7 @@ class ClientChatController extends FController
      */
     public function actionInfo(): Response
     {
-        if (!Yii::$app->request->isAjax || !$cchId = (int) Yii::$app->request->post('cch_id')) {
+        if (!Yii::$app->request->isAjax || !$cchId = (int)Yii::$app->request->post('cch_id')) {
             throw new BadRequestHttpException('Invalid parameters');
         }
 
@@ -356,7 +360,10 @@ class ClientChatController extends FController
             $clientChat = $this->clientChatRepository->findById($cchId);
 
             if ($clientChat->cch_owner_user_id && $clientChat->isOwner(Auth::id())) {
-                $this->clientChatMessageService->discardUnreadMessages($clientChat->cch_id, (int)$clientChat->cch_owner_user_id);
+                $this->clientChatMessageService->discardUnreadMessages(
+                    $clientChat->cch_id,
+                    (int)$clientChat->cch_owner_user_id
+                );
             }
 
             $result['html'] = $this->renderAjax('partial/_client-chat-info', [
@@ -383,7 +390,7 @@ class ClientChatController extends FController
 
     public function actionNote(): Response
     {
-        $cchId = (int) Yii::$app->request->post('cch_id', 0);
+        $cchId = (int)Yii::$app->request->post('cch_id', 0);
 
         $result = [
             'html' => '',
@@ -416,7 +423,7 @@ class ClientChatController extends FController
      */
     public function actionCreateNote(): string
     {
-        if (!Yii::$app->request->isAjax || !$cchId = (int) Yii::$app->request->get('cch_id')) {
+        if (!Yii::$app->request->isAjax || !$cchId = (int)Yii::$app->request->get('cch_id')) {
             throw new BadRequestHttpException('Invalid parameters');
         }
 
@@ -468,8 +475,8 @@ class ClientChatController extends FController
             throw new BadRequestHttpException('Invalid parameters');
         }
 
-        $cchId = (int) Yii::$app->request->get('cch_id', 0);
-        $ccnId = (int) Yii::$app->request->get('ccn_id', 0);
+        $cchId = (int)Yii::$app->request->get('cch_id', 0);
+        $ccnId = (int)Yii::$app->request->get('ccn_id', 0);
 
         try {
             $clientChat = $this->clientChatRepository->findById($cchId);
@@ -513,8 +520,8 @@ class ClientChatController extends FController
             throw new BadRequestHttpException('Invalid parameters');
         }
 
-        $ccuaId = (int) Yii::$app->request->post('ccuaId');
-        $accessAction = (int) Yii::$app->request->post('accessAction');
+        $ccuaId = (int)Yii::$app->request->post('ccuaId');
+        $accessAction = (int)Yii::$app->request->post('accessAction');
 
         try {
             $result = [
@@ -557,9 +564,9 @@ class ClientChatController extends FController
      */
     public function actionAjaxDataInfo(): string
     {
-        $cchId = (int) Yii::$app->request->post('cchId');
+        $cchId = (int)Yii::$app->request->post('cchId');
         if (!$cchId) {
-            $cchId = (int) Yii::$app->request->get('cchId');
+            $cchId = (int)Yii::$app->request->get('cchId');
         }
 
         if (!Yii::$app->request->isAjax || !$cchId) {
@@ -735,7 +742,7 @@ class ClientChatController extends FController
      */
     public function actionAjaxClose(): string
     {
-        if (!Yii::$app->request->isAjax || !$cchId = (int) Yii::$app->request->post('cchId')) {
+        if (!Yii::$app->request->isAjax || !$cchId = (int)Yii::$app->request->post('cchId')) {
             throw new BadRequestHttpException('Invalid parameters');
         }
 
@@ -745,7 +752,7 @@ class ClientChatController extends FController
         try {
             $form->load(Yii::$app->request->post());
 
-            $chat = $this->clientChatRepository->findById((int) $form->cchId);
+            $chat = $this->clientChatRepository->findById((int)$form->cchId);
 
             $permissions = new ClientChatActionPermission();
 
@@ -763,7 +770,10 @@ class ClientChatController extends FController
         } catch (\RuntimeException $e) {
             $form->addError('general', $e->getMessage());
         } catch (\Throwable $e) {
-            Yii::error(VarDumper::dumpAsString(AppHelper::throwableLog($e, true)), 'ClientChatController::actionAjaxClose::Throwable');
+            Yii::error(
+                VarDumper::dumpAsString(AppHelper::throwableLog($e, true)),
+                'ClientChatController::actionAjaxClose::Throwable'
+            );
             $form->addError('general', 'Internal Server Error');
         }
 
@@ -779,7 +789,7 @@ class ClientChatController extends FController
      */
     public function actionAjaxHistory(): string
     {
-        if (!Yii::$app->request->isAjax || !$chatId = (int) Yii::$app->request->post('cchId')) {
+        if (!Yii::$app->request->isAjax || !$chatId = (int)Yii::$app->request->post('cchId')) {
             throw new BadRequestHttpException('Invalid parameters');
         }
 
@@ -805,7 +815,7 @@ class ClientChatController extends FController
      */
     public function actionAjaxTransferView(): string
     {
-        if (!Yii::$app->request->isAjax || !$cchId = (int) Yii::$app->request->post('cchId')) {
+        if (!Yii::$app->request->isAjax || !$cchId = (int)Yii::$app->request->post('cchId')) {
             throw new BadRequestHttpException('Invalid parameters');
         }
 
@@ -864,7 +874,7 @@ class ClientChatController extends FController
      */
     public function actionAjaxHoldView(): string
     {
-        if (!Yii::$app->request->isAjax || !$cchId = (int) Yii::$app->request->post('cchId')) {
+        if (!Yii::$app->request->isAjax || !$cchId = (int)Yii::$app->request->post('cchId')) {
             throw new BadRequestHttpException('Invalid parameters');
         }
 
@@ -884,7 +894,6 @@ class ClientChatController extends FController
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
-
                 $clientChat->hold(Auth::id(), ClientChatStatusLog::ACTION_HOLD, $form->comment);
                 $this->clientChatRepository->save($clientChat);
 
@@ -931,7 +940,7 @@ class ClientChatController extends FController
 
             $result = ['message' => '', 'status' => 0];
             try {
-                if (!$cchId = (int) Yii::$app->request->post('cchId')) {
+                if (!$cchId = (int)Yii::$app->request->post('cchId')) {
                     throw new BadRequestHttpException('Invalid parameters', -1);
                 }
                 if (!$clientChat = ClientChat::findOne($cchId)) {
@@ -971,7 +980,7 @@ class ClientChatController extends FController
             $result = ['message' => '', 'status' => 0, 'goToClientChatId' => ''];
 
             try {
-                if (!$cchId = (int) Yii::$app->request->post('cchId')) {
+                if (!$cchId = (int)Yii::$app->request->post('cchId')) {
                     throw new BadRequestHttpException('Invalid parameters', -1);
                 }
                 if (!$redis->get($takeIdentity = 'cc_take_' . $cchId)) {
@@ -996,7 +1005,7 @@ class ClientChatController extends FController
                     $result['goToClientChatId'] = $clientChat->cch_id;
                 } elseif ($takeClientChat = $this->clientChatService->takeClientChat($clientChat, Auth::user())) {
                     $data = ClientChatAccessMessage::chatTaken($clientChat, $takeClientChat->cchOwnerUser->nickname);
-                    Notifications::pub(['chat-' . $clientChat->cch_id], 'refreshChatPage', ['data' => $data]);
+                    Notifications::pub(['chat-' . $clientChat->cch_id], 'refreshChatPage', ['data' => $data]); /* TODO:: remove */
 
                     $clientChatLink = Purifier::createChatShortLink($clientChat);
                     Notifications::createAndPublish(
@@ -1013,6 +1022,9 @@ class ClientChatController extends FController
                 } else {
                     throw new \RuntimeException('Error: TakeClientChat is failed');
                 }
+
+
+
             } catch (\Throwable $throwable) {
                 AppHelper::throwableLogger(
                     $throwable,
@@ -1061,8 +1073,8 @@ class ClientChatController extends FController
 
     public function actionSendOfferList(): string
     {
-        $chatId = (int) \Yii::$app->request->post('chat_id');
-        $leadId = (int) \Yii::$app->request->post('lead_id');
+        $chatId = (int)\Yii::$app->request->post('chat_id');
+        $leadId = (int)\Yii::$app->request->post('lead_id');
         $errorMessage = '';
         $dataProvider = null;
 
@@ -1140,7 +1152,7 @@ class ClientChatController extends FController
                     } else {
                         $selling .= '.00';
                     }
-                    $price = (int) (str_replace('.', '', $selling)) * 100;
+                    $price = (int)(str_replace('.', '', $selling)) * 100;
                     $captures[] = [
                         'price' => $price,
                         'data' => $capture,
@@ -1176,8 +1188,8 @@ class ClientChatController extends FController
     public function actionSendOffer(): Response
     {
         $out = ['error' => false, 'message' => ''];
-        $chatId = (int) \Yii::$app->request->post('chatId');
-        $leadId = (int) \Yii::$app->request->post('leadId');
+        $chatId = (int)\Yii::$app->request->post('chatId');
+        $leadId = (int)\Yii::$app->request->post('leadId');
 
         try {
             $clientChat = $this->clientChatRepository->findById($chatId);
@@ -1214,10 +1226,10 @@ class ClientChatController extends FController
             throw new BadRequestHttpException();
         }
 
-        $chatId = (int) Yii::$app->request->post('chatId');
-        $leadId = (int) Yii::$app->request->post('leadId');
-        $captureKey = (int) Yii::$app->request->post('captureKey');
-        $type = (string) Yii::$app->request->post('type');
+        $chatId = (int)Yii::$app->request->post('chatId');
+        $leadId = (int)Yii::$app->request->post('leadId');
+        $captureKey = (int)Yii::$app->request->post('captureKey');
+        $type = (string)Yii::$app->request->post('type');
 
         if (!$chatId || !$leadId || !$type) {
             throw new BadRequestHttpException('Not found chatId or leadId or type');
@@ -1298,7 +1310,10 @@ class ClientChatController extends FController
         $host = AppParamsHelper::liveChatRealTimeVisitorsUrl();
         $projectsWithKeys = Project::getListByUserWithProjectKeys(Auth::id());
 
-        return $this->render('real-time', ['host' => $host, 'projectsWithKeys' => json_encode($projectsWithKeys, true)]);
+        return $this->render(
+            'real-time',
+            ['host' => $host, 'projectsWithKeys' => json_encode($projectsWithKeys, true)]
+        );
     }
 
     /**
@@ -1307,7 +1322,7 @@ class ClientChatController extends FController
      */
     public function actionAjaxCancelTransfer(): Response
     {
-        if (!Yii::$app->request->isAjax || !$cchId = (int) Yii::$app->request->post('cchId')) {
+        if (!Yii::$app->request->isAjax || !$cchId = (int)Yii::$app->request->post('cchId')) {
             throw new BadRequestHttpException('Invalid parameters');
         }
 
@@ -1321,7 +1336,11 @@ class ClientChatController extends FController
 
             $this->transactionManager->wrap(function () use ($chat) {
                 $this->clientChatUserAccessService->disableAccessForOtherUsersBatch($chat, $chat->cch_owner_user_id);
-                $this->clientChatService->cancelTransfer($chat, Auth::user(), ClientChatStatusLog::ACTION_ACCEPT_TRANSFER);
+                $this->clientChatService->cancelTransfer(
+                    $chat,
+                    Auth::user(),
+                    ClientChatStatusLog::ACTION_ACCEPT_TRANSFER
+                );
             });
         } catch (\DomainException | \RuntimeException $e) {
             $result['error'] = true;
@@ -1356,14 +1375,21 @@ class ClientChatController extends FController
         } catch (\RuntimeException | \DomainException $e) {
             $form->addError('general', $e->getMessage());
         } catch (\Throwable $e) {
-            Yii::error($e->getMessage() . '; File: ' . $e->getFile() . '; Line: ' . $e->getLine(), 'ClientChatController::actionRealTimeStartChat::Throwable');
+            Yii::error(
+                $e->getMessage() . '; File: ' . $e->getFile() . '; Line: ' . $e->getLine(),
+                'ClientChatController::actionRealTimeStartChat::Throwable'
+            );
             $form->addError('general', 'Internal Server Error');
         }
 
         $domainError = '';
         $channels = [];
         try {
-            $channels = $this->clientChatChannelRepository->getByUserAndProject(Auth::id(), $form->projectId, Department::DEPARTMENT_EXCHANGE);
+            $channels = $this->clientChatChannelRepository->getByUserAndProject(
+                Auth::id(),
+                $form->projectId,
+                Department::DEPARTMENT_EXCHANGE
+            );
             $channels = ArrayHelper::map($channels, 'ccc_id', 'ccc_name');
 
             if (!$channels) {
@@ -1393,7 +1419,7 @@ class ClientChatController extends FController
         $widget->countDisplayedRequests = (int)$countDisplayedRequests;
         return $this->asJson([
             'data' => $widget->fetchItems(),
-            'page' => $page+1,
+            'page' => $page + 1,
             'totalItems' => $widget->getTotalItems()
         ]);
     }
@@ -1535,8 +1561,11 @@ class ClientChatController extends FController
 
     public function actionResetUnreadMessage()
     {
-        $chatId = (int) Yii::$app->request->post('chatId');
-        $unread = ClientChatUnread::find()->select(['*', 'cch_owner_user_id as ownerId'])->andWhere(['ccu_cc_id' => $chatId])->innerJoinWith('chat', false)->one();
+        $chatId = (int)Yii::$app->request->post('chatId');
+        $unread = ClientChatUnread::find()->select([
+            '*',
+            'cch_owner_user_id as ownerId'
+        ])->andWhere(['ccu_cc_id' => $chatId])->innerJoinWith('chat', false)->one();
 
         if (!$unread) {
             return $this->asJson(['error' => false, 'message' => '']);
@@ -1567,8 +1596,8 @@ class ClientChatController extends FController
 
     public function actionAddActiveConnection()
     {
-        $chatId = (int) Yii::$app->request->post('chatId');
-        $connectionId = (int) Yii::$app->request->post('connectionId');
+        $chatId = (int)Yii::$app->request->post('chatId');
+        $connectionId = (int)Yii::$app->request->post('connectionId');
 
         if (!$chat = ClientChat::find()->andWhere(['cch_id' => $chatId])->one()) {
             return $this->asJson(['error' => true, 'message' => 'Client chat not found']);
@@ -1618,8 +1647,8 @@ class ClientChatController extends FController
 
     public function actionRemoveActiveConnection()
     {
-        $chatId = (int) Yii::$app->request->post('chatId');
-        $connectionId = (int) Yii::$app->request->post('connectionId');
+        $chatId = (int)Yii::$app->request->post('chatId');
+        $connectionId = (int)Yii::$app->request->post('connectionId');
 
         if (!$chat = ClientChat::find()->andWhere(['cch_id' => $chatId])->one()) {
             return $this->asJson(['error' => true, 'message' => 'Client chat not found']);
@@ -1629,7 +1658,10 @@ class ClientChatController extends FController
             return $this->asJson(['error' => true, 'message' => 'Owner incorrect']);
         }
 
-        if (!$activeConnection = UserConnectionActiveChat::find()->andWhere(['ucac_conn_id' => $connectionId, 'ucac_chat_id' => $chatId])->one()) {
+        if (!$activeConnection = UserConnectionActiveChat::find()->andWhere([
+            'ucac_conn_id' => $connectionId,
+            'ucac_chat_id' => $chatId
+        ])->one()) {
             return $this->asJson(['error' => false, 'message' => '']);
         }
 

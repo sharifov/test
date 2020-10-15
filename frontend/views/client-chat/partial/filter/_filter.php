@@ -222,13 +222,16 @@ use yii\web\JsExpression;
             <?php foreach ($filter->getGroupFilterUI() as $key => $item): ?>
                 <?php if ($key === GroupFilter::FREE_TO_TAKE): ?>
                     <?php
-                        $countItems = ' 
-                            <small style="margin-left: 4px;">
-                                <span 
-                                    class="label label-default" 
-                                    style="font-size: 9px;" 
-                                    id="count_free_to_take">
-                                        ' . $countFreeToTake . '</span></small>';
+                        $countItems = '';
+                        if ($countFreeToTake) {
+                            $countItems = ' 
+                                <small style="margin-left: 4px;">
+                                    <span 
+                                        class="label label-default" 
+                                        style="font-size: 9px;" 
+                                        id="count_free_to_take">
+                                            ' . $countFreeToTake . '</span></small>';
+                        }
                     ?>
                     <div
                         class="_cc_group cc_btn_group_filter <?php echo($key === $filter->group ? 'active' : '') ?>"

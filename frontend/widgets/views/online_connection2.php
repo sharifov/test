@@ -497,14 +497,22 @@ $js = <<<JS
                             window.updateVoiceRecordCounters();
                         }
                         
-                         if(obj.cmd === 'updateCountFreeToTake') {
-                            let freeToTakeEl = $('#count_free_to_take');
-                            
-                            if (freeToTakeEl.length) {
-                                freeToTakeEl.text(obj.count);
+                        if(obj.cmd === 'updateFreeToTake') {
+                            let freeToTakeElement = $('#count_free_to_take');
+                            if (freeToTakeElement.length) {
+                                pjaxReload({container: '#pjax-client-chat-channel-list'});
                             }
                         }
                         
+                        if(obj.cmd === 'clientChatUpdateStatus') {
+                            let activeChatId = parseInt(localStorage.getItem('activeChatId'), 10);
+                            let cchId = parseInt(obj.data.cchId, 10);
+                            
+                            if (activeChatId === cchId) {
+                                window.refreshChatInfo(cchId);
+                                createNotify('Warning', obj.data.message, 'warning');
+                            }
+                        }
                     }
                     // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
                 } catch (error) {
