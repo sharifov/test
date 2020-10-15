@@ -209,6 +209,9 @@ class ClientChatController extends FController
                     'create-note',
                     'ajax-hold-view',
                     'ajax-un-hold',
+                    'info',
+                    'ajax-data-info',
+                    'ajax-history',
                 ],
             ],
         ];
@@ -256,14 +259,16 @@ class ClientChatController extends FController
         }
 
         $clientChat = null;
+        $accessChatError = false;
         $chid = (int)Yii::$app->request->get('chid');
 
         if ($chid) {
             try {
                 $clientChat = $this->clientChatRepository->findById($chid);
 
-                if (!Auth::can('client-chat/manage/all', ['chat' => $clientChat])) {
-                    throw new ForbiddenHttpException('You do not have access to this chat', 403);
+                if (!Auth::can('client-chat/view', ['chat' => $clientChat])) {
+                    $accessChatError = true;
+                    throw new \DomainException('You do not have access to this chat');
                 }
 
                 if ($clientChat->cch_owner_user_id && $clientChat->isOwner(Auth::id())) {
@@ -338,6 +343,7 @@ class ClientChatController extends FController
             'page' => $page + 1,
             'actionPermissions' => new ClientChatActionPermission(),
             'countFreeToTake' => $countFreeToTake,
+            'accessChatError' => $accessChatError
         ]);
     }
 
@@ -359,12 +365,24 @@ class ClientChatController extends FController
         try {
             $clientChat = $this->clientChatRepository->findById($cchId);
 
-            if ($clientChat->cch_owner_user_id && $clientChat->isOwner(Auth::id())) {
+            if (!Auth::can('client-chat/view', ['chat' => $clientChat])) {
+                throw new ForbiddenHttpException('You don\'t have access to this chat');
+            }
+
+            if ($clientChat->hasOwner() && $clientChat->isOwner(Auth::id())) {
                 $this->clientChatMessageService->discardUnreadMessages(
                     $clientChat->cch_id,
                     (int)$clientChat->cch_owner_user_id
                 );
             }
+
+            if ($clientChat->isOwner(Auth::id())) {
+                $result['readonly'] = '';
+            } else {
+                $result['readonly'] = '&readonly=true';
+            }
+
+            $result['gotoParam'] = '/live/' . $clientChat->cch_rid . '?layout=embedded';
 
             $result['html'] = $this->renderAjax('partial/_client-chat-info', [
                 'clientChat' => $clientChat,
@@ -577,6 +595,10 @@ class ClientChatController extends FController
             $clientChat = $this->clientChatRepository->findById($cchId);
         } catch (NotFoundException $throwable) {
             throw new NotFoundHttpException('Client chat is not found');
+        }
+
+        if (!Auth::can('client-chat/view', ['chat' => $clientChat])) {
+            throw new ForbiddenHttpException('You don\'t have access to this chat');
         }
 
         $visitorLog = null;
@@ -798,6 +820,11 @@ class ClientChatController extends FController
             //			if ($clientChat->isClosed()) {
 //				$history = ClientChatMessage::find()->byChhId($clientChat->cch_id)->all();
 //			}
+
+            if (!Auth::can('client-chat/view', ['chat' => $clientChat])) {
+                throw new ForbiddenHttpException('You don\'t have access to this chat');
+            }
+
         } catch (NotFoundException $e) {
             $clientChat = null;
         }

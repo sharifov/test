@@ -14,6 +14,7 @@ use yii\bootstrap4\Alert;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Url;
 use yii\web\JqueryAsset;
+use yii\web\View;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
@@ -26,6 +27,7 @@ use yii\widgets\Pjax;
 /** @var int $page */
 /** @var ClientChatActionPermission $actionPermissions */
 /** @var int $countFreeToTake */
+/** @var bool $accessChatError */
 
 $this->title = 'My Client Chat';
 //$this->params['breadcrumbs'][] = $this->title;
@@ -87,35 +89,49 @@ $clientChatTakeUrl = Url::toRoute(['/client-chat/ajax-take']);
         </div>
 		<?php Pjax::end(); ?>
     </div>
+
+    <?php
+         $iframeData = null;
+         $infoData = null;
+         $noteData = null;
+         if ($accessChatError) {
+             $this->registerJs('createNotify("Client chat view", "You don\'t have access to this chat", "error")', View::POS_LOAD);
+         } elseif ($clientChat) {
+             if ($clientChat->isClosed()) {
+                 $iframeData = $this->render('partial/_chat_history', ['clientChat' => $clientChat]);
+             } else {
+                 $iframeData = '<iframe class="_rc-iframe" src="' . $rcUrl . '?layout=embedded&resumeToken=' . $userRcAuthToken . '&goto=' . urlencode('/live/' . $clientChat->cch_rid . '?layout=embedded') . '" id="_rc-' . $clientChat->cch_id . '" style="border: none; width: 100%; height: 100%;" ></iframe >';
+             }
+             if ($client) {
+                 $infoData = $this->render('partial/_client-chat-info',
+                     ['clientChat' => $clientChat, 'client' => $client, 'actionPermissions' => $actionPermissions]);
+             }
+             if ($actionPermissions->canNoteView($clientChat) || $actionPermissions->canNoteAdd($clientChat) || $actionPermissions->canNoteDelete($clientChat)) {
+                 $noteData = $this->render('partial/_client-chat-note', [
+                     'clientChat' => $clientChat,
+                     'model' => new ClientChatNote(),
+                     'actionPermissions' => $actionPermissions,
+                 ]);
+             }
+         }
+    ?>
+
     <div class="col-md-6">
         <div id="_rc-iframe-wrapper">
-            <?php if ($clientChat && !$clientChat->isClosed()): ?>
-                <iframe class="_rc-iframe" src="<?= $rcUrl; ?>?layout=embedded&resumeToken=<?= $userRcAuthToken; ?>&goto=<?= urlencode('/live/' . $clientChat->cch_rid . '?layout=embedded'); ?>" id="_rc-<?= $clientChat->cch_id; ?>" style="border: none; width: 100%; height: 100%;" ></iframe>
-            <?php elseif ($clientChat && $clientChat->isClosed()): ?>
-				<?= $this->render('partial/_chat_history', ['clientChat' => $clientChat]); ?>
-            <?php endif; ?>
+            <?= $iframeData ?: '' ?>
         </div>
     </div>
     <div class="col-md-3">
         <div id="_cc_additional_info_wrapper" style="position: relative;">
             <div id="_client-chat-info">
-                <?php if ($clientChat && $client): ?>
-                    <?= $this->render('partial/_client-chat-info', ['clientChat' => $clientChat, 'client' => $client, 'actionPermissions' => $actionPermissions]); ?>
-                <?php endif; ?>
+                <?= $infoData ?: '' ?>
             </div>
-
             <div id="_client-chat-note">
-                <?php if ($clientChat && ($actionPermissions->canNoteView($clientChat) || $actionPermissions->canNoteAdd($clientChat) || $actionPermissions->canNoteDelete($clientChat))): ?>
-                    <?php echo $this->render('partial/_client-chat-note', [
-                        'clientChat' => $clientChat,
-                        'model' => new ClientChatNote(),
-                        'actionPermissions' => $actionPermissions,
-                    ]); ?>
-                <?php endif;?>
+                <?= $noteData ?: '' ?>
             </div>
-
         </div>
     </div>
+
 </div>
 
 <?php
@@ -316,37 +332,22 @@ window.removeChatFromActiveConnection = function () {
     currentChatOwnerId = 0;
 };
 
-$(document).on('click', '._cc-list-item', function () {
-
-    let cch_id = $(this).attr('data-cch-id');
-    currentChatId = cch_id;
-    let ownerId = $(this).attr('data-owner-id');
-    currentChatOwnerId = ownerId;
-    let countUnreadMessage = $("._cc-chat-unread-message").find("[data-cch-id='"+cch_id+"']").html();
-        
-   if (ownerId === userId) {
-        addChatToActiveConnection();    
-   }
-        
-    if ($(this).hasClass('_cc_active')) {
-        return false;
-    }
-    
+window.loadClientChatData = function (cch_id, data, ref) {
     let rcUrl = '{$rcUrl}';
     let userRcAuthToken = '{$userRcAuthToken}';
-    let gotoParam = encodeURIComponent($(this).attr('data-goto-param'));
-    let iframeHref = rcUrl + '?layout=embedded&resumeToken=' + userRcAuthToken + '&goto=' + gotoParam;
+    let gotoParam = encodeURIComponent(data.gotoParam);
+    
+    let iframeHref = rcUrl + '?layout=embedded&resumeToken=' + userRcAuthToken + '&goto=' + gotoParam + data.readonly;
     // let windowHeight = $(window)[0].innerHeight;
     // let offsetTop = $("#_rc-iframe-wrapper").offset().top;
     // let iframeHeight = windowHeight - offsetTop - 20;
     
-    let isClosed = $(this).attr('data-is-closed');
+    let isClosed = $(ref).attr('data-is-closed');
     $("#_rc-iframe-wrapper").find('._rc-iframe').hide();
     $('._cc-list-item').removeClass('_cc_active');
-    $(this).addClass('_cc_active');
-    
+    $(ref).addClass('_cc_active');
     if (!$('#_rc-'+cch_id).length) {
-    
+        
         if (isClosed) {
             getChatHistory(cch_id);
         } else {
@@ -372,7 +373,24 @@ $(document).on('click', '._cc-list-item', function () {
     localStorage.setItem('activeChatId', cch_id);
     
     $('#_rc-'+cch_id).show();
-    window.refreshChatInfo(cch_id);
+}
+
+$(document).on('click', '._cc-list-item', function () {
+    let cch_id = $(this).attr('data-cch-id');
+    currentChatId = cch_id;
+    let ownerId = $(this).attr('data-owner-id');
+    currentChatOwnerId = ownerId;
+    
+    if (ownerId === userId) {
+        addChatToActiveConnection();    
+    }
+        
+    if ($(this).hasClass('_cc_active')) {
+        return false;
+    }
+    
+    let ref = this;
+    window.refreshChatInfo(cch_id, loadClientChatData, ref);
 });
 
 $(document).on('click', '.cc_cancel_transfer', function (e) {
@@ -550,7 +568,7 @@ window.getChatHistory = function (cchId) {
     });
 }
 
-window.refreshChatInfo = function (cch_id) {
+window.refreshChatInfo = function (cch_id, callable, ref) {
     $.ajax({
         type: 'post',
         url: '{$clientChatInfoUrl}',
@@ -563,6 +581,9 @@ window.refreshChatInfo = function (cch_id) {
         success: function (data) {
             $('#_client-chat-info').html(data.html);
             $('#_client-chat-note').html(data.noteHtml);
+            if (callable) {
+                callable(cch_id, data, ref);
+            }          
         },
         error: function (xhr) {
             createNotify('Error', xhr.responseText, 'error');

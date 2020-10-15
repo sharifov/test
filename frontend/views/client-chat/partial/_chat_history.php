@@ -10,7 +10,7 @@ $date = $history[0]->ccm_sent_dt ?? null;
 $iDate = null;
 $rcUrl = Yii::$app->rchat->host  . '/home';
 $userRcAuthToken = Auth::user()->userProfile ? Auth::user()->userProfile->up_rc_auth_token : '';
-$readOnly = ($clientChat->isClosed() ? '&readonly=true' : '');
+$readOnly = (!$clientChat->isOwner(Auth::id()) ? '&readonly=true' : '');
 ?>
 
 <?php /* if ($history && $clientChat): ?>
