@@ -8,8 +8,7 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use yii\data\ArrayDataProvider;
-use yii\data\SqlDataProvider;
-use yii\db\Expression;
+use common\models\UserGroupAssign;
 use yii\db\Query;
 
 class ChatExtendedGraphsSearch extends ClientChatSearch
@@ -18,6 +17,9 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
     public string $createTimeStart;
     public string $createTimeEnd;
     public int $graphGroupBy;
+    public $userGroupIds = [];
+    public string $defaultUserTz = '';
+    public string $timeZone = '';
 
     public const CREATE_TIME_START_DEFAULT = '-29 days';
 
@@ -53,8 +55,9 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
     public function rules(): array
     {
         return [
-            [['createTimeRange', 'createTimeStart', 'createTimeEnd'], 'string'],
-            [['graphGroupBy', 'cch_owner_user_id', 'cch_channel_id'], 'integer'],
+            [['createTimeRange', 'createTimeStart', 'createTimeEnd', 'timeZone', 'defaultUserTz'], 'string'],
+            [['graphGroupBy', 'cch_owner_user_id', 'cch_channel_id', 'cch_project_id'], 'integer'],
+            [['userGroupIds'], 'each', 'rule' => ['integer']],
         ];
     }
 
@@ -67,6 +70,7 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
         $this->createTimeEnd = $range[1];
 
         $this->graphGroupBy = self::DATE_FORMAT_DAYS;
+        $this->defaultUserTz = \Yii::$app->user->identity->timezone;
     }
 
     public function stats()
@@ -92,18 +96,30 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
 
         //$query->where(['cch_status_id' => [ClientChat::STATUS_PENDING, ClientChat::STATUS_CLOSED]]);
 
+        if ($this->cch_project_id) {
+            $query->andWhere(['cch_project_id' => $this->cch_project_id]);
+        }
+
         $ccTblSubQuery = new Query();
         $ccTblSubQuery->select('*')->from(ClientChat::tableName())->where('date_format(cch_created_dt, "%Y-%m-%d") = date');
 
         $ccuaTblSubQuery = new Query();
         $ccuaTblSubQuery->select('*')->from(ClientChatUserAccess::tableName())->where(['ccua_status_id' => ClientChatUserAccess::STATUS_ACCEPT]);
 
-        if($this->cch_owner_user_id){
+        if ($this->cch_owner_user_id) {
             $query->andWhere(['cch_owner_user_id' => $this->cch_owner_user_id]);
             $ccuaTblSubQuery->andWhere(['ccua_user_id' => $this->cch_owner_user_id]);
         }
 
-        if($this->cch_channel_id){
+        if ($this->userGroupIds) {
+            $userIdsByGroup = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id) as cch_owner_user_id'])->where(['ugs_group_id' => $this->userGroupIds])->asArray()->all();
+            if ($userIdsByGroup) {
+                $query->andWhere(['in', ['cch_owner_user_id'], $userIdsByGroup]);
+            }
+        }
+
+
+        if ($this->cch_channel_id) {
             $query->andWhere(['cch_channel_id' => $this->cch_channel_id]);
             $ccTblSubQuery->andWhere(['cch_channel_id' => $this->cch_channel_id]);
         }
@@ -122,11 +138,12 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
         ]);
 
         //$query->andWhere('cch_owner_user_id IS NOT NULL');
+
         $query->andWhere([
             'between',
             'cch_created_dt',
-            Employee::convertTimeFromUserDtToUTC(strtotime($this->createTimeStart)),
-            Employee::convertTimeFromUserDtToUTC(strtotime($this->createTimeEnd))
+            Employee::convertToUTC(strtotime($this->createTimeStart), $this->timeZone),
+            Employee::convertToUTC(strtotime($this->createTimeEnd), $this->timeZone),
         ]);
 
 
@@ -145,11 +162,11 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
         ]);
         //$queryChats->where(['cch_status_id' => [ClientChat::STATUS_PENDING, ClientChat::STATUS_CLOSED]]);
 
-        if($this->cch_owner_user_id){
+        if ($this->cch_owner_user_id) {
             $queryChats->andWhere(['cch_owner_user_id' => $this->cch_owner_user_id]);
         }
 
-        if($this->cch_channel_id){
+        if ($this->cch_channel_id) {
             $queryChats->andWhere(['cch_channel_id' => $this->cch_channel_id]);
         }
 
@@ -197,13 +214,13 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
             $chatsData[$key]['chat_duration'] = 0;
 
             foreach ($firstChatAgentMessage as $message) {
-                if ($chat['cch_id'] == $message['ccm_cch_id']){
+                if ($chat['cch_id'] == $message['ccm_cch_id']) {
                     $chatsData[$key]['agent_frt'] = strtotime($message['first_msg_date']) - strtotime($chat['cch_created_dt']);
                 }
             }
 
             foreach ($firstMessagesOfChats as $messageOfChat) {
-                if ($chat['cch_id'] == $messageOfChat['ccm_cch_id'] && $chat['cch_status_id'] == ClientChat::STATUS_CLOSED ){
+                if ($chat['cch_id'] == $messageOfChat['ccm_cch_id'] && $chat['cch_status_id'] == ClientChat::STATUS_CLOSED) {
                     $chatsData[$key]['chat_duration'] = strtotime($chat['cch_updated_dt']) - strtotime($messageOfChat['first_msg_date']);
                 }
             }
@@ -211,20 +228,20 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
 
         //var_dump($chatsData); die();
 
-        foreach ($allData as $key => $finalData){
+        foreach ($allData as $key => $finalData) {
             $allData[$key]['sumFrtOfChatsInGroup'] = 0;
             $allData[$key]['sumClientChatDurationInGroup'] = 0;
             $allData[$key]['sumAgentChatDurationInGroup'] = 0;
             $agentsInGroup = explode(',', $finalData['agentsInGroup']);
-            for ($i = 0; $i < count($agentsInGroup); $i++){
-                foreach ($chatsData as $chat){
-                    if (!strcmp($finalData['date'], $chat['date'])  && $agentsInGroup[$i] == $chat['cch_owner_user_id'] && $chat['cch_source_type_id'] == ClientChat::SOURCE_TYPE_CLIENT ){
+            for ($i = 0; $i < count($agentsInGroup); $i++) {
+                foreach ($chatsData as $chat) {
+                    if (!strcmp($finalData['date'], $chat['date'])  && $agentsInGroup[$i] == $chat['cch_owner_user_id'] && $chat['cch_source_type_id'] == ClientChat::SOURCE_TYPE_CLIENT) {
                         $allData[$key]['sumFrtOfChatsInGroup'] += $chat['agent_frt'];
                     }
-                    if (!strcmp($finalData['date'], $chat['date'])  && $agentsInGroup[$i] == $chat['cch_owner_user_id'] && $chat['cch_source_type_id'] == ClientChat::SOURCE_TYPE_CLIENT ){
+                    if (!strcmp($finalData['date'], $chat['date'])  && $agentsInGroup[$i] == $chat['cch_owner_user_id'] && $chat['cch_source_type_id'] == ClientChat::SOURCE_TYPE_CLIENT) {
                         $allData[$key]['sumClientChatDurationInGroup'] += $chat['chat_duration'];
                     }
-                    if (!strcmp($finalData['date'], $chat['date'])  && $agentsInGroup[$i] == $chat['cch_owner_user_id'] && $chat['cch_source_type_id'] == ClientChat::SOURCE_TYPE_AGENT ){
+                    if (!strcmp($finalData['date'], $chat['date'])  && $agentsInGroup[$i] == $chat['cch_owner_user_id'] && $chat['cch_source_type_id'] == ClientChat::SOURCE_TYPE_AGENT) {
                         $allData[$key]['sumAgentChatDurationInGroup'] += $chat['chat_duration'];
                     }
                 }
@@ -232,7 +249,6 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
         }
 
         //var_dump($allData); die();
-
 
         return new ArrayDataProvider([
             'allModels' => $allData,
@@ -260,18 +276,29 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
     private function setGroupingParam()
     {
         $format = $this->getDateFormat($this->graphGroupBy);
-        if($this->graphGroupBy === self::DATE_FORMAT_HOURS){
-            return "date_format(cch_created_dt, '$format')";
-        } else if ($this->graphGroupBy === self::DATE_FORMAT_DAYS){
-            return "date_format(cch_created_dt, '$format')";
-        } else if ($this->graphGroupBy === self::DATE_FORMAT_WEEKS){
-            return "concat(str_to_date(date_format(cch_created_dt, '%Y %v Monday'), '%x %v %W'), '/', str_to_date(date_format(cch_created_dt, '%Y %v Sunday'), '%x %v %W'))";
-        } else if ($this->graphGroupBy === self::DATE_FORMAT_MONTH){
-            return "date_format(cch_created_dt, '$format')";
-        } else if ($this->graphGroupBy === self::DATE_FORMAT_HOURS_DAYS){
-            return "date_format(cch_created_dt, '$format')";
-        } else if ($this->graphGroupBy === self::DATE_FORMAT_WEEKDAYS){
-            return "WEEKDAY(cch_created_dt)";
+        $offset = $this->getTimeZoneOffset();
+        if ($this->graphGroupBy === self::DATE_FORMAT_HOURS) {
+            return "date_format(CONVERT_TZ(cch_created_dt, '+00:00', '$offset'), '$format')";
+        } elseif ($this->graphGroupBy === self::DATE_FORMAT_DAYS) {
+            return "date_format(CONVERT_TZ(cch_created_dt, '+00:00', '$offset'), '$format')";
+        } elseif ($this->graphGroupBy === self::DATE_FORMAT_WEEKS) {
+            return "concat(str_to_date(date_format(CONVERT_TZ(cch_created_dt, '+00:00', '$offset'), '%Y %v Monday'), '%x %v %W'), '/', str_to_date(date_format(CONVERT_TZ(cch_created_dt, '+00:00', '$offset'), '%Y %v Sunday'), '%x %v %W'))";
+        } elseif ($this->graphGroupBy === self::DATE_FORMAT_MONTH) {
+            return "date_format(CONVERT_TZ(cch_created_dt, '+00:00', '$offset'), '$format')";
+        } elseif ($this->graphGroupBy === self::DATE_FORMAT_HOURS_DAYS) {
+            return "date_format(CONVERT_TZ(cch_created_dt, '+00:00', '$offset'), '$format')";
+        } elseif ($this->graphGroupBy === self::DATE_FORMAT_WEEKDAYS) {
+            return "WEEKDAY(CONVERT_TZ(cch_created_dt, '+00:00', '$offset'))";
         }
+    }
+
+    private function getTimeZoneOffset()
+    {
+        $timezone = new \DateTimeZone($this->timeZone);
+        $seconds = $timezone->getOffset(new \DateTime);
+        $sign = ($seconds > 0) ? '+' : '-';
+        $hours = floor(abs($seconds) / 3600);
+        $minutes = floor((abs($seconds) / 60) % 60);
+        return $sign . sprintf("%02d:%02d", $hours, $minutes);
     }
 }

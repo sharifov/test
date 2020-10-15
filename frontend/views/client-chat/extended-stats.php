@@ -1,11 +1,15 @@
 <?php
 
-use sales\entities\chat\ChatGraphsSearch;
+use sales\entities\chat\ChatExtendedGraphsSearch;
 use yii\bootstrap4\ActiveForm;
 use yii\helpers\Html;
 use sales\widgets\UserSelect2Widget;
+use kartik\select2\Select2;
+use common\models\UserGroup;
+use common\models\Employee;
+
 /**
- * @var ChatGraphsSearch $model
+ * @var ChatExtendedGraphsSearch $model
  */
 
 $this->title = 'Client Chat';
@@ -51,13 +55,48 @@ $this->params['breadcrumbs'][] = $this->title;
                         </div>
 
                         <div class="col-md-2">
-                            <?= $form->field($model, 'graphGroupBy', [
-                                'options' => ['class' => 'form-group']
-                            ])->dropDownList($model::getDateFormatTextList())->label('Group By')?>
+                            <?= $form->field($model, 'timeZone')->widget(Select2::class, [
+                                'data' => Employee::timezoneList(true),
+                                'size' => Select2::SMALL,
+                                'options' => [
+                                    'placeholder' => 'Select TimeZone',
+                                    'multiple' => false,
+                                    'value' => $model->defaultUserTz
+                                ],
+                                'pluginOptions' => ['allowClear' => true],
+                            ]);
+                            ?>
                         </div>
 
                         <div class="col-md-2">
-                            <?= $form->field($model, 'cch_owner_user_id')->widget(UserSelect2Widget::class) ?>
+                            <?= $form->field($model, 'graphGroupBy', [
+                                'options' => ['class' => 'form-group']
+                            ])->dropDownList($model::getDateFormatTextList())->label('Group By') ?>
+                        </div>
+
+                        <div class="col-md-2">
+                            <?= $form->field($model, 'cch_owner_user_id')->widget(UserSelect2Widget::class, [
+                                'data' => $model->cch_owner_user_id ? [
+                                    $model->cch_owner_user_id => $model->cchOwnerUser->username
+                                ] : [],
+                            ])
+                            ?>
+                        </div>
+
+                        <div class="col-md-2">
+                            <?= $form->field($model, 'userGroupIds', [
+                                'options' => ['class' => 'form-group']
+                            ])->widget(Select2::class, [
+                                'data' => UserGroup::getList(),
+                                'size' => Select2::SMALL,
+                                'options' => ['placeholder' => 'Select User Group', 'multiple' => true],
+                                'pluginOptions' => ['allowClear' => true],
+                            ])->label('User Groups') ?>
+                        </div>
+
+                        <div class="col-md-2">
+                            <?= $form->field($model, 'cch_project_id')->dropDownList(\common\models\Project::getList(),
+                                ['prompt' => '-']) ?>
                         </div>
 
                         <div class="col-md-2">
@@ -73,7 +112,11 @@ $this->params['breadcrumbs'][] = $this->title;
                     <div class="row">
                         <div class="col-md-12">
                             <div class="d-flex justify-content-center">
-                                <?= \yii\helpers\Html::button('<i class="fa fa-search"></i> Search', ['type' => 'submit', 'class' => 'btn btn-default', 'id' => 'chat-chart-from-btn']) ?>
+                                <?= \yii\helpers\Html::button('<i class="fa fa-search"></i> Search', [
+                                    'type' => 'submit',
+                                    'class' => 'btn btn-default',
+                                    'id' => 'chat-chart-from-btn'
+                                ]) ?>
                             </div>
                         </div>
                     </div>
