@@ -451,6 +451,13 @@ class ViewModelTotalCallGraph
                 array_push($normalizedData, [$point, 0, '', 0, '']);
             }
         }
+
+        usort($normalizedData, function ($firstElement, $secondElement) {
+            $datetimeFirst = strtotime($firstElement[0]);
+            $datetimeSecond = strtotime($secondElement[0]);
+            return $datetimeFirst - $datetimeSecond;
+        });
+
         return $normalizedData;
     }
 
