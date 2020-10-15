@@ -10,7 +10,13 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
 ?>
 
 <?php if ($viewModel->callData): ?>
+  <div class="btn-toolbar">
     <?= $this->render('_call_graph_export', ['viewModel' => $viewModel]) ?>
+    <div class="btn-group" role="group">
+        <button id="lineType" class="btn btn-outline-secondary btn-group ml-2" value="LineChart"><i class="fa fa-line-chart blue"></i></button>
+        <button id="columnType" class="btn btn-outline-secondary btn-group" value="ColumnChart"><i class="fa fa-bar-chart blue"></i></button>
+    </div>
+    </div>
     <div id="myChart"></div>
 
 
@@ -68,7 +74,20 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
 
             google.charts.load('current', {'packages':['corechart','bar']});
             google.charts.setOnLoadCallback(function () {
-                var totalCallsChart = new google.visualization.ColumnChart(document.getElementById('myChart'));
+                var chartType = document.getElementById("lineType").value;
+                var totalCallsChart = new google.visualization[chartType](document.getElementById('myChart'));
+
+                $("#lineType").on('click', function () {
+                    chartType = document.getElementById("lineType").value;
+                    totalCallsChart = new google.visualization[chartType](document.getElementById('myChart'));
+                    totalCallsChart.draw(data, options);
+                });
+
+                $("#columnType").on('click', function () {
+                    chartType = document.getElementById("columnType").value;
+                    totalCallsChart = new google.visualization[chartType](document.getElementById('myChart'));
+                    totalCallsChart.draw(data, options);
+                });
 
                 var colors = ['#8ec5ff', '#dd4b4e', '#587ca6'];
 
