@@ -13,6 +13,7 @@ use Yii;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\clientChatUserChannel\entity\search\ClientChatUserChannelSearch;
 use frontend\controllers\FController;
+use yii\caching\TagDependency;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -29,28 +30,28 @@ use yii\db\StaleObjectException;
 class ClientChatUserChannelCrudController extends FController
 {
 
-	/**
-	 * @var ClientChatService
-	 */
-	private ClientChatService $clientChatService;
-	/**
-	 * @var ClientChatUserAccessService
-	 */
-	private ClientChatUserAccessService $accessService;
+    /**
+     * @var ClientChatService
+     */
+    private ClientChatService $clientChatService;
+    /**
+     * @var ClientChatUserAccessService
+     */
+    private ClientChatUserAccessService $accessService;
 
-	public function __construct($id, $module, ClientChatService $clientChatService, ClientChatUserAccessService $accessService, $config = [])
-	{
-		parent::__construct($id, $module, $config);
-		$this->clientChatService = $clientChatService;
-		$this->accessService = $accessService;
-	}
+    public function __construct($id, $module, ClientChatService $clientChatService, ClientChatUserAccessService $accessService, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->clientChatService = $clientChatService;
+        $this->accessService = $accessService;
+    }
 
-	/**
+    /**
     * @return array
     */
     public function behaviors(): array
     {
-         $behaviors = [
+        $behaviors = [
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
@@ -102,18 +103,17 @@ class ClientChatUserChannelCrudController extends FController
         $model = new ClientChatUserChannel();
 
         try {
-			if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            if ($model->load(Yii::$app->request->post()) && $model->save()) {
+                $this->accessService->setUserAccessToAllChatsByChannelIds([$model->ccuc_channel_id], $model->ccuc_user_id);
 
-				$this->accessService->setUserAccessToAllChatsByChannelIds([$model->ccuc_channel_id], $model->ccuc_user_id);
-
-				return $this->redirect(['view', 'ccuc_user_id' => $model->ccuc_user_id, 'ccuc_channel_id' => $model->ccuc_channel_id]);
-			}
-		} catch (\DomainException | \RuntimeException $e) {
-			$model->addError('general', $e->getMessage());
-		} catch (\Throwable $e) {
-			$model->addError('general', $e->getMessage());
-			Yii::error(AppHelper::throwableFormatter($e), 'ClientChatUserChannelCrudController::actionCreate::Throwable');
-		}
+                return $this->redirect(['view', 'ccuc_user_id' => $model->ccuc_user_id, 'ccuc_channel_id' => $model->ccuc_channel_id]);
+            }
+        } catch (\DomainException | \RuntimeException $e) {
+            $model->addError('general', $e->getMessage());
+        } catch (\Throwable $e) {
+            $model->addError('general', $e->getMessage());
+            Yii::error(AppHelper::throwableFormatter($e), 'ClientChatUserChannelCrudController::actionCreate::Throwable');
+        }
 
         return $this->render('create', [
             'model' => $model,
@@ -132,11 +132,12 @@ class ClientChatUserChannelCrudController extends FController
         $previousChannelId = $model->ccuc_channel_id ?? null;
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            if ($previousChannelId !== (int)$model->ccuc_channel_id) {
+                $this->accessService->disableUserAccessToAllChatsByChannelIds([$previousChannelId], $model->ccuc_user_id);
+                $this->accessService->setUserAccessToAllChatsByChannelIds([$model->ccuc_channel_id], $model->ccuc_user_id);
+            }
 
-        	if ($previousChannelId !== (int)$model->ccuc_channel_id) {
-        		$this->accessService->disableUserAccessToAllChatsByChannelIds([$previousChannelId], $model->ccuc_user_id);
-        		$this->accessService->setUserAccessToAllChatsByChannelIds([$model->ccuc_channel_id], $model->ccuc_user_id);
-			}
+            TagDependency::invalidate(Yii::$app->cache, ClientChatUserChannel::cacheTags($model->ccuc_user_id));
 
             return $this->redirect(['view', 'ccuc_user_id' => $model->ccuc_user_id, 'ccuc_channel_id' => $model->ccuc_channel_id]);
         }
@@ -159,8 +160,9 @@ class ClientChatUserChannelCrudController extends FController
         $model = $this->findModel($ccuc_user_id, $ccuc_channel_id);
 
         $model->delete();
-		$this->accessService->disableUserAccessToAllChatsByChannelIds([$ccuc_channel_id], $ccuc_user_id);
-		return $this->redirect(['index']);
+        $this->accessService->disableUserAccessToAllChatsByChannelIds([$ccuc_channel_id], $ccuc_user_id);
+        TagDependency::invalidate(Yii::$app->cache, ClientChatUserChannel::cacheTags($ccuc_user_id));
+        return $this->redirect(['index']);
     }
 
     /**
