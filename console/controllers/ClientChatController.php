@@ -293,6 +293,7 @@ class ClientChatController extends Controller
         echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
 
+        $channels = [];
         $processed = $failed = 0;
         $timeStart = microtime(true);
         $minutes = \Yii::$app->params['settings']['client_chat_inactive_minutes'] ?? 0;
@@ -318,6 +319,7 @@ class ClientChatController extends Controller
                 /** @var ClientChat $clientChat */
                 $clientChat->idle(null, ClientChatStatusLog::ACTION_AUTO_IDLE);
                 $this->clientChatRepository->save($clientChat);
+                $channels[$clientChat->cch_channel_id] = $clientChat->cch_channel_id;
                 $processed++;
             } catch (\Throwable $throwable) {
                 Yii::error(
@@ -329,12 +331,13 @@ class ClientChatController extends Controller
             }
         }
 
-        if ($processed) {
-            Notifications::sendCommandByControllerAction(
-                'updateFreeToTake',
-                'client-chat',
-                'index'
-            );
+        if ($channels) {
+            foreach ($channels as $key => $channelId) {
+                Notifications::pub(
+                    ['channel-' . $channelId],
+                    'reloadClientChatList'
+                );
+            }
         }
 
         $timeEnd = microtime(true);

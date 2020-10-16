@@ -71,10 +71,10 @@ use sales\viewModel\chat\ViewModelChatFeedbackGraph;
 use sales\viewModel\chat\ViewModelChatGraph;
 use Yii;
 use yii\base\InvalidConfigException;
+use yii\caching\TagDependency;
 use yii\data\ActiveDataProvider;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
-use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
@@ -240,10 +240,7 @@ class ClientChatController extends FController
     {
         $userId = Auth::id();
 
-        $channels = ClientChatChannel::find()->select([
-            'ccc_name',
-            'ccc_id'
-        ])->joinWithCcuc($userId)->indexBy('ccc_id')->column();
+        $channels = ClientChatChannel::getListByUserId($userId);
 
         $filter = new FilterForm($channels);
 
@@ -836,13 +833,12 @@ class ClientChatController extends FController
         try {
             $clientChat = $this->clientChatRepository->findById($chatId);
             //			if ($clientChat->isClosed()) {
-//				$history = ClientChatMessage::find()->byChhId($clientChat->cch_id)->all();
-//			}
+            //				$history = ClientChatMessage::find()->byChhId($clientChat->cch_id)->all();
+            //			}
 
             if (!Auth::can('client-chat/view', ['chat' => $clientChat])) {
                 throw new ForbiddenHttpException('You don\'t have access to this chat');
             }
-
         } catch (NotFoundException $e) {
             $clientChat = null;
         }

@@ -8,9 +8,11 @@ use common\models\Project;
 use common\models\UserGroup;
 use sales\model\clientChat\entity\channelTranslate\ClientChatChannelTranslate;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\caching\TagDependency;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
@@ -294,5 +296,27 @@ class ClientChatChannel extends \yii\db\ActiveRecord
     public function unRegistered(): void
     {
         $this->ccc_registered = false;
+    }
+
+    public static function getListByUserId(?int $userId): ?array
+    {
+        if (!$userId) {
+            return null;
+        }
+
+        return Yii::$app->cache->getOrSet(
+            ClientChatUserChannel::userCacheName($userId),
+            static function () use ($userId) {
+                return ClientChatChannel::find()
+                    ->select(['ccc_name', 'ccc_id'])
+                    ->joinWithCcuc($userId)
+                    ->indexBy('ccc_id')
+                    ->column();
+            },
+            ClientChatUserChannel::CACHE_DURATION,
+            new TagDependency([
+                'tags' => ClientChatUserChannel::cacheTags($userId),
+            ])
+        );
     }
 }
