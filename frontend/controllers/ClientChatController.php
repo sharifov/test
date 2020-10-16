@@ -1165,7 +1165,7 @@ class ClientChatController extends FController
 
         try {
             $clientChat = $this->clientChatRepository->findById($chatId);
-            if (!Auth::can('client-chat/manage/all', ['chat' => $clientChat])) {
+            if (!Auth::can('client-chat/manage', ['chat' => $clientChat])) {
                 throw new ForbiddenHttpException('You do not have access to perform this action', 403);
             }
             $lead = $this->leadRepository->find($leadId);

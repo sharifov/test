@@ -2108,7 +2108,7 @@ class LeadController extends FController
             throw new NotFoundHttpException('Client chat not found');
         }
 
-		if (!Auth::can('client-chat/manage/all', ['chat' => ClientChat::findOne(['cch_id' => $chat])])) {
+		if (!Auth::can('client-chat/manage', ['chat' => ClientChat::findOne(['cch_id' => $chat])])) {
 			throw new ForbiddenHttpException('You do not have access to perform this action', 403);
 		}
 

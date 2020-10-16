@@ -39,6 +39,6 @@ class ClientChatManageGuard
 
 	public function isHasAccess(ClientChat $chat): bool
 	{
-		return Auth::can('client-chat/manage/all', ['chat' => $chat]);
+		return Auth::can('client-chat/manage', ['chat' => $chat]);
 	}
 }
