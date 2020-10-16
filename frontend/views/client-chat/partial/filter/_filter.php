@@ -6,6 +6,7 @@ use sales\model\clientChat\dashboard\GroupFilter;
 use sales\widgets\UserSelect2Widget;
 use yii\data\ArrayDataProvider;
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\web\JsExpression;
 
 /** @var FilterForm $filter */
@@ -28,7 +29,7 @@ use yii\web\JsExpression;
 
 ?>
 
-<?= Html::beginForm(\yii\helpers\Url::to(['/client-chat/index']), 'GET', ['id' => $filter->getId()]); ?>
+<?= Html::beginForm(Url::to(['/client-chat/index']), 'GET', ['id' => $filter->getId()]); ?>
     <div class="col-md-12" style="margin-top: 10px">
 
         <?php echo Html::hiddenInput(Html::getInputName($filter, 'resetAdditionalFilter'), 0, ['id' => 'resetAdditionalFilter']); ?>
@@ -249,12 +250,153 @@ use yii\web\JsExpression;
         <div class="_cc_groups_wrapper"><h5>Not found chat permissions</h5></div>
     <?php endif; ?>
 
-    <?php if (GroupFilter::isMy($filter->group) && $filter->permissions->canReadUnread()): ?>
-        <div class="row" style="margin-top: 10px">
-            <div class="col-md-12">
-                <?= $filter->getReadUnreadInput(); ?>
+    <?php $canReadUnread = (GroupFilter::isMy($filter->group) && $filter->permissions->canReadUnread()); ?>
+    <div class="row" style="margin-top: 10px">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-<?php if ($canReadUnread): ?>between<?php else: ?>end<?php endif; ?> align-items-center">
+                <?php if ($canReadUnread): ?>
+                    <?= $filter->getReadUnreadInput(); ?>
+                <?php endif; ?>
+
+                <div class="btn-group">
+                    <?php echo Html::button('<span class="fa fa-square-o"></span> Check All', ['class' => 'btn btn-sm btn-default', 'id' => 'btn-check-all']); ?>
+
+                    <button type="button" class="btn btn-default dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="sr-only">Toggle Dropdown</span>
+                    </button>
+                    <div class="dropdown-menu">
+                        <?= \yii\helpers\Html::a('<i class="fa fa-edit text-warning"></i> Multiple update', null, ['class' => 'dropdown-item btn-multiple-update'])?>
+<!--                        <div class="dropdown-divider"></div>-->
+                    </div>
+                </div>
             </div>
         </div>
-    <?php endif; ?>
+    </div>
 
-<?= Html::endForm();
+<?= Html::endForm(); ?>
+
+<?php
+$selectAllUrl = Url::to(array_merge(['client-chat/index'], Yii::$app->getRequest()->getQueryParams(), ['act' => 'select-all']));
+$clientChatMultipleUpdate = Url::to(['client-chat/ajax-multiple-update']);
+$js = <<<JS
+$(document).on('click', '#btn-check-all',  function (e) {
+        let btn = $(this);
+        
+        if ($(this).hasClass('checked')) {
+            btn.removeClass(['btn-warning', 'checked']).addClass('btn-default').html('<span class="fa fa-square-o"></span> Check All');
+            $('.select-on-check-all').prop('checked', false);
+            $("input[name='selection[]']:checked").prop('checked', false);
+            sessionStorage.selectedChats = '{}';
+            //sessionStorage.removeItem('selectedUsers');
+        } else {
+            btn.html('<span class="fa fa-spinner fa-spin"></span> Loading ...');
+            
+            $.ajax({
+             type: 'post',
+             dataType: 'json',
+             //data: {},
+             url: '$selectAllUrl',
+             success: function (data) {
+                let cnt = Object.keys(data).length
+                if (data) {
+                    let jsonData = JSON.stringify(data);
+                    sessionStorage.selectedChats = jsonData;
+                    btn.removeClass('btn-default').addClass(['btn-warning', 'checked']).html('<span class="fa fa-check-square-o"></span> Uncheck All (' + cnt + ')');
+                   
+                    $('.select-on-check-all').prop('checked', true); //.trigger('click');
+                    $("input[name='selection[]']").prop('checked', true);
+                } else {
+                    btn.html('<span class="fa fa-square-o"></span> Check All');
+                }
+             },
+             error: function (error) {
+                    btn.html('<span class="fa fa-error text-danger"></span> Error ...');
+                    console.error(error);
+                    alert('Request Error');
+                 }
+             });
+        }
+});
+
+function refreshUserSelectedState() {
+     if (sessionStorage.selectedChats) {
+        let data = jQuery.parseJSON( sessionStorage.selectedChats );
+        let btn = $('#btn-check-all');
+        
+        let cnt = Object.keys(data).length;
+        if (cnt > 0) {
+            $.each( data, function( key, value ) {
+              $("input[name='selection[]'][value=" + value + "]").prop('checked', true);
+            });
+            btn.removeClass('btn-default').addClass(['btn-warning', 'checked']).html('<span class="fa fa-check-square-o"></span> Uncheck All (' + cnt + ')');
+            
+        } else {
+            btn.removeClass(['btn-warning', 'checked']).addClass('btn-default').html('<span class="fa fa-square-o"></span> Check All');
+            $('.select-on-check-all').prop('checked', false);
+        }
+    }
+}
+
+$(document).on('click', '.multiple-checkbox', function(e) {
+    e.stopPropagation();
+    let checked = $("input[name='selection[]']:checked").map(function () { return this.value; }).get();
+    let unchecked = $("input[name='selection[]']:not(:checked)").map(function () { return this.value; }).get();
+    let data = [];
+    if (sessionStorage.selectedChats) {
+        data = jQuery.parseJSON( sessionStorage.selectedChats );
+    }
+   
+    $.each( checked, function( key, value ) {
+        if (typeof data[value] === 'undefined') {
+          data[value] = value;
+        }
+    });
+    
+   $.each( unchecked, function( key, value ) {
+      if (typeof data[value] !== 'undefined') {
+            delete(data[value]);
+      }
+    });
+   
+   sessionStorage.selectedChats = JSON.stringify(data);
+   refreshUserSelectedState();
+});
+
+$(document).on('click', '.btn-multiple-update', function(e) {
+e.preventDefault();        
+let arrIds = [];
+if (sessionStorage.selectedChats) {
+    let data = jQuery.parseJSON( sessionStorage.selectedChats );
+    arrIds = Object.values(data);
+    
+    console.log(arrIds);
+    // $('#user_list_json').val(JSON.stringify(arrIds));
+    
+    let modal = $('#modal-sm');
+    
+    $.ajax({
+        type: 'post',
+        url: '{$clientChatMultipleUpdate}',
+        dataType: 'html',
+        cache: false,
+        data: {chatIds: arrIds.length ? JSON.stringify(arrIds) : ''},
+        beforeSend: function () {
+            modal.find('.modal-body').html('<div><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
+            modal.find('.modal-title').html('Client Chat Multiple Update');
+            modal.modal('show');
+        },
+        success: function (data) {
+            modal.find('.modal-body').html(data);
+        },
+        error: function (xhr) {                  
+            modal.find('.modal-body').html('Error: ' + xhr.responseText);
+            //createNotify('Error', xhr.responseText, 'error');
+        },
+    });
+}
+});
+
+refreshUserSelectedState();
+JS;
+$this->registerJs($js);
+?>

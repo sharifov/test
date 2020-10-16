@@ -23,6 +23,7 @@ use sales\entities\cases\CasesSearch;
 use sales\entities\chat\ChatExtendedGraphsSearch;
 use sales\entities\chat\ChatFeedbackGraphSearch;
 use sales\entities\chat\ChatGraphsSearch;
+use sales\forms\clientChat\MultipleUpdateForm;
 use sales\forms\clientChat\RealTimeStartChatForm;
 use sales\helpers\app\AppHelper;
 use sales\helpers\app\AppParamsHelper;
@@ -70,6 +71,7 @@ use yii\base\InvalidConfigException;
 use yii\data\ActiveDataProvider;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
@@ -249,6 +251,11 @@ class ClientChatController extends FController
         $dataProvider = null;
         /** @var $channels ClientChatChannel[] */
         if ($channels) {
+            if (Yii::$app->request->get('act') === 'select-all') {
+                $chatIds = (new ClientChatSearch())->getListOfChatsIds(Auth::user(), array_keys($channels), $filter);
+                return $this->asJson($chatIds);
+            }
+
             $dataProvider = (new ClientChatSearch())->getListOfChats(Auth::user(), array_keys($channels), $filter);
 
             if ($filter->group === GroupFilter::FREE_TO_TAKE) {
@@ -1744,5 +1751,40 @@ class ClientChatController extends FController
         Notifications::pub(['chat-' . $chat->cch_id], 'refreshChatPage', ['data' => $data]);
 
         return $this->asJson(['error' => false, 'message' => '']);
+    }
+
+    public function actionAjaxMultipleUpdate()
+    {
+        if (!Yii::$app->request->isPost) {
+            throw new BadRequestHttpException();
+        }
+
+        $form = new MultipleUpdateForm();
+
+        if (Yii::$app->request->isPjax && $form->load(Yii::$app->request->post()) && $form->validate()) {
+            foreach ($form->chatIds as $chatId) {
+                $chat = ClientChat::findOne(['cch_id' => $chatId]);
+                if ($chat) {
+                    $chat->cch_status_id = $form->statusId;
+                    $chat->save();
+                }
+            }
+
+            return '<script>sessionStorage.selectedChats = "{}"; $("#modal-sm").modal("hide"); createNotify("Success", "Chats updated successfully", "success"); setTimeout(()=>{window.location.reload();}, 1000);</script>';
+        }
+
+        $chatIds = Yii::$app->request->post('chatIds');
+
+        $alertMessage = '';
+        if (empty($chatIds)) {
+            $alertMessage = 'Select the chats you want to update';
+        }
+
+        $form->chatIds = $chatIds;
+
+        return $this->renderAjax('partial/_ajax_multiple_update_form', [
+            'formMultipleUpdate' => $form,
+            'alertMessage' => $alertMessage
+        ]);
     }
 }
