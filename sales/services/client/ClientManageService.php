@@ -39,36 +39,35 @@ class ClientManageService
     private $clientEmailRepository;
     private $internalPhoneGuard;
     private $finder;
-	/**
-	 * @var ClientChatVisitorRepository
-	 */
-	private ClientChatVisitorRepository $clientChatVisitorRepository;
+    /**
+     * @var ClientChatVisitorRepository
+     */
+    private ClientChatVisitorRepository $clientChatVisitorRepository;
 
-	/**
-	 * ClientManageService constructor.
-	 * @param ClientRepository $clientRepository
-	 * @param ClientPhoneRepository $clientPhoneRepository
-	 * @param ClientEmailRepository $clientEmailRepository
-	 * @param InternalPhoneGuard $internalPhoneGuard
-	 * @param ServiceFinder $finder
-	 * @param ClientChatVisitorRepository $clientChatVisitorRepository
-	 */
+    /**
+     * ClientManageService constructor.
+     * @param ClientRepository $clientRepository
+     * @param ClientPhoneRepository $clientPhoneRepository
+     * @param ClientEmailRepository $clientEmailRepository
+     * @param InternalPhoneGuard $internalPhoneGuard
+     * @param ServiceFinder $finder
+     * @param ClientChatVisitorRepository $clientChatVisitorRepository
+     */
     public function __construct(
         ClientRepository $clientRepository,
         ClientPhoneRepository $clientPhoneRepository,
         ClientEmailRepository $clientEmailRepository,
         InternalPhoneGuard $internalPhoneGuard,
         ServiceFinder $finder,
-		ClientChatVisitorRepository $clientChatVisitorRepository
-    )
-    {
+        ClientChatVisitorRepository $clientChatVisitorRepository
+    ) {
         $this->clientRepository = $clientRepository;
         $this->clientPhoneRepository = $clientPhoneRepository;
         $this->clientEmailRepository = $clientEmailRepository;
         $this->internalPhoneGuard = $internalPhoneGuard;
         $this->finder = $finder;
-		$this->clientChatVisitorRepository = $clientChatVisitorRepository;
-	}
+        $this->clientChatVisitorRepository = $clientChatVisitorRepository;
+    }
 
     /**
      * @param ClientCreateForm $clientForm
@@ -115,7 +114,7 @@ class ClientManageService
             $phone = ClientPhone::create(
                 $phoneForm->phone,
                 $client->id,
-				$phoneForm->type ?? null,
+                $phoneForm->type ?? null,
                 $phoneForm->comments ?? null,
                 $phoneForm->cp_title ?? null
             );
@@ -131,20 +130,20 @@ class ClientManageService
      */
     public function updatePhone(PhoneCreateForm $form): ClientPhone
     {
-		$phone = $this->clientPhoneRepository->find($form->id);
+        $phone = $this->clientPhoneRepository->find($form->id);
 
-		if ($form->phone !== null) {
-			$phone->phone = $form->phone;
-		}
-		if ($form->type !== null) {
-			$phone->type = $form->type;
-		}
-		if ($form->cp_title !== null) {
-			$phone->cp_title = $form->cp_title;
-		}
-		$this->clientPhoneRepository->save($phone);
-		return $phone;
-	}
+        if ($form->phone !== null) {
+            $phone->phone = $form->phone;
+        }
+        if ($form->type !== null) {
+            $phone->type = $form->type;
+        }
+        if ($form->cp_title !== null) {
+            $phone->cp_title = $form->cp_title;
+        }
+        $this->clientPhoneRepository->save($phone);
+        return $phone;
+    }
 
     /**
      * @param Client $client
@@ -170,43 +169,43 @@ class ClientManageService
             $email = ClientEmail::create(
                 $emailForm->email,
                 $client->id,
-				$emailForm->type,
-				$emailForm->ce_title
+                $emailForm->type,
+                $emailForm->ce_title
             );
             $this->clientEmailRepository->save($email);
         }
     }
 
-	/**
-	 * @param EmailCreateForm $form
-	 */
-	public function updateEmail(EmailCreateForm $form): void
-	{
-		$email = $this->clientEmailRepository->find($form->id);
-		// $email->editEmail($form->email), $form->type);
-		if ($form->email !== null) {
-			$email->email = $form->email;
-		}
-		if ($form->type !== null) {
-			$email->type = $form->type;
-		}
-		if ($form->ce_title !== null) {
-			$email->ce_title = $form->ce_title;
-		}
+    /**
+     * @param EmailCreateForm $form
+     */
+    public function updateEmail(EmailCreateForm $form): void
+    {
+        $email = $this->clientEmailRepository->find($form->id);
+        // $email->editEmail($form->email), $form->type);
+        if ($form->email !== null) {
+            $email->email = $form->email;
+        }
+        if ($form->type !== null) {
+            $email->type = $form->type;
+        }
+        if ($form->ce_title !== null) {
+            $email->ce_title = $form->ce_title;
+        }
 
-		$this->clientEmailRepository->save($email);
-	}
+        $this->clientEmailRepository->save($email);
+    }
 
-	/**
+    /**
      * @param int|Client $client
-	 * @param ClientCreateForm $form
-	 */
-	public function updateClient(Client $client, ClientCreateForm $form): void
-	{
-		$client = $this->finder->clientFind($client);
-		$client->edit((string)$form->firstName, (string)$form->lastName, (string)$form->middleName);
-		$this->clientRepository->save($client);
-	}
+     * @param ClientCreateForm $form
+     */
+    public function updateClient(Client $client, ClientCreateForm $form): void
+    {
+        $client = $this->finder->clientFind($client);
+        $client->edit((string)$form->firstName, (string)$form->lastName, (string)$form->middleName);
+        $this->clientRepository->save($client);
+    }
 
     /**
      * Find or create Client
@@ -250,13 +249,13 @@ class ClientManageService
         return $client;
     }
 
-	/**
-	 * @param PhoneCreateForm[] $phones
-	 * @param ClientCreateForm $form
-	 * @return Client
-	 */
+    /**
+     * @param PhoneCreateForm[] $phones
+     * @param ClientCreateForm $form
+     * @return Client
+     */
     public function getExistingOrCreateEmptyObj(array $phones, ClientCreateForm $form): Client
-	{
+    {
         $parentId = null;
         $projectId = (int)$form->projectId;
 
@@ -281,8 +280,8 @@ class ClientManageService
         $client = Client::create('', '', '', $form->projectId, $form->typeCreate, $parentId);
         $client->id = 0;
 
-		return $client;
-	}
+        return $client;
+    }
 
     /**
      * Find or create Client
@@ -327,57 +326,57 @@ class ClientManageService
     }
 
     public function getOrCreateByClientId(ClientCreateForm $form, $parentId): Client
-	{
-		if ($client = Client::findOne($form->id)) {
-			return $client;
-		}
-		return $this->create($form, $parentId);
-	}
+    {
+        if ($client = Client::findOne($form->id)) {
+            return $client;
+        }
+        return $this->create($form, $parentId);
+    }
 
-	public function createByRcId(ClientCreateForm $form, $parentId): Client
-	{
-		$client = Client::create(
-			$form->firstName,
-			$form->middleName,
-			$form->lastName,
+    public function createByRcId(ClientCreateForm $form, $parentId): Client
+    {
+        $client = Client::create(
+            $form->firstName,
+            $form->middleName,
+            $form->lastName,
             $form->projectId,
             $form->typeCreate,
             $parentId
-		);
-		$client->uuid = $form->uuid;
+        );
+        $client->uuid = $form->uuid;
 
-		$this->clientRepository->save($client);
+        $this->clientRepository->save($client);
 
-		return $client;
-	}
+        return $client;
+    }
 
-	public function getOrCreateByClientChatRequest(ClientChatRequest $clientChatRequest, int $projectId): Client
-	{
-		$clientEmailForm = (new EmailCreateForm());
-		$clientEmailForm->email = $clientChatRequest->getEmailFromData();
+    public function getOrCreateByClientChatRequest(ClientChatRequest $clientChatRequest, int $projectId): Client
+    {
+        $clientEmailForm = (new EmailCreateForm());
+        $clientEmailForm->email = $clientChatRequest->getEmailFromData();
 
-		$clientPhoneForm = new PhoneCreateForm();
-		$clientPhoneForm->phone = $clientChatRequest->getPhoneFromData();
+        $clientPhoneForm = new PhoneCreateForm();
+        $clientPhoneForm->phone = $clientChatRequest->getPhoneFromData();
 
-		$rcId = $clientChatRequest->getClientRcId();
-		$uuId = $clientChatRequest->getClientUuId();
+        $rcId = $clientChatRequest->getClientRcId();
+        $uuId = $clientChatRequest->getClientUuId();
 
-		if (empty($rcId)) {
-			throw new \RuntimeException('Client Rocket Chat id is not provided');
-		}
+        if (empty($rcId)) {
+            throw new \RuntimeException('Client Rocket Chat id is not provided');
+        }
 
-		$clientForm = new ClientCreateForm([
-			'firstName' => $clientChatRequest->getNameFromData(),
-			'rcId' => $rcId,
-			'uuid' => $uuId,
+        $clientForm = new ClientCreateForm([
+            'firstName' => $clientChatRequest->getNameFromData(),
+            'rcId' => $rcId,
+            'uuid' => $uuId,
             'typeCreate' => Client::TYPE_CREATE_CLIENT_CHAT,
             'projectId' => $projectId
-		]);
+        ]);
 
-		if ($client = self::detectClientFromChatRequest($projectId, $uuId, $clientEmailForm->email, $rcId)) {
-		    $this->updateClient($client, $clientForm);
-		} else {
-		    if (empty($clientForm->projectId)) {
+        if ($client = self::detectClientFromChatRequest($projectId, $uuId, $clientEmailForm->email, $rcId)) {
+            $this->updateClient($client, $clientForm);
+        } else {
+            if (empty($clientForm->projectId)) {
                 throw new \RuntimeException('Cannot create client without Project');
             }
 
@@ -387,13 +386,13 @@ class ClientManageService
                 $parentId = $parent->id;
             }
             $client = $this->createByRcId($clientForm, $parentId);
-		}
+        }
 
-		$this->addEmail($client, $clientEmailForm);
-		$this->addPhone($client, $clientPhoneForm);
+        $this->addEmail($client, $clientEmailForm);
+        $this->addPhone($client, $clientPhoneForm);
 
-		return $client;
-	}
+        return $client;
+    }
 
     /**
      * @param int $projectId
@@ -405,15 +404,15 @@ class ClientManageService
     private static function detectClientFromChatRequest(int $projectId, ?string $uuId, ?string $email, ?string $rcId)
     {
         if (!empty($uuId) && $client = Client::find()->byProject($projectId)->byUuid($uuId)->one()) {
-			return $client;
-		}
+            return $client;
+        }
         if (!empty($email) && $client = ClientsQuery::oneByEmailAndProject($email, $projectId)) {
-			return $client;
-		}
+            return $client;
+        }
         if (!empty($rcId) && $client = Client::find()->byProject($projectId)->joinWithCcVisitor($rcId)->one()) {
-			return $client;
-		}
-		return null;
+            return $client;
+        }
+        return null;
     }
 
     /**
@@ -443,22 +442,22 @@ class ClientManageService
         return $client;
     }
 
-	/**
-	 * @param array $phoneNumbers
-	 * @return int
-	 */
+    /**
+     * @param array $phoneNumbers
+     * @return int
+     */
     public function checkIfPhoneIsTest(array $phoneNumbers): int
-	{
-		$testPhones = \Yii::$app->params['settings']['test_phone_list'] ?? \Yii::$app->params['test_phone_list'];
+    {
+        $testPhones = \Yii::$app->params['settings']['test_phone_list'] ?? \Yii::$app->params['test_phone_list'];
 
-		foreach ($phoneNumbers as $phoneNumber) {
-			if (in_array($phoneNumber, $testPhones ?? [], false)) {
-				return 1;
-			}
-		}
+        foreach ($phoneNumbers as $phoneNumber) {
+            if (in_array($phoneNumber, $testPhones ?? [], false)) {
+                return 1;
+            }
+        }
 
-		return 0;
-	}
+        return 0;
+    }
 
     /**
      * @param PhoneCreateForm[] $clientPhones
@@ -500,13 +499,13 @@ class ClientManageService
      * @throws \yii\db\StaleObjectException
      */
     public function removeContact(Client $client): void
-	{
-		$client = $this->finder->clientFind($client);
-		$client->cl_type_id = Client::TYPE_CLIENT;
-		$clientId = $this->clientRepository->save($client);
+    {
+        $client = $this->finder->clientFind($client);
+        $client->cl_type_id = Client::TYPE_CLIENT;
+        $clientId = $this->clientRepository->save($client);
 
         if ($userContactList = UserContactList::findOne(['ucl_client_id' => $clientId])) {
             $userContactList->delete();
         }
-	}
+    }
 }

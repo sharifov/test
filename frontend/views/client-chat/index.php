@@ -67,11 +67,11 @@ $clientChatTakeUrl = Url::toRoute(['/client-chat/ajax-take']);
     ]); ?>
 <?php elseif (empty($userRcAuthToken)): ?>
 	<?php echo Alert::widget([
-	    'options' => [
-	        'class' => 'alert-warning',
-	    ],
-	    'body' => 'You have no assigned token or the token is not valid.',
-	]); ?>
+        'options' => [
+            'class' => 'alert-warning',
+        ],
+        'body' => 'You have no assigned token or the token is not valid.',
+    ]); ?>
 <?php else: ?>
 
 <div class="row">
@@ -231,6 +231,7 @@ $(document).on('click', '#btn-load-channels', function (e) {
             if (data.html) {
                 $('._cc-list-wrapper').append(data.html);
                 btn.html(btnCurrentText).removeAttr('disabled').removeClass('disabled').attr('data-page', data.page);
+                refreshUserSelectedState();
             } else {
                 btn.html('All conversations are loaded');
             }

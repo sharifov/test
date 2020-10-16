@@ -99,6 +99,8 @@ use yii\helpers\StringHelper;
             <span class="_cc-chat-unread-message" title="Unread messages">
                 <span class="badge badge-info" data-cch-id="<?= $clientChat['cch_id'] ?>"><?=$unreadMessages>0 ? ($unreadMessages > 99 ? '99+' : $unreadMessages) : '' ?></span>
             </span>
+
+            <?= Html::input('checkbox', 'selection[]', $clientChat['cch_id'], ['class' => 'multiple-checkbox', 'style' => 'position: relative; z-index: 500;']) ?>
         </div>
     </div>
 <?php endforeach; ?>

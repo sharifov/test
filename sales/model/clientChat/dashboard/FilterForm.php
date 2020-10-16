@@ -298,7 +298,7 @@ class FilterForm extends Model
 
     public function getReadUnreadInput(): string
     {
-        return Html::activeCheckbox($this, 'readUnread', ['label' => 'Unread', 'id' => $this->getReadUnreadInputId()]);
+        return Html::activeCheckbox($this, 'readUnread', ['label' => 'Unread', 'id' => $this->getReadUnreadInputId(), 'labelOptions' => ['style' => 'margin: 0']]);
     }
 
     public function getReadUnreadInputId(): string

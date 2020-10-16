@@ -346,6 +346,61 @@ class ClientChatSearch extends ClientChat
             ]);
         }
 
+        $query = $this->listOfChatsQuery($filter, $user, $channelsIds);
+
+        $data = $query->asArray()->all();
+        $data = ArrayHelper::index($data, 'cch_id');
+        $chatIds = ArrayHelper::map($data, 'cch_id', 'cch_id');
+        $lastMessages = ClientChatMessage::find()->select(['ccm_sent_dt' => 'MAX(ccm_sent_dt)', 'ccm_cch_id'])->byChatIds($chatIds)->groupBy(['ccm_cch_id'])->asArray()->all();
+        $lastMessages = ArrayHelper::index($lastMessages, 'ccm_cch_id');
+
+        foreach ($data as $key => $item) {
+            if (isset($lastMessages[$key])) {
+                $data[$key]['ccm_sent_dt'] = $lastMessages[$key]['ccm_sent_dt'] ? strtotime($lastMessages[$key]['ccm_sent_dt']) : 0;
+            } else {
+                $data[$key]['ccm_sent_dt'] = 0;
+            }
+            $data[$key]['count_unread_messages'] = (int) $item['ccu_count'];
+        }
+
+        if (GroupFilter::isMy($filter->group)) {
+            if (ReadUnreadFilter::isUnread($filter->readUnread)) {
+                $data = array_filter($data, static function ($item) {
+                    return $item['count_unread_messages'] > 0;
+                });
+            }
+        }
+
+
+        $dataProvider = new ArrayDataProvider([
+            'allModels' => $data,
+            'pagination' => ['pageSize' => $this->pageSize],
+            //            'sort' => [
+            //                'defaultOrder' => [
+            //                    'count_unread_messages' => SORT_DESC,
+            //                    'ccm_sent_dt' => SORT_DESC,
+            //                    'cch_created_dt' => SORT_DESC,
+            //                ],
+            //                'attributes' => [
+            //                    'count_unread_messages',
+            //                    'ccm_sent_dt',
+            //                    'cch_created_dt',
+            //                ],
+            //            ],
+        ]);
+
+        return $dataProvider;
+    }
+
+    public function getListOfChatsIds(Employee $user, array $channelsIds, FilterForm $filter): array
+    {
+        $query = $this->listOfChatsQuery($filter, $user, $channelsIds);
+        $query->select('client_chat.cch_id');
+        return ArrayHelper::map($query->asArray()->all(), 'cch_id', 'cch_id');
+    }
+
+    private function listOfChatsQuery(FilterForm $filter, Employee $user, array $channelsIds)
+    {
         $query = ClientChat::find()->select([
             ClientChat::tableName() . '.*',
             new Expression('trim(concat_ws(\' \', client.first_name, client.last_name)) as client_full_name'),
@@ -415,49 +470,7 @@ class ClientChatSearch extends ClientChat
         $query->leftJoin(['project' => Project::tableName()], 'cch_project_id = project.id');
         $query->leftJoin(ClientChatUnread::tableName(), 'ccu_cc_id = cch_id');
         $query->leftJoin(['owner' => Employee::tableName()], 'cch_owner_user_id = owner.id');
-
-        $data = $query->asArray()->all();
-        $data = ArrayHelper::index($data, 'cch_id');
-        $chatIds = ArrayHelper::map($data, 'cch_id', 'cch_id');
-        $lastMessages = ClientChatMessage::find()->select(['ccm_sent_dt' => 'MAX(ccm_sent_dt)', 'ccm_cch_id'])->byChatIds($chatIds)->groupBy(['ccm_cch_id'])->asArray()->all();
-        $lastMessages = ArrayHelper::index($lastMessages, 'ccm_cch_id');
-
-        foreach ($data as $key => $item) {
-            if (isset($lastMessages[$key])) {
-                $data[$key]['ccm_sent_dt'] = $lastMessages[$key]['ccm_sent_dt'] ? strtotime($lastMessages[$key]['ccm_sent_dt']) : 0;
-            } else {
-                $data[$key]['ccm_sent_dt'] = 0;
-            }
-            $data[$key]['count_unread_messages'] = (int) $item['ccu_count'];
-        }
-
-        if (GroupFilter::isMy($filter->group)) {
-            if (ReadUnreadFilter::isUnread($filter->readUnread)) {
-                $data = array_filter($data, static function ($item) {
-                    return $item['count_unread_messages'] > 0;
-                });
-            }
-        }
-
-
-        $dataProvider = new ArrayDataProvider([
-            'allModels' => $data,
-            'pagination' => ['pageSize' => $this->pageSize],
-            //            'sort' => [
-            //                'defaultOrder' => [
-            //                    'count_unread_messages' => SORT_DESC,
-            //                    'ccm_sent_dt' => SORT_DESC,
-            //                    'cch_created_dt' => SORT_DESC,
-            //                ],
-            //                'attributes' => [
-            //                    'count_unread_messages',
-            //                    'ccm_sent_dt',
-            //                    'cch_created_dt',
-            //                ],
-            //            ],
-        ]);
-
-        return $dataProvider;
+        return $query;
     }
 
     public function searchChatGraph($params, $user_id): array
