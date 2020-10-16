@@ -50,7 +50,8 @@ class ClientChatRequestSearch extends ClientChatRequest
         ]);
 
         $query->andFilterWhere(['like', 'ccr_event', $this->ccr_event]);
-//            ->andFilterWhere(['like', 'ccr_json_data', $this->ccr_json_data]);
+
+        $query->andFilterWhere(['like', 'ccr_json_data', $this->ccr_json_data]);
 
         return $dataProvider;
     }
