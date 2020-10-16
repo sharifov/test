@@ -107,6 +107,7 @@ use function Amp\call;
 class ClientChatController extends FController
 {
     private const CLIENT_CHAT_PAGE_SIZE = 10;
+    private const RESERVE_CHAT_TO_PROCESS_KEY = 'reserve_chat_to_process_key_';
     /**
      * @var ClientChatRepository
      */
@@ -225,6 +226,9 @@ class ClientChatController extends FController
                     'info',
                     'ajax-data-info',
                     'ajax-history',
+                    'ajax-return',
+                    'ajax-take',
+
                 ],
             ],
         ];
@@ -1016,56 +1020,42 @@ class ClientChatController extends FController
     {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
-            $redis = Yii::$app->redis;
 
             $result = ['message' => '', 'status' => 0, 'goToClientChatId' => ''];
 
             try {
-                if (!$cchId = (int)Yii::$app->request->post('cchId')) {
-                    throw new BadRequestHttpException('Invalid parameters', -1);
+
+                if (!$cchId = (int) Yii::$app->request->post('cchId')) {
+                    throw new BadRequestHttpException('Invalid parameters');
                 }
-                if (!$redis->get($takeIdentity = 'cc_take_' . $cchId)) {
-                    $redis->setnx($takeIdentity, Auth::id());
-                    $redis->expire($takeIdentity, 20);
-                } else {
-                    throw new \RuntimeException('Chat is already being processed', -2);
-                }
+
                 if (!$clientChat = ClientChat::findOne($cchId)) {
-                    throw new NotFoundHttpException('Chat is not found', -3);
-                }
-                if (!$clientChat->isIdle()) { // TODO:: must be replaced to permission in separate task
-                    throw new ForbiddenHttpException('Chat must be in status Idle', -4);
+                    throw new NotFoundHttpException('Chat is not found');
                 }
 
-                if ($clientChat->cch_owner_user_id === Auth::id()) {
-                    $clientChat->inProgress(Auth::id(), ClientChatStatusLog::ACTION_REVERT_TO_PROGRESS);
-                    $this->clientChatRepository->save($clientChat);
-
-                    $result['message'] = 'ClientChat status changed to InProgress';
-                    $result['status'] = 2;
-                    $result['goToClientChatId'] = $clientChat->cch_id;
-                } elseif ($takeClientChat = $this->clientChatService->takeClientChat($clientChat, Auth::user())) {
-                    $data = ClientChatAccessMessage::chatTaken($clientChat, $takeClientChat->cchOwnerUser->nickname);
-                    Notifications::pub(['chat-' . $clientChat->cch_id], 'refreshChatPage', ['data' => $data]); /* TODO:: remove */
-
-                    $clientChatLink = Purifier::createChatShortLink($clientChat);
-                    Notifications::createAndPublish(
-                        $clientChat->cch_owner_user_id,
-                        'Chat was taken',
-                        'Client Chat was taken by ' . $takeClientChat->cchOwnerUser->nickname . ' (' . $clientChatLink . ')',
-                        Notifications::TYPE_INFO,
-                        true
-                    );
-
-                    $result['message'] = 'Client Chat was successfully taken';
-                    $result['status'] = 1;
-                    $result['goToClientChatId'] = $takeClientChat->cch_id;
-                } else {
-                    throw new \RuntimeException('Error: TakeClientChat is failed');
+                $permission = new ClientChatActionPermission();
+                if (!$permission->canTake($clientChat)) {
+                    throw new ForbiddenHttpException('Access denied.');
                 }
 
+                $this->guardCanProcessChat(Auth::id(), $cchId);
 
+                $takeClientChat = $this->clientChatService->takeClientChat($clientChat, Auth::user());
+                $data = ClientChatAccessMessage::chatTaken($clientChat, $takeClientChat->cchOwnerUser->nickname);
+                Notifications::pub(['chat-' . $clientChat->cch_id], 'refreshChatPage', ['data' => $data]);
 
+                $clientChatLink = Purifier::createChatShortLink($clientChat);
+                Notifications::createAndPublish(
+                    $clientChat->cch_owner_user_id,
+                    'Chat was taken',
+                    'Client Chat was taken by ' . $takeClientChat->cchOwnerUser->nickname . ' (' . $clientChatLink . ')',
+                    Notifications::TYPE_INFO,
+                    true
+                );
+
+                $result['message'] = 'Client Chat was successfully taken';
+                $result['status'] = 1;
+                $result['goToClientChatId'] = $takeClientChat->cch_id;
             } catch (\Throwable $throwable) {
                 AppHelper::throwableLogger(
                     $throwable,
@@ -1073,10 +1063,64 @@ class ClientChatController extends FController
                 );
                 $result['message'] = VarDumper::dumpAsString($throwable->getMessage());
             }
-            $redis->del($takeIdentity ?? 'cc_take');
             return $result;
         }
         throw new BadRequestHttpException();
+    }
+
+    public function actionAjaxReturn(): array
+    {
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+
+            $result = ['message' => '', 'status' => 0, 'goToClientChatId' => ''];
+
+            try {
+                if (!$cchId = (int) Yii::$app->request->post('cchId')) {
+                    throw new BadRequestHttpException('Invalid parameters');
+                }
+
+                if (!$clientChat = ClientChat::findOne($cchId)) {
+                    throw new NotFoundHttpException('Chat is not found');
+                }
+
+                $permission = new ClientChatActionPermission();
+                if (!$permission->canReturn($clientChat)) {
+                    throw new ForbiddenHttpException('Access denied.');
+                }
+
+                $this->guardCanProcessChat(Auth::id(), $cchId);
+
+                $clientChat->inProgress(Auth::id(), ClientChatStatusLog::ACTION_REVERT_TO_PROGRESS);
+                $this->clientChatRepository->save($clientChat);
+
+                $result['message'] = 'ClientChat returned to InProgress';
+                $result['status'] = 1;
+                $result['goToClientChatId'] = $clientChat->cch_id;
+
+            } catch (\Throwable $throwable) {
+                AppHelper::throwableLogger(
+                    $throwable,
+                    'ClientChatController:actionAjaxReturn:throwable'
+                );
+                $result['message'] = VarDumper::dumpAsString($throwable->getMessage());
+            }
+            return $result;
+        }
+        throw new BadRequestHttpException();
+    }
+
+    private function guardCanProcessChat(int $userId, int $chatId): void
+    {
+        $redis = Yii::$app->redis;
+        $key = self::RESERVE_CHAT_TO_PROCESS_KEY . $chatId;
+        $redis->setnx($key, $userId);
+        $value = $redis->get($key);
+        if ((int)$value === $userId) {
+            $redis->expire($key, 20);
+        } else {
+            throw new \RuntimeException('Chat is already being processed');
+        }
     }
 
     public function actionPjaxUpdateChatWidget()
