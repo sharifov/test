@@ -615,7 +615,7 @@ class ClientChatController extends FController
             $visitorId = $clientChat->ccv->ccvCvd->cvd_visitor_rc_id ?? '';
         }
         $data[$requestSearch->formName()]['ccr_visitor_id'] = $visitorId;
-        $data[$requestSearch->formName()]['ccr_json_data'] = 'http';
+        $data[$requestSearch->formName()]['ccr_json_data'] = 'url":"http';
         $dataProviderRequest = $requestSearch->search($data);
         $dataProviderRequest->setPagination(['pageSize' => 40]);
         $dataProviderRequest->pagination->params = array_merge(Yii::$app->request->get(), ['cchId' => $cchId]);
