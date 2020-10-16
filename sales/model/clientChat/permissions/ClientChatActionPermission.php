@@ -17,6 +17,7 @@ use sales\model\clientChat\entity\ClientChat;
  * @property bool|null $canHold
  * @property bool|null $canUnHold
  * @property bool|null $canReturn
+ * @property bool|null $canTake
  */
 class ClientChatActionPermission
 {
