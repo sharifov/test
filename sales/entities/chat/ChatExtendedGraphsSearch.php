@@ -101,7 +101,7 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
         }
 
         $ccTblSubQuery = new Query();
-        $ccTblSubQuery->select('*')->from(ClientChat::tableName())->where('date_format(cch_created_dt, "%Y-%m-%d") = date');
+        $ccTblSubQuery->select('*')->from(ClientChat::tableName())->where('' . $this->setGroupingParam() . ' = date');
 
         $ccuaTblSubQuery = new Query();
         $ccuaTblSubQuery->select('*')->from(ClientChatUserAccess::tableName())->where(['ccua_status_id' => ClientChatUserAccess::STATUS_ACCEPT]);
