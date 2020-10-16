@@ -174,10 +174,10 @@ class ClientChatCrudController extends FController
      * @throws \Throwable
      * @throws StaleObjectException
      */
-    public function actionDelete($id): Response
+    public function actionDelete(int $id): Response
     {
         $this->findModel($id)->delete();
-
+        ClientChatMessage::removeAllMessages($id);
         return $this->redirect(['index']);
     }
 
