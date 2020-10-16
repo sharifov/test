@@ -161,17 +161,14 @@ class ClientChatCrudController extends FController
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
 
             if ((ClientChat::STATUS_IDLE !== $oldStatus) && $model->isIdle()) { /* TODO:: FOR TEST  */
-
                 Notifications::pub(
                     ['chat-' . $model->cch_id],
-                    'clientChatUpdateStatus',
+                    'reloadChatInfo',
                     ['data' => ClientChatAccessMessage::chatIdle($model->cch_id)]
                 );
-
-                Notifications::sendCommandByControllerAction(
-                    'updateFreeToTake',
-                    'client-chat',
-                    'index'
+                Notifications::pub(
+                    ['channel-' . $model->cch_channel_id],
+                    'reloadClientChatList'
                 );
             }
 

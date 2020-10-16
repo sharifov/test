@@ -10,6 +10,7 @@ use yii\helpers\StringHelper;
 /** @var $clientChats ClientChat[] */
 /** @var $clientChatId int|null */
 /** @var $formatter Formatter */
+/** @var int|null $resetUnreadMessagesChatId */
 ?>
 
 <?php foreach ($clientChats as $clientChat): ?>
@@ -41,6 +42,10 @@ use yii\helpers\StringHelper;
         $isClosed = (int)$clientChat['cch_status_id'] === ClientChat::STATUS_CLOSED;
 
         $clientFullName = $clientChat['client_full_name'] ?: ('Guest-' . $clientChat['client_id']);
+        $unreadMessages = $clientChat['count_unread_messages'] ?: null;
+        if ($unreadMessages && $resetUnreadMessagesChatId && $resetUnreadMessagesChatId === $clientChat['cch_id']) {
+            $unreadMessages = null;
+        }
     ?>
 
         <div id="dialog-<?= $clientChat['cch_id'] ?>" data-owner-id="<?= $clientChat['cch_owner_user_id'] ?>" class="_cc-list-item <?= $isClosed ? 'cc_closed' : '' ?> <?= $clientChatId && $clientChatId === (int)$clientChat['cch_id'] ? '_cc_active' : '' ?>" data-rid="<?= $clientChat['cch_rid'] ?>" data-cch-id="<?= $clientChat['cch_id'] ?>" data-is-closed="<?= (int)$clientChat['cch_status_id'] === ClientChat::STATUS_CLOSED ?>">
@@ -50,7 +55,7 @@ use yii\helpers\StringHelper;
                 <span class="_cc-status-wrapper">
                     <span class="_cc-status" data-is-online="<?= (int)$clientChat['cch_client_online'] ?>"></span>
                 </span>
-                <?php $unreadMessages = $clientChat['count_unread_messages'] ?: null; ?>
+
             </span>
             <span>
                 <div title="Client name"><b><?= Html::encode($clientFullName) ?></b></div>

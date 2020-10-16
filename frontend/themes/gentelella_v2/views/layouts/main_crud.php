@@ -129,7 +129,8 @@ $bundle = \frontend\themes\gentelella_v2\assets\AssetCrud::register($this);
 
                         <?php /*php if($isAdmin):*/ ?>
 
-                            <?= frontend\widgets\OnlineConnection::widget() ?>
+                            <?php echo frontend\widgets\OnlineConnection::widget() ?>
+
                             <?php //= frontend\widgets\Notifications::widget() ?>
                             <?php
                                 if (Yii::$app->params['settings']['notification_web_socket']) {

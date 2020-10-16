@@ -201,6 +201,7 @@ use yii\helpers\VarDumper;
 use common\components\ReceiveEmailsJob;
 use yii\queue\Queue;
 use common\components\CentrifugoService;
+use yii\web\NotFoundHttpException;
 
 
 /**
@@ -1888,6 +1889,14 @@ class TestController extends FController
 
 	public function actionZ()
     {
+        try {
+            throw new NotFoundHttpException('Test not found', -1);
+        } catch (\Throwable $throwable) {
+            AppHelper::throwableLogger(
+                $throwable,
+                'TEST:actionZ:throwable'
+            );
+        }
 
         return $this->render('z');
     }

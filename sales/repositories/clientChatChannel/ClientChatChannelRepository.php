@@ -34,13 +34,14 @@ class ClientChatChannelRepository extends Repository
 		throw new NotFoundException('Channel Not Found');
 	}
 
-	/**
-	 * @param int $userId
-	 * @param int|null $projectId
-	 * @param int|null $exceptDepartment
-	 * @return ClientChatChannel[]
-	 */
-	public function getByUserAndProject(int $userId, ?int $projectId, ?int $exceptDepartment = null): array
+    /**
+     * @param int $userId
+     * @param int|null $projectId
+     * @param int|null $exceptDepartment
+     * @param array|null $exceptChannels
+     * @return ClientChatChannel[]
+     */
+	public function getByUserAndProject(int $userId, ?int $projectId, ?int $exceptDepartment = null, ?array $exceptChannels = null): array
 	{
 		$channelQuery = ClientChatChannel::find();
 		$channelQuery->joinWithCcuc($userId);
@@ -50,6 +51,9 @@ class ClientChatChannelRepository extends Repository
 		if ($exceptDepartment) {
 			$channelQuery->exceptDepartment($exceptDepartment);
 		}
+		if ($exceptChannels) {
+		    $channelQuery->exceptChannels($exceptChannels);
+        }
 		$channels = $channelQuery->asArray()->all();
 		if ($channels) {
 			return $channels;

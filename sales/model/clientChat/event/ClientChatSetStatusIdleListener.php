@@ -15,7 +15,7 @@ class ClientChatSetStatusIdleListener
         try {
             Notifications::pub(
                 ['chat-' . $event->clientChatId],
-                'clientChatUpdateStatus',
+                'reloadChatInfo',
                 ['data' => ClientChatAccessMessage::chatIdle($event->clientChatId)]
             );
         } catch (\Throwable $throwable) {

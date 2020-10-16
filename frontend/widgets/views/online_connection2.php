@@ -497,21 +497,24 @@ $js = <<<JS
                             window.updateVoiceRecordCounters();
                         }
                         
-                        if(obj.cmd === 'updateFreeToTake') {
-                            let freeToTakeElement = $('#count_free_to_take');
-                            if (freeToTakeElement.length) {
+                        if(obj.cmd === 'reloadClientChatList') {
+                            let boxElement = $('#pjax-client-chat-channel-list');
+                            if (boxElement.length) {
                                 pjaxReload({container: '#pjax-client-chat-channel-list'});
                             }
                         }
                         
-                        if(obj.cmd === 'clientChatUpdateStatus') {
-                            let activeChatId = parseInt(localStorage.getItem('activeChatId'), 10);
-                            let cchId = parseInt(obj.data.cchId, 10);
-                            
-                            if (activeChatId === cchId) {
-                                window.refreshChatInfo(cchId);
-                                createNotify('Warning', obj.data.message, 'warning');
-                            }
+                        if(obj.cmd === 'reloadChatInfo') {
+                            let boxElement = $('#_cc_additional_info_wrapper');
+                            if (boxElement.length) {
+                                let activeChatId = parseInt(localStorage.getItem('activeChatId'), 10);
+                                let cchId = parseInt(obj.data.cchId, 10);
+                                
+                                if (activeChatId === cchId) {
+                                    window.refreshChatInfo(cchId);
+                                    createNotify('Warning', obj.data.message, 'warning');
+                                }
+                            }    
                         }
                     }
                     // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');

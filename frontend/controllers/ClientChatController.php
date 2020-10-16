@@ -12,6 +12,7 @@ use common\models\Project;
 use common\models\Quote;
 use common\models\search\LeadSearch;
 use common\models\UserConnection;
+use common\models\UserProfile;
 use common\models\VisitorLog;
 use frontend\helpers\JsonHelper;
 use frontend\widgets\clientChat\ClientChatAccessMessage;
@@ -50,6 +51,7 @@ use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestRepository
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestService;
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\model\clientChatUnread\entity\ClientChatUnread;
+use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\user\entity\userConnectionActiveChat\UserConnectionActiveChat;
 use sales\repositories\clientChatChannel\ClientChatChannelRepository;
 use sales\repositories\clientChatStatusLogRepository\ClientChatStatusLogRepository;
@@ -57,6 +59,7 @@ use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessReposi
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\NotFoundException;
 use sales\repositories\project\ProjectRepository;
+use sales\services\client\ClientManageService;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatService\ClientChatQuery;
 use sales\services\clientChatService\ClientChatService;
@@ -68,15 +71,16 @@ use sales\viewModel\chat\ViewModelChatFeedbackGraph;
 use sales\viewModel\chat\ViewModelChatGraph;
 use Yii;
 use yii\base\InvalidConfigException;
+use yii\caching\TagDependency;
 use yii\data\ActiveDataProvider;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
-use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
+use function Amp\call;
 
 /**
  * Class ClientChatController
@@ -98,10 +102,12 @@ use yii\web\Response;
  * @property ClientChatStatusLogService $clientChatStatusLogService
  * @property ClientChatStatusLogRepository $clientChatStatusLogRepository
  * @property ClientChatHoldRepository $clientChatHoldRepository
+ * @property ClientManageService $clientManageService
  */
 class ClientChatController extends FController
 {
     private const CLIENT_CHAT_PAGE_SIZE = 10;
+    private const RESERVE_CHAT_TO_PROCESS_KEY = 'reserve_chat_to_process_key_';
     /**
      * @var ClientChatRepository
      */
@@ -152,6 +158,10 @@ class ClientChatController extends FController
     private ClientChatStatusLogService $clientChatStatusLogService;
     private ClientChatStatusLogRepository $clientChatStatusLogRepository;
     private ClientChatHoldRepository $clientChatHoldRepository;
+    /**
+     * @var ClientManageService
+     */
+    private ClientManageService $clientManageService;
 
     public function __construct(
         $id,
@@ -171,6 +181,7 @@ class ClientChatController extends FController
         ClientChatStatusLogService $clientChatStatusLogService,
         ClientChatStatusLogRepository $clientChatStatusLogRepository,
         ClientChatHoldRepository $clientChatHoldRepository,
+        ClientManageService $clientManageService,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -189,6 +200,7 @@ class ClientChatController extends FController
         $this->clientChatStatusLogService = $clientChatStatusLogService;
         $this->clientChatStatusLogRepository = $clientChatStatusLogRepository;
         $this->clientChatHoldRepository = $clientChatHoldRepository;
+        $this->clientManageService = $clientManageService;
     }
 
     /**
@@ -214,6 +226,9 @@ class ClientChatController extends FController
                     'info',
                     'ajax-data-info',
                     'ajax-history',
+                    'ajax-return',
+                    'ajax-take',
+
                 ],
             ],
         ];
@@ -225,10 +240,7 @@ class ClientChatController extends FController
     {
         $userId = Auth::id();
 
-        $channels = ClientChatChannel::find()->select([
-            'ccc_name',
-            'ccc_id'
-        ])->joinWithCcuc($userId)->indexBy('ccc_id')->column();
+        $channels = ClientChatChannel::getListByUserId($userId);
 
         $filter = new FilterForm($channels);
 
@@ -267,6 +279,7 @@ class ClientChatController extends FController
 
         $clientChat = null;
         $accessChatError = false;
+        $resetUnreadMessagesChatId = null;
         $chid = (int)Yii::$app->request->get('chid');
 
         if ($chid) {
@@ -283,14 +296,7 @@ class ClientChatController extends FController
                         $clientChat->cch_id,
                         $clientChat->cch_owner_user_id
                     );
-
-                    if ($dataProvider && ($models = $dataProvider->getModels())) {
-                        if (isset($models[$clientChat->cch_id])) {
-                            $models[$clientChat->cch_id]['count_unread_messages'] = 0;
-                        }
-                        $dataProvider->refresh();
-                        $dataProvider->setModels($models);
-                    }
+                    $resetUnreadMessagesChatId = $clientChat->cch_rid;
                 }
 
                 if ($clientChat->isClosed()) {
@@ -325,7 +331,8 @@ class ClientChatController extends FController
                     $response['html'] = $this->renderPartial('partial/_client-chat-item', [
                         'clientChats' => $dataProvider->getModels(),
                         'clientChatId' => $clientChat ? $clientChat->cch_id : '',
-                        'formatter' => $formatter
+                        'formatter' => $formatter,
+                        'resetUnreadMessagesChatId' => $resetUnreadMessagesChatId,
                     ]);
                     $response['page'] = $page + 1;
                 }
@@ -350,7 +357,8 @@ class ClientChatController extends FController
             'page' => $page + 1,
             'actionPermissions' => new ClientChatActionPermission(),
             'countFreeToTake' => $countFreeToTake,
-            'accessChatError' => $accessChatError
+            'accessChatError' => $accessChatError,
+            'resetUnreadMessagesChatId' => $resetUnreadMessagesChatId
         ]);
     }
 
@@ -619,7 +627,7 @@ class ClientChatController extends FController
             $visitorId = $clientChat->ccv->ccvCvd->cvd_visitor_rc_id ?? '';
         }
         $data[$requestSearch->formName()]['ccr_visitor_id'] = $visitorId;
-        $data[$requestSearch->formName()]['ccr_event'] = ClientChatRequest::EVENT_TRACK;
+        $data[$requestSearch->formName()]['ccr_json_data'] = 'url":"http';
         $dataProviderRequest = $requestSearch->search($data);
         $dataProviderRequest->setPagination(['pageSize' => 40]);
         $dataProviderRequest->pagination->params = array_merge(Yii::$app->request->get(), ['cchId' => $cchId]);
@@ -825,13 +833,12 @@ class ClientChatController extends FController
         try {
             $clientChat = $this->clientChatRepository->findById($chatId);
             //			if ($clientChat->isClosed()) {
-//				$history = ClientChatMessage::find()->byChhId($clientChat->cch_id)->all();
-//			}
+            //				$history = ClientChatMessage::find()->byChhId($clientChat->cch_id)->all();
+            //			}
 
             if (!Auth::can('client-chat/view', ['chat' => $clientChat])) {
                 throw new ForbiddenHttpException('You don\'t have access to this chat');
             }
-
         } catch (NotFoundException $e) {
             $clientChat = null;
         }
@@ -1009,56 +1016,42 @@ class ClientChatController extends FController
     {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
-            $redis = Yii::$app->redis;
 
             $result = ['message' => '', 'status' => 0, 'goToClientChatId' => ''];
 
             try {
-                if (!$cchId = (int)Yii::$app->request->post('cchId')) {
-                    throw new BadRequestHttpException('Invalid parameters', -1);
+
+                if (!$cchId = (int) Yii::$app->request->post('cchId')) {
+                    throw new BadRequestHttpException('Invalid parameters');
                 }
-                if (!$redis->get($takeIdentity = 'cc_take_' . $cchId)) {
-                    $redis->setnx($takeIdentity, Auth::id());
-                    $redis->expire($takeIdentity, 20);
-                } else {
-                    throw new \RuntimeException('Chat is already being processed', -2);
-                }
+
                 if (!$clientChat = ClientChat::findOne($cchId)) {
-                    throw new NotFoundHttpException('Chat is not found', -3);
-                }
-                if (!$clientChat->isIdle()) { // TODO:: must be replaced to permission in separate task
-                    throw new ForbiddenHttpException('Chat must be in status Idle', -4);
+                    throw new NotFoundHttpException('Chat is not found');
                 }
 
-                if ($clientChat->cch_owner_user_id === Auth::id()) {
-                    $clientChat->inProgress(Auth::id(), ClientChatStatusLog::ACTION_REVERT_TO_PROGRESS);
-                    $this->clientChatRepository->save($clientChat);
-
-                    $result['message'] = 'ClientChat status changed to InProgress';
-                    $result['status'] = 2;
-                    $result['goToClientChatId'] = $clientChat->cch_id;
-                } elseif ($takeClientChat = $this->clientChatService->takeClientChat($clientChat, Auth::user())) {
-                    $data = ClientChatAccessMessage::chatTaken($clientChat, $takeClientChat->cchOwnerUser->nickname);
-                    Notifications::pub(['chat-' . $clientChat->cch_id], 'refreshChatPage', ['data' => $data]); /* TODO:: remove */
-
-                    $clientChatLink = Purifier::createChatShortLink($clientChat);
-                    Notifications::createAndPublish(
-                        $clientChat->cch_owner_user_id,
-                        'Chat was taken',
-                        'Client Chat was taken by ' . $takeClientChat->cchOwnerUser->nickname . ' (' . $clientChatLink . ')',
-                        Notifications::TYPE_INFO,
-                        true
-                    );
-
-                    $result['message'] = 'Client Chat was successfully taken';
-                    $result['status'] = 1;
-                    $result['goToClientChatId'] = $takeClientChat->cch_id;
-                } else {
-                    throw new \RuntimeException('Error: TakeClientChat is failed');
+                $permission = new ClientChatActionPermission();
+                if (!$permission->canTake($clientChat)) {
+                    throw new ForbiddenHttpException('Access denied.');
                 }
 
+                $this->guardCanProcessChat(Auth::id(), $cchId);
 
+                $takeClientChat = $this->clientChatService->takeClientChat($clientChat, Auth::user());
+                $data = ClientChatAccessMessage::chatTaken($clientChat, $takeClientChat->cchOwnerUser->nickname);
+                Notifications::pub(['chat-' . $clientChat->cch_id], 'refreshChatPage', ['data' => $data]);
 
+                $clientChatLink = Purifier::createChatShortLink($clientChat);
+                Notifications::createAndPublish(
+                    $clientChat->cch_owner_user_id,
+                    'Chat was taken',
+                    'Client Chat was taken by ' . $takeClientChat->cchOwnerUser->nickname . ' (' . $clientChatLink . ')',
+                    Notifications::TYPE_INFO,
+                    true
+                );
+
+                $result['message'] = 'Client Chat was successfully taken';
+                $result['status'] = 1;
+                $result['goToClientChatId'] = $takeClientChat->cch_id;
             } catch (\Throwable $throwable) {
                 AppHelper::throwableLogger(
                     $throwable,
@@ -1066,10 +1059,64 @@ class ClientChatController extends FController
                 );
                 $result['message'] = VarDumper::dumpAsString($throwable->getMessage());
             }
-            $redis->del($takeIdentity ?? 'cc_take');
             return $result;
         }
         throw new BadRequestHttpException();
+    }
+
+    public function actionAjaxReturn(): array
+    {
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+
+            $result = ['message' => '', 'status' => 0, 'goToClientChatId' => ''];
+
+            try {
+                if (!$cchId = (int) Yii::$app->request->post('cchId')) {
+                    throw new BadRequestHttpException('Invalid parameters');
+                }
+
+                if (!$clientChat = ClientChat::findOne($cchId)) {
+                    throw new NotFoundHttpException('Chat is not found');
+                }
+
+                $permission = new ClientChatActionPermission();
+                if (!$permission->canReturn($clientChat)) {
+                    throw new ForbiddenHttpException('Access denied.');
+                }
+
+                $this->guardCanProcessChat(Auth::id(), $cchId);
+
+                $clientChat->inProgress(Auth::id(), ClientChatStatusLog::ACTION_REVERT_TO_PROGRESS);
+                $this->clientChatRepository->save($clientChat);
+
+                $result['message'] = 'ClientChat returned to InProgress';
+                $result['status'] = 1;
+                $result['goToClientChatId'] = $clientChat->cch_id;
+
+            } catch (\Throwable $throwable) {
+                AppHelper::throwableLogger(
+                    $throwable,
+                    'ClientChatController:actionAjaxReturn:throwable'
+                );
+                $result['message'] = VarDumper::dumpAsString($throwable->getMessage());
+            }
+            return $result;
+        }
+        throw new BadRequestHttpException();
+    }
+
+    private function guardCanProcessChat(int $userId, int $chatId): void
+    {
+        $redis = Yii::$app->redis;
+        $key = self::RESERVE_CHAT_TO_PROCESS_KEY . $chatId;
+        $redis->setnx($key, $userId);
+        $value = $redis->get($key);
+        if ((int)$value === $userId) {
+            $redis->expire($key, 20);
+        } else {
+            throw new \RuntimeException('Chat is already being processed');
+        }
     }
 
     public function actionPjaxUpdateChatWidget()
@@ -1114,7 +1161,7 @@ class ClientChatController extends FController
 
         try {
             $clientChat = $this->clientChatRepository->findById($chatId);
-            if (!Auth::can('client-chat/manage/all', ['chat' => $clientChat])) {
+            if (!Auth::can('client-chat/manage', ['chat' => $clientChat])) {
                 throw new ForbiddenHttpException('You do not have access to perform this action', 403);
             }
             $lead = $this->leadRepository->find($leadId);
@@ -1396,13 +1443,44 @@ class ClientChatController extends FController
 
         $form = new RealTimeStartChatForm($visitorId, $projectName, $visitorName);
 
+        if ($form->projectName) {
+            $form->projectId = $this->projectRepository->getIdByProjectKey($form->projectName);
+        }
         try {
-            if ($form->projectName) {
-                $form->projectId = $this->projectRepository->getIdByProjectKey($form->projectName);
-            }
 
             if (Yii::$app->request->isPjax && $form->load(Yii::$app->request->post()) && $form->validate()) {
-                $this->clientChatService->createByAgent($form, Auth::id());
+                if (!$userProfile = UserProfile::findOne(['up_user_id' => Auth::id()])) {
+                    throw new NotFoundException('User Profile is not found');
+                }
+                if (!$userProfile->isRegisteredInRc()) {
+                    throw new \DomainException('You dont have rocketchat credentials');
+                }
+
+                $channel = $this->clientChatChannelRepository->find($form->channelId);
+
+                $department = Department::find()->select(['dep_name'])->where(['dep_id' => $channel->ccc_dep_id])->asArray()->one();
+                if (!$department) {
+                    throw new \RuntimeException('Cannot create room: department data is not found');
+                }
+
+                $clientChatRequest = ClientChatRequest::createByAgent($form);
+                $this->clientChatRequestRepository->save($clientChatRequest);
+                $client = $this->clientManageService->getOrCreateByClientChatRequest($clientChatRequest, (int)$form->projectId);
+
+                $activeChatExist = ClientChat::find()->byChannel($channel->ccc_id)->withOwner()->byClientId($client->id)->notClosed()->exists();
+                if ($activeChatExist) {
+                    throw new \DomainException('This visitor is already chatting with agent in ' . $department['dep_name'] . ' department');
+                }
+
+                $this->clientChatService->createByAgent(
+                    $form,
+                    Auth::id(),
+                    $userProfile->up_rc_user_id,
+                    $userProfile->up_rc_auth_token,
+                    $clientChatRequest,
+                    $client,
+                    $channel
+                );
 
                 return '<script>$("#modal-sm").modal("hide"); createNotify("Success", "Message was successfully sent to client", "success");</script>';
             }
@@ -1418,19 +1496,29 @@ class ClientChatController extends FController
 
         $domainError = '';
         $channels = [];
+        $activeChannelsIds = null;
         try {
+            $userChannel = ClientChatUserChannel::find()->byUserId(Auth::id())->exists();
+            if (!$userChannel) {
+                throw new \DomainException('It looks like you do not have access to channels');
+            }
+
+            if ($client = $this->clientManageService->detectClientFromChatRequest($form->projectId, null, null, $form->visitorId)) {
+                $activeChannelsIds = ClientChat::find()->select(['cch_channel_id'])->distinct()->withOwner()->byClientId($client->id)->notClosed()->column();
+            }
+
             $channels = $this->clientChatChannelRepository->getByUserAndProject(
                 Auth::id(),
                 $form->projectId,
-                Department::DEPARTMENT_EXCHANGE
+                Department::DEPARTMENT_EXCHANGE,
+                $activeChannelsIds
             );
             $channels = ArrayHelper::map($channels, 'ccc_id', 'ccc_name');
-
-            if (!$channels) {
-                $domainError = 'You dont have access to channels';
-            }
-        } catch (NotFoundException $e) {
+        } catch (NotFoundException | \DomainException $e) {
             $domainError = $e->getMessage();
+            if ($activeChannelsIds) {
+                $domainError = 'The client already has active chats on all channels to which you have access';
+            }
         }
 
         return $this->renderAjax('partial/_real_time_start_chat', [

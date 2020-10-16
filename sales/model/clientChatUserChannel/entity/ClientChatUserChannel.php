@@ -22,24 +22,28 @@ use yii\db\ActiveRecord;
  */
 class ClientChatUserChannel extends \yii\db\ActiveRecord
 {
-	public function behaviors(): array
-	{
-		return [
-			'timestamp' => [
-				'class' => TimestampBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['ccuc_created_dt'],
-				],
-				'value' => date('Y-m-d H:i:s'),
-			],
-			'user' => [
-				'class' => BlameableBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['ccuc_created_user_id'],
-				]
-			],
-		];
-	}
+    public const CACHE_TAG = 'client_chat_user_channel';
+    public const CACHE_TAG_USER = self::CACHE_TAG . '-user';
+    public const CACHE_DURATION = 60 * 60 * 24;
+
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['ccuc_created_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s'),
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['ccuc_created_user_id'],
+                ]
+            ],
+        ];
+    }
 
     public function rules(): array
     {
@@ -94,5 +98,17 @@ class ClientChatUserChannel extends \yii\db\ActiveRecord
     public static function tableName(): string
     {
         return 'client_chat_user_channel';
+    }
+
+    public static function cacheTags(int $userId): array
+    {
+        return [
+            self::CACHE_TAG_USER . '-' . $userId,
+        ];
+    }
+
+    public static function userCacheName(int $userId): string
+    {
+        return self::CACHE_TAG . '-' . $userId;
     }
 }

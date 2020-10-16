@@ -516,4 +516,24 @@ class Notifications extends ActiveRecord
         }
         return $resultUserIds;
     }
+
+    public static function sendCommandByChanel(
+        string $command,
+        int $channelId,
+        array $data = [],
+        string $controller = 'client-chat',
+        string $action = 'index',
+        bool $isOnline = true,
+        bool $idleOnline = false
+    ): array {
+        $resultUserIds = [];
+        if ($userIds = UserConnection::getUsersByChanel($channelId, $controller, $action, $isOnline, $idleOnline)) {
+            foreach ($userIds as $userId) {
+                $socketParams['user_id'] = $userId;
+                self::publish($command, $socketParams, ['data' => $data]);
+                $resultUserIds[] = $userId;
+            }
+        }
+        return $resultUserIds;
+    }
 }

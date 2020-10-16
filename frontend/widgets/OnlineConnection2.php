@@ -18,7 +18,7 @@ use Yii;
  *
  * @author Alexandr <alex.connor@techork.com>
  */
-class OnlineConnection extends \yii\bootstrap\Widget
+class OnlineConnection2 extends \yii\bootstrap\Widget
 {
 
     public function init()
