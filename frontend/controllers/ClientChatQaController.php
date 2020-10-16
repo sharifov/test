@@ -157,10 +157,17 @@ class ClientChatQaController extends FController
             $history = ClientChatMessage::find()->byChhId($clientChat->cch_id)->all();
         }
 
-		return $this->render('room', [
-            'clientChat' => $clientChat,
-            'history' => $history ?? null,
-        ]);
+        if (Yii::$app->request->isAjax) {
+            return $this->renderAjax('room', [
+                'clientChat' => $clientChat,
+                'history' => $history ?? null,
+            ]);
+        } else {
+            return $this->render('room', [
+                'clientChat' => $clientChat,
+                'history' => $history ?? null,
+            ]);
+        }
     }
 
     /**

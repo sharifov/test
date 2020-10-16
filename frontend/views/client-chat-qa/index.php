@@ -1,5 +1,6 @@
 <?php
 
+use sales\auth\Auth;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
@@ -9,6 +10,7 @@ use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\helpers\Url;
 use yii\widgets\Pjax;
+use yii\bootstrap4\Modal;
 
 /* @var yii\web\View $this */
 /* @var sales\model\clientChat\entity\search\ClientChatSearch $searchModel */
@@ -35,29 +37,33 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'cch_id',
                 'options' => ['style' => 'width:100px']
             ],
-			[
-				'attribute' => 'cch_parent_id',
-				'value' => static function (ClientChat $model) {
-					return $model->cch_parent_id ?
-						Html::a('<i class="fa fa-link"></i> ' . $model->cch_parent_id,
-							['client-chat-crud/view', 'id' => $model->cch_parent_id],
-							['target' => '_blank', 'data-pjax' => 0]) : '-';
-				},
-				'format' => 'raw',
-				'options' => ['style' => 'width:100px'],
-			],
+            [
+                'attribute' => 'cch_parent_id',
+                'value' => static function (ClientChat $model) {
+                    return $model->cch_parent_id ?
+                        Html::a(
+                            '<i class="fa fa-link"></i> ' . $model->cch_parent_id,
+                            ['client-chat-crud/view', 'id' => $model->cch_parent_id],
+                            ['target' => '_blank', 'data-pjax' => 0]
+                        ) : '-';
+                },
+                'format' => 'raw',
+                'options' => ['style' => 'width:100px'],
+            ],
             'cch_rid',
             [
                 'label' => 'Messages',
                 'value' => static function (ClientChat $model) {
                     $count = ClientChatMessage::countByChatId($model->cch_id);
-                    return Html::a('<span class="glyphicon glyphicon-comment"></span> <sup>' . $count . '</sup>',
+                    return Html::a(
+                        '<span class="glyphicon glyphicon-comment"></span> <sup>' . $count . '</sup>',
                         ['/client-chat-qa/view', 'id' => $model->cch_id, '#' => 'messages'],
                         [
                             'target' => '_blank',
                             'data-pjax' => 0,
                             'title' => 'Messages',
-                        ]);
+                        ]
+                    );
                 },
                 'format' => 'raw',
             ],
@@ -65,9 +71,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'cch_ccr_id',
                 'value' => static function (ClientChat $model) {
                     return $model->cch_ccr_id ?
-                        Html::a('<i class="fa fa-link"></i> ' . $model->cch_ccr_id,
-                        ['client-chat-request-crud/view', 'id' => $model->cch_ccr_id],
-                        ['target' => '_blank', 'data-pjax' => 0]) : '-';
+                        Html::a(
+                            '<i class="fa fa-link"></i> ' . $model->cch_ccr_id,
+                            ['client-chat-request-crud/view', 'id' => $model->cch_ccr_id],
+                            ['target' => '_blank', 'data-pjax' => 0]
+                        ) : '-';
                 },
                 'format' => 'raw',
                 'options' => ['style' => 'width:100px'],
@@ -75,7 +83,11 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'cch_status_id',
                 'value' => static function (ClientChat $model) {
-                    return Html::tag('span', $model->getStatusName(), ['class' => 'badge badge-'.$model->getStatusClass()]);
+                    return Html::tag(
+                        'span',
+                        $model->getStatusName(),
+                        ['class' => 'badge badge-' . $model->getStatusClass()]
+                    );
                 },
                 'format' => 'raw',
                 'filter' => ClientChat::getStatusList()
@@ -93,9 +105,11 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'cch_channel_id',
                 'value' => static function (ClientChat $model) {
-                    return $model->cch_channel_id ? Html::a(Html::encode($model->cchChannel->ccc_name),
+                    return $model->cch_channel_id ? Html::a(
+                        Html::encode($model->cchChannel->ccc_name),
                         ['client-chat-channel-crud/view', 'id' => $model->cch_channel_id],
-                        ['target' => '_blank', 'data-pjax' => 0]) : '-';
+                        ['target' => '_blank', 'data-pjax' => 0]
+                    ) : '-';
                 },
                 'format' => 'raw',
                 'filter' => ClientChatChannel::getList()
@@ -103,9 +117,11 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'cch_client_id',
                 'value' => static function (ClientChat $model) {
-                    return $model->cch_client_id ? Html::a('<i class="fa fa-link"></i> ' . $model->cch_client_id,
+                    return $model->cch_client_id ? Html::a(
+                        '<i class="fa fa-link"></i> ' . $model->cch_client_id,
                         ['client/view', 'id' => $model->cch_client_id],
-                        ['target' => '_blank', 'data-pjax' => 0]) : '-';
+                        ['target' => '_blank', 'data-pjax' => 0]
+                    ) : '-';
                 },
                 'format' => 'raw',
             ],
@@ -114,21 +130,21 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => \common\components\grid\UserColumn::class,
                 'relation' => 'cchOwnerUser',
             ],
-			[
-				'attribute' => 'cch_source_type_id',
-				'options' => ['style' => 'width:100px'],
+            [
+                'attribute' => 'cch_source_type_id',
+                'options' => ['style' => 'width:100px'],
                 'filter' => ClientChat::getSourceTypeList(),
                 'value' => static function (ClientChat $model) {
                     return $model->getSourceTypeName();
                 }
-			],
+            ],
             [
                 'attribute' => 'caseId',
                 'label' => 'Case',
                 'value' => static function (ClientChat $chat) {
                     $out = '';
                     foreach ($chat->cases as $case) {
-                        $out .= Yii::$app->formatter->format($case,  'case') . '<br />';
+                        $out .= Yii::$app->formatter->format($case, 'case') . '<br />';
                     }
                     return $out;
                 },
@@ -141,7 +157,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => static function (ClientChat $chat) {
                     $out = '';
                     foreach ($chat->leads as $lead) {
-                        $out .= Yii::$app->formatter->format($lead,  'lead') . '<br />';
+                        $out .= Yii::$app->formatter->format($lead, 'lead') . '<br />';
                     }
                     return $out;
                 },
@@ -149,9 +165,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => ['style' => 'width:120px; white-space: normal;'],
             ],
             [
-				'class' => DateTimeColumn::class,
-				'attribute' => 'cch_created_dt',
-				'format' => 'byUserDateTime',
+                'class' => DateTimeColumn::class,
+                'attribute' => 'cch_created_dt',
+                'format' => 'byUserDateTime',
             ],
             [
                 'class' => ActionColumn::class,
@@ -159,15 +175,29 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => ['style' => 'width:50px; white-space: normal;'],
                 'buttons' => [
                     'view' => static function ($url, ClientChat $model) {
-                        return Html::a('<span class="glyphicon glyphicon-eye-open"></span>',
+                        return Html::a(
+                            '<span class="glyphicon glyphicon-eye-open"></span>',
                             [$url],
                             [
                                 'target' => '_blank',
                                 'data-pjax' => 0,
                                 'title' => 'View',
-                            ]);
+                            ]
+                        );
                     },
                     'room' => static function ($url, ClientChat $model) {
+                        return Html::a(
+                            '<span class="glyphicon glyphicon-list-alt"></span>',
+                            '#',
+                            [
+                                'data-pjax' => 0,
+                                'title' => 'Room',
+                                'data-rid' => $model->cch_rid,
+                                'class' => 'pop-up-button'
+                            ]
+                        );
+                    },
+                    /*'room' => static function ($url, ClientChat $model) {
                         $urlArr = explode('/', $url);
                         return Html::a('<span class="glyphicon glyphicon-list-alt"></span>',
                             ['/client-chat-qa/room', 'rid' => $model->cch_rid],
@@ -176,12 +206,46 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'data-pjax' => 0,
                                 'title' => 'Room',
                             ]);
-                    },
+                    },*/
                 ],
+                'visibleButtons' => [
+                    'room' => function ($model) {
+                        return Auth::can('client-chat/view', ['chat' => $model]);
+                    },
+                ]
             ],
         ],
     ]); ?>
 
     <?php Pjax::end(); ?>
 
+    <?php Modal::begin([
+        'title' => 'Client Chat Room',
+        'id' => 'chat-room-popup',
+        'size' => Modal::SIZE_LARGE
+    ]) ?>
+
+    <?php Modal::end() ?>
+
 </div>
+
+<?php
+$js = <<<JS
+
+$('body').on('click', '.pop-up-button', function(e) {    
+    $.get(        
+        '/client-chat-qa/room',       
+        {
+            rid: $(this).data('rid')
+        },
+        function (data) {
+            $('.modal-body').html(data);
+            $('#chat-room-popup').modal('handleUpdate')
+            $('#chat-room-popup').modal('show');
+        }  
+    );
+});
+
+JS;
+$this->registerJs($js)
+?>
