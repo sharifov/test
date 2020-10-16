@@ -267,6 +267,7 @@ class ClientChatController extends FController
 
         $clientChat = null;
         $accessChatError = false;
+        $resetUnreadMessagesChatId = null;
         $chid = (int)Yii::$app->request->get('chid');
 
         if ($chid) {
@@ -283,14 +284,7 @@ class ClientChatController extends FController
                         $clientChat->cch_id,
                         $clientChat->cch_owner_user_id
                     );
-
-                    if ($dataProvider && ($models = $dataProvider->getModels())) {
-                        if (isset($models[$clientChat->cch_id])) {
-                            $models[$clientChat->cch_id]['count_unread_messages'] = 0;
-                        }
-                        $dataProvider->refresh();
-                        $dataProvider->setModels($models);
-                    }
+                    $resetUnreadMessagesChatId = $clientChat->cch_rid;
                 }
 
                 if ($clientChat->isClosed()) {
@@ -325,7 +319,8 @@ class ClientChatController extends FController
                     $response['html'] = $this->renderPartial('partial/_client-chat-item', [
                         'clientChats' => $dataProvider->getModels(),
                         'clientChatId' => $clientChat ? $clientChat->cch_id : '',
-                        'formatter' => $formatter
+                        'formatter' => $formatter,
+                        'resetUnreadMessagesChatId' => $resetUnreadMessagesChatId,
                     ]);
                     $response['page'] = $page + 1;
                 }
@@ -350,7 +345,8 @@ class ClientChatController extends FController
             'page' => $page + 1,
             'actionPermissions' => new ClientChatActionPermission(),
             'countFreeToTake' => $countFreeToTake,
-            'accessChatError' => $accessChatError
+            'accessChatError' => $accessChatError,
+            'resetUnreadMessagesChatId' => $resetUnreadMessagesChatId
         ]);
     }
 

@@ -28,6 +28,7 @@ use yii\widgets\Pjax;
 /** @var ClientChatActionPermission $actionPermissions */
 /** @var int $countFreeToTake */
 /** @var bool $accessChatError */
+/** @var int|null $resetUnreadMessagesChatId */
 
 $this->title = 'My Client Chat';
 //$this->params['breadcrumbs'][] = $this->title;
@@ -85,6 +86,7 @@ $clientChatTakeUrl = Url::toRoute(['/client-chat/ajax-take']);
                 'filter' => $filter,
                 'page' => $page,
                 'countFreeToTake' => $countFreeToTake,
+                'resetUnreadMessagesChatId' => $resetUnreadMessagesChatId
             ]); ?>
         </div>
 		<?php Pjax::end(); ?>

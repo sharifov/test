@@ -10,6 +10,7 @@ use sales\model\clientChat\dashboard\FilterForm;
 /** @var FilterForm $filter */
 /** @var int $page */
 /** @var int $countFreeToTake */
+/** @var int|null $resetUnreadMessagesChatId */
 
 $formatter = new \common\components\i18n\Formatter();
 $formatter->timeZone = \sales\auth\Auth::user()->timezone;
@@ -18,23 +19,28 @@ $formatter->timeZone = \sales\auth\Auth::user()->timezone;
 <div class="_cc-wrapper">
 
     <div class="cc-filters-wrapper">
-        <?= $this->render('filter/_filter',
-            [
-                'filter' => $filter,
-                'loadChannelsUrl' => $loadChannelsUrl,
-                'dataProvider' => $dataProvider,
-                'countFreeToTake' => $countFreeToTake,
-            ]
-        ); ?>
+        <?= $this->render('filter/_filter', [
+            'filter' => $filter,
+            'loadChannelsUrl' => $loadChannelsUrl,
+            'dataProvider' => $dataProvider,
+            'countFreeToTake' => $countFreeToTake,
+        ]) ?>
     </div>
 
-	<div id="cc-dialogs-wrapper" class="_cc-list-wrapper">
+    <div id="cc-dialogs-wrapper" class="_cc-list-wrapper">
         <?php if ($dataProvider): ?>
-		    <?= $this->render('_client-chat-item', ['clientChats' => $dataProvider->getModels(), 'clientChatId' => $clientChatId, 'formatter' => $formatter]); ?>
+            <?= $this->render('_client-chat-item', [
+                'clientChats' => $dataProvider->getModels(),
+                'clientChatId' => $clientChatId,
+                'formatter' => $formatter,
+                'resetUnreadMessagesChatId' => $resetUnreadMessagesChatId
+            ]); ?>
         <?php endif; ?>
-	</div>
+    </div>
 
-	<div class="_cc-channel-pagination" style="display: flex;justify-content: center; padding: 15px 0 10px;">
-        <button class="btn btn-default btn-sm" id="btn-load-channels" data-page="<?= $page; ?>"><i class="fa fa-angle-double-down"></i> Load more ...</button>
-	</div>
+    <div class="_cc-channel-pagination" style="display: flex;justify-content: center; padding: 15px 0 10px;">
+        <button class="btn btn-default btn-sm" id="btn-load-channels" data-page="<?= $page; ?>">
+            <i class="fa fa-angle-double-down"> </i> Load more ...
+        </button>
+    </div>
 </div>
