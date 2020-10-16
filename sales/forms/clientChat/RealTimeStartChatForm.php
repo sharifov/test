@@ -18,49 +18,49 @@ use yii\helpers\Json;
  */
 class RealTimeStartChatForm extends \yii\base\Model
 {
-	public string $rid = '';
+    public string $rid = '';
 
-	public string $visitorId = '';
+    public string $visitorId = '';
 
-	public string $message = '';
+    public string $message = '';
 
-	public $projectId;
+    public $projectId;
 
-	public string $projectName = '';
+    public string $projectName = '';
 
-	public int $channelId = 0;
+    public int $channelId = 0;
 
-	public string $visitorName = '';
+    public string $visitorName = '';
 
-	public function __construct(string $visitorId, string $projectName, string $visitorName, $config = [])
-	{
-		$this->visitorId = $visitorId;
-		$this->projectName = $projectName;
-		$this->visitorName = $visitorName;
-		parent::__construct($config);
-	}
+    public function __construct(string $visitorId, string $projectName, string $visitorName, $config = [])
+    {
+        $this->visitorId = $visitorId;
+        $this->projectName = $projectName;
+        $this->visitorName = $visitorName;
+        parent::__construct($config);
+    }
 
-	public function rules(): array
-	{
-		return [
-			[['rid', 'visitorId', 'message', 'visitorName'], 'string'],
-			[['channelId', 'projectId'], 'integer'],
-			[['visitorId', 'message', 'channelId'], 'required'],
-			[['channelId'], 'filter', 'filter' => 'intval'],
-			[['projectId'], 'default', 'value' => null],
-			[['projectId'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-		];
-	}
+    public function rules(): array
+    {
+        return [
+            [['rid', 'visitorId', 'message', 'visitorName'], 'string'],
+            [['channelId', 'projectId'], 'integer'],
+            [['visitorId', 'message', 'channelId'], 'required'],
+            [['channelId'], 'filter', 'filter' => 'intval'],
+            [['projectId'], 'default', 'value' => null],
+            [['projectId'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+        ];
+    }
 
-	public function dataToJson(): string
-	{
-		return Json::encode([
-			'rid' => $this->rid,
-			'visitor' => [
-				'id' => $this->visitorId,
-				'project' => $this->projectName,
-				'name' => $this->visitorName
-			]
-		]);
-	}
+    public function dataToJson(): string
+    {
+        return Json::encode([
+            'rid' => $this->rid,
+            'visitor' => [
+                'id' => $this->visitorId,
+                'project' => $this->projectName,
+                'name' => $this->visitorName
+            ]
+        ]);
+    }
 }

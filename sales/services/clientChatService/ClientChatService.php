@@ -2,6 +2,7 @@
 namespace sales\services\clientChatService;
 
 use common\components\purifier\Purifier;
+use common\models\Client;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Notifications;
@@ -222,8 +223,15 @@ class ClientChatService
         }
     }
 
-    public function createByAgent(RealTimeStartChatForm $form, int $ownerId): void
-    {
+    public function createByAgent(
+        RealTimeStartChatForm $form,
+        int $agentId,
+        string $rcUserId,
+        string $rcUserToken,
+        ClientChatRequest $clientChatRequest,
+        Client $client,
+        ClientChatChannel $channel
+    ): void {
         $_self = $this;
         try {
             $redis = \Yii::$app->redis;
@@ -233,28 +241,6 @@ class ClientChatService
                 $redis->setnx($key, true);
             } else {
                 throw new \RuntimeException('This action is currently being taken by another agent.', ClientChatCodeException::CC_REAL_TIME_ACTION_TAKEN);
-            }
-
-            if (!$userProfile = UserProfile::findOne(['up_user_id' => $ownerId])) {
-                throw new NotFoundException('User Profile is not found');
-            }
-            if (!$userProfile->isRegisteredInRc()) {
-                throw new \DomainException('You dont have rocketchat credentials');
-            }
-            $channel = $_self->clientChatChannelRepository->find($form->channelId);
-
-            $department = Department::find()->select(['dep_name'])->where(['dep_id' => $channel->ccc_dep_id])->asArray()->one();
-            if (!$department) {
-                throw new \RuntimeException('Cannot create room: department data is not found');
-            }
-
-            $clientChatRequest = ClientChatRequest::createByAgent($form);
-            $_self->clientChatRequestRepository->save($clientChatRequest);
-            $client = $_self->clientManageService->getOrCreateByClientChatRequest($clientChatRequest, (int)$form->projectId);
-
-            $activeChatExist = ClientChat::find()->byChannel($channel->ccc_id)->withOwner()->byClientId($client->id)->notClosed()->exists();
-            if ($activeChatExist) {
-                throw new \DomainException('This visitor is already chatting with agent in ' . $department['dep_name'] . ' department');
             }
 
             $clientChat = $_self->clientChatRepository->getOrCreateByRequest($clientChatRequest, ClientChat::SOURCE_TYPE_AGENT);
@@ -268,12 +254,12 @@ class ClientChatService
 
             $clientChat->cch_channel_id = $channel->ccc_id;
             $clientChat->cch_project_id = $channel->ccc_project_id;
-            $clientChat->cch_owner_user_id = $ownerId;
+            $clientChat->cch_owner_user_id = $agentId;
             $clientChat->cch_client_online = 1;
-            $clientChat->inProgress($ownerId, ClientChatStatusLog::ACTION_OPEN_BY_AGENT);
+            $clientChat->inProgress($agentId, ClientChatStatusLog::ACTION_OPEN_BY_AGENT);
             $this->clientChatRepository->save($clientChat);
 
-            $this->transactionManager->wrap(static function () use ($form, $ownerId, $_self, $department, $userProfile, $clientChatRequest, $clientChat) {
+            $this->transactionManager->wrap(static function () use ($form, $agentId, $_self, $rcUserId, $rcUserToken, $clientChatRequest, $clientChat) {
                 $visitorRcId = $clientChatRequest->getClientRcId();
                 try {
                     $visitorData = $_self->clientChatVisitorDataRepository->findByVisitorRcId($visitorRcId);
@@ -285,13 +271,13 @@ class ClientChatService
                     $_self->clientChatVisitorRepository->create($clientChat->cch_id, $visitorData->cvd_id, $clientChat->cch_client_id);
                 }
 
-                $userChannel = $_self->clientChatUserChannelRepository->findByPrimaryKeys($ownerId, $form->channelId);
+                $userChannel = $_self->clientChatUserChannelRepository->findByPrimaryKeys($agentId, $form->channelId);
 
                 $clientChatUserAccess = ClientChatUserAccess::create($clientChat->cch_id, $userChannel->ccuc_user_id);
                 $clientChatUserAccess->accept();
                 $_self->clientChatUserAccessRepository->save($clientChatUserAccess, $clientChat);
 
-                $rid = $_self->createRcRoom($form->visitorId, (string)$clientChat->cch_channel_id, $form->message, $userProfile->up_rc_user_id, $userProfile->up_rc_auth_token);
+                $rid = $_self->createRcRoom($form->visitorId, (string)$clientChat->cch_channel_id, $form->message, $rcUserId, $rcUserToken);
 
                 $clientChat->cch_rid = $rid;
                 $_self->clientChatRepository->save($clientChat);

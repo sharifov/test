@@ -12,6 +12,7 @@ use common\models\Project;
 use common\models\Quote;
 use common\models\search\LeadSearch;
 use common\models\UserConnection;
+use common\models\UserProfile;
 use common\models\VisitorLog;
 use frontend\helpers\JsonHelper;
 use frontend\widgets\clientChat\ClientChatAccessMessage;
@@ -50,6 +51,7 @@ use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestRepository
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestService;
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\model\clientChatUnread\entity\ClientChatUnread;
+use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\user\entity\userConnectionActiveChat\UserConnectionActiveChat;
 use sales\repositories\clientChatChannel\ClientChatChannelRepository;
 use sales\repositories\clientChatStatusLogRepository\ClientChatStatusLogRepository;
@@ -57,6 +59,7 @@ use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessReposi
 use sales\repositories\lead\LeadRepository;
 use sales\repositories\NotFoundException;
 use sales\repositories\project\ProjectRepository;
+use sales\services\client\ClientManageService;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatService\ClientChatQuery;
 use sales\services\clientChatService\ClientChatService;
@@ -77,6 +80,7 @@ use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
+use function Amp\call;
 
 /**
  * Class ClientChatController
@@ -98,6 +102,7 @@ use yii\web\Response;
  * @property ClientChatStatusLogService $clientChatStatusLogService
  * @property ClientChatStatusLogRepository $clientChatStatusLogRepository
  * @property ClientChatHoldRepository $clientChatHoldRepository
+ * @property ClientManageService $clientManageService
  */
 class ClientChatController extends FController
 {
@@ -152,6 +157,10 @@ class ClientChatController extends FController
     private ClientChatStatusLogService $clientChatStatusLogService;
     private ClientChatStatusLogRepository $clientChatStatusLogRepository;
     private ClientChatHoldRepository $clientChatHoldRepository;
+    /**
+     * @var ClientManageService
+     */
+    private ClientManageService $clientManageService;
 
     public function __construct(
         $id,
@@ -171,6 +180,7 @@ class ClientChatController extends FController
         ClientChatStatusLogService $clientChatStatusLogService,
         ClientChatStatusLogRepository $clientChatStatusLogRepository,
         ClientChatHoldRepository $clientChatHoldRepository,
+        ClientManageService $clientManageService,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -189,6 +199,7 @@ class ClientChatController extends FController
         $this->clientChatStatusLogService = $clientChatStatusLogService;
         $this->clientChatStatusLogRepository = $clientChatStatusLogRepository;
         $this->clientChatHoldRepository = $clientChatHoldRepository;
+        $this->clientManageService = $clientManageService;
     }
 
     /**
@@ -1392,13 +1403,44 @@ class ClientChatController extends FController
 
         $form = new RealTimeStartChatForm($visitorId, $projectName, $visitorName);
 
+        if ($form->projectName) {
+            $form->projectId = $this->projectRepository->getIdByProjectKey($form->projectName);
+        }
         try {
-            if ($form->projectName) {
-                $form->projectId = $this->projectRepository->getIdByProjectKey($form->projectName);
-            }
 
             if (Yii::$app->request->isPjax && $form->load(Yii::$app->request->post()) && $form->validate()) {
-                $this->clientChatService->createByAgent($form, Auth::id());
+                if (!$userProfile = UserProfile::findOne(['up_user_id' => Auth::id()])) {
+                    throw new NotFoundException('User Profile is not found');
+                }
+                if (!$userProfile->isRegisteredInRc()) {
+                    throw new \DomainException('You dont have rocketchat credentials');
+                }
+
+                $channel = $this->clientChatChannelRepository->find($form->channelId);
+
+                $department = Department::find()->select(['dep_name'])->where(['dep_id' => $channel->ccc_dep_id])->asArray()->one();
+                if (!$department) {
+                    throw new \RuntimeException('Cannot create room: department data is not found');
+                }
+
+                $clientChatRequest = ClientChatRequest::createByAgent($form);
+                $this->clientChatRequestRepository->save($clientChatRequest);
+                $client = $this->clientManageService->getOrCreateByClientChatRequest($clientChatRequest, (int)$form->projectId);
+
+                $activeChatExist = ClientChat::find()->byChannel($channel->ccc_id)->withOwner()->byClientId($client->id)->notClosed()->exists();
+                if ($activeChatExist) {
+                    throw new \DomainException('This visitor is already chatting with agent in ' . $department['dep_name'] . ' department');
+                }
+
+                $this->clientChatService->createByAgent(
+                    $form,
+                    Auth::id(),
+                    $userProfile->up_rc_user_id,
+                    $userProfile->up_rc_auth_token,
+                    $clientChatRequest,
+                    $client,
+                    $channel
+                );
 
                 return '<script>$("#modal-sm").modal("hide"); createNotify("Success", "Message was successfully sent to client", "success");</script>';
             }
@@ -1414,19 +1456,29 @@ class ClientChatController extends FController
 
         $domainError = '';
         $channels = [];
+        $activeChannelsIds = null;
         try {
+            $userChannel = ClientChatUserChannel::find()->byUserId(Auth::id())->exists();
+            if (!$userChannel) {
+                throw new \DomainException('It looks like you do not have access to channels');
+            }
+
+            if ($client = $this->clientManageService->detectClientFromChatRequest($form->projectId, null, null, $form->visitorId)) {
+                $activeChannelsIds = ClientChat::find()->select(['cch_channel_id'])->distinct()->withOwner()->byClientId($client->id)->notClosed()->column();
+            }
+
             $channels = $this->clientChatChannelRepository->getByUserAndProject(
                 Auth::id(),
                 $form->projectId,
-                Department::DEPARTMENT_EXCHANGE
+                Department::DEPARTMENT_EXCHANGE,
+                $activeChannelsIds
             );
             $channels = ArrayHelper::map($channels, 'ccc_id', 'ccc_name');
-
-            if (!$channels) {
-                $domainError = 'You dont have access to channels';
-            }
-        } catch (NotFoundException $e) {
+        } catch (NotFoundException | \DomainException $e) {
             $domainError = $e->getMessage();
+            if ($activeChannelsIds) {
+                $domainError = 'The client already has active chats on all channels to which you have access';
+            }
         }
 
         return $this->renderAjax('partial/_real_time_start_chat', [

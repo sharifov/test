@@ -373,7 +373,7 @@ class ClientManageService
             'projectId' => $projectId
         ]);
 
-        if ($client = self::detectClientFromChatRequest($projectId, $uuId, $clientEmailForm->email, $rcId)) {
+        if ($client = $this->detectClientFromChatRequest($projectId, $uuId, $clientEmailForm->email, $rcId)) {
             $this->updateClient($client, $clientForm);
         } else {
             if (empty($clientForm->projectId)) {
@@ -401,7 +401,7 @@ class ClientManageService
      * @param string|null $rcId
      * @return Client|ActiveRecord|null
      */
-    private static function detectClientFromChatRequest(int $projectId, ?string $uuId, ?string $email, ?string $rcId)
+    public function detectClientFromChatRequest(int $projectId, ?string $uuId, ?string $email, ?string $rcId)
     {
         if (!empty($uuId) && $client = Client::find()->byProject($projectId)->byUuid($uuId)->one()) {
             return $client;
