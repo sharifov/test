@@ -49,7 +49,7 @@ class ClientChatRequestSearch extends ClientChatRequest
             'DATE(ccr_created_dt)' => $this->ccr_created_dt,
         ]);
 
-        $query->andFilterWhere(['like', 'ccr_event', $this->ccr_event]);
+        $query->andFilterWhere(['ccr_event' => $this->ccr_event]);
 
         $query->andFilterWhere(['like', 'ccr_json_data', $this->ccr_json_data]);
 
