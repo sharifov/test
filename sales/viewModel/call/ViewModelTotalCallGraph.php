@@ -186,7 +186,7 @@ class ViewModelTotalCallGraph
                 (int)$arr['incoming'],
                 'Incoming Calls: ' . (int)$arr['incoming'],
                 (int)$arr['outgoing'],
-                'Incoming Calls: ' . (int)$arr['outgoing'],
+                'Outgoing Calls: ' . (int)$arr['outgoing'],
                 ]);
         }
 
