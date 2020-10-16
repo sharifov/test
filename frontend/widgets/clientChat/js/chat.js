@@ -57,7 +57,7 @@
                 }.bind(this))
                 .catch(() => {this.hasNoRequests()})
                 .finally(() => {
-                    accessIcon.removeClass('fa-spinner fa-spin').addClass('fa-comment-o');
+                    accessIcon.removeClass('fa-spinner fa-spin').addClass('fa-comments-o');
                     accessWg.attr('data-loading', 0);
                 });
         }

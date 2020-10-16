@@ -2,10 +2,12 @@
 
 use common\models\Employee;
 use frontend\helpers\EmailHelper;
+use sales\model\clientChat\entity\ClientChat;
 use yii\helpers\Html;
 use \common\models\Email;
 use \common\models\Sms;
 use \common\models\Call;
+use yii\helpers\VarDumper;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -150,7 +152,7 @@ $fromType = 'client';
             }
     ?>
         <div class="chat__message chat__message--<?=($sms->s_type_id == Sms::TYPE_INBOX ? 'client' : 'system')?> chat__message--sms">
-        <div class="chat__icn"><i class="fa fa-comments-o"></i></div>
+        <div class="chat__icn"><i class="fas fa-sms"> </i></div>
 
         <i class="chat__status chat__status--<?=$statusClass?> fa fa-circle" data-toggle="tooltip" title="<?=Html::encode($statusTitle)?>" data-placement="left" data-original-title="<?=Html::encode($statusTitle)?>"></i>
         <div class="chat__message-heading">
@@ -167,3 +169,17 @@ $fromType = 'client';
     </div>
     <?php endif;?>
 <?php endif;?>
+
+
+<?php
+
+    if ($model['type'] === 'chat') {
+        if ($chat = ClientChat::find()->andWhere(['cch_id' => $model['id']])->with(['feedback'])->one()) {
+            $start = $chat['cch_created_dt'];
+            $owner = $chat->hasOwner() ? $chat->cchOwnerUser->nickname : '';
+            $feedback = $chat->feedback ? $chat->feedback->ccf_rating : '';
+            $channelName = $chat->cchChannel ? $chat->cchChannel->ccc_name : '';
+            $status = $chat->getStatusName();
+        }
+    }
+?>
