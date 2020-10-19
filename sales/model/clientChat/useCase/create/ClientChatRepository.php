@@ -60,7 +60,7 @@ class ClientChatRepository
 
 	public function findByRid(string $rid): ClientChat
 	{
-		if ($clientChat = ClientChat::findOne(['cch_rid' => $rid])) {
+		if ($clientChat = ClientChat::find()->andWhere(['cch_rid' => $rid])->orderBy(['cch_id' => SORT_DESC])->one()) {
 			return $clientChat;
 		}
 		throw new NotFoundException('unable to find client chat by rid: ' . $rid);
