@@ -105,6 +105,7 @@ class ClientChatUserChannelCrudController extends FController
         try {
             if ($model->load(Yii::$app->request->post()) && $model->save()) {
                 $this->accessService->setUserAccessToAllChatsByChannelIds([$model->ccuc_channel_id], $model->ccuc_user_id);
+                TagDependency::invalidate(Yii::$app->cache, ClientChatUserChannel::cacheTags($model->ccuc_user_id));
 
                 return $this->redirect(['view', 'ccuc_user_id' => $model->ccuc_user_id, 'ccuc_channel_id' => $model->ccuc_channel_id]);
             }
@@ -136,7 +137,6 @@ class ClientChatUserChannelCrudController extends FController
                 $this->accessService->disableUserAccessToAllChatsByChannelIds([$previousChannelId], $model->ccuc_user_id);
                 $this->accessService->setUserAccessToAllChatsByChannelIds([$model->ccuc_channel_id], $model->ccuc_user_id);
             }
-
             TagDependency::invalidate(Yii::$app->cache, ClientChatUserChannel::cacheTags($model->ccuc_user_id));
 
             return $this->redirect(['view', 'ccuc_user_id' => $model->ccuc_user_id, 'ccuc_channel_id' => $model->ccuc_channel_id]);

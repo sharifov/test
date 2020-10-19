@@ -14,8 +14,6 @@ use yii\web\Response;
  */
 class CleanController extends FController
 {
-
-
     public $assetPaths = [
         '@frontend/web/assets',
         '@webapi/web/assets'
@@ -64,7 +62,7 @@ class CleanController extends FController
     {
         foreach ((array)$this->assetPaths as $path) {
             $this->cleanDir($path);
-            Yii::$app->session->addFlash('cleaner','Assets path "'	. $path .	'" is cleaned.');
+            Yii::$app->session->addFlash('cleaner', 'Assets path "'	. $path .	'" is cleaned.');
         }
         //exit;
         return $this->redirect(['index']);
@@ -78,7 +76,7 @@ class CleanController extends FController
     {
         foreach ((array)$this->runtimePaths as $path) {
             $this->cleanDir($path);
-            Yii::$app->session->addFlash('cleaner','Runtime path "'	. $path .	'" is cleaned.');
+            Yii::$app->session->addFlash('cleaner', 'Runtime path "'	. $path .	'" is cleaned.');
         }
         return $this->redirect(['index']);
     }
@@ -99,14 +97,19 @@ class CleanController extends FController
      */
     public function actionCache() : Response
     {
-
         $successItems = [];
         $warningItems = [];
 
-        if( Yii::$app->cache->flush()) {
+        if (Yii::$app->cache->flush()) {
             $successItems[] = 'Cache is flushed';
         } else {
             $warningItems[] = 'Cache is not flushed!';
+        }
+
+        if (Yii::$app->cacheFile->flush()) {
+            $successItems[] = 'File Cache is flushed';
+        } else {
+            $warningItems[] = 'File Cache is not flushed!';
         }
 
         Yii::$app->db->schema->refresh();
@@ -116,19 +119,18 @@ class CleanController extends FController
             $dir = Yii::getAlias($path) . '/cache';
             FileHelper::removeDirectory($dir);
 
-            if(!file_exists($dir)) {
+            if (!file_exists($dir)) {
                 $successItems[] = 'Removed dir '.$dir;
             } else {
                 $warningItems[] = 'Not Removed dir '.$dir;
             }
         }
 
-
-        if($successItems) {
+        if ($successItems) {
             Yii::$app->session->setFlash('success', implode('<br>', $successItems));
         }
 
-        if($warningItems) {
+        if ($warningItems) {
             Yii::$app->session->setFlash('warning', implode('<br>', $warningItems));
         }
 
@@ -143,11 +145,10 @@ class CleanController extends FController
     private function cleanDir($dir) : void
     {
         $iterator = new \DirectoryIterator(Yii::getAlias($dir));
-        foreach($iterator as $sub) {
-            if(!$sub->isDot() && $sub->isDir()) {
+        foreach ($iterator as $sub) {
+            if (!$sub->isDot() && $sub->isDir()) {
                 FileHelper::removeDirectory($sub->getPathname());
             }
         }
     }
-
 }
