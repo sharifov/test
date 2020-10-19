@@ -139,8 +139,6 @@ class ClientChatUserChannelCrudController extends FController
             }
             TagDependency::invalidate(Yii::$app->cache, ClientChatUserChannel::cacheTags($model->ccuc_user_id));
 
-            TagDependency::invalidate(Yii::$app->cache, ClientChatUserChannel::cacheTags($model->ccuc_user_id));
-
             return $this->redirect(['view', 'ccuc_user_id' => $model->ccuc_user_id, 'ccuc_channel_id' => $model->ccuc_channel_id]);
         }
 
