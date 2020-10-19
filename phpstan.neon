@@ -1,6 +1,6 @@
 parameters:
   autoload_files:
-        - vendor/yiisoft/yii2/Yii.php
+        - vendor/proget-hq/phpstan-yii2/extension.neon
   level: 5
   paths:
     - webapi/controllers

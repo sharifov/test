@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "bde3dbc90c24d3c3765604dbc1f738f7",
+    "content-hash": "ecf717046523da48b6260c49b57a727b",
     "packages": [
         {
             "name": "2amigos/2fa-library",
@@ -764,7 +764,7 @@
             "version": "v0.9.15",
             "source": {
                 "type": "git",
-                "url": "https://github.com/davidstutz/bootstrap-multiselect.git",
+                "url": "git@github.com:davidstutz/bootstrap-multiselect.git",
                 "reference": "4749da211e6d39644ef164cd709cfeae5ccba579"
             },
             "dist": {
@@ -783,7 +783,7 @@
             "version": "v4.7.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/FortAwesome/Font-Awesome.git",
+                "url": "git@github.com:FortAwesome/Font-Awesome.git",
                 "reference": "a8386aae19e200ddb0f6845b5feeee5eb7013687"
             },
             "dist": {
@@ -803,7 +803,7 @@
             "version": "3.3.11",
             "source": {
                 "type": "git",
-                "url": "git@github.com:RobinHerbots/Inputmask.git",
+                "url": "https://github.com/RobinHerbots/Inputmask.git",
                 "reference": "5e670ad62f50c738388d4dcec78d2888505ad77b"
             },
             "dist": {
@@ -839,7 +839,7 @@
             "version": "3.5.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/jquery/jquery-dist.git",
+                "url": "git@github.com:jquery/jquery-dist.git",
                 "reference": "4c0e4becb8263bb5b3e6dadc448d8e7305ef8215"
             },
             "dist": {
@@ -857,7 +857,7 @@
             "version": "1.12.1",
             "source": {
                 "type": "git",
-                "url": "git@github.com:components/jqueryui.git",
+                "url": "https://github.com/components/jqueryui.git",
                 "reference": "44ecf3794cc56b65954cc19737234a3119d036cc"
             },
             "dist": {
@@ -8855,6 +8855,54 @@
                 "xunit"
             ],
             "time": "2020-01-08T08:45:45+00:00"
+        },
+        {
+            "name": "proget-hq/phpstan-yii2",
+            "version": "0.7.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/proget-hq/phpstan-yii2.git",
+                "reference": "a24ea3f9bb02cfe4e6985cc3c18f0e3e5719fa58"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/proget-hq/phpstan-yii2/zipball/a24ea3f9bb02cfe4e6985cc3c18f0e3e5719fa58",
+                "reference": "a24ea3f9bb02cfe4e6985cc3c18f0e3e5719fa58",
+                "shasum": ""
+            },
+            "require": {
+                "nikic/php-parser": "^4.1.0",
+                "php": "^7.2",
+                "phpstan/phpstan": "^0.12"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^2.13",
+                "phpstan/phpstan-phpunit": "^0.12",
+                "phpunit/phpunit": "^8.0",
+                "yiisoft/yii2": "^2.0.15"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Proget\\PHPStan\\Yii2\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Arkadiusz Kondas",
+                    "email": "arkadiusz.kondas@gmail.com"
+                },
+                {
+                    "name": "Marcin Michalski",
+                    "email": "marcin@michalski.dev"
+                }
+            ],
+            "description": "Yii2 extension for PHPStan",
+            "time": "2020-07-13T15:51:26+00:00"
         },
         {
             "name": "psr/event-dispatcher",

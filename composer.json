@@ -94,7 +94,8 @@
 		"phpunit/phpunit": "^7.0",
 		"vimeo/psalm": "^3.13",
 		"phpstan/phpstan": "^0.12.37",
-		"friendsofphp/php-cs-fixer": "^2.16"
+		"friendsofphp/php-cs-fixer": "^2.16",
+		"proget-hq/phpstan-yii2": "^0.7.3"
 	},
 	"config" : {
 		"process-timeout" : 1800,
