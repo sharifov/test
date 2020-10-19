@@ -440,12 +440,14 @@ class ClientChatRequestController extends ApiBaseController
      * @apiParam {int} [project_id] Project ID
      * @apiParam {string{100}} [project_key] Project Key (Priority)
      * @apiParam {string{5}} [language_id] Language ID (ru-RU)
+     * @apiParam {int=0, 1} [nocache] W/o cache
      *
      * @apiParamExample {get} Request-Example:
      * {
      *     "project_id": 1,
      *     "project_key": "ovago",
-     *     "language_id": "ru-RU"
+     *     "language_id": "ru-RU",
+     *     "nocache": 1
      * }
      *
      * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
@@ -517,57 +519,56 @@ class ClientChatRequestController extends ApiBaseController
             }
         }
     ],
-     *
-     *
-     * "language_id": "ru-RU",
-    "translations": {
-        "connection_lost": {
-            "title": "Connection Lost",
-            "subtitle": "Trying to reconnect"
+    "language_id": "ru-RU",
+        "translations": {
+            "connection_lost": {
+                "title": "Connection Lost",
+                "subtitle": "Trying to reconnect"
+            },
+            "waiting_for_response": "Waiting for response",
+            "waiting_for_agent": "Waiting for an agent",
+            "video_reply": "Video message",
+            "audio_reply": "Audio message",
+            "image_reply": "Image message",
+            "new_message": "New message",
+            "agent": "Agent",
+            "textarea_placeholder": "Type a message...",
+            "registration": {
+                "title": "Welcome",
+                "subtitle": "Be sure to leave a message",
+                "name": "Name",
+                "name_placeholder": "Your name",
+                "email": "Email",
+                "email_placeholder": "Your email",
+                "department": "Department",
+                "department_placeholder": "Choose a department",
+                "start_chat": "Start chat"
+            },
+            "conversations": {
+                "no_conversations": "No conversations yet",
+                "no_archived_conversations": "No archived conversations yet",
+                "history": "Conversation history",
+                "active": "Active",
+                "archived": "Archived Chats",
+                "start_new": "New Chat"
+            },
+            "file_upload": {
+                "file_too_big": "This file is too big. Max file size is {{size}}",
+                "file_too_big_alt": "No archived conversations yetThis file is too large",
+                "generic_error": "Failed to upload, please try again",
+                "not_allowed": "This file type is not supported",
+                "drop_file": "Drop file here to upload it",
+                "upload_progress": "Uploading file..."
+            },
+            "department": {
+                "sales": "Sales",
+                "support": "Support",
+                "exchange": "Exchange"
+            }
         },
-        "waiting_for_response": "Waiting for response",
-        "waiting_for_agent": "Waiting for an agent",
-        "video_reply": "Video message",
-        "audio_reply": "Audio message",
-        "image_reply": "Image message",
-        "new_message": "New message",
-        "agent": "Agent",
-        "textarea_placeholder": "Type a message...",
-        "registration": {
-            "title": "Welcome",
-            "subtitle": "Be sure to leave a message",
-            "name": "Name",
-            "name_placeholder": "Your name",
-            "email": "Email",
-            "email_placeholder": "Your email",
-            "department": "Department",
-            "department_placeholder": "Choose a department",
-            "start_chat": "Start chat"
-        },
-        "conversations": {
-            "no_conversations": "No conversations yet",
-            "no_archived_conversations": "No archived conversations yet",
-            "history": "Conversation history",
-            "active": "Active",
-            "archived": "Archived Chats",
-            "start_new": "New Chat"
-        },
-        "file_upload": {
-            "file_too_big": "This file is too big. Max file size is {{size}}",
-            "file_too_big_alt": "No archived conversations yetThis file is too large",
-            "generic_error": "Failed to upload, please try again",
-            "not_allowed": "This file type is not supported",
-            "drop_file": "Drop file here to upload it",
-            "upload_progress": "Uploading file..."
-        },
-        "department": {
-            "sales": "Sales",
-            "support": "Support",
-            "exchange": "Exchange"
-        }
+        "cache": true
     }
-     * }
-     * }
+    }
      *
      *
      * @apiSuccessExample {json} Not Modified-Response (304):
@@ -598,6 +599,7 @@ class ClientChatRequestController extends ApiBaseController
 
         $projectId = \Yii::$app->request->get('project_id');
         $projectKey = \Yii::$app->request->get('project_key');
+        $noCache = (int) \Yii::$app->request->get('nocache', 0);
 
         if ($projectKey) {
             /** @var Project $project */
@@ -617,27 +619,50 @@ class ClientChatRequestController extends ApiBaseController
             $languageId = substr($languageId, 0, 5);
         }
 
-        $projectConfig = ClientChatProjectConfig::findOne(['ccpc_project_id' => $projectId]);
-        $projectChannels = ClientChatChannel::find()
-            ->select(['ccc_frontend_name', 'ccc_id'])
-            ->where(['ccc_project_id' => $projectId, 'ccc_disabled' => false])
-            ->orderBy(['ccc_frontend_name' => SORT_ASC])
-            ->indexBy('ccc_id')->asArray()->column();
+        $keyCache = ClientChatProjectConfig::getCacheKey($projectId, $languageId);
 
-        if ($projectConfig) {
-            $data = ArrayHelper::toArray(new ProjectConfigApiResponseDto($projectConfig, $languageId));
-            $data['language_id'] = $languageId;
-            $data['translations'] = ClientChatTranslate::getTranslates($languageId);
+        if ($noCache) {
+            Yii::$app->cache->delete($keyCache);
+        }
 
-            if ($projectChannels) {
-                $data['translations']['department'] = $projectChannels;
+        $data = Yii::$app->cache->get($keyCache);
+
+        if ($data === false) {
+            $projectConfig = ClientChatProjectConfig::findOne(['ccpc_project_id' => $projectId]);
+            $projectChannels = ClientChatChannel::find()
+                ->select(['ccc_frontend_name', 'ccc_id'])
+                ->where(['ccc_project_id' => $projectId, 'ccc_disabled' => false])
+                ->orderBy(['ccc_frontend_name' => SORT_ASC])
+                ->indexBy('ccc_id')->asArray()->column();
+
+            if ($projectConfig) {
+                $data = ArrayHelper::toArray(new ProjectConfigApiResponseDto($projectConfig, $languageId));
+                $data['language_id'] = $languageId;
+                $data['translations'] = ClientChatTranslate::getTranslates($languageId);
+
+                if ($projectChannels) {
+                    $data['translations']['department'] = $projectChannels;
+                }
+
+                if ($data) {
+                    Yii::$app->cache->set($keyCache, $data, 60 * 60);
+                }
+
+                $data['cache'] = false;
+
+                return new SuccessResponse(
+                    new StatusCodeMessage(200),
+                    new DataMessage($data)
+                );
             }
-
+        } else {
+            $data['cache'] = true;
             return new SuccessResponse(
                 new StatusCodeMessage(200),
                 new DataMessage($data)
             );
         }
+
 
         return new ErrorResponse(
             new StatusCodeMessage(404),

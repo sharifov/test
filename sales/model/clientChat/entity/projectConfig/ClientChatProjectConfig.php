@@ -123,4 +123,15 @@ class ClientChatProjectConfig extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Employee::class, ['id' => 'ccpc_updated_user_id']);
     }
+
+    /**
+     * @param int $projectId
+     * @param string|null $languageId
+     * @return string
+     */
+    public static function getCacheKey(int $projectId, ?string $languageId): string
+    {
+        return 'chat-config-' . $projectId . '-' . $languageId;
+    }
+
 }
