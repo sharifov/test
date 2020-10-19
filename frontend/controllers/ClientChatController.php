@@ -872,11 +872,14 @@ class ClientChatController extends FController
             throw new ForbiddenHttpException('You do not have access to perform this action', 403);
         }
 
+        $availableUserChannelIds = array_keys((array)(ClientChatChannel::getListByUserId(Auth::id())));
+
         $form = new ClientChatTransferForm(
             $clientChat->cch_id,
             $clientChat->cch_channel_id,
             $clientChat->cch_project_id,
-            $clientChat->cch_owner_user_id
+            $clientChat->cch_owner_user_id,
+            $availableUserChannelIds
         );
 
         try {
