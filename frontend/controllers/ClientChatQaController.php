@@ -17,6 +17,7 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\entity\search\ClientChatQaSearch;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -58,6 +59,12 @@ class ClientChatQaController extends FController
                     'delete' => ['POST'],
                 ],
             ],
+            'access' => [
+                'allowActions' => [
+                    'room',
+                    'view',
+                ],
+            ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
@@ -93,7 +100,11 @@ class ClientChatQaController extends FController
             ->one();
 
         if (!$clientChat) {
-            throw new NotFoundException('Client chat not found or access denied');
+            throw new NotFoundHttpException('Client chat not found or access denied');
+        }
+
+        if (!Auth::can('client-chat/view', ['chat' => $clientChat])) {
+            throw new ForbiddenHttpException('Access denied.');
         }
 
         $searchModel = new ClientChatMessageSearch();
@@ -137,13 +148,14 @@ class ClientChatQaController extends FController
     }
 
     /**
-     * @param $rid
+     * @param $id
      * @return string
+     * @throws ForbiddenHttpException
      */
-    public function actionRoom($rid): string
+    public function actionRoom($id): string
     {
         $clientChat = ClientChat::find()
-            ->byRid($rid)
+            ->byId($id)
             ->byUserGroupsRestriction()
             ->byProjectRestriction()
             ->byDepartmentRestriction()
@@ -151,6 +163,10 @@ class ClientChatQaController extends FController
 
         if (!$clientChat) {
             throw new NotFoundException('Client chat not found or access denied');
+        }
+
+        if (!Auth::can('client-chat/view', ['chat' => $clientChat])) {
+            throw new ForbiddenHttpException('Access denied.');
         }
 
         if ($clientChat->isClosed()) {

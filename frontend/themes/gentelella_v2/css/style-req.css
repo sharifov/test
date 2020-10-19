@@ -5149,7 +5149,7 @@ input[disabled] + .radio-tab__text {
   color: #63d400;
 }
 
-.chat__details {
+.chat__details, .comm-chat-room-view-details {
   background: #fff;
   color: #596b7d;
   font-size: 11px;
@@ -5997,3 +5997,4 @@ td.selected-cell {
   from, to { box-shadow: 0 0 0 0 red;}
   0% { box-shadow: 0 0 0 2px red; }
 }
+

@@ -15,7 +15,8 @@ $this->params['breadcrumbs'][] = 'Room';
 
 $userRcAuthToken = Auth::user()->userProfile ? Auth::user()->userProfile->up_rc_auth_token : '';
 
-$rcUrl = Yii::$app->rchat->host  . '/live/' . urlencode($clientChat->cch_rid) . '?layout=embedded&readonly';
+$readOnly = (!$clientChat->isOwner(Auth::id()) ? '&readonly=true' : '');
+$rcUrl = Yii::$app->rchat->host  . '/live/' . urlencode($clientChat->cch_rid) . '?layout=embedded' . $readOnly;
 
 ?>
 

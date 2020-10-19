@@ -1,5 +1,6 @@
 <?php
 
+use sales\auth\Auth;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 
@@ -50,10 +51,10 @@ if ($lastMessageDate) {
                     <i class="fa fa-comments-o"> </i> <?= $count ?>
                 </td>
                 <td>
-                    <span class="badge badge-warning"><?= $duration ?></span>
+                    <span class="badge badge-warning" data-toggle="tooltip" title="Duration"><?= $duration ?></span>
                 </td>
                 <td class="text-center">
-                    <small><?= $lastMessageDate ?></small>
+                    <small data-toggle="tooltip" title="Last message"><?= $lastMessageDate ?></small>
                 </td>
                 <td class="text-center" style="width: 90px">
                     <?= $feedback ?>
@@ -65,8 +66,10 @@ if ($lastMessageDate) {
             </tr>
             </tbody>
         </table>
-        <div class="chat__message-footer">
-            <a class="chat__details" href="#"><i class="fa fa-search-plus"> </i>Details</a>
-        </div>
+        <?php if (Auth::can('client-chat/view', ['chat' => $chat])): ?>
+            <div class="chat__message-footer">
+                <a class="comm-chat-room-view comm-chat-room-view-details" href="#" data-id="<?= $chat->cch_id ?>"><i class="fa fa-search-plus"> </i> Details</a>
+            </div>
+        <?php endif; ?>
     </div>
 </div>

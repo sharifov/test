@@ -38,7 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="row">
         <div class="col-md-4">
             <?php $room = Html::a('<span class="glyphicon glyphicon-list-alt"></span>',
-                ['/client-chat-qa/room', 'rid' => $model->cch_rid],
+                ['/client-chat-qa/room', 'id' => $model->cch_id],
                 [
                     'target' => '_blank',
                     'data-pjax' => 0,

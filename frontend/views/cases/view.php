@@ -273,3 +273,30 @@ Modal::end();
 JS;
 
 $this->registerJs($js);
+
+Modal::begin([
+    'title' => 'Client Chat Room',
+    'id' => 'chat-room-popup',
+    'size' => Modal::SIZE_LARGE
+]);
+
+Modal::end();
+
+$jsCommBlockChatView = <<<JS
+
+$('body').on('click', '.comm-chat-room-view', function(e) {  
+    e.preventDefault();
+    $.get(        
+        '/client-chat-qa/room',       
+        {
+            id: $(this).data('id')
+        },
+        function (data) {
+            $('#chat-room-popup .modal-body').html(data);
+            $('#chat-room-popup').modal('show');
+        }  
+    );
+});
+
+JS;
+$this->registerJs($jsCommBlockChatView);

@@ -172,7 +172,6 @@ $fromType = 'client';
     <?php endif;?>
 <?php endif;?>
 
-
 <?php
     if ($model['type'] === 'chat') {
         if ($chat = ClientChat::find()->andWhere(['cch_id' => $model['id']])->one()) {

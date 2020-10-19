@@ -199,7 +199,7 @@ use yii\helpers\Html;
                     },*/
                     'room' => static function ($url, $model) {
                         return Html::a('<span class="glyphicon glyphicon-list-alt"></span>',
-                            ['/client-chat-qa/room', 'rid' => $model['cch_rid']],
+                            ['/client-chat-qa/room', 'id' => $model['cch_id']],
                             [
                                 'target' => '_blank',
                                 'data-pjax' => 0,
