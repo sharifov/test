@@ -413,29 +413,38 @@ class ClientChatSearch extends ClientChat
             'owner_username' => 'owner.username',
         ]);
 
-        $query->addOrderBy(['ccu_updated_dt' => SORT_DESC]);
-
         if (ClientChat::isTabAll($filter->status)) {
-
         } elseif (ClientChat::isTabActive($filter->status)) {
             $query->active();
         } elseif (ClientChat::isTabClosed($filter->status)) {
             $query->archive();
+        } elseif (ClientChat::isTabUnassigned($filter->status)) {
+            $query->byOwner(null);
         }
-
-        $query->addOrderBy(['cch_status_id' => SORT_ASC]);
 
         if (GroupFilter::isMy($filter->group)) {
             $query->byOwner($user->id);
-            $query->addOrderBy(['cch_updated_dt' => SORT_DESC]);
             $query->notInStatus(ClientChat::STATUS_IDLE);
+            $query->orderBy([
+                '(cch_status_id = ' . ClientChat::STATUS_IN_PROGRESS . ')' => SORT_DESC,
+                'cch_updated_dt' => SORT_DESC,
+            ]);
         } elseif (GroupFilter::isOther($filter->group)) {
-            $query
-                ->andWhere(['<>', 'cch_owner_user_id', $user->id])
-                ->andWhere(['IS NOT', 'cch_owner_user_id', null]);
-            $query->addOrderBy(['cch_created_dt' => SORT_DESC]);
+            $query->andWhere(['OR',
+                ['!=', 'cch_owner_user_id', $user->id],
+                ['IS', 'cch_owner_user_id', null]
+            ]);
+            $query->orderBy([
+                '(cch_status_id = ' . ClientChat::STATUS_IN_PROGRESS . ')' => SORT_DESC,
+                '(cch_owner_user_id IS NULL)' => SORT_DESC,
+                'cch_created_dt' => SORT_ASC,
+            ]);
         } elseif (GroupFilter::isFreeToTake($filter->group)) {
             $query->byStatus(ClientChat::STATUS_IDLE);
+            $query->orderBy(['cch_updated_dt' => SORT_ASC]);
+        } else {
+            $query->byOwner($user->id);
+            $query->orderBy(['cch_updated_dt' => SORT_DESC]);
         }
 
         if ($filter->channelId) {

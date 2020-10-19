@@ -35,26 +35,27 @@ use yii\web\JsExpression;
         <?php echo Html::hiddenInput(Html::getInputName($filter, 'resetAdditionalFilter'), 0, ['id' => 'resetAdditionalFilter']); ?>
 
             <div class="row">
-                <?php if ($filter->permissions->canProject()): ?>
+
+                <?php if ($filter->permissions->canStatus()): ?>
                     <div class="col-md-6">
-                        <?= Html::label('Project:', null, ['class' => 'control-label']); ?>
+                        <?= Html::label('Show:', null, ['class' => 'control-label']); ?>
                         <?= Select2::widget([
-                            'data' => $filter->getProjects(),
-                            'name' => Html::getInputName($filter, 'project'),
+                            'data' => $filter->getShowFilter(),
+                            'name' => Html::getInputName($filter, 'status'),
                             'size' => Select2::SIZE_SMALL,
-                            'options' => [
-                                'placeholder' => 'Choose the channel...',
-                                'id' => Html::getInputId($filter, 'project'),
+                            'pluginEvents' => [
+                                'change' => new \yii\web\JsExpression('function (e) {
+                                        window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
+                                    }'),
                             ],
-                            'value' => $filter->project,
                             'pluginOptions' => [
                                 'width' => '100%',
                             ],
-                            'pluginEvents' => [
-                                'change' => new \yii\web\JsExpression('function (e) {
-                                    window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
-                                }'),
+                            'options' => [
+                                'placeholder' => 'Choose the status...',
+                                'id' => Html::getInputId($filter, 'status'),
                             ],
+                            'value' => $filter->status,
                         ]); ?>
                     </div>
                 <?php endif; ?>
@@ -85,7 +86,7 @@ use yii\web\JsExpression;
             </div>
 
         <?php
-            if ($filter->permissions->canDepartment() || $filter->permissions->canStatus() || $filter->permissions->canUser() || $filter->permissions->canCreatedDate()):
+            if ($filter->permissions->canProject() || $filter->permissions->canUser() || $filter->permissions->canCreatedDate()):
         ?>
 
             <?php $isAdditionalFilterActive = $filter->isAdditionalFilterActive(); ?>
@@ -94,14 +95,7 @@ use yii\web\JsExpression;
                 <div class="col-md-12 text-right">
                     <i class="fa fa-filter"></i> <?= Html::a('Additional filters', null, ['id' => 'btn_additional_filters']) ?>
                     <?php if ($isAdditionalFilterActive): ?>
-                        <?php echo Html::a(
-            '(reset <i class="fa fa-times"></i>)',
-            null,
-            [
-                                'id' => 'reset_additional',
-                                'style' => 'font-weight: bold;',
-                            ]
-        ); ?>
+                        <?php echo Html::a('(reset <i class="fa fa-times"></i>)', null, ['id' => 'reset_additional', 'style' => 'font-weight: bold;']); ?>
                     <?php endif ?>
                 </div>
             </div>
@@ -111,50 +105,26 @@ use yii\web\JsExpression;
                 id="additional_filters_div"
                 style="margin-bottom: 20px; display: <?php echo $isAdditionalFilterActive ? '' : 'none' ?>;">
 
-                <?php /*if ($filter->permissions->canDepartment()): ?>
-                    <div class="col-md-6" >
-                        <?= Html::label('Department:', null, ['class' => 'control-label']); ?>
+                <?php if ($filter->permissions->canProject()): ?>
+                    <div class="col-md-6">
+                        <?= Html::label('Project:', null, ['class' => 'control-label']); ?>
                         <?= Select2::widget([
-                            'data' => $filter->getDepartments(),
-                            'name' => Html::getInputName($filter, 'dep'),
+                            'data' => $filter->getProjects(),
+                            'name' => Html::getInputName($filter, 'project'),
                             'size' => Select2::SIZE_SMALL,
                             'options' => [
                                 'placeholder' => 'Choose the channel...',
-                                'id' => Html::getInputId($filter, 'dep'),
+                                'id' => Html::getInputId($filter, 'project'),
                             ],
-                            'value' => $filter->dep,
+                            'value' => $filter->project,
                             'pluginOptions' => [
                                 'width' => '100%',
                             ],
                             'pluginEvents' => [
                                 'change' => new \yii\web\JsExpression('function (e) {
-                                        window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
-                                    }'),
+                                    window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
+                                }'),
                             ],
-                        ]); ?>
-                    </div>
-                <?php endif;*/ ?>
-
-                <?php if ($filter->permissions->canStatus()): ?>
-                    <div class="col-md-6">
-                        <?= Html::label('Status:', null, ['class' => 'control-label']); ?>
-                        <?= Select2::widget([
-                            'data' => $filter->getStatuses(),
-                            'name' => Html::getInputName($filter, 'status'),
-                            'size' => Select2::SIZE_SMALL,
-                            'pluginEvents' => [
-                                'change' => new \yii\web\JsExpression('function (e) {
-                                        window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
-                                    }'),
-                            ],
-                            'pluginOptions' => [
-                                'width' => '100%',
-                            ],
-                            'options' => [
-                                'placeholder' => 'Choose the status...',
-                                'id' => Html::getInputId($filter, 'status'),
-                            ],
-                            'value' => $filter->status,
                         ]); ?>
                     </div>
                 <?php endif; ?>

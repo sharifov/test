@@ -63,7 +63,7 @@ class FilterForm extends Model
     public Permissions $permissions;
 
     private array $additionalFilterAttributes = [
-        'status',
+        'project',
         'userId',
         'rangeDate',
     ];
@@ -86,7 +86,7 @@ class FilterForm extends Model
             ['status', 'integer'],
             ['status', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
             ['status', 'default', 'value' => self::DEFAULT_VALUE_STATUS],
-            ['status', 'in', 'range' => array_keys($this->getStatuses())],
+            ['status', 'in', 'range' => array_keys($this->getShowFilter())],
 
             ['dep', 'integer'],
             ['dep', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
@@ -140,9 +140,9 @@ class FilterForm extends Model
         return ReadUnreadFilter::LIST;
     }
 
-    public function getStatuses(): array
+    public function getShowFilter(): array
     {
-        return ArrayHelper::merge([ClientChat::TAB_ALL => 'All'], ClientChat::TAB_LIST_NAME);
+        return ClientChat::getTabList();
     }
 
     public function getDepartments(): array
@@ -333,7 +333,7 @@ class FilterForm extends Model
 
     public function resetAdditionalAttributes(): FilterForm
     {
-        $this->status = self::DEFAULT_VALUE_STATUS;
+        $this->project = self::DEFAULT_VALUE_PROJECT;
         $this->userId = self::DEFAULT_VALUE_USER_ID;
         $this->fromDate = self::DEFAULT_VALUE_FROM_DATE;
         $this->toDate = self::DEFAULT_VALUE_TO_DATE;

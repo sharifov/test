@@ -113,10 +113,13 @@ class ClientChat extends \yii\db\ActiveRecord
     public const TAB_ALL = 0;
     public const TAB_ACTIVE = 1;
     public const TAB_ARCHIVE = 2;
+    public const TAB_UNASSIGNED = 3;
 
     public const TAB_LIST_NAME = [
+        self::TAB_ALL => 'All',
         self::TAB_ACTIVE => 'Active',
-        self::TAB_ARCHIVE => 'Closed'
+        self::TAB_ARCHIVE => 'Closed',
+        self::TAB_UNASSIGNED => 'Unassigned',
     ];
 
     public const SOURCE_TYPE_CLIENT = 1;
@@ -511,6 +514,11 @@ class ClientChat extends \yii\db\ActiveRecord
     public static function isTabAll(int $tab): bool
     {
         return $tab === self::TAB_ALL;
+    }
+
+    public static function isTabUnassigned(int $tab): bool
+    {
+        return $tab === self::TAB_UNASSIGNED;
     }
 
     public function isAssignedLead(int $leadId): bool
