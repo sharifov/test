@@ -43,19 +43,19 @@ class CallLogController extends FController
         ]);
     }
 
-	/**
-	 * @param $id
-	 * @param string $breadcrumbsPreviousPage
-	 * @return string
-	 * @throws NotFoundHttpException
-	 */
+    /**
+     * @param $id
+     * @param string $breadcrumbsPreviousPage
+     * @return string
+     * @throws NotFoundHttpException
+     */
     public function actionView($id, $breadcrumbsPreviousPage = 'list'): string
     {
-    	$breadcrumbsPreviousLabel = $breadcrumbsPreviousPage === 'index' ? 'Call Logs' : 'My Call Logs';
+        $breadcrumbsPreviousLabel = $breadcrumbsPreviousPage === 'index' ? 'Call Logs' : 'My Call Logs';
         return $this->render('view', [
             'model' => $this->findModel($id),
-			'breadcrumbsPreviousPage' => $breadcrumbsPreviousPage,
-			'breadcrumbsPreviousLabel' => $breadcrumbsPreviousLabel
+            'breadcrumbsPreviousPage' => $breadcrumbsPreviousPage,
+            'breadcrumbsPreviousLabel' => $breadcrumbsPreviousLabel
         ]);
     }
 
@@ -93,34 +93,33 @@ class CallLogController extends FController
         ]);
     }
 
-	public function actionAjaxGetCallHistory()
-	{
-		if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
+    public function actionAjaxGetCallHistory()
+    {
+        if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
+            $callSearch = new CallLogSearch();
+            $page = (int)Yii::$app->request->post('page', 0);
 
-			$callSearch = new CallLogSearch();
-			$page = (int)Yii::$app->request->post('page', 0);
+            $callHistory = $callSearch->getCallHistory(Auth::id());
+            $callHistory->pagination->setPage($page);
 
-			$callHistory = $callSearch->getCallHistory(Auth::id());
-			$callHistory->pagination->setPage($page);
-
-			$rows = $callHistory->getModels();
+            $rows = $callHistory->getModels();
 
             $userTimezone = Auth::user()->userParams->up_timezone ?? 'UTC';
 
-			$result = [
-				'html'  => $this->renderAjax('partial/_ajax_wg_call_history', [
-					'callHistory' => CallHelper::formatCallHistoryByDate($rows, $userTimezone),
+            $result = [
+                'html'  => $this->renderAjax('partial/_ajax_wg_call_history', [
+                    'callHistory' => CallHelper::formatCallHistoryByDate($rows, $userTimezone),
                     'page' => ($page + 1)
-				]),
-				'page' => $page + 1,
-				'rows' => empty($rows)
-			];
+                ]),
+                'page' => $page + 1,
+                'rows' => empty($rows)
+            ];
 
-			return $this->asJson($result);
-		}
+            return $this->asJson($result);
+        }
 
-		throw new BadRequestHttpException();
-	}
+        throw new BadRequestHttpException();
+    }
 
     /**
      * @param $id

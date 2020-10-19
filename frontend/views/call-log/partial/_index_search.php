@@ -38,6 +38,7 @@ use common\models\Department;
         </div>
         <div class="x_content" style="display: ">
             <?php $form = ActiveForm::begin([
+                'id' => 'call-log-search-form',
                 'action' => ['index'],
                 'method' => 'get',
                 'options' => [
@@ -123,8 +124,8 @@ use common\models\Department;
             <div class="row">
                 <div class="col-md-12">
                     <div class="form-group text-center">
-                        <?= Html::submitButton('<i class="fa fa-search"></i> Search', ['class' => 'btn btn-primary']) ?>
-                        <?= Html::resetButton('<i class="fa fa-close"></i> Reset form', ['class' => 'btn btn-default']) ?>
+                        <?= Html::submitButton('<i class="fa fa-search"></i> Search calls', ['name' => 'search', 'class' => 'btn btn-primary search_calls_btn']) ?>
+                        <?= Html::a('<i class="glyphicon glyphicon-repeat"></i> Reset data', ['index'], ['class' => 'btn btn-warning']) ?>
                     </div>
                 </div>
             </div>

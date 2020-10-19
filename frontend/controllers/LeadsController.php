@@ -96,7 +96,7 @@ class LeadsController extends FController
 
         $params = ArrayHelper::merge($params, $params2);
 
-        if (isset($params['reset'])){
+        if (isset($params['reset'])) {
             $params = [];
             $session->remove('LeadSearch');
         }
@@ -156,7 +156,7 @@ class LeadsController extends FController
 
         $params = Yii::$app->request->queryParams;
 
-        if(Yii::$app->user->identity->canRole('supervision')) {
+        if (Yii::$app->user->identity->canRole('supervision')) {
             $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
         }
 
@@ -172,7 +172,7 @@ class LeadsController extends FController
     {
         $searchModel = new LeadSearch();
         $params = Yii::$app->request->queryParams;
-        if(Yii::$app->user->identity->canRole('supervision')) {
+        if (Yii::$app->user->identity->canRole('supervision')) {
             $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
         }
 
@@ -186,28 +186,27 @@ class LeadsController extends FController
 
         $fpath = fopen(Yii::getAlias('@runtime'. '/file.csv'), 'w');
 
-        for ($i = 0; $i < $queryIterations; $i++){
+        for ($i = 0; $i < $queryIterations; $i++) {
             $offset = $i * $limit;
             $dataProvideQuery = $searchModel->searchExportCsv($params, $offset, $limit);
 
-            foreach ($dataProvideQuery as $rowIndex => $row){
-                if ($i == 0 && $rowIndex == 0){
+            foreach ($dataProvideQuery as $rowIndex => $row) {
+                if ($i == 0 && $rowIndex == 0) {
                     fputcsv($fpath, array_keys($row));
                 }
 
-                if (!empty($row['l_type_create'])){
+                if (!empty($row['l_type_create'])) {
                     $row['l_type_create'] = Lead::TYPE_CREATE_LIST[$row['l_type_create']];
                 }
-                if (!empty($row['status'])){
+                if (!empty($row['status'])) {
                     $row['status'] = Lead::STATUS_LIST[$row['status']];
                 }
 
                 fputcsv($fpath, $row);
             }
+        }
 
-    }
-
-        if(fclose($fpath)){
+        if (fclose($fpath)) {
             return 'success';
         }
     }
@@ -300,7 +299,7 @@ class LeadsController extends FController
             //return $this->renderAjax('view', $viewParams);
         }
 
-        if ($showInPopUp === 'modal'){
+        if ($showInPopUp === 'modal') {
             return $this->renderAjax('view', $viewParams);
         } else {
             return $this->render('view', $viewParams);

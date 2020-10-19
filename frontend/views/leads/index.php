@@ -33,7 +33,6 @@ $statusList = Lead::STATUS_LIST;
 $user = Auth::user();
 
 if ($user->isAdmin()) {
-
 } else {
     if ($isAgent) {
         unset($statusList[Lead::STATUS_PENDING]);
@@ -72,7 +71,7 @@ $this->registerJs($js);
 ?>
 
 
-    <?php Pjax::begin(['id' => 'lead-pjax-list', 'timeout' => 7000, 'enablePushState' => true]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]); ?>
+    <?php Pjax::begin(['id' => 'lead-pjax-list', 'timeout' => 7000, 'enablePushState' => true]); //['id' => 'lead-pjax-list', 'timeout' => 5000, 'enablePushState' => true, 'clientOptions' => ['method' => 'GET']]);?>
 
     <?php
 
@@ -155,7 +154,6 @@ $this->registerJs($js);
             'header' => 'Client / Emails / Phones',
             'format' => 'raw',
             'value' => static function (Lead $lead) use ($user) {
-
                 if ($lead->client) {
                     $clientName = $lead->client->first_name . ' ' . $lead->client->last_name;
                     if ($clientName === 'Client Name') {
@@ -255,10 +253,10 @@ $this->registerJs($js);
         [
             'label' => 'PNR',
             'value' => static function (Lead $model) {
-            $allPnr = $model->getAdditionalInformationMultiplePnr();
-            if(!empty($allPnr) && isset($allPnr[0])){
-                return '<code>' . implode('<br>',  $allPnr) . '</code>';
-            }
+                $allPnr = $model->getAdditionalInformationMultiplePnr();
+                if (!empty($allPnr) && isset($allPnr[0])) {
+                    return '<code>' . implode('<br>', $allPnr) . '</code>';
+                }
                 return '-';
             },
             'format' => 'raw',
@@ -463,7 +461,7 @@ $this->registerJs($js);
     ?>
 
     <br>
-    <?php $form = ActiveForm::begin(['options' => ['data-pjax' => true, 'class' => '', 'style' => 'overflow: hidden;']]); // ['action' => ['leads/update-multiple'] ?>
+    <?php $form = ActiveForm::begin(['options' => ['data-pjax' => true, 'class' => '', 'style' => 'overflow: hidden;']]); // ['action' => ['leads/update-multiple']?>
 
     <?= Html::button('<i class="fa fa-edit"></i> Multiple update', ['class' => 'btn btn-info multiple-update-btn']) ?>
 
