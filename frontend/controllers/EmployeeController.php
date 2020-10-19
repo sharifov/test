@@ -777,6 +777,7 @@ class EmployeeController extends FController
                     } else {
                         $this->clientChatUserAccessService->disableUserAccessToAllChats($model->id);
                     }
+                    TagDependency::invalidate(Yii::$app->cache, ClientChatUserChannel::cacheTags($model->id));
                 }
 
                 //VarDumper::dump($attr['user_groups'], 10, true); exit;
@@ -803,7 +804,6 @@ class EmployeeController extends FController
 
                     Yii::$app->queue_job->priority(10)->push($job);
                 }
-                TagDependency::invalidate(Yii::$app->cache, ClientChatUserChannel::cacheTags($model->id));
 
                 Yii::$app->getSession()->setFlash('success', 'User updated');
             }
