@@ -10,13 +10,6 @@ class ClientChatChannelDefaultSettings
         'maxConversations' => 2,
         'maxMessageLength' => 500,
         'showOnRegister' => true,
-        'max_dialog_count' => 1,
-        'count_of_active_chats' => 1,
-        'feedback_rating_enabled' => true,
-        'feedback_message_enabled' => true,
-        'history_email_enabled' => true,
-        'history_download_enabled' => true,
-        'allow_transfer_to_channel_with_active_chat' => false,
         'canStartFromArchived' => true,
         'audioRecording' => [
             'enabled' => true,
@@ -58,11 +51,19 @@ class ClientChatChannelDefaultSettings
                     'minLength' => 3,
                 ]
             ]
+        ],
+        'system' => [
+            'allowTransferChannelActiveChat' => false,
         ]
     ];
 
     public static function getAll(): array
     {
         return self::$settings;
+    }
+
+    public static function isAllowTransferChannelActiveChat(): bool
+    {
+        return self::$settings['system']['allowTransferChannelActiveChat'] ?? false;
     }
 }
