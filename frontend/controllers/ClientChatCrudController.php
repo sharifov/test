@@ -9,6 +9,7 @@ use sales\auth\Auth;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\entity\search\ClientChatQaSearch;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
+use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatFeedback\entity\ClientChatFeedbackSearch;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatMessage\entity\search\ClientChatMessageSearch;
@@ -167,7 +168,7 @@ class ClientChatCrudController extends FController
                     ['data' => ClientChatAccessMessage::chatIdle($model->cch_id)]
                 );
                 Notifications::pub(
-                    ['channel-' . $model->cch_channel_id],
+                    [ClientChatChannel::getPubSubKey($model->cch_channel_id)],
                     'reloadClientChatList'
                 );
             }

@@ -70,8 +70,8 @@ class OnlineConnection extends \yii\bootstrap\Widget
                 }
             }
             if ($channels = ClientChatChannel::getListByUserId($userId)) {
-                foreach ($channels as $chanelId => $chanelName) {
-                    $subList[] = 'channel-' . $chanelId;
+                foreach ($channels as $channelId => $chanelName) {
+                    $subList[] = ClientChatChannel::getPubSubKey($channelId);
                 }
             }
         }

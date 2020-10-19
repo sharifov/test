@@ -334,7 +334,7 @@ class ClientChatController extends Controller
         if ($channels) {
             foreach ($channels as $key => $channelId) {
                 Notifications::pub(
-                    ['channel-' . $channelId],
+                    [ClientChatChannel::getPubSubKey($channelId)],
                     'reloadClientChatList'
                 );
             }
