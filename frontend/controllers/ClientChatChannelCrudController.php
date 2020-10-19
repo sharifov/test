@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use sales\helpers\setting\SettingHelper;
+use sales\model\clientChat\entity\projectConfig\service\ClientChatProjectConfigService;
 use sales\model\clientChatChannel\entity\ClientChatChannelDefaultSettings;
 use sales\repositories\NotFoundException;
 use sales\services\clientChatChannel\ClientChatChannelService;
@@ -21,21 +22,27 @@ use yii\db\StaleObjectException;
  * @package frontend\controllers
  *
  * @property ClientChatChannelService $channelService
+ * @property ClientChatProjectConfigService $chatProjectConfigService
  */
 class ClientChatChannelCrudController extends FController
 {
-	/**
-	 * @var ClientChatChannelService
-	 */
-	private ClientChatChannelService $channelService;
+    /**
+     * @var ClientChatChannelService
+     */
+    private ClientChatChannelService $channelService;
+    /**
+     * @var ClientChatProjectConfigService
+     */
+    private ClientChatProjectConfigService $chatProjectConfigService;
 
-	public function __construct($id, $module, ClientChatChannelService $channelService, $config = [])
-	{
-		parent::__construct($id, $module, $config);
-		$this->channelService = $channelService;
-	}
+    public function __construct($id, $module, ClientChatChannelService $channelService, ClientChatProjectConfigService $chatProjectConfigService, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->channelService = $channelService;
+        $this->chatProjectConfigService = $chatProjectConfigService;
+    }
 
-	/**
+    /**
     * @return array
     */
     public function behaviors(): array
@@ -97,23 +104,24 @@ class ClientChatChannelCrudController extends FController
         $model = new ClientChatChannel();
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-        	$transaction = Yii::$app->db->beginTransaction();
-        	try {
-        	    $model->registered();
-				if ($model->save()) {
-					$this->channelService->registerChannelInRocketChat($model->ccc_id, SettingHelper::getRcNameForRegisterChannelInRc());
-					$transaction->commit();
-            		return $this->redirect(['view', 'id' => $model->ccc_id]);
-				}
-			} catch (\Throwable $e) {
-				Yii::$app->session->setFlash('error', $e->getMessage());
-			}
-			$transaction->rollBack();
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                $model->registered();
+                if ($model->save()) {
+                    $this->channelService->registerChannelInRocketChat($model->ccc_id, SettingHelper::getRcNameForRegisterChannelInRc());
+                    $this->chatProjectConfigService->deleteConfigCacheActiveLanguages($model->ccc_project_id);
+                    $transaction->commit();
+                    return $this->redirect(['view', 'id' => $model->ccc_id]);
+                }
+            } catch (\Throwable $e) {
+                Yii::$app->session->setFlash('error', $e->getMessage());
+            }
+            $transaction->rollBack();
         }
 
-		$model->ccc_settings = json_encode(ClientChatChannelDefaultSettings::getAll());
+        $model->ccc_settings = json_encode(ClientChatChannelDefaultSettings::getAll());
 
-		return $this->render('create', [
+        return $this->render('create', [
             'model' => $model,
         ]);
     }
@@ -128,6 +136,7 @@ class ClientChatChannelCrudController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            $this->chatProjectConfigService->deleteConfigCacheActiveLanguages($model->ccc_project_id);
             return $this->redirect(['view', 'id' => $model->ccc_id]);
         } else {
             if (!$model->ccc_settings) {
@@ -149,41 +158,45 @@ class ClientChatChannelCrudController extends FController
      */
     public function actionDelete($id): Response
     {
-        $this->findModel($id)->delete();
+        $model = $this->findModel($id);
+        if ($model->delete()) {
+            $this->chatProjectConfigService->deleteConfigCacheActiveLanguages($model->ccc_project_id);
+        }
 
         return $this->redirect(['index']);
     }
 
     public function actionSetDefault(): Response
-	{
-		$channelId = Yii::$app->request->get('channel_id');
+    {
+        $channelId = Yii::$app->request->get('channel_id');
 
-		$result = [
-			'error' => false,
-			'message' => ''
-		];
+        $result = [
+            'error' => false,
+            'message' => ''
+        ];
 
-		try {
-			$channel = $this->findModel((int)$channelId);
+        try {
+            $channel = $this->findModel((int)$channelId);
 
-			$otherChannels = ClientChatChannel::find()->select(['ccc_id'])->where(['ccc_project_id' => $channel->ccc_project_id, 'ccc_default' => 1])->andWhere(['<>', 'ccc_id', $channel->ccc_id])->column();
-			if ($otherChannels) {
-				Yii::$app->db->createCommand()->update(ClientChatChannel::tableName(),
-					['ccc_default' => 0],
-					['ccc_id' => $otherChannels]
-				)->execute();
-			}
-			$channel->ccc_default = 1;
-			$channel->save();
+            $otherChannels = ClientChatChannel::find()->select(['ccc_id'])->where(['ccc_project_id' => $channel->ccc_project_id, 'ccc_default' => 1])->andWhere(['<>', 'ccc_id', $channel->ccc_id])->column();
+            if ($otherChannels) {
+                Yii::$app->db->createCommand()->update(
+                    ClientChatChannel::tableName(),
+                    ['ccc_default' => 0],
+                    ['ccc_id' => $otherChannels]
+                )->execute();
+            }
+            $channel->ccc_default = 1;
+            $channel->save();
 
-			$result['message'] = 'Channel is set by default';
-		} catch (NotFoundException $e) {
-			$result['error'] = true;
-			$result['message'] = $e->getMessage();
-		}
+            $result['message'] = 'Channel is set by default';
+        } catch (NotFoundException $e) {
+            $result['error'] = true;
+            $result['message'] = $e->getMessage();
+        }
 
-		return $this->asJson($result);
-	}
+        return $this->asJson($result);
+    }
 
     /**
      * @param integer $id
@@ -242,7 +255,7 @@ class ClientChatChannelCrudController extends FController
         $channels = ClientChatChannel::find()->orderBy(['ccc_id' => SORT_ASC])->all();
 
         foreach ($channels as $channel) {
-           $report[] = $this->register($channel);
+            $report[] = $this->register($channel);
         }
 
         return $this->render('report', [
