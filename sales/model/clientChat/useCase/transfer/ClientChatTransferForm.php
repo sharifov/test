@@ -29,7 +29,6 @@ use yii\helpers\VarDumper;
  * @property array|null $agentId
  * @property ReasonDto[] $reasons
  * @property array|null $agents
- * @property array $availableUserChannels
  */
 class ClientChatTransferForm extends Model
 {
@@ -67,14 +66,11 @@ class ClientChatTransferForm extends Model
 
     private $agents;
 
-    private $availableUserChannels;
-
     public function __construct(
         int $chatId,
         ?int $originalChannelId,
         ?int $projectId,
         ?int $ownerId,
-        array $availableUserChannels,
         $config = []
     ) {
         parent::__construct($config);
@@ -83,7 +79,6 @@ class ClientChatTransferForm extends Model
         $this->projectId = $projectId;
         $this->ownerId = $ownerId;
         $this->reasons = ClientChatActionReasonQuery::getReasons(ClientChatStatusLog::ACTION_TRANSFER);
-        $this->availableUserChannels = $availableUserChannels;
     }
 
     public function rules(): array
@@ -132,7 +127,6 @@ class ClientChatTransferForm extends Model
             ->select(['ccc_name', 'ccc_id'])
             ->enabled()
             ->byProject($this->projectId)
-            ->andWhere(['ccc_id' => $this->availableUserChannels])
             ->andWhere(['ccc_id' => ClientChatChannelTransfer::find()->select(['cctr_to_ccc_id'])->fromChannel($this->originalChannelId)]);
         if ($this->depId) {
             $channels->byDepartment((int)$this->depId);

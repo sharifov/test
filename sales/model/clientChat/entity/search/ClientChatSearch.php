@@ -450,7 +450,9 @@ class ClientChatSearch extends ClientChat
         if ($filter->channelId) {
             $query->byChannel($filter->channelId);
         } else {
-            $query->byChannelIds($channelsIds);
+            if (!GroupFilter::isMy($filter->group)) {
+                $query->byChannelIds($channelsIds);
+            }
         }
 
         if ($filter->dep) {
