@@ -29,7 +29,7 @@ use frontend\models\LeadForm;
 use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
 use sales\auth\Auth;
-use yii\data\ActiveDataProvider;
+use yii\bootstrap4\Modal;use yii\data\ActiveDataProvider;
 
 \frontend\themes\gentelella\assets\AssetLeadCommunication::register($this);
 
@@ -354,3 +354,30 @@ $(document).on('click','#client-unsubscribe-button', function (e) {
 JS;
 
 $this->registerJs($jsCode);
+
+Modal::begin([
+    'title' => 'Client Chat Room',
+    'id' => 'chat-room-popup',
+    'size' => Modal::SIZE_LARGE
+]);
+
+Modal::end();
+
+$jsCommBlockChatView = <<<JS
+
+$('body').on('click', '.comm-chat-room-view', function(e) {  
+    e.preventDefault();
+    $.get(        
+        '/client-chat-qa/room',       
+        {
+            id: $(this).data('id')
+        },
+        function (data) {
+            $('#chat-room-popup .modal-body').html(data);
+            $('#chat-room-popup').modal('show');
+        }  
+    );
+});
+
+JS;
+$this->registerJs($jsCommBlockChatView);

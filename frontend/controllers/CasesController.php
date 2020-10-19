@@ -760,8 +760,13 @@ class CasesController extends FController
 //            ->addGroupBy(['id', 'case_id', 'created_dt']);
             ->addGroupBy(['id']);
 
+        $query4 = (new \yii\db\Query())
+            ->select(['cccs_chat_id AS id', new Expression('"chat" AS type'), 'cccs_case_id AS case_id', 'cccs_created_dt AS created_dt'])
+            ->from('{{%client_chat_case}}')
+            ->where(['cccs_case_id' => $model->cs_id]);
+
         $unionQuery = (new \yii\db\Query())
-            ->from(['union_table' => $query1->union($query2)->union($query3)])
+            ->from(['union_table' => $query1->union($query2)->union($query3)->union($query4)])
             ->orderBy(['created_dt' => SORT_ASC]);
 
         //echo $query1->count(); exit;
@@ -800,8 +805,13 @@ class CasesController extends FController
 			->orderBy(['created_dt' => SORT_ASC])
 			->groupBy(['id', 'type', 'case_id']);
 
+        $query4 = (new \yii\db\Query())
+            ->select(['cccs_chat_id AS id', new Expression('"chat" AS type'), 'cccs_case_id AS case_id', 'cccs_created_dt AS created_dt'])
+            ->from('{{%client_chat_case}}')
+            ->where(['cccs_case_id' => $model->cs_id]);
+
 		$unionQuery = (new \yii\db\Query())
-			->from(['union_table' => $query1->union($query2)->union($query3)])
+			->from(['union_table' => $query1->union($query2)->union($query3)->union($query4)])
 			->orderBy(['created_dt' => SORT_ASC]);
 
 

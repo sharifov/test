@@ -192,7 +192,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             [
                                 'data-pjax' => 0,
                                 'title' => 'Room',
-                                'data-rid' => $model->cch_rid,
+                                'data-id' => $model->cch_id,
                                 'class' => 'pop-up-button'
                             ]
                         );
@@ -200,7 +200,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     /*'room' => static function ($url, ClientChat $model) {
                         $urlArr = explode('/', $url);
                         return Html::a('<span class="glyphicon glyphicon-list-alt"></span>',
-                            ['/client-chat-qa/room', 'rid' => $model->cch_rid],
+                            ['/client-chat-qa/room', 'id' => $model->cch_id],
                             [
                                 'target' => '_blank',
                                 'data-pjax' => 0,
@@ -233,14 +233,14 @@ $this->params['breadcrumbs'][] = $this->title;
 $js = <<<JS
 
 $('body').on('click', '.pop-up-button', function(e) {    
+    e.preventDefault();
     $.get(        
         '/client-chat-qa/room',       
         {
-            rid: $(this).data('rid')
+            id: $(this).data('id')
         },
         function (data) {
-            $('.modal-body').html(data);
-            $('#chat-room-popup').modal('handleUpdate')
+            $('#chat-room-popup .modal-body').html(data);
             $('#chat-room-popup').modal('show');
         }  
     );

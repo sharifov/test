@@ -30,6 +30,7 @@ $c_type_id = $comForm->c_type_id;
 
 $pjaxContainerId = $isCommunicationLogEnabled ? 'pjax-case-communication-log' : 'pjax-case-communication';
 $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communication/_list_item';
+
 ?>
 
 <div class="x_panel">

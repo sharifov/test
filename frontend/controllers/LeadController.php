@@ -1041,6 +1041,11 @@ class LeadController extends FController
             ->from('sms')
             ->where(['s_lead_id' => $lead->id]);
 
+        $queryChats = (new \yii\db\Query())
+            ->select(['ccl_chat_id AS id', new Expression('"chat" AS type'), 'ccl_lead_id AS lead_id', 'ccl_created_dt AS created_dt'])
+            ->from('{{%client_chat_lead}}')
+            ->where(['ccl_lead_id' => $lead->id]);
+
 
 //        $query3 = (new \yii\db\Query())
 //            ->select(['c_id AS id', new Expression('"voice" AS type'), 'c_lead_id AS lead_id', 'c_created_dt AS created_dt'])
@@ -1067,7 +1072,7 @@ class LeadController extends FController
 			->orderBy(['created_dt' => SORT_ASC])
 			->groupBy(['id', 'type', 'lead_id']);
 
-        $queryUnion = $queryEmail->union($querySms);
+        $queryUnion = $queryEmail->union($querySms)->union($queryChats);
 		$queryUnionLog = clone $queryUnion;
 
 		$unionQueryLog = (new Query())

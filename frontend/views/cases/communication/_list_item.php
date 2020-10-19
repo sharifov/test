@@ -1,6 +1,7 @@
 <?php
 
 use frontend\helpers\EmailHelper;
+use sales\model\clientChat\entity\ClientChat;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use \common\models\Email;
@@ -147,3 +148,11 @@ use \common\models\Call;
     </div>
     <?php endif;?>
 <?php endif;?>
+
+<?php
+    if ($model['type'] === 'chat') {
+        if ($chat = ClientChat::find()->andWhere(['cch_id' => $model['id']])->one()) {
+            echo $this->render('../../partial/_communication_chat_block', ['chat' => $chat]);
+        }
+    }
+?>
