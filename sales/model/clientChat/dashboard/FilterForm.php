@@ -155,14 +155,13 @@ class FilterForm extends Model
         return ArrayHelper::merge(['All'], Project::getList());
     }
 
-    public function getChannels(int $cacheDuration = 300): array
+    public function getChannels(): array
     {
         if ($this->project) {
             $channels = ClientChatChannel::find()
                 ->select(['ccc_name', 'ccc_id'])
                 ->where(['ccc_project_id' => $this->project])
                 ->andWhere(['IN', 'ccc_id', array_keys($this->channels)])
-                ->cache($cacheDuration)
                 ->indexBy('ccc_id')
                 ->column();
             return ArrayHelper::merge(['All'], $channels);
