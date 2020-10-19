@@ -1,6 +1,13 @@
 parameters:
+  autoload_files:
+        - vendor/yiisoft/yii2/Yii.php
   level: 5
   paths:
-    - webapi
+    - webapi/controllers
+    - frontend/controllers
+    - console/controllers
+    - common/models
   excludes_analyse:
     - webapi/tests/*
+  yii2:
+    config_path: %rootDir%/../../../common/config/boostrap.php

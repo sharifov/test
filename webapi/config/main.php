@@ -80,7 +80,7 @@ return [
                     'sourceLanguage' => 'en-US', // Developer language
                     'sourceMessageTable' => '{{%language_source}}',
                     'messageTable' => '{{%language_translate}}',
-                    'cachingDuration' => 86400,
+                    'cachingDuration' => 3600,
                     'enableCaching' => true,
                 ],
             ],

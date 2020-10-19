@@ -145,11 +145,11 @@ return [
                 '*' => [
                     'class' => 'yii\i18n\DbMessageSource',
                     'db' => 'db',
-                    //'sourceLanguage' => 'en-US', // Developer language
+                    'sourceLanguage' => 'en-US', // Developer language
                     'sourceMessageTable' => '{{%language_source}}',
                     'messageTable' => '{{%language_translate}}',
-                    //'cachingDuration' => 86400,
-                    //'enableCaching' => true,
+                    'cachingDuration' => 3600,
+                    'enableCaching' => true,
                 ],
                 'yii2mod.rbac' => [
                     'class' => 'yii\i18n\PhpMessageSource',
