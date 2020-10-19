@@ -273,7 +273,7 @@ class ClientChatController extends FController
             if ($filter->group === GroupFilter::FREE_TO_TAKE) {
                 $countFreeToTake = $dataProvider->getTotalCount();
             } else {
-                $countFreeToTake = ClientChatQuery::countFreeToTake(Auth::user(), array_keys($channels), $filter);
+                $countFreeToTake = (new ClientChatSearch())->countFreeToTake(Auth::user(), array_keys($channels), $filter);
             }
         }
 

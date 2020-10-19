@@ -309,9 +309,8 @@ class ClientChatController extends Controller
             ->innerJoinWith('lastMessage', false)
             ->byStatus(ClientChat::STATUS_IN_PROGRESS)
             ->andWhere(['<=', 'cclm_dt', $dtOlder])
-            ->andWhere(['cclm_type_id' => ClientChatLastMessage::TYPE_AGENT])
+            ->andWhere(['cclm_type_id' => ClientChatLastMessage::TYPE_CLIENT])
             ->orderBy(['cch_id' => SORT_ASC])
-            ->indexBy('cch_id')
             ->all();
 
         foreach ($inactiveChats as $clientChat) {

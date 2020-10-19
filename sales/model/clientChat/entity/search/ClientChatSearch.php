@@ -6,23 +6,19 @@ use common\models\Client;
 use common\models\Department;
 use common\models\Employee;
 use common\models\Project;
-use sales\auth\Auth;
 use sales\helpers\query\QueryHelper;
 use sales\model\clientChat\dashboard\FilterForm;
-use sales\model\clientChat\dashboard\ReadUnreadFilter;
 use sales\model\clientChat\dashboard\GroupFilter;
+use sales\model\clientChat\dashboard\ReadUnreadFilter;
+use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatUnread\entity\ClientChatUnread;
-use sales\services\clientChatMessage\ClientChatMessageService;
 use yii\data\ActiveDataProvider;
-use sales\model\clientChat\entity\ClientChat;
 use yii\data\ArrayDataProvider;
-use yii\data\SqlDataProvider;
 use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
-use yii\helpers\VarDumper;
 
 /**
  * Class ClientChatSearch
@@ -508,5 +504,32 @@ class ClientChatSearch extends ClientChat
         $query->groupBy('createdDate');
 
         return $query->createCommand()->queryAll();
+    }
+
+    public function countFreeToTake(Employee $user, array $channelsIds, FilterForm $filter): int
+    {
+        $query = ClientChat::find()->byStatus(ClientChat::STATUS_IDLE);
+
+        if ($filter->channelId) {
+            $query->byChannel($filter->channelId);
+        } else {
+            $query->byChannelIds($channelsIds);
+        }
+        if ($filter->project) {
+            $query->byProject($filter->project);
+        }
+        if ($filter->userId) {
+            $query->andWhere(['cch_owner_user_id' => $filter->userId]);
+        }
+        if ($filter->fromDate && $filter->toDate) {
+            QueryHelper::dateRangeByUserTZ(
+                $query,
+                'cch_created_dt',
+                $filter->fromDate,
+                $filter->toDate,
+                $user->timezone
+            );
+        }
+        return (int) $query->count();
     }
 }
