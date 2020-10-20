@@ -34,8 +34,6 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'cvd_local_time')->textInput(['maxlength' => true]) ?>
 
-        <?= $form->field($model, 'cvd_data')->textInput() ?>
-
         <?= $form->field($model, 'cvd_created_dt')->textInput() ?>
 
         <?= $form->field($model, 'cvd_updated_dt')->textInput() ?>
@@ -48,6 +46,26 @@ use yii\widgets\ActiveForm;
 
         <?php ActiveForm::end(); ?>
 
+    </div>
+
+    <div class="col-md-4">
+        <?php
+        try {
+            echo $form->field($model, 'cvd_data')->widget(
+                \kdn\yii2\JsonEditor::class,
+                [
+                    'clientOptions' => [
+                        'modes' => ['code', 'form', 'tree', 'view'], //'text',
+                        'mode' => $model->isNewRecord ? 'code' : 'form'
+                    ],
+                    //'collapseAll' => ['view'],
+                    'expandAll' => ['tree', 'form'],
+                ]
+            );
+        } catch (Exception $exception) {
+            echo $form->field($model, 'ccc_settings')->textarea(['rows' => 6]);
+        }
+        ?>
     </div>
 
 </div>
