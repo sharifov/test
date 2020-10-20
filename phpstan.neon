@@ -1,13 +1,19 @@
+includes:
+    - vendor/proget-hq/phpstan-yii2/extension.neon
 parameters:
   autoload_files:
-        - vendor/proget-hq/phpstan-yii2/extension.neon
+    - vendor/yiisoft/yii2/Yii.php
   level: 5
   paths:
     - webapi/controllers
     - frontend/controllers
     - console/controllers
     - common/models
+    - sales
   excludes_analyse:
     - webapi/tests/*
+    - docker/*
+    - vagrant/*
+    - node_modules/*
   yii2:
     config_path: %rootDir%/../../../common/config/boostrap.php

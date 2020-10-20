@@ -250,7 +250,7 @@ return [
         ],
         'rbac' => [
             'class' => 'yii2mod\rbac\Module',
-            'layout' => '@frontend/themes/gentelella_v2/views/layouts/main',
+            'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
             'as access' => [
                 'class' => yii2mod\rbac\filters\AccessControl::class,
                 'rules' => [

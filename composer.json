@@ -97,11 +97,29 @@
 		"friendsofphp/php-cs-fixer": "^2.16",
 		"proget-hq/phpstan-yii2": "^0.7.3"
 	},
+	"autoload-dev": {
+		"psr-2": {
+			"app\\": "./"
+		},
+		"classmap": [
+			"common/models/",
+			"frontend/models/",
+			"common/components/",
+			"vendor/yiisoft/yii2/Yii.php",
+			"sales/"
+		],
+		"exclude-from-classmap": [
+			"docker/",
+			"vagrant/",
+			"node_modules/"
+		]
+	},
 	"config" : {
 		"process-timeout" : 1800,
 		"fxp-asset" : {
 			"enabled" : false
-		}
+		},
+		"optimize-autoloader": true
 	},
 	"repositories" : [
 		{
