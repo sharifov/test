@@ -103,7 +103,8 @@ $clientChatReturnUrl = Url::toRoute(['/client-chat/ajax-return']);
              if ($clientChat->isClosed()) {
                  $iframeData = $this->render('partial/_chat_history', ['clientChat' => $clientChat]);
              } else {
-                 $iframeData = '<iframe class="_rc-iframe" src="' . $rcUrl . '?layout=embedded&resumeToken=' . $userRcAuthToken . '&goto=' . urlencode('/live/' . $clientChat->cch_rid . '?layout=embedded') . '" id="_rc-' . $clientChat->cch_id . '" style="border: none; width: 100%; height: 100%;" ></iframe >';
+                 $readOnly = (!$clientChat->isOwner(Auth::id()) ? '&readonly=true' : '');
+                 $iframeData = '<iframe class="_rc-iframe" src="' . $rcUrl . '?layout=embedded' . $readOnly . '&resumeToken=' . $userRcAuthToken . '&goto=' . urlencode('/live/' . $clientChat->cch_rid . '?layout=embedded' . $readOnly) . '" id="_rc-' . $clientChat->cch_id . '" style="border: none; width: 100%; height: 100%;" ></iframe >';
              }
              if ($client) {
                  $infoData = $this->render('partial/_client-chat-info',
