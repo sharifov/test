@@ -30,6 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'ccm_id',
             'ccm_rid',
+            'ccm_cch_id',
             'ccm_client_id',
             //'ccm_user_id:userName',
             [

@@ -26,6 +26,8 @@ use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatService\ClientChatService;
 use sales\services\TransactionManager;
 use Yii;
+use yii\caching\CacheInterface;
+use yii\caching\TagDependency;
 use yii\helpers\Html;
 use yii\helpers\StringHelper;
 use yii\helpers\VarDumper;
@@ -46,6 +48,7 @@ use yii\helpers\VarDumper;
  * @property ClientChatVisitorDataRepository $clientChatVisitorDataRepository
  * @property ClientChatChannelRepository $clientChatChannelRepository
  * @property ClientChatFeedbackRepository $clientChatFeedbackRepository
+ * @property CacheInterface $cache
  */
 class ClientChatRequestService
 {
@@ -97,6 +100,8 @@ class ClientChatRequestService
 
     private ClientChatFeedbackRepository $clientChatFeedbackRepository;
 
+    private CacheInterface $cache;
+
     /**
      * ClientChatRequestService constructor.
      * @param ClientChatRequestRepository $clientChatRequestRepository
@@ -138,6 +143,7 @@ class ClientChatRequestService
         $this->clientChatVisitorDataRepository = $clientChatVisitorDataRepository;
         $this->clientChatChannelRepository = $clientChatChannelRepository;
         $this->clientChatFeedbackRepository = $clientChatFeedbackRepository;
+        $this->cache = Yii::$app->cache;
     }
 
     /**
@@ -179,6 +185,7 @@ class ClientChatRequestService
             $this->clientChatMessageRepository->save($message, 0);
 
             $clientChat = $this->findClientChat($form->data['rid'] ?? '');
+//            $clientChat = $this->findClientChatByCache($form->data['rid'] ?? '');
             if ($clientChat) {
                 $this->assignMessageToChat($message, $clientChat);
             }
@@ -196,6 +203,16 @@ class ClientChatRequestService
             $clientChat = $this->clientChatRepository->getLastByRid($rid);
         }
         return $clientChat;
+    }
+
+    public function findClientChatByCache(string $rid): ?ClientChat
+    {
+        $tag = 'TAG_MUST_BE_SET';
+        $duration = 10;
+        $key = 'FIND_LAST_CLIENT_CHAT-' . $rid;
+        return $this->cache->getOrSet($key, function () use ($rid) {
+            return $this->findClientChat($rid);
+        }, $duration, new TagDependency(['tags' => $tag]));
     }
 
     /**
@@ -322,11 +339,20 @@ class ClientChatRequestService
         }
 
         if ($clientChatCreated) {
-            $messages = ClientChatMessage::find()->andWhere(['ccm_rid' => $clientChat->cch_rid])->andWhere(['is', 'ccm_cch_id', null])->all();
+            $messages = $this->getFreeMessages($clientChat->cch_rid);
             foreach ($messages as $message) {
                 $this->assignMessageToChat($message, $clientChat);
             }
         }
+    }
+
+    /**
+     * @param string $rid
+     * @return ClientChatMessage[]
+     */
+    public function getFreeMessages(string $rid): array
+    {
+        return ClientChatMessage::find()->andWhere(['ccm_rid' => $rid])->andWhere(['is', 'ccm_cch_id', null])->all();
     }
 
     public function assignMessageToChat(ClientChatMessage $message, ClientChat $clientChat): void
