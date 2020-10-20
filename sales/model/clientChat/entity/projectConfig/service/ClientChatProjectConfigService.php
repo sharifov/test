@@ -24,7 +24,7 @@ class ClientChatProjectConfigService
         foreach ($languages as $languageId => $languageName) {
             $keyCache = ClientChatProjectConfig::getCacheKey($projectId, (string)$languageId);
 
-            if (!AppHelper::deleteCacheByKey($keyCache)) {
+            if (!\Yii::$app->webApiCache->delete($keyCache)) {
                 $keyCacheNotDeleted[] = $keyCache;
             }
         }

@@ -597,7 +597,7 @@ class ClientChatRequestController extends ApiBaseController
             );
         }
 
-        $projectId = \Yii::$app->request->get('project_id');
+        $projectId = (int)\Yii::$app->request->get('project_id');
         $projectKey = \Yii::$app->request->get('project_key');
         $noCache = (int) \Yii::$app->request->get('nocache', 0);
 

@@ -43,6 +43,14 @@ return [
             'defaultDuration' => 10 * 60,
             'gcProbability' => 100,
         ],
+        'webApiCache' => [
+            'class' => 'yii\caching\FileCache',
+            'cachePath' => '@webapi/runtime/cache'
+        ],
+        'consoleCache' => [
+            'class' => 'yii\caching\FileCache',
+            'cachePath' => '@console/runtime/cache'
+        ],
         'mailer' => [
             'class' => 'yii\swiftmailer\Mailer',
             'viewPath' => '@common/mail',

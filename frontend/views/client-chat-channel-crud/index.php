@@ -119,8 +119,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $model->cccUg ? $model->cccUg->ug_name : null;
                 }
             ],
-            //'ccc_disabled:boolean',
-            ['class' => BooleanColumn::class, 'attribute' => 'ccc_disabled'],
+            'ccc_disabled:boolean',
+//            ['class' => BooleanColumn::class, 'attribute' => 'ccc_disabled'],
             //'ccc_frontend_enabled:booleanByLabel',
             ['class' => BooleanColumn::class, 'attribute' => 'ccc_frontend_enabled'],
             //'ccc_default:boolean',

@@ -163,14 +163,4 @@ class AppHelper
         return $newArray;
     }
 
-    /**
-     * @param string $key
-     * @return bool
-     */
-    public static function deleteCacheByKey(string $key): bool
-    {
-        return Yii::$app->cache->delete($key);
-    }
-
-
 }
