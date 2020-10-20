@@ -53,23 +53,23 @@ class ClientChatRequestController extends ApiBaseController
         parent::__construct($id, $module, $config);
     }
 
-    /**
-     * @return array
-     * @throws \yii\web\NotAcceptableHttpException
-     */
-    public function behaviors(): array
-    {
-        $behaviors = [
-            'HttpCache' => [
-                'class' => HttpCache::class,
-                'only' => ['projectConfig'],
-                'lastModified' => static function () {
-                    return strtotime(ClientChatProjectConfig::find()->max('ccpc_updated_dt'));
-                },
-            ],
-        ];
-        return ArrayHelper::merge(parent::behaviors(), $behaviors);
-    }
+//    /**
+//     * @return array
+//     * @throws \yii\web\NotAcceptableHttpException
+//     */
+//    public function behaviors(): array
+//    {
+//        $behaviors = [
+//            'HttpCache' => [
+//                'class' => HttpCache::class,
+//                'only' => ['projectConfig'],
+//                'lastModified' => static function () {
+//                    return strtotime(ClientChatProjectConfig::find()->max('ccpc_updated_dt'));
+//                },
+//            ],
+//        ];
+//        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+//    }
 
     /**
      * @return array
