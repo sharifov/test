@@ -246,7 +246,7 @@ class ClientChatChannel extends \yii\db\ActiveRecord
 
     public function isAllowedTransferToChannel(): bool
     {
-        return (bool)($this->settings['allowTransferChannelActiveChat'] ?? ClientChatChannelDefaultSettings::isAllowTransferChannelActiveChat());
+        return (bool)($this->settings['system']['allowTransferChannelActiveChat'] ?? ClientChatChannelDefaultSettings::isAllowTransferChannelActiveChat());
     }
 
     /**
