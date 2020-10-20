@@ -25,6 +25,7 @@ use sales\services\client\ClientManageService;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatService\ClientChatService;
 use sales\services\TransactionManager;
+use sales\model\clientChatRequest\repository\ClientChatRequestRepository;
 use Yii;
 use yii\caching\CacheInterface;
 use yii\caching\TagDependency;

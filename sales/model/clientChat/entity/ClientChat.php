@@ -61,7 +61,6 @@ use yii\helpers\Html;
  * @property int|null $cch_parent_id
  * @property int|null $countUnreadMessage
  *
- * @property ClientChatRequest $cchCcr
  * @property Client $cchClient
  * @property ClientChatChannel $cchChannel
  * @property Department $cchDep
@@ -204,11 +203,6 @@ class ClientChat extends \yii\db\ActiveRecord
             ['cch_updated_user_id', 'integer'],
             ['cch_updated_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['cch_updated_user_id' => 'id']],
         ];
-    }
-
-    public function getCchCcr(): \yii\db\ActiveQuery
-    {
-        return $this->hasOne(ClientChatRequest::class, ['ccr_id' => 'cch_ccr_id']);
     }
 
     public function getCchChannel(): \yii\db\ActiveQuery

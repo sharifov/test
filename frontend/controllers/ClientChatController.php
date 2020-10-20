@@ -47,7 +47,7 @@ use sales\model\clientChatNote\ClientChatNoteRepository;
 use sales\model\clientChatNote\entity\ClientChatNote;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatRequest\entity\search\ClientChatRequestSearch;
-use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestRepository;
+use sales\model\clientChatRequest\repository\ClientChatRequestRepository;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestService;
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\model\clientChatUnread\entity\ClientChatUnread;

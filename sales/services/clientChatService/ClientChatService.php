@@ -26,7 +26,7 @@ use sales\model\clientChatLead\entity\ClientChatLeadRepository;
 use sales\model\clientChatNote\ClientChatNoteRepository;
 use sales\model\clientChatNote\entity\ClientChatNote;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
-use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestRepository;
+use sales\model\clientChatRequest\repository\ClientChatRequestRepository;
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\model\clientChatUnread\entity\ClientChatUnread;
 use sales\model\clientChatUnread\entity\ClientChatUnreadRepository;
@@ -335,7 +335,7 @@ class ClientChatService
 
             $clientChatChannel = $this->clientChatChannelRepository->find($form->channelId);
 
-            $activeChatExists = ClientChat::find()->byChannel($clientChatChannel->ccc_id)->byClientId($clientChat->cch_client_id)->expectOwner($clientChat->cch_owner_user_id)->active()->exists();
+            $activeChatExists = ClientChat::find()->byChannel($clientChatChannel->ccc_id)->byClientId($clientChat->cch_client_id)->expectOwner((int)$clientChat->cch_owner_user_id)->active()->exists();
 
             if ($activeChatExists && !$clientChatChannel->isAllowedTransferToChannel()) {
                 throw new \DomainException('Client already has active chat in this department');
