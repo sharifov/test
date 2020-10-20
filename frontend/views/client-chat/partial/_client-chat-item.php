@@ -41,7 +41,7 @@ use yii\helpers\StringHelper;
         }
         $isClosed = (int)$clientChat['cch_status_id'] === ClientChat::STATUS_CLOSED;
 
-        $clientFullName = $clientChat['client_full_name'] ?: ('Guest-' . $clientChat['client_id']);
+        $clientFullName = $clientChat['client_full_name'] ?: ('Client-' . $clientChat['client_id']);
         $unreadMessages = $clientChat['count_unread_messages'] ?: null;
         if ($unreadMessages && $resetUnreadMessagesChatId && $resetUnreadMessagesChatId === $clientChat['cch_id']) {
             $unreadMessages = null;

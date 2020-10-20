@@ -13,7 +13,7 @@ class ClientChatHelper
 {
     public static function getClientName(ClientChat $clientChat): string
     {
-        return $clientChat->cchClient && $clientChat->cchClient->full_name ? $clientChat->cchClient->full_name : 'Guest-' . $clientChat->cch_id;
+        return $clientChat->cchClient && $clientChat->cchClient->full_name ? $clientChat->cchClient->full_name : 'Client-' . $clientChat->cch_id;
     }
 
     public static function getFirstLetterFromName(string $name): string
