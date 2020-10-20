@@ -1029,16 +1029,6 @@ $(document).on('click', '.cc_return', function (e) {
         }, 3000);
     });           
 });
-
-$(document).on('click', '.kv-clear', function (e) {
-    e.stopPropagation();
-    e.preventDefault();    
-    $(document).find('.kv-drp-dropdown').find('.range-value').val('');
-    $(document).val('').trigger('change').trigger('cancel.daterangepicker');
-    $('.kv-drp-container input').each(function() {
-        $(this).val('');
-    });     
-}); 
     
 $(document).on('click', '#reset_additional', function (e) {
     e.stopPropagation();
@@ -1070,7 +1060,10 @@ $css = <<<CSS
     }
     #pjax-notes .x_panel {
         margin-top: 10px;
-    }    
+    } 
+    .kv-clear {
+        display: none;
+    }  
 CSS;
 $this->registerCss($css);
 
