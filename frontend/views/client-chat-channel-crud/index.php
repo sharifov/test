@@ -146,7 +146,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'class' => UserSelect2Column::class,
                 'attribute' => 'ccc_updated_user_id',
-                'relation' => 'cccCreatedUser',
+                'relation' => 'cccUpdatedUser',
                 'format' => 'username',
                 'placeholder' => 'Select User'
             ],
