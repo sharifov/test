@@ -66,12 +66,20 @@ class ClientChatRepository
 		throw new NotFoundException('unable to find client chat by rid: ' . $rid);
 	}
 
-    public function findLastByRid(string $rid): ?ActiveRecord
+    public function findLastByRid(string $rid): ClientChat
 	{
 		if ($clientChat = ClientChat::find()->byRid($rid)->orderBy(['cch_id' => SORT_DESC])->one()) {
 			return $clientChat;
 		}
 		throw new NotFoundException('Not find client chat by rid: ' . $rid);
+	}
+
+    public function getLastByRid(string $rid): ?ClientChat
+	{
+        if ($clientChat = ClientChat::find()->byRid($rid)->orderBy(['cch_id' => SORT_DESC])->one()) {
+            return $clientChat;
+        }
+        return null;
 	}
 
 	public function findNotClosed(string $rid): ClientChat

@@ -174,10 +174,27 @@ class ClientChatRequestService
         $clientChatRequest = $this->createRequest($form);
 
         if ($clientChatRequest->isGuestUttered() || $clientChatRequest->isAgentUttered()) {
-            $this->saveMessage($form, $clientChatRequest);
+            //$this->saveMessage($form);
+            $message = ClientChatMessage::createByApi($form);
+            $this->clientChatMessageRepository->save($message, 0);
+
+            $clientChat = $this->findClientChat($form->data['rid'] ?? '');
+            if ($clientChat) {
+                $this->assignMessageToChat($message, $clientChat, $clientChatRequest);
+            }
         } else {
             throw new \RuntimeException('Unknown event provided');
         }
+    }
+
+    private function findClientChat(string $rid): ?ClientChat
+    {
+        try {
+            $clientChat = $this->clientChatRepository->findNotClosed($rid);
+        } catch (NotFoundException $e) {
+            $clientChat = $this->clientChatRepository->getLastByRid($rid);
+        }
+        return $clientChat;
     }
 
     /**
@@ -193,7 +210,6 @@ class ClientChatRequestService
 
     public function createOrUpdateFeedback(string $rid, ?string $comment, ?int $rating): ClientChatFeedback
     {
-        /** @var ClientChat $clientChat */
         $clientChat = $this->clientChatRepository->findLastByRid($rid ?? '');
 
         if ($clientChatFeedback = $clientChat->feedback) {
@@ -303,19 +319,21 @@ class ClientChatRequestService
         }
     }
 
-    /**
-     * @param ClientChatRequestApiForm $form
-     * @param ClientChatRequest $clientChatRequest
-     */
-    private function saveMessage(ClientChatRequestApiForm $form, ClientChatRequest $clientChatRequest): void
+    private function saveMessage(ClientChatRequestApiForm $form): void
     {
-        try {
-            $clientChat = $this->clientChatRepository->findNotClosed($form->data['rid'] ?? '');
-        } catch (NotFoundException $e) {
-            $clientChat = $this->clientChatRepository->findByRid($form->data['rid'] ?? '');
-        }
-        $message = ClientChatMessage::createByApi($form, $clientChat, $clientChatRequest);
+        $message = ClientChatMessage::createByApi($form);
         $this->clientChatMessageRepository->save($message, 0);
+    }
+
+    public function assignMessageToChat(ClientChatMessage $message, ClientChat $clientChat, ClientChatRequest $clientChatRequest): void
+    {
+        $ownerUserId = null;
+        if ($clientChatRequest->isAgentUttered()) {
+            $ownerUserId = $clientChat->cch_owner_user_id;
+        }
+        $message->assignToChat($clientChat->cch_id, $clientChat->cch_client_id, $ownerUserId);
+        $this->clientChatMessageRepository->save($message, 0);
+
         $this->sendLastChatMessageToMonitor($clientChat, $message);
 
         if ($clientChatRequest->isGuestUttered()) {

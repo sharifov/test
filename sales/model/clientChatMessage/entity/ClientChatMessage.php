@@ -130,32 +130,27 @@ class ClientChatMessage extends \yii\db\ActiveRecord
         return [$partitionStartDate, $partitionEndDate];
     }
 
-    /**
-     * @param ClientChatRequestApiForm $form
-     * @param ClientChat $clientChat
-     * @param ClientChatRequest $clientChatRequest
-     * @return ClientChatMessage
-     */
-    public static function createByApi(ClientChatRequestApiForm $form, ClientChat $clientChat, ClientChatRequest $clientChatRequest): ClientChatMessage
+    public static function createByApi(ClientChatRequestApiForm $form): ClientChatMessage
     {
         $message = new self();
         $message->ccm_rid = $form->data['rid'] ?? '';
-        $message->ccm_cch_id = $clientChat->cch_id;
         $date = new DateTime();
         $date->setTimestamp($form->data['timestamp']/1000);
         $message->ccm_sent_dt = $date->format('Y-m-d H:i:s');
         $message->ccm_body = $form->data;
-        $message->ccm_client_id = $clientChat->cch_client_id;
-        //if agent message fill also agent id
-        if ($clientChatRequest->isAgentUttered()) {
-            $message->ccm_user_id = $clientChat->cch_owner_user_id;
-        }
 
         if (array_key_exists('file', $form->data)) {
             $message->ccm_has_attachment = 1;
         }
 
         return $message;
+    }
+
+    public function assignToChat(int $chatId, ?int $clientId, ?int $ownerUserId): void
+    {
+        $this->ccm_cch_id = $chatId;
+        $this->ccm_client_id = $clientId;
+        $this->ccm_user_id = $ownerUserId;
     }
 
     public function isMessageFromClient(): bool
