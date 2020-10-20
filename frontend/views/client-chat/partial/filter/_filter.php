@@ -169,13 +169,21 @@ use yii\web\JsExpression;
                                 'timePicker' => false,
                                 'locale' => [
                                     'format' => 'Y-m-d',
-                                    'separator' => ' / '
+                                    'separator' => ' / ',
+                                    'cancelLabel' => 'Clear',
                                 ]
                             ],
                             'pluginEvents' => [
                                 'apply.daterangepicker' => new JsExpression('function() { 
                                     window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
-                                }')
+                                }'),
+                                'cancel.daterangepicker' => new JsExpression('function() { 
+                                    $(".range-value").val("");
+                                    $(".kv-drp-container input").each(function() {
+                                        $(this).val("");
+                                    });
+                                    window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
+                                }'),
                             ],
                         ]); ?>
                     </div>
