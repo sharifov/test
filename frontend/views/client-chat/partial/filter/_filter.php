@@ -157,9 +157,9 @@ use yii\web\JsExpression;
                     <div class="col-md-12">
                         <?= Html::label('Created:', null, ['class' => 'control-label']); ?>
                         <?= \kartik\daterange\DateRangePicker::widget([
-                            'model' => $filter,
+                        'model' => $filter,
                             'attribute' => 'rangeDate',
-                            'useWithAddon' => false,
+                            'useWithAddon' => true,
                             'presetDropdown' => false,
                             'hideInput' => true,
                             'convertFormat' => true,
@@ -167,12 +167,10 @@ use yii\web\JsExpression;
                             'endAttribute' => 'toDate',
                             'pluginOptions' => [
                                 'timePicker' => false,
-                                'clearBtn' => true,
                                 'locale' => [
                                     'format' => 'Y-m-d',
                                     'separator' => ' / '
-                                ],
-                                'allowClear' => true,
+                                ]
                             ],
                             'pluginEvents' => [
                                 'apply.daterangepicker' => new JsExpression('function() { 

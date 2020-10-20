@@ -1030,15 +1030,14 @@ $(document).on('click', '.cc_return', function (e) {
     });           
 });
 
-$(document).find('.kv-drp-dropdown').find('.kv-clear').on('click', function(e) {
+$(document).on('click', '.kv-clear', function (e) {
     e.stopPropagation();
-    e.preventDefault();
+    e.preventDefault();    
     $(document).find('.kv-drp-dropdown').find('.range-value').val('');
     $(document).val('').trigger('change').trigger('cancel.daterangepicker');
     $('.kv-drp-container input').each(function() {
         $(this).val('');
-    }); 
-    window.updateClientChatFilter("{$filter->getId()}", "{$filter->formName()}", "{$loadChannelsUrl}");
+    });     
 }); 
     
 $(document).on('click', '#reset_additional', function (e) {

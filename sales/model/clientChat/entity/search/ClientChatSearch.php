@@ -468,7 +468,9 @@ class ClientChatSearch extends ClientChat
         }
 
         if ($filter->fromDate && $filter->toDate) {
-            QueryHelper::dateRangeByUserTZ($query, 'cch_created_dt', $filter->fromDate, $filter->toDate, $user->timezone);
+            $fromDate = date('Y-m-d', strtotime($filter->fromDate));
+            $toDate = date('Y-m-d', strtotime($filter->toDate));
+            $query->andWhere(['BETWEEN', 'DATE(cch_created_dt)', $fromDate, $toDate]);
         }
 
         $query->join('JOIN', ['client' => Client::tableName()], 'cch_client_id = client.id');
