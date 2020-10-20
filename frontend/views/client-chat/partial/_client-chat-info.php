@@ -141,7 +141,7 @@ $guard = new ClientChatManageGuard($statusLogRepository);
                     <div class="_rc-client-info">
 
                         <span class="_rc-client-name">
-                            <span><?= Html::encode($client->full_name ?: 'Guest-' . $client->id); ?></span>
+                            <span><?= Html::encode($client->full_name ?: 'Client-' . $client->id); ?></span>
                         </span>
 
                         <?php if ($emails = $client->clientEmails): ?>
