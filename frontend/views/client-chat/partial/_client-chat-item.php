@@ -3,6 +3,7 @@
 use common\components\i18n\Formatter;
 use sales\helpers\clientChat\ClientChatHelper;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChatLastMessage\entity\ClientChatLastMessage;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use yii\helpers\Html;
 use yii\helpers\StringHelper;
@@ -15,30 +16,7 @@ use yii\helpers\StringHelper;
 
 <?php foreach ($clientChats as $clientChat): ?>
     <?php
-        $inMessage = true;
-        $lastChatMessage = $lastChatMessageDate = '';
-        $lastClientMessage = ClientChatMessage::getLastMessageByClient((int)$clientChat['cch_id']);
-        $lastAgentMessage = ClientChatMessage::getLastMessageByAgent((int)$clientChat['cch_id']);
 
-        if ($lastClientMessage && !$lastAgentMessage) {
-            $inMessage = true;
-            $lastChatMessage = $lastClientMessage->message;
-            $lastChatMessageDate = $lastClientMessage->ccm_sent_dt;
-        } elseif ($lastAgentMessage && !$lastClientMessage) {
-            $inMessage = false;
-            $lastChatMessage = $lastAgentMessage->message;
-            $lastChatMessageDate = $lastAgentMessage->ccm_sent_dt;
-        } elseif ($lastClientMessage && $lastAgentMessage) {
-            if (strtotime($lastClientMessage->ccm_sent_dt) > strtotime($lastAgentMessage->ccm_sent_dt)) {
-                $inMessage = true;
-                $lastChatMessage = $lastClientMessage->message;
-                $lastChatMessageDate = $lastClientMessage->ccm_sent_dt;
-            } else {
-                $inMessage = false;
-                $lastChatMessage = $lastAgentMessage->message;
-                $lastChatMessageDate = $lastAgentMessage->ccm_sent_dt;
-            }
-        }
         $isClosed = (int)$clientChat['cch_status_id'] === ClientChat::STATUS_CLOSED;
 
         $clientFullName = $clientChat['client_full_name'] ?: ('Client-' . $clientChat['client_id']);
@@ -53,7 +31,7 @@ use yii\helpers\StringHelper;
             <span class="_cc-item-icon-round">
                 <span class="_cc_client_name"><?= ClientChatHelper::getFirstLetterFromName($clientFullName) ?></span>
                 <span class="_cc-status-wrapper">
-                    <span class="_cc-status" data-is-online="<?= (int)$clientChat['cch_client_online'] ?>"></span>
+                    <span class="_cc-status" data-is-online="<?= (int)$clientChat['cch_client_online'] ?>"> </span>
                 </span>
 
             </span>
@@ -61,7 +39,7 @@ use yii\helpers\StringHelper;
                 <div title="Client name"><b><?= Html::encode($clientFullName) ?></b></div>
                 <span title="Chat creation date"><small><?= $formatter->asByUserDateTime($clientChat['cch_created_dt'], 'php:F d Y, H:i') ?></small></span>
                 <?php if (!empty($clientChat['cch_owner_user_id'])): ?>
-                    , <span title="Owner"><small><i class="fa fa-user"></i> <?= Html::encode($clientChat['owner_username']) ?></small></span>
+                    , <span title="Owner"><small><i class="fa fa-user"> </i> <?= Html::encode($clientChat['owner_username']) ?></small></span>
                 <?php endif;?>
                 <div>
                     <?php /*if ($clientChat['dep_name']): ?>
@@ -80,8 +58,8 @@ use yii\helpers\StringHelper;
                 </div>
                 <?php // Pjax::begin(['id' => 'chat-last-message-refresh-' . $clientChat['cch_id']])?>
                 <div id="chat-last-message-<?= $clientChat['cch_id'] ?>">
-                    <?php if ($lastChatMessage) : ?>
-                        <p title="Last <?= $inMessage ? 'client' : 'agent' ?>  message"><small><i class="fa fa-comment-o"></i> <?= StringHelper::truncate($lastChatMessage, 40, '...')?></small></p>
+                    <?php if ($clientChat['last_message']) : ?>
+                        <p title="Last <?= $clientChat['last_message_type_id'] === ClientChatLastMessage::TYPE_CLIENT ? 'client' : 'agent' ?>  message"><small><i class="fa fa-comment-o"> </i> <?= StringHelper::truncate($clientChat['last_message'], 40, '...')?></small></p>
                     <?php endif; ?>
                 </div>
                 <?php // Pjax::end()?>
@@ -94,10 +72,10 @@ use yii\helpers\StringHelper;
             ?>
             </span>
 
-			<?php if ($lastChatMessageDate): ?>
+			<?php if ($clientChat['last_message_date']): ?>
                 <span title="Last message date & time">
-                    <?php $period = round((time() - strtotime($lastChatMessageDate))); ?>
-					<small class="_cc-item-last-message-time" data-moment="<?= $period ?>" data-cch-id="<?= $clientChat['cch_id'] ?>"></small><br>
+                    <?php $period = round((time() - strtotime($clientChat['last_message_date']))); ?>
+					<small class="_cc-item-last-message-time" data-moment="<?= $period ?>" data-cch-id="<?= $clientChat['cch_id'] ?>"> </small><br>
                 </span>
 			<?php endif; ?>
 

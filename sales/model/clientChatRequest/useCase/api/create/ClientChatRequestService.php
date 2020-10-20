@@ -10,6 +10,7 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatFeedback\ClientChatFeedbackRepository;
 use sales\model\clientChatFeedback\entity\ClientChatFeedback;
+use sales\model\clientChatLastMessage\ClientChatLastMessageRepository;
 use sales\model\clientChatMessage\ClientChatMessageRepository;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
@@ -171,18 +172,18 @@ class ClientChatRequestService
      */
     public function createMessage(ClientChatRequestApiForm $form): void
     {
-        $clientChatRequest = $this->createRequest($form);
+        $clientChatRequest = ClientChatRequest::createByApi($form);
 
         if ($clientChatRequest->isGuestUttered() || $clientChatRequest->isAgentUttered()) {
-            //$this->saveMessage($form);
-            $message = ClientChatMessage::createByApi($form);
+            $message = ClientChatMessage::createByApi($form, $clientChatRequest->ccr_event);
             $this->clientChatMessageRepository->save($message, 0);
 
             $clientChat = $this->findClientChat($form->data['rid'] ?? '');
             if ($clientChat) {
-                $this->assignMessageToChat($message, $clientChat, $clientChatRequest);
+                $this->assignMessageToChat($message, $clientChat);
             }
         } else {
+            $this->clientChatRequestRepository->save($clientChatRequest);
             throw new \RuntimeException('Unknown event provided');
         }
     }
@@ -282,6 +283,8 @@ class ClientChatRequestService
     {
         $clientChat = $this->clientChatRepository->getOrCreateByRequest($clientChatRequest, ClientChat::SOURCE_TYPE_CLIENT);
 
+        $clientChatCreated = $clientChat->cch_id ? false : true;
+
         if (!$clientChat->cch_client_id) {
             $client = $this->clientManageService->getOrCreateByClientChatRequest($clientChatRequest, (int)$clientChat->cch_project_id);
             $clientChat->cch_client_id = $client->id;
@@ -317,18 +320,19 @@ class ClientChatRequestService
                 'statusMessage' => Html::encode($clientChat->getClientStatusMessage()),
             ]);
         }
+
+        if ($clientChatCreated) {
+            $messages = ClientChatMessage::find()->andWhere(['ccm_rid' => $clientChat->cch_rid])->andWhere(['is', 'ccm_cch_id', null])->all();
+            foreach ($messages as $message) {
+                $this->assignMessageToChat($message, $clientChat);
+            }
+        }
     }
 
-    private function saveMessage(ClientChatRequestApiForm $form): void
-    {
-        $message = ClientChatMessage::createByApi($form);
-        $this->clientChatMessageRepository->save($message, 0);
-    }
-
-    public function assignMessageToChat(ClientChatMessage $message, ClientChat $clientChat, ClientChatRequest $clientChatRequest): void
+    public function assignMessageToChat(ClientChatMessage $message, ClientChat $clientChat): void
     {
         $ownerUserId = null;
-        if ($clientChatRequest->isAgentUttered()) {
+        if ($message->isAgentUttered()) {
             $ownerUserId = $clientChat->cch_owner_user_id;
         }
         $message->assignToChat($clientChat->cch_id, $clientChat->cch_client_id, $ownerUserId);
@@ -336,7 +340,7 @@ class ClientChatRequestService
 
         $this->sendLastChatMessageToMonitor($clientChat, $message);
 
-        if ($clientChatRequest->isGuestUttered()) {
+        if ($message->isGuestUttered()) {
             if ($clientChat->hasOwner() && $clientChat->cchOwnerUser->userProfile && $clientChat->cchOwnerUser->userProfile->isRegisteredInRc()) {
                 if (!UserConnectionActiveChat::find()->andWhere(['ucac_chat_id' => $clientChat->cch_id])->exists()) {
                     $countUnreadByChatMessages = $this->clientChatMessageService->increaseUnreadMessages($clientChat->cch_id);
@@ -355,7 +359,8 @@ class ClientChatRequestService
             } else {
                 $this->clientChatMessageService->increaseUnreadMessages($clientChat->cch_id);
             }
-        } elseif ($clientChatRequest->isAgentUttered()) {
+            (Yii::createObject(ClientChatLastMessageRepository::class))->createOrUpdateByMessage($message);
+        } elseif ($message->isAgentUttered()) {
             $this->clientChatMessageService->touchUnreadMessage($clientChat->cch_id);
             if ($clientChat->hasOwner() && $clientChat->cchOwnerUser->userProfile && $clientChat->cchOwnerUser->userProfile->isRegisteredInRc()) {
                 Notifications::publish('clientChatUpdateItemInfo', ['user_id' => $clientChat->cch_owner_user_id], [
@@ -367,6 +372,7 @@ class ClientChatRequestService
                     ]
                 ]);
             }
+            (Yii::createObject(ClientChatLastMessageRepository::class))->createOrUpdateByMessage($message);
         }
     }
 

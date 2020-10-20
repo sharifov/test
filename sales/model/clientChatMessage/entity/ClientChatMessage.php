@@ -3,7 +3,6 @@
 namespace sales\model\clientChatMessage\entity;
 
 use DateTime;
-use sales\behaviors\ClientChatSetLastMessageBehavior;
 use sales\entities\EventTrait;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
@@ -24,6 +23,7 @@ use yii\helpers\ArrayHelper;
  * @property int $ccm_has_attachment
  * @property string $message
  * @property string $username
+ * @property int|null $ccm_event
  */
 class ClientChatMessage extends \yii\db\ActiveRecord
 {
@@ -33,6 +33,24 @@ class ClientChatMessage extends \yii\db\ActiveRecord
     public const BY_AGENT = 'agent';
     public const BY_CLIENT = 'client';
     public const BOT_EMAIL = 'bot@techork.com';
+
+    private const EVENT_GUEST_UTTERED = ClientChatRequest::EVENT_GUEST_UTTERED;
+    private const EVENT_AGENT_UTTERED = ClientChatRequest::EVENT_AGENT_UTTERED;
+
+    private const EVENT_LIST = [
+        self::EVENT_GUEST_UTTERED => self::EVENT_GUEST_UTTERED,
+        self::EVENT_AGENT_UTTERED => self::EVENT_AGENT_UTTERED,
+    ];
+
+    public function isGuestUttered(): bool
+    {
+        return $this->ccm_event === self::EVENT_GUEST_UTTERED;
+    }
+
+    public function isAgentUttered(): bool
+    {
+        return $this->ccm_event === self::EVENT_AGENT_UTTERED;
+    }
 
     /**
      * {@inheritdoc}
@@ -66,15 +84,6 @@ class ClientChatMessage extends \yii\db\ActiveRecord
         return $this->getPrimaryKey();
     }
 
-    public function behaviors(): array
-    {
-        return [
-            'setLastMessage' => [
-                'class' => ClientChatSetLastMessageBehavior::class,
-            ],
-        ];
-    }
-
     /**
      * {@inheritdoc}
      */
@@ -86,6 +95,7 @@ class ClientChatMessage extends \yii\db\ActiveRecord
             [['ccm_client_id', 'ccm_user_id', 'ccm_has_attachment', 'ccm_cch_id'], 'integer'],
             [['ccm_sent_dt', 'ccm_body'], 'safe'],
             [['ccm_rid'], 'string', 'max' => 150],
+            ['ccm_event', 'in', 'range' => array_keys(self::EVENT_LIST)],
         ];
     }
 
@@ -130,7 +140,7 @@ class ClientChatMessage extends \yii\db\ActiveRecord
         return [$partitionStartDate, $partitionEndDate];
     }
 
-    public static function createByApi(ClientChatRequestApiForm $form): ClientChatMessage
+    public static function createByApi(ClientChatRequestApiForm $form, int $event): ClientChatMessage
     {
         $message = new self();
         $message->ccm_rid = $form->data['rid'] ?? '';
@@ -138,6 +148,7 @@ class ClientChatMessage extends \yii\db\ActiveRecord
         $date->setTimestamp($form->data['timestamp']/1000);
         $message->ccm_sent_dt = $date->format('Y-m-d H:i:s');
         $message->ccm_body = $form->data;
+        $message->ccm_event = $event;
 
         if (array_key_exists('file', $form->data)) {
             $message->ccm_has_attachment = 1;

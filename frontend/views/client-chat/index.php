@@ -152,7 +152,7 @@ $this->registerJsFile('/js/moment.min.js', [
 ]);
 $moveOfferUrl = Url::to(['/client-chat/move-offer']);
 $clientChatId = $clientChat ? $clientChat->cch_id : 0;
-$clientChatOwnerId = $clientChat ? $clientChat->cch_owner_user_id : 0;
+$clientChatOwnerId = ($clientChat && $clientChat->cch_owner_user_id) ? $clientChat->cch_owner_user_id : 0;
 $discardUnreadMessageUrl = Url::to(['/client-chat/discard-unread-messages']);
 $readAll = ReadUnreadFilter::ALL;
 $selectAllUrl = Url::to(array_merge(['client-chat/index'], Yii::$app->getRequest()->getQueryParams(), ['act' => 'select-all']));

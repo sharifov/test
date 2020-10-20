@@ -12,6 +12,7 @@ use sales\model\clientChat\dashboard\GroupFilter;
 use sales\model\clientChat\dashboard\ReadUnreadFilter;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
+use sales\model\clientChatLastMessage\entity\ClientChatLastMessage;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatUnread\entity\ClientChatUnread;
 use yii\data\ActiveDataProvider;
@@ -407,6 +408,10 @@ class ClientChatSearch extends ClientChat
             'ccu_count',
             'ccu_updated_dt',
             'owner_username' => 'owner.username',
+            'last_message',
+            'last_message.cclm_message as last_message',
+            'last_message.cclm_type_id as last_message_type_id',
+            'last_message.cclm_dt as last_message_date',
         ]);
 
         if (ClientChat::isTabAll($filter->status)) {
@@ -479,6 +484,7 @@ class ClientChatSearch extends ClientChat
         $query->leftJoin(['project' => Project::tableName()], 'cch_project_id = project.id');
         $query->leftJoin(ClientChatUnread::tableName(), 'ccu_cc_id = cch_id');
         $query->leftJoin(['owner' => Employee::tableName()], 'cch_owner_user_id = owner.id');
+        $query->leftJoin(['last_message' => ClientChatLastMessage::tableName()], 'cch_id = last_message.cclm_cch_id');
         return $query;
     }
 
