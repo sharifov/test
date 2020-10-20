@@ -622,10 +622,10 @@ class ClientChatRequestController extends ApiBaseController
         $keyCache = ClientChatProjectConfig::getCacheKey($projectId, $languageId);
 
         if ($noCache) {
-            Yii::$app->cache->delete($keyCache);
+            Yii::$app->webApiCache->delete($keyCache);
         }
 
-        $data = Yii::$app->cache->get($keyCache);
+        $data = Yii::$app->webApiCache->get($keyCache);
 
         if ($data === false) {
             $projectConfig = ClientChatProjectConfig::findOne(['ccpc_project_id' => $projectId]);
