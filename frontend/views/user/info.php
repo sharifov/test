@@ -14,6 +14,8 @@ use yii\widgets\Pjax;
  * @var $userActivity  \frontend\models\search\UserSiteActivitySearch
  * @var $callLogDataProvider \yii\data\ActiveDataProvider
  * @var $callLogSearchModel \sales\model\callLog\entity\callLog\search\CallLogSearch
+ * @var $emailDataProvider \yii\data\ActiveDataProvider
+ * @var $emailSearchModel \common\models\search\EmailSearch
  */
 
 $this->title = 'User Info';
@@ -23,8 +25,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <div class="user-info">
         <h1><i class="fa fa-user"></i> <?= Html::encode($this->title) ?></h1>
-        <?php //Pjax::begin(); ?>
-        <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+        <?php //Pjax::begin();?>
+        <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
         <p>
             <?php if (\sales\auth\Auth::can('/employee/edit')): ?>
@@ -32,7 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <?php endif; ?>
         </p>
 
-        <?php //Pjax::end(); ?>
+        <?php //Pjax::end();?>
 
         <div class="x_panel">
             <div class="x_title">
@@ -127,13 +129,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     <!--                    </ul>-->
 
                 </div>
-                <?php Pjax::begin(['enablePushState' => false]) ?>
+                <?php Pjax::begin(['timeout' => 10000, 'enablePushState' => false]) ?>
                 <div class="col-md-9 col-sm-9 ">
                     <?= $this->render('partial/_info_search', [
                         'datePickerModel' => $datePickerModel
                     ]) ?>
 
-                    <!--<? /*= $this->render('partial/_info_user_monitor', [
+                    <!--<?php /*= $this->render('partial/_info_user_monitor', [
                         'data' => $data,
                         'startDateTime' => $startDateTime,
                         'endDateTime' => $endDateTime,
@@ -195,7 +197,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                                 let data = google.visualization.arrayToDataTable([
                                     ['Days', 'Requests', {role: 'annotation'}],
-                                    <?php foreach($userActivity['byHour'] as $k => $item): ?>
+                                    <?php foreach ($userActivity['byHour'] as $k => $item): ?>
                                     ['<?=($item['created_hour']) ?>:00, <?=date('d-M', strtotime($item['created_date'])) ?> ', <?= $item['cnt'] ?>, '<?= ' ' ?>'],
                                     <?php endforeach; ?>
                                 ]);
@@ -293,7 +295,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             <!--                            <div role="tabpanel" class="tab-pane fade" id="tab_content2" aria-labelledby="profile-tab">-->
                             <!--                                --><?php //= $this->render('partial/_info_project', [
                             //                                    'model' => $model,
-                            //                                ]) ?>
+                            //                                ])?>
                             <!--                            </div>-->
                             <div role="tabpanel" class="tab-pane fade" id="tab_content3" aria-labelledby="profile-tab">
                                 <?= $this->render('partial/_info_profile', [
@@ -367,9 +369,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <?php
                 $jsTabs = <<<JS
-                    $('a[data-toggle="tab"]').on('show.bs.tab', function(e) {
-                        //console.log(localStorage)
-                        //localStorage.removeItem('activeTab');
+                    $('a[data-toggle="tab"]').on('show.bs.tab', function(e) {                        
                         localStorage.setItem('activeTab', $(e.target).attr('href'));
                     });                    
                     
