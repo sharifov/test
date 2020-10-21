@@ -174,10 +174,21 @@ use yii\web\JsExpression;
                                 ]
                             ],
                             'pluginEvents' => [
-                                'apply.daterangepicker' => new JsExpression('function() { 
+                                'apply.daterangepicker' => new JsExpression('function(ev, picker) {
+                                    var rangeDataEl = $("#filterform-rangedate");
+                                    var rangeDataVal = rangeDataEl.val();
+                                    if (rangeDataEl.length && rangeDataVal.length === 0) {
+                                        var format = picker.locale.format;
+                                        var separator = picker.locale.separator;
+                                        var generatedRange = picker.startDate.format(format) + separator + picker.endDate.format(format);  
+                                        rangeDataEl.val(generatedRange);
+                                        $(".range-value").val(generatedRange);
+                                        $("#filterform-rangedate-start").val(picker.startDate.format(format));
+                                        $("#filterform-rangedate-end").val(picker.endDate.format(format));
+                                    } 
                                     window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
                                 }'),
-                                'cancel.daterangepicker' => new JsExpression('function() { 
+                                'cancel.daterangepicker' => new JsExpression('function(ev, picker) {
                                     $(".range-value").val("");
                                     $(".kv-drp-container input").each(function() {
                                         $(this).val("");
