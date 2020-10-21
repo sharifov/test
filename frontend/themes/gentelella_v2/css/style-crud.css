@@ -5999,7 +5999,7 @@ td.selected-cell {
 }
 
 ul.bar_tabs {
-  height: 26px !important;
+  height: auto !important;
 }
 
 ul.bar_tabs>li a {
@@ -6008,4 +6008,12 @@ ul.bar_tabs>li a {
 
 ul.bar_tabs>li> a.active {
   background:#fff;
+}
+
+ul.bar_tabs>li {
+  margin-top: 5px !important;
+}
+
+ul.bar_tabs>li.active {
+  margin-top: 5px !important;
 }

@@ -29,7 +29,7 @@
                         textStyle:{fontSize:10}
                     },
                     height: 650,
-                    width: 1125,
+                    width: 1160,
                     chartArea: {width: '95%', right: 10},
                     theme: 'material',
                     isStacked: true,
@@ -55,7 +55,7 @@
                 totalSmsChart.draw(data, options);
 
                 $(window).on('resize', function () {
-                    options.width = document.getElementById('tab_content11').clientWidth - 20
+                    options.width = document.getElementById('tab_content11').clientWidth - 15
                     totalSmsChart.draw(data, options)
                 })
             })
