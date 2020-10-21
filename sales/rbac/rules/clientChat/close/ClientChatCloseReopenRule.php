@@ -20,6 +20,8 @@ class ClientChatCloseReopenRule extends Rule
         /** @var ClientChat $chat */
         $chat = $params['chat'];
 
-        return $chat->isClosed() && !ClientChatQuery::existsSameChatNotClosed($chat->cch_rid);
+        $clientChat = ClientChatQuery::lastSameChat($chat->cch_rid);
+
+        return $chat->isClosed() && $clientChat->isClosed() && ($clientChat->cch_id === $chat->cch_id);
     }
 }

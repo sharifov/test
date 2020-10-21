@@ -5,8 +5,8 @@ namespace sales\model\clientChat\entity;
 
 class ClientChatQuery
 {
-    public static function existsSameChatNotClosed(string $rid): bool
+    public static function lastSameChat(string $rid): ClientChat
     {
-        return ClientChat::find()->byRid($rid)->notClosed()->exists();
+        return ClientChat::find()->byRid($rid)->last()->one();
     }
 }
