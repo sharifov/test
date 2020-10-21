@@ -61,7 +61,7 @@ class ClientChatActionPermission
         if ($this->canReopenChat !== null) {
             return $this->canReopenChat;
         }
-        $this->canReopenChat = Auth::can('client-chat/manage', ['chat' => $chat]) && Auth::can('client-chat/close/reopen', ['chat' => $chat]);
+        $this->canReopenChat = Auth::can('client-chat/manage', ['chat' => $chat]) && Auth::can('client-chat/reopen', ['chat' => $chat]);
         return $this->canReopenChat;
     }
 

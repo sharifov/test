@@ -4,6 +4,7 @@
 namespace sales\rbac\rules\clientChat\close;
 
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChat\entity\ClientChatQuery;
 use yii\rbac\Rule;
 
 class ClientChatCloseReopenRule extends Rule
@@ -19,6 +20,6 @@ class ClientChatCloseReopenRule extends Rule
         /** @var ClientChat $chat */
         $chat = $params['chat'];
 
-        return $chat->isClosed();
+        return $chat->isClosed() && !ClientChatQuery::existsSameChatNotClosed($chat->cch_rid);
     }
 }
