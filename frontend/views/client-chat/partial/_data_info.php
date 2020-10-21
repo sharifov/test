@@ -15,6 +15,12 @@ use common\models\Client;
 use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
 
 $tabs[] = [
+    'id' => 'chat-data',
+    'name' => 'Chat data',
+    'content' => $this->render('info/chat_data', ['clientChatData' => $clientChat])
+];
+
+$tabs[] = [
     'id' => 'additional-data',
     'name' => 'Additional data',
     'content' => $this->render('info/additional_data', ['clientChatVisitorData' => $clientChatVisitorData])
