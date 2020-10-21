@@ -30,7 +30,9 @@ class m201020_194648_drop_tbl_client_chat_request extends Migration
             'ccr_event' => $this->tinyInteger(2),
             'ccr_rid' => $this->string(150),
             'ccr_json_data' => $this->text(),
-            'ccr_created_dt' => $this->dateTime()
+            'ccr_created_dt' => $this->dateTime(),
+            'ccr_visitor_id' => $this->string(100),
+            'ccr_job_id' => $this->integer()
         ], $tableOptions);
         $this->createIndex('IND-ccr_event', '{{%client_chat_request}}', ['ccr_event']);
         $this->createIndex('IND-ccr_rid', '{{%client_chat_request}}', ['ccr_rid']);

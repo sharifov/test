@@ -58,7 +58,7 @@ class m201020_085832_migrate_tbl_client_chat_request_to_postgresql extends Migra
             $id = $clientChatRequest['ccr_id'] ?: 'DEFAULT';
             $event = $clientChatRequest['ccr_event'] ?: 'DEFAULT';
             $rid = $clientChatRequest['ccr_rid'] ? "'{$clientChatRequest['ccr_rid']}'" : 'DEFAULT';
-            $jsonData = $clientChatRequest['ccr_json_data'] ? "'{$clientChatRequest['ccr_json_data']}'" : 'DEFAULT';
+            $jsonData = $clientChatRequest['ccr_json_data'] ? "'".str_replace("'", "''", $clientChatRequest['ccr_json_data'])."'" : 'DEFAULT';
             $createdDt = $clientChatRequest['ccr_created_dt'] ? "'{$clientChatRequest['ccr_created_dt']}'" : 'DEFAULT';
             $visitorId = $clientChatRequest['ccr_visitor_id'] ? "'{$clientChatRequest['ccr_visitor_id']}'" : 'DEFAULT';
             $jobId = $clientChatRequest['ccr_job_id'] ?: 'DEFAULT';
