@@ -86,6 +86,7 @@ class ClientChat extends \yii\db\ActiveRecord
     public const STATUS_HOLD = 5;
     public const STATUS_IDLE = 6;
     public const STATUS_CLOSED = 9;
+    public const STATUS_ARCHIVE = 10;
 
     public const MISSED = 1;
 
