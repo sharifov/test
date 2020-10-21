@@ -6,7 +6,7 @@
     {
         this.data = [];
 
-        Array.prototype.keySort = function (keys) {
+        this.data.keySort = function (keys) {
             keys = keys || {};
 
             var obLen = function(obj) {
