@@ -11,6 +11,7 @@ use frontend\widgets\clientChat\ClientChatAccessMessage;
 use frontend\widgets\notification\NotificationMessage;
 use sales\dispatchers\DeferredEventDispatcher;
 use sales\forms\clientChat\RealTimeStartChatForm;
+use sales\helpers\setting\SettingHelper;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
@@ -405,7 +406,7 @@ class ClientChatService
                 throw new \RuntimeException('Unable to determine the previous chat channel');
             }
 
-            $clientChat->close($chatUserAccess->ccua_user_id, ClientChatStatusLog::ACTION_ACCEPT_TRANSFER);
+            $clientChat->archive($chatUserAccess->ccua_user_id, ClientChatStatusLog::ACTION_ACCEPT_TRANSFER);
             $this->clientChatRepository->save($clientChat);
 
             $dto = ClientChatCloneDto::feelInOnTransfer($clientChat);
@@ -493,7 +494,11 @@ class ClientChatService
             throw new \RuntimeException('[Chat Bot] ' . ($botCloseChatResult['data']['message'] ?? 'Unknown error message'));
         }
 
-        $clientChat->close($user->id, ClientChatStatusLog::ACTION_CLOSE, $form->reasonId, $form->comment);
+        if (SettingHelper::isClientChatSoftCloseEnabled()) {
+            $clientChat->close($user->id, ClientChatStatusLog::ACTION_CLOSE, $form->reasonId, $form->comment);
+        } else {
+            $clientChat->archive($user->id, ClientChatStatusLog::ACTION_CLOSE, $form->reasonId, $form->comment);
+        }
 
         $this->clientChatRepository->save($clientChat);
 

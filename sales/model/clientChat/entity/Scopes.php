@@ -78,7 +78,7 @@ class Scopes extends \yii\db\ActiveQuery
 
     public function archive(): self
     {
-        return $this->andWhere(['cch_status_id' => ClientChat::STATUS_CLOSED]);
+        return $this->andWhere(['OR', ['cch_status_id' => ClientChat::STATUS_CLOSED], ['cch_status_id' => ClientChat::STATUS_ARCHIVE]]);
     }
 
     public function byClientId(int $id): self
