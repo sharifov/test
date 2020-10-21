@@ -406,7 +406,7 @@ class ClientChatService
                 throw new \RuntimeException('Unable to determine the previous chat channel');
             }
 
-            $clientChat->close($chatUserAccess->ccua_user_id, ClientChatStatusLog::ACTION_ACCEPT_TRANSFER);
+            $clientChat->archive($chatUserAccess->ccua_user_id, ClientChatStatusLog::ACTION_ACCEPT_TRANSFER);
             $this->clientChatRepository->save($clientChat);
 
             $dto = ClientChatCloneDto::feelInOnTransfer($clientChat);
