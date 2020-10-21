@@ -234,7 +234,7 @@ use yii\web\JsExpression;
                     <?= $filter->getReadUnreadInput(); ?>
                 <?php endif; ?>
 
-                <div class="btn-group">
+                <div class="btn-group check_uncheck_btns">
                     <?php echo Html::button('<span class="fa fa-square-o"></span> Check All', ['class' => 'btn btn-sm btn-default', 'id' => 'btn-check-all']); ?>
 
                     <button type="button" class="btn btn-default dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

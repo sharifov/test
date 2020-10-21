@@ -553,3 +553,7 @@
 ._cc-list-wrapper ._cc-list-item.cc_closed {
     background: #ffefed;
 }
+.check_uncheck_btns .btn:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
