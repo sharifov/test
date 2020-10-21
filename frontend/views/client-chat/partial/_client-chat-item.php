@@ -17,7 +17,7 @@ use yii\helpers\StringHelper;
 <?php foreach ($clientChats as $clientChat): ?>
     <?php
 
-        $isClosed = (int)$clientChat['cch_status_id'] === ClientChat::STATUS_CLOSED;
+        $isClosed = (int)$clientChat['cch_status_id'] === ClientChat::STATUS_CLOSED || (int)$clientChat['cch_status_id'] === ClientChat::STATUS_ARCHIVE;
 
         $clientFullName = $clientChat['client_full_name'] ?: ('Client-' . $clientChat['client_id']);
         $unreadMessages = $clientChat['count_unread_messages'] ?: null;

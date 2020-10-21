@@ -98,12 +98,14 @@ class ClientChat extends \yii\db\ActiveRecord
         self::STATUS_IN_PROGRESS => 'In Progress',
         self::STATUS_HOLD => 'Hold',
         self::STATUS_IDLE => 'Idle',
+        self::STATUS_ARCHIVE => 'Archive',
     ];
 
     private const STATUS_CLASS_LIST = [
         self::STATUS_NEW => 'info',
         self::STATUS_PENDING => 'warning',
         self::STATUS_CLOSED => 'danger',
+        self::STATUS_ARCHIVE => 'danger',
         self::STATUS_TRANSFER => 'warning',
         self::STATUS_IN_PROGRESS => 'success',
         self::STATUS_HOLD => 'info',
@@ -328,6 +330,13 @@ class ClientChat extends \yii\db\ActiveRecord
         $this->recordEvent(new ClientChatManageStatusLogEvent($this, $this->cch_status_id, self::STATUS_CLOSED, $this->cch_owner_user_id, $userId, $description, $this->cch_channel_id, $action, $reasonId));
         $this->recordEvent(new ClientChatSetStatusCloseEvent($this->cch_id));
         $this->cch_status_id = self::STATUS_CLOSED;
+    }
+
+    public function archive(int $userId, int $action, ?int $reasonId = null, ?string $description = null): void
+    {
+        $this->recordEvent(new ClientChatManageStatusLogEvent($this, $this->cch_status_id, self::STATUS_ARCHIVE, $this->cch_owner_user_id, $userId, $description, $this->cch_channel_id, $action, $reasonId));
+        $this->recordEvent(new ClientChatSetStatusCloseEvent($this->cch_id));
+        $this->cch_status_id = self::STATUS_ARCHIVE;
     }
 
     public function transfer(int $userId, int $action, ?int $reasonId, ?string $description = null): void
