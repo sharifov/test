@@ -228,7 +228,7 @@ class ClientChatController extends FController
                     'ajax-history',
                     'ajax-return',
                     'ajax-take',
-
+                    'ajax-reopen-chat'
                 ],
             ],
         ];
