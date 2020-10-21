@@ -155,7 +155,7 @@ $clientChatId = $clientChat ? $clientChat->cch_id : 0;
 $clientChatOwnerId = ($clientChat && $clientChat->cch_owner_user_id) ? $clientChat->cch_owner_user_id : 0;
 $discardUnreadMessageUrl = Url::to(['/client-chat/discard-unread-messages']);
 $readAll = ReadUnreadFilter::ALL;
-$selectAllUrl = Url::to(array_merge(['client-chat/index'], Yii::$app->getRequest()->getQueryParams(), ['act' => 'select-all']));
+$selectAllUrl = Url::to(['client-chat/index']);
 $clientChatMultipleUpdate = Url::to(['client-chat/ajax-multiple-update']);
 $js = <<<JS
 
@@ -262,6 +262,8 @@ $(document).on('click', '.cc_btn_group_filter', function () {
     let groupInput = $(document).find('#{$filter->getGroupInputId()}');
     groupInput.val(newValue);
     window.updateClientChatFilter('{$filter->getId()}', '{$filter->formName()}', '{$loadChannelsUrl}');
+    sessionStorage.selectedChats = '{}';
+    refreshUserSelectedState();
 });
 
 $(document).on('click', '#{$filter->getReadUnreadInputId()}', function () {
@@ -1061,12 +1063,13 @@ $(document).on('click', '#btn-check-all',  function (e) {
             //sessionStorage.removeItem('selectedUsers');
         } else {
             btn.html('<span class="fa fa-spinner fa-spin"></span> Loading ...');
-            
+            let params = new URLSearchParams(window.location.search);
+            console.log(params.toString());
             $.ajax({
              type: 'post',
              dataType: 'json',
              //data: {},
-             url: '$selectAllUrl',
+             url: '$selectAllUrl' + '?' + params.toString() + '&act=select-all',
              success: function (data) {
                 let cnt = Object.keys(data).length
                 if (data) {
