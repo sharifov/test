@@ -167,7 +167,7 @@ class CallGraphsSearch extends CallLogSearch
         $this->createTimeRange = date('Y-m-d 00:00:00', strtotime(self::CREATE_TIME_START_DEFAULT)) . ' - ' . date('Y-m-d 23:59:59');
         $this->betweenHoursFrom = 0;
         $this->betweenHoursTo = 24;
-        $this->recordingDurationFrom = 30;
+        $this->recordingDurationFrom = 0;
         $this->timeZone = $this->timeZone ?? Yii::$app->user->identity->timezone;
     }
 
@@ -266,11 +266,12 @@ class CallGraphsSearch extends CallLogSearch
             $this->createTimeEnd = date('Y-m-d H:i:59', $this->createTimeEnd);
         } else {
             $this->createTimeStart = date('Y-m-d 00:00:00', strtotime(self::CREATE_TIME_START_DEFAULT));
-            $this->createTimeEnd = date('Y-m-d H:i:s');
+            $this->createTimeEnd = date('Y-m-d H:i:59');
             $this->createTimeRange = $this->createTimeStart . ' - ' . $this->createTimeEnd;
         }
 
-        $timeZone = Employee::getUtcOffsetDst($this->timeZone, $this->createTimeStart);
+        //$timeZone = Employee::getUtcOffsetDst($this->timeZone, $this->createTimeStart);
+        $timeZone = $this->getTimeZoneOffset();
 
         $parentQuery = self::find()->select([
             ''. $this->setGroupingParam() .' AS `group`',
@@ -305,7 +306,7 @@ class CallGraphsSearch extends CallLogSearch
 
         if ($this->cl_user_id) {
             $parentQuery->andWhere(['cl_user_id' => $this->cl_user_id]);
-        } else if ($this->userGroupIds) {
+        } elseif ($this->userGroupIds) {
             $userIdsByGroup = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id) as cl_user_id'])->where(['ugs_group_id' => $this->userGroupIds])->asArray()->all();
             if ($userIdsByGroup) {
                 $parentQuery->andWhere(['in', ['cl_user_id'], $userIdsByGroup]);
@@ -364,7 +365,7 @@ class CallGraphsSearch extends CallLogSearch
 
         if ($this->cl_user_id) {
             $childQuery->andWhere(['cl_user_id' => $this->cl_user_id]);
-        } else if ($this->userGroupIds) {
+        } elseif ($this->userGroupIds) {
             $userIdsByGroup = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id) as cl_user_id'])->where(['ugs_group_id' => $this->userGroupIds])->asArray()->all();
             if ($userIdsByGroup) {
                 $childQuery->andWhere(['in', ['cl_user_id'], $userIdsByGroup]);
@@ -396,12 +397,14 @@ class CallGraphsSearch extends CallLogSearch
 
     private function setGroupingParam()
     {
-        $timeZone = Employee::getUtcOffsetDst($this->timeZone, $this->createTimeStart);
+        //$timeZone = Employee::getUtcOffsetDst($this->timeZone, $this->createTimeStart);
+        $timeZone = $this->getTimeZoneOffset();
 
         $dateFormat = $this->getDateFormat($this->callGraphGroupBy) ?? $this->getDefaultDateFormat();
         if ((int)$this->callGraphGroupBy === self::DATE_FORMAT_WEEKS) {
             return "concat(str_to_date(date_format(convert_tz(cl_call_created_dt, '+00:00', '".$timeZone."'), '%Y %v Monday'), '%x %v %W'), '/', str_to_date(date_format(convert_tz(cl_call_created_dt, '+00:00', '".$timeZone."'), '%Y %v Sunday'), '%x %v %W'))";
-        } if ((int)$this->callGraphGroupBy === self::DATE_FORMAT_WEEKDAYS){
+        }
+        if ((int)$this->callGraphGroupBy === self::DATE_FORMAT_WEEKDAYS) {
             return "WEEKDAY(convert_tz(cl_call_created_dt, '+00:00', '".$timeZone."'))";
         } else {
             return "date_format(convert_tz(cl_call_created_dt, '+00:00', '".$timeZone."'), '$dateFormat')";
@@ -413,7 +416,7 @@ class CallGraphsSearch extends CallLogSearch
         $yFrom = date('y', strtotime($this->createTimeStart));
         $yTo = date('y', strtotime($this->createTimeEnd));
         $partitions = 'y';
-        if ($yFrom == $yTo){
+        if ($yFrom == $yTo) {
             $nextYear = (int)$yFrom + 1 ;
             $partitions = 'y' . $nextYear ;
         } else {
@@ -487,4 +490,13 @@ class CallGraphsSearch extends CallLogSearch
         return self::DATE_FORMAT_LIST[self::DATE_FORMAT_DAYS];
     }
 
+    private function getTimeZoneOffset()
+    {
+        $timezone = new \DateTimeZone($this->timeZone);
+        $seconds = $timezone->getOffset(new \DateTime);
+        $sign = ($seconds > 0) ? '+' : '-';
+        $hours = floor(abs($seconds) / 3600);
+        $minutes = floor((abs($seconds) / 60) % 60);
+        return $sign . sprintf("%02d:%02d", $hours, $minutes);
+    }
 }
