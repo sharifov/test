@@ -27,6 +27,6 @@ return [
     ClientChatManageStatusLogEvent::class => [ClientChatManageStatusLogListener::class],
     ClientChatSetStatusCloseEvent::class => [ClientChatSetStatusCloseListener::class],
     ClientChatSetStatusIdleEvent::class => [ClientChatSetStatusIdleListener::class],
-    ClientChatSetStatusArchivedEvent::class => [ClientChatSetStatusCloseListener::class, ClientChatEndConversationListener::class],
+    ClientChatSetStatusArchivedEvent::class => [ClientChatEndConversationListener::class],
 //    ClientChatOwnerAssignedEvent::class => [ClientChatRemoveOldOwnerUnreadMessagesListener::class],
 ];
