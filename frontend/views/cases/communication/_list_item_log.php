@@ -154,7 +154,7 @@ $fromType = 'client';
 		}
 		?>
 		<div class="chat__message chat__message--<?=($sms->s_type_id == Sms::TYPE_INBOX ? 'client' : 'system')?> chat__message--sms">
-			<div class="chat__icn"><i class="fa fa-comments-o"></i></div>
+			<div class="chat__icn"><i class="fas fa-sms"></i></div>
 
 			<i class="chat__status chat__status--<?=$statusClass?> fa fa-circle" data-toggle="tooltip" title="<?=Html::encode($statusTitle)?>" data-placement="left" data-original-title="<?=Html::encode($statusTitle)?>"></i>
 			<div class="chat__message-heading">
