@@ -25,15 +25,15 @@ class UserVoiceMailController extends FController
     */
     public function behaviors(): array
     {
-		$behaviors = [
-			'verbs' => [
-				'class' => VerbFilter::class,
-				'actions' => [
-					'delete' => ['POST'],
-				],
-			],
-		];
-		return ArrayHelper::merge(parent::behaviors(), $behaviors);
+        $behaviors = [
+            'verbs' => [
+                'class' => VerbFilter::class,
+                'actions' => [
+                    'delete' => ['POST'],
+                ],
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**
@@ -72,16 +72,16 @@ class UserVoiceMailController extends FController
         $model->uvm_say_voice = 'alice';
 
         if ($model->load(Yii::$app->request->post())) {
-			$model->recordFile = UploadedFile::getInstance($model, 'recordFile');
-			try {
-				if($model->validate() && $model->save(false)) {
-					return $this->redirect(['view', 'id' => $model->uvm_id]);
-				}
-			} catch (\Throwable $e) {
-				AppHelper::throwableLogger($e, 'UserVoiceMail::save');
-				$model->addError('general', 'Internal Server Error');
-				$model->deleteRecord();
-			}
+            $model->recordFile = UploadedFile::getInstance($model, 'recordFile');
+            try {
+                if ($model->validate() && $model->save(false)) {
+                    return $this->redirect(['view', 'id' => $model->uvm_id]);
+                }
+            } catch (\Throwable $e) {
+                AppHelper::throwableLogger($e, 'UserVoiceMail::save');
+                $model->addError('general', 'Internal Server Error');
+                $model->deleteRecord();
+            }
         }
 
         $languages = Language::getList();
@@ -89,7 +89,7 @@ class UserVoiceMailController extends FController
 
         return $this->render('create', [
             'model' => $model,
-			'languageList' => $languages
+            'languageList' => $languages
         ]);
     }
 
@@ -103,26 +103,26 @@ class UserVoiceMailController extends FController
         $model = UserVoiceMailForm::findOne($id);
 
         if ($model) {
-			if ($model->load(Yii::$app->request->post())) {
-				$model->recordFile = UploadedFile::getInstance($model, 'recordFile');
-				try {
-					if($model->validate() && $model->updateRow()) {
-						return $this->redirect(['view', 'id' => $model->uvm_id]);
-					}
-				} catch (\Throwable $e) {
-					AppHelper::throwableLogger($e, 'UserVoiceMail::save');
-					$model->addError('general', 'Internal Server Error');
-				}
-			}
-		} else {
-			throw new NotFoundHttpException('The requested page does not exist.');
-		}
+            if ($model->load(Yii::$app->request->post())) {
+                $model->recordFile = UploadedFile::getInstance($model, 'recordFile');
+                try {
+                    if ($model->validate() && $model->updateRow()) {
+                        return $this->redirect(['view', 'id' => $model->uvm_id]);
+                    }
+                } catch (\Throwable $e) {
+                    AppHelper::throwableLogger($e, 'UserVoiceMail::save');
+                    $model->addError('general', 'Internal Server Error');
+                }
+            }
+        } else {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
 
-		$languages = Language::getList();
-		return $this->render('update', [
+        $languages = Language::getList();
+        return $this->render('update', [
             'model' => $model,
-			'languageList' => $languages
-		]);
+            'languageList' => $languages
+        ]);
     }
 
     /**
@@ -139,86 +139,84 @@ class UserVoiceMailController extends FController
         return $this->redirect(['index']);
     }
 
-	/**s
-	 * @return string
-	 * @throws BadRequestHttpException
-	 */
+    /**s
+     * @return string
+     * @throws BadRequestHttpException
+     */
     public function actionAjaxCreate(): string
-	{
-		$userId = Yii::$app->request->get('uid');
-		if (!$user = Employee::findOne($userId)) {
-			throw new BadRequestHttpException('Invalid User Id: ' . $userId, 1);
-		}
+    {
+        $userId = Yii::$app->request->get('uid');
+        if (!$user = Employee::findOne($userId)) {
+            throw new BadRequestHttpException('Invalid User Id: ' . $userId, 1);
+        }
 
-		$userVoiceMail = new UserVoiceMailForm();
-		$userVoiceMail->uvm_user_id = $userId;
-		$userVoiceMail->uvm_max_recording_time = 10;
+        $userVoiceMail = new UserVoiceMailForm();
+        $userVoiceMail->uvm_user_id = $userId;
+        $userVoiceMail->uvm_max_recording_time = 10;
 
-		if ($userVoiceMail->load(Yii::$app->request->post())) {
-			$userVoiceMail->recordFile = UploadedFile::getInstance($userVoiceMail, 'recordFile');
-			try {
-				if($userVoiceMail->validate() && $userVoiceMail->save(false)) {
-					return 'Success <script>$("#modal-df").modal("hide"); createNotify("Success", "Voice Mail created successfully", "success");</script>';
-				}
-			} catch (\Throwable $e) {
-				AppHelper::throwableLogger($e, 'UserVoiceMail::save');
-				$userVoiceMail->addError('general', 'Internal Server Error');
-				$userVoiceMail->deleteRecord();
-			}
-		}
+        if ($userVoiceMail->load(Yii::$app->request->post())) {
+            $userVoiceMail->recordFile = UploadedFile::getInstance($userVoiceMail, 'recordFile');
+            try {
+                if ($userVoiceMail->validate() && $userVoiceMail->save(false)) {
+                    return 'Success <script>$("#modal-df").modal("hide"); createNotify("Success", "Voice Mail created successfully", "success");</script>';
+                }
+            } catch (\Throwable $e) {
+                AppHelper::throwableLogger($e, 'UserVoiceMail::save');
+                $userVoiceMail->addError('general', 'Internal Server Error');
+                $userVoiceMail->deleteRecord();
+            }
+        }
 
-		return $this->renderAjax('create_ajax', [
-			'model' => $userVoiceMail,
-		]);
-	}
+        return $this->renderAjax('create_ajax', [
+            'model' => $userVoiceMail,
+        ]);
+    }
 
-	public function actionAjaxUpdate(): string
-	{
-		$id = Yii::$app->request->get('id');
+    public function actionAjaxUpdate(): string
+    {
+        $id = Yii::$app->request->get('id');
 
-		$model = UserVoiceMailForm::findOne($id);
+        $model = UserVoiceMailForm::findOne($id);
 
-		if ($model) {
+        if ($model) {
+            if ($model->load(Yii::$app->request->post())) {
+                $model->recordFile = UploadedFile::getInstance($model, 'recordFile');
+                try {
+                    if ($model->validate() && $model->updateRow()) {
+                        return 'Success <script>$("#modal-df").modal("hide"); createNotify("Success", "Voice Mail updated successfully", "success");</script>';
+                    }
+                } catch (\Throwable $e) {
+                    AppHelper::throwableLogger($e, 'UserVoiceMail::save');
+                    $model->addError('general', 'Internal Server Error');
+                }
+            }
+        } else {
+            $model->addError('general', 'User Voice Mail entity not found');
+        }
+        return $this->renderAjax('update_ajax', [
+            'model' => $model,
+        ]);
+    }
 
-			if ($model->load(Yii::$app->request->post())) {
-				$model->recordFile = UploadedFile::getInstance($model, 'recordFile');
-				try {
-					if($model->validate() && $model->updateRow()) {
-						return 'Success <script>$("#modal-df").modal("hide"); createNotify("Success", "Voice Mail updated successfully", "success");</script>';
-					}
-				} catch (\Throwable $e) {
-					AppHelper::throwableLogger($e, 'UserVoiceMail::save');
-					$model->addError('general', 'Internal Server Error');
-				}
-			}
+    /**
+     * @return string
+     * @throws BadRequestHttpException
+     * @throws NotFoundHttpException
+     * @throws StaleObjectException
+     * @throws \Throwable
+     */
+    public function actionAjaxDelete()
+    {
+        $id = Yii::$app->request->get('id');
 
-		} else {
-			$model->addError('general', 'User Voice Mail entity not found');
-		}
-		return $this->renderAjax('update_ajax', [
-			'model' => $model,
-		]);
-	}
+        $model = $this->findModel($id);
 
-	/**
-	 * @return string
-	 * @throws BadRequestHttpException
-	 * @throws NotFoundHttpException
-	 * @throws StaleObjectException
-	 * @throws \Throwable
-	 */
-	public function actionAjaxDelete()
-	{
-		$id = Yii::$app->request->get('id');
+        if ($model->delete()) {
+            return $this->asJson(['error' => false]);
+        }
 
-		$model = $this->findModel($id);
-
-		if ($model->delete()) {
-			return $this->asJson(['error' => false]);
-		}
-
-		return $this->asJson(['error' => true, 'message' => $model->getErrorSummary(false)[0]]);
-	}
+        return $this->asJson(['error' => true, 'message' => $model->getErrorSummary(false)[0]]);
+    }
 
     /**
      * @param integer $id
