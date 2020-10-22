@@ -12,6 +12,7 @@ use sales\entities\cases\Cases;
 use sales\entities\EventTrait;
 use sales\helpers\clientChat\ClientChatHelper;
 use sales\model\clientChat\ClientChatCodeException;
+use sales\model\clientChat\event\ClientChatCloseEvent;
 use sales\model\clientChat\event\ClientChatManageStatusLogEvent;
 use sales\model\clientChat\event\ClientChatOwnerAssignedEvent;
 use sales\model\clientChat\event\ClientChatSetStatusArchivedEvent;
@@ -329,15 +330,14 @@ class ClientChat extends \yii\db\ActiveRecord
     public function close(int $userId, int $action, ?int $reasonId = null, ?string $description = null): void
     {
         $this->recordEvent(new ClientChatManageStatusLogEvent($this, $this->cch_status_id, self::STATUS_CLOSED, $this->cch_owner_user_id, $userId, $description, $this->cch_channel_id, $action, $reasonId));
-        $this->recordEvent(new ClientChatSetStatusCloseEvent($this->cch_id));
+        $this->recordEvent(new ClientChatCloseEvent($this->cch_id, true));
         $this->cch_status_id = self::STATUS_CLOSED;
     }
 
     public function archive(?int $userId, int $action, ?int $reasonId = null, ?string $description = null): void
     {
         $this->recordEvent(new ClientChatManageStatusLogEvent($this, $this->cch_status_id, self::STATUS_ARCHIVE, $this->cch_owner_user_id, $userId, $description, $this->cch_channel_id, $action, $reasonId));
-        $this->recordEvent(new ClientChatSetStatusCloseEvent($this->cch_id));
-        $this->recordEvent(new ClientChatSetStatusArchivedEvent($this->cch_id));
+        $this->recordEvent(new ClientChatCloseEvent($this->cch_id, false));
         $this->cch_status_id = self::STATUS_ARCHIVE;
     }
 

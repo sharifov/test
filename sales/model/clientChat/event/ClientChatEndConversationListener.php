@@ -2,7 +2,9 @@
 
 namespace sales\model\clientChat\event;
 
+use common\components\jobs\clientChat\ClientChatEndConversationJob;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
+use Yii;
 
 /**
  * Class ClientChatEndConversationListener
@@ -21,23 +23,18 @@ class ClientChatEndConversationListener
         $this->clientChatRepository = $clientChatRepository;
     }
 
-    public function handle(ClientChatSetStatusArchivedEvent $event): void
+    public function handle(ClientChatCloseEvent $event): void
     {
         try {
-            if ($clientChat = $this->clientChatRepository->findById($event->clientChatId)) {
-                if (!$clientChat->ccv || !$clientChat->ccv->ccvCvd || !$clientChat->ccv->ccvCvd->cvd_visitor_rc_id) {
-                    throw new \RuntimeException('Visitor RC id is not found');
-                }
+            $clientChatEndConversationJob = new ClientChatEndConversationJob();
+            $clientChatEndConversationJob->clientChatId = $event->clientChatId;
+            $clientChatEndConversationJob->shallowClose = $event->shallowClose;
 
-                $botCloseChatResult = \Yii::$app->chatBot->endConversation($clientChat->cch_rid, $clientChat->ccv->ccvCvd->cvd_visitor_rc_id, false);
-                if ($botCloseChatResult['error']) {
-                    throw new \RuntimeException('[Chat Bot] ' . $botCloseChatResult['error']['message'] ?? 'Unknown error message');
-                }
-            }
+            Yii::$app->queue_client_chat_job->priority(10)->push($clientChatEndConversationJob);
         } catch (\Throwable $throwable) {
             \Yii::error(
                 $throwable,
-                'ClientChatListener:ClientChatSetStatusArchivedListener'
+                'ClientChatListener:ClientChatEndConversationListener'
             );
         }
     }
