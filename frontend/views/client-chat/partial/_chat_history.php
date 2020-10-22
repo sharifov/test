@@ -10,12 +10,12 @@ $date = $history[0]->ccm_sent_dt ?? null;
 $iDate = null;
 $rcUrl = Yii::$app->rchat->host  . '/home';
 $userRcAuthToken = Auth::user()->userProfile ? Auth::user()->userProfile->up_rc_auth_token : '';
-$readOnly = (!$clientChat->isOwner(Auth::id()) ? '&readonly=true' : '');
+$readOnly = '&readonly=true';
 ?>
 
 <?php /* if ($history && $clientChat): ?>
 <div class="row">
-	<div class="col-md-12">
+    <div class="col-md-12">
         <div class="_cc_history">
             <p class="text-center _cc_start_conv">Start of conversation</p>
 
@@ -57,16 +57,16 @@ $readOnly = (!$clientChat->isOwner(Auth::id()) ? '&readonly=true' : '');
             <?php endforeach; ?>
 
         </div>
-	</div>
+    </div>
 </div>
 <?php else: ?>
 <?= \yii\bootstrap4\Alert::widget([
-		'options' => [
-			'class' => 'alert-danger',
-			'delay' => 4000
+        'options' => [
+            'class' => 'alert-danger',
+            'delay' => 4000
 
-		],
-		'body' => 'Chat is undefined or unable to find chat history',
+        ],
+        'body' => 'Chat is undefined or unable to find chat history',
         'closeButton' => false
     ]) ?>
 <?php endif; */ ?>
@@ -74,13 +74,13 @@ $readOnly = (!$clientChat->isOwner(Auth::id()) ? '&readonly=true' : '');
     <iframe class="_rc-iframe" onload="removeCcLoadFromIframe()" src="<?= $rcUrl ?>?&layout=embedded<?= $readOnly ?>&resumeToken=<?= $userRcAuthToken ?>&goto=<?= urlencode('/live/'. $clientChat->cch_rid . '?layout=embedded' . $readOnly) ?>" id="_rc-<?= $clientChat->cch_id ?>" style="border: none; width: 100%; height: 100%;" ></iframe>
 <?php else: ?>
 	<?= \yii\bootstrap4\Alert::widget([
-		'options' => [
-			'class' => 'alert-danger',
-			'delay' => 4000
+        'options' => [
+            'class' => 'alert-danger',
+            'delay' => 4000
 
-		],
-		'body' => 'Chat is undefined or unable to find chat history',
-		'closeButton' => false
-	]) ?>
+        ],
+        'body' => 'Chat is undefined or unable to find chat history',
+        'closeButton' => false
+    ]) ?>
 <?php endif; ?>
 

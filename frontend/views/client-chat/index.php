@@ -100,15 +100,17 @@ $clientChatReturnUrl = Url::toRoute(['/client-chat/ajax-return']);
          if ($accessChatError) {
              $this->registerJs('createNotify("Client chat view", "You don\'t have access to this chat", "error")', View::POS_LOAD);
          } elseif ($clientChat) {
-             if ($clientChat->isClosed()) {
+             if ($clientChat->isClosed() || $clientChat->isArchive()) {
                  $iframeData = $this->render('partial/_chat_history', ['clientChat' => $clientChat]);
              } else {
                  $readOnly = (!$clientChat->isOwner(Auth::id()) ? '&readonly=true' : '');
                  $iframeData = '<iframe class="_rc-iframe" src="' . $rcUrl . '?layout=embedded' . $readOnly . '&resumeToken=' . $userRcAuthToken . '&goto=' . urlencode('/live/' . $clientChat->cch_rid . '?layout=embedded' . $readOnly) . '" id="_rc-' . $clientChat->cch_id . '" style="border: none; width: 100%; height: 100%;" ></iframe >';
              }
              if ($client) {
-                 $infoData = $this->render('partial/_client-chat-info',
-                     ['clientChat' => $clientChat, 'client' => $client, 'actionPermissions' => $actionPermissions]);
+                 $infoData = $this->render(
+                     'partial/_client-chat-info',
+                     ['clientChat' => $clientChat, 'client' => $client, 'actionPermissions' => $actionPermissions]
+                 );
              }
              if ($actionPermissions->canNoteView($clientChat) || $actionPermissions->canNoteAdd($clientChat) || $actionPermissions->canNoteDelete($clientChat)) {
                  $noteData = $this->render('partial/_client-chat-note', [

@@ -431,6 +431,11 @@ class ClientChat extends \yii\db\ActiveRecord
         return (int) $this->cch_status_id === self::STATUS_IDLE;
     }
 
+    public function isArchive(): bool
+    {
+        return (int) $this->cch_status_id === self::STATUS_ARCHIVE;
+    }
+
     public static function getStatusClassList(): array
     {
         return self::STATUS_CLASS_LIST;
