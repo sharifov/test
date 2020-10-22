@@ -13,13 +13,13 @@ use yii\helpers\VarDumper;
  */
 class ClientChatLastMessageRepository extends Repository
 {
-	public function save(ClientChatLastMessage $clientChatLastMessage, bool $runValidation = false): ClientChatLastMessage
-	{
-		if (!$clientChatLastMessage->save($runValidation)) {
-			throw new \RuntimeException('ClientChatLastMessage saving failed');
-		}
-		return $clientChatLastMessage;
-	}
+    public function save(ClientChatLastMessage $clientChatLastMessage, bool $runValidation = false): ClientChatLastMessage
+    {
+        if (!$clientChatLastMessage->save($runValidation)) {
+            throw new \RuntimeException('ClientChatLastMessage saving failed');
+        }
+        return $clientChatLastMessage;
+    }
 
     public function createOrUpdateByMessage(ClientChatMessage $clientChatMessage): ?ClientChatLastMessage
     {
@@ -38,10 +38,25 @@ class ClientChatLastMessageRepository extends Repository
                 Yii::error(VarDumper::dumpAsString([
                     'Throwable' => $throwable,
                     'Errors' => $clientChatLastMessage->getErrors(),
-                ]),'ClientChatLastMessageRepository:createOrUpdateByMessage:save');
+                ]), 'ClientChatLastMessageRepository:createOrUpdateByMessage:save');
             }
         }
         return null;
+    }
+
+    public function getByChatId(int $chatId): ?ClientChatLastMessage
+    {
+        return ClientChatLastMessage::findOne(['cclm_cch_id' => $chatId]);
+    }
+
+    public function cloneToNewChat(ClientChatLastMessage $clientChatLastMessage, int $chatId): ClientChatLastMessage
+    {
+        return ClientChatLastMessage::create(
+            $chatId,
+            $clientChatLastMessage->cclm_type_id,
+            $clientChatLastMessage->cclm_message,
+            $clientChatLastMessage->cclm_dt
+        );
     }
 
     private static function getTypeByMessage(ClientChatMessage $clientChatMessage): int

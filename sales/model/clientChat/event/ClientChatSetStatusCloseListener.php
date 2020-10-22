@@ -13,20 +13,22 @@ class ClientChatSetStatusCloseListener
     /**
      * @var ClientChatLastMessageRepository
      */
-    private ClientChatLastMessageRepository $ClientChatLastMessageRepository;
+    private ClientChatLastMessageRepository $clientChatLastMessageRepository;
 
     public function __construct(ClientChatLastMessageRepository $clientChatLastMessageRepository)
-	{
-		$this->ClientChatLastMessageRepository = $clientChatLastMessageRepository;
-	}
+    {
+        $this->clientChatLastMessageRepository = $clientChatLastMessageRepository;
+    }
 
-	public function handle(ClientChatSetStatusCloseEvent $event): void
-	{
-		try {
-            $this->ClientChatLastMessageRepository->removeByClientChat($event->clientChatId);
-		} catch (\Throwable $throwable) {
-			\Yii::error($throwable,
-			'ClientChatListener:ClientChatSetStatusCloseListener');
-		}
-	}
+    public function handle(ClientChatSetStatusCloseEvent $event): void
+    {
+        try {
+            $this->clientChatLastMessageRepository->removeByClientChat($event->clientChatId);
+        } catch (\Throwable $throwable) {
+            \Yii::error(
+                $throwable,
+                'ClientChatListener:ClientChatSetStatusCloseListener'
+            );
+        }
+    }
 }

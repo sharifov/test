@@ -22,6 +22,8 @@ use sales\model\clientChatCase\entity\ClientChatCase;
 use sales\model\clientChatCase\entity\ClientChatCaseRepository;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatChannelTransfer\ClientChatChannelTransferRule;
+use sales\model\clientChatLastMessage\ClientChatLastMessageRepository;
+use sales\model\clientChatLastMessage\entity\ClientChatLastMessage;
 use sales\model\clientChatLead\entity\ClientChatLead;
 use sales\model\clientChatLead\entity\ClientChatLeadRepository;
 use sales\model\clientChatNote\ClientChatNoteRepository;
@@ -66,6 +68,7 @@ use yii\helpers\VarDumper;
  * @property ClientChatStatusLogRepository $clientChatStatusLogRepository
  * @property ClientChatMessageService $clientChatMessageService
  * @property ClientChatUnreadRepository $clientChatUnreadRepository
+ * @property ClientChatLastMessageRepository $clientChatLastMessageRepository
  */
 class ClientChatService
 {
@@ -129,6 +132,7 @@ class ClientChatService
     private ClientChatMessageService $clientChatMessageService;
 
     private ClientChatUnreadRepository $clientChatUnreadRepository;
+    private ClientChatLastMessageRepository $clientChatLastMessageRepository;
 
     public function __construct(
         ClientChatChannelRepository $clientChatChannelRepository,
@@ -146,7 +150,8 @@ class ClientChatService
         ClientChatNoteRepository $clientChatNoteRepository,
         ClientChatStatusLogRepository $clientChatStatusLogRepository,
         ClientChatMessageService $clientChatMessageService,
-        ClientChatUnreadRepository $clientChatUnreadRepository
+        ClientChatUnreadRepository $clientChatUnreadRepository,
+        ClientChatLastMessageRepository $clientChatLastMessageRepository
     ) {
         $this->clientChatChannelRepository = $clientChatChannelRepository;
         $this->clientChatRepository = $clientChatRepository;
@@ -164,6 +169,7 @@ class ClientChatService
         $this->clientChatStatusLogRepository = $clientChatStatusLogRepository;
         $this->clientChatMessageService = $clientChatMessageService;
         $this->clientChatUnreadRepository = $clientChatUnreadRepository;
+        $this->clientChatLastMessageRepository = $clientChatLastMessageRepository;
     }
 
     /**
@@ -405,6 +411,7 @@ class ClientChatService
             if (!$oldChannelId) {
                 throw new \RuntimeException('Unable to determine the previous chat channel');
             }
+            $lastMessage = $this->clientChatLastMessageRepository->getByChatId($clientChat->cch_id);
 
             $clientChat->archive($chatUserAccess->ccua_user_id, ClientChatStatusLog::ACTION_ACCEPT_TRANSFER);
             $this->clientChatRepository->save($clientChat);
@@ -451,6 +458,11 @@ class ClientChatService
             }
 
             $this->assignAgentToRcChannel($newClientChat->cch_rid, $newClientChat->cchOwnerUser->userProfile->up_rc_user_id ?? '');
+
+            if ($lastMessage) {
+                $lastMessageNew = $this->clientChatLastMessageRepository->cloneToNewChat($lastMessage, $newClientChat->cch_id);
+                $this->clientChatLastMessageRepository->save($lastMessageNew);
+            }
 
             $data = ClientChatAccessMessage::agentTransferAccepted($clientChat, $userAccess->ccuaUser);
             Notifications::publish('refreshChatPage', ['user_id' => $clientChat->cch_owner_user_id], ['data' => $data]);

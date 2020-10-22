@@ -61,18 +61,18 @@ class ClientChatLastMessage extends ActiveRecord
     }
 
     public function behaviors(): array
-	{
-		return [
-			'timestamp' => [
-				'class' => TimestampBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['cclm_dt'],
-					ActiveRecord::EVENT_BEFORE_UPDATE => ['cclm_dt'],
-				],
-				'value' => date('Y-m-d H:i:s'),
-			],
-		];
-	}
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['cclm_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['cclm_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s'),
+            ],
+        ];
+    }
 
     public function getClientChat(): ActiveQuery
     {
@@ -90,5 +90,15 @@ class ClientChatLastMessage extends ActiveRecord
     public static function getTypeName(int $typeId): string
     {
         return self::TYPE_LIST[$typeId] ?? '-';
+    }
+
+    public static function create(int $cchId, int $typeId, string $message, ?string $dt): self
+    {
+        $model = new static();
+        $model->cclm_cch_id = $cchId;
+        $model->cclm_type_id = $typeId;
+        $model->cclm_message = $message;
+        $model->cclm_dt = $dt;
+        return $model;
     }
 }
