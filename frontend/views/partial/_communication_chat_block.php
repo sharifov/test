@@ -25,13 +25,22 @@ if ($lastMessageDate) {
     $duration = Yii::$app->formatter->asDuration($durationTime);
 }
 
+$started = ' started';
+if ($firstSourceStarted = $chat->getFirstHumanSourceTypeStarted()) {
+    if ($firstSourceStarted === ClientChat::SOURCE_TYPE_CLIENT) {
+        $started = ' answered';
+    } elseif ($firstSourceStarted === ClientChat::SOURCE_TYPE_AGENT) {
+        $started = ' started';
+    }
+}
+
 ?>
 <div class="chat__message chat__message--client chat__message--phone">
     <div class="chat__icn"><i class="fa fa-comments-o"> </i></div>
     <?php // <i class="chat__status chat__status--success fa fa-circle" data-toggle="tooltip" title="" data-placement="right" data-original-title="COMPLETED - 26-Mar-2020 [19:31] - Call ID: 3363432"></i>?>
     <div class="chat__message-heading">
         <div class="chat__sender">
-            <?= $chat->cchChannel->ccc_name ?> chat from <?= $chat->cchClient->getShortName()?>
+            <?= $chat->cchChannel->ccc_name ?> chat <?= $started ?> by <?= $owner ?>
         </div>
         <div class="chat__date">
             Id: <?= $chat->cch_id ?>

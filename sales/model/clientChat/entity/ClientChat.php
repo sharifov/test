@@ -76,6 +76,7 @@ use yii\helpers\Html;
  * @property ClientChatLastMessage $lastMessage
  * @property ClientChatHold $clientChatHold
  * @property ClientChatUnread $unreadMessage
+ * @property ClientChat $parent
  */
 class ClientChat extends \yii\db\ActiveRecord
 {
@@ -288,6 +289,11 @@ class ClientChat extends \yii\db\ActiveRecord
     public function getUnreadMessage(): ActiveQuery
     {
         return $this->hasOne(ClientChatUnread::class, ['ccu_cc_id' => 'cch_id']);
+    }
+
+    public function getParent(): ActiveQuery
+    {
+        return $this->hasOne(self::class, ['cch_id' => 'cch_parent_id']);
     }
 
     public static function getStatusList(): array
@@ -581,5 +587,25 @@ class ClientChat extends \yii\db\ActiveRecord
     public static function getStatusNameById(?int $statusId): string
     {
         return self::getStatusList()[$statusId] ?? 'unknown status';
+    }
+
+    public function getFirstHumanSourceTypeStarted(): ?int
+    {
+        if ($this->isHumanStarted()) {
+            return $this->cch_source_type_id;
+        }
+        $parent = $this->parent;
+        while ($parent) {
+            if ($parent->isHumanStarted()) {
+                return $parent->cch_source_type_id;
+            }
+            $parent = $parent->parent;
+        }
+        return null;
+    }
+
+    public function isHumanStarted(): bool
+    {
+        return $this->cch_source_type_id === self::SOURCE_TYPE_AGENT || $this->cch_source_type_id === self::SOURCE_TYPE_CLIENT ;
     }
 }
