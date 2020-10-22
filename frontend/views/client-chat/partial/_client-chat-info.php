@@ -71,7 +71,7 @@ $guard = new ClientChatManageGuard($statusLogRepository);
                                     'data-cch-id' => $clientChat->cch_id
                                 ]) ?>
                             <?php endif; ?>
-                        <?php elseif (!$clientChat->isClosed()): ?>
+                        <?php elseif (!$clientChat->isClosed() && !$clientChat->isArchive()): ?>
                             <?php if ($actionPermissions->canClose($clientChat)): ?>
                                 <?php echo Html::a('<i class="fa fa-times-circle"></i> Close Chat', null, [
                                     'class' => 'dropdown-item text-danger cc_close',
