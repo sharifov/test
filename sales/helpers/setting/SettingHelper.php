@@ -60,8 +60,8 @@ class SettingHelper
         return (bool)(\Yii::$app->params['settings']['client_chat_soft_close_enabled'] ?? true);
     }
 
-    public static function getClientChatSoftCloseTimeoutMinutes(): int
+    public static function getClientChatSoftCloseTimeoutHours(): int
     {
-        return (int)(\Yii::$app->params['settings']['client_chat_soft_close_timeout_minutes'] ?? 20);
+        return (int)(\Yii::$app->params['settings']['client_chat_soft_close_timeout_hours'] ?? 1);
     }
 }

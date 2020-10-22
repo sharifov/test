@@ -9,6 +9,7 @@ use frontend\widgets\clientChat\ClientChatAccessMessage;
 use sales\helpers\app\AppHelper;
 use sales\helpers\setting\SettingHelper;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChat\entity\ClientChatQuery;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatHold\entity\ClientChatHold;
@@ -18,6 +19,7 @@ use sales\services\clientChatChannel\ClientChatChannelCodeException;
 use sales\services\clientChatChannel\ClientChatChannelService;
 use Yii;
 use yii\console\Controller;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
 
@@ -417,5 +419,47 @@ class ClientChatController extends Controller
             'Execute Time' => $time . ' sec',
             'End Time' => date('Y-m-d H:i:s'),
         ]), 'info\ClientChatController:actionHoldToProgress:result');
+    }
+
+    public function actionCloseToArchiveOnTimeout(int $hourTimeout = 0): void
+    {
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
+
+        $processed = $failed = 0;
+        $timeStart = microtime(true);
+
+        $closedChats = ClientChatQuery::getLastUpdatedClosedChatsIdsByTimeout($hourTimeout ?: SettingHelper::getClientChatSoftCloseTimeoutHours());
+
+        foreach ($closedChats as $clientChat) {
+            try {
+                $clientChat->archive(null, ClientChatStatusLog::ACTION_TIMEOUT_FINISH);
+                $this->clientChatRepository->save($clientChat);
+
+                $processed++;
+
+                Notifications::pub(
+                    ['chat-' . $clientChat->cch_id],
+                    'refreshChatPage',
+                    ['data' => ClientChatAccessMessage::chatInProgress($clientChat->cch_id)]
+                );
+            } catch (\Throwable $e) {
+                Yii::error(
+                    AppHelper::throwableFormatter($e),
+                    'ClientChatController:actionCloseToArchiveOnTimeout:throwable'
+                );
+                echo Console::renderColoredString('%r --- Error : ' . $e->getMessage() . ' %n'), PHP_EOL;
+                $failed++;
+            }
+        }
+
+        $timeEnd = microtime(true);
+        $time = number_format(round($timeEnd - $timeStart, 2), 2);
+
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .
+            ' s] %g Processed: %w[' . $processed . '] %g Failed: %w[' . $failed . '] %n'), PHP_EOL;
+
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
     }
 }
