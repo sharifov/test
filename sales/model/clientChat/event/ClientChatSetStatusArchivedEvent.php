@@ -8,7 +8,7 @@ namespace sales\model\clientChat\event;
  *
  * @property int $clientChatId
  */
-class ClientChatSetStatusCloseEvent
+class ClientChatSetStatusArchivedEvent
 {
     public $clientChatId;
 

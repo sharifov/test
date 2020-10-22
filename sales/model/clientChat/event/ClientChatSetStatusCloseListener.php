@@ -15,6 +15,10 @@ class ClientChatSetStatusCloseListener
      */
     private ClientChatLastMessageRepository $clientChatLastMessageRepository;
 
+    /**
+     * ClientChatSetStatusCloseListener constructor.
+     * @param ClientChatLastMessageRepository $clientChatLastMessageRepository
+     */
     public function __construct(ClientChatLastMessageRepository $clientChatLastMessageRepository)
     {
         $this->clientChatLastMessageRepository = $clientChatLastMessageRepository;
