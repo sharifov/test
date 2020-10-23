@@ -512,6 +512,7 @@ $(document).on('click', '.cc_reopen', function (e) {
                 createNotify('Error', data.message, 'error');
             } else {
                 createNotify('Success', 'Chat reopened successfully', 'success');
+                refreshChatPage(cchId);
             }
         },
         complete: function () {
