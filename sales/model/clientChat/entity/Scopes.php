@@ -180,4 +180,14 @@ class Scopes extends \yii\db\ActiveQuery
     {
         return $this->andWhere(['!=', 'cch_status_id', $statusId]);
     }
+
+    public function notInStatuses(array $statusIds): self
+    {
+        return $this->andWhere(['NOT IN', 'cch_status_id', $statusIds]);
+    }
+
+    public function notInClosedGroup(): self
+    {
+        return $this->notInStatuses(ClientChat::CLOSED_STATUS_GROUP);
+    }
 }

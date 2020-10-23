@@ -66,7 +66,7 @@ use yii\helpers\StringHelper;
             </span>
         </div>
         <div class="_cc_item_data">
-            <span class="label label-info">
+            <span class="label label-info" title="<?= $clientChat['cch_id'] ?>">
             <?php
                echo Html::encode(ClientChat::getStatusNameById($clientChat['cch_status_id']));
             ?>

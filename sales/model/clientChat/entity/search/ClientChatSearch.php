@@ -416,18 +416,20 @@ class ClientChatSearch extends ClientChat
 
         if (ClientChat::isTabAll($filter->status)) {
         } elseif (ClientChat::isTabActive($filter->status)) {
-            $query->active();
+            $query->notInClosedGroup();
         } elseif (ClientChat::isTabClosed($filter->status)) {
             $query->archive();
         } elseif (ClientChat::isTabUnassigned($filter->status)) {
             $query->byOwner(null);
+            $query->byStatus(ClientChat::STATUS_PENDING);
         }
 
         if (GroupFilter::isMy($filter->group)) {
             $query->byOwner($user->id);
             $query->notInStatus(ClientChat::STATUS_IDLE);
             $query->orderBy([
-                '(cch_status_id = ' . ClientChat::STATUS_IN_PROGRESS . ')' => SORT_DESC,
+                '(cch_status_id = ' . ClientChat::STATUS_ARCHIVE .
+                    ' OR cch_status_id = ' . ClientChat::STATUS_CLOSED . ')' => SORT_ASC,
                 'cch_updated_dt' => SORT_DESC,
             ]);
         } elseif (GroupFilter::isOther($filter->group)) {
@@ -436,7 +438,8 @@ class ClientChatSearch extends ClientChat
                 ['IS', 'cch_owner_user_id', null]
             ]);
             $query->orderBy([
-                '(cch_status_id = ' . ClientChat::STATUS_IN_PROGRESS . ')' => SORT_DESC,
+                '(cch_status_id = ' . ClientChat::STATUS_ARCHIVE .
+                    ' OR cch_status_id = ' . ClientChat::STATUS_CLOSED . ')' => SORT_ASC,
                 '(cch_owner_user_id IS NULL)' => SORT_DESC,
                 'cch_created_dt' => SORT_ASC,
             ]);

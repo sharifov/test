@@ -91,6 +91,11 @@ class ClientChat extends \yii\db\ActiveRecord
     public const STATUS_CLOSED = 9;
     public const STATUS_ARCHIVE = 10;
 
+    public const CLOSED_STATUS_GROUP = [
+        self::STATUS_CLOSED,
+        self::STATUS_ARCHIVE,
+    ];
+
     public const MISSED = 1;
 
     private const STATUS_LIST = [
