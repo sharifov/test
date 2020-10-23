@@ -2,7 +2,10 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\StringHelper;
+use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\ApiLogSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -14,10 +17,10 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
     <?php Pjax::begin(); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <p>
-        <?php //= Html::a('Create Api Log', ['create'], ['class' => 'btn btn-success']) ?>
+        <?php //= Html::a('Create Api Log', ['create'], ['class' => 'btn btn-success'])?>
         <?= Html::a('Delete All', ['delete-all'], [
             'class' => 'btn btn-danger',
             'data' => [
@@ -37,7 +40,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'al_id',
-                'value' => function(\common\models\ApiLog $model) {
+                'value' => function (\common\models\ApiLog $model) {
                     return $model->al_id;
                 },
                 'options' => ['style' => 'width:100px']
@@ -45,7 +48,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'attribute' => 'al_action',
-                'value' => function(\common\models\ApiLog $model) {
+                'value' => function (\common\models\ApiLog $model) {
                     return '<b>'.Html::encode($model->al_action).'</b>';
                 },
                 'format' => 'raw',
@@ -59,30 +62,29 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 //'format' => 'raw'
             ],
-
-            //'al_request_data:ntext',
-
             [
                 'attribute' => 'al_request_data',
                 'format' => 'raw',
-                'value' => function(\common\models\ApiLog $model) {
-                    $data = \yii\helpers\VarDumper::dumpAsString(@json_decode($model->al_request_data, true));
-                    //if($data) $data = end($data);
-                    $str = \yii\helpers\StringHelper::truncate(Html::encode($data), 1600, '...', null, false);
-//                    $str = preg_replace("~CA(\w+)~", '<b style="color: darkred">${0}</b>', $str);
-//
-//                    $str = str_replace('CallSid', '<b style="color: green">CallSid</b>', $str);
-//
-//                    $str = str_replace('CallStatus', '<b style="color: #2b3f63">CallStatus</b>', $str);
+                'value' => static function (\common\models\ApiLog $model) {
+                    $resultStr = '-';
+                    if ($decodedData = @json_decode($model->al_request_data, true, 512, JSON_THROW_ON_ERROR)) {
+                        $truncatedStr = StringHelper::truncate(
+                            Html::encode(VarDumper::dumpAsString($decodedData)),
+                            1600,
+                            '...',
+                            null,
+                            false
+                        );
 
+                        $detailData = VarDumper::dumpAsString($decodedData, 10, true);
+                        $detailBox = '<div id="detail_' . $model->al_id . '" style="display: none;">' . $detailData . '</div>';
+                        $detailBtn = ' <i class="fas fa-eye green showDetail" style="cursor: pointer;" data-idt="' . $model->al_id . '"></i>';
 
-
-                    return $data ? '<small>'.$str.'</small>' : '-';
+                        $resultStr = $truncatedStr . $detailBox . $detailBtn;
+                    }
+                    return '<small>' . $resultStr . '</small>';
                 },
             ],
-
-            //'al_request_dt',
-
             [
                 'attribute' => 'al_request_dt',
                 'value' => static function (\common\models\ApiLog $model) {
@@ -105,9 +107,9 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'al_response_data',
                 'format' => 'raw',
-                'value' => function(\common\models\ApiLog $model) {
+                'value' => function (\common\models\ApiLog $model) {
                     return Yii::$app->formatter->asShortSize(mb_strlen($model->al_response_data), 1);
-                    //$data = \yii\helpers\VarDumper::dumpAsString(@json_decode($model->al_response_data, true));
+                //$data = \yii\helpers\VarDumper::dumpAsString(@json_decode($model->al_response_data, true));
                     //if($data) $data = end($data);
                     //return $data ? '<small>'.\yii\helpers\StringHelper::truncate(Html::encode($data), 500, '...', null, false).'</small>' : '-';
                 },
@@ -125,28 +127,28 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'al_execution_time',
                 //'format' => 'html',
-                'value' => function(\common\models\ApiLog $model) {
+                'value' => function (\common\models\ApiLog $model) {
                     return $model->al_execution_time;
                 },
             ],
             [
                 'attribute' => 'al_memory_usage',
                 'format' => 'raw',
-                'value' => function(\common\models\ApiLog $model) {
+                'value' => function (\common\models\ApiLog $model) {
                     return Yii::$app->formatter->asShortSize($model->al_memory_usage, 2);
                 },
             ],
 
             [
                 'attribute' => 'al_db_execution_time',
-                'value' => function(\common\models\ApiLog $model) {
+                'value' => function (\common\models\ApiLog $model) {
                     return $model->al_db_execution_time;
                 },
             ],
 
             [
                 'attribute' => 'al_db_query_count',
-                'value' => function(\common\models\ApiLog $model) {
+                'value' => function (\common\models\ApiLog $model) {
                     return $model->al_db_query_count;
                 },
             ],
@@ -156,7 +158,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'al_user_id',
                 //'format' => 'html',
-                'value' => function(\common\models\ApiLog $model) {
+                'value' => function (\common\models\ApiLog $model) {
                     $apiUser = \common\models\ApiUser::findOne($model->al_user_id);
                     return $apiUser ? $apiUser->au_name . ' ('.$model->al_user_id.')' : $model->al_user_id;
                 },
@@ -170,3 +172,27 @@ $this->params['breadcrumbs'][] = $this->title;
     ]); ?>
     <?php Pjax::end(); ?>
 </div>
+
+<?php
+yii\bootstrap4\Modal::begin([
+        'title' => 'Log detail',
+        'id' => 'modal',
+        'size' => \yii\bootstrap4\Modal::SIZE_LARGE,
+    ]);
+yii\bootstrap4\Modal::end();
+
+$jsCode = <<<JS
+    $(document).on('click', '.showDetail', function(){
+        
+        let logId = $(this).data('idt');
+        let detailEl = $('#detail_' + logId);
+        let modalBodyEl = $('#modal .modal-body');
+        
+        modalBodyEl.html(detailEl.html()); 
+        $('#modal-label').html('Detail Api Log (' + logId + ')');       
+        $('#modal').modal('show');
+        return false;
+    });
+JS;
+
+$this->registerJs($jsCode, \yii\web\View::POS_READY);
