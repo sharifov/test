@@ -1,10 +1,10 @@
 [program:queue-virtual-cron-worker]
 process_name=%(program_name)s_%(process_num)02d
-command=/usr/bin/php /var/www/sales/yii queue-virtual-cron/listen --verbose=1 --color=0
+command=/usr/bin/php /var/www/sale/yii queue-virtual-cron/listen --verbose=1 --color=0
 autostart=true
 autorestart=true
 ;user=www-data
 numprocs=3
 stopsignal=KILL
 redirect_stderr=false
-stdout_logfile=/var/www/sales/logs/queue-virtual-cron-worker.log
+stdout_logfile=/var/www/sale/console/runtime/queue-virtual-cron-worker.log
