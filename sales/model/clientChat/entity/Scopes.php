@@ -190,4 +190,9 @@ class Scopes extends \yii\db\ActiveQuery
     {
         return $this->notInStatuses(ClientChat::CLOSED_STATUS_GROUP);
     }
+
+    public function byParent(int $parentId): self
+    {
+        return $this->andWhere(['cch_parent_id' => $parentId]);
+    }
 }
