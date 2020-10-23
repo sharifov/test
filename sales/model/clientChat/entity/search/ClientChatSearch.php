@@ -533,13 +533,9 @@ class ClientChatSearch extends ClientChat
             $query->andWhere(['cch_owner_user_id' => $filter->userId]);
         }
         if ($filter->fromDate && $filter->toDate) {
-            QueryHelper::dateRangeByUserTZ(
-                $query,
-                'cch_created_dt',
-                $filter->fromDate,
-                $filter->toDate,
-                $user->timezone
-            );
+            $fromDate = date('Y-m-d', strtotime($filter->fromDate));
+            $toDate = date('Y-m-d', strtotime($filter->toDate));
+            $query->andWhere(['BETWEEN', 'DATE(cch_created_dt)', $fromDate, $toDate]);
         }
         return (int) $query->count();
     }
