@@ -511,8 +511,7 @@ $(document).on('click', '.cc_reopen', function (e) {
             if (data.error) {
                 createNotify('Error', data.message, 'error');
             } else {
-                createNotify('Success', 'Chat reopened successfully', 'success');
-                refreshChatPage(cchId);
+                createNotify('Success', 'Chat reopened successfully', 'success');                
             }
         },
         complete: function () {
@@ -575,6 +574,9 @@ window.getChatHistory = function (cchId) {
     $('#_rc-' + cchId).remove();
               
     $.post('{$chatHistoryUrl}', {cchId: cchId}, function(data) {
+        if (data.indexOf('iframe') !== -1) {
+            $('#_rc-'+cchId).remove();
+        }
         $("#_rc-iframe-wrapper").append(data);
     });
 }
