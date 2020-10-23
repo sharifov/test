@@ -57,38 +57,38 @@ $guard = new ClientChatManageGuard($statusLogRepository);
                     </button>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
 
-                        <?php echo Html::a('<i class="fa fa-info-circle"></i> Information', null, [
+                        <?php echo Html::a('<i class="fa fa-info-circle"> </i> Information', null, [
                             'class' => 'dropdown-item text-success cc_full_info',
                             'title' => 'Additional Information',
                             'data-cch-id' => $clientChat->cch_id
                         ]) ?>
 
-                        <?php if ($clientChat->isTransfer()): ?>
-                            <?php if($guard->isCanCancelTransfer($clientChat, Auth::user())): ?>
-                                <?php echo Html::a('<i class="fa fa-exchange"></i> Cancel Transfer', null, [
-                                    'class' => 'dropdown-item cc_cancel_transfer',
-                                    'title' => 'Cancel Transfer',
-                                    'data-cch-id' => $clientChat->cch_id
-                                ]) ?>
-                            <?php endif; ?>
-                        <?php elseif (!$clientChat->isClosed() && !$clientChat->isArchive()): ?>
-                            <?php if ($actionPermissions->canClose($clientChat)): ?>
-                                <?php echo Html::a('<i class="fa fa-times-circle"></i> Close Chat', null, [
-                                    'class' => 'dropdown-item text-danger cc_close',
-                                    'title' => 'Close',
-                                    'data-cch-id' => $clientChat->cch_id
-                                ]) ?>
-                            <?php endif;?>
+                        <?php if ($guard->isCanCancelTransfer($clientChat, Auth::user())): ?>
+                            <?php echo Html::a('<i class="fa fa-exchange"> </i> Cancel Transfer', null, [
+                                'class' => 'dropdown-item cc_cancel_transfer',
+                                'title' => 'Cancel Transfer',
+                                'data-cch-id' => $clientChat->cch_id
+                            ]) ?>
+                        <?php endif; ?>
 
-                            <?php if ($actionPermissions->canTransfer($clientChat)): ?>
-                                <?php echo Html::a('<i class="fa fa-exchange"></i> Transfer', null, [
-                                    'class' => 'dropdown-item text-warning cc_transfer',
-                                    'title' => 'Transfer',
-                                    'data-cch-id' => $clientChat->cch_id
-                                ]) ?>
-                            <?php endif;?>
-                        <?php elseif ($actionPermissions->canReopenChat($clientChat)): ?>
-                            <?php echo Html::a('<i class="fab fa-openid"></i> Reopen', null, [
+                        <?php if ($actionPermissions->canClose($clientChat)): ?>
+                            <?php echo Html::a('<i class="fa fa-times-circle"> </i> Close Chat', null, [
+                                'class' => 'dropdown-item text-danger cc_close',
+                                'title' => 'Close',
+                                'data-cch-id' => $clientChat->cch_id
+                            ]) ?>
+                        <?php endif;?>
+
+                        <?php if ($actionPermissions->canTransfer($clientChat)): ?>
+                            <?php echo Html::a('<i class="fa fa-exchange"> </i> Transfer', null, [
+                                'class' => 'dropdown-item text-warning cc_transfer',
+                                'title' => 'Transfer',
+                                'data-cch-id' => $clientChat->cch_id
+                            ]) ?>
+                        <?php endif;?>
+
+                        <?php if ($actionPermissions->canReopenChat($clientChat)): ?>
+                            <?php echo Html::a('<i class="fab fa-openid"> </i> Reopen', null, [
                                 'class' => 'dropdown-item text-warning cc_reopen',
                                 'title' => 'Reopen',
                                 'data-cch-id' => $clientChat->cch_id
@@ -115,7 +115,9 @@ $guard = new ClientChatManageGuard($statusLogRepository);
                                 'title' => 'Return the chat to In Progress',
                                 'data-cch-id' => $clientChat->cch_id
                             ]) ?>
-                        <?php elseif ($actionPermissions->canTake($clientChat)): ?>
+                        <?php endif; ?>
+
+                        <?php if ($actionPermissions->canTake($clientChat)): ?>
                             <?php echo Html::a('<i class="fa fa-arrows-h"> </i> Take', null, [
                                 'class' => 'dropdown-item text-info cc_take ',
                                 'title' => 'Take',

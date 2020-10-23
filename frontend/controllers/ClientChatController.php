@@ -103,6 +103,7 @@ use function Amp\call;
  * @property ClientChatStatusLogRepository $clientChatStatusLogRepository
  * @property ClientChatHoldRepository $clientChatHoldRepository
  * @property ClientManageService $clientManageService
+ * @property ClientChatActionPermission $actionPermissions
  */
 class ClientChatController extends FController
 {
@@ -163,6 +164,8 @@ class ClientChatController extends FController
      */
     private ClientManageService $clientManageService;
 
+    private ClientChatActionPermission $actionPermissions;
+
     public function __construct(
         $id,
         $module,
@@ -182,6 +185,7 @@ class ClientChatController extends FController
         ClientChatStatusLogRepository $clientChatStatusLogRepository,
         ClientChatHoldRepository $clientChatHoldRepository,
         ClientManageService $clientManageService,
+        ClientChatActionPermission $actionPermissions,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -201,6 +205,7 @@ class ClientChatController extends FController
         $this->clientChatStatusLogRepository = $clientChatStatusLogRepository;
         $this->clientChatHoldRepository = $clientChatHoldRepository;
         $this->clientManageService = $clientManageService;
+        $this->actionPermissions = $actionPermissions;
     }
 
     /**
@@ -791,9 +796,7 @@ class ClientChatController extends FController
 
             $chat = $this->clientChatRepository->findById((int)$form->cchId);
 
-            $permissions = new ClientChatActionPermission();
-
-            if (!$permissions->canClose($chat)) {
+            if (!$this->actionPermissions->canClose($chat)) {
                 throw new ForbiddenHttpException('You do not have access to close this chat', 403);
             }
 

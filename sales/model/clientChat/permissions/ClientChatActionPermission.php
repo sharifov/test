@@ -43,7 +43,13 @@ class ClientChatActionPermission
         if ($this->canClose !== null) {
             return $this->canClose;
         }
-        $this->canClose = Auth::can('client-chat/manage', ['chat' => $chat]) && Auth::can('client-chat/close', ['chat' => $chat]);
+        $statusValid = !$chat->isClosed() && !$chat->isArchive();
+        if (!$statusValid) {
+            $this->canClose = false;
+            return $this->canClose;
+        }
+        $permissionsAccess = Auth::can('client-chat/manage', ['chat' => $chat]) && Auth::can('client-chat/close', ['chat' => $chat]);
+        $this->canClose = $permissionsAccess;
         return $this->canClose;
     }
 
