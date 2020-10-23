@@ -26,7 +26,14 @@ use yii\helpers\StringHelper;
         }
     ?>
 
-        <div id="dialog-<?= $clientChat['cch_id'] ?>" data-owner-id="<?= $clientChat['cch_owner_user_id'] ?>" class="_cc-list-item <?= $isClosed ? 'cc_closed' : '' ?> <?= $clientChatId && $clientChatId === (int)$clientChat['cch_id'] ? '_cc_active' : '' ?>" data-rid="<?= $clientChat['cch_rid'] ?>" data-cch-id="<?= $clientChat['cch_id'] ?>" data-is-closed="<?= (int)$clientChat['cch_status_id'] === ClientChat::STATUS_CLOSED ?>">
+    <div
+        id="dialog-<?= $clientChat['cch_id'] ?>"
+        data-owner-id="<?= $clientChat['cch_owner_user_id'] ?>"
+        class="_cc-list-item <?= $isClosed ? 'cc_closed' : '' ?> <?= $clientChatId && $clientChatId === (int)$clientChat['cch_id'] ? '_cc_active' : '' ?>"
+        data-rid="<?= $clientChat['cch_rid'] ?>"
+        data-cch-id="<?= $clientChat['cch_id'] ?>"
+        data-is-closed="<?= (int) $isClosed ?>">
+
         <div class="_cc-item-icon-wrapper">
             <span class="_cc-item-icon-round">
                 <span class="_cc_client_name"><?= ClientChatHelper::getFirstLetterFromName($clientFullName) ?></span>
