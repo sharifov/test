@@ -311,6 +311,16 @@ return [
         'mail' => [
             'class' => EmailModule::class,
         ],
+        'virtual-cron' => [
+            'class' => \kivork\VirtualCron\VirtualCronModule::class,
+            'queueName' => 'queue_virtual_cron', //Yii:$app->queue_cron
+            'userTable' => 'employees',
+            'userIdColumn' => 'id',
+            'userClass' => '\common\models\Employee',
+            'userFieldDisplay' => 'username', // for gridview, detail vew
+            'cronTable' => 'cron_scheduler', //schedulers list table name
+            'roles' => ['admin', 'superadmin'], //for roles can manage module
+        ],
     ],
     'as beforeRequest' => [
         'class' => \frontend\components\UserSiteActivityLog::class,

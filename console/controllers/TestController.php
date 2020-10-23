@@ -24,6 +24,7 @@ use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackF
 use sales\services\clientChatMessage\ClientChatMessageService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
 use yii\console\Controller;
+use yii\console\ExitCode;
 use yii\helpers\VarDumper;
 
 class TestController extends Controller
@@ -130,5 +131,12 @@ die;
 		$channelIds = [1,2,3,4,5,6,7,8];
 		$service = \Yii::createObject(ClientChatUserAccessService::class);
 		$service->setUserAccessToAllChatsByChannelIds($channelIds, $userId);
+	}
+
+    public function actionVirtualCronTest()
+    {
+        echo date('Y-m-d H:i:s');
+        \Yii::info($_SERVER, 'info\TestController:actionTest');
+        return ExitCode::OK;
 	}
 }

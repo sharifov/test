@@ -33,6 +33,7 @@ return [
                 'modules\order\migrations',
                 'modules\invoice\migrations',
                 'modules\qaTask\migrations',
+                'kivork\VirtualCron\Migrations'
             ],
         ],
 
@@ -139,6 +140,14 @@ return [
             ],
 
             //'googleApiKey'              => 'AIzaSyCBz5uH4JyegEa_vqN_OGJCORq-UpkmTiQ',
+        ],
+        'virtual-cron' => [
+            'class' => \kivork\VirtualCron\VirtualCronModule::class,
+            'queueName' => 'queue_virtual_cron', //Yii:$app->queue_cron
+            'userTable' => 'employees',
+            'userIdColumn' => 'id',
+            'userClass' => '\common\models\Employee',
+            'userFieldDisplay' => 'username', // for gridview, detail vew
         ],
     ],
     'params' => $params,

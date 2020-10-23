@@ -141,6 +141,12 @@ return [
             'tube' => 'queue_client_chat_job',
             'as idAccess' => sales\behaviors\JobIdAccessBehavior::class
         ],
+        'queue_virtual_cron' => [
+            'class' => \kivork\VirtualCron\Queue\Queue::class,
+            'host' => 'localhost',
+            'port' => 11300,
+            'tube' => 'queue_virtual_cron',
+        ],
         'telegram' => [
             'class' => \aki\telegram\Telegram::class,
             'botUsername' => 'CrmKivorkBot',
@@ -158,6 +164,7 @@ return [
         'queue_job',
         'queue_client_chat_job',
         'queue_system_services',
+        'queue_virtual_cron',
         \common\components\SettingsBootstrap::class,
         common\bootstrap\SetUp::class,
         common\bootstrap\SetUpListeners::class,
