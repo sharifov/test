@@ -13,11 +13,6 @@ $this->title = 'Client Chat Room: ' . $clientChat->cch_rid;
 $this->params['breadcrumbs'][] = ['label' => 'Client Chats QA', 'url' => ['index']];
 $this->params['breadcrumbs'][] = 'Room';
 
-$userRcAuthToken = Auth::user()->userProfile ? Auth::user()->userProfile->up_rc_auth_token : '';
-
-$readOnly = (!$clientChat->isOwner(Auth::id()) ? '&readonly=true' : '');
-$rcUrl = Yii::$app->rchat->host  . '/live/' . urlencode($clientChat->cch_rid) . '?layout=embedded' . $readOnly;
-
 ?>
 
 <div class="row room_box justify-content-center">
@@ -25,14 +20,8 @@ $rcUrl = Yii::$app->rchat->host  . '/live/' . urlencode($clientChat->cch_rid) . 
     <div class="col-md-8">
         <h5><?= Html::encode($this->title) ?></h5>
         <div id="_rc-iframe-wrapper" style="height: 95%; width: 100%; position: relative; min-height: 740px;">
-            <?php if ($clientChat && !$clientChat->isClosed()): ?>
-                <iframe
-                    class="_rc-iframe"
-                    src="<?= $rcUrl ?>"
-                    id="_rc-<?= $clientChat->cch_id ?>"
-                    style="border: none; width: 100%; height: 100%;" ></iframe>
-            <?php elseif ($clientChat && $clientChat->isClosed()): ?>
-                <?= $this->render('../client-chat/partial/_chat_history', ['history' => $history, 'clientChat' => $clientChat]) ?>
+            <?php if ($clientChat): ?>
+                <?php echo $this->render('../client-chat/partial/_chat_history', ['clientChat' => $clientChat]) ?>
             <?php endif; ?>
         </div>
     </div>

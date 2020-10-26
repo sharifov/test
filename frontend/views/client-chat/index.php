@@ -100,7 +100,7 @@ $clientChatReturnUrl = Url::toRoute(['/client-chat/ajax-return']);
          if ($accessChatError) {
              $this->registerJs('createNotify("Client chat view", "You don\'t have access to this chat", "error")', View::POS_LOAD);
          } elseif ($clientChat) {
-             if ($clientChat->isClosed() || $clientChat->isArchive()) {
+             if ($clientChat->isInClosedStatusGroup()) {
                  $iframeData = $this->render('partial/_chat_history', ['clientChat' => $clientChat]);
              } else {
                  $readOnly = (!$clientChat->isOwner(Auth::id()) ? '&readonly=true' : '');
@@ -349,11 +349,13 @@ window.loadClientChatData = function (cch_id, data, ref) {
     let gotoParam = encodeURIComponent(data.gotoParam);
     
     let iframeHref = rcUrl + '?layout=embedded&resumeToken=' + userRcAuthToken + '&goto=' + gotoParam + data.readonly;
+        
     // let windowHeight = $(window)[0].innerHeight;
     // let offsetTop = $("#_rc-iframe-wrapper").offset().top;
     // let iframeHeight = windowHeight - offsetTop - 20;
     
-    let isClosed = $(ref).attr('data-is-closed');
+    let isClosed = parseInt($(ref).attr('data-is-closed'), 10);
+    
     $("#_rc-iframe-wrapper").find('._rc-iframe').hide();
     $('._cc-list-item').removeClass('_cc_active');
     $(ref).addClass('_cc_active');

@@ -33,6 +33,7 @@ use sales\model\clientChatVisitor\entity\ClientChatVisitor;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 
 /**
@@ -447,6 +448,11 @@ class ClientChat extends \yii\db\ActiveRecord
     public function isArchive(): bool
     {
         return (int) $this->cch_status_id === self::STATUS_ARCHIVE;
+    }
+
+    public function isInClosedStatusGroup(): bool
+    {
+        return ArrayHelper::isIn((int) $this->cch_status_id, self::CLOSED_STATUS_GROUP);
     }
 
     public static function getStatusClassList(): array

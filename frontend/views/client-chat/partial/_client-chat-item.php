@@ -5,6 +5,7 @@ use sales\helpers\clientChat\ClientChatHelper;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatLastMessage\entity\ClientChatLastMessage;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\StringHelper;
 
@@ -16,8 +17,7 @@ use yii\helpers\StringHelper;
 
 <?php foreach ($clientChats as $clientChat): ?>
     <?php
-
-        $isClosed = (int)$clientChat['cch_status_id'] === ClientChat::STATUS_CLOSED || (int)$clientChat['cch_status_id'] === ClientChat::STATUS_ARCHIVE;
+        $isClosed = ArrayHelper::isIn((int)$clientChat['cch_status_id'], ClientChat::CLOSED_STATUS_GROUP);
 
         $clientFullName = $clientChat['client_full_name'] ?: ('Client-' . $clientChat['client_id']);
         $unreadMessages = $clientChat['count_unread_messages'] ?: null;

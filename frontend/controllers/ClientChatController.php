@@ -844,7 +844,6 @@ class ClientChatController extends FController
 
         return $this->renderAjax('partial/_chat_history', [
             //			'history' => $history ?? null,
-            'history' => null,
             'clientChat' => $clientChat,
         ]);
     }
