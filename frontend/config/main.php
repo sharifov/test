@@ -315,6 +315,7 @@ return [
         ],
         'virtual-cron' => [
             'class' => \kivork\VirtualCron\VirtualCronModule::class,
+            'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud.php',
             'queueName' => 'queue_virtual_cron', //Yii:$app->queue_cron
             'userTable' => 'employees',
             'userIdColumn' => 'id',
