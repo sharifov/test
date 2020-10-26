@@ -240,7 +240,7 @@ class DepartmentPhoneProjectController extends FController
             $model->file = UploadedFile::getInstance($model, 'file');
 
             if ($model->file && $model->validate()) {
-                if ($model->file->type === 'text/tab-separated-values') {
+                if ($model->file->type === 'text/tab-separated-values' || $model->file->type === 'text/plain') {
                     $logs = (new ImportPhones())->import($model->file->tempName);
                 } else {
                     $model->addError('file', 'Type must be "text/tab-separated-values"');
