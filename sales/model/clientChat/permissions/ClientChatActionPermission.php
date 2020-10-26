@@ -100,9 +100,7 @@ class ClientChatActionPermission
             return $this->canReopenChat;
         }
 
-        $clientChatId = ClientChatQuery::lastSameChatId($chat->cch_rid);
-        $childExist = ClientChat::find()->byParent($chat->cch_id)->exists();
-        if (!(($clientChatId === $chat->cch_id) && !$childExist)) {
+        if (!ClientChatQuery::isChildExistByChatId($chat->cch_id)) {
             $this->canReopenChat = false;
             return $this->canReopenChat;
         }

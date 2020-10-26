@@ -41,4 +41,9 @@ class ClientChatQuery
     {
         return ClientChat::find()->byRid($rid)->notInClosedGroup()->exists();
     }
+
+    public static function isChildExistByChatId(int $cchId): bool
+    {
+        return ClientChat::find()->byParent($cchId)->exists();
+    }
 }
