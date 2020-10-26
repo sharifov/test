@@ -240,8 +240,7 @@ class DepartmentPhoneProjectController extends FController
             $model->file = UploadedFile::getInstance($model, 'file');
 
             if ($model->file && $model->validate()) {
-                Yii::info($model->file->type, 'info\Debug mime type');
-                if ($model->file->type === 'text/tab-separated-values' || $model->file->type === 'text/plain') {
+                if ($model->file->type === 'text/tab-separated-values') {
                     $logs = (new ImportPhones())->import($model->file->tempName);
                 } else {
                     $model->addError('file', 'Type must be "text/tab-separated-values"');
