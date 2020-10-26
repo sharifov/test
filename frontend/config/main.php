@@ -17,6 +17,7 @@ use yii\bootstrap\BootstrapAsset;
 use yii\bootstrap\BootstrapPluginAsset;
 use frontend\themes\gentelella\assets\AssetLeadCommunication;
 use frontend\themes\gentelella_v2\assets\ThemeAsset;
+
 $params = array_merge(
     require __DIR__ . '/../../common/config/params.php',
     require __DIR__ . '/../../common/config/params-local.php',
@@ -25,6 +26,7 @@ $params = array_merge(
 );
 
 $appVersion = $params['release']['version'] ?? '';
+$gitHash = $params['release']['git_hash'] ?? '';
 
 return [
     'id' => 'app-frontend',
@@ -158,42 +160,42 @@ return [
             ],
         ],
 
-		'assetManager' => [
-			'forceCopy' => false,
-			'appendTimestamp' => false,
+        'assetManager' => [
+            'forceCopy' => false,
+            'appendTimestamp' => false,
             'hashCallback' => static function ($path) use ($appVersion) {
                 return hash('md4', $path . $appVersion);
             },
-			'bundles' => [
-				BootstrapAsset::class => [
-					'sourcePath' => '@npm/bootstrap/dist',
-					'css' => [
-						'css/bootstrap.css'
-					],
-				],
-				BootstrapPluginAsset::class => [
-					'sourcePath' => '@npm/bootstrap/dist',
-					'js' => [
-						'js/bootstrap.bundle.js'
-					],
-					'depends' => [
-						JqueryAsset::class,
-						\yii\bootstrap4\BootstrapAsset::class,
-					],
-				],
-				AssetLeadCommunication::class => [
-					'basePath' => '@webroot',
-					'baseUrl' => '@web',
-					'js' => [
-						'https://cdnjs.cloudflare.com/ajax/libs/scrollup/2.4.1/jquery.scrollUp.min.js',
-						'/js/sms_counter.min.js',
-					],
-					'depends' => [
-						ThemeAsset::class,
-					]
-				]
-			],
-		],
+            'bundles' => [
+                BootstrapAsset::class => [
+                    'sourcePath' => '@npm/bootstrap/dist',
+                    'css' => [
+                        'css/bootstrap.css'
+                    ],
+                ],
+                BootstrapPluginAsset::class => [
+                    'sourcePath' => '@npm/bootstrap/dist',
+                    'js' => [
+                        'js/bootstrap.bundle.js'
+                    ],
+                    'depends' => [
+                        JqueryAsset::class,
+                        \yii\bootstrap4\BootstrapAsset::class,
+                    ],
+                ],
+                AssetLeadCommunication::class => [
+                    'basePath' => '@webroot',
+                    'baseUrl' => '@web',
+                    'js' => [
+                        'https://cdnjs.cloudflare.com/ajax/libs/scrollup/2.4.1/jquery.scrollUp.min.js',
+                        '/js/sms_counter.min.js',
+                    ],
+                    'depends' => [
+                        ThemeAsset::class,
+                    ]
+                ]
+            ],
+        ],
     ],
     'modules' => [
         'gridview' =>  [
@@ -291,23 +293,23 @@ return [
         'qa-task' => [
             'class' => QaTaskModule::class,
         ],
-		'rbac-import-export' => [
-			'class' => RbacImportExportModule::class,
-			'as access' => [
-				'class' => yii2mod\rbac\filters\AccessControl::class,
-				'rules' => [
-					[
-						'allow' => true,
-						'roles' => [Employee::ROLE_SUPER_ADMIN],
-					]
-				]
-			],
-			'components' => [
-				'authManager' => [
-					'class' => DbManager::class
-				]
-			]
-		],
+        'rbac-import-export' => [
+            'class' => RbacImportExportModule::class,
+            'as access' => [
+                'class' => yii2mod\rbac\filters\AccessControl::class,
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'roles' => [Employee::ROLE_SUPER_ADMIN],
+                    ]
+                ]
+            ],
+            'components' => [
+                'authManager' => [
+                    'class' => DbManager::class
+                ]
+            ]
+        ],
         'mail' => [
             'class' => EmailModule::class,
         ],
@@ -341,8 +343,8 @@ return [
                 'options' => ['class' => 'table-responsive'],
                 //'tableOptions' => ['class' => 'table table-bordered table-condensed table-hover'],
             ],
-			\yii\widgets\LinkPager::class => \yii\bootstrap4\LinkPager::class,
-		],
+            \yii\widgets\LinkPager::class => \yii\bootstrap4\LinkPager::class,
+        ],
     ],
 
     /*'view' => [
