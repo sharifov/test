@@ -162,18 +162,25 @@ class DbController extends Controller
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 	}
 
-	/**
+
+
+    /**
      * @throws \yii\db\Exception
      */
     public function actionConvertCollate()
     {
+
+        $collate = 'utf8mb4';
+        $collation = 'utf8mb4_unicode_ci';
+
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
         $db = Yii::$app->getDb();
         // get the db name
         $schema = $db->createCommand('select database()')->queryScalar();
         // get all tables
-        $tables = $db->createCommand('SELECT table_name FROM information_schema.tables WHERE table_schema=:schema AND table_type = "BASE TABLE"', [
-            ':schema' => $schema
+        $tables = $db->createCommand('SELECT table_name, table_collation FROM information_schema.tables WHERE table_schema=:schema AND table_type = "BASE TABLE" AND table_collation <> :collation', [
+            ':schema' => $schema,
+            ':collation' => $collation,
         ])->queryAll();
         $db->createCommand('SET FOREIGN_KEY_CHECKS=0;')->execute();
 
@@ -181,21 +188,39 @@ class DbController extends Controller
 
         // Alter the encoding of each table
         foreach ($tables as $id => $table) {
-            if(isset($table['table_name'])) {
-                $tableName = $table['table_name'];
-                $db->createCommand("ALTER TABLE `$tableName` CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci")->execute();
-                echo $id." - tbl: " . $tableName . "\r\n";
-            }
-
-            if(isset($table['TABLE_NAME'])) {
-                $tableName = $table['TABLE_NAME'];
-                $db->createCommand("ALTER TABLE `$tableName` CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci")->execute();
-                echo $id." - tbl: " . $tableName . "\r\n";
+            $tableName = $table['TABLE_NAME'];
+            if($tableName) {
+                $db->createCommand("ALTER TABLE `$tableName` CONVERT TO CHARACTER SET " . $collate . " COLLATE " . $collation)->execute();
+                echo $id." - tbl: " . $tableName . " - " . $table['TABLE_COLLATION'] . " \r\n";
             }
         }
         $db->createCommand('SET FOREIGN_KEY_CHECKS=1;')->execute();
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
+
+    /**
+     * @param string $tableName
+     * @throws Exception
+     */
+    public function actionConvertCollateTbl(string $tableName)
+    {
+
+        $collate = 'utf8mb4';
+        $collation = 'utf8mb4_unicode_ci';
+
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+
+        echo ' - Table: "' . $tableName . '"';
+        //echo PHP_EOL;
+
+        $db = Yii::$app->getDb();
+        $db->createCommand('SET FOREIGN_KEY_CHECKS=0;')->execute();
+        $db->createCommand("ALTER TABLE `$tableName` CONVERT TO CHARACTER SET " . $collate . " COLLATE " . $collation)->execute();
+        $db->createCommand('SET FOREIGN_KEY_CHECKS=1;')->execute();
+
+        printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+    }
+
 
     /**
      * Remove Client Emails and Phones Duplicates
