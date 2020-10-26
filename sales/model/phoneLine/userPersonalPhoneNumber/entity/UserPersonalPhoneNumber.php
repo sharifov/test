@@ -3,6 +3,7 @@
 namespace sales\model\phoneLine\userPersonalPhoneNumber\entity;
 
 use common\models\Employee;
+use sales\model\phoneList\entity\PhoneList;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -24,22 +25,23 @@ use yii\db\ActiveRecord;
  * @property Employee $upnCreatedUser
  * @property Employee $upnUpdatedUser
  * @property Employee $upnUser
+ * @property PhoneList $upnPhoneNumber
  */
 class UserPersonalPhoneNumber extends \yii\db\ActiveRecord
 {
-	public function behaviors(): array
-	{
-		return [
-			'timestamp' => [
-				'class' => TimestampBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['upn_created_dt', 'upn_updated_dt'],
-					ActiveRecord::EVENT_BEFORE_UPDATE => ['upn_updated_dt'],
-				],
-				'value' => date('Y-m-d H:i:s'),
-			],
-		];
-	}
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['upn_created_dt', 'upn_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['upn_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s'),
+            ],
+        ];
+    }
 
     public function rules(): array
     {
@@ -84,6 +86,16 @@ class UserPersonalPhoneNumber extends \yii\db\ActiveRecord
         return $this->hasOne(Employee::class, ['id' => 'upn_user_id']);
     }
 
+    /**
+     * Gets query for [[UpnPhoneNumber]].
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUpnPhoneNumber()
+    {
+        return $this->hasOne(PhoneList::class, ['pl_id' => 'upn_phone_number']);
+    }
+
     public function attributeLabels(): array
     {
         return [
@@ -100,10 +112,10 @@ class UserPersonalPhoneNumber extends \yii\db\ActiveRecord
         ];
     }
 
-	public static function find(): Scopes
-	{
-		return new Scopes(static::class);
-	}
+    public static function find(): Scopes
+    {
+        return new Scopes(static::class);
+    }
 
     public static function tableName(): string
     {

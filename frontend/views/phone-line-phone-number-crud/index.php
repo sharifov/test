@@ -4,6 +4,7 @@ use frontend\extensions\DatePicker;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\phoneLine\phoneLinePhoneNumber\entity\search\PhoneLinePhoneNumberSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -20,7 +21,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php Pjax::begin(); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -30,69 +31,75 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'plpn_line_id',
             'plpn_pl_id',
+            [
+               'label' => 'Phone Number',
+                'value' => static function (\sales\model\phoneLine\phoneLinePhoneNumber\entity\PhoneLinePhoneNumber $model) {
+                    return $model->plpnPl ? $model->plpnPl->pl_phone_number : '-';
+                }
+            ],
             'plpn_default:BooleanByLabel',
             'plpn_enabled:BooleanByLabel',
-			[
-				'attribute' => 'plpn_created_user_id',
-				'filter' => \sales\widgets\UserSelect2Widget::widget([
-					'model' => $searchModel,
-					'attribute' => 'plpn_created_user_id'
-				]),
-				'format' => 'username',
-				'options' => [
-					'width' => '150px'
-				]
-			],
-			[
-				'attribute' => 'plpn_updated_user_id',
-				'filter' => \sales\widgets\UserSelect2Widget::widget([
-					'model' => $searchModel,
-					'attribute' => 'plpn_updated_user_id'
-				]),
-				'format' => 'username',
-				'options' => [
-					'width' => '150px'
-				]
-			],
-			[
-				'attribute' => 'plpn_created_dt',
-				'format' => 'byUserDateTime',
-				'filter' => DatePicker::widget([
-					'model' => $searchModel,
-					'attribute' => 'plpn_created_dt',
-					'clientOptions' => [
-						'autoclose' => true,
-						'format' => 'yyyy-mm-dd',
-					],
-					'options' => [
-						'autocomplete' => 'off',
-						'placeholder' =>'Choose Date',
+            [
+                'attribute' => 'plpn_created_user_id',
+                'filter' => \sales\widgets\UserSelect2Widget::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'plpn_created_user_id'
+                ]),
+                'format' => 'username',
+                'options' => [
+                    'width' => '150px'
+                ]
+            ],
+            [
+                'attribute' => 'plpn_updated_user_id',
+                'filter' => \sales\widgets\UserSelect2Widget::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'plpn_updated_user_id'
+                ]),
+                'format' => 'username',
+                'options' => [
+                    'width' => '150px'
+                ]
+            ],
+            [
+                'attribute' => 'plpn_created_dt',
+                'format' => 'byUserDateTime',
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'plpn_created_dt',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' =>'Choose Date',
 
-					],
-				]),
-				'options' => [
-					'width' => '150px'
-				]
-			],
-			[
-				'attribute' => 'plpn_updated_dt',
-				'format' => 'byUserDateTime',
-				'filter' => DatePicker::widget([
-					'model' => $searchModel,
-					'attribute' => 'plpn_updated_dt',
-					'clientOptions' => [
-						'autoclose' => true,
-						'format' => 'yyyy-mm-dd',
-					],
-					'options' => [
-						'autocomplete' => 'off',
-						'placeholder' =>'Choose Date'
-					],
-				]),
-				'options' => [
-					'width' => '150px'
-				]
-			],
+                    ],
+                ]),
+                'options' => [
+                    'width' => '150px'
+                ]
+            ],
+            [
+                'attribute' => 'plpn_updated_dt',
+                'format' => 'byUserDateTime',
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'plpn_updated_dt',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' =>'Choose Date'
+                    ],
+                ]),
+                'options' => [
+                    'width' => '150px'
+                ]
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

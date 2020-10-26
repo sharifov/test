@@ -58,8 +58,8 @@ class PhoneLineUserAssignSearch extends PhoneLineUserAssign
             'plus_enabled' => $this->plus_enabled,
             'plus_created_user_id' => $this->plus_created_user_id,
             'plus_updated_user_id' => $this->plus_updated_user_id,
-            'plus_created_dt' => $this->plus_created_dt,
-            'plus_updated_dt' => $this->plus_updated_dt,
+            'DATE(plus_created_dt)' => $this->plus_created_dt,
+            'DATE(plus_updated_dt)' => $this->plus_updated_dt,
         ]);
 
         $query->andFilterWhere(['like', 'plus_settings_json', $this->plus_settings_json]);
