@@ -583,7 +583,10 @@ class ClientChatService
 
     public function takeClientChat(ClientChat $clientChat, Employee $owner): ClientChat
     {
-        return $this->transactionManager->wrap(function () use ($clientChat, $owner) {
+        $lastMessage = $this->clientChatLastMessageRepository->getByChatId($clientChat->cch_id);
+
+        return $this->transactionManager->wrap(function () use ($clientChat, $owner, $lastMessage) {
+
             $clientChat->close($owner->id, ClientChatStatusLog::ACTION_ACCEPT_TRANSFER);
             $this->clientChatRepository->save($clientChat);
 
@@ -606,6 +609,11 @@ class ClientChatService
                     $oldVisitor->cvd_id,
                     $newClientChat->cch_client_id
                 );
+            }
+
+            if ($lastMessage) {
+                $lastMessageNew = $this->clientChatLastMessageRepository->cloneToNewChat($lastMessage, $newClientChat->cch_id);
+                $this->clientChatLastMessageRepository->save($lastMessageNew);
             }
 
             $this->assignAgentToRcChannel($newClientChat->cch_rid, $owner->userProfile->up_rc_user_id ?? '');
