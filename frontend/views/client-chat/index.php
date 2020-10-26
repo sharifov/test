@@ -354,8 +354,14 @@ window.loadClientChatData = function (cch_id, data, ref) {
     // let offsetTop = $("#_rc-iframe-wrapper").offset().top;
     // let iframeHeight = windowHeight - offsetTop - 20;
     
-    let isClosed = parseInt($(ref).attr('data-is-closed'), 10);
+    let isClosed = 1;
     
+    if ($(ref).length) {
+        isClosed = parseInt($(ref).attr('data-is-closed'), 10);
+    } else if ($('#dialog-' + cch_id).length) {
+        isClosed = parseInt($('#dialog-' + cch_id).attr('data-is-closed'), 10);
+    }
+        
     $("#_rc-iframe-wrapper").find('._rc-iframe').hide();
     $('._cc-list-item').removeClass('_cc_active');
     $(ref).addClass('_cc_active');
