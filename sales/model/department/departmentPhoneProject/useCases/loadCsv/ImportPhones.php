@@ -58,7 +58,7 @@ class ImportPhones
         $data['dpp_source_id'] = $row[1];
         $data['dpp_phone_number'] = $row[2];
         $data['dpp_dep_id'] = $row[3];
-        $data['dpp_params'] = $row[4];
+        $data['dpp_params'] = str_replace('\"', '"', $row[4]);
         $data['dpp_ivr_enable'] = $row[5] === 'TRUE';
         $data['dpp_enable'] = $row[6] === 'TRUE';
         $data['dpp_redial'] = $row[7] === 'TRUE';
