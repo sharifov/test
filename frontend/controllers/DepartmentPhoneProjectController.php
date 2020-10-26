@@ -4,13 +4,15 @@ namespace frontend\controllers;
 
 use common\models\DepartmentPhoneProjectUserGroup;
 use common\models\Employee;
+use sales\model\department\departmentPhoneProject\useCases\loadCsv\DepartmentPhonesForm;
+use sales\model\department\departmentPhoneProject\useCases\loadCsv\ImportPhones;
 use Yii;
 use common\models\DepartmentPhoneProject;
 use common\models\search\DepartmentPhoneProjectSearch;
 use yii\helpers\ArrayHelper;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\UploadedFile;
 
 /**
  * DepartmentPhoneProjectController implements the CRUD actions for DepartmentPhoneProject model.
@@ -228,5 +230,23 @@ class DepartmentPhoneProjectController extends FController
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    public function actionImport()
+    {
+        $model = new DepartmentPhonesForm();
+        $logs = [];
+        if (Yii::$app->request->isPost) {
+            $model->file = UploadedFile::getInstance($model, 'file');
+
+            if ($model->file && $model->validate()) {
+                if ($model->file->type === 'text/tab-separated-values') {
+                    $logs = (new ImportPhones())->import($model->file->tempName);
+                } else {
+                    $model->addError('file', 'Type must be "text/tab-separated-values"');
+                }
+            }
+        }
+        return $this->render('import', ['model' => $model, 'logs' => $logs]);
     }
 }

@@ -69,7 +69,9 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
 //            ['dpp_phone_number', 'string', 'max' => 18],
 //            [['dpp_dep_id', 'dpp_project_id', 'dpp_phone_number'], 'unique', 'targetAttribute' => ['dpp_dep_id', 'dpp_project_id', 'dpp_phone_number']],
 
-            [['dpp_dep_id', 'dpp_project_id', 'dpp_source_id', 'dpp_updated_user_id', 'dpp_default'], 'integer'],
+            [['dpp_dep_id', 'dpp_project_id', 'dpp_source_id', 'dpp_updated_user_id'], 'integer'],
+
+            ['dpp_default', 'boolean'],
 
             [['dpp_ivr_enable', 'dpp_enable'], 'boolean'],
             [['dpp_params', 'dpp_updated_dt', 'user_group_list'], 'safe'],
