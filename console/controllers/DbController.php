@@ -163,7 +163,8 @@ class DbController extends Controller
 	}
 
 
-	/**
+
+    /**
      * @throws \yii\db\Exception
      */
     public function actionConvertCollate()
@@ -219,6 +220,7 @@ class DbController extends Controller
 
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
+
 
     /**
      * Remove Client Emails and Phones Duplicates
