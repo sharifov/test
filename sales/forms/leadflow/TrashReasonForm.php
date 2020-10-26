@@ -28,6 +28,7 @@ class TrashReasonForm extends Model
     public const REASON_TRANSFER_TO_CUSTOMER_CARE = 'Transfer to Customer Care';
     public const REASON_TRANSFER_TO_EXCHANGE = 'Transfer to Exchange';
     public const REASON_TRANSFER_TO_SCHEDULE_CHARGE = 'Transfer to Schedule Change';
+    public const REASON_ALTERNATIVE = 'Alternative';
     public const REASON_TEST = 'Test';
     public const REASON_OTHER = 'Other';
 
@@ -40,6 +41,7 @@ class TrashReasonForm extends Model
         self::REASON_TRANSFER_TO_CUSTOMER_CARE => self::REASON_TRANSFER_TO_CUSTOMER_CARE,
         self::REASON_TRANSFER_TO_EXCHANGE => self::REASON_TRANSFER_TO_EXCHANGE,
         self::REASON_TRANSFER_TO_SCHEDULE_CHARGE => self::REASON_TRANSFER_TO_SCHEDULE_CHARGE,
+        self::REASON_ALTERNATIVE => self::REASON_ALTERNATIVE,
         self::REASON_TEST => self::REASON_TEST,
         self::REASON_OTHER => self::REASON_OTHER,
     ];
