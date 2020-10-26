@@ -39,6 +39,6 @@ class ClientChatQuery
 
     public static function isExistsNotClosedArchivedChatByRid(string $rid): bool
     {
-        return ClientChat::find()->byRid($rid)->notClosed()->notArchived()->exists();
+        return ClientChat::find()->byRid($rid)->notInClosedGroup()->exists();
     }
 }

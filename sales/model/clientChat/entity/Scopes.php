@@ -63,7 +63,7 @@ class Scopes extends \yii\db\ActiveQuery
 
     public function notArchived(): self
     {
-        return $this->andWhere(['<>'. 'cch_status_id', ClientChat::STATUS_ARCHIVE]);
+        return $this->andWhere(['<>', 'cch_status_id', ClientChat::STATUS_ARCHIVE]);
     }
 
     public function closed(): self
