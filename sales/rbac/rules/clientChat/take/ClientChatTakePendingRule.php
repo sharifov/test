@@ -15,11 +15,9 @@ class ClientChatTakePendingRule extends Rule
             return false;
         }
 
-        $user = (int)$user;
-
         /** @var ClientChat $chat */
         $chat = $params['chat'];
 
-        return $chat->isPending() && !$chat->isOwner($user);
+        return $chat->isPending();
     }
 }

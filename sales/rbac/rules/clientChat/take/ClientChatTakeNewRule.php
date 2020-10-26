@@ -15,11 +15,9 @@ class ClientChatTakeNewRule extends Rule
             return false;
         }
 
-        $user = (int)$user;
-
         /** @var ClientChat $chat */
         $chat = $params['chat'];
 
-        return $chat->isNew() && !$chat->isOwner($user);
+        return $chat->isNew();
     }
 }

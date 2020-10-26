@@ -15,11 +15,9 @@ class ClientChatTakeInProgressRule extends Rule
             return false;
         }
 
-        $user = (int)$user;
-
         /** @var ClientChat $chat */
         $chat = $params['chat'];
 
-        return $chat->isInProgress() && !$chat->isOwner($user);
+        return $chat->isInProgress();
     }
 }

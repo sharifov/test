@@ -7,9 +7,17 @@ use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 
 class ClientChatQuery
 {
-    public static function lastSameChat(string $rid): ClientChat
+    public static function lastSameChat(string $rid): ?ClientChat
     {
         return ClientChat::find()->byRid($rid)->last()->one();
+    }
+
+    public static function lastSameChatId(string $rid): ?int
+    {
+        if ($chat = ClientChat::find()->select(['cch_id'])->byRid($rid)->last()->asArray()->one()) {
+            return (int)$chat['cch_id'];
+        }
+        return null;
     }
 
     /**

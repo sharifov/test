@@ -360,7 +360,7 @@ class ClientChatController extends FController
             'history' => $history ?? null,
             'filter' => $filter,
             'page' => $page + 1,
-            'actionPermissions' => new ClientChatActionPermission(),
+            'actionPermissions' => $this->actionPermissions,
             'countFreeToTake' => $countFreeToTake,
             'accessChatError' => $accessChatError,
             'resetUnreadMessagesChatId' => $resetUnreadMessagesChatId
@@ -407,14 +407,13 @@ class ClientChatController extends FController
             $result['html'] = $this->renderAjax('partial/_client-chat-info', [
                 'clientChat' => $clientChat,
                 'client' => $clientChat->cchClient,
-                'actionPermissions' => new ClientChatActionPermission(),
+                'actionPermissions' => $this->actionPermissions,
             ]);
-            $permissions = new ClientChatActionPermission();
-            if ($permissions->canNoteView($clientChat) || $permissions->canNoteAdd($clientChat) || $permissions->canNoteDelete($clientChat)) {
+            if ($this->actionPermissions->canNoteView($clientChat) || $this->actionPermissions->canNoteAdd($clientChat) || $this->actionPermissions->canNoteDelete($clientChat)) {
                 $result['noteHtml'] = $this->renderAjax('partial/_client-chat-note', [
                     'clientChat' => $clientChat,
                     'model' => new ClientChatNote(),
-                    'actionPermissions' => $permissions,
+                    'actionPermissions' => $this->actionPermissions,
                 ]);
             } else {
                 $result['noteHtml'] = '';
@@ -437,12 +436,11 @@ class ClientChatController extends FController
         try {
             $clientChat = $this->clientChatRepository->findById($cchId);
 
-            $permissions = new ClientChatActionPermission();
-            if ($permissions->canNoteView($clientChat)) {
+            if ($this->actionPermissions->canNoteView($clientChat)) {
                 $result['html'] = $this->renderPartial('partial/_client-chat-note', [
                     'clientChat' => $clientChat,
                     'model' => new ClientChatNote(),
-                    'actionPermissions' => $permissions,
+                    'actionPermissions' => $this->actionPermissions,
                 ]);
             } else {
                 $result['html'] = '';
@@ -471,8 +469,7 @@ class ClientChatController extends FController
             throw new NotFoundHttpException('Client chat is not found');
         }
 
-        $permissions = new ClientChatActionPermission();
-        if (!$permissions->canNoteAdd($clientChat)) {
+        if (!$this->actionPermissions->canNoteAdd($clientChat)) {
             throw new ForbiddenHttpException('You do not have access to perform this action', 403);
         }
 
@@ -494,7 +491,7 @@ class ClientChatController extends FController
             'clientChat' => $clientChat,
             'model' => $model,
             'showContent' => false,
-            'actionPermissions' => $permissions,
+            'actionPermissions' => $this->actionPermissions,
         ]);
     }
 
@@ -522,8 +519,7 @@ class ClientChatController extends FController
             throw new NotFoundHttpException('Client chat is not found');
         }
 
-        $permissions = new ClientChatActionPermission();
-        if (!$permissions->canNoteDelete($clientChat)) {
+        if (!$this->actionPermissions->canNoteDelete($clientChat)) {
             throw new ForbiddenHttpException('You do not have access to perform this action', 403);
         }
 
@@ -541,7 +537,7 @@ class ClientChatController extends FController
             'clientChat' => $clientChat ?? null,
             'model' => new ClientChatNote(),
             'showContent' => true,
-            'actionPermissions' => $permissions
+            'actionPermissions' => $this->actionPermissions
         ]);
     }
 
@@ -870,9 +866,7 @@ class ClientChatController extends FController
             throw new NotFoundHttpException('Client chat is not found');
         }
 
-        $permissions = new ClientChatActionPermission();
-
-        if (!$permissions->canTransfer($clientChat)) {
+        if (!$this->actionPermissions->canTransfer($clientChat)) {
             throw new ForbiddenHttpException('You do not have access to perform this action', 403);
         }
 
@@ -929,8 +923,7 @@ class ClientChatController extends FController
             throw new NotFoundHttpException('Client chat is not found');
         }
 
-        $permissions = new ClientChatActionPermission();
-        if (!$permissions->canHold($clientChat)) {
+        if (!$this->actionPermissions->canHold($clientChat)) {
             throw new ForbiddenHttpException('Access denied.');
         }
 
@@ -991,8 +984,7 @@ class ClientChatController extends FController
                 if (!$clientChat = ClientChat::findOne($cchId)) {
                     throw new NotFoundHttpException('Client chat is not found', -2);
                 }
-                $permissions = new ClientChatActionPermission();
-                if (!$permissions->canUnHold($clientChat)) {
+                if (!$this->actionPermissions->canUnHold($clientChat)) {
                     throw new ForbiddenHttpException('Access denied.', -3);
                 }
 
@@ -1033,8 +1025,7 @@ class ClientChatController extends FController
                     throw new NotFoundHttpException('Chat is not found');
                 }
 
-                $permission = new ClientChatActionPermission();
-                if (!$permission->canTake($clientChat)) {
+                if (!$this->actionPermissions->canTake($clientChat)) {
                     throw new ForbiddenHttpException('Access denied.');
                 }
 
@@ -1084,8 +1075,7 @@ class ClientChatController extends FController
                     throw new NotFoundHttpException('Chat is not found');
                 }
 
-                $permission = new ClientChatActionPermission();
-                if (!$permission->canReturn($clientChat)) {
+                if (!$this->actionPermissions->canReturn($clientChat)) {
                     throw new ForbiddenHttpException('Access denied.');
                 }
 
@@ -1419,6 +1409,10 @@ class ClientChatController extends FController
         try {
             $chat = $this->clientChatRepository->findById($cchId);
 
+            if (!$this->actionPermissions->canCancelTransfer($chat)) {
+                throw new ForbiddenHttpException('Access denied.');
+            }
+
             $this->transactionManager->wrap(function () use ($chat) {
                 $this->clientChatUserAccessService->disableAccessForOtherUsersBatch($chat, $chat->cch_owner_user_id);
                 $this->clientChatService->cancelTransfer(
@@ -1427,7 +1421,7 @@ class ClientChatController extends FController
                     ClientChatStatusLog::ACTION_ACCEPT_TRANSFER
                 );
             });
-        } catch (\DomainException | \RuntimeException $e) {
+        } catch (\DomainException | \RuntimeException | ForbiddenHttpException $e) {
             $result['error'] = true;
             $result['message'] = $e->getMessage();
         } catch (\Throwable $e) {
@@ -1826,8 +1820,7 @@ class ClientChatController extends FController
             return $this->asJson(['error' => true, 'message' => 'Chat not found']);
         }
 
-        $permissions = new ClientChatActionPermission();
-        if (!$permissions->canReopenChat($chat)) {
+        if (!$this->actionPermissions->canReopenChat($chat)) {
             throw new ForbiddenHttpException('You do not have access to perform this action', 403);
         }
 

@@ -15,11 +15,9 @@ class ClientChatTakeHoldRule extends Rule
             return false;
         }
 
-        $user = (int)$user;
-
         /** @var ClientChat $chat */
         $chat = $params['chat'];
 
-        return $chat->isHold() && !$chat->isOwner($user);
+        return $chat->isHold();
     }
 }

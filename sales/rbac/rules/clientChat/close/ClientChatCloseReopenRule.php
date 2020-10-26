@@ -22,6 +22,6 @@ class ClientChatCloseReopenRule extends Rule
         $clientChat = ClientChatQuery::lastSameChat($chat->cch_rid);
         $childExist = ClientChat::find()->byParent($chat->cch_id)->exists();
 
-        return $chat->isClosed() && ($clientChat->cch_id === $chat->cch_id) && !$childExist;
+        return $chat->isClosed() && ($clientChat && $clientChat->cch_id === $chat->cch_id) && !$childExist;
     }
 }

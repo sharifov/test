@@ -15,11 +15,9 @@ class ClientChatTakeIdleRule extends Rule
             return false;
         }
 
-        $user = (int)$user;
-
         /** @var ClientChat $chat */
         $chat = $params['chat'];
 
-        return $chat->isIdle() && !$chat->isOwner($user);
+        return $chat->isIdle();
     }
 }

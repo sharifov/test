@@ -3,14 +3,12 @@
 use common\models\Client;
 use sales\auth\Auth;
 use sales\entities\cases\CasesStatus;
-use sales\guards\clientChat\ClientChatManageGuard;
 use sales\helpers\clientChat\ClientChatHelper;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatHold\service\ClientChatHoldService;
 use sales\model\clientChat\permissions\ClientChatActionPermission;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
-use sales\repositories\clientChatStatusLogRepository\ClientChatStatusLogRepository;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\JqueryAsset;
@@ -27,8 +25,6 @@ use yii\widgets\Pjax;
 
 $_self = $this;
 
-$statusLogRepository = Yii::createObject(ClientChatStatusLogRepository::class);
-$guard = new ClientChatManageGuard($statusLogRepository);
 ?>
 
 <div class="_rc-client-chat-info-wrapper">
@@ -63,7 +59,7 @@ $guard = new ClientChatManageGuard($statusLogRepository);
                             'data-cch-id' => $clientChat->cch_id
                         ]) ?>
 
-                        <?php if ($guard->isCanCancelTransfer($clientChat, Auth::user())): ?>
+                        <?php if ($actionPermissions->canCancelTransfer($clientChat)): ?>
                             <?php echo Html::a('<i class="fa fa-exchange"> </i> Cancel Transfer', null, [
                                 'class' => 'dropdown-item cc_cancel_transfer',
                                 'title' => 'Cancel Transfer',
