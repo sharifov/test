@@ -359,24 +359,24 @@ window.loadClientChatData = function (cch_id, data, ref) {
     $("#_rc-iframe-wrapper").find('._rc-iframe').hide();
     $('._cc-list-item').removeClass('_cc_active');
     $(ref).addClass('_cc_active');
-    if (!$('#_rc-'+cch_id).length) {
+    
+    $('#_rc-'+cch_id).remove();
+    
+    if (isClosed) {
+        getChatHistory(cch_id);
+    } else {
+        $("#_rc-iframe-wrapper").find('#_cc-load').remove();
+        $("#_rc-iframe-wrapper").append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
         
-        if (isClosed) {
-            getChatHistory(cch_id);
-        } else {
-            $("#_rc-iframe-wrapper").find('#_cc-load').remove();
-            $("#_rc-iframe-wrapper").append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
-            
-            let iframe = document.createElement('iframe');
-            iframe.setAttribute('src', iframeHref);
-            // iframe.setAttribute('style', 'width: 100%; height: '+iframeHeight+'px; border: none;');
-            iframe.onload = function () {
-                $('#_rc-iframe-wrapper').find('#_cc-load').remove();
-            }
-            iframe.setAttribute('class', '_rc-iframe');
-            iframe.setAttribute('id', '_rc-'+cch_id);
-            $('#_rc-iframe-wrapper').append(iframe);
+        let iframe = document.createElement('iframe');
+        iframe.setAttribute('src', iframeHref);
+        // iframe.setAttribute('style', 'width: 100%; height: '+iframeHeight+'px; border: none;');
+        iframe.onload = function () {
+            $('#_rc-iframe-wrapper').find('#_cc-load').remove();
         }
+        iframe.setAttribute('class', '_rc-iframe');
+        iframe.setAttribute('id', '_rc-'+cch_id);
+        $('#_rc-iframe-wrapper').append(iframe);
     }
     
     let params = new URLSearchParams(window.location.search);
@@ -617,8 +617,8 @@ window.refreshChatPage = function (cchId, tab) {
     $('#_rc-'+cchId).remove();
     $('.cc_transfer').remove();
     $('.cc_close').remove();
-    getChatHistory(cchId);
-    refreshChatInfo(cchId);
+    
+    refreshChatInfo(cchId, loadClientChatData);
 }
 
 $(document).on('click', '.chat-offer', function(e) {
