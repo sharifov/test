@@ -36,4 +36,9 @@ class ClientChatQuery
             ->groupBy(['cch_id'])
             ->all();
     }
+
+    public static function isExistsNotClosedArchivedChatByRid(string $rid): bool
+    {
+        return ClientChat::find()->byRid($rid)->notClosed()->notArchived()->exists();
+    }
 }

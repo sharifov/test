@@ -433,6 +433,10 @@ class ClientChatController extends Controller
 
         foreach ($closedChats as $clientChat) {
             try {
+                if (ClientChatQuery::isExistsNotClosedArchivedChatByRid($clientChat->cch_rid)) {
+                    continue;
+                }
+
                 $clientChat->archive(null, ClientChatStatusLog::ACTION_TIMEOUT_FINISH);
                 $this->clientChatRepository->save($clientChat);
 
