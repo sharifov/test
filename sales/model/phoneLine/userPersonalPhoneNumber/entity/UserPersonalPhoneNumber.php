@@ -13,7 +13,7 @@ use yii\db\ActiveRecord;
  *
  * @property int $upn_id
  * @property int $upn_user_id
- * @property string $upn_phone_number
+ * @property int $upn_phone_number
  * @property string|null $upn_title
  * @property int|null $upn_approved
  * @property int|null $upn_enabled
@@ -56,7 +56,7 @@ class UserPersonalPhoneNumber extends \yii\db\ActiveRecord
             ['upn_enabled', 'integer'],
 
             ['upn_phone_number', 'required'],
-            ['upn_phone_number', 'string', 'max' => 15],
+            ['upn_phone_number', 'integer'],
 
             ['upn_title', 'string', 'max' => 100],
 
