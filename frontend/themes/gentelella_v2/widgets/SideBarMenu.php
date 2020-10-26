@@ -402,6 +402,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Departments', 'url' => ['/department/index']],
                         ['label' => 'Department Emails', 'url' => ['/department-email-project/index']],
                         ['label' => 'Department Phones', 'url' => ['/department-phone-project/index']],
+                        ['label' => 'Department Phones Import', 'url' => ['/department-phone-project/import']],
                     ]
                 ],
                 [
