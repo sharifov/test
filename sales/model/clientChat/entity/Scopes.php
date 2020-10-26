@@ -71,11 +71,6 @@ class Scopes extends \yii\db\ActiveQuery
         return $this->orderBy(['cch_id' => SORT_DESC])->limit(1);
     }
 
-    public function active(): self
-    {
-        return $this->notClosed();
-    }
-
     public function archive(): self
     {
         return $this->andWhere(['OR', ['cch_status_id' => ClientChat::STATUS_CLOSED], ['cch_status_id' => ClientChat::STATUS_ARCHIVE]]);
