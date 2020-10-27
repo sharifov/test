@@ -2,6 +2,7 @@
 
 namespace sales\model\sms\entity\smsDistributionList\forms;
 use borales\extensions\phoneInput\PhoneInputValidator;
+use common\models\Project;
 use yii\base\Model;
 
 /**
@@ -46,6 +47,8 @@ class SmsDistributionListAddMultipleForm extends Model
             [['sdl_text', 'sdl_phone_to_list'], 'string'],
             [['sdl_start_dt', 'sdl_end_dt'], 'safe'],
             [['sdl_phone_from'], 'string', 'max' => 20],
+
+            ['sdl_project_id', 'in', 'range' => array_keys($this->getProjects())],
         ];
     }
 
@@ -65,5 +68,10 @@ class SmsDistributionListAddMultipleForm extends Model
             'sdl_priority' => 'Priority',
             'sdl_phone_to_list' => 'Phone To List'
         ];
+    }
+
+    public function getProjects(): array
+    {
+       return Project::getSmsEnabledList();
     }
 }
