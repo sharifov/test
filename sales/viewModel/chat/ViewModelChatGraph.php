@@ -17,7 +17,7 @@ use yii\helpers\ArrayHelper;
 
 class ViewModelChatGraph
 {
-    public string $preparedData;
+    public string $preparedData = '';
     public array $clientChatData;
     public ChatGraphsSearch $chatGraphsSearch;
 
