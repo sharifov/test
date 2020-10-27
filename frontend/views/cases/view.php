@@ -33,6 +33,7 @@ use yii\bootstrap4\Modal;
  * @var $sendCouponsForm \sales\model\coupon\useCase\send\SendCouponsForm
  *
  * @var $fromPhoneNumbers array
+ * @var bool $smsEnabled
  */
 
 $this->title = 'Case ' . $model->cs_id;
@@ -145,7 +146,8 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
                         'dataProvider'  => (bool)Yii::$app->params['settings']['new_communication_block_case'] ? $dataProviderCommunicationLog : $dataProviderCommunication,
                         'isAdmin'       => $isAdmin,
                         'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_case'],
-                        'fromPhoneNumbers' => $fromPhoneNumbers
+                        'fromPhoneNumbers' => $fromPhoneNumbers,
+                        'smsEnabled' => $smsEnabled
                     ]);
                     ?>
             <?php else: ?>

@@ -23,7 +23,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             <div class="row">
                 <div class="col-md-6">
-                    <?= $form->field($model, 'sdl_project_id')->dropDownList(\common\models\Project::getList(), ['prompt' => '-']) ?>
+                    <?= $form->field($model, 'sdl_project_id')->dropDownList($model->getProjects(), ['prompt' => '-']) ?>
                 </div>
                 <div class="col-md-6">
                     <?= $form->field($model, 'sdl_status_id')->dropDownList(SmsDistributionList::getStatusList(), ['prompt' => '-']) ?>

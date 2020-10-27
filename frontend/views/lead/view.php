@@ -18,6 +18,7 @@
  * @var $dataProviderOffers ActiveDataProvider
  * @var $dataProviderOrders ActiveDataProvider
  * @var $fromPhoneNumbers array
+ * @var bool $smsEnabled
  */
 
 use common\models\Employee;
@@ -186,7 +187,8 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
                     'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_lead'],
                     'lead' => $lead,
                     'fromPhoneNumbers' => $fromPhoneNumbers,
-                    'unsubscribe' => $unsubscribe
+                    'unsubscribe' => $unsubscribe,
+                    'smsEnabled' => $smsEnabled,
                 ]); ?>
             <?php else: ?>
                 <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
