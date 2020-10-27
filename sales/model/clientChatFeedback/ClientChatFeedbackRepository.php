@@ -10,19 +10,19 @@ use sales\repositories\Repository;
  */
 class ClientChatFeedbackRepository extends Repository
 {
-	public function save(ClientChatFeedback $ClientChatFeedback): ClientChatFeedback
-	{
-		if (!$ClientChatFeedback->save(false)) {
-			throw new \RuntimeException('Client Chat Feedback saving failed');
-		}
-		return $ClientChatFeedback;
-	}
+    public function save(ClientChatFeedback $ClientChatFeedback): ClientChatFeedback
+    {
+        if (!$ClientChatFeedback->save(false)) {
+            throw new \RuntimeException('Client Chat Feedback saving failed');
+        }
+        return $ClientChatFeedback;
+    }
 
-	public function findById(int $id): ClientChatFeedback
-	{
-		if ($clientChatFeedback = ClientChatFeedback::findOne($id)) {
-			return $clientChatFeedback;
-		}
-		throw new NotFoundException('Client chat Feedback is not found');
-	}
+    public function findById(int $id): ClientChatFeedback
+    {
+        if ($clientChatFeedback = ClientChatFeedback::findOne($id)) {
+            return $clientChatFeedback;
+        }
+        throw new NotFoundException('Client chat Feedback is not found');
+    }
 }

@@ -33,6 +33,7 @@ use sales\helpers\app\AppHelper;
 use sales\helpers\app\AppParamsHelper;
 use sales\model\clientChat\cannedResponse\entity\ClientChatCannedResponse;
 use sales\model\clientChat\cannedResponse\entity\search\ClientChatCannedResponseSearch;
+use sales\helpers\ErrorsToStringHelper;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\dashboard\FilterForm;
 use sales\model\clientChat\dashboard\GroupFilter;
@@ -45,6 +46,8 @@ use sales\model\clientChat\useCase\hold\ClientChatHoldForm;
 use sales\model\clientChat\useCase\sendOffer\GenerateImagesForm;
 use sales\model\clientChat\useCase\transfer\ClientChatTransferForm;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
+use sales\model\clientChatCouchNote\ClientChatCouchNoteRepository;
+use sales\model\clientChatCouchNote\entity\ClientChatCouchNote;
 use sales\model\clientChatHold\ClientChatHoldRepository;
 use sales\model\clientChatHold\entity\ClientChatHold;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
@@ -65,8 +68,8 @@ use sales\repositories\lead\LeadRepository;
 use sales\repositories\NotFoundException;
 use sales\repositories\project\ProjectRepository;
 use sales\services\client\ClientManageService;
+use sales\services\clientChatCouchNote\ClientChatCouchNoteForm;
 use sales\services\clientChatMessage\ClientChatMessageService;
-use sales\services\clientChatService\ClientChatQuery;
 use sales\services\clientChatService\ClientChatService;
 use sales\services\clientChatService\ClientChatStatusLogService;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
@@ -76,16 +79,15 @@ use sales\viewModel\chat\ViewModelChatFeedbackGraph;
 use sales\viewModel\chat\ViewModelChatGraph;
 use Yii;
 use yii\base\InvalidConfigException;
-use yii\caching\TagDependency;
 use yii\data\ActiveDataProvider;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
-use function Amp\call;
 
 /**
  * Class ClientChatController
@@ -109,6 +111,7 @@ use function Amp\call;
  * @property ClientChatHoldRepository $clientChatHoldRepository
  * @property ClientManageService $clientManageService
  * @property ClientChatActionPermission $actionPermissions
+ * @property ClientChatCouchNoteRepository  $clientChatCouchNoteRepository
  */
 class ClientChatController extends FController
 {
@@ -164,6 +167,7 @@ class ClientChatController extends FController
     private ClientChatStatusLogService $clientChatStatusLogService;
     private ClientChatStatusLogRepository $clientChatStatusLogRepository;
     private ClientChatHoldRepository $clientChatHoldRepository;
+    private ClientChatCouchNoteRepository $clientChatCouchNoteRepository;
     /**
      * @var ClientManageService
      */
@@ -191,6 +195,7 @@ class ClientChatController extends FController
         ClientChatHoldRepository $clientChatHoldRepository,
         ClientManageService $clientManageService,
         ClientChatActionPermission $actionPermissions,
+        ClientChatCouchNoteRepository $clientChatCouchNoteRepository,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -211,6 +216,7 @@ class ClientChatController extends FController
         $this->clientChatHoldRepository = $clientChatHoldRepository;
         $this->clientManageService = $clientManageService;
         $this->actionPermissions = $actionPermissions;
+        $this->clientChatCouchNoteRepository = $clientChatCouchNoteRepository;
     }
 
     /**
@@ -240,7 +246,9 @@ class ClientChatController extends FController
                     'ajax-take',
                     'ajax-reopen-chat',
                     'ajax-canned-response',
-                    'ajax-send-canned-response'
+                    'ajax-send-canned-response',
+                    'ajax-reopen-chat',
+                    'ajax-couch-note-view',
                 ],
             ],
         ];
@@ -370,7 +378,8 @@ class ClientChatController extends FController
             'actionPermissions' => $this->actionPermissions,
             'countFreeToTake' => $countFreeToTake,
             'accessChatError' => $accessChatError,
-            'resetUnreadMessagesChatId' => $resetUnreadMessagesChatId
+            'resetUnreadMessagesChatId' => $resetUnreadMessagesChatId,
+            'couchNoteForm' => new ClientChatCouchNoteForm($clientChat, Auth::user()),
         ]);
     }
 
@@ -1919,7 +1928,6 @@ class ClientChatController extends FController
                         $cannedResponse[$key]['message'] = preg_replace($patterns, $replacement, $item['message']);
                     }
                 }
-
             } else {
                 $errorMessage = $form->getErrorSummary(false)[0];
             }
@@ -1992,5 +2000,87 @@ class ClientChatController extends FController
         }
 
         return $this->asJson($result);
+    }
+
+    /**
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function actionAjaxCouchNote(): array
+    {
+        if (Yii::$app->request->isAjax && Yii::$app->request->post()) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+
+            $result = ['message' => '', 'status' => 0];
+            try {
+                $form = new ClientChatCouchNoteForm();
+                if (!$form->load(Yii::$app->request->post())) {
+                    throw new BadRequestHttpException('Form not loaded', -1);
+                }
+                if (!$form->validate()) {
+                    throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($form));
+                }
+                if (!(new ClientChatActionPermission())->canCouchNote($form->getClientChat())) {
+                    throw new ForbiddenHttpException('Access denied.', -3);
+                }
+                $response = \Yii::$app->chatBot->sendNote($form->rid, $form->message, $form->alias);
+                if (!empty($response['error']['message'])) {
+                    throw new \RuntimeException('RC Error: ' .
+                        VarDumper::dumpAsString($response['error']['message']), -4);
+                }
+                $clientChatCouchNote = ClientChatCouchNote::create(
+                    $form->getClientChat()->cch_id,
+                    $form->rid,
+                    $form->alias,
+                    $form->message
+                );
+                $this->clientChatCouchNoteRepository->save($clientChatCouchNote);
+
+                $result = ['message' => 'ClientChat Note successful created', 'status' => 1];
+            } catch (\Throwable $throwable) {
+                AppHelper::throwableLogger(
+                    $throwable,
+                    'ClientChatController:actionAjaxCouchNote:throwable'
+                );
+                $result['message'] = VarDumper::dumpAsString($throwable->getMessage());
+            }
+            return $result;
+        }
+        throw new BadRequestHttpException();
+    }
+
+    public function actionAjaxCouchNoteView(): array
+    {
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+
+            $result = ['message' => '', 'status' => 0, 'html' => ''];
+
+            try {
+                if (!$cchId = (int) Yii::$app->request->post('cch_id')) {
+                    throw new BadRequestHttpException('Invalid parameters', -1);
+                }
+                if (!$clientChat = ClientChat::findOne($cchId)) {
+                    throw new NotFoundHttpException('Chat is not found', -2);
+                }
+                if (!(new ClientChatActionPermission())->canCouchNote($clientChat)) {
+                    throw new ForbiddenHttpException('Access denied.', -3);
+                }
+
+                $html = $this->renderAjax('partial/_couch_note', [
+                    'couchNoteForm' => new ClientChatCouchNoteForm($clientChat, Auth::user()),
+                ]);
+
+                $result = ['status' => 1, 'html' => $html];
+            } catch (\Throwable $throwable) {
+                AppHelper::throwableLogger(
+                    $throwable,
+                    'ClientChatController:actionAjaxCouchNoteView:throwable'
+                );
+                $result['message'] = VarDumper::dumpAsString($throwable->getMessage());
+            }
+            return $result;
+        }
+        throw new BadRequestHttpException();
     }
 }

@@ -251,6 +251,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Hold', 'url' => ['/client-chat-hold-crud/index']],
                         ['label' => 'Unread messages', 'url' => ['/client-chat-unread/index']],
                         ['label' => 'Connection Active chat', 'url' => ['/user-connection-active-chat/index']],
+                        ['label' => 'Couch Note', 'url' => ['/client-chat-couch-note-crud/index']],
                         ['label' => 'Canned Response', 'url' => ['/client-chat-canned-response-crud/index']],
                         ['label' => 'Canned Response Category', 'url' => ['/client-chat-canned-response-category-crud/index']],
                     ],

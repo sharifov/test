@@ -41,6 +41,7 @@ class ClientChatActionPermission
     private ?bool $canReturn = null;
 
     private ?bool $canTake = null;
+    private ?bool $canCouchNoteChecked = null;
     private ?bool $canSendCannedResponse = null;
 
     public function canClose(ClientChat $chat): bool
@@ -210,5 +211,19 @@ class ClientChatActionPermission
 
         $this->canSendCannedResponse = Auth::can('client-chat/canned-response');
         return $this->canSendCannedResponse;
+    }
+
+    public function canCouchNote(?ClientChat $chat): bool
+    {
+        if ($this->canCouchNoteChecked !== null) {
+            return $this->canCouchNoteChecked;
+        }
+        if (!$chat || $chat->isInClosedStatusGroup()) {
+            return $this->canCouchNoteChecked = false;
+        }
+
+        $this->canCouchNoteChecked = Auth::can('client-chat/view', ['chat' => $chat]) &&
+            Auth::can('client-chat/couch-note', ['chat' => $chat]);
+        return $this->canCouchNoteChecked;
     }
 }

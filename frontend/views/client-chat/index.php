@@ -10,6 +10,7 @@ use sales\model\clientChat\permissions\ClientChatActionPermission;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatNote\entity\ClientChatNote;
+use sales\services\clientChatCouchNote\ClientChatCouchNoteForm;
 use yii\bootstrap4\Alert;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
@@ -30,6 +31,7 @@ use yii\widgets\Pjax;
 /** @var int $countFreeToTake */
 /** @var bool $accessChatError */
 /** @var int|null $resetUnreadMessagesChatId */
+/** @var ClientChatCouchNoteForm $couchNoteForm */
 
 $this->title = 'My Client Chat';
 //$this->params['breadcrumbs'][] = $this->title;
@@ -58,7 +60,8 @@ $clientChatAddActiveConnectionUrl = Url::toRoute(['/client-chat/add-active-conne
 $clientChatRemoveFromActiveConnectionUrl = Url::toRoute(['/client-chat/remove-active-connection']);
 $clientChatTakeUrl = Url::toRoute(['/client-chat/ajax-take']);
 $clientChatReturnUrl = Url::toRoute(['/client-chat/ajax-return']);
-
+$clientChatCouchNoteUrl = Url::toRoute(['/client-chat/ajax-couch-note']);
+$clientChatCouchNoteViewUrl = Url::toRoute(['/client-chat/ajax-couch-note-view']);
 ?>
 
 <?php if ($filter->isEmptyChannels()): ?>
@@ -138,6 +141,15 @@ $clientChatReturnUrl = Url::toRoute(['/client-chat/ajax-return']);
             </span>
         </div>
         <?php endif; ?>
+
+        <div id="couch_note_box">
+            <?php if ($clientChat && $actionPermissions->canCouchNote($clientChat)): ?>
+                <?php echo $this->render('partial/_couch_note', [
+                    'couchNoteForm' => $couchNoteForm,
+                ]); ?>
+            <?php endif; ?>
+        </div>
+
     </div>
     <div class="col-md-3">
         <div id="_cc_additional_info_wrapper" style="position: relative;">
@@ -463,6 +475,7 @@ window.loadClientChatData = function (cch_id, data, ref) {
     if (isClosed) {
         getChatHistory(cch_id);
         $('#canned-response-wrap').addClass('disabled');
+        $('#couch_note_box').html('');
     } else {
         $("#_rc-iframe-wrapper").find('#_cc-load').remove();
         $("#_rc-iframe-wrapper").append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
@@ -478,6 +491,8 @@ window.loadClientChatData = function (cch_id, data, ref) {
         $('#_rc-iframe-wrapper').append(iframe);
         $('#canned-response-wrap').removeClass('disabled');
         $('#canned-response').attr('data-chat-id', cch_id).val('');
+        
+        window.refreshCouchNote(cch_id);
     }
     
     let params = new URLSearchParams(window.location.search);
@@ -720,6 +735,29 @@ window.refreshChatPage = function (cchId, tab) {
     $('.cc_close').remove();
     
     refreshChatInfo(cchId, loadClientChatData);
+}
+
+window.refreshCouchNote = function (cch_id) {    
+    $('#couch_note_box').html('');    
+    $.ajax({
+        url: '{$clientChatCouchNoteViewUrl}',
+        type: 'POST',
+        data: {cch_id: cch_id},
+        dataType: 'json'    
+    })
+    .done(function(dataResponse) {                
+        if (dataResponse.status > 0 && dataResponse.html.length) { 
+            $('#couch_note_box').html(dataResponse.html);
+        } else if (dataResponse.status === 0 && dataResponse.message.length) {
+            console.log(dataResponse.message);
+        } else {
+            console.log('RefreshCouchNote failed. Please see logs');
+        }
+    })
+    .fail(function(jqXHR, textStatus, errorThrown) {
+        console.log(jqXHR.responseText);
+    })
+    .always(function(jqXHR, textStatus, errorThrown) {}); 
 }
 
 $(document).on('click', '.chat-offer', function(e) {
@@ -1273,6 +1311,45 @@ if (sessionStorage.selectedChats) {
         },
     });
 }
+});
+ 
+$(document).on('click', '.js-couch-note-btn', function (e) {
+    e.stopPropagation();
+    e.preventDefault(); 
+    
+    let btnSubmit = $(this);
+    let btnContent = btnSubmit.html();
+        
+    btnSubmit.html('<i class="fa fa-cog fa-spin"></i>...')
+        .addClass('btn-default')
+        .prop('disabled', true);
+         
+    $.ajax({
+        url: '{$clientChatCouchNoteUrl}',
+        type: 'POST',
+        data: $('#ClientChatCouchNoteForm').serialize(),
+        dataType: 'json'    
+    })
+    .done(function(dataResponse) {        
+        if (dataResponse.status > 0) { 
+            createNotify('Success', dataResponse.message, 'success');
+            $('#couchNoteMessage').val('');
+        } else if (dataResponse.message.length) {
+            createNotify('Error', dataResponse.message, 'error');
+        } else {
+            createNotify('Error', 'Error, please check logs', 'error');
+        }
+        btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);
+    })
+    .fail(function(jqXHR, textStatus, errorThrown) {        
+        createNotify('Error', jqXHR.responseText, 'error');
+        btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);
+    })
+    .always(function(jqXHR, textStatus, errorThrown) {  
+        setTimeout(function () {                        
+            btnSubmit.html(btnContent).removeClass('btn-default').prop('disabled', false);
+        }, 2000);
+    });           
 });
 
 refreshUserSelectedState();

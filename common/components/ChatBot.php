@@ -279,6 +279,29 @@ class ChatBot extends Component
         return $out;
     }
 
+    public function sendNote(string $rid, string $message, string $alias) : array
+    {
+        $out = ['error' => false, 'data' => []];
+        $data = [
+            'rid' => $rid,
+            'message' => $message,
+            'alias' => $alias,
+        ];
+
+        $response = $this->sendRequest('livechat/send-note', $data, 'post');
+
+        if ($response->isOk) {
+            if (!empty($response->data)) {
+                $out['data'] = $response->data;
+            } else {
+                $out['error']['message'] = 'Not found in response array data key [data]';
+            }
+        } else {
+            $out['error'] = $this->parseErrorContent($response);
+        }
+        return $out;
+    }
+
     private function parseErrorContent(Response $response): array
     {
         $result = json_decode($response->content, true);

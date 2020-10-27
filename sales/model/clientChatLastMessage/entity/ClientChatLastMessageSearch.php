@@ -51,7 +51,7 @@ class ClientChatLastMessageSearch extends ClientChatLastMessage
 
         $query->andFilterWhere(['like', 'cclm_message', $this->cclm_message]);
 
-        if ($this->cclm_dt){
+        if ($this->cclm_dt) {
             $query->andFilterWhere(['>=', 'cclm_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->cclm_dt))])
                 ->andFilterWhere(['<=', 'cclm_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->cclm_dt) + 3600 * 24)]);
         }

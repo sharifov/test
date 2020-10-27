@@ -1889,14 +1889,6 @@ class TestController extends FController
 
 	public function actionZ()
     {
-        try {
-            throw new NotFoundHttpException('Test not found', -1);
-        } catch (\Throwable $throwable) {
-            AppHelper::throwableLogger(
-                $throwable,
-                'TEST:actionZ:throwable'
-            );
-        }
 
         return $this->render('z');
     }
