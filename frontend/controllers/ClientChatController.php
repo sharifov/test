@@ -1413,7 +1413,7 @@ class ClientChatController extends FController
             }
 
             $this->transactionManager->wrap(function () use ($chat) {
-                $this->clientChatUserAccessService->disableAccessForOtherUsersBatch($chat, $chat->cch_owner_user_id);
+                $this->clientChatUserAccessService->disableAccessForOtherUsersBatch($chat->cch_id, $chat->cch_owner_user_id);
                 $this->clientChatService->cancelTransfer(
                     $chat,
                     Auth::user(),
