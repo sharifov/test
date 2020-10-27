@@ -298,11 +298,15 @@ class CasesController extends FController
             }
         }
 
+        $smsEnabled = true;
+        if ($model->project->getCustomData()->sms_enabled === false) {
+            $smsEnabled = false;
+        }
 
         $previewSmsForm = new CasePreviewSmsForm();
         $previewSmsForm->is_send = false;
 
-        if ($previewSmsForm->load(Yii::$app->request->post())) {
+        if ($smsEnabled && $previewSmsForm->load(Yii::$app->request->post())) {
             $previewSmsForm->s_case_id = $model->cs_id;
             if ($previewSmsForm->validate()) {
 
@@ -379,7 +383,7 @@ class CasesController extends FController
 
             $comForm->c_case_id = $model->cs_id;
 
-            $isTypeSMS = (int)$comForm->c_type_id === CaseCommunicationForm::TYPE_SMS;
+            $isTypeSMS = (int)$comForm->c_type_id === CaseCommunicationForm::TYPE_SMS && $smsEnabled;
 
             $isTypeEmail = (int)$comForm->c_type_id === CaseCommunicationForm::TYPE_EMAIL;
 
@@ -727,7 +731,8 @@ class CasesController extends FController
 			'coupons' => $coupons,
 			'sendCouponsForm' => $sendCouponForm,
 
-			'fromPhoneNumbers' => $fromPhoneNumbers
+			'fromPhoneNumbers' => $fromPhoneNumbers,
+            'smsEnabled' => $smsEnabled
         ]);
     }
 

@@ -9,6 +9,7 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\entity\projectConfig\ClientChatProjectConfig;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\phoneLine\phoneLine\entity\PhoneLine;
+use sales\model\project\entity\CustomData;
 use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
 use Yii;
 use yii\db\ActiveQuery;
@@ -35,6 +36,7 @@ use yii\httpclient\CurlTransport;
  * @property string|null $project_key
  *
  * @property ContactInfo $contactInfo
+ * @property CustomData|null $customData
  *
  * @property ApiUser[] $apiUsers
  * @property Call[] $calls
@@ -64,6 +66,8 @@ use yii\httpclient\CurlTransport;
 class Project extends \yii\db\ActiveRecord
 {
     private ContactInfo $_contactInfo;
+
+    private ?CustomData $customData = null;
 
     /**
      * @return string
@@ -137,6 +141,15 @@ class Project extends \yii\db\ActiveRecord
         return $this->_contactInfo;
     }
 
+    public function getCustomData(): CustomData
+    {
+        if ($this->customData !== null) {
+            return $this->customData;
+        }
+        $this->customData = new CustomData($this->custom_data, $this->id);
+        return $this->customData;
+    }
+
     /**
      * @return ProjectEmailTemplate[]
      */
@@ -154,6 +167,16 @@ class Project extends \yii\db\ActiveRecord
         return ArrayHelper::map($data,'id', 'name');
     }
 
+    public static function getSmsEnabledList(): array
+    {
+        $projects = [];
+        foreach (self::find()->all() as $item) {
+            if ($item->getCustomData()->sms_enabled !== false) {
+                $projects[$item->id] = $item->name;
+            }
+        }
+        return $projects;
+    }
 
     /**
      * @param int $user_id
@@ -341,7 +364,7 @@ class Project extends \yii\db\ActiveRecord
         return $emailPostfix['email_postfix'] ?? null;
     }
 
-    
+
     //---------------------------------------------------------------------------------------------------------------------------------------
 
     /**
@@ -583,5 +606,5 @@ class Project extends \yii\db\ActiveRecord
     {
         return $this->hasMany(VisitorLog::class, ['vl_project_id' => 'id']);
     }
-    
+
 }

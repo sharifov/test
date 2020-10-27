@@ -268,6 +268,16 @@ class SmsDistributionList extends ActiveRecord
      */
     public function sendSms()
     {
+        if ($this->sdlProject && $this->sdlProject->getCustomData()->sms_enabled === false) {
+            $this->sdl_status_id = self::STATUS_ERROR;
+            $this->sdl_error_message = 'Sms disabled for project ' . $this->sdlProject->name;
+            if (!$this->save()) {
+                Yii::error(VarDumper::dumpAsString($this->errors), 'SmsDistributionList:sendSms:smsDisabled');
+            }
+            $out = ['error' => $this->sdl_error_message];
+            return $out;
+        }
+
         $out = ['error' => false];
         $communication = Yii::$app->communication;
         $data = [];

@@ -497,11 +497,15 @@ class LeadController extends FController
             }
         }
 
+        $smsEnabled = true;
+        if ($lead->project->getCustomData()->sms_enabled === false) {
+            $smsEnabled = false;
+        }
 
         $previewSmsForm = new LeadPreviewSmsForm();
         $previewSmsForm->is_send = false;
 
-        if ($previewSmsForm->load(Yii::$app->request->post())) {
+        if ($smsEnabled && $previewSmsForm->load(Yii::$app->request->post())) {
             $previewSmsForm->s_lead_id = $lead->id;
             if ($previewSmsForm->validate()) {
 
@@ -710,7 +714,7 @@ class LeadController extends FController
                 }
 
 
-                if ($comForm->c_type_id == CommunicationForm::TYPE_SMS) {
+                if ($smsEnabled && $comForm->c_type_id == CommunicationForm::TYPE_SMS) {
 
                     $comForm->c_preview_sms = 1;
 
@@ -1257,7 +1261,8 @@ class LeadController extends FController
             'dataProviderOffers'    => $dataProviderOffers,
             'dataProviderOrders'    => $dataProviderOrders,
 
-			'fromPhoneNumbers' => $fromPhoneNumbers
+			'fromPhoneNumbers' => $fromPhoneNumbers,
+            'smsEnabled' => $smsEnabled
         ]);
 
     }
