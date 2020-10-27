@@ -3,6 +3,7 @@
 use kartik\select2\Select2;
 use sales\model\clientChat\dashboard\FilterForm;
 use sales\model\clientChat\dashboard\GroupFilter;
+use sales\model\clientChat\entity\ClientChat;
 use sales\widgets\UserSelect2Widget;
 use yii\data\ArrayDataProvider;
 use yii\helpers\Html;
@@ -41,7 +42,7 @@ use yii\web\JsExpression;
                         <?= Html::label('Show:', null, ['class' => 'control-label']); ?>
                         <?= Select2::widget([
                             'data' => $filter->getShowFilter(),
-                            'name' => Html::getInputName($filter, 'status'),
+                            'name' => Html::getInputName($filter, 'showFilter'),
                             'size' => Select2::SIZE_SMALL,
                             'pluginEvents' => [
                                 'change' => new \yii\web\JsExpression('function (e) {
@@ -52,10 +53,10 @@ use yii\web\JsExpression;
                                 'width' => '100%',
                             ],
                             'options' => [
-                                'placeholder' => 'Choose the status...',
-                                'id' => Html::getInputId($filter, 'status'),
+                                'placeholder' => 'Choose the show filter...',
+                                'id' => Html::getInputId($filter, 'showFilter'),
                             ],
-                            'value' => $filter->status,
+                            'value' => $filter->showFilter,
                         ]); ?>
                     </div>
                 <?php endif; ?>
@@ -86,7 +87,7 @@ use yii\web\JsExpression;
             </div>
 
         <?php
-            if ($filter->permissions->canProject() || $filter->permissions->canUser() || $filter->permissions->canCreatedDate()):
+            if ($filter->permissions->canProject() || $filter->permissions->canUser() || $filter->permissions->canCreatedDate() || $filter->permissions->canStatus()):
         ?>
 
             <?php $isAdditionalFilterActive = $filter->isAdditionalFilterActive(); ?>
@@ -196,6 +197,30 @@ use yii\web\JsExpression;
                                     window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
                                 }'),
                             ],
+                        ]); ?>
+                    </div>
+                <?php endif; ?>
+
+                <?php if ($filter->permissions->canStatus()): ?>
+                    <div class="col-md-6">
+                        <?php echo Html::label('Status:', null, ['class' => 'control-label']); ?>
+                        <?= Select2::widget([
+                            'data' => $filter->getStatuses(),
+                            'name' => Html::getInputName($filter, 'status'),
+                            'size' => Select2::SIZE_SMALL,
+                            'pluginEvents' => [
+                                'change' => new \yii\web\JsExpression('function (e) {
+                                        window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");
+                                    }'),
+                            ],
+                            'pluginOptions' => [
+                                'width' => '100%',
+                            ],
+                            'options' => [
+                                'placeholder' => 'Choose the status...',
+                                'id' => Html::getInputId($filter, 'status'),
+                            ],
+                            'value' => $filter->status,
                         ]); ?>
                     </div>
                 <?php endif; ?>

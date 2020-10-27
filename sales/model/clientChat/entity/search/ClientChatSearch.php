@@ -36,6 +36,7 @@ class ClientChatSearch extends ClientChat
     public string $timeRange;
     public string $timeStart;
     public string $timeEnd;
+
     public const DEFAULT_INTERVAL_BETWEEN_DAYS = '-6 days';
 
     private int $pageSize;
@@ -414,12 +415,12 @@ class ClientChatSearch extends ClientChat
             'last_message.cclm_dt as last_message_date',
         ]);
 
-        if (ClientChat::isTabAll($filter->status)) {
-        } elseif (ClientChat::isTabActive($filter->status)) {
+        if (ClientChat::isTabAll($filter->showFilter)) {
+        } elseif (ClientChat::isTabActive($filter->showFilter)) {
             $query->notInClosedGroup();
-        } elseif (ClientChat::isTabClosed($filter->status)) {
+        } elseif (ClientChat::isTabClosed($filter->showFilter)) {
             $query->archive();
-        } elseif (ClientChat::isTabUnassigned($filter->status)) {
+        } elseif (ClientChat::isTabUnassigned($filter->showFilter)) {
             $query->byOwner(null);
             $query->byStatus(ClientChat::STATUS_PENDING);
         }
@@ -479,6 +480,10 @@ class ClientChatSearch extends ClientChat
             $fromDate = date('Y-m-d', strtotime($filter->fromDate));
             $toDate = date('Y-m-d', strtotime($filter->toDate));
             $query->andWhere(['BETWEEN', 'DATE(cch_created_dt)', $fromDate, $toDate]);
+        }
+
+        if ($filter->status) {
+            $query->byStatus($filter->status);
         }
 
         $query->join('JOIN', ['client' => Client::tableName()], 'cch_client_id = client.id');
