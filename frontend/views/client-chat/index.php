@@ -477,8 +477,7 @@ window.loadClientChatData = function (cch_id, data, ref) {
         iframe.setAttribute('id', '_rc-'+cch_id);
         $('#_rc-iframe-wrapper').append(iframe);
         $('#canned-response-wrap').removeClass('disabled');
-            $('#canned-response').attr('data-chat-id', cch_id).val('');
-        }
+        $('#canned-response').attr('data-chat-id', cch_id).val('');
     }
     
     let params = new URLSearchParams(window.location.search);
