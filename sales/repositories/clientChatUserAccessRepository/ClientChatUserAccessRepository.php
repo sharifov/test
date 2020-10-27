@@ -11,6 +11,7 @@ use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatUserAccess\event\UpdateChatUserAccessWidgetEvent;
 use sales\repositories\NotFoundException;
 use sales\repositories\Repository;
+use yii\helpers\VarDumper;
 
 /**
  * Class ClientChatUserAccessRepository
@@ -75,6 +76,8 @@ class ClientChatUserAccessRepository extends Repository
         } elseif ($statusId === ClientChatUserAccess::STATUS_SKIP || $statusId === ClientChatUserAccess::STATUS_CANCELED) {
             $data = ClientChatAccessMessage::skip($chatId, $userId, (int)$chatUserAccessId);
         }
+
+        \Yii::info('UserId: ' . $userId . '; ' . VarDumper::dumpAsString($data), 'info\updateChatUserAccessWidget');
 
         Notifications::publish('clientChatRequest', ['user_id' => $userId], ['data' => $data]);
     }
