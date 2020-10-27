@@ -8,7 +8,7 @@ class ClientChatAsset extends AssetBundle
 {
     public $sourcePath = '@frontend/themes/gentelella_v2/';
     public $css = [
-        'css/client-chat/client-chat.css?v1.0',
+        'css/client-chat/client-chat.css?v1.1',
     ];
 
     public $js = [
