@@ -18,7 +18,7 @@ $goto = urlencode('/live/' . $clientChat->cch_rid . '?layout=embedded' . $readOn
         onload="removeCcLoadFromIframe()"
         src="<?php echo $rcUrl ?>?&layout=embedded<?= $readOnly ?>&resumeToken=<?= $userRcAuthToken ?>&rnd=<?php echo $randInt ?>&goto=<?= $goto ?>"
         id="_rc-<?php echo $clientChat->cch_id ?>"
-        style="border: none; width: 100%; height: 100%;"
+        style="border: none; width: 100%;"
         name="_<?php echo $randInt ?>_<?php echo $clientChat->cch_status_id ?>"></iframe>
 
 <?php

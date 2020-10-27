@@ -9,7 +9,6 @@ use common\models\Employee;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use Yii;
 
-
 /**
  * Class SideBarMenu
  * @package frontend\themes\gentelella_v2\widgets
@@ -94,7 +93,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
         $menuLItems[] = ['label' => 'Import Leads', 'url' => ['/lead/import'], 'icon' => 'upload'];
 
 
-        if($isAdmin) {
+        if ($isAdmin) {
             $menuItems[] = [
                 'label' => 'Leads',
                 'url' => 'javascript:',
@@ -187,11 +186,11 @@ class SideBarMenu extends \yii\bootstrap\Widget
             'icon' => 'user'
         ];
 
-//		$menuItems[] = [
-//			'label' => 'My Client Chat ' . '<span id="div-cnt-client-chat"><span class="label-success label pull-right _cc_unread_messages"></span></span>',
-//			'url' => ['/client-chat/index'],
-//			'icon' => 'comments'
-//		];
+        //		$menuItems[] = [
+        //			'label' => 'My Client Chat ' . '<span id="div-cnt-client-chat"><span class="label-success label pull-right _cc_unread_messages"></span></span>',
+        //			'url' => ['/client-chat/index'],
+        //			'icon' => 'comments'
+        //		];
 
 
         $menuItems[] = [
@@ -252,6 +251,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Hold', 'url' => ['/client-chat-hold-crud/index']],
                         ['label' => 'Unread messages', 'url' => ['/client-chat-unread/index']],
                         ['label' => 'Connection Active chat', 'url' => ['/user-connection-active-chat/index']],
+                        ['label' => 'Canned Response', 'url' => ['/client-chat-canned-response-crud/index']],
+                        ['label' => 'Canned Response Category', 'url' => ['/client-chat-canned-response-category-crud/index']],
                     ],
                 ],
                 ['label' => 'SMS List', 'url' => ['/sms/index'], 'icon' => 'list'],
@@ -667,7 +668,6 @@ class SideBarMenu extends \yii\bootstrap\Widget
     {
         $allVisible = false;
         foreach ($items as $k => &$item) {
-
             if (!isset($item['label'])) {
                 $item['visible'] = false;
                 continue;
@@ -739,5 +739,4 @@ class SideBarMenu extends \yii\bootstrap\Widget
         }
         return $allVisible;
     }
-
 }

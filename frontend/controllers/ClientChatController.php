@@ -19,15 +19,20 @@ use frontend\widgets\clientChat\ClientChatAccessMessage;
 use frontend\widgets\clientChat\ClientChatAccessWidget;
 use frontend\widgets\notification\NotificationSocketWidget;
 use frontend\widgets\notification\NotificationWidget;
+use http\Exception\RuntimeException;
 use sales\auth\Auth;
 use sales\entities\cases\CasesSearch;
 use sales\entities\chat\ChatExtendedGraphsSearch;
 use sales\entities\chat\ChatFeedbackGraphSearch;
 use sales\entities\chat\ChatGraphsSearch;
+use sales\forms\clientChat\ClientChatSearchCannedResponse;
+use sales\forms\clientChat\ClientChatSendCannedMessage;
 use sales\forms\clientChat\MultipleUpdateForm;
 use sales\forms\clientChat\RealTimeStartChatForm;
 use sales\helpers\app\AppHelper;
 use sales\helpers\app\AppParamsHelper;
+use sales\model\clientChat\cannedResponse\entity\ClientChatCannedResponse;
+use sales\model\clientChat\cannedResponse\entity\search\ClientChatCannedResponseSearch;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\dashboard\FilterForm;
 use sales\model\clientChat\dashboard\GroupFilter;
@@ -233,7 +238,9 @@ class ClientChatController extends FController
                     'ajax-history',
                     'ajax-return',
                     'ajax-take',
-                    'ajax-reopen-chat'
+                    'ajax-reopen-chat',
+                    'ajax-canned-response',
+                    'ajax-send-canned-response'
                 ],
             ],
         ];
@@ -1015,7 +1022,6 @@ class ClientChatController extends FController
             $result = ['message' => '', 'status' => 0, 'goToClientChatId' => ''];
 
             try {
-
                 if (!$cchId = (int) Yii::$app->request->post('cchId')) {
                     throw new BadRequestHttpException('Invalid parameters');
                 }
@@ -1086,7 +1092,6 @@ class ClientChatController extends FController
                 $result['message'] = 'ClientChat returned to InProgress';
                 $result['status'] = 1;
                 $result['goToClientChatId'] = $clientChat->cch_id;
-
             } catch (\Throwable $throwable) {
                 AppHelper::throwableLogger(
                     $throwable,
@@ -1444,7 +1449,6 @@ class ClientChatController extends FController
             $form->projectId = $this->projectRepository->getIdByProjectKey($form->projectName);
         }
         try {
-
             if (Yii::$app->request->isPjax && $form->load(Yii::$app->request->post()) && $form->validate()) {
                 if (!$userProfile = UserProfile::findOne(['up_user_id' => Auth::id()])) {
                     throw new NotFoundException('User Profile is not found');
@@ -1870,5 +1874,123 @@ class ClientChatController extends FController
             'formMultipleUpdate' => $form,
             'alertMessage' => $alertMessage
         ]);
+    }
+
+    public function actionAjaxCannedResponse(): Response
+    {
+        $chatId = (int)Yii::$app->request->get('chatId', 0);
+        $query = Yii::$app->request->get('query', '');
+
+        $cannedResponse = [];
+        $errorMessage = '';
+
+        if (!$this->actionPermissions->canSendCannedResponse()) {
+            throw new ForbiddenHttpException();
+        }
+
+        try {
+            $form = new ClientChatSearchCannedResponse();
+            $form->query = (string)$query;
+            $form->chatId = $chatId;
+            if ($form->validate()) {
+                $chat = $this->clientChatRepository->findById($form->chatId);
+                $cannedResponse = (new ClientChatCannedResponseSearch())->searchCannedResponse(
+                    $chat->cch_project_id,
+                    $form->query,
+                    Auth::id(),
+                    $chat->cch_language_id
+                );
+
+                $patterns = [
+                    '/{{project_name}}/',
+                    '/{{nickname}}/',
+                    '/{{client_full_name}}/'
+                ];
+
+                $replacement = [
+                    $chat->cchProject->name ?? '',
+                    Auth::user()->nickname,
+                    $chat->cchClient->full_name
+                ];
+
+                if ($cannedResponse) {
+                    foreach ($cannedResponse as $key => $item) {
+                        $cannedResponse[$key]['headline_message'] = preg_replace($patterns, $replacement, $item['headline_message']);
+                        $cannedResponse[$key]['message'] = preg_replace($patterns, $replacement, $item['message']);
+                    }
+                }
+
+            } else {
+                $errorMessage = $form->getErrorSummary(false)[0];
+            }
+        } catch (\Throwable $e) {
+            $errorMessage = $e->getMessage();
+        }
+
+        return $this->asJson([
+            'query' => $query,
+            'data' => $cannedResponse,
+            'message' => $errorMessage
+        ]);
+    }
+
+    public function actionAjaxSendCannedResponse(): Response
+    {
+        if (!Yii::$app->request->isPost) {
+            throw new BadRequestHttpException();
+        }
+
+        $result = [
+            'error' => false,
+            'message' => ''
+        ];
+
+        if (!$this->actionPermissions->canSendCannedResponse()) {
+            throw new ForbiddenHttpException();
+        }
+
+        try {
+            $chatBot = Yii::$app->chatBot;
+
+            $chatId = Yii::$app->request->post('chatId');
+            $message = Yii::$app->request->post('message');
+
+            $form = new ClientChatSendCannedMessage();
+            $form->message = $message;
+            $form->chatId = $chatId;
+
+            if (!$form->validate()) {
+                throw new \RuntimeException($form->getErrorSummary(false)[0]);
+            }
+
+            $chat = $this->clientChatRepository->findById($form->chatId);
+
+            $data = [
+                'message' => [
+                    'rid' => $chat->cch_rid,
+                    'msg' => $form->message
+                ],
+            ];
+
+            if (($rocketUserId = Auth::user()->userProfile->up_rc_user_id) && ($rocketToken = Auth::user()->userProfile->up_rc_auth_token)) {
+                $headers = [
+                    'X-User-Id' => $rocketUserId,
+                    'X-Auth-Token' => $rocketToken,
+                ];
+            } else {
+                $headers = Yii::$app->rchat->getSystemAuthDataHeader();
+            }
+
+            $response = $chatBot->sendMessage($data, $headers);
+
+            if ($response['error']) {
+                throw new \RuntimeException($response['error']['error'] ?? 'Unknown error from chat bot');
+            }
+        } catch (\Throwable $e) {
+            $result['error'] = true;
+            $result['message'] = $e->getMessage();
+        }
+
+        return $this->asJson($result);
     }
 }

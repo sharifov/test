@@ -20,6 +20,7 @@ use sales\model\clientChat\entity\ClientChatQuery;
  * @property bool|null $canUnHold
  * @property bool|null $canReturn
  * @property bool|null $canTake
+ * @property bool|null $canSendCannedResponse
  */
 class ClientChatActionPermission
 {
@@ -40,6 +41,7 @@ class ClientChatActionPermission
     private ?bool $canReturn = null;
 
     private ?bool $canTake = null;
+    private ?bool $canSendCannedResponse = null;
 
     public function canClose(ClientChat $chat): bool
     {
@@ -198,5 +200,15 @@ class ClientChatActionPermission
 
         $this->canTake = Auth::can('client-chat/view', ['chat' => $chat]) && Auth::can('client-chat/take', ['chat' => $chat]);
         return $this->canTake;
+    }
+
+    public function canSendCannedResponse(): ?bool
+    {
+        if ($this->canSendCannedResponse !== null) {
+            return $this->canSendCannedResponse;
+        }
+
+        $this->canSendCannedResponse = Auth::can('client-chat/canned-response');
+        return $this->canSendCannedResponse;
     }
 }

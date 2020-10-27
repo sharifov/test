@@ -12,6 +12,7 @@ use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatNote\entity\ClientChatNote;
 use yii\bootstrap4\Alert;
 use yii\data\ActiveDataProvider;
+use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\JqueryAsset;
 use yii\web\View;
@@ -104,7 +105,7 @@ $clientChatReturnUrl = Url::toRoute(['/client-chat/ajax-return']);
                  $iframeData = $this->render('partial/_chat_history', ['clientChat' => $clientChat]);
              } else {
                  $readOnly = (!$clientChat->isOwner(Auth::id()) ? '&readonly=true' : '');
-                 $iframeData = '<iframe class="_rc-iframe" src="' . $rcUrl . '?layout=embedded' . $readOnly . '&resumeToken=' . $userRcAuthToken . '&goto=' . urlencode('/live/' . $clientChat->cch_rid . '?layout=embedded' . $readOnly) . '" id="_rc-' . $clientChat->cch_id . '" style="border: none; width: 100%; height: 100%;" ></iframe >';
+                 $iframeData = '<iframe class="_rc-iframe" src="' . $rcUrl . '?layout=embedded' . $readOnly . '&resumeToken=' . $userRcAuthToken . '&goto=' . urlencode('/live/' . $clientChat->cch_rid . '?layout=embedded' . $readOnly) . '" id="_rc-' . $clientChat->cch_id . '" style="border: none; width: 100%;" ></iframe >';
              }
              if ($client) {
                  $infoData = $this->render(
@@ -126,6 +127,17 @@ $clientChatReturnUrl = Url::toRoute(['/client-chat/ajax-return']);
         <div id="_rc-iframe-wrapper">
             <?= $iframeData ?: '' ?>
         </div>
+        <?php if ($actionPermissions->canSendCannedResponse()): ?>
+        <div id="canned-response-wrap" class="<?= !$clientChat || ($clientChat && ($clientChat->isClosed() || $clientChat->isArchive())) ? 'disabled' : '' ?>">
+            <?= Html::textarea('canned-response', '', ['placeholder' => 'Try to search quickly response by typing /search text', 'id' => 'canned-response', 'class' => 'form-control canned-response', 'data-chat-id' => $clientChat->cch_id ?? null, 'rows' => 3]) ?>
+            <span id="send-canned-response" class="canned-response-icon">
+                <i class="fa fa-paper-plane"></i>
+            </span>
+            <span id="loading-canned-response" class="canned-response-icon" style="display: none">
+                <i class="fa fa-spin fa-spinner"></i>
+            </span>
+        </div>
+        <?php endif; ?>
     </div>
     <div class="col-md-3">
         <div id="_cc_additional_info_wrapper" style="position: relative;">
@@ -159,8 +171,8 @@ $discardUnreadMessageUrl = Url::to(['/client-chat/discard-unread-messages']);
 $readAll = ReadUnreadFilter::ALL;
 $selectAllUrl = Url::to(['client-chat/index']);
 $clientChatMultipleUpdate = Url::to(['client-chat/ajax-multiple-update']);
+$cannedResponseSendMessageUrl = Url::to(['client-chat/ajax-send-canned-response']);
 $js = <<<JS
-
 let currentChatId = {$clientChatId};
 let currentChatOwnerId = {$clientChatOwnerId};
 
@@ -171,9 +183,88 @@ let spinnerForModal = '<div><div style="width:100%;text-align:center;margin-top:
 $(document).ready( function () {
     let clientChatId = {$clientChatId};
 
-    if (clientChatId) {
-        localStorage.setItem('activeChatId', clientChatId);
-    }
+    $('textarea.canned-response').devbridgeAutocomplete({
+        noCache: false,
+        serviceUrl: '/client-chat/ajax-canned-response',
+        deferRequestBy: 700,
+        minChars: 3,
+        params: {chatId: clientChatId},
+        delimiter: '/',
+        orientation: 'top',
+        showNoSuggestionNotice: true,
+        triggerSelectOnValidInput: false,
+        transformResult: function(response) {
+            response = JSON.parse(response);
+            if (response.message) {
+                createNotify('Error', response.message, 'error');
+                $('#send-canned-response').show();
+                $('#loading-canned-response').hide();
+                return {suggestions: []};
+            } else {
+                return {
+                    suggestions: $.map(response.data, function(dataItem) {
+                        return { value: dataItem.message, data: dataItem.headline_message };
+                    })
+                };
+            }
+        },
+        formatResult: function (suggestion, currentValue) {
+            return suggestion.data;
+        },
+        onSearchStart: function (params) {
+            if (!$(this).val().includes("/")) {
+                return false;
+            }
+            params['chatId'] = $(this).attr('data-chat-id');
+            $('#send-canned-response').hide();
+            $('#loading-canned-response').show();
+        },
+        onSearchComplete: function () {
+            $('#send-canned-response').show();
+            $('#loading-canned-response').hide();
+        },
+        onSelect: function (suggestion) {
+            let searchValue = '/'+suggestion.value;
+            let curVal = $(this).val();
+            $(this).val(curVal.replace(searchValue, suggestion.value));
+        },
+        onSearchError: function (query, jqXHR, textStatus, errorThrown) {
+            createNotify('Error', jqXHR.statusText, 'error');
+            $('#send-canned-response').show();
+            $('#loading-canned-response').hide();
+        }
+    });
+    
+    $('#send-canned-response').on('click', function () {
+        let message = $('#canned-response').val();
+        let chatId = $('#canned-response').attr('data-chat-id');
+        
+        $.ajax({
+            type: 'post',
+            url: '{$cannedResponseSendMessageUrl}',
+            dataType: 'json',
+            cache: false,
+            data: {chatId: chatId, message: message},
+            beforeSend: function () {
+                $('#send-canned-response').hide();
+                $('#loading-canned-response').show();
+            },
+            success: function (data) {
+                if (data.error) {
+                    createNotify('Error', data.message, 'error');
+                } else {
+                    $('#canned-response').val('');
+                }
+            },
+            complete: function () {
+                $('#send-canned-response').show();
+                $('#loading-canned-response').hide();  
+            },
+            error: function (xhr) {
+                createNotify('Error', xhr.responseText, 'error');
+            },
+        })
+    });
     
     $(window).on("beforeunload", function() { 
         localStorage.removeItem('activeChatId');
@@ -266,6 +357,7 @@ $(document).on('click', '.cc_btn_group_filter', function () {
     window.updateClientChatFilter('{$filter->getId()}', '{$filter->formName()}', '{$loadChannelsUrl}');
     sessionStorage.selectedChats = '{}';
     refreshUserSelectedState();
+    $('#canned-response-wrap').addClass('disabled');
 });
 
 $(document).on('click', '#{$filter->getReadUnreadInputId()}', function () {
@@ -370,6 +462,7 @@ window.loadClientChatData = function (cch_id, data, ref) {
     
     if (isClosed) {
         getChatHistory(cch_id);
+        $('#canned-response-wrap').addClass('disabled');
     } else {
         $("#_rc-iframe-wrapper").find('#_cc-load').remove();
         $("#_rc-iframe-wrapper").append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
@@ -383,6 +476,9 @@ window.loadClientChatData = function (cch_id, data, ref) {
         iframe.setAttribute('class', '_rc-iframe');
         iframe.setAttribute('id', '_rc-'+cch_id);
         $('#_rc-iframe-wrapper').append(iframe);
+        $('#canned-response-wrap').removeClass('disabled');
+            $('#canned-response').attr('data-chat-id', cch_id).val('');
+        }
     }
     
     let params = new URLSearchParams(window.location.search);

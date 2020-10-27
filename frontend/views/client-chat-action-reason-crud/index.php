@@ -8,6 +8,7 @@ use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\clientChat\entity\actionReason\search\actionReasonSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -24,7 +25,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php Pjax::begin(); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -41,32 +42,32 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'ccar_key',
             'ccar_name',
-			['class' => BooleanColumn::class, 'attribute' => 'ccar_enabled'],
-			['class' => BooleanColumn::class, 'attribute' => 'ccar_comment_required'],
-			[
-				'class' => UserSelect2Column::class,
-				'attribute' => 'ccar_created_user_id',
-				'relation' => 'ccarCreatedUser',
-				'format' => 'username',
-				'placeholder' => 'Select User'
-			],
-			[
-				'class' => UserSelect2Column::class,
-				'attribute' => 'ccar_updated_user_id',
-				'relation' => 'ccarUpdatedUser',
-				'format' => 'username',
-				'placeholder' => 'Select User'
-			],
-			[
-				'class' => DateTimeColumn::class,
-				'attribute' => 'ccar_created_dt',
-				'format' => 'byUserDateTime'
-			],
-			[
-				'class' => DateTimeColumn::class,
-				'attribute' => 'ccar_updated_dt',
-				'format' => 'byUserDateTime'
-			],
+            ['class' => BooleanColumn::class, 'attribute' => 'ccar_enabled'],
+            ['class' => BooleanColumn::class, 'attribute' => 'ccar_comment_required'],
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'ccar_created_user_id',
+                'relation' => 'ccarCreatedUser',
+                'format' => 'username',
+                'placeholder' => 'Select User'
+            ],
+            [
+                'class' => UserSelect2Column::class,
+                'attribute' => 'ccar_updated_user_id',
+                'relation' => 'ccarUpdatedUser',
+                'format' => 'username',
+                'placeholder' => 'Select User'
+            ],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'ccar_created_dt',
+                'format' => 'byUserDateTime'
+            ],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'ccar_updated_dt',
+                'format' => 'byUserDateTime'
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],
