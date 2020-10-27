@@ -281,7 +281,7 @@ $js = <<<JS
 								    'case_id': dialData.case_id, 
 								    'c_type': 'call-web', 
 								    'c_user_id': userId, 
-								    'user_identity': userIdentity, 
+								    'user_identity': window.userIdentity, 
 								    'is_conference_call': conferenceBase,
 								    'c_client_id': dialData.client_id,
 								    'c_source_type_id': dialData.source_type_id

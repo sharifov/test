@@ -1264,7 +1264,7 @@ use yii\helpers\Html;
             'c_user_id': userId,
             'c_source_type_id': c_source_type_id,
             'is_conference_call': conferenceBase,
-            'user_identity': userIdentity
+            'user_identity': window.userIdentity
         };
         webPhoneParams = params;
 
