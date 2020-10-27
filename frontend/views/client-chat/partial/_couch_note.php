@@ -17,7 +17,7 @@ use yii\widgets\ActiveForm;
         $form = ActiveForm::begin([
             'id' => $couchNoteForm->formName(),
             'class' => '',
-            'enableClientValidation' => true,
+            'enableClientValidation' => false,
             'enableAjaxValidation' => false,
             'action' => ['client-chat/ajax-couch-note'],
             'method' => 'post',
