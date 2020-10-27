@@ -1422,7 +1422,7 @@ class ClientChatController extends FController
                 $this->clientChatService->cancelTransfer(
                     $chat,
                     Auth::user(),
-                    ClientChatStatusLog::ACTION_ACCEPT_TRANSFER
+                    ClientChatStatusLog::ACTION_CANCEL_TRANSFER_BY_AGENT
                 );
             });
         } catch (\DomainException | \RuntimeException | ForbiddenHttpException $e) {
