@@ -29,6 +29,7 @@ use yii\db\ActiveRecord;
  * @property bool $dpp_show_on_site
  * @property int|null $dpp_phone_list_id
  * @property string|null $dpp_language_id
+ * @property int|null $dpp_allow_transfer
  *
  * @property array $user_group_list
  *
@@ -43,7 +44,6 @@ use yii\db\ActiveRecord;
  */
 class DepartmentPhoneProject extends \yii\db\ActiveRecord
 {
-
     public $user_group_list = [];
     public const DPP_DEFAULT_TRUE = 1;
     public const DEP_DEFAULT_TRUE = 1;
@@ -83,6 +83,7 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
             [['dpp_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['dpp_updated_user_id' => 'id']],
 
             ['dpp_redial', 'boolean'],
+            ['dpp_allow_transfer', 'boolean'],
             [['dpp_phone_number'], 'string', 'max' => 18],
             ['dpp_description', 'string', 'max' => 255],
             [['dpp_language_id'], 'default', 'value' => null],
@@ -117,11 +118,12 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
             'dpp_updated_dt' => 'Updated Date',
             'dpp_redial' => 'Redial phone',
             'dpp_description' => 'Description',
-			'dpp_default' => 'Default',
-			'dpp_show_on_site' => 'Show on site',
+            'dpp_default' => 'Default',
+            'dpp_show_on_site' => 'Show on site',
             'dpp_phone_list_id' => 'Phone List',
             'phoneList.pl_phone_number' => 'Phone List',
             'dpp_language_id' => 'Language ID',
+            'dpp_allow_transfer' => 'Allow transfer',
         ];
     }
 
@@ -245,7 +247,7 @@ class DepartmentPhoneProject extends \yii\db\ActiveRecord
      * @return bool
      */
     public function isEnabled(): bool
-	{
-		return (bool)$this->dpp_enable;
-	}
+    {
+        return (bool)$this->dpp_enable;
+    }
 }
