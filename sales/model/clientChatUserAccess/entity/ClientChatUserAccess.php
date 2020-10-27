@@ -33,6 +33,7 @@ class ClientChatUserAccess extends \yii\db\ActiveRecord
     public const STATUS_BUSY = 3;
     public const STATUS_SKIP = 4;
     public const STATUS_TRANSFER_ACCEPTED = 5;
+    public const STATUS_CANCELED = 6;
 
     public const STATUS_LIST = [
         self::STATUS_PENDING => 'Pending',
@@ -40,6 +41,7 @@ class ClientChatUserAccess extends \yii\db\ActiveRecord
         self::STATUS_BUSY => 'Busy',
         self::STATUS_SKIP => 'Skip',
         self::STATUS_TRANSFER_ACCEPTED => 'Transfer Accepted',
+        self::STATUS_CANCELED => 'Canceled',
     ];
 
     public const STATUS_CLASS_LIST = [
@@ -48,6 +50,7 @@ class ClientChatUserAccess extends \yii\db\ActiveRecord
         self::STATUS_BUSY => 'warning',
         self::STATUS_SKIP => 'danger',
         self::STATUS_TRANSFER_ACCEPTED => 'warning',
+        self::STATUS_CANCELED => 'danger',
     ];
 
     public function behaviors(): array
@@ -138,6 +141,11 @@ class ClientChatUserAccess extends \yii\db\ActiveRecord
     public function transferAccepted(): void
     {
         $this->ccua_status_id = self::STATUS_TRANSFER_ACCEPTED;
+    }
+
+    public function canceled(): void
+    {
+        $this->ccua_status_id = self::STATUS_CANCELED;
     }
 
     /**

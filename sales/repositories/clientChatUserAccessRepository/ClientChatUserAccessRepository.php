@@ -21,67 +21,67 @@ use sales\repositories\Repository;
  */
 class ClientChatUserAccessRepository extends Repository
 {
-	/**
-	 * @var ClientChatRepository
-	 */
-	private ClientChatRepository $clientChatRepository;
-	/**
-	 * @var EventDispatcher
-	 */
-	private EventDispatcher $eventDispatcher;
+    /**
+     * @var ClientChatRepository
+     */
+    private ClientChatRepository $clientChatRepository;
+    /**
+     * @var EventDispatcher
+     */
+    private EventDispatcher $eventDispatcher;
 
-	public function __construct(ClientChatRepository $clientChatRepository, EventDispatcher $eventDispatcher)
-	{
-		$this->clientChatRepository = $clientChatRepository;
-		$this->eventDispatcher = $eventDispatcher;
-	}
+    public function __construct(ClientChatRepository $clientChatRepository, EventDispatcher $eventDispatcher)
+    {
+        $this->clientChatRepository = $clientChatRepository;
+        $this->eventDispatcher = $eventDispatcher;
+    }
 
-	public function save(ClientChatUserAccess $access, ?ClientChat $chat = null): ClientChatUserAccess
-	{
-		if (!$access->save()) {
-			throw new \RuntimeException($access->getErrorSummary(false)[0], ClientChatCodeException::CC_USER_ACCESS_SAVE_FAILED);
-		}
-		$this->eventDispatcher->dispatch(new UpdateChatUserAccessWidgetEvent($chat ?: $access->ccuaCch, $access->ccua_user_id, $access->ccua_status_id, $access->getPrimaryKey()), 'UpdateChatUserAccessWidgetEvent_' . $access->ccua_user_id);
-		return $access;
-	}
+    public function save(ClientChatUserAccess $access, ?ClientChat $chat = null): ClientChatUserAccess
+    {
+        if (!$access->save()) {
+            throw new \RuntimeException($access->getErrorSummary(false)[0], ClientChatCodeException::CC_USER_ACCESS_SAVE_FAILED);
+        }
+        $this->eventDispatcher->dispatch(new UpdateChatUserAccessWidgetEvent($chat ?: $access->ccuaCch, $access->ccua_user_id, $access->ccua_status_id, $access->getPrimaryKey()), 'UpdateChatUserAccessWidgetEvent_' . $access->ccua_user_id);
+        return $access;
+    }
 
-	public function findByPrimaryKey(int $id): ClientChatUserAccess
-	{
-		if ($access = ClientChatUserAccess::findOne(['ccua_id' => $id])) {
-			return $access;
-		}
-		throw new NotFoundException('Client Chat User Access is not found');
-	}
+    public function findByPrimaryKey(int $id): ClientChatUserAccess
+    {
+        if ($access = ClientChatUserAccess::findOne(['ccua_id' => $id])) {
+            return $access;
+        }
+        throw new NotFoundException('Client Chat User Access is not found');
+    }
 
-	/**
-	 * @param int $chatId
-	 * @return ClientChatUserAccess[]
-	 */
-	public function findByChatIdAndUserId(int $chatId, int $userId): array
-	{
-		if ($access = ClientChatUserAccess::find()->byChatId($chatId)->byUserId($userId)->all()) {
-			return $access;
-		}
-		throw new NotFoundException('Client Chat User Access not found rows');
-	}
+    /**
+     * @param int $chatId
+     * @return ClientChatUserAccess[]
+     */
+    public function findByChatIdAndUserId(int $chatId, int $userId): array
+    {
+        if ($access = ClientChatUserAccess::find()->byChatId($chatId)->byUserId($userId)->all()) {
+            return $access;
+        }
+        throw new NotFoundException('Client Chat User Access not found rows');
+    }
 
-	public function updateChatUserAccessWidget(ClientChat $chat, int $userId, int $statusId, ?int $chatUserAccessId = null): void
-	{
-		$data = [];
-		if ($statusId === ClientChatUserAccess::STATUS_ACCEPT) {
-			$data = ClientChatAccessMessage::accept($chat->cch_id, $userId, (int)$chatUserAccessId);
-		} else if ($statusId === ClientChatUserAccess::STATUS_PENDING) {
-			$data = ClientChatAccessMessage::pending($userId, (int)$chatUserAccessId);
-		} else if ($statusId === ClientChatUserAccess::STATUS_SKIP) {
-			$data = ClientChatAccessMessage::skip($chat->cch_id, $userId, (int)$chatUserAccessId);
-		}
+    public function updateChatUserAccessWidget(int $chatId, int $userId, int $statusId, ?int $chatUserAccessId = null): void
+    {
+        $data = [];
+        if ($statusId === ClientChatUserAccess::STATUS_ACCEPT) {
+            $data = ClientChatAccessMessage::accept($chatId, $userId, (int)$chatUserAccessId);
+        } elseif ($statusId === ClientChatUserAccess::STATUS_PENDING) {
+            $data = ClientChatAccessMessage::pending($userId, (int)$chatUserAccessId);
+        } elseif ($statusId === ClientChatUserAccess::STATUS_SKIP || $statusId === ClientChatUserAccess::STATUS_CANCELED) {
+            $data = ClientChatAccessMessage::skip($chatId, $userId, (int)$chatUserAccessId);
+        }
 
-		Notifications::publish('clientChatRequest', ['user_id' => $userId], ['data' => $data]);
-	}
+        Notifications::publish('clientChatRequest', ['user_id' => $userId], ['data' => $data]);
+    }
 
-	public function resetChatUserAccessWidget(int $userId): void
-	{
-		$data = ClientChatAccessMessage::reset($userId);
-		Notifications::publish('clientChatRequest', ['user_id' => $userId], ['data' => $data]);
-	}
+    public function resetChatUserAccessWidget(int $userId): void
+    {
+        $data = ClientChatAccessMessage::reset($userId);
+        Notifications::publish('clientChatRequest', ['user_id' => $userId], ['data' => $data]);
+    }
 }

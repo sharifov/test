@@ -12,15 +12,15 @@ use sales\repositories\clientChatUserAccessRepository\ClientChatUserAccessReposi
  */
 class UpdateChatUserAccessWidgetListener
 {
-	public $accessRepository;
+    public $accessRepository;
 
-	public function __construct(ClientChatUserAccessRepository $accessRepository)
-	{
-		$this->accessRepository = $accessRepository;
-	}
+    public function __construct(ClientChatUserAccessRepository $accessRepository)
+    {
+        $this->accessRepository = $accessRepository;
+    }
 
-	public function handle(UpdateChatUserAccessWidgetEvent $event): void
-	{
-		$this->accessRepository->updateChatUserAccessWidget($event->chat, $event->userId, $event->statusId, $event->ccuaId);
-	}
+    public function handle(UpdateChatUserAccessWidgetEvent $event): void
+    {
+        $this->accessRepository->updateChatUserAccessWidget($event->chat->cch_id, $event->userId, $event->statusId, $event->ccuaId);
+    }
 }

@@ -342,14 +342,14 @@ class ClientChat extends \yii\db\ActiveRecord
     public function close(int $userId, int $action, ?int $reasonId = null, ?string $description = null): void
     {
         $this->recordEvent(new ClientChatManageStatusLogEvent($this, $this->cch_status_id, self::STATUS_CLOSED, $this->cch_owner_user_id, $userId, $description, $this->cch_channel_id, $action, $reasonId));
-        $this->recordEvent(new ClientChatCloseEvent($this->cch_id, true));
+        $this->recordEvent(new ClientChatCloseEvent($this->cch_id, true, (int)$this->cch_owner_user_id));
         $this->cch_status_id = self::STATUS_CLOSED;
     }
 
     public function archive(?int $userId, int $action, ?int $reasonId = null, ?string $description = null): void
     {
         $this->recordEvent(new ClientChatManageStatusLogEvent($this, $this->cch_status_id, self::STATUS_ARCHIVE, $this->cch_owner_user_id, $userId, $description, $this->cch_channel_id, $action, $reasonId));
-        $this->recordEvent(new ClientChatCloseEvent($this->cch_id, false));
+        $this->recordEvent(new ClientChatCloseEvent($this->cch_id, false, (int)$this->cch_owner_user_id));
         $this->cch_status_id = self::STATUS_ARCHIVE;
     }
 
