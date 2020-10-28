@@ -9,7 +9,7 @@ use common\models\Lead;
  * @var $gds string
  * @var $lead Lead
  */
-if ($result && !empty($result['data'])):
+if ($result && !empty($result['data']['results'])):
     $result = $result['data'];
     $js = <<<JS
     $(document).on('click','.search_details__btn', function (e) {
