@@ -513,13 +513,15 @@ class LeadRedialController extends FController
         $key = 'lead_redial_reservation_' . $leadId;
         $result = (bool)Yii::$app->redis->setnx($key, $userId);
         if (!$result) {
-            $value = Yii::$app->redis->get($key);
-            Yii::info(VarDumper::dumpAsString([
-                'leadId' => $leadId,
-                'userId' => $userId,
-                'reservedUserId' => (int)$value,
-            ]), 'info\LeadRedialRedisReservation');
-            throw new \DomainException('Lead reserved. Try again later.');
+            $value = (int)Yii::$app->redis->get($key);
+            if ($value !== $userId) {
+                Yii::info(VarDumper::dumpAsString([
+                    'leadId' => $leadId,
+                    'userId' => $userId,
+                    'reservedUserId' => $value,
+                ]), 'info\LeadRedialRedisReservation');
+                throw new \DomainException('Lead reserved. Try again later.');
+            }
         }
         Yii::$app->redis->expire($key, 5);
     }
