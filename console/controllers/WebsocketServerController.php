@@ -377,13 +377,13 @@ class WebsocketServerController extends Controller
                     $subList[] = 'con-' . $row['uc_id'];
 
                     foreach ($subList as $value) {
-                        $server->redis->unsubscribe($value);
 
                         if (isset($server->channelList[$value][$fd])) {
                             unset($server->channelList[$value][$fd]);
 
                             if (isset($server->channelList[$value]) && empty($server->channelList[$value])) {
                                 unset($server->channelList[$value]);
+                                $server->redis->unsubscribe($value);
                             }
                         }
 
