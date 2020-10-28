@@ -92,7 +92,7 @@ class WebsocketServerController extends Controller
             echo ' Worker (Id: ' . $workerId . ')  start: ' . date('Y-m-d H:i:s') . PHP_EOL;
 
 
-            $server->tick(20000, static function() use ($server) {
+            $server->tick(20000, static function () use ($server) {
                 if (!empty($server->tblConnections)) {
                     foreach ($server->tblConnections as $connection) {
                         // $server->push($connection['fd'], json_encode(['cmd' => 'pong', 'time' => date('H:i:s')])); //WEBSOCKET_OPCODE_PING
@@ -101,7 +101,7 @@ class WebsocketServerController extends Controller
                 }
             });
 
-            $server->tick(30000, static function() use ($server) {
+            $server->tick(30000, static function () use ($server) {
                 \Yii::$app->db->createCommand('SELECT 1')->execute();
             });
 
@@ -111,7 +111,7 @@ class WebsocketServerController extends Controller
             $server->redis = $client;
 
             $client->on('message', static function (Redis $redis, $result) use ($server, $workerId) {
-
+                echo 'message to client';
                 if ($result) {
                     [$cmd, $channel, $value] = $result;
 //                    if ($cmd === 'subscribe') {
@@ -121,34 +121,29 @@ class WebsocketServerController extends Controller
 //                    if ($cmd === 'unsubscribe') {
 //
 //                    }
-
+                    var_dump('cmd: ' . $cmd);
                     if ($cmd === 'message') {
+                        var_dump(empty($server->channelList[$channel]));
                         if (!empty($server->channelList[$channel])) {
+                            var_dump(VarDumper::dumpAsString($value));
                             foreach ($server->channelList[$channel] as $fd) {
                                 $server->push($fd, $value);
                             }
                         }
                     }
                 }
-
-
             });
 
             $client->connect($redisConfig['host'], $redisConfig['port'], static function (\swoole_redis $client, $result) use ($redisConfig) {
                 echo ' Redis Connected ' . $redisConfig['host'] . ':' . $redisConfig['port'] . PHP_EOL;
             });
-
-
-
         });
 
-        $server->on('open', static function(Server $server, \Swoole\Http\Request $request) use ($frontendConfig, $thisClass, $redisConfig, $redisList) {
-
+        $server->on('open', static function (Server $server, \Swoole\Http\Request $request) use ($frontendConfig, $thisClass, $redisConfig, $redisList) {
             echo '+ ' . date('m-d H:i:s'). " +{$request->fd}";
             $user = $thisClass->getIdentityByCookie($request, $frontendConfig);
 
             if ($user) {
-
                 $userId = $user->getId();
 
                 $server->push($request->fd, json_encode(['cmd' => 'userInit', 'time' => date('H:i:s')])); //WEBSOCKET_OPCODE_PING
@@ -187,7 +182,6 @@ class WebsocketServerController extends Controller
                 $userConnection->uc_sub_list = $subList ? @json_encode($subList) : null;
 
                 if ($userConnection->save()) {
-
                     $um = UserMonitor::find()->where(['um_user_id' => $userId, 'um_type_id' => UserMonitor::TYPE_ONLINE])->limit(1)->orderBy(['um_id' => SORT_DESC])->one();
                     if (!$um) {
                         UserMonitor::addEvent($userId, UserMonitor::TYPE_ONLINE);
@@ -214,13 +208,12 @@ class WebsocketServerController extends Controller
                         $userOnline->update();
                     }
                     unset($userOnline);
-
                 } else {
                     echo 'UserConnection:save' . PHP_EOL;
                     VarDumper::dump($userConnection->errors);
                 }
 
-                $server->tblConnections->set($request->fd,[
+                $server->tblConnections->set($request->fd, [
                     'fd' => $request->fd,
                     'uc_id' => $userConnection->uc_id,
                     'uid' => $uid,
@@ -272,7 +265,7 @@ class WebsocketServerController extends Controller
 
                 unset($userConnection);
 
-                //VarDumper::dump($server->channelList);
+            //VarDumper::dump($server->channelList);
 
                 //$server->redis->subscribe('con-' . $userConnection->uc_id);
                 //$server->redis->subscribe('con-' . $userConnection->uc_id);
@@ -338,17 +331,15 @@ class WebsocketServerController extends Controller
 //                }
 
                 //$redis->discard();
-
             } else {
                 echo ' : not init user' . PHP_EOL;
                 $server->push($request->fd, json_encode(['cmd' => 'userNotInit', 'time' => date('H:i:s')])); //WEBSOCKET_OPCODE_PING
                 $server->disconnect($request->fd, 403, 'Access denied');
             }
-
         });
 
 
-        $server->on('message', static function(Server $server, \Swoole\WebSocket\Frame $frame) use ($thisClass) {
+        $server->on('message', static function (Server $server, \Swoole\WebSocket\Frame $frame) use ($thisClass) {
             echo ' * ' . date('m-d H:i:s'). " received message: {$frame->data}\n";
 
             $data = json_decode($frame->data, true);
@@ -358,7 +349,7 @@ class WebsocketServerController extends Controller
             }
         });
 
-        $server->on('close', static function(Server $server, int $fd) {
+        $server->on('close', static function (Server $server, int $fd) {
             echo '- ' . date('m-d H:i:s'). " -{$fd}\n";
             $row = $server->tblConnections->get($fd);
             $server->tblConnections->del($fd);
@@ -366,7 +357,6 @@ class WebsocketServerController extends Controller
             if (!empty($row['uid'])) {
                 $uc = UserConnection::find()->where(['uc_connection_uid' => $row['uid']])->limit(1)->one();
                 if ($uc) {
-
                     if (!empty($uc->uc_sub_list)) {
                         $subList = @json_decode($uc->uc_sub_list);
                     } else {
@@ -386,7 +376,6 @@ class WebsocketServerController extends Controller
                                 unset($server->channelList[$value]);
                             }
                         }
-
                     }
 
                     $uc->delete();
@@ -416,13 +405,10 @@ class WebsocketServerController extends Controller
 //
 //                unset($redisList[$fd]);
 //            }
-
-
-
         });
 
 
-        $server->on('workerError', static function(Server $server, int $workerId, $workerPid, $exitCode, $signal) {
+        $server->on('workerError', static function (Server $server, int $workerId, $workerPid, $exitCode, $signal) {
             $message = "Error Worker (Id: {$workerId}): pid={$workerPid} code={$exitCode} signal={$signal}";
             echo '> ' . $message . PHP_EOL;
         });
@@ -471,7 +457,6 @@ class WebsocketServerController extends Controller
                 //echo "\r\n";
                 $uc = UserConnection::find()->where(['uc_connection_id' => $frame->fd, 'uc_app_instance' => \Yii::$app->params['appInstance']])->one();
                 if ($uc && $uc->uc_user_id) {
-
                     if ($val) {
                         UserMonitor::setUserIdle($uc->uc_user_id);
                     } else {
@@ -487,7 +472,6 @@ class WebsocketServerController extends Controller
                 }
 
                 unset($uc, $val);
-
             }
         }
 
@@ -577,7 +561,6 @@ class WebsocketServerController extends Controller
         } else {
             printf("- OK: %s\n", $this->ansiFormat('Class \Swoole\Redis', Console::FG_BLUE));
         }
-
     }
 
     public function actionRedis(): void
@@ -648,6 +631,4 @@ class WebsocketServerController extends Controller
 
         return null;
     }
-
-
 }
