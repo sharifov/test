@@ -511,9 +511,9 @@ class LeadRedialController extends FController
     private function guardQueueReservation(int $leadId, int $userId): void
     {
         $key = 'lead_redial_reservation_' . $leadId;
-        Yii::$app->redis->setnx($key, $userId);
-        $value = Yii::$app->redis->get($key);
-        if ((int)$value !== $userId) {
+        $result = (bool)Yii::$app->redis->setnx($key, $userId);
+        if (!$result) {
+            $value = Yii::$app->redis->get($key);
             Yii::info(VarDumper::dumpAsString([
                 'leadId' => $leadId,
                 'userId' => $userId,
