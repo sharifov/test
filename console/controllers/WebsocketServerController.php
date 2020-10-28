@@ -121,11 +121,8 @@ class WebsocketServerController extends Controller
 //                    if ($cmd === 'unsubscribe') {
 //
 //                    }
-                    var_dump('cmd: ' . $cmd);
                     if ($cmd === 'message') {
-                        var_dump(empty($server->channelList[$channel]));
                         if (!empty($server->channelList[$channel])) {
-                            var_dump(VarDumper::dumpAsString($value));
                             foreach ($server->channelList[$channel] as $fd) {
                                 $server->push($fd, $value);
                             }
@@ -367,13 +364,13 @@ class WebsocketServerController extends Controller
                     $subList[] = 'con-' . $row['uc_id'];
 
                     foreach ($subList as $value) {
-                        $server->redis->unsubscribe($value);
 
                         if (isset($server->channelList[$value][$fd])) {
                             unset($server->channelList[$value][$fd]);
 
                             if (isset($server->channelList[$value]) && empty($server->channelList[$value])) {
                                 unset($server->channelList[$value]);
+                                $server->redis->unsubscribe($value);
                             }
                         }
                     }
