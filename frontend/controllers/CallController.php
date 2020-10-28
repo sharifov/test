@@ -1037,15 +1037,15 @@ class CallController extends FController
                     switch ($action) {
                         case 'accept':
                             $key = 'accept_call_' . $callUserAccess->cua_call_id;
-                            Yii::$app->redis->setnx($key, Auth::id());
-                            $value = Yii::$app->redis->get($key);
-                            if ((int)$value === (int)Auth::id()) {
+                            $result = (bool)Yii::$app->redis->setnx($key, Auth::id());
+                            if ($result) {
                                 $prepare = new PrepareCurrentCallsForNewCall(Auth::id());
                                 if ($prepare->prepare()) {
                                     $this->callService->acceptCall($callUserAccess, Auth::user());
                                 }
                                 Yii::$app->redis->expire($key, 5);
                             } else {
+                                $value = Yii::$app->redis->get($key);
                                 Notifications::publish('callAlreadyTaken', ['user_id' => Auth::id()], ['callSid' => $call->c_call_sid]);
                                 Yii::info(VarDumper::dumpAsString([
                                     'callId' => $callUserAccess->cua_call_id,
