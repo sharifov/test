@@ -12,17 +12,22 @@ class ClientChatEndConversationService
 {
     public static function endConversation(int $chatId, bool $shallowClose = true): ?ClientChat
     {
-        if (!$clientChat = ClientChat::findOne((int) $chatId)) {
+        if (!$clientChat = ClientChat::findOne($chatId)) {
             throw new NotFoundException('ClientChat not found. clientChatId (' . $chatId . ')');
         }
         if (!isset($clientChat->ccv->ccvCvd->cvd_visitor_rc_id)) {
             throw new NotFoundException('Visitor RC id is not found. clientChatId (' . $chatId . ')');
         }
 
+        $shallowCloseParam = $shallowClose;
+        if (!$shallowClose && ClientChat::find()->byRid($clientChat->cch_rid)->notById($chatId)->notArchived()->exists()) {
+            $shallowCloseParam = true;
+        }
+
         $botCloseChatResult = \Yii::$app->chatBot->endConversation(
             $clientChat->cch_rid,
             $clientChat->ccv->ccvCvd->cvd_visitor_rc_id,
-            $shallowClose
+            $shallowCloseParam
         );
         if ($botCloseChatResult['error']) {
             $errorMessage = '[Chat Bot] ' . $botCloseChatResult['error']['message'] ?? 'Unknown error message';

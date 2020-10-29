@@ -61,6 +61,11 @@ class Scopes extends \yii\db\ActiveQuery
         return $this->andWhere(['<>', 'cch_status_id', ClientChat::STATUS_CLOSED]);
     }
 
+    public function notArchived(): self
+    {
+        return $this->andWhere(['<>', 'cch_status_id', ClientChat::STATUS_ARCHIVE]);
+    }
+
     public function closed(): self
     {
         return $this->andWhere(['cch_status_id' => ClientChat::STATUS_CLOSED]);
@@ -152,6 +157,11 @@ class Scopes extends \yii\db\ActiveQuery
     public function byId(int $id): self
     {
         return $this->andWhere(['cch_id' => $id]);
+    }
+
+    public function notById(int $id): self
+    {
+        return $this->andWhere(['!=', 'cch_id', $id]);
     }
 
     public function withoutOwnerOrInTransfer(): Scopes
