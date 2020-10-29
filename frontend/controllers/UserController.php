@@ -225,7 +225,7 @@ class UserController extends FController
         $callLogSearchModel = new CallLogSearch();
         $callLogSearchModel->createTimeStart = $datePickerModel->dateStart;
         $callLogSearchModel->createTimeEnd = $datePickerModel->dateEnd;
-        $callLogDataProvider = $callLogSearchModel->searchMyCalls($params, Employee::findIdentity($id));
+        $callLogDataProvider = $callLogSearchModel->searchMyCalls($params, $id);
 
         $callsInfoGraph = $callLogSearchModel->searchCallsGraph($params, $id);
 
