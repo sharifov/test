@@ -706,6 +706,10 @@ class PhoneController extends FController
                     throw new NotAcceptableHttpException('This agent is not online (Id: ' . $id . ')', 7);
                 }
                 $data['id'] = $user->id;
+                $userDepartment = UserProjectParams::find()->select(['upp_dep_id'])->asArray()->byUserId($user->id)->byProject($originCall->c_project_id)->one();
+                if ($userDepartment) {
+                    $data['dep_id'] = $userDepartment['upp_dep_id'];
+                }
 
             } elseif ($type === 'department') {
                 $department = DepartmentPhoneProject::findOne($id);
