@@ -8,9 +8,9 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
-/* @var $this yii\web\View */
-/* @var $searchModel sales\model\call\entity\callCommand\search\CallCommandSearch */
-/* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var yii\web\View $this */
+/* @var sales\model\call\entity\callCommand\search\CallCommandSearch $searchModel */
+/* @var yii\data\ActiveDataProvider $dataProvider */
 
 $this->title = 'Call Commands';
 $this->params['breadcrumbs'][] = $this->title;
@@ -22,7 +22,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Create Call Command', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
     <?php Pjax::begin(); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'ccom_id',
             [
                 'attribute' => 'ccom_type_id',
-                'value' => static function(CallCommand $model) {
+                'value' => static function (CallCommand $model) {
                     if ((int) $model->ccom_type_id === CallCommand::TYPE_COMMAND_LIST) {
                         $childrenCnt = (int) CallCommand::find()->where(['ccom_parent_id' => $model->ccom_id])->count();
                         return $model::getTypeName($model->ccom_type_id) . ' (' . $childrenCnt . ')';

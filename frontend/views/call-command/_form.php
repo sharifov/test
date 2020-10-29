@@ -26,8 +26,15 @@ $typeForm = $typeForm ?? '';
 
                 <div class="row">
                     <div class="col-md-6">
-                        <?= $form->field($model, 'ccom_type_id')->dropDownList(CallCommand::getTypeList(),
-                            ['prompt' => '---', 'id' => 'callCommandTypeId']) ?>
+                        <?= $form->field($model, 'ccom_type_id')
+                        ->dropDownList(
+                            CallCommand::getTypeList(),
+                            [
+                                'prompt' => '---',
+                                'id' => 'callCommandTypeId',
+                                'data-prev_type' => $model->ccom_type_id
+                            ]
+                        ) ?>
                     </div>
                     <div class="col-md-6">
                         <?= $form->field($model, 'ccom_name')->textInput(['maxlength' => true]) ?>
@@ -47,8 +54,10 @@ $typeForm = $typeForm ?? '';
                         <?php $disabled = ($model->ccom_type_id === CallCommand::TYPE_COMMAND_LIST) ?>
 
                         <?php echo $form->field($model, 'ccom_parent_id')
-                            ->dropDownList(CallCommand::getListByTypes([CallCommand::TYPE_COMMAND_LIST], false),
-                                ['prompt' => '-', 'id' => 'callCommandParent', 'disabled' => $disabled]) ?>
+                            ->dropDownList(
+                                CallCommand::getListByTypes([CallCommand::TYPE_COMMAND_LIST], false),
+                                ['prompt' => '-', 'id' => 'callCommandParent', 'disabled' => $disabled]
+                            ) ?>
                     </div>
                     <div class="col-md-4">
                         <?= $form->field($model, 'ccom_project_id')->dropDownList(\common\models\Project::getList(), ['prompt' => '-']) ?>
@@ -247,7 +256,9 @@ $js = <<<JS
         return false;   
     });
         
-    $(document).on('change', '#callCommandTypeId', function() {
+    $(document).on('change', '#callCommandTypeId', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
         
         let typeObj = $(this);
         let typeId = parseInt(typeObj.val(), 10);
@@ -382,7 +393,3 @@ $js = <<<JS
     }               
 JS;
 $this->registerJs($js);
-
-
-
-
