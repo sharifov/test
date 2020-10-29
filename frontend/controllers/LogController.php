@@ -93,7 +93,7 @@ class LogController extends FController
      */
     public function actionClear()
     {
-        Yii::$app->db->createCommand()->truncateTable('log')->execute();
+        Log::getDb()->createCommand()->truncateTable('log')->execute();
         $this->redirect(['log/index']);
     }
 

@@ -89,6 +89,15 @@ class Log extends \yii\db\ActiveRecord
         return $arr;
     }
 
+    public static function deleteAll($condition = null, $params = []): int
+    {
+        $command = self::getDb()->createCommand();
+        $command->delete(self::tableName(), $condition, $params);
+
+        return $command->execute();
+    }
+
+
     /**
      * @param $model Log
      * @return int|string
