@@ -388,6 +388,10 @@ class TwilioController extends ApiBaseNoAuthController
 
                 if ($type === 'user') {
                     if ($id) {
+                        $depId = (int)Yii::$app->request->post('dep_id');
+                        if ($depId) {
+                            $call->c_dep_id = $depId;
+                        }
                         $call->c_created_user_id = $id;
                         if (!$call->save()) {
                             Yii::error(VarDumper::dumpAsString($call->errors), 'API:Twilio:RedirectCall:Call:update:1');

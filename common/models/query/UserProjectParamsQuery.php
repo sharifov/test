@@ -105,4 +105,9 @@ class UserProjectParamsQuery extends ActiveQuery
     {
         return $this->andWhere(['upp_user_id' => $userId]);
     }
+
+    public function byProject(int $projectId): self
+    {
+        return $this->andWhere(['upp_project_id' => $projectId]);
+    }
 }
