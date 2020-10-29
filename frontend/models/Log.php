@@ -25,6 +25,14 @@ class Log extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return object
+     */
+    public static function getDb()
+    {
+        return \Yii::$app->get('db_postgres');
+    }
+
+    /**
      * @inheritdoc
      */
     public function rules()

@@ -91,6 +91,7 @@ return [
                         $ip = $_SERVER['REMOTE_ADDR'];
                         return "[frontend][$ip][$userID]";
                     },
+                    'db' => 'db_postgres'
                 ],
                 [
                     'class' => 'yii\log\DbTarget',
@@ -102,6 +103,7 @@ return [
                         $ip = $_SERVER['REMOTE_ADDR'];
                         return "[frontend][$ip][$userID]";
                     },
+                    'db' => 'db_postgres'
                 ],
                 [
                     'class' => \common\components\logger\AirFileTarget::class,
