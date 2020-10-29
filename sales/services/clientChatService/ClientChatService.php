@@ -418,7 +418,7 @@ class ClientChatService
             }
             $lastMessage = $this->clientChatLastMessageRepository->getByChatId($clientChat->cch_id);
 
-            $clientChat->close($chatUserAccess->ccua_user_id, ClientChatStatusLog::ACTION_ACCEPT_TRANSFER);
+            $clientChat->archive($chatUserAccess->ccua_user_id, ClientChatStatusLog::ACTION_ACCEPT_TRANSFER);
             $this->clientChatRepository->save($clientChat);
 
             $dto = ClientChatCloneDto::feelInOnTransfer($clientChat);
