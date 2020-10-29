@@ -29,6 +29,7 @@ use vova07\imperavi\Widget;
 $c_type_id = $comForm->c_type_id;
 
 $pjaxContainerId = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled ? 'pjax-lead-communication-log' : 'pjax-lead-communication';
+$pjaxContainerIdForm = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled ? 'pjax-lead-communication-log-form' : 'pjax-lead-communication-form';
 $listItemView = isset($isCommunicationLogEnabled) && $isCommunicationLogEnabled ? '_list_item_log' : '_list_item';
 
 $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscribes, 'eu_email'));
@@ -57,13 +58,15 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
         </div>
         <div class="x_content" style="display: block;">
 
-            <?php yii\widgets\Pjax::begin(['id' => $pjaxContainerId , 'timeout' => 5000]) ?>
-
-            <?php $statistics = new StatisticsHelper($lead->id, StatisticsHelper::TYPE_LEAD) ?>
-            <?php echo $this->render('/partial/_communication_statistic', ['statistics' => $statistics->setCountAll()]) ?>
-
             <div class="panel">
                 <div class="chat__list">
+
+                    <div class="communication-block-scroll">
+
+                    <?php yii\widgets\Pjax::begin(['id' => $pjaxContainerId , 'timeout' => 5000]) ?>
+
+                    <?php $statistics = new StatisticsHelper($lead->id, StatisticsHelper::TYPE_LEAD) ?>
+                    <?php echo $this->render('/partial/_communication_statistic', ['statistics' => $statistics->setCountAll()]) ?>
 
                     <?= \yii\widgets\ListView::widget([
                         'dataProvider' => $dataProvider,
@@ -93,6 +96,12 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
                         ],*/
 
                     ]) ?>
+
+                    <?php yii\widgets\Pjax::end() ?>
+
+                    </div>
+
+                    <?php yii\widgets\Pjax::begin(['id' => $pjaxContainerIdForm , 'timeout' => 5000]) ?>
 
                     <?php if(!Yii::$app->user->identity->canRole('qa')) : ?>
                         <?php if ($unsubscribe) : ?>
@@ -637,10 +646,10 @@ JS;
                         </div>
                     <?php endif; ?>
 
+                    <?php yii\widgets\Pjax::end() ?>
                 </div>
             </div>
 
-            <?php yii\widgets\Pjax::end() ?>
         </div>
     </div>
 

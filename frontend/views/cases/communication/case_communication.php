@@ -30,6 +30,7 @@ $c_type_id = $comForm->c_type_id;
 // <script src="https://cdnjs.cloudflare.com/ajax/libs/timer.jquery/0.9.0/timer.jquery.min.js"></script>
 
 $pjaxContainerId = $isCommunicationLogEnabled ? 'pjax-case-communication-log' : 'pjax-case-communication';
+$pjaxContainerIdForm = $isCommunicationLogEnabled ? 'pjax-case-communication-log-form' : 'pjax-case-communication-form';
 $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communication/_list_item';
 
 ?>
@@ -55,42 +56,49 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
         <div class="clearfix"></div>
     </div>
     <div class="x_content" style="display: block;">
-    <?php yii\widgets\Pjax::begin(['id' => $pjaxContainerId ,'enablePushState' => false]) ?>
-
-        <?php $statistics = new StatisticsHelper($model->cs_id, StatisticsHelper::TYPE_CASE) ?>
-        <?php echo $this->render('/partial/_communication_statistic', ['statistics' => $statistics->setCountAll()]) ?>
-
         <div class="panel">
             <div class="chat__list">
 
-                <?= \yii\widgets\ListView::widget([
-                    'dataProvider' => $dataProvider,
+                <div class="communication-block-scroll">
+                    <?php yii\widgets\Pjax::begin(['id' => $pjaxContainerId ,'enablePushState' => false]) ?>
 
-                    'options' => [
-                        'tag' => 'div',
-                        'class' => 'list-wrapper',
-                        'id' => 'list-wrapper',
-                    ],
-                    'emptyText' => '<div class="text-center">Not found communication messages</div><br>',
-                    'layout' => "{summary}\n<div class=\"text-center\">{pager}</div>\n{items}<div class=\"text-center\">{pager}</div>\n",
-                    'itemView' => function ($model, $key, $index, $widget) use ($dataProvider, $listItemView) {
-                        return $this->render($listItemView, ['model' => $model, 'dataProvider' => $dataProvider]);
-                    },
+                    <?php $statistics = new StatisticsHelper($model->cs_id, StatisticsHelper::TYPE_CASE) ?>
+                    <?php echo $this->render('/partial/_communication_statistic', ['statistics' => $statistics->setCountAll()]) ?>
 
-                    'itemOptions' => [
-                        //'class' => 'item',
-                        'tag' => false,
-                    ],
 
-                    /*'pager' => [
-                        'firstPageLabel' => 'first',
-                        'lastPageLabel' => 'last',
-                        'nextPageLabel' => 'next',
-                        'prevPageLabel' => 'previous',
-                        'maxButtonCount' => 3,
-                    ],*/
+                    <?= \yii\widgets\ListView::widget([
+                        'dataProvider' => $dataProvider,
 
-                ]) ?>
+                        'options' => [
+                            'tag' => 'div',
+                            'class' => 'list-wrapper',
+                            'id' => 'list-wrapper',
+                        ],
+                        'emptyText' => '<div class="text-center">Not found communication messages</div><br>',
+                        'layout' => "{summary}\n<div class=\"text-center\">{pager}</div>\n{items}<div class=\"text-center\">{pager}</div>\n",
+                        'itemView' => function ($model, $key, $index, $widget) use ($dataProvider, $listItemView) {
+                            return $this->render($listItemView, ['model' => $model, 'dataProvider' => $dataProvider]);
+                        },
+
+                        'itemOptions' => [
+                            //'class' => 'item',
+                            'tag' => false,
+                        ],
+
+                        /*'pager' => [
+                            'firstPageLabel' => 'first',
+                            'lastPageLabel' => 'last',
+                            'nextPageLabel' => 'next',
+                            'prevPageLabel' => 'previous',
+                            'maxButtonCount' => 3,
+                        ],*/
+
+                    ]) ?>
+
+                    <?php yii\widgets\Pjax::end() ?>
+                </div>
+
+                <?php yii\widgets\Pjax::begin(['id' => $pjaxContainerIdForm ,'enablePushState' => false]) ?>
 
                 <?php if($model->isProcessing() || $model->isSolved()):?>
                      <div class="chat__form panel">
@@ -663,10 +671,10 @@ JS;
                 </div>
                 <?php endif; ?>
 
+                <?php yii\widgets\Pjax::end() ?>
             </div>
         </div>
 
-    <?php yii\widgets\Pjax::end() ?>
     </div>
 </div>
 

@@ -5998,3 +5998,20 @@ td.selected-cell {
   0% { box-shadow: 0 0 0 2px red; }
 }
 
+
+.communication-block-scroll {
+    max-height: 700px;
+    overflow-y: auto;
+    padding-right: 15px;
+}
+.communication-block-scroll::-webkit-scrollbar {
+    width: 8px;
+}
+.communication-block-scroll::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px grey;
+    border-radius: 10px;
+}
+.communication-block-scroll::-webkit-scrollbar-thumb {
+    background: #909090;
+    border-radius: 10px;
+}
