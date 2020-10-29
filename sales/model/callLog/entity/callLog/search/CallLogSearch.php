@@ -389,12 +389,12 @@ class CallLogSearch extends CallLog
         return $dataProvider;
     }
 
-    public function searchMyCalls($params, Employee $user): ActiveDataProvider
+    public function searchMyCalls($params, $id): ActiveDataProvider
     {
         $this->load($params);
 
         $query = static::find();
-        $query->where(['cl_user_id' => $user->id]);
+        $query->where(['cl_user_id' => $id]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -405,9 +405,9 @@ class CallLogSearch extends CallLog
             return $dataProvider;
         }
 
-        if ($this->cl_call_created_dt) {
+        /*if ($this->cl_call_created_dt) {
             \sales\helpers\query\QueryHelper::dayEqualByUserTZ($query, 'cl_call_created_dt', $this->cl_call_created_dt, $user->timezone);
-        }
+        }*/
 
         if ($this->createTimeStart && $this->createTimeEnd) {
             $dateTimeStart = Employee::convertTimeFromUserDtToUTC(strtotime($this->createTimeStart));
@@ -450,6 +450,7 @@ class CallLogSearch extends CallLog
             'cl_category_id' => $this->cl_category_id,
             'cl_status_id' => $this->cl_status_id,
             'cl_client_id' => $this->cl_client_id,
+            'DATE(cl_call_created_dt)' => $this->cl_call_created_dt
         ]);
 
         $query->andFilterWhere(['like', 'cl_phone_from', $this->cl_phone_from])
