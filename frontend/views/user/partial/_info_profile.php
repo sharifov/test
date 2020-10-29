@@ -127,17 +127,14 @@ use yii\widgets\Pjax;
                         ],
 
                         [
-                            'label' => 'Email List',
-                            'value' => function (\common\models\UserProjectParams $model) {
-                                return $model->upp_email ? $model->upp_email : '-';
-                            },
+                            'class' => \common\components\grid\EmailSelect2Column::class,
+                            'attribute' => 'upp_email_list_id',
+                            'relation' => 'emailList',
                         ],
-
                         [
-                            'label' => 'Phone List',
-                            'value' => function (\common\models\UserProjectParams $model) {
-                                return $model->upp_tw_phone_number ? $model->upp_tw_phone_number : '-';
-                            },
+                            'class' => \common\components\grid\PhoneSelect2Column::class,
+                            'attribute' => 'upp_phone_list_id',
+                            'relation' => 'phoneList',
                         ],
 
                         [

@@ -29,7 +29,6 @@ use yii\filters\VerbFilter;
  */
 class UserController extends FController
 {
-
     public function behaviors()
     {
         $behaviors = [
@@ -57,7 +56,7 @@ class UserController extends FController
     {
         $searchModel = new UserCallStatusSearch();
         $params = Yii::$app->request->queryParams;
-        if(isset($params['reset'])){
+        if (isset($params['reset'])) {
             unset($params['UserCallStatusSearch']['date_range']);
         }
 
@@ -180,7 +179,6 @@ class UserController extends FController
             } else {
                 // Notifications::socket($ucs->us_user_id, null, 'updateUserCallStatus', ['id' => 'ucs'.$ucs->us_id, 'type_id' => $type_id]);
                 Notifications::publish('updateUserCallStatus', ['user_id' =>$ucs->us_user_id], ['id' => 'ucs'.$ucs->us_id, 'type_id' => $type_id]);
-
             }
         }
 
@@ -208,7 +206,7 @@ class UserController extends FController
         $datePickerModel->addRule('dateEnd', 'string');
         $datePickerModel->addRule('dateRange', 'match', ['pattern' => '/^.+\s\-\s.+$/']);
 
-        if(!$datePickerModel->load(Yii::$app->request->get())){
+        if (!$datePickerModel->load(Yii::$app->request->get())) {
             $datePickerModel->dateStart = ($currentDate->modify('-6 days'))->format('Y-m-d') . ' 00:00:00';
             $datePickerModel->dateEnd = $currentDate->format('Y-m-d') . ' 23:59:59';
             $datePickerModel->dateRange = $datePickerModel->dateStart . ' - ' . $datePickerModel->dateEnd;
