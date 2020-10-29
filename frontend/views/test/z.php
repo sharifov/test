@@ -30,8 +30,79 @@ $js = <<<JS
 JS;
 $this->registerJs($js);
 ?>
+<?php
+$js = <<<JS
 
-<?php $form = ActiveForm::begin(); ?>
+    let cchId = 39;
+
+    function f1(id) {
+        return new Promise(function(resolve, reject){
+            setTimeout(function() {
+                let testData = {
+                    xxx: 'xxx',
+                    cId: id,
+                    fnName: 'f1'
+                };
+                console.log(testData);
+                if (testData.fnName === 'f3') {
+                    reject(new Error('Error in ' + testData.fnName));
+                }
+                resolve(testData);
+            }, 3000);
+        });
+    }
+    
+    function f2(data) {
+        return new Promise(function(resolve, reject){
+            setTimeout(function() {
+                data.fnName = 'f2';
+                console.log(data);
+                if (data.fnName === 'f3') {
+                    reject(new Error('Error in ' + data.fnName));
+                }
+                resolve(data);
+            }, 3000);
+        });
+    }
+    
+    function f3(data) {
+        return new Promise(function(resolve, reject){
+            setTimeout(function() {
+                data.fnName = 'f3';
+                console.log(data);
+                if (data.fnName === 'f3') {
+                    reject(new Error('Error in ' + data.fnName));
+                }
+                resolve(data);
+            }, 3000);
+        });
+    }
+    
+    function f4() {        
+        setTimeout(function() {            
+            console.log('f4');            
+        }, 3000);        
+    }
+    
+    f1(cchId).then(function(testData) {
+        return f2(testData);
+    }).then(function(testData) {
+        return f3(testData);
+    }).then(function() {
+        return f4();
+    }).then(function() {
+        console.log('Done!');
+    }).catch(function(errorMsg) {
+        alert(errorMsg);
+    });
+JS;
+
+$this->registerJs($js);
+
+?>
+
+
+<?php  $form = ActiveForm::begin(); ?>
 
 <?php
   echo AutoComplete::widget([
@@ -43,3 +114,5 @@ $this->registerJs($js);
 ?>
 
 <?php ActiveForm::end(); ?>
+
+

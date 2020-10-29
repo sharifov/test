@@ -462,7 +462,7 @@ $js = <<<JS
                             let activeChatId = localStorage.getItem('activeChatId');
                             if (typeof window.refreshChatPage === 'function' && window.name === 'chat' && activeChatId == obj.data.cchId) {
                                 $("#modal-sm").modal("hide");
-                                window.refreshChatPage(obj.data.cchId, obj.data.tab);
+                                window.refreshChatPage(obj.data.cchId);
                             }
                             createNotify('Warning', obj.data.message, 'warning');
                         }

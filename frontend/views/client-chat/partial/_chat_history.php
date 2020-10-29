@@ -2,24 +2,13 @@
 
 /** @var ClientChat|null $clientChat */
 
-use sales\auth\Auth;
+use sales\helpers\clientChat\ClientChatIframeHelper;
 use sales\model\clientChat\entity\ClientChat;
 
-$iDate = null;
-$rcUrl = Yii::$app->rchat->host  . '/home';
-$userRcAuthToken = Auth::user()->userProfile ? Auth::user()->userProfile->up_rc_auth_token : '';
-$readOnly = '&readonly=true';
-$randInt = random_int(1, 99999);
-$goto = urlencode('/live/' . $clientChat->cch_rid . '?layout=embedded' . $readOnly . '&rnd=' . $randInt);
 ?>
 
 <?php if ($clientChat): ?>
-    <iframe class="_rc-iframe"
-        onload="removeCcLoadFromIframe()"
-        src="<?php echo $rcUrl ?>?&layout=embedded<?= $readOnly ?>&resumeToken=<?= $userRcAuthToken ?>&rnd=<?php echo $randInt ?>&goto=<?= $goto ?>"
-        id="_rc-<?php echo $clientChat->cch_id ?>"
-        style="border: none; width: 100%;"
-        name="_<?php echo $randInt ?>_<?php echo $clientChat->cch_status_id ?>"></iframe>
+    <?php echo (new ClientChatIframeHelper($clientChat))->generateIframe(); ?>
 
 <?php
 $js = <<<JS

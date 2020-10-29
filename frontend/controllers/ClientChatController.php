@@ -31,6 +31,7 @@ use sales\forms\clientChat\MultipleUpdateForm;
 use sales\forms\clientChat\RealTimeStartChatForm;
 use sales\helpers\app\AppHelper;
 use sales\helpers\app\AppParamsHelper;
+use sales\helpers\clientChat\ClientChatIframeHelper;
 use sales\model\clientChat\cannedResponse\entity\ClientChatCannedResponse;
 use sales\model\clientChat\cannedResponse\entity\search\ClientChatCannedResponseSearch;
 use sales\helpers\ErrorsToStringHelper;
@@ -247,8 +248,8 @@ class ClientChatController extends FController
                     'ajax-reopen-chat',
                     'ajax-canned-response',
                     'ajax-send-canned-response',
-                    'ajax-reopen-chat',
                     'ajax-couch-note-view',
+                    'ajax-reload-chat',
                 ],
             ],
         ];
@@ -815,7 +816,7 @@ class ClientChatController extends FController
             if (Yii::$app->request->isPjax && $form->validate()) {
                 $this->clientChatService->closeConversation($form, Auth::user());
 
-                return '<script>$("#modal-sm").modal("hide"); refreshChatPage(' . $form->cchId . ', ' . ClientChat::TAB_ARCHIVE . '); createNotify("Success", "Room successfully closed", "success")</script>';
+                return '<script>$("#modal-sm").modal("hide"); refreshChatPage(' . $form->cchId . '); createNotify("Success", "Room successfully closed", "success")</script>';
             }
         } catch (NotFoundException | ForbiddenHttpException $e) {
             return '<script>setTimeout(function () {$("#modal-sm").modal("hide");}, 500); createNotify("Error", "' . $e->getMessage() . '", "error")</script>';
@@ -2018,7 +2019,7 @@ class ClientChatController extends FController
                     throw new BadRequestHttpException('Form not loaded', -1);
                 }
                 if (!$form->validate()) {
-                    throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($form));
+                    throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($form), -2);
                 }
                 if (!(new ClientChatActionPermission())->canCouchNote($form->getClientChat())) {
                     throw new ForbiddenHttpException('Access denied.', -3);
@@ -2026,7 +2027,7 @@ class ClientChatController extends FController
                 $response = \Yii::$app->chatBot->sendNote($form->rid, $form->message, $form->alias);
                 if (!empty($response['error']['message'])) {
                     throw new \RuntimeException('RC Error: ' .
-                        VarDumper::dumpAsString($response['error']['message']), -4);
+                        VarDumper::dumpAsString($response['error']['message']));
                 }
                 $clientChatCouchNote = ClientChatCouchNote::create(
                     $form->getClientChat()->cch_id,
@@ -2049,6 +2050,10 @@ class ClientChatController extends FController
         throw new BadRequestHttpException();
     }
 
+    /**
+     * @return array
+     * @throws BadRequestHttpException
+     */
     public function actionAjaxCouchNoteView(): array
     {
         if (Yii::$app->request->isAjax) {
@@ -2063,6 +2068,10 @@ class ClientChatController extends FController
                 if (!$clientChat = ClientChat::findOne($cchId)) {
                     throw new NotFoundHttpException('Chat is not found', -2);
                 }
+                if ($clientChat->isInClosedStatusGroup()) {
+                    $result['status'] = 2;
+                    throw new \DomainException('Chat is closed status group.', -11);
+                }
                 if (!(new ClientChatActionPermission())->canCouchNote($clientChat)) {
                     throw new ForbiddenHttpException('Access denied.', -3);
                 }
@@ -2071,11 +2080,54 @@ class ClientChatController extends FController
                     'couchNoteForm' => new ClientChatCouchNoteForm($clientChat, Auth::user()),
                 ]);
 
-                $result = ['status' => 1, 'html' => $html];
+                $result['status'] = 1;
+                $result['html'] = $html;
+            } catch (\Throwable $throwable) {
+                if ($throwable->getCode() > -10) {
+                    AppHelper::throwableLogger(
+                        $throwable,
+                        'ClientChatController:actionAjaxCouchNoteView:throwable'
+                    );
+                }
+                $result['message'] = VarDumper::dumpAsString($throwable->getMessage());
+            }
+            return $result;
+        }
+        throw new BadRequestHttpException();
+    }
+
+    /**
+     * @return array
+     * @throws BadRequestHttpException
+     */
+    public function actionAjaxReloadChat(): array
+    {
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $result = [
+                'message' => '', 'status' => 0, 'iframe' => '',
+                'isClosed' => 1, 'cchId' => 0
+            ];
+
+            try {
+                if (!$cchId = (int) Yii::$app->request->post('cchId')) {
+                    throw new BadRequestHttpException('Invalid parameters', -1);
+                }
+                if (!$clientChat = ClientChat::findOne($cchId)) {
+                    throw new NotFoundHttpException('Chat is not found', -2);
+                }
+                if (!Auth::can('client-chat/view', ['chat' => $clientChat])) {
+                    throw new ForbiddenHttpException('You don\'t have access to this chat');
+                }
+
+                $result['status'] = 1;
+                $result['cchId'] = $clientChat->cch_id;
+                $result['isClosed'] = (int) $clientChat->isInClosedStatusGroup();
+                $result['iframe'] = (new ClientChatIframeHelper($clientChat))->generateIframe();
             } catch (\Throwable $throwable) {
                 AppHelper::throwableLogger(
                     $throwable,
-                    'ClientChatController:actionAjaxCouchNoteView:throwable'
+                    'ClientChatController:actionAjaxChatIframe:throwable'
                 );
                 $result['message'] = VarDumper::dumpAsString($throwable->getMessage());
             }

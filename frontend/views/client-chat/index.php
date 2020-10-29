@@ -2,6 +2,7 @@
 
 use frontend\themes\gentelella_v2\assets\ClientChatAsset;
 use sales\auth\Auth;
+use sales\helpers\clientChat\ClientChatIframeHelper;
 use sales\model\clientChat\dashboard\FilterForm;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\dashboard\ReadUnreadFilter;
@@ -62,6 +63,7 @@ $clientChatTakeUrl = Url::toRoute(['/client-chat/ajax-take']);
 $clientChatReturnUrl = Url::toRoute(['/client-chat/ajax-return']);
 $clientChatCouchNoteUrl = Url::toRoute(['/client-chat/ajax-couch-note']);
 $clientChatCouchNoteViewUrl = Url::toRoute(['/client-chat/ajax-couch-note-view']);
+$clientChatReloadChatUrl = Url::toRoute(['/client-chat/ajax-reload-chat']);
 ?>
 
 <?php if ($filter->isEmptyChannels()): ?>
@@ -104,12 +106,8 @@ $clientChatCouchNoteViewUrl = Url::toRoute(['/client-chat/ajax-couch-note-view']
          if ($accessChatError) {
              $this->registerJs('createNotify("Client chat view", "You don\'t have access to this chat", "error")', View::POS_LOAD);
          } elseif ($clientChat) {
-             if ($clientChat->isInClosedStatusGroup()) {
-                 $iframeData = $this->render('partial/_chat_history', ['clientChat' => $clientChat]);
-             } else {
-                 $readOnly = (!$clientChat->isOwner(Auth::id()) ? '&readonly=true' : '');
-                 $iframeData = '<iframe class="_rc-iframe" src="' . $rcUrl . '?layout=embedded' . $readOnly . '&resumeToken=' . $userRcAuthToken . '&goto=' . urlencode('/live/' . $clientChat->cch_rid . '?layout=embedded' . $readOnly) . '" id="_rc-' . $clientChat->cch_id . '" style="border: none; width: 100%;" ></iframe >';
-             }
+             $iframeData = (new ClientChatIframeHelper($clientChat))->generateIframe();
+
              if ($client) {
                  $infoData = $this->render(
                      'partial/_client-chat-info',
@@ -542,7 +540,7 @@ $(document).on('click', '.cc_cancel_transfer', function (e) {
                 if (data.error) {
                     createNotify('Error', data.message, 'error');
                 } else {
-                    refreshChatPage(cchId, data.tab);
+                    refreshChatPage(cchId);
                     createNotify('Success', data.message, 'success');
                 }
             },
@@ -722,19 +720,87 @@ window.refreshChatInfo = function (cch_id, callable, ref) {
         }
     });
 }
-window.refreshChatPage = function (cchId, tab) {
-    //todo will remove all TAB logic
-//    if (tab) {
-//        let params = new URLSearchParams(window.location.search);
-//        params.set('tab', tab);
-//        window.history.replaceState({}, '', '{$loadChannelsUrl}?'+params.toString());
-//    }
-    pjaxReload({container: '#pjax-client-chat-channel-list'});
-    $('#_rc-'+cchId).remove();
-    $('.cc_transfer').remove();
-    $('.cc_close').remove();
+
+window.refreshChatPage = function (cchId) {
     
-    refreshChatInfo(cchId, loadClientChatData);
+    preReloadChat(cchId);
+    pjaxReload({container: '#pjax-client-chat-channel-list'});
+    refreshChatInfo(cchId);    
+    
+    getChatDataPromise(cchId).then(function(chatData) {
+        return reloadChat(chatData);
+    }).then(function(chatData) {
+        return reloadCannedResponse(chatData);
+    }).then(function(chatData) {
+        return reloadCouchNote(chatData);
+    }).catch(function(errorMsg) {
+        createNotify('Error', errorMsg, 'error');
+    });
+    postReloadChat();
+}
+
+window.getChatDataPromise = function (cchId) {  
+    return new Promise(function(resolve, reject) {
+        $.ajax({
+            url: '{$clientChatReloadChatUrl}',
+            type: 'post',
+            data: {cchId: cchId},
+            dataType: 'json'    
+        })
+        .done(function(dataResponse) {                
+            if (dataResponse.status) {
+                resolve(dataResponse);
+            } else if (dataResponse.status === 0 && dataResponse.message.length) {
+                reject(new Error(dataResponse.message));
+            } else {
+                reject(new Error('Error. Please see logs'));
+            }
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            reject(new Error(jqXHR.responseText));
+        })
+        .always(function(jqXHR, textStatus, errorThrown) {}); 
+    });    
+}
+
+reloadCannedResponse = function(chatData) {
+    return new Promise(function(resolve, reject) {
+        if (chatData.isClosed) {
+            $('#canned-response-wrap').addClass('disabled');
+        } else {
+            $('#canned-response-wrap').removeClass('disabled');
+            $('#canned-response').attr('data-chat-id', chatData.cchId).val('');
+        } 
+        resolve(chatData);                        
+    }); 
+}
+
+reloadCouchNote = function(chatData) {
+    return new Promise(function(resolve, reject) {        
+        window.refreshCouchNote(chatData.cchId);         
+        resolve(chatData);                          
+    }); 
+}
+
+reloadChat = function(chatData) {
+    return new Promise(function(resolve, reject) {
+        $('#_rc-iframe-wrapper').append(chatData.iframe);  
+        resolve(chatData);                  
+    }); 
+}
+
+preReloadChat = function(cchId) {
+    $('#page-loader').show();  
+    $('#_rc-'+cchId).remove();
+    
+    let iframeWrapperEl = $("#_rc-iframe-wrapper");
+    iframeWrapperEl.find('._rc-iframe').hide();
+    iframeWrapperEl.find('#_cc-load').remove();
+    iframeWrapperEl.append('<div id="_cc-load">' + spinnerForModal + '</div>');
+}
+
+postReloadChat = function() {
+    $('#page-loader').hide();
 }
 
 window.refreshCouchNote = function (cch_id) {    
@@ -747,7 +813,9 @@ window.refreshCouchNote = function (cch_id) {
     })
     .done(function(dataResponse) {                
         if (dataResponse.status > 0 && dataResponse.html.length) { 
-            $('#couch_note_box').html(dataResponse.html);
+            $('#couch_note_box').html(dataResponse.html);            
+        } else if (dataResponse.status === 2) { // chat closed
+            $('#couch_note_box').html('');            
         } else if (dataResponse.status === 0 && dataResponse.message.length) {
             console.log(dataResponse.message);
         } else {
