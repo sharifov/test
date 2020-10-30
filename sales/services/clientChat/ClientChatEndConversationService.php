@@ -34,10 +34,20 @@ class ClientChatEndConversationService
             $errorMessage .= ' clientChatId (' . $chatId . ')';
             \Yii::error(
                 $errorMessage,
-                'ClientChatEndConversationJob:ChatBot:Error'
+                'ClientChatEndConversationService:ChatBot:Error'
             );
             throw new \RuntimeException($errorMessage);
         }
+
+        $info = 'Id : (' . $clientChat->cch_id .
+                ') Rid : (' . $clientChat->cch_rid .
+                ') Status: (' . $clientChat->getStatusName() .
+                ') shallowCloseParam: (' . (string) $shallowCloseParam . ')';
+        \Yii::info(
+            'Chat Bot request successfully processed. ' . PHP_EOL . $info,
+            'info\ClientChatEndConversationService:successfully'
+        );
+
         return $clientChat;
     }
 }

@@ -35,14 +35,8 @@ class ClientChatEndConversationListener
                 $clientChatEndConversationJob->shallowClose = $event->shallowClose;
 
                 Yii::$app->queue_client_chat_job->priority(10)->push($clientChatEndConversationJob);
-            } elseif ($clientChat = ClientChatEndConversationService::endConversation($event->clientChatId, $event->shallowClose)) {
-                $info = ' Id : (' . $clientChat->cch_id .
-                    ') Rid : (' . $clientChat->cch_rid .
-                    ') Status: (' . $clientChat->getStatusName() . ')';
-                \Yii::info(
-                    'Chat Bot request successfully processed. ' . PHP_EOL . $info,
-                    'info\ClientChatEndConversationListener:successfully'
-                );
+            } else {
+                ClientChatEndConversationService::endConversation($event->clientChatId, $event->shallowClose);
             }
         } catch (\Throwable $throwable) {
             \Yii::error(
