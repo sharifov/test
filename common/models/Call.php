@@ -1190,7 +1190,7 @@ class Call extends \yii\db\ActiveRecord
         }
 
         if (
-            $this->c_created_user_id && ($insert || $isChangedStatus)
+            $this->c_created_user_id && ($insert || $isChangedStatusFromEmptyInclude)
             && (!($this->isIn() && $this->isStatusQueue()))
             && (!($this->isIn() && $this->isStatusDelay()))
             && (!$this->isInternal() || $this->isEnded())
