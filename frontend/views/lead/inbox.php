@@ -94,8 +94,8 @@ $this->params['breadcrumbs'][] = $this->title;
             </table>
         </div>*/ ?>
 
-        <div class="col-md-1" title="Сompleted Tasks Percent">
-            <input type="text" value="<?=$taskSummary['completedTasksPercent']?>" data-width="120" data-height="120" data-fgColor="<?=($taskSummary['completedTasksPercent']>=$user->userParams->up_min_percent_for_take_leads?'#66CC66':'#f3a72d')?>" class="knob_element" readonly="readonly" title="Сompleted Tasks Percent">
+        <div class="col-md-1" title="Completed Tasks Percent">
+            <input type="text" value="<?=$taskSummary['completedTasksPercent']?>" data-width="120" data-height="120" data-fgColor="<?=($taskSummary['completedTasksPercent']>=$user->userParams->up_min_percent_for_take_leads?'#66CC66':'#f3a72d')?>" class="knob_element" readonly="readonly" title="Completed Tasks Percent">
         </div>
 
         <div class="col-md-1" title="Taked leads">

@@ -22,7 +22,7 @@ class Permissions
         if ($this->channel !== null) {
             return $this->channel;
         }
-        $this->channel = Auth::can('client-сhat/dashboard/filter/channel');
+        $this->channel = Auth::can('client-chat/dashboard/filter/channel');
         return $this->channel;
     }
 
@@ -31,7 +31,7 @@ class Permissions
         if ($this->status !== null) {
             return $this->status;
         }
-        $this->status = Auth::can('client-сhat/dashboard/filter/status');
+        $this->status = Auth::can('client-chat/dashboard/filter/status');
         return $this->status;
     }
 
@@ -40,7 +40,7 @@ class Permissions
         if ($this->user !== null) {
             return $this->user;
         }
-        $this->user = Auth::can('client-сhat/dashboard/filter/user');
+        $this->user = Auth::can('client-chat/dashboard/filter/user');
         return $this->user;
     }
 
@@ -49,7 +49,7 @@ class Permissions
         if ($this->created_date !== null) {
             return $this->created_date;
         }
-        $this->created_date = Auth::can('client-сhat/dashboard/filter/created_date');
+        $this->created_date = Auth::can('client-chat/dashboard/filter/created_date');
         return $this->created_date;
     }
 
@@ -58,7 +58,7 @@ class Permissions
         if ($this->department !== null) {
             return $this->department;
         }
-        $this->department = Auth::can('client-сhat/dashboard/filter/department');
+        $this->department = Auth::can('client-chat/dashboard/filter/department');
         return $this->department;
     }
 
@@ -67,7 +67,7 @@ class Permissions
         if ($this->project !== null) {
             return $this->project;
         }
-        $this->project = Auth::can('client-сhat/dashboard/filter/project');
+        $this->project = Auth::can('client-chat/dashboard/filter/project');
         return $this->project;
     }
 
@@ -76,7 +76,7 @@ class Permissions
         if ($this->read_unread !== null) {
             return $this->read_unread;
         }
-        $this->read_unread = Auth::can('client-сhat/dashboard/filter/read_unread');
+        $this->read_unread = Auth::can('client-chat/dashboard/filter/read_unread');
         return $this->read_unread;
     }
 
@@ -85,7 +85,7 @@ class Permissions
         if ($this->group_my_chats !== null) {
             return $this->group_my_chats;
         }
-        $this->group_my_chats = Auth::can('client-сhat/dashboard/filter/group/my_chats');
+        $this->group_my_chats = Auth::can('client-chat/dashboard/filter/group/my_chats');
         return $this->group_my_chats;
     }
 
@@ -94,7 +94,7 @@ class Permissions
         if ($this->group_other_chats !== null) {
             return $this->group_other_chats;
         }
-        $this->group_other_chats = Auth::can('client-сhat/dashboard/filter/group/other_chats');
+        $this->group_other_chats = Auth::can('client-chat/dashboard/filter/group/other_chats');
         return $this->group_other_chats;
     }
 
@@ -103,7 +103,7 @@ class Permissions
         if ($this->group_free_to_take !== null) {
             return $this->group_free_to_take;
         }
-        $this->group_free_to_take = Auth::can('client-сhat/dashboard/filter/group/free_to_take_chats');
+        $this->group_free_to_take = Auth::can('client-chat/dashboard/filter/group/free_to_take_chats');
         return $this->group_free_to_take;
     }
 

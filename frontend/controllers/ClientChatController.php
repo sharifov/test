@@ -965,7 +965,7 @@ class ClientChatController extends FController
 
                 return '<script>$("#modal-sm").modal("hide"); 
                     refreshChatPage(' . $form->cchId . '); 
-                    createNotify("Success", "Сhat status changed to Hold", "success");</script>';
+                    createNotify("Success", "Chat status changed to Hold", "success");</script>';
             } catch (\Throwable $throwable) {
                 $form->addError('general', 'Internal Server Error');
                 Yii::error(
