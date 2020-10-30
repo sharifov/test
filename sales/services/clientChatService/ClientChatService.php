@@ -592,7 +592,7 @@ class ClientChatService
 
         return $this->transactionManager->wrap(function () use ($clientChat, $owner, $lastMessage) {
 
-            $clientChat->close($owner->id, ClientChatStatusLog::ACTION_ACCEPT_TRANSFER);
+            $clientChat->archive($owner->id, ClientChatStatusLog::ACTION_TAKE);
             $this->clientChatRepository->save($clientChat);
 
             $dto = ClientChatCloneDto::feelInOnTake($clientChat, $owner->id);
