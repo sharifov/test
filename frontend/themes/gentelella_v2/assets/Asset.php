@@ -17,12 +17,6 @@ class Asset extends \yii\web\AssetBundle
     ];
 
     public $js = [
-        [
-            'https://js.sentry-cdn.com/759a9e865aaa4088acd6fb21376c5289.min.js',
-            'crossorigin' => 'anonymous',
-            'data-lazy' => 'no',
-            'position' => \yii\web\View::POS_HEAD,
-        ],
         'js/util.js',
         'js/extension.js',
         '/js/centrifuge-js-master/dist/centrifuge.js',
@@ -30,7 +24,8 @@ class Asset extends \yii\web\AssetBundle
 
     public $depends = [
         ThemeAsset::class,
-        CommonAsset::class
+        CommonAsset::class,
+        SentryAsset::class
 //        'yiister\gentelella\assets\ExtensionAsset',
     ];
 }
