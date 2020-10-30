@@ -64,4 +64,9 @@ class SettingHelper
     {
         return (int)(\Yii::$app->params['settings']['client_chat_soft_close_timeout_hours'] ?? 1);
     }
+
+    public static function isSentryFrontendEnabled()
+    {
+        return (bool)(\Yii::$app->params['settings']['sentry_frontend_enabled'] ?? false);
+    }
 }
