@@ -39,10 +39,10 @@ class ClientChatIframeHelper
         $params['layout'] = 'embedded';
         $params['resumeToken'] = $this->getUserRcAuthToken();
         $params['rand'] = $this->getRandInt();
-        $params['goto'] = $this->getLiveGoto();
         if ($this->isReadonly()) {
             $params['readonly'] = 'true';
         }
+        $params['goto'] = $this->getLiveGoto();
 
         return $this->rcUrl . '?' . http_build_query($params);
     }
