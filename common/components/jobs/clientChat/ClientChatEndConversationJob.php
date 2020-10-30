@@ -25,15 +25,7 @@ class ClientChatEndConversationJob implements RetryableJobInterface
     public function execute($queue): void
     {
         try {
-            if ($clientChat = ClientChatEndConversationService::endConversation($this->clientChatId, $this->shallowClose)) {
-                $info = ' Id : (' . $clientChat->cch_id .
-                    ') Rid : (' . $clientChat->cch_rid .
-                    ') Status: (' . $clientChat->getStatusName() . ')';
-                \Yii::info(
-                    'Chat Bot request successfully processed. ' . PHP_EOL . $info,
-                    'info\ClientChatEndConversationJob:successfully'
-                );
-            }
+            ClientChatEndConversationService::endConversation($this->clientChatId, $this->shallowClose);
         } catch (NotFoundException $throwable) {
             AppHelper::throwableLogger(
                 $throwable,
