@@ -9,6 +9,7 @@ use frontend\widgets\notification\NotificationSocketWidget;
 use frontend\widgets\notification\NotificationWidget;
 use sales\auth\Auth;
 use yii\helpers\Html;
+use sales\helpers\setting\SettingHelper;
 use frontend\widgets\centrifugo\CentrifugoNotificationWidget;
 
 $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
@@ -45,7 +46,7 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
         echo Html::tag('title', ucfirst($host).' - '.Html::encode($this->title));
     ?>
     <?php /*<link rel="stylesheet" href="<?= Yii::$app->getAssetManager()->publish(Yii::getAlias('@frontend').'/web/css/style_theme.css')[1];?>"/>*/ ?>
-    <?php //php $this->head() ?>
+    <?php //php $this->head()?>
     <?php /*<link rel="shortcut icon" href="<?php echo Yii::$app->request->baseUrl; ?>/favicon.ico" type="image/x-icon" />*/ ?>
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -53,6 +54,33 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
+
+    <?php
+    if (SettingHelper::isSentryFrontendEnabled()) {
+        $options = [
+            'releaseVer' => Yii::$app->params['release']['version'] ?? '',
+            'environment' => YII_ENV,
+            'username' => Auth::user()->username ?? '',
+        ];
+        $this->registerJs(
+            "let extraInfo = ".\yii\helpers\Json::htmlEncode($options).";",
+            \yii\web\View::POS_HEAD,
+            'extraInfo'
+        );
+        $sentryJS = <<<JS
+            Sentry.onLoad(function() {
+                Sentry.init({
+                    debug: false,
+                    release: extraInfo.releaseVer,
+                    environment: extraInfo.environment,
+                });
+                Sentry.setUser({ username: extraInfo.username });
+            });
+        JS;
+        $this->registerJs($sentryJS, \yii\web\View::POS_HEAD);
+    }
+    ?>
+
 </head>
 <body class="nav-<?= !empty($_COOKIE['menuIsCollapsed']) && $_COOKIE['menuIsCollapsed'] === 'true' ? 'sm' : 'md' ?>">
 <?php $this->beginBody(); ?>
@@ -66,7 +94,7 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
 
 <div class="container body">
     <div class="main_container">
-        <?php if(!Yii::$app->user->isGuest):?>
+        <?php if (!Yii::$app->user->isGuest):?>
         <div class="col-md-3 left_col">
             <div class="left_col scroll-view">
 
@@ -85,7 +113,7 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
                 </div>
 
                 <!-- sidebar menu -->
-                <?php //= $this->render('_sidebar_menu') ?>
+                <?php //= $this->render('_sidebar_menu')?>
                 <?= \frontend\themes\gentelella_v2\widgets\SideBarMenu::widget(['user' => $user]); ?>
                 <!-- /sidebar menu -->
 
@@ -117,12 +145,18 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
                             </a>
                             <ul class="dropdown-menu dropdown-usermenu pull-right">
                                 <li>
-                                    <?=Html::a('<i class="fa fa-user pull-right"></i> My Profile', ['/site/profile'],
-                                        ['title' => 'My Profile']) ?>
+                                    <?=Html::a(
+                    '<i class="fa fa-user pull-right"></i> My Profile',
+                    ['/site/profile'],
+                    ['title' => 'My Profile']
+                ) ?>
                                 </li>
                                 <li>
-                                    <?=Html::a('<i class="fa fa-sign-out pull-right"></i> Log Out', ['/site/logout'],
-                                        ['title' => 'Logout']) ?>
+                                    <?=Html::a(
+                    '<i class="fa fa-sign-out pull-right"></i> Log Out',
+                    ['/site/logout'],
+                    ['title' => 'Logout']
+                ) ?>
                                 </li>
                             </ul>
                         </li>
@@ -130,7 +164,7 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
                         <?php /*php if($isAdmin):*/ ?>
 
                             <?= frontend\widgets\OnlineConnection::widget() ?>
-                            <?php //= frontend\widgets\Notifications::widget() ?>
+                            <?php //= frontend\widgets\Notifications::widget()?>
                             <?php
                                 if (Yii::$app->params['settings']['notification_web_socket']) {
                                     echo NotificationSocketWidget::widget(['userId' => Auth::id()]);
@@ -152,7 +186,7 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
 
                         <?php /*php endif;*/?>
 
-                        <?php //= frontend\widgets\ChatNotifications::widget(); ?>
+                        <?php //= frontend\widgets\ChatNotifications::widget();?>
 
                     </ul>
                 </nav>
