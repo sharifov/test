@@ -1189,6 +1189,7 @@ class Call extends \yii\db\ActiveRecord
             NativeEventDispatcher::trigger(CallEvents::class, CallEvents::CHANGE_STATUS);
         }
 
+        Yii::info(['message' => 'before Condition', 'attributes' => $this->getAttributes(), 'time' => microtime()], 'info\Debug');
         if (
             $this->c_created_user_id && ($insert || $isChangedStatus)
             && (!($this->isIn() && $this->isStatusQueue()))
@@ -1196,11 +1197,13 @@ class Call extends \yii\db\ActiveRecord
             && (!$this->isInternal() || $this->isEnded())
 //            && (!($this->isIn() && $this->isStatusRinging() && $this->isInternal()))
         )  {
+            Yii::info(['message' => 'in Condition', 'attributes' => $this->getAttributes(), 'time' => microtime()], 'info\Debug');
             if (
                 $this->isEnded()
                 ||!$this->currentParticipant
                 || ($this->currentParticipant && ($this->currentParticipant->isAgent() || $this->currentParticipant->isUser()))
             ) {
+                Yii::info(['message' => 'Before send', 'attributes' => $this->getAttributes(), 'time' => microtime()], 'info\Debug');
                 $message = (new CallUpdateMessage)->create($this, $isChangedStatus, $this->c_created_user_id);
                 Notifications::publish('callUpdate', ['user_id' => $this->c_created_user_id], $message);
             }
