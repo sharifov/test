@@ -4,7 +4,7 @@ namespace common\components\jobs\clientChat;
 
 use sales\helpers\app\AppHelper;
 use sales\repositories\NotFoundException;
-use sales\services\clientChatEndConversation\ClientChatEndConversationService;
+use sales\services\clientChat\ClientChatEndConversationService;
 use Yii;
 use yii\queue\Queue;
 use yii\queue\RetryableJobInterface;
@@ -26,8 +26,11 @@ class ClientChatEndConversationJob implements RetryableJobInterface
     {
         try {
             if ($clientChat = ClientChatEndConversationService::endConversation($this->clientChatId, $this->shallowClose)) {
+                $info = ' Id : (' . $clientChat->cch_id .
+                    ') Rid : (' . $clientChat->cch_rid .
+                    ') Status: (' . $clientChat->getStatusName() . ')';
                 \Yii::info(
-                    'Chat Bot request successfully processed. Rid (' . $clientChat->cch_rid . ')',
+                    'Chat Bot request successfully processed. ' . PHP_EOL . $info,
                     'info\ClientChatEndConversationJob:successfully'
                 );
             }

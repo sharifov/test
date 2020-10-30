@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\services\clientChatEndConversation;
+namespace sales\services\clientChat;
 
 use sales\model\clientChat\entity\ClientChat;
 use sales\repositories\NotFoundException;
