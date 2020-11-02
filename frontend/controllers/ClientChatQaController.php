@@ -155,7 +155,7 @@ class ClientChatQaController extends FController
     public function actionRoom($id): string
     {
         $clientChat = ClientChat::find()
-            ->byId($id)
+            ->byId((int)$id)
             ->byUserGroupsRestriction()
             ->byProjectRestriction()
             ->byDepartmentRestriction()
