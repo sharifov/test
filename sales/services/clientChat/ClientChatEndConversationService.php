@@ -42,7 +42,7 @@ class ClientChatEndConversationService
         $info = 'Id : (' . $clientChat->cch_id .
                 ') Rid : (' . $clientChat->cch_rid .
                 ') Status: (' . $clientChat->getStatusName() .
-                ') shallowCloseParam: (' . (string) $shallowCloseParam . ')';
+                ') shallowCloseParam: (' . (int) $shallowCloseParam . ')';
         \Yii::info(
             'Chat Bot request successfully processed. ' . PHP_EOL . $info,
             'info\ClientChatEndConversationService:successfully'

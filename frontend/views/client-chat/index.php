@@ -739,6 +739,7 @@ window.refreshChatPage = function (cchId) {
     }).then(function(chatData) {
         return reloadCouchNote(chatData);
     }).catch(function(errorMsg) {
+        console.log({error: 'refreshChatPage', msg: errorMsg});
         createNotify('Error', errorMsg, 'error');
     });
     postReloadChat();
