@@ -151,6 +151,7 @@ class ClientChatQaController extends FController
      * @param $id
      * @return string
      * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
      */
     public function actionRoom($id): string
     {
@@ -162,7 +163,7 @@ class ClientChatQaController extends FController
             ->one();
 
         if (!$clientChat) {
-            throw new NotFoundException('Client chat not found or access denied');
+            throw new NotFoundHttpException('Client chat not found or access denied');
         }
 
         if (!Auth::can('client-chat/view', ['chat' => $clientChat])) {
