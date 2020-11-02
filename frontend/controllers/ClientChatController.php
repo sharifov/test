@@ -1845,8 +1845,11 @@ class ClientChatController extends FController
             return $this->asJson(['error' => true, 'message' => $e->getMessage()]);
         }
 
-        $data = ClientChatAccessMessage::chatReopen($chat->cch_id, Auth::user()->nickname);
-        Notifications::pub(['chat-' . $chat->cch_id], 'refreshChatPage', ['data' => $data]);
+        Notifications::pub(
+            [ClientChatChannel::getPubSubKey($chat->cch_channel_id)],
+            'refreshChatPage',
+            ['data' => ClientChatAccessMessage::chatReopen($chat->cch_id, Auth::user()->nickname)]
+        );
 
         return $this->asJson(['error' => false, 'message' => '']);
     }

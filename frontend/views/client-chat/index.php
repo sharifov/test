@@ -281,11 +281,16 @@ $(document).ready( function () {
         window.name = '';
     })
     
+    let activeChatId = $('._cc-list-wrapper').find('._cc-list-item._cc_active').attr('data-cch-id');
+    let params = new URLSearchParams(window.location.search);
+    let chatId = params.get('chid'); 
+    
+    if (typeof activeChatId !== 'undefined' && typeof chatId !== 'undefined') {
+        localStorage.setItem('activeChatId', chatId);
+    }
+            
     document.addEventListener("visibilitychange", function () {
-        if (window.name === 'chat') {
-            let activeChatId = $('._cc-list-wrapper').find('._cc-list-item._cc_active').attr('data-cch-id');
-            let params = new URLSearchParams(window.location.search);
-            let chatId = params.get('chid');
+        if (window.name === 'chat') {            
             if (activeChatId == chatId) {
                 $.post('{$discardUnreadMessageUrl}', {cchId: activeChatId});
             }
@@ -615,28 +620,28 @@ $(document).on('click', '.cc_reopen', function (e) {
     
     if (confirm('Confirm reopen action...')) {
         $.ajax({
-        type: 'post',
-        url: '{$chatReopenUrl}',
-        dataType: 'json',
-        cache: false,
-        data: {chatId: cchId},
-        beforeSend: function () {
-            btn.find('i').replaceWith('<i class="fa fa-spin fa-spinner"></i>');
-        },
-        success: function (data) {
-            if (data.error) {
-                createNotify('Error', data.message, 'error');
-            } else {
-                createNotify('Success', 'Chat reopened successfully', 'success');                
-            }
-        },
-        complete: function () {
-            btn.find('i').replaceWith(btnIcon);
-        },
-        error: function (xhr) {
-            createNotify('Error', xhr.responseText, 'error');
-        },
-    });
+            type: 'post',
+            url: '{$chatReopenUrl}',
+            dataType: 'json',
+            cache: false,
+            data: {chatId: cchId},
+            beforeSend: function () {
+                btn.find('i').replaceWith('<i class="fa fa-spin fa-spinner"></i>');
+            },
+            success: function (data) {
+                if (data.error) {
+                    createNotify('Error', data.message, 'error');
+                } else {
+                    createNotify('Success', 'Chat reopened successfully', 'success');
+                }
+            },
+            complete: function () {
+                btn.find('i').replaceWith(btnIcon);
+            },
+            error: function (xhr) {
+                createNotify('Error', xhr.responseText, 'error');
+            },
+        });
     }
 });
 
