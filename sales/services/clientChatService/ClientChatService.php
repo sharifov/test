@@ -385,9 +385,6 @@ class ClientChatService
                 }
             }
 
-            $data = ClientChatAccessMessage::agentStartTransfer($clientChat, $user);
-            Notifications::pub(['chat-' . $clientChat->cch_id], 'refreshChatPage', ['data' => $data]);
-
             return $clientChatChannel;
         });
     }

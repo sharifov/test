@@ -413,13 +413,8 @@ class ClientChatController extends FController
                 );
             }
 
-            if ($clientChat->isOwner(Auth::id())) {
-                $result['readonly'] = '';
-            } else {
-                $result['readonly'] = '&readonly=true';
-            }
-
-            $result['gotoParam'] = '/live/' . $clientChat->cch_rid . '?layout=embedded';
+            $result['isClosed'] = (int) $clientChat->isInClosedStatusGroup();
+            $result['iframe'] = (new ClientChatIframeHelper($clientChat))->generateIframe();
 
             $result['html'] = $this->renderAjax('partial/_client-chat-info', [
                 'clientChat' => $clientChat,

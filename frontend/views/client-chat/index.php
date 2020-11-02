@@ -451,47 +451,25 @@ window.removeChatFromActiveConnection = function () {
 };
 
 window.loadClientChatData = function (cch_id, data, ref) {
-    let rcUrl = '{$rcUrl}';
-    let userRcAuthToken = '{$userRcAuthToken}';
-    let gotoParam = encodeURIComponent(data.gotoParam);
     
-    let iframeHref = rcUrl + '?layout=embedded&resumeToken=' + userRcAuthToken + '&goto=' + gotoParam + data.readonly;
+    let isClosed = data.isClosed;
+    let iframeWrapperEl = $("#_rc-iframe-wrapper");
         
-    // let windowHeight = $(window)[0].innerHeight;
-    // let offsetTop = $("#_rc-iframe-wrapper").offset().top;
-    // let iframeHeight = windowHeight - offsetTop - 20;
-    
-    let isClosed = 1;
-    
-    if ($(ref).length) {
-        isClosed = parseInt($(ref).attr('data-is-closed'), 10);
-    } else if ($('#dialog-' + cch_id).length) {
-        isClosed = parseInt($('#dialog-' + cch_id).attr('data-is-closed'), 10);
-    }
-        
-    $("#_rc-iframe-wrapper").find('._rc-iframe').hide();
+    iframeWrapperEl.find('._rc-iframe').hide();
     $('._cc-list-item').removeClass('_cc_active');
     $(ref).addClass('_cc_active');
     
+    iframeWrapperEl.find('#_cc-load').remove();
+    iframeWrapperEl.append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
+    
     $('#_rc-'+cch_id).remove();
     
-    if (isClosed) {
-        getChatHistory(cch_id);
+    $('#_rc-iframe-wrapper').append(data.iframe);
+    
+    if (isClosed) {        
         $('#canned-response-wrap').addClass('disabled');
         $('#couch_note_box').html('');
     } else {
-        $("#_rc-iframe-wrapper").find('#_cc-load').remove();
-        $("#_rc-iframe-wrapper").append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
-        
-        let iframe = document.createElement('iframe');
-        iframe.setAttribute('src', iframeHref);
-        // iframe.setAttribute('style', 'width: 100%; height: '+iframeHeight+'px; border: none;');
-        iframe.onload = function () {
-            $('#_rc-iframe-wrapper').find('#_cc-load').remove();
-        }
-        iframe.setAttribute('class', '_rc-iframe');
-        iframe.setAttribute('id', '_rc-'+cch_id);
-        $('#_rc-iframe-wrapper').append(iframe);
         $('#canned-response-wrap').removeClass('disabled');
         $('#canned-response').attr('data-chat-id', cch_id).val('');
         
