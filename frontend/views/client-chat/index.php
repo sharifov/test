@@ -502,6 +502,10 @@ $(document).on('click', '._cc-list-item', function () {
     
     let ref = this;
     window.refreshChatInfo(cch_id, loadClientChatData, ref);
+    
+    setTimeout(function () {
+        $('#page-loader').hide(); 
+    }, 1200);
 });
 
 $(document).on('click', '.cc_cancel_transfer', function (e) {
