@@ -1042,8 +1042,12 @@ class ClientChatController extends FController
                 $this->guardCanProcessChat(Auth::id(), $cchId);
 
                 $takeClientChat = $this->clientChatService->takeClientChat($clientChat, Auth::user());
-                $data = ClientChatAccessMessage::chatTaken($clientChat, $takeClientChat->cchOwnerUser->nickname);
-                Notifications::pub(['chat-' . $clientChat->cch_id], 'refreshChatPage', ['data' => $data]);
+                
+                Notifications::pub(
+                    [ClientChatChannel::getPubSubKey($clientChat->cch_channel_id)],
+                    'refreshChatPage',
+                    ['data' => ClientChatAccessMessage::chatTaken($clientChat, $takeClientChat->cchOwnerUser->nickname)]
+                );
 
                 $clientChatLink = Purifier::createChatShortLink($clientChat);
                 Notifications::createAndPublish(
