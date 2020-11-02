@@ -486,6 +486,7 @@ window.loadClientChatData = function (cch_id, data, ref) {
 }
 
 $(document).on('click', '._cc-list-item', function () {
+    $('#page-loader').show();  
     let cch_id = $(this).attr('data-cch-id');
     currentChatId = cch_id;
     let ownerId = $(this).attr('data-owner-id');
@@ -699,6 +700,7 @@ window.refreshChatInfo = function (cch_id, callable, ref) {
         },
         complete: function () {
             $('#_cc_additional_info_wrapper #_cc-load').remove();
+            $('#page-loader').hide();  
         }
     });
 }
