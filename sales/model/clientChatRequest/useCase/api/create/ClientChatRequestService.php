@@ -198,12 +198,7 @@ class ClientChatRequestService
 
     private function findClientChat(string $rid): ?ClientChat
     {
-        try {
-            $clientChat = $this->clientChatRepository->findNotClosed($rid);
-        } catch (NotFoundException $e) {
-            $clientChat = $this->clientChatRepository->getLastByRid($rid);
-        }
-        return $clientChat;
+        return $this->clientChatRepository->getLastByRid($rid);
     }
 
     public function findClientChatByCache(string $rid): ?ClientChat

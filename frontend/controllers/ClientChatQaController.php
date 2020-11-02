@@ -162,7 +162,7 @@ class ClientChatQaController extends FController
         }
 
         $clientChat = ClientChat::find()
-            ->byId($id)
+            ->byId((int)$id)
             ->byUserGroupsRestriction()
             ->byProjectRestriction()
             ->byDepartmentRestriction()
