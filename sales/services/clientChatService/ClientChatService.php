@@ -485,8 +485,11 @@ class ClientChatService
             $clientChat->inProgress($user->id ?? null, $action);
             $this->clientChatRepository->save($clientChat);
 
-            $data = ClientChatAccessMessage::chatCanceled($clientChat, $user);
-            Notifications::pub(['chat-' . $clientChat->cch_id], 'refreshChatPage', ['data' => $data]);
+            Notifications::pub(
+                [ClientChatChannel::getPubSubKey($clientChat->cch_channel_id)],
+                'refreshChatPage',
+                ['data' => ClientChatAccessMessage::chatCanceled($clientChat, $user)]
+            );
         }
     }
 
@@ -515,8 +518,11 @@ class ClientChatService
             }
         }
 
-        $data = ClientChatAccessMessage::chatClosed($clientChat, $user);
-        Notifications::pub(['chat-' . $clientChat->cch_id], 'refreshChatPage', ['data' => $data]);
+        Notifications::pub(
+            [ClientChatChannel::getPubSubKey($clientChat->cch_channel_id)],
+            'refreshChatPage',
+            ['data' => ClientChatAccessMessage::chatClosed($clientChat, $user)]
+        );
     }
 
     /**
