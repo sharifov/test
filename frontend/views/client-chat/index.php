@@ -522,8 +522,7 @@ $(document).on('click', '.cc_cancel_transfer', function (e) {
             success: function (data) {
                 if (data.error) {
                     createNotify('Error', data.message, 'error');
-                } else {
-                    refreshChatPage(cchId);
+                } else {                    
                     createNotify('Success', data.message, 'success');
                 }
             },
