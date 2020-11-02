@@ -17,6 +17,7 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\entity\search\ClientChatQaSearch;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
+use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -151,10 +152,15 @@ class ClientChatQaController extends FController
      * @param $id
      * @return string
      * @throws ForbiddenHttpException
+     * @throws BadRequestHttpException
      * @throws NotFoundHttpException
      */
     public function actionRoom($id): string
     {
+        if (!$id = (int) $id) {
+            throw new BadRequestHttpException('Invalid parameter id');
+        }
+
         $clientChat = ClientChat::find()
             ->byId($id)
             ->byUserGroupsRestriction()
