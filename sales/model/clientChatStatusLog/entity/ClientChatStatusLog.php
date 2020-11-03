@@ -84,7 +84,7 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
         self::ACTION_AUTO_REVERT_TO_PROGRESS => 'badge badge-info',
         self::ACTION_REOPEN => 'badge badge-info',
         self::ACTION_TIMEOUT_FINISH => 'badge badge-info',
-        self::ACTION_CHAT_ACCEPT => 'badge badge-info',
+        self::ACTION_CHAT_ACCEPT => 'badge badge-success',
     ];
 
     public function rules(): array
