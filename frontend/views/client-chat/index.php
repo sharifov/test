@@ -486,7 +486,8 @@ window.loadClientChatData = function (cch_id, data, ref) {
 }
 
 $(document).on('click', '._cc-list-item', function () {
-     
+    let pageLoader = $('#page-loader');
+    pageLoader.show();  
     let cch_id = $(this).attr('data-cch-id');
     currentChatId = cch_id;
     let ownerId = $(this).attr('data-owner-id');
@@ -497,12 +498,16 @@ $(document).on('click', '._cc-list-item', function () {
     }
         
     if ($(this).hasClass('_cc_active')) {
+        pageLoader.hide(); 
         return false;
     }
     
     let ref = this;
     window.refreshChatInfo(cch_id, loadClientChatData, ref);
     
+    setTimeout(function () {
+        $('#page-loader').hide(); 
+    }, 2000);
 });
 
 $(document).on('click', '.cc_cancel_transfer', function (e) {
@@ -706,22 +711,6 @@ window.refreshChatInfo = function (cch_id, callable, ref) {
     });
 }
 
-window.refreshChatPage = function (cchId, tab) {
-    //todo will remove all TAB logic
-//    if (tab) {
-//        let params = new URLSearchParams(window.location.search);
-//        params.set('tab', tab);
-//        window.history.replaceState({}, '', '{$loadChannelsUrl}?'+params.toString());
-//    }
-    pjaxReload({container: '#pjax-client-chat-channel-list'});
-    $('#_rc-'+cchId).remove();
-    $('.cc_transfer').remove();
-    $('.cc_close').remove();
-    
-    refreshChatInfo(cchId, loadClientChatData);
-}
-
-/*
 window.refreshChatPage = function (cchId) {
     
     preReloadChat(cchId);
@@ -740,7 +729,6 @@ window.refreshChatPage = function (cchId) {
     });
     postReloadChat();
 }
-*/
 
 window.getChatDataPromise = function (cchId) {  
     return new Promise(function(resolve, reject) {
