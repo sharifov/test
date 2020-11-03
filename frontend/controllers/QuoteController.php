@@ -588,6 +588,10 @@ class QuoteController extends FController
                         throw new \DomainException('Quote not saved. Error: ' . $quote->getErrorSummary(false)[0], -4);
                     }
 
+                    if (empty($post['QuotePrice'])) {
+                        throw new \DomainException('Error: QuotePrice cannot be empty.', -5);
+                    }
+
                     foreach ($post['QuotePrice'] as $key => $quotePrice) {
                         if ($price = new AddQuotePriceForm()) {
                             $price->quote_id = $quote->id;
@@ -610,7 +614,7 @@ class QuoteController extends FController
                     }
 
                     if (count($response['errorsPrices'])) {
-                        throw new \DomainException('QuotePrice not saved.', -5);
+                        throw new \DomainException('QuotePrice not saved.', -6);
                     }
 
                     $this->logQuote($quote);
