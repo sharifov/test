@@ -706,6 +706,22 @@ window.refreshChatInfo = function (cch_id, callable, ref) {
     });
 }
 
+window.refreshChatPage = function (cchId, tab) {
+    //todo will remove all TAB logic
+//    if (tab) {
+//        let params = new URLSearchParams(window.location.search);
+//        params.set('tab', tab);
+//        window.history.replaceState({}, '', '{$loadChannelsUrl}?'+params.toString());
+//    }
+    pjaxReload({container: '#pjax-client-chat-channel-list'});
+    $('#_rc-'+cchId).remove();
+    $('.cc_transfer').remove();
+    $('.cc_close').remove();
+    
+    refreshChatInfo(cchId, loadClientChatData);
+}
+
+/*
 window.refreshChatPage = function (cchId) {
     
     preReloadChat(cchId);
@@ -724,6 +740,7 @@ window.refreshChatPage = function (cchId) {
     });
     postReloadChat();
 }
+*/
 
 window.getChatDataPromise = function (cchId) {  
     return new Promise(function(resolve, reject) {
