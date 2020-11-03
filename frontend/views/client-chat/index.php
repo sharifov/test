@@ -486,7 +486,7 @@ window.loadClientChatData = function (cch_id, data, ref) {
 }
 
 $(document).on('click', '._cc-list-item', function () {
-    $('#page-loader').show();  
+     
     let cch_id = $(this).attr('data-cch-id');
     currentChatId = cch_id;
     let ownerId = $(this).attr('data-owner-id');
@@ -503,9 +503,6 @@ $(document).on('click', '._cc-list-item', function () {
     let ref = this;
     window.refreshChatInfo(cch_id, loadClientChatData, ref);
     
-    setTimeout(function () {
-        $('#page-loader').hide(); 
-    }, 1200);
 });
 
 $(document).on('click', '.cc_cancel_transfer', function (e) {
