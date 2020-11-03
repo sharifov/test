@@ -398,7 +398,7 @@ class ClientChatService
     {
         $_self = $this;
         $this->transactionManager->wrap(static function () use ($_self, $clientChat, $ownerId) {
-            $clientChat->assignOwner($ownerId)->inProgress($ownerId, ClientChatStatusLog::ACTION_OPEN);
+            $clientChat->assignOwner($ownerId)->inProgress($ownerId, ClientChatStatusLog::ACTION_CHAT_ACCEPT);
             $_self->clientChatRepository->save($clientChat);
             $_self->clientChatMessageService->touchUnreadMessage($clientChat->cch_id);
             $_self->assignAgentToRcChannel($clientChat->cch_rid, $clientChat->cchOwnerUser->userProfile->up_rc_user_id ?? '');
