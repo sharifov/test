@@ -130,7 +130,7 @@ class ClientChatAccessMessage
         ];
     }
 
-    public static function chatInProgress(int $chatId): array
+    public static function chatArchive(int $chatId): array
     {
         return [
             'message' => 'Chat changed status to ' . ClientChat::getStatusNameById(ClientChat::STATUS_IN_PROGRESS),

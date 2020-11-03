@@ -392,7 +392,7 @@ class ClientChatController extends Controller
                 Notifications::pub(
                     ['chat-' . $clientChat->cch_id],
                     'refreshChatPage',
-                    ['data' => ClientChatAccessMessage::chatInProgress($clientChat->cch_id)]
+                    ['data' => ClientChatAccessMessage::chatArchive($clientChat->cch_id)]
                 );
 
                 $processed++;
@@ -445,7 +445,7 @@ class ClientChatController extends Controller
                 Notifications::pub(
                     ['chat-' . $clientChat->cch_id],
                     'refreshChatPage',
-                    ['data' => ClientChatAccessMessage::chatInProgress($clientChat->cch_id)]
+                    ['data' => ClientChatAccessMessage::chatArchive($clientChat->cch_id)]
                 );
             } catch (\Throwable $e) {
                 Yii::error(
@@ -465,5 +465,12 @@ class ClientChatController extends Controller
 
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+
+        Yii::info(VarDumper::dumpAsString([
+            'Processed' => $processed,
+            'Failed' => $failed,
+            'Execute Time' => $time . ' sec',
+            'End Time' => date('Y-m-d H:i:s'),
+        ]), 'info\ClientChatController:actionCloseToArchiveOnTimeout:result');
     }
 }
