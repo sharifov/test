@@ -140,7 +140,7 @@ class CallLogController extends FController
         $searchModel = new CallLogSearch();
         $searchModel->createTimeRange = null;
 
-        $dataProvider = $searchModel->searchMyCalls(Yii::$app->request->queryParams, Auth::user());
+        $dataProvider = $searchModel->searchMyCalls(Yii::$app->request->queryParams, Auth::user()->id);
 
         return $this->render('list', [
             'searchModel' => $searchModel,
