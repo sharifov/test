@@ -355,7 +355,7 @@ class ClientChat extends \yii\db\ActiveRecord
         $this->recordEvent(new ClientChatCloseEvent(
             $this->cch_id,
             (int)$this->cch_status_id,
-            (int)$this->cch_owner_user_id,
+            $this->cch_owner_user_id,
             $userId,
             $description,
             (int)$this->cch_channel_id,
@@ -370,7 +370,7 @@ class ClientChat extends \yii\db\ActiveRecord
         $this->recordEvent(new ClientChatArchiveEvent(
             $this->cch_id,
             (int)$this->cch_status_id,
-            (int)$this->cch_owner_user_id,
+            $this->cch_owner_user_id,
             $userId,
             $description,
             (int)$this->cch_channel_id,
