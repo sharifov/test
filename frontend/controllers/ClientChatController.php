@@ -1702,7 +1702,7 @@ class ClientChatController extends FController
         }
 
         try {
-            $mailCapture = $communication->mailCapture(
+            $mailCapture = $communication->clientChatOfferCapture(
                 $quote->lead->project_id,
                 'chat_offer',
                 '',
@@ -1716,10 +1716,13 @@ class ClientChatController extends FController
                     'img_update' => 1,
                 ]
             );
-            $url = $mailCapture['data'];
+
+            if (!isset($mailCapture['data']['img'])) {
+                throw new \RuntimeException('Create capture error.');
+            }
 
             return [
-                'img' => $url['host'] . $url['dir'] . $url['img'],
+                'img' => $mailCapture['data']['img'],
                 'checkoutUrl' => $quote->getCheckoutUrlPage(),
             ];
         } catch (\Throwable $e) {
