@@ -3,7 +3,6 @@
 
 namespace sales\services\clientChatService;
 
-
 use sales\model\clientChat\entity\statusLogReason\ClientChatStatusLogReason;
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\repositories\clientChatStatusLogRepository\ClientChatStatusLogRepository;
@@ -16,16 +15,15 @@ use sales\repositories\clientChatStatusLogRepository\ClientChatStatusLogReposito
  */
 class ClientChatStatusLogService
 {
-	/**
-	 * @var ClientChatStatusLogRepository
-	 */
-	private ClientChatStatusLogRepository $clientChatStatusLogRepository;
+    /**
+     * @var ClientChatStatusLogRepository
+     */
+    private ClientChatStatusLogRepository $clientChatStatusLogRepository;
 
-	public function __construct(ClientChatStatusLogRepository $clientChatStatusLogRepository)
-	{
-
-		$this->clientChatStatusLogRepository = $clientChatStatusLogRepository;
-	}
+    public function __construct(ClientChatStatusLogRepository $clientChatStatusLogRepository)
+    {
+        $this->clientChatStatusLogRepository = $clientChatStatusLogRepository;
+    }
 
     public function log(
         int $chatId,
@@ -42,8 +40,15 @@ class ClientChatStatusLogService
             $previous->end();
             $this->clientChatStatusLogRepository->save($previous);
         }
-        $log = ClientChatStatusLog::create($chatId, $fromStatus, $toStatus, $ownerId, $userId, $prevChannel,
-            $actionType);
+        $log = ClientChatStatusLog::create(
+            $chatId,
+            $fromStatus,
+            $toStatus,
+            $ownerId,
+            $userId,
+            $prevChannel,
+            $actionType
+        );
         $this->clientChatStatusLogRepository->save($log);
         if ($reasonId) {
             $statusLogReason = ClientChatStatusLogReason::create($log->csl_id, $reasonId, $description);

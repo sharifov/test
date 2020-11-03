@@ -6,21 +6,22 @@ namespace sales\model\clientChat\event;
 use sales\model\clientChat\entity\ClientChat;
 
 /**
- * Class ClientChatCloseEvent
+ * Class ClientChatInProgressEvent
+ * @package sales\model\clientChat\event
  *
- * @property int $chatId
+ * @property ClientChat $chat
  * @property int|null $oldStatus
+ * @property int $newStatus
  * @property int|null $ownerId
  * @property int|null $creatorUserId
  * @property int|string $description
  * @property int|null $prevChannelId
  * @property int| $actionType
  * @property int|null $reasonId
- * @property bool $shallowClose
  */
-class ClientChatCloseEvent implements ClosedStatusGroupEventInterface
+class ClientChatInProgressEvent
 {
-    public $chatId;
+    public $chat;
     public $oldStatus;
     public $ownerId;
     public $creatorUserId;
@@ -28,31 +29,18 @@ class ClientChatCloseEvent implements ClosedStatusGroupEventInterface
     public $prevChannelId;
     public $actionType;
     public $reasonId;
-    public $shallowClose;
 
-    /**
-     * @param int $chatId
-     * @param int|null $oldStatus
-     * @param int|null $ownerId
-     * @param int|null $creatorUserId
-     * @param string|null $description
-     * @param int|null $prevChannelId
-     * @param int $actionType
-     * @param int|null $reasonId
-     * @param bool $shallowClose
-     */
     public function __construct(
-        int $chatId,
+        ClientChat $chat,
         ?int $oldStatus,
         ?int $ownerId,
         ?int $creatorUserId,
         ?string $description,
         ?int $prevChannelId,
         int $actionType,
-        ?int $reasonId,
-        bool $shallowClose = true
+        ?int $reasonId
     ) {
-        $this->chatId = $chatId;
+        $this->chat = $chat;
         $this->oldStatus = $oldStatus;
         $this->ownerId = $ownerId;
         $this->creatorUserId = $creatorUserId;
@@ -60,21 +48,5 @@ class ClientChatCloseEvent implements ClosedStatusGroupEventInterface
         $this->prevChannelId = $prevChannelId;
         $this->actionType = $actionType;
         $this->reasonId = $reasonId;
-        $this->shallowClose = $shallowClose;
-    }
-
-    public function getChatId(): int
-    {
-        return $this->chatId;
-    }
-
-    public function getOwnerId(): int
-    {
-        return (int)$this->ownerId;
-    }
-
-    public function getShallowCase(): bool
-    {
-        return $this->shallowClose;
     }
 }

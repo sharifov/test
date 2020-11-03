@@ -6,7 +6,7 @@ namespace sales\model\clientChat\event;
 use sales\model\clientChat\entity\ClientChat;
 
 /**
- * Class ClientChatManageStatusLogEvent
+ * Class ClientChatPendingEvent
  * @package sales\model\clientChat\event
  *
  * @property ClientChat $chat
@@ -19,11 +19,10 @@ use sales\model\clientChat\entity\ClientChat;
  * @property int| $actionType
  * @property int|null $reasonId
  */
-class ClientChatManageStatusLogEvent
+class ClientChatPendingEvent
 {
     public $chat;
     public $oldStatus;
-    public $newStatus;
     public $ownerId;
     public $creatorUserId;
     public $description;
@@ -31,11 +30,18 @@ class ClientChatManageStatusLogEvent
     public $actionType;
     public $reasonId;
 
-    public function __construct(ClientChat $chat, ?int $oldStatus, int $newStatus, ?int $ownerId, ?int $creatorUserId, ?string $description, ?int $prevChannelId, int $actionType, ?int $reasonId)
-    {
+    public function __construct(
+        ClientChat $chat,
+        ?int $oldStatus,
+        ?int $ownerId,
+        ?int $creatorUserId,
+        ?string $description,
+        ?int $prevChannelId,
+        int $actionType,
+        ?int $reasonId
+    ) {
         $this->chat = $chat;
         $this->oldStatus = $oldStatus;
-        $this->newStatus = $newStatus;
         $this->ownerId = $ownerId;
         $this->creatorUserId = $creatorUserId;
         $this->description = $description;

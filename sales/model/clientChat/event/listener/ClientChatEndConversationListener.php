@@ -1,9 +1,10 @@
 <?php
 
-namespace sales\model\clientChat\event;
+namespace sales\model\clientChat\event\listener;
 
 use common\components\jobs\clientChat\ClientChatEndConversationJob;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChat\event\ClosedStatusGroupEventInterface;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
 use sales\repositories\NotFoundException;
 use sales\services\clientChat\ClientChatEndConversationService;
@@ -26,17 +27,17 @@ class ClientChatEndConversationListener
         $this->clientChatRepository = $clientChatRepository;
     }
 
-    public function handle(ClientChatCloseEvent $event): void
+    public function handle(ClosedStatusGroupEventInterface $event): void
     {
         try {
             if (Yii::$app->params['settings']['enable_client_chat_job']) {
                 $clientChatEndConversationJob = new ClientChatEndConversationJob();
-                $clientChatEndConversationJob->clientChatId = $event->clientChatId;
-                $clientChatEndConversationJob->shallowClose = $event->shallowClose;
+                $clientChatEndConversationJob->clientChatId = $event->getChatId();
+                $clientChatEndConversationJob->shallowClose = $event->getShallowCase();
 
                 Yii::$app->queue_client_chat_job->priority(10)->push($clientChatEndConversationJob);
             } else {
-                ClientChatEndConversationService::endConversation($event->clientChatId, $event->shallowClose);
+                ClientChatEndConversationService::endConversation($event->getChatId(), $event->getShallowCase());
             }
         } catch (\Throwable $throwable) {
             \Yii::error(

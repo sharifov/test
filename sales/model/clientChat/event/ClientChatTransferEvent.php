@@ -3,22 +3,21 @@
 
 namespace sales\model\clientChat\event;
 
-use sales\model\clientChat\entity\ClientChat;
-
 /**
- * Class ClientChatCloseEvent
+ * Class ClientChatTransferEvent
+ * @package sales\model\clientChat\event
  *
  * @property int $chatId
  * @property int|null $oldStatus
+ * @property int $newStatus
  * @property int|null $ownerId
  * @property int|null $creatorUserId
  * @property int|string $description
  * @property int|null $prevChannelId
  * @property int| $actionType
  * @property int|null $reasonId
- * @property bool $shallowClose
  */
-class ClientChatCloseEvent implements ClosedStatusGroupEventInterface
+class ClientChatTransferEvent
 {
     public $chatId;
     public $oldStatus;
@@ -28,19 +27,7 @@ class ClientChatCloseEvent implements ClosedStatusGroupEventInterface
     public $prevChannelId;
     public $actionType;
     public $reasonId;
-    public $shallowClose;
 
-    /**
-     * @param int $chatId
-     * @param int|null $oldStatus
-     * @param int|null $ownerId
-     * @param int|null $creatorUserId
-     * @param string|null $description
-     * @param int|null $prevChannelId
-     * @param int $actionType
-     * @param int|null $reasonId
-     * @param bool $shallowClose
-     */
     public function __construct(
         int $chatId,
         ?int $oldStatus,
@@ -49,8 +36,7 @@ class ClientChatCloseEvent implements ClosedStatusGroupEventInterface
         ?string $description,
         ?int $prevChannelId,
         int $actionType,
-        ?int $reasonId,
-        bool $shallowClose = true
+        ?int $reasonId
     ) {
         $this->chatId = $chatId;
         $this->oldStatus = $oldStatus;
@@ -60,21 +46,5 @@ class ClientChatCloseEvent implements ClosedStatusGroupEventInterface
         $this->prevChannelId = $prevChannelId;
         $this->actionType = $actionType;
         $this->reasonId = $reasonId;
-        $this->shallowClose = $shallowClose;
-    }
-
-    public function getChatId(): int
-    {
-        return $this->chatId;
-    }
-
-    public function getOwnerId(): int
-    {
-        return (int)$this->ownerId;
-    }
-
-    public function getShallowCase(): bool
-    {
-        return $this->shallowClose;
     }
 }

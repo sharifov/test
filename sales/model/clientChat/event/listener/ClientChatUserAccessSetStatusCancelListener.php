@@ -1,8 +1,9 @@
 <?php
 
 
-namespace sales\model\clientChat\event;
+namespace sales\model\clientChat\event\listener;
 
+use sales\model\clientChat\event\ClosedStatusGroupEventInterface;
 use sales\services\clientChatUserAccessService\ClientChatUserAccessService;
 
 /**
@@ -23,10 +24,10 @@ class ClientChatUserAccessSetStatusCancelListener
         $this->accessService = $accessService;
     }
 
-    public function handle(ClientChatCloseEvent $event): void
+    public function handle(ClosedStatusGroupEventInterface $event): void
     {
         try {
-            $this->accessService->disableAccessForOtherUsersBatch($event->clientChatId, $event->chatOwnerId);
+            $this->accessService->disableAccessForOtherUsersBatch($event->getChatId(), $event->getOwnerId());
         } catch (\Throwable $throwable) {
             \Yii::error(
                 $throwable,

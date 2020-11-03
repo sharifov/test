@@ -1,14 +1,15 @@
 <?php
 
-namespace sales\model\clientChat\event;
+namespace sales\model\clientChat\event\listener;
 
+use sales\model\clientChat\event\ClosedStatusGroupEventInterface;
 use sales\model\clientChatLastMessage\ClientChatLastMessageRepository;
 
 /**
- * Class ClientChatSetStatusCloseListener
- *
+ * Class ClientChatRemoveLastMessageListener
+ * @property ClientChatLastMessageRepository $clientChatLastMessageRepository
  */
-class ClientChatSetStatusCloseListener
+class ClientChatRemoveLastMessageListener
 {
     /**
      * @var ClientChatLastMessageRepository
@@ -16,7 +17,7 @@ class ClientChatSetStatusCloseListener
     private ClientChatLastMessageRepository $clientChatLastMessageRepository;
 
     /**
-     * ClientChatSetStatusCloseListener constructor.
+     * ClientChatRemoveLastMessageListener constructor.
      * @param ClientChatLastMessageRepository $clientChatLastMessageRepository
      */
     public function __construct(ClientChatLastMessageRepository $clientChatLastMessageRepository)
@@ -24,14 +25,17 @@ class ClientChatSetStatusCloseListener
         $this->clientChatLastMessageRepository = $clientChatLastMessageRepository;
     }
 
-    public function handle(ClientChatSetStatusCloseEvent $event): void
+    /**
+     * @param $event
+     */
+    public function handle(ClosedStatusGroupEventInterface $event): void
     {
         try {
-            $this->clientChatLastMessageRepository->removeByClientChat($event->clientChatId);
+            $this->clientChatLastMessageRepository->removeByClientChat($event->getChatId());
         } catch (\Throwable $throwable) {
             \Yii::error(
                 $throwable,
-                'ClientChatListener:ClientChatSetStatusCloseListener'
+                'ClientChatListener:ClientChatRemoveLastMessageListener'
             );
         }
     }

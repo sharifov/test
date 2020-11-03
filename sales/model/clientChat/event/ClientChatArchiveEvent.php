@@ -6,7 +6,8 @@ namespace sales\model\clientChat\event;
 use sales\model\clientChat\entity\ClientChat;
 
 /**
- * Class ClientChatCloseEvent
+ * Class ClientChatArchiveEvent
+ * @package sales\model\clientChat\event
  *
  * @property int $chatId
  * @property int|null $oldStatus
@@ -18,7 +19,7 @@ use sales\model\clientChat\entity\ClientChat;
  * @property int|null $reasonId
  * @property bool $shallowClose
  */
-class ClientChatCloseEvent implements ClosedStatusGroupEventInterface
+class ClientChatArchiveEvent implements ClosedStatusGroupEventInterface
 {
     public $chatId;
     public $oldStatus;

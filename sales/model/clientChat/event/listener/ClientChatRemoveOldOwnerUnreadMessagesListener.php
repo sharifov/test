@@ -1,7 +1,8 @@
 <?php
 
-namespace sales\model\clientChat\event;
+namespace sales\model\clientChat\event\listener;
 
+use sales\model\clientChat\event\ClientChatOwnerAssignedEvent;
 use sales\services\clientChatMessage\ClientChatMessageService;
 
 /**
