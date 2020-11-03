@@ -36,7 +36,7 @@ class ClientChatChannelDefaultSettings
             'maxFileSize' => 10000000,
         ],
         'registration' => [
-            'enabled' => true,
+            'formFieldsEnabled' => true,
             'formFields' => [
                 'name' => [
                     'enabled' => true,
@@ -54,6 +54,7 @@ class ClientChatChannelDefaultSettings
         ],
         'system' => [
             'allowTransferChannelActiveChat' => false,
+            'displayOrder' => 0
         ]
     ];
 
