@@ -84,7 +84,7 @@ $_self = $this;
                         <?php endif;?>
 
                         <?php if ($actionPermissions->canReopenChat($clientChat)): ?>
-                            <?php echo Html::a('<i class="fab fa-openid"> </i> Reopen', null, [
+                            <?php echo Html::a('<i class="fa fa-undo"> </i> Reopen', null, [
                                 'class' => 'dropdown-item text-warning cc_reopen',
                                 'title' => 'Reopen',
                                 'data-cch-id' => $clientChat->cch_id
