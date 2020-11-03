@@ -293,8 +293,8 @@ class ViewModelChatExtendedGraph
     {
         $totalInitiatedByClient = array_sum(array_column($this->clientChatData, 'newIncomingClientChats'));
         $totalInitiatedByAgent = array_sum(array_column($this->clientChatData, 'newOutgoingAgentChats'));
-        $totalInitiatedByClientClosed = array_sum(array_column($this->clientChatData, 'initiatedByClientClosed'));
-        $totalInitiatedByAgentClosed = array_sum(array_column($this->clientChatData, 'initiatedByAgentClosed'));
+        $totalInitiatedByClientClosed = array_sum(array_column($this->clientChatData, 'initByClientClosedArchive'));
+        $totalInitiatedByAgentClosed = array_sum(array_column($this->clientChatData, 'initByAgentClosedArchive'));
         $totalAcceptedByAgent = array_sum(array_column($this->clientChatData, 'acceptedByAgent'));
         $totalMissedChats = array_sum(array_column($this->clientChatData, 'missedChats'));
         $totalFrtAvg = floor(array_sum(array_column($this->clientChatData, 'sumFrtOfChatsInGroup')) / ($totalInitiatedByClient ?: 1));
