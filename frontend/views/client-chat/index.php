@@ -188,7 +188,8 @@ let currentChatOwnerId = {$clientChatOwnerId};
 
 window.name = 'chat';
 
-let spinnerForModal = '<div><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>'; 
+let spinnerContent = '<div><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>';
+let loaderIframe = '<div id="_cc-load">' + spinnerContent + '</div>';  
 
 $(document).ready( function () {
     let clientChatId = {$clientChatId};
@@ -460,12 +461,15 @@ window.loadClientChatData = function (cch_id, data, ref) {
     $(ref).addClass('_cc_active');
     
     iframeWrapperEl.find('#_cc-load').remove();
-    iframeWrapperEl.append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
+    iframeWrapperEl.append(loaderIframe);
     
-    $('#_rc-'+cch_id).remove();
-    
-    $('#_rc-iframe-wrapper').append(data.iframe);
-    
+    let chatEl = $('#_rc-' + cch_id);
+    if (chatEl.length) {
+        chatEl.attr('src', data.iframeSrc);
+    } else {
+        $('#_rc-iframe-wrapper').append(data.iframe);
+    }
+        
     if (isClosed) {        
         $('#canned-response-wrap').addClass('disabled');
         $('#couch_note_box').html('');
@@ -482,7 +486,7 @@ window.loadClientChatData = function (cch_id, data, ref) {
     
     localStorage.setItem('activeChatId', cch_id);
     
-    $('#_rc-'+cch_id).show();
+    chatEl.show();
 }
 
 $(document).on('click', '._cc-list-item', function () {
@@ -555,7 +559,7 @@ $(document).on('click', '.cc_full_info', function (e) {
         cache: false,
         data: {cchId: cchId},
         beforeSend: function () {
-            modal.find('.modal-body').html(spinnerForModal);
+            modal.find('.modal-body').html(spinnerContent);
             modal.find('.modal-title').html('Client Chat Info');
             modal.modal('show');
         },
@@ -581,7 +585,7 @@ $(document).on('click', '.cc_transfer', function (e) {
         cache: false,
         data: {cchId: cchId},
         beforeSend: function () {
-            modal.find('.modal-body').html(spinnerForModal);
+            modal.find('.modal-body').html(spinnerContent);
             modal.find('.modal-title').html('Client Chat Transfer');
             modal.modal('show');
         },
@@ -644,7 +648,7 @@ $(document).on('click', '.cc_close', function (e) {
         data: {cchId: cchId},
         beforeSend: function () {
             // btn.html('<i class="fa fa-spin fa-spinner"></i>');
-            modal.find('.modal-body').html(spinnerForModal);
+            modal.find('.modal-body').html(spinnerContent);
             modal.find('.modal-title').html('Client Chat Close Chat');
             modal.modal('show');
         },
@@ -674,7 +678,7 @@ window.removeCcLoadFromIframe = function () {
 window.getChatHistory = function (cchId) {
     $("#_rc-iframe-wrapper").find('._rc-iframe').hide();
     $("#_rc-iframe-wrapper").find('#_cc-load').remove();
-    $("#_rc-iframe-wrapper").append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
+    $("#_rc-iframe-wrapper").append(loaderIframe);
         
     $.post('{$chatHistoryUrl}', {cchId: cchId}, function(data) {
         if (data.indexOf('iframe') !== -1) {
@@ -692,7 +696,7 @@ window.refreshChatInfo = function (cch_id, callable, ref) {
         cache: false,
         data: {cch_id: cch_id},
         beforeSend: function () {
-            $('#_cc_additional_info_wrapper').append('<div id="_cc-load"><div style="width:100%;text-align:center;margin-top:20px"><i class="fa fa-spinner fa-spin fa-5x"></i></div></div>');
+            $('#_cc_additional_info_wrapper').append(loaderIframe);
         },
         success: function (data) {
             $('#_client-chat-info').html(data.html);
@@ -711,8 +715,7 @@ window.refreshChatInfo = function (cch_id, callable, ref) {
     });
 }
 
-window.refreshChatPage = function (cchId) {
-    
+window.refreshChatPage = function (cchId) {    
     preReloadChat(cchId);
     pjaxReload({container: '#pjax-client-chat-channel-list'});
     refreshChatInfo(cchId);    
@@ -726,8 +729,13 @@ window.refreshChatPage = function (cchId) {
     }).catch(function(errorMsg) {
         console.log({error: 'refreshChatPage', msg: errorMsg});
         createNotify('Error', errorMsg, 'error');
-    });
-    postReloadChat();
+    }).finally(function() {
+        postReloadChat();
+    }); 
+    
+    setTimeout(function () {
+        postReloadChat();
+    }, 3000);   
 }
 
 window.getChatDataPromise = function (cchId) {  
@@ -787,7 +795,7 @@ preReloadChat = function(cchId) {
     let iframeWrapperEl = $("#_rc-iframe-wrapper");
     iframeWrapperEl.find('._rc-iframe').hide();
     iframeWrapperEl.find('#_cc-load').remove();
-    iframeWrapperEl.append('<div id="_cc-load">' + spinnerForModal + '</div>');
+    iframeWrapperEl.append(loaderIframe);
 }
 
 postReloadChat = function() {
@@ -825,7 +833,7 @@ $(document).on('click', '.chat-offer', function(e) {
     let leadId = $(this).attr('data-lead-id');
     let modal = $('#modal-lg');
     
-    modal.find('.modal-body').html(spinnerForModal);
+    modal.find('.modal-body').html(spinnerContent);
     modal.find('.modal-title').html('Send Offer');
     modal.modal('show');
 
@@ -868,7 +876,7 @@ $(document).on('click', '.quotes-uid-chat-generate', function(e) {
     }
     
     let modal = $('#modal-lg');
-    modal.find('.modal-body').html(spinnerForModal);    
+    modal.find('.modal-body').html(spinnerContent);    
     
      $.ajax({
         type: 'post',
@@ -899,7 +907,7 @@ $(document).on('click', '.client-chat-send-offer', function(e) {
      }
      
      let modal = $('#modal-lg');
-     modal.find('.modal-body').html(spinnerForModal);    
+     modal.find('.modal-body').html(spinnerContent);    
     
      $.ajax({
         type: 'post',
@@ -1067,7 +1075,7 @@ $(document).on('click', '.cc_hold', function (e) {
     
     let cchId = btnHold.attr('data-cch-id');
     let modal = $('#modal-sm');
-    modal.find('.modal-body').html(spinnerForModal);
+    modal.find('.modal-body').html(spinnerContent);
     modal.modal('show');
                 
     $.ajax({

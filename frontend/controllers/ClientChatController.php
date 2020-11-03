@@ -387,6 +387,7 @@ class ClientChatController extends FController
     /**
      * @return Response
      * @throws BadRequestHttpException
+     * @throws ForbiddenHttpException
      */
     public function actionInfo(): Response
     {
@@ -413,8 +414,10 @@ class ClientChatController extends FController
                 );
             }
 
+            $clientChatIframeHelper = new ClientChatIframeHelper($clientChat);
             $result['isClosed'] = (int) $clientChat->isInClosedStatusGroup();
-            $result['iframe'] = (new ClientChatIframeHelper($clientChat))->generateIframe();
+            $result['iframe'] = $clientChatIframeHelper->generateIframe();
+            $result['iframeSrc'] = $clientChatIframeHelper->generateIframeSrc();
 
             $result['html'] = $this->renderAjax('partial/_client-chat-info', [
                 'clientChat' => $clientChat,
