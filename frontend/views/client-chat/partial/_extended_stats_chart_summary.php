@@ -17,11 +17,11 @@ $amountOfChats = $viewModel->amountOfChats;
             </tr>
             <tr>
                 <td></td>
-                <td>Amount of Chats <i class="fa fa-exclamation-triangle" aria-hidden="true" title="Calculated by Chats in Status New"></i></td>
+                <td>Amount of Chats</td>
                 <td>Amount of Accepted Chats</td>
                 <td>Amount of Missed Chats</td>
                 <td>First Response Time (FRT)</td>
-                <td>Average Chat Duration (ACD) <i class="fa fa-exclamation-triangle" aria-hidden="true" title="Calculated by Chats in Status Closed"></i></td>
+                <td>Average Chat Duration (ACD) <i class="fa fa-exclamation-triangle" aria-hidden="true" title="Calculated by Chats in Statuses Closed/Archive"></i></td>
             </tr>
             <tr>
                 <td>Incoming</td>
