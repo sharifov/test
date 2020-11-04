@@ -85,22 +85,24 @@ class ClientChatQaController extends FController
     }
 
     /**
-     * @param $id
+     * @param int $id
      * @return string
      * @throws NotFoundHttpException
      * @throws \yii\base\InvalidConfigException
      */
-    public function actionView($id): string
+    public function actionView(int $id): string
     {
-        $clientChat = ClientChat::find()
-            ->byId($id)
-            ->byUserGroupsRestriction()
-            ->byProjectRestriction()
-            ->byDepartmentRestriction()
-            ->one();
+//        $clientChat = ClientChat::find()
+//            ->byId($id)
+//            ->byUserGroupsRestriction()
+//            ->byProjectRestriction()
+//            ->byDepartmentRestriction()
+//            ->one();
+
+        $clientChat = ClientChat::find()->byId($id)->one();
 
         if (!$clientChat) {
-            throw new NotFoundHttpException('Client chat not found or access denied');
+            throw new NotFoundHttpException('Client chat not found.');
         }
 
         if (!Auth::can('client-chat/view', ['chat' => $clientChat])) {
@@ -148,21 +150,23 @@ class ClientChatQaController extends FController
     }
 
     /**
-     * @param $id
+     * @param int $id
      * @return string
      * @throws ForbiddenHttpException
      */
-    public function actionRoom($id): string
+    public function actionRoom(int $id): string
     {
-        $clientChat = ClientChat::find()
-            ->byId((int)$id)
-            ->byUserGroupsRestriction()
-            ->byProjectRestriction()
-            ->byDepartmentRestriction()
-            ->one();
+//        $clientChat = ClientChat::find()
+//            ->byId((int)$id)
+//            ->byUserGroupsRestriction()
+//            ->byProjectRestriction()
+//            ->byDepartmentRestriction()
+//            ->one();
+
+        $clientChat = ClientChat::find()->byId($id)->one();
 
         if (!$clientChat) {
-            throw new NotFoundException('Client chat not found or access denied');
+            throw new NotFoundHttpException('Client chat not found.');
         }
 
         if (!Auth::can('client-chat/view', ['chat' => $clientChat])) {
