@@ -251,6 +251,7 @@ $(document).on('click', '.cc_btn_group_filter', function () {
     sessionStorage.selectedChats = '{}';
     refreshUserSelectedState();
     $('#canned-response-wrap').addClass('disabled');
+    $('#couch_note_box').html('');
 });
 
 $(document).on('click', '#{$filter->getReadUnreadInputId()}', function () {
@@ -649,11 +650,11 @@ window.getChatDataPromise = function (cchId) {
 
 reloadCannedResponse = function(chatData) {
     return new Promise(function(resolve, reject) {
-        if (chatData.isClosed) {
-            $('#canned-response-wrap').addClass('disabled');
-        } else {
+        if (chatData.isShowInput) {
             $('#canned-response-wrap').removeClass('disabled');
             $('#canned-response').attr('data-chat-id', chatData.cchId).val('');
+        } else {
+            $('#canned-response-wrap').addClass('disabled');
         } 
         resolve(chatData);                        
     }); 

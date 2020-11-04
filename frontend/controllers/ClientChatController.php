@@ -2161,6 +2161,7 @@ class ClientChatController extends FController
                 $result['cchId'] = $clientChat->cch_id;
                 $result['isClosed'] = (int) $clientChat->isInClosedStatusGroup();
                 $result['iframe'] = (new ClientChatIframeHelper($clientChat))->generateIframe();
+                $result['isShowInput'] = (int) ClientChatHelper::isShowInput($clientChat, Auth::user());
             } catch (\Throwable $throwable) {
                 AppHelper::throwableLogger(
                     $throwable,
