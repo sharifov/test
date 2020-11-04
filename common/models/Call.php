@@ -1196,6 +1196,7 @@ class Call extends \yii\db\ActiveRecord
             && (!($this->isIn() && $this->isStatusDelay()))
             && (!$this->isInternal() || $this->isEnded())
 //            && (!($this->isIn() && $this->isStatusRinging() && $this->isInternal()))
+            && (!($this->isOut() && $this->isChild()))
         )  {
             if (
                 $this->isEnded()
