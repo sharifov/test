@@ -498,8 +498,7 @@ class ClientChatService
         $clientChat = $this->clientChatRepository->findById($form->cchId);
 
         if (!$clientChat->ccv || !$clientChat->ccv->ccvCvd || !$clientChat->ccv->ccvCvd->cvd_visitor_rc_id) {
-            //throw new \RuntimeException('Visitor RC id is not found');
-            /* TODO:: FOR DEBUG:: must by remove  */
+            throw new \RuntimeException('Visitor RC id is not found');
         }
 
         if (SettingHelper::isClientChatSoftCloseEnabled()) {
