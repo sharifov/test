@@ -113,6 +113,7 @@ use yii\web\Response;
  * @property ClientManageService $clientManageService
  * @property ClientChatActionPermission $actionPermissions
  * @property ClientChatCouchNoteRepository  $clientChatCouchNoteRepository
+ * @property array|null $channels
  */
 class ClientChatController extends FController
 {
@@ -175,6 +176,7 @@ class ClientChatController extends FController
     private ClientManageService $clientManageService;
 
     private ClientChatActionPermission $actionPermissions;
+    private ?array $channels;
 
     public function __construct(
         $id,
@@ -218,6 +220,7 @@ class ClientChatController extends FController
         $this->clientManageService = $clientManageService;
         $this->actionPermissions = $actionPermissions;
         $this->clientChatCouchNoteRepository = $clientChatCouchNoteRepository;
+        $this->channels = ClientChatChannel::getListByUserId(Auth::id());
     }
 
     /**
@@ -250,6 +253,7 @@ class ClientChatController extends FController
                     'ajax-send-canned-response',
                     'ajax-couch-note-view',
                     'ajax-reload-chat',
+                    'view',
                 ],
             ],
         ];
@@ -259,11 +263,7 @@ class ClientChatController extends FController
 
     public function actionIndex()
     {
-        $userId = Auth::id();
-
-        $channels = ClientChatChannel::getListByUserId($userId);
-
-        $filter = new FilterForm($channels);
+        $filter = new FilterForm($this->channels);
 
         if (!$filter->load(Yii::$app->request->get()) || !$filter->validate()) {
             $filter->loadDefaultValues();
@@ -282,19 +282,19 @@ class ClientChatController extends FController
 
         $countFreeToTake = 0;
         $dataProvider = null;
-        /** @var $channels ClientChatChannel[] */
-        if ($channels) {
+
+        if ($this->channels) {
             if (Yii::$app->request->get('act') === 'select-all') {
-                $chatIds = (new ClientChatSearch())->getListOfChatsIds(Auth::user(), array_keys($channels), $filter);
+                $chatIds = (new ClientChatSearch())->getListOfChatsIds(Auth::user(), array_keys($this->channels), $filter);
                 return $this->asJson($chatIds);
             }
 
-            $dataProvider = (new ClientChatSearch())->getListOfChats(Auth::user(), array_keys($channels), $filter);
+            $dataProvider = (new ClientChatSearch())->getListOfChats(Auth::user(), array_keys($this->channels), $filter);
 
             if ($filter->group === GroupFilter::FREE_TO_TAKE) {
                 $countFreeToTake = $dataProvider->getTotalCount();
             } else {
-                $countFreeToTake = (new ClientChatSearch())->countFreeToTake(Auth::user(), array_keys($channels), $filter);
+                $countFreeToTake = (new ClientChatSearch())->countFreeToTake(Auth::user(), array_keys($this->channels), $filter);
             }
         }
 
@@ -318,10 +318,6 @@ class ClientChatController extends FController
                         $clientChat->cch_owner_user_id
                     );
                     $resetUnreadMessagesChatId = $clientChat->cch_rid;
-                }
-
-                if ($clientChat->isClosed()) {
-                    $history = ClientChatMessage::find()->byChhId($clientChat->cch_id)->all();
                 }
             } catch (NotFoundException $e) {
                 $clientChat = null;
@@ -373,7 +369,7 @@ class ClientChatController extends FController
             'dataProvider' => $dataProvider,
             'clientChat' => $clientChat,
             'client' => $clientChat->cchClient ?? null,
-            'history' => $history ?? null,
+            'history' => null,
             'filter' => $filter,
             'page' => $page + 1,
             'actionPermissions' => $this->actionPermissions,
@@ -381,6 +377,43 @@ class ClientChatController extends FController
             'accessChatError' => $accessChatError,
             'resetUnreadMessagesChatId' => $resetUnreadMessagesChatId,
             'couchNoteForm' => new ClientChatCouchNoteForm($clientChat, Auth::user()),
+        ]);
+    }
+
+    /**
+     * @return string
+     * @throws BadRequestHttpException
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
+     */
+    public function actionView(): string
+    {
+        if (!$cchId = (int) Yii::$app->request->get('chid')) {
+            throw new BadRequestHttpException('Invalid parameter');
+        }
+        if (!$clientChat = ClientChat::findOne($cchId)) {
+            throw new NotFoundHttpException('Chat is not found');
+        }
+        if (!Auth::can('client-chat/view', ['chat' => $clientChat])) {
+            throw new ForbiddenHttpException('You don\'t have access to this chat');
+        }
+
+        if ($clientChat->cch_owner_user_id && $clientChat->isOwner(Auth::id())) {
+            $this->clientChatMessageService->discardUnreadMessages(
+                $clientChat->cch_id,
+                $clientChat->cch_owner_user_id
+            );
+        }
+
+        return $this->render('view', [
+            'clientChat' => $clientChat,
+            'client' => $clientChat->cchClient ?? null,
+            'actionPermissions' => $this->actionPermissions,
+            'couchNoteForm' => new ClientChatCouchNoteForm($clientChat, Auth::user()),
+            'iframe' => (new ClientChatIframeHelper($clientChat))->generateIframe(),
+            'isClosed' => (int) $clientChat->isInClosedStatusGroup(),
+            'userRcAuthToken' => Auth::user()->userProfile ? Auth::user()->userProfile->up_rc_auth_token : '',
+            'filter' => (new FilterForm($this->channels))->loadDefaultValuesByPermissions(),
         ]);
     }
 

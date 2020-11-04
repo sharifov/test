@@ -197,34 +197,3 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
     'size' => Modal::SIZE_LARGE,
 ])
 ?>
-
-
-<?php /*
-$this->registerJs(
-    '
-        $(document).on("click","#btn-notes-form", function() {
-            $("#div-notes-form").show();
-            $("#pjax-notes .x_content").show();
-            
-             $([document.documentElement, document.body]).animate({
-                scrollTop: $("#div-notes-form").offset().top
-            }, 1000);
-                        
-            return false;
-        });
-
-        $("#pjax-notes").on("pjax:start", function () {            
-            $("#btn-submit-note").attr("disabled", true).prop("disabled", true).addClass("disabled");
-            $("#btn-submit-note i").attr("class", "fa fa-spinner fa-pulse fa-fw")
-
-        });
-
-        $("#pjax-notes").on("pjax:end", function () {           
-            $("#btn-submit-note").attr("disabled", false).prop("disabled", false).removeClass("disabled");
-            $("#btn-submit-note i").attr("class", "fa fa-plus");
-            $("#pjax-notes .x_content").show();
-           
-        }); 
-    '
-);*/
-?>

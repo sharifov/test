@@ -139,6 +139,11 @@ class ClientChatActionPermission
         return $this->canNoteDelete;
     }
 
+    public function canNoteShow(ClientChat $chat): bool
+    {
+        return ($this->canNoteView($chat) || $this->canNoteAdd($chat) || $this->canNoteDelete($chat));
+    }
+
     public function canHold(ClientChat $chat): bool
     {
         if ($this->canHold !== null) {

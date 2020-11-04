@@ -32,6 +32,12 @@ $_self = $this;
         <div class="col-md-12">
 
             <div class="col-md-8">
+                <?php echo Html::a(
+                    Html::tag('i', '', ['class' => 'fa fa-external-link']),
+                    ['client-chat/view', 'chid' => $clientChat->cch_id],
+                    ['target' => '_blank']
+                )?>
+
                 <b><?= Html::encode($clientChat->cchProject ? $clientChat->cchProject->name : '-'); ?></b>:
                 <?= Html::encode($clientChat->cchChannel ? $clientChat->cchChannel->ccc_name : '-'); ?>
                 <br>
@@ -166,7 +172,7 @@ $_self = $this;
 
     </div>
 
-    <?php if($clientChat->isShowDeadlineProgress() && $clientChatHold = $clientChat->clientChatHold): ?>
+    <?php if ($clientChat->isShowDeadlineProgress() && $clientChatHold = $clientChat->clientChatHold): ?>
         <div class="_rc-block-wrapper" id="progress_bar_box">
             <div class="x_panel">
                 <div class="x_title">
@@ -365,10 +371,10 @@ $_self = $this;
 
             </div>
         <?php endif; ?>
-    <?php // Pjax::end(); ?>
+    <?php // Pjax::end();?>
 </div>
 
-<?php if(isset($clientChatHold)): ?>
+<?php if (isset($clientChatHold)): ?>
 
 <?php
 

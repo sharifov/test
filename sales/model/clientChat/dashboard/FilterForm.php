@@ -219,7 +219,7 @@ class FilterForm extends Model
         }
     }
 
-    public function loadDefaultValuesByPermissions(): void
+    public function loadDefaultValuesByPermissions(): FilterForm
     {
         if (!$this->permissions->canChannel()) {
             $this->channelId = self::DEFAULT_VALUE_CHANNEL_ID;
@@ -249,6 +249,7 @@ class FilterForm extends Model
         if (!$this->permissions->canCreatedDate()) {
             $this->createdDate = self::DEFAULT_VALUE_CREATED_DATE;
         }
+        return $this;
     }
 
     public function getAvailableGroup(): array

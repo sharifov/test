@@ -13,6 +13,7 @@ use sales\helpers\UserCallIdentity;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * OnlineConnection widget
@@ -21,6 +22,11 @@ use Yii;
  */
 class OnlineConnection extends \yii\bootstrap\Widget
 {
+    public const CHAT_SUBSCRIBE_LIST = [
+        'client-chat/index',
+        'client-chat/view',
+    ];
+
     public function init()
     {
         parent::init();
@@ -60,7 +66,7 @@ class OnlineConnection extends \yii\bootstrap\Widget
             }
         }
 
-        if (Yii::$app->controller->action->uniqueId === 'client-chat/index') {
+        if (ArrayHelper::isIn(Yii::$app->controller->action->uniqueId, self::CHAT_SUBSCRIBE_LIST)) {
             $cchId = Yii::$app->request->get('chid');
             if ($cchId) {
                 $chat = ClientChat::find()->select(['cch_id'])->byId($cchId)->asArray()->one();
