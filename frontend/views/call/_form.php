@@ -62,6 +62,8 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'c_is_new')->checkbox() ?>
 
+    <?= $form->field($model, 'c_price')->textInput(['maxlength' => true]) ?>
+
 </div>
 
     <div class="form-group">

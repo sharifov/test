@@ -269,6 +269,7 @@ class Call extends \yii\db\ActiveRecord
 
             [['c_is_new'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
 
+            ['c_price', 'default', 'value' => null],
             [['c_price'], 'number'],
             [['c_is_new'], 'default', 'value' => true],
             [['c_case_id', 'c_lead_id', 'c_recording_duration', 'c_dep_id', 'c_client_id', 'c_call_duration'], 'default', 'value' => null],
