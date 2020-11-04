@@ -181,6 +181,11 @@ class Scopes extends \yii\db\ActiveQuery
         return $this->andWhere(['cch_status_id' => $statusId]);
     }
 
+    public function byStatuses(array $statusIds): self
+    {
+        return $this->andWhere(['IN', 'cch_status_id', $statusIds]);
+    }
+
     public function notInStatus(int $statusId): self
     {
         return $this->andWhere(['!=', 'cch_status_id', $statusId]);
@@ -200,4 +205,10 @@ class Scopes extends \yii\db\ActiveQuery
     {
         return $this->andWhere(['cch_parent_id' => $parentId]);
     }
+
+    public function freeToTake(): self
+    {
+        return $this->byStatuses(ClientChat::FREE_TO_TAKE_STATUS_GROUP);
+    }
+
 }

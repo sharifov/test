@@ -99,6 +99,12 @@ class ClientChat extends \yii\db\ActiveRecord
         self::STATUS_ARCHIVE,
     ];
 
+    public const FREE_TO_TAKE_STATUS_GROUP = [
+        self::STATUS_IDLE,
+        self::STATUS_PENDING,
+        self::STATUS_TRANSFER,
+    ];
+
     public const MISSED = 1;
 
     private const STATUS_LIST = [
