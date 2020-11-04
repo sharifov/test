@@ -2,6 +2,7 @@
 
 use frontend\themes\gentelella_v2\assets\ClientChatAsset;
 use sales\auth\Auth;
+use sales\helpers\clientChat\ClientChatHelper;
 use sales\helpers\clientChat\ClientChatIframeHelper;
 use sales\model\clientChat\dashboard\FilterForm;
 use sales\model\clientChat\entity\ClientChat;
@@ -104,22 +105,12 @@ $userRcAuthToken = Auth::user()->userProfile ? Auth::user()->userProfile->up_rc_
             <?= $iframeData ?: '' ?>
         </div>
         <?php if ($actionPermissions->canSendCannedResponse()): ?>
-        <div id="canned-response-wrap" class="<?= !$clientChat || ($clientChat && ($clientChat->isClosed() || $clientChat->isArchive())) ? 'disabled' : '' ?>">
-            <?= Html::textarea('canned-response', '', ['placeholder' => 'Try to search quickly response by typing /search text', 'id' => 'canned-response', 'class' => 'form-control canned-response', 'data-chat-id' => $clientChat->cch_id ?? null, 'rows' => 3]) ?>
-            <span id="send-canned-response" class="canned-response-icon">
-                <i class="fa fa-paper-plane"></i>
-            </span>
-            <span id="loading-canned-response" class="canned-response-icon" style="display: none">
-                <i class="fa fa-spin fa-spinner"></i>
-            </span>
-        </div>
+            <?php echo $this->render('partial/_canned_response', ['clientChat' => $clientChat]) ?>
         <?php endif; ?>
 
         <div id="couch_note_box">
             <?php if ($clientChat && $actionPermissions->canCouchNote($clientChat)): ?>
-                <?php echo $this->render('partial/_couch_note', [
-                    'couchNoteForm' => $couchNoteForm,
-                ]); ?>
+                <?php echo $this->render('partial/_couch_note', ['couchNoteForm' => $couchNoteForm]); ?>
             <?php endif; ?>
         </div>
     </div>

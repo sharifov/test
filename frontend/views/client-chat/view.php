@@ -2,6 +2,8 @@
 
 use common\models\Client;
 use frontend\themes\gentelella_v2\assets\ClientChatAsset;
+use sales\auth\Auth;
+use sales\helpers\clientChat\ClientChatHelper;
 use sales\model\clientChat\dashboard\FilterForm;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\permissions\ClientChatActionPermission;
@@ -43,22 +45,12 @@ ClientChatAsset::register($this);
                 <?= $iframe ?: '' ?>
             </div>
             <?php if (!$isClosed && $actionPermissions->canSendCannedResponse()): ?>
-                <div id="canned-response-wrap" class="<?= !$clientChat || ($clientChat && ($clientChat->isClosed() || $clientChat->isArchive())) ? 'disabled' : '' ?>">
-                    <?= Html::textarea('canned-response', '', ['placeholder' => 'Try to search quickly response by typing /search text', 'id' => 'canned-response', 'class' => 'form-control canned-response', 'data-chat-id' => $clientChat->cch_id ?? null, 'rows' => 3]) ?>
-                    <span id="send-canned-response" class="canned-response-icon">
-                        <i class="fa fa-paper-plane"></i>
-                    </span>
-                    <span id="loading-canned-response" class="canned-response-icon" style="display: none">
-                        <i class="fa fa-spin fa-spinner"></i>
-                    </span>
-                </div>
+                <?php echo $this->render('partial/_canned_response', ['clientChat' => $clientChat]) ?>
             <?php endif; ?>
 
             <div id="couch_note_box">
                 <?php if (!$isClosed && $actionPermissions->canCouchNote($clientChat)): ?>
-                    <?php echo $this->render('partial/_couch_note', [
-                        'couchNoteForm' => $couchNoteForm,
-                    ]); ?>
+                    <?php echo $this->render('partial/_couch_note', ['couchNoteForm' => $couchNoteForm]); ?>
                 <?php endif; ?>
             </div>
         </div>
@@ -66,21 +58,22 @@ ClientChatAsset::register($this);
         <div class="col-md-3">
             <div id="_cc_additional_info_wrapper" style="position: relative;">
                 <div id="_client-chat-info">
-                    <?php if ($client) {
-                        echo $this->render(
-                            'partial/_client-chat-info',
-                            ['clientChat' => $clientChat, 'client' => $client, 'actionPermissions' => $actionPermissions]
-                        );
-                    } ?>
+                    <?php if ($client): ?>
+                        <?php echo $this->render('partial/_client-chat-info', [
+                            'clientChat' => $clientChat,
+                            'client' => $client,
+                            'actionPermissions' => $actionPermissions
+                        ]); ?>
+                    <?php endif; ?>
                 </div>
                 <div id="_client-chat-note">
-                    <?php if ($actionPermissions->canNoteShow($clientChat)) {
-                        echo $this->render('partial/_client-chat-note', [
+                    <?php if ($actionPermissions->canNoteShow($clientChat)): ?>
+                        <?php echo $this->render('partial/_client-chat-note', [
                             'clientChat' => $clientChat,
                             'model' => new ClientChatNote(),
                             'actionPermissions' => $actionPermissions,
-                        ]);
-                    } ?>
+                        ]); ?>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

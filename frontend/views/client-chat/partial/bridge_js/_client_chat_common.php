@@ -346,15 +346,17 @@ window.loadClientChatData = function (cch_id, data, ref) {
     } else {
         $('#_rc-iframe-wrapper').append(data.iframe);
     }
-        
-    if (isClosed) {        
-        $('#canned-response-wrap').addClass('disabled');
-        $('#couch_note_box').html('');
-    } else {
+    
+    $('#couch_note_box').html('');
+    if (!isClosed) {
+        window.refreshCouchNote(cch_id);
+    }
+    
+    if (data.isShowInput) {
         $('#canned-response-wrap').removeClass('disabled');
         $('#canned-response').attr('data-chat-id', cch_id).val('');
-        
-        window.refreshCouchNote(cch_id);
+    } else {
+        $('#canned-response-wrap').addClass('disabled');
     }
     
     let params = new URLSearchParams(window.location.search);
@@ -695,9 +697,7 @@ window.refreshCouchNote = function (cch_id) {
     })
     .done(function(dataResponse) {                
         if (dataResponse.status > 0 && dataResponse.html.length) { 
-            $('#couch_note_box').html(dataResponse.html);            
-        } else if (dataResponse.status === 2) { // chat closed
-            $('#couch_note_box').html('');            
+            $('#couch_note_box').html(dataResponse.html);
         } else if (dataResponse.status === 0 && dataResponse.message.length) {
             console.log(dataResponse.message);
         } else {

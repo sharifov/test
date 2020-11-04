@@ -105,10 +105,7 @@ class ClientChatIframeHelper
     public function setReadOnly(?bool $readOnly = null): ClientChatIframeHelper
     {
         if ($readOnly === null) {
-            $this->readOnly = (
-                !$this->clientChat->isOwner($this->employee->getId()) ||
-                ($this->clientChat->isInClosedStatusGroup())
-            );
+            $this->readOnly = !ClientChatHelper::isShowInput($this->clientChat, $this->employee);
             return $this;
         }
         $this->readOnly = $readOnly;

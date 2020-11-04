@@ -31,6 +31,7 @@ use sales\forms\clientChat\MultipleUpdateForm;
 use sales\forms\clientChat\RealTimeStartChatForm;
 use sales\helpers\app\AppHelper;
 use sales\helpers\app\AppParamsHelper;
+use sales\helpers\clientChat\ClientChatHelper;
 use sales\helpers\clientChat\ClientChatIframeHelper;
 use sales\model\clientChat\cannedResponse\entity\ClientChatCannedResponse;
 use sales\model\clientChat\cannedResponse\entity\search\ClientChatCannedResponseSearch;
@@ -451,6 +452,7 @@ class ClientChatController extends FController
             $result['isClosed'] = (int) $clientChat->isInClosedStatusGroup();
             $result['iframe'] = $clientChatIframeHelper->generateIframe();
             $result['iframeSrc'] = $clientChatIframeHelper->generateIframeSrc();
+            $result['isShowInput'] = (int) ClientChatHelper::isShowInput($clientChat, Auth::user());
 
             $result['html'] = $this->renderAjax('partial/_client-chat-info', [
                 'clientChat' => $clientChat,
@@ -2107,19 +2109,16 @@ class ClientChatController extends FController
                     throw new NotFoundHttpException('Chat is not found', -2);
                 }
                 if ($clientChat->isInClosedStatusGroup()) {
-                    $result['status'] = 2;
                     throw new \DomainException('Chat is closed status group.', -11);
                 }
                 if (!(new ClientChatActionPermission())->canCouchNote($clientChat)) {
-                    throw new ForbiddenHttpException('Access denied.', -3);
+                    throw new ForbiddenHttpException('Permission "canCouchNote" is fail.', -12);
                 }
 
-                $html = $this->renderAjax('partial/_couch_note', [
+                $result['status'] = 1;
+                $result['html'] = $this->renderAjax('partial/_couch_note', [
                     'couchNoteForm' => new ClientChatCouchNoteForm($clientChat, Auth::user()),
                 ]);
-
-                $result['status'] = 1;
-                $result['html'] = $html;
             } catch (\Throwable $throwable) {
                 if ($throwable->getCode() > -10) {
                     AppHelper::throwableLogger(

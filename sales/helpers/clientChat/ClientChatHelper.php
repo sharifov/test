@@ -1,6 +1,7 @@
 <?php
 namespace sales\helpers\clientChat;
 
+use common\models\Employee;
 use common\models\UserProfile;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
@@ -35,5 +36,16 @@ class ClientChatHelper
             $result = ArrayHelper::map($availableAgents, 'user_id', 'nickname');
         }
         return $result;
+    }
+
+    public static function isShowInput(?ClientChat $clientChat, ?Employee $employee): bool
+    {
+        if ($clientChat === null || $employee === null) {
+            return false;
+        }
+        if ($clientChat->isInClosedStatusGroup() || !$clientChat->isOwner($employee->getId())) {
+            return false;
+        }
+        return true;
     }
 }
