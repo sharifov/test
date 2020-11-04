@@ -55,6 +55,7 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
     public function rules(): array
     {
         return [
+            ['timeZone', 'required'],
             [['createTimeRange', 'createTimeStart', 'createTimeEnd', 'timeZone', 'defaultUserTz'], 'string'],
             [['graphGroupBy', 'cch_owner_user_id', 'cch_channel_id', 'cch_project_id'], 'integer'],
             [['userGroupIds'], 'each', 'rule' => ['integer']],
