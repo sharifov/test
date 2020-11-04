@@ -42,14 +42,15 @@ class ClientChatQaController extends FController
      * @param array $config
      */
     public function __construct(
-		$id,
-		$module,
-		ClientChatRepository $clientChatRepository,
-		$config = [])
-	{
-		parent::__construct($id, $module, $config);
-		$this->clientChatRepository = $clientChatRepository;
-	}
+        $id,
+        $module,
+        ClientChatRepository $clientChatRepository,
+        $config = []
+    )
+    {
+        parent::__construct($id, $module, $config);
+        $this->clientChatRepository = $clientChatRepository;
+    }
 
     public function behaviors(): array
     {
@@ -125,9 +126,9 @@ class ClientChatQaController extends FController
 
         $requestSearch = new ClientChatRequestSearch();
         $visitorId = '';
-		if ($clientChat->ccv && $clientChat->ccv->ccvCvd) {
-		    $visitorId = $clientChat->ccv->ccvCvd->cvd_visitor_rc_id ?? '';
-		}
+        if ($clientChat->ccv && $clientChat->ccv->ccvCvd) {
+            $visitorId = $clientChat->ccv->ccvCvd->cvd_visitor_rc_id ?? '';
+        }
         $data[$requestSearch->formName()]['ccr_visitor_id'] = $visitorId;
         $data[$requestSearch->formName()]['ccr_event'] = ClientChatRequest::EVENT_TRACK;
         $dataProviderRequest = $requestSearch->search($data);
@@ -154,21 +155,11 @@ class ClientChatQaController extends FController
      * @param int $id
      * @return string
      * @throws ForbiddenHttpException
-     * @throws BadRequestHttpException
      * @throws NotFoundHttpException
      */
     public function actionRoom(int $id): string
     {
-//        $clientChat = ClientChat::find()
-//            ->byId((int)$id)
-//            ->byUserGroupsRestriction()
-//            ->byProjectRestriction()
-//            ->byDepartmentRestriction()
-//            ->one();
-
-        $clientChat = ClientChat::find()->byId($id)->one();
-
-        if (!$clientChat) {
+        if (!$clientChat = ClientChat::findOne($id)) {
             throw new NotFoundHttpException('Client chat not found.');
         }
 
@@ -176,21 +167,14 @@ class ClientChatQaController extends FController
             throw new ForbiddenHttpException('Access denied.');
         }
 
-        if ($clientChat->isClosed()) {
-            $history = ClientChatMessage::find()->byChhId($clientChat->cch_id)->all();
-        }
-
         if (Yii::$app->request->isAjax) {
             return $this->renderAjax('room', [
                 'clientChat' => $clientChat,
-                'history' => $history ?? null,
-            ]);
-        } else {
-            return $this->render('room', [
-                'clientChat' => $clientChat,
-                'history' => $history ?? null,
             ]);
         }
+        return $this->render('room', [
+            'clientChat' => $clientChat,
+        ]);
     }
 
     /**

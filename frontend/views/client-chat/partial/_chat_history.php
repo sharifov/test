@@ -8,7 +8,7 @@ use sales\model\clientChat\entity\ClientChat;
 ?>
 
 <?php if ($clientChat): ?>
-    <?php echo (new ClientChatIframeHelper($clientChat))->generateIframe(); ?>
+    <?php echo (new ClientChatIframeHelper($clientChat))->setReadOnly(true)->generateIframe(); ?>
 
 <?php
 $js = <<<JS

@@ -91,5 +91,4 @@ ClientChatAsset::register($this);
             'filter' => $filter,
         ]);
     ?>
-
 <?php endif; ?>

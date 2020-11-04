@@ -16,6 +16,7 @@ class ClientChatIframeHelper
     private Employee $employee;
     private string $rcUrl;
     private int $randInt;
+    private bool $readOnly;
 
     public const DEFAULT_STYLE = 'border: none; width: 100%; height: 100%;';
     public const DEFAULT_CLASS = '_rc-iframe';
@@ -32,6 +33,7 @@ class ClientChatIframeHelper
         $this->clientChat = $clientChat;
         $this->rcUrl = Yii::$app->rchat->host  . '/home';
         $this->randInt = $this->setRandInt();
+        $this->setReadOnly(null);
     }
 
     public function generateIframeSrc(): string
@@ -57,11 +59,11 @@ class ClientChatIframeHelper
         return '_' . $this->getRandInt() . '_' . $this->clientChat->cch_status_id;
     }
 
-    public function generateIframe(string $class = '', string $style = ''): string
+    public function generateIframe(string $class = '', string $style = '', string $onload = ''): string
     {
         return '<iframe class="' . self::DEFAULT_CLASS . ' ' . $class . '"
             style="' . self::DEFAULT_STYLE . ' ' . $style . '"
-            onload="' . self::DEFAULT_ONLOAD_FUNCTION . '"
+            onload="' . self::DEFAULT_ONLOAD_FUNCTION . $onload . '"
             src="' . $this->generateIframeSrc() . '"
             id="' . $this->generateIframeId() . '"
             name="' . $this->generateIframeName() . '"
@@ -72,10 +74,7 @@ class ClientChatIframeHelper
 
     public function isReadonly(): bool
     {
-        return (
-            !$this->clientChat->isOwner($this->employee->getId()) ||
-            ($this->clientChat->isInClosedStatusGroup())
-        );
+        return $this->readOnly;
     }
 
     public function getUserRcAuthToken(): string
@@ -101,5 +100,18 @@ class ClientChatIframeHelper
         } catch (\Throwable $throwable) {
             return $this->randInt = time();
         }
+    }
+
+    public function setReadOnly(?bool $readOnly = null): ClientChatIframeHelper
+    {
+        if ($readOnly === null) {
+            $this->readOnly = (
+                !$this->clientChat->isOwner($this->employee->getId()) ||
+                ($this->clientChat->isInClosedStatusGroup())
+            );
+            return $this;
+        }
+        $this->readOnly = $readOnly;
+        return $this;
     }
 }

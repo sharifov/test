@@ -11,7 +11,7 @@ use yii\helpers\Html;
 
 $this->title = 'Client Chat Room: ' . $clientChat->cch_rid;
 $this->params['breadcrumbs'][] = ['label' => 'Client Chats QA', 'url' => ['index']];
-$this->params['breadcrumbs'][] = 'Room';
+$this->params['breadcrumbs'][] = 'Chat';
 
 ?>
 
