@@ -2112,7 +2112,7 @@ class ClientChatController extends FController
                     throw new \DomainException('Chat is closed status group.', -11);
                 }
                 if (!(new ClientChatActionPermission())->canCouchNote($clientChat)) {
-                    throw new ForbiddenHttpException('Permission "canCouchNote" is fail.', -12);
+                    throw new ForbiddenHttpException('', -12);
                 }
 
                 $result['status'] = 1;

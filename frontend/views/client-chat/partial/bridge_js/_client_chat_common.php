@@ -370,8 +370,7 @@ window.loadClientChatData = function (cch_id, data, ref) {
 }
 
 $(document).on('click', '._cc-list-item', function () {
-    let pageLoader = $('#page-loader');
-    pageLoader.show();  
+    $('#cc-dialogs-wrapper').append(loaderIframe); 
     let cch_id = $(this).attr('data-cch-id');
     currentChatId = cch_id;
     let ownerId = $(this).attr('data-owner-id');
@@ -382,7 +381,7 @@ $(document).on('click', '._cc-list-item', function () {
     }
         
     if ($(this).hasClass('_cc_active')) {
-        pageLoader.hide(); 
+        $('#cc-dialogs-wrapper #_cc-load').remove(); 
         return false;
     }
     
@@ -390,7 +389,7 @@ $(document).on('click', '._cc-list-item', function () {
     window.refreshChatInfo(cch_id, loadClientChatData, ref);
     
     setTimeout(function () {
-        $('#page-loader').hide(); 
+        $('#cc-dialogs-wrapper #_cc-load').remove();
     }, 2000);
 });
 
@@ -590,7 +589,7 @@ window.refreshChatInfo = function (cch_id, callable, ref) {
         },
         complete: function () {
             $('#_cc_additional_info_wrapper #_cc-load').remove();
-            $('#page-loader').hide();  
+            $('#cc-dialogs-wrapper #_cc-load').remove(); 
         }
     });
 }
@@ -701,9 +700,7 @@ window.refreshCouchNote = function (cch_id) {
             $('#couch_note_box').html(dataResponse.html);
         } else if (dataResponse.status === 0 && dataResponse.message.length) {
             console.log(dataResponse.message);
-        } else {
-            console.log('RefreshCouchNote failed. Please see logs');
-        }
+        } 
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
         console.log(jqXHR.responseText);
