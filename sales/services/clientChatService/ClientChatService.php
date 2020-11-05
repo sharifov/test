@@ -422,10 +422,10 @@ class ClientChatService
                 null,
                 true
             );
+            $dto = ClientChatCloneDto::feelInOnTransfer($clientChat);
             $clientChat->changeChannel($oldChannelId);
             $this->clientChatRepository->save($clientChat);
 
-            $dto = ClientChatCloneDto::feelInOnTransfer($clientChat);
             $newClientChat = ClientChat::clone($dto);
             $newClientChat->assignOwner($chatUserAccess->ccua_user_id);
             $newClientChat->cch_source_type_id = ClientChat::SOURCE_TYPE_TRANSFER;
