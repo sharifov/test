@@ -112,20 +112,31 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
 
         </div>
         <div class="col-md-6">
-            <?php if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && !$lead->isOwner($user->id)):?>
+            <?php /*if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && !$lead->isOwner($user->id)):*/?><!--
                 <div class="alert alert-warning" role="alert">
                     <h4 class="alert-heading">Warning!</h4>
                     <p>Client information is not available in VIEW MODE, please take lead!</p>
                 </div>
 
-            <?php elseif(!$is_manager && !$is_qa && ( $lead->isFollowUp() || ($lead->isPending() && !$lead->isNewRecord) ) && !$lead->isOwner($user->id)):?>
+            <?php /*elseif(!$is_manager && !$is_qa && ( $lead->isFollowUp() || ($lead->isPending() && !$lead->isNewRecord) ) && !$lead->isOwner($user->id)):*/?>
 
                 <div class="alert alert-warning" role="alert">
                     <h4 class="alert-heading">Warning!</h4>
-                    <p>Client information is not available for this status (<?=strtoupper($lead->getStatusName())?>)!</p>
+                    <p>Client information is not available for this status (<?/*=strtoupper($lead->getStatusName())*/?>)!</p>
                 </div>
 
-            <?php else: ?>
+            <?php /*else: */?>
+                <?php /*yii\widgets\Pjax::begin(['id' => 'pjax-client-info', 'enablePushState' => false, 'enableReplaceState' => false]) */?>
+                <?/*= $this->render('client-info/client_info', [
+                    'lead' => $lead,
+                    'leadForm' => $leadForm,
+                    'is_manager' => $is_manager,
+                    'unsubscribe' => $unsubscribe
+                ]) */?>
+                <?php /*\yii\widgets\Pjax::end(); */?>
+            --><?php /*endif;*/?>
+
+            <?php if (Auth::can('lead/view_Client_Info')): ?>
                 <?php yii\widgets\Pjax::begin(['id' => 'pjax-client-info', 'enablePushState' => false, 'enableReplaceState' => false]) ?>
                 <?= $this->render('client-info/client_info', [
                     'lead' => $lead,
@@ -134,22 +145,28 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
                     'unsubscribe' => $unsubscribe
                 ]) ?>
                 <?php \yii\widgets\Pjax::end(); ?>
-            <?php endif;?>
+            <?php endif; ?>
 
-
-
-            <?php if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && !$lead->isOwner($user->id)):?>
+            <?php /*if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && !$lead->isOwner($user->id)):*/?><!--
                 <div class="alert alert-warning" role="alert">
                     <h4 class="alert-heading">Warning!</h4>
                     <p>Lead Preferences is not available in VIEW MODE, please take lead!</p>
                 </div>
-            <?php elseif(!$is_manager && !$is_qa && ( $lead->isFollowUp() || ($lead->isPending() && !$lead->isNewRecord) ) && !$lead->isOwner($user->id)):?>
+            <?php /*elseif(!$is_manager && !$is_qa && ( $lead->isFollowUp() || ($lead->isPending() && !$lead->isNewRecord) ) && !$lead->isOwner($user->id)):*/?>
 
                 <div class="alert alert-warning" role="alert">
                     <h4 class="alert-heading">Warning!</h4>
-                    <p>Client information is not available for this status (<?=strtoupper($lead->getStatusName())?>)!</p>
+                    <p>Client information is not available for this status (<?/*=strtoupper($lead->getStatusName())*/?>)!</p>
                 </div>
-            <?php else: ?>
+            <?php /*else: */?>
+                <div id="lead-preferences">
+                    <?/*= $this->render('partial/_lead_preferences', [
+                        'lead' => $lead
+                    ]) */?>
+                </div>
+            --><?php /*endif; */?>
+
+            <?php if (Auth::can('lead/view_Lead_Preferences')): ?>
                 <div id="lead-preferences">
                     <?= $this->render('partial/_lead_preferences', [
                         'lead' => $lead
