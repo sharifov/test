@@ -633,7 +633,7 @@ class ClientChatService
     public function autoReopen(ClientChat $clientChat): ClientChat
     {
         if ($clientChat->isIdle()) {
-            $clientChat->inProgress(null, ClientChatStatusLog::ACTION_AUTO_REOPEN);
+            $clientChat->inProgress(null, ClientChatStatusLog::ACTION_AUTO_RETURN);
             $this->clientChatRepository->save($clientChat);
 
             Notifications::pub(
