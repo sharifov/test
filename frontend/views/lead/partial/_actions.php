@@ -108,7 +108,9 @@ $user = Yii::$app->user->identity;
     //    }
         //$buttonsSubAction[] = $buttonHoldOn;
         $buttonsSubAction[] = $buttonFollowUp;
-        $buttonsSubAction[] = $buttonSnooze;
+        if (Auth::can('/lead-change-state/snooze')) {
+            $buttonsSubAction[] = $buttonSnooze;
+        }
         $buttonsSubAction[] = $buttonTrash;
         if ($leadModel->isSold()) {
             if ($user->isAdmin()) {
