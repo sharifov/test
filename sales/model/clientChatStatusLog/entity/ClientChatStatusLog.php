@@ -66,7 +66,7 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
         self::ACTION_REOPEN => 'Reopen',
         self::ACTION_TIMEOUT_FINISH => 'Timeout Finish',
         self::ACTION_CHAT_ACCEPT => 'Chat Accept',
-        self::ACTION_AUTO_REOPEN => 'Auto Reopen',
+        self::ACTION_AUTO_REOPEN => 'Auto Return',
     ];
 
     private const ACTION_LABEL_LIST = [
