@@ -371,8 +371,13 @@ class ClientChat extends \yii\db\ActiveRecord
         $this->cch_status_id = self::STATUS_CLOSED;
     }
 
-    public function archive(?int $userId, int $action, ?int $reasonId = null, ?string $description = null): void
-    {
+    public function archive(
+        ?int $userId,
+        int $action,
+        ?int $reasonId = null,
+        ?string $description = null,
+        bool $shallowClose = false
+    ): void {
         $this->recordEvent(new ClientChatArchiveEvent(
             $this->cch_id,
             (int)$this->cch_status_id,
@@ -382,7 +387,7 @@ class ClientChat extends \yii\db\ActiveRecord
             (int)$this->cch_channel_id,
             $action,
             $reasonId,
-            false
+            $shallowClose
         ));
         $this->cch_status_id = self::STATUS_ARCHIVE;
     }
