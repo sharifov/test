@@ -121,6 +121,14 @@ class ClientChatAccessMessage
         ];
     }
 
+    public static function chatAutoReturn(int $chatId): array
+    {
+        return [
+            'message' => 'This chat is auto return. Client wrote a message.',
+            'cchId' => $chatId,
+        ];
+    }
+
     public static function chatAutoReopen(int $chatId): array
     {
         return [

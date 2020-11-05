@@ -630,18 +630,27 @@ class ClientChatService
         });
     }
 
-    public function autoReopen(ClientChat $clientChat): ClientChat
+    public function autoReturn(ClientChat $clientChat): void
     {
-        if ($clientChat->isIdle()) {
-            $clientChat->inProgress(null, ClientChatStatusLog::ACTION_AUTO_RETURN);
-            $this->clientChatRepository->save($clientChat);
+        $clientChat->inProgress(null, ClientChatStatusLog::ACTION_AUTO_RETURN);
+        $this->clientChatRepository->save($clientChat);
 
-            Notifications::pub(
-                [ClientChatChannel::getPubSubKey($clientChat->cch_channel_id)],
-                'refreshChatPage',
-                ['data' => ClientChatAccessMessage::chatAutoReopen($clientChat->cch_id)]
-            );
-        }
-        return $clientChat;
+        Notifications::pub(
+            [ClientChatChannel::getPubSubKey($clientChat->cch_channel_id)],
+            'refreshChatPage',
+            ['data' => ClientChatAccessMessage::chatAutoReturn($clientChat->cch_id)]
+        );
+    }
+
+    public function autoReopen(ClientChat $clientChat): void
+    {
+        $clientChat->inProgress(null, ClientChatStatusLog::ACTION_AUTO_REOPEN);
+        $this->clientChatRepository->save($clientChat);
+
+        Notifications::pub(
+            [ClientChatChannel::getPubSubKey($clientChat->cch_channel_id)],
+            'refreshChatPage',
+            ['data' => ClientChatAccessMessage::chatAutoReopen($clientChat->cch_id)]
+        );
     }
 }
