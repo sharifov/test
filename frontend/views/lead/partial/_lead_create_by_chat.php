@@ -31,32 +31,13 @@ use yii\widgets\Pjax;
                 'data-pjax' => 1
             ],
         ]) ?>
+        <?= $activeForm->field($form, 'source')->hiddenInput()->label(false)?>
+        <?= $activeForm->field($form, 'projectId')->hiddenInput()->label(false)?>
         <div class="row">
             <div class="col-md-12">
                 <?= Alert::widget() ?>
                 <br>
                 <?= $activeForm->errorSummary($form, ['showAllErrors' => false]) ?>
-            </div>
-            <div class="col-md-12">
-                <div class="x_panel">
-                    <div class="x_title">
-                        <h2>Lead info</h2>
-                        <ul class="nav navbar-right panel_toolbox">
-                            <!--                            <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>-->
-                        </ul>
-                        <div class="clearfix"></div>
-                    </div>
-                    <div class="x_content">
-                        <div class="col-md-6">
-                            <?= $activeForm->field($form, 'source')->widget(\kartik\select2\Select2::class, [
-                                'data' => $form->listSources(),
-                                'size' => \kartik\select2\Select2::SMALL,
-                                'options' => ['placeholder' => 'Select market', 'multiple' => false],
-                                'pluginOptions' => ['allowClear' => true],
-                            ]) ?>
-                        </div>
-                    </div>
-                </div>
             </div>
             <?php if ($client = $chat->cchClient): ?>
                 <div class="col-md-12 col-sm-12">

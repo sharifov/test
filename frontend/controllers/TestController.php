@@ -111,6 +111,8 @@ use sales\forms\api\communication\voice\record\RecordForm;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatHold\entity\ClientChatHold;
 use sales\model\clientChatLastMessage\entity\ClientChatLastMessage;
+use sales\model\clientChatVisitor\entity\ClientChatVisitor;
+use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
 use sales\repositories\client\ClientsQuery;
 use sales\services\client\ClientCreateForm;
 use sales\forms\lead\EmailCreateForm;
@@ -1889,6 +1891,17 @@ class TestController extends FController
 
 	public function actionZ()
     {
+        if (($chat = ClientChat::findOne(3)) && $chat->ccv) {
+            if ($clientChatVisitorData = $chat->ccv->ccvCvd) {
+                /** @var VisitorLog $visitorLog */
+                $visitorLog = VisitorLog::find()
+                    ->byCvdId($clientChatVisitorData->cvd_id)
+                    ->orderBy(['vl_id' => SORT_DESC])
+                    ->one();
+
+                $visitorLog->vl_source_cid;
+            }
+        }
 
         return $this->render('z');
     }

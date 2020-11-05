@@ -9,7 +9,7 @@ use yii\widgets\ActiveForm;
 /** @var ClientChatCouchNoteForm $couchNoteForm */
 ?>
 
-<h6 style="margin-top: 20px;">Couch message</h6>
+<h6 style="margin-top: 20px;">Supervisor message</h6>
 
 <div class="row">
 

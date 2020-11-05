@@ -37,6 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'vl_customer_id',
             'vl_client_id',
             'lead:lead',
+            'vl_cvd_id',
             'vl_gclid',
             'vl_dclid',
             'vl_utm_source',

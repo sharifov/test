@@ -2134,6 +2134,13 @@ class LeadController extends FController
         $form = new LeadCreateByChatForm($userId, $chat);
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+
+            if (empty($form->source)) {
+                Yii::warning([
+                    'post' => Yii::$app->request->post()
+                ], 'LeadController:actionCreateByChat:sourceNotFound');
+            }
+
             try {
                 $leadManageService = Yii::createObject(\sales\model\lead\useCases\lead\create\LeadManageService::class);
                 $lead = $leadManageService->createByClientChat($form, $chat, $userId);

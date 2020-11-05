@@ -33,6 +33,8 @@ $list = (new ListsAccess(Auth::id()));
 
         <?= $form->field($model, 'vl_lead_id')->textInput() ?>
 
+        <?= $form->field($model, 'vl_cvd_id')->textInput() ?>
+
         <?= $form->field($model, 'vl_gclid')->textInput(['maxlength' => true]) ?>
 
         <?= $form->field($model, 'vl_dclid')->textInput(['maxlength' => true]) ?>
