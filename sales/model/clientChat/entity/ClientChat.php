@@ -669,4 +669,9 @@ class ClientChat extends \yii\db\ActiveRecord
     {
         return $this->cch_source_type_id === self::SOURCE_TYPE_AGENT || $this->cch_source_type_id === self::SOURCE_TYPE_CLIENT ;
     }
+
+    public function changeChannel(int $channelId): void
+    {
+        $this->cch_channel_id = $channelId;
+    }
 }

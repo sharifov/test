@@ -422,6 +422,7 @@ class ClientChatService
                 null,
                 true
             );
+            $clientChat->changeChannel($oldChannelId);
             $this->clientChatRepository->save($clientChat);
 
             $dto = ClientChatCloneDto::feelInOnTransfer($clientChat);
