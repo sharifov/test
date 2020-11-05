@@ -189,11 +189,6 @@ class ClientChatRequestService
 //            $clientChat = $this->findClientChatByCache($form->data['rid'] ?? '');
             if ($clientChat) {
                 $this->assignMessageToChat($message, $clientChat);
-
-                if ($clientChat->isIdle() && $clientChatRequest->isGuestUttered()) {
-                    $clientChat->inProgress($clientChat->cch_owner_user_id, ClientChatStatusLog::ACTION_AUTO_REOPEN);
-                    $this->clientChatRepository->save($clientChat);
-                }
             }
             if ($clientChat && $clientChatRequest->isGuestUttered()) {
                 $this->clientChatService->autoReopen($clientChat);
