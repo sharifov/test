@@ -195,6 +195,9 @@ class ClientChatRequestService
                     $this->clientChatRepository->save($clientChat);
                 }
             }
+            if ($clientChat && $clientChatRequest->isGuestUttered()) {
+                $this->clientChatService->autoReopen($clientChat);
+            }
         } else {
             $this->clientChatRequestRepository->save($clientChatRequest);
             throw new \RuntimeException('Unknown event provided');
