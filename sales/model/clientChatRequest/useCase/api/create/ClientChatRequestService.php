@@ -191,11 +191,12 @@ class ClientChatRequestService
                 $this->assignMessageToChat($message, $clientChat);
             }
             if ($clientChat && $clientChatRequest->isGuestUttered()) {
-                if ($clientChat->isIdle()) {
-                    $this->clientChatService->autoReturn($clientChat);
-                } elseif ($clientChat->isClosed()) {
+                if ($clientChat->isClosed()) {
                     $this->clientChatService->autoReopen($clientChat);
                 }
+            }
+            if (($clientChat && $clientChat->isIdle()) && $clientChatRequest->isAgentUttered()) {
+                $this->clientChatService->autoReturn($clientChat);
             }
         } else {
             $this->clientChatRequestRepository->save($clientChatRequest);
