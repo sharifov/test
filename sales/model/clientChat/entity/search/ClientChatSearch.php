@@ -444,8 +444,11 @@ class ClientChatSearch extends ClientChat
                 'cch_created_dt' => SORT_ASC,
             ]);
         } elseif (GroupFilter::isFreeToTake($filter->group)) {
-            $query->byStatus(ClientChat::STATUS_IDLE);
-            $query->orderBy(['cch_updated_dt' => SORT_ASC]);
+            $query->freeToTake();
+            $query->orderBy([
+                '(cch_status_id = ' . ClientChat::STATUS_TRANSFER . ')' => SORT_DESC,
+                'cch_created_dt' => SORT_ASC,
+            ]);
         } else {
             $query->byOwner($user->id);
             $query->orderBy(['cch_updated_dt' => SORT_DESC]);
@@ -519,7 +522,7 @@ class ClientChatSearch extends ClientChat
 
     public function countFreeToTake(Employee $user, array $channelsIds, FilterForm $filter): int
     {
-        $query = ClientChat::find()->byStatus(ClientChat::STATUS_IDLE);
+        $query = ClientChat::find()->freeToTake();
 
         if ($filter->channelId) {
             $query->byChannel($filter->channelId);
