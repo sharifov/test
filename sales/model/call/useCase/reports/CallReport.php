@@ -9,36 +9,36 @@ use yii\helpers\FileHelper;
 
 class CallReport
 {
-    private const PHONES = [
-        '+18559404266',
-        '+18559404246',
-        '+18559404224',
-        '+18559404288',
-    ];
+    private array $phones;
+    private Credential $credential;
+
+    public function __construct(array $phones, Credential $credential)
+    {
+        $this->phones = $phones;
+        $this->credential = $credential;
+    }
 
     public function generate(): void
     {
-        $params = \Yii::$app->params['price_line_ftp_credential'];
-        $newFileName = 'Test1_Call_Report_' . date('Y-m-d') . '.csv';
+        $newFileName = 'Call Report_' . date('Y-m-d') . '.csv';
 
-        $result = $this->getResult(self::PHONES);
+        $result = $this->getResult($this->phones);
         $file = $this->writeTmpFile($result);
-        $this->send($file, $newFileName, $params);
-//        FileHelper::unlink($file);
+        $this->send($file, $newFileName);
+        FileHelper::unlink($file);
     }
 
-    private function send(string $file, $newFileName, $params)
+    private function send(string $file, $newFileName)
     {
-//        $this->withSFTP($file, $newFileName, $params);
-//        $this->withCurl($file, $newFileName, $params);
+        $this->withSFTP($file, $newFileName);
     }
 
-    private function withSFTP($file, $newFileName, $params)
+    private function withSFTP($file, $newFileName)
     {
         try {
-            $sftp = new SFTPConnection($params['url'], $params['port']);
-            $sftp->login($params['user'], $params['pass']);
-            $sftp->uploadFile($file, $params['path'] . '/' . $newFileName);
+            $sftp = new SFTPConnection($this->credential->url, $this->credential->port);
+            $sftp->login($this->credential->user, $this->credential->password);
+            $sftp->uploadFile($file, $this->credential->path . '/' . $newFileName);
         } catch (\Throwable $e) {
             \Yii::error($e);
         }
@@ -116,6 +116,8 @@ class CallReport
             ->andWhere(['>=', 'c_created_dt', new Expression('date(now()) - interval 1 day')])
             ->andWhere(['<', 'c_created_dt', new Expression('date(now())')])
             ->orderBy(['`Time Stamp (UTC)`' => SORT_ASC]);
-        return $query->all();
+        $data = $query->all();
+        array_unshift($data, ['Time Stamp (UTC)', 'Call ID', 'Call Length', 'Phone number']);
+        return $data;
     }
 }

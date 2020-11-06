@@ -31,21 +31,25 @@ class SFTPConnection
     public function uploadFile($local_file, $remote_file): void
     {
         $sftp = $this->sftp;
-        $stream = @fopen("ssh2.sftp://$sftp$remote_file", 'w');
+        $remoteStream = @fopen("ssh2.sftp://{$sftp}/" . $remote_file, 'w');
 
-        if (!$stream) {
+        if (!$remoteStream) {
             throw new \Exception("Could not open file: $remote_file");
         }
 
-        $data_to_send = @file_get_contents($local_file);
-        if ($data_to_send === false) {
+        $localStream = @fopen($local_file, 'r');
+        if ($localStream === false) {
+            @fclose($remoteStream);
             throw new \Exception("Could not open local file: $local_file.");
         }
 
-        if (@fwrite($stream, $data_to_send) === false) {
+        if (@stream_copy_to_stream($localStream, $remoteStream) === false) {
+            @fclose($remoteStream);
+            @fclose($localStream);
             throw new \Exception("Could not send data from file: $local_file.");
         }
 
-        @fclose($stream);
+        @fclose($remoteStream);
+        @fclose($localStream);
     }
 }
