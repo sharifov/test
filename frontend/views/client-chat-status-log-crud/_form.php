@@ -32,6 +32,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'csl_description')->textarea(['maxlength' => true]) ?>
 
+        <?= $form->field($model, 'csl_rid')->textInput() ?>
+
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
         </div>

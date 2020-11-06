@@ -40,7 +40,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $model->cslCch->cch_id ?? null;
                 }
             ],
-            //'csl_from_status',
+            'csl_rid',
             [
                 'attribute' => 'csl_from_status',
                 'value' => static function (ClientChatStatusLog $model) {

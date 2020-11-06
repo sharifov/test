@@ -18,6 +18,7 @@ use sales\model\clientChat\entity\ClientChat;
  * @property int| $actionType
  * @property int|null $reasonId
  * @property bool $shallowClose
+ * @property string|null $rid
  */
 class ClientChatArchiveEvent implements ClosedStatusGroupEventInterface
 {
@@ -30,6 +31,7 @@ class ClientChatArchiveEvent implements ClosedStatusGroupEventInterface
     public $actionType;
     public $reasonId;
     public $shallowClose;
+    public $rid;
 
     /**
      * @param int $chatId
@@ -41,6 +43,7 @@ class ClientChatArchiveEvent implements ClosedStatusGroupEventInterface
      * @param int $actionType
      * @param int|null $reasonId
      * @param bool $shallowClose
+     * @param string|null $rid
      */
     public function __construct(
         int $chatId,
@@ -51,7 +54,8 @@ class ClientChatArchiveEvent implements ClosedStatusGroupEventInterface
         ?int $prevChannelId,
         int $actionType,
         ?int $reasonId,
-        bool $shallowClose = true
+        bool $shallowClose = true,
+        ?string $rid = null
     ) {
         $this->chatId = $chatId;
         $this->oldStatus = $oldStatus;
@@ -62,6 +66,7 @@ class ClientChatArchiveEvent implements ClosedStatusGroupEventInterface
         $this->actionType = $actionType;
         $this->reasonId = $reasonId;
         $this->shallowClose = $shallowClose;
+        $this->rid = $rid;
     }
 
     public function getChatId(): int

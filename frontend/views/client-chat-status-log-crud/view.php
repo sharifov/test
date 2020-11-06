@@ -36,6 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'attributes' => [
                 'csl_id',
                 'csl_cch_id',
+                'csl_rid',
                 //'csl_from_status',
                 [
                     'attribute' => 'csl_from_status',

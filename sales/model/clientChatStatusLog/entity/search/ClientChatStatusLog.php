@@ -28,9 +28,10 @@ class ClientChatStatusLog extends ClientChatStatusLogModel
 
             ['csl_user_id', 'integer'],
             ['csl_prev_channel_id', 'integer'],
-			['csl_action_type', 'integer'],
+            ['csl_action_type', 'integer'],
 
-		];
+            ['csl_rid', 'string', 'max' => 150],
+        ];
     }
 
     public function search($params): ActiveDataProvider
@@ -63,6 +64,7 @@ class ClientChatStatusLog extends ClientChatStatusLogModel
             'csl_user_id' => $this->csl_user_id,
             'csl_prev_channel_id' => $this->csl_prev_channel_id,
             'csl_action_type' => $this->csl_action_type,
+            'csl_rid' => $this->csl_rid,
         ]);
 
         $query->andFilterWhere(['like', 'csl_description', $this->csl_description]);

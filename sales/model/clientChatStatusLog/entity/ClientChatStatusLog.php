@@ -21,6 +21,7 @@ use yii\helpers\Html;
  * @property int|null $csl_user_id
  * @property int|null $csl_prev_channel_id
  * @property int $csl_action_type
+ * @property string|null $csl_rid
  *
  * @property ClientChat $cslCch
  * @property Employee $cslOwner
@@ -121,6 +122,8 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
 
             ['csl_user_id', 'integer'],
             ['csl_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['csl_user_id' => 'id']],
+
+            ['csl_rid', 'string', 'max' => 150],
         ];
     }
 
@@ -158,6 +161,7 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
             'csl_user_id' => 'User ID',
             'csl_prev_channel_id' => 'Prev Channel ID',
             'csl_action_type' => 'Action Type',
+            'csl_rid' => 'Room Id',
         ];
     }
 
@@ -178,7 +182,8 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
         ?int $ownerId,
         ?int $creatorId,
         ?int $channelId,
-        int $actionType
+        int $actionType,
+        ?string $rid
     ): self {
         $status = new self();
         $status->csl_cch_id = $chatId;
@@ -188,6 +193,7 @@ class ClientChatStatusLog extends \yii\db\ActiveRecord
         $status->csl_user_id = $creatorId;
         $status->csl_prev_channel_id = $channelId;
         $status->csl_action_type = $actionType;
+        $status->csl_rid = $rid;
         $status->csl_start_dt = date('Y-m-d H:i:s');
         return $status;
     }

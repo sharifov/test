@@ -34,7 +34,8 @@ class ClientChatStatusLogService
         ?int $userId,
         ?int $prevChannel,
         int $actionType,
-        ?int $reasonId
+        ?int $reasonId,
+        ?string $rid
     ): ?int {
         if ($previous = $this->clientChatStatusLogRepository->getPrevious($chatId)) {
             $previous->end();
@@ -47,7 +48,8 @@ class ClientChatStatusLogService
             $ownerId,
             $userId,
             $prevChannel,
-            $actionType
+            $actionType,
+            $rid
         );
         $this->clientChatStatusLogRepository->save($log);
         if ($reasonId) {

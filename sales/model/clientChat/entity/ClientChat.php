@@ -351,7 +351,8 @@ class ClientChat extends \yii\db\ActiveRecord
             $description,
             $this->cch_channel_id,
             $action,
-            null
+            null,
+            $this->cch_rid
         ));
         $this->cch_status_id = self::STATUS_PENDING;
     }
@@ -366,7 +367,8 @@ class ClientChat extends \yii\db\ActiveRecord
             $description,
             (int)$this->cch_channel_id,
             $action,
-            $reasonId
+            $reasonId,
+            $this->cch_rid
         ));
         $this->cch_status_id = self::STATUS_CLOSED;
     }
@@ -387,7 +389,8 @@ class ClientChat extends \yii\db\ActiveRecord
             (int)$this->cch_channel_id,
             $action,
             $reasonId,
-            $shallowClose
+            $shallowClose,
+            $this->cch_rid
         ));
         $this->cch_status_id = self::STATUS_ARCHIVE;
     }
@@ -402,7 +405,8 @@ class ClientChat extends \yii\db\ActiveRecord
             $description,
             (int)$this->cch_channel_id,
             $action,
-            $reasonId
+            $reasonId,
+            $this->cch_rid
         ));
         $this->cch_status_id = self::STATUS_TRANSFER;
     }
@@ -417,7 +421,8 @@ class ClientChat extends \yii\db\ActiveRecord
             null,
             $this->cch_channel_id,
             $action,
-            null
+            null,
+            $this->cch_rid
         ));
         $this->cch_status_id = self::STATUS_IN_PROGRESS;
     }
@@ -436,7 +441,8 @@ class ClientChat extends \yii\db\ActiveRecord
             $description,
             $this->cch_channel_id,
             $action,
-            $reasonId
+            $reasonId,
+            $this->cch_rid
         ));
         $this->cch_status_id = self::STATUS_HOLD;
     }
@@ -455,7 +461,8 @@ class ClientChat extends \yii\db\ActiveRecord
             $description,
             $this->cch_channel_id,
             $action,
-            $reasonId
+            $reasonId,
+            $this->cch_rid
         ));
         $this->cch_status_id = self::STATUS_IDLE;
     }

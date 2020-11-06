@@ -39,7 +39,8 @@ class ClientChatIdleStatusLogListener
                 $event->creatorUserId,
                 $event->prevChannelId,
                 $event->actionType,
-                $event->reasonId
+                $event->reasonId,
+                $event->rid
             );
             Notifications::pub(
                 ['chat-' . $event->chatId],

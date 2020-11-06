@@ -16,6 +16,7 @@ namespace sales\model\clientChat\event;
  * @property int|null $prevChannelId
  * @property int| $actionType
  * @property int|null $reasonId
+ * @property string|null $rid
  */
 class ClientChatIdleEvent
 {
@@ -27,6 +28,7 @@ class ClientChatIdleEvent
     public $prevChannelId;
     public $actionType;
     public $reasonId;
+    public $rid;
 
     public function __construct(
         int $chatId,
@@ -36,7 +38,8 @@ class ClientChatIdleEvent
         ?string $description,
         ?int $prevChannelId,
         int $actionType,
-        ?int $reasonId
+        ?int $reasonId,
+        ?string $rid
     ) {
         $this->chatId = $chatId;
         $this->oldStatus = $oldStatus;
@@ -46,5 +49,6 @@ class ClientChatIdleEvent
         $this->prevChannelId = $prevChannelId;
         $this->actionType = $actionType;
         $this->reasonId = $reasonId;
+        $this->rid = $rid;
     }
 }
