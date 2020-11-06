@@ -20,7 +20,7 @@ class CallReport
 
     public function generate(): void
     {
-        $newFileName = 'Call Report_' . date('Y-m-d') . '.csv';
+        $newFileName = 'CallReport_' . date('Y-m-d') . '.csv';
 
         $result = $this->getResult($this->phones);
         $file = $this->writeTmpFile($result);
