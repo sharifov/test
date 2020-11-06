@@ -26,6 +26,7 @@ use sales\viewModel\call\ViewModelTotalCallGraph;
             ]
         ],
 		'target' => \kartik\export\ExportMenu::TARGET_BLANK,
+        'bsVersion' => '3.x',
 		'fontAwesome' => true,
 		'dropdownOptions' => [
 			'label' => 'Full Export'

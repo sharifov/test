@@ -6,16 +6,17 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
 /**
  * @var $viewModel ViewModelTotalCallGraph
  */
-
 ?>
 
 <?php if ($viewModel->callData): ?>
-  <div class="btn-toolbar">
-    <?= $this->render('_call_graph_export', ['viewModel' => $viewModel]) ?>
-    <div class="btn-group" role="group">
-        <button id="lineType" class="btn btn-outline-secondary btn-group ml-2" value="LineChart"><i class="fa fa-line-chart blue"></i></button>
-        <button id="columnType" class="btn btn-outline-secondary btn-group" value="ColumnChart"><i class="fa fa-bar-chart blue"></i></button>
-    </div>
+    <div class="btn-toolbar">
+        <?= $this->render('_call_graph_export', ['viewModel' => $viewModel]) ?>
+        <div class="btn-group" role="group">
+            <button id="lineType" class="btn btn-outline-secondary btn-group ml-2" value="LineChart"><i
+                        class="fa fa-line-chart blue"></i></button>
+            <button id="columnType" class="btn btn-outline-secondary btn-group" value="ColumnChart"><i
+                        class="fa fa-bar-chart blue"></i></button>
+        </div>
     </div>
     <div id="myChart"></div>
 
@@ -23,21 +24,24 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
     <div class="row d-flex align-items-center">
         <div class="col-md-2">
             <label class="control-label">View Columns on Graph</label>
-            <?= \yii\helpers\Html::checkboxList('totalChartColumns', $viewModel->callGraphsSearch->totalChartColumns, $viewModel->callGraphsSearch::getChartTotalCallTextList(), [
-                'itemOptions' => [
-                    'class' => 'totalChartColumns',
-                    'data-name' => $viewModel->callGraphsSearch->formName().'[totalChartColumns][]'
-                ]
-            ]) ?>
+            <?= \yii\helpers\Html::checkboxList('totalChartColumns', $viewModel->callGraphsSearch->totalChartColumns,
+                $viewModel->callGraphsSearch::getChartTotalCallTextList(), [
+                    'itemOptions' => [
+                        'class' => 'totalChartColumns',
+                        'data-name' => $viewModel->callGraphsSearch->formName() . '[totalChartColumns][]'
+                    ]
+                ]) ?>
         </div>
 
         <div class="col-md-2">
             <div class="form-group">
                 <label class="control-label">Measure</label>
-                <?= \yii\helpers\Html::dropDownList('chartTotalCallsVaxis', $viewModel->callGraphsSearch->chartTotalCallsVaxis, $viewModel->callGraphsSearch::getChartTotalCallsVaxisTextList(), [
-                    'class' => 'form-control chartTotalCallsVaxis',
-                    'data-name' => $viewModel->callGraphsSearch->formName().'[chartTotalCallsVaxis]'
-                ]) ?>
+                <?= \yii\helpers\Html::dropDownList('chartTotalCallsVaxis',
+                    $viewModel->callGraphsSearch->chartTotalCallsVaxis,
+                    $viewModel->callGraphsSearch::getChartTotalCallsVaxisTextList(), [
+                        'class' => 'form-control chartTotalCallsVaxis',
+                        'data-name' => $viewModel->callGraphsSearch->formName() . '[chartTotalCallsVaxis]'
+                    ]) ?>
             </div>
         </div>
     </div>
@@ -47,7 +51,7 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
     ]) ?>
 
     <script type="text/javascript">
-        $(document).ready( function () {
+        $(document).ready(function () {
 
             $('a[class^="export-full"]').off();
 
@@ -56,7 +60,7 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
             var totalCallsDataAvg = <?= $viewModel->totalCallsGraphDataAvg ?>;
             var totalCallsRecDurationData = <?= $viewModel->totalCallsRecDurationData ?>;
             var totalCallsRecDurationDataAVG = <?= $viewModel->totalCallsRecDurationDataAVG ?>;
-
+            var groupBy = 'Grouped by ' + '<?= CallGraphsSearch::DATE_FORMAT_TEXT[$viewModel->callGraphsSearch->callGraphGroupBy] ?>';
 
             var selectedMeasure = +$('.chartTotalCallsVaxis').val();
             var measuresText = <?= json_encode(CallGraphsSearch::getChartTotalCallsVaxisTextList()) ?>;
@@ -72,28 +76,17 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
                 graphData = totalCallsRecDurationDataAVG;
             }
 
-            google.charts.load('current', {'packages':['corechart','bar']});
+            google.charts.load('current', {'packages': ['corechart', 'bar']});
             google.charts.setOnLoadCallback(function () {
+
                 var chartType = document.getElementById("lineType").value;
                 var totalCallsChart = new google.visualization[chartType](document.getElementById('myChart'));
-
-                $("#lineType").on('click', function () {
-                    chartType = document.getElementById("lineType").value;
-                    totalCallsChart = new google.visualization[chartType](document.getElementById('myChart'));
-                    totalCallsChart.draw(data, options);
-                });
-
-                $("#columnType").on('click', function () {
-                    chartType = document.getElementById("columnType").value;
-                    totalCallsChart = new google.visualization[chartType](document.getElementById('myChart'));
-                    totalCallsChart.draw(data, options);
-                });
 
                 var colors = ['#8ec5ff', '#dd4b4e', '#587ca6'];
 
                 var options = {
-                    title: measuresText[selectedMeasure]+': ' + timeRange,
-                    chartArea:{width:'95%', right: 10},
+                    title: measuresText[selectedMeasure] + ': ' + timeRange + ' ' + groupBy,
+                    chartArea: {width: '95%', right: 10},
                     textStyle: {
                         color: '#596b7d'
                     },
@@ -103,7 +96,7 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
                     colors: colors,
                     enableInteractivity: true,
                     height: 650,
-                    animation:{
+                    animation: {
                         duration: 200,
                         easing: 'linear',
                         startup: true
@@ -114,8 +107,8 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
                     },
                     hAxis: {
                         title: 'Date',
-                        slantedText:true,
-                        slantedTextAngle:30,
+                        slantedText: true,
+                        slantedTextAngle: 30,
                         textStyle: {
                             fontSize: 12,
                             color: '#596b7d',
@@ -139,26 +132,31 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
                 var arr = [0];
                 var c = [];
 
+                /*var indexes = {
+                    1: [1, 2],
+                    2: [3, 4],
+                    3: [5, 6]
+                };*/
+
                 var indexes = {
-                    1: [1,2],
-                    2: [3,4],
-                    3: [5,6]
+                    0: [1, 2],
+                    1: [3, 4],
                 };
 
-                $('.totalChartColumns:checked').each( function(i, elem) {
+                $('.totalChartColumns:checked').each(function (i, elem) {
                     if (
                         selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION ?>
                         || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION_AVG ?>
                         || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS_AVG ?>
                         || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS ?>
                     ) {
-                        indexes[+$(elem).val()].forEach( function (e) {
+                        indexes[i].forEach(function (e) {
                             arr.push(e);
                         });
-                        c.push(colors[+$(elem).val()-1]);
+                        c.push(colors[+$(elem).val() - 1]);
                     } else {
                         arr.push((+$(elem).val()));
-                        c.push(colors[+$(elem).val()-1]);
+                        c.push(colors[+$(elem).val() - 1]);
                     }
                 });
                 totalCallsChart.draw(data, options);
@@ -167,7 +165,7 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
                     view.setColumns(arr);
                     totalCallsChart.draw(view, options);
                 }, 1);
-                $(window).resize(function(){
+                $(window).resize(function () {
                     totalCallsChart.draw(data, options);
                 });
 
@@ -193,27 +191,26 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
                     let arr = [0];
                     let c = [];
                     var selectedMeasure = +$('.chartTotalCallsVaxis').val();
-                    $('.totalChartColumns:checked').each( function(i, elem) {
+                    $('.totalChartColumns:checked').each(function (i, elem) {
                         if (
                             selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION ?>
                             || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION_AVG ?>
                             || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS_AVG ?>
                             || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS ?>
                         ) {
-                            indexes[+$(elem).val()].forEach( function (e) {
+                            indexes[i].forEach(function (e) {
                                 arr.push(e);
                             });
-                            c.push(colors[+$(elem).val()-1]);
+                            c.push(colors[+$(elem).val() - 1]);
                         } else {
                             arr.push((+$(elem).val()));
-                            c.push(colors[+$(elem).val()-1]);
+                            c.push(colors[+$(elem).val() - 1]);
                         }
                     });
                     options.colors = c;
-                    options.title = measuresText[val]+': ' + timeRange;
+                    options.title = measuresText[val] + ': ' + timeRange + ' ' + groupBy;
 
-                    $('select[name="'+$(this).attr('data-name')+'"]').val($(this).val()).change();
-
+                    $('select[name="' + $(this).attr('data-name') + '"]').val($(this).val()).change();
                     view.setColumns(arr);
                     totalCallsChart.draw(data, options);
                     totalCallsChart.draw(view, options);
@@ -225,7 +222,7 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
                     var arr = [0];
                     let c = [];
                     var selectedMeasure = +$('.chartTotalCallsVaxis').val();
-                    $('.totalChartColumns').each( function(i, elem) {
+                    $('.totalChartColumns').each(function (i, elem) {
                         if ($(elem).prop('checked')) {
                             if (
                                 selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION ?>
@@ -233,17 +230,17 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
                                 || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS_AVG ?>
                                 || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS ?>
                             ) {
-                                indexes[+$(elem).val()].forEach( function (e) {
+                                indexes[i].forEach(function (e) {
                                     arr.push(e);
                                 });
-                                c.push(colors[+$(elem).val()-1]);
+                                c.push(colors[+$(elem).val() - 1]);
                             } else {
                                 arr.push((+$(elem).val()));
-                                c.push(colors[+$(elem).val()-1]);
+                                c.push(colors[+$(elem).val() - 1]);
                             }
                         }
 
-                        $('input[name="'+$(elem).attr('data-name')+'"][value="'+$(elem).val()+'"]').prop('checked', $(elem).prop('checked'));
+                        $('input[name="' + $(elem).attr('data-name') + '"][value="' + $(elem).val() + '"]').prop('checked', $(elem).prop('checked'));
                     });
 
                     if (arr.length < 2) {
@@ -267,7 +264,7 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
                     var arr = [0];
                     let c = [];
                     var selectedMeasure = +$('.chartTotalCallsVaxis').val();
-                    $('.totalChartColumns').each( function(i, elem) {
+                    $('.totalChartColumns').each(function (i, elem) {
                         if ($(elem).prop('checked')) {
                             if (
                                 selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION ?>
@@ -275,17 +272,17 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
                                 || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS_AVG ?>
                                 || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS ?>
                             ) {
-                                indexes[+$(elem).val()].forEach( function (e) {
+                                indexes[i].forEach(function (e) {
                                     arr.push(e);
                                 });
-                                c.push(colors[+$(elem).val()-1]);
+                                c.push(colors[+$(elem).val() - 1]);
                             } else {
                                 arr.push((+$(elem).val()));
-                                c.push(colors[+$(elem).val()-1]);
+                                c.push(colors[+$(elem).val() - 1]);
                             }
                         }
 
-                        $('input[name="'+$(elem).attr('data-name')+'"][value="'+$(elem).val()+'"]').prop('checked', $(elem).prop('checked'));
+                        $('input[name="' + $(elem).attr('data-name') + '"][value="' + $(elem).val() + '"]').prop('checked', $(elem).prop('checked'));
                     });
 
                     if (arr.length < 2) {
@@ -300,6 +297,110 @@ use sales\viewmodel\call\ViewModelTotalCallGraph;
 
                     view.setColumns(arr);
                     options.colors = c;
+                    totalCallsChart.draw(view, options);
+                });
+
+                $("#lineType").on('click', function () {
+                    chartType = document.getElementById("lineType").value;
+                    totalCallsChart = new google.visualization[chartType](document.getElementById('myChart'));
+                    //totalCallsChart.draw(data, options);
+                    var selectedMeasure = +$('.chartTotalCallsVaxis').val();
+
+                    if (selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS ?>) { // calls
+                        graphData = totalCallsData;
+                        options.vAxis.title = '<?= CallGraphsSearch::getChartTotalCallsVaxisText(CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS) ?>';
+                    } else if (selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS_AVG ?>) {
+                        graphData = totalCallsDataAvg;
+                        options.vAxis.title = '<?= CallGraphsSearch::getChartTotalCallsVaxisText(CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS_AVG) ?>';
+                    } else if (selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION ?>) { // calls recording
+                        graphData = totalCallsRecDurationData;
+                        options.vAxis.title = '<?= CallGraphsSearch::getChartTotalCallsVaxisText(CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION) ?>';
+                    } else if (selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION_AVG ?>) {
+                        graphData = totalCallsRecDurationDataAVG;
+                        options.vAxis.title = '<?= CallGraphsSearch::getChartTotalCallsVaxisText(CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION_AVG) ?>';
+                    }
+
+                    let data = google.visualization.arrayToDataTable(graphData);
+                    let view = new google.visualization.DataView(data);
+                    let arr = [0];
+                    let c = [];
+
+                    $('.totalChartColumns:checked').each(function (i, elem) {
+                        if ($(elem).prop('checked')) {
+                            if (
+                                selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION ?>
+                                || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION_AVG ?>
+                                || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS_AVG ?>
+                                || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS ?>
+                            ) {
+                                indexes[i].forEach(function (e) {
+                                    arr.push(e);
+                                });
+                                c.push(colors[+$(elem).val() - 1]);
+                            } else {
+                                arr.push((+$(elem).val()));
+                                c.push(colors[+$(elem).val() - 1]);
+                            }
+                        }
+                    });
+                    options.colors = c;
+                    options.title = measuresText[selectedMeasure] + ': ' + timeRange  + ' ' + groupBy;
+
+                    $('select[name="' + $(this).attr('data-name') + '"]').val($(this).val()).change();
+
+                    view.setColumns(arr);
+                    totalCallsChart.draw(data, options);
+                    totalCallsChart.draw(view, options);
+                });
+
+                $("#columnType").on('click', function () {
+                    chartType = document.getElementById("columnType").value;
+                    totalCallsChart = new google.visualization[chartType](document.getElementById('myChart'));
+                    //totalCallsChart.draw(data, options);
+                    var selectedMeasure = +$('.chartTotalCallsVaxis').val();
+
+                    if (selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS ?>) { // calls
+                        graphData = totalCallsData;
+                        options.vAxis.title = '<?= CallGraphsSearch::getChartTotalCallsVaxisText(CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS) ?>';
+                    } else if (selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS_AVG ?>) {
+                        graphData = totalCallsDataAvg;
+                        options.vAxis.title = '<?= CallGraphsSearch::getChartTotalCallsVaxisText(CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS_AVG) ?>';
+                    } else if (selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION ?>) { // calls recording
+                        graphData = totalCallsRecDurationData;
+                        options.vAxis.title = '<?= CallGraphsSearch::getChartTotalCallsVaxisText(CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION) ?>';
+                    } else if (selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION_AVG ?>) {
+                        graphData = totalCallsRecDurationDataAVG;
+                        options.vAxis.title = '<?= CallGraphsSearch::getChartTotalCallsVaxisText(CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION_AVG) ?>';
+                    }
+
+                    let data = google.visualization.arrayToDataTable(graphData);
+                    let view = new google.visualization.DataView(data);
+                    let arr = [0];
+                    let c = [];
+
+                    $('.totalChartColumns:checked').each(function (i, elem) {
+                        if (
+                            selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION ?>
+                            || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_REC_DURATION_AVG ?>
+                            || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS_AVG ?>
+                            || selectedMeasure === <?= CallGraphsSearch::CHART_TOTAL_CALLS_VAXIS_CALLS ?>
+                        ) {
+                            indexes[i].forEach(function (e) {
+                                arr.push(e);
+                            });
+                            c.push(colors[+$(elem).val() - 1]);
+                        } else {
+                            arr.push((+$(elem).val()));
+                            c.push(colors[+$(elem).val() - 1]);
+                        }
+                    });
+                    options.colors = c;
+                    options.title = measuresText[selectedMeasure] + ': ' + timeRange + ' ' + groupBy;
+
+                    $('select[name="' + $(this).attr('data-name') + '"]').val($(this).val()).change();
+
+                    view.setColumns(arr);
+                    totalCallsChart.draw(data, options);
                     totalCallsChart.draw(view, options);
                 });
             });
