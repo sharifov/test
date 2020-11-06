@@ -11,6 +11,7 @@ class ClientChatChannelDefaultSettings
         'maxMessageLength' => 500,
         'showOnRegister' => true,
         'canStartFromArchived' => true,
+        'displayOrder' => 0,
         'audioRecording' => [
             'enabled' => true,
             'maxLength' => 30
@@ -54,7 +55,6 @@ class ClientChatChannelDefaultSettings
         ],
         'system' => [
             'allowTransferChannelActiveChat' => false,
-            'displayOrder' => 0
         ]
     ];
 
