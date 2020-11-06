@@ -80,6 +80,10 @@ redis-cli
 127.0.0.1:6379> SUBSCRIBE "user-167"
 ```
 
+1.3)
+
+sudo apt install php-ssh2
+
 2). Composer INSTALL:
 
 ```
@@ -375,6 +379,7 @@ CRONs
 */3 * * * *         php /var/www/sale/yii user-monitor/logout
 */1 * * * *   run-this-one php /var/www/sale/yii client-chat/idle
 */1 * * * *   run-this-one php /var/www/sale/yii client-chat/hold-to-progress
+30 4 * * * php /var/www/sale/yii call-report/priceline
 ```
   
 ```
