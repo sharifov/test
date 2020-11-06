@@ -368,6 +368,7 @@ class ClientChat extends \yii\db\ActiveRecord
             (int)$this->cch_channel_id,
             $action,
             $reasonId,
+            true,
             $this->cch_rid
         ));
         $this->cch_status_id = self::STATUS_CLOSED;
