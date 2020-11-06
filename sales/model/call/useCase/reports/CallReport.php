@@ -3,32 +3,27 @@
 namespace sales\model\call\useCase\reports;
 
 use common\models\Call;
-use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\FileHelper;
 
 class CallReport
 {
-    private array $phones;
     private Credential $credential;
 
-    public function __construct(array $phones, Credential $credential)
+    public function __construct(Credential $credential)
     {
-        $this->phones = $phones;
         $this->credential = $credential;
     }
 
-    public function generate(): void
+    public function generate(array $phones, string $fileName, string $date): void
     {
-        $newFileName = 'CallReport_' . date('Y-m-d') . '.csv';
-
-        $result = $this->getResult($this->phones);
+        $result = $this->getResult($phones, $date);
         $file = $this->writeTmpFile($result);
-        $this->send($file, $newFileName);
+        $this->send($file, $fileName);
         FileHelper::unlink($file);
     }
 
-    private function send(string $file, $newFileName)
+    private function send(string $file, string $newFileName): void
     {
         $this->withSFTP($file, $newFileName);
     }
@@ -89,8 +84,10 @@ class CallReport
         return $file;
     }
 
-    private function getResult(array $phones): array
+    private function getResult(array $phones, string $date): array
     {
+        $fromDate =  date('Y-m-d H:i:s', strtotime($date));
+        $toDate =  date('Y-m-d H:i:s', strtotime('+1 day', strtotime($date)));
         $query = (new Query())
             ->select([
                 '`Time Stamp (UTC)`' => 'c_created_dt',
@@ -113,8 +110,8 @@ class CallReport
             )
             ->andWhere(['c_call_type_id' => Call::CALL_TYPE_IN])
             ->andWhere(['c_to' => $phones])
-            ->andWhere(['>=', 'c_created_dt', new Expression('date(now()) - interval 1 day')])
-            ->andWhere(['<', 'c_created_dt', new Expression('date(now())')])
+            ->andWhere(['>=', 'c_created_dt', $fromDate])
+            ->andWhere(['<', 'c_created_dt', $toDate])
             ->orderBy(['`Time Stamp (UTC)`' => SORT_ASC]);
         $data = $query->all();
         array_unshift($data, ['Time Stamp (UTC)', 'Call ID', 'Call Length', 'Phone number']);
