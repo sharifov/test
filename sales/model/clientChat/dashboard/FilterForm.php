@@ -27,6 +27,7 @@ use yii\helpers\Html;
  * @property $fromDate
  * @property $toDate
  * @property $rangeDate
+ * @property $clientName
  * @property $resetAdditionalFilter
  * @property array       $channels
  * @property Permissions $permissions
@@ -44,6 +45,7 @@ class FilterForm extends Model
     public const DEFAULT_VALUE_FROM_DATE = null;
     public const DEFAULT_VALUE_TO_DATE = null;
     public const DEFAULT_VALUE_SHOW_FILTER = 0;
+    public const DEFAULT_VALUE_CLIENT_NAME = null;
 
     public $channelId;
     public $status;
@@ -59,6 +61,7 @@ class FilterForm extends Model
     public $rangeDate;
     public $resetAdditionalFilter = false;
     public $showFilter;
+    public $clientName;
 
     private array $channels;
 
@@ -69,6 +72,7 @@ class FilterForm extends Model
         'userId',
         'rangeDate',
         'status',
+        'clientName',
     ];
 
     public function __construct(array $channels, $config = [])
@@ -131,6 +135,8 @@ class FilterForm extends Model
 
             ['rangeDate', 'safe'],
             ['resetAdditionalFilter', 'boolean'],
+
+            [['clientName'], 'string', 'max' => 30],
         ];
     }
 
@@ -216,6 +222,9 @@ class FilterForm extends Model
         }
         if ($this->createdDate === null || $this->hasErrors('createdDate')) {
             $this->createdDate = self::DEFAULT_VALUE_CREATED_DATE;
+        }
+        if ($this->clientName === null || $this->hasErrors('clientName')) {
+            $this->clientName = self::DEFAULT_VALUE_CLIENT_NAME;
         }
     }
 
@@ -333,6 +342,7 @@ class FilterForm extends Model
             'project' => 'Project',
             'userId' => 'User ID',
             'rangeDate' => 'Created range dates',
+            'clientName' => 'Client Name',
         ];
     }
 
@@ -358,6 +368,7 @@ class FilterForm extends Model
         $this->fromDate = self::DEFAULT_VALUE_FROM_DATE;
         $this->toDate = self::DEFAULT_VALUE_TO_DATE;
         $this->status = self::DEFAULT_VALUE_STATUS;
+        $this->clientName = self::DEFAULT_VALUE_CLIENT_NAME;
         return $this;
     }
 }

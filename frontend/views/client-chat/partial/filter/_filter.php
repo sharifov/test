@@ -86,9 +86,7 @@ use yii\web\JsExpression;
                 <?php endif; ?>
             </div>
 
-        <?php
-            if ($filter->permissions->canProject() || $filter->permissions->canUser() || $filter->permissions->canCreatedDate() || $filter->permissions->canStatus()):
-        ?>
+        <?php if ($filter->permissions->canAdditionalFilter()): ?>
 
             <?php $isAdditionalFilterActive = $filter->isAdditionalFilterActive(); ?>
 
@@ -224,6 +222,23 @@ use yii\web\JsExpression;
                         ]); ?>
                     </div>
                 <?php endif; ?>
+
+                <?php if ($filter->permissions->canClientName()): ?>
+                    <div class="col-md-6">
+                        <?php echo Html::label('Client Name:', null, ['class' => 'control-label']); ?>
+                        <?php echo Html::textInput(
+                            Html::getInputName($filter, 'clientName'),
+                            $filter->clientName,
+                            [
+                                'id' => Html::getInputId($filter, 'clientName'),
+                                'class' => 'form-control',
+                                'autocomplete' => 'off',
+                                'onchange' => new JsExpression('window.updateClientChatFilter("' . $filter->getId() . '", "' . $filter->formName() . '", "' . $loadChannelsUrl . '");'),
+                            ]
+                        ) ?>
+                    </div>
+                <?php endif; ?>
+
             </div>
 
     <?php endif; ?>

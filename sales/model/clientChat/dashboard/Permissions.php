@@ -16,6 +16,7 @@ class Permissions
     private $group_my_chats;
     private $group_other_chats;
     private $group_free_to_take;
+    private $client_name;
 
     public function canChannel(): bool
     {
@@ -116,4 +117,19 @@ class Permissions
     {
         return $this->canGroupMyChats() && $this->canGroupOtherChats() && $this->canGroupFreeToTake();
     }
+
+    public function canClientName(): bool
+    {
+        if ($this->client_name !== null) {
+            return $this->client_name;
+        }
+        $this->client_name = Auth::can('client-chat/dashboard/filter/client_name');
+        return $this->client_name;
+    }
+
+    public function canAdditionalFilter(): bool
+    {
+        return $this->canProject() || $this->canUser() || $this->canCreatedDate() || $this->canStatus() || $this->canClientName();
+    }
+
 }

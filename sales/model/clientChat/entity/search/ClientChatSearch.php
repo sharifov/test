@@ -489,6 +489,13 @@ class ClientChatSearch extends ClientChat
             $query->byStatus($filter->status);
         }
 
+        if ($filter->clientName) {
+            $query->andWhere(['OR',
+                ['like', 'client.first_name', $filter->clientName],
+                ['like', 'client.last_name', $filter->clientName]
+            ]);
+        }
+
         $query->join('JOIN', ['client' => Client::tableName()], 'cch_client_id = client.id');
         $query->join('JOIN', [ClientChatChannel::tableName()], 'cch_channel_id = ccc_id');
         $query->leftJoin(Department::tableName(), 'cch_dep_id = dep_id');
