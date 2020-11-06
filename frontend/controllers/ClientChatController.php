@@ -1501,7 +1501,7 @@ class ClientChatController extends FController
             }
 
             if ($client = $this->clientManageService->detectClientFromChatRequest($form->projectId, null, null, $form->visitorId)) {
-                $activeChannelsIds = ClientChat::find()->select(['cch_channel_id'])->distinct()->withOwner()->byClientId($client->id)->notClosed()->column();
+                $activeChannelsIds = ClientChat::find()->select(['cch_channel_id'])->distinct()->withOwner()->byClientId($client->id)->notClosed()->notArchived()->column();
             }
 
             $channels = $this->clientChatChannelRepository->getByUserAndProject(
