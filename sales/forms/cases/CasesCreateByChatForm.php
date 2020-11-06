@@ -71,7 +71,7 @@ class CasesCreateByChatForm extends Model
             ['sourceTypeId', 'required'],
             ['sourceTypeId', 'integer'],
             ['sourceTypeId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['sourceTypeId', 'in', 'range' => array_keys($this->getSourceTypeList())],
+            ['sourceTypeId', 'compare', 'compareValue' => CasesSourceType::CHAT, 'operator' => '==', 'type' => 'number'],
 
             ['orderUid', 'default', 'value' => null],
             ['orderUid', 'string', 'min'  => '5', 'max' => 7],

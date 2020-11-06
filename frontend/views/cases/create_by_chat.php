@@ -50,7 +50,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                         <?= $form->field($model, 'categoryId')->dropDownList($model->getCategories(), ['prompt' => 'Choose a category']) ?>
 
-                        <?= $form->field($model, 'sourceTypeId')->dropDownList($model->getSourceTypeList(), ['prompt' => 'Choose a source type']) ?>
+                        <?= $form->field($model, 'sourceTypeId')->hiddenInput()->label(false) ?>
 
                         <?= $form->field($model, 'orderUid')->textInput(['maxlength' => 7]) ?>
 
