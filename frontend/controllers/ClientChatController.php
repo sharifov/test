@@ -1464,7 +1464,7 @@ class ClientChatController extends FController
                 $this->clientChatRequestRepository->save($clientChatRequest);
                 $client = $this->clientManageService->getOrCreateByClientChatRequest($clientChatRequest, (int)$form->projectId);
 
-                $activeChatExist = ClientChat::find()->byChannel($channel->ccc_id)->withOwner()->byClientId($client->id)->notClosed()->exists();
+                $activeChatExist = ClientChat::find()->byChannel($channel->ccc_id)->withOwner()->byClientId($client->id)->notClosed()->notArchived()->exists();
                 if ($activeChatExist) {
                     throw new \DomainException('This visitor is already chatting with agent in ' . $department['dep_name'] . ' department');
                 }
