@@ -422,18 +422,19 @@ class ClientChatService
                 null,
                 true
             );
+            $dto = ClientChatCloneDto::feelInOnTransfer($clientChat);
+            $clientChat->changeChannel($oldChannelId);
             $this->clientChatRepository->save($clientChat);
 
-            $dto = ClientChatCloneDto::feelInOnTransfer($clientChat);
             $newClientChat = ClientChat::clone($dto);
             $newClientChat->assignOwner($chatUserAccess->ccua_user_id);
             $newClientChat->cch_source_type_id = ClientChat::SOURCE_TYPE_TRANSFER;
-            if (!$channel = $clientChat->cchChannel) {
+            if (!$clientChat->cchChannel) {
                 $channel = $this->clientChatChannelRepository->findDefaultByProject((int)$clientChat->cch_project_id);
+                $newClientChat->cch_channel_id = $channel->ccc_id;
             }
             $this->clientChatRepository->save($newClientChat);
             $this->cloneLead($clientChat, $newClientChat)->cloneCase($clientChat, $newClientChat)->cloneNotes($clientChat, $newClientChat);
-            $newClientChat->cch_channel_id = $channel->ccc_id;
             $newClientChat->cch_parent_id = $clientChat->cch_id;
             $newClientChat->inProgress($chatUserAccess->ccua_user_id, ClientChatStatusLog::ACTION_ACCEPT_TRANSFER);
             $this->clientChatRepository->save($newClientChat);
