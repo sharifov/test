@@ -18,6 +18,13 @@ use sales\auth\Auth;
             <ul class="nav navbar-right panel_toolbox">
                 <?php if($caseModel->isProcessing()):?>
                     <li>
+                        <?=Html::a('<i class="fas fa-info-circle"></i> Details', '#',  [
+                            'id' => 'btn-client-details',
+                            'data-client-id' => $caseModel->cs_client_id,
+                            'title' => 'Client Info',
+                        ])?>
+                    </li>
+                    <li>
                         <?= \yii\bootstrap\Html::a('<i class="fa fa-plus-circle success"></i> Add Phone', '#', ['id' => 'btn-add-phone', 'title' => 'Add Phone'])?>
                     </li>
                     <li>
