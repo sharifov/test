@@ -7,6 +7,7 @@ use common\components\jobs\CreateSaleFromBOJob;
 use common\models\DepartmentEmailProject;
 use common\models\DepartmentPhoneProject;
 use common\models\Lead;
+use common\models\UserProjectParams;
 use frontend\widgets\notification\NotificationMessage;
 use sales\entities\cases\Cases;
 use sales\forms\lead\EmailCreateForm;
@@ -20,6 +21,7 @@ use sales\services\email\EmailService;
 use sales\services\email\incoming\EmailIncomingService;
 use sales\services\internalContact\InternalContactService;
 use yii\base\BaseObject;
+use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use Yii;
 use common\models\Email;
@@ -89,11 +91,12 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                 $filter['limit'] = 20;
             }
 
-            if (isset($this->request_data['email_list'])) {
-                $filter['email_list'] = $this->request_data['email_list'];
-            } else {
-                $filter['email_list'] = [];
-            }
+//            if (isset($this->request_data['email_list'])) {
+//                $filter['email_list'] = $this->request_data['email_list'];
+//            } else {
+//                $filter['email_list'] = [];
+//            }
+            $filter['email_list'] = Json::encode(['list' => $this->getEmailsForReceivedMessages()]);
 
             /** @var CommunicationService $communication */
             $communication = Yii::$app->communication;
@@ -335,5 +338,15 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
             return $str;
         }
         return filter_var($str, FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW|FILTER_FLAG_STRIP_HIGH);
+    }
+
+    private function getEmailsForReceivedMessages(): array
+    {
+//        $mailsUpp = UserProjectParams::find()->select(['DISTINCT(upp_email)'])->andWhere(['!=', 'upp_email', ''])->column();
+        $mailsUpp = UserProjectParams::find()->select('el_email')->distinct()->joinWith('emailList', false, 'INNER JOIN')->column();
+//        $mailsDep = DepartmentEmailProject::find()->select(['DISTINCT(dep_email)'])->andWhere(['!=', 'dep_email', ''])->column();
+        $mailsDep = DepartmentEmailProject::find()->select(['el_email'])->distinct()->joinWith('emailList', false, 'INNER JOIN')->column();
+        $list = array_merge($mailsUpp, $mailsDep);
+        return $list;
     }
 }

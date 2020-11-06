@@ -2191,14 +2191,14 @@ class CommunicationController extends ApiBaseController
             }
 
             $filter['limit'] = 20;
-            $filter['mail_list'] = $this->getEmailsForReceivedMessages();
+//            $filter['mail_list'] = $this->getEmailsForReceivedMessages();
 
             // push job
             $job = new ReceiveEmailsJob();
             $job->last_email_id = $filter['last_id'];
             $data = [
                 'last_email_id' => $filter['last_id'],
-                'email_list' => $filter['mail_list'],
+//                'email_list' => $filter['mail_list'],
                 'limit' => $filter['limit'],
             ];
 
