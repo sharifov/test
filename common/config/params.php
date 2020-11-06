@@ -56,5 +56,13 @@ return [
         'iv'        => '',
     ],
 	'user_voice_mail_alias' => '@frontend/web/',
-	'liveChatRealTimeVisitors' => 'https://livechat.travelinsides.com/visitors'
+	'liveChatRealTimeVisitors' => 'https://livechat.travelinsides.com/visitors',
+    'price_line_ftp_credential' => [
+        'url' => "priceline-reports.travelinsides.com",
+        'port' => "22",
+        'protocol' => "sftp",
+        'path' => "reports",
+        'user' => "priceline",
+        'pass' => "ajfhiuEfbhvRyfbb(_&*^@31emdiow2rdfn2",
+    ],
 ];
