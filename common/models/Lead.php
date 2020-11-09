@@ -425,6 +425,11 @@ class Lead extends ActiveRecord implements Objectable
         return $this->l_type_create === self::TYPE_CREATE_CLONE;
     }
 
+    public function isClientChatCreated(): bool
+    {
+        return $this->l_type_create === self::TYPE_CREATE_CLIENT_CHAT;
+    }
+
 //    public function init()
 //    {
 //        parent::init();

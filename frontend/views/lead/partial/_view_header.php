@@ -40,7 +40,8 @@ use yii\helpers\Html;
                     </div>
 
                     <div class="page-header__general-item">
-                        <strong>Market:</strong>
+                        <?php $typeCreate = Lead::TYPE_CREATE_LIST[$lead->l_type_create] ?? '-' ?>
+                        <strong title="<?php echo $typeCreate?>">Market:</strong>
                         <span><?= Html::encode(($lead->project ? $lead->project->name : '') . ($lead->source ? ' - ' . $lead->source->name : ''))?></span>
                     </div>
 
