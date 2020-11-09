@@ -2136,9 +2136,10 @@ class LeadController extends FController
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
 
             if (empty($form->source)) {
-                Yii::warning([
-                    'post' => Yii::$app->request->post()
-                ], 'LeadController:actionCreateByChat:sourceNotFound');
+                Yii::warning(VarDumper::dumpAsString([
+                    'post' => Yii::$app->request->post($form->formName()),
+                    'chatId' => $chatId,
+                ]), 'LeadController:actionCreateByChat:sourceNotFound');
             }
 
             try {
