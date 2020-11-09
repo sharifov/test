@@ -327,7 +327,6 @@ class ClientChatController extends FController
             }
         }
 
-
         $loadingChannels = \Yii::$app->request->get('loadingChannels');
         if ($dataProvider) {
             if ($loadingChannels) {
@@ -337,10 +336,12 @@ class ClientChatController extends FController
 //            } else {
 //                $dataProvider->pagination->page = $filter->page = 0;
 //            }
-
+                $alreadyLoadedCount = $dataProvider->getPagination()->getPageSize() * ($page - 1) + $dataProvider->getCount();
                 $response = [
                     'html' => '',
                     'page' => $page,
+                    'isFullList' => $alreadyLoadedCount >= $dataProvider->getTotalCount(),
+                    'moreCount' => $dataProvider->getTotalCount() - $alreadyLoadedCount,
                 ];
 
                 if ($dataProvider->getCount()) {
@@ -366,18 +367,24 @@ class ClientChatController extends FController
             }
         }
 
+        $isFullList =  $dataProvider ? ($dataProvider->getCount() === $dataProvider->getTotalCount()) : false;
+
         return $this->render('index', [
             'dataProvider' => $dataProvider,
             'clientChat' => $clientChat,
             'client' => $clientChat->cchClient ?? null,
             'history' => null,
             'filter' => $filter,
-            'page' => $page + 1,
             'actionPermissions' => $this->actionPermissions,
             'countFreeToTake' => $countFreeToTake,
             'accessChatError' => $accessChatError,
             'resetUnreadMessagesChatId' => $resetUnreadMessagesChatId,
             'couchNoteForm' => new ClientChatCouchNoteForm($clientChat, Auth::user()),
+            'listParams' => [
+                'page' => $page + 1,
+                'isFullList' => $isFullList,
+                'moreCount' => $isFullList ? 0 : $dataProvider->getTotalCount() - $dataProvider->getCount(),
+            ]
         ]);
     }
 
