@@ -11,6 +11,7 @@ use frontend\helpers\JsonHelper;
 use sales\entities\EventTrait;
 use sales\events\quote\QuoteSendEvent;
 use sales\helpers\app\AppHelper;
+use sales\helpers\setting\SettingHelper;
 use sales\services\parsingDump\lib\ParsingDump;
 use sales\services\parsingDump\ReservationService;
 use Yii;
@@ -411,7 +412,7 @@ class Quote extends \yii\db\ActiveRecord
         if($this->lead->getAgentsProcessingFee()){
             $final -= $this->lead->getAgentsProcessingFee();
         }else{
-            $final -= ($this->lead->adults + $this->lead->children)*Lead::AGENT_PROCESSING_FEE_PER_PAX;
+            $final -= ($this->lead->adults + $this->lead->children) * SettingHelper::processingFee();
         }
         return $final;
     }

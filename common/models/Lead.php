@@ -45,6 +45,7 @@ use sales\events\lead\LeadStatusChangedEvent;
 use sales\events\lead\LeadTaskEvent;
 use sales\events\lead\LeadTrashEvent;
 use sales\helpers\lead\LeadHelper;
+use sales\helpers\setting\SettingHelper;
 use sales\interfaces\Objectable;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\callLog\entity\callLog\CallLogType;
@@ -223,7 +224,6 @@ class Lead extends ActiveRecord implements Objectable
 {
     use EventTrait;
 
-    public const AGENT_PROCESSING_FEE_PER_PAX = 25.0;
     public const PENDING_ALLOW_CALL_TIME_MINUTES = 20; // minutes
 
 
@@ -3380,7 +3380,7 @@ Reason: {reason}',
             $this->children = (int) $this->children;
             $this->infants = (int) $this->infants;
             $this->bo_flight_id = (int) $this->bo_flight_id;
-            $this->agents_processing_fee = ($this->adults + $this->children) * self::AGENT_PROCESSING_FEE_PER_PAX;
+            $this->agents_processing_fee = ($this->adults + $this->children) * SettingHelper::processingFee();
             return true;
         }
         return false;
@@ -3516,7 +3516,7 @@ Reason: {reason}',
             return $this->processingFeePerPax;
         }
 
-        $this->processingFeePerPax = self::AGENT_PROCESSING_FEE_PER_PAX;
+        $this->processingFeePerPax = SettingHelper::processingFee();
 
         if ($this->employee_id && $this->employee) {
             $groups = $this->employee->ugsGroups;
