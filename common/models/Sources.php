@@ -180,4 +180,12 @@ class Sources extends \yii\db\ActiveRecord
         }
         return $map;
     }
+
+    public static function getByProjectId(int $projectId): ?Sources
+    {
+        if ($defaultSource = self::findOne(['project_id' => $projectId, 'default' => true])) {
+            return $defaultSource;
+        }
+        return self::findOne(['project_id' => $projectId]);
+    }
 }

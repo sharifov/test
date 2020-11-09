@@ -466,6 +466,9 @@ class LeadSearch extends Lead
             $query->andWhere(['IN', 'leads.id', $subQuery2]);
         }
 
+        if($this->createdType) {
+            $query->andWhere(['l_type_create' => $this->createdType]);
+        }
 
         if (!empty($this->emailsQtyFrom) || !empty($this->emailsQtyTo)) {
             $query->leftJoin([

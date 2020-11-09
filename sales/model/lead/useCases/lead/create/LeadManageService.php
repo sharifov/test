@@ -207,27 +207,16 @@ class LeadManageService
                 throw new \DomainException('Client Chat not assigned with Client');
             }
 
-            $lead = Lead::createManually(
+            $lead = Lead::createByClientChat(
                 $client->id,
                 $client->first_name,
                 $client->last_name,
-                null,
-                null,
-                null,
-                null,
                 $chat->cch_ip,
                 $form->source,
                 $form->projectId,
-                null,
-                null,
-                null,
                 $chat->cchChannel->ccc_dep_id,
-                null
+                $userId
             );
-//            $clientShortInfo = new ClientShortInfo($chat->cchCcr);
-//            $lead->offset_gmt = $clientShortInfo->utc_offset;
-//            $lead->l_client_ua = $clientShortInfo->userAgent;
-//            $lead->request_ip_detail = Json::encode($clientShortInfo->geo);
 
             $lead->processing($userId, $userId, LeadFlow::DESCRIPTION_CLIENT_CHAT_CREATE);
 

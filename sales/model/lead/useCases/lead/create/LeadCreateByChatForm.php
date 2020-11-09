@@ -46,10 +46,16 @@ class LeadCreateByChatForm extends Model
             ['source', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
             ['source', 'exist', 'skipOnError' => true, 'targetClass' => Sources::class, 'targetAttribute' => ['source' => 'id']],
             ['source', 'sourceProjectValidate'],
+            ['source', 'emptyStringToNull', 'skipOnEmpty' => false],
 
             ['projectId', 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['projectId' => 'id']],
             ['projectId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
         ];
+    }
+
+    public function emptyStringToNull(): void
+    {
+        $this->source = $this->source === '' ? null : $this->source;
     }
 
     public function sourceProjectValidate(): void
@@ -70,9 +76,6 @@ class LeadCreateByChatForm extends Model
         if ($sourceId = $this->getSourceIdByLogs()) {
             $this->source = $sourceId;
             return $this;
-        }
-        if ($source = Sources::findOne(['project_id' => $this->projectId, 'default' => 1])) {
-            $this->source = $source->id;
         }
         return $this;
     }
