@@ -88,9 +88,7 @@ return [
         LeadCreatedNewEventLogListener::class,
         LeadSendToGaListener::class,
     ],
-     LeadCreatedClientChatEvent::class => [
-        LeadCreatedClientChatLogListener::class,
-    ],
+     LeadCreatedClientChatEvent::class => [],
 
     LeadDuplicateDetectedEvent::class => [LeadDuplicateDetectedEventListener::class],
     LeadOwnerChangedEvent::class => [LeadOwnerChangedNotificationsListener::class],

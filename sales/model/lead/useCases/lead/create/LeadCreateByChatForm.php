@@ -44,7 +44,6 @@ class LeadCreateByChatForm extends Model
             ['projectId', 'required'],
             ['source', 'integer'],
             ['source', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['source', 'exist', 'skipOnError' => true, 'targetClass' => Sources::class, 'targetAttribute' => ['source' => 'id']],
             ['source', 'sourceProjectValidate'],
             ['source', 'emptyStringToNull', 'skipOnEmpty' => false],
 
@@ -61,7 +60,7 @@ class LeadCreateByChatForm extends Model
     public function sourceProjectValidate(): void
     {
         if ($this->source && !Sources::findOne(['id' => $this->source, 'project_id' => $this->projectId])) {
-            $this->addError('source', 'Source (' . $this->source . ') not found with project (' . $this->projectId . ')');
+            $this->source = null;
         }
     }
 

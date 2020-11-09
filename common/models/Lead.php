@@ -791,7 +791,7 @@ class Lead extends ActiveRecord implements Objectable
         $lead->source_id = $sourceId;
         $lead->project_id = $projectId;
         $lead->l_dep_id = $depId;
-        $lead->status = self::STATUS_PENDING;
+        $lead->status = null;
         $lead->l_type_create = self::TYPE_CREATE_CLIENT_CHAT;
         $lead->recordEvent(new LeadCreatedClientChatEvent($lead, $creatorId));
         return $lead;
