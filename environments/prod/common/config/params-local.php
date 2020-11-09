@@ -52,7 +52,6 @@ return [
     'lead' => [
         'call2DelayTime' => '{{ common.config.params.lead.call2DelayTime:int }}',
     ],
-    'processing_fee' => '{{ common.config.params.processing_fee:int }}',
     'global_phone' => '{{ common.config.params.global_phone:str }}',
 
     'appEnv' => 'prod',

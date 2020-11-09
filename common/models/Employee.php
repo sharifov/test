@@ -9,6 +9,7 @@ use common\models\search\EmployeeSearch;
 use frontend\models\UserFailedLogin;
 use modules\product\src\entities\productType\ProductType;
 use sales\access\EmployeeGroupAccess;
+use sales\helpers\setting\SettingHelper;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatUserAccess\event\UpdateChatUserAccessWidgetEvent;
@@ -1752,7 +1753,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             $quote = Quote::findOne(['id' => $entry['q_id']]);
             if ($entry['final_profit'] !== null) {
                 $totalProfit = $entry['final_profit'];
-                $agentsProcessingFee = ($entry['agents_processing_fee'])?$entry['agents_processing_fee']:$entry['pax_cnt']*Lead::AGENT_PROCESSING_FEE_PER_PAX;
+                $agentsProcessingFee = ($entry['agents_processing_fee'])?$entry['agents_processing_fee']:$entry['pax_cnt']*SettingHelper::processingFee();
                 $totalProfit -= $agentsProcessingFee;
             } else {
                 $totalProfit = $quote->getEstimationProfit();

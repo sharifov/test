@@ -19,6 +19,7 @@ use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productQuote\ProductQuote;
 use sales\helpers\app\AppHelper;
 use sales\helpers\product\ProductQuoteHelper;
+use sales\helpers\setting\SettingHelper;
 use Yii;
 use yii\base\ErrorException;
 use yii\data\ActiveDataProvider;
@@ -142,7 +143,7 @@ class FlightQuoteHelper
 		if($lead->getAgentsProcessingFee()){
 			$final -= $lead->getAgentsProcessingFee();
 		}else{
-			$final -= ($lead->adults + $lead->children)*Flight::AGENT_PROCESSING_FEE_PER_PAX;
+			$final -= ($lead->adults + $lead->children) * SettingHelper::processingFee();
 		}
 		return $final;
 	}

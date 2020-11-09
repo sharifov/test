@@ -7,6 +7,7 @@ use modules\product\src\entities\product\Product;
 use modules\product\src\entities\productTypePaymentMethod\ProductTypePaymentMethod;
 use sales\entities\EventTrait;
 use sales\helpers\product\ProductQuoteHelper;
+use sales\helpers\setting\SettingHelper;
 
 /**
  * This is the model class for table "product_type".
@@ -30,8 +31,6 @@ class ProductType extends \yii\db\ActiveRecord
 
     public const PRODUCT_FLIGHT = 1;
     public const PRODUCT_HOTEL  = 2;
-
-    public const PROCESSING_FEE_AMOUNT = 25.00;
 
     public const ALLOW_CALL_EXPERT = [
         self::PRODUCT_FLIGHT,
@@ -101,7 +100,7 @@ class ProductType extends \yii\db\ActiveRecord
 	{
 		$setting = json_decode((string)$this->pt_settings, true);
 
-		return ProductQuoteHelper::roundPrice(isset($setting['processing_fee_amount']) ? (float)$setting['processing_fee_amount'] : self::PROCESSING_FEE_AMOUNT);
+		return ProductQuoteHelper::roundPrice(isset($setting['processing_fee_amount']) ? (float)$setting['processing_fee_amount'] : SettingHelper::processingFee());
 	}
 
     /**
