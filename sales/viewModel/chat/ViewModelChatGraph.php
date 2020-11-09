@@ -49,7 +49,8 @@ class ViewModelChatGraph
                 (int)$arr['transfer'],
                 (int)$arr['hold'],
                 (int)$arr['idle'],
-                (int)$arr['closed']
+                (int)$arr['closed'],
+                (int)$arr['archive']
             ]);
         }
 
@@ -66,6 +67,7 @@ class ViewModelChatGraph
             'Hold',
             'Idle',
             'Closed',
+            'Archive'
         ];
         if ($mappedData){
             $this->preparedData = json_encode(ArrayHelper::merge([$headers], $mappedData));

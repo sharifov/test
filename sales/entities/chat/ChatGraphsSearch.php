@@ -78,7 +78,8 @@ class ChatGraphsSearch extends ClientChatSearch
             'SUM(IF(cch_status_id = '. ClientChat::STATUS_TRANSFER .', 1, 0)) AS transfer',
             'SUM(IF(cch_status_id = '. ClientChat::STATUS_HOLD .', 1, 0)) AS hold',
             'SUM(IF(cch_status_id = '. ClientChat::STATUS_IDLE .', 1, 0)) AS idle',
-            'SUM(IF(cch_status_id = '. ClientChat::STATUS_CLOSED .', 1, 0)) AS closed'
+            'SUM(IF(cch_status_id = '. ClientChat::STATUS_CLOSED .', 1, 0)) AS closed',
+            'SUM(IF(cch_status_id = '. ClientChat::STATUS_ARCHIVE .', 1, 0)) AS archive'
         ]);
 
         $query->andWhere([
