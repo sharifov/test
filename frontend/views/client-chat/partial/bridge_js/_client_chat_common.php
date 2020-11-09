@@ -222,10 +222,13 @@ $(document).on('click', '#btn-load-channels', function (e) {
         success: function (data) {
             if (data.html) {
                 $('._cc-list-wrapper').append(data.html);
-                btn.html(btnCurrentText).removeAttr('disabled').removeClass('disabled').attr('data-page', data.page);
                 refreshUserSelectedState();
-            } else {
+            }
+            if (data.isFullList) {
                 btn.html('All conversations are loaded');
+            } else {
+                let txt = '<i class="fa fa-angle-double-down"> </i> Load more (<span>' + data.moreCount + '</span>)';
+                btn.html(txt).removeAttr('disabled').removeClass('disabled').attr('data-page', data.page);
             }
             window.history.replaceState({}, '', '{$loadChannelsUrl}?' + urlParams + '&page=' + (data.page - 1));
         },

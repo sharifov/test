@@ -28,12 +28,12 @@ use yii\widgets\Pjax;
 /* @var $history ClientChatMessage|null */
 /** @var $totalUnreadMessages int */
 /** @var FilterForm $filter */
-/** @var int $page */
 /** @var ClientChatActionPermission $actionPermissions */
 /** @var int $countFreeToTake */
 /** @var bool $accessChatError */
 /** @var int|null $resetUnreadMessagesChatId */
 /** @var ClientChatCouchNoteForm $couchNoteForm */
+/** @var array $listParams */
 
 $this->title = 'My Client Chat';
 
@@ -67,9 +67,9 @@ $userRcAuthToken = Auth::user()->userProfile ? Auth::user()->userProfile->up_rc_
                 'loadChannelsUrl' => Url::to('/client-chat/index'),
                 'clientChatId' => $clientChat ? $clientChat->cch_id : null,
                 'filter' => $filter,
-                'page' => $page,
                 'countFreeToTake' => $countFreeToTake,
-                'resetUnreadMessagesChatId' => $resetUnreadMessagesChatId
+                'resetUnreadMessagesChatId' => $resetUnreadMessagesChatId,
+                'listParams' => $listParams
             ]); ?>
         </div>
 		<?php Pjax::end(); ?>
