@@ -2,6 +2,7 @@
 
 use common\models\Employee;
 use frontend\helpers\EmailHelper;
+use sales\auth\Auth;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\callLog\entity\callLog\CallLogStatus;
 use sales\model\clientChat\entity\ClientChat;
@@ -131,9 +132,11 @@ $fromType = 'client';
 				<div class="">
 					<?php echo \yii\helpers\StringHelper::truncate(Email::strip_html_tags($mail->getEmailBodyHtml()), 300, '...', null, true)?>
 				</div>
-				<div class="chat__message-footer">
-                    <?= EmailHelper::renderDetailButton($mail) ?>
-				</div>
+                <?php if(Auth::can('email/view', ['email' => $mail])): ?>
+				    <div class="chat__message-footer">
+                        <?= EmailHelper::renderDetailButton($mail) ?>
+				    </div>
+                <?php endif; ?>
 			</div>
 		</div>
 	<?php endif;?>

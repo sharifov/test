@@ -1,6 +1,7 @@
 <?php
 
 use frontend\helpers\EmailHelper;
+use sales\auth\Auth;
 use sales\model\clientChat\entity\ClientChat;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
@@ -107,9 +108,11 @@ use \common\models\Call;
                 <div class="">
                     <?php echo \yii\helpers\StringHelper::truncate(Email::strip_html_tags($mail->getEmailBodyHtml()), 300, '...', null, true)?>
                 </div>
-                <div class="chat__message-footer">
-                    <?= EmailHelper::renderDetailButton($mail) ?>
-                </div>
+                <?php if(Auth::can('email/view', ['email' => $mail])): ?>
+                    <div class="chat__message-footer">
+                        <?= EmailHelper::renderDetailButton($mail) ?>
+                    </div>
+                <?php endif;?>
             </div>
         </div>
         <?php endif;?>
