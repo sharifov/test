@@ -47,6 +47,11 @@ class EmailController extends FController
                     'delete' => ['POST'],
                 ],
             ],
+            'access' => [
+                'allowActions' => [
+                    'view',
+                ],
+            ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
@@ -336,29 +341,14 @@ class EmailController extends FController
      */
     public function actionView($id): string
     {
-        $model =$this->findModel($id);
+        $model = $this->findModel($id);
 
-        /** @var Employee $user */
-        $user = Yii::$app->user->identity;
-        $roleAccess = ($user->isAdmin() || $user->isSupervision() || $user->isExSuper() || $user->isSupSuper() || $user->isQa());
-
-        if(!$roleAccess) {
-//            $userAccess = UserProjectParams::find()->where(['or', ['upp_email' => $model->e_email_from], ['upp_email' => $model->e_email_to]])->andWhere(['upp_user_id' => $user->id])->exists();
-            $userAccess = UserProjectParams::find()->byEmail([$model->e_email_from, $model->e_email_to])->andWhere(['upp_user_id' => $user->id])->exists();
-            if(!$userAccess) {
-                if ($model->e_case_id) {
-                    $userAccess = Cases::find()->where(['cs_id' => $model->e_case_id, 'cs_user_id' => $user->id])->exists();
-                    if(!$userAccess) {
-                        throw new ForbiddenHttpException('Access Denied. Case: '.$model->e_case_id.', Email ID:'.$model->e_id);
-                    }
-                } else {
-                    throw new ForbiddenHttpException('Access Denied. Email ID:' . $model->e_id);
-                }
-            }
+        if (!Auth::can('email/view', ['email' => $model])) {
+            throw new ForbiddenHttpException('Access denied.');
         }
 
-        if(Yii::$app->request->get('preview')) {
-           return $model->getEmailBodyHtml() ?: '';
+        if (Yii::$app->request->get('preview')) {
+            return $model->getEmailBodyHtml() ?: '';
         }
 
         return $this->render('view', [
