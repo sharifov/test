@@ -18,7 +18,7 @@ use sales\auth\Auth;
             <ul class="nav navbar-right panel_toolbox">
                 <li>
                     <?=Html::a('<i class="fas fa-info-circle"></i> Details', '#',  [
-                        'id' => 'btn-client-details',
+                        'id' => 'btn-client-info-details',
                         'data-client-id' => $caseModel->cs_client_id,
                         'title' => 'Client Info',
                     ])?>
@@ -178,6 +178,7 @@ use sales\auth\Auth;
 $addPhoneAjaxUrl = \yii\helpers\Url::to(['cases/add-phone', 'gid' => $caseModel->cs_gid]);
 $addEmailAjaxUrl = \yii\helpers\Url::to(['cases/add-email', 'gid' => $caseModel->cs_gid]);
 $clientUpdateAjaxUrl = \yii\helpers\Url::to(['cases/client-update', 'gid' => $caseModel->cs_gid]);
+$clientInfoUrl = \yii\helpers\Url::to(['/client/ajax-get-info']);
 
 $js = <<<JS
      $(document).on('click', '#btn-add-phone', function(){
@@ -216,6 +217,19 @@ $js = <<<JS
             
            return false;
      });
+    
+    $(document).on('click', '#btn-client-info-details', function(e) {
+        e.preventDefault();
+        var client_id = $(this).data('client-id');
+        $('#modalCase .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+        $('#modalCase-label').html('Client Details (' + client_id + ')');
+        $('#modalCase').modal();
+        $.post('$clientInfoUrl', {client_id: client_id},
+            function (data) {
+                $('#modalCase .modal-body').html(data);
+            }
+        );
+    });
 
 JS;
 

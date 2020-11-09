@@ -30,7 +30,8 @@ use frontend\models\LeadForm;
 use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
 use sales\auth\Auth;
-use yii\bootstrap4\Modal;use yii\data\ActiveDataProvider;
+use yii\bootstrap4\Modal;
+use yii\data\ActiveDataProvider;
 
 \frontend\themes\gentelella\assets\AssetLeadCommunication::register($this);
 
@@ -288,6 +289,15 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
 
     </div>
 </div>
+
+<?php
+Modal::begin([
+    'id' => 'modalLead',
+    'title' => '',
+    'size' => Modal::SIZE_LARGE,
+    'clientOptions' => ['backdrop' => 'static']//, 'keyboard' => FALSE]
+]);
+?>
 
 <?php
 

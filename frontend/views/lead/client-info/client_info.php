@@ -29,7 +29,7 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
                 <?php if ($leadForm->mode !== $leadForm::VIEW_MODE || $manageClientInfoAccess): ?>
                     <li>
                         <?=Html::a('<i class="fas fa-info-circle"></i> Details', '#',  [
-                            'id' => 'btn-client-details',
+                            'id' => 'btn-client-info-details',
                             'data-client-id' => $leadForm->getClient()->id,
                             'title' => 'Client Info',
                         ])?>
@@ -196,4 +196,23 @@ $manageClientInfoAccess = \sales\access\ClientInfoAccess::isUserCanManageLeadCli
     'id' => 'modal-client-large',
     'size' => Modal::SIZE_LARGE,
 ])
+?>
+<?php
+$clientInfoUrl = \yii\helpers\Url::to(['/client/ajax-get-info']);
+
+$js = <<<JS
+    $(document).on('click', '#btn-client-info-details', function(e) {
+        e.preventDefault();
+        var client_id = $(this).data('client-id');
+        $('#modalLead .modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+        $('#modalLead-label').html('Client Details (' + client_id + ')');
+        $('#modalLead').modal();
+        $.post('$clientInfoUrl', {client_id: client_id},
+            function (data) {
+                $('#modalLead .modal-body').html(data);
+            }
+        );
+    });
+JS;
+$this->registerJs($js);
 ?>
