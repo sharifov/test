@@ -35,7 +35,11 @@ $_self = $this;
                 <?php echo Html::a(
                     Html::tag('i', '', ['class' => 'fa fa-external-link']),
                     ['client-chat/view', 'chid' => $clientChat->cch_id],
-                    ['target' => '_blank']
+                    [
+                        'target' => '_blank',
+                        'title' => 'Open chat in new tab',
+                        'data-toggle' => 'tooltip',
+                    ]
                 )?>
 
                 <b><?= Html::encode($clientChat->cchProject ? $clientChat->cchProject->name : '-'); ?></b>:
