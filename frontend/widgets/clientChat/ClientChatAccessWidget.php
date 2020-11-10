@@ -107,7 +107,7 @@ class ClientChatAccessWidget extends Widget
         $search = new ClientChatUserAccessSearch();
         $accessItems = $search->searchPendingRequests($this->userId, $this->getOffset(), $this->limit);
         foreach ($accessItems as $key => $access) {
-            $accessItems[$key]['html'] = $this->render('cc_request_item', ['access' => $access, 'formatter' => $formatter]);
+            $accessItems[$key]['html'] = $this->render('cc_request_item', ['access' => $access, 'formatter' => $formatter, 'user' => $user]);
             $accessItems[$key]['ccua_created_t'] = strtotime($access['ccua_created_dt']);
             $accessItems[$key]['cch_created_t'] = strtotime($access['cch_created_dt']);
         }
@@ -133,7 +133,7 @@ class ClientChatAccessWidget extends Widget
         $search = new ClientChatUserAccessSearch();
         $accessItem = $search->getPendingRequestByChatUserAccessId($this->userAccessId);
 
-        $accessItem['html'] = $this->render('cc_request_item', ['access' => $accessItem, 'formatter' => $formatter]);
+        $accessItem['html'] = $this->render('cc_request_item', ['access' => $accessItem, 'formatter' => $formatter, 'user' => $user]);
         $accessItem['ccua_created_t'] = strtotime($accessItem['ccua_created_dt']);
         $accessItem['cch_created_t'] = strtotime($accessItem['cch_created_dt']);
 

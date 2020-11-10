@@ -2,12 +2,14 @@
 use common\components\i18n\Formatter;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
+use common\models\Employee;
 use sales\helpers\clientChat\ClientChatHelper;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use yii\helpers\Html;
 
 /** @var $access array */
 /** @var $formatter Formatter */
+/** @var $user Employee */
 
 $accessUrl = \yii\helpers\Url::to('/client-chat/access-manage');
 
@@ -76,12 +78,14 @@ $date = (int)$access['is_transfer'] ? $access['ccua_created_dt'] : $access['cch_
 		<div class="_cc-action">
             <?php if ((int)$access['is_transfer']): ?>
                 <?= ClientChatHelper::displayBtnAcceptTransfer(
+                    $user,
                     $access['ccua_id'],
                     $access['ccua_cch_id'],
                     $accessUrl,
                     ClientChatUserAccess::STATUS_TRANSFER_SKIP
                 ) ?>
                 <?= ClientChatHelper::displayBtnSkipTransfer(
+                    $user,
                     $access['ccua_id'],
                     $access['ccua_cch_id'],
                     $accessUrl,
@@ -89,6 +93,7 @@ $date = (int)$access['is_transfer'] ? $access['ccua_created_dt'] : $access['cch_
                 ) ?>
             <?php elseif ((int)$access['is_pending']): ?>
                 <?= ClientChatHelper::displayBtnAcceptPending(
+                    $user,
                     $access['ccua_id'],
                     $access['ccua_cch_id'],
                     $accessUrl,
@@ -96,6 +101,7 @@ $date = (int)$access['is_transfer'] ? $access['ccua_created_dt'] : $access['cch_
                 ) ?>
 
                 <?= ClientChatHelper::displayBtnSkipPending(
+                    $user,
                     $access['ccua_id'],
                     $access['ccua_cch_id'],
                     $accessUrl,
@@ -103,6 +109,7 @@ $date = (int)$access['is_transfer'] ? $access['ccua_created_dt'] : $access['cch_
                 ) ?>
             <?php elseif ((int)$access['is_idle']): ?>
                 <?= ClientChatHelper::displayBtnTakeIdle(
+                    $user,
                     $access,
                     $accessUrl,
                     ClientChatUserAccess::STATUS_TAKE
