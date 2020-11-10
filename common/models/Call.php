@@ -314,6 +314,8 @@ class Call extends \yii\db\ActiveRecord
             ['c_is_conference', 'boolean'],
 
             ['c_data_json', 'string'],
+            
+            ['c_call_sid', 'unique'],
         ];
     }
 

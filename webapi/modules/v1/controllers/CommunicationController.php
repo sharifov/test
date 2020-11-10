@@ -28,6 +28,8 @@ use sales\entities\cases\Cases;
 use sales\forms\lead\PhoneCreateForm;
 use sales\helpers\app\AppHelper;
 use sales\helpers\UserCallIdentity;
+use sales\model\call\exceptions\CallFinishedException;
+use sales\model\call\exceptions\UniqueCallNotFoundException;
 use sales\model\call\form\CallCustomParameters;
 use sales\model\call\services\RepeatMessageCallJobCreator;
 use sales\model\callLog\services\CallLogConferenceTransferService;
@@ -896,7 +898,24 @@ class CommunicationController extends ApiBaseController
         if (isset($post['callData']['CallSid']) && $post['callData']['CallSid']) {
 
             $callData = $post['callData'];
-            $call = $this->findOrCreateCallByData($callData);
+            try {
+                $call = $this->findOrCreateCallByData($callData);
+            } catch (UniqueCallNotFoundException $e) {
+                Yii::error([
+                    'message' => $e->getMessage(),
+                    'post' => $post,
+                ], 'CallCallBackProcessingError');
+                $response['status'] = 'Success';
+                return $response;
+            } catch (CallFinishedException $e) {
+                //todo change to Info level
+                Yii::error([
+                    'message' => $e->getMessage(),
+                    'post' => $post,
+                ], 'CallCallBackProcessingError');
+                $response['status'] = 'Success';
+                return $response;
+            }
 
             if (!$call->isJoin()) {
 
@@ -1078,6 +1097,32 @@ class CommunicationController extends ApiBaseController
         return $call;
     }
 
+    private function checkOnlyUniqueCallSidError(array $errors, $callSid): bool
+    {
+        if (!$callSid) {
+            return false;
+        }
+
+        $callSid = (string)$callSid;
+
+        if (count($errors) > 1) {
+            return false;
+        }
+
+        if (empty($errors['c_call_sid'])) {
+            return false;
+        }
+
+        if (count($errors['c_call_sid']) > 1) {
+            return false;
+        }
+
+        if ($errors['c_call_sid'][0] === 'Call SID "' . $callSid . '" has already been taken.') {
+            return true;
+        }
+
+        return false;
+    }
 
     /**
      * @param array $callData
@@ -1251,16 +1296,66 @@ class CommunicationController extends ApiBaseController
                 $call->c_to = $custom_parameters->to;
             }
 
-            if (!$call->save()) {
-                \Yii::error(VarDumper::dumpAsString($call->errors), 'API:CommunicationController:findOrCreateCallByData:Call:save');
+            $callSaved = false;
+
+            $call->validate();
+
+            if ($errors = $call->getErrors()) {
+                $isOnlyUniqueError = $this->checkOnlyUniqueCallSidError($errors, $call->c_call_sid);
+                if ($isOnlyUniqueError) {
+                    $tmpCallSid = $call->c_call_sid;
+                    $call = Call::find()->andWhere(['c_call_sid' => $tmpCallSid])->one();
+                    if (!$call) {
+                        throw new UniqueCallNotFoundException($tmpCallSid);
+                    }
+                    if ($call->isTwFinishStatus()) {
+                        throw new CallFinishedException($call->c_call_sid);
+                    }
+                    Yii::info([
+                        'message' => 'Detected duplicate call',
+                        'callSid' => $call->c_call_sid
+                    ], 'info\ProcessCallCallback');
+                } else {
+                    \Yii::error([[
+                        'errors' => $errors,
+                        'call' => $call->getAttributes(),
+                    ]], 'API:CommunicationController:findOrCreateCallByData:Call:save');
+                }
             } else {
+
+                try {
+                    $call->save(false);
+                    $callSaved = true;
+                } catch (\yii\db\IntegrityException $e) {
+                    if (!empty($e->errorInfo[2]) && strpos($e->errorInfo[2], 'Duplicate entry', 0) === 0) {
+                        $tmpCallSid = $call->c_call_sid;
+                        $call = Call::find()->andWhere(['c_call_sid' => $tmpCallSid])->one();
+                        if (!$call) {
+                            throw new UniqueCallNotFoundException($tmpCallSid);
+                        }
+                        if ($call->isTwFinishStatus()) {
+                            throw new CallFinishedException($call->c_call_sid);
+                        }
+                        Yii::info([
+                            'message' => 'Detected duplicate call',
+                            'callSid' => $call->c_call_sid
+                        ], 'info\ProcessCallCallback');
+                    } else {
+                        throw $e;
+                    }
+                }
+
+            }
+
+            if ($callSaved) {
                 if ($parentCall && $parentCall->callUserGroups && !$call->callUserGroups) {
                     foreach ($parentCall->callUserGroups as $cugItem) {
                         $cug = new CallUserGroup();
                         $cug->cug_ug_id = $cugItem->cug_ug_id;
                         $cug->cug_c_id = $call->c_id;
                         if (!$cug->save()) {
-                            \Yii::error(VarDumper::dumpAsString($cug->errors), 'API:CommunicationController:findOrCreateCallByData:CallUserGroup:save');
+                            \Yii::error(VarDumper::dumpAsString($cug->errors),
+                                'API:CommunicationController:findOrCreateCallByData:CallUserGroup:save');
                         }
                     }
                 }
