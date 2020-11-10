@@ -3359,7 +3359,7 @@ Reason: {reason}',
 
             if ($insert) {
                 //$this->created = date('Y-m-d H:i:s');
-                if (!empty($this->project_id) && empty($this->source_id)) {
+                if (!empty($this->project_id) && empty($this->source_id) && $this->l_type_create !== self::TYPE_CREATE_CLIENT_CHAT) {
                     $project = Project::findOne(['id' => $this->project_id]);
                     if ($project !== null) {
                         $this->source_id = $project->sources[0]->id;
