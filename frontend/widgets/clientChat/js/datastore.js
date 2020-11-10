@@ -93,7 +93,7 @@
         }
 
         this.defaultSort = {
-            'cch_status_id': 'desc',
+            'is_transfer': 'desc',
             'ccua_created_t': 'asc',
             'cch_created_t': 'asc'
         }
@@ -165,8 +165,8 @@
             let key = this.getKeyByProperty('ccua_id', id);
             if (key >= 0) {
                 this.data.splice(key, 1);
+                resolve();
             }
-            resolve();
         }.bind(this));
         return promise;
     };

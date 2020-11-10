@@ -323,7 +323,7 @@ class ClientChatRequestService
             }
 
             $this->clientChatRepository->save($clientChat);
-            $this->clientChatService->sendRequestToUsers($clientChat, $channel);
+            $this->clientChatService->sendRequestToUsers($clientChat);
         } else {
             if (!$clientChat->cch_id) {
                 $clientChat->pending(null, ClientChatStatusLog::ACTION_OPEN);

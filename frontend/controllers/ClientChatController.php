@@ -29,6 +29,7 @@ use sales\forms\clientChat\ClientChatSearchCannedResponse;
 use sales\forms\clientChat\ClientChatSendCannedMessage;
 use sales\forms\clientChat\MultipleUpdateForm;
 use sales\forms\clientChat\RealTimeStartChatForm;
+use sales\guards\clientChat\ClientChatManageGuard;
 use sales\helpers\app\AppHelper;
 use sales\helpers\app\AppParamsHelper;
 use sales\helpers\clientChat\ClientChatHelper;
@@ -61,6 +62,7 @@ use sales\model\clientChatRequest\repository\ClientChatRequestRepository;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestService;
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\model\clientChatUnread\entity\ClientChatUnread;
+use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\user\entity\userConnectionActiveChat\UserConnectionActiveChat;
 use sales\repositories\clientChatChannel\ClientChatChannelRepository;
@@ -622,9 +624,16 @@ class ClientChatController extends FController
                 'notifyType' => '',
             ];
 
-            $ccua = $this->clientChatUserAccessRepository->findByPrimaryKey($ccuaId);
-            $clientChat = $this->clientChatRepository->findById($ccua->ccua_cch_id);
-            $this->clientChatUserAccessService->updateStatus($clientChat, $ccua, $accessAction);
+            if (!ClientChatUserAccess::statusExist($accessAction)) {
+                throw new \RuntimeException('User access status is unknown');
+            }
+
+            $access = $this->clientChatUserAccessRepository->findByPrimaryKey($ccuaId);
+
+            $this->guardCanProcessChat(Auth::id(), $access->ccua_cch_id);
+
+            $clientChat = $this->clientChatRepository->findById($access->ccua_cch_id);
+            ClientChatUserAccess::getAccessManageRequest($accessAction, $clientChat, Auth::user(), $access)->handle();
 
             $result['success'] = true;
         } catch (\RuntimeException | \DomainException | NotFoundException $e) {

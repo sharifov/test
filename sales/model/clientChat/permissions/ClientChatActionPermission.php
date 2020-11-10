@@ -20,6 +20,10 @@ use sales\model\clientChat\entity\ClientChatQuery;
  * @property bool|null $canUnHold
  * @property bool|null $canReturn
  * @property bool|null $canTake
+ * @property bool|null $canAcceptTransfer
+ * @property bool|null $canSkipTransfer
+ * @property bool|null $canAcceptPending
+ * @property bool|null $canSkipPending
  * @property bool|null $canSendCannedResponse
  */
 class ClientChatActionPermission
@@ -41,6 +45,10 @@ class ClientChatActionPermission
     private ?bool $canReturn = null;
 
     private ?bool $canTake = null;
+    private ?bool $canAcceptTransfer = null;
+    private ?bool $canSkipTransfer = null;
+    private ?bool $canAcceptPending = null;
+    private ?bool $canSkipPending = null;
     private ?bool $canCouchNoteChecked = null;
     private ?bool $canSendCannedResponse = null;
 
@@ -206,6 +214,70 @@ class ClientChatActionPermission
 
         $this->canTake = Auth::can('client-chat/view', ['chat' => $chat]) && Auth::can('client-chat/take', ['chat' => $chat]);
         return $this->canTake;
+    }
+
+    public function canAcceptTransfer(ClientChat $chat): bool
+    {
+        if ($this->canAcceptTransfer !== null) {
+            return $this->canAcceptTransfer;
+        }
+
+        $systemRuleValid = $chat->isTransfer() && !$chat->isOwner(Auth::id());
+        if (!$systemRuleValid) {
+            $this->canAcceptTransfer = false;
+            return $this->canAcceptTransfer;
+        }
+
+        $this->canAcceptTransfer = Auth::can('client-chat/view', ['chat' => $chat]) && Auth::can('client-chat/accept-transfer');
+        return (bool)$this->canAcceptTransfer;
+    }
+
+    public function canSkipTransfer(ClientChat $chat): bool
+    {
+        if ($this->canSkipTransfer !== null) {
+            return $this->canSkipTransfer;
+        }
+
+        $systemRuleValid = $chat->isTransfer();
+        if (!$systemRuleValid) {
+            $this->canSkipTransfer = false;
+            return $this->canSkipTransfer;
+        }
+
+        $this->canSkipTransfer = Auth::can('client-chat/skip-transfer');
+        return (bool)$this->canSkipTransfer;
+    }
+
+    public function canAcceptPending(ClientChat $chat): bool
+    {
+        if ($this->canAcceptPending !== null) {
+            return $this->canAcceptPending;
+        }
+
+        $systemRuleValid = $chat->isPending();
+        if (!$systemRuleValid) {
+            $this->canAcceptPending = false;
+            return $this->canAcceptPending;
+        }
+
+        $this->canAcceptPending = Auth::can('client-chat/accept-pending');
+        return (bool)$this->canAcceptPending;
+    }
+
+    public function canSkipPending(ClientChat $chat): bool
+    {
+        if ($this->canSkipPending !== null) {
+            return $this->canSkipPending;
+        }
+
+        $systemRuleValid = $chat->isPending();
+        if (!$systemRuleValid) {
+            $this->canSkipPending = false;
+            return $this->canSkipPending;
+        }
+
+        $this->canSkipPending = Auth::can('client-chat/skip-pending');
+        return (bool)$this->canSkipPending;
     }
 
     public function canSendCannedResponse(): ?bool

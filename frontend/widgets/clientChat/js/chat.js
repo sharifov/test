@@ -161,7 +161,7 @@
                 }
             })
             .then(() => {
-                if (!this.db.data.length && this.totalItems == 0) {
+                if (!this.db.data.length && this.totalItems <= 0) {
                     this.hasNoRequests();
                 } else if (!this.db.data.length && this.totalItems) {
                     this.firstRequest(1);

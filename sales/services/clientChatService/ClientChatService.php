@@ -190,11 +190,10 @@ class ClientChatService
 
     /**
      * @param ClientChat $clientChat
-     * @param ClientChatChannel $channel
      */
-    public function sendRequestToUsers(ClientChat $clientChat, ClientChatChannel $channel): void
+    public function sendRequestToUsers(ClientChat $clientChat): void
     {
-        $userChannel = ClientChatUserChannel::find()->byChannelId($channel->ccc_id)->onlineUsers()->all();
+        $userChannel = ClientChatUserChannel::find()->byChannelId($clientChat->cch_channel_id)->all();
 
         if ($userChannel) {
             /** @var ClientChatUserChannel $item */
@@ -372,7 +371,7 @@ class ClientChatService
                 $agentNames = Employee::find()->select(['nickname'])->where(['id' => $form->agentId])->asArray()->column();
                 $transferTo = implode(', ', $agentNames) . ' agent';
             } else {
-                $this->sendRequestToUsers($clientChat, $clientChatChannel);
+                $this->sendRequestToUsers($clientChat);
                 $transferTo = $clientChatChannel->ccc_name . ' channel';
             }
 

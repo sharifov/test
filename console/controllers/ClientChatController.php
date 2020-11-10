@@ -17,6 +17,7 @@ use sales\model\clientChatLastMessage\entity\ClientChatLastMessage;
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\services\clientChatChannel\ClientChatChannelCodeException;
 use sales\services\clientChatChannel\ClientChatChannelService;
+use sales\services\clientChatService\ClientChatService;
 use Yii;
 use yii\console\Controller;
 use yii\helpers\ArrayHelper;
@@ -28,15 +29,25 @@ use yii\helpers\VarDumper;
  * @package console\controllers
  *
  * @property ClientChatRepository $clientChatRepository
+ * @property ClientChatService $clientChatService
  */
 class ClientChatController extends Controller
 {
     private ClientChatRepository $clientChatRepository;
 
-    public function __construct($id, $module, ClientChatRepository $clientChatRepository, $config = [])
+    private ClientChatService $clientChatService;
+
+    public function __construct(
+        $id,
+        $module,
+        ClientChatRepository $clientChatRepository,
+        ClientChatService $clientChatService,
+        $config = []
+    )
     {
         parent::__construct($id, $module, $config);
         $this->clientChatRepository = $clientChatRepository;
+        $this->clientChatService = $clientChatService;
     }
 
     /**
@@ -320,6 +331,7 @@ class ClientChatController extends Controller
                 /** @var ClientChat $clientChat */
                 $clientChat->idle(null, ClientChatStatusLog::ACTION_AUTO_IDLE);
                 $this->clientChatRepository->save($clientChat);
+                $this->clientChatService->sendRequestToUsers($clientChat);
                 $channels[$clientChat->cch_channel_id] = $clientChat->cch_channel_id;
                 $processed++;
             } catch (\Throwable $throwable) {

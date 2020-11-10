@@ -3,12 +3,14 @@ namespace sales\helpers\clientChat;
 
 use common\models\Employee;
 use common\models\UserProfile;
+use sales\auth\Auth;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use sales\model\clientChatUserChannel\entity\search\ClientChatUserChannelSearch;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Html;
 
 class ClientChatHelper
 {
@@ -47,5 +49,79 @@ class ClientChatHelper
             return false;
         }
         return true;
+    }
+
+    public static function displayBtnAcceptTransfer($accessId, $chatId, $accessUrl, $accessAction): string
+    {
+        if (!Auth::can('client-chat/accept-transfer')) {
+            return '';
+        }
+        return Html::button('<i class="fa fa-check"></i> Accept', [
+            'class' => 'btn btn-sm btn-success _cc-access-action',
+            'data-ccua-id' => $accessId,
+            'data-cch-id' => $chatId,
+            'data-ajax-url' => $accessUrl,
+            'data-access-action' => $accessAction
+        ]);
+    }
+
+    public static function displayBtnSkipTransfer($accessId, $chatId, $accessUrl, $accessAction): string
+    {
+        if (!Auth::can('client-chat/skip-transfer')) {
+            return '';
+        }
+        return Html::button('<i class="fa fa-close"></i> Skip', [
+            'class' => 'btn btn-sm btn-warning _cc-access-action',
+            'data-ccua-id' => $accessId,
+            'data-cch-id' => $chatId,
+            'data-ajax-url' => $accessUrl,
+            'data-access-action' => $accessAction
+        ]);
+    }
+
+    public static function displayBtnAcceptPending($accessId, $chatId, $accessUrl, $accessAction): string
+    {
+        if (!Auth::can('client-chat/accept-pending')) {
+            return '';
+        }
+        return Html::button('<i class="fa fa-check"></i> Accept', [
+            'class' => 'btn btn-sm btn-success _cc-access-action',
+            'data-ccua-id' => $accessId,
+            'data-cch-id' => $chatId,
+            'data-ajax-url' => $accessUrl,
+            'data-access-action' => $accessAction
+        ]);
+    }
+
+    public static function displayBtnSkipPending($accessId, $chatId, $accessUrl, $accessAction): string
+    {
+        if (!Auth::can('client-chat/skip-pending')) {
+            return '';
+        }
+        return Html::button('<i class="fa fa-close"></i> Skip', [
+            'class' => 'btn btn-sm btn-warning _cc-access-action',
+            'data-ccua-id' => $accessId,
+            'data-cch-id' => $chatId,
+            'data-ajax-url' => $accessUrl,
+            'data-access-action' => $accessAction
+        ]);
+    }
+
+    public static function displayBtnTakeIdle(array $access, $accessUrl, $accessAction): string
+    {
+        $chat = new ClientChat();
+        $chat->cch_status_id = (int)($access['cch_status_id'] ?? 0);
+        $chat->cch_owner_user_id = (int)($access['ccua_user_id'] ?? 0);
+
+        if (!Auth::can('client-chat/view', ['chat' => $chat]) || !Auth::can('client-chat/take', ['chat' => $chat])) {
+            return '';
+        }
+        return Html::button('<i class="fa fa-check"></i> Take', [
+            'class' => 'btn btn-sm btn-info _cc-access-action',
+            'data-ccua-id' => $access['ccua_id'] ?? null,
+            'data-cch-id' => $access['ccua_cch_id'] ?? null,
+            'data-ajax-url' => $accessUrl,
+            'data-access-action' => $accessAction
+        ]);
     }
 }

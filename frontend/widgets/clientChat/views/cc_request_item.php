@@ -2,6 +2,7 @@
 use common\components\i18n\Formatter;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
+use sales\helpers\clientChat\ClientChatHelper;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use yii\helpers\Html;
 
@@ -61,19 +62,53 @@ $date = (int)$access['is_transfer'] ? $access['ccua_created_dt'] : $access['cch_
                 </span>
             </div>
 
-			<?php if ((int)$access['is_transfer']): ?>
-				<div>
-					<span class="label label-warning">Transfer</span> from <b><?= Html::encode($access['owner_nickname'] ?? 'Unknown agent') ?></b>
-				</div>
-			<?php endif; ?>
+            <div>
+                <?php if ((int)$access['is_transfer']): ?>
+                    <span class="label label-warning">Transfer</span> from <b><?= Html::encode($access['owner_nickname'] ?? 'Unknown agent') ?></b>
+                <?php elseif ((int)$access['is_pending']): ?>
+                    <span class="label label-default">Pending</span>
+                <?php elseif ((int)$access['is_idle']): ?>
+                    <span class="label label-info">Idle</span>
+                <?php endif; ?>
+            </div>
 		</div>
 
 		<div class="_cc-action">
-			<button class="btn btn-sm btn-success _cc-access-action" data-ccua-id="<?= $access['ccua_id'] ?>" data-cch-id="<?= $access['ccua_cch_id'] ?>" data-ajax-url="<?= $accessUrl ?>" data-access-action="<?= ClientChatUserAccess::STATUS_ACCEPT ?>"><i class="fa fa-check"></i> Accept</button>
-			<button class="btn btn-sm btn-warning _cc-access-action" data-ccua-id="<?= $access['ccua_id'] ?>" data-cch-id="<?= $access['ccua_cch_id'] ?>" data-ajax-url="<?= $accessUrl ?>" data-access-action="<?= ClientChatUserAccess::STATUS_SKIP ?>"><i class="fa fa-close"></i> Skip</button>
-		</div>
+            <?php if ((int)$access['is_transfer']): ?>
+                <?= ClientChatHelper::displayBtnAcceptTransfer(
+                    $access['ccua_id'],
+                    $access['ccua_cch_id'],
+                    $accessUrl,
+                    ClientChatUserAccess::STATUS_TRANSFER_SKIP
+                ) ?>
+                <?= ClientChatHelper::displayBtnSkipTransfer(
+                    $access['ccua_id'],
+                    $access['ccua_cch_id'],
+                    $accessUrl,
+                    ClientChatUserAccess::STATUS_TRANSFER_SKIP
+                ) ?>
+            <?php elseif ((int)$access['is_pending']): ?>
+                <?= ClientChatHelper::displayBtnAcceptPending(
+                    $access['ccua_id'],
+                    $access['ccua_cch_id'],
+                    $accessUrl,
+                    ClientChatUserAccess::STATUS_ACCEPT
+                ) ?>
 
-		<!--                            <span class="_cc_chevron"><i class="fa fa-chevron-down"></i></span>-->
+                <?= ClientChatHelper::displayBtnSkipPending(
+                    $access['ccua_id'],
+                    $access['ccua_cch_id'],
+                    $accessUrl,
+                    ClientChatUserAccess::STATUS_SKIP
+                ) ?>
+            <?php elseif ((int)$access['is_idle']): ?>
+                <?= ClientChatHelper::displayBtnTakeIdle(
+                    $access,
+                    $accessUrl,
+                    ClientChatUserAccess::STATUS_TAKE
+                ) ?>
+            <?php endif; ?>
+		</div>
 	</div>
 	<hr>
 </div>

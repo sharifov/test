@@ -15,19 +15,19 @@ use sales\model\clientChat\entity\ClientChat;
  */
 class UpdateChatUserAccessWidgetEvent
 {
-	public $chat;
+    public $chat;
 
-	public $userId;
+    public $userId;
 
-	public $statusId;
+    public $statusId;
 
-	public $ccuaId;
+    public $ccuaId;
 
-	public function __construct(ClientChat $chat, int $userId, int $statusId, ?int $ccuaId = null)
-	{
-		$this->chat = $chat;
-		$this->userId = $userId;
-		$this->statusId = $statusId;
-		$this->ccuaId = $ccuaId;
-	}
+    public function __construct(ClientChat $chat, int $userId, int $statusId, ?int $ccuaId = null)
+    {
+        $this->chat = $chat;
+        $this->userId = $userId;
+        $this->statusId = $statusId;
+        $this->ccuaId = $ccuaId;
+    }
 }

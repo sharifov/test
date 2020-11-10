@@ -2,6 +2,8 @@
 
 namespace sales\services\clientChatUserAccessService;
 
+use common\components\purifier\Purifier;
+use common\models\Employee;
 use common\models\Notifications;
 use frontend\widgets\clientChat\ClientChatAccessMessage;
 use sales\auth\Auth;
@@ -9,6 +11,7 @@ use sales\dispatchers\EventDispatcher;
 use sales\model\clientChat\ClientChatCodeException;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
+use sales\model\clientChatChannel\entity\ClientChatChannel;
 use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\model\clientChatUserAccess\entity\ClientChatUserAccess;
 use sales\model\clientChatUserAccess\event\ResetChatUserAccessWidgetEvent;
@@ -75,27 +78,52 @@ class ClientChatUserAccessService
         $this->transactionManager = $transactionManager;
     }
 
-    public function updateStatus(ClientChat $clientChat, ClientChatUserAccess $ccua, int $status, ?int $chatOwnerId = null): void
+    public function acceptTransfer(ClientChat $chat, ClientChatUserAccess $access, int $status): void
     {
-        if (!ClientChatUserAccess::statusExist($status)) {
-            throw new \RuntimeException('User access status is unknown');
-        }
-        $ccua->setStatus($status);
+        $access->setStatus($status);
+        $this->clientChatService->finishTransfer($chat, $access);
+        $this->disableAccessForOtherUsersBatch($chat->cch_id, $access->ccua_user_id);
+        $this->clientChatUserAccessRepository->save($access, $chat);
+    }
 
-        if ($ccua->isAccept()) {
-            if ($clientChat->isTransfer()) {
-                $this->clientChatService->finishTransfer($clientChat, $ccua);
-            } else {
-                $this->clientChatService->acceptChat($clientChat, $ccua->ccua_user_id);
-            }
-            $this->disableAccessForOtherUsersBatch($clientChat->cch_id, $ccua->ccua_user_id);
-        } elseif ($ccua->isSkip() && $clientChat->isTransfer()) {
-            $userAccesses = ClientChatUserAccess::find()->byChatId($clientChat->cch_id)->exceptById($ccua->ccua_id)->pending()->exists();
-            if (!$userAccesses) {
-                $this->clientChatService->cancelTransfer($clientChat, null, ClientChatStatusLog::ACTION_CANCEL_TRANSFER_BY_SYSTEM);
-            }
+    public function skipTransfer(ClientChat $chat, ClientChatUserAccess $access, int $status): void
+    {
+        $access->setStatus($status);
+        $userAccesses = ClientChatUserAccess::find()->byChatId($chat->cch_id)->exceptById($access->ccua_id)->pending()->exists();
+        if (!$userAccesses) {
+            $this->clientChatService->cancelTransfer($chat, null, ClientChatStatusLog::ACTION_CANCEL_TRANSFER_BY_SYSTEM);
         }
-        $this->clientChatUserAccessRepository->save($ccua, $clientChat);
+        $this->clientChatUserAccessRepository->save($access, $chat);
+    }
+
+    public function acceptPending(ClientChat $chat, ClientChatUserAccess $access, int $status): void
+    {
+        $access->setStatus($status);
+        $this->clientChatService->acceptChat($chat, $access->ccua_user_id);
+        $this->disableAccessForOtherUsersBatch($chat->cch_id, $access->ccua_user_id);
+        $this->clientChatUserAccessRepository->save($access, $chat);
+    }
+
+    public function skipPending(ClientChat $chat, ClientChatUserAccess $access, int $status): void
+    {
+        $access->setStatus($status);
+        $this->clientChatUserAccessRepository->save($access, $chat);
+    }
+
+    public function takeIdle(ClientChat $chat, ClientChatUserAccess $access, int $status, Employee $owner): void
+    {
+        $access->setStatus($status);
+        $takeClientChat = $this->clientChatService->takeClientChat($chat, $owner);
+        $this->clientChatUserAccessRepository->save($access, $takeClientChat);
+
+        $clientChatLink = Purifier::createChatShortLink($chat);
+        Notifications::createAndPublish(
+            $chat->cch_owner_user_id,
+            'Chat was taken',
+            'Client Chat was taken by ' . $takeClientChat->cchOwnerUser->nickname . ' (' . $clientChatLink . ')',
+            Notifications::TYPE_INFO,
+            true
+        );
     }
 
     public function disableAccessForOtherUsersBatch(int $chatId, int $ownerId): bool

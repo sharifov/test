@@ -8,6 +8,12 @@ use sales\entities\EventTrait;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatUserAccess\event\ClientChatUserAccessEvent;
 use sales\model\clientChatUserAccess\event\UpdateChatUserAccessWidgetEvent;
+use sales\model\clientChatUserAccess\useCase\manageRequest\UserAccessAcceptPending;
+use sales\model\clientChatUserAccess\useCase\manageRequest\UserAccessAcceptTransfer;
+use sales\model\clientChatUserAccess\useCase\manageRequest\UserAccessManageRequestInterface;
+use sales\model\clientChatUserAccess\useCase\manageRequest\UserAccessSkipPending;
+use sales\model\clientChatUserAccess\useCase\manageRequest\UserAccessSkipTransfer;
+use sales\model\clientChatUserAccess\useCase\manageRequest\UserAccessTakeIdle;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 
@@ -32,16 +38,20 @@ class ClientChatUserAccess extends \yii\db\ActiveRecord
     public const STATUS_ACCEPT = 2;
     public const STATUS_BUSY = 3;
     public const STATUS_SKIP = 4;
-    public const STATUS_TRANSFER_ACCEPTED = 5;
+    public const STATUS_TRANSFER_ACCEPT = 5;
+    public const STATUS_TRANSFER_SKIP = 7;
     public const STATUS_CANCELED = 6;
+    public const STATUS_TAKE = 8;
 
     public const STATUS_LIST = [
         self::STATUS_PENDING => 'Pending',
         self::STATUS_ACCEPT => 'Accept',
         self::STATUS_BUSY => 'Busy',
         self::STATUS_SKIP => 'Skip',
-        self::STATUS_TRANSFER_ACCEPTED => 'Transfer Accepted',
+        self::STATUS_TRANSFER_ACCEPT => 'Transfer Accept',
+        self::STATUS_TRANSFER_SKIP => 'Transfer Skip',
         self::STATUS_CANCELED => 'Canceled',
+        self::STATUS_TAKE => 'Take',
     ];
 
     public const STATUS_CLASS_LIST = [
@@ -49,8 +59,22 @@ class ClientChatUserAccess extends \yii\db\ActiveRecord
         self::STATUS_ACCEPT => 'success',
         self::STATUS_BUSY => 'warning',
         self::STATUS_SKIP => 'danger',
-        self::STATUS_TRANSFER_ACCEPTED => 'warning',
+        self::STATUS_TRANSFER_ACCEPT => 'warning',
+        self::STATUS_TRANSFER_SKIP => 'danger',
         self::STATUS_CANCELED => 'danger',
+        self::STATUS_TAKE => 'info',
+    ];
+
+    public const STATUS_ACCEPT_GROUP = [
+        self::STATUS_ACCEPT,
+        self::STATUS_TRANSFER_ACCEPT,
+        self::STATUS_TAKE
+    ];
+
+    public const STATUS_SKIP_GROUP = [
+        self::STATUS_SKIP,
+        self::STATUS_TRANSFER_SKIP,
+        self::STATUS_CANCELED
     ];
 
     public function behaviors(): array
@@ -138,9 +162,9 @@ class ClientChatUserAccess extends \yii\db\ActiveRecord
         $this->ccua_status_id = self::STATUS_ACCEPT;
     }
 
-    public function transferAccepted(): void
+    public function transferAccept(): void
     {
-        $this->ccua_status_id = self::STATUS_TRANSFER_ACCEPTED;
+        $this->ccua_status_id = self::STATUS_TRANSFER_ACCEPT;
     }
 
     public function canceled(): void
@@ -162,9 +186,43 @@ class ClientChatUserAccess extends \yii\db\ActiveRecord
         return array_key_exists($status, self::STATUS_LIST);
     }
 
+    public static function getAccessManageRequest(int $statusId, ClientChat $chat, Employee $owner, ClientChatUserAccess $access): UserAccessManageRequestInterface
+    {
+        if ($statusId === self::STATUS_TRANSFER_ACCEPT) {
+            return new UserAccessAcceptTransfer($chat, $access, $statusId);
+        }
+
+        if ($statusId === self::STATUS_TRANSFER_SKIP) {
+            return new UserAccessSkipTransfer($chat, $access, $statusId);
+        }
+
+        if ($statusId === self::STATUS_ACCEPT) {
+            return new UserAccessAcceptPending($chat, $access, $statusId);
+        }
+
+        if ($statusId === self::STATUS_SKIP) {
+            return new UserAccessSkipPending($chat, $access, $statusId);
+        }
+
+        if ($statusId === self::STATUS_TAKE) {
+            return new UserAccessTakeIdle($chat, $access, $statusId, $owner);
+        }
+        throw new \DomainException('Unknown access action');
+    }
+
     public function setStatus(int $status): void
     {
         $this->ccua_status_id = $status;
+    }
+
+    public function isTransferAccept(): bool
+    {
+        return $this->ccua_status_id === self::STATUS_TRANSFER_ACCEPT;
+    }
+
+    public function isTransferSkip(): bool
+    {
+        return $this->ccua_status_id === self::STATUS_TRANSFER_SKIP;
     }
 
     public function isAccept(): bool
@@ -201,5 +259,15 @@ class ClientChatUserAccess extends \yii\db\ActiveRecord
             return (string)$this->ccua_created_dt;
         }
         return (string)$this->ccuaCch->cch_created_dt;
+    }
+
+    public static function isInStatusAcceptGroupList(int $statusId): bool
+    {
+        return in_array($statusId, self::STATUS_ACCEPT_GROUP);
+    }
+
+    public static function isInStatusSkipGroupList(int $statusId): bool
+    {
+        return in_array($statusId, self::STATUS_SKIP_GROUP);
     }
 }
