@@ -3356,24 +3356,32 @@ Reason: {reason}',
     public function beforeSave($insert): bool
     {
         if (parent::beforeSave($insert)) {
+
             if ($insert) {
-                if (
-                    !empty($this->project_id) &&
-                    empty($this->source_id) &&
-                    $this->l_type_create !== self::TYPE_CREATE_CLIENT_CHAT &&
-                    $source = Sources::getByProjectId((int)$this->project_id)
-                ) {
-                    $this->source_id = $source->id;
+                //$this->created = date('Y-m-d H:i:s');
+                if (!empty($this->project_id) && empty($this->source_id)) {
+                    $project = Project::findOne(['id' => $this->project_id]);
+                    if ($project !== null) {
+                        $this->source_id = $project->sources[0]->id;
+                    }
                 }
 
-                $leadExistByUID = self::findOne([
+                $leadExistByUID = Lead::findOne([
                     'uid' => $this->uid,
                     'source_id' => $this->source_id
                 ]);
                 if ($leadExistByUID !== null) {
                     $this->uid = self::generateUid();
                 }
+
+                /*if(!$this->gid) {
+                    $this->gid = md5(uniqid('', true));
+                }*/
+
+            } else {
+                //$this->updated = date('Y-m-d H:i:s');
             }
+
             if (!$this->uid) {
                 $this->uid = self::generateUid();
             }
