@@ -42,7 +42,7 @@ class PhoneLineUserAssignCrudController extends FController
     public function actionIndex(): string
     {
         $searchModel = new PhoneLineUserAssignSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, Auth::user());
 
         return $this->render('index', [
             'searchModel' => $searchModel,
