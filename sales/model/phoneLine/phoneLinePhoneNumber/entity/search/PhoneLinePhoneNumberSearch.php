@@ -29,7 +29,7 @@ class PhoneLinePhoneNumberSearch extends PhoneLinePhoneNumber
             ['plpn_updated_dt', 'safe'],
 
             ['plpn_updated_user_id', 'integer'],
-            ['phoneNumber', 'safe'],
+            ['phoneNumber', 'match', 'pattern' => '/^[+]\d*$/i'],
         ];
     }
 
@@ -58,6 +58,11 @@ class PhoneLinePhoneNumberSearch extends PhoneLinePhoneNumber
             // $query->where('0=1');
             return $dataProvider;
         }
+
+        $dataProvider->sort->attributes['phoneNumber'] = [
+            'asc' => ['pl_phone_number' => SORT_ASC],
+            'desc' => ['pl_phone_number' => SORT_DESC],
+        ];
 
         $query->andFilterWhere([
             'plpn_line_id' => $this->plpn_line_id,
