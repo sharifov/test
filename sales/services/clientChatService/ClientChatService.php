@@ -451,7 +451,7 @@ class ClientChatService
             if ($oldVisitor) {
                 $this->clientChatVisitorRepository->create($newClientChat->cch_id, $oldVisitor->cvd_id, $newClientChat->cch_client_id);
             }
-            $chatUserAccess->transferAccepted();
+//            $chatUserAccess->transferAccept();
 
             if ((int)$oldChannelId !== (int)$newClientChat->cch_channel_id) {
                 $botTransferChatResult = \Yii::$app->chatBot->transferDepartment($clientChat->cch_rid, $clientChat->ccv->ccvCvd->cvd_visitor_rc_id, (string)$oldChannelId, (string)$newClientChat->cch_channel_id);
