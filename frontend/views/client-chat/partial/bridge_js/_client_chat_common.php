@@ -377,6 +377,10 @@ window.loadClientChatData = function (cch_id, data, ref) {
 
 $(document).on('click', '._cc-list-item', function () {
     $('#cc-dialogs-wrapper').append(loaderIframe); 
+    let iframeWrapperEl = $("#_rc-iframe-wrapper");
+    iframeWrapperEl.find('#_cc-load').remove();
+    iframeWrapperEl.append(loaderIframe);
+
     let cch_id = $(this).attr('data-cch-id');
     currentChatId = cch_id;
     let ownerId = $(this).attr('data-owner-id');
@@ -396,6 +400,7 @@ $(document).on('click', '._cc-list-item', function () {
     
     setTimeout(function () {
         $('#cc-dialogs-wrapper #_cc-load').remove();
+        $("#_rc-iframe-wrapper").find('#_cc-load').remove();
     }, 2000);
 });
 
