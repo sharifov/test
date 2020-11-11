@@ -87,6 +87,7 @@ use yii\data\ActiveDataProvider;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
+use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
@@ -1577,12 +1578,23 @@ class ClientChatController extends FController
                 Department::DEPARTMENT_EXCHANGE,
                 $activeChannelsIds
             );
+
+            $channels = array_filter($channels, static function ($item) {
+                $settings = Json::decode(Json::decode($item['ccc_settings']));
+                return $settings['system']['allowRealtime'];
+            });
+            if (empty($channels)) {
+                throw new \DomainException('It seems channels not allowed for the real time page');
+            }
             $channels = ArrayHelper::map($channels, 'ccc_id', 'ccc_name');
         } catch (NotFoundException | \DomainException $e) {
             $domainError = $e->getMessage();
             if ($activeChannelsIds) {
                 $domainError = 'The client already has active chats on all channels to which you have access';
             }
+        } catch (\Throwable $e) {
+            $domainError = 'Internal server Error';
+            AppHelper::throwableLogger($e, 'ClientChatController:actionRealTimeStartChat:Throwable');
         }
 
         return $this->renderAjax('partial/_real_time_start_chat', [

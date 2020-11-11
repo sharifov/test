@@ -55,6 +55,7 @@ class ClientChatChannelDefaultSettings
         ],
         'system' => [
             'allowTransferChannelActiveChat' => false,
+            'allowRealtime' => true
         ]
     ];
 
