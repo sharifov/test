@@ -33,6 +33,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'ccc_frontend_enabled')->checkbox() ?>
 
+        <?= $form->field($model, 'ccc_default_device')->checkbox() ?>
+
         <?= $form->field($model, 'ccc_priority')->input('number', ['min' => 0, 'max' => 255, 'step' => 1]) ?>
 
         <?php // $form->field($model, 'ccc_created_dt')->textInput() ?>

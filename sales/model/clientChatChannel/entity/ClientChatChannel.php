@@ -38,6 +38,7 @@ use yii\helpers\Json;
  * @property string|null $ccc_settings
  * @property array $settings
  * @property bool $ccc_registered
+ * @property bool $ccc_default_device
  *
  * @property Employee $cccCreatedUser
  * @property Department $cccDep
@@ -83,7 +84,9 @@ class ClientChatChannel extends \yii\db\ActiveRecord
             ['ccc_created_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ccc_created_user_id' => 'id']],
 
             ['ccc_default', 'integer'],
-            ['ccc_frontend_enabled', 'boolean'],
+            [['ccc_frontend_enabled', 'ccc_default_device'], 'boolean'],
+
+            ['ccc_default_device', 'validateDefaultDevice'],
 
             ['ccc_dep_id', 'integer'],
             ['ccc_dep_id', 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['ccc_dep_id' => 'dep_id']],
@@ -196,6 +199,7 @@ class ClientChatChannel extends \yii\db\ActiveRecord
             'ccc_frontend_enabled' => 'Frontend Enabled',
             'ccc_settings' => 'Settings',
             'ccc_registered' => 'Registered',
+            'ccc_default_device' => 'Default Device'
         ];
     }
 
@@ -281,6 +285,7 @@ class ClientChatChannel extends \yii\db\ActiveRecord
                     'priority' => $channelItem->ccc_priority,
                     'default' => (boolean) $channelItem->ccc_default,
                     'enabled' => (boolean) $channelItem->ccc_frontend_enabled,
+                    'defaultDevice' => (boolean) $channelItem->ccc_default_device,
                     'settings' => $settings
                 ];
             }
@@ -323,5 +328,12 @@ class ClientChatChannel extends \yii\db\ActiveRecord
     public static function getPubSubKey(?int $channelId): string
     {
         return 'channel-' . (int) $channelId;
+    }
+
+    public function validateDefaultDevice($attribute, $params)
+    {
+        if (self::find()->where(['ccc_project_id' => $this->ccc_project_id])->andWhere(['ccc_default_device' => true])->exists() && $this->ccc_default_device && $this->isNewRecord) {
+            $this->addError($attribute, 'Default Device already set for project ' . ($this->cccProject ? $this->cccProject->name : ''));
+        }
     }
 }
