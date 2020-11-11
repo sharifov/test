@@ -31,7 +31,7 @@ class UserPersonalPhoneNumberSearch extends UserPersonalPhoneNumber
             ['upn_updated_user_id', 'integer'],
 
             ['upn_user_id', 'integer'],
-            ['phoneNumber', 'safe'],
+            ['phoneNumber', 'match', 'pattern' => '/^[+]\d*$/i'],
         ];
     }
 
@@ -63,6 +63,11 @@ class UserPersonalPhoneNumberSearch extends UserPersonalPhoneNumber
             // $query->where('0=1');
             return $dataProvider;
         }
+
+        $dataProvider->sort->attributes['phoneNumber'] = [
+            'asc' => ['pl_phone_number' => SORT_ASC],
+            'desc' => ['pl_phone_number' => SORT_DESC],
+        ];
 
         $query->andFilterWhere([
             'upn_id' => $this->upn_id,
