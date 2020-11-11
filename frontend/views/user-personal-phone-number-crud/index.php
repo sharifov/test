@@ -46,11 +46,15 @@ $this->params['breadcrumbs'][] = $this->title;
                'label' => 'Phone Number ID',
                'attribute' => 'upn_phone_number',
             ],
-            [
+            /*[
                 'label' => 'Phone Number',
                 'value' => static function (\sales\model\phoneLine\userPersonalPhoneNumber\entity\UserPersonalPhoneNumber $model) {
                     return $model->upnPhoneNumber ? $model->upnPhoneNumber->pl_phone_number : '-';
                 }
+            ],*/
+            [
+                'attribute' => 'phoneNumber',
+                'value' => 'upnPhoneNumber.pl_phone_number'
             ],
             'upn_title',
             'upn_approved:BooleanByLabel',

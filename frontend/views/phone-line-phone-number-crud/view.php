@@ -32,7 +32,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'model' => $model,
             'attributes' => [
                 'plpn_line_id',
-                'plpnPl:phoneList',
+                //'plpnPl:phoneList',
+                'plpnPl.pl_phone_number',
                 'plpn_default:BooleanByLabel',
                 'plpn_enabled:BooleanByLabel',
                 'plpn_settings_json:dumpJson',

@@ -7,6 +7,8 @@ use sales\model\phoneLine\userPersonalPhoneNumber\entity\UserPersonalPhoneNumber
 
 class UserPersonalPhoneNumberSearch extends UserPersonalPhoneNumber
 {
+    public $phoneNumber;
+
     public function rules(): array
     {
         return [
@@ -29,12 +31,27 @@ class UserPersonalPhoneNumberSearch extends UserPersonalPhoneNumber
             ['upn_updated_user_id', 'integer'],
 
             ['upn_user_id', 'integer'],
+            ['phoneNumber', 'safe'],
         ];
     }
 
     public function search($params): ActiveDataProvider
     {
-        $query = static::find();
+        $query = self::find();
+        $query->joinWith('upnPhoneNumber');
+        $query->select([
+            'upn_id',
+            'upn_user_id',
+            'upn_title',
+            'upn_approved',
+            'upn_enabled',
+            'upn_phone_number',
+            'upn_created_user_id',
+            'upn_updated_user_id',
+            'upn_created_dt',
+            'upn_updated_dt',
+            'pl_phone_number'
+        ]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -59,7 +76,8 @@ class UserPersonalPhoneNumberSearch extends UserPersonalPhoneNumber
         ]);
 
         $query->andFilterWhere(['like', 'upn_phone_number', $this->upn_phone_number])
-            ->andFilterWhere(['like', 'upn_title', $this->upn_title]);
+            ->andFilterWhere(['like', 'upn_title', $this->upn_title])
+            ->andFilterWhere(['like', 'pl_phone_number', $this->phoneNumber]);
 
         return $dataProvider;
     }

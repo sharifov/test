@@ -7,6 +7,8 @@ use sales\model\phoneLine\phoneLinePhoneNumber\entity\PhoneLinePhoneNumber;
 
 class PhoneLinePhoneNumberSearch extends PhoneLinePhoneNumber
 {
+    public $phoneNumber;
+
     public function rules(): array
     {
         return [
@@ -27,12 +29,24 @@ class PhoneLinePhoneNumberSearch extends PhoneLinePhoneNumber
             ['plpn_updated_dt', 'safe'],
 
             ['plpn_updated_user_id', 'integer'],
+            ['phoneNumber', 'safe'],
         ];
     }
 
     public function search($params): ActiveDataProvider
     {
-        $query = static::find();
+        $query = static::find()->joinWith('plpnPl');
+        $query->select([
+            'plpn_line_id',
+            'plpn_pl_id',
+            'plpn_default',
+            'plpn_enabled',
+            'plpn_created_user_id',
+            'plpn_updated_user_id',
+            'plpn_created_dt',
+            'plpn_updated_dt',
+            'pl_phone_number'
+        ]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -56,7 +70,8 @@ class PhoneLinePhoneNumberSearch extends PhoneLinePhoneNumber
             'date_format(plpn_updated_dt, "%Y-%m-%d")' => $this->plpn_updated_dt,
         ]);
 
-        $query->andFilterWhere(['like', 'plpn_settings_json', $this->plpn_settings_json]);
+        $query->andFilterWhere(['like', 'plpn_settings_json', $this->plpn_settings_json])
+            ->andFilterWhere(['like', 'pl_phone_number', $this->phoneNumber]);
 
         return $dataProvider;
     }

@@ -31,11 +31,15 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'plpn_line_id',
             'plpn_pl_id',
-            [
+            /*[
                'label' => 'Phone Number',
                 'value' => static function (\sales\model\phoneLine\phoneLinePhoneNumber\entity\PhoneLinePhoneNumber $model) {
                     return $model->plpnPl ? $model->plpnPl->pl_phone_number : '-';
                 }
+            ],*/
+            [
+                'attribute' => 'phoneNumber',
+                'value' => 'plpnPl.pl_phone_number'
             ],
             'plpn_default:BooleanByLabel',
             'plpn_enabled:BooleanByLabel',
