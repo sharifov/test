@@ -82,7 +82,7 @@ $date = (int)$access['is_transfer'] ? $access['ccua_created_dt'] : $access['cch_
                     $access['ccua_id'],
                     $access['ccua_cch_id'],
                     $accessUrl,
-                    ClientChatUserAccess::STATUS_TRANSFER_SKIP
+                    ClientChatUserAccess::STATUS_TRANSFER_ACCEPT
                 ) ?>
                 <?= ClientChatHelper::displayBtnSkipTransfer(
                     $user,
