@@ -8,6 +8,7 @@ use common\components\purifier\Purifier;
 use common\models\query\CallQuery;
 use sales\helpers\PhoneFormatter;
 use sales\helpers\UserCallIdentity;
+use sales\model\call\entity\call\Data;
 use sales\model\call\helper\CallHelper;
 use frontend\widgets\newWebPhone\call\socket\MissedCallMessage;
 use frontend\widgets\newWebPhone\call\socket\RemoveIncomingRequestMessage;
@@ -92,7 +93,10 @@ use Locale;
  *
  * @property string $c_recording_url
  * @property bool $c_is_new
+ * @property string|null $c_data_json
  * @property string $recordingUrl
+ *
+ * @property Data|null $data
  *
  * @property Employee $cCreatedUser
  * @property Cases $cCase
@@ -245,6 +249,8 @@ class Call extends \yii\db\ActiveRecord
     public const QUEUE_GENERAL = 'general';
     public const QUEUE_DIRECT = 'direct';
 
+    private ?Data $data = null;
+
     //public $c_recording_url = '';
 
     /**
@@ -306,6 +312,8 @@ class Call extends \yii\db\ActiveRecord
 
             ['c_is_conference', 'default', 'value' => false],
             ['c_is_conference', 'boolean'],
+
+            ['c_data_json', 'string'],
         ];
     }
 
@@ -352,6 +360,7 @@ class Call extends \yii\db\ActiveRecord
             'c_conference_id' => 'Conference ID',
             'c_conference_sid' => 'Conference SID',
             'c_language_id' => 'Language ID',
+            'c_data_json' => 'Data',
         ];
     }
 
@@ -2170,4 +2179,13 @@ class Call extends \yii\db\ActiveRecord
     {
         return $this->c_source_type_id === self::SOURCE_INTERNAL;
 	}
+
+    public function getData(): Data
+    {
+        if ($this->data !== null) {
+            return $this->data;
+        }
+        $this->data = new Data($this->c_data_json);
+        return $this->data;
+    }
 }
