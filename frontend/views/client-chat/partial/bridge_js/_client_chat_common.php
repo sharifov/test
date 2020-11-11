@@ -392,6 +392,7 @@ $(document).on('click', '._cc-list-item', function () {
         
     if ($(this).hasClass('_cc_active')) {
         $('#cc-dialogs-wrapper #_cc-load').remove(); 
+        iframeWrapperEl.find('#_cc-load').remove();
         return false;
     }
     
