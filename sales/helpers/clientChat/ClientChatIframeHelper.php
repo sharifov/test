@@ -69,7 +69,8 @@ class ClientChatIframeHelper
             name="' . $this->generateIframeName() . '"
             data-rid="' . $this->clientChat->cch_rid . '"
             data-cch-id="' . $this->clientChat->cch_id . '"
-            data-is-closed="' . (int) $this->clientChat->isInClosedStatusGroup() . '"></iframe>';
+            data-is-closed="' . (int) $this->clientChat->isInClosedStatusGroup() . '"
+            data-is-show-input="' . (int) ClientChatHelper::isShowInput($this->clientChat, $this->employee) . '"></iframe>';
     }
 
     public function isReadonly(): bool

@@ -345,10 +345,12 @@ window.loadClientChatData = function (cch_id, data, ref) {
     iframeWrapperEl.append(loaderIframe);
     
     let chatEl = $('#_rc-' + cch_id);
-    if (chatEl.length) {
-        chatEl.attr('src', data.iframeSrc);
-    } else {
+    let chatIsShowInput = parseInt(chatEl.data('isShowInput'), 10);
+    
+    if (!chatEl.length) {
         $('#_rc-iframe-wrapper').append(data.iframe);
+    } else if (chatEl.length && chatIsShowInput !== data.isShowInput) {
+        chatEl.attr('src', data.iframeSrc);
     }
     
     $('#couch_note_box').html('');
@@ -370,6 +372,7 @@ window.loadClientChatData = function (cch_id, data, ref) {
     localStorage.setItem('activeChatId', cch_id);
     
     chatEl.show();
+    window.removeCcLoadFromIframe();
 }
 
 $(document).on('click', '._cc-list-item', function () {
