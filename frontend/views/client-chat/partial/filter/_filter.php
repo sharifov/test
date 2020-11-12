@@ -37,7 +37,7 @@ use yii\web\JsExpression;
 
             <div class="row">
 
-                <?php if ($filter->permissions->canStatus()): ?>
+                <?php if ($filter->permissions->canShow()): ?>
                     <div class="col-md-6">
                         <?= Html::label('Show:', null, ['class' => 'control-label']); ?>
                         <?= Select2::widget([

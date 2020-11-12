@@ -236,7 +236,7 @@ class FilterForm extends Model
         if (!$this->permissions->canStatus()) {
             $this->status = self::DEFAULT_VALUE_STATUS;
         }
-        if (!$this->permissions->canStatus()) {
+        if (!$this->permissions->canShow()) {
             $this->showFilter = ClientChat::TAB_ALL;
         }
         if (!$this->permissions->canDepartment()) {

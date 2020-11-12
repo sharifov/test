@@ -8,6 +8,7 @@ class Permissions
 {
     private $channel;
     private $status;
+    private $show;
     private $user;
     private $created_date;
     private $department;
@@ -34,6 +35,15 @@ class Permissions
         }
         $this->status = Auth::can('client-chat/dashboard/filter/status');
         return $this->status;
+    }
+
+    public function canShow(): bool
+    {
+        if ($this->show !== null) {
+            return $this->show;
+        }
+        $this->show = Auth::can('client-chat/dashboard/filter/show');
+        return $this->show;
     }
 
     public function canUser(): bool
@@ -131,5 +141,4 @@ class Permissions
     {
         return $this->canProject() || $this->canUser() || $this->canCreatedDate() || $this->canStatus() || $this->canClientName();
     }
-
 }
