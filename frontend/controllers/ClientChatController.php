@@ -370,7 +370,12 @@ class ClientChatController extends FController
             }
         }
 
-        $isFullList =  $dataProvider ? ($dataProvider->getCount() === $dataProvider->getTotalCount()) : false;
+        $isFullList = $dataProvider ? ($dataProvider->getCount() === $dataProvider->getTotalCount()) : false;
+        if ($isFullList || !$dataProvider) {
+            $moreCount = 0;
+        } else {
+            $moreCount = $dataProvider->getTotalCount() - $dataProvider->getCount();
+        }
 
         return $this->render('index', [
             'dataProvider' => $dataProvider,
@@ -386,7 +391,7 @@ class ClientChatController extends FController
             'listParams' => [
                 'page' => $page + 1,
                 'isFullList' => $isFullList,
-                'moreCount' => $isFullList ? 0 : $dataProvider->getTotalCount() - $dataProvider->getCount(),
+                'moreCount' => $moreCount,
             ]
         ]);
     }
