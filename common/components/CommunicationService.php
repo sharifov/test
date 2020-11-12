@@ -1096,4 +1096,38 @@ class CommunicationService extends Component implements CommunicationServiceInte
 
        return $this->processResponse($response);
     }
+
+    public function repeatMessage(array $data): array
+    {
+        $response = $this->sendRequest('twilio/repeat-message', $data);
+
+        $out = [
+            'code' => null,
+            'error' => false,
+            'message' => '',
+            'result' => []
+        ];
+
+        if ($response->isOk) {
+            if (isset($response->data['data'])) {
+                $data = $response->data['data'];
+                $isError = (bool)($data['is_error'] ?? false);
+                if ($isError) {
+                    $out['error'] = true;
+                    $out['message'] = (string)($data['message'] ?? 'Undefined error message');
+                }
+                $out['result'] = $data['result'] ?? [];
+                $out['code'] = $response->data['code'] ?? [];
+            } else {
+                $out['error'] = true;
+                $out['message'] = 'Not found in response array data';
+            }
+        } else {
+            $out['error'] = true;
+            $out['message'] = 'Server error. Try again later.';
+            \Yii::error(VarDumper::dumpAsString($response->content), 'Component:CommunicationService::repeatMessage');
+        }
+
+        return $out;
+    }
 }
