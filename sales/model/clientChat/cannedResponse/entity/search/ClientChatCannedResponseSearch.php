@@ -78,9 +78,9 @@ class ClientChatCannedResponseSearch extends ClientChatCannedResponse
             ))
         );
 
-//        if ($projectId) {
-//            $query->byProjectId($projectId);
-//        }
+        if ($projectId) {
+            $query->byProjectId($projectId);
+        }
         $query->byTsVectorMessage($searchSubString);
         $query->andWhere(['or', ['cr_user_id' => $userId], ['cr_user_id' => null]]);
         $query->joinCategory()->categoryEnabled();
