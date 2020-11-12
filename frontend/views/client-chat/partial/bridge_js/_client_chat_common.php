@@ -72,9 +72,9 @@ $(document).ready( function () {
     let clientChatId = {$clientChatId};
 
     $('textarea.canned-response').devbridgeAutocomplete({
-        noCache: false,
+        noCache: true,
         serviceUrl: '/client-chat/ajax-canned-response',
-        deferRequestBy: 700,
+        deferRequestBy: 1300,
         minChars: 3,
         params: {chatId: clientChatId},
         delimiter: '/',

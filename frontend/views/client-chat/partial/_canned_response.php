@@ -13,7 +13,7 @@ use yii\helpers\Html;
     'canned-response',
     '',
     [
-        'placeholder' => 'Try to search quickly response by typing /search text',
+        'placeholder' => 'Try to search quickly response by typing "/"',
         'id' => 'canned-response',
         'class' => 'form-control canned-response',
         'data-chat-id' => $clientChat->cch_id ?? null,
