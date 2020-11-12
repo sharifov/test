@@ -472,6 +472,20 @@ class PhoneController extends FController
                     $sid = $firstChild->c_call_sid;
                 }
 
+                if ($call = Call::find()->andWhere(['c_call_sid' => $sid])->one()) {
+                    /** @var Call $call */
+                    $data = $call->getData();
+                    $data->repeat->reset();
+                    $call->setData($data);
+                    if (!$call->save()) {
+                        Yii::error([
+                            'message' => 'Not saved call',
+                            'useCase' => 'Forward conference call',
+                            'errors' => $call->getErrors(),
+                            'call' => $call->getAttributes(),
+                        ], 'AjaxCallRedirect:Call:resetRepeat');
+                    }
+                }
                 $resultApi = $communication->callForward($sid, $from, $to);
                 if ($resultApi && isset($resultApi['result']['sid'])) {
                     $result = [
@@ -496,6 +510,20 @@ class PhoneController extends FController
                 }
 
             } else {
+                if ($call = Call::find()->andWhere(['c_call_sid' => $sid])->one()) {
+                    /** @var Call $call */
+                    $data = $call->getData();
+                    $data->repeat->reset();
+                    $call->setData($data);
+                    if (!$call->save()) {
+                        Yii::error([
+                            'message' => 'Not saved call',
+                            'useCase' => 'Forward simple call',
+                            'errors' => $call->getErrors(),
+                            'call' => $call->getAttributes(),
+                        ], 'AjaxCallRedirect:Call:resetRepeat');
+                    }
+                }
                 $resultApi = $communication->callRedirect($sid, $type, $from, $to, $firstTransferToNumber);
                 if ($resultApi && isset($resultApi['data']['result']['sid'])) {
 

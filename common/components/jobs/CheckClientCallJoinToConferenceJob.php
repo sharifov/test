@@ -4,7 +4,9 @@ namespace common\components\jobs;
 
 use common\models\Call;
 use common\models\ConferenceParticipant;
+use common\models\DepartmentPhoneProject;
 use sales\helpers\app\AppHelper;
+use sales\model\call\services\RepeatMessageCallJobCreator;
 use yii\helpers\VarDumper;
 use yii\queue\JobInterface;
 
@@ -22,6 +24,7 @@ class CheckClientCallJoinToConferenceJob implements JobInterface
 
     public function execute($queue)
     {
+        /** @var Call $call */
         $call = Call::find()->andWhere(['c_id' => $this->callId, 'c_status_id' => Call::STATUS_DELAY])->one();
 
         if (!$call) {
@@ -64,7 +67,37 @@ class CheckClientCallJoinToConferenceJob implements JobInterface
         $queueJob = new CallUserAccessJob();
         $queueJob->call_id = $call->c_id;
         $queueJob->isExceptUsers = false;
-        \Yii::$app->queue_job->push($queueJob);
+        $jobId = \Yii::$app->queue_job->push($queueJob);
+
+        $data = $call->getData();
+        if (!$data->repeat->isEmpty()) {
+            $this->createRepeatMessageJob($jobId, $call, $data->repeat->departmentPhoneId);
+        }
+    }
+
+    private function createRepeatMessageJob($jobId, $call, $depPhoneId): void
+    {
+        try {
+            if (!$jobId) {
+                throw new \DomainException('Not created CallUserAccessJob');
+            }
+            $depPhone = DepartmentPhoneProject::findOne($depPhoneId);
+            if (!$depPhone) {
+                throw new \DomainException('Not found DepartmentPhoneProject ID:' . $depPhoneId);
+            }
+            $dParams = @json_decode($depPhone->dpp_params, true);
+            $repeatParams = $dParams['queue_repeat'] ?? [];
+            if ($repeatParams) {
+                (new RepeatMessageCallJobCreator())->create($call, $depPhone->dpp_id, $repeatParams);
+            }
+        } catch (\Throwable $e) {
+            \Yii::error([
+                'message' => 'Create repeat call job Error.',
+                'useCase' => 'CheckClientCallJoinToConferenceJob',
+                'error' => $e->getMessage(),
+                'call' => $call->getAttributes(),
+            ], 'CallQueueRepeatMessageJob::create');
+        }
     }
 
     public function cancelRingingCalls(int $callId): void

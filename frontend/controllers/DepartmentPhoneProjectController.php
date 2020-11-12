@@ -158,6 +158,14 @@ class DepartmentPhoneProjectController extends FController
         }
       }
     }
+  }, 
+  "queue_repeat": {
+    "enable": false,
+    "repeat_time": 180,
+    "language": "en-US",
+    "voice": "Polly.Joanna",
+    "say": "Please hold, while you are connected to the next available agent.",
+    "play": "https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3"
   }
 }';
         }

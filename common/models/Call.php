@@ -8,7 +8,7 @@ use common\components\purifier\Purifier;
 use common\models\query\CallQuery;
 use sales\helpers\PhoneFormatter;
 use sales\helpers\UserCallIdentity;
-use sales\model\call\entity\call\Data;
+use sales\model\call\entity\call\data\Data;
 use sales\model\call\helper\CallHelper;
 use frontend\widgets\newWebPhone\call\socket\MissedCallMessage;
 use frontend\widgets\newWebPhone\call\socket\RemoveIncomingRequestMessage;
@@ -2189,5 +2189,11 @@ class Call extends \yii\db\ActiveRecord
         }
         $this->data = new Data($this->c_data_json);
         return $this->data;
+    }
+
+    public function setData(Data $data): void
+    {
+        $this->c_data_json = $data->toJson();
+        $this->data = $data;
     }
 }
