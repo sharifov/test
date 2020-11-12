@@ -12,6 +12,9 @@ use sales\model\clientChat\ClientChatTranslate;
 use sales\model\clientChat\entity\projectConfig\ClientChatProjectConfig;
 use sales\model\clientChat\entity\projectConfig\ProjectConfigApiResponseDto;
 use sales\model\clientChatChannel\entity\ClientChatChannel;
+use sales\model\clientChatForm\entity\ClientChatForm;
+use sales\model\clientChatForm\form\ClientChatFormApiForm;
+use sales\model\clientChatForm\helper\ClientChatFormTranslateHelper;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestApiForm;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestFeedbackSubForm;
@@ -34,6 +37,7 @@ use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 use yii\web\UnprocessableEntityHttpException;
+use webapi\src\Messages;
 
 /**
  * Class ClientChatController
@@ -645,7 +649,7 @@ class ClientChatRequestController extends ApiBaseController
                 }
 
                 if ($data) {
-                    Yii::$app->cache->set($keyCache, $data, 60 * 60);
+                    Yii::$app->webApiCache->set($keyCache, $data, 60 * 60);
                 }
 
                 $data['cache'] = false;
@@ -814,6 +818,158 @@ class ClientChatRequestController extends ApiBaseController
         return $this->endApiLog($apiLog, new SuccessResponse(
             new StatusCodeMessage(200),
             new MessageMessage($resultMessage ?? 'Ok'),
+        ));
+    }
+
+    /**
+     * @api {get} /v1/client-chat-request/chat-form Client Chat Form
+     * @apiVersion 0.1.0
+     * @apiName ClientChatForm
+     * @apiGroup ClientChat
+     * @apiPermission Authorized User
+     *
+     * @apiParam {string{100}} form_key Form Key
+     * @apiParam {string{5}} language_id Language ID (en-US)
+     * @apiParam {int=0, 1} [cache] Cache (not required, default eq 1)
+     *
+     * @apiParamExample {get} Request-Example:
+     * {
+     *     "form_key": "example_form",
+     *     "language_id": "ru-RU",
+     *     "cache": 1
+     * }
+     *
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeader {string} Accept-Encoding
+     * @apiHeader {string} If-Modified-Since  Format <code> day-name, day month year hour:minute:second GMT</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     * @apiHeaderExample {json} Header-Example (If-Modified-Since):
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate",
+     *      "If-Modified-Since": "Mon, 23 Dec 2019 08:17:54 GMT",
+     *  }
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *
+     * HTTP/1.1 200 OK
+     * {
+     * "status": 200,
+     * "message": "OK",
+     * "data": {
+        "data_form": [
+            {
+                "type": "textarea",
+                "name": "example_name",
+                "className": "form-control",
+                "label": "Please, describe problem",
+                "required": true,
+                "rows": 5
+            },
+            {
+                "type": "select",
+                "name": "destination",
+                "className": "form-control",
+                "label": "Куда летим?",
+                "values": [
+                    "label": "Амстердам",
+                    "value": "AMS",
+                    "selected": true
+                ],
+                [
+                    "label": "Магадан",
+                    "value": "GDX",
+                    "selected": false
+                ]
+            },
+            {
+                "type": "button",
+                "name": "button-123",
+                "className": "btn-success btn",
+                "label": "Submit"
+            }
+        ],
+        "from_cache" : true
+     }
+     *
+     * @apiErrorExample {json} Error-Response (400):
+     *
+     * HTTP/1.1 400 Bad Request
+     *   {
+     *     "status": 400,
+     *     "message": "Validate failed",
+     *     "code": "13110",
+     *     "errors": []
+     * }
+     */
+    public function actionChatForm()
+    {
+        $apiLog = $this->startApiLog($this->action->uniqueId);
+
+        if (!$this->request->isGet) {
+            return new ErrorResponse(
+                new StatusCodeMessage(405),
+                new MessageMessage('Method not allowed.'),
+            );
+        }
+
+        $form = new ClientChatFormApiForm();
+        if (!$form->load(Yii::$app->request->get())) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage(Messages::LOAD_DATA_ERROR),
+                new ErrorsMessage('Not loaded data from get request'),
+                new CodeMessage(ApiCodeException::GET_DATA_NOT_LOADED)
+            );
+        }
+
+        if (!$form->validate()) {
+            return $this->endApiLog($apiLog, new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage('Validate failed'),
+                new ErrorsMessage($form->getErrorSummary(true)),
+                new CodeMessage(ApiCodeException::FAILED_FORM_VALIDATE)
+            ));
+        }
+
+        try {
+            $keyCache = ClientChatForm::getCacheKey($form->form_key, $form->language_id);
+
+            if (!$form->cache) {
+                Yii::$app->webApiCache->delete($keyCache);
+            }
+
+            $data = Yii::$app->webApiCache->get($keyCache);
+
+            if ($data === false) {
+                if (!$clientChatForm = ClientChatForm::findOne(['ccf_key' => $form->form_key])) {
+                    throw new \Exception('Client Chat Form not found');
+                }
+                $data['data_form'] = ClientChatFormTranslateHelper::translateLabel($clientChatForm, $form->language_id);
+
+                Yii::$app->webApiCache->set($keyCache, $data, ClientChatForm::CACHE_DURATION);
+
+                $data['from_cache'] = false;
+            } else {
+                $data['from_cache'] = true;
+            }
+        } catch (\Throwable $e) {
+            return $this->endApiLog($apiLog, new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage('Unexpected error'),
+                new ErrorsMessage($e->getMessage()),
+                new CodeMessage(ApiCodeException::UNEXPECTED_ERROR)
+            ));
+        }
+
+        return $this->endApiLog($apiLog, new SuccessResponse(
+            new StatusCodeMessage(200),
+            new MessageMessage('OK'),
+            new DataMessage($data),
         ));
     }
 
