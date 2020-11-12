@@ -57,17 +57,17 @@ class UserPersonalPhoneNumberSearch extends UserPersonalPhoneNumber
             'query' => $query,
         ]);
 
+        $dataProvider->sort->attributes['phoneNumber'] = [
+            'asc' => ['pl_phone_number' => SORT_ASC],
+            'desc' => ['pl_phone_number' => SORT_DESC],
+        ];
+
         $this->load($params);
 
         if (!$this->validate()) {
             // $query->where('0=1');
             return $dataProvider;
         }
-
-        $dataProvider->sort->attributes['phoneNumber'] = [
-            'asc' => ['pl_phone_number' => SORT_ASC],
-            'desc' => ['pl_phone_number' => SORT_DESC],
-        ];
 
         $query->andFilterWhere([
             'upn_id' => $this->upn_id,
