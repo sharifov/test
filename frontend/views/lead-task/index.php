@@ -1,6 +1,6 @@
 <?php
 
-use dosamigos\datepicker\DatePicker;
+use common\components\grid\DateTimeColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\ActiveForm;
@@ -99,8 +99,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => \common\models\Employee::getList()
             ],
 
-            //'lt_date:date',
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'lt_date'
+            ],
+
+            /*[
                 'attribute' => 'lt_date',
                 'value' => function(\common\models\LeadTask $model) {
                     return $model->lt_date ? '<i class="fa fa-calendar"></i> '. date('d-M-Y', strtotime($model->lt_date))  : '-';
@@ -118,10 +122,15 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
-            ],
+            ],*/
             'lt_notes',
 
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'lt_completed_dt'
+            ],
+
+            /*[
                 'attribute' => 'lt_completed_dt',
                 'value' => function(\common\models\LeadTask $model) {
                     return $model->lt_completed_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->lt_completed_dt)) : '-';
@@ -139,9 +148,14 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
-            ],
+            ],*/
 
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'lt_updated_dt'
+            ],
+
+            /*[
                 'attribute' => 'lt_updated_dt',
                 'value' => function(\common\models\LeadTask $model) {
                     return $model->lt_updated_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->lt_updated_dt)) : '-';
@@ -159,9 +173,8 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
-            ],
-            //'lt_completed_dt',
-            //'lt_updated_dt',
+            ],*/
+
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

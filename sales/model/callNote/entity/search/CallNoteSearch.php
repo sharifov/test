@@ -11,16 +11,14 @@ class CallNoteSearch extends CallNote
     {
         return [
             ['cn_call_id', 'integer'],
-
-            ['cn_created_dt', 'safe'],
+            
+            [['cn_created_dt', 'cn_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
 
             ['cn_created_user_id', 'integer'],
 
             ['cn_id', 'integer'],
 
             ['cn_note', 'safe'],
-
-            ['cn_updated_dt', 'safe'],
 
             ['cn_updated_user_id', 'integer'],
         ];
@@ -32,11 +30,11 @@ class CallNoteSearch extends CallNote
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-			'sort' => [
-				'defaultOrder' => [
-					'cn_id' => SORT_DESC
-				]
-			]
+            'sort' => [
+                'defaultOrder' => [
+                    'cn_id' => SORT_DESC
+                ]
+            ]
         ]);
 
         $this->load($params);
@@ -49,8 +47,8 @@ class CallNoteSearch extends CallNote
         $query->andFilterWhere([
             'cn_id' => $this->cn_id,
             'cn_call_id' => $this->cn_call_id,
-			'date_format(cn_created_dt, "%Y-%m-%d")' => $this->cn_created_dt,
-			'date_format(cn_updated_dt, "%Y-%m-%d")' => $this->cn_updated_dt,
+            'date_format(cn_created_dt, "%Y-%m-%d")' => $this->cn_created_dt,
+            'date_format(cn_updated_dt, "%Y-%m-%d")' => $this->cn_updated_dt,
             'cn_created_user_id' => $this->cn_created_user_id,
             'cn_updated_user_id' => $this->cn_updated_user_id,
         ]);

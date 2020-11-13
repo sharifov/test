@@ -93,14 +93,14 @@ class CallSearch extends Call
         return [
             [['c_id', 'c_call_type_id', 'c_lead_id', 'c_created_user_id', 'c_com_call_id', 'c_project_id', 'c_is_new', 'supervision_id', 'limit', 'c_recording_duration',
                 'c_source_type_id', 'call_duration_from', 'call_duration_to', 'c_case_id', 'c_client_id', 'c_status_id', 'callDepId', 'userGroupId'], 'integer'],
-            [['c_call_sid', 'c_from', 'c_to', 'c_call_status', 'c_forwarded_from', 'c_caller_name', 'c_parent_call_sid', 'c_call_duration', 'c_recording_url', 'c_recording_sid', 'c_sequence_number', 'c_created_dt', 'c_updated_dt', 'c_error_message', 'c_price', 'statuses', 'limit', 'projectId', 'statusId', 'callTypeId'], 'safe'],
+            [['c_call_sid', 'c_from', 'c_to', 'c_call_status', 'c_forwarded_from', 'c_caller_name', 'c_parent_call_sid', 'c_call_duration', 'c_recording_url', 'c_recording_sid', 'c_sequence_number', 'c_error_message', 'c_price', 'statuses', 'limit', 'projectId', 'statusId', 'callTypeId'], 'safe'],
             [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['createTimeStart', 'createTimeEnd'], 'safe'],
             [['ug_ids', 'status_ids', 'dep_ids'], 'each', 'rule' => ['integer']],
             [['reportTimezone', 'timeFrom', 'timeTo'], 'string'],
 
             ['c_is_transfer', 'boolean'],
-            ['c_queue_start_dt', 'date', 'format' => 'php:Y-m-d'],
+            [['c_queue_start_dt','c_created_dt', 'c_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
             ['c_group_id', 'integer'],
 
             ['phoneList', 'safe'],

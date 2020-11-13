@@ -18,8 +18,9 @@ class HotelQuoteRoomSearch extends HotelQuoteRoom
     {
         return [
             [['hqr_id', 'hqr_hotel_quote_id', 'hqr_code', 'hqr_rooms', 'hqr_adults', 'hqr_children'], 'integer'],
-            [['hqr_room_name', 'hqr_key', 'hqr_class', 'hqr_currency', 'hqr_cancel_from_dt', 'hqr_payment_type', 'hqr_board_code', 'hqr_board_name'], 'safe'],
+            [['hqr_room_name', 'hqr_key', 'hqr_class', 'hqr_currency', 'hqr_payment_type', 'hqr_board_code', 'hqr_board_name'], 'safe'],
             [['hqr_amount', 'hqr_cancel_amount', 'hqr_service_fee_percent'], 'number'],
+            [['hqr_cancel_from_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -64,7 +65,7 @@ class HotelQuoteRoomSearch extends HotelQuoteRoom
             'hqr_code' => $this->hqr_code,
             'hqr_amount' => $this->hqr_amount,
             'hqr_cancel_amount' => $this->hqr_cancel_amount,
-            'hqr_cancel_from_dt' => $this->hqr_cancel_from_dt,
+            'DATE(hqr_cancel_from_dt)' => $this->hqr_cancel_from_dt,
             'hqr_rooms' => $this->hqr_rooms,
             'hqr_adults' => $this->hqr_adults,
             'hqr_children' => $this->hqr_children,

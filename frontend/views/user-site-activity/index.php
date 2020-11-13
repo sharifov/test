@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use common\components\grid\DateTimeColumn;
 /* @var $this yii\web\View */
 /* @var $searchModel frontend\models\search\UserSiteActivitySearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -60,14 +61,19 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             //'usa_request_get:ntext',
             //'usa_request_post:ntext',
-            //'usa_created_dt',
+
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'usa_created_dt'
+            ],
+
+            /*[
                 'attribute' => 'usa_created_dt',
                 'value' => static function(\frontend\models\UserSiteActivity $model) {
                     return $model->usa_created_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->usa_created_dt), 'php: Y-m-d [H:i:s]') : $model->usa_created_dt;
                 },
                 'format' => 'raw',
-            ],
+            ],*/
             [
                 'label' => 'Duration',
                 'value' => static function (\frontend\models\UserSiteActivity $model) {

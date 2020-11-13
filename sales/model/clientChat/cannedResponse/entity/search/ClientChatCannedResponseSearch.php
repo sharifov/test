@@ -13,7 +13,7 @@ class ClientChatCannedResponseSearch extends ClientChatCannedResponse
         return [
             ['cr_category_id', 'integer'],
 
-            ['cr_created_dt', 'safe'],
+            [['cr_created_dt', 'cr_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
 
             ['cr_id', 'integer'],
 
@@ -24,8 +24,6 @@ class ClientChatCannedResponseSearch extends ClientChatCannedResponse
             ['cr_project_id', 'integer'],
 
             ['cr_sort_order', 'integer'],
-
-            ['cr_updated_dt', 'safe'],
 
             ['cr_user_id', 'integer'],
         ];

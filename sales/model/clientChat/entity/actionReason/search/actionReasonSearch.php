@@ -14,7 +14,7 @@ class actionReasonSearch extends ClientChatActionReason
 
             ['ccar_comment_required', 'integer'],
 
-            ['ccar_created_dt', 'safe'],
+            [['ccar_created_dt', 'ccar_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
 
             ['ccar_created_user_id', 'integer'],
 
@@ -25,8 +25,6 @@ class actionReasonSearch extends ClientChatActionReason
             ['ccar_key', 'safe'],
 
             ['ccar_name', 'safe'],
-
-            ['ccar_updated_dt', 'safe'],
 
             ['ccar_updated_user_id', 'integer'],
         ];

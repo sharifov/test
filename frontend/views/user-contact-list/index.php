@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
+use common\components\grid\DateTimeColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\UserContactListSearch */
@@ -42,7 +43,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'filter' => [1 => 'Yes', 0 => 'No']
             ],
-            'ucl_created_dt:byUserDateTime',
+            //'ucl_created_dt:byUserDateTime',
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'ucl_created_dt'
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

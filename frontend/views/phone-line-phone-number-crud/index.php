@@ -1,6 +1,6 @@
 <?php
 
-use frontend\extensions\DatePicker;
+use common\components\grid\DateTimeColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -65,7 +65,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'width' => '150px'
                 ]
             ],
-            [
+            /*[
                 'attribute' => 'plpn_created_dt',
                 'format' => 'byUserDateTime',
                 'filter' => DatePicker::widget([
@@ -84,8 +84,19 @@ $this->params['breadcrumbs'][] = $this->title;
                 'options' => [
                     'width' => '150px'
                 ]
-            ],
+            ],*/
+
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'plpn_created_dt'
+            ],
+
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'plpn_updated_dt'
+            ],
+
+            /*[
                 'attribute' => 'plpn_updated_dt',
                 'format' => 'byUserDateTime',
                 'filter' => DatePicker::widget([
@@ -103,7 +114,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'options' => [
                     'width' => '150px'
                 ]
-            ],
+            ],*/
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

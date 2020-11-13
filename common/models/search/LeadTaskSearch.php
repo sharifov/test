@@ -28,7 +28,8 @@ class LeadTaskSearch extends LeadTask
             [['datetime_start', 'datetime_end'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['lt_lead_id', 'lt_task_id', 'lt_user_id'], 'integer'],
-            [['lt_date', 'lt_notes', 'lt_completed_dt', 'lt_updated_dt', 'status_not_in', 'status'], 'safe'],
+            [['lt_notes', 'status_not_in', 'status'], 'safe'],
+            [['lt_date', 'lt_completed_dt', 'lt_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -70,7 +71,7 @@ class LeadTaskSearch extends LeadTask
             return $dataProvider;
         }
 
-        if(empty($this->lt_date) && isset($params['LeadTaskSearch']['date_range'])){
+        if (empty($this->lt_date) && isset($params['LeadTaskSearch']['date_range'])) {
             $query->andFilterWhere(['>=', 'DATE(lt_date)', $this->datetime_start])
                 ->andFilterWhere(['<=', 'DATE(lt_date)', $this->datetime_end]);
         }
@@ -124,13 +125,13 @@ class LeadTaskSearch extends LeadTask
             return $dataProvider;
         }
 
-        if($this->status_not_in) {
+        if ($this->status_not_in) {
             $query->joinWith(['ltLead' => function ($q) {
                 $q->where(['NOT IN', 'leads.status', $this->status_not_in]);
             }]);
         }
 
-        if($this->status) {
+        if ($this->status) {
             $query->joinWith(['ltLead' => function ($q) {
                 $q->where(['IN', 'leads.status', $this->status]);
             }]);

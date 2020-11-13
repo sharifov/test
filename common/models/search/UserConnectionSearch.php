@@ -36,8 +36,9 @@ class UserConnectionSearch extends UserConnection
     {
         return [
             [['uc_id', 'uc_connection_id', 'uc_user_id', 'uc_lead_id', 'uc_case_id', 'dep_id', 'uc_window_state', 'uc_idle_state'], 'integer'],
-            [['uc_user_agent', 'uc_controller_id', 'uc_action_id', 'uc_page_url', 'uc_ip', 'uc_created_dt', 'uc_connection_uid', 'uc_app_instance', 'uc_sub_list', 'uc_window_state_dt', 'uc_idle_state_dt'], 'safe'],
+            [['uc_user_agent', 'uc_controller_id', 'uc_action_id', 'uc_page_url', 'uc_ip', 'uc_connection_uid', 'uc_app_instance', 'uc_sub_list', '', ''], 'safe'],
             ['ug_ids', 'each', 'rule' => ['integer']],
+            [['uc_window_state_dt', 'uc_idle_state_dt', 'uc_created_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

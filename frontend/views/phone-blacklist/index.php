@@ -49,6 +49,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'pbl_enabled',
             ],
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'pbl_expiration_date',
+            ],
+            /*[
                 'label' => 'Expiration date',
                 'attribute' => 'pbl_expiration_date',
                 'value' => static function (PhoneBlacklist $model) {
@@ -69,7 +73,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
-            ],
+            ],*/
 //            [
 //                'class' => DateTimeColumn::class,
 //                'attribute' => 'pbl_created_dt',

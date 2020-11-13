@@ -18,7 +18,7 @@ class SaleCreditCardSearch extends SaleCreditCard
     {
         return [
             [['scc_sale_id', 'scc_cc_id', 'scc_created_user_id'], 'integer'],
-            [['scc_created_dt'], 'safe'],
+            [['scc_created_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -60,7 +60,7 @@ class SaleCreditCardSearch extends SaleCreditCard
         $query->andFilterWhere([
             'scc_sale_id' => $this->scc_sale_id,
             'scc_cc_id' => $this->scc_cc_id,
-            'scc_created_dt' => $this->scc_created_dt,
+            'DATE(scc_created_dt)' => $this->scc_created_dt,
             'scc_created_user_id' => $this->scc_created_user_id,
         ]);
 

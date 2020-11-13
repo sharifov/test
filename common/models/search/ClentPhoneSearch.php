@@ -20,8 +20,9 @@ class ClentPhoneSearch extends ClientPhone
     {
         return [
             [['id', 'client_id', 'is_sms', 'type'], 'integer'],
-            [['phone', 'created', 'updated', 'comments', 'validate_dt'], 'safe'],
+            [['phone', 'comments'], 'safe'],
             [['cp_title'], 'string', 'max' => 150],
+            [[ 'created', 'updated', 'validate_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

@@ -10,7 +10,6 @@ class ClientChatChannelSearch extends ClientChatChannel
     public function rules(): array
     {
         return [
-            ['ccc_created_dt', 'safe'],
             ['ccc_settings', 'safe'],
             ['ccc_created_user_id', 'integer'],
             ['ccc_dep_id', 'integer'],
@@ -23,9 +22,9 @@ class ClientChatChannelSearch extends ClientChatChannel
             ['ccc_frontend_name', 'safe'],
             ['ccc_project_id', 'integer'],
             ['ccc_ug_id', 'integer'],
-            ['ccc_updated_dt', 'safe'],
             ['ccc_updated_user_id', 'integer'],
-            ['ccc_registered', 'boolean']
+            ['ccc_registered', 'boolean'],
+            [['ccc_created_dt', 'ccc_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -44,7 +43,7 @@ class ClientChatChannelSearch extends ClientChatChannel
         $this->load($params);
 
         if (!$this->validate()) {
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 

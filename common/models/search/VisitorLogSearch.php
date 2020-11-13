@@ -54,9 +54,7 @@ class VisitorLogSearch extends VisitorLog
 
             ['vl_ip_address', 'string', 'max' => 39],
 
-            ['vl_visit_dt', 'date', 'format' => 'php:Y-m-d'],
-
-            ['vl_created_dt', 'date', 'format' => 'php:Y-m-d'],
+            [['vl_created_dt', 'vl_visit_dt'], 'date', 'format' => 'php:Y-m-d'],
 
             ['vl_cvd_id', 'integer'],
         ];

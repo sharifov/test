@@ -19,7 +19,7 @@ class OrderUserProfitSearch extends OrderUserProfit
         return [
             [['oup_order_id', 'oup_user_id', 'oup_percent', 'oup_created_user_id', 'oup_updated_user_id'], 'integer'],
             [['oup_amount'], 'number'],
-            [['oup_created_dt', 'oup_updated_dt'], 'safe'],
+            [['oup_created_dt', 'oup_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -63,8 +63,8 @@ class OrderUserProfitSearch extends OrderUserProfit
             'oup_user_id' => $this->oup_user_id,
             'oup_percent' => $this->oup_percent,
             'oup_amount' => $this->oup_amount,
-            'oup_created_dt' => $this->oup_created_dt,
-            'oup_updated_dt' => $this->oup_updated_dt,
+            'DATE(oup_created_dt)' => $this->oup_created_dt,
+            'DATE(oup_updated_dt)' => $this->oup_updated_dt,
             'oup_created_user_id' => $this->oup_created_user_id,
             'oup_updated_user_id' => $this->oup_updated_user_id,
         ]);

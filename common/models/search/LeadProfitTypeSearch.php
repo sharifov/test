@@ -18,7 +18,7 @@ class LeadProfitTypeSearch extends LeadProfitType
     {
         return [
             [['lpt_profit_type_id', 'lpt_diff_rule', 'lpt_commission_min', 'lpt_commission_max', 'lpt_commission_fix', 'lpt_created_user_id', 'lpt_updated_user_id'], 'integer'],
-            [['lpt_created_dt', 'lpt_updated_dt'], 'safe'],
+            [['lpt_created_dt', 'lpt_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use common\components\grid\DateTimeColumn;
 /* @var $this yii\web\View */
 /* @var $searchModel modules\hotel\models\search\HotelQuoteRoomSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -36,7 +37,11 @@ $this->params['breadcrumbs'][] = $this->title;
             'hqr_amount',
             'hqr_currency',
             'hqr_cancel_amount',
-            'hqr_cancel_from_dt',
+            //'hqr_cancel_from_dt',
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'hqr_cancel_from_dt'
+            ],
             'hqr_payment_type',
             'hqr_board_code',
             'hqr_board_name',

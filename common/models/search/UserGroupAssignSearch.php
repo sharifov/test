@@ -20,7 +20,7 @@ class UserGroupAssignSearch extends UserGroupAssign
     {
         return [
             [['ugs_user_id', 'ugs_group_id'], 'integer'],
-            [['ugs_updated_dt'], 'safe'],
+            [['ugs_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

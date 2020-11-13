@@ -65,15 +65,19 @@ $this->params['breadcrumbs'][] = $this->title;
 
             ],
             [
-                'class' => \common\components\grid\DateTimeColumn::class,
+                'class' => DateTimeColumn::class,
                 'attribute' => 'cf_start_dt',
             ],
             [
-                'class' => \common\components\grid\DateTimeColumn::class,
+                'class' => DateTimeColumn::class,
                 'attribute' => 'cf_end_dt',
             ],
             'cf_duration:duration',
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'cf_created_dt',
+            ],
+            /*[
                 'attribute' => 'cf_created_dt',
                 'value' => function(\common\models\Conference $model) {
                     return $model->cf_created_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->cf_created_dt)) : '-';
@@ -92,8 +96,12 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ]),
                 'options' => ['style' => 'width: 250px'],
-            ],
+            ],*/
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'cf_updated_dt',
+            ],
+            /*[
                 'attribute' => 'cf_updated_dt',
                 'value' => function(\common\models\Conference $model) {
                     return $model->cf_updated_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->cf_updated_dt)) : '';
@@ -112,7 +120,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ]),
                 'options' => ['style' => 'width: 250px'],
-            ],
+            ],*/
             [
                 'attribute' => 'cf_cr_id',
                 'value' => function(\common\models\Conference $model) {

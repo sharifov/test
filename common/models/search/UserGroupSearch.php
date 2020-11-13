@@ -20,8 +20,9 @@ class UserGroupSearch extends UserGroup
     {
         return [
             [['ug_id', 'ug_disable'], 'integer'],
-            [['ug_key', 'ug_name', 'ug_description', 'ug_updated_dt'], 'safe'],
+            [['ug_key', 'ug_name', 'ug_description'], 'safe'],
             ['ug_user_group_set_id', 'integer'],
+            [['ug_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

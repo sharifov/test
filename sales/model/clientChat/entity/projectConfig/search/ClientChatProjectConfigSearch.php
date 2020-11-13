@@ -18,7 +18,8 @@ class ClientChatProjectConfigSearch extends ClientChatProjectConfig
     {
         return [
             [['ccpc_project_id', 'ccpc_enabled', 'ccpc_created_user_id', 'ccpc_updated_user_id'], 'integer'],
-            [['ccpc_params_json', 'ccpc_theme_json', 'ccpc_registration_json', 'ccpc_settings_json', 'ccpc_created_dt', 'ccpc_updated_dt'], 'safe'],
+            [['ccpc_params_json', 'ccpc_theme_json', 'ccpc_registration_json', 'ccpc_settings_json'], 'safe'],
+            [['ccpc_created_dt', 'ccpc_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -52,7 +53,7 @@ class ClientChatProjectConfigSearch extends ClientChatProjectConfig
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 
@@ -62,8 +63,8 @@ class ClientChatProjectConfigSearch extends ClientChatProjectConfig
             'ccpc_enabled' => $this->ccpc_enabled,
             'ccpc_created_user_id' => $this->ccpc_created_user_id,
             'ccpc_updated_user_id' => $this->ccpc_updated_user_id,
-            'ccpc_created_dt' => $this->ccpc_created_dt,
-            'ccpc_updated_dt' => $this->ccpc_updated_dt,
+            'DATE(ccpc_created_dt)' => $this->ccpc_created_dt,
+            'DATE(ccpc_updated_dt)' => $this->ccpc_updated_dt,
         ]);
 
         $query->andFilterWhere(['like', 'ccpc_params_json', $this->ccpc_params_json])

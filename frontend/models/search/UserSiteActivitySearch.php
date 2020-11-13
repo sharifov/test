@@ -29,8 +29,9 @@ class UserSiteActivitySearch extends UserSiteActivity
     {
         return [
             [['usa_id', 'usa_user_id', 'usa_request_type'], 'integer'],
-            [['usa_request_url', 'usa_page_url', 'usa_ip', 'usa_request_get', 'usa_request_post', 'usa_created_dt'], 'safe'],
+            [['usa_request_url', 'usa_page_url', 'usa_ip', 'usa_request_get', 'usa_request_post'], 'safe'],
             [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+            [['usa_created_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

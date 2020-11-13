@@ -30,10 +30,14 @@ class DateTimeColumn extends DataColumn
                     'autoclose' => true,
                     'format' => 'yyyy-mm-dd',
                     'clearBtn' => true,
+                    'endDate' => date('Y-m-d', time())
                 ],
                 'options' => [
                     'autocomplete' => 'off',
                     'placeholder' => 'Choose Date',
+                ],
+                'containerOptions' => [
+                    'class' => (array_key_exists($this->attribute, $this->grid->filterModel->errors)) ? 'has-error' : null,
                 ],
                 'clientEvents' => [
                     'clearDate' => 'function (e) {$(e.target).find("input").change();}',

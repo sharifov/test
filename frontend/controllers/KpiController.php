@@ -37,10 +37,10 @@ class KpiController extends FController
 
         $model = new DynamicModel(['date_dt']);
         $model->addRule(['date_dt'], 'required');
+        $model->addRule(['date_dt'], 'date', ['format' => 'php:Y-m-d']);
 
-        if($model->load($params2)){
+        if ($model->load($params2)) {
             $date = \DateTime::createFromFormat('M-Y', $params2['DynamicModel']['date_dt']);
-
 
             //echo $date; exit;
 
@@ -56,7 +56,7 @@ class KpiController extends FController
         }
 
         $params = array_merge($params, $params2);
-        if($isAgent) {
+        if ($isAgent) {
             $params['KpiHistorySearch']['kh_user_id'] = $user->id;
         } elseif ($user->isSupervision()) {
             $userIds = EmployeeGroupAccess::getUsersIdsInCommonGroups($user->id);
@@ -82,7 +82,7 @@ class KpiController extends FController
         $isAgent = Auth::user()->isAgent();
 
         $kpiHistory = KpiHistory::find()->where(['kh_id' => $id])->one();
-        if(!$kpiHistory || ($isAgent && Yii::$app->user->id !== $kpiHistory->kh_user_id) ){
+        if (!$kpiHistory || ($isAgent && Yii::$app->user->id !== $kpiHistory->kh_user_id)) {
             return $this->redirect([
                 'kpi/index',
             ]);
@@ -93,20 +93,20 @@ class KpiController extends FController
         $start->modify('first day of this month');
         $agent = $kpiHistory->khUser;
 
-        if(Yii::$app->request->isPost){
+        if (Yii::$app->request->isPost) {
             $postParams = Yii::$app->request->post();
-            if(isset($postParams['recalculate_kpi'])){
+            if (isset($postParams['recalculate_kpi'])) {
                 $kpiHistory = KpiHistory::recalculateSalary($agent, $start, $end);
                 Yii::info('Month: '.$end->format('M-Y').' User: '.Yii::$app->user->id.' Agent: '.$agent->id, 'info\KpiHistory::recalculateSalary');
 
                 $kpiHistory->kh_agent_approved_dt = null;
                 $kpiHistory->kh_super_approved_dt = null;
-            }elseif(isset($postParams['approved_by_super'])){
+            } elseif (isset($postParams['approved_by_super'])) {
                 $kpiHistory->kh_super_approved_dt = date('Y-m-d H:i:s');
                 $kpiHistory->kh_super_id = Yii::$app->user->id;
-            }elseif(isset($postParams['approved_by_agent'])){
+            } elseif (isset($postParams['approved_by_agent'])) {
                 $kpiHistory->kh_agent_approved_dt = date('Y-m-d H:i:s');
-            }else{
+            } else {
                 $kpiHistory->load($postParams);
                 $kpiHistory->kh_agent_approved_dt = null;
                 $kpiHistory->kh_super_approved_dt = null;

@@ -18,7 +18,8 @@ class CreditCardSearch extends CreditCard
     {
         return [
             [['cc_id', 'cc_expiration_month', 'cc_expiration_year', 'cc_type_id', 'cc_status_id', 'cc_is_expired', 'cc_created_user_id', 'cc_updated_user_id'], 'integer'],
-            [['cc_number', 'cc_display_number', 'cc_holder_name', 'cc_cvv', 'cc_created_dt', 'cc_updated_dt'], 'safe'],
+            [['cc_number', 'cc_display_number', 'cc_holder_name', 'cc_cvv'], 'safe'],
+            [['cc_created_dt', 'cc_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -66,8 +67,8 @@ class CreditCardSearch extends CreditCard
             'cc_is_expired' => $this->cc_is_expired,
             'cc_created_user_id' => $this->cc_created_user_id,
             'cc_updated_user_id' => $this->cc_updated_user_id,
-            'cc_created_dt' => $this->cc_created_dt,
-            'cc_updated_dt' => $this->cc_updated_dt,
+            'DATE(cc_created_dt)' => $this->cc_created_dt,
+            'DATE(cc_updated_dt)' => $this->cc_updated_dt,
         ]);
 
         $query->andFilterWhere(['like', 'cc_number', $this->cc_number])

@@ -19,7 +19,8 @@ class LeadChecklistTypeSearch extends LeadChecklistType
     {
         return [
             [['lct_id', 'lct_enabled', 'lct_sort_order', 'lct_updated_user_id'], 'integer'],
-            [['lct_key', 'lct_name', 'lct_description', 'lct_updated_dt'], 'safe'],
+            [['lct_key', 'lct_name', 'lct_description'], 'safe'],
+            [['lct_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

@@ -19,7 +19,7 @@ class UserBonusRulesSearch extends UserBonusRules
         return [
             [['ubr_exp_month', 'ubr_kpi_percent', 'ubr_order_profit', 'ubr_created_user_id', 'ubr_updated_user_id'], 'integer'],
             [['ubr_value'], 'number'],
-            [['ubr_created_dt', 'ubr_updated_dt'], 'safe'],
+            [['ubr_created_dt', 'ubr_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

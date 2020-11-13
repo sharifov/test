@@ -77,6 +77,7 @@ class CasesQSearch extends Cases
             ['css_penalty_type', 'integer'],
             [['last_in_date', 'last_out_date', 'css_departure_dt'], 'string'],
             [['saleExist', 'nextFlight'], 'safe'],
+            [['cs_created_dt', 'css_departure_dt', 'trash_date'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -238,7 +239,7 @@ class CasesQSearch extends Cases
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 
@@ -405,7 +406,7 @@ class CasesQSearch extends Cases
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 
@@ -465,7 +466,7 @@ class CasesQSearch extends Cases
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 

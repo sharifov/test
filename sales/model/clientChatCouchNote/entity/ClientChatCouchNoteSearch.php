@@ -13,7 +13,7 @@ class ClientChatCouchNoteSearch extends ClientChatCouchNote
     {
         return [
             ['cccn_cch_id', 'integer'],
-            ['cccn_created_dt', 'safe'],
+            ['cccn_created_dt', 'date', 'format' => 'php:Y-m-d'],
             ['cccn_created_user_id', 'integer'],
             ['cccn_id', 'integer'],
 

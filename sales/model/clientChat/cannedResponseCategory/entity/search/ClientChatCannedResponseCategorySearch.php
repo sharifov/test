@@ -10,7 +10,8 @@ class ClientChatCannedResponseCategorySearch extends ClientChatCannedResponseCat
     public function rules(): array
     {
         return [
-            ['crc_created_dt', 'safe'],
+
+            [['crc_created_dt', 'crc_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
 
             ['crc_created_user_id', 'integer'],
 
@@ -20,7 +21,7 @@ class ClientChatCannedResponseCategorySearch extends ClientChatCannedResponseCat
 
             ['crc_name', 'safe'],
 
-            ['crc_updated_dt', 'safe'],
+            ['', 'safe'],
 
             ['crc_updated_user_id', 'integer'],
         ];
@@ -44,8 +45,8 @@ class ClientChatCannedResponseCategorySearch extends ClientChatCannedResponseCat
         $query->andFilterWhere([
             'crc_id' => $this->crc_id,
             'crc_enabled' => $this->crc_enabled,
-            'date_format(crc_created_dt, "%Y-%m-%d")' => $this->crc_created_dt,
-            'date_format(crc_updated_dt, "%Y-%m-%d")' => $this->crc_updated_dt,
+            'DATE(crc_created_dt)' => $this->crc_created_dt,
+            'DATE(crc_updated_dt)' => $this->crc_updated_dt,
             'crc_created_user_id' => $this->crc_created_user_id,
             'crc_updated_user_id' => $this->crc_updated_user_id,
         ]);

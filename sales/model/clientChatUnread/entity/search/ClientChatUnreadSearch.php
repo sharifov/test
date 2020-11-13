@@ -11,9 +11,7 @@ class ClientChatUnreadSearch extends ClientChatUnread
     public function rules(): array
     {
         return [
-            ['ccu_created_dt', 'date', 'format' => 'php:Y-m-d'],
-
-            ['ccu_updated_dt', 'date', 'format' => 'php:Y-m-d'],
+            [['ccu_created_dt', 'ccu_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
 
             ['ccu_cc_id', 'integer'],
 

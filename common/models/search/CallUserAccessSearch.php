@@ -19,7 +19,7 @@ class CallUserAccessSearch extends CallUserAccess
     {
         return [
             [['cua_call_id', 'cua_user_id', 'cua_status_id'], 'integer'],
-            [['cua_created_dt', 'cua_updated_dt'], 'safe'],
+            [['cua_created_dt', 'cua_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

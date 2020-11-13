@@ -25,7 +25,8 @@ class LeadFlowChecklistSearch extends LeadFlow
     {
         return [
             [['id', 'employee_id', 'lead_id', 'status', 'supervision_id', 'lf_from_status_id'], 'integer'],
-            [['created', 'statuses', 'dateRange', 'lf_end_dt'], 'safe'],
+            [['statuses', 'dateRange'], 'safe'],
+            [['created', 'lf_end_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

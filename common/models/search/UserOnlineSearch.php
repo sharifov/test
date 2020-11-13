@@ -18,7 +18,7 @@ class UserOnlineSearch extends UserOnline
     {
         return [
             [['uo_user_id', 'uo_idle_state'], 'integer'],
-            [['uo_updated_dt', 'uo_idle_state_dt'], 'safe'],
+            [['uo_updated_dt', 'uo_idle_state_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -63,9 +63,9 @@ class UserOnlineSearch extends UserOnline
         // grid filtering conditions
         $query->andFilterWhere([
             'uo_user_id' => $this->uo_user_id,
-            'uo_updated_dt' => $this->uo_updated_dt,
+            'DATE(uo_updated_dt)' => $this->uo_updated_dt,
             'uo_idle_state' => $this->uo_idle_state,
-            'uo_idle_state_dt' => $this->uo_idle_state_dt,
+            'DATE(uo_idle_state_dt)' => $this->uo_idle_state_dt,
         ]);
 
         return $dataProvider;

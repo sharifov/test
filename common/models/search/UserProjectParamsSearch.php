@@ -25,7 +25,7 @@ class UserProjectParamsSearch extends UserProjectParams
             [['upp_user_id', 'upp_project_id', 'upp_updated_user_id', 'supervision_id'], 'integer'],
 //            ['upp_email', 'safe'],
 //            ['upp_tw_phone_number', 'safe'],
-            [['upp_phone_number', 'upp_tw_sip_id', 'upp_created_dt', 'upp_updated_dt', 'upp_allow_general_line'], 'safe'],
+            [['upp_phone_number', 'upp_tw_sip_id', 'upp_allow_general_line'], 'safe'],
             ['upp_phone_list_id', 'integer'],
             ['upp_email_list_id', 'integer'],
             ['upp_dep_id', 'integer'],
@@ -35,6 +35,8 @@ class UserProjectParamsSearch extends UserProjectParams
 
             ['upp_vm_enabled', 'boolean'],
             ['upp_vm_id', 'string'],
+
+            [['upp_created_dt', 'upp_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

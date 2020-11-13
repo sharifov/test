@@ -18,7 +18,7 @@ class KpiUserProductCommissionSearch extends KpiUserProductCommission
     {
         return [
             [['upc_product_type_id', 'upc_user_id', 'upc_year', 'upc_month', 'upc_performance', 'upc_commission_percent', 'upc_created_user_id', 'upc_updated_user_id'], 'integer'],
-            [['upc_created_dt', 'upc_updated_dt'], 'safe'],
+            [['upc_created_dt', 'upc_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

@@ -17,8 +17,9 @@ class CurrencyHistorySearch extends CurrencyHistory
     public function rules()
     {
         return [
-            [['ch_code', 'ch_created_date', 'ch_main_created_dt', 'ch_main_updated_dt', 'ch_main_synch_dt'], 'safe'],
+            [['ch_code'], 'safe'],
             [['ch_base_rate', 'ch_app_rate', 'ch_app_percent'], 'number'],
+            [['ch_created_date', 'ch_main_created_dt', 'ch_main_updated_dt', 'ch_main_synch_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -67,10 +68,10 @@ class CurrencyHistorySearch extends CurrencyHistory
             'ch_base_rate' => $this->ch_base_rate,
             'ch_app_rate' => $this->ch_app_rate,
             'ch_app_percent' => $this->ch_app_percent,
-            'ch_created_date' => $this->ch_created_date,
-            'ch_main_created_dt' => $this->ch_main_created_dt,
-            'ch_main_updated_dt' => $this->ch_main_updated_dt,
-            'ch_main_synch_dt' => $this->ch_main_synch_dt,
+            'DATE(ch_created_date)' => $this->ch_created_date,
+            'DATE(ch_main_created_dt)' => $this->ch_main_created_dt,
+            'DATE(ch_main_updated_dt)' => $this->ch_main_updated_dt,
+            'DATE(ch_main_synch_dt)' => $this->ch_main_synch_dt,
         ]);
 
         $query->andFilterWhere(['like', 'ch_code', $this->ch_code]);

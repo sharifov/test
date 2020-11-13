@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
-use dosamigos\datepicker\DatePicker;
+use common\components\grid\DateTimeColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\UserGroupAssignSearch */
@@ -53,8 +53,13 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             //'ugs_group_id',
-            //'ugs_updated_dt',
+
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'ugs_updated_dt'
+            ],
+
+            /*[
                 'attribute' => 'ugs_updated_dt',
                 'value' => function(\common\models\UserGroupAssign $model) {
                     return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->ugs_updated_dt));
@@ -72,7 +77,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
-            ],
+            ],*/
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

@@ -25,6 +25,8 @@ class DepartmentPhoneProjectSearch extends DepartmentPhoneProject
 
             ['dpp_show_on_site', 'boolean'],
             ['dpp_phone_list_id', 'integer'],
+
+            [['dpp_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

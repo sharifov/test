@@ -19,7 +19,8 @@ class UserFailedLoginSearch extends UserFailedLogin
     {
         return [
             [['ufl_id', 'ufl_user_id'], 'integer'],
-            [['ufl_username', 'ufl_ua', 'ufl_ip', 'ufl_session_id', 'ufl_created_dt'], 'safe'],
+            [['ufl_username', 'ufl_ua', 'ufl_ip', 'ufl_session_id'], 'safe'],
+            [['ufl_created_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -66,8 +67,8 @@ class UserFailedLoginSearch extends UserFailedLogin
         ]);
 
         if ($this->ufl_created_dt) {
-            $query->andFilterWhere(['>=', 'au_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ufl_created_dt))])
-                ->andFilterWhere(['<=', 'au_updated_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ufl_created_dt) + 3600 * 24)]);
+            $query->andFilterWhere(['>=', 'ufl_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ufl_created_dt))])
+                ->andFilterWhere(['<=', 'ufl_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ufl_created_dt) + 3600 * 24)]);
         }
 
         $query->andFilterWhere(['like', 'ufl_username', $this->ufl_username])

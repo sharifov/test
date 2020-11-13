@@ -19,7 +19,8 @@ class DepartmentSearch extends Department
     {
         return [
             [['dep_id', 'dep_updated_user_id'], 'integer'],
-            [['dep_key', 'dep_name', 'dep_updated_dt'], 'safe'],
+            [['dep_key', 'dep_name'], 'safe'],
+            [['dep_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

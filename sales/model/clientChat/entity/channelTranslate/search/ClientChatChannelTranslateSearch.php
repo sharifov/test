@@ -18,7 +18,8 @@ class ClientChatChannelTranslateSearch extends ClientChatChannelTranslate
     {
         return [
             [['ct_channel_id', 'ct_created_user_id', 'ct_updated_user_id'], 'integer'],
-            [['ct_language_id', 'ct_name', 'ct_created_dt', 'ct_updated_dt'], 'safe'],
+            [['ct_language_id', 'ct_name'], 'safe'],
+            [['ct_created_dt', 'ct_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

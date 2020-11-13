@@ -26,7 +26,8 @@ class UserMonitorSearch extends UserMonitor
     {
         return [
             [['um_id', 'um_user_id', 'um_type_id', 'um_period_sec', 'userId', 'typeId'], 'integer'],
-            [['um_start_dt', 'um_end_dt', 'um_description', 'timeRange', 'startTime', 'endTime'], 'safe'],
+            [['um_description', 'timeRange', 'startTime', 'endTime'], 'safe'],
+            [['um_start_dt', 'um_end_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

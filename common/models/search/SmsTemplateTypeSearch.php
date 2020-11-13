@@ -20,7 +20,8 @@ class SmsTemplateTypeSearch extends SmsTemplateType
     {
         return [
             [['stp_id', 'stp_hidden', 'stp_created_user_id', 'stp_updated_user_id'], 'integer'],
-            [['stp_key', 'stp_origin_name', 'stp_name', 'stp_created_dt', 'stp_updated_dt'], 'safe'],
+            [['stp_key', 'stp_origin_name', 'stp_name'], 'safe'],
+            [['stp_created_dt', 'stp_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

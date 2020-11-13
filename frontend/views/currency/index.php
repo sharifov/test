@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use common\components\grid\DateTimeColumn;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\CurrencySearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -65,28 +66,43 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'cur_sort_order',
 
-            [
+            /*[
                 'attribute' => 'cur_synch_dt',
                 'value' => static function(\common\models\Currency $model) {
                     return $model->cur_synch_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->cur_synch_dt)) : '-';
                 },
                 'format' => 'raw',
-            ],
+            ],*/
 
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'cur_synch_dt'
+            ],
+
+            /*[
                 'attribute' => 'cur_created_dt',
                 'value' => static function(\common\models\Currency $model) {
                     return $model->cur_created_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->cur_created_dt)) : '-';
                 },
                 'format' => 'raw',
-            ],
+            ],*/
 
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'cur_created_dt'
+            ],
+
+            /*[
                 'attribute' => 'cur_updated_dt',
                 'value' => static function(\common\models\Currency $model) {
                     return $model->cur_updated_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->cur_updated_dt)) : '-';
                 },
                 'format' => 'raw',
+            ],*/
+
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'cur_updated_dt'
             ],
 
             ['class' => 'yii\grid\ActionColumn'],
