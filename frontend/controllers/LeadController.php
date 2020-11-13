@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use common\components\BackOffice;
 use common\components\CommunicationService;
 use common\models\Call;
+use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Department;
@@ -496,11 +497,15 @@ class LeadController extends FController
             }
         }
 
+        $smsEnabled = true;
+        if ($lead->project->getCustomData()->sms_enabled === false) {
+            $smsEnabled = false;
+        }
 
         $previewSmsForm = new LeadPreviewSmsForm();
         $previewSmsForm->is_send = false;
 
-        if ($previewSmsForm->load(Yii::$app->request->post())) {
+        if ($smsEnabled && $previewSmsForm->load(Yii::$app->request->post())) {
             $previewSmsForm->s_lead_id = $lead->id;
             if ($previewSmsForm->validate()) {
 
@@ -709,7 +714,7 @@ class LeadController extends FController
                 }
 
 
-                if ($comForm->c_type_id == CommunicationForm::TYPE_SMS) {
+                if ($smsEnabled && $comForm->c_type_id == CommunicationForm::TYPE_SMS) {
 
                     $comForm->c_preview_sms = 1;
 
@@ -1040,6 +1045,11 @@ class LeadController extends FController
             ->from('sms')
             ->where(['s_lead_id' => $lead->id]);
 
+        $queryChats = (new \yii\db\Query())
+            ->select(['ccl_chat_id AS id', new Expression('"chat" AS type'), 'ccl_lead_id AS lead_id', 'ccl_created_dt AS created_dt'])
+            ->from('{{%client_chat_lead}}')
+            ->where(['ccl_lead_id' => $lead->id]);
+
 
 //        $query3 = (new \yii\db\Query())
 //            ->select(['c_id AS id', new Expression('"voice" AS type'), 'c_lead_id AS lead_id', 'c_created_dt AS created_dt'])
@@ -1066,7 +1076,7 @@ class LeadController extends FController
 			->orderBy(['created_dt' => SORT_ASC])
 			->groupBy(['id', 'type', 'lead_id']);
 
-        $queryUnion = $queryEmail->union($querySms);
+        $queryUnion = $queryEmail->union($querySms)->union($queryChats);
 		$queryUnionLog = clone $queryUnion;
 
 		$unionQueryLog = (new Query())
@@ -1251,7 +1261,8 @@ class LeadController extends FController
             'dataProviderOffers'    => $dataProviderOffers,
             'dataProviderOrders'    => $dataProviderOrders,
 
-			'fromPhoneNumbers' => $fromPhoneNumbers
+			'fromPhoneNumbers' => $fromPhoneNumbers,
+            'smsEnabled' => $smsEnabled
         ]);
 
     }
@@ -2049,6 +2060,8 @@ class LeadController extends FController
         $form->assignDep(Department::DEPARTMENT_SALES);
         if ($form->load($data['post']) && $form->validate()) {
             try {
+                $form->client->projectId = $form->projectId;
+                $form->client->typeCreate = Client::TYPE_CREATE_LEAD;
                 $lead = $this->leadManageService->createManuallyByDefault($form, Yii::$app->user->id, Yii::$app->user->id, LeadFlow::DESCRIPTION_MANUAL_CREATE);
                 Yii::$app->session->setFlash('success', 'Lead save');
                 return $this->redirect(['/lead/view', 'gid' => $lead->gid]);
@@ -2077,6 +2090,8 @@ class LeadController extends FController
 			if (Yii::$app->request->isPjax && $form->load($data['post']) && $form->validate()) {
 				try {
 					$leadManageService = Yii::createObject(\sales\model\lead\useCases\lead\create\LeadManageService::class);
+					$form->client->projectId = $form->projectId;
+					$form->client->typeCreate = Client::TYPE_CREATE_LEAD;
 					$lead = $leadManageService->createManuallyByDefault($form, Yii::$app->user->id, Yii::$app->user->id, LeadFlow::DESCRIPTION_MANUAL_CREATE);
 					Yii::$app->session->setFlash('success', 'Lead save');
 					return $this->redirect(['/lead/view', 'gid' => $lead->gid]);
@@ -2103,7 +2118,7 @@ class LeadController extends FController
             throw new NotFoundHttpException('Client chat not found');
         }
 
-		if (!Auth::can('client-chat/manage/all', ['chat' => ClientChat::findOne(['cch_id' => $chat])])) {
+		if (!Auth::can('client-chat/manage', ['chat' => ClientChat::findOne(['cch_id' => $chat])])) {
 			throw new ForbiddenHttpException('You do not have access to perform this action', 403);
 		}
 
@@ -2150,6 +2165,8 @@ class LeadController extends FController
         $form->assignDep(Department::DEPARTMENT_EXCHANGE);
         if ($form->load($data['post']) && $form->validate()) {
             try {
+                $form->client->projectId = $form->projectId;
+                $form->client->typeCreate = Client::TYPE_CREATE_LEAD;
                 $lead = $this->leadManageService->createManuallyFromCase($form, Yii::$app->user->id, Yii::$app->user->id, 'Manual create form Case');
                 Yii::$app->session->setFlash('success', 'Lead save');
                 return $this->redirect(['/lead/view', 'gid' => $lead->gid]);

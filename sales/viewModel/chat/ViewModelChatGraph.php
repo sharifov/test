@@ -17,7 +17,7 @@ use yii\helpers\ArrayHelper;
 
 class ViewModelChatGraph
 {
-    public string $preparedData;
+    public string $preparedData = '';
     public array $clientChatData;
     public ChatGraphsSearch $chatGraphsSearch;
 
@@ -43,7 +43,12 @@ class ViewModelChatGraph
         foreach ($this->clientChatData as $arr){
             array_push($mappedData, [
                 $arr['date'],
-                (int)$arr['generated'],
+                (int)$arr['new'],
+                (int)$arr['pending'],
+                (int)$arr['progress'],
+                (int)$arr['transfer'],
+                (int)$arr['hold'],
+                (int)$arr['idle'],
                 (int)$arr['closed']
             ]);
         }
@@ -54,7 +59,12 @@ class ViewModelChatGraph
 
         $headers = [
             'Date',
-            'Generated',
+            'New',
+            'Pending',
+            'Progress',
+            'Transfer',
+            'Hold',
+            'Idle',
             'Closed',
         ];
         if ($mappedData){

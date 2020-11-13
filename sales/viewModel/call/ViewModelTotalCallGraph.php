@@ -2,6 +2,7 @@
 
 namespace sales\viewModel\call;
 
+use common\components\ChartTools;
 use DateInterval;
 use DatePeriod;
 use DateTime;
@@ -51,9 +52,10 @@ class ViewModelTotalCallGraph
      * @param CallGraphsSearch $callGraphsSearch
      * @throws \Exception
      */
-    public function __construct(SqlDataProvider $callData,
-                                CallGraphsSearch $callGraphsSearch)
-    {
+    public function __construct(
+        SqlDataProvider $callData,
+        CallGraphsSearch $callGraphsSearch
+    ) {
         $this->callData = $callData->getModels();
         $this->callGraphsSearch = $callGraphsSearch;
 
@@ -76,7 +78,7 @@ class ViewModelTotalCallGraph
         $finalData = [];
         $mappedData = [];
 
-        foreach ($this->callData as $rowIndex){
+        foreach ($this->callData as $rowIndex) {
             $data['incoming'] = 0;
             $data['incomingAvg'] = 0;
             $data['incomingTotal'] = 0;
@@ -91,24 +93,24 @@ class ViewModelTotalCallGraph
             $data['totalCallsDuration'] = 0;
             $data['totalAvgDuration'] = 0;
 
-            foreach ($this->callData as $row){
+            foreach ($this->callData as $row) {
                 if ($rowIndex['group'] == $row['group']) {
                     $data['date'] = $row['group'];
-                    if ($row['callType'] === 'in'){
+                    if ($row['callType'] === 'in') {
                         $data['incoming'] = $row['totalCalls'];
                         $data['incomingAvg'] = $row['avgCallsPerGroup'];
                         $data['incomingTotal'] = $row['totalCallsDuration'];
                         $data['incomingAvgDuration'] = $row['avgCallDuration'];
                     }
 
-                    if ($row['callType'] === 'out'){
+                    if ($row['callType'] === 'out') {
                         $data['outgoing'] = $row['totalCalls'];
                         $data['outgoingAvg'] = $row['avgCallsPerGroup'];
                         $data['outgoingTotal'] = $row['totalCallsDuration'];
                         $data['outgoingAvgDuration'] = $row['avgCallDuration'];
                     }
 
-                    if ($row['callType'] === 'total'){
+                    if ($row['callType'] === 'total') {
                         $data['total'] = $row['totalCalls'];
                         $data['totalCallsDuration'] = $row['totalCallsDuration'];
                         $data['totalAvgDuration'] = $row['avgCallDuration'];
@@ -118,7 +120,7 @@ class ViewModelTotalCallGraph
             }
         }
 
-        foreach ($finalData as $arr){
+        foreach ($finalData as $arr) {
             array_push($mappedData, [
                 'date' => $arr['date'],
                 'incoming' => (int)$arr['incoming'],
@@ -155,18 +157,18 @@ class ViewModelTotalCallGraph
         $finalData = [];
         $mappedData = [];
 
-        foreach ($this->callData as $rowIndex){
+        foreach ($this->callData as $rowIndex) {
             $data['incoming'] = 0;
             $data['outgoing'] = 0;
-            foreach ($this->callData as $row){
+            foreach ($this->callData as $row) {
                 if ($rowIndex['group'] == $row['group']) {
                     $data['date'] = $row['group'];
 
-                    if ($row['callType'] === 'in'){
+                    if ($row['callType'] === 'in') {
                         $data['incoming'] = $row['totalCalls'];
                     }
 
-                    if ($row['callType'] === 'out'){
+                    if ($row['callType'] === 'out') {
                         $data['outgoing'] = $row['totalCalls'];
                     }
 
@@ -178,28 +180,30 @@ class ViewModelTotalCallGraph
             }
         }
 
-        foreach ($finalData as $arr){
+        foreach ($finalData as $arr) {
             array_push($mappedData, [
                 $arr['date'],
                 (int)$arr['incoming'],
+                'Incoming Calls: ' . (int)$arr['incoming'],
                 (int)$arr['outgoing'],
-                /*(int)$arr['total']*/
+                'Outgoing Calls: ' . (int)$arr['outgoing'],
                 ]);
         }
 
-        if ($this->callGraphsSearch->callGraphGroupBy === CallGraphsSearch::DATE_FORMAT_WEEKDAYS) {
-            $mappedData = $this->setWeekDayName($mappedData);
-        }
-
-        if ($this->callGraphsSearch->callGraphGroupBy === CallGraphsSearch::DATE_FORMAT_MONTH) {
-            $mappedData = $this->setMonthName($mappedData);
-        }
+        $mappedData = $this->normalizeAxisX($mappedData);
 
         $this->totalCallsGraphData = json_encode(ArrayHelper::merge([[
             'Date',
             'Incoming',
+            [
+                'type' => 'string',
+                'role' => 'tooltip'
+            ],
             'Outgoing',
-            /*'Total',*/
+            [
+                'type' => 'string',
+                'role' => 'tooltip'
+            ],
         ]], $mappedData));
     }
 
@@ -212,17 +216,17 @@ class ViewModelTotalCallGraph
         $finalData = [];
         $mappedData = [];
 
-        foreach ($this->callData as $rowIndex){
+        foreach ($this->callData as $rowIndex) {
             $data['incoming'] = 0;
             $data['outgoing'] = 0;
-            foreach ($this->callData as $row){
+            foreach ($this->callData as $row) {
                 if ($rowIndex['group'] == $row['group']) {
                     $data['date'] = $row['group'];
-                    if ($row['callType'] === 'in'){
+                    if ($row['callType'] === 'in') {
                         $data['incoming'] = $row['avgCallsPerGroup'];
                     }
 
-                    if ($row['callType'] === 'out'){
+                    if ($row['callType'] === 'out') {
                         $data['outgoing'] = $row['avgCallsPerGroup'];
                     }
 
@@ -234,28 +238,30 @@ class ViewModelTotalCallGraph
             }
         }
 
-        foreach ($finalData as $arr){
+        foreach ($finalData as $arr) {
             array_push($mappedData, [
                 $arr['date'],
                 (int)$arr['incoming'],
+                'Incoming Calls AVG: ' . (int)$arr['incoming'],
                 (int)$arr['outgoing'],
-                /*(int)$arr['total']*/
+                'Outgoing Calls AVG: ' . (int)$arr['outgoing'],
             ]);
         }
 
-        if ($this->callGraphsSearch->callGraphGroupBy === CallGraphsSearch::DATE_FORMAT_WEEKDAYS) {
-            $mappedData = $this->setWeekDayName($mappedData);
-        }
-
-        if ($this->callGraphsSearch->callGraphGroupBy === CallGraphsSearch::DATE_FORMAT_MONTH) {
-            $mappedData = $this->setMonthName($mappedData);
-        }
+        $mappedData = $this->normalizeAxisX($mappedData);
 
         $this->totalCallsGraphDataAvg = json_encode(ArrayHelper::merge([[
             'Date',
             'Incoming',
+            [
+                'type' => 'string',
+                'role' => 'tooltip'
+            ],
             'Outgoing',
-            /*'Total',*/
+            [
+                'type' => 'string',
+                'role' => 'tooltip'
+            ],
         ]], $mappedData));
     }
 
@@ -268,17 +274,17 @@ class ViewModelTotalCallGraph
         $finalData = [];
         $mappedData = [];
 
-        foreach ($this->callData as $rowIndex){
+        foreach ($this->callData as $rowIndex) {
             $data['incoming'] = 0;
             $data['outgoing'] = 0;
-            foreach ($this->callData as $row){
+            foreach ($this->callData as $row) {
                 if ($rowIndex['group'] == $row['group']) {
                     $data['date'] = $row['group'];
-                    if ($row['callType'] === 'in'){
+                    if ($row['callType'] === 'in') {
                         $data['incoming'] = $row['totalCallsDuration'];
                     }
 
-                    if ($row['callType'] === 'out'){
+                    if ($row['callType'] === 'out') {
                         $data['outgoing'] = $row['totalCallsDuration'];
                     }
 
@@ -290,25 +296,17 @@ class ViewModelTotalCallGraph
             }
         }
 
-        foreach ($finalData as $arr){
+        foreach ($finalData as $arr) {
             array_push($mappedData, [
                 $arr['date'],
                 (int)$arr['incoming'],
                 'Incoming Call Duration: ' . Yii::$app->formatter->asDuration((int)$arr['incoming']),
                 (int)$arr['outgoing'],
                 'Outgoing Call Duration: ' . Yii::$app->formatter->asDuration((int)$arr['outgoing']),
-                /*(int)$arr['total'],
-                'Total Call Duration: ' . Yii::$app->formatter->asDuration((int)$arr['total']),*/
             ]);
         }
 
-        if ($this->callGraphsSearch->callGraphGroupBy === CallGraphsSearch::DATE_FORMAT_WEEKDAYS) {
-            $mappedData = $this->setWeekDayName($mappedData);
-        }
-
-        if ($this->callGraphsSearch->callGraphGroupBy === CallGraphsSearch::DATE_FORMAT_MONTH) {
-            $mappedData = $this->setMonthName($mappedData);
-        }
+        $mappedData = $this->normalizeAxisX($mappedData);
 
         $this->totalCallsRecDurationData = json_encode(ArrayHelper::merge([[
             'Date',
@@ -322,11 +320,6 @@ class ViewModelTotalCallGraph
                 'type' => 'string',
                 'role' => 'tooltip'
             ],
-            /*'Total Call Duration',
-            [
-                'type' => 'string',
-                'role' => 'tooltip'
-            ],*/
         ]], $mappedData));
     }
 
@@ -339,17 +332,17 @@ class ViewModelTotalCallGraph
         $finalData = [];
         $mappedData = [];
 
-        foreach ($this->callData as $rowIndex){
+        foreach ($this->callData as $rowIndex) {
             $data['incoming'] = 0;
             $data['outgoing'] = 0;
-            foreach ($this->callData as $row){
+            foreach ($this->callData as $row) {
                 if ($rowIndex['group'] == $row['group']) {
                     $data['date'] = $row['group'];
-                    if ($row['callType'] === 'in'){
+                    if ($row['callType'] === 'in') {
                         $data['incoming'] = $row['avgCallDuration'];
                     }
 
-                    if ($row['callType'] === 'out'){
+                    if ($row['callType'] === 'out') {
                         $data['outgoing'] = $row['avgCallDuration'];
                     }
 
@@ -361,25 +354,17 @@ class ViewModelTotalCallGraph
             }
         }
 
-        foreach ($finalData as $arr){
+        foreach ($finalData as $arr) {
             array_push($mappedData, [
                 $arr['date'],
                 (int)$arr['incoming'],
                 'Incoming Call Duration AVG: ' . Yii::$app->formatter->asDuration((int)$arr['incoming']),
                 (int)$arr['outgoing'],
                 'Outgoing Call Duration AVG: ' . Yii::$app->formatter->asDuration((int)$arr['outgoing']),
-                /*(int)$arr['total'],
-                'Total Call Duration AVG: ' . Yii::$app->formatter->asDuration((int)$arr['total']),*/
             ]);
         }
 
-        if ($this->callGraphsSearch->callGraphGroupBy === CallGraphsSearch::DATE_FORMAT_WEEKDAYS) {
-            $mappedData = $this->setWeekDayName($mappedData);
-        }
-
-        if ($this->callGraphsSearch->callGraphGroupBy === CallGraphsSearch::DATE_FORMAT_MONTH) {
-            $mappedData = $this->setMonthName($mappedData);
-        }
+        $mappedData = $this->normalizeAxisX($mappedData);
 
         $this->totalCallsRecDurationDataAVG = json_encode(ArrayHelper::merge([[
             'Date',
@@ -393,14 +378,204 @@ class ViewModelTotalCallGraph
                 'type' => 'string',
                 'role' => 'tooltip'
             ],
-            /*'Total Call Duration AVG',
-            [
-                'type' => 'string',
-                'role' => 'tooltip'
-            ],*/
         ]], $mappedData));
     }
 
+    private function normalizeAxisX($mappedData)
+    {
+        if ($this->callGraphsSearch->callGraphGroupBy == CallGraphsSearch::DATE_FORMAT_HOURS) {
+            $mappedData = $this->normalizeByHoursOnAxisX($mappedData);
+        }
+
+        if ($this->callGraphsSearch->callGraphGroupBy == CallGraphsSearch::DATE_FORMAT_DAYS) {
+            $mappedData = $this->normalizeByDaysOnAxisX($mappedData);
+        }
+
+        if ($this->callGraphsSearch->callGraphGroupBy == CallGraphsSearch::DATE_FORMAT_WEEKS) {
+            $mappedData = $this->normalizeByWeeksOnAxisX($mappedData);
+        }
+
+        if ($this->callGraphsSearch->callGraphGroupBy === CallGraphsSearch::DATE_FORMAT_WEEKDAYS) {
+            $mappedData = $this->setWeekDayName($mappedData);
+        }
+
+        if ($this->callGraphsSearch->callGraphGroupBy === CallGraphsSearch::DATE_FORMAT_MONTH) {
+            $mappedData = $this->setMonthName($mappedData);
+            $mappedData = $this->normalizeByMonthsOnAxisX($mappedData);
+        }
+
+        if ($this->callGraphsSearch->callGraphGroupBy == CallGraphsSearch::DATE_FORMAT_HOURS_DAYS) {
+            $mappedData = $this->normalizeByHoursOfDaysOnAxisX($mappedData);
+        }
+
+        if ($this->callGraphsSearch->callGraphGroupBy == CallGraphsSearch::DATE_FORMAT_WEEKDAYS) {
+            $mappedData = $this->normalizeByWeekDaysOnAxisX($mappedData);
+        }
+
+        return $mappedData;
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    private function normalizeByHoursOnAxisX(array $data): array
+    {
+        $timeRange = explode(' - ', $this->callGraphsSearch->createTimeRange);
+        $groupFormat = $this->callGraphsSearch::GROUP_FORMAT_DAYS_HOURS;
+        $axisX = ChartTools::getHoursRange($timeRange[0], $timeRange[1], $step = '+1 hour', $groupFormat);
+        $defaultGroups = array_column($data, 0);
+        $normalizedData = $data;
+        foreach ($axisX as $point) {
+            if (in_array($point, $defaultGroups)) {
+                continue;
+            } else {
+                array_push($normalizedData, [$point, 0, '', 0, '']);
+            }
+        }
+
+        usort($normalizedData, function ($firstElement, $secondElement) {
+            $datetimeFirst = strtotime($firstElement[0]);
+            $datetimeSecond = strtotime($secondElement[0]);
+            return $datetimeFirst - $datetimeSecond;
+        });
+
+        return $normalizedData;
+    }
+    /**
+     * @param array $data
+     * @return array
+     */
+    private function normalizeByHoursOfDaysOnAxisX(array $data): array
+    {
+        $axisX = ChartTools::getHourRange();
+        $defaultGroups = array_column($data, 0);
+        $normalizedData = $data;
+        foreach ($axisX as $point) {
+            if (in_array($point, $defaultGroups)) {
+                continue;
+            } else {
+                array_push($normalizedData, [$point, 0, '', 0, '']);
+            }
+        }
+
+        usort($normalizedData, function ($firstElement, $secondElement) {
+            $datetimeFirst = strtotime($firstElement[0]);
+            $datetimeSecond = strtotime($secondElement[0]);
+            return $datetimeFirst - $datetimeSecond;
+        });
+
+        return $normalizedData;
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    private function normalizeByWeekDaysOnAxisX(array $data): array
+    {
+        $axisX = ChartTools::getWeekDaysRange();
+        $defaultGroups = array_column($data, 0);
+        $normalizedData = $data;
+        foreach ($axisX as $point) {
+            if (in_array($point, $defaultGroups)) {
+                continue;
+            } else {
+                array_push($normalizedData, [$point, 0, '', 0, '']);
+            }
+        }
+
+        usort($normalizedData, function ($a, $b) {
+            return date('N', strtotime($a[0])) - date('N', strtotime($b[0]));
+        });
+
+        return $normalizedData;
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    private function normalizeByDaysOnAxisX(array $data): array
+    {
+        $timeRange = explode(' - ', $this->callGraphsSearch->createTimeRange);
+        $axisX = ChartTools::getDaysRange($timeRange[0], $timeRange[1]);
+        $defaultGroups = array_column($data, 0);
+        $normalizedData = $data;
+        foreach ($axisX as $point) {
+            if (in_array($point, $defaultGroups)) {
+                continue;
+            } else {
+                array_push($normalizedData, [$point, 0, '', 0, '']);
+            }
+        }
+
+        usort($normalizedData, function ($firstElement, $secondElement) {
+            $datetimeFirst = strtotime($firstElement[0]);
+            $datetimeSecond = strtotime($secondElement[0]);
+            return $datetimeFirst - $datetimeSecond;
+        });
+
+        return $normalizedData;
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     * @throws \Exception
+     */
+    private function normalizeByWeeksOnAxisX(array $data): array
+    {
+        $timeRange = explode(' - ', $this->callGraphsSearch->createTimeRange);
+        $axisX = ChartTools::getWeeksRange(new \DateTime($timeRange[0]), new \DateTime($timeRange[1]));
+        $defaultGroups = array_column($data, 0);
+        $normalizedData = $data;
+        foreach ($axisX as $point) {
+            if (in_array($point, $defaultGroups)) {
+                continue;
+            } else {
+                array_push($normalizedData, [$point, 0, '', 0, '']);
+            }
+        }
+
+        usort($normalizedData, function ($firstElement, $secondElement) {
+            $firstCriteria = explode('/', $firstElement[0]);
+            $secondCriteria = explode('/', $secondElement[0]);
+            $datetimeFirst = strtotime($firstCriteria[0]);
+            $datetimeSecond = strtotime($secondCriteria[0]);
+            return $datetimeFirst - $datetimeSecond;
+        });
+
+        return $normalizedData;
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    private function normalizeByMonthsOnAxisX(array $data): array
+    {
+        $timeRange = explode(' - ', $this->callGraphsSearch->createTimeRange);
+        $axisX = ChartTools::getMonthsRange($timeRange[0], $timeRange[1], 'Y-F');
+        $defaultGroups = array_column($data, 0);
+        $normalizedData = $data;
+
+        foreach ($axisX as $point) {
+            if (in_array($point, $defaultGroups)) {
+                continue;
+            } else {
+                array_push($normalizedData, [$point, 0, '', 0, '']);
+            }
+        }
+
+        usort($normalizedData, function ($firstElement, $secondElement) {
+            $datetimeFirst = strtotime($firstElement[0]);
+            $datetimeSecond = strtotime($secondElement[0]);
+            return $datetimeFirst - $datetimeSecond;
+        });
+
+        return $normalizedData;
+    }
 
     /**
      * @param array $data
@@ -410,7 +585,7 @@ class ViewModelTotalCallGraph
     {
         $week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-        foreach ($data as $key => $arr){
+        foreach ($data as $key => $arr) {
             $firstKey = array_key_first($arr);
             $data[$key][$firstKey] = $week[$arr[$firstKey]];
         }
@@ -424,7 +599,7 @@ class ViewModelTotalCallGraph
      */
     private function setMonthName(array $data):array
     {
-        foreach ($data as $key => $arr){
+        foreach ($data as $key => $arr) {
             $firstKey = array_key_first($arr);
             $data[$key][$firstKey] = date('Y-F', strtotime($data[$key][$firstKey]));
         }
@@ -433,76 +608,8 @@ class ViewModelTotalCallGraph
     }
 
     /**
-     * @param array $callData
-     * @return $this
-     * @throws \Exception
+     * @return array
      */
-    /*private function calcTotalCallsAverage(array &$callData): void
-    {
-        foreach ($callData as $key => $item) {
-            $delimiter = 1;
-            if ($this->callGraphsSearch->callGraphGroupBy === CallGraphsSearch::DATE_FORMAT_HOURS_DAYS) {
-                $delimiter = $this->countHourDayInDateRange($item['created_formatted'], $this->callGraphsSearch->createTimeStart, $this->callGraphsSearch->createTimeEnd);
-            } else if ($this->callGraphsSearch->callGraphGroupBy === CallGraphsSearch::DATE_FORMAT_WEEKDAYS) {
-                $delimiter = $this->countWeekDayInDateRange($item['created_formatted'], $this->callGraphsSearch->createTimeStart, $this->callGraphsSearch->createTimeEnd);
-            }
-
-            $callData[$key]['incoming_avg'] = $item['incoming'] / $delimiter;
-            $callData[$key]['outgoing_avg'] = $item['outgoing'] / $delimiter;
-            $callData[$key]['total_calls_avg'] = ($item['incoming'] + $item['outgoing']) / $delimiter;
-        }
-    }*/
-
-    /**
-     * How many times the hour of the day repeat in the datetime range
-     *
-     * @param string $hour
-     * @param string $dateStart
-     * @param string $dateEnd
-     * @return int
-     * @throws \Exception
-     */
-    /*private function countHourDayInDateRange(string $hour, string $dateStart, string $dateEnd): int
-    {
-        $dateStart = new DateTime($dateStart);
-        $dateEnd = new DateTime($dateEnd);
-        $d1 = new DateTime($dateStart->format('Y-m-d '.$hour));
-        $d2 = new DateTime($dateEnd->format('Y-m-d '.$hour));
-
-        $interval = $dateStart->diff($dateEnd);
-        if ( ($d1 < $dateStart && $d2 < $dateEnd) || ($d1 > $dateStart && $d2 > $dateEnd) ) {
-            $hourCount = $interval->d;
-        } else {
-            $hourCount = $interval->d+1;
-        }
-
-        return $hourCount;
-    }*/
-
-    /**
-     * @param string $dayName
-     * @param string $dateStart
-     * @param string $dateEnd
-     * @return int
-     * @throws \Exception
-     */
-    /*private function countWeekDayInDateRange(string $dayName, string $dateStart, string $dateEnd): int
-    {
-        $week = ['Monday' => 0, 'Tuesday' => 0, 'Wednesday' => 0, 'Thursday' => 0, 'Friday' => 0, 'Saturday' => 0, 'Sunday' => 0];
-
-        $d1 = new DateTime($dateStart);
-        $d2 = new DateTime($dateEnd);
-
-        $interval = DateInterval::createFromDateString('1 day');
-        $period   = new DatePeriod($d1, $interval, $d2);
-
-        foreach ($period as $date) {
-            $week[$date->format('l')]++;
-        }
-
-        return $week[$dayName];
-    }*/
-
     private function fetchGridColumns()
     {
         return [

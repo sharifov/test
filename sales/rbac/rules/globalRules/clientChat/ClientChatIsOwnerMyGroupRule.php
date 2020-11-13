@@ -10,19 +10,6 @@ class ClientChatIsOwnerMyGroupRule extends \yii\rbac\Rule
 {
 	public $name = 'ClientChatIsOwnerMyGroupRule';
 
-	private array $primaryRoles = [
-		Employee::ROLE_SUPER_ADMIN,
-		Employee::ROLE_ADMIN,
-		Employee::ROLE_QA,
-		Employee::ROLE_QA_SUPER
-	];
-
-	private array $roles = [
-		Employee::ROLE_SUPERVISION,
-		Employee::ROLE_SUP_SUPER,
-		Employee::ROLE_EX_SUPER,
-	];
-
 	public function execute($user, $item, $params)
 	{
 		if (!isset($params['chat']) || !$params['chat'] instanceof ClientChat) {
@@ -31,10 +18,19 @@ class ClientChatIsOwnerMyGroupRule extends \yii\rbac\Rule
 		$chat = $params['chat'];
 
 		if ($currentUser = Employee::findOne((int)$user)) {
-			if ($currentUser->canRoles($this->primaryRoles)) {
+			if ($currentUser->canRoles([
+				Employee::ROLE_SUPER_ADMIN,
+				Employee::ROLE_ADMIN,
+				Employee::ROLE_QA,
+				Employee::ROLE_QA_SUPER
+			])) {
 				return true;
 			}
-			return ($currentUser->canRoles($this->roles) && EmployeeGroupAccess::isUserInCommonGroup($user, (int)$chat->cch_owner_user_id));
+			return ($currentUser->canRoles([
+					Employee::ROLE_SUPERVISION,
+					Employee::ROLE_SUP_SUPER,
+					Employee::ROLE_EX_SUPER,
+				]) && EmployeeGroupAccess::isUserInCommonGroup($user, (int)$chat->cch_owner_user_id));
 		}
 		return false;
 	}

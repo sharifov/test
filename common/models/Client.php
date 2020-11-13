@@ -33,6 +33,8 @@ use yii\db\ActiveQuery;
  * @property bool $disabled
  * @property int $rating
  * @property int $cl_type_id // 1 - Client, 2 - Contact
+ * @property int|null $cl_type_create // 1 - Manually, 2 - Lead etc.
+ * @property int|null $cl_project_id
  *
  * @property ClientEmail[] $clientEmails
  * @property ClientPhone[] $clientPhones
@@ -45,10 +47,13 @@ use yii\db\ActiveQuery;
  * @property array $emailList
  * @property Project[] $projects
  * @property UserContactList $contact
+ * @property Project|null $project
  * @method clientPhonesByType(array $array)
  */
 class Client extends ActiveRecord
 {
+    public const SCENARIO_MANUALLY = 'manually';
+
     use EventTrait;
 
     public $full_name;
@@ -63,6 +68,24 @@ class Client extends ActiveRecord
         self::TYPE_INTERNAL => 'Internal',
     ];
 
+    public const TYPE_CREATE_MANUALLY = 1;
+    public const TYPE_CREATE_LEAD = 2;
+    public const TYPE_CREATE_CASE = 3;
+    public const TYPE_CREATE_CALL = 4;
+    public const TYPE_CREATE_SMS = 5;
+    public const TYPE_CREATE_EMAIL = 6;
+    public const TYPE_CREATE_CLIENT_CHAT = 7;
+
+    public const TYPE_CREATE_LIST = [
+        self::TYPE_CREATE_MANUALLY => 'Manually',
+        self::TYPE_CREATE_LEAD => 'Lead',
+        self::TYPE_CREATE_CASE => 'Case',
+        self::TYPE_CREATE_CALL => 'Call',
+        self::TYPE_CREATE_SMS => 'Sms',
+        self::TYPE_CREATE_EMAIL => 'Email',
+        self::TYPE_CREATE_CLIENT_CHAT => 'Client chat'
+    ];
+
     /**
      * @return string
      */
@@ -75,14 +98,20 @@ class Client extends ActiveRecord
      * @param $firstName
      * @param $middleName
      * @param $lastName
+     * @param $projectId
+     * @param $typeCreate
+     * @param $parentId
      * @return Client
      */
-    public static function create($firstName, $middleName, $lastName): self
+    public static function create($firstName, $middleName, $lastName, $projectId, $typeCreate, $parentId): self
     {
         $client = new static();
         $client->first_name = $firstName;
         $client->middle_name = $middleName;
         $client->last_name = $lastName;
+        $client->cl_project_id = $projectId;
+        $client->cl_type_create = $typeCreate;
+        $client->parent_id = $parentId;
         $client->uuid = UuidHelper::uuid();
         return $client;
     }
@@ -113,6 +142,15 @@ class Client extends ActiveRecord
             [['parent_id', 'rating', 'cl_type_id'], 'integer'],
             ['uuid', 'unique'],
             ['uuid', UuidValidator::class],
+
+            ['cl_type_create', 'integer'],
+            ['cl_type_create', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['cl_type_create', 'in', 'range' => array_keys(self::TYPE_CREATE_LIST)],
+
+            ['cl_project_id', 'required', 'on' => [self::SCENARIO_MANUALLY]],
+            ['cl_project_id', 'integer'],
+            ['cl_project_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['cl_project_id', 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['cl_project_id' => 'id']],
         ];
     }
 
@@ -137,7 +175,8 @@ class Client extends ActiveRecord
             'disabled' => 'Disabled',
             'rating' => 'Rating',
             'cl_type_id' => 'Type',
-            'ucl_favorite' => 'Favorite'
+            'cl_type_create' => 'Type create',
+            'cl_project_id' => 'Project',
         ];
     }
 
@@ -218,6 +257,11 @@ class Client extends ActiveRecord
     public function getContact(): ActiveQuery
     {
          return $this->hasOne(UserContactList::class, ['ucl_client_id' => 'id']);
+    }
+
+    public function getProject(): ActiveQuery
+    {
+         return $this->hasOne(Project::class, ['id' => 'cl_project_id']);
     }
 
     public function beforeSave($insert): bool
@@ -386,5 +430,15 @@ class Client extends ActiveRecord
     public function isInternal(): bool
     {
         return $this->cl_type_id === self::TYPE_INTERNAL;
+	}
+
+    public function isProjectEqual(int $projectId): bool
+    {
+        return $this->cl_project_id === $projectId;
+	}
+
+    public function isWithoutProject(): bool
+    {
+        return $this->cl_project_id === null;
 	}
 }

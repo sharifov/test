@@ -10,6 +10,7 @@
  * @var $isCommunicationLogEnabled bool
  * @var $lead Lead
  * @var $fromPhoneNumbers array
+ * @var bool $smsEnabled
  *
  */
 
@@ -328,7 +329,7 @@ $unsubscribedEmails =  @json_encode(array_column($lead->project->emailUnsubscrib
 //                                            if ($agentParams->upp_tw_phone_number) {
                                             if ($agentParams->getPhone()) {
 
-                                                if ($tk == CommunicationForm::TYPE_SMS) {
+                                                if ($tk == CommunicationForm::TYPE_SMS && $smsEnabled) {
 //                                                    $typeList[$tk] = $itemName . ' (' . $agentParams->upp_tw_phone_number . ')';
                                                     $typeList[$tk] = $itemName . ' (' . $agentParams->getPhone() . ')';
                                                 }

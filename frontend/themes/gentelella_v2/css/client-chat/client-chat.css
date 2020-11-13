@@ -2,7 +2,8 @@
     width: 100%;
     margin-top: 15px;
 }
-._cc-wrapper ._cc_tabs_wrapper {
+._cc-wrapper ._cc_tabs_wrapper,
+._cc-wrapper ._cc_groups_wrapper {
     display: flex;
     align-items: center;
     width: 100%;
@@ -20,9 +21,10 @@
     height: 100%;
     align-items: start;
     justify-content: start;
+    margin-bottom: 10px;
 }
 ._cc-wrapper ._cc_filter_wrapper ._cc_filter:first-child {
-    margin-right: 7px;
+    //margin-right: 7px;
 }
 ._cc-case-item,
 ._cc-lead-item,
@@ -81,7 +83,8 @@
     box-shadow: 0px 1px 5px 0px rgba(143,143,143,1);
 }
 
-._cc-wrapper ._cc_tabs_wrapper ._cc_tab {
+._cc-wrapper ._cc_tabs_wrapper ._cc_tab,
+._cc-wrapper ._cc_groups_wrapper ._cc_group {
     width: 50%;
     display: flex;
     height: 100%;
@@ -89,11 +92,12 @@
     justify-content: center;
     font-weight: 600;
     cursor: pointer;
-    padding: 20px 0;
+    padding: 12px 0;
     border-bottom: 1px solid #ebebeb;
     position: relative;
 }
-._cc-wrapper ._cc_tabs_wrapper ._cc_tab ._cc_tab_active {
+._cc-wrapper ._cc_tabs_wrapper ._cc_tab ._cc_tab_active,
+._cc-wrapper ._cc_groups_wrapper ._cc_group ._cc_group_active {
     position: absolute;
     bottom: 0;
     left: 0;
@@ -102,17 +106,22 @@
     background-color: #0073ce;
     display: none;
 }
-._cc-wrapper ._cc_tabs_wrapper ._cc_tab:hover ._cc_tab_active {
+._cc-wrapper ._cc_tabs_wrapper ._cc_tab:hover ._cc_tab_active,
+._cc-wrapper ._cc_groups_wrapper ._cc_group:hover ._cc_group_active {
     /*background-color: rgba(191, 191, 191, 0.53);*/
     display: block;
 }
-._cc-wrapper ._cc_tabs_wrapper ._cc_tab:last-child {
+._cc-wrapper ._cc_tabs_wrapper ._cc_tab:last-child,
+._cc-wrapper ._cc_groups_wrapper ._cc_group:last-child {
     border-right: 0;
 }
-._cc-wrapper ._cc_tabs_wrapper ._cc_tab.active {
+._cc-wrapper ._cc_tabs_wrapper ._cc_tab.active,
+._cc-wrapper ._cc_groups_wrapper ._cc_group.active {
     color: #0073ce;
+    background-color: #e2effb;
 }
-._cc-wrapper ._cc_tabs_wrapper ._cc_tab.active ._cc_tab_active {
+._cc-wrapper ._cc_tabs_wrapper ._cc_tab.active ._cc_tab_active,
+._cc-wrapper ._cc_groups_wrapper ._cc_group.active ._cc_group_active {
     display: block;
 }
 
@@ -177,7 +186,7 @@
     display: flex;
     align-content: center;
     align-items: flex-start;
-    width: 78%;
+    width: 86%;
     flex-wrap: nowrap;
 }
 
@@ -222,7 +231,7 @@
 ._cc-chat-unread-message .badge {
     padding: 3px;
     border-radius: 100%;
-    width: 15px;
+    width: 21px;
     height: 15px;
     line-height: 0.9;
     font-size: 10px;
@@ -540,4 +549,11 @@
 }
 ._cc_item_data span:last-child {
     margin-bottom: 0;
+}
+._cc-list-wrapper ._cc-list-item.cc_closed {
+    background: #ffefed;
+}
+.check_uncheck_btns .btn:focus {
+    outline: none !important;
+    box-shadow: none !important;
 }

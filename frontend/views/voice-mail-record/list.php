@@ -91,8 +91,6 @@ $(document).on('click', '.btn-voice-mail-showed', function() {
                     createNotify('Mark showed error', data.message, 'error');
                     return;
                 }
-                 pjaxReload({container: "#voice-mail-pjax"});
-                 window.updateVoiceRecordCounters();
             })
             .fail(function () {
                 createNotify('Mark showed error', 'Server error', 'error');

@@ -4,9 +4,19 @@ namespace frontend\controllers;
 
 use common\models\Employee;
 use common\models\Notifications;
+use common\models\search\EmailSearch;
+use common\models\search\LeadSearch;
+use common\models\search\SmsSearch;
+use frontend\models\search\UserSiteActivitySearch;
+use sales\auth\Auth;
+use sales\entities\cases\CasesSearch;
+use sales\model\callLog\entity\callLog\search\CallLogSearch;
+use sales\model\clientChat\entity\search\ClientChatSearch;
+use sales\model\user\entity\monitor\search\UserMonitorSearch;
 use Yii;
 use common\models\UserCallStatus;
 use common\models\search\UserCallStatusSearch;
+use yii\base\DynamicModel;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
@@ -19,7 +29,6 @@ use yii\filters\VerbFilter;
  */
 class UserController extends FController
 {
-
     public function behaviors()
     {
         $behaviors = [
@@ -33,6 +42,12 @@ class UserController extends FController
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
+    public function init(): void
+    {
+        parent::init();
+        $this->layoutCrud();
+    }
+
     /**
      * Lists all UserCallStatus models.
      * @return mixed
@@ -41,7 +56,7 @@ class UserController extends FController
     {
         $searchModel = new UserCallStatusSearch();
         $params = Yii::$app->request->queryParams;
-        if(isset($params['reset'])){
+        if (isset($params['reset'])) {
             unset($params['UserCallStatusSearch']['date_range']);
         }
 
@@ -164,7 +179,6 @@ class UserController extends FController
             } else {
                 // Notifications::socket($ucs->us_user_id, null, 'updateUserCallStatus', ['id' => 'ucs'.$ucs->us_id, 'type_id' => $type_id]);
                 Notifications::publish('updateUserCallStatus', ['user_id' =>$ucs->us_user_id], ['id' => 'ucs'.$ucs->us_id, 'type_id' => $type_id]);
-
             }
         }
 
@@ -178,10 +192,105 @@ class UserController extends FController
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionInfo($id)
+    public function actionInfo(int $id)
     {
+        $params = Yii::$app->request->queryParams;
+
+        $userTimezone = Auth::user()->userParams->up_timezone ?? 'UTC';
+        $currentDate = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->setTimezone(new \DateTimeZone($userTimezone));
+
+        $datePickerModel = new DynamicModel([
+            'dateRange', 'dateStart', 'dateEnd'
+        ]);
+        $datePickerModel->addRule('dateStart', 'string');
+        $datePickerModel->addRule('dateEnd', 'string');
+        $datePickerModel->addRule('dateRange', 'match', ['pattern' => '/^.+\s\-\s.+$/']);
+
+        if (!$datePickerModel->load(Yii::$app->request->get())) {
+            $datePickerModel->dateStart = ($currentDate->modify('-6 days'))->format('Y-m-d') . ' 00:00:00';
+            $datePickerModel->dateEnd = $currentDate->format('Y-m-d') . ' 23:59:59';
+            $datePickerModel->dateRange = $datePickerModel->dateStart . ' - ' . $datePickerModel->dateEnd;
+        }
+
+        /*$searchModel = new UserMonitorSearch();
+        $startDateTime = date('Y-m-d H:i', strtotime('-1 day'));
+        $endDateTime = date('Y-m-d H:i', strtotime('+10 hours'));
+        $data = $searchModel->searchStats(['UserMonitorSearch' => ['um_user_id' => $id]], $startDateTime);*/
+
+        $userSiteActivityModel = new UserSiteActivitySearch();
+        $userSiteActivityModel->createTimeStart = strtotime($datePickerModel->dateStart);
+        $userSiteActivityModel->createTimeEnd = strtotime($datePickerModel->dateEnd);
+        $userActivity = $userSiteActivityModel->searchReport(['UserSiteActivitySearch' => ['usa_user_id' => $id]]);
+
+        $callLogSearchModel = new CallLogSearch();
+        $callLogSearchModel->createTimeStart = $datePickerModel->dateStart;
+        $callLogSearchModel->createTimeEnd = $datePickerModel->dateEnd;
+        $callLogDataProvider = $callLogSearchModel->searchMyCalls($params, $id);
+
+        $callsInfoGraph = $callLogSearchModel->searchCallsGraph($params, $id);
+
+        $emailSearchModel = new EmailSearch();
+        $emailSearchModel->datetime_start = $datePickerModel->dateStart;
+        $emailSearchModel->datetime_end = $datePickerModel->dateEnd;
+        $params['EmailSearch']['e_created_user_id'] = $id;
+        $emailDataProvider = $emailSearchModel->search($params);
+        $emailDataProvider->pagination->pageSize = 10;
+
+        $emailsInfoGraph = $emailSearchModel->searchEmailGraph($params, $id);
+
+        $smsSearchModel = new SmsSearch();
+        $smsSearchModel->datetime_start = $datePickerModel->dateStart;
+        $smsSearchModel->datetime_end = $datePickerModel->dateEnd;
+        $params['SmsSearch']['s_created_user_id'] = $id;
+        $smsDataProvider = $smsSearchModel->search($params);
+        $smsDataProvider->pagination->pageSize = 10;
+
+        $smsInfoGraph = $smsSearchModel->searchSmsGraph($params, $id);
+
+        $chatSearchModel = new ClientChatSearch();
+        $chatSearchModel->timeStart = $datePickerModel->dateStart;
+        $chatSearchModel->timeEnd = $datePickerModel->dateEnd;
+        $params['ClientChatSearch']['cch_owner_user_id'] = $id;
+        $chatDataProvider = $chatSearchModel->search($params);
+        $chatDataProvider->pagination->pageSize = 10;
+
+        $chatInfoGraph = $chatSearchModel->searchChatGraph($params, $id);
+
+        $leadsSearchModel = new LeadSearch();
+        $leadsSearchModel->datetime_start = $datePickerModel->dateStart;
+        $leadsSearchModel->datetime_end = $datePickerModel->dateEnd;
+        $leadsInfoDataProvider = $leadsSearchModel->searchUserLeadsInfo($params, $id);
+
+        $casesSearchModel = new CasesSearch();
+        $casesSearchModel->datetime_start =  $datePickerModel->dateStart;
+        $casesSearchModel->datetime_end= $datePickerModel->dateEnd;
+
+        $casesInfoDataProvider = $casesSearchModel->searchUserCasesInfo($params, $id);
+
+
         return $this->render('info', [
             'model' => $this->findUserModel($id),
+            /*'data' => $data,
+            'startDateTime' => $startDateTime,
+            'endDateTime' => $endDateTime,*/
+            'userActivity' => $userActivity,
+            'callLogDataProvider' => $callLogDataProvider,
+            'callLogSearchModel' => $callLogSearchModel,
+            'emailDataProvider' => $emailDataProvider,
+            'emailSearchModel' => $emailSearchModel,
+            'smsDataProvider' => $smsDataProvider,
+            'smsSearchModel' => $smsSearchModel,
+            'chatDataProvider' => $chatDataProvider,
+            'chatSearchModel' => $chatSearchModel,
+            'callsInfoGraph' => $callsInfoGraph,
+            'emailsInfoGraph' => $emailsInfoGraph,
+            'smsInfoGraph' => $smsInfoGraph,
+            'chatInfoGraph' => $chatInfoGraph,
+            'leadsInfoDataProvider' => $leadsInfoDataProvider,
+            'leadsSearchModel' => $leadsSearchModel,
+            'casesInfoDataProvider' => $casesInfoDataProvider,
+            'casesSearchModel' => $casesSearchModel,
+            'datePickerModel' => $datePickerModel
         ]);
     }
 }

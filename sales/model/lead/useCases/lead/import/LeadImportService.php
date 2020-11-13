@@ -2,8 +2,9 @@
 
 namespace sales\model\lead\useCases\lead\import;
 
+use common\models\Client;
 use common\models\Lead;
-use sales\forms\lead\ClientCreateForm;
+use sales\services\client\ClientCreateForm;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
 use sales\repositories\lead\LeadRepository;
@@ -51,13 +52,18 @@ class LeadImportService
                 try {
                     /** @var Lead $lead */
                     $lead = $this->transactionManager->wrap(function () use ($form, $creatorId) {
+
+                        $clientForm = new ClientCreateForm([
+                            'firstName' => $form->client->first_name,
+                            'lastName' => $form->client->last_name,
+                        ]);
+                        $clientForm->projectId = $form->project_id;
+                        $clientForm->typeCreate = Client::TYPE_CREATE_LEAD;
+
                         $client = $this->clientManageService->getOrCreate(
                             [new PhoneCreateForm(['phone' => $form->client->phone])],
                             [new EmailCreateForm(['email' => $form->client->email])],
-                            new ClientCreateForm([
-                                'firstName' => $form->client->first_name,
-                                'lastName' => $form->client->last_name,
-                            ])
+                            $clientForm
                         );
                         $this->guardDuplicate($form, $client->id);
                         $lead = Lead::createNew($form, $client, $creatorId);

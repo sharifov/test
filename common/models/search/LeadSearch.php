@@ -1383,11 +1383,24 @@ class LeadSearch extends Lead
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> ['defaultOrder' => ['id' => SORT_DESC]],
+            'sort'=> ['defaultOrder' => ['leads.id' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 30,
             ],
         ]);
+
+        $sort = $dataProvider->getSort();
+        $sort->attributes = array_merge($sort->attributes, [
+            'leads.id' => [
+                'asc' => [Lead::tableName() . '.id' => SORT_ASC],
+                'desc' => [Lead::tableName() .'.id' => SORT_DESC]
+            ],
+            'id' => [
+                'asc' => [Lead::tableName() . '.id' => SORT_ASC],
+                'desc' => [Lead::tableName() .'.id' => SORT_DESC]
+            ]
+        ]);
+        $dataProvider->setSort($sort);
 
         $this->load($params);
 
@@ -3850,5 +3863,45 @@ class LeadSearch extends Lead
         ];
 
         return $dataProvider = new ArrayDataProvider($paramsData);
+    }
+
+    public function searchUserLeadsInfo($params, $userID)
+    {
+        $this->load($params);
+
+        $query = new Query();
+        $query->addSelect(['DATE(created) as createdDate,
+            COUNT(id) AS allUserLeads,
+            SUM(IF(status = '. Lead::STATUS_BOOKED .', 1, 0)) AS bookedLeads
+        ']);
+        $query->from(static::tableName());
+        $query->where(['employee_id' => $userID]);
+        if($this->datetime_start && $this->datetime_end){
+            $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
+                ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
+        }
+        $query->groupBy('createdDate');
+
+        $command = $query->createCommand();
+        $sql = $command->rawSql;
+
+        $paramsData = [
+            'sql' => $sql,
+            'sort' => [
+                'defaultOrder' => [
+                    'createdDate' => SORT_DESC,
+                ],
+                'attributes' => [
+                    'createdDate',
+                    'allUserLeads',
+                    'bookedLeads',
+                ],
+            ],
+            'pagination' => [
+                'pageSize' => 10,
+            ],
+        ];
+
+        return new SqlDataProvider($paramsData);
     }
 }

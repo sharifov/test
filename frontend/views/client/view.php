@@ -40,6 +40,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'description',
             'is_company:boolean',
             'is_public:boolean',
+            'project:projectName',
+            [
+                'attribute' => 'cl_type_create',
+                'value' => static function (Client $model) {
+                    return Client::TYPE_CREATE_LIST[$model->cl_type_create] ?? null;
+                },
+            ],
             'disabled:boolean',
             'rating',
             [
@@ -47,7 +54,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function(\common\models\Client $model) {
                     $out = '<span class="not-set">(not set)</span>';
                     if ($model->parent_id && $parent = Client::findOne(['id' => $model->parent_id])) {
-                        return '<i class="fa fa-user"></i> ' . $parent->getNameByType();
+                        return $parent->id . '  <i class="fa fa-user"></i> ' . $parent->getNameByType();
                     }
                     return $out;
                 },
@@ -118,7 +125,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'attribute' => 'updated',
                         'value' => function(\common\models\Client $model) {
-                            return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
+                            return $model->updated ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated)) : null;
                         },
                         'format' => 'html',
                     ],

@@ -16,4 +16,14 @@ class Scopes extends \yii\db\ActiveQuery
 	{
 		return $this->andWhere(['ccm_cch_id' => $id]);
 	}
+
+	public function byChatIds(array $ids): self
+	{
+		return $this->andWhere(['ccm_cch_id' => $ids]);
+	}
+
+    public function first(int $chatId): self
+    {
+        return $this->andWhere(['ccm_cch_id' => $chatId])->orderBy(['ccm_id' => SORT_ASC]);
+	}
 }

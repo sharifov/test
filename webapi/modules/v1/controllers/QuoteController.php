@@ -9,18 +9,21 @@ use common\models\GlobalLog;
 use common\models\Lead;
 //use common\models\LeadLog;
 use common\models\local\LeadLogMessage;
+use common\models\Log;
 use common\models\Notifications;
 use common\models\Quote;
 use common\models\QuotePrice;
 use common\models\UserProjectParams;
 use common\models\VisitorLog;
 use frontend\widgets\notification\NotificationMessage;
+use modules\invoice\src\exceptions\InvoiceCodeException;
 use modules\lead\src\entities\lead\LeadQuery;
 use sales\auth\Auth;
 use sales\helpers\app\AppHelper;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
 use sales\repositories\lead\LeadRepository;
+use sales\services\quote\addQuote\TripService;
 use Yii;
 use yii\helpers\Html;
 use yii\helpers\Json;
@@ -360,7 +363,6 @@ class QuoteController extends ApiBaseController
             else $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
 
             $response['error'] = $message;
-            $response['errors'] = $message;
             $response['error_code'] = 30;
         }
 
@@ -588,7 +590,6 @@ class QuoteController extends ApiBaseController
                 else $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
 
                 $response['error'] = $message;
-                $response['errors'] = $message;
                 $response['error_code'] = 30;
 
                 $transaction->rollBack();
@@ -677,13 +678,126 @@ class QuoteController extends ApiBaseController
         return $responseData;
     }
 
-
     /**
-     * @return mixed
+     *
+     * @api {post} /v1/quote/create Create Quote
+     * @apiVersion 0.1.0
+     * @apiName CreateQuote
+     * @apiGroup Quotes
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {string}           [apiKey]                    API Key for Project
+     * @apiParam {object}           Lead                        Lead data array
+     * @apiParam {string}           [Lead.uid]                  uid
+     * @apiParam {int}              [Lead.market_info_id]       market_info_id
+     * @apiParam {int}              [Lead.bo_flight_id]         bo_flight_id
+     * @apiParam {float}            [Lead.final_profit]         final_profit
+     * @apiParam {object}           Quote                       Quote data array
+     * @apiParam {string}           [Quote.uid]                 uid
+     * @apiParam {string}           [Quote.record_locator]      record_locator
+     * @apiParam {string}           [Quote.pcc]                 pcc
+     * @apiParam {string}           [Quote.cabin]               cabin
+     * @apiParam {string}           [Quote.gds]                 gds
+     * @apiParam {string}           [Quote.trip_type]           trip_type
+     * @apiParam {string}           [Quote.main_airline_code]   main_airline_code
+     * @apiParam {string}           [Quote.reservation_dump]    reservation_dump
+     * @apiParam {int}              [Quote.status]              status
+     * @apiParam {string}           [Quote.check_payment]       check_payment
+     * @apiParam {string}           [Quote.fare_type]           fare_type
+     * @apiParam {string}           [Quote.employee_name]       employee_name
+     * @apiParam {bool}             [Quote.created_by_seller]   created_by_seller
+     * @apiParam {object}           QuotePrice[]                QuotePrice data array
+     * @apiParam {string}           [QuotePrice.uid]            uid
+     * @apiParam {string}           [QuotePrice.passenger_type] passenger_type
+     * @apiParam {float}            [QuotePrice.selling]        selling
+     * @apiParam {float}            [QuotePrice.net]            net
+     * @apiParam {float}            [QuotePrice.fare]           fare
+     * @apiParam {float}            [QuotePrice.taxes]          taxes
+     * @apiParam {float}            [QuotePrice.mark_up]        mark_up
+     * @apiParam {float}            [QuotePrice.extra_mark_up]  extra_mark_up
+     * @apiParam {float}            [QuotePrice.service_fee]    service_fee
+     *
+     * @apiParamExample {json} Request-Example:
+     * {
+     *      "apiKey": "d190c378e131ccfd8a889c8ee8994cb55f22fbeeb93f9b99007e8e7ecc24d0dd",
+     *      "Lead": {
+     *          "uid": "5de486f15f095",
+     *          "market_info_id": 52,
+     *          "bo_flight_id": 0,
+     *          "final_profit": 0
+     *      },
+     *      "Quote": {
+     *          "uid": "5f207ec201b99",
+     *          "record_locator": null,
+     *          "pcc": "0RY9",
+     *          "cabin": "E",
+     *          "gds": "S",
+     *          "trip_type": "RT",
+     *          "main_airline_code": "UA",
+     *          "reservation_dump": "1 KL6123V 15OCT Q MCOAMS SS1   801P 1100A  16OCT F /DCKL /E \n 2 KL1009L 18OCT S AMSLHR SS1  1015A 1045A /DCKL /E",
+     *          "status": 1,
+     *          "check_payment": "1",
+     *          "fare_type": "TOUR",
+     *          "employee_name": "Barry",
+     *          "created_by_seller": false
+     *      },
+     *      "QuotePrice": [
+     *          {
+     *              "uid": "expert.5f207ec222c86",
+     *              "passenger_type": "ADT",
+     *              "selling": 696.19,
+     *              "net": 622.65,
+     *              "fare": 127,
+     *              "taxes": 495.65,
+     *              "mark_up": 50,
+     *              "extra_mark_up": 0,
+     *              "service_fee": 23.54
+     *          }
+     *      ]
+     * }
+     *
+     * @apiSuccess {string} status    Status
+     *
+     * @apiSuccess {string} action    Action
+     * @apiSuccess {integer} response_id    Response Id
+     * @apiSuccess {DateTime} request_dt    Request Date & Time
+     * @apiSuccess {DateTime} response_dt   Response Date & Time
+     *
+     * @apiSuccessExample Success-Response:
+     * HTTP/1.1 200 OK
+     *  {
+     *      "status": "Success",
+     *      "action": "v1/quote/create",
+     *      "response_id": 11926893,
+     *      "request_dt": "2020-09-22 05:05:54",
+     *      "response_dt": "2020-09-22 05:05:54",
+     *      "execution_time": 0.193,
+     *      "memory_usage": 1647440
+     *  }
+     *
+     *
+     * @apiErrorExample Error-Response:
+     *   HTTP/1.1 404 Not Found
+     *   {
+     *       "name": "Not Found",
+     *       "message": "Already Exist Quote UID: 5f207ec201b19",
+     *       "code": 2,
+     *       "status": 404,
+     *       "type": "yii\\web\\NotFoundHttpException"
+     *   }
+     *
+     *
+     * @return array
      * @throws BadRequestHttpException
      * @throws NotFoundHttpException
      * @throws UnprocessableEntityHttpException
-     * @throws \yii\db\Exception
      */
     public function actionCreate()
     {
@@ -708,34 +822,39 @@ class QuoteController extends ApiBaseController
             throw new NotFoundHttpException('Not found Lead UID: ' . $leadAttributes['uid'], 2);
         }
 
-        $model = Quote::findOne(['uid' => $quoteAttributes['uid']]);
-        if ($model) {
+        $quote = Quote::findOne(['uid' => $quoteAttributes['uid']]);
+        if ($quote) {
             throw new NotFoundHttpException('Already Exist Quote UID: ' . $quoteAttributes['uid'], 2);
-        } else {
-            $model = new Quote();
         }
 
+        $quote = new Quote();
         $selling = 0;
-        $changedAttributes = $model->attributes;
+        $changedAttributes = $quote->attributes;
         $changedAttributes['selling'] = $selling;
-
 
         $response = [
             'status' => 'Failed',
-            'errors' => []
         ];
 
         $transaction = Yii::$app->db->beginTransaction();
         try {
-            $model->attributes = $quoteAttributes;
-            $model->lead_id = $lead->id;
-            $model->employee_id = null;
+            $quote->attributes = $quoteAttributes;
+            $quote->lead_id = $lead->id;
+            $quote->employee_id = null;
 
             $type = $quoteAttributes['type_id'] ?? null;
-            $this->setTypeQuoteInsert($type, $model, $lead);
+            $this->setTypeQuoteInsert($type, $quote, $lead);
 
-            $model->save();
-            $model->createQuoteTrips();
+            $quote->save();
+            if ($quote->hasErrors()) {
+                throw new \RuntimeException($quote->getErrorSummary(false)[0]);
+            }
+
+            $tripsSegmentsData = $quote->getTripsSegmentsData();
+
+            $trip = new TripService($quote);
+            $trip->createTrips($tripsSegmentsData);
+            $quote = $trip->getQuote();
 
             if(isset($quoteAttributes['baggage']) && !empty($quoteAttributes['baggage'])){
                 foreach ($quoteAttributes['baggage'] as $baggageAttr){
@@ -743,7 +862,7 @@ class QuoteController extends ApiBaseController
                     $origin = substr($segmentKey, 0, 3);
                     $destination = substr($segmentKey, 2, 3);
                     $segment = QuoteSegment::find()->innerJoin(QuoteTrip::tableName(),'qs_trip_id = qt_id')
-                                ->andWhere(['qt_quote_id' =>  $model->id])
+                                ->andWhere(['qt_quote_id' =>  $quote->id])
                                 ->andWhere(['or',
                                     ['qs_departure_airport_code'=>$origin],
                                     ['qs_arrival_airport_code'=>$destination]
@@ -800,73 +919,60 @@ class QuoteController extends ApiBaseController
                     $quotePrice = new QuotePrice();
                     if ($quotePrice) {
                         $quotePrice->attributes = $quotePriceAttributes;
-                        $quotePrice->quote_id = $model->id;
-                        //$selling += $quotePrice->selling;
+                        $quotePrice->quote_id = $quote->id;
                         if (!$quotePrice->save()) {
-                            $response['errors'][] = $quotePrice->getErrors();
+                            $warnings[] = $quotePrice->getErrorSummary(false)[0];
                         }
                     }
                 }
             }
 
-            if (!$model->hasErrors()) {
+            if (!$quote->hasErrors()) {
                 $response['status'] = 'Success';
                 $transaction->commit();
 
-                //Add logs after changed model attributes
-                //todo
-//                $leadLog = new LeadLog((new LeadLogMessage()));
-//                $leadLog->logMessage->oldParams = $changedAttributes;
-//                $newParams = array_intersect_key($model->attributes, $changedAttributes);
-//                $newParams['selling'] = round($model->getPricesData()['total']['selling'], 2);
-//                $leadLog->logMessage->newParams = $newParams;
-//                $leadLog->logMessage->title = 'Create';
-//                $leadLog->logMessage->model = sprintf('%s (%s)', $model->formName(), $model->uid);
-//                $leadLog->addLog([
-//                    'lead_id' => $model->lead_id,
-//                ]);
-
                 (\Yii::createObject(GlobalLogInterface::class))->log(
                     new LogDTO(
-                        get_class($model),
-                        $model->id,
+                        get_class($quote),
+                        $quote->id,
                         \Yii::$app->id,
                         null,
                         Json::encode(['selling' => $changedAttributes['selling'] ?? 0]),
-                        Json::encode(['selling' => round($model->getPricesData()['total']['selling'], 2)]),
+                        Json::encode(['selling' => round($quote->getPricesData()['total']['selling'], 2)]),
                         null,
                         GlobalLog::ACTION_TYPE_UPDATE
                     )
                 );
 
-            } else {
-                $response['errors'][] = $model->getErrors();
-                $transaction->rollBack();
             }
-        } catch (\Throwable $e) {
-
-            $message = AppHelper::throwableFormatter($e);
-            Yii::error($message, 'API:Quote:create:try');
-
-            $response['error'] = $message;
-            $response['errors'] = $message;
-            $response['error_code'] = 30;
+        } catch (\Throwable $throwable) {
 
             $transaction->rollBack();
+
+            if ($throwable->getCode() < 0) {
+                Yii::warning(AppHelper::throwableFormatter($throwable),'API:Quote:create:warning:try');
+            } else {
+                Yii::error(VarDumper::dumpAsString($throwable),'API:Quote:create:try');
+            }
+
+            if (Yii::$app->request->get('debug')) {
+                $message = $throwable->getTraceAsString();
+            } else {
+                $message = Log::cutErrorMessage($throwable->getMessage());
+            }
+
+            $response['error'] = $message;
+            $response['error_code'] = 30;
         }
 
         $responseData = $response;
-        $responseData = $apiLog->endApiLog($responseData);
 
-        if (isset($response['error']) && $response['error']) {
-            $json = $response['error']; //@json_encode($response['error']);
-            if (isset($response['error_code']) && $response['error_code']) {
-                $error_code = (int) $response['error_code'];
-            } else {
-                $error_code = 0;
-            }
-            throw new UnprocessableEntityHttpException(VarDumper::dumpAsString($json, 10), $error_code);
+        if (!empty($warnings)) {
+            $responseData['warnings'] = $warnings;
+            Yii::warning(VarDumper::dumpAsString($warnings),'API:Quote:create:warnings');
         }
+
+        $responseData = $apiLog->endApiLog($responseData);
 
         return $responseData;
     }

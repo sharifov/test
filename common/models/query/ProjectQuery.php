@@ -21,4 +21,9 @@ class ProjectQuery extends ActiveQuery
 	{
 		return $this->andWhere(['name' => $name]);
 	}
+
+    public function byKey(string $key): self
+	{
+		return $this->andWhere(['project_key' => $key]);
+	}
 }

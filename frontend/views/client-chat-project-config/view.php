@@ -25,6 +25,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'method' => 'post',
             ],
         ]) ?>
+        <?= Html::a('Delete Cache', ['delete-cache', 'projectId' => $model->ccpc_project_id], [
+            'class' => 'btn btn-primary',
+            'data' => [
+                'method' => 'post',
+            ],
+        ]) ?>
     </p>
 
     <?= DetailView::widget([
@@ -68,59 +74,13 @@ $this->params['breadcrumbs'][] = $this->title;
 
             ?>
                 </pre>
-            <h4><?=$model->getAttributeLabel('ccpc_theme_json')?></h4>
-            <pre>
-            <?php
 
-                try {
-                    echo JsonEditor::widget(
-                        [
-                            'clientOptions' => [
-                                'modes' => ['code', 'view'], //'text',
-                                'mode' => 'view'
-                            ],
-                            //'collapseAll' => ['view'],
-                            'expandAll' => ['tree', 'form'],
-                            'value' => $model->ccpc_theme_json
-                        ]
-                    );
-                } catch (Exception $exception) {
-                    echo \yii\helpers\VarDumper::dumpAsString(\yii\helpers\Json::decode($model->ccpc_theme_json), 10, true);
-                }
-
-            ?>
-                </pre>
 
         </div>
 
         <div class="col-md-6">
-            <h4><?=$model->getAttributeLabel('ccpc_registration_json')?></h4>
-            <pre>
-            <?php
 
-
-                try {
-                    echo JsonEditor::widget(
-                        [
-                            'clientOptions' => [
-                                'modes' => ['code', 'view'], //'text',
-                                'mode' => 'view'
-                            ],
-                            //'collapseAll' => ['view'],
-                            'expandAll' => ['tree', 'form'],
-                            'value' => $model->ccpc_registration_json
-                        ]
-                    );
-                } catch (Exception $exception) {
-                    echo \yii\helpers\VarDumper::dumpAsString(\yii\helpers\Json::decode($model->ccpc_registration_json), 10, true);
-                }
-
-
-
-            ?>
-                </pre>
-
-            <h4><?=$model->getAttributeLabel('ccpc_settings_json')?></h4>
+            <h4><?=$model->getAttributeLabel('ccpc_theme_json')?></h4>
             <pre>
             <?php
 
@@ -133,16 +93,16 @@ $this->params['breadcrumbs'][] = $this->title;
                         ],
                         //'collapseAll' => ['view'],
                         'expandAll' => ['tree', 'form'],
-                        'value' => $model->ccpc_registration_json
+                        'value' => $model->ccpc_theme_json
                     ]
                 );
             } catch (Exception $exception) {
-                echo \yii\helpers\VarDumper::dumpAsString(\yii\helpers\Json::decode($model->ccpc_settings_json), 10, true);
+                echo \yii\helpers\VarDumper::dumpAsString(\yii\helpers\Json::decode($model->ccpc_theme_json), 10, true);
             }
 
-
             ?>
-            </pre>
+                </pre>
+
 
         </div>
     </div>

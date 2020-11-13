@@ -9,7 +9,8 @@ use common\models\Lead;
  * @var $gds string
  * @var $lead Lead
  */
-if($result && (isset($result['count']) && $result['count'] > 0)):
+if ($result && !empty($result['data']['results'])):
+    $result = $result['data'];
     $js = <<<JS
     $(document).on('click','.search_details__btn', function (e) {
         e.preventDefault();
@@ -45,20 +46,20 @@ JS;
     <?php
 
     $minPrice = $result['results'][0]['prices']['totalPrice'];
-    if(isset($result['results'][0]['passengers']['ADT'])){
+    if (isset($result['results'][0]['passengers']['ADT'])) {
         $minPrice = $result['results'][0]['passengers']['ADT']['price'];
-    }elseif (isset($result['results'][0]['passengers']['CHD'])){
+    } elseif (isset($result['results'][0]['passengers']['CHD'])) {
         $minPrice = $result['results'][0]['passengers']['CHD']['price'];
-    }elseif (isset($result['results'][0]['passengers']['INF'])){
+    } elseif (isset($result['results'][0]['passengers']['INF'])) {
         $minPrice = $result['results'][0]['passengers']['INF']['price'];
     }
     $lastResult = end($result['results']);
     $maxPrice = $lastResult['prices']['totalPrice'];
-    if(isset($lastResult['passengers']['ADT'])){
+    if (isset($lastResult['passengers']['ADT'])) {
         $maxPrice = $lastResult['passengers']['ADT']['price'];
-    }elseif (isset($lastResult['passengers']['CHD'])){
+    } elseif (isset($lastResult['passengers']['CHD'])) {
         $maxPrice = $lastResult['passengers']['CHD']['price'];
-    }elseif (isset($lastResult['passengers']['INF'])){
+    } elseif (isset($lastResult['passengers']['INF'])) {
         $maxPrice = $lastResult['passengers']['INF']['price'];
     }
     ?>
@@ -246,12 +247,12 @@ JS;
                             <div class="search-filters__flight">
                                 <?php $tabTtl = ['Depart','Return'];?>
                                 <?php $cntTrips = count($lead->leadFlightSegments);?>
-                                <?php if($cntTrips > 1):?>
+                                <?php if ($cntTrips > 1):?>
                                     <ul class="nav nav-tabs search-filters__tabs">
                                         <?php foreach ($lead->leadFlightSegments as $idx => $flSegment):?>
-                                            <li<?php if($idx == 0):?> class="active"<?php endif;?>>
+                                            <li<?php if ($idx == 0):?> class="active"<?php endif;?>>
                                                 <a href="#filter-time-<?= $idx?>" data-toggle="tab">
-                                                    <?php if($cntTrips > 2):?>Trip <?= $idx+1?><?php else:?><?= $tabTtl[$idx]?><?php endif;?>
+                                                    <?php if ($cntTrips > 2):?>Trip <?= $idx+1?><?php else:?><?= $tabTtl[$idx]?><?php endif;?>
                                                 </a>
                                             </li>
                                         <?php endforeach;?>
@@ -260,7 +261,7 @@ JS;
 
                                 <div class="tab-content search-filters__tab-content">
                                     <?php foreach ($lead->leadFlightSegments as $idx => $flSegment):?>
-                                        <div class="tab-pane<?php if($idx == 0):?> active<?php endif;?>" id="filter-time-<?= $idx?>" data-index="<?= $idx?>">
+                                        <div class="tab-pane<?php if ($idx == 0):?> active<?php endif;?>" id="filter-time-<?= $idx?>" data-index="<?= $idx?>">
                                             <div class="search-filters__time-section">
                                                 <h4 class="search-filters__flight-title"><?= $flSegment->origin?> &#8594; <?= $flSegment->destination?></h4>
                                                 <div class="search-filters__time-item takeoff" data-id="landing-time">
@@ -418,7 +419,7 @@ JS;
             <?= $this->render('_search_result_item', ['resultKey' => $key,'result' => $resultItem,'locations' => $locations,'airlines' => $airlines]);?>
             <?php
             $n++;
-            if($n > 50) {
+            if ($n > 50) {
                 //break;
             }
             ?>
@@ -439,7 +440,14 @@ $this->registerCss($css);
 ?>
     </div>
 <?php else:?>
+    <?php if (!empty($result['error'])): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <pre><?= \yii\helpers\VarDumper::dumpAsString(\yii\helpers\Json::decode($result['error']), 10) ?></pre>
+        </div>
+
+       <?php else: ?>
     <div class="search-results__wrapper">
         <p>No search results</p>
     </div>
+    <?php endif;?>
 <?php endif;?>

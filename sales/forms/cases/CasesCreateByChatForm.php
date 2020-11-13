@@ -42,7 +42,7 @@ class CasesCreateByChatForm extends Model
     public function __construct(Employee $tipsUser, ClientChat $chat, $config = [])
     {
         parent::__construct($config);
-        $this->depId = $chat->cch_dep_id;
+        $this->depId = $chat->cchChannel->ccc_dep_id;
         $this->projectId = $chat->cch_project_id;
         $this->sourceTypeId = CasesSourceType::CHAT;
         $this->user = $tipsUser;
@@ -71,7 +71,7 @@ class CasesCreateByChatForm extends Model
             ['sourceTypeId', 'required'],
             ['sourceTypeId', 'integer'],
             ['sourceTypeId', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-            ['sourceTypeId', 'in', 'range' => array_keys($this->getSourceTypeList())],
+            ['sourceTypeId', 'compare', 'compareValue' => CasesSourceType::CHAT, 'operator' => '==', 'type' => 'number'],
 
             ['orderUid', 'default', 'value' => null],
             ['orderUid', 'string', 'min'  => '5', 'max' => 7],

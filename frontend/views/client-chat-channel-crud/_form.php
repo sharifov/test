@@ -17,6 +17,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'ccc_name')->textInput(['maxlength' => true]) ?>
 
+        <?= $form->field($model, 'ccc_frontend_name')->textInput(['maxlength' => true]) ?>
+
         <?= $form->field($model, 'ccc_project_id')->dropDownList(\common\models\Project::getList(), ['prompt' => '---'])?>
 
         <?= $form->field($model, 'ccc_dep_id')->dropDownList(\common\models\Department::getList(), ['prompt' => '---']) ?>
@@ -29,7 +31,7 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'ccc_disabled')->checkbox() ?>
 
-        <?= $form->field($model, 'ccc_default')->checkbox() ?>
+        <?= $form->field($model, 'ccc_frontend_enabled')->checkbox() ?>
 
         <?= $form->field($model, 'ccc_priority')->input('number', ['min' => 0, 'max' => 255, 'step' => 1]) ?>
 
@@ -45,8 +47,31 @@ use yii\widgets\ActiveForm;
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
         </div>
 
-        <?php ActiveForm::end(); ?>
+
 
     </div>
+    <div class="col-md-8">
+        <?php
+
+        try {
+            echo $form->field($model, 'ccc_settings')->widget(
+                \kdn\yii2\JsonEditor::class,
+                [
+                    'clientOptions' => [
+                        'modes' => ['code', 'form', 'tree', 'view'], //'text',
+                        'mode' => $model->isNewRecord ? 'code' : 'form'
+                    ],
+                    //'collapseAll' => ['view'],
+                    'expandAll' => ['tree', 'form'],
+                ]
+            );
+        } catch (Exception $exception) {
+            echo $form->field($model, 'ccc_settings')->textarea(['rows' => 6]);
+        }
+
+        ?>
+    </div>
+
+    <?php ActiveForm::end(); ?>
 
 </div>

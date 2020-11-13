@@ -30,6 +30,12 @@ class SettingCategoryController extends FController
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
+    public function init(): void
+    {
+        parent::init();
+        $this->layoutCrud();
+    }
+
     /**
      * Lists all SettingCategory models.
      * @return mixed

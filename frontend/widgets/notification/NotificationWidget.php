@@ -7,6 +7,7 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use yii\bootstrap\Widget;
 use yii\caching\TagDependency;
+use yii\helpers\VarDumper;
 
 /**
  * Class NotificationWidget
@@ -28,14 +29,14 @@ class NotificationWidget extends Widget
 
         $notifications = $this->processPopupNotifications($result['notifications']);
 
-		$clientChatMessageService = \Yii::createObject(ClientChatMessageService::class);
-		$totalUnreadMessages = $clientChatMessageService->getCountOfTotalUnreadMessages($this->userId) ?: '';
-		$chatsWithUnreadMessages = ClientChat::find()->byIds($clientChatMessageService->getChatWithUnreadMessages($this->userId))->all();
+        $service = \Yii::createObject(ClientChatMessageService::class);
+        $totalUnreadMessages = $service->getCountOfTotalUnreadMessagesByUser($this->userId);
+		$chatsWithUnreadMessages = ClientChat::find()->select(['*', 'ccu_count as countUnreadMessage'])->byOwner($this->userId)->withUnreadMessage()->all();
 
         return $this->render('notifications', [
         	'notifications' => $notifications,
 			'count' => $result['count'],
-			'totalUnreadMessages' => $totalUnreadMessages,
+			'totalUnreadMessages' => $totalUnreadMessages ?: '',
 			'chatsWithUnreadMessages' => $chatsWithUnreadMessages
 		]);
     }

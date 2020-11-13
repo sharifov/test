@@ -98,4 +98,18 @@ class SettingCategory extends ActiveRecord
         $data = self::find()->active()->orderBy(['sc_name' => SORT_ASC])->asArray()->all();
         return ArrayHelper::map($data, 'sc_id', 'sc_name');
     }
+
+    /**
+     * @param string $name
+     * @return SettingCategory
+     */
+    public static function getOrCreateByName(string $name): SettingCategory
+    {
+        if (!$settingCategory = self::findOne(['sc_name' => $name])) {
+            $settingCategory = new self();
+            $settingCategory->sc_name = $name;
+            $settingCategory->save();
+        }
+        return $settingCategory;
+    }
 }

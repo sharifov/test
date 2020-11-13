@@ -902,7 +902,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
         return $this->processConferenceResponse($response);
     }
 
-    public function joinToConference(string $callSid, string $conferenceSid, int $projectId, string $from, string $to, string $source_type_id): array
+    public function joinToConference(string $callSid, string $conferenceSid, int $projectId, string $from, string $to, string $source_type_id, int $user_id): array
     {
         $data = [
             'callSid' => $callSid,
@@ -911,6 +911,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
             'from' => $from,
             'to' => $to,
             'source_type_id' => $source_type_id,
+            'user_id' => $user_id
         ];
 
         $response = $this->sendRequest('twilio-conference/join-to-conference', $data);
@@ -1068,11 +1069,12 @@ class CommunicationService extends Component implements CommunicationServiceInte
        return $this->processResponseGetPrice($response);
     }
 
-    public function callToUser(string $from, string $to, int $created_userId, array $requestCall, string $friendly_name): array
+    public function callToUser(string $from, string $to, int $to_user_id, int $created_userId, array $requestCall, string $friendly_name): array
     {
         $data = [
             'from' => $from,
             'to' => $to,
+            'to_user_id' => $to_user_id,
             'created_user_id' => $created_userId,
             'requestCall' => $requestCall,
             'voipApiUsername' => $this->voipApiUsername,
@@ -1093,5 +1095,39 @@ class CommunicationService extends Component implements CommunicationServiceInte
        $response = $this->sendRequest('twilio-conference/get-call-info', $data);
 
        return $this->processResponse($response);
+    }
+
+    public function repeatMessage(array $data): array
+    {
+        $response = $this->sendRequest('twilio/repeat-message', $data);
+
+        $out = [
+            'code' => null,
+            'error' => false,
+            'message' => '',
+            'result' => []
+        ];
+
+        if ($response->isOk) {
+            if (isset($response->data['data'])) {
+                $data = $response->data['data'];
+                $isError = (bool)($data['is_error'] ?? false);
+                if ($isError) {
+                    $out['error'] = true;
+                    $out['message'] = (string)($data['message'] ?? 'Undefined error message');
+                }
+                $out['result'] = $data['result'] ?? [];
+                $out['code'] = $response->data['code'] ?? [];
+            } else {
+                $out['error'] = true;
+                $out['message'] = 'Not found in response array data';
+            }
+        } else {
+            $out['error'] = true;
+            $out['message'] = 'Server error. Try again later.';
+            \Yii::error(VarDumper::dumpAsString($response->content), 'Component:CommunicationService::repeatMessage');
+        }
+
+        return $out;
     }
 }

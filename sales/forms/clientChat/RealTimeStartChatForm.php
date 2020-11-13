@@ -13,50 +13,54 @@ use yii\helpers\Json;
  * @property $message string
  * @property $projectId int|null
  * @property $projectName string
+ * @property $visitorName string
  * @property $channelId int
  */
 class RealTimeStartChatForm extends \yii\base\Model
 {
-	public string $rid = '';
+    public string $rid = '';
 
-	public string $visitorId = '';
+    public string $visitorId = '';
 
-	public string $message = '';
+    public string $message = '';
 
-	public $projectId;
+    public $projectId;
 
-	public string $projectName = '';
+    public string $projectName = '';
 
-	public int $channelId = 0;
+    public int $channelId = 0;
 
-	public function __construct(string $visitorId, string $projectName, ProjectRepository $projectRepository, $config = [])
-	{
-		$this->visitorId = $visitorId;
-		$this->projectName = $projectName;
-		$this->projectId = $projectRepository->getIdByName($projectName);
-		parent::__construct($config);
-	}
+    public string $visitorName = '';
 
-	public function rules(): array
-	{
-		return [
-			[['rid', 'visitorId', 'message'], 'string'],
-			[['channelId', 'projectId'], 'integer'],
-			[['visitorId', 'message', 'channelId'], 'required'],
-			[['channelId'], 'filter', 'filter' => 'intval'],
-			[['projectId'], 'default', 'value' => null],
-			[['projectId'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
-		];
-	}
+    public function __construct(string $visitorId, string $projectName, string $visitorName, $config = [])
+    {
+        $this->visitorId = $visitorId;
+        $this->projectName = $projectName;
+        $this->visitorName = $visitorName;
+        parent::__construct($config);
+    }
 
-	public function dataToJson(): string
-	{
-		return Json::encode([
-			'rid' => $this->rid,
-			'visitor' => [
-				'id' => $this->visitorId,
-				'project' => $this->projectName,
-			]
-		]);
-	}
+    public function rules(): array
+    {
+        return [
+            [['rid', 'visitorId', 'message', 'visitorName'], 'string'],
+            [['channelId', 'projectId'], 'integer'],
+            [['visitorId', 'message', 'channelId'], 'required'],
+            [['channelId'], 'filter', 'filter' => 'intval'],
+            [['projectId'], 'default', 'value' => null],
+            [['projectId'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+        ];
+    }
+
+    public function dataToJson(): string
+    {
+        return Json::encode([
+            'rid' => $this->rid,
+            'visitor' => [
+                'id' => $this->visitorId,
+                'project' => $this->projectName,
+                'name' => $this->visitorName
+            ]
+        ]);
+    }
 }

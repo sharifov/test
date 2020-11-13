@@ -464,9 +464,9 @@ class Formatter extends \yii\i18n\Formatter
 
 		$diff = abs($currentTime-$dateTime);
 
-		$icon = Html::tag('i', '', ['class' => 'fas fa-hourglass-end']);
+		$icon = Html::tag('i', '', ['class' => 'fa fa-clock-o']);
 		$timerSpan = Html::tag('span', '', ['class' => 'enable-timer ' . $timerSpanClass, 'data-seconds' => $diff]);
-		return Html::tag('span', $icon . ' ' . $timerSpan);
+		return Html::tag('div', $icon . ' ' . $timerSpan);
 	}
 
 	/**
@@ -485,15 +485,16 @@ class Formatter extends \yii\i18n\Formatter
 
     /**
      * @param $dateTime
+     * @param string $format
      * @return string
      * @throws \yii\base\InvalidConfigException
      */
-    public function asByUserDateTime($dateTime): string
+    public function asByUserDateTime($dateTime, $format = 'php:d-M-Y [H:i]'): string
     {
         if (!$dateTime) {
             return $this->nullDisplay;
         }
-        return Html::tag('i', '', ['class' => 'fa fa-calendar']) . ' ' . $this->asDatetime(strtotime($dateTime), 'php:d-M-Y [H:i]');
+        return Html::tag('i', '', ['class' => 'fa fa-calendar']) . ' ' . $this->asDatetime(strtotime($dateTime), $format);
     }
 
 	/**

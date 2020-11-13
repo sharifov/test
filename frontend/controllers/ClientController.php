@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\models\Employee;
+use common\models\Project;
 use common\models\search\lead\LeadSearchByClient;
 use common\models\search\LeadSearch;
 use sales\access\EmployeeDepartmentAccess;
@@ -41,6 +42,12 @@ class ClientController extends FController
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
+    public function init(): void
+    {
+        parent::init();
+        $this->layoutCrud();
+    }
+
     /**
      * @return string
      */
@@ -73,9 +80,14 @@ class ClientController extends FController
     public function actionCreate()
     {
         $model = new Client();
+        $model->scenario = Client::SCENARIO_MANUALLY;
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if ($model->load(Yii::$app->request->post())) {
+            if ($model->validate()) {
+                $model->cl_type_create = Client::TYPE_CREATE_MANUALLY;
+                $model->save(false);
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
         }
 
         return $this->render('create', [
@@ -91,6 +103,7 @@ class ClientController extends FController
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        $model->scenario = Client::SCENARIO_MANUALLY;
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
@@ -208,6 +221,28 @@ class ClientController extends FController
         $dataProvider->setPagination($pagination);
 
         return $dataProvider;
+    }
+
+    public function actionStats()
+    {
+        $projects = Project::find()->asArray()->all();
+        $data = [];
+
+        foreach ($projects as $project) {
+            $data[] = [
+                'projectId' => $project['id'],
+                'projectName' => $project['name'],
+                'countClients' => Client::find()->andWhere(['cl_project_id' => $project['id']])->count()
+            ];
+        }
+
+        $data[] = [
+            'projectId' => null,
+            'projectName' => 'Without project',
+            'countClients' => Client::find()->andWhere(['IS', 'cl_project_id', null])->count()
+        ];
+
+        return $this->render('stats', ['data' => $data]);
     }
 
 }

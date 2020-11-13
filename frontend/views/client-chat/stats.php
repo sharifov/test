@@ -26,7 +26,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     <?php $form = ActiveForm::begin([
                         'id' => 'chat-chart-search-form',
                         'options' => ['data-pjax' => '#client-chat-chart'],
-                        'action' => \yii\helpers\Url::to('/stats/ajax-get-total-chart'),
+                        //'action' => \yii\helpers\Url::to('/stats/ajax-get-total-chart'),
                         'enableClientValidation' => false,
                     ]) ?>
 

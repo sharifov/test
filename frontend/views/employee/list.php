@@ -253,7 +253,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 'contentOptions' => ['style' => 'width: 10%; white-space: pre-wrap']
             ],
 
-            'email:email',
+            //'email:email',
             [
                 'attribute' => 'status',
                 'filter' => $searchModel::STATUS_LIST,
@@ -374,27 +374,27 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 'filter' => $projectList
             ],*/
 
-            /*[
-                'label' => 'Projects Params',
-                'attribute' => 'user_params_project_id',
-                'value' => static function (\common\models\Employee $model) {
-
-                    $projects = $model->uppProjects;
-                    $projectsValueArr = [];
-
-                    if($projects) {
-                        foreach ($projects as $project) {
-                            $projectsValueArr[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-list']) . ' ' . Html::encode($project->name), ['class' => 'label label-default']);
-                        }
-                    }
-
-                    $projectsValue = implode(' ', $projectsValueArr);
-
-                    return $projectsValue;
-                },
-                'format' => 'raw',
-                'filter' => $projectList
-            ],*/
+//            [
+//                'label' => 'Projects Params',
+//                'attribute' => 'user_params_project_id',
+//                'value' => static function (\common\models\Employee $model) {
+//
+//                    $projects = $model->uppProjects;
+//                    $projectsValueArr = [];
+//
+//                    if($projects) {
+//                        foreach ($projects as $project) {
+//                            $projectsValueArr[] = Html::tag('span', Html::tag('i', '', ['class' => 'fa fa-list']) . ' ' . Html::encode($project->name), ['class' => 'label label-default']);
+//                        }
+//                    }
+//
+//                    $projectsValue = implode(' ', $projectsValueArr);
+//
+//                    return $projectsValue;
+//                },
+//                'format' => 'raw',
+//                'filter' => $projectList
+//            ],
 
             /*[
                 'label' => 'Sip',
@@ -405,7 +405,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 'format' => 'raw'
             ],*/
 
-            /*[
+            [
                 'label' => 'Projects Params',
                 'attribute' => 'user_params_project_id',
                 'value' => static function (\common\models\Employee $model) {
@@ -436,7 +436,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 },
                 'format' => 'raw',
                 'filter' => $projectList
-            ],*/
+            ],
 
             //'created_at:datetime',
             //'updated_at:datetime',
@@ -590,14 +590,14 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 //                    ],
 //                ]),
 //            ],
-            [
-                'label' => '2FA enable',
-                'value' => static function (\common\models\Employee $model) {
-                    return ($model->userProfile && $model->userProfile->up_2fa_enable) ?
-                        '<span class="label label-success">true</span>' : '<span class="label label-danger">false</span>';
-                },
-                'format' => 'raw'
-            ],
+//            [
+//                'label' => '2FA enable',
+//                'value' => static function (\common\models\Employee $model) {
+//                    return ($model->userProfile && $model->userProfile->up_2fa_enable) ?
+//                        '<span class="label label-success">true</span>' : '<span class="label label-danger">false</span>';
+//                },
+//                'format' => 'raw'
+//            ],
 
             [
                 'attribute' => 'updated_at',

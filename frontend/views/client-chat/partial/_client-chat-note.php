@@ -2,6 +2,7 @@
 
 use frontend\helpers\OutHelper;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChat\permissions\ClientChatActionPermission;
 use sales\model\clientChatNote\entity\ClientChatNote;
 use yii\helpers\Html;
 use yii\web\View;
@@ -14,6 +15,7 @@ use yii\bootstrap4\Modal;
  * @var View $this
  * @var ClientChatNote $model
  * @var bool $showContent
+ * @var ClientChatActionPermission $actionPermissions
  */
 
 $showContent = $showContent ?? false;
@@ -25,9 +27,11 @@ $showContent = $showContent ?? false;
         <div class="x_title">
             <h2>Chat notes (<?php echo count($clientChat->notes) ?>) </h2>
             <ul class="nav navbar-right panel_toolbox">
-                <li>
-                    <a class="btn_toggle_form"><i class="fa fa-plus"></i> New Note</a>
-                </li>
+                <?php if ($actionPermissions->canNoteAdd($clientChat)): ?>
+                    <li>
+                        <a class="btn_toggle_form"><i class="fa fa-plus"></i> New Note</a>
+                    </li>
+                <?php endif; ?>
                 <li>
                     <a class="collapse-link"><i class="fa fa-chevron-down"></i></a>
                 </li>
@@ -41,20 +45,22 @@ $showContent = $showContent ?? false;
                 <div class="_cc-chat-notes-item">
                     <div class="d-flex justify-content-between align-items-center" style="width: 100%;">
                         <span class="_cc_agent_name"><?php echo $note->user ? Html::encode($note->user->username): '-' ?></span>
-                        <span>
-                            <?php $class = $note->ccn_deleted ? 'fa-reply' : 'fa-remove' ?>
-							<?php $textAlert = $note->ccn_deleted ? 'recover' : 'delete' ?>
-							<?= Html::a('<i class="fa ' . $class . '"></i>',
-                                ['client-chat/delete-note', 'ccn_id' => $note->ccn_id, 'cch_id' => $clientChat->cch_id],
-                                [
-                                    'class' => 'text-secondary',
-                                    'data' => [
-                                        'confirm' => 'Are you sure you want to ' . $textAlert . ' this note?',
-                                        'method' => 'post',
-                                    ],
-                                    'data-pjax'=> 1,
-                            ]) ?>
-                        </span>
+                        <?php if ($actionPermissions->canNoteDelete($clientChat)): ?>
+                            <span>
+                                <?php $class = $note->ccn_deleted ? 'fa-reply' : 'fa-remove' ?>
+                                <?php $textAlert = $note->ccn_deleted ? 'recover' : 'delete' ?>
+                                <?= Html::a('<i class="fa ' . $class . '"></i>',
+                                    ['client-chat/delete-note', 'ccn_id' => $note->ccn_id, 'cch_id' => $clientChat->cch_id],
+                                    [
+                                        'class' => 'text-secondary',
+                                        'data' => [
+                                            'confirm' => 'Are you sure you want to ' . $textAlert . ' this note?',
+                                            'method' => 'post',
+                                        ],
+                                        'data-pjax'=> 1,
+                                ]) ?>
+                            </span>
+                        <?php endif;?>
                     </div>
                     <div class="_cc_chat_note_date_item">
 						<?= $note->ccn_created_dt ? Yii::$app->formatter->asDatetime(strtotime($note->ccn_created_dt)) : '' ?>

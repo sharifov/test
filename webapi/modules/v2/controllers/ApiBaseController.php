@@ -16,7 +16,6 @@ use yii\web\BadRequestHttpException;
 use yii\web\NotAcceptableHttpException;
 use yii\web\Response;
 
-
 /**
  * Class ApiBaseController
  * @package webapi\controllers
@@ -28,7 +27,6 @@ use yii\web\Response;
  */
 class ApiBaseController extends Controller
 {
-
     public $apiUser;
     public $apiProject;
     public $debug = false;
@@ -41,7 +39,7 @@ class ApiBaseController extends Controller
         parent::init();
 
         Yii::$app->user->enableSession = false;
-        if(Yii::$app->request->get('debug')) {
+        if (Yii::$app->request->get('debug')) {
             $this->debug = true;
         }
     }
@@ -66,18 +64,16 @@ class ApiBaseController extends Controller
             ],
         ];
 
-        if($apiKey) {
-
+        if ($apiKey) {
             $apiUser = null;
             $apiProject = Project::find()->where(['api_key' => $apiKey])->one();
-            if($apiProject) {
+            if ($apiProject) {
                 $apiUser = ApiUser::findOne([
                     'au_project_id' => $apiProject->id
                 ]);
 
-                if($apiUser) {
-
-                    if($apiUser->au_enabled) {
+                if ($apiUser) {
+                    if ($apiUser->au_enabled) {
                         $this->apiUser = $apiUser;
                         $this->apiProject = $apiProject;
                     } else {
@@ -88,33 +84,32 @@ class ApiBaseController extends Controller
                 throw new NotAcceptableHttpException('Not init Project', 9);
             }
 
-            if(!$apiUser) {
+            if (!$apiUser) {
                 throw new NotAcceptableHttpException('Not init User', 8);
             }
 
             Yii::$app->getUser()->login($apiUser);
-
-
         } else {
-
             $behaviors['authenticator'] = [
                 'class' => HttpBasicAuth::class,
             ];
 
             $behaviors['authenticator']['auth'] = function ($username, $password) {
-
                 $apiUser = ApiUser::findOne([
                     'au_api_username' => $username
                 ]);
 
                 if (!$apiUser) {
-                    Yii::warning('API not found username: '.$username, 'API:HttpBasicAuth:ApiUser');
-                    return NULL;
+                    Yii::warning(['message' => 'API: not found username', 'username' => $username, 'endpoint' => $this->action->uniqueId, 'RemoteIP' => Yii::$app->request->getRemoteIP(), 'UserIP' => Yii::$app->request->getUserIP()], 'API:v2:HttpBasicAuth:ApiUser');
+                    return null;
                 }
+
                 if (!$apiUser->validatePassword($password)) {
-                    Yii::warning('API invalid password: '.$password.', username: '.$username.' ', 'API:HttpBasicAuth:ApiUser');
-                    return NULL;
+                    Yii::warning(['message' => 'API: invalid password', 'username' => $username, 'endpoint' => $this->action->uniqueId, 'password' => $password, 'RemoteIP' => Yii::$app->request->getRemoteIP(), 'UserIP' => Yii::$app->request->getUserIP()], 'API:v2:HttpBasicAuth:ApiUser');
+                    return null;
                 }
+
+
                 if (!$apiUser->au_enabled) {
                     throw new NotAcceptableHttpException('ApiUser is disabled', 10);
                 }
@@ -167,8 +162,12 @@ class ApiBaseController extends Controller
      */
     public function checkPost()
     {
-        if (!Yii::$app->request->isPost) throw new BadRequestHttpException('Not found POST request', 1);
-        if (!Yii::$app->request->post()) throw new BadRequestHttpException('POST data request is empty', 2);
+        if (!Yii::$app->request->isPost) {
+            throw new BadRequestHttpException('Not found POST request', 1);
+        }
+        if (!Yii::$app->request->post()) {
+            throw new BadRequestHttpException('POST data request is empty', 2);
+        }
     }
 
 
@@ -178,7 +177,6 @@ class ApiBaseController extends Controller
      */
     public function startApiLog(string $action = ''): ApiLog
     {
-
         $apiLog = new ApiLog();
         $apiLog->al_request_data = @json_encode(Yii::$app->request->post());
         $apiLog->al_request_dt = date('Y-m-d H:i:s');
@@ -189,16 +187,14 @@ class ApiBaseController extends Controller
         $apiLog->start_memory_usage = memory_get_usage();
 
 
-        if($this->apiUser) {
+        if ($this->apiUser) {
             $apiLog->al_user_id = $this->apiUser->au_id;
         }
 
-        if(!$apiLog->save()) {
+        if (!$apiLog->save()) {
             Yii::error(print_r($apiLog->errors, true), 'ApiBaseControl:startApiLog:ApiLog:save');
         }
 
         return $apiLog;
     }
-
-
 }

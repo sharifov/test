@@ -15,6 +15,7 @@ use common\models\ProjectEmailTemplate;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\filters\AccessControl;
+use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
@@ -25,6 +26,28 @@ use yii\web\Response;
  */
 class SettingsController extends FController
 {
+
+    /**
+     * {@inheritdoc}
+     */
+    public function behaviors()
+    {
+        $behaviors = [
+            'verbs' => [
+                'class' => VerbFilter::class,
+                'actions' => [
+                    'delete' => ['POST'],
+                ],
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
+    public function init(): void
+    {
+        parent::init();
+        $this->layoutCrud();
+    }
 
     public function actionSync($type)
     {

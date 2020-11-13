@@ -76,8 +76,8 @@
 		"centrifugal/phpcent": "~3.0",
 		"kivork/yii2-bootstrap4-glyphicons": "*",
 		"2amigos/yii2-multi-select-widget": "*",
-		"kivork/yii2-mattermost-log-target": "@dev"
-
+		"kivork/yii2-mattermost-log-target": "@dev",
+        "kivork/yii2-virtual-cron": "@dev"
 	},
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.1",
@@ -93,13 +93,33 @@
 		"codeception/phpunit-wrapper": "^7.8",
 		"phpunit/phpunit": "^7.0",
 		"vimeo/psalm": "^3.13",
-		"phpstan/phpstan": "^0.12.37"
+		"phpstan/phpstan": "^0.12.37",
+		"friendsofphp/php-cs-fixer": "^2.16",
+		"proget-hq/phpstan-yii2": "^0.7.3"
+	},
+	"autoload-dev": {
+		"psr-2": {
+			"app\\": "./"
+		},
+		"classmap": [
+			"common/models/",
+			"frontend/models/",
+			"common/components/",
+			"vendor/yiisoft/yii2/Yii.php",
+			"sales/"
+		],
+		"exclude-from-classmap": [
+			"docker/",
+			"vagrant/",
+			"node_modules/"
+		]
 	},
 	"config" : {
 		"process-timeout" : 1800,
 		"fxp-asset" : {
 			"enabled" : false
-		}
+		},
+		"optimize-autoloader": true
 	},
 	"repositories" : [
 		{
@@ -117,6 +137,15 @@
 		{
 			"type": "vcs",
 			"url": "https://stash.travelinsides.com/scm/lib/yii2-mattermost-log-target.git"
+		},
+		{
+			"type": "vcs",
+			"url": "https://stash.travelinsides.com/scm/lib/yii2-virtual-cron.git"
 		}
-	]
+	],
+	"scripts": {
+		"cs-fix": [
+			"vendor/bin/php-cs-fixer fix --config=.php_cs --verbose --show-progress=dots"
+		]
+	}
 }

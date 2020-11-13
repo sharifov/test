@@ -251,6 +251,68 @@
     "groupTitle": "Cases"
   },
   {
+    "type": "post",
+    "url": "/v1/client-chat-request/feedback",
+    "title": "Client Chat Feedback",
+    "version": "0.1.0",
+    "name": "ClientChatFeedback",
+    "group": "ClientChat",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "examples": [
+        {
+          "title": "Request-Example LEAVE_FEEDBACK:",
+          "content": "{\n\t\t\"event\": \"LEAVE_FEEDBACK\",\n\t\t\"data\": {\n\t\t\t\"rid\": \"20a20989-4d26-42f4-9a1c-2948ce4c4d56\",\n         \"comment\": \"Hello, this is my feedback\",\n         \"rating\": 4,\n         \"visitor\": {\n             \"id\": \"1c1d90ff-5489-45f5-b19b-2181a65ce898\",\n             \"project\": \"ovago\"\n         }\n     }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n{\n   \"status\": 200\n   \"message\": \"Ok\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response (400):",
+          "content": "\nHTTP/1.1 400 Bad Request\n{\n\t\"status\":400,\n\t\"message\":\"Some errors occurred while creating client chat request\",\n\t\"code\":\"13104\",\n\t\"errors\":[\"Event is invalid.\"]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v1/controllers/ClientChatRequestController.php",
+    "groupTitle": "ClientChat"
+  },
+  {
     "type": "get",
     "url": "/v1/client-chat-request/project-config",
     "title": "Project Config",
@@ -268,9 +330,17 @@
           {
             "group": "Parameter",
             "type": "int",
-            "optional": false,
+            "optional": true,
             "field": "project_id",
             "description": "<p>Project ID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "size": "100",
+            "optional": true,
+            "field": "project_key",
+            "description": "<p>Project Key (Priority)</p>"
           },
           {
             "group": "Parameter",
@@ -279,13 +349,24 @@
             "optional": true,
             "field": "language_id",
             "description": "<p>Language ID (ru-RU)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "allowedValues": [
+              "0",
+              "1"
+            ],
+            "optional": true,
+            "field": "nocache",
+            "description": "<p>W/o cache</p>"
           }
         ]
       },
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n    \"project_id\": 1,\n    \"language_id\": \"ru-RU\"\n}",
+          "content": "{\n    \"project_id\": 1,\n    \"project_key\": \"ovago\",\n    \"language_id\": \"ru-RU\",\n    \"nocache\": 1\n}",
           "type": "get"
         }
       ]
@@ -333,7 +414,7 @@
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "\nHTTP/1.1 200 OK\n\n{\n\"status\": 200,\n\"message\": \"OK\",\n\"data\": {\n\"endpoint\": \"chatbot.travel-dev.com\",\n\"enabled\": true,\n\"project\": \"HOP2\",\n\"notificationSound\": \"https://cdn.travelinsides.com/npmstatic/assets/chime.mp3\",\n\"theme\": {\n\"theme\": \"linear-gradient(270deg, #0AAB99 0%, #1E71D1 100%)\",\n\"primary\": \"#0C89DF\",\n\"primaryDark\": \"#0066BA\",\n\"accent\": \"#0C89DF\",\n\"accentDark\": \"#0066BA\"\n},\n\"registration\": {\n\"enabled\": true,\n\"departments\": [\n\"Sales\",\n\"Support\"\n],\n\"registrationTitle\": \"Registration title if registration is enabled\",\n\"registrationSubtitle\": \"Registration subtitle if it is enabled\",\n\"formFields\": {\n\"name\": {\n\"enabled\": true,\n\"required\": true,\n\"maxLength\": 40,\n\"minLength\": 3\n},\n\"email\": {\n\"enabled\": true,\n\"required\": true,\n\"maxLength\": 40,\n\"minLength\": 3\n},\n\"department\": {\n\"enabled\": true,\n\"required\": true\n}\n}\n},\n\"settings\": {\n\"fileUpload\": true,\n\"maxMessageLength\": 500\n},\n\"language_id\": \"ru-RU\",\n    \"translations\": {\n        \"connection_lost\": {\n            \"title\": \"Connection Lost\",\n            \"subtitle\": \"Trying to reconnect\"\n        },\n        \"waiting_for_response\": \"Waiting for response\",\n        \"waiting_for_agent\": \"Waiting for an agent\",\n        \"video_reply\": \"Video message\",\n        \"audio_reply\": \"Audio message\",\n        \"image_reply\": \"Image message\",\n        \"new_message\": \"New message\",\n        \"agent\": \"Agent\",\n        \"textarea_placeholder\": \"Type a message...\",\n        \"registration\": {\n            \"title\": \"Welcome\",\n            \"subtitle\": \"Be sure to leave a message\",\n            \"name\": \"Name\",\n            \"name_placeholder\": \"Your name\",\n            \"email\": \"Email\",\n            \"email_placeholder\": \"Your email\",\n            \"department\": \"Department\",\n            \"department_placeholder\": \"Choose a department\",\n            \"start_chat\": \"Start chat\"\n        },\n        \"conversations\": {\n            \"no_conversations\": \"No conversations yet\",\n            \"no_archived_conversations\": \"No archived conversations yet\",\n            \"history\": \"Conversation history\",\n            \"active\": \"Active\",\n            \"archived\": \"Archived Chats\",\n            \"start_new\": \"New Chat\"\n        },\n        \"file_upload\": {\n            \"file_too_big\": \"This file is too big. Max file size is {{size}}\",\n            \"file_too_big_alt\": \"No archived conversations yetThis file is too large\",\n            \"generic_error\": \"Failed to upload, please try again\",\n            \"not_allowed\": \"This file type is not supported\",\n            \"drop_file\": \"Drop file here to upload it\",\n            \"upload_progress\": \"Uploading file...\"\n        },\n        \"department\": {\n            \"sales\": \"Sales\",\n            \"support\": \"Support\",\n            \"exchange\": \"Exchange\"\n        }\n    }\n}\n}",
+          "content": "\nHTTP/1.1 200 OK\n\n{\n\"status\": 200,\n\"message\": \"OK\",\n\"data\": {\n\"endpoint\": \"chatbot.travel-dev.com\",\n\"enabled\": true,\n\"project\": \"WOWFARE\",\n\"projectKey\": \"wowfare\",\n\"notificationSound\": \"https://cdn.travelinsides.com/npmstatic/assets/chime.mp3\",\n\"theme\": {\n\"theme\": \"linear-gradient(270deg, #0AAB99 0%, #1E71D1 100%)\",\n\"primary\": \"#0C89DF\",\n\"primaryDark\": \"#0066BA\",\n\"accent\": \"#0C89DF\",\n\"accentDark\": \"#0066BA\"\n},\n\"settings\": {\n},\n\n\"channels\": [\n        {\n            \"id\": 2,\n            \"name\": \"Channel 2\",\n            \"priority\": 1,\n            \"default\": false,\n            \"enabled\": true,\n            \"settings\": {\n                \"max_dialog_count\": 4,\n                \"feedback_rating_enabled\": false,\n                \"feedback_message_enabled\": true,\n                \"history_email_enabled\": false,\n                \"history_download_enabled\": true\n            }\n        },\n        {\n            \"id\": 3,\n            \"name\": \"Channel 11\",\n            \"priority\": 2,\n            \"default\": true,\n            \"enabled\": true,\n            \"settings\": {\n                \"max_dialog_count\": 1,\n                \"feedback_rating_enabled\": true,\n                \"feedback_message_enabled\": true,\n                \"history_email_enabled\": true,\n                \"history_download_enabled\": true\n            }\n        }\n    ],\n    \"language_id\": \"ru-RU\",\n        \"translations\": {\n            \"connection_lost\": {\n                \"title\": \"Connection Lost\",\n                \"subtitle\": \"Trying to reconnect\"\n            },\n            \"waiting_for_response\": \"Waiting for response\",\n            \"waiting_for_agent\": \"Waiting for an agent\",\n            \"video_reply\": \"Video message\",\n            \"audio_reply\": \"Audio message\",\n            \"image_reply\": \"Image message\",\n            \"new_message\": \"New message\",\n            \"agent\": \"Agent\",\n            \"textarea_placeholder\": \"Type a message...\",\n            \"registration\": {\n                \"title\": \"Welcome\",\n                \"subtitle\": \"Be sure to leave a message\",\n                \"name\": \"Name\",\n                \"name_placeholder\": \"Your name\",\n                \"email\": \"Email\",\n                \"email_placeholder\": \"Your email\",\n                \"department\": \"Department\",\n                \"department_placeholder\": \"Choose a department\",\n                \"start_chat\": \"Start chat\"\n            },\n            \"conversations\": {\n                \"no_conversations\": \"No conversations yet\",\n                \"no_archived_conversations\": \"No archived conversations yet\",\n                \"history\": \"Conversation history\",\n                \"active\": \"Active\",\n                \"archived\": \"Archived Chats\",\n                \"start_new\": \"New Chat\"\n            },\n            \"file_upload\": {\n                \"file_too_big\": \"This file is too big. Max file size is {{size}}\",\n                \"file_too_big_alt\": \"No archived conversations yetThis file is too large\",\n                \"generic_error\": \"Failed to upload, please try again\",\n                \"not_allowed\": \"This file type is not supported\",\n                \"drop_file\": \"Drop file here to upload it\",\n                \"upload_progress\": \"Uploading file...\"\n            },\n            \"department\": {\n                \"sales\": \"Sales\",\n                \"support\": \"Support\",\n                \"exchange\": \"Exchange\"\n            }\n        },\n        \"cache\": true\n    }\n    }",
           "type": "json"
         },
         {
@@ -390,13 +471,8 @@
     "parameter": {
       "examples": [
         {
-          "title": "Request-Example GUEST_CONNECTED:",
-          "content": "{\n\t\t\t\"event\": \"GUEST_CONNECTED\",\n\t\t\t\"data\": {\n\t\t\t\t\"rid\": \"292a9961-asdas-4d66-bhnjm-sdvsdv\",\n\t\t\t\t\"channel\": \"livechat-channel\",\n\t\t\t\t\"name\": \"Test 45\",\n\t\t\t\t\"email\": \"test+45@mail.com\",\n\t\t\t\t\"ip\": \"127.0.0.1\",\n\t\t\t\t\"project\": 'OVAGO',\n\t \t\t\t\"department\": \"department id optional\"\n\t\t\t}\n}",
-          "type": "json"
-        },
-        {
           "title": "Request-Example ROOM_CONNECTED:",
-          "content": "{\n\t\t\t\"event\": 'ROOM_CONNECTED',\n\t\t\t\"data\": {\n\t\t\t\t\"rid\": '9e563c67-fe10-42d5-a664-6e30d2974201',\n\t\t\t\t\"visitor\": { \"_id\": 'pnjNRHsnnWXhW5LBn', \"username\": 'guest-81' }\n\t\t\t}\n}",
+          "content": "{\n            \"event\": \"ROOM_CONNECTED\",\n            \"data\": {\n                \"geo\": {\n                    \"ip\": \"92.115.180.30\",\n                    \"version\": \"IPv4\",\n                    \"city\": \"Chisinau\",\n                    \"region\": \"Chi\\u0219in\\u0103u Municipality\",\n                    \"region_code\": \"CU\",\n                    \"country\": \"MD\",\n                    \"country_name\": \"Republic of Moldova\",\n                    \"country_code\": \"MD\",\n                    \"country_code_iso3\": \"MDA\",\n                    \"country_capital\": \"Chisinau\",\n                    \"country_tld\": \".md\",\n                    \"continent_code\": \"EU\",\n                    \"in_eu\": false,\n                    \"postal\": \"MD-2000\",\n                    \"latitude\": 47.0056,\n                    \"longitude\": 28.8575,\n                    \"timezone\": \"Europe\\/Chisinau\",\n                    \"utc_offset\": \"+0300\",\n                    \"country_calling_code\": \"+373\",\n                    \"currency\": \"MDL\",\n                    \"currency_name\": \"Leu\",\n                    \"languages\": \"ro,ru,gag,tr\",\n                    \"country_area\": 33843,\n                    \"country_population\": 3545883,\n                    \"asn\": \"AS8926\",\n                    \"org\": \"Moldtelecom SA\"\n                },\n                \"visitor\": {\n                    \"conversations\": 0,\n                    \"lastAgentMessage\": null,\n                    \"lastVisitorMessage\": null,\n                    \"id\": \"fef46d63-8a30-4eec-89eb-62f1bfc0ffcd\",\n                    \"uuid\": \"54d87707-bb54-46e3-9eca-8f776c7bcacf\",\n                    \"project\": \"ovago\"\n                },\n                \"sources\": [],\n                \"page\": {\n                    \"url\": \"https:\\/\\/dev-ovago.travel-dev.com\\/search\\/WAS-FRA%2F2021-03-22%2F2021-03-28\",\n                    \"title\": \"Air Ticket Booking - Find Cheap Flights and Airfare Deals - Ovago.com\",\n                    \"referrer\": \"https:\\/\\/dev-ovago.travel-dev.com\\/search\\/WAS-FRA%2F2021-03-22%2F2021-03-28\"\n                },\n                \"system\": {\n                    \"user_agent\": \"Mozilla\\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\\/537.36 (KHTML, like Gecko) Chrome\\/85.0.4183.102 Safari\\/537.36\",\n                    \"language\": \"en-US\",\n                    \"resolution\": \"1920x1080\"\n                },\n                \"custom\": {\n                    \"event\": {\n                        \"eventName\": \"UPDATE\",\n                        \"eventProps\": []\n                    }\n                }\n            }\n}",
           "type": "json"
         }
       ]
@@ -457,13 +533,13 @@
     "parameter": {
       "examples": [
         {
-          "title": "Request-Example GUEST_UTTERED:",
-          "content": "{\n\t\t\t\"event\": \"GUEST_UTTERED\",\n\t\t\t\"data\": {\n\t\t\t\t\"_id\": \"XipJ2fqumzr3n3Nhh\",\n\t\t\t\t\"rid\": \"292a9961-asdas-4d66-bhnjm-sdgadg\",\n\t\t\t\t\"msg\": \"hello\",\n\t\t\t\t\"token\": \"292a9961-asdas-4d66-bhnjm-sdvsdu\",\n\t\t\t\t\"alias\": \"jora\",\n\t\t\t\t\"ts\": {\n\t\t\t\t\t\"$date\": 1592924833106\n\t\t\t\t},\n\t\t\t\t\"u\": {\n\t\t\t\t\t\"_id\": \"pvS87aeQxfqgnzsFW\",\n\t\t\t\t\t\"username\": \"guest-124\",\n\t\t\t\t\t\"name\": \"jora\"\n\t\t\t\t},\n\t\t\t\t\"groupable\": false,\n\t\t\t\t\"mentions\": [],\n\t\t\t\t\"channels\": [],\n\t\t\t\t\"_updatedAt\": {\n\t\t\t\t\t\"$date\": 1592924833113\n\t\t\t\t}\n\t\t\t}\n}",
+          "title": "Request-Example AGENT_UTTERED:",
+          "content": "{\n            \"event\": \"AGENT_UTTERED\",\n            \"data\": {\n                \"id\": \"G6CBYkRYBotjaPPSu\",\n                \"rid\": \"e19bf809-12c9-4981-89d0-da2f5d071890\",\n                \"token\": \"56976e05-1916-44fb-a074-5a8d0358019b\",\n                \"visitor\": {\n                    \"conversations\": 0,\n                    \"lastAgentMessage\": null,\n                    \"lastVisitorMessage\": null,\n                    \"id\": \"56976e05-1916-44fb-a074-5a8d0358019b\",\n                    \"username\": \"guest-1219\",\n                    \"phone\": null,\n                    \"token\": \"56976e05-1916-44fb-a074-5a8d0358019b\"\n                },\n                \"agent\": {\n                    \"name\": \"vadim_larsen_admin\",\n                    \"username\": \"vadim_larsen_admin\",\n                    \"email\": \"vadim.larsen@techork.com\"\n                },\n                \"msg\": \"test\",\n                \"timestamp\": 1602587182948,\n                \"u\": {\n                    \"_id\": \"MszwfgYRGB9Tpw5Et\",\n                    \"username\": \"vadim.larsen\"\n                },\n                    \"agentId\": \"MszwfgYRGB9Tpw5Et\"\n                }\n}",
           "type": "json"
         },
         {
           "title": "Request-Example GUEST_UTTERED with Attachment:",
-          "content": "{\n\t\t\t\"event\": \"GUEST_UTTERED\",\n\t\t\t\"data\": {\n\t\t\t\t\"_id\": \"XipJ2fqumzr3n3Nhh\",\n\t\t\t\t\"rid\": \"292a9961-asdas-4d66-bhnjm-sdgadg\",\n\t\t\t\t\"msg\": \"hello\",\n\t\t\t\t\"token\": \"292a9961-asdas-4d66-bhnjm-sdvsdu\",\n\t\t\t\t\"alias\": \"jora\",\n\t\t\t\t\"ts\": {\n\t\t\t\t\t\"$date\": 1592924833106\n\t\t\t\t},\n\t\t\t\t\"file\": {\n\t\t\t\t\t\"_id\": \"EKSp7qfb7LqQxjA3N\",\n\t\t\t\t\t\"name\": \"469_5263_9274dc35-1390-4b95-9767-fa4b71adc7a2-c26e70f8-0eff-4558-8005-73a699c7d7f8.mp4\",\n\t\t\t\t\t\"type\": \"video/mp4\"\n\t\t\t\t},\n\t\t\t\t\"attachments\": [\n\t\t\t\t\t{\n\t\t\t\t\t\t\"title\": \"469_5263_9274dc35-1390-4b95-9767-fa4b71adc7a2-c26e70f8-0eff-4558-8005-73a699c7d7f8.mp4\",\n\t\t\t\t\t\t\"type\": \"file\",\n\t\t\t\t\t\t\"title_link\": \"/file-upload/EKSp7qfb7LqQxjA3N/469_5263_9274dc35-1390-4b95-9767-fa4b71adc7a2-c26e70f8-0eff-4558-8005-73a699c7d7f8.mp4\",\n\t\t\t\t\t\t\"title_link_download\": true,\n\t\t\t\t\t\t\"video_url\": \"/file-upload/EKSp7qfb7LqQxjA3N/469_5263_9274dc35-1390-4b95-9767-fa4b71adc7a2-c26e70f8-0eff-4558-8005-73a699c7d7f8.mp4\",\n\t\t\t\t\t\t\"video_type\": \"video/mp4\",\n\t\t\t\t\t\t\"video_size\": 5276\n\t\t\t\t\t}\n\t\t\t\t],\n\t\t\t\t\"u\": {\n\t\t\t\t\t\"_id\": \"pvS87aeQxfqgnzsFW\",\n\t\t\t\t\t\"username\": \"guest-124\",\n\t\t\t\t\t\"name\": \"jora\"\n\t\t\t\t},\n\t\t\t\t\"groupable\": false,\n\t\t\t\t\"mentions\": [],\n\t\t\t\t\"channels\": [],\n\t\t\t\t\"_updatedAt\": {\n\t\t\t\t\t\"$date\": 1592924833113\n\t\t\t\t}\n\t\t\t}\n}",
+          "content": "{\n            \"event\": \"GUEST_UTTERED\",\n            \"data\": {\n                \"id\": \"93ea7e9d-04cc-4f96-8bbf-d8b646113fd7\",\n                \"rid\": \"88c395e3-fe19-4fe2-99dc-b0a1874efbdd\",\n                \"token\": \"9728d3b4-5754-4339-9b0f-1c75edc727e9\",\n                \"visitor\": {\n                    \"conversations\": 0,\n                    \"lastAgentMessage\": null,\n                    \"lastVisitorMessage\": null,\n                    \"id\": \"9728d3b4-5754-4339-9b0f-1c75edc727e9\",\n                    \"name\": \"Henry Fonda\",\n                    \"username\": \"guest-1220\",\n                    \"phone\": null,\n                    \"token\": \"9728d3b4-5754-4339-9b0f-1c75edc727e9\"\n                },\n                \"agent\": {\n                    \"name\": \"bot\",\n                    \"username\": \"bot\",\n                    \"email\": \"bot@techork.com\"\n                },\n                \"msg\": \"Hi\",\n                \"timestamp\": 1602588445024,\n                \"u\": {\n                    \"_id\": \"cYNGwXX6L8cN3eb2Q\",\n                    \"username\": \"guest-1220\",\n                    \"name\": \"Henry Fonda\"\n                }\n            }\n}",
           "type": "json"
         }
       ]
@@ -488,6 +564,103 @@
     },
     "filename": "webapi/modules/v1/controllers/ClientChatRequestController.php",
     "groupTitle": "ClientChat"
+  },
+  {
+    "type": "get",
+    "url": "/v1/client/info",
+    "title": "Client Info",
+    "version": "0.1.0",
+    "name": "Client",
+    "group": "Client",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          },
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Accept-Encoding",
+            "description": ""
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "client_uuid",
+            "description": "<p>Client UUID</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "project_key",
+            "description": "<p>Project key</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "\n{\n     \"client_uuid\": \"af5241f1-094f-4fde-ada3-bd72986216f0\",\n     \"project_key\": \"ovago\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\nHTTP/1.1 200 OK\n{\n     \"status\": 200,\n     \"message\": \"OK\",\n     \"data\": {\n         \"first_name\": \"Client first name\",\n         \"last_name\": \"Client last name\",\n         \"created\": \"2020-09-24 11:29:15\"\n     }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response (422):",
+          "content": "\nHTTP/1.1 200 OK\n\n{\n    \"status\": 422,\n    \"message\": \"Validation error\",\n    \"errors\": {\n        \"client_uuid\": [\n            \"Client Uuid cannot be blank.\"\n       ],\n       \"project_key\": [\n            \"Project Key is invalid.\"\n        ]\n    },\n    \"code\": \"11602\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (400):",
+          "content": "\nHTTP/1.1 200 OK\n\n{\n    \"status\": 400,\n    \"message\": \"Load data error\",\n    \"errors\": {\n         \"Not found Client data on request\"\n    },\n    \"code\": \"11601\"\n}",
+          "type": "json"
+        },
+        {
+          "title": "Error-Response (404):",
+          "content": "\nHTTP/1.1 200 OK\n\n{\n    \"status\": 404,\n    \"message\": \"Client not found\",\n    \"code\": \"11100\",\n    \"errors\": []\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v1/controllers/ClientController.php",
+    "groupTitle": "Client"
   },
   {
     "type": "get",
@@ -1297,13 +1470,55 @@
             "optional": false,
             "field": "lead.visitor_log.vl_visit_dt",
             "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "Client",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "Client.name",
+            "description": "<p>Client name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "Client.phone",
+            "description": "<p>Client phone</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "Client.email",
+            "description": "<p>Client email</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "Client.client_ip",
+            "description": "<p>Client client_ip</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "Client.uuid",
+            "description": "<p>Client uuid</p>"
           }
         ]
       },
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n   \"apiKey\": \"d190c378e131ccfd8a889c8ee8994cb55f22fbeeb93f9b99007e8e7ecc24d0dd\",\n   \"lead\": {\n       \"flights\": [\n           {\n               \"origin\": \"KIV\",\n               \"destination\": \"DME\",\n               \"departure\": \"2018-10-13 13:50:00\",\n           },\n           {\n               \"origin\": \"DME\",\n               \"destination\": \"KIV\",\n               \"departure\": \"2018-10-18 10:54:00\",\n           }\n       ],\n       \"emails\": [\n         \"email1@gmail.com\",\n         \"email2@gmail.com\",\n       ],\n       \"phones\": [\n         \"+373-69-487523\",\n         \"022-45-7895-89\",\n       ],\n       \"source_id\": 38,\n       \"sub_sources_code\": \"BBM101\",\n       \"adults\": 1,\n       \"client_first_name\": \"Alexandr\",\n       \"client_last_name\": \"Freeman\",\n       \"user_language\": \"en-GB\",\n       \"visitor_log\": [\n              {\n                  \"vl_source_cid\": \"string_abc\",\n                  \"vl_ga_client_id\": \"35009a79-1a05-49d7-b876-2b884d0f825b\",\n                  \"vl_ga_user_id\": \"35009a79-1a05-49d7-b876-2b884d0f825b\",\n                  \"vl_customer_id\": \"3\",\n                  \"vl_gclid\": \"gclid=TeSter-123#bookmark\",\n                  \"vl_dclid\": \"CJKu8LrQxd4CFQ1qwQodmJIElw\",\n                  \"vl_utm_source\": \"newsletter4\",\n                  \"vl_utm_medium\": \"string_abc\",\n                  \"vl_utm_campaign\": \"string_abc\",\n                  \"vl_utm_term\": \"string_abc\",\n                  \"vl_utm_content\": \"string_abc\",\n                  \"vl_referral_url\": \"string_abc\",\n                  \"vl_location_url\": \"string_abc\",\n                  \"vl_user_agent\": \"string_abc\",\n                  \"vl_ip_address\": \"127.0.0.1\",\n                  \"vl_visit_dt\": \"2020-02-14 12:00:00\"\n              },\n              {\n                  \"vl_source_cid\": \"string_abc\",\n                  \"vl_ga_client_id\": \"35009a79-1a05-49d7-b876-2b884d0f825b\",\n                  \"vl_ga_user_id\": \"35009a79-1a05-49d7-b876-2b884d0f825b\",\n                  \"vl_customer_id\": \"3\",\n                  \"vl_gclid\": \"gclid=TeSter-123#bookmark\",\n                  \"vl_dclid\": \"CJKu8LrQxd4CFQ1qwQodmJIElw\",\n                  \"vl_utm_source\": \"newsletter4\",\n                  \"vl_utm_medium\": \"string_abc\",\n                  \"vl_utm_campaign\": \"string_abc\",\n                  \"vl_utm_term\": \"string_abc\",\n                  \"vl_utm_content\": \"string_abc\",\n                  \"vl_referral_url\": \"string_abc\",\n                  \"vl_location_url\": \"string_abc\",\n                  \"vl_user_agent\": \"string_abc\",\n                  \"vl_ip_address\": \"127.0.0.1\",\n                  \"vl_visit_dt\": \"2020-02-14 12:00:00\"\n              }\n       ]\n   }\n}",
+          "content": "{\n   \"apiKey\": \"d190c378e131ccfd8a889c8ee8994cb55f22fbeeb93f9b99007e8e7ecc24d0dd\",\n   \"lead\": {\n       \"flights\": [\n           {\n               \"origin\": \"KIV\",\n               \"destination\": \"DME\",\n               \"departure\": \"2018-10-13 13:50:00\",\n           },\n           {\n               \"origin\": \"DME\",\n               \"destination\": \"KIV\",\n               \"departure\": \"2018-10-18 10:54:00\",\n           }\n       ],\n       \"emails\": [\n         \"email1@gmail.com\",\n         \"email2@gmail.com\",\n       ],\n       \"phones\": [\n         \"+373-69-487523\",\n         \"022-45-7895-89\",\n       ],\n       \"source_id\": 38,\n       \"sub_sources_code\": \"BBM101\",\n       \"adults\": 1,\n       \"client_first_name\": \"Alexandr\",\n       \"client_last_name\": \"Freeman\",\n       \"user_language\": \"en-GB\",\n       \"visitor_log\": [\n              {\n                  \"vl_source_cid\": \"string_abc\",\n                  \"vl_ga_client_id\": \"35009a79-1a05-49d7-b876-2b884d0f825b\",\n                  \"vl_ga_user_id\": \"35009a79-1a05-49d7-b876-2b884d0f825b\",\n                  \"vl_customer_id\": \"3\",\n                  \"vl_gclid\": \"gclid=TeSter-123#bookmark\",\n                  \"vl_dclid\": \"CJKu8LrQxd4CFQ1qwQodmJIElw\",\n                  \"vl_utm_source\": \"newsletter4\",\n                  \"vl_utm_medium\": \"string_abc\",\n                  \"vl_utm_campaign\": \"string_abc\",\n                  \"vl_utm_term\": \"string_abc\",\n                  \"vl_utm_content\": \"string_abc\",\n                  \"vl_referral_url\": \"string_abc\",\n                  \"vl_location_url\": \"string_abc\",\n                  \"vl_user_agent\": \"string_abc\",\n                  \"vl_ip_address\": \"127.0.0.1\",\n                  \"vl_visit_dt\": \"2020-02-14 12:00:00\"\n              },\n              {\n                  \"vl_source_cid\": \"string_abc\",\n                  \"vl_ga_client_id\": \"35009a79-1a05-49d7-b876-2b884d0f825b\",\n                  \"vl_ga_user_id\": \"35009a79-1a05-49d7-b876-2b884d0f825b\",\n                  \"vl_customer_id\": \"3\",\n                  \"vl_gclid\": \"gclid=TeSter-123#bookmark\",\n                  \"vl_dclid\": \"CJKu8LrQxd4CFQ1qwQodmJIElw\",\n                  \"vl_utm_source\": \"newsletter4\",\n                  \"vl_utm_medium\": \"string_abc\",\n                  \"vl_utm_campaign\": \"string_abc\",\n                  \"vl_utm_term\": \"string_abc\",\n                  \"vl_utm_content\": \"string_abc\",\n                  \"vl_referral_url\": \"string_abc\",\n                  \"vl_location_url\": \"string_abc\",\n                  \"vl_user_agent\": \"string_abc\",\n                  \"vl_ip_address\": \"127.0.0.1\",\n                  \"vl_visit_dt\": \"2020-02-14 12:00:00\"\n              }\n       ]\n   },\n   \"Client\": {\n       \"name\": \"Alexandr\",\n       \"phone\": \"+373-69-487523\",\n       \"email\": \"email1@gmail.com\",\n       \"client_ip\": \"127.0.0.1\",\n       \"uuid\": \"35009a79-1a05-49d7-b876-2b884d0f825b\"\n   }\n}",
           "type": "json"
         }
       ]
@@ -1532,6 +1747,14 @@
           },
           {
             "group": "Parameter",
+            "type": "string",
+            "size": "50",
+            "optional": true,
+            "field": "lead.client.uuid",
+            "description": "<p>Client uuid</p>"
+          },
+          {
+            "group": "Parameter",
             "type": "int",
             "size": "2",
             "allowedValues": [
@@ -1576,7 +1799,7 @@
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "\n{\n     \"lead\": {\n          \"client\": {\n              \"phone\": \"+37369333333\",\n              \"email\": \"email@email.com\",\n          },\n          \"uid\": \"WD6q53PO3b\",\n          \"status\": 14,\n          \"source_code\": \"JIVOCH\",\n          \"cabin\": \"E\",\n          \"adults\": 2,\n          \"children\": 2,\n          \"infants\": 2,\n          \"request_ip\": \"12.12.12.12\",\n          \"discount_id\": \"123123\",\n          \"user_agent\": \"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36\",\n          \"flight_id\": 12457,\n          \"user_language\": \"en-GB\",\n          \"flights\": [\n              {\n                  \"origin\": \"NYC\",\n                  \"destination\": \"LON\",\n                  \"departure\": \"2019-12-16\"\n              },\n              {\n                  \"origin\": \"LON\",\n                  \"destination\": \"NYC\",\n                  \"departure\": \"2019-12-17\"\n              },\n              {\n                  \"origin\": \"LON\",\n                  \"destination\": \"NYC\",\n                  \"departure\": \"2019-12-18\"\n              }\n          ]\n      }\n}",
+          "content": "\n{\n     \"lead\": {\n          \"client\": {\n              \"phone\": \"+37369333333\",\n              \"email\": \"email@email.com\",\n              \"uuid\" : \"af5246f1-094f-4fde-ada3-bd7298621613\"\n          },\n          \"uid\": \"WD6q53PO3b\",\n          \"status\": 14,\n          \"source_code\": \"JIVOCH\",\n          \"cabin\": \"E\",\n          \"adults\": 2,\n          \"children\": 2,\n          \"infants\": 2,\n          \"request_ip\": \"12.12.12.12\",\n          \"discount_id\": \"123123\",\n          \"user_agent\": \"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36\",\n          \"flight_id\": 12457,\n          \"user_language\": \"en-GB\",\n          \"flights\": [\n              {\n                  \"origin\": \"NYC\",\n                  \"destination\": \"LON\",\n                  \"departure\": \"2019-12-16\"\n              },\n              {\n                  \"origin\": \"LON\",\n                  \"destination\": \"NYC\",\n                  \"departure\": \"2019-12-17\"\n              },\n              {\n                  \"origin\": \"LON\",\n                  \"destination\": \"NYC\",\n                  \"departure\": \"2019-12-18\"\n              }\n          ]\n      }\n}",
           "type": "json"
         }
       ]
@@ -1585,7 +1808,7 @@
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "\nHTTP/1.1 200 OK\n{\n      \"status\": 200,\n      \"message\": \"OK\",\n      \"data\": {\n         \"lead\": {\n              \"id\": 370949,\n              \"uid\": \"WD6q53PO3b\",\n              \"gid\": \"63e1505f4a8a87e6651048e3e3eae4e1\",\n              \"client_id\": 1034,\n              \"client\": {\n                 \"uuid\": \"35009a79-1a05-49d7-b876-2b884d0f825b\"\n                 \"client_id\": 331968,\n                 \"first_name\": \"Johann\",\n                 \"middle_name\": \"Sebastian\",\n                 \"last_name\": \"Bach\",\n                 \"phones\": [\n                     \"+13152572166\"\n                 ],\n                 \"emails\": [\n                     \"example@test.com\",\n                     \"bah@gmail.com\"\n                 ]\n             }\n          }\n      }\n      \"request\": {\n          \"lead\": {\n             \"client\": {\n                  \"phone\": \"+37369636963\",\n                  \"email\": \"example@test.com\",\n              },\n              \"uid\": \"WD6q53PO3b\",\n              \"status\": 14,\n              \"source_code\": \"JIVOCH\",\n              \"cabin\": \"E\",\n              \"adults\": 2,\n              \"children\": 2,\n              \"infants\": 2,\n              \"request_ip\": \"12.12.12.12\",\n              \"discount_id\": \"123123\",\n              \"user_agent\": \"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36\",\n              \"flight_id\": 12457,\n              \"user_language\": \"en-GB\",\n              \"flights\": [\n                  {\n                      \"origin\": \"NYC\",\n                      \"destination\": \"LON\",\n                      \"departure\": \"2019-12-16\"\n                  },\n                  {\n                      \"origin\": \"LON\",\n                      \"destination\": \"NYC\",\n                      \"departure\": \"2019-12-17\"\n                  },\n                  {\n                      \"origin\": \"LON\",\n                      \"destination\": \"NYC\",\n                      \"departure\": \"2019-12-18\"\n                  }\n              ]\n          }\n      },\n      \"technical\": {\n          \"action\": \"v2/lead/create\",\n          \"response_id\": 11930215,\n          \"request_dt\": \"2019-12-30 12:22:20\",\n          \"response_dt\": \"2019-12-30 12:22:21\",\n          \"execution_time\": 0.055,\n          \"memory_usage\": 1394416\n      }\n}",
+          "content": "\nHTTP/1.1 200 OK\n{\n      \"status\": 200,\n      \"message\": \"OK\",\n      \"data\": {\n         \"lead\": {\n              \"id\": 370949,\n              \"uid\": \"WD6q53PO3b\",\n              \"gid\": \"63e1505f4a8a87e6651048e3e3eae4e1\",\n              \"client_id\": 1034,\n              \"client\": {\n                 \"uuid\": \"35009a79-1a05-49d7-b876-2b884d0f825b\"\n                 \"client_id\": 331968,\n                 \"first_name\": \"Johann\",\n                 \"middle_name\": \"Sebastian\",\n                 \"last_name\": \"Bach\",\n                 \"phones\": [\n                     \"+13152572166\"\n                 ],\n                 \"emails\": [\n                     \"example@test.com\",\n                     \"bah@gmail.com\"\n                 ]\n             }\n          }\n      }\n      \"request\": {\n          \"lead\": {\n             \"client\": {\n                  \"phone\": \"+37369636963\",\n                  \"email\": \"example@test.com\",\n                  \"uuid\" : \"af5246f1-094f-4fde-ada3-bd7298621613\"\n              },\n              \"uid\": \"WD6q53PO3b\",\n              \"status\": 14,\n              \"source_code\": \"JIVOCH\",\n              \"cabin\": \"E\",\n              \"adults\": 2,\n              \"children\": 2,\n              \"infants\": 2,\n              \"request_ip\": \"12.12.12.12\",\n              \"discount_id\": \"123123\",\n              \"user_agent\": \"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36\",\n              \"flight_id\": 12457,\n              \"user_language\": \"en-GB\",\n              \"flights\": [\n                  {\n                      \"origin\": \"NYC\",\n                      \"destination\": \"LON\",\n                      \"departure\": \"2019-12-16\"\n                  },\n                  {\n                      \"origin\": \"LON\",\n                      \"destination\": \"NYC\",\n                      \"departure\": \"2019-12-17\"\n                  },\n                  {\n                      \"origin\": \"LON\",\n                      \"destination\": \"NYC\",\n                      \"departure\": \"2019-12-18\"\n                  }\n              ]\n          }\n      },\n      \"technical\": {\n          \"action\": \"v2/lead/create\",\n          \"response_id\": 11930215,\n          \"request_dt\": \"2019-12-30 12:22:20\",\n          \"response_dt\": \"2019-12-30 12:22:21\",\n          \"execution_time\": 0.055,\n          \"memory_usage\": 1394416\n      }\n}",
           "type": "json"
         }
       ]
@@ -2445,6 +2668,321 @@
     },
     "filename": "webapi/modules/v2/controllers/OrderController.php",
     "groupTitle": "Orders"
+  },
+  {
+    "type": "post",
+    "url": "/v1/quote/create",
+    "title": "Create Quote",
+    "version": "0.1.0",
+    "name": "CreateQuote",
+    "group": "Quotes",
+    "permission": [
+      {
+        "name": "Authorized User"
+      }
+    ],
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>Credentials <code>base64_encode(Username:Password)</code></p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n    \"Authorization\": \"Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==\",\n    \"Accept-Encoding\": \"Accept-Encoding: gzip, deflate\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "apiKey",
+            "description": "<p>API Key for Project</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "Lead",
+            "description": "<p>Lead data array</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "Lead.uid",
+            "description": "<p>uid</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "Lead.market_info_id",
+            "description": "<p>market_info_id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "Lead.bo_flight_id",
+            "description": "<p>bo_flight_id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "float",
+            "optional": true,
+            "field": "Lead.final_profit",
+            "description": "<p>final_profit</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "Quote",
+            "description": "<p>Quote data array</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "Quote.uid",
+            "description": "<p>uid</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "Quote.record_locator",
+            "description": "<p>record_locator</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "Quote.pcc",
+            "description": "<p>pcc</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "Quote.cabin",
+            "description": "<p>cabin</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "Quote.gds",
+            "description": "<p>gds</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "Quote.trip_type",
+            "description": "<p>trip_type</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "Quote.main_airline_code",
+            "description": "<p>main_airline_code</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "Quote.reservation_dump",
+            "description": "<p>reservation_dump</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": true,
+            "field": "Quote.status",
+            "description": "<p>status</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "Quote.check_payment",
+            "description": "<p>check_payment</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "Quote.fare_type",
+            "description": "<p>fare_type</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "Quote.employee_name",
+            "description": "<p>employee_name</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "bool",
+            "optional": true,
+            "field": "Quote.created_by_seller",
+            "description": "<p>created_by_seller</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "object",
+            "optional": false,
+            "field": "QuotePrice[]",
+            "description": "<p>QuotePrice data array</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "QuotePrice.uid",
+            "description": "<p>uid</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": true,
+            "field": "QuotePrice.passenger_type",
+            "description": "<p>passenger_type</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "float",
+            "optional": true,
+            "field": "QuotePrice.selling",
+            "description": "<p>selling</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "float",
+            "optional": true,
+            "field": "QuotePrice.net",
+            "description": "<p>net</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "float",
+            "optional": true,
+            "field": "QuotePrice.fare",
+            "description": "<p>fare</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "float",
+            "optional": true,
+            "field": "QuotePrice.taxes",
+            "description": "<p>taxes</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "float",
+            "optional": true,
+            "field": "QuotePrice.mark_up",
+            "description": "<p>mark_up</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "float",
+            "optional": true,
+            "field": "QuotePrice.extra_mark_up",
+            "description": "<p>extra_mark_up</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "float",
+            "optional": true,
+            "field": "QuotePrice.service_fee",
+            "description": "<p>service_fee</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Request-Example:",
+          "content": "{\n     \"apiKey\": \"d190c378e131ccfd8a889c8ee8994cb55f22fbeeb93f9b99007e8e7ecc24d0dd\",\n     \"Lead\": {\n         \"uid\": \"5de486f15f095\",\n         \"market_info_id\": 52,\n         \"bo_flight_id\": 0,\n         \"final_profit\": 0\n     },\n     \"Quote\": {\n         \"uid\": \"5f207ec201b99\",\n         \"record_locator\": null,\n         \"pcc\": \"0RY9\",\n         \"cabin\": \"E\",\n         \"gds\": \"S\",\n         \"trip_type\": \"RT\",\n         \"main_airline_code\": \"UA\",\n         \"reservation_dump\": \"1 KL6123V 15OCT Q MCOAMS SS1   801P 1100A  16OCT F /DCKL /E \\n 2 KL1009L 18OCT S AMSLHR SS1  1015A 1045A /DCKL /E\",\n         \"status\": 1,\n         \"check_payment\": \"1\",\n         \"fare_type\": \"TOUR\",\n         \"employee_name\": \"Barry\",\n         \"created_by_seller\": false\n     },\n     \"QuotePrice\": [\n         {\n             \"uid\": \"expert.5f207ec222c86\",\n             \"passenger_type\": \"ADT\",\n             \"selling\": 696.19,\n             \"net\": 622.65,\n             \"fare\": 127,\n             \"taxes\": 495.65,\n             \"mark_up\": 50,\n             \"extra_mark_up\": 0,\n             \"service_fee\": 23.54\n         }\n     ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "string",
+            "optional": false,
+            "field": "status",
+            "description": "<p>Status</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "string",
+            "optional": false,
+            "field": "action",
+            "description": "<p>Action</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "integer",
+            "optional": false,
+            "field": "response_id",
+            "description": "<p>Response Id</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "DateTime",
+            "optional": false,
+            "field": "request_dt",
+            "description": "<p>Request Date &amp; Time</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "DateTime",
+            "optional": false,
+            "field": "response_dt",
+            "description": "<p>Response Date &amp; Time</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "HTTP/1.1 200 OK\n {\n     \"status\": \"Success\",\n     \"action\": \"v1/quote/create\",\n     \"response_id\": 11926893,\n     \"request_dt\": \"2020-09-22 05:05:54\",\n     \"response_dt\": \"2020-09-22 05:05:54\",\n     \"execution_time\": 0.193,\n     \"memory_usage\": 1647440\n }",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "examples": [
+        {
+          "title": "Error-Response:",
+          "content": "HTTP/1.1 404 Not Found\n{\n    \"name\": \"Not Found\",\n    \"message\": \"Already Exist Quote UID: 5f207ec201b19\",\n    \"code\": 2,\n    \"status\": 404,\n    \"type\": \"yii\\\\web\\\\NotFoundHttpException\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "webapi/modules/v1/controllers/QuoteController.php",
+    "groupTitle": "Quotes"
   },
   {
     "type": "post",

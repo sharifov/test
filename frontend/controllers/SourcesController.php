@@ -42,6 +42,12 @@ class SourcesController extends FController
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
+    public function init(): void
+    {
+        parent::init();
+        $this->layoutCrud();
+    }
+
     public function actionSetDefault()
     {
         $id = Yii::$app->request->post('id');

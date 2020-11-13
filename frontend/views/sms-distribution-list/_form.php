@@ -15,7 +15,7 @@ use yii\widgets\ActiveForm;
 
     <div class="col-md-6">
 
-        <?= $form->field($model, 'sdl_project_id')->dropDownList(\common\models\Project::getList(), ['prompt' => '-']) ?>
+        <?= $form->field($model, 'sdl_project_id')->dropDownList(\common\models\Project::getSmsEnabledList(), ['prompt' => '-']) ?>
 
         <div class="row">
             <div class="col-md-6">

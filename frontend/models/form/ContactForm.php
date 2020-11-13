@@ -2,6 +2,7 @@
 
 namespace frontend\models\form;
 
+use common\models\Project;
 use sales\forms\CompositeForm;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
@@ -50,6 +51,7 @@ class ContactForm extends CompositeForm
     public $created;
     public $updated;
     public $uuid;
+    public $cl_project_id;
 
     /**
      * ContactForm constructor.
@@ -92,6 +94,9 @@ class ContactForm extends CompositeForm
             [['first_name'], 'required', 'when' => static function (self $model) {
                 return (bool)$model->is_company === false;
             }],
+
+            ['cl_project_id', 'integer'],
+            ['cl_project_id', 'exist', 'skipOnEmpty' => true, 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['cl_project_id' => 'id']],
         ];
     }
 

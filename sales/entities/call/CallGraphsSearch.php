@@ -42,6 +42,7 @@ use DateTime;
  * @property mixed $completeIncomingCallsQuery
  * @property string $partitionsByYears
  * @property \yii\data\SqlDataProvider $totalCalls
+ * @property-read \yii\data\SqlDataProvider $callLogStats
  * @property string $timeZone
  */
 class CallGraphsSearch extends CallLogSearch
@@ -93,6 +94,9 @@ class CallGraphsSearch extends CallLogSearch
         self::DATE_FORMAT_HOURS_DAYS,
         self::DATE_FORMAT_WEEKDAYS
     ];
+
+    public const GROUP_FORMAT_HOURS = 'H:00:00';
+    public const GROUP_FORMAT_DAYS_HOURS = 'Y-m-d H:00';
 
     public const DATE_FORMAT_LIST = [
         self::DATE_FORMAT_HOURS_DAYS => '%H:00',
@@ -163,7 +167,7 @@ class CallGraphsSearch extends CallLogSearch
         $this->createTimeRange = date('Y-m-d 00:00:00', strtotime(self::CREATE_TIME_START_DEFAULT)) . ' - ' . date('Y-m-d 23:59:59');
         $this->betweenHoursFrom = 0;
         $this->betweenHoursTo = 24;
-        $this->recordingDurationFrom = 30;
+        $this->recordingDurationFrom = 0;
         $this->timeZone = $this->timeZone ?? Yii::$app->user->identity->timezone;
     }
 
@@ -262,11 +266,12 @@ class CallGraphsSearch extends CallLogSearch
             $this->createTimeEnd = date('Y-m-d H:i:59', $this->createTimeEnd);
         } else {
             $this->createTimeStart = date('Y-m-d 00:00:00', strtotime(self::CREATE_TIME_START_DEFAULT));
-            $this->createTimeEnd = date('Y-m-d H:i:s');
+            $this->createTimeEnd = date('Y-m-d H:i:59');
             $this->createTimeRange = $this->createTimeStart . ' - ' . $this->createTimeEnd;
         }
 
-        $timeZone = Employee::getUtcOffsetDst($this->timeZone, $this->createTimeStart);
+        //$timeZone = Employee::getUtcOffsetDst($this->timeZone, $this->createTimeStart);
+        $timeZone = $this->getTimeZoneOffset();
 
         $parentQuery = self::find()->select([
             ''. $this->setGroupingParam() .' AS `group`',
@@ -301,7 +306,7 @@ class CallGraphsSearch extends CallLogSearch
 
         if ($this->cl_user_id) {
             $parentQuery->andWhere(['cl_user_id' => $this->cl_user_id]);
-        } else if ($this->userGroupIds) {
+        } elseif ($this->userGroupIds) {
             $userIdsByGroup = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id) as cl_user_id'])->where(['ugs_group_id' => $this->userGroupIds])->asArray()->all();
             if ($userIdsByGroup) {
                 $parentQuery->andWhere(['in', ['cl_user_id'], $userIdsByGroup]);
@@ -360,7 +365,7 @@ class CallGraphsSearch extends CallLogSearch
 
         if ($this->cl_user_id) {
             $childQuery->andWhere(['cl_user_id' => $this->cl_user_id]);
-        } else if ($this->userGroupIds) {
+        } elseif ($this->userGroupIds) {
             $userIdsByGroup = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id) as cl_user_id'])->where(['ugs_group_id' => $this->userGroupIds])->asArray()->all();
             if ($userIdsByGroup) {
                 $childQuery->andWhere(['in', ['cl_user_id'], $userIdsByGroup]);
@@ -392,216 +397,26 @@ class CallGraphsSearch extends CallLogSearch
 
     private function setGroupingParam()
     {
-        $timeZone = Employee::getUtcOffsetDst($this->timeZone, $this->createTimeStart);
+        //$timeZone = Employee::getUtcOffsetDst($this->timeZone, $this->createTimeStart);
+        $timeZone = $this->getTimeZoneOffset();
 
         $dateFormat = $this->getDateFormat($this->callGraphGroupBy) ?? $this->getDefaultDateFormat();
         if ((int)$this->callGraphGroupBy === self::DATE_FORMAT_WEEKS) {
-            return "concat(str_to_date(date_format(convert_tz(cl_call_created_dt, '+00:00', '".$timeZone."'), '%Y %v Monday'), '%x %v %W'), ' - ', str_to_date(date_format(convert_tz(cl_call_created_dt, '+00:00', '".$timeZone."'), '%Y %v Sunday'), '%x %v %W'))";
-        } if ((int)$this->callGraphGroupBy === self::DATE_FORMAT_WEEKDAYS){
+            return "concat(str_to_date(date_format(convert_tz(cl_call_created_dt, '+00:00', '".$timeZone."'), '%Y %v Monday'), '%x %v %W'), '/', str_to_date(date_format(convert_tz(cl_call_created_dt, '+00:00', '".$timeZone."'), '%Y %v Sunday'), '%x %v %W'))";
+        }
+        if ((int)$this->callGraphGroupBy === self::DATE_FORMAT_WEEKDAYS) {
             return "WEEKDAY(convert_tz(cl_call_created_dt, '+00:00', '".$timeZone."'))";
         } else {
             return "date_format(convert_tz(cl_call_created_dt, '+00:00', '".$timeZone."'), '$dateFormat')";
         }
     }
 
-    /**
-     * @return SqlDataProvider
-     */
-    /*public function getTotalCalls(): SqlDataProvider
-    {
-        $dateFormat = $this->getDateFormat($this->callGraphGroupBy) ?? $this->getDefaultDateFormat();
-
-        $query = self::find()->select([
-            'sum(incoming) as incoming',
-            'sum(outgoing) as outgoing',
-            'sum(incoming + outgoing) as total_calls',
-            'sum(incoming_duration_sum) as in_rec_duration',
-            'sum(outgoing_duration_sum) as out_rec_duration',
-            'sum(tbl.incoming_duration_sum + tbl.outgoing_duration_sum) as total_rec_duration',
-            'coalesce(sum(incoming_duration_sum) / sum(incoming), 0) as incoming_duration_avg',
-            'coalesce(sum(outgoing_duration_sum) / sum(outgoing), 0) as outgoing_duration_avg',
-            'coalesce(sum(tbl.incoming_duration_sum + tbl.outgoing_duration_sum) / sum(incoming + outgoing),0) as total_rec_duration_avg',
-            'sum(case when incoming_duration_sum > 0 then 1 else 0 end) as \'inc_dur_count\'',
-            'sum(case when outgoing_duration_sum > 0 then 1 else 0 end) as \'out_dur_count\''
-        ]);
-
-        if ((int)$this->callGraphGroupBy === self::DATE_FORMAT_WEEKS) {
-            $query->addSelect(["concat(str_to_date(date_format(created, '%Y %v Monday'), '%x %v %W'), ' - ', str_to_date(date_format(created, '%Y %v Sunday'), '%x %v %W')) as created_formatted"]);
-        } else {
-            $query->addSelect(["date_format(`created`, '$dateFormat') as created_formatted"]);
-        }
-
-        if ($this->createTimeRange) {
-            $this->createTimeStart = date('Y-m-d H:i:00', $this->createTimeStart);
-            $this->createTimeEnd = date('Y-m-d H:i:59', $this->createTimeEnd);
-        } else {
-            $this->createTimeStart = date('Y-m-d 00:00:00', strtotime(self::CREATE_TIME_START_DEFAULT));
-            $this->createTimeEnd = date('Y-m-d H:i:s');
-            $this->createTimeRange = $this->createTimeStart . ' - ' . $this->createTimeEnd;
-        }
-
-        if (!$this->cl_duration) {
-            $this->cl_duration = 2;
-        }
-
-        $incomingComplete = $this->getCompleteIncomingCallsQuery();
-        $incomingNotAnswered = $this->getNotAnsweredIncomingCallsQuery();
-        $outgoingComplete = $this->getCompleteOutgoingCallsQuery();
-        $outgoingNotAnswered = $this->getNotAnsweredOutgoingCallsQuery();
-
-        $query->from(['tbl' => $incomingComplete->union($incomingNotAnswered)
-            ->union($outgoingComplete)
-            ->union($outgoingNotAnswered)
-        ])->groupBy(['created_formatted']);
-
-        if ($this->callGraphGroupBy === self::DATE_FORMAT_HOURS_DAYS) {
-            $order = [
-                'created_formatted' => SORT_ASC,
-            ];
-        } else {
-            $order = [
-                'created' => SORT_ASC,
-            ];
-        }
-        $query->orderBy($order);
-
-        return new SqlDataProvider(['sql' => $query->createCommand()->rawSql, 'pagination' => false]);
-    }
-
-    private function getCompleteIncomingCallsQuery()
-    {
-        $query = CallLog::find()
-            ->select([
-                'count(cl_id) as incoming',
-                'coalesce(0) as outgoing',
-                'coalesce(sum(cl_duration), 0) as incoming_duration_sum',
-                'coalesce(0) as outgoing_duration_sum'
-            ])
-            ->andWhere(['cl_type_id' => CallLogType::IN])
-            ->andWhere(['cl_status_id' => CallLogStatus::COMPLETE])
-            ->andWhere(['<>','cl_category_id', CallLogCategory::TRANSFER_CALL]);
-
-        if ($this->recordingDurationFrom) {
-            $query->andWhere(['>=', 'cl_duration', $this->recordingDurationFrom]);
-        }
-
-        if ($this->recordingDurationTo) {
-            $query->andWhere(['<=', 'cl_duration', $this->recordingDurationTo]);
-        }
-
-        return $this->applySearchQuery($query);
-    }
-
-    private function getNotAnsweredIncomingCallsQuery()
-    {
-        $query = CallLog::find()
-            ->select([
-                'count(cl_id) as incoming',
-                'coalesce(0) as outgoing',
-                'coalesce(sum(cl_duration), 0) as incoming_duration_sum',
-                'coalesce(0) as outgoing_duration_sum'
-            ])
-            ->andWhere(['cl_type_id' => CallLogType::IN])
-            ->andWhere(['cl_status_id' => [CallLogStatus::BUSY, CallLogStatus::NOT_ANSWERED]])
-            ->andWhere(['<>','cl_category_id', CallLogCategory::TRANSFER_CALL]);
-
-        if ($this->recordingDurationFrom) {
-            $query->andWhere(['>=', 'cl_duration', $this->recordingDurationFrom]);
-        }
-
-        if ($this->recordingDurationTo) {
-            $query->andWhere(['<=', 'cl_duration', $this->recordingDurationTo]);
-        }
-
-        return $this->applySearchQuery($query);
-    }
-
-    private function getCompleteOutgoingCallsQuery()
-    {
-        $query = CallLog::find()
-            ->select([
-                'coalesce(0) as incoming',
-                'count(cl_id) as outgoing',
-                'coalesce(0) as incoming_duration_sum',
-                'coalesce(sum(cl_duration), 0) as outgoing_duration_sum'
-            ])
-            ->andWhere(['cl_type_id' => CallLogType::OUT])
-            ->andWhere(['cl_status_id' => CallLogStatus::COMPLETE])
-            ->andWhere(['<>','cl_category_id', CallLogCategory::TRANSFER_CALL]);
-
-        if ($this->recordingDurationFrom) {
-            $query->andWhere(['>=', 'cl_duration', $this->recordingDurationFrom]);
-        }
-
-        if ($this->recordingDurationTo) {
-            $query->andWhere(['<=', 'cl_duration', $this->recordingDurationTo]);
-        }
-
-        return $this->applySearchQuery($query);
-    }
-
-    private function getNotAnsweredOutgoingCallsQuery()
-    {
-        $query = CallLog::find()
-            ->select([
-                'coalesce(0) as incoming',
-                'count(cl_id) as outgoing',
-                'coalesce(0) as incoming_duration_sum',
-                'coalesce(sum(cl_duration), 0) as outgoing_duration_sum'
-            ])
-            ->andWhere(['cl_type_id' => CallLogType::OUT])
-            ->andWhere(['cl_status_id' => [CallLogStatus::BUSY, CallLogStatus::NOT_ANSWERED]])
-            ->andWhere(['<>','cl_category_id', CallLogCategory::TRANSFER_CALL]);
-
-        return $this->applySearchQuery($query);
-    }
-
-    private function applySearchQuery($query)
-    {
-        $timeZone = Employee::getUtcOffsetDst($this->timeZone, date('Y-m-d'));
-
-        $query->from([new \yii\db\Expression(CallLog::tableName(). ' PARTITION('. $this->getPartitionsByYears() .') ')]);
-
-        $query->addSelect(["date_format(convert_tz(cl_call_created_dt, '+00:00', '$timeZone'), '%Y-%m-%d %H:00:00') as created"]);
-
-        $query->andWhere(['between', "convert_tz(cl_call_created_dt, '+00:00', '".$timeZone."')", $this->createTimeStart, $this->createTimeEnd]);
-
-        if ($this->projectIds) {
-            $query->andWhere(['cl_project_id' => $this->projectIds]);
-        }
-
-        if ($this->dep_ids) {
-            $query->andWhere(['cl_department_id' => $this->dep_ids]);
-        }
-
-        if ($this->cl_user_id) {
-            $query->andWhere(['cl_user_id' => $this->cl_user_id]);
-        } else if ($this->userGroupIds) {
-            $userIdsByGroup = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id) as cl_user_id'])->where(['ugs_group_id' => $this->userGroupIds])->asArray()->all();
-            if ($userIdsByGroup) {
-                $query->andWhere(['in', ['cl_user_id'], $userIdsByGroup]);
-            }
-        }
-
-        if ($this->betweenHoursFrom) {
-            $query->andWhere(['>=', 'hour(convert_tz(cl_call_created_dt, \'+00:00\', \''.$timeZone.'\'))', $this->betweenHoursFrom]);
-        }
-
-        if ($this->betweenHoursTo) {
-            $query->andWhere(['<=', 'hour(convert_tz(cl_call_created_dt, \'+00:00\', \''.$timeZone.'\'))', $this->betweenHoursTo]);
-        }
-
-        $query->groupBy('created')->orderBy('created');
-
-        return $query;
-    }*/
-
     private function getPartitionsByYears()
     {
         $yFrom = date('y', strtotime($this->createTimeStart));
         $yTo = date('y', strtotime($this->createTimeEnd));
         $partitions = 'y';
-        if ($yFrom == $yTo){
+        if ($yFrom == $yTo) {
             $nextYear = (int)$yFrom + 1 ;
             $partitions = 'y' . $nextYear ;
         } else {
@@ -675,4 +490,13 @@ class CallGraphsSearch extends CallLogSearch
         return self::DATE_FORMAT_LIST[self::DATE_FORMAT_DAYS];
     }
 
+    private function getTimeZoneOffset()
+    {
+        $timezone = new \DateTimeZone($this->timeZone);
+        $seconds = $timezone->getOffset(new \DateTime);
+        $sign = ($seconds > 0) ? '+' : '-';
+        $hours = floor(abs($seconds) / 3600);
+        $minutes = floor((abs($seconds) / 60) % 60);
+        return $sign . sprintf("%02d:%02d", $hours, $minutes);
+    }
 }

@@ -33,6 +33,7 @@ class FilterShortCodeToIdUrl implements Filter
         $this->processLead();
         $this->processCase();
         $this->processQaTask();
+        $this->processChat();
         return $this->content;
     }
 
@@ -56,4 +57,11 @@ class FilterShortCodeToIdUrl implements Filter
             return $matches[1] . ' ' . $this->host . '/qa-task/qa-task/view?gid=' . $matches[2];
         }, $this->content);
     }
+
+	private function processChat(): void
+	{
+		$this->content = preg_replace_callback('|{chat-([\d]+)}|iU', function ($matches) {
+			return $this->host . '/client-chat/index?chid=' . $matches[1];
+		}, $this->content);
+	}
 }

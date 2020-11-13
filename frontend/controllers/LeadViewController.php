@@ -13,7 +13,7 @@ use sales\access\ClientInfoAccess;
 use sales\access\EmployeeGroupAccess;
 use sales\access\LeadPreferencesAccess;
 use sales\auth\Auth;
-use sales\forms\lead\ClientCreateForm;
+use sales\services\client\ClientCreateForm;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\LeadPreferencesForm;
 use sales\forms\lead\PhoneCreateForm;

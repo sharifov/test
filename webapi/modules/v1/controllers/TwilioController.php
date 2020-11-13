@@ -13,6 +13,7 @@ use modules\twilio\src\entities\conferenceLog\ConferenceLog;
 use modules\twilio\src\services\sms\SmsCommunicationService;
 use sales\helpers\app\AppHelper;
 use sales\helpers\UserCallIdentity;
+use sales\model\call\services\RepeatMessageCallJobCreator;
 use sales\model\user\entity\userStatus\UserStatus;
 use sales\model\phoneList\entity\PhoneList;
 use Twilio\TwiML\MessagingResponse;
@@ -370,6 +371,7 @@ class TwilioController extends ApiBaseNoAuthController
 
             $responseTwml = new VoiceResponse();
 
+            /** @var Call $call */
             if ($call) {
                 //$call->c_call_status = Call::TW_STATUS_QUEUE;
                 //$call->setStatusByTwilioStatus($call->c_call_status);
@@ -388,7 +390,14 @@ class TwilioController extends ApiBaseNoAuthController
 
                 if ($type === 'user') {
                     if ($id) {
+                        $depId = (int)Yii::$app->request->post('dep_id');
+                        if ($depId) {
+                            $call->c_dep_id = $depId;
+                        }
                         $call->c_created_user_id = $id;
+                        $data = $call->getData();
+                        $data->repeat->reset();
+                        $call->setData($data);
                         if (!$call->save()) {
                             Yii::error(VarDumper::dumpAsString($call->errors), 'API:Twilio:RedirectCall:Call:update:1');
                         }
@@ -406,6 +415,8 @@ class TwilioController extends ApiBaseNoAuthController
 
                     $url_music = 'https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3';
                     $responseTwml->play($url_music, ['loop' => 0]);
+
+
 
                 } elseif ($type === 'department') {
                     $call->c_created_user_id = null;
@@ -469,6 +480,25 @@ class TwilioController extends ApiBaseNoAuthController
                         $job->call_id = $call->c_id;
                         $job->delay = 0;
                         $jobId = Yii::$app->queue_job->delay(7)->priority(80)->push($job);
+
+                        try {
+                            if (!$jobId) {
+                                throw new \DomainException('Not created CallQueueJob');
+                            }
+                            $dParams = @json_decode($depPhone->dpp_params, true);
+                            $repeatParams = $dParams['queue_repeat'] ?? [];
+                            if ($repeatParams) {
+                                (new RepeatMessageCallJobCreator())->create($call, $depPhone->dpp_id, $repeatParams);
+                            }
+                        } catch (\Throwable $e) {
+                            Yii::error([
+                                'message' => 'Create repeat call job Error.',
+                                'useCase' => 'Transfer to department use case.',
+                                'error' => $e->getMessage(),
+                                'call' => $call->getAttributes(),
+                            ], 'CallQueueRepeatMessageJob::create');
+                        }
+
                     } else {
                         throw new Exception('Not found DepartmentPhoneProject', 10);
                     }

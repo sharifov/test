@@ -17,6 +17,7 @@ use yii\bootstrap\BootstrapAsset;
 use yii\bootstrap\BootstrapPluginAsset;
 use frontend\themes\gentelella\assets\AssetLeadCommunication;
 use frontend\themes\gentelella_v2\assets\ThemeAsset;
+
 $params = array_merge(
     require __DIR__ . '/../../common/config/params.php',
     require __DIR__ . '/../../common/config/params-local.php',
@@ -25,10 +26,11 @@ $params = array_merge(
 );
 
 $appVersion = $params['release']['version'] ?? '';
+$gitHash = $params['release']['git_hash'] ?? '';
 
 return [
     'id' => 'app-frontend',
-    'name'  => 'Sales',
+    'name'  => 'Sales CRM',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'controllerNamespace' => 'frontend\controllers',
@@ -145,11 +147,11 @@ return [
                 '*' => [
                     'class' => 'yii\i18n\DbMessageSource',
                     'db' => 'db',
-                    //'sourceLanguage' => 'en-US', // Developer language
+                    'sourceLanguage' => 'en-US', // Developer language
                     'sourceMessageTable' => '{{%language_source}}',
                     'messageTable' => '{{%language_translate}}',
-                    //'cachingDuration' => 86400,
-                    //'enableCaching' => true,
+                    'cachingDuration' => 3600,
+                    'enableCaching' => true,
                 ],
                 'yii2mod.rbac' => [
                     'class' => 'yii\i18n\PhpMessageSource',
@@ -158,42 +160,42 @@ return [
             ],
         ],
 
-		'assetManager' => [
-			'forceCopy' => false,
-			'appendTimestamp' => false,
+        'assetManager' => [
+            'forceCopy' => false,
+            'appendTimestamp' => false,
             'hashCallback' => static function ($path) use ($appVersion) {
                 return hash('md4', $path . $appVersion);
             },
-			'bundles' => [
-				BootstrapAsset::class => [
-					'sourcePath' => '@npm/bootstrap/dist',
-					'css' => [
-						'css/bootstrap.css'
-					],
-				],
-				BootstrapPluginAsset::class => [
-					'sourcePath' => '@npm/bootstrap/dist',
-					'js' => [
-						'js/bootstrap.bundle.js'
-					],
-					'depends' => [
-						JqueryAsset::class,
-						\yii\bootstrap4\BootstrapAsset::class,
-					],
-				],
-				AssetLeadCommunication::class => [
-					'basePath' => '@webroot',
-					'baseUrl' => '@web',
-					'js' => [
-						'https://cdnjs.cloudflare.com/ajax/libs/scrollup/2.4.1/jquery.scrollUp.min.js',
-						'/js/sms_counter.min.js',
-					],
-					'depends' => [
-						ThemeAsset::class,
-					]
-				]
-			],
-		],
+            'bundles' => [
+                BootstrapAsset::class => [
+                    'sourcePath' => '@npm/bootstrap/dist',
+                    'css' => [
+                        'css/bootstrap.css'
+                    ],
+                ],
+                BootstrapPluginAsset::class => [
+                    'sourcePath' => '@npm/bootstrap/dist',
+                    'js' => [
+                        'js/bootstrap.bundle.js'
+                    ],
+                    'depends' => [
+                        JqueryAsset::class,
+                        \yii\bootstrap4\BootstrapAsset::class,
+                    ],
+                ],
+                AssetLeadCommunication::class => [
+                    'basePath' => '@webroot',
+                    'baseUrl' => '@web',
+                    'js' => [
+                        'https://cdnjs.cloudflare.com/ajax/libs/scrollup/2.4.1/jquery.scrollUp.min.js',
+                        '/js/sms_counter.min.js',
+                    ],
+                    'depends' => [
+                        ThemeAsset::class,
+                    ]
+                ]
+            ],
+        ],
     ],
     'modules' => [
         'gridview' =>  [
@@ -213,7 +215,7 @@ return [
             'class'                     => \lajax\translatemanager\Module::class,
             'root'                      => [/*'@frontend/views/',*/ '@frontend/../sales/model/clientChat/'],               // The root directory of the project scan.
             'scanRootParentDirectory'   => true,
-            'layout'                    => '@frontend/themes/gentelella_v2/views/layouts/main',         // Name of the used layout. If using own layout use 'null'.
+            'layout'                    => '@frontend/themes/gentelella_v2/views/layouts/main_crud',         // Name of the used layout. If using own layout use 'null'.
             'allowedIPs'                => ['*'],               // 127.0.0.1 IP addresses from which the translation interface is accessible.
             'roles'                     => [Employee::ROLE_SUPER_ADMIN, Employee::ROLE_ADMIN],               // For setting access levels to the translating interface.
             'tmpDir'                    => '@runtime',         // Writable directory for the client-side temporary language files.
@@ -250,7 +252,7 @@ return [
         ],
         'rbac' => [
             'class' => 'yii2mod\rbac\Module',
-            'layout' => '@frontend/themes/gentelella_v2/views/layouts/main',
+            'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
             'as access' => [
                 'class' => yii2mod\rbac\filters\AccessControl::class,
                 'rules' => [
@@ -291,25 +293,36 @@ return [
         'qa-task' => [
             'class' => QaTaskModule::class,
         ],
-		'rbac-import-export' => [
-			'class' => RbacImportExportModule::class,
-			'as access' => [
-				'class' => yii2mod\rbac\filters\AccessControl::class,
-				'rules' => [
-					[
-						'allow' => true,
-						'roles' => [Employee::ROLE_SUPER_ADMIN],
-					]
-				]
-			],
-			'components' => [
-				'authManager' => [
-					'class' => DbManager::class
-				]
-			]
-		],
+        'rbac-import-export' => [
+            'class' => RbacImportExportModule::class,
+            'as access' => [
+                'class' => yii2mod\rbac\filters\AccessControl::class,
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'roles' => [Employee::ROLE_SUPER_ADMIN],
+                    ]
+                ]
+            ],
+            'components' => [
+                'authManager' => [
+                    'class' => DbManager::class
+                ]
+            ]
+        ],
         'mail' => [
             'class' => EmailModule::class,
+        ],
+        'virtual-cron' => [
+            'class' => \kivork\VirtualCron\VirtualCronModule::class,
+            'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud.php',
+            'queueName' => 'queue_virtual_cron', //Yii:$app->queue_cron
+            'userTable' => 'employees',
+            'userIdColumn' => 'id',
+            'userClass' => '\common\models\Employee',
+            'userFieldDisplay' => 'username', // for gridview, detail vew
+            'cronTable' => 'cron_scheduler', //schedulers list table name
+            'roles' => ['admin', 'superadmin'], //for roles can manage module
         ],
     ],
     'as beforeRequest' => [
@@ -331,8 +344,8 @@ return [
                 'options' => ['class' => 'table-responsive'],
                 //'tableOptions' => ['class' => 'table table-bordered table-condensed table-hover'],
             ],
-			\yii\widgets\LinkPager::class => \yii\bootstrap4\LinkPager::class,
-		],
+            \yii\widgets\LinkPager::class => \yii\bootstrap4\LinkPager::class,
+        ],
     ],
 
     /*'view' => [

@@ -32,4 +32,7 @@ class ClientCodeException
     public const CLIENT_EMAILS_EMPTY = Module::CLIENT . 503;
 
     public const CLIENT_UUID_EMPTY = Module::CLIENT . 504;
+
+    public const API_CLIENT_INFO_NOT_FOUND_DATA_ON_REQUEST = Module::CLIENT . 601;
+    public const API_CLIENT_INFO_VALIDATE = Module::CLIENT . 602;
 }

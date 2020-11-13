@@ -9,6 +9,7 @@ use sales\entities\cases\Cases;
 use sales\model\phoneList\entity\PhoneList;
 use sales\services\cases\CasesCommunicationService;
 use sales\services\cases\CasesCreateService;
+use sales\services\client\ClientCreateForm;
 use sales\services\internalContact\InternalContactService;
 use Yii;
 use sales\services\TransactionManager;
@@ -76,10 +77,14 @@ class SmsIncomingService
 
         	$isInternalPhone = PhoneList::find()->byPhone($form->si_phone_from)->enabled()->exists();
 
+            $clientForm = ClientCreateForm::createWidthDefaultName();
+            $clientForm->projectId = $form->si_project_id;
+            $clientForm->typeCreate = Client::TYPE_CREATE_SMS;
+
         	if (!$isInternalPhone) {
-            	$client = $this->clients->getOrCreateByPhones([new PhoneCreateForm(['phone' => $form->si_phone_from])]);
+            	$client = $this->clients->getOrCreateByPhones([new PhoneCreateForm(['phone' => $form->si_phone_from])], $clientForm);
 			} else {
-        		$client = $this->clients->getExistingOrCreateEmptyObj([new PhoneCreateForm(['phone' => $form->si_phone_from])]);
+        		$client = $this->clients->getExistingOrCreateEmptyObj([new PhoneCreateForm(['phone' => $form->si_phone_from])], $clientForm);
 			}
 
             $contact = $this->internalContactService->findByPhone($form->si_phone_to, $form->si_project_id);

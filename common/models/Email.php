@@ -849,4 +849,14 @@ class Email extends \yii\db\ActiveRecord
         }
         return $value;
     }
+
+    public function isCreatedUser(int $userId): bool
+    {
+        return $this->e_created_user_id === $userId;
+    }
+
+    public function hasCreatedUser(): bool
+    {
+        return $this->e_created_user_id ? true : false;
+    }
 }

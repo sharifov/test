@@ -2,6 +2,7 @@
 
 namespace sales\services\cases;
 
+use common\models\Client;
 use sales\entities\cases\Cases;
 use sales\forms\cases\CasesCreateByChatForm;
 use sales\forms\cases\CasesCreateByWebForm;
@@ -11,6 +12,7 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatCase\entity\ClientChatCase;
 use sales\model\clientChatCase\entity\ClientChatCaseRepository;
 use sales\repositories\cases\CasesRepository;
+use sales\services\client\ClientCreateForm;
 use sales\services\client\ClientManageService;
 use sales\services\TransactionManager;
 
@@ -104,9 +106,14 @@ class CasesCreateService
     {
         $case = $this->transaction->wrap(function () use ($form, $creatorId) {
 
+            $clientForm = ClientCreateForm::createWidthDefaultName();
+            $clientForm->projectId = $form->projectId;
+            $clientForm->typeCreate = Client::TYPE_CREATE_CASE;
+
             $client = $this->clientManageService->getOrCreate(
                 [new PhoneCreateForm(['phone' => $form->clientPhone])],
-                [new EmailCreateForm(['email' => $form->clientEmail])]
+                [new EmailCreateForm(['email' => $form->clientEmail])],
+                $clientForm
             );
 
             $case = Cases::createByWeb(
@@ -142,7 +149,10 @@ class CasesCreateService
     {
         $case = $this->transaction->wrap(function () use ($clientPhones, $callId, $projectId, $depId) {
 
-            $client = $this->clientManageService->getOrCreateByPhones($clientPhones);
+            $clientForm = ClientCreateForm::createWidthDefaultName();
+            $clientForm->projectId = $projectId;
+            $clientForm->typeCreate = Client::TYPE_CREATE_CASE;
+            $client = $this->clientManageService->getOrCreateByPhones($clientPhones, $clientForm);
             $case = Cases::createByCall(
                 $client->id,
                 $callId,
@@ -162,10 +172,14 @@ class CasesCreateService
 
         $case = $this->transaction->wrap(function () use ($clientPhones, $callId, $projectId, $depId, $createCaseOnIncoming) {
 
+            $clientForm = ClientCreateForm::createWidthDefaultName();
+            $clientForm->projectId = $projectId;
+            $clientForm->typeCreate = Client::TYPE_CREATE_CALL;
+
         	if ($createCaseOnIncoming) {
-				$client = $this->clientManageService->getOrCreateByPhones($clientPhones);
+				$client = $this->clientManageService->getOrCreateByPhones($clientPhones, $clientForm);
 			} else {
-        		$client = $this->clientManageService->getExistingOrCreateEmptyObj($clientPhones);
+        		$client = $this->clientManageService->getExistingOrCreateEmptyObj($clientPhones, $clientForm);
 			}
 
             if ((!$case = Cases::find()->findLastActiveCaseByClient($client->id, $projectId)->byDepartment($depId)->one()) && $createCaseOnIncoming) {

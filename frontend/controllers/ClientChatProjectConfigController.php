@@ -2,19 +2,34 @@
 
 namespace frontend\controllers;
 
+use sales\model\clientChat\entity\projectConfig\service\ClientChatProjectConfigService;
 use Yii;
 use sales\model\clientChat\entity\projectConfig\ClientChatProjectConfig;
 use sales\model\clientChat\entity\projectConfig\search\ClientChatProjectConfigSearch;
 use frontend\controllers\FController;
 use yii\helpers\ArrayHelper;
+use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
  * ClientChatProjectConfigController implements the CRUD actions for ClientChatProjectConfig model.
+ *
+ * @property ClientChatProjectConfigService $chatProjectConfigService
  */
 class ClientChatProjectConfigController extends FController
 {
+    /**
+     * @var ClientChatProjectConfigService
+     */
+    private ClientChatProjectConfigService $chatProjectConfigService;
+
+    public function __construct($id, $module, ClientChatProjectConfigService $chatProjectConfigService, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->chatProjectConfigService = $chatProjectConfigService;
+    }
+
     /**
      * @return array
      */
@@ -69,6 +84,7 @@ class ClientChatProjectConfigController extends FController
         $model = new ClientChatProjectConfig();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            $this->chatProjectConfigService->deleteConfigCacheActiveLanguages($model->ccpc_project_id);
             return $this->redirect(['view', 'id' => $model->ccpc_project_id]);
         } else {
             $model->ccpc_params_json = '{
@@ -135,6 +151,7 @@ class ClientChatProjectConfigController extends FController
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            $this->chatProjectConfigService->deleteConfigCacheActiveLanguages($model->ccpc_project_id);
             return $this->redirect(['view', 'id' => $model->ccpc_project_id]);
         }
 
@@ -152,9 +169,29 @@ class ClientChatProjectConfigController extends FController
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
-
+        $model = $this->findModel($id);
+        $projectId = $model->ccpc_project_id;
+        if ($model->delete()) {
+            $this->chatProjectConfigService->deleteConfigCacheActiveLanguages($projectId);
+        }
         return $this->redirect(['index']);
+    }
+
+    public function actionDeleteCache(): \yii\web\Response
+    {
+        $projectId = (int)Yii::$app->request->get('projectId');
+        if (!$projectId) {
+            throw new BadRequestHttpException('Invalid project id');
+        }
+
+        $model = $this->findModel($projectId);
+
+        if ($keyCacheNotDeleted = $this->chatProjectConfigService->deleteConfigCacheActiveLanguages($model->ccpc_project_id)) {
+            Yii::$app->session->setFlash('warning', 'Cache was not deleted because cache with keys is not exists: ' . implode(', ', $keyCacheNotDeleted));
+        } else {
+            Yii::$app->session->setFlash('success', 'Cache was deleted successfully');
+        }
+        return $this->redirect(['view', 'id' => $projectId]);
     }
 
     /**

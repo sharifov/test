@@ -472,6 +472,20 @@ class PhoneController extends FController
                     $sid = $firstChild->c_call_sid;
                 }
 
+                if ($call = Call::find()->andWhere(['c_call_sid' => $sid])->one()) {
+                    /** @var Call $call */
+                    $data = $call->getData();
+                    $data->repeat->reset();
+                    $call->setData($data);
+                    if (!$call->save()) {
+                        Yii::error([
+                            'message' => 'Not saved call',
+                            'useCase' => 'Forward conference call',
+                            'errors' => $call->getErrors(),
+                            'call' => $call->getAttributes(),
+                        ], 'AjaxCallRedirect:Call:resetRepeat');
+                    }
+                }
                 $resultApi = $communication->callForward($sid, $from, $to);
                 if ($resultApi && isset($resultApi['result']['sid'])) {
                     $result = [
@@ -496,6 +510,20 @@ class PhoneController extends FController
                 }
 
             } else {
+                if ($call = Call::find()->andWhere(['c_call_sid' => $sid])->one()) {
+                    /** @var Call $call */
+                    $data = $call->getData();
+                    $data->repeat->reset();
+                    $call->setData($data);
+                    if (!$call->save()) {
+                        Yii::error([
+                            'message' => 'Not saved call',
+                            'useCase' => 'Forward simple call',
+                            'errors' => $call->getErrors(),
+                            'call' => $call->getAttributes(),
+                        ], 'AjaxCallRedirect:Call:resetRepeat');
+                    }
+                }
                 $resultApi = $communication->callRedirect($sid, $type, $from, $to, $firstTransferToNumber);
                 if ($resultApi && isset($resultApi['data']['result']['sid'])) {
 
@@ -632,7 +660,7 @@ class PhoneController extends FController
 
         $departments = [];
         if ($call) {
-            $departments = DepartmentPhoneProject::find()->where(['dpp_project_id' => $call->c_project_id, 'dpp_enable' => true])->andWhere(['>', 'dpp_dep_id', 0])->withPhoneList()->orderBy(['dpp_dep_id' => SORT_ASC])->all();
+            $departments = DepartmentPhoneProject::find()->where(['dpp_project_id' => $call->c_project_id, 'dpp_enable' => true, 'dpp_allow_transfer' => true])->andWhere(['>', 'dpp_dep_id', 0])->withPhoneList()->orderBy(['dpp_dep_id' => SORT_ASC])->all();
         }
         $phones = \Yii::$app->params['settings']['support_phone_numbers'] ?? [];
 
@@ -706,6 +734,10 @@ class PhoneController extends FController
                     throw new NotAcceptableHttpException('This agent is not online (Id: ' . $id . ')', 7);
                 }
                 $data['id'] = $user->id;
+                $userDepartment = UserProjectParams::find()->select(['upp_dep_id'])->andWhere(['IS NOT', 'upp_dep_id', null])->byUserId($user->id)->byProject($originCall->c_project_id)->asArray()->one();
+                if ($userDepartment) {
+                    $data['dep_id'] = $userDepartment['upp_dep_id'];
+                }
 
             } elseif ($type === 'department') {
                 $department = DepartmentPhoneProject::findOne($id);
@@ -930,6 +962,17 @@ class PhoneController extends FController
 
             $result = Yii::$app->communication->hangUp($call->c_call_sid);
 
+            if (isset($result['result']['status']) && ($result['result']['status'] !== $call->c_call_status)) {
+                $call->c_call_status = (string)$result['result']['status'];
+                $call->setStatusByTwilioStatus($call->c_call_status);
+                if (!$call->save()) {
+                    Yii::error(VarDumper::dumpAsString([
+                        'errors' => $call->getErrors(),
+                        'model' => $call->getAttributes(),
+                    ]), 'PhoneController:AjaxHangup:Call:save');
+                }
+            }
+
         } catch (\Throwable $e) {
             $result = [
                 'error' => true,
@@ -1008,7 +1051,8 @@ class PhoneController extends FController
                 $call->c_project_id,
                 $from,
                 UserCallIdentity::getClientId(Auth::id()),
-                $source_type_id
+                $source_type_id,
+                Auth::id()
             );
             Yii::$app->session->set($key, time());
         } catch (\Throwable $e) {
@@ -1353,6 +1397,7 @@ class PhoneController extends FController
             $result = Yii::$app->communication->callToUser(
                 UserCallIdentity::getClientId($createdUser->id),
                 UserCallIdentity::getClientId($user_id),
+                $user_id,
                 $createdUser->id,
                 [
                     'status' => 'Ringing',

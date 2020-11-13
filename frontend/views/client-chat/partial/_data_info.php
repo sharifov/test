@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var $this \yii\web\View
  * @var $clientChat \sales\model\clientChat\entity\ClientChat|null
@@ -11,163 +12,74 @@
  */
 
 use common\models\Client;
-use common\models\Lead;
-use sales\entities\cases\Cases;
-use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatVisitorData\entity\ClientChatVisitorData;
-use yii\bootstrap4\Alert;
-use yii\grid\GridView;
-use yii\widgets\DetailView;
-use yii\widgets\Pjax;
 
+$tabs[] = [
+    'id' => 'chat-data',
+    'name' => 'Chat data',
+    'content' => $this->render('info/chat_data', ['clientChatData' => $clientChat])
+];
+
+$tabs[] = [
+    'id' => 'additional-data',
+    'name' => 'Additional data',
+    'content' => $this->render('info/additional_data', ['clientChatVisitorData' => $clientChatVisitorData])
+];
+
+if ($dataProviderRequest->getTotalCount()) {
+    $tabs[] = [
+        'id' => 'browsing-history',
+        'name' => 'Browsing history',
+        'content' => $this->render('info/browsing_history', ['dataProviderRequest' => $dataProviderRequest])
+    ];
+}
+
+if ($client) {
+    if ($leadDataProvider && $leadDataProvider->getTotalCount()) {
+        $tabs[] = [
+            'id' => 'client-leads',
+            'name' => 'Leads from client',
+            'content' => $this->render('info/client_leads', ['leadDataProvider' => $leadDataProvider])
+        ];
+    }
+    if ($casesDataProvider && $casesDataProvider->getTotalCount()) {
+        $tabs[] = [
+            'id' => 'client-cases',
+            'name' => 'Cases from client',
+            'content' => $this->render('info/client_cases', ['casesDataProvider' => $casesDataProvider])
+        ];
+    }
+}
+
+$tabs[] = [
+    'id' => 'visitor-log',
+    'name' => 'Visitor log',
+    'content' => $this->render('info/visitor_log', ['visitorLog' => $visitorLog])
+];
 ?>
 
 <div class="row">
-	<div class="col-md-6">
-        <?php if ($clientChatVisitorData): ?>
-            <h4>Client chat additional data</h4>
-            <?= DetailView::widget([
-                'model' => $clientChatVisitorData,
-                'attributes' => [
-                    'cvd_country',
-                    'cvd_region',
-                    'cvd_city',
-                    'cvd_latitude',
-                    'cvd_longitude',
-                    'cvd_url',
-                    'cvd_referrer',
-                    'cvd_timezone',
-                    'cvd_local_time'
-                ]
-            ]) ?>
-        <?php else: ?>
-            <?= Alert::widget([
-                'body' => 'Client Chat Data not found.',
-                'options' => [
-                    'class' => 'alert alert-warning'
-                ]
-            ]) ?>
-        <?php endif; ?>
-
-        <?php if ($dataProviderRequest->getTotalCount()) :?>
-            <h4>Browsing history</h4>
-            <?php Pjax::begin(['id' => 'pjax-browsing-history', 'timeout' => 5000, 'enablePushState' => false]); ?>
-            <?php echo GridView::widget([
-                'dataProvider' => $dataProviderRequest,
-                'columns' => [
-                    [
-                        'attribute' => 'ccr_created_dt',
-                        'value' => static function(ClientChatRequest $model) {
-                            return $model->ccr_created_dt ?
-                                Yii::$app->formatter->asDatetime(strtotime($model->ccr_created_dt)) : '-';
-                        },
-                        'format' => 'raw',
-                        'header' => 'Created',
-                    ],
-                    [
-                        'label' => 'Url',
-                        'value' => static function(ClientChatRequest $model) {
-                            if ($pageUrl = $model->getPageUrl()) {
-                                return Yii::$app->formatter->asUrl($pageUrl);
-                            }
-                            return Yii::$app->formatter->nullDisplay;
-                        },
-                        'format' => 'raw',
-                        'header' => 'Url',
-                    ],
-                ],
-            ]) ?>
-            <?php Pjax::end() ?>
-        <?php endif ?>
-
-        <?php if ($client) :?>
-            <?php if ($leadDataProvider->getTotalCount()) :?>
-                <h4>Leads from client</h4>
-                <?php Pjax::begin(['id' => 'pjax-client-leads', 'timeout' => 5000, 'enablePushState' => false]); ?>
-                <?php echo GridView::widget([
-                    'dataProvider' => $leadDataProvider,
-                    'columns' => [
-                        [
-                            'attribute' => 'id',
-                            'value' => static function(Lead $model) {
-                                return Yii::$app->formatter->asLead($model, 'fa-cubes');
-                            },
-                            'format' => 'raw',
-                            'header' => 'Lead',
-                        ],
-                        [
-                            'attribute' => 'created',
-                            'value' => static function(Lead $model) {
-                                return Yii::$app->formatter->asByUserDateTime($model->created);
-                            },
-                            'format' => 'raw',
-                            'header' => 'Created',
-                        ],
-                    ],
-                ]) ?>
-                <?php Pjax::end() ?>
-            <?php endif ?>
-
-            <?php if ($casesDataProvider->getTotalCount()) :?>
-                <h4>Cases from client</h4>
-                <?php Pjax::begin(['id' => 'pjax-client-cases', 'timeout' => 5000, 'enablePushState' => false]); ?>
-                <?php echo GridView::widget([
-                    'dataProvider' => $casesDataProvider,
-                    'columns' => [
-                        [
-                            'attribute' => 'cs_id',
-                            'value' => static function(Cases $model) {
-                                return Yii::$app->formatter->asCase($model, 'fa-cube');
-                            },
-                            'format' => 'raw',
-                            'header' => 'Case',
-                        ],
-                        [
-                            'attribute' => 'cs_created_dt',
-                            'value' => static function(Cases $model) {
-                                return Yii::$app->formatter->asByUserDateTime($model->cs_created_dt);
-                            },
-                            'format' => 'raw',
-                            'header' => 'Created',
-                        ],
-                    ],
-                ]) ?>
-                <?php Pjax::end() ?>
-            <?php endif ?>
-
-        <?php endif  ?>
-
-	</div>
-    <div class="col-md-6">
-        <?php if ($visitorLog): ?>
-            <h4>Visitor log</h4>
-			<?= DetailView::widget([
-				'model' => $visitorLog,
-				'attributes' => [
-					'vl_project_id:projectName',
-					'vl_ga_client_id',
-					'vl_ga_user_id',
-					'vl_customer_id',
-					'lead:lead',
-                    'vl_gclid',
-                    'vl_dclid',
-                    'vl_utm_source',
-                    'vl_utm_medium',
-                    'vl_utm_campaign',
-                    'vl_utm_term',
-                    'vl_utm_content',
-                    'vl_referral_url',
-                    'vl_user_agent',
-                    'vl_ip_address'
-				]
-			]) ?>
-        <?php else: ?>
-			<?= Alert::widget([
-				'body' => 'Visitor log data not found.',
-				'options' => [
-					'class' => 'alert alert-warning'
-				]
-			]) ?>
-        <?php endif; ?>
+	<div class="col-md-12">
+        <nav>
+            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                <?php foreach ($tabs as $key => $tab): ?>
+                    <?php if ($key === 0): ?>
+                        <a class="nav-item nav-link active" id="nav-<?= $tab['id']?>-tab" data-toggle="tab" href="#nav-<?= $tab['id']?>" role="tab" aria-controls="nav-<?= $tab['id']?>" aria-selected="true"><?= $tab['name']?></a>
+                    <?php else: ?>
+                        <a class="nav-item nav-link" id="nav-<?= $tab['id']?>-tab" data-toggle="tab" href="#nav-<?= $tab['id']?>" role="tab" aria-controls="nav-<?= $tab['id']?>" aria-selected="false"><?= $tab['name']?></a>
+                    <?php endif;?>
+                <?php endforeach; ?>
+            </div>
+        </nav>
+        <div class="tab-content" id="nav-tabContent">
+            <br>
+            <?php foreach ($tabs as $key => $tab): ?>
+                <?php if ($key === 0): ?>
+                    <div class="tab-pane fade show active" id="nav-<?= $tab['id']?>" role="tabpanel" aria-labelledby="nav-<?= $tab['id']?>-tab"><?= $tab['content']?></div>
+                <?php else: ?>
+                    <div class="tab-pane fade" id="nav-<?= $tab['id']?>" role="tabpanel" aria-labelledby="nav-<?= $tab['id']?>-tab"><?= $tab['content']?></div>
+                <?php endif;?>
+            <?php endforeach; ?>
+        </div>
     </div>
 </div>

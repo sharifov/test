@@ -3,6 +3,7 @@
 namespace sales\model\clientChatMessage\entity;
 
 use DateTime;
+use sales\entities\EventTrait;
 use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestApiForm;
@@ -22,14 +23,34 @@ use yii\helpers\ArrayHelper;
  * @property int $ccm_has_attachment
  * @property string $message
  * @property string $username
+ * @property int|null $ccm_event
  */
 class ClientChatMessage extends \yii\db\ActiveRecord
 {
+    use EventTrait;
 
     public const BY_BOT = 'bot';
     public const BY_AGENT = 'agent';
     public const BY_CLIENT = 'client';
     public const BOT_EMAIL = 'bot@techork.com';
+
+    private const EVENT_GUEST_UTTERED = ClientChatRequest::EVENT_GUEST_UTTERED;
+    private const EVENT_AGENT_UTTERED = ClientChatRequest::EVENT_AGENT_UTTERED;
+
+    private const EVENT_LIST = [
+        self::EVENT_GUEST_UTTERED => self::EVENT_GUEST_UTTERED,
+        self::EVENT_AGENT_UTTERED => self::EVENT_AGENT_UTTERED,
+    ];
+
+    public function isGuestUttered(): bool
+    {
+        return $this->ccm_event === self::EVENT_GUEST_UTTERED;
+    }
+
+    public function isAgentUttered(): bool
+    {
+        return $this->ccm_event === self::EVENT_AGENT_UTTERED;
+    }
 
     /**
      * {@inheritdoc}
@@ -74,6 +95,7 @@ class ClientChatMessage extends \yii\db\ActiveRecord
             [['ccm_client_id', 'ccm_user_id', 'ccm_has_attachment', 'ccm_cch_id'], 'integer'],
             [['ccm_sent_dt', 'ccm_body'], 'safe'],
             [['ccm_rid'], 'string', 'max' => 150],
+            ['ccm_event', 'in', 'range' => array_keys(self::EVENT_LIST)],
         ];
     }
 
@@ -90,7 +112,7 @@ class ClientChatMessage extends \yii\db\ActiveRecord
         $db = self::getDb();
         $partTableName = self::tableName()."_".date_format($partFromDateTime, "Y_m");
         $cmd = $db->createCommand("create table ".$partTableName." PARTITION OF ".self::tableName().
-            " FOR VALUES FROM ('". date_format($partFromDateTime, "Y-m-d") . "') TO ('".date_format($partToDateTime,"Y-m-d")."')");
+            " FOR VALUES FROM ('". date_format($partFromDateTime, "Y-m-d") . "') TO ('".date_format($partToDateTime, "Y-m-d")."')");
         $cmd->execute();
         return $partTableName;
     }
@@ -105,7 +127,7 @@ class ClientChatMessage extends \yii\db\ActiveRecord
      */
     public static function partitionDatesFrom(DateTime $date) : array
     {
-        $monthBegin = date('Y-m-d', strtotime(date_format($date,'Y-m-1')));
+        $monthBegin = date('Y-m-d', strtotime(date_format($date, 'Y-m-1')));
         if (!$monthBegin) {
             throw new \RuntimeException("invalid partition start date");
         }
@@ -118,43 +140,39 @@ class ClientChatMessage extends \yii\db\ActiveRecord
         return [$partitionStartDate, $partitionEndDate];
     }
 
-	/**
-	 * @param ClientChatRequestApiForm $form
-	 * @param ClientChat $clientChat
-	 * @param ClientChatRequest $clientChatRequest
-	 * @return ClientChatMessage
-	 */
-    public static function createByApi(ClientChatRequestApiForm $form, ClientChat $clientChat, ClientChatRequest $clientChatRequest): ClientChatMessage
-	{
-		$message = new self();
-		$message->ccm_rid = $form->data['rid'] ?? '';
-		$message->ccm_cch_id = $clientChat->cch_id;
-		$date = new DateTime();
-		$date->setTimestamp($form->data['timestamp']/1000);
-		$message->ccm_sent_dt = $date->format('Y-m-d H:i:s');
-		$message->ccm_body = $form->data;
-		$message->ccm_client_id = $clientChat->cch_client_id;
-		//if agent message fill also agent id
-		if ($clientChatRequest->isAgentUttered()) {
-			$message->ccm_user_id = $clientChat->cch_owner_user_id;
-		}
+    public static function createByApi(ClientChatRequestApiForm $form, int $event): ClientChatMessage
+    {
+        $message = new self();
+        $message->ccm_rid = $form->data['rid'] ?? '';
+        $date = new DateTime();
+        $date->setTimestamp($form->data['timestamp']/1000);
+        $message->ccm_sent_dt = $date->format('Y-m-d H:i:s');
+        $message->ccm_body = $form->data;
+        $message->ccm_event = $event;
 
-		if (array_key_exists('file', $form->data)) {
-			$message->ccm_has_attachment = 1;
-		}
+        if (array_key_exists('file', $form->data)) {
+            $message->ccm_has_attachment = 1;
+        }
 
-		return $message;
-	}
+        return $message;
+    }
 
-	public function isMessageFromClient(): bool
-	{
-		return $this->ccm_client_id && !$this->ccm_user_id;
-	}
+    public function assignToChat(int $chatId, ?int $clientId, ?int $ownerUserId): void
+    {
+        $this->ccm_cch_id = $chatId;
+        $this->ccm_client_id = $clientId;
+        $this->ccm_user_id = $ownerUserId;
+    }
 
-	public function isMessageFromBot(): bool
-	{
-		return (isset($this->ccm_body['agent']['email']) && $this->ccm_body['agent']['email'] === self::BOT_EMAIL);
-	}
+    public function isMessageFromClient(): bool
+    {
+        return $this->ccm_client_id && !$this->ccm_user_id;
+    }
+
+    public function isMessageFromBot(): bool
+    {
+        return (isset($this->ccm_body['agent']['email']) && $this->ccm_body['agent']['email'] === self::BOT_EMAIL);
+    }
 
     public function getByType(): string
     {
@@ -168,24 +186,24 @@ class ClientChatMessage extends \yii\db\ActiveRecord
             return self::BY_AGENT;
         }
         return 'undefined';
-	}
+    }
 
-	public function getMessage(): string
-	{
-		return $this->ccm_body['msg'] ?? '';
-	}
+    public function getMessage(): string
+    {
+        return $this->ccm_body['msg'] ?? '';
+    }
 
-	public function getUsername(): string
-	{
-		return $this->ccm_body['u']['username'] ?? 'NoName';
-	}
+    public function getUsername(): string
+    {
+        return $this->ccm_body['u']['username'] ?? 'NoName';
+    }
 
-	public static function find(): Scopes
-	{
-		return new Scopes(static::class);
-	}
+    public static function find(): Scopes
+    {
+        return new Scopes(static::class);
+    }
 
-	/**
+    /**
      * {@inheritdoc}
      */
     public function attributeLabels()
@@ -209,6 +227,21 @@ class ClientChatMessage extends \yii\db\ActiveRecord
      */
     public static function countByChatId(int $chatId): ?int
     {
-		return self::find()->where(['ccm_cch_id' => $chatId])->count();
-	}
+        return self::find()->where(['ccm_cch_id' => $chatId])->count();
+    }
+
+    public static function getLastMessageByClient(int $cchId): ?self
+    {
+        return ClientChatMessage::find()->andWhere(['ccm_cch_id' => $cchId])->andWhere(['is', 'ccm_user_id', null])->orderBy(['ccm_id' => SORT_DESC])->limit(1)->one();
+    }
+
+    public static function getLastMessageByAgent(int $cchId): ?self
+    {
+        return ClientChatMessage::find()->andWhere(['ccm_cch_id' => $cchId])->andWhere(['is not', 'ccm_user_id', null])->orderBy(['ccm_id' => SORT_DESC])->limit(1)->one();
+    }
+
+    public static function removeAllMessages(int $cchId)
+    {
+        self::deleteAll(['ccm_cch_id' => $cchId]);
+    }
 }

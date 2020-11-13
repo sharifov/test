@@ -46,11 +46,12 @@ class ClientChatRequestSearch extends ClientChatRequest
             'ccr_id' => $this->ccr_id,
             'ccr_rid' => $this->ccr_rid,
             'ccr_visitor_id' => $this->ccr_visitor_id,
-            'date_format(ccr_created_dt, "%y-%m-%d")' => $this->ccr_created_dt,
+            'DATE(ccr_created_dt)' => $this->ccr_created_dt,
         ]);
 
-        $query->andFilterWhere(['like', 'ccr_event', $this->ccr_event]);
-//            ->andFilterWhere(['like', 'ccr_json_data', $this->ccr_json_data]);
+        $query->andFilterWhere(['ccr_event' => $this->ccr_event]);
+
+        $query->andFilterWhere(['like', 'ccr_json_data', $this->ccr_json_data]);
 
         return $dataProvider;
     }

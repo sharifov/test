@@ -31,6 +31,12 @@ class UserGroupAssignController extends FController
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
+    public function init(): void
+    {
+        parent::init();
+        $this->layoutCrud();
+    }
+
     /**
      * Lists all UserGroupAssign models.
      * @return mixed

@@ -4,6 +4,7 @@ use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\UserContactList;
 use frontend\models\form\ContactForm;
+use sales\access\EmployeeProjectAccess;
 use sales\auth\Auth;
 use unclead\multipleinput\MultipleInput;
 use unclead\multipleinput\MultipleInputColumn;
@@ -32,6 +33,7 @@ $this->registerCss('
     }   
 '
 );
+$projectList = EmployeeProjectAccess::getProjects(Yii::$app->user->id);
 ?>
 <div class="contact-create">
     <h1><?= Html::encode($this->title) ?></h1>
@@ -63,6 +65,7 @@ $this->registerCss('
                 <?= $form->field($contactForm, 'description')->textarea(['rows' => 4, 'style' => 'width: 320px', 'class' => 'form-control']) ?>
                 <?= $form->field($contactForm, 'is_public')->checkbox() ?>
                 <?= $form->field($contactForm, 'disabled')->checkbox() ?>
+                <?= $form->field($contactForm, 'cl_project_id')->dropDownList($projectList, ['prompt' => '-'])->label('Project') ?>
 
                 <?php echo Html::checkbox('ucl_favorite', $favorite,
                     ['id' => 'ucl_favorite', ]) ?> Favorite

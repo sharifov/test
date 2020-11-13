@@ -2,12 +2,12 @@
 /**
  * @var $form ActiveForm
  * @var $this View
- * @var $editName ClientCreateForm
+ * @var $editName \sales\services\client\ClientCreateForm
  * @var $lead Lead
  */
 
 use common\models\Lead;
-use sales\forms\lead\ClientCreateForm;
+use sales\services\client\ClientCreateForm;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;

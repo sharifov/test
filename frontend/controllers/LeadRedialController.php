@@ -511,14 +511,17 @@ class LeadRedialController extends FController
     private function guardQueueReservation(int $leadId, int $userId): void
     {
         $key = 'lead_redial_reservation_' . $leadId;
-        Yii::$app->redis->setnx($key, $userId);
-        $value = Yii::$app->redis->get($key);
-        if ((int)$value !== $userId) {
-            Yii::info(VarDumper::dumpAsString([
-                'leadId' => $leadId,
-                'userId' => $userId
-            ]), 'info\LeadRedialRedisReservation');
-            throw new \DomainException('Lead reserved. Try again later.');
+        $result = (bool)Yii::$app->redis->setnx($key, $userId);
+        if (!$result) {
+            $value = (int)Yii::$app->redis->get($key);
+            if ($value !== $userId) {
+                Yii::info(VarDumper::dumpAsString([
+                    'leadId' => $leadId,
+                    'userId' => $userId,
+                    'reservedUserId' => $value,
+                ]), 'info\LeadRedialRedisReservation');
+                throw new \DomainException('Lead reserved. Try again later.');
+            }
         }
         Yii::$app->redis->expire($key, 5);
     }

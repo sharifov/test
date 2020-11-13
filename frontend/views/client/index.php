@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Client;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -22,6 +23,10 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Create Client', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
+    <?php
+    $filterProjects = \common\models\Project::getList();
+    $filterProjects['-1'] ='Without project';
+    ?>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
@@ -30,12 +35,19 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'id',
             'uuid',
+            'parent_id',
             'first_name',
             'middle_name',
             'last_name',
             'company_name',
             'is_company:boolean',
             'is_public:boolean',
+            [
+                'class' => \common\components\grid\project\ProjectColumn::class,
+                'attribute' => 'cl_project_id',
+                'relation' => 'project',
+                'filter' => $filterProjects,
+            ],
             'disabled:boolean',
             [
                 'header' => 'Phones',
@@ -125,7 +137,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'updated',
                 'value' => function(\common\models\Client $model) {
-                return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated));
+                return $model->updated ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated)) : null;
                 },
                 'format' => 'raw',
                 'filter' => DatePicker::widget([

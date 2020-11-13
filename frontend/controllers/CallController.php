@@ -16,7 +16,6 @@ use common\models\search\UserConnectionSearch;
 use common\models\Sources;
 use common\models\UserProjectParams;
 use frontend\widgets\CallBox;
-use frontend\widgets\IncomingCallWidget;
 use frontend\widgets\newWebPhone\call\socket\MissedCallMessage;
 use http\Exception\InvalidArgumentException;
 use sales\auth\Auth;
@@ -1034,24 +1033,36 @@ class CallController extends FController
                 ])->one();
 
 				if ($callUserAccess) {
+				    $userId = Auth::id();
                     switch ($action) {
                         case 'accept':
                             $key = 'accept_call_' . $callUserAccess->cua_call_id;
-                            Yii::$app->redis->setnx($key, Auth::id());
-                            $value = Yii::$app->redis->get($key);
-                            if ((int)$value === (int)Auth::id()) {
-                                $prepare = new PrepareCurrentCallsForNewCall(Auth::id());
+                            $result = (bool)Yii::$app->redis->setnx($key, $userId);
+                            $isOk = true;
+                            $value = null;
+
+                            if (!$result) {
+                                $value = (int)Yii::$app->redis->get($key);
+                                if ($value !== $userId) {
+                                    $isOk = false;
+                                }
+                            }
+
+                            if ($isOk) {
+                                $prepare = new PrepareCurrentCallsForNewCall($userId);
                                 if ($prepare->prepare()) {
                                     $this->callService->acceptCall($callUserAccess, Auth::user());
                                 }
                                 Yii::$app->redis->expire($key, 5);
                             } else {
-                                Notifications::publish('callAlreadyTaken', ['user_id' => Auth::id()], ['callSid' => $call->c_call_sid]);
+                                Notifications::publish('callAlreadyTaken', ['user_id' => $userId], ['callSid' => $call->c_call_sid]);
                                 Yii::info(VarDumper::dumpAsString([
                                     'callId' => $callUserAccess->cua_call_id,
-                                    'userId' => Auth::id()
+                                    'userId' => $userId,
+                                    'acceptedUserId' => $value,
                                 ]), 'info\NewPhoneWidgetAcceptRedisReservation');
                             }
+
                             $response['error'] = false;
                             $response['message'] = 'success';
                             break;

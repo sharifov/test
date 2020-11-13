@@ -79,69 +79,56 @@ class ChatBot extends Component
     {
         $url = $this->url . $action;
         //$options = ['RETURNTRANSFER' => 1];
-		return $this->send($url, $data, $method, $headers, $options);
+        return $this->send($url, $data, $method, $headers, $options);
     }
 
-	/**
-	 * @param string $action
-	 * @param array $data
-	 * @param string $method
-	 * @param array $headers
-	 * @param array $options
-	 * @return Response
-	 * @throws \yii\httpclient\Exception
-	 */
-    protected function visitorsSendRequest(string $action = '', array $data = [], string $method = 'post', array $headers = [], array $options = []): Response
-	{
-		$url = $this->visitorsUrl . $action;
-		return $this->send($url, $data, $method, $headers, $options);
-	}
+    /**
+     * @param string $url
+     * @param array $data
+     * @param string $method
+     * @param array $headers
+     * @param array $options
+     * @return Response
+     * @throws \yii\httpclient\Exception
+     */
+    private function send(string $url, array $data = [], string $method = 'post', array $headers = [], array $options = []): Response
+    {
+        $this->request->setMethod($method)
+            ->setFormat(\yii\httpclient\Client::FORMAT_JSON)
+            ->setUrl($url)
+            ->setData($data);
 
-	/**
-	 * @param string $url
-	 * @param array $data
-	 * @param string $method
-	 * @param array $headers
-	 * @param array $options
-	 * @return Response
-	 * @throws \yii\httpclient\Exception
-	 */
-	private function send(string $url, array $data = [], string $method = 'post', array $headers = [], array $options = []): Response
-	{
-		$this->request->setMethod($method)
-			->setFormat(\yii\httpclient\Client::FORMAT_JSON)
-			->setUrl($url)
-			->setData($data);
+        if ($headers) {
+            $this->request->addHeaders($headers);
+        }
 
-		if ($headers) {
-			$this->request->addHeaders($headers);
-		}
+        $this->request->setOptions([CURLOPT_ENCODING => 'gzip']);
 
-		$this->request->setOptions([CURLOPT_ENCODING => 'gzip']);
+        if ($options) {
+            $this->request->setOptions($options);
+        }
 
-		if ($options) {
-			$this->request->setOptions($options);
-		}
-
-		return $this->request->send();
-	}
+        return $this->request->send();
+    }
 
 
-	/**
-	 * @param string $rid
-	 * @param string $visitorId
-	 * @return array
-	 * @throws \yii\httpclient\Exception
-	 */
-    public function endConversation(string $rid, string $visitorId) : array
+    /**
+     * @param string $rid
+     * @param string $visitorId
+     * @param bool $shallowClose
+     * @return array
+     * @throws \yii\httpclient\Exception
+     */
+    public function endConversation(string $rid, string $visitorId, bool $shallowClose = true) : array
     {
         $out = ['error' => false, 'data' => []];
         $data = [
             'rid' => $rid,
-			'visitorId' => $visitorId
+            'visitorId' => $visitorId,
+            'shallowClose' => $shallowClose
         ];
 
-		$headers = \Yii::$app->rchat->getSystemAuthDataHeader();
+        $headers = \Yii::$app->rchat->getSystemAuthDataHeader();
         $response = $this->sendRequest('livechat/end-conversation', $data, 'post', $headers);
 
         if ($response->isOk) {
@@ -157,39 +144,39 @@ class ChatBot extends Component
         return $out;
     }
 
-	/**
-	 * @param string $rid
-	 * @param string $visitorId
-	 * @param string $oldDepartment
-	 * @param string $newDepartment
-	 * @return array
-	 * @throws \yii\httpclient\Exception
-	 */
-	public function transferDepartment(string $rid, string $visitorId, string $oldDepartment, string $newDepartment) : array
-	{
-		$out = ['error' => false, 'data' => []];
-		$data = [
-			'rid' => $rid,
-			'visitorId' => $visitorId,
-			'oldDepartment' => $oldDepartment,
-			'newDepartment' => $newDepartment
-		];
+    /**
+     * @param string $rid
+     * @param string $visitorId
+     * @param string $oldDepartment
+     * @param string $newDepartment
+     * @return array
+     * @throws \yii\httpclient\Exception
+     */
+    public function transferDepartment(string $rid, string $visitorId, string $oldDepartment, string $newDepartment) : array
+    {
+        $out = ['error' => false, 'data' => []];
+        $data = [
+            'rid' => $rid,
+            'visitorId' => $visitorId,
+            'oldDepartment' => $oldDepartment,
+            'newDepartment' => $newDepartment
+        ];
 
-		$headers = \Yii::$app->rchat->getSystemAuthDataHeader();
-		$response = $this->sendRequest('livechat/transfer-department', $data, 'post', $headers);
+        $headers = \Yii::$app->rchat->getSystemAuthDataHeader();
+        $response = $this->sendRequest('livechat/transfer-department', $data, 'post', $headers);
 
-		if ($response->isOk) {
-			if (!empty($response->data)) {
-				$out['data'] = $response->data;
-			} else {
-				$out['error']['message'] = 'Not found in response array';
-			}
-		} else {
-			$out['error'] = $this->parseErrorContent($response);
-		}
+        if ($response->isOk) {
+            if (!empty($response->data)) {
+                $out['data'] = $response->data;
+            } else {
+                $out['error']['message'] = 'Not found in response array';
+            }
+        } else {
+            $out['error'] = $this->parseErrorContent($response);
+        }
 
-		return $out;
-	}
+        return $out;
+    }
 
     /**
      * @param string $rid
@@ -221,28 +208,31 @@ class ChatBot extends Component
         return $out;
     }
 
-	public function createRoom(string $visitorId, string $department) : array
-	{
-		$out = ['error' => false, 'data' => []];
-		$data = [
-			'id' => $visitorId,
-			'department' => $department
-		];
+    public function createRoom(string $visitorId, string $channelId, ?string $message, string $userRcId, string $userRcToken) : array
+    {
+        $out = ['error' => false, 'data' => []];
+        $data = [
+            'visitorId' => $visitorId,
+            'department' => $channelId,
+            'userId' => $userRcId,
+            'userToken' => $userRcToken,
+            'message' => $message
+        ];
 
-		$response = $this->visitorsSendRequest('create-room', $data, 'post');
+        $response = $this->sendRequest('livechat/create-room', $data, 'post');
 
-		if ($response->isOk) {
-			if (!empty($response->data)) {
-				$out['data'] = $response->data;
-			} else {
-				$out['error']['message'] = 'Not found in response array data key [data]';
-			}
-		} else {
-			$out['error'] = $this->parseErrorContent($response);
-		}
+        if ($response->isOk) {
+            if (!empty($response->data)) {
+                $out['data'] = $response->data;
+            } else {
+                $out['error']['message'] = 'Not found in response array data key [data]';
+            }
+        } else {
+            $out['error'] = $this->parseErrorContent($response);
+        }
 
-		return $out;
-	}
+        return $out;
+    }
 
     public function sendMessage(array $data, array $headers = []) : array
     {
@@ -258,18 +248,43 @@ class ChatBot extends Component
             }
         } else {
             $out['error'] = $this->parseErrorContent($response);
-//			\Yii::error(VarDumper::dumpAsString($out['error'], 10), 'ChatBot:sendMessage');
+            //			\Yii::error(VarDumper::dumpAsString($out['error'], 10), 'ChatBot:sendMessage');
+        }
+
+        return $out;
+    }
+
+    public function getUserInfo(string $username)
+    {
+        $out = ['error' => false, 'data' => []];
+
+        $data = [
+            'username' => $username
+        ];
+
+        $headers = \Yii::$app->rchat->getSystemAuthDataHeader();
+        $response = $this->sendRequest('users.info?' . http_build_query($data), $data, 'GET', $headers);
+
+        if ($response->isOk) {
+            if (!empty($response->data)) {
+                $out['data'] = $response->data;
+            } else {
+                $out['error']['message'] = 'Not found in response array data key [data]';
+            }
+        } else {
+            $out['error'] = $this->parseErrorContent($response);
+            //			\Yii::error(VarDumper::dumpAsString($out['error'], 10), 'ChatBot:sendMessage');
         }
 
         return $out;
     }
 
     private function parseErrorContent(Response $response): array
-	{
-		$result = json_decode($response->content, true);
-		if (json_last_error() === JSON_ERROR_NONE) {
-			return $result;
-		}
-		return ['message' => strip_tags($response->content)];
-	}
+    {
+        $result = json_decode($response->content, true);
+        if (json_last_error() === JSON_ERROR_NONE) {
+            return $result;
+        }
+        return ['message' => strip_tags($response->content)];
+    }
 }

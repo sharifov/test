@@ -556,7 +556,6 @@ class QuoteController extends ApiBaseController
             else $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
 
             $response['error'] = $message;
-            $response['errors'] = $message;
             $response['error_code'] = 30;
         }
 

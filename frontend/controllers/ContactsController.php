@@ -140,6 +140,7 @@ class ContactsController extends FController
     {
         $client = new Client();
         $client->cl_type_id = Client::TYPE_CONTACT;
+        $client->cl_type_create = Client::TYPE_CREATE_MANUALLY;
         $contactForm = new ContactForm();
         $post = Yii::$app->request->post();
 
@@ -247,7 +248,9 @@ class ContactsController extends FController
         }
 
         foreach ($client->getAttributes() AS $name => $value) {
-            $form->{$name} = $value;
+            if ($name !== 'cl_type_create') {
+                $form->{$name} = $value;
+            }
         }
 
         $form->emails = $client->clientEmails;

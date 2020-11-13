@@ -5,10 +5,12 @@ namespace common\models\search;
 use common\models\Employee;
 use common\models\UserGroupAssign;
 use common\models\UserProjectParams;
+use sales\auth\Auth;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Sms;
+use yii\db\Query;
 use yii\helpers\VarDumper;
 
 /**
@@ -21,6 +23,7 @@ class SmsSearch extends Sms
     public $datetime_start;
     public $datetime_end;
     public $date_range;
+    public const CREATE_TIME_START_DEFAULT_RANGE = '-6 days';
     /**
      * {@inheritdoc}
      */
@@ -33,6 +36,14 @@ class SmsSearch extends Sms
             [['s_phone_from', 's_phone_to', 's_sms_text', 's_sms_data', 's_language_id', 's_status_done_dt', 's_read_dt', 's_error_message', 's_tw_sent_dt', 's_tw_account_sid', 's_tw_message_sid', 's_tw_to_country', 's_tw_to_state', 's_tw_to_city', 's_tw_to_zip', 's_tw_from_country', 's_tw_from_state', 's_tw_from_city', 's_tw_from_zip', 's_created_dt', 's_updated_dt'], 'safe'],
             [['s_tw_price'], 'number'],
         ];
+    }
+
+    public function __construct($config = [])
+    {
+        parent::__construct($config);
+        $userTimezone = Auth::user()->userParams->up_timezone ?? 'UTC';
+        $currentDate = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->setTimezone(new \DateTimeZone($userTimezone));
+        $this->date_range = ($currentDate->modify(self::CREATE_TIME_START_DEFAULT_RANGE))->format('Y-m-d') . ' 00:00:00 - ' . $currentDate->format('Y-m-d') . ' 23:59:59';
     }
 
     /**
@@ -75,12 +86,14 @@ class SmsSearch extends Sms
             return $dataProvider;
         }
 
-        if(empty($this->s_created_dt) && isset($params['SmsSearch']['date_range'])){
+
+        if($this->datetime_start && $this->datetime_end){
             $query->andFilterWhere(['>=', 's_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
                 ->andFilterWhere(['<=', 's_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
-        } elseif (isset($params['SmsSearch']['s_created_dt']) && !empty($params['SmsSearch']['s_created_dt'])) {
-            $query->andFilterWhere(['>=', 's_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->s_created_dt))])
-                ->andFilterWhere(['<=', 's_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->s_created_dt) + 3600 * 24)]);
+        }
+
+        if (!empty($this->s_created_dt)) {
+            $query->andFilterWhere(['DATE(s_created_dt)' => date('Y-m-d', strtotime($this->e_created_dt))]);
         }
 
         if($this->supervision_id > 0) {
@@ -239,5 +252,26 @@ class SmsSearch extends Sms
             ->andFilterWhere(['like', 's_tw_from_zip', $this->s_tw_from_zip]);
 
         return $dataProvider;
+    }
+
+    public function searchSmsGraph($params, $user_id): array
+    {
+        $query = new Query();
+        $query->addSelect(['DATE(s_created_dt) as createdDate,
+               SUM(IF(s_status_id= ' . SMS::STATUS_DONE . ', 1, 0)) AS smsDone,
+               SUM(IF(s_status_id= ' . SMS::STATUS_ERROR . ', 1, 0)) AS smsError               
+        ']);
+
+        $query->from(static::tableName());
+        $query->where('s_status_id IS NOT NULL');
+        $query->andWhere(['s_created_user_id' => $user_id]);
+        if($this->datetime_start && $this->datetime_end){
+            $query->andWhere(['>=', 's_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))]);
+            $query->andWhere(['<=', 's_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
+        }
+
+        $query->groupBy('createdDate');
+
+        return $query->createCommand()->queryAll();
     }
 }

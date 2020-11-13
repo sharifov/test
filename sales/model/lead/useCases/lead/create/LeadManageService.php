@@ -221,7 +221,7 @@ class LeadManageService
                 null,
                 null,
                 null,
-                $chat->cch_dep_id,
+                $chat->cchChannel->ccc_dep_id,
                 null
             );
 //            $clientShortInfo = new ClientShortInfo($chat->cchCcr);

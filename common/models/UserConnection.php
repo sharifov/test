@@ -3,14 +3,11 @@
 namespace common\models;
 
 use common\models\query\UserConnectionQuery;
-use sales\dispatchers\NativeEventDispatcher;
 use sales\entities\cases\Cases;
-use sales\model\user\entity\userConnection\events\UserConnectionEvents;
-use Yii;
+use sales\model\clientChatUserChannel\entity\ClientChatUserChannel;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
-use yii\helpers\VarDumper;
 
 /**
  * This is the model class for table "user_connection".
@@ -241,4 +238,48 @@ class UserConnection extends \yii\db\ActiveRecord
         return \Yii::$app->params['settings']['idle_seconds'] ?? 0;
     }
 
+    public static function getUsersByControllerAction(
+        string $controller,
+        string $action,
+        bool $isOnline = true,
+        bool $idleOnline = false
+    ): array {
+        $query = self::find()
+            ->select(['uc_user_id'])
+            ->where(['uc_controller_id' => $controller])
+            ->andWhere(['uc_action_id' => $action]);
+
+        if ($isOnline) {
+            $query->innerJoin(UserOnline::tableName() . ' AS user_online', 'user_online.uo_user_id = uc_user_id');
+            $query->andWhere(['user_online.uo_idle_state' => $idleOnline]);
+        }
+
+        return $query->orderBy(['uc_id' => SORT_DESC])
+            ->indexBy('uc_user_id')
+            ->column();
+    }
+
+    public static function getUsersByChanel(
+        int $channelId,
+        string $controller,
+        string $action,
+        bool $isOnline = true,
+        bool $idleOnline = false
+    ): array {
+        $query = self::find()
+            ->select(['uc_user_id'])
+            ->where(['uc_controller_id' => $controller])
+            ->innerJoin(ClientChatUserChannel::tableName() . ' AS user_channel', 'user_channel.ccuc_user_id = uc_user_id')
+            ->andWhere(['uc_action_id' => $action])
+            ->andWhere(['ccuc_channel_id' => $channelId]);
+
+        if ($isOnline) {
+            $query->innerJoin(UserOnline::tableName() . ' AS user_online', 'user_online.uo_user_id = uc_user_id');
+            $query->andWhere(['user_online.uo_idle_state' => $idleOnline]);
+        }
+
+        return $query->orderBy(['uc_id' => SORT_DESC])
+            ->indexBy('uc_user_id')
+            ->column();
+    }
 }

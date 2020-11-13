@@ -298,11 +298,15 @@ class CasesController extends FController
             }
         }
 
+        $smsEnabled = true;
+        if ($model->project->getCustomData()->sms_enabled === false) {
+            $smsEnabled = false;
+        }
 
         $previewSmsForm = new CasePreviewSmsForm();
         $previewSmsForm->is_send = false;
 
-        if ($previewSmsForm->load(Yii::$app->request->post())) {
+        if ($smsEnabled && $previewSmsForm->load(Yii::$app->request->post())) {
             $previewSmsForm->s_case_id = $model->cs_id;
             if ($previewSmsForm->validate()) {
 
@@ -379,7 +383,7 @@ class CasesController extends FController
 
             $comForm->c_case_id = $model->cs_id;
 
-            $isTypeSMS = (int)$comForm->c_type_id === CaseCommunicationForm::TYPE_SMS;
+            $isTypeSMS = (int)$comForm->c_type_id === CaseCommunicationForm::TYPE_SMS && $smsEnabled;
 
             $isTypeEmail = (int)$comForm->c_type_id === CaseCommunicationForm::TYPE_EMAIL;
 
@@ -727,7 +731,8 @@ class CasesController extends FController
 			'coupons' => $coupons,
 			'sendCouponsForm' => $sendCouponForm,
 
-			'fromPhoneNumbers' => $fromPhoneNumbers
+			'fromPhoneNumbers' => $fromPhoneNumbers,
+            'smsEnabled' => $smsEnabled
         ]);
     }
 
@@ -760,8 +765,13 @@ class CasesController extends FController
 //            ->addGroupBy(['id', 'case_id', 'created_dt']);
             ->addGroupBy(['id']);
 
+        $query4 = (new \yii\db\Query())
+            ->select(['cccs_chat_id AS id', new Expression('"chat" AS type'), 'cccs_case_id AS case_id', 'cccs_created_dt AS created_dt'])
+            ->from('{{%client_chat_case}}')
+            ->where(['cccs_case_id' => $model->cs_id]);
+
         $unionQuery = (new \yii\db\Query())
-            ->from(['union_table' => $query1->union($query2)->union($query3)])
+            ->from(['union_table' => $query1->union($query2)->union($query3)->union($query4)])
             ->orderBy(['created_dt' => SORT_ASC]);
 
         //echo $query1->count(); exit;
@@ -800,8 +810,13 @@ class CasesController extends FController
 			->orderBy(['created_dt' => SORT_ASC])
 			->groupBy(['id', 'type', 'case_id']);
 
+        $query4 = (new \yii\db\Query())
+            ->select(['cccs_chat_id AS id', new Expression('"chat" AS type'), 'cccs_case_id AS case_id', 'cccs_created_dt AS created_dt'])
+            ->from('{{%client_chat_case}}')
+            ->where(['cccs_case_id' => $model->cs_id]);
+
 		$unionQuery = (new \yii\db\Query())
-			->from(['union_table' => $query1->union($query2)->union($query3)])
+			->from(['union_table' => $query1->union($query2)->union($query3)->union($query4)])
 			->orderBy(['created_dt' => SORT_ASC]);
 
 
@@ -958,7 +973,7 @@ class CasesController extends FController
             throw new NotFoundHttpException('Client chat not found');
         }
 
-		if (!Auth::can('client-chat/manage/all', ['chat' => ClientChat::findOne(['cch_id' => $chat])])) {
+		if (!Auth::can('client-chat/manage', ['chat' => $chat])) {
 			throw new ForbiddenHttpException('You do not have access to perform this action', 403);
 		}
 

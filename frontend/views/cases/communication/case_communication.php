@@ -9,6 +9,7 @@
  * @var $isAdmin bool
  * @var $isCommunicationLogEnabled bool
  * @var $fromPhoneNumbers array
+ * @var bool $smsEnabled
  */
 
 use common\models\Call;
@@ -30,6 +31,7 @@ $c_type_id = $comForm->c_type_id;
 
 $pjaxContainerId = $isCommunicationLogEnabled ? 'pjax-case-communication-log' : 'pjax-case-communication';
 $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communication/_list_item';
+
 ?>
 
 <div class="x_panel">
@@ -329,7 +331,7 @@ $listItemView = $isCommunicationLogEnabled ? '_list_item_log' : '/lead/communica
                                             }
 
                                             //if ($agentParams->upp_tw_phone_number) {
-                                                if ($tk == \frontend\models\CommunicationForm::TYPE_SMS) {
+                                                if ($tk == \frontend\models\CommunicationForm::TYPE_SMS && $smsEnabled) {
 
                                                     if ($model->isDepartmentSupport()) {
                                                         $typeList[$tk] = $itemName;

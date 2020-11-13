@@ -448,7 +448,7 @@ JS;
             </div>
         </div>
     </div>
-    <?php if (!$model->isNewRecord && (Auth::user()->isAdmin() || Auth::user()->isSuperAdmin())) : ?>
+    <?php if (!$model->isNewRecord && (Auth::can('/employee/register-to-rocket-chat') && Auth::can('/employee/un-register-from-rocket-chat'))): ?>
         <h5>Rocket Chat Credentials</h5>
         <div class="well">
             <div class="form-group">
@@ -467,6 +467,8 @@ JS;
                         <?= $form->field($modelProfile, 'up_rc_auth_token')->textInput(['maxlength' => true]) ?>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-md-6">
                 <?php
                     $displayRegister = ($modelProfile->up_rc_user_id) ? 'block' : 'none';
                     echo Html::button(
@@ -499,6 +501,14 @@ JS;
                         ]
                     )
                 ?>
+                    </div>
+                    <?php if ($modelProfile->up_rc_user_id && $modelProfile->up_rc_auth_token && Auth::can('/employee/validate-rocket-chat-credential')): ?>
+                        <div class="col-md-6" style="text-align: right">
+                            <button class="btn btn-success refresh_token" data-user-id="<?= $modelProfile->up_user_id ?>">Refresh Token</button>
+                            <button class="btn btn-success validate_credential" data-user-id="<?= $modelProfile->up_user_id ?>">Validate credential</button>
+                        </div>
+                    <?php endif;?>
+                </div>
             </div>
         </div>
     <?php endif; ?>
@@ -684,7 +694,7 @@ JS;
 					'uvm_record_enable:booleanByLabel',
 					'uvm_max_recording_time',
 //					'uvm_transcribe_enable:booleanByLabel',
-					'uvm_enabled:booleanByLabel',
+//					'uvm_enabled:booleanByLabel',
 					'uvm_created_dt:byUserDateTime',
 					'uvm_updated_dt:byUserDateTime',
 					[
@@ -879,6 +889,8 @@ JS;
 
 
 <?php
+$validateCredentialRcUrl = Url::to(['/employee/validate-rocket-chat-credential']);
+$refreshTokenRcUrl = Url::to(['/employee/refresh-rocket-chat-user-token']);
 $js = <<<JS
 
     //  $(document).on('click', '.unblock-user', function(e) {
@@ -1148,6 +1160,67 @@ $js = <<<JS
             $(this).data('inner', $(this).html());            
         });
     });    
+    
+    $(document).on('click', '.validate_credential', function(e) {
+        e.preventDefault();
+        let btn = $(this); 
+        let userId = btn.attr('data-user-id');
+        btn.html('<i class="fa fa-spinner fa-spin"></i> Validate credential');
+        btn.attr('disabled', true);
+        $.ajax({
+            type: 'post',
+            dataType: 'json',
+            url: '{$validateCredentialRcUrl}',
+            data: {
+                id: userId
+            }
+        })
+        .done(function(data) {
+            if (data.error) {
+                createNotify('Validate Rocket Chat credential', data.message, 'error');
+                return;
+            }
+            createNotify('Validate Rocket Chat credential', 'Success', 'success');
+        })  
+         .fail(function (xhr, textStatus, errorThrown) {
+             createNotify('Validate Rocket Chat credential', xhr.responseText, 'error');
+         })
+        .always(function () {
+            btn.html('Validate credential');
+            btn.attr('disabled', false);
+        });
+    });
+    
+    $(document).on('click', '.refresh_token', function(e) {
+        e.preventDefault();
+        let btn = $(this); 
+        let userId = btn.attr('data-user-id');
+        btn.html('<i class="fa fa-spinner fa-spin"></i> Refresh Token');
+        btn.attr('disabled', true);
+        $.ajax({
+            type: 'post',
+            dataType: 'json',
+            url: '{$refreshTokenRcUrl}',
+            data: {
+                id: userId
+            }
+        })
+        .done(function(data) {
+            if (data.error) {
+                createNotify('Refresh Rocket Chat User Token', data.message, 'error');
+                return;
+            }
+            createNotify('Refresh Rocket Chat User Token', 'Success', 'success');
+            setTimeout(() => {window.location.reload();}, 500);
+        })  
+         .fail(function (xhr, textStatus, errorThrown) {
+             createNotify('Refresh Rocket Chat User Token', xhr.responseText, 'error');
+         })
+        .always(function () {
+            btn.html('Refresh Token');
+            btn.attr('disabled', false);
+        });
+    });
     
 JS;
 $this->registerJs($js);

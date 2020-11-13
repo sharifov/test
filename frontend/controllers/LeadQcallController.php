@@ -6,7 +6,6 @@ use common\models\Employee;
 use Yii;
 use common\models\LeadQcall;
 use common\models\search\LeadQcallSearch;
-use frontend\controllers\FController;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -23,6 +22,7 @@ class LeadQcallController extends FController
                 'class' => VerbFilter::class,
                 'actions' => [
                     'delete' => ['POST'],
+                    'flush' => ['POST'],
                 ],
             ],
         ];
@@ -146,5 +146,19 @@ class LeadQcallController extends FController
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    public function actionFlush()
+    {
+        $leads = LeadQcall::find()->select(['lqc_lead_id'])->asArray()->all();
+        if ($leads) {
+            $keys = [];
+            foreach ($leads as $lead) {
+                $keys[] = 'lead_redial_reservation_' . $lead['lqc_lead_id'];
+            }
+            Yii::$app->redis->del(...$keys);
+        }
+        Yii::$app->session->setFlash('success', 'Done');
+        return $this->redirect(['index']);
     }
 }

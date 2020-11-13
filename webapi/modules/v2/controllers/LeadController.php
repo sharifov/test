@@ -72,6 +72,7 @@ class LeadController extends BaseController
      * @apiParam {object}               lead.client                                 Client
      * @apiParam {string{20}}           lead.client.phone                           Client phone or Client email is required
      * @apiParam {string{160}}          lead.client.email                           Client email or Client phone is required
+     * @apiParam {string{50}}           [lead.client.uuid]                           Client uuid
      * @apiParam {int{2}=14-BOOK_FAILED, 15-ALTERNATIVE}   lead.status              Status
      * @apiParam {string{1}=E-ECONOMY, B-BUSINESS, F-FIRST, P-PREMIUM} lead.cabin   Cabin
      * @apiParam {int}                  lead.flight_id                              BO Flight ID
@@ -84,6 +85,7 @@ class LeadController extends BaseController
      *           "client": {
      *               "phone": "+37369333333",
      *               "email": "email@email.com",
+     *               "uuid" : "af5246f1-094f-4fde-ada3-bd7298621613"
      *           },
      *           "uid": "WD6q53PO3b",
      *           "status": 14,
@@ -150,6 +152,7 @@ class LeadController extends BaseController
      *              "client": {
      *                   "phone": "+37369636963",
      *                   "email": "example@test.com",
+     *                   "uuid" : "af5246f1-094f-4fde-ada3-bd7298621613"
      *               },
      *               "uid": "WD6q53PO3b",
      *               "status": 14,

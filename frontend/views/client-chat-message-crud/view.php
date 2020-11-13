@@ -32,6 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'attributes' => [
             'ccm_id',
             'ccm_rid',
+            'ccm_cch_id',
             'ccm_client_id',
             'ccm_user_id',
             'ccm_sent_dt',
@@ -72,6 +73,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw',
             ],
+            'byType:ntext:Type'
         ],
     ]) ?>
 

@@ -7,6 +7,7 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\services\clientChatMessage\ClientChatMessageService;
 use yii\bootstrap\Widget;
 use yii\caching\TagDependency;
+use yii\helpers\VarDumper;
 
 /**
  * Class NotificationSocketWidget
@@ -34,15 +35,14 @@ class NotificationSocketWidget extends Widget
 //            ];
 //        }, null, new TagDependency(['tags' => NotificationCache::getClientChatTags($this->userId)]));
 
-		$clientChatMessageService = \Yii::createObject(ClientChatMessageService::class);
-		$totalUnreadMessages = $clientChatMessageService->getCountOfTotalUnreadMessages($this->userId) ?: '';
-		$chatsWithUnreadMessages = ClientChat::find()->byIds($clientChatMessageService->getChatWithUnreadMessages($this->userId))->all();
+        $totalUnreadMessages = ClientChat::find()->select(['sum(ccu_count) as count'])->byOwner($this->userId)->withUnreadMessage()->asArray()->one();
+        $chatsWithUnreadMessages = ClientChat::find()->select(['*', 'ccu_count as countUnreadMessage'])->byOwner($this->userId)->withUnreadMessage()->all();
 
 		return $this->render('notifications-socket', [
         	'notifications' => $result['notifications'],
 			'count' => $result['count'],
-			'totalUnreadMessages' => $totalUnreadMessages,
-			'chatsWithUnreadMessages' => $chatsWithUnreadMessages
+            'totalUnreadMessages' => $totalUnreadMessages['count'] ?: '',
+            'chatsWithUnreadMessages' => $chatsWithUnreadMessages
 		]);
     }
 }

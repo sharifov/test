@@ -2,24 +2,30 @@
 
 namespace frontend\controllers;
 
+use common\models\Notifications;
 use common\models\VisitorLog;
+use frontend\widgets\clientChat\ClientChatAccessMessage;
 use sales\auth\Auth;
+use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\entity\search\ClientChatQaSearch;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
+use sales\model\clientChatChannel\entity\ClientChatChannel;
+use sales\model\clientChatFeedback\entity\ClientChatFeedbackSearch;
+use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatMessage\entity\search\ClientChatMessageSearch;
 use sales\model\clientChatNote\entity\ClientChatNoteSearch;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatRequest\entity\search\ClientChatRequestSearch;
-use sales\services\clientChatMessage\ClientChatMessageService;
+use Throwable;
 use Yii;
-use sales\model\clientChat\entity\ClientChat;
-use sales\model\clientChat\entity\search\ClientChatSearch;
-use frontend\controllers\FController;
-use yii\helpers\ArrayHelper;
-use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
-use yii\web\Response;
 use yii\db\StaleObjectException;
+use yii\filters\VerbFilter;
+use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
+use yii\web\BadRequestHttpException;
+use yii\web\NotAcceptableHttpException;
+use yii\web\NotFoundHttpException;
+use yii\web\Response;
 
 class ClientChatCrudController extends FController
 {
@@ -33,10 +39,10 @@ class ClientChatCrudController extends FController
      * @param array $config
      */
     public function __construct($id, $module, ClientChatRepository $clientChatRepository, $config = [])
-	{
-		parent::__construct($id, $module, $config);
-		$this->clientChatRepository = $clientChatRepository;
-	}
+    {
+        parent::__construct($id, $module, $config);
+        $this->clientChatRepository = $clientChatRepository;
+    }
 
     /**
     * @return array
@@ -54,6 +60,12 @@ class ClientChatCrudController extends FController
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
+    public function init(): void
+    {
+        parent::init();
+        $this->layoutCrud();
+    }
+
     /**
      * @return string
      */
@@ -62,7 +74,7 @@ class ClientChatCrudController extends FController
         $searchModel = new ClientChatQaSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-        return $this->render('../client-chat-qa/index', [
+        return $this->render('../client-chat-crud/index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
@@ -93,15 +105,20 @@ class ClientChatCrudController extends FController
 
         $requestSearch = new ClientChatRequestSearch();
         $visitorId = '';
-		if ($clientChat->ccv && $clientChat->ccv->ccvCvd) {
-		    $visitorId = $clientChat->ccv->ccvCvd->cvd_visitor_rc_id ?? '';
-		}
+        if ($clientChat->ccv && $clientChat->ccv->ccvCvd) {
+            $visitorId = $clientChat->ccv->ccvCvd->cvd_visitor_rc_id ?? '';
+        }
         $data[$requestSearch->formName()]['ccr_visitor_id'] = $visitorId;
         $data[$requestSearch->formName()]['ccr_event'] = ClientChatRequest::EVENT_TRACK;
         $dataProviderRequest = $requestSearch->search($data);
         $dataProviderRequest->setPagination(['pageSize' => 10]);
 
-        return $this->render('../client-chat-qa/view', [
+        $searchModelFeedback = new ClientChatFeedbackSearch();
+        $data[$searchModelFeedback->formName()]['ccf_client_chat_id'] = $id;
+        $dataProviderFeedback = $searchModelFeedback->search($data);
+        $dataProviderFeedback->setPagination(['pageSize' => 20]);
+
+        return $this->render('../client-chat-crud/view', [
             'model' => $this->findModel($id),
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
@@ -109,6 +126,7 @@ class ClientChatCrudController extends FController
             'visitorLog' => $visitorLog ?? null,
             'clientChatVisitorData' => $clientChat->ccv->ccvCvd ?? null,
             'dataProviderRequest' => $dataProviderRequest,
+            'dataProviderFeedback' => $dataProviderFeedback,
         ]);
     }
 
@@ -119,8 +137,8 @@ class ClientChatCrudController extends FController
     {
         $model = new ClientChat();
 
-		$model->cch_created_user_id = Auth::id();
-		$model->cch_updated_user_id = Auth::id();
+        $model->cch_created_user_id = Auth::id();
+        $model->cch_updated_user_id = Auth::id();
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->cch_id]);
         }
@@ -138,10 +156,24 @@ class ClientChatCrudController extends FController
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        $model->cch_updated_user_id = Auth::id();
+        $oldStatus = $model->cch_status_id;
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-			$model->cch_updated_user_id = Auth::id();
-			return $this->redirect(['view', 'id' => $model->cch_id]);
+
+            if ((ClientChat::STATUS_IDLE !== $oldStatus) && $model->isIdle()) { /* TODO:: FOR TEST  */
+                Notifications::pub(
+                    ['chat-' . $model->cch_id],
+                    'reloadChatInfo',
+                    ['data' => ClientChatAccessMessage::chatIdle($model->cch_id)]
+                );
+                Notifications::pub(
+                    [ClientChatChannel::getPubSubKey($model->cch_channel_id)],
+                    'reloadClientChatList'
+                );
+            }
+
+            return $this->redirect(['view', 'id' => $model->cch_id]);
         }
 
         return $this->render('update', [
@@ -156,11 +188,53 @@ class ClientChatCrudController extends FController
      * @throws \Throwable
      * @throws StaleObjectException
      */
-    public function actionDelete($id): Response
+    public function actionDelete(int $id): Response
     {
         $this->findModel($id)->delete();
-
+        ClientChatMessage::removeAllMessages($id);
         return $this->redirect(['index']);
+    }
+
+    /**
+     * @return Response
+     * @throws BadRequestHttpException
+     */
+    public function actionSelectAll(): Response
+    {
+        if (Yii::$app->request->isAjax) {
+            $result = (new ClientChatQaSearch())->searchIds(Yii::$app->request->queryParams);
+            return $this->asJson($result);
+        }
+        throw new BadRequestHttpException();
+    }
+
+    public function actionDeleteSelected(): Response
+    {
+        if (!Auth::user()->isAdmin()) {
+            throw new NotAcceptableHttpException('Access denied');
+        }
+
+        $items = Yii::$app->request->post('selection');
+
+        if (Yii::$app->request->isAjax && !empty($items) && is_array($items)) {
+            $result = [];
+            foreach ($items as $value) {
+                if ($clientChat = self::findModel($value)) {
+                    try {
+                        $clientChat->delete();
+                        ClientChatMessage::removeAllMessages($value);
+                        $result[] = $value;
+                    } catch (Throwable $throwable) {
+                        Yii::warning(
+                            VarDumper::dumpAsString($throwable),
+                            'ClientChatCrudController:actionDeleteSelected'
+                        );
+                    }
+                }
+            }
+            return $this->asJson($result);
+        }
+        throw new BadRequestHttpException();
     }
 
     /**
@@ -168,7 +242,7 @@ class ClientChatCrudController extends FController
      * @return ClientChat
      * @throws NotFoundHttpException
      */
-    protected function findModel($id): ClientChat
+    protected function findModel(int $id): ClientChat
     {
         if (($model = ClientChat::findOne($id)) !== null) {
             return $model;

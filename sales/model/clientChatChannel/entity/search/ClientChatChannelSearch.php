@@ -11,26 +11,21 @@ class ClientChatChannelSearch extends ClientChatChannel
     {
         return [
             ['ccc_created_dt', 'safe'],
-
+            ['ccc_settings', 'safe'],
             ['ccc_created_user_id', 'integer'],
-
             ['ccc_dep_id', 'integer'],
-
             ['ccc_disabled', 'integer'],
-
+            ['ccc_default', 'integer'],
+            ['ccc_frontend_enabled', 'integer'],
             ['ccc_priority', 'integer'],
-
             ['ccc_id', 'integer'],
-
             ['ccc_name', 'safe'],
-
+            ['ccc_frontend_name', 'safe'],
             ['ccc_project_id', 'integer'],
-
             ['ccc_ug_id', 'integer'],
-
             ['ccc_updated_dt', 'safe'],
-
             ['ccc_updated_user_id', 'integer'],
+            ['ccc_registered', 'boolean']
         ];
     }
 
@@ -59,14 +54,19 @@ class ClientChatChannelSearch extends ClientChatChannel
             'ccc_dep_id' => $this->ccc_dep_id,
             'ccc_ug_id' => $this->ccc_ug_id,
             'ccc_disabled' => $this->ccc_disabled,
+            'ccc_frontend_enabled' => $this->ccc_frontend_enabled,
+            'ccc_default' => $this->ccc_default,
             'ccc_priority' => $this->ccc_priority,
             'date_format(ccc_created_dt, "%Y-%m-%d")' => $this->ccc_created_dt,
             'date_format(ccc_updated_dt, "%Y-%m-%d")' => $this->ccc_updated_dt,
             'ccc_created_user_id' => $this->ccc_created_user_id,
             'ccc_updated_user_id' => $this->ccc_updated_user_id,
+            'ccc_registered' => $this->ccc_registered,
         ]);
 
         $query->andFilterWhere(['like', 'ccc_name', $this->ccc_name]);
+        $query->andFilterWhere(['like', 'ccc_frontend_name', $this->ccc_frontend_name]);
+        $query->andFilterWhere(['like', 'ccc_settings', $this->ccc_settings]);
 
         return $dataProvider;
     }

@@ -118,7 +118,12 @@ class LeadController extends ApiBaseController
      * @apiParam {string{500}}          lead.visitor_log.vl_user_agent
      * @apiParam {string{39}}           lead.visitor_log.vl_ip_address
      * @apiParam {datetime{YYYY-MM-DD HH:mm:ss}}  lead.visitor_log.vl_visit_dt
-     *
+     * @apiParam {object}               Client
+     * @apiParam {string}               [Client.name]                            Client name
+     * @apiParam {string}               [Client.phone]                           Client phone
+     * @apiParam {string}               [Client.email]                           Client email
+     * @apiParam {string}               [Client.client_ip]                       Client client_ip
+     * @apiParam {string}               [Client.uuid]                            Client uuid
      *
      * @apiParamExample {json} Request-Example:
      * {
@@ -188,6 +193,13 @@ class LeadController extends ApiBaseController
      *                   "vl_visit_dt": "2020-02-14 12:00:00"
      *               }
      *        ]
+     *    },
+     *    "Client": {
+     *        "name": "Alexandr",
+     *        "phone": "+373-69-487523",
+     *        "email": "email1@gmail.com",
+     *        "client_ip": "127.0.0.1",
+     *        "uuid": "35009a79-1a05-49d7-b876-2b884d0f825b"
      *    }
      * }
      *
@@ -384,8 +396,12 @@ class LeadController extends ApiBaseController
             $post = Yii::$app->request->post();
         }
 
+        if (!empty($post['Client']['uuid'])) {
+            $post['lead']['clientUuid'] = $post['Client']['uuid'];
+        }
 
         $modelLead = new ApiLead();
+
         //$modelLead->scenario = ApiLead::SCENARIO_CREATE;
 
         //print_r($this->apiProject); exit;
@@ -397,7 +413,6 @@ class LeadController extends ApiBaseController
         }
 
         if ($modelLead->load($post)) {
-
 
             if($modelLead->project_id) {
 
@@ -1318,7 +1333,6 @@ class LeadController extends ApiBaseController
                 $message = $e->getMessage() . ' (code:' . $e->getCode() . ', line: ' . $e->getLine() . ')';
             }
             $response['error'] = $message;
-            $response['errors'] = $message;
             $response['error_code'] = 30;
         }
 

@@ -51,6 +51,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'is_company:booleanByLabel',
             'is_public:booleanByLabel',
             'disabled:booleanByLabel',
+            'project:ProjectName',
+            [
+                'attribute' => 'cl_type_create',
+                'value' => static function (Client $model) {
+                    return Client::TYPE_CREATE_LIST[$model->cl_type_create] ?? null;
+                },
+            ],
             [
                 'attribute' => 'ucl_favorite',
                 'value' => static function(Client $model) {

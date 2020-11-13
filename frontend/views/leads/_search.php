@@ -58,7 +58,7 @@ use frontend\extensions\DatePicker;
 
             <div class="row">
                 <div class="col-md-6">
-                    <?= $form->field($model, 'client_email')//->input('email')  ?>
+                    <?= $form->field($model, 'client_email')//->input('email')?>
                 </div>
                 <div class="col-md-6">
                     <?= $form->field($model, 'client_phone') ?>
@@ -93,7 +93,7 @@ use frontend\extensions\DatePicker;
 
             <div class="row">
                 <div class="col-md-12">
-                    <?php //= $form->field($model, 'status')->dropDownList(Lead::STATUS_LIST, ['prompt' => '-']) ?>
+                    <?php //= $form->field($model, 'status')->dropDownList(Lead::STATUS_LIST, ['prompt' => '-'])?>
                     <?php
                     echo $form->field($model, 'statuses')->widget(Select2::class, [
                         'data' => Lead::STATUS_LIST,
@@ -230,24 +230,24 @@ use frontend\extensions\DatePicker;
                 </div>
             </div>
 
-            <?php //= $form->field($model, 'employee_id') ?>
+            <?php //= $form->field($model, 'employee_id')?>
 
 
         </div>
 
         <div class="col-md-3">
-            <?php // echo $form->field($model, 'request_ip_detail') ?>
+            <?php // echo $form->field($model, 'request_ip_detail')?>
 
-            <?php // echo $form->field($model, 'offset_gmt') ?>
+            <?php // echo $form->field($model, 'offset_gmt')?>
 
-            <?php //php  echo $form->field($model, 'snooze_for') ?>
+            <?php //php  echo $form->field($model, 'snooze_for')?>
 
             <div class="row">
                 <div class="col-md-6">
                     <?php echo $form->field($model, 'rating')->dropDownList(array_combine(range(1, 3), range(1, 3)), ['prompt' => '-']) ?>
                 </div>
 
-                <?php //php  echo $form->field($model, 'called_expert') ?>
+                <?php //php  echo $form->field($model, 'called_expert')?>
                 <div class="col-md-6">
                     <?php echo $form->field($model, 'employee_id')->dropDownList($lists->getEmployees(true), ['prompt' => '-']) ?>
                 </div>
@@ -267,7 +267,7 @@ use frontend\extensions\DatePicker;
                 <div class="col-md-6"><?php echo $form->field($model, 'quote_pnr')->label('PNR') ?></div>
             </div>
 
-            <?php //php  echo $form->field($model, 'bo_flight_id') ?>
+            <?php //php  echo $form->field($model, 'bo_flight_id')?>
 
             <div class="row">
                 <div class="col-md-12">

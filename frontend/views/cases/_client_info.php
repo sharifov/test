@@ -16,6 +16,13 @@ use sales\auth\Auth;
         <div class="x_title">
             <h2><i class="fa fa-user"></i> Client Info</h2>
             <ul class="nav navbar-right panel_toolbox">
+                <li>
+                    <?=Html::a('<i class="fas fa-info-circle"></i> Details', '#',  [
+                        'id' => 'btn-client-details',
+                        'data-client-id' => $caseModel->cs_client_id,
+                        'title' => 'Client Info',
+                    ])?>
+                </li>
                 <?php if($caseModel->isProcessing()):?>
                     <li>
                         <?= \yii\bootstrap\Html::a('<i class="fa fa-plus-circle success"></i> Add Phone', '#', ['id' => 'btn-add-phone', 'title' => 'Add Phone'])?>
@@ -99,6 +106,7 @@ use sales\auth\Auth;
                         <?= \yii\widgets\DetailView::widget([
                             'model' => $caseModel->client,
                             'attributes' => [
+                                'project:projectName',
                                 [
                                     'label' => 'Phones',
                                     'value' => function(\common\models\Client $model) {

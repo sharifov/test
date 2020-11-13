@@ -1,4 +1,5 @@
 <?php
+
 return [
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
@@ -42,6 +43,14 @@ return [
             'defaultDuration' => 10 * 60,
             'gcProbability' => 100,
         ],
+        'webApiCache' => [
+            'class' => 'yii\caching\FileCache',
+            'cachePath' => '@webapi/runtime/cache'
+        ],
+        'consoleCache' => [
+            'class' => 'yii\caching\FileCache',
+            'cachePath' => '@console/runtime/cache'
+        ],
         'mailer' => [
             'class' => 'yii\swiftmailer\Mailer',
             'viewPath' => '@common/mail',
@@ -84,7 +93,6 @@ return [
         'chatBot' => [
             'class' => \common\components\ChatBot::class,
             'url' => 'https://chatbot.travel-dev.com/private/api/v1/',
-			'visitorsUrl' => 'https://chatbot.travel-dev.com/visitors/api/v1/',
             'username' => '',
             'password' => '',
         ],
@@ -126,6 +134,19 @@ return [
             'port' => 11300,
             'tube' => 'queue_system_services',
         ],
+        'queue_client_chat_job' => [
+            'class' => \yii\queue\beanstalk\Queue::class,
+            'host' => 'localhost',
+            'port' => 11300,
+            'tube' => 'queue_client_chat_job',
+            'as idAccess' => sales\behaviors\JobIdAccessBehavior::class
+        ],
+        'queue_virtual_cron' => [
+            'class' => \kivork\VirtualCron\Queue\Queue::class,
+            'host' => 'localhost',
+            'port' => 11300,
+            'tube' => 'queue_virtual_cron',
+        ],
         'telegram' => [
             'class' => \aki\telegram\Telegram::class,
             'botUsername' => 'CrmKivorkBot',
@@ -141,7 +162,9 @@ return [
         'queue_email_job',
         'queue_phone_check',
         'queue_job',
+        'queue_client_chat_job',
         'queue_system_services',
+        'queue_virtual_cron',
         \common\components\SettingsBootstrap::class,
         common\bootstrap\SetUp::class,
         common\bootstrap\SetUpListeners::class,

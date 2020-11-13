@@ -5,6 +5,7 @@ use frontend\helpers\ChatHelper;
 use frontend\helpers\JsonHelper;
 use frontend\helpers\OutHelper;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChatFeedback\entity\ClientChatFeedback;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatMessage\entity\search\ClientChatMessageSearch;
 use sales\model\clientChatNote\entity\ClientChatNote;
@@ -26,6 +27,7 @@ use yii\widgets\Pjax;
 /* @var yii\data\ActiveDataProvider $dataProviderNotes */
 /* @var yii\data\ActiveDataProvider $dataProviderRequest */
 /* @var ClientChatVisitorData|null $clientChatVisitorData */
+/* @var yii\data\ActiveDataProvider|null $dataProviderFeedback */
 
 $this->title = $model->cch_id;
 $this->params['breadcrumbs'][] = ['label' => 'Client Chats', 'url' => ['index']];
@@ -36,7 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="row">
         <div class="col-md-4">
             <?php $room = Html::a('<span class="glyphicon glyphicon-list-alt"></span>',
-                ['/client-chat-qa/room', 'rid' => $model->cch_rid],
+                ['/client-chat-qa/room', 'id' => $model->cch_id],
                 [
                     'target' => '_blank',
                     'data-pjax' => 0,
@@ -48,6 +50,17 @@ $this->params['breadcrumbs'][] = $this->title;
                 'model' => $model,
                 'attributes' => [
                     'cch_id',
+					[
+						'attribute' => 'cch_parent_id',
+						'value' => static function (ClientChat $model) {
+							return $model->cch_parent_id ?
+								Html::a('<i class="fa fa-link"></i> ' . $model->cch_parent_id,
+									['client-chat-crud/view', 'id' => $model->cch_parent_id],
+									['target' => '_blank', 'data-pjax' => 0]) : '-';
+						},
+						'format' => 'raw',
+						'options' => ['style' => 'width:100px'],
+					],
                     'cch_rid',
                     'cch_ccr_id',
                     'cch_title',
@@ -83,10 +96,18 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'attribute' => 'cch_language_id',
                         'value' => static function (ClientChat $model) {
-                            return $model->language ? $model->language->name : '<span class="not-set">(not set)</span>';
+                            return $model->language ? $model->language->name : null;
                         },
                         'format' => 'raw',
                     ],
+					[
+						'attribute' => 'cch_source_type_id',
+						'value' => static function (ClientChat $model) {
+							return $model->getSourceTypeName();
+						},
+						'format' => 'raw',
+					],
+					'cch_missed:booleanByLabel',
                     'cch_created_dt:byUserDateTime',
                     'cch_updated_dt:byUserDateTime',
                     'cch_created_user_id:username',
@@ -254,6 +275,9 @@ $this->params['breadcrumbs'][] = $this->title;
                             $view = '';
                             if (array_key_exists('attachments', $model->ccm_body)) {
                                 foreach ($model->ccm_body['attachments'] as $attachment) {
+                                    if (!is_array($attachment)) {
+                                        continue;
+                                    }
                                     if (array_key_exists('title_link', $attachment) && array_key_exists('title', $attachment)) {
                                         $titleLink = explode('.', $attachment['title_link']);
                                         $title = '[' . StringHelper::truncate($attachment['title'], 20) . '].' . end($titleLink);
@@ -292,6 +316,24 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     'ccn_user_id:userName',
                     'ccn_created_dt:byUserDateTime',
+                ],
+            ]);  ?>
+        </div>
+
+        <div class="col-md-6">
+            <h5>Chat feedback</h5>
+            <?php echo GridView::widget([
+                'dataProvider' => $dataProviderFeedback,
+                'columns' => [
+                    [
+                        'attribute' => 'ccf_message',
+                        'value' => static function (ClientChatFeedback $feedback) {
+                            return Html::encode($feedback->ccf_message);
+                        },
+                    ],
+                    'ccf_rating',
+                    'ccf_user_id:userName',
+                    'ccf_created_dt:byUserDateTime',
                 ],
             ]);  ?>
         </div>

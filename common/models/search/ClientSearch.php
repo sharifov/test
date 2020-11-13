@@ -5,6 +5,7 @@ namespace common\models\search;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Employee;
+use common\models\Project;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Client;
@@ -31,6 +32,11 @@ class ClientSearch extends Client
             ['uuid', 'string', 'max' => 36],
             [['company_name'], 'string', 'max' => 150],
             [['is_company', 'is_public', 'disabled'], 'boolean'],
+
+            ['cl_project_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['cl_project_id', 'integer'],
+
+            ['parent_id', 'integer'],
         ];
     }
 
@@ -40,7 +46,7 @@ class ClientSearch extends Client
      */
     public function search($params): ActiveDataProvider
     {
-        $query = Client::find()->with('leads.employee.ugsGroups');
+        $query = Client::find()->with(['leads.employee.ugsGroups'])->joinWith(['project']);
 
         // add conditions that should always apply here
 
@@ -51,6 +57,11 @@ class ClientSearch extends Client
                 'pageSize' => 30,
             ],
         ]);
+
+        $dataProvider->sort->attributes['cl_project_id'] = [
+            'asc' => [Project::tableName() . '.name' => SORT_ASC],
+            'desc' => [Project::tableName() . '.name' => SORT_DESC],
+        ];
 
         $this->load($params);
 
@@ -72,21 +83,21 @@ class ClientSearch extends Client
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'id' => $this->id,
+            Client::tableName() . '.id' => $this->id,
         ]);
 
         if($this->not_in_client_id) {
-            $query->andWhere(['NOT IN', 'id', $this->not_in_client_id]);
+            $query->andWhere(['NOT IN', Client::tableName() . '.id', $this->not_in_client_id]);
         }
 
         if ($this->client_email) {
             $subQuery = ClientEmail::find()->select(['DISTINCT(client_id)'])->where(['like', 'email', $this->client_email]);
-            $query->andWhere(['IN', 'id', $subQuery]);
+            $query->andWhere(['IN', Client::tableName() . '.id', $subQuery]);
         }
 
         if ($this->client_phone) {
             $subQuery = ClientPhone::find()->select(['DISTINCT(client_id)'])->where(['like', 'phone', $this->client_phone]);
-            $query->andWhere(['IN', 'id', $subQuery]);
+            $query->andWhere(['IN', Client::tableName() . '.id', $subQuery]);
         }
 
         $query->andFilterWhere(['like', 'first_name', $this->first_name])
@@ -99,7 +110,16 @@ class ClientSearch extends Client
             'is_company' => $this->is_company,
             'is_public' => $this->is_public,
             'disabled' => $this->disabled,
+            'parent_id' => $this->parent_id,
         ]);
+
+        if ($this->cl_project_id === -1) {
+            $query->andWhere(['IS', 'cl_project_id', null]);
+        } else {
+            $query->andFilterWhere([
+                'cl_project_id' => $this->cl_project_id,
+            ]);
+        }
 
         return $dataProvider;
     }

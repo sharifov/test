@@ -7,14 +7,12 @@ use common\components\purifier\Purifier;
 use common\components\purifier\PurifierFilter;
 use common\models\query\NotificationsQuery;
 use frontend\widgets\notification\NotificationCache;
+use frontend\widgets\notification\NotificationMessage;
 use sales\helpers\app\AppHelper;
 use Yii;
 use yii\behaviors\TimestampBehavior;
-use yii\caching\TagDependency;
 use yii\db\ActiveRecord;
 use yii\helpers\Json;
-use yii\helpers\VarDumper;
-use yii\queue\beanstalk\Queue;
 
 /**
  * This is the model class for table "notifications".
@@ -38,11 +36,10 @@ use yii\queue\beanstalk\Queue;
  */
 class Notifications extends ActiveRecord
 {
-
-    CONST TYPE_SUCCESS = 1;
-    CONST TYPE_INFO = 2;
-    CONST TYPE_WARNING = 3;
-    CONST TYPE_DANGER = 4;
+    const TYPE_SUCCESS = 1;
+    const TYPE_INFO = 2;
+    const TYPE_WARNING = 3;
+    const TYPE_DANGER = 4;
 
     private $_eventList = [];
 
@@ -142,11 +139,16 @@ class Notifications extends ActiveRecord
      */
     public function getType($type_id = null)
     {
-        if(!$type_id) $type_id = $this->n_type_id;
+        if (!$type_id) {
+            $type_id = $this->n_type_id;
+        }
 
         $list = self::getTypeList();
-        if(isset($list[$type_id])) return $list[$type_id];
-            else return '???';
+        if (isset($list[$type_id])) {
+            return $list[$type_id];
+        } else {
+            return '???';
+        }
     }
 
     /**
@@ -346,7 +348,7 @@ class Notifications extends ActiveRecord
         $redis = \Yii::$app->redis;
         $channels = [];
 
-        if($command) {
+        if ($command) {
             $data['cmd'] = $command;
         }
         $jsonData = [];
@@ -354,15 +356,14 @@ class Notifications extends ActiveRecord
         if (isset($params['user_id'])) {
             $jsonData['user_id'] = (int) $params['user_id'];
             $channels[] = 'user-' . $jsonData['user_id'];
-
         }
 
-        if(isset($params['lead_id'])) {
+        if (isset($params['lead_id'])) {
             $jsonData['lead_id'] = $params['lead_id'];
             $channels[] = 'lead-' . $jsonData['lead_id'];
         }
 
-        if(isset($params['case_id'])) {
+        if (isset($params['case_id'])) {
             $jsonData['case_id'] = $params['case_id'];
             $channels[] = 'case-' . $jsonData['case_id'];
         }
@@ -392,7 +393,7 @@ class Notifications extends ActiveRecord
     public static function pub(array $channels, string $command, array $data = []) : bool
     {
         $redis = \Yii::$app->redis;
-        if($command) {
+        if ($command) {
             $data['cmd'] = $command;
         }
         $jsonData = $data;
@@ -429,7 +430,7 @@ class Notifications extends ActiveRecord
             ->cache(60)
             ->column();
 
-        if($userConnections) {
+        if ($userConnections) {
             $pubChannelList = [];
             foreach ($userConnections as $uc_id) {
                 // self::socket($user_id, null, 'callMapUpdate', [], true);
@@ -477,5 +478,62 @@ class Notifications extends ActiveRecord
     {
         $this->on($name, $handler, $data, $append);
         $this->_eventList[] = $name;
+    }
+
+    /**
+     * @param int $user_id
+     * @param string $title
+     * @param string $message
+     * @param int $type
+     * @param bool $popup
+     * @param bool $unique
+     * @return bool
+     */
+    public static function createAndPublish($user_id = 0, $title = '', $message = '', $type = 1, $popup = true, $unique = false): bool
+    {
+        if ($ntf = self::create($user_id, $title, $message, $type, $popup, $unique)) {
+            $dataNotification = (\Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+            return self::publish('getNewNotification', ['user_id' => $user_id], $dataNotification);
+        }
+        return false;
+    }
+
+    public static function sendCommandByControllerAction(
+        string $command,
+        string $controller,
+        string $action,
+        array $data = [],
+        bool $isOnline = true,
+        bool $idleOnline = false
+    ): array {
+        $resultUserIds = [];
+        if ($userIds = UserConnection::getUsersByControllerAction($controller, $action, $isOnline, $idleOnline)) {
+            foreach ($userIds as $userId) {
+                $socketParams['user_id'] = $userId;
+                self::publish($command, $socketParams, ['data' => $data]);
+                $resultUserIds[] = $userId;
+            }
+        }
+        return $resultUserIds;
+    }
+
+    public static function sendCommandByChanel(
+        string $command,
+        int $channelId,
+        array $data = [],
+        string $controller = 'client-chat',
+        string $action = 'index',
+        bool $isOnline = true,
+        bool $idleOnline = false
+    ): array {
+        $resultUserIds = [];
+        if ($userIds = UserConnection::getUsersByChanel($channelId, $controller, $action, $isOnline, $idleOnline)) {
+            foreach ($userIds as $userId) {
+                $socketParams['user_id'] = $userId;
+                self::publish($command, $socketParams, ['data' => $data]);
+                $resultUserIds[] = $userId;
+            }
+        }
+        return $resultUserIds;
     }
 }

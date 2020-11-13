@@ -55,6 +55,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'cvd_updated_dt',
                 'cvd_visitor_rc_id',
             ],
+            'options' => [
+                'class' => 'table table-striped table-bordered detail-view table-responsive'
+            ]
         ]) ?>
 
     </div>

@@ -2,18 +2,36 @@
 
 namespace frontend\controllers;
 
+use sales\model\clientChatRequest\repository\ClientChatRequestRepository;
+use sales\model\clientChatRequest\useCase\api\create\ClientChatRequestService;
 use Yii;
 use sales\model\clientChatRequest\entity\ClientChatRequest;
 use sales\model\clientChatRequest\entity\search\ClientChatRequestSearch;
-use frontend\controllers\FController;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\db\StaleObjectException;
 
+/**
+ * Class ClientChatRequestCrudController
+ * @package frontend\controllers
+ *
+ * @property ClientChatRequestRepository $requestRepository
+ */
 class ClientChatRequestCrudController extends FController
 {
+    /**
+     * @var ClientChatRequestRepository
+     */
+    private ClientChatRequestRepository $requestRepository;
+
+    public function __construct($id, $module, ClientChatRequestRepository $requestRepository, $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->requestRepository = $requestRepository;
+    }
+
     /**
     * @return array
     */
@@ -28,6 +46,12 @@ class ClientChatRequestCrudController extends FController
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
+    public function init(): void
+    {
+        parent::init();
+        $this->layoutCrud();
     }
 
     /**
@@ -63,8 +87,13 @@ class ClientChatRequestCrudController extends FController
     {
         $model = new ClientChatRequest();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->ccr_id]);
+        if ($model->load(Yii::$app->request->post())) {
+            try {
+                $this->requestRepository->save($model);
+                return $this->redirect(['view', 'id' => $model->ccr_id]);
+            } catch (\Throwable $e) {
+                $model->addError('general' , $e->getMessage());
+            }
         }
 
         return $this->render('create', [
@@ -81,8 +110,13 @@ class ClientChatRequestCrudController extends FController
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->ccr_id]);
+        if ($model->load(Yii::$app->request->post())) {
+            try {
+                $this->requestRepository->save($model);
+                return $this->redirect(['view', 'id' => $model->ccr_id]);
+            } catch (\Throwable $e) {
+                $model->addError('general', $e->getMessage());
+            }
         }
 
         return $this->render('update', [

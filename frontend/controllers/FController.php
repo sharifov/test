@@ -25,6 +25,11 @@ class FController extends Controller
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
+    public function layoutCrud(): void
+    {
+        $this->layout = '@frontend/themes/gentelella_v2/views/layouts/main_crud.php';
+    }
+
     public function beforeAction($action)
     {
 //       $this->layout = '@frontend/themes/gentelella_v2/views/layouts/main.php';

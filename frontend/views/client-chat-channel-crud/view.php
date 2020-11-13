@@ -16,8 +16,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <div class="col-md-4">
-
         <p>
             <?= Html::a('Update', ['update', 'id' => $model->ccc_id], ['class' => 'btn btn-primary']) ?>
             <?= Html::a('Delete', ['delete', 'id' => $model->ccc_id], [
@@ -27,13 +25,37 @@ $this->params['breadcrumbs'][] = $this->title;
                     'method' => 'post',
                 ],
             ]) ?>
+            <?= Html::a('Validate', ['validate', 'id' => $model->ccc_id], [
+                'class' => 'btn btn-info',
+                'data' => [
+                    'confirm' => 'Are you sure you want to Validate?',
+                    'method' => 'post',
+                ],
+            ]) ?>
+            <?= Html::a('Register', ['register', 'id' => $model->ccc_id], [
+                'class' => 'btn btn-warning',
+                'data' => [
+                    'confirm' => 'Are you sure you want to Register?',
+                    'method' => 'post',
+                ],
+            ]) ?>
+            <?= Html::a('UnRegister', ['un-register', 'id' => $model->ccc_id], [
+                'class' => 'btn btn-danger',
+                'data' => [
+                    'confirm' => 'Are you sure you want to UnRegister?',
+                    'method' => 'post',
+                ],
+            ]) ?>
         </p>
 
+    <div class="col-md-4">
         <?= DetailView::widget([
             'model' => $model,
             'attributes' => [
                 'ccc_id',
                 'ccc_name',
+                'ccc_registered:booleanByLabel',
+                'ccc_frontend_name',
                 'ccc_project_id:projectName',
                 'ccc_dep_id:departmentName',
                 [
@@ -43,6 +65,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     }
                 ],
                 'ccc_disabled:booleanByLabel',
+                'ccc_frontend_enabled:booleanByLabel',
                 'ccc_default:booleanByLabel',
                 'ccc_priority',
                 'ccc_created_dt:byUserDateTime',
@@ -52,6 +75,15 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ]) ?>
 
+    </div>
+
+    <div class="col-md-8">
+        <h2>Settings:</h2>
+        <?php if ($model->ccc_settings): ?>
+            <pre>
+            <?php \yii\helpers\VarDumper::dump(@json_decode($model->ccc_settings, true), 10, true) ?>
+            </pre>
+        <?php endif;?>
     </div>
 
 </div>

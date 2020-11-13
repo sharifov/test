@@ -25,7 +25,12 @@ class ClientChatStatusLog extends ClientChatStatusLogModel
             ['csl_start_dt', 'safe'],
 
             ['csl_to_status', 'integer'],
-        ];
+
+            ['csl_user_id', 'integer'],
+            ['csl_prev_channel_id', 'integer'],
+			['csl_action_type', 'integer'],
+
+		];
     }
 
     public function search($params): ActiveDataProvider
@@ -55,6 +60,9 @@ class ClientChatStatusLog extends ClientChatStatusLogModel
             'date_format(csl_start_dt, "%Y-%m-%d")' => $this->csl_start_dt,
             'date_format(csl_end_dt, "%Y-%m-%d")' => $this->csl_end_dt,
             'csl_owner_id' => $this->csl_owner_id,
+            'csl_user_id' => $this->csl_user_id,
+            'csl_prev_channel_id' => $this->csl_prev_channel_id,
+            'csl_action_type' => $this->csl_action_type,
         ]);
 
         $query->andFilterWhere(['like', 'csl_description', $this->csl_description]);

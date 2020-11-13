@@ -72,9 +72,9 @@ class InternalContactService
     {
         $log = new Log();
 
-        if ($incomingProject === null) {
-            $log->add('Incoming Project is empty');
-        }
+//        if ($incomingProject === null) {
+//            $log->add('Incoming Project is empty');
+//        }
 
         if ($dpp = DepartmentPhoneProject::find()->byPhone($phone)->one()) {
             if ($dpp->dpp_dep_id && $department = $dpp->dppDep) {
@@ -106,7 +106,7 @@ class InternalContactService
             }
         }
 
-        $log->add('Not found department for phone: ' . $phone);
+//        $log->add('Not found department for phone: ' . $phone);
         return new InternalContact(null, null, null, $log);
     }
 
@@ -119,9 +119,9 @@ class InternalContactService
     {
         $log = new Log();
 
-        if ($incomingProject === null) {
-            $log->add('Incoming Project is empty');
-        }
+//        if ($incomingProject === null) {
+//            $log->add('Incoming Project is empty');
+//        }
 
         if ($dep = DepartmentEmailProject::find()->byEmail($email)->one()) {
             if ($dep->dep_dep_id && $department = $dep->depDep) {
@@ -153,7 +153,7 @@ class InternalContactService
             }
         }
 
-        $log->add('Not found department for email: ' . $email);
+//        $log->add('Not found department for email: ' . $email);
         return new InternalContact(null, null, null, $log);
     }
 }

@@ -23,11 +23,11 @@ class DeferredEventDispatcher implements EventDispatcher
     public function dispatch($event, $key = null): void
     {
         if ($this->defer) {
-        	if ($key) {
-            	$this->queue[$key] = $event;
-			} else {
-            	$this->queue[] = $event;
-			}
+            if ($key) {
+                $this->queue[$key] = $event;
+            } else {
+                $this->queue[] = $event;
+            }
         } else {
             $this->next->dispatch($event);
         }
@@ -50,10 +50,10 @@ class DeferredEventDispatcher implements EventDispatcher
             $this->next->dispatch($event);
             unset($this->queue[$i]);
 
-			if (property_exists($event, 'resetDispatcherQueue') && $event->resetDispatcherQueue) {
-            	reset($this->queue);
-				$this->release();
-			}
+            if (property_exists($event, 'resetDispatcherQueue') && $event->resetDispatcherQueue) {
+                reset($this->queue);
+                $this->release();
+            }
         }
         $this->defer = false;
     }

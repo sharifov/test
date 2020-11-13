@@ -37,7 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'ccpc_params_json',
             'ccpc_theme_json',
             //'ccpc_registration_json',
-            'ccpc_settings_json',
+            //'ccpc_settings_json',
             'ccpc_enabled:boolean',
             [
                 'class' => UserSelect2Column::class,

@@ -16,6 +16,10 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <p>
         <?= Html::a('Create Lead Qcall', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('Flush Redis reservation', ['flush'], ['class' => 'btn btn-danger', 'data' => [
+            'confirm' => 'Are you sure you want to flush data?',
+            'method' => 'post',
+        ],]) ?>
     </p>
 
     <?php Pjax::begin(); ?>

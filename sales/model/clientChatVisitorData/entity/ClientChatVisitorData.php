@@ -33,6 +33,8 @@ use yii\helpers\Json;
  */
 class ClientChatVisitorData extends \yii\db\ActiveRecord
 {
+	private CONST REFERRER_MAX_LENGTH = 1000;
+
 	public function behaviors(): array
 	{
 		return [
@@ -65,7 +67,10 @@ class ClientChatVisitorData extends \yii\db\ActiveRecord
 
             ['cvd_longitude', 'number'],
 
-            ['cvd_referrer', 'string', 'max' => 255],
+			['cvd_referrer', 'filter', 'filter' => function ($value) {
+				return substr($value, 0, self::REFERRER_MAX_LENGTH);
+			}],
+			['cvd_referrer', 'string', 'max' => self::REFERRER_MAX_LENGTH],
 
             ['cvd_region', 'string', 'max' => 5],
 
@@ -75,9 +80,10 @@ class ClientChatVisitorData extends \yii\db\ActiveRecord
 
             ['cvd_updated_dt', 'safe'],
 
-            ['cvd_url', 'string', 'max' => 255],
+            ['cvd_url', 'string', 'max' => 1000],
 
 			['cvd_visitor_rc_id', 'string', 'max' => 50],
+			['cvd_visitor_rc_id', 'required'],
 			['cvd_visitor_rc_id', 'unique'], // ccr_visitor_id in ClientChatRequest
 		];
     }
@@ -149,7 +155,7 @@ class ClientChatVisitorData extends \yii\db\ActiveRecord
 		$_self->cvd_city = $data['geo']['city'] ?? '';
 		$_self->cvd_latitude = (float)($data['geo']['latitude'] ?? 0);
 		$_self->cvd_longitude = (float)($data['geo']['longitude'] ?? 0);
-		$_self->cvd_url = $data['page']['url'] ?? '';
+		$_self->cvd_url = (string)substr(($data['page']['url'] ?? ''), 0, 1000);
 		$_self->cvd_title = $data['page']['title'] ?? '';
 		$_self->cvd_referrer = $data['page']['referrer'] ?? '';
 		$_self->cvd_timezone = $data['geo']['timezone'] ?? '';

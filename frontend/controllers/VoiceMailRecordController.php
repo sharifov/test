@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\models\Notifications;
 use sales\auth\Auth;
 use Yii;
 use sales\model\voiceMailRecord\entity\VoiceMailRecord;
@@ -165,6 +166,7 @@ class VoiceMailRecordController extends FController
                 'message' => 'Saved error'
             ]);
         }
+        Notifications::publish('updateVoiceMailRecord', ['user_id' => $model->vmr_user_id], []);
         return $this->asJson([
             'error' => false,
             'message' => 'OK'

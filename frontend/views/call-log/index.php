@@ -7,6 +7,7 @@ use common\components\grid\UserSelect2Column;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use yii\web\View;
 
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\callLog\entity\callLog\search\CallLogSearch */
@@ -23,11 +24,10 @@ $this->params['breadcrumbs'][] = $this->title;
     <p>
         <?= Html::a('Create Call Log', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
-
+    <?php Pjax::begin(['timeout' => 15000, 'enablePushState' => true]); ?>
     <?php echo $this->render('partial/_index_search', ['model' => $searchModel]); ?>
 
-    <?php Pjax::begin(); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -139,3 +139,26 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php Pjax::end(); ?>
 
 </div>
+
+<?php
+
+$js = <<<JS
+
+    $(document).on('beforeSubmit', '#call-log-search-form', function(event) {
+        let btn = $(this).find('.search_calls_btn');
+        
+        btn.html('<span class="spinner-border spinner-border-sm"></span> Loading');        
+        btn.prop("disabled", true)
+    });
+
+    $(document).on('pjax:end', function() {
+         $('[data-toggle="tooltip"]').tooltip({html:true});
+    });
+
+   $('[data-toggle="tooltip"]').tooltip({html:true});
+
+JS;
+$this->registerJs($js, View::POS_READY);
+?>
+
+

@@ -2,11 +2,13 @@
 
 namespace sales\model\cases\useCases\cases\api\create;
 
+use common\models\Client;
 use sales\entities\cases\Cases;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
 use sales\repositories\cases\CaseCategoryRepository;
 use sales\repositories\cases\CasesRepository;
+use sales\services\client\ClientCreateForm;
 use sales\services\client\ClientManageService;
 use sales\services\TransactionManager;
 
@@ -45,9 +47,14 @@ class Handler
         /** @var Result $result */
         $result = $this->transactionManager->wrap(function () use ($command, $category) {
 
+            $clientForm = ClientCreateForm::createWidthDefaultName();
+            $clientForm->projectId = $command->project_id;
+            $clientForm->typeCreate = Client::TYPE_CREATE_CASE;
+
             $client = $this->clientManageService->getOrCreate(
                 [new PhoneCreateForm(['phone' => $command->contact_phone])],
-                [new EmailCreateForm(['email' => $command->contact_email])]
+                [new EmailCreateForm(['email' => $command->contact_email])],
+                $clientForm
             );
 
             $case = Cases::createByApi(

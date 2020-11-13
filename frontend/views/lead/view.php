@@ -18,6 +18,7 @@
  * @var $dataProviderOffers ActiveDataProvider
  * @var $dataProviderOrders ActiveDataProvider
  * @var $fromPhoneNumbers array
+ * @var bool $smsEnabled
  */
 
 use common\models\Employee;
@@ -29,7 +30,7 @@ use frontend\models\LeadForm;
 use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
 use sales\auth\Auth;
-use yii\data\ActiveDataProvider;
+use yii\bootstrap4\Modal;use yii\data\ActiveDataProvider;
 
 \frontend\themes\gentelella\assets\AssetLeadCommunication::register($this);
 
@@ -111,20 +112,31 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
 
         </div>
         <div class="col-md-6">
-            <?php if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && !$lead->isOwner($user->id)):?>
+            <?php /*if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && !$lead->isOwner($user->id)):*/?><!--
                 <div class="alert alert-warning" role="alert">
                     <h4 class="alert-heading">Warning!</h4>
                     <p>Client information is not available in VIEW MODE, please take lead!</p>
                 </div>
 
-            <?php elseif(!$is_manager && !$is_qa && ( $lead->isFollowUp() || ($lead->isPending() && !$lead->isNewRecord) ) && !$lead->isOwner($user->id)):?>
+            <?php /*elseif(!$is_manager && !$is_qa && ( $lead->isFollowUp() || ($lead->isPending() && !$lead->isNewRecord) ) && !$lead->isOwner($user->id)):*/?>
 
                 <div class="alert alert-warning" role="alert">
                     <h4 class="alert-heading">Warning!</h4>
-                    <p>Client information is not available for this status (<?=strtoupper($lead->getStatusName())?>)!</p>
+                    <p>Client information is not available for this status (<?/*=strtoupper($lead->getStatusName())*/?>)!</p>
                 </div>
 
-            <?php else: ?>
+            <?php /*else: */?>
+                <?php /*yii\widgets\Pjax::begin(['id' => 'pjax-client-info', 'enablePushState' => false, 'enableReplaceState' => false]) */?>
+                <?/*= $this->render('client-info/client_info', [
+                    'lead' => $lead,
+                    'leadForm' => $leadForm,
+                    'is_manager' => $is_manager,
+                    'unsubscribe' => $unsubscribe
+                ]) */?>
+                <?php /*\yii\widgets\Pjax::end(); */?>
+            --><?php /*endif;*/?>
+
+            <?php if (Auth::can('lead/view_Client_Info')): ?>
                 <?php yii\widgets\Pjax::begin(['id' => 'pjax-client-info', 'enablePushState' => false, 'enableReplaceState' => false]) ?>
                 <?= $this->render('client-info/client_info', [
                     'lead' => $lead,
@@ -133,22 +145,28 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
                     'unsubscribe' => $unsubscribe
                 ]) ?>
                 <?php \yii\widgets\Pjax::end(); ?>
-            <?php endif;?>
+            <?php endif; ?>
 
-
-
-            <?php if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && !$lead->isOwner($user->id)):?>
+            <?php /*if($leadForm->mode === $leadForm::VIEW_MODE && (!$is_admin && !$is_qa && !$is_supervision) && !$lead->isOwner($user->id)):*/?><!--
                 <div class="alert alert-warning" role="alert">
                     <h4 class="alert-heading">Warning!</h4>
                     <p>Lead Preferences is not available in VIEW MODE, please take lead!</p>
                 </div>
-            <?php elseif(!$is_manager && !$is_qa && ( $lead->isFollowUp() || ($lead->isPending() && !$lead->isNewRecord) ) && !$lead->isOwner($user->id)):?>
+            <?php /*elseif(!$is_manager && !$is_qa && ( $lead->isFollowUp() || ($lead->isPending() && !$lead->isNewRecord) ) && !$lead->isOwner($user->id)):*/?>
 
                 <div class="alert alert-warning" role="alert">
                     <h4 class="alert-heading">Warning!</h4>
-                    <p>Client information is not available for this status (<?=strtoupper($lead->getStatusName())?>)!</p>
+                    <p>Client information is not available for this status (<?/*=strtoupper($lead->getStatusName())*/?>)!</p>
                 </div>
-            <?php else: ?>
+            <?php /*else: */?>
+                <div id="lead-preferences">
+                    <?/*= $this->render('partial/_lead_preferences', [
+                        'lead' => $lead
+                    ]) */?>
+                </div>
+            --><?php /*endif; */?>
+
+            <?php if (Auth::can('lead/view_Lead_Preferences')): ?>
                 <div id="lead-preferences">
                     <?= $this->render('partial/_lead_preferences', [
                         'lead' => $lead
@@ -186,7 +204,8 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
                     'isCommunicationLogEnabled' => Yii::$app->params['settings']['new_communication_block_lead'],
                     'lead' => $lead,
                     'fromPhoneNumbers' => $fromPhoneNumbers,
-                    'unsubscribe' => $unsubscribe
+                    'unsubscribe' => $unsubscribe,
+                    'smsEnabled' => $smsEnabled,
                 ]); ?>
             <?php else: ?>
                 <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
@@ -354,3 +373,30 @@ $(document).on('click','#client-unsubscribe-button', function (e) {
 JS;
 
 $this->registerJs($jsCode);
+
+Modal::begin([
+    'title' => 'Client Chat Room',
+    'id' => 'chat-room-popup',
+    'size' => Modal::SIZE_LARGE
+]);
+
+Modal::end();
+
+$jsCommBlockChatView = <<<JS
+
+$('body').on('click', '.comm-chat-room-view', function(e) {  
+    e.preventDefault();
+    $.get(        
+        '/client-chat-qa/room',       
+        {
+            id: $(this).data('id')
+        },
+        function (data) {
+            $('#chat-room-popup .modal-body').html(data);
+            $('#chat-room-popup').modal('show');
+        }  
+    );
+});
+
+JS;
+$this->registerJs($jsCommBlockChatView);

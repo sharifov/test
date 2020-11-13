@@ -35,34 +35,34 @@ $this->title = 'Calls Stats';
                         <div class="row">
                             <div class="col-md-4">
 								<?= $form->field($model, 'createTimeRange', [
-									'options' => ['class' => 'form-group'],
-								])->widget(\kartik\daterange\DateRangePicker::class, [
-									'presetDropdown' => false,
-									'hideInput' => true,
-									'convertFormat' => true,
-									'pluginOptions' => [
-										'timePicker' => true,
-										'timePickerIncrement' => 1,
-										'timePicker24Hour' => true,
-										'locale' => [
-											'format' => 'Y-m-d H:i:s',
-											'separator' => ' - '
-										]
-									]
-								])->label('Created From / To'); ?>
+                                    'options' => ['class' => 'form-group'],
+                                ])->widget(\kartik\daterange\DateRangePicker::class, [
+                                    'presetDropdown' => false,
+                                    'hideInput' => true,
+                                    'convertFormat' => true,
+                                    'pluginOptions' => [
+                                        'timePicker' => true,
+                                        'timePickerIncrement' => 1,
+                                        'timePicker24Hour' => true,
+                                        'locale' => [
+                                            'format' => 'Y-m-d H:i:s',
+                                            'separator' => ' - '
+                                        ]
+                                    ]
+                                ])->label('Created From / To'); ?>
                             </div>
 
                             <div class="col-md-2">
 								<?= $form->field($model, 'timeZone')->widget(\kartik\select2\Select2::class, [
-									'data' => Employee::timezoneList(true),
-									'size' => \kartik\select2\Select2::SMALL,
-									'options' => [
-										'placeholder' => 'Select TimeZone',
-										'multiple' => false,
-										'value' =>  $model->timeZone ?? Yii::$app->user->identity->timezone
-									],
-									'pluginOptions' => ['allowClear' => true],
-								]) ?>
+                                    'data' => Employee::timezoneList(true),
+                                    'size' => \kartik\select2\Select2::SMALL,
+                                    'options' => [
+                                        'placeholder' => 'Select TimeZone',
+                                        'multiple' => false,
+                                        'value' =>  $model->timeZone ?? Yii::$app->user->identity->timezone
+                                    ],
+                                    'pluginOptions' => ['allowClear' => true],
+                                ]) ?>
                             </div>
 
                             <div class="col-md-2">
@@ -70,27 +70,27 @@ $this->title = 'Calls Stats';
                                         'options' => ['class' => 'form-group']
                                 ])->widget(Select2::class, [
                                     'data' => Project::getList(),
-									'size' => Select2::SMALL,
-									'options' => ['placeholder' => 'Select Project', 'multiple' => true],
-									'pluginOptions' => ['allowClear' => true],
+                                    'size' => Select2::SMALL,
+                                    'options' => ['placeholder' => 'Select Project', 'multiple' => true],
+                                    'pluginOptions' => ['allowClear' => true],
                                 ])->label('Project') ?>
                             </div>
 
                             <div class="col-md-2">
 								<?= $form->field($model, 'dep_ids', [
-									'options' => ['class' => 'form-group']
-								])->widget(Select2::class, [
-									'data' => Department::getList(),
-									'size' => Select2::SMALL,
-									'options' => ['placeholder' => 'Select Department', 'multiple' => true],
-									'pluginOptions' => ['allowClear' => true],
-								])->label('Department') ?>
+                                    'options' => ['class' => 'form-group']
+                                ])->widget(Select2::class, [
+                                    'data' => Department::getList(),
+                                    'size' => Select2::SMALL,
+                                    'options' => ['placeholder' => 'Select Department', 'multiple' => true],
+                                    'pluginOptions' => ['allowClear' => true],
+                                ])->label('Department') ?>
                             </div>
 
                             <div class="col-md-2">
 								<?= $form->field($model, 'callGraphGroupBy', [
-									'options' => ['class' => 'form-group']
-								])->dropDownList($model::getDateFormatTextList())->label('Group By') ?>
+                                    'options' => ['class' => 'form-group']
+                                ])->dropDownList($model::getDateFormatTextList())->label('Group By') ?>
                             </div>
 
                             <div class="col-md-2">
@@ -103,13 +103,13 @@ $this->title = 'Calls Stats';
 
                             <div class="col-md-2">
 								<?= $form->field($model, 'userGroupIds', [
-									'options' => ['class' => 'form-group']
-								])->widget(Select2::class, [
-									'data' => UserGroup::getList(),
-									'size' => Select2::SMALL,
-									'options' => ['placeholder' => 'Select User Group', 'multiple' => true],
-									'pluginOptions' => ['allowClear' => true],
-								])->label('User Groups') ?>
+                                    'options' => ['class' => 'form-group']
+                                ])->widget(Select2::class, [
+                                    'data' => UserGroup::getList(),
+                                    'size' => Select2::SMALL,
+                                    'options' => ['placeholder' => 'Select User Group', 'multiple' => true],
+                                    'pluginOptions' => ['allowClear' => true],
+                                ])->label('User Groups') ?>
                             </div>
 
                             <div class="col-md-2">
@@ -127,13 +127,13 @@ $this->title = 'Calls Stats';
                             <div class="col-md-2">
                                 <?= $form->field($model, 'recordingDurationFrom', [
                                         'options' => ['class' => 'form-group']
-                                ])->input('number', ['class' => 'form-control'])->label('Recording Duration Seconds From') ?>
+                                ])->input('number', ['class' => 'form-control'])->label('Duration Seconds From') ?>
                             </div>
 
                             <div class="col-md-2">
 								<?= $form->field($model, 'recordingDurationTo', [
-									'options' => ['class' => 'form-group']
-								])->input('number', ['class' => 'form-control'])->label('Recording Duration Seconds To') ?>
+                                    'options' => ['class' => 'form-group']
+                                ])->input('number', ['class' => 'form-control'])->label('Duration Seconds To') ?>
                             </div>
 
                         </div>

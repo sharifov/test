@@ -66,17 +66,15 @@ class SmsController extends FController
             $params['SmsSearch']['supervision_id'] = Yii::$app->user->id;
         }
 
-        $searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
-        $searchModel->datetime_end = date('Y-m-d');
-
+        $searchModel->date_range = null;
         $dataProvider = $searchModel->search($params);
 
-        $inboxModel = new SmsInboxForm();
+        //$inboxModel = new SmsInboxForm();
 
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-            'inboxModel' => $inboxModel,
+            //'inboxModel' => $inboxModel,
         ]);
     }
 

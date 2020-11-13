@@ -1,5 +1,7 @@
 <?php
 
+use yii\log\FileTarget;
+use yii\log\DbTarget;
 use webapi\bootstrap\SetUp;
 
 $params = array_merge(
@@ -78,7 +80,7 @@ return [
                     'sourceLanguage' => 'en-US', // Developer language
                     'sourceMessageTable' => '{{%language_source}}',
                     'messageTable' => '{{%language_translate}}',
-                    'cachingDuration' => 86400,
+                    'cachingDuration' => 3600,
                     'enableCaching' => true,
                 ],
             ],
@@ -88,19 +90,20 @@ return [
             'traceLevel' => 0,
             'targets' => [
                 [
-                    'class' => 'yii\log\FileTarget',
+                    'class' => FileTarget::class,
                     'levels' => ['error', 'warning'],
                     //'logVars' => [],
                 ],
                 [
-                    'class' => 'yii\log\DbTarget',
+                    'class' => DbTarget::class,
                     'levels' => ['error', 'warning'],
                     'except' => [
                         'yii\web\HttpException:404',
+                        'yii\web\HttpException:401'
                     ],
                     'logVars' => [],
 //                    'logVars' => ['_POST', '_GET'],
-                    'prefix' => function () {
+                    'prefix' => static function () {
                         $userID = Yii::$app->user->isGuest ? '-' : Yii::$app->user->id;
                         $ip = $_SERVER['REMOTE_ADDR'];
                         return "[webapi][$ip][$userID]";
@@ -114,7 +117,7 @@ return [
                     ],
                     'logVars' => [],
                     'categories' => ['info\*'],
-                    'prefix' => function () {
+                    'prefix' => static function () {
                         $userID = Yii::$app->user->isGuest ? '-' : Yii::$app->user->id;
                         $ip = $_SERVER['REMOTE_ADDR'];
                         return "[webapi][$ip][$userID]";
@@ -125,6 +128,7 @@ return [
                     'levels' => ['error', 'warning'],
                     'except' => [
                         'yii\web\HttpException:404',
+                        'yii\web\HttpException:401'
                     ],
                     //'logVars' => YII_DEBUG ? ['_GET', '_POST', '_FILES', '_COOKIE', '_SESSION', '_SERVER'] : [],
                     'logVars' => [],

@@ -36,91 +36,94 @@ use yii\helpers\VarDumper;
  */
 class UserVoiceMail extends \yii\db\ActiveRecord
 {
-	private const MAX_COUNT_ROWS = 10;
+    private const MAX_COUNT_ROWS = 10;
 
-	private const VOICE_ALICE = 'alice';
-	private const VOICE_MAN = 'man';
-	private const VOICE_WOMAN = 'woman';
+    private const VOICE_ALICE = 'alice';
+    private const VOICE_MAN = 'man';
+    private const VOICE_WOMAN = 'woman';
 
-	private const ALLOWED_SAY_VOICE = [
-		self::VOICE_ALICE => self::VOICE_ALICE,
-		self::VOICE_MAN => self::VOICE_MAN,
-		self::VOICE_WOMAN => self::VOICE_WOMAN,
-	];
+    private const ALLOWED_SAY_VOICE = [
+        self::VOICE_ALICE => self::VOICE_ALICE,
+        self::VOICE_MAN => self::VOICE_MAN,
+        self::VOICE_WOMAN => self::VOICE_WOMAN,
+    ];
 
-	private const ALLOWED_VOICE_LANGUAGES = [
-		self::VOICE_ALICE => [
-			'da-DK',
-			'da-DE',
-			'en-AU',
-			'en-CA',
-			'en-GB',
-			'en-IN',
-			'en-US',
-			'ca-ES',
-			'es-ES',
-			'es-MX',
-			'fi-FI',
-			'fi-CA',
-			'fr-CA',
-			'it-IT',
-			'ja-JP',
-			'ko-KR',
-			'nb-NO',
-			'nl-NL',
-			'pl-PL',
-			'pt-PT',
-			'ru-RU',
-			'sv-SE',
-			'zn-CN',
-			'zh-HK',
-			'zh-TW',
-		],
-		self::VOICE_MAN => [
-			'en-GB',
-			'en-PI',
-			'en-UD',
-			'en-US',
-			'es-ES',
-			'es-LA',
-			'fr-CA',
-			'fr-FR',
-			'de-DE',
-		],
-		self::VOICE_WOMAN => [
-			'en-GB',
-			'en-PI',
-			'en-UD',
-			'en-US',
-			'es-ES',
-			'es-LA',
-			'fr-CA',
-			'fr-FR',
-			'de-DE',
-		],
-	];
+    private const ALLOWED_VOICE_LANGUAGES = [
+        self::VOICE_ALICE => [
+            'da-DK',
+            'da-DE',
+            'de-DE',
+            'en-AU',
+            'en-CA',
+            'en-GB',
+            'en-IN',
+            'en-US',
+            'ca-ES',
+            'es-ES',
+            'es-MX',
+            'fi-FI',
+            'fi-CA',
+            'fr-CA',
+            'it-IT',
+            'ja-JP',
+            'ko-KR',
+            'nb-NO',
+            'nl-NL',
+            'pl-PL',
+            'pt-PT',
+            'ru-RU',
+            'sv-SE',
+            'zn-CN',
+            'zh-HK',
+            'zh-TW',
+        ],
+        self::VOICE_MAN => [
+            'en-GB',
+            'en-PI',
+            'en-UD',
+            'en-US',
+            'es-ES',
+            'es-LA',
+            'fr-CA',
+            'fr-FR',
+            'de-DE',
+            'ru-RU',
+        ],
+        self::VOICE_WOMAN => [
+            'en-GB',
+            'en-PI',
+            'en-UD',
+            'en-US',
+            'es-ES',
+            'es-LA',
+            'fr-CA',
+            'fr-FR',
+            'de-DE',
+            'ru-RU',
+        ],
+    ];
 
-	/**
-	 * @return array
-	 */
-	public function behaviors(): array
-	{
-		return [
-			'timestamp' => [
-				'class' => TimestampBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['uvm_created_dt', 'uvm_updated_dt'],
-					ActiveRecord::EVENT_BEFORE_UPDATE => ['uvm_updated_dt'],
-				],
-				'value' => date('Y-m-d H:i:s')
-			],
-			'user' => [
-				'class' => BlameableBehavior::class,
-				'createdByAttribute' => 'uvm_created_user_id',
-				'updatedByAttribute' => 'uvm_updated_user_id',
-			],
-		];
-	}
+    /**
+     * @return array
+     */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['uvm_created_dt', 'uvm_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['uvm_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s')
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'createdByAttribute' => 'uvm_created_user_id',
+                'updatedByAttribute' => 'uvm_updated_user_id',
+            ],
+        ];
+    }
 
     public function rules(): array
     {
@@ -131,6 +134,7 @@ class UserVoiceMail extends \yii\db\ActiveRecord
             ['uvm_created_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['uvm_created_user_id' => 'id']],
 
             ['uvm_enabled', 'boolean'],
+            ['uvm_enabled', 'default', 'value' => true],
 
             ['uvm_max_recording_time', 'integer', 'max' => 3600],
 
@@ -141,7 +145,7 @@ class UserVoiceMail extends \yii\db\ActiveRecord
 
             ['uvm_say_language', 'string', 'max' => 10],
             ['uvm_say_language', 'default', 'value' => null],
-			['uvm_say_language', 'exist', 'skipOnError' => true, 'skipOnEmpty' => true, 'targetClass' => Language::class, 'targetAttribute' => ['uvm_say_language' => 'language_id']],
+            ['uvm_say_language', 'exist', 'skipOnError' => true, 'skipOnEmpty' => true, 'targetClass' => Language::class, 'targetAttribute' => ['uvm_say_language' => 'language_id']],
 
             ['uvm_say_text_message', 'string'],
 
@@ -159,8 +163,8 @@ class UserVoiceMail extends \yii\db\ActiveRecord
 
             ['uvm_voice_file_message', 'string', 'max' => 255],
 
-			['uvm_user_id', 'checkCountOfRows'],
-			[['uvm_say_voice', 'uvm_say_language'], 'checkAllowedLanguages']
+            ['uvm_user_id', 'checkCountOfRows'],
+            [['uvm_say_voice', 'uvm_say_language'], 'checkAllowedLanguages']
         ];
     }
 
@@ -211,30 +215,30 @@ class UserVoiceMail extends \yii\db\ActiveRecord
     }
 
     public function checkCountOfRows($attribute, $params, $validator): void
-	{
-		if ($this->getIsNewRecord()) {
-			$count = self::find()->where(['uvm_user_id' => $this->uvm_user_id])->count();
+    {
+        if ($this->getIsNewRecord()) {
+            $count = self::find()->where(['uvm_user_id' => $this->uvm_user_id])->count();
 
-			$maxRows = Yii::$app->params['user_voice_mail'] ?? self::MAX_COUNT_ROWS;
-			if ($count+1 > $maxRows) {
-				$this->addError('uvm_user_id', 'Maximum number of entries exceeded: ' . $maxRows);
-			}
-		}
-	}
+            $maxRows = Yii::$app->params['user_voice_mail'] ?? self::MAX_COUNT_ROWS;
+            if ($count+1 > $maxRows) {
+                $this->addError('uvm_user_id', 'Maximum number of entries exceeded: ' . $maxRows);
+            }
+        }
+    }
 
-	public function getAllowedLanguagesByVoice(string $voice): array
-	{
-		return self::ALLOWED_VOICE_LANGUAGES[$voice] ?? [];
-	}
+    public function getAllowedLanguagesByVoice(string $voice): array
+    {
+        return self::ALLOWED_VOICE_LANGUAGES[$voice] ?? [];
+    }
 
-	public function checkAllowedLanguages($attribute, $params, $validator): void
-	{
-		if ($allowedLanguages = $this->getAllowedLanguagesByVoice($this->uvm_say_voice)) {
-			if (!in_array($this->uvm_say_language, $allowedLanguages)) {
-				$this->addError('uvm_say_language', 'Allowed languages for the selected voice: ' . implode(',', $allowedLanguages));
-			}
-		}
-	}
+    public function checkAllowedLanguages($attribute, $params, $validator): void
+    {
+        if ($allowedLanguages = $this->getAllowedLanguagesByVoice($this->uvm_say_voice)) {
+            if (!in_array($this->uvm_say_language, $allowedLanguages)) {
+                $this->addError('uvm_say_language', 'Allowed languages for the selected voice: ' . implode(',', $allowedLanguages));
+            }
+        }
+    }
 
     public function isExistVoiceRecordFile(): bool
     {
@@ -243,34 +247,34 @@ class UserVoiceMail extends \yii\db\ActiveRecord
         return $fileName && file_exists($filePath . $fileName);
     }
 
-	public function deleteRecord(?string $oldRecord = null): void
-	{
-		$filePath = \Yii::getAlias('@frontend/web/');
-		$fileName = $oldRecord ?: $this->oldAttributes['uvm_voice_file_message'] ?? '';
-		if ($fileName && file_exists($filePath . $fileName)) {
-			unlink($filePath . $fileName);
-		}
-	}
+    public function deleteRecord(?string $oldRecord = null): void
+    {
+        $filePath = \Yii::getAlias('@frontend/web/');
+        $fileName = $oldRecord ?: $this->oldAttributes['uvm_voice_file_message'] ?? '';
+        if ($fileName && file_exists($filePath . $fileName)) {
+            unlink($filePath . $fileName);
+        }
+    }
 
-	public function getSaveVoiceList(): array
-	{
-		return self::ALLOWED_SAY_VOICE;
-	}
+    public function getSaveVoiceList(): array
+    {
+        return self::ALLOWED_SAY_VOICE;
+    }
 
-	public function getAllowedList(): array
-	{
-		$result = [];
-		foreach (self::ALLOWED_SAY_VOICE as $item) {
-			$result = ArrayHelper::merge($result, $this->getAllowedLanguagesByVoice($item));
-		}
-		return $result;
-	}
+    public function getAllowedList(): array
+    {
+        $result = [];
+        foreach (self::ALLOWED_SAY_VOICE as $item) {
+            $result = ArrayHelper::merge($result, $this->getAllowedLanguagesByVoice($item));
+        }
+        return $result;
+    }
 
-	public function delete()
-	{
-		$this->deleteRecord();
-		return parent::delete(); // TODO: Change the autogenerated stub
-	}
+    public function delete()
+    {
+        $this->deleteRecord();
+        return parent::delete(); // TODO: Change the autogenerated stub
+    }
 
     public function getResponse(): array
     {
@@ -321,5 +325,11 @@ class UserVoiceMail extends \yii\db\ActiveRecord
             return '';
         }
         return Yii::$app->params['url_address'] . $this->uvm_voice_file_message;
+    }
+
+    public static function getList() : array
+    {
+        $data = self::find()->orderBy(['uvm_name' => SORT_ASC])->asArray()->all();
+        return ArrayHelper::map($data, 'uvm_id', 'uvm_name');
     }
 }

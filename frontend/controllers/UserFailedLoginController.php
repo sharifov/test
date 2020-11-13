@@ -26,13 +26,19 @@ class UserFailedLoginController extends FController
     {
         $behaviors = [
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class' => VerbFilter::class,
                 'actions' => [
                     'delete' => ['POST'],
                 ],
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
+    public function init(): void
+    {
+        parent::init();
+        $this->layoutCrud();
     }
 
     /**

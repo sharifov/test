@@ -151,7 +151,9 @@
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     padding-top: 8px;
-    background-color: #d5b24c
+    background-color: #d5b24c;
+    position: relative;
+    z-index: 101;
 }
 ._cc-box-option {
     float: left;
@@ -178,11 +180,11 @@
 ._cc-box-body {
     background: #fff;
     width: 100%;
-    display: inline-block;
     text-align: center;
     overflow-y: auto;
     padding: 10px 10px 0 10px;
     max-height: 350px;
+    display: inline-block;
 }
 ._cc-box-item {
     width: 100%;
@@ -259,4 +261,21 @@
     }
 }
 
+#_wrap_cc_load_requests {
+    z-index: 100;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+#_wrap_cc_load_requests.active {
+    display: flex;
+}
+/*#_wrap_cc_load_requests .fa {*/
+/*    font-size: 42px;*/
+/*}*/
+
+._cc_access_item_num {
+    font-size: 12px;
+    color: #808080;
+}
 

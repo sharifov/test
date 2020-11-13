@@ -23,12 +23,15 @@ class ConferenceParticipantSearch extends ConferenceParticipant
             ['cp_type_id', 'integer'],
 
             [['cp_leave_dt', 'cp_join_dt', 'cp_hold_dt'], 'date', 'format' => 'php:Y-m-d'],
+
+            ['cp_user_id', 'integer'],
+            ['cp_identity', 'string'],
         ];
     }
 
     public function search($params, Employee $user)
     {
-        $query = ConferenceParticipant::find();
+        $query = ConferenceParticipant::find()->with('user');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -65,6 +68,8 @@ class ConferenceParticipantSearch extends ConferenceParticipant
             'cp_call_id' => $this->cp_call_id,
             'cp_status_id' => $this->cp_status_id,
             'cp_type_id' => $this->cp_type_id,
+            'cp_user_id' => $this->cp_user_id,
+            'cp_identity' => $this->cp_identity,
         ]);
 
         $query->andFilterWhere(['like', 'cp_call_sid', $this->cp_call_sid]);

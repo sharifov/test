@@ -162,7 +162,8 @@ class SmsDistributionListController extends FController
         $id = Yii::$app->request->get('id');
         $model = $this->findModel($id);
 
-        if ($model->sendSms()) {
+        $result = $model->sendSms();
+        if ($result['error'] === false) {
             Yii::$app->session->setFlash('success', 'Success send to communication: Id: ' . $model->sdl_id);
         } else {
             Yii::$app->session->setFlash('danger', 'Error send to communication: Id: ' . $model->sdl_id);

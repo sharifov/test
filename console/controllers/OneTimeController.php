@@ -3,15 +3,23 @@
 namespace console\controllers;
 
 use common\components\jobs\CreateSaleFromBOJob;
+use common\models\Call;
 use common\models\CaseSale;
 use common\components\jobs\UpdateSaleFromBOJob;
 use common\models\Client;
+use common\models\ClientEmail;
+use common\models\ClientPhone;
 use common\models\Conference;
 use common\models\DepartmentEmailProject;
 use common\models\DepartmentPhoneProject;
+use common\models\Email;
+use common\models\Lead;
+use common\models\Sms;
 use common\models\UserProjectParams;
+use sales\entities\cases\Cases;
 use sales\entities\cases\CasesStatus;
 use sales\helpers\app\AppHelper;
+use sales\model\clientChat\entity\ClientChat;
 use sales\model\emailList\entity\EmailList;
 use sales\model\phoneList\entity\PhoneList;
 use thamtech\uuid\helpers\UuidHelper;
@@ -19,6 +27,7 @@ use Yii;
 use yii\console\Controller;
 use yii\db\Expression;
 use yii\db\Query;
+use yii\helpers\BaseConsole;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
 
@@ -602,5 +611,293 @@ class OneTimeController extends Controller
                 ':not_type' => $notType,
             ]
         )->queryOne();
+    }
+
+    public function actionUpdateClientProject(): void
+    {
+        $offset = BaseConsole::input('Start from client number: ');
+        $limit = BaseConsole::input('Limit: ');
+
+        $offset = (int)$offset;
+        $limit = (int)$limit;
+
+        if ($offset < 1) {
+            echo 'Start must be > 0' . PHP_EOL;
+            return;
+        }
+
+        if ($limit < 1) {
+            echo 'Limit must be > 0' . PHP_EOL;
+            return;
+        }
+
+        $offset--;
+
+        printf(PHP_EOL . '--- Start [' . date('Y-m-d H:i:s') . '] %s ---' . PHP_EOL, $this->ansiFormat(self::class . '\\' . $this->action->id, Console::FG_YELLOW));
+        printf(PHP_EOL);
+        $time_start = microtime(true);
+
+        $clients = Client::find()
+            ->offset($offset)
+            ->limit($limit)
+            ->asArray()
+            ->orderBy(['id' => SORT_ASC])
+            ->all();
+
+        $count = count($clients);
+
+        Console::startProgress(0, $count);
+        $processed = 0;
+
+        foreach ($clients as $client) {
+
+            $processed ++;
+            Console::updateProgress($processed, $count);
+
+            if ($client['cl_project_id']) {
+                continue;
+            }
+
+            $projects = [];
+
+            $models = Lead::find()->select(['project_id', 'created'])->andWhere(['client_id' => $client['id']])->andWhere(['IS NOT', 'project_id', null])->orderBy(['id' => SORT_ASC])->asArray()->all();
+            foreach ($models as $model) {
+                if (empty($projects[$model['project_id']])) {
+                    $projects[$model['project_id']] = [
+                        'date' => $model['created'],
+                        'type' => Client::TYPE_CREATE_LEAD,
+                    ];
+                } else {
+                    $oldDate = strtotime($projects[$model['project_id']]['date']);
+                    $newDate = strtotime($model['created']);
+                    if ($newDate < $oldDate) {
+                        $projects[$model['project_id']] = [
+                            'date' => $model['created'],
+                            'type' => Client::TYPE_CREATE_LEAD,
+                        ];
+                    }
+                }
+            }
+
+            $models = Cases::find()->select(['cs_project_id', 'cs_created_dt'])->andWhere(['cs_client_id' => $client['id']])->andWhere(['IS NOT', 'cs_project_id', null])->orderBy(['cs_id' => SORT_ASC])->asArray()->all();
+            foreach ($models as $model) {
+                if (empty($projects[$model['cs_project_id']])) {
+                    $projects[$model['cs_project_id']] = [
+                        'date' => $model['cs_created_dt'],
+                        'type' => Client::TYPE_CREATE_CASE,
+                    ];
+                } else {
+                    $oldDate = strtotime($projects[$model['cs_project_id']]['date']);
+                    $newDate = strtotime($model['cs_created_dt']);
+                    if ($newDate < $oldDate) {
+                        $projects[$model['cs_project_id']] = [
+                            'date' => $model['cs_created_dt'],
+                            'type' => Client::TYPE_CREATE_CASE,
+                        ];
+                    }
+                }
+            }
+
+            $models = Call::find()->select(['c_project_id', 'c_created_dt'])->andWhere(['c_client_id' => $client['id']])->andWhere(['IS NOT', 'c_project_id', null])->orderBy(['c_id' => SORT_ASC])->asArray()->all();
+            foreach ($models as $model) {
+                if (empty($projects[$model['c_project_id']])) {
+                    $projects[$model['c_project_id']] = [
+                        'date' => $model['c_created_dt'],
+                        'type' => Client::TYPE_CREATE_CALL,
+                    ];
+                } else {
+                    $oldDate = strtotime($projects[$model['c_project_id']]['date']);
+                    $newDate = strtotime($model['c_created_dt']);
+                    if ($newDate < $oldDate) {
+                        $projects[$model['c_project_id']] = [
+                            'date' => $model['c_created_dt'],
+                            'type' => Client::TYPE_CREATE_CALL,
+                        ];
+                    }
+                }
+            }
+
+            $models = Sms::find()->select(['s_project_id', 's_created_dt'])->andWhere(['s_client_id' => $client['id']])->andWhere(['IS NOT', 's_project_id', null])->orderBy(['s_id' => SORT_ASC])->asArray()->all();
+            foreach ($models as $model) {
+                if (empty($projects[$model['s_project_id']])) {
+                    $projects[$model['s_project_id']] = [
+                        'date' => $model['s_created_dt'],
+                        'type' => Client::TYPE_CREATE_SMS,
+                    ];
+                } else {
+                    $oldDate = strtotime($projects[$model['s_project_id']]['date']);
+                    $newDate = strtotime($model['s_created_dt']);
+                    if ($newDate < $oldDate) {
+                        $projects[$model['s_project_id']] = [
+                            'date' => $model['s_created_dt'],
+                            'type' => Client::TYPE_CREATE_SMS,
+                        ];
+                    }
+                }
+            }
+
+            $models = Email::find()->select(['e_project_id', 'e_created_dt'])->andWhere(['e_client_id' => $client['id']])->andWhere(['IS NOT', 'e_project_id', null])->orderBy(['e_id' => SORT_ASC])->asArray()->all();
+            foreach ($models as $model) {
+                if (empty($projects[$model['e_project_id']])) {
+                    $projects[$model['e_project_id']] = [
+                        'date' => $model['e_created_dt'],
+                        'type' => Client::TYPE_CREATE_EMAIL,
+                    ];
+                } else {
+                    $oldDate = strtotime($projects[$model['e_project_id']]['date']);
+                    $newDate = strtotime($model['e_created_dt']);
+                    if ($newDate < $oldDate) {
+                        $projects[$model['e_project_id']] = [
+                            'date' => $model['e_created_dt'],
+                            'type' => Client::TYPE_CREATE_EMAIL,
+                        ];
+                    }
+                }
+            }
+
+            $models = ClientChat::find()->select(['cch_project_id', 'cch_created_dt'])->andWhere(['cch_client_id' => $client['id']])->andWhere(['IS NOT', 'cch_project_id', null])->orderBy(['cch_id' => SORT_ASC])->asArray()->all();
+            foreach ($models as $model) {
+                if (empty($projects[$model['cch_project_id']])) {
+                    $projects[$model['cch_project_id']] = [
+                        'date' => $model['cch_created_dt'],
+                        'type' => Client::TYPE_CREATE_CLIENT_CHAT,
+                    ];
+                } else {
+                    $oldDate = strtotime($projects[$model['cch_project_id']]['date']);
+                    $newDate = strtotime($model['cch_created_dt']);
+                    if ($newDate < $oldDate) {
+                        $projects[$model['cch_project_id']] = [
+                            'date' => $model['cch_created_dt'],
+                            'type' => Client::TYPE_CREATE_CLIENT_CHAT,
+                        ];
+                    }
+                }
+            }
+
+            $firstData = [];
+            foreach ($projects as $key => $project) {
+                if (empty($firstData)) {
+                    $firstData = [
+                        'projectId' => $key,
+                        'date' => $project['date'],
+                        'type' => $project['type']
+                    ];
+                } else {
+                    $oldDate = strtotime($firstData['date']);
+                    $newDate = strtotime($project['date']);
+                    if ($newDate < $oldDate) {
+                        $firstData = [
+                            'projectId' => $key,
+                            'date' => $project['date'],
+                            'type' => $project['type']
+                        ];
+                    }
+                }
+            }
+
+//            echo 'ClientId: ' . $client['id'];
+            if ($firstData) {
+//                echo ' First ProjectId: ' . $firstData['projectId'] . ' Type: ' . $firstData['type'] . ' date: ' . $firstData['date'];
+                Client::updateAll(['cl_project_id' => $firstData['projectId'], 'cl_type_create' => $firstData['type']], 'id = ' . $client['id']);
+                unset($projects[$firstData['projectId']]);
+            }
+
+            foreach ($projects as $key => $project) {
+                $exist = Client::find()->andWhere(['cl_project_id' => $key, 'parent_id' => $client['id']])->exists();
+                if ($exist) {
+                    continue;
+                }
+                $this->cloneClientWithProject($client, $key, $project['type'], $project['date']);
+            }
+
+//            echo PHP_EOL;
+//            VarDumper::dump($projects);
+//            echo PHP_EOL;
+
+        }
+
+        Console::endProgress(false);
+
+        $time_end = microtime(true);
+        $time = number_format(round($time_end - $time_start, 2), 2);
+
+        printf(PHP_EOL . 'Execute Time: %s' . PHP_EOL, $this->ansiFormat($time . ' s', Console::FG_RED));
+        printf(PHP_EOL . ' --- End [' . date('Y-m-d H:i:s') . '] %s ---' . PHP_EOL . PHP_EOL, $this->ansiFormat(self::class . '\\' . $this->action->id, Console::FG_YELLOW));
+
+    }
+
+    private function cloneClientWithProject($parentClient, $projectId, $typeCreate, $createdDt): void
+    {
+        $client = Client::create(
+            $parentClient['first_name'],
+            $parentClient['middle_name'],
+            $parentClient['last_name'],
+            $projectId,
+            $typeCreate,
+            $parentClient['id']
+        );
+        $client->disabled = $parentClient['disabled'];
+        $client->cl_type_id = $parentClient['cl_type_id'];
+        $client->created = $createdDt;
+        $client->is_company = $parentClient['is_company'];
+        $client->is_public = $parentClient['is_public'];
+        $client->company_name = $parentClient['company_name'];
+        $client->detachBehavior('timestamp');
+        if (!$client->save()) {
+            Yii::error(VarDumper::dumpAsString([
+                'errors' => $client->getErrors(),
+                'model' => $client->getAttributes(),
+            ]), 'OneTimeController:cloneClientWithProject:save');
+            return;
+        }
+        $this->cloneClientPhone($parentClient['id'], $client->id);
+        $this->cloneClientEmail($parentClient['id'], $client->id);
+    }
+
+    private function cloneClientPhone($fromId, $toId): void
+    {
+        $oldPhones = ClientPhone::find()->andWhere(['client_id' => $fromId])->asArray()->all();
+        foreach ($oldPhones as $oldPhone) {
+            $phone = new ClientPhone();
+            $phone->enablelAferSave = false;
+            $phone->client_id = $toId;
+            $phone->phone = $oldPhone['phone'];
+            $phone->created = $oldPhone['created'];
+            $phone->is_sms = $oldPhone['is_sms'];
+            $phone->validate_dt = $oldPhone['validate_dt'];
+            $phone->type = $oldPhone['type'] ?: ClientPhone::PHONE_NOT_SET;
+            $phone->cp_title = $oldPhone['cp_title'];
+            $phone->detachBehavior('timestamp');
+            if (!$phone->save()) {
+                Yii::error(VarDumper::dumpAsString([
+                    'fromId' => $fromId,
+                    'toId' => $toId,
+                    'errors' => $phone->getErrors(),
+                    'model' => $phone->getAttributes(),
+                ]), 'OneTimeController:cloneClientPhone:save');
+            }
+        }
+    }
+
+    private function cloneClientEmail($fromId, $toId): void
+    {
+        $oldEmails = ClientEmail::find()->andWhere(['client_id' => $fromId])->asArray()->all();
+        foreach ($oldEmails as $oldEmail) {
+            $email = new ClientEmail();
+            $email->client_id = $toId;
+            $email->email = $oldEmail['email'];
+            $email->created = $oldEmail['created'];
+            $email->type = $oldEmail['type'] ?: ClientEmail::EMAIL_NOT_SET;
+            $email->ce_title = $oldEmail['ce_title'];
+            $email->detachBehavior('timestamp');
+            if (!$email->save()) {
+                Yii::error(VarDumper::dumpAsString([
+                    'fromId' => $fromId,
+                    'toId' => $toId,
+                    'errors' => $email->getErrors(),
+                    'model' => $email->getAttributes(),
+                ]), 'OneTimeController:cloneClientEmail:save');
+            }
+        }
     }
 }

@@ -16,6 +16,8 @@ use common\models\Email;
 use sales\viewModel\call\ViewModelTotalCallGraph;
 use Yii;
 use yii\base\Model;
+use yii\filters\VerbFilter;
+use yii\helpers\ArrayHelper;
 use yii\widgets\ActiveForm;
 
 /**
@@ -23,6 +25,28 @@ use yii\widgets\ActiveForm;
  */
 class StatsController extends FController
 {
+
+    /**
+     * {@inheritdoc}
+     */
+    public function behaviors()
+    {
+        $behaviors = [
+            'verbs' => [
+                'class' => VerbFilter::class,
+                'actions' => [
+                    'delete' => ['POST'],
+                ],
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
+    public function init(): void
+    {
+        parent::init();
+        $this->layoutCrud();
+    }
 
     /**
      * Displays homepage.

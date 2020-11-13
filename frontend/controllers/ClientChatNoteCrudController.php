@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use sales\auth\Auth;
 use Yii;
 use sales\model\clientChatNote\entity\ClientChatNote;
 use sales\model\clientChatNote\entity\ClientChatNoteSearch;
@@ -29,6 +30,12 @@ class ClientChatNoteCrudController extends FController
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
+    public function init(): void
+    {
+        parent::init();
+        $this->layoutCrud();
     }
 
     /**
@@ -67,6 +74,7 @@ class ClientChatNoteCrudController extends FController
     public function actionCreate()
     {
         $model = new ClientChatNote();
+        $model->ccn_user_id = Auth::id();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->ccn_id]);

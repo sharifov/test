@@ -3,6 +3,7 @@
 use common\models\ConferenceParticipant;
 use frontend\extensions\DatePicker;
 use sales\widgets\DateTimePicker;
+use sales\widgets\UserSelect2Widget;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -19,9 +20,15 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'cp_cf_id')->textInput() ?>
 
+    <?= $form->field($model, 'cp_cf_sid')->textInput() ?>
+
+    <?= $form->field($model, 'cp_identity')->textInput() ?>
+
     <?= $form->field($model, 'cp_call_sid')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'cp_call_id')->textInput() ?>
+
+    <?= $form->field($model, 'cp_user_id')->widget(UserSelect2Widget::class) ?>
 
     <?= $form->field($model, 'cp_status_id')->dropDownList(ConferenceParticipant::STATUS_LIST, ['prompt' => 'Select status']) ?>
 

@@ -6,6 +6,8 @@ use common\models\LeadFlow;
 use common\models\VisitorLog;
 use sales\forms\lead\EmailCreateForm;
 use sales\forms\lead\PhoneCreateForm;
+use sales\repositories\client\ClientsCollection;
+use sales\repositories\client\ClientsQuery;
 use sales\repositories\lead\LeadSegmentRepository;
 use sales\services\TransactionManager;
 use Yii;
@@ -14,7 +16,7 @@ use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Lead;
 use common\models\LeadFlightSegment;
-use sales\forms\lead\ClientCreateForm;
+use sales\services\client\ClientCreateForm;
 use sales\repositories\lead\LeadRepository;
 use sales\services\client\ClientManageService;
 use sales\services\lead\calculator\LeadTripTypeCalculator;
@@ -290,41 +292,74 @@ class LeadCreateApiService
      */
     private function findOrCreateClient(ApiLead $modelLead, Lead $lead): Client
     {
-        if (!$client = $this->getClientByPhones($modelLead->phones, $lead)) {
+        $projectId = $modelLead->project_id;
+        $parentId = null;
 
-            $firstName = null;
-            $lastName = null;
-            $middleName = null;
+        if (!empty($modelLead->clientUuid) && $client = Client::findOne(['uuid' => $modelLead->clientUuid])) {
+            return $client;
+        }
 
-            if ($modelLead->client_first_name) {
-                $firstName = $modelLead->client_first_name;
+        if (!is_array($modelLead->phones)) {
+            throw new UnprocessableEntityHttpException('Phones from ModelLead cannot be empty.');
+        }
+
+        foreach ($modelLead->phones as $phone) {
+            $phone = trim($phone);
+            if (!$phone) {
+                continue;
+            }
+            $collections = new ClientsCollection(ClientsQuery::allByPhone($phone));
+            if ($collections->isEmpty()) {
+                continue;
+            }
+            if ($projectId) {
+                if ($client = $collections->getWithProject($projectId)) {
+                    $lead->l_client_phone = $phone;
+                    return $client;
+                }
             } else {
-                $firstName = 'ClientName';
+                if ($client = $collections->getWithoutProject()) {
+                    $lead->l_client_phone = $phone;
+                    return $client;
+                }
             }
+            $parentId = $collections->getFirstId();
+            break;
+        }
 
-            if ($modelLead->client_last_name) {
-                $lastName = $modelLead->client_last_name;
-            }
-            if ($modelLead->client_middle_name) {
-                $middleName = $modelLead->client_middle_name;
-            }
+        $firstName = null;
+        $lastName = null;
+        $middleName = null;
 
-            $newClient = new ClientCreateForm([
-                'firstName' => $firstName,
-                'middleName' => $middleName,
-                'lastName' => $lastName
-            ]);
+        if ($modelLead->client_first_name) {
+            $firstName = $modelLead->client_first_name;
+        } else {
+            $firstName = 'ClientName';
+        }
 
-            if (!$newClient->validate()) {
-                throw new UnprocessableEntityHttpException($this->errorToString($newClient->errors));
-            }
+        if ($modelLead->client_last_name) {
+            $lastName = $modelLead->client_last_name;
+        }
+        if ($modelLead->client_middle_name) {
+            $middleName = $modelLead->client_middle_name;
+        }
 
-            try {
-                $client = $this->clientManageService->create($newClient);
-            } catch (\Throwable $e) {
-                throw new UnprocessableEntityHttpException($e->getMessage());
-            }
+        $newClient = new ClientCreateForm([
+            'firstName' => $firstName,
+            'middleName' => $middleName,
+            'lastName' => $lastName,
+            'projectId' => $modelLead->project_id,
+            'typeCreate' => Client::TYPE_CREATE_LEAD,
+        ]);
 
+        if (!$newClient->validate()) {
+            throw new UnprocessableEntityHttpException($this->errorToString($newClient->errors));
+        }
+
+        try {
+            $client = $this->clientManageService->create($newClient, $parentId);
+        } catch (\Throwable $e) {
+            throw new UnprocessableEntityHttpException($e->getMessage());
         }
         return $client;
     }

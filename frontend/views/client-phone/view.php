@@ -57,7 +57,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'updated',
                 'value' => static function (\common\models\ClientPhone $model) {
-                    return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->updated));
+                    return $model->updated ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->updated)) : null;
                 },
                 'format' => 'raw'
             ],

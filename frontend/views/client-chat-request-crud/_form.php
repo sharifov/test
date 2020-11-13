@@ -14,9 +14,29 @@ use yii\widgets\ActiveForm;
 
         <?php $form = ActiveForm::begin(); ?>
 
+        <?= $form->errorSummary($model) ?>
+
         <?= $form->field($model, 'ccr_event')->dropDownList(\sales\model\clientChatRequest\entity\ClientChatRequest::getEventList(), ['prompt' => '-']) ?>
 
-        <?= $form->field($model, 'ccr_json_data')->textarea(['rows' => 6]) ?>
+        <?php
+        try {
+            echo $form->field($model, 'ccr_json_data')->widget(
+                \kdn\yii2\JsonEditor::class,
+                [
+                    'clientOptions' => [
+                        'modes' => ['code', 'form', 'tree', 'view'], //'text',
+                        'mode' => $model->isNewRecord ? 'code' : 'form'
+                    ],
+                    //'collapseAll' => ['view'],
+                    'expandAll' => ['tree', 'form'],
+                ]
+            );
+        } catch (Exception $exception) {
+            echo $form->field($model, 'ccr_json_data')->textarea(['rows' => 6]);
+        }
+        ?>
+
+        <?= $form->field($model, 'ccr_job_id')->textInput() ?>
 
         <?php // $form->field($model, 'ccr_created_dt')->textInput() ?>
 

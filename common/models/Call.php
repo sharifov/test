@@ -8,6 +8,7 @@ use common\components\purifier\Purifier;
 use common\models\query\CallQuery;
 use sales\helpers\PhoneFormatter;
 use sales\helpers\UserCallIdentity;
+use sales\model\call\entity\call\data\Data;
 use sales\model\call\helper\CallHelper;
 use frontend\widgets\newWebPhone\call\socket\MissedCallMessage;
 use frontend\widgets\newWebPhone\call\socket\RemoveIncomingRequestMessage;
@@ -92,7 +93,10 @@ use Locale;
  *
  * @property string $c_recording_url
  * @property bool $c_is_new
+ * @property string|null $c_data_json
  * @property string $recordingUrl
+ *
+ * @property Data|null $data
  *
  * @property Employee $cCreatedUser
  * @property Cases $cCase
@@ -245,6 +249,8 @@ class Call extends \yii\db\ActiveRecord
     public const QUEUE_GENERAL = 'general';
     public const QUEUE_DIRECT = 'direct';
 
+    private ?Data $data = null;
+
     //public $c_recording_url = '';
 
     /**
@@ -269,6 +275,7 @@ class Call extends \yii\db\ActiveRecord
 
             [['c_is_new'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
 
+            ['c_price', 'default', 'value' => null],
             [['c_price'], 'number'],
             [['c_is_new'], 'default', 'value' => true],
             [['c_case_id', 'c_lead_id', 'c_recording_duration', 'c_dep_id', 'c_client_id', 'c_call_duration'], 'default', 'value' => null],
@@ -305,6 +312,10 @@ class Call extends \yii\db\ActiveRecord
 
             ['c_is_conference', 'default', 'value' => false],
             ['c_is_conference', 'boolean'],
+
+            ['c_call_sid', 'unique'],
+            
+            ['c_data_json', 'string'],
         ];
     }
 
@@ -351,6 +362,7 @@ class Call extends \yii\db\ActiveRecord
             'c_conference_id' => 'Conference ID',
             'c_conference_sid' => 'Conference SID',
             'c_language_id' => 'Language ID',
+            'c_data_json' => 'Data',
         ];
     }
 
@@ -1190,11 +1202,13 @@ class Call extends \yii\db\ActiveRecord
         }
 
         if (
-            $this->c_created_user_id && ($insert || $isChangedStatus)
+            $this->c_created_user_id && ($insert || $isChangedStatusFromEmptyInclude)
             && (!($this->isIn() && $this->isStatusQueue()))
             && (!($this->isIn() && $this->isStatusDelay()))
             && (!$this->isInternal() || $this->isEnded())
 //            && (!($this->isIn() && $this->isStatusRinging() && $this->isInternal()))
+            && (!($this->isOut() && $this->isChild()))
+            && (!($this->isIn() && $this->isChild() && $this->isStatusRinging()))
         )  {
             if (
                 $this->isEnded()
@@ -2167,4 +2181,19 @@ class Call extends \yii\db\ActiveRecord
     {
         return $this->c_source_type_id === self::SOURCE_INTERNAL;
 	}
+
+    public function getData(): Data
+    {
+        if ($this->data !== null) {
+            return $this->data;
+        }
+        $this->data = new Data($this->c_data_json);
+        return $this->data;
+    }
+
+    public function setData(Data $data): void
+    {
+        $this->c_data_json = $data->toJson();
+        $this->data = $data;
+    }
 }

@@ -2,11 +2,13 @@
 
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
-use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChatChannel\entity\ClientChatChannel;
+use sales\model\clientChatStatusLog\entity\ClientChatStatusLog;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\clientChatStatusLog\entity\search\ClientChatStatusLog */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -35,14 +37,16 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' =>'Client Chat ID',
                 'attribute' => 'csl_cch_id',
                 'value' => static function (ClientChatStatusLog $model) {
-                    return $model->cslCch ? $model->cslCch->cch_id : null;
+                    return $model->cslCch->cch_id ?? null;
                 }
             ],
             //'csl_from_status',
             [
                 'attribute' => 'csl_from_status',
                 'value' => static function (ClientChatStatusLog $model) {
-                    return $model->csl_from_status ?  Html::tag('span', ClientChat::getStatusList()[$model->csl_from_status], ['class' => 'badge badge-'.ClientChat::getStatusClassList()[$model->csl_from_status]]) : null;
+                    return $model->csl_from_status ? Html::tag('span',
+                        ClientChat::getStatusNameById($model->csl_from_status),
+                            ['class' => 'badge badge-' . ClientChat::getStatusClassById($model->csl_from_status)]) : null;
                 },
                 'format' => 'raw',
                 'filter' => \sales\model\clientChat\entity\ClientChat::getStatusList()
@@ -50,11 +54,28 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'csl_to_status',
                 'value' => static function (ClientChatStatusLog $model) {
-                    return $model->csl_from_status ?  Html::tag('span', ClientChat::getStatusList()[$model->csl_to_status], ['class' => 'badge badge-'.ClientChat::getStatusClassList()[$model->csl_to_status]]) : null;
+                    return $model->csl_to_status ? Html::tag('span',
+                        ClientChat::getStatusNameById($model->csl_to_status),
+                            ['class' => 'badge badge-' . ClientChat::getStatusClassById($model->csl_to_status)]) : null;
                 },
                 'format' => 'raw',
                 'filter' => \sales\model\clientChat\entity\ClientChat::getStatusList()
             ],
+			[
+				'attribute' => 'csl_prev_channel_id',
+				'value' => static function (ClientChatStatusLog $model) {
+					return $model->cslPrevChannel ? Html::a('<i class="fa fa-link"></i> ' . $model->cslPrevChannel->ccc_name, ['/client-chat-channel-crud/view', 'id' => $model->csl_prev_channel_id], ['target' => '_blank', 'data-pjax' => 0]) : null;
+				},
+				'format' => 'raw',
+				'filter' => ClientChatChannel::getList()
+			],
+			[
+				'class' => UserSelect2Column::class,
+				'attribute' => 'csl_user_id',
+				'relation' => 'cslUser',
+				'format' => 'username',
+				'placeholder' => 'Select User'
+			],
             //'csl_to_status',
 			[
 				'class' => DateTimeColumn::class,
@@ -72,6 +93,15 @@ $this->params['breadcrumbs'][] = $this->title;
 				'relation' => 'cslOwner',
 				'format' => 'username',
 				'placeholder' => 'Select User'
+			],
+
+			[
+				'attribute' => 'csl_action_type',
+				'value' => static function (ClientChatStatusLog $model) {
+					return ClientChatStatusLog::getActionLabel($model->csl_action_type);
+				},
+				'format' => 'raw',
+				'filter' => ClientChatStatusLog::getActionList()
 			],
 
             ['class' => 'yii\grid\ActionColumn'],

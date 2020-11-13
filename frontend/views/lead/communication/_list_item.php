@@ -2,10 +2,15 @@
 
 use common\models\Employee;
 use frontend\helpers\EmailHelper;
+use sales\auth\Auth;
+use sales\model\clientChat\entity\ClientChat;
+use sales\model\clientChatLastMessage\entity\ClientChatLastMessage;
+use sales\model\clientChatMessage\entity\ClientChatMessage;
 use yii\helpers\Html;
 use \common\models\Email;
 use \common\models\Sms;
 use \common\models\Call;
+use yii\helpers\VarDumper;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -126,9 +131,11 @@ $fromType = 'client';
                 <div class="">
                     <?php echo \yii\helpers\StringHelper::truncate(Email::strip_html_tags($mail->getEmailBodyHtml()), 300, '...', null, true)?>
                 </div>
-                <div class="chat__message-footer">
-                    <?= EmailHelper::renderDetailButton($mail) ?>
-                </div>
+                <?php if(Auth::can('email/view', ['email' => $mail])): ?>
+                    <div class="chat__message-footer">
+                        <?= EmailHelper::renderDetailButton($mail) ?>
+                    </div>
+                <?php endif;?>
             </div>
         </div>
         <?php endif;?>
@@ -150,7 +157,7 @@ $fromType = 'client';
             }
     ?>
         <div class="chat__message chat__message--<?=($sms->s_type_id == Sms::TYPE_INBOX ? 'client' : 'system')?> chat__message--sms">
-        <div class="chat__icn"><i class="fa fa-comments-o"></i></div>
+        <div class="chat__icn"><i class="fas fa-sms"> </i></div>
 
         <i class="chat__status chat__status--<?=$statusClass?> fa fa-circle" data-toggle="tooltip" title="<?=Html::encode($statusTitle)?>" data-placement="left" data-original-title="<?=Html::encode($statusTitle)?>"></i>
         <div class="chat__message-heading">
@@ -167,3 +174,11 @@ $fromType = 'client';
     </div>
     <?php endif;?>
 <?php endif;?>
+
+<?php
+    if ($model['type'] === 'chat') {
+        if ($chat = ClientChat::find()->andWhere(['cch_id' => $model['id']])->one()) {
+            echo $this->render('../../partial/_communication_chat_block', ['chat' => $chat]);
+        }
+    }
+?>

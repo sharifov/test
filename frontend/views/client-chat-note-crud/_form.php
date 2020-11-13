@@ -24,9 +24,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'ccn_deleted')->dropDownList([0 => 'No', 1 => 'Yes']) ?>
 
-        <?= $form->field($model, 'ccn_created_dt')->widget(DateTimePicker::class) ?>
-
-        <?= $form->field($model, 'ccn_updated_dt')->widget(DateTimePicker::class) ?>
+        <?php // echo $form->field($model, 'ccn_created_dt')->widget(DateTimePicker::class) ?>
+        <?php // echo $form->field($model, 'ccn_updated_dt')->widget(DateTimePicker::class) ?>
 
         <div class="form-group">
             <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

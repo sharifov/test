@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use common\models\VisitorLog;
 use sales\auth\Auth;
 use sales\model\clientChat\useCase\create\ClientChatRepository;
+use sales\model\clientChatFeedback\entity\ClientChatFeedbackSearch;
 use sales\model\clientChatMessage\entity\ClientChatMessage;
 use sales\model\clientChatMessage\entity\search\ClientChatMessageSearch;
 use sales\model\clientChatNote\entity\ClientChatNoteSearch;
@@ -16,6 +17,7 @@ use sales\model\clientChat\entity\ClientChat;
 use sales\model\clientChat\entity\search\ClientChatQaSearch;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -57,6 +59,12 @@ class ClientChatQaController extends FController
                     'delete' => ['POST'],
                 ],
             ],
+            'access' => [
+                'allowActions' => [
+                    'room',
+                    'view',
+                ],
+            ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
@@ -77,22 +85,28 @@ class ClientChatQaController extends FController
     }
 
     /**
-     * @param $id
+     * @param int $id
      * @return string
      * @throws NotFoundHttpException
      * @throws \yii\base\InvalidConfigException
      */
-    public function actionView($id): string
+    public function actionView(int $id): string
     {
-        $clientChat = ClientChat::find()
-            ->byId($id)
-            ->byUserGroupsRestriction()
-            ->byProjectRestriction()
-            ->byDepartmentRestriction()
-            ->one();
+//        $clientChat = ClientChat::find()
+//            ->byId($id)
+//            ->byUserGroupsRestriction()
+//            ->byProjectRestriction()
+//            ->byDepartmentRestriction()
+//            ->one();
+
+        $clientChat = ClientChat::find()->byId($id)->one();
 
         if (!$clientChat) {
-            throw new NotFoundException('Client chat not found or access denied');
+            throw new NotFoundHttpException('Client chat not found.');
+        }
+
+        if (!Auth::can('client-chat/view', ['chat' => $clientChat])) {
+            throw new ForbiddenHttpException('Access denied.');
         }
 
         $searchModel = new ClientChatMessageSearch();
@@ -118,6 +132,11 @@ class ClientChatQaController extends FController
         $dataProviderRequest = $requestSearch->search($data);
         $dataProviderRequest->setPagination(['pageSize' => 10]);
 
+        $searchModelFeedback = new ClientChatFeedbackSearch();
+        $data[$searchModelFeedback->formName()]['ccf_client_chat_id'] = $id;
+        $dataProviderFeedback = $searchModelFeedback->search($data);
+        $dataProviderFeedback->setPagination(['pageSize' => 20]);
+
         return $this->render('view', [
             'model' => $this->findModel($id),
             'searchModel' => $searchModel,
@@ -126,34 +145,49 @@ class ClientChatQaController extends FController
             'visitorLog' => $visitorLog ?? null,
             'clientChatVisitorData' => $clientChat->ccv->ccvCvd ?? null,
             'dataProviderRequest' => $dataProviderRequest,
+            'dataProviderFeedback' => $dataProviderFeedback,
         ]);
     }
 
     /**
-     * @param $rid
+     * @param int $id
      * @return string
+     * @throws ForbiddenHttpException
      */
-    public function actionRoom($rid): string
+    public function actionRoom(int $id): string
     {
-        $clientChat = ClientChat::find()
-            ->byRid($rid)
-            ->byUserGroupsRestriction()
-            ->byProjectRestriction()
-            ->byDepartmentRestriction()
-            ->one();
+//        $clientChat = ClientChat::find()
+//            ->byId((int)$id)
+//            ->byUserGroupsRestriction()
+//            ->byProjectRestriction()
+//            ->byDepartmentRestriction()
+//            ->one();
+
+        $clientChat = ClientChat::find()->byId($id)->one();
 
         if (!$clientChat) {
-            throw new NotFoundException('Client chat not found or access denied');
+            throw new NotFoundHttpException('Client chat not found.');
+        }
+
+        if (!Auth::can('client-chat/view', ['chat' => $clientChat])) {
+            throw new ForbiddenHttpException('Access denied.');
         }
 
         if ($clientChat->isClosed()) {
             $history = ClientChatMessage::find()->byChhId($clientChat->cch_id)->all();
         }
 
-		return $this->render('room', [
-            'clientChat' => $clientChat,
-            'history' => $history ?? null,
-        ]);
+        if (Yii::$app->request->isAjax) {
+            return $this->renderAjax('room', [
+                'clientChat' => $clientChat,
+                'history' => $history ?? null,
+            ]);
+        } else {
+            return $this->render('room', [
+                'clientChat' => $clientChat,
+                'history' => $history ?? null,
+            ]);
+        }
     }
 
     /**

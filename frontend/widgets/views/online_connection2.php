@@ -8,6 +8,7 @@ use yii\helpers\Url;
 
 /* @var $caseId integer */
 /* @var $userId integer */
+/* @var $userIdentity integer */
 /* @var $controllerId string */
 /* @var $actionId string */
 /* @var $pageUrl string */
@@ -21,8 +22,8 @@ if (UserConnection::isIdleMonitorEnabled()) {
     \frontend\assets\IdleAsset::register($this);
 }
 
+$bundle = \frontend\assets\TimerAsset::register($this);
 if (UserMonitor::isAutologoutEnabled()) {
-    $bundle = \frontend\assets\TimerAsset::register($this);
     \frontend\assets\BroadcastChannelAsset::register($this);
 }
 
@@ -110,6 +111,7 @@ $discardUnreadMessageUrl = Url::to(['/client-chat/discard-unread-messages']);
 $js = <<<JS
    
     window.socket = null;
+    window.socketConnectionId = null;
 
     /**
      * Send a message to the WebSocket server
@@ -137,19 +139,24 @@ $js = <<<JS
         }                
     }
     
-    function sortDialogOnLoad() {        
-        $('._cc_item_unread_messages').each(function(i, obj) { 
-            if ($(this).text()){
-                pushDialogOnTop($(this).data('cch-id'))                
-            }                           
-        });   
-    }
-    sortDialogOnLoad() 
+    // function sortDialogOnLoad() {        
+    //     $('._cc_item_unread_messages').each(function(i, obj) { 
+    //         if ($(this).text()){
+    //             pushDialogOnTop($(this).data('cch-id'))                
+    //         }                           
+    //     });   
+    // }
+    // sortDialogOnLoad() 
     
 
     const userId = '$userId';
+    window.userIdentity = '$userIdentity';
     const wsUrl = '$wsUrl';
     const onlineObj = $('#online-connection-indicator');
+    
+    window.sendCommandUpdatePhoneWidgetCurrentCalls = function () {
+        socketSend('Call', 'GetCurrentQueueCalls', {'userId': userId});
+    };
     
     function wsInitConnect(){
         
@@ -165,7 +172,7 @@ $js = <<<JS
                 onlineObj.attr('title', 'Online Connection: opened').find('i').removeClass('danger').addClass('warning');
                 // console.log(e);
                 
-                socketSend('Call', 'GetCurrentQueueCalls', {'userId': userId});
+                window.sendCommandUpdatePhoneWidgetCurrentCalls();
                
             };
             
@@ -186,6 +193,10 @@ $js = <<<JS
                         if(obj.cmd === 'initConnection') {
                             if (typeof obj.uc_id !== 'undefined') {
                                 if(obj.uc_id > 0) {
+                                    window.socketConnectionId = obj.uc_id;
+                                    if (typeof addChatToActiveConnection ===  "function") {
+                                        addChatToActiveConnection();
+                                    }
                                     onlineObj.attr('title', 'Online Connection (' + obj.uc_id +'): true').find('i').removeClass('warning').removeClass('danger').addClass('success');
                                 } else {
                                     onlineObj.attr('title', 'Timeout DB connection: restart service').find('i').removeClass('danger').removeClass('success').addClass('warning');
@@ -394,19 +405,44 @@ $js = <<<JS
                                 }
                             }
                             
-                            if (obj.data.cchId) {
-                                $("._cc-chat-unread-message").find("[data-cch-id='"+obj.data.cchId+"']").html(obj.data.cchUnreadMessages); 
-                                if($('#chat-last-message-refresh-' + obj.data.cchId).length > 0){
-                                    pjaxReload({container: '#chat-last-message-refresh-' + obj.data.cchId, async: false});
+                            if (obj.data.cchId && (obj.data.cchUnreadMessages === null || obj.data.cchUnreadMessages > 0)) {
+                                $("._cc-chat-unread-message").find("[data-cch-id='"+obj.data.cchId+"']").html(obj.data.cchUnreadMessages);
+                            }
+                            // if (obj.data.cchId) {
+                                // if($('#chat-last-message-refresh-' + obj.data.cchId).length > 0){
+                                   //pjaxReload({container: '#chat-last-message-refresh-' + obj.data.cchId, async: false});
+                                   //pushDialogOnTop(obj.data.cchId)
+                                // } 
+                                // if($('#pjax-chat-additional-data-' + obj.data.cchId).length > 0){
+                                 //  pjaxReload({container: '#pjax-chat-additional-data-' + obj.data.cchId, async: false});
+                                // } 
+                            // }
+                            
+                            if (obj.data.shortMessage) {
+                                let lastMessageValue = $('#chat-last-message-' + obj.data.cchId);
+                                if (lastMessageValue.length > 0) {
+                                    lastMessageValue.html('<p title="Last ' + obj.data.messageOwner + ' message"><small>' + obj.data.shortMessage + '</small></p>');
                                     pushDialogOnTop(obj.data.cchId)
-                                } 
-                                if($('#pjax-chat-additional-data-' + obj.data.cchId).length > 0){
-                                    pjaxReload({container: '#pjax-chat-additional-data-' + obj.data.cchId, async: false});
-                                } 
+                                 }
                             }
                             if($('#notify-pjax-cc').length > 0){
                                 pjaxReload({container: '#notify-pjax-cc', url: '{$ccNotificationUpdateUrl}'});
                             }
+                            
+                            if (obj.data.cchId && obj.data.moment) {
+                                let seconds = + obj.data.moment;
+                                $("._cc-item-last-message-time[data-cch-id='"+obj.data.cchId+"']").attr('data-moment', obj.data.moment).html(moment.duration(-seconds, 'seconds').humanize(true));
+                            }
+                        }
+                        
+                        if (obj.cmd === 'clientChatUpdateItemInfo') {
+                            let seconds = + obj.data.moment;
+                            $("._cc-item-last-message-time[data-cch-id='"+obj.data.cchId+"']").attr('data-moment', obj.data.moment).html(moment.duration(-seconds, 'seconds').humanize(true));
+                            let lastMessageValue = $('#chat-last-message-' + obj.data.cchId);
+                            if (lastMessageValue.length > 0) {
+                                lastMessageValue.html('<p title="Last ' + obj.data.messageOwner + ' message"><small>' + obj.data.shortMessage + '</small></p>');
+                                pushDialogOnTop(obj.data.cchId)
+                             }
                         }
                         
                         if (obj.cmd === 'clientChatUpdateClientStatus') {
@@ -416,15 +452,16 @@ $js = <<<JS
                             //createNotify('Client Chat Notification', obj.statusMessage, obj.isOnline ? 'success' : 'warning');
                         }
 
-                        if (obj.cmd === 'clientChatUpdateTimeLastMessage') {                            
-                            if (obj.data.cchId) {                                
-                                $("._cc-item-last-message-time[data-cch-id='"+obj.data.cchId+"']").attr('data-moment', obj.data.moment).html(obj.data.dateTime);                                
-                            }
-                        }
+                        // if (obj.cmd === 'clientChatUpdateTimeLastMessage') {                            
+                        //     if (obj.data.cchId) {                                
+                        //         $("._cc-item-last-message-time[data-cch-id='"+obj.data.cchId+"']").attr('data-moment', obj.data.moment).html(obj.data.dateTime);                                
+                        //     }
+                        // }
                         
-                        if (obj.cmd === 'clientChatTransfer') {
+                        if (obj.cmd === 'refreshChatPage') {
                             let activeChatId = localStorage.getItem('activeChatId');
                             if (typeof window.refreshChatPage === 'function' && window.name === 'chat' && activeChatId == obj.data.cchId) {
+                                $("#modal-sm").modal("hide");
                                 window.refreshChatPage(obj.data.cchId, obj.data.tab);
                             }
                             createNotify('Warning', obj.data.message, 'warning');
@@ -453,6 +490,32 @@ $js = <<<JS
                             createNotify(data.title, data.message, data.type);
                         }
                         
+                        if (obj.cmd === 'updateVoiceMailRecord') {
+                            if ($("#voice-mail-pjax").length > 0) {
+                                pjaxReload({container: "#voice-mail-pjax"});    
+                            }
+                            window.updateVoiceRecordCounters();
+                        }
+                        
+                        if(obj.cmd === 'reloadClientChatList') {
+                            let boxElement = $('#pjax-client-chat-channel-list');
+                            if (boxElement.length) {
+                                pjaxReload({container: '#pjax-client-chat-channel-list'});
+                            }
+                        }
+                        
+                        if(obj.cmd === 'reloadChatInfo') {
+                            let boxElement = $('#_cc_additional_info_wrapper');
+                            if (boxElement.length) {
+                                let activeChatId = parseInt(localStorage.getItem('activeChatId'), 10);
+                                let cchId = parseInt(obj.data.cchId, 10);
+                                
+                                if (activeChatId === cchId) {
+                                    window.refreshChatInfo(cchId);
+                                    createNotify('Warning', obj.data.message, 'warning');
+                                }
+                            }    
+                        }
                     }
                     // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
                 } catch (error) {
@@ -472,6 +535,7 @@ $js = <<<JS
                 //console.log('Code: ' + event.code);
                 
                 onlineObj.attr('title', 'Disconnect').find('i').removeClass('success').addClass('danger');
+                window.socketConnectionId = null;
                 // setTimeout(function() {
                 //   wsInitConnect();
                 // }, 5000);
@@ -483,12 +547,14 @@ $js = <<<JS
                     console.log('Socket error: ' + event.message);
                 //}
                 onlineObj.attr('title', 'Online Connection: false').find('i').removeClass('success').addClass('danger');
+                window.socketConnectionId = null;
                 
             };
     
         } catch (error) {
             console.error(error);
             onlineObj.attr('title', 'Online Connection: error').find('i').removeClass('success').addClass('danger');
+            window.socketConnectionId = null;
         }
     }
     
