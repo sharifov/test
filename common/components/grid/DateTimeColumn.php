@@ -35,6 +35,7 @@ class DateTimeColumn extends DataColumn
                 'options' => [
                     'autocomplete' => 'off',
                     'placeholder' => 'Choose Date',
+                    'readonly' => 'readonly'
                 ],
                 'containerOptions' => [
                     'class' => (array_key_exists($this->attribute, $this->grid->filterModel->errors)) ? 'has-error' : null,
