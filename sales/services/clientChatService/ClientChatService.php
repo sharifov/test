@@ -193,7 +193,7 @@ class ClientChatService
      */
     public function sendRequestToUsers(ClientChat $clientChat): void
     {
-        $userChannel = ClientChatUserChannel::find()->byChannelId($clientChat->cch_channel_id)->all();
+        $userChannel = ClientChatUserChannel::find()->byChannelId($clientChat->cch_channel_id)->onlineUsers()->all();
 
         if ($userChannel) {
             /** @var ClientChatUserChannel $item */
