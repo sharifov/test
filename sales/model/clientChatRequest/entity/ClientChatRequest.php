@@ -248,6 +248,11 @@ class ClientChatRequest extends \yii\db\ActiveRecord
         return $this->decodedData['page']['url'] ?? '';
     }
 
+    public function getSourceCid(): string
+    {
+        return $this->decodedData['sources']['cid'] ?? '';
+    }
+
     /**
      * @param string $rid
      * @return array|ActiveRecord|null

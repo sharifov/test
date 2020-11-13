@@ -30,17 +30,22 @@ class VisitorLogQuery extends \yii\db\ActiveQuery
     }
 
     public function byClient(int $id): self
-	{
-		return $this->andWhere(['vl_client_id' => $id]);
-	}
+    {
+        return $this->andWhere(['vl_client_id' => $id]);
+    }
 
-	public function byCchId(int $id): self
-	{
-		return $this->andWhere(['vl_cch_id' => $id]);
-	}
+    public function byProject(int $id): self
+    {
+        return $this->andWhere(['vl_project_id' => $id]);
+    }
 
-	public function byCvdId(int $id): self
-	{
-		return $this->andWhere(['vl_cvd_id' => $id]);
-	}
+    public function byCchId(int $id): self
+    {
+        return $this->andWhere(['vl_cch_id' => $id]);
+    }
+
+    public function byCvdId(int $id): self
+    {
+        return $this->andWhere(['vl_cvd_id' => $id]);
+    }
 }
