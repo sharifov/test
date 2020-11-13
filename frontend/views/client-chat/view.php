@@ -34,7 +34,7 @@ ClientChatAsset::register($this);
 <?php else: ?>
 
     <?php
-        $this->title = ' ' . $clientChat->cchClient->full_name . ' Chat';
+        $this->title = ' ' . $clientChat->cchClient->full_name . ' - Chat';
         $this->params['breadcrumbs'][] = ['label' => 'My Client Chat', 'url' => ['index', 'chid' => $clientChat->cch_id]];
         $this->params['breadcrumbs'][] = $this->title;
     ?>
