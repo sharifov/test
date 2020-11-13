@@ -150,7 +150,7 @@ $js = <<<JS
     
 
     const userId = '$userId';
-    const userIdentity = '$userIdentity';
+    window.userIdentity = '$userIdentity';
     const wsUrl = '$wsUrl';
     const onlineObj = $('#online-connection-indicator');
     

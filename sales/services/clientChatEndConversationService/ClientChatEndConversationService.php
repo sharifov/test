@@ -1,6 +1,6 @@
 <?php
 
-namespace sales\services\clientChat;
+namespace sales\services\clientChatEndConversation;
 
 use sales\model\clientChat\entity\ClientChat;
 use sales\repositories\NotFoundException;
@@ -34,20 +34,10 @@ class ClientChatEndConversationService
             $errorMessage .= ' clientChatId (' . $chatId . ')';
             \Yii::error(
                 $errorMessage,
-                'ClientChatEndConversationService:ChatBot:Error'
+                'ClientChatEndConversationJob:ChatBot:Error'
             );
             throw new \RuntimeException($errorMessage);
         }
-
-        $info = 'Id : (' . $clientChat->cch_id .
-                ') Rid : (' . $clientChat->cch_rid .
-                ') Status: (' . $clientChat->getStatusName() .
-                ') shallowCloseParam: (' . (string) $shallowCloseParam . ')';
-        \Yii::info(
-            'Chat Bot request successfully processed. ' . PHP_EOL . $info,
-            'info\ClientChatEndConversationService:successfully'
-        );
-
         return $clientChat;
     }
 }

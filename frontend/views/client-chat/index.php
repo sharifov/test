@@ -131,4 +131,3 @@ $userRcAuthToken = Auth::user()->userProfile ? Auth::user()->userProfile->up_rc_
             'filter' => $filter,
         ]);
     ?>
-<?php endif; ?>

@@ -63,6 +63,8 @@ use yii\widgets\ActiveForm;
 
         <?= $form->field($model, 'dpp_default')->checkbox() ?>
 
+        <?= $form->field($model, 'dpp_allow_transfer')->checkbox() ?>
+
         <?= $form->field($model, 'dpp_show_on_site')->checkbox() ?>
 
 

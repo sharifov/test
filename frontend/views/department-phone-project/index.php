@@ -99,6 +99,10 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'class' => \common\components\grid\BooleanColumn::class,
+                'attribute' => 'dpp_allow_transfer',
+            ],
+            [
+                'class' => \common\components\grid\BooleanColumn::class,
                 'attribute' => 'dpp_show_on_site',
             ],
 
