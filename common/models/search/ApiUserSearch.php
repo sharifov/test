@@ -20,7 +20,8 @@ class ApiUserSearch extends ApiUser
     {
         return [
             [['au_id', 'au_project_id', 'au_enabled', 'au_updated_user_id'], 'integer'],
-            [['au_name', 'au_api_username', 'au_api_password', 'au_email', 'au_updated_dt'], 'safe'],
+            [['au_name', 'au_api_username', 'au_api_password', 'au_email'], 'safe'],
+            [['au_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

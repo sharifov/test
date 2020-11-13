@@ -16,7 +16,6 @@ use yii\helpers\VarDumper;
  */
 class KpiHistorySearch extends KpiHistory
 {
-
     public $usersIdsInCommonGroups;
 
     /**
@@ -26,9 +25,10 @@ class KpiHistorySearch extends KpiHistory
     {
         return [
             [['kh_id', 'kh_user_id', 'kh_super_id', 'kh_bonus_active', 'kh_commission_percent'], 'integer'],
-            [['kh_date_dt', 'kh_created_dt', 'kh_updated_dt', 'kh_agent_approved_dt', 'kh_super_approved_dt', 'kh_description'], 'safe'],
+            [['kh_agent_approved_dt', 'kh_super_approved_dt', 'kh_description'], 'safe'],
             [['kh_base_amount', 'kh_profit_bonus', 'kh_manual_bonus', 'kh_estimation_profit'], 'number'],
-
+            [['kh_created_dt', 'kh_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
+            [['kh_date_dt'], 'date', 'format' => 'php:M-Y'],
             ['usersIdsInCommonGroups', 'safe']
         ];
     }
@@ -64,7 +64,7 @@ class KpiHistorySearch extends KpiHistory
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 
@@ -83,8 +83,8 @@ class KpiHistorySearch extends KpiHistory
             'kh_estimation_profit' => $this->kh_estimation_profit,
         ]);
 
-        if($this->kh_date_dt){
-            $start = \DateTime::createFromFormat('M-Y',$this->kh_date_dt);
+        if ($this->kh_date_dt) {
+            $start = \DateTime::createFromFormat('M-Y', $this->kh_date_dt);
             $start = $start->modify('first day of this month');
             $end = clone $start;
             $end->modify('last day of this month');

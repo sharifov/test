@@ -50,7 +50,7 @@ class CaseStatusLogSearch extends CaseStatusLog
 
             ['csl_case_id', 'integer'],
 
-            [['csl_start_dt', 'csl_end_dt'], 'string'],
+            [['csl_start_dt', 'csl_end_dt'], 'date', 'format' => 'php:Y-m-d'],
 
             [['created_date_from', 'created_date_to'], 'string'],
 

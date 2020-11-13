@@ -1,7 +1,7 @@
 <?php
 
 use common\components\grid\UserSelect2Column;
-use dosamigos\datepicker\DatePicker;
+use common\components\grid\DateTimeColumn;
 use yii\grid\ActionColumn;
 use sales\model\call\entity\callCommand\CallCommand;
 use yii\helpers\Html;
@@ -78,7 +78,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     'width' => '150px'
                 ]
             ],
+
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'ccom_created_dt'
+            ],
+
+            /*[
                 'attribute' => 'ccom_created_dt',
                 'value' => static function (CallCommand $model) {
                     return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->ccom_created_dt));
@@ -100,7 +106,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'clearDate' => 'function (e) {$(e.target).find("input").change();}',
                     ],
                 ]),
-            ],
+            ],*/
             ['class' => ActionColumn::class],
         ],
     ]); ?>

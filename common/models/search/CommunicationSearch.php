@@ -49,7 +49,7 @@ class CommunicationSearch extends Model
     {
         return [
             [['id', 'project_id', 'lead_id', 'communication_type_id', 'created_user_id', 'supervision_id', 'user_group_id'], 'integer'],
-            [['created_dt'], 'safe'],
+            [['created_dt'], 'date', 'format' => 'php:Y-m-d'],
             [['datetime_start', 'datetime_end', 'agent_phone', 'client_phone'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
         ];

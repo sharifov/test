@@ -20,7 +20,8 @@ class EmailTemplateTypeSearch extends EmailTemplateType
     {
         return [
             [['etp_id', 'etp_created_user_id', 'etp_updated_user_id', 'etp_dep_id'], 'integer'],
-            [['etp_key', 'etp_name', 'etp_origin_name', 'etp_hidden', 'etp_created_dt', 'etp_updated_dt'], 'safe'],
+            [['etp_key', 'etp_name', 'etp_origin_name', 'etp_hidden'], 'safe'],
+            [['etp_created_dt', 'etp_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

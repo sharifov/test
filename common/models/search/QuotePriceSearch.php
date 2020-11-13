@@ -20,8 +20,9 @@ class QuotePriceSearch extends QuotePrice
     {
         return [
             [['id', 'quote_id'], 'integer'],
-            [['passenger_type', 'created', 'updated'], 'safe'],
+            [['passenger_type'], 'safe'],
             [['selling', 'net', 'fare', 'taxes', 'mark_up', 'extra_mark_up'], 'number'],
+            [['created', 'updated'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

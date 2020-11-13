@@ -4,7 +4,7 @@ use common\models\CaseNote;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
-use dosamigos\datepicker\DatePicker;
+use common\components\grid\DateTimeColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\CaseNoteSearch */
@@ -40,7 +40,13 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             'cn_text:ntext',
+
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'cn_created_dt'
+            ],
+
+            /*[
                 'attribute' => 'cn_created_dt',
                 'value' => function(\common\models\CaseNote $model) {
                     return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->cn_created_dt));
@@ -58,8 +64,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
-            ],
-            //'cn_updated_dt',
+            ],*/
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

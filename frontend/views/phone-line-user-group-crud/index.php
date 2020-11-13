@@ -1,9 +1,10 @@
 <?php
 
-use frontend\extensions\DatePicker;
+use common\components\grid\DateTimeColumn;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\phoneLine\phoneLineUserGroup\entity\search\PhoneLineUserGroupSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -20,7 +21,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php Pjax::begin(); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -30,45 +31,57 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'plug_line_id',
             'plug_ug_id',
-			[
-				'attribute' => 'plug_created_dt',
-				'format' => 'byUserDateTime',
-				'filter' => DatePicker::widget([
-					'model' => $searchModel,
-					'attribute' => 'plug_created_dt',
-					'clientOptions' => [
-						'autoclose' => true,
-						'format' => 'yyyy-mm-dd',
-					],
-					'options' => [
-						'autocomplete' => 'off',
-						'placeholder' =>'Choose Date',
 
-					],
-				]),
-				'options' => [
-					'width' => '150px'
-				]
-			],
-			[
-				'attribute' => 'plug_updated_dt',
-				'format' => 'byUserDateTime',
-				'filter' => DatePicker::widget([
-					'model' => $searchModel,
-					'attribute' => 'plug_updated_dt',
-					'clientOptions' => [
-						'autoclose' => true,
-						'format' => 'yyyy-mm-dd',
-					],
-					'options' => [
-						'autocomplete' => 'off',
-						'placeholder' =>'Choose Date'
-					],
-				]),
-				'options' => [
-					'width' => '150px'
-				]
-			],
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'plug_created_dt'
+            ],
+
+            /*[
+                'attribute' => 'plug_created_dt',
+                'format' => 'byUserDateTime',
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'plug_created_dt',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' =>'Choose Date',
+
+                    ],
+                ]),
+                'options' => [
+                    'width' => '150px'
+                ]
+            ],*/
+
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'plug_updated_dt'
+            ],
+
+            /*[
+                'attribute' => 'plug_updated_dt',
+                'format' => 'byUserDateTime',
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'plug_updated_dt',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' =>'Choose Date'
+                    ],
+                ]),
+                'options' => [
+                    'width' => '150px'
+                ]
+            ],*/
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

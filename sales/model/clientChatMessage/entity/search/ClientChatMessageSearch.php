@@ -18,7 +18,8 @@ class ClientChatMessageSearch extends ClientChatMessage
     {
         return [
             [['ccm_id', 'ccm_client_id', 'ccm_user_id', 'ccm_cch_id'], 'integer'],
-            [['ccm_rid', 'ccm_sent_dt', 'ccm_body'], 'safe'],
+            [['ccm_rid', 'ccm_body'], 'safe'],
+            [['ccm_sent_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

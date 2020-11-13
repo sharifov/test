@@ -1,6 +1,6 @@
 <?php
 
-use frontend\extensions\DatePicker;
+use common\components\grid\DateTimeColumn;
 use sales\widgets\UserSelect2Widget;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
@@ -81,7 +81,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     'width' => '150px'
                 ]
             ],
+
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'upn_created_dt'
+            ],
+
+            /*[
                 'attribute' => 'upn_created_dt',
                 'format' => 'byUserDateTime',
                 'filter' => DatePicker::widget([
@@ -100,8 +106,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'options' => [
                     'width' => '150px'
                 ]
-            ],
+            ],*/
+
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'upn_updated_dt'
+            ],
+
+            /*[
                 'attribute' => 'upn_updated_dt',
                 'format' => 'byUserDateTime',
                 'filter' => DatePicker::widget([
@@ -119,7 +131,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'options' => [
                     'width' => '150px'
                 ]
-            ],
+            ],*/
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

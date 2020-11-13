@@ -5,6 +5,7 @@ use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use common\components\grid\DateTimeColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\ClientEmailSearch */
@@ -46,7 +47,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'email:email',
             'ce_title',
             'comments:text',
-            [
+            /*[
                 'attribute' => 'created',
                 'value' => static function (ClientEmail $model) {
                     return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->created));
@@ -64,8 +65,14 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' => 'Choose Date'
                     ],
                 ]),
-            ],
+            ],*/
+
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'created'
+            ],
+
+            /*[
                 'attribute' => 'updated',
                 'value' => static function (ClientEmail $model) {
                     return $model->updated ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->updated)) : null;
@@ -83,6 +90,11 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' => 'Choose Date'
                     ],
                 ]),
+            ],*/
+
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'updated'
             ],
 
             [

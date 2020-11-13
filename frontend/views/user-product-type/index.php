@@ -5,6 +5,7 @@ use common\models\UserProductType;
 use modules\product\src\entities\productType\ProductType;
 use yii\helpers\Html;
 use yii\grid\GridView;
+use common\components\grid\DateTimeColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\UserProductTypeSearch */
@@ -61,14 +62,20 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'filter' => ['' => '-', 0 => 'No', 1 => 'Yes']
             ],
+
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'upt_created_dt'
+            ],
+
+            /*[
                 'attribute' => 'upt_created_dt',
                 'value' => static function (UserProductType $model) {
                     return $model->upt_created_dt ?
                         '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->upt_created_dt)) : '-';
                 },
                 'format' => 'raw',
-            ],
+            ],*/
             ['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>

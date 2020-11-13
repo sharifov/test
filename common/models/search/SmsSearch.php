@@ -33,8 +33,9 @@ class SmsSearch extends Sms
             [['datetime_start', 'datetime_end'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['s_id', 's_reply_id', 's_lead_id', 's_case_id', 's_project_id', 's_type_id', 's_template_type_id', 's_communication_id', 's_is_deleted', 's_is_new', 's_delay', 's_priority', 's_status_id', 's_tw_num_segments', 's_created_user_id', 's_updated_user_id', 'supervision_id'], 'integer'],
-            [['s_phone_from', 's_phone_to', 's_sms_text', 's_sms_data', 's_language_id', 's_status_done_dt', 's_read_dt', 's_error_message', 's_tw_sent_dt', 's_tw_account_sid', 's_tw_message_sid', 's_tw_to_country', 's_tw_to_state', 's_tw_to_city', 's_tw_to_zip', 's_tw_from_country', 's_tw_from_state', 's_tw_from_city', 's_tw_from_zip', 's_created_dt', 's_updated_dt'], 'safe'],
+            [['s_phone_from', 's_phone_to', 's_sms_text', 's_sms_data', 's_language_id', 's_status_done_dt', 's_error_message', 's_tw_sent_dt', 's_tw_account_sid', 's_tw_message_sid', 's_tw_to_country', 's_tw_to_state', 's_tw_to_city', 's_tw_to_zip', 's_tw_from_country', 's_tw_from_state', 's_tw_from_city', 's_tw_from_zip'], 'safe'],
             [['s_tw_price'], 'number'],
+            [['s_created_dt', 's_updated_dt', 's_read_dt',], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -93,7 +94,7 @@ class SmsSearch extends Sms
         }
 
         if (!empty($this->s_created_dt)) {
-            $query->andFilterWhere(['DATE(s_created_dt)' => date('Y-m-d', strtotime($this->e_created_dt))]);
+            $query->andFilterWhere(['DATE(s_created_dt)' => date('Y-m-d', strtotime($this->s_created_dt))]);
         }
 
         if($this->supervision_id > 0) {

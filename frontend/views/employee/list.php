@@ -600,6 +600,11 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 //            ],
 
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'updated_at'
+            ],
+
+            /*[
                 'attribute' => 'updated_at',
                 'value' => static function (\common\models\Employee $model) {
                     return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated_at));
@@ -617,7 +622,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
-            ],
+            ],*/
 
         ]
     ])

@@ -4,6 +4,7 @@ use common\components\grid\BooleanColumn;
 use common\components\grid\department\DepartmentColumn;
 use common\components\grid\EmailSelect2Column;
 use common\components\grid\UserSelect2Column;
+use common\components\grid\DateTimeColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -42,7 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'dep_email',
             [
-                'class' => \common\components\grid\EmailSelect2Column::class,
+                'class' => EmailSelect2Column::class,
                 'attribute' => 'dep_email_list_id',
                 'relation' => 'emailList',
             ],
@@ -74,17 +75,23 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => BooleanColumn::class, 'attribute' => 'dep_enable'],
             ['class' => BooleanColumn::class, 'attribute' => 'dep_default'],
             [
-                'class' => \common\components\grid\UserSelect2Column::class,
+                'class' => UserSelect2Column::class,
                 'attribute' => 'dep_updated_user_id',
                 'relation' => 'depUpdatedUser',
             ],
-			[
+
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'dep_updated_dt'
+            ],
+
+			/*[
 				'attribute' => 'dep_updated_dt',
 				'value' => static function (\common\models\DepartmentEmailProject $model) {
 					return $model->dep_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->dep_updated_dt)) : '-';
 				},
 				'format' => 'raw'
-			],
+			],*/
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

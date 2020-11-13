@@ -14,7 +14,7 @@ class PhoneLineSearch extends PhoneLine
 
             ['line_allow_out', 'integer'],
 
-            ['line_created_dt', 'safe'],
+            [['line_created_dt', 'line_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
 
             ['line_created_user_id', 'integer'],
 
@@ -33,8 +33,6 @@ class PhoneLineSearch extends PhoneLine
             ['line_project_id', 'integer'],
 
             ['line_settings_json', 'safe'],
-
-            ['line_updated_dt', 'safe'],
 
             ['line_updated_user_id', 'integer'],
 

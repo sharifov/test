@@ -13,7 +13,7 @@ class ClientChatUserChannelSearch extends ClientChatUserChannel
         return [
             ['ccuc_channel_id', 'integer'],
 
-            ['ccuc_created_dt', 'safe'],
+            [['ccuc_created_dt'], 'date', 'format' => 'php:Y-m-d'],
 
             ['ccuc_created_user_id', 'integer'],
 

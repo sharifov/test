@@ -18,7 +18,7 @@ class ClientProjectSearch extends ClientProject
     {
         return [
             [['cp_client_id', 'cp_project_id'], 'integer'],
-            [['cp_created_dt'], 'safe'],
+            [['cp_created_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -60,7 +60,7 @@ class ClientProjectSearch extends ClientProject
         $query->andFilterWhere([
             'cp_client_id' => $this->cp_client_id,
             'cp_project_id' => $this->cp_project_id,
-            'cp_created_dt' => $this->cp_created_dt,
+            'DATE(cp_created_dt)' => $this->cp_created_dt,
         ]);
 
         return $dataProvider;

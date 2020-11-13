@@ -3,6 +3,7 @@
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use common\components\grid\DateTimeColumn;
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\userVoiceMail\entity\search\UserVoiceMailSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -37,8 +38,16 @@ $this->params['breadcrumbs'][] = $this->title;
             //'uvm_max_recording_time:datetime',
 //            'uvm_transcribe_enable:BooleanByLabel',
 //            'uvm_enabled:BooleanByLabel',
-            'uvm_created_dt:byUserDateTime',
-            'uvm_updated_dt:byUserDateTime',
+            //'uvm_created_dt:byUserDateTime',
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'uvm_created_dt'
+            ],
+            //'uvm_updated_dt:byUserDateTime',
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'uvm_updated_dt'
+            ],
             'uvm_created_user_id:username',
             'uvm_updated_user_id:username',
 

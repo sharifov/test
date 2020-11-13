@@ -30,7 +30,8 @@ class GlobalLogSearch extends GlobalLog
     {
         return [
             [['gl_id', 'gl_app_user_id', 'gl_obj_id', 'leadId', 'gl_action_type'], 'integer'],
-            [['gl_app_id', 'gl_model', 'gl_old_attr', 'gl_new_attr', 'gl_created_at'], 'safe'],
+            [['gl_app_id', 'gl_model', 'gl_old_attr', 'gl_new_attr'], 'safe'],
+            [['gl_created_at'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -77,7 +78,7 @@ class GlobalLogSearch extends GlobalLog
             'gl_id' => $this->gl_id,
             'gl_app_user_id' => $this->gl_app_user_id,
             'gl_obj_id' => $this->gl_obj_id,
-            'gl_created_at' => $this->gl_created_at,
+            'DATE(gl_created_at)' => $this->gl_created_at,
 			'gl_model' => $this->gl_model,
 			'gl_app_id' => $this->gl_app_id,
 			'gl_action_type' => $this->gl_action_type

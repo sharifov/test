@@ -1,6 +1,6 @@
 <?php
 
-use common\components\grid\UserSelect2Column;
+use common\components\grid\DateTimeColumn;
 use dosamigos\datepicker\DatePicker;
 use sales\model\clientChatFeedback\entity\ClientChatFeedback;
 use sales\widgets\UserSelect2Widget;
@@ -25,7 +25,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php Pjax::begin(); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -51,27 +51,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
             ],
             [
+                'class' => DateTimeColumn::class,
                 'attribute' => 'ccf_created_dt',
-                'value' => static function (ClientChatFeedback $model) {
-                    return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->ccf_created_dt));
-                },
-                'format' => 'raw',
-                'filter' => DatePicker::widget([
-                    'model' => $searchModel,
-                    'attribute' => 'ccf_created_dt',
-                    'clientOptions' => [
-                        'autoclose' => true,
-                        'format' => 'yyyy-mm-dd',
-                        'clearBtn' => true,
-                    ],
-                    'options' => [
-                        'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
-                    ],
-                    'clientEvents' => [
-                        'clearDate' => 'function (e) {$(e.target).find("input").change();}',
-                    ],
-                ]),
+                'format' => 'byUserDateTime'
             ],
 
             ['class' => ActionColumn::class],

@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
-use dosamigos\datepicker\DatePicker;
+use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\CaseSaleSearch */
@@ -34,7 +34,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'css_sale_book_id',
             'css_sale_pnr',
             'css_sale_pax',
+
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'css_sale_created_dt'
+            ],
+
+            /*[
                 'attribute' => 'css_sale_created_dt',
                 'value' => function(\common\models\CaseSale $model) {
                     return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->css_sale_created_dt));
@@ -52,7 +58,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
-            ],
+            ],*/
 
             //'css_sale_data',
 
@@ -71,6 +77,11 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'css_created_dt'
+            ],
+
+            /*[
                 'attribute' => 'css_created_dt',
                 'value' => function(\common\models\CaseSale $model) {
                     return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->css_created_dt));
@@ -88,8 +99,14 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
-            ],
+            ],*/
+
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'css_updated_dt'
+            ],
+
+            /*[
                 'attribute' => 'css_updated_dt',
                 'value' => function(\common\models\CaseSale $model) {
                     return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->css_updated_dt));
@@ -107,7 +124,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
-            ],
+            ],*/
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

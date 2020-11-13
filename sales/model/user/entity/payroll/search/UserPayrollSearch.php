@@ -19,7 +19,7 @@ class UserPayrollSearch extends UserPayroll
         return [
             [['ups_id', 'ups_user_id', 'ups_month', 'ups_year', 'ups_agent_status_id', 'ups_status_id'], 'integer'],
             [['ups_base_amount', 'ups_profit_amount', 'ups_tax_amount', 'ups_payment_amount', 'ups_total_amount'], 'number'],
-            [['ups_created_dt', 'ups_updated_dt'], 'safe'],
+            [['ups_created_dt', 'ups_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

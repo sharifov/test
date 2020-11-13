@@ -17,9 +17,10 @@ class AirportsSearch extends Airports
     public function rules()
     {
         return [
-            [['name', 'city', 'country', 'iata', 'timezone', 'a_icao', 'a_country_code', 'a_city_code', 'a_state', 'a_created_dt', 'a_updated_dt'], 'safe'],
+            [['name', 'city', 'country', 'iata', 'timezone', 'a_icao', 'a_country_code', 'a_city_code', 'a_state'], 'safe'],
             [['latitude', 'longitude', 'a_rank'], 'number'],
             [['dst', 'a_created_user_id', 'a_updated_user_id', 'a_multicity', 'a_close', 'a_disabled'], 'integer'],
+            [['a_created_dt', 'a_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -68,8 +69,8 @@ class AirportsSearch extends Airports
             'a_multicity' => $this->a_multicity,
             'a_close' => $this->a_close,
             'a_disabled' => $this->a_disabled,
-            'a_created_dt' => $this->a_created_dt,
-            'a_updated_dt' => $this->a_updated_dt,
+            'DATE(a_created_dt)' => $this->a_created_dt,
+            'DATE(a_updated_dt)' => $this->a_updated_dt,
         ]);
 
         $query->andFilterWhere(['like', 'name', $this->name])

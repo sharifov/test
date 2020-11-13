@@ -24,7 +24,8 @@ class LeadChecklistSearch extends LeadChecklist
             [['datetime_start', 'datetime_end'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['lc_type_id', 'lc_lead_id', 'lc_user_id'], 'integer'],
-            [['lc_notes', 'lc_created_dt'], 'safe'],
+            [['lc_notes'], 'safe'],
+            [['lc_created_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

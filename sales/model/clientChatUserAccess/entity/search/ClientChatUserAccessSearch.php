@@ -22,11 +22,9 @@ class ClientChatUserAccessSearch extends ClientChatUserAccess
 
             ['ccua_cch_id', 'integer'],
 
-            ['ccua_created_dt', 'safe'],
+            [['ccua_created_dt', 'ccua_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
 
             ['ccua_status_id', 'integer'],
-
-            ['ccua_updated_dt', 'safe'],
 
             ['ccua_user_id', 'integer'],
         ];

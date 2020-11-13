@@ -16,7 +16,8 @@ class ClientChatFeedbackSearch extends ClientChatFeedback
     {
         return [
             [['ccf_id', 'ccf_client_chat_id', 'ccf_user_id', 'ccf_client_id', 'ccf_rating'], 'integer'],
-            [['ccf_message', 'ccf_created_dt', 'ccf_updated_dt'], 'safe'],
+            [['ccf_message'], 'safe'],
+            [['ccf_created_dt', 'ccf_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

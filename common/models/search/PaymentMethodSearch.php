@@ -18,7 +18,8 @@ class PaymentMethodSearch extends PaymentMethod
     {
         return [
             [['pm_id', 'pm_enabled', 'pm_category_id', 'pm_updated_user_id'], 'integer'],
-            [['pm_name', 'pm_short_name', 'pm_updated_dt'], 'safe'],
+            [['pm_name', 'pm_short_name'], 'safe'],
+            [['pm_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -62,7 +63,7 @@ class PaymentMethodSearch extends PaymentMethod
             'pm_enabled' => $this->pm_enabled,
             'pm_category_id' => $this->pm_category_id,
             'pm_updated_user_id' => $this->pm_updated_user_id,
-            'pm_updated_dt' => $this->pm_updated_dt,
+            'DATE(pm_updated_dt)' => $this->pm_updated_dt,
         ]);
 
         $query->andFilterWhere(['like', 'pm_name', $this->pm_name])

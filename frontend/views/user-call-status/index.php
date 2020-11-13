@@ -5,6 +5,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
+use common\components\grid\DateTimeColumn;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\UserCallStatusSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -95,6 +96,11 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'us_created_dt'
+            ],
+
+            /*[
                 'attribute' => 'us_created_dt',
                 'value' => static function (\common\models\UserCallStatus $model) {
                     return $model->us_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->us_created_dt)) : $model->us_created_dt;
@@ -112,7 +118,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
-            ],
+            ],*/
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

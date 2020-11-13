@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use common\components\grid\DateTimeColumn;
 /* @var $this yii\web\View */
 /* @var $searchModel modules\flight\models\search\FlightQuoteSegmentStopSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -33,8 +34,16 @@ $this->params['breadcrumbs'][] = $this->title;
             'qss_equipment',
             'qss_elapsed_time:datetime',
             'qss_duration',
-            'qss_departure_dt',
-            'qss_arrival_dt',
+            //'qss_departure_dt',
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'qss_departure_dt'
+            ],
+            //'qss_arrival_dt',
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'qss_arrival_dt'
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

@@ -16,7 +16,8 @@ class ClientChatLastMessageSearch extends ClientChatLastMessage
     {
         return [
             [['cclm_id', 'cclm_cch_id', 'cclm_type_id'], 'integer'],
-            [['cclm_message', 'cclm_dt'], 'safe'],
+            [['cclm_message'], 'safe'],
+            [['cclm_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

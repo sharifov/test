@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use dosamigos\datepicker\DatePicker;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\UserOnlineSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -54,7 +55,27 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => static function (\common\models\UserOnline $model) {
                     return $model->uo_idle_state_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->uo_idle_state_dt), 'php: Y-m-d [H:i:s]')  : '-';
                 },
-                'format' => 'raw'
+                'format' => 'raw',
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'uo_idle_state_dt',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                        'clearBtn' => true,
+                        'endDate' => date('Y-m-d', time())
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' =>'Choose Date'
+                    ],
+                    'containerOptions' => [
+                        'class' => (array_key_exists('uo_idle_state_dt', $searchModel->errors)) ? 'has-error' : null,
+                    ],
+                    'clientEvents' => [
+                        'clearDate' => 'function (e) {$(e.target).find("input").change();}',
+                    ],
+                ]),
             ],
 
             /*[
@@ -68,7 +89,27 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => static function (\common\models\UserOnline $model) {
                     return $model->uo_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->uo_updated_dt), 'php: Y-m-d [H:i:s]')  : '-';
                 },
-                'format' => 'raw'
+                'format' => 'raw',
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'uo_updated_dt',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                        'clearBtn' => true,
+                        'endDate' => date('Y-m-d', time())
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' =>'Choose Date'
+                    ],
+                    'containerOptions' => [
+                        'class' => (array_key_exists('uo_updated_dt', $searchModel->errors)) ? 'has-error' : null,
+                    ],
+                    'clientEvents' => [
+                        'clearDate' => 'function (e) {$(e.target).find("input").change();}',
+                    ],
+                ]),
             ],
 
 

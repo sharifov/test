@@ -55,9 +55,7 @@ class LeadQcallSearch extends LeadQcall
 
             [['current_dt', 'l_is_test', 'deadline'], 'safe'],
 
-            ['lqc_created_dt', 'date', 'format' => 'php:Y-m-d'],
-            ['lqc_dt_from', 'date', 'format' => 'php:Y-m-d'],
-            ['lqc_dt_to', 'date', 'format' => 'php:Y-m-d'],
+            [['lqc_created_dt', 'lqc_dt_from', 'lqc_dt_to'], 'date', 'format' => 'php:Y-m-d'],
 
             ['projectId', 'integer'],
             ['leadStatus', 'integer'],
@@ -109,8 +107,8 @@ class LeadQcallSearch extends LeadQcall
         // grid filtering conditions
         $query->andFilterWhere([
             'lqc_lead_id' => $this->lqc_lead_id,
-            'lqc_dt_from' => $this->lqc_dt_from,
-            'lqc_dt_to' => $this->lqc_dt_to,
+            'DATE(lqc_dt_from)' => $this->lqc_dt_from,
+            'DATE(lqc_dt_to)' => $this->lqc_dt_to,
             'lqc_weight' => $this->lqc_weight,
         ]);
 
@@ -154,8 +152,8 @@ class LeadQcallSearch extends LeadQcall
         // grid filtering conditions
         $query->andFilterWhere([
             'lqc_lead_id' => $this->lqc_lead_id,
-            'lqc_dt_from' => $this->lqc_dt_from,
-            'lqc_dt_to' => $this->lqc_dt_to,
+            'DATE(lqc_dt_from)' => $this->lqc_dt_from,
+            'DATE(lqc_dt_to)' => $this->lqc_dt_to,
             'lqc_weight' => $this->lqc_weight,
         ]);
 

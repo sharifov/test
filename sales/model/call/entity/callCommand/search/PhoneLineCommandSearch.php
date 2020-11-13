@@ -17,7 +17,7 @@ class PhoneLineCommandSearch extends PhoneLineCommand
     {
         return [
             [['plc_id', 'plc_line_id', 'plc_ccom_id', 'plc_sort_order', 'plc_created_user_id'], 'integer'],
-            [['plc_created_dt'], 'safe'],
+            [['plc_created_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
