@@ -28,26 +28,30 @@ use yii\helpers\Json;
  * @property string|null $cvd_created_dt
  * @property string|null $cvd_updated_dt
  *
+ * @property array|null $decodedData
+ *
  * @property ClientChat[] $ccvCches
  * @property ClientChatVisitor[] $clientChatVisitors
  */
 class ClientChatVisitorData extends \yii\db\ActiveRecord
 {
-	private CONST REFERRER_MAX_LENGTH = 1000;
+    private const REFERRER_MAX_LENGTH = 1000;
 
-	public function behaviors(): array
-	{
-		return [
-			'timestamp' => [
-				'class' => TimestampBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['cvd_created_dt', 'cvd_updated_dt'],
-					ActiveRecord::EVENT_BEFORE_UPDATE => ['cvd_updated_dt'],
-				],
-				'value' => date('Y-m-d H:i:s'),
-			],
-		];
-	}
+    private array $data = [];
+
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['cvd_created_dt', 'cvd_updated_dt'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['cvd_updated_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s'),
+            ],
+        ];
+    }
 
     public function rules(): array
     {
@@ -67,10 +71,10 @@ class ClientChatVisitorData extends \yii\db\ActiveRecord
 
             ['cvd_longitude', 'number'],
 
-			['cvd_referrer', 'filter', 'filter' => function ($value) {
-				return substr($value, 0, self::REFERRER_MAX_LENGTH);
-			}],
-			['cvd_referrer', 'string', 'max' => self::REFERRER_MAX_LENGTH],
+            ['cvd_referrer', 'filter', 'filter' => function ($value) {
+                return substr($value, 0, self::REFERRER_MAX_LENGTH);
+            }],
+            ['cvd_referrer', 'string', 'max' => self::REFERRER_MAX_LENGTH],
 
             ['cvd_region', 'string', 'max' => 5],
 
@@ -82,21 +86,21 @@ class ClientChatVisitorData extends \yii\db\ActiveRecord
 
             ['cvd_url', 'string', 'max' => 1000],
 
-			['cvd_visitor_rc_id', 'string', 'max' => 50],
-			['cvd_visitor_rc_id', 'required'],
-			['cvd_visitor_rc_id', 'unique'], // ccr_visitor_id in ClientChatRequest
-		];
+            ['cvd_visitor_rc_id', 'string', 'max' => 50],
+            ['cvd_visitor_rc_id', 'required'],
+            ['cvd_visitor_rc_id', 'unique'], // ccr_visitor_id in ClientChatRequest
+        ];
     }
 
     public function getCcvCches(): \yii\db\ActiveQuery
     {
-		return $this->hasMany(ClientChat::class, ['cch_id' => 'ccv_cch_id'])->viaTable('client_chat_visitor', ['ccv_cvd_id' => 'cvd_id']);
+        return $this->hasMany(ClientChat::class, ['cch_id' => 'ccv_cch_id'])->viaTable('client_chat_visitor', ['ccv_cvd_id' => 'cvd_id']);
     }
 
-	public function getClientChatVisitors(): \yii\db\ActiveQuery
-	{
-		return $this->hasMany(ClientChatVisitor::class, ['ccv_cvd_id' => 'cvd_id']);
-	}
+    public function getClientChatVisitors(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(ClientChatVisitor::class, ['ccv_cvd_id' => 'cvd_id']);
+    }
 
     public function attributeLabels(): array
     {
@@ -116,7 +120,7 @@ class ClientChatVisitorData extends \yii\db\ActiveRecord
             'cvd_data' => 'Data',
             'cvd_created_dt' => 'Created Dt',
             'cvd_updated_dt' => 'Updated Dt',
-			'cvd_visitor_rc_id' => 'Cvd Visitor Rc ID',
+            'cvd_visitor_rc_id' => 'Cvd Visitor Rc ID',
         ];
     }
 
@@ -130,48 +134,67 @@ class ClientChatVisitorData extends \yii\db\ActiveRecord
         return 'client_chat_visitor_data';
     }
 
-	public static function createByClientChatRequest(string $visitorRcId, array $data): self
-	{
-		$_self = new self();
-		$_self->cvd_visitor_rc_id = $visitorRcId;
-		self::fillInData($_self, $data);
-
-		return $_self;
-	}
-
-	public function updateByClientChatRequest(array $data): void
-	{
-		self::fillInData($this, $data);
-	}
-
-	/**
-	 * @param ClientChatVisitorData $_self
-	 * @param array $data
-	 */
-	private static function fillInData(self $_self, array $data): void
-	{
-		$_self->cvd_country = $data['geo']['country'] ?? '';
-		$_self->cvd_region = $data['geo']['region_code'] ?? '';
-		$_self->cvd_city = $data['geo']['city'] ?? '';
-		$_self->cvd_latitude = (float)($data['geo']['latitude'] ?? 0);
-		$_self->cvd_longitude = (float)($data['geo']['longitude'] ?? 0);
-		$_self->cvd_url = (string)substr(($data['page']['url'] ?? ''), 0, 1000);
-		$_self->cvd_title = $data['page']['title'] ?? '';
-		$_self->cvd_referrer = $data['page']['referrer'] ?? '';
-		$_self->cvd_timezone = $data['geo']['timezone'] ?? '';
-		$_self->cvd_local_time = $data['page']['local_time'] ?? '';
-		$_self->cvd_data = Json::encode($data);
-	}
-
-	public static function getCountryList(): array
+    public static function createByClientChatRequest(string $visitorRcId, array $data): self
     {
-        return ArrayHelper::map(self::find()->orderBy(['cvd_country' => SORT_ASC])->distinct()->asArray()->all(),
-        'cvd_country', 'cvd_country');
+        $_self = new self();
+        $_self->cvd_visitor_rc_id = $visitorRcId;
+        self::fillInData($_self, $data);
+
+        return $_self;
+    }
+
+    public function updateByClientChatRequest(array $data): void
+    {
+        self::fillInData($this, $data);
+    }
+
+    /**
+     * @param ClientChatVisitorData $_self
+     * @param array $data
+     */
+    private static function fillInData(self $_self, array $data): void
+    {
+        $_self->cvd_country = $data['geo']['country'] ?? '';
+        $_self->cvd_region = $data['geo']['region_code'] ?? '';
+        $_self->cvd_city = $data['geo']['city'] ?? '';
+        $_self->cvd_latitude = (float)($data['geo']['latitude'] ?? 0);
+        $_self->cvd_longitude = (float)($data['geo']['longitude'] ?? 0);
+        $_self->cvd_url = (string)substr(($data['page']['url'] ?? ''), 0, 1000);
+        $_self->cvd_title = $data['page']['title'] ?? '';
+        $_self->cvd_referrer = $data['page']['referrer'] ?? '';
+        $_self->cvd_timezone = $data['geo']['timezone'] ?? '';
+        $_self->cvd_local_time = $data['page']['local_time'] ?? '';
+        $_self->cvd_data = Json::encode($data);
+    }
+
+    public static function getCountryList(): array
+    {
+        return ArrayHelper::map(
+            self::find()->orderBy(['cvd_country' => SORT_ASC])->distinct()->asArray()->all(),
+            'cvd_country',
+            'cvd_country'
+        );
     }
 
     public static function getCityList(): array
     {
-        return ArrayHelper::map(self::find()->orderBy(['cvd_city' => SORT_ASC])->distinct()->asArray()->all(),
-        'cvd_city', 'cvd_city');
+        return ArrayHelper::map(
+            self::find()->orderBy(['cvd_city' => SORT_ASC])->distinct()->asArray()->all(),
+            'cvd_city',
+            'cvd_city'
+        );
+    }
+
+    public function getDecodedData(): array
+    {
+        if (!$this->data || !is_array($this->data)) {
+            return $this->data = Json::decode($this->cvd_data);
+        }
+        return $this->data;
+    }
+
+    public function getSourceCid(): ?string
+    {
+        return $this->decodedData['sources']['cid'] ?? null;
     }
 }

@@ -166,7 +166,7 @@ class ClientChatRequestService
             } elseif ($clientChatRequest->isGuestDisconnected()) {
                 $this->guestDisconnected($clientChatRequest);
             } elseif ($clientChatRequest->isTrackEvent()) {
-                $this->createOrUpdateVisitorData($clientChatRequest);
+                $this->updateVisitorData($clientChatRequest);
             } else {
                 throw new \RuntimeException('Unknown event provided');
             }
@@ -421,17 +421,10 @@ class ClientChatRequestService
         ]);
     }
 
-    public function createOrUpdateVisitorData(ClientChatRequest $request): void
+    public function updateVisitorData(ClientChatRequest $request): void
     {
         $cchVisitorData = $this->clientChatVisitorDataRepository->findByVisitorRcId($request->getClientRcId());
         $this->clientChatVisitorDataRepository->updateByClientChatRequest($cchVisitorData, $request->getDecodedData());
-
-        try {
-            $visitorLog = $this->visitorLogRepository->findByVisitorDataId($cchVisitorData->cvd_id);
-            $this->visitorLogRepository->updateByClientChatRequest($visitorLog, $request->getDecodedData());
-        } catch (NotFoundException $e) {
-            $this->visitorLogRepository->createByClientChatRequest($cchVisitorData->cvd_id, $request->getDecodedData());
-        }
     }
 
     public function updateDateTimeLastMessageNotification(ClientChat $clientChat, ClientChatMessage $message): void
@@ -491,14 +484,6 @@ class ClientChatRequestService
         } catch (NotFoundException $e) {
             $visitorData = $this->clientChatVisitorDataRepository->createByClientChatRequest($visitorRcId, $data);
             $this->clientChatVisitorRepository->create($chatId, $visitorData->cvd_id, $clientId);
-        }
-
-        try {
-            $visitorLog = $this->visitorLogRepository->findByVisitorDataId($visitorData->cvd_id);
-            $visitorLog->updateByClientChatRequest($data);
-            $this->visitorLogRepository->save($visitorLog);
-        } catch (NotFoundException $e) {
-            $this->visitorLogRepository->createByClientChatRequest($visitorData->cvd_id, $data);
         }
     }
 }

@@ -99,8 +99,8 @@ class VisitorLog extends \yii\db\ActiveRecord
             ['vl_ip_address', 'string', 'max' => 39],
 
             ['vl_cvd_id', 'integer'],
-			['vl_cvd_id', 'exist', 'skipOnError' => true, 'targetClass' => ClientChatVisitorData::class, 'targetAttribute' => ['vl_cvd_id' => 'cvd_id']],
-		];
+            ['vl_cvd_id', 'exist', 'skipOnError' => true, 'targetClass' => ClientChatVisitorData::class, 'targetAttribute' => ['vl_cvd_id' => 'cvd_id']],
+        ];
     }
 
     public function behaviors(): array
@@ -188,33 +188,33 @@ class VisitorLog extends \yii\db\ActiveRecord
     }
 
     public static function createByClientChatRequest(int $cvdId, array $data): self
-	{
-		$log = new self();
-		$log->scenario = self::SCENARIO_CLIENT_CHAT_CREATE;
-		$log->vl_cvd_id = $cvdId;
-		self::fillInData($log, $data);
-		return $log;
-	}
+    {
+        $log = new self();
+        $log->scenario = self::SCENARIO_CLIENT_CHAT_CREATE;
+        $log->vl_cvd_id = $cvdId;
+        self::fillInData($log, $data);
+        return $log;
+    }
 
-	public function updateByClientChatRequest(array $data): void
-	{
-		$this->scenario = self::SCENARIO_CLIENT_CHAT_CREATE;
-		self::fillInData($this, $data);
-	}
+    public function updateByClientChatRequest(array $data): void
+    {
+        $this->scenario = self::SCENARIO_CLIENT_CHAT_CREATE;
+        self::fillInData($this, $data);
+    }
 
-	private static function fillInData(self $_self, $data): void
-	{
-		$_self->vl_source_cid = $data['sources']['cid'] ?? null;
-		$_self->vl_utm_source = $data['sources']['utm_source'] ?? null;
-		$_self->vl_ga_client_id = $data['visitor']['ga_client_id'] ?? null;
-		$_self->vl_gclid = $data['sources']['gclid'] ?? null;
-		$_self->vl_dclid = $data['sources']['dclid'] ?? null;
-		$_self->vl_utm_source = $data['sources']['utm_source'] ?? null;
-		$_self->vl_utm_medium = $data['sources']['utm_medium'] ?? null;
-		$_self->vl_utm_content = $data['sources']['utm_content'] ?? null;
-		$_self->vl_utm_term = $data['sources']['utm_term'] ?? null;
-		$_self->vl_utm_campaign = $data['sources']['utm_campaign'] ?? null;
-		$_self->vl_user_agent = $data['system']['user_agent'] ?? null;
-		$_self->vl_ip_address = $data['geo']['ip'] ?? null;
-	}
+    private static function fillInData(self $_self, $data): void
+    {
+        $_self->vl_source_cid = $data['sources']['cid'] ?? null;
+        $_self->vl_utm_source = $data['sources']['utm_source'] ?? null;
+        $_self->vl_ga_client_id = $data['visitor']['ga_client_id'] ?? null;
+        $_self->vl_gclid = $data['sources']['gclid'] ?? null;
+        $_self->vl_dclid = $data['sources']['dclid'] ?? null;
+        $_self->vl_utm_source = $data['sources']['utm_source'] ?? null;
+        $_self->vl_utm_medium = $data['sources']['utm_medium'] ?? null;
+        $_self->vl_utm_content = $data['sources']['utm_content'] ?? null;
+        $_self->vl_utm_term = $data['sources']['utm_term'] ?? null;
+        $_self->vl_utm_campaign = $data['sources']['utm_campaign'] ?? null;
+        $_self->vl_user_agent = $data['system']['user_agent'] ?? null;
+        $_self->vl_ip_address = $data['geo']['ip'] ?? null;
+    }
 }

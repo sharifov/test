@@ -8,60 +8,68 @@ use yii\helpers\VarDumper;
 
 class VisitorLogRepository extends Repository
 {
-	public function createByClientChatRequest(int $cvdId, array $data): void
-	{
-		$visitorLog = VisitorLog::createByClientChatRequest($cvdId, $data);
-		if (!$visitorLog->validate()) {
-			foreach ($visitorLog->errors as $attribute => $error) {
-				$visitorLog->{$attribute} = null;
-			}
-			\Yii::error('VisitorLog validation failed: ' . VarDumper::dumpAsString($visitorLog->errors), 'ClientChatRequestService::createByClientChatRequest::visitorLog::validation');
-		}
+    public function createByClientChatRequest(int $cvdId, array $data): void
+    {
+        $visitorLog = VisitorLog::createByClientChatRequest($cvdId, $data);
+        if (!$visitorLog->validate()) {
+            foreach ($visitorLog->errors as $attribute => $error) {
+                $visitorLog->{$attribute} = null;
+            }
+            \Yii::error('VisitorLog validation failed: ' . VarDumper::dumpAsString($visitorLog->errors), 'ClientChatRequestService::createByClientChatRequest::visitorLog::validation');
+        }
 
-		try {
-			$this->save($visitorLog);
-		} catch (\RuntimeException $e) {
-			\Yii::error('VisitorLog save failed: ' . VarDumper::dumpAsString($visitorLog->errors), 'ClientChatRequestService::createByClientChatRequest::visitorLog::save');
-		}
-	}
+        try {
+            $this->save($visitorLog);
+        } catch (\RuntimeException $e) {
+            \Yii::error('VisitorLog save failed: ' . VarDumper::dumpAsString($visitorLog->errors), 'ClientChatRequestService::createByClientChatRequest::visitorLog::save');
+        }
+    }
 
-	public function updateByClientChatRequest(VisitorLog $visitorLog, array $data): void
-	{
-		$visitorLog->updateByClientChatRequest($data);
-		if (!$visitorLog->validate()) {
-			foreach ($visitorLog->errors as $attribute => $error) {
-				$visitorLog->{$attribute} = null;
-			}
-			\Yii::error('VisitorLog validation failed: ' . VarDumper::dumpAsString($visitorLog->errors), 'ClientChatRequestService::updateByClientChatRequest::visitorLog::validation');
-		}
+    public function updateByClientChatRequest(VisitorLog $visitorLog, array $data): void
+    {
+        $visitorLog->updateByClientChatRequest($data);
+        if (!$visitorLog->validate()) {
+            foreach ($visitorLog->errors as $attribute => $error) {
+                $visitorLog->{$attribute} = null;
+            }
+            \Yii::error('VisitorLog validation failed: ' . VarDumper::dumpAsString($visitorLog->errors), 'ClientChatRequestService::updateByClientChatRequest::visitorLog::validation');
+        }
 
-		try {
-			$this->save($visitorLog);
-		} catch (\RuntimeException $e) {
-			\Yii::error('VisitorLog save failed: ' . VarDumper::dumpAsString($visitorLog->errors), 'ClientChatRequestService::updateByClientChatRequest::visitorLog::save');
-		}
-	}
+        try {
+            $this->save($visitorLog);
+        } catch (\RuntimeException $e) {
+            \Yii::error('VisitorLog save failed: ' . VarDumper::dumpAsString($visitorLog->errors), 'ClientChatRequestService::updateByClientChatRequest::visitorLog::save');
+        }
+    }
 
-	public function existByClientId(int $id): bool
-	{
-		return VisitorLog::find()->byClient($id)->exists();
-	}
+    public function existByClientId(int $id): bool
+    {
+        return VisitorLog::find()->byClient($id)->exists();
+    }
 
-	public function save(VisitorLog $visitorLog): VisitorLog
-	{
-		if (!$visitorLog->save(false)) {
-			throw new \RuntimeException('Visitor log saving failed');
-		}
-		return $visitorLog;
-	}
+    public function save(VisitorLog $visitorLog): VisitorLog
+    {
+        if (!$visitorLog->save(false)) {
+            throw new \RuntimeException('Visitor log saving failed');
+        }
+        return $visitorLog;
+    }
 
-	public function findByVisitorDataId(int $id): VisitorLog
-	{
-		if ($log = VisitorLog::find()->byCvdId($id)->orderBy(['vl_id' => SORT_DESC])->one()) {
-			return $log;
-		}
-		throw new NotFoundException('Visitor Log not found by client: ' . $id);
-	}
+    public function findByVisitorDataId(int $id): VisitorLog
+    {
+        if ($log = VisitorLog::find()->byCvdId($id)->orderBy(['vl_id' => SORT_DESC])->one()) {
+            return $log;
+        }
+        throw new NotFoundException('Visitor Log not found by visitor data: ' . $id);
+    }
+
+    public function findLastByClientAndProject(int $clientId, int $projectId)
+    {
+        if ($log = VisitorLog::find()->byClient($clientId)->byProject($projectId)->orderBy(['vl_id' => SORT_DESC])->one()) {
+            return $log;
+        }
+        throw new NotFoundException('Visitor Log not found by client: ' . $clientId . ' and project: ' . $projectId);
+    }
 
 	public function clone(VisitorLog $visitorLog): VisitorLog
 	{
