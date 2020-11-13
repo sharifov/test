@@ -2,7 +2,7 @@
 
 use common\components\grid\UserSelect2Column;
 use common\models\Employee;
-use dosamigos\datepicker\DatePicker;
+use common\components\grid\DateTimeColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\ActiveForm;
@@ -201,6 +201,10 @@ $user = Yii::$app->user->identity;
                 },
             ],*/
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'e_created_dt'
+            ],
+            /*[
                 'attribute' => 'e_created_dt',
                 'value' => static function (\common\models\Email $model) {
                     return $model->e_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->e_created_dt), 'php: Y-m-d [H:i:s]')  : '-';
@@ -217,7 +221,7 @@ $user = Yii::$app->user->identity;
                         'autocomplete' => 'off'
                     ],
                 ]),
-            ],
+            ],*/
 
 
         ],

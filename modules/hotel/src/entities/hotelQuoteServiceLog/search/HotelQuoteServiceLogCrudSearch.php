@@ -18,7 +18,8 @@ class HotelQuoteServiceLogCrudSearch extends HotelQuoteServiceLog
     {
         return [
             [['hqsl_id', 'hqsl_hotel_quote_id', 'hqsl_action_type_id', 'hqsl_status_id', 'hqsl_created_user_id'], 'integer'],
-            [['hqsl_message', 'hqsl_created_dt', 'hqsl_updated_dt'], 'safe'],
+            [['hqsl_message'], 'safe'],
+            [['hqsl_created_dt', 'hqsl_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -62,8 +63,8 @@ class HotelQuoteServiceLogCrudSearch extends HotelQuoteServiceLog
             'hqsl_action_type_id' => $this->hqsl_action_type_id,
             'hqsl_status_id' => $this->hqsl_status_id,
             'hqsl_created_user_id' => $this->hqsl_created_user_id,
-            'hqsl_created_dt' => $this->hqsl_created_dt,
-            'hqsl_updated_dt' => $this->hqsl_updated_dt,
+            'DATE(hqsl_created_dt)' => $this->hqsl_created_dt,
+            'DATE(hqsl_updated_dt)' => $this->hqsl_updated_dt,
         ]);
 
         $query->andFilterWhere(['like', 'hqsl_message', $this->hqsl_message]);

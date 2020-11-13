@@ -57,7 +57,7 @@ class UserProfitSearch extends UserProfit
         return [
             [['up_id', 'up_user_id', 'up_lead_id', 'up_order_id', 'up_product_quote_id', 'up_percent', 'up_status_id', 'up_payroll_id', 'up_type_id'], 'integer'],
             [['up_profit', 'up_split_percent', 'up_amount'], 'number'],
-            [['up_created_dt', 'up_updated_dt'], 'safe'],
+            [['up_created_dt', 'up_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

@@ -25,7 +25,8 @@ class LeadFlowSearch extends LeadFlow
     {
         return [
             [['id', 'employee_id', 'lead_id', 'status', 'supervision_id', 'lf_from_status_id', 'lf_out_calls', 'lf_owner_id'], 'integer'],
-            [['created', 'statuses', 'lf_end_dt', 'createdRangeTime'], 'safe'],
+            [['statuses', 'createdRangeTime'], 'safe'],
+            [['created', 'lf_end_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

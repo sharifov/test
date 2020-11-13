@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
-use dosamigos\datepicker\DatePicker;
+use common\components\grid\DateTimeColumn;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\LeadChecklistTypeSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -39,7 +39,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'lct_description',
             'lct_enabled:boolean',
             'lct_sort_order',
+
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'lct_updated_dt'
+            ],
+            /*[
                 'attribute' => 'lct_updated_dt',
                 'value' => function(\common\models\LeadChecklistType $model) {
                     return $model->lct_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->lct_updated_dt)) : '-';
@@ -57,7 +62,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
-            ],
+            ],*/
             /*[
                 'attribute' => 'lct_updated_user_id',
                 'value' => static function (\common\models\LeadChecklistType $model) {

@@ -19,7 +19,7 @@ class UserProductTypeSearch extends UserProductType
         return [
             [['upt_user_id', 'upt_product_type_id', 'upt_product_enabled', 'upt_created_user_id', 'upt_updated_user_id'], 'integer'],
             [['upt_commission_percent'], 'number'],
-            [['upt_created_dt', 'upt_updated_dt'], 'safe'],
+            [['upt_created_dt', 'upt_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -56,8 +56,8 @@ class UserProductTypeSearch extends UserProductType
             'upt_product_enabled' => $this->upt_product_enabled,
             'upt_created_user_id' => $this->upt_created_user_id,
             'upt_updated_user_id' => $this->upt_updated_user_id,
-            'upt_created_dt' => $this->upt_created_dt,
-            'upt_updated_dt' => $this->upt_updated_dt,
+            'DATE(upt_created_dt)' => $this->upt_created_dt,
+            'DATE(upt_updated_dt)' => $this->upt_updated_dt,
         ]);
 
         return $dataProvider;

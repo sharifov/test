@@ -12,7 +12,7 @@ class PhoneLinePhoneNumberSearch extends PhoneLinePhoneNumber
     public function rules(): array
     {
         return [
-            ['plpn_created_dt', 'safe'],
+            [['plpn_created_dt', 'plpn_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
 
             ['plpn_created_user_id', 'integer'],
 
@@ -25,8 +25,6 @@ class PhoneLinePhoneNumberSearch extends PhoneLinePhoneNumber
             ['plpn_pl_id', 'integer'],
 
             ['plpn_settings_json', 'safe'],
-
-            ['plpn_updated_dt', 'safe'],
 
             ['plpn_updated_user_id', 'integer'],
             ['phoneNumber', 'match', 'pattern' => '/^[+]\d*$/i'],

@@ -4,6 +4,7 @@ use common\models\SettingCategory;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use common\components\grid\DateTimeColumn;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\SettingSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -97,12 +98,17 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 's_updated_dt'
+            ],
+
+            /*[
                 'attribute' => 's_updated_dt',
                 'value' => static function (\common\models\Setting $model) {
                     return $model->s_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->s_updated_dt)) : $model->s_updated_dt;
                 },
                 'format' => 'raw'
-            ],
+            ],*/
 
 
         ],

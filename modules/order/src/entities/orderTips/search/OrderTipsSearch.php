@@ -19,7 +19,8 @@ class OrderTipsSearch extends OrderTips
         return [
             [['ot_order_id', 'ot_user_profit_percent'], 'integer'],
             [['ot_client_amount', 'ot_amount', 'ot_user_profit'], 'number'],
-            [['ot_description', 'ot_created_dt', 'ot_updated_dt'], 'safe'],
+            [['ot_description'], 'safe'],
+            [['ot_created_dt', 'ot_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

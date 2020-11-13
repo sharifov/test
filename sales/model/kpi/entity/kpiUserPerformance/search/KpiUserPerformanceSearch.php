@@ -18,7 +18,7 @@ class KpiUserPerformanceSearch extends KpiUserPerformance
     {
         return [
             [['up_user_id', 'up_year', 'up_month', 'up_performance', 'up_created_user_id', 'up_updated_user_id'], 'integer'],
-            [['up_created_dt', 'up_updated_dt'], 'safe'],
+            [['up_created_dt', 'up_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

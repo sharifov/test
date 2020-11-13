@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use dosamigos\datepicker\DatePicker;
 /* @var $this yii\web\View */
 /* @var $searchModel modules\flight\models\search\FlightQuoteSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -57,7 +58,30 @@ $this->params['breadcrumbs'][] = $this->title;
             'fq_reservation_dump:ntext',
             'fq_pricing_info:ntext',
             'fq_origin_search_data',
-            'fq_last_ticket_date',
+            //'fq_last_ticket_date',
+            [
+                'attribute' => 'fq_last_ticket_date',
+                'filter' => DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'fq_last_ticket_date',
+                    'clientOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                        'clearBtn' => true,
+                        'endDate' => date('Y-m-d', time())
+                    ],
+                    'options' => [
+                        'autocomplete' => 'off',
+                        'placeholder' =>'Choose Date'
+                    ],
+                    'containerOptions' => [
+                        'class' => (array_key_exists('fq_last_ticket_date', $searchModel->errors)) ? 'has-error' : null,
+                    ],
+                    'clientEvents' => [
+                        'clearDate' => 'function (e) {$(e.target).find("input").change();}',
+                    ],
+                ]),
+            ],
             'fq_request_hash',
 
             ['class' => 'yii\grid\ActionColumn'],

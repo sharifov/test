@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use common\components\grid\DateTimeColumn;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\SaleCreditCardSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -29,7 +30,11 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'scc_sale_id',
             'scc_cc_id',
-            'scc_created_dt',
+            //'scc_created_dt',
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'scc_created_dt'
+            ],
             'scc_created_user_id',
 
             ['class' => 'yii\grid\ActionColumn'],

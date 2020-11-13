@@ -19,9 +19,10 @@ class ProjectSearch extends Project
     {
         return [
             [['id', 'closed', 'sort_order'], 'integer'],
-            [['name', 'link', 'api_key', 'contact_info', 'last_update', 'custom_data'], 'safe'],
+            [['name', 'link', 'api_key', 'contact_info', 'custom_data'], 'safe'],
             [['email_postfix'], 'string', 'max' => 100],
             [['project_key'], 'string', 'max' => 50],
+            [['last_update'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

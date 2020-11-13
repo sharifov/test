@@ -5,6 +5,7 @@ use dosamigos\datepicker\DatePicker;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use common\components\grid\DateTimeColumn;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\LeadFlowSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -72,8 +73,14 @@ if($user->isAdmin()) {
                 'options' => ['style' => 'width:140px'],
                 //'filter' => false
             ],
-            //'created',
+
             [
+                'label' => 'Status start date',
+                'class' => DateTimeColumn::class,
+                'attribute' => 'created'
+            ],
+
+            /*[
                 'label' => 'Status start date',
                 'attribute' => 'created',
                 'value' => function(\common\models\LeadFlow $model) {
@@ -93,8 +100,15 @@ if($user->isAdmin()) {
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
-            ],
+            ],*/
+
             [
+                'label' => 'Status end date',
+                'class' => DateTimeColumn::class,
+                'attribute' => 'lf_end_dt'
+            ],
+
+            /*[
                 'label' => 'Status end date',
                 'attribute' => 'lf_end_dt',
                 'value' => function(\common\models\LeadFlow $model) {
@@ -114,7 +128,7 @@ if($user->isAdmin()) {
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
-            ],
+            ],*/
 
             [
                 //'label' => 'Status end date',

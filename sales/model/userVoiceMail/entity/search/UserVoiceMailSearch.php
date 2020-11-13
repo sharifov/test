@@ -10,7 +10,7 @@ class UserVoiceMailSearch extends UserVoiceMail
     public function rules(): array
     {
         return [
-            ['uvm_created_dt', 'safe'],
+            [['uvm_created_dt', 'uvm_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
 
             ['uvm_created_user_id', 'integer'],
 
@@ -31,8 +31,6 @@ class UserVoiceMailSearch extends UserVoiceMail
             ['uvm_say_voice', 'safe'],
 
             ['uvm_transcribe_enable', 'integer'],
-
-            ['uvm_updated_dt', 'safe'],
 
             ['uvm_updated_user_id', 'integer'],
 

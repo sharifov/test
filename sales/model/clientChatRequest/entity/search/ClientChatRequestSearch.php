@@ -10,7 +10,7 @@ class ClientChatRequestSearch extends ClientChatRequest
     public function rules(): array
     {
         return [
-            ['ccr_created_dt', 'safe'],
+            ['ccr_created_dt', 'date', 'format' => 'php:Y-m-d'],
 
             ['ccr_event', 'safe'],
 

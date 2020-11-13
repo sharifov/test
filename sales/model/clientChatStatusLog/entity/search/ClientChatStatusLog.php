@@ -14,15 +14,13 @@ class ClientChatStatusLog extends ClientChatStatusLogModel
 
             ['csl_description', 'safe'],
 
-            ['csl_end_dt', 'safe'],
-
             ['csl_from_status', 'integer'],
 
             ['csl_id', 'integer'],
 
             ['csl_owner_id', 'integer'],
 
-            ['csl_start_dt', 'safe'],
+            [['csl_start_dt', 'csl_end_dt'], 'date', 'format' => 'php:Y-m-d'],
 
             ['csl_to_status', 'integer'],
 

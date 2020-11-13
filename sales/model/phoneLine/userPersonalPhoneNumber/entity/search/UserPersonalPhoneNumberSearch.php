@@ -14,7 +14,7 @@ class UserPersonalPhoneNumberSearch extends UserPersonalPhoneNumber
         return [
             ['upn_approved', 'integer'],
 
-            ['upn_created_dt', 'safe'],
+            [['upn_created_dt', 'upn_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
 
             ['upn_created_user_id', 'integer'],
 
@@ -25,8 +25,6 @@ class UserPersonalPhoneNumberSearch extends UserPersonalPhoneNumber
             ['upn_phone_number', 'safe'],
 
             ['upn_title', 'safe'],
-
-            ['upn_updated_dt', 'safe'],
 
             ['upn_updated_user_id', 'integer'],
 

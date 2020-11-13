@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use common\components\grid\DateTimeColumn;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\ConferenceRoomSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -83,23 +84,8 @@ $this->params['breadcrumbs'][] = $this->title;
             //'cr_created_dt',
             //'cr_updated_dt',
             [
-                'attribute' => 'cr_updated_dt',
-                'value' => function(\common\models\ConferenceRoom $model) {
-                    return $model->cr_updated_dt ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->cr_updated_dt)) : '-';
-                },
-                'format' => 'raw',
-                'filter' => \dosamigos\datepicker\DatePicker::widget([
-                    'model' => $searchModel,
-                    'attribute' => 'cr_updated_dt',
-                    'clientOptions' => [
-                        'autoclose' => true,
-                        'format' => 'yyyy-mm-dd',
-                    ],
-                    'options' => [
-                        'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
-                    ],
-                ]),
+                'class' => DateTimeColumn::class,
+                'attribute' => 'cr_updated_dt'
             ],
 
             //'cr_created_user_id',

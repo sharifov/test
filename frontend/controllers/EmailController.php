@@ -69,8 +69,6 @@ class EmailController extends FController
             $params['EmailSearch']['supervision_id'] = Yii::$app->user->id;
         }
         $searchModel->date_range = null;
-       /* $searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
-        $searchModel->datetime_end = date('Y-m-d');*/
 
         $dataProvider = $searchModel->search($params);
 

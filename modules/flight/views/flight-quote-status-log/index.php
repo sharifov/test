@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use common\components\grid\DateTimeColumn;
 /* @var $this yii\web\View */
 /* @var $searchModel modules\flight\models\search\FlightQuoteStatusLogSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -39,7 +40,11 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'qsl_flight_quote_id',
             'qsl_status_id',
-            'qsl_created_dt',
+            //'qsl_created_dt',
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'qsl_created_dt'
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

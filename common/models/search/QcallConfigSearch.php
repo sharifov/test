@@ -18,7 +18,7 @@ class QcallConfigSearch extends QcallConfig
     {
         return [
             [['qc_status_id', 'qc_call_att', 'qc_client_time_enable', 'qc_time_from', 'qc_time_to', 'qc_created_user_id', 'qc_updated_user_id'], 'integer'],
-            [['qc_created_dt', 'qc_updated_dt'], 'safe'],
+            [['qc_created_dt', 'qc_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
             ['qc_phone_switch', 'boolean']
         ];
     }
@@ -68,8 +68,8 @@ class QcallConfigSearch extends QcallConfig
             'qc_client_time_enable' => $this->qc_client_time_enable,
             'qc_time_from' => $this->qc_time_from,
             'qc_time_to' => $this->qc_time_to,
-            'qc_created_dt' => $this->qc_created_dt,
-            'qc_updated_dt' => $this->qc_updated_dt,
+            'DATE(qc_created_dt)' => $this->qc_created_dt,
+            'DATE(qc_updated_dt)' => $this->qc_updated_dt,
             'qc_created_user_id' => $this->qc_created_user_id,
             'qc_updated_user_id' => $this->qc_updated_user_id,
             'qc_phone_switch' => $this->qc_phone_switch,

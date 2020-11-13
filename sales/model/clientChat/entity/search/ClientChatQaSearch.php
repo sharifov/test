@@ -65,11 +65,11 @@ class ClientChatQaSearch extends ClientChat
             [
                 [
                     'cch_rid', 'cch_title', 'cch_description',
-                    'cch_note', 'cch_ip', 'cch_language_id',
-                    'cch_created_dt', 'cch_updated_dt', 'createdRangeDate',
+                    'cch_note', 'cch_ip', 'cch_language_id', 'createdRangeDate',
                 ],
                 'safe',
             ],
+            [['cch_created_dt', 'cch_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
             [['dataCountry', 'dataCity', 'messageText'], 'string', 'max' => 100],
             ['ownerUserID', 'string']
         ];

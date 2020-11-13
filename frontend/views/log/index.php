@@ -67,14 +67,6 @@ $this->params['breadcrumbs'][] = $this->title;
                         },
                         //'contentOptions'=>['style'=>'width: 100px;text-align:left;']
                     ],
-                    /*[
-                        'attribute' => 'log_time',
-                        'format' => 'html',
-                        'value' => static function ($model) {
-                            return '<small>'.date('Y-m-d H:i:s', $model->log_time).'</small>';
-                        },
-
-                    ],*/
 
                     [
                         'attribute' => 'log_time',

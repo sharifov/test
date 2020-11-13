@@ -56,11 +56,13 @@ class EmployeeSearch extends Employee
     {
         return [
             [['id', 'status', 'acl_rules_activated', 'supervision_id', 'user_group_id', 'user_project_id', 'user_params_project_id', 'online', 'user_call_type_id', 'user_department_id', 'experienceMonth'], 'integer'],
-            [['username', 'nickname', 'full_name', 'auth_key', 'password_hash', 'password_reset_token', 'email', 'last_activity', 'created_at', 'updated_at', 'user_sip', 'pageSize'], 'safe'],
+            [['username', 'nickname', 'full_name', 'auth_key', 'password_hash', 'password_reset_token', 'email', 'last_activity', 'user_sip', 'pageSize'], 'safe'],
             [['timeStart', 'timeEnd', 'roles', 'twoFaEnable', 'joinDate'], 'safe'],
 			[['joinDate'], 'date', 'format' => 'php:Y-m-d', 'skipOnEmpty' => true],
             [['timeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
-            [['projectParamsIds', 'projectAccessIds'], 'each', 'rule' => ['integer']]
+            [['projectParamsIds', 'projectAccessIds'], 'each', 'rule' => ['integer']],
+            [['created_at', 'updated_at'], 'date', 'format' => 'php:Y-m-d'],
+
         ];
     }
 

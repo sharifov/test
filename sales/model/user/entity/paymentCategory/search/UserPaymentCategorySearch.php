@@ -19,7 +19,8 @@ class UserPaymentCategorySearch extends UserPaymentCategory
     {
         return [
             [['upc_id', 'upc_enabled', 'upc_created_user_id', 'upc_updated_user_id'], 'integer'],
-            [['upc_name', 'upc_description', 'upc_created_dt', 'upc_updated_dt'], 'safe'],
+            [['upc_name', 'upc_description'], 'safe'],
+            [['upc_created_dt', 'upc_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

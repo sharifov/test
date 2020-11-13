@@ -20,7 +20,8 @@ class LeadFlightSegmentSearch extends LeadFlightSegment
     {
         return [
             [['id', 'lead_id', 'flexibility'], 'integer'],
-            [['origin', 'destination', 'departure', 'created', 'updated', 'flexibility_type'], 'safe'],
+            [['origin', 'destination', 'departure', 'flexibility_type'], 'safe'],
+            [['created', 'updated'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -56,12 +57,11 @@ class LeadFlightSegmentSearch extends LeadFlightSegment
 
         $this->load($params);
 
-        /*if (!$this->validate()) {
+        if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
-            var_dump($this->getErrors());
             return $dataProvider;
-        }*/
+        }
 
         if ($this->created) {
             $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])

@@ -5,7 +5,7 @@ use modules\hotel\src\entities\hotelQuoteServiceLog\HotelQuoteServiceLogStatus;
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
-use dosamigos\datepicker\DatePicker;
+use common\components\grid\DateTimeColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel modules\hotel\src\entities\hotelQuoteServiceLog\search\HotelQuoteServiceLogCrudSearch */
@@ -80,6 +80,11 @@ use dosamigos\datepicker\DatePicker;
             ],
 
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'hqsl_created_dt'
+            ],
+
+            /*[
                 'attribute' => 'hqsl_created_dt',
                 'value' => static function (HotelQuoteServiceLog $model) {
                     return $model->hqsl_created_dt ?
@@ -97,7 +102,7 @@ use dosamigos\datepicker\DatePicker;
                         'autocomplete' => 'off'
                     ],
                 ]) : null,
-            ],
+            ],*/
         ];
     ?>
     <?= GridView::widget([

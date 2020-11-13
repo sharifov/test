@@ -19,7 +19,8 @@ class UserContactListSearch extends UserContactList
         return [
             [['ucl_user_id', 'ucl_client_id'], 'integer'],
             [['ucl_favorite'], 'boolean'],
-            [['ucl_title', 'ucl_description', 'ucl_created_dt'], 'safe'],
+            [['ucl_title', 'ucl_description'], 'safe'],
+            [['ucl_created_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -61,7 +62,7 @@ class UserContactListSearch extends UserContactList
         $query->andFilterWhere([
             'ucl_user_id' => $this->ucl_user_id,
             'ucl_client_id' => $this->ucl_client_id,
-            'ucl_created_dt' => $this->ucl_created_dt,
+            'DATE(ucl_created_dt)' => $this->ucl_created_dt,
             'ucl_favorite' => $this->ucl_favorite,
         ]);
 

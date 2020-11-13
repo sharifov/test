@@ -20,6 +20,7 @@ class SourcesSearch extends Sources
         return [
             [['id', 'project_id', 'default', 'hidden'], 'integer'],
             [['name', 'cid', 'last_update'], 'safe'],
+            [['last_update'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

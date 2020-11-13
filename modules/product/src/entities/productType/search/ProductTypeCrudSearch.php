@@ -18,9 +18,7 @@ class ProductTypeCrudSearch extends ProductType
             [['pt_id', 'pt_enabled'], 'integer'],
             [['pt_service_fee_percent'], 'number'],
             [['pt_key', 'pt_name', 'pt_description', 'pt_settings'], 'safe'],
-
-            ['pt_created_dt', 'date', 'format' => 'php:Y-m-d'],
-            ['pt_updated_dt', 'date', 'format' => 'php:Y-m-d'],
+            [['pt_created_dt', 'pt_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

@@ -2,6 +2,7 @@
 
 use common\components\grid\UserSelect2Column;
 use dosamigos\datepicker\DatePicker;
+use common\components\grid\DateTimeColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\ActiveForm;
@@ -97,6 +98,10 @@ $this->params['breadcrumbs'][] = $this->title;
             'n_popup:boolean',
             'n_popup_show:boolean',
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'n_read_dt'
+            ],
+            /*[
                 'attribute' => 'n_read_dt',
                 'value' => static function (\common\models\Notifications $model) {
                     return $model->n_read_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->n_read_dt)) : '-';
@@ -114,8 +119,14 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
-            ],
+            ],*/
+
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'n_created_dt'
+            ],
+
+            /*[
                 'attribute' => 'n_created_dt',
                 'value' => static function (\common\models\Notifications $model) {
                     return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->n_created_dt));
@@ -133,7 +144,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
-            ],
+            ],*/
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

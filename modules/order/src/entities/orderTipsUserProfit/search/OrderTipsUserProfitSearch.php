@@ -19,7 +19,7 @@ class OrderTipsUserProfitSearch extends OrderTipsUserProfit
         return [
             [['otup_order_id', 'otup_user_id', 'otup_percent', 'otup_created_user_id', 'otup_updated_user_id'], 'integer'],
             [['otup_amount'], 'number'],
-            [['otup_created_dt', 'otup_updated_dt'], 'safe'],
+            [['otup_created_dt', 'otup_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

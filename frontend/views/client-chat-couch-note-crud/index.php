@@ -6,7 +6,7 @@ use yii\bootstrap4\Html;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
-use dosamigos\datepicker\DatePicker;
+use common\components\grid\DateTimeColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\ClientChatCouchNote\entity\ClientChatCouchNoteSearch */
@@ -46,28 +46,10 @@ $this->params['breadcrumbs'][] = $this->title;
                     'width' => '200px'
                 ],
             ],
+
             [
+                'class' => DateTimeColumn::class,
                 'attribute' => 'cccn_created_dt',
-                'value' => static function (ClientChatCouchNote $model) {
-                    return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->cccn_created_dt));
-                },
-                'format' => 'raw',
-                'filter' => DatePicker::widget([
-                    'model' => $searchModel,
-                    'attribute' => 'cccn_created_dt',
-                    'clientOptions' => [
-                        'autoclose' => true,
-                        'format' => 'yyyy-mm-dd',
-                        'clearBtn' => true,
-                    ],
-                    'options' => [
-                        'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
-                    ],
-                    'clientEvents' => [
-                        'clearDate' => 'function (e) {$(e.target).find("input").change();}',
-                    ],
-                ]),
             ],
 
             ['class' => ActionColumn::class],

@@ -5,7 +5,7 @@ use sales\model\clientChatLastMessage\entity\ClientChatLastMessage;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
-use dosamigos\datepicker\DatePicker;
+use common\components\grid\DateTimeColumn;
 
 /* @var yii\web\View $this */
 /* @var sales\model\clientChatLastMessage\entity\ClientChatLastMessageSearch $searchModel */
@@ -23,7 +23,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php Pjax::begin(); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -45,27 +45,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
             ],
             [
+                'class' => DateTimeColumn::class,
                 'attribute' => 'cclm_dt',
-                'value' => static function (ClientChatLastMessage $model) {
-                    return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->cclm_dt));
-                },
-                'format' => 'raw',
-                'filter' => DatePicker::widget([
-                    'model' => $searchModel,
-                    'attribute' => 'cclm_dt',
-                    'clientOptions' => [
-                        'autoclose' => true,
-                        'format' => 'yyyy-mm-dd',
-                        'clearBtn' => true,
-                    ],
-                    'options' => [
-                        'autocomplete' => 'off',
-                        'placeholder' =>'Choose Date'
-                    ],
-                    'clientEvents' => [
-                        'clearDate' => 'function (e) {$(e.target).find("input").change();}',
-                    ],
-                ]),
+                'format' => 'byUserDateTime'
             ],
 
             ['class' => ActionColumn::class],

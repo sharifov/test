@@ -1,6 +1,6 @@
 <?php
 
-use dosamigos\datepicker\DatePicker;
+use common\components\grid\DateTimeColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use sales\entities\cases\CasesStatus;
@@ -54,7 +54,14 @@ $userList = Employee::getList();
                 'attribute' => 'csl_case_id',
                 'options' => ['style' => 'width:140px'],
             ],
+
             [
+                'label' => 'Status start date',
+                'class' => DateTimeColumn::class,
+                'attribute' => 'csl_start_dt'
+            ],
+
+            /*[
                 'label' => 'Status start date',
                 'attribute' => 'csl_start_dt',
                 'value' => static function (CaseStatusLog $model) {
@@ -74,8 +81,15 @@ $userList = Employee::getList();
                         'placeholder' => 'Choose Date'
                     ],
                 ]),
-            ],
+            ],*/
+
             [
+                'label' => 'Status end date',
+                'class' => DateTimeColumn::class,
+                'attribute' => 'csl_end_dt'
+            ],
+
+            /*[
                 'label' => 'Status end date',
                 'attribute' => 'csl_end_dt',
                 'value' => static function (CaseStatusLog $model) {
@@ -95,7 +109,7 @@ $userList = Employee::getList();
                         'placeholder' => 'Choose Date'
                     ],
                 ]),
-            ],
+            ],*/
             'csl_time_duration',
             [
                 'attribute' => 'csl_owner_id',

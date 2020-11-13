@@ -173,6 +173,8 @@ class LeadSearch extends Lead
                 return $value ? filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION) : null;
             }],
 
+            [['created', 'updated', 'l_last_action_dt'], 'date', 'format' => 'php:Y-m-d'],
+
             ['last_ticket_date', 'safe'],
             [['departRangeTime', 'createdRangeTime', 'soldRangeTime', 'updatedRangeTime', 'lastActionRangeTime'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
 
@@ -1719,7 +1721,7 @@ class LeadSearch extends Lead
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 
@@ -1894,7 +1896,7 @@ class LeadSearch extends Lead
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 
@@ -1945,7 +1947,7 @@ class LeadSearch extends Lead
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 
@@ -2067,7 +2069,7 @@ class LeadSearch extends Lead
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 
@@ -2210,7 +2212,7 @@ class LeadSearch extends Lead
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 
@@ -2499,7 +2501,7 @@ class LeadSearch extends Lead
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 
@@ -2554,7 +2556,7 @@ class LeadSearch extends Lead
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 
@@ -2686,7 +2688,7 @@ class LeadSearch extends Lead
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 
@@ -2756,7 +2758,7 @@ class LeadSearch extends Lead
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
         }
 

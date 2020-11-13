@@ -5,6 +5,7 @@ use yii\grid\GridView;
 use yii\helpers\StringHelper;
 use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
+use common\components\grid\DateTimeColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\ApiLogSearch */
@@ -85,13 +86,19 @@ $this->params['breadcrumbs'][] = $this->title;
                     return '<small>' . $resultStr . '</small>';
                 },
             ],
+
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'al_request_dt'
+            ],
+
+            /*[
                 'attribute' => 'al_request_dt',
                 'value' => static function (\common\models\ApiLog $model) {
                     return $model->al_request_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->al_request_dt), 'php:Y-m-d [H:i:s]') : '-';
                 },
                 'format' => 'raw'
-            ],
+            ],*/
 
             //'al_response_data:ntext',
 //            [

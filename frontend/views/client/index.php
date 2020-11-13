@@ -5,6 +5,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use dosamigos\datepicker\DatePicker;
+use common\components\grid\DateTimeColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\ClientSearch */
@@ -115,7 +116,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 //'options' => ['style' => 'width:100px']
             ],
 
-            [
+            /*[
                 'attribute' => 'created',
                 'value' => function(\common\models\Client $model) {
                 return '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->created));
@@ -133,8 +134,19 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
-            ],
+            ],*/
+
             [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'created'
+            ],
+
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'updated'
+            ],
+
+            /*[
                 'attribute' => 'updated',
                 'value' => function(\common\models\Client $model) {
                 return $model->updated ? '<i class="fa fa-calendar"></i> '.Yii::$app->formatter->asDatetime(strtotime($model->updated)) : null;
@@ -152,7 +164,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'placeholder' =>'Choose Date'
                     ],
                 ]),
-            ],
+            ],*/
 
             ['class' => 'yii\grid\ActionColumn', 'template' => '{view}'],
         ],

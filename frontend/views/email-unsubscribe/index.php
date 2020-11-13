@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use common\components\grid\DateTimeColumn;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\EmailUnsubscribeSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -30,7 +31,10 @@ $this->params['breadcrumbs'][] = $this->title;
             'eu_email:email',
             'eu_project_id',
             'eu_created_user_id',
-            'eu_created_dt',
+            [
+                'class' => DateTimeColumn::class,
+                'attribute' => 'eu_created_dt'
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],
