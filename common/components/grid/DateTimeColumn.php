@@ -30,6 +30,7 @@ class DateTimeColumn extends DataColumn
                     'autoclose' => true,
                     'format' => 'yyyy-mm-dd',
                     'clearBtn' => true,
+                    'startDate' => date('Y-m-d', strtotime('2017-01-01')),
                     'endDate' => date('Y-m-d', time())
                 ],
                 'options' => [
