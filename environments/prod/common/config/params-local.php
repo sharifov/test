@@ -46,7 +46,7 @@ return [
     ],
 
     'email_to' => [
-        'bcc_sales' => '{{ common.config.params.email_from.bcc_sales:str }}',
+        'bcc_sales' => '{{ common.config.params.email_to.bcc_sales:str }}',
     ],
 
     'lead' => [
@@ -55,5 +55,13 @@ return [
     'global_phone' => '{{ common.config.params.global_phone:str }}',
 
     'appEnv' => 'prod',
-	'liveChatRealTimeVisitors' => '{{ common.config.params.liveChatRealTimeVisitors:str }}'
+
+    'liveChatRealTimeVisitors' => '{{ common.config.params.liveChatRealTimeVisitors:str }}',
+
+    'centrifugo' => [
+        'apiKey' => '{{ common.config.params.centrifugo.apiKey:str }}',
+        'jsClientUrl' => '{{ common.config.params.centrifugo.jsClientUrl:str }}',
+        'serviceUrl' => '{{ common.config.params.centrifugo.serviceUrl:str }}',
+        'tokenHmacSecretKey' => '{{ common.config.params.centrifugo.tokenHmacSecretKey:str }}'
+    ],
 ];

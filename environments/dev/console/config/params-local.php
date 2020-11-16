@@ -1,15 +1,31 @@
 <?php
 return [
+    'serviceName' => '{{ console.config.params.serviceName:str }}',
     'sync' => [
-        'ver' => '1.0.0',
-        'apiKey' => '5394bbedf41dd2c0403897ca621f188b',
-        'serverUrl' => 'http://bo-dev.zeit.style/api/sync'
+        'ver' => '{{ console.config.params.sync.ver:str }}',
+        'apiKey' => '{{ console.config.params.sync.apiKey:str }}',
+        'serverUrl' => '{{ console.config.params.sync.serverUrl:str }}'
     ],
     'AWS_MAILER' => [
-        'host' => 'email-smtp.us-east-1.amazonaws.com',
-        'port' => '25',
-        'security' => 'tls',
-        'username' => 'AKIAI5VDT2W5LGW7T3TQ',
-        'password' => 'Avufe0iKvYJGNT+Dv8LyVBesiCbMX2ZaB5HC4kBc/2Zn'
+        'host' => '{{ console.config.params.AWS_MAILER.host:str }}',
+        'port' => '{{ console.config.params.AWS_MAILER.port:int }}',
+        'security' => '{{ console.config.params.AWS_MAILER.security:str }}',
+        'username' => '{{ console.config.params.AWS_MAILER.username:str }}',
+        'password' => '{{ console.config.params.AWS_MAILER.password:str }}'
+    ],
+    'webSocketServer' => [
+        'host' => '{{ console.config.params.webSocketServer.host:str }}',
+        'port' => '{{ console.config.params.webSocketServer.port:int }}',
+        'mode' => SWOOLE_PROCESS,
+        'sockType' => SWOOLE_SOCK_TCP,
+        'settings' => [
+            // https://www.swoole.co.uk/docs/modules/swoole-server/configuration
+            'pid_file' => __DIR__ . '/../runtime/swoole.pid',
+            'worker_num' => 1,
+            'websocket_compression' => true,
+            //'daemonize' => 0,
+            //'task_worker_num' => 2,
+            'group' => 'www-data'
+        ]
     ]
 ];
