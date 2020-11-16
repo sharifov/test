@@ -23,8 +23,6 @@ return [
     'lead' => [
         'call2DelayTime' => 2 * 60 * 60,     // 2 hours
     ],
-    'processing_fee' => 25,
-
     'ipinfodb_key' => '9079611957f72155dea3bb7ab848ee101c268564ab64921ca5345c4bce7af5b7',
 
     'backOffice' => [
