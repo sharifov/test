@@ -419,7 +419,7 @@ class CasesSaleService
                 throw new \RuntimeException('BO request Error: ' . $responseStr, 20);
             }
         } catch (\Throwable $exception) {
-            \Yii::error(VarDumper::dumpAsString([$exception, $params], 20),
+            \Yii::error(VarDumper::dumpAsString([$exception->getMessage(), $params], 20),
             'CasesSaleService:searchRequestToBackOffice:Fail');
         }
         return [];

@@ -255,6 +255,7 @@ class ClientChatController extends FController
                     'ajax-reopen-chat',
                     'ajax-canned-response',
                     'ajax-send-canned-response',
+                    'ajax-couch-note',
                     'ajax-couch-note-view',
                     'ajax-reload-chat',
                     'view',
