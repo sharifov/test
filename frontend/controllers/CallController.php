@@ -11,9 +11,13 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\Notifications;
 use common\models\Project;
+use common\models\ProjectEmployeeAccess;
 use common\models\search\LeadSearch;
 use common\models\search\UserConnectionSearch;
 use common\models\Sources;
+use common\models\UserConnection;
+use common\models\UserDepartment;
+use common\models\UserGroupAssign;
 use common\models\UserProjectParams;
 use frontend\widgets\CallBox;
 use frontend\widgets\newWebPhone\call\socket\MissedCallMessage;
@@ -22,11 +26,13 @@ use sales\auth\Auth;
 
 use sales\helpers\call\CallHelper;
 use sales\model\call\services\currentQueueCalls\CurrentQueueCallsService;
+use sales\model\call\useCase\assignUsers\UsersForm;
 use sales\model\callLog\entity\callLog\CallLog;
 use sales\model\conference\useCase\DisconnectFromAllActiveClientsCreatedConferences;
 use sales\model\callNote\useCase\addNote\CallNoteRepository;
 use sales\model\conference\useCase\PrepareCurrentCallsForNewCall;
 use sales\model\conference\useCase\ReturnToHoldCall;
+use sales\model\user\entity\userStatus\UserStatus;
 use sales\repositories\call\CallRepository;
 use sales\repositories\call\CallUserAccessRepository;
 use sales\repositories\NotFoundException;
@@ -85,6 +91,11 @@ class CallController extends FController
                 'actions' => [
                     'delete' => ['POST'],
                     //'cancel' => ['POST'],
+                ],
+            ],
+            'access' => [
+                'allowActions' => [
+                    'get-users-for-call',
                 ],
             ],
         ];
@@ -290,105 +301,197 @@ class CallController extends FController
 
     public function actionUserMap()
     {
-
         $this->layout = '@frontend/themes/gentelella_v2/views/layouts/main_tv';
 
-        /** @var Employee $user */
-        $user = Yii::$app->user->identity;
+        $user = Auth::user();
+        $isAdmin = $user->isSuperAdmin() || $user->isOnlyAdmin();
 
-
-
-        $searchModel = new CallSearch();
-        $searchModel2 = new UserConnectionSearch();
+        $callSearch = new CallSearch();
+        $userConnectionSearch = new UserConnectionSearch();
         $params = Yii::$app->request->queryParams;
 
-        //if (Yii::$app->user->identity->canRole('supervision')) {
-            //$params['CallSearch']['supervision_id'] = $userId;
-            //$params['CallSearch']['status'] = Employee::STATUS_ACTIVE;
-        //}
-
-        $accessDepartmentModels = $user->udDeps;
-
-        if($accessDepartmentModels) {
-            $accessDepartments = ArrayHelper::map($accessDepartmentModels, 'dep_id', 'dep_id');
-        } else {
+        $withOutDepartments = 0;
+        if ($isAdmin) {
             $accessDepartments = [];
+        } elseif ($departments = $user->udDeps) {
+            $accessDepartments = ArrayHelper::getColumn($departments, 'dep_id');
+        } else {
+            $accessDepartments = [$withOutDepartments];
         }
 
-        $isSuper = ($user->isSupervision() || $user->isExSuper() || $user->isSupSuper());
-
-        if ($isSuper && !in_array(Department::DEPARTMENT_SUPPORT, $accessDepartments, true)) {
-            $userGroupsModel = $user->ugsGroups;
-
-            if ($userGroupsModel) {
-                $userGroups = ArrayHelper::map($userGroupsModel, 'ug_id', 'ug_id');
-            } else {
-                $userGroups = [];
-            }
-
-            $params['UserConnectionSearch']['ug_ids'] = $userGroups;
-            $params['CallSearch']['ug_ids'] = $userGroups;
+        $withOutProjects = 0;
+        if ($isAdmin) {
+            $accessProjects = [];
+        } elseif ($projects = $user->projects) {
+            $accessProjects = ArrayHelper::getColumn($projects, 'id');
+        } else {
+            $accessProjects = [$withOutProjects];
         }
 
-        //VarDumper::dump($accessDepartments, 10, true); exit;
+//        $withOutGroups = 0;
+//        if ($isAdmin) {
+//            $accessGroups = [];
+//        } elseif ($groups = $user->ugsGroups) {
+//            $accessGroups = ArrayHelper::getColumn($groups, 'ug_id');
+//        } else {
+//            $accessGroups = [$withOutGroups];
+//        }
+        $accessGroups = [];
 
+        $params['UserConnectionSearch']['ug_ids'] = $accessGroups;
+        $params['UserConnectionSearch']['project_ids'] = $accessProjects;
 
-        if (!$accessDepartments || in_array(Department::DEPARTMENT_SALES, $accessDepartments, true)) {
+        if ($isAdmin || in_array(Department::DEPARTMENT_SALES, $accessDepartments, true)) {
             $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_SALES;
-            $dataProviderOnlineDep1 = $searchModel2->searchUserCallMap($params);
+            $salesOnline = $userConnectionSearch->searchUsersByCallMap($params);
         } else {
-            $dataProviderOnlineDep1 = null;
+            $salesOnline = null;
         }
 
-        if (!$accessDepartments || in_array(Department::DEPARTMENT_EXCHANGE, $accessDepartments, true)) {
+        if ($isAdmin || in_array(Department::DEPARTMENT_EXCHANGE, $accessDepartments, true)) {
             $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_EXCHANGE;
-            $dataProviderOnlineDep2 = $searchModel2->searchUserCallMap($params);
+            $exchangeOnline = $userConnectionSearch->searchUsersByCallMap($params);
         } else {
-            $dataProviderOnlineDep2 = null;
+            $exchangeOnline = null;
         }
 
-        if (!$accessDepartments || in_array(Department::DEPARTMENT_SUPPORT, $accessDepartments, true)) {
+        if ($isAdmin || in_array(Department::DEPARTMENT_SUPPORT, $accessDepartments, true)) {
             $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_SUPPORT;
-            $dataProviderOnlineDep3 = $searchModel2->searchUserCallMap($params);
+            $supportOnline = $userConnectionSearch->searchUsersByCallMap($params);
         } else {
-            $dataProviderOnlineDep3 = null;
+            $supportOnline = null;
         }
 
-        if (!$accessDepartments) {
-            $params['UserConnectionSearch']['dep_id'] = 0;
-            $dataProviderOnline = $searchModel2->searchUserCallMap($params);
+        if ($isAdmin || in_array($withOutDepartments, $accessDepartments, true)) {
+            $params['UserConnectionSearch']['dep_id'] = $withOutDepartments;
+            $withoutDepartmentOnline = $userConnectionSearch->searchUsersByCallMap($params);
         } else {
-            $dataProviderOnline = null;
+            $withoutDepartmentOnline = null;
         }
 
         $params['CallSearch']['dep_ids'] = $accessDepartments;
+        $params['CallSearch']['project_ids'] = $accessProjects;
+        $params['CallSearch']['ug_ids'] = $accessGroups;
+
         $params['CallSearch']['status_ids'] = [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING, Call::STATUS_QUEUE, Call::STATUS_IVR, Call::STATUS_DELAY];
-        $dataProvider3 = $searchModel->searchUserCallMap($params);
+        $activeCalls = $callSearch->searchUserCallMap($params);
 
         $params['CallSearch']['status_ids'] = [Call::STATUS_COMPLETED, Call::STATUS_BUSY, Call::STATUS_FAILED, Call::STATUS_NO_ANSWER, Call::STATUS_CANCELED];
         $params['CallSearch']['limit'] = 10;
-        $dataProvider2 = $searchModel->searchUserCallMapHistory($params);
-
-        //$searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
-        //$searchModel->datetime_end = date('Y-m-d');
-
-        //$searchModel->date_range = $searchModel->datetime_start.' - '. $searchModel->datetime_end;
-
-        //var_dump($dataProvider3->getModels()); die();
+        $historyCalls = $callSearch->searchUserCallMapHistory($params);
 
         return $this->render('user-map/user-map', [
-            'dataProviderOnlineDep1' => $dataProviderOnlineDep1,
-            'dataProviderOnlineDep2' => $dataProviderOnlineDep2,
-            'dataProviderOnlineDep3' => $dataProviderOnlineDep3,
-            'dataProviderOnline' => $dataProviderOnline,
-
-
-            'dataProvider2' => $dataProvider2,
-            'dataProvider3' => $dataProvider3,
-            //'searchModel' => $searchModel,
+            'salesOnline' => $salesOnline,
+            'exchangeOnline' => $exchangeOnline,
+            'supportOnline' => $supportOnline,
+            'withoutDepartmentOnline' => $withoutDepartmentOnline,
+            'historyCalls' => $historyCalls,
+            'activeCalls' => $activeCalls,
         ]);
-
     }
+
+    //todo remove
+//    public function actionUserMapOld()
+//    {
+//
+//        $this->layout = '@frontend/themes/gentelella_v2/views/layouts/main_tv';
+//
+//        /** @var Employee $user */
+//        $user = Yii::$app->user->identity;
+//
+//
+//
+//        $searchModel = new CallSearch();
+//        $searchModel2 = new UserConnectionSearch();
+//        $params = Yii::$app->request->queryParams;
+//
+//        //if (Yii::$app->user->identity->canRole('supervision')) {
+//            //$params['CallSearch']['supervision_id'] = $userId;
+//            //$params['CallSearch']['status'] = Employee::STATUS_ACTIVE;
+//        //}
+//
+//        $accessDepartmentModels = $user->udDeps;
+//
+//        if($accessDepartmentModels) {
+//            $accessDepartments = ArrayHelper::map($accessDepartmentModels, 'dep_id', 'dep_id');
+//        } else {
+//            $accessDepartments = [];
+//        }
+//
+//        $isSuper = ($user->isSupervision() || $user->isExSuper() || $user->isSupSuper());
+//
+//        if ($isSuper && !in_array(Department::DEPARTMENT_SUPPORT, $accessDepartments, true)) {
+//            $userGroupsModel = $user->ugsGroups;
+//
+//            if ($userGroupsModel) {
+//                $userGroups = ArrayHelper::map($userGroupsModel, 'ug_id', 'ug_id');
+//            } else {
+//                $userGroups = [];
+//            }
+//
+//            $params['UserConnectionSearch']['ug_ids'] = $userGroups;
+//            $params['CallSearch']['ug_ids'] = $userGroups;
+//        }
+//
+//        //VarDumper::dump($accessDepartments, 10, true); exit;
+//
+//
+//        if (!$accessDepartments || in_array(Department::DEPARTMENT_SALES, $accessDepartments, true)) {
+//            $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_SALES;
+//            $dataProviderOnlineDep1 = $searchModel2->searchUserCallMap($params);
+//        } else {
+//            $dataProviderOnlineDep1 = null;
+//        }
+//
+//        if (!$accessDepartments || in_array(Department::DEPARTMENT_EXCHANGE, $accessDepartments, true)) {
+//            $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_EXCHANGE;
+//            $dataProviderOnlineDep2 = $searchModel2->searchUserCallMap($params);
+//        } else {
+//            $dataProviderOnlineDep2 = null;
+//        }
+//
+//        if (!$accessDepartments || in_array(Department::DEPARTMENT_SUPPORT, $accessDepartments, true)) {
+//            $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_SUPPORT;
+//            $dataProviderOnlineDep3 = $searchModel2->searchUserCallMap($params);
+//        } else {
+//            $dataProviderOnlineDep3 = null;
+//        }
+//
+//        if (!$accessDepartments) {
+//            $params['UserConnectionSearch']['dep_id'] = 0;
+//            $dataProviderOnline = $searchModel2->searchUserCallMap($params);
+//        } else {
+//            $dataProviderOnline = null;
+//        }
+//
+//        $params['CallSearch']['dep_ids'] = $accessDepartments;
+//        $params['CallSearch']['status_ids'] = [Call::STATUS_IN_PROGRESS, Call::STATUS_RINGING, Call::STATUS_QUEUE, Call::STATUS_IVR, Call::STATUS_DELAY];
+//        $dataProvider3 = $searchModel->searchUserCallMap($params);
+//
+//        $params['CallSearch']['status_ids'] = [Call::STATUS_COMPLETED, Call::STATUS_BUSY, Call::STATUS_FAILED, Call::STATUS_NO_ANSWER, Call::STATUS_CANCELED];
+//        $params['CallSearch']['limit'] = 10;
+//        $dataProvider2 = $searchModel->searchUserCallMapHistory($params);
+//
+//        //$searchModel->datetime_start = date('Y-m-d', strtotime('-0 day'));
+//        //$searchModel->datetime_end = date('Y-m-d');
+//
+//        //$searchModel->date_range = $searchModel->datetime_start.' - '. $searchModel->datetime_end;
+//
+//        //var_dump($dataProvider3->getModels()); die();
+//
+//        return $this->render('user-map/user-map', [
+//            'dataProviderOnlineDep1' => $dataProviderOnlineDep1,
+//            'dataProviderOnlineDep2' => $dataProviderOnlineDep2,
+//            'dataProviderOnlineDep3' => $dataProviderOnlineDep3,
+//            'dataProviderOnline' => $dataProviderOnline,
+//
+//
+//            'dataProvider2' => $dataProvider2,
+//            'dataProvider3' => $dataProvider3,
+//            //'searchModel' => $searchModel,
+//        ]);
+//
+//    }
 
     public function actionRealtimeUserMap()
     {
@@ -1215,6 +1318,100 @@ class CallController extends FController
         return $this->renderAjax('ajax_call_log_info', [
             'model' => $model,
         ]);
+    }
+
+    public function actionGetUsersForCall($id)
+    {
+        $call = $this->findModel($id);
+        if (!Auth::can('call/assignUsers', ['call' => $call])) {
+            if (Yii::$app->request->getIsGet()) {
+                return '<h5>Call ID: ' . $call->c_id . ' (' . $call->getCallTypeName() . ') </h5> Access denied.';
+            }
+            return "<script> $('#modal-df').modal('hide');createNotify('Add users to call', 'Access denied.', 'error');</script>";
+        }
+
+        $groups = [];
+        $users = $this->getAvailableUsers($call, $groups);
+        if (Yii::$app->request->getIsGet()) {
+            if (!$users) {
+                return '<h5>Call ID: ' . $call->c_id . ' (' . $call->getCallTypeName() . ') </h5>Users not found';
+            }
+        }
+
+        $model = new UsersForm($users);
+
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $result = $this->addUsersForCall($call, $model->selectedUsers);
+            if ($result) {
+                return "<script> $('#modal-df').modal('hide');createNotify('Add users to call', 'Done', 'success');pjaxReload({container: '#pjax-call-list'});</script>";
+            }
+            return "<script> $('#modal-df').modal('hide');createNotify('Add users to call', 'Server error. Please try again later.', 'danger');</script>";
+        }
+
+        return $this->renderAjax('get_users_for_call', [
+            'model' => $model,
+            'call' => $call
+        ]);
+    }
+
+    private function addUsersForCall(Call $call, array $users): array
+    {
+        $result = [];
+        if ($users) {
+            foreach ($users as $userId) {
+                if (Call::applyCallToAgentAccess($call, $userId)) {
+                    $result[] = $userId;
+                }
+            }
+        }
+        return $result;
+    }
+
+    private function getAvailableUsers(Call $call, array $groups): array
+    {
+        $users = [];
+        $onlineUsers = $this->getUsersOnlineForAddToCall($call, $groups);
+        $diffUsers = array_diff(array_keys($onlineUsers), $this->getUsersAlreadyAccess($call));
+        if ($diffUsers) {
+            foreach ($diffUsers as $userId) {
+                if (array_key_exists($userId, $onlineUsers)) {
+                    $users[$userId] = $onlineUsers[$userId];
+                }
+            }
+        }
+        unset($onlineUsers);
+        return $users;
+    }
+
+    private function getUsersAlreadyAccess(Call $call): array
+    {
+        return array_keys(CallUserAccess::find()
+            ->select(['cua_user_id'])
+            ->andWhere(['cua_call_id' => $call->c_id])->andWhere(['cua_status_id' => CallUserAccess::STATUS_TYPE_PENDING])
+            ->indexBy('cua_user_id')
+            ->column());
+    }
+
+    private function getUsersOnlineForAddToCall(Call $call, array $groups): array
+    {
+        $query = Employee::find()
+            ->select(['*'])
+            ->addSelect(['us_is_on_call'])
+            ->leftJoin(UserStatus::tableName(), 'us_user_id = ' . Employee::tableName() . '.id')
+            ->andWhere(['IN', 'id', UserConnection::find()->select(['uc_user_id'])->groupBy(['uc_user_id'])])
+            ->andWhere(['IN', 'id', UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['ud_dep_id' => $call->c_dep_id])])
+            ->andWhere(['IN', 'id', ProjectEmployeeAccess::find()->select(['DISTINCT(employee_id)'])->where(['project_id' => $call->c_project_id])])
+            ->andWhere([
+                'OR',
+                ['IS', 'us_is_on_call', null],
+                ['us_is_on_call' => false],
+            ]);
+
+        if ($groups) {
+            $query->andWhere(['IN', 'id', UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['ugs_group_id' => $groups])]);
+        }
+
+        return $query->indexBy('id')->all();
     }
 
     protected function findCallLogModel(string $sid): CallLog

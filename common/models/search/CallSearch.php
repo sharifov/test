@@ -25,6 +25,7 @@ use yii\helpers\VarDumper;
  *
  * @property int $limit
  * @property array $dep_ids
+ * @property array $project_ids
  * @property array $statuses
  * @property array $status_ids
  * @property array $ug_ids
@@ -60,6 +61,7 @@ class CallSearch extends Call
     public $timeTo;
 
     public $dep_ids = [];
+    public $project_ids = [];
     public $phoneList = [];
 
     private $callSearchRepository;
@@ -96,7 +98,7 @@ class CallSearch extends Call
             [['c_call_sid', 'c_from', 'c_to', 'c_call_status', 'c_forwarded_from', 'c_caller_name', 'c_parent_call_sid', 'c_call_duration', 'c_recording_url', 'c_recording_sid', 'c_sequence_number', 'c_error_message', 'c_price', 'statuses', 'limit', 'projectId', 'statusId', 'callTypeId'], 'safe'],
             [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['createTimeStart', 'createTimeEnd'], 'safe'],
-            [['ug_ids', 'status_ids', 'dep_ids'], 'each', 'rule' => ['integer']],
+            [['ug_ids', 'status_ids', 'dep_ids', 'project_ids'], 'each', 'rule' => ['integer']],
             [['reportTimezone', 'timeFrom', 'timeTo'], 'string'],
 
             ['c_is_transfer', 'boolean'],
@@ -373,6 +375,10 @@ class CallSearch extends Call
 
         if ($this->dep_ids) {
             $query->andWhere(['c_dep_id' => $this->dep_ids]);
+        }
+
+        if ($this->project_ids) {
+            $query->andWhere(['c_project_id' => $this->project_ids]);
         }
 
         if ($this->ug_ids) {
@@ -784,6 +790,10 @@ class CallSearch extends Call
 
         if ($this->dep_ids) {
             $query->andWhere(['c_dep_id' => $this->dep_ids]);
+        }
+
+        if ($this->project_ids) {
+            $query->andWhere(['c_project_id' => $this->project_ids]);
         }
 
         if ($this->ug_ids) {
