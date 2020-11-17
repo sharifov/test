@@ -156,6 +156,22 @@ return [
             'class' => \common\components\ga\GaRequestService::class,
             'url' => 'https://www.google-analytics.com/collect',  // For test : debug/collect
         ],
+        'prometheus' => [
+            'class' => \common\components\PrometheusClient::class,
+            'redisOptions' => [
+                'host' => 'localhost2',
+                'port' => 6379,
+                'password' => null,
+                'timeout' => 0.1, // in seconds
+                'read_timeout' => '10', // in seconds
+                'persistent_connections' => false
+            ],
+            //'url' => 'https://geonames.travelinsides.com/api/v1/',
+            'enabled' => true,
+            'useHttpBasicAuth' => true,
+            'authUsername' => 'test',
+            'authPassword' => '12345',
+        ],
     ],
     'bootstrap' => [
         'queue_sms_job',

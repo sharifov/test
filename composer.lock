@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "94d25bdef37d668eff686a87784a1126",
+    "content-hash": "f17880f513b06b9a82949e3934abc302",
     "packages": [
         {
             "name": "2amigos/2fa-library",
@@ -803,7 +803,7 @@
             "version": "3.3.11",
             "source": {
                 "type": "git",
-                "url": "https://github.com/RobinHerbots/Inputmask.git",
+                "url": "git@github.com:RobinHerbots/Inputmask.git",
                 "reference": "5e670ad62f50c738388d4dcec78d2888505ad77b"
             },
             "dist": {
@@ -839,7 +839,7 @@
             "version": "3.5.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/jquery/jquery-dist.git",
+                "url": "git@github.com:jquery/jquery-dist.git",
                 "reference": "4c0e4becb8263bb5b3e6dadc448d8e7305ef8215"
             },
             "dist": {
@@ -4295,6 +4295,65 @@
             "time": "2020-03-03T09:12:48+00:00"
         },
         {
+            "name": "promphp/prometheus_client_php",
+            "version": "v2.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/PromPHP/prometheus_client_php.git",
+                "reference": "1f2e17ac7fb42a118263cad3447e613cf413cd0a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/PromPHP/prometheus_client_php/zipball/1f2e17ac7fb42a118263cad3447e613cf413cd0a",
+                "reference": "1f2e17ac7fb42a118263cad3447e613cf413cd0a",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "php": "^7.2",
+                "symfony/polyfill-apcu": "^1.6"
+            },
+            "replace": {
+                "endclothing/prometheus_client_php": "*",
+                "jimdo/prometheus_client_php": "*",
+                "lkaemmerling/prometheus_client_php": "*"
+            },
+            "require-dev": {
+                "guzzlehttp/guzzle": "^6.3|^7.0",
+                "phpstan/phpstan": "^0.12.48",
+                "phpunit/phpunit": "^8.4",
+                "squizlabs/php_codesniffer": "^3.5"
+            },
+            "suggest": {
+                "ext-apc": "Required if using APCu.",
+                "ext-redis": "Required if using Redis.",
+                "promphp/prometheus_push_gateway_php": "An easy client for using Prometheus PushGateway."
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Prometheus\\": "src/Prometheus/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Lukas Kämmerling",
+                    "email": "kontakt@lukas-kaemmerling.de"
+                }
+            ],
+            "description": "Prometheus instrumentation library for PHP applications.",
+            "time": "2020-10-08T04:00:26+00:00"
+        },
+        {
             "name": "psr/container",
             "version": "1.0.0",
             "source": {
@@ -5034,6 +5093,66 @@
             "description": "A generic function and convention to trigger deprecation notices",
             "homepage": "https://symfony.com",
             "time": "2020-09-07T11:33:47+00:00"
+        },
+        {
+            "name": "symfony/polyfill-apcu",
+            "version": "v1.20.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-apcu.git",
+                "reference": "f5191eb0e98e08d12eb49fc0ed0820e37de89fdf"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-apcu/zipball/f5191eb0e98e08d12eb49fc0ed0820e37de89fdf",
+                "reference": "f5191eb0e98e08d12eb49fc0ed0820e37de89fdf",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.1"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "1.20-dev"
+                },
+                "thanks": {
+                    "name": "symfony/polyfill",
+                    "url": "https://github.com/symfony/polyfill"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Polyfill\\Apcu\\": ""
+                },
+                "files": [
+                    "bootstrap.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Nicolas Grekas",
+                    "email": "p@tchwork.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony polyfill backporting apcu_* functions to lower PHP versions",
+            "homepage": "https://symfony.com",
+            "keywords": [
+                "apcu",
+                "compatibility",
+                "polyfill",
+                "portable",
+                "shim"
+            ],
+            "time": "2020-10-23T14:02:19+00:00"
         },
         {
             "name": "symfony/polyfill-ctype",
@@ -7883,7 +8002,6 @@
                 "faker",
                 "fixtures"
             ],
-            "abandoned": true,
             "time": "2019-12-12T13:22:17+00:00"
         },
         {
