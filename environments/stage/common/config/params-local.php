@@ -1,7 +1,10 @@
 <?php
 return [
     'appInstance' => '{{ common.config.params.appInstance:str }}',
+    'appEnv' => 'stage',
+
     'url_address'      => '{{ common.config.params.url_address:str }}',
+
     'email_from' => [
         'sales' => '{{ common.config.params.email_from.sales:str }}',
     ],
@@ -30,6 +33,5 @@ return [
         'iv'        => '{{ common.config.params.crypt.iv:str }}',
     ],
 
-    'appEnv' => 'stage',
 	'liveChatRealTimeVisitors' => '{{ common.config.params.liveChatRealTimeVisitors:str }}'
 ];

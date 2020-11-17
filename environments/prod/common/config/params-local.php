@@ -5,6 +5,7 @@ return [
     'serviceVersion' => '{{ common.config.params.serviceVersion:str }}',
     'appName' => '{{ common.config.params.appName:str }}',
     'appInstance' => '{{ common.config.params.appInstance:str }}',
+    'appEnv' => 'prod',
 
     'url_address'      => '{{ common.config.params.url_address:str }}',
     'url_api_address'  => '{{ common.config.params.url_api_address:str }}',
@@ -53,8 +54,6 @@ return [
         'call2DelayTime' => '{{ common.config.params.lead.call2DelayTime:int }}',
     ],
     'global_phone' => '{{ common.config.params.global_phone:str }}',
-
-    'appEnv' => 'prod',
 
     'liveChatRealTimeVisitors' => '{{ common.config.params.liveChatRealTimeVisitors:str }}',
 
