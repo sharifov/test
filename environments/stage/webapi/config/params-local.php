@@ -1,7 +1,7 @@
 <?php
 return [
     'api'   => [
-        'username'  => 'apiuser',
-        'password'  => 'zeitstyle2018',
+        'username'  => '{{ webapi.config.params.api.username:str }}',
+        'password'  => '{{ webapi.config.params.api.password:str }}',
     ]
 ];

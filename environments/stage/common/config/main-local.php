@@ -7,24 +7,24 @@ return [
             'username' => '{{ common.config.main.components.db.username:str }}',
             'password' => '{{ common.config.main.components.db.password:str }}',
             'charset' => 'utf8mb4',
-            'enableSchemaCache' => true,
-            'schemaCacheDuration' => 3600
+            'enableSchemaCache' => '{{ common.config.main.components.db.enableSchemaCache:bool }}',
+            'schemaCacheDuration' => '{{ common.config.main.components.db.schemaCacheDuration:int }}'
         ],
         'cache' => [
             'class' => 'yii\caching\MemCache',
             'servers' => [
                 [
-                    'host' => '127.0.0.1',
-                    'port' => 11211,
+                    'host' => '{{ common.config.main.components.cache.server1.host:str }}',
+                    'port' => '{{ common.config.main.components.cache.server1.port:int }}',
                 ],
             ],
-            'useMemcached' => true,
+            'useMemcached' => '{{ common.config.main.components.cache.useMemcached:bool }}',
             'keyPrefix' => 'MemCache'
         ],
         'cacheFile' => [
             'class' => 'yii\caching\FileCache',
-            'defaultDuration' => 10 * 60,
-            'gcProbability' => 100,
+            'defaultDuration' => '{{ common.config.main.components.cacheFile.defaultDuration:int }}',
+            'gcProbability' => '{{ common.config.main.components.cacheFile.gcProbability:int }}',
         ],
         'mailer' => [
             'class' => 'yii\swiftmailer\Mailer',
@@ -39,8 +39,8 @@ return [
                 'host' => '{{ common.config.main.components.mailer2.host:str }}',
                 'username' => '{{ common.config.main.components.mailer2.username:str }}',
                 'password' => '{{ common.config.main.components.mailer2.password:str }}',
-                'port' => 587,
-                'encryption' => 'tls',
+                'port' => '{{ common.config.main.components.mailer2.port:int }}',
+                'encryption' => '{{ common.config.main.components.mailer2.encryption:str }}',
             ],
         ],
         'communication' => [
@@ -51,9 +51,9 @@ return [
         ],
         'airsearch' => [
             'class' => \common\components\AirSearchService::class,
-            'url' => 'https://airapi-test.travel-dev.com/',
-            'username' => 'SAL101',
-            'password' => 'c940e3484fe9fcc73ed12a7fcec469b4',
+            'url' => '{{ common.config.main.components.airsearch.url:str }}',
+            'username' => '{{ common.config.main.components.airsearch.username:str }}',
+            'password' => '{{ common.config.main.components.airsearch.password:str }}',
         ],
         'gaRequestService' => [
             'class' => \common\components\ga\GaRequestService::class,
