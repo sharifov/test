@@ -157,7 +157,7 @@ class UserConnectionSearch extends UserConnection
             $subQuery = UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['ud_dep_id' => $this->dep_id]);
             $query->andWhere(['IN', 'uc_user_id', $subQuery]);
         } elseif ($this->dep_id === 0) {
-            $subQuery = UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['ud_dep_id' => [Department::DEPARTMENT_SALES, Department::DEPARTMENT_EXCHANGE, Department::DEPARTMENT_SUPPORT]]);
+            $subQuery = UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['ud_dep_id' => array_keys(Department::DEPARTMENT_LIST)]);
             $query->andWhere(['NOT IN', 'uc_user_id', $subQuery]);
         }
 
@@ -204,7 +204,7 @@ class UserConnectionSearch extends UserConnection
             $subQuery = UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['ud_dep_id' => $this->dep_id]);
             $query->andWhere(['IN', 'uc_user_id', $subQuery]);
         } elseif ($this->dep_id === 0) {
-            $subQuery = UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['ud_dep_id' => [Department::DEPARTMENT_SALES, Department::DEPARTMENT_EXCHANGE, Department::DEPARTMENT_SUPPORT]]);
+            $subQuery = UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['ud_dep_id' => array_keys(Department::DEPARTMENT_LIST)]);
             $query->andWhere(['NOT IN', 'uc_user_id', $subQuery]);
         }
 
@@ -242,7 +242,7 @@ class UserConnectionSearch extends UserConnection
             $subQuery = UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['ud_dep_id' => $this->dep_id]);
             $query->andWhere(['IN', 'uc_user_id', $subQuery]);
         } elseif ($this->dep_id === 0) {
-            $subQuery = UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['ud_dep_id' => [Department::DEPARTMENT_SALES, Department::DEPARTMENT_EXCHANGE, Department::DEPARTMENT_SUPPORT]]);
+            $subQuery = UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['ud_dep_id' => array_keys(Department::DEPARTMENT_LIST)]);
             $query->andWhere(['NOT IN', 'uc_user_id', $subQuery]);
         }
 
