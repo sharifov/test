@@ -7,34 +7,22 @@ use yii\db\ActiveQuery;
 
 class CasesQuery extends ActiveQuery
 {
-    public function findLastActiveExchangeCaseByClient(int $clientId, ?int $projectId): self
+    public function findLastActiveClientCaseByDepartment(int $departmentId, int $clientId, ?int $projectId, int $trashActiveDaysLimit): self
     {
-        return $this->findLastActiveCaseByClient($clientId, $projectId)->byExchange();
+        return $this->findLastActiveClientCase($clientId, $projectId, $trashActiveDaysLimit)->byDepartment($departmentId);
     }
 
-    public function findLastExchangeCaseByClient(int $clientId, ?int $projectId): self
+    public function findLastClientCaseByDepartment(int $departmentId, int $clientId, ?int $projectId): self
     {
-        return $this->findLastCaseByClient($clientId, $projectId)->byExchange();
+        return $this->findLastClientCase($clientId, $projectId)->byDepartment($departmentId);
     }
 
-    public function findLastActiveSupportCaseByClient(int $clientId, ?int $projectId): self
+    public function findLastActiveClientCase(int $clientId, ?int $projectId, int $trashActiveDaysLimit): self
     {
-        return $this->findLastActiveCaseByClient($clientId, $projectId)->bySupport();
-    }
+        $query = $this->findLastClientCase($clientId, $projectId)->andWhere(['NOT IN', 'cs_status', [CasesStatus::STATUS_SOLVED]]);
 
-    public function findLastSupportCaseByClient(int $clientId, ?int $projectId): self
-    {
-        return $this->findLastCaseByClient($clientId, $projectId)->bySupport();
-    }
-
-    public function findLastActiveCaseByClient(int $clientId, ?int $projectId): self
-    {
-        $trashDaysLimit = (int)(\Yii::$app->params['settings']['trash_cases_active_days_limit'] ?? 0);
-
-        $query = $this->findLastCaseByClient($clientId, $projectId)->andWhere(['NOT IN', 'cs_status', [CasesStatus::STATUS_SOLVED]]);
-
-        if ($trashDaysLimit > 0) {
-            $limit = (new \DateTimeImmutable())->modify('- ' . $trashDaysLimit . 'day');
+        if ($trashActiveDaysLimit > 0) {
+            $limit = (new \DateTimeImmutable())->modify('- ' . $trashActiveDaysLimit . 'day');
             $query->andWhere(['OR',
                 ['NOT IN', 'cs_status', [CasesStatus::STATUS_TRASH]],
                 ['>', 'cs_created_dt', $limit->format('Y-m-d H:i:s')],
@@ -46,7 +34,7 @@ class CasesQuery extends ActiveQuery
         return $query;
     }
 
-    public function findLastCaseByClient(int $clientId, ?int $projectId): self
+    public function findLastClientCase(int $clientId, ?int $projectId): self
     {
         return $this
             ->andWhere(['cs_client_id' => $clientId])

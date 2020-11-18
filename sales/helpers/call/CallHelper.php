@@ -179,15 +179,18 @@ class CallHelper
             $tpl .= ' data-case-id="' . $call['case_id'] . '"';
         } elseif ((int)$call['cl_type_id'] === Call::CALL_TYPE_IN) {
             $department = (int)$call['cl_department_id'];
-            if ($department === Department::DEPARTMENT_SALES) {
-                if ($call['lead_id']) {
-                    $tpl .= ' data-source-type-id="' . Call::SOURCE_LEAD . '"';
-                    $tpl .= ' data-lead-id="' . $call['lead_id'] . '"';
-                }
-            } elseif ($department) {
-                if ($call['case_id']) {
-                    $tpl .= ' data-source-type-id="' . Call::SOURCE_CASE . '"';
-                    $tpl .= ' data-case-id="' . $call['case_id'] . '"';
+            $dep = Department::findOne($department);
+            if ($dep && ($departmentParams = $dep->getParams())) {
+                if ($departmentParams->object->type->isLead()) {
+                    if ($call['lead_id']) {
+                        $tpl .= ' data-source-type-id="' . Call::SOURCE_LEAD . '"';
+                        $tpl .= ' data-lead-id="' . $call['lead_id'] . '"';
+                    }
+                } elseif ($departmentParams->object->type->isCase()) {
+                    if ($call['case_id']) {
+                        $tpl .= ' data-source-type-id="' . Call::SOURCE_CASE . '"';
+                        $tpl .= ' data-case-id="' . $call['case_id'] . '"';
+                    }
                 }
             }
         }

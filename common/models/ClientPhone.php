@@ -3,6 +3,7 @@
 namespace common\models;
 
 use borales\extensions\phoneInput\PhoneInputValidator;
+use common\models\query\ClientPhoneQuery;
 use sales\entities\EventTrait;
 use Yii;
 use yii\behaviors\AttributeBehavior;
@@ -314,4 +315,9 @@ class ClientPhone extends \yii\db\ActiveRecord
 	{
 		return self::find()->select(['phone', 'id'])->where(['client_id' => $clientId])->column();
 	}
+
+    public static function find()
+    {
+        return new ClientPhoneQuery(static::class);
+    }
 }
