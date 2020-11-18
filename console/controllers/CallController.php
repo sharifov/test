@@ -54,6 +54,7 @@ class CallController extends Controller
      */
     public function actionCleaner(int $days = 10): void
     {
+        /* TODO:: remove this action */
         echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
 

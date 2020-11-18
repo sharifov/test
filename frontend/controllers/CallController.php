@@ -36,6 +36,8 @@ use sales\repositories\call\CallRepository;
 use sales\repositories\call\CallUserAccessRepository;
 use sales\repositories\NotFoundException;
 use sales\services\call\CallService;
+use sales\services\cleaner\cleaners\CallCleaner;
+use sales\services\cleaner\form\DbCleanerParamsForm;
 use Yii;
 use common\models\Call;
 use common\models\search\CallSearch;
@@ -115,9 +117,15 @@ class CallController extends FController
         $user = Yii::$app->user->identity;
         $dataProvider = $searchModel->search($params, $user);
 
+        $userMonitorCleaner = new CallCleaner();
+        $dbCleanerParamsForm = (new DbCleanerParamsForm())
+            ->setTable($userMonitorCleaner->getTable())
+            ->setColumn($userMonitorCleaner->getColumn());
+
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'modelCleaner' => $dbCleanerParamsForm,
         ]);
     }
 

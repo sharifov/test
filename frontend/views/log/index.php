@@ -1,5 +1,7 @@
 <?php
 
+use sales\auth\Auth;
+use sales\services\cleaner\form\DbCleanerParamsForm;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use dosamigos\datepicker\DatePicker;
@@ -7,23 +9,46 @@ use dosamigos\datepicker\DatePicker;
 /* @var $this yii\web\View */
 /* @var $searchModel frontend\models\search\LogSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var DbCleanerParamsForm $modelCleaner */
 
 $this->title = 'Logs';
 $this->params['breadcrumbs'][] = $this->title;
+$pjaxListId = 'pjax-log';
 ?>
-<div class="log-index">
+<div class="log-index row">
 
-    <h1><?= Html::encode($this->title) ?></h1>
+    <div class="col-md-12">
+        <h1><?= Html::encode($this->title) ?></h1>
+    </div>
 
-    <?php \yii\widgets\Pjax::begin(); ?>
-    <?= $this->render('_detele_logs', ['model' => $searchModel]); ?>
+    <?php if (Auth::can('global/clean/table')): ?>
+        <div class="col-md-6" >
+            <?php echo $this->render(
+                '_clean_table_form',
+                [
+                    'modelCleaner' => $modelCleaner,
+                    'pjaxIdForReload' => $pjaxListId,
+                ]
+            ) ?>
+        </div>
 
-    <div class="row">
+        <div class="col-md-12" style="margin-bottom: 12px;">
+            <?php echo Html::a(
+                '<i class="fas fa-remove"></i> Clear all Logs',
+                ['log/clear'],
+                [
+                    'class' => 'btn btn-danger',
+                    'data' => [
+                        'confirm' => 'Remove all records from logs?'
+                    ]
+                ]
+            ) ?>
+        </div>
+    <?php endif ?>
+
+    <?php \yii\widgets\Pjax::begin(['id' => $pjaxListId]); ?>
+    <div class="row" style="margin-left: 1px;">
         <div class="col-md-12">
-
-            <p>
-                <?=Html::a('<i class="fas fa-remove"></i> Clear all Logs',['log/clear'],['class' => 'btn btn-danger', 'data' => ['confirm' => 'Delete all records from logs?']]) ?>
-            </p>
 
             <?= GridView::widget([
                 'dataProvider' => $dataProvider,

@@ -2,6 +2,8 @@
 
 namespace frontend\controllers;
 
+use sales\services\cleaner\form\DbCleanerParamsForm;
+use sales\services\cleaner\cleaners\GlobalLogCleaner;
 use Yii;
 use common\models\GlobalLog;
 use common\models\search\GlobalLogSearch;
@@ -47,9 +49,15 @@ class GlobalLogController extends FController
         $searchModel = new GlobalLogSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
+        $cleaner = new GlobalLogCleaner();
+        $dbCleanerParamsForm = (new DbCleanerParamsForm())
+            ->setTable($cleaner->getTable())
+            ->setColumn($cleaner->getColumn());
+
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'modelCleaner' => $dbCleanerParamsForm,
         ]);
     }
 

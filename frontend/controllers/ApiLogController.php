@@ -2,6 +2,8 @@
 
 namespace frontend\controllers;
 
+use sales\services\cleaner\cleaners\ApiLogCleaner;
+use sales\services\cleaner\form\DbCleanerParamsForm;
 use Yii;
 use common\models\ApiLog;
 use common\models\search\ApiLogSearch;
@@ -45,9 +47,15 @@ class ApiLogController extends FController
         $searchModel = new ApiLogSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
+        $cleaner = new ApiLogCleaner();
+        $dbCleanerParamsForm = (new DbCleanerParamsForm())
+            ->setTable($cleaner->getTable())
+            ->setColumn($cleaner->getColumn());
+
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'modelCleaner' => $dbCleanerParamsForm,
         ]);
     }
 

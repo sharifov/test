@@ -9,6 +9,7 @@ use common\models\Employee;
 use dosamigos\datepicker\DatePicker;
 use common\components\grid\call\CallDurationColumn;
 use sales\auth\Auth;
+use sales\services\cleaner\form\DbCleanerParamsForm;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -17,22 +18,33 @@ use yii\bootstrap4\Modal;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\CallSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var DbCleanerParamsForm $modelCleaner */
 
 $this->title = 'Call List';
 $this->params['breadcrumbs'][] = $this->title;
 
 /** @var Employee $user */
 $user = Yii::$app->user->identity;
-
+$pjaxListId = 'pjax-call-index';
 ?>
+
 <div class="call-index">
     <h1><i class="fa fa-phone"></i> <?= Html::encode($this->title) ?></h1>
-    <?php Pjax::begin(['timeout' => 10000]); ?>
+
     <?php echo $this->render('_search', ['model' => $searchModel]); ?>
     <p>
         <?php /*= Html::a('Create Call', ['create'], ['class' => 'btn btn-success'])*/ ?>
     </p>
+    <?php if (Auth::can('global/clean/table')): ?>
+        <div class="col-md-6" style="margin-left: -10px;">
+            <?php echo $this->render('../clean/_clean_table_form', [
+                'modelCleaner' => $modelCleaner,
+                'pjaxIdForReload' => $pjaxListId,
+            ]); ?>
+        </div>
+    <?php endif ?>
 
+    <?php Pjax::begin(['id' => $pjaxListId, 'timeout' => 10000]); ?>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
