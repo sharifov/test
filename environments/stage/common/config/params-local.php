@@ -33,5 +33,11 @@ return [
         'iv'        => '{{ common.config.params.crypt.iv:str }}',
     ],
 
-	'liveChatRealTimeVisitors' => '{{ common.config.params.liveChatRealTimeVisitors:str }}'
+    'liveChatRealTimeVisitors' => '{{ common.config.params.liveChatRealTimeVisitors:str }}',
+
+    'centrifugo' => [
+        'enabled' => '{{ common.config.params.centrifugo.enabled:bool }}',
+        'wsConnectionUrl' => '{{ common.config.params.centrifugo.wsConnectionUrl:str }}',
+    ],
+
 ];

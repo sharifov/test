@@ -1,11 +1,12 @@
 <?php
 use sales\auth\Auth;
-use frontend\widgets\centrifugo\RealtimeCallUserMapWidget;
+use frontend\widgets\centrifugo\CentrifugoWidget;
 
 ?>
 
-<?= RealtimeCallUserMapWidget::widget([
+<?= CentrifugoWidget::widget([
     'userId' => Auth::id(),
+    'widgetView' => 'connect-user-map',
     'userAllowedChannels' => [
         'realtimeUserMapChannel#' . Auth::id(),
     ]

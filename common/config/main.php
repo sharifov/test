@@ -156,6 +156,12 @@ return [
             'class' => \common\components\ga\GaRequestService::class,
             'url' => 'https://www.google-analytics.com/collect',  // For test : debug/collect
         ],
+        'centrifugo' => [
+            'class'  => \sorokinmedia\centrifugo\Client::class,
+            'host'   => 'http://localhost:8000/api',
+            'secret' => 'very-long-secret-key',
+            'apikey' => 'very-long-api-ket'
+        ],
     ],
     'bootstrap' => [
         'queue_sms_job',

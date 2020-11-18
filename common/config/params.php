@@ -63,4 +63,10 @@ return [
         'user' => "priceline",
         'pass' => "ajfhiuEfbhvRyfbb(_&*^@31emdiow2rdfn2",
     ],
+
+    'centrifugo' => [
+        'enabled' => false,
+        'wsConnectionUrl' => 'wss://app.sales.com/centrifugo/connection/websocket',
+    ],
+
 ];

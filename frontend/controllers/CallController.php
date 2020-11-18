@@ -2,7 +2,6 @@
 
 namespace frontend\controllers;
 
-use common\components\CentrifugoService;
 use common\models\CallUserAccess;
 use common\models\Conference;
 use common\models\Department;
@@ -558,14 +557,23 @@ class CallController extends FController
 
             $callsHistory = $searchUserCallModel->searchRealtimeUserCallMapHistory($params);
 
-            CentrifugoService::sendMsg(json_encode([
+            /*CentrifugoService::sendMsg(json_encode([
                 'onlineDepSales' => $usersOnlineDepSales,
                 'onlineDepExchange' => $usersOnlineDepExchange,
                 'onlineDepSupport' => $usersOnlineDepSupport,
                 'usersOnline' => $usersOnline,
                 'realtimeCalls' => $realtimeCalls,
                 'callsHistory' => $callsHistory
-            ]), 'realtimeUserMapChannel#' . Auth::id());
+            ]), 'realtimeUserMapChannel#' . Auth::id());*/
+
+            Yii::$app->centrifugo->setSafety(false)->publish('realtimeUserMapChannel#' . Auth::id(), ['message' => json_encode([
+                'onlineDepSales' => $usersOnlineDepSales,
+                'onlineDepExchange' => $usersOnlineDepExchange,
+                'onlineDepSupport' => $usersOnlineDepSupport,
+                'usersOnline' => $usersOnline,
+                'realtimeCalls' => $realtimeCalls,
+                'callsHistory' => $callsHistory
+            ])]);
 
             return $this->asJson(['updatedTime' => Yii::$app->formatter->asTime(time(), 'php:H:i:s')]);
         } else {

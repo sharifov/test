@@ -174,6 +174,7 @@ $bundle = \frontend\themes\gentelella_v2\assets\Asset::register($this);
                             ?>
                         <?php /*= CentrifugoNotificationWidget::widget([
                             'userId' => Auth::id(),
+                            'widgetView => 'index',
                             'userAllowedChannels' => [
                                 'ownUserChannel#' . Auth::id(),
                                 'multipleUsersChannel#658,659'

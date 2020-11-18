@@ -1,34 +1,31 @@
 <?php
 
+
 namespace frontend\widgets\centrifugo;
 
-use yii\bootstrap\Widget;
-use phpcent\Client;
-use Yii;
 use yii\base\InvalidConfigException;
+use yii\bootstrap\Widget;
+use yii;
 
-/**
- * @author vincent.barnes
- * @since 2.20
- */
-
-class CentrifugoNotificationWidget extends Widget
+class CentrifugoWidget extends Widget
 {
-    public $userId;
+    public int $userId;
+    public array $userAllowedChannels;
     public string $widgetView;
-    public $userAllowedChannels;
-    private $centrifugoUrl;
+    private string $wsUrl;
+    private bool $switch;
 
     public function init()
     {
         parent::init();
-        $this->centrifugoUrl = Yii::$app->params['centrifugo']['wsConnectionUrl'];
+        $this->switch = Yii::$app->params['centrifugo']['enabled'];
+        $this->wsUrl = Yii::$app->params['centrifugo']['wsConnectionUrl'];
 
         if ($this->userId === null) {
             throw new InvalidConfigException('The "userId" property must be set.');
         }
 
-        if ($this->centrifugoUrl === null || $this->centrifugoUrl === '') {
+        if ($this->wsUrl === null || $this->wsUrl === '') {
             throw new InvalidConfigException('The "wsConnectionUrl" property must be set in system params.');
         }
 
@@ -37,23 +34,25 @@ class CentrifugoNotificationWidget extends Widget
         }
     }
 
-    public function run()
+    public function beforeRun()
     {
-        $this->registerAssets();
+        if (!parent::beforeRun()) {
+            return false;
+        }
 
-        return $this->render($this->widgetView, [
-            'channels' => $this->userAllowedChannels,
-            'centrifugoUrl' => $this->centrifugoUrl,
-            'token' => Yii::$app->centrifugo->generateConnectionToken($this->userId)
-        ]);
+        if ($this->switch) {
+            return true;
+        }
+
+        return false; // or false to not run the widget
     }
 
-    /**
-     * Register assets.
-     */
-    protected function registerAssets()
+    public function run()
     {
-        $view = $this->getView();
-        CentrifugoNotificationAssets::register($view);
+        return $this->render($this->widgetView, [
+            'channels' => $this->userAllowedChannels,
+            'centrifugoUrl' => $this->wsUrl,
+            'token' => Yii::$app->centrifugo->generateConnectionToken($this->userId)
+        ]);
     }
 }
