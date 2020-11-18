@@ -71,7 +71,9 @@ class ClientChatQaSearch extends ClientChat
             ],
             [['cch_created_dt', 'cch_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
             [['dataCountry', 'dataCity', 'messageText'], 'string', 'max' => 100],
-            ['ownerUserID', 'string']
+            ['ownerUserID', 'string'],
+            [['createdRangeDate'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+            [['createdRangeDate'], 'validateRange', 'params' => ['minStartDate' => '2020-01-01 00:00:00', 'maxEndDate' => date("Y-m-d 23:59:59")]],
         ];
     }
 
@@ -103,6 +105,7 @@ class ClientChatQaSearch extends ClientChat
         $this->load($params);
 
         if (!$this->validate()) {
+            $this->createdRangeDate = null;
             $query->where('0=1');
             return $dataProvider;
         }
@@ -268,5 +271,27 @@ class ClientChatQaSearch extends ClientChat
             ->andFilterWhere(['like', 'cch_language_id', $this->cch_language_id]);
 
         return $query;
+    }
+
+    public function validateRange($attribute, $params)
+    {
+        $range = explode(' - ', $this->$attribute);
+        if ((count($range) == count($params)) == 2) {
+            if (
+                (strtotime(reset($range)) < strtotime(reset($params)) ||
+                    strtotime(reset($range)) > strtotime(end($params))) ||
+
+                (strtotime(end($range)) > strtotime(end($params)) ||
+                    strtotime(end($range)) < strtotime(reset($params))) ||
+
+                (strtotime(reset($range)) > strtotime(end($range)) ||
+                    strtotime(end($range)) < strtotime(reset($range)))
+
+            ) {
+                $this->addError($attribute, 'Range start date or end date is incorrect');
+            }
+        } else {
+            $this->addError($attribute, 'Range format or validation params set wrong');
+        }
     }
 }
