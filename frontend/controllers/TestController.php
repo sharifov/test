@@ -1967,6 +1967,26 @@ class TestController extends FController
         }
         return 'ok';
     }
+
+    public function actionPrometheus(): string
+    {
+        $registry = Yii::$app->prometheus->registry;
+        $counter = $registry->registerCounter('frontend', 'some_counter234', 'it increases', ['a', 's', 'd']);
+        $counter->incBy(2, ['blue', '34', 3]);
+        $counter->incBy(1, ['red', '35', 4]);
+
+        $counter = $registry->getOrRegisterCounter('backend', 'some_counter', 'it increases', ['type']);
+        $counter->incBy(3, ['blue']);
+
+        $gauge = $registry->getOrRegisterGauge('console', 'some_gauge', 'it sets', ['type']);
+        $gauge->set(2.5, ['blue']);
+
+        $histogram = $registry->getOrRegisterHistogram('webapi', 'some_histogram', 'it observes', ['type'], [0.1, 1, 2, 3.5, 4, 5, 6, 7, 8, 9]);
+        $histogram->observe(3.5, ['blue']);
+
+        return  '123';
+        //return Yii::$app->prometheus->getMetric();
+    }
 }
 
 

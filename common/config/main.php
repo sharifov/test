@@ -157,17 +157,16 @@ return [
             'url' => 'https://www.google-analytics.com/collect',  // For test : debug/collect
         ],
         'prometheus' => [
-            'class' => \common\components\PrometheusClient::class,
+            'class' => \kivork\PrometheusClient\components\PrometheusClient::class,
             'redisOptions' => [
-                'host' => 'localhost2',
+                'host' => 'localhost',
                 'port' => 6379,
                 'password' => null,
                 'timeout' => 0.1, // in seconds
-                'read_timeout' => '10', // in seconds
-                'persistent_connections' => false
+                'read_timeout' => 10, // in seconds
+                'persistent_connections' => false,
+                'database' => 3,
             ],
-            //'url' => 'https://geonames.travelinsides.com/api/v1/',
-            'enabled' => true,
             'useHttpBasicAuth' => true,
             'authUsername' => 'test',
             'authPassword' => '12345',

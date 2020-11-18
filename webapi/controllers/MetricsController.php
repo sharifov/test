@@ -1,23 +1,22 @@
 <?php
-namespace webapi\modules\v1\controllers;
+namespace webapi\controllers;
 
 use webapi\models\PrometheusUser;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\auth\HttpBasicAuth;
 use yii\web\Controller;
-use yii\web\HttpException;
 use yii\web\NotAcceptableHttpException;
 use yii\web\Response;
 use yii\web\ServerErrorHttpException;
 
 /**
  * Class PrometheusController
- * @package webapi\modules\v1\controllers
+ * @package webapi\modules\controllers
  */
-class PrometheusController extends Controller
+class MetricsController extends Controller
 {
-    public function init()
+    public function init(): void
     {
         parent::init();
         Yii::$app->user->enableSession = false;
@@ -27,7 +26,7 @@ class PrometheusController extends Controller
     /**
      * @return array
      */
-    public function behaviors()
+    public function behaviors(): array
     {
         $behaviors = parent::behaviors();
         if (Yii::$app->prometheus->useHttpBasicAuth) {
@@ -40,7 +39,7 @@ class PrometheusController extends Controller
                 if ($user::login($username, $password)) {
                     $message = 'Invalid username or password for HttpBasicAuth Prometheus component';
                     Yii::warning(['message' => $message, 'username' => $username, 'endpoint' => $this->action->uniqueId, 'RemoteIP' => Yii::$app->request->getRemoteIP(),
-                        'UserIP' => Yii::$app->request->getUserIP()], 'API:v1:PrometheusController:HttpBasicAuth');
+                        'UserIP' => Yii::$app->request->getUserIP()], 'API:MetricsController:HttpBasicAuth');
                     throw new NotAcceptableHttpException($message, 10);
                     //return null;
                 }
