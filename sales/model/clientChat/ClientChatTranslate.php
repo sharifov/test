@@ -90,7 +90,6 @@ class ClientChatTranslate
             'rating_5'                  => Yii::t('clientChat_feedback', 'Awesome', [], $language),
         ];
 
-
         $dataEmojiPicker['search']   = Yii::t('clientChat_emojipicker', 'Search', [], $language);
         $dataEmojiPicker['clear']   = Yii::t('clientChat_emojipicker', 'Clear', [], $language);
         $dataEmojiPicker['notfound']   = Yii::t('clientChat_emojipicker', 'No Emoji Found', [], $language);
@@ -124,6 +123,12 @@ class ClientChatTranslate
 
         $data['emojipicker'] = $dataEmojiPicker;
 
+        $data['form'] = [
+            'text_field' => Yii::t('clientChat_form', 'Text Field', [], $language),
+            'option_1' => Yii::t('clientChat_form', 'Option 1', [], $language),
+            'option_2' => Yii::t('clientChat_form', 'Option 2', [], $language),
+            'option_3' => Yii::t('clientChat_form', 'Option 3', [], $language),
+        ];
 
         return $data;
     }
