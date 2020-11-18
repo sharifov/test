@@ -10,8 +10,8 @@ use DateTime;
 use modules\twilio\components\TwilioCommunicationService;
 use sales\entities\cases\Cases;
 use sales\entities\EventTrait;
-use sales\events\sms\SmsCreatedByIncomingSalesEvent;
-use sales\events\sms\SmsCreatedByIncomingSupportsEvent;
+use sales\events\sms\IncomingSmsCreatedByLeadTypeEvent;
+use sales\events\sms\IncomingSmsCreatedByCaseTypeEvent;
 use sales\events\sms\SmsCreatedEvent;
 use sales\services\sms\incoming\SmsIncomingForm;
 use Yii;
@@ -152,8 +152,7 @@ class Sms extends \yii\db\ActiveRecord
         ?int $ownerId,
         ?int $leadId,
         ?int $caseId
-    ): self
-    {
+    ): self {
         $sms = self::create();
         $sms->s_lead_id = $leadId;
         $sms->s_case_id = $caseId;
@@ -161,66 +160,29 @@ class Sms extends \yii\db\ActiveRecord
         return $sms;
     }
 
-    /**
-     * @param SmsIncomingForm $form
-     * @param int $clientId
-     * @param int|null $ownerId
-     * @param int|null $caseId
-     * @return static
-     */
-    public static function createByIncomingExchange(
+    public static function createIncomingByCaseType(
         SmsIncomingForm $form,
         ?int $clientId,
         ?int $ownerId,
         ?int $caseId
-    ): self
-    {
+    ): self {
         $sms = self::create();
         $sms->loadByIncoming($form, $clientId, $ownerId);
         $sms->s_case_id = $caseId;
-        $sms->recordEvent(new SmsCreatedByIncomingSupportsEvent($sms, $caseId, $form->si_phone_from, $form->si_phone_to, $form->si_sms_text));
+        $sms->recordEvent(new IncomingSmsCreatedByCaseTypeEvent($sms, $caseId, $form->si_phone_from, $form->si_phone_to, $form->si_sms_text));
         return $sms;
     }
 
-    /**
-     * @param SmsIncomingForm $form
-     * @param int $clientId
-     * @param int|null $ownerId
-     * @param int|null $caseId
-     * @return static
-     */
-    public static function createByIncomingSupport(
-        SmsIncomingForm $form,
-        ?int $clientId,
-        ?int $ownerId,
-        ?int $caseId
-    ): self
-    {
-        $sms = self::create();
-        $sms->loadByIncoming($form, $clientId, $ownerId);
-        $sms->s_case_id = $caseId;
-        $sms->recordEvent(new SmsCreatedByIncomingSupportsEvent($sms, $caseId, $form->si_phone_from, $form->si_phone_to, $form->si_sms_text));
-        return $sms;
-    }
-
-    /**
-     * @param SmsIncomingForm $form
-     * @param int $clientId
-     * @param int|null $ownerId
-     * @param int|null $leadId
-     * @return static
-     */
-    public static function createByIncomingSales(
+    public static function createIncomingByLeadType(
         SmsIncomingForm $form,
         ?int $clientId,
         ?int $ownerId,
         ?int $leadId
-    ): self
-    {
+    ): self {
         $sms = self::create();
         $sms->loadByIncoming($form, $clientId, $ownerId);
         $sms->s_lead_id = $leadId;
-        $sms->recordEvent(new SmsCreatedByIncomingSalesEvent($sms, $leadId, $form->si_phone_from, $form->si_phone_to, $form->si_sms_text));
+        $sms->recordEvent(new IncomingSmsCreatedByLeadTypeEvent($sms, $leadId, $form->si_phone_from, $form->si_phone_to, $form->si_sms_text));
         return $sms;
     }
 

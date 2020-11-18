@@ -39,8 +39,7 @@ class CasesCreateService
         TransactionManager $transaction,
         CasesSaleService $casesSaleService,
         ClientChatCaseRepository $chatCaseRepository
-    )
-    {
+    ) {
         $this->casesRepository = $casesRepository;
         $this->clientManageService = $clientManageService;
         $this->transaction = $transaction;
@@ -48,50 +47,16 @@ class CasesCreateService
         $this->chatCaseRepository = $chatCaseRepository;
     }
 
-    /**
-     * @param int $clientId
-     * @param int|null $projectId
-     * @return Cases
-     */
-    public function createSupportByIncomingEmail(int $clientId, ?int $projectId): Cases
+    public function createByDepartmentIncomingEmail(int $departmentId, int $clientId, ?int $projectId): Cases
     {
-        $case = Cases::createSupportByIncomingEmail($clientId, $projectId);
+        $case = Cases::createByDepartmentIncomingEmail($departmentId, $clientId, $projectId);
         $this->casesRepository->save($case);
         return $case;
     }
 
-    /**
-     * @param int $clientId
-     * @param int|null $projectId
-     * @return Cases
-     */
-    public function createExchangeByIncomingEmail(int $clientId, ?int $projectId): Cases
+    public function createByIncomingSms(int $departmentId, int $clientId, ?int $projectId): Cases
     {
-        $case = Cases::createExchangeByIncomingEmail($clientId, $projectId);
-        $this->casesRepository->save($case);
-        return $case;
-    }
-
-    /**
-     * @param int $clientId
-     * @param int|null $projectId
-     * @return Cases
-     */
-    public function createExchangeByIncomingSms(int $clientId, ?int $projectId): Cases
-    {
-        $case = Cases::createExchangeByIncomingSms($clientId, $projectId);
-        $this->casesRepository->save($case);
-        return $case;
-    }
-
-    /**
-     * @param int $clientId
-     * @param int|null $projectId
-     * @return Cases
-     */
-    public function createSupportByIncomingSms(int $clientId, ?int $projectId): Cases
-    {
-        $case = Cases::createSupportByIncomingSms($clientId, $projectId);
+        $case = Cases::createByIncomingSms($departmentId, $clientId, $projectId);
         $this->casesRepository->save($case);
         return $case;
     }
@@ -105,7 +70,6 @@ class CasesCreateService
     public function createByWeb(CasesCreateByWebForm $form, int $creatorId): Cases
     {
         $case = $this->transaction->wrap(function () use ($form, $creatorId) {
-
             $clientForm = ClientCreateForm::createWidthDefaultName();
             $clientForm->projectId = $form->projectId;
             $clientForm->typeCreate = Client::TYPE_CREATE_CASE;
@@ -131,7 +95,6 @@ class CasesCreateService
             $this->casesRepository->save($case);
 
             return $case;
-
         });
 
         return $case;
@@ -148,7 +111,6 @@ class CasesCreateService
     public function createByCall(array $clientPhones, int $callId, int $projectId, ?int $depId): Cases
     {
         $case = $this->transaction->wrap(function () use ($clientPhones, $callId, $projectId, $depId) {
-
             $clientForm = ClientCreateForm::createWidthDefaultName();
             $clientForm->projectId = $projectId;
             $clientForm->typeCreate = Client::TYPE_CREATE_CASE;
@@ -167,22 +129,26 @@ class CasesCreateService
         return $case;
     }
 
-    public function getOrCreateByCall(array $clientPhones, int $callId, int $projectId, int $depId, bool $createCaseOnIncoming = true): ?Cases
-    {
-
-        $case = $this->transaction->wrap(function () use ($clientPhones, $callId, $projectId, $depId, $createCaseOnIncoming) {
-
+    public function getOrCreateByCall(
+        array $clientPhones,
+        int $callId,
+        int $projectId,
+        int $depId,
+        bool $createCaseOnIncoming,
+        int $trashActiveDaysLimit
+    ): ?Cases {
+        $case = $this->transaction->wrap(function () use ($clientPhones, $callId, $projectId, $depId, $createCaseOnIncoming, $trashActiveDaysLimit) {
             $clientForm = ClientCreateForm::createWidthDefaultName();
             $clientForm->projectId = $projectId;
             $clientForm->typeCreate = Client::TYPE_CREATE_CALL;
 
-        	if ($createCaseOnIncoming) {
-				$client = $this->clientManageService->getOrCreateByPhones($clientPhones, $clientForm);
-			} else {
-        		$client = $this->clientManageService->getExistingOrCreateEmptyObj($clientPhones, $clientForm);
-			}
+            if ($createCaseOnIncoming) {
+                $client = $this->clientManageService->getOrCreateByPhones($clientPhones, $clientForm);
+            } else {
+                $client = $this->clientManageService->getExistingOrCreateEmptyObj($clientPhones, $clientForm);
+            }
 
-            if ((!$case = Cases::find()->findLastActiveCaseByClient($client->id, $projectId)->byDepartment($depId)->one()) && $createCaseOnIncoming) {
+            if ((!$case = Cases::find()->findLastActiveClientCase($client->id, $projectId, $trashActiveDaysLimit)->byDepartment($depId)->one()) && $createCaseOnIncoming) {
                 //\Yii::info('Not found case:  ' . VarDumper::dumpAsString(['ClientId' => $client->id, 'projectId' => $projectId, 'depId' => $depId]), 'info\getByClientProjectDepartment');
                 $case = Cases::createByCall(
                     $client->id,
@@ -191,12 +157,10 @@ class CasesCreateService
                     $depId
                 );
                 $this->casesRepository->save($case);
-
             } else {
                 //\Yii::info('Find case: ' . $case->cs_id . ' - ' . VarDumper::dumpAsString(['ClientId' => $client->id, 'projectId' => $projectId, 'depId' => $depId]), 'info\getByClientProjectDepartment');
             }
             return $case;
-
         });
 
         return $case;
@@ -205,7 +169,6 @@ class CasesCreateService
     public function createByChat(CasesCreateByChatForm $form, ClientChat $chat, int $creatorId): Cases
     {
         $case = $this->transaction->wrap(function () use ($form, $chat, $creatorId) {
-
             if (!$client = $chat->cchClient) {
                 throw new \DomainException('Client Chat not assigned with Client');
             }
@@ -228,7 +191,6 @@ class CasesCreateService
             $this->chatCaseRepository->save($clientChatCase);
 
             return $case;
-
         });
 
         return $case;

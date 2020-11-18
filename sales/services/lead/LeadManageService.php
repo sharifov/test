@@ -96,37 +96,31 @@ class LeadManageService
      * @param int $clientId
      * @param int|null $projectId
      * @param int|null $sourceId
+     * @param int $departmentId
      * @return Lead
      */
     public function createByIncomingEmail(
         string $clientEmail,
         int $clientId,
         ?int $projectId,
-        ?int $sourceId
-    ): Lead
-    {
-        $lead = Lead::createByIncomingEmail($clientEmail, $clientId, $projectId, $sourceId);
+        ?int $sourceId,
+        int $departmentId
+    ): Lead {
+        $lead = Lead::createByIncomingEmail($clientEmail, $clientId, $projectId, $sourceId, $departmentId);
 
         $this->leadRepository->save($lead);
 
         return $lead;
     }
 
-    /**
-     * @param string $clientPhone
-     * @param int $clientId
-     * @param int|null $projectId
-     * @param int|null $sourceId
-     * @return Lead
-     */
     public function createByIncomingSms(
         string $clientPhone,
         int $clientId,
         ?int $projectId,
-        ?int $sourceId
-    ): Lead
-    {
-        $lead = Lead::createByIncomingSms($clientPhone, $clientId, $projectId, $sourceId);
+        ?int $sourceId,
+        int $departmentId
+    ): Lead {
+        $lead = Lead::createByIncomingSms($clientPhone, $clientId, $projectId, $sourceId, $departmentId);
 
         $lead->l_is_test = $this->clientManageService->checkIfPhoneIsTest([$clientPhone]);
 
@@ -144,9 +138,14 @@ class LeadManageService
      * @return Lead
      * @throws \Throwable
      */
-    public function createByIncomingCall(string $phoneNumber = '', ?int $projectId = null, ?int $sourceId = null, $gmt = ''): Lead
-    {
-        $lead = $this->transaction->wrap(function () use ($phoneNumber, $projectId, $sourceId, $gmt) {
+    public function createByIncomingCall(
+        string $phoneNumber = '',
+        ?int $projectId = null,
+        ?int $sourceId = null,
+        int $departmentId,
+        $gmt = ''
+    ): Lead {
+        $lead = $this->transaction->wrap(function () use ($phoneNumber, $projectId, $sourceId, $departmentId, $gmt) {
 
             $clientForm = ClientCreateForm::createWidthDefaultName();
             $clientForm->projectId = $projectId;
@@ -155,7 +154,7 @@ class LeadManageService
 
             $sourceId = $this->getSourceId($sourceId, $projectId);
 
-            $lead = Lead::createByIncomingCall($phoneNumber, $client->id, $projectId, $sourceId, $gmt);
+            $lead = Lead::createByIncomingCall($phoneNumber, $client->id, $projectId, $sourceId, $departmentId, $gmt);
 
             $lead->l_is_test = $this->clientManageService->checkIfPhoneIsTest([$phoneNumber]);
 

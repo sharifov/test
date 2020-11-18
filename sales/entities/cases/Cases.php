@@ -96,49 +96,23 @@ class Cases extends ActiveRecord implements Objectable
         return $case;
     }
 
-    /**
-     * @param int $clientId
-     * @param int|null $projectId
-     * @return static
-     */
-    public static function createSupportByIncomingSms(int $clientId, ?int $projectId): self
+    public static function createByIncomingSms(int $departmentId, int $clientId, ?int $projectId): self
     {
         $case = self::create();
         $case->cs_client_id = $clientId;
         $case->cs_project_id = $projectId;
-        $case->cs_dep_id = Department::DEPARTMENT_SUPPORT;
+        $case->cs_dep_id = $departmentId;
         $case->cs_source_type_id = CasesSourceType::SMS;
         $case->pending(null, 'Created by incoming sms');
         return $case;
     }
 
-    /**
-     * @param int $clientId
-     * @param int|null $projectId
-     * @return static
-     */
-    public static function createSupportByIncomingEmail(int $clientId, ?int $projectId): self
+    public static function createByDepartmentIncomingEmail(int $departmentId, int $clientId, ?int $projectId): self
     {
         $case = self::create();
         $case->cs_client_id = $clientId;
         $case->cs_project_id = $projectId;
-        $case->cs_dep_id = Department::DEPARTMENT_SUPPORT;
-        $case->cs_source_type_id = CasesSourceType::MAIL;
-        $case->pending(null, 'Created by incoming email');
-        return $case;
-    }
-
-    /**
-     * @param int $clientId
-     * @param int|null $projectId
-     * @return static
-     */
-    public static function createExchangeByIncomingEmail(int $clientId, ?int $projectId): self
-    {
-        $case = self::create();
-        $case->cs_client_id = $clientId;
-        $case->cs_project_id = $projectId;
-        $case->cs_dep_id = Department::DEPARTMENT_EXCHANGE;
+        $case->cs_dep_id = $departmentId;
         $case->cs_source_type_id = CasesSourceType::MAIL;
         $case->pending(null, 'Created by incoming email');
         return $case;
