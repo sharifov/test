@@ -127,7 +127,7 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
         }
 
         $query->addSelect([
-            'acceptedByAgent' => (new Query())
+            'acceptedByAgentSourceAgent' => (new Query())
                 ->select('COUNT(*)')
                 ->from([
                     //'ccTbl' => ((new Query())->select('*')->from(ClientChat::tableName())->where('date_format(cch_created_dt, "%Y-%m-%d") = date')),
@@ -137,6 +137,17 @@ class ChatExtendedGraphsSearch extends ClientChatSearch
                 ])
                 ->where('ccTbl.cch_id = ccuaTbl.ccua_cch_id')
                 ->andWhere('ccTbl.cch_owner_user_id = ccuaTbl.ccua_user_id')
+                ->andWhere('ccTbl.cch_source_type_id = ' . ClientChat::SOURCE_TYPE_AGENT),
+
+            'acceptedByAgentSourceClient' => (new Query())
+                ->select('COUNT(*)')
+                ->from([
+                    'ccTbl' => $ccTblSubQuery,
+                    'ccuaTbl' => $ccuaTblSubQuery
+                ])
+                ->where('ccTbl.cch_id = ccuaTbl.ccua_cch_id')
+                ->andWhere('ccTbl.cch_owner_user_id = ccuaTbl.ccua_user_id')
+                ->andWhere('ccTbl.cch_source_type_id = ' . ClientChat::SOURCE_TYPE_CLIENT)
         ]);
 
         //$query->andWhere('cch_owner_user_id IS NOT NULL');
