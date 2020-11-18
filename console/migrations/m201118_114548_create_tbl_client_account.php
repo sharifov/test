@@ -34,7 +34,7 @@ class m201118_114548_create_tbl_client_account extends Migration
 
         $this->createTable('{{%client_account}}', [
             'ca_id' => $this->primaryKey(),
-            'ca_project_id' => $this->integer(), /* TODO:: add req to rules */
+            'ca_project_id' => $this->integer(),
             'ca_uuid' => $this->string(36)->notNull(),
             'ca_hid' => $this->integer()->notNull(),
             'ca_username' => $this->string(100)->notNull(),
