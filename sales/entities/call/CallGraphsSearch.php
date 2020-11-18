@@ -180,6 +180,7 @@ class CallGraphsSearch extends CallLogSearch
             [['cl_id', 'cl_type_id', 'cl_user_id', 'cl_project_id', 'cl_duration', 'cl_client_id', 'cl_status_id', 'recordingDurationFrom', 'recordingDurationTo', 'betweenHoursFrom', 'betweenHoursTo', 'callGraphGroupBy', 'chartTotalCallsVaxis'], 'integer'],
             [['cl_call_created_dt', 'statuses', 'limit', 'projectId', 'statusId', 'callTypeId'], 'safe'],
             [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+            [['createTimeRange'], 'validateRange', 'params' => ['minStartDate' => '2018-01-01 00:00:00', 'maxEndDate' => date("Y-m-d 23:59:59")]],
             [['dep_ids', 'totalChartColumns', 'projectIds', 'userGroupIds'], 'each', 'rule' => ['integer']],
             ['recordingDurationTo', 'compare', 'compareAttribute' => 'recordingDurationFrom', 'operator' => '>='],
             ['betweenHoursTo', 'compare', 'compareAttribute' => 'betweenHoursFrom', 'operator' => '>='],
@@ -498,5 +499,35 @@ class CallGraphsSearch extends CallLogSearch
         $hours = floor(abs($seconds) / 3600);
         $minutes = floor((abs($seconds) / 60) % 60);
         return $sign . sprintf("%02d:%02d", $hours, $minutes);
+    }
+
+    public function validateRange($attribute, $params)
+    {
+        $range = explode(' - ', $this->$attribute);
+        if ((count($range) == count($params)) == 2) {
+            if (
+                (strtotime(reset($range)) < strtotime(reset($params)) ||
+                strtotime(reset($range)) > strtotime(end($params))) ||
+
+                (strtotime(end($range)) > strtotime(end($params)) ||
+                    strtotime(end($range)) < strtotime(reset($params))) ||
+
+                (strtotime(reset($range)) > strtotime(end($range)) ||
+                    strtotime(end($range)) < strtotime(reset($range)))
+
+            ) {
+                $this->addError($attribute, 'Range start date or end date is incorrect');
+            }
+
+            /* if (!(bool)strtotime(reset($range))) {
+                 $this->addError($attribute, 'Range start date wrong format');
+             }
+
+             if (!(bool)strtotime(end($range))) {
+                 $this->addError($attribute, 'Range end date wrong format');
+             }*/
+        } else {
+            $this->addError($attribute, 'Range format or validation params set wrong');
+        }
     }
 }
