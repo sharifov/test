@@ -19,6 +19,7 @@ use \common\models\CallUserAccess;
 /* @var $salesOnline yii\data\ActiveDataProvider */
 /* @var $exchangeOnline yii\data\ActiveDataProvider */
 /* @var $supportOnline yii\data\ActiveDataProvider */
+/* @var $scheduleChangeOnline yii\data\ActiveDataProvider */
 /* @var $withoutDepartmentOnline yii\data\ActiveDataProvider */
 
 /* @var $historyCalls yii\data\ActiveDataProvider */
@@ -353,6 +354,26 @@ function getJoinTemplate($model)
                     <div class="card-body">
                         <?= \yii\widgets\ListView::widget([
                             'dataProvider' => $supportOnline,
+                            'emptyText' => '<div class="text-center">Not found online users</div><br>',
+                            'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
+                            'itemView' => function ($model, $key, $index, $widget) {
+                                return $this->render('_list_item_online', ['model' => $model, 'index' => $index]);
+                            },
+                            'itemOptions' => [
+                                //'class' => 'item',
+                                //'tag' => false,
+                            ],
+                        ])?>
+                    </div>
+                </div>
+                <?php endif;?>
+
+                <?php if ($scheduleChangeOnline): ?>
+                <div class="card card-default" style="margin-bottom: 20px;">
+                    <div class="card-header"><i class="fa fa-users"></i> OnLine - Department Schedule Change (<?= $scheduleChangeOnline->totalCount ?>)</div>
+                    <div class="card-body">
+                        <?= \yii\widgets\ListView::widget([
+                            'dataProvider' => $scheduleChangeOnline,
                             'emptyText' => '<div class="text-center">Not found online users</div><br>',
                             'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
                             'itemView' => function ($model, $key, $index, $widget) {

@@ -369,6 +369,13 @@ class CallController extends FController
             $supportOnline = null;
         }
 
+        if ($isAdmin || in_array(Department::DEPARTMENT_SCHEDULE_CHANGE, $accessDepartments, true)) {
+            $params['UserConnectionSearch']['dep_id'] = Department::DEPARTMENT_SCHEDULE_CHANGE;
+            $scheduleChangeOnline = $userConnectionSearch->searchUsersByCallMap($params);
+        } else {
+            $scheduleChangeOnline = null;
+        }
+
         if ($isAdmin || in_array($withOutDepartments, $accessDepartments, true)) {
             $params['UserConnectionSearch']['dep_id'] = $withOutDepartments;
             $withoutDepartmentOnline = $userConnectionSearch->searchUsersByCallMap($params);
@@ -391,6 +398,7 @@ class CallController extends FController
             'salesOnline' => $salesOnline,
             'exchangeOnline' => $exchangeOnline,
             'supportOnline' => $supportOnline,
+            'scheduleChangeOnline' => $scheduleChangeOnline,
             'withoutDepartmentOnline' => $withoutDepartmentOnline,
             'historyCalls' => $historyCalls,
             'activeCalls' => $activeCalls,
