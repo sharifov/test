@@ -70,7 +70,7 @@ class CasesQRepository
             $conditions = $this->freeCase();
         }
 
-        $query->andWhere($this->createSubQuery($user->id, $conditions, $checkDepPermission = false));
+        $query->andWhere($this->createSubQuery($user->id, $conditions, $checkDepPermission = true));
 
         return $query;
     }
@@ -90,7 +90,7 @@ class CasesQRepository
             ->andWhere(['cs_need_action' => true])
             ->andWhere(['<>', 'cs_status', CasesStatus::STATUS_PENDING]);
 
-        $query->andWhere($this->createSubQueryForNeedAction($user->id, [], $checkDepPermission = false));
+        $query->andWhere($this->createSubQueryForNeedAction($user->id, [], $checkDepPermission = true));
 
         if ($user->can('caseListAny')) {
             return $query;
@@ -135,7 +135,7 @@ class CasesQRepository
 
         $conditions = [];
 
-        $query->andWhere($this->createSubQuery($user->id, $conditions, $checkDepPermission = false));
+        $query->andWhere($this->createSubQuery($user->id, $conditions, $checkDepPermission = true));
 
         return $query;
     }
@@ -173,7 +173,7 @@ class CasesQRepository
             ];
         }
 
-        $query->andWhere($this->createSubQuery($user->id, $conditions, $checkDepPermission = false));
+        $query->andWhere($this->createSubQuery($user->id, $conditions, $checkDepPermission = true));
 
         return $query;
     }
@@ -211,7 +211,7 @@ class CasesQRepository
             ];
         }
 
-        $query->andWhere($this->createSubQuery($user->id, $conditions, $checkDepPermission = false));
+        $query->andWhere($this->createSubQuery($user->id, $conditions, $checkDepPermission = true));
 
         return $query;
     }
@@ -239,7 +239,7 @@ class CasesQRepository
 
         $conditions = [];
 
-        $query->andWhere($this->createSubQuery($user->id, $conditions, $checkDepPermission = false));
+        $query->andWhere($this->createSubQuery($user->id, $conditions, $checkDepPermission = true));
 
         return $query;
     }
