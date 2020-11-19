@@ -24,6 +24,11 @@ $urlParams = $generator->generateUrlParams();
 $actionParams = $generator->generateActionParams();
 $actionParamComments = $generator->generateActionParamComments();
 
+$isCrud = false;
+if (stripos($controllerClass, 'crud') !== false) {
+    $isCrud = true;
+}
+
 echo "<?php\n";
 ?>
 
@@ -41,9 +46,32 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
 use yii\db\StaleObjectException;
+<?php if ($isCrud): ?>
+use yii\helpers\ArrayHelper;
+<?php endif; ?>
 
 class <?= $controllerClass ?> extends <?= StringHelper::basename($generator->baseControllerClass) . "\n" ?>
 {
+    <?php if ($isCrud): ?>
+public function init(): void
+    {
+        parent::init();
+        $this->layoutCrud();
+    }
+
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'verbs' => [
+                'class' => VerbFilter::class,
+                'actions' => [
+                    'delete' => ['POST'],
+                ],
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+    <?php else: ?>
     /**
     * @return array
     */
@@ -58,6 +86,7 @@ class <?= $controllerClass ?> extends <?= StringHelper::basename($generator->bas
             ],
         ];
     }
+    <?php endif; ?>
 
     /**
      * @return string

@@ -9,6 +9,9 @@ use yii\helpers\StringHelper;
 $urlParams = $generator->generateUrlParams();
 $nameAttribute = $generator->getNameAttribute();
 
+$modelClass = Inflector::camel2id(StringHelper::basename($generator->modelClass));
+$pjaxListId = 'pjax-' . $modelClass;
+
 echo "<?php\n";
 ?>
 
@@ -23,7 +26,7 @@ use <?= $generator->indexWidgetType === 'grid' ? "yii\\grid\\GridView" : "yii\\w
 $this->title = <?= $generator->generateString(Inflector::pluralize(Inflector::camel2words(StringHelper::basename($generator->modelClass)))) ?>;
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="<?= Inflector::camel2id(StringHelper::basename($generator->modelClass)) ?>-index">
+<div class="<?= $modelClass ?>-index">
 
     <h1><?= "<?= " ?>Html::encode($this->title) ?></h1>
 
@@ -31,7 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= "<?= " ?>Html::a(<?= $generator->generateString('Create ' . Inflector::camel2words(StringHelper::basename($generator->modelClass))) ?>, ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-<?= $generator->enablePjax ? "    <?php Pjax::begin(); ?>\n" : '' ?>
+<?= $generator->enablePjax ? "    <?php Pjax::begin(['id' => '" . $pjaxListId . "']); ?>\n" : '' ?>
 <?php if(!empty($generator->searchModelClass)): ?>
 <?= "    <?php " . ($generator->indexWidgetType === 'grid' ? "// " : "") ?>echo $this->render('_search', ['model' => $searchModel]); ?>
 <?php endif; ?>
