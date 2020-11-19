@@ -78,6 +78,7 @@
 		"2amigos/yii2-multi-select-widget": "*",
 		"kivork/yii2-mattermost-log-target": "@dev",
         "kivork/yii2-virtual-cron": "@dev",
+        "kivork/yii2-prometheus-client": "@dev",
 		"sorokinmedia/yii2-centrifugo": "*"
 	},
 	"require-dev" : {
@@ -142,6 +143,10 @@
 		{
 			"type": "vcs",
 			"url": "https://stash.travelinsides.com/scm/lib/yii2-virtual-cron.git"
+		},
+		{
+			"type": "vcs",
+			"url": "https://stash.travelinsides.com/scm/lib/yii2-prometheus-client.git"
 		}
 	],
 	"scripts": {

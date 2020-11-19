@@ -10,6 +10,7 @@ use common\components\jobs\CallPriceJob;
 use common\components\jobs\CreateSaleFromBOJob;
 use common\components\jobs\SendLeadInfoToGaJob;
 use common\components\jobs\SmsPriceJob;
+use common\components\Metrics;
 use common\components\Purifier;
 use common\components\jobs\TelegramSendMessageJob;
 use common\components\RocketChat;
@@ -1931,6 +1932,86 @@ class TestController extends FController
             //sleep(3);
         }
         return 'ok';
+    }
+
+    public function actionPrometheus(): string
+    {
+        $registry = Yii::$app->prometheus->registry;
+        $counter = $registry->registerCounter('frontend', 'some_counter234', 'it increases', ['a', 's', 'd']);
+        $counter->incBy(2, ['blue', '34', 3]);
+        $counter->incBy(1, ['red', '35', 4]);
+
+        $counter = $registry->getOrRegisterCounter('backend', 'some_counter', 'it increases', ['type']);
+        $counter->incBy(3, ['blue']);
+
+        $gauge = $registry->getOrRegisterGauge('console', 'some_gauge', 'it sets', ['type']);
+        $gauge->set(2.5, ['blue']);
+
+        $histogram = $registry->getOrRegisterHistogram('webapi', 'some_histogram', 'it observes', ['type'], [0.1, 1, 2, 3.5, 4, 5, 6, 7, 8, 9]);
+        $histogram->observe(3.5, ['blue']);
+
+        //return  '123';
+        return Yii::$app->prometheus->getMetric();
+    }
+
+    public function actionMetrics(): string
+    {
+        $metrics = new Metrics();
+
+        $timeStart = microtime(true);
+
+
+        sleep(random_int(0, 2));
+        $seconds = round(microtime(true) - $timeStart, 1);
+        echo $seconds; exit;
+
+        $metrics->jobCounter('count');
+        $metrics->jobHistogram('hst', random_int(0, 7));
+        $metrics->jobHistogram('hst2', random_int(0, 7));
+        $metrics->jobGauge('test2', random_int(-100, 100));
+        $metrics->jobGauge('test1', random_int(-100, 100));
+        return Yii::$app->prometheus->getMetric();
+    }
+
+    public function actionLocale()
+    {
+        Yii::$app->language = 'ru-RU';
+        Yii::$app->formatter->locale = 'ru-CA';
+
+        echo '<hr>';
+        echo 'lang: ' . Yii::$app->language.'<br>';
+        echo 'locale: ' . Yii::$app->formatter->locale.'<br>';
+        echo 'Decimal: ' . Yii::$app->formatter->asDecimal(1234.5678).'<br>';
+        echo 'Currency: ' . Yii::$app->formatter->asCurrency(1234.5678).'<br>';
+        echo 'Date: ' . Yii::$app->formatter->asDate('2014-01-01').'<br>';
+
+        echo 'DateTime: ' . Yii::$app->formatter->asDatetime(time()).'<br><hr>';
+
+
+        //Yii::$app->formatter->locale = 'ru-RU';
+        Yii::$app->language = 'en-US';
+
+
+
+        echo 'lang: ' . Yii::$app->language.'<br>';
+        echo 'locale: ' . Yii::$app->formatter->locale.'<br>';
+        echo 'Decimal: ' . Yii::$app->formatter->asDecimal(1234.5678).'<br>';
+        echo 'Currency: ' . Yii::$app->formatter->asCurrency(1234.5678).'<br>';
+        echo 'Date: ' . Yii::$app->formatter->asDate('2014-01-01').'<br>';
+        echo 'DateTime: ' . Yii::$app->formatter->asDatetime(time()).'<br>';
+
+        Yii::$app->formatter->locale = 'SK';
+        Yii::$app->language = 'ru-RU';
+
+
+        echo '<hr>';
+        echo 'lang: ' . Yii::$app->language.'<br>';
+        echo 'locale: ' . Yii::$app->formatter->locale.'<br>';
+        echo 'Decimal: ' . Yii::$app->formatter->asDecimal(1234.5678).'<br>';
+        echo 'Currency: ' . Yii::$app->formatter->asCurrency(1234.5678).'<br>';
+        echo 'Date: ' . Yii::$app->formatter->asDate('2014-01-01').'<br>';
+        echo 'DateTime: ' . Yii::$app->formatter->asDatetime(time()).'<br>';
+
     }
 }
 

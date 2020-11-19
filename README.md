@@ -33,8 +33,7 @@ OR:
 
 1). PHP 7.3, 7.4 Install:
 ```
-sudo apt-get install php7.3 php7.3-fpm php-pear php-imagick php7.3-intl php7.3-zip php7.3-curl php7.3-gd php7.3-mysql php7.3-xml php7.3-mbstring php7.3-pgsql php7.3-xmlrpc php7.3-sqlite3 php7.3-soap php7.3-tidy php7.3-recode php7.3-pspell php7.3-imap
-sudo apt-get install php7.4 php7.4-fpm php-pear php-imagick php7.4-intl php7.4-zip php7.4-curl php7.4-gd php7.4-mysql php7.4-xml php7.4-mbstring php7.4-pgsql php7.4-xmlrpc php7.4-sqlite3 php7.4-soap php7.4-tidy php7.4-pspell php7.4-imap php7.4-bcmath
+sudo apt-get install php7.4 php7.4-fpm php-pear php-imagick php7.4-intl php7.4-zip php7.4-curl php7.4-gd php7.4-mysql php7.4-xml php7.4-mbstring php7.4-pgsql php7.4-xmlrpc php7.4-sqlite3 php7.4-soap php7.4-tidy php7.4-pspell php7.4-imap php7.4-bcmath php-redis
 
 sudo update-alternatives --config php
 ```

@@ -48,6 +48,7 @@ abstract class BaseApplication extends yii\base\Application
  * @property \common\components\ChatBot $chatBot ChatBot component
  * @property \common\components\TravelServices $travelServices TravelServices component
  * @property \common\components\ga\GaRequestService $gaRequestService GaRequestService component
+ * @property \kivork\PrometheusClient\components\PrometheusClient $prometheus Prometheus client component
  *
  *
  *
