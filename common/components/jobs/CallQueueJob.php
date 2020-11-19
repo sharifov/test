@@ -7,6 +7,7 @@
 
 namespace common\components\jobs;
 
+use common\components\Metrics;
 use common\models\Call;
 use common\models\CallUserAccess;
 use common\models\Client;
@@ -47,15 +48,15 @@ use yii\queue\Queue;
 
 class CallQueueJob extends BaseObject implements JobInterface
 {
-    public $call_id;
-    public $source_id = 0;
-    public $delay;
-    public $callFromInternalPhone = false;
+    public int $call_id;
+    public int $source_id = 0;
+    public int $delay;
+    public bool $callFromInternalPhone = false;
 
-    private $casesCreateService;
-    private $casesRepository;
-    private $clientManageService;
-    private $casesSaleService;
+    private CasesCreateService $casesCreateService;
+    private CasesRepository $casesRepository;
+    private ClientManageService $clientManageService;
+    private CasesSaleService $casesSaleService;
 
     /*public function __construct(CasesCreateService $casesCreateService, ClientManageService $clientManageService, $config = [])
     {
@@ -71,6 +72,9 @@ class CallQueueJob extends BaseObject implements JobInterface
      */
     public function execute($queue) : bool
     {
+        $metrics = new Metrics();
+        $timeStart = microtime(true);
+
         try {
             $this->casesCreateService = Yii::createObject(CasesCreateService::class);
             $this->clientManageService = Yii::createObject(ClientManageService::class);
@@ -235,6 +239,8 @@ class CallQueueJob extends BaseObject implements JobInterface
 
                 if ($call->isStatusQueue() || $call->isStatusIvr()) {
                     if ($call->checkCancelCall()) {
+                        $seconds = round(microtime(true) - $timeStart, 1);
+                        $metrics->jobHistogram(self::class, $seconds);
                         return true;
                     }
 
@@ -303,9 +309,14 @@ class CallQueueJob extends BaseObject implements JobInterface
         } catch (\Throwable $e) {
             Yii::error(VarDumper::dumpAsString($e->getMessage()), 'CallQueueJob:execute:catch');
         }
+        $seconds = round(microtime(true) - $timeStart, 1);
+        $metrics->jobHistogram(self::class, $seconds);
         return false;
     }
 
+    /**
+     * @return float|int
+     */
     public function getTtr()
     {
         return 1 * 5;

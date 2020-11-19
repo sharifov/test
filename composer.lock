@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "009541539782ba64577bd7ac526152b0",
+    "content-hash": "c80edce105afccd691d8368b2f92b94d",
     "packages": [
         {
             "name": "2amigos/2fa-library",
@@ -724,7 +724,7 @@
             "version": "v3.4.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/twbs/bootstrap.git",
+                "url": "git@github.com:twbs/bootstrap.git",
                 "reference": "68b0d231a13201eb14acd3dc84e51543d16e5f7e"
             },
             "dist": {
@@ -766,7 +766,7 @@
             "version": "v0.9.15",
             "source": {
                 "type": "git",
-                "url": "https://github.com/davidstutz/bootstrap-multiselect.git",
+                "url": "git@github.com:davidstutz/bootstrap-multiselect.git",
                 "reference": "4749da211e6d39644ef164cd709cfeae5ccba579"
             },
             "dist": {
@@ -841,7 +841,7 @@
             "version": "3.5.1",
             "source": {
                 "type": "git",
-                "url": "git@github.com:jquery/jquery-dist.git",
+                "url": "https://github.com/jquery/jquery-dist.git",
                 "reference": "4c0e4becb8263bb5b3e6dadc448d8e7305ef8215"
             },
             "dist": {
@@ -1229,20 +1229,6 @@
                 "constructor",
                 "instantiate"
             ],
-            "funding": [
-                {
-                    "url": "https://www.doctrine-project.org/sponsorship.html",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://www.patreon.com/phpdoctrine",
-                    "type": "patreon"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/doctrine%2Finstantiator",
-                    "type": "tidelift"
-                }
-            ],
             "time": "2020-11-10T18:47:58+00:00"
         },
         {
@@ -1362,12 +1348,6 @@
                 "emailvalidator",
                 "validation",
                 "validator"
-            ],
-            "funding": [
-                {
-                    "url": "https://github.com/egulias",
-                    "type": "github"
-                }
             ],
             "time": "2020-11-14T15:56:27+00:00"
         },
@@ -2137,12 +2117,6 @@
                 "json",
                 "serialization",
                 "xml"
-            ],
-            "funding": [
-                {
-                    "url": "https://github.com/goetas",
-                    "type": "github"
-                }
             ],
             "time": "2020-10-29T20:24:00+00:00"
         },
@@ -3236,6 +3210,50 @@
             "time": "2020-10-29T10:10:37+00:00"
         },
         {
+            "name": "kivork/yii2-prometheus-client",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://stash.travelinsides.com/scm/lib/yii2-prometheus-client.git",
+                "reference": "d9b7a5ad1e7317465ca2a3850c4180c06c72fc2a"
+            },
+            "require": {
+                "ext-redis": "*",
+                "php": ">=7.2",
+                "promphp/prometheus_client_php": "*",
+                "yiisoft/yii2": "~2.0.0"
+            },
+            "require-dev": {
+                "roave/security-advisories": "dev-master"
+            },
+            "type": "yii2-extension",
+            "autoload": {
+                "psr-4": {
+                    "kivork\\PrometheusClient\\": "src\\"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Alex Connor",
+                    "email": "alex.connor@techork.com"
+                }
+            ],
+            "description": "Yii2 prometheus client",
+            "keywords": [
+                "client",
+                "extension",
+                "prometheus",
+                "yii2"
+            ],
+            "support": {
+                "source": "https://stash.travelinsides.com/scm/lib/yii2-prometheus-client.git"
+            },
+            "time": "2020-11-18T13:12:46+00:00"
+        },
+        {
             "name": "kivork/yii2-rbac-export-import",
             "version": "dev-master",
             "source": {
@@ -3752,12 +3770,6 @@
                 "object",
                 "object graph"
             ],
-            "funding": [
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/myclabs/deep-copy",
-                    "type": "tidelift"
-                }
-            ],
             "time": "2020-11-13T09:40:50+00:00"
         },
         {
@@ -3803,16 +3815,6 @@
             "homepage": "http://github.com/myclabs/php-enum",
             "keywords": [
                 "enum"
-            ],
-            "funding": [
-                {
-                    "url": "https://github.com/mnapoli",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/myclabs/php-enum",
-                    "type": "tidelift"
-                }
             ],
             "time": "2020-11-14T18:14:52+00:00"
         },
@@ -4333,6 +4335,68 @@
                 "dependency injection"
             ],
             "time": "2020-03-03T09:12:48+00:00"
+        },
+        {
+            "name": "promphp/prometheus_client_php",
+            "version": "v2.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/PromPHP/prometheus_client_php.git",
+                "reference": "d576d1067fcafc0a4392af04098feb08e82a5468"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/PromPHP/prometheus_client_php/zipball/d576d1067fcafc0a4392af04098feb08e82a5468",
+                "reference": "d576d1067fcafc0a4392af04098feb08e82a5468",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "php": "^7.2|^8.0",
+                "symfony/polyfill-apcu": "^1.6"
+            },
+            "replace": {
+                "endclothing/prometheus_client_php": "*",
+                "jimdo/prometheus_client_php": "*",
+                "lkaemmerling/prometheus_client_php": "*"
+            },
+            "require-dev": {
+                "guzzlehttp/guzzle": "^6.3|^7.0",
+                "phpstan/extension-installer": "^1.0",
+                "phpstan/phpstan": "^0.12.50",
+                "phpstan/phpstan-phpunit": "^0.12.16",
+                "phpstan/phpstan-strict-rules": "^0.12.5",
+                "phpunit/phpunit": "^8.4|^9.4",
+                "squizlabs/php_codesniffer": "^3.5"
+            },
+            "suggest": {
+                "ext-apc": "Required if using APCu.",
+                "ext-redis": "Required if using Redis.",
+                "promphp/prometheus_push_gateway_php": "An easy client for using Prometheus PushGateway."
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Prometheus\\": "src/Prometheus/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Lukas Kämmerling",
+                    "email": "kontakt@lukas-kaemmerling.de"
+                }
+            ],
+            "description": "Prometheus instrumentation library for PHP applications.",
+            "time": "2020-11-17T22:06:29+00:00"
         },
         {
             "name": "psr/container",
@@ -5182,6 +5246,66 @@
             "description": "A generic function and convention to trigger deprecation notices",
             "homepage": "https://symfony.com",
             "time": "2020-09-07T11:33:47+00:00"
+        },
+        {
+            "name": "symfony/polyfill-apcu",
+            "version": "v1.20.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-apcu.git",
+                "reference": "f5191eb0e98e08d12eb49fc0ed0820e37de89fdf"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-apcu/zipball/f5191eb0e98e08d12eb49fc0ed0820e37de89fdf",
+                "reference": "f5191eb0e98e08d12eb49fc0ed0820e37de89fdf",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.1"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "1.20-dev"
+                },
+                "thanks": {
+                    "name": "symfony/polyfill",
+                    "url": "https://github.com/symfony/polyfill"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Polyfill\\Apcu\\": ""
+                },
+                "files": [
+                    "bootstrap.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Nicolas Grekas",
+                    "email": "p@tchwork.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony polyfill backporting apcu_* functions to lower PHP versions",
+            "homepage": "https://symfony.com",
+            "keywords": [
+                "apcu",
+                "compatibility",
+                "polyfill",
+                "portable",
+                "shim"
+            ],
+            "time": "2020-10-23T14:02:19+00:00"
         },
         {
             "name": "symfony/polyfill-ctype",
@@ -6324,16 +6448,6 @@
                 "large data",
                 "yii2"
             ],
-            "funding": [
-                {
-                    "url": "https://github.com/klimov-paul",
-                    "type": "github"
-                },
-                {
-                    "url": "https://www.patreon.com/klimov_paul",
-                    "type": "patreon"
-                }
-            ],
             "time": "2020-03-04T11:17:11+00:00"
         },
         {
@@ -6433,20 +6547,6 @@
             "keywords": [
                 "framework",
                 "yii2"
-            ],
-            "funding": [
-                {
-                    "url": "https://github.com/yiisoft",
-                    "type": "github"
-                },
-                {
-                    "url": "https://opencollective.com/yiisoft",
-                    "type": "open_collective"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/yiisoft/yii2",
-                    "type": "tidelift"
-                }
             ],
             "time": "2020-11-13T10:15:29+00:00"
         },
@@ -6589,20 +6689,6 @@
                 "bootstrap",
                 "bootstrap4",
                 "yii2"
-            ],
-            "funding": [
-                {
-                    "url": "https://github.com/yiisoft",
-                    "type": "github"
-                },
-                {
-                    "url": "https://opencollective.com/yiisoft",
-                    "type": "open_collective"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/yiisoft/yii2-bootstrap4",
-                    "type": "tidelift"
-                }
             ],
             "time": "2020-11-10T12:37:27+00:00"
         },
@@ -6895,20 +6981,6 @@
                 "session",
                 "yii2"
             ],
-            "funding": [
-                {
-                    "url": "https://github.com/yiisoft",
-                    "type": "github"
-                },
-                {
-                    "url": "https://opencollective.com/yiisoft",
-                    "type": "open_collective"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/yiisoft/yii2-redis",
-                    "type": "tidelift"
-                }
-            ],
             "time": "2020-11-10T11:53:29+00:00"
         },
         {
@@ -7038,12 +7110,6 @@
                 "future",
                 "non-blocking",
                 "promise"
-            ],
-            "funding": [
-                {
-                    "url": "https://github.com/amphp",
-                    "type": "github"
-                }
             ],
             "time": "2020-11-03T16:23:45+00:00"
         },
@@ -7254,12 +7320,6 @@
                 "acceptance testing",
                 "functional testing",
                 "unit testing"
-            ],
-            "funding": [
-                {
-                    "url": "https://opencollective.com/codeception",
-                    "type": "open_collective"
-                }
             ],
             "time": "2020-11-16T06:36:57+00:00"
         },
@@ -7689,20 +7749,6 @@
                 }
             ],
             "description": "Composer plugin that provides efficient querying for installed package versions (no runtime IO)",
-            "funding": [
-                {
-                    "url": "https://packagist.com",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/composer",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/composer/composer",
-                    "type": "tidelift"
-                }
-            ],
             "time": "2020-11-11T10:22:58+00:00"
         },
         {
@@ -7765,20 +7811,6 @@
                 "validation",
                 "versioning"
             ],
-            "funding": [
-                {
-                    "url": "https://packagist.com",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/composer",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/composer/composer",
-                    "type": "tidelift"
-                }
-            ],
             "time": "2020-11-13T08:59:24+00:00"
         },
         {
@@ -7822,20 +7854,6 @@
             "keywords": [
                 "Xdebug",
                 "performance"
-            ],
-            "funding": [
-                {
-                    "url": "https://packagist.com",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/composer",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/composer/composer",
-                    "type": "tidelift"
-                }
             ],
             "time": "2020-11-13T08:04:11+00:00"
         },
@@ -8795,20 +8813,6 @@
                 "MIT"
             ],
             "description": "PHPStan - PHP Static Analysis Tool",
-            "funding": [
-                {
-                    "url": "https://github.com/ondrejmirtes",
-                    "type": "github"
-                },
-                {
-                    "url": "https://www.patreon.com/phpstan",
-                    "type": "patreon"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/phpstan/phpstan",
-                    "type": "tidelift"
-                }
-            ],
             "time": "2020-11-16T22:59:18+00:00"
         },
         {
@@ -11029,20 +11033,6 @@
                 "debugger",
                 "yii2"
             ],
-            "funding": [
-                {
-                    "url": "https://github.com/yiisoft",
-                    "type": "github"
-                },
-                {
-                    "url": "https://opencollective.com/yiisoft",
-                    "type": "open_collective"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/yiisoft/yii2-debug",
-                    "type": "tidelift"
-                }
-            ],
             "time": "2020-11-13T10:09:11+00:00"
         },
         {
@@ -11104,20 +11094,6 @@
                 "faker",
                 "yii2"
             ],
-            "funding": [
-                {
-                    "url": "https://github.com/yiisoft",
-                    "type": "github"
-                },
-                {
-                    "url": "https://opencollective.com/yiisoft",
-                    "type": "open_collective"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/yiisoft/yii2-faker",
-                    "type": "tidelift"
-                }
-            ],
             "time": "2020-11-10T12:27:35+00:00"
         },
         {
@@ -11169,20 +11145,6 @@
                 "gii",
                 "yii2"
             ],
-            "funding": [
-                {
-                    "url": "https://github.com/yiisoft",
-                    "type": "github"
-                },
-                {
-                    "url": "https://opencollective.com/yiisoft",
-                    "type": "open_collective"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/yiisoft/yii2-gii",
-                    "type": "tidelift"
-                }
-            ],
             "time": "2020-05-02T11:59:43+00:00"
         }
     ],
@@ -11201,6 +11163,7 @@
         "kivork/yii2-rbac-export-import": 20,
         "kivork/yii2-mattermost-log-target": 20,
         "kivork/yii2-virtual-cron": 20,
+        "kivork/yii2-prometheus-client": 20,
         "eaglewu/swoole-ide-helper": 20
     },
     "prefer-stable": true,
@@ -11217,6 +11180,5 @@
         "ext-openssl": "*",
         "ext-zlib": "*"
     },
-    "platform-dev": [],
-    "plugin-api-version": "1.1.0"
+    "platform-dev": []
 }
