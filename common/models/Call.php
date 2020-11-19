@@ -976,8 +976,13 @@ class Call extends \yii\db\ActiveRecord
 
             //Yii::info(VarDumper::dumpAsString($this->attributes), 'info\Call:afterSave');
 
-
-            if (($this->c_lead_id || $this->c_case_id) && $isChangedStatus && $this->isIn() && $this->isStatusInProgress() && in_array($changedAttributes['c_status_id'], [self::STATUS_RINGING, self::STATUS_QUEUE], true)) {
+            if (
+                ($this->c_lead_id || $this->c_case_id)
+                && $this->isIn()
+                && $this->isStatusInProgress()
+                && $isChangedStatusFromEmptyInclude
+                && in_array($changedAttributes['c_status_id'], [self::STATUS_RINGING, self::STATUS_QUEUE, null], true)
+            ) {
 
                 $host = \Yii::$app->params['url_address'] ?? '';
 
