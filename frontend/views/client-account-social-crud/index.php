@@ -46,7 +46,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => ClientAccountSocial::TYPE_LIST,
             ],
             'cas_identity',
-            'cas_created_dt',
             ['class' => DateTimeColumn::class, 'attribute' => 'cas_created_dt'],
 
             ['class' => ActionColumn::class],

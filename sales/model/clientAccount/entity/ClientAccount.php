@@ -99,14 +99,14 @@ class ClientAccount extends ActiveRecord
             ['ca_uuid', 'unique'],
             ['ca_uuid', UuidValidator::class],
 
-            ['ca_created_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
-            ['ca_updated_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+            'ca_created_dt_format' => ['ca_created_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+            'ca_updated_dt_format' => ['ca_updated_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
 
-            ['ca_origin_created_dt', 'safe'], /* TODO::  */
+            ['ca_origin_created_dt', 'safe'],
 
-            ['ca_origin_updated_dt', 'safe'], /* TODO::  */
+            ['ca_origin_updated_dt', 'safe'],
 
-            ['ca_dob', 'safe'], /* TODO::  */
+            ['ca_dob', 'safe'],
         ];
     }
 

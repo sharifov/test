@@ -18,7 +18,9 @@ class ClientAccountSearch extends ClientAccount
         unset(
             $parentRules['ca_uuid_required'],
             $parentRules['ca_username_required'],
-            $parentRules['ca_hid_required']
+            $parentRules['ca_hid_required'],
+            $parentRules['ca_created_dt_format'],
+            $parentRules['ca_updated_dt_format']
         );
 
         $rules = [
