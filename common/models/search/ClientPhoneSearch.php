@@ -9,9 +9,9 @@ use common\models\ClientPhone;
 use yii\helpers\VarDumper;
 
 /**
- * ClentPhoneSearch represents the model behind the search form of `common\models\ClientPhone`.
+ * ClientPhoneSearch represents the model behind the search form of `common\models\ClientPhone`.
  */
-class ClentPhoneSearch extends ClientPhone
+class ClientPhoneSearch extends ClientPhone
 {
     /**
      * {@inheritdoc}
@@ -22,7 +22,7 @@ class ClentPhoneSearch extends ClientPhone
             [['id', 'client_id', 'is_sms', 'type'], 'integer'],
             [['phone', 'comments'], 'safe'],
             [['cp_title'], 'string', 'max' => 150],
-            [[ 'created', 'updated', 'validate_dt'], 'date', 'format' => 'php:Y-m-d'],
+            [[ 'created', 'validate_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -60,12 +60,13 @@ class ClentPhoneSearch extends ClientPhone
         $this->load($params);
 
         if (!$this->validate()) {
+            //var_dump(self::getErrors()); die();
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
         }
 
-        if ($this->created) {
+        /*if ($this->created) {
             $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
                 ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
         }
@@ -73,7 +74,7 @@ class ClentPhoneSearch extends ClientPhone
         if ($this->validate_dt) {
             $query->andFilterWhere(['>=', 'validate_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->validate_dt))])
                 ->andFilterWhere(['<=', 'validate_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->validate_dt) + 3600 * 24)]);
-        }
+        }*/
 
         if ($this->type >= 0) {
         	$query->andFilterWhere(['=', 'type', $this->type]);
@@ -83,10 +84,9 @@ class ClentPhoneSearch extends ClientPhone
         $query->andFilterWhere([
             'id' => $this->id,
             'client_id' => $this->client_id,
-            //'created' => $this->created,
-            //'updated' => $this->updated,
+            'DATE(created)' => $this->created,
             'is_sms' => $this->is_sms,
-            //'validate_dt' => $this->validate_dt,
+            'DATE(validate_dt)' => $this->validate_dt,
         ]);
 
         $query->andFilterWhere(['like', 'phone', $this->phone])
