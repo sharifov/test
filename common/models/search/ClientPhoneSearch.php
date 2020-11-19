@@ -66,7 +66,7 @@ class ClientPhoneSearch extends ClientPhone
             return $dataProvider;
         }
 
-        /*if ($this->created) {
+        if ($this->created) {
             $query->andFilterWhere(['>=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created))])
                 ->andFilterWhere(['<=', 'created', Employee::convertTimeFromUserDtToUTC(strtotime($this->created) + 3600 * 24)]);
         }
@@ -74,7 +74,7 @@ class ClientPhoneSearch extends ClientPhone
         if ($this->validate_dt) {
             $query->andFilterWhere(['>=', 'validate_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->validate_dt))])
                 ->andFilterWhere(['<=', 'validate_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->validate_dt) + 3600 * 24)]);
-        }*/
+        }
 
         if ($this->type >= 0) {
         	$query->andFilterWhere(['=', 'type', $this->type]);
@@ -84,9 +84,9 @@ class ClientPhoneSearch extends ClientPhone
         $query->andFilterWhere([
             'id' => $this->id,
             'client_id' => $this->client_id,
-            'DATE(created)' => $this->created,
+            //'DATE(created)' => $this->created,
             'is_sms' => $this->is_sms,
-            'DATE(validate_dt)' => $this->validate_dt,
+            //'DATE(validate_dt)' => $this->validate_dt,
         ]);
 
         $query->andFilterWhere(['like', 'phone', $this->phone])
