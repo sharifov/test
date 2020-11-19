@@ -637,45 +637,41 @@ class Lead extends ActiveRecord implements Objectable
      * @param int $clientId
      * @param int|null $projectId
      * @param int|null $sourceId
+     * @param int $departmentId
      * @return Lead
      */
     public static function createByIncomingEmail(
         string $clientEmail,
         int $clientId,
         ?int $projectId,
-        ?int $sourceId
+        ?int $sourceId,
+        int $departmentId
     ): self {
         $lead = self::create();
         $lead->l_client_email = $clientEmail;
         $lead->client_id = $clientId;
         $lead->project_id = $projectId;
         $lead->source_id = $sourceId;
-        $lead->l_dep_id = Department::DEPARTMENT_SALES;
+        $lead->l_dep_id = $departmentId;
         $lead->status = self::STATUS_PENDING;
         $lead->l_type_create = self::TYPE_CREATE_INCOMING_EMAIL;
         $lead->recordEvent(new LeadCreatedByIncomingEmailEvent($lead));
         return $lead;
     }
 
-    /**
-     * @param string $clientPhone
-     * @param int $clientId
-     * @param int|null $projectId
-     * @param int|null $sourceId
-     * @return Lead
-     */
     public static function createByIncomingSms(
         string $clientPhone,
         int $clientId,
         ?int $projectId,
-        ?int $sourceId
+        ?int $sourceId,
+        int $departmentId
     ): self {
         $lead = self::create();
         $lead->l_client_phone = $clientPhone;
         $lead->client_id = $clientId;
         $lead->project_id = $projectId;
         $lead->source_id = $sourceId;
-        $lead->l_dep_id = Department::DEPARTMENT_SALES;
+        $lead->l_dep_id = $departmentId;
         $lead->status = self::STATUS_PENDING;
         $lead->l_type_create = self::TYPE_CREATE_INCOMING_SMS;
         $lead->recordEvent(new LeadCreatedByIncomingSmsEvent($lead));
@@ -695,6 +691,7 @@ class Lead extends ActiveRecord implements Objectable
         $clientId,
         $projectId,
         $sourceId,
+        $departmentId,
         $gmt
     ): self {
         $lead = self::create();
@@ -703,7 +700,7 @@ class Lead extends ActiveRecord implements Objectable
         $lead->project_id = $projectId;
         $lead->source_id = $sourceId;
         $lead->offset_gmt = $gmt;
-        $lead->l_dep_id = Department::DEPARTMENT_SALES;
+        $lead->l_dep_id = $departmentId;
         $lead->status = self::STATUS_PENDING;
         $lead->l_type_create = self::TYPE_CREATE_INCOMING_CALL;
         $lead->l_call_status_id = self::CALL_STATUS_QUEUE;

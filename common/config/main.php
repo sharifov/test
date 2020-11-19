@@ -171,6 +171,12 @@ return [
             'authUsername' => '',
             'authPassword' => '',
         ],
+        'centrifugo' => [
+            'class'  => \sorokinmedia\centrifugo\Client::class,
+            'host'   => 'http://localhost:8000/api',
+            'secret' => '',
+            'apikey' => ''
+        ],
     ],
     'bootstrap' => [
         'queue_sms_job',

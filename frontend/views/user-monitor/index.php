@@ -2,16 +2,20 @@
 
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
+use sales\auth\Auth;
 use sales\model\user\entity\monitor\UserMonitor;
+use sales\services\cleaner\form\DbCleanerParamsForm;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 /* @var $this yii\web\View */
 /* @var $searchModel sales\model\user\entity\monitor\search\UserMonitorSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var DbCleanerParamsForm $modelCleaner */
 
 $this->title = 'User Monitors';
 $this->params['breadcrumbs'][] = $this->title;
+$pjaxListId = 'pjax-user-monitor';
 ?>
 <div class="user-monitor-index">
 
@@ -22,7 +26,16 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
     <?php echo $this->render('_search', ['model' => $searchModel]); ?>
 
-    <?php Pjax::begin(); ?>
+    <?php if (Auth::can('global/clean/table')): ?>
+        <div class="col-md-6" style="margin-left: -10px;">
+            <?php echo $this->render('../clean/_clean_table_form', [
+                'modelCleaner' => $modelCleaner,
+                'pjaxIdForReload' => $pjaxListId,
+            ]); ?>
+        </div>
+    <?php endif ?>
+
+    <?php Pjax::begin(['id' => $pjaxListId]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,

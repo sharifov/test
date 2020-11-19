@@ -204,6 +204,11 @@ use yii\helpers\VarDumper;
 
                 <?php endif; ?>
             </td>
+            <?php if (Auth::can('call/assignUsers', ['call' => $model])): ?>
+                <td>
+                    <button class="btn btn-success add_users_btn" data-call-id="<?= $model->c_id?>"><i class="fa fa-plus"> </i> add users </button>
+                </td>
+            <?php endif;?>
             <td>
                 <?php getJoinTemplate($model); ?>
             </td>

@@ -393,6 +393,7 @@ ORDER BY lf.lead_id, id';
      */
     public function actionClearUserSiteActivityLogs(): void
     {
+        /* TODO:: remove this action */
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
         $count = UserSiteActivity::clearHistoryLogs();
         echo 'Removed: ' . $count;
@@ -537,7 +538,7 @@ ORDER BY lf.lead_id, id';
         $resultInfo = 'Processed: ' . $processed .
             ', Execute Time: ' . number_format(round(microtime(true) - $timeStart, 2), 2);
 
-        Yii::info($resultInfo , 'info\:' . self::class . ':' . $this->action->id);
+        Yii::info($resultInfo, 'info\DbController:actionCompressEmail');
         $this->printInfo($resultInfo, $this->action->id);
     }
 

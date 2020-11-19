@@ -1,5 +1,7 @@
 <?php
 
+use sales\auth\Auth;
+use sales\services\cleaner\form\DbCleanerParamsForm;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\StringHelper;
@@ -10,14 +12,16 @@ use common\components\grid\DateTimeColumn;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\ApiLogSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var DbCleanerParamsForm $modelCleaner */
 
 $this->title = 'Api Logs';
 $this->params['breadcrumbs'][] = $this->title;
+$pjaxListId = 'pjax-api-log';
 ?>
 <div class="api-log-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-    <?php Pjax::begin(); ?>
+
     <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <p>
@@ -30,6 +34,17 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ]) ?>
     </p>
+
+    <?php if (Auth::can('global/clean/table')): ?>
+        <div class="col-md-6" style="margin-left: -10px;">
+            <?php echo $this->render('../clean/_clean_table_form', [
+                'modelCleaner' => $modelCleaner,
+                'pjaxIdForReload' => $pjaxListId,
+            ]); ?>
+        </div>
+    <?php endif ?>
+
+    <?php Pjax::begin(['id' => $pjaxListId]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,

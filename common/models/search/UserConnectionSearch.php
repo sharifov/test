@@ -4,6 +4,7 @@ namespace common\models\search;
 
 use common\models\Department;
 use common\models\Employee;
+use common\models\ProjectEmployeeAccess;
 use common\models\UserDepartment;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -17,6 +18,7 @@ use yii\db\Query;
  *
  * @property int $dep_id
  * @property array $ug_ids
+ * @property array $project_ids
  */
 class UserConnectionSearch extends UserConnection
 {
@@ -29,6 +31,8 @@ class UserConnectionSearch extends UserConnection
      */
     public $ug_ids = [];
 
+    public $project_ids = [];
+
     /**
      * {@inheritdoc}
      */
@@ -36,9 +40,10 @@ class UserConnectionSearch extends UserConnection
     {
         return [
             [['uc_id', 'uc_connection_id', 'uc_user_id', 'uc_lead_id', 'uc_case_id', 'dep_id', 'uc_window_state', 'uc_idle_state'], 'integer'],
-            [['uc_user_agent', 'uc_controller_id', 'uc_action_id', 'uc_page_url', 'uc_ip', 'uc_connection_uid', 'uc_app_instance', 'uc_sub_list', '', ''], 'safe'],
+            [['uc_user_agent', 'uc_controller_id', 'uc_action_id', 'uc_page_url', 'uc_ip', 'uc_connection_uid', 'uc_app_instance', 'uc_sub_list'], 'safe'],
             ['ug_ids', 'each', 'rule' => ['integer']],
             [['uc_window_state_dt', 'uc_idle_state_dt', 'uc_created_dt'], 'date', 'format' => 'php:Y-m-d'],
+            ['project_ids', 'each', 'rule' => ['integer']],
         ];
     }
 
@@ -140,8 +145,7 @@ class UserConnectionSearch extends UserConnection
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+             $query->where('0=1');
             return $dataProvider;
         }
 
@@ -153,12 +157,64 @@ class UserConnectionSearch extends UserConnection
             $subQuery = UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['ud_dep_id' => $this->dep_id]);
             $query->andWhere(['IN', 'uc_user_id', $subQuery]);
         } elseif ($this->dep_id === 0) {
-            $subQuery = UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['ud_dep_id' => [Department::DEPARTMENT_SALES, Department::DEPARTMENT_EXCHANGE, Department::DEPARTMENT_SUPPORT]]);
+            $subQuery = UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['ud_dep_id' => array_keys(Department::DEPARTMENT_LIST)]);
             $query->andWhere(['NOT IN', 'uc_user_id', $subQuery]);
         }
 
         if ($this->ug_ids) {
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['ugs_group_id' => $this->ug_ids]);
+            $query->andWhere(['IN', 'uc_user_id', $subQuery]);
+        }
+
+        $query->cache(5);
+        //$query->with(['ucUser']);
+
+        return $dataProvider;
+    }
+
+    /**
+     * @param $params
+     * @return ActiveDataProvider
+     */
+    public function searchUsersByCallMap($params): ActiveDataProvider
+    {
+        $query = UserConnection::find();
+
+        // add conditions that should always apply here
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => [
+                'pageSize' => 100,
+            ],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+             $query->where('0=1');
+            return $dataProvider;
+        }
+
+
+        $query->select(['uc_user_id']); //'cnt' => 'COUNT(*)',
+        $query->groupBy(['uc_user_id']);
+
+        if ($this->dep_id > 0) {
+            $subQuery = UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['ud_dep_id' => $this->dep_id]);
+            $query->andWhere(['IN', 'uc_user_id', $subQuery]);
+        } elseif ($this->dep_id === 0) {
+            $subQuery = UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['ud_dep_id' => array_keys(Department::DEPARTMENT_LIST)]);
+            $query->andWhere(['NOT IN', 'uc_user_id', $subQuery]);
+        }
+
+        if ($this->ug_ids) {
+            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['ugs_group_id' => $this->ug_ids]);
+            $query->andWhere(['IN', 'uc_user_id', $subQuery]);
+        }
+
+        if ($this->project_ids) {
+            $subQuery = ProjectEmployeeAccess::find()->select(['DISTINCT(employee_id)'])->where(['project_id' => $this->project_ids]);
             $query->andWhere(['IN', 'uc_user_id', $subQuery]);
         }
 
@@ -186,7 +242,7 @@ class UserConnectionSearch extends UserConnection
             $subQuery = UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['ud_dep_id' => $this->dep_id]);
             $query->andWhere(['IN', 'uc_user_id', $subQuery]);
         } elseif ($this->dep_id === 0) {
-            $subQuery = UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['ud_dep_id' => [Department::DEPARTMENT_SALES, Department::DEPARTMENT_EXCHANGE, Department::DEPARTMENT_SUPPORT]]);
+            $subQuery = UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['ud_dep_id' => array_keys(Department::DEPARTMENT_LIST)]);
             $query->andWhere(['NOT IN', 'uc_user_id', $subQuery]);
         }
 

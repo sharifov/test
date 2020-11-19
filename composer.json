@@ -16,7 +16,8 @@
 		"irc" : "irc://irc.freenode.net/yii",
 		"source" : "https://github.com/yiisoft/yii2"
 	},
-	"minimum-stability" : "stable",
+	"minimum-stability" : "dev",
+	"prefer-stable": true,
 	"require" : {
 		"php" : ">=7.4",
 		"yiisoft/yii2" : "~2.0.24",
@@ -73,13 +74,12 @@
 		"kivork/yii2-rbac-export-import": "@dev",
 		"2amigos/2fa-library": "^2.0",
 		"yiisoft/yii2-redis": "~2.0.0",
-		"centrifugal/phpcent": "~3.0",
 		"kivork/yii2-bootstrap4-glyphicons": "*",
 		"2amigos/yii2-multi-select-widget": "*",
 		"kivork/yii2-mattermost-log-target": "@dev",
         "kivork/yii2-virtual-cron": "@dev",
         "kivork/yii2-prometheus-client": "@dev",
-		"promphp/prometheus_client_php": "^2.1"
+		"sorokinmedia/yii2-centrifugo": "*"
 	},
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.1",

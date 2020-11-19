@@ -3,6 +3,7 @@
 namespace sales\services\email\incoming;
 
 use common\models\Client;
+use common\models\Department;
 use common\models\Sources;
 use sales\services\cases\CasesSaleService;
 use sales\services\client\ClientCreateForm;
@@ -15,7 +16,6 @@ use sales\forms\lead\EmailCreateForm;
 use sales\services\cases\CasesCreateService;
 use sales\services\client\ClientManageService;
 use sales\services\internalContact\InternalContactService;
-use yii\helpers\VarDumper;
 
 /**
  * Class EmailIncomingService
@@ -43,8 +43,7 @@ class EmailIncomingService
         LeadManageService $leadManageService,
         TransactionManager $transactionManager,
         CasesSaleService $casesSaleService
-    )
-    {
+    ) {
         $this->casesCreateService = $casesCreateService;
         $this->clientManageService = $clientManageService;
         $this->internalContactService = $internalContactService;
@@ -66,11 +65,9 @@ class EmailIncomingService
         string $clientEmail,
         string $internalEmail,
         ?int $incomingProject
-    ): Process
-    {
+    ): Process {
         /** @var Process $process */
         $process = $this->transactionManager->wrap(function () use ($clientEmail, $internalEmail, $incomingProject, $emailId) {
-
             $contact = $this->internalContactService->findByEmail($internalEmail, $incomingProject);
 
             if (!$contact->projectId) {
@@ -83,33 +80,37 @@ class EmailIncomingService
 
             $client = $this->clientManageService->getOrCreateByEmails([new EmailCreateForm(['email' => $clientEmail])], $clientForm);
 
-            if ($department = $contact->department) {
-                if ($department->isSales()) {
+            if ($contact->department && ($departmentParams = $contact->department->getParams())) {
+                if ($departmentParams->object->type->isLead()) {
                     $leadId = $this->getOrCreateLead(
                         $client->id,
                         $clientEmail,
                         $contact->projectId,
                         $internalEmail,
-                        $emailId
+                        $emailId,
+                        $contact->department->dep_id,
+                        $departmentParams->object->lead->createOnEmail
                     );
-                    $contact->releaseLog('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . ' | ', 'EmailIncomingService' );
+                    $contact->releaseLog('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . ' | ', 'EmailIncomingService');
                     return new Process($leadId, null);
                 }
-                if ($department->isExchange()) {
-                    $caseId = $this->getOrCreateCaseByExchange($client->id, $contact->projectId, $internalEmail, $emailId);
 
-                    $contact->releaseLog('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . ' | ', 'EmailIncomingService' );
-                    return new Process(null, $caseId);
-                }
-                if ($department->isSupport()) {
-                    $caseId = $this->getOrCreateCaseBySupport($client->id, $contact->projectId, $internalEmail, $emailId);
-
-                    $contact->releaseLog('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . ' | ', 'EmailIncomingService' );
+                if ($departmentParams->object->type->isCase()) {
+                    $caseId = $this->getOrCreateCase(
+                        $client->id,
+                        $contact->projectId,
+                        $internalEmail,
+                        $emailId,
+                        $contact->department->dep_id,
+                        $departmentParams->object->case->createOnEmail,
+                        $departmentParams->object->case->trashActiveDaysLimit,
+                    );
+                    $contact->releaseLog('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . ' | ', 'EmailIncomingService');
                     return new Process(null, $caseId);
                 }
             }
 
-            $contact->releaseLog('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . ' | ', 'EmailIncomingService' );
+            $contact->releaseLog('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . ' | ', 'EmailIncomingService');
             Yii::error('Incoming email. Created Email Id: ' . $emailId . ' | Not found Department for email: ' . $internalEmail, 'EmailIncomingService');
             $process = $this->getOrCreateByDefault($client->id, $contact->projectId, $internalEmail, $emailId);
 
@@ -125,101 +126,99 @@ class EmailIncomingService
      * @param int|null $projectId
      * @param string $internalEmail
      * @param int $emailId
+     * @param int $departmentId
+     * @param bool $createLeadOnEmail
      * @return int|null
      */
-    private function getOrCreateLead(int $clientId, string $clientEmail, ?int $projectId, string $internalEmail, int $emailId): ?int
-    {
-        if ($lead = Lead::find()->findLastActiveSalesLeadByClient($clientId, $projectId)->one()) {
+    private function getOrCreateLead(
+        int $clientId,
+        string $clientEmail,
+        ?int $projectId,
+        string $internalEmail,
+        int $emailId,
+        int $departmentId,
+        bool $createLeadOnEmail
+    ): ?int {
+        if ($lead = Lead::find()->findLastActiveLeadByDepartmentClient($departmentId, $clientId, $projectId)->one()) {
             return $lead->id;
         }
-        if ((bool)Yii::$app->params['settings']['create_new_lead_email']) {
+        if ($createLeadOnEmail) {
             $lead = $this->leadManageService->createByIncomingEmail(
                 $clientEmail,
                 $clientId,
                 $projectId,
-                $this->findSource($projectId)
+                $this->findSource($projectId),
+                $departmentId
             );
             return $lead->id;
         }
-        if ($lead = Lead::find()->findLastSalesLeadByClient($clientId, $projectId)->one()) {
+        if ($lead = Lead::find()->findLastLeadByDepartmentClient($departmentId, $clientId, $projectId)->one()) {
             return $lead->id;
         }
 //        Yii::info('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . '. | No new lead creation allowed on email.', 'info\EmailIncomingService');
         return null;
     }
 
-    /**
-     * @param int $clientId
-     * @param int|null $projectId
-     * @param string $internalEmail
-     * @param int $emailId
-     * @return int|null
-     */
-    private function getOrCreateCaseByExchange(int $clientId, ?int $projectId, string $internalEmail, int $emailId): ?int
-    {
-        if ($case = Cases::find()->findLastActiveExchangeCaseByClient($clientId, $projectId)->one()) {
+    private function getOrCreateCase(
+        int $clientId,
+        ?int $projectId,
+        string $internalEmail,
+        int $emailId,
+        int $departmentId,
+        bool $createCaseOnEmail,
+        int $trashActiveDaysLimit
+    ): ?int {
+        if ($case = Cases::find()->findLastActiveClientCaseByDepartment($departmentId, $clientId, $projectId, $trashActiveDaysLimit)->one()) {
             return $case->cs_id;
         }
-        if ((bool)Yii::$app->params['settings']['create_new_exchange_case_email']) {
-            $case = $this->casesCreateService->createExchangeByIncomingEmail($clientId, $projectId);
+        if ($createCaseOnEmail) {
+            $case = $this->casesCreateService->createByDepartmentIncomingEmail($departmentId, $clientId, $projectId);
             return $case->cs_id;
         }
-        if ($case = Cases::find()->findLastExchangeCaseByClient($clientId, $projectId)->one()) {
+        if ($case = Cases::find()->findLastClientCaseByDepartment($departmentId, $clientId, $projectId)->one()) {
             return $case->cs_id;
         }
 //        Yii::info('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . '. | No new exchange case creation allowed on Email.', 'info\EmailIncomingService');
         return null;
     }
 
-    /**
-     * @param int $clientId
-     * @param int|null $projectId
-     * @param string $internalEmail
-     * @param int $emailId
-     * @return int|null
-     */
-    private function getOrCreateCaseBySupport(int $clientId, ?int $projectId, string $internalEmail, int $emailId): ?int
-    {
-        if ($case = Cases::find()->findLastActiveSupportCaseByClient($clientId, $projectId)->one()) {
-            return $case->cs_id;
-        }
-        if ((bool)Yii::$app->params['settings']['create_new_support_case_email']) {
-            $case = $this->casesCreateService->createSupportByIncomingEmail($clientId, $projectId);
-            return $case->cs_id;
-        }
-        if ($case = Cases::find()->findLastSupportCaseByClient($clientId, $projectId)->one()) {
-            return $case->cs_id;
-        }
-//        Yii::info('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . '. | No new support case creation allowed on Email.', 'info\EmailIncomingService');
-        return null;
-    }
-
-    /**
-     * @param int $clientId
-     * @param int|null $projectId
-     * @param string $internalEmail
-     * @param int $emailId
-     * @return Process
-     */
-    private function getOrCreateByDefault(int $clientId, ?int $projectId, string $internalEmail, int $emailId): Process
-    {
+    private function getOrCreateByDefault(
+        int $clientId,
+        ?int $projectId,
+        string $internalEmail,
+        int $emailId
+    ): Process {
         $leadId = null;
         $caseId = null;
         if ($lead = Lead::find()->findLastActiveSalesLeadByClient($clientId, $projectId)->one()) {
             $leadId = $lead->id;
-        } elseif ($case = Cases::find()->findLastActiveSupportCaseByClient($clientId, $projectId)->one()) {
-            $caseId = $case->cs_id;
-        } elseif ($case = Cases::find()->findLastActiveExchangeCaseByClient($clientId, $projectId)->one()) {
-            $caseId = $case->cs_id;
         } else {
-            if ((bool)Yii::$app->params['settings']['create_case_only_department_email'] === false) {
-                $case = $this->casesCreateService->createSupportByIncomingEmail($clientId, $projectId);
-                return new Process(null, $case->cs_id);
+            $department = Department::find()->andWhere(['dep_id' => Department::DEPARTMENT_SUPPORT])->one();
+            if (
+                $department
+                && ($departmentParams = $department->getParams())
+                && $case = Cases::find()->findLastActiveClientCaseByDepartment($department->dep_id, $clientId, $projectId, $departmentParams->object->case->trashActiveDaysLimit)->one()
+            ) {
+                $caseId = $case->cs_id;
+            } else {
+                $department = Department::find()->andWhere(['dep_id' => Department::DEPARTMENT_EXCHANGE])->one();
+                if (
+                    $department
+                    && ($departmentParams = $department->getParams())
+                    && $case = Cases::find()->findLastActiveClientCaseByDepartment($department->dep_id, $clientId, $projectId, $departmentParams->object->case->trashActiveDaysLimit)->one()
+                ) {
+                    $caseId = $case->cs_id;
+                } else {
+                    if ((bool)Yii::$app->params['settings']['create_case_only_department_email'] === false) {
+                        $case = $this->casesCreateService->createByDepartmentIncomingEmail(Department::DEPARTMENT_SUPPORT, $clientId, $projectId);
+                        return new Process($leadId, $case->cs_id);
+                    }
+                    if ($case = Cases::find()->findLastClientCaseByDepartment(Department::DEPARTMENT_SUPPORT, $clientId, $projectId)->one()) {
+                        return new Process($leadId, $case->cs_id);
+                    }
+//                    Yii::info('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . '. | No new support case creation allowed on Email.', 'info\EmailIncomingService');
+                }
             }
-            if ($case = Cases::find()->findLastSupportCaseByClient($clientId, $projectId)->one()) {
-                return $case->cs_id;
-            }
-//            Yii::info('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . '. | No new support case creation allowed on Email.', 'info\EmailIncomingService');
         }
 
         return new Process($leadId, $caseId);

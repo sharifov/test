@@ -13,7 +13,7 @@ use common\models\Sms;
  * @property string|null $userPhone
  * @property string|null $text
  */
-class SmsCreatedByIncomingSupportsEvent
+class IncomingSmsCreatedByCaseTypeEvent
 {
     public $sms;
     public $caseId;
@@ -21,13 +21,6 @@ class SmsCreatedByIncomingSupportsEvent
     public $userPhone;
     public $text;
 
-    /**
-     * @param Sms $sms
-     * @param int|null $caseId
-     * @param string|null $clientPhone
-     * @param string|null $userPhone
-     * @param string|null $text
-     */
     public function __construct(Sms $sms, ?int $caseId, ?string $clientPhone, ?string $userPhone, ?string $text)
     {
         $this->sms = $sms;

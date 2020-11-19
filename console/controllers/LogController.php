@@ -40,33 +40,32 @@ class LogController extends Controller
      * @param array $config
      */
     public function __construct($id, $module, OutputHelper $outputHelper, $config = [])
-	{
-		parent::__construct($id, $module, $config);
-		$this->outputHelper = $outputHelper;
-		$this->setSettings();
-	}
+    {
+        parent::__construct($id, $module, $config);
+        $this->outputHelper = $outputHelper;
+        $this->setSettings();
+    }
 
     /**
      * @param int|null $days
      * @param int|null $limit
      */
     public function actionCleaner(?int $days = null, ?int $limit = null): void
-	{
-	    $infoMessage = '';
-	    $timeStart = microtime(true);
-	    $days = $days ?? $this->logCleanerParams['days'];
-	    $limit = $limit ?? $this->logCleanerParams['limit'];
-	    $point = $this->shortClassName . ':' .$this->action->id;
-	    
-	    if (!$this->logCleanerEnable) {
+    {
+        $infoMessage = '';
+        $timeStart = microtime(true);
+        $days = $days ?? $this->logCleanerParams['days'];
+        $limit = $limit ?? $this->logCleanerParams['limit'];
+        $point = $this->shortClassName . ':' .$this->action->id;
+        
+        if (!$this->logCleanerEnable) {
             $this->outputHelper->printInfo('Cleaner is disable. ', $point, Console::FG_RED);
-	        return;
-	    }
+            return;
+        }
 
         $this->outputHelper->printInfo('Start. ', $point);
 
         foreach ($this->cleanerCollection as $table => $params) {
-
             $result = $this->baseCleaner($days, $limit, $params['prepareSql'], $params['deleteSql'], $table);
 
             $message = '"' . $table . '" - Processed: ' . $result['processed'] . ' ExecutionTime: ' . $result['executionTime'];
@@ -78,8 +77,8 @@ class LogController extends Controller
 
         $resultInfo = 'Total execution time: ' . number_format(round(microtime(true) - $timeStart, 2), 2);
         $this->outputHelper->printInfo($resultInfo, $point);
-        Yii::info($infoMessage . $resultInfo,'info\LogController:done');
-	}
+        Yii::info($infoMessage . $resultInfo, 'info\LogController:done');
+    }
 
     /**
      * @param int $days
@@ -105,8 +104,10 @@ class LogController extends Controller
                 ->bindValue(':days', $days)
                 ->queryOne();
         } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableFormatter($throwable),
-            $this->shortClassName . ':' . $tableName . ':FailedPrepareInfo');
+            Yii::error(
+                AppHelper::throwableFormatter($throwable),
+                $this->shortClassName . ':' . $tableName . ':FailedPrepareInfo'
+            );
             $result['status'] = -1;
             $result['executionTime'] = number_format(round(microtime(true) - $timeStart, 2), 2);
             return $result;
@@ -121,8 +122,10 @@ class LogController extends Controller
                             ->execute();
             } catch (\Throwable $throwable) {
                 $result['status'] = 0;
-                Yii::error(AppHelper::throwableFormatter($throwable),
-            $this->shortClassName. ':' . $tableName . ':FailedDelete');
+                Yii::error(
+                    AppHelper::throwableFormatter($throwable),
+                    $this->shortClassName. ':' . $tableName . ':FailedDelete'
+                );
             }
         }
 
@@ -140,20 +143,20 @@ class LogController extends Controller
         $this->shortClassName = OutputHelper::getShortClassName(self::class);
 
         $settings = Yii::$app->params['settings'];
-		$this->logCleanerEnable = $settings['console_log_cleaner_enable'] ?? false;
+        $this->logCleanerEnable = $settings['console_log_cleaner_enable'] ?? false;
 
-		try {
-		    $this->logCleanerParams = [
-		        'days' => $settings['console_log_cleaner_params']['days'],
-		        'limit' => $settings['console_log_cleaner_params']['limit'],
+        try {
+            $this->logCleanerParams = [
+                'days' => $settings['console_log_cleaner_params']['days'],
+                'limit' => $settings['console_log_cleaner_params']['limit'],
             ];
-		} catch (\Throwable $throwable) {
-		   $this->logCleanerParams = [
-		        'days' => $this->defaultDays,
-		        'limit' => $this->defaultLimit,
+        } catch (\Throwable $throwable) {
+            $this->logCleanerParams = [
+                'days' => $this->defaultDays,
+                'limit' => $this->defaultLimit,
            ];
-           Yii::error(AppHelper::throwableFormatter($throwable),$this->shortClassName. ':' . __FUNCTION__ . ':Failed');
-		}
+            Yii::error(AppHelper::throwableFormatter($throwable), $this->shortClassName. ':' . __FUNCTION__ . ':Failed');
+        }
 
         $this->cleanerCollection[GlobalLog::tableName()] =
             [
@@ -175,5 +178,5 @@ class LogController extends Controller
             ];
 
         return $this;
-    }    
+    }
 }

@@ -15,39 +15,36 @@ use yii\base\InvalidConfigException;
 class CentrifugoNotificationWidget extends Widget
 {
     public $userId;
+    public string $widgetView;
     public $userAllowedChannels;
     private $centrifugoUrl;
-    private $tokenHmacSecretKey;
 
     public function init()
     {
         parent::init();
-        $this->centrifugoUrl = Yii::$app->params['centrifugo']['jsClientUrl'];
-        $this->tokenHmacSecretKey = Yii::$app->params['centrifugo']['tokenHmacSecretKey'];
+        $this->centrifugoUrl = Yii::$app->params['centrifugo']['wsConnectionUrl'];
 
         if ($this->userId === null) {
             throw new InvalidConfigException('The "userId" property must be set.');
         }
 
         if ($this->centrifugoUrl === null || $this->centrifugoUrl === '') {
-            throw new InvalidConfigException('The "jsClientUrl" property must be set in system params.');
+            throw new InvalidConfigException('The "wsConnectionUrl" property must be set in system params.');
         }
 
-        if ($this->tokenHmacSecretKey === null || $this->tokenHmacSecretKey === '') {
-            throw new InvalidConfigException('The "tokenHmacSecretKey" property must be set in system params.');
+        if ($this->widgetView === null || $this->widgetView === '') {
+            throw new InvalidConfigException('The "widgetView" property must be set in widget params.');
         }
     }
 
     public function run()
     {
         $this->registerAssets();
-        $client = new Client($this->centrifugoUrl);
-        $token = $client->setSecret($this->tokenHmacSecretKey)->generateConnectionToken('',  '');
 
-        return $this->render('index',[
+        return $this->render($this->widgetView, [
             'channels' => $this->userAllowedChannels,
             'centrifugoUrl' => $this->centrifugoUrl,
-            'token' => $token
+            'token' => Yii::$app->centrifugo->generateConnectionToken($this->userId)
         ]);
     }
 
@@ -56,7 +53,7 @@ class CentrifugoNotificationWidget extends Widget
      */
     protected function registerAssets()
     {
-        $view = $this->getView(); // получаем объект вида, в который рендерится виджет
-        CentrifugoNotificationAssets::register($view);// регестрируем файл с классом наборов css, js.
+        $view = $this->getView();
+        CentrifugoNotificationAssets::register($view);
     }
 }

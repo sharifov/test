@@ -2,7 +2,6 @@
 
 namespace sales\model\clientChatRequest\useCase\api\create;
 
-use common\components\CentrifugoService;
 use common\components\purifier\Purifier;
 use common\models\Notifications;
 use frontend\widgets\notification\NotificationMessage;
@@ -450,14 +449,14 @@ class ClientChatRequestService
         $data['chat_id'] = $message->ccm_cch_id;
         $data['client_id'] = $message->ccm_client_id;
         $data['user_id'] = $message->ccm_user_id;
-        $data['sent_dt'] = \Yii::$app->formatter->asDatetime(strtotime($message->ccm_sent_dt), 'php: Y-m-d H:i:s');
-        $data['period'] = \Yii::$app->formatter->asRelativeTime(strtotime($message->ccm_sent_dt));
+        $data['sent_dt'] = Yii::$app->formatter->asDatetime(strtotime($message->ccm_sent_dt), 'php: Y-m-d H:i:s');
+        $data['period'] = Yii::$app->formatter->asRelativeTime(strtotime($message->ccm_sent_dt));
         $data['msg'] = $message->message;
 
         try {
-            CentrifugoService::sendMsg(json_encode([
+            Yii::$app->centrifugo->setSafety(false)->publish('realtimeClientChatChannel', ['message' => json_encode([
                 'chatMessageData' => $data,
-            ]), 'realtimeClientChatChannel');
+            ])]);
         } catch (\Throwable $throwable) {
             Yii::error(
                 VarDumper::dumpAsString($throwable),

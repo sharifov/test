@@ -2,6 +2,8 @@
 
 namespace frontend\controllers;
 
+use sales\services\cleaner\form\DbCleanerParamsForm;
+use sales\services\cleaner\cleaners\UserMonitorCleaner;
 use Yii;
 use sales\model\user\entity\monitor\UserMonitor;
 use sales\model\user\entity\monitor\search\UserMonitorSearch;
@@ -47,9 +49,15 @@ class UserMonitorController extends FController
         $searchModel = new UserMonitorSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
+        $userMonitorCleaner = new UserMonitorCleaner();
+        $dbCleanerParamsForm = (new DbCleanerParamsForm())
+            ->setTable($userMonitorCleaner->getTable())
+            ->setColumn($userMonitorCleaner->getColumn());
+
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'modelCleaner' => $dbCleanerParamsForm,
         ]);
     }
 

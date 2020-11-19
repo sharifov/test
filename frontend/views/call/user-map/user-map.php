@@ -5,6 +5,7 @@ use common\models\ConferenceParticipant;
 use common\models\Department;
 use common\models\search\CallSearch;
 use sales\auth\Auth;
+use yii\bootstrap4\Modal;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -14,15 +15,15 @@ use yii\widgets\ActiveForm;
 use \common\models\CallUserAccess;
 
 /* @var $this yii\web\View */
-/* @var $searchModel common\models\search\EmployeeSearch */
 
-/* @var $dataProviderOnlineDep1 yii\data\ActiveDataProvider */
-/* @var $dataProviderOnlineDep2 yii\data\ActiveDataProvider */
-/* @var $dataProviderOnlineDep3 yii\data\ActiveDataProvider */
-/* @var $dataProviderOnline yii\data\ActiveDataProvider */
+/* @var $salesOnline yii\data\ActiveDataProvider */
+/* @var $exchangeOnline yii\data\ActiveDataProvider */
+/* @var $supportOnline yii\data\ActiveDataProvider */
+/* @var $scheduleChangeOnline yii\data\ActiveDataProvider */
+/* @var $withoutDepartmentOnline yii\data\ActiveDataProvider */
 
-/* @var $dataProvider2 yii\data\ActiveDataProvider */
-/* @var $dataProvider3 yii\data\ActiveDataProvider */
+/* @var $historyCalls yii\data\ActiveDataProvider */
+/* @var $activeCalls yii\data\ActiveDataProvider */
 /* @var $form yii\widgets\ActiveForm */
 
 $this->title = 'User Call Map';
@@ -307,15 +308,12 @@ function getJoinTemplate($model)
             <div class="col-md-2">
                 <?php /*<h1><i class="fa fa-bar-chart"></i> <?=$this->title?></h1>*/?>
 
-
-
-
-                <?php if($dataProviderOnlineDep1):?>
+                <?php if ($salesOnline): ?>
                 <div class="card card-default" style="margin-bottom: 20px;">
-                    <div class="card-header"><i class="fa fa-users"></i> OnLine - Department SALES (<?=$dataProviderOnlineDep1->totalCount?>)</div>
+                    <div class="card-header"><i class="fa fa-users"> </i> OnLine - Department SALES (<?= $salesOnline->totalCount?>)</div>
                     <div class="card-body">
                         <?= \yii\widgets\ListView::widget([
-                            'dataProvider' => $dataProviderOnlineDep1,
+                            'dataProvider' => $salesOnline,
                             'emptyText' => '<div class="text-center">Not found online users</div><br>',
                             'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
                             'itemView' => function ($model, $key, $index, $widget) {
@@ -330,13 +328,12 @@ function getJoinTemplate($model)
                 </div>
                 <?php endif;?>
 
-
-                <?php if($dataProviderOnlineDep2):?>
+                <?php if ($exchangeOnline): ?>
                 <div class="card card-default" style="margin-bottom: 20px;">
-                    <div class="card-header"><i class="fa fa-users"></i> OnLine - Department EXCHANGE (<?=$dataProviderOnlineDep2->totalCount?>)</div>
+                    <div class="card-header"><i class="fa fa-users"></i> OnLine - Department EXCHANGE (<?= $exchangeOnline->totalCount?>)</div>
                     <div class="card-body">
                         <?= \yii\widgets\ListView::widget([
-                            'dataProvider' => $dataProviderOnlineDep2,
+                            'dataProvider' => $exchangeOnline,
                             'emptyText' => '<div class="text-center">Not found online users</div><br>',
                             'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
                             'itemView' => function ($model, $key, $index, $widget) {
@@ -351,12 +348,12 @@ function getJoinTemplate($model)
                 </div>
                 <?php endif;?>
 
-                <?php if($dataProviderOnlineDep3):?>
+                <?php if ($supportOnline): ?>
                 <div class="card card-default" style="margin-bottom: 20px;">
-                    <div class="card-header"><i class="fa fa-users"></i> OnLine - Department SUPPORT (<?=$dataProviderOnlineDep3->totalCount?>)</div>
+                    <div class="card-header"><i class="fa fa-users"></i> OnLine - Department SUPPORT (<?= $supportOnline->totalCount ?>)</div>
                     <div class="card-body">
                         <?= \yii\widgets\ListView::widget([
-                            'dataProvider' => $dataProviderOnlineDep3,
+                            'dataProvider' => $supportOnline,
                             'emptyText' => '<div class="text-center">Not found online users</div><br>',
                             'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
                             'itemView' => function ($model, $key, $index, $widget) {
@@ -371,12 +368,32 @@ function getJoinTemplate($model)
                 </div>
                 <?php endif;?>
 
-                <?php if($dataProviderOnline):?>
+                <?php if ($scheduleChangeOnline): ?>
                 <div class="card card-default" style="margin-bottom: 20px;">
-<!--                    <div class="card-header"><i class="fa fa-users"></i> OnLine Users - W/O Department (--><?php //=$dataProviderOnline->totalCount?><!--)</div>-->
+                    <div class="card-header"><i class="fa fa-users"></i> OnLine - Department Schedule Change (<?= $scheduleChangeOnline->totalCount ?>)</div>
                     <div class="card-body">
                         <?= \yii\widgets\ListView::widget([
-                            'dataProvider' => $dataProviderOnline,
+                            'dataProvider' => $scheduleChangeOnline,
+                            'emptyText' => '<div class="text-center">Not found online users</div><br>',
+                            'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
+                            'itemView' => function ($model, $key, $index, $widget) {
+                                return $this->render('_list_item_online', ['model' => $model, 'index' => $index]);
+                            },
+                            'itemOptions' => [
+                                //'class' => 'item',
+                                //'tag' => false,
+                            ],
+                        ])?>
+                    </div>
+                </div>
+                <?php endif;?>
+
+                <?php if ($withoutDepartmentOnline): ?>
+                <div class="card card-default" style="margin-bottom: 20px;">
+<!--                    <div class="card-header"><i class="fa fa-users"></i> OnLine Users - W/O Department (--><?php //=$withoutDepartmentOnline->totalCount?><!--)</div>-->
+                    <div class="card-body">
+                        <?= \yii\widgets\ListView::widget([
+                            'dataProvider' => $withoutDepartmentOnline,
                             'emptyText' => '<div class="text-center">Not found online users</div><br>',
                             'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
                             'itemView' => function ($model, $key, $index, $widget) {
@@ -399,7 +416,7 @@ function getJoinTemplate($model)
                     <div class="card-header"><i class="fa fa-list"></i> Calls in IVR, DELAY, QUEUE, RINGING, PROGRESS (Updated: <i class="fa fa-clock-o"></i> <?= Yii::$app->formatter->asTime(time(), 'php:H:i:s') ?>)</div>
                     <div class="card-body">
                         <?= \yii\widgets\ListView::widget([
-                            'dataProvider' => $dataProvider3,
+                            'dataProvider' => $activeCalls,
                             'emptyText' => '<div class="text-center">Not found calls</div><br>',
                             'layout' => "{items}<div class=\"text-center\">{pager}</div>\n", //{summary}\n
                             'itemView' => function ($model, $key, $index, $widget) {
@@ -417,10 +434,10 @@ function getJoinTemplate($model)
             <div class="col-md-5">
                 <?php /*<h1><i class="fa fa-bar-chart"></i> <?=$this->title?></h1>*/?>
                 <div class="card card-default">
-                    <div class="card-header"><i class="fa fa-list"></i> Last <?=$dataProvider2->count?> ended Calls</div>
+                    <div class="card-header"><i class="fa fa-list"></i> Last <?= $historyCalls->count ?> ended Calls</div>
                     <div class="card-body">
                         <?= \yii\widgets\ListView::widget([
-                            'dataProvider' => $dataProvider2,
+                            'dataProvider' => $historyCalls,
 
                             /*'options' => [
                                 'tag' => 'div',
@@ -504,6 +521,28 @@ $js = <<<JS
       setTimeout(runTimerRefresh, 30000);
     }, 30000);*/
 
+    $(document).on('click', '.add_users_btn', function (e) {
+        e.preventDefault();
+        let callId = $(this).data('call-id');
+        let modal = $('#modal-df');
+        modal.find('.modal-title').html('Add users');
+        modal.find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+        modal.modal('show');
+       
+        $.get('/call/get-users-for-call?id=' + callId)
+            .done(function( data ) {
+                modal.find('.modal-body').html(data);
+            }
+        );       
+        
+    });
 
 JS;
 $this->registerJs($js);
+
+echo Modal::widget([
+    'id' => 'modal-df',
+    'title' => '',
+    //'footer' => '<a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>',
+    'size' => Modal::SIZE_DEFAULT
+]);

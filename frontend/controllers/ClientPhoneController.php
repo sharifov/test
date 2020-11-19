@@ -4,7 +4,7 @@ namespace frontend\controllers;
 
 use Yii;
 use common\models\ClientPhone;
-use common\models\search\ClentPhoneSearch;
+use common\models\search\ClientPhoneSearch;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
@@ -43,7 +43,7 @@ class ClientPhoneController extends FController
      */
     public function actionIndex()
     {
-        $searchModel = new ClentPhoneSearch();
+        $searchModel = new ClientPhoneSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
         //VarDumper::dump(Yii::$app->request->queryParams, 10, true); exit;
         return $this->render('index', [

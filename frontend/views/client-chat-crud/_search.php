@@ -58,9 +58,11 @@ use yii\widgets\Pjax;
                         'hideInput' => true,
                         'convertFormat' => true,
                         'pluginOptions' => [
+                            'minDate' => "2020-01-01 00:00",
+                            'maxDate' => date("Y-m-d 23:59"),
                             'timePicker' => false,
                             'locale' => [
-                                'format' => 'd-M-Y',
+                                'format' => 'Y-m-d H:i',
                                 'separator' => ' - '
                             ]
                         ]

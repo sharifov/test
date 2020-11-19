@@ -67,6 +67,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw',
             ],
+            'cl_ca_id',
         ],
     ]) ?>
     </div>

@@ -1,5 +1,7 @@
 <?php
 
+use sales\auth\Auth;
+use sales\services\cleaner\form\DbCleanerParamsForm;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -8,10 +10,12 @@ use common\components\grid\DateTimeColumn;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\GlobalLogSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var DbCleanerParamsForm $modelCleaner */
 
 $this->title = 'Global Logs';
 $this->params['breadcrumbs'][] = $this->title;
 $view = $this;
+$pjaxListId = 'pjax-global-log';
 ?>
 <div class="global-log-index">
 
@@ -21,7 +25,16 @@ $view = $this;
         <?php //    = Html::a('Create Global Log', ['create'], ['class' => 'btn btn-success'])?>
     </p>
 
-    <?php Pjax::begin(); ?>
+    <?php if (Auth::can('global/clean/table')): ?>
+        <div class="col-md-6" style="margin-left: -10px;">
+            <?php echo $this->render('../clean/_clean_table_form', [
+                'modelCleaner' => $modelCleaner,
+                'pjaxIdForReload' => $pjaxListId,
+            ]); ?>
+        </div>
+    <?php endif ?>
+
+    <?php Pjax::begin(['id' => $pjaxListId]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?= GridView::widget([

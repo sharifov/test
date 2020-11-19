@@ -297,6 +297,7 @@ Modal::begin([
     'size' => Modal::SIZE_LARGE,
     'clientOptions' => ['backdrop' => 'static']//, 'keyboard' => FALSE]
 ]);
+Modal::end();
 ?>
 
 <?php

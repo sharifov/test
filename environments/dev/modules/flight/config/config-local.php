@@ -2,10 +2,10 @@
 return [
     'components' => [
         'apiService' => [
-            'class' => \modules\flight\components\ApiFlightService::class,
-            'url' => 'https://dev-flight.travel-dev.com/api/v1/',
-            'username' => 'flight',
-            'password' => '',
+            'class' => \modules\flight\components\api\ApiFlightService::class,
+            'url' => '{{ modules.flight.config.components.apiService.url:str }}',
+            'username' => '{{ modules.flight.config.components.apiService.username:str }}',
+            'password' => '{{ modules.flight.config.components.apiService.password:str }}',
         ],
     ],
     'params' => [

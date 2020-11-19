@@ -1,11 +1,12 @@
 <?php
 use sales\auth\Auth;
-use frontend\widgets\centrifugo\RealtimeClientChatMonitorWidget;
+use frontend\widgets\centrifugo\CentrifugoWidget;
 
 ?>
 
-<?= RealtimeClientChatMonitorWidget::widget([
+<?= CentrifugoWidget::widget([
     'userId' => Auth::id(),
+    'widgetView' => 'monitor',
     'userAllowedChannels' => [
         'realtimeClientChatChannel',
     ]

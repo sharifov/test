@@ -7,6 +7,7 @@ use sales\entities\cases\Cases;
 use sales\entities\EventTrait;
 use sales\logger\db\GlobalLogInterface;
 use sales\logger\db\LogDTO;
+use sales\model\clientAccount\entity\ClientAccount;
 use thamtech\uuid\helpers\UuidHelper;
 use thamtech\uuid\validators\UuidValidator;
 use yii\behaviors\TimestampBehavior;
@@ -35,6 +36,7 @@ use yii\db\ActiveQuery;
  * @property int $cl_type_id // 1 - Client, 2 - Contact
  * @property int|null $cl_type_create // 1 - Manually, 2 - Lead etc.
  * @property int|null $cl_project_id
+ * @property int|null $cl_ca_id
  *
  * @property ClientEmail[] $clientEmails
  * @property ClientPhone[] $clientPhones
@@ -48,6 +50,7 @@ use yii\db\ActiveQuery;
  * @property Project[] $projects
  * @property UserContactList $contact
  * @property Project|null $project
+ * @property ClientAccount|null $clientAccount
  * @method clientPhonesByType(array $array)
  */
 class Client extends ActiveRecord
@@ -116,17 +119,17 @@ class Client extends ActiveRecord
         return $client;
     }
 
-	/**
-	 * @param string $firstName
-	 * @param string $lastName
-	 * @param string $middleName
-	 */
-	public function edit(string $firstName, string $lastName, string $middleName): void
-	{
-		$this->first_name = $firstName;
-		$this->last_name = $lastName;
-		$this->middle_name = $middleName;
-	}
+    /**
+     * @param string $firstName
+     * @param string $lastName
+     * @param string $middleName
+     */
+    public function edit(string $firstName, string $lastName, string $middleName): void
+    {
+        $this->first_name = $firstName;
+        $this->last_name = $lastName;
+        $this->middle_name = $middleName;
+    }
 
     /**
      * @return array
@@ -151,6 +154,10 @@ class Client extends ActiveRecord
             ['cl_project_id', 'integer'],
             ['cl_project_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
             ['cl_project_id', 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['cl_project_id' => 'id']],
+
+            ['cl_ca_id', 'integer'],
+            ['cl_ca_id', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+            ['cl_ca_id', 'exist', 'skipOnError' => true, 'targetClass' => ClientAccount::class, 'targetAttribute' => ['cl_ca_id' => 'ca_id']],
         ];
     }
 
@@ -177,6 +184,7 @@ class Client extends ActiveRecord
             'cl_type_id' => 'Type',
             'cl_type_create' => 'Type create',
             'cl_project_id' => 'Project',
+            'cl_ca_id' => 'Client account',
         ];
     }
 
@@ -238,7 +246,7 @@ class Client extends ActiveRecord
      */
     public function getProjects(): ActiveQuery
     {
-         return $this->hasMany(Project::class, ['id' => 'cp_project_id'])->viaTable('client_project', ['cp_client_id' => 'id']);
+        return $this->hasMany(Project::class, ['id' => 'cp_project_id'])->viaTable('client_project', ['cp_client_id' => 'id']);
     }
 
     /**
@@ -256,12 +264,17 @@ class Client extends ActiveRecord
      */
     public function getContact(): ActiveQuery
     {
-         return $this->hasOne(UserContactList::class, ['ucl_client_id' => 'id']);
+        return $this->hasOne(UserContactList::class, ['ucl_client_id' => 'id']);
     }
 
     public function getProject(): ActiveQuery
     {
-         return $this->hasOne(Project::class, ['id' => 'cl_project_id']);
+        return $this->hasOne(Project::class, ['id' => 'cl_project_id']);
+    }
+    
+    public function getClientAccount(): ActiveQuery
+    {
+        return $this->hasOne(ClientAccount::class, ['ca_id' => 'cl_ca_id']);
     }
 
     public function beforeSave($insert): bool
@@ -278,46 +291,30 @@ class Client extends ActiveRecord
     }
 
     /**
-	 * @return array
-	 */
-	public function behaviors(): array
-	{
-		return [
-			'timestamp' => [
-				'class' => TimestampBehavior::class,
-				'attributes' => [
-					ActiveRecord::EVENT_BEFORE_INSERT => ['created', 'updated'],
-					ActiveRecord::EVENT_BEFORE_UPDATE => ['updated'],
-				],
-				'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
-			],
-		];
-	}
+     * @return array
+     */
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['created', 'updated'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['updated'],
+                ],
+                'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
+            ],
+        ];
+    }
 
-//    public function beforeSave($insert): bool
-//    {
-//        if (parent::beforeSave($insert)) {
-//
-//            if ($insert) {
-//                if (!$this->created) {
-//                    $this->created = date('Y-m-d H:i:s');
-//                }
-//            }
-//
-//            $this->updated = date('Y-m-d H:i:s');
-//            return true;
-//        }
-//        return false;
-//    }
-
-	/**
-	 * @param bool $insert
-	 * @param array $changedAttributes
-	 * @throws \yii\base\InvalidConfigException
-	 */
+    /**
+     * @param bool $insert
+     * @param array $changedAttributes
+     * @throws \yii\base\InvalidConfigException
+     */
     public function afterSave($insert, $changedAttributes)
-	{
-//		$newAttr = [];
+    {
+        //		$newAttr = [];
 //		foreach ($changedAttributes as $key => $attribute) {
 //			if (array_key_exists($key, $this->oldAttributes)) {
 //				$newAttr[$key] = $this->oldAttributes[$key];
@@ -340,10 +337,10 @@ class Client extends ActiveRecord
 //				null
 //			)
 //		);
-		parent::afterSave($insert, $changedAttributes); // TODO: Change the autogenerated stub
-	}
+        parent::afterSave($insert, $changedAttributes); // TODO: Change the autogenerated stub
+    }
 
-	/**
+    /**
      * @return array
      */
     public static function getList(): array
@@ -408,37 +405,37 @@ class Client extends ActiveRecord
     }
 
     public function getFullName(): string
-	{
-		return trim($this->last_name . ' ' . $this->first_name . ' ' . $this->middle_name);
-	}
+    {
+        return trim($this->last_name . ' ' . $this->first_name . ' ' . $this->middle_name);
+    }
 
     public function getShortName(): string
     {
         return trim($this->first_name . ' ' . $this->last_name);
-	}
+    }
 
     public function isClient(): bool
     {
         return $this->cl_type_id === self::TYPE_CLIENT;
-	}
+    }
 
     public function isContact(): bool
     {
         return $this->cl_type_id === self::TYPE_CONTACT;
-	}
+    }
 
     public function isInternal(): bool
     {
         return $this->cl_type_id === self::TYPE_INTERNAL;
-	}
+    }
 
     public function isProjectEqual(int $projectId): bool
     {
         return $this->cl_project_id === $projectId;
-	}
+    }
 
     public function isWithoutProject(): bool
     {
         return $this->cl_project_id === null;
-	}
+    }
 }

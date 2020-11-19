@@ -26,7 +26,7 @@ $amountOfChats = $viewModel->amountOfChats;
             <tr>
                 <td>Incoming</td>
                 <td> <?= $amountOfChats['clients'] ?> </td>
-                <td> <?= $amountOfChats['acceptedByAgent'] ?> </td>
+                <td> <?= $amountOfChats['acceptedByAgentSourceClient'] ?> </td>
                 <td> - </td>
                 <td> <?= $amountOfChats['totalFrtAvg'] ?> </td>
                 <td> <?= $amountOfChats['totalClientChatDurationAvg'] ?> </td>
@@ -34,7 +34,7 @@ $amountOfChats = $viewModel->amountOfChats;
             <tr>
                 <td>Outgoing</td>
                 <td><?= $amountOfChats['agents'] ?></td>
-                <td> - </td>
+                <td> <?= $amountOfChats['acceptedByAgentSourceAgent'] ?> </td>
                 <td> - </td>
                 <td> - </td>
                 <td> <?= $amountOfChats['totalAgentChatDurationAvg'] ?> </td>
@@ -42,7 +42,7 @@ $amountOfChats = $viewModel->amountOfChats;
             <tr>
                 <td>Total</td>
                 <td><?= $amountOfChats['total'] ?></td>
-                <td><?= $amountOfChats['acceptedByAgent'] ?></td>
+                <td><?= $amountOfChats['acceptedByAgentSourceAgent'] + $amountOfChats['acceptedByAgentSourceClient'] ?></td>
                 <td><?= $amountOfChats['missedChats'] ?></td>
                 <td><?= $amountOfChats['totalFrtAvg'] ?></td>
                 <td> <?= $amountOfChats['totalChatDurationAvg'] ?> </td>

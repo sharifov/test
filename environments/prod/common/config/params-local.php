@@ -5,6 +5,7 @@ return [
     'serviceVersion' => '{{ common.config.params.serviceVersion:str }}',
     'appName' => '{{ common.config.params.appName:str }}',
     'appInstance' => '{{ common.config.params.appInstance:str }}',
+    'appEnv' => 'prod',
 
     'url_address'      => '{{ common.config.params.url_address:str }}',
     'url_api_address'  => '{{ common.config.params.url_api_address:str }}',
@@ -46,7 +47,7 @@ return [
     ],
 
     'email_to' => [
-        'bcc_sales' => '{{ common.config.params.email_from.bcc_sales:str }}',
+        'bcc_sales' => '{{ common.config.params.email_to.bcc_sales:str }}',
     ],
 
     'lead' => [
@@ -54,6 +55,10 @@ return [
     ],
     'global_phone' => '{{ common.config.params.global_phone:str }}',
 
-    'appEnv' => 'prod',
-	'liveChatRealTimeVisitors' => '{{ common.config.params.liveChatRealTimeVisitors:str }}'
+    'liveChatRealTimeVisitors' => '{{ common.config.params.liveChatRealTimeVisitors:str }}',
+
+    'centrifugo' => [
+        'enabled' => '{{ common.config.params.centrifugo.enabled:bool }}',
+        'wsConnectionUrl' => '{{ common.config.params.centrifugo.wsConnectionUrl:str }}',
+    ],
 ];

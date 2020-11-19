@@ -2,7 +2,6 @@
 
 namespace frontend\controllers;
 
-use common\components\CentrifugoService;
 use common\components\i18n\Formatter;
 use common\components\purifier\Purifier;
 use common\models\Department;
@@ -1444,9 +1443,9 @@ class ClientChatController extends FController
             $searchModel = new ClientChatSearch();
             $chatsData = $searchModel->searchRealtimeClientChatActivity($params);
 
-            CentrifugoService::sendMsg(json_encode([
+            Yii::$app->centrifugo->setSafety(false)->publish('realtimeClientChatChannel', ['message' => json_encode([
                 'chatsData' => $chatsData,
-            ]), 'realtimeClientChatChannel');
+            ])]);
         } else {
             $this->layout = '@frontend/themes/gentelella_v2/views/layouts/main_tv';
 
