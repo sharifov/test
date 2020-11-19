@@ -7,6 +7,7 @@
 
 namespace common\components\jobs;
 
+use common\components\Metrics;
 use yii\base\BaseObject;
 use yii\helpers\VarDumper;
 use yii\queue\JobInterface;
@@ -16,12 +17,13 @@ use yii\queue\Queue;
 /**
  * This is the Test JOB
  *
+ * @property-read float|int $ttr
  * @property array $data
  */
 
 class TestJob extends BaseObject implements JobInterface
 {
-    public $data = [];
+    public array $data = [];
 
     /**
      * @param Queue $queue
@@ -29,10 +31,20 @@ class TestJob extends BaseObject implements JobInterface
      */
     public function execute($queue) : bool
     {
+        $metrics = new Metrics();
+        $timeStart = microtime(true);
+
         Yii::warning(VarDumper::dumpAsString($this->data), 'JOB:TestJob');
+
+        sleep(random_int(1, 5));
+        $seconds = round(microtime(true) - $timeStart, 1);
+        $metrics->jobHistogram(self::class, $seconds);
         return true;
     }
 
+    /**
+     * @return float|int
+     */
     public function getTtr()
     {
         return 1 * 20;

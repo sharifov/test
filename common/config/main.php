@@ -167,9 +167,9 @@ return [
                 'persistent_connections' => false,
                 'database' => 3,
             ],
-            'useHttpBasicAuth' => true,
-            'authUsername' => 'test',
-            'authPassword' => '12345',
+            'useHttpBasicAuth' => false,
+            'authUsername' => '',
+            'authPassword' => '',
         ],
     ],
     'bootstrap' => [
