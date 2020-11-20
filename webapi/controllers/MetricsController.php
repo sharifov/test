@@ -36,7 +36,7 @@ class MetricsController extends Controller
 
             $behaviors['authenticator']['auth'] = function ($username, $password) {
                 $user = new PrometheusUser();
-                if ($user::login($username, $password)) {
+                if (!$user::login($username, $password)) {
                     $message = 'Invalid username or password for HttpBasicAuth Prometheus component';
                     Yii::warning(['message' => $message, 'username' => $username, 'endpoint' => $this->action->uniqueId, 'RemoteIP' => Yii::$app->request->getRemoteIP(),
                         'UserIP' => Yii::$app->request->getUserIP()], 'API:MetricsController:HttpBasicAuth');

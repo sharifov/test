@@ -69,6 +69,6 @@ class PrometheusUser implements IdentityInterface
      */
     public static function login(string $username = '', string $password = ''): bool
     {
-        return (Yii::$app->prometheus->authUsername !== $username || Yii::$app->prometheus->authPassword !== $password);
+        return (Yii::$app->prometheus->authUsername === $username && Yii::$app->prometheus->authPassword === $password);
     }
 }
