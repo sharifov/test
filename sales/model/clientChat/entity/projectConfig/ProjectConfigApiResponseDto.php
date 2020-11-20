@@ -12,8 +12,7 @@ use yii\helpers\Json;
  * @property string $endpoint
  * @property bool $enabled
  * @property bool $registrationEnabled
- * @property bool $welcomeMessageEnabled
- * @property bool $startChatEnabled
+ * @property bool $welcomeScreenEnabled
  * @property string $project
  * @property string $projectKey
  * @property string $notificationSound
@@ -38,8 +37,7 @@ class ProjectConfigApiResponseDto
      */
     public bool $registrationEnabled;
 
-    public bool $welcomeMessageEnabled;
-    public bool $startChatEnabled;
+    public bool $welcomeScreenEnabled;
 
     /**
      * @var string $project
@@ -84,8 +82,7 @@ class ProjectConfigApiResponseDto
         $this->endpoint = $params['endpoint'] ?? '';
         $this->notificationSound = $params['notificationSound'] ?? '';
         $this->registrationEnabled = (bool) ($params['registrationEnabled'] ?? true);
-            $this->welcomeMessageEnabled = (bool) ($params['welcomeMessageEnabled'] ?? true);
-            $this->startChatEnabled = (bool) ($params['startChatEnabled'] ?? true);
+        $this->welcomeScreenEnabled = (bool) ($params['welcomeScreenEnabled'] ?? true);
 
         $this->enabled = (bool)$projectConfig->ccpc_enabled;
         $this->project = $projectConfig->ccpcProject ? $projectConfig->ccpcProject->name : '';
