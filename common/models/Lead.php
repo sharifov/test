@@ -683,6 +683,7 @@ class Lead extends ActiveRecord implements Objectable
      * @param $clientId
      * @param $projectId
      * @param $sourceId
+     * @param $departmentId
      * @param $gmt
      * @return Lead
      */
