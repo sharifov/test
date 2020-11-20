@@ -29,7 +29,16 @@ use yii\helpers\Url;
 
     <div class="x_panel">
         <div class="x_title">
-            <h2><i class="fa fa-trash"></i> Clean</h2>
+            <h2 style="overflow: visible;">
+            <i class="fa fa-trash"></i> Clean
+                <sup>
+                    <?php echo Html::a(
+                        Html::tag('i', '', ['class' => 'fa fa-info-circle', 'style' => 'color: #53a265;']),
+                        null,
+                        ['id' => 'js-info_clean_btn']
+                    ) ?>
+                </sup>
+            </h2>
             <ul class="nav navbar-right panel_toolbox">
                 <li>
                     <a class="collapse-link"><i class="fa fa-chevron-down"></i></a>
@@ -39,7 +48,7 @@ use yii\helpers\Url;
         </div>
         <div class="x_content" style="display: none;">
             <div class="row">
-                <div class="col-md-2">
+                <div class="col-md-1">
                     <?= $form->field($modelCleaner, 'level')->dropDownList([
                         Logger::LEVEL_ERROR => Logger::getLevelName(Logger::LEVEL_ERROR),
                         Logger::LEVEL_WARNING => Logger::getLevelName(Logger::LEVEL_WARNING),
@@ -49,13 +58,11 @@ use yii\helpers\Url;
                         Logger::LEVEL_PROFILE_END => Logger::getLevelName(Logger::LEVEL_PROFILE_END),
                     ], ['prompt' => '-']) ?>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-1">
                     <?= $form->field($modelCleaner, 'category')->dropDownList(\frontend\models\Log::getCategoryFilter(), ['prompt' => '-']) ?>
                 </div>
-            </div>
 
-            <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-2">
                         <?php echo $form->field($modelCleaner, 'strict_date')->widget(
                             DatePicker::class,
                             [
@@ -74,10 +81,10 @@ use yii\helpers\Url;
                             ]
                         ) ?>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-2">
                         <?php echo $form->field($modelCleaner, 'datetime')->widget(DateTimePicker::class) ?>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-2">
                         <?php echo $form->field($modelCleaner, 'date')->widget(
                     DatePicker::class,
                             [
@@ -96,19 +103,17 @@ use yii\helpers\Url;
                             ]
                         ) ?>
                     </div>
-                </div>
 
-                <div class="row">
-                    <div class="col-md-2">
+                    <div class="col-md-1">
                         <?php echo $form->field($modelCleaner, 'hour')->input('number', ['min' => 1, 'step' => 1]) ?>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-1">
                         <?php echo $form->field($modelCleaner, 'day')->input('number', ['min' => 1, 'step' => 1]) ?>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-1">
                         <?php echo $form->field($modelCleaner, 'month')->input('number', ['min' => 1, 'step' => 1]) ?>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-1">
                         <?php echo $form->field($modelCleaner, 'year')->input('number', ['min' => 1, 'step' => 1]) ?>
                     </div>
                 </div>

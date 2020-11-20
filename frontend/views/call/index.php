@@ -36,12 +36,10 @@ $pjaxListId = 'pjax-call-index';
         <?php /*= Html::a('Create Call', ['create'], ['class' => 'btn btn-success'])*/ ?>
     </p>
     <?php if (Auth::can('global/clean/table')): ?>
-        <div class="col-md-6" style="margin-left: -10px;">
-            <?php echo $this->render('../clean/_clean_table_form', [
-                'modelCleaner' => $modelCleaner,
-                'pjaxIdForReload' => $pjaxListId,
-            ]); ?>
-        </div>
+        <?php echo $this->render('../clean/_clean_table_form', [
+            'modelCleaner' => $modelCleaner,
+            'pjaxIdForReload' => $pjaxListId,
+        ]); ?>
     <?php endif ?>
 
     <?php Pjax::begin(['id' => $pjaxListId, 'timeout' => 10000]); ?>

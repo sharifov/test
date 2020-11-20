@@ -15,39 +15,40 @@ $this->title = 'Logs';
 $this->params['breadcrumbs'][] = $this->title;
 $pjaxListId = 'pjax-log';
 ?>
-<div class="log-index row">
+<div class="log-index">
 
-    <div class="col-md-12">
-        <h1><?= Html::encode($this->title) ?></h1>
-    </div>
+    <h1><?= Html::encode($this->title) ?></h1>
 
     <?php if (Auth::can('global/clean/table')): ?>
-        <div class="col-md-6" >
-            <?php echo $this->render(
-                '_clean_table_form',
-                [
-                    'modelCleaner' => $modelCleaner,
-                    'pjaxIdForReload' => $pjaxListId,
-                ]
-            ) ?>
-        </div>
-
-        <div class="col-md-12" style="margin-bottom: 12px;">
-            <?php echo Html::a(
-                '<i class="fas fa-remove"></i> Clear all Logs',
-                ['log/clear'],
-                [
-                    'class' => 'btn btn-danger',
-                    'data' => [
-                        'confirm' => 'Remove all records from logs?'
+        <div class="row">
+            <div class="col-md-12" style="margin-bottom: 12px;">
+                <?php echo Html::a(
+                    '<i class="fas fa-remove"></i> Clear all Logs',
+                    ['log/clear'],
+                    [
+                        'class' => 'btn btn-danger',
+                        'data' => [
+                            'confirm' => 'Remove all records from logs?'
+                        ]
                     ]
-                ]
-            ) ?>
+                ) ?>
+            </div>
+
+            <div class="col-md-12" >
+                <?php echo $this->render(
+                    '_clean_table_form',
+                    [
+                        'modelCleaner' => $modelCleaner,
+                        'pjaxIdForReload' => $pjaxListId,
+                    ]
+                ) ?>
+            </div>
         </div>
     <?php endif ?>
 
     <?php \yii\widgets\Pjax::begin(['id' => $pjaxListId]); ?>
-    <div class="row" style="margin-left: 1px;">
+
+    <div class="row">
         <div class="col-md-12">
 
             <?= GridView::widget([
