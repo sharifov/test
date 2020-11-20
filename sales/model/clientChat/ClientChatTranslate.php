@@ -34,8 +34,10 @@ class ClientChatTranslate
         $data['videocall_started']   = Yii::t('clientChat', 'Video call started', [], $language);
         $data['videocall_ended']   = Yii::t('clientChat', 'Video call ended', [], $language);
 
-
-
+        $data['departmentTitle']   = Yii::t('clientChat', 'New chat', [], $language);
+        $data['departmentTitleTaken']   = Yii::t('clientChat', 'taken by {{agentName}}', [], $language);
+        $data['departmentSubtitle']   = Yii::t('clientChat', 'subtitle {{name}}', [], $language);
+        $data['departmentSubtitleTaken']   = Yii::t('clientChat', 'subtitle taken {{name}}', [], $language);
 
         $data['registration'] = [
             'title'                     => Yii::t('clientChat_registration', 'We are ready to help you', [], $language),
