@@ -476,6 +476,7 @@ class PhoneController extends FController
                     /** @var Call $call */
                     $data = $call->getData();
                     $data->repeat->reset();
+                    $data->queueLongTime->reset();
                     $call->setData($data);
                     if (!$call->save()) {
                         Yii::error([
@@ -514,6 +515,7 @@ class PhoneController extends FController
                     /** @var Call $call */
                     $data = $call->getData();
                     $data->repeat->reset();
+                    $data->queueLongTime->reset();
                     $call->setData($data);
                     if (!$call->save()) {
                         Yii::error([

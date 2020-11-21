@@ -6,7 +6,9 @@ use common\models\Call;
 use common\models\ConferenceParticipant;
 use common\models\DepartmentPhoneProject;
 use sales\helpers\app\AppHelper;
+use sales\model\call\services\QueueLongTimeNotificationJobCreator;
 use sales\model\call\services\RepeatMessageCallJobCreator;
+use sales\model\department\departmentPhoneProject\entity\params\QueueLongTimeNotificationParams;
 use yii\helpers\VarDumper;
 use yii\queue\JobInterface;
 
@@ -73,6 +75,9 @@ class CheckClientCallJoinToConferenceJob implements JobInterface
         if (!$data->repeat->isEmpty()) {
             $this->createRepeatMessageJob($jobId, $call, $data->repeat->departmentPhoneId);
         }
+        if (!$data->queueLongTime->isEmpty()) {
+            $this->createCallQueueLongTimeJob($jobId, $call, $data->queueLongTime->departmentPhoneId);
+        }
     }
 
     private function createRepeatMessageJob($jobId, $call, $depPhoneId): void
@@ -97,6 +102,31 @@ class CheckClientCallJoinToConferenceJob implements JobInterface
                 'error' => $e->getMessage(),
                 'call' => $call->getAttributes(),
             ], 'CallQueueRepeatMessageJob::create');
+        }
+    }
+
+    private function createCallQueueLongTimeJob($jobId, $call, $depPhoneId): void
+    {
+        try {
+            if (!$jobId) {
+                throw new \DomainException('Not created CallUserAccessJob');
+            }
+            $depPhone = DepartmentPhoneProject::findOne($depPhoneId);
+            if (!$depPhone) {
+                throw new \DomainException('Not found DepartmentPhoneProject ID:' . $depPhoneId);
+            }
+            $dParams = @json_decode($depPhone->dpp_params, true);
+            $queueLongTimeParams = new QueueLongTimeNotificationParams($dParams['queue_long_time_notification'] ?? []);
+            if ($queueLongTimeParams->isActive()) {
+                (new QueueLongTimeNotificationJobCreator())->create($call, $depPhone->dpp_id, $queueLongTimeParams);
+            }
+        } catch (\Throwable $e) {
+            \Yii::error([
+                'message' => 'Create call long queue time job Error.',
+                'useCase' => 'CheckClientCallJoinToConferenceJob',
+                'error' => $e->getMessage(),
+                'call' => $call->getAttributes(),
+            ], 'CallQueueLongTimeNotificationJob::create');
         }
     }
 

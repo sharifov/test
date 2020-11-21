@@ -31,12 +31,14 @@ use sales\helpers\UserCallIdentity;
 use sales\model\call\exceptions\CallFinishedException;
 use sales\model\call\exceptions\UniqueCallNotFoundException;
 use sales\model\call\form\CallCustomParameters;
+use sales\model\call\services\QueueLongTimeNotificationJobCreator;
 use sales\model\call\services\RepeatMessageCallJobCreator;
 use sales\model\callLog\services\CallLogConferenceTransferService;
 use sales\model\callLog\services\CallLogTransferService;
 use sales\model\conference\useCase\recordingStatusCallBackEvent\ConferenceRecordingStatusCallbackForm;
 use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackForm;
 use sales\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackHandler;
+use sales\model\department\departmentPhoneProject\entity\params\QueueLongTimeNotificationParams;
 use sales\model\emailList\entity\EmailList;
 use sales\model\phoneList\entity\PhoneList;
 use sales\model\sms\entity\smsDistributionList\SmsDistributionList;
@@ -1316,10 +1318,10 @@ class CommunicationController extends ApiBaseController
                         'callSid' => $call->c_call_sid
                     ], 'info\ProcessCallCallback');
                 } else {
-                    \Yii::error([[
+                    \Yii::error([
                         'errors' => $errors,
                         'call' => $call->getAttributes(),
-                    ]], 'API:CommunicationController:findOrCreateCallByData:Call:save');
+                    ], 'API:CommunicationController:findOrCreateCallByData:Call:save');
                 }
             } else {
 
@@ -1369,12 +1371,18 @@ class CommunicationController extends ApiBaseController
 
         } else {*/
 
+        $preCallStatus = $call->c_call_status;
+
         if (isset($callData['Command']) && $callData['Command'] === 'change_call_status') {
             if ($call->isStatusRinging()) {
                 $call->c_call_status = $callData['CallStatus'];
             }
         } else {
             $call->c_call_status = $callData['CallStatus'];
+        }
+
+        if ($preCallStatus === Call::TW_STATUS_IN_PROGRESS && $call->c_call_status === Call::TW_STATUS_RINGING) {
+           $call->c_call_status = Call::TW_STATUS_IN_PROGRESS;
         }
 
         $call->setStatusByTwilioStatus($call->c_call_status);
@@ -1642,8 +1650,14 @@ class CommunicationController extends ApiBaseController
         ];
     }
 
-    protected function startCallService(Call $callModel, DepartmentPhoneProject $department, int $ivrSelectedDigit, array $stepParams, array $repeatParams): array
-    {
+    protected function startCallService(
+        Call $callModel,
+        DepartmentPhoneProject $department,
+        int $ivrSelectedDigit,
+        array $stepParams,
+        array $repeatParams,
+        QueueLongTimeNotificationParams $queueLongTimeParams
+    ): array {
 
         if(isset(Department::DEPARTMENT_LIST[$ivrSelectedDigit])) {
             $callModel->c_dep_id = $ivrSelectedDigit;
@@ -1664,13 +1678,16 @@ class CommunicationController extends ApiBaseController
                 if ($repeatParams) {
                     (new RepeatMessageCallJobCreator())->create($callModel, $department->dpp_id, $repeatParams);
                 }
+                if ($queueLongTimeParams->isActive()) {
+                    (new QueueLongTimeNotificationJobCreator())->create($callModel, $department->dpp_id, $queueLongTimeParams);
+                }
             } catch (\Throwable $e) {
                 Yii::error([
-                    'message' => 'Create repeat call job Error.',
+                    'message' => 'Create call job Error.',
                     'useCase' => 'Processing Incoming call. StartCallService',
                     'error' => $e->getMessage(),
                     'call' => $callModel->getAttributes(),
-                ], 'CallQueueRepeatMessageJob::create');
+                ], 'CallQueueStartCallService::JobsCreate');
             }
 
         }
@@ -1741,6 +1758,7 @@ class CommunicationController extends ApiBaseController
             $dParams = @json_decode($department->dpp_params, true);
             $ivrParams = $dParams['ivr'] ?? [];
             $repeatParams = $dParams['queue_repeat'] ?? [];
+            $queueLongTimeParams = new QueueLongTimeNotificationParams(empty($dParams['queue_long_time_notification']) ? [] : $dParams['queue_long_time_notification']);
 
             $stepParams = [];
 
@@ -1760,7 +1778,7 @@ class CommunicationController extends ApiBaseController
                 $ivrSelectedDigit = (int) $ivrSelectedDigit;
 
                 if ($ivrSelectedDigit) {
-                    return $this->startCallService($callModel, $department, $ivrSelectedDigit, $stepParams, $repeatParams);
+                    return $this->startCallService($callModel, $department, $ivrSelectedDigit, $stepParams, $repeatParams, $queueLongTimeParams);
                 }
 
                 $responseTwml = new VoiceResponse();
@@ -1863,13 +1881,16 @@ class CommunicationController extends ApiBaseController
                         if ($repeatParams) {
                             (new RepeatMessageCallJobCreator())->create($callModel, $department->dpp_id, $repeatParams);
                         }
+                        if ($queueLongTimeParams->isActive()) {
+                            (new QueueLongTimeNotificationJobCreator())->create($callModel, $department->dpp_id, $queueLongTimeParams);
+                        }
                     } catch (\Throwable $e) {
                         Yii::error([
-                            'message' => 'Create repeat call job Error.',
+                            'message' => 'Create call job Error.',
                             'useCase' => 'Processing Incoming call. Without ivrSteps params',
                             'error' => $e->getMessage(),
                             'call' => $callModel->getAttributes(),
-                        ], 'CallQueueRepeatMessageJob::create');
+                        ], 'CallQueueStartCallService::JobsCreate');
                     }
                 }
 

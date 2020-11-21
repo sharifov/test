@@ -36,7 +36,7 @@ use yii\queue\Queue;
  *
  * @property int $call_id
  * @property int $delay
- * @property int $source_id
+ * @property int|null $source_id
  * @property bool $callFromInternalPhone
  *
  * @property CasesCreateService $casesCreateService
@@ -49,7 +49,7 @@ use yii\queue\Queue;
 class CallQueueJob extends BaseObject implements JobInterface
 {
     public int $call_id;
-    public int $source_id = 0;
+    public ?int $source_id = null;
     public int $delay;
     public bool $callFromInternalPhone = false;
 

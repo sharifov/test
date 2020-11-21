@@ -13,7 +13,9 @@ use modules\twilio\src\entities\conferenceLog\ConferenceLog;
 use modules\twilio\src\services\sms\SmsCommunicationService;
 use sales\helpers\app\AppHelper;
 use sales\helpers\UserCallIdentity;
+use sales\model\call\services\QueueLongTimeNotificationJobCreator;
 use sales\model\call\services\RepeatMessageCallJobCreator;
+use sales\model\department\departmentPhoneProject\entity\params\QueueLongTimeNotificationParams;
 use sales\model\user\entity\userStatus\UserStatus;
 use sales\model\phoneList\entity\PhoneList;
 use Twilio\TwiML\MessagingResponse;
@@ -397,6 +399,7 @@ class TwilioController extends ApiBaseNoAuthController
                         $call->c_created_user_id = $id;
                         $data = $call->getData();
                         $data->repeat->reset();
+                        $data->queueLongTime->reset();
                         $call->setData($data);
                         if (!$call->save()) {
                             Yii::error(VarDumper::dumpAsString($call->errors), 'API:Twilio:RedirectCall:Call:update:1');
@@ -489,6 +492,10 @@ class TwilioController extends ApiBaseNoAuthController
                             $repeatParams = $dParams['queue_repeat'] ?? [];
                             if ($repeatParams) {
                                 (new RepeatMessageCallJobCreator())->create($call, $depPhone->dpp_id, $repeatParams);
+                            }
+                            $queueLongTimeParams = new QueueLongTimeNotificationParams(empty($dParams['queue_long_time_notification']) ? [] : $dParams['queue_long_time_notification']);
+                            if ($queueLongTimeParams->isActive()) {
+                                (new QueueLongTimeNotificationJobCreator())->create($call, $depPhone->dpp_id, $queueLongTimeParams);
                             }
                         } catch (\Throwable $e) {
                             Yii::error([
