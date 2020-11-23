@@ -48,8 +48,9 @@ $clientChatMultipleUpdate = Url::to(['client-chat/ajax-multiple-update']);
 $cannedResponseSendMessageUrl = Url::to(['client-chat/ajax-send-canned-response']);
 
 $this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2.2.0/jquery.countdown.min.js', [
-    'position' => $this::POS_HEAD,
-    'depends' => [JqueryAsset::class]
+    'depends' => [
+        \yii\web\JqueryAsset::class
+    ]
 ]);
 
 $this->registerJsFile('/js/moment.min.js', [
