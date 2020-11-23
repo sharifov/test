@@ -117,6 +117,7 @@ class RocketChat extends Component
         } else {
             $metrics->serviceCounter('rocket_chat', ['type' => 'error', 'action' => $action]);
         }
+        unset($metrics);
 
         return $response;
     }

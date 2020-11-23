@@ -88,6 +88,7 @@ class ChatBot extends Component
         } else {
             $metrics->serviceCounter('chat_bot', ['type' => 'error', 'action' => $action]);
         }
+        unset($metrics);
 
         return $response;
     }

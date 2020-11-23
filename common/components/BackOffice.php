@@ -103,6 +103,7 @@ class BackOffice
         } else {
             $metrics->serviceCounter('back_office', ['type' => 'error', 'action' => $endpoint]);
         }
+        unset($metrics);
 
         //VarDumper::dump($response->content, 10, true); exit;
         return $response;

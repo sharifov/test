@@ -110,6 +110,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
         } else {
             $metrics->serviceCounter('communication', ['type' => 'error', 'action' => $action]);
         }
+        unset($metrics);
 
         return $response;
     }

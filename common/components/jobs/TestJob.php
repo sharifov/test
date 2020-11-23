@@ -38,7 +38,8 @@ class TestJob extends BaseObject implements JobInterface
 
         sleep(random_int(1, 5));
         $seconds = round(microtime(true) - $timeStart, 1);
-        $metrics->jobHistogram(self::class, $seconds);
+        $metrics->jobHistogram(substr(strrchr(get_class($this), '\\'), 1) . '_seconds', $seconds);
+        unset($metrics);
         return true;
     }
 

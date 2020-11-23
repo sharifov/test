@@ -96,6 +96,7 @@ class CurrencyService extends Component
         } else {
             $metrics->serviceCounter('currency', ['type' => 'error', 'action' => $action]);
         }
+        unset($metrics);
 
         return $response;
     }

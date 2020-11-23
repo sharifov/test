@@ -104,6 +104,7 @@ class TravelServices extends Component
         } else {
             $metrics->serviceCounter('travel', ['type' => 'error', 'action' => $action]);
         }
+        unset($metrics);
 
         return $response;
     }
