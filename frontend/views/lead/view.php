@@ -167,7 +167,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
                 </div>
             --><?php /*endif; */?>
 
-            <?php if (Auth::can('lead/view_Lead_Preferences')): ?>
+            <?php if (Auth::can('lead-view/lead-preferences/view', ['lead' => $lead])): ?>
                 <div id="lead-preferences">
                     <?= $this->render('partial/_lead_preferences', [
                         'lead' => $lead
