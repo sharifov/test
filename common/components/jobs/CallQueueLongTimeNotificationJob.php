@@ -4,6 +4,7 @@ namespace common\components\jobs;
 
 use common\models\Call;
 use common\models\DepartmentPhoneProject;
+use common\models\Employee;
 use common\models\Notifications;
 use common\models\ProjectEmployeeAccess;
 use common\models\UserConnection;
@@ -101,6 +102,20 @@ class CallQueueLongTimeNotificationJob implements JobInterface
     {
         $query = UserConnection::find()->select(['uc_user_id'])->groupBy(['uc_user_id']);
 
+        $adminUsers = [];
+        if (in_array(Employee::ROLE_ADMIN, $roles, true)) {
+            $q = clone $query;
+            foreach ($roles as $key => $role) {
+                if ($role === Employee::ROLE_ADMIN) {
+                    unset($roles[$key]);
+                }
+            }
+            $q->andWhere([
+                'uc_user_id' => (new Query())->select(['user_id'])->from('{{%auth_assignment}}')->andWhere(['item_name' => [Employee::ROLE_ADMIN]])
+            ]);
+            $adminUsers = array_keys($q->indexBy('uc_user_id')->column());
+        }
+
         if ($departmentId) {
             $query->andWhere([
                 'uc_user_id' => UserDepartment::find()->select(['DISTINCT(ud_user_id)'])->where(['ud_dep_id' => $departmentId])
@@ -117,7 +132,9 @@ class CallQueueLongTimeNotificationJob implements JobInterface
             'uc_user_id' => (new Query())->select(['user_id'])->from('{{%auth_assignment}}')->andWhere(['item_name' => $roles])
         ]);
 
-        return array_keys($query->indexBy('uc_user_id')->column());
+        $otherUsers = array_keys($query->indexBy('uc_user_id')->column());
+
+        return array_unique(array_merge($adminUsers, $otherUsers));
     }
 
     private function findCall(): Call
