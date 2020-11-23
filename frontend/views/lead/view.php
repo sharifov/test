@@ -45,7 +45,7 @@ $is_admin = $user->isAdmin();
 $is_qa = $user->isQa();
 $is_supervision = $user->canRole('supervision');
 
-if($is_admin || $is_supervision) {
+if ($is_admin || $is_supervision) {
     $is_manager = true;
 } else {
     $is_manager = false;
@@ -55,9 +55,9 @@ $lead = $leadForm->getLead();
 
 $clientProjectInfo = $lead->client->clientProjects;
 $unsubscribe = false;
-if (isset($clientProjectInfo) && $clientProjectInfo){
-    foreach ($clientProjectInfo as $item){
-        if ($lead->project_id == $item['cp_project_id']){
+if (isset($clientProjectInfo) && $clientProjectInfo) {
+    foreach ($clientProjectInfo as $item) {
+        if ($lead->project_id == $item['cp_project_id']) {
             $unsubscribe = $item['cp_unsubscribe'];
         }
     }
@@ -137,7 +137,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
                 <?php /*\yii\widgets\Pjax::end(); */?>
             --><?php /*endif;*/?>
 
-            <?php if (Auth::can('lead/view_Client_Info')): ?>
+            <?php if (Auth::can('lead-view/client-info/view', ['lead' => $lead])): ?>
                 <?php yii\widgets\Pjax::begin(['id' => 'pjax-client-info', 'enablePushState' => false, 'enableReplaceState' => false]) ?>
                 <?= $this->render('client-info/client_info', [
                     'lead' => $lead,
@@ -212,12 +212,12 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
                 <div class="alert alert-warning" role="alert">You do not have access to view Communication block messages.</div>
             <?php endif;?>
 
-            <?php //php \yii\helpers\VarDumper::dump(Yii::$app->user->identity->callExpertCountByShiftTime) ?>
+            <?php //php \yii\helpers\VarDumper::dump(Yii::$app->user->identity->callExpertCountByShiftTime)?>
 
 
 
             <?php if (Auth::can('lead/view_BO_Expert')): ?>
-                <?php  if(Yii::$app->user->identity->isAllowCallExpert): ?>
+                <?php  if (Yii::$app->user->identity->isAllowCallExpert): ?>
                     <?= $this->render('call-expert/lead_call_expert', [
                         'lead' => $lead,
                         'comForm'       => $comForm,
@@ -235,10 +235,10 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
 
         <div class="col-md-6">
 
-<!--            --><?php //if (!$lead->isNewRecord) : ?>
+<!--            --><?php //if (!$lead->isNewRecord) :?>
 <!--                <div class="row">-->
 <!--                    <div class="col-md-12">-->
-<!--                        --><?php //if(!$lead->l_answered): ?>
+<!--                        --><?php //if(!$lead->l_answered):?>
 <!---->
 <!--                            --><?php //if($lead->isProcessing()):?>
 <!--                                --><?php //= Html::a(($lead->l_answered ? '<i class="fa fa-commenting-o"></i>Make UnAnswered' : '<i class="fa fa-commenting"></i> Make Answered'), ['lead/update2', 'id' => $lead->id, 'act' => 'answer'], [
@@ -249,19 +249,19 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
 //                                        'method' => 'post',
 //                                        'pjax' => 0
 //                                    ],
-//                                ]) ?>
-<!--                            --><?php //else: ?>
+//                                ])?>
+<!--                            --><?php //else:?>
 <!--                                <span class="badge badge-warning"><i class="fa fa-commenting-o"></i> ANSWERED: false</span>-->
 <!--                            --><?php //endif;?>
 <!---->
-<!--                        --><?php //else: ?>
+<!--                        --><?php //else:?>
 <!--                            <span class="badge badge-success"><i class="fa fa-commenting-o"></i> ANSWERED: true</span>-->
-<!--                        --><?php //endif; ?>
+<!--                        --><?php //endif;?>
 <!---->
 <!--                    </div>-->
 <!---->
 <!--                </div>-->
-<!--            --><?php //endif; ?>
+<!--            --><?php //endif;?>
 
 
 
@@ -272,7 +272,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo){
 //                    'lead' => $lead,
 //                    'leadForm' => $leadForm,
 //                    'is_manager' => $is_manager,
-//                ]); ?>
+//                ]);?>
 
 
                 <?= $this->render('notes/agent_notes', [
