@@ -71,7 +71,7 @@ class Metrics extends Component
                 'job_' . $name,
                 'Job ' . $name,
                 array_keys($labels),
-                [0.1, 0.3, 0.5, 0.8, 1, 2, 3, 5, 7, 10]
+                [0.4, 0.5, 0.7, 0.8, 0.9, 1, 3]
             );
             $histogram->observe($value, array_values($labels));
         } catch (\Throwable $throwable) {
