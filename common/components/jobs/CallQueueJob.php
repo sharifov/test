@@ -9,9 +9,7 @@ namespace common\components\jobs;
 
 use common\components\Metrics;
 use common\models\Call;
-use common\models\CallUserAccess;
 use common\models\Client;
-use common\models\Department;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Notifications;
@@ -240,7 +238,7 @@ class CallQueueJob extends BaseObject implements JobInterface
                 if ($call->isStatusQueue() || $call->isStatusIvr()) {
                     if ($call->checkCancelCall()) {
                         $seconds = round(microtime(true) - $timeStart, 1);
-                        $metrics->jobHistogram(self::class, $seconds);
+                        $metrics->jobHistogram(substr(strrchr(get_class($this), '\\'), 1) . '_seconds', $seconds, ['type' => 'cancel']);
                         return true;
                     }
 
@@ -260,9 +258,9 @@ class CallQueueJob extends BaseObject implements JobInterface
 
 
                                 if ((int)$call->c_source_type_id === Call::SOURCE_GENERAL_LINE) {
-                                    $timeStartCallUserAccess = (int)Yii::$app->params['settings']['time_start_call_user_access_general'] ?? 0;
+                                    $timeStartCallUserAccess = (int) (Yii::$app->params['settings']['time_start_call_user_access_general'] ?? 0);
                                 } else {
-                                    $timeStartCallUserAccess = (int)Yii::$app->params['settings']['time_start_call_user_access_direct'] ?? 0;
+                                    $timeStartCallUserAccess = (int) (Yii::$app->params['settings']['time_start_call_user_access_direct'] ?? 0);
                                 }
 
                                 if ($timeStartCallUserAccess) {
@@ -291,7 +289,7 @@ class CallQueueJob extends BaseObject implements JobInterface
                         }
 
 
-                        $timeStartCallUserAccess = (int) Yii::$app->params['settings']['time_start_call_user_access_general'] ?? 0;
+                        $timeStartCallUserAccess = (int) (Yii::$app->params['settings']['time_start_call_user_access_general'] ?? 0);
 
                         if ($timeStartCallUserAccess) {
                             $job = new CallUserAccessJob();
@@ -310,7 +308,7 @@ class CallQueueJob extends BaseObject implements JobInterface
             Yii::error(VarDumper::dumpAsString($e->getMessage()), 'CallQueueJob:execute:catch');
         }
         $seconds = round(microtime(true) - $timeStart, 1);
-        $metrics->jobHistogram(self::class, $seconds);
+        $metrics->jobHistogram(substr(strrchr(get_class($this), '\\'), 1) . '_seconds', $seconds, ['type' => 'execute']);
         return false;
     }
 

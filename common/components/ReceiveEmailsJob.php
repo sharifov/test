@@ -2,7 +2,6 @@
 
 namespace common\components;
 
-
 use common\components\jobs\CreateSaleFromBOJob;
 use common\models\DepartmentEmailProject;
 use common\models\DepartmentPhoneProject;
@@ -43,13 +42,13 @@ use common\components\purifier\Purifier;
  */
 class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 {
-	/**
-	 * @var EmailService
-	 */
-	private $emailService;
-	private $casesSaleService;
+    /**
+     * @var EmailService
+     */
+    private $emailService;
+    private $casesSaleService;
 
-	public $last_email_id = 0;
+    public $last_email_id = 0;
 
     public $request_data = [];
 
@@ -70,8 +69,8 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 //        Yii::info(VarDumper::dumpAsString(['last_email_id' => $this->last_email_id, 'request_data' => $this->request_data]), 'info\JOB:ReceiveEmailsJob');
 
         try {
-        	$this->emailService = Yii::createObject(EmailService::class);
-        	$this->casesSaleService = Yii::createObject(CasesSaleService::class);
+            $this->emailService = Yii::createObject(EmailService::class);
+            $this->casesSaleService = Yii::createObject(CasesSaleService::class);
 
             if ((int)$this->last_email_id < 1) {
                 \Yii::error('Not found last_email_id (' . $this->last_email_id . ')', 'ReceiveEmailsJob:execute');
@@ -109,7 +108,6 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
             $notifyByLeads = [];
 
             while ($accessEmailRequest && $cicleCount < 100) {
-
                 if ($debug) {
                     echo "Cicle #" . $cicleCount . PHP_EOL;
                 }
@@ -128,16 +126,15 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                     && isset($res['data']['emails'][0])
                     && $res['data']['emails'][0]
                 ) {
-                    
                     foreach ($res['data']['emails'] as $mail) {
-
                         if ($debug) {
                             echo '.';
                         }
 
                         $filter['last_id'] = $mail['ei_id'] + 1;
 
-                        $find = Email::find()->where([
+                        $find = Email::find()->where(
+                            [
                                 "e_message_id" => $mail['ei_message_id'],
                                 "e_email_to" => $mail['ei_email_to']]
                         )->one();
@@ -189,7 +186,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                             }
                         }
 
-                        if($user_id > 0) {
+                        if ($user_id > 0) {
                             $email->e_created_user_id = $user_id;
                         }
 
@@ -199,8 +196,8 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                         }
 
                         if ($case_id) {
-							$caseArray[$case_id] = $case_id;
-						}
+                            $caseArray[$case_id] = $case_id;
+                        }
 
                         if (!$email->save()) {
                             \Yii::error(VarDumper::dumpAsString([
@@ -219,8 +216,8 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                                     );
                                     $email->e_lead_id = $process->leadId;
                                     $email->e_case_id = $process->caseId;
-									$email->e_client_id = $this->emailService->detectClientId($email->e_email_from);
-									$email->save(false);
+                                    $email->e_client_id = $this->emailService->detectClientId($email->e_email_from);
+                                    $email->save(false);
                                 } catch (\Throwable $e) {
                                     Yii::error($e->getMessage(), 'ReceiveEmailsJob:EmailIncomingService:create');
                                 }
@@ -246,7 +243,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 
                         if ($email->e_case_id && ($case = Cases::findOne($email->e_case_id))) {
                             $userID = $email->getUserIdByEmail($email->e_email_to);
-                            if ($userID){
+                            if ($userID) {
                                 $userCase = ['user' => $userID, 'case_short_link' => Purifier::createCaseShortLink($case)];
                                 array_push($notifyByCases, $userCase);
                             }
@@ -254,7 +251,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 
                         if ($email->e_lead_id && ($lead = Lead::findOne($email->e_lead_id))) {
                             $userID = $email->getUserIdByEmail($email->e_email_to);
-                            if ($userID){
+                            if ($userID) {
                                 $userLead = ['user' => $userID, 'lead_short_link' => Purifier::createLeadShortLink($lead)];
                                 array_push($notifyByLeads, $userLead);
                             }
@@ -268,7 +265,6 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                             break;
                         }
                     }
-
                 } else {
                     $cicleCount--;
                     $accessEmailRequest = false;
@@ -279,8 +275,8 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                 $cicleCount++;
             }
 
-            if ($notifyByCases){
-                foreach ($notifyByCases as $data){
+            if ($notifyByCases) {
+                foreach ($notifyByCases as $data) {
                     if ($ntf = Notifications::create($data['user'], 'New Email Received', 'New Email Received. Case('. $data['case_short_link'] .').', Notifications::TYPE_INFO, true)) {
                         $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
                         Notifications::publish('getNewNotification', ['user_id' => $data['user']], $dataNotification);
@@ -288,8 +284,8 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                 }
             }
 
-            if ($notifyByLeads){
-                foreach ($notifyByLeads as $data){
+            if ($notifyByLeads) {
+                foreach ($notifyByLeads as $data) {
                     if ($ntf = Notifications::create($data['user'], 'New Email Received', 'New Email Received. Lead('. $data['lead_short_link'] .').', Notifications::TYPE_INFO, true)) {
                         $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
                         Notifications::publish('getNewNotification', ['user_id' => $data['user']], $dataNotification);

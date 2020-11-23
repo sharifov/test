@@ -79,7 +79,17 @@ class ChatBot extends Component
     {
         $url = $this->url . $action;
         //$options = ['RETURNTRANSFER' => 1];
-        return $this->send($url, $data, $method, $headers, $options);
+
+        $response = $this->send($url, $data, $method, $headers, $options);
+
+        $metrics = new Metrics();
+        if ($response->isOk) {
+            $metrics->serviceCounter('chat_bot', ['type' => 'success', 'action' => $action]);
+        } else {
+            $metrics->serviceCounter('chat_bot', ['type' => 'error', 'action' => $action]);
+        }
+
+        return $response;
     }
 
     /**

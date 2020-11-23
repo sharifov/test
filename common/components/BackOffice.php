@@ -38,20 +38,19 @@ class BackOffice
     }
 
 
-	/**
-	 * @param string $endpoint
-	 * @param array $fields
-	 * @param string $type
-	 * @param int $curlTimeOut
-	 * @param string $host
-	 * @return \yii\httpclient\Response
-	 * @throws \yii\base\InvalidConfigException
-	 * @throws \yii\httpclient\Exception
-	 */
+    /**
+     * @param string $endpoint
+     * @param array $fields
+     * @param string $type
+     * @param int $curlTimeOut
+     * @param string $host
+     * @return \yii\httpclient\Response
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\httpclient\Exception
+     */
     public static function sendRequest2(string $endpoint = '', array $fields = [], string $type = 'POST', int $curlTimeOut = 30, string $host = '', bool $addBasicAuth = false): \yii\httpclient\Response
     {
-
-    	$host = $host ?: Yii::$app->params['backOffice']['serverUrl'];
+        $host = $host ?: Yii::$app->params['backOffice']['serverUrl'];
 
         $uri = $host . '/' . $endpoint;
         $signature = self::getSignatureBO(Yii::$app->params['backOffice']['apiKey'], Yii::$app->params['backOffice']['ver']);
@@ -78,11 +77,11 @@ class BackOffice
         ];
 
         if ($addBasicAuth) {
-			$username = Yii::$app->params['backOffice']['username'] ?? '';
-			$password = Yii::$app->params['backOffice']['password'] ?? '';
-			$authStr = base64_encode($username . ':' . $password);
-			$headers['Authorization'] = 'Basic ' . $authStr;
-		}
+            $username = Yii::$app->params['backOffice']['username'] ?? '';
+            $password = Yii::$app->params['backOffice']['password'] ?? '';
+            $authStr = base64_encode($username . ':' . $password);
+            $headers['Authorization'] = 'Basic ' . $authStr;
+        }
 
         $response = $client->createRequest()
             ->setMethod($type)
@@ -98,10 +97,14 @@ class BackOffice
             ->send();
 
 
+        $metrics = new Metrics();
+        if ($response->isOk) {
+            $metrics->serviceCounter('back_office', ['type' => 'success', 'action' => $endpoint]);
+        } else {
+            $metrics->serviceCounter('back_office', ['type' => 'error', 'action' => $endpoint]);
+        }
+
         //VarDumper::dump($response->content, 10, true); exit;
-
-
-
         return $response;
     }
 
@@ -125,14 +128,12 @@ class BackOffice
      */
     public static function webHook(array $data)
     {
-
         $settings = \Yii::$app->params['settings'];
 
         $uri = Yii::$app->params['backOffice']['serverUrl'] ? Yii::$app->params['backOffice']['serverUrl'] . '/' . (Yii::$app->params['backOffice']['webHookEndpoint'] ?? '') : '';
 
         if (isset($settings['bo_web_hook_enable']) && $uri) {
             if ($settings['bo_web_hook_enable']) {
-
                 try {
                     $response = self::sendRequest2($uri, $data);
 
@@ -144,13 +145,11 @@ class BackOffice
                     } else {
                         throw new Exception('Url: ' . $uri .' , BO request Error: ' . VarDumper::dumpAsString($response->content), 10);
                     }
-
                 } catch (\Throwable $exception) {
                     //throw new BadRequestHttpException($exception->getMessage());
                     \Yii::error($exception->getMessage(), 'BackOffice:webHook');
                 }
             }
-
         } else {
             \Yii::warning('Not isset settings bo_web_hook_enable or empty params webHookEndpoint', 'UserGroupEvents:webHook');
         }

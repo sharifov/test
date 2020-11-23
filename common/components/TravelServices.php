@@ -96,7 +96,16 @@ class TravelServices extends Component
         if ($options) {
             $this->request->addOptions($options);
         }
-        return $this->request->send();
+        $response = $this->request->send();
+
+        $metrics = new Metrics();
+        if ($response->isOk) {
+            $metrics->serviceCounter('travel', ['type' => 'success', 'action' => $action]);
+        } else {
+            $metrics->serviceCounter('travel', ['type' => 'error', 'action' => $action]);
+        }
+
+        return $response;
     }
 
 

@@ -108,7 +108,17 @@ class RocketChat extends Component
         if ($options) {
             $this->request->setOptions($options);
         }
-        return $this->request->send();
+
+        $response = $this->request->send();
+
+        $metrics = new Metrics();
+        if ($response->isOk) {
+            $metrics->serviceCounter('rocket_chat', ['type' => 'success', 'action' => $action]);
+        } else {
+            $metrics->serviceCounter('rocket_chat', ['type' => 'error', 'action' => $action]);
+        }
+
+        return $response;
     }
 
 
@@ -133,7 +143,6 @@ class RocketChat extends Component
             if (!empty($response->data['data'])) {
                 if (!empty($response->data['status'] === 'success')) {
                     $out['data'] = $response->data['data'];
-
                 } else {
                     $out['error'] = $response->content;
                     \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'RocketChat:systemLogin');
@@ -170,7 +179,6 @@ class RocketChat extends Component
             if (!empty($response->data['data'])) {
                 if (!empty($response->data['status'] === 'success')) {
                     $out['data'] = $response->data['data'];
-
                 } else {
                     $out['error'] = $response->content;
                     \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'RocketChat:login');
@@ -194,7 +202,6 @@ class RocketChat extends Component
      */
     public function getSystemAuthData(bool $cacheEnable = true): array
     {
-
         $cache = \Yii::$app->cache;
         $key = 'rocket_chat_system_authToken_' . md5($this->url);
 
@@ -217,11 +224,11 @@ class RocketChat extends Component
             }
         }
 
-        if(empty($authData['userId'])) {
+        if (empty($authData['userId'])) {
             $authData['userId'] = null;
         }
 
-        if(empty($authData['authToken'])) {
+        if (empty($authData['authToken'])) {
             $authData['authToken'] = null;
         }
 
@@ -330,7 +337,6 @@ class RocketChat extends Component
 
     public function createUser(string $username, string $password, string $name, string $email, array $roles = ["user", "livechat-agent"], bool $active = true, bool $joinDefaultChannels = false): array
     {
-
         $out = ['error' => false, 'data' => []];
         $headers = $this->getSystemAuthDataHeader();
 
@@ -365,24 +371,23 @@ class RocketChat extends Component
     }
 
 
-	/**
-	 * @param string|null $userRcId
-	 * @param string|null $username
-	 * @param bool $deleteByUsername
-	 * @return array
-	 * @throws Exception
-	 */
+    /**
+     * @param string|null $userRcId
+     * @param string|null $username
+     * @param bool $deleteByUsername
+     * @return array
+     * @throws Exception
+     */
     public function deleteUser(?string $userRcId, ?string $username = null, bool $deleteByUsername = false): array
     {
-
         $out = ['error' => false, 'data' => []];
         $headers = $this->getSystemAuthDataHeader();
 
-		if ($userRcId && !$deleteByUsername) {
-			$data['userId'] = $userRcId;
-		} else if ($username) {
-        	$data['username'] = $username;
-		}
+        if ($userRcId && !$deleteByUsername) {
+            $data['userId'] = $userRcId;
+        } elseif ($username) {
+            $data['username'] = $username;
+        }
 
         $response = $this->sendRequest('users.delete', $data, 'post', $headers);
 
@@ -410,7 +415,6 @@ class RocketChat extends Component
      */
     public function deleteUserByUserId(string $userId): array
     {
-
         $out = ['error' => false, 'data' => []];
         $headers = $this->getSystemAuthDataHeader();
 
@@ -443,12 +447,11 @@ class RocketChat extends Component
         $out = ['error' => false, 'data' => []];
         $headers = $this->getSystemAuthDataHeader();
 
-       $data = [];
+        $data = [];
 
         $response = $this->sendRequest('livechat/department', $data, 'get', $headers);
 
         if ($response->isOk) {
-
             if (!empty($response->data['departments'])) {
                 $out['data'] = $response->data;
             } else {
@@ -476,7 +479,6 @@ class RocketChat extends Component
         $response = $this->sendRequest('chat.sendMessage', $message, 'post', $headers);
 
         if ($response->isOk) {
-
             if (!empty($response->data['departments'])) {
                 $out['data'] = $response->data;
             } else {
@@ -566,102 +568,108 @@ class RocketChat extends Component
             \Yii::error(VarDumper::dumpAsString([
                 'RequestData' => $dataRequest,
                 'ResponseError' => $out['error'],
-            ], 10),'RocketChat:updateUser:fail');
+            ], 10), 'RocketChat:updateUser:fail');
         }
 
         return $out;
     }
 
-	public function getDepartments()
-	{
-		$out = ['error' => '', 'data' => []];
-		$headers = $this->getSystemAuthDataHeader();
+    public function getDepartments()
+    {
+        $out = ['error' => '', 'data' => []];
+        $headers = $this->getSystemAuthDataHeader();
 
-		$response = $this->sendRequest('livechat/department', [], 'get', $headers);
+        $response = $this->sendRequest('livechat/department', [], 'get', $headers);
 
-		if ($response->isOk) {
-			if (!empty($response->data['success'])) {
-				$out['data'] = $response->data;
-			} else {
-				$out['error'] = 'Not found in response array data key';
-			}
-		} else {
-			$out['error'] = self::getErrorMessageFromResult($response->content);
-		}
+        if ($response->isOk) {
+            if (!empty($response->data['success'])) {
+                $out['data'] = $response->data;
+            } else {
+                $out['error'] = 'Not found in response array data key';
+            }
+        } else {
+            $out['error'] = self::getErrorMessageFromResult($response->content);
+        }
 
-		if (!empty($out['error'])) {
-			\Yii::error(VarDumper::dumpAsString($out['error'], 10),
-				'RocketChat:getDepartments:fail');
-		}
+        if (!empty($out['error'])) {
+            \Yii::error(
+                VarDumper::dumpAsString($out['error'], 10),
+                'RocketChat:getDepartments:fail'
+            );
+        }
 
-		return $out;
-	}
+        return $out;
+    }
 
-	public function createDepartment(array $data, string $rcAgentId, string $rcUsername): array
-	{
-		$out = ['error' => '', 'data' => []];
-		$headers = $this->getSystemAuthDataHeader();
+    public function createDepartment(array $data, string $rcAgentId, string $rcUsername): array
+    {
+        $out = ['error' => '', 'data' => []];
+        $headers = $this->getSystemAuthDataHeader();
 
-		$defaultData = [
-			'department' => [
-				'enabled' => true,
-				'email' => '',
-				'description' => '',
-				'name' => '',
-				'showOnRegistration' => true,
-				'showOnOfflineForm' => false
-			],
-			'agents' => [
-				[
-					'agentId' => $rcAgentId,
-					'username' => $rcUsername
-				]
-			]
-		];
-		$data = ArrayHelper::merge($defaultData, $data);
-		$response = $this->sendRequest('livechat/department', $data, 'post', $headers);
+        $defaultData = [
+            'department' => [
+                'enabled' => true,
+                'email' => '',
+                'description' => '',
+                'name' => '',
+                'showOnRegistration' => true,
+                'showOnOfflineForm' => false
+            ],
+            'agents' => [
+                [
+                    'agentId' => $rcAgentId,
+                    'username' => $rcUsername
+                ]
+            ]
+        ];
+        $data = ArrayHelper::merge($defaultData, $data);
+        $response = $this->sendRequest('livechat/department', $data, 'post', $headers);
 
-		if ($response->isOk) {
-			if (!empty($response->data['success'])) {
-				$out['data'] = $response->data;
-			} else {
-				$out['error'] = 'Not found in response array data key';
-			}
-		} else {
-			$out['error'] = self::getErrorMessageFromResult($response->content);
-		}
+        if ($response->isOk) {
+            if (!empty($response->data['success'])) {
+                $out['data'] = $response->data;
+            } else {
+                $out['error'] = 'Not found in response array data key';
+            }
+        } else {
+            $out['error'] = self::getErrorMessageFromResult($response->content);
+        }
 
-		if (!empty($out['error'])) {
-			\Yii::error(VarDumper::dumpAsString($out['error'], 10),
-				'RocketChat:getDepartments:fail');
-		}
+        if (!empty($out['error'])) {
+            \Yii::error(
+                VarDumper::dumpAsString($out['error'], 10),
+                'RocketChat:getDepartments:fail'
+            );
+        }
 
-		return $out;
-	}
+        return $out;
+    }
 
-	public function removeDepartment(string $departmentId): array
-	{
-		$out = ['error' => '', 'data' => []];
-		$headers = $this->getSystemAuthDataHeader();
-		$response = $this->sendRequest('livechat/department/' . $departmentId, [],'delete', $headers);
+    public function removeDepartment(string $departmentId): array
+    {
+        $out = ['error' => '', 'data' => []];
+        $headers = $this->getSystemAuthDataHeader();
+        $response = $this->sendRequest('livechat/department/' . $departmentId, [], 'delete', $headers);
 
-		if ($response->isOk) {
-			if (!empty($response->data['success'])) {
-				$out['data'] = $response->data;
-			} else {
-				$out['error'] = 'Not found in response array data key';
-			}
-		} else {
-			$out['error'] = self::getErrorMessageFromResult($response->content);
-		}
+        if ($response->isOk) {
+            if (!empty($response->data['success'])) {
+                $out['data'] = $response->data;
+            } else {
+                $out['error'] = 'Not found in response array data key';
+            }
+        } else {
+            $out['error'] = self::getErrorMessageFromResult($response->content);
+        }
 
-		if (!empty($out['error'])) {
-			\Yii::error(VarDumper::dumpAsString($out['error'], 10),
-				'RocketChat:removeDepartment:fail');
-		}
+        if (!empty($out['error'])) {
+            \Yii::error(
+                VarDumper::dumpAsString($out['error'], 10),
+                'RocketChat:removeDepartment:fail'
+            );
+        }
 
-		return $out;
-	}
+        return $out;
+    }
 
     /**
      * @param int $length
@@ -689,7 +697,7 @@ class RocketChat extends Component
      */
     public static function getErrorMessageFromResult($result): string
     {
-    	$errorMessage = 'Unknown error message';
+        $errorMessage = 'Unknown error message';
         if (!empty($result['error'])) {
             $errorArr = @json_decode($result['error'], true, 512, JSON_THROW_ON_ERROR);
             if (isset($errorArr['message'])) {
@@ -699,18 +707,18 @@ class RocketChat extends Component
             } else {
                 $errorMessage = VarDumper::dumpAsString($result['error']);
             }
-        } else if (isset($result['success']) && !$result['success']) {
-			$errorMessage = $result['message'] ?? 'Unknown error message';
-		} else if (!is_array($result)) {
-        	$error = Json::decode($result);
-        	if (isset($error['success']) && !$error['success']) {
-        		$errorMessage = $error['message'] ?? 'Unknown error message';
-			}
+        } elseif (isset($result['success']) && !$result['success']) {
+            $errorMessage = $result['message'] ?? 'Unknown error message';
+        } elseif (!is_array($result)) {
+            $error = Json::decode($result);
+            if (isset($error['success']) && !$error['success']) {
+                $errorMessage = $error['message'] ?? 'Unknown error message';
+            }
 
-        	if (isset($error['status']) && $error['status'] === 'error') {
-				$errorMessage = $error['message'] ?? 'Unknown error message';
-			}
-		} else {
+            if (isset($error['status']) && $error['status'] === 'error') {
+                $errorMessage = $error['message'] ?? 'Unknown error message';
+            }
+        } else {
             $errorMessage = VarDumper::dumpAsString($result);
         }
         return $errorMessage;

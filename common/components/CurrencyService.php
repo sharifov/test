@@ -88,7 +88,16 @@ class CurrencyService extends Component
             $this->request->setOptions($options);
         }
 
-        return $this->request->send();
+        $response = $this->request->send();
+
+        $metrics = new Metrics();
+        if ($response->isOk) {
+            $metrics->serviceCounter('currency', ['type' => 'success', 'action' => $action]);
+        } else {
+            $metrics->serviceCounter('currency', ['type' => 'error', 'action' => $action]);
+        }
+
+        return $response;
     }
 
 

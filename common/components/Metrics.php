@@ -60,20 +60,39 @@ class Metrics extends Component
     /**
      * @param string $name
      * @param float $value
+     * @param array $labels
      */
-    public function jobHistogram(string $name, float $value): void
+    public function jobHistogram(string $name, float $value, array $labels = []): void
     {
+        $name = strtolower($name);
         try {
             $histogram = $this->_registry->getOrRegisterHistogram(
                 self::NAMESPACE_CONSOLE,
-                'queue_jobs',
-                'Console queue Jobs Histogram',
-                ['name'],
+                'job_' . $name,
+                'Job ' . $name,
+                array_keys($labels),
                 [0.1, 0.3, 0.5, 0.8, 1, 2, 3, 5, 7, 10]
             );
-            $histogram->observe($value, [$name]);
+            $histogram->observe($value, array_values($labels));
         } catch (\Throwable $throwable) {
             \Yii::error(AppHelper::throwableLog($throwable), 'Metrics:jobHistogram:Throwable');
+        }
+    }
+
+
+    /**
+     * @param string $name
+     * @param array $labels
+     * @param int $value
+     */
+    public function serviceCounter(string $name, array $labels = [], int $value = 1): void
+    {
+        $name = strtolower($name);
+        try {
+            $counter = $this->_registry->registerCounter(self::NAMESPACE_CONSOLE, 'service_' . $name . '_cnt', 'Service ' . $name, array_keys($labels));
+            $counter->incBy($value, array_values($labels));
+        } catch (\Throwable $throwable) {
+            \Yii::error(AppHelper::throwableLog($throwable), 'Metrics:serviceCounter:Throwable');
         }
     }
 }

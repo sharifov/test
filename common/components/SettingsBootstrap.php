@@ -6,16 +6,16 @@ use common\models\Setting;
 use Yii;
 use yii\base\BootstrapInterface;
 
-
 /*
 /* The base class that you use to retrieve the settings from the database
 */
 
-class SettingsBootstrap implements BootstrapInterface {
-
+class SettingsBootstrap implements BootstrapInterface
+{
     private $db;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->db = Yii::$app->db;
     }
 
@@ -26,13 +26,10 @@ class SettingsBootstrap implements BootstrapInterface {
      */
     public function bootstrap($app)
     {
-
-
         $tableSchema = Yii::$app->db->schema->getTableSchema('setting');
 
 
-        if($tableSchema) {
-
+        if ($tableSchema) {
             $cache = Yii::$app->cache;
 
             //$cache->delete('site_settings');
@@ -49,8 +46,7 @@ class SettingsBootstrap implements BootstrapInterface {
                 if ($settings) {
                     foreach ($settings as $key => $setting) {
                         if (isset(Setting::TYPE_LIST[$setting['s_type']])) {
-
-                            if($setting['s_type'] === Setting::TYPE_ARRAY) {
+                            if ($setting['s_type'] === Setting::TYPE_ARRAY) {
                                 $setting['s_value'] = @json_decode($setting['s_value'], true);
                             }
                             @settype($setting['s_value'], $setting['s_type']);
@@ -69,9 +65,6 @@ class SettingsBootstrap implements BootstrapInterface {
                 // $settingsArr['cache'] = true;
                 Yii::$app->params['settings'] = $settingsArr;
             }
-
         }
-
     }
-
 }
