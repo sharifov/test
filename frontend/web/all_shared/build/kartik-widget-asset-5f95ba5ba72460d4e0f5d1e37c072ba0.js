@@ -1,0 +1,1 @@
+var kvInitHtml5;!function(n){"use strict";kvInitHtml5=function(t,i){var e=n(t),a=n(i);n(document).on("change",t,function(){a.val(this.value)}).on("input change",i,function(n){e.val(this.value),"change"===n.type&&e.trigger("change")})}}(window.jQuery);
