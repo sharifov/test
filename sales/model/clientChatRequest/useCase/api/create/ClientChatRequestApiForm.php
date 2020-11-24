@@ -73,8 +73,11 @@ class ClientChatRequestApiForm extends Model
 
     public function validateMessageFromBot()
     {
-        if (ClientChatRequest::isMessage($this->eventId)
-            && !empty($this->data['agent']['username']) && $this->data['agent']['username'] === 'bot') {
+        if (
+            ClientChatRequest::isMessage($this->eventId)
+            && $this->eventId === ClientChatRequest::EVENT_AGENT_UTTERED
+            && !empty($this->data['u']['username']) && $this->data['u']['username'] === 'bot'
+        ) {
             $this->addError('data', 'Messages from the bot are not processed');
         }
     }
