@@ -214,7 +214,11 @@ $js = <<<JS
                             //alert(obj.cmd);
                              if (typeof obj.notification !== 'undefined') {
                                  if (userId == obj.notification.userId) {
-                                    notificationInit(obj.notification);
+                                    if (typeof notificationInit === 'undefined') {
+                                        console.warn('not found notificationInit method');
+                                    } else {
+                                        notificationInit(obj.notification); 
+                                    }
                                  } else {
                                      console.error('connecting user Id not equal notification user Id');
                                  }
