@@ -149,7 +149,7 @@ return [
                 '*' => [
                     'class' => 'yii\i18n\DbMessageSource',
                     'db' => 'db',
-                    'sourceLanguage' => 'en-US', // Developer language
+                    'sourceLanguage' => 'xx', // 'en-US' Developer language
                     'sourceMessageTable' => '{{%language_source}}',
                     'messageTable' => '{{%language_translate}}',
                     'cachingDuration' => 3600,
