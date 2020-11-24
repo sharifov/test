@@ -146,6 +146,8 @@ use yii\helpers\VarDumper;
                     if($model->c_updated_dt) {
                         if($model->isEnded()) {
                             $sec = $model->c_call_duration ?: strtotime($model->c_updated_dt) - strtotime($model->c_created_dt);
+                        } elseif ($model->isStatusQueue()) {
+                            $sec = time() - strtotime($model->c_queue_start_dt);
                         } else {
                             $sec = time() - strtotime($model->c_updated_dt);
                         }

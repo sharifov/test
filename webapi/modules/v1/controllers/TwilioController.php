@@ -495,7 +495,7 @@ class TwilioController extends ApiBaseNoAuthController
                             }
                             $queueLongTimeParams = new QueueLongTimeNotificationParams(empty($dParams['queue_long_time_notification']) ? [] : $dParams['queue_long_time_notification']);
                             if ($queueLongTimeParams->isActive()) {
-                                (new QueueLongTimeNotificationJobCreator())->create($call, $depPhone->dpp_id, $queueLongTimeParams);
+                                (new QueueLongTimeNotificationJobCreator())->create($call, $depPhone->dpp_id, $queueLongTimeParams->getDelay());
                             }
                         } catch (\Throwable $e) {
                             Yii::error([

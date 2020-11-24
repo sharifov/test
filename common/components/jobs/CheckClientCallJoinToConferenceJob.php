@@ -118,7 +118,7 @@ class CheckClientCallJoinToConferenceJob implements JobInterface
             $dParams = @json_decode($depPhone->dpp_params, true);
             $queueLongTimeParams = new QueueLongTimeNotificationParams($dParams['queue_long_time_notification'] ?? []);
             if ($queueLongTimeParams->isActive()) {
-                (new QueueLongTimeNotificationJobCreator())->create($call, $depPhone->dpp_id, $queueLongTimeParams);
+                (new QueueLongTimeNotificationJobCreator())->create($call, $depPhone->dpp_id, $queueLongTimeParams->getDelay());
             }
         } catch (\Throwable $e) {
             \Yii::error([

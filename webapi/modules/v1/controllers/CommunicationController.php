@@ -1679,7 +1679,7 @@ class CommunicationController extends ApiBaseController
                     (new RepeatMessageCallJobCreator())->create($callModel, $department->dpp_id, $repeatParams);
                 }
                 if ($queueLongTimeParams->isActive()) {
-                    (new QueueLongTimeNotificationJobCreator())->create($callModel, $department->dpp_id, $queueLongTimeParams);
+                    (new QueueLongTimeNotificationJobCreator())->create($callModel, $department->dpp_id, $queueLongTimeParams->getDelay() + 7);
                 }
             } catch (\Throwable $e) {
                 Yii::error([
@@ -1882,7 +1882,7 @@ class CommunicationController extends ApiBaseController
                             (new RepeatMessageCallJobCreator())->create($callModel, $department->dpp_id, $repeatParams);
                         }
                         if ($queueLongTimeParams->isActive()) {
-                            (new QueueLongTimeNotificationJobCreator())->create($callModel, $department->dpp_id, $queueLongTimeParams);
+                            (new QueueLongTimeNotificationJobCreator())->create($callModel, $department->dpp_id, $queueLongTimeParams->getDelay() + 7);
                         }
                     } catch (\Throwable $e) {
                         Yii::error([

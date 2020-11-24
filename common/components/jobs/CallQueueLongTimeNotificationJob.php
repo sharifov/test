@@ -57,7 +57,9 @@ class CallQueueLongTimeNotificationJob implements JobInterface
                 $this->sendNotifications($users, $call);
             }
 
-            (new QueueLongTimeNotificationJobCreator())->create($call, $this->departmentPhoneProjectId, $params);
+            if ($params->isActive()) {
+                (new QueueLongTimeNotificationJobCreator())->create($call, $this->departmentPhoneProjectId, $params->getDelay());
+            }
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => $e->getMessage(),

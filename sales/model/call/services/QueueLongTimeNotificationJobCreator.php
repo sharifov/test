@@ -3,20 +3,15 @@
 namespace sales\model\call\services;
 
 use common\components\jobs\CallQueueLongTimeNotificationJob;
-use sales\model\department\departmentPhoneProject\entity\params\QueueLongTimeNotificationParams;
 use Yii;
 use common\models\Call;
 
 class QueueLongTimeNotificationJobCreator
 {
-    public function create(Call $call, int $depPhoneProjectId, QueueLongTimeNotificationParams $params): void
+    public function create(Call $call, int $depPhoneProjectId, int $delay): void
     {
-        if (!$params->isActive()) {
-            return;
-        }
-
         $job = new CallQueueLongTimeNotificationJob($call->c_id, $depPhoneProjectId, microtime());
-        $jobId = Yii::$app->queue_job->delay($params->getDelay())->priority(100)->push($job);
+        $jobId = Yii::$app->queue_job->delay($delay)->priority(100)->push($job);
         if ($jobId) {
             $data = $call->getData();
             $data->queueLongTime->jobId = $jobId;
