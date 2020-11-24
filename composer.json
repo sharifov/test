@@ -80,6 +80,7 @@
         "kivork/yii2-virtual-cron": "@dev",
         "kivork/yii2-prometheus-client": "@dev",
 		"sorokinmedia/yii2-centrifugo": "*"
+
 	},
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.1",
@@ -97,7 +98,8 @@
 		"vimeo/psalm": "^3.13",
 		"phpstan/phpstan": "^0.12.37",
 		"friendsofphp/php-cs-fixer": "^2.16",
-		"proget-hq/phpstan-yii2": "^0.7.3"
+		"proget-hq/phpstan-yii2": "^0.7.3",
+		"squizlabs/php_codesniffer": "*"
 	},
 	"autoload-dev": {
 		"psr-2": {
@@ -152,6 +154,8 @@
 	"scripts": {
 		"cs-fix": [
 			"vendor/bin/php-cs-fixer fix --config=.php_cs --verbose --show-progress=dots"
-		]
+		],
+		"cs-check": "phpcs",
+		"cs-fix2": "phpcbf"
 	}
 }

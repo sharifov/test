@@ -1,4 +1,5 @@
 <?php
+
 return [
     'api'   => [
         'username'  => '{{ webapi.config.params.api.username:str }}',

@@ -1,4 +1,5 @@
 <?php
+
 return [
     'serviceName' => '{{ common.config.params.serviceName:str }}',
     'serviceVersion' => '{{ common.config.params.serviceVersion:str }}',
@@ -18,7 +19,7 @@ return [
         'bcc_sales' => '{{ common.config.params.email_to.bcc_sales:str }}'
     ],
     'lead' => [
-        'call2DelayTime' =>'{{ common.config.params.lead.call2DelayTime:int }}',
+        'call2DelayTime' => '{{ common.config.params.lead.call2DelayTime:int }}',
     ],
     'ipinfodb_key' => '{{ common.config.params.lead.ipinfodb_key }}',
 

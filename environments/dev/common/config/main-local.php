@@ -1,4 +1,5 @@
 <?php
+
 return [
     'name' => 'CRM - DEV',
     'components' => [
@@ -115,7 +116,7 @@ return [
             'url' => '{{ common.config.main.components.rchat.url:str }}',
             'username' => '{{ common.config.main.components.rchat.username:str }}',
             'password' => '{{ common.config.main.components.rchat.password:str }}',
-			'host' => '{{ common.config.main.components.rchat.host:str }}',
+            'host' => '{{ common.config.main.components.rchat.host:str }}',
         ],
 
         'chatBot' => [

@@ -1,4 +1,5 @@
 <?php
+
 return [
     'getAirportUrl' => 'https://backoffice.travelinsides.com/api/v2/airport/search',
     'sync' => [

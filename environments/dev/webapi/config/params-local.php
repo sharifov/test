@@ -1,4 +1,5 @@
 <?php
+
 return [
     'serviceName' => '{{ webapi.config.params.serviceName:str }}',
     'client.passwordResetTokenExpire'  => '{{ webapi.config.params.client.passwordResetTokenExpire:int }}',

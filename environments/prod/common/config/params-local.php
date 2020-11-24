@@ -1,4 +1,5 @@
 <?php
+
 return [
 
     'serviceName' => '{{ common.config.params.serviceName:str }}',

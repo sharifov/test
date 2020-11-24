@@ -1,4 +1,5 @@
 <?php
+
 return [
     'serviceName' => '{{ console.config.params.serviceName:str }}',
     'sync' => [

@@ -1,4 +1,5 @@
 <?php
+
 return [
     'appInstance' => '{{ common.config.params.appInstance:str }}',
     'appEnv' => 'stage',
