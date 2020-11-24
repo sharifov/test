@@ -9,12 +9,14 @@ use common\models\UserGroupAssign;
 use sales\access\EmployeeDepartmentAccess;
 use sales\access\EmployeeGroupAccess;
 use sales\access\EmployeeProjectAccess;
+use sales\auth\Auth;
 use sales\entities\cases\Cases;
 use sales\entities\cases\CasesQSearch;
 use sales\entities\cases\CasesStatus;
 use yii\db\ActiveQuery;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 class CasesQRepository
 {
@@ -161,17 +163,26 @@ class CasesQRepository
             return $query;
         }
 
+        $all = Auth::can('cases-q/processing/list/all');
+        $owner = Auth::can('cases-q/processing/list/owner');
+        $group = Auth::can('cases-q/processing/list/group');
+        $empty = Auth::can('cases-q/processing/list/empty');
+
+        if (!$all && !$owner && !$group && !$empty) {
+            $query->where('0 = 1');
+            return $query;
+        }
+
+        if (!$all) {
+            $query->andWhere([
+                'OR',
+                $owner ? $this->isOwner($user->id) : [],
+                $group ? ['cs_user_id' => $this->usersIdsInCommonGroups($user->id)] : [],
+                $empty ? $this->freeCase() : []
+            ]);
+        }
+
         $conditions = [];
-
-        if ($user->isSupAgent() || $user->isExAgent()) {
-            $conditions = $this->isOwner($user->id);
-        }
-
-        if ($user->isExSuper() || $user->isSupSuper()) {
-            $conditions = [
-                'cs_user_id' => $this->usersIdsInCommonGroups($user->id)
-            ];
-        }
 
         $query->andWhere($this->createSubQuery($user->id, $conditions, $checkDepPermission = true));
 
@@ -199,17 +210,26 @@ class CasesQRepository
             return $query;
         }
 
+        $all = Auth::can('cases-q/solved/list/all');
+        $owner = Auth::can('cases-q/solved/list/owner');
+        $group = Auth::can('cases-q/solved/list/group');
+        $empty = Auth::can('cases-q/solved/list/empty');
+
+        if (!$all && !$owner && !$group && !$empty) {
+            $query->where('0 = 1');
+            return $query;
+        }
+
+        if (!$all) {
+            $query->andWhere([
+                'OR',
+                $owner ? $this->isOwner($user->id) : [],
+                $group ? ['cs_user_id' => $this->usersIdsInCommonGroups($user->id)] : [],
+                $empty ? $this->freeCase() : []
+            ]);
+        }
+
         $conditions = [];
-
-        if ($user->isSupAgent() || $user->isExAgent()) {
-            $conditions = $this->isOwner($user->id);
-        }
-
-        if ($user->isExSuper() || $user->isSupSuper()) {
-            $conditions = [
-                'cs_user_id' => $this->usersIdsInCommonGroups($user->id)
-            ];
-        }
 
         $query->andWhere($this->createSubQuery($user->id, $conditions, $checkDepPermission = true));
 
@@ -235,6 +255,25 @@ class CasesQRepository
 
         if ($user->isAdmin()) {
             return $query;
+        }
+
+        $all = Auth::can('cases-q/trash/list/all');
+        $owner = Auth::can('cases-q/trash/list/owner');
+        $group = Auth::can('cases-q/trash/list/group');
+        $empty = Auth::can('cases-q/trash/list/empty');
+
+        if (!$all && !$owner && !$group && !$empty) {
+            $query->where('0 = 1');
+            return $query;
+        }
+
+        if (!$all) {
+            $query->andWhere([
+                'OR',
+                $owner ? $this->isOwner($user->id) : [],
+                $group ? ['cs_user_id' => $this->usersIdsInCommonGroups($user->id)] : [],
+                $empty ? $this->freeCase() : []
+            ]);
         }
 
         $conditions = [];
