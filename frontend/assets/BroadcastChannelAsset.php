@@ -9,8 +9,8 @@ use yii\web\AssetBundle;
  */
 class BroadcastChannelAsset extends AssetBundle
 {
-    public $basePath = '@webroot';
-    public $baseUrl = '@web';
+//    public $basePath = '@webroot';
+//    public $baseUrl = '@web';
 //    public $css = [
 //        '/js/jquery.timeline2/dist/jquery.timeline.min.css',
 //
@@ -18,8 +18,8 @@ class BroadcastChannelAsset extends AssetBundle
     public $js = [
         'https://cdn.jsdelivr.net/npm/broadcast-channel@3.1.0/dist/lib/browser.min.js'
     ];
-    public $depends = [
-        'yii\web\YiiAsset',
-        'yii\bootstrap4\BootstrapPluginAsset',
-    ];
+//    public $depends = [
+//        'yii\web\YiiAsset',
+//        'yii\bootstrap4\BootstrapPluginAsset',
+//    ];
 }

@@ -1,6 +1,7 @@
 <?php
 namespace frontend\themes\gentelella_v2\assets;
 
+use frontend\assets\MomentAsset;
 use yii\web\AssetBundle;
 use yii\web\JqueryAsset;
 
@@ -8,7 +9,7 @@ class ClientChatAsset extends AssetBundle
 {
     public $sourcePath = '@frontend/themes/gentelella_v2/';
     public $css = [
-        'css/client-chat/client-chat.css?v1.1',
+        'css/client-chat/client-chat.css',
     ];
 
     public $js = [

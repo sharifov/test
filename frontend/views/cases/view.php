@@ -42,7 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 \frontend\assets\CreditCardAsset::register($this);
 
-$bundle = \frontend\themes\gentelella\assets\AssetLeadCommunication::register($this);
+$bundle = \frontend\themes\gentelella_v2\assets\AssetLeadCommunication::register($this);
 
 /** @var Employee $user */
 $user = Yii::$app->user->identity;

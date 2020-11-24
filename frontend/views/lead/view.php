@@ -33,7 +33,7 @@ use sales\auth\Auth;
 use yii\bootstrap4\Modal;
 use yii\data\ActiveDataProvider;
 
-\frontend\themes\gentelella\assets\AssetLeadCommunication::register($this);
+\frontend\themes\gentelella_v2\assets\AssetLeadCommunication::register($this);
 
 // $this->params['breadcrumbs'][] = $this->title;
 

@@ -13,9 +13,9 @@ class NotificationSocketAsset extends AssetBundle
         'notification-socket.js',
     ];
 
-    public $depends = [
-        YiiAsset::class,
-    ];
+//    public $depends = [
+//        YiiAsset::class,
+//    ];
 
     public $jsOptions = [
         'position' => \yii\web\View::POS_END

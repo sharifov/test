@@ -20,7 +20,7 @@ use sales\formatters\client\ClientTimeFormatter;
 use yii\bootstrap\Html;
 use frontend\models\LeadForm;
 
-$bundle = \frontend\themes\gentelella\assets\AssetLeadCommunication::register($this);
+$bundle = \frontend\themes\gentelella_v2\assets\AssetLeadCommunication::register($this);
 
 //$this->registerCssFile('/css/style-req.css');
 

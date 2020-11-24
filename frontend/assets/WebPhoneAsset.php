@@ -8,6 +8,9 @@
 namespace frontend\assets;
 
 use yii\web\AssetBundle;
+use yii\web\YiiAsset;
+use yii\web\JqueryAsset;
+use yii\bootstrap4\BootstrapAsset;
 
 /**
  * @author Alexandr
@@ -22,15 +25,11 @@ class WebPhoneAsset extends AssetBundle
         'css/style-web-phone.css'
     ];
 
-    public $js = [
-        'https://sdk.twilio.com/js/client/v1.10/twilio.min.js',
-        //'/js/quickstart.js',
-    ];
-
     public $depends = [
-        'yii\web\YiiAsset',
-        'yii\web\JqueryAsset',
-        'yii\bootstrap4\BootstrapAsset',
+        YiiAsset::class,
+        JqueryAsset::class,
+        BootstrapAsset::class,
+        TwilioAsset::class
     ];
 
     public $jsOptions = [

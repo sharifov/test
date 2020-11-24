@@ -7,25 +7,26 @@
 
 namespace frontend\themes\gentelella_v2\assets;
 
+use frontend\assets\CentrifugeAsset;
+
 class Asset extends \yii\web\AssetBundle
 {
     public $sourcePath = '@frontend/themes/gentelella_v2/';
     public $baseUrl = '@web';
 
     public $css = [
-        'css/style-req.css?v=1.1'
+        'css/style-req.css'
     ];
 
     public $js = [
         'js/util.js',
         'js/extension.js',
-        '/js/centrifuge-js-master/dist/centrifuge.js',
     ];
 
     public $depends = [
         ThemeAsset::class,
         CommonAsset::class,
-        SentryAsset::class
-//        'yiister\gentelella\assets\ExtensionAsset',
+        SentryAsset::class,
+        CentrifugeAsset::class
     ];
 }

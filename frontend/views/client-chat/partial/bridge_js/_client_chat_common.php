@@ -53,12 +53,13 @@ $this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2
     ]
 ]);
 
-$this->registerJsFile('/js/moment.min.js', [
-    'position' => View::POS_HEAD,
-    'depends' => [
-        JqueryAsset::class,
-    ],
-]);
+//$this->registerJsFile('/js/moment.min.js', [
+//    'position' => View::POS_HEAD,
+//    'depends' => [
+//        JqueryAsset::class,
+//    ],
+//]);
+
 
 $js = <<<JS
 let currentChatId = {$clientChatId};

@@ -8,6 +8,7 @@ use common\models\Employee;
 use common\models\User;
 use frontend\models\LeadForm;
 
+use frontend\themes\gentelella_v2\assets\groups\GentelellaAsset;
 use sales\access\EmployeeProductAccess;
 use sales\access\ListsAccess;
 
@@ -808,7 +809,7 @@ $this->registerJs($js);
 
 
 <?php $this->registerCssFile('//cdnjs.cloudflare.com/ajax/libs/noUiSlider/11.1.0/nouislider.min.css',[
-    'depends' => [\yii\bootstrap\BootstrapAsset::class],
+    'depends' => [GentelellaAsset::class],
 ]);?>
 <?php //$this->registerCssFile('//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.2.6/css/bootstrap-modal.css',[
 //    'depends' => [\yii\bootstrap4\BootstrapAsset::class],

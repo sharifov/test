@@ -7,6 +7,10 @@
 
 namespace frontend\themes\gentelella_v2\assets;
 
+use frontend\assets\groups\AllSharedAsset;
+use frontend\themes\gentelella_v2\assets\groups\GentelellaAsset;
+use yii\web\JqueryAsset;
+
 class AssetLeadCommunication extends \yii\web\AssetBundle
 {
     //public $sourcePath = '@frontend/themes/gentelella/';
@@ -23,15 +27,7 @@ class AssetLeadCommunication extends \yii\web\AssetBundle
 //		'https://cdnjs.cloudflare.com/ajax/libs/timer.jquery/0.9.0/timer.jquery.min.js'
     ];
 
-    /*public $depends = [
-        //'yii\web\YiiAsset',
-        //'yii\bootstrap\BootstrapAsset',
-        'yiister\gentelella\assets\Asset',
-    ];*/
-
     public $depends = [
-        ThemeAsset::class,
-//        'yiister\gentelella\assets\ExtensionAsset',
+        JqueryAsset::class
     ];
-
 }

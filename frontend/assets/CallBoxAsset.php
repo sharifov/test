@@ -19,18 +19,18 @@ class CallBoxAsset extends AssetBundle
     public $baseUrl = '@web';
 
     public $css = [
-        'css/style-call-box.css?v=15'
+        'css/style-call-box.css'
     ];
 
     public $js = [
-        'js/js-call-box.js?v=11',
+        'js/js-call-box.js',
     ];
 
-    public $depends = [
-        'yii\web\YiiAsset',
-        'yii\web\JqueryAsset',
-        'yii\bootstrap4\BootstrapAsset',
-    ];
+//    public $depends = [
+//        'yii\web\YiiAsset',
+//        'yii\web\JqueryAsset',
+//        'yii\bootstrap4\BootstrapAsset',
+//    ];
 
     public $jsOptions = [
         'position' => \yii\web\View::POS_END

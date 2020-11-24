@@ -9,8 +9,9 @@ use yii\web\AssetBundle;
  */
 class CreditCardAsset extends AssetBundle
 {
-    public $basePath = '@webroot';
-    public $baseUrl = '@web';
+//    public $basePath = '@webroot';
+//    public $baseUrl = '@web';
+
     public $css = [
         'https://cdnjs.cloudflare.com/ajax/libs/card/2.4.0/card.css',
     ];

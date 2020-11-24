@@ -12,7 +12,7 @@ class EditToolAsset extends AssetBundle
     public $js = [
         '/js/edit-tool.js'
     ];
-    public $depends = [
-        \yii\web\YiiAsset::class
-    ];
+//    public $depends = [
+//        \yii\web\YiiAsset::class
+//    ];
 }

@@ -525,7 +525,7 @@ $this->registerJsFile('/js/moment-timezone-with-data.min.js', [
 ]);*/
 
 $this->registerJsFile('/js/jquery.countdown-2.2.0/jquery.countdown.min.js', [
-    'position' => \yii\web\View::POS_HEAD,
+    'position' => \yii\web\View::POS_END,
     'depends' => [
         \yii\web\JqueryAsset::class
     ]

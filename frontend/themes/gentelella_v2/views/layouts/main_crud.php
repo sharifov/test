@@ -4,21 +4,19 @@
 /* @var $content string */
 
 use common\models\Employee;
-use frontend\widgets\clientChat\ClientChatAccessWidget;
+use frontend\assets\groups\AllSharedAsset;
+use frontend\themes\gentelella_v2\assets\groups\GentelellaCrudAsset;
 use frontend\widgets\notification\NotificationSocketWidget;
 use frontend\widgets\notification\NotificationWidget;
 use sales\auth\Auth;
 use yii\helpers\Html;
-use frontend\widgets\centrifugo\CentrifugoNotificationWidget;
 
-$bundle = \frontend\themes\gentelella_v2\assets\AssetCrud::register($this);
-\frontend\assets\PageLoaderAsset::register($this);
+$bundle = \frontend\assets\AppCrudAsset::register($this);
 
 
 //$this->registerCssFile('@frontend/themes/gentelella/css/custom.css');
 //Yii::$app->view->registerCssFile('@frontend/themes/gentelella/css/custom.css', ['depends'=>'yiister\gentelella_v2\assets\Asset']);
 
-\frontend\assets\NotifyAsset::register($this);
 
 ?>
 <?php $this->beginPage(); ?>

@@ -11,8 +11,8 @@ use sales\helpers\setting\SettingHelper;
 
 class SentryAsset extends \yii\web\AssetBundle
 {
-    public $sourcePath = '@frontend/themes/gentelella_v2/';
-    public $baseUrl = '@web';
+//    public $sourcePath = '@frontend/themes/gentelella_v2/';
+//    public $baseUrl = '@web';
 
     public function init()
     {

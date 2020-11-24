@@ -7,8 +7,9 @@ use frontend\widgets\OnlineConnection;
 use sales\auth\Auth;
 use yii\helpers\Html;
 
-\frontend\themes\gentelella_v2\assets\Asset::register($this);
-\frontend\assets\NotifyAsset::register($this);
+//\frontend\themes\gentelella_v2\assets\Asset::register($this);
+$bundle = \frontend\themes\gentelella_v2\assets\SimpleAsset::register($this);
+//\frontend\assets\NotifyAsset::register($this);
 
 
 ?>

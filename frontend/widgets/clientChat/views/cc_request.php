@@ -1,7 +1,7 @@
 <?php
 
 use common\components\i18n\Formatter;
-use frontend\widgets\clientChat\ClientChatAsset;
+use frontend\widgets\clientChat\ClientChatWidgetAsset;
 use yii\helpers\Html;
 
 /** @var $this \yii\web\View */
@@ -10,7 +10,7 @@ use yii\helpers\Html;
 /** @var $formatter Formatter */
 /** @var $page int */
 
-ClientChatAsset::register($this);
+ClientChatWidgetAsset::register($this);
 
 $totalRequest = count($access);
 ?>

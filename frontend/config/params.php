@@ -4,4 +4,5 @@ return [
     'serviceName' => 'sales-frontend',
     'limitUserConnections' => 0,   // WebSocket Limit user Connections
 	'bsVersion' => '4.x',
+    'minifiedAssetsEnabled' => true
 ];
