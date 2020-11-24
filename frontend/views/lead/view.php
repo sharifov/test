@@ -216,7 +216,7 @@ if (isset($clientProjectInfo) && $clientProjectInfo) {
 
 
 
-            <?php if (Auth::can('lead/view_BO_Expert')): ?>
+            <?php if (Auth::can('lead-view/call-expert/view', ['lead' => $lead])): ?>
                 <?php  if (Yii::$app->user->identity->isAllowCallExpert): ?>
                     <?= $this->render('call-expert/lead_call_expert', [
                         'lead' => $lead,
