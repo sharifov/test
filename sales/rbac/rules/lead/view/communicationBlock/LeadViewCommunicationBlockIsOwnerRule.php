@@ -7,6 +7,8 @@ use yii\rbac\Rule;
 
 class LeadViewCommunicationBlockIsOwnerRule extends Rule
 {
+    public $name = 'LeadViewCommunicationBlockIsOwnerRule';
+
     public function execute($userId, $item, $params): bool
     {
         if (!isset($params['lead']) || !$params['lead'] instanceof Lead) {
