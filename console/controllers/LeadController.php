@@ -60,7 +60,7 @@ class LeadController extends Controller
 
         $message = '0 leads returned to call ready';
         if (count($report) > 0) {
-            $message = count($report) .' leads returned to call ready. [' . implode(', ', array_keys($report)) . ']';
+            $message = count($report) . ' leads returned to call ready. [' . implode(', ', array_keys($report)) . ']';
         }
 
         //Yii::info($message, 'info\CronReturnLead');
@@ -87,10 +87,9 @@ class LeadController extends Controller
 
         //$message = '0 leads returned to call bugged';
         if (count($report) > 0) {
-            $message = count($report) .' leads returned to call bugged. [' . implode(', ', array_keys($report)) . ']';
+            $message = count($report) . ' leads returned to call bugged. [' . implode(', ', array_keys($report)) . ']';
             Yii::info($message, 'info\CronReturnLead');
         }
-
     }
 
     /**
@@ -139,19 +138,17 @@ class LeadController extends Controller
 
             //print_r($leads->createCommand()->getRawSql());
 
-        if($leads) {
+        if ($leads) {
             foreach ($leads as $lead) {
-
                 $out = $lead->updateIpInfo();
 
-                if(isset($out['error']) && $out['error']) {
-                    echo $lead->id."\r\n";
+                if (isset($out['error']) && $out['error']) {
+                    echo $lead->id . "\r\n";
                     VarDumper::dump($out);
                     echo "\r\n";
-
                 } else {
-                    echo $lead->id.' OK - ';
-                    if(isset($out['data']['timeZone'])) {
+                    echo $lead->id . ' OK - ';
+                    if (isset($out['data']['timeZone'])) {
                         VarDumper::dump($out['data']['timeZone']);
                     }
                     echo "\r\n";
@@ -159,7 +156,6 @@ class LeadController extends Controller
 
                 sleep(1);
             }
-
         }
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
@@ -246,47 +242,46 @@ class LeadController extends Controller
 
         $repo = Yii::createObject(LeadRepository::class);
 
-       $leadsData = Lead::getEndTaskLeads(Task::CAT_NOT_ANSWERED_PROCESS);
+        $leadsData = Lead::getEndTaskLeads(Task::CAT_NOT_ANSWERED_PROCESS);
 
-       echo " ---- TASK CATEGORY 1 ----\n";
-       if($leadsData) {
-           foreach ($leadsData as $leadItem) {
-               $lead = Lead::findOne($leadItem['lt_lead_id']);
-               if($lead) {
-                   /*if(!$leadItem['l_answered']) {
+        echo " ---- TASK CATEGORY 1 ----\n";
+        if ($leadsData) {
+            foreach ($leadsData as $leadItem) {
+                $lead = Lead::findOne($leadItem['lt_lead_id']);
+                if ($lead) {
+                    /*if(!$leadItem['l_answered']) {
                        $lead->status = Lead::STATUS_SNOOZE;
                        $lead->status_description = 'System Autochange status to SNOOZE ('.$leadItem['checked_cnt'] .'/'. $leadItem['all_cnt'] . ' tasks completed)';
-                   } else*/
+                    } else*/
 
-                   if(!$leadItem['l_answered']) {
-                       try {
-                           $lead->followUp($lead->employee_id, null, 'System AutoChange status to FOLLOW UP');
-                           $repo->save($lead);
-                       } catch (\Throwable $e) {
-                           Yii::error($e->getMessage(), 'ConsoleLeadController:UpdateByTask:FollowUp');
-                       }
+                    if (!$leadItem['l_answered']) {
+                        try {
+                            $lead->followUp($lead->employee_id, null, 'System AutoChange status to FOLLOW UP');
+                            $repo->save($lead);
+                        } catch (\Throwable $e) {
+                            Yii::error($e->getMessage(), 'ConsoleLeadController:UpdateByTask:FollowUp');
+                        }
                                                     //    status_description - Was deleted
-//                       $lead->status_description = 'System AutoChange status to FOLLOW_UP ('.$leadItem['checked_cnt'] .'/'. $leadItem['all_cnt'] . ' tasks completed)';
-//                       if ($lead->employee_id && !$lead->sendNotification('lead-status-follow-up', $lead->employee_id, null, $lead)) {
-//                           Yii::warning('Not send Email notification to employee_id: ' . $lead->employee_id . ', lead: ' . $lead->id, 'Console:LeadController:UpdateByTasks:sendNotification');
-//                       }
+ //                       $lead->status_description = 'System AutoChange status to FOLLOW_UP ('.$leadItem['checked_cnt'] .'/'. $leadItem['all_cnt'] . ' tasks completed)';
+ //                       if ($lead->employee_id && !$lead->sendNotification('lead-status-follow-up', $lead->employee_id, null, $lead)) {
+ //                           Yii::warning('Not send Email notification to employee_id: ' . $lead->employee_id . ', lead: ' . $lead->id, 'Console:LeadController:UpdateByTasks:sendNotification');
+ //                       }
+                    }
 
-                   }
-
-                   echo ' - Lead: '.$lead->id. ' - ' .$leadItem['checked_cnt'] .'/'. $leadItem['all_cnt'] . " tasks completed \r\n";
-               }
-           }
-       }
+                    echo ' - Lead: ' . $lead->id . ' - ' . $leadItem['checked_cnt'] . '/' . $leadItem['all_cnt'] . " tasks completed \r\n";
+                }
+            }
+        }
 
 
         $leadsData = Lead::getEndTaskLeads(Task::CAT_ANSWERED_PROCESS);
         echo " ---- TASK CATEGORY 2 ----\n";
 
-        if($leadsData) {
+        if ($leadsData) {
             foreach ($leadsData as $leadItem) {
                 $lead = Lead::findOne($leadItem['lt_lead_id']);
-                if($lead) {
-                    if($leadItem['l_answered']) {
+                if ($lead) {
+                    if ($leadItem['l_answered']) {
 //                        $lead->status = Lead::STATUS_SNOOZE;
 //                        $lead->snooze_for = date('Y-m-d', strtotime('+3 days'));
 
@@ -305,7 +300,7 @@ class LeadController extends Controller
                         $lead->status_description = 'System AutoChange status to FOLLOW_UP ('.$leadItem['checked_cnt'] .'/'. $leadItem['all_cnt'] . ' tasks completed)';
                     }*/
 
-                    echo ' - Lead: '.$lead->id. ' - ' .$leadItem['checked_cnt'] .'/'. $leadItem['all_cnt'] . " tasks completed \r\n";
+                    echo ' - Lead: ' . $lead->id . ' - ' . $leadItem['checked_cnt'] . '/' . $leadItem['all_cnt'] . " tasks completed \r\n";
                 }
             }
         }
@@ -315,7 +310,4 @@ class LeadController extends Controller
 
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
-
-
-
 }

@@ -9,20 +9,20 @@ use yii\db\Migration;
  */
 class m200903_055156_add_permission_for_start_clint_chat extends Migration
 {
-	public $route = [
-		'/client-chat/real-time-start-chat'
-	];
+    public $route = [
+        '/client-chat/real-time-start-chat'
+    ];
 
-	public $roles = [
-		Employee::ROLE_ADMIN,
-		Employee::ROLE_SUPER_ADMIN,
-	];
+    public $roles = [
+        Employee::ROLE_ADMIN,
+        Employee::ROLE_SUPER_ADMIN,
+    ];
     /**
      * {@inheritdoc}
      */
     public function safeUp()
     {
-		(new RbacMigrationService())->up($this->route, $this->roles);
+        (new RbacMigrationService())->up($this->route, $this->roles);
     }
 
     /**
@@ -30,6 +30,6 @@ class m200903_055156_add_permission_for_start_clint_chat extends Migration
      */
     public function safeDown()
     {
-		(new RbacMigrationService())->down($this->route, $this->roles);
-	}
+        (new RbacMigrationService())->down($this->route, $this->roles);
+    }
 }

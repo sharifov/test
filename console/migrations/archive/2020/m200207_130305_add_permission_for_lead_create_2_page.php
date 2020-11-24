@@ -9,22 +9,22 @@ use yii\db\Migration;
  */
 class m200207_130305_add_permission_for_lead_create_2_page extends Migration
 {
-	public $roles = [
-		Employee::ROLE_ADMIN,
-		Employee::ROLE_SUPER_ADMIN,
-	];
+    public $roles = [
+        Employee::ROLE_ADMIN,
+        Employee::ROLE_SUPER_ADMIN,
+    ];
 
-	public $routes = [
-		'/lead/create2'
-	];
+    public $routes = [
+        '/lead/create2'
+    ];
 
     public function safeUp()
     {
-		(new RbacMigrationService())->up($this->routes, $this->roles);
+        (new RbacMigrationService())->up($this->routes, $this->roles);
     }
 
     public function safeDown()
     {
-		(new RbacMigrationService())->down($this->routes, $this->roles);
-	}
+        (new RbacMigrationService())->down($this->routes, $this->roles);
+    }
 }

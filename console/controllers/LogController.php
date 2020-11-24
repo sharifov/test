@@ -1,6 +1,5 @@
 <?php
 
-
 namespace console\controllers;
 
 use common\models\ApiLog;
@@ -56,8 +55,8 @@ class LogController extends Controller
         $timeStart = microtime(true);
         $days = $days ?? $this->logCleanerParams['days'];
         $limit = $limit ?? $this->logCleanerParams['limit'];
-        $point = $this->shortClassName . ':' .$this->action->id;
-        
+        $point = $this->shortClassName . ':' . $this->action->id;
+
         if (!$this->logCleanerEnable) {
             $this->outputHelper->printInfo('Cleaner is disable. ', $point, Console::FG_RED);
             return;
@@ -124,7 +123,7 @@ class LogController extends Controller
                 $result['status'] = 0;
                 Yii::error(
                     AppHelper::throwableFormatter($throwable),
-                    $this->shortClassName. ':' . $tableName . ':FailedDelete'
+                    $this->shortClassName . ':' . $tableName . ':FailedDelete'
                 );
             }
         }
@@ -154,8 +153,8 @@ class LogController extends Controller
             $this->logCleanerParams = [
                 'days' => $this->defaultDays,
                 'limit' => $this->defaultLimit,
-           ];
-            Yii::error(AppHelper::throwableFormatter($throwable), $this->shortClassName. ':' . __FUNCTION__ . ':Failed');
+            ];
+            Yii::error(AppHelper::throwableFormatter($throwable), $this->shortClassName . ':' . __FUNCTION__ . ':Failed');
         }
 
         $this->cleanerCollection[GlobalLog::tableName()] =

@@ -32,6 +32,5 @@ class m201023_183345_remove_client_chat_rules extends Migration
      */
     public function safeDown()
     {
-
     }
 }

@@ -49,7 +49,6 @@ class m190816_082358_add_permissions_to_cases_q_counters extends Migration
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 
     /**
@@ -76,5 +75,4 @@ class m190816_082358_add_permissions_to_cases_q_counters extends Migration
             Yii::$app->cache->flush();
         }
     }
-
 }

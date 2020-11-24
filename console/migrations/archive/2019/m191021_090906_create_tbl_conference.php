@@ -28,7 +28,7 @@ class m191021_090906_create_tbl_conference extends Migration
             $tableOptions = 'CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE=InnoDB';
         }
 
-        $this->createTable('{{%conference_room}}',	[
+        $this->createTable('{{%conference_room}}', [
             'cr_id'                     => $this->primaryKey(),
             'cr_key'                    => $this->string(30)->notNull()->unique(),
             'cr_name'                   => $this->string(50)->notNull(),
@@ -80,7 +80,7 @@ class m191021_090906_create_tbl_conference extends Migration
         );
 
 
-        $this->createTable('{{%conference}}',	[
+        $this->createTable('{{%conference}}', [
             'cf_id'                 => $this->primaryKey(),
             'cf_cr_id'              => $this->integer()->notNull(),
             'cf_sid'                => $this->string(34)->unique(),
@@ -98,9 +98,8 @@ class m191021_090906_create_tbl_conference extends Migration
         $auth = Yii::$app->authManager;
 
         foreach ($this->routes as $route) {
-
             $permission = $auth->getPermission($route);
-            if(!$permission) {
+            if (!$permission) {
                 $permission = $auth->createPermission($route);
                 $auth->add($permission);
             }
@@ -116,7 +115,6 @@ class m191021_090906_create_tbl_conference extends Migration
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 
     /**

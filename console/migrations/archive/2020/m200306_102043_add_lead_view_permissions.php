@@ -89,7 +89,6 @@ class m200306_102043_add_lead_view_permissions extends Migration
         $leadViewSnooze->ruleName = $leadViewSnoozeRule->name;
         $auth->add($leadViewSnooze);
         $auth->addChild($leadViewSnooze, $leadView);
-
     }
 
     /**

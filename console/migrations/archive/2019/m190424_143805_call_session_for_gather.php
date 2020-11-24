@@ -17,7 +17,7 @@ class m190424_143805_call_session_for_gather extends Migration
             $tableOptions = 'CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE=InnoDB';
         }
 
-        $this->createTable('{{%call_session}}',	[
+        $this->createTable('{{%call_session}}', [
             'cs_id'             => $this->primaryKey(),
             'cs_call_id'        => $this->integer()->notNull(),
             'cs_cid'            => $this->string(255),

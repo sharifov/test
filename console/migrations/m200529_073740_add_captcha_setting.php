@@ -76,7 +76,7 @@ class m200529_073740_add_captcha_setting extends Migration
             $tableOptions = 'CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE=InnoDB';
         }
 
-        $this->createTable('{{%user_failed_login}}',	[
+        $this->createTable('{{%user_failed_login}}', [
             'ufl_id' => $this->primaryKey(),
             'ufl_username' => $this->string(150),
             'ufl_user_id' => $this->integer(),
@@ -87,8 +87,15 @@ class m200529_073740_add_captcha_setting extends Migration
         ], $tableOptions);
 
         $this->createIndex('IND-user_failed_login-ufl_ip', '{{%user_failed_login}}', 'ufl_ip');
-        $this->addForeignKey('FK-user_failed_login-ufl_user_id',
-            '{{%user_failed_login}}', ['ufl_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
+        $this->addForeignKey(
+            'FK-user_failed_login-ufl_user_id',
+            '{{%user_failed_login}}',
+            ['ufl_user_id'],
+            '{{%employees}}',
+            ['id'],
+            'SET NULL',
+            'CASCADE'
+        );
 
         (new RbacMigrationService())->up($this->route, $this->roles);
 

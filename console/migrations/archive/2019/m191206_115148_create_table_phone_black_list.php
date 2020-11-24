@@ -39,8 +39,8 @@ class m191206_115148_create_table_phone_black_list extends Migration
      */
     public function safeDown()
     {
-       $this->dropForeignKey('FK-phone_blacklist_pbl_updated_user_id', '{{%phone_blacklist}}');
-       $this->dropTable('{{%phone_blacklist}}');
+        $this->dropForeignKey('FK-phone_blacklist_pbl_updated_user_id', '{{%phone_blacklist}}');
+        $this->dropTable('{{%phone_blacklist}}');
 
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();

@@ -41,7 +41,7 @@ class m181022_083737_create_tbl_user_project_params extends Migration
 
         $userParams = \common\models\EmployeeContactInfo::find()->all();
 
-        if($userParams) {
+        if ($userParams) {
             foreach ($userParams as $k => $param) {
                 $this->insert('{{%user_project_params}}', [
                     'upp_user_id' => $param->employee_id,
@@ -53,7 +53,6 @@ class m181022_083737_create_tbl_user_project_params extends Migration
                 ]);
             }
         }
-
     }
 
     /**

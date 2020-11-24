@@ -25,7 +25,6 @@ class m191104_130033_table_settings_add_redial_pending_to_follow_up_attempts ext
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 
     /**
@@ -41,6 +40,4 @@ class m191104_130033_table_settings_add_redial_pending_to_follow_up_attempts ext
             Yii::$app->cache->flush();
         }
     }
-
-
 }

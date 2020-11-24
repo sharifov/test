@@ -1,4 +1,5 @@
 <?php
+
 namespace console\controllers;
 
 use common\models\UserCallStatus;
@@ -76,7 +77,7 @@ class WebsocketServerController extends Controller
         $server->channelList = [];
 
         $server->on('start', static function (Server $server) {
-            echo ' Swoole WebSocket Server is started at ' . $server->host.':'.$server->port . PHP_EOL;
+            echo ' Swoole WebSocket Server is started at ' . $server->host . ':' . $server->port . PHP_EOL;
             if (!empty(\Yii::$app->params['appInstance'])) {
                 $ucList = UserConnection::find()->where(['uc_app_instance' => \Yii::$app->params['appInstance']])->all();
                 if ($ucList) {
@@ -137,7 +138,7 @@ class WebsocketServerController extends Controller
         });
 
         $server->on('open', static function (Server $server, \Swoole\Http\Request $request) use ($frontendConfig, $thisClass, $redisConfig, $redisList) {
-            echo '+ ' . date('m-d H:i:s'). " +{$request->fd}";
+            echo '+ ' . date('m-d H:i:s') . " +{$request->fd}";
             $user = $thisClass->getIdentityByCookie($request, $frontendConfig);
 
             if ($user) {
@@ -231,7 +232,7 @@ class WebsocketServerController extends Controller
 //                    'name' => $user->username,
 //                    'dt' => date('Y-m-d H:i:s')]);
 
-                echo ': ' . $user->username . ' ('.$userId.')' . PHP_EOL;
+                echo ': ' . $user->username . ' (' . $userId . ')' . PHP_EOL;
 
                 unset($user);
 
@@ -337,7 +338,7 @@ class WebsocketServerController extends Controller
 
 
         $server->on('message', static function (Server $server, \Swoole\WebSocket\Frame $frame) use ($thisClass) {
-            echo ' * ' . date('m-d H:i:s'). " received message: {$frame->data}\n";
+            echo ' * ' . date('m-d H:i:s') . " received message: {$frame->data}\n";
 
             $data = json_decode($frame->data, true);
             $dataRequest = $thisClass->dataProcessing($server, $frame, $data);
@@ -347,7 +348,7 @@ class WebsocketServerController extends Controller
         });
 
         $server->on('close', static function (Server $server, int $fd) {
-            echo '- ' . date('m-d H:i:s'). " -{$fd}\n";
+            echo '- ' . date('m-d H:i:s') . " -{$fd}\n";
             $row = $server->tblConnections->get($fd);
             $server->tblConnections->del($fd);
 
@@ -364,7 +365,6 @@ class WebsocketServerController extends Controller
                     $subList[] = 'con-' . $row['uc_id'];
 
                     foreach ($subList as $value) {
-
                         if (isset($server->channelList[$value][$fd])) {
                             unset($server->channelList[$value][$fd]);
 

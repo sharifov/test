@@ -26,7 +26,6 @@ class m190819_075930_add_permissions_for_route_create_from_case extends Migratio
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 
     /**
@@ -37,12 +36,12 @@ class m190819_075930_add_permissions_for_route_create_from_case extends Migratio
         $auth = Yii::$app->authManager;
 
         $route = $auth->getPermission('/lead/create-case');
-        if($route) {
+        if ($route) {
             $auth->remove($route);
         }
 
         $route = $auth->getPermission('/lead/create-from-case');
-        if($route) {
+        if ($route) {
             $auth->remove($route);
         }
 
@@ -50,5 +49,4 @@ class m190819_075930_add_permissions_for_route_create_from_case extends Migratio
             Yii::$app->cache->flush();
         }
     }
-
 }

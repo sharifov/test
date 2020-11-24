@@ -89,8 +89,8 @@ class m200227_150551_create_tbl_visitor_log extends Migration
     public function safeDown()
     {
         $this->dropForeignKey('FK-visitor_log-vl_lead_id', '{{%visitor_log}}');
-        $this->dropForeignKey('FK-visitor_log-vl_client_id','{{%visitor_log}}');
-        $this->dropForeignKey('FK-visitor_log-vl_project_id','{{%visitor_log}}');
+        $this->dropForeignKey('FK-visitor_log-vl_client_id', '{{%visitor_log}}');
+        $this->dropForeignKey('FK-visitor_log-vl_project_id', '{{%visitor_log}}');
 
         $this->dropIndex('IND-visitor_log-vl_visit_dt', '{{%visitor_log}}');
         $this->dropIndex('IND-visitor_log-vl_client_id', '{{%visitor_log}}');

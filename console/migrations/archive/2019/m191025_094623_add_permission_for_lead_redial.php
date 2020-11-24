@@ -20,7 +20,6 @@ class m191025_094623_add_permission_for_lead_redial extends Migration
     public function safeUp()
     {
         (new RbacMigrationService())->up($this->routes, $this->roles);
-
     }
 
     public function safeDown()

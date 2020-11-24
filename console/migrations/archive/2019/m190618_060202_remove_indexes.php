@@ -38,6 +38,4 @@ class m190618_060202_remove_indexes extends Migration
         $this->dropIndex('IND-uid_quotes', '{{%quotes}}');
         $this->dropIndex('IND-leads_uid_source_id', '{{%leads}}');
     }
-
-
 }

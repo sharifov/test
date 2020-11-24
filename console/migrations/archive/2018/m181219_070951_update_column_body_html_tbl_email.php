@@ -14,7 +14,6 @@ class m181219_070951_update_column_body_html_tbl_email extends Migration
     {
 
         if ($this->db->driverName === 'mysql') {
-
             $schema = $this->getDb()->getSchema();
             $columnBase = $schema->createColumnSchemaBuilder('mediumtext');
             $columnExtension = $schema->createColumnSchemaBuilder('CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci');
@@ -39,6 +38,4 @@ class m181219_070951_update_column_body_html_tbl_email extends Migration
         $this->alterColumn('{{%email}}', 'e_email_body_text', $this->text()->append('CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci'));
         $this->alterColumn('{{%email}}', 'e_email_subject', $this->string(255)->append('CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci'));
     }
-
-
 }

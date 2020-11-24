@@ -12,13 +12,13 @@ class m200803_145148_change_css_sale_pnr extends Migration
      */
     public function safeUp()
     {
-		$this->alterColumn('{{%case_sale}}', 'css_sale_pnr', $this->string(20));
+        $this->alterColumn('{{%case_sale}}', 'css_sale_pnr', $this->string(20));
 
-		if (Yii::$app->cache) {
-			Yii::$app->cache->flush();
-		}
+        if (Yii::$app->cache) {
+            Yii::$app->cache->flush();
+        }
 
-		Yii::$app->db->getSchema()->refreshTableSchema('{{%case_sale}}');
+        Yii::$app->db->getSchema()->refreshTableSchema('{{%case_sale}}');
     }
 
     /**
@@ -26,12 +26,12 @@ class m200803_145148_change_css_sale_pnr extends Migration
      */
     public function safeDown()
     {
-		$this->alterColumn('{{%case_sale}}', 'css_sale_pnr', $this->string(8));
+        $this->alterColumn('{{%case_sale}}', 'css_sale_pnr', $this->string(8));
 
-		if (Yii::$app->cache) {
-			Yii::$app->cache->flush();
-		}
+        if (Yii::$app->cache) {
+            Yii::$app->cache->flush();
+        }
 
-		Yii::$app->db->getSchema()->refreshTableSchema('{{%case_sale}}');
+        Yii::$app->db->getSchema()->refreshTableSchema('{{%case_sale}}');
     }
 }

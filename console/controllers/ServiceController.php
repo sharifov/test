@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created
  * User: alex.connor@techork.com
@@ -28,7 +29,7 @@ class ServiceController extends Controller
      */
     public function actionUpdateCurrency(): void
     {
-        printf("\n --- Start (" . date('H:i:s') .") %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+        printf("\n --- Start (" . date('H:i:s') . ") %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
         try {
             $result = Currency::synchronization();
@@ -45,7 +46,6 @@ class ServiceController extends Controller
                     if ($result['updated']) {
                         echo $this->ansiFormat('- Updated currency: "' . implode(', ', $result['updated']) . '"', Console::FG_GREEN) . PHP_EOL;
                     }
-
                 }
             }
         } catch (\Throwable $throwable) {
@@ -54,7 +54,7 @@ class ServiceController extends Controller
             echo $this->ansiFormat('Error: ' . $message, Console::FG_RED) . PHP_EOL;
         }
 
-        printf("\n --- End (" . date('H:i:s') .") %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+        printf("\n --- End (" . date('H:i:s') . ") %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
 
     /**
@@ -62,7 +62,7 @@ class ServiceController extends Controller
      */
     public function actionSendSms(): void
     {
-        printf("\n --- Start (" . date('H:i:s') .") %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+        printf("\n --- Start (" . date('H:i:s') . ") %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
         $count = Yii::$app->params['settings']['sms_distribution_count'] ?? 0;
         $n = 0;
@@ -70,11 +70,11 @@ class ServiceController extends Controller
             try {
                 $smsList = SmsDistributionList::getSmsListForJob($count);
                 if ($smsList) {
-                   foreach ($smsList as $smsItem) {
-                       $result = $smsItem->sendSms();
-                       echo (++$n) . '. Id: ' . $smsItem->sdl_id . ' ';
-                       echo VarDumper::dumpAsString($result) . PHP_EOL;
-                   }
+                    foreach ($smsList as $smsItem) {
+                        $result = $smsItem->sendSms();
+                        echo (++$n) . '. Id: ' . $smsItem->sdl_id . ' ';
+                        echo VarDumper::dumpAsString($result) . PHP_EOL;
+                    }
                 } else {
                     echo $this->ansiFormat(' - SMS List is empty! -', Console::FG_RED);
                 }
@@ -87,10 +87,6 @@ class ServiceController extends Controller
             printf("\n Setting %s is empty! \n", $this->ansiFormat('sms_distribution_count', Console::FG_YELLOW));
         }
 
-        printf("\n --- End (" . date('H:i:s') .") %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+        printf("\n --- End (" . date('H:i:s') . ") %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
-
-
-
-
 }

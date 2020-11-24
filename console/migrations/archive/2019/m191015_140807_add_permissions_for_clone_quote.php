@@ -21,7 +21,6 @@ class m191015_140807_add_permissions_for_clone_quote extends Migration
         $auth = Yii::$app->authManager;
 
         foreach ($this->routes as $route) {
-
             if (!$permission = $auth->getPermission($route)) {
                 $permission = $auth->createPermission($route);
                 $auth->add($permission);
@@ -37,7 +36,6 @@ class m191015_140807_add_permissions_for_clone_quote extends Migration
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 
     public function safeDown()

@@ -12,7 +12,7 @@ class m200401_075809_alter_tbl_email_add_index_on_e_is_deleted_field extends Mig
      */
     public function safeUp()
     {
-		$this->createIndex('IND-e_is_deleted', '{{%email}}', 'e_is_deleted');
+        $this->createIndex('IND-e_is_deleted', '{{%email}}', 'e_is_deleted');
     }
 
     /**
@@ -20,6 +20,6 @@ class m200401_075809_alter_tbl_email_add_index_on_e_is_deleted_field extends Mig
      */
     public function safeDown()
     {
-		$this->dropIndex('IND-e_is_deleted', '{{%email}}');
-	}
+        $this->dropIndex('IND-e_is_deleted', '{{%email}}');
+    }
 }

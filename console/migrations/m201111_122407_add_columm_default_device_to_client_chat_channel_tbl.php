@@ -22,5 +22,4 @@ class m201111_122407_add_columm_default_device_to_client_chat_channel_tbl extend
     {
         $this->dropColumn('{{%client_chat_channel}}', 'ccc_default_device');
     }
-
 }

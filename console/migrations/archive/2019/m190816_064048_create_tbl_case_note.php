@@ -7,7 +7,7 @@ use yii\db\Migration;
  */
 class m190816_064048_create_tbl_case_note extends Migration
 {
-    public  $routes = ['/case-note/*'];
+    public $routes = ['/case-note/*'];
 
     /**
      * {@inheritdoc}

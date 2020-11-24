@@ -12,13 +12,13 @@ class m191224_093414_add_foreign_key_to_tbl_currency_history extends Migration
      */
     public function safeUp()
     {
-		$this->addForeignKey('FK-currency_history-ch_code', '{{%currency_history}}', 'ch_code', '{{%currency}}', 'cur_code', 'CASCADE', 'CASCADE');
+        $this->addForeignKey('FK-currency_history-ch_code', '{{%currency_history}}', 'ch_code', '{{%currency}}', 'cur_code', 'CASCADE', 'CASCADE');
 
-		Yii::$app->db->getSchema()->refreshTableSchema('{{%currency_history}}');
+        Yii::$app->db->getSchema()->refreshTableSchema('{{%currency_history}}');
 
-		if (Yii::$app->cache) {
-			Yii::$app->cache->flush();
-		}
+        if (Yii::$app->cache) {
+            Yii::$app->cache->flush();
+        }
     }
 
     /**
@@ -26,12 +26,12 @@ class m191224_093414_add_foreign_key_to_tbl_currency_history extends Migration
      */
     public function safeDown()
     {
-    	$this->dropForeignKey('FK-currency_history-ch_code', '{{%currency_history}}');
+        $this->dropForeignKey('FK-currency_history-ch_code', '{{%currency_history}}');
 
-		Yii::$app->db->getSchema()->refreshTableSchema('{{%currency_history}}');
+        Yii::$app->db->getSchema()->refreshTableSchema('{{%currency_history}}');
 
-		if (Yii::$app->cache) {
-			Yii::$app->cache->flush();
-		}
+        if (Yii::$app->cache) {
+            Yii::$app->cache->flush();
+        }
     }
 }

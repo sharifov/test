@@ -70,7 +70,7 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
         }
     }
 
-    private function createDataItemChild($roles) : array
+    private function createDataItemChild($roles): array
     {
         $data = [];
         foreach ($roles as $roleName => $controllers) {
@@ -83,7 +83,7 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
         return $data;
     }
 
-    private function createDataItem($roles) : array
+    private function createDataItem($roles): array
     {
         $data = [];
         foreach ($roles as $role => $controller) {
@@ -101,12 +101,12 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
         return $items;
     }
 
-    private function createRoute($controller, $action) : string
+    private function createRoute($controller, $action): string
     {
         return '/' . Inflector::camel2id(strstr($controller, 'Controller', true)) . '/' . $action;
     }
 
-    private function assignParentChild(&$roles, $parent, $child) : void
+    private function assignParentChild(&$roles, $parent, $child): void
     {
         foreach ($roles[$child] as $controller => $items) {
             foreach ($items as $key => $item) {
@@ -115,7 +115,7 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
         }
     }
 
-    private function createSuperAdmin() : void
+    private function createSuperAdmin(): void
     {
         $employee = new \common\models\Employee();
         $employee->username = 'superadmin';
@@ -139,10 +139,9 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
         $auth->addChild($superAdmin, $roleAdmin);
 
         $auth->assign($superAdmin, $employee->getId());
-
     }
 
-    private function createAssArrayWithRolesAndPermissions(&$roles) : void
+    private function createAssArrayWithRolesAndPermissions(&$roles): void
     {
 
         foreach ($this->listAccess() as $arrayItem) {
@@ -218,10 +217,9 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 
-    private function listAccess() : array
+    private function listAccess(): array
     {
         return [
             [
@@ -812,5 +810,4 @@ class m190524_094842_remove_permissions_role_and_insert_routes extends Migration
 
         ];
     }
-
 }

@@ -32,7 +32,6 @@ class RbacMigrationService
         $routes = $this->createRoutes($routes);
 
         foreach ($routes as $route) {
-
             if (!$permission = $auth->getPermission($route)) {
                 $permission = $auth->createPermission($route);
                 $auth->add($permission);
@@ -101,7 +100,7 @@ class RbacMigrationService
      */
     private function createCrudRoutesFromGeneralRoute(string $route): array
     {
-        if (substr($route, -2) !== '/*' ) {
+        if (substr($route, -2) !== '/*') {
             throw new \InvalidArgumentException('2 last symbols of route must be: /* ');
         }
         $generalRoute = substr($route, 0, (strlen($route) - 2));

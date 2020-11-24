@@ -46,7 +46,6 @@ class m190424_133029_add_usermanager_role_tbl_item extends Migration
 
         $authorRole = $auth->getRole('userManager');
         $auth->assign($authorRole, $employee->getId());
-
     }
 
     /**
@@ -59,7 +58,7 @@ class m190424_133029_add_usermanager_role_tbl_item extends Migration
         $auth->remove($um);
 
         $um = \common\models\Employee::find()->where(['username' => 'user.manager'])->one();
-        if($um) {
+        if ($um) {
             $um->delete();
         }
     }

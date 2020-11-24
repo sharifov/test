@@ -24,7 +24,6 @@ class m190417_060006_add_columns_tbl_lead extends Migration
 
         $this->addForeignKey('FK-leads-l_duplicate_lead_id', '{{%leads}}', ['l_duplicate_lead_id'], '{{%leads}}', ['id'], 'SET NULL', 'CASCADE');
         $this->createIndex('IND-leads-l_request_hash', '{{%leads}}', ['l_request_hash']);
-
     }
 
     /**
@@ -44,6 +43,4 @@ class m190417_060006_add_columns_tbl_lead extends Migration
         $this->dropForeignKey('FK-leads-l_duplicate_lead_id', '{{%leads}}');
         $this->dropIndex('IND-leads-l_request_hash', '{{%leads}}');
     }
-
-
 }

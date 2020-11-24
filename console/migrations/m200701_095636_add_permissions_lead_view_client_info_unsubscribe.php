@@ -23,7 +23,6 @@ class m200701_095636_add_permissions_lead_view_client_info_unsubscribe extends M
         $auth->add($checkList);
         $auth->addChild($admin, $checkList);
         $auth->addChild($superAdmin, $checkList);
-
     }
 
     /**

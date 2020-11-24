@@ -34,5 +34,4 @@ class m190807_124306_add_permission_for_supervision_for_duplicate extends Migrat
         $supervision = $auth->getRole('supervision');
         $auth->removeChild($supervision, $routeDuplicate);
     }
-
 }

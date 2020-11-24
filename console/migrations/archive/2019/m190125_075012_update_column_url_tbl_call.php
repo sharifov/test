@@ -45,6 +45,4 @@ class m190125_075012_update_column_url_tbl_call extends Migration
         $this->dropColumn('{{%call}}', 'c_is_new');
         $this->dropColumn('{{%call}}', 'c_is_deleted');
     }
-
-
 }

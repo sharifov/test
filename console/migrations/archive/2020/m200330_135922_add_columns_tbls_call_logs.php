@@ -40,9 +40,9 @@ class m200330_135922_add_columns_tbls_call_logs extends Migration
      */
     public function safeDown()
     {
-       $this->dropForeignKey('FK-call_log_case-clc_case_status_log_id','{{%call_log_case}}');
-       $this->dropColumn('{{%call_log_case}}', 'clc_case_status_log_id');
-       $this->dropForeignKey('FK-call_log_lead-cll_lead_flow_id','{{%call_log_lead}}');
-       $this->dropColumn('{{%call_log_lead}}', 'cll_lead_flow_id');
+        $this->dropForeignKey('FK-call_log_case-clc_case_status_log_id', '{{%call_log_case}}');
+        $this->dropColumn('{{%call_log_case}}', 'clc_case_status_log_id');
+        $this->dropForeignKey('FK-call_log_lead-cll_lead_flow_id', '{{%call_log_lead}}');
+        $this->dropColumn('{{%call_log_lead}}', 'cll_lead_flow_id');
     }
 }

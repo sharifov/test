@@ -22,5 +22,4 @@ class m190422_135258_add_column_init_price_tbl_lead extends Migration
     {
         $this->dropColumn('{{%leads}}', 'l_init_price');
     }
-
 }

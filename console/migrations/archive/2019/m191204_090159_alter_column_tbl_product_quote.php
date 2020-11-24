@@ -12,7 +12,7 @@ class m191204_090159_alter_column_tbl_product_quote extends Migration
      */
     public function safeUp()
     {
-        $this->renameColumn('{{%product_quote}}',	'pr_name', 'pq_name');
+        $this->renameColumn('{{%product_quote}}', 'pr_name', 'pq_name');
 
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
@@ -26,7 +26,7 @@ class m191204_090159_alter_column_tbl_product_quote extends Migration
      */
     public function safeDown()
     {
-        $this->renameColumn('{{%product_quote}}',	'pq_name', 'pr_name');
+        $this->renameColumn('{{%product_quote}}', 'pq_name', 'pr_name');
 
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();

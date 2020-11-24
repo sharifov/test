@@ -12,7 +12,7 @@ class m181115_114818_alter_quote_operating_length extends Migration
      */
     public function safeUp()
     {
-        $this->alterColumn('{{%quote_segment}}','qs_operating_airline', $this->string(25));
+        $this->alterColumn('{{%quote_segment}}', 'qs_operating_airline', $this->string(25));
     }
 
     /**
@@ -20,7 +20,6 @@ class m181115_114818_alter_quote_operating_length extends Migration
      */
     public function safeDown()
     {
-        $this->alterColumn('{{%quote_segment}}','qs_operating_airline', $this->string(2));
+        $this->alterColumn('{{%quote_segment}}', 'qs_operating_airline', $this->string(2));
     }
-
 }

@@ -14,9 +14,9 @@ class m191220_095617_add_fk_currency_orders_offers extends Migration
     {
 
         $this->addColumn('{{%offer}}', 'of_client_currency', $this->string(3));
-        $this->addColumn('{{%offer}}', 'of_client_currency_rate', $this->decimal(8,5));
-        $this->addColumn('{{%offer}}', 'of_app_total', $this->decimal(8,2));
-        $this->addColumn('{{%offer}}', 'of_client_total', $this->decimal(8,2));
+        $this->addColumn('{{%offer}}', 'of_client_currency_rate', $this->decimal(8, 5));
+        $this->addColumn('{{%offer}}', 'of_app_total', $this->decimal(8, 2));
+        $this->addColumn('{{%offer}}', 'of_client_total', $this->decimal(8, 2));
 
         $this->addForeignKey('FK-order-or_client_currency', '{{%order}}', ['or_client_currency'], '{{%currency}}', ['cur_code'], 'SET NULL', 'CASCADE');
 
@@ -49,5 +49,4 @@ class m191220_095617_add_fk_currency_orders_offers extends Migration
             Yii::$app->cache->flush();
         }
     }
-
 }

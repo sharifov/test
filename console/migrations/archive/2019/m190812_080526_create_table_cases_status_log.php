@@ -68,5 +68,4 @@ class m190812_080526_create_table_cases_status_log extends Migration
             Yii::$app->cache->flush();
         }
     }
-
 }

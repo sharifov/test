@@ -54,9 +54,9 @@ class PriceController extends Controller
         foreach ($calls as $call) {
             try {
                 $this->updateCallPrice->update($call['c_call_sid']);
-                printf('%s',$this->ansiFormat('.', Console::FG_GREEN));
+                printf('%s', $this->ansiFormat('.', Console::FG_GREEN));
             } catch (\Throwable $e) {
-                printf('%s',$this->ansiFormat('.', Console::FG_RED));
+                printf('%s', $this->ansiFormat('.', Console::FG_RED));
 //                \Yii::error($e->getMessage(), 'PriceController:actionUpdateCallsPrice:update');
             }
         }
@@ -88,9 +88,9 @@ class PriceController extends Controller
         foreach ($smses as $sms) {
             try {
                 $this->updateSmsPrice->update($sms['s_tw_message_sid']);
-                printf('%s',$this->ansiFormat('.', Console::FG_GREEN));
+                printf('%s', $this->ansiFormat('.', Console::FG_GREEN));
             } catch (\Throwable $e) {
-                printf('%s',$this->ansiFormat('.', Console::FG_RED));
+                printf('%s', $this->ansiFormat('.', Console::FG_RED));
 //                \Yii::error($e->getMessage(), 'PriceController:actionUpdateSmsPrice:update');
             }
         }

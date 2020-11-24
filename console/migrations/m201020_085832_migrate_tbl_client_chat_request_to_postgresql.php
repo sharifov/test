@@ -58,7 +58,7 @@ class m201020_085832_migrate_tbl_client_chat_request_to_postgresql extends Migra
             $id = $clientChatRequest['ccr_id'] ?: 'DEFAULT';
             $event = $clientChatRequest['ccr_event'] ?: 'DEFAULT';
             $rid = $clientChatRequest['ccr_rid'] ? "'{$clientChatRequest['ccr_rid']}'" : 'DEFAULT';
-            $jsonData = $clientChatRequest['ccr_json_data'] ? "'".str_replace("'", "''", $clientChatRequest['ccr_json_data'])."'" : 'DEFAULT';
+            $jsonData = $clientChatRequest['ccr_json_data'] ? "'" . str_replace("'", "''", $clientChatRequest['ccr_json_data']) . "'" : 'DEFAULT';
             $createdDt = $clientChatRequest['ccr_created_dt'] ? "'{$clientChatRequest['ccr_created_dt']}'" : 'DEFAULT';
             $visitorId = $clientChatRequest['ccr_visitor_id'] ? "'{$clientChatRequest['ccr_visitor_id']}'" : 'DEFAULT';
             $jobId = $clientChatRequest['ccr_job_id'] ?: 'DEFAULT';
@@ -70,9 +70,9 @@ class m201020_085832_migrate_tbl_client_chat_request_to_postgresql extends Migra
         if ($values) {
             /** @var $dbPostgres \yii\db\Connection */
             $dbPostgres->createCommand('insert into client_chat_request (ccr_id, ccr_event, ccr_rid, ccr_json_data, ccr_created_dt, ccr_visitor_id, ccr_job_id) VALUES ' . rtrim($values, ','))->execute();
-            $restartWith = $clientChatRequests[count($clientChatRequests)-1]['ccr_id'] + 1;
+            $restartWith = $clientChatRequests[count($clientChatRequests) - 1]['ccr_id'] + 1;
         }
-        $dbPostgres->createCommand('alter table client_chat_request alter column ccr_id add generated always as identity (INCREMENT BY '.$restartWith.')')->execute();
+        $dbPostgres->createCommand('alter table client_chat_request alter column ccr_id add generated always as identity (INCREMENT BY ' . $restartWith . ')')->execute();
     }
 
     /**

@@ -42,5 +42,4 @@ class m191115_082352_table_settings_add_redial_calls_to_bugged extends Migration
             Yii::$app->cache->flush();
         }
     }
-
 }

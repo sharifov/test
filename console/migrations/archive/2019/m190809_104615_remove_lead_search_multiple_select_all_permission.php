@@ -39,5 +39,4 @@ class m190809_104615_remove_lead_search_multiple_select_all_permission extends M
             Yii::$app->cache->flush();
         }
     }
-
 }

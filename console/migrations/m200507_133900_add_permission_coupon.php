@@ -56,6 +56,4 @@ class m200507_133900_add_permission_coupon extends Migration
             Yii::$app->cache->flush();
         }
     }
-
-
 }

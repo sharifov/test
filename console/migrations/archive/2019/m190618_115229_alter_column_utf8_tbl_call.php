@@ -20,7 +20,5 @@ class m190618_115229_alter_column_utf8_tbl_call extends Migration
      */
     public function safeDown()
     {
-
     }
-
 }

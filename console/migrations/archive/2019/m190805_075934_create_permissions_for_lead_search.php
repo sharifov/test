@@ -45,7 +45,6 @@ class m190805_075934_create_permissions_for_lead_search extends Migration
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 
     /**
@@ -74,5 +73,4 @@ class m190805_075934_create_permissions_for_lead_search extends Migration
             Yii::$app->cache->flush();
         }
     }
-
 }

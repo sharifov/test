@@ -28,7 +28,7 @@ class m191029_072118_create_tbl_conference_participant extends Migration
         }
 
 
-        $this->createTable('{{%conference_participant}}',	[
+        $this->createTable('{{%conference_participant}}', [
             'cp_id'                 => $this->primaryKey(),
             'cp_cf_id'              => $this->integer()->notNull(),
             'cp_call_sid'           => $this->string(34)->unique(),
@@ -47,9 +47,8 @@ class m191029_072118_create_tbl_conference_participant extends Migration
         $auth = Yii::$app->authManager;
 
         foreach ($this->routes as $route) {
-
             $permission = $auth->getPermission($route);
-            if(!$permission) {
+            if (!$permission) {
                 $permission = $auth->createPermission($route);
                 $auth->add($permission);
             }
@@ -65,7 +64,6 @@ class m191029_072118_create_tbl_conference_participant extends Migration
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 
     /**

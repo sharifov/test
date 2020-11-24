@@ -64,6 +64,4 @@ class m200709_080723_add_setting_ga extends Migration
 
         Yii::$app->db->getSchema()->refreshTableSchema('{{%setting}}');
     }
-
-
 }

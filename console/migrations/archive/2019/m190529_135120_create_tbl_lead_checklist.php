@@ -81,7 +81,6 @@ class m190529_135120_create_tbl_lead_checklist extends Migration
         }
 
         //Yii::$app->db->getSchema()->refreshTableSchema('{{%lead_checklist_type}}');
-
     }
 
     /**
@@ -97,13 +96,13 @@ class m190529_135120_create_tbl_lead_checklist extends Migration
 
 
         $permission = $auth->getPermission('/lead-checklist-type/*');
-        if($permission) {
+        if ($permission) {
             $auth->remove($permission);
         }
 
 
         $permission = $auth->createPermission('/lead-checklist/*');
-        if($permission) {
+        if ($permission) {
             $auth->remove($permission);
         }
 
@@ -111,5 +110,4 @@ class m190529_135120_create_tbl_lead_checklist extends Migration
             Yii::$app->cache->flush();
         }
     }
-
 }

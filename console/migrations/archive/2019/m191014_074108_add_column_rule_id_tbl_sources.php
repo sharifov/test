@@ -21,7 +21,6 @@ class m191014_074108_add_column_rule_id_tbl_sources extends Migration
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 
     /**

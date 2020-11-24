@@ -22,5 +22,4 @@ class m190122_150240_quote_add_pricing_info extends Migration
     {
         $this->dropColumn('{{%quotes}}', 'pricing_info');
     }
-
 }

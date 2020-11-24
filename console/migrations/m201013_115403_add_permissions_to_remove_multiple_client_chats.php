@@ -2,7 +2,7 @@
 
 use yii\db\Migration;
 use common\models\Employee;
-Use console\migrations\RbacMigrationService;
+use console\migrations\RbacMigrationService;
 
 /**
  * Class m201013_115403_add_permissions_to_remove_multiple_client_chats

@@ -30,7 +30,6 @@ class m190627_091408_create_table_lead_flow_checklist extends Migration
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 
     /**
@@ -46,7 +45,5 @@ class m190627_091408_create_table_lead_flow_checklist extends Migration
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
-
 }

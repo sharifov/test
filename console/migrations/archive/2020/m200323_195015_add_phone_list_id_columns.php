@@ -45,8 +45,8 @@ class m200323_195015_add_phone_list_id_columns extends Migration
      */
     public function safeDown()
     {
-        $this->dropForeignKey('FK-user_project_params-upp_phone_list_id','{{%user_project_params}}');
-        $this->dropForeignKey('FK-department_phone_project-dpp_phone_list_id','{{%department_phone_project}}');
+        $this->dropForeignKey('FK-user_project_params-upp_phone_list_id', '{{%user_project_params}}');
+        $this->dropForeignKey('FK-department_phone_project-dpp_phone_list_id', '{{%department_phone_project}}');
         $this->dropColumn('{{%department_phone_project}}', 'dpp_phone_list_id');
         $this->dropColumn('{{%user_project_params}}', 'upp_phone_list_id');
         $schema = Yii::$app->db->getSchema();

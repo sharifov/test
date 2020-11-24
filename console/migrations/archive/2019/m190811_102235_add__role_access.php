@@ -24,9 +24,8 @@ class m190811_102235_add__role_access extends Migration
 
 
         foreach ($this->routes as $route) {
-
             $permission = $auth->getPermission($route);
-            if(!$permission) {
+            if (!$permission) {
                 $permission = $auth->createPermission($route);
                 $auth->add($permission);
             }
@@ -36,7 +35,7 @@ class m190811_102235_add__role_access extends Migration
                 $auth->addChild($auth->getRole('support'), $permission);
             }*/
 
-            if(!$auth->hasChild($auth->getRole('admin'), $permission)) {
+            if (!$auth->hasChild($auth->getRole('admin'), $permission)) {
                 $auth->addChild($auth->getRole('admin'), $permission);
             }
 
@@ -46,7 +45,6 @@ class m190811_102235_add__role_access extends Migration
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 
     /**
@@ -65,6 +63,5 @@ class m190811_102235_add__role_access extends Migration
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 }

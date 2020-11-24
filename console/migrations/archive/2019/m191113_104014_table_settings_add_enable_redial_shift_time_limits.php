@@ -27,7 +27,6 @@ class m191113_104014_table_settings_add_enable_redial_shift_time_limits extends 
         }
 
         Yii::$app->db->getSchema()->refreshTableSchema('{{%setting}}');
-
     }
 
     /**
@@ -43,5 +42,4 @@ class m191113_104014_table_settings_add_enable_redial_shift_time_limits extends 
             Yii::$app->cache->flush();
         }
     }
-
 }

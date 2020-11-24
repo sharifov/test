@@ -12,7 +12,7 @@ class m200710_143002_alter_column_ticket_number_tbl_sale_ticket extends Migratio
      */
     public function safeUp()
     {
-		$this->alterColumn('{{%sale_ticket}}', 'st_ticket_number', $this->string(50));
+        $this->alterColumn('{{%sale_ticket}}', 'st_ticket_number', $this->string(50));
     }
 
     /**
@@ -20,6 +20,6 @@ class m200710_143002_alter_column_ticket_number_tbl_sale_ticket extends Migratio
      */
     public function safeDown()
     {
-    	$this->alterColumn('{{%sale_ticket}}', 'st_ticket_number', $this->string(30));
+        $this->alterColumn('{{%sale_ticket}}', 'st_ticket_number', $this->string(30));
     }
 }

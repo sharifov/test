@@ -26,7 +26,6 @@ class m190626_061224_table_setting_add_coll_call_access extends Migration
         }
 
         Yii::$app->db->getSchema()->refreshTableSchema('{{%setting}}');
-
     }
 
     /**

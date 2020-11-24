@@ -31,7 +31,6 @@ class m190607_081156_add_column_source_type_id_tbl_calls extends Migration
             't_name' => 'Missed Call',
             't_sort_order' => 2,
         ]);
-
     }
 
     /**
@@ -50,5 +49,4 @@ class m190607_081156_add_column_source_type_id_tbl_calls extends Migration
 
         $this->delete('{{%task}}', ['t_key' => 'missed-call']);
     }
-
 }

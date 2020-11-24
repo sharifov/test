@@ -26,7 +26,6 @@ class m201021_073604_rename_client_chat_close_reopen_permission extends Migratio
             if ($clientChatManagePermission) {
                 $auth->addChild($clientChatReopenPermission, $clientChatManagePermission);
             }
-
         }
     }
 

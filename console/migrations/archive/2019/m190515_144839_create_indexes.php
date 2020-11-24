@@ -26,6 +26,4 @@ class m190515_144839_create_indexes extends Migration
         $this->dropIndex('IND-call_c_call_status', '{{%call}}');
         $this->dropIndex('IND-call_c_created_user_id', '{{%call}}');
     }
-
-
 }

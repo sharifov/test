@@ -26,9 +26,15 @@ class m200424_043826_add_columns_to_client extends Migration
         $this->createIndex('IND-clients-last_name', '{{%clients}}', ['last_name']);
         $this->createIndex('IND-clients-company_name', '{{%clients}}', ['company_name']);
 
-        $this->addForeignKey('FK-clients-id_parent_id',
-            '{{%clients}}', 'parent_id',
-            '{{%clients}}', 'id', 'SET NULL', 'CASCADE');
+        $this->addForeignKey(
+            'FK-clients-id_parent_id',
+            '{{%clients}}',
+            'parent_id',
+            '{{%clients}}',
+            'id',
+            'SET NULL',
+            'CASCADE'
+        );
 
         $this->addColumn('{{%client_phone}}', 'cp_title', $this->string(100));
         $this->addColumn('{{%client_email}}', 'ce_title', $this->string(100));
@@ -42,27 +48,51 @@ class m200424_043826_add_columns_to_client extends Migration
         ]);
 
         $this->addPrimaryKey('PK-user_contact_list', '{{%user_contact_list}}', ['ucl_user_id', 'ucl_client_id']);
-        $this->addForeignKey('FK-user_contact_list-ucl_ucl_user_id',
-            '{{%user_contact_list}}', 'ucl_user_id',
-            '{{%employees}}', 'id', 'CASCADE', 'CASCADE');
-        $this->addForeignKey('FK-user_contact_list-ucl_client_id',
-            '{{%user_contact_list}}', 'ucl_client_id',
-            '{{%clients}}', 'id', 'CASCADE', 'CASCADE');
+        $this->addForeignKey(
+            'FK-user_contact_list-ucl_ucl_user_id',
+            '{{%user_contact_list}}',
+            'ucl_user_id',
+            '{{%employees}}',
+            'id',
+            'CASCADE',
+            'CASCADE'
+        );
+        $this->addForeignKey(
+            'FK-user_contact_list-ucl_client_id',
+            '{{%user_contact_list}}',
+            'ucl_client_id',
+            '{{%clients}}',
+            'id',
+            'CASCADE',
+            'CASCADE'
+        );
 
 
-        $this->createTable('{{%client_project}}',    [
+        $this->createTable('{{%client_project}}', [
             'cp_client_id' => $this->integer()->notNull(),
             'cp_project_id' => $this->integer()->notNull(),
             'cp_created_dt' => $this->dateTime(),
         ]);
 
         $this->addPrimaryKey('PK-client_project', '{{%client_project}}', ['cp_client_id', 'cp_project_id']);
-        $this->addForeignKey('FK-client_project-cp_client_id',
-            '{{%client_project}}', 'cp_client_id',
-            '{{%clients}}', 'id', 'CASCADE', 'CASCADE');
-        $this->addForeignKey('FK-client_project_cp_project_id',
-            '{{%client_project}}', 'cp_project_id',
-            '{{%projects}}', 'id', 'CASCADE', 'CASCADE');
+        $this->addForeignKey(
+            'FK-client_project-cp_client_id',
+            '{{%client_project}}',
+            'cp_client_id',
+            '{{%clients}}',
+            'id',
+            'CASCADE',
+            'CASCADE'
+        );
+        $this->addForeignKey(
+            'FK-client_project_cp_project_id',
+            '{{%client_project}}',
+            'cp_project_id',
+            '{{%projects}}',
+            'id',
+            'CASCADE',
+            'CASCADE'
+        );
     }
 
     /**

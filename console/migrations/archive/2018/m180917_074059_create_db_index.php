@@ -24,6 +24,4 @@ class m180917_074059_create_db_index extends Migration
         $this->dropIndex('tbl_leads_status_project_id_ind', '{{%leads}}');
         $this->dropIndex('tbl_quotes_status_ind', '{{%quotes}}');
     }
-
-
 }

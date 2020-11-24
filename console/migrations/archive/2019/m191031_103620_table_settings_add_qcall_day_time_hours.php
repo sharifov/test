@@ -36,5 +36,4 @@ class m191031_103620_table_settings_add_qcall_day_time_hours extends Migration
             Yii::$app->cache->flush();
         }
     }
-
 }

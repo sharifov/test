@@ -34,19 +34,18 @@ class m190809_104922_add_support_role_tbl_auth_item extends Migration
         $auth->add($role);
 
         foreach ($this->routes as $route) {
-
             $permission = $auth->getPermission($route);
-            if(!$permission) {
+            if (!$permission) {
                 $permission = $auth->createPermission($route);
                 $auth->add($permission);
             }
 
 
-            if(!$auth->hasChild($auth->getRole('support'), $permission)) {
+            if (!$auth->hasChild($auth->getRole('support'), $permission)) {
                 $auth->addChild($auth->getRole('support'), $permission);
             }
 
-            if(!$auth->hasChild($auth->getRole('admin'), $permission)) {
+            if (!$auth->hasChild($auth->getRole('admin'), $permission)) {
                 $auth->addChild($auth->getRole('admin'), $permission);
             }
 
@@ -91,7 +90,6 @@ class m190809_104922_add_support_role_tbl_auth_item extends Migration
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 
     /**
@@ -104,7 +102,7 @@ class m190809_104922_add_support_role_tbl_auth_item extends Migration
         $auth->remove($qa);
 
         $user = \common\models\Employee::find()->where(['username' => 'support.test'])->one();
-        if($user) {
+        if ($user) {
             $user->delete();
         }
 
@@ -118,6 +116,5 @@ class m190809_104922_add_support_role_tbl_auth_item extends Migration
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 }

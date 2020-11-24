@@ -61,7 +61,5 @@ class m201109_132359_add_new_permissions_client_chat extends Migration
                 $auth->remove($permission);
             }
         }
-
     }
-
 }

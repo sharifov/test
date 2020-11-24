@@ -65,5 +65,4 @@ class m200729_115607_add_columns_tbl_user_connection extends Migration
             Yii::$app->cache->flush();
         }
     }
-
 }

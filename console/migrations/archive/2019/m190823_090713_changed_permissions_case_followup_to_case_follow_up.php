@@ -51,8 +51,5 @@ class m190823_090713_changed_permissions_case_followup_to_case_follow_up extends
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
-
-
 }

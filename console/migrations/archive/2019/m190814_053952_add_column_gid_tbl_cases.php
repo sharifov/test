@@ -13,7 +13,7 @@ class m190814_053952_add_column_gid_tbl_cases extends Migration
     public function safeUp()
     {
         $this->addColumn('{{%cases}}', 'cs_gid', $this->string(32)->unique()->after('cs_id'));
-        $this->createIndex('IND-cases_cs_gid','{{%cases}}', 'cs_gid', true);
+        $this->createIndex('IND-cases_cs_gid', '{{%cases}}', 'cs_gid', true);
 
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
@@ -36,5 +36,4 @@ class m190814_053952_add_column_gid_tbl_cases extends Migration
             Yii::$app->cache->flush();
         }
     }
-
 }

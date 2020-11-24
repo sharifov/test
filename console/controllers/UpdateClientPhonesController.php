@@ -26,5 +26,4 @@ class UpdateClientPhonesController extends Controller
         }
         echo 'updated: ' . $countUpdated . ' phones' . PHP_EOL;
     }
-
 }

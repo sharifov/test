@@ -66,7 +66,6 @@ class CleanController extends Controller
             \Yii::$app->runAction('clean/call', $params);
             \Yii::$app->runAction('clean/user-site-activity', $params);
             \Yii::$app->runAction('clean/user-monitor', $params);
-
         } catch (\Throwable $throwable) {
             Yii::error(
                 AppHelper::throwableFormatter($throwable),

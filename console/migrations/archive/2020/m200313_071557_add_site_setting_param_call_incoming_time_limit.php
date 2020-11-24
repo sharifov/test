@@ -44,7 +44,6 @@ class m200313_071557_add_site_setting_param_call_incoming_time_limit extends Mig
         ]);
 
         (new RbacMigrationService())->up($this->routes, $this->roles);
-
     }
 
     /**

@@ -12,13 +12,13 @@ class m191023_073608_alter_column_type_tbl_client_phone extends Migration
      */
     public function safeUp()
     {
-    	$sql = 'Alter table client_phone alter column type set default 0';
+        $sql = 'Alter table client_phone alter column type set default 0';
 
-    	$this->execute($sql);
+        $this->execute($sql);
 
-    	$sql = 'Update client_phone set type = 0 where type is null';
+        $sql = 'Update client_phone set type = 0 where type is null';
 
-    	$this->execute($sql);
+        $this->execute($sql);
     }
 
     /**

@@ -70,6 +70,4 @@ class m190819_134505_insert_case_categories extends Migration
             $this->delete('{{%cases_category}}', ['cc_key' => $item['cc_key']]);
         }
     }
-
-
 }

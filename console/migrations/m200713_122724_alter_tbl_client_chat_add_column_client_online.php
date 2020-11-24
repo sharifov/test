@@ -12,7 +12,7 @@ class m200713_122724_alter_tbl_client_chat_add_column_client_online extends Migr
      */
     public function safeUp()
     {
-		$this->addColumn('{{%client_chat}}', 'cch_client_online', $this->boolean());
+        $this->addColumn('{{%client_chat}}', 'cch_client_online', $this->boolean());
     }
 
     /**
@@ -20,6 +20,6 @@ class m200713_122724_alter_tbl_client_chat_add_column_client_online extends Migr
      */
     public function safeDown()
     {
-    	$this->dropColumn('{{%client_chat}}', 'cch_client_online');
-	}
+        $this->dropColumn('{{%client_chat}}', 'cch_client_online');
+    }
 }

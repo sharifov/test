@@ -35,7 +35,6 @@ class m190822_143638_create_permissions_for_lead_and_case_sections extends Migra
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 
     /**
@@ -55,5 +54,4 @@ class m190822_143638_create_permissions_for_lead_and_case_sections extends Migra
             Yii::$app->cache->flush();
         }
     }
-
 }

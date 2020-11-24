@@ -27,7 +27,7 @@ class m191114_080518_create_tbl_currency extends Migration
         }
 
 
-        $this->createTable('{{%currency}}',	[
+        $this->createTable('{{%currency}}', [
             'cur_code'           => $this->string(3)->notNull()->unique(),
             'cur_name'           => $this->string(34)->notNull(),
             'cur_symbol'         => $this->string(3)->notNull(),

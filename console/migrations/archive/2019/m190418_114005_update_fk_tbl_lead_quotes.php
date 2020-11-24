@@ -21,8 +21,5 @@ class m190418_114005_update_fk_tbl_lead_quotes extends Migration
      */
     public function safeDown()
     {
-
     }
-
-
 }

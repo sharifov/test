@@ -86,21 +86,20 @@ class SyncController extends Controller
 
         $result = Airports::synchronization($limit);
 
-        if($result) {
-            if($result['error']) {
+        if ($result) {
+            if ($result['error']) {
                 printf(" - Error: %s\n", $this->ansiFormat($result['error'], Console::FG_RED));
             } else {
-
-                if($result['created']) {
-                    $message = 'Created Airports (' . count($result['created']) . '): "'.implode(', ', $result['created']);
+                if ($result['created']) {
+                    $message = 'Created Airports (' . count($result['created']) . '): "' . implode(', ', $result['created']);
                     printf(" - Created: %s\n", $this->ansiFormat($message, Console::FG_GREEN));
                 }
-                if($result['updated']) {
-                    $message = 'Updated Airports (' . count($result['updated']) . '): "'.implode(', ', $result['updated']);
+                if ($result['updated']) {
+                    $message = 'Updated Airports (' . count($result['updated']) . '): "' . implode(', ', $result['updated']);
                     printf(" - Updated: %s\n", $this->ansiFormat($message, Console::FG_YELLOW));
                 }
-                if($result['errored']) {
-                    $message = 'Errored Airports (' . count($result['errored']) . '): "'.implode(', ', $result['errored']);
+                if ($result['errored']) {
+                    $message = 'Errored Airports (' . count($result['errored']) . '): "' . implode(', ', $result['errored']);
                     printf(" - Error: %s\n", $this->ansiFormat($message, Console::FG_RED));
                 }
             }
@@ -149,7 +148,6 @@ class SyncController extends Controller
                     var_dump($empoloyee->getErrors());
                     exit;
                 } else {
-
                     $empoloyee->roles[] = $empoloyeeeAttr['role'];
                     $empoloyee->addRole(false);
 
@@ -240,10 +238,10 @@ class SyncController extends Controller
                 try {
                     $leadId = intval($leadId);
                     //check if exist employee
-                    if (empty($objects['Lead']['employee_id']) && !in_array($status,[5, 1])) {
+                    if (empty($objects['Lead']['employee_id']) && !in_array($status, [5, 1])) {
                         continue;
                     }
-                    if (!in_array($status,[5, 1])) {
+                    if (!in_array($status, [5, 1])) {
                         $employee = Employee::findOne(['id' => $objects['Lead']['employee_id']]);
                         if ($employee === null) {
                             echo 'Need sync employee id: ' . $objects['Lead']['employee_id'] . PHP_EOL;
@@ -386,7 +384,7 @@ class SyncController extends Controller
                             $quote->created = $item['created'];
                             $quote->update(false, ['created']);
 
-                            Yii::$app->db->createCommand('UPDATE '.Quote::tableName().' SET updated = :updated WHERE id = :id', [
+                            Yii::$app->db->createCommand('UPDATE ' . Quote::tableName() . ' SET updated = :updated WHERE id = :id', [
                                 ':updated' => $item['updated'],
                                 ':id' => $quote->id
                             ])->execute();
@@ -400,7 +398,7 @@ class SyncController extends Controller
                                 $quotePrice->created = $priceItem['created'];
                                 $quotePrice->update(false, ['created']);
 
-                                Yii::$app->db->createCommand('UPDATE '.QuotePrice::tableName().' SET updated = :updated WHERE id = :id', [
+                                Yii::$app->db->createCommand('UPDATE ' . QuotePrice::tableName() . ' SET updated = :updated WHERE id = :id', [
                                     ':updated' => $priceItem['updated'],
                                     ':id' => $quotePrice->id
                                 ])->execute();
@@ -432,7 +430,7 @@ class SyncController extends Controller
                     $lead->created = $objects['Lead']['created'];
                     $lead->update(false, ['created']);
 
-                    Yii::$app->db->createCommand('UPDATE '.Lead::tableName().' SET updated = :updated WHERE id = :id', [
+                    Yii::$app->db->createCommand('UPDATE ' . Lead::tableName() . ' SET updated = :updated WHERE id = :id', [
                         ':updated' => $objects['Lead']['updated'],
                         ':id' => $lead->id
                     ])->execute();

@@ -48,5 +48,4 @@ class m181214_075641_kpi_history_params extends Migration
         $this->dropForeignKey('fk-kh-super', '{{%kpi_history}}');
         $this->dropTable('{{%kpi_history}}');
     }
-
 }

@@ -43,11 +43,11 @@ class CallController extends Controller
      * @param array $config
      */
     public function __construct($id, $module, OutputHelper $outputHelper, $config = [])
-	{
-		parent::__construct($id, $module, $config);
-		$this->outputHelper = $outputHelper;
-		$this->setSettings();
-	}
+    {
+        parent::__construct($id, $module, $config);
+        $this->outputHelper = $outputHelper;
+        $this->setSettings();
+    }
 
     /**
      * @param int $days
@@ -56,7 +56,7 @@ class CallController extends Controller
     {
         /* TODO:: remove this action */
         echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
-            self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
         $processed = 0;
         $timeStart = microtime(true);
@@ -65,8 +65,10 @@ class CallController extends Controller
         try {
             $processed = Call::deleteAll(['<=', 'c_created_dt', $dtOlder]);
         } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableFormatter($throwable),
-            'CallController:actionCleaner');
+            Yii::error(
+                AppHelper::throwableFormatter($throwable),
+                'CallController:actionCleaner'
+            );
             echo Console::renderColoredString('%r --- Error : ' . $throwable->getMessage() . ' %n'), PHP_EOL;
         }
 
@@ -94,18 +96,18 @@ class CallController extends Controller
     public function actionTerminator(?int $ringingMinutes = null, ?int $queueMinutes = null, ?int $inProgressMinutes = null, ?int $delayMinutes = null): void
     {
         $timeStart = microtime(true);
-	    $ringingMinutes = $ringingMinutes ?? $this->terminatorParams['ringing_minutes'];
-	    $queueMinutes = $queueMinutes ?? $this->terminatorParams['queue_minutes'];
-	    $inProgressMinutes = $inProgressMinutes ?? $this->terminatorParams['in_progress_minutes'];
-	    $delayMinutesDefault = $this->terminatorParams['in_progress_minutes'] ?? 120;
-	    $delayMinutes = $delayMinutes ?? $delayMinutesDefault;
+        $ringingMinutes = $ringingMinutes ?? $this->terminatorParams['ringing_minutes'];
+        $queueMinutes = $queueMinutes ?? $this->terminatorParams['queue_minutes'];
+        $inProgressMinutes = $inProgressMinutes ?? $this->terminatorParams['in_progress_minutes'];
+        $delayMinutesDefault = $this->terminatorParams['in_progress_minutes'] ?? 120;
+        $delayMinutes = $delayMinutes ?? $delayMinutesDefault;
 
-	    $point = $this->shortClassName . ':' . $this->action->id;
+        $point = $this->shortClassName . ':' . $this->action->id;
 
-	    if (!$this->terminatorEnable) {
+        if (!$this->terminatorEnable) {
             $this->outputHelper->printInfo('Call terminator is disable. ', $point, Console::FG_RED);
-	        return;
-	    }
+            return;
+        }
 
         $this->outputHelper->printInfo('Start. ', $point);
 
@@ -123,12 +125,12 @@ class CallController extends Controller
                 ['AND',
                     ['c_status_id' => Call::STATUS_RINGING],
                     ['<=', 'c_created_dt', $dtRinging],
-                    ['IS NOT', 'c_parent_id', NULL],
+                    ['IS NOT', 'c_parent_id', null],
                 ],
                 ['AND',
                     ['c_status_id' =>  Call::STATUS_IN_PROGRESS],
                     ['<=', 'c_created_dt', $dtInProgress],
-                    ['IS NOT', 'c_parent_id', NULL],
+                    ['IS NOT', 'c_parent_id', null],
                 ],
                 ['AND',
                     ['c_status_id' =>  Call::STATUS_DELAY],
@@ -148,13 +150,13 @@ class CallController extends Controller
             $this->outputHelper->printInfo('Find ' . count($items) . ' items for update', 'Count');
 
             /** @var Call $call */
-            foreach ($items AS $call) {
+            foreach ($items as $call) {
                 $old_status = $call->getStatusName();
                 if ($call->isStatusDelay()) {
                     $call->setStatusCompleted();
                 } else {
                     $call->setStatusFailed();
-                }                
+                }
 
                 if ($call->save()) {
                     $out[] = ['c_id' => $call->c_id,
@@ -185,7 +187,7 @@ class CallController extends Controller
             $this->outputHelper->printInfo('No items to update', 'Count:noItems');
         }
 
-        $resultInfo = 'Processed: '. count($out) .' Total execution time: ' .
+        $resultInfo = 'Processed: ' . count($out) . ' Total execution time: ' .
             number_format(round(microtime(true) - $timeStart, 2), 2);
         $this->outputHelper->printInfo($resultInfo, $point);
         //$resultInfo = count($out) ? VarDumper::dumpAsString(['calls' => $out, 'errors' => $errors]) . $resultInfo : $resultInfo;
@@ -199,14 +201,14 @@ class CallController extends Controller
         $items = [];
         $dtNow = new \DateTime('now');
         $dateFormatNow = $dtNow->format("Y-m-d H:i:s");
-        if(count($users)) {
-            foreach ($users AS $user) {
+        if (count($users)) {
+            foreach ($users as $user) {
                 $upps = $user->userProjectParams;
-                if(count($upps)) {
-                    foreach ($upps AS $upp) {
-                        if(!isset($items[$user->id]) && $upp->upp_tw_sip_id && (strlen($upp->upp_tw_sip_id) > 2)) {
+                if (count($upps)) {
+                    foreach ($upps as $upp) {
+                        if (!isset($items[$user->id]) && $upp->upp_tw_sip_id && (strlen($upp->upp_tw_sip_id) > 2)) {
                             $items[$user->id] = $upp->upp_tw_sip_id;
-                            if(!$user->userProfile) {
+                            if (!$user->userProfile) {
                                 $userProfile = new UserProfile();
                                 $userProfile->up_call_type_id = 2;
                                 $userProfile->up_user_id = $user->id;
@@ -221,13 +223,13 @@ class CallController extends Controller
                 }
             }
         }
-        VarDumper::dump($items); exit;
+        VarDumper::dump($items);
+        exit;
     }
 
     public function actionCallFromHold()
     {
         try {
-
             $results = [];
 
             /**
@@ -245,38 +247,37 @@ class CallController extends Controller
                             ->orderBy(['c_id' => SORT_ASC])
                             ->all();
 
-            if($itemsInHold && is_array($itemsInHold)) {
-                foreach ($itemsInHold AS $call) {
-
-                    if(!$call->c_to) {
+            if ($itemsInHold && is_array($itemsInHold)) {
+                foreach ($itemsInHold as $call) {
+                    if (!$call->c_to) {
                         continue;
                     }
 
-                    if(!$call->c_from) {
+                    if (!$call->c_from) {
                         continue;
                     }
 
                     $agent_phone_number = $call->c_to;
                     $source = Sources::findOne(['phone_number' => $agent_phone_number]);
-                    if($source && $source->project) {
+                    if ($source && $source->project) {
                         $project = $source->project;
                         $project_employee_access = ProjectEmployeeAccess::find()->where(['project_id' => $project->id])->all();
                         if ($project_employee_access && is_array($project_employee_access) && count($project_employee_access)) {
-                            foreach ($project_employee_access AS $projectEmployer) {
+                            foreach ($project_employee_access as $projectEmployer) {
                                 $projectUser = Employee::findOne($projectEmployer->employee_id);
-                                if($projectUser && $projectUser->userProfile && $projectUser->userProfile->up_call_type_id === UserProfile::CALL_TYPE_WEB) {
+                                if ($projectUser && $projectUser->userProfile && $projectUser->userProfile->up_call_type_id === UserProfile::CALL_TYPE_WEB) {
                                         $user = $projectUser;
-                                        if ($user->isOnline() && $user->isCallStatusReady() && $user->isCallFree()) {
-                                            $agent = UserCallIdentity::getId($user->id);
-                                            echo 'Find agent:'. $agent . PHP_EOL;
-                                            $res = $communicationService->callRedirect($call->c_call_sid, 'client', $call->c_from, $agent);
-                                            if($res && isset($res['error']) && $res['error'] === false) {
-                                                $results[] = $res;
-                                                break;
-                                            } else {
-                                                echo "Bad response: " . PHP_EOL .  VarDumper::dumpAsString( $res, 10, false) . PHP_EOL;
-                                            }
+                                    if ($user->isOnline() && $user->isCallStatusReady() && $user->isCallFree()) {
+                                        $agent = UserCallIdentity::getId($user->id);
+                                        echo 'Find agent:' . $agent . PHP_EOL;
+                                        $res = $communicationService->callRedirect($call->c_call_sid, 'client', $call->c_from, $agent);
+                                        if ($res && isset($res['error']) && $res['error'] === false) {
+                                            $results[] = $res;
+                                            break;
+                                        } else {
+                                            echo "Bad response: " . PHP_EOL .  VarDumper::dumpAsString($res, 10, false) . PHP_EOL;
                                         }
+                                    }
                                 }
                             }
                         }
@@ -286,7 +287,7 @@ class CallController extends Controller
         } catch (\Throwable $e) {
             echo VarDumper::dumpAsString($e->getMessage(), 10, false) . PHP_EOL;
         }
-        echo "Results redirects for hold calls: " . PHP_EOL .  VarDumper::dumpAsString( $results, 10, false) . PHP_EOL;
+        echo "Results redirects for hold calls: " . PHP_EOL .  VarDumper::dumpAsString($results, 10, false) . PHP_EOL;
         return 0;
     }
 
@@ -298,23 +299,22 @@ class CallController extends Controller
         $this->shortClassName = OutputHelper::getShortClassName(self::class);
 
         $settings = Yii::$app->params['settings'];
-		$this->terminatorEnable = $settings['console_call_terminator_enable'] ?? false;
+        $this->terminatorEnable = $settings['console_call_terminator_enable'] ?? false;
 
-		try {
-		    $this->terminatorParams = [
-		        'ringing_minutes' => (int)$settings['console_call_terminator_params']['ringing_minutes'],
-		        'queue_minutes' => (int)$settings['console_call_terminator_params']['queue_minutes'],
-		        'in_progress_minutes' => (int)$settings['console_call_terminator_params']['in_progress_minutes'],
+        try {
+            $this->terminatorParams = [
+                'ringing_minutes' => (int)$settings['console_call_terminator_params']['ringing_minutes'],
+                'queue_minutes' => (int)$settings['console_call_terminator_params']['queue_minutes'],
+                'in_progress_minutes' => (int)$settings['console_call_terminator_params']['in_progress_minutes'],
             ];
-		} catch (\Throwable $throwable) {
-		   $this->terminatorParams = [
-		        'ringing_minutes' => $this->defaultRingingMinutes,
-		        'queue_minutes' => $this->defaultQueueMinutes,
-		        'in_progress_minutes' => $this->defaultInProgressMinutes,
-           ];
-           Yii::error(AppHelper::throwableFormatter($throwable),$this->shortClassName . ':' . __FUNCTION__ . ':Failed');
-		}
+        } catch (\Throwable $throwable) {
+            $this->terminatorParams = [
+                'ringing_minutes' => $this->defaultRingingMinutes,
+                'queue_minutes' => $this->defaultQueueMinutes,
+                'in_progress_minutes' => $this->defaultInProgressMinutes,
+            ];
+            Yii::error(AppHelper::throwableFormatter($throwable), $this->shortClassName . ':' . __FUNCTION__ . ':Failed');
+        }
         return $this;
     }
-
 }

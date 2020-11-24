@@ -143,7 +143,7 @@ class TestController extends Controller
     public function actionFillChatCannedTablesWithTestData()
     {
         echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
-            self::class . ':' . __FUNCTION__ .' %n'), PHP_EOL;
+            self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
         $processedCategory = 0;
         $timeStart = microtime(true);

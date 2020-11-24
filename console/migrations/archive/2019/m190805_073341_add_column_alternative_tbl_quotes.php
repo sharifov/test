@@ -30,7 +30,4 @@ class m190805_073341_add_column_alternative_tbl_quotes extends Migration
             Yii::$app->cache->flush();
         }
     }
-
-
-
 }

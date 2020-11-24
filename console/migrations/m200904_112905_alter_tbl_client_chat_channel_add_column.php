@@ -12,7 +12,7 @@ class m200904_112905_alter_tbl_client_chat_channel_add_column extends Migration
      */
     public function safeUp()
     {
-    	$this->addColumn('{{%client_chat_channel}}', 'ccc_default', $this->tinyInteger(1)->defaultValue(0));
+        $this->addColumn('{{%client_chat_channel}}', 'ccc_default', $this->tinyInteger(1)->defaultValue(0));
     }
 
     /**
@@ -20,6 +20,6 @@ class m200904_112905_alter_tbl_client_chat_channel_add_column extends Migration
      */
     public function safeDown()
     {
-		$this->dropColumn('{{%client_chat_channel}}', 'ccc_default');
-	}
+        $this->dropColumn('{{%client_chat_channel}}', 'ccc_default');
+    }
 }

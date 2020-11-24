@@ -18,7 +18,6 @@ class m190322_103038_update_fk_project extends Migration
 
         $this->addForeignKey('fk-project_employee_access-projects', 'project_employee_access', 'project_id', 'projects', 'id', 'SET NULL', 'CASCADE');
         $this->addForeignKey('fk-project_employee_access-employees', 'project_employee_access', 'employee_id', 'employees', 'id', 'SET NULL', 'CASCADE');
-
     }
 
     /**
@@ -32,8 +31,5 @@ class m190322_103038_update_fk_project extends Migration
 
         $this->addForeignKey('fk-project_employee_access-projects', 'project_employee_access', 'project_id', 'projects', 'id');
         $this->addForeignKey('fk-project_employee_access-employees', 'project_employee_access', 'employee_id', 'employees', 'id');
-
     }
-
-
 }

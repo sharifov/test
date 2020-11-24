@@ -18,7 +18,7 @@ class m181121_123057_create_tbl_email extends Migration
         }
 
 
-        $this->createTable('{{%email_template_type}}',	[
+        $this->createTable('{{%email_template_type}}', [
             'etp_id'                     => $this->primaryKey(),
             'etp_key'                    => $this->string(50)->unique()->notNull(),
             'etp_origin_name'            => $this->string(100)->notNull(),
@@ -34,7 +34,7 @@ class m181121_123057_create_tbl_email extends Migration
         $this->addForeignKey('FK-email_template_type_etp_updated_user_id', '{{%email_template_type}}', ['etp_updated_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
 
 
-        $this->createTable('{{%email}}',	[
+        $this->createTable('{{%email}}', [
             'e_id'                     => $this->primaryKey(),
             'e_reply_id'               => $this->integer(),
             'e_lead_id'                => $this->integer(),
@@ -73,7 +73,6 @@ class m181121_123057_create_tbl_email extends Migration
         $this->addForeignKey('FK-email_e_created_user_id', '{{%email}}', ['e_created_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
         $this->addForeignKey('FK-email_e_updated_user_id', '{{%email}}', ['e_updated_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
         $this->addForeignKey('FK-email_e_lead_id', '{{%email}}', ['e_lead_id'], '{{%leads}}', ['id'], 'SET NULL', 'CASCADE');
-
     }
 
     /**
@@ -84,6 +83,4 @@ class m181121_123057_create_tbl_email extends Migration
         $this->dropTable('{{%email}}');
         $this->dropTable('{{%email_template_type}}');
     }
-
-
 }

@@ -12,7 +12,7 @@ class m191031_114235_add_column_action_type_id_tbl_global_log extends Migration
      */
     public function safeUp()
     {
-		$this->addColumn('global_log', 'gl_action_type', $this->smallInteger(1)->after('gl_formatted_attr'));
+        $this->addColumn('global_log', 'gl_action_type', $this->smallInteger(1)->after('gl_formatted_attr'));
     }
 
     /**
@@ -20,6 +20,6 @@ class m191031_114235_add_column_action_type_id_tbl_global_log extends Migration
      */
     public function safeDown()
     {
-    	$this->dropColumn('global_log', 'gl_action_type');
+        $this->dropColumn('global_log', 'gl_action_type');
     }
 }

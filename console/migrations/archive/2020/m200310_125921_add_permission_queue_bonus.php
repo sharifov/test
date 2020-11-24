@@ -37,7 +37,6 @@ class m200310_125921_add_permission_queue_bonus extends Migration
         $auth->add($permissionBonusQueue);
 
         foreach ($roles as $role) {
-
             $permissions = $auth->getPermissionsByRole($role);
 
             foreach ($permissions as $permission) {
@@ -52,7 +51,6 @@ class m200310_125921_add_permission_queue_bonus extends Migration
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 
     /**

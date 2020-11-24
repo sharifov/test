@@ -20,7 +20,6 @@ class m191011_110526_create_lead_view_permissions extends Migration
         $auth = Yii::$app->authManager;
 
         foreach ($this->routes as $route) {
-
             if (!$permission = $auth->getPermission($route)) {
                 $permission = $auth->createPermission($route);
                 $auth->add($permission);
@@ -36,7 +35,6 @@ class m191011_110526_create_lead_view_permissions extends Migration
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 
     public function safeDown()

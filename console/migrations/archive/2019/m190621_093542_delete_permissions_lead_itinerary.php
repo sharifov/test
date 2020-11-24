@@ -47,5 +47,4 @@ class m190621_093542_delete_permissions_lead_itinerary extends Migration
         $auth->addChild($updateLead, $leadItineraryViewEditForm);
         $auth->addChild($updateLead, $leadItineraryEdit);
     }
-
 }

@@ -35,7 +35,6 @@ class m190628_094931_change_permissions_for_lead_checklist extends Migration
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();
         }
-
     }
 
     /**
@@ -67,5 +66,4 @@ class m190628_094931_change_permissions_for_lead_checklist extends Migration
             Yii::$app->cache->flush();
         }
     }
-
 }

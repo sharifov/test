@@ -26,7 +26,7 @@ class m191211_122524_create_tbl_order_product extends Migration
             $tableOptions = 'CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE=InnoDB';
         }
 
-        $this->createTable('{{%order_product}}',	[
+        $this->createTable('{{%order_product}}', [
             'orp_order_id'               => $this->integer()->notNull(),
             'orp_product_quote_id'       => $this->integer()->notNull(),
             'orp_created_user_id'        => $this->integer(),
@@ -65,5 +65,4 @@ class m191211_122524_create_tbl_order_product extends Migration
             Yii::$app->cache->flush();
         }
     }
-
 }

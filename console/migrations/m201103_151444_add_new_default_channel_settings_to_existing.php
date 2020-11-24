@@ -42,5 +42,4 @@ class m201103_151444_add_new_default_channel_settings_to_existing extends Migrat
     public function safeDown()
     {
     }
-
 }

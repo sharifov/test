@@ -54,7 +54,6 @@ class m181010_062539_create_tbl_user_agent extends Migration
                 'ug_updated_dt'          => date('Y-m-d H:i:s'),
             ]);
         }
-
     }
 
     /**
@@ -65,6 +64,4 @@ class m181010_062539_create_tbl_user_agent extends Migration
         $this->dropTable('{{%user_group_assign}}');
         $this->dropTable('{{%user_group}}');
     }
-
-
 }

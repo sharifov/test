@@ -24,5 +24,4 @@ class m200519_055213_add_column_tbl_credit_card extends Migration
         $this->dropColumn('{{%credit_card}}', 'cc_bo_link');
         $this->dropColumn('{{%credit_card}}', 'cc_security_hash');
     }
-
 }

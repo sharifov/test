@@ -1,6 +1,6 @@
 <?php
-namespace console\controllers;
 
+namespace console\controllers;
 
 use common\components\CommunicationService;
 use common\components\ReceiveEmailsJob;
@@ -37,7 +37,7 @@ class CommunicationController extends Controller
         ];
 
         $job->last_email_id = $lastId;
-        
+
         $job->execute('job');
 
         printf("\n --- Finish %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
@@ -114,14 +114,9 @@ class CommunicationController extends Controller
 
 
 
-        if(isset($res['error']) && $res['error']) {
-
+        if (isset($res['error']) && $res['error']) {
             print_r($res['error']);
-
-
-        } elseif(isset($res['data']['emails']) && $res['data']['emails'] && \is_array($res['data']['emails'])) {
-
-
+        } elseif (isset($res['data']['emails']) && $res['data']['emails'] && \is_array($res['data']['emails'])) {
             /*
             * @property int $ei_id
             * @property string $ei_email_to
@@ -140,7 +135,6 @@ class CommunicationController extends Controller
 
 
             foreach ($res['data']['emails'] as $mail) {
-
                 print_r($mail['ei_id']);
 
 
@@ -162,7 +156,7 @@ class CommunicationController extends Controller
                 $email->e_ref_message_id = $mail['ei_ref_mess_ids'];
                 $email->e_message_id = $mail['ei_message_id'];
 
-                if(!$email->save()) {
+                if (!$email->save()) {
                     Yii::error(VarDumper::dumpAsString($email->errors), 'API:Communication:newMessagesReceived:Email:save');
                 }
             }
@@ -179,5 +173,4 @@ class CommunicationController extends Controller
 
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
-
 }

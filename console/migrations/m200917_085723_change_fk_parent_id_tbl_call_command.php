@@ -14,8 +14,15 @@ class m200917_085723_change_fk_parent_id_tbl_call_command extends Migration
     {
         $this->dropForeignKey('FK-call_command-ccom_parent_id', '{{%call_command}}');
 
-        $this->addForeignKey('FK-call_command-ccom_parent_id', '{{%call_command}}', ['ccom_parent_id'],
-        '{{%call_command}}', ['ccom_id'], 'SET NULL', 'CASCADE');
+        $this->addForeignKey(
+            'FK-call_command-ccom_parent_id',
+            '{{%call_command}}',
+            ['ccom_parent_id'],
+            '{{%call_command}}',
+            ['ccom_id'],
+            'SET NULL',
+            'CASCADE'
+        );
     }
 
     /**
@@ -25,7 +32,14 @@ class m200917_085723_change_fk_parent_id_tbl_call_command extends Migration
     {
         $this->dropForeignKey('FK-call_command-ccom_parent_id', '{{%call_command}}');
 
-        $this->addForeignKey('FK-call_command-ccom_parent_id', '{{%call_command}}', ['ccom_parent_id'],
-        '{{%call_command}}', ['ccom_id'], 'CASCADE', 'CASCADE');
+        $this->addForeignKey(
+            'FK-call_command-ccom_parent_id',
+            '{{%call_command}}',
+            ['ccom_parent_id'],
+            '{{%call_command}}',
+            ['ccom_id'],
+            'CASCADE',
+            'CASCADE'
+        );
     }
 }

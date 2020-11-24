@@ -21,6 +21,5 @@ class m190114_144226_update_columns_character_tbl_notification extends Migration
      */
     public function safeDown()
     {
-
     }
 }

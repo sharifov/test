@@ -28,11 +28,11 @@ class m200519_135754_create_tbl_sale_credit_card extends Migration
             $tableOptions = 'CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE=InnoDB';
         }
 
-        $this->createTable('{{%sale_credit_card}}',	[
+        $this->createTable('{{%sale_credit_card}}', [
             'scc_sale_id'               => $this->integer()->notNull(),
             'scc_cc_id'                 => $this->integer()->notNull(),
-            'scc_created_dt'			=> $this->dateTime(),
-            'scc_created_user_id'		=> $this->integer(),
+            'scc_created_dt'            => $this->dateTime(),
+            'scc_created_user_id'       => $this->integer(),
         ], $tableOptions);
 
         $this->addPrimaryKey('PK-sale_credit_card', '{{%sale_credit_card}}', ['scc_sale_id', 'scc_cc_id']);

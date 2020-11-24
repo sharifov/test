@@ -12,13 +12,13 @@ class m200603_200350_add_in_site_settings_new_params extends Migration
      */
     public function safeUp()
     {
-		$caseSaleTicketEmailData = Yii::$app->params['settings']['case_sale_ticket_email_data'];
+        $caseSaleTicketEmailData = Yii::$app->params['settings']['case_sale_ticket_email_data'];
 
-		$caseSaleTicketEmailData['emailOnRecallCommChanged'] = [];
+        $caseSaleTicketEmailData['emailOnRecallCommChanged'] = [];
 
-		$this->update('{{%setting}}', [
-			's_value' => json_encode($caseSaleTicketEmailData)
-		], ['s_key' => 'case_sale_ticket_email_data']);
+        $this->update('{{%setting}}', [
+            's_value' => json_encode($caseSaleTicketEmailData)
+        ], ['s_key' => 'case_sale_ticket_email_data']);
     }
 
     /**
@@ -26,6 +26,5 @@ class m200603_200350_add_in_site_settings_new_params extends Migration
      */
     public function safeDown()
     {
-
     }
 }

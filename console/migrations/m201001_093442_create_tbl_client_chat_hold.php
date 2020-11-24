@@ -38,11 +38,25 @@ class m201001_093442_create_tbl_client_chat_hold extends Migration
             'cchd_deadline_dt' => $this->dateTime()->notNull(),
         ], $tableOptions);
 
-        $this->addForeignKey('FK-client_chat_hold-cchd_cch_id', '{{%client_chat_hold}}', ['cchd_cch_id'],
-        '{{%client_chat}}', ['cch_id'], 'CASCADE', 'CASCADE');
+        $this->addForeignKey(
+            'FK-client_chat_hold-cchd_cch_id',
+            '{{%client_chat_hold}}',
+            ['cchd_cch_id'],
+            '{{%client_chat}}',
+            ['cch_id'],
+            'CASCADE',
+            'CASCADE'
+        );
 
-        $this->addForeignKey('FK-client_chat_hold-cchd_cch_status_log_id', '{{%client_chat_hold}}', ['cchd_cch_status_log_id'],
-        '{{%client_chat_status_log}}', ['csl_id'], 'SET NULL', 'CASCADE');
+        $this->addForeignKey(
+            'FK-client_chat_hold-cchd_cch_status_log_id',
+            '{{%client_chat_hold}}',
+            ['cchd_cch_status_log_id'],
+            '{{%client_chat_status_log}}',
+            ['csl_id'],
+            'SET NULL',
+            'CASCADE'
+        );
 
         (new \console\migrations\RbacMigrationService())->up($this->route, $this->roles);
     }

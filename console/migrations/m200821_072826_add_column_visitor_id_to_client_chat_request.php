@@ -10,7 +10,7 @@ class m200821_072826_add_column_visitor_id_to_client_chat_request extends Migrat
     public function safeUp()
     {
         $this->addColumn('{{%client_chat_request}}', 'ccr_visitor_id', $this->string(100));
-        $this->createIndex('IND-client_chat_request-ccr_visitor_id','{{%client_chat_request}}', 'ccr_visitor_id', false);
+        $this->createIndex('IND-client_chat_request-ccr_visitor_id', '{{%client_chat_request}}', 'ccr_visitor_id', false);
     }
 
     /**

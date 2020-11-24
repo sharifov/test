@@ -9,21 +9,20 @@ use yii\db\Migration;
  */
 class m200922_122328_add_permission_for_set_default_chat_channel extends Migration
 {
-	public $route = [
-		'/client-chat-channel-crud/set-default',
-	];
+    public $route = [
+        '/client-chat-channel-crud/set-default',
+    ];
 
-	public $roles = [
-		Employee::ROLE_SUPER_ADMIN,
-		Employee::ROLE_ADMIN,
-	];
+    public $roles = [
+        Employee::ROLE_SUPER_ADMIN,
+        Employee::ROLE_ADMIN,
+    ];
     /**
      * {@inheritdoc}
      */
     public function safeUp()
     {
-		(new RbacMigrationService())->up($this->route, $this->roles);
-
+        (new RbacMigrationService())->up($this->route, $this->roles);
     }
 
     /**
@@ -31,7 +30,6 @@ class m200922_122328_add_permission_for_set_default_chat_channel extends Migrati
      */
     public function safeDown()
     {
-		(new RbacMigrationService())->down($this->route, $this->roles);
-	}
-
+        (new RbacMigrationService())->down($this->route, $this->roles);
+    }
 }

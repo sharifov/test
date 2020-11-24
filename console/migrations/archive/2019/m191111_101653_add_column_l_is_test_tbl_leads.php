@@ -12,9 +12,9 @@ class m191111_101653_add_column_l_is_test_tbl_leads extends Migration
      */
     public function safeUp()
     {
-		$this->addColumn('{{%leads}}', 'l_is_test', $this->tinyInteger(1)->defaultValue(0)->notNull());
+        $this->addColumn('{{%leads}}', 'l_is_test', $this->tinyInteger(1)->defaultValue(0)->notNull());
 
-		$this->createIndex('IND-leads_l_is_test', '{{%leads}}', 'l_is_test');
+        $this->createIndex('IND-leads_l_is_test', '{{%leads}}', 'l_is_test');
     }
 
     /**
@@ -22,8 +22,8 @@ class m191111_101653_add_column_l_is_test_tbl_leads extends Migration
      */
     public function safeDown()
     {
-    	$this->dropIndex('IND-leads_l_is_test', '{{%leads}}');
+        $this->dropIndex('IND-leads_l_is_test', '{{%leads}}');
 
-    	$this->dropColumn('{{%leads}}', 'l_is_test');
+        $this->dropColumn('{{%leads}}', 'l_is_test');
     }
 }

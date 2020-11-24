@@ -19,7 +19,7 @@ class m190123_105515_create_tbl_call extends Migration
 
         //https://www.twilio.com/docs/voice/api/call#statuscallback
 
-        $this->createTable('{{%call}}',	[
+        $this->createTable('{{%call}}', [
             'c_id'                 => $this->primaryKey(),
             'c_call_sid'           => $this->string(34)->notNull(),
             'c_account_sid'        => $this->string(34)->notNull(),
@@ -54,7 +54,6 @@ class m190123_105515_create_tbl_call extends Migration
 
         $this->addForeignKey('FK-call_c_created_user_id', '{{%call}}', ['c_created_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
         $this->addForeignKey('FK-call_c_lead_id', '{{%call}}', ['c_lead_id'], '{{%leads}}', ['id'], 'SET NULL', 'CASCADE');
-
     }
 
     /**
@@ -64,6 +63,4 @@ class m190123_105515_create_tbl_call extends Migration
     {
         $this->dropTable('{{%call}}');
     }
-
-
 }

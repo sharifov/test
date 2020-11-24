@@ -22,7 +22,6 @@ class m190321_165933_add_field_tbl_sources extends Migration
         }
 
         Yii::$app->db->getSchema()->refreshTableSchema('{{%sources}}');
-
     }
 
     /**
@@ -38,6 +37,4 @@ class m190321_165933_add_field_tbl_sources extends Migration
             Yii::$app->cache->flush();
         }
     }
-
-
 }

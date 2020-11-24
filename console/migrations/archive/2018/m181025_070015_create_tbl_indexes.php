@@ -26,6 +26,4 @@ class m181025_070015_create_tbl_indexes extends Migration
         $this->dropIndex('lead_flow_index', '{{%lead_flow}}');
         $this->dropIndex('log_index', '{{%log}}');
     }
-
-
 }

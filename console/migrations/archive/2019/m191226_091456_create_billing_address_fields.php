@@ -43,11 +43,11 @@ class m191226_091456_create_billing_address_fields extends Migration
         //$this->dropTable('{{%credit_card}}');
         //$this->dropTable('{{%billing_info}}');
 
-        $this->createTable('{{%credit_card}}',	[
-            'cc_id'				        => $this->primaryKey(),
-            'cc_number'     	        => $this->string(50)->notNull(),
-            'cc_display_number'	        => $this->string(18),
-            'cc_holder_name'	        => $this->string(50),
+        $this->createTable('{{%credit_card}}', [
+            'cc_id'                     => $this->primaryKey(),
+            'cc_number'                 => $this->string(50)->notNull(),
+            'cc_display_number'         => $this->string(18),
+            'cc_holder_name'            => $this->string(50),
             'cc_expiration_month'       => $this->tinyInteger(2)->notNull(),
             'cc_expiration_year'        => $this->smallInteger()->notNull(),
             'cc_cvv'                    => $this->string(32),
@@ -82,10 +82,10 @@ class m191226_091456_create_billing_address_fields extends Migration
 
 
 
-        $this->createTable('{{%billing_info}}',	[
-            'bi_id'				        => $this->primaryKey(),
-            'bi_first_name'   	        => $this->string(30)->notNull(),
-            'bi_last_name'	            => $this->string(30)->notNull(),
+        $this->createTable('{{%billing_info}}', [
+            'bi_id'                     => $this->primaryKey(),
+            'bi_first_name'             => $this->string(30)->notNull(),
+            'bi_last_name'              => $this->string(30)->notNull(),
             'bi_middle_name'            => $this->string(30),
             'bi_company_name'           => $this->string(40),
             'bi_address_line1'          => $this->string(50)->notNull(),
@@ -154,11 +154,11 @@ class m191226_091456_create_billing_address_fields extends Migration
         );
 
 
-        $this->createTable('{{%payment_method}}',	[
-            'pm_id'		                => $this->primaryKey(),
+        $this->createTable('{{%payment_method}}', [
+            'pm_id'                     => $this->primaryKey(),
             'pm_name'                   => $this->string(50)->unique()->notNull(),
             'pm_short_name'             => $this->string(20),
-            'pm_enabled'   	            => $this->boolean()->defaultValue(true),
+            'pm_enabled'                => $this->boolean()->defaultValue(true),
             'pm_category_id'            => $this->tinyInteger(1),
             'pm_updated_user_id'        => $this->integer(),
             'pm_updated_dt'             => $this->dateTime(),
@@ -184,21 +184,21 @@ class m191226_091456_create_billing_address_fields extends Migration
         $payMethodList[] = ['pm_id' => 6, 'pm_name' => 'Cash & PrePaid Vouchers', 'pm_short_name' => 'CH', 'pm_enabled' => false];
         $payMethodList[] = ['pm_id' => 7, 'pm_name' => 'Mobile Payments', 'pm_short_name' => 'MP', 'pm_enabled' => false];
 
-        foreach($payMethodList as $payMethod) {
+        foreach ($payMethodList as $payMethod) {
             $payMethod['pm_updated_dt'] = date('Y-m-d H:i:s');
             $this->insert('{{%payment_method}}', $payMethod);
         }
 
 
-        $this->createTable('{{%payment}}',	[
-            'pay_id'		            => $this->primaryKey(),
+        $this->createTable('{{%payment}}', [
+            'pay_id'                    => $this->primaryKey(),
             'pay_type_id'               => $this->tinyInteger(1),
             'pay_method_id'             => $this->integer(),
             'pay_status_id'             => $this->tinyInteger(1)->defaultValue(0),         // Canceled, Completed, Disputed, Challenged
 
-            'pay_date'     	            => $this->date()->notNull(),
-            'pay_amount'   	            => $this->decimal(8, 2)->notNull(),
-            'pay_currency'   	        => $this->string(3),
+            'pay_date'                  => $this->date()->notNull(),
+            'pay_amount'                => $this->decimal(8, 2)->notNull(),
+            'pay_currency'              => $this->string(3),
 
             'pay_invoice_id'            => $this->integer(),
             'pay_order_id'              => $this->integer(),
@@ -245,15 +245,15 @@ class m191226_091456_create_billing_address_fields extends Migration
         );
 
 
-        $this->createTable('{{%transaction}}',	[
-            'tr_id'		                => $this->primaryKey(),
-            'tr_code'   	            => $this->string(30),
+        $this->createTable('{{%transaction}}', [
+            'tr_id'                     => $this->primaryKey(),
+            'tr_code'                   => $this->string(30),
             'tr_invoice_id'             => $this->integer(),
             'tr_payment_id'             => $this->integer(),
             'tr_type_id'                => $this->tinyInteger(1), // Payment, Refund, Adjustment
-            'tr_date'     	            => $this->date()->notNull(),
-            'tr_amount'   	            => $this->decimal(8, 2)->notNull(),
-            'tr_currency'   	        => $this->string(3),
+            'tr_date'                   => $this->date()->notNull(),
+            'tr_amount'                 => $this->decimal(8, 2)->notNull(),
+            'tr_currency'               => $this->string(3),
 
             'tr_created_dt'             => $this->dateTime(),
         ], $tableOptions);
@@ -266,13 +266,13 @@ class m191226_091456_create_billing_address_fields extends Migration
 
 /*
  *
-Credit Card Type	Credit Card Number
-American Express	371449635398431
-Diners Club	30569309025904
-Discover	6011111111111117
-JCB	3530111333300000
-MasterCard	5555555555554444
-Visa	4111111111111111
+Credit Card Type    Credit Card Number
+American Express    371449635398431
+Diners Club 30569309025904
+Discover    6011111111111117
+JCB 3530111333300000
+MasterCard  5555555555554444
+Visa    4111111111111111
  */
 
 
@@ -345,5 +345,4 @@ Visa	4111111111111111
             Yii::$app->cache->flush();
         }
     }
-
 }

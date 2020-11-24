@@ -35,10 +35,17 @@ class m200930_092854_create_tbl_client_chat_last_message extends Migration
         ], $tableOptions);
 
         $this->createIndex('IND-client_chat_last_message-cclm_type_id', '{{%client_chat_last_message}}', ['cclm_type_id']);
-        $this->addCommentOnColumn('{{%client_chat_last_message}}','cclm_type_id','1 - client, 2 - user');
+        $this->addCommentOnColumn('{{%client_chat_last_message}}', 'cclm_type_id', '1 - client, 2 - user');
 
-        $this->addForeignKey('FK-client_chat_last_message-cclm_cch_id', '{{%client_chat_last_message}}', ['cclm_cch_id'],
-        '{{%client_chat}}', ['cch_id'], 'CASCADE', 'CASCADE');
+        $this->addForeignKey(
+            'FK-client_chat_last_message-cclm_cch_id',
+            '{{%client_chat_last_message}}',
+            ['cclm_cch_id'],
+            '{{%client_chat}}',
+            ['cch_id'],
+            'CASCADE',
+            'CASCADE'
+        );
 
         (new \console\migrations\RbacMigrationService())->up($this->route, $this->roles);
     }

@@ -35,7 +35,6 @@ class m190502_120134_create_tbl_lead_call_expert extends Migration
 
         $this->addForeignKey('FK-lead_call_expert_lce_lead_id', '{{%lead_call_expert}}', ['lce_lead_id'], '{{%leads}}', ['id'], 'CASCADE', 'CASCADE');
         $this->addForeignKey('FK-lead_call_expert_lce_agent_user_id', '{{%lead_call_expert}}', ['lce_agent_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
-
     }
 
     /**
@@ -45,6 +44,4 @@ class m190502_120134_create_tbl_lead_call_expert extends Migration
     {
         $this->dropTable('{{%lead_call_expert}}');
     }
-
-
 }

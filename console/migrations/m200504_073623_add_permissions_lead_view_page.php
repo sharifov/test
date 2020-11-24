@@ -44,16 +44,16 @@ class m200504_073623_add_permissions_lead_view_page extends Migration
     {
         $auth = Yii::$app->authManager;
 
-       if ($permission = $auth->getPermission('lead/view_Check_List')) {
-           $auth->remove($permission);
-       }
+        if ($permission = $auth->getPermission('lead/view_Check_List')) {
+            $auth->remove($permission);
+        }
 
-       if ($permission = $auth->getPermission('lead/view_Task_List')) {
-           $auth->remove($permission);
-       }
+        if ($permission = $auth->getPermission('lead/view_Task_List')) {
+            $auth->remove($permission);
+        }
 
-       if ($permission = $auth->getPermission('lead/view_BO_Expert')) {
-           $auth->remove($permission);
-       }
+        if ($permission = $auth->getPermission('lead/view_BO_Expert')) {
+            $auth->remove($permission);
+        }
     }
 }

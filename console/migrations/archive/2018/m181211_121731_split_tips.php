@@ -44,5 +44,4 @@ class m181211_121731_split_tips extends Migration
         $this->dropIndex('uniq_idx_user_tips_split', 'tips_split');
         $this->dropTable('tips_split');
     }
-
 }

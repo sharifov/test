@@ -54,7 +54,6 @@ class m190424_092753_create_tbl_setting extends Migration
             's_value' => '1034.56',
             's_updated_dt' => date('Y-m-d H:i:s'),
         ]);*/
-
     }
 
     /**
@@ -64,6 +63,4 @@ class m190424_092753_create_tbl_setting extends Migration
     {
         $this->dropTable('{{%setting}}');
     }
-
-
 }

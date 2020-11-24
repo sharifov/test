@@ -17,7 +17,7 @@ class m191121_143754_create_table_project_weight extends Migration
             $tableOptions = 'CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE=InnoDB';
         }
 
-        $this->createTable('{{%project_weight}}',	[
+        $this->createTable('{{%project_weight}}', [
             'pw_project_id'   => $this->integer()->notNull(),
             'pw_weight'     => $this->integer()->defaultValue(0),
         ], $tableOptions);
@@ -45,5 +45,4 @@ class m191121_143754_create_table_project_weight extends Migration
             Yii::$app->cache->flush();
         }
     }
-
 }

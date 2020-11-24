@@ -12,13 +12,13 @@ class m191125_140409_increase_column_length_dep_email_tbl_department_email_proje
      */
     public function safeUp()
     {
-		$this->alterColumn('{{%department_email_project}}', 'dep_email', $this->string(50)->notNull());
+        $this->alterColumn('{{%department_email_project}}', 'dep_email', $this->string(50)->notNull());
 
-		Yii::$app->db->getSchema()->refreshTableSchema('{{%department_email_project}}');
+        Yii::$app->db->getSchema()->refreshTableSchema('{{%department_email_project}}');
 
-		if (Yii::$app->cache) {
-			Yii::$app->cache->flush();
-		}
+        if (Yii::$app->cache) {
+            Yii::$app->cache->flush();
+        }
     }
 
     /**
@@ -26,12 +26,12 @@ class m191125_140409_increase_column_length_dep_email_tbl_department_email_proje
      */
     public function safeDown()
     {
-		$this->alterColumn('{{%department_email_project}}', 'dep_email', $this->string(18)->notNull());
+        $this->alterColumn('{{%department_email_project}}', 'dep_email', $this->string(18)->notNull());
 
-		Yii::$app->db->getSchema()->refreshTableSchema('{{%department_email_project}}');
+        Yii::$app->db->getSchema()->refreshTableSchema('{{%department_email_project}}');
 
-		if (Yii::$app->cache) {
-			Yii::$app->cache->flush();
-		}
-	}
+        if (Yii::$app->cache) {
+            Yii::$app->cache->flush();
+        }
+    }
 }

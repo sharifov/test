@@ -33,7 +33,7 @@ class m200528_064104_add_setting_service_fee extends Migration
     {
          $this->delete('{{%setting}}', ['IN', 's_key', [
             'enable_request_to_bo_sale'
-        ]]);
+         ]]);
 
         if (Yii::$app->cache) {
             Yii::$app->cache->flush();

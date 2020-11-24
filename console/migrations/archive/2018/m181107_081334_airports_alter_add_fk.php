@@ -24,7 +24,7 @@ class m181107_081334_airports_alter_add_fk extends Migration
         foreach ($tables as $table) {
             $tableName = $table['table_name'];
             $db->createCommand("ALTER TABLE `$tableName` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci")->execute();
-            echo "tbl: ".$tableName. "\r\n";
+            echo "tbl: " . $tableName . "\r\n";
         }
         $db->createCommand('SET FOREIGN_KEY_CHECKS=1;')->execute();
 
@@ -33,7 +33,6 @@ class m181107_081334_airports_alter_add_fk extends Migration
         $this->addForeignKey('fk-lead_flight_segment_destination', '{{%lead_flight_segments}}', 'destination', '{{%airports}}', 'iata'); */
         $this->addForeignKey('fk-quote_segment_departure', '{{%quote_segment}}', 'qs_departure_airport_code', '{{%airports}}', 'iata');
         $this->addForeignKey('fk-quote_segment_arrival', '{{%quote_segment}}', 'qs_arrival_airport_code', '{{%airports}}', 'iata');
-
     }
 
     /**

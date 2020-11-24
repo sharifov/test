@@ -7,7 +7,7 @@ use yii\db\Migration;
  */
 class m190813_121749_create_permission_cases_for_admin extends Migration
 {
-    public  $routes = ['/cases/*', '/cases-category/*', '/cases-status-log/*'];
+    public $routes = ['/cases/*', '/cases-category/*', '/cases-status-log/*'];
 
     /**
      * {@inheritdoc}
@@ -34,5 +34,4 @@ class m190813_121749_create_permission_cases_for_admin extends Migration
             $auth->remove($permission);
         }
     }
-
 }

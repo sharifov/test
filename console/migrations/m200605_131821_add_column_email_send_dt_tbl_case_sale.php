@@ -12,7 +12,7 @@ class m200605_131821_add_column_email_send_dt_tbl_case_sale extends Migration
      */
     public function safeUp()
     {
-    	$this->addColumn('{{%case_sale}}', 'css_send_email_dt', $this->dateTime());
+        $this->addColumn('{{%case_sale}}', 'css_send_email_dt', $this->dateTime());
     }
 
     /**
@@ -20,6 +20,6 @@ class m200605_131821_add_column_email_send_dt_tbl_case_sale extends Migration
      */
     public function safeDown()
     {
-    	$this->dropColumn('{{%case_sale}}', 'css_send_email_dt');
+        $this->dropColumn('{{%case_sale}}', 'css_send_email_dt');
     }
 }

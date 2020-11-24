@@ -13,20 +13,20 @@ class m200921_055334_add_new_site_settings extends Migration
      */
     public function safeUp()
     {
-		$this->insert('{{%setting}}', [
-			's_key' => 'rc_username_for_register_channel',
-			's_name' => 'From what name the client chat channel will be registered in Rocket Chat',
-			's_type' => Setting::TYPE_STRING,
-			's_value' => 'bot',
-			's_updated_dt' => date('Y-m-d H:i:s'),
-			's_updated_user_id' => 1,
-		]);
+        $this->insert('{{%setting}}', [
+            's_key' => 'rc_username_for_register_channel',
+            's_name' => 'From what name the client chat channel will be registered in Rocket Chat',
+            's_type' => Setting::TYPE_STRING,
+            's_value' => 'bot',
+            's_updated_dt' => date('Y-m-d H:i:s'),
+            's_updated_user_id' => 1,
+        ]);
 
-		if (Yii::$app->cache) {
-			Yii::$app->cache->flush();
-		}
+        if (Yii::$app->cache) {
+            Yii::$app->cache->flush();
+        }
 
-		Yii::$app->db->getSchema()->refreshTableSchema('{{%setting}}');
+        Yii::$app->db->getSchema()->refreshTableSchema('{{%setting}}');
     }
 
     /**
@@ -34,15 +34,14 @@ class m200921_055334_add_new_site_settings extends Migration
      */
     public function safeDown()
     {
-		$this->delete('{{%setting}}', ['IN', 's_key', [
-			'rc_username_for_register_channel'
-		]]);
+        $this->delete('{{%setting}}', ['IN', 's_key', [
+            'rc_username_for_register_channel'
+        ]]);
 
-		if (Yii::$app->cache) {
-			Yii::$app->cache->flush();
-		}
+        if (Yii::$app->cache) {
+            Yii::$app->cache->flush();
+        }
 
-		Yii::$app->db->getSchema()->refreshTableSchema('{{%setting}}');
+        Yii::$app->db->getSchema()->refreshTableSchema('{{%setting}}');
     }
-
 }

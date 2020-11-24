@@ -22,5 +22,4 @@ class m181217_082329_alter_user_params_add_frequency_minutes extends Migration
     {
         $this->dropColumn('{{%user_params}}', 'up_frequency_minutes');
     }
-
 }

@@ -57,5 +57,4 @@ class m191009_120146_table_settings_add_followup_settings extends Migration
             Yii::$app->cache->flush();
         }
     }
-
 }

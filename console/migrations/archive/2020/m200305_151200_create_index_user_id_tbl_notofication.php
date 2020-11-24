@@ -22,6 +22,4 @@ class m200305_151200_create_index_user_id_tbl_notofication extends Migration
     {
         $this->dropIndex('IND-notifications-n_user_id', '{{%notifications}}');
     }
-
-
 }

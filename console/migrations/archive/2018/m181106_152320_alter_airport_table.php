@@ -1,4 +1,5 @@
 <?php
+
 use yii\db\Migration;
 
 /**
@@ -38,7 +39,7 @@ class m181106_152320_alter_airport_table extends Migration
         $this->alterColumn('{{%airports}}', 'latitude', $this->decimal(10, 6));
         $this->alterColumn('{{%airports}}', 'longitude', $this->decimal(10, 6));
         $this->alterColumn('{{%airports}}', 'countryId', $this->string(2));
-        $this->dropIndex('idx-airports-iata','{{%airports}}');
+        $this->dropIndex('idx-airports-iata', '{{%airports}}');
     }
 
     /**

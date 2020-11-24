@@ -29,7 +29,6 @@ class m181012_074910_create_tbl_user_params extends Migration
         $this->addPrimaryKey('user_params_pk', '{{%user_params}}', ['up_user_id']);
         $this->addForeignKey('user_params_up_user_id_fkey', '{{%user_params}}', ['up_user_id'], '{{%employees}}', ['id'], 'CASCADE', 'CASCADE');
         $this->addForeignKey('user_params_up_updated_user_id_fkey', '{{%user_params}}', ['up_updated_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
-
     }
 
     /**
@@ -39,5 +38,4 @@ class m181012_074910_create_tbl_user_params extends Migration
     {
         $this->dropTable('{{%user_params}}');
     }
-
 }

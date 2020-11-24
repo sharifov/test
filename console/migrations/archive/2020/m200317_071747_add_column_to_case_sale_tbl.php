@@ -24,8 +24,8 @@ class m200317_071747_add_column_to_case_sale_tbl extends Migration
      */
     public function safeUp()
     {
-        $this->addColumn($this->table, 'css_charged', $this->decimal(8,2));
-        $this->addColumn($this->table, 'css_profit', $this->decimal(8,2));
+        $this->addColumn($this->table, 'css_charged', $this->decimal(8, 2));
+        $this->addColumn($this->table, 'css_profit', $this->decimal(8, 2));
         $this->addColumn($this->table, 'css_out_departure_airport', $this->string(3));
         $this->addColumn($this->table, 'css_out_arrival_airport', $this->string(3));
         $this->addColumn($this->table, 'css_out_date', $this->dateTime());
@@ -74,8 +74,8 @@ class m200317_071747_add_column_to_case_sale_tbl extends Migration
     {
         Yii::$app->db->getSchema()->refreshTableSchema($this->table);
 
-		if (Yii::$app->cache) {
-			Yii::$app->cache->flush();
-		}
+        if (Yii::$app->cache) {
+            Yii::$app->cache->flush();
+        }
     }
 }

@@ -83,7 +83,6 @@ class m201022_110324_create_tbls_for_canned_response extends Migration
         $auth->add($cannedResponsePermission);
 
         (new RbacMigrationService())->up($this->routes, $this->roles);
-
     }
 
     /**

@@ -113,7 +113,7 @@ return [
         ],*/
 
     ],
-    'modules'=>[
+    'modules' => [
         'translatemanager' => [
             'class'                     => 'lajax\translatemanager\Module',
             'root'                      => '@frontend',               // The root directory of the project scan.

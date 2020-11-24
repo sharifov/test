@@ -12,7 +12,7 @@ class m200821_095739_alter_table_client_chat_visitor_data extends Migration
      */
     public function safeUp()
     {
-		$this->alterColumn('{{%client_chat_visitor_data}}', 'cvd_title', $this->string(150));
+        $this->alterColumn('{{%client_chat_visitor_data}}', 'cvd_title', $this->string(150));
     }
 
     /**
@@ -20,8 +20,8 @@ class m200821_095739_alter_table_client_chat_visitor_data extends Migration
      */
     public function safeDown()
     {
-		$this->alterColumn('{{%client_chat_visitor_data}}', 'cvd_title', $this->string(50));
-	}
+        $this->alterColumn('{{%client_chat_visitor_data}}', 'cvd_title', $this->string(50));
+    }
 
     /*
     // Use up()/down() to run migration code without a transaction.

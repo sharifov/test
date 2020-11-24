@@ -61,5 +61,4 @@ class m201021_123354_add_new_site_settings_soft_close extends Migration
             Yii::$app->cache->flush();
         }
     }
-
 }

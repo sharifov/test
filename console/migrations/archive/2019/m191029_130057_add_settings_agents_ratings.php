@@ -45,7 +45,6 @@ class m191029_130057_add_settings_agents_ratings extends Migration
         }
 
         Yii::$app->db->getSchema()->refreshTableSchema('{{%setting}}');
-
     }
 
     /**

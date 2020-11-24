@@ -27,7 +27,7 @@ class m191220_113953_create_table_user_group_set extends Migration
             $tableOptions = 'CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE=InnoDB';
         }
 
-        $this->createTable('{{%user_group_set}}',	[
+        $this->createTable('{{%user_group_set}}', [
             'ugs_id'             => $this->primaryKey(),
             'ugs_name'           => $this->string(255),
             'ugs_enabled'        => $this->boolean()->defaultValue(false),

@@ -12,9 +12,9 @@ class m200117_071005_alter_table_case_sale_drop_trigger extends Migration
      */
     public function safeUp()
     {
-    	$db = Yii::$app->getDb();
+        $db = Yii::$app->getDb();
 
-		$db->createCommand('DROP TRIGGER if exists case_sale_BEFORE_INSERT')->execute();
+        $db->createCommand('DROP TRIGGER if exists case_sale_BEFORE_INSERT')->execute();
     }
 
     /**

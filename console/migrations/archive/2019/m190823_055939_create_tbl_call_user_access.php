@@ -43,7 +43,7 @@ class m190823_055939_create_tbl_call_user_access extends Migration
 
         foreach ($this->routes as $route) {
             $permission = $auth->getPermission($route);
-            if(!$permission) {
+            if (!$permission) {
                 $permission = $auth->createPermission($route);
                 $auth->add($permission);
             }
